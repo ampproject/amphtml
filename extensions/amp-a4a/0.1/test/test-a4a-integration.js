@@ -16,7 +16,6 @@
 
 import {
     MockA4AImpl,
-    stringToArrayBuffer,
     SIGNATURE_HEADER,
     TEST_URL,
 } from './utils';
@@ -32,6 +31,7 @@ import {
     resetScheduledElementForTesting,
     upgradeOrRegisterElement,
 } from '../../../../src/custom-element';
+import {utf8Encode} from '../../../../src/utils/bytes';
 import * as sinon from 'sinon';
 
 function expectRenderedInFriendlyIframe(element, srcdoc) {
@@ -69,7 +69,7 @@ describe('integration test: a4a', () => {
     xhrMock = sandbox.stub(Xhr.prototype, 'fetch');
     mockResponse = {
       arrayBuffer: function() {
-        return Promise.resolve(stringToArrayBuffer(validCSSAmp.reserialized));
+        return utf8Encode(validCSSAmp.reserialized);
       },
       bodyUsed: false,
       headers: new Headers(),
@@ -145,7 +145,7 @@ describe('integration test: a4a', () => {
   it('should fall back to 3p when extractCreative returns empty sig', () => {
     sandbox.stub(MockA4AImpl.prototype, 'extractCreativeAndSignature')
         .onFirstCall().returns({
-          creative: stringToArrayBuffer(validCSSAmp.reserialized),
+          creative: utf8Encode(validCSSAmp.reserialized),
           signature: null,
         })
         .onSecondCall().throws(new Error(

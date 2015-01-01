@@ -37,6 +37,3 @@ export class MockA4AImpl extends AmpA4A {
   }
 }
 
-export function stringToArrayBuffer(str) {
-  return new TextEncoder('utf-8').encode(str);
-}

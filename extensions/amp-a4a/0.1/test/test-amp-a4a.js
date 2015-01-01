@@ -15,7 +15,6 @@
  */
 
 import {
-  stringToArrayBuffer,
   MockA4AImpl,
   TEST_URL,
   SIGNATURE_HEADER,
@@ -24,7 +23,6 @@ import {AmpA4A, RENDERING_TYPE_HEADER} from '../amp-a4a';
 import {Xhr} from '../../../../src/service/xhr-impl';
 import {Viewer} from '../../../../src/service/viewer-impl';
 import {ampdocServiceFor} from '../../../../src/ampdoc';
-import {utf8Encode} from '../../../../src/utils/bytes';
 import {cancellation} from '../../../../src/error';
 import {createIframePromise} from '../../../../testing/iframe';
 import {
@@ -33,6 +31,7 @@ import {
 import {data as testFragments} from './testdata/test_fragments';
 import {installDocService} from '../../../../src/service/ampdoc-impl';
 import {base64UrlDecodeToBytes} from '../../../../src/utils/base64';
+import {utf8Encode} from '../../../../src/utils/bytes';
 import {resetScheduledElementForTesting} from '../../../../src/custom-element';
 import '../../../../extensions/amp-ad/0.1/amp-ad-xorigin-iframe-handler';
 import * as sinon from 'sinon';
@@ -90,7 +89,7 @@ describe('amp-a4a', () => {
     viewerWhenVisibleMock.returns(Promise.resolve());
     mockResponse = {
       arrayBuffer: function() {
-        return Promise.resolve(stringToArrayBuffer(validCSSAmp.reserialized));
+        return utf8Encode(validCSSAmp.reserialized);
       },
       bodyUsed: false,
       headers: new Headers(),
@@ -476,20 +475,19 @@ describe('amp-a4a', () => {
             </script>
             </body></html>`;
         mockResponse.arrayBuffer = () => {
-          return Promise.resolve(stringToArrayBuffer(fullResponse));
+          return utf8Encode(fullResponse);
         };
         // Return value from `#extractCreativeAndSignature` is a sub-doc of
         // the full response.  To validate this test, comment out the following
         // statement and verify that test fails, with full response spliced in
         // to shadow doc.
         sandbox.stub(a4a, 'extractCreativeAndSignature').returns(
-          stringToArrayBuffer(validCSSAmp.reserialized).then(buffer => {
-            return {
-              creative: buffer,
-              signature: base64UrlDecodeToBytes(validCSSAmp.signature),
-            };
-          })
-        );
+            utf8Encode(validCSSAmp.reserialized).then(c => {
+              return {
+                creative: c,
+                signature: base64UrlDecodeToBytes(validCSSAmp.signature),
+              };
+            }));
         a4a.onLayoutMeasure();
         let onAmpCreativeRenderFired = false;
         a4a.onAmpCreativeRender = () => {
@@ -695,21 +693,23 @@ describe('amp-a4a', () => {
         const a4a = new AmpA4A(a4aElement);
         a4a.adUrl_ = 'https://nowhere.org';
         return buildCreativeArrayBuffer().then(bytes => {
-          return a4a.maybeRenderAmpAd_(bytes);
-        }).then(rendered => {
-          expect(rendered).to.be.true;
-          // Verify iframe presence.
-          expect(a4aElement.children.length).to.equal(1);
-          const friendlyIframe = a4aElement.children[0];
-          expect(friendlyIframe.tagName).to.equal('IFRAME');
-          expect(friendlyIframe.src).to.not.be.ok;
-          expect(friendlyIframe.srcdoc).to.be.ok;
-          const frameDoc = friendlyIframe.contentDocument;
-          const styles = frameDoc.querySelectorAll('style[amp-custom]');
-          expect(Array.prototype.some.call(styles,
-              s => { return s.innerHTML == 'p { background: green }'; }),
-              'Some style is "background: green"').to.be.true;
-          expect(frameDoc.body.innerHTML.trim()).to.equal('<p>some text</p>');
+          return a4a.maybeRenderAmpAd_(bytes).then(rendered => {
+            expect(rendered).to.be.true;
+            // Verify iframe presence.
+            expect(a4aElement.children.length).to.equal(1);
+            const friendlyIframe = a4aElement.children[0];
+            expect(friendlyIframe.tagName).to.equal('IFRAME');
+            expect(friendlyIframe.src).to.not.be.ok;
+            expect(friendlyIframe.srcdoc).to.be.ok;
+            const frameDoc = friendlyIframe.contentDocument;
+            const styles = frameDoc.querySelectorAll('style[amp-custom]');
+            expect(Array.prototype.some.call(styles,
+                s => {
+                  return s.innerHTML == 'p { background: green }';
+                }),
+                'Some style is "background: green"').to.be.true;
+            expect(frameDoc.body.innerHTML.trim()).to.equal('<p>some text</p>');
+          });
         });
       });
     });
@@ -722,47 +722,47 @@ describe('amp-a4a', () => {
         const a4a = new AmpA4A(a4aElement);
         a4a.adUrl_ = 'https://nowhere.org';
         return buildCreativeArrayBuffer().then(bytes => {
-          return a4a.maybeRenderAmpAd_(bytes);
-        }).then(() => {
-          // Force vsync system to run all queued tasks, so that DOM mutations
-          // are actually completed before testing.
-          a4a.vsync_.runScheduledTasks_();
-          const adBody = a4aElement.querySelector('iframe')
-              .contentDocument.querySelector('body');
-          let clickHandlerCalled = 0;
+          return a4a.maybeRenderAmpAd_(bytes).then(() => {
+            // Force vsync system to run all queued tasks, so that DOM mutations
+            // are actually completed before testing.
+            a4a.vsync_.runScheduledTasks_();
+            const adBody = a4aElement.querySelector('iframe')
+                .contentDocument.querySelector('body');
+            let clickHandlerCalled = 0;
 
-          adBody.onclick = function(e) {
-            expect(e.defaultPrevented).to.be.false;
-            e.preventDefault();  // Make the test not actually navigate.
-            clickHandlerCalled++;
-          };
-          adBody.innerHTML = '<a ' +
-              'href="https://f.co?CLICK_X,CLICK_Y,RANDOM">' +
-              '<button id="target"><button></div>';
-          const button = adBody.querySelector('#target');
-          const a = adBody.querySelector('a');
-          const ev1 = new Event('click', {bubbles: true});
-          ev1.pageX = 10;
-          ev1.pageY = 20;
-          button.dispatchEvent(ev1);
-          expect(a.href).to.equal('https://f.co/?10,20,RANDOM');
-          expect(clickHandlerCalled).to.equal(1);
+            adBody.onclick = function (e) {
+              expect(e.defaultPrevented).to.be.false;
+              e.preventDefault();  // Make the test not actually navigate.
+              clickHandlerCalled++;
+            };
+            adBody.innerHTML = '<a ' +
+                'href="https://f.co?CLICK_X,CLICK_Y,RANDOM">' +
+                '<button id="target"><button></div>';
+            const button = adBody.querySelector('#target');
+            const a = adBody.querySelector('a');
+            const ev1 = new Event('click', {bubbles: true});
+            ev1.pageX = 10;
+            ev1.pageY = 20;
+            button.dispatchEvent(ev1);
+            expect(a.href).to.equal('https://f.co/?10,20,RANDOM');
+            expect(clickHandlerCalled).to.equal(1);
 
-          const ev2 = new Event('click', {bubbles: true});
-          ev2.pageX = 111;
-          ev2.pageY = 222;
-          a.dispatchEvent(ev2);
-          expect(a.href).to.equal('https://f.co/?111,222,RANDOM');
-          expect(clickHandlerCalled).to.equal(2);
+            const ev2 = new Event('click', {bubbles: true});
+            ev2.pageX = 111;
+            ev2.pageY = 222;
+            a.dispatchEvent(ev2);
+            expect(a.href).to.equal('https://f.co/?111,222,RANDOM');
+            expect(clickHandlerCalled).to.equal(2);
 
-          const ev3 = new Event('click', {bubbles: true});
-          ev3.pageX = 666;
-          ev3.pageY = 666;
-          // Click parent of a tag.
-          a.parentElement.dispatchEvent(ev3);
-          // Had no effect, because actual link wasn't clicked.
-          expect(a.href).to.equal('https://f.co/?111,222,RANDOM');
-          expect(clickHandlerCalled).to.equal(3);
+            const ev3 = new Event('click', {bubbles: true});
+            ev3.pageX = 666;
+            ev3.pageY = 666;
+            // Click parent of a tag.
+            a.parentElement.dispatchEvent(ev3);
+            // Had no effect, because actual link wasn't clicked.
+            expect(a.href).to.equal('https://f.co/?111,222,RANDOM');
+            expect(clickHandlerCalled).to.equal(3);
+          });
         });
       });
     });
