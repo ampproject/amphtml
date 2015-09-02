@@ -1,0 +1,9 @@
+.DS_Store
+.g4ignore
+build
+dist
+dist.ads
+examples.build
+examples.min
+node_modules
+npm-debug.log
