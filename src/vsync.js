@@ -38,7 +38,7 @@ class VsyncTaskSpec {}
 export class Vsync {
 
   /**
-   * @param {!Widnow} win
+   * @param {!Window} win
    */
   constructor(win) {
     /** @const {!Window} */
