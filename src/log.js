@@ -21,7 +21,7 @@
 export class Log {
 
   /**
-   * @param {!Widnow} win
+   * @param {!Window} win
    */
   constructor(win) {
     /** @const {!Window} */
