@@ -144,13 +144,15 @@ export class Resources {
     // Phase 4: Trigger active. Active window = viewport window + 25% up/down.
     var activeTop = viewportTop - viewportHeight / 4;
     var activeBottom = viewportBottom + viewportHeight / 4;
-    log.fine(TAG_, 'activate window: ' + activeTop + '/' + activeBottom);
+    log.fine(TAG_, 'activate window: ' + activeTop + '/' + activeBottom + ', ' +
+        viewportBottom + ', ' + viewportHeight);
     for (let r of this.resources_) {
       let box = r.getLayoutBox();
       if (box.height == 0) {
         // Not visible
         continue;
       }
+      log.fine(TAG_, 'bottom: ' + box.bottom + ',' + box.top);
       var shouldBeActive = (box.top <= activeBottom && activeTop <= box.bottom);
       if (r.isActive() != shouldBeActive) {
         r.setActive(shouldBeActive);
@@ -242,7 +244,7 @@ export class Resources {
       id = 'AMP_' + this.resources_.length;
       element.id = id;
     }
-    log.fine(TAG_, 'add element: ' + id);
+    log.fine(TAG_, 'add element: ' + element.tagName + ': #' + element.id);
     this.resources_.push(new Resource(element));
     this.schedulePass(/* rebuild */ false);
   }
@@ -308,8 +310,10 @@ class Resource {
     }
     if (this.element.ownerDocument.defaultView
         .matchMedia(mediaQuery).matches) {
+      log.fine(TAG_, 'MATCH ' + this.element.id)
       this.element.classList.remove('-amp-hidden-by-media-query')
     } else {
+      log.fine(TAG_, 'NO MATCH ' + this.element.id)
       this.element.classList.add('-amp-hidden-by-media-query');
     }
   }

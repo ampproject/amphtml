@@ -19,7 +19,7 @@ import {createFixtureIframe} from '../../testing/iframe.js';
 describe('Rendering of amp-img', () => {
   var fixture;
   beforeEach(() => {
-    return createFixtureIframe('fixtures/components.html', 5000).then((f) => {
+    return createFixtureIframe('fixtures/components.html', 500).then((f) => {
       fixture = f;
     });
   });
@@ -47,19 +47,21 @@ describe('Rendering of amp-img', () => {
   });
 
   it('should respect media queries', () => {
-    var smallScreen = fixture.doc.getElementById('img3');
-    var largeScreen = fixture.doc.getElementById('img3_1');
-    expect(smallScreen.className).to.not.match(/-amp-hidden-by-media-query/);
-    expect(largeScreen.className).to.match(/-amp-hidden-by-media-query/);
-    expect(smallScreen.offsetHeight).to.equal(177);
-    expect(largeScreen.offsetHeight).to.equal(0);
-    fixture.iframe.width = 600;
-    fixture.win.dispatchEvent(new fixture.win.Event('resize'));
-    return fixture.awaitEvent('amp:load:start', 5).then(function() {
-      expect(smallScreen.className).to.match(/-amp-hidden-by-media-query/);
-      expect(largeScreen.className).to.not.match(/-amp-hidden-by-media-query/);
-      expect(smallScreen.offsetHeight).to.equal(0);
-      expect(largeScreen.offsetHeight).to.equal(193);
+    return fixture.awaitEvent('amp:load:start', 3).then(function() {
+      var smallScreen = fixture.doc.getElementById('img3');
+      var largeScreen = fixture.doc.getElementById('img3_1');
+      expect(smallScreen.className).to.not.match(/-amp-hidden-by-media-query/);
+      expect(largeScreen.className).to.match(/-amp-hidden-by-media-query/);
+      expect(smallScreen.offsetHeight).to.equal(177);
+      expect(largeScreen.offsetHeight).to.equal(0);
+      fixture.iframe.width = 600;
+      fixture.win.dispatchEvent(new fixture.win.Event('resize'));
+      return fixture.awaitEvent('amp:load:start', 5).then(function() {
+        expect(smallScreen.className).to.match(/-amp-hidden-by-media-query/);
+        expect(largeScreen.className).to.not.match(/-amp-hidden-by-media-query/);
+        expect(smallScreen.offsetHeight).to.equal(0);
+        expect(largeScreen.offsetHeight).to.equal(193);
+      });
     });
   });
 });
