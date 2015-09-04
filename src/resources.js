@@ -310,8 +310,10 @@ class Resource {
     }
     if (this.element.ownerDocument.defaultView
         .matchMedia(mediaQuery).matches) {
+      log.fine(TAG_, 'MATCH ' + this.element.id)
       this.element.classList.remove('-amp-hidden-by-media-query')
     } else {
+      log.fine(TAG_, 'NO MATCH ' + this.element.id)
       this.element.classList.add('-amp-hidden-by-media-query');
     }
   }
