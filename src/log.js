@@ -38,55 +38,55 @@ export class Log {
   /**
    * @param {string} tag
    * @param {string} level
-   * @param {string} message
+   * @param {!Array} messages
    * @param {?} opt_error
    */
-  msg_(tag, level, message, opt_error) {
+  msg_(tag, level, messages) {
     if (this.isEnabled_) {
-      let s = '[' + tag + '] [' + level + '] ' + message;
-      if (level != 'ERROR' || !this.win.console.error) {
-        this.win.console.log(s);
-      } else {
-        if (opt_error) {
-          this.win.console.error(s, opt_error);
-        } else {
-          this.win.console.error(s);
-        }
+      var fn = this.win.console.log;
+      if (level == 'ERROR') {
+        fn = this.win.console.error || fn;
+      } else if (level == 'INFO') {
+        fn = this.win.console.info || fn;
+      } else if (level == 'WARN') {
+        fn = this.win.console.warn || fn;
       }
+      messages.unshift('[' + tag + ']');
+      fn.apply(this.win.console, messages);
     }
   }
 
   /**
    * @param {string} tag
-   * @param {string} message
+   * @param {...*} var_args
    */
-  fine(tag, message) {
-    this.msg_(tag, 'FINE', message);
+  fine(tag, var_args) {
+    this.msg_(tag, 'FINE', Array.prototype.slice.call(arguments, 1));
   }
 
   /**
    * @param {string} tag
-   * @param {string} message
+   * @param {...*} var_args
    */
-  info(tag, message) {
-    this.msg_(tag, 'INFO', message);
+  info(tag, var_args) {
+    this.msg_(tag, 'INFO', Array.prototype.slice.call(arguments, 1));
   }
 
   /**
    * @param {string} tag
-   * @param {string} message
+   * @param {...*} var_args
    */
-  warn(tag, message) {
-    this.msg_(tag, 'WARN', message);
+  warn(tag, var_args) {
+    this.msg_(tag, 'WARN', Array.prototype.slice.call(arguments, 1));
   }
 
   /**
    * @param {string} tag
-   * @param {string} message
+   * @param {...*} var_args
    * @param {?} opt_error
    */
-  error(tag, message, opt_error) {
-    this.msg_(tag, 'ERROR', message, opt_error);
+  error(tag, var_args) {
+    this.msg_(tag, 'ERROR', Array.prototype.slice.call(arguments, 1));
   }
 }
 
