@@ -58,6 +58,8 @@ export function createFixtureIframe(fixture, initialIframeHeight, done) {
     // window object early enough to not miss any events that may get fired
     // on that window.
     window.beforeLoad = function(win) {
+      // Flag as being a test window.
+      win.AMP_TEST = true;
       // Function that returns a promise for when the given event fired at
       // least count times.
       var awaitEvent = (eventName, count) => {
@@ -125,6 +127,8 @@ export function createIframe() {
   iframe.srcdoc = '<!doctype><html><head><body>';
   document.body.appendChild(iframe);
   registerForUnitTest(iframe.contentWindow);
+  // Flag as being a test window.
+  iframe.contentWindow.AMP_TEST = true;
   return {
     win: iframe.contentWindow,
     doc: iframe.contentWindow.document,
