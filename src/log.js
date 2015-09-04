@@ -24,8 +24,12 @@ export class Log {
    * @param {!Window} win
    */
   constructor(win) {
-    /** @const {!Window} */
-    this.win = win;
+    /**
+     * In tests we use the main test window instead of the iframe where
+     * the tests runs because only the former is relayed to the console.
+     * @const {!Window}
+     */
+    this.win = win.AMP_TEST ? win.parent : win;
 
     /** @private {boolean} */
     this.isEnabled_ = !!this.win.console && !!this.win.console.log;
@@ -41,12 +45,12 @@ export class Log {
     if (this.isEnabled_) {
       let s = '[' + tag + '] [' + level + '] ' + message;
       if (level != 'ERROR' || !this.win.console.error) {
-        console.log(s);
+        this.win.console.log(s);
       } else {
         if (opt_error) {
-          console.error(s, opt_error);
+          this.win.console.error(s, opt_error);
         } else {
-          console.error(s);
+          this.win.console.error(s);
         }
       }
     }
