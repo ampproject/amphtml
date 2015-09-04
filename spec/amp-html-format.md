@@ -67,8 +67,8 @@ In concrete terms this means that:
     "datePublished": "2015-02-05T08:00:00+08:00"
   }
   </script>
-  <script element="amp-carousel" src="https://cdn.amphtml.org/v1/amp-carousel-0.1.js" async></script>
-  <script src="https://cdn.amphtml.org/v1.js"></script>
+  <script element="amp-carousel" src="https://cdn.ampproject.org/v1/amp-carousel-0.1.js" async></script>
+  <script src="https://cdn.ampproject.org/v1.js"></script>
 </head>
 <body>
 <h1>Sample document</h1>
@@ -92,7 +92,7 @@ AMP HTML documents MUST
 - contain a `<link rel="canonical" href="$SOME_URL" />` tag inside their head that points to the regular HTML version of the AMP HTML document or to itself if no such HTML version exists.
 - contain a `<meta charset="utf-8">` tag as the first child of their head tag.
 - contain a `<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">` tag inside their head tag.
-- contain a `<script src="https://cdn.amphtml.org/v1.js"></script>` tag as the last element in their head.
+- contain a `<script src="https://cdn.ampproject.org/v1.js"></script>` tag as the last element in their head.
 
 ### Metadata
 
@@ -226,9 +226,9 @@ Authors are free to include all custom fonts via a `@font-face` CSS instruction 
 
 The AMP runtime is a piece of JavaScript that runs inside every AMP document. It provides implementations for AMP custom elements, manages resource loading and prioritization and optionally includes a runtime validator for AMP HTML for use during development.
 
-The AMP runtime is loaded via the mandatory `<script src="https://cdn.amphtml.org/v1.js"></script>` tag in the AMP document head.
+The AMP runtime is loaded via the mandatory `<script src="https://cdn.ampproject.org/v1.js"></script>` tag in the AMP document head.
 
-Development mode is triggered by including the attribute "development" in the script tag: `<script src="https://cdn.amphtml.org/v1.js" development></script>`
+Development mode is triggered by including the attribute "development" in the script tag: `<script src="https://cdn.ampproject.org/v1.js" development></script>`
 
 
 ## Resources
@@ -295,20 +295,20 @@ Extended components are components that do not necessarily ship with the AMP run
 Extended components are loaded by including a script tag in the head of the document like this
 
 ```html
-<script element="amp-carousel" src="https://cdn.amphtml.org/v1/amp-carousel-0.1.js" async></script>
+<script element="amp-carousel" src="https://cdn.ampproject.org/v1/amp-carousel-0.1.js" async></script>
 ```
 
 The script tag MUST have an async attribute and MUST have an `element` attribute referencing the name of the element.
 
 Runtime implementations may use the name to render placeholders for these elements.
 
-The script URL must start with “https://cdn.amphtml.org” and must follow a very strict pattern of “/v\d+/[a-z-]+-(latest|\d+|\d+-\d+)\.js”
+The script URL must start with “https://cdn.ampproject.org” and must follow a very strict pattern of “/v\d+/[a-z-]+-(latest|\d+|\d+-\d+)\.js”
 
 ##### URL
 
 The URL for extended components is of the form:
 
-https://cdn.amphtml.org/$RUNTIME_VERSION/$ELEMENT_NAME-$ELEMENT_VERSION.js
+https://cdn.ampproject.org/$RUNTIME_VERSION/$ELEMENT_NAME-$ELEMENT_VERSION.js
 
 ##### Versioning
 
