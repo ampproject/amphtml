@@ -25,7 +25,7 @@ setTimeout(function() {
         return true;
       }
       /** @override */
-      loadContent() {
+      layoutCallback() {
         var h1 = document.createElement('h1');
         h1.textContent = 'Loads after 2 seconds. Sloowwww';
         this.element.appendChild(h1);

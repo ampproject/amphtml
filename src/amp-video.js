@@ -16,6 +16,7 @@
 
 import {BaseElement} from './base-element';
 import {getLengthNumeral, isLayoutSizeDefined} from './layout';
+import {loadPromise} from './event-helper';
 import {registerElement} from './custom-element';
 
 
@@ -31,7 +32,7 @@ export function installVideo(win) {
     }
 
     /** @override */
-    loadContent() {
+    layoutCallback() {
       var width = this.element.getAttribute('width');
       var height = this.element.getAttribute('height');
       var video = document.createElement('video');
@@ -42,7 +43,7 @@ export function installVideo(win) {
       video.height = getLengthNumeral(height);
       this.applyFillContent(video);
       this.element.appendChild(video);
-      return video;
+      return loadPromise(video);
     }
   }
 

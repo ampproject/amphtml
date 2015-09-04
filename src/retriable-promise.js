@@ -49,16 +49,15 @@ export function retriablePromise(exec, maxAttempts, delay, backoffFactor) {
  */
 function attempt_(exec, resolve, reject, attemptsLeft, nextDelay,
                   backoffFactor) {
-  log.fine(TAG_, 'attempts left: ' + attemptsLeft);
   exec().then((result) => {
-    log.fine(TAG_, 'success');
     resolve(result);
   }, (reason) => {
-    log.fine(TAG_, 'attempt failed: ' + reason);
     if (attemptsLeft <= 0) {
-      log.fine(TAG_, 'out of attempts');
+      log.error(TAG_, 'all attempts failed:', reason);
       reject(reason);
     } else {
+      log.fine(TAG_, 'attempt failed with', attemptsLeft, 'attempts left:',
+          reason);
       // TODO(dvoytenko): not all errors retriable
       var nextNextDelay = (nextDelay * backoffFactor / 2) *
           (1 + Math.random());

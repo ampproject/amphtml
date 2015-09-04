@@ -30,7 +30,12 @@ import * as tr from '../../../src/transition';
     }
 
     /** @override */
-    firstAttachedCallback() {
+    isReadyToBuild() {
+      return this.getRealChildren().length > 0;
+    }
+
+    /** @override */
+    buildCallback() {
       /** @private {!Array<!Element>} */
       this.slides_ = this.getRealChildren();
       this.slides_.forEach((child, i) => {
@@ -142,19 +147,15 @@ import * as tr from '../../../src/transition';
     }
 
     /** @override */
-    loadContent() {
-      this.preload_(this.currentIndex_);
+    layoutCallback() {
+      this.scheduleLayout(this.slides_[this.currentIndex_]);
       this.preloadNext_(1);
       return Promise.resolve();
     }
 
     /** @override */
-    activateContent() {
-      // TODO(dvoytenko): activate/deactivate current slide
-    }
-
-    /** @override */
-    deactivateContent() {
+    viewportCallback(inViewport) {
+      this.updateInViewport(this.slides_[this.currentIndex_], inViewport);
     }
 
     /**
@@ -195,10 +196,7 @@ import * as tr from '../../../src/transition';
         display: 'block'
       });
 
-      // TODO(dvoytenko): do this strictly via Resources
-      if (slide.initiateLoadContent) {
-        slide.initiateLoadContent();
-      }
+      this.scheduleLayout(slide);
     }
 
     /**
@@ -237,13 +235,9 @@ import * as tr from '../../../src/transition';
       newSlide.style.transform = '';
       newSlide.style.transition = '';
       newSlide.style.opacity = 1;
-      // TODO(dvoytenko): do these strictly via Resources
-      if (oldSlide.deactivateContentCallback) {
-        oldSlide.deactivateContentCallback();
-      }
-      if (newSlide.activateContentCallback) {
-        newSlide.activateContentCallback();
-      }
+      this.scheduleLayout(newSlide);
+      this.updateInViewport(oldSlide, false);
+      this.updateInViewport(newSlide, true);
     }
 
     /**
@@ -270,18 +264,7 @@ import * as tr from '../../../src/transition';
       // guarantee of it has display!=none.
       var nextIndex = this.nextIndex_(dir);
       if (nextIndex != this.currentIndex_) {
-        this.preload_(nextIndex);
-      }
-    }
-
-    /**
-     * @param {number} index
-     * @private
-     */
-    preload_(index) {
-      // TODO(dvoytenko): do this strictly via Resources
-      if (this.slides_[index].initiateLoadContent) {
-        this.slides_[index].initiateLoadContent();
+        this.schedulePreload(this.slides_[nextIndex]);
       }
     }
   }

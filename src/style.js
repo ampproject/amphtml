@@ -42,6 +42,19 @@ export function setStyles(element, styles) {
 
 
 /**
+ * Shows or hides the specified element.
+ * @param {!Element} element
+ * @param {boolean=} opt_display
+ */
+export function toggle(element, opt_display) {
+  if (opt_display === undefined) {
+    opt_display = element.style.display != 'none';
+  }
+  element.style.display = opt_display ? '' : 'none';
+}
+
+
+/**
  * Returns a pixel value.
  * @param {number} value
  * @return {string}

@@ -24,14 +24,7 @@ export const stubbedElements = [];
 export class ElementStub extends BaseElement {
   constructor(element) {
     super(element);
-    this.calledFirstAttachedCallback_ = false;
-    this.calledLoadContent_ = false;
-    this.calledLoadIdleContent_ = false;
     stubbedElements.push(this);
-    /** @private {?Function} */
-    this.loadPromiseResolve_ = null;
-    /** @private {?Function} */
-    this.loadPromiseReject_ = null;
   }
 
   /** @override */
@@ -52,50 +45,5 @@ export class ElementStub extends BaseElement {
     this.element.classList.remove('amp-unresolved');
     this.element.classList.remove('-amp-unresolved');
     newImpl.createdCallback();
-    try {
-      if (this.getLayout() != Layout.NODISPLAY &&
-            !newImpl.isLayoutSupported(this.getLayout())) {
-        throw new Error('Layout not supported: ' + this.getLayout());
-      }
-      newImpl.layout_ = this.getLayout();
-      if (this.calledFirstAttachedCallback_) {
-        newImpl.firstAttachedCallback();
-        this.element.dispatchCustomEvent('amp:attached');
-      }
-    } catch(e) {
-      let msg = '' + e;
-      // TODO(dvoytenko): only do this in dev mode
-      this.element.classList.add('-amp-element-error');
-      this.element.textContent = msg;
-      throw e;
-    }
-    if (this.calledLoadContent_) {
-      var promise = newImpl.loadContent();
-      promise.then(this.loadPromiseResolve_, this.loadPromiseReject_);
-      this.element.dispatchCustomEvent('amp:load:start');
-    }
-    if (this.calledLoadIdleContent_) {
-      newImpl.loadIdleContent();
-    }
-  }
-
-  /** @override */
-  firstAttachedCallback() {
-    this.calledFirstAttachedCallback_ = true;
-  }
-
-  /** @override */
-  loadContent() {
-    // TODO(malteubl): Implement prefetching.
-    this.calledLoadContent_ = true;
-    return new Promise((resolve, reject) => {
-      this.loadPromiseResolve_ = resolve;
-      this.loadPromiseReject_ = reject;
-    });
-  }
-
-  /** @override */
-  loadIdleContent() {
-    this.calledLoadIdleContent_ = true;
   }
 }

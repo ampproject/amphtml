@@ -80,7 +80,17 @@ i-amp-sizer {
   overflow: hidden !important;
 }
 
-.-amp-unresolved > * {
+/* For author styling. */
+.amp-notbuilt {
+}
+
+.-amp-notbuilt {
+  position: relative !important;
+  overflow: hidden !important;
+  color: transparent !important;
+}
+
+.-amp-notbuilt > * {
   display: none;
 }
 
@@ -101,7 +111,7 @@ i-amp-sizer {
   z-index: 1 !important;
 }
 
-.-amp-unresolved > [placeholder]:not(.hidden) {
+.-amp-notbuilt > [placeholder]:not(.hidden) {
   display: block !important;
 }
 

@@ -57,12 +57,7 @@ export function upgradeOrRegisterElement(win, name, toClass) {
     //    implementation.
     var element = stub.element;
     if (element.tagName.toLowerCase() == name) {
-      var impl = new toClass(element);
-      var registeredStub = element.implementation_;
-      element.implementation_ = impl;
-      if (registeredStub) {
-        registeredStub.upgrade(impl);
-      }
+      element.upgrade(new toClass(element));
     }
   }
 }
@@ -89,8 +84,6 @@ export function stubElements(win) {
  * @param {!Element}
  */
 export function applyLayout_(element) {
-  element.classList.add('-amp-element');
-
   let widthAttr = element.getAttribute('width');
   let heightAttr = element.getAttribute('height');
   let layoutAttr = element.getAttribute('layout');
@@ -152,6 +145,13 @@ export function applyLayout_(element) {
 
 
 /**
+ * @interface
+ */
+class AmpElement {
+}
+
+
+/**
  * Registers a new custom element with its implementation class.
  * @param {!Window} win The window in which to register the elements.
  * @param {string} name Name of the custom element
@@ -160,6 +160,8 @@ export function applyLayout_(element) {
 export function registerElement(win, name, implementationClass) {
   knownElements[name] = implementationClass;
   implementationClass.elementName = name;
+
+  // TODO(dvoytenko): express that ElementProto implements AmpElement interface.
   var ElementProto = win.Object.create(win.HTMLElement.prototype);
 
   /**
@@ -168,16 +170,88 @@ export function registerElement(win, name, implementationClass) {
    * @final
    */
   ElementProto.createdCallback = function() {
+    this.classList.add('-amp-element');
+
+    // Flag "notbuilt" is removed by Resource manager when the resource is
+    // considered to be built. See "setBuilt" method.
+    /** @private {boolean} */
+    this.built_ = false;
+    this.classList.add('-amp-notbuilt');
+    this.classList.add('amp-notbuilt');
+
     this.readyState = 'loading';
-    this.loadedContent = false;
-    this.loadedIdleContent = false;
     this.everAttached = false;
+
     /** @private {!Layout} */
     this.layout_ = Layout.NODISPLAY;
+
     /** @private {!BaseElement} */
     this.implementation_ = new implementationClass(this);
     this.implementation_.createdCallback();
-  }
+  };
+
+  /**
+   * @return {boolean}
+   * @final
+   */
+  ElementProto.isUpgraded = function() {
+    return !(this.implementation_ instanceof ElementStub);
+  };
+
+  /**
+   * @param {!BaseElement} newImpl
+   * @final
+   */
+  ElementProto.upgrade = function(newImpl) {
+    let registeredStub = this.implementation_;
+    this.implementation_ = newImpl;
+    if (registeredStub) {
+      registeredStub.upgrade(newImpl);
+    }
+    try {
+      if (this.layout_ != Layout.NODISPLAY &&
+            !this.implementation_.isLayoutSupported(this.layout_)) {
+        throw new Error('Layout not supported: ' + this.layout_);
+      }
+      this.implementation_.layout_ = this.layout_;
+      if (this.everAttached) {
+        this.implementation_.firstAttachedCallback();
+        this.dispatchCustomEvent('amp:attached');
+      }
+    } catch(e) {
+      let msg = '' + e;
+      // TODO(dvoytenko): only do this in dev mode
+      this.classList.add('-amp-element-error');
+      this.textContent = msg;
+      throw e;
+    }
+    resources.upgraded(this);
+  };
+
+  /**
+   * @return {boolean}
+   * @final
+   */
+  ElementProto.isBuilt = function() {
+    return this.built_;
+  };
+
+  /**
+   * @param {boolean} force
+   * @return {boolean}
+   * @final
+   */
+  ElementProto.build = function(force) {
+    assert(this.isUpgraded(), 'Cannot build unupgraded element');
+    if (!force && !this.implementation_.isReadyToBuild()) {
+      return false;
+    }
+    this.implementation_.buildCallback();
+    this.built_ = true;
+    this.classList.remove('-amp-notbuilt');
+    this.classList.remove('amp-notbuilt');
+    return true;
+  };
 
   /**
    * Called when the element is first attached to the DOM. Calls
@@ -217,7 +291,7 @@ export function registerElement(win, name, implementationClass) {
       setToErrorMode(this, e);
       throw e;
     }
-    if (this.implementation_ instanceof ElementStub) {
+    if (!this.isUpgraded()) {
       // amp:attached is dispatched from the ElementStub class when it replayed
       // the firstAttachedCallback call.
       this.dispatchCustomEvent('amp:stubbed');
@@ -256,107 +330,38 @@ export function registerElement(win, name, implementationClass) {
    * @final
    */
   ElementProto.getLayoutBox = function() {
-    var r = resources.getResource(this);
-    assert(r, 'Element is not attached yet: %s', this);
-    return r.getLayoutBox();
+    return resources.getResourceForElement(this).getLayoutBox();
   }
 
   /**
-   * @return {boolean}
-   * @final
-   */
-  ElementProto.isContentLoaded = function() {
-    return this.loadedContent;
-  };
-
-  /**
-   * Instructs the resource to load its content by calling the
-   * {@link loadContent} method that should be implemented
-   * by sub classes.
-   * If that method returns an element it will forward that element's
-   * load event to this element.
+   * Instructs the element to layout its content and load its resources if
+   * necessary by calling the {@link BaseElement.layoutCallback} method that
+   * should be implemented by BaseElement subclasses.
    * @return {!Promise}
    * @package @final
    */
-  ElementProto.initiateLoadContent = function() {
-    if (this.loadedContent) {
-      return Promise.resolve();
-    }
-    if (!(this.implementation_ instanceof ElementStub)) {
-      this.dispatchCustomEvent('amp:load:start');
-    }
-    var loadProxy;
-    try {
-      loadProxy = this.implementation_.loadContent();
-    } catch (e) {
-      setToErrorMode(this, e);
-      return Promise.reject(e);
-    }
-    if (loadProxy instanceof Promise) {
-      return loadProxy;
-    }
-    return ((loadProxy instanceof Promise)
-        ? loadProxy
-        : new Promise((resolve, reject) => {
-          if (loadProxy) {
-            if (loadProxy.complete) {
-              resolve();
-            } else {
-              loadProxy.addEventListener('load', () => {
-                var evt = document.createEvent('Event');
-                evt.initEvent('load', false, false);
-                this.dispatchEvent(evt);
-                resolve();
-              });
-              loadProxy.addEventListener('error', (event) => {
-                reject(event);
-              });
-            }
-          } else {
-            reject('no proxy');
-          }
-        })).then(() => {
-          this.loadedContent = true;
-          this.readyState = 'complete';
-        });
+  ElementProto.layoutCallback = function() {
+    assert(this.isUpgraded() && this.isBuilt(),
+        'Must be upgraded and built to receive viewport events');
+    this.dispatchCustomEvent('amp:load:start');
+    var promise = this.implementation_.layoutCallback();
+    assert(promise instanceof Promise,
+        'layoutCallback must return a promise');
+    return promise.then(() => {
+      this.readyState = 'complete';
+    });
   };
 
   /**
-   * Instructs the resource to load the content it should only load
-   * when nothing else is currently being downloaded.
-   * {@link ElementProto.loadIdleContent} method that should be implemented
-   * by sub classes.
-   * If that method returns an element it will forward that element's
-   * load event to this element.
-   * @final
-   * TODO(dvoytenko): consider removing
-   */
-  ElementProto.initiateLoadIdleContent = function() {
-    if (this.loadedIdleContent) {
-      return;
-    }
-    this.loadedIdleContent = true;
-    this.implementation_.loadIdleContent();
-  };
-
-  /**
-   * TODO(dvoytenko): come up with a more appropriate name that would signify
-   * "visible in viewport right now".
-   * Instructs the resource that it's currently in the active viewport
-   * and can activate itself.
+   * Instructs the resource that it entered or exited the visible viewport.
+   * @param {boolean} inViewport
    * @final @package
    */
-  ElementProto.activateContentCallback = function() {
-    this.implementation_.activateContent();
-  };
-
-  /**
-   * Instructs the resource that it's no longer in the active viewport
-   * and should deactivate itself.
-   * @final @package
-   */
-  ElementProto.deactivateContentCallback = function() {
-    this.implementation_.deactivateContent();
+  ElementProto.viewportCallback = function(inViewport) {
+    assert(this.isUpgraded() && this.isBuilt(),
+        'Must be upgraded and built to receive viewport events');
+    this.implementation_.inViewport_ = inViewport;
+    this.implementation_.viewportCallback(inViewport);
   };
 
   /**
@@ -365,15 +370,8 @@ export function registerElement(win, name, implementationClass) {
    * @final
    */
   ElementProto.activate = function() {
+    // TODO(dvoytenko, #35): defer until "built" state.
     this.implementation_.activate();
-  };
-
-  ElementProto.upgradeImplementation = function() {
-    if (this.loadedIdleContent) {
-      return;
-    }
-    this.loadedIdleContent = true;
-    this.implementation_.loadIdleContent();
   };
 
   win.document.registerElement(name, {
