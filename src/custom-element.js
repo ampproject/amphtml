@@ -185,11 +185,11 @@ export function registerElement(win, name, implementationClass) {
    * @final
    */
   ElementProto.attachedCallback = function() {
+    resources.add(this);
     if (!this.everAttached) {
       this.everAttached = true;
       this.firstAttachedCallback_();
     }
-    resources.add(this);
   }
 
   /**
@@ -214,10 +214,7 @@ export function registerElement(win, name, implementationClass) {
       this.implementation_.layout_ = this.layout_;
       this.implementation_.firstAttachedCallback();
     } catch(e) {
-      let msg = '' + e;
-      // TODO(dvoytenko): only do this in dev mode
-      this.classList.add('-amp-element-error');
-      this.textContent = msg;
+      setToErrorMode(this, e);
       throw e;
     }
     if (this.implementation_ instanceof ElementStub) {
@@ -228,6 +225,18 @@ export function registerElement(win, name, implementationClass) {
       this.dispatchCustomEvent('amp:attached');
     }
   };
+
+  /**
+   *
+   * @param {!Element} element
+   * @param {string|Error} message
+   */
+  function setToErrorMode(element, message) {
+    let msg = '' + message;
+    // TODO(dvoytenko): only do this in dev mode
+    element.classList.add('-amp-element-error');
+    element.textContent = msg;
+  }
 
   /**
    * @param {string} name
@@ -241,6 +250,16 @@ export function registerElement(win, name, implementationClass) {
     var win = this.ownerDocument.defaultView;
     this.dispatchEvent(new win.CustomEvent(name, data));
   };
+
+  /**
+   * @return {!LayoutRect}
+   * @final
+   */
+  ElementProto.getLayoutBox = function() {
+    var r = resources.getResource(this);
+    assert(r, 'Element is not attached yet: %s', this);
+    return r.getLayoutBox();
+  }
 
   /**
    * @return {boolean}
@@ -266,7 +285,13 @@ export function registerElement(win, name, implementationClass) {
     if (!(this.implementation_ instanceof ElementStub)) {
       this.dispatchCustomEvent('amp:load:start');
     }
-    var loadProxy = this.implementation_.loadContent();
+    var loadProxy;
+    try {
+      loadProxy = this.implementation_.loadContent();
+    } catch (e) {
+      setToErrorMode(this, e);
+      return Promise.reject(e);
+    }
     if (loadProxy instanceof Promise) {
       return loadProxy;
     }
