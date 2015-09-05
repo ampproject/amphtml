@@ -9,7 +9,7 @@ in particular its [components in form of custom elements](spec/amp-html-componen
 
 `npm i`
 
-Map `ads.localhost` to `127.0.0.1` in your `/etc/hosts` file.
+Map `ads.localhost` and `iframe.localhost` to `127.0.0.1` in your `/etc/hosts` file.
 
 ### Continuous build
 

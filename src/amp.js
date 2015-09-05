@@ -24,6 +24,7 @@
 require('babelify/polyfill');
 
 import {installAd} from './amp-ad';
+import {installIframe} from './amp-iframe';
 import {installImg} from './amp-img';
 import {installVideo} from './amp-video';
 import {installPixel} from './amp-pixel';
@@ -35,6 +36,7 @@ import {cssText} from '../build/css.js';
 import {action} from './action';
 
 installAd(window);
+installIframe(window);
 installImg(window);
 installPixel(window);
 installVideo(window);

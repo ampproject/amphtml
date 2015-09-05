@@ -32,6 +32,9 @@ export class Resources {
     /** @private @const {!Array<!Resource>} */
     this.resources_ = [];
 
+    /** @private @const {!Object<string, !Resource>} */
+    this.resourceMap_ = Object.create(null);
+
     /** @private {boolean} */
     this.rebuild_ = false;
 
@@ -238,6 +241,10 @@ export class Resources {
     return this.resources_;
   }
 
+  getResource(element) {
+    return this.resourceMap_[element.id];
+  }
+
   add(element) {
     var id = element.id;
     if (!id) {
@@ -245,11 +252,14 @@ export class Resources {
       element.id = id;
     }
     log.fine(TAG_, 'add element: ' + element.tagName + ': #' + element.id);
-    this.resources_.push(new Resource(element));
+    var r = new Resource(element);
+    this.resources_.push(r);
+    this.resourceMap_[element.id] = r;
     this.schedulePass(/* rebuild */ false);
   }
 
   remove(element) {
+    delete this.resourceMap_[element.id];
     this.resources_ = this.resources_.filter((r) => {
       return r.element != element;
     });
@@ -328,7 +338,7 @@ class Resource {
    * @return {!LayoutRect}
    */
   getLayoutBox() {
-    assert(this.boundingBox_);
+    assert(this.boundingBox_, 'Bounding box was not measured yet');
     return this.boundingBox_;
   }
 
