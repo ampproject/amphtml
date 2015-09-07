@@ -16,6 +16,7 @@
 
 
 import {assert} from './asserts';
+import {getMode} from './mode';
 
 
 /** @type {number} Number of ads on the page. */
@@ -105,10 +106,9 @@ function addDataAttributes(element, attributes) {
 function getBootstrapBaseUrl(parentWindow) {
   // TODO(malteubl): Change to final URL.
   var url = 'https://www.gstatic.com/amphtml/ads/bootstrap.html';
-  if (parentWindow.location.hostname == 'localhost' ||
-      // Happens in tests when embedded into a srcdoc.
-      !parentWindow.location.hostname) {
-    url = 'http://ads.localhost:' + parentWindow.location.port + '/dist.ads/v0.max.html'
+  if (getMode().localDev) {
+    url = 'http://ads.localhost:' + parentWindow.location.port +
+        '/dist.ads/v0.max.html';
   }
   return url;
 }
