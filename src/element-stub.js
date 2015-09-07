@@ -18,6 +18,7 @@ import {BaseElement} from './base-element';
 import {Layout} from './layout';
 
 
+/** @type {!Array} */
 export const stubbedElements = [];
 
 export class ElementStub extends BaseElement {

@@ -132,7 +132,8 @@ class AnimationPlayer {
 
     /** @private @const {!Array<!SegmentRuntime_>} */
     this.segments_ = [];
-    for (let segment of segments) {
+    for (let i = 0; i < segments.length; i++) {
+      let segment = segments[i];
       this.segments_.push({
         delay: segment.delay,
         func: segment.func,
@@ -282,14 +283,16 @@ class AnimationPlayer {
         this.duration_, 1);
 
     // Start segments due to be started
-    for (let segment of this.segments_) {
+    for (let i = 0; i < this.segments_.length; i++) {
+      let segment = this.segments_[i];
       if (!segment.started && normLinearTime >= segment.delay) {
         segment.started = true;
       }
     }
 
     // Execute all pending segments.
-    for (let segment of this.segments_) {
+    for (let i = 0; i < this.segments_.length; i++) {
+      let segment = this.segments_[i];
       if (!segment.started || segment.completed) {
         continue;
       }

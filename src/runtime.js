@@ -21,6 +21,7 @@ import {registerElement} from './custom-element';
 import {registerExtendedElement} from './extended-element';
 
 
+/** @type {!Array} */
 const elementsForTesting = [];
 
 
@@ -72,7 +73,8 @@ export function adopt(global) {
   };
 
   // Execute asynchronously scheduled elements.
-  for (let fn of preregisteredElements) {
+  for (let i = 0; i < preregisteredElements.length; i++) {
+    let fn = preregisteredElements[i];
     fn(global.AMP);
   }
 };
@@ -86,7 +88,8 @@ export function adopt(global) {
  * @param {!Window} global Global scope to adopt.
  */
 export function registerForUnitTest(win) {
-  for (let element of elementsForTesting) {
+  for (let i = 0; i < elementsForTesting.length; i++) {
+    let element = elementsForTesting[i];
     registerElement(win, element.name, element.implementationClass);
   }
 }

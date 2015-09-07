@@ -80,7 +80,8 @@ export class Resources {
 
     // Phase 1: Relayout as needed.
     let relayoutCount = 0;
-    for (let r of this.resources_) {
+    for (let i = 0; i < this.resources_.length; i++) {
+      let r = this.resources_[i];
       if (!r.isLayoutReady() || rebuild) {
         r.applyMediaQuery();
         r.layout();
@@ -92,7 +93,8 @@ export class Resources {
     if (relayoutCount > 0) {
       // TODO(dvoytenko): optimize: most likely not everything has to be
       // re-measured.
-      for (let r of this.resources_) {
+      for (let i = 0; i < this.resources_.length; i++) {
+        let r = this.resources_[i];
         r.measure();
       }
       this.resources_.sort((r1, r2) => {
@@ -128,7 +130,8 @@ export class Resources {
     // TODO(dvoytenko): what about slides? All of its content is at the same
     // box.top, but only few are visible at a time.
     // TODO(dvoytenko): some elements are explicitly not visible (amp-pixel)
-    for (let r of this.resources_) {
+    for (let i = 0; i < this.resources_.length; i++) {
+      let r = this.resources_[i];
       let box = r.getLayoutBox();
       if (box.height == 0) {
         // Not visible
@@ -146,7 +149,8 @@ export class Resources {
     var activeBottom = viewportBottom + viewportHeight / 4;
     log.fine(TAG_, 'activate window: ' + activeTop + '/' + activeBottom + ', ' +
         viewportBottom + ', ' + viewportHeight);
-    for (let r of this.resources_) {
+    for (let i = 0; i < this.resources_.length; i++) {
+      let r = this.resources_[i];
       let box = r.getLayoutBox();
       if (box.height == 0) {
         // Not visible
@@ -167,7 +171,8 @@ export class Resources {
     // Phase 5: Idle loading
     // TODO(dvoytenko): document/estimate IDLE timeouts and other constants
     if (now > this.lastLoading_ + 3000) {
-      for (let r of this.resources_) {
+      for (let i = 0; i < this.resources_.length; i++) {
+        let r = this.resources_[i];
         let box = r.getLayoutBox();
         if (box.height == 0) {
           // Not visible

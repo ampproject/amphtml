@@ -37,7 +37,8 @@ export var NULL = function(time) {return null;};
  */
 export function all(transitions) {
   return (time) => {
-    for (let tr of transitions) {
+    for (let i = 0; i < transitions.length; i++) {
+      let tr = transitions[i];
       tr(time);
     }
   };

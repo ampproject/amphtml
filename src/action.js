@@ -182,7 +182,8 @@ export class Action {
     let actionMap = null;
     let actions = s.split(';');
     if (actions && actions.length > 0) {
-      for (let actionStr of actions) {
+      for (let i = 0; i < actions.length; i++) {
+        let actionStr = actions[i];
         let actionInfo = this.parseAction_(actionStr);
         if (actionInfo) {
           if (!actionMap) {

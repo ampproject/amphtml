@@ -132,7 +132,8 @@ export class BaseElement {
    * @protected @final
    */
   propagateAttributes(attributes, element) {
-    for (let attr of attributes) {
+    for (let i = 0; i < attributes.length; i++) {
+      let attr = attributes[i];
       if (!this.element.hasAttribute(attr)) {
         continue;
       }
