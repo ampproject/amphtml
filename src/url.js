@@ -19,7 +19,7 @@ import {assert} from './asserts';
 
 /**
  * Returns a Location-like object for the given URL. If it is relative,
- * the URL gets resolve.
+ * the URL gets resolved.
  * @return {!Location}
  */
 export function parseUrl(url) {
@@ -40,6 +40,10 @@ export function parseUrl(url) {
   return info;
 }
 
+/**
+ * @param {!Object} info
+ * @return {string}
+ */
 function getOrigin(info) {
   return info.protocol + '//' + info.host
 }
