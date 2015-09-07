@@ -34,7 +34,6 @@ module.exports = function(config) {
 
     reporters: ['progress'],
 
-    // Some tests rely on this for absolute URLs.
     port: 9876,
 
     colors: true,

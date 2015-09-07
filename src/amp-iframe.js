@@ -19,9 +19,9 @@ import {assert} from './asserts';
 import {getLengthNumeral, isLayoutSizeDefined} from './layout';
 import {loadPromise} from './event-helper';
 import {registerElement} from './custom-element';
-import {viewport} from './viewport';
+import {parseUrl} from './url';
 
-
+var count = 0;
 /**
  * @param {!Window} win Destination window for the new element.
  */
@@ -33,28 +33,36 @@ export function installIframe(win) {
       return isLayoutSizeDefined(layout);
     }
 
-    assertSource(src) {
+    assertSource(src, containerSrc) {
+      var url = parseUrl(src);
       assert(
-          src.startsWith('https://') ||
-              src.startsWith('http://iframe.localhost/'),
+          url.protocol == 'https:' ||
+              url.origin.startsWith('http://iframe.localhost:'),
           'Invalid <amp-iframe> src. Must start with https://. Found %s',
+          this.element);
+      var containerUrl = parseUrl(containerSrc);
+      assert(
+          url.origin != containerUrl.origin,
+          'Origin of <amp-iframe> must not be equal to container %s.',
           this.element);
     }
 
     assertPosition() {
       var pos = this.element.getLayoutBox();
-      var minTop = Math.min(600, viewport.getSize().height * .75);
+      var minTop = Math.min(600, this.getViewport().getSize().height * .75);
       assert(pos.top >= minTop,
           '<amp-iframe> elements must be positioned outside the first 75% ' +
           'of the viewport or 600px from the top (whichever is smaller). ' +
           'Please contact the AMP team if that is a problem in your project.' +
-          ' We\'d love to learn about your use case.');
+          ' We\'d love to learn about your use case. Current position %s. Min: %s %s',
+          pos.top,
+          minTop);
     }
 
     /** @override */
     firstAttachedCallback() {
       var iframeSrc = this.element.getAttribute('src');
-      this.assertSource(iframeSrc);
+      this.assertSource(iframeSrc, win.location.href);
       this.iframeSrc = iframeSrc;
     }
 
@@ -70,13 +78,14 @@ export function installIframe(win) {
       this.applyFillContent(iframe);
       iframe.width = getLengthNumeral(width);
       iframe.height = getLengthNumeral(height);
-      this.element.appendChild(iframe);
       /** @const {!Element} */
       this.propagateAttributes(
           ['frameborder', 'allowfullscreen', 'allowtransparency'],
           iframe);
       setSandbox(this.element, iframe);
       iframe.src = this.iframeSrc;
+      this.element.appendChild(iframe);
+      console.log('APPENDED' + count++)
       return loadPromise(iframe);
     }
   }
