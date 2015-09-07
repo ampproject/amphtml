@@ -248,12 +248,12 @@ class AnimationPlayer {
       try {
         if (dir > 0) {
           // Natural order - all set to 1.
-          for (let i  = 0; i < this.segments_.length; i++) {
+          for (let i = 0; i < this.segments_.length; i++) {
             this.segments_[i].func(1);
           }
         } else {
           // Reverse order - all set to 0.
-          for (let i  = this.segments_.length - 1; i >= 0; i--) {
+          for (let i = this.segments_.length - 1; i >= 0; i--) {
             this.segments_[i].func(0);
           }
         }
