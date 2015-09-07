@@ -33,7 +33,7 @@ export function installIframe(win) {
       return isLayoutSizeDefined(layout);
     }
 
-    assertSource(src, containerSrc) {
+    assertSource(src, containerSrc, sandbox) {
       var url = parseUrl(src);
       assert(
           url.protocol == 'https:' ||
@@ -42,6 +42,7 @@ export function installIframe(win) {
           this.element);
       var containerUrl = parseUrl(containerSrc);
       assert(
+          !((' ' + sandbox + ' ').match(/\s+allow-same-origin\s+/)) ||
           url.origin != containerUrl.origin,
           'Origin of <amp-iframe> must not be equal to container %s.',
           this.element);
@@ -62,7 +63,8 @@ export function installIframe(win) {
     /** @override */
     firstAttachedCallback() {
       var iframeSrc = this.element.getAttribute('src');
-      this.assertSource(iframeSrc, win.location.href);
+      this.assertSource(iframeSrc, win.location.href,
+          this.element.getAttribute('sandbox'));
       this.iframeSrc = iframeSrc;
     }
 

@@ -142,17 +142,24 @@ describe('amp-iframe', () => {
   it('should deny same origin', () => {
     return getAmpIframeObject().then((amp) => {
       expect(() => {
-        amp.assertSource('https://google.com/fpp', 'https://google.com/abc');
+        amp.assertSource('https://google.com/fpp', 'https://google.com/abc',
+            'allow-same-origin');
       }).to.throw(/must not be equal to container/);
       expect(() => {
-        amp.assertSource('http://google.com/', 'https://foo.com');
+        amp.assertSource('https://google.com/fpp', 'https://google.com/abc',
+            'allow-same-origin allow-scripts');
+      }).to.throw(/must not be equal to container/);
+      // Same origin, but sandboxed.
+      amp.assertSource('https://google.com/fpp', 'https://google.com/abc', '');
+      expect(() => {
+        amp.assertSource('http://google.com/', 'https://foo.com', '');
       }).to.throw(/Must start with https/);
       expect(() => {
-        amp.assertSource('./foo', 'https://foo.com');
+        amp.assertSource('./foo', 'https://foo.com', '');
       }).to.throw(/Must start with https/);
 
-      amp.assertSource('http://iframe.localhost:123/foo', 'https://foo.com');
-      amp.assertSource('https://container.com', 'https://foo.com');
+      amp.assertSource('http://iframe.localhost:123/foo', 'https://foo.com', '');
+      amp.assertSource('https://container.com', 'https://foo.com', '');
     });
   });
 
