@@ -34,7 +34,7 @@ var HistoryId;
 export class History {
 
   /**
-   * @param {!Widnow} win
+   * @param {!Window} win
    */
   constructor(win) {
     /** @const {!Window} */
