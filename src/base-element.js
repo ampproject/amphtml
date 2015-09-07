@@ -16,6 +16,7 @@
 
 import {assert} from './asserts';
 import {Layout, isInternalElement} from './layout';
+import {viewportFor} from './viewport';
 
 
 /**
@@ -197,5 +198,12 @@ export class BaseElement {
    */
   applyFillContent(element) {
     element.classList.add('-amp-fill-content');
+  }
+
+  /**
+   * @return {!Viewport}
+   */
+  getViewport() {
+    return viewportFor(this.element.ownerDocument.defaultView);
   }
 }

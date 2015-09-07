@@ -101,7 +101,7 @@ export function createFixtureIframe(fixture, initialIframeHeight, done) {
     html = html.replace('>', '><script>parent.beforeLoad(window);</script>');
     html += '<script>parent.afterLoad(window);</script>';
     var iframe = document.createElement('iframe');
-    iframe.name = 'test-' + fixture + iframeCount++;
+    iframe.name = 'test_' + fixture + iframeCount++;
     iframe.onerror = function(event) {
       throw event.error;
     };
@@ -115,6 +115,10 @@ export function createFixtureIframe(fixture, initialIframeHeight, done) {
 /**
  * Creates a super simple iframe. Use this in unit tests to register elements
  * in a sandbox.
+ * TODO(@cramforce): Remove this function. In this sync mode, the iframe is
+ * treated as if it wasn't attached yet and the document actually exchanges
+ * when it does. This breaks tests that want to measure things because
+ * the iframe is treated as not rendered.
  * @return {{
  *   win: !Window,
  *   doc: !Document,
@@ -123,8 +127,8 @@ export function createFixtureIframe(fixture, initialIframeHeight, done) {
  */
 export function createIframe() {
   var iframe = document.createElement('iframe');
-  iframe.name = 'test-' + iframeCount++;
-  iframe.srcdoc = '<!doctype><html><head><body>';
+  iframe.name = 'test_' + iframeCount++;
+  iframe.srcdoc = '<!doctype><html><head><body style="margin:0">';
   document.body.appendChild(iframe);
   registerForUnitTest(iframe.contentWindow);
   // Flag as being a test window.
@@ -134,4 +138,32 @@ export function createIframe() {
     doc: iframe.contentWindow.document,
     iframe: iframe
   };
+}
+
+/**
+ * Creates a super simple iframe. Use this in unit tests to register elements
+ * in a sandbox.
+ * @return {{
+ *   win: !Window,
+ *   doc: !Document,
+ *   iframe: !Element
+ * }}
+ */
+export function createIframePromise() {
+  return new Promise(function(resolve) {
+    var iframe = document.createElement('iframe');
+    iframe.name = 'test_' + iframeCount++;
+    iframe.srcdoc = '<!doctype><html><head><body style="margin:0">';
+    iframe.onload = function() {
+      registerForUnitTest(iframe.contentWindow);
+      // Flag as being a test window.
+      iframe.contentWindow.AMP_TEST = true;
+      resolve({
+        win: iframe.contentWindow,
+        doc: iframe.contentWindow.document,
+        iframe: iframe
+      });
+    };
+    document.body.appendChild(iframe);
+  });
 }
