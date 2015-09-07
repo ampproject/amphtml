@@ -45,7 +45,8 @@ export function upgradeOrRegisterElement(win, name, toClass) {
   }
   assert(knownElements[name] == ElementStub,
       'Expected ' + name + ' to be an ElementStub.');
-  for (let stub of stubbedElements) {
+  for (let i = 0; i < stubbedElements.length; i++) {
+    let stub = stubbedElements[i];
     // There are 3 possible states here:
     // 1. We never made the stub because the extended impl. loaded first.
     //    In that case the element won't be in the array.

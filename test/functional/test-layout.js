@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Layout, getLengthNumeral, getLengthUnits, parseLength} from
+import {Layout, getLengthNumeral, getLengthUnits, parseLength, parseLayout} from
     '../../src/layout';
 import {applyLayout_} from '../../src/custom-element';
 
@@ -24,6 +24,19 @@ describe('Layout', () => {
 
   beforeEach(() => {
     div = document.createElement('div');
+  });
+
+  it('parseLayout', () => {
+    expect(parseLayout('nodisplay')).to.equal('nodisplay');
+    expect(parseLayout('fixed')).to.equal('fixed');
+    expect(parseLayout('responsive')).to.equal('responsive');
+    expect(parseLayout('container')).to.equal('container');
+    expect(parseLayout('fill')).to.equal('fill');
+  });
+
+  it('parseLayout - failure', () => {
+    expect(parseLayout('abc')).to.be.undefined;
+    expect(parseLayout('xyz')).to.be.undefined;
   });
 
   it('parseLength', () => {

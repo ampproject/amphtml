@@ -57,4 +57,34 @@ describe('BaseElement', () => {
     expect(elements[0].tagName.toLowerCase()).to.equal('content');
   });
 
+  it('propagateAttributes - niente', () => {
+    let target = document.createElement('div');
+    expect(target.hasAttributes()).to.be.false;
+
+    element.propagateAttributes(['data-test1'], target);
+    expect(target.hasAttributes()).to.be.false;
+
+    element.propagateAttributes(['data-test2', 'data-test3'], target);
+    expect(target.hasAttributes()).to.be.false;
+  });
+
+  it('propagateAttributes', () => {
+    let target = document.createElement('div');
+    expect(target.hasAttributes()).to.be.false;
+
+    div.setAttribute('data-test1', 'abc');
+    div.setAttribute('data-test2', 'xyz');
+    div.setAttribute('data-test3', '123');
+
+    element.propagateAttributes(['data-test1'], target);
+    expect(target.hasAttributes()).to.be.true;
+
+    expect(target.getAttribute('data-test1')).to.equal('abc');
+    expect(target.getAttribute('data-test2')).to.be.null;
+    expect(target.getAttribute('data-test3')).to.be.null;
+
+    element.propagateAttributes(['data-test2', 'data-test3'], target);
+    expect(target.getAttribute('data-test2')).to.equal('xyz');
+    expect(target.getAttribute('data-test3')).to.equal('123');
+  });
 });
