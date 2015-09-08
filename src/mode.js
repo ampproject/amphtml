@@ -33,6 +33,7 @@ export function getMode() {
   if (mode) {
     return mode;
   }
+  console.error('Process', process.env);
   return mode = getMode_();
 }
 
@@ -41,11 +42,13 @@ export function getMode() {
  * @return {!Mode}
  */
 function getMode_() {
-  var isLocalDev = parentWindow.location.hostname == 'localhost' ||
-      // Happens in tests when embedded into a srcdoc.
-      !parentWindow.location.hostname) &&
+  var isLocalDev = (location.hostname == 'localhost' ||
+      (location.ancestorOrigins &&
+          location.ancestorOrigins[0].startsWith('http://localhost:'))) &&
       // Filter out localhost running against a prod script.
-      !!document.querySelector('script[src*="/dist/"]');
+      // Because all allowed scripts are ours, we know that these can only
+      // occur during local dev.
+      !!document.querySelector('script[src*="/dist/"],script[src*="/base/"]');
 
   return {
     localDev: isLocalDev,
