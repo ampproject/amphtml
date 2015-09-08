@@ -37,7 +37,7 @@ export function installIframe(win) {
       var url = parseUrl(src);
       assert(
           url.protocol == 'https:' ||
-              url.origin.indexOf('http://iframe.localhost:') == 0,
+              url.origin.startsWith('http://iframe.localhost:'),
           'Invalid <amp-iframe> src. Must start with https://. Found %s',
           this.element);
       var containerUrl = parseUrl(containerSrc);
@@ -64,7 +64,7 @@ export function installIframe(win) {
     /** @override */
     firstAttachedCallback() {
       var iframeSrc = this.element.getAttribute('src');
-      this.iframeSrc = this.assertSource(iframeSrc, win.location.href,
+      this.assertSource(iframeSrc, win.location.href,
           this.element.getAttribute('sandbox'));
     }
 
