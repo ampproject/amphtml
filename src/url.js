@@ -41,7 +41,7 @@ export function parseUrl(url) {
 }
 
 /**
- * @param {!Object} info
+ * @param {!Location} info
  * @return {string}
  */
 function getOrigin(info) {

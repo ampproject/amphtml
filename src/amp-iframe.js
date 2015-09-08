@@ -37,7 +37,7 @@ export function installIframe(win) {
       var url = parseUrl(src);
       assert(
           url.protocol == 'https:' ||
-              url.origin.startsWith('http://iframe.localhost:'),
+              url.origin.indexOf('http://iframe.localhost:') == 0,
           'Invalid <amp-iframe> src. Must start with https://. Found %s',
           this.element);
       var containerUrl = parseUrl(containerSrc);
@@ -46,6 +46,7 @@ export function installIframe(win) {
           url.origin != containerUrl.origin,
           'Origin of <amp-iframe> must not be equal to container %s.',
           this.element);
+      return src;
     }
 
     assertPosition() {
@@ -63,9 +64,8 @@ export function installIframe(win) {
     /** @override */
     firstAttachedCallback() {
       var iframeSrc = this.element.getAttribute('src');
-      this.assertSource(iframeSrc, win.location.href,
+      this.iframeSrc = this.assertSource(iframeSrc, win.location.href,
           this.element.getAttribute('sandbox'));
-      this.iframeSrc = iframeSrc;
     }
 
     /** @override */
@@ -87,7 +87,6 @@ export function installIframe(win) {
       setSandbox(this.element, iframe);
       iframe.src = this.iframeSrc;
       this.element.appendChild(iframe);
-      console.log('APPENDED' + count++)
       return loadPromise(iframe);
     }
   }
