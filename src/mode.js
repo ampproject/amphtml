@@ -33,7 +33,6 @@ export function getMode() {
   if (mode) {
     return mode;
   }
-  console.error('Process', process.env);
   return mode = getMode_();
 }
 

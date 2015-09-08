@@ -94,6 +94,17 @@ function unitWatch(done) {
   }, done);
 }
 
+function unitWatchVerbose(done) {
+  karma.start({
+    configFile: path.resolve('karma.conf.js'),
+    files: tests,
+    browsers: ['Chrome'],
+    client: {
+      captureConsole: true
+    }
+  }, done);
+}
+
 function lint() {
   return gulp.src(srcs, tests)
     .pipe(gjslint())
@@ -192,6 +203,7 @@ gulp.task('extensions', buildExtensions);
 gulp.task('clean', clean);
 gulp.task('unit', unit);
 gulp.task('unit-watch', unitWatch);
+gulp.task('unit-watch-verbose', unitWatchVerbose);
 gulp.task('build', function() { return compile(); });
 gulp.task('watch', function() { return watch(); });
 gulp.task('minify', function() {
