@@ -64,7 +64,7 @@ export function installIframe(win) {
     /** @override */
     firstAttachedCallback() {
       var iframeSrc = this.element.getAttribute('src');
-      this.assertSource(iframeSrc, win.location.href,
+      this.iframeSrc = this.assertSource(iframeSrc, win.location.href,
           this.element.getAttribute('sandbox'));
     }
 
