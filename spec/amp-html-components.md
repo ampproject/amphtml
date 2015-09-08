@@ -16,6 +16,9 @@ limitations under the License.
 
 Changelog:
 
+0.5
+Added amp-iframe
+
 0.4
 Renamed CAT to AMP
 Provisionally removed amp-on spec - subject to be update to “on” attribute.
@@ -461,6 +464,24 @@ For example:
 The `amp-lightbox` component can be styled with standard CSS.
 
 
+### <a name=”amp-iframe”></a> `amp-iframe`
+
+Displays an iframe.
+
+`amp-iframe` has several important differences from vanilla iframes that are designed to make it more secure and avoid AMP files that are dominated by a single iframe:
+
+- `amp-iframe` may not appear close to the top of the document. They must be either 600px away from the top or not within the first 75% of the viewport when scrolled to the top – whichever is smaller. NOTE: We are currently looking for feedback as to how well this restriction works in practice.
+- They are sandboxed by default. That means that authors needs to be explicit about what should be allowed in the iframe. See the [the docs on MDN](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe) for details on the sandbox attribute.
+- They must only request resources via HTTPS.
+- They must not be in the same origin as the container unless they do not allow `allow-same-origin` in the sandbox attribute.
+
+#### Attributes
+
+**src, sandbox, frameborder, allowfullscreen, allowtransparency**
+
+The attributes above should all behave like they do on standard iframes.
+
+
 ### <a name=”amp-instagram”></a> `amp-instagram`
 
 Displays an instagram embed.
@@ -473,7 +494,7 @@ Example:
       layout="responsive">
     </amp-instagram>
 
-Note that due to instagram using a fixed aspect ratio when using responsive layout the value for width and height in the example should be universal.
+The width/height given in the example should be correct for responsive layouts with square (instagram's default) pictures. Other aspect ratios will require different values.
 
 #### Attributes
 

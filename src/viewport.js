@@ -227,5 +227,14 @@ export class Viewport {
   }
 }
 
+/**
+ * @return {!Viewport}
+ */
+export function viewportFor(window) {
+  if (window.__viewport) {
+    return window.__viewport;
+  }
+  return window.__viewport = new Viewport(window);
+};
 
 export const viewport = new Viewport(window);
