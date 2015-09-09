@@ -7,7 +7,9 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
   <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
   <script custom-element="amp-anim" src="../dist/v0/amp-anim-0.1.max.js" async></script>
+  <script custom-element="amp-iframe" src="../dist/v0/amp-iframe-0.1.max.js" async></script>
   <script custom-element="amp-instagram" src="../dist/v0/amp-instagram-0.1.max.js" async></script>
+  <script custom-element="amp-twitter" src="../dist/v0/amp-twitter-0.1.max.js" async></script>
   <script custom-element="amp-youtube" src="../dist/v0/amp-youtube-0.1.max.js" async></script>
   <script src="../dist/amp.js"></script>
   <style>
@@ -74,6 +76,15 @@
   </amp-ad>
 
 
+  <h2>Iframe</h2>
+  <amp-iframe width=300 height=300
+      sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
+      layout="responsive"
+      frameborder="0"
+      src="https://www.google.com/maps/embed/v1/place?key=AIzaSyDG9YXIhKBhqclZizcSzJ0ROiE0qgVfwzI&q=Alameda,%20CA">
+  </amp-iframe>
+
+
   <h2>Instagram</h2>
   <amp-instagram
     shortcode="fBwFP"
@@ -88,6 +99,14 @@
       type="adsense"
       data-ad-client="ca-pub-9350112648257122">
   </amp-ad>
+
+
+  <h2>Twitter</h2>
+  <amp-twitter width=486 height=256
+      layout="responsive"
+      data-tweetID="585110598171631616"
+      data-cards="hidden">
+  </amp-twitter>
 
 
   <amp-pixel width=1 height=1 src="https://pubads.g.doubleclick.net/activity;dc_iu=/12344/pixel;ord=$RANDOM?"></amp-pixel>
