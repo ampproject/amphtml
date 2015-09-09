@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {writeScript, executeAfterWriteScript} from '../src/3p'
+import {writeScript} from '../src/3p'
 
 /**
  * @param {!Window} global
@@ -24,11 +24,21 @@ export function doubleclick(global, data) {
   writeScript(global,
       'https://www.googletagservices.com/tag/js/gpt.js',
       function() {
-        global.googletag.defineSlot(data.slot,
-          [data.width, data.height], 'dbad').addService(googletag.pubads());
-        global.googletag.pubads().enableSyncRendering();
-        global.googletag.pubads().set("page_url", context.location.href);
-        global.googletag.enableServices();
-        googletag.display('c');
+        global.googletag.cmd.push(function() {
+          var dimensions = [[
+            parseInt(data.width, 10),
+            parseInt(data.height, 10)
+          ]];
+          googletag.defineSlot(data.slot, dimensions, 'c')
+              .addService(googletag.pubads());
+          googletag.pubads().enableSingleRequest();
+          googletag.pubads().enableSyncRendering();
+          googletag.pubads().set("page_url", context.location.href);
+          googletag.enableServices();
+
+          global.docEndCallback = function() {
+            global.googletag.display('c');
+          };
+        });
       });
 }
