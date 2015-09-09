@@ -42,7 +42,6 @@ describe('amp-iframe', () => {
 
   function getAmpIframe(attributes, opt_top, opt_height, opt_translateY) {
     return createIframePromise().then(function(iframe) {
-      //installIframe(iframe.win);
       var i = iframe.doc.createElement('amp-iframe');
       for (var key in attributes) {
         i.setAttribute(key, attributes[key]);
