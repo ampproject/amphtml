@@ -21,7 +21,10 @@ import {loadPromise} from './event-helper';
 import {registerElement} from './custom-element';
 import {parseUrl} from './url';
 
+/** @type {number}  */
 var count = 0;
+
+
 /**
  * @param {!Window} win Destination window for the new element.
  */
@@ -80,6 +83,7 @@ export function installIframe(win) {
       this.applyFillContent(iframe);
       iframe.width = getLengthNumeral(width);
       iframe.height = getLengthNumeral(height);
+      iframe.name = 'amp_iframe' + count++;
       /** @const {!Element} */
       this.propagateAttributes(
           ['frameborder', 'allowfullscreen', 'allowtransparency'],

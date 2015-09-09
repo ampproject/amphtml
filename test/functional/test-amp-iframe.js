@@ -37,7 +37,7 @@ describe('amp-iframe', () => {
     }
   };
 
-  function getAmpIframe(attributes, opt_top, opt_height) {
+  function getAmpIframe(attributes, opt_top, opt_height, opt_translateY) {
     return createIframePromise().then(function(iframe) {
       installIframe(iframe.win);
       var i = iframe.doc.createElement('amp-iframe');
@@ -50,6 +50,9 @@ describe('amp-iframe', () => {
       var top = opt_top || '600px';
       i.style.position = 'absolute';
       i.style.top = top;
+      if (opt_translateY) {
+        i.style.transform = 'translateY(' + opt_translateY + ')';
+      }
       iframe.doc.body.appendChild(i);
       // Wait an event loop for the iframe to be created.
       return timer.promise(0).then(() => {
@@ -111,6 +114,17 @@ describe('amp-iframe', () => {
       width: 100,
       height: 100
     }, '599px', '1000px').then((amp) => {
+      expect(amp.iframe).to.be.null;
+    });
+  });
+
+  it('should respect translations', () => {
+    return getAmpIframe({
+      src: iframeSrc,
+      sandbox: 'allow-scripts',
+      width: 100,
+      height: 100
+    }, '650px', '1000px', '-100px').then((amp) => {
       expect(amp.iframe).to.be.null;
     });
   });
