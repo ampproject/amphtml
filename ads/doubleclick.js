@@ -36,6 +36,7 @@ export function doubleclick(global, data) {
           googletag.pubads().set("page_url", context.location.href);
           googletag.enableServices();
 
+          // This must be called from its own script tag.
           global.docEndCallback = function() {
             global.googletag.display('c');
           };
