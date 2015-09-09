@@ -33,6 +33,7 @@ import {adopt} from './runtime';
 import {installExperimentalViewerIntegration} from './experimental-viewer-integration';
 import {cssText} from '../build/css.js';
 import {action} from './action';
+import {maybeValidate} from './validator-integration';
 
 installAd(window);
 installImg(window);
@@ -44,5 +45,7 @@ adopt(window);
 stubElements(window);
 
 action.addEvent('tap');
+
+maybeValidate(window);
 
 installExperimentalViewerIntegration();
