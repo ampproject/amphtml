@@ -29,7 +29,7 @@ export function twitter(global, data) {
   var s = document.createElement('script');
   s.src = 'https://platform.twitter.com/widgets.js';
   s.onload = function() {
-    twttr.widgets.createTweet(data.tweetid, tweet);
+    twttr.widgets.createTweet(data.tweetid, tweet, data);
   };
   // Buggy, hacky, dirty.
   var redraw = global.onload = global.onresize = function() {
