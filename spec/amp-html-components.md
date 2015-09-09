@@ -526,7 +526,7 @@ Twitter does not currently provide an API that yields fixed aspect ratio Tweet e
 
 The ID of the tweet. In a URL like https://twitter.com/joemccann/status/640300967154597888 `640300967154597888` is the tweetID.
 
-**data-***
+**data-nameOfOption**
 
 Options for the Tweet appearance can be set using `data-` attributes. E.g. `data-cards="hidden"` deactivates Twitter cards. For documentation of the available options, see [Twitter's docs](https://dev.twitter.com/web/javascript/creating-widgets#create-tweet).
 
