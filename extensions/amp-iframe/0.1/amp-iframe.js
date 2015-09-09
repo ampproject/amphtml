@@ -14,22 +14,20 @@
  * limitations under the License.
  */
 
-import {BaseElement} from './base-element';
-import {assert} from './asserts';
-import {getLengthNumeral, isLayoutSizeDefined} from './layout';
-import {loadPromise} from './event-helper';
-import {registerElement} from './custom-element';
-import {parseUrl} from './url';
-
-/** @type {number}  */
-var count = 0;
+import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
+import {loadPromise} from '../../../src/event-helper';
+import {parseUrl} from '../../../src/url';
 
 
-/**
- * @param {!Window} win Destination window for the new element.
- */
-export function installIframe(win) {
-  class AmpIframe extends BaseElement {
+(window.AMP = window.AMP || []).push(function(AMP) {
+
+  /** @type {number}  */
+  var count = 0;
+
+  /** @const */
+  var assert = AMP.assert;
+
+  class AmpIframe extends AMP.BaseElement {
 
     /** @override */
     isLayoutSupported(layout) {
@@ -67,7 +65,7 @@ export function installIframe(win) {
     /** @override */
     firstAttachedCallback() {
       var iframeSrc = this.element.getAttribute('src');
-      this.iframeSrc = this.assertSource(iframeSrc, win.location.href,
+      this.iframeSrc = this.assertSource(iframeSrc, window.location.href,
           this.element.getAttribute('sandbox'));
     }
 
@@ -106,5 +104,5 @@ export function installIframe(win) {
     iframe.setAttribute('sandbox', allows);
   }
 
-  registerElement(win, 'amp-iframe', AmpIframe);
-}
+  AMP.registerElement('amp-iframe', AmpIframe);
+});

@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
-import {Timer} from '../../src/timer';
-import {createIframePromise} from '../../testing/iframe';
-import {installIframe} from '../../src/amp-iframe';
-import {loadPromise} from '../../src/event-helper';
-import {resources} from '../../src/resources';
+import {Timer} from '../../../../src/timer';
+import {adopt} from '../../../../src/runtime';
+import {createIframePromise} from '../../../../testing/iframe';
+import {loadPromise} from '../../../../src/event-helper';
+import {resources} from '../../../../src/resources';
+require('../amp-iframe');
+
+adopt(window);
 
 describe('amp-iframe', () => {
 
@@ -39,7 +42,6 @@ describe('amp-iframe', () => {
 
   function getAmpIframe(attributes, opt_top, opt_height, opt_translateY) {
     return createIframePromise().then(function(iframe) {
-      installIframe(iframe.win);
       var i = iframe.doc.createElement('amp-iframe');
       for (var key in attributes) {
         i.setAttribute(key, attributes[key]);
