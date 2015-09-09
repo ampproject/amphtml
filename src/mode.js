@@ -42,7 +42,7 @@ export function getMode() {
  */
 function getMode_() {
   var isLocalDev = (location.hostname == 'localhost' ||
-      (location.ancestorOrigins &&
+      (location.ancestorOrigins && location.ancestorOrigins[0] &&
           location.ancestorOrigins[0].startsWith('http://localhost:'))) &&
       // Filter out localhost running against a prod script.
       // Because all allowed scripts are ours, we know that these can only
