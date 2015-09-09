@@ -18,6 +18,7 @@ Changelog:
 
 0.5
 Added amp-iframe
+Added amp-twitter
 
 0.4
 Renamed CAT to AMP
@@ -474,6 +475,14 @@ Displays an iframe.
 - They are sandboxed by default. That means that authors needs to be explicit about what should be allowed in the iframe. See the [the docs on MDN](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe) for details on the sandbox attribute.
 - They must only request resources via HTTPS.
 - They must not be in the same origin as the container unless they do not allow `allow-same-origin` in the sandbox attribute.
+
+Example:
+    <amp-iframe width=300 height=300
+        sandbox="allow-scripts"
+        layout="responsive"
+        frameborder="0"
+        src="https://foo.com/iframe">
+    </amp-iframe>
 
 #### Attributes
 
