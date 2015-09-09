@@ -52,7 +52,6 @@ function getMode_() {
   return {
     localDev: isLocalDev,
     // Triggers validation
-    // TODO(cramforce): Hook this up when validator is available.
-    // development: !!document.querySelector('script[development]')
+    development: !!document.querySelector('script[development]')
   };
 }
