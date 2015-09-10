@@ -38,10 +38,11 @@ import * as tr from '../../../src/transition';
     buildCallback() {
       /** @private {!Array<!Element>} */
       this.slides_ = this.getRealChildren();
-      this.slides_.forEach((child, i) => {
+      this.slides_.forEach((slide, i) => {
+        this.setAsOwner(slide);
         // Only the first element is initially visible.
-        child.style.display = i > 0 ? 'none' : 'block';
-        this.applyFillContent(child);
+        slide.style.display = i > 0 ? 'none' : 'block';
+        this.applyFillContent(slide);
       });
 
       /** @private {number} */

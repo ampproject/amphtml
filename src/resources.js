@@ -25,11 +25,13 @@ import {viewport} from './viewport';
 
 let TAG_ = 'Resources';
 let RESOURCE_PROP_ = '__AMP__RESOURCE';
+let OWNER_PROP_ = '__AMP__OWNER';
 let LAYOUT_TASK_ID_ = 'L';
 let LAYOUT_TASK_OFFSET_ = 0;
 let PRELOAD_TASK_ID_ = 'P';
 let PRELOAD_TASK_OFFSET_ = 2;
 let PRIORITY_BASE_ = 10;
+let PRIORITY_PENALTY_TIME_ = 1000;
 let POST_TASK_PASS_DELAY_ = 1000;
 
 
@@ -178,6 +180,16 @@ export class Resources {
   }
 
   /**
+   * @param {!Element} element
+   * @param {!AmpElement} owner
+   * @package
+   */
+  setOwner(element, owner) {
+    assert(owner.contains(element), 'Owner must contain the element');
+    element[OWNER_PROP_] = owner;
+  }
+
+  /**
    * @param {!Element} parentElement
    * @param {!Element|!Array<!Element>} subElements
    */
@@ -223,7 +235,8 @@ export class Resources {
    */
   doPass_() {
     let viewportSize = viewport.getSize();
-    log.fine(TAG_, 'PASS: forceBuild=', this.forceBuild_,
+    log.fine(TAG_, 'PASS: at ' + timer.now() +
+        ', forceBuild=', this.forceBuild_,
         ', relayoutAll=', this.relayoutAll_,
         ', viewportSize=', viewportSize.width, viewportSize.height);
 
@@ -266,10 +279,11 @@ export class Resources {
     if (relayoutCount > 0 || relayoutAll) {
       for (let i = 0; i < this.resources_.length; i++) {
         let r = this.resources_[i];
-        if (r.getState() != ResourceState_.NOT_BUILT) {
-          if (r.getState() == ResourceState_.NOT_LAID_OUT || relayoutAll) {
-            r.measure();
-          }
+        if (r.getState() == ResourceState_.NOT_BUILT || r.hasOwner()) {
+          continue;
+        }
+        if (r.getState() == ResourceState_.NOT_LAID_OUT || relayoutAll) {
+          r.measure();
         }
       }
     }
@@ -284,7 +298,7 @@ export class Resources {
     // current viewport.
     for (let i = 0; i < this.resources_.length; i++) {
       let r = this.resources_[i];
-      if (r.getState() != ResourceState_.READY_FOR_LAYOUT) {
+      if (r.getState() != ResourceState_.READY_FOR_LAYOUT || r.hasOwner()) {
         continue;
       }
       if (r.isDisplayed() && r.overlaps(loadRect)) {
@@ -295,6 +309,9 @@ export class Resources {
     // Phase 4: Trigger "viewport enter/exit" events.
     for (let i = 0; i < this.resources_.length; i++) {
       let r = this.resources_[i];
+      if (r.hasOwner()) {
+        continue;
+      }
       var shouldBeInViewport = (r.isDisplayed() && r.overlaps(visibleRect));
       if (r.isInViewport() != shouldBeInViewport) {
         r.setInViewport(shouldBeInViewport);
@@ -310,7 +327,7 @@ export class Resources {
       for (let i = 0; i < this.resources_.length; i++) {
         let r = this.resources_[i];
         if (r.getState() == ResourceState_.READY_FOR_LAYOUT &&
-                r.isDisplayed()) {
+                !r.hasOwner() && r.isDisplayed()) {
           log.fine(TAG_, 'idle layout:', r.debugid);
           this.scheduleLayoutOrPreload_(r, /* layout */ false);
           idleScheduledCount++;
@@ -415,27 +432,21 @@ export class Resources {
    */
   calcTaskTimeout_(task) {
     if (this.exec_.getSize() == 0) {
-      if (task.resource.debugid == 'amp-ad#24') {
-        console.log('--- amp-ad timeout = 0 b/c exec is empty');
-      }
-      // XXX: should it be 0 or find a way to delay more?
       return 0;
     }
 
+    let now = timer.now();
     let timeout = 0;
     this.exec_.forEach((other) => {
       // Higher priority tasks get the head start. Currently 500ms per a drop
       // in priority (note that priority is 10-based).
-      let penalty = Math.max((task.priority - other.priority) /
-          PRIORITY_BASE_ * 500, 0);
-      if (task.resource.debugid == 'amp-ad#24') {
-        console.log('--- amp-ad timeout = 0 b/c penalty = ' + penalty +
-            ', exec[0]=', other);
-      }
-
+      let penalty = Math.max((task.priority - other.priority) *
+          PRIORITY_PENALTY_TIME_, 0);
+      // TODO(dvoytenko): Consider running total and not maximum.
+      timeout = Math.max(timeout, penalty - (now - other.startTime));
     });
 
-    return Math.max(timer.now() - firstExec.startTime - penalty, 0);
+    return timeout;
   }
 
   /**
@@ -615,6 +626,9 @@ export class Resource {
     /* @const {string} */
     this.debugid = element.tagName.toLowerCase() + '#' + id;
 
+    /* @const {!AmpElement|undefined|null} */
+    this.owner_ = undefined;
+
     /** @const {number} */
     this.priority_ = getElementPriority(element.tagName);
 
@@ -634,6 +648,32 @@ export class Resource {
    */
   getId() {
     return this.id_;
+  }
+
+  /**
+   * @return {?AmpElement}
+   */
+  getOwner() {
+    if (this.owner_ === undefined) {
+      let n = this.element;
+      for (let n = this.element; n; n = n.parentElement) {
+        if (n[OWNER_PROP_]) {
+          this.owner_ = n[OWNER_PROP_];
+          break;
+        }
+      }
+      if (this.owner_ === undefined) {
+        this.owner_ = null;
+      }
+    }
+    return this.owner_;
+  }
+
+  /**
+   * @return {boolean}
+   */
+  hasOwner() {
+    return !!this.getOwner();
   }
 
   /**
@@ -698,14 +738,14 @@ export class Resource {
       return;
     }
     let box = viewport.getLayoutRect(this.element);
+    // Note that "left" doesn't affect readiness for the layout.
     if (this.state_ == ResourceState_.NOT_LAID_OUT ||
           this.layoutBox_.top != box.top ||
-          this.layoutBox_.left != box.left ||
           this.layoutBox_.width != box.width ||
           this.layoutBox_.height != box.height) {
-      this.layoutBox_ = box;
       this.state_ = ResourceState_.READY_FOR_LAYOUT;
     }
+    this.layoutBox_ = box;
   }
 
   /**
@@ -755,7 +795,7 @@ export class Resource {
 
     // Double check that the element has not disappeared since scheduling
     this.measure();
-    if (this.state_ != ResourceState_.READY_FOR_LAYOUT) {
+    if (!this.isDisplayed()) {
       log.fine(TAG_, 'layout canceled due to element loosing display:',
           this.debugid, this.state_);
       return Promise.resolve();

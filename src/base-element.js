@@ -129,6 +129,13 @@ export class BaseElement {
   }
 
   /**
+   * @param {!Element} element
+   */
+  setAsOwner(element) {
+    resources.setOwner(element, this.element);
+  }
+
+  /**
    * Called when the element should perform layout. At this point the element
    * should load/reload resources associated with it. This method is called
    * by runtime and cannot be called manually. Returns promise that will

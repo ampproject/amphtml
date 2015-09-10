@@ -54,6 +54,7 @@ import * as tr from '../../../src/transition';
       this.element.appendChild(this.container_);
 
       this.cells_.forEach((cell) => {
+        this.setAsOwner(cell);
         cell.style.display = 'inline-block';
         if (cell != this.cells_[0]) {
           // TODO(dvoytenko): this has to be customizable
