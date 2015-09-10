@@ -14,9 +14,15 @@
  * limitations under the License.
  */
 
+import {getMode} from './mode'
+
 
 /**
- * This class is completely removed in the PROD mode.
+ * Logging.
+ * // TODO(@cramforce): Make this DCRable.
+ * Add #log=1 to URL to turn on logging when in prod (providing a build with
+ * logging is used and #log=0 to turn off logging in local dev.
+ * @final
  */
 export class Log {
 
@@ -32,7 +38,23 @@ export class Log {
     this.win = win.AMP_TEST ? win.parent : win;
 
     /** @private {boolean} */
-    this.isEnabled_ = !!this.win.console && !!this.win.console.log;
+    this.isEnabled_ = this.shouldBeEnabled_();
+  }
+
+  shouldBeEnabled_() {
+    if (!this.win.console || !this.win.console.log) {
+      return false;
+    }
+    // Search for #log=0 or log=1
+    var match = this.win.location.hash.match(/log=(\d)/);
+    var shouldLog = match && match[1];
+    if (getMode().localDev && shouldLog != '0') {
+      return true;
+    }
+    if (this.win.location.hash && shouldLog == '1') {
+      return true;
+    }
+    return false;
   }
 
   /**
