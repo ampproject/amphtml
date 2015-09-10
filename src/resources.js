@@ -418,21 +418,22 @@ export class Resources {
       if (task.resource.debugid == 'amp-ad#24') {
         console.log('--- amp-ad timeout = 0 b/c exec is empty');
       }
+      // XXX: should it be 0 or find a way to delay more?
       return 0;
     }
 
-    let firstExec = this.exec_.getFirst();
-
-    // Higher priority tasks get the head start. Currently 500ms per a drop
-    // in priority (note that priority is 10-based).
-    let penalty = (task.priority - firstExec.priority) / PRIORITY_BASE_ * 500;
-    if (penalty <= 0) {
+    let timeout = 0;
+    this.exec_.forEach((other) => {
+      // Higher priority tasks get the head start. Currently 500ms per a drop
+      // in priority (note that priority is 10-based).
+      let penalty = Math.max((task.priority - other.priority) /
+          PRIORITY_BASE_ * 500, 0);
       if (task.resource.debugid == 'amp-ad#24') {
         console.log('--- amp-ad timeout = 0 b/c penalty = ' + penalty +
-            ', exec[0]=', firstExec);
+            ', exec[0]=', other);
       }
-      return 0;
-    }
+
+    });
 
     return Math.max(timer.now() - firstExec.startTime - penalty, 0);
   }
@@ -572,7 +573,7 @@ export class Resources {
     if (element.classList.contains('-amp-element')) {
       callback(this.getResourceForElement(element));
     } else {
-      let ampElements = element.querySelectorAll('.-amp-element');
+      let ampElements = element.getElementsByClassName('-amp-element');
       let seen = [];
       for (let i = 0; i < ampElements.length; i++) {
         let ampElement = ampElements[i];
@@ -751,6 +752,15 @@ export class Resource {
 
     assert(this.state_ != ResourceState_.NOT_BUILT && this.isDisplayed(),
         'Not ready to start layout: %s (%s)', this.debugid, this.state_);
+
+    // Double check that the element has not disappeared since scheduling
+    this.measure();
+    if (this.state_ != ResourceState_.READY_FOR_LAYOUT) {
+      log.fine(TAG_, 'layout canceled due to element loosing display:',
+          this.debugid, this.state_);
+      return Promise.resolve();
+    }
+
     log.fine(TAG_, 'start layout:', this.debugid);
 
     let promise = retriablePromise(() => {
@@ -856,13 +866,6 @@ export class TaskQueue_ {
   }
 
   /**
-   * @return {?Task_}
-   */
-  getFirst() {
-    return this.tasks_.length > 0 ? this.tasks_[0] : null;
-  }
-
-  /**
    * Enqueues the task. If the task is already in the queue, the error is
    * thrown.
    * @param {!Task_} task
@@ -910,6 +913,14 @@ export class TaskQueue_ {
       }
     }
     return minTask;
+  }
+
+  /**
+   * Iterates over all tasks in queue in the insertion order.
+   * @param {function(!Task_)} callback
+   */
+  forEach(callback) {
+    this.tasks_.forEach(callback);
   }
 }
 
