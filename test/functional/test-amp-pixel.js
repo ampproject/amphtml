@@ -55,7 +55,7 @@ describe('amp-pixel', () => {
     expect(p.children[0].src).to.match(/ord=(\d\.\d+)\?$/);
   });
 
-  it('throw for invalid URL', () => {
+  it('should throw for invalid URL', () => {
     expect(function() {
       getPixel(
           'http://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=$RANDOM?');

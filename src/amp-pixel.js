@@ -17,6 +17,7 @@
 import {BaseElement} from './base-element';
 import {Layout} from './layout';
 import {registerElement} from './custom-element';
+import {assert} from './asserts';
 
 
 /**
@@ -39,10 +40,7 @@ export function installPixel(win) {
     /** @override */
     loadContent() {
       var src = this.element.getAttribute('src');
-      if (!(/^(https\:\/\/|\/\/)/i.test(src))) {
-        throw new Error('The <amp-pixel> src attribute must start with ' +
-            '"https://" or "//". Invalid value: ' + src);
-      }
+      src = this.assertSource(src);
       src = src.replace(/\$RANDOM/, encodeURIComponent(Math.random()));
       var image = new Image();
       image.src = src;
@@ -50,6 +48,14 @@ export function installPixel(win) {
       image.height = 1;
       this.element.appendChild(image);
       return Promise.resolve();
+    }
+
+    assertSource(src) {
+      assert(
+          /^(https\:\/\/|\/\/)/i.test(src),
+          'The <amp-pixel> src attribute must start with ' +
+          '"https://" or "//". Invalid value: ' + src);
+      return src;
     }
   }
 
