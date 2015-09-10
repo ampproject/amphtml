@@ -29,6 +29,18 @@ describe('Style', () => {
     sandbox = null;
   });
 
+  it('toggle', () => {
+    let element = document.createElement('div');
+    st.toggle(element);
+    expect(element.style.display).to.equal('none');
+    st.toggle(element);
+    expect(element.style.display).to.equal('');
+    st.toggle(element, true);
+    expect(element.style.display).to.equal('');
+    st.toggle(element, false);
+    expect(element.style.display).to.equal('none');
+  });
+
   it('setStyle', () => {
     let element = document.createElement('div');
     st.setStyle(element, 'width', '1px');

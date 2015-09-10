@@ -31,14 +31,46 @@ import {viewportFor} from './viewport';
  * lifecycle (See
  * http://www.html5rocks.com/en/tutorials/webcomponents/customelements/)
  * and adding AMP style late loading to the mix.
- * The lifecycle is:
- *   createdCallback ->
- *   firstAttachedCallback ->
- *   (isReadyToBuild)* ->
- *   buildCallback ->
- *   layoutCallback (one or more) ->
- *   viewportCallback (one or more)
  *
+ * The complete lifecycle of custom DOM element is:
+ *
+ *           ||
+ *           || createdCallback
+ *           ||
+ *           \/
+ *    State: <NOT BUILT> <NOT UPGRADED> <NOT ATTACHED>
+ *           ||
+ *           || upgrade
+ *           ||
+ *           \/
+ *    State: <NOT BUILT> <NOT ATTACHED>
+ *           ||
+ *           || firstAttachedCallback
+ *           ||
+ *           \/
+ *    State: <NOT BUILT>           <=
+ *           ||                     ||
+ *           || isBuildReady?  ======
+ *           ||
+ *           \/
+ *    State: <NOT BUILT>
+ *           ||
+ *           || buildCallback
+ *           ||
+ *           \/
+ *    State: <BUILT>
+ *           ||
+ *           || layoutCallback
+ *           ||
+ *           \/
+ *    State: <LAID OUT>
+ *           ||
+ *           || viewportCallback
+ *           ||
+ *           \/
+ *    State: <IN VIEWPORT>
+ *
+ * For more details, see {@link custom-element.js}.
  *
  * Each method is called exactly once and overriding them in subclasses
  * is optional.

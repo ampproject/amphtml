@@ -36,6 +36,7 @@ let POST_TASK_PASS_DELAY_ = 1000;
 
 
 /**
+ * Returns the element-based priority. A value from 0 to 10.
  * @param {string} tagName
  * @return {number}
  */
@@ -86,6 +87,7 @@ export class Resources {
     /** @const {!TaskQueue_} */
     this.queue_ = new TaskQueue_();
 
+    // When viewport is resized, we have to re-measure all elements.
     viewport.onChanged((event) => {
       this.lastVelocity_ = event.velocity;
       this.relayoutAll_ = this.relayoutAll_ || event.relayoutAll;
@@ -132,15 +134,21 @@ export class Resources {
   }
 
   /**
+   * Returns the {@link Resource} instance corresponding to the specified AMP
+   * Element. If no Resource is found, the exception is thrown.
    * @param {!AmpElement} element
    * @return {?Resource}
+   * @package
    */
   getResourceForElement(element) {
     return assert(/** @type {!Resource} */ (element[RESOURCE_PROP_]));
   }
 
   /**
+   * Signals that an element has been added to the DOM. Resources manager
+   * will start tracking it from this point on.
    * @param {!AmpElement} element
+   * @package
    */
   add(element) {
     let resource = new Resource((++this.resourceIdCounter_), element);
@@ -159,7 +167,10 @@ export class Resources {
   }
 
   /**
+   * Signals that an element has been removed to the DOM. Resources manager
+   * will stop tracking it from this point on.
    * @param {!AmpElement} element
+   * @package
    */
   remove(element) {
     let resource = this.getResourceForElement(element);
@@ -171,7 +182,10 @@ export class Resources {
   }
 
   /**
+   * Signals that an element has been upgraded to the DOM. Resources manager
+   * will perform build and enable layout/viewport signals for this element.
    * @param {!AmpElement} element
+   * @package
    */
   upgraded(element) {
     let resource = this.getResourceForElement(element);
@@ -180,6 +194,8 @@ export class Resources {
   }
 
   /**
+   * Assigns an owner for the specified element. This means that the resources
+   * within this element will be managed by the owner and not Resources manager.
    * @param {!Element} element
    * @param {!AmpElement} owner
    * @package
@@ -190,6 +206,11 @@ export class Resources {
   }
 
   /**
+   * Schedules layout for the specified sub-elements that are children of the
+   * parent element. The parent element may choose to send this signal either
+   * because it's an owner (see {@link setOwner}) or because it wants the
+   * layouts to be done sooner. In either case, both parent's and children's
+   * priority is observed when scheduling this work.
    * @param {!Element} parentElement
    * @param {!Element|!Array<!Element>} subElements
    */
@@ -201,6 +222,11 @@ export class Resources {
   }
 
   /**
+   * Schedules preload for the specified sub-elements that are children of the
+   * parent element. The parent element may choose to send this signal either
+   * because it's an owner (see {@link setOwner}) or because it wants the
+   * preloads to be done sooner. In either case, both parent's and children's
+   * priority is observed when scheduling this work.
    * @param {!Element} parentElement
    * @param {!Element|!Array<!Element>} subElements
    */
@@ -212,6 +238,10 @@ export class Resources {
   }
 
   /**
+   * A parent resource, especially in when it's an owner (see {@link setOwner}),
+   * may request the Resources manager to update children's inViewport state.
+   * A child's inViewport state is a logical AND between inLocalViewport
+   * specified here and parent's own inViewport state.
    * @param {!Element} parentElement
    * @param {!Element|!Array<!Element>} subElements
    * @param {boolean} inLocalViewport
@@ -224,6 +254,7 @@ export class Resources {
   }
 
   /**
+   * Schedules the work pass at the latest with the specified delay.
    * @param {number=} opt_delay
    */
   schedulePass(opt_delay) {
@@ -249,7 +280,18 @@ export class Resources {
     }
   }
 
-  /** @private */
+  /**
+   * Discovers work that needs to be done since the last pass. If viewport
+   * has changed, it will try to build new elements, measure changed elements,
+   * and schedule layouts and preloads within a resonable distance of the
+   * current viewport. Finally, this process also updates inViewport state
+   * of changed elements.
+   *
+   * Layouts and preloads are not executed immediately, but instead scheduled
+   * in the queue with different priorities.
+   *
+   * @private
+   */
   discoverWork_() {
 
     // TODO(dvoytenko): vsync separation may be needed for different phases
@@ -340,6 +382,14 @@ export class Resources {
   }
 
   /**
+   * Dequeues layout and preload tasks from the queue and initiates their
+   * execution.
+   *
+   * There are two main drivers to dequeueing: a task's score and timeout. The
+   * score is built based on the resource's priority and viewport location
+   * (see {@link calcTaskScore_}). Timeout depends on the priority and age
+   * of tasks currently in the execution pool (see {@link calcTaskTimeout_}).
+   *
    * @return {!time}
    * @private
    */
@@ -400,16 +450,24 @@ export class Resources {
   }
 
   /**
-   * @param {!Task_} task
-   * @private
-   */
-  reschedule_(task) {
-    if (!this.queue_.getTaskById(task.id)) {
-      this.queue_.enqueue(task);
-    }
-  }
-
-  /**
+   * Calculates the task's score. A task with the lowest score will be dequeued
+   * from the queue the first.
+   *
+   * There are three components of the score: element's priority, operation or
+   * offset priority and viewport priority.
+   *
+   * Element's priority is constant of the element's name. E.g. amp-img has a
+   * priority of 0, while amp-ad has a priority of 2.
+   *
+   * The operation (offset) priority is the priority of the task. A layout is
+   * a high-priority task while preload is a lower-priority task.
+   *
+   * Viewport priority is a function of the distance of the element from the
+   * currently visible viewports. The elements in the visible viewport get
+   * higher priority and further away from the viewport get lower priority.
+   * This priority also depends on whether or not the user is scrolling towards
+   * this element or away from it.
+   *
    * @param {!LayoutRect} viewportRect
    * @param {number} dir
    * @param {!Task_} task
@@ -419,7 +477,7 @@ export class Resources {
     let box = task.resource.getLayoutBox();
     let posPriority = Math.floor((box.top - viewportRect.top) /
         viewportRect.height);
-    if (posPriority != 0 && Math.sign(posPriority) != dir) {
+    if (posPriority != 0 && Math.sign(posPriority) != (dir || 1)) {
       posPriority *= 2;
     }
     posPriority = Math.abs(posPriority);
@@ -427,6 +485,16 @@ export class Resources {
   }
 
   /**
+   * Calculates the timeout of a task. The timeout depends on two main factors:
+   * the priorities of the tasks currently in the execution pool and their age.
+   * The timeout is calculated against each task in the execution pool and the
+   * maximum value is returned.
+   *
+   * A task is penalized with higher timeout values when it's lower in priority
+   * than the task in the execution pool. However, this penalty is judged
+   * against the age of the executing task. If it has been in executing for
+   * some time, the penalty is reduced.
+   *
    * @param {!Task_} task
    * @private
    */
@@ -451,6 +519,16 @@ export class Resources {
 
   /**
    * @param {!Task_} task
+   * @private
+   */
+  reschedule_(task) {
+    if (!this.queue_.getTaskById(task.id)) {
+      this.queue_.enqueue(task);
+    }
+  }
+
+  /**
+   * @param {!Task_} task
    * @param {boolean} success
    * @param {*=} opt_reason
    * @return {!Promise|undefined}
@@ -467,6 +545,7 @@ export class Resources {
   }
 
   /**
+   * Schedules layout or preload for the specified resource.
    * @param {!Resource} resource
    * @param {boolean} layout
    * @param {number=} opt_parentPriority
@@ -491,6 +570,8 @@ export class Resources {
   }
 
   /**
+   * Schedules layout or preload for the sub-resources of the specified
+   * resource.
    * @param {!Resource} parentResource
    * @param {boolean} layout
    * @param {!Array<!Element>} subElements
@@ -516,6 +597,7 @@ export class Resources {
   }
 
   /**
+   * Schedules a task.
    * @param {!Resource} resource
    * @param {string} localId
    * @param {number} priorityOffset
@@ -550,6 +632,7 @@ export class Resources {
   }
 
   /**
+   * Updates inViewport state for the specified sub-resources of a resource.
    * @param {!Resource} parentResource
    * @param {!Array<!Element>} subElements
    * @param {boolean} inLocalViewport
@@ -564,6 +647,7 @@ export class Resources {
   }
 
   /**
+   * Finds resources within the parent resource's shallow subtree.
    * @param {!Resource} parentResource
    * @param {!Array<!Element>} elements
    * @param {function(!Resource)} callback
@@ -647,6 +731,7 @@ export class Resource {
   }
 
   /**
+   * Returns resource's ID.
    * @return {number}
    */
   getId() {
@@ -654,6 +739,7 @@ export class Resource {
   }
 
   /**
+   * Returns an owner element or null.
    * @return {?AmpElement}
    */
   getOwner() {
@@ -673,6 +759,7 @@ export class Resource {
   }
 
   /**
+   * Whether the resource has an owner.
    * @return {boolean}
    */
   hasOwner() {
@@ -680,6 +767,7 @@ export class Resource {
   }
 
   /**
+   * Returns the resource's element priority.
    * @return {number}
    */
   getPriority() {
@@ -687,6 +775,7 @@ export class Resource {
   }
 
   /**
+   * Returns the resource's state. See {@link ResourceState_} for details.
    * @return {!ResourceState_}
    */
   getState() {
@@ -694,6 +783,8 @@ export class Resource {
   }
 
   /**
+   * Requests the resource's element to be built. See {@link AmpElement.build}
+   * for details.
    * @param {boolean} force
    * @return {boolean}
    */
@@ -739,7 +830,9 @@ export class Resource {
     }
   }
 
-  /** */
+  /**
+   * Measures the resource's boundaries. Only allowed for upgraded elements.
+   */
   measure() {
     assert(this.element.isUpgraded(), 'Must be upgraded to measure: %s',
         this.debugid);
@@ -759,7 +852,7 @@ export class Resource {
   }
 
   /**
-   * Notice! Calling this method before measure() was called may cause relayout.
+   * Returns a previously measured layout box.
    * @return {!LayoutRect}
    */
   getLayoutBox() {
@@ -767,6 +860,8 @@ export class Resource {
   }
 
   /**
+   * Whether the resource is displayed, i.e. if it has non-zero width and
+   * height.
    * @return {boolean}
    */
   isDisplayed() {
@@ -774,6 +869,7 @@ export class Resource {
   }
 
   /**
+   * Whether the element's layout box overlaps with the specified rect.
    * @param {!LayoutRect} rect
    * @return {boolean}
    */
@@ -781,12 +877,17 @@ export class Resource {
     return layoutRectsOverlap(this.layoutBox_, rect);
   }
 
-  /** */
+  /**
+   * Sets the resource's state to LAYOUT_SCHEDULED.
+   */
   layoutScheduled() {
     this.state_ = ResourceState_.LAYOUT_SCHEDULED;
   }
 
   /**
+   * Starts the layout of the resource. Returns the promise that will yield
+   * once layout is complete. Only allowed to be called on a upgraded, built
+   * and displayed element.
    * @return {!Promise}
    */
   startLayout() {
@@ -839,6 +940,7 @@ export class Resource {
   }
 
   /**
+   * Whether the resource is currently visible in the viewport.
    * @return {boolean}
    */
   isInViewport() {
@@ -846,6 +948,7 @@ export class Resource {
   }
 
   /**
+   * Updates the inViewport state of the element.
    * @param {boolean} inViewport
    */
   setInViewport(inViewport) {
@@ -887,6 +990,7 @@ export class TaskQueue_ {
   }
 
   /**
+   * Size of the queue.
    * @return {number}
    */
   getSize() {
@@ -894,6 +998,7 @@ export class TaskQueue_ {
   }
 
   /**
+   * Last time a task was enqueued.
    * @return {!time}
    */
   getLastEnqueueTime() {
@@ -901,6 +1006,7 @@ export class TaskQueue_ {
   }
 
   /**
+   * Last time a task was dequeued.
    * @return {!time}
    */
   getLastDequeueTime() {
@@ -908,11 +1014,12 @@ export class TaskQueue_ {
   }
 
   /**
+   * Returns the task with the specified ID or null.
    * @param {string} taskId
-   * @return {!Task_}
+   * @return {?Task_}
    */
   getTaskById(taskId) {
-    return this.taskIdMap_[taskId];
+    return this.taskIdMap_[taskId] || null;
   }
 
   /**
@@ -921,8 +1028,7 @@ export class TaskQueue_ {
    * @param {!Task_} task
    */
   enqueue(task) {
-    assert(!this.taskIdMap_[task.id], 'task already enqueued: %s for %s',
-        task.id, task.resource.debugid);
+    assert(!this.taskIdMap_[task.id], 'Task already enqueued: %s', task.id);
     this.tasks_.push(task);
     this.taskIdMap_[task.id] = task;
     this.lastEnqueueTime_ = timer.now();
@@ -988,20 +1094,47 @@ function elements_(elements) {
 
 
 /**
+ * Resource state.
  * @enum {number}
  * @private
  */
 var ResourceState_ = {
+  /**
+   * The resource has not been built yet. Measures, layouts, preloads or
+   * viewport signals are not allowed.
+   */
   NOT_BUILT: 0,
+
+  /**
+   * The resource has been built, but not measured yet and not yet ready
+   * for layout.
+   */
   NOT_LAID_OUT: 1,
+
+  /**
+   * The resource has been built and measured and ready for layout.
+   */
   READY_FOR_LAYOUT: 2,
+
+  /**
+   * The resource is currently scheduled for layout.
+   */
   LAYOUT_SCHEDULED: 3,
+
+  /**
+   * The resource has been laid out.
+   */
   LAYOUT_COMPLETE: 4,
+
+  /**
+   * The latest resource's layout failed.
+   */
   LAYOUT_FAILED: 5
 };
 
 
 /**
+ * The internal structure for the task.
  * @typedef {{
  *   id: string,
  *   resource: !Resource,
