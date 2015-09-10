@@ -28,7 +28,7 @@ let RESOURCE_PROP_ = '__AMP__RESOURCE';
 let LAYOUT_TASK_ID_ = 'L';
 let LAYOUT_TASK_OFFSET_ = 0;
 let PRELOAD_TASK_ID_ = 'P';
-let PRELOAD_TASK_OFFSET_ = 5;
+let PRELOAD_TASK_OFFSET_ = 2;
 let PRIORITY_BASE_ = 10;
 let POST_TASK_PASS_DELAY_ = 1000;
 
@@ -276,7 +276,7 @@ export class Resources {
 
     var viewportRect = viewport.getRect();
     // Load viewport = viewport + 3x up/down.
-    var loadRect = expandLayoutRect(viewportRect, 0.25, 3);
+    var loadRect = expandLayoutRect(viewportRect, 0.25, 2);
     // Visible viewport = viewport + 25% up/down.
     var visibleRect = expandLayoutRect(viewportRect, 0.25, 0.25);
 
