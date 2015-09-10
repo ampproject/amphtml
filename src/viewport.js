@@ -249,4 +249,4 @@ export function viewportFor(window) {
   return window.__viewport = new Viewport(window);
 };
 
-export const viewport = new Viewport(window);
+export const viewport = viewportFor(window);
