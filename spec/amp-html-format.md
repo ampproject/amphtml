@@ -204,7 +204,7 @@ The initial version of AMP will prohibit the use of the following CSS properties
 `overflow` (and `overflow-y`, etc.) may not be styled as “auto” or “scroll”. No user defined element in a AMP document may have a scrollbar.
 
 ##### Maximum size
-It is a validation error if the author stylesheet is larger than 20KB post gzip.
+It is a validation error if the author stylesheet is larger than 100,000 bytes.
 
 ### Custom fonts
 
