@@ -16,6 +16,9 @@
 
 
 /**
+ * The structure that combines position and size for an element. The exact
+ * interpretation of position and size depends on the use case.
+ *
  * @typedef {{
  *   top: number,
  *   bottom: number,
@@ -29,6 +32,8 @@ var LayoutRect;
 
 
 /**
+ * Creates a layout rect based on the left, top, width and height parameters
+ * in that order.
  * @param {number} left
  * @param {number} top
  * @param {number} width
@@ -60,6 +65,7 @@ export function layoutRectsOverlap(r1, r2) {
 
 
 /**
+ * Expand the layout rect using multiples of width and height.
  * @param {!LayoutRect} rect Original rect.
  * @param {number} dw Expansion in width, specified as a multiple of width.
  * @param {number} dh Expansion in height, specified as a multiple of height.
