@@ -178,7 +178,7 @@ Allowed selectors are of the form:
 - `#id`
 - `tag-name`
 - selector, selector
-- `--css-variables`
+- media queries
 
 Pseudo selectors are generally forbidden and must be whitelisted 1 by 1. Initially we only allow `:hover`, `:active` and `:visited` with whitelisted CSS properties (For color and underlining).
 
