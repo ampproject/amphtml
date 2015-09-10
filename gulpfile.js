@@ -52,14 +52,6 @@ var tests = [
 ];
 
 function buildExtensions(options) {
-  // Building extensions is a 2 step process because of the renaming
-  // and CSS inlining. This watcher watches the original file, copies
-  // it to the destination and adds the CSS.
-  if (options.watch) {
-    gulpWatch('extensions/**', function() {
-      buildExtensions(options);
-    });
-  }
   // We pass watch further in to have browserify watch the built file
   // and update it if any of its required deps changed.
   // Each extension and version must be listed individually here.
@@ -124,7 +116,7 @@ function compile(watch, shouldMinify) {
     watch: watch,
     minify: shouldMinify
   });
-  adsBootstrap();
+  adsBootstrap(watch);
 }
 
 
@@ -177,6 +169,17 @@ function buildExtension(name, version, hasCss, options) {
   console.log('Bundling ' + name);
   var path = 'extensions/' + name + '/' + version;
   var jsPath = path + '/' + name + '.js';
+  // Building extensions is a 2 step process because of the renaming
+  // and CSS inlining. This watcher watches the original file, copies
+  // it to the destination and adds the CSS.
+  if (options.watch) {
+    // Do not set watchers agains when we get called by the watcher.
+    var copy = Object.create(options);
+    copy.watch = false;
+    gulpWatch(path + '/*', function() {
+      buildExtension(name, version, hasCss, copy);
+    });
+  }
   var js = fs.readFileSync(jsPath, "utf8");
   if (hasCss) {
     var css = jsifyCss(path + '/' + name + '.css');
@@ -189,7 +192,6 @@ function buildExtension(name, version, hasCss, options) {
   gulp.src(jsPath)
       .pipe(file(builtName, js))
       .pipe(gulp.dest('build/all/v0/'))
-      // TODO(malteubl): Babelify the file and add minification.
       .on('end', function() {
         compileJs('build/all/v0/', builtName, 'dist/v0/', {
           watch: options.watch,
@@ -242,8 +244,13 @@ function examplesWithMinifiedJs(name) {
       .pipe(gulp.dest('examples.build/'));
 }
 
-function adsBootstrap() {
-  var input = 'ads/v0.max.html'
+function adsBootstrap(watch) {
+  var input = 'ads/v0.max.html';
+  if (input) {
+    gulpWatch(input, function() {
+      adsBootstrap(false);
+    });
+  }
   console.log('Processing ' + input);
   var html = fs.readFileSync(input, "utf8");
   var min = html;

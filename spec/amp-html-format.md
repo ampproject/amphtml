@@ -143,6 +143,7 @@ Most HTML tags can be used unchanged in AMP HTML. Certain tags, however, have eq
 | style     | Only one. Must be in head tag. |
 | link      | Allowed for certain values of rel: `canonical`. `stylesheet` is generally disallowed, but some values may be whitelisted for font providers. |
 | meta      | The `http-equiv` attribute is banned. Otherwise allowed. |
+| a         | The `href` attribute value must not begin with `javascript:`. If set, the `target` attribute value must be `_blank`. Otherwise allowed. |
 
 Validator implementations should use a whitelist based on the HTML5 specification with the above tags removed.
 TODO(malteubl): Add addendum with whitelist.
