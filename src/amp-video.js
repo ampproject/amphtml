@@ -15,7 +15,7 @@
  */
 
 import {BaseElement} from './base-element';
-import {maybeApplyResponsivenessToItem} from './layout';
+import {getLengthNumeral, isLayoutSizeDefined} from './layout';
 import {registerElement} from './custom-element';
 
 
@@ -24,6 +24,12 @@ import {registerElement} from './custom-element';
  */
 export function installVideo(win) {
   class AmpVideo extends BaseElement {
+
+    /** @override */
+    isLayoutSupported(layout) {
+      return isLayoutSizeDefined(layout);
+    }
+
     /** @override */
     loadContent() {
       var width = this.element.getAttribute('width');
@@ -32,9 +38,9 @@ export function installVideo(win) {
       this.propagateAttributes(
           ['src', 'controls', 'autoplay', 'muted', 'loop'],
           video);
-      maybeApplyResponsivenessToItem(this.element, video);
-      video.width = width;
-      video.height = height;
+      video.width = getLengthNumeral(width);
+      video.height = getLengthNumeral(height);
+      this.applyFillContent(video);
       this.element.appendChild(video);
       return video;
     }
