@@ -626,6 +626,9 @@ export class Resource {
     /* @const {string} */
     this.debugid = element.tagName.toLowerCase() + '#' + id;
 
+    /* @private {boolean} */
+    this.blacklisted_ = false;
+
     /* @const {!AmpElement|undefined|null} */
     this.owner_ = undefined;
 
@@ -695,11 +698,18 @@ export class Resource {
    * @return {boolean}
    */
   build(force) {
-    if (!this.element.isUpgraded()) {
-      // Build on unupgraded element is never allowed.
+    if (this.blacklisted_ || !this.element.isUpgraded()) {
       return false;
     }
-    if (!this.element.build(force)) {
+    let built;
+    try {
+      built = this.element.build(force);
+    } catch(e) {
+      log.error(TAG_, 'failed to build:', this.debugid, e);
+      built = false;
+      this.blacklisted_ = true;
+    }
+    if (!built) {
       return false;
     }
     this.state_ = ResourceState_.NOT_LAID_OUT;

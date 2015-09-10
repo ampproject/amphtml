@@ -80,8 +80,11 @@ i-amp-sizer {
   overflow: hidden !important;
 }
 
-/* For author styling. */
+/* "notbuild" classes are set as soon as an element is created and removed
+   as soon as the element is built. */
+
 .amp-notbuilt {
+  /* For author styling. */
 }
 
 .-amp-notbuilt {

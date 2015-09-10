@@ -34,6 +34,7 @@ import {viewportFor} from './viewport';
  * The lifecycle is:
  *   createdCallback ->
  *   firstAttachedCallback ->
+ *   (isReadyToBuild)* ->
  *   buildCallback ->
  *   layoutCallback (one or more) ->
  *   viewportCallback (one or more)
@@ -102,7 +103,7 @@ export class BaseElement {
    * "true" and return "false" otherwise. The element may not be ready to build
    * e.g. beacuse its children are not available yet.
    *
-   * See "buildCallback" for more details.
+   * See {@link buildCallback} for more details.
    *
    * @return {boolean}
    */
@@ -129,6 +130,11 @@ export class BaseElement {
   }
 
   /**
+   * Sets this element as the owner of the specified element. By setting itself
+   * as an owner, the element declares that it will manage the lifecycle of
+   * the owned element itself. This element, as an owner, will have to call
+   * {@link scheduleLayout}, {@link schedulePreload}, {@link updateInViewport}
+   * and similar methods.
    * @param {!Element} element
    */
   setAsOwner(element) {
@@ -254,6 +260,7 @@ export class BaseElement {
   }
 
   /**
+   * Returns the viewport within which the element operates.
    * @return {!Viewport}
    */
   getViewport() {
@@ -261,6 +268,9 @@ export class BaseElement {
   }
 
   /**
+   * Schedule the layout request for the children element or elements
+   * specified. Resource manager will perform the actual layout based on the
+   * priority of this element and its children.
    * @param {!Element|!Array<!Element>} elements
    * @param {boolean} inLocalViewport
    */
@@ -269,6 +279,9 @@ export class BaseElement {
   }
 
   /**
+   * Schedule the preload request for the children element or elements
+   * specified. Resource manager will perform the actual preload based on the
+   * priority of this element and its children.
    * @param {!Element|!Array<!Element>} elements
    * @param {boolean} inLocalViewport
    */
@@ -277,6 +290,9 @@ export class BaseElement {
   }
 
   /**
+   * Update inViewport state of the specified children element or elements.
+   * Resource manager will perform the actual changes to the inViewport state
+   * based on the state of these elements and their parent subtree.
    * @param {!Element|!Array<!Element>} elements
    * @param {boolean} inLocalViewport
    */
