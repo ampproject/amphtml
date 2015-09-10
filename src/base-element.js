@@ -292,5 +292,4 @@ function isInternalOrServiceNode(node) {
     return true;
   }
   return false;
->>>>>>> Resource Loading with prioritized queues, upgrade, and scheduling API
 }
