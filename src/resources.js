@@ -16,10 +16,11 @@
 
 import {Pass} from './pass';
 import {assert} from './asserts';
-import {expandLayoutRect, layoutRectsOverlap, viewport} from './viewport';
+import {expandLayoutRect, layoutRectsOverlap} from './layout-rect';
 import {log} from './log';
 import {retriablePromise} from './retriable-promise';
 import {timer} from './timer';
+import {viewport} from './viewport';
 
 let TAG_ = 'Resources';
 let RESOURCE_PROP_ = '__AMP__RESOURCE';
@@ -180,8 +181,9 @@ export class Resources {
    * @param {!Element|!Array<!Element>} subElements
    */
   scheduleLayout(parentElement, subElements) {
-    this.scheduleLayoutForSubresources_(
+    this.scheduleLayoutOrPreloadForSubresources_(
         this.getResourceForElement(parentElement),
+        /* layout */ true,
         elements_(subElements));
   }
 
@@ -190,8 +192,9 @@ export class Resources {
    * @param {!Element|!Array<!Element>} subElements
    */
   schedulePreload(parentElement, subElements) {
-    this.schedulePreloadForSubresources_(
+    this.scheduleLayoutOrPreloadForSubresources_(
         this.getResourceForElement(parentElement),
+        /* layout */ false,
         elements_(subElements));
   }
 
@@ -259,11 +262,13 @@ export class Resources {
 
     // Phase 2: Remeasure if there were any relayouts. Unfortunately, currently
     // there's no way to optimize this. All reads happen here.
-    if (relayoutCount > 0) {
+    if (relayoutCount > 0 || relayoutAll) {
       for (let i = 0; i < this.resources_.length; i++) {
         let r = this.resources_[i];
         if (r.getState() != ResourceState_.NOT_BUILT) {
-          r.measure();
+          if (r.getState() == ResourceState_.NOT_LAID_OUT || relayoutAll) {
+            r.measure();
+          }
         }
       }
     }
@@ -282,7 +287,7 @@ export class Resources {
         continue;
       }
       if (r.isDisplayed() && r.overlaps(loadRect)) {
-        this.scheduleLayout_(r);
+        this.scheduleLayoutOrPreload_(r, /* layout */ true);
       }
     }
 
@@ -303,9 +308,10 @@ export class Resources {
       let idleScheduledCount = 0;
       for (let i = 0; i < this.resources_.length; i++) {
         let r = this.resources_[i];
-        if (r.isDisplayed() && r.getState() == ResourceState_.READY_FOR_LAYOUT) {
+        if (r.getState() == ResourceState_.READY_FOR_LAYOUT &&
+                r.isDisplayed()) {
           log.fine(TAG_, 'idle layout:', r.debugid);
-          this.schedulePreload_(r);
+          this.scheduleLayoutOrPreload_(r, /* layout */ false);
           idleScheduledCount++;
           if (idleScheduledCount >= 4) {
             break;
@@ -449,62 +455,51 @@ export class Resources {
 
   /**
    * @param {!Resource} resource
+   * @param {boolean} layout
    * @param {number=} opt_parentPriority
    * @private
    */
-  scheduleLayout_(resource, opt_parentPriority) {
+  scheduleLayoutOrPreload_(resource, layout, opt_parentPriority) {
     assert(resource.getState() != ResourceState_.NOT_BUILT &&
         resource.isDisplayed(),
         'Not ready for layout: %s (%s)',
         resource.debugid, resource.getState());
-    this.schedule_(resource,
-        LAYOUT_TASK_ID_, LAYOUT_TASK_OFFSET_,
-        opt_parentPriority || 0,
-        resource.startLayout.bind(resource));
-  }
-
-  /**
-   * @param {!Resource} resource
-   * @param {number=} opt_parentPriority
-   * @private
-   */
-  schedulePreload_(resource, opt_parentPriority) {
-    assert(resource.getState() != ResourceState_.NOT_BUILT &&
-        resource.isDisplayed(),
-        'Not ready for preload: %s (%s)',
-        resource.debugid, resource.getState());
-    this.schedule_(resource,
-        PRELOAD_TASK_ID_, PRELOAD_TASK_OFFSET_,
-        opt_parentPriority || 0,
-        resource.startLayout.bind(resource));
+    if (layout) {
+      this.schedule_(resource,
+          LAYOUT_TASK_ID_, LAYOUT_TASK_OFFSET_,
+          opt_parentPriority || 0,
+          resource.startLayout.bind(resource));
+    } else {
+      this.schedule_(resource,
+          PRELOAD_TASK_ID_, PRELOAD_TASK_OFFSET_,
+          opt_parentPriority || 0,
+          resource.startLayout.bind(resource));
+    }
   }
 
   /**
    * @param {!Resource} parentResource
+   * @param {boolean} layout
    * @param {!Array<!Element>} subElements
    * @private
    */
-  scheduleLayoutForSubresources_(parentResource, subElements) {
+  scheduleLayoutOrPreloadForSubresources_(parentResource, layout, subElements) {
+    let resources = [];
     this.discoverResourcesForArray_(parentResource, subElements, (resource) => {
-      if (resource.getState() != ResourceState_.NOT_BUILT &&
-            resource.isDisplayed()) {
-        this.scheduleLayout_(resource, parentResource.getPriority());
+      if (resource.getState() != ResourceState_.NOT_BUILT) {
+        resources.push(resource);
       }
     });
-  }
-
-  /**
-   * @param {!Resource} parentResource
-   * @param {!Array<!Element>} subElements
-   * @private
-   */
-  schedulePreloadForSubresources_(parentResource, subElements) {
-    this.discoverResourcesForArray_(parentResource, subElements, (resource) => {
-      if (resource.getState() != ResourceState_.NOT_BUILT &&
-            resource.isDisplayed()) {
-        this.schedulePreload_(resource, parentResource.getPriority());
-      }
-    });
+    if (resources.length > 0) {
+      resources.forEach((resource) => {
+        resource.measure();
+        if (resource.getState() == ResourceState_.READY_FOR_LAYOUT &&
+                resource.isDisplayed()) {
+          this.scheduleLayoutOrPreload_(resource, layout,
+              parentResource.getPriority());
+        }
+      });
+    }
   }
 
   /**
@@ -702,7 +697,7 @@ export class Resource {
       return;
     }
     let box = viewport.getLayoutRect(this.element);
-    if (!this.layoutBox_ ||
+    if (this.state_ == ResourceState_.NOT_LAID_OUT ||
           this.layoutBox_.top != box.top ||
           this.layoutBox_.left != box.left ||
           this.layoutBox_.width != box.width ||

@@ -15,24 +15,12 @@
  */
 
 import {Observable} from './observable';
+import {layoutRectLtwh} from './layout-rect';
 import {log} from './log';
 import {platform} from './platform';
 import {timer} from './timer';
 
 let TAG_ = 'Viewport';
-
-
-/**
- * @typedef {{
- *   top: number,
- *   bottom: number,
- *   left: number,
- *   right: number,
- *   width: number,
- *   height: number
- * }}
- */
-var LayoutRect;
 
 
 /**
@@ -45,36 +33,6 @@ var LayoutRect;
  * }}
  */
 var ViewportChangedEvent;
-
-
-/**
- * Returns true if the specified two rects overlap by a single pixel.
- * @param {!LayoutRect} r1
- * @param {!LayoutRect} r2
- * @return {boolean}
- */
-export function layoutRectsOverlap(r1, r2) {
-  return (r1.top <= r2.bottom && r2.top <= r1.bottom &&
-      r1.left <= r2.right && r2.left <= r1.right);
-};
-
-
-/**
- * @param {!LayoutRect} rect Original rect.
- * @param {number} dw Expansion in width, specified as a multiple of width.
- * @param {number} dh Expansion in height, specified as a multiple of height.
- * @return {!LayoutRect}
- */
-export function expandLayoutRect(rect, dw, dh) {
-  return {
-    top: rect.top - rect.height * dh,
-    bottom: rect.bottom + rect.height * dh,
-    left: rect.left - rect.width * dw,
-    right: rect.right + rect.width * dw,
-    width: rect.width * (1 + dw * 2),
-    height: rect.height * (1 + dh * 2)
-  };
-};
 
 
 /**
@@ -147,14 +105,7 @@ export class Viewport {
     var scrollTop = this.calcScrollTop_();
     var scrollLeft = this.calcScrollLeft_();
     var size = this.getSize();
-    return {
-      top: scrollTop,
-      bottom: scrollTop + size.height,
-      left: scrollLeft,
-      right: scrollLeft + size.width,
-      width: size.width,
-      height: size.height
-    };
+    return layoutRectLtwh(scrollLeft, scrollTop, size.width, size.height);
   }
 
   /**
@@ -166,14 +117,10 @@ export class Viewport {
     var scrollTop = this.calcScrollTop_();
     var scrollLeft = this.calcScrollLeft_();
     var b = el.getBoundingClientRect();
-    return {
-      top: Math.round(b.top + scrollTop),
-      bottom: Math.round(b.bottom + scrollTop),
-      left: Math.round(b.left + scrollLeft),
-      right: Math.round(b.right + scrollLeft),
-      width: Math.round(b.width),
-      height: Math.round(b.height)
-    };
+    return layoutRectLtwh(Math.round(b.left + scrollLeft),
+        Math.round(b.top + scrollTop),
+        Math.round(b.width),
+        Math.round(b.height));
   }
 
   /**
