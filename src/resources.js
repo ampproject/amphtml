@@ -16,7 +16,8 @@
 
 import {Pass} from './pass';
 import {assert} from './asserts';
-import {expandLayoutRect, layoutRectsOverlap} from './layout-rect';
+import {expandLayoutRect, layoutRectLtwh, layoutRectsOverlap} from
+    './layout-rect';
 import {log} from './log';
 import {retriablePromise} from './retriable-promise';
 import {timer} from './timer';
@@ -621,8 +622,7 @@ export class Resource {
         ResourceState_.NOT_BUILT;
 
     /** @type {?LayoutRect} */
-    this.layoutBox_ = {top: -10000, bottom: -10000, left: 0, right: 0,
-        width: 0, height: 0};
+    this.layoutBox_ = layoutRectLtwh(-10000, -10000, 0, 0);
 
     /** @private {boolean} */
     this.isInViewport_ = false;
