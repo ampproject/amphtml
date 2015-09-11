@@ -28,10 +28,6 @@ Added amp-instagram, amp-youtube
 0.3
 Changed `amp-carousel` styling custom properties; from left and right arrow to next and previous
 
-0.2
-Added `amp-form-input` component
-Added `amp-email-input` component
-
 # AMP HTML Components
 
 ## Overview
@@ -564,69 +560,3 @@ E.g. in https://www.youtube.com/watch?v=Z1q71gFeRqM Z1q71gFeRqM is the video id.
 ### <a name=”on-attribute”></a> `on` attribute
 
 TODO: describe `on` attribute
-
-### <a name=”amp-form”></a> `amp-form`
-
-A replacement for the `form` tag - defines a block of content that can contain `amp-*-input` fields, and a message that displays to the user when the form is submitted.
-
-#### Behavior
-
-The `amp-form` component provides a block of content and AMP-specified input fields. It takes user input in the fields and submits the values via a cross-domain XHR as form data to a specified CORS endpoint. It then can show a success or error message depending on the result of the submission.
-
-The `amp-form` can be “triggered” by a `amp-on` element in order to submit it. For a simple tap-to-submit button, for example:
-
-    <amp-form method=”post” action=”my-site.com/signup” id=”signupForm”>
-      <p>Sign up for our newsletter!</p>
-      <amp-email-input></amp-email-input>
-      <amp-on triggers=”#signupForm”>
-        <div class=”submit-button”>Submit!</div>
-      </amp-on>
-    </amp-form>
-
-The `amp-form` component emits “amp-form-submitted”, “amp-form-success”, and “amp-form-error” events that can be listened for and acted upon by a `amp-on` component. These can be used, for example, to hide the form when a user submits it, or show success or error messages.
-
-#### Attributes
-
-**method**
-
-The HTTP method that is used via XHR for the form.
-
-**action**
-
-The URL to send the form data to.
-
-**content-type**
-
-The content type string to use when sending the data. This can be application/x-www-form-urlencoded or application/json.
-
-### Styling
-
-The `amp-form` component is primarily meant as a wrapper and should not be styled.
-
-
-
-### <a name=”amp-email-input”></a> `amp-email-input`
-
-An input field specifically for email addresses, used for things like newsletter signups.
-
-#### Behavior
-
-This input is meant to take email addresses for things like newsletter signups. It may optionally validate the email address on the client.
-
-#### Attributes
-
-**autovalidate**
-
-If present, the input autovalidates the input against the RFC-5322 email specification via a regex. It applies the `error` class on blur if the input isn’t empty, which can be styled via client CSS.
-
-**label**
-
-The default label to show in the field prior to user input.
-
-**name**
-
-The key to associate with the value the user enters in the input field.
-
-### Styling
-
-The `amp-email-input` can be styled like a typical input field.

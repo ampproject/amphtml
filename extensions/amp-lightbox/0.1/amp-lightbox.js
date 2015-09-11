@@ -28,7 +28,12 @@ import * as st from '../../../src/style';
     }
 
     /** @override */
-    firstAttachedCallback() {
+    isReadyToBuild() {
+      return this.element.firstChild != null;
+    }
+
+    /** @override */
+    buildCallback() {
       st.setStyles(this.element, {
         position: 'fixed',
         zIndex: 1000,
@@ -38,10 +43,7 @@ import * as st from '../../../src/style';
         right: 0
       });
 
-      let children = [];
-      for (let i = 0; i < this.element.children.length; i++) {
-        children.push(this.element.children[i]);
-      }
+      let children = this.getRealChildren();
 
       /** @private {!Element} */
       this.container_ = document.createElement('div');
@@ -57,8 +59,7 @@ import * as st from '../../../src/style';
     }
 
     /** @override */
-    loadContent() {
-      // TODO(dvoytenko): load children
+    layoutCallback() {
       return Promise.resolve();
     }
 
@@ -115,12 +116,8 @@ import * as st from '../../../src/style';
         }
       });
 
-      // TODO(dvoytenko): do these strictly via Resources
-      let resources = this.element.querySelectorAll('.-amp-element');
-      for (let i = 0; i < resources.length; i++) {
-        resources[i].initiateLoadContent();
-        resources[i].activateContentCallback();
-      }
+      this.scheduleLayout(this.container_);
+      this.updateInViewport(this.container_, true);
     }
 
     close() {

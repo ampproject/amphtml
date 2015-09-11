@@ -27,7 +27,14 @@ import * as st from '../../../src/style';
     }
 
     /** @override */
-    firstAttachedCallback() {
+    isReadyToBuild() {
+      return this.element.firstChild != null;
+    }
+
+    /** @override */
+    buildCallback() {
+      var childNodes = this.getRealChildNodes();
+
       /** @private @const */
       this.content_ = document.createElement('div');
       this.applyFillContent(this.content_);
@@ -63,7 +70,13 @@ import * as st from '../../../src/style';
     }
 
     /** @override */
-    loadContent() {
+    layoutCallback() {
+      this.updateFontSize_();
+      return Promise.resolve();
+    }
+
+    /** @private */
+    updateFontSize_() {
       let min = this.minFontSize_;
       let max = this.maxFontSize_;
       let expectedHeight = this.element.offsetHeight;
@@ -85,7 +98,6 @@ import * as st from '../../../src/style';
       // doing the truncation?
 
       this.content_.style.fontSize = st.px(min);
-      return Promise.resolve();
     }
   }
 

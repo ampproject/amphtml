@@ -33,7 +33,7 @@ describe('amp-ad', () => {
       a.setAttribute(key, attributes[key]);
     }
     iframe.doc.body.appendChild(a);
-    a.implementation_.loadContent();
+    a.implementation_.layoutCallback();
     return a;
   }
 

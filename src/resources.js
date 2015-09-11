@@ -16,12 +16,40 @@
 
 import {Pass} from './pass';
 import {assert} from './asserts';
+import {expandLayoutRect, layoutRectLtwh, layoutRectsOverlap} from
+    './layout-rect';
 import {log} from './log';
 import {retriablePromise} from './retriable-promise';
 import {timer} from './timer';
 import {viewport} from './viewport';
 
 let TAG_ = 'Resources';
+let RESOURCE_PROP_ = '__AMP__RESOURCE';
+let OWNER_PROP_ = '__AMP__OWNER';
+let LAYOUT_TASK_ID_ = 'L';
+let LAYOUT_TASK_OFFSET_ = 0;
+let PRELOAD_TASK_ID_ = 'P';
+let PRELOAD_TASK_OFFSET_ = 2;
+let PRIORITY_BASE_ = 10;
+let PRIORITY_PENALTY_TIME_ = 1000;
+let POST_TASK_PASS_DELAY_ = 1000;
+
+
+/**
+ * Returns the element-based priority. A value from 0 to 10.
+ * @param {string} tagName
+ * @return {number}
+ */
+export function getElementPriority(tagName) {
+  tagName = tagName.toLowerCase();
+  if (tagName == 'amp-ad') {
+    return 2;
+  }
+  if (tagName == 'amp-pixel') {
+    return 1;
+  }
+  return 0;
+}
 
 
 export class Resources {
@@ -29,14 +57,23 @@ export class Resources {
     /** @const {!Window} */
     this.win = window;
 
+    /** @private @const {number} */
+    this.maxDpr_ = this.win.devicePixelRatio || 1;
+
+    /** @private {number} */
+    this.resourceIdCounter_ = 0;
+
     /** @private @const {!Array<!Resource>} */
     this.resources_ = [];
 
-    /** @private @const {!Object<string, !Resource>} */
-    this.resourceMap_ = Object.create(null);
+    /** @private {boolean} */
+    this.relayoutAll_ = false;
 
     /** @private {boolean} */
-    this.rebuild_ = false;
+    this.forceBuild_ = false;
+
+    /** @private {boolean} */
+    this.documentReady_ = false;
 
     /** @private {number} */
     this.lastVelocity_ = 0;
@@ -44,25 +81,183 @@ export class Resources {
     /** @const {!Pass} */
     this.pass_ = new Pass(() => this.doPass_());
 
-    /** @const {!Array<!Resource>} */
-    this.loading_ = [];
+    /** @const {!TaskQueue_} */
+    this.exec_ = new TaskQueue_();
 
-    /** @private {number} */
-    this.lastLoading_ = 0;
+    /** @const {!TaskQueue_} */
+    this.queue_ = new TaskQueue_();
 
+    // When viewport is resized, we have to re-measure all elements.
     viewport.onChanged((event) => {
       this.lastVelocity_ = event.velocity;
-      this.schedulePass(event.rebuild);
+      this.relayoutAll_ = this.relayoutAll_ || event.relayoutAll;
+      this.schedulePass();
     });
-    this.schedulePass(/* rebuild */ true);
+
+    // Ensure that we attempt to rebuild things when DOM is ready.
+    if (this.win.document.readyState != 'loading') {
+      this.documentReady_ = true;
+      this.forceBuild_ = true;
+    } else {
+      let readyListener = () => {
+        if (this.win.document.readyState != 'loading') {
+          this.documentReady_ = true;
+          this.forceBuild_ = true;
+          this.relayoutAll_ = true;
+          this.schedulePass();
+          this.win.document.removeEventListener('readystatechange',
+              readyListener);
+        }
+      };
+      this.win.document.addEventListener('readystatechange', readyListener);
+    }
+
+    this.relayoutAll_ = true;
+    this.schedulePass();
   }
 
   /**
-   * @param {boolean} rebuild
+   * Returns the maximum DPR available on this device.
+   * @return {number}
+   */
+  getMaxDpr() {
+    return this.maxDpr_;
+  }
+
+  /**
+   * Returns the most optimal DPR currently recommended.
+   * @return {number}
+   */
+  getDpr() {
+    // TODO(dvoytenko): return optimal DPR.
+    return this.maxDpr_;
+  }
+
+  /**
+   * Returns the {@link Resource} instance corresponding to the specified AMP
+   * Element. If no Resource is found, the exception is thrown.
+   * @param {!AmpElement} element
+   * @return {?Resource}
+   * @package
+   */
+  getResourceForElement(element) {
+    return assert(/** @type {!Resource} */ (element[RESOURCE_PROP_]));
+  }
+
+  /**
+   * Signals that an element has been added to the DOM. Resources manager
+   * will start tracking it from this point on.
+   * @param {!AmpElement} element
+   * @package
+   */
+  add(element) {
+    let resource = new Resource((++this.resourceIdCounter_), element);
+    if (!element.id) {
+      element.id = 'AMP_' + resource.getId();
+    }
+    element[RESOURCE_PROP_] = resource;
+    this.resources_.push(resource);
+
+    // Try to immediately build element, it may already be ready.
+    resource.build(this.forceBuild_);
+
+    this.schedulePass();
+
+    log.fine(TAG_, 'element added:', resource.debugid);
+  }
+
+  /**
+   * Signals that an element has been removed to the DOM. Resources manager
+   * will stop tracking it from this point on.
+   * @param {!AmpElement} element
+   * @package
+   */
+  remove(element) {
+    let resource = this.getResourceForElement(element);
+    let index = resource ? this.resources_.indexOf(resource) : -1;
+    if (index != -1) {
+      this.resources_.splice(index, 1);
+    }
+    log.fine(TAG_, 'element removed:', resource.debugid);
+  }
+
+  /**
+   * Signals that an element has been upgraded to the DOM. Resources manager
+   * will perform build and enable layout/viewport signals for this element.
+   * @param {!AmpElement} element
+   * @package
+   */
+  upgraded(element) {
+    let resource = this.getResourceForElement(element);
+    resource.build(this.forceBuild_);
+    log.fine(TAG_, 'element upgraded:', resource.debugid);
+  }
+
+  /**
+   * Assigns an owner for the specified element. This means that the resources
+   * within this element will be managed by the owner and not Resources manager.
+   * @param {!Element} element
+   * @param {!AmpElement} owner
+   * @package
+   */
+  setOwner(element, owner) {
+    assert(owner.contains(element), 'Owner must contain the element');
+    element[OWNER_PROP_] = owner;
+  }
+
+  /**
+   * Schedules layout for the specified sub-elements that are children of the
+   * parent element. The parent element may choose to send this signal either
+   * because it's an owner (see {@link setOwner}) or because it wants the
+   * layouts to be done sooner. In either case, both parent's and children's
+   * priority is observed when scheduling this work.
+   * @param {!Element} parentElement
+   * @param {!Element|!Array<!Element>} subElements
+   */
+  scheduleLayout(parentElement, subElements) {
+    this.scheduleLayoutOrPreloadForSubresources_(
+        this.getResourceForElement(parentElement),
+        /* layout */ true,
+        elements_(subElements));
+  }
+
+  /**
+   * Schedules preload for the specified sub-elements that are children of the
+   * parent element. The parent element may choose to send this signal either
+   * because it's an owner (see {@link setOwner}) or because it wants the
+   * preloads to be done sooner. In either case, both parent's and children's
+   * priority is observed when scheduling this work.
+   * @param {!Element} parentElement
+   * @param {!Element|!Array<!Element>} subElements
+   */
+  schedulePreload(parentElement, subElements) {
+    this.scheduleLayoutOrPreloadForSubresources_(
+        this.getResourceForElement(parentElement),
+        /* layout */ false,
+        elements_(subElements));
+  }
+
+  /**
+   * A parent resource, especially in when it's an owner (see {@link setOwner}),
+   * may request the Resources manager to update children's inViewport state.
+   * A child's inViewport state is a logical AND between inLocalViewport
+   * specified here and parent's own inViewport state.
+   * @param {!Element} parentElement
+   * @param {!Element|!Array<!Element>} subElements
+   * @param {boolean} inLocalViewport
+   */
+  updateInViewport(parentElement, subElements, inLocalViewport) {
+    this.updateInViewportForSubresources_(
+        this.getResourceForElement(parentElement),
+        elements_(subElements),
+        inLocalViewport);
+  }
+
+  /**
+   * Schedules the work pass at the latest with the specified delay.
    * @param {number=} opt_delay
    */
-  schedulePass(rebuild, opt_delay) {
-    this.rebuild_ = this.rebuild_ || rebuild;
+  schedulePass(opt_delay) {
     this.pass_.schedule(opt_delay);
   }
 
@@ -70,244 +265,546 @@ export class Resources {
    * @private
    */
   doPass_() {
-    log.fine(TAG_, 'PASS rebuild=' + this.rebuild_);
+    let viewportSize = viewport.getSize();
+    log.fine(TAG_, 'PASS: at ' + timer.now() +
+        ', forceBuild=', this.forceBuild_,
+        ', relayoutAll=', this.relayoutAll_,
+        ', viewportSize=', viewportSize.width, viewportSize.height);
 
-    let now = timer.now();
+    // If viewport size is 0, the manager will wait for the resize event.
+    if (viewportSize.height > 0 && viewportSize.width > 0) {
+      this.discoverWork_();
+      let delay = this.work_();
+      log.fine(TAG_, 'next pass:', delay);
+      this.schedulePass(delay);
+    }
+  }
+
+  /**
+   * Discovers work that needs to be done since the last pass. If viewport
+   * has changed, it will try to build new elements, measure changed elements,
+   * and schedule layouts and preloads within a resonable distance of the
+   * current viewport. Finally, this process also updates inViewport state
+   * of changed elements.
+   *
+   * Layouts and preloads are not executed immediately, but instead scheduled
+   * in the queue with different priorities.
+   *
+   * @private
+   */
+  discoverWork_() {
 
     // TODO(dvoytenko): vsync separation may be needed for different phases
 
-    // Ensure all resources layout phase complete; when rebuild is requested
-    // force re-layout.
-    let rebuild = this.rebuild_;
-    this.rebuild_ = false;
+    let now = timer.now();
 
-    // Phase 1: Relayout as needed.
+    // Ensure all resources layout phase complete; when relayoutAll is requested
+    // force re-layout.
+    let relayoutAll = this.relayoutAll_;
+    this.relayoutAll_ = false;
+
+    // Phase 1: Build and relayout as needed. All mutations happen here.
     let relayoutCount = 0;
     for (let i = 0; i < this.resources_.length; i++) {
       let r = this.resources_[i];
-      if (!r.isLayoutReady() || rebuild) {
+      if (r.getState() == ResourceState_.NOT_BUILT) {
+        r.build(this.forceBuild_);
+      }
+      if (r.getState() == ResourceState_.NOT_LAID_OUT || relayoutAll) {
         r.applyMediaQuery();
-        r.layout();
         relayoutCount++;
       }
     }
 
-    // Phase 2: Remeasure if there were any relayouts.
-    if (relayoutCount > 0) {
-      // TODO(dvoytenko): optimize: most likely not everything has to be
-      // re-measured.
+    // Phase 2: Remeasure if there were any relayouts. Unfortunately, currently
+    // there's no way to optimize this. All reads happen here.
+    if (relayoutCount > 0 || relayoutAll) {
       for (let i = 0; i < this.resources_.length; i++) {
         let r = this.resources_[i];
-        r.measure();
-      }
-      this.resources_.sort((r1, r2) => {
-        let box1 = r1.getLayoutBox();
-        let box2 = r2.getLayoutBox();
-        if (box1.top != box2.top) {
-          return box1.top - box2.top;
-        }
-        // Ensure that order is deterministic.
-        return (r1.element.compareDocumentPosition(r2.element) & 10) ? -1 : 1;
-      });
-    }
-
-    var viewportTop = viewport.getTop();
-    var viewportSize = viewport.getSize();
-    var viewportHeight = viewportSize.height;
-    var viewportBottom = viewportTop + viewportHeight;
-
-    // Phase 3: Trigger loading. Loading window is 1 window up/down + 1 window
-    // in the direction of motion.
-    var loadTop = viewportTop - viewportHeight;
-    var loadBottom = viewportBottom + viewportHeight;
-    if (this.lastVelocity_ >= 0) {
-      loadBottom += viewportHeight;
-    } else {
-      loadTop -= viewportHeight;
-    }
-    // TODO(dvoytenko): should we always go from the document top instead? What
-    // if this is a video up top and users typically expect those to take a
-    // little longer and they'd start scrolling while waiting for load?
-    // TODO(dvoytenko): some priority is needed here. E.g. amp-ad may need to
-    // wait for other non-ad content.
-    // TODO(dvoytenko): what about slides? All of its content is at the same
-    // box.top, but only few are visible at a time.
-    // TODO(dvoytenko): some elements are explicitly not visible (amp-pixel)
-    for (let i = 0; i < this.resources_.length; i++) {
-      let r = this.resources_[i];
-      let box = r.getLayoutBox();
-      if (box.height == 0) {
-        // Not visible
-        continue;
-      }
-      if (box.top <= loadBottom && loadTop <= box.bottom) {
-        if (!r.isLoaded() && !r.isLoadingFailed() && !this.isLoading_(r)) {
-          this.enqueLoading_(r);
-        }
-      }
-    }
-
-    // Phase 4: Trigger active. Active window = viewport window + 25% up/down.
-    var activeTop = viewportTop - viewportHeight / 4;
-    var activeBottom = viewportBottom + viewportHeight / 4;
-    log.fine(TAG_, 'activate window: ' + activeTop + '/' + activeBottom + ', ' +
-        viewportBottom + ', ' + viewportHeight);
-    for (let i = 0; i < this.resources_.length; i++) {
-      let r = this.resources_[i];
-      let box = r.getLayoutBox();
-      if (box.height == 0) {
-        // Not visible
-        continue;
-      }
-      log.fine(TAG_, 'bottom: ' + box.bottom + ',' + box.top);
-      var shouldBeActive = (box.top <= activeBottom && activeTop <= box.bottom);
-      if (r.isActive() != shouldBeActive) {
-        r.setActive(shouldBeActive);
-      }
-    }
-
-    log.fine(TAG_, 'currently loading: ' + this.loading_.length);
-    if (this.loading_.length > 0) {
-      this.lastLoading_ = now;
-    }
-
-    // Phase 5: Idle loading
-    // TODO(dvoytenko): document/estimate IDLE timeouts and other constants
-    if (now > this.lastLoading_ + 3000) {
-      for (let i = 0; i < this.resources_.length; i++) {
-        let r = this.resources_[i];
-        let box = r.getLayoutBox();
-        if (box.height == 0) {
-          // Not visible
+        if (r.getState() == ResourceState_.NOT_BUILT || r.hasOwner()) {
           continue;
         }
-        if (!r.isLoaded() && !r.isLoadingFailed() && !this.isLoading_(r)) {
-          log.fine(TAG_, 'idle load: ' + r.element.id + '');
-          this.enqueLoading_(r);
-          if (this.loading_.length >= 4) {
+        if (r.getState() == ResourceState_.NOT_LAID_OUT || relayoutAll) {
+          r.measure();
+        }
+      }
+    }
+
+    var viewportRect = viewport.getRect();
+    // Load viewport = viewport + 3x up/down.
+    var loadRect = expandLayoutRect(viewportRect, 0.25, 2);
+    // Visible viewport = viewport + 25% up/down.
+    var visibleRect = expandLayoutRect(viewportRect, 0.25, 0.25);
+
+    // Phase 3: Schedule elements for layout within a reasonable distance from
+    // current viewport.
+    for (let i = 0; i < this.resources_.length; i++) {
+      let r = this.resources_[i];
+      if (r.getState() != ResourceState_.READY_FOR_LAYOUT || r.hasOwner()) {
+        continue;
+      }
+      if (r.isDisplayed() && r.overlaps(loadRect)) {
+        this.scheduleLayoutOrPreload_(r, /* layout */ true);
+      }
+    }
+
+    // Phase 4: Trigger "viewport enter/exit" events.
+    for (let i = 0; i < this.resources_.length; i++) {
+      let r = this.resources_[i];
+      if (r.hasOwner()) {
+        continue;
+      }
+      var shouldBeInViewport = (r.isDisplayed() && r.overlaps(visibleRect));
+      if (r.isInViewport() != shouldBeInViewport) {
+        r.setInViewport(shouldBeInViewport);
+      }
+    }
+
+    // Phase 5: Idle layout: layout more if we are otherwise not doing much.
+    // TODO(dvoytenko): document/estimate IDLE timeouts and other constants
+    if (this.exec_.getSize() == 0 &&
+          this.queue_.getSize() == 0 &&
+          now > this.exec_.getLastDequeueTime() + 5000) {
+      let idleScheduledCount = 0;
+      for (let i = 0; i < this.resources_.length; i++) {
+        let r = this.resources_[i];
+        if (r.getState() == ResourceState_.READY_FOR_LAYOUT &&
+                !r.hasOwner() && r.isDisplayed()) {
+          log.fine(TAG_, 'idle layout:', r.debugid);
+          this.scheduleLayoutOrPreload_(r, /* layout */ false);
+          idleScheduledCount++;
+          if (idleScheduledCount >= 4) {
             break;
           }
         }
       }
     }
-    if (this.loading_.length > 0) {
-      this.lastLoading_ = now;
+  }
+
+  /**
+   * Dequeues layout and preload tasks from the queue and initiates their
+   * execution.
+   *
+   * There are two main drivers to dequeueing: a task's score and timeout. The
+   * score is built based on the resource's priority and viewport location
+   * (see {@link calcTaskScore_}). Timeout depends on the priority and age
+   * of tasks currently in the execution pool (see {@link calcTaskTimeout_}).
+   *
+   * @return {!time}
+   * @private
+   */
+  work_() {
+    let now = timer.now();
+
+    let scorer = this.calcTaskScore_.bind(this, viewport.getRect(),
+        Math.sign(this.lastVelocity_));
+
+    let timeout = -1;
+    let task = this.queue_.peek(scorer);
+    if (task) {
+      do {
+        timeout = this.calcTaskTimeout_(task);
+        log.fine(TAG_, 'peek from queue:', task.id,
+            'sched at', task.scheduleTime,
+            'score', scorer(task),
+            'timeout', timeout);
+        if (timeout > 16) {
+          break;
+        }
+
+        this.queue_.dequeue(task);
+
+        // Do not override a task in execution. This task will have to wait
+        // until the current one finished the execution.
+        let executing = this.exec_.getTaskById(task.id);
+        if (!executing) {
+          task.promise = task.callback();
+          task.startTime = now;
+          log.fine(TAG_, 'exec:', task.id, 'at', task.startTime);
+          this.exec_.enqueue(task);
+          task.promise.then(this.taskComplete_.bind(this, task, true),
+              this.taskComplete_.bind(this, task, false));
+        } else {
+          // Reschedule post execution.
+          executing.promise.then(this.reschedule_.bind(this, task),
+              this.reschedule_.bind(this, task));
+        }
+
+        task = this.queue_.peek(scorer);
+        timeout = -1;
+      } while (task);
     }
 
-    // Finally, schedule the next pass.
-    var nextPassDelay = (now - this.lastLoading_) * 2;
+    log.fine(TAG_, 'queue size:', this.queue_.getSize());
+    log.fine(TAG_, 'exec size:', this.exec_.getSize());
+
+    if (timeout >= 0) {
+      // Work pass.
+      return timeout;
+    }
+
+    // Idle pass.
+    var nextPassDelay = (now - this.exec_.getLastDequeueTime()) * 2;
     nextPassDelay = Math.max(Math.min(30000, nextPassDelay), 5000);
-    this.schedulePass(/* rebuild */ false, nextPassDelay);
+    return nextPassDelay;
   }
 
   /**
-   * @param {!Resource} resource
+   * Calculates the task's score. A task with the lowest score will be dequeued
+   * from the queue the first.
+   *
+   * There are three components of the score: element's priority, operation or
+   * offset priority and viewport priority.
+   *
+   * Element's priority is constant of the element's name. E.g. amp-img has a
+   * priority of 0, while amp-ad has a priority of 2.
+   *
+   * The operation (offset) priority is the priority of the task. A layout is
+   * a high-priority task while preload is a lower-priority task.
+   *
+   * Viewport priority is a function of the distance of the element from the
+   * currently visible viewports. The elements in the visible viewport get
+   * higher priority and further away from the viewport get lower priority.
+   * This priority also depends on whether or not the user is scrolling towards
+   * this element or away from it.
+   *
+   * @param {!LayoutRect} viewportRect
+   * @param {number} dir
+   * @param {!Task_} task
+   * @private
    */
-  enqueLoading_(resource) {
-    this.loading_.push(resource);
-    resource.load().then(() => {
-      this.dequeueLoading_(resource);
-    }, (error) => {
-      this.dequeueLoading_(resource);
-      console.error(error);
+  calcTaskScore_(viewportRect, dir, task) {
+    let box = task.resource.getLayoutBox();
+    let posPriority = Math.floor((box.top - viewportRect.top) /
+        viewportRect.height);
+    if (posPriority != 0 && Math.sign(posPriority) != (dir || 1)) {
+      posPriority *= 2;
+    }
+    posPriority = Math.abs(posPriority);
+    return task.priority * PRIORITY_BASE_ + posPriority;
+  }
+
+  /**
+   * Calculates the timeout of a task. The timeout depends on two main factors:
+   * the priorities of the tasks currently in the execution pool and their age.
+   * The timeout is calculated against each task in the execution pool and the
+   * maximum value is returned.
+   *
+   * A task is penalized with higher timeout values when it's lower in priority
+   * than the task in the execution pool. However, this penalty is judged
+   * against the age of the executing task. If it has been in executing for
+   * some time, the penalty is reduced.
+   *
+   * @param {!Task_} task
+   * @private
+   */
+  calcTaskTimeout_(task) {
+    if (this.exec_.getSize() == 0) {
+      return 0;
+    }
+
+    let now = timer.now();
+    let timeout = 0;
+    this.exec_.forEach((other) => {
+      // Higher priority tasks get the head start. Currently 500ms per a drop
+      // in priority (note that priority is 10-based).
+      let penalty = Math.max((task.priority - other.priority) *
+          PRIORITY_PENALTY_TIME_, 0);
+      // TODO(dvoytenko): Consider running total and not maximum.
+      timeout = Math.max(timeout, penalty - (now - other.startTime));
+    });
+
+    return timeout;
+  }
+
+  /**
+   * @param {!Task_} task
+   * @private
+   */
+  reschedule_(task) {
+    if (!this.queue_.getTaskById(task.id)) {
+      this.queue_.enqueue(task);
+    }
+  }
+
+  /**
+   * @param {!Task_} task
+   * @param {boolean} success
+   * @param {*=} opt_reason
+   * @return {!Promise|undefined}
+   * @private
+   */
+  taskComplete_(task, success, opt_reason) {
+    this.exec_.dequeue(task);
+    this.schedulePass(POST_TASK_PASS_DELAY_);
+    if (!success) {
+      log.error(TAG_, 'task failed:',
+          task.id, task.resource.debugid, opt_reason);
+      return Promise.reject(opt_reason);
+    }
+  }
+
+  /**
+   * Schedules layout or preload for the specified resource.
+   * @param {!Resource} resource
+   * @param {boolean} layout
+   * @param {number=} opt_parentPriority
+   * @private
+   */
+  scheduleLayoutOrPreload_(resource, layout, opt_parentPriority) {
+    assert(resource.getState() != ResourceState_.NOT_BUILT &&
+        resource.isDisplayed(),
+        'Not ready for layout: %s (%s)',
+        resource.debugid, resource.getState());
+    if (layout) {
+      this.schedule_(resource,
+          LAYOUT_TASK_ID_, LAYOUT_TASK_OFFSET_,
+          opt_parentPriority || 0,
+          resource.startLayout.bind(resource));
+    } else {
+      this.schedule_(resource,
+          PRELOAD_TASK_ID_, PRELOAD_TASK_OFFSET_,
+          opt_parentPriority || 0,
+          resource.startLayout.bind(resource));
+    }
+  }
+
+  /**
+   * Schedules layout or preload for the sub-resources of the specified
+   * resource.
+   * @param {!Resource} parentResource
+   * @param {boolean} layout
+   * @param {!Array<!Element>} subElements
+   * @private
+   */
+  scheduleLayoutOrPreloadForSubresources_(parentResource, layout, subElements) {
+    let resources = [];
+    this.discoverResourcesForArray_(parentResource, subElements, (resource) => {
+      if (resource.getState() != ResourceState_.NOT_BUILT) {
+        resources.push(resource);
+      }
+    });
+    if (resources.length > 0) {
+      resources.forEach((resource) => {
+        resource.measure();
+        if (resource.getState() == ResourceState_.READY_FOR_LAYOUT &&
+                resource.isDisplayed()) {
+          this.scheduleLayoutOrPreload_(resource, layout,
+              parentResource.getPriority());
+        }
+      });
+    }
+  }
+
+  /**
+   * Schedules a task.
+   * @param {!Resource} resource
+   * @param {string} localId
+   * @param {number} priorityOffset
+   * @param {number} parentPriority
+   * @param {function():!Promise} callback
+   * @private
+   */
+  schedule_(resource, localId, priorityOffset, parentPriority, callback) {
+    let taskId = resource.debugid + '#' + localId;
+
+    let task = {
+      id: taskId,
+      resource: resource,
+      priority: Math.max(resource.getPriority(), parentPriority) +
+          priorityOffset,
+      callback: callback,
+      scheduleTime: timer.now()
+    };
+    log.fine(TAG_, 'schedule:', task.id, 'at', task.scheduleTime);
+
+    // Only schedule a new task if there's no one enqueued yet or if this task
+    // has a higher priority.
+    let queued = this.queue_.getTaskById(taskId);
+    if (!queued || task.priority < queued.priority) {
+      if (queued) {
+        this.queue_.dequeue(queued);
+      }
+      this.queue_.enqueue(task);
+      this.schedulePass(this.calcTaskTimeout_(task));
+    }
+    task.resource.layoutScheduled();
+  }
+
+  /**
+   * Updates inViewport state for the specified sub-resources of a resource.
+   * @param {!Resource} parentResource
+   * @param {!Array<!Element>} subElements
+   * @param {boolean} inLocalViewport
+   * @private
+   */
+  updateInViewportForSubresources_(parentResource, subElements,
+      inLocalViewport) {
+    let inViewport = parentResource.isInViewport() && inLocalViewport;
+    this.discoverResourcesForArray_(parentResource, subElements, (resource) => {
+      resource.setInViewport(inViewport);
     });
   }
 
   /**
-   * @param {!Resource} resource
+   * Finds resources within the parent resource's shallow subtree.
+   * @param {!Resource} parentResource
+   * @param {!Array<!Element>} elements
+   * @param {function(!Resource)} callback
    */
-  dequeueLoading_(resource) {
-    var removedCount = 0;
-    for (let i = 0; i < this.loading_.length; i++) {
-      if (resource == this.loading_[i]) {
-        removedCount++;
-        this.loading_.splice(i, 1);
-        break;
-      }
-    }
-    if (removedCount > 0 && this.loading_.length == 0) {
-      this.schedulePass(/* rebuild */ false, /* delay */ 300);
-    }
+  discoverResourcesForArray_(parentResource, elements, callback) {
+    elements.forEach((element) => {
+      assert(parentResource.element.contains(element));
+      this.discoverResourcesForElement_(element, callback);
+    });
   }
 
   /**
-   * @param {!Resource} resource
-   * @return {boolean}
+   * @param {!Element} element
+   * @param {function(!Resource)} callback
    */
-  isLoading_(resource) {
-    for (let i = 0; i < this.loading_.length; i++) {
-      if (resource == this.loading_[i]) {
-        return true;
+  discoverResourcesForElement_(element, callback) {
+    // Breadth-first search.
+    if (element.classList.contains('-amp-element')) {
+      callback(this.getResourceForElement(element));
+    } else {
+      let ampElements = element.getElementsByClassName('-amp-element');
+      let seen = [];
+      for (let i = 0; i < ampElements.length; i++) {
+        let ampElement = ampElements[i];
+        let covered = false;
+        for (let j = 0; j < seen.length; j++) {
+          if (seen[j].contains(ampElement)) {
+            covered = true;
+            break;
+          }
+        }
+        if (!covered) {
+          seen.push(ampElement);
+          callback(this.getResourceForElement(ampElement));
+        }
       }
     }
-  }
-
-  get() {
-    return this.resources_;
-  }
-
-  getResource(element) {
-    return this.resourceMap_[element.id];
-  }
-
-  add(element) {
-    var id = element.id;
-    if (!id) {
-      id = 'AMP_' + this.resources_.length;
-      element.id = id;
-    }
-    log.fine(TAG_, 'add element: ' + element.tagName + ': #' + element.id);
-    var r = new Resource(element);
-    this.resources_.push(r);
-    this.resourceMap_[element.id] = r;
-    this.schedulePass(/* rebuild */ false);
-  }
-
-  remove(element) {
-    delete this.resourceMap_[element.id];
-    this.resources_ = this.resources_.filter((r) => {
-      return r.element != element;
-    });
   }
 }
 
-class Resource {
-  constructor(element) {
-    /* @const {!Element} */
+
+/**
+ * A Resource binding for an AmpElement.
+ *
+ * Visible for testing only!
+ */
+export class Resource {
+
+  /**
+   * @param {number} id
+   * @param {!AmpElement} element
+   */
+  constructor(id, element) {
+    /** @private {number} */
+    this.id_ = id;
+
+    /* @const {!AmpElement} */
     this.element = element;
 
-    /** @private {boolean} */
-    this.layoutReady_ = false;
+    /* @const {string} */
+    this.debugid = element.tagName.toLowerCase() + '#' + id;
+
+    /* @private {boolean} */
+    this.blacklisted_ = false;
+
+    /* @const {!AmpElement|undefined|null} */
+    this.owner_ = undefined;
+
+    /** @const {number} */
+    this.priority_ = getElementPriority(element.tagName);
+
+    /* @const {!ResourceState_} */
+    this.state_ = element.isBuilt() ? ResourceState_.NOT_LAID_OUT :
+        ResourceState_.NOT_BUILT;
 
     /** @type {?LayoutRect} */
-    this.boundingBox_ = null;
+    this.layoutBox_ = layoutRectLtwh(-10000, -10000, 0, 0);
 
     /** @private {boolean} */
-    this.isLoaded_ = this.element.isContentLoaded();
-
-    /** @private {boolean} */
-    this.isLoadingFailed_ = false;
-
-    /** @private {?Promise} */
-    this.loadingPromise_ = null;
-
-    /** @private {boolean} */
-    this.isActive_ = false;
-
-    /** @private {?Promise} */
-    this.activatingPromise_ = null;
+    this.isInViewport_ = false;
   }
 
-  /** @return {boolean} */
-  isLayoutReady() {
-    return this.layoutReady_;
+  /**
+   * Returns resource's ID.
+   * @return {number}
+   */
+  getId() {
+    return this.id_;
   }
 
-  /** */
-  layout() {
-    // TODO(dvoytenko): call to the component
-    this.layoutReady_ = true;
-    this.boundingBox_ = null;
+  /**
+   * Returns an owner element or null.
+   * @return {?AmpElement}
+   */
+  getOwner() {
+    if (this.owner_ === undefined) {
+      let n = this.element;
+      for (let n = this.element; n; n = n.parentElement) {
+        if (n[OWNER_PROP_]) {
+          this.owner_ = n[OWNER_PROP_];
+          break;
+        }
+      }
+      if (this.owner_ === undefined) {
+        this.owner_ = null;
+      }
+    }
+    return this.owner_;
+  }
+
+  /**
+   * Whether the resource has an owner.
+   * @return {boolean}
+   */
+  hasOwner() {
+    return !!this.getOwner();
+  }
+
+  /**
+   * Returns the resource's element priority.
+   * @return {number}
+   */
+  getPriority() {
+    return this.priority_;
+  }
+
+  /**
+   * Returns the resource's state. See {@link ResourceState_} for details.
+   * @return {!ResourceState_}
+   */
+  getState() {
+    return this.state_;
+  }
+
+  /**
+   * Requests the resource's element to be built. See {@link AmpElement.build}
+   * for details.
+   * @param {boolean} force
+   * @return {boolean}
+   */
+  build(force) {
+    if (this.blacklisted_ || !this.element.isUpgraded()) {
+      return false;
+    }
+    let built;
+    try {
+      built = this.element.build(force);
+    } catch(e) {
+      log.error(TAG_, 'failed to build:', this.debugid, e);
+      built = false;
+      this.blacklisted_ = true;
+    }
+    if (!built) {
+      return false;
+    }
+    this.state_ = ResourceState_.NOT_LAID_OUT;
+    return true;
   }
 
   /**
@@ -325,127 +822,331 @@ class Resource {
     }
     if (this.element.ownerDocument.defaultView
         .matchMedia(mediaQuery).matches) {
-      log.fine(TAG_, 'MATCH ' + this.element.id)
+      log.fine(TAG_, 'media match:', this.debugid)
       this.element.classList.remove('-amp-hidden-by-media-query')
     } else {
-      log.fine(TAG_, 'NO MATCH ' + this.element.id)
+      log.fine(TAG_, 'media no match:', this.debugid)
       this.element.classList.add('-amp-hidden-by-media-query');
     }
   }
 
-  /** */
+  /**
+   * Measures the resource's boundaries. Only allowed for upgraded elements.
+   */
   measure() {
-    this.boundingBox_ = viewport.getLayoutRect(this.element);
+    assert(this.element.isUpgraded(), 'Must be upgraded to measure: %s',
+        this.debugid);
+    if (this.state_ == ResourceState_.NOT_BUILT) {
+      // Can't measure unbuilt element.
+      return;
+    }
+    let box = viewport.getLayoutRect(this.element);
+    // Note that "left" doesn't affect readiness for the layout.
+    if (this.state_ == ResourceState_.NOT_LAID_OUT ||
+          this.layoutBox_.top != box.top ||
+          this.layoutBox_.width != box.width ||
+          this.layoutBox_.height != box.height) {
+      this.state_ = ResourceState_.READY_FOR_LAYOUT;
+    }
+    this.layoutBox_ = box;
   }
 
   /**
-   * Notice! Calling this method before measure() was called may cause relayout.
+   * Returns a previously measured layout box.
    * @return {!LayoutRect}
    */
   getLayoutBox() {
-    assert(this.boundingBox_, 'Bounding box was not measured yet');
-    return this.boundingBox_;
+    return this.layoutBox_;
   }
 
   /**
+   * Whether the resource is displayed, i.e. if it has non-zero width and
+   * height.
    * @return {boolean}
    */
-  isLoaded() {
-    return this.isLoaded_;
+  isDisplayed() {
+    return this.layoutBox_.height > 0 && this.layoutBox_.width > 0;
   }
 
   /**
+   * Whether the element's layout box overlaps with the specified rect.
+   * @param {!LayoutRect} rect
    * @return {boolean}
    */
-  isLoadingFailed() {
-    return this.isLoadingFailed_;
+  overlaps(rect) {
+    return layoutRectsOverlap(this.layoutBox_, rect);
   }
 
   /**
+   * Sets the resource's state to LAYOUT_SCHEDULED.
+   */
+  layoutScheduled() {
+    this.state_ = ResourceState_.LAYOUT_SCHEDULED;
+  }
+
+  /**
+   * Starts the layout of the resource. Returns the promise that will yield
+   * once layout is complete. Only allowed to be called on a upgraded, built
+   * and displayed element.
    * @return {!Promise}
    */
-  load() {
-    if (this.isLoaded_) {
+  startLayout() {
+    if (this.layoutPromise_) {
+      return this.layoutPromise_;
+    }
+    if (this.state_ == ResourceState_.LAYOUT_COMPLETE) {
       return Promise.resolve();
     }
-    if (this.isLoadingFailed_) {
+    if (this.state_ == ResourceState_.LAYOUT_FAILED) {
       return Promise.reject('already failed');
     }
 
-    if (!this.loadingPromise_) {
-      log.fine(TAG_, 'load: ' + this.element.id);
-      let promise = retriablePromise(() => {
-        return this.element.initiateLoadContent();
-      }, /* maxAttempts */ 2, /* delay */ 5000, /* backoffFactor */ 1.5);
-      this.loadingPromise_ = promise.then(() => {
-        log.fine(TAG_, 'loaded: ' + this.element.id);
-        this.isLoaded_ = true;
-      }, (reason) => {
-        log.fine(TAG_, 'loading failed: ' + this.element.id + ': ' + reason);
-        this.isLoadingFailed_ = true;
-      });
+    assert(this.state_ != ResourceState_.NOT_BUILT && this.isDisplayed(),
+        'Not ready to start layout: %s (%s)', this.debugid, this.state_);
+
+    // Double check that the element has not disappeared since scheduling
+    this.measure();
+    if (!this.isDisplayed()) {
+      log.fine(TAG_, 'layout canceled due to element loosing display:',
+          this.debugid, this.state_);
+      return Promise.resolve();
     }
-    return this.loadingPromise_;
+
+    log.fine(TAG_, 'start layout:', this.debugid);
+
+    let promise = retriablePromise(() => {
+      return this.element.layoutCallback();
+    }, /* maxAttempts */ 2, /* delay */ 5000, /* backoffFactor */ 1.5);
+    this.layoutPromise_ = promise.then(() => this.layoutComplete_(true),
+        (reason) => this.layoutComplete_(false, reason));
+    return this.layoutPromise_;
   }
 
   /**
+   * @param {boolean} success
+   * @param {*=} opt_reason
+   * @return {!Promise|undefined}
+   */
+  layoutComplete_(success, opt_reason) {
+    this.layoutPromise_ = null;
+    this.state_ = success ? ResourceState_.LAYOUT_COMPLETE :
+        ResourceState_.LAYOUT_FAILED;
+    if (success) {
+      log.fine(TAG_, 'layout complete:', this.debugid);
+    } else {
+      log.fine(TAG_, 'loading failed:', this.debugid, opt_reason);
+      return Promise.reject(opt_reason);
+    }
+  }
+
+  /**
+   * Whether the resource is currently visible in the viewport.
    * @return {boolean}
    */
-  isActive() {
-    return this.isActive_;
+  isInViewport() {
+    return this.isInViewport_;
   }
 
   /**
-   * @param {boolean} active
+   * Updates the inViewport state of the element.
+   * @param {boolean} inViewport
    */
-  setActive(active) {
-    if (active == this.isActive_) {
+  setInViewport(inViewport) {
+    if (inViewport == this.isInViewport_) {
       return;
     }
-    this.isActive_ = active;
-    if (active) {
-      if (!this.activatingPromise_) {
-        log.fine(TAG_, 'activate: ' + this.element.id);
-        this.activatingPromise_ = this.load().then(() => {
-          this.doActivate_();
-          this.activatingPromise_ = null;
-        }, (reason) => {
-          log.fine(TAG_, 'activation failed: ' + this.element.id + ': ' +
-              reason);
-          this.activatingPromise_ = null;
-        });
-      }
-    } else {
-      log.fine(TAG_, 'deactivate: ' + this.element.id);
-      if (this.activatingPromise_) {
-        this.activatingPromise_.then(() => this.doDeactivate_(),
-            () => this.doDeactivate_());
-        this.activatingPromise_ = null;
-      } else if (this.isLoaded_) {
-        this.doDeactivate_();
-      }
+    if (this.state_ == ResourceState_.NOT_BUILT) {
+      // Can't send any events to unbuilt element.
+      return;
     }
-  }
-
-  /**
-   * @private
-   */
-  doActivate_() {
-    if (this.isActive_) {
-      log.fine(TAG_, 'activated: ' + this.element.id);
-      this.element.activateContentCallback();
-    }
-  }
-
-  /**
-   * @private
-   */
-  doDeactivate_() {
-    if (!this.isActive_) {
-      this.element.deactivateContentCallback();
-    }
+    log.fine(TAG_, 'inViewport:', this.debugid, inViewport);
+    this.isInViewport_ = inViewport;
+    this.element.viewportCallback(inViewport);
   }
 }
+
+
+/**
+ * A scheduling queue for Resources.
+ *
+ * Visible only for testing!
+ *
+ * @private
+ */
+export class TaskQueue_ {
+
+  constructor() {
+    /** @private @const {!Array<!Task_>} */
+    this.tasks_ = [];
+
+    /** @private @const {!Object<string, !Task_>} */
+    this.taskIdMap_ = {};
+
+    /** @private {!time} */
+    this.lastEnqueueTime_ = 0;
+
+    /** @private {!time} */
+    this.lastDequeueTime_ = 0;
+  }
+
+  /**
+   * Size of the queue.
+   * @return {number}
+   */
+  getSize() {
+    return this.tasks_.length;
+  }
+
+  /**
+   * Last time a task was enqueued.
+   * @return {!time}
+   */
+  getLastEnqueueTime() {
+    return this.lastEnqueueTime_;
+  }
+
+  /**
+   * Last time a task was dequeued.
+   * @return {!time}
+   */
+  getLastDequeueTime() {
+    return this.lastDequeueTime_;
+  }
+
+  /**
+   * Returns the task with the specified ID or null.
+   * @param {string} taskId
+   * @return {?Task_}
+   */
+  getTaskById(taskId) {
+    return this.taskIdMap_[taskId] || null;
+  }
+
+  /**
+   * Enqueues the task. If the task is already in the queue, the error is
+   * thrown.
+   * @param {!Task_} task
+   */
+  enqueue(task) {
+    assert(!this.taskIdMap_[task.id], 'Task already enqueued: %s', task.id);
+    this.tasks_.push(task);
+    this.taskIdMap_[task.id] = task;
+    this.lastEnqueueTime_ = timer.now();
+  }
+
+  /**
+   * Dequeues the task and returns "true" if dequeueing is successful. Otherwise
+   * returns "false", e.g. when this task is not currently enqueued.
+   * @param {!Task_} task
+   * @return {boolean}
+   */
+  dequeue(task) {
+    let existing = this.taskIdMap_[task.id];
+    if (!existing) {
+      return false;
+    }
+    this.tasks_.splice(this.tasks_.indexOf(existing), 1);
+    delete this.taskIdMap_[task.id];
+    this.lastDequeueTime_ = timer.now();
+    return true;
+  }
+
+  /**
+   * Returns the task with the minimal score based on the provided scroing
+   * callback.
+   * @param {function(!Task_):number} scorer
+   * @return {?Task_}
+   */
+  peek(scorer) {
+    let minScore = 1e6;
+    let minTask = null;
+    for (let i = 0; i < this.tasks_.length; i++) {
+      let task = this.tasks_[i];
+      let score = scorer(task);
+      if (score < minScore) {
+        minScore = score;
+        minTask = task;
+      }
+    }
+    return minTask;
+  }
+
+  /**
+   * Iterates over all tasks in queue in the insertion order.
+   * @param {function(!Task_)} callback
+   */
+  forEach(callback) {
+    this.tasks_.forEach(callback);
+  }
+}
+
+
+/**
+ * @param {!Element|!Array<!Element>} elements
+ * @return {!Array<!Element>}
+ */
+function elements_(elements) {
+  if (elements.length !== undefined) {
+    return elements;
+  }
+  return [elements];
+}
+
+
+/**
+ * Resource state.
+ * @enum {number}
+ * @private
+ */
+var ResourceState_ = {
+  /**
+   * The resource has not been built yet. Measures, layouts, preloads or
+   * viewport signals are not allowed.
+   */
+  NOT_BUILT: 0,
+
+  /**
+   * The resource has been built, but not measured yet and not yet ready
+   * for layout.
+   */
+  NOT_LAID_OUT: 1,
+
+  /**
+   * The resource has been built and measured and ready for layout.
+   */
+  READY_FOR_LAYOUT: 2,
+
+  /**
+   * The resource is currently scheduled for layout.
+   */
+  LAYOUT_SCHEDULED: 3,
+
+  /**
+   * The resource has been laid out.
+   */
+  LAYOUT_COMPLETE: 4,
+
+  /**
+   * The latest resource's layout failed.
+   */
+  LAYOUT_FAILED: 5
+};
+
+
+/**
+ * The internal structure for the task.
+ * @typedef {{
+ *   id: string,
+ *   resource: !Resource,
+ *   priority: number,
+ *   callback: function(),
+ *   scheduleTime: time,
+ *   startTime: time,
+ *   promise: (!Promise|undefined)
+ * }}
+ * @private
+ */
+var Task_;
 
 
 export const resources = new Resources(window);

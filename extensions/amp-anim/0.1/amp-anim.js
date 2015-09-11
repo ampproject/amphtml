@@ -16,6 +16,8 @@
 
 import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
+import {parseSrcset} from '../../../src/srcset';
+import * as st from '../../../src/style';
 
 
 (window.AMP = window.AMP || []).push(function(AMP) {
@@ -27,50 +29,71 @@ import {loadPromise} from '../../../src/event-helper';
     }
 
     /** @override */
-    firstAttachedCallback() {
-      /** @private {?Element} */
+    isReadyToBuild() {
+      return this.element.firstChild != null;
+    }
+
+    /** @override */
+    buildCallback() {
+      /** @private @const {?Element} */
       this.placeholder_ = this.getPlaceholder();
 
-      var width = this.element.getAttribute('width');
-      var height = this.element.getAttribute('height');
-      var img = new Image();
-      if (this.placeholder_) {
-        img.style.display = 'none';
-      }
-      this.applyFillContent(img);
-      img.width = getLengthNumeral(width);
-      img.height = getLengthNumeral(height);
-      this.element.appendChild(img);
+      /** @private @const {!Element} */
+      this.img_ = new Image();
+      this.propagateAttributes(['alt'], this.img_);
+      this.applyFillContent(this.img_);
+      this.img_.width = getLengthNumeral(this.element.getAttribute('width'));
+      this.img_.height = getLengthNumeral(this.element.getAttribute('height'));
 
-      /** @const {!Element} */
-      this.img = img;
+      // The image shown/hidden depends on placeholder.
+      st.toggle(this.img_, !this.placeholder_);
+
+      this.element.appendChild(this.img_);
+
+      /** @private @const {!Srcset} */
+      this.srcset_ = parseSrcset(this.element.getAttribute('srcset') ||
+          this.element.getAttribute('src'));
+
+      /** @private {?Promise} */
+      this.loadPromise_ = null;
     }
 
     /** @override */
-    loadContent() {
-      // TODO(dvoytenko): do strictly via Resources
-      if (this.placeholder_.initiateLoadContent) {
-        this.placeholder_.initiateLoadContent();
-      }
-
-      this.propagateAttributes(['src', 'srcset', 'alt'], this.img);
-      return loadPromise(this.img);
+    layoutCallback() {
+      return this.updateImageSrc_();
     }
 
     /** @override */
-    activateContent() {
+    viewportCallback(inViewport) {
       if (this.placeholder_) {
-        this.placeholder_.classList.add('hidden');
-        this.img.style.display = 'block';
+        if (!inViewport || !this.loadPromise_) {
+          this.updateInViewport_(inViewport);
+        } else {
+          this.loadPromise_.then(() => this.updateInViewport_(inViewport));
+        }
       }
     }
 
-    /** @override */
-    deactivateContent() {
-      if (this.placeholder_) {
-        this.placeholder_.classList.remove('hidden');
-        this.img.style.display = 'none';
+    /** @private */
+    updateInViewport_() {
+      let inViewport = this.isInViewport();
+      this.placeholder_.classList.toggle('hidden', inViewport);
+      st.toggle(this.img_, inViewport);
+    }
+
+    /**
+     * @return {!Promise}
+     * @private
+     */
+    updateImageSrc_() {
+      let src = this.srcset_.select(this.element.offsetWidth,
+          this.getDpr()).url;
+      if (src == this.img_.getAttribute('src')) {
+        return Promise.resolve();
       }
+      this.img_.setAttribute('src', src);
+      this.loadPromise_ = loadPromise(this.img_);
+      return this.loadPromise_;
     }
   }
 

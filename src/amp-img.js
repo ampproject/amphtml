@@ -17,6 +17,7 @@
 import {BaseElement} from './base-element';
 import {getLengthNumeral, isLayoutSizeDefined} from './layout';
 import {loadPromise} from './event-helper';
+import {parseSrcset} from './srcset';
 import {registerElement} from './custom-element';
 
 
@@ -32,26 +33,42 @@ export function installImg(win) {
     }
 
     /** @override */
-    firstAttachedCallback() {
-      var width = this.element.getAttribute('width');
-      var height = this.element.getAttribute('height');
-      var img = new Image();
+    buildCallback() {
+      /** @private @const {!Element} */
+      this.img_ = new Image();
       if (this.element.id) {
-        img.setAttribute('amp-img-id', this.element.id);
+        this.img_.setAttribute('amp-img-id', this.element.id);
       }
-      this.applyFillContent(img);
-      img.width = getLengthNumeral(width);
-      img.height = getLengthNumeral(height);
-      this.element.appendChild(img);
+      this.propagateAttributes(['alt'], this.img_);
+      this.applyFillContent(this.img_);
 
-      /** @const {!Element} */
-      this.img = img;
+      this.img_.width = getLengthNumeral(this.element.getAttribute('width'));
+      this.img_.height = getLengthNumeral(this.element.getAttribute('height'));
+
+      this.element.appendChild(this.img_);
+
+      /** @private @const {!Srcset} */
+      this.srcset_ = parseSrcset(this.element.getAttribute('srcset') ||
+          this.element.getAttribute('src'));
     }
 
     /** @override */
-    loadContent() {
-      this.propagateAttributes(['src', 'srcset', 'alt'], this.img);
-      return loadPromise(this.img);
+    layoutCallback() {
+      return this.updateImageSrc_();
+    }
+
+    /**
+     * @return {!Promise}
+     * @private
+     */
+    updateImageSrc_() {
+      let src = this.srcset_.select(this.element.offsetWidth,
+          this.getDpr()).url;
+      if (src == this.img_.getAttribute('src')) {
+        return Promise.resolve();
+      }
+      this.img_.setAttribute('src', src);
+      return loadPromise(this.img_);
     }
   }
 

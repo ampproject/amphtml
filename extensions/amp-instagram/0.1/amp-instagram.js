@@ -45,7 +45,7 @@ import {loadPromise} from '../../../src/event-helper';
       return isLayoutSizeDefined(layout);
     }
     /** @override */
-    loadContent() {
+    layoutCallback() {
       var width = this.element.getAttribute('width');
       var height = this.element.getAttribute('height');
       var shortCode = AMP.assert(this.element.getAttribute('shortcode'),
