@@ -20,6 +20,7 @@ import {expandLayoutRect, layoutRectLtwh, layoutRectsOverlap} from
     './layout-rect';
 import {log} from './log';
 import {retriablePromise} from './retriable-promise';
+import {reportErrorToDeveloper} from './error';
 import {timer} from './timer';
 import {viewport} from './viewport';
 
@@ -919,6 +920,7 @@ export class Resource {
     }, /* maxAttempts */ 2, /* delay */ 5000, /* backoffFactor */ 1.5);
     this.layoutPromise_ = promise.then(() => this.layoutComplete_(true),
         (reason) => this.layoutComplete_(false, reason));
+    this.layoutPromise_.catch(reportErrorToDeveloper);
     return this.layoutPromise_;
   }
 

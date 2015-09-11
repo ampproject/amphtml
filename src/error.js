@@ -18,14 +18,18 @@
 import {getMode} from './mode';
 
 
-export function reportError(error) {
+export function reportErrorToDeveloper(error) {
   if (!window.console) {
     return;
   }
+  if (error.reported) {
+    return;
+  }
+  error.reported = true;
   var element = error.associatedElement;
   if (element && getMode().development) {
     element.classList.add('-amp-element-error');
-    element.textContent = error.message;
+    element.setAttribute('error-message', error.message);
   }
   var log = console.error
       ? console.error.bind(console)

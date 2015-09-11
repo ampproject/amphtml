@@ -19,6 +19,7 @@ import {Layout, getLayoutClass, getLengthNumeral, getLengthUnits,
 import {ElementStub, stubbedElements} from './element-stub';
 import {assert} from './asserts';
 import {log} from './log';
+import {reportErrorToDeveloper} from './error';
 import {resources} from './resources';
 
 
@@ -145,19 +146,6 @@ export function applyLayout_(element) {
 
 
 /**
- * @param {!Element} element
- * @param {string|Error} message
- * @private
- */
-function setToErrorMode_(element, message) {
-  let msg = '' + message;
-  // TODO(dvoytenko): only do this in dev mode
-  element.classList.add('-amp-element-error');
-  element.textContent = msg;
-}
-
-
-/**
  * The interface that is implemented by all custom elements in the AMP
  * namespace.
  * @interface
@@ -243,7 +231,7 @@ export function createAmpElementProto(win, name, implementationClass) {
         this.dispatchCustomEvent('amp:attached');
       }
     } catch(e) {
-      setToErrorMode_(this, e);
+      reportErrorToDeveloper(e);
       throw e;
     }
     resources.upgraded(this);
@@ -290,7 +278,7 @@ export function createAmpElementProto(win, name, implementationClass) {
       this.classList.remove('-amp-notbuilt');
       this.classList.remove('amp-notbuilt');
     } catch(e) {
-      setToErrorMode_(this, e);
+      reportErrorToDeveloper(e);
       throw e;
     }
     return true;
@@ -331,7 +319,7 @@ export function createAmpElementProto(win, name, implementationClass) {
       this.implementation_.layout_ = this.layout_;
       this.implementation_.firstAttachedCallback();
     } catch(e) {
-      setToErrorMode_(this, e);
+      reportErrorToDeveloper(e);
       throw e;
     }
     if (!this.isUpgraded()) {
@@ -413,6 +401,11 @@ export function createAmpElementProto(win, name, implementationClass) {
     this.implementation_.activate();
   };
 
+  /** @override */
+  ElementProto.toString = function() {
+    return this.tagName.toLowerCase() + '#' + this.id;
+  };
+
   return ElementProto;
 }
 
@@ -425,11 +418,6 @@ export function createAmpElementProto(win, name, implementationClass) {
  */
 export function registerElement(win, name, implementationClass) {
   knownElements[name] = implementationClass;
-
-  /** @override */
-  ElementProto.toString = function() {
-    return this.tagName.toLowerCase() + '#' + this.id;
-  };
 
   win.document.registerElement(name, {
     prototype: createAmpElementProto(win, name, implementationClass)

@@ -15,8 +15,6 @@
  */
 
 
-import {format} from './error';
-
 
 /**
  * Throws an error if the first argument isn't truish.
@@ -42,7 +40,7 @@ export function assert(shouldBeTrueish, message, var_args) {
       }
       messageArray.push(val, splitMessage.shift());
     }
-    var e = new Error(format(message, messageArray.join()));
+    var e = new Error(messageArray.join(''));
     e.associatedElement = firstElement;
     e.messageArray = messageArray;
     throw e;
