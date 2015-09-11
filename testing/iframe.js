@@ -30,6 +30,7 @@ var iframeCount = 0;
  * - iframe: The host iframe element. Useful for e.g. resizing.
  * - awaitEvent: A function that returns a promise for when the given custom
  *   event fired at least the given number of times.
+ * - errors: Array of console.error fired during page load.
  *
  * @param {string} fixture The name of the fixture file.
  * @param {number} initialIframeHeight in px.

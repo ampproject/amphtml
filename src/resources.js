@@ -422,8 +422,9 @@ export class Resources {
           task.startTime = now;
           log.fine(TAG_, 'exec:', task.id, 'at', task.startTime);
           this.exec_.enqueue(task);
-          task.promise.catch(reportErrorToDeveloper).then(this.taskComplete_.bind(this, task, true),
-              this.taskComplete_.bind(this, task, false));
+          task.promise.then(this.taskComplete_.bind(this, task, true),
+              this.taskComplete_.bind(this, task, false))
+              .catch(reportErrorToDeveloper);
         } else {
           // Reschedule post execution.
           executing.promise.then(this.reschedule_.bind(this, task),
