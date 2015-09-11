@@ -19,6 +19,7 @@ import {assert} from './asserts';
 import {installStyles} from './styles';
 import {registerElement} from './custom-element';
 import {registerExtendedElement} from './extended-element';
+import {viewerFor} from './viewer';
 
 
 /** @type {!Array} */
@@ -63,6 +64,8 @@ export function adopt(global) {
   global.AMP.BaseElement = BaseElement;
   /** @const */
   global.AMP.assert = assert;
+  /** @const */
+  global.AMP.viewer = viewerFor(global);
   /**
    * Registers a new custom element.
    * @param {GlobalAmp} fn
