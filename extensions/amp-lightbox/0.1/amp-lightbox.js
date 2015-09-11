@@ -15,6 +15,7 @@
  */
 
 import {Layout} from '../../../src/layout';
+import {history} from '../../../src/history';
 import {timer} from '../../../src/timer';
 import * as st from '../../../src/style';
 
@@ -56,6 +57,9 @@ import * as st from '../../../src/style';
       // TODO(dvoytenko): configure how to close. Or maybe leave it completely
       // up to "on" element.
       this.element.addEventListener('click', () => this.close());
+
+      /** @private {number} */
+      this.historyId_ = -1;
     }
 
     /** @override */
@@ -118,10 +122,17 @@ import * as st from '../../../src/style';
 
       this.scheduleLayout(this.container_);
       this.updateInViewport(this.container_, true);
+
+      history().push(this.close.bind(this)).then((historyId) => {
+        this.historyId_ = historyId;
+      });
     }
 
     close() {
       this.element.style.display = 'none';
+      if (this.historyId_ != -1) {
+        history().pop(this.historyId_);
+      }
     }
   }
 

@@ -27,6 +27,18 @@ let TAG_ = 'History';
 /** @private @const */
 let HISTORY_PROP_ = 'AMP.History';
 
+
+/**
+ * @return {*}
+ * @private
+ */
+function historyState_(stackIndex) {
+  let state = {};
+  state[HISTORY_PROP_] = stackIndex;
+  return state;
+}
+
+
 /** @typedef {number} */
 var HistoryId;
 
@@ -44,6 +56,10 @@ export class History {
 
     /** @private {number} */
     this.startIndex_ = history.length - 1;
+    if (history.state && history.state[HISTORY_PROP_] !== undefined) {
+      this.startIndex_ = Math.min(history.state[HISTORY_PROP_],
+          this.startIndex_);
+    }
 
     /** @private {number} */
     this.stackIndex_ = this.startIndex_;
@@ -63,8 +79,7 @@ export class History {
     this.supportsState_ = 'state' in history;
 
     /** @private {*} */
-    this.unsupportedState_ = {};
-    this.unsupportedState_[HISTORY_PROP_] = this.stackIndex_;
+    this.unsupportedState_ = historyState_(this.stackIndex_);
 
     // There are still browsers who do not support push/replaceState.
     let pushState, replaceState;
@@ -95,6 +110,8 @@ export class History {
 
     /** @private @const {function(*, string=, string=)} */
     this.replaceState_ = replaceState;
+
+    this.replaceState_(historyState_(this.stackIndex_));
 
     history.pushState = this.historyPushState_.bind(this);
     history.replaceState = this.historyReplaceState_.bind(this);
@@ -149,7 +166,7 @@ export class History {
     // On pop, stack is not allowed to go prior to the starting point.
     stateId = Math.max(stateId, this.startIndex_);
     return this.whenReady_(() => {
-      return this.back_(this.win.history.length - stateId);
+      return this.back_(this.stackIndex_ - stateId + 1);
     });
   }
 
@@ -161,7 +178,7 @@ export class History {
     // On pop, stack is not allowed to go prior to the starting point.
     stateId = Math.max(stateId, this.startIndex_);
     return this.whenReady_(() => {
-      return this.back_(this.win.history.length - stateId + 1);
+      return this.back_(this.stackIndex_ - stateId);
     });
   }
 
@@ -273,8 +290,7 @@ export class History {
     if (steps <= 0) {
       return Promise.resolve();
     }
-    this.unsupportedState_ = {};
-    this.unsupportedState_[HISTORY_PROP_] = this.stackIndex_ - steps;
+    this.unsupportedState_ = historyState_(this.stackIndex_ - steps);
     let promise = this.wait_();
     this.win.history.go(-steps);
     return promise;
@@ -291,6 +307,7 @@ export class History {
     if (!state) {
       state = {};
     }
+    let len = this.win.history.length;
     let stackIndex = this.stackIndex_ + 1;
     state[HISTORY_PROP_] = stackIndex;
     this.pushState_(state, title, url);
@@ -360,4 +377,19 @@ export class History {
 }
 
 
-export const history = new History(window);
+/**
+ * @private {!Window} win
+ */
+export function installHistory(win) {
+  win['__AMP.History'] = new History(win);
+}
+
+
+/**
+ * @param {!Window=} opt_win
+ * @return {!History}
+ */
+export function history(opt_win) {
+  let win = opt_win || window;
+  return /** @type {!History} */ (assert(win['__AMP.History']));
+}

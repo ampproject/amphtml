@@ -47,6 +47,20 @@ describe('History', () => {
         window.history.length - 1);
   });
 
+  it('initial - with preexisting state', () => {
+    history.origPushState_({'AMP.History': window.history.length}, undefined);
+    history.origReplaceState_({'AMP.History': window.history.length - 2},
+        undefined);
+    let history2 = new History(window);
+    expect(history2.stackIndex_).to.equal(window.history.length - 2);
+    expect(history2.startIndex_).to.equal(window.history.length - 2);
+    expect(history.unsupportedState_['AMP.History']).to.equal(
+        window.history.length - 2);
+    history2.cleanup_();
+    history.origReplaceState_({'AMP.History': window.history.length - 1},
+        undefined);
+  });
+
   it('history.pushState', () => {
     window.history.pushState({a: 111});
     expect(history.unsupportedState_.a).to.equal(111);
