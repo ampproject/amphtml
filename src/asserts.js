@@ -21,6 +21,13 @@
  *
  * Supports argument substitution into the message via %s placeholders.
  *
+ * Throws an error object that has two extra properties:
+ * - associatedElement: This is the first element provided in the var args.
+ *   It can be used for improved display of error messages.
+ * - messageArray: The elements of the substituted message as non-stringified
+ *   elements in an array. When e.g. passed to console.error this yields
+ *   native displays of things like HTML elements.
+ *
  * @param {T} shouldBeTruish The value to assert. The assert fails if it does
  *     not evaluate to true.
  * @param {string} message The assertion message
@@ -32,18 +39,45 @@ export function assert(shouldBeTrueish, message, var_args) {
   var firstElement;
   if (!shouldBeTrueish) {
     var splitMessage = message.split('%s');
-    var messageArray = [splitMessage.shift()];
+    var first = splitMessage.shift();
+    var formatted = first;
+    var messageArray = [];
+    pushIfNonEmpty(messageArray, first);
     for (var i = 2; i < arguments.length; i++) {
       var val = arguments[i];
       if (val instanceof Element) {
         firstElement = val;
       }
-      messageArray.push(val, splitMessage.shift());
+      var nextConstant = splitMessage.shift()
+      messageArray.push(val);
+      pushIfNonEmpty(messageArray, nextConstant.trim());
+      formatted += toString(val) + nextConstant;
     }
-    var e = new Error(messageArray.join(''));
+    var e = new Error(formatted);
     e.associatedElement = firstElement;
     e.messageArray = messageArray;
     throw e;
   }
   return shouldBeTrueish;
 };
+
+/**
+ * @param {*} val
+ * @return {string}
+ */
+function toString(val) {
+  if (val instanceof Element) {
+    return val.tagName.toLowerCase() + (val.id ? '#' + val.id : '');
+  }
+  return val;
+}
+
+/**
+ * @param {!Array} array
+ * @param {*} val
+ */
+function pushIfNonEmpty(array, val) {
+  if (val != '') {
+    array.push(val);
+  }
+}

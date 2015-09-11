@@ -38,9 +38,20 @@ describe('asserts', () => {
       assert(false, 'should fail %s %s', 'XYZ', 'YYY');
     }).to.throw(/should fail XYZ YYY/);
     var div = document.createElement('div');
+    div.id = 'abc';
     div.textContent = 'foo';
     expect(function() {
       assert(false, 'should fail %s', div);
-    }).to.throw(/should fail \[object HTMLDivElement\]/);
+    }).to.throw(/should fail div#abc/);
+
+    var error;
+    try {
+      assert(false, '%s a %s b %s', 1, 2, 3);
+    } catch (e) {
+      error = e;
+    }
+    expect(error).to.be.instanceof(Error);
+    expect(error.message).to.equal('1 a 2 b 3');
+    expect(error.messageArray).to.deep.equal([1, 'a', 2, 'b', 3]);
   });
 });

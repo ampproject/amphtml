@@ -18,6 +18,15 @@
 import {getMode} from './mode';
 
 
+/**
+ * Reports an error. If the error has an "associatedElement" property
+ * the element is marked with the -amp-element-error and displays
+ * the message itself. The message is always send to the console.
+ * If the error has a "messageArray" property, that array is logged.
+ * This way one gets the native fidelity of the console for things like
+ * elements instead of stringification.
+ * @param {!Error} error
+ */
 export function reportErrorToDeveloper(error) {
   if (!window.console) {
     return;

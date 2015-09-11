@@ -117,7 +117,7 @@ describe('amp-iframe', () => {
       height: 100
     }, '599px', '1000px').then((amp) => {
       expect(amp.iframe).to.be.null;
-    });
+    }).catch(() => {});
   });
 
   it('should respect translations', () => {
@@ -128,7 +128,7 @@ describe('amp-iframe', () => {
       height: 100
     }, '650px', '1000px', '-100px').then((amp) => {
       expect(amp.iframe).to.be.null;
-    });
+    }).catch(() => {});
   });
 
   it('should render if further than 75% viewport away from top', () => {

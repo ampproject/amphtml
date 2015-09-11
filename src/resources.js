@@ -19,7 +19,6 @@ import {assert} from './asserts';
 import {expandLayoutRect, layoutRectLtwh, layoutRectsOverlap} from
     './layout-rect';
 import {log} from './log';
-import {retriablePromise} from './retriable-promise';
 import {reportErrorToDeveloper} from './error';
 import {timer} from './timer';
 import {viewport} from './viewport';
@@ -423,12 +422,13 @@ export class Resources {
           task.startTime = now;
           log.fine(TAG_, 'exec:', task.id, 'at', task.startTime);
           this.exec_.enqueue(task);
-          task.promise.then(this.taskComplete_.bind(this, task, true),
+          task.promise.catch(reportErrorToDeveloper).then(this.taskComplete_.bind(this, task, true),
               this.taskComplete_.bind(this, task, false));
         } else {
           // Reschedule post execution.
           executing.promise.then(this.reschedule_.bind(this, task),
-              this.reschedule_.bind(this, task));
+              this.reschedule_.bind(this, task))
+              .catch(reportErrorToDeveloper);
         }
 
         task = this.queue_.peek(scorer);
@@ -915,13 +915,15 @@ export class Resource {
 
     log.fine(TAG_, 'start layout:', this.debugid);
 
-    let promise = retriablePromise(() => {
-      return this.element.layoutCallback();
-    }, /* maxAttempts */ 2, /* delay */ 5000, /* backoffFactor */ 1.5);
+    let promise;
+    try {
+      promise = this.element.layoutCallback();
+    } catch (e) {
+      return Promise.reject(e);
+    }
     this.layoutPromise_ = promise.then(() => this.layoutComplete_(true),
         (reason) => this.layoutComplete_(false, reason));
-    this.layoutPromise_.catch(reportErrorToDeveloper);
-    return this.layoutPromise_;
+    return this.layoutPromise_.catch(reportErrorToDeveloper);
   }
 
   /**

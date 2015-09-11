@@ -84,6 +84,10 @@ export function createFixtureIframe(fixture, initialIframeHeight, done) {
           events[name]++;
         });
       }
+      var errors = []
+      win.console.error = function() {
+        errors.push([].slice.call(arguments).join(' '));
+      };
       var timeout = setTimeout(function() {
         reject(new Error('Timeout waiting for elements to start loading.'));
       }, 1000);
@@ -93,7 +97,8 @@ export function createFixtureIframe(fixture, initialIframeHeight, done) {
           win: win,
           doc: win.document,
           iframe: iframe,
-          awaitEvent: awaitEvent
+          awaitEvent: awaitEvent,
+          errors: errors
         });
       };
     };

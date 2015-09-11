@@ -58,7 +58,11 @@ export function upgradeOrRegisterElement(win, name, toClass) {
     //    implementation.
     var element = stub.element;
     if (element.tagName.toLowerCase() == name) {
-      element.upgrade(toClass);
+      try {
+        element.upgrade(toClass);
+      } catch (e) {
+        reportErrorToDeveloper(e);
+      }
     }
   }
 }
@@ -217,10 +221,10 @@ export function createAmpElementProto(win, name, implementationClass) {
     let registeredStub = this.implementation_;
     let newImpl = new newImplClass(this);
     this.implementation_ = newImpl;
-    if (registeredStub) {
-      registeredStub.upgrade(newImpl);
-    }
     try {
+      if (registeredStub) {
+        registeredStub.upgrade(newImpl);
+      }
       if (this.layout_ != Layout.NODISPLAY &&
             !this.implementation_.isLayoutSupported(this.layout_)) {
         throw new Error('Layout not supported: ' + this.layout_);
@@ -293,7 +297,12 @@ export function createAmpElementProto(win, name, implementationClass) {
     resources.add(this);
     if (!this.everAttached) {
       this.everAttached = true;
-      this.firstAttachedCallback_();
+      try {
+        this.firstAttachedCallback_();
+      }
+      catch (e) {
+        reportErrorToDeveloper(e);
+      }
     }
   }
 
@@ -399,11 +408,6 @@ export function createAmpElementProto(win, name, implementationClass) {
   ElementProto.activate = function() {
     // TODO(dvoytenko, #35): defer until "built" state.
     this.implementation_.activate();
-  };
-
-  /** @override */
-  ElementProto.toString = function() {
-    return this.tagName.toLowerCase() + '#' + this.id;
   };
 
   return ElementProto;
