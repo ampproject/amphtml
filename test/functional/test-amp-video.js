@@ -28,7 +28,7 @@ describe('amp-video', () => {
       v.setAttribute(key, attributes[key]);
     }
     iframe.doc.body.appendChild(v);
-    v.implementation_.loadContent();
+    v.implementation_.layoutCallback();
     return v;
   }
 
