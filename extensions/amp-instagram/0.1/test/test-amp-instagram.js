@@ -33,7 +33,7 @@ describe('amp-instagram', () => {
       ins.setAttribute('layout', 'responsive');
     }
     iframe.doc.body.appendChild(ins);
-    ins.implementation_.loadContent();
+    ins.implementation_.layoutCallback();
     return ins;
   }
 

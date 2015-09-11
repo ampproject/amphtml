@@ -15,6 +15,7 @@
  */
 
 import {Observable} from './observable';
+import {layoutRectLtwh} from './layout-rect';
 import {log} from './log';
 import {platform} from './platform';
 import {timer} from './timer';
@@ -24,25 +25,14 @@ let TAG_ = 'Viewport';
 
 /**
  * @typedef {{
- *   top: number,
- *   bottom: number,
- *   width: number,
- *   height: number
- * }}
- */
-export class LayoutRect {}
-
-
-/**
- * @typedef {{
- *   rebuild: boolean,
+ *   relayoutAll: boolean,
  *   top: number,
  *   width: number,
  *   height: number,
  *   velocity: number
  * }}
  */
-export class ViewportChangedEvent {}
+var ViewportChangedEvent;
 
 
 /**
@@ -60,6 +50,9 @@ export class Viewport {
     this.win = win;
 
     /** @private {number} */
+    this.width_ = this.getSize().width;
+
+    /** @private {number} */
     this.scrollTop_ = this.calcScrollTop_();
 
     /** @private {number} */
@@ -73,7 +66,7 @@ export class Viewport {
 
     this.win.addEventListener('scroll', this.scroll_.bind(this));
     this.win.addEventListener('resize', this.resize_.bind(this));
-    this.changed_(/* rebuild */ false, /* velocity */ 0);
+    this.changed_(/* relayoutAll */ false, /* velocity */ 0);
   }
 
   /**
@@ -105,19 +98,29 @@ export class Viewport {
   }
 
   /**
+   * Returns the rect of the viewport which includes scroll positions and size.
+   * @return {!LayoutRect}
+   */
+  getRect() {
+    var scrollTop = this.calcScrollTop_();
+    var scrollLeft = this.calcScrollLeft_();
+    var size = this.getSize();
+    return layoutRectLtwh(scrollLeft, scrollTop, size.width, size.height);
+  }
+
+  /**
    * Returns the rect of the element within the document.
    * @param {!Element} el
    * @return {!LayoutRect}
    */
   getLayoutRect(el) {
     var scrollTop = this.calcScrollTop_();
+    var scrollLeft = this.calcScrollLeft_();
     var b = el.getBoundingClientRect();
-    return {
-      top: Math.round(b.top + scrollTop),
-      bottom: Math.round(b.bottom + scrollTop),
-      width: Math.round(b.width),
-      height: Math.round(b.height)
-    };
+    return layoutRectLtwh(Math.round(b.left + scrollLeft),
+        Math.round(b.top + scrollTop),
+        Math.round(b.width),
+        Math.round(b.height));
   }
 
   /**
@@ -152,19 +155,27 @@ export class Viewport {
   }
 
   /**
-   * @param {boolean} rebuild
+   * @return {number}
+   * @private
+   */
+  calcScrollLeft_() {
+    return this.getScrollingElement_().scrollLeft || this.win.pageXOffset;
+  }
+
+  /**
+   * @param {boolean} relayoutAll
    * @param {number} velocity
    * @private
    */
-  changed_(rebuild, velocity) {
+  changed_(relayoutAll, velocity) {
     var size = this.getSize();
     log.fine(TAG_, 'changed event: ' +
-        'rebuild=' + rebuild + '; ' +
+        'relayoutAll=' + relayoutAll + '; ' +
         'top=' + this.scrollTop_ + '; ' +
         'bottom=' + (this.scrollTop_ + size.height) + '; ' +
         'velocity=' + velocity);
     this.changeObservable_.fire({
-      rebuild: rebuild,
+      relayoutAll: relayoutAll,
       top: this.scrollTop_,
       width: size.width,
       height: size.height,
@@ -210,7 +221,7 @@ export class Viewport {
     // TODO(dvoytenko): confirm the desired value and document it well.
     // Currently, this is 20px/second -> 0.02px/millis
     if (Math.abs(velocity) < 0.02) {
-      this.changed_(/* rebuild */ false, velocity);
+      this.changed_(/* relayoutAll */ false, velocity);
     } else {
       timer.delay(() => {
         if (!this.scrollTracking_) {
@@ -222,8 +233,9 @@ export class Viewport {
 
   /** @private */
   resize_() {
-    // TODO(dvoytenko): only width changes should lead to rebuilds.
-    this.changed_(true, 0);
+    let oldWidth = this.width_;
+    this.width_ = this.getSize().width;
+    this.changed_(oldWidth != this.width_, 0);
   }
 }
 
@@ -237,4 +249,4 @@ export function viewportFor(window) {
   return window.__viewport = new Viewport(window);
 };
 
-export const viewport = new Viewport(window);
+export const viewport = viewportFor(window);

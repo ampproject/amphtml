@@ -28,7 +28,7 @@ describe('amp-pixel', () => {
     p.setAttribute('height', '0');
     p.setAttribute('src', src);
     iframe.doc.body.appendChild(p);
-    p.implementation_.loadContent();
+    p.implementation_.layoutCallback();
     return p;
   }
 

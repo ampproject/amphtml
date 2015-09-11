@@ -135,8 +135,8 @@ export class Srcset {
    * @return {!SrcsetSource}
    */
   select(width, dpr) {
-    assert(width);
-    assert(dpr);
+    assert(width, 'width=%s', width);
+    assert(dpr, 'dpr=%s', dpr);
     let index = -1;
     if (this.widthBased_) {
       index = this.selectByWidth_(width, dpr);

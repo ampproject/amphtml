@@ -31,14 +31,14 @@ export function installPixel(win) {
     }
 
     /** @override */
-    firstAttachedCallback() {
+    buildCallback() {
       // Remove user defined size. Pixels should always be the default size.
       this.element.style.width = '';
       this.element.style.height = '';
     }
 
     /** @override */
-    loadContent() {
+    layoutCallback() {
       var src = this.element.getAttribute('src');
       src = this.assertSource(src);
       src = src.replace(/\$RANDOM/, encodeURIComponent(Math.random()));

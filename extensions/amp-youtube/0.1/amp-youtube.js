@@ -26,7 +26,7 @@ import {loadPromise} from '../../../src/event-helper';
     }
 
     /** @override */
-    loadContent() {
+    layoutCallback() {
       var width = this.element.getAttribute('width');
       var height = this.element.getAttribute('height');
       var videoId = AMP.assert(this.element.getAttribute('video-id'),

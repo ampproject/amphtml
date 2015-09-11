@@ -70,7 +70,7 @@ import {parseUrl} from '../../../src/url';
     }
 
     /** @override */
-    loadContent() {
+    layoutCallback() {
       this.assertPosition();
       if (!this.iframeSrc) {
         return;

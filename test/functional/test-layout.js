@@ -69,7 +69,6 @@ describe('Layout', () => {
     expect(div.style.width).to.equal('');
     expect(div.style.height).to.equal('');
     expect(div.style.display).to.equal('none');
-    expect(div.classList.contains('-amp-element')).to.equal(true);
     expect(div.classList.contains('-amp-layout-nodisplay')).to.equal(true);
     expect(div.classList.contains('-amp-layout-size-defined')).to.equal(false);
     expect(div.children.length).to.equal(0);
@@ -82,7 +81,6 @@ describe('Layout', () => {
     expect(applyLayout_(div)).to.equal(Layout.FIXED);
     expect(div.style.width).to.equal('100px');
     expect(div.style.height).to.equal('200px');
-    expect(div.classList.contains('-amp-element')).to.equal(true);
     expect(div.classList.contains('-amp-layout-fixed')).to.equal(true);
     expect(div.classList.contains('-amp-layout-size-defined')).to.equal(true);
     expect(div.children.length).to.equal(0);
@@ -109,7 +107,6 @@ describe('Layout', () => {
     expect(applyLayout_(div)).to.equal(Layout.RESPONSIVE);
     expect(div.style.width).to.equal('');
     expect(div.style.height).to.equal('');
-    expect(div.classList.contains('-amp-element')).to.equal(true);
     expect(div.classList.contains('-amp-layout-responsive')).to.equal(true);
     expect(div.classList.contains('-amp-layout-size-defined')).to.equal(true);
     expect(div.children.length).to.equal(1);
@@ -122,7 +119,6 @@ describe('Layout', () => {
     expect(applyLayout_(div)).to.equal(Layout.FILL);
     expect(div.style.width).to.equal('');
     expect(div.style.height).to.equal('');
-    expect(div.classList.contains('-amp-element')).to.equal(true);
     expect(div.classList.contains('-amp-layout-fill')).to.equal(true);
     expect(div.classList.contains('-amp-layout-size-defined')).to.equal(true);
     expect(div.children.length).to.equal(0);
@@ -133,7 +129,6 @@ describe('Layout', () => {
     expect(applyLayout_(div)).to.equal(Layout.CONTAINER);
     expect(div.style.width).to.equal('');
     expect(div.style.height).to.equal('');
-    expect(div.classList.contains('-amp-element')).to.equal(true);
     expect(div.classList.contains('-amp-layout-container')).to.equal(true);
     expect(div.classList.contains('-amp-layout-size-defined')).to.equal(false);
     expect(div.children.length).to.equal(0);

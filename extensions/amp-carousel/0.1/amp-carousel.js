@@ -30,7 +30,12 @@ import * as tr from '../../../src/transition';
     }
 
     /** @override */
-    firstAttachedCallback() {
+    isReadyToBuild() {
+      return this.element.firstChild != null;
+    }
+
+    /** @override */
+    buildCallback() {
       /** @private {number} */
       this.pos_ = 0;
 
@@ -49,6 +54,7 @@ import * as tr from '../../../src/transition';
       this.element.appendChild(this.container_);
 
       this.cells_.forEach((cell) => {
+        this.setAsOwner(cell);
         cell.style.display = 'inline-block';
         if (cell != this.cells_[0]) {
           // TODO(dvoytenko): this has to be customizable
@@ -79,12 +85,13 @@ import * as tr from '../../../src/transition';
           transform: st.translateX(-this.pos_)
         });
         if (e.velocity < 0.05) {
-          this.preload_(this.pos_);
+          this.commitSwitch_(e.startPosition, this.pos_, 0);
         }
       });
       this.swipeX_.onEnd((e) => {
+        let dir = Math.sign(e.position - this.pos_);
         this.pos_ = e.position;
-        this.commitSwitch_(e.startPosition, this.pos_);
+        this.commitSwitch_(e.startPosition, this.pos_, dir);
       });
 
       // TODO(dvoytenko): move to CSS
@@ -122,19 +129,15 @@ import * as tr from '../../../src/transition';
     }
 
     /** @override */
-    loadContent() {
-      this.preload_(this.pos_);
-      this.preloadNext_(this.pos_);
+    layoutCallback() {
+      this.doLayout_(this.pos_);
+      this.preloadNext_(this.pos_, 1);
       return Promise.resolve();
     }
 
     /** @override */
-    activateContent() {
-      // TODO(dvoytenko): control active/inactive state within the visible items
-    }
-
-    /** @override */
-    deactivateContent() {
+    viewportCallback(inViewport) {
+      this.updateInViewport_(this.pos_, this.pos_);
     }
 
     /**
@@ -143,22 +146,19 @@ import * as tr from '../../../src/transition';
      * @param {boolean} animate
      */
     go(dir, animate) {
-      var newPos = this.nextPos_(dir);
+      var newPos = this.nextPos_(this.pos_, dir);
       if (newPos != this.pos_) {
         var oldPos = this.pos_;
         this.pos_ = newPos;
 
-        this.preload_(newPos);
-        this.preloadNext_(dir);
-
         var containerWidth = this.element.offsetWidth;
         if (!animate) {
-          this.commitSwitch_(oldPos, newPos);
+          this.commitSwitch_(oldPos, newPos, dir);
         } else {
           Animation.animate(tr.setStyles(this.container_, {
             transform: tr.translateX(tr.numeric(-oldPos, -newPos))
           }), 200, 'ease-out').thenAlways(() => {
-            this.commitSwitch_(oldPos, newPos);
+            this.commitSwitch_(oldPos, newPos, dir);
           });
         }
       }
@@ -167,34 +167,27 @@ import * as tr from '../../../src/transition';
     /**
      * @param {number} oldPos
      * @param {number} newPos
-     * @private
-     */
-    commitSwitch_(oldPos, newPos) {
-      st.setStyles(this.container_, {
-        transform: st.translateX(-newPos)
-      });
-      // TODO(dvoytenko): do these strictly via Resources.
-      // TODO(dvoytenko): old/new can overlap. don't do extra steps.
-      this.withinWindow_(oldPos, (cell) => {
-        if (cell.deactivateContentCallback) {
-          cell.deactivateContentCallback();
-        }
-      });
-      this.withinWindow_(newPos, (cell) => {
-        if (cell.activateContentCallback) {
-          cell.activateContentCallback();
-        }
-      });
-    }
-
-    /**
      * @param {number} dir
      * @private
      */
-    nextPos_(dir) {
+    commitSwitch_(oldPos, newPos, dir) {
+      st.setStyles(this.container_, {
+        transform: st.translateX(-newPos)
+      });
+      this.doLayout_(newPos);
+      this.preloadNext_(newPos, dir);
+      this.updateInViewport_(newPos, oldPos);
+    }
+
+    /**
+     * @param {number} pos
+     * @param {number} dir
+     * @private
+     */
+    nextPos_(pos, dir) {
       let containerWidth = this.element.offsetWidth;
       let fullWidth = this.container_.scrollWidth;
-      let newPos = this.pos_ + dir * containerWidth;
+      let newPos = pos + dir * containerWidth;
       if (newPos < 0) {
         return 0;
       }
@@ -225,24 +218,43 @@ import * as tr from '../../../src/transition';
      * @param {number} pos
      * @private
      */
-    preload_(pos) {
+    doLayout_(pos) {
       this.withinWindow_(pos, (cell) => {
-        // TODO(dvoytenko): do this strictly via Resources. In particular this
-        // code will currently cause double-loadings and other problems.
-        if (cell.initiateLoadContent) {
-          cell.initiateLoadContent();
-        }
+        this.scheduleLayout(cell);
       });
     }
 
     /**
+     * @param {number} pos
      * @param {number} dir
      * @private
      */
-    preloadNext_(dir) {
-      var nextPos = this.nextPos_(dir);
-      if (nextPos != this.pos_) {
-        this.preload_(nextPos);
+    preloadNext_(pos, dir) {
+      var nextPos = this.nextPos_(pos, dir);
+      if (nextPos != pos) {
+        this.withinWindow_(nextPos, (cell) => {
+          this.schedulePreload(cell);
+        });
+      }
+    }
+
+    /**
+     * @param {number} newPos
+     * @param {number} oldPos
+     * @private
+     */
+    updateInViewport_(newPos, oldPos) {
+      let seen = [];
+      this.withinWindow_(newPos, (cell) => {
+        seen.push(cell);
+        this.updateInViewport(cell, true);
+      });
+      if (oldPos != newPos) {
+        this.withinWindow_(oldPos, (cell) => {
+          if (seen.indexOf(cell) == -1) {
+            this.updateInViewport(cell, false);
+          }
+        });
       }
     }
   }

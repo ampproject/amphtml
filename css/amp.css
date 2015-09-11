@@ -80,7 +80,20 @@ i-amp-sizer {
   overflow: hidden !important;
 }
 
-.-amp-unresolved > * {
+/* "notbuild" classes are set as soon as an element is created and removed
+   as soon as the element is built. */
+
+.amp-notbuilt {
+  /* For author styling. */
+}
+
+.-amp-notbuilt {
+  position: relative !important;
+  overflow: hidden !important;
+  color: transparent !important;
+}
+
+.-amp-notbuilt > * {
   display: none;
 }
 
@@ -101,7 +114,7 @@ i-amp-sizer {
   z-index: 1 !important;
 }
 
-.-amp-unresolved > [placeholder]:not(.hidden) {
+.-amp-notbuilt > [placeholder]:not(.hidden) {
   display: block !important;
 }
 

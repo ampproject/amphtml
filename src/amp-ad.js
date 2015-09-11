@@ -16,6 +16,7 @@
 
 import {BaseElement} from './base-element';
 import {isLayoutSizeDefined} from './layout';
+import {loadPromise} from './event-helper';
 import {registerElement} from './custom-element';
 import {getIframe} from './3p-frame'
 
@@ -32,16 +33,19 @@ export function installAd(win) {
 
     /** @override */
     createdCallback() {
-      this.readyState = 'complete';
+      /** @private {?Element} */
+      this.iframe_ = null;
     }
 
     /** @override */
-    loadContent() {
-      var iframe = getIframe(this.element.ownerDocument.defaultView,
-          this.element);
-      this.applyFillContent(iframe);
-      this.element.appendChild(iframe);
-      return iframe;
+    layoutCallback() {
+      if (!this.iframe_) {
+        this.iframe_ = getIframe(this.element.ownerDocument.defaultView,
+            this.element);
+        this.applyFillContent(this.iframe_);
+        this.element.appendChild(this.iframe_);
+      }
+      return loadPromise(this.iframe_);
     }
   }
 
