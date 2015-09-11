@@ -57,6 +57,7 @@ function buildExtensions(options) {
   // Each extension and version must be listed individually here.
   buildExtension('sample', '0.1', true, options);
   buildExtension('amp-anim', '0.1', false, options);
+  buildExtension('amp-audio', '0.1', false, options);
   buildExtension('amp-carousel', '0.1', false, options);
   buildExtension('amp-fit-text', '0.1', true, options);
   buildExtension('amp-iframe', '0.1', false, options);
