@@ -26,8 +26,9 @@ import {getMode} from './mode';
  * This way one gets the native fidelity of the console for things like
  * elements instead of stringification.
  * @param {!Error} error
+ * @param {!Element=} opt_associatedElement
  */
-export function reportErrorToDeveloper(error) {
+export function reportErrorToDeveloper(error, opt_associatedElement) {
   if (!window.console) {
     return;
   }
@@ -35,14 +36,11 @@ export function reportErrorToDeveloper(error) {
     return;
   }
   error.reported = true;
-  var element = error.associatedElement;
+  var element = opt_associatedElement || error.associatedElement;
   if (element && getMode().development) {
     element.classList.add('-amp-element-error');
     element.setAttribute('error-message', error.message);
   }
-  var log = console.error
-      ? console.error.bind(console)
-      : console.log.bind(console);
   if (error.messageArray) {
     (console.error || console.log).apply(console,
         error.messageArray);

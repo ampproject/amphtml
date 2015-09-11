@@ -428,8 +428,7 @@ export class Resources {
         } else {
           // Reschedule post execution.
           executing.promise.then(this.reschedule_.bind(this, task),
-              this.reschedule_.bind(this, task))
-              .catch(reportErrorToDeveloper);
+              this.reschedule_.bind(this, task));
         }
 
         task = this.queue_.peek(scorer);
@@ -924,7 +923,7 @@ export class Resource {
     }
     this.layoutPromise_ = promise.then(() => this.layoutComplete_(true),
         (reason) => this.layoutComplete_(false, reason));
-    return this.layoutPromise_.catch(reportErrorToDeveloper);
+    return this.layoutPromise_;
   }
 
   /**
