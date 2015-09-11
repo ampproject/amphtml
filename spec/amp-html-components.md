@@ -58,30 +58,32 @@ elements such as `amp-img` can be styled with class or element selectors in an
 author-defined, inlined stylesheet, using most common CSS properties. For
 example:
 
-    <!doctype html ⚡>
-    <head>
-      <style>
-        amp-img {
-          border: 5px solid black;
-        }
+    <!doctype html>
+    <html ⚡>
+      <head>
+        <style>
+          amp-img {
+            border: 5px solid black;
+          }
 
-        amp-img.grey-placeholder {
-          background-color: grey;
-        }
-      </style>
-    </head>
+          amp-img.grey-placeholder {
+            background-color: grey;
+          }
+        </style>
+      </head>
 
-    <body>
-      <amp-img src="https://placekitten.com/g/200/300" width=200 height=300>
-      </amp-img>
+      <body>
+        <amp-img src="https://placekitten.com/g/200/300" width=200 height=300>
+        </amp-img>
 
-      <amp-img
-        class="grey-placeholder"
-        src="https://placekitten.com/g/500/300"
-        width=500
-        height=300>
-      </amp-img>
-    </body>
+        <amp-img
+          class="grey-placeholder"
+          src="https://placekitten.com/g/500/300"
+          width=500
+          height=300>
+        </amp-img>
+      </body>
+    </html>
 
 AMP HTML components that are more complex and nested, such as `amp-carousel`,
 may be styled with an explicitly defined set of CSS Custom Properties. These
@@ -89,31 +91,33 @@ are propagated to any children elements that are dynamically created by the
 runtime, to achieve the desired style. This way the AMP author does not need to
 know the internals of the component, only its styleable properties. For example:
 
-    <!doctype html ⚡>
-    <head>
-      <style>
-        amp-carousel {
-          --arrow-color: green;
-          --dots: {
-            opacity: 50%;
-            color: blue;
+    <!doctype html>
+    <html ⚡>
+      <head>
+        <style>
+          amp-carousel {
+            --arrow-color: green;
+            --dots: {
+              opacity: 50%;
+              color: blue;
+            }
           }
-        }
-      </style>
-    </head>
+        </style>
+      </head>
 
-    <body>
-      <amp-carousel width=500 height=500>
-        <div>
-          <amp-img width=500 height=500 src="https://placekitten.com/g/500/500">
-          </amp-img>
-        </div>
-        <div>
-          <amp-img width=500 height=500 src="https://placekitten.com/g/500/500">
-          </amp-img>
-        </div>
-      </amp-carousel>
-    </body>
+      <body>
+        <amp-carousel width=500 height=500>
+          <div>
+            <amp-img width=500 height=500 src="https://placekitten.com/g/500/500">
+            </amp-img>
+          </div>
+          <div>
+            <amp-img width=500 height=500 src="https://placekitten.com/g/500/500">
+            </amp-img>
+          </div>
+        </amp-carousel>
+      </body>
+    </html>
 
 Inline `style` attributes are not allowed, as per the AMP spec.
 
