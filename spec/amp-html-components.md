@@ -518,7 +518,7 @@ Displays a Twitter Tweet.
 Example:
     <amp-twitter width=486 height=657
         layout="responsive"
-        data-tweetID="585110598171631616"
+        data-tweetid="585110598171631616"
         data-cards="hidden">
 
 **CAVEATS**
@@ -527,11 +527,11 @@ Twitter does not currently provide an API that yields fixed aspect ratio Tweet e
 
 #### Attributes
 
-**data-tweetID**
+**data-tweetid**
 
 The ID of the tweet. In a URL like https://twitter.com/joemccann/status/640300967154597888 `640300967154597888` is the tweetID.
 
-**data-nameOfOption**
+**data-nameofoption**
 
 Options for the Tweet appearance can be set using `data-` attributes. E.g. `data-cards="hidden"` deactivates Twitter cards. For documentation of the available options, see [Twitter's docs](https://dev.twitter.com/web/javascript/creating-widgets#create-tweet).
 
