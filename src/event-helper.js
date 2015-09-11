@@ -78,7 +78,11 @@ export function loadPromise(element, opt_timeout) {
     } else {
       // Listen once since IE 5/6/7 fire the onload event continuously for
       // animated GIFs.
-      unlistenLoad = listenOnce(element, 'load', () => resolve(element));
+      if (element.tagName === 'AUDIO' || element.tagName === 'VIDEO') {
+        unlistenLoad = listenOnce(element, 'loadstart', () => resolve(element));
+      } else {
+        unlistenLoad = listenOnce(element, 'load', () => resolve(element));
+      }
       unlistenError = listenOnce(element, 'error', reject);
     }
   });

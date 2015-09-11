@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-import {createIframe} from '../../testing/iframe';
-import {installAudio} from '../../src/amp-audio';
+import {adopt} from '../../../../src/runtime';
+import {createIframe} from '../../../../testing/iframe';
+require('../amp-audio');
+
+adopt(window);
 
 describe('amp-audio', () => {
 
   function getAudio(attributes, opt_childNodesAttrs) {
     var iframe = createIframe();
-    installAudio(iframe.win);
     var audio = iframe.doc.createElement('amp-audio');
     for (var key in attributes) {
       audio.setAttribute(key, attributes[key]);
@@ -50,12 +52,12 @@ describe('amp-audio', () => {
 
   it('should load audio through attribute', () => {
     var a = getAudio({
-      src: 'audio.mp3'
+      src: 'https://origin.com/audio.mp3'
     });
     var audio = a.querySelector('audio');
     expect(audio).to.be.an.instanceof(Element);
     expect(audio.tagName).to.equal('AUDIO');
-    expect(audio.getAttribute('src')).to.equal('audio.mp3');
+    expect(audio.getAttribute('src')).to.equal('https://origin.com/audio.mp3');
     expect(audio.hasAttribute('controls')).to.be.true;
     expect(a.hasAttribute('width')).to.be.true;
     expect(a.hasAttribute('height')).to.be.true;
@@ -71,8 +73,8 @@ describe('amp-audio', () => {
       muted: '',
       loop: ''
     }, [
-        {tag: 'source', src: 'audio.mp3', type: 'audio/mpeg'},
-        {tag: 'source', src: 'audio.ogg', type: 'audio/ogg'},
+        {tag: 'source', src: 'https://origin.com/audio.mp3', type: 'audio/mpeg'},
+        {tag: 'source', src: 'https://origin.com/audio.ogg', type: 'audio/ogg'},
         {tag: 'text', text: 'Unsupported.'},
     ]);
     var audio = a.querySelector('audio');
@@ -88,10 +90,13 @@ describe('amp-audio', () => {
     expect(audio.hasAttribute('loop')).to.be.true;
     expect(audio.hasAttribute('src')).to.be.false;
     expect(audio.childNodes[0].tagName).to.equal('SOURCE');
-    expect(audio.childNodes[0].getAttribute('src')).to.equal('audio.mp3');
+    expect(audio.childNodes[0].getAttribute('src'))
+      .to.equal('https://origin.com/audio.mp3');
     expect(audio.childNodes[1].tagName).to.equal('SOURCE');
-    expect(audio.childNodes[1].getAttribute('src')).to.equal('audio.ogg');
+    expect(audio.childNodes[1].getAttribute('src'))
+      .to.equal('https://origin.com/audio.ogg');
     expect(audio.childNodes[2].nodeType).to.equal(Node.TEXT_NODE);
     expect(audio.childNodes[2].textContent).to.equal('Unsupported.');
   });
+
 });

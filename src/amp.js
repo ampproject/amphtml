@@ -25,7 +25,6 @@ require('babelify/polyfill');
 
 import {installAd} from './amp-ad';
 import {installImg} from './amp-img';
-import {installAudio} from './amp-audio';
 import {installVideo} from './amp-video';
 import {installPixel} from './amp-pixel';
 import {installStyles} from './styles';
@@ -39,7 +38,6 @@ import {maybeValidate} from './validator-integration';
 installAd(window);
 installImg(window);
 installPixel(window);
-installAudio(window);
 installVideo(window);
 
 installStyles(document, cssText);
