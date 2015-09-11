@@ -27,7 +27,7 @@ import {loadPromise} from '../../../src/event-helper';
       return isLayoutSizeDefined(layout);
     }
     /** @override */
-    loadContent() {
+    layoutCallback() {
       // TODO(malteubl): Preconnect to twitter.
       var iframe = getIframe(this.element.ownerDocument.defaultView,
           this.element, 'twitter');

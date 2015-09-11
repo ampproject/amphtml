@@ -32,7 +32,7 @@ describe('amp-youtube', () => {
       yt.setAttribute('layout', 'responsive');
     }
     iframe.doc.body.appendChild(yt);
-    yt.implementation_.loadContent();
+    yt.implementation_.layoutCallback();
     return yt;
   }
 

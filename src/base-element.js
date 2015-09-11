@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {assert} from './asserts';
 import {Layout, isInternalElement} from './layout';
+import {assert} from './asserts';
+import {resources} from './resources';
 import {viewportFor} from './viewport';
 
 
@@ -30,10 +31,48 @@ import {viewportFor} from './viewport';
  * lifecycle (See
  * http://www.html5rocks.com/en/tutorials/webcomponents/customelements/)
  * and adding AMP style late loading to the mix.
- * The lifecycle is:
- * createdCallback -> firstAttachedCallback -> loadContent -> loadIdleContent.
  *
- * Each method is called exactly once and overriding them in sub classes
+ * The complete lifecycle of custom DOM element is:
+ *
+ *           ||
+ *           || createdCallback
+ *           ||
+ *           \/
+ *    State: <NOT BUILT> <NOT UPGRADED> <NOT ATTACHED>
+ *           ||
+ *           || upgrade
+ *           ||
+ *           \/
+ *    State: <NOT BUILT> <NOT ATTACHED>
+ *           ||
+ *           || firstAttachedCallback
+ *           ||
+ *           \/
+ *    State: <NOT BUILT>           <=
+ *           ||                     ||
+ *           || isBuildReady?  ======
+ *           ||
+ *           \/
+ *    State: <NOT BUILT>
+ *           ||
+ *           || buildCallback
+ *           ||
+ *           \/
+ *    State: <BUILT>
+ *           ||
+ *           || layoutCallback
+ *           ||
+ *           \/
+ *    State: <LAID OUT>
+ *           ||
+ *           || viewportCallback
+ *           ||
+ *           \/
+ *    State: <IN VIEWPORT>
+ *
+ * For more details, see {@link custom-element.js}.
+ *
+ * Each method is called exactly once and overriding them in subclasses
  * is optional.
  */
 export class BaseElement {
@@ -41,8 +80,12 @@ export class BaseElement {
   constructor(element) {
     /** @public @const */
     this.element = element;
-    /** @private {!Layout} */
+
+    /** @package {!Layout} */
     this.layout_ = Layout.NODISPLAY;
+
+    /** @package {boolean} */
+    this.inViewport_ = false;
   }
 
   /** @return {!Layout} */
@@ -63,59 +106,90 @@ export class BaseElement {
   }
 
   /**
+   * @return {boolean}
+   */
+  isInViewport() {
+    return this.inViewport_;
+  }
+
+  /**
    * Called when the element is first created. Note that for element created
    * using createElement this may be before any children are added.
    */
   createdCallback() {
-    // Sub classes may override.
+    // Subclasses may override.
   }
 
   /**
-   * Override in sub class to adjust the element when it is being added to the
+   * Override in subclass to adjust the element when it is being added to the
    * DOM. Could e.g. be used to insert a fallback. Should not typically start
    * loading a resource.
    */
   firstAttachedCallback() {
-    // Sub classes may override.
+    // Subclasses may override.
   }
 
   /**
-   * Called when the element should load the resources associated with it.
-   * At this time the element should be visible or should soon be visible.
-   * @return {!Element|!Promise|undefined} Element whose load event is takes
-   *     as a proxy for the overall component load event or a Promise for
-   *     when the element was loaded.
+   * Override in subclass to indicate if the element is ready to rebuild its
+   * DOM subtree.  If the element can proceed with building the content return
+   * "true" and return "false" otherwise. The element may not be ready to build
+   * e.g. beacuse its children are not available yet.
+   *
+   * See {@link buildCallback} for more details.
+   *
+   * @return {boolean}
    */
-  loadContent() {
+  isReadyToBuild() {
+    // Subclasses may override.
+    return true;
+  }
+
+  /**
+   * Override in subclass if the element needs to rebuilt its DOM content.
+   * Until the element has been rebuilt its content are not shown with an only
+   * exception of [placeholder] elements. From the moment the element is created
+   * and until the building phase is complete it will have "amp-notbuilt" CSS
+   * class set on it.
+   *
+   * This callback is executed early after the element has been attached to DOM
+   * if "isReadyToBuild" callback returns "true" or its called later upon the
+   * determination of Resources manager but definitely before first
+   * "layoutCallback" is called. Notice that "isReadyToBuild" call is not
+   * consulted in the later case.
+   */
+  buildCallback() {
+    // Subclasses may override.
+  }
+
+  /**
+   * Sets this element as the owner of the specified element. By setting itself
+   * as an owner, the element declares that it will manage the lifecycle of
+   * the owned element itself. This element, as an owner, will have to call
+   * {@link scheduleLayout}, {@link schedulePreload}, {@link updateInViewport}
+   * and similar methods.
+   * @param {!Element} element
+   */
+  setAsOwner(element) {
+    resources.setOwner(element, this.element);
+  }
+
+  /**
+   * Called when the element should perform layout. At this point the element
+   * should load/reload resources associated with it. This method is called
+   * by runtime and cannot be called manually. Returns promise that will
+   * complete when loading is considered to be complete.
+   * @return {!Promise}
+   */
+  layoutCallback() {
     return Promise.resolve();
   }
 
   /**
-   * Called once when no other resources are being downloaded.
-   * @return {!Element|!Promiseundefined} Element whose load event is takes
-   *     as a proxy for the overall component load event or a Promise for
-   *     when the element was loaded.
+   * Instructs the resource that it has either entered or exited the visible
+   * viewport. Intended to be implemented by actual components.
+   * @param {boolean} inViewport
    */
-  loadIdleContent() {
-    // Sub classes should override.
-  }
-
-  /**
-   * TODO(dvoytenko): come up with a more appropriate name that would signify
-   * "visible in viewport right now".
-   * Instructs the resource that it's currently in the active viewport
-   * and can activate itself. Intended to be implemented by actual
-   * components.
-   */
-  activateContent(){
-  }
-
-  /**
-   * Instructs the resource that it's no longer in the active viewport
-   * and should deactivate itself. Intended to be implemented by actual
-   * components.
-   */
-  deactivateContent() {
+  viewportCallback(inViewport) {
   }
 
   /**
@@ -123,6 +197,22 @@ export class BaseElement {
    * user event. Intended to be implemented by actual components.
    */
   activate() {
+  }
+
+  /**
+   * Returns the maximum DPR available on this device.
+   * @return {number}
+   */
+  getMaxDpr() {
+    return resources.getMaxDpr();
+  }
+
+  /**
+   * Returns the most optimal DPR currently recommended.
+   * @return {number}
+   */
+  getDpr() {
+    return resources.getDpr();
   }
 
   /**
@@ -167,7 +257,7 @@ export class BaseElement {
   getRealChildNodes() {
     let nodes = [];
     for (let n = this.element.firstChild; n; n = n.nextSibling) {
-      if (!isInternalElement(n)) {
+      if (!isInternalOrServiceNode(n)) {
         nodes.push(n);
       }
     }
@@ -184,7 +274,7 @@ export class BaseElement {
     let elements = [];
     for (let i = 0; i < this.element.children.length; i++) {
       let child = this.element.children[i];
-      if (!isInternalElement(child)) {
+      if (!isInternalOrServiceNode(child)) {
         elements.push(child);
       }
     }
@@ -202,9 +292,59 @@ export class BaseElement {
   }
 
   /**
+   * Returns the viewport within which the element operates.
    * @return {!Viewport}
    */
   getViewport() {
     return viewportFor(this.element.ownerDocument.defaultView);
   }
+
+  /**
+   * Schedule the layout request for the children element or elements
+   * specified. Resource manager will perform the actual layout based on the
+   * priority of this element and its children.
+   * @param {!Element|!Array<!Element>} elements
+   * @param {boolean} inLocalViewport
+   */
+  scheduleLayout(elements) {
+    resources.scheduleLayout(this.element, elements);
+  }
+
+  /**
+   * Schedule the preload request for the children element or elements
+   * specified. Resource manager will perform the actual preload based on the
+   * priority of this element and its children.
+   * @param {!Element|!Array<!Element>} elements
+   * @param {boolean} inLocalViewport
+   */
+  schedulePreload(elements) {
+    resources.schedulePreload(this.element, elements);
+  }
+
+  /**
+   * Update inViewport state of the specified children element or elements.
+   * Resource manager will perform the actual changes to the inViewport state
+   * based on the state of these elements and their parent subtree.
+   * @param {!Element|!Array<!Element>} elements
+   * @param {boolean} inLocalViewport
+   */
+  updateInViewport(elements, inLocalViewport) {
+    resources.updateInViewport(this.element, elements, inLocalViewport);
+  }
+}
+
+
+/**
+ * Returns "true" for internal AMP nodes or for placeholder elements.
+ * @param {!Node} node
+ * @return {boolean}
+ */
+function isInternalOrServiceNode(node) {
+  if (isInternalElement(node)) {
+    return true;
+  }
+  if (node.tagName && node.hasAttribute('placeholder')) {
+    return true;
+  }
+  return false;
 }

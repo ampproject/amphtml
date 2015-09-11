@@ -32,7 +32,7 @@ describe('amp-fit-text', () => {
     }
     ft.textContent = text;
     iframe.doc.body.appendChild(ft);
-    ft.implementation_.loadContent();
+    ft.implementation_.layoutCallback();
     return ft;
   }
 
