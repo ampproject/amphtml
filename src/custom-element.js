@@ -19,6 +19,7 @@ import {Layout, getLayoutClass, getLengthNumeral, getLengthUnits,
 import {ElementStub, stubbedElements} from './element-stub';
 import {assert} from './asserts';
 import {log} from './log';
+import {reportErrorToDeveloper} from './error';
 import {resources} from './resources';
 
 
@@ -57,7 +58,11 @@ export function upgradeOrRegisterElement(win, name, toClass) {
     //    implementation.
     var element = stub.element;
     if (element.tagName.toLowerCase() == name) {
-      element.upgrade(toClass);
+      try {
+        element.upgrade(toClass);
+      } catch (e) {
+        reportErrorToDeveloper(e, this);
+      }
     }
   }
 }
@@ -145,19 +150,6 @@ export function applyLayout_(element) {
 
 
 /**
- * @param {!Element} element
- * @param {string|Error} message
- * @private
- */
-function setToErrorMode_(element, message) {
-  let msg = '' + message;
-  // TODO(dvoytenko): only do this in dev mode
-  element.classList.add('-amp-element-error');
-  element.textContent = msg;
-}
-
-
-/**
  * The interface that is implemented by all custom elements in the AMP
  * namespace.
  * @interface
@@ -232,19 +224,14 @@ export function createAmpElementProto(win, name, implementationClass) {
     if (registeredStub) {
       registeredStub.upgrade(newImpl);
     }
-    try {
-      if (this.layout_ != Layout.NODISPLAY &&
-            !this.implementation_.isLayoutSupported(this.layout_)) {
-        throw new Error('Layout not supported: ' + this.layout_);
-      }
-      this.implementation_.layout_ = this.layout_;
-      if (this.everAttached) {
-        this.implementation_.firstAttachedCallback();
-        this.dispatchCustomEvent('amp:attached');
-      }
-    } catch(e) {
-      setToErrorMode_(this, e);
-      throw e;
+    if (this.layout_ != Layout.NODISPLAY &&
+          !this.implementation_.isLayoutSupported(this.layout_)) {
+      throw new Error('Layout not supported: ' + this.layout_);
+    }
+    this.implementation_.layout_ = this.layout_;
+    if (this.everAttached) {
+      this.implementation_.firstAttachedCallback();
+      this.dispatchCustomEvent('amp:attached');
     }
     resources.upgraded(this);
   };
@@ -290,7 +277,7 @@ export function createAmpElementProto(win, name, implementationClass) {
       this.classList.remove('-amp-notbuilt');
       this.classList.remove('amp-notbuilt');
     } catch(e) {
-      setToErrorMode_(this, e);
+      reportErrorToDeveloper(e, this);
       throw e;
     }
     return true;
@@ -305,7 +292,12 @@ export function createAmpElementProto(win, name, implementationClass) {
     resources.add(this);
     if (!this.everAttached) {
       this.everAttached = true;
-      this.firstAttachedCallback_();
+      try {
+        this.firstAttachedCallback_();
+      }
+      catch (e) {
+        reportErrorToDeveloper(e, this);
+      }
     }
   }
 
@@ -331,7 +323,7 @@ export function createAmpElementProto(win, name, implementationClass) {
       this.implementation_.layout_ = this.layout_;
       this.implementation_.firstAttachedCallback();
     } catch(e) {
-      setToErrorMode_(this, e);
+      reportErrorToDeveloper(e, this);
       throw e;
     }
     if (!this.isUpgraded()) {

@@ -30,6 +30,7 @@ var iframeCount = 0;
  * - iframe: The host iframe element. Useful for e.g. resizing.
  * - awaitEvent: A function that returns a promise for when the given custom
  *   event fired at least the given number of times.
+ * - errors: Array of console.error fired during page load.
  *
  * @param {string} fixture The name of the fixture file.
  * @param {number} initialIframeHeight in px.
@@ -84,6 +85,10 @@ export function createFixtureIframe(fixture, initialIframeHeight, done) {
           events[name]++;
         });
       }
+      var errors = []
+      win.console.error = function() {
+        errors.push([].slice.call(arguments).join(' '));
+      };
       var timeout = setTimeout(function() {
         reject(new Error('Timeout waiting for elements to start loading.'));
       }, 1000);
@@ -93,7 +98,8 @@ export function createFixtureIframe(fixture, initialIframeHeight, done) {
           win: win,
           doc: win.document,
           iframe: iframe,
-          awaitEvent: awaitEvent
+          awaitEvent: awaitEvent,
+          errors: errors
         });
       };
     };

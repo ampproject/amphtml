@@ -127,6 +127,10 @@ i-amp-sizer {
   color: white !important;
 }
 
+.-amp-element-error::before {
+  content: attr(error-message);
+}
+
 amp-pixel {
   position: absolute;
   width: 0;

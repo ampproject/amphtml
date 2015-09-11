@@ -55,9 +55,10 @@ import {parseUrl} from '../../../src/url';
       var minTop = Math.min(600, this.getViewport().getSize().height * .75);
       assert(pos.top >= minTop,
           '<amp-iframe> elements must be positioned outside the first 75% ' +
-          'of the viewport or 600px from the top (whichever is smaller). ' +
+          'of the viewport or 600px from the top (whichever is smaller): %s ' +
           'Please contact the AMP team if that is a problem in your project.' +
-          ' We\'d love to learn about your use case. Current position %s. Min: %s %s',
+          ' We\'d love to learn about your use case. Current position %s. Min: %s',
+          this.element,
           pos.top,
           minTop);
     }
@@ -73,7 +74,8 @@ import {parseUrl} from '../../../src/url';
     layoutCallback() {
       this.assertPosition();
       if (!this.iframeSrc) {
-        return;
+        // This failed already, lets not signal another error.
+        return Promise.resolve();
       }
       var width = this.element.getAttribute('width');
       var height = this.element.getAttribute('height');
