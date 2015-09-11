@@ -56,7 +56,7 @@ describe('Rendering of amp-img', () => {
       expect(largeScreen.offsetHeight).to.equal(0);
       fixture.iframe.width = 600;
       fixture.win.dispatchEvent(new fixture.win.Event('resize'));
-      return fixture.awaitEvent('amp:load:start', 5).then(function() {
+      return fixture.awaitEvent('amp:load:start', 4).then(function() {
         expect(smallScreen.className).to.match(/-amp-hidden-by-media-query/);
         expect(largeScreen.className).to.not.match(/-amp-hidden-by-media-query/);
         expect(smallScreen.offsetHeight).to.equal(0);
