@@ -51,7 +51,7 @@ create more advanced and customized UI.
 
 ### Styling/Theming
 
-Styling and theming of AMP-provided components is all done via CSS. See the [AMP Spec](amp-html-spec.md) for more detail.
+Styling and theming of AMP-provided components is all done via CSS. See the [AMP Spec](amp-html-format.md) for more detail.
 
 AMP HTML component style can be specified in two particular ways. Simple
 elements such as `amp-img` can be styled with class or element selectors in an
