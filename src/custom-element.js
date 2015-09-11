@@ -426,6 +426,11 @@ export function createAmpElementProto(win, name, implementationClass) {
 export function registerElement(win, name, implementationClass) {
   knownElements[name] = implementationClass;
 
+  /** @override */
+  ElementProto.toString = function() {
+    return this.tagName.toLowerCase() + '#' + this.id;
+  };
+
   win.document.registerElement(name, {
     prototype: createAmpElementProto(win, name, implementationClass)
   });

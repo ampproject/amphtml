@@ -15,6 +15,9 @@
  */
 
 
+import {format} from './error';
+
+
 /**
  * Throws an error if the first argument isn't truish.
  *
@@ -28,15 +31,21 @@
  * @template T
  */
 export function assert(shouldBeTrueish, message, var_args) {
+  var firstElement;
   if (!shouldBeTrueish) {
+    var splitMessage = message.split('%s');
+    var messageArray = [splitMessage.shift()];
     for (var i = 2; i < arguments.length; i++) {
       var val = arguments[i];
       if (val instanceof Element) {
-        val = val.outerHTML;
+        firstElement = val;
       }
-      message = message.replace(/\%s/, val);
+      messageArray.push(val, splitMessage.shift());
     }
-    throw new Error('Assertion failed: ' + message);
+    var e = new Error(format(message, messageArray.join()));
+    e.associatedElement = firstElement;
+    e.messageArray = messageArray;
+    throw e;
   }
   return shouldBeTrueish;
 };
