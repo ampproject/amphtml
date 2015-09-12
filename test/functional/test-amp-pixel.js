@@ -15,7 +15,7 @@
  */
 
 import {createIframe} from '../../testing/iframe';
-import {installPixel} from '../../src/amp-pixel';
+import {installPixel} from '../../builtins/amp-pixel';
 
 describe('amp-pixel', () => {
 

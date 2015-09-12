@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {BaseElement} from './base-element';
-import {getLengthNumeral, isLayoutSizeDefined} from './layout';
-import {loadPromise} from './event-helper';
-import {parseSrcset} from './srcset';
-import {registerElement} from './custom-element';
+import {BaseElement} from '../src/base-element';
+import {getLengthNumeral, isLayoutSizeDefined} from '../src/layout';
+import {loadPromise} from '../src/event-helper';
+import {parseSrcset} from '../src/srcset';
+import {registerElement} from '../src/custom-element';
 
 
 /**
