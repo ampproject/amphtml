@@ -28,6 +28,9 @@ export function maybeValidate(win) {
     return;
   }
   var filename = win.location.href;
+  if (filename.startsWith('about:')) {  // Should only happen in tests.
+    return;
+  }
   var s = document.createElement('script');
   // TODO(@cramforce): Switch to locally build version when we integrated
   // the validator and switch to production URL.
@@ -38,9 +41,7 @@ export function maybeValidate(win) {
     // like: amp.validator.validateAndRender(url);
     // Also, most switch to something different from fetch, so this works in
     // Safari.
-    fetch(filename).then((response) => {
-      return response.text();
-    }).then((html) => {
+    get(filename).then((html) => {
       var result = win.amp.validator.renderValidationResult(
           win.amp.validator.validateString(html), filename);
       var status = result.shift();
@@ -57,4 +58,26 @@ export function maybeValidate(win) {
     });
   };
   win.document.head.appendChild(s);
+}
+
+/**
+ * @param {string} filename
+ * @return {!Promise<!string>} The fetched doc.
+ */
+function get(filename) {
+  return new Promise((resolve, reject) => {
+    var xhr = new XMLHttpRequest();
+
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState == 4) {
+        if (xhr.status == 200) {
+          resolve(xhr.responseText)
+        } else {
+          reject('Fetching file for validation failed: ' + filename);
+        }
+      }
+    };
+    xhr.open("GET", filename, true);
+    xhr.send();
+  });
 }

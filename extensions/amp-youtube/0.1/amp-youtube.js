@@ -18,34 +18,32 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
 
 
-(window.AMP = window.AMP || []).push(function(AMP) {
-  class AmpYoutube extends AMP.BaseElement {
-    /** @override */
-    isLayoutSupported(layout) {
-      return isLayoutSizeDefined(layout);
-    }
-
-    /** @override */
-    layoutCallback() {
-      var width = this.element.getAttribute('width');
-      var height = this.element.getAttribute('height');
-      var videoId = AMP.assert(this.element.getAttribute('video-id'),
-          'The video-id attribute is required for <amp-youtube> %s',
-          this.element);
-      // See
-      // https://developers.google.com/youtube/iframe_api_reference
-      var iframe = document.createElement('iframe');
-      iframe.setAttribute('frameborder', '0');
-      iframe.setAttribute('allowfullscreen', 'true');
-      iframe.src = 'https://www.youtube.com/embed/' + encodeURIComponent(
-          videoId);
-      this.applyFillContent(iframe);
-      iframe.width = width;
-      iframe.height = height;
-      this.element.appendChild(iframe);
-      return loadPromise(iframe);
-    }
+class AmpYoutube extends AMP.BaseElement {
+  /** @override */
+  isLayoutSupported(layout) {
+    return isLayoutSizeDefined(layout);
   }
 
-  AMP.registerElement('amp-youtube', AmpYoutube);
-});
+  /** @override */
+  layoutCallback() {
+    var width = this.element.getAttribute('width');
+    var height = this.element.getAttribute('height');
+    var videoId = AMP.assert(this.element.getAttribute('video-id'),
+        'The video-id attribute is required for <amp-youtube> %s',
+        this.element);
+    // See
+    // https://developers.google.com/youtube/iframe_api_reference
+    var iframe = document.createElement('iframe');
+    iframe.setAttribute('frameborder', '0');
+    iframe.setAttribute('allowfullscreen', 'true');
+    iframe.src = 'https://www.youtube.com/embed/' + encodeURIComponent(
+        videoId);
+    this.applyFillContent(iframe);
+    iframe.width = width;
+    iframe.height = height;
+    this.element.appendChild(iframe);
+    return loadPromise(iframe);
+  }
+}
+
+AMP.registerElement('amp-youtube', AmpYoutube);

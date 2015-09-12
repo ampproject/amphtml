@@ -28,6 +28,7 @@ var browserify = require('browserify');
 var watchify = require('watchify');
 var include = require('gulp-include');
 var uglify = require('gulp-uglify');
+var wrap = require("gulp-wrap");
 var rename = require('gulp-rename');
 var replace = require('gulp-replace');
 var babel = require('babelify');
@@ -49,7 +50,11 @@ var tests = [
     included: false,
     served: true
   },
-  'testing/**/*.js'
+  {
+    pattern: 'build/**/*.js',
+    included: false,
+    served: true
+  }
 ];
 
 // Used to e.g. references the ads binary from the runtime to get
@@ -78,14 +83,19 @@ function clean(done) {
 }
 
 function unit(done) {
+  polyfillsForTests();
   karma.start({
     configFile: path.resolve('karma.conf.js'),
     files: tests,
-    singleRun: true
+    singleRun: true,
+    client: {
+      captureConsole: true
+    }
   }, done);
 }
 
 function unitWatch(done) {
+  polyfillsForTests();
   karma.start({
     configFile: path.resolve('karma.conf.js'),
     files: tests,
@@ -94,6 +104,7 @@ function unitWatch(done) {
 }
 
 function unitWatchVerbose(done) {
+  polyfillsForTests();
   karma.start({
     configFile: path.resolve('karma.conf.js'),
     files: tests,
@@ -104,6 +115,10 @@ function unitWatchVerbose(done) {
   }, done);
 }
 
+function polyfillsForTests() {
+  compileJs('./src/', 'polyfills.js', './build/');
+}
+
 function lint() {
   return gulp.src(srcs, tests)
     .pipe(gjslint())
@@ -111,7 +126,7 @@ function lint() {
 }
 
 function compile(watch, shouldMinify) {
-  compileCss(watch);
+  compileCss();
   compileJs('./src/', 'amp.js', './dist', {
     minifiedName: 'v0.js',
     watch: watch,
@@ -126,7 +141,7 @@ function compile(watch, shouldMinify) {
 }
 
 
-function compileCss(watch) {
+function compileCss() {
   console.info('Recompiling CSS.');
   var css = jsifyCss('css/amp.css');
   gulp.src('css/**.css')
@@ -202,7 +217,8 @@ function buildExtension(name, version, hasCss, options) {
         compileJs('build/all/v0/', builtName, 'dist/v0/', {
           watch: options.watch,
           minify: options.minify,
-          minifiedName: minifiedName
+          minifiedName: minifiedName,
+          wrapper: '(window.AMP = window.AMP || []).push(function(AMP) {<%= contents %>\n});'
         });
       });
 }
@@ -253,7 +269,7 @@ function examplesWithMinifiedJs(name) {
 
 function adsBootstrap(watch) {
   var input = 'ads/frame.max.html';
-  if (input) {
+  if (watch) {
     gulpWatch(input, function() {
       adsBootstrap(false);
     });
@@ -270,7 +286,12 @@ function adsBootstrap(watch) {
 
 function compileJs(srcDir, srcFilename, destDir, options) {
   options = options || {};
-  var bundler = watchify(browserify(srcDir + srcFilename, { debug: true }).transform(babel));
+  var bundler = browserify(srcDir + srcFilename, { debug: true }).transform(babel);
+  if (options.watch) {
+    bundler = watchify(bundler);
+  }
+
+  var wrapper = options.wrapper || '<%= contents %>';
 
   function rebundle() {
     bundler.bundle()
@@ -281,6 +302,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
       .pipe(replace(/\$internalRuntimeVersion\$/g, internalRuntimeVersion))
       .pipe(sourcemaps.init({ loadMaps: true }))
       .pipe(sourcemaps.write('./'))
+      .pipe(wrap(wrapper))
       .pipe(gulp.dest(destDir));
   }
 

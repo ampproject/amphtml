@@ -19,83 +19,80 @@ import {loadPromise} from '../../../src/event-helper';
 import {parseSrcset} from '../../../src/srcset';
 import * as st from '../../../src/style';
 
+class AmpAnim extends AMP.BaseElement {
 
-(window.AMP = window.AMP || []).push(function(AMP) {
-  class AmpAnim extends AMP.BaseElement {
+  /** @override */
+  isLayoutSupported(layout) {
+    return isLayoutSizeDefined(layout);
+  }
 
-    /** @override */
-    isLayoutSupported(layout) {
-      return isLayoutSizeDefined(layout);
-    }
+  /** @override */
+  isReadyToBuild() {
+    return this.element.firstChild != null;
+  }
 
-    /** @override */
-    isReadyToBuild() {
-      return this.element.firstChild != null;
-    }
+  /** @override */
+  buildCallback() {
+    /** @private @const {?Element} */
+    this.placeholder_ = this.getPlaceholder();
 
-    /** @override */
-    buildCallback() {
-      /** @private @const {?Element} */
-      this.placeholder_ = this.getPlaceholder();
+    /** @private @const {!Element} */
+    this.img_ = new Image();
+    this.propagateAttributes(['alt'], this.img_);
+    this.applyFillContent(this.img_);
+    this.img_.width = getLengthNumeral(this.element.getAttribute('width'));
+    this.img_.height = getLengthNumeral(this.element.getAttribute('height'));
 
-      /** @private @const {!Element} */
-      this.img_ = new Image();
-      this.propagateAttributes(['alt'], this.img_);
-      this.applyFillContent(this.img_);
-      this.img_.width = getLengthNumeral(this.element.getAttribute('width'));
-      this.img_.height = getLengthNumeral(this.element.getAttribute('height'));
+    // The image shown/hidden depends on placeholder.
+    st.toggle(this.img_, !this.placeholder_);
 
-      // The image shown/hidden depends on placeholder.
-      st.toggle(this.img_, !this.placeholder_);
+    this.element.appendChild(this.img_);
 
-      this.element.appendChild(this.img_);
+    /** @private @const {!Srcset} */
+    this.srcset_ = parseSrcset(this.element.getAttribute('srcset') ||
+        this.element.getAttribute('src'));
 
-      /** @private @const {!Srcset} */
-      this.srcset_ = parseSrcset(this.element.getAttribute('srcset') ||
-          this.element.getAttribute('src'));
+    /** @private {?Promise} */
+    this.loadPromise_ = null;
+  }
 
-      /** @private {?Promise} */
-      this.loadPromise_ = null;
-    }
+  /** @override */
+  layoutCallback() {
+    return this.updateImageSrc_();
+  }
 
-    /** @override */
-    layoutCallback() {
-      return this.updateImageSrc_();
-    }
-
-    /** @override */
-    viewportCallback(inViewport) {
-      if (this.placeholder_) {
-        if (!inViewport || !this.loadPromise_) {
-          this.updateInViewport_(inViewport);
-        } else {
-          this.loadPromise_.then(() => this.updateInViewport_(inViewport));
-        }
+  /** @override */
+  viewportCallback(inViewport) {
+    if (this.placeholder_) {
+      if (!inViewport || !this.loadPromise_) {
+        this.updateInViewport_(inViewport);
+      } else {
+        this.loadPromise_.then(() => this.updateInViewport_(inViewport));
       }
-    }
-
-    /** @private */
-    updateInViewport_() {
-      let inViewport = this.isInViewport();
-      this.placeholder_.classList.toggle('hidden', inViewport);
-      st.toggle(this.img_, inViewport);
-    }
-
-    /**
-     * @return {!Promise}
-     * @private
-     */
-    updateImageSrc_() {
-      let src = this.srcset_.select(this.element.offsetWidth,
-          this.getDpr()).url;
-      if (src == this.img_.getAttribute('src')) {
-        return Promise.resolve();
-      }
-      this.img_.setAttribute('src', src);
-      this.loadPromise_ = loadPromise(this.img_);
-      return this.loadPromise_;
     }
   }
 
-  AMP.registerElement('amp-anim', AmpAnim);
-});
+  /** @private */
+  updateInViewport_() {
+    let inViewport = this.isInViewport();
+    this.placeholder_.classList.toggle('hidden', inViewport);
+    st.toggle(this.img_, inViewport);
+  }
+
+  /**
+   * @return {!Promise}
+   * @private
+   */
+  updateImageSrc_() {
+    let src = this.srcset_.select(this.element.offsetWidth,
+        this.getDpr()).url;
+    if (src == this.img_.getAttribute('src')) {
+      return Promise.resolve();
+    }
+    this.img_.setAttribute('src', src);
+    this.loadPromise_ = loadPromise(this.img_);
+    return this.loadPromise_;
+  }
+}
+
+AMP.registerElement('amp-anim', AmpAnim);

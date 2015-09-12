@@ -80,7 +80,7 @@ describe('amp-iframe', () => {
     });
   }
 
-  it('should render iframe', () => {
+  it.skipOnTravis('should render iframe', () => {
     return getAmpIframe({
       src: iframeSrc,
       width: 100,
@@ -95,7 +95,7 @@ describe('amp-iframe', () => {
     });
   });
 
-  it('should allow JS', () => {
+  it.skipOnTravis('should allow JS', () => {
     return getAmpIframe({
       src: iframeSrc,
       sandbox: 'allow-scripts',
@@ -103,7 +103,7 @@ describe('amp-iframe', () => {
       height: 100
     }).then((amp) => {
       expect(amp.iframe.getAttribute('sandbox')).to.equal('allow-scripts');
-      return timer.promise(0).then(() => {
+      return timer.promise(400).then(() => {
         expect(ranJs).to.equal(1);
       });
     });
@@ -131,7 +131,7 @@ describe('amp-iframe', () => {
     }).catch(() => {});
   });
 
-  it('should render if further than 75% viewport away from top', () => {
+  it.skipOnTravis('should render if further than 75% viewport away from top', () => {
     return getAmpIframe({
       src: iframeSrc,
       sandbox: 'allow-scripts',

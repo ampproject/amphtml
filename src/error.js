@@ -47,4 +47,7 @@ export function reportErrorToDeveloper(error, opt_associatedElement) {
   } else {
     (console.error || console.log).call(console, error.message);
   }
+  if (element && element.dispatchCustomEvent) {
+    element.dispatchCustomEvent('amp:error', error.message);
+  }
 }

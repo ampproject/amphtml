@@ -45,7 +45,7 @@ export function assert(shouldBeTrueish, message, var_args) {
     pushIfNonEmpty(messageArray, first);
     for (var i = 2; i < arguments.length; i++) {
       var val = arguments[i];
-      if (val instanceof Element) {
+      if (val.tagName) {
         firstElement = val;
       }
       var nextConstant = splitMessage.shift()

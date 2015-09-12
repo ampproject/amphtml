@@ -19,92 +19,89 @@ import {loadPromise} from '../../../src/event-helper';
 import {parseUrl} from '../../../src/url';
 
 
-(window.AMP = window.AMP || []).push(function(AMP) {
+/** @type {number}  */
+var count = 0;
 
-  /** @type {number}  */
-  var count = 0;
+/** @const */
+var assert = AMP.assert;
 
-  /** @const */
-  var assert = AMP.assert;
+class AmpIframe extends AMP.BaseElement {
 
-  class AmpIframe extends AMP.BaseElement {
-
-    /** @override */
-    isLayoutSupported(layout) {
-      return isLayoutSizeDefined(layout);
-    }
-
-    assertSource(src, containerSrc, sandbox) {
-      var url = parseUrl(src);
-      assert(
-          url.protocol == 'https:' ||
-              url.origin.startsWith('http://iframe.localhost:'),
-          'Invalid <amp-iframe> src. Must start with https://. Found %s',
-          this.element);
-      var containerUrl = parseUrl(containerSrc);
-      assert(
-          !((' ' + sandbox + ' ').match(/\s+allow-same-origin\s+/)) ||
-          url.origin != containerUrl.origin,
-          'Origin of <amp-iframe> must not be equal to container %s.',
-          this.element);
-      return src;
-    }
-
-    assertPosition() {
-      var pos = this.element.getLayoutBox();
-      var minTop = Math.min(600, this.getViewport().getSize().height * .75);
-      assert(pos.top >= minTop,
-          '<amp-iframe> elements must be positioned outside the first 75% ' +
-          'of the viewport or 600px from the top (whichever is smaller): %s ' +
-          'Please contact the AMP team if that is a problem in your project.' +
-          ' We\'d love to learn about your use case. Current position %s. Min: %s',
-          this.element,
-          pos.top,
-          minTop);
-    }
-
-    /** @override */
-    firstAttachedCallback() {
-      var iframeSrc = this.element.getAttribute('src');
-      this.iframeSrc = this.assertSource(iframeSrc, window.location.href,
-          this.element.getAttribute('sandbox'));
-    }
-
-    /** @override */
-    layoutCallback() {
-      this.assertPosition();
-      if (!this.iframeSrc) {
-        // This failed already, lets not signal another error.
-        return Promise.resolve();
-      }
-      var width = this.element.getAttribute('width');
-      var height = this.element.getAttribute('height');
-      var iframe = document.createElement('iframe');
-      this.applyFillContent(iframe);
-      iframe.width = getLengthNumeral(width);
-      iframe.height = getLengthNumeral(height);
-      iframe.name = 'amp_iframe' + count++;
-      /** @const {!Element} */
-      this.propagateAttributes(
-          ['frameborder', 'allowfullscreen', 'allowtransparency'],
-          iframe);
-      setSandbox(this.element, iframe);
-      iframe.src = this.iframeSrc;
-      this.element.appendChild(iframe);
-      return loadPromise(iframe);
-    }
+  /** @override */
+  isLayoutSupported(layout) {
+    return isLayoutSizeDefined(layout);
   }
 
-  /**
-   * We always set a sandbox. Default is that none of the things that need
-   * to be opted in are allowed.
-   * @param {!Element} element
-   * @param {!Element} iframe
-   */
-  function setSandbox(element, iframe) {
-    var allows = element.getAttribute('sandbox') || '';
-    iframe.setAttribute('sandbox', allows);
+  assertSource(src, containerSrc, sandbox) {
+    var url = parseUrl(src);
+    assert(
+        url.protocol == 'https:' ||
+            url.origin.startsWith('http://iframe.localhost:'),
+        'Invalid <amp-iframe> src. Must start with https://. Found %s',
+        this.element);
+    var containerUrl = parseUrl(containerSrc);
+    assert(
+        !((' ' + sandbox + ' ').match(/\s+allow-same-origin\s+/)) ||
+        url.origin != containerUrl.origin,
+        'Origin of <amp-iframe> must not be equal to container %s.',
+        this.element);
+    return src;
   }
 
-  AMP.registerElement('amp-iframe', AmpIframe);
-});
+  assertPosition() {
+    var pos = this.element.getLayoutBox();
+    var minTop = Math.min(600, this.getViewport().getSize().height * .75);
+    assert(pos.top >= minTop,
+        '<amp-iframe> elements must be positioned outside the first 75% ' +
+        'of the viewport or 600px from the top (whichever is smaller): %s ' +
+        'Please contact the AMP team if that is a problem in your project.' +
+        ' We\'d love to learn about your use case. Current position %s. Min: %s',
+        this.element,
+        pos.top,
+        minTop);
+  }
+
+  /** @override */
+  firstAttachedCallback() {
+    var iframeSrc = this.element.getAttribute('src');
+    this.iframeSrc = this.assertSource(iframeSrc, window.location.href,
+        this.element.getAttribute('sandbox'));
+  }
+
+  /** @override */
+  layoutCallback() {
+    this.assertPosition();
+    if (!this.iframeSrc) {
+      // This failed already, lets not signal another error.
+      return Promise.resolve();
+    }
+    var width = this.element.getAttribute('width');
+    var height = this.element.getAttribute('height');
+    var iframe = document.createElement('iframe');
+    this.applyFillContent(iframe);
+    iframe.width = getLengthNumeral(width);
+    iframe.height = getLengthNumeral(height);
+    iframe.name = 'amp_iframe' + count++;
+    /** @const {!Element} */
+    this.propagateAttributes(
+        ['frameborder', 'allowfullscreen', 'allowtransparency'],
+        iframe);
+    setSandbox(this.element, iframe);
+    iframe.src = this.iframeSrc;
+    this.element.appendChild(iframe);
+    return loadPromise(iframe);
+  }
+}
+
+/**
+ * We always set a sandbox. Default is that none of the things that need
+ * to be opted in are allowed.
+ * @param {!Element} element
+ * @param {!Element} iframe
+ */
+function setSandbox(element, iframe) {
+  var allows = element.getAttribute('sandbox') || '';
+  iframe.setAttribute('sandbox', allows);
+}
+
+AMP.registerElement('amp-iframe', AmpIframe);
