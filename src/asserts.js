@@ -81,3 +81,19 @@ function pushIfNonEmpty(array, val) {
     array.push(val);
   }
 }
+
+/**
+ * Ensures a given element is loading a secure or protocol-free path.
+ */
+export function assertElementSrcHttpsIfExists(element) {
+  if (!(element instanceof Element) || !element.hasAttribute('src')) {
+    return;
+  }
+
+  let src = element.getAttribute('src');
+  assert(
+      /^(https\:\/\/|\/\/)/i.test(src),
+      '<' + element.toString() + '> source must start with ' +
+      '"https://" or "//". Invalid value: ' + src);
+}
+

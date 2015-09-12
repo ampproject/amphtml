@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {assert} from '../../../src/asserts';
+import {assert, assertElementSrcHttpsIfExists} from '../../../src/asserts';
 import {Layout}  from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
 
@@ -90,34 +90,18 @@ import {loadPromise} from '../../../src/event-helper';
       let audio = document.createElement('audio');
       // Force controls otherwise there is no player UI.
       audio.controls = true;
-      this.assertElementSrcIfExists(this.element);
+      assertElementSrcHttpsIfExists(this.element);
       this.propagateAttributes(
           ['src', 'autoplay', 'muted', 'loop'],
           audio);
 
       this.applyFillContent(audio);
       this.getRealChildNodes().forEach(child => {
-        this.assertElementSrcIfExists(child);
+        assertElementSrcHttpsIfExists(child);
         audio.appendChild(child);
       });
       this.element.appendChild(audio);
       return loadPromise(audio);
-    }
-
-
-    /**
-     * Ensures an <audio> or nested <source> is loading a secure or
-     * protocol-free path.
-     */
-    assertElementSrcIfExists(element) {
-      if (!(element instanceof Element) || !element.hasAttribute('src')) {
-        return;
-      }
-      let src = element.getAttribute('src');
-      assert(
-          /^(https\:\/\/|\/\/)/i.test(src),
-          'An <amp-audio> audio source must start with ' +
-          '"https://" or "//". Invalid value: ' + src);
     }
   }
 
