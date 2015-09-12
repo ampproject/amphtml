@@ -31,6 +31,16 @@ export function installPixel(win) {
     }
 
     /** @override */
+    createdCallback() {
+      if (!this.element.hasAttribute('height')) {
+        this.element.setAttribute('height', '1');
+      }
+      if (!this.element.hasAttribute('width')) {
+        this.element.setAttribute('width', '1');
+      }
+    }
+
+    /** @override */
     buildCallback() {
       // Remove user defined size. Pixels should always be the default size.
       this.element.style.width = '';
