@@ -16,13 +16,15 @@
 
 import {getService} from './service';
 import {assert} from './asserts';
+import {parseUrl} from './url';
 
 export function documentInfoFor(win) {
  	return getService(win, 'documentInfo', () => {
     return {
-      canonicalUrl: assert(
+      canonicalUrl: parseUrl(assert(
           win.document.querySelector('link[rel=canonical]'),
-          'Expected to find canonical link tag.').href
+              'AMP files are required to have a <link rel=canonical> tag.')
+              .href).href
     }
   })
 }
