@@ -15,6 +15,7 @@
  */
 
 import {Observable} from './observable';
+import {getService} from './service';
 import {layoutRectLtwh} from './layout-rect';
 import {log} from './log';
 import {platform} from './platform';
@@ -243,10 +244,9 @@ export class Viewport {
  * @return {!Viewport}
  */
 export function viewportFor(window) {
-  if (window.__viewport) {
-    return window.__viewport;
-  }
-  return window.__viewport = new Viewport(window);
+  return getService(window, 'viewport', () => {
+    return new Viewport(window);
+  });
 };
 
 export const viewport = viewportFor(window);
