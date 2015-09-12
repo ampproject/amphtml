@@ -4,7 +4,7 @@ The `amp-pixel` element is meant to be used as a typical tracking pixel - to cou
 
 #### Behavior
 
-The `amp-pixel` component behaves like a simple tracking pixel `img`. It takes a single URL, but provides variables that can be replaced by the component in the URL string when making the request. See the `src` and `src-format` attributes for more information.
+The `amp-pixel` component behaves like a simple tracking pixel `img`. It takes a single URL, but provides variables that can be replaced by the component in the URL string when making the request. See the `src` attribute for more information.
 
 #### Attributes
 
