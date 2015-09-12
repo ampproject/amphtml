@@ -16,6 +16,7 @@
 
 
 import {assert} from './asserts';
+import {documentInfoFor} from './document-info';
 import {getMode} from './mode';
 
 
@@ -47,8 +48,7 @@ function getFrameAttributes(parentWindow, element, opt_type) {
   attributes.type = type;
   attributes._context = {
     location: {
-      href: assert(parentWindow.document.querySelector('link[rel=canonical]'),
-          'Expected to find canonical link tag.').href
+      href: documentInfoFor(parentWindow).canonicalUrl
     }
   };
   var adSrc = element.getAttribute('src');

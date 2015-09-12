@@ -16,8 +16,9 @@
 
 import {BaseElement} from './base-element';
 import {Layout} from './layout';
-import {registerElement} from './custom-element';
 import {assert} from './asserts';
+import {documentInfoFor} from './document-info';
+import {registerElement} from './custom-element';
 
 
 /**
@@ -41,7 +42,17 @@ export function installPixel(win) {
     layoutCallback() {
       var src = this.element.getAttribute('src');
       src = this.assertSource(src);
-      src = src.replace(/\$RANDOM/, encodeURIComponent(Math.random()));
+      src = src.replace(/\$(RANDOM|CANONICAL_URL)+/g, function(match, name) {
+        var val = name;
+        switch (name) {
+          case 'RANDOM':
+            val = Math.random();
+            break;
+          case 'CANONICAL_URL':
+            val = documentInfoFor(win).canonicalUrl
+        }
+        return encodeURIComponent(val);
+      });
       var image = new Image();
       image.src = src;
       image.width = 1;
