@@ -29,6 +29,7 @@ var watchify = require('watchify');
 var include = require('gulp-include');
 var uglify = require('gulp-uglify');
 var rename = require('gulp-rename');
+var replace = require('gulp-replace');
 var babel = require('babelify');
 
 var srcs = [
@@ -50,6 +51,10 @@ var tests = [
   },
   'testing/**/*.js'
 ];
+
+// Used to e.g. references the ads binary from the runtime to get
+// version lock.
+var internalRuntimeVersion = new Date().getTime();
 
 function buildExtensions(options) {
   // We pass watch further in to have browserify watch the built file
@@ -112,8 +117,8 @@ function compile(watch, shouldMinify) {
     watch: watch,
     minify: shouldMinify
   });
-  compileJs('./ads/', 'ads.js', './dist.ads', {
-    minifiedName: 'ads.v0.js',
+  compileJs('./ads/', 'ads.js', './dist.ads/' + internalRuntimeVersion, {
+    minifiedName: 'f.js',
     watch: watch,
     minify: shouldMinify
   });
@@ -211,6 +216,7 @@ gulp.task('unit-watch-verbose', unitWatchVerbose);
 gulp.task('build', function() { return compile(); });
 gulp.task('watch', function() { return watch(); });
 gulp.task('minify', function() {
+  process.env.NODE_ENV = 'production';
   compile(false, true);
   buildExtensions({minify: true});
   examplesWithMinifiedJs('ads.html');
@@ -246,7 +252,7 @@ function examplesWithMinifiedJs(name) {
 }
 
 function adsBootstrap(watch) {
-  var input = 'ads/v0.max.html';
+  var input = 'ads/frame.max.html';
   if (input) {
     gulpWatch(input, function() {
       adsBootstrap(false);
@@ -255,10 +261,10 @@ function adsBootstrap(watch) {
   console.log('Processing ' + input);
   var html = fs.readFileSync(input, "utf8");
   var min = html;
-  min = min.replace(/\.\/ads\.js/g, './ads.v0.js');
+  min = min.replace(/\.\/ads\.js/g, './f.js');
   gulp.src(input)
-      .pipe(file('v0.html', min))
-      .pipe(gulp.dest('dist.ads/'));
+      .pipe(file('frame.html', min))
+      .pipe(gulp.dest('dist.ads/' + internalRuntimeVersion));
 }
 
 
@@ -272,6 +278,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
       .pipe(source(srcFilename))
       .pipe(buffer())
       .pipe(include())
+      .pipe(replace(/\$internalRuntimeVersion\$/g, internalRuntimeVersion))
       .pipe(sourcemaps.init({ loadMaps: true }))
       .pipe(sourcemaps.write('./'))
       .pipe(gulp.dest(destDir));
@@ -291,6 +298,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
       .pipe(source(srcFilename))
       .pipe(buffer())
       .pipe(include())
+      .pipe(replace(/\$internalRuntimeVersion\$/g, internalRuntimeVersion))
       .pipe(sourcemaps.init({ loadMaps: true }))
       .pipe(uglify({
         preserveComments: 'some'

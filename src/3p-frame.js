@@ -106,10 +106,14 @@ function addDataAttributes(element, attributes) {
  */
 function getBootstrapBaseUrl(parentWindow) {
   // TODO(malteubl): Change to final URL.
-  var url = 'https://www.gstatic.com/amphtml/ads/v0.html';
+  var url =
+      'https://www.gstatic.com/amphtml/ads/$internalRuntimeVersion$/frame.html';
   if (getMode().localDev) {
+
     url = 'http://ads.localhost:' + parentWindow.location.port +
-        '/dist.ads/v0.max.html';
+        '/dist.ads/$internalRuntimeVersion$/frame' +
+        (getMode().minified ? '' : '.max') +
+        '.html';
   }
   return url;
 }
