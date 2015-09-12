@@ -219,10 +219,10 @@ gulp.task('minify', function() {
   process.env.NODE_ENV = 'production';
   compile(false, true);
   buildExtensions({minify: true});
-  examplesWithMinifiedJs('ads.html');
-  examplesWithMinifiedJs('everything.html');
-  examplesWithMinifiedJs('newsstand.html');
-  examplesWithMinifiedJs('released.html');
+  examplesWithMinifiedJs('ads.amp.html');
+  examplesWithMinifiedJs('everything.amp.html');
+  examplesWithMinifiedJs('newsstand.amp.html');
+  examplesWithMinifiedJs('released.amp.html');
 });
 
 gulp.task('default', ['watch']);
