@@ -18,8 +18,18 @@ import {parseUrl} from '../../src/url';
 
 describe('url', () => {
 
+  var currentPort = location.port;
+
+  function compareParse(url, result) {
+    // Using JSON string comparison because Chai's deeply equal
+    // errors are impossible to debug.
+    var parsed = JSON.stringify(parseUrl(url));
+    var expected = JSON.stringify(result);
+    expect(parsed).to.equal(expected);
+  }
+
   it('should parse correctly', () => {
-    expect(parseUrl('https://foo.com/abc?123#foo')).to.deep.equal({
+    compareParse('https://foo.com/abc?123#foo', {
       href: 'https://foo.com/abc?123#foo',
       protocol: 'https:',
       host: 'foo.com',
@@ -32,7 +42,7 @@ describe('url', () => {
     });
   });
   it('should handle ports', () => {
-    expect(parseUrl('https://foo.com:123/abc?123#foo')).to.deep.equal({
+    compareParse('https://foo.com:123/abc?123#foo', {
       href: 'https://foo.com:123/abc?123#foo',
       protocol: 'https:',
       host: 'foo.com:123',
@@ -45,7 +55,7 @@ describe('url', () => {
     });
   });
   it('should support http', () => {
-    expect(parseUrl('http://foo.com:123/abc?123#foo')).to.deep.equal({
+    compareParse('http://foo.com:123/abc?123#foo', {
       href: 'http://foo.com:123/abc?123#foo',
       protocol: 'http:',
       host: 'foo.com:123',
@@ -58,34 +68,33 @@ describe('url', () => {
     });
   });
   it('should resolve relative urls', () => {
-    expect(parseUrl('./abc?123#foo')).to.deep.equal({
-      href: 'http://localhost:9876/abc?123#foo',
+    compareParse('./abc?123#foo', {
+      href: 'http://localhost:' + currentPort + '/abc?123#foo',
       protocol: 'http:',
-      host: 'localhost:9876',
+      host: 'localhost:' + currentPort,
       hostname: 'localhost',
-      port: '9876',
+      port: currentPort,
       pathname: '/abc',
       search: '?123',
       hash: '#foo',
-      origin: 'http://localhost:9876'
+      origin: 'http://localhost:' + currentPort
     });
   });
   it('should resolve path relative urls', () => {
-    expect(parseUrl('/abc?123#foo')).to.deep.equal({
-      href: 'http://localhost:9876/abc?123#foo',
+    compareParse('/abc?123#foo', {
+      href: 'http://localhost:' + currentPort + '/abc?123#foo',
       protocol: 'http:',
-      host: 'localhost:9876',
+      host: 'localhost:' + currentPort,
       hostname: 'localhost',
-      port: '9876',
+      port: currentPort,
       pathname: '/abc',
       search: '?123',
       hash: '#foo',
-      origin: 'http://localhost:9876'
+      origin: 'http://localhost:' + currentPort
     });
   });
   it('should handle URLs with just the domain', () => {
-    console.log(parseUrl('http://foo.com:123'))
-    expect(parseUrl('http://foo.com:123')).to.deep.equal({
+    compareParse('http://foo.com:123', {
       href: 'http://foo.com:123/',
       protocol: 'http:',
       host: 'foo.com:123',

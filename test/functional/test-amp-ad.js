@@ -54,7 +54,7 @@ describe('amp-ad', () => {
     expect(iframe.tagName).to.equal('IFRAME');
     var url = iframe.getAttribute('src');
     expect(url).to.match(/^http:\/\/ads.localhost:/);
-    expect(url).to.match(/v0(.max)?.html#{/);
+    expect(url).to.match(/frame(.max)?.html#{/);
 
     var fragment = url.substr(url.indexOf('#') + 1);
     var data = JSON.parse(fragment);

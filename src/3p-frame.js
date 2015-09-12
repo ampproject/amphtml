@@ -111,8 +111,8 @@ function getBootstrapBaseUrl(parentWindow) {
   if (getMode().localDev) {
 
     url = 'http://ads.localhost:' + parentWindow.location.port +
-        '/dist.ads/' +
-        (getMode().minified ? '$internalRuntimeVersion$/frame' : 'frame.max') +
+        '/dist.ads/$internalRuntimeVersion$/frame' +
+        (getMode().minified ? '' : '.max') +
         '.html';
   }
   return url;

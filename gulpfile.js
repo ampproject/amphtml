@@ -117,9 +117,8 @@ function compile(watch, shouldMinify) {
     watch: watch,
     minify: shouldMinify
   });
-  compileJs('./ads/', 'ads.js', './dist.ads', {
+  compileJs('./ads/', 'ads.js', './dist.ads/' + internalRuntimeVersion, {
     minifiedName: 'f.js',
-    minifiedDestDir: './dist.ads/' + internalRuntimeVersion,
     watch: watch,
     minify: shouldMinify
   });
@@ -294,7 +293,6 @@ function compileJs(srcDir, srcFilename, destDir, options) {
 
   function minify() {
     console.log('Minifying ' + srcFilename);
-    var minifiedDestDir = options.minifiedDestDir || destDir;
     bundler.bundle()
       .on('error', function(err) { console.error(err); this.emit('end'); })
       .pipe(source(srcFilename))
@@ -307,7 +305,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
       }))
       .pipe(rename(options.minifiedName))
       .pipe(sourcemaps.write('./'))
-      .pipe(gulp.dest(minifiedDestDir));
+      .pipe(gulp.dest(destDir));
   }
 
   if (options.minify) {
