@@ -52,6 +52,7 @@ function getMode_() {
   return {
     localDev: isLocalDev,
     // Triggers validation
-    development: !!document.querySelector('script[development]')
+    development: !!document.querySelector('script[development]'),
+    minified: process.env.NODE_ENV == 'production'
   };
 }

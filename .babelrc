@@ -1,0 +1,3 @@
+{
+  "plugins": ["inline-environment-variables"]
+}
