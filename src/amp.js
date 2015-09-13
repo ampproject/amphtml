@@ -14,14 +14,7 @@
  * limitations under the License.
  */
 
-// This loads the polyfill into the output.
-// TODO(malteubl) Provide builds with and without the polyfill.
-//=require node_modules/webcomponents.js/webcomponents-lite.js
-
-// Pulls in the ES6 polyfill for things like Symbols
-// for-of. See
-// http://babeljs.io/docs/advanced/caveats/
-require('babelify/polyfill');
+require('./polyfills');
 
 import {installAd} from './amp-ad';
 import {installImg} from './amp-img';

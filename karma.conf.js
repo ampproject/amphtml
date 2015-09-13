@@ -15,7 +15,8 @@
  */
 
 module.exports = function(config) {
-  config.set({
+
+  var configuration = {
     frameworks: ['fixture', 'browserify', 'mocha', 'sinon-chai'],
 
     preprocessors: {
@@ -45,6 +46,13 @@ module.exports = function(config) {
 
     browsers: ['Chrome'],
 
+    customLaunchers: {
+      Chrome_travis_ci: {
+        base: 'Chrome',
+        flags: ['--no-sandbox']
+      }
+    },
+
     // change Karma's debug.html to the mocha web reporter
     client: {
       mocha: {
@@ -52,5 +60,11 @@ module.exports = function(config) {
       },
       captureConsole: false
     }
-  });
+  };
+
+  if(process.env.TRAVIS){
+    configuration.browsers = ['Chrome_travis_ci'];
+  }
+
+  config.set(configuration);
 };
