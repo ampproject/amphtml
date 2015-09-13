@@ -189,9 +189,10 @@ export function createIframePromise() {
 /**
  * @param {strin} description
  * @param {fn():boolean} condition
+ * @param {fn():!Error=} opt_onError
  * @return {!Promise}
  */
-export function poll(description, condition) {
+export function poll(description, condition, opt_onError) {
   return new Promise((resolve, reject) => {
     var start = new Date().getTime();
     var interval = setInterval(function() {
@@ -199,8 +200,12 @@ export function poll(description, condition) {
         clearInterval(interval);
         resolve();
       } else {
-        if (new Date().getTime() - start > 1000) {
+        if (new Date().getTime() - start > 1800) {
           clearInterval(interval);
+          if (opt_onError) {
+            reject(opt_onError());
+            return;
+          }
           reject(new Error('Timeout waiting for ' + description));
         }
       }

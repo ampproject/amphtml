@@ -23,15 +23,18 @@ describe('error page', () => {
   beforeEach(() => {
     return createFixtureIframe('fixtures/errors.html', 500).then((f) => {
       fixture = f;
-      return poll('errors to occur', function() {
-        return fixture.errors.length >= 2;
+      return poll('errors to happen', () => {
+        return fixture.doc.querySelectorAll('[error-message]').length >= 2;
+      }, () => {
+        return new Error('Failed to find errors. HTML\n' +
+            fixture.doc.documentElement.innerHTML);
       });
-    })
+    });
   });
 
   function shouldFail(id) {
     // Skip for issue #110
-    it.skipOnTravis('should fail to load #' + id, () => {
+    it('should fail to load #' + id, () => {
       var e = fixture.doc.getElementById(id);
       expect(fixture.errors.join('\n')).to.contain(
           e.getAttribute('data-expectederror'));
@@ -42,6 +45,6 @@ describe('error page', () => {
   }
 
   // Add cases to fixtures/errors.html and add them here.
-  shouldFail('iframe0');
   shouldFail('yt0');
+  shouldFail('iframe0');
 });
