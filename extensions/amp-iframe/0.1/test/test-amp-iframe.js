@@ -58,14 +58,15 @@ describe('amp-iframe', () => {
       iframe.doc.body.appendChild(i);
       // Wait an event loop for the iframe to be created.
       return timer.promise(0).then(() => {
-        if (i.lastChild && i.lastChild.tagName == 'IFRAME') {
+        var created = i.lastChild;
+        if (created && created.tagName == 'IFRAME') {
           // Wait for the iframe to load
-          return loadPromise(i.lastChild).then(() => {
+          return loadPromise(created).then(() => {
             // Wait a bit more for postMessage to get through.
             return timer.promise(0).then(() => {
               return {
                 container: i,
-                iframe: i.lastChild
+                iframe: created
               };
             });
           });
@@ -80,7 +81,7 @@ describe('amp-iframe', () => {
     });
   }
 
-  it.skipOnTravis('should render iframe', () => {
+  it('should render iframe', () => {
     return getAmpIframe({
       src: iframeSrc,
       width: 100,
@@ -95,7 +96,7 @@ describe('amp-iframe', () => {
     });
   });
 
-  it.skipOnTravis('should allow JS', () => {
+  it('should allow JS', () => {
     return getAmpIframe({
       src: iframeSrc,
       sandbox: 'allow-scripts',
@@ -103,7 +104,7 @@ describe('amp-iframe', () => {
       height: 100
     }).then((amp) => {
       expect(amp.iframe.getAttribute('sandbox')).to.equal('allow-scripts');
-      return timer.promise(400).then(() => {
+      return timer.promise(100).then(() => {
         expect(ranJs).to.equal(1);
       });
     });
@@ -131,7 +132,7 @@ describe('amp-iframe', () => {
     }).catch(() => {});
   });
 
-  it.skipOnTravis('should render if further than 75% viewport away from top', () => {
+  it('should render if further than 75% viewport away from top', () => {
     return getAmpIframe({
       src: iframeSrc,
       sandbox: 'allow-scripts',

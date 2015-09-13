@@ -1,6 +1,10 @@
 language: node_js
 node_js:
   - "stable"
+addons:
+  hosts:
+    - ads.localhost
+    - iframe.localhost
 before_install:
   - export CHROME_BIN=chromium-browser
   - export DISPLAY=:99.0
