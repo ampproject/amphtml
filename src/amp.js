@@ -16,10 +16,10 @@
 
 import './polyfills';
 
-import {installAd} from './amp-ad';
-import {installImg} from './amp-img';
-import {installVideo} from './amp-video';
-import {installPixel} from './amp-pixel';
+import {installAd} from '../builtins/amp-ad';
+import {installImg} from '../builtins/amp-img';
+import {installVideo} from '../builtins/amp-video';
+import {installPixel} from '../builtins/amp-pixel';
 import {installStyles} from './styles';
 import {stubElements} from './custom-element';
 import {adopt} from './runtime';

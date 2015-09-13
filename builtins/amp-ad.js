@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {BaseElement} from './base-element';
-import {isLayoutSizeDefined} from './layout';
-import {loadPromise} from './event-helper';
-import {registerElement} from './custom-element';
-import {getIframe} from './3p-frame'
+import {BaseElement} from '../src/base-element';
+import {isLayoutSizeDefined} from '../src/layout';
+import {loadPromise} from '../src/event-helper';
+import {registerElement} from '../src/custom-element';
+import {getIframe} from '../src/3p-frame'
 
 
 /**
