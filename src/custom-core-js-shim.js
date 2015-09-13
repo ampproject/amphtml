@@ -1,3 +1,31 @@
+/**
+ * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// NOTE:
+// This file contains the core-js shims that the project currently requires.
+// The uncommented `require` lines are shims which the team
+// has deemed to not be used or ones which the team thinks
+// shouldn't be used.
+//
+// If a you feel strongly that a shim is required or should be used then
+// uncomment it from the list and contact the team.
+//
+// This is temporary until we can build out something more sophistacted with
+// gulp + browserify + cli or switch to webpack.
+
 require('core-js/modules/es5');
 //require('core-js/modules/es6.symbol');
 require('core-js/modules/es6.object.assign');
@@ -80,10 +108,10 @@ require('core-js/modules/es6.reflect.get');
 require('core-js/modules/es6.reflect.get-own-property-descriptor');
 require('core-js/modules/es6.reflect.get-prototype-of');
 require('core-js/modules/es6.reflect.has');
-require('core-js/modules/es6.reflect.is-extensible');
+//require('core-js/modules/es6.reflect.is-extensible');
 require('core-js/modules/es6.reflect.own-keys');
 require('core-js/modules/es6.reflect.prevent-extensions');
-require('core-js/modules/es6.reflect.set');
+//require('core-js/modules/es6.reflect.set');
 require('core-js/modules/es6.reflect.set-prototype-of');
 //require('core-js/modules/es7.array.includes');
 //require('core-js/modules/es7.string.at');
