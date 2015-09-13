@@ -44,4 +44,4 @@ and then:
 
 `http-server -p 8000 -c-1`
 
-Then go to http://localhost:8000/examples/released.html
+Then go to http://localhost:8000/examples/released.amp.html
