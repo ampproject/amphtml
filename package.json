@@ -7,7 +7,7 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/cramforce/amp-html.git"
+    "url": "https://github.com/ampproject/amphtml.git"
   },
   "scripts": {
     "test": "gulp unit",
