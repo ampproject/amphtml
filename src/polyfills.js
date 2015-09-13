@@ -21,5 +21,5 @@
 
 //=require node_modules/webcomponents.js/webcomponents-lite.js
 
-require('core-js/shim');
+require('./custom-core-js-shim');
 require('babel-core/external-helpers');
