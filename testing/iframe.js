@@ -165,7 +165,7 @@ export function createIframe() {
  * }}
  */
 export function createIframePromise() {
-  return new Promise(function(resolve) {
+  return new Promise(function(resolve, reject) {
     var iframe = document.createElement('iframe');
     iframe.name = 'test_' + iframeCount++;
     iframe.srcdoc = '<!doctype><html><head>' +
@@ -181,6 +181,7 @@ export function createIframePromise() {
         iframe: iframe
       });
     };
+    iframe.onerror = reject;
     document.body.appendChild(iframe);
   });
 }
