@@ -16,7 +16,7 @@
 
 // This must load before all other tests.
 
-require('../src/polyfills');
+import '../src/polyfills';
 import {adopt} from '../src/runtime';
 
 adopt(global);

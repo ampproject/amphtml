@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-require('./polyfills');
+import './polyfills';
 
 import {installAd} from './amp-ad';
 import {installImg} from './amp-img';

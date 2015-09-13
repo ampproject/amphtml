@@ -21,7 +21,5 @@
 
 //=require node_modules/webcomponents.js/webcomponents-lite.js
 
-// Pulls in the ES6 polyfill for things like Symbols
-// for-of. See
-// http://babeljs.io/docs/advanced/caveats/
-require('babelify/polyfill');
+require('core-js/shim');
+require('babel-core/external-helpers');
