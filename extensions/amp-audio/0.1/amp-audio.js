@@ -18,68 +18,66 @@ import {assert} from '../../../src/asserts';
 import {Layout, getLengthNumeral}  from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
 
-(window.AMP = window.AMP || []).push(function(AMP) {
-  class AmpAudio extends AMP.BaseElement {
+class AmpAudio extends AMP.BaseElement {
 
-    /** @override */
-    isLayoutSupported(layout) {
-      return layout === Layout.FIXED || layout === Layout.CONTAINER ||
-        layout === Layout.FILL;
-    }
+  /** @override */
+  isLayoutSupported(layout) {
+    return layout === Layout.FIXED || layout === Layout.CONTAINER ||
+      layout === Layout.FILL;
+  }
 
 
-    /**
-     * Ensure if we are `container` or `fill` layout, we set our width to 100%
-     * so we fill the container but ensure our height matches our attribute.
-     * @override
-     */
-    firstAttachedCallback() {
-      var layout = this.getLayout();
-      if (layout !== Layout.FIXED) {
-        let heightAttr = this.element.getAttribute('height');
-        this.element.style.height = getLengthNumeral(heightAttr) + 'px';
-        if (layout === Layout.CONTAINER || layout === Layout.FILL) {
-          this.element.style.width = '100%';
-        }
+  /**
+   * Ensure if we are `container` or `fill` layout, we set our width to 100%
+   * so we fill the container but ensure our height matches our attribute.
+   * @override
+   */
+  firstAttachedCallback() {
+    var layout = this.getLayout();
+    if (layout !== Layout.FIXED) {
+      let heightAttr = this.element.getAttribute('height');
+      this.element.style.height = getLengthNumeral(heightAttr) + 'px';
+      if (layout === Layout.CONTAINER || layout === Layout.FILL) {
+        this.element.style.width = '100%';
       }
-    }
-
-
-    /** @override */
-    layoutCallback() {
-      let audio = document.createElement('audio');
-      // Force controls otherwise there is no player UI.
-      audio.controls = true;
-      this.assertElementSrcIfExists(this.element);
-      this.propagateAttributes(
-          ['src', 'autoplay', 'muted', 'loop'],
-          audio);
-
-      this.applyFillContent(audio);
-      this.getRealChildNodes().forEach(child => {
-        this.assertElementSrcIfExists(child);
-        audio.appendChild(child);
-      });
-      this.element.appendChild(audio);
-      return loadPromise(audio);
-    }
-
-
-    /**
-     * Ensures an <audio> or nested <source> is loading a secure or
-     * protocol-free path.
-     */
-    assertElementSrcIfExists(element) {
-      if (!(element instanceof Element) || !element.hasAttribute('src')) {
-        return;
-      }
-      let src = element.getAttribute('src');
-      assert(
-          /^(https\:\/\/|\/\/)/i.test(src),
-          'An <amp-audio> audio source must start with ' +
-          '"https://" or "//". Invalid value: ' + src);
     }
   }
 
-  AMP.registerElement('amp-audio', AmpAudio);
-});
+
+  /** @override */
+  layoutCallback() {
+    let audio = document.createElement('audio');
+    // Force controls otherwise there is no player UI.
+    audio.controls = true;
+    this.assertElementSrcIfExists(this.element);
+    this.propagateAttributes(
+        ['src', 'autoplay', 'muted', 'loop'],
+        audio);
+
+    this.applyFillContent(audio);
+    this.getRealChildNodes().forEach(child => {
+      this.assertElementSrcIfExists(child);
+      audio.appendChild(child);
+    });
+    this.element.appendChild(audio);
+    return loadPromise(audio);
+  }
+
+
+  /**
+   * Ensures an <audio> or nested <source> is loading a secure or
+   * protocol-free path.
+   */
+  assertElementSrcIfExists(element) {
+    if (!(element instanceof Element) || !element.hasAttribute('src')) {
+      return;
+    }
+    let src = element.getAttribute('src');
+    assert(
+        /^(https\:\/\/|\/\/)/i.test(src),
+        'An <amp-audio> audio source must start with ' +
+        '"https://" or "//". Invalid value: ' + src);
+  }
+}
+
+AMP.registerElement('amp-audio', AmpAudio);

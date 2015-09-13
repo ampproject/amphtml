@@ -20,15 +20,8 @@ describe('asserts', () => {
 
   it('should fail', () => {
     expect(function() {
-      assert(false, 'should fail');
-    }).to.throw(/Assertion failed\: /);
-    expect(function() {
       assert(false, 'xyz');
     }).to.throw(/xyz/);
-
-    expect(function() {
-      assert(0, 'should fail');
-    }).to.throw(/Assertion failed\: /);
   });
 
   it('should not fail', () => {
@@ -40,14 +33,25 @@ describe('asserts', () => {
   it('should substitute', () => {
     expect(function() {
       assert(false, 'should fail %s', 'XYZ');
-    }).to.throw(/Assertion failed: should fail XYZ/);
+    }).to.throw(/should fail XYZ/);
     expect(function() {
       assert(false, 'should fail %s %s', 'XYZ', 'YYY');
-    }).to.throw(/Assertion failed: should fail XYZ YYY/);
+    }).to.throw(/should fail XYZ YYY/);
     var div = document.createElement('div');
+    div.id = 'abc';
     div.textContent = 'foo';
     expect(function() {
       assert(false, 'should fail %s', div);
-    }).to.throw(/Assertion failed: should fail <div>foo<\/div>/);
+    }).to.throw(/should fail div#abc/);
+
+    var error;
+    try {
+      assert(false, '%s a %s b %s', 1, 2, 3);
+    } catch (e) {
+      error = e;
+    }
+    expect(error).to.be.instanceof(Error);
+    expect(error.message).to.equal('1 a 2 b 3');
+    expect(error.messageArray).to.deep.equal([1, 'a', 2, 'b', 3]);
   });
 });

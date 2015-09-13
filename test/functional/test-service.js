@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-// Simulate a slow network.
-setTimeout(function() {
-  'use strict';
+import {getService} from '../../src/service';
 
-  class ExtendedSample extends AMP.BaseElement {
-    /** @override */
-    isLayoutSupported(layout) {
-      return true;
-    }
-    /** @override */
-    layoutCallback() {
-      var h1 = document.createElement('h1');
-      h1.textContent = 'Loads after 2 seconds. Sloowwww';
-      this.element.appendChild(h1);
-      return Promise.resolve();
-    }
+describe('service`', () => {
+
+  var count = 1;
+  function inc() {
+    return count++;
   }
 
-  AMP.registerElement('amp-extended-sample', ExtendedSample, $CSS$)
-}, 2000);
+  it('should make per window singletons', () => {
+    var a1 = getService(window, 'a', inc);
+    var a2 = getService(window, 'a', inc);
+    expect(a1).to.equal(a2);
+    expect(a1).to.equal(1);
+    var b1 = getService(window, 'b', inc);
+    var b2 = getService(window, 'b', inc);
+    expect(b1).to.equal(b2);
+    expect(b1).to.not.equal(a1);
+  });
+});

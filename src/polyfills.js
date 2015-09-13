@@ -14,23 +14,12 @@
  * limitations under the License.
  */
 
-// Simulate a slow network.
-setTimeout(function() {
-  'use strict';
+/**
+ * @fileoverview Loads all polyfills needed by the AMP runtime.
+ */
 
-  class ExtendedSample extends AMP.BaseElement {
-    /** @override */
-    isLayoutSupported(layout) {
-      return true;
-    }
-    /** @override */
-    layoutCallback() {
-      var h1 = document.createElement('h1');
-      h1.textContent = 'Loads after 2 seconds. Sloowwww';
-      this.element.appendChild(h1);
-      return Promise.resolve();
-    }
-  }
 
-  AMP.registerElement('amp-extended-sample', ExtendedSample, $CSS$)
-}, 2000);
+//=require node_modules/webcomponents.js/webcomponents-lite.js
+
+require('./custom-core-js-shim');
+require('babel-core/external-helpers');

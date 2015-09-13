@@ -14,23 +14,19 @@
  * limitations under the License.
  */
 
-// Simulate a slow network.
-setTimeout(function() {
-  'use strict';
+// This must load before all other tests.
 
-  class ExtendedSample extends AMP.BaseElement {
-    /** @override */
-    isLayoutSupported(layout) {
-      return true;
-    }
-    /** @override */
-    layoutCallback() {
-      var h1 = document.createElement('h1');
-      h1.textContent = 'Loads after 2 seconds. Sloowwww';
-      this.element.appendChild(h1);
-      return Promise.resolve();
-    }
+import '../src/polyfills';
+import {adopt} from '../src/runtime';
+
+adopt(global);
+
+// Hack for skipping tests on Travis that don't work there.
+// Get permission before use!
+it.skipOnTravis = function(desc, fn) {
+  if (navigator.userAgent.match(/Chromium/)) {
+    it.skip(desc, fn);
+    return;
   }
-
-  AMP.registerElement('amp-extended-sample', ExtendedSample, $CSS$)
-}, 2000);
+  it(desc, fn);
+};

@@ -11,13 +11,24 @@ in particular its [components in form of custom elements](spec/amp-html-componen
 
 Map `ads.localhost` and `iframe.localhost` to `127.0.0.1` in your `/etc/hosts` file.
 
-### Continuous build
+### Build
 
+[![Build Status](https://magnum.travis-ci.com/ampproject/amphtml.svg?token=AmxgqDRzeUjVvqT2oydf&branch=master)](https://magnum.travis-ci.com/ampproject/amphtml)
+
+Builds main binaries for development. Watches and rebuilds as changes are saved.
 `gulp`
 
-for tests:
+`gulp unit`
+Runs tests.
 
 `gulp unit-watch`
+Runs tests for changed files.
+
+`gulp unit-watch-verbose`
+Runs tests for changed files with logging enabled.
+
+`gulp minify`
+Builds production binaries.
 
 ### Start dev server
 
@@ -33,4 +44,4 @@ and then:
 
 `http-server -p 8000 -c-1`
 
-Then go to http://localhost:8000/examples/released.html
+Then go to http://localhost:8000/examples/released.amp.html

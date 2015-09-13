@@ -14,25 +14,19 @@
  * limitations under the License.
  */
 
-// This loads the polyfill into the output.
-// TODO(malteubl) Provide builds with and without the polyfill.
-//=require node_modules/webcomponents.js/webcomponents-lite.js
+import './polyfills';
 
-// Pulls in the ES6 polyfill for things like Symbols
-// for-of. See
-// http://babeljs.io/docs/advanced/caveats/
-require('babelify/polyfill');
-
-import {installAd} from './amp-ad';
-import {installImg} from './amp-img';
-import {installVideo} from './amp-video';
-import {installPixel} from './amp-pixel';
+import {installAd} from '../builtins/amp-ad';
+import {installImg} from '../builtins/amp-img';
+import {installVideo} from '../builtins/amp-video';
+import {installPixel} from '../builtins/amp-pixel';
 import {installStyles} from './styles';
 import {stubElements} from './custom-element';
 import {adopt} from './runtime';
 import {installExperimentalViewerIntegration} from './experimental-viewer-integration';
 import {cssText} from '../build/css.js';
 import {action} from './action';
+import {installHistory} from './history';
 import {maybeValidate} from './validator-integration';
 
 installAd(window);
@@ -44,6 +38,7 @@ installStyles(document, cssText);
 adopt(window);
 stubElements(window);
 
+installHistory(window);
 action.addEvent('tap');
 
 maybeValidate(window);

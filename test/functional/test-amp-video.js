@@ -15,7 +15,7 @@
  */
 
 import {createIframe} from '../../testing/iframe';
-import {installVideo} from '../../src/amp-video';
+import {installVideo} from '../../builtins/amp-video';
 
 describe('amp-video', () => {
 
@@ -28,7 +28,7 @@ describe('amp-video', () => {
       v.setAttribute(key, attributes[key]);
     }
     iframe.doc.body.appendChild(v);
-    v.implementation_.loadContent();
+    v.implementation_.layoutCallback();
     return v;
   }
 

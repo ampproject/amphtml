@@ -1,0 +1,5 @@
+{
+  optional: ["utility.inlineEnvironmentVariables"],
+  externalHelpers: true,
+  blacklist: ["regenerator"]
+}

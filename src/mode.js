@@ -43,7 +43,7 @@ export function getMode() {
 function getMode_() {
   var isLocalDev = (location.hostname == 'localhost' ||
       (location.ancestorOrigins && location.ancestorOrigins[0] &&
-          location.ancestorOrigins[0].startsWith('http://localhost:'))) &&
+          location.ancestorOrigins[0].indexOf('http://localhost:') == 0)) &&
       // Filter out localhost running against a prod script.
       // Because all allowed scripts are ours, we know that these can only
       // occur during local dev.
@@ -52,6 +52,7 @@ function getMode_() {
   return {
     localDev: isLocalDev,
     // Triggers validation
-    development: !!document.querySelector('script[development]')
+    development: !!document.querySelector('script[development]'),
+    minified: process.env.NODE_ENV == 'production'
   };
 }

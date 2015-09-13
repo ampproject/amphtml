@@ -14,26 +14,21 @@
  * limitations under the License.
  */
 
-
-import {getIframe} from '../../../src/3p-frame'
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {loadPromise} from '../../../src/event-helper';
-
-
-class AmpTwitter extends AMP.BaseElement {
-  /** @override */
-  isLayoutSupported(layout) {
-    return isLayoutSizeDefined(layout);
+/**
+ * @param {!Window} win
+ * @param {string} id
+ * @param {function():!Object} factory Should create the service if it does
+ *     not exist yet.
+ * @return {!Object}
+ */
+export function getService(win, id, factory) {
+  var services = win.services;
+  if (!services) {
+    services = win.services = {};
   }
-  /** @override */
-  layoutCallback() {
-    // TODO(malteubl): Preconnect to twitter.
-    var iframe = getIframe(this.element.ownerDocument.defaultView,
-        this.element, 'twitter');
-    this.applyFillContent(iframe);
-    this.element.appendChild(iframe);
-    return loadPromise(iframe);
+  var s = services[id];
+  if (!s) {
+    return services[id] = factory();
   }
+  return s;
 }
-
-AMP.registerElement('amp-twitter', AmpTwitter);

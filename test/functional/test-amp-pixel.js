@@ -15,7 +15,7 @@
  */
 
 import {createIframe} from '../../testing/iframe';
-import {installPixel} from '../../src/amp-pixel';
+import {installPixel} from '../../builtins/amp-pixel';
 
 describe('amp-pixel', () => {
 
@@ -28,6 +28,10 @@ describe('amp-pixel', () => {
     p.setAttribute('height', '0');
     p.setAttribute('src', src);
     iframe.doc.body.appendChild(p);
+    var link = iframe.doc.createElement('link');
+    link.setAttribute('href', 'https://pinterest.com');
+    link.setAttribute('rel', 'canonical');
+    iframe.doc.head.appendChild(link);
     p.implementation_.layoutCallback();
     return p;
   }
@@ -53,6 +57,14 @@ describe('amp-pixel', () => {
         'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=$RANDOM?');
     expect(p.querySelector('img')).to.be.an.instanceof(Image)
     expect(p.children[0].src).to.match(/ord=(\d\.\d+)\?$/);
+  });
+
+  it('replace $CANONICAL_URL', () => {
+    var p = getPixel(
+        'https://foo.com?href=$CANONICAL_URL');
+    expect(p.querySelector('img')).to.be.an.instanceof(Image)
+    expect(p.children[0].src).to.equal(
+        'https://foo.com/?href=https%3A%2F%2Fpinterest.com%2F');
   });
 
   it('should throw for invalid URL', () => {

@@ -14,23 +14,17 @@
  * limitations under the License.
  */
 
-// Simulate a slow network.
-setTimeout(function() {
-  'use strict';
+import {getService} from './service';
+import {assert} from './asserts';
+import {parseUrl} from './url';
 
-  class ExtendedSample extends AMP.BaseElement {
-    /** @override */
-    isLayoutSupported(layout) {
-      return true;
+export function documentInfoFor(win) {
+ 	return getService(win, 'documentInfo', () => {
+    return {
+      canonicalUrl: parseUrl(assert(
+          win.document.querySelector('link[rel=canonical]'),
+              'AMP files are required to have a <link rel=canonical> tag.')
+              .href).href
     }
-    /** @override */
-    layoutCallback() {
-      var h1 = document.createElement('h1');
-      h1.textContent = 'Loads after 2 seconds. Sloowwww';
-      this.element.appendChild(h1);
-      return Promise.resolve();
-    }
-  }
-
-  AMP.registerElement('amp-extended-sample', ExtendedSample, $CSS$)
-}, 2000);
+  })
+}
