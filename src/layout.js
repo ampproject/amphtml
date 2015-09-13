@@ -139,3 +139,43 @@ export function getLengthUnits(length) {
 export function getLengthNumeral(length) {
   return parseInt(length, 10);
 };
+
+
+/**
+ * @typedef {{
+ *   width: number,
+ *   height: number
+ * }}
+ */
+var Dimensions;
+
+/**
+ * Cached browser natural dimenions for elements. Exported for testing.
+ * @type {Object<String, Dimensions>}
+ */
+export var naturalDimensions_ = {};
+
+
+/**
+ * Determines the default dimensions for an element which could vary across
+ * different browser implementations, like <audio> for instance.
+ * @return {Dimensions}
+ */
+export function getBrowserNaturalDimensions(tagName) {
+  tagName = tagName.toLowerCase().replace(/^amp\-/, '');
+  if (!naturalDimensions_[tagName]) {
+    let temp = document.createElement(tagName);
+    if (tagName === 'audio') {
+      temp.controls = true;
+    }
+    temp.style.position = 'absolute';
+    temp.style.visibility = 'hidden';
+    document.body.appendChild(temp);
+    naturalDimensions_[tagName] = {
+      width: temp.offsetWidth,
+      height: temp.offsetHeight
+    };
+    document.body.removeChild(temp);
+  }
+  return naturalDimensions_[tagName];;
+}

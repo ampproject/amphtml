@@ -15,7 +15,8 @@
  */
 
 import {Layout, getLayoutClass, getLengthNumeral, getLengthUnits,
-          isLayoutSizeDefined, parseLayout, parseLength} from './layout';
+          isLayoutSizeDefined, parseLayout, parseLength,
+          getBrowserNaturalDimensions} from './layout';
 import {ElementStub, stubbedElements} from './element-stub';
 import {assert} from './asserts';
 import {log} from './log';
@@ -84,6 +85,7 @@ export function stubElements(win) {
  * @param {!Element}
  */
 export function applyLayout_(element) {
+  applyNaturalLayout_(element);
   let widthAttr = element.getAttribute('width');
   let heightAttr = element.getAttribute('height');
   let layoutAttr = element.getAttribute('layout');
@@ -141,6 +143,39 @@ export function applyLayout_(element) {
     throw new Error('Unsupported layout value: ' + layout);
   }
   return layout;
+}
+
+
+/**
+ * Transforms a natural layout or dimension to the browser-calculated values
+ * and resets the appropriate element attribute(s). A layout=natural transforms
+ * to a layout=fixed, that calculates the browser's natural dimensions. It's
+ * also possible to preserve a different layout, like fill or container, but
+ * request a single height/width attribute to fill in the natural browser value.
+ * @param {!Element}
+ */
+function applyNaturalLayout_(element) {
+  let widthAttr = element.getAttribute('width');
+  let heightAttr = element.getAttribute('height');
+  let layoutAttr = element.getAttribute('layout');
+  let naturalAttrValue = 'natural';
+
+  if (layoutAttr === naturalAttrValue || heightAttr === naturalAttrValue ||
+      widthAttr === naturalAttrValue) {
+    let dimensions = getBrowserNaturalDimensions(element.nodeName);
+    if (!heightAttr || heightAttr === naturalAttrValue) {
+      heightAttr = dimensions.height;
+      element.setAttribute('height', heightAttr);
+    }
+    if (!widthAttr || widthAttr === naturalAttrValue) {
+      widthAttr = dimensions.width;
+      element.setAttribute('width', widthAttr);
+    }
+    if (layoutAttr === naturalAttrValue) {
+      layoutAttr = Layout.FIXED;
+      element.setAttribute('layout', layoutAttr);
+    }
+  }
 }
 
 

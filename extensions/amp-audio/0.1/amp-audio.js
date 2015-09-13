@@ -15,71 +15,31 @@
  */
 
 import {assert} from '../../../src/asserts';
-import {Layout}  from '../../../src/layout';
+import {Layout, getLengthNumeral}  from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
 
 (window.AMP = window.AMP || []).push(function(AMP) {
-
-  /**
-   * @typedef {{
-   *   width: number,
-   *   height: number
-   * }}
-   */
-  let Dimensions;
-
-  /** @type {?Dimensions} */
-  let audioDefaultDimensions_ = null;
-
-  /**
-   * Determines the default dimensions for an audio player which varies across
-   * browser implementations.
-   * @return {Dimensions}
-   */
-  function getBrowserAudioDefaultDimensions() {
-    if (!audioDefaultDimensions_) {
-      let temp = document.createElement('audio');
-      temp.controls = true;
-      temp.style.position = 'absolute';
-      temp.style.visibility = 'hidden';
-      document.body.appendChild(temp);
-      audioDefaultDimensions_ = {
-        width: temp.offsetWidth,
-        height: temp.offsetHeight
-      };
-      document.body.removeChild(temp);
-    }
-    return audioDefaultDimensions_;
-  }
-
-
-  /**
-   * @param {!Window} win Destination window for the new element.
-   */
   class AmpAudio extends AMP.BaseElement {
-
 
     /** @override */
     isLayoutSupported(layout) {
-      return layout === Layout.FIXED;
+      return layout === Layout.FIXED || layout === Layout.CONTAINER ||
+        layout === Layout.FILL;
     }
 
 
     /**
-     * Ensures that a width and height is set to the browser's default audio
-     * player's inherent dimensions if not specified.
+     * Ensure if we are `container` or `fill` layout, we set our width to 100%
+     * so we fill the container but ensure our height matches our attribute.
      * @override
      */
-    createdCallback() {
-      let heightAttr = this.element.getAttribute('height');
-      let widthAttr = this.element.getAttribute('width');
-      if (!heightAttr || !widthAttr) {
-        let dimensions = getBrowserAudioDefaultDimensions();
-        if (!heightAttr) {
-          this.element.setAttribute('height', dimensions.height);
-        }
-        if (!widthAttr) {
-          this.element.setAttribute('width', dimensions.width);
+    firstAttachedCallback() {
+      var layout = this.getLayout();
+      if (layout !== Layout.FIXED) {
+        let heightAttr = this.element.getAttribute('height');
+        this.element.style.height = getLengthNumeral(heightAttr) + 'px';
+        if (layout === Layout.CONTAINER || layout === Layout.FILL) {
+          this.element.style.width = '100%';
         }
       }
     }
