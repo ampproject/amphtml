@@ -135,11 +135,11 @@ Most HTML tags can be used unchanged in AMP HTML. Certain tags, however, have eq
 | iframe    | Banned. May be replaced with amp-iframe in the future. |
 | frame     | Banned. |
 | frameset  | Banned. |
-| object    | Banned |
-| param     | Banned |
-| applet    | Banned |
-| embed     | Banned |
-| form      | Banned |
+| object    | Banned. |
+| param     | Banned. |
+| applet    | Banned. |
+| embed     | Banned. |
+| form      | Banned. |
 | input elements | Banned. Includes input, button, textarea, select, option. |
 | style     | Only one. Must be in head tag. |
 | link      | Allowed for certain values of rel: `canonical`. `stylesheet` is generally disallowed, but some values may be whitelisted for font providers. |
