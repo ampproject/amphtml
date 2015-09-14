@@ -30,7 +30,7 @@ export function parseUrl(url) {
     protocol: a.protocol,
     host: a.host,
     hostname: a.hostname,
-    port: a.port,
+    port: a.port == '0' ? '' : a.port,
     pathname: a.pathname,
     search: a.search,
     hash: a.hash

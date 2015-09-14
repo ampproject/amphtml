@@ -345,7 +345,10 @@ export function createAmpElementProto(win, name, implementationClass) {
     data.bubbles = true;
     // Constructors of events need to come from the correct window. Sigh.
     var win = this.ownerDocument.defaultView;
-    this.dispatchEvent(new win.CustomEvent(name, data));
+    var event = document.createEvent('Event');
+    event.data = data;
+    event.initEvent(name, true, true);
+    this.dispatchEvent(event);
   };
 
   /**
