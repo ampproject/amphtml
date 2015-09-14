@@ -98,6 +98,14 @@ i-amp-sizer {
   display: none;
 }
 
+.-amp-layout {
+  /* Just state. */
+}
+
+.-amp-error {
+  /* Just state. */
+}
+
 [placeholder] {
   display: block;
 }

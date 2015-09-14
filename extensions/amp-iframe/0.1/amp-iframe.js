@@ -82,6 +82,10 @@ class AmpIframe extends AMP.BaseElement {
     iframe.width = getLengthNumeral(width);
     iframe.height = getLengthNumeral(height);
     iframe.name = 'amp_iframe' + count++;
+    iframe.onload = function() {
+      // Chrome does not reflect the iframe readystate.
+      this.readyState = 'complete';
+    };
     /** @const {!Element} */
     this.propagateAttributes(
         ['frameborder', 'allowfullscreen', 'allowtransparency'],
