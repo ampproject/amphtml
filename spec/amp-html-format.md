@@ -12,7 +12,7 @@ distributed under the License is distributed on an "AS-IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
--->
+-->a
 
 # AMP HTML ⚡
 
@@ -99,7 +99,7 @@ AMP HTML documents MUST
 
 #### Schema.org
 
-AMP HTML documents MUST be marked up with [schema.org/CreativeWork(https://schema.org/CreativeWork) or any of its more specific types such as [schema.org/NewsArticle](https://schema.org/NewsArticle) or [schema.org/BlogPosting](https://schema.org/BlogPosting). More types may be added in the future.
+AMP HTML documents MUST be marked up with [schema.org/CreativeWork](https://schema.org/CreativeWork) or any of its more specific types such as [schema.org/NewsArticle](https://schema.org/NewsArticle) or [schema.org/BlogPosting](https://schema.org/BlogPosting). More types may be added in the future.
 
 Both JSON-LD and microdata serializations of schema.org are supported.
 
@@ -246,7 +246,7 @@ The AMP runtime may at any time decide to unload resources that are not currentl
 
 AMP HTML uses HTML custom elements called “AMP components” to substitute built-in resource-loading tags such as `<img>` and `<video>` and to implement features with complex interactions such as image lightboxes or carousels.
 
-See the [AMP component spec](https://docs.google.com/document/d/1_yD_z0ediXll_yhiXBuVw5EYJ5vw5ZNFCF7XTncmBUY/edit#) for details about supported components.
+See the [AMP component spec](./amp-html-components.md) for details about supported components.
 
 There are 2 types of supported AMP components:
 
