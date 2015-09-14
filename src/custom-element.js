@@ -382,6 +382,7 @@ export function createAmpElementProto(win, name, implementationClass) {
         'Must be upgraded and built to receive viewport events');
     this.dispatchCustomEvent('amp:load:start');
     var promise = this.implementation_.layoutCallback();
+    this.classList.add('-amp-layout')
     assert(promise instanceof Promise,
         'layoutCallback must return a promise');
     return promise.then(() => {
