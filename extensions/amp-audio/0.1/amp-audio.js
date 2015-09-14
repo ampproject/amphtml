@@ -15,71 +15,14 @@
  */
 
 import {assert} from '../../../src/asserts';
-import {Layout}  from '../../../src/layout';
+import {Layout, getLengthNumeral}  from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
 
-/**
- * @typedef {{
- *   width: number,
- *   height: number
- * }}
- */
-let Dimensions;
-
-/** @type {?Dimensions} */
-let audioDefaultDimensions_ = null;
-
-/**
- * Determines the default dimensions for an audio player which varies across
- * browser implementations.
- * @return {Dimensions}
- */
-function getBrowserAudioDefaultDimensions() {
-  if (!audioDefaultDimensions_) {
-    let temp = document.createElement('audio');
-    temp.controls = true;
-    temp.style.position = 'absolute';
-    temp.style.visibility = 'hidden';
-    document.body.appendChild(temp);
-    audioDefaultDimensions_ = {
-      width: temp.offsetWidth,
-      height: temp.offsetHeight
-    };
-    document.body.removeChild(temp);
-  }
-  return audioDefaultDimensions_;
-}
-
-
-/**
- * @param {!Window} win Destination window for the new element.
- */
 class AmpAudio extends AMP.BaseElement {
-
 
   /** @override */
   isLayoutSupported(layout) {
     return layout === Layout.FIXED;
-  }
-
-
-  /**
-   * Ensures that a width and height is set to the browser's default audio
-   * player's inherent dimensions if not specified.
-   * @override
-   */
-  createdCallback() {
-    let heightAttr = this.element.getAttribute('height');
-    let widthAttr = this.element.getAttribute('width');
-    if (!heightAttr || !widthAttr) {
-      let dimensions = getBrowserAudioDefaultDimensions();
-      if (!heightAttr) {
-        this.element.setAttribute('height', dimensions.height);
-      }
-      if (!widthAttr) {
-        this.element.setAttribute('width', dimensions.width);
-      }
-    }
   }
 
 

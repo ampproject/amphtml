@@ -139,3 +139,59 @@ export function getLengthUnits(length) {
 export function getLengthNumeral(length) {
   return parseInt(length, 10);
 };
+
+
+/**
+ * @typedef {{
+ *   width: number,
+ *   height: number
+ * }}
+ */
+var Dimensions;
+
+/**
+ * Set or cached browser natural dimensions for elements. The tagname
+ * initialized here will return true `hasNaturalDimensions`, even if yet to be
+ * calculated. Exported for testing.
+ * @type {!Object<string, Dimensions>}
+ */
+export var naturalDimensions_ = {
+  'AMP-PIXEL': {width: 1, height: 1},
+  'AMP-AUDIO': null
+};
+
+
+/**
+ * Determines whether the tagName is a known element that has natural dimensions
+ * in our runtime or the browser.
+ * @param {string} tagName The element tag name.
+ * @return {Dimensions}
+ */
+export function hasNaturalDimensions(tagName) {
+  return naturalDimensions_[tagName] !== undefined;
+};
+
+
+/**
+ * Determines the default dimensions for an element which could vary across
+ * different browser implementations, like <audio> for instance.
+ * @param {string} tagName The element tag name.
+ * @return {Dimensions}
+ */
+export function getNaturalDimensions(tagName) {
+  if (!naturalDimensions_[tagName]) {
+    let naturalTagName = tagName.toLowerCase().replace(/^amp\-/, '');
+    let temp = document.createElement(naturalTagName);
+    // For audio, should no-op elsewhere.
+    temp.controls = true;
+    temp.style.position = 'absolute';
+    temp.style.visibility = 'hidden';
+    document.body.appendChild(temp);
+    naturalDimensions_[tagName] = {
+      width: temp.offsetWidth,
+      height: temp.offsetHeight
+    };
+    document.body.removeChild(temp);
+  }
+  return naturalDimensions_[tagName];
+}
