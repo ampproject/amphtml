@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Layout, getLengthNumeral, getLengthUnits, parseLength, parseLayout}
-  from '../../src/layout';
+import {Layout, getLengthNumeral, getLengthUnits, parseLength, parseLayout} from
+    '../../src/layout';
 import {applyLayout_} from '../../src/custom-element';
 
 
@@ -132,6 +132,13 @@ describe('Layout', () => {
     expect(div.classList.contains('-amp-layout-container')).to.equal(true);
     expect(div.classList.contains('-amp-layout-size-defined')).to.equal(false);
     expect(div.children.length).to.equal(0);
+  });
+
+  it('layout=unknown', () => {
+    div.setAttribute('layout', 'foo');
+    expect(function() {
+      applyLayout_(div);
+    }).to.throw(/Unknown layout: foo/);
   });
 
 });
