@@ -19,6 +19,12 @@ import {Observable} from '../../src/observable';
 
 describe('EventHelper', () => {
 
+  function getEvent(name) {
+    var event = document.createEvent('Event');
+    event.initEvent(name, true, true);
+    return event;
+  }
+
   let sandbox;
   let element;
   let loadObservable;
@@ -65,7 +71,7 @@ describe('EventHelper', () => {
   });
 
   it('listenOnce', () => {
-    let event = new Event('load');
+    let event = getEvent('load');
     let c = 0;
     let handler = (e) => {
       c++;
@@ -86,7 +92,7 @@ describe('EventHelper', () => {
   });
 
   it('listenOnce - cancel', () => {
-    let event = new Event('load');
+    let event = getEvent('load');
     let c = 0;
     let handler = (e) => {
       c++;
@@ -106,7 +112,7 @@ describe('EventHelper', () => {
   });
 
   it('listenOncePromise - load event', () => {
-    let event = new Event('load');
+    let event = getEvent('load');
     let promise = listenOncePromise(element, 'load').then((result) => {
       expect(result).to.equal(event);
     });
@@ -132,7 +138,7 @@ describe('EventHelper', () => {
     let promise = loadPromise(element).then((result) => {
       expect(result).to.equal(element);
     });
-    loadObservable.fire(new Event('load'));
+    loadObservable.fire(getEvent('load'));
     return promise;
   });
 
@@ -141,7 +147,7 @@ describe('EventHelper', () => {
       assert.fail('must never be here: ' + result);
     }).catch((reason) => {
     });
-    errorObservable.fire(new Event('error'));
+    errorObservable.fire(getEvent('error'));
     return promise;
   });
 
