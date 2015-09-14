@@ -21,6 +21,7 @@ import {expandLayoutRect, layoutRectLtwh, layoutRectsOverlap} from
 import {log} from './log';
 import {reportErrorToDeveloper} from './error';
 import {timer} from './timer';
+import {viewerFor} from './viewer';
 import {viewport} from './viewport';
 
 let TAG_ = 'Resources';
@@ -87,6 +88,9 @@ export class Resources {
     /** @const {!TaskQueue_} */
     this.queue_ = new TaskQueue_();
 
+    /** @private {number} */
+    this.scrollHeight_ = 0;
+
     // When viewport is resized, we have to re-measure all elements.
     viewport.onChanged((event) => {
       this.lastVelocity_ = event.velocity;
@@ -96,15 +100,17 @@ export class Resources {
 
     // Ensure that we attempt to rebuild things when DOM is ready.
     if (this.win.document.readyState != 'loading') {
-      this.documentReady_ = true;
+      this.setDocumentReady_();
       this.forceBuild_ = true;
     } else {
       let readyListener = () => {
         if (this.win.document.readyState != 'loading') {
-          this.documentReady_ = true;
-          this.forceBuild_ = true;
-          this.relayoutAll_ = true;
-          this.schedulePass();
+          if (!this.documentReady_) {
+            this.setDocumentReady_();
+            this.forceBuild_ = true;
+            this.relayoutAll_ = true;
+            this.schedulePass();
+          }
           this.win.document.removeEventListener('readystatechange',
               readyListener);
         }
@@ -114,6 +120,28 @@ export class Resources {
 
     this.relayoutAll_ = true;
     this.schedulePass();
+  }
+
+  /**
+   * @private
+   */
+  setDocumentReady_() {
+    this.documentReady_ = true;
+    viewerFor(this.win).postDocumentReady(viewport.getSize().width,
+        this.win.document.body.scrollHeight);
+    this.updateScrollHeight_();
+  }
+
+  /**
+   * @private
+   */
+  updateScrollHeight_() {
+    let scrollHeight = this.win.document.body.scrollHeight;
+    if (scrollHeight != this.scrollHeight_) {
+      this.scrollHeight_ = scrollHeight;
+      viewerFor(this.win).postDocumentResized(viewport.getSize().width,
+          scrollHeight);
+    }
   }
 
   /**
@@ -277,6 +305,7 @@ export class Resources {
       let delay = this.work_();
       log.fine(TAG_, 'next pass:', delay);
       this.schedulePass(delay);
+      this.updateScrollHeight_();
     }
   }
 

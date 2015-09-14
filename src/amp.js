@@ -16,6 +16,8 @@
 
 import './polyfills';
 
+import {viewerFor} from './viewer';
+
 import {installAd} from '../builtins/amp-ad';
 import {installImg} from '../builtins/amp-img';
 import {installVideo} from '../builtins/amp-video';
@@ -28,6 +30,8 @@ import {cssText} from '../build/css.js';
 import {action} from './action';
 import {installHistory} from './history';
 import {maybeValidate} from './validator-integration';
+
+viewerFor(window);
 
 installAd(window);
 installImg(window);

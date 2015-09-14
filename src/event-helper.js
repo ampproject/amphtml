@@ -20,7 +20,7 @@ import {timer} from './timer';
 /**
  * Listens for the specified event on the element and removes the listener
  * as soon as event has been received.
- * @param {!Element} element
+ * @param {!EventTarget} element
  * @param {string} eventType
  * @param {function(Event)} listener
  * @param {boolean=} opt_capture
@@ -45,7 +45,7 @@ export function listenOnce(element, eventType, listener, opt_capture) {
  * Returns  a promise that will resolve as soon as the specified event has
  * fired on the element. Optionally, opt_timeout can be specified that will
  * reject the promise if the event has not fired by then.
- * @param {!Element} element
+ * @param {!EventTarget} element
  * @param {string} eventType
  * @param {boolean=} opt_capture
  * @param {number=} opt_timeout
