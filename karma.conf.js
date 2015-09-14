@@ -44,7 +44,9 @@ module.exports = function(config) {
 
     autoWatch: true,
 
-    browsers: ['Chrome'],
+    //browsers: ['Chrome'],
+
+    browsers: ['PhantomJS'],
 
     customLaunchers: {
       Chrome_travis_ci: {
