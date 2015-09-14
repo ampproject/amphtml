@@ -187,7 +187,7 @@ export function createIframePromise() {
 }
 
 /**
- * @param {strin} description
+ * @param {string} description
  * @param {fn():boolean} condition
  * @param {fn():!Error=} opt_onError
  * @return {!Promise}
@@ -195,12 +195,12 @@ export function createIframePromise() {
 export function poll(description, condition, opt_onError) {
   return new Promise((resolve, reject) => {
     var start = new Date().getTime();
-    var interval = setInterval(function() {
+    function poll() {
       if (condition()) {
         clearInterval(interval);
         resolve();
       } else {
-        if (new Date().getTime() - start > 1800) {
+        if (new Date().getTime() - start > 1600) {
           clearInterval(interval);
           if (opt_onError) {
             reject(opt_onError());
@@ -209,6 +209,25 @@ export function poll(description, condition, opt_onError) {
           reject(new Error('Timeout waiting for ' + description));
         }
       }
-    }, 50);
+    }
+    var interval = setInterval(poll, 50);
+    poll();
+  });
+}
+
+/**
+ * Polls for the given number of elements to have received layout or
+ * be in error state (Better to fail an assertion after this then just time
+ * out).
+ * @param {!Window} win
+ * @param {number} count
+ * @return {!Promise}
+ */
+export function pollForLayout(win, count) {
+  return poll('Waiting for elements to layout: ' + count, () => {
+    return win.document.querySelectorAll('.-amp-layout,.-amp-error').length >= count;
+  }, () => {
+    return new Error('Failed to find elements with layout. HTML:\n' +
+        win.document.documentElement.innerHTML);
   });
 }
