@@ -96,15 +96,11 @@ export function applyLayout_(element) {
 
   // Handle elements that do not specify a width/height and are defined to have
   // natural browser dimensions.
-  if ((!widthAttr || !heightAttr) && hasNaturalDimensions(element.tagName)) {
+  if ((!layoutAttr || layoutAttr === Layout.FIXED) &&
+      (!widthAttr || !heightAttr) && hasNaturalDimensions(element.tagName)) {
     let dimensions = getNaturalDimensions(element.tagName);
     widthAttr = widthAttr || dimensions.width;
     heightAttr = heightAttr || dimensions.height;
-    // Re-set these if `layout=container` to expose these to the element.
-    if (layoutAttr === Layout.CONTAINER) {
-      element.setAttribute('width', widthAttr);
-      element.setAttribute('height', heightAttr);
-    }
   }
 
   let layout;

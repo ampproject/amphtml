@@ -127,18 +127,4 @@ describe('amp-audio', () => {
     expect(a.style.height).to.be.equal('30px');
   });
 
-  it('should set have a flex width if layout=container', () => {
-    var a = setAudioAttrs({
-      'layout': 'container'
-    });
-    a.style.display = 'block'; // -amp-layout-container
-    var container = iframe.doc.createElement('div');
-    container.style.width = '600px';
-    container.appendChild(a);
-    attachAndRun(container);
-    expect(a.style.height).to.be.equal('30px');
-    expect(a.offsetWidth).to.be.equal(600);
-    expect(a.offsetHeight).to.be.equal(30);
-  });
-
 });

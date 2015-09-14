@@ -153,10 +153,11 @@ var Dimensions;
  * Set or cached browser natural dimensions for elements. The tagname
  * initialized here will return true `hasNaturalDimensions`, even if yet to be
  * calculated. Exported for testing.
- * @type {Object<string, Dimensions>}
+ * @type {!Object<string, Dimensions>}
  */
 export var naturalDimensions_ = {
-  'audio': null
+  'AMP-PIXEL': {width: 1, height: 1},
+  'AMP-AUDIO': null
 };
 
 
@@ -167,7 +168,6 @@ export var naturalDimensions_ = {
  * @return {Dimensions}
  */
 export function hasNaturalDimensions(tagName) {
-  tagName = tagName.toLowerCase().replace(/^amp\-/, '');
   return typeof naturalDimensions_[tagName] !== 'undefined';
 };
 
@@ -179,12 +179,11 @@ export function hasNaturalDimensions(tagName) {
  * @return {Dimensions}
  */
 export function getNaturalDimensions(tagName) {
-  tagName = tagName.toLowerCase().replace(/^amp\-/, '');
   if (!naturalDimensions_[tagName]) {
-    let temp = document.createElement(tagName);
-    if (tagName === 'audio') {
-      temp.controls = true;
-    }
+    let naturalTagName = tagName.toLowerCase().replace(/^amp\-/, '');
+    let temp = document.createElement(naturalTagName);
+    // For audio, should no-op elsewhere.
+    temp.controls = true;
     temp.style.position = 'absolute';
     temp.style.visibility = 'hidden';
     document.body.appendChild(temp);

@@ -22,23 +22,7 @@ class AmpAudio extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout === Layout.FIXED || layout === Layout.CONTAINER;
-  }
-
-
-  /**
-   * Handles the container layout for our audio. Since `Layout.FIXED` sets the
-   * width and height styles automatically, we'll use `Layout.CONTAINER` to
-   * have our element span the width of its container yet maintiain the height
-   * of the audio element.
-   * @override
-   */
-  firstAttachedCallback() {
-    var layout = this.getLayout();
-    if (layout === Layout.CONTAINER) {
-      let heightAttr = this.element.getAttribute('height');
-      this.element.style.height = getLengthNumeral(heightAttr) + 'px';
-    }
+    return layout === Layout.FIXED;
   }
 
 
