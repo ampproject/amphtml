@@ -83,7 +83,7 @@ function clean(done) {
 }
 
 function unit(done) {
-  polyfillsForTests();
+  build();
   karma.start({
     configFile: path.resolve('karma.conf.js'),
     files: tests,
@@ -95,7 +95,7 @@ function unit(done) {
 }
 
 function unitWatch(done) {
-  polyfillsForTests();
+  build();
   karma.start({
     configFile: path.resolve('karma.conf.js'),
     files: tests,
@@ -223,13 +223,19 @@ function buildExtension(name, version, hasCss, options) {
       });
 }
 
+function build() {
+  polyfillsForTests();
+  buildExtensions();
+  return compile();
+}
+
 gulp.task('css', compileCss);
 gulp.task('extensions', buildExtensions);
 gulp.task('clean', clean);
 gulp.task('unit', unit);
 gulp.task('unit-watch', unitWatch);
 gulp.task('unit-watch-verbose', unitWatchVerbose);
-gulp.task('build', function() { return compile(); });
+gulp.task('build', build);
 gulp.task('watch', function() { return watch(); });
 gulp.task('minify', function() {
   process.env.NODE_ENV = 'production';
