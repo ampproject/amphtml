@@ -20,7 +20,7 @@ import {listenOncePromise} from '../../src/event-helper';
 import * as sinon from 'sinon';
 
 
-describe.only('History', () => {
+describe('History', () => {
 
   let sandbox;
   let clock;
