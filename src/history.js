@@ -16,8 +16,10 @@
 
 import {Pass} from './pass';
 import {assert} from './asserts';
+import {getService} from './service';
 import {log} from './log';
 import {timer} from './timer';
+import {viewerFor} from './viewer';
 
 
 /** @private @const */
@@ -46,6 +48,194 @@ var HistoryId;
 export class History {
 
   /**
+   * @param {!HistoryBinding} binding
+   */
+  constructor(binding) {
+    /** @private @const {!HistoryBinding} */
+    this.binding_ = binding;
+
+    /** @private {number} */
+    this.stackIndex_ = 0;
+
+    /** @private {!Array<!Function|undefined>} */
+    this.stackOnPop_ = [];
+
+    /**
+     * @private {!Array<!{callback: function():!Promise>,
+     *   resolve: !Function, reject: !Function}} */
+    this.queue_ = [];
+
+    this.binding_.setOnStackIndexUpdated(this.onStackIndexUpdated_.bind(this));
+  }
+
+  /** @private */
+  cleanup_() {
+    this.binding_.cleanup_();
+  }
+
+  /**
+   * Pushes new state into history stack with an optional callback to be called
+   * when this state is popped.
+   * @param {!Function=} opt_onPop
+   * @return {!Promise<!HistoryId>}
+   */
+  push(opt_onPop) {
+    return this.enque_(() => {
+      return this.binding_.push().then((stackIndex) => {
+        this.onStackIndexUpdated_(stackIndex);
+        if (opt_onPop) {
+          this.stackOnPop_[stackIndex] = opt_onPop;
+        }
+        return stackIndex;
+      });
+    });
+  }
+
+  /**
+   * Pops a previously pushed state from the history stack. If onPop callback
+   * has been registered, it will be called. All states coming after this
+   * state will also be popped and their callbacks executed.
+   * @param {!HistoryId} stateId
+   * @return {!Promise}
+   */
+  pop(stateId) {
+    return this.enque_(() => {
+      return this.binding_.pop(stateId).then((stackIndex) => {
+        this.onStackIndexUpdated_(stackIndex);
+      });
+    });
+  }
+
+  /**
+   * @param {number} stackIndex
+   * @private
+   */
+  onStackIndexUpdated_(stackIndex) {
+    this.stackIndex_ = stackIndex;
+    this.doPop_();
+  }
+
+  /** @private */
+  doPop_() {
+    if (this.stackIndex_ >= this.stackOnPop_.length - 1) {
+      return;
+    }
+
+    let toPop = [];
+    for (let i = this.stackOnPop_.length - 1; i > this.stackIndex_; i--) {
+      if (this.stackOnPop_[i]) {
+        toPop.push(this.stackOnPop_[i]);
+        this.stackOnPop_[i] = undefined;
+      }
+    }
+    this.stackOnPop_.splice(this.stackIndex_ + 1);
+
+    if (toPop.length > 0) {
+      for (let i = 0; i < toPop.length; i++) {
+        // With the same delay timeouts must observe the order, although
+        // there's no hard requirement in this case to follow the pop order.
+        timer.delay(toPop[i]);
+      }
+    }
+  }
+
+  /**
+   * @param {function():!Promise<RESULT>} callback
+   * @return {!Promise<RESULT>}
+   * @template RESULT
+   * @private
+   */
+  enque_(callback) {
+    let resolve;
+    let reject;
+    var promise = new Promise((aResolve, aReject) => {
+      resolve = aResolve;
+      reject = aReject;
+    });
+
+    this.queue_.push({callback: callback, resolve: resolve, reject: reject});
+    if (this.queue_.length == 1) {
+      this.deque_();
+    }
+
+    return promise;
+  }
+
+  /**
+   * @private
+   */
+  deque_() {
+    if (this.queue_.length == 0) {
+      return;
+    }
+
+    let task = this.queue_[0];
+    let promise;
+    try {
+      promise = task.callback();
+    } catch (e) {
+      promise = Promise.reject(e);
+    }
+
+    promise.then((result) => {
+      task.resolve(result);
+    }, (reason) => {
+      log.error(TAG_, 'failed to execute a task:', reason);
+      task.reject(reason);
+    }).then(() => {
+      this.queue_.splice(0, 1);
+      this.deque_();
+    });
+  }
+}
+
+
+/**
+ * HistoryBinding is an interface that defines an underlying technology behind
+ * the {@link History}.
+ * @interface
+ */
+class HistoryBinding {
+
+  /** @private */
+  cleanup_() {}
+
+  /**
+   * Configres a callback to be called when stack index has been updated.
+   * @param {function(number)} callback
+   * @protected
+   */
+  setOnStackIndexUpdated(callback) {}
+
+  /**
+   * Pushes new state into the history stack. Returns promise that yields new
+   * stack index.
+   * @return {!Promise<number>}
+   */
+  push() {}
+
+  /**
+   * Pops a previously pushed state from the history stack. All states coming
+   * after this state will also be popped. Returns promise that yields new
+   * state index.
+   * @param {number} stackIndex
+   * @return {!Promise<number>}
+   */
+  pop(stackIndex) {}
+}
+
+
+/**
+ * Implementation of HistoryBinding based on the native window. It uses
+ * window.history properties and events.
+ *
+ * Visible for testing.
+ *
+ * @implements {HistoryBinding}
+ */
+export class HistoryBindingNatural_ {
+
+  /**
    * @param {!Window} win
    */
   constructor(win) {
@@ -64,14 +254,14 @@ export class History {
     /** @private {number} */
     this.stackIndex_ = this.startIndex_;
 
-    /** @private {!Array<!Function|undefined>} */
-    this.stackOnPop_ = [];
-
     /**
      * @private {{promise: !Promise, resolve: !Function,
      *   reject: !Function}|undefined}
      */
     this.waitingState_;
+
+    /** @private {?function(number)} */
+    this.onStackIndexUpdated_ = null;
 
     // A number of browsers do not support history.state. In this cases,
     // History will track its own version. See unsupportedState_.
@@ -135,7 +325,7 @@ export class History {
     this.win.addEventListener('hashchange', this.hashchangeHandler_);
   }
 
-  /** @private */
+  /** @override */
   cleanup_() {
     if (this.origPushState_) {
       this.win.history.pushState = this.origPushState_;
@@ -147,42 +337,37 @@ export class History {
     this.win.removeEventListener('hashchange', this.hashchangeHandler_);
   }
 
-  /**
-   * @param {!Function=} opt_onPop
-   * @return {!Promise<!HistoryId>}
-   */
-  push(opt_onPop) {
+  /** @override */
+  setOnStackIndexUpdated(callback) {
+    this.onStackIndexUpdated_ = callback;
+  }
+
+  /** @override */
+  push() {
     return this.whenReady_(() => {
       this.historyPushState_();
-      let stackIndex = this.stackIndex_;
-      if (opt_onPop) {
-        this.stackOnPop_[stackIndex] = opt_onPop;
-      }
-      return Promise.resolve(stackIndex);
+      return Promise.resolve(this.stackIndex_);
+    });
+  }
+
+  /** @override */
+  pop(stackIndex) {
+    // On pop, stack is not allowed to go prior to the starting point.
+    stackIndex = Math.max(stackIndex, this.startIndex_);
+    return this.whenReady_(() => {
+      return this.back_(this.stackIndex_ - stackIndex + 1);
     });
   }
 
   /**
-   * @param {!HistoryId} stateId
+   * @param {number} stackIndex
    * @return {!Promise}
    */
-  pop(stateId) {
+  backTo(stackIndex) {
     // On pop, stack is not allowed to go prior to the starting point.
-    stateId = Math.max(stateId, this.startIndex_);
+    stackIndex = Math.max(stackIndex, this.startIndex_);
     return this.whenReady_(() => {
-      return this.back_(this.stackIndex_ - stateId + 1);
-    });
-  }
-
-  /**
-   * @param {!HistoryId} stateId
-   * @return {!Promise}
-   */
-  backTo(stateId) {
-    // On pop, stack is not allowed to go prior to the starting point.
-    stateId = Math.max(stateId, this.startIndex_);
-    return this.whenReady_(() => {
-      return this.back_(this.stackIndex_ - stateId);
+      return this.back_(this.stackIndex_ - stackIndex);
     });
   }
 
@@ -191,7 +376,7 @@ export class History {
     let state = this.getState_();
     log.fine(TAG_, 'history event: ' + this.win.history.length + ', ' +
         JSON.stringify(state));
-    let stateIndex = state ? state[HISTORY_PROP_] : undefined;
+    let stackIndex = state ? state[HISTORY_PROP_] : undefined;
     let newStackIndex = this.stackIndex_;
     let waitingState = this.waitingState_;
     this.waitingState_ = undefined;
@@ -203,12 +388,12 @@ export class History {
       this.updateStackIndex_(newStackIndex);
     }
 
-    if (stateIndex == undefined) {
+    if (stackIndex == undefined) {
       // A new navigation forward by the user.
       newStackIndex = newStackIndex + 1;
-    } else if (stateIndex < this.win.history.length) {
+    } else if (stackIndex < this.win.history.length) {
       // A simple trip back.
-      newStackIndex = stateIndex;
+      newStackIndex = stackIndex;
     } else {
       // Generally not possible, but for posterity.
       newStackIndex = this.win.history.length - 1;
@@ -292,12 +477,14 @@ export class History {
   back_(steps) {
     this.assertReady_();
     if (steps <= 0) {
-      return Promise.resolve();
+      return Promise.resolve(this.stackIndex_);
     }
     this.unsupportedState_ = historyState_(this.stackIndex_ - steps);
     let promise = this.wait_();
     this.win.history.go(-steps);
-    return promise;
+    return promise.then(() => {
+      return Promise.resolve(this.stackIndex_);
+    });
   }
 
   /**
@@ -351,30 +538,8 @@ export class History {
       log.fine(TAG_, 'stack index changed: ' + this.stackIndex_ + ' -> ' +
           stackIndex);
       this.stackIndex_ = stackIndex;
-      this.doPop_();
-    }
-  }
-
-  /** @private */
-  doPop_() {
-    if (this.stackIndex_ >= this.stackOnPop_.length - 1) {
-      return;
-    }
-
-    let toPop = [];
-    for (let i = this.stackOnPop_.length - 1; i > this.stackIndex_; i--) {
-      if (this.stackOnPop_[i]) {
-        toPop.push(this.stackOnPop_[i]);
-        this.stackOnPop_[i] = undefined;
-      }
-    }
-    this.stackOnPop_.splice(this.stackIndex_ + 1);
-
-    if (toPop.length > 0) {
-      for (let i = 0; i < toPop.length; i++) {
-        // With the same delay timeouts must observe the order, although
-        // there's no hard requirement in this case to follow the pop order.
-        timer.delay(toPop[i]);
+      if (this.onStackIndexUpdated_) {
+        this.onStackIndexUpdated_(stackIndex);
       }
     }
   }
@@ -382,18 +547,110 @@ export class History {
 
 
 /**
- * @private {!Window} win
+ * Implementation of HistoryBinding that assumes a virtual history that
+ * relies on viewer's "pushHistory", "popHistory" and "historyPopped"
+ * protocol.
+ *
+ * Visible for testing.
+ *
+ * @implements {HistoryBinding}
  */
-export function installHistory(win) {
-  win['__AMP.History'] = new History(win);
+export class HistoryBindingVirtual_ {
+
+  /**
+   * @param {!Viewer} viewer
+   */
+  constructor(viewer) {
+    /** @private @const {!Viewer} */
+    this.viewer_ = viewer;
+
+    /** @private {number} */
+    this.stackIndex_ = 0;
+
+    /** @private {?function(number)} */
+    this.onStackIndexUpdated_ = null;
+
+    /** @private {!Unlisten} */
+    this.unlistenOnHistoryPopped_ = this.viewer_.onHistoryPoppedEvent(
+        this.onHistoryPopped_.bind(this));
+  }
+
+  /** @override */
+  cleanup_() {
+    this.unlistenOnHistoryPopped_();
+  }
+
+  /** @override */
+  setOnStackIndexUpdated(callback) {
+    this.onStackIndexUpdated_ = callback;
+  }
+
+  /** @override */
+  push() {
+    // Current implemention doesn't wait for response from viewer.
+    this.updateStackIndex_(this.stackIndex_ + 1);
+    this.viewer_.postPushHistory(this.stackIndex_);
+    return Promise.resolve(this.stackIndex_);
+  }
+
+  /** @override */
+  pop(stackIndex) {
+    if (stackIndex > this.stackIndex_) {
+      return Promise.resolve(this.stackIndex_);
+    }
+    this.viewer_.postPopHistory(stackIndex);
+    this.updateStackIndex_(stackIndex - 1);
+    return Promise.resolve(this.stackIndex_);
+  }
+
+  /**
+   * @param {!ViewerHistoryPoppedEvent} event
+   * @private
+   */
+  onHistoryPopped_(event) {
+    this.updateStackIndex_(event.newStackIndex);
+  }
+
+  /**
+   * @param {number} stackIndex
+   * @private
+   */
+  updateStackIndex_(stackIndex) {
+    if (this.stackIndex_ != stackIndex) {
+      log.fine(TAG_, 'stack index changed: ' + this.stackIndex_ + ' -> ' +
+          stackIndex);
+      this.stackIndex_ = stackIndex;
+      if (this.onStackIndexUpdated_) {
+        this.onStackIndexUpdated_(stackIndex);
+      }
+    }
+  }
 }
 
 
 /**
- * @param {!Window=} opt_win
+ * @param {!Window} window
+ * @return {!History}
+ * @private
+ */
+function createHistory_(window) {
+  let viewer = viewerFor(window);
+  let binding;
+  if (viewer.isOvertakeHistory()) {
+    binding = new HistoryBindingVirtual_(viewer);
+  } else {
+    binding = new HistoryBindingNatural_(window);
+  }
+  return new History(binding);
+};
+
+
+/**
+ * @param {!Window} window
  * @return {!History}
  */
-export function history(opt_win) {
-  let win = opt_win || window;
-  return /** @type {!History} */ (assert(win['__AMP.History']));
-}
+export function historyFor(window) {
+  return getService(window, 'history', () => {
+    return createHistory_(window);
+  });
+};

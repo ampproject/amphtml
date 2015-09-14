@@ -16,6 +16,7 @@
 
 import './polyfills';
 
+import {historyFor} from './history';
 import {viewerFor} from './viewer';
 
 import {installAd} from '../builtins/amp-ad';
@@ -28,9 +29,9 @@ import {adopt} from './runtime';
 import {installExperimentalViewerIntegration} from './experimental-viewer-integration';
 import {cssText} from '../build/css.js';
 import {action} from './action';
-import {installHistory} from './history';
 import {maybeValidate} from './validator-integration';
 
+historyFor(window);
 viewerFor(window);
 
 installAd(window);
@@ -42,7 +43,6 @@ installStyles(document, cssText);
 adopt(window);
 stubElements(window);
 
-installHistory(window);
 action.addEvent('tap');
 
 maybeValidate(window);
