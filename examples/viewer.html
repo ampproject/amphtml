@@ -1,0 +1,246 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Viewer</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
+  <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
+  <style>
+    html, body {
+      overflow: hidden;
+    }
+
+    body {
+      font-family: 'Questrial', Arial;
+    }
+
+    body, viewer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      overflow: hidden;
+      margin: 0;
+      padding: 0;
+    }
+
+    viewer {
+      background: #eee;
+    }
+
+    header {
+      position: absolute;
+      z-index: 1;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 50px;
+      background: #4285F4;
+      opacity: 0.7;
+      color: #fff;
+      display: flex;
+      flex-direction: row;
+      justify-content: flex-start;
+      align-items: center;
+      padding: 0 8px;
+    }
+
+    @media screen and (min-width: 500px) {
+      header {
+        height: 64px;
+      }
+    }
+
+    header h1 {
+      font-size: 22px;
+    }
+
+    .wait {
+      position: absolute;
+      z-index: 3;
+      top: 100px;
+      left: 20px;
+      font-size: 12px;
+    }
+
+    container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      overflow-x: hidden;
+      overflow-y: auto;
+    }
+
+    container iframe {
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+  <script>
+
+    var SENTINEL = '__AMP__';
+
+    function Viewer() {
+      this.alreadyLoaded_ = false;
+
+      this.header = document.querySelector('header');
+      this.container = document.querySelector('container');
+      this.iframe = document.createElement('iframe');
+      this.iframe.style.width = '100%';
+      this.iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+      this.iframe.setAttribute('scrolling', 'no');
+
+      window.addEventListener('message', this.onMessage_.bind(this));
+      this.container.addEventListener('scroll', this.onScroll_.bind(this));
+      window.addEventListener('resize', this.onResize_.bind(this));
+    };
+
+
+    Viewer.prototype.start = function() {
+      var params = {
+        viewportType: 'virtual',
+        width: this.container.offsetWidth,
+        height: this.container.offsetHeight,
+        paddingTop: this.header.offsetHeight
+      };
+      log('Params:' + JSON.stringify(params));
+
+      var url = 'http://localhost:8000/examples/everything.amp.html#' +
+          paramsStr(params);
+      log('AMP URL = ' + url);
+      this.iframe.style.display = 'none';
+      this.container.appendChild(this.iframe);
+
+      // Notice that name can only be set once the IFrame is in the DOM.
+      this.iframe.contentWindow.name = SENTINEL + paramsStr(params);
+
+      this.iframe.onload = this.loaded_.bind(this);
+      setTimeout(function() {
+        this.iframe.style.visibility = 'hidden';
+        this.iframe.style.height = this.container.offsetHeight + 'px';
+        this.iframe.style.display = '';
+        this.iframe.setAttribute('src', url);
+      }.bind(this));
+    };
+
+
+    Viewer.prototype.loaded_ = function() {
+      if (this.alreadyLoaded_) {
+        return;
+      }
+      log('AMP Loaded');
+      this.alreadyLoaded_ = true;
+
+      var waiter = document.querySelector('.wait');
+      if (waiter) {
+        waiter.parentElement.removeChild(waiter);
+      }
+
+      this.iframe.style.display = '';
+      this.iframe.style.visibility = '';
+    };
+
+
+    Viewer.prototype.documentReady_ = function() {
+      log('AMP document ready');
+      this.loaded_();
+    };
+
+
+    Viewer.prototype.documentHeight_ = function(documentHeight) {
+      log('AMP document height:', documentHeight);
+      this.iframe.style.height = Math.max(documentHeight,
+          this.container.offsetHeight) + 'px';
+    };
+
+
+    Viewer.prototype.onScroll_ = function() {
+      this.sendMessage_('viewport', {scrollTop: this.container.scrollTop});
+    };
+
+
+    Viewer.prototype.onResize_ = function() {
+      log('Resized to ', this.container.offsetWidth,
+          this.container.offsetHeight,
+          this.header.offsetHeight,
+          this.container.scrollTop);
+      this.sendMessage_('viewport', {
+        scrollTop: this.container.scrollTop,
+        width: this.container.offsetWidth,
+        height: this.container.offsetHeight,
+        paddingTop: this.header.offsetHeight
+      });
+    };
+
+
+    Viewer.prototype.sendMessage_ = function(type, message) {
+      message['type'] = type;
+      message['sentinel'] = SENTINEL;
+      if (this.iframe.contentWindow) {
+        this.iframe.contentWindow.postMessage(message, '*');
+      }
+    };
+
+
+    Viewer.prototype.onMessage_ = function() {
+      var data = event.data;
+      if (data.sentinel != SENTINEL) {
+        return;
+      }
+      if (data.type == 'documentLoaded') {
+        this.documentReady_();
+      } else if (data.type == 'documentResized') {
+        this.documentHeight_(data.height);
+      }
+    };
+
+
+    function log() {
+      var var_args = Array.prototype.slice.call(arguments, 0);
+      var_args.unshift('[VIEWER]');
+      console.log.apply(console, var_args);
+    }
+
+
+    function paramsStr(params) {
+      var s = '';
+      for (var k in params) {
+        var v = params[k];
+        if (v === null || v === undefined) {
+          continue;
+        }
+        if (s.length > 0) {
+          s += '&';
+        }
+        s += encodeURIComponent(k) + '=' + encodeURIComponent(v);
+      }
+      return s;
+    }
+
+
+    var viewer;
+
+    function loadAmpDoc() {
+      viewer = new Viewer();
+      viewer.start();
+    }
+
+    window.onload = loadAmpDoc;
+  </script>
+</head>
+<body>
+  <viewer>
+    <header>
+      <h1>Viewer</h1>
+    </header>
+    <container>
+      <div class="wait">
+        Please wait, the AMP doc will appear here...
+      </div>
+    </container>
+  </viewer>
+</body>
+</html>

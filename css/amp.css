@@ -36,6 +36,7 @@
 
 .-amp-layout-container {
   display: block;
+  position: relative;
 }
 
 .-amp-layout-fill {
@@ -125,6 +126,7 @@ i-amp-sizer {
 .-amp-element-error {
   background: red !important;
   color: white !important;
+  position: relative !important;
 }
 
 .-amp-element-error::before {

@@ -194,8 +194,13 @@ In these cases, services may set up endpoints that produce data that conforms to
 - [amp-ad](../src/amp-ad.md)
 - [amp-pixel](../src/amp-pixel.md)
 - [amp-video](../src/amp-video.md)
+- [amp-carousel](../extensions/amp-carousel/amp-carousel.md)
 - [amp-lightbox](../extensions/amp-lightbox/amp-lightbox.md)
 - [amp-iframe](../extensions/amp-iframe/amp-iframe.md)
 - [amp-instagram](../extensions/amp-instagram/amp-instagram.md)
 - [amp-twitter](../extensions/amp-twitter/amp-twitter.md)
 - [amp-youtube](../extensions/amp-youtube/amp-youtube.md)
+
+### <a name=”on-attribute”></a> `on` attribute
+
+TODO: describe `on` attribute
