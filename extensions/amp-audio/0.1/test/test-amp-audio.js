@@ -64,7 +64,6 @@ describe('amp-audio', () => {
 
   it('should load audio through attribute', () => {
     var a = attachAndRun(setAudioAttrs({
-      layout: 'natural',
       src: 'https://origin.com/audio.mp3'
     }));
     var audio = a.querySelector('audio');
@@ -72,10 +71,8 @@ describe('amp-audio', () => {
     expect(audio.tagName).to.equal('AUDIO');
     expect(audio.getAttribute('src')).to.equal('https://origin.com/audio.mp3');
     expect(audio.hasAttribute('controls')).to.be.true;
-    expect(a.hasAttribute('width')).to.be.true;
-    expect(a.hasAttribute('height')).to.be.true;
-    expect(audio.offsetWidth).to.be.greaterThan('1');
-    expect(audio.offsetHeight).to.be.greaterThan('1');
+    expect(a.style.width).to.be.equal('300px');
+    expect(a.style.height).to.be.equal('30px');
   });
 
   it('should load audio through sources', () => {
@@ -113,9 +110,7 @@ describe('amp-audio', () => {
   });
 
   it('should set its dimensions to the browser natural', () => {
-    var a = attachAndRun(setAudioAttrs({
-      'layout': 'natural'
-    }));
+    var a = attachAndRun(setAudioAttrs({}));
     var audio = a.querySelector('audio');
     expect(a.style.width).to.be.equal('300px');
     expect(a.style.height).to.be.equal('30px');
@@ -124,19 +119,26 @@ describe('amp-audio', () => {
   });
 
   it('should set have a flex width if layout fill or container', () => {
+    var a = attachAndRun(setAudioAttrs({
+      'width': '500'
+    }));
+    var audio = a.querySelector('audio');
+    expect(a.style.width).to.be.equal('500px');
+    expect(a.style.height).to.be.equal('30px');
+  });
+
+  it('should set have a flex width if layout fill or container', () => {
     var a = setAudioAttrs({
-      'layout': 'container',
-      'height': 'natural'
+      'layout': 'container'
     });
-    a.style.display = 'inline-block'; // -amp-element default.
+    a.style.display = 'block'; // -amp-layout-container
     var container = iframe.doc.createElement('div');
     container.style.width = '600px';
     container.appendChild(a);
     attachAndRun(container);
-    expect(a.style.width).to.be.equal('100%');
     expect(a.style.height).to.be.equal('30px');
-    expect(a.offsetHeight).to.be.equal(30);
     expect(a.offsetWidth).to.be.equal(600);
+    expect(a.offsetHeight).to.be.equal(30);
   });
 
 });

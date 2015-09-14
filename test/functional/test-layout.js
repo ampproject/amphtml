@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-import {Layout, getLengthNumeral, getLengthUnits, parseLength, parseLayout,
-    naturalDimensions_} from '../../src/layout';
+import {Layout, getLengthNumeral, getLengthUnits, parseLength, parseLayout}
+  from '../../src/layout';
 import {applyLayout_} from '../../src/custom-element';
 
 
 describe('Layout', () => {
   var div;
-  // Mock default dimensions for <div> for natural layout.
-  naturalDimensions_['div'] = {width: 300, height: 30};
 
   beforeEach(() => {
     div = document.createElement('div');
@@ -134,30 +132,6 @@ describe('Layout', () => {
     expect(div.classList.contains('-amp-layout-container')).to.equal(true);
     expect(div.classList.contains('-amp-layout-size-defined')).to.equal(false);
     expect(div.children.length).to.equal(0);
-  });
-
-  it('layout=natural - no width/height', () => {
-    div.setAttribute('layout', 'natural');
-    expect(applyLayout_(div)).to.equal(Layout.FIXED);
-    expect(div.getAttribute('width')).to.equal('300');
-    expect(div.getAttribute('height')).to.equal('30');
-  });
-
-  it('layout=natural - only width specified', () => {
-    div.setAttribute('layout', 'natural');
-    div.setAttribute('width', 500);
-    expect(applyLayout_(div)).to.equal(Layout.FIXED);
-    expect(div.getAttribute('width')).to.equal('500');
-    expect(div.getAttribute('height')).to.equal('30');
-  });
-
-  it('layout=container - height=natural, width specified', () => {
-    div.setAttribute('layout', 'container');
-    div.setAttribute('height', 'natural');
-    div.setAttribute('width', 500);
-    expect(applyLayout_(div)).to.equal(Layout.CONTAINER);
-    expect(div.getAttribute('width')).to.equal('500');
-    expect(div.getAttribute('height')).to.equal('30');
   });
 
 });

@@ -150,18 +150,35 @@ export function getLengthNumeral(length) {
 var Dimensions;
 
 /**
- * Cached browser natural dimenions for elements. Exported for testing.
- * @type {Object<String, Dimensions>}
+ * Set or cached browser natural dimensions for elements. The tagname
+ * initialized here will return true `hasNaturalDimensions`, even if yet to be
+ * calculated. Exported for testing.
+ * @type {Object<string, Dimensions>}
  */
-export var naturalDimensions_ = {};
+export var naturalDimensions_ = {
+  'audio': null
+};
+
+
+/**
+ * Determines whether the tagName is a known element that has natural dimensions
+ * in our runtime or the browser.
+ * @param {string} tagName The element tag name.
+ * @return {Dimensions}
+ */
+export function hasNaturalDimensions(tagName) {
+  tagName = tagName.toLowerCase().replace(/^amp\-/, '');
+  return typeof naturalDimensions_[tagName] !== 'undefined';
+};
 
 
 /**
  * Determines the default dimensions for an element which could vary across
  * different browser implementations, like <audio> for instance.
+ * @param {string} tagName The element tag name.
  * @return {Dimensions}
  */
-export function getBrowserNaturalDimensions(tagName) {
+export function getNaturalDimensions(tagName) {
   tagName = tagName.toLowerCase().replace(/^amp\-/, '');
   if (!naturalDimensions_[tagName]) {
     let temp = document.createElement(tagName);
@@ -177,5 +194,5 @@ export function getBrowserNaturalDimensions(tagName) {
     };
     document.body.removeChild(temp);
   }
-  return naturalDimensions_[tagName];;
+  return naturalDimensions_[tagName];
 }
