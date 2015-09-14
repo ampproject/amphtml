@@ -176,6 +176,18 @@
     };
 
 
+    Viewer.prototype.requestFullOverlay_ = function() {
+      log('requestFullOverlay');
+      this.header.style.opacity = 0;
+    };
+
+
+    Viewer.prototype.cancelFullOverlay_ = function() {
+      log('cancelFullOverlay');
+      this.header.style.opacity = 1;
+    };
+
+
     Viewer.prototype.sendMessage_ = function(type, message) {
       message['type'] = type;
       message['sentinel'] = SENTINEL;
@@ -194,6 +206,10 @@
         this.documentReady_();
       } else if (data.type == 'documentResized') {
         this.documentHeight_(data.height);
+      } else if (data.type == 'requestFullOverlay') {
+        this.requestFullOverlay_();
+      } else if (data.type == 'cancelFullOverlay') {
+        this.cancelFullOverlay_();
       }
     };
 

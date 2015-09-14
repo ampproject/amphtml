@@ -199,6 +199,20 @@ export class Viewer {
   }
 
   /**
+   * Requests full overlay mode from the viewer.
+   */
+  requestFullOverlay() {
+    this.sendMessage_('requestFullOverlay', {});
+  }
+
+  /**
+   * Requests to cancel full overlay mode from the viewer.
+   */
+  cancelFullOverlay() {
+    this.sendMessage_('cancelFullOverlay', {});
+  }
+
+  /**
    * Requests AMP document to receive a message from Viewer.
    * @param {string} eventType
    * @param {*} data

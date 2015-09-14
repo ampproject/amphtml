@@ -68,6 +68,7 @@ class AmpLightbox extends AMP.BaseElement {
 
   /** @override */
   activate() {
+    this.requestFullOverlay();
     this.element.style.display = '';
     this.element.style.opacity = 0;
 
@@ -128,6 +129,7 @@ class AmpLightbox extends AMP.BaseElement {
   }
 
   close() {
+    this.cancelFullOverlay();
     this.element.style.display = 'none';
     if (this.historyId_ != -1) {
       history().pop(this.historyId_);

@@ -27,6 +27,7 @@
 (window.AMP = window.AMP || []).push(function(AMP) {
 
   var SENTINEL = '__AMP__';
+
   var viewer = AMP.viewer;
 
   function onMessage(event) {

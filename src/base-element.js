@@ -17,6 +17,7 @@
 import {Layout, isInternalElement} from './layout';
 import {assert} from './asserts';
 import {resources} from './resources';
+import {viewerFor} from './viewer';
 import {viewportFor} from './viewport';
 
 
@@ -330,6 +331,20 @@ export class BaseElement {
    */
   updateInViewport(elements, inLocalViewport) {
     resources.updateInViewport(this.element, elements, inLocalViewport);
+  }
+
+  /**
+   * Requests full overlay mode from the viewer.
+   */
+  requestFullOverlay() {
+    viewerFor(this.element.ownerDocument.defaultView).requestFullOverlay();
+  }
+
+  /**
+   * Requests to cancel full overlay mode from the viewer.
+   */
+  cancelFullOverlay() {
+    viewerFor(this.element.ownerDocument.defaultView).cancelFullOverlay();
   }
 }
 
