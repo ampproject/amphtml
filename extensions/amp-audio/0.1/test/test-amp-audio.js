@@ -118,7 +118,7 @@ describe('amp-audio', () => {
     expect(audio.offsetHeight).to.be.equal(30);
   });
 
-  it('should set have a flex width if layout fill or container', () => {
+  it('should set its natural dimension only if not specified', () => {
     var a = attachAndRun(setAudioAttrs({
       'width': '500'
     }));
@@ -127,7 +127,7 @@ describe('amp-audio', () => {
     expect(a.style.height).to.be.equal('30px');
   });
 
-  it('should set have a flex width if layout fill or container', () => {
+  it('should set have a flex width if layout=container', () => {
     var a = setAudioAttrs({
       'layout': 'container'
     });

@@ -27,8 +27,10 @@ class AmpAudio extends AMP.BaseElement {
 
 
   /**
-   * Handles the container layout for our audio. It's an odd scenrio for audio
-   * which requires a width or it will be set to
+   * Handles the container layout for our audio. Since `Layout.FIXED` sets the
+   * width and height styles automatically, we'll use `Layout.CONTAINER` to
+   * have our element span the width of its container yet maintiain the height
+   * of the audio element.
    * @override
    */
   firstAttachedCallback() {
