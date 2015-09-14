@@ -112,6 +112,13 @@ describe('Viewer', () => {
     expect(m.data.height).to.equal(14);
   });
 
+  it('should post request/cancelFullOverlay event', () => {
+    viewer.requestFullOverlay();
+    viewer.cancelFullOverlay();
+    expect(viewer.messageQueue_[0].eventType).to.equal('requestFullOverlay');
+    expect(viewer.messageQueue_[1].eventType).to.equal('cancelFullOverlay');
+  });
+
   it('should queue non-dupe events', () => {
     viewer.postDocumentReady(11, 12);
     viewer.postDocumentResized(13, 14);
