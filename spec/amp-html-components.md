@@ -189,11 +189,11 @@ In these cases, services may set up endpoints that produce data that conforms to
 
 ## Components
 
-- [amp-img](../src/amp-img.md)
+- [amp-img](../builtins/amp-img.md)
 - [amp-anim](../extensions/amp-anim/amp-anim.md)
-- [amp-ad](../src/amp-ad.md)
-- [amp-pixel](../src/amp-pixel.md)
-- [amp-video](../src/amp-video.md)
+- [amp-ad](../builtins/amp-ad.md)
+- [amp-pixel](../builtins/amp-pixel.md)
+- [amp-video](../builtins/amp-video.md)
 - [amp-carousel](../extensions/amp-carousel/amp-carousel.md)
 - [amp-lightbox](../extensions/amp-lightbox/amp-lightbox.md)
 - [amp-iframe](../extensions/amp-iframe/amp-iframe.md)
