@@ -16,12 +16,13 @@
 
 
 import {assert} from './asserts';
+import {getLengthNumeral} from '../src/layout';
 import {documentInfoFor} from './document-info';
 import {getMode} from './mode';
 
 
-/** @type {number} Number of ads on the page. */
-var count = 0;
+/** @type {!Object<string,number>} Number of 3p frames on the for that type. */
+var count = {};
 
 
 /**
@@ -43,13 +44,14 @@ function getFrameAttributes(parentWindow, element, opt_type) {
   var attributes = {};
   // Do these first, as the other attributes have precedence.
   addDataAttributes(element, attributes);
-  attributes.width = width;
-  attributes.height = height;
+  attributes.width = getLengthNumeral(width);
+  attributes.height = getLengthNumeral(height);
   attributes.type = type;
   attributes._context = {
     location: {
       href: documentInfoFor(parentWindow).canonicalUrl
-    }
+    },
+    mode: getMode()
   };
   var adSrc = element.getAttribute('src');
   if (adSrc) {
@@ -69,15 +71,18 @@ function getFrameAttributes(parentWindow, element, opt_type) {
 export function getIframe(parentWindow, element, opt_type) {
   var attributes = getFrameAttributes(parentWindow, element, opt_type)
   var iframe = document.createElement('iframe');
-  iframe.name = 'frame_' + attributes.type + '_' + count++;
+  if (!count[attributes.type]) {
+    count[attributes.type] = 0;
+  }
+  iframe.name = 'frame_' + attributes.type + '_' + count[attributes.type]++;
 
   // Pass ad attributes to iframe via the fragment.
   var src = getBootstrapBaseUrl(parentWindow) + '#' +
       JSON.stringify(attributes);
 
   iframe.src = src;
-  iframe.width = attributes.width + 'px';
-  iframe.height = attributes.height + 'px';
+  iframe.width = attributes.width;
+  iframe.height = attributes.height;
   iframe.style.border = 'none';
   iframe.setAttribute('scrolling', 'no');
   return iframe;

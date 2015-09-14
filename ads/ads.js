@@ -19,6 +19,7 @@
  * one of them.
  */
 
+import '../src/polyfills';
 import {a9} from './a9';
 import {adreactor} from './adreactor';
 import {adsense} from './adsense';
@@ -49,5 +50,6 @@ window.drawAd = function() {
   var fragment = location.hash
   var data = fragment ? JSON.parse(fragment.substr(1)) : {};
   window.context = data._context;
+  delete data._context;
   drawAd(window, data);
 };

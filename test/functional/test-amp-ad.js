@@ -61,8 +61,8 @@ describe('amp-ad', () => {
 
     expect(data.type).to.equal('a9');
     expect(data.src).to.equal('testsrc');
-    expect(data.width).to.equal('300');
-    expect(data.height).to.equal('250');
+    expect(data.width).to.equal(300);
+    expect(data.height).to.equal(250);
     expect(data._context.location.href).to.equal('https://schema.org/');
     expect(data.aax_size).to.equal('300x250');
   });
