@@ -168,7 +168,7 @@ export var naturalDimensions_ = {
  * @return {Dimensions}
  */
 export function hasNaturalDimensions(tagName) {
-  return typeof naturalDimensions_[tagName] !== 'undefined';
+  return naturalDimensions_[tagName] !== undefined;
 };
 
 
