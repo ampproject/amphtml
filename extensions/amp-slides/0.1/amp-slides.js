@@ -147,6 +147,11 @@ class AmpSlides extends AMP.BaseElement {
   }
 
   /** @override */
+  isRelayoutNeeded() {
+    return true;
+  }
+
+  /** @override */
   layoutCallback() {
     this.scheduleLayout(this.slides_[this.currentIndex_]);
     this.preloadNext_(1);

@@ -129,6 +129,11 @@ class AmpCarousel extends AMP.BaseElement {
   }
 
   /** @override */
+  isRelayoutNeeded() {
+    return true;
+  }
+
+  /** @override */
   layoutCallback() {
     this.doLayout_(this.pos_);
     this.preloadNext_(this.pos_, 1);
