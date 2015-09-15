@@ -15,6 +15,7 @@
  */
 
 import {BaseElement} from '../src/base-element';
+import {assertElementSrcHttpsIfExists} from '../src/asserts';
 import {getLengthNumeral, isLayoutSizeDefined} from '../src/layout';
 import {loadPromise} from '../src/event-helper';
 import {registerElement} from '../src/custom-element';
@@ -36,12 +37,17 @@ export function installVideo(win) {
       var width = this.element.getAttribute('width');
       var height = this.element.getAttribute('height');
       var video = document.createElement('video');
+      assertElementSrcHttpsIfExists(this.element);
       this.propagateAttributes(
           ['src', 'controls', 'autoplay', 'muted', 'loop'],
           video);
       video.width = getLengthNumeral(width);
       video.height = getLengthNumeral(height);
       this.applyFillContent(video);
+      this.getRealChildNodes().forEach(child => {
+        assertElementSrcHttpsIfExists(child);
+        video.appendChild(child);
+      });
       this.element.appendChild(video);
       return loadPromise(video);
     }

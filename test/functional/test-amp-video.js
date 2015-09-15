@@ -19,13 +19,21 @@ import {installVideo} from '../../builtins/amp-video';
 
 describe('amp-video', () => {
 
+  function getFooVideoSrc(mediatype) {
+    return '//localhost/foo.' + mediatype.slice(mediatype.indexOf('/') + 1); // assumes no optional params
+  }
 
-  function getVideo(attributes) {
+  function getVideo(attributes, children) {
     var iframe = createIframe();
     installVideo(iframe.win);
     var v = iframe.doc.createElement('amp-video');
     for (var key in attributes) {
       v.setAttribute(key, attributes[key]);
+    }
+    if (children != null) {
+      for (var key in children) {
+        v.appendChild(children[key]);
+      }
     }
     iframe.doc.body.appendChild(v);
     v.implementation_.layoutCallback();
@@ -63,4 +71,57 @@ describe('amp-video', () => {
     expect(video.hasAttribute('muted')).to.be.true;
     expect(video.hasAttribute('loop')).to.be.true;
   });
+
+  it('should load a video with source children', () => {
+    var sources = [];
+    var mediatypes = ['video/ogg', 'video/mp4', 'video/webm'];
+    for (var i = 0; i < mediatypes.length; i++) {
+      var mediatype = mediatypes[i];
+      var source = document.createElement('source');
+      source.setAttribute('src',  getFooVideoSrc(mediatype));
+      source.setAttribute('type', mediatype);
+      sources.push(source);
+    }
+    var v = getVideo({
+      src: 'video.mp4',
+      width: 160,
+      height: 90,
+      'controls': '',
+      'autoplay': '',
+      'muted': '',
+      'loop': ''
+    }, sources);
+    var video = v.querySelector('video');
+    // check that the source tags were propogated
+    expect(video.children.length).to.equal(mediatypes.length);
+    for (var i = 0; i < mediatypes.length; i++) {
+      var mediatype = mediatypes[i];
+      expect(video.children.item(i).tagName).to.equal('SOURCE');
+      expect(video.children.item(i).hasAttribute('src')).to.be.true;
+      expect(video.children.item(i).getAttribute('src')).to.equal(getFooVideoSrc(mediatype));
+      expect(video.children.item(i).getAttribute('type')).to.equal(mediatype);
+    }
+  });
+
+  it('should not load a video with http source children', () => {
+    var sources = [];
+    var mediatypes = ['video/ogg', 'video/mp4', 'video/webm'];
+    for (var i = 0; i < mediatypes.length; i++) {
+      var mediatype = mediatypes[i];
+      var source = document.createElement('source');
+      source.setAttribute('src', 'http:' + getFooVideoSrc(mediatype));
+      source.setAttribute('type', mediatype);
+      sources.push(source);
+    }
+    expect(() => { getVideo({
+      src: 'video.mp4',
+      width: 160,
+      height: 90,
+      'controls': '',
+      'autoplay': '',
+      'muted': '',
+      'loop': ''
+    }, sources);}).to.throw(/start with/);
+  });
+
 });
