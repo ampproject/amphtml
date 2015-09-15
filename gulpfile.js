@@ -26,7 +26,6 @@ var source = require('vinyl-source-stream');
 var buffer = require('vinyl-buffer');
 var browserify = require('browserify');
 var watchify = require('watchify');
-var include = require('gulp-include');
 var uglify = require('gulp-uglify');
 var wrap = require("gulp-wrap");
 var rename = require('gulp-rename');
@@ -304,7 +303,6 @@ function compileJs(srcDir, srcFilename, destDir, options) {
       .on('error', function(err) { console.error(err); this.emit('end'); })
       .pipe(source(srcFilename))
       .pipe(buffer())
-      .pipe(include())
       .pipe(replace(/\$internalRuntimeVersion\$/g, internalRuntimeVersion))
       .pipe(wrap(wrapper))
       .pipe(sourcemaps.init({ loadMaps: true }))
@@ -325,7 +323,6 @@ function compileJs(srcDir, srcFilename, destDir, options) {
       .on('error', function(err) { console.error(err); this.emit('end'); })
       .pipe(source(srcFilename))
       .pipe(buffer())
-      .pipe(include())
       .pipe(replace(/\$internalRuntimeVersion\$/g, internalRuntimeVersion))
       .pipe(wrap(wrapper))
       .pipe(sourcemaps.init({ loadMaps: true }))

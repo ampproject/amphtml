@@ -20,6 +20,5 @@
 
 
 import 'webcomponents.js/webcomponents-lite'
-
-require('./custom-core-js-shim');
-require('babel-core/external-helpers');
+import './custom-core-js-shim';
+import 'babel-core/external-helpers';
