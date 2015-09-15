@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {createIframe} from '../../../../testing/iframe';
+import {createIframePromise} from '../../../../testing/iframe';
 require('../amp-youtube');
 import {adopt} from '../../../../src/runtime';
 
@@ -23,39 +23,40 @@ adopt(window);
 describe('amp-youtube', () => {
 
   function getYt(videoId, opt_responsive) {
-    var iframe = createIframe();
-    var yt = iframe.doc.createElement('amp-youtube');
-    yt.setAttribute('video-id', videoId);
-    yt.setAttribute('width', '111');
-    yt.setAttribute('height', '222');
-    if (opt_responsive) {
-      yt.setAttribute('layout', 'responsive');
-    }
-    iframe.doc.body.appendChild(yt);
-    yt.implementation_.layoutCallback();
-    return yt;
+    return createIframePromise().then((iframe) => {
+      var yt = iframe.doc.createElement('amp-youtube');
+      yt.setAttribute('video-id', videoId);
+      yt.setAttribute('width', '111');
+      yt.setAttribute('height', '222');
+      if (opt_responsive) {
+        yt.setAttribute('layout', 'responsive');
+      }
+      iframe.doc.body.appendChild(yt);
+      yt.implementation_.layoutCallback();
+      return yt;
+    });
   }
 
   it('renders', () => {
-    var yt = getYt('mGENRKrdoGY');
-    var iframe = yt.querySelector('iframe');
-    expect(iframe).to.not.be.null;
-    expect(iframe.tagName).to.equal('IFRAME');
-    expect(iframe.src).to.equal('https://www.youtube.com/embed/mGENRKrdoGY');
-    expect(iframe.getAttribute('width')).to.equal('111');
-    expect(iframe.getAttribute('height')).to.equal('222');
+    return getYt('mGENRKrdoGY').then((yt) => {
+      var iframe = yt.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.tagName).to.equal('IFRAME');
+      expect(iframe.src).to.equal('https://www.youtube.com/embed/mGENRKrdoGY');
+      expect(iframe.getAttribute('width')).to.equal('111');
+      expect(iframe.getAttribute('height')).to.equal('222');
+    });
   });
 
   it('renders responsively', () => {
-    var yt = getYt('mGENRKrdoGY', true);
-    var iframe = yt.querySelector('iframe');
-    expect(iframe).to.not.be.null;
-    expect(iframe.className).to.match(/-amp-fill-content/)
+    return getYt('mGENRKrdoGY', true).then((yt) => {
+      var iframe = yt.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.className).to.match(/-amp-fill-content/);
+    });
   });
 
   it('requires video-id', () => {
-    expect(() => {
-      getYt('');
-    }).to.throw(/The video-id attribute is required for/);
+    return getYt('').should.eventually.be.rejectedWith(/The video-id attribute is required for/);
   });
 });

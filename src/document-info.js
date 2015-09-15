@@ -18,6 +18,11 @@ import {getService} from './service';
 import {assert} from './asserts';
 import {parseUrl} from './url';
 
+/**
+ * @param {!Window} win
+ * @return {{canonicalUrl: string}} Info about the doc
+ *     - canonicalUrl: The doc's canonical.
+ */
 export function documentInfoFor(win) {
  	return getService(win, 'documentInfo', () => {
     return {
@@ -25,6 +30,6 @@ export function documentInfoFor(win) {
           win.document.querySelector('link[rel=canonical]'),
               'AMP files are required to have a <link rel=canonical> tag.')
               .href).href
-    }
-  })
+    };
+  });
 }

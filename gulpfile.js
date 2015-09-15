@@ -82,15 +82,13 @@ function clean(done) {
   del(['dist', 'dist.ads', 'build', 'examples.build'], done);
 }
 
+// TODO(@cramforce): Consolidate test running functions.
 function unit(done) {
   build();
   karma.start({
     configFile: path.resolve('karma.conf.js'),
     files: tests,
-    singleRun: true,
-    client: {
-      captureConsole: true
-    }
+    singleRun: true
   }, done);
 }
 
@@ -99,18 +97,29 @@ function unitWatch(done) {
   karma.start({
     configFile: path.resolve('karma.conf.js'),
     files: tests,
-    browsers: ['Chrome']
   }, done);
 }
 
 function unitWatchVerbose(done) {
-  polyfillsForTests();
+  build();
+  karma.start({
+    configFile: path.resolve('karma.conf.js'),
+    files: tests
+  }, done);
+}
+
+function unitSafari(done) {
+  build();
   karma.start({
     configFile: path.resolve('karma.conf.js'),
     files: tests,
-    browsers: ['Chrome'],
+    singleRun: true,
+    browsers: ['Safari'],
     client: {
-      captureConsole: true
+      captureConsole: true,
+      mocha: {
+        timeout: 10000
+      }
     }
   }, done);
 }
@@ -235,6 +244,7 @@ gulp.task('clean', clean);
 gulp.task('unit', unit);
 gulp.task('unit-watch', unitWatch);
 gulp.task('unit-watch-verbose', unitWatchVerbose);
+gulp.task('unit-safari', unitSafari);
 gulp.task('build', build);
 gulp.task('watch', function() { return watch(); });
 gulp.task('minify', function() {
@@ -304,11 +314,11 @@ function compileJs(srcDir, srcFilename, destDir, options) {
       .on('error', function(err) { console.error(err); this.emit('end'); })
       .pipe(source(srcFilename))
       .pipe(buffer())
-      .pipe(include())
       .pipe(replace(/\$internalRuntimeVersion\$/g, internalRuntimeVersion))
       .pipe(wrap(wrapper))
       .pipe(sourcemaps.init({ loadMaps: true }))
       .pipe(sourcemaps.write('./'))
+      .pipe(include())
       .pipe(gulp.dest(destDir));
   }
 
@@ -327,8 +337,8 @@ function compileJs(srcDir, srcFilename, destDir, options) {
       .pipe(buffer())
       .pipe(include())
       .pipe(replace(/\$internalRuntimeVersion\$/g, internalRuntimeVersion))
-      .pipe(wrap(wrapper))
       .pipe(sourcemaps.init({ loadMaps: true }))
+      .pipe(wrap(wrapper))
       .pipe(uglify({
         preserveComments: 'some'
       }))

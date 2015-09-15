@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
+import {Timer} from '../../../../src/timer';
 import {adopt} from '../../../../src/runtime';
 import {naturalDimensions_} from '../../../../src/layout';
-import {createIframe} from '../../../../testing/iframe';
+import {createIframePromise} from '../../../../testing/iframe';
 require('../amp-audio');
 
 adopt(window);
@@ -25,14 +26,18 @@ describe('amp-audio', () => {
   var iframe;
   var ampAudio;
 
-  naturalDimensions_['audio'] = {width: 300, height: 30};
-
   beforeEach(() => {
-    iframe = createIframe();
-    ampAudio = iframe.doc.createElement('amp-audio');
+    return createIframePromise().then(i => {
+      iframe = i
+    });
   });
 
-  function setAudioAttrs(attributes, opt_childNodesAttrs) {
+  afterEach(() => {
+    document.body.removeChild(iframe.iframe);
+  });
+
+  function getAmpAudio(attributes, opt_childNodesAttrs) {
+    ampAudio = iframe.doc.createElement('amp-audio');
     for (var key in attributes) {
       ampAudio.setAttribute(key, attributes[key]);
     }
@@ -55,28 +60,34 @@ describe('amp-audio', () => {
     return ampAudio;
   }
 
-  function attachAndRun(element) {
-    iframe.doc.body.appendChild(element);
-    ampAudio.implementation_.firstAttachedCallback();
-    ampAudio.implementation_.layoutCallback();
-    return element;
+  function attachAndRun(attributes, opt_childNodesAttrs) {
+    var ampAudio = getAmpAudio(attributes, opt_childNodesAttrs);
+    naturalDimensions_['AMP-AUDIO'] = {width: 300, height: 30};
+    iframe.doc.body.appendChild(ampAudio);
+    return new Timer(window).promise(16).then(() => {
+      ampAudio.implementation_.firstAttachedCallback();
+      ampAudio.implementation_.buildCallback();
+      ampAudio.implementation_.layoutCallback();
+      return ampAudio;
+    });
   }
 
   it('should load audio through attribute', () => {
-    var a = attachAndRun(setAudioAttrs({
+    return attachAndRun({
       src: 'https://origin.com/audio.mp3'
-    }));
-    var audio = a.querySelector('audio');
-    expect(audio).to.be.an.instanceof(Element);
-    expect(audio.tagName).to.equal('AUDIO');
-    expect(audio.getAttribute('src')).to.equal('https://origin.com/audio.mp3');
-    expect(audio.hasAttribute('controls')).to.be.true;
-    expect(a.style.width).to.be.equal('300px');
-    expect(a.style.height).to.be.equal('30px');
+    }).then(a => {
+      var audio = a.querySelector('audio');
+      expect(audio).to.be.an.instanceof(Element);
+      expect(audio.tagName).to.equal('AUDIO');
+      expect(audio.getAttribute('src')).to.equal('https://origin.com/audio.mp3');
+      expect(audio.hasAttribute('controls')).to.be.true;
+      expect(a.style.width).to.be.equal('300px');
+      expect(a.style.height).to.be.equal('30px');
+    });
   });
 
   it('should load audio through sources', () => {
-    var a = attachAndRun(setAudioAttrs({
+    return attachAndRun({
       width: 503,
       height: 53,
       autoplay: '',
@@ -86,45 +97,54 @@ describe('amp-audio', () => {
         {tag: 'source', src: 'https://origin.com/audio.mp3', type: 'audio/mpeg'},
         {tag: 'source', src: 'https://origin.com/audio.ogg', type: 'audio/ogg'},
         {tag: 'text', text: 'Unsupported.'},
-    ]));
-    var audio = a.querySelector('audio');
-    expect(audio).to.be.an.instanceof(Element);
-    expect(audio.tagName).to.equal('AUDIO');
-    expect(a.getAttribute('width')).to.be.equal('503');
-    expect(a.getAttribute('height')).to.be.equal('53');
-    expect(audio.offsetWidth).to.be.greaterThan('1');
-    expect(audio.offsetHeight).to.be.greaterThan('1');
-    expect(audio.hasAttribute('controls')).to.be.true;
-    expect(audio.hasAttribute('autoplay')).to.be.true;
-    expect(audio.hasAttribute('muted')).to.be.true;
-    expect(audio.hasAttribute('loop')).to.be.true;
-    expect(audio.hasAttribute('src')).to.be.false;
-    expect(audio.childNodes[0].tagName).to.equal('SOURCE');
-    expect(audio.childNodes[0].getAttribute('src'))
-      .to.equal('https://origin.com/audio.mp3');
-    expect(audio.childNodes[1].tagName).to.equal('SOURCE');
-    expect(audio.childNodes[1].getAttribute('src'))
-      .to.equal('https://origin.com/audio.ogg');
-    expect(audio.childNodes[2].nodeType).to.equal(Node.TEXT_NODE);
-    expect(audio.childNodes[2].textContent).to.equal('Unsupported.');
+    ]).then(a => {
+      var audio = a.querySelector('audio');
+      expect(audio).to.be.an.instanceof(Element);
+      expect(audio.tagName).to.equal('AUDIO');
+      expect(a.getAttribute('width')).to.be.equal('503');
+      expect(a.getAttribute('height')).to.be.equal('53');
+      expect(audio.offsetWidth).to.be.greaterThan('1');
+      expect(audio.offsetHeight).to.be.greaterThan('1');
+      expect(audio.hasAttribute('controls')).to.be.true;
+      expect(audio.hasAttribute('autoplay')).to.be.true;
+      expect(audio.hasAttribute('muted')).to.be.true;
+      expect(audio.hasAttribute('loop')).to.be.true;
+      expect(audio.hasAttribute('src')).to.be.false;
+      expect(audio.childNodes[0].tagName).to.equal('SOURCE');
+      expect(audio.childNodes[0].tagName).to.equal('SOURCE');
+      expect(audio.childNodes[0].getAttribute('src'))
+        .to.equal('https://origin.com/audio.mp3');
+      expect(audio.childNodes[1].tagName).to.equal('SOURCE');
+      expect(audio.childNodes[1].getAttribute('src'))
+        .to.equal('https://origin.com/audio.ogg');
+      expect(audio.childNodes[2].nodeType).to.equal(Node.TEXT_NODE);
+      expect(audio.childNodes[2].textContent).to.equal('Unsupported.');
+    });
   });
 
   it('should set its dimensions to the browser natural', () => {
-    var a = attachAndRun(setAudioAttrs({}));
-    var audio = a.querySelector('audio');
-    expect(a.style.width).to.be.equal('300px');
-    expect(a.style.height).to.be.equal('30px');
-    expect(audio.offsetWidth).to.be.equal(300);
-    expect(audio.offsetHeight).to.be.equal(30);
+    return attachAndRun({}).then(a => {
+      var audio = a.querySelector('audio');
+      expect(a.style.width).to.be.equal('300px');
+      expect(a.style.height).to.be.equal('30px');
+      if (/Safari/.test(navigator.userAgent)) {
+        // Safari has default sizes for audio tags that cannot
+        // be overridden.
+        return;
+      }
+      expect(audio.offsetWidth).to.be.equal(300);
+      expect(audio.offsetHeight).to.be.equal(30);
+    });
   });
 
   it('should set its natural dimension only if not specified', () => {
-    var a = attachAndRun(setAudioAttrs({
+    return attachAndRun({
       'width': '500'
-    }));
-    var audio = a.querySelector('audio');
-    expect(a.style.width).to.be.equal('500px');
-    expect(a.style.height).to.be.equal('30px');
+    }).then(a => {
+      var audio = a.querySelector('audio');
+      expect(a.style.width).to.be.equal('500px');
+      expect(a.style.height).to.be.equal('30px');
+    });
   });
 
 });
