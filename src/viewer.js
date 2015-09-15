@@ -433,7 +433,6 @@ export class Viewer {
    * @param {*} data
    * @param {boolean} awaitResponse
    * @return {(!Promise<*>|undefined)}
-   * @package
    * @export
    */
   receiveMessage(eventType, data, awaitResponse) {
@@ -479,7 +478,6 @@ export class Viewer {
    * Provides a message delivery mechanism by which AMP document can send
    * messages to the viewer.
    * @param {function(string, *, boolean):(!Promise<*>|undefined)} deliverer
-   * @package
    * @export
    */
   setMessageDeliverer(deliverer) {
@@ -532,11 +530,10 @@ export class Viewer {
 /**
  * Parses the viewer parameters as a string.
  *
- * Visible for testing only.
- *
  * @param {string} str
  * @param {!Object<string, string>} allParams
  * @private
+ * visibleForTesting
  */
 export function parseParams_(str, allParams) {
   const params = parseQueryString(str);

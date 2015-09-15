@@ -16,7 +16,7 @@
 
 
 import {getMode} from './mode';
-import {exponentialBackoff} from './exponential-backoff.js';
+import {exponentialBackoff} from './exponential-backoff';
 import {makeBodyVisible} from './styles';
 
 const globalExponentialBackoff = exponentialBackoff(1.5);
