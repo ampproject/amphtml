@@ -71,12 +71,25 @@
       right: 0;
       bottom: 0;
       overflow-x: hidden;
+    }
+
+    viewer.natural container {
+      overflow-y: hidden;
+    }
+
+    viewer.virtual container {
       overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
     }
 
     container iframe {
       margin: 0;
       padding: 0;
+      width: 100%;
+    }
+
+    viewer.natural container iframe {
+      height: 100%;
     }
   </style>
   <script>
@@ -86,16 +99,28 @@
     function Viewer() {
       this.alreadyLoaded_ = false;
       this.stackIndex_ = 0;
+      this.viewportType_ = 'natural';  // "natural" or "virtual"
 
+      this.isIos_ = /iPhone|iPad|iPod/i.test(window.navigator.userAgent);
+
+      this.viewer = document.querySelector('viewer');
       this.header = document.querySelector('header');
       this.container = document.querySelector('container');
       this.iframe = document.createElement('iframe');
-      this.iframe.style.width = '100%';
       this.iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
-      this.iframe.setAttribute('scrolling', 'no');
+
+      this.viewer.classList.add(this.viewportType_);
+
+      if (this.viewportType_ == 'natural' && !this.isIos_) {
+        this.iframe.setAttribute('scrolling', 'yes');
+      } else {
+        this.iframe.setAttribute('scrolling', 'no');
+      }
 
       window.addEventListener('message', this.onMessage_.bind(this));
-      this.container.addEventListener('scroll', this.onScroll_.bind(this));
+      if (this.viewportType_ == 'virtual') {
+        this.container.addEventListener('scroll', this.onScroll_.bind(this));
+      }
       window.addEventListener('resize', this.onResize_.bind(this));
       window.addEventListener('popstate', this.onPopState_.bind(this));
     };
@@ -104,7 +129,7 @@
     Viewer.prototype.start = function() {
       var params = {
         history: 1,
-        viewportType: 'virtual',
+        viewportType: this.viewportType_,
         width: this.container.offsetWidth,
         height: this.container.offsetHeight,
         paddingTop: this.header.offsetHeight
@@ -123,7 +148,9 @@
       this.iframe.onload = this.loaded_.bind(this);
       setTimeout(function() {
         this.iframe.style.visibility = 'hidden';
-        this.iframe.style.height = this.container.offsetHeight + 'px';
+        if (this.viewportType_ == 'virtual') {
+          this.iframe.style.height = this.container.offsetHeight + 'px';
+        }
         this.iframe.style.display = '';
         this.iframe.setAttribute('src', url);
       }.bind(this));
@@ -155,8 +182,10 @@
 
     Viewer.prototype.documentHeight_ = function(documentHeight) {
       log('AMP document height:', documentHeight);
-      this.iframe.style.height = Math.max(documentHeight,
-          this.container.offsetHeight) + 'px';
+      if (this.viewportType_ == 'virtual') {
+        this.iframe.style.height = Math.max(documentHeight,
+            this.container.offsetHeight) + 'px';
+      }
     };
 
 
