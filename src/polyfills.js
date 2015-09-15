@@ -19,7 +19,7 @@
  */
 
 
-//=require node_modules/webcomponents.js/webcomponents-lite.js
+import 'webcomponents.js/webcomponents-lite'
 
 require('./custom-core-js-shim');
 require('babel-core/external-helpers');
