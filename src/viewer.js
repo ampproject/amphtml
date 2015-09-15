@@ -119,7 +119,8 @@ export class Viewer {
     // Configure scrolling parameters when AMP is embeded in a viewer on iOS.
     if (this.viewportType_ == 'natural' && this.win.parent &&
             platform.isIos()) {
-      onDocumentReady(this.win.document, () => this.setupEmbeddedScrolling_());
+      onDocumentReady(this.win.document,
+          () => this.setupEmbeddedScrollingIos_());
     }
 
     // Remove hash - no reason to keep it around.
@@ -339,7 +340,7 @@ export class Viewer {
   /**
    * @private
    */
-  setupEmbeddedScrolling_() {
+  setupEmbeddedScrollingIos_() {
     // Embedded scrolling on iOS is rather complicated. IFrames cannot be sized
     // and be scrollable. Sizing iframe by scrolling height has a big negative
     // that "fixed" position is essentially impossible. The only option we
