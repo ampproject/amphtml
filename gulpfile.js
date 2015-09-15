@@ -306,9 +306,9 @@ function compileJs(srcDir, srcFilename, destDir, options) {
       .pipe(buffer())
       .pipe(include())
       .pipe(replace(/\$internalRuntimeVersion\$/g, internalRuntimeVersion))
+      .pipe(wrap(wrapper))
       .pipe(sourcemaps.init({ loadMaps: true }))
       .pipe(sourcemaps.write('./'))
-      .pipe(wrap(wrapper))
       .pipe(gulp.dest(destDir));
   }
 
@@ -327,6 +327,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
       .pipe(buffer())
       .pipe(include())
       .pipe(replace(/\$internalRuntimeVersion\$/g, internalRuntimeVersion))
+      .pipe(wrap(wrapper))
       .pipe(sourcemaps.init({ loadMaps: true }))
       .pipe(uglify({
         preserveComments: 'some'
