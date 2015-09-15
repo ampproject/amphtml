@@ -25,31 +25,63 @@ import {writeScript, executeAfterWriteScript} from '../src/3p'
 export function twitter(global, data) {
   var tweet = document.createElement('div');
   tweet.id = 'tweet';
+  var width = data.width;
+  var height = data.height;
+  tweet.style.height = height + 'px';
+  tweet.style.width = width + 'px';
   global.document.getElementById('c').appendChild(tweet);
   var s = document.createElement('script');
   s.src = 'https://platform.twitter.com/widgets.js';
   s.onload = function() {
-    twttr.widgets.createTweet(data.tweetid, tweet, data);
+    twttr.widgets.createTweet(data.tweetid, tweet, data).then(() => {
+      window.onresize = resize;
+      var iframe = global.document.querySelector('#c iframe');
+      // Unfortunately the tweet isn't really done when the promise
+      // resolves. We listen for resize to learn when things are
+      // really done.
+      iframe.contentWindow.addEventListener('resize', function(e) {
+        // Stop propagation in capture phase to avoid the tweet
+        // auto resizing itself.
+        e.stopPropagation();
+        render();
+      }, true)
+      render();
+    });
   };
-  // Buggy, hacky, dirty.
-  var redraw = global.onload = global.onresize = function() {
+
+  function resize() {
+    // On resize we reset our base dimensions.
+    width = window.innerWidth;
+    height = window.innerHeight;
+    render();
+  }
+
+  function render() {
     var iframe = global.document.querySelector('#c iframe');
-    if (!iframe) {
-      setTimeout(redraw, 32); // Poll for the iframe
-      return;
-    }
-    iframe.contentWindow.onresize = redraw;
-    if (!iframe.offsetHeight) {
-      setTimeout(redraw, 32); // Poll for the iframe to have a height.
-      return;
-    }
-    var offsetHeight = iframe.offsetHeight + /* margins */ 20;
+    var offsetHeight = iframe.contentWindow.document.body.offsetHeight +
+        /* margins */ 20;
     var offsetWidth = iframe.offsetWidth;
-    tweet.style.height = offsetHeight + 'px';
-    tweet.style.width = offsetWidth + 'px';
+    var scale = window.innerHeight / offsetHeight;
+    if (context.mode.development && scale != 1) {
+      console.info('Ideal tweet size for tweet id:', data.tweetid,
+          'width="' + iframe.offsetWidth +'" height="' + offsetHeight + '"',
+          data);
+    }
     tweet.style.position = 'absolute';
     tweet.style.transformOrigin = 'top left';
-    tweet.style.transform = 'scale(' + (window.innerHeight / offsetHeight) + ')';
-  };
+    tweet.style.transform = 'scale(' + scale + ')';
+    // Alright, here we get from hacky into monkey patch territory.
+    // We do not want the Tweet embed to know that we scaled it, because
+    // then it may just redraw based on the new space.
+    // This, of course, could break due to all kinds of changes in the
+    // Twitter code. May we rest in peace.
+    iframe.getBoundingClientRect = function() {
+      return {
+        width: width,
+        height: height
+      };
+    };
+  }
+
   global.document.body.appendChild(s);
 }
