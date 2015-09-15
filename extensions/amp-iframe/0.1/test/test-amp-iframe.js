@@ -16,7 +16,7 @@
 
 import {Timer} from '../../../../src/timer';
 import {adopt} from '../../../../src/runtime';
-import {createIframePromise} from '../../../../testing/iframe';
+import {createIframePromise, pollForLayout} from '../../../../testing/iframe';
 import {loadPromise} from '../../../../src/event-helper';
 import {resources} from '../../../../src/resources';
 require('../amp-iframe');
@@ -26,7 +26,7 @@ adopt(window);
 describe('amp-iframe', () => {
 
   var iframeSrc = 'http://iframe.localhost:' + location.port +
-          '/base/fixtures/served/iframe.html';
+      '/base/fixtures/served/iframe.html';
 
   var timer = new Timer(window);
   var ranJs = 0;
@@ -57,15 +57,16 @@ describe('amp-iframe', () => {
       }
       iframe.doc.body.appendChild(i);
       // Wait an event loop for the iframe to be created.
-      return timer.promise(0).then(() => {
-        if (i.lastChild && i.lastChild.tagName == 'IFRAME') {
+      return pollForLayout(iframe.win, 1).then(() => {
+        var created = i.lastChild;
+        if (created && created.tagName == 'IFRAME') {
           // Wait for the iframe to load
-          return loadPromise(i.lastChild).then(() => {
+          return loadPromise(created).then(() => {
             // Wait a bit more for postMessage to get through.
             return timer.promise(0).then(() => {
               return {
                 container: i,
-                iframe: i.lastChild
+                iframe: created
               };
             });
           });
@@ -103,7 +104,7 @@ describe('amp-iframe', () => {
       height: 100
     }).then((amp) => {
       expect(amp.iframe.getAttribute('sandbox')).to.equal('allow-scripts');
-      return timer.promise(0).then(() => {
+      return timer.promise(100).then(() => {
         expect(ranJs).to.equal(1);
       });
     });

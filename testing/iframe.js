@@ -15,6 +15,7 @@
  */
 
 
+require('../src/polyfills');
 import {registerForUnitTest} from '../src/runtime';
 
 var iframeCount = 0;
@@ -46,6 +47,7 @@ export function createFixtureIframe(fixture, initialIframeHeight, done) {
     // Counts the supported custom events.
     const events = {
       'amp:attached': 0,
+      'amp:error': 0,
       'amp:stubbed': 0,
       'amp:load:start': 0
     };
@@ -85,9 +87,14 @@ export function createFixtureIframe(fixture, initialIframeHeight, done) {
           events[name]++;
         });
       }
+      win.onerror = function(message, file, line, col, error) {
+        throw new Error('Error in frame: ' + message + '\n' +
+            file + ':' + line + '\n' +
+            (error ? error.stack : 'no stack'));
+      };
       var errors = []
       win.console.error = function() {
-        errors.push([].slice.call(arguments).join(' '));
+        errors.push('Error: ' + [].slice.call(arguments).join(' '));
       };
       var timeout = setTimeout(function() {
         reject(new Error('Timeout waiting for elements to start loading.'));
@@ -134,7 +141,9 @@ export function createFixtureIframe(fixture, initialIframeHeight, done) {
 export function createIframe() {
   var iframe = document.createElement('iframe');
   iframe.name = 'test_' + iframeCount++;
-  iframe.srcdoc = '<!doctype><html><head><body style="margin:0">';
+  iframe.srcdoc = '<!doctype><html><head>' +
+      '<script src="/base/build/polyfills.js"></script>' +
+      '<body style="margin:0">';
   document.body.appendChild(iframe);
   registerForUnitTest(iframe.contentWindow);
   // Flag as being a test window.
@@ -156,10 +165,12 @@ export function createIframe() {
  * }}
  */
 export function createIframePromise() {
-  return new Promise(function(resolve) {
+  return new Promise(function(resolve, reject) {
     var iframe = document.createElement('iframe');
     iframe.name = 'test_' + iframeCount++;
-    iframe.srcdoc = '<!doctype><html><head><body style="margin:0">';
+    iframe.srcdoc = '<!doctype><html><head>' +
+        '<script src="/base/build/polyfills.js"></script>' +
+        '<body style="margin:0">';
     iframe.onload = function() {
       registerForUnitTest(iframe.contentWindow);
       // Flag as being a test window.
@@ -170,6 +181,53 @@ export function createIframePromise() {
         iframe: iframe
       });
     };
+    iframe.onerror = reject;
     document.body.appendChild(iframe);
+  });
+}
+
+/**
+ * @param {string} description
+ * @param {fn():boolean} condition
+ * @param {fn():!Error=} opt_onError
+ * @return {!Promise}
+ */
+export function poll(description, condition, opt_onError) {
+  return new Promise((resolve, reject) => {
+    var start = new Date().getTime();
+    function poll() {
+      if (condition()) {
+        clearInterval(interval);
+        resolve();
+      } else {
+        if (new Date().getTime() - start > 1600) {
+          clearInterval(interval);
+          if (opt_onError) {
+            reject(opt_onError());
+            return;
+          }
+          reject(new Error('Timeout waiting for ' + description));
+        }
+      }
+    }
+    var interval = setInterval(poll, 50);
+    poll();
+  });
+}
+
+/**
+ * Polls for the given number of elements to have received layout or
+ * be in error state (Better to fail an assertion after this then just time
+ * out).
+ * @param {!Window} win
+ * @param {number} count
+ * @return {!Promise}
+ */
+export function pollForLayout(win, count) {
+  return poll('Waiting for elements to layout: ' + count, () => {
+    return win.document.querySelectorAll('.-amp-layout,.-amp-error').length >= count;
+  }, () => {
+    return new Error('Failed to find elements with layout. HTML:\n' +
+        win.document.documentElement.innerHTML);
   });
 }

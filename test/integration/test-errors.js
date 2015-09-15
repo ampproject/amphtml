@@ -15,7 +15,7 @@
  */
 
 import {Timer} from '../../src/timer';
-import {createFixtureIframe} from '../../testing/iframe.js';
+import {createFixtureIframe, poll} from '../../testing/iframe.js';
 import {loadPromise} from '../../src/event-helper';
 
 describe('error page', () => {
@@ -23,26 +23,28 @@ describe('error page', () => {
   beforeEach(() => {
     return createFixtureIframe('fixtures/errors.html', 500).then((f) => {
       fixture = f;
-    }).then(() => {
-      // Only run this when we are fully loaded.
-      return loadPromise(fixture.win);
-    }).then(() => {
-      return new Timer(window).promise(500);
+      return poll('errors to happen', () => {
+        return fixture.doc.querySelectorAll('[error-message]').length >= 2;
+      }, () => {
+        return new Error('Failed to find errors. HTML\n' +
+            fixture.doc.documentElement.innerHTML);
+      });
     });
   });
 
   function shouldFail(id) {
+    // Skip for issue #110
     it('should fail to load #' + id, () => {
       var e = fixture.doc.getElementById(id);
+      expect(fixture.errors.join('\n')).to.contain(
+          e.getAttribute('data-expectederror'));
       expect(e.getAttribute('error-message')).to.contain(
           e.getAttribute('data-expectederror'));
       expect(e.className).to.contain('-amp-element-error');
-      expect(fixture.errors.join('\n')).to.contain(
-          e.getAttribute('data-expectederror'));
     });
   }
 
   // Add cases to fixtures/errors.html and add them here.
-  shouldFail('iframe0');
   shouldFail('yt0');
+  shouldFail('iframe0');
 });

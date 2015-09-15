@@ -1,0 +1,61 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>AMP #0</title>
+  <link rel="canonical" href="amps.html" >
+  <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
+  <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
+  <script custom-element="amp-lightbox" src="../../dist/v0/amp-lightbox-0.1.max.js" async></script>
+  <script src="../../dist/amp.js" development></script>
+  <style>
+    body {
+      max-width: 527px;
+      font-family: 'Questrial', Arial;
+    }
+
+    .lightbox1 {
+      background: #222;
+    }
+
+    .lightbox1-content {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      flex-direction: column;
+      flex-wrap: nowrap;
+      justify-content: center;
+      align-items: center;
+    }
+    .lightbox1 amp-img {
+      max-width: 80%;
+      max-height: 80%;
+      width: 100%;
+    }
+
+    amp-lightbox .lightbox1-content {
+      margin: 30px;
+      padding: 30px;
+      border: 10px solid red;
+    }
+  </style>
+</head>
+<body>
+  <h1>amp #0</h1>
+  <p>
+    <amp-img id="img0"
+        src="https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w2004-h734-no/PANO_20150726_171347%257E2.jpg"
+        width=527 height=193 layout="responsive"
+        on="tap:lightbox1"></amp-img>
+  </p>
+  <amp-lightbox id="lightbox1" class="lightbox1" layout="nodisplay" from="img0">
+    <div class="lightbox1-content">
+      <amp-img id="img0" src="https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w452-h900-p/PANO_20150726_171347%257E2.jpg" width=226 height=450 layout="responsive"></amp-img>
+    </div>
+  </amp-lightbox>
+</body>
+</html>
+

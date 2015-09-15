@@ -15,7 +15,8 @@
  */
 
 import {Layout, getLayoutClass, getLengthNumeral, getLengthUnits,
-          isLayoutSizeDefined, parseLayout, parseLength} from './layout';
+          isLayoutSizeDefined, parseLayout, parseLength,
+          getNaturalDimensions, hasNaturalDimensions} from './layout';
 import {ElementStub, stubbedElements} from './element-stub';
 import {assert} from './asserts';
 import {log} from './log';
@@ -92,6 +93,15 @@ export function applyLayout_(element) {
   let widthAttr = element.getAttribute('width');
   let heightAttr = element.getAttribute('height');
   let layoutAttr = element.getAttribute('layout');
+
+  // Handle elements that do not specify a width/height and are defined to have
+  // natural browser dimensions.
+  if ((!layoutAttr || layoutAttr === Layout.FIXED) &&
+      (!widthAttr || !heightAttr) && hasNaturalDimensions(element.tagName)) {
+    let dimensions = getNaturalDimensions(element.tagName);
+    widthAttr = widthAttr || dimensions.width;
+    heightAttr = heightAttr || dimensions.height;
+  }
 
   let layout;
   if (layoutAttr) {
@@ -372,6 +382,7 @@ export function createAmpElementProto(win, name, implementationClass) {
         'Must be upgraded and built to receive viewport events');
     this.dispatchCustomEvent('amp:load:start');
     var promise = this.implementation_.layoutCallback();
+    this.classList.add('-amp-layout')
     assert(promise instanceof Promise,
         'layoutCallback must return a promise');
     return promise.then(() => {

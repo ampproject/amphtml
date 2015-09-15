@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {BaseElement} from './base-element';
-import {Layout} from './layout';
-import {assert} from './asserts';
-import {documentInfoFor} from './document-info';
-import {registerElement} from './custom-element';
+import {BaseElement} from '../src/base-element';
+import {Layout} from '../src/layout';
+import {assert} from '../src/asserts';
+import {documentInfoFor} from '../src/document-info';
+import {registerElement} from '../src/custom-element';
 
 
 /**

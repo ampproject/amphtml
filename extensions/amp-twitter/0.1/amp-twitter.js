@@ -20,22 +20,20 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
 
 
-(window.AMP = window.AMP || []).push(function(AMP) {
-  class AmpTwitter extends AMP.BaseElement {
-    /** @override */
-    isLayoutSupported(layout) {
-      return isLayoutSizeDefined(layout);
-    }
-    /** @override */
-    layoutCallback() {
-      // TODO(malteubl): Preconnect to twitter.
-      var iframe = getIframe(this.element.ownerDocument.defaultView,
-          this.element, 'twitter');
-      this.applyFillContent(iframe);
-      this.element.appendChild(iframe);
-      return loadPromise(iframe);
-    }
+class AmpTwitter extends AMP.BaseElement {
+  /** @override */
+  isLayoutSupported(layout) {
+    return isLayoutSizeDefined(layout);
   }
+  /** @override */
+  layoutCallback() {
+    // TODO(malteubl): Preconnect to twitter.
+    var iframe = getIframe(this.element.ownerDocument.defaultView,
+        this.element, 'twitter');
+    this.applyFillContent(iframe);
+    this.element.appendChild(iframe);
+    return loadPromise(iframe);
+  }
+}
 
-  AMP.registerElement('amp-twitter', AmpTwitter);
-});
+AMP.registerElement('amp-twitter', AmpTwitter);

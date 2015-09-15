@@ -16,23 +16,21 @@
 
 // Simulate a slow network.
 setTimeout(function() {
-  (window.AMP = window.AMP || []).push(function(AMP) {
-    'use strict';
+  'use strict';
 
-    class ExtendedSample extends AMP.BaseElement {
-      /** @override */
-      isLayoutSupported(layout) {
-        return true;
-      }
-      /** @override */
-      layoutCallback() {
-        var h1 = document.createElement('h1');
-        h1.textContent = 'Loads after 2 seconds. Sloowwww';
-        this.element.appendChild(h1);
-        return Promise.resolve();
-      }
+  class ExtendedSample extends AMP.BaseElement {
+    /** @override */
+    isLayoutSupported(layout) {
+      return true;
     }
+    /** @override */
+    layoutCallback() {
+      var h1 = document.createElement('h1');
+      h1.textContent = 'Loads after 2 seconds. Sloowwww';
+      this.element.appendChild(h1);
+      return Promise.resolve();
+    }
+  }
 
-    AMP.registerElement('amp-extended-sample', ExtendedSample, $CSS$)
-  });
+  AMP.registerElement('amp-extended-sample', ExtendedSample, $CSS$)
 }, 2000);

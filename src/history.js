@@ -111,7 +111,11 @@ export class History {
     /** @private @const {function(*, string=, string=)} */
     this.replaceState_ = replaceState;
 
-    this.replaceState_(historyState_(this.stackIndex_));
+    try {
+      this.replaceState_(historyState_(this.stackIndex_));
+    } catch (e) {
+      log.error(TAG_, 'Initial replaceState failed: ' + e.message);
+    }
 
     history.pushState = this.historyPushState_.bind(this);
     history.replaceState = this.historyReplaceState_.bind(this);

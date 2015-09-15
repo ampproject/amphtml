@@ -40,6 +40,39 @@ export function parseUrl(url) {
   return info;
 }
 
+
+/**
+ * Parses the query string of an URL. This method returns a simple key/value
+ * map. If there are duplicate keys the latest value is returned.
+ * @param {string} queryString
+ * @return {!Object<string, string>}
+ */
+export function parseQueryString(queryString) {
+  var params = Object.create(null);
+  if (!queryString) {
+    return params;
+  }
+  let pairs = queryString.split('&');
+  for (let i = 0; i < pairs.length; i++) {
+    let pair = pairs[i];
+    let eqIndex = pair.indexOf('=');
+    let name;
+    let value;
+    if (eqIndex != -1) {
+      name = decodeURIComponent(pair.substring(0, eqIndex)).trim();
+      value = decodeURIComponent(pair.substring(eqIndex + 1)).trim();
+    } else {
+      name = decodeURIComponent(pair).trim();
+      value = '';
+    }
+    if (name) {
+      params[name] = value;
+    }
+  }
+  return params;
+}
+
+
 /**
  * @param {!Location} info
  * @return {string}

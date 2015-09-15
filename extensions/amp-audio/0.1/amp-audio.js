@@ -15,111 +15,51 @@
  */
 
 import {assert} from '../../../src/asserts';
-import {Layout}  from '../../../src/layout';
+import {Layout, getLengthNumeral}  from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
 
-(window.AMP = window.AMP || []).push(function(AMP) {
+class AmpAudio extends AMP.BaseElement {
 
-  /**
-   * @typedef {{
-   *   width: number,
-   *   height: number
-   * }}
-   */
-  let Dimensions;
+  /** @override */
+  isLayoutSupported(layout) {
+    return layout === Layout.FIXED;
+  }
 
-  /** @type {?Dimensions} */
-  let audioDefaultDimensions_ = null;
 
-  /**
-   * Determines the default dimensions for an audio player which varies across
-   * browser implementations.
-   * @return {Dimensions}
-   */
-  function getBrowserAudioDefaultDimensions() {
-    if (!audioDefaultDimensions_) {
-      let temp = document.createElement('audio');
-      temp.controls = true;
-      temp.style.position = 'absolute';
-      temp.style.visibility = 'hidden';
-      document.body.appendChild(temp);
-      audioDefaultDimensions_ = {
-        width: temp.offsetWidth,
-        height: temp.offsetHeight
-      };
-      document.body.removeChild(temp);
-    }
-    return audioDefaultDimensions_;
+  /** @override */
+  layoutCallback() {
+    let audio = document.createElement('audio');
+    // Force controls otherwise there is no player UI.
+    audio.controls = true;
+    this.assertElementSrcIfExists(this.element);
+    this.propagateAttributes(
+        ['src', 'autoplay', 'muted', 'loop'],
+        audio);
+
+    this.applyFillContent(audio);
+    this.getRealChildNodes().forEach(child => {
+      this.assertElementSrcIfExists(child);
+      audio.appendChild(child);
+    });
+    this.element.appendChild(audio);
+    return loadPromise(audio);
   }
 
 
   /**
-   * @param {!Window} win Destination window for the new element.
+   * Ensures an <audio> or nested <source> is loading a secure or
+   * protocol-free path.
    */
-  class AmpAudio extends AMP.BaseElement {
-
-
-    /** @override */
-    isLayoutSupported(layout) {
-      return layout === Layout.FIXED;
+  assertElementSrcIfExists(element) {
+    if (!(element instanceof Element) || !element.hasAttribute('src')) {
+      return;
     }
-
-
-    /**
-     * Ensures that a width and height is set to the browser's default audio
-     * player's inherent dimensions if not specified.
-     * @override
-     */
-    createdCallback() {
-      let heightAttr = this.element.getAttribute('height');
-      let widthAttr = this.element.getAttribute('width');
-      if (!heightAttr || !widthAttr) {
-        let dimensions = getBrowserAudioDefaultDimensions();
-        if (!heightAttr) {
-          this.element.setAttribute('height', dimensions.height);
-        }
-        if (!widthAttr) {
-          this.element.setAttribute('width', dimensions.width);
-        }
-      }
-    }
-
-
-    /** @override */
-    layoutCallback() {
-      let audio = document.createElement('audio');
-      // Force controls otherwise there is no player UI.
-      audio.controls = true;
-      this.assertElementSrcIfExists(this.element);
-      this.propagateAttributes(
-          ['src', 'autoplay', 'muted', 'loop'],
-          audio);
-
-      this.applyFillContent(audio);
-      this.getRealChildNodes().forEach(child => {
-        this.assertElementSrcIfExists(child);
-        audio.appendChild(child);
-      });
-      this.element.appendChild(audio);
-      return loadPromise(audio);
-    }
-
-
-    /**
-     * Ensures an <audio> or nested <source> is loading a secure or
-     * protocol-free path.
-     */
-    assertElementSrcIfExists(element) {
-      if (!(element instanceof Element) || !element.hasAttribute('src')) {
-        return;
-      }
-      let src = element.getAttribute('src');
-      assert(
-          /^(https\:\/\/|\/\/)/i.test(src),
-          'An <amp-audio> audio source must start with ' +
-          '"https://" or "//". Invalid value: ' + src);
-    }
+    let src = element.getAttribute('src');
+    assert(
+        /^(https\:\/\/|\/\/)/i.test(src),
+        'An <amp-audio> audio source must start with ' +
+        '"https://" or "//". Invalid value: ' + src);
   }
+}
 
-  AMP.registerElement('amp-audio', AmpAudio);
-});
+AMP.registerElement('amp-audio', AmpAudio);

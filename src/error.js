@@ -37,14 +37,20 @@ export function reportErrorToDeveloper(error, opt_associatedElement) {
   }
   error.reported = true;
   var element = opt_associatedElement || error.associatedElement;
-  if (element && getMode().development) {
-    element.classList.add('-amp-element-error');
-    element.setAttribute('error-message', error.message);
+  if (element) {
+    element.classList.add('-amp-error');
+    if (getMode().development) {
+      element.classList.add('-amp-element-error');
+      element.setAttribute('error-message', error.message);
+    }
   }
   if (error.messageArray) {
     (console.error || console.log).apply(console,
         error.messageArray);
   } else {
     (console.error || console.log).call(console, error.message);
+  }
+  if (element && element.dispatchCustomEvent) {
+    element.dispatchCustomEvent('amp:error', error.message);
   }
 }

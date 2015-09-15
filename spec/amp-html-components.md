@@ -131,7 +131,7 @@ The width of the component. `width` and `height` attributes imply the aspect rat
 
 **height**
 
-The height of the image. `width` and `height` attributes imply the aspect ratio of the image, which can then scale with the container.
+The height of the component. `width` and `height` attributes imply the aspect ratio of the image, which can then scale with the container.
 
 **layout**
 
@@ -159,7 +159,7 @@ In the near-term, implementation will focus on the core components, before prior
 
 The creators of the AMP component project - Google and a core group of collaborators, and potentially representatives from other collaborators as the project grows in usage - will have ultimate discretion as to the inclusion of contributed components, though with the goal of including every high-quality contribution that meets the above guidelines, and resolving or providing feedback on proposed contributions in a timely manner.
 
-While in active development, the initial creators of the project - Google and a core group of collaborators - will work together onaround adding additional owners as well as approving contributions for inclusion.
+While in active development, the initial creators of the project - Google and a core group of collaborators - will work together around adding additional owners as well as approving contributions for inclusion.
 
 Contributions with the following characteristics will be prioritized:
 - Generalized components that solve problems in a non-service-specific way - e.g. a “Related Content” widget that makes a request to a generic JSON endpoint for lazy-loading in additional content.
@@ -189,13 +189,18 @@ In these cases, services may set up endpoints that produce data that conforms to
 
 ## Components
 
-- [amp-img](../src/amp-img.md)
+- [amp-img](../builtins/amp-img.md)
 - [amp-anim](../extensions/amp-anim/amp-anim.md)
-- [amp-ad](../src/amp-ad.md)
-- [amp-pixel](../src/amp-pixel.md)
-- [amp-video](../src/amp-video.md)
+- [amp-ad](../builtins/amp-ad.md)
+- [amp-pixel](../builtins/amp-pixel.md)
+- [amp-video](../builtins/amp-video.md)
+- [amp-carousel](../extensions/amp-carousel/amp-carousel.md)
 - [amp-lightbox](../extensions/amp-lightbox/amp-lightbox.md)
 - [amp-iframe](../extensions/amp-iframe/amp-iframe.md)
 - [amp-instagram](../extensions/amp-instagram/amp-instagram.md)
 - [amp-twitter](../extensions/amp-twitter/amp-twitter.md)
 - [amp-youtube](../extensions/amp-youtube/amp-youtube.md)
+
+### <a name=”on-attribute”></a> `on` attribute
+
+TODO: describe `on` attribute

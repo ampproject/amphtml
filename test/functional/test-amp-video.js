@@ -15,7 +15,7 @@
  */
 
 import {createIframe} from '../../testing/iframe';
-import {installVideo} from '../../src/amp-video';
+import {installVideo} from '../../builtins/amp-video';
 
 describe('amp-video', () => {
 

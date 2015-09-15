@@ -38,33 +38,31 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
 
 
-(window.AMP = window.AMP || []).push(function(AMP) {
-  class AmpInstagram extends AMP.BaseElement {
-    /** @override */
-    isLayoutSupported(layout) {
-      return isLayoutSizeDefined(layout);
-    }
-    /** @override */
-    layoutCallback() {
-      var width = this.element.getAttribute('width');
-      var height = this.element.getAttribute('height');
-      var shortCode = AMP.assert(this.element.getAttribute('shortcode'),
-          'The shortcode attribute is required for <amp-instagram> %s',
-          this.element);
-      // See
-      // https://instagram.com/developer/embedding/?hl=en
-      var iframe = document.createElement('iframe');
-      iframe.setAttribute('frameborder', '0');
-      iframe.setAttribute('allowtransparency', 'true');
-      iframe.src = 'https://instagram.com/p/' +
-          encodeURIComponent(shortCode) + '/embed/?v=4';
-      this.applyFillContent(iframe);
-      iframe.width = width;
-      iframe.height = height;
-      this.element.appendChild(iframe);
-      return loadPromise(iframe);
-    }
+class AmpInstagram extends AMP.BaseElement {
+  /** @override */
+  isLayoutSupported(layout) {
+    return isLayoutSizeDefined(layout);
   }
+  /** @override */
+  layoutCallback() {
+    var width = this.element.getAttribute('width');
+    var height = this.element.getAttribute('height');
+    var shortCode = AMP.assert(this.element.getAttribute('shortcode'),
+        'The shortcode attribute is required for <amp-instagram> %s',
+        this.element);
+    // See
+    // https://instagram.com/developer/embedding/?hl=en
+    var iframe = document.createElement('iframe');
+    iframe.setAttribute('frameborder', '0');
+    iframe.setAttribute('allowtransparency', 'true');
+    iframe.src = 'https://instagram.com/p/' +
+        encodeURIComponent(shortCode) + '/embed/?v=4';
+    this.applyFillContent(iframe);
+    iframe.width = width;
+    iframe.height = height;
+    this.element.appendChild(iframe);
+    return loadPromise(iframe);
+  }
+}
 
-  AMP.registerElement('amp-instagram', AmpInstagram);
-});
+AMP.registerElement('amp-instagram', AmpInstagram);

@@ -20,121 +20,121 @@ import {timer} from '../../../src/timer';
 import * as st from '../../../src/style';
 
 
-(window.AMP = window.AMP || []).push(function(AMP) {
-  class AmpLightbox extends AMP.BaseElement {
+class AmpLightbox extends AMP.BaseElement {
 
-    /** @override */
-    isLayoutSupported(layout) {
-      return layout == Layout.NODISPLAY;
-    }
-
-    /** @override */
-    isReadyToBuild() {
-      return this.element.firstChild != null;
-    }
-
-    /** @override */
-    buildCallback() {
-      st.setStyles(this.element, {
-        position: 'fixed',
-        zIndex: 1000,
-        top: 0,
-        left: 0,
-        bottom: 0,
-        right: 0
-      });
-
-      let children = this.getRealChildren();
-
-      /** @private {!Element} */
-      this.container_ = document.createElement('div');
-      this.applyFillContent(this.container_);
-      this.element.appendChild(this.container_);
-      children.forEach((child) => {
-        this.container_.appendChild(child);
-      });
-
-      // TODO(dvoytenko): configure how to close. Or maybe leave it completely
-      // up to "on" element.
-      this.element.addEventListener('click', () => this.close());
-
-      /** @private {number} */
-      this.historyId_ = -1;
-    }
-
-    /** @override */
-    layoutCallback() {
-      return Promise.resolve();
-    }
-
-    /** @override */
-    activate() {
-      this.element.style.display = '';
-      this.element.style.opacity = 0;
-
-      let transLayer = null;
-
-      // TODO(dvoytenko): This is definitely not great. Instead would be better
-      // to pass in the action's event or do this via auto-lightbox API.
-      let from = this.element.hasAttribute('from') ? document.getElementById(
-          this.element.getAttribute('from')) : null;
-      if (from) {
-        let rect = from.getBoundingClientRect();
-        let clone = from.cloneNode(true);
-        clone.style.position = 'absolute';
-        clone.style.top = rect.top;
-        clone.style.left = rect.left;
-        clone.style.bottom = rect.bottom;
-        clone.style.right = rect.right;
-
-        transLayer = document.createElement('div');
-        transLayer.style.pointerEvents = 'none';
-        transLayer.style.position = 'fixed';
-        transLayer.style.zIndex = 1001;
-        transLayer.style.top = 0;
-        transLayer.style.left = 0;
-        transLayer.style.bottom = 0;
-        transLayer.style.right = 0;
-        transLayer.appendChild(clone);
-        document.body.appendChild(transLayer);
-
-        this.container_.style.opacity = 0;
-      }
-
-      this.element.style.transition = 'opacity 0.1s ease-in';
-      requestAnimationFrame(() => {
-        this.element.style.opacity = '';
-        if (transLayer) {
-          this.container_.style.transition = 'opacity 0.1s ease-in';
-          transLayer.style.transition = 'opacity 0.1s ease-out';
-          // TODO(dvoytenko): onAnimationEnd
-          timer.delay(() => {
-            requestAnimationFrame(() => {
-              this.container_.style.opacity = '';
-              transLayer.style.opacity = 0;
-              timer.delay(() => {
-                document.body.removeChild(transLayer);
-              }, 100);
-            });
-          }, 100);
-        }
-      });
-
-      this.scheduleLayout(this.container_);
-      this.updateInViewport(this.container_, true);
-
-      history().push(this.close.bind(this)).then((historyId) => {
-        this.historyId_ = historyId;
-      });
-    }
-
-    close() {
-      this.element.style.display = 'none';
-      if (this.historyId_ != -1) {
-        history().pop(this.historyId_);
-      }
-    }
+  /** @override */
+  isLayoutSupported(layout) {
+    return layout == Layout.NODISPLAY;
   }
 
-  AMP.registerElement('amp-lightbox', AmpLightbox);
-});
+  /** @override */
+  isReadyToBuild() {
+    return this.element.firstChild != null;
+  }
+
+  /** @override */
+  buildCallback() {
+    st.setStyles(this.element, {
+      position: 'fixed',
+      zIndex: 1000,
+      top: 0,
+      left: 0,
+      bottom: 0,
+      right: 0
+    });
+
+    let children = this.getRealChildren();
+
+    /** @private {!Element} */
+    this.container_ = document.createElement('div');
+    this.applyFillContent(this.container_);
+    this.element.appendChild(this.container_);
+    children.forEach((child) => {
+      this.container_.appendChild(child);
+    });
+
+    // TODO(dvoytenko): configure how to close. Or maybe leave it completely
+    // up to "on" element.
+    this.element.addEventListener('click', () => this.close());
+
+    /** @private {number} */
+    this.historyId_ = -1;
+  }
+
+  /** @override */
+  layoutCallback() {
+    return Promise.resolve();
+  }
+
+  /** @override */
+  activate() {
+    this.requestFullOverlay();
+    this.element.style.display = '';
+    this.element.style.opacity = 0;
+
+    let transLayer = null;
+
+    // TODO(dvoytenko): This is definitely not great. Instead would be better
+    // to pass in the action's event or do this via auto-lightbox API.
+    let from = this.element.hasAttribute('from') ? document.getElementById(
+        this.element.getAttribute('from')) : null;
+    if (from) {
+      let rect = from.getBoundingClientRect();
+      let clone = from.cloneNode(true);
+      clone.style.position = 'absolute';
+      clone.style.top = rect.top;
+      clone.style.left = rect.left;
+      clone.style.bottom = rect.bottom;
+      clone.style.right = rect.right;
+
+      transLayer = document.createElement('div');
+      transLayer.style.pointerEvents = 'none';
+      transLayer.style.position = 'fixed';
+      transLayer.style.zIndex = 1001;
+      transLayer.style.top = 0;
+      transLayer.style.left = 0;
+      transLayer.style.bottom = 0;
+      transLayer.style.right = 0;
+      transLayer.appendChild(clone);
+      document.body.appendChild(transLayer);
+
+      this.container_.style.opacity = 0;
+    }
+
+    this.element.style.transition = 'opacity 0.1s ease-in';
+    requestAnimationFrame(() => {
+      this.element.style.opacity = '';
+      if (transLayer) {
+        this.container_.style.transition = 'opacity 0.1s ease-in';
+        transLayer.style.transition = 'opacity 0.1s ease-out';
+        // TODO(dvoytenko): onAnimationEnd
+        timer.delay(() => {
+          requestAnimationFrame(() => {
+            this.container_.style.opacity = '';
+            transLayer.style.opacity = 0;
+            timer.delay(() => {
+              document.body.removeChild(transLayer);
+            }, 100);
+          });
+        }, 100);
+      }
+    });
+
+    this.scheduleLayout(this.container_);
+    this.updateInViewport(this.container_, true);
+
+    history().push(this.close.bind(this)).then((historyId) => {
+      this.historyId_ = historyId;
+    });
+  }
+
+  close() {
+    this.cancelFullOverlay();
+    this.element.style.display = 'none';
+    if (this.historyId_ != -1) {
+      history().pop(this.historyId_);
+    }
+  }
+}
+
+AMP.registerElement('amp-lightbox', AmpLightbox);

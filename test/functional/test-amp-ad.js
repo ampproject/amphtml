@@ -15,7 +15,7 @@
  */
 
 import {createIframe} from '../../testing/iframe';
-import {installAd} from '../../src/amp-ad';
+import {installAd} from '../../builtins/amp-ad';
 
 describe('amp-ad', () => {
 
