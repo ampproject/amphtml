@@ -15,7 +15,7 @@
  */
 
 import {Layout} from '../../../src/layout';
-import {history} from '../../../src/history';
+import {historyFor} from '../../../src/history';
 import {timer} from '../../../src/timer';
 import * as st from '../../../src/style';
 
@@ -123,7 +123,7 @@ class AmpLightbox extends AMP.BaseElement {
     this.scheduleLayout(this.container_);
     this.updateInViewport(this.container_, true);
 
-    history().push(this.close.bind(this)).then((historyId) => {
+    this.getHistory_().push(this.close.bind(this)).then((historyId) => {
       this.historyId_ = historyId;
     });
   }
@@ -132,8 +132,12 @@ class AmpLightbox extends AMP.BaseElement {
     this.cancelFullOverlay();
     this.element.style.display = 'none';
     if (this.historyId_ != -1) {
-      history().pop(this.historyId_);
+      this.getHistory_().pop(this.historyId_);
     }
+  }
+
+  getHistory_() {
+    return historyFor(this.element.ownerDocument.defaultView);
   }
 }
 

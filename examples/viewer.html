@@ -85,6 +85,7 @@
 
     function Viewer() {
       this.alreadyLoaded_ = false;
+      this.stackIndex_ = 0;
 
       this.header = document.querySelector('header');
       this.container = document.querySelector('container');
@@ -96,11 +97,13 @@
       window.addEventListener('message', this.onMessage_.bind(this));
       this.container.addEventListener('scroll', this.onScroll_.bind(this));
       window.addEventListener('resize', this.onResize_.bind(this));
+      window.addEventListener('popstate', this.onPopState_.bind(this));
     };
 
 
     Viewer.prototype.start = function() {
       var params = {
+        history: 1,
         viewportType: 'virtual',
         width: this.container.offsetWidth,
         height: this.container.offsetHeight,
@@ -188,6 +191,37 @@
     };
 
 
+    Viewer.prototype.pushHistory_ = function(stackIndex) {
+      log('push history to ', stackIndex);
+      // Super trivial. Only one step allowed.
+      if (stackIndex != this.stackIndex_ + 1) {
+        throw new Error('Only one step push allowed');
+      }
+      this.stackIndex_ = stackIndex;
+      window.history.pushState({}, '');
+    };
+
+
+    Viewer.prototype.popHistory_ = function(stackIndex) {
+      log('pop history at ', stackIndex);
+      // Super trivial. Only one step allowed.
+      if (stackIndex != this.stackIndex_) {
+        throw new Error('Only one step pop allowed');
+      }
+      this.stackIndex_ = stackIndex;
+      window.history.go(-1);
+    };
+
+
+    Viewer.prototype.onPopState_ = function() {
+      // Even more trivial. Always assumes that only one step was popped in
+      // history.
+      this.stackIndex_--;
+      this.sendMessage_('historyPopped', {newStackIndex: this.stackIndex_});
+      log('history popped to ', this.stackIndex_);
+    };
+
+
     Viewer.prototype.sendMessage_ = function(type, message) {
       message['type'] = type;
       message['sentinel'] = SENTINEL;
@@ -210,6 +244,10 @@
         this.requestFullOverlay_();
       } else if (data.type == 'cancelFullOverlay') {
         this.cancelFullOverlay_();
+      } else if (data.type == 'pushHistory') {
+        this.pushHistory_(data.stackIndex);
+      } else if (data.type == 'popHistory') {
+        this.popHistory_(data.stackIndex);
       }
     };
 

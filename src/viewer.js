@@ -42,6 +42,9 @@ export class Viewer {
     /** @const {!Window} */
     this.win = win;
 
+    /** @const {boolean} */
+    this.overtakeHistory_ = false;
+
     /** @private {string} */
     this.viewportType_ = 'natural';
 
@@ -59,6 +62,9 @@ export class Viewer {
 
     /** @private {!Observable<!ViewerViewportEvent>} */
     this.viewportObservable_ = new Observable();
+
+    /** @private {!Observable<!ViewerHistoryPoppedEvent>} */
+    this.historyPoppedObservable_ = new Observable();
 
     /** @private {?function(string, *)} */
     this.messageDeliverer_ = null;
@@ -85,6 +91,11 @@ export class Viewer {
     }
 
     log.fine(TAG_, 'Viewer params:', this.params_);
+
+    this.overtakeHistory_ = parseInt(this.params_['history']) ||
+        this.overtakeHistory_;
+    log.fine(TAG_, '- history:', this.overtakeHistory_);
+
     this.viewportType_ = this.params_['viewportType'] || this.viewportType_;
     log.fine(TAG_, '- viewportType:', this.viewportType_);
 
@@ -123,6 +134,16 @@ export class Viewer {
    */
   getParam(name) {
     return this.params_[name];
+  }
+
+  /**
+   * Whether the viewer overtakes the history for AMP document. If yes,
+   * the viewer must implement history messages "pushHistory" and "popHistory"
+   * and emit message "historyPopped"
+   * @return {boolean}
+   */
+  isOvertakeHistory() {
+    return this.overtakeHistory_;
   }
 
   /**
@@ -172,12 +193,21 @@ export class Viewer {
   }
 
   /**
-   * Adds a viewport event listener for viewer events.
+   * Adds a "viewport" event listener for viewer events.
    * @param {function(!ViewerViewportEvent)} handler
    * @return {!Unlisten}
    */
   onViewportEvent(handler) {
     return this.viewportObservable_.add(handler);
+  }
+
+  /**
+   * Adds a "history popped" event listener for viewer events.
+   * @param {function(ViewerHistoryPoppedEvent)} handler
+   * @return {!Unlisten}
+   */
+  onHistoryPoppedEvent(handler) {
+    return this.historyPoppedObservable_.add(handler);
   }
 
   /**
@@ -213,6 +243,22 @@ export class Viewer {
   }
 
   /**
+   * Triggers "pushHistory" event for the viewer.
+   * @param {number} stackIndex
+   */
+  postPushHistory(stackIndex) {
+    this.sendMessage_('pushHistory', {stackIndex: stackIndex});
+  }
+
+  /**
+   * Triggers "popHistory" event for the viewer.
+   * @param {number} stackIndex
+   */
+  postPopHistory(stackIndex) {
+    this.sendMessage_('popHistory', {stackIndex: stackIndex});
+  }
+
+  /**
    * Requests AMP document to receive a message from Viewer.
    * @param {string} eventType
    * @param {*} data
@@ -231,6 +277,10 @@ export class Viewer {
       if (paddingTop !== undefined) {
         this.updatePaddingTop_(paddingTop);
       }
+    } else if (eventType == 'historyPopped') {
+      this.historyPoppedObservable_.fire({
+        newStackIndex: data['newStackIndex']
+      });
     }
   }
 
@@ -316,6 +366,14 @@ export function parseParams_(str, allParams) {
  * }}
  */
 var ViewerViewportEvent;
+
+
+/**
+ * @typedef {{
+ *   newStackIndex: number
+ * }}
+ */
+var ViewerHistoryPoppedEvent;
 
 
 /**
