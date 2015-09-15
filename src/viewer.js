@@ -19,7 +19,9 @@ import {assert} from './asserts';
 import {getService} from './service';
 import {installStyles} from './styles';
 import {log} from './log';
+import {onDocumentReady} from './event-helper';
 import {parseQueryString} from './url';
+import {platform} from './platform';
 import * as st from './style';
 
 
@@ -113,6 +115,13 @@ export class Viewer {
     let paddingTop = parseInt(this.params_['paddingTop']) || this.paddingTop_;
     log.fine(TAG_, '- padding-top:', paddingTop);
     this.updatePaddingTop_(paddingTop);
+
+    // Configure scrolling parameters when AMP is embeded in a viewer on iOS.
+    if (this.viewportType_ == 'natural' && this.win.parent &&
+            platform.isIos()) {
+      onDocumentReady(this.win.document,
+          () => this.setupEmbeddedScrollingIos_());
+    }
 
     // Remove hash - no reason to keep it around.
     var newUrl = this.win.location.href;
@@ -329,12 +338,59 @@ export class Viewer {
   }
 
   /**
+   * @private
+   */
+  setupEmbeddedScrollingIos_() {
+    // Embedded scrolling on iOS is rather complicated. IFrames cannot be sized
+    // and be scrollable. Sizing iframe by scrolling height has a big negative
+    // that "fixed" position is essentially impossible. The only option we
+    // found is to reset scrolling on the AMP doc, which overrides natural BODY
+    // scrolling with overflow:auto. We need the following styling:
+    // html {
+    //   overflow: auto;
+    //   -webkit-overflow-scrolling: touch;
+    // }
+    // body {
+    //   position: absolute;
+    //   overflow: auto;
+    //   -webkit-overflow-scrolling: touch;
+    // }
+    st.setStyles(this.win.document.documentElement, {
+      overflowX: 'hidden',
+      overflowY: 'auto',
+      webkitOverflowScrolling: 'touch'
+    });
+    st.setStyles(this.win.document.body, {
+      overflowX: 'hidden',
+      overflowY: 'auto',
+      webkitOverflowScrolling: 'touch',
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0
+    });
+
+    // TODO(dvoytenko): These styles are a lot more controversial. If we do
+    // go ahead with these styles, we'll have to define them in amp.css as
+    // "!important". This will have some authoring implications, although
+    // should not be a major issue. Overall, if we embed content, we want
+    // to have stronger control over margins.
+    st.setStyles(this.win.document.body, {
+      margin: 0,
+      overflowX: 'hidden'
+    });
+  }
+
+  /**
    * @param {number} paddingTop
    */
   updatePaddingTop_(paddingTop) {
     if (paddingTop != this.paddingTop_) {
       this.paddingTop_ = paddingTop;
-      this.win.document.documentElement.style.paddingTop = st.px(paddingTop);
+      onDocumentReady(this.win.document, () => {
+        this.win.document.body.style.paddingTop = st.px(this.paddingTop_);
+      });
     }
   }
 }

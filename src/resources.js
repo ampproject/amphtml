@@ -19,6 +19,7 @@ import {assert} from './asserts';
 import {expandLayoutRect, layoutRectLtwh, layoutRectsOverlap} from
     './layout-rect';
 import {log} from './log';
+import {onDocumentReady} from './event-helper';
 import {reportErrorToDeveloper} from './error';
 import {timer} from './timer';
 import {viewerFor} from './viewer';
@@ -99,24 +100,12 @@ export class Resources {
     });
 
     // Ensure that we attempt to rebuild things when DOM is ready.
-    if (this.win.document.readyState != 'loading') {
+    onDocumentReady(this.win.document, () => {
       this.setDocumentReady_();
       this.forceBuild_ = true;
-    } else {
-      let readyListener = () => {
-        if (this.win.document.readyState != 'loading') {
-          if (!this.documentReady_) {
-            this.setDocumentReady_();
-            this.forceBuild_ = true;
-            this.relayoutAll_ = true;
-            this.schedulePass();
-          }
-          this.win.document.removeEventListener('readystatechange',
-              readyListener);
-        }
-      };
-      this.win.document.addEventListener('readystatechange', readyListener);
-    }
+      this.relayoutAll_ = true;
+      this.schedulePass();
+    });
 
     this.relayoutAll_ = true;
     this.schedulePass();
