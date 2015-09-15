@@ -141,9 +141,13 @@ export function createFixtureIframe(fixture, initialIframeHeight, done) {
 export function createIframe() {
   var iframe = document.createElement('iframe');
   iframe.name = 'test_' + iframeCount++;
-  iframe.srcdoc = '<!doctype><html><head>' +
+  var html = '<!doctype><html><head>' +
+      '<script src="/base/node_modules/document-register-element/build/' +
+      'document-register-element.max.js"></script>' +
       '<script src="/base/build/polyfills.js"></script>' +
       '<body style="margin:0">';
+  iframe.setAttribute('html', html);
+  iframe.src = 'javascript:window.frameElement.getAttribute("html");';
   document.body.appendChild(iframe);
   registerForUnitTest(iframe.contentWindow);
   // Flag as being a test window.
@@ -168,9 +172,12 @@ export function createIframePromise() {
   return new Promise(function(resolve, reject) {
     var iframe = document.createElement('iframe');
     iframe.name = 'test_' + iframeCount++;
-    iframe.srcdoc = '<!doctype><html><head>' +
+    var html = '<!doctype><html><head>' +
+        '<script src="/base/node_modules/document-register-element/build/' +
+        'document-register-element.max.js"></script>' +
         '<script src="/base/build/polyfills.js"></script>' +
         '<body style="margin:0">';
+    iframe.setAttribute('html', html);
     iframe.onload = function() {
       registerForUnitTest(iframe.contentWindow);
       // Flag as being a test window.
@@ -181,8 +188,9 @@ export function createIframePromise() {
         iframe: iframe
       });
     };
-    iframe.onerror = reject;
+    iframe.src = 'javascript:window.frameElement.getAttribute("html");';
     document.body.appendChild(iframe);
+    iframe.onerror = reject;
   });
 }
 

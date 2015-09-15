@@ -16,6 +16,7 @@
     "dist": "gulp dist"
   },
   "dependencies": {
+    "document-register-element": "^0.4.5",
     "webcomponents.js": "^0.7.2"
   },
   "devDependencies": {
@@ -47,8 +48,10 @@
     "karma-fixture": "~0.2.5",
     "karma-html2js-preprocessor": "~0.1.0",
     "karma-mocha": "^0.2.0",
+    "karma-phantomjs-launcher": "^0.2.1",
     "karma-sinon-chai": "^1.0.0",
     "mocha": "^2.2.5",
+    "phantomjs": "^1.9.18",
     "sinon": "^1.15.4",
     "sinon-chai": "^2.8.0",
     "vinyl-buffer": "^1.0.0",

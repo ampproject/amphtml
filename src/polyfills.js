@@ -19,7 +19,7 @@
  */
 
 
-//=require node_modules/webcomponents.js/webcomponents-lite.js
+//=require node_modules/document-register-element/build/document-register-element.max.js
 
 require('./custom-core-js-shim');
 require('babel-core/external-helpers');

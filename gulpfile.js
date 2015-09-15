@@ -42,6 +42,7 @@ var extensions = [
   'extensions/**/*.js'
 ];
 var tests = [
+  'node_modules/document-register-element/build/document-register-element.max.js',
   'test/**/*.js',
   'extensions/**/test/**/*.js',
   'fixtures/**/*.html',
@@ -108,7 +109,7 @@ function unitWatchVerbose(done) {
   karma.start({
     configFile: path.resolve('karma.conf.js'),
     files: tests,
-    browsers: ['Chrome'],
+    //browsers: ['Chrome'],
     client: {
       captureConsole: true
     }
