@@ -83,6 +83,7 @@
     }
 
     container iframe {
+      border: 0;
       margin: 0;
       padding: 0;
       width: 100%;
@@ -136,8 +137,7 @@
       };
       log('Params:' + JSON.stringify(params));
 
-      var url = 'http://localhost:8000/examples/everything.amp.html#' +
-          paramsStr(params);
+      var url = './everything.amp.html#' + paramsStr(params);
       log('AMP URL = ' + url);
       this.iframe.style.display = 'none';
       this.container.appendChild(this.iframe);

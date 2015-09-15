@@ -355,17 +355,29 @@ export class Viewer {
     //   -webkit-overflow-scrolling: touch;
     // }
     st.setStyles(this.win.document.documentElement, {
-      overflow: 'auto',
+      overflowX: 'hidden',
+      overflowY: 'auto',
       webkitOverflowScrolling: 'touch'
     });
     st.setStyles(this.win.document.body, {
-      overflow: 'auto',
+      overflowX: 'hidden',
+      overflowY: 'auto',
       webkitOverflowScrolling: 'touch',
       position: 'absolute',
       top: 0,
       left: 0,
       right: 0,
       bottom: 0
+    });
+
+    // TODO(dvoytenko): These styles are a lot more controversial. If we do
+    // go ahead with these styles, we'll have to define them in amp.css as
+    // "!important". This will have some authoring implications, although
+    // should not be a major issue. Overall, if we embed content, we want
+    // to have stronger control over margins.
+    st.setStyles(this.win.document.body, {
+      margin: 0,
+      overflowX: 'hidden'
     });
   }
 
