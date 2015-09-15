@@ -42,6 +42,23 @@ export function parseUrl(url) {
 
 
 /**
+ * Asserts that a given url is HTTPS or protocol relative.
+ * Provides an exception for localhost.
+ * @param {string} urlString
+ */
+export function assertHttpsUrl(urlString, elementContext) {
+  var url = parseUrl(urlString);
+  assert(
+      url.protocol == 'https:' || /^(\/\/)/.test(urlString) ||
+      url.hostname == 'localhost' || url.hostname.endsWith('.localhost'),
+      '%s source must start with ' +
+      '"https://" or "//" or be relative and served from ' +
+      'https. Invalid value: %s',
+      elementContext, urlString);
+}
+
+
+/**
  * Parses the query string of an URL. This method returns a simple key/value
  * map. If there are duplicate keys the latest value is returned.
  * @param {string} queryString
