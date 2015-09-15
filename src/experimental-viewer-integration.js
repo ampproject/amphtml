@@ -40,12 +40,12 @@ function listenAndPostTouchMessages_() {
 
 /**
  * Makes a partial copy of the event e and posts a message with it.
- * @param {Event} e The event object to be copied and reposted.
+ * @param {!Event} e The event object to be copied and reposted.
  * @private
  */
 function copyTouchAndPostMessage_(e) {
   if (e && parent != window) {
-    var msg = copyTouchEvent_(/** @type {!Event} */ e);
+    var msg = copyTouchEvent_(e);
     // TODO(flaviop, 23309537): Provide a way to pass down the parent origin to
     // be set as target frame.
     parent./*TODO-review*/postMessage({touchEvent: msg}, '*' /* any target frame */);
