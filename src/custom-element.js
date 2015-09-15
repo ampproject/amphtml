@@ -364,13 +364,26 @@ export function createAmpElementProto(win, name, implementationClass) {
    */
   ElementProto.getLayoutBox = function() {
     return resources.getResourceForElement(this).getLayoutBox();
-  }
+  };
+
+  /**
+   * The runtime calls this method to determine if {@link layoutCallback}
+   * should be called again when layout changes.
+   * @return {boolean}
+   * @package @final
+   */
+  ElementProto.isRelayoutNeeded = function() {
+    return this.implementation_.isRelayoutNeeded();
+  };
 
   /**
    * Instructs the element to layout its content and load its resources if
    * necessary by calling the {@link BaseElement.layoutCallback} method that
    * should be implemented by BaseElement subclasses. Must return a promise
    * that will yield when the layout and associated loadings are complete.
+   *
+   * This method is always called for the first layout, but for subsequent
+   * layouts the runtime consults {@link isRelayoutNeeded} method.
    *
    * Can only be called on a upgraded and built element.
    *

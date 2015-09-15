@@ -34,6 +34,7 @@ export function installVideo(win) {
 
     /** @override */
     layoutCallback() {
+      // TODO(dvoytenko): Add re-layout as well.
       var width = this.element.getAttribute('width');
       var height = this.element.getAttribute('height');
       var video = document.createElement('video');

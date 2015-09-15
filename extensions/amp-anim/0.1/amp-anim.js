@@ -57,6 +57,11 @@ class AmpAnim extends AMP.BaseElement {
   }
 
   /** @override */
+  isRelayoutNeeded() {
+    return true;
+  }
+
+  /** @override */
   layoutCallback() {
     return this.updateImageSrc_();
   }

@@ -339,7 +339,7 @@ export class Resources {
       if (r.getState() == ResourceState_.NOT_BUILT) {
         r.build(this.forceBuild_);
       }
-      if (r.getState() == ResourceState_.NOT_LAID_OUT || relayoutAll) {
+      if (r.getState() == ResourceState_.NEVER_LAID_OUT || relayoutAll) {
         r.applyMediaQuery();
         relayoutCount++;
       }
@@ -353,7 +353,7 @@ export class Resources {
         if (r.getState() == ResourceState_.NOT_BUILT || r.hasOwner()) {
           continue;
         }
-        if (r.getState() == ResourceState_.NOT_LAID_OUT || relayoutAll) {
+        if (r.getState() == ResourceState_.NEVER_LAID_OUT || relayoutAll) {
           r.measure();
         }
       }
@@ -749,11 +749,14 @@ export class Resource {
     /** @const {number} */
     this.priority_ = getElementPriority(element.tagName);
 
-    /* @const {!ResourceState_} */
-    this.state_ = element.isBuilt() ? ResourceState_.NOT_LAID_OUT :
+    /* @private {!ResourceState_} */
+    this.state_ = element.isBuilt() ? ResourceState_.NEVER_LAID_OUT :
         ResourceState_.NOT_BUILT;
 
-    /** @type {?LayoutRect} */
+    /** @private {number} */
+    this.layoutCount_ = 0;
+
+    /** @private {?LayoutRect} */
     this.layoutBox_ = layoutRectLtwh(-10000, -10000, 0, 0);
 
     /** @private {boolean} */
@@ -833,7 +836,7 @@ export class Resource {
     if (!built) {
       return false;
     }
-    this.state_ = ResourceState_.NOT_LAID_OUT;
+    this.state_ = ResourceState_.NEVER_LAID_OUT;
     return true;
   }
 
@@ -872,11 +875,14 @@ export class Resource {
     }
     let box = viewport.getLayoutRect(this.element);
     // Note that "left" doesn't affect readiness for the layout.
-    if (this.state_ == ResourceState_.NOT_LAID_OUT ||
+    if (this.state_ == ResourceState_.NEVER_LAID_OUT ||
           this.layoutBox_.top != box.top ||
           this.layoutBox_.width != box.width ||
           this.layoutBox_.height != box.height) {
-      this.state_ = ResourceState_.READY_FOR_LAYOUT;
+      if (this.state_ == ResourceState_.NEVER_LAID_OUT ||
+              this.element.isRelayoutNeeded()) {
+        this.state_ = ResourceState_.READY_FOR_LAYOUT;
+      }
     }
     this.layoutBox_ = box;
   }
@@ -931,7 +937,7 @@ export class Resource {
       return Promise.reject('already failed');
     }
 
-    assert(this.state_ != ResourceState_.NOT_BUILT && this.isDisplayed(),
+    assert(this.state_ != ResourceState_.NOT_BUILT,
         'Not ready to start layout: %s (%s)', this.debugid, this.state_);
 
     // Double check that the element has not disappeared since scheduling
@@ -942,7 +948,17 @@ export class Resource {
       return Promise.resolve();
     }
 
-    log.fine(TAG_, 'start layout:', this.debugid);
+    // Not-wanted re-layouts are ignored.
+    if (this.layoutCount_ > 0 && !this.element.isRelayoutNeeded()) {
+      log.fine(TAG_, 'layout canceled since it wasn\'t requested:',
+          this.debugid, this.state_);
+      this.state_ = ResourceState_.LAYOUT_COMPLETE;
+      return Promise.resolve();
+    }
+
+    log.fine(TAG_, 'start layout:', this.debugid, 'count:', this.layoutCount_);
+    this.layoutCount_++;
+    this.state_ = ResourceState_.LAYOUT_SCHEDULED;
 
     let promise;
     try {
@@ -1128,10 +1144,13 @@ function elements_(elements) {
 
 /**
  * Resource state.
+ *
+ * Visible for testing only!
+ *
  * @enum {number}
  * @private
  */
-var ResourceState_ = {
+export const ResourceState_ = {
   /**
    * The resource has not been built yet. Measures, layouts, preloads or
    * viewport signals are not allowed.
@@ -1142,7 +1161,7 @@ var ResourceState_ = {
    * The resource has been built, but not measured yet and not yet ready
    * for layout.
    */
-  NOT_LAID_OUT: 1,
+  NEVER_LAID_OUT: 1,
 
   /**
    * The resource has been built and measured and ready for layout.

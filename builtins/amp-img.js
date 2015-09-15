@@ -53,6 +53,11 @@ export function installImg(win) {
     }
 
     /** @override */
+    isRelayoutNeeded() {
+      return true;
+    }
+
+    /** @override */
     layoutCallback() {
       return this.updateImageSrc_();
     }
