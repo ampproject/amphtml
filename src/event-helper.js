@@ -18,40 +18,6 @@ import {timer} from './timer';
 
 
 /**
- * Whether the document is ready.
- * @param {!Document} doc
- * @return {boolean}
- */
-export function isDocumentReady(doc) {
-  return doc.readyState != 'loading';
-}
-
-
-/**
- * Calls the callback when document is ready.
- * @param {!Document} doc
- * @param {!Function} callback
- */
-export function onDocumentReady(doc, callback) {
-  let ready = isDocumentReady(doc);
-  if (ready) {
-    callback();
-  } else {
-    var readyListener = () => {
-      if (doc.readyState != 'loading') {
-        if (!ready) {
-          ready = true;
-          callback();
-        }
-        doc.removeEventListener('readystatechange', readyListener);
-      }
-    };
-    doc.addEventListener('readystatechange', readyListener);
-  }
-}
-
-
-/**
  * Listens for the specified event on the element and removes the listener
  * as soon as event has been received.
  * @param {!EventTarget} element

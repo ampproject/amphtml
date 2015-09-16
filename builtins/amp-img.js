@@ -53,6 +53,11 @@ export function installImg(win) {
     }
 
     /** @override */
+    prerenderAllowed() {
+      return true;
+    }
+
+    /** @override */
     isRelayoutNeeded() {
       return true;
     }

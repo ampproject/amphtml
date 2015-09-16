@@ -54,6 +54,13 @@
 
     header h1 {
       font-size: 22px;
+      flex-grow: 1;
+    }
+
+    header #visibilityToggle {
+      flex-grow: 0;
+      flex-shrink: 0;
+      padding: 8px;
     }
 
     .wait {
@@ -104,6 +111,7 @@
       this.alreadyLoaded_ = false;
       this.stackIndex_ = 0;
       this.viewportType_ = 'natural';  // "natural" or "virtual"
+      this.visibilityState_ = 'prefetchAboveTheFold';  // "prefetchAboveTheFold"
 
       this.isIos_ = /iPhone|iPad|iPod/i.test(window.navigator.userAgent);
 
@@ -112,6 +120,20 @@
       this.container = document.querySelector('container');
       this.iframe = document.createElement('iframe');
       this.iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+
+      this.visibilityToggle_ = document.getElementById('visibilityToggle');
+      this.visibilityToggle_.onclick = function() {
+        if (this.visibilityState_ == 'visible') {
+          this.visibilityState_ = 'prefetchAboveTheFold';
+        } else {
+          this.visibilityState_ = 'visible';
+        }
+        this.messaging_.sendRequest('visibilitychange', {
+          state: this.visibilityState_
+        }, true);
+        this.updateVisibilityToggle_();
+      }.bind(this);
+      this.updateVisibilityToggle_();
 
       this.viewer.classList.add(this.viewportType_);
 
@@ -135,7 +157,8 @@
         viewportType: this.viewportType_,
         width: this.container.offsetWidth,
         height: this.container.offsetHeight,
-        paddingTop: this.header.offsetHeight
+        paddingTop: this.header.offsetHeight,
+        visibilityState: this.visibilityState_
       };
       log('Params:' + JSON.stringify(params));
 
@@ -261,6 +284,13 @@
       log('history popped to ', this.stackIndex_);
     };
 
+
+    Viewer.prototype.updateVisibilityToggle_ = function() {
+      this.visibilityToggle_.textContent = this.visibilityState_ == 'visible' ?
+          'Visible' : 'Not visible';
+    };
+
+
     Viewer.prototype.processRequest_ = function(type, data, awaitResponse) {
       if (type == 'documentLoaded') {
         return this.documentReady_();
@@ -321,6 +351,7 @@
   <viewer>
     <header>
       <h1>Viewer</h1>
+      <a id="visibilityToggle">Visible</a>
     </header>
     <container>
       <div class="wait">

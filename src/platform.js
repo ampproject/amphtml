@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 /**
  * A helper class that provides information about device/OS/browser currently
  * running.

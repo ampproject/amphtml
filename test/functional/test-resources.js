@@ -147,6 +147,34 @@ describe('Resources', () => {
     expect(resources.calcTaskTimeout_(task_p0)).to.equal(0);
     expect(resources.calcTaskTimeout_(task_p1)).to.equal(1000);
   });
+
+  it('should not schedule non-prerenderable resource when' +
+        ' document is hidden', () => {
+    let resource = {
+      getState: () => {return ResourceState_.READY_FOR_LAYOUT;},
+      isDisplayed: () => {return true;},
+      prerenderAllowed: () => {return false;},
+      startLayout: () => {}
+    };
+    resources.visible_ = false;
+    resources.scheduleLayoutOrPreload_(resource, true);
+    expect(resources.queue_.getSize()).to.equal(0);
+  });
+
+  it('should not schedule prerenderable resource when' +
+        ' document is hidden', () => {
+    let resource = {
+      getState: () => {return ResourceState_.READY_FOR_LAYOUT;},
+      isDisplayed: () => {return true;},
+      prerenderAllowed: () => {return true;},
+      getPriority: () => {return 1;},
+      startLayout: () => {},
+      layoutScheduled: () => {}
+    };
+    resources.visible_ = false;
+    resources.scheduleLayoutOrPreload_(resource, true);
+    expect(resources.queue_.getSize()).to.equal(1);
+  });
 });
 
 
@@ -222,6 +250,7 @@ describe('Resources.Resource', () => {
       tagName: 'AMP-AD',
       isBuilt: () => {return false;},
       isUpgraded: () => {return false;},
+      prerenderAllowed: () => {return false;},
       build: (force) => {return false;},
       getBoundingClientRect: () => {return null;},
       isRelayoutNeeded: () => {return false;},
@@ -393,14 +422,14 @@ describe('Resources.Resource', () => {
     elementMock.expects('layoutCallback').never();
 
     resource.state_ = ResourceState_.LAYOUT_COMPLETE;
-    resource.startLayout();
+    resource.startLayout(true);
 
     resource.state_ = ResourceState_.LAYOUT_FAILED;
-    resource.startLayout();
+    resource.startLayout(true);
 
     resource.state_ = ResourceState_.READY_FOR_LAYOUT;
     resource.layoutPromise_ = {};
-    resource.startLayout();
+    resource.startLayout(true);
   });
 
   it('should fail startLayout if not built', () => {
@@ -408,7 +437,7 @@ describe('Resources.Resource', () => {
 
     resource.state_ = ResourceState_.NOT_BUILT;
     expect(() => {
-      resource.startLayout();
+      resource.startLayout(true);
     }).to.throw(/Not ready to start layout/);
   });
 
@@ -421,7 +450,7 @@ describe('Resources.Resource', () => {
 
     resource.state_ = ResourceState_.READY_FOR_LAYOUT;
     resource.layoutBox_ = {left: 11, top: 12, width: 0, height: 0};
-    resource.startLayout();
+    resource.startLayout(true);
   });
 
   it('should force startLayout for first layout', () => {
@@ -433,7 +462,7 @@ describe('Resources.Resource', () => {
 
     resource.state_ = ResourceState_.READY_FOR_LAYOUT;
     resource.layoutBox_ = {left: 11, top: 12, width: 10, height: 10};
-    resource.startLayout();
+    resource.startLayout(true);
     expect(resource.getState()).to.equal(ResourceState_.LAYOUT_SCHEDULED);
   });
 
@@ -448,7 +477,7 @@ describe('Resources.Resource', () => {
     resource.layoutBox_ = {left: 11, top: 12, width: 10, height: 10};
     resource.layoutCount_ = 1;
     elementMock.expects('isRelayoutNeeded').returns(false).atLeast(1);
-    resource.startLayout();
+    resource.startLayout(true);
     expect(resource.getState()).to.equal(ResourceState_.LAYOUT_COMPLETE);
   });
 
@@ -463,7 +492,39 @@ describe('Resources.Resource', () => {
     resource.layoutBox_ = {left: 11, top: 12, width: 10, height: 10};
     resource.layoutCount_ = 1;
     elementMock.expects('isRelayoutNeeded').returns(true).atLeast(1);
-    resource.startLayout();
+    resource.startLayout(true);
+    expect(resource.getState()).to.equal(ResourceState_.LAYOUT_SCHEDULED);
+  });
+
+  it('should ignore startLayout when document is hidden' +
+        ' and prerender not allowed', () => {
+    elementMock.expects('isUpgraded').returns(true).atLeast(0);
+    elementMock.expects('getBoundingClientRect').
+        returns({left: 1, top: 1, width: 1, height: 1}).atLeast(0);
+    elementMock.expects('prerenderAllowed').returns(false).atLeast(1);
+
+    elementMock.expects('layoutCallback').never();
+
+    resource.state_ = ResourceState_.READY_FOR_LAYOUT;
+    resource.layoutBox_ = {left: 11, top: 12, width: 10, height: 10};
+    resource.layoutCount_ = 0;
+    resource.startLayout(false);
+    expect(resource.getState()).to.equal(ResourceState_.READY_FOR_LAYOUT);
+  });
+
+  it('should proceed startLayout when document is hidden' +
+        ' and prerender is allowed', () => {
+    elementMock.expects('isUpgraded').returns(true).atLeast(0);
+    elementMock.expects('getBoundingClientRect').
+        returns({left: 1, top: 1, width: 1, height: 1}).atLeast(0);
+    elementMock.expects('prerenderAllowed').returns(true).atLeast(1);
+
+    elementMock.expects('layoutCallback').returns(Promise.resolve()).once();
+
+    resource.state_ = ResourceState_.READY_FOR_LAYOUT;
+    resource.layoutBox_ = {left: 11, top: 12, width: 10, height: 10};
+    resource.layoutCount_ = 0;
+    resource.startLayout(false);
     expect(resource.getState()).to.equal(ResourceState_.LAYOUT_SCHEDULED);
   });
 
@@ -477,7 +538,7 @@ describe('Resources.Resource', () => {
 
     resource.state_ = ResourceState_.READY_FOR_LAYOUT;
     resource.layoutBox_ = {left: 11, top: 12, width: 10, height: 10};
-    let promise = resource.startLayout();
+    let promise = resource.startLayout(true);
     expect(resource.layoutPromise_).to.not.equal(null);
     expect(resource.getState()).to.equal(ResourceState_.LAYOUT_SCHEDULED);
 
@@ -496,7 +557,7 @@ describe('Resources.Resource', () => {
 
     resource.state_ = ResourceState_.READY_FOR_LAYOUT;
     resource.layoutBox_ = {left: 11, top: 12, width: 10, height: 10};
-    let promise = resource.startLayout();
+    let promise = resource.startLayout(true);
     expect(resource.layoutPromise_).to.not.equal(null);
     expect(resource.getState()).to.equal(ResourceState_.LAYOUT_SCHEDULED);
 

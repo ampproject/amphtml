@@ -361,6 +361,15 @@ export function createAmpElementProto(win, name, implementationClass) {
   };
 
   /**
+   * Whether the element can pre-render.
+   * @return {boolean}
+   * @final
+   */
+  ElementProto.prerenderAllowed = function() {
+    return this.implementation_.prerenderAllowed();
+  };
+
+  /**
    * @return {!LayoutRect}
    * @final
    */
