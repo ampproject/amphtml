@@ -27,7 +27,7 @@ describe('error page', () => {
         return fixture.doc.querySelectorAll('[error-message]').length >= 2;
       }, () => {
         return new Error('Failed to find errors. HTML\n' +
-            fixture.doc.documentElement.innerHTML);
+            fixture.doc.documentElement./*TEST*/innerHTML);
       });
     });
   });

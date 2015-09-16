@@ -48,7 +48,7 @@ function copyTouchAndPostMessage_(e) {
     var msg = copyTouchEvent_(/** @type {!Event} */ e);
     // TODO(flaviop, 23309537): Provide a way to pass down the parent origin to
     // be set as target frame.
-    parent.postMessage({touchEvent: msg}, '*' /* any target frame */);
+    parent./*TODO-review*/postMessage({touchEvent: msg}, '*' /* any target frame */);
   }
 }
 

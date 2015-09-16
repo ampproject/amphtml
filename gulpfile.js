@@ -305,7 +305,7 @@ gulp.task('minify', function() {
   examplesWithMinifiedJs('released.amp.html');
 });
 gulp.task('presubmit', function() {
-  require('./build-system/presubmit-checks.js').run();
+  return require('./build-system/presubmit-checks.js').run();
 });
 
 gulp.task('default', ['watch']);

@@ -128,7 +128,7 @@ ViewerMessaging.prototype.sendMessage_ = function(sentinel, requestId,
     payload: payload,
     rsvp: awaitResponse
   };
-  this.target_.postMessage(message, '*');
+  this.target_./*TODO-REVIEW*/postMessage(message, '*');
 };
 
 

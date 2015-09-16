@@ -261,7 +261,6 @@
       log('history popped to ', this.stackIndex_);
     };
 
-
     Viewer.prototype.processRequest_ = function(type, data, awaitResponse) {
       if (type == 'documentLoaded') {
         return this.documentReady_();
@@ -288,7 +287,7 @@
     function log() {
       var var_args = Array.prototype.slice.call(arguments, 0);
       var_args.unshift('[VIEWER]');
-      console.log.apply(console, var_args);
+      console/*OK*/.log.apply(console, var_args);
     }
 
 
