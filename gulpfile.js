@@ -255,6 +255,9 @@ gulp.task('minify', function() {
   examplesWithMinifiedJs('newsstand.amp.html');
   examplesWithMinifiedJs('released.amp.html');
 });
+gulp.task('presubmit', function() {
+  require('./build-system/presubmit-checks.js').run();
+});
 
 gulp.task('default', ['watch']);
 
