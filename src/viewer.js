@@ -68,7 +68,7 @@ export class Viewer {
     /** @private {!Observable<!ViewerHistoryPoppedEvent>} */
     this.historyPoppedObservable_ = new Observable();
 
-    /** @private {?function(string, *, boolean):Promise<*>} */
+    /** @private {?function(string, *, boolean):(Promise<*>|undefined)} */
     this.messageDeliverer_ = null;
 
     /** @private {!Array<!{eventType: string, data: *}>} */
@@ -258,17 +258,19 @@ export class Viewer {
   /**
    * Triggers "pushHistory" event for the viewer.
    * @param {number} stackIndex
+   * @return {!Promise}
    */
   postPushHistory(stackIndex) {
-    this.sendMessage_('pushHistory', {stackIndex: stackIndex});
+    return this.sendMessage_('pushHistory', {stackIndex: stackIndex}, true);
   }
 
   /**
    * Triggers "popHistory" event for the viewer.
    * @param {number} stackIndex
+   * @return {!Promise}
    */
   postPopHistory(stackIndex) {
-    this.sendMessage_('popHistory', {stackIndex: stackIndex});
+    return this.sendMessage_('popHistory', {stackIndex: stackIndex}, true);
   }
 
   /**
