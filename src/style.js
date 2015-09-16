@@ -15,6 +15,67 @@
  */
 
 
+/** @private @const {!Object<string>} */
+const propertyNameCache_ = Object.create(null);
+
+/** @private @const {!Array<string>} */
+const vendorPrefixes_ = ['Webkit', 'Moz', 'ms', 'O'];
+
+
+/**
+ * @exports
+ * @param {string} camelCase camel cased string
+ * @return {string} title cased string
+ */
+export function camelCaseToTitleCase(camelCase) {
+  return camelCase.charAt(0).toUpperCase() + camelCase.slice(1);
+}
+
+/**
+ * Checks the element if a prefixed version of a property exists and returns
+ * it or returns an empty string.
+ * @private
+ * @param {!Element} element
+ * @param {string} titleCase the title case version of a css property name
+ * @return {string} the prefixed property name or null.
+ */
+function getVendorJsPropertyName_(element, titleCase) {
+  for (let i = 0; i < vendorPrefixes_.length; i++) {
+    let propertyName = vendorPrefixes_[i] + titleCase;
+    if (element.style[propertyName] !== undefined) {
+      return propertyName;
+    }
+  }
+  return '';
+}
+
+/**
+ * Returns the possibly prefixed JavaScript property name of a style property
+ * (ex. WebkitTransitionDuration) given a camelCase'd version of the property
+ * (ex. transitionDuration).
+ * @exports
+ * @param {!Element} element
+ * @param {string} camelCase the camel cased version of a css property name
+ * @param {bool=} opt_bypassCache bypass the memoized cache of property mapping
+ * @return {string}
+ */
+export function getVendorJsPropertyName(element, camelCase, opt_bypassCache) {
+  let propertyName = !opt_bypassCache && propertyNameCache_[camelCase];
+  if (!propertyName) {
+    propertyName = camelCase;
+    if (element.style[camelCase] === undefined) {
+      let titleCase = camelCaseToTitleCase(camelCase);
+      let prefixedPropertyName = getVendorJsPropertyName_(element, titleCase);
+
+      if (element.style[prefixedPropertyName] !== undefined) {
+        propertyName = prefixedPropertyName;
+      }
+    }
+    propertyNameCache_[camelCase] = propertyName;
+  }
+  return propertyName;
+}
+
 /**
  * Sets the CSS style of the specified element with optional units, e.g. "px".
  * @param {!Element} element
@@ -23,8 +84,10 @@
  * @param {string=} opt_units
  */
 export function setStyle(element, property, value, opt_units) {
-  // TODO(dvoytenko): vendor specific properties
-  element.style[property] = opt_units ? value + opt_units : value;
+  let propertyName = getVendorJsPropertyName(element, property);
+  if (propertyName) {
+    element.style[propertyName] = opt_units ? value + opt_units : value;
+  }
 }
 
 

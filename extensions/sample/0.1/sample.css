@@ -18,6 +18,8 @@
 
 amp-extended-sample {
   color: green;
+  display: flex;
+  flex-direction: row-reverse;
 }
 
 amp-extended-sample > h1 {

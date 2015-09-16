@@ -31,6 +31,23 @@ var wrap = require("gulp-wrap");
 var rename = require('gulp-rename');
 var replace = require('gulp-replace');
 var babel = require('babelify');
+var postcss = require('postcss');
+var autoprefixer = require('autoprefixer');
+
+// NOTE: see https://github.com/ai/browserslist#queries for `browsers` list
+var cssprefixer = autoprefixer(
+  {
+    browsers: [
+      'last 5 ChromeAndroid versions',
+      'last 5 iOS versions',
+      'last 3 FirefoxAndroid versions',
+      'last 5 Android versions',
+      'last 2 ExplorerMobile versions',
+      'last 2 OperaMobile versions',
+      'last 2 OperaMini versions'
+    ]
+  }
+);
 
 var srcs = [
   'src/**/*.js',
@@ -167,20 +184,28 @@ function compile(watch, shouldMinify) {
 
 function compileCss() {
   console.info('Recompiling CSS.');
-  var css = jsifyCss('css/amp.css');
-  gulp.src('css/**.css')
-      .pipe(file('css.js', 'export const cssText = ' + css))
-      .pipe(gulp.dest('build'));
+  return jsifyCssPromise('css/amp.css').then(function(css) {
+    return gulp.src('css/**.css')
+        .pipe(file('css.js', 'export const cssText = ' + css))
+        .pipe(gulp.dest('build'));
+  });
 }
 
-function jsifyCss(filename) {
+function jsifyCssPromise(filename) {
   var css = fs.readFileSync(filename, "utf8");
   // Remove copyright comment. Crude hack to get our own copyright out
   // of the string.
-  css = css.replace(
-      /\/\* START COPYRIGHT \*\/(.|[\n\r])*\/\* END COPYRIGHT \*\//m,
-      '\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n');
-  return JSON.stringify(css + '\n/*# sourceURL=/' + filename + '*/');
+  return postcss([cssprefixer]).process(css.toString())
+      .then(function(result) {
+        result.warnings().forEach(function(warn) {
+          console.warn(warn.toString());
+        });
+      var css= result.css;
+      css = css.replace(
+        /\/\* START COPYRIGHT \*\/(.|[\n\r])*\/\* END COPYRIGHT \*\//m,
+        '\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n');
+      return JSON.stringify(css + '\n/*# sourceURL=/' + filename + '*/');
+    });
 }
 
 function watch() {
@@ -227,14 +252,21 @@ function buildExtension(name, version, hasCss, options) {
   }
   var js = fs.readFileSync(jsPath, "utf8");
   if (hasCss) {
-    var css = jsifyCss(path + '/' + name + '.css');
-    console.assert(/\$CSS\$/.test(js),
-        'Expected to find $CSS$ marker in extension JS: ' + jsPath);
-    js = js.replace(/\$CSS\$/, css);
+    return jsifyCssPromise(path + '/' + name + '.css').then(function(css) {
+      console.assert(/\$CSS\$/.test(js),
+          'Expected to find $CSS$ marker in extension JS: ' + jsPath);
+      js = js.replace(/\$CSS\$/, css);
+      return buildExtensionJs(js, jsPath, name, version, options);
+    });
+  } else {
+    return buildExtensionJs(js, jsPath, name, version, options);
   }
+}
+
+function buildExtensionJs(js, jsPath, name, version, options) {
   var builtName = name + '-' + version + '.max.js';
   var minifiedName = name + '-' + version + '.js';
-  gulp.src(jsPath)
+  return gulp.src(jsPath)
       .pipe(file(builtName, js))
       .pipe(gulp.dest('build/all/v0/'))
       .on('end', function() {
