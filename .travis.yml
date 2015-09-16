@@ -16,3 +16,4 @@ script:
   - gulp build
   - gulp minify
   - gulp unit
+  - gulp unit-firefox

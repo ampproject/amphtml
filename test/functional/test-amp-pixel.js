@@ -41,7 +41,7 @@ describe('amp-pixel', () => {
     return getPixel(
         'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?'
         ).then((p) => {
-          expect(p.querySelector('img')).to.be.an.instanceof(Image)
+          expect(p.querySelector('img')).to.not.be.null;
           expect(p.children[0].src).to.equal(
             'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?');
         });
@@ -51,7 +51,7 @@ describe('amp-pixel', () => {
     return getPixel(
         '//pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?'
         ).then((p) => {
-          expect(p.querySelector('img')).to.be.an.instanceof(Image)
+          expect(p.querySelector('img')).to.not.be.null;
           expect(p.children[0].src).to.equal(
             'http://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?');
         });
@@ -61,7 +61,7 @@ describe('amp-pixel', () => {
     return getPixel(
         'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=$RANDOM?'
         ).then((p) => {
-          expect(p.querySelector('img')).to.be.an.instanceof(Image)
+          expect(p.querySelector('img')).to.not.be.null;
           expect(p.children[0].src).to.match(/ord=(\d\.\d+)\?$/);
         });
   });
@@ -70,7 +70,7 @@ describe('amp-pixel', () => {
     return getPixel(
         'https://foo.com?href=$CANONICAL_URL'
         ).then((p) => {
-          expect(p.querySelector('img')).to.be.an.instanceof(Image)
+          expect(p.querySelector('img')).to.not.be.null;
           expect(p.children[0].src).to.equal(
               'https://foo.com/?href=https%3A%2F%2Fpinterest.com%2F');
         });
