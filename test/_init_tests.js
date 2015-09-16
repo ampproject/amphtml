@@ -29,3 +29,13 @@ it.skipOnTravis = function(desc, fn) {
   }
   it(desc, fn);
 };
+
+// Hack for skipping tests on Travis that don't work there.
+// Get permission before use!
+it.skipOnFirefox = function(desc, fn) {
+  if (navigator.userAgent.match(/Firefox/)) {
+    it.skip(desc, fn);
+    return;
+  }
+  it(desc, fn);
+};

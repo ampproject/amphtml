@@ -123,6 +123,22 @@ function unitSafari(done) {
   }, done);
 }
 
+function unitFirefox(done) {
+  build();
+  karma.start({
+    configFile: path.resolve('karma.conf.js'),
+    files: tests,
+    singleRun: true,
+    browsers: ['Firefox'],
+    client: {
+      captureConsole: true,
+      mocha: {
+        timeout: 10000
+      }
+    }
+  }, done);
+}
+
 function polyfillsForTests() {
   compileJs('./src/', 'polyfills.js', './build/');
 }
@@ -244,6 +260,7 @@ gulp.task('unit', unit);
 gulp.task('unit-watch', unitWatch);
 gulp.task('unit-watch-verbose', unitWatchVerbose);
 gulp.task('unit-safari', unitSafari);
+gulp.task('unit-firefox', unitFirefox);
 gulp.task('build', build);
 gulp.task('watch', function() { return watch(); });
 gulp.task('minify', function() {

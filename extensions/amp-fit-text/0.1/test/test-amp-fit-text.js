@@ -52,7 +52,7 @@ describe('amp-fit-text', () => {
       var content = ft.querySelector('.-amp-fit-text-content');
       expect(content).to.not.equal(null);
       expect(content.textContent).to.equal(text);
-      expect(content.style.fontSize).to.equal('8px');
+      expect(content.style.fontSize).to.equal('6px');
     });
   });
 
