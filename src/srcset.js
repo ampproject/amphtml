@@ -32,6 +32,7 @@ var SrcsetSource;
 /**
  * Parses the text representation of srcset into Srcset object.
  * See https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#Attributes.
+ * See http://www.w3.org/html/wg/drafts/html/master/semantics.html#attr-img-srcset.
  * @param {string} s
  * @return {!Srcset}
  */
@@ -48,7 +49,8 @@ export function parseSrcset(s) {
     }
     let url = parts[0].trim();
     if (parts.length == 1 || parts.length == 2 && !parts[1]) {
-      sources.push({url: url});
+      // If no "w" or "x" specified, we assume it's "1x".
+      sources.push({url: url, dpr: 1});
     } else {
       let spec = parts[1].trim().toLowerCase();
       let lastChar = spec.substring(spec.length - 1);
@@ -88,16 +90,26 @@ export class Srcset {
     let hasWidth = false;
     let hasDpr = false;
     this.sources_.forEach((source) => {
+      assert((source.width || source.dpr) && (!source.width || !source.dpr),
+          'Either dpr or width must be specified');
       hasWidth = hasWidth || !!source.width;
       hasDpr = hasDpr || !!source.dpr;
     });
     assert(!hasWidth || !hasDpr,
         'Srcset cannot have both width and dpr sources');
 
-    // The last source must not have either width or DPR specified.
-    let last = this.sources_[this.sources_.length - 1];
-    assert(!last.width && !last.dpr,
-        'Last source in a srcset must not have width or DPR');
+    // Source and assert duplicates.
+    if (hasWidth) {
+      this.sources_.sort((s1, s2) => {
+        assert(s1.width != s2.width, 'Duplicate width: %s', s1.width);
+        return s2.width - s1.width;
+      });
+    } else {
+      this.sources_.sort((s1, s2) => {
+        assert(s1.dpr != s2.dpr, 'Duplicate dpr: %s', s1.dpr);
+        return s2.dpr - s1.dpr;
+      });
+    }
 
     /** @private @const {boolean} */
     this.widthBased_ = hasWidth;
