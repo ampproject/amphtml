@@ -19,7 +19,7 @@
 const propertyNameCache_ = Object.create(null);
 
 /** @private @const {!Array<string>} */
-const vendorPrefixes_ = ['Webkit', 'Moz', 'ms', 'O'];
+const vendorPrefixes_ = ['Webkit', 'webkit', 'Moz', 'moz', 'ms', 'O', 'o'];
 
 
 /**
@@ -32,17 +32,17 @@ export function camelCaseToTitleCase(camelCase) {
 }
 
 /**
- * Checks the element if a prefixed version of a property exists and returns
+ * Checks the object if a prefixed version of a property exists and returns
  * it or returns an empty string.
  * @private
- * @param {!Element} element
+ * @param {!Object} object
  * @param {string} titleCase the title case version of a css property name
  * @return {string} the prefixed property name or null.
  */
-function getVendorJsPropertyName_(element, titleCase) {
+function getVendorJsPropertyName_(object, titleCase) {
   for (let i = 0; i < vendorPrefixes_.length; i++) {
     let propertyName = vendorPrefixes_[i] + titleCase;
-    if (element.style[propertyName] !== undefined) {
+    if (object[propertyName] !== undefined) {
       return propertyName;
     }
   }
@@ -54,27 +54,30 @@ function getVendorJsPropertyName_(element, titleCase) {
  * (ex. WebkitTransitionDuration) given a camelCase'd version of the property
  * (ex. transitionDuration).
  * @exports
- * @param {!Element} element
+ * @param {!Object} object
  * @param {string} camelCase the camel cased version of a css property name
  * @param {bool=} opt_bypassCache bypass the memoized cache of property mapping
  * @return {string}
  */
-export function getVendorJsPropertyName(element, camelCase, opt_bypassCache) {
-  let propertyName = !opt_bypassCache && propertyNameCache_[camelCase];
-  if (!propertyName) {
+export function getVendorJsPropertyName(object, camelCase, opt_bypassCache) {
+  let propertyName = propertyNameCache_[camelCase];
+  if (!propertyName || opt_bypassCache) {
     propertyName = camelCase;
-    if (element.style[camelCase] === undefined) {
+    if (object[camelCase] === undefined) {
       let titleCase = camelCaseToTitleCase(camelCase);
-      let prefixedPropertyName = getVendorJsPropertyName_(element, titleCase);
+      let prefixedPropertyName = getVendorJsPropertyName_(object, titleCase);
 
-      if (element.style[prefixedPropertyName] !== undefined) {
+      if (object[prefixedPropertyName] !== undefined) {
         propertyName = prefixedPropertyName;
       }
     }
-    propertyNameCache_[camelCase] = propertyName;
+    if (!opt_bypassCache) {
+      propertyNameCache_[camelCase] = propertyName;
+    }
   }
   return propertyName;
 }
+
 
 /**
  * Sets the CSS style of the specified element with optional units, e.g. "px".
@@ -82,9 +85,11 @@ export function getVendorJsPropertyName(element, camelCase, opt_bypassCache) {
  * @param {string} property
  * @param {*} value
  * @param {string=} opt_units
+ * @param {bool=} opt_bypassCache
  */
-export function setStyle(element, property, value, opt_units) {
-  let propertyName = getVendorJsPropertyName(element, property);
+export function setStyle(element, property, value, opt_units, opt_bypassCache) {
+  let propertyName =
+      getVendorJsPropertyName(element.style, property, opt_bypassCache);
   if (propertyName) {
     element.style[propertyName] = opt_units ? value + opt_units : value;
   }
