@@ -112,7 +112,7 @@ function addDataAttributes(element, attributes) {
 function getBootstrapBaseUrl(parentWindow) {
   // TODO(malteubl): Change to final URL.
   var url =
-      'https://www.gstatic.com/amphtml/ads/$internalRuntimeVersion$/frame.html';
+      'https://ads.ampproject.net/$internalRuntimeVersion$/frame.html';
   if (getMode().localDev) {
 
     url = 'http://ads.localhost:' + parentWindow.location.port +
