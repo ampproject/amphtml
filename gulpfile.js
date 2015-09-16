@@ -332,7 +332,7 @@ function examplesWithMinifiedJs(name) {
       .pipe(gulp.dest('examples.build/'));
 
   var prod = min;
-  prod = prod.replace(/\.\.\/dist\//g, 'https://www.gstatic.com/amphtml/');
+  prod = prod.replace(/\.\.\/dist\//g, 'https://cdn.ampproject.org/');
   gulp.src(input)
       .pipe(file(name.replace('.html', '.prod.html'), prod))
       .pipe(gulp.dest('examples.build/'));
