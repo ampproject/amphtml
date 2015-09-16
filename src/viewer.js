@@ -278,7 +278,7 @@ export class Viewer {
    * @param {string} eventType
    * @param {*} data
    * @param {boolean} awaitResponse
-   * @return {!Promise<*>}
+   * @return {(!Promise<*>|undefined)}
    * @package
    * @expose
    */
@@ -348,7 +348,7 @@ export class Viewer {
     } else {
       this.messageQueue_.push({eventType: eventType, data: data});
     }
-    if (!awaitResponse) {
+    if (awaitResponse) {
       // TODO(dvoytenko): This is somewhat questionable. What do we return
       // when no one is listening?
       return Promise.resolve();
