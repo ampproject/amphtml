@@ -16,6 +16,9 @@ limitations under the License.
 
 Changelog:
 
+0.6
+Added amp-audio
+
 0.5
 Added amp-iframe
 Added amp-twitter
