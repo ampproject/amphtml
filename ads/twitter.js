@@ -63,7 +63,7 @@ export function twitter(global, data) {
     var offsetWidth = iframe.offsetWidth;
     var scale = window.innerHeight / offsetHeight;
     if (context.mode.development && scale != 1) {
-      console.info('Ideal tweet size for tweet id:', data.tweetid,
+      console/*OK*/.info('Ideal tweet size for tweet id:', data.tweetid,
           'width="' + iframe.offsetWidth +'" height="' + offsetHeight + '"',
           data);
     }

@@ -12,6 +12,7 @@ before_install:
 before_script:
   - npm install -g gulp
 script:
+  - gulp presubmit
   - gulp build
   - gulp minify
   - gulp unit

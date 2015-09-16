@@ -56,7 +56,7 @@ describe('History', () => {
     sandbox = null;
   });
 
-  it('should initialize correctly', () => {
+  it.skipOnFirefox('should initialize correctly', () => {
     expect(history.stackIndex_).to.equal(window.history.length - 1);
     expect(history.stackOnPop_.length).to.equal(0);
     expect(onStackIndexUpdated).to.not.equal(null);

@@ -16,6 +16,9 @@ limitations under the License.
 
 Changelog:
 
+0.6
+Added amp-audio
+
 0.5
 Added amp-iframe
 Added amp-twitter
@@ -190,6 +193,7 @@ In these cases, services may set up endpoints that produce data that conforms to
 ## Components
 
 - [amp-img](../builtins/amp-img.md)
+- [amp-audio](../extensions/amp-audio/amp-audio.md)
 - [amp-anim](../extensions/amp-anim/amp-anim.md)
 - [amp-ad](../builtins/amp-ad.md)
 - [amp-pixel](../builtins/amp-pixel.md)

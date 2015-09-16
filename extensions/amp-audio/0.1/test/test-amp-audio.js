@@ -127,7 +127,7 @@ describe('amp-audio', () => {
       var audio = a.querySelector('audio');
       expect(a.style.width).to.be.equal('300px');
       expect(a.style.height).to.be.equal('30px');
-      if (/Safari/.test(navigator.userAgent)) {
+      if (/Safari|Firefox/.test(navigator.userAgent)) {
         // Safari has default sizes for audio tags that cannot
         // be overridden.
         return;

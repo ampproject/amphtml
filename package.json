@@ -19,6 +19,7 @@
     "webcomponents.js": "^0.7.2"
   },
   "devDependencies": {
+    "autoprefixer": "^6.0.2",
     "babel-core": "^5.8.24",
     "babelify": "^6.1.3",
     "browserify": "^11.0.1",
@@ -27,6 +28,7 @@
     "core-js": "^1.1.4",
     "del": "^1.2.0",
     "es6ify": "~1.6.0",
+    "find-in-files": "^0.1.1",
     "gulp": "^3.9.0",
     "gulp-babel": "~5.1.0",
     "gulp-concat": "~2.6.0",
@@ -52,6 +54,7 @@
     "karma-safari-launcher": "^0.1.1",
     "karma-sinon-chai": "^1.0.0",
     "mocha": "^2.2.5",
+    "postcss": "^5.0.5",
     "sinon": "^1.15.4",
     "sinon-chai": "^2.8.0",
     "vinyl-buffer": "^1.0.0",
