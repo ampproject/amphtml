@@ -68,7 +68,7 @@ export class Viewer {
     /** @private {!Observable<!ViewerHistoryPoppedEvent>} */
     this.historyPoppedObservable_ = new Observable();
 
-    /** @private {?function(string, *):Promise<*>} */
+    /** @private {?function(string, *, boolean):Promise<*>} */
     this.messageDeliverer_ = null;
 
     /** @private {!Array<!{eventType: string, data: *}>} */
@@ -225,7 +225,7 @@ export class Viewer {
    * @param {number} height
    */
   postDocumentReady(width, height) {
-    this.sendMessage_('documentLoaded', {width: width, height: height});
+    this.sendMessage_('documentLoaded', {width: width, height: height}, false);
   }
 
   /**
@@ -234,7 +234,7 @@ export class Viewer {
    * @param {number} height
    */
   postDocumentResized(width, height) {
-    this.sendMessage_('documentResized', {width: width, height: height});
+    this.sendMessage_('documentResized', {width: width, height: height}, false);
   }
 
   /**
@@ -243,7 +243,7 @@ export class Viewer {
    * @return {!Promise}
    */
   requestFullOverlay() {
-    return this.sendMessage_('requestFullOverlay', {});
+    return this.sendMessage_('requestFullOverlay', {}, true);
   }
 
   /**
@@ -252,7 +252,7 @@ export class Viewer {
    * @return {!Promise}
    */
   cancelFullOverlay() {
-    return this.sendMessage_('cancelFullOverlay', {});
+    return this.sendMessage_('cancelFullOverlay', {}, true);
   }
 
   /**
@@ -275,11 +275,12 @@ export class Viewer {
    * Requests AMP document to receive a message from Viewer.
    * @param {string} eventType
    * @param {*} data
+   * @param {boolean} awaitResponse
    * @return {!Promise<*>}
    * @package
    * @expose
    */
-  receiveMessage(eventType, data) {
+  receiveMessage(eventType, data, awaitResponse) {
     if (eventType == 'viewport') {
       this.viewportObservable_.fire({
         scrollTop: data['scrollTop'],
@@ -304,7 +305,7 @@ export class Viewer {
   /**
    * Provides a message delivery mechanism by which AMP document can send
    * messages to the viewer.
-   * @param {function(string, *):Promise} deliverer
+   * @param {function(string, *, boolean):(!Promise<*>|undefined)} deliverer
    * @package
    * @expose
    */
@@ -315,7 +316,7 @@ export class Viewer {
       let queue = this.messageQueue_.slice(0);
       this.messageQueue_ = [];
       queue.forEach((message) => {
-        this.messageDeliverer_(message.eventType, message.data);
+        this.messageDeliverer_(message.eventType, message.data, false);
       });
     }
   }
@@ -323,12 +324,13 @@ export class Viewer {
   /**
    * @param {string} eventType
    * @param {*} data
-   * @return {!Promise<*>}
+   * @param {boolean} awaitResponse
+   * @return {!Promise<*>|undefined}
    * @private
    */
-  sendMessage_(eventType, data) {
+  sendMessage_(eventType, data, awaitResponse) {
     if (this.messageDeliverer_) {
-      return this.messageDeliverer_(eventType, data);
+      return this.messageDeliverer_(eventType, data, awaitResponse);
     }
 
     // Store only a last version for an event type.
@@ -344,9 +346,12 @@ export class Viewer {
     } else {
       this.messageQueue_.push({eventType: eventType, data: data});
     }
-    // TODO(dvoytenko): This is somewhat questionable. What do we return
-    // when no one is listening?
-    return Promise.resolve();
+    if (!awaitResponse) {
+      // TODO(dvoytenko): This is somewhat questionable. What do we return
+      // when no one is listening?
+      return Promise.resolve();
+    }
+    return undefined;
   }
 
   /**

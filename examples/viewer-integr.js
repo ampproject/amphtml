@@ -41,11 +41,12 @@ function whenMessagingLoaded(callback) {
   var viewer = AMP.viewer;
 
   whenMessagingLoaded(function(ViewerMessaging) {
-    var messaging = new ViewerMessaging(window.parent, function(type, payload) {
-      return viewer.receiveMessage(type, payload);
-    });
-    viewer.setMessageDeliverer(function(type, payload) {
-      return messaging.sendRequest(type, payload);
+    var messaging = new ViewerMessaging(window.parent,
+        function(type, payload, awaitResponse) {
+          return viewer.receiveMessage(type, payload, awaitResponse);
+        });
+    viewer.setMessageDeliverer(function(type, payload, awaitResponse) {
+      return messaging.sendRequest(type, payload, awaitResponse);
     });
   });
 });

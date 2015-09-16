@@ -17,7 +17,9 @@
 
 /**
  * This is a very simple messaging protocol between viewer and viewer client.
- * @param {function(string, *):!Promise<*>} requestProcessor
+ * @param {!Window} target
+ * @param {function(string, *, boolean):(!Promise<*>|undefined)}
+ *    requestProcessor
  * @constructor
  */
 function ViewerMessaging(target, requestProcessor) {
@@ -38,15 +40,23 @@ function ViewerMessaging(target, requestProcessor) {
 /**
  * @param {string} eventType
  * @param {*} payload
- * @param {!Promise<*>}
+ * @param {boolean} awaitResponse
+ * @return {!Promise<*>|undefined}
  */
-ViewerMessaging.prototype.sendRequest = function(eventType, payload) {
+ViewerMessaging.prototype.sendRequest = function(eventType, payload,
+    awaitResponse) {
   var requestId = ++this.requestIdCounter_;
-  var promise = new Promise(function(resolve, reject) {
-    this.waitingForResponse_[requestId] = {resolve: resolve, reject: reject};
-  }.bind(this));
-  this.sendMessage_(this.requestSentinel_, requestId, eventType, payload);
-  return promise;
+  if (awaitResponse) {
+    var promise = new Promise(function(resolve, reject) {
+      this.waitingForResponse_[requestId] = {resolve: resolve, reject: reject};
+    }.bind(this));
+    this.sendMessage_(this.requestSentinel_, requestId, eventType, payload,
+        true);
+    return promise;
+  }
+  this.sendMessage_(this.requestSentinel_, requestId, eventType, payload,
+      false);
+  return undefined;
 };
 
 
@@ -69,12 +79,18 @@ ViewerMessaging.prototype.onMessage_ = function(event) {
  */
 ViewerMessaging.prototype.onRequest_ = function(message) {
   var requestId = message.requestId;
-  var promise = this.requestProcessor_(message.type, message.payload);
-  promise.then(function(payload) {
-    this.sendResponse_(requestId, payload);
-  }.bind(this), function(reason) {
-    this.sendResponseError_(requestId, reason);
-  }.bind(this));
+  var promise = this.requestProcessor_(message.type, message.payload,
+      message.rsvp);
+  if (message.rsvp) {
+    if (!promise) {
+      throw new Error('expected response but none given: ' + message.type);
+    }
+    promise.then(function(payload) {
+      this.sendResponse_(requestId, payload);
+    }.bind(this), function(reason) {
+      this.sendResponseError_(requestId, reason);
+    }.bind(this));
+  }
 };
 
 
@@ -84,8 +100,8 @@ ViewerMessaging.prototype.onRequest_ = function(message) {
 ViewerMessaging.prototype.onResponse_ = function(message) {
   var requestId = message.requestId;
   var pending = this.waitingForResponse_[requestId];
-  delete this.waitingForResponse_[requestId];
   if (pending) {
+    delete this.waitingForResponse_[requestId];
     if (message.type == 'ERROR') {
       pending.reject(message.payload);
     } else {
@@ -99,15 +115,17 @@ ViewerMessaging.prototype.onResponse_ = function(message) {
  * @param {string} sentinel
  * @param {string} eventType
  * @param {*} payload
+ * @param {boolean} awaitResponse
  */
 ViewerMessaging.prototype.sendMessage_ = function(sentinel, requestId,
-      eventType, payload) {
+      eventType, payload, awaitResponse) {
   // TODO: must check for origin/target.
   var message = {
     sentinel: sentinel,
     requestId: requestId,
     type: eventType,
-    payload: payload
+    payload: payload,
+    rsvp: awaitResponse
   };
   this.target_.postMessage(message, '*');
 };
@@ -118,7 +136,7 @@ ViewerMessaging.prototype.sendMessage_ = function(sentinel, requestId,
  * @param {*} payload
  */
 ViewerMessaging.prototype.sendResponse_ = function(requestId, payload) {
-  this.sendMessage_(this.responseSentinel_, requestId, null, payload);
+  this.sendMessage_(this.responseSentinel_, requestId, null, payload, false);
 };
 
 
@@ -127,7 +145,7 @@ ViewerMessaging.prototype.sendResponse_ = function(requestId, payload) {
  * @param {*} reason
  */
 ViewerMessaging.prototype.sendResponseError_ = function(requestId, reason) {
-  this.sendMessage_(this.responseSentinel_, requestId, 'ERROR', reason);
+  this.sendMessage_(this.responseSentinel_, requestId, 'ERROR', reason, false);
 };
 
 

@@ -148,9 +148,7 @@
       this.iframe.contentWindow.name = SENTINEL + paramsStr(params);
 
       this.messaging_ = new ViewerMessaging(this.iframe.contentWindow,
-          function(type, payload) {
-            return this.processRequest_(type, payload);
-          }.bind(this));
+          this.processRequest_.bind(this));
 
       this.iframe.onload = this.loaded_.bind(this);
       setTimeout(function() {
@@ -201,7 +199,7 @@
     Viewer.prototype.onScroll_ = function() {
       this.messaging_.sendRequest('viewport', {
         scrollTop: this.container.scrollTop
-      });
+      }, false);
     };
 
 
@@ -215,7 +213,7 @@
         width: this.container.offsetWidth,
         height: this.container.offsetHeight,
         paddingTop: this.header.offsetHeight
-      });
+      }, false);
     };
 
 
@@ -264,7 +262,7 @@
     };
 
 
-    Viewer.prototype.processRequest_ = function(type, data) {
+    Viewer.prototype.processRequest_ = function(type, data, awaitResponse) {
       if (type == 'documentLoaded') {
         return this.documentReady_();
       }
@@ -279,6 +277,7 @@
       }
       if (data.type == 'pushHistory') {
         return this.pushHistory_(data.stackIndex);
+      }
       if (data.type == 'popHistory') {
         return this.popHistory_(data.stackIndex);
       }
