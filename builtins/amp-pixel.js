@@ -36,6 +36,8 @@ export function installPixel(win) {
       // Remove user defined size. Pixels should always be the default size.
       this.element.style.width = '';
       this.element.style.height = '';
+      // Consider the element invisible.
+      this.element.setAttribute('aria-hidden', 'true');
     }
 
     /** @override */

@@ -43,7 +43,8 @@ describe('amp-pixel', () => {
         ).then((p) => {
           expect(p.querySelector('img')).to.not.be.null;
           expect(p.children[0].src).to.equal(
-            'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?');
+              'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?');
+          expect(p.getAttribute('aria-hidden')).to.equal('true');
         });
   });
 
@@ -53,7 +54,7 @@ describe('amp-pixel', () => {
         ).then((p) => {
           expect(p.querySelector('img')).to.not.be.null;
           expect(p.children[0].src).to.equal(
-            'http://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?');
+              'http://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?');
         });
   });
 
