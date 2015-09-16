@@ -317,7 +317,6 @@ function compileJs(srcDir, srcFilename, destDir, options) {
       .pipe(wrap(wrapper))
       .pipe(sourcemaps.init({ loadMaps: true }))
       .pipe(sourcemaps.write('./'))
-      .pipe(include())
       .pipe(gulp.dest(destDir));
   }
 
