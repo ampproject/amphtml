@@ -20,7 +20,7 @@ import {installVideo} from '../../builtins/amp-video';
 describe('amp-video', () => {
 
   function getFooVideoSrc(mediatype) {
-    return '//localhost/foo.' + mediatype.slice(mediatype.indexOf('/') + 1); // assumes no optional params
+    return '//someHost/foo.' + mediatype.slice(mediatype.indexOf('/') + 1); // assumes no optional params
   }
 
   function getVideo(attributes, children) {
