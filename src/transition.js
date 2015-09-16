@@ -26,7 +26,7 @@ import {getCurve} from './curve';
 class Transition {}
 
 
-export var NULL = function(time) {return null;};
+export const NULL = function(time) {return null;};
 
 
 /**

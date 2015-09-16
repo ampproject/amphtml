@@ -20,7 +20,7 @@ import {assert} from './asserts';
 /**
  * @enum {string}
  */
-export var Layout = {
+export const Layout = {
   NODISPLAY: 'nodisplay',
   FIXED: 'fixed',
   RESPONSIVE: 'responsive',
@@ -153,9 +153,12 @@ var Dimensions;
  * Set or cached browser natural dimensions for elements. The tagname
  * initialized here will return true `hasNaturalDimensions`, even if yet to be
  * calculated. Exported for testing.
+ *
+ * Visible for testing only!
+ *
  * @type {!Object<string, Dimensions>}
  */
-export var naturalDimensions_ = {
+export const naturalDimensions_ = {
   'AMP-PIXEL': {width: 1, height: 1},
   'AMP-AUDIO': null
 };
