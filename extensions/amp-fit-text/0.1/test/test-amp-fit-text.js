@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {createIframe} from '../../../../testing/iframe';
+import {Timer} from '../../../../src/timer';
+import {createIframePromise} from '../../../../testing/iframe';
 require('../../../../build/all/v0/amp-fit-text-0.1.max');
 import {adopt} from '../../../../src/runtime';
 
@@ -23,26 +24,36 @@ adopt(window);
 describe('amp-fit-text', () => {
 
   function getFitText(text, opt_responsive) {
-    var iframe = createIframe();
-    var ft = iframe.doc.createElement('amp-fit-text');
-    ft.setAttribute('width', '111');
-    ft.setAttribute('height', '222');
-    if (opt_responsive) {
-      ft.setAttribute('layout', 'responsive');
-    }
-    ft.textContent = text;
-    iframe.doc.body.appendChild(ft);
-    ft.implementation_.layoutCallback();
-    return ft;
+    return createIframePromise().then(iframe => {
+      var ft = iframe.doc.createElement('amp-fit-text');
+      ft.setAttribute('width', '111');
+      ft.setAttribute('height', '222');
+      ft.style.fontFamily = 'Arial';
+      ft.style.fontSize = '17px';
+      ft.style.overflow = 'hidden';
+      ft.style.width = '111px';
+      ft.style.height = '222px';
+      ft.style.position = 'relative';
+      if (opt_responsive) {
+        ft.setAttribute('layout', 'responsive');
+      }
+      ft.textContent = text;
+      iframe.doc.body.appendChild(ft);
+      return new Timer(window).promise(16).then(() => {
+        ft.implementation_.layoutCallback();
+        return ft;
+      });
+    });
   }
 
-  it('renders', () => {
+  it.skipOnTravis('renders', () => {
     var text = 'Lorem ipsum';
-    var ft = getFitText(text);
-    var content = ft.querySelector('.-amp-fit-text-content');
-    expect(content).to.not.equal(null);
-    expect(content.textContent).to.equal(text);
-    expect(content.style.fontSize).to.equal('6px');
+    return getFitText(text).then(ft => {
+      var content = ft.querySelector('.-amp-fit-text-content');
+      expect(content).to.not.equal(null);
+      expect(content.textContent).to.equal(text);
+      expect(content.style.fontSize).to.equal('8px');
+    });
   });
 
 });

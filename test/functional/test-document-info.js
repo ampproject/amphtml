@@ -34,14 +34,14 @@ describe('document-info', () => {
     return getWin('https://twitter.com/').then((win) => {
       expect(documentInfoFor(win).canonicalUrl).to.equal(
           'https://twitter.com/');
-    })
+    });
   });
 
   it('should provide the relative canonicalUrl as absolute', () => {
     return getWin('./foo.html').then((win) => {
       expect(documentInfoFor(win).canonicalUrl).to.equal(
           'http://localhost:' + location.port + '/foo.html');
-    })
+    });
   });
 
   it('should throw if no canonical is available.', () => {
@@ -49,6 +49,6 @@ describe('document-info', () => {
       expect(() => {
         documentInfoFor(win).canonicalUrl;
       }).to.throw(/AMP files are required to have a/)
-    })
+    });
   });
 });

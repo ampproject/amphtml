@@ -28,6 +28,10 @@ class AmpAudio extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    if (this.didLayout) {
+      return;
+    }
+    this.didLayout = true;
     let audio = document.createElement('audio');
     // Force controls otherwise there is no player UI.
     audio.controls = true;

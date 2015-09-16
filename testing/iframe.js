@@ -128,36 +128,6 @@ export function createFixtureIframe(fixture, initialIframeHeight, done) {
 /**
  * Creates a super simple iframe. Use this in unit tests to register elements
  * in a sandbox.
- * TODO(@cramforce): Remove this function. In this sync mode, the iframe is
- * treated as if it wasn't attached yet and the document actually exchanges
- * when it does. This breaks tests that want to measure things because
- * the iframe is treated as not rendered.
- * @return {{
- *   win: !Window,
- *   doc: !Document,
- *   iframe: !Element
- * }}
- */
-export function createIframe() {
-  var iframe = document.createElement('iframe');
-  iframe.name = 'test_' + iframeCount++;
-  iframe.srcdoc = '<!doctype><html><head>' +
-      '<script src="/base/build/polyfills.js"></script>' +
-      '<body style="margin:0">';
-  document.body.appendChild(iframe);
-  registerForUnitTest(iframe.contentWindow);
-  // Flag as being a test window.
-  iframe.contentWindow.AMP_TEST = true;
-  return {
-    win: iframe.contentWindow,
-    doc: iframe.contentWindow.document,
-    iframe: iframe
-  };
-}
-
-/**
- * Creates a super simple iframe. Use this in unit tests to register elements
- * in a sandbox.
  * @return {{
  *   win: !Window,
  *   doc: !Document,

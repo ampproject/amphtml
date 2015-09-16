@@ -168,6 +168,7 @@ export var naturalDimensions_ = {
  * @return {Dimensions}
  */
 export function hasNaturalDimensions(tagName) {
+  tagName = tagName.toUpperCase();
   return naturalDimensions_[tagName] !== undefined;
 };
 
@@ -179,8 +180,9 @@ export function hasNaturalDimensions(tagName) {
  * @return {Dimensions}
  */
 export function getNaturalDimensions(tagName) {
+  tagName = tagName.toUpperCase();
   if (!naturalDimensions_[tagName]) {
-    let naturalTagName = tagName.toLowerCase().replace(/^amp\-/, '');
+    let naturalTagName = tagName.toUpperCase().replace(/^AMP\-/, '');
     let temp = document.createElement(naturalTagName);
     // For audio, should no-op elsewhere.
     temp.controls = true;

@@ -15,7 +15,6 @@
  */
 
 // This must load before all other tests.
-
 import '../src/polyfills';
 import {adopt} from '../src/runtime';
 
