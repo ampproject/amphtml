@@ -54,7 +54,20 @@ export function twitter(global, data) {
   var height = data.initialWindowHeight;
   tweet.style.height = height + 'px';
   tweet.style.width = width + 'px';
-  global.document.getElementById('c').appendChild(tweet);
+  var container = document.createElement('div');
+  // This container makes the iframe always as big as the
+  // parent wants the iframe to be instead of extending
+  // to the dimensions of the content.
+  setStyles(container, {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    bottom: 0,
+    right: 0,
+    overflow: 'hidden'
+  });
+  container.appendChild(tweet);
+  global.document.getElementById('c').appendChild(container);
   getTwttr(global).then(function(twttr) {
     twttr.widgets.createTweet(data.tweetid, tweet, data).then(() => {
       window.onresize = resize;
