@@ -352,7 +352,6 @@ export function createAmpElementProto(win, name, implementationClass) {
    */
   ElementProto.dispatchCustomEvent = function(name, opt_data) {
     var data = opt_data || {};
-    data.bubbles = true;
     // Constructors of events need to come from the correct window. Sigh.
     var win = this.ownerDocument.defaultView;
     var event = document.createEvent('Event');

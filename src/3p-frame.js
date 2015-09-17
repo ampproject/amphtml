@@ -46,6 +46,9 @@ function getFrameAttributes(parentWindow, element, opt_type) {
   addDataAttributes(element, attributes);
   attributes.width = getLengthNumeral(width);
   attributes.height = getLengthNumeral(height);
+  var box = element.getLayoutBox();
+  attributes.initialWindowWidth = box.width;
+  attributes.initialWindowHeight = box.height;
   attributes.type = type;
   attributes._context = {
     location: {
