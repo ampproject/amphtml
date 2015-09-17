@@ -68,7 +68,7 @@ export class Viewer {
     /** @private {!Observable<!ViewerHistoryPoppedEvent>} */
     this.historyPoppedObservable_ = new Observable();
 
-    /** @private {?function(string, *)} */
+    /** @private {?function(string, *, boolean):(Promise<*>|undefined)} */
     this.messageDeliverer_ = null;
 
     /** @private {!Array<!{eventType: string, data: *}>} */
@@ -225,7 +225,7 @@ export class Viewer {
    * @param {number} height
    */
   postDocumentReady(width, height) {
-    this.sendMessage_('documentLoaded', {width: width, height: height});
+    this.sendMessage_('documentLoaded', {width: width, height: height}, false);
   }
 
   /**
@@ -234,47 +234,55 @@ export class Viewer {
    * @param {number} height
    */
   postDocumentResized(width, height) {
-    this.sendMessage_('documentResized', {width: width, height: height});
+    this.sendMessage_('documentResized', {width: width, height: height}, false);
   }
 
   /**
-   * Requests full overlay mode from the viewer.
+   * Requests full overlay mode from the viewer. Returns a promise that yields
+   * when the viewer has switched to full overlay mode.
+   * @return {!Promise}
    */
   requestFullOverlay() {
-    this.sendMessage_('requestFullOverlay', {});
+    return this.sendMessage_('requestFullOverlay', {}, true);
   }
 
   /**
-   * Requests to cancel full overlay mode from the viewer.
+   * Requests to cancel full overlay mode from the viewer. Returns a promise
+   * that yields when the viewer has switched off full overlay mode.
+   * @return {!Promise}
    */
   cancelFullOverlay() {
-    this.sendMessage_('cancelFullOverlay', {});
+    return this.sendMessage_('cancelFullOverlay', {}, true);
   }
 
   /**
    * Triggers "pushHistory" event for the viewer.
    * @param {number} stackIndex
+   * @return {!Promise}
    */
   postPushHistory(stackIndex) {
-    this.sendMessage_('pushHistory', {stackIndex: stackIndex});
+    return this.sendMessage_('pushHistory', {stackIndex: stackIndex}, true);
   }
 
   /**
    * Triggers "popHistory" event for the viewer.
    * @param {number} stackIndex
+   * @return {!Promise}
    */
   postPopHistory(stackIndex) {
-    this.sendMessage_('popHistory', {stackIndex: stackIndex});
+    return this.sendMessage_('popHistory', {stackIndex: stackIndex}, true);
   }
 
   /**
    * Requests AMP document to receive a message from Viewer.
    * @param {string} eventType
    * @param {*} data
+   * @param {boolean} awaitResponse
+   * @return {(!Promise<*>|undefined)}
    * @package
    * @expose
    */
-  receiveMessage(eventType, data) {
+  receiveMessage(eventType, data, awaitResponse) {
     if (eventType == 'viewport') {
       this.viewportObservable_.fire({
         scrollTop: data['scrollTop'],
@@ -286,17 +294,22 @@ export class Viewer {
       if (paddingTop !== undefined) {
         this.updatePaddingTop_(paddingTop);
       }
-    } else if (eventType == 'historyPopped') {
+      return Promise.resolve();
+    }
+    if (eventType == 'historyPopped') {
       this.historyPoppedObservable_.fire({
         newStackIndex: data['newStackIndex']
       });
+      return Promise.resolve();
     }
+    log.fine(TAG_, 'unknown message:', eventType);
+    return undefined;
   }
 
   /**
    * Provides a message delivery mechanism by which AMP document can send
    * messages to the viewer.
-   * @param {function(string, *)} deliverer
+   * @param {function(string, *, boolean):(!Promise<*>|undefined)} deliverer
    * @package
    * @expose
    */
@@ -307,7 +320,7 @@ export class Viewer {
       let queue = this.messageQueue_.slice(0);
       this.messageQueue_ = [];
       queue.forEach((message) => {
-        this.messageDeliverer_(message.eventType, message.data);
+        this.messageDeliverer_(message.eventType, message.data, false);
       });
     }
   }
@@ -315,26 +328,34 @@ export class Viewer {
   /**
    * @param {string} eventType
    * @param {*} data
+   * @param {boolean} awaitResponse
+   * @return {!Promise<*>|undefined}
    * @private
    */
-  sendMessage_(eventType, data) {
+  sendMessage_(eventType, data, awaitResponse) {
     if (this.messageDeliverer_) {
-      this.messageDeliverer_(eventType, data);
-    } else {
-      // Store only a last version for an event type.
-      let found = null;
-      for (let i = 0; i < this.messageQueue_.length; i++) {
-        if (this.messageQueue_[i].eventType == eventType) {
-          found = this.messageQueue_[i];
-          break;
-        }
-      }
-      if (found) {
-        found.data = data;
-      } else {
-        this.messageQueue_.push({eventType: eventType, data: data});
+      return this.messageDeliverer_(eventType, data, awaitResponse);
+    }
+
+    // Store only a last version for an event type.
+    let found = null;
+    for (let i = 0; i < this.messageQueue_.length; i++) {
+      if (this.messageQueue_[i].eventType == eventType) {
+        found = this.messageQueue_[i];
+        break;
       }
     }
+    if (found) {
+      found.data = data;
+    } else {
+      this.messageQueue_.push({eventType: eventType, data: data});
+    }
+    if (awaitResponse) {
+      // TODO(dvoytenko): This is somewhat questionable. What do we return
+      // when no one is listening?
+      return Promise.resolve();
+    }
+    return undefined;
   }
 
   /**
