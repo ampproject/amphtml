@@ -81,28 +81,38 @@ class AmpFitText extends AMP.BaseElement {
 
   /** @private */
   updateFontSize_() {
-    let min = this.minFontSize_;
-    let max = this.maxFontSize_;
-    let expectedHeight = this.element.offsetHeight;
-
-    // Binomial search for the best font size.
-    while (max - min > 1) {
-      let mid = Math.round((min + max) / 2);
-      this.measurer_.style.fontSize = st.px(mid);
-      let height = this.measurer_.offsetHeight;
-      if (height > expectedHeight) {
-        max = mid;
-      } else {
-        min = mid;
-      }
-    }
-
     // TODO(dvoytenko): Add ellipsis if the content is still bigger than
     // the available size. Ensure that basic tags are supported when
     // doing the truncation?
-
-    this.content_.style.fontSize = st.px(min);
+    this.content_.style.fontSize = st.px(calculateFontSize_(this.measurer_,
+        this.element.offsetHeight, this.minFontSize_, this.maxFontSize_));
   }
 }
+
+
+/**
+ * @param {!Element} measurer
+ * @param {number} expectedHeight
+ * @param {number} minFontSize
+ * @param {number} maxFontSize
+ * @private  Visible for testing only!
+ */
+export function calculateFontSize_(measurer, expectedHeight,
+    minFontSize, maxFontSize) {
+  maxFontSize++;
+  // Binomial search for the best font size.
+  while (maxFontSize - minFontSize > 1) {
+    let mid = Math.floor((minFontSize + maxFontSize) / 2);
+    measurer.style.fontSize = st.px(mid);
+    let height = measurer.offsetHeight;
+    if (height > expectedHeight) {
+      maxFontSize = mid;
+    } else {
+      minFontSize = mid;
+    }
+  }
+  return minFontSize;
+}
+
 
 AMP.registerElement('amp-fit-text', AmpFitText, $CSS$);
