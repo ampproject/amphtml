@@ -26,6 +26,7 @@
     "chai": "^3.0.0",
     "chai-as-promised": "^5.1.0",
     "core-js": "^1.1.4",
+    "cssnano": "^3.0.1",
     "del": "^1.2.0",
     "es6ify": "~1.6.0",
     "find-in-files": "^0.1.1",
