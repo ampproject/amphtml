@@ -19,6 +19,6 @@
  */
 
 
-import 'document-register-element'
+import 'document-register-element/build/document-register-element.max'
 import './custom-core-js-shim';
 import 'babel-core/external-helpers';
