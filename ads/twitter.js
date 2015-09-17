@@ -19,6 +19,30 @@
 import {writeScript, executeAfterWriteScript} from '../src/3p'
 
 /**
+ * Returns the Twitter API object. If the current frame is the master
+ * frame it makes a new one by injecting the respective script, otherwise
+ * it retrieves a promise for the script from the master window.
+ * @param {!Window} global
+ */
+function getTwttr(global) {
+  if (context.isMaster) {
+    return global.twttrPromise = new Promise(function(resolve, reject) {
+      var s = document.createElement('script');
+      s.src = 'https://platform.twitter.com/widgets.js';
+      s.onload = function() {
+        resolve(global.twttr);
+      }
+      s.onerror = reject;
+      global.document.body.appendChild(s);
+    });
+  } else {
+    // Because we rely on this global existing it is important that
+    // this promise is created synchronously after master selection.
+    return context.master.twttrPromise;
+  }
+}
+
+/**
  * @param {!Window} global
  * @param {!Object} data
  */
@@ -30,9 +54,7 @@ export function twitter(global, data) {
   tweet.style.height = height + 'px';
   tweet.style.width = width + 'px';
   global.document.getElementById('c').appendChild(tweet);
-  var s = document.createElement('script');
-  s.src = 'https://platform.twitter.com/widgets.js';
-  s.onload = function() {
+  getTwttr(global).then(function(twttr) {
     twttr.widgets.createTweet(data.tweetid, tweet, data).then(() => {
       window.onresize = resize;
       var iframe = global.document.querySelector('#c iframe');
@@ -47,7 +69,7 @@ export function twitter(global, data) {
       }, true)
       render();
     });
-  };
+  });
 
   function resize() {
     // On resize we reset our base dimensions.
@@ -82,6 +104,4 @@ export function twitter(global, data) {
       };
     };
   }
-
-  global.document.body.appendChild(s);
 }
