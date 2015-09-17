@@ -198,6 +198,6 @@ export function pollForLayout(win, count) {
     return win.document.querySelectorAll('.-amp-layout,.-amp-error').length >= count;
   }, () => {
     return new Error('Failed to find elements with layout. HTML:\n' +
-        win.document.documentElement.innerHTML);
+        win.document.documentElement./*TEST*/innerHTML);
   });
 }

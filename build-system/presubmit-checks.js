@@ -30,11 +30,22 @@ var srcDirectories = [
 
 // Terms that must not appear in our source files.
 var forbiddenTerms = [
-  'DO' + ' NOT SUBMIT',
-  'X' + 'XX',
+  'DO NOT SUBMIT',
+  'XXX',
   // If you run against this, use console/*OK*/.log to whitelist a legit
   // case.
   'console\\.\\w+\\(',
+  '\\.innerHTML',
+  '\\.outerHTML',
+  '\\.postMessage',
+  'cookie',
+  'eval\\(',
+  'localStorage',
+  'sessionStorage',
+  'indexedDB',
+  'openDatabase',
+  'requestFileSystem',
+  'webkitRequestFileSystem',
 ];
 
 function checkForbiddenTerms() {
@@ -44,11 +55,10 @@ function checkForbiddenTerms() {
       promises.push(checkForbiddenTerm(dir, term));
     });
   });
-  Promise.all(promises).then(function(bools) {
+  return Promise.all(promises).then(function(bools) {
     if (bools.filter(function(bool) { return bool }).length) {
+      console.log('Please remove these usages or consult with the AMP team.')
       process.exit(1);
-    } else {
-      process.exit();
     }
   });
 }
@@ -63,6 +73,9 @@ function checkForbiddenTerm(directory, term) {
       function(results) {
         var found = false;
         for (var result in results) {
+          if (result == 'build-system/presubmit-checks.js') {
+            continue;
+          }
           var res = results[result];
           console/*OK*/.error(
               'Found "' + res.matches[0] + '" ' + res.count
@@ -75,5 +88,5 @@ function checkForbiddenTerm(directory, term) {
 }
 
 exports.run = function() {
-  checkForbiddenTerms();
+  return checkForbiddenTerms();
 };
