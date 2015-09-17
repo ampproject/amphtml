@@ -19,10 +19,8 @@ import {assert} from './asserts';
 import {getService} from './service';
 import {installStyles} from './styles';
 import {log} from './log';
-import {onDocumentReady} from './event-helper';
 import {parseQueryString} from './url';
 import {platform} from './platform';
-import * as st from './style';
 
 
 let TAG_ = 'Viewer';
@@ -57,12 +55,12 @@ export class Viewer {
     this.viewportHeight_ = 0;
 
     /** @private {number} */
-    this.scrollTop_ = 0;
+    this./*OK*/scrollTop_ = 0;
 
     /** @private {number} */
     this.paddingTop_ = 0;
 
-    /** @private {!Observable<!ViewerViewportEvent>} */
+    /** @private {!Observable} */
     this.viewportObservable_ = new Observable();
 
     /** @private {!Observable<!ViewerHistoryPoppedEvent>} */
@@ -99,6 +97,11 @@ export class Viewer {
     log.fine(TAG_, '- history:', this.overtakeHistory_);
 
     this.viewportType_ = this.params_['viewportType'] || this.viewportType_;
+    // Configure scrolling parameters when AMP is embeded in a viewer on iOS.
+    if (this.viewportType_ == 'natural' && this.win.parent &&
+            platform.isIos()) {
+      this.viewportType_ = 'natural-ios-embed';
+    }
     log.fine(TAG_, '- viewportType:', this.viewportType_);
 
     this.viewportWidth_ = parseInt(this.params_['width']) ||
@@ -109,19 +112,12 @@ export class Viewer {
         this.viewportHeight_;
     log.fine(TAG_, '- viewportHeight:', this.viewportHeight_);
 
-    this.scrollTop_ = parseInt(this.params_['scrollTop']) || this.scrollTop_;
-    log.fine(TAG_, '- scrollTop:', this.scrollTop_);
+    this./*OK*/scrollTop_ = parseInt(this.params_['scrollTop']) ||
+        this./*OK*/scrollTop_;
+    log.fine(TAG_, '- scrollTop:', this./*OK*/scrollTop_);
 
-    let paddingTop = parseInt(this.params_['paddingTop']) || this.paddingTop_;
-    log.fine(TAG_, '- padding-top:', paddingTop);
-    this.updatePaddingTop_(paddingTop);
-
-    // Configure scrolling parameters when AMP is embeded in a viewer on iOS.
-    if (this.viewportType_ == 'natural' && this.win.parent &&
-            platform.isIos()) {
-      onDocumentReady(this.win.document,
-          () => this.setupEmbeddedScrollingIos_());
-    }
+    this.paddingTop_ = parseInt(this.params_['paddingTop']) || this.paddingTop_;
+    log.fine(TAG_, '- padding-top:', this.paddingTop_);
 
     // Remove hash - no reason to keep it around.
     var newUrl = this.win.location.href;
@@ -190,7 +186,7 @@ export class Viewer {
    * @return {number}
    */
   getScrollTop() {
-    return this.scrollTop_;
+    return this./*OK*/scrollTop_;
   }
 
   /**
@@ -203,7 +199,7 @@ export class Viewer {
 
   /**
    * Adds a "viewport" event listener for viewer events.
-   * @param {function(!ViewerViewportEvent)} handler
+   * @param {function()} handler
    * @return {!Unlisten}
    */
   onViewportEvent(handler) {
@@ -284,17 +280,20 @@ export class Viewer {
    */
   receiveMessage(eventType, data, awaitResponse) {
     if (eventType == 'viewport') {
-      this.viewportObservable_.fire({
-        scrollTop: data['scrollTop'],
-        scrollLeft: data['scrollLeft'],
-        width: data['width'],
-        height: data['height']
-      });
-      let paddingTop = data['paddingTop'];
-      if (paddingTop !== undefined) {
-        this.updatePaddingTop_(paddingTop);
+      if (data['width'] !== undefined) {
+        this.viewportWidth_ = data['width'];
       }
-      return Promise.resolve();
+      if (data['height'] !== undefined) {
+        this.viewportHeight_ = data['height'];
+      }
+      if (data['paddingTop'] !== undefined) {
+        this.paddingTop_ = data['paddingTop'];
+      }
+      if (data['scrollTop'] !== undefined) {
+        this./*OK*/scrollTop_ = data['scrollTop'];
+      }
+      this.viewportObservable_.fire();
+      return undefined;
     }
     if (eventType == 'historyPopped') {
       this.historyPoppedObservable_.fire({
@@ -357,63 +356,6 @@ export class Viewer {
     }
     return undefined;
   }
-
-  /**
-   * @private
-   */
-  setupEmbeddedScrollingIos_() {
-    // Embedded scrolling on iOS is rather complicated. IFrames cannot be sized
-    // and be scrollable. Sizing iframe by scrolling height has a big negative
-    // that "fixed" position is essentially impossible. The only option we
-    // found is to reset scrolling on the AMP doc, which overrides natural BODY
-    // scrolling with overflow:auto. We need the following styling:
-    // html {
-    //   overflow: auto;
-    //   -webkit-overflow-scrolling: touch;
-    // }
-    // body {
-    //   position: absolute;
-    //   overflow: auto;
-    //   -webkit-overflow-scrolling: touch;
-    // }
-    st.setStyles(this.win.document.documentElement, {
-      overflowX: 'hidden',
-      overflowY: 'auto',
-      webkitOverflowScrolling: 'touch'
-    });
-    st.setStyles(this.win.document.body, {
-      overflowX: 'hidden',
-      overflowY: 'auto',
-      webkitOverflowScrolling: 'touch',
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0
-    });
-
-    // TODO(dvoytenko): These styles are a lot more controversial. If we do
-    // go ahead with these styles, we'll have to define them in amp.css as
-    // "!important". This will have some authoring implications, although
-    // should not be a major issue. Overall, if we embed content, we want
-    // to have stronger control over margins.
-    st.setStyles(this.win.document.body, {
-      margin: 0,
-      overflowX: 'hidden'
-    });
-  }
-
-  /**
-   * @param {number} paddingTop
-   */
-  updatePaddingTop_(paddingTop) {
-    if (paddingTop != this.paddingTop_) {
-      this.paddingTop_ = paddingTop;
-      onDocumentReady(this.win.document, () => {
-        this.win.document.body.style.paddingTop = st.px(this.paddingTop_);
-      });
-    }
-  }
 }
 
 
@@ -432,17 +374,6 @@ export function parseParams_(str, allParams) {
     allParams[k] = params[k];
   }
 }
-
-
-/**
- * @typedef {{
- *   scrollTop: (number|undefined),
- *   scrollLeft: (number|undefined),
- *   width: (number|undefined),
- *   height: (number|undefined)
- * }}
- */
-var ViewerViewportEvent;
 
 
 /**
