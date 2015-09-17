@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "description": "Fastish HTML",
   "main": "index.js",
+  "engines" : {
+    "node": "^4.0.0"
+  },
   "author": "The AMP HTML Authors",
   "license": "Apache-2.0",
   "repository": {
