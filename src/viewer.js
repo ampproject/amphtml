@@ -295,13 +295,15 @@ export class Viewer {
         this.updatePaddingTop_(paddingTop);
       }
       return Promise.resolve();
-    } else if (eventType == 'historyPopped') {
+    }
+    if (eventType == 'historyPopped') {
       this.historyPoppedObservable_.fire({
         newStackIndex: data['newStackIndex']
       });
       return Promise.resolve();
     }
-    return Promise.reject('unknown message: ' + eventType);
+    log.fine(TAG_, 'unknown message:', eventType);
+    return undefined;
   }
 
   /**

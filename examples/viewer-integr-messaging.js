@@ -83,6 +83,7 @@ ViewerMessaging.prototype.onRequest_ = function(message) {
       message.rsvp);
   if (message.rsvp) {
     if (!promise) {
+      this.sendResponseError_(requestId, 'no response');
       throw new Error('expected response but none given: ' + message.type);
     }
     promise.then(function(payload) {
