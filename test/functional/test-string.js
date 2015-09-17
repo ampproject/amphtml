@@ -14,29 +14,13 @@
  * limitations under the License.
  */
 
-import {addDataAndJsonAttributes_} from '../../src/3p-frame';
+import {dashToCamelCase} from '../../src/string';
 
-describe('3p-frame', () => {
-  it('add attributes', () => {
-    var div = document.createElement('div');
-    div.setAttribute('data-foo', 'foo');
-    div.setAttribute('data-bar', 'bar');
-    div.setAttribute('foo', 'nope');
-    var obj = {};
-    addDataAndJsonAttributes_(div, obj)
-    expect(obj).to.deep.equal({
-      'foo': 'foo',
-      'bar': 'bar'
-    });
-
-    div.setAttribute('json', '{"abc": [1,2,3]}');
-
-    obj = {};
-    addDataAndJsonAttributes_(div, obj)
-    expect(obj).to.deep.equal({
-      'foo': 'foo',
-      'bar': 'bar',
-      'abc': [1, 2, 3]
-    });
+describe('dashToCamelCase', () => {
+  it('should transform dashes to camel case.', () => {
+    expect(dashToCamelCase('foo')).to.equal('foo');
+    expect(dashToCamelCase('foo-bar')).to.equal('fooBar');
+    expect(dashToCamelCase('foo-bar-baz')).to.equal('fooBarBaz');
+    expect(dashToCamelCase('-foo')).to.equal('Foo');
   });
 });

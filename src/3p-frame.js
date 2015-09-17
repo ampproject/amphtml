@@ -19,6 +19,7 @@ import {assert} from './asserts';
 import {getLengthNumeral} from '../src/layout';
 import {documentInfoFor} from './document-info';
 import {getMode} from './mode';
+import {dashToCamelCase} from './string';
 
 
 /** @type {!Object<string,number>} Number of 3p frames on the for that type. */
@@ -103,7 +104,7 @@ export function addDataAndJsonAttributes_(element, attributes) {
     if (attr.name.indexOf('data-') != 0) {
       continue;
     }
-    attributes[dashToCamelCase_(attr.name.substr(5))] = attr.value;
+    attributes[dashToCamelCase(attr.name.substr(5))] = attr.value;
   }
   var json = element.getAttribute('json');
   if (json) {
@@ -118,18 +119,6 @@ export function addDataAndJsonAttributes_(element, attributes) {
       attributes[key] = obj[key];
     }
   }
-}
-
-
-/**
- * @param {string} name Attribute name with dashes
- * @return {string} Dashes removed and character after to upper case.
- * @visibleForTesting
- */
-export function dashToCamelCase_(name) {
-  return name.replace(/-([a-z])/g, function(all, character) {
-    return character.toUpperCase();
-  });
 }
 
 /**
