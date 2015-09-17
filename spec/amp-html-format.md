@@ -87,13 +87,13 @@ In concrete terms this means that:
 
 AMP HTML documents MUST
 
-- start with the doctype `<!doctype html>.
-- contain a top-level `<html ⚡>` tag (`<html amp>` is accepted as well).
-- contain `<head>` and `<body>` tags (They are optional in HTML).
-- contain a `<link rel="canonical" href="$SOME_URL" />` tag inside their head that points to the regular HTML version of the AMP HTML document or to itself if no such HTML version exists.
-- contain a `<meta charset="utf-8">` tag as the first child of their head tag.
-- contain a `<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">` tag inside their head tag.
-- contain a `<script src="https://cdn.ampproject.org/v1.js"></script>` tag as the last element in their head.
+- <a name="dctp"></a>start with the doctype `<!doctype html>`. [🔗](#dctp)
+- <a name="ampd"></a>contain a top-level `<html ⚡>` tag (`<html amp>` is accepted as well). [🔗](#ampd)
+- <a name="crps"></a>contain `<head>` and `<body>` tags (They are optional in HTML). [🔗](#crps)
+- <a name="canon"></a>contain a `<link rel="canonical" href="$SOME_URL" />` tag inside their head that points to the regular HTML version of the AMP HTML document or to itself if no such HTML version exists. [🔗](#canon)
+- <a name="chrs"></a>contain a `<meta charset="utf-8">` tag as the first child of their head tag. [🔗](#chrs)
+- <a name="vprt"></a>contain a `<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">` tag inside their head tag. [🔗](#vprt)
+- <a name="scrpt"></a>contain a `<script src="https://cdn.ampproject.org/v1.js"></script>` tag as the last element in their head. [🔗](#scrpt)
 
 ### Metadata
 
