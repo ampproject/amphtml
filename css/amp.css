@@ -141,6 +141,20 @@ i-amp-sizer {
   content: attr(error-message);
 }
 
+/**
+ * Wraps an element to make the contents scrollable. This is
+ * used to wrap iframes which in iOS always behave as if they had the
+ * seamless attribute.
+ */
+i-amp-scroll-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: auto;
+}
+
 amp-pixel {
   position: absolute;
   width: 0;
