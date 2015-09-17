@@ -76,10 +76,6 @@ export class Viewport {
     /** @private @const {!Observable<!ViewportChangedEvent>} */
     this.changeObservable_ = new Observable();
 
-    this.binding_.onScroll(this.scroll_.bind(this));
-    this.binding_.onResize(this.resize_.bind(this));
-    this.changed_(/* relayoutAll */ false, /* velocity */ 0);
-
     this.viewer_.onViewportEvent(() => {
       this.binding_.updateViewerViewport(this.viewer_);
       let paddingTop = this.viewer_.getPaddingTop();
@@ -88,12 +84,25 @@ export class Viewport {
         this.binding_.updatePaddingTop(this.paddingTop_);
       }
     });
+    this.binding_.updateViewerViewport(this.viewer_);
     this.binding_.updatePaddingTop(this.paddingTop_);
+
+    this.binding_.onScroll(this.scroll_.bind(this));
+    this.binding_.onResize(this.resize_.bind(this));
+    this.changed_(/* relayoutAll */ false, /* velocity */ 0);
   }
 
   /** For testing. */
   cleanup_() {
     this.binding_.cleanup_();
+  }
+
+  /**
+   * Returns the top padding mandated by the viewer.
+   * @return {number}
+   */
+  getPaddingTop() {
+    return this.paddingTop_;
   }
 
   /**
@@ -579,9 +588,12 @@ export class ViewportBindingNaturalIosEmbed_ {
 export class ViewportBindingVirtual_ {
 
   /**
+   * @param {!Window} win
    * @param {!Viewer} viewer
    */
-  constructor(viewer) {
+  constructor(win, viewer) {
+    /** @private @const {!Window} */
+    this.win = win;
 
     /** @private {number} */
     this.width_ = viewer.getViewportWidth();
@@ -672,7 +684,7 @@ function createViewport_(window) {
   let viewer = viewerFor(window);
   let binding;
   if (viewer.getViewportType() == 'virtual') {
-    binding = new ViewportBindingVirtual_(viewer);
+    binding = new ViewportBindingVirtual_(window, viewer);
   } else if (viewer.getViewportType() == 'natural-ios-embed') {
     binding = new ViewportBindingNaturalIosEmbed_(window);
   } else {
