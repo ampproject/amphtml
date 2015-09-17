@@ -265,9 +265,11 @@ Depending on the value of the `layout` attribute AMP component elements must hav
 
 The optional layout attribute allows specifying how the component behaves in the document layout. Valid values for the layout attribute are:
 
-- Not present: The `width` and `height` attributes must be present and determine the exact size of the component.
+- Not present: If `width` and `height` attributes are present `fixed` layout is assumed. If `width` and `height` are not present `container` layout is assumed (unless otherwise documented with the component) which may not be supported by the element (Would trigger a runtime error).
+- fixed:
 - `responsive`: The `width` and `height` attributes must be present and are used to determine the aspect ratio of the component and the component is sized to the width of its container element while maintaining the height based on the aspect ratio.
-- `nodisplay`: The component takes up zero space on the screen as if its display style was `none`.
+- `nodisplay`: The component takes up zero space on the screen as if its display style was `none`. The `width` and `height` attributes are not required.
+- `fill`: Element size will be determined by the parent element.
 - `container`: The component is assumed to not have specific layout itself but only act as a container. Its children as rendered immediately.
 
 #### `media`
@@ -288,6 +290,16 @@ Example: Here we have 2 images with mutually exclusive media queries. Depending 
         width=527
         height=193 layout="responsive" ></amp-img>
 ```
+
+### `on`
+
+The on attribute is used to install event handlers on elements. The events that are supported depend on the element.
+
+The value for the syntax is a simple domain specific language of the form `eventName:targetId[.methodName]`.
+Example: `on="tap:fooId.showLightbox"`
+
+If `methodName` is omitted the default method is executed if defined for the element.
+Example: `on="tap:fooId"`
 
 
 ### Extended components
