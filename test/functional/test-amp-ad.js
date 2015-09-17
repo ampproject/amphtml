@@ -32,9 +32,7 @@ describe('amp-ad', () => {
       for (var key in attributes) {
         a.setAttribute(key, attributes[key]);
       }
-      iframe.doc.body.appendChild(a);
-      a.implementation_.layoutCallback();
-      return a;
+      return iframe.addElement(a);
     });
   }
 

@@ -25,14 +25,12 @@ describe('amp-pixel', () => {
       installPixel(iframe.win);
       var p = iframe.doc.createElement('amp-pixel');
       p.setAttribute('src', src);
-      iframe.doc.body.appendChild(p);
       var link = iframe.doc.createElement('link');
       link.setAttribute('href', 'https://pinterest.com');
       link.setAttribute('rel', 'canonical');
       iframe.doc.head.appendChild(link);
-      p.implementation_.layoutCallback();
-      return p;
-    })
+      return iframe.addElement(p);
+    });
   }
 
   it('should load a pixel', () => {
