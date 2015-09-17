@@ -19,6 +19,7 @@ import {assert} from './asserts';
 import {getLengthNumeral} from '../src/layout';
 import {documentInfoFor} from './document-info';
 import {getMode} from './mode';
+import {dashToCamelCase} from './string';
 
 
 /** @type {!Object<string,number>} Number of 3p frames on the for that type. */
@@ -43,7 +44,7 @@ function getFrameAttributes(parentWindow, element, opt_type) {
   assert(type, 'Attribute type required for <amp-ad>: %s', element);
   var attributes = {};
   // Do these first, as the other attributes have precedence.
-  addDataAttributes(element, attributes);
+  addDataAndJsonAttributes_(element, attributes);
   attributes.width = getLengthNumeral(width);
   attributes.height = getLengthNumeral(height);
   var box = element.getLayoutBox();
@@ -93,17 +94,33 @@ export function getIframe(parentWindow, element, opt_type) {
 
 /**
  * Copies data- attributes from the element into the attributes object.
- * Removes the data- from the name.
+ * Removes the data- from the name and capitalizes after -. If there
+ * is an attribute called json, parses the JSON and adds it to the
+ * attributes.
  * @param {!Element} element
  * @param {!Object} attributes The destination.
+ * @visibleForTesting
  */
-function addDataAttributes(element, attributes) {
+export function addDataAndJsonAttributes_(element, attributes) {
   for (var i = 0; i < element.attributes.length; i++) {
     var attr = element.attributes[i];
     if (attr.name.indexOf('data-') != 0) {
       continue;
     }
-    attributes[attr.name.substr(5)] = attr.value;
+    attributes[dashToCamelCase(attr.name.substr(5))] = attr.value;
+  }
+  var json = element.getAttribute('json');
+  if (json) {
+    var obj;
+    try {
+      obj = JSON.parse(json);
+    } catch (e) {
+      assert(false, 'Error parsing JSON in json attribute in element %s',
+          element);
+    }
+    for (var key in obj) {
+      attributes[key] = obj[key];
+    }
   }
 }
 
