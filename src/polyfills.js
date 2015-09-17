@@ -19,6 +19,6 @@
  */
 
 
-import 'webcomponents.js/webcomponents-lite'
+import 'document-register-element'
 import './custom-core-js-shim';
 import 'babel-core/external-helpers';

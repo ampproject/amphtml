@@ -38,6 +38,7 @@
 export function assert(shouldBeTrueish, message, var_args) {
   var firstElement;
   if (!shouldBeTrueish) {
+    message = message || 'Assertion failed';
     var splitMessage = message.split('%s');
     var first = splitMessage.shift();
     var formatted = first;
