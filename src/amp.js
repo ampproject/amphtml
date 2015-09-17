@@ -31,6 +31,16 @@ import {cssText} from '../build/css.js';
 import {action} from './action';
 import {maybeValidate} from './validator-integration';
 
+// Output a message to the console and add an attribute to the <html>
+// tag to give some information that can be used in error reports.
+// (At least by sophisticated users).
+if (window.console) {
+  (console.info || console.log).call(console,
+      'Powered by AMP ⚡ HTML – Version $internalRuntimeVersion$');
+  document.documentElement.setAttribute('amp-version',
+      '$internalRuntimeVersion$');
+}
+
 historyFor(window);
 viewerFor(window);
 
