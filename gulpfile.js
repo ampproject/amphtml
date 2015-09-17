@@ -70,6 +70,11 @@ var tests = [
     pattern: 'build/**/*.js',
     included: false,
     served: true
+  },
+  {
+    pattern: 'examples/**/*.js',
+    included: false,
+    served: true
   }
 ];
 
