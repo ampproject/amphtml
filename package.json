@@ -16,7 +16,7 @@
     "dist": "gulp dist"
   },
   "dependencies": {
-    "webcomponents.js": "^0.7.2"
+    "document-register-element": "^0.4.5"
   },
   "devDependencies": {
     "autoprefixer": "^6.0.2",
