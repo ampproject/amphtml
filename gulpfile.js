@@ -33,6 +33,7 @@ var replace = require('gulp-replace');
 var babel = require('babelify');
 var postcss = require('postcss');
 var autoprefixer = require('autoprefixer');
+var cssnano = require('cssnano');
 
 // NOTE: see https://github.com/ai/browserslist#queries for `browsers` list
 var cssprefixer = autoprefixer(
@@ -198,17 +199,15 @@ function compileCss() {
 
 function jsifyCssPromise(filename) {
   var css = fs.readFileSync(filename, "utf8");
+  var transformers = [cssprefixer, cssnano()];
   // Remove copyright comment. Crude hack to get our own copyright out
   // of the string.
-  return postcss([cssprefixer]).process(css.toString())
+  return postcss(transformers).process(css.toString())
       .then(function(result) {
         result.warnings().forEach(function(warn) {
           console.warn(warn.toString());
         });
-      var css= result.css;
-      css = css.replace(
-        /\/\* START COPYRIGHT \*\/(.|[\n\r])*\/\* END COPYRIGHT \*\//m,
-        '\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n');
+      var css = result.css;
       return JSON.stringify(css + '\n/*# sourceURL=/' + filename + '*/');
     });
 }
