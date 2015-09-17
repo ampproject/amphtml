@@ -198,7 +198,7 @@
 
     Viewer.prototype.onScroll_ = function() {
       this.messaging_.sendRequest('viewport', {
-        scrollTop: this.container.scrollTop
+        scrollTop: this.container./*OK*/scrollTop
       }, false);
     };
 
@@ -207,9 +207,9 @@
       log('Resized to ', this.container.offsetWidth,
           this.container.offsetHeight,
           this.header.offsetHeight,
-          this.container.scrollTop);
+          this.container./*OK*/scrollTop);
       this.messaging_.sendRequest('viewport', {
-        scrollTop: this.container.scrollTop,
+        scrollTop: this.container./*OK*/scrollTop,
         width: this.container.offsetWidth,
         height: this.container.offsetHeight,
         paddingTop: this.header.offsetHeight

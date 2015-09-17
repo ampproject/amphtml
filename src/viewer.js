@@ -55,7 +55,7 @@ export class Viewer {
     this.viewportHeight_ = 0;
 
     /** @private {number} */
-    this.scrollTop_ = 0;
+    this./*OK*/scrollTop_ = 0;
 
     /** @private {number} */
     this.paddingTop_ = 0;
@@ -112,8 +112,9 @@ export class Viewer {
         this.viewportHeight_;
     log.fine(TAG_, '- viewportHeight:', this.viewportHeight_);
 
-    this.scrollTop_ = parseInt(this.params_['scrollTop']) || this.scrollTop_;
-    log.fine(TAG_, '- scrollTop:', this.scrollTop_);
+    this./*OK*/scrollTop_ = parseInt(this.params_['scrollTop']) ||
+        this./*OK*/scrollTop_;
+    log.fine(TAG_, '- scrollTop:', this./*OK*/scrollTop_);
 
     this.paddingTop_ = parseInt(this.params_['paddingTop']) || this.paddingTop_;
     log.fine(TAG_, '- padding-top:', this.paddingTop_);
@@ -185,7 +186,7 @@ export class Viewer {
    * @return {number}
    */
   getScrollTop() {
-    return this.scrollTop_;
+    return this./*OK*/scrollTop_;
   }
 
   /**
@@ -289,7 +290,7 @@ export class Viewer {
         this.paddingTop_ = data['paddingTop'];
       }
       if (data['scrollTop'] !== undefined) {
-        this.scrollTop_ = data['scrollTop'];
+        this./*OK*/scrollTop_ = data['scrollTop'];
       }
       this.viewportObservable_.fire();
       return undefined;

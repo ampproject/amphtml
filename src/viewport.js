@@ -62,7 +62,7 @@ export class Viewport {
     this.width_ = this.getSize().width;
 
     /** @private {number} */
-    this.scrollTop_ = this.binding_.getScrollTop();
+    this./*OK*/scrollTop_ = this.binding_.getScrollTop();
 
     /** @private {number} */
     this.paddingTop_ = viewer.getPaddingTop();
@@ -111,7 +111,7 @@ export class Viewport {
    * @return {number}
    */
   getTop() {
-    return this.scrollTop_;
+    return this./*OK*/scrollTop_;
   }
 
   /**
@@ -160,12 +160,12 @@ export class Viewport {
     var size = this.getSize();
     log.fine(TAG_, 'changed event: ' +
         'relayoutAll=' + relayoutAll + '; ' +
-        'top=' + this.scrollTop_ + '; ' +
-        'bottom=' + (this.scrollTop_ + size.height) + '; ' +
+        'top=' + this./*OK*/scrollTop_ + '; ' +
+        'bottom=' + (this./*OK*/scrollTop_ + size.height) + '; ' +
         'velocity=' + velocity);
     this.changeObservable_.fire({
       relayoutAll: relayoutAll,
-      top: this.scrollTop_,
+      top: this./*OK*/scrollTop_,
       width: size.width,
       height: size.height,
       velocity: velocity
@@ -187,7 +187,7 @@ export class Viewport {
     }
 
     this.scrollTracking_ = true;
-    this.scrollTop_ = newScrollTop;
+    this./*OK*/scrollTop_ = newScrollTop;
     this.scrollMeasureTime_ = timer.now();
     timer.delay(() => this.scrollDeferred_(), 500);
   }
@@ -199,13 +199,13 @@ export class Viewport {
     var now = timer.now();
     var velocity = 0;
     if (now != this.scrollMeasureTime_) {
-      velocity = (newScrollTop - this.scrollTop_) /
+      velocity = (newScrollTop - this./*OK*/scrollTop_) /
           (now - this.scrollMeasureTime_);
     }
     log.fine(TAG_, 'scroll: ' +
         'scrollTop=' + newScrollTop + '; ' +
         'velocity=' + velocity);
-    this.scrollTop_ = newScrollTop;
+    this./*OK*/scrollTop_ = newScrollTop;
     this.scrollMeasureTime_ = now;
     // TODO(dvoytenko): confirm the desired value and document it well.
     // Currently, this is 20px/second -> 0.02px/millis
@@ -362,7 +362,7 @@ export class ViewportBindingNatural_ {
 
   /** @override */
   getScrollTop() {
-    return this.getScrollingElement_().scrollTop || this.win.pageYOffset;
+    return this.getScrollingElement_()./*OK*/scrollTop || this.win.pageYOffset;
   }
 
   /** @override */
@@ -556,9 +556,9 @@ export class ViewportBindingNaturalIosEmbed_ {
     // - https://bugs.webkit.org/show_bug.cgi?id=149264
     // This is an iOS-specific issue in the context of AMP, but Chrome bugs
     // are listed for reference. In a nutshell, this is because WebKit (and
-    // Chrome as well) redirect body.scrollTop to documentElement instead of
+    // Chrome as well) redirect body's scrollTop to documentElement instead of
     // body. Since in this case we are actually using direct body scrolling,
-    // body.scrollTop would always return wrong values.
+    // body's scrollTop would always return wrong values.
     // This will all change with a complete migration when
     // document.scrollingElement will point to document.documentElement. This
     // already works correctly in Chrome with "scroll-top-left-interop" flag
@@ -602,7 +602,7 @@ export class ViewportBindingVirtual_ {
     this.height_ = viewer.getViewportHeight();
 
     /** @private {number} */
-    this.scrollTop_ = viewer.getScrollTop();
+    this./*OK*/scrollTop_ = viewer.getScrollTop();
 
     /** @private @const {!Observable} */
     this.scrollObservable_ = new Observable();
@@ -618,8 +618,8 @@ export class ViewportBindingVirtual_ {
 
   /** @override */
   updateViewerViewport(viewer) {
-    if (viewer.getScrollTop() != this.scrollTop_) {
-      this.scrollTop_ = viewer.getScrollTop();
+    if (viewer.getScrollTop() != this./*OK*/scrollTop_) {
+      this./*OK*/scrollTop_ = viewer.getScrollTop();
       this.scrollObservable_.fire();
     }
     if (viewer.getViewportWidth() != this.width_ ||
@@ -652,7 +652,7 @@ export class ViewportBindingVirtual_ {
 
   /** @override */
   getScrollTop() {
-    return this.scrollTop_;
+    return this./*OK*/scrollTop_;
   }
 
   /** @override */

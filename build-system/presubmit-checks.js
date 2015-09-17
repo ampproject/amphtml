@@ -45,6 +45,7 @@ var forbiddenTerms = [
   'indexedDB',
   'openDatabase',
   'requestFileSystem',
+  '\\.scrollTop',
   'webkitRequestFileSystem',
 ];
 
