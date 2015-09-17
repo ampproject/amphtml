@@ -24,8 +24,6 @@ describe('amp-pixel', () => {
     return createIframePromise().then((iframe) => {
       installPixel(iframe.win);
       var p = iframe.doc.createElement('amp-pixel');
-      p.setAttribute('width', '0');
-      p.setAttribute('height', '0');
       p.setAttribute('src', src);
       iframe.doc.body.appendChild(p);
       var link = iframe.doc.createElement('link');

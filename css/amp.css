@@ -144,7 +144,8 @@ i-amp-sizer {
 amp-pixel {
   position: absolute !important;
   top: 0 !important;
-  width: 0 !important;
+  width: 1 !important;
   height: 1px !important; /* Only things with height are ever loaded. */
   overflow: hidden !important;
+  visibility: hidden;
 }

@@ -59,6 +59,8 @@ export function installPixel(win) {
       image.src = src;
       image.width = 1;
       image.height = 1;
+      // Make it take zero space
+      this.element.style.width = 0;
       this.element.appendChild(image);
       return Promise.resolve();
     }
