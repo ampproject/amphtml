@@ -17,6 +17,7 @@
 // TODO(malteubl) Move somewhere else since this is not an ad.
 
 import {writeScript, executeAfterWriteScript} from '../src/3p'
+import {setStyles} from '../src/style'
 
 /**
  * @param {!Window} global
@@ -25,8 +26,8 @@ import {writeScript, executeAfterWriteScript} from '../src/3p'
 export function twitter(global, data) {
   var tweet = document.createElement('div');
   tweet.id = 'tweet';
-  var width = data.width;
-  var height = data.height;
+  var width = data.initialWindowWidth;
+  var height = data.initialWindowHeight;
   tweet.style.height = height + 'px';
   tweet.style.width = width + 'px';
   global.document.getElementById('c').appendChild(tweet);
@@ -67,9 +68,11 @@ export function twitter(global, data) {
           'width="' + iframe.offsetWidth +'" height="' + offsetHeight + '"',
           data);
     }
-    tweet.style.position = 'absolute';
-    tweet.style.transformOrigin = 'top left';
-    tweet.style.transform = 'scale(' + scale + ')';
+    setStyles(tweet, {
+      position: 'absolute',
+      transformOrigin: 'top left',
+      transform: 'scale(' + scale + ')'
+    });
     // Alright, here we get from hacky into monkey patch territory.
     // We do not want the Tweet embed to know that we scaled it, because
     // then it may just redraw based on the new space.
