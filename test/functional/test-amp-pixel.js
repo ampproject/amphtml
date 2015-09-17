@@ -24,8 +24,6 @@ describe('amp-pixel', () => {
     return createIframePromise().then((iframe) => {
       installPixel(iframe.win);
       var p = iframe.doc.createElement('amp-pixel');
-      p.setAttribute('width', '0');
-      p.setAttribute('height', '0');
       p.setAttribute('src', src);
       iframe.doc.body.appendChild(p);
       var link = iframe.doc.createElement('link');
@@ -43,7 +41,8 @@ describe('amp-pixel', () => {
         ).then((p) => {
           expect(p.querySelector('img')).to.not.be.null;
           expect(p.children[0].src).to.equal(
-            'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?');
+              'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?');
+          expect(p.getAttribute('aria-hidden')).to.equal('true');
         });
   });
 
@@ -53,7 +52,7 @@ describe('amp-pixel', () => {
         ).then((p) => {
           expect(p.querySelector('img')).to.not.be.null;
           expect(p.children[0].src).to.equal(
-            'http://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?');
+              'http://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?');
         });
   });
 
