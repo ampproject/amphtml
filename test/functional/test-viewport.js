@@ -297,9 +297,9 @@ describe('ViewportBindingNaturalIosEmbed', () => {
   it('should setup document for embed scrolling', () => {
     let documentElement = windowApi.document.documentElement;
     let body = windowApi.document.body;
-    expect(documentElement.style.overflowY).to.equal('auto');
+    expect(documentElement.style.overflow).to.equal('auto');
     expect(documentElement.style.webkitOverflowScrolling).to.equal('touch');
-    expect(body.style.overflowY).to.equal('auto');
+    expect(body.style.overflow).to.equal('auto');
     expect(body.style.webkitOverflowScrolling).to.equal('touch');
     expect(body.style.position).to.equal('absolute');
     expect(body.style.top).to.equal(0);

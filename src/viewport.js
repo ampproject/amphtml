@@ -453,29 +453,17 @@ export class ViewportBindingNaturalIosEmbed_ {
     //   -webkit-overflow-scrolling: touch;
     // }
     setStyles(documentElement, {
-      overflowX: 'hidden',
-      overflowY: 'auto',
+      overflow: 'auto',
       webkitOverflowScrolling: 'touch'
     });
     setStyles(documentBody, {
-      overflowX: 'hidden',
-      overflowY: 'auto',
+      overflow: 'auto',
       webkitOverflowScrolling: 'touch',
       position: 'absolute',
       top: 0,
       left: 0,
       right: 0,
       bottom: 0
-    });
-
-    // TODO(dvoytenko): These styles are a lot more controversial. If we do
-    // go ahead with these styles, we'll have to define them in amp.css as
-    // "!important". This will have some authoring implications, although
-    // should not be a major issue. Overall, if we embed content, we want
-    // to have stronger control over margins.
-    setStyles(documentBody, {
-      margin: 0,
-      overflowX: 'hidden'
     });
 
     // Insert scrollPos element into DOM. See {@link onScrolled_} for why
