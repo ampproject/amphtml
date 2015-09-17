@@ -27,12 +27,12 @@ export function adsense(global, data) {
   global.document.body.appendChild(s);
 
   var i = document.createElement('ins');
-  i.setAttribute('data-ad-client', data['ad-client']);
-  if (data['ad-slot']) {
-    i.setAttribute('data-ad-slot', data['ad-slot']);
+  i.setAttribute('data-ad-client', data['adClient']);
+  if (data['adSlot']) {
+    i.setAttribute('data-ad-slot', data['adSlot']);
   }
-  if (data['ad-format']) {
-    i.setAttribute('data-ad-format', data['ad-format']);
+  if (data['adFormat']) {
+    i.setAttribute('data-ad-format', data['adFormat']);
   }
   i.setAttribute('class', 'adsbygoogle');
   i.style.cssText = 'display:inline-block;width:100%;height:100%;';
