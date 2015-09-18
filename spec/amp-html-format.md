@@ -171,7 +171,7 @@ Major semantic tags and the AMP custom elements come with default styles to make
 
 #### Author stylesheets
 
-Authors may add custom styles to a document using a single `<style>` tag in the head of the document.
+Authors may add custom styles to a document using a single `<style amp-custom>` tag in the head of the document.
 
 #### Selectors
 The initial version of AMP will only allow very simple CSS selectors in AMPs. The restriction is in place to make overall performance easier to reason about. It may be opened up in the future.
