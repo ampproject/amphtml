@@ -68,7 +68,8 @@ In concrete terms this means that:
   }
   </script>
   <script element="amp-carousel" src="https://cdn.ampproject.org/v1/amp-carousel-0.1.js" async></script>
-  <script src="https://cdn.ampproject.org/v1.js"></script>
+  <script src="https://cdn.ampproject.org/v0.js" async></script>
+  <style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
 </head>
 <body>
 <h1>Sample document</h1>
@@ -93,7 +94,8 @@ AMP HTML documents MUST
 - <a name="canon"></a>contain a `<link rel="canonical" href="$SOME_URL" />` tag inside their head that points to the regular HTML version of the AMP HTML document or to itself if no such HTML version exists. [🔗](#canon)
 - <a name="chrs"></a>contain a `<meta charset="utf-8">` tag as the first child of their head tag. [🔗](#chrs)
 - <a name="vprt"></a>contain a `<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">` tag inside their head tag. [🔗](#vprt)
-- <a name="scrpt"></a>contain a `<script src="https://cdn.ampproject.org/v1.js"></script>` tag as the last element in their head. [🔗](#scrpt)
+- <a name="scrpt"></a>contain a `<script src="https://cdn.ampproject.org/v0.js" async></script>` tag as the last element in their head. [🔗](#scrpt)
+- <a name="opacity"></a>contain `<style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>` in their head tag. [🔗](#opacity)
 
 ### Metadata
 
@@ -141,7 +143,7 @@ Most HTML tags can be used unchanged in AMP HTML. Certain tags, however, have eq
 | embed     | Banned. |
 | form      | Banned. |
 | input elements | Banned. Includes input, button, textarea, select, option. |
-| style     | Only one. Must be in head tag. |
+| style     | [Required style tags for adjusting opacity](#opacity) One additional style tag is allowed in head tag for the purpose of custom styling. |
 | link      | Allowed for certain values of rel: `canonical`. `stylesheet` is generally disallowed, but some values may be whitelisted for font providers. |
 | meta      | The `http-equiv` attribute is banned. Otherwise allowed. |
 | a         | The `href` attribute value must not begin with `javascript:`. If set, the `target` attribute value must be `_blank`. Otherwise allowed. |
