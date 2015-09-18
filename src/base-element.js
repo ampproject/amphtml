@@ -177,7 +177,16 @@ export class BaseElement {
   }
 
   /**
-   * Subclasses can override this class to opt-in into receiving additional
+   * Subclasses can override this method to opt-in into being called to
+   * prerender when document itself is not yet visible (pre-render mode).
+   * @return {boolean}
+   */
+  prerenderAllowed() {
+    return false;
+  }
+
+  /**
+   * Subclasses can override this method to opt-in into receiving additional
    * {@link layoutCallback} calls. Note that this method is not consulted for
    * the first layout given that each element must be laid out at least once.
    * @return {boolean}

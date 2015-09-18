@@ -18,7 +18,7 @@ import {Observable} from './observable';
 import {getService} from './service';
 import {layoutRectLtwh} from './layout-rect';
 import {log} from './log';
-import {onDocumentReady} from './event-helper';
+import {onDocumentReady} from './document-state';
 import {platform} from './platform';
 import {px, setStyles} from './style';
 import {timer} from './timer';
@@ -317,6 +317,8 @@ export class ViewportBindingNatural_ {
 
     this.win.addEventListener('scroll', () => this.scrollObservable_.fire());
     this.win.addEventListener('resize', () => this.resizeObservable_.fire());
+
+    log.fine(TAG_, 'initialized natural viewport');
   }
 
   /** @override */
@@ -431,6 +433,8 @@ export class ViewportBindingNaturalIosEmbed_ {
 
     onDocumentReady(this.win.document, this.setup_.bind(this));
     this.win.addEventListener('resize', () => this.resizeObservable_.fire());
+
+    log.fine(TAG_, 'initialized natural viewport for iOS embeds');
   }
 
   /** @private */
@@ -597,6 +601,8 @@ export class ViewportBindingVirtual_ {
 
     /** @private @const {!Observable} */
     this.resizeObservable_ = new Observable();
+
+    log.fine(TAG_, 'initialized virtual viewport');
   }
 
   /** @override */
