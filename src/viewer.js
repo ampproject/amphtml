@@ -60,7 +60,7 @@ export const ViewportType = {
  * @enum {string}
  * @private
  */
-const VisibilityState_ = {
+export const VisibilityState = {
 
   /**
    * Viewer has shown the AMP document.
@@ -68,16 +68,9 @@ const VisibilityState_ = {
   VISIBLE: 'visible',
 
   /**
-   * Viewer has configured the AMP document, but it's not shown yet. The AMP
-   * runtime is NOT requested to prerender any of the elements.
+   * Viewer has indicated that AMP document is hidden.
    */
-  PREFETCH_DOCUMENT: 'prefetchDocument',
-
-  /**
-   * Viewer has configured the AMP document, but it's not shown yet. The AMP
-   * runtime is requested to perform a minor prefetch.
-   */
-  PREFETCH_ABOVE_THE_FOLD: 'prefetchAboveTheFold'
+  HIDDEN: 'hidden'
 };
 
 
@@ -103,7 +96,10 @@ export class Viewer {
     this.overtakeHistory_ = false;
 
     /** @private {string} */
-    this.visibilityState_ = VisibilityState_.VISIBLE;
+    this.visibilityState_ = VisibilityState.VISIBLE;
+
+    /** @private {number} */
+    this.prerenderSize_ = 1;
 
     /** @private {string} */
     this.viewportType_ = ViewportType.NATURAL;
@@ -162,6 +158,10 @@ export class Viewer {
     this.visibilityState_ = this.params_['visibilityState'] ||
         this.visibilityState_;
     log.fine(TAG_, '- visibilityState:', this.visibilityState_);
+
+    this.prerenderSize_ = parseInt(this.params_['prerenderSize']) ||
+        this.prerenderSize_;
+    log.fine(TAG_, '- prerenderSize:', this.prerenderSize_);
 
     this.viewportType_ = this.params_['viewportType'] || this.viewportType_;
     // Configure scrolling parameters when AMP is embeded in a viewer on iOS.
@@ -224,14 +224,23 @@ export class Viewer {
   }
 
   /**
+   * Returns visibility state configured by the viewer.
+   * See {@link isVisible}.
+   * @return {!VisibilityState}
+   */
+  getVisibilityState() {
+    return this.visibilityState_;
+  }
+
+  /**
    * Whether the AMP document currently visible. The reasons why it might not
    * be visible include user switching to another tab, browser running the
    * document in the prerender mode or viewer running the document in the
    * prerender mode.
-   * @return {string}
+   * @return {boolean}
    */
   isVisible() {
-    return this.visibilityState_ == VisibilityState_.VISIBLE &&
+    return this.visibilityState_ == VisibilityState.VISIBLE &&
         !this.docState_.isHidden();
   }
 
@@ -240,11 +249,8 @@ export class Viewer {
    * The values are in number of screens.
    * @return {number}
    */
-  getPrerenderCount() {
-    if (this.visibilityState_ == VisibilityState_.PREFETCH_DOCUMENT) {
-      return 0;
-    }
-    return 1;
+  getPrerenderSize() {
+    return this.prerenderSize_;
   }
 
   /**
@@ -409,7 +415,14 @@ export class Viewer {
       return Promise.resolve();
     }
     if (eventType == 'visibilitychange') {
-      this.visibilityState_ = data['state'];
+      if (data['state'] !== undefined) {
+        this.visibilityState_ = data['state'];
+      }
+      if (data['prerenderSize'] !== undefined) {
+        this.prerenderSize_ = data['prerenderSize'];
+      }
+      log.fine(TAG_, 'visibilitychange event:', this.visibilityState_,
+          this.prerenderSize_);
       this.visibilityObservable_.fire();
       return Promise.resolve();
     }
