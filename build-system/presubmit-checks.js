@@ -24,6 +24,8 @@ var srcDirectories = [
   './examples',
   './spec',
   './src',
+  './builtins',
+  './extensions',
   './test',
   './testing',
 ];
@@ -70,7 +72,7 @@ function checkForbiddenTerms() {
  * @return {!Promise<boolean>} True if a forbidden term was found.
  */
 function checkForbiddenTerm(directory, term) {
-  return find(term, directory, /(\.js|\.css|\.html|\.md)$/).then(
+  return find(term, directory, '(\\.js|\\.css|\\.html|\\.md)$').then(
       function(results) {
         var found = false;
         for (var result in results) {
