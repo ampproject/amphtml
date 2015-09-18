@@ -74,11 +74,11 @@ export class Resources {
     /** @private {boolean} */
     this.visible_ = this.viewer_.isVisible();
 
+    /** @private {number} */
+    this.prerenderSize_ = this.viewer_.getPrerenderSize();
+
     /** @private {boolean} */
     this.documentReady_ = false;
-
-    /** @private {number} */
-    this.prerenderCount_ = 1;
 
     /** @private {boolean} */
     this.relayoutAll_ = false;
@@ -120,7 +120,7 @@ export class Resources {
     // simple pass.
     this.viewer_.onVisibilityChanged(() => {
       this.visible_ = this.viewer_.isVisible();
-      this.prerenderCount_ = this.viewer_.getPrerenderCount();
+      this.prerenderSize_ = this.viewer_.getPrerenderSize();
       this.schedulePass();
     });
 
@@ -306,7 +306,8 @@ export class Resources {
         ', visible=', this.visible_,
         ', forceBuild=', this.forceBuild_,
         ', relayoutAll=', this.relayoutAll_,
-        ', viewportSize=', viewportSize.width, viewportSize.height);
+        ', viewportSize=', viewportSize.width, viewportSize.height,
+        ', prerenderSize=', this.prerenderSize_);
 
     // If viewport size is 0, the manager will wait for the resize event.
     if (viewportSize.height > 0 && viewportSize.width > 0) {
@@ -374,10 +375,10 @@ export class Resources {
 
     let viewportRect = viewport.getRect();
     // Load viewport = viewport + 3x up/down when document is visible or
-    // depending on prerenderCount in pre-render mode.
+    // depending on prerenderSize in pre-render mode.
     let loadRect = this.visible_ ?
         expandLayoutRect(viewportRect, 0.25, 2) :
-        expandLayoutRect(viewportRect, 0.25, this.prerenderCount_);
+        expandLayoutRect(viewportRect, 0.25, this.prerenderSize_);
     // Visible viewport = viewport + 25% up/down.
     let visibleRect = expandLayoutRect(viewportRect, 0.25, 0.25);
 
