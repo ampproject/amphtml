@@ -237,7 +237,7 @@ export class Viewer {
    * be visible include user switching to another tab, browser running the
    * document in the prerender mode or viewer running the document in the
    * prerender mode.
-   * @return {string}
+   * @return {boolean}
    */
   isVisible() {
     return this.visibilityState_ == VisibilityState.VISIBLE &&
