@@ -18,12 +18,14 @@ import {Pass} from './pass';
 import {assert} from './asserts';
 import {expandLayoutRect, layoutRectLtwh, layoutRectsOverlap} from
     './layout-rect';
+import {inputFor} from './input';
 import {log} from './log';
 import {onDocumentReady} from './event-helper';
 import {reportErrorToDeveloper} from './error';
 import {timer} from './timer';
 import {viewerFor} from './viewer';
 import {viewport} from './viewport';
+import {vsync} from './vsync';
 
 let TAG_ = 'Resources';
 let RESOURCE_PROP_ = '__AMP__RESOURCE';
@@ -105,15 +107,39 @@ export class Resources {
       this.forceBuild_ = true;
       this.relayoutAll_ = true;
       this.schedulePass();
+      this.monitorInput_();
     });
 
     this.relayoutAll_ = true;
     this.schedulePass();
   }
 
+  /** @private */
+  monitorInput_() {
+    let input = inputFor(this.win);
+    input.onTouchDetected((detected) => {
+      this.toggleInputClass_('amp-mode-touch', detected);
+    }, true);
+    input.onMouseDetected((detected) => {
+      this.toggleInputClass_('amp-mode-mouse', detected);
+    }, true);
+    input.onKeyboardStateChanged((active) => {
+      this.toggleInputClass_('amp-mode-keyboard-active', active);
+    }, true);
+  }
+
   /**
+   * @param {string} clazz
+   * @param {boolean} on
    * @private
    */
+  toggleInputClass_(clazz, on) {
+    vsync.mutate(() => {
+      this.win.document.body.classList.toggle(clazz, on);
+    });
+  }
+
+  /** @private */
   setDocumentReady_() {
     this.documentReady_ = true;
     viewerFor(this.win).postDocumentReady(viewport.getSize().width,
@@ -121,9 +147,7 @@ export class Resources {
     this.updateScrollHeight_();
   }
 
-  /**
-   * @private
-   */
+  /** @private */
   updateScrollHeight_() {
     let scrollHeight = this.win.document.body.scrollHeight;
     if (scrollHeight != this.scrollHeight_) {
