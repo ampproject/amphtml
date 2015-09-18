@@ -307,6 +307,7 @@ gulp.task('minify', function() {
   examplesWithMinifiedJs('everything.amp.html');
   examplesWithMinifiedJs('newsstand.amp.html');
   examplesWithMinifiedJs('released.amp.html');
+  examplesWithMinifiedJs('article.amp.html');
 });
 gulp.task('presubmit', function() {
   return require('./build-system/presubmit-checks.js').run();
