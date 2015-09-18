@@ -79,26 +79,26 @@ describe('amp-fit-text calculateFontSize', () => {
   });
 
   it('should always fit on one line', () => {
-    element.innerHTML = 'A';
+    element./*OK*/innerHTML = 'A';
     expect(calculateFontSize_(element, 20, 6, 72)).to.equal(20);
     expect(calculateFontSize_(element, 10, 6, 72)).to.equal(10);
     expect(calculateFontSize_(element, 40, 6, 72)).to.equal(40);
   });
 
   it('should hit min', () => {
-    element.innerHTML = 'A';
+    element./*OK*/innerHTML = 'A';
     expect(calculateFontSize_(element, 6, 6, 72)).to.equal(6);
     expect(calculateFontSize_(element, 3, 6, 72)).to.equal(6);
   });
 
   it('should hit max', () => {
-    element.innerHTML = 'A';
+    element./*OK*/innerHTML = 'A';
     expect(calculateFontSize_(element, 72, 6, 72)).to.equal(72);
     expect(calculateFontSize_(element, 80, 6, 72)).to.equal(72);
   });
 
   it('should always fit on two lines', () => {
-    element.innerHTML = 'A<br>B';
+    element./*OK*/innerHTML = 'A<br>B';
     expect(calculateFontSize_(element, 20, 6, 72)).to.equal(10);
   });
 });
