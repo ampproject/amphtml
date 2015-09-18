@@ -15,10 +15,12 @@
  */
 
 /**
- * @fileoverview Loads all polyfills needed by the AMP runtime.
+ * @param {string} name Attribute name with dashes
+ * @return {string} Dashes removed and character after to upper case.
+ * @visibleForTesting
  */
-
-
-import 'document-register-element/build/document-register-element.max'
-import './custom-core-js-shim';
-import 'babel-core/external-helpers';
+export function dashToCamelCase(name) {
+  return name.replace(/-([a-z])/g, function(all, character) {
+    return character.toUpperCase();
+  });
+}

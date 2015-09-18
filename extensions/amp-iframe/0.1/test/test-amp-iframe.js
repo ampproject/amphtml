@@ -58,15 +58,16 @@ describe('amp-iframe', () => {
       iframe.doc.body.appendChild(i);
       // Wait an event loop for the iframe to be created.
       return pollForLayout(iframe.win, 1).then(() => {
-        var created = i.lastChild;
-        if (created && created.tagName == 'IFRAME') {
+        var created = i.querySelector('iframe');
+        if (created) {
           // Wait for the iframe to load
           return loadPromise(created).then(() => {
             // Wait a bit more for postMessage to get through.
             return timer.promise(0).then(() => {
               return {
                 container: i,
-                iframe: created
+                iframe: created,
+                scrollWrapper: i.querySelector('i-amp-scroll-container')
               };
             });
           });
@@ -90,22 +91,25 @@ describe('amp-iframe', () => {
       expect(amp.iframe).to.be.instanceof(Element);
       expect(amp.iframe.src).to.equal(iframeSrc);
       expect(amp.iframe.getAttribute('sandbox')).to.equal('');
+      expect(amp.iframe.parentNode).to.equal(amp.scrollWrapper);
       return timer.promise(0).then(() => {
         expect(ranJs).to.equal(0);
       });
     });
   });
 
-  it('should allow JS', () => {
+  it('should allow JS and propagate scrolling', () => {
     return getAmpIframe({
       src: iframeSrc,
       sandbox: 'allow-scripts',
       width: 100,
-      height: 100
+      height: 100,
+      scrolling: 'no'
     }).then((amp) => {
       expect(amp.iframe.getAttribute('sandbox')).to.equal('allow-scripts');
       return timer.promise(100).then(() => {
         expect(ranJs).to.equal(1);
+        expect(amp.scrollWrapper).to.be.null;
       });
     });
   });

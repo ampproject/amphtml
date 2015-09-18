@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "description": "Fastish HTML",
   "main": "index.js",
+  "engines" : {
+    "node": "^4.0.0"
+  },
   "author": "The AMP HTML Authors",
   "license": "Apache-2.0",
   "repository": {
@@ -16,7 +19,7 @@
     "dist": "gulp dist"
   },
   "dependencies": {
-    "webcomponents.js": "^0.7.2"
+    "document-register-element": "^0.4.5"
   },
   "devDependencies": {
     "autoprefixer": "^6.0.2",
@@ -26,6 +29,7 @@
     "chai": "^3.0.0",
     "chai-as-promised": "^5.1.0",
     "core-js": "^1.1.4",
+    "cssnano": "^3.0.1",
     "del": "^1.2.0",
     "es6ify": "~1.6.0",
     "find-in-files": "^0.1.1",

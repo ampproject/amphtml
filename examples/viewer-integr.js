@@ -16,6 +16,18 @@
 
 
 /**
+ * Super crude way to share ViewerMessaging class without any kind of module
+ * system or packaging.
+ */
+function whenMessagingLoaded(callback) {
+  window['__AMP_VIEWER_MESSAGING_CALLBACK'] = callback;
+  var script = document.createElement('script');
+  script.src = './viewer-integr-messaging.js';
+  document.head.appendChild(script);
+}
+
+
+/**
  * This is a very naive implementation of Viewer/AMP integration, but it
  * showcases all main APIs exposed by Viewer which are
  * {@link Viewer.receiveMessage} and {@link Viewer.setMessageDeliverer}.
@@ -26,28 +38,15 @@
  */
 (window.AMP = window.AMP || []).push(function(AMP) {
 
-  var SENTINEL = '__AMP__';
-
   var viewer = AMP.viewer;
 
-  function onMessage(event) {
-    var data = event.data;
-
-    // TODO: must check for origin/target.
-    if (data['sentinel'] == SENTINEL) {
-      viewer.receiveMessage(data['type'], data);
-    }
-  }
-
-  window.addEventListener('message', onMessage, false);
-
-
-  function sendMessage(eventType, data) {
-    // TODO: must check for origin/target.
-    data['sentinel'] = SENTINEL;
-    data['type'] = eventType;
-    window.parent.postMessage(data, '*');
-  }
-
-  viewer.setMessageDeliverer(sendMessage);
+  whenMessagingLoaded(function(ViewerMessaging) {
+    var messaging = new ViewerMessaging(window.parent,
+        function(type, payload, awaitResponse) {
+          return viewer.receiveMessage(type, payload, awaitResponse);
+        });
+    viewer.setMessageDeliverer(function(type, payload, awaitResponse) {
+      return messaging.sendRequest(type, payload, awaitResponse);
+    });
+  });
 });

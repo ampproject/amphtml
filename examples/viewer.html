@@ -93,6 +93,9 @@
       height: 100%;
     }
   </style>
+
+  <script src="./viewer-integr-messaging.js"></script>
+
   <script>
 
     var SENTINEL = '__AMP__';
@@ -118,7 +121,6 @@
         this.iframe.setAttribute('scrolling', 'no');
       }
 
-      window.addEventListener('message', this.onMessage_.bind(this));
       if (this.viewportType_ == 'virtual') {
         this.container.addEventListener('scroll', this.onScroll_.bind(this));
       }
@@ -144,6 +146,9 @@
 
       // Notice that name can only be set once the IFrame is in the DOM.
       this.iframe.contentWindow.name = SENTINEL + paramsStr(params);
+
+      this.messaging_ = new ViewerMessaging(this.iframe.contentWindow,
+          this.processRequest_.bind(this));
 
       this.iframe.onload = this.loaded_.bind(this);
       setTimeout(function() {
@@ -177,6 +182,7 @@
     Viewer.prototype.documentReady_ = function() {
       log('AMP document ready');
       this.loaded_();
+      return Promise.resolve();
     };
 
 
@@ -186,11 +192,14 @@
         this.iframe.style.height = Math.max(documentHeight,
             this.container.offsetHeight) + 'px';
       }
+      return Promise.resolve();
     };
 
 
     Viewer.prototype.onScroll_ = function() {
-      this.sendMessage_('viewport', {scrollTop: this.container.scrollTop});
+      this.messaging_.sendRequest('viewport', {
+        scrollTop: this.container./*OK*/scrollTop
+      }, false);
     };
 
 
@@ -198,25 +207,27 @@
       log('Resized to ', this.container.offsetWidth,
           this.container.offsetHeight,
           this.header.offsetHeight,
-          this.container.scrollTop);
-      this.sendMessage_('viewport', {
-        scrollTop: this.container.scrollTop,
+          this.container./*OK*/scrollTop);
+      this.messaging_.sendRequest('viewport', {
+        scrollTop: this.container./*OK*/scrollTop,
         width: this.container.offsetWidth,
         height: this.container.offsetHeight,
         paddingTop: this.header.offsetHeight
-      });
+      }, false);
     };
 
 
     Viewer.prototype.requestFullOverlay_ = function() {
       log('requestFullOverlay');
       this.header.style.opacity = 0;
+      return Promise.resolve();
     };
 
 
     Viewer.prototype.cancelFullOverlay_ = function() {
       log('cancelFullOverlay');
       this.header.style.opacity = 1;
+      return Promise.resolve();
     };
 
 
@@ -250,41 +261,33 @@
       log('history popped to ', this.stackIndex_);
     };
 
-
-    Viewer.prototype.sendMessage_ = function(type, message) {
-      message['type'] = type;
-      message['sentinel'] = SENTINEL;
-      if (this.iframe.contentWindow) {
-        this.iframe.contentWindow.postMessage(message, '*');
+    Viewer.prototype.processRequest_ = function(type, data, awaitResponse) {
+      if (type == 'documentLoaded') {
+        return this.documentReady_();
       }
-    };
-
-
-    Viewer.prototype.onMessage_ = function() {
-      var data = event.data;
-      if (data.sentinel != SENTINEL) {
-        return;
+      if (type == 'documentResized') {
+        return this.documentHeight_(data.height);
       }
-      if (data.type == 'documentLoaded') {
-        this.documentReady_();
-      } else if (data.type == 'documentResized') {
-        this.documentHeight_(data.height);
-      } else if (data.type == 'requestFullOverlay') {
-        this.requestFullOverlay_();
-      } else if (data.type == 'cancelFullOverlay') {
-        this.cancelFullOverlay_();
-      } else if (data.type == 'pushHistory') {
-        this.pushHistory_(data.stackIndex);
-      } else if (data.type == 'popHistory') {
-        this.popHistory_(data.stackIndex);
+      if (type == 'requestFullOverlay') {
+        return this.requestFullOverlay_();
       }
+      if (type == 'cancelFullOverlay') {
+        return this.cancelFullOverlay_();
+      }
+      if (data.type == 'pushHistory') {
+        return this.pushHistory_(data.stackIndex);
+      }
+      if (data.type == 'popHistory') {
+        return this.popHistory_(data.stackIndex);
+      }
+      return Promise.reject('request not supported: ' + type);
     };
 
 
     function log() {
       var var_args = Array.prototype.slice.call(arguments, 0);
       var_args.unshift('[VIEWER]');
-      console.log.apply(console, var_args);
+      console/*OK*/.log.apply(console, var_args);
     }
 
 

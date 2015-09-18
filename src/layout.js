@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Implements element layout. See https://goo.gl/9avXuT for
+ * details.
+ */
+
 import {assert} from './asserts';
 
 

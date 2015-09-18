@@ -63,13 +63,7 @@ describe('amp-audio', () => {
   function attachAndRun(attributes, opt_childNodesAttrs) {
     var ampAudio = getAmpAudio(attributes, opt_childNodesAttrs);
     naturalDimensions_['AMP-AUDIO'] = {width: 300, height: 30};
-    iframe.doc.body.appendChild(ampAudio);
-    return new Timer(window).promise(16).then(() => {
-      ampAudio.implementation_.firstAttachedCallback();
-      ampAudio.implementation_.buildCallback();
-      ampAudio.implementation_.layoutCallback();
-      return ampAudio;
-    });
+    return iframe.addElement(ampAudio);
   }
 
   it('should load audio through attribute', () => {

@@ -18,9 +18,12 @@ import {Observable} from './observable';
 import {getService} from './service';
 import {layoutRectLtwh} from './layout-rect';
 import {log} from './log';
+import {onDocumentReady} from './event-helper';
 import {platform} from './platform';
+import {px, setStyles} from './style';
 import {timer} from './timer';
 import {viewerFor} from './viewer';
+
 
 let TAG_ = 'Viewport';
 
@@ -46,16 +49,23 @@ export class Viewport {
 
   /**
    * @param {!ViewportBinding} binding
+   * @param {!Viewer} viewer
    */
-  constructor(binding) {
+  constructor(binding, viewer) {
     /** @const {!ViewportBinding} */
     this.binding_ = binding;
+
+    /** @const {!Viewer} */
+    this.viewer_ = viewer;
 
     /** @private {number} */
     this.width_ = this.getSize().width;
 
     /** @private {number} */
-    this.scrollTop_ = this.binding_.getScrollTop();
+    this./*OK*/scrollTop_ = this.binding_.getScrollTop();
+
+    /** @private {number} */
+    this.paddingTop_ = viewer.getPaddingTop();
 
     /** @private {number} */
     this.scrollMeasureTime_ = 0;
@@ -65,6 +75,17 @@ export class Viewport {
 
     /** @private @const {!Observable<!ViewportChangedEvent>} */
     this.changeObservable_ = new Observable();
+
+    this.viewer_.onViewportEvent(() => {
+      this.binding_.updateViewerViewport(this.viewer_);
+      let paddingTop = this.viewer_.getPaddingTop();
+      if (paddingTop != this.paddingTop_) {
+        this.paddingTop_ = paddingTop;
+        this.binding_.updatePaddingTop(this.paddingTop_);
+      }
+    });
+    this.binding_.updateViewerViewport(this.viewer_);
+    this.binding_.updatePaddingTop(this.paddingTop_);
 
     this.binding_.onScroll(this.scroll_.bind(this));
     this.binding_.onResize(this.resize_.bind(this));
@@ -77,12 +98,20 @@ export class Viewport {
   }
 
   /**
+   * Returns the top padding mandated by the viewer.
+   * @return {number}
+   */
+  getPaddingTop() {
+    return this.paddingTop_;
+  }
+
+  /**
    * Returns the viewport's top position in the document. This is essentially
    * the scroll position.
    * @return {number}
    */
   getTop() {
-    return this.scrollTop_;
+    return this./*OK*/scrollTop_;
   }
 
   /**
@@ -131,12 +160,12 @@ export class Viewport {
     var size = this.getSize();
     log.fine(TAG_, 'changed event: ' +
         'relayoutAll=' + relayoutAll + '; ' +
-        'top=' + this.scrollTop_ + '; ' +
-        'bottom=' + (this.scrollTop_ + size.height) + '; ' +
+        'top=' + this./*OK*/scrollTop_ + '; ' +
+        'bottom=' + (this./*OK*/scrollTop_ + size.height) + '; ' +
         'velocity=' + velocity);
     this.changeObservable_.fire({
       relayoutAll: relayoutAll,
-      top: this.scrollTop_,
+      top: this./*OK*/scrollTop_,
       width: size.width,
       height: size.height,
       velocity: velocity
@@ -158,7 +187,7 @@ export class Viewport {
     }
 
     this.scrollTracking_ = true;
-    this.scrollTop_ = newScrollTop;
+    this./*OK*/scrollTop_ = newScrollTop;
     this.scrollMeasureTime_ = timer.now();
     timer.delay(() => this.scrollDeferred_(), 500);
   }
@@ -170,13 +199,13 @@ export class Viewport {
     var now = timer.now();
     var velocity = 0;
     if (now != this.scrollMeasureTime_) {
-      velocity = (newScrollTop - this.scrollTop_) /
+      velocity = (newScrollTop - this./*OK*/scrollTop_) /
           (now - this.scrollMeasureTime_);
     }
     log.fine(TAG_, 'scroll: ' +
         'scrollTop=' + newScrollTop + '; ' +
         'velocity=' + velocity);
-    this.scrollTop_ = newScrollTop;
+    this./*OK*/scrollTop_ = newScrollTop;
     this.scrollMeasureTime_ = now;
     // TODO(dvoytenko): confirm the desired value and document it well.
     // Currently, this is 20px/second -> 0.02px/millis
@@ -218,6 +247,18 @@ class ViewportBinding {
    * @param {function()} callback
    */
   onResize(callback) {}
+
+  /**
+   * Updates binding with the new viewer's viewport info.
+   * @param {!Viewer} viewer
+   */
+  updateViewerViewport(viewer) {}
+
+  /**
+   * Updates binding with the new padding.
+   * @param {number} paddingTop
+   */
+  updatePaddingTop(paddingTop) {}
 
   /**
    * Returns the size of the viewport.
@@ -294,6 +335,16 @@ export class ViewportBindingNatural_ {
   }
 
   /** @override */
+  updateViewerViewport(viewer) {
+    // Viewer's viewport is ignored since this window is fully accurate.
+  }
+
+  /** @override */
+  updatePaddingTop(paddingTop) {
+    this.win.document.documentElement.style.paddingTop = px(paddingTop);
+  }
+
+  /** @override */
   getSize() {
     // Notice, that documentElement.clientHeight is buggy on iOS Safari and thus
     // cannot be used. But when the values are undefined, fallback to
@@ -311,7 +362,7 @@ export class ViewportBindingNatural_ {
 
   /** @override */
   getScrollTop() {
-    return this.getScrollingElement_().scrollTop || this.win.pageYOffset;
+    return this.getScrollingElement_()./*OK*/scrollTop || this.win.pageYOffset;
   }
 
   /** @override */
@@ -348,30 +399,29 @@ export class ViewportBindingNatural_ {
 
 
 /**
- * Implementation of ViewportBinding that assumes a virtual viewport that is
- * sized outside of the AMP runtime (e.g. in a parent window) and passed here
- * via config and events. Applicable to cases where a parent window expands the
- * iframe to all available height and leaves scrolling to the parent window.
+ * Implementation of ViewportBinding based on the native window in case when
+ * the AMP document is embedded in a IFrame on iOS. It assumes that the native
+ * window is sized properly and events represent the actual resize events.
+ * The main difference from natural binding is that in this case, the document
+ * itself is not scrollable, but instead only "body" is scrollable.
  *
  * Visible for testing.
  *
  * @implements {ViewportBinding}
  */
-export class ViewportBindingVirtual_ {
-
+export class ViewportBindingNaturalIosEmbed_ {
   /**
-   * @param {!Viewer} viewer
+   * @param {!Window} win
    */
-  constructor(viewer) {
+  constructor(win) {
+    /** @const {!Window} */
+    this.win = win;
 
-    /** @private {number} */
-    this.width_ = viewer.getViewportWidth();
+    /** @private {?Element} */
+    this.scrollPosEl_ = null;
 
-    /** @private {number} */
-    this.height_ = viewer.getViewportHeight();
-
-    /** @private {number} */
-    this.scrollTop_ = viewer.getScrollTop();
+    /** @private {!{x: number, y: number}} */
+    this.pos_ = {x: 0, y: 0};
 
     /** @private @const {!Observable} */
     this.scrollObservable_ = new Observable();
@@ -379,7 +429,70 @@ export class ViewportBindingVirtual_ {
     /** @private @const {!Observable} */
     this.resizeObservable_ = new Observable();
 
-    viewer.onViewportEvent(this.onViewportEvent_.bind(this));
+    onDocumentReady(this.win.document, this.setup_.bind(this));
+    this.win.addEventListener('resize', () => this.resizeObservable_.fire());
+  }
+
+  /** @private */
+  setup_() {
+    let documentElement = this.win.document.documentElement;
+    let documentBody = this.win.document.body;
+
+    // Embedded scrolling on iOS is rather complicated. IFrames cannot be sized
+    // and be scrollable. Sizing iframe by scrolling height has a big negative
+    // that "fixed" position is essentially impossible. The only option we
+    // found is to reset scrolling on the AMP doc, which overrides natural BODY
+    // scrolling with overflow:auto. We need the following styling:
+    // html {
+    //   overflow: auto;
+    //   -webkit-overflow-scrolling: touch;
+    // }
+    // body {
+    //   position: absolute;
+    //   overflow: auto;
+    //   -webkit-overflow-scrolling: touch;
+    // }
+    setStyles(documentElement, {
+      overflow: 'auto',
+      webkitOverflowScrolling: 'touch'
+    });
+    setStyles(documentBody, {
+      overflow: 'auto',
+      webkitOverflowScrolling: 'touch',
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0
+    });
+
+    // Insert scrollPos element into DOM. See {@link onScrolled_} for why
+    // this is needed.
+    this.scrollPosEl_ = this.win.document.createElement('div');
+    this.scrollPosEl_.id = '-amp-scrollpos'
+    setStyles(this.scrollPosEl_, {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      width: 0,
+      height: 0,
+      visibility: 'hidden'
+    });
+    documentBody.appendChild(this.scrollPosEl_);
+
+    documentBody.addEventListener('scroll', this.onScrolled_.bind(this));
+  }
+
+  /** @override */
+  updateViewerViewport(viewer) {
+    // Viewer's viewport is ignored since this window is fully accurate.
+  }
+
+  /** @override */
+  updatePaddingTop(paddingTop) {
+    onDocumentReady(this.win.document, () => {
+      this.win.document.body.style.paddingTop = px(paddingTop);
+    });
   }
 
   /** @override */
@@ -399,12 +512,135 @@ export class ViewportBindingVirtual_ {
 
   /** @override */
   getSize() {
+    return {width: this.win.innerWidth, height: this.win.innerHeight};
+  }
+
+  /** @override */
+  getScrollTop() {
+    return Math.round(this.pos_.y);
+  }
+
+  /** @override */
+  getScrollLeft() {
+    return Math.round(this.pos_.x);
+  }
+
+  /** @override */
+  getLayoutRect(el) {
+    var b = el.getBoundingClientRect();
+    return layoutRectLtwh(Math.round(b.left + this.pos_.x),
+        Math.round(b.top + this.pos_.y),
+        Math.round(b.width),
+        Math.round(b.height));
+  }
+
+  /** @private */
+  onScrolled_() {
+    // We have to use a special "positioning" element on iOS due to the
+    // following bugs:
+    // - https://code.google.com/p/chromium/issues/detail?id=2891
+    // - https://code.google.com/p/chromium/issues/detail?id=157855
+    // - https://bugs.webkit.org/show_bug.cgi?id=106133
+    // - https://bugs.webkit.org/show_bug.cgi?id=149264
+    // This is an iOS-specific issue in the context of AMP, but Chrome bugs
+    // are listed for reference. In a nutshell, this is because WebKit (and
+    // Chrome as well) redirect body's scrollTop to documentElement instead of
+    // body. Since in this case we are actually using direct body scrolling,
+    // body's scrollTop would always return wrong values.
+    // This will all change with a complete migration when
+    // document.scrollingElement will point to document.documentElement. This
+    // already works correctly in Chrome with "scroll-top-left-interop" flag
+    // turned on "chrome://flags/#scroll-top-left-interop".
+    if (!this.scrollPosEl_) {
+      return;
+    }
+    let rect = this.scrollPosEl_.getBoundingClientRect();
+    if (this.pos_.x != -rect.left || this.pos_.y != -rect.top) {
+      this.pos_ = {x: -rect.left, y: -rect.top};
+      this.scrollObservable_.fire();
+    }
+  }
+}
+
+
+/**
+ * Implementation of ViewportBinding that assumes a virtual viewport that is
+ * sized outside of the AMP runtime (e.g. in a parent window) and passed here
+ * via config and events. Applicable to cases where a parent window expands the
+ * iframe to all available height and leaves scrolling to the parent window.
+ *
+ * Visible for testing.
+ *
+ * @implements {ViewportBinding}
+ */
+export class ViewportBindingVirtual_ {
+
+  /**
+   * @param {!Window} win
+   * @param {!Viewer} viewer
+   */
+  constructor(win, viewer) {
+    /** @private @const {!Window} */
+    this.win = win;
+
+    /** @private {number} */
+    this.width_ = viewer.getViewportWidth();
+
+    /** @private {number} */
+    this.height_ = viewer.getViewportHeight();
+
+    /** @private {number} */
+    this./*OK*/scrollTop_ = viewer.getScrollTop();
+
+    /** @private @const {!Observable} */
+    this.scrollObservable_ = new Observable();
+
+    /** @private @const {!Observable} */
+    this.resizeObservable_ = new Observable();
+  }
+
+  /** @override */
+  cleanup_() {
+    // TODO(dvoytenko): remove listeners
+  }
+
+  /** @override */
+  updateViewerViewport(viewer) {
+    if (viewer.getScrollTop() != this./*OK*/scrollTop_) {
+      this./*OK*/scrollTop_ = viewer.getScrollTop();
+      this.scrollObservable_.fire();
+    }
+    if (viewer.getViewportWidth() != this.width_ ||
+            viewer.getViewportHeight() != this.height_) {
+      this.width_ = viewer.getViewportWidth();
+      this.height_ = viewer.getViewportHeight();
+      this.resizeObservable_.fire();
+    }
+  }
+
+  /** @override */
+  updatePaddingTop(paddingTop) {
+    this.win.document.documentElement.style.paddingTop = px(paddingTop);
+  }
+
+  /** @override */
+  onScroll(callback) {
+    this.scrollObservable_.add(callback);
+  }
+
+  /** @override */
+  onResize(callback) {
+    this.resizeObservable_.add(callback);
+  }
+
+  /** @override */
+  getSize() {
     return {width: this.width_, height: this.height_};
   }
 
   /** @override */
   getScrollTop() {
-    return this.scrollTop_;
+    return this./*OK*/scrollTop_;
   }
 
   /** @override */
@@ -424,24 +660,6 @@ export class ViewportBindingVirtual_ {
         Math.round(b.width),
         Math.round(b.height));
   }
-
-  /**
-   * Handles a "viewport" event from viewer.
-   * @param {!ViewerViewportEvent} event
-   * @private
-   */
-  onViewportEvent_(event) {
-    if (event.scrollTop !== undefined && event.scrollTop != this.scrollTop_) {
-      this.scrollTop_ = event.scrollTop;
-      this.scrollObservable_.fire();
-    }
-    if (event.width !== undefined && event.width != this.width_ ||
-            event.height !== undefined && event.height != this.height_) {
-      this.width_ = event.width || this.width_;
-      this.height_ = event.height || this.height_;
-      this.resizeObservable_.fire();
-    }
-  }
 }
 
 
@@ -454,11 +672,13 @@ function createViewport_(window) {
   let viewer = viewerFor(window);
   let binding;
   if (viewer.getViewportType() == 'virtual') {
-    binding = new ViewportBindingVirtual_(viewer);
+    binding = new ViewportBindingVirtual_(window, viewer);
+  } else if (viewer.getViewportType() == 'natural-ios-embed') {
+    binding = new ViewportBindingNaturalIosEmbed_(window);
   } else {
     binding = new ViewportBindingNatural_(window);
   }
-  return new Viewport(binding);
+  return new Viewport(binding, viewer);
 }
 
 

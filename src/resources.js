@@ -158,7 +158,8 @@ export class Resources {
    * @package
    */
   getResourceForElement(element) {
-    return assert(/** @type {!Resource} */ (element[RESOURCE_PROP_]));
+    return assert(/** @type {!Resource} */ (element[RESOURCE_PROP_]),
+        'Missing resource prop on %s', element);
   }
 
   /**

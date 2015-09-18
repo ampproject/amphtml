@@ -16,6 +16,7 @@
 
 
 require('../src/polyfills');
+import {Timer} from '../src/timer';
 import {registerForUnitTest} from '../src/runtime';
 
 var iframeCount = 0;
@@ -128,11 +129,19 @@ export function createFixtureIframe(fixture, initialIframeHeight, done) {
 /**
  * Creates a super simple iframe. Use this in unit tests to register elements
  * in a sandbox.
- * @return {{
+ * Returns a promise for an object with:
+ * - win: The created window.
+ * - doc: The created document.
+ * - iframe: The host iframe element. Useful for e.g. resizing.
+ * - addElement: Adds an AMP element to the iframe and returns a promise for
+ *   that element. When the promise is resolved we will have called the entire
+ *   lifecycle including layoutCallback.
+ * @return {!Promise<{
  *   win: !Window,
  *   doc: !Document,
- *   iframe: !Element
- * }}
+ *   iframe: !Element,
+ *   addElement: function(!Element):!Promise
+ * }>}
  */
 export function createIframePromise() {
   return new Promise(function(resolve, reject) {
@@ -148,7 +157,15 @@ export function createIframePromise() {
       resolve({
         win: iframe.contentWindow,
         doc: iframe.contentWindow.document,
-        iframe: iframe
+        iframe: iframe,
+        addElement: function(element) {
+          iframe.contentWindow.document.body.appendChild(element);
+          // Wait for mutation observer to fire.
+          return new Timer(window).promise(16).then(() => {
+            element.implementation_.layoutCallback();
+            return element;
+          });
+        }
       });
     };
     iframe.onerror = reject;
@@ -157,6 +174,7 @@ export function createIframePromise() {
 }
 
 /**
+ * Returns a promise for when the condition becomes true.
  * @param {string} description
  * @param {fn():boolean} condition
  * @param {fn():!Error=} opt_onError
@@ -198,6 +216,6 @@ export function pollForLayout(win, count) {
     return win.document.querySelectorAll('.-amp-layout,.-amp-error').length >= count;
   }, () => {
     return new Error('Failed to find elements with layout. HTML:\n' +
-        win.document.documentElement.innerHTML);
+        win.document.documentElement./*TEST*/innerHTML);
   });
 }

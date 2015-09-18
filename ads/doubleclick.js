@@ -29,12 +29,27 @@ export function doubleclick(global, data) {
             parseInt(data.width, 10),
             parseInt(data.height, 10)
           ]];
-          googletag.defineSlot(data.slot, dimensions, 'c')
+          var slot = googletag.defineSlot(data.slot, dimensions, 'c')
               .addService(googletag.pubads());
           googletag.pubads().enableSingleRequest();
           googletag.pubads().enableSyncRendering();
           googletag.pubads().set("page_url", context.location.href);
           googletag.enableServices();
+
+          if (data.targeting) {
+            for (var key in data.targeting) {
+              slot.setTargeting(key, data.targeting[key]);
+            }
+          }
+
+          if (data.categoryExclusion) {
+            slot.setCategoryExclusion(data.categoryExclusion);
+          }
+
+          if (data.tagForChildDirectedTreatment != undefined) {
+            slot.TagForChildDirectedTreatment(
+                data.tagForChildDirectedTreatment);
+          }
 
           // This must be called from its own script tag.
           global.docEndCallback = function() {

@@ -17,6 +17,31 @@
 // TODO(malteubl) Move somewhere else since this is not an ad.
 
 import {writeScript, executeAfterWriteScript} from '../src/3p'
+import {setStyles} from '../src/style'
+
+/**
+ * Returns the Twitter API object. If the current frame is the master
+ * frame it makes a new one by injecting the respective script, otherwise
+ * it retrieves a promise for the script from the master window.
+ * @param {!Window} global
+ */
+function getTwttr(global) {
+  if (context.isMaster) {
+    return global.twttrPromise = new Promise(function(resolve, reject) {
+      var s = document.createElement('script');
+      s.src = 'https://platform.twitter.com/widgets.js';
+      s.onload = function() {
+        resolve(global.twttr);
+      }
+      s.onerror = reject;
+      global.document.body.appendChild(s);
+    });
+  } else {
+    // Because we rely on this global existing it is important that
+    // this promise is created synchronously after master selection.
+    return context.master.twttrPromise;
+  }
+}
 
 /**
  * @param {!Window} global
@@ -25,14 +50,25 @@ import {writeScript, executeAfterWriteScript} from '../src/3p'
 export function twitter(global, data) {
   var tweet = document.createElement('div');
   tweet.id = 'tweet';
-  var width = data.width;
-  var height = data.height;
+  var width = data.initialWindowWidth;
+  var height = data.initialWindowHeight;
   tweet.style.height = height + 'px';
   tweet.style.width = width + 'px';
-  global.document.getElementById('c').appendChild(tweet);
-  var s = document.createElement('script');
-  s.src = 'https://platform.twitter.com/widgets.js';
-  s.onload = function() {
+  var container = document.createElement('div');
+  // This container makes the iframe always as big as the
+  // parent wants the iframe to be instead of extending
+  // to the dimensions of the content.
+  setStyles(container, {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    bottom: 0,
+    right: 0,
+    overflow: 'hidden'
+  });
+  container.appendChild(tweet);
+  global.document.getElementById('c').appendChild(container);
+  getTwttr(global).then(function(twttr) {
     twttr.widgets.createTweet(data.tweetid, tweet, data).then(() => {
       window.onresize = resize;
       var iframe = global.document.querySelector('#c iframe');
@@ -47,7 +83,7 @@ export function twitter(global, data) {
       }, true)
       render();
     });
-  };
+  });
 
   function resize() {
     // On resize we reset our base dimensions.
@@ -67,9 +103,11 @@ export function twitter(global, data) {
           'width="' + iframe.offsetWidth +'" height="' + offsetHeight + '"',
           data);
     }
-    tweet.style.position = 'absolute';
-    tweet.style.transformOrigin = 'top left';
-    tweet.style.transform = 'scale(' + scale + ')';
+    setStyles(tweet, {
+      position: 'absolute',
+      transformOrigin: 'top left',
+      transform: 'scale(' + scale + ')'
+    });
     // Alright, here we get from hacky into monkey patch territory.
     // We do not want the Tweet embed to know that we scaled it, because
     // then it may just redraw based on the new space.
@@ -82,6 +120,4 @@ export function twitter(global, data) {
       };
     };
   }
-
-  global.document.body.appendChild(s);
 }

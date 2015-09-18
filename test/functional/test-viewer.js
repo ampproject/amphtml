@@ -62,8 +62,6 @@ describe('Viewer', () => {
     expect(viewer.getViewportHeight()).to.equal(333);
     expect(viewer.getScrollTop()).to.equal(15);
     expect(viewer.getPaddingTop()).to.equal(17);
-    expect(windowApi.document.body.style.paddingTop).to.
-        equal('17px');
 
     // All of the startup params are also available via getParam.
     expect(viewer.getParam('paddingTop')).to.equal('17');
@@ -80,16 +78,7 @@ describe('Viewer', () => {
     sandbox.mock(platform).expects('isIos').returns(true).once();
     let viewer = new Viewer(windowApi);
 
-    expect(viewer.getViewportType()).to.equal('natural');
-    expect(documentElement.style.overflowY).to.equal('auto');
-    expect(documentElement.style.webkitOverflowScrolling).to.equal('touch');
-    expect(body.style.overflowY).to.equal('auto');
-    expect(body.style.webkitOverflowScrolling).to.equal('touch');
-    expect(body.style.position).to.equal('absolute');
-    expect(body.style.top).to.equal(0);
-    expect(body.style.left).to.equal(0);
-    expect(body.style.right).to.equal(0);
-    expect(body.style.bottom).to.equal(0);
+    expect(viewer.getViewportType()).to.equal('natural-ios-embed');
   });
 
   it('should receive viewport event', () => {
@@ -101,22 +90,14 @@ describe('Viewer', () => {
       scrollTop: 11,
       scrollLeft: 12,
       width: 13,
-      height: 14
+      height: 14,
+      paddingTop: 19
     });
     expect(viewportEvent).to.not.equal(null);
-    expect(viewportEvent.scrollTop).to.equal(11);
-    expect(viewportEvent.scrollLeft).to.equal(12);
-    expect(viewportEvent.width).to.equal(13);
-    expect(viewportEvent.height).to.equal(14);
-  });
-
-  it('should apply paddingTop in viewport event', () => {
-    windowApi.document = {body: {style: {}}};
-    viewer.receiveMessage('viewport', {
-      paddingTop: 17
-    });
-    expect(windowApi.document.body.style.paddingTop).to.
-        equal('17px');
+    expect(viewer.getScrollTop()).to.equal(11);
+    expect(viewer.getViewportWidth()).to.equal(13);
+    expect(viewer.getViewportHeight()).to.equal(14);
+    expect(viewer.getPaddingTop()).to.equal(19);
   });
 
   it('should post documentLoaded event', () => {

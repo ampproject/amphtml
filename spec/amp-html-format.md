@@ -12,7 +12,7 @@ distributed under the License is distributed on an "AS-IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
--->a
+-->
 
 # AMP HTML ⚡
 
@@ -68,7 +68,8 @@ In concrete terms this means that:
   }
   </script>
   <script element="amp-carousel" src="https://cdn.ampproject.org/v1/amp-carousel-0.1.js" async></script>
-  <script src="https://cdn.ampproject.org/v1.js"></script>
+  <script src="https://cdn.ampproject.org/v0.js" async></script>
+  <style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
 </head>
 <body>
 <h1>Sample document</h1>
@@ -87,13 +88,14 @@ In concrete terms this means that:
 
 AMP HTML documents MUST
 
-- start with the doctype `<!doctype html>.
-- contain a top-level `<html ⚡>` tag (`<html amp>` is accepted as well).
-- contain `<head>` and `<body>` tags (They are optional in HTML).
-- contain a `<link rel="canonical" href="$SOME_URL" />` tag inside their head that points to the regular HTML version of the AMP HTML document or to itself if no such HTML version exists.
-- contain a `<meta charset="utf-8">` tag as the first child of their head tag.
-- contain a `<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">` tag inside their head tag.
-- contain a `<script src="https://cdn.ampproject.org/v1.js"></script>` tag as the last element in their head.
+- <a name="dctp"></a>start with the doctype `<!doctype html>`. [🔗](#dctp)
+- <a name="ampd"></a>contain a top-level `<html ⚡>` tag (`<html amp>` is accepted as well). [🔗](#ampd)
+- <a name="crps"></a>contain `<head>` and `<body>` tags (They are optional in HTML). [🔗](#crps)
+- <a name="canon"></a>contain a `<link rel="canonical" href="$SOME_URL" />` tag inside their head that points to the regular HTML version of the AMP HTML document or to itself if no such HTML version exists. [🔗](#canon)
+- <a name="chrs"></a>contain a `<meta charset="utf-8">` tag as the first child of their head tag. [🔗](#chrs)
+- <a name="vprt"></a>contain a `<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">` tag inside their head tag. [🔗](#vprt)
+- <a name="scrpt"></a>contain a `<script src="https://cdn.ampproject.org/v0.js" async></script>` tag as the last element in their head. [🔗](#scrpt)
+- <a name="opacity"></a>contain `<style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>` in their head tag. [🔗](#opacity)
 
 ### Metadata
 
@@ -141,7 +143,7 @@ Most HTML tags can be used unchanged in AMP HTML. Certain tags, however, have eq
 | embed     | Banned. |
 | form      | Banned. |
 | input elements | Banned. Includes input, button, textarea, select, option. |
-| style     | Only one. Must be in head tag. |
+| style     | [Required style tags for adjusting opacity](#opacity) One additional style tag is allowed in head tag for the purpose of custom styling. |
 | link      | Allowed for certain values of rel: `canonical`. `stylesheet` is generally disallowed, but some values may be whitelisted for font providers. |
 | meta      | The `http-equiv` attribute is banned. Otherwise allowed. |
 | a         | The `href` attribute value must not begin with `javascript:`. If set, the `target` attribute value must be `_blank`. Otherwise allowed. |
@@ -265,9 +267,11 @@ Depending on the value of the `layout` attribute AMP component elements must hav
 
 The optional layout attribute allows specifying how the component behaves in the document layout. Valid values for the layout attribute are:
 
-- Not present: The `width` and `height` attributes must be present and determine the exact size of the component.
+- Not present: If `width` and `height` attributes are present `fixed` layout is assumed. If `width` and `height` are not present `container` layout is assumed (unless otherwise documented with the component) which may not be supported by the element (Would trigger a runtime error).
+- fixed:
 - `responsive`: The `width` and `height` attributes must be present and are used to determine the aspect ratio of the component and the component is sized to the width of its container element while maintaining the height based on the aspect ratio.
-- `nodisplay`: The component takes up zero space on the screen as if its display style was `none`.
+- `nodisplay`: The component takes up zero space on the screen as if its display style was `none`. The `width` and `height` attributes are not required.
+- `fill`: Element size will be determined by the parent element.
 - `container`: The component is assumed to not have specific layout itself but only act as a container. Its children as rendered immediately.
 
 #### `media`
@@ -288,6 +292,16 @@ Example: Here we have 2 images with mutually exclusive media queries. Depending 
         width=527
         height=193 layout="responsive" ></amp-img>
 ```
+
+### `on`
+
+The on attribute is used to install event handlers on elements. The events that are supported depend on the element.
+
+The value for the syntax is a simple domain specific language of the form `eventName:targetId[.methodName]`.
+Example: `on="tap:fooId.showLightbox"`
+
+If `methodName` is omitted the default method is executed if defined for the element.
+Example: `on="tap:fooId"`
 
 
 ### Extended components

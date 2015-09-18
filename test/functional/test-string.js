@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-/**
- * @fileoverview Loads all polyfills needed by the AMP runtime.
- */
+import {dashToCamelCase} from '../../src/string';
 
-
-import 'document-register-element/build/document-register-element.max'
-import './custom-core-js-shim';
-import 'babel-core/external-helpers';
+describe('dashToCamelCase', () => {
+  it('should transform dashes to camel case.', () => {
+    expect(dashToCamelCase('foo')).to.equal('foo');
+    expect(dashToCamelCase('foo-bar')).to.equal('fooBar');
+    expect(dashToCamelCase('foo-bar-baz')).to.equal('fooBarBaz');
+    expect(dashToCamelCase('-foo')).to.equal('Foo');
+  });
+});

@@ -5,7 +5,8 @@
   <title>Ad examples</title>
   <link rel="canonical" href="http://schema.org/" >
   <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
-  <script src="../dist/amp.js"></script>
+  <script src="../dist/amp.js" development async></script>
+  <style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
   <style>
   amp-ad {
     max-width: 500px;
@@ -33,11 +34,12 @@
   <h2>AdSense</h2>
   <amp-ad width=300 height=200
       type="adsense"
-      data-ad-client="ca-pub-9350112648257122">
+      data-ad-client="ca-pub-8125901705757971"
+      data-ad-slot="7783467241">
   </amp-ad>
 
   <h2>AdSense responsive</h2>
-  <amp-ad width=300 height=200
+  <amp-ad width=300 height=75
       type="adsense"
       layout="responsive"
       data-ad-client="ca-pub-8125901705757971"
@@ -54,7 +56,17 @@
   <h2>Doubleclick</h2>
   <amp-ad width=320 height=50
       type="doubleclick"
-      data-slot="/4119129/mobile_ad_banner">
+      data-slot="/4119129/mobile_ad_banner"
+      json='{"targeting":{"sport":["rugby","cricket"]},"categoryExclusion":"health","tagForChildDirectedTreatment":false}'
+      >
+  </amp-ad>
+
+  <h2>Doubleclick with JSON based parameters</h2>
+  <amp-ad width=320 height=50
+      type="doubleclick"
+      data-slot="/4119129/mobile_ad_banner"
+      json='{"targeting":{"sport":["rugby","cricket"]},"categoryExclusion":"health","tagForChildDirectedTreatment":false}'
+      >
   </amp-ad>
 
 
