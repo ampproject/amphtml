@@ -88,9 +88,36 @@ export class ImageViewer {
 
     /** @private {number} */
     this.scale_ = 1;
-
+    /** @private {number} */
+    this.startScale_ = 1;
     /** @private {number} */
     this.maxSeenScale_ = 1;
+    /** @private {number} */
+    this.minScale_ = 1;
+    /** @private {number} */
+    this.maxScale_ = 2;
+
+    /** @private {number} */
+    this.startX_ = 0;
+    /** @private {number} */
+    this.startY_ = 0;
+    /** @private {number} */
+    this.posX_ = 0;
+    /** @private {number} */
+    this.posY_ = 0;
+    /** @private {number} */
+    this.minX_ = 0;
+    /** @private {number} */
+    this.minY_ = 0;
+    /** @private {number} */
+    this.maxX_ = 0;
+    /** @private {number} */
+    this.maxY_ = 0;
+
+    /** @private {?Motion} */
+    this.motion_ = null;
+
+    this.setupGestures_();
   }
 
   /**
@@ -134,7 +161,25 @@ export class ImageViewer {
     this.imageBox_ = layoutRectLtwh(0, 0, 0, 0);
     this.sourceWidth_ = 0;
     this.sourceHeight_ = 0;
+
     this.maxSeenScale_ = 1;
+    this.scale_ = 1;
+    this.startScale_ = 1;
+    this.maxScale_ = 2;
+
+    this.startX_ = 0;
+    this.startY_ = 0;
+    this.posX_ = 0;
+    this.posY_ = 0;
+    this.minX_ = 0;
+    this.minY_ = 0;
+    this.maxX_ = 0;
+    this.maxY_ = 0;
+
+    if (this.motion_) {
+      this.motion_.halt();
+    }
+    this.motion_ = null;
   }
 
   /**
@@ -190,7 +235,12 @@ export class ImageViewer {
       height: st.px(this.imageBox_.height)
     });
 
-    // TODO(dvoytenko): update pan/zoom info.
+    // Reset zoom and pan.
+    this.startScale_ = this.scale_ = 1;
+    this.startX_ = this.posX_ = 0;
+    this.startY_ = this.posY_ = 0;
+    this.updatePanZoomBounds_(this.scale_);
+    this.updatePanZoom_();
 
     return this.updateSrc_();
   }
@@ -212,6 +262,346 @@ export class ImageViewer {
     return timer.promise(1).then(() => {
       this.image_.setAttribute('src', src);
       return loadPromise(this.image_);
+    });
+  }
+
+  /** @private */
+  setupGestures_() {
+    let gestures = Gestures.get(this.image_);
+
+    // Toggle viewer mode.
+    gestures.onGesture(TapRecognizer, () => {
+      this.lightbox_.toggleViewMode();
+    });
+
+    // Movable.
+    gestures.onGesture(SwipeXYRecognizer, (e) => {
+      this.onMove_(e.data.deltaX, e.data.deltaY, false);
+      if (e.data.last) {
+        this.onMoveRelease_(e.data.velocityX, e.data.velocityY);
+      }
+    });
+    gestures.onPointerDown(() => {
+      if (this.motion_) {
+        this.motion_.halt();
+      }
+    });
+
+    // Zoomable.
+    gestures.onGesture(DoubletapRecognizer, (e) => {
+      let newScale;
+      if (this.scale_ == 1) {
+        newScale = this.maxScale_;
+      } else {
+        newScale = this.minScale_;
+      }
+      let deltaX = this.viewerBox_.width / 2 - e.data.clientX;
+      let deltaY = this.viewerBox_.height / 2 - e.data.clientY;
+      this.onZoom_(newScale, deltaX, deltaY, true).then(() => {
+        return this.onZoomRelease_(0, 0, 0, 0, 0, 0);
+      });
+    });
+    gestures.onGesture(TapzoomRecognizer, (e) => {
+      this.onZoomInc_(e.data.centerClientX, e.data.centerClientY,
+          e.data.deltaX, e.data.deltaY);
+      if (e.data.last) {
+        this.onZoomRelease_(e.data.centerClientX, e.data.centerClientY,
+            e.data.deltaX, e.data.deltaY, e.data.velocityY, e.data.velocityY);
+      }
+    });
+  }
+
+  /**
+   * Returns value bound to min and max values +/- extent.
+   * @param {number} v
+   * @param {number} min
+   * @param {number} max
+   * @param {number} extent
+   * @private
+   */
+  boundValue_(v, min, max, extent) {
+    return Math.max(min - extent, Math.min(max + extent, v));
+  }
+
+  /**
+   * Returns the scale within the allowed range with possible extent.
+   * @param {number} s
+   * @param {boolean} allowExtent
+   * @private
+   */
+  boundScale_(s, allowExtent) {
+    return this.boundValue_(s, this.minScale_, this.maxScale_,
+        allowExtent ? 0.25 : 0);
+  }
+
+  /**
+   * Returns the X position within the allowed range with possible extent.
+   * @param {number} x
+   * @param {boolean} allowExtent
+   * @private
+   */
+  boundX_(x, allowExtent) {
+    return this.boundValue_(x, this.minX_, this.maxX_,
+        allowExtent && this.scale_ > 1 ? this.viewerBox_.width * 0.25 : 0);
+  }
+
+  /**
+   * Returns the Y position within the allowed range with possible extent.
+   * @param {number} y
+   * @param {boolean} allowExtent
+   * @private
+   */
+  boundY_(y, allowExtent) {
+    return this.boundValue_(y, this.minY_, this.maxY_,
+        allowExtent ? this.viewerBox_.height * 0.25 : 0);
+  }
+
+  /**
+   * Updates X/Y bounds based on the provided scale value. The min/max bounds
+   * are calculated to allow full pan of the image regardless of the scale
+   * value.
+   * @param {number} scale
+   * @private
+   */
+  updatePanZoomBounds_(scale) {
+    let maxY = 0;
+    let minY = 0;
+    let dh = this.viewerBox_.height - this.imageBox_.height * scale;
+    if (dh >= 0) {
+      minY = maxY = 0;
+    } else {
+      minY = dh / 2;
+      maxY = -minY;
+    }
+
+    let maxX = 0;
+    let minX = 0;
+    let dw = this.viewerBox_.width - this.imageBox_.width * scale;
+    if (dw >= 0) {
+      minX = maxX = 0;
+    } else {
+      minX = dw / 2;
+      maxX = -minX;
+    }
+
+    this.minX_ = minX;
+    this.minY_ = minY;
+    this.maxX_ = maxX;
+    this.maxY_ = maxY;
+  }
+
+  /**
+   * Updates pan/zoom of the image based on the current values.
+   * @private
+   */
+  updatePanZoom_() {
+    st.setStyles(this.image_, {
+      transform: st.translate(this.posX_, this.posY_) +
+          ' ' + st.scale(this.scale_)
+    });
+    if (this.scale_ != 1) {
+      this.lightbox_.toggleViewMode(true);
+    }
+  }
+
+  /**
+   * Performs a one-step or an animated motion (panning).
+   * @param {number} deltaX
+   * @param {number} deltaY
+   * @param {boolean} animate
+   * @private
+   */
+  onMove_(deltaX, deltaY, animate) {
+    let newPosX = this.boundX_(this.startX_ + deltaX, true);
+    let newPosY = this.boundY_(this.startY_ + deltaY, true);
+    this.set_(this.scale_, newPosX, newPosY, animate);
+  }
+
+  /**
+   * Performs actions once the motion gesture has been complete. The motion
+   * may continue based on the final velocity.
+   * @param {number} veloX
+   * @param {number} veloY
+   * @private
+   */
+  onMoveRelease_(veloX, veloY) {
+    let deltaY = this.posY_ - this.startY_;
+    if (this.scale_ == 1 && Math.abs(deltaY) > 10) {
+      this.lightbox_.close();
+      return;
+    }
+
+    // Continue motion.
+    this.motion_ = continueMotion(this.posX_, this.posY_, veloX, veloY,
+        (x, y) => {
+          let newPosX = this.boundX_(x, true);
+          let newPosY = this.boundY_(y, true);
+          if (Math.abs(newPosX - this.posX_) < 1 &&
+                Math.abs(newPosY - this.posY_) < 1) {
+            // Hit the wall: stop motion.
+            return false;
+          }
+          this.set_(this.scale_, newPosX, newPosY, false);
+          return true;
+        });
+
+    // Snap back.
+    this.motion_.thenAlways(() => {
+      this.motion_ = null;
+      return this.release_();
+    });
+  }
+
+  /**
+   * Performs a one-step zoom action.
+   * @param {number} centerClientX
+   * @param {number} centerClientY
+   * @param {number} deltaX
+   * @param {number} deltaY
+   * @private
+   */
+  onZoomInc_(centerClientX, centerClientY, deltaX, deltaY) {
+    let dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+    let zoomSign = Math.abs(deltaY) > Math.abs(deltaX) ?
+        Math.sign(deltaY) : Math.sign(-deltaX);
+    if (zoomSign == 0) {
+      return;
+    }
+
+    let newScale = this.startScale_  * (1 + zoomSign * dist / 100);
+    let deltaCenterX = this.viewerBox_.width / 2 - centerClientX;
+    let deltaCenterY = this.viewerBox_.height / 2 - centerClientY;
+    deltaX = Math.min(deltaCenterX, deltaCenterX * (dist / 100));
+    deltaY = Math.min(deltaCenterY, deltaCenterY * (dist / 100));
+    this.onZoom_(newScale, deltaX, deltaY, false);
+  }
+
+  /**
+   * Performs a one-step or an animated zoom action.
+   * @param {number} scale
+   * @param {number} deltaX
+   * @param {number} deltaY
+   * @param {boolean} animate
+   * @return {!Promise}
+   * @private
+   */
+  onZoom_(scale, deltaX, deltaY, animate) {
+    let newScale = this.boundScale_(scale, true);
+    if (newScale == this.scale_) {
+      return;
+    }
+
+    this.updatePanZoomBounds_(newScale);
+
+    let newPosX = this.boundX_(this.startX_ + deltaX * newScale, false);
+    let newPosY = this.boundY_(this.startY_ + deltaY * newScale, false);
+    return this.set_(newScale, newPosX, newPosY, animate);
+  }
+
+  /**
+   * Performs actions after the gesture that was performing zooming has been
+   * released. The zooming may continue based on the final velocity.
+   * @param {number} centerClientX
+   * @param {number} centerClientY
+   * @param {number} deltaX
+   * @param {number} deltaY
+   * @param {number} veloX
+   * @param {number} veloY
+   * @return {!Promise}
+   * @private
+   */
+  onZoomRelease_(centerClientX, centerClientY, deltaX, deltaY, veloX, veloY) {
+    let promise;
+    if (veloX == 0 && veloY == 0) {
+      promise = Promise.resolve();
+    } else {
+      promise = continueMotion(deltaX, deltaY, veloX, veloY, (x, y) => {
+        this.onZoomInc_(centerClientX, centerClientY, x, y);
+        return true;
+      }).thenAlways();
+    }
+
+    let relayout = this.scale_ > this.startScale_;
+    return promise.then(() => {
+      return this.release_();
+    }).then(() => {
+      if (relayout) {
+        this.updateSrc_();
+      }
+    });
+  }
+
+  /**
+   * Sets or animates pan/zoom parameters.
+   * @param {number} newScale
+   * @param {number} newPosX
+   * @param {number} newPosY
+   * @param {boolean} animate
+   * @return {!Promise}
+   * @private
+   */
+  set_(newScale, newPosX, newPosY, animate) {
+    let ds = newScale - this.scale_;
+    let dx = newPosX - this.posX_;
+    let dy = newPosY - this.posY_;
+    let dist = Math.sqrt(dx * dx + dy * dy);
+
+    let dur = 0;
+    if (animate) {
+      let maxDur = 250;
+      dur = Math.min(maxDur, Math.max(
+          maxDur * dist * 0.01,      // Moving component.
+          maxDur * Math.abs(ds)));   // Zooming component.
+    }
+
+    let promise;
+    if (dur > 16 && animate) {
+      let scaleFunc = tr.numeric(this.scale_, newScale);
+      let xFunc = tr.numeric(this.posX_, newPosX);
+      let yFunc = tr.numeric(this.posY_, newPosY);
+      promise = Animation.animate((time) => {
+        this.scale_ = scaleFunc(time);
+        this.posX_ = xFunc(time);
+        this.posY_ = yFunc(time);
+        this.updatePanZoom_();
+      }, dur, PAN_ZOOM_CURVE_).thenAlways(() => {
+        this.scale_ = newScale;
+        this.posX_ = newPosX;
+        this.posY_ = newPosY;
+        this.updatePanZoom_();
+      });
+    } else {
+      this.scale_ = newScale;
+      this.posX_ = newPosX;
+      this.posY_ = newPosY;
+      this.updatePanZoom_();
+      if (animate) {
+        promise = Promise.resolve();
+      } else {
+        promise = undefined;
+      }
+    }
+
+    return promise;
+  }
+
+  /**
+   * Sets or animates pan/zoom parameters after release of the gesture.
+   * @return {!Promise}
+   * @private
+   */
+  release_() {
+    let newScale = this.boundScale_(this.scale_, false);
+    if (newScale != this.scale_) {
+      this.updatePanZoomBounds_(newScale);
+    }
+    let newPosX = this.boundX_(this.posX_ / this.scale_ * newScale, false);
+    let newPosY = this.boundY_(this.posY_ / this.scale_ * newScale, false);
+    return this.set_(newScale, newPosX, newPosY, true).then(() => {
+      this.startScale_ = this.scale_;
+      this.startX_ = this.posX_;
+      this.startY_ = this.posY_;
     });
   }
 }
@@ -381,6 +771,7 @@ class AmpImageLightbox extends AMP.BaseElement {
     dom.removeChildren(this.captionElement_);
     this.sourceElement_ = null;
     this.sourceImage_ = null;
+    this.toggleViewMode(false);
   }
 
   /**
@@ -535,7 +926,9 @@ class AmpImageLightbox extends AMP.BaseElement {
         opacity: ''
       });
       st.setStyles(this.container_, {opacity: ''});
-      document.body.removeChild(transLayer);
+      if (transLayer) {
+        document.body.removeChild(transLayer);
+      }
       this.reset_();
     });
   }
