@@ -71,6 +71,9 @@ export function parseQueryString(queryString) {
   if (!queryString) {
     return params;
   }
+  if (queryString.startsWith('?')) {
+    queryString = queryString.substr(1);
+  }
   let pairs = queryString.split('&');
   for (let i = 0; i < pairs.length; i++) {
     let pair = pairs[i];

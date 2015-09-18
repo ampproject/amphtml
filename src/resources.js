@@ -21,7 +21,7 @@ import {expandLayoutRect, layoutRectLtwh, layoutRectsOverlap} from
 import {inputFor} from './input';
 import {log} from './log';
 import {onDocumentReady} from './document-state';
-import {reportErrorToDeveloper} from './error';
+import {reportError} from './error';
 import {timer} from './timer';
 import {viewerFor} from './viewer';
 import {viewport} from './viewport';
@@ -499,7 +499,7 @@ export class Resources {
           this.exec_.enqueue(task);
           task.promise.then(this.taskComplete_.bind(this, task, true),
               this.taskComplete_.bind(this, task, false))
-              .catch(reportErrorToDeveloper);
+              .catch(reportError);
         } else {
           // Reschedule post execution.
           executing.promise.then(this.reschedule_.bind(this, task),
