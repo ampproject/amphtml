@@ -50,6 +50,8 @@ var cssprefixer = autoprefixer(
   }
 );
 
+var cssminifier = cssnano({ discardUnused: false });
+
 var srcs = [
   'src/**/*.js',
   'ads/**/*.js',
@@ -199,7 +201,7 @@ function compileCss() {
 
 function jsifyCssPromise(filename) {
   var css = fs.readFileSync(filename, "utf8");
-  var transformers = [cssprefixer, cssnano()];
+  var transformers = [cssprefixer, cssminifier];
   // Remove copyright comment. Crude hack to get our own copyright out
   // of the string.
   return postcss(transformers).process(css.toString())
