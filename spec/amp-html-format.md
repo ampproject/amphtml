@@ -143,7 +143,7 @@ Most HTML tags can be used unchanged in AMP HTML. Certain tags, however, have eq
 | embed     | Banned. |
 | form      | Banned. |
 | input elements | Banned. Includes input, button, textarea, select, option. |
-| <a name="cust"></a>style     | [Required style tags for adjusting opacity](#opacity) One additional style tag is allowed in head tag for the purpose of custom styling. This style tag must have the attribute `amp-custom`.[🔗](#cust) |
+| <a name="cust"></a>style     | [Required style tags for adjusting opacity](#opacity) One additional style tag is allowed in head tag for the purpose of custom styling. This style tag must have the attribute `amp-custom`. [🔗](#cust) |
 | link      | Allowed for certain values of rel: `canonical`. `stylesheet` is generally disallowed, but some values may be whitelisted for font providers. |
 | meta      | The `http-equiv` attribute is banned. Otherwise allowed. |
 | <a name="ancr"></a>a         | The `href` attribute value must not begin with `javascript:`. If set, the `target` attribute value must be `_blank`. Otherwise allowed.[🔗](#ancr) |
