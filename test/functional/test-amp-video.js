@@ -14,47 +14,47 @@
  * limitations under the License.
  */
 
-import {createIframe} from '../../testing/iframe';
+import {createIframePromise} from '../../testing/iframe';
 import {installVideo} from '../../builtins/amp-video';
 
 describe('amp-video', () => {
 
   function getFooVideoSrc(mediatype) {
-    return '//localhost/foo.' + mediatype.slice(mediatype.indexOf('/') + 1); // assumes no optional params
+    return '//someHost/foo.' + mediatype.slice(mediatype.indexOf('/') + 1); // assumes no optional params
   }
 
   function getVideo(attributes, children) {
-    var iframe = createIframe();
-    installVideo(iframe.win);
-    var v = iframe.doc.createElement('amp-video');
-    for (var key in attributes) {
-      v.setAttribute(key, attributes[key]);
-    }
-    if (children != null) {
-      for (var key in children) {
-        v.appendChild(children[key]);
+    return createIframePromise().then((iframe) => {
+      installVideo(iframe.win);
+      var v = iframe.doc.createElement('amp-video');
+      for (var key in attributes) {
+        v.setAttribute(key, attributes[key]);
       }
-    }
-    iframe.doc.body.appendChild(v);
-    v.implementation_.layoutCallback();
-    return v;
+      if (children != null) {
+        for (var key in children) {
+          v.appendChild(children[key]);
+        }
+      }
+      return iframe.addElement(v);
+    })
   }
 
   it('should load a video', () => {
-    var v = getVideo({
+    return getVideo({
       src: 'video.mp4',
       width: 160,
       height: 90
+    }).then(v => {
+      var video = v.querySelector('video');
+      expect(video).to.be.an.instanceof(Element);
+      expect(video.tagName).to.equal('VIDEO');
+      expect(video.getAttribute('src')).to.equal('video.mp4');
+      expect(video.hasAttribute('controls')).to.be.false;
     });
-    var video = v.querySelector('video');
-    expect(video).to.be.an.instanceof(Element);
-    expect(video.tagName).to.equal('VIDEO');
-    expect(video.getAttribute('src')).to.equal('video.mp4');
-    expect(video.hasAttribute('controls')).to.be.false;
   });
 
   it('should load a video', () => {
-    var v = getVideo({
+    return getVideo({
       src: 'video.mp4',
       width: 160,
       height: 90,
@@ -62,14 +62,15 @@ describe('amp-video', () => {
       'autoplay': '',
       'muted': '',
       'loop': ''
+    }).then(v => {
+      var video = v.querySelector('video');
+      expect(video).to.be.an.instanceof(Element);
+      expect(video.tagName).to.equal('VIDEO');
+      expect(video.hasAttribute('controls')).to.be.true;
+      expect(video.hasAttribute('autoplay')).to.be.true;
+      expect(video.hasAttribute('muted')).to.be.true;
+      expect(video.hasAttribute('loop')).to.be.true;
     });
-    var video = v.querySelector('video');
-    expect(video).to.be.an.instanceof(Element);
-    expect(video.tagName).to.equal('VIDEO');
-    expect(video.hasAttribute('controls')).to.be.true;
-    expect(video.hasAttribute('autoplay')).to.be.true;
-    expect(video.hasAttribute('muted')).to.be.true;
-    expect(video.hasAttribute('loop')).to.be.true;
   });
 
   it('should load a video with source children', () => {
@@ -82,7 +83,7 @@ describe('amp-video', () => {
       source.setAttribute('type', mediatype);
       sources.push(source);
     }
-    var v = getVideo({
+    return getVideo({
       src: 'video.mp4',
       width: 160,
       height: 90,
@@ -90,17 +91,18 @@ describe('amp-video', () => {
       'autoplay': '',
       'muted': '',
       'loop': ''
-    }, sources);
-    var video = v.querySelector('video');
-    // check that the source tags were propogated
-    expect(video.children.length).to.equal(mediatypes.length);
-    for (var i = 0; i < mediatypes.length; i++) {
-      var mediatype = mediatypes[i];
-      expect(video.children.item(i).tagName).to.equal('SOURCE');
-      expect(video.children.item(i).hasAttribute('src')).to.be.true;
-      expect(video.children.item(i).getAttribute('src')).to.equal(getFooVideoSrc(mediatype));
-      expect(video.children.item(i).getAttribute('type')).to.equal(mediatype);
-    }
+    }, sources).then(v => {
+      var video = v.querySelector('video');
+      // check that the source tags were propogated
+      expect(video.children.length).to.equal(mediatypes.length);
+      for (var i = 0; i < mediatypes.length; i++) {
+        var mediatype = mediatypes[i];
+        expect(video.children.item(i).tagName).to.equal('SOURCE');
+        expect(video.children.item(i).hasAttribute('src')).to.be.true;
+        expect(video.children.item(i).getAttribute('src')).to.equal(getFooVideoSrc(mediatype));
+        expect(video.children.item(i).getAttribute('type')).to.equal(mediatype);
+      }
+    });
   });
 
   it('should not load a video with http source children', () => {
@@ -113,7 +115,7 @@ describe('amp-video', () => {
       source.setAttribute('type', mediatype);
       sources.push(source);
     }
-    expect(() => { getVideo({
+    return expect(getVideo({
       src: 'video.mp4',
       width: 160,
       height: 90,
@@ -121,7 +123,7 @@ describe('amp-video', () => {
       'autoplay': '',
       'muted': '',
       'loop': ''
-    }, sources);}).to.throw(/start with/);
+    }, sources)).to.be.rejectedWith(/start with/);
   });
 
 });

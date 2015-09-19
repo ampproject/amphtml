@@ -19,7 +19,6 @@
  */
 
 
-//=require node_modules/webcomponents.js/webcomponents-lite.js
-
-require('./custom-core-js-shim');
-require('babel-core/external-helpers');
+import 'document-register-element/build/document-register-element.max'
+import './custom-core-js-shim';
+import 'babel-core/external-helpers';

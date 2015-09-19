@@ -88,11 +88,11 @@ class AmpIframe extends AMP.BaseElement {
     };
     /** @const {!Element} */
     this.propagateAttributes(
-        ['frameborder', 'allowfullscreen', 'allowtransparency'],
+        ['frameborder', 'allowfullscreen', 'allowtransparency', 'scrolling'],
         iframe);
     setSandbox(this.element, iframe);
     iframe.src = this.iframeSrc;
-    this.element.appendChild(iframe);
+    this.element.appendChild(makeIOsScrollable(this.element, iframe));
     return loadPromise(iframe);
   }
 }
@@ -106,6 +106,23 @@ class AmpIframe extends AMP.BaseElement {
 function setSandbox(element, iframe) {
   var allows = element.getAttribute('sandbox') || '';
   iframe.setAttribute('sandbox', allows);
+}
+
+
+/**
+ * If scrolling is allowed for the iframe, wraps it into a container
+ * that is scrollable because iOS auto expands iframes to their size.
+ * @param {!Element} element
+ * @param {!Element} iframe
+ * @param {!Element} The wrapper or the iframe.
+ */
+function makeIOsScrollable(element, iframe) {
+  if (element.getAttribute('scrolling') != 'no') {
+    var wrapper = document.createElement('i-amp-scroll-container');
+    wrapper.appendChild(iframe);
+    return wrapper;
+  }
+  return iframe;
 }
 
 AMP.registerElement('amp-iframe', AmpIframe);

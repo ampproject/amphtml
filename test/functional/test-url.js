@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {parseQueryString, parseUrl} from '../../src/url';
+import {assertHttpsUrl, parseQueryString, parseUrl} from '../../src/url';
 
 describe('url', () => {
 
@@ -147,5 +147,32 @@ describe('parseQueryString', () => {
       'a': '3',
       'b': '2'
     });
+  });
+});
+
+describe('assertHttpsUrl', () => {
+  var referenceElement = document.createElement('div');
+  it('should allow https', () => {
+    assertHttpsUrl('https://twitter.com', referenceElement);
+  });
+  it('should allow protocol relative', () => {
+    assertHttpsUrl('//twitter.com', referenceElement);
+  });
+  it('should allow localhost with http', () => {
+    assertHttpsUrl('http://localhost:8000/sfasd', referenceElement);
+  });
+  it('should allow localhost with http suffix', () => {
+    assertHttpsUrl('http://iframe.localhost:8000/sfasd', referenceElement);
+  });
+
+  it('should fail on http', () => {
+    expect(() => {
+      assertHttpsUrl('http://twitter.com', referenceElement);
+    }).to.throw(/source must start with/);
+  });
+  it('should fail on http with localhost in the name', () => {
+    expect(() => {
+      assertHttpsUrl('http://foolocalhost', referenceElement);
+    }).to.throw(/source must start with/);
   });
 });

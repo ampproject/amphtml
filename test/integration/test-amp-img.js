@@ -19,7 +19,7 @@ import {createFixtureIframe} from '../../testing/iframe.js';
 describe('Rendering of amp-img', () => {
   var fixture;
   beforeEach(() => {
-    return createFixtureIframe('fixtures/components.html', 500).then((f) => {
+    return createFixtureIframe('fixtures/images.html', 500).then((f) => {
       fixture = f;
     });
   });

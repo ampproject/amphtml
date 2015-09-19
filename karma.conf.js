@@ -17,7 +17,14 @@
 module.exports = function(config) {
 
   var configuration = {
-    frameworks: ['fixture', 'browserify', 'mocha', 'sinon-chai'],
+    frameworks: [
+      'fixture',
+      'browserify',
+      'mocha',
+      'chai-as-promised',
+      'sinon-chai',
+      'chai',
+    ],
 
     preprocessors: {
       'fixtures/*.html' : ['html2js'],

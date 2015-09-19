@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {assert, assertElementSrcHttpsIfExists} from '../../../src/asserts';
 import {Layout, getLengthNumeral}  from '../../../src/layout';
+import {assertHttpsUrl} from '../../../src/url';
 import {loadPromise} from '../../../src/event-helper';
 
 class AmpAudio extends AMP.BaseElement {
@@ -28,17 +28,25 @@ class AmpAudio extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    if (this.didLayout) {
+      return;
+    }
+    this.didLayout = true;
     let audio = document.createElement('audio');
     // Force controls otherwise there is no player UI.
     audio.controls = true;
-    assertElementSrcHttpsIfExists(this.element);
+    if (this.element.getAttribute('src')) {
+      assertHttpsUrl(this.element.getAttribute('src'), this.element);
+    }
     this.propagateAttributes(
         ['src', 'autoplay', 'muted', 'loop'],
         audio);
 
     this.applyFillContent(audio);
     this.getRealChildNodes().forEach(child => {
-      assertElementSrcHttpsIfExists(child);
+      if (child.getAttribute && child.getAttribute('src')) {
+        assertHttpsUrl(child.getAttribute('src'), child);
+      }
       audio.appendChild(child);
     });
     this.element.appendChild(audio);

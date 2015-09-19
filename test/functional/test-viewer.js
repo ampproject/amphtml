@@ -15,6 +15,8 @@
  */
 
 import {Viewer} from '../../src/viewer';
+import {platform} from '../../src/platform';
+
 
 describe('Viewer', () => {
 
@@ -53,20 +55,30 @@ describe('Viewer', () => {
     windowApi.name = '__AMP__viewportType=virtual&width=222&height=333' +
         '&scrollTop=15';
     windowApi.location.hash = '#width=111&paddingTop=17&other=something';
-    windowApi.document = {documentElement: {style: {}}};
+    windowApi.document = {body: {style: {}}};
     let viewer = new Viewer(windowApi);
     expect(viewer.getViewportType()).to.equal('virtual');
     expect(viewer.getViewportWidth()).to.equal(111);
     expect(viewer.getViewportHeight()).to.equal(333);
     expect(viewer.getScrollTop()).to.equal(15);
     expect(viewer.getPaddingTop()).to.equal(17);
-    expect(windowApi.document.documentElement.style.paddingTop).to.
-        equal('17px');
 
     // All of the startup params are also available via getParam.
     expect(viewer.getParam('paddingTop')).to.equal('17');
     expect(viewer.getParam('width')).to.equal('111');
     expect(viewer.getParam('other')).to.equal('something');
+  });
+
+  it('should configure correctly for iOS embedding', () => {
+    windowApi.name = '__AMP__viewportType=natural';
+    windowApi.parent = {};
+    let body = {style: {}};
+    let documentElement = {style: {}};
+    windowApi.document = {body: body, documentElement: documentElement};
+    sandbox.mock(platform).expects('isIos').returns(true).once();
+    let viewer = new Viewer(windowApi);
+
+    expect(viewer.getViewportType()).to.equal('natural-ios-embed');
   });
 
   it('should receive viewport event', () => {
@@ -78,22 +90,14 @@ describe('Viewer', () => {
       scrollTop: 11,
       scrollLeft: 12,
       width: 13,
-      height: 14
+      height: 14,
+      paddingTop: 19
     });
     expect(viewportEvent).to.not.equal(null);
-    expect(viewportEvent.scrollTop).to.equal(11);
-    expect(viewportEvent.scrollLeft).to.equal(12);
-    expect(viewportEvent.width).to.equal(13);
-    expect(viewportEvent.height).to.equal(14);
-  });
-
-  it('should apply paddingTop in viewport event', () => {
-    windowApi.document = {documentElement: {style: {}}};
-    viewer.receiveMessage('viewport', {
-      paddingTop: 17
-    });
-    expect(windowApi.document.documentElement.style.paddingTop).to.
-        equal('17px');
+    expect(viewer.getScrollTop()).to.equal(11);
+    expect(viewer.getViewportWidth()).to.equal(13);
+    expect(viewer.getViewportHeight()).to.equal(14);
+    expect(viewer.getPaddingTop()).to.equal(19);
   });
 
   it('should post documentLoaded event', () => {

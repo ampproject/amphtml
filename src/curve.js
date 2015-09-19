@@ -239,7 +239,7 @@ class Bezier {
  * See https://developer.mozilla.org/en-US/docs/Web/CSS/timing-function
  * @enum {!Curve}
  */
-export var Curves = {
+export const Curves = {
   /**
    * linear
    */

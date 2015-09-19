@@ -16,6 +16,15 @@
  */
 /* END COPYRIGHT */
 
+/**
+ * Margin:0 is currently needed for iOS viewer embeds.
+ * See https://docs.google.com/document/d/1YjFk_B6r97CCaQJf2nXRVuBOuNi_3Fn87Zyf1U7Xoz4/edit
+ * and {@link ViewportBindingNaturalIosEmbed_} for more info.
+ */
+body {
+  margin: 0 !important;
+}
+
 .-amp-element {
   display: inline-block;
 }
@@ -141,9 +150,25 @@ i-amp-sizer {
   content: attr(error-message);
 }
 
-amp-pixel {
+/**
+ * Wraps an element to make the contents scrollable. This is
+ * used to wrap iframes which in iOS always behave as if they had the
+ * seamless attribute.
+ */
+i-amp-scroll-container {
   position: absolute;
-  width: 0;
-  height: 1; /* Only things with height are ever loaded. */
-  overflow: hidden;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: auto;
+}
+
+amp-pixel {
+  position: absolute !important;
+  top: 0 !important;
+  width: 1 !important;
+  height: 1px !important; /* Only things with height are ever loaded. */
+  overflow: hidden !important;
+  visibility: hidden;
 }

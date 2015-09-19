@@ -2,7 +2,7 @@
 <html ⚡>
 <head>
   <meta charset="utf-8">
-  <title>AMP #0</title>
+  <title>amp-iframe</title>
   <link rel="canonical" href="amps.html" >
   <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
   <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
@@ -14,24 +14,25 @@
       font-family: 'Questrial', Arial;
     }
 
-    amp-iframe {
-      margin-top: 601px;
-    }
-
     amp-iframe iframe {
       margin: 30px;
       padding: 30px;
       border: 10px solid red;
     }
+
+    h1 {
+      padding-bottom: 75vh;
+    }
   </style>
 </head>
 <body>
-  <h1>amp #0</h1>
+  <h1>Scroll down to see an iframe. The iframe is scrollable.</h1>
   <amp-iframe width=300 height=300
       sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
       layout="responsive"
       frameborder="0"
-      src="https://www.google.com/maps/embed/v1/place?key=AIzaSyDG9YXIhKBhqclZizcSzJ0ROiE0qgVfwzI&q=Alameda,%20CA">
+      src="https://www.w3.org/TR/page-visibility/">
+      <!-- a very long document -->
   </amp-iframe>
 </body>
 </html>

@@ -20,7 +20,7 @@ import {getService} from './service';
 import {installStyles} from './styles';
 import {log} from './log';
 import {parseQueryString} from './url';
-import * as st from './style';
+import {platform} from './platform';
 
 
 let TAG_ = 'Viewer';
@@ -42,6 +42,9 @@ export class Viewer {
     /** @const {!Window} */
     this.win = win;
 
+    /** @const {boolean} */
+    this.overtakeHistory_ = false;
+
     /** @private {string} */
     this.viewportType_ = 'natural';
 
@@ -52,15 +55,18 @@ export class Viewer {
     this.viewportHeight_ = 0;
 
     /** @private {number} */
-    this.scrollTop_ = 0;
+    this./*OK*/scrollTop_ = 0;
 
     /** @private {number} */
     this.paddingTop_ = 0;
 
-    /** @private {!Observable<!ViewerViewportEvent>} */
+    /** @private {!Observable} */
     this.viewportObservable_ = new Observable();
 
-    /** @private {?function(string, *)} */
+    /** @private {!Observable<!ViewerHistoryPoppedEvent>} */
+    this.historyPoppedObservable_ = new Observable();
+
+    /** @private {?function(string, *, boolean):(Promise<*>|undefined)} */
     this.messageDeliverer_ = null;
 
     /** @private {!Array<!{eventType: string, data: *}>} */
@@ -85,7 +91,17 @@ export class Viewer {
     }
 
     log.fine(TAG_, 'Viewer params:', this.params_);
+
+    this.overtakeHistory_ = parseInt(this.params_['history']) ||
+        this.overtakeHistory_;
+    log.fine(TAG_, '- history:', this.overtakeHistory_);
+
     this.viewportType_ = this.params_['viewportType'] || this.viewportType_;
+    // Configure scrolling parameters when AMP is embeded in a viewer on iOS.
+    if (this.viewportType_ == 'natural' && this.win.parent &&
+            platform.isIos()) {
+      this.viewportType_ = 'natural-ios-embed';
+    }
     log.fine(TAG_, '- viewportType:', this.viewportType_);
 
     this.viewportWidth_ = parseInt(this.params_['width']) ||
@@ -96,12 +112,12 @@ export class Viewer {
         this.viewportHeight_;
     log.fine(TAG_, '- viewportHeight:', this.viewportHeight_);
 
-    this.scrollTop_ = parseInt(this.params_['scrollTop']) || this.scrollTop_;
-    log.fine(TAG_, '- scrollTop:', this.scrollTop_);
+    this./*OK*/scrollTop_ = parseInt(this.params_['scrollTop']) ||
+        this./*OK*/scrollTop_;
+    log.fine(TAG_, '- scrollTop:', this./*OK*/scrollTop_);
 
-    let paddingTop = parseInt(this.params_['paddingTop']) || this.paddingTop_;
-    log.fine(TAG_, '- padding-top:', paddingTop);
-    this.updatePaddingTop_(paddingTop);
+    this.paddingTop_ = parseInt(this.params_['paddingTop']) || this.paddingTop_;
+    log.fine(TAG_, '- padding-top:', this.paddingTop_);
 
     // Remove hash - no reason to keep it around.
     var newUrl = this.win.location.href;
@@ -123,6 +139,16 @@ export class Viewer {
    */
   getParam(name) {
     return this.params_[name];
+  }
+
+  /**
+   * Whether the viewer overtakes the history for AMP document. If yes,
+   * the viewer must implement history messages "pushHistory" and "popHistory"
+   * and emit message "historyPopped"
+   * @return {boolean}
+   */
+  isOvertakeHistory() {
+    return this.overtakeHistory_;
   }
 
   /**
@@ -160,7 +186,7 @@ export class Viewer {
    * @return {number}
    */
   getScrollTop() {
-    return this.scrollTop_;
+    return this./*OK*/scrollTop_;
   }
 
   /**
@@ -172,12 +198,21 @@ export class Viewer {
   }
 
   /**
-   * Adds a viewport event listener for viewer events.
-   * @param {function(!ViewerViewportEvent)} handler
+   * Adds a "viewport" event listener for viewer events.
+   * @param {function()} handler
    * @return {!Unlisten}
    */
   onViewportEvent(handler) {
     return this.viewportObservable_.add(handler);
+  }
+
+  /**
+   * Adds a "history popped" event listener for viewer events.
+   * @param {function(ViewerHistoryPoppedEvent)} handler
+   * @return {!Unlisten}
+   */
+  onHistoryPoppedEvent(handler) {
+    return this.historyPoppedObservable_.add(handler);
   }
 
   /**
@@ -186,7 +221,7 @@ export class Viewer {
    * @param {number} height
    */
   postDocumentReady(width, height) {
-    this.sendMessage_('documentLoaded', {width: width, height: height});
+    this.sendMessage_('documentLoaded', {width: width, height: height}, false);
   }
 
   /**
@@ -195,49 +230,85 @@ export class Viewer {
    * @param {number} height
    */
   postDocumentResized(width, height) {
-    this.sendMessage_('documentResized', {width: width, height: height});
+    this.sendMessage_('documentResized', {width: width, height: height}, false);
   }
 
   /**
-   * Requests full overlay mode from the viewer.
+   * Requests full overlay mode from the viewer. Returns a promise that yields
+   * when the viewer has switched to full overlay mode.
+   * @return {!Promise}
    */
   requestFullOverlay() {
-    this.sendMessage_('requestFullOverlay', {});
+    return this.sendMessage_('requestFullOverlay', {}, true);
   }
 
   /**
-   * Requests to cancel full overlay mode from the viewer.
+   * Requests to cancel full overlay mode from the viewer. Returns a promise
+   * that yields when the viewer has switched off full overlay mode.
+   * @return {!Promise}
    */
   cancelFullOverlay() {
-    this.sendMessage_('cancelFullOverlay', {});
+    return this.sendMessage_('cancelFullOverlay', {}, true);
+  }
+
+  /**
+   * Triggers "pushHistory" event for the viewer.
+   * @param {number} stackIndex
+   * @return {!Promise}
+   */
+  postPushHistory(stackIndex) {
+    return this.sendMessage_('pushHistory', {stackIndex: stackIndex}, true);
+  }
+
+  /**
+   * Triggers "popHistory" event for the viewer.
+   * @param {number} stackIndex
+   * @return {!Promise}
+   */
+  postPopHistory(stackIndex) {
+    return this.sendMessage_('popHistory', {stackIndex: stackIndex}, true);
   }
 
   /**
    * Requests AMP document to receive a message from Viewer.
    * @param {string} eventType
    * @param {*} data
+   * @param {boolean} awaitResponse
+   * @return {(!Promise<*>|undefined)}
    * @package
    * @expose
    */
-  receiveMessage(eventType, data) {
+  receiveMessage(eventType, data, awaitResponse) {
     if (eventType == 'viewport') {
-      this.viewportObservable_.fire({
-        scrollTop: data['scrollTop'],
-        scrollLeft: data['scrollLeft'],
-        width: data['width'],
-        height: data['height']
-      });
-      let paddingTop = data['paddingTop'];
-      if (paddingTop !== undefined) {
-        this.updatePaddingTop_(paddingTop);
+      if (data['width'] !== undefined) {
+        this.viewportWidth_ = data['width'];
       }
+      if (data['height'] !== undefined) {
+        this.viewportHeight_ = data['height'];
+      }
+      if (data['paddingTop'] !== undefined) {
+        this.paddingTop_ = data['paddingTop'];
+      }
+      if (data['scrollTop'] !== undefined) {
+        this./*OK*/scrollTop_ = data['scrollTop'];
+      }
+      this.viewportObservable_.fire();
+      return undefined;
     }
+    if (eventType == 'historyPopped') {
+      this.historyPoppedObservable_.fire({
+        newStackIndex: data['newStackIndex']
+      });
+      return Promise.resolve();
+    }
+    log.fine(TAG_, 'unknown message:', eventType);
+    return undefined;
   }
 
   /**
    * Provides a message delivery mechanism by which AMP document can send
    * messages to the viewer.
-   * @param {function(string, *)} deliverer
+   * @param {function(string, *, boolean):(!Promise<*>|undefined)} deliverer
    * @package
    * @expose
    */
@@ -248,7 +319,7 @@ export class Viewer {
       let queue = this.messageQueue_.slice(0);
       this.messageQueue_ = [];
       queue.forEach((message) => {
-        this.messageDeliverer_(message.eventType, message.data);
+        this.messageDeliverer_(message.eventType, message.data, false);
       });
     }
   }
@@ -256,36 +327,34 @@ export class Viewer {
   /**
    * @param {string} eventType
    * @param {*} data
+   * @param {boolean} awaitResponse
+   * @return {!Promise<*>|undefined}
    * @private
    */
-  sendMessage_(eventType, data) {
+  sendMessage_(eventType, data, awaitResponse) {
     if (this.messageDeliverer_) {
-      this.messageDeliverer_(eventType, data);
-    } else {
-      // Store only a last version for an event type.
-      let found = null;
-      for (let i = 0; i < this.messageQueue_.length; i++) {
-        if (this.messageQueue_[i].eventType == eventType) {
-          found = this.messageQueue_[i];
-          break;
-        }
-      }
-      if (found) {
-        found.data = data;
-      } else {
-        this.messageQueue_.push({eventType: eventType, data: data});
-      }
+      return this.messageDeliverer_(eventType, data, awaitResponse);
     }
-  }
 
-  /**
-   * @param {number} paddingTop
-   */
-  updatePaddingTop_(paddingTop) {
-    if (paddingTop != this.paddingTop_) {
-      this.paddingTop_ = paddingTop;
-      this.win.document.documentElement.style.paddingTop = st.px(paddingTop);
+    // Store only a last version for an event type.
+    let found = null;
+    for (let i = 0; i < this.messageQueue_.length; i++) {
+      if (this.messageQueue_[i].eventType == eventType) {
+        found = this.messageQueue_[i];
+        break;
+      }
     }
+    if (found) {
+      found.data = data;
+    } else {
+      this.messageQueue_.push({eventType: eventType, data: data});
+    }
+    if (awaitResponse) {
+      // TODO(dvoytenko): This is somewhat questionable. What do we return
+      // when no one is listening?
+      return Promise.resolve();
+    }
+    return undefined;
   }
 }
 
@@ -309,13 +378,10 @@ export function parseParams_(str, allParams) {
 
 /**
  * @typedef {{
- *   scrollTop: (number|undefined),
- *   scrollLeft: (number|undefined),
- *   width: (number|undefined),
- *   height: (number|undefined)
+ *   newStackIndex: number
  * }}
  */
-var ViewerViewportEvent;
+var ViewerHistoryPoppedEvent;
 
 
 /**

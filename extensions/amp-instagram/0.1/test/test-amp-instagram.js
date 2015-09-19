@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {createIframe} from '../../../../testing/iframe';
+import {createIframePromise} from '../../../../testing/iframe';
 require('../amp-instagram');
 import {adopt} from '../../../../src/runtime';
 
@@ -22,41 +22,39 @@ adopt(window);
 
 describe('amp-instagram', () => {
 
-/*
   function getIns(shortcode, opt_responsive) {
-    var iframe = createIframe();
-    var ins = iframe.doc.createElement('amp-instagram');
-    ins.setAttribute('shortcode', shortcode);
-    ins.setAttribute('width', '111');
-    ins.setAttribute('height', '222');
-    if (opt_responsive) {
-      ins.setAttribute('layout', 'responsive');
-    }
-    iframe.doc.body.appendChild(ins);
-    ins.implementation_.layoutCallback();
-    return ins;
+    return createIframePromise().then(() => {
+      var ins = iframe.doc.createElement('amp-instagram');
+      ins.setAttribute('shortcode', shortcode);
+      ins.setAttribute('width', '111');
+      ins.setAttribute('height', '222');
+      if (opt_responsive) {
+        ins.setAttribute('layout', 'responsive');
+      }
+      return iframe.addElement(ins);
+    });
   }
 
   it('renders', () => {
-    var ins = getIns('fBwFP');
-    var iframe = ins.firstChild;
-    expect(iframe).to.not.be.null;
-    expect(iframe.tagName).to.equal('IFRAME');
-    expect(iframe.src).to.equal('https://instagram.com/p/fBwFP/embed/?v=4');
-    expect(iframe.getAttribute('width')).to.equal('111');
-    expect(iframe.getAttribute('height')).to.equal('222');
+    getIns('fBwFP').then(ins => {
+      var iframe = ins.firstChild;
+      expect(iframe).to.not.be.null;
+      expect(iframe.tagName).to.equal('IFRAME');
+      expect(iframe.src).to.equal('https://instagram.com/p/fBwFP/embed/?v=4');
+      expect(iframe.getAttribute('width')).to.equal('111');
+      expect(iframe.getAttribute('height')).to.equal('222');
+    });
   });
 
   it('renders responsively', () => {
-    var ins = getIns('fBwFP', true);
-    var iframe = ins.firstChild;
-    expect(iframe.className).to.match(/amp-responsive-item/)
+    var ins = getIns('fBwFP', true).then((ins) => {
+      var iframe = ins.firstChild;
+      expect(iframe.className).to.match(/amp-responsive-item/)
+    });
   });
 
   it('requires shortcode', () => {
-    expect(() => {
-      getIns('');
-    }).to.throw(/The shortcode attribute is required for/);
+    expect(getIns('')).to.be.rejectedWith(
+        /The shortcode attribute is required for/);
   });
-*/
 });

@@ -14,31 +14,30 @@
  * limitations under the License.
  */
 
-import {createIframe} from '../../testing/iframe';
+import {createIframePromise} from '../../testing/iframe';
 import {installAd} from '../../builtins/amp-ad';
 
 describe('amp-ad', () => {
 
   function getAd(attributes, canonical) {
-    var iframe = createIframe();
-    installAd(iframe.win);
-    if (canonical) {
-      var link = iframe.doc.createElement('link');
-      link.setAttribute('rel', 'canonical');
-      link.setAttribute('href', canonical);
-      iframe.doc.head.appendChild(link)
-    }
-    var a = iframe.doc.createElement('amp-ad');
-    for (var key in attributes) {
-      a.setAttribute(key, attributes[key]);
-    }
-    iframe.doc.body.appendChild(a);
-    a.implementation_.layoutCallback();
-    return a;
+    return createIframePromise().then((iframe) => {
+      installAd(iframe.win);
+      if (canonical) {
+        var link = iframe.doc.createElement('link');
+        link.setAttribute('rel', 'canonical');
+        link.setAttribute('href', canonical);
+        iframe.doc.head.appendChild(link)
+      }
+      var a = iframe.doc.createElement('amp-ad');
+      for (var key in attributes) {
+        a.setAttribute(key, attributes[key]);
+      }
+      return iframe.addElement(a);
+    });
   }
 
   it('render an ad', () => {
-    var ad = getAd({
+    return getAd({
       width: 300,
       height: 250,
       type: 'a9',
@@ -48,41 +47,38 @@ describe('amp-ad', () => {
       'data-aax_src': '302',
       // Test precedence
       'data-width': '6666'
-    }, 'https://schema.org');
-    var iframe = ad.firstChild;
-    expect(iframe).to.not.be.null;
-    expect(iframe.tagName).to.equal('IFRAME');
-    var url = iframe.getAttribute('src');
-    expect(url).to.match(/^http:\/\/ads.localhost:/);
-    expect(url).to.match(/frame(.max)?.html#{/);
+    }, 'https://schema.org').then((ad) => {
+      var iframe = ad.firstChild;
+      expect(iframe).to.not.be.null;
+      expect(iframe.tagName).to.equal('IFRAME');
+      var url = iframe.getAttribute('src');
+      expect(url).to.match(/^http:\/\/ads.localhost:/);
+      expect(url).to.match(/frame(.max)?.html#{/);
 
-    var fragment = url.substr(url.indexOf('#') + 1);
-    var data = JSON.parse(fragment);
+      var fragment = url.substr(url.indexOf('#') + 1);
+      var data = JSON.parse(fragment);
 
-    expect(data.type).to.equal('a9');
-    expect(data.src).to.equal('testsrc');
-    expect(data.width).to.equal('300');
-    expect(data.height).to.equal('250');
-    expect(data._context.location.href).to.equal('https://schema.org/');
-    expect(data.aax_size).to.equal('300x250');
+      expect(data.type).to.equal('a9');
+      expect(data.src).to.equal('testsrc');
+      expect(data.width).to.equal(300);
+      expect(data.height).to.equal(250);
+      expect(data._context.location.href).to.equal('https://schema.org/');
+      expect(data.aax_size).to.equal('300x250');
+    });
   });
 
   it('should require a canonical', () => {
-    expect(() => {
-      getAd({
-        width: 300,
-        height: 250,
-        type: 'a9',
-      }, null);
-    }).to.throw(/canonical/);
+    return expect(getAd({
+      width: 300,
+      height: 250,
+      type: 'a9',
+    }, null)).to.be.rejectedWith(/canonical/);
   });
 
   it('should require a type', () => {
-    expect(() => {
-      getAd({
-        width: 300,
-        height: 250,
-      }, null);
-    }).to.throw(/type/);
+    return expect(getAd({
+      width: 300,
+      height: 250,
+    }, null)).to.be.rejectedWith(/type/);
   });
 });

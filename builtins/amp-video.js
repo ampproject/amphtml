@@ -15,7 +15,7 @@
  */
 
 import {BaseElement} from '../src/base-element';
-import {assertElementSrcHttpsIfExists} from '../src/asserts';
+import {assertHttpsUrl} from '../src/url';
 import {getLengthNumeral, isLayoutSizeDefined} from '../src/layout';
 import {loadPromise} from '../src/event-helper';
 import {registerElement} from '../src/custom-element';
@@ -34,10 +34,13 @@ export function installVideo(win) {
 
     /** @override */
     layoutCallback() {
+      // TODO(dvoytenko): Add re-layout as well.
       var width = this.element.getAttribute('width');
       var height = this.element.getAttribute('height');
       var video = document.createElement('video');
-      assertElementSrcHttpsIfExists(this.element);
+      if (this.element.getAttribute('src')) {
+        assertHttpsUrl(this.element.getAttribute('src'), this.element);
+      }
       this.propagateAttributes(
           ['src', 'controls', 'autoplay', 'muted', 'loop'],
           video);
@@ -45,7 +48,9 @@ export function installVideo(win) {
       video.height = getLengthNumeral(height);
       this.applyFillContent(video);
       this.getRealChildNodes().forEach(child => {
-        assertElementSrcHttpsIfExists(child);
+        if (child.getAttribute && child.getAttribute('src')) {
+          assertHttpsUrl(child.getAttribute('src'), child);
+        }
         video.appendChild(child);
       });
       this.element.appendChild(video);

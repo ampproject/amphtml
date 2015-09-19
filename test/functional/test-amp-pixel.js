@@ -14,63 +14,68 @@
  * limitations under the License.
  */
 
-import {createIframe} from '../../testing/iframe';
+import {createIframePromise} from '../../testing/iframe';
 import {installPixel} from '../../builtins/amp-pixel';
 
 describe('amp-pixel', () => {
 
 
   function getPixel(src) {
-    var iframe = createIframe();
-    installPixel(iframe.win);
-    var p = iframe.doc.createElement('amp-pixel');
-    p.setAttribute('width', '0');
-    p.setAttribute('height', '0');
-    p.setAttribute('src', src);
-    iframe.doc.body.appendChild(p);
-    var link = iframe.doc.createElement('link');
-    link.setAttribute('href', 'https://pinterest.com');
-    link.setAttribute('rel', 'canonical');
-    iframe.doc.head.appendChild(link);
-    p.implementation_.layoutCallback();
-    return p;
+    return createIframePromise().then((iframe) => {
+      installPixel(iframe.win);
+      var p = iframe.doc.createElement('amp-pixel');
+      p.setAttribute('src', src);
+      var link = iframe.doc.createElement('link');
+      link.setAttribute('href', 'https://pinterest.com');
+      link.setAttribute('rel', 'canonical');
+      iframe.doc.head.appendChild(link);
+      return iframe.addElement(p);
+    });
   }
 
   it('should load a pixel', () => {
-    var p = getPixel(
-        'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?');
-    expect(p.querySelector('img')).to.be.an.instanceof(Image)
-    expect(p.children[0].src).to.equal(
-      'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?');
+    return getPixel(
+        'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?'
+        ).then((p) => {
+          expect(p.querySelector('img')).to.not.be.null;
+          expect(p.children[0].src).to.equal(
+              'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?');
+          expect(p.getAttribute('aria-hidden')).to.equal('true');
+        });
   });
 
   it('should load a pixel with protocol relative URL', () => {
-    var p = getPixel(
-        '//pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?');
-    expect(p.querySelector('img')).to.be.an.instanceof(Image)
-    expect(p.children[0].src).to.equal(
-      'http://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?');
+    return getPixel(
+        '//pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?'
+        ).then((p) => {
+          expect(p.querySelector('img')).to.not.be.null;
+          expect(p.children[0].src).to.equal(
+              'http://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?');
+        });
   });
 
   it('replace $RANDOM', () => {
-    var p = getPixel(
-        'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=$RANDOM?');
-    expect(p.querySelector('img')).to.be.an.instanceof(Image)
-    expect(p.children[0].src).to.match(/ord=(\d\.\d+)\?$/);
+    return getPixel(
+        'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=$RANDOM?'
+        ).then((p) => {
+          expect(p.querySelector('img')).to.not.be.null;
+          expect(p.children[0].src).to.match(/ord=(\d\.\d+)\?$/);
+        });
   });
 
   it('replace $CANONICAL_URL', () => {
-    var p = getPixel(
-        'https://foo.com?href=$CANONICAL_URL');
-    expect(p.querySelector('img')).to.be.an.instanceof(Image)
-    expect(p.children[0].src).to.equal(
-        'https://foo.com/?href=https%3A%2F%2Fpinterest.com%2F');
+    return getPixel(
+        'https://foo.com?href=$CANONICAL_URL'
+        ).then((p) => {
+          expect(p.querySelector('img')).to.not.be.null;
+          expect(p.children[0].src).to.equal(
+              'https://foo.com/?href=https%3A%2F%2Fpinterest.com%2F');
+        });
   });
 
   it('should throw for invalid URL', () => {
-    expect(function() {
-      getPixel(
-          'http://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=$RANDOM?');
-    }).to.throw(/src attribute must start with/);
+    return getPixel(
+        'http://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=$RANDOM?')
+        .should.be.rejectedWith(/src attribute must start with/);
   });
 });

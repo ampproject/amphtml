@@ -19,6 +19,7 @@
  * one of them.
  */
 
+import '../src/polyfills';
 import {a9} from './a9';
 import {adreactor} from './adreactor';
 import {adsense} from './adsense';
@@ -45,9 +46,39 @@ export function drawAd(win, data) {
   run('ad', type, win, data);
 };
 
+/**
+ * Returns the "master frame" for all widgets of a given type.
+ * This frame should be used to e.g. fetch scripts that can
+ * be reused across frames.
+ * @param {string} type
+ * @return {!Window}
+ */
+function masterSelection(type) {
+  // The master has a special name.
+  var masterName = 'frame_' + type + '_master';
+  var master;
+  try {
+    // Try to get the master from the parent. If it does not
+    // exist yet we get a security exception that we catch
+    // and ignore.
+    master = window.parent.frames[masterName];
+  } catch (expected) {
+    /* ignore */
+  }
+  if (!master) {
+    // No master yet, rename ourselves to be master. Yaihh.
+    window.name = masterName;
+    master = window;
+  }
+  return master;
+}
+
 window.drawAd = function() {
   var fragment = location.hash
   var data = fragment ? JSON.parse(fragment.substr(1)) : {};
   window.context = data._context;
+  window.context.master = masterSelection(data.type);
+  window.context.isMaster = window.context.master == window;
+  delete data._context;
   drawAd(window, data);
 };

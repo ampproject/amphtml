@@ -38,6 +38,7 @@
 export function assert(shouldBeTrueish, message, var_args) {
   var firstElement;
   if (!shouldBeTrueish) {
+    message = message || 'Assertion failed';
     var splitMessage = message.split('%s');
     var first = splitMessage.shift();
     var formatted = first;
@@ -45,7 +46,7 @@ export function assert(shouldBeTrueish, message, var_args) {
     pushIfNonEmpty(messageArray, first);
     for (var i = 2; i < arguments.length; i++) {
       var val = arguments[i];
-      if (val.tagName) {
+      if (val && val.tagName) {
         firstElement = val;
       }
       var nextConstant = splitMessage.shift()
@@ -81,20 +82,3 @@ function pushIfNonEmpty(array, val) {
     array.push(val);
   }
 }
-
-/**
- * Ensures a given element is loading a secure or protocol-free path.
- * @param {!Element} element
- */
-export function assertElementSrcHttpsIfExists(element) {
-  if (!(element instanceof Element) || !element.hasAttribute('src')) {
-    return;
-  }
-
-  let src = element.getAttribute('src');
-  assert(
-      /^(https\:\/\/|\/\/)/i.test(src),
-      '<' + element.toString() + '> source must start with ' +
-      '"https://" or "//". Invalid value: ' + src);
-}
-

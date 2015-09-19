@@ -61,10 +61,12 @@ import {viewportFor} from './viewport';
  *           \/
  *    State: <BUILT>
  *           ||
- *           || layoutCallback
- *           ||
- *           \/
- *    State: <LAID OUT>
+ *           || layoutCallback      <=
+ *           ||                      ||
+ *           \/                      || isRelayoutNeeded?
+ *    State: <LAID OUT>              ||
+ *           ||                      ||
+ *           ||                 ======
  *           ||
  *           || viewportCallback
  *           ||
@@ -175,10 +177,25 @@ export class BaseElement {
   }
 
   /**
+   * Subclasses can override this class to opt-in into receiving additional
+   * {@link layoutCallback} calls. Note that this method is not consulted for
+   * the first layout given that each element must be laid out at least once.
+   * @return {boolean}
+   */
+  isRelayoutNeeded() {
+    return false;
+  }
+
+  /**
    * Called when the element should perform layout. At this point the element
    * should load/reload resources associated with it. This method is called
-   * by runtime and cannot be called manually. Returns promise that will
+   * by the runtime and cannot be called manually. Returns promise that will
    * complete when loading is considered to be complete.
+   *
+   * The first layout call is always called. If the subclass is interested in
+   * receiving additional callbacks, it has to opt in to do so using
+   * {@link isRelayoutNeeded} method.
+   *
    * @return {!Promise}
    */
   layoutCallback() {

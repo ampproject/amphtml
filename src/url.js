@@ -30,7 +30,7 @@ export function parseUrl(url) {
     protocol: a.protocol,
     host: a.host,
     hostname: a.hostname,
-    port: a.port,
+    port: a.port == '0' ? '' : a.port,
     pathname: a.pathname,
     search: a.search,
     hash: a.hash
@@ -38,6 +38,23 @@ export function parseUrl(url) {
   info.origin = a.origin || getOrigin(info);
   assert(info.origin, 'Origin must exist');
   return info;
+}
+
+
+/**
+ * Asserts that a given url is HTTPS or protocol relative.
+ * Provides an exception for localhost.
+ * @param {string} urlString
+ */
+export function assertHttpsUrl(urlString, elementContext) {
+  var url = parseUrl(urlString);
+  assert(
+      url.protocol == 'https:' || /^(\/\/)/.test(urlString) ||
+      url.hostname == 'localhost' || url.hostname.endsWith('.localhost'),
+      '%s source must start with ' +
+      '"https://" or "//" or be relative and served from ' +
+      'https. Invalid value: %s',
+      elementContext, urlString);
 }
 
 

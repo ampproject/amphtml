@@ -46,14 +46,14 @@ export function maybeValidate(win) {
           win.amp.validator.validateString(html), filename);
       var status = result.shift();
       if (status == 'PASS') {
-        console.info('AMP validation successful.');
+        console/*OK*/.info('AMP validation successful.');
       } else if (status == 'UNKNOWN') {
-        console.error('AMP validation yielded unknown status.');
+        console/*OK*/.error('AMP validation yielded unknown status.');
       } else {
-        console.error('AMP validation had errors:');
+        console/*OK*/.error('AMP validation had errors:');
       }
       result.forEach((message) => {
-        console.error(message);
+        console/*OK*/.error(message);
       });
     });
   };

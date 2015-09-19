@@ -14,13 +14,18 @@
  * limitations under the License.
  */
 
+/**
+ * @fileoverview Implements element layout. See https://goo.gl/9avXuT for
+ * details.
+ */
+
 import {assert} from './asserts';
 
 
 /**
  * @enum {string}
  */
-export var Layout = {
+export const Layout = {
   NODISPLAY: 'nodisplay',
   FIXED: 'fixed',
   RESPONSIVE: 'responsive',
@@ -153,9 +158,12 @@ var Dimensions;
  * Set or cached browser natural dimensions for elements. The tagname
  * initialized here will return true `hasNaturalDimensions`, even if yet to be
  * calculated. Exported for testing.
+ *
+ * Visible for testing only!
+ *
  * @type {!Object<string, Dimensions>}
  */
-export var naturalDimensions_ = {
+export const naturalDimensions_ = {
   'AMP-PIXEL': {width: 1, height: 1},
   'AMP-AUDIO': null
 };
@@ -168,6 +176,7 @@ export var naturalDimensions_ = {
  * @return {Dimensions}
  */
 export function hasNaturalDimensions(tagName) {
+  tagName = tagName.toUpperCase();
   return naturalDimensions_[tagName] !== undefined;
 };
 
@@ -179,8 +188,9 @@ export function hasNaturalDimensions(tagName) {
  * @return {Dimensions}
  */
 export function getNaturalDimensions(tagName) {
+  tagName = tagName.toUpperCase();
   if (!naturalDimensions_[tagName]) {
-    let naturalTagName = tagName.toLowerCase().replace(/^amp\-/, '');
+    let naturalTagName = tagName.replace(/^AMP\-/, '');
     let temp = document.createElement(naturalTagName);
     // For audio, should no-op elsewhere.
     temp.controls = true;

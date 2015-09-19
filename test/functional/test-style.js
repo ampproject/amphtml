@@ -47,6 +47,12 @@ describe('Style', () => {
     expect(element.style.width).to.equal('1px');
   });
 
+  it('setStyle with vendor prefix', () => {
+    let element = { style: { WebkitTransitionDuration: '' } };
+    st.setStyle(element, 'transitionDuration', '1s', undefined, true);
+    expect(element.style.WebkitTransitionDuration).to.equal('1s');
+  });
+
   it('setStyles', () => {
     let element = document.createElement('div');
     st.setStyles(element, {
@@ -65,5 +71,60 @@ describe('Style', () => {
   it('translateX', () => {
     expect(st.translateX(101)).to.equal('translateX(101px)');
     expect(st.translateX('101vw')).to.equal('translateX(101vw)');
+  });
+
+  it('camelCaseToTitleCase', () => {
+    let str = 'theQuickBrownFox';
+    expect(st.camelCaseToTitleCase(str)).to.equal('TheQuickBrownFox');
+  });
+
+  describe('getVendorJsPropertyName', () => {
+
+    it('no prefix', () => {
+      let element = { style: { transitionDuration: '' } };
+      let prop = st
+          .getVendorJsPropertyName(element.style, 'transitionDuration', true);
+      expect(prop).to.equal('transitionDuration');
+    });
+
+    it('should use cached previous result', () => {
+      let element = { style: { transitionDuration: '' } };
+      let prop = st
+          .getVendorJsPropertyName(element.style, 'transitionDuration');
+      expect(prop).to.equal('transitionDuration');
+
+      element = { style: { WebkitTransitionDuration: '' } };
+      prop = st
+          .getVendorJsPropertyName(element.style, 'transitionDuration');
+      expect(prop).to.equal('transitionDuration');
+    });
+
+    it('Webkit', () => {
+      let element = { style: { WebkitTransitionDuration: '' } };
+      let prop = st
+          .getVendorJsPropertyName(element.style, 'transitionDuration', true);
+      expect(prop).to.equal('WebkitTransitionDuration');
+    });
+
+    it('Moz', () => {
+      let element = { style: { MozTransitionDuration: '' } };
+      let prop = st
+          .getVendorJsPropertyName(element.style, 'transitionDuration', true);
+      expect(prop).to.equal('MozTransitionDuration');
+    });
+
+    it('ms', () => {
+      let element = { style: { msTransitionDuration: '' } };
+      let prop = st
+          .getVendorJsPropertyName(element.style, 'transitionDuration', true);
+      expect(prop).to.equal('msTransitionDuration');
+    });
+
+    it('O opera', () => {
+      let element = { style: { OTransitionDuration: '' } };
+      let prop = st
+          .getVendorJsPropertyName(element.style, 'transitionDuration', true);
+      expect(prop).to.equal('OTransitionDuration');
+    });
   });
 });

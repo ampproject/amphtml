@@ -17,8 +17,8 @@
 /**
  * @param {!Window} win
  * @param {string} id
- * @param {function():!Object} factory Should create the service if it does
- *     not exist yet.
+ * @param {function(!Window):!Object} factory Should create the service if it
+ *     does not exist yet.
  * @return {!Object}
  */
 export function getService(win, id, factory) {
@@ -28,7 +28,7 @@ export function getService(win, id, factory) {
   }
   var s = services[id];
   if (!s) {
-    return services[id] = factory();
+    return services[id] = factory(win);
   }
   return s;
 }
