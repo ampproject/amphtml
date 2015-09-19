@@ -67,7 +67,7 @@ In concrete terms this means that:
     "datePublished": "2015-02-05T08:00:00+08:00"
   }
   </script>
-  <script element="amp-carousel" src="https://cdn.ampproject.org/v1/amp-carousel-0.1.js" async></script>
+  <script custom-element="amp-carousel" src="https://cdn.ampproject.org/v1/amp-carousel-0.1.js" async></script>
   <script src="https://cdn.ampproject.org/v0.js" async></script>
   <style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
 </head>
@@ -311,7 +311,7 @@ Extended components are components that do not necessarily ship with the AMP run
 Extended components are loaded by including a script tag in the head of the document like this
 
 ```html
-<script element="amp-carousel" src="https://cdn.ampproject.org/v1/amp-carousel-0.1.js" async></script>
+<script custom-element="amp-carousel" src="https://cdn.ampproject.org/v1/amp-carousel-0.1.js" async></script>
 ```
 
 The script tag MUST have an async attribute and MUST have an `element` attribute referencing the name of the element.
