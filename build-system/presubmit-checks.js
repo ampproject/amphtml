@@ -30,6 +30,8 @@ var srcGlobs = [
 // Terms that must not appear in our source files.
 var forbiddenTerms = {
   'DO NOT SUBMIT': '',
+  'describe\\.only': '',
+  'it\\.only': '',
   'XXX': '',
   'console\\.\\w+\\(': 'If you run against this, use console/*OK*/.log to ' +
       'whitelist a legit case.',
