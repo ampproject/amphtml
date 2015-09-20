@@ -31,4 +31,20 @@ Identifier for the ad network. This selects the template that is used for the ad
 
 **src**
 
-Optional src value for a script tag loaded for this ad network. This can be used with ad network that require exactly a single script tag to be inserted in the page. The src value must have a prefix that is whitelisted for this ad network.
+Optional src value for a script tag loaded for this ad network. This can be used with ad networks that require exactly a single script tag to be inserted in the page. The src value must have a prefix that is whitelisted for this ad network.
+
+**data-foo-bar**
+
+Most ad networks require further configuration. This can be passed to the network using HTML `data-` attributes. The parameter names are subject to standard data attribute dash to camel case conversion. E.g. "data-foo-bar" is send to the ad for configuration as "fooBar".
+
+**json**
+
+Optional attribute to pass configuration to the ad as an arbitrarily complex JSON object. The object is passed to the ad as-is with no mangling done on the names.
+
+#### Supported ad networks
+
+- [A9](../ads/a9.md)
+- [AdReactor](../ads/adreactor.md)
+- [AdSense](../ads/adsense.md)
+- [AdTech](../ads/adtech.md)
+- [Doubleclick](../ads/doubleclick.md)
