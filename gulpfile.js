@@ -208,9 +208,10 @@ gulp.task('minify', function() {
   buildExtensions({minify: true});
   examplesWithMinifiedJs('ads.amp.html');
   examplesWithMinifiedJs('everything.amp.html');
-  examplesWithMinifiedJs('newsstand.amp.html');
   examplesWithMinifiedJs('released.amp.html');
   examplesWithMinifiedJs('article.amp.html');
+  examplesWithMinifiedJs('article-metadata.amp.html');
+  examplesWithMinifiedJs('twitter.amp.html');
 });
 
 gulp.task('default', ['watch']);

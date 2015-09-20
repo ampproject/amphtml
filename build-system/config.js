@@ -16,7 +16,7 @@ var paths = [
     served: true
   },
   {
-    pattern: 'examples/**/*.js',
+    pattern: 'examples/**/*.html',
     included: false,
     served: true
   }
