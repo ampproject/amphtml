@@ -31,6 +31,7 @@ var wrap = require("gulp-wrap");
 var rename = require('gulp-rename');
 var replace = require('gulp-replace');
 var babel = require('babelify');
+var closureCompiler = require('gulp-closure-compiler');
 var postcss = require('postcss');
 var autoprefixer = require('autoprefixer');
 var cssnano = require('cssnano');
@@ -405,3 +406,19 @@ function compileJs(srcDir, srcFilename, destDir, options) {
     rebundle();
   }
 }
+
+gulp.task('check', function() {
+  return gulp.src('src/*.js')
+    .pipe(closureCompiler({
+      compilerPath: 'node_modules/google-closure-compiler/compiler.jar',
+      fileName: 'compiler-build.js',
+      compilerFlags: {
+        debug: null,
+        language_in: 'ECMASCRIPT6_TYPED',
+        common_js_entry_module: 'amp.js',
+        process_common_js_modules: null,
+        common_js_module_path_prefix: 'node_modules/',
+      }
+    }))
+    .pipe(gulp.dest('dist'));
+});
