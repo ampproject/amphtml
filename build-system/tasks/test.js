@@ -23,11 +23,11 @@ gulp.task('test', ['build'], function(done) {
   var config = getConfig();
   var browsers = [];
 
-  if (argv.watch) {
+  if (argv.watch || argv.w) {
     config.singleRun = false;
   }
 
-  if (argv.verbose) {
+  if (argv.verbose || argv.v) {
     config.client.captureConsole = true;
   }
 

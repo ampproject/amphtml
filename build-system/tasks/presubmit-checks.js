@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-var find = require('find-in-files').find;
 var gulp = require('gulp');
 var util = require('gulp-util');
 
