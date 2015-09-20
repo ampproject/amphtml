@@ -16,6 +16,9 @@
 
 import {getMode} from './mode';
 
+/** @const Time when this JS loaded.  */
+var start = new Date().getTime();
+
 
 /**
  * Logging.
@@ -73,7 +76,7 @@ export class Log {
       } else if (level == 'WARN') {
         fn = this.win.console.warn || fn;
       }
-      messages.unshift('[' + tag + ']');
+      messages.unshift(new Date().getTime() - start, '[' + tag + ']');
       fn.apply(this.win.console, messages);
     }
   }

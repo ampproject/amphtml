@@ -34,6 +34,9 @@ var iframeCount = 0;
  *   event fired at least the given number of times.
  * - errors: Array of console.error fired during page load.
  *
+ * setTimeout inside the iframe will go 10x normal speed.
+ * TODO(@cramforce): Add support for a fake clock.
+ *
  * @param {string} fixture The name of the fixture file.
  * @param {number} initialIframeHeight in px.
  * @return {!Promise<{
@@ -96,6 +99,11 @@ export function createFixtureIframe(fixture, initialIframeHeight, done) {
       var errors = []
       win.console.error = function() {
         errors.push('Error: ' + [].slice.call(arguments).join(' '));
+      };
+      // Make time go 10x as fast
+      win.setTimeout = function(fn, ms) {
+        ms = ms || 0;
+        setTimeout(fn, ms / 10);
       };
       var timeout = setTimeout(function() {
         reject(new Error('Timeout waiting for elements to start loading.'));
@@ -178,9 +186,10 @@ export function createIframePromise() {
  * @param {string} description
  * @param {fn():boolean} condition
  * @param {fn():!Error=} opt_onError
+ * @param {number=} opt_timeout
  * @return {!Promise}
  */
-export function poll(description, condition, opt_onError) {
+export function poll(description, condition, opt_onError, opt_timeout) {
   return new Promise((resolve, reject) => {
     var start = new Date().getTime();
     function poll() {
@@ -188,7 +197,7 @@ export function poll(description, condition, opt_onError) {
         clearInterval(interval);
         resolve();
       } else {
-        if (new Date().getTime() - start > 1600) {
+        if (new Date().getTime() - start > (opt_timeout || 1600)) {
           clearInterval(interval);
           if (opt_onError) {
             reject(opt_onError());
@@ -209,13 +218,19 @@ export function poll(description, condition, opt_onError) {
  * out).
  * @param {!Window} win
  * @param {number} count
+ * @param {number=} opt_timeout
+ *
  * @return {!Promise}
  */
-export function pollForLayout(win, count) {
+export function pollForLayout(win, count, opt_timeout) {
+  var getCount = () => {
+    return win.document.querySelectorAll('.-amp-layout,.-amp-error').length;
+  };
   return poll('Waiting for elements to layout: ' + count, () => {
-    return win.document.querySelectorAll('.-amp-layout,.-amp-error').length >= count;
+    return getCount() >= count;
   }, () => {
-    return new Error('Failed to find elements with layout. HTML:\n' +
+    return new Error('Failed to find elements with layout.' +
+        ' Current count: ' + getCount() + ' HTML:\n' +
         win.document.documentElement./*TEST*/innerHTML);
-  });
+  }, opt_timeout);
 }

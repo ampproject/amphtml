@@ -38,8 +38,8 @@ installStyles(document, cssText, () => {
   historyFor(window);
   viewerFor(window);
 
-  installAd(window);
   installImg(window);
+  installAd(window);
   installPixel(window);
   installVideo(window);
 

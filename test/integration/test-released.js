@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {createFixtureIframe} from '../../testing/iframe.js';
+import {createFixtureIframe, pollForLayout} from '../../testing/iframe.js';
 
 describe('Rendering of released components', () => {
   var fixture;
@@ -26,7 +26,7 @@ describe('Rendering of released components', () => {
 
   it('all components should get loaded', function() {
     this.timeout(5000);
-    return fixture.awaitEvent('amp:load:start', 13).then(function() {
+    return pollForLayout(fixture.win, 13, 5500).then(function() {
       expect(fixture.doc.querySelectorAll('.-amp-element')).to.have.length(16);
       expect(fixture.doc.querySelectorAll('.-amp-layout')).to.have.length(13);
       expect(fixture.doc.querySelectorAll('.-amp-error')).to.have.length(0);

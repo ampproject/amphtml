@@ -32,7 +32,7 @@ var paths = [
     served: true
   },
   {
-    pattern: 'examples/**/*.html',
+    pattern: 'examples/**/*',
     included: false,
     served: true
   }

@@ -27,6 +27,10 @@ import {registerElement} from '../src/custom-element';
  * @return {undefined}
  */
 export function installImg(win) {
+
+  /** @type {number} Count of images */
+  var count = 0;
+
   class AmpImg extends BaseElement {
 
     /** @override */
@@ -52,6 +56,13 @@ export function installImg(win) {
       /** @private @const {!Srcset} */
       this.srcset_ = parseSrcset(this.element.getAttribute('srcset') ||
           this.element.getAttribute('src'));
+
+      // TODO(@dvoytenko) Remove when #254 is fixed.
+      // Always immediately request the first two images to make sure
+      // we start the HTTP requests for them as early as possible.
+      if (count++ < 2 && this.element.offsetWidth) {
+        this.updateImageSrc_();
+      }
     }
 
     /** @override */
