@@ -13,7 +13,7 @@
     "url": "https://github.com/ampproject/amphtml.git"
   },
   "scripts": {
-    "test": "gulp unit",
+    "test": "gulp test",
     "lint": "gulp lint",
     "build": "gulp build",
     "dist": "gulp dist"
@@ -57,6 +57,7 @@
     "karma-mocha": "^0.2.0",
     "karma-safari-launcher": "^0.1.1",
     "karma-sinon-chai": "^1.0.0",
+    "minimist": "^1.2.0",
     "mocha": "^2.2.5",
     "postcss": "^5.0.5",
     "sinon": "^1.15.4",

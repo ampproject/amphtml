@@ -22,7 +22,7 @@ var util = require('gulp-util');
 var srcGlobs = [
   '**/*.{css,js,html,md}',
   '!{node_modules,dist,dist.ads}/**/*.*',
-  '!build-system/presubmit-checks.js',
+  '!build-system/tasks/presubmit-checks.js',
   '!build/polyfills.js',
   '!gulpfile.js'
 ];
@@ -62,7 +62,7 @@ function hasAnyTerms(file) {
     // negligible.
     var matches = content.match(new RegExp(term));
     if (matches) {
-      util.log(util.colors.red('Found: ' + matches[0] + ' in ' + file.path));
+      util.log(util.colors.red('Found: "' + matches[0] + '" in ' + file.path));
       fix = forbiddenTerms[term];
       if (fix) {
         util.log(util.colors.blue(fix));

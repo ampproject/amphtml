@@ -40,17 +40,23 @@ Builds production binaries.
 
 ### Test
 
-`gulp unit`
+`gulp test`
 Runs tests.
 
-`gulp unit-watch`
+`gulp test --verbose`
+Runs tests with logging enabled.
+
+`gulp test --watch`
 Runs tests for changed files.
 
-`gulp unit-watch-verbose`
+`gulp test --watch --verbose`
 Runs tests for changed files with logging enabled.
 
-`gulp unit-watch-safari`
+`gulp test --safari`
 Runs tests in Safari. It is required to manually test this before sending PR.
+
+`gulp test --firefox`
+Runs tests in Firefox. It is required to manually test this before sending PR.
 
 To fix issues with Safari test runner launching multiple instances of the test run
 `defaults write com.apple.Safari ApplePersistenceIgnoreState YES`

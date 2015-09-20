@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
+var argv = require('minimist')(process.argv.slice(2));
 var gulp = require('gulp');
 var del = require('del');
 var file = require('gulp-file');
 var gulpWatch = require('gulp-watch');
 var fs = require('fs');
 var sourcemaps = require('gulp-sourcemaps');
-var karma = require('karma').server;
-var path = require('path');
 var source = require('vinyl-source-stream');
 var buffer = require('vinyl-buffer');
 var browserify = require('browserify');
@@ -34,7 +33,7 @@ var babel = require('babelify');
 var postcss = require('postcss');
 var autoprefixer = require('autoprefixer');
 var cssnano = require('cssnano');
-require('./build-system/presubmit-checks');
+require('./build-system/tasks');
 
 // NOTE: see https://github.com/ai/browserslist#queries for `browsers` list
 var cssprefixer = autoprefixer(
@@ -103,64 +102,6 @@ function buildExtensions(options) {
 
 function clean(done) {
   del(['dist', 'dist.ads', 'build', 'examples.build'], done);
-}
-
-// TODO(@cramforce): Consolidate test running functions.
-function unit(done) {
-  build();
-  karma.start({
-    configFile: path.resolve('karma.conf.js'),
-    files: tests,
-    singleRun: true
-  }, done);
-}
-
-function unitWatch(done) {
-  build();
-  karma.start({
-    configFile: path.resolve('karma.conf.js'),
-    files: tests,
-  }, done);
-}
-
-function unitWatchVerbose(done) {
-  build();
-  karma.start({
-    configFile: path.resolve('karma.conf.js'),
-    files: tests
-  }, done);
-}
-
-function unitSafari(done) {
-  build();
-  karma.start({
-    configFile: path.resolve('karma.conf.js'),
-    files: tests,
-    singleRun: true,
-    browsers: ['Safari'],
-    client: {
-      captureConsole: true,
-      mocha: {
-        timeout: 10000
-      }
-    }
-  }, done);
-}
-
-function unitFirefox(done) {
-  build();
-  karma.start({
-    configFile: path.resolve('karma.conf.js'),
-    files: tests,
-    singleRun: true,
-    browsers: ['Firefox'],
-    client: {
-      captureConsole: true,
-      mocha: {
-        timeout: 10000
-      }
-    }
-  }, done);
 }
 
 function polyfillsForTests() {
@@ -293,11 +234,6 @@ function build() {
 gulp.task('css', compileCss);
 gulp.task('extensions', buildExtensions);
 gulp.task('clean', clean);
-gulp.task('unit', unit);
-gulp.task('unit-watch', unitWatch);
-gulp.task('unit-watch-verbose', unitWatchVerbose);
-gulp.task('unit-safari', unitSafari);
-gulp.task('unit-firefox', unitFirefox);
 gulp.task('build', build);
 gulp.task('watch', function() { return watch(); });
 gulp.task('minify', function() {
