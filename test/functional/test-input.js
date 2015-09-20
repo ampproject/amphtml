@@ -18,7 +18,7 @@ import {Input} from '../../src/input';
 import * as sinon from 'sinon';
 
 
-describe.only('Input', () => {
+describe('Input', () => {
 
   let sandbox;
   let clock;
