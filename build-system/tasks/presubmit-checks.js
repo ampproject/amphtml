@@ -20,7 +20,7 @@ var util = require('gulp-util');
 // Directories to check for presubmit checks.
 var srcGlobs = [
   '**/*.{css,js,html,md}',
-  '!{node_modules,dist,dist.ads}/**/*.*',
+  '!{node_modules,dist,dist.3p}/**/*.*',
   '!build-system/tasks/presubmit-checks.js',
   '!build/polyfills.js',
   '!gulpfile.js'
