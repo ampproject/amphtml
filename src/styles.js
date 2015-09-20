@@ -19,9 +19,39 @@
  * Adds the given css text to the given document.
  * @param {!Document} doc The document that should get the new styles.
  * @param {string} cssText
+ * @param {function()} cb Called when the new styles are available.
+ *     Not using a promise, because this is synchronous when possible.
+ *     for better performance.
  */
-export function installStyles(doc, cssText) {
+export function installStyles(doc, cssText, cb) {
+  var length = doc.styleSheets.length;
   var style = doc.createElement('style');
   style.textContent = cssText;
-  doc.head.appendChild(style);
+  doc.head.insertBefore(style, doc.head.firstChild);
+  // Styles aren't always available synchronously. E.g. if there is a
+  // pending style download, it will have to finish before the new
+  // style is visible.
+  // For this reason we poll until the style becomes available.
+  var done = () => {
+    var sheets = doc.styleSheets;
+    for (var i = 0; i < sheets.length; i++) {
+      var sheet = sheets[i];
+      if (sheet.ownerNode == style) {
+        return true;
+      }
+    }
+    return false;
+  };
+  // Sync case.
+  if (done()) {
+    cb();
+    return;
+  }
+  // Poll until styles are available.
+  var interval = setInterval(() => {
+    if (done()) {
+      clearInterval(interval);
+      cb();
+    }
+  }, 4);
 }
