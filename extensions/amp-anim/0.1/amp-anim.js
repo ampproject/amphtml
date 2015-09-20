@@ -21,7 +21,7 @@ import * as st from '../../../src/style';
 
 class AmpAnim extends AMP.BaseElement {
 
-  var supported_mimetypes = {}; // cache of supported mime types
+  var supported_mimetypes = Object.create(null); // cache of supported mime types
 
   /** @override */
   isLayoutSupported(layout) {
@@ -51,26 +51,33 @@ class AmpAnim extends AMP.BaseElement {
     // that tag, and delete the other source tags.
 
 
-    this.getRealChildNodes().forEach(child => { // XXX will this preserve order?
-      if (child.tagName == 'SOURCE') {
-          // only supports <source> tag at the moment.  the notable exclusion
-          // is <track>
-          // XXX do I need to confirm attributes exists, and type is a valid call?
-          if (child.attributes.type != null) {
-              // we do want to pass any optional parameters in the typeval
-              // media type through to typeSupported.
-              var typeval = trim(child.attributes.type); // XXX confirm output of trim() supports this usage
-              var type = typeval.slice(0, typeval.indexOf('/'));
-              if (type == 'IMAGE' or type == 'VIDEO') {
-                  // only image and video types are supported
-                  if (mimetypeSupported(typeval, type)) {
-                      // create a corresponding amp-img/video tag
-                      // XXX IMAGE => img
-                      var media_tag = 'amp-' + type.toLowerCase();
-                      // XXX create tag, move source under it, escape, delete parent tag
-                  }
-              }
-          }
+    var children = this.getRealChildNodes();
+    for (child in children) { 
+      if (child.tagName != 'SOURCE') {
+        // only supports <source> tag at the moment
+        // the notable exclusion is <track>
+        continue;
+      }
+      if (child.attributes.type == null) {
+        // XXX warning
+        continue;
+      }
+      // we do want to pass any optional parameters in the typeval media type through to typeSupported.
+      var typeval = child.attributes.type.trim(); 
+      var type = typeval.slice(0, typeval.indexOf('/'));
+      var typemap = {
+        IMAGE: amp-img
+        VIDEO: amp-video
+      };
+      if (!type in typemap) {
+        // only image and video types are supported
+        // XXX warning
+        continue;
+      }
+      if (mimetypeSupported(typeval, type)) {
+          // create a corresponding amp-img/video tag
+          var media_tag = 'amp-' + type.toLowerCase();
+          // XXX create tag, move source under it, escape, delete parent tag
       }
     });
 
@@ -91,7 +98,7 @@ class AmpAnim extends AMP.BaseElement {
         this.element.getAttribute('src'));
 
     /** @private */
-    typeSupported(typeval, type) {
+    isTypeSupported(typeval, type) {
       if (!typeval in this.supported_types) {
         // we haven't seen this mimetype yet
         this.supported_types[type] =
