@@ -41,20 +41,22 @@ if (window.console) {
       '$internalRuntimeVersion$');
 }
 
-historyFor(window);
-viewerFor(window);
+// Should happen first.
+installStyles(document, cssText, () => {
+  historyFor(window);
+  viewerFor(window);
 
-installAd(window);
-installImg(window);
-installPixel(window);
-installVideo(window);
+  installAd(window);
+  installImg(window);
+  installPixel(window);
+  installVideo(window);
 
-installStyles(document, cssText);
-adopt(window);
-stubElements(window);
+  adopt(window);
+  stubElements(window);
 
-action.addEvent('tap');
+  action.addEvent('tap');
 
-maybeValidate(window);
+  maybeValidate(window);
 
-installExperimentalViewerIntegration();
+  installExperimentalViewerIntegration();
+});

@@ -23,7 +23,7 @@
  */
 body {
   /* Undoes mandatory opacity: 0 in doc. */
-  opacity: 1;
+  opacity: 1 !important;
   margin: 0 !important;
 }
 

@@ -51,14 +51,19 @@ export function adopt(global) {
    *     CSS file associated with the element.
    */
   global.AMP.registerElement = function(name, implementationClass, opt_css) {
+    var register = function() {
+      registerExtendedElement(global, name, implementationClass);
+      elementsForTesting.push({
+        name: name,
+        implementationClass: implementationClass
+      });
+    };
     if (opt_css) {
-      installStyles(global.document, opt_css);
+      installStyles(global.document, opt_css, register);
+    } else {
+      register();
     }
-    registerExtendedElement(global, name, implementationClass);
-    elementsForTesting.push({
-      name: name,
-      implementationClass: implementationClass
-    });
+
   };
   /** @const */
   global.AMP.BaseElement = BaseElement;
