@@ -43,13 +43,13 @@ Builds production binaries.
 `gulp test`
 Runs tests.
 
-`gulp test --verbose`
+`gulp test --verbose (short name: -v)`
 Runs tests with logging enabled.
 
-`gulp test --watch`
+`gulp test --watch (short name: -w)`
 Runs tests for changed files.
 
-`gulp test --watch --verbose`
+`gulp test --watch --verbose (short name: -w -v)`
 Runs tests for changed files with logging enabled.
 
 `gulp test --safari`
