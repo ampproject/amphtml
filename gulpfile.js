@@ -34,6 +34,7 @@ var babel = require('babelify');
 var postcss = require('postcss');
 var autoprefixer = require('autoprefixer');
 var cssnano = require('cssnano');
+require('./build-system/presubmit-checks');
 
 // NOTE: see https://github.com/ai/browserslist#queries for `browsers` list
 var cssprefixer = autoprefixer(
@@ -308,9 +309,6 @@ gulp.task('minify', function() {
   examplesWithMinifiedJs('newsstand.amp.html');
   examplesWithMinifiedJs('released.amp.html');
   examplesWithMinifiedJs('article.amp.html');
-});
-gulp.task('presubmit', function() {
-  return require('./build-system/presubmit-checks.js').run();
 });
 
 gulp.task('default', ['watch']);

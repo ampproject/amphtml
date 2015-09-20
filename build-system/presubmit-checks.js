@@ -15,81 +15,80 @@
  */
 
 var find = require('find-in-files').find;
+var gulp = require('gulp');
+var util = require('gulp-util');
 
 // Directories to check for presubmit checks.
-var srcDirectories = [
-  './ads',
-  './build-system',
-  './css',
-  './examples',
-  './spec',
-  './src',
-  './builtins',
-  './extensions',
-  './test',
-  './testing',
+var srcGlobs = [
+  '**/*.{css,js,html,md}',
+  '!{node_modules,dist,dist.ads}/**/*.*',
+  '!build-system/presubmit-checks.js',
+  '!build/polyfills.js',
+  '!gulpfile.js'
 ];
 
 // Terms that must not appear in our source files.
-var forbiddenTerms = [
-  'DO NOT SUBMIT',
-  'XXX',
-  // If you run against this, use console/*OK*/.log to whitelist a legit
-  // case.
-  'console\\.\\w+\\(',
-  '\\.innerHTML',
-  '\\.outerHTML',
-  '\\.postMessage',
-  'cookie',
-  'eval\\(',
-  'localStorage',
-  'sessionStorage',
-  'indexedDB',
-  'openDatabase',
-  'requestFileSystem',
-  '\\.scrollTop',
-  'webkitRequestFileSystem',
-];
+var forbiddenTerms = {
+  'DO NOT SUBMIT': '',
+  'XXX': '',
+  'console\\.\\w+\\(': 'If you run against this, use console/*OK*/.log to ' +
+      'whitelist a legit case.',
+  '\\.innerHTML': '',
+  '\\.outerHTML': '',
+  '\\.postMessage': '',
+  'cookie': '',
+  'eval\\(': '',
+  'localStorage': '',
+  'sessionStorage': '',
+  'indexedDB': '',
+  'openDatabase': '',
+  'requestFileSystem': '',
+  '\\.scrollTop': '',
+  'webkitRequestFileSystem': '',
+}
+
+var forbiddenTermsKeys = Object.keys(forbiddenTerms);
+
+function hasAnyTerms(file) {
+  var content = file.contents.toString();
+  return forbiddenTermsKeys.map(function(term) {
+    var fix;
+    // we can't optimize building the `RegExp` objects early unless we build
+    // another mapping of term -> regexp object to be able to get back to the
+    // original term to get the possible fix value. This is ok as the
+    // presubmit doesn't have to be blazing fast and this is most likely
+    // negligible.
+    var matches = content.match(new RegExp(term));
+    if (matches) {
+      util.log(util.colors.red('Found: ' + matches[0] + ' in ' + file.path));
+      fix = forbiddenTerms[term];
+      if (fix) {
+        util.log(util.colors.blue(fix));
+      }
+      util.log(util.colors.blue('=========='));
+      return true;
+    }
+    return false;
+  }).some(function(hasAnyTerm) {
+    return hasAnyTerm;
+  });
+}
 
 function checkForbiddenTerms() {
-  var promises = [];
-  srcDirectories.forEach(function(dir) {
-    forbiddenTerms.forEach(function(term) {
-      promises.push(checkForbiddenTerm(dir, term));
-    });
-  });
-  return Promise.all(promises).then(function(bools) {
-    if (bools.filter(function(bool) { return bool }).length) {
-      console.log('Please remove these usages or consult with the AMP team.')
-      process.exit(1);
-    }
-  });
-}
-
-/**
- * @param {string} directory
- * @param {string} term
- * @return {!Promise<boolean>} True if a forbidden term was found.
- */
-function checkForbiddenTerm(directory, term) {
-  return find(term, directory, '(\\.js|\\.css|\\.html|\\.md)$').then(
-      function(results) {
-        var found = false;
-        for (var result in results) {
-          if (result == 'build-system/presubmit-checks.js') {
-            continue;
-          }
-          var res = results[result];
-          console/*OK*/.error(
-              'Found "' + res.matches[0] + '" ' + res.count
-              + ' times in "' + result + '"'
-          );
-          found = true;
-        }
-        return found;
+  var errorsFound = false;
+  return gulp.src(srcGlobs)
+    .pipe(util.buffer(function(err, files) {
+      errorsFound = files.map(hasAnyTerms).some(function(errorFound) {
+        return errorFound;
       });
+    }))
+    .on('end', function() {
+      if (errorsFound) {
+        util.log(util.colors.blue(
+            'Please remove these usages or consult with the AMP team.'));
+        process.exit(1);
+      }
+    });
 }
 
-exports.run = function() {
-  return checkForbiddenTerms();
-};
+gulp.task('presubmit', checkForbiddenTerms);
