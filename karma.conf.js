@@ -27,7 +27,7 @@ module.exports = function(config) {
     ],
 
     preprocessors: {
-      'fixtures/*.html' : ['html2js'],
+      'test/fixtures/*.html' : ['html2js'],
       'src/**/*.js': ['browserify'],
       'test/**/*.js': ['browserify'],
       'extensions/**/test/**/*.js': ['browserify'],

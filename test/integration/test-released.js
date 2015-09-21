@@ -19,7 +19,7 @@ import {createFixtureIframe} from '../../testing/iframe.js';
 describe('Rendering of released components', () => {
   var fixture;
   beforeEach(() => {
-    return createFixtureIframe('fixtures/released.html', 3000).then((f) => {
+    return createFixtureIframe('test/fixtures/released.html', 3000).then((f) => {
       fixture = f;
     });
   });
