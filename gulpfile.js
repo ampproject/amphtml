@@ -58,26 +58,6 @@ var srcs = [
 var extensions = [
   'extensions/**/*.js'
 ];
-var tests = [
-  'test/**/*.js',
-  'extensions/**/test/**/*.js',
-  'fixtures/**/*.html',
-  {
-    pattern: 'dist/**/*.js',
-    included: false,
-    served: true
-  },
-  {
-    pattern: 'build/**/*.js',
-    included: false,
-    served: true
-  },
-  {
-    pattern: 'examples/**/*.js',
-    included: false,
-    served: true
-  }
-];
 
 // Used to e.g. references the ads binary from the runtime to get
 // version lock.
@@ -109,7 +89,8 @@ function polyfillsForTests() {
 }
 
 function lint() {
-  return gulp.src(srcs, tests)
+  // FIX ME
+  return gulp.src(srcs)
     .pipe(gjslint())
     .pipe(gjslint.reporter('console'))
 }

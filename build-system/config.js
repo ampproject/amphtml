@@ -5,7 +5,7 @@ var karmaConf = path.resolve('karma.conf.js');
 var paths = [
   'test/**/*.js',
   'extensions/**/test/**/*.js',
-  'fixtures/**/*.html',
+  'test/fixtures/**/*.html',
   {
     pattern: 'dist/**/*.js',
     included: false,

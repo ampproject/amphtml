@@ -26,7 +26,7 @@ adopt(window);
 describe('amp-iframe', () => {
 
   var iframeSrc = 'http://iframe.localhost:' + location.port +
-      '/base/fixtures/served/iframe.html';
+      '/base/test/fixtures/served/iframe.html';
 
   var timer = new Timer(window);
   var ranJs = 0;
@@ -151,7 +151,7 @@ describe('amp-iframe', () => {
     return getAmpIframe({
       // ads. is not whitelisted for http iframes.
       src: 'http://ads.localhost:' + location.port +
-          '/base/fixtures/served/iframe.html',
+          '/base/test/fixtures/served/iframe.html',
       sandbox: 'allow-scripts',
       width: 100,
       height: 100
