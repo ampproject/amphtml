@@ -23,6 +23,8 @@ import {registerElement} from '../src/custom-element';
 
 /**
  * @param {!Window} win Destination window for the new element.
+ * @this {undefined}  // Make linter happy
+ * @return {undefined}
  */
 export function installImg(win) {
   class AmpImg extends BaseElement {
@@ -80,7 +82,7 @@ export function installImg(win) {
       this.img_.setAttribute('src', src);
       return loadPromise(this.img_);
     }
-  }
+  };
 
   registerElement(win, 'amp-img', AmpImg);
 }

@@ -15,36 +15,27 @@
  */
 
 
-/**
- * A helper class that provides information about device/OS/browser currently
- * running.
- */
-export class Platform {
+var gulp = require('gulp');
+var gjslint = require('gulp-gjslint');
 
-  /**
-   * @param {!Window} win
-   */
-  constructor(win) {
-    /** @const {!Window} */
-    this.win = win;
-  }
+// Directories to check for presubmit checks.
+var srcGlobs = [
+  '**/*.{css,js,html,md}',
+  '!{node_modules,build,dist,dist.ads}/**/*.*',
+];
 
-  /**
-   * Whether the current platform an iOS device.
-   * @return {boolean}
-   */
-  isIos() {
-    return /iPhone|iPad|iPod/i.test(this.win.navigator.userAgent);
-  }
-
-  /**
-   * Whether the current browser a Chrome browser.
-   * @return {boolean}
-   */
-  isChrome() {
-    return /Chrome|CriOS/i.test(this.win.navigator.userAgent);
-  }
+var options = {
+  flags: [
+      '--max_line_length 100',
+      '--custom_jsdoc_tags=visibleForTesting',
+      '--limited_doc_files=test-*.js',
+  ]
 };
 
+function lint() {
+  return gulp.src(srcGlobs)
+    .pipe(gjslint(options))
+    .pipe(gjslint.reporter('console'), {fail: true});
+}
 
-export const platform = new Platform(window);
+gulp.task('lint', lint);

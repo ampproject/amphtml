@@ -44,6 +44,6 @@ class AmpYoutube extends AMP.BaseElement {
     this.element.appendChild(iframe);
     return loadPromise(iframe);
   }
-}
+};
 
 AMP.registerElement('amp-youtube', AmpYoutube);

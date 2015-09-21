@@ -85,7 +85,7 @@ export function adopt(global) {
     let fn = preregisteredElements[i];
     fn(global.AMP);
   }
-};
+}
 
 
 /**
@@ -93,7 +93,7 @@ export function adopt(global) {
  * window.
  * Make sure to call `adopt(window)` in your unit test as well and
  * then call this on the generated iframe.
- * @param {!Window} global Global scope to adopt.
+ * @param {!Window} win
  */
 export function registerForUnitTest(win) {
   for (let i = 0; i < elementsForTesting.length; i++) {

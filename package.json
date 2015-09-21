@@ -37,7 +37,7 @@
     "gulp-concat": "~2.6.0",
     "gulp-esperanto": "~0.2.0",
     "gulp-file": "^0.2.0",
-    "gulp-gjslint": "~0.1.4",
+    "gulp-gjslint": "^0.1.5",
     "gulp-rename": "~1.2.2",
     "gulp-replace": "^0.5.4",
     "gulp-sourcemaps": "^1.5.2",

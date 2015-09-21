@@ -18,11 +18,13 @@ import {BaseElement} from '../src/base-element';
 import {isLayoutSizeDefined} from '../src/layout';
 import {loadPromise} from '../src/event-helper';
 import {registerElement} from '../src/custom-element';
-import {getIframe} from '../src/3p-frame'
+import {getIframe} from '../src/3p-frame';
 
 
 /**
  * @param {!Window} win Destination window for the new element.
+ * @this {undefined}  // Make linter happy
+ * @return {undefined}
  */
 export function installAd(win) {
   class AmpAd extends BaseElement {
@@ -47,7 +49,7 @@ export function installAd(win) {
       }
       return loadPromise(this.iframe_);
     }
-  }
+  };
 
   registerElement(win, 'amp-ad', AmpAd);
 }

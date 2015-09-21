@@ -23,7 +23,7 @@ const vendorPrefixes_ = ['Webkit', 'webkit', 'Moz', 'moz', 'ms', 'O', 'o'];
 
 
 /**
- * @exports
+ * @export
  * @param {string} camelCase camel cased string
  * @return {string} title cased string
  */
@@ -53,7 +53,7 @@ function getVendorJsPropertyName_(object, titleCase) {
  * Returns the possibly prefixed JavaScript property name of a style property
  * (ex. WebkitTransitionDuration) given a camelCase'd version of the property
  * (ex. transitionDuration).
- * @exports
+ * @export
  * @param {!Object} object
  * @param {string} camelCase the camel cased version of a css property name
  * @param {bool=} opt_bypassCache bypass the memoized cache of property mapping

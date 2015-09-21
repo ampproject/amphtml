@@ -57,6 +57,7 @@ var karma = {
   }
 };
 
+/** @const  */
 module.exports = {
   paths: paths,
   karma: karma

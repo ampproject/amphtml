@@ -41,7 +41,7 @@ var syncScriptLoads = 0;
  * @param {ThirdPartyFunction} draw Function that draws the 3p integration.
  */
 export function register(type, id, draw) {
-  var ofType = assert(registrations[type], 'Unknown type ' + type)
+  var ofType = assert(registrations[type], 'Unknown type ' + type);
   ofType[id] = draw;
 }
 
@@ -83,7 +83,7 @@ export function writeScript(win, url, opt_cb) {
 function executeAfterWriteScript(win, fn) {
   var index = syncScriptLoads++;
   win['__runScript' + index] = fn;
-  win.document.write('<' + 'script>__runScript' + index + '()<' + '/script>')
+  win.document.write('<' + 'script>__runScript' + index + '()<' + '/script>');
 }
 
 /**

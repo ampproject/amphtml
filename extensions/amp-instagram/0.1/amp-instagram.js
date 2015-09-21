@@ -63,6 +63,6 @@ class AmpInstagram extends AMP.BaseElement {
     this.element.appendChild(iframe);
     return loadPromise(iframe);
   }
-}
+};
 
 AMP.registerElement('amp-instagram', AmpInstagram);

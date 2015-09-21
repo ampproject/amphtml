@@ -56,6 +56,7 @@ function copyTouchAndPostMessage_(e) {
  * Makes a partial copy of the event and posts a message with it.
  * @param {!Event} e The event object to be copied and posted.
  * @private
+ * @return {!Event}
  */
 function copyTouchEvent_(e) {
   var eventProperties = [
@@ -109,7 +110,7 @@ function copyTouches_(touchList) {
 
 /**
  * @param {!Object} o
- * @param {!Array<string>}
+ * @param {!Array<string>} properties
  * @return {!Object}
  * @private
  */
