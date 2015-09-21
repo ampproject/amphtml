@@ -37,6 +37,14 @@ export function getMode() {
 }
 
 /**
+ * Set mode in a test. Pass null in afterEach function to reset.
+ * @param {?Mode} m
+ */
+export function setModeForTesting(m) {
+  mode = m;
+}
+
+/**
  * Provides info about the current app.
  * @return {!Mode}
  */
@@ -53,6 +61,7 @@ function getMode_() {
     localDev: isLocalDev,
     // Triggers validation
     development: !!document.querySelector('script[development]'),
-    minified: process.env.NODE_ENV == 'production'
+    minified: process.env.NODE_ENV == 'production',
+    test: window.AMP_TEST
   };
 }

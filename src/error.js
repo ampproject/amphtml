@@ -16,6 +16,9 @@
 
 
 import {getMode} from './mode';
+import {exponentialBackoff} from './exponential-backoff.js';
+
+var globalExponentialBackoff = exponentialBackoff(1.5);
 
 
 /**
@@ -28,7 +31,7 @@ import {getMode} from './mode';
  * @param {!Error} error
  * @param {!Element=} opt_associatedElement
  */
-export function reportErrorToDeveloper(error, opt_associatedElement) {
+export function reportError(error, opt_associatedElement) {
   if (!window.console) {
     return;
   }
@@ -53,4 +56,72 @@ export function reportErrorToDeveloper(error, opt_associatedElement) {
   if (element && element.dispatchCustomEvent) {
     element.dispatchCustomEvent('amp:error', error.message);
   }
+  reportErrorToServer(undefined, undefined, undefined, undefined, error);
+}
+
+/**
+ * Install handling of global unhandled exceptions.
+ * @param {!Window} win
+ */
+export function installErrorReporting(win) {
+  win.onerror = reportErrorToServer;
+}
+
+/**
+ * Signature designed, so it can work with window.onerror
+ * @param {string|undefined} message
+ * @param {string|undefined} filename
+ * @param {string|undefined} line
+ * @param {string|undefined} col
+ * @param {!Error|undefined} error
+ */
+function reportErrorToServer(message, filename, line, col, error) {
+  var mode = getMode();
+  if (mode.isLocalDev || mode.development || mode.test) {
+    return;
+  }
+  var url = getErrorReportUrl(message, filename, line, col, error);
+  globalExponentialBackoff(() => {
+    new Image().src = url;
+  });
+}
+
+/**
+ * Signature designed, so it can work with window.onerror
+ * @param {string|undefined} message
+ * @param {string|undefined} filename
+ * @param {string|undefined} line
+ * @param {string|undefined} col
+ * @param {!Error|undefined} error
+ * @VisibleForTesting
+ */
+export function getErrorReportUrl(message, filename, line, col, error) {
+  message = error ? error.message : message;
+  if (/_reported_/.test(message)) {
+    return;
+  }
+
+  var url = 'https://cdn.ampproject.org/error/report.gif' +
+      '?v=' + encodeURIComponent('$internalRuntimeVersion$') +
+      '&m=' + encodeURIComponent(message);
+
+  if (error) {
+    var tagName = error && error.associatedElement
+      ? error.associatedElement.tagName
+      : 'u';  // Unknown
+    // We may want to consider not reporting asserts but for now
+    // this should be helpful.
+    url += '&a=' + (error.fromAssert ? 1 : 0) +
+        '&el=' + encodeURIComponent(tagName) +
+        '&s=' + encodeURIComponent(error.stack || '');
+    } else {
+    url += '&f=' + encodeURIComponent(filename) +
+        '&l=' + encodeURIComponent(line) +
+        '&c=' + encodeURIComponent(col || '');
+  }
+  if (error) {
+    error.message += ' _reported_';
+  }
+  // Shorten URLs to a value all browsers will send.
+  return url.substr(0, 2000);
 }

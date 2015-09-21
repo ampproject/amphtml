@@ -55,6 +55,7 @@ export function assert(shouldBeTrueish, message, var_args) {
       formatted += toString(val) + nextConstant;
     }
     var e = new Error(formatted);
+    e.fromAssert = true;
     e.associatedElement = firstElement;
     e.messageArray = messageArray;
     throw e;
