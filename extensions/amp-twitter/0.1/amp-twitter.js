@@ -15,7 +15,7 @@
  */
 
 
-import {getIframe} from '../../../src/3p-frame'
+import {getIframe} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
 
@@ -34,6 +34,6 @@ class AmpTwitter extends AMP.BaseElement {
     this.element.appendChild(iframe);
     return loadPromise(iframe);
   }
-}
+};
 
 AMP.registerElement('amp-twitter', AmpTwitter);

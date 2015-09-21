@@ -79,7 +79,7 @@ import {viewportFor} from './viewport';
  * is optional.
  */
 export class BaseElement {
-  /** @param {!Element} */
+  /** @param {!Element} element */
   constructor(element) {
     /** @public @const */
     this.element = element;
@@ -372,7 +372,7 @@ export class BaseElement {
   cancelFullOverlay() {
     viewerFor(this.element.ownerDocument.defaultView).cancelFullOverlay();
   }
-}
+};
 
 
 /**

@@ -26,7 +26,7 @@ var buffer = require('vinyl-buffer');
 var browserify = require('browserify');
 var watchify = require('watchify');
 var uglify = require('gulp-uglify');
-var wrap = require("gulp-wrap");
+var wrap = require('gulp-wrap');
 var rename = require('gulp-rename');
 var replace = require('gulp-replace');
 var babel = require('babelify');
@@ -49,15 +49,6 @@ var cssprefixer = autoprefixer(
     ]
   }
 );
-
-var srcs = [
-  'src/**/*.js',
-  'ads/**/*.js',
-  'node_modules/document-register-element/build/*.js'
-];
-var extensions = [
-  'extensions/**/*.js'
-];
 
 // Used to e.g. references the ads binary from the runtime to get
 // version lock.
@@ -88,13 +79,6 @@ function polyfillsForTests() {
   compileJs('./src/', 'polyfills.js', './build/');
 }
 
-function lint() {
-  // FIX ME
-  return gulp.src(srcs)
-    .pipe(gjslint())
-    .pipe(gjslint.reporter('console'))
-}
-
 function compile(watch, shouldMinify) {
   compileCss();
   compileJs('./src/', 'amp.js', './dist', {
@@ -121,7 +105,7 @@ function compileCss() {
 }
 
 function jsifyCssPromise(filename) {
-  var css = fs.readFileSync(filename, "utf8");
+  var css = fs.readFileSync(filename, 'utf8');
   var transformers = [cssprefixer, cssnano()];
   // Remove copyright comment. Crude hack to get our own copyright out
   // of the string.
@@ -143,7 +127,7 @@ function watch() {
     watch: true
   });
   return compile(true);
-};
+}
 
 /**
  * Copies extensions from
@@ -160,6 +144,7 @@ function watch() {
  *     the sub directory inside the extension directory
  * @param {boolean} hasCss Whether there is a CSS file for this extension.
  * @param {!Object} options
+ * @return {!Object} Gulp object
  */
 function buildExtension(name, version, hasCss, options) {
   options = options || {};
@@ -177,7 +162,7 @@ function buildExtension(name, version, hasCss, options) {
       buildExtension(name, version, hasCss, copy);
     });
   }
-  var js = fs.readFileSync(jsPath, "utf8");
+  var js = fs.readFileSync(jsPath, 'utf8');
   if (hasCss) {
     return jsifyCssPromise(path + '/' + name + '.css').then(function(css) {
       console.assert(/\$CSS\$/.test(js),
@@ -239,7 +224,7 @@ gulp.task('default', ['watch']);
 function examplesWithMinifiedJs(name) {
   var input = 'examples/' + name;
   console.log('Processing ' + name);
-  var html = fs.readFileSync(input, "utf8");
+  var html = fs.readFileSync(input, 'utf8');
   var min = html;
   min = min.replace(/\.max\.js/g, '.js');
   min = min.replace(/dist\/amp\.js/g, 'dist\/v0\.js');
@@ -262,7 +247,7 @@ function adsBootstrap(watch) {
     });
   }
   console.log('Processing ' + input);
-  var html = fs.readFileSync(input, "utf8");
+  var html = fs.readFileSync(input, 'utf8');
   var min = html;
   min = min.replace(/\.\/ads\.js/g, './f.js');
   gulp.src(input)

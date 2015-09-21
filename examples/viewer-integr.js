@@ -18,6 +18,7 @@
 /**
  * Super crude way to share ViewerMessaging class without any kind of module
  * system or packaging.
+ * @param {!Function} callback
  */
 function whenMessagingLoaded(callback) {
   window['__AMP_VIEWER_MESSAGING_CALLBACK'] = callback;

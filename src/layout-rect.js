@@ -49,7 +49,7 @@ export function layoutRectLtwh(left, top, width, height) {
     bottom: top + height,
     right: left + width
   };
-};
+}
 
 
 /**
@@ -61,7 +61,7 @@ export function layoutRectLtwh(left, top, width, height) {
 export function layoutRectsOverlap(r1, r2) {
   return (r1.top <= r2.bottom && r2.top <= r1.bottom &&
       r1.left <= r2.right && r2.left <= r1.right);
-};
+}
 
 
 /**
@@ -80,4 +80,4 @@ export function expandLayoutRect(rect, dw, dh) {
     width: rect.width * (1 + dw * 2),
     height: rect.height * (1 + dh * 2)
   };
-};
+}

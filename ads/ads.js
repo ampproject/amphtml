@@ -26,7 +26,7 @@ import {adsense} from './adsense';
 import {adtech} from './adtech';
 import {doubleclick} from './doubleclick';
 import {twitter} from './twitter';
-import {register, run} from '../src/3p'
+import {register, run} from '../src/3p';
 
 register('ad', 'a9', a9);
 register('ad', 'adreactor', adreactor);
@@ -40,11 +40,13 @@ register('ad', 'twitter', twitter);
 /**
  * Visible for testing.
  * Draws an ad to the window. Expects the data to include the ad type.
+ * @param {!Window} win
+ * @param {!Object} data
  */
 export function drawAd(win, data) {
   var type = data.type;
   run('ad', type, win, data);
-};
+}
 
 /**
  * Returns the "master frame" for all widgets of a given type.
@@ -73,8 +75,11 @@ function masterSelection(type) {
   return master;
 }
 
+/**
+ * Draws an optionally synchronously to the DOM.
+ */
 window.drawAd = function() {
-  var fragment = location.hash
+  var fragment = location.hash;
   var data = fragment ? JSON.parse(fragment.substr(1)) : {};
   window.context = data._context;
   window.context.master = masterSelection(data.type);

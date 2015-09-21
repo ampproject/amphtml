@@ -33,7 +33,7 @@ let DEFAULT_METHOD_ = 'activate';
  *   str: string
  * }}
  */
-class ActionInfo_ {}
+class ActionInfo_ {};
 
 
 /**
@@ -222,7 +222,7 @@ export class Action {
     }
     return {event: event, target: target, method: method, str: s};
   }
-}
+};
 
 
 export const action = new Action(window);

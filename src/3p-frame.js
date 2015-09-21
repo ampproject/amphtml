@@ -73,7 +73,7 @@ function getFrameAttributes(parentWindow, element, opt_type) {
  * @return {!Element} The iframe.
  */
 export function getIframe(parentWindow, element, opt_type) {
-  var attributes = getFrameAttributes(parentWindow, element, opt_type)
+  var attributes = getFrameAttributes(parentWindow, element, opt_type);
   var iframe = document.createElement('iframe');
   if (!count[attributes.type]) {
     count[attributes.type] = 0;

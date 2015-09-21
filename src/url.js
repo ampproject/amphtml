@@ -20,6 +20,7 @@ import {assert} from './asserts';
 /**
  * Returns a Location-like object for the given URL. If it is relative,
  * the URL gets resolved.
+ * @param {string} url
  * @return {!Location}
  */
 export function parseUrl(url) {
@@ -45,6 +46,7 @@ export function parseUrl(url) {
  * Asserts that a given url is HTTPS or protocol relative.
  * Provides an exception for localhost.
  * @param {string} urlString
+ * @param {!Element} elementContext Element where the url was found.
  */
 export function assertHttpsUrl(urlString, elementContext) {
   var url = parseUrl(urlString);
@@ -95,5 +97,5 @@ export function parseQueryString(queryString) {
  * @return {string}
  */
 function getOrigin(info) {
-  return info.protocol + '//' + info.host
+  return info.protocol + '//' + info.host;
 }

@@ -23,6 +23,8 @@ import {registerElement} from '../src/custom-element';
 
 /**
  * @param {!Window} win Destination window for the new element.
+ * @this {undefined}  // Make linter happy
+ * @return {undefined}
  */
 export function installPixel(win) {
   class AmpPixel extends BaseElement {
@@ -51,7 +53,7 @@ export function installPixel(win) {
             val = Math.random();
             break;
           case 'CANONICAL_URL':
-            val = documentInfoFor(win).canonicalUrl
+            val = documentInfoFor(win).canonicalUrl;
         }
         return encodeURIComponent(val);
       });
@@ -72,7 +74,7 @@ export function installPixel(win) {
           '"https://" or "//". Invalid value: ' + src);
       return src;
     }
-  }
+  };
 
   registerElement(win, 'amp-pixel', AmpPixel);
 }

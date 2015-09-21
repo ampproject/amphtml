@@ -46,7 +46,7 @@ var forbiddenTerms = {
   'requestFileSystem': '',
   '\\.scrollTop': '',
   'webkitRequestFileSystem': '',
-}
+};
 
 var forbiddenTermsKeys = Object.keys(forbiddenTerms);
 

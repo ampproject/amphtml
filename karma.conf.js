@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+/**
+ * @param {!Object} config
+ */
 module.exports = function(config) {
 
   var configuration = {

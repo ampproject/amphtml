@@ -46,7 +46,7 @@ export function parseLayout(s) {
     }
   }
   return undefined;
-};
+}
 
 
 /**
@@ -55,7 +55,7 @@ export function parseLayout(s) {
  */
 export function getLayoutClass(layout) {
   return '-amp-layout-' + layout;
-};
+}
 
 
 /**
@@ -67,7 +67,7 @@ export function isLayoutSizeDefined(layout) {
   return (layout == Layout.FIXED ||
       layout == Layout.RESPONSIVE ||
       layout == Layout.FILL);
-};
+}
 
 
 /**
@@ -78,7 +78,7 @@ export function isLayoutSizeDefined(layout) {
 export function isInternalElement(tag) {
   let tagName = (typeof tag == 'string') ? tag : tag.tagName;
   return tagName && tagName.toLowerCase().indexOf('i-') == 0;
-};
+}
 
 
 /**
@@ -108,7 +108,7 @@ export function parseLength(s) {
     return s + 'px';
   }
   return s;
-};
+}
 
 
 /**
@@ -120,7 +120,7 @@ export function assertLength(length) {
   assert(/^\d+(px|em|rem|vh|vw|vmin|vmax)$/.test(length),
       'Invalid length value: %s', length);
   return length;
-};
+}
 
 
 /**
@@ -133,7 +133,7 @@ export function getLengthUnits(length) {
   let m = assert(length.match(/[a-z]+/i),
       'Failed to read units from %s', length);
   return m[0];
-};
+}
 
 
 /**
@@ -143,7 +143,7 @@ export function getLengthUnits(length) {
  */
 export function getLengthNumeral(length) {
   return parseInt(length, 10);
-};
+}
 
 
 /**
@@ -162,6 +162,7 @@ var Dimensions;
  * Visible for testing only!
  *
  * @type {!Object<string, Dimensions>}
+ * @private
  */
 export const naturalDimensions_ = {
   'AMP-PIXEL': {width: 1, height: 1},
@@ -178,7 +179,7 @@ export const naturalDimensions_ = {
 export function hasNaturalDimensions(tagName) {
   tagName = tagName.toUpperCase();
   return naturalDimensions_[tagName] !== undefined;
-};
+}
 
 
 /**

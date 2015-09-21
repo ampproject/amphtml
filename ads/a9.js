@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {writeScript} from '../src/3p'
+import {writeScript} from '../src/3p';
 
 /**
  * @param {!Window} global
@@ -23,6 +23,6 @@ import {writeScript} from '../src/3p'
 export function a9(global, data) {
   global.aax_size = data.aax_size;
   global.aax_pubname = data.aax_pubname;
-  global.aax_src = data.aax_src
+  global.aax_src = data.aax_src;
   writeScript(global, 'https://c.amazon-adsystem.com/aax2/assoc.js');
 }
