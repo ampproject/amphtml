@@ -26,6 +26,8 @@ var srcGlobs = [
   '!gulpfile.js'
 ];
 
+var dedicatedCopyrightNoteSources = /(\.js|.css|\.md)$/;
+
 // Terms that must not appear in our source files.
 var forbiddenTerms = {
   'DO NOT SUBMIT': '',
@@ -48,11 +50,20 @@ var forbiddenTerms = {
   'webkitRequestFileSystem': '',
 };
 
-var forbiddenTermsKeys = Object.keys(forbiddenTerms);
+// Terms that must appear in a source file.
+var requiredTerms = {
+  'Copyright 2015 The AMP HTML Authors\\.':
+      dedicatedCopyrightNoteSources,
+  'Licensed under the Apache License, Version 2\\.0':
+      dedicatedCopyrightNoteSources,
+  'http\\://www\\.apache\\.org/licenses/LICENSE-2\\.0':
+      dedicatedCopyrightNoteSources,
+};
+
 
 function hasAnyTerms(file) {
   var content = file.contents.toString();
-  return forbiddenTermsKeys.map(function(term) {
+  return Object.keys(forbiddenTerms).map(function(term) {
     var fix;
     // we can't optimize building the `RegExp` objects early unless we build
     // another mapping of term -> regexp object to be able to get back to the
@@ -61,7 +72,8 @@ function hasAnyTerms(file) {
     // negligible.
     var matches = content.match(new RegExp(term));
     if (matches) {
-      util.log(util.colors.red('Found: "' + matches[0] + '" in ' + file.path));
+      util.log(util.colors.red('Found forbidden: "' + matches[0] +
+          '" in ' + file.path));
       fix = forbiddenTerms[term];
       if (fix) {
         util.log(util.colors.blue(fix));
@@ -75,21 +87,53 @@ function hasAnyTerms(file) {
   });
 }
 
-function checkForbiddenTerms() {
-  var errorsFound = false;
+function hasAllTerms(file) {
+  var content = file.contents.toString();
+  return Object.keys(requiredTerms).map(function(term) {
+    var filter = requiredTerms[term];
+    if (!filter.test(file.path)) {
+      return false;
+    }
+
+    var matches = content.match(new RegExp(term));
+    if (!matches) {
+      util.log(util.colors.red('Did not find required: "' + term +
+          '" in ' + file.path));
+      util.log(util.colors.blue('=========='));
+      return true;
+    }
+    return false;
+  }).some(function(hasAnyTerm) {
+    return hasAnyTerm;
+  });
+}
+
+function checkForbiddenAndRequiredTerms() {
+  var forbiddenFound = false;
+  var missingRequirements = false;
   return gulp.src(srcGlobs)
     .pipe(util.buffer(function(err, files) {
-      errorsFound = files.map(hasAnyTerms).some(function(errorFound) {
+      forbiddenFound = files.map(hasAnyTerms).some(function(errorFound) {
+        return errorFound;
+      });
+      missingRequirements = files.map(hasAllTerms).some(function(errorFound) {
         return errorFound;
       });
     }))
     .on('end', function() {
-      if (errorsFound) {
+      if (forbiddenFound) {
         util.log(util.colors.blue(
             'Please remove these usages or consult with the AMP team.'));
+      }
+      if (missingRequirements) {
+        util.log(util.colors.blue(
+            'Adding these terms (e.g. by adding a required LICENSE ' +
+            'to the file'));
+      }
+      if (forbiddenFound || missingRequirements) {
         process.exit(1);
       }
     });
 }
 
-gulp.task('presubmit', checkForbiddenTerms);
+gulp.task('presubmit', checkForbiddenAndRequiredTerms);
