@@ -67,6 +67,7 @@ describe('reportErrorToServer', () => {
     expect(query.m).to.equal('XYZ');
     expect(query.el).to.equal('FOO-BAR');
     expect(query.a).to.equal('0');
+    expect(query.v).to.equal('$internalRuntimeVersion$');
   });
 
   it('reportError mark asserts', () => {
@@ -78,6 +79,7 @@ describe('reportErrorToServer', () => {
 
     expect(query.m).to.equal('XYZ');
     expect(query.a).to.equal('1');
+    expect(query.v).to.equal('$internalRuntimeVersion$');
   });
 
   it('reportError without error object', () => {

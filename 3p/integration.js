@@ -20,22 +20,20 @@
  */
 
 import '../src/polyfills';
-import {a9} from './a9';
-import {adreactor} from './adreactor';
-import {adsense} from './adsense';
-import {adtech} from './adtech';
-import {doubleclick} from './doubleclick';
+import {a9} from '../ads/a9';
+import {adreactor} from '../ads/adreactor';
+import {adsense} from '../ads/adsense';
+import {adtech} from '../ads/adtech';
+import {doubleclick} from '../ads/doubleclick';
 import {twitter} from './twitter';
 import {register, run} from '../src/3p';
 
-register('ad', 'a9', a9);
-register('ad', 'adreactor', adreactor);
-register('ad', 'adsense', adsense);
-register('ad', 'adtech', adtech);
-register('ad', 'doubleclick', doubleclick);
-
-// TODO(malteubl) Move somewhere else since this is not an ad.
-register('ad', 'twitter', twitter);
+register('a9', a9);
+register('adreactor', adreactor);
+register('adsense', adsense);
+register('adtech', adtech);
+register('doubleclick', doubleclick);
+register('twitter', twitter);
 
 /**
  * Visible for testing.
@@ -43,10 +41,10 @@ register('ad', 'twitter', twitter);
  * @param {!Window} win
  * @param {!Object} data
  */
-export function drawAd(win, data) {
+export function draw3p(win, data) {
   var type = data.type;
-  run('ad', type, win, data);
-}
+  run(type, win, data);
+};
 
 /**
  * Returns the "master frame" for all widgets of a given type.
@@ -78,12 +76,12 @@ function masterSelection(type) {
 /**
  * Draws an optionally synchronously to the DOM.
  */
-window.drawAd = function() {
+window.draw3p = function() {
   var fragment = location.hash;
   var data = fragment ? JSON.parse(fragment.substr(1)) : {};
   window.context = data._context;
   window.context.master = masterSelection(data.type);
   window.context.isMaster = window.context.master == window;
   delete data._context;
-  drawAd(window, data);
+  draw3p(window, data);
 };

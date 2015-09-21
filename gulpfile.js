@@ -72,7 +72,7 @@ function buildExtensions(options) {
 }
 
 function clean(done) {
-  del(['dist', 'dist.ads', 'build', 'examples.build'], done);
+  del(['dist', 'dist.3p', 'build', 'examples.build'], done);
 }
 
 function polyfillsForTests() {
@@ -86,12 +86,12 @@ function compile(watch, shouldMinify) {
     watch: watch,
     minify: shouldMinify
   });
-  compileJs('./ads/', 'ads.js', './dist.ads/' + internalRuntimeVersion, {
+  compileJs('./3p/', 'integration.js', './dist.3p/' + internalRuntimeVersion, {
     minifiedName: 'f.js',
     watch: watch,
     minify: shouldMinify
   });
-  adsBootstrap(watch);
+  thirdPartyBootstrap(watch);
 }
 
 
@@ -240,8 +240,8 @@ function examplesWithMinifiedJs(name) {
       .pipe(gulp.dest('examples.build/'));
 }
 
-function adsBootstrap(watch) {
-  var input = 'ads/frame.max.html';
+function thirdPartyBootstrap(watch) {
+  var input = '3p/frame.max.html';
   if (watch) {
     gulpWatch(input, function() {
       adsBootstrap(false);
@@ -250,10 +250,10 @@ function adsBootstrap(watch) {
   console.log('Processing ' + input);
   var html = fs.readFileSync(input, 'utf8');
   var min = html;
-  min = min.replace(/\.\/ads\.js/g, './f.js');
+  min = min.replace(/\.\/integration\.js/g, './f.js');
   gulp.src(input)
       .pipe(file('frame.html', min))
-      .pipe(gulp.dest('dist.ads/' + internalRuntimeVersion));
+      .pipe(gulp.dest('dist.3p/' + internalRuntimeVersion));
 }
 
 

@@ -27,34 +27,29 @@ import {assert} from './asserts';
 var ThirdPartyFunction;
 
 
-/** @const {!Object<!Object<ThirdPartyFunction>>} */
-var registrations = {
-  ad: {}
-};
+/** @const {!Object<ThirdPartyFunction>} */
+var registrations = {};
 
 var syncScriptLoads = 0;
 
 /**
- * @param {string} type The type of 3p integration. See keys in the
- *     registrations objects.
  * @param {string} id The specific 3p integration.
  * @param {ThirdPartyFunction} draw Function that draws the 3p integration.
  */
-export function register(type, id, draw) {
-  var ofType = assert(registrations[type], 'Unknown type ' + type);
-  ofType[id] = draw;
+export function register(id, draw) {
+  assert(!registrations[id], 'Double registration %s', id);
+  registrations[id] = draw;
 }
 
 /**
- * Execute the 3p integration with the given type and id.
- * @param {string} type
+ * Execute the 3p integration with the given id.
  * @param {id} id
  * @param {!Window} win
  * @param {!Object} data
  */
-export function run(type, id, win, data) {
-  var fn = assert(registrations[type], 'Unknown type ' + type)[id];
-  assert(fn, 'Unknown ' + type + ': ' + id);
+export function run(id, win, data) {
+  var fn = registrations[id];
+  assert(fn, 'Unknown 3p: ' + id);
   fn(win, data);
 }
 
