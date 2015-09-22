@@ -45,6 +45,10 @@ For example:
 
 #### Attributes
 
+**src**
+
+Required if no <source> children are present. Must be HTTPS.
+
 **autoplay**
 
 The `autoplay` attribute allows the author to specify when - if ever - the animated image will autoplay.
