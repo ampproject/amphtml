@@ -29,7 +29,6 @@ in particular its [components in form of custom elements](spec/amp-html-componen
   css/            - default css
   examples/       - example AMP HTML files and corresponding assets
   extensions/     - plugins which extend the AMP HTML runtime's core set of tags
-  fixtures/       -
   spec/           - The AMP HTML Specification files
   src/            - source code for the AMP runtime
   test/           - tests for the AMP runtime and builtins
