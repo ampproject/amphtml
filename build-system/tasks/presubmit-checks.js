@@ -48,6 +48,7 @@ var forbiddenTerms = {
   'requestFileSystem': '',
   '\\.scrollTop': '',
   'webkitRequestFileSystem': '',
+  'debugger': '',
 };
 
 // Terms that must appear in a source file.
