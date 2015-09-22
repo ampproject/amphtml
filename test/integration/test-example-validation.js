@@ -44,8 +44,6 @@ describe('example', function() {
   // Only add to this whitelist to temporarily manage discrepancies
   // between validator and runtime.
   var errorWhitelist = [
-    // Permanent: Used in examples, not public.
-    /DISALLOWED_TAG amp-extended-sample/,
     // Issue #231: Valid, must be whitelisted.
     /DISALLOWED_ATTR from/,
     // Issue #231: Valid, must be whitelisted
