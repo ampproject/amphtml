@@ -21,6 +21,7 @@ in particular its [components in form of custom elements](spec/amp-html-componen
 
 ## Repository Layout
 <pre>
+  3p              - Implementation of third party sandbox iframes.
   ads/            - Modules implementing specific ad networks used in <amp-ad>
   build-system/   - build infrastructure
   builtins/       - tags built into the core AMP runtime
