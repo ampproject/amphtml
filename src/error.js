@@ -51,7 +51,11 @@ export function reportError(error, opt_associatedElement) {
     (console.error || console.log).apply(console,
         error.messageArray);
   } else {
-    (console.error || console.log).call(console, error.message);
+    if (process.env.NODE_ENV == 'production') {
+      (console.error || console.log).call(console, error.message);
+    } else {
+      (console.error || console.log).call(console, error.stack);
+    }
   }
   if (element && element.dispatchCustomEvent) {
     element.dispatchCustomEvent('amp:error', error.message);
