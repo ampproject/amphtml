@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+var fs = require('fs');
 var argv = require('minimist')(process.argv.slice(2));
 var gulp = require('gulp');
 var del = require('del');
@@ -90,7 +91,7 @@ function compile(watch, shouldMinify) {
     watch: watch,
     minify: shouldMinify
   });
-  thirdPartyBootstrap(watch);
+  thirdPartyBootstrap(watch, shouldMinify);
 }
 
 
@@ -241,11 +242,11 @@ function examplesWithMinifiedJs(name) {
       .pipe(gulp.dest('examples.build/'));
 }
 
-function thirdPartyBootstrap(watch) {
+function thirdPartyBootstrap(watch, shouldMinify) {
   var input = '3p/frame.max.html';
   if (watch) {
     gulpWatch(input, function() {
-      adsBootstrap(false);
+      thirdPartyBootstrap(false);
     });
   }
   console.log('Processing ' + input);
@@ -254,7 +255,20 @@ function thirdPartyBootstrap(watch) {
   min = min.replace(/\.\/integration\.js/g, './f.js');
   gulp.src(input)
       .pipe(file('frame.html', min))
-      .pipe(gulp.dest('dist.3p/' + internalRuntimeVersion));
+      .pipe(gulp.dest('dist.3p/' + internalRuntimeVersion))
+      .on('end', function() {
+        var aliasToLatestBuild = 'dist.3p/current';
+        if (shouldMinify) {
+          aliasToLatestBuild += '-min';
+        }
+        if (fs.existsSync(aliasToLatestBuild)) {
+          fs.unlinkSync(aliasToLatestBuild);
+        }
+        fs.symlinkSync(
+            './' + internalRuntimeVersion,
+            aliasToLatestBuild,
+            'dir');
+      });
 }
 
 

@@ -27,12 +27,16 @@ import {adtech} from '../ads/adtech';
 import {doubleclick} from '../ads/doubleclick';
 import {twitter} from './twitter';
 import {register, run} from '../src/3p';
+import {parseUrl} from '../src/url';
 
 register('a9', a9);
 register('adreactor', adreactor);
 register('adsense', adsense);
 register('adtech', adtech);
 register('doubleclick', doubleclick);
+register('_ping_', function(win, data) {
+  win.document.getElementById('c').textContent = data.ping;
+});
 register('twitter', twitter);
 
 /**
@@ -82,6 +86,7 @@ window.draw3p = function() {
   window.context = data._context;
   window.context.master = masterSelection(data.type);
   window.context.isMaster = window.context.master == window;
+  window.context.data = data;
   delete data._context;
   draw3p(window, data);
 };

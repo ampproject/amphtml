@@ -19,7 +19,6 @@ import '../src/polyfills';
 import {adopt} from '../src/runtime';
 
 adopt(global);
-window.AMP_TEST = true;
 
 // Hack for skipping tests on Travis that don't work there.
 // Get permission before use!

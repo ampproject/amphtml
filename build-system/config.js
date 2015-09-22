@@ -35,6 +35,11 @@ var paths = [
     pattern: 'examples/**/*',
     included: false,
     served: true
+  },
+  {
+    pattern: 'dist.3p/**/*',
+    included: false,
+    served: true
   }
 ];
 
