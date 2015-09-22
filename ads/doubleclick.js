@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {writeScript} from '../src/3p'
+import {writeScript} from '../src/3p';
 
 /**
  * @param {!Window} global
@@ -33,7 +33,7 @@ export function doubleclick(global, data) {
               .addService(googletag.pubads());
           googletag.pubads().enableSingleRequest();
           googletag.pubads().enableSyncRendering();
-          googletag.pubads().set("page_url", context.location.href);
+          googletag.pubads().set('page_url', context.location.href);
           googletag.enableServices();
 
           if (data.targeting) {

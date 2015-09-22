@@ -21,7 +21,7 @@ import {loadPromise} from '../../src/event-helper';
 describe('error page', () => {
   var fixture;
   beforeEach(() => {
-    return createFixtureIframe('fixtures/errors.html', 500).then((f) => {
+    return createFixtureIframe('test/fixtures/errors.html', 500).then((f) => {
       fixture = f;
       return poll('errors to happen', () => {
         return fixture.doc.querySelectorAll('[error-message]').length >= 2;

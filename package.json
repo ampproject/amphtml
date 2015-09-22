@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "Fastish HTML",
   "main": "index.js",
-  "engines" : {
+  "engines": {
     "node": "^4.0.0"
   },
   "author": "The AMP HTML Authors",
@@ -13,7 +13,7 @@
     "url": "https://github.com/ampproject/amphtml.git"
   },
   "scripts": {
-    "test": "gulp unit",
+    "test": "gulp test",
     "lint": "gulp lint",
     "build": "gulp build",
     "dist": "gulp dist"
@@ -32,18 +32,18 @@
     "cssnano": "^3.0.1",
     "del": "^1.2.0",
     "es6ify": "~1.6.0",
-    "find-in-files": "^0.1.1",
+    "fs-extra": "^0.24.0",
     "gulp": "^3.9.0",
     "gulp-babel": "~5.1.0",
     "gulp-concat": "~2.6.0",
     "gulp-esperanto": "~0.2.0",
     "gulp-file": "^0.2.0",
-    "gulp-gjslint": "~0.1.4",
+    "gulp-gjslint": "^0.1.5",
     "gulp-rename": "~1.2.2",
     "gulp-replace": "^0.5.4",
     "gulp-sourcemaps": "^1.5.2",
     "gulp-uglify": "~1.2.0",
-    "gulp-util": "~3.0.4",
+    "gulp-util": "^3.0.6",
     "gulp-watch": "^4.3.4",
     "gulp-wrap": "^0.11.0",
     "karma": "^0.12.37",
@@ -57,6 +57,7 @@
     "karma-mocha": "^0.2.0",
     "karma-safari-launcher": "^0.1.1",
     "karma-sinon-chai": "^1.0.0",
+    "minimist": "^1.2.0",
     "mocha": "^2.2.5",
     "postcss": "^5.0.5",
     "sinon": "^1.15.4",

@@ -53,7 +53,7 @@ In concrete terms this means that:
   <title>Sample document</title>
   <link rel="canonical" href="./regular-html-version.html">
   <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
-  <style>
+  <style amp-custom>
     h1 {color: red}
   </style>
   <script type="application/ld+json">
@@ -67,7 +67,7 @@ In concrete terms this means that:
     "datePublished": "2015-02-05T08:00:00+08:00"
   }
   </script>
-  <script element="amp-carousel" src="https://cdn.ampproject.org/v1/amp-carousel-0.1.js" async></script>
+  <script custom-element="amp-carousel" src="https://cdn.ampproject.org/v1/amp-carousel-0.1.js" async></script>
   <script src="https://cdn.ampproject.org/v0.js" async></script>
   <style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
 </head>
@@ -143,10 +143,10 @@ Most HTML tags can be used unchanged in AMP HTML. Certain tags, however, have eq
 | embed     | Banned. |
 | form      | Banned. |
 | input elements | Banned. Includes input, button, textarea, select, option. |
-| style     | [Required style tags for adjusting opacity](#opacity) One additional style tag is allowed in head tag for the purpose of custom styling. |
+| <a name="cust"></a>style     | [Required style tags for adjusting opacity](#opacity) One additional style tag is allowed in head tag for the purpose of custom styling. This style tag must have the attribute `amp-custom`. [🔗](#cust) |
 | link      | Allowed for certain values of rel: `canonical`. `stylesheet` is generally disallowed, but some values may be whitelisted for font providers. |
 | meta      | The `http-equiv` attribute is banned. Otherwise allowed. |
-| a         | The `href` attribute value must not begin with `javascript:`. If set, the `target` attribute value must be `_blank`. Otherwise allowed. |
+| <a name="ancr"></a>a         | The `href` attribute value must not begin with `javascript:`. If set, the `target` attribute value must be `_blank`. Otherwise allowed. [🔗](#ancr) |
 
 Validator implementations should use a whitelist based on the HTML5 specification with the above tags removed.
 TODO(malteubl): Add addendum with whitelist.
@@ -171,7 +171,7 @@ Major semantic tags and the AMP custom elements come with default styles to make
 
 #### Author stylesheets
 
-Authors may add custom styles to a document using a single `<style>` tag in the head of the document.
+Authors may add custom styles to a document using a single `<style amp-custom>` tag in the head of the document.
 
 #### Selectors
 The initial version of AMP will only allow very simple CSS selectors in AMPs. The restriction is in place to make overall performance easier to reason about. It may be opened up in the future.
@@ -311,7 +311,7 @@ Extended components are components that do not necessarily ship with the AMP run
 Extended components are loaded by including a script tag in the head of the document like this
 
 ```html
-<script element="amp-carousel" src="https://cdn.ampproject.org/v1/amp-carousel-0.1.js" async></script>
+<script custom-element="amp-carousel" src="https://cdn.ampproject.org/v1/amp-carousel-0.1.js" async></script>
 ```
 
 The script tag MUST have an async attribute and MUST have an `element` attribute referencing the name of the element.

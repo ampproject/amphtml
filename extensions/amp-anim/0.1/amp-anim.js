@@ -98,6 +98,6 @@ class AmpAnim extends AMP.BaseElement {
     this.loadPromise_ = loadPromise(this.img_);
     return this.loadPromise_;
   }
-}
+};
 
 AMP.registerElement('amp-anim', AmpAnim);

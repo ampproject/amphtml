@@ -20,7 +20,7 @@
  * normtime value.
  * @typedef {function(normtime):normtime}
  */
-class Curve {}
+class Curve {};
 
 
 /**
@@ -38,7 +38,8 @@ export function bezierCurve(x1, y1, x2, y2) {
 
 
 /**
- * Thanks to https://closure-library.googlecode.com/git-history/docs/local_closure_goog_math_bezier.js.source.html
+ * Thanks to
+ * https://closure-library.googlecode.com/git-history/docs/local_closure_goog_math_bezier.js.source.html
  */
 class Bezier {
 
@@ -231,7 +232,7 @@ class Bezier {
   lerp(a, b, x) {
     return a + x * (b - a);
   }
-}
+};
 
 
 /**
@@ -242,6 +243,8 @@ class Bezier {
 export const Curves = {
   /**
    * linear
+   * @param {number} n
+   * @return {number}
    */
   LINEAR: function(n) {return n;},
 
@@ -264,7 +267,7 @@ export const Curves = {
    * ease-in-out
    */
   EASE_IN_OUT: bezierCurve(0.42, 0.0, 0.58, 1.0)
-}
+};
 
 
 /**
@@ -281,8 +284,8 @@ var NAME_MAP = {
 
 /**
  * If the argument is a string, this methods matches an existing curve by name.
- * @param {!Curve|string|undefined|null} curve
- * @return {!Curve|null}
+ * @param {?Curve|string|undefined} curve
+ * @return {?Curve}
  */
 export function getCurve(curve) {
   if (!curve) {

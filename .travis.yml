@@ -15,4 +15,4 @@ script:
   - gulp presubmit
   - gulp build
   - gulp minify
-  - gulp unit
+  - gulp test

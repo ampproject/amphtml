@@ -55,7 +55,7 @@ class AmpFitText extends AMP.BaseElement {
     this.getRealChildNodes().forEach((node) => {
       this.content_.appendChild(node);
     });
-    this.measurer_.innerHTML = this.content_.innerHTML;
+    this.measurer_./*OK*/innerHTML = this.content_./*OK*/innerHTML;
     this.element.appendChild(this.content_);
     this.element.appendChild(this.measurer_);
 
@@ -66,6 +66,11 @@ class AmpFitText extends AMP.BaseElement {
     /** @private @const {number} */
     this.maxFontSize_ = getLengthNumeral(this.element.getAttribute(
         'max-font-size')) || 72;
+  }
+
+  /** @override */
+  prerenderAllowed() {
+    return true;
   }
 
   /** @override */

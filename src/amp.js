@@ -24,6 +24,7 @@ import {installImg} from '../builtins/amp-img';
 import {installVideo} from '../builtins/amp-video';
 import {installPixel} from '../builtins/amp-pixel';
 import {installStyles} from './styles';
+import {installErrorReporting} from './error';
 import {stubElements} from './custom-element';
 import {adopt} from './runtime';
 import {installExperimentalViewerIntegration} from './experimental-viewer-integration';
@@ -31,30 +32,32 @@ import {cssText} from '../build/css.js';
 import {action} from './action';
 import {maybeValidate} from './validator-integration';
 
+// Should happen first.
+installErrorReporting(window);
+installStyles(document, cssText, () => {
+  historyFor(window);
+  viewerFor(window);
+
+  installImg(window);
+  installAd(window);
+  installPixel(window);
+  installVideo(window);
+
+  adopt(window);
+  stubElements(window);
+  action.addEvent('tap');
+
+  maybeValidate(window);
+
+  installExperimentalViewerIntegration();
+});
+
 // Output a message to the console and add an attribute to the <html>
 // tag to give some information that can be used in error reports.
 // (At least by sophisticated users).
 if (window.console) {
   (console.info || console.log).call(console,
       'Powered by AMP ⚡ HTML – Version $internalRuntimeVersion$');
-  document.documentElement.setAttribute('amp-version',
-      '$internalRuntimeVersion$');
 }
-
-historyFor(window);
-viewerFor(window);
-
-installAd(window);
-installImg(window);
-installPixel(window);
-installVideo(window);
-
-installStyles(document, cssText);
-adopt(window);
-stubElements(window);
-
-action.addEvent('tap');
-
-maybeValidate(window);
-
-installExperimentalViewerIntegration();
+document.documentElement.setAttribute('amp-version',
+      '$internalRuntimeVersion$');

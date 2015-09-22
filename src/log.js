@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import {getMode} from './mode'
+import {getMode} from './mode';
+
+/** @const Time when this JS loaded.  */
+var start = new Date().getTime();
 
 
 /**
@@ -73,7 +76,7 @@ export class Log {
       } else if (level == 'WARN') {
         fn = this.win.console.warn || fn;
       }
-      messages.unshift('[' + tag + ']');
+      messages.unshift(new Date().getTime() - start, '[' + tag + ']');
       fn.apply(this.win.console, messages);
     }
   }
@@ -110,7 +113,7 @@ export class Log {
   error(tag, var_args) {
     this.msg_(tag, 'ERROR', Array.prototype.slice.call(arguments, 1));
   }
-}
+};
 
 
 export const log = new Log(window);

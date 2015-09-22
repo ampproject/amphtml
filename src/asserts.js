@@ -28,7 +28,7 @@
  *   elements in an array. When e.g. passed to console.error this yields
  *   native displays of things like HTML elements.
  *
- * @param {T} shouldBeTruish The value to assert. The assert fails if it does
+ * @param {T} shouldBeTrueish The value to assert. The assert fails if it does
  *     not evaluate to true.
  * @param {string} message The assertion message
  * @param {...*} var_args Arguments substituted into %s in the message.
@@ -49,18 +49,19 @@ export function assert(shouldBeTrueish, message, var_args) {
       if (val && val.tagName) {
         firstElement = val;
       }
-      var nextConstant = splitMessage.shift()
+      var nextConstant = splitMessage.shift();
       messageArray.push(val);
       pushIfNonEmpty(messageArray, nextConstant.trim());
       formatted += toString(val) + nextConstant;
     }
     var e = new Error(formatted);
+    e.fromAssert = true;
     e.associatedElement = firstElement;
     e.messageArray = messageArray;
     throw e;
   }
   return shouldBeTrueish;
-};
+}
 
 /**
  * @param {*} val

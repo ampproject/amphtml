@@ -18,12 +18,14 @@ import {Pass} from './pass';
 import {assert} from './asserts';
 import {expandLayoutRect, layoutRectLtwh, layoutRectsOverlap} from
     './layout-rect';
+import {inputFor} from './input';
 import {log} from './log';
-import {onDocumentReady} from './event-helper';
-import {reportErrorToDeveloper} from './error';
+import {onDocumentReady} from './document-state';
+import {reportError} from './error';
 import {timer} from './timer';
 import {viewerFor} from './viewer';
 import {viewport} from './viewport';
+import {vsync} from './vsync';
 
 let TAG_ = 'Resources';
 let RESOURCE_PROP_ = '__AMP__RESOURCE';
@@ -59,6 +61,9 @@ export class Resources {
     /** @const {!Window} */
     this.win = window;
 
+    /** @const {!Viewer} */
+    this.viewer_ = viewerFor(window);
+
     /** @private @const {number} */
     this.maxDpr_ = this.win.devicePixelRatio || 1;
 
@@ -69,13 +74,19 @@ export class Resources {
     this.resources_ = [];
 
     /** @private {boolean} */
+    this.visible_ = this.viewer_.isVisible();
+
+    /** @private {number} */
+    this.prerenderSize_ = this.viewer_.getPrerenderSize();
+
+    /** @private {boolean} */
+    this.documentReady_ = false;
+
+    /** @private {boolean} */
     this.relayoutAll_ = false;
 
     /** @private {boolean} */
     this.forceBuild_ = false;
-
-    /** @private {boolean} */
-    this.documentReady_ = false;
 
     /** @private {number} */
     this.lastVelocity_ = 0;
@@ -105,30 +116,60 @@ export class Resources {
       this.forceBuild_ = true;
       this.relayoutAll_ = true;
       this.schedulePass();
+      this.monitorInput_();
+    });
+
+    // When document becomes visible, e.g. from "prerender" mode, do a
+    // simple pass.
+    this.viewer_.onVisibilityChanged(() => {
+      this.visible_ = this.viewer_.isVisible();
+      this.prerenderSize_ = this.viewer_.getPrerenderSize();
+      this.schedulePass();
     });
 
     this.relayoutAll_ = true;
     this.schedulePass();
   }
 
+  /** @private */
+  monitorInput_() {
+    let input = inputFor(this.win);
+    input.onTouchDetected((detected) => {
+      this.toggleInputClass_('amp-mode-touch', detected);
+    }, true);
+    input.onMouseDetected((detected) => {
+      this.toggleInputClass_('amp-mode-mouse', detected);
+    }, true);
+    input.onKeyboardStateChanged((active) => {
+      this.toggleInputClass_('amp-mode-keyboard-active', active);
+    }, true);
+  }
+
   /**
+   * @param {string} clazz
+   * @param {boolean} on
    * @private
    */
+  toggleInputClass_(clazz, on) {
+    vsync.mutate(() => {
+      this.win.document.body.classList.toggle(clazz, on);
+    });
+  }
+
+  /** @private */
   setDocumentReady_() {
     this.documentReady_ = true;
-    viewerFor(this.win).postDocumentReady(viewport.getSize().width,
+    this.viewer_.postDocumentReady(viewport.getSize().width,
         this.win.document.body.scrollHeight);
     this.updateScrollHeight_();
   }
 
-  /**
-   * @private
-   */
+  /** @private */
   updateScrollHeight_() {
     let scrollHeight = this.win.document.body.scrollHeight;
     if (scrollHeight != this.scrollHeight_) {
       this.scrollHeight_ = scrollHeight;
-      viewerFor(this.win).postDocumentResized(viewport.getSize().width,
+      this.viewer_.postDocumentResized(viewport.getSize().width,
           scrollHeight);
     }
   }
@@ -208,6 +249,7 @@ export class Resources {
   upgraded(element) {
     let resource = this.getResourceForElement(element);
     resource.build(this.forceBuild_);
+    this.schedulePass();
     log.fine(TAG_, 'element upgraded:', resource.debugid);
   }
 
@@ -285,17 +327,23 @@ export class Resources {
   doPass_() {
     let viewportSize = viewport.getSize();
     log.fine(TAG_, 'PASS: at ' + timer.now() +
+        ', visible=', this.visible_,
         ', forceBuild=', this.forceBuild_,
         ', relayoutAll=', this.relayoutAll_,
-        ', viewportSize=', viewportSize.width, viewportSize.height);
+        ', viewportSize=', viewportSize.width, viewportSize.height,
+        ', prerenderSize=', this.prerenderSize_);
 
     // If viewport size is 0, the manager will wait for the resize event.
     if (viewportSize.height > 0 && viewportSize.width > 0) {
       this.discoverWork_();
       let delay = this.work_();
-      log.fine(TAG_, 'next pass:', delay);
-      this.schedulePass(delay);
-      this.updateScrollHeight_();
+      if (this.visible_) {
+        log.fine(TAG_, 'next pass:', delay);
+        this.schedulePass(delay);
+        this.updateScrollHeight_();
+      } else {
+        log.fine(TAG_, 'document is not visible: no scheduling');
+      }
     }
   }
 
@@ -349,11 +397,14 @@ export class Resources {
       }
     }
 
-    var viewportRect = viewport.getRect();
-    // Load viewport = viewport + 3x up/down.
-    var loadRect = expandLayoutRect(viewportRect, 0.25, 2);
+    let viewportRect = viewport.getRect();
+    // Load viewport = viewport + 3x up/down when document is visible or
+    // depending on prerenderSize in pre-render mode.
+    let loadRect = this.visible_ ?
+        expandLayoutRect(viewportRect, 0.25, 2) :
+        expandLayoutRect(viewportRect, 0.25, this.prerenderSize_);
     // Visible viewport = viewport + 25% up/down.
-    var visibleRect = expandLayoutRect(viewportRect, 0.25, 0.25);
+    let visibleRect = expandLayoutRect(viewportRect, 0.25, 0.25);
 
     // Phase 3: Schedule elements for layout within a reasonable distance from
     // current viewport.
@@ -373,7 +424,10 @@ export class Resources {
       if (r.hasOwner()) {
         continue;
       }
-      var shouldBeInViewport = (r.isDisplayed() && r.overlaps(visibleRect));
+      // Note that when the document is not visible, neither are any of its
+      // elements to reduce CPU cycles.
+      var shouldBeInViewport = (this.visible_ && r.isDisplayed() &&
+          r.overlaps(visibleRect));
       if (r.isInViewport() != shouldBeInViewport) {
         r.setInViewport(shouldBeInViewport);
       }
@@ -381,7 +435,8 @@ export class Resources {
 
     // Phase 5: Idle layout: layout more if we are otherwise not doing much.
     // TODO(dvoytenko): document/estimate IDLE timeouts and other constants
-    if (this.exec_.getSize() == 0 &&
+    if (this.visible_ &&
+          this.exec_.getSize() == 0 &&
           this.queue_.getSize() == 0 &&
           now > this.exec_.getLastDequeueTime() + 5000) {
       let idleScheduledCount = 0;
@@ -437,13 +492,14 @@ export class Resources {
         // until the current one finished the execution.
         let executing = this.exec_.getTaskById(task.id);
         if (!executing) {
-          task.promise = task.callback();
+          // Ensure that task can prerender
+          task.promise = task.callback(this.visible_);
           task.startTime = now;
           log.fine(TAG_, 'exec:', task.id, 'at', task.startTime);
           this.exec_.enqueue(task);
           task.promise.then(this.taskComplete_.bind(this, task, true),
               this.taskComplete_.bind(this, task, false))
-              .catch(reportErrorToDeveloper);
+              .catch(reportError);
         } else {
           // Reschedule post execution.
           executing.promise.then(this.reschedule_.bind(this, task),
@@ -576,6 +632,11 @@ export class Resources {
         resource.isDisplayed(),
         'Not ready for layout: %s (%s)',
         resource.debugid, resource.getState());
+    // Don't schedule elements that can't prerender, they won't be allowed
+    // to execute anyway.
+    if (!this.visible_ && !resource.prerenderAllowed()) {
+      return;
+    }
     if (layout) {
       this.schedule_(resource,
           LAYOUT_TASK_ID_, LAYOUT_TASK_OFFSET_,
@@ -904,6 +965,14 @@ export class Resource {
   }
 
   /**
+   * Whether this element can be pre-rendered.
+   * @return {boolean}
+   */
+  prerenderAllowed() {
+    return this.element.prerenderAllowed();
+  }
+
+  /**
    * Sets the resource's state to LAYOUT_SCHEDULED.
    */
   layoutScheduled() {
@@ -914,9 +983,10 @@ export class Resource {
    * Starts the layout of the resource. Returns the promise that will yield
    * once layout is complete. Only allowed to be called on a upgraded, built
    * and displayed element.
+   * @param {boolean} isDocumentVisible
    * @return {!Promise}
    */
-  startLayout() {
+  startLayout(isDocumentVisible) {
     if (this.layoutPromise_) {
       return this.layoutPromise_;
     }
@@ -929,6 +999,13 @@ export class Resource {
 
     assert(this.state_ != ResourceState_.NOT_BUILT,
         'Not ready to start layout: %s (%s)', this.debugid, this.state_);
+
+    if (!isDocumentVisible && !this.prerenderAllowed()) {
+      log.fine(TAG_, 'layout canceled due to non pre-renderable element:',
+          this.debugid, this.state_);
+      this.state_ = ResourceState_.READY_FOR_LAYOUT;
+      return Promise.resolve();
+    }
 
     // Double check that the element has not disappeared since scheduling
     this.measure();
@@ -1181,7 +1258,7 @@ export const ResourceState_ = {
  *   id: string,
  *   resource: !Resource,
  *   priority: number,
- *   callback: function(),
+ *   callback: function(boolean),
  *   scheduleTime: time,
  *   startTime: time,
  *   promise: (!Promise|undefined)

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 /**
  * A helper class that provides information about device/OS/browser currently
  * running.
@@ -43,7 +44,7 @@ export class Platform {
   isChrome() {
     return /Chrome|CriOS/i.test(this.win.navigator.userAgent);
   }
-}
+};
 
 
 export const platform = new Platform(window);

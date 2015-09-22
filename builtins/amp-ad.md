@@ -8,6 +8,21 @@ Ads are loaded like all other resources in AMP documents, with a special
 custom element called `<amp-ad>`. No ad network provided JavaScript is allowed to run inside the AMP document. Instead the AMP runtime loads an iframe from a
 different origin (via iframe sandbox) as the AMP document and executes the ad
 network’s JS inside that iframe sandbox.
+<!---
+Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS-IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
 
 AMP documents only support ads served via HTTPS.
 
@@ -31,4 +46,20 @@ Identifier for the ad network. This selects the template that is used for the ad
 
 **src**
 
-Optional src value for a script tag loaded for this ad network. This can be used with ad network that require exactly a single script tag to be inserted in the page. The src value must have a prefix that is whitelisted for this ad network.
+Optional src value for a script tag loaded for this ad network. This can be used with ad networks that require exactly a single script tag to be inserted in the page. The src value must have a prefix that is whitelisted for this ad network.
+
+**data-foo-bar**
+
+Most ad networks require further configuration. This can be passed to the network using HTML `data-` attributes. The parameter names are subject to standard data attribute dash to camel case conversion. E.g. "data-foo-bar" is send to the ad for configuration as "fooBar".
+
+**json**
+
+Optional attribute to pass configuration to the ad as an arbitrarily complex JSON object. The object is passed to the ad as-is with no mangling done on the names.
+
+#### Supported ad networks
+
+- [A9](../ads/a9.md)
+- [AdReactor](../ads/adreactor.md)
+- [AdSense](../ads/adsense.md)
+- [AdTech](../ads/adtech.md)
+- [Doubleclick](../ads/doubleclick.md)

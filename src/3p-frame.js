@@ -73,7 +73,7 @@ function getFrameAttributes(parentWindow, element, opt_type) {
  * @return {!Element} The iframe.
  */
 export function getIframe(parentWindow, element, opt_type) {
-  var attributes = getFrameAttributes(parentWindow, element, opt_type)
+  var attributes = getFrameAttributes(parentWindow, element, opt_type);
   var iframe = document.createElement('iframe');
   if (!count[attributes.type]) {
     count[attributes.type] = 0;
@@ -132,11 +132,11 @@ export function addDataAndJsonAttributes_(element, attributes) {
 function getBootstrapBaseUrl(parentWindow) {
   // TODO(malteubl): Change to final URL.
   var url =
-      'https://ads.ampproject.net/$internalRuntimeVersion$/frame.html';
+      'https://3p.ampproject.net/$internalRuntimeVersion$/frame.html';
   if (getMode().localDev) {
 
     url = 'http://ads.localhost:' + parentWindow.location.port +
-        '/dist.ads/$internalRuntimeVersion$/frame' +
+        '/dist.3p/$internalRuntimeVersion$/frame' +
         (getMode().minified ? '' : '.max') +
         '.html';
   }

@@ -46,4 +46,4 @@ export class ElementStub extends BaseElement {
     this.element.classList.remove('-amp-unresolved');
     newImpl.createdCallback();
   }
-}
+};

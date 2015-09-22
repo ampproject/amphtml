@@ -69,6 +69,20 @@ describe('Viewer', () => {
     expect(viewer.getParam('other')).to.equal('something');
   });
 
+  it('should configure visibilityState visible by default', () => {
+    expect(viewer.getVisibilityState()).to.equal('visible');
+    expect(viewer.isVisible()).to.equal(true);
+    expect(viewer.getPrerenderSize()).to.equal(1);
+  });
+
+  it('should configure visibilityState and prerender', () => {
+    windowApi.location.hash = '#visibilityState=hidden&prerenderSize=3';
+    let viewer = new Viewer(windowApi);
+    expect(viewer.getVisibilityState()).to.equal('hidden');
+    expect(viewer.isVisible()).to.equal(false);
+    expect(viewer.getPrerenderSize()).to.equal(3);
+  });
+
   it('should configure correctly for iOS embedding', () => {
     windowApi.name = '__AMP__viewportType=natural';
     windowApi.parent = {};
@@ -98,6 +112,21 @@ describe('Viewer', () => {
     expect(viewer.getViewportWidth()).to.equal(13);
     expect(viewer.getViewportHeight()).to.equal(14);
     expect(viewer.getPaddingTop()).to.equal(19);
+  });
+
+  it('should receive visibilitychange event', () => {
+    let visEvent = null;
+    viewer.onVisibilityChanged((event) => {
+      visEvent = event;
+    });
+    viewer.receiveMessage('visibilitychange', {
+      state: 'other',
+      prerenderSize: 4
+    });
+    expect(visEvent).to.not.equal(null);
+    expect(viewer.getVisibilityState()).to.equal('other');
+    expect(viewer.isVisible()).to.equal(false);
+    expect(viewer.getPrerenderSize()).to.equal(4);
   });
 
   it('should post documentLoaded event', () => {

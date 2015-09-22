@@ -19,9 +19,14 @@ import '../src/polyfills';
 import {adopt} from '../src/runtime';
 
 adopt(global);
+window.AMP_TEST = true;
 
 // Hack for skipping tests on Travis that don't work there.
 // Get permission before use!
+/**
+ * @param {string} desc
+ * @param {function()} fn
+ */
 it.skipOnTravis = function(desc, fn) {
   if (navigator.userAgent.match(/Chromium/)) {
     it.skip(desc, fn);
@@ -32,6 +37,10 @@ it.skipOnTravis = function(desc, fn) {
 
 // Hack for skipping tests on Travis that don't work there.
 // Get permission before use!
+/**
+ * @param {string} desc
+ * @param {function()} fn
+ */
 it.skipOnFirefox = function(desc, fn) {
   if (navigator.userAgent.match(/Firefox/)) {
     it.skip(desc, fn);

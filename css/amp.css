@@ -1,4 +1,3 @@
-/* START COPYRIGHT */
 /**
  * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
  *
@@ -14,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/* END COPYRIGHT */
 
 /**
  * Margin:0 is currently needed for iOS viewer embeds.
@@ -23,7 +21,7 @@
  */
 body {
   /* Undoes mandatory opacity: 0 in doc. */
-  opacity: 1;
+  opacity: 1 !important;
   margin: 0 !important;
 }
 
@@ -169,7 +167,7 @@ i-amp-scroll-container {
 amp-pixel {
   position: absolute !important;
   top: 0 !important;
-  width: 1 !important;
+  width: 1px !important;
   height: 1px !important; /* Only things with height are ever loaded. */
   overflow: hidden !important;
   visibility: hidden;

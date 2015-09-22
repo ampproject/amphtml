@@ -95,7 +95,7 @@ class AmpIframe extends AMP.BaseElement {
     this.element.appendChild(makeIOsScrollable(this.element, iframe));
     return loadPromise(iframe);
   }
-}
+};
 
 /**
  * We always set a sandbox. Default is that none of the things that need
@@ -114,7 +114,7 @@ function setSandbox(element, iframe) {
  * that is scrollable because iOS auto expands iframes to their size.
  * @param {!Element} element
  * @param {!Element} iframe
- * @param {!Element} The wrapper or the iframe.
+ * @return {!Element} The wrapper or the iframe.
  */
 function makeIOsScrollable(element, iframe) {
   if (element.getAttribute('scrolling') != 'no') {

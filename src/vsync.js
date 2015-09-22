@@ -61,6 +61,14 @@ export class Vsync {
   }
 
   /**
+   * Runs the mutate operation via vsync.
+   * @param {function()} mutator
+   */
+  mutate(mutator) {
+    this.run({mutate: mutator});
+  }
+
+  /**
    * @param {!VsyncTaskSpec} task
    * @return {function((!Object<string, *>|undefined))}
    */

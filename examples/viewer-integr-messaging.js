@@ -34,7 +34,7 @@ function ViewerMessaging(target, requestProcessor) {
   this.requestProcessor_ = requestProcessor;
 
   window.addEventListener('message', this.onMessage_.bind(this), false);
-};
+}
 
 
 /**
@@ -62,6 +62,7 @@ ViewerMessaging.prototype.sendRequest = function(eventType, payload,
 
 /**
  * @param {!Event} event
+ * @private
  */
 ViewerMessaging.prototype.onMessage_ = function(event) {
   // TODO: must check for origin/target.
@@ -76,6 +77,7 @@ ViewerMessaging.prototype.onMessage_ = function(event) {
 
 /**
  * @param {*} message
+ * @private
  */
 ViewerMessaging.prototype.onRequest_ = function(message) {
   var requestId = message.requestId;
@@ -97,6 +99,7 @@ ViewerMessaging.prototype.onRequest_ = function(message) {
 
 /**
  * @param {*} message
+ * @private
  */
 ViewerMessaging.prototype.onResponse_ = function(message) {
   var requestId = message.requestId;
@@ -114,9 +117,11 @@ ViewerMessaging.prototype.onResponse_ = function(message) {
 
 /**
  * @param {string} sentinel
+ * @param {string} requestId
  * @param {string} eventType
  * @param {*} payload
  * @param {boolean} awaitResponse
+ * @private
  */
 ViewerMessaging.prototype.sendMessage_ = function(sentinel, requestId,
       eventType, payload, awaitResponse) {
@@ -135,6 +140,7 @@ ViewerMessaging.prototype.sendMessage_ = function(sentinel, requestId,
 /**
  * @param {number} requestId
  * @param {*} payload
+ * @private
  */
 ViewerMessaging.prototype.sendResponse_ = function(requestId, payload) {
   this.sendMessage_(this.responseSentinel_, requestId, null, payload, false);
@@ -144,6 +150,7 @@ ViewerMessaging.prototype.sendResponse_ = function(requestId, payload) {
 /**
  * @param {number} requestId
  * @param {*} reason
+ * @private
  */
 ViewerMessaging.prototype.sendResponseError_ = function(requestId, reason) {
   this.sendMessage_(this.responseSentinel_, requestId, 'ERROR', reason, false);

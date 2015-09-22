@@ -37,47 +37,7 @@ export function maybeValidate(win) {
   s.src = 'https://www.gstatic.com/amphtml/v0/validator.js';
   s.onload = () => {
     win.document.head.removeChild(s);
-    // TODO(@gregable): Move all of this into the validator for a simple API
-    // like: amp.validator.validateAndRender(url);
-    // Also, most switch to something different from fetch, so this works in
-    // Safari.
-    get(filename).then((html) => {
-      var result = win.amp.validator.renderValidationResult(
-          win.amp.validator.validateString(html), filename);
-      var status = result.shift();
-      if (status == 'PASS') {
-        console/*OK*/.info('AMP validation successful.');
-      } else if (status == 'UNKNOWN') {
-        console/*OK*/.error('AMP validation yielded unknown status.');
-      } else {
-        console/*OK*/.error('AMP validation had errors:');
-      }
-      result.forEach((message) => {
-        console/*OK*/.error(message);
-      });
-    });
+    amp.validator.validateUrlAndLog(filename)
   };
   win.document.head.appendChild(s);
-}
-
-/**
- * @param {string} filename
- * @return {!Promise<!string>} The fetched doc.
- */
-function get(filename) {
-  return new Promise((resolve, reject) => {
-    var xhr = new XMLHttpRequest();
-
-    xhr.onreadystatechange = function() {
-      if (xhr.readyState == 4) {
-        if (xhr.status == 200) {
-          resolve(xhr.responseText)
-        } else {
-          reject('Fetching file for validation failed: ' + filename);
-        }
-      }
-    };
-    xhr.open("GET", filename, true);
-    xhr.send();
-  });
 }

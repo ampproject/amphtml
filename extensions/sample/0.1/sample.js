@@ -30,7 +30,7 @@ setTimeout(function() {
       this.element.appendChild(h1);
       return Promise.resolve();
     }
-  }
+  };
 
-  AMP.registerElement('amp-extended-sample', ExtendedSample, $CSS$)
+  AMP.registerElement('amp-extended-sample', ExtendedSample, $CSS$);
 }, 2000);

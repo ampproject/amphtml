@@ -129,4 +129,5 @@ require('core-js/modules/es6.promise');
 //require('core-js/modules/web.timers');
 //require('core-js/modules/web.immediate');
 require('core-js/modules/web.dom.iterable');
+/** @const  */
 module.exports = require('core-js/modules/$.core');

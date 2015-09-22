@@ -16,6 +16,7 @@
 
 import {Observable} from './observable';
 import {assert} from './asserts';
+import {documentStateFor} from './document-state';
 import {getService} from './service';
 import {installStyles} from './styles';
 import {log} from './log';
@@ -25,6 +26,52 @@ import {platform} from './platform';
 
 let TAG_ = 'Viewer';
 let SENTINEL_ = '__AMP__';
+
+
+/**
+ * The type of the viewport.
+ * @enum {string}
+ */
+export const ViewportType = {
+
+  /**
+   * Viewer leaves sizing and scrolling up to the AMP document's window.
+   */
+  NATURAL: 'natural',
+
+  /**
+   * Viewer sets and updates sizing and scrolling.
+   */
+  VIRTUAL: 'virtual',
+
+  /**
+   * This is AMP-specific type and doesn't come from viewer. This is the type
+   * that AMP sets when Viewer has requested "natural" viewport on a iOS
+   * device.
+   * See https://docs.google.com/document/d/1YjFk_B6r97CCaQJf2nXRVuBOuNi_3Fn87Zyf1U7Xoz4/edit
+   * and {@link ViewportBindingNaturalIosEmbed_} for more details.
+   */
+  NATURAL_IOS_EMBED: 'natural-ios-embed'
+};
+
+
+/**
+ * Visibility state of the AMP document.
+ * @enum {string}
+ * @private
+ */
+export const VisibilityState = {
+
+  /**
+   * Viewer has shown the AMP document.
+   */
+  VISIBLE: 'visible',
+
+  /**
+   * Viewer has indicated that AMP document is hidden.
+   */
+  HIDDEN: 'hidden'
+};
 
 
 /**
@@ -42,11 +89,20 @@ export class Viewer {
     /** @const {!Window} */
     this.win = win;
 
+    /** @const {!DocumentState} */
+    this.docState_ = documentStateFor(window);
+
     /** @const {boolean} */
     this.overtakeHistory_ = false;
 
     /** @private {string} */
-    this.viewportType_ = 'natural';
+    this.visibilityState_ = VisibilityState.VISIBLE;
+
+    /** @private {number} */
+    this.prerenderSize_ = 1;
+
+    /** @private {string} */
+    this.viewportType_ = ViewportType.NATURAL;
 
     /** @private {number} */
     this.viewportWidth_ = 0;
@@ -59,6 +115,9 @@ export class Viewer {
 
     /** @private {number} */
     this.paddingTop_ = 0;
+
+    /** @private {!Observable} */
+    this.visibilityObservable_ = new Observable();
 
     /** @private {!Observable} */
     this.viewportObservable_ = new Observable();
@@ -96,11 +155,19 @@ export class Viewer {
         this.overtakeHistory_;
     log.fine(TAG_, '- history:', this.overtakeHistory_);
 
+    this.visibilityState_ = this.params_['visibilityState'] ||
+        this.visibilityState_;
+    log.fine(TAG_, '- visibilityState:', this.visibilityState_);
+
+    this.prerenderSize_ = parseInt(this.params_['prerenderSize']) ||
+        this.prerenderSize_;
+    log.fine(TAG_, '- prerenderSize:', this.prerenderSize_);
+
     this.viewportType_ = this.params_['viewportType'] || this.viewportType_;
     // Configure scrolling parameters when AMP is embeded in a viewer on iOS.
-    if (this.viewportType_ == 'natural' && this.win.parent &&
+    if (this.viewportType_ == ViewportType.NATURAL && this.win.parent &&
             platform.isIos()) {
-      this.viewportType_ = 'natural-ios-embed';
+      this.viewportType_ = ViewportType.NATURAL_IOS_EMBED;
     }
     log.fine(TAG_, '- viewportType:', this.viewportType_);
 
@@ -118,6 +185,11 @@ export class Viewer {
 
     this.paddingTop_ = parseInt(this.params_['paddingTop']) || this.paddingTop_;
     log.fine(TAG_, '- padding-top:', this.paddingTop_);
+
+    // Wait for document to become visible.
+    this.docState_.onVisibilityChanged(() => {
+      this.visibilityObservable_.fire();
+    });
 
     // Remove hash - no reason to keep it around.
     var newUrl = this.win.location.href;
@@ -152,11 +224,41 @@ export class Viewer {
   }
 
   /**
+   * Returns visibility state configured by the viewer.
+   * See {@link isVisible}.
+   * @return {!VisibilityState}
+   */
+  getVisibilityState() {
+    return this.visibilityState_;
+  }
+
+  /**
+   * Whether the AMP document currently visible. The reasons why it might not
+   * be visible include user switching to another tab, browser running the
+   * document in the prerender mode or viewer running the document in the
+   * prerender mode.
+   * @return {boolean}
+   */
+  isVisible() {
+    return this.visibilityState_ == VisibilityState.VISIBLE &&
+        !this.docState_.isHidden();
+  }
+
+  /**
+   * How much the viewer has requested the runtime to prerender the document.
+   * The values are in number of screens.
+   * @return {number}
+   */
+  getPrerenderSize() {
+    return this.prerenderSize_;
+  }
+
+  /**
    * There are two types of viewports: "natural" and "virtual". "Natural" is
    * the viewport of the AMP document's window. "Virtual" is the viewport
    * provided by the viewer.
    * See {@link Viewport} and {@link ViewportBinding} for more details.
-   * @return {string}
+   * @return {!ViewportType}
    */
   getViewportType() {
     return this.viewportType_;
@@ -195,6 +297,17 @@ export class Viewer {
    */
   getPaddingTop() {
     return this.paddingTop_;
+  }
+
+  /**
+   * Adds a "visibilitychange" event listener for viewer events. The
+   * callback can check {@link isVisible} and {@link getPrefetchCount}
+   * methods for more info.
+   * @param {function()} handler
+   * @return {!Unlisten}
+   */
+  onVisibilityChanged(handler) {
+    return this.visibilityObservable_.add(handler);
   }
 
   /**
@@ -299,6 +412,18 @@ export class Viewer {
       this.historyPoppedObservable_.fire({
         newStackIndex: data['newStackIndex']
       });
+      return Promise.resolve();
+    }
+    if (eventType == 'visibilitychange') {
+      if (data['state'] !== undefined) {
+        this.visibilityState_ = data['state'];
+      }
+      if (data['prerenderSize'] !== undefined) {
+        this.prerenderSize_ = data['prerenderSize'];
+      }
+      log.fine(TAG_, 'visibilitychange event:', this.visibilityState_,
+          this.prerenderSize_);
+      this.visibilityObservable_.fire();
       return Promise.resolve();
     }
     log.fine(TAG_, 'unknown message:', eventType);

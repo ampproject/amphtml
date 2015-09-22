@@ -20,7 +20,7 @@ import {Layout, getLayoutClass, getLengthNumeral, getLengthUnits,
 import {ElementStub, stubbedElements} from './element-stub';
 import {assert} from './asserts';
 import {log} from './log';
-import {reportErrorToDeveloper} from './error';
+import {reportError} from './error';
 import {resources} from './resources';
 
 
@@ -62,7 +62,7 @@ export function upgradeOrRegisterElement(win, name, toClass) {
       try {
         element.upgrade(toClass);
       } catch (e) {
-        reportErrorToDeveloper(e, this);
+        reportError(e, this);
       }
     }
   }
@@ -287,7 +287,7 @@ export function createAmpElementProto(win, name, implementationClass) {
       this.classList.remove('-amp-notbuilt');
       this.classList.remove('amp-notbuilt');
     } catch(e) {
-      reportErrorToDeveloper(e, this);
+      reportError(e, this);
       throw e;
     }
     return true;
@@ -299,16 +299,16 @@ export function createAmpElementProto(win, name, implementationClass) {
    * @final
    */
   ElementProto.attachedCallback = function() {
-    resources.add(this);
     if (!this.everAttached) {
       this.everAttached = true;
       try {
         this.firstAttachedCallback_();
       }
       catch (e) {
-        reportErrorToDeveloper(e, this);
+        reportError(e, this);
       }
     }
+    resources.add(this);
   }
 
   /**
@@ -333,7 +333,7 @@ export function createAmpElementProto(win, name, implementationClass) {
       this.implementation_.layout_ = this.layout_;
       this.implementation_.firstAttachedCallback();
     } catch(e) {
-      reportErrorToDeveloper(e, this);
+      reportError(e, this);
       throw e;
     }
     if (!this.isUpgraded()) {
@@ -358,6 +358,15 @@ export function createAmpElementProto(win, name, implementationClass) {
     event.data = data;
     event.initEvent(name, true, true);
     this.dispatchEvent(event);
+  };
+
+  /**
+   * Whether the element can pre-render.
+   * @return {boolean}
+   * @final
+   */
+  ElementProto.prerenderAllowed = function() {
+    return this.implementation_.prerenderAllowed();
   };
 
   /**

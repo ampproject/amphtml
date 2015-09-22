@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+/**
+ * @param {!Object} config
+ */
 module.exports = function(config) {
 
   var configuration = {
@@ -27,7 +30,7 @@ module.exports = function(config) {
     ],
 
     preprocessors: {
-      'fixtures/*.html' : ['html2js'],
+      'test/fixtures/*.html' : ['html2js'],
       'src/**/*.js': ['browserify'],
       'test/**/*.js': ['browserify'],
       'extensions/**/test/**/*.js': ['browserify'],
@@ -69,7 +72,7 @@ module.exports = function(config) {
     }
   };
 
-  if(process.env.TRAVIS){
+  if (process.env.TRAVIS) {
     configuration.browsers = ['Chrome_travis_ci'];
   }
 

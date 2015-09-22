@@ -14,26 +14,26 @@
  * limitations under the License.
  */
 
+var argv = require('minimist')(process.argv.slice(2));
 var gulp = require('gulp');
 var del = require('del');
 var file = require('gulp-file');
 var gulpWatch = require('gulp-watch');
-var fs = require('fs');
+var fs = require('fs-extra');
 var sourcemaps = require('gulp-sourcemaps');
-var karma = require('karma').server;
-var path = require('path');
 var source = require('vinyl-source-stream');
 var buffer = require('vinyl-buffer');
 var browserify = require('browserify');
 var watchify = require('watchify');
 var uglify = require('gulp-uglify');
-var wrap = require("gulp-wrap");
+var wrap = require('gulp-wrap');
 var rename = require('gulp-rename');
 var replace = require('gulp-replace');
 var babel = require('babelify');
 var postcss = require('postcss');
 var autoprefixer = require('autoprefixer');
 var cssnano = require('cssnano');
+require('./build-system/tasks');
 
 // NOTE: see https://github.com/ai/browserslist#queries for `browsers` list
 var cssprefixer = autoprefixer(
@@ -49,35 +49,6 @@ var cssprefixer = autoprefixer(
     ]
   }
 );
-
-var srcs = [
-  'src/**/*.js',
-  'ads/**/*.js',
-  'node_modules/document-register-element/build/*.js'
-];
-var extensions = [
-  'extensions/**/*.js'
-];
-var tests = [
-  'test/**/*.js',
-  'extensions/**/test/**/*.js',
-  'fixtures/**/*.html',
-  {
-    pattern: 'dist/**/*.js',
-    included: false,
-    served: true
-  },
-  {
-    pattern: 'build/**/*.js',
-    included: false,
-    served: true
-  },
-  {
-    pattern: 'examples/**/*.js',
-    included: false,
-    served: true
-  }
-];
 
 // Used to e.g. references the ads binary from the runtime to get
 // version lock.
@@ -101,75 +72,11 @@ function buildExtensions(options) {
 }
 
 function clean(done) {
-  del(['dist', 'dist.ads', 'build', 'examples.build'], done);
-}
-
-// TODO(@cramforce): Consolidate test running functions.
-function unit(done) {
-  build();
-  karma.start({
-    configFile: path.resolve('karma.conf.js'),
-    files: tests,
-    singleRun: true
-  }, done);
-}
-
-function unitWatch(done) {
-  build();
-  karma.start({
-    configFile: path.resolve('karma.conf.js'),
-    files: tests,
-  }, done);
-}
-
-function unitWatchVerbose(done) {
-  build();
-  karma.start({
-    configFile: path.resolve('karma.conf.js'),
-    files: tests
-  }, done);
-}
-
-function unitSafari(done) {
-  build();
-  karma.start({
-    configFile: path.resolve('karma.conf.js'),
-    files: tests,
-    singleRun: true,
-    browsers: ['Safari'],
-    client: {
-      captureConsole: true,
-      mocha: {
-        timeout: 10000
-      }
-    }
-  }, done);
-}
-
-function unitFirefox(done) {
-  build();
-  karma.start({
-    configFile: path.resolve('karma.conf.js'),
-    files: tests,
-    singleRun: true,
-    browsers: ['Firefox'],
-    client: {
-      captureConsole: true,
-      mocha: {
-        timeout: 10000
-      }
-    }
-  }, done);
+  del(['dist', 'dist.3p', 'build', 'examples.build'], done);
 }
 
 function polyfillsForTests() {
   compileJs('./src/', 'polyfills.js', './build/');
-}
-
-function lint() {
-  return gulp.src(srcs, tests)
-    .pipe(gjslint())
-    .pipe(gjslint.reporter('console'))
 }
 
 function compile(watch, shouldMinify) {
@@ -179,12 +86,12 @@ function compile(watch, shouldMinify) {
     watch: watch,
     minify: shouldMinify
   });
-  compileJs('./ads/', 'ads.js', './dist.ads/' + internalRuntimeVersion, {
+  compileJs('./3p/', 'integration.js', './dist.3p/' + internalRuntimeVersion, {
     minifiedName: 'f.js',
     watch: watch,
     minify: shouldMinify
   });
-  adsBootstrap(watch);
+  thirdPartyBootstrap(watch);
 }
 
 
@@ -198,7 +105,7 @@ function compileCss() {
 }
 
 function jsifyCssPromise(filename) {
-  var css = fs.readFileSync(filename, "utf8");
+  var css = fs.readFileSync(filename, 'utf8');
   var transformers = [cssprefixer, cssnano()];
   // Remove copyright comment. Crude hack to get our own copyright out
   // of the string.
@@ -220,7 +127,7 @@ function watch() {
     watch: true
   });
   return compile(true);
-};
+}
 
 /**
  * Copies extensions from
@@ -237,6 +144,7 @@ function watch() {
  *     the sub directory inside the extension directory
  * @param {boolean} hasCss Whether there is a CSS file for this extension.
  * @param {!Object} options
+ * @return {!Object} Gulp object
  */
 function buildExtension(name, version, hasCss, options) {
   options = options || {};
@@ -254,7 +162,7 @@ function buildExtension(name, version, hasCss, options) {
       buildExtension(name, version, hasCss, copy);
     });
   }
-  var js = fs.readFileSync(jsPath, "utf8");
+  var js = fs.readFileSync(jsPath, 'utf8');
   if (hasCss) {
     return jsifyCssPromise(path + '/' + name + '.css').then(function(css) {
       console.assert(/\$CSS\$/.test(js),
@@ -270,6 +178,7 @@ function buildExtension(name, version, hasCss, options) {
 function buildExtensionJs(js, jsPath, name, version, options) {
   var builtName = name + '-' + version + '.max.js';
   var minifiedName = name + '-' + version + '.js';
+  var latestName = name + '-latest.js';
   return gulp.src(jsPath)
       .pipe(file(builtName, js))
       .pipe(gulp.dest('build/all/v0/'))
@@ -278,6 +187,7 @@ function buildExtensionJs(js, jsPath, name, version, options) {
           watch: options.watch,
           minify: options.minify,
           minifiedName: minifiedName,
+          latestName: latestName,
           wrapper: '(window.AMP = window.AMP || []).push(function(AMP) {<%= contents %>\n});'
         });
       });
@@ -292,11 +202,6 @@ function build() {
 gulp.task('css', compileCss);
 gulp.task('extensions', buildExtensions);
 gulp.task('clean', clean);
-gulp.task('unit', unit);
-gulp.task('unit-watch', unitWatch);
-gulp.task('unit-watch-verbose', unitWatchVerbose);
-gulp.task('unit-safari', unitSafari);
-gulp.task('unit-firefox', unitFirefox);
 gulp.task('build', build);
 gulp.task('watch', function() { return watch(); });
 gulp.task('minify', function() {
@@ -305,11 +210,10 @@ gulp.task('minify', function() {
   buildExtensions({minify: true});
   examplesWithMinifiedJs('ads.amp.html');
   examplesWithMinifiedJs('everything.amp.html');
-  examplesWithMinifiedJs('newsstand.amp.html');
   examplesWithMinifiedJs('released.amp.html');
-});
-gulp.task('presubmit', function() {
-  return require('./build-system/presubmit-checks.js').run();
+  examplesWithMinifiedJs('article.amp.html');
+  examplesWithMinifiedJs('article-metadata.amp.html');
+  examplesWithMinifiedJs('twitter.amp.html');
 });
 
 gulp.task('default', ['watch']);
@@ -323,7 +227,7 @@ gulp.task('default', ['watch']);
 function examplesWithMinifiedJs(name) {
   var input = 'examples/' + name;
   console.log('Processing ' + name);
-  var html = fs.readFileSync(input, "utf8");
+  var html = fs.readFileSync(input, 'utf8');
   var min = html;
   min = min.replace(/\.max\.js/g, '.js');
   min = min.replace(/dist\/amp\.js/g, 'dist\/v0\.js');
@@ -338,20 +242,20 @@ function examplesWithMinifiedJs(name) {
       .pipe(gulp.dest('examples.build/'));
 }
 
-function adsBootstrap(watch) {
-  var input = 'ads/frame.max.html';
+function thirdPartyBootstrap(watch) {
+  var input = '3p/frame.max.html';
   if (watch) {
     gulpWatch(input, function() {
       adsBootstrap(false);
     });
   }
   console.log('Processing ' + input);
-  var html = fs.readFileSync(input, "utf8");
+  var html = fs.readFileSync(input, 'utf8');
   var min = html;
-  min = min.replace(/\.\/ads\.js/g, './f.js');
+  min = min.replace(/\.\/integration\.js/g, './f.js');
   gulp.src(input)
       .pipe(file('frame.html', min))
-      .pipe(gulp.dest('dist.ads/' + internalRuntimeVersion));
+      .pipe(gulp.dest('dist.3p/' + internalRuntimeVersion));
 }
 
 
@@ -397,7 +301,14 @@ function compileJs(srcDir, srcFilename, destDir, options) {
       }))
       .pipe(rename(options.minifiedName))
       .pipe(sourcemaps.write('./'))
-      .pipe(gulp.dest(destDir));
+      .pipe(gulp.dest(destDir))
+      .on('end', function() {
+        if (options.latestName) {
+          fs.copySync(
+              destDir + '/' + options.minifiedName,
+              destDir + '/' + options.latestName);
+        }
+      });
   }
 
   if (options.minify) {

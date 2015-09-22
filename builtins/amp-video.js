@@ -23,6 +23,8 @@ import {registerElement} from '../src/custom-element';
 
 /**
  * @param {!Window} win Destination window for the new element.
+ * @this {undefined}  // Make linter happy
+ * @return {undefined}
  */
 export function installVideo(win) {
   class AmpVideo extends BaseElement {
