@@ -19,7 +19,7 @@ var gulp = require('gulp');
 var del = require('del');
 var file = require('gulp-file');
 var gulpWatch = require('gulp-watch');
-var fs = require('fs');
+var fs = require('fs-extra');
 var sourcemaps = require('gulp-sourcemaps');
 var source = require('vinyl-source-stream');
 var buffer = require('vinyl-buffer');
@@ -178,6 +178,7 @@ function buildExtension(name, version, hasCss, options) {
 function buildExtensionJs(js, jsPath, name, version, options) {
   var builtName = name + '-' + version + '.max.js';
   var minifiedName = name + '-' + version + '.js';
+  var latestName = name + '-latest.js';
   return gulp.src(jsPath)
       .pipe(file(builtName, js))
       .pipe(gulp.dest('build/all/v0/'))
@@ -186,6 +187,7 @@ function buildExtensionJs(js, jsPath, name, version, options) {
           watch: options.watch,
           minify: options.minify,
           minifiedName: minifiedName,
+          latestName: latestName,
           wrapper: '(window.AMP = window.AMP || []).push(function(AMP) {<%= contents %>\n});'
         });
       });
@@ -299,7 +301,14 @@ function compileJs(srcDir, srcFilename, destDir, options) {
       }))
       .pipe(rename(options.minifiedName))
       .pipe(sourcemaps.write('./'))
-      .pipe(gulp.dest(destDir));
+      .pipe(gulp.dest(destDir))
+      .on('end', function() {
+        if (options.latestName) {
+          fs.copySync(
+              destDir + '/' + options.minifiedName,
+              destDir + '/' + options.latestName);
+        }
+      });
   }
 
   if (options.minify) {
