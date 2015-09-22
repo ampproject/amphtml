@@ -299,7 +299,6 @@ export function createAmpElementProto(win, name, implementationClass) {
    * @final
    */
   ElementProto.attachedCallback = function() {
-    resources.add(this);
     if (!this.everAttached) {
       this.everAttached = true;
       try {
@@ -309,6 +308,7 @@ export function createAmpElementProto(win, name, implementationClass) {
         reportError(e, this);
       }
     }
+    resources.add(this);
   }
 
   /**
