@@ -1,0 +1,374 @@
+<!doctype html>
+<html AMP lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>The World Will Never Be the Same - The Springfield Chronicle</title>
+  <link rel="canonical" href="http://example.ampproject.org/article-metadata.html" />
+  <link href='https://fonts.googleapis.com/css?family=Neuton' rel='stylesheet' type='text/css'>
+  <script custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js" async></script>
+  <script src="https://cdn.ampproject.org/v0.js" async development></script>
+  <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
+  <script type="application/ld+json">
+  {
+    "@context": "http://schema.org",
+    "@type": "NewsArticle",
+    "mainEntityOfPage": "http://example.ampproject.org/article-styled.html",
+    "headline": "The World Will Never Be the Same",
+    "datePublished": "2015-08-17T12:02:41Z",
+    "author": {
+      "@type": "Person",
+      "name": "Shirley Dempsey"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "The Springfield Chronicle",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "img/logo.jpg",
+        "width": 650,
+        "height": 60
+      }
+    },
+    "image": {
+      "@type": "ImageObject",
+      "url": "img/osaka.jpg",
+      "height": 1400,
+      "width": 535
+    }
+  }
+  </script>
+  <style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
+  <style amp-custom>
+    body {
+      background-color: white;
+    }
+
+    header {
+      position: relative;
+      background-color: #3B5286;
+    }
+
+    header h1 {
+      margin: 0 auto;
+      padding: 16px 0 0;
+    }
+
+    header h1 amp-img {
+      top: 0;
+      position: absolute;
+    }
+
+    article {
+      font-family: Georgia, Times New Roman;
+      margin: 0 auto 60px auto;
+    }
+
+    article .sections {
+      margin: 16px 0;
+    }
+
+    article .sections a {
+      color: white;
+      text-decoration: none;
+      background-color: #CCC;
+      font-family: Arial;
+      font-size: 11px;
+      text-transform: uppercase;
+      padding: 4px 8px;
+      margin: 2px;
+    }
+
+    article .sections a:hover {
+      background-color: black;
+    }
+
+    article h1 {
+      margin: 40px 0 0;
+      font-family: Neuton, Georgia, Times New Roman;
+      font-size: 40px;
+      border-bottom: 1px solid black;
+    }
+
+    article .byline {
+      margin: 8px 0 40px 0;
+      color: #999;
+    }
+
+    article .byline a,
+    article .byline a:active,
+    article .byline a:visited {
+      color: black;
+    }
+
+    article .dateline {
+      color: black;
+    }
+
+    article p {
+      margin: 2em 0;
+    }
+
+    article .sections,
+    article .byline,
+    article p,
+    article figure figcaption,
+    article .recommendations,
+    footer p {
+      max-width: 600px;
+    }
+
+    header h1,
+    article h1,
+    article,
+    footer p {
+      max-width: 700px;
+    }
+
+    article .capitalized {
+      font-size: 60px;
+      float: left;
+      margin: 0 12px 0 0;
+      line-height: 50px;
+      font-weight: bold;
+    }
+
+    article figure {
+      margin: 32px 0 64px 0;
+    }
+
+    article figure figcaption {
+      margin-top: 8px;
+      font-size: 14px;
+      color: #666;
+    }
+
+    article blockquote {
+      position: relative;
+      max-width: 500px;
+      margin: 40px 20px;
+    }
+
+    article blockquote p {
+      font-size: 22px;
+      font-style: italic;
+      margin: 0 40px;
+      padding: 40px 0;
+      color: #607796;
+    }
+
+    article blockquote .left_quote,
+    article blockquote .right_quote {
+      position: absolute;
+      font-size: 80px;
+      color: #D5DEEA;
+    }
+
+    article blockquote .left_quote {
+      top: 0;
+      left: 0;
+    }
+
+    article blockquote .right_quote {
+      bottom: -40px;
+      right: 0;
+    }
+
+    article .recommendations {
+      margin-top: 60px;
+    }
+
+    article .recommendations h2 {
+      font-family: Neuton;
+      border-bottom: 1px solid black;
+      font-size: 28px;
+    }
+
+    article .recommendations ul {
+      list-style-type: none;
+      margin: 0 0 0 24px;
+      padding: 0;
+    }
+
+    article .recommendations li {
+      display: block;
+      width: 100%;
+      height: 32px;
+    }
+
+    article .recommendations amp-img {
+      float: left;
+      margin: 0 16px 8px 0;
+    }
+
+    article .recommendations a {
+      color: black;
+      text-decoration: none;
+      font-family: Neuton;
+      font-size: 16px;
+    }
+
+    article .recommendations a:hover {
+      text-decoration: underline;
+    }
+
+    footer {
+      background-color: #505050;
+      color: #CCC;
+      font-weight: normal;
+      font-family: Arial;
+      font-size: 13px;
+      padding: 24px 0 60px 0;
+    }
+
+    footer a {
+      color: white;
+    }
+
+    @media all and (max-width: 700px) {
+      article h1,
+      article .sections,
+      article .byline,
+      article p,
+      article figure figcaption,
+      article .recommendations,
+      article amp-ad,
+      header h1,
+      footer p {
+        margin-left: 32px;
+        margin-right: 32px;
+      }
+    }
+
+    @media all and (min-width: 700px) {
+      footer p {
+        margin: 0 auto;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>
+      <amp-img src="img/logo.png" alt="Lorem Ipsum?" width="297" height="30"></amp-img>
+    </h1>
+  </header>
+  <article>
+    <div class="sections">
+      <a href="">World</a>
+      <a href="">Technology</a>
+    </div>
+    <h1>The World Will Never Be the Same</h1>
+    <div class="byline">
+      By <a href="">Shirley Dempsey</a> on
+      <span class="dateline">August 17, 2015</span>
+    </div>
+    <figure>
+      <amp-img src="img/osaka.jpg" alt="Dotonbori, Osaka, Japan" width="1400" height="535" layout="responsive"></amp-img>
+      <figcaption>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+        <span class="attribution">Source: Photograph by <a href="">Dan Sterling</a>.</span>
+      </figcaption>
+    </figure>
+    <p>
+      <span class="capitalized">T</span>he world has never seen times like this. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero. Sed cursus ante dapibus diam. Sed nisi. Nulla quis sem at nibh elementum imperdiet. Duis sagittis ipsum.
+      Praesent mauris. Fusce nec tellus sed augue semper porta. Mauris massa. Vestibulum lacinia arcu eget nulla. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.</p>
+    <p>Curabitur sodales ligula in libero. Sed dignissim lacinia nunc. Curabitur tortor. Pellentesque nibh. Aenean quam. In scelerisque sem at dolor. Maecenas mattis. Sed convallis tristique sem. Proin ut ligula vel nunc egestas porttitor. Morbi lectus risus,
+      iaculis vel, suscipit quis, luctus non, massa. Fusce ac turpis quis ligula lacinia aliquet. Mauris ipsum.</p>
+    <p>Nulla metus metus, ullamcorper vel, tincidunt sed, euismod in, nibh. Quisque volutpat condimentum velit. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Nam nec ante. Sed lacinia, urna non tincidunt mattis,
+      tortor neque adipiscing diam, a cursus ipsum ante quis turpis. Nulla facilisi. Ut fringilla. Suspendisse potenti. Nunc feugiat mi a tellus consequat imperdiet. Vestibulum sapien. Proin quam.</p>
+
+    <blockquote>
+      <span class="left_quote">&ldquo;</span>
+      <p>Quo usque tandem abutere, Catilina, patientia nostra? Quam diu etiam furor iste tuus nos eludet? Quem ad finem sese effrenata iactabit audacia?
+      </p>
+      <span class="right_quote">&rdquo;</span>
+    </blockquote>
+
+    <p>Etiam ultrices. Suspendisse in justo eu magna luctus suscipit. Sed lectus. Integer euismod lacus luctus magna. Quisque cursus, metus vitae pharetra auctor, sem massa mattis sem, at interdum magna augue eget diam. Vestibulum ante ipsum primis in faucibus
+      orci luctus et ultrices posuere cubilia Curae; Morbi lacinia molestie dui. Praesent blandit dolor. Sed non quam. In vel mi sit amet augue congue elementum. Morbi in ipsum sit amet pede facilisis laoreet. Donec lacus nunc, viverra nec, blandit vel,
+      egestas et, augue. Vestibulum tincidunt malesuada tellus. Ut ultrices ultrices enim.</p>
+    <p>Curabitur sit amet mauris. Morbi in dui quis est pulvinar ullamcorper. Nulla facilisi. Integer lacinia sollicitudin massa. Cras metus. Sed aliquet risus a tortor. Integer id quam. Morbi mi. Quisque nisl felis, venenatis tristique, dignissim in, ultrices
+      sit amet, augue. Proin sodales libero eget ante. Nulla quam. Aenean laoreet. Vestibulum nisi lectus, commodo ac, facilisis ac, ultricies eu, pede.</p>
+
+    <amp-carousel width=600 height=200>
+      <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w300-h200-no" width=300 height=200></amp-img>
+      <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no" width=300 height=200></amp-img>
+      <amp-img src="https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w300-h200-no" width=300 height=200></amp-img>
+      <amp-anim src="https://lh3.googleusercontent.com/qNn8GDz8Jfd-s9lt3Nc4lJeLjVyEaqGJTk1vuCUWazCmAeOBVjSWDD0SMTU7x0zhVe5UzOTKR0n-kN4SXx7yElvpKYvCMaRyS_g-jydhJ_cEVYmYPiZ_j1Y9de43mlKxU6s06uK1NAlpbSkL_046amEKOdgIACICkuWfOBwlw2hUDfjPOWskeyMrcTu8XOEerCLuVqXugG31QC345hz3lUyOlkdT9fMYVUynSERGNzHba7bXMOxKRe3izS5DIWUgJs3oeKYqA-V8iqgCvneD1jj0Ff68V_ajm4BDchQubBJU0ytXVkoWh27ngeEHubpnApOS6fcGsjPxeuMjnzAUtoTsiXz2FZi1mMrxrblJ-kZoAq1DJ95cnoqoa2CYq3BTgq2E8BRe2paNxLJ5GXBCTpNdXMpVJc6eD7ceijQyn-2qanilX-iK3ChbOq0uBHMvsdoC_LsFOu5KzbbNH71vM3DPkvDGmHJmF67Vj8sQ6uBrLnzpYlCyN4-Y9frR8zugDcqX5Q=w300-h200-no"
+      width="300" height="200">
+        <amp-img placeholder src="https://lh3.googleusercontent.com/qNn8GDz8Jfd-s9lt3Nc4lJeLjVyEaqGJTk1vuCUWazCmAeOBVjSWDD0SMTU7x0zhVe5UzOTKR0n-kN4SXx7yElvpKYvCMaRyS_g-jydhJ_cEVYmYPiZ_j1Y9de43mlKxU6s06uK1NAlpbSkL_046amEKOdgIACICkuWfOBwlw2hUDfjPOWskeyMrcTu8XOEerCLuVqXugG31QC345hz3lUyOlkdT9fMYVUynSERGNzHba7bXMOxKRe3izS5DIWUgJs3oeKYqA-V8iqgCvneD1jj0Ff68V_ajm4BDchQubBJU0ytXVkoWh27ngeEHubpnApOS6fcGsjPxeuMjnzAUtoTsiXz2FZi1mMrxrblJ-kZoAq1DJ95cnoqoa2CYq3BTgq2E8BRe2paNxLJ5GXBCTpNdXMpVJc6eD7ceijQyn-2qanilX-iK3ChbOq0uBHMvsdoC_LsFOu5KzbbNH71vM3DPkvDGmHJmF67Vj8sQ6uBrLnzpYlCyN4-Y9frR8zugDcqX5Q=w300-h200-no-k"
+        width="300" height="200"></amp-img>
+      </amp-anim>
+    </amp-carousel>
+
+    <p>
+      <span class="capitalized">L</span>orem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero. Sed cursus ante dapibus diam. Sed nisi. Nulla quis sem at nibh elementum imperdiet. Duis sagittis ipsum. Praesent mauris. Fusce nec tellus sed augue
+      semper porta. Mauris massa. Vestibulum lacinia arcu eget nulla. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.</p>
+    <p>Curabitur sodales ligula in libero. Sed dignissim lacinia nunc. Curabitur tortor. Pellentesque nibh. Aenean quam. In scelerisque sem at dolor. Maecenas mattis. Sed convallis tristique sem. Proin ut ligula vel nunc egestas porttitor. Morbi lectus risus,
+      iaculis vel, suscipit quis, luctus non, massa. Fusce ac turpis quis ligula lacinia aliquet. Mauris ipsum.</p>
+    <p>Nulla metus metus, ullamcorper vel, tincidunt sed, euismod in, nibh. Quisque volutpat condimentum velit. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Nam nec ante. Sed lacinia, urna non tincidunt mattis,
+      tortor neque adipiscing diam, a cursus ipsum ante quis turpis. Nulla facilisi. Ut fringilla. Suspendisse potenti. Nunc feugiat mi a tellus consequat imperdiet. Vestibulum sapien. Proin quam.</p>
+
+      <amp-ad width=300 height=250
+        type="a9"
+        data-aax_size="300x250"
+        data-aax_pubname="abc123"
+        data-aax_src="302">
+    </amp-ad>
+
+    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero. Sed cursus ante dapibus diam. Sed nisi. Nulla quis sem at nibh elementum imperdiet. Duis sagittis ipsum. Praesent mauris. Fusce nec tellus sed augue semper
+      porta. Mauris massa. Vestibulum lacinia arcu eget nulla. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.</p>
+    <p>Curabitur sodales ligula in libero. Sed dignissim lacinia nunc. Curabitur tortor. Pellentesque nibh. Aenean quam. In scelerisque sem at dolor. Maecenas mattis. Sed convallis tristique sem. Proin ut ligula vel nunc egestas porttitor. Morbi lectus risus,
+      iaculis vel, suscipit quis, luctus non, massa. Fusce ac turpis quis ligula lacinia aliquet. Mauris ipsum.</p>
+    <p>Nulla metus metus, ullamcorper vel, tincidunt sed, euismod in, nibh. Quisque volutpat condimentum velit. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Nam nec ante. Sed lacinia, urna non tincidunt mattis,
+      tortor neque adipiscing diam, a cursus ipsum ante quis turpis. Nulla facilisi. Ut fringilla. Suspendisse potenti. Nunc feugiat mi a tellus consequat imperdiet. Vestibulum sapien. Proin quam.</p>
+
+    <div class="recommendations">
+      <h2>More from The Springfield Chronicle</h2>
+      <ul>
+        <li>
+          <a href="">
+            <amp-img src="img/placeholder.png" alt="Lorem Ipsum?" width="32" height="32"></amp-img>
+            <h3>Lorem ipsum dolor sit amet
+              <h3>
+          </a>
+        </li>
+        <li>
+          <a href="">
+            <amp-img src="img/placeholder.png" alt="Lorem Ipsum?" width="32" height="32"></amp-img>
+            <h3>Class aptent taciti sociosqu
+              <h3>
+          </a>
+        </li>
+        <li>
+          <a href="">
+            <amp-img src="img/placeholder.png" alt="Lorem Ipsum?" width="32" height="32"></amp-img>
+            <h3>Curabitur sodales ligula in libero
+              <h3>
+          </a>
+        </li>
+        <li>
+          <a href="">
+            <amp-img src="img/placeholder.png" alt="Lorem Ipsum?" width="32" height="32"></amp-img>
+            <h3>Fusce nec tellus sed augue
+              <h3>
+          </a>
+        </li>
+        <li>
+          <a href="">
+            <amp-img src="img/placeholder.png" alt="Lorem Ipsum?" width="32" height="32"></amp-img>
+            <h3>Nulla metus metus, ullamcorper vel
+              <h3>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+  </article>
+  <footer>
+    <p>This sample AMP article and all accompanying images are made available by Google under a <a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License</a>.</p>
+  </footer>
+</body>
+
+</html>
