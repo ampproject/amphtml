@@ -41,13 +41,15 @@ function whenMessagingLoaded(callback) {
 
   var viewer = AMP.viewer;
 
-  whenMessagingLoaded(function(ViewerMessaging) {
-    var messaging = new ViewerMessaging(window.parent,
-        function(type, payload, awaitResponse) {
-          return viewer.receiveMessage(type, payload, awaitResponse);
-        });
-    viewer.setMessageDeliverer(function(type, payload, awaitResponse) {
-      return messaging.sendRequest(type, payload, awaitResponse);
+  if (window.parent && window.parent != window) {
+    whenMessagingLoaded(function(ViewerMessaging) {
+      var messaging = new ViewerMessaging(window.parent,
+          function(type, payload, awaitResponse) {
+            return viewer.receiveMessage(type, payload, awaitResponse);
+          });
+      viewer.setMessageDeliverer(function(type, payload, awaitResponse) {
+        return messaging.sendRequest(type, payload, awaitResponse);
+      });
     });
-  });
+  }
 });
