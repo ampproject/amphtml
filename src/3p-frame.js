@@ -65,7 +65,7 @@ function getFrameAttributes(parentWindow, element, opt_type) {
 }
 
 /**
- * Creates the iframe for the ad. Applies correct size and passes the ad
+ * Creates the iframe for the embed. Applies correct size and passes the embed
  * attributes to the frame via JSON inside the fragment.
  * @param {!Window} parentWindow
  * @param {!Element} element
@@ -89,6 +89,10 @@ export function getIframe(parentWindow, element, opt_type) {
   iframe.height = attributes.height;
   iframe.style.border = 'none';
   iframe.setAttribute('scrolling', 'no');
+  iframe.onload = function() {
+    // Chrome does not reflect the iframe readystate.
+    this.readyState = 'complete';
+  };
   return iframe;
 }
 
@@ -136,8 +140,8 @@ function getBootstrapBaseUrl(parentWindow) {
   if (getMode().localDev) {
 
     url = 'http://ads.localhost:' + parentWindow.location.port +
-        '/dist.3p/$internalRuntimeVersion$/frame' +
-        (getMode().minified ? '' : '.max') +
+        '/dist.3p/current' +
+        (getMode().minified ? '-min/frame' : '/frame.max') +
         '.html';
   }
   return url;
