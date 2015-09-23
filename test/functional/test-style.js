@@ -73,6 +73,13 @@ describe('Style', () => {
     expect(st.translateX('101vw')).to.equal('translateX(101vw)');
   });
 
+  it('translate', () => {
+    expect(st.translate(101, 201)).to.equal('translate(101px,201px)');
+    expect(st.translate('101vw,201em')).to.equal('translate(101vw,201em)');
+    expect(st.translate(101)).to.equal('translate(101px)');
+    expect(st.translate('101vw')).to.equal('translate(101vw)');
+  });
+
   it('camelCaseToTitleCase', () => {
     let str = 'theQuickBrownFox';
     expect(st.camelCaseToTitleCase(str)).to.equal('TheQuickBrownFox');
