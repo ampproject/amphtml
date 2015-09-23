@@ -15,11 +15,12 @@
  */
 
 import {BaseElement} from '../src/base-element';
+import {createLoaderElement} from '../src/loader';
 import {getLengthNumeral, isLayoutSizeDefined} from '../src/layout';
 import {loadPromise} from '../src/event-helper';
 import {parseSrcset} from '../src/srcset';
 import {registerElement} from '../src/custom-element';
-import * as st from '../src/style';
+import {timer} from '../src/timer';
 
 
 /**
@@ -47,10 +48,10 @@ export function installImg(win) {
       /** @private {?Element} */
       this.placeholder_ = this.getPlaceholder();
 
-      /** @private {bool} */
+      /** @private {boolean} */
       this.isDefaultPlaceholder_ = !this.placeholder_;
 
-      /** @private {bool} */
+      /** @private {boolean} */
       this.imgLoadedOnce_ = false;
 
       if (this.element.id) {
@@ -61,9 +62,6 @@ export function installImg(win) {
 
       this.img_.width = getLengthNumeral(this.element.getAttribute('width'));
       this.img_.height = getLengthNumeral(this.element.getAttribute('height'));
-
-      // The image shown/hidden depends on placeholder.
-      st.toggle(this.img_, !this.placeholder_);
 
       this.element.appendChild(this.img_);
 
@@ -78,9 +76,6 @@ export function installImg(win) {
       if (count++ < 2 && this.element.offsetWidth) {
         this.updateImageSrc_();
       }
-
-      /** @private {?Promise} */
-      this.loadPromise_ = null;
     }
 
     /** @override */
@@ -99,7 +94,7 @@ export function installImg(win) {
     }
 
     /**
-     * @param {bool} inViewport
+     * @param {boolean} inViewport
      * @override
      */
     viewportCallback(inViewport) {
@@ -113,15 +108,13 @@ export function installImg(win) {
     updateImageSrc_() {
       let src = this.srcset_.select(this.element.offsetWidth,
           this.getDpr()).url;
-      let onImgLoaded = this.onImgLoaded_.bind(this);
-
-      if (this.loadPromise_) {
-        return this.loadPromise_;
+      if (src == this.img_.getAttribute('src')) {
+        return Promise.resolve();
       }
       this.img_.setAttribute('src', src);
-      this.loadPromise_ = loadPromise(this.img_)
-          .then(onImgLoaded, onImgLoaded);
-      return this.loadPromise_;
+
+      let onImgLoaded = this.onImgLoaded_.bind(this);
+      return loadPromise(this.img_).then(onImgLoaded, onImgLoaded);
     }
 
     /**
@@ -130,41 +123,20 @@ export function installImg(win) {
     setDefaultPlaceholder_() {
       if (this.isDefaultPlaceholder_ && !this.placeholder_ &&
           !this.imgLoadedOnce_ && this.isInViewport()) {
-        this.placeholder_ = this.getDefaultPlaceholder_();
+        this.placeholder_ = createLoaderElement();
         this.placeholder_.setAttribute('placeholder', '');
         this.element.appendChild(this.placeholder_);
 
-        // Set a minimum timeout in case the image resource loads much faster
+        // Set a minimum delay in case the image resource loads much faster
         // than an intermitent loading screen that dissapears right away.
         // This can occur on fast internet connections or on a local server.
-        win.setTimeout(() => {
+        return timer.delay(() => {
           this.placeholder_.classList
               .toggle('hidden', this.imgLoadedOnce_);
           this.placeholder_.classList
-              .toggle('-amp-loader-start', !this.imgLoadedOnce_);
+              .toggle('active', !this.imgLoadedOnce_);
         }, 100);
       }
-    }
-
-    /**
-     * @private
-     * @return {!Element}
-     */
-    getDefaultPlaceholder_() {
-      let placeholder = document.createElement('div');
-      let loader = document.createElement('div');
-      placeholder.appendChild(loader);
-
-      placeholder.classList.add('hidden');
-      placeholder.classList.add('-amp-img-default-placeholder');
-      loader.classList.add('-amp-loader');
-
-      for (let i = 0; i < 3; i++) {
-        let dot = document.createElement('div');
-        dot.classList.add('-amp-loader-dot');
-        loader.appendChild(dot);
-      }
-      return placeholder;
     }
 
     /**
@@ -174,7 +146,7 @@ export function installImg(win) {
       let inViewport = this.isInViewport();
       if (this.placeholder_ && (!inViewport || this.imgLoadedOnce_)) {
         if (this.isDefaultPlaceholder_) {
-          this.placeholder_.classList.remove('-amp-loader-start');
+          this.placeholder_.classList.remove('active');
         }
         this.placeholder_.classList.add('hidden');
       }

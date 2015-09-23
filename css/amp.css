@@ -179,15 +179,17 @@ amp-pixel {
   height: 10px;
   top: 50%;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-50%) translateY(-50%);
+  transform-origin: 50% 50%;
+  white-space: nowrap;
 }
 
-.-amp-loader-stop {
-  display: none;
-}
-
-.-amp-loader-start .-amp-loader-dot {
-  animation: dots 2s infinite;
+/**
+ * We want to be a bit more specific here as we don't want a global active
+ * to just trigger the loading animation
+ */
+.-amp-autoplaceholder.active .-amp-loader-dot {
+  animation: -amp-loader-dots 2s infinite;
 }
 
 .-amp-loader-dot {
@@ -200,7 +202,7 @@ amp-pixel {
   border-radius: 100%;
   background-color: rgba(0, 0, 0, .3);
 
-  animation: dots 1s infinite;
+  animation: -amp-loader-dots 1s infinite;
   box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, .2);
   will-change: transform;
 }
@@ -217,7 +219,7 @@ amp-pixel {
   animation-delay: .2s;
 }
 
-@keyframes dots {
+@keyframes -amp-loader-dots {
   0%, 100% {
     transform: scale(.7);
     background-color: rgba(0, 0, 0, .3);
