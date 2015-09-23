@@ -34,10 +34,10 @@ export class Pass {
     /** @private @const {function()} */
     this.handler_ = handler;
 
-    /** @private @const {number} */
+    /** @private @const {number|string} */
     this.defaultDelay_ = opt_defaultDelay || 0;
 
-    /** @private {number} */
+    /** @private {number|string} */
     this.scheduled_ = -1;
 
     /** @private {number} */

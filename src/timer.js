@@ -25,6 +25,13 @@ export class Timer {
   constructor(win) {
     /** @const {!Window} */
     this.win = win;
+
+    /** @private @const {!Promise}  */
+    this.resolved_ = Promise.resolve();
+
+    this.taskCount_ = 0;
+
+    this.canceled_ = {};
   }
 
   /**
@@ -37,22 +44,41 @@ export class Timer {
   }
 
   /**
-   * Runs the provided callback after the specified delay. If delay is not
-   * specified, the 0 value is assumed. Returns the timer ID that can be used
-   * to cancel the timer (cancel method).
+   * Runs the provided callback after the specified delay. This uses a micro
+   * task for 0 or no specified time. This means that the delay will actually
+   * be close to 0 and this will NOT yield to the event queue.
+   *
+   * Returns the timer ID that can be used to cancel the timer (cancel method).
    * @param {!function()} callback
    * @param {number=} opt_delay
-   * @return {number}
+   * @return {number|string}
    */
   delay(callback, opt_delay) {
-    return this.win.setTimeout(callback, opt_delay || 0);
+    if (!opt_delay) {
+      // For a delay of zero,  schedule a promise based micro task since
+      // they are predictably fast.
+      var id = 'p' + this.taskCount_++;
+      this.resolved_.then(() => {
+        if (this.canceled_[id]) {
+          delete this.canceled_[id];
+          return;
+        }
+        callback();
+      });
+      return id;
+    }
+    return this.win.setTimeout(callback, opt_delay);
   }
 
   /**
    * Cancels the previously scheduled callback.
-   * @param {number} timeoutId
+   * @param {number|string} timeoutId
    */
   cancel(timeoutId) {
+    if (typeof timeoutId == 'string') {
+      this.canceled_[timeoutId] = true;
+      return;
+    }
     this.win.clearTimeout(timeoutId);
   }
 
