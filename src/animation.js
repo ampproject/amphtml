@@ -21,6 +21,8 @@ import {vsync} from './vsync';
 
 let TAG_ = 'Animation';
 
+let NULL_CALLBACK = function() {};
+
 
 /**
  * The animation class allows construction of arbitrary animation processes.
@@ -199,10 +201,11 @@ class AnimationPlayer {
 
   /**
    * Callback for regardless whether the animation succeeds or fails.
-   * @param {!Function} callback
+   * @param {!Function=} opt_callback
    * @return {!Promise}
    */
-  thenAlways(callback) {
+  thenAlways(opt_callback) {
+    let callback = opt_callback || NULL_CALLBACK;
     return this.then(callback, callback);
   }
 
@@ -250,12 +253,12 @@ class AnimationPlayer {
         if (dir > 0) {
           // Natural order - all set to 1.
           for (let i = 0; i < this.segments_.length; i++) {
-            this.segments_[i].func(1);
+            this.segments_[i].func(1, true);
           }
         } else {
           // Reverse order - all set to 0.
           for (let i = this.segments_.length - 1; i >= 0; i--) {
-            this.segments_[i].func(0);
+            this.segments_[i].func(0, false);
           }
         }
       } catch(e) {
@@ -312,27 +315,34 @@ class AnimationPlayer {
    * @param {number} totalLinearTime
    */
   mutateSegment_(segment, totalLinearTime) {
-    let normLinearTime = Math.min((totalLinearTime - segment.delay) /
-        segment.duration, 1);
-    let normTime = normLinearTime;
-    if (segment.curve && normTime != 1) {
-      try {
-        normTime = Math.max(Math.min(segment.curve(normLinearTime), 1), 0);
-      } catch(e) {
-        log.error(TAG_, 'step curve failed: ' + e, e);
-        this.complete_(/* success */ false, /* dir */ 0);
-        return;
+    let normLinearTime;
+    let normTime;
+    if (segment.duration > 0) {
+      normLinearTime = Math.min((totalLinearTime - segment.delay) /
+          segment.duration, 1);
+      normTime = normLinearTime;
+      if (segment.curve && normTime != 1) {
+        try {
+          normTime = segment.curve(normLinearTime);
+        } catch(e) {
+          log.error(TAG_, 'step curve failed: ' + e, e);
+          this.complete_(/* success */ false, /* dir */ 0);
+          return;
+        }
       }
+    } else {
+      normLinearTime = 1;
+      normTime = 1;
+    }
+    if (normLinearTime == 1) {
+      segment.completed = true;
     }
     try {
-      segment.func(normTime);
+      segment.func(normTime, segment.completed);
     } catch(e) {
       log.error(TAG_, 'step mutate failed: ' + e, e);
       this.complete_(/* success */ false, /* dir */ 0);
       return;
-    }
-    if (normLinearTime == 1 || normTime == 1) {
-      segment.completed = true;
     }
   }
 }
