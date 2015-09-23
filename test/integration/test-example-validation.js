@@ -70,6 +70,15 @@ describe('example', function() {
             // We only look at individual error lines.
             continue;
           }
+          if (/DEV_MODE_ENABLED/.test(line)) {
+            // This error is expected since we have to be in dev mode to
+            // run the validator. It is only a warning and we'd probably
+            // see that by looking for PASS / FAIL. By itself it doesn't
+            // make things fail.
+            // TODO(johannes): Add warning prefixes to such events so they
+            // can be detected systematically.
+            continue;
+          }
           for (let n = 0; n < errorWhitelist.length; n++) {
             var ok = errorWhitelist[n];
             if (ok.test(rendered)) {
