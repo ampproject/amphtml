@@ -15,10 +15,12 @@
  */
 
 import {BaseElement} from '../src/base-element';
+import {createLoaderElement} from '../src/loader';
 import {getLengthNumeral, isLayoutSizeDefined} from '../src/layout';
 import {loadPromise} from '../src/event-helper';
 import {parseSrcset} from '../src/srcset';
 import {registerElement} from '../src/custom-element';
+import {timer} from '../src/timer';
 
 
 /**
@@ -42,6 +44,16 @@ export function installImg(win) {
     buildCallback() {
       /** @private @const {!Element} */
       this.img_ = new Image();
+
+      /** @private {?Element} */
+      this.placeholder_ = this.getPlaceholder();
+
+      /** @private {boolean} */
+      this.isDefaultPlaceholder_ = !this.placeholder_;
+
+      /** @private {boolean} */
+      this.imgLoadedOnce_ = false;
+
       if (this.element.id) {
         this.img_.setAttribute('amp-img-id', this.element.id);
       }
@@ -57,6 +69,7 @@ export function installImg(win) {
       this.srcset_ = parseSrcset(this.element.getAttribute('srcset') ||
           this.element.getAttribute('src'));
 
+      this.setDefaultPlaceholder_();
       // TODO(@dvoytenko) Remove when #254 is fixed.
       // Always immediately request the first two images to make sure
       // we start the HTTP requests for them as early as possible.
@@ -81,6 +94,14 @@ export function installImg(win) {
     }
 
     /**
+     * @param {boolean} inViewport
+     * @override
+     */
+    viewportCallback(inViewport) {
+      this.setDefaultPlaceholder_();
+    }
+
+    /**
      * @return {!Promise}
      * @private
      */
@@ -91,7 +112,55 @@ export function installImg(win) {
         return Promise.resolve();
       }
       this.img_.setAttribute('src', src);
-      return loadPromise(this.img_);
+
+      let onImgLoaded = this.onImgLoaded_.bind(this);
+      return loadPromise(this.img_).then(onImgLoaded, onImgLoaded);
+    }
+
+    /**
+     * @private
+     */
+    setDefaultPlaceholder_() {
+      if (this.isDefaultPlaceholder_ && !this.placeholder_ &&
+          !this.imgLoadedOnce_ && this.isInViewport()) {
+        this.placeholder_ = createLoaderElement();
+        this.placeholder_.setAttribute('placeholder', '');
+        this.element.appendChild(this.placeholder_);
+
+        // Set a minimum delay in case the image resource loads much faster
+        // than an intermitent loading screen that dissapears right away.
+        // This can occur on fast internet connections or on a local server.
+        return timer.delay(() => {
+          this.placeholder_.classList
+              .toggle('hidden', this.imgLoadedOnce_);
+          this.placeholder_.classList
+              .toggle('active', !this.imgLoadedOnce_);
+        }, 100);
+      }
+    }
+
+    /**
+     * @private
+     */
+    cleanupPlaceholder_() {
+      let inViewport = this.isInViewport();
+      if (this.placeholder_ && (!inViewport || this.imgLoadedOnce_)) {
+        if (this.isDefaultPlaceholder_) {
+          this.placeholder_.classList.remove('active');
+        }
+        this.placeholder_.classList.add('hidden');
+      }
+    }
+
+    /**
+     * @param {!Element} element
+     * @return {!Element}
+     * @private
+     */
+    onImgLoaded_(element) {
+      this.imgLoadedOnce_ = true;
+      this.cleanupPlaceholder_();
+      return element;
     }
   };
 
