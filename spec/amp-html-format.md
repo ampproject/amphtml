@@ -77,8 +77,11 @@ In concrete terms this means that:
   Some text
   <amp-img src=sample.jpg width=300 height=300 />
 </p>
-<amp-ad width=100% height=300>
-  <!-- <script>document.write(…)</script> -->
+<amp-ad width=300 height=250
+    type="a9"
+    data-aax_size="300x250"
+    data-aax_pubname="test123"
+    data-aax_src="302">
 </amp-ad>
 </body>
 </html>
