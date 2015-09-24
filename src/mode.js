@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {parseQueryString} from './url';
+
 
 /**
  * @typedef {{
@@ -57,10 +59,15 @@ function getMode_() {
       // occur during local dev.
       !!document.querySelector('script[src*="/dist/"],script[src*="/base/"]');
 
+  var overrideDevelopment = parseQueryString(location.hash)['development'];
+  var development = overrideDevelopment != undefined
+      ? overrideDevelopment == '1'
+      : !!document.querySelector('script[development]')
+
   return {
     localDev: isLocalDev,
     // Triggers validation
-    development: !!document.querySelector('script[development]'),
+    development:  development,
     minified: process.env.NODE_ENV == 'production',
     test: window.AMP_TEST
   };
