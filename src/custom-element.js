@@ -299,7 +299,13 @@ export function createAmpElementProto(win, name, implementationClass) {
       throw e;
     }
     if (this.actionQueue_) {
-      timer.delay(this.dequeueActions_.bind(this), 1);
+      if (this.actionQueue_.length > 0) {
+        // Only schedule when the queue is not empty, which should be
+        // the case 99% of the time.
+        timer.delay(this.dequeueActions_.bind(this), 1);
+      } else {
+        this.actionQueue_ = null;
+      }
     }
     return true;
   };
