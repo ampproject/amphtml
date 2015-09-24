@@ -22,6 +22,7 @@ import {assert} from './asserts';
 import {log} from './log';
 import {reportError} from './error';
 import {resources} from './resources';
+import {timer} from './timer';
 
 
 let TAG_ = 'CustomElement';
@@ -209,6 +210,13 @@ export function createAmpElementProto(win, name, implementationClass) {
     /** @private {!BaseElement} */
     this.implementation_ = new implementationClass(this);
     this.implementation_.createdCallback();
+
+    /**
+     * Action queue is initially created and kept around until the element
+     * is ready to send actions directly to the implementation.
+     * @private {?Array<!ActionInvocation>}
+     */
+    this.actionQueue_ = [];
   };
 
   /**
@@ -289,6 +297,9 @@ export function createAmpElementProto(win, name, implementationClass) {
     } catch(e) {
       reportError(e, this);
       throw e;
+    }
+    if (this.actionQueue_) {
+      timer.delay(this.dequeueActions_.bind(this), 1);
     }
     return true;
   };
@@ -431,14 +442,53 @@ export function createAmpElementProto(win, name, implementationClass) {
   };
 
   /**
-   * Instructs the element that its activation is requested based on some
-   * user event.
+   * Enqueues the action with the element. If element has been upgraded and
+   * built, the action is dispatched to the implementation right away.
+   * Otherwise the invocation is enqueued until the implementation is ready
+   * to receive actions.
+   * @param {!ActionInvocation} invocation
    * @final
    */
-  ElementProto.activate = function() {
-    // TODO(dvoytenko, #35): defer until "built" state.
-    this.implementation_.activate();
+  ElementProto.enqueAction = function(invocation) {
+    if (!this.isBuilt()) {
+      assert(this.actionQueue_).push(invocation);
+    } else {
+      this.executionAction_(invocation, false);
+    }
   };
+
+  /**
+   * Dequeues events from the queue and dispatches them to the implementation
+   * with "deferred" flag.
+   * @private
+   */
+  ElementProto.dequeueActions_ = function() {
+    if (!this.actionQueue_) {
+      return;
+    }
+
+    let actionQueue = assert(this.actionQueue_);
+    this.actionQueue_ = null;
+
+    actionQueue.forEach((invocation) => {
+      this.executionAction_(invocation, true);
+    });
+  };
+
+  /**
+   * Executes the action immediately. All errors are consumed and reported.
+   * @param {!ActionInvocation} invocation
+   * @param {boolean} deferred
+   * @final
+   * @private
+   */
+  ElementProto.executionAction_ = function(invocation, deferred) {
+    try {
+      this.implementation_.executeAction(invocation, deferred);
+    } catch (e) {
+      log.error(TAG_, 'Action execution failed:', invocation, e);
+    }
+  }
 
   return ElementProto;
 }

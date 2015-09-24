@@ -16,7 +16,8 @@
 
 import {Action} from '../../src/action';
 
-describe('Action', () => {
+
+describe('Action parseAction', () => {
 
   let sandbox;
   let action;
@@ -33,92 +34,126 @@ describe('Action', () => {
   });
 
 
-  it('parseAction_ - default event and method', () => {
+  it('should parse with default event and method', () => {
     let a = action.parseAction_('target1');
     expect(a.event).to.equal('tap');
     expect(a.target).to.equal('target1');
     expect(a.method).to.equal('activate');
   });
 
-  it('parseAction_ - default event', () => {
+  it('should parse with default event', () => {
     let a = action.parseAction_('target1.method1');
     expect(a.event).to.equal('tap');
     expect(a.target).to.equal('target1');
     expect(a.method).to.equal('method1');
   });
 
-  it('parseAction_ - default method', () => {
+  it('should parse with default method', () => {
     let a = action.parseAction_('event1:target1');
     expect(a.event).to.equal('event1');
     expect(a.target).to.equal('target1');
     expect(a.method).to.equal('activate');
   });
 
-  it('parseAction_ - no defaults', () => {
+  it('should parse full form', () => {
     let a = action.parseAction_('event1:target1.method1');
     expect(a.event).to.equal('event1');
     expect(a.target).to.equal('target1');
     expect(a.method).to.equal('method1');
   });
 
-  it('parseAction_ - lots of whitespace', () => {
+  it('should parse with lots of whitespace', () => {
     let a = action.parseAction_('  event1  :  target1  .  method1  ');
     expect(a.event).to.equal('event1');
     expect(a.target).to.equal('target1');
     expect(a.method).to.equal('method1');
   });
 
-  it('parseAction_ - empty', () => {
+  it('should parse empty to null', () => {
     let a = action.parseAction_('');
     expect(a).to.equal(null);
   });
 
-  it('parseAction_ - no target', () => {
+  it('should parse without target to null', () => {
     expect(action.parseAction_('event1:')).to.equal(null);
     expect(action.parseAction_('.method1')).to.equal(null);
     expect(action.parseAction_('event1:.method1')).to.equal(null);
   });
 
-  it('parseAction_ - period in event or method', () => {
+  it('should parse with period in event or method', () => {
     let a = action.parseAction_('event.1:target1.method.1');
     expect(a.event).to.equal('event.1');
     expect(a.target).to.equal('target1');
     expect(a.method).to.equal('method.1');
   });
+});
 
 
-  it('parseActionMap_ - single action', () => {
+describe('Action parseActionMap', () => {
+
+  let sandbox;
+  let action;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+    action = new Action(window);
+  });
+
+  afterEach(() => {
+    action = null;
+    sandbox.restore();
+    sandbox = null;
+  });
+
+  it('should parse with a single action', () => {
     let m = action.parseActionMap_('event1:action1');
     expect(m['event1'].target).to.equal('action1');
   });
 
-  it('parseActionMap_ - two actions', () => {
+  it('should parse with two actions', () => {
     let m = action.parseActionMap_('event1:action1; event2: action2');
     expect(m['event1'].target).to.equal('action1');
     expect(m['event2'].target).to.equal('action2');
   });
 
-  it('parseActionMap_ - dupe actions', () => {
+  it('should parse with dupe actions by overriding with last', () => {
     let m = action.parseActionMap_('event1:action1; event1: action2');
     // Currently, we overwrite the events.
     expect(m['event1'].target).to.equal('action2');
   });
 
-  it('parseActionMap_ - empty', () => {
+  it('should parse empty forms to null', () => {
     expect(action.parseActionMap_('')).to.equal(null);
     expect(action.parseActionMap_('  ')).to.equal(null);
     expect(action.parseActionMap_(';;;')).to.equal(null);
   });
+});
 
 
-  it('getActionMap_', () => {
+describe('Action findAction', () => {
+
+  let sandbox;
+  let action;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+    action = new Action(window);
+  });
+
+  afterEach(() => {
+    action = null;
+    sandbox.restore();
+    sandbox = null;
+  });
+
+  it('should create action map in getActionMap_', () => {
     var element = document.createElement('div');
     element.setAttribute('on', 'event1:action1');
     let m = action.getActionMap_(element);
     expect(m['event1'].target).to.equal('action1');
   });
 
-  it('getActionMap_ - cached', () => {
+  it('should cache action map', () => {
     var element = document.createElement('div');
     element.setAttribute('on', 'event1:action1');
     let m1 = action.getActionMap_(element);
@@ -127,7 +162,7 @@ describe('Action', () => {
   });
 
 
-  it('findAction_ - direct', () => {
+  it('should find action on the same element', () => {
     var element = document.createElement('div');
     element.setAttribute('on', 'event1:action1');
     let a = action.findAction_(element, 'event1');
@@ -137,7 +172,7 @@ describe('Action', () => {
     expect(action.findAction_(element, 'event3')).to.equal(null);
   });
 
-  it('findAction_ - hierarchy', () => {
+  it('should find action in subtree', () => {
     var parent = document.createElement('div');
     parent.setAttribute('on', 'event1:action1');
     var element = document.createElement('div');
@@ -154,39 +189,75 @@ describe('Action', () => {
 
     expect(action.findAction_(element, 'event3')).to.equal(null);
   });
+});
 
 
-  it('invoke_', () => {
-    var activateCalled = false;
-    var element = {
-      activate: function() {
-        activateCalled = true;
-      }
-    };
+describe('Action method', () => {
 
-    action.invoke_(element, {event: 'event1', target: 'target1',
-        method: 'activate', str: 'action1'});
-    expect(activateCalled).to.equal(true);
+  let sandbox;
+  let action;
+  let onEnqueue;
+  let targetElement, parent, child, execElement;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+    action = new Action(window);
+    onEnqueue = sinon.spy();
+    targetElement = document.createElement('target');
+    let id = ('E' + Math.random()).replace('.', '');
+    targetElement.setAttribute('on', 'tap:' + id + '.method1');
+    parent = document.createElement('parent');
+    child = document.createElement('child');
+    parent.appendChild(targetElement);
+    targetElement.appendChild(child);
+    document.body.appendChild(parent);
+
+    execElement = document.createElement('amp-element');
+    execElement.setAttribute('id', id);
+    execElement.enqueAction = onEnqueue;
+    parent.appendChild(execElement);
   });
 
-  it('invoke_ - no method', () => {
-    var activateCalled = false;
-    var element = {
-    };
-
-    expectFailure(() => {
-      action.invoke_(element, {event: 'event1', target: 'target1',
-          method: 'activate', str: 'action1'});
-    });
-    expect(activateCalled).to.equal(false);
+  afterEach(() => {
+    document.body.removeChild(parent);
+    action = null;
+    sandbox.restore();
+    sandbox = null;
   });
 
-  function expectFailure(func) {
-    try {
-      func();
-    } catch(e) {
-      // ignore, expected.
-    }
-  }
 
+  it('should invoke on the AMP element', () => {
+    action.invoke_(execElement, 'method1', 'source1', 'event1');
+    expect(onEnqueue.callCount).to.equal(1);
+    let inv = onEnqueue.getCall(0).args[0];
+    expect(inv.target).to.equal(execElement);
+    expect(inv.method).to.equal('method1');
+    expect(inv.source).to.equal('source1');
+    expect(inv.event).to.equal('event1');
+  });
+
+  it('should not allow invoke on non-AMP element', () => {
+    expect(() => {
+      action.invoke_({tagName: 'img'}, 'method1', 'source1', 'event1');
+    }).to.throw(/target must be an AMP element/);
+    expect(onEnqueue.callCount).to.equal(0);
+  });
+
+  it('should trigger event', () => {
+    action.trigger(child, 'tap', null);
+    expect(onEnqueue.callCount).to.equal(1);
+    let inv = onEnqueue.getCall(0).args[0];
+    expect(inv.target).to.equal(execElement);
+    expect(inv.method).to.equal('method1');
+    expect(inv.source).to.equal(targetElement);
+  });
+
+  it('should execute method', () => {
+    action.execute(execElement, 'method1', child, null);
+    expect(onEnqueue.callCount).to.equal(1);
+    let inv = onEnqueue.getCall(0).args[0];
+    expect(inv.target).to.equal(execElement);
+    expect(inv.method).to.equal('method1');
+    expect(inv.source).to.equal(child);
+  });
 });
