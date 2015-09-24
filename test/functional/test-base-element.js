@@ -16,6 +16,7 @@
 
 import {BaseElement} from '../../src/base-element';
 
+
 describe('BaseElement', () => {
 
   let div;
@@ -86,5 +87,31 @@ describe('BaseElement', () => {
     element.propagateAttributes(['data-test2', 'data-test3'], target);
     expect(target.getAttribute('data-test2')).to.equal('xyz');
     expect(target.getAttribute('data-test3')).to.equal('123');
+  });
+
+  it('should register action', () => {
+    let handler = () => {};
+    element.registerAction('method1', handler);
+    expect(element.actionMap_['method1']).to.equal(handler);
+  });
+
+  it('should fail execution of unregistered action', () => {
+    expect(() => {
+      element.executeAction({method: 'method1'}, false);
+    }).to.throw(/Method not found/);
+  });
+
+  it('should execute registered action', () => {
+    let handler = sinon.spy();
+    element.registerAction('method1', handler);
+    element.executeAction({method: 'method1'}, false);
+    expect(handler.callCount).to.equal(1);
+  });
+
+  it('should execute "activate" action without registration', () => {
+    let handler = sinon.spy();
+    element.activate = handler;
+    element.executeAction({method: 'activate'}, false);
+    expect(handler.callCount).to.equal(1);
   });
 });

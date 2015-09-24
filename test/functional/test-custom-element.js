@@ -21,6 +21,7 @@ import {createAmpElementProto} from '../../src/custom-element';
 import {resources} from '../../src/resources';
 import * as sinon from 'sinon';
 
+
 describe('CustomElement', () => {
 
   let testElementCreatedCallback;
@@ -65,10 +66,12 @@ describe('CustomElement', () => {
 
   let sandbox;
   let resourcesMock;
+  let clock;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     resourcesMock = sandbox.mock(resources);
+    clock = sandbox.useFakeTimers();
 
     testElementCreatedCallback = sinon.spy();
     testElementFirstAttachedCallback = sinon.spy();
@@ -81,6 +84,7 @@ describe('CustomElement', () => {
     resourcesMock.verify();
     resourcesMock.restore();
     resourcesMock = null;
+    clock.restore();
     sandbox.restore();
     sandbox = null;
   });
@@ -395,4 +399,54 @@ describe('CustomElement', () => {
     expect(testElementViewportCallback.callCount).to.equal(1);
   });
 
+
+  it('should enqueue actions until built', () => {
+    let element = new ElementClass();
+    let handler = sinon.spy();
+    element.implementation_.executeAction = handler;
+    expect(element.actionQueue_).to.not.equal(null);
+
+    let inv = {};
+    element.enqueAction(inv);
+    expect(element.actionQueue_.length).to.equal(1);
+    expect(element.actionQueue_[0]).to.equal(inv);
+    expect(handler.callCount).to.equal(0);
+  });
+
+  it('should execute action immediately after built', () => {
+    let element = new ElementClass();
+    let handler = sinon.spy();
+    element.implementation_.executeAction = handler;
+    element.build(true);
+
+    let inv = {};
+    element.enqueAction(inv);
+    expect(handler.callCount).to.equal(1);
+    expect(handler.getCall(0).args[0]).to.equal(inv);
+    expect(handler.getCall(0).args[1]).to.equal(false);
+  });
+
+  it('should dequeue all actions after build', () => {
+    let element = new ElementClass();
+    let handler = sinon.spy();
+    element.implementation_.executeAction = handler;
+
+    let inv1 = {};
+    let inv2 = {};
+    element.enqueAction(inv1);
+    element.enqueAction(inv2);
+    expect(element.actionQueue_.length).to.equal(2);
+    expect(element.actionQueue_[0]).to.equal(inv1);
+    expect(element.actionQueue_[1]).to.equal(inv2);
+    expect(handler.callCount).to.equal(0);
+
+    element.build(true);
+    clock.tick(10);
+    expect(handler.callCount).to.equal(2);
+    expect(handler.getCall(0).args[0]).to.equal(inv1);
+    expect(handler.getCall(0).args[1]).to.equal(true);
+    expect(handler.getCall(1).args[0]).to.equal(inv2);
+    expect(handler.getCall(1).args[1]).to.equal(true);
+    expect(element.actionQueue_).to.equal(null);
+  });
 });

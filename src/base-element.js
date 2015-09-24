@@ -89,6 +89,9 @@ export class BaseElement {
 
     /** @package {boolean} */
     this.inViewport_ = false;
+
+    /** @private {!Object<string, function(!ActionInvocation)>} */
+    this.actionMap_ = element.ownerDocument.defaultView.Object.create(null);
   }
 
   /** @return {!Layout} */
@@ -222,8 +225,41 @@ export class BaseElement {
   /**
    * Instructs the element that its activation is requested based on some
    * user event. Intended to be implemented by actual components.
+   * @param {!ActionInvocation} invocation
    */
-  activate() {
+  activate(invocation) {
+  }
+
+  /**
+   * Registers the action handler for the method with the specified name.
+   * @param {string} method
+   * @param {function(!ActionInvocation)} handler
+   * @protected
+   */
+  registerAction(method, handler) {
+    this.actionMap_[method] = handler;
+  }
+
+  /**
+   * Requests the element to execute the specified method. If method must have
+   * been previously registered using {@link registerAction}, otherwise an
+   * error is thrown.
+   * @param {!ActionInvocation} invocation The invocation data.
+   * @param {boolean} deferred Whether the invocation has had to wait any time
+   *   for the element to be resolved, upgraded and built.
+   * @final
+   * @package
+   */
+  executeAction(invocation, deferred) {
+    if (invocation.method == 'activate') {
+      this.activate(invocation);
+    } else {
+      let handler = this.actionMap_[invocation.method];
+      if (!handler) {
+        throw new Error(`Method not found: ${invocation.method}`);
+      }
+      handler(invocation);
+    }
   }
 
   /**
