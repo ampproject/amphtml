@@ -168,18 +168,18 @@ function buildExtension(name, version, hasCss, options) {
       console.assert(/\$CSS\$/.test(js),
           'Expected to find $CSS$ marker in extension JS: ' + jsPath);
       js = js.replace(/\$CSS\$/, css);
-      return buildExtensionJs(js, jsPath, name, version, options);
+      return buildExtensionJs(js, path, name, version, options);
     });
   } else {
-    return buildExtensionJs(js, jsPath, name, version, options);
+    return buildExtensionJs(js, path, name, version, options);
   }
 }
 
-function buildExtensionJs(js, jsPath, name, version, options) {
+function buildExtensionJs(js, path, name, version, options) {
   var builtName = name + '-' + version + '.max.js';
   var minifiedName = name + '-' + version + '.js';
   var latestName = name + '-latest.js';
-  return gulp.src(jsPath)
+  return gulp.src(path + '/*.js')
       .pipe(file(builtName, js))
       .pipe(gulp.dest('build/all/v0/'))
       .on('end', function() {
