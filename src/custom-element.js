@@ -349,7 +349,7 @@ export function createAmpElementProto(win, name, implementationClass) {
       }
     }
     resources.add(this);
-  }
+  };
 
   /**
    * Called when the element is detached from the DOM.
@@ -357,7 +357,7 @@ export function createAmpElementProto(win, name, implementationClass) {
    */
   ElementProto.detachedCallback = function() {
     resources.remove(this);
-  }
+  };
 
   /**
    * Called when the element is attached to the DOM for the first time.
@@ -446,7 +446,7 @@ export function createAmpElementProto(win, name, implementationClass) {
         'Must be upgraded and built to receive viewport events');
     this.dispatchCustomEvent('amp:load:start');
     var promise = this.implementation_.layoutCallback();
-    this.classList.add('-amp-layout')
+    this.classList.add('-amp-layout');
     assert(promise instanceof Promise,
         'layoutCallback must return a promise');
     return promise.then(() => {
@@ -517,7 +517,7 @@ export function createAmpElementProto(win, name, implementationClass) {
     } catch (e) {
       log.error(TAG_, 'Action execution failed:', invocation, e);
     }
-  }
+  };
 
   return ElementProto;
 }

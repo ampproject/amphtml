@@ -36,7 +36,7 @@ describe('amp-video', () => {
         }
       }
       return iframe.addElement(v);
-    })
+    });
   }
 
   it('should load a video', () => {

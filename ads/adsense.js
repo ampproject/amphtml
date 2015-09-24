@@ -21,6 +21,7 @@ import {writeScript} from '../src/3p';
  * @param {!Object} data
  */
 export function adsense(global, data) {
+  /*eslint "google-camelcase/google-camelcase": 0*/
   global.google_page_url = global.context.location.href;
   var s = document.createElement('script');
   s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js';

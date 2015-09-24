@@ -107,7 +107,7 @@ function triggerDimensions(width, height) {
 function nonSensitiveDataPostMessage(type, opt_object) {
   var object = opt_object || {};
   object.type = type;
-  object.sentinel = 'amp-3p'
+  object.sentinel = 'amp-3p';
   // Use of * is OK. We are not worried who gets this message.
   window.parent./*OK*/postMessage(object, '*');
 }

@@ -57,6 +57,7 @@ module.exports = function(config) {
     browsers: ['Chrome'],
 
     customLaunchers: {
+      /*eslint "google-camelcase/google-camelcase": 0*/
       Chrome_travis_ci: {
         base: 'Chrome',
         flags: ['--no-sandbox']

@@ -69,7 +69,7 @@ describe('amp-image-lightbox component', () => {
       let requestFullOverlay = sinon.spy();
       impl.requestFullOverlay = requestFullOverlay;
       let viewportOnChanged = sinon.spy();
-      impl.getViewport = () => {return {onChanged: viewportOnChanged}};
+      impl.getViewport = () => {return {onChanged: viewportOnChanged};};
       let historyPush = sinon.spy();
       impl.getHistory_ = () => {
         return {push: () => {

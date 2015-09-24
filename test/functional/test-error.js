@@ -27,10 +27,10 @@ describe('reportErrorToServer', () => {
   let onError;
 
   beforeEach(() => {
-    onError = window.onerror
+    onError = window.onerror;
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
-    sinon.spy(window, 'Image')
+    sinon.spy(window, 'Image');
   });
 
   afterEach(() => {
