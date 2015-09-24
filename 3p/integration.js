@@ -87,6 +87,14 @@ window.draw3p = function() {
   window.context.master = masterSelection(data.type);
   window.context.isMaster = window.context.master == window;
   window.context.data = data;
+  window.context.noContentAvailable = triggerNoContentAvailable;
   delete data._context;
   draw3p(window, data);
 };
+
+function triggerNoContentAvailable() {
+  // Use of * is OK. We are not worried who gets this message.
+  window.parent./*OK*/postMessage({
+    type: 'no-content'
+  }, '*');
+}

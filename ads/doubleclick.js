@@ -51,6 +51,12 @@ export function doubleclick(global, data) {
                 data.tagForChildDirectedTreatment);
           }
 
+          googletag.pubads().addEventListener('slotRenderEnded', function(event) {
+            if (event.isEmpty) {
+              context.noContentAvailable();
+            }
+          });
+
           // This must be called from its own script tag.
           global.docEndCallback = function() {
             global.googletag.display('c');

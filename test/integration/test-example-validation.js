@@ -43,6 +43,7 @@ describe('example', function() {
 
   // Only add to this whitelist to temporarily manage discrepancies
   // between validator and runtime.
+  /** @constructor {!Array<RegExp>}  */
   var errorWhitelist = [
   ];
 

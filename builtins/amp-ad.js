@@ -18,7 +18,7 @@ import {BaseElement} from '../src/base-element';
 import {isLayoutSizeDefined} from '../src/layout';
 import {loadPromise} from '../src/event-helper';
 import {registerElement} from '../src/custom-element';
-import {getIframe} from '../src/3p-frame';
+import {getIframe, listen} from '../src/3p-frame';
 
 
 /**
@@ -37,6 +37,13 @@ export function installAd(win) {
     createdCallback() {
       /** @private {?Element} */
       this.iframe_ = null;
+
+      /** @private {?Element} */
+      this.placeholder_ = this.getPlaceholder();
+
+      if (this.placeholder_) {
+        this.placeholder_.classList.add('hidden');
+      }
     }
 
     /** @override */
@@ -46,6 +53,12 @@ export function installAd(win) {
             this.element);
         this.applyFillContent(this.iframe_);
         this.element.appendChild(this.iframe_);
+        if (this.placeholder_) {
+          // Triggered by context.noContentAvailable() inside the ad iframe.
+          listen(this.iframe_, 'no-content', () => {
+            this.placeholder_.classList.remove('hidden');
+          });
+        }
       }
       return loadPromise(this.iframe_);
     }
