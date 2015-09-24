@@ -134,7 +134,7 @@ export class History {
       for (let i = 0; i < toPop.length; i++) {
         // With the same delay timeouts must observe the order, although
         // there's no hard requirement in this case to follow the pop order.
-        timer.delay(toPop[i]);
+        timer.delay(toPop[i], 1);
       }
     }
   }
