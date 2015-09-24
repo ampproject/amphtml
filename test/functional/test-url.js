@@ -132,6 +132,12 @@ describe('parseQueryString', () => {
       'b': '2'
     });
   });
+  it('should ignore leading #', () => {
+    expect(parseQueryString('#a=1&b=2')).to.deep.equal({
+      'a': '1',
+      'b': '2'
+    });
+  });
   it('should parse empty value', () => {
     expect(parseQueryString('a=&b=2')).to.deep.equal({
       'a': '',

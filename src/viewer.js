@@ -140,13 +140,7 @@ export class Viewer {
       parseParams_(this.win.name.substring(SENTINEL_.length), this.params_);
     }
     if (this.win.location.hash) {
-      let hash = this.win.location.hash;
-      if (hash.substring(0, 1) == '#') {
-        hash = hash.substring(1);
-      }
-      if (hash) {
-        parseParams_(hash, this.params_);
-      }
+      parseParams_(this.win.location.hash, this.params_);
     }
 
     log.fine(TAG_, 'Viewer params:', this.params_);
