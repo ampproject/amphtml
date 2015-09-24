@@ -74,7 +74,9 @@ export function installImg(win) {
       // Always immediately request the first two images to make sure
       // we start the HTTP requests for them as early as possible.
       if (count++ < 2 && this.element.offsetWidth) {
-        this.updateImageSrc_();
+        if (this.element.offsetWidth > 10) {
+          this.updateImageSrc_();
+        }
       }
     }
 
