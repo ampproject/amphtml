@@ -108,7 +108,7 @@ export class Gestures {
      * Observers for each type of registered gesture types.
      * @private {!Object<string, !Observable<!Gesture>>}
      */
-    this.overservers_ = {};
+    this.overservers_ = Object.create(null);
 
     /** @private @const {function(!Event)} */
     this.boundOnTouchStart_ = this.onTouchStart_.bind(this);
