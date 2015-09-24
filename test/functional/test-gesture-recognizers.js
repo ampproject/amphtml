@@ -372,7 +372,7 @@ describe('SwipeXYRecognizer', () => {
 });
 
 
-describe.only('TapzoomRecognizer', () => {
+describe('TapzoomRecognizer', () => {
 
   let sandbox;
   let element;
