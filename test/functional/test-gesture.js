@@ -72,6 +72,8 @@ describe('Gestures', () => {
   });
 
   function sendEvent(event) {
+    event.preventDefault = () => {};
+    event.stopPropagation = () => {};
     eventListeners[event.type](event);
   }
 
@@ -282,5 +284,80 @@ describe('Gestures', () => {
     gestures.doPass_();
     expect(gestures.pass_.isPending()).to.equal(false);
     expect(gestures.eventing_).to.equal(recognizer);
+  });
+
+
+  it('should allow event to propagate when nothing happening', () => {
+    let event = {
+      type: 'touchend',
+      preventDefault: sinon.spy(),
+      stopPropagation: sinon.spy(),
+    }
+    eventListeners[event.type](event);
+    expect(event.preventDefault.callCount).to.equal(0);
+    expect(event.stopPropagation.callCount).to.equal(0);
+  });
+
+  it('should cancel event when eventing', () => {
+    gestures.eventing_ = recognizer;
+    let event = {
+      type: 'touchend',
+      preventDefault: sinon.spy(),
+      stopPropagation: sinon.spy(),
+    }
+    eventListeners[event.type](event);
+    expect(event.preventDefault.callCount).to.equal(1);
+    expect(event.stopPropagation.callCount).to.equal(1);
+  });
+
+  it('should cancel event after eventing stopped', () => {
+    gestures.eventing_ = recognizer;
+    gestures.signalEnd_(recognizer);
+    expect(gestures.eventing_).to.equal(null);
+    expect(gestures.wasEventing_).to.equal(true);
+
+    let event = {
+      type: 'touchend',
+      preventDefault: sinon.spy(),
+      stopPropagation: sinon.spy(),
+    }
+    eventListeners[event.type](event);
+    expect(event.preventDefault.callCount).to.equal(1);
+    expect(event.stopPropagation.callCount).to.equal(1);
+    expect(gestures.wasEventing_).to.equal(false);
+  });
+
+  it('should cancel event when anyone is ready', () => {
+    gestures.ready_[0] = 1;
+    let event = {
+      type: 'touchend',
+      preventDefault: sinon.spy(),
+      stopPropagation: sinon.spy(),
+    }
+    eventListeners[event.type](event);
+    expect(event.preventDefault.callCount).to.equal(1);
+    expect(event.stopPropagation.callCount).to.equal(1);
+  });
+
+  it('should cancel event when anyone is pending', () => {
+    gestures.pending_[0] = 1;
+    let event = {
+      type: 'touchend',
+      preventDefault: sinon.spy(),
+      stopPropagation: sinon.spy(),
+    }
+    eventListeners[event.type](event);
+    expect(event.preventDefault.callCount).to.equal(1);
+    expect(event.stopPropagation.callCount).to.equal(1);
+
+    clock.tick(10);
+    event = {
+      type: 'touchend',
+      preventDefault: sinon.spy(),
+      stopPropagation: sinon.spy(),
+    }
+    eventListeners[event.type](event);
+    expect(event.preventDefault.callCount).to.equal(0);
+    expect(event.stopPropagation.callCount).to.equal(0);
   });
 });
