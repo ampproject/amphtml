@@ -48,4 +48,14 @@ describe('LayoutRect', () => {
     expect(rect2.height).to.equal(40 + 40 * 6);
   });
 
+  it('layoutRectFromDomRect', () => {
+    let rect = lr.layoutRectFromDomRect({top: 11, left: 12, width: 111,
+        height: 222});
+    expect(rect.top).to.equal(11);
+    expect(rect.left).to.equal(12);
+    expect(rect.width).to.equal(111);
+    expect(rect.height).to.equal(222);
+    expect(rect.bottom).to.equal(11 + 222);
+    expect(rect.right).to.equal(12 + 111);
+  });
 });
