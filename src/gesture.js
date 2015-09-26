@@ -98,6 +98,13 @@ export class Gestures {
     /** @private {?GestureRecognizer} */
     this.eventing_ = null;
 
+    /**
+     * This variable indicates that the eventing has stopped on this
+     * event cycle.
+     * @private {boolean}
+     */
+    this.wasEventing_ = false;
+
     /** @private {!Pass} */
     this.pass_ = new Pass(this.doPass_.bind(this));
 
@@ -175,6 +182,7 @@ export class Gestures {
    */
   onTouchStart_(event) {
     let now = timer.now();
+    this.wasEventing_ = false;
 
     this.pointerDownObservable_.fire(event);
 
@@ -337,6 +345,7 @@ export class Gestures {
   signalEnd_(recognizer) {
     if (this.eventing_ == recognizer) {
       this.eventing_ = null;
+      this.wasEventing_ = true;
     }
   }
 
@@ -363,7 +372,19 @@ export class Gestures {
    * @private
    */
   afterEvent_(event) {
-    if (this.eventing_) {
+    let cancelEvent = !!this.eventing_ || this.wasEventing_;
+    this.wasEventing_ = false;
+    if (!cancelEvent) {
+      let now = timer.now();
+      for (let i = 0; i < this.recognizers_.length; i++) {
+        if (this.ready_[i] ||
+                this.pending_[i] && this.pending_[i] >= now) {
+          cancelEvent = true;
+          break;
+        }
+      }
+    }
+    if (cancelEvent) {
       event.stopPropagation();
       event.preventDefault();
     }
