@@ -166,6 +166,9 @@ export class Resources {
 
   /** @private */
   updateScrollHeight_() {
+    if (!this.win.document.body) {
+      return;
+    }
     let scrollHeight = this.win.document.body.scrollHeight;
     if (scrollHeight != this.scrollHeight_) {
       this.scrollHeight_ = scrollHeight;
