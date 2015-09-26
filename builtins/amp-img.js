@@ -73,10 +73,8 @@ export function installImg(win) {
       // TODO(@dvoytenko) Remove when #254 is fixed.
       // Always immediately request the first two images to make sure
       // we start the HTTP requests for them as early as possible.
-      if (count++ < 2 && this.element.offsetWidth) {
-        if (this.element.offsetWidth > 10) {
-          this.updateImageSrc_();
-        }
+      if (count++ < 2 && this.element.offsetWidth > 10) {
+        this.updateImageSrc_();
       }
     }
 
