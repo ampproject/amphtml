@@ -107,6 +107,10 @@ i-amp-sizer {
   display: none;
 }
 
+.-amp-ghost {
+  visibility: hidden !important;
+}
+
 .-amp-layout {
   /* Just state. */
 }
