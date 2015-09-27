@@ -24,12 +24,6 @@ const TAG_ = 'Action';
 /** @const {string} */
 const ACTION_MAP_ = '__AMP_ACTION_MAP__' + Math.random();
 
-/**
- * TODO(dvoytenko, #291): remove
- * @const {string}
- */
-const DEFAULT_EVENT_ = 'tap';
-
 /** @const {string} */
 const DEFAULT_METHOD_ = 'activate';
 
@@ -269,14 +263,13 @@ export class Action {
     let eventSep = s.indexOf(':');
     let methodSep = s.indexOf('.', eventSep + 1);
     let event = (eventSep != -1 ? s.substring(0, eventSep) : '').toLowerCase().
-        trim() || DEFAULT_EVENT_;
+        trim() || null;
     let target = s.substring(eventSep + 1, methodSep != -1 ? methodSep :
         s.length).trim();
     let method = (methodSep != -1 ? s.substring(methodSep + 1) : '').
         trim() || DEFAULT_METHOD_;
 
-    if (!target) {
-      // TODO(dvoytenko): report action info parse errors separately
+    if (!event || !target) {
       log.error(TAG_, 'invalid action definition: ' + s);
       return null;
     }

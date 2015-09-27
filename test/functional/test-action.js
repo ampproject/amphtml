@@ -34,18 +34,9 @@ describe('Action parseAction', () => {
   });
 
 
-  it('should parse with default event and method', () => {
-    let a = action.parseAction_('target1');
-    expect(a.event).to.equal('tap');
-    expect(a.target).to.equal('target1');
-    expect(a.method).to.equal('activate');
-  });
-
-  it('should parse with default event', () => {
+  it('should fail parse without event', () => {
     let a = action.parseAction_('target1.method1');
-    expect(a.event).to.equal('tap');
-    expect(a.target).to.equal('target1');
-    expect(a.method).to.equal('method1');
+    expect(a).to.equal(null);
   });
 
   it('should parse with default method', () => {
