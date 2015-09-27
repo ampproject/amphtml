@@ -20,6 +20,7 @@ import {getLengthNumeral} from '../src/layout';
 import {documentInfoFor} from './document-info';
 import {getMode} from './mode';
 import {dashToCamelCase} from './string';
+import {parseUrl} from './url';
 
 
 /** @type {!Object<string,number>} Number of 3p frames on the for that type. */
@@ -94,6 +95,30 @@ export function getIframe(parentWindow, element, opt_type) {
     this.readyState = 'complete';
   };
   return iframe;
+}
+
+/**
+ * Allows listening for message from the iframe.
+ * @param {!Element} iframe
+ * @param {string} typeOfMessage
+ * @param {function()} callback Called when a message of this type
+ *     arrives for this iframe.
+ */
+export function listen(iframe, typeOfMessage, callback) {
+  var win = iframe.ownerDocument.defaultView;
+  var origin = parseUrl(getBootstrapBaseUrl(win)).origin;
+  win.addEventListener('message', function(event) {
+    if (event.origin != origin) {
+      return;
+    }
+    if (event.source != iframe.contentWindow) {
+      return;
+    }
+    if (event.data.type != typeOfMessage) {
+      return;
+    }
+    callback();
+  });
 }
 
 /**
