@@ -39,8 +39,11 @@ export function installAd(win) {
       this.iframe_ = null;
 
       /** @private {?Element} */
-      this.placeholder_ = this.getPlaceholder();
+      this.placeholder_ = null;
+    }
 
+    /** @override */
+    buildCallback() {
       if (this.placeholder_) {
         this.placeholder_.classList.add('hidden');
       }
