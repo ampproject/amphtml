@@ -27,7 +27,6 @@ import {installStyles} from './styles';
 import {installErrorReporting} from './error';
 import {stubElements} from './custom-element';
 import {adopt} from './runtime';
-import {installExperimentalViewerIntegration} from './experimental-viewer-integration';
 import {cssText} from '../build/css.js';
 import {action} from './action';
 import {maybeValidate} from './validator-integration';
@@ -48,8 +47,6 @@ installStyles(document, cssText, () => {
   action.addEvent('tap');
 
   maybeValidate(window);
-
-  installExperimentalViewerIntegration();
 });
 
 // Output a message to the console and add an attribute to the <html>
