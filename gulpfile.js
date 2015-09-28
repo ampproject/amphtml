@@ -67,6 +67,7 @@ function buildExtensions(options) {
   buildExtension('amp-image-lightbox', '0.1', true, options);
   buildExtension('amp-instagram', '0.1', false, options);
   buildExtension('amp-lightbox', '0.1', false, options);
+  /** @deprecated amp-lides is deprecated and will be deleted before 1.0 */
   buildExtension('amp-slides', '0.1', false, options);
   buildExtension('amp-twitter', '0.1', false, options);
   buildExtension('amp-youtube', '0.1', false, options);

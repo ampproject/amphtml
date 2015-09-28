@@ -21,6 +21,7 @@ import * as st from '../../../src/style';
 import * as tr from '../../../src/transition';
 
 
+/** @deprecated amp-lides is deprecated and will be deleted before 1.0 */
 class AmpSlides extends AMP.BaseElement {
 
   /** @override */
