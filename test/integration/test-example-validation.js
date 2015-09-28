@@ -43,13 +43,8 @@ describe('example', function() {
 
   // Only add to this whitelist to temporarily manage discrepancies
   // between validator and runtime.
+  /** @constructor {!Array<RegExp>}  */
   var errorWhitelist = [
-    // Permanent: Used in examples, not public.
-    /DISALLOWED_TAG amp-extended-sample/,
-    // Issue #231: Valid, must be whitelisted.
-    /DISALLOWED_ATTR from/,
-    // Issue #231: Valid, must be whitelisted
-    /DISALLOWED_ATTR json/,
   ];
 
   var usedWhitelist = [];
@@ -74,6 +69,15 @@ describe('example', function() {
           }
           if (line == 'FAIL') {
             // We only look at individual error lines.
+            continue;
+          }
+          if (/DEV_MODE_ENABLED/.test(line)) {
+            // This error is expected since we have to be in dev mode to
+            // run the validator. It is only a warning and we'd probably
+            // see that by looking for PASS / FAIL. By itself it doesn't
+            // make things fail.
+            // TODO(johannes): Add warning prefixes to such events so they
+            // can be detected systematically.
             continue;
           }
           for (let n = 0; n < errorWhitelist.length; n++) {

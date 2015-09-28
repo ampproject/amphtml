@@ -37,23 +37,23 @@ describe('Transition', () => {
     expect(func1.callCount).to.equal(0);
     expect(func2.callCount).to.equal(0);
 
-    all(0);
+    all(0, false);
     expect(func1.callCount).to.equal(1);
-    expect(func1.calledWithExactly(0)).to.equal(true);
+    expect(func1.calledWithExactly(0, false)).to.equal(true);
     expect(func2.callCount).to.equal(1);
-    expect(func2.calledWithExactly(0)).to.equal(true);
+    expect(func2.calledWithExactly(0, false)).to.equal(true);
 
-    all(0.5);
+    all(0.5, false);
     expect(func1.callCount).to.equal(2);
-    expect(func1.calledWithExactly(0.5)).to.equal(true);
+    expect(func1.calledWithExactly(0.5, false)).to.equal(true);
     expect(func2.callCount).to.equal(2);
-    expect(func2.calledWithExactly(0.5)).to.equal(true);
+    expect(func2.calledWithExactly(0.5, false)).to.equal(true);
 
-    all(1);
+    all(1, true);
     expect(func1.callCount).to.equal(3);
-    expect(func1.calledWithExactly(1)).to.equal(true);
+    expect(func1.calledWithExactly(1, true)).to.equal(true);
     expect(func2.callCount).to.equal(3);
-    expect(func2.calledWithExactly(1)).to.equal(true);
+    expect(func2.calledWithExactly(1, true)).to.equal(true);
   });
 
   it('setStyles', () => {
@@ -133,5 +133,29 @@ describe('Transition', () => {
 
     func = tr.translateX(() => {return '101vw';});
     expect(func(0)).to.equal('translateX(101vw)');
+  });
+
+  it('should translate with X and Y', () => {
+    let func = tr.translate(tr.numeric(0, 10), tr.numeric(20, 30));
+    expect(func(0)).to.equal('translate(0px,20px)');
+    expect(func(0.3)).to.equal('translate(3px,23px)');
+    expect(func(0.6)).to.equal('translate(6px,26px)');
+    expect(func(0.9)).to.equal('translate(9px,29px)');
+    expect(func(1)).to.equal('translate(10px,30px)');
+
+    func = tr.translate(() => {return '101vw';}, () => {return '201em';});
+    expect(func(0)).to.equal('translate(101vw,201em)');
+  });
+
+  it('should translate with only X', () => {
+    let func = tr.translate(tr.numeric(0, 10));
+    expect(func(0)).to.equal('translate(0px)');
+    expect(func(0.3)).to.equal('translate(3px)');
+    expect(func(0.6)).to.equal('translate(6px)');
+    expect(func(0.9)).to.equal('translate(9px)');
+    expect(func(1)).to.equal('translate(10px)');
+
+    func = tr.translate(() => {return '101vw';});
+    expect(func(0)).to.equal('translate(101vw)');
   });
 });

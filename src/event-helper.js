@@ -62,6 +62,16 @@ export function listenOncePromise(element, eventType, opt_capture,
 
 
 /**
+ * Whether the specified element has been loaded already.
+ * @param {!Element} element
+ * @return {boolean}
+ */
+export function isLoaded(element) {
+  return element.complete || element.readyState == 'complete';
+}
+
+
+/**
  * Returns a promise that will resolve or fail based on the element's 'load'
  * and 'error' events. Optionally this method takes a timeout, which will reject
  * the promise if the resource has not loaded by then.
@@ -73,7 +83,7 @@ export function loadPromise(element, opt_timeout) {
   let unlistenLoad;
   let unlistenError;
   let loadingPromise = new Promise((resolve, reject) => {
-    if (element.complete || element.readyState == 'complete') {
+    if (isLoaded(element)) {
       resolve(element);
     } else {
       // Listen once since IE 5/6/7 fire the onload event continuously for

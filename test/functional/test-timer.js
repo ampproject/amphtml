@@ -48,17 +48,28 @@ describe('Timer', () => {
     timer.delay(handler, 111);
   });
 
-  it('delay default', () => {
-    let handler = () => {};
-    windowMock.expects('setTimeout').withExactArgs(handler, 0).
-        returns(1).once();
+  it('delay default', (done) => {
+    windowMock.expects('setTimeout').never();
     windowMock.expects('clearTimeout').never();
-    timer.delay(handler);
+    timer.delay(done);
   });
 
   it('cancel', () => {
     windowMock.expects('clearTimeout').withExactArgs(1).once();
     timer.cancel(1);
+  });
+
+  it('cancel default', (done) => {
+    windowMock.expects('setTimeout').never();
+    windowMock.expects('clearTimeout').never();
+    var id = timer.delay(() => {
+      throw new Error('should have been cancelled');
+    });
+    timer.cancel(id);
+
+    // This makes sure the error has time to throw while this test
+    // is still running.
+    timer.delay(done);
   });
 
   it('promise', () => {

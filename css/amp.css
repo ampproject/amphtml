@@ -107,6 +107,10 @@ i-amp-sizer {
   display: none;
 }
 
+.-amp-ghost {
+  visibility: hidden !important;
+}
+
 .-amp-layout {
   /* Just state. */
 }
@@ -171,4 +175,62 @@ amp-pixel {
   height: 1px !important; /* Only things with height are ever loaded. */
   overflow: hidden !important;
   visibility: hidden;
+}
+
+.-amp-loader {
+  position: absolute;
+  display: block;
+  height: 10px;
+  top: 50%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-50%);
+  transform-origin: 50% 50%;
+  white-space: nowrap;
+}
+
+/**
+ * We want to be a bit more specific here as we don't want a global active
+ * to just trigger the loading animation
+ */
+.-amp-autoplaceholder.active .-amp-loader-dot {
+  animation: -amp-loader-dots 2s infinite;
+}
+
+.-amp-loader-dot {
+  position: relative;
+  display: inline-block;
+
+  height: 10px;
+  width: 10px;
+  margin: 2px;
+  border-radius: 100%;
+  background-color: rgba(0, 0, 0, .3);
+
+  animation: -amp-loader-dots 1s infinite;
+  box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, .2);
+  will-change: transform;
+}
+
+.-amp-loader .-amp-loader-dot:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.-amp-loader .-amp-loader-dot:nth-child(2) {
+  animation-delay: .1s;
+}
+
+.-amp-loader .-amp-loader-dot:nth-child(3) {
+  animation-delay: .2s;
+}
+
+@keyframes -amp-loader-dots {
+  0%, 100% {
+    transform: scale(.7);
+    background-color: rgba(0, 0, 0, .3);
+  }
+
+  50% {
+    transform: scale(.8);
+    background-color: rgba(0, 0, 0, .5);
+  }
 }

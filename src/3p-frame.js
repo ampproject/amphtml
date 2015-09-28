@@ -20,6 +20,7 @@ import {getLengthNumeral} from '../src/layout';
 import {documentInfoFor} from './document-info';
 import {getMode} from './mode';
 import {dashToCamelCase} from './string';
+import {parseUrl} from './url';
 
 
 /** @type {!Object<string,number>} Number of 3p frames on the for that type. */
@@ -65,7 +66,7 @@ function getFrameAttributes(parentWindow, element, opt_type) {
 }
 
 /**
- * Creates the iframe for the ad. Applies correct size and passes the ad
+ * Creates the iframe for the embed. Applies correct size and passes the embed
  * attributes to the frame via JSON inside the fragment.
  * @param {!Window} parentWindow
  * @param {!Element} element
@@ -89,7 +90,35 @@ export function getIframe(parentWindow, element, opt_type) {
   iframe.height = attributes.height;
   iframe.style.border = 'none';
   iframe.setAttribute('scrolling', 'no');
+  iframe.onload = function() {
+    // Chrome does not reflect the iframe readystate.
+    this.readyState = 'complete';
+  };
   return iframe;
+}
+
+/**
+ * Allows listening for message from the iframe.
+ * @param {!Element} iframe
+ * @param {string} typeOfMessage
+ * @param {function()} callback Called when a message of this type
+ *     arrives for this iframe.
+ */
+export function listen(iframe, typeOfMessage, callback) {
+  var win = iframe.ownerDocument.defaultView;
+  var origin = parseUrl(getBootstrapBaseUrl(win)).origin;
+  win.addEventListener('message', function(event) {
+    if (event.origin != origin) {
+      return;
+    }
+    if (event.source != iframe.contentWindow) {
+      return;
+    }
+    if (event.data.type != typeOfMessage) {
+      return;
+    }
+    callback();
+  });
 }
 
 /**
@@ -136,8 +165,8 @@ function getBootstrapBaseUrl(parentWindow) {
   if (getMode().localDev) {
 
     url = 'http://ads.localhost:' + parentWindow.location.port +
-        '/dist.3p/$internalRuntimeVersion$/frame' +
-        (getMode().minified ? '' : '.max') +
+        '/dist.3p/current' +
+        (getMode().minified ? '-min/frame' : '/frame.max') +
         '.html';
   }
   return url;

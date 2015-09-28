@@ -18,11 +18,14 @@ import {log} from './log';
 import {platform} from './platform';
 import {timer} from './timer';
 
-let TAG_ = 'Action';
+/** @const {string} */
+const TAG_ = 'Action';
 
-let ACTION_MAP_ = '__AMP_ACTION_MAP__' + Math.random();
-let DEFAULT_EVENT_ = 'tap';
-let DEFAULT_METHOD_ = 'activate';
+/** @const {string} */
+const ACTION_MAP_ = '__AMP_ACTION_MAP__' + Math.random();
+
+/** @const {string} */
+const DEFAULT_METHOD_ = 'activate';
 
 
 /**
@@ -34,6 +37,33 @@ let DEFAULT_METHOD_ = 'activate';
  * }}
  */
 class ActionInfo_ {};
+
+
+/**
+ * The structure that contains all details of the action method invocation.
+ * @struct
+ * @const
+ * TODO(dvoytenko): add action arguments here as well.
+ */
+class ActionInvocation {
+  /**
+   * @param {!Element} target
+   * @param {string} method
+   * @param {?Element} source
+   * @param {?Event} event
+   */
+  constructor(target, method, source, event) {
+    /** @const {!Element} */
+    this.target = target;
+    /** @const {string} */
+    this.method = method;
+    /** @const {?Element} */
+    this.source = source;
+    /** @const {?Event} */
+    this.event = event;
+  }
+}
+
 
 
 /**
@@ -64,29 +94,54 @@ export class Action {
       // fast-click.
       this.win.document.addEventListener('click', (event) => {
         if (!event.defaultPrevented) {
-          this.action_('tap', event);
+          this.trigger(event.target, 'tap', event);
         }
       });
     }
   }
 
   /**
+   * Triggers the specified event on the target element.
+   * @param {!Element} target
+   * @param {string} eventType
+   * @param {?Event} event
+   */
+  trigger(target, eventType, event) {
+    this.action_(target, eventType, event);
+  }
+
+  /**
+   * Triggers execution of the method on a target/method.
+   * @param {!Element} target
+   * @param {string} method
+   * @param {?Element} source
+   * @param {?Event} event
+   */
+  execute(target, method, source, event) {
+    this.invoke_(target, method, source, event, null);
+  }
+
+  /**
+   * @param {!Element} source
    * @param {string} actionEventType
    * @param {!Event} event
    * @private
    */
-  action_(actionEventType, event) {
-    let action = this.findAction_(event.target, actionEventType);
+  action_(source, actionEventType, event) {
+    let action = this.findAction_(source, actionEventType);
     if (!action) {
+      // TODO(dvoytenko): implement default (catch-all) actions.
       return;
     }
 
-    var target = document.getElementById(action.actionInfo.target);
-    if (target) {
-      this.invoke_(target, action.actionInfo);
-    } else {
+    let target = document.getElementById(action.actionInfo.target);
+    if (!target) {
       this.actionInfoError_('target not found', action.actionInfo, target);
+      return;
     }
+
+    this.invoke_(target, action.actionInfo.method,
+        action.node, event, action.actionInfo);
   }
 
   /**
@@ -105,25 +160,24 @@ export class Action {
 
   /**
    * @param {!Element} target
-   * @param {!ActionInfo} actionInfo
+   * @param {string} method
+   * @param {?Element} source
+   * @param {?Event} event
+   * @param {?ActionInfo} actionInfo
    */
-  invoke_(target, actionInfo) {
-    let method = actionInfo.method;
-    // TODO(dvoytenko): introduce two systems:
-    // 1. Action.registerMethod('toggleClass'): we can add arbitrary
-    //    actions to all elements. toggleClass is a good example.
-    // 2. CustomElement.registerAction(name, function): this way elements
-    //    can register any methods that they want to expose to Action.
-    // TODO(dvoytenko): promise for not-yet-upgraded event.
-    if (method == 'activate') {
-      if (target.activate) {
-        target.activate();
-      } else {
-        this.actionInfoError_('method not found', actionInfo, target);
-      }
-    } else {
-      this.actionInfoError_('not implemented', actionInfo, target);
+  invoke_(target, method, source, event, actionInfo) {
+    let invocation = new ActionInvocation(target, method, source, event);
+
+    // TODO(dvoytenko): implement common method handlers, e.g. "toggleClass"
+
+    // Only amp elements are allowed to proceed further.
+    if (target.tagName.toLowerCase().substring(0, 4) != 'amp-') {
+      this.actionInfoError_('target must be an AMP element', actionInfo,
+          target);
+      return;
     }
+
+    target.enqueAction(invocation);
   }
 
   /**
@@ -209,14 +263,13 @@ export class Action {
     let eventSep = s.indexOf(':');
     let methodSep = s.indexOf('.', eventSep + 1);
     let event = (eventSep != -1 ? s.substring(0, eventSep) : '').toLowerCase().
-        trim() || DEFAULT_EVENT_;
+        trim() || null;
     let target = s.substring(eventSep + 1, methodSep != -1 ? methodSep :
         s.length).trim();
     let method = (methodSep != -1 ? s.substring(methodSep + 1) : '').
         trim() || DEFAULT_METHOD_;
 
-    if (!target) {
-      // TODO(dvoytenko): report action info parse errors separately
+    if (!event || !target) {
       log.error(TAG_, 'invalid action definition: ' + s);
       return null;
     }

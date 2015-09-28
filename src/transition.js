@@ -15,12 +15,16 @@
  */
 
 import {getCurve} from './curve';
+import * as st from './style';
 
 
 /**
- * Transition function that accepts normtime between 0 and 1 and performs an
- * arbitrary animation action.
- * @typedef {function(normtime):RESULT}
+ * Transition function that accepts normtime, typically between 0 and 1 and
+ * performs an arbitrary animation action. Notice that sometimes normtime can
+ * dip above 1 or below 0. This is an acceptable case for some curves. The
+ * second argument is a boolean value that equals "true" for the completed
+ * transition and "false" for ongoing.
+ * @typedef {function(normtime, boolean):RESULT}
  * @template RESULT
  */
 class Transition {}
@@ -36,10 +40,10 @@ export const NULL = function(time) {return null;};
  * @return {!Transition<void>}
  */
 export function all(transitions) {
-  return (time) => {
+  return (time, complete) => {
     for (let i = 0; i < transitions.length; i++) {
       let tr = transitions[i];
-      tr(time);
+      tr(time, complete);
     }
   };
 }
@@ -54,9 +58,9 @@ export function all(transitions) {
  * @return {!Transition<void>}
  */
 export function setStyles(element, styles) {
-  return (time) => {
+  return (time, complete) => {
     for (let k in styles) {
-      element.style[k] = styles[k](time);
+      st.setStyle(element, k, styles[k](time, complete));
     }
   };
 }
@@ -120,9 +124,34 @@ export function translateX(transition) {
   return (time) => {
     let res = transition(time);
     if (typeof res == 'string') {
-      return 'translateX(' + res + ')';
+      return `translateX(${res})`;
     }
-    return 'translateX(' + res + 'px)';
+    return `translateX(${res}px)`;
+  };
+}
+
+
+/**
+ * A transition for "translate(x, y)" of CSS "transform" property.
+ * @param {!Transition<number|string>} transitionX
+ * @param {!Transition<number|string>|undefined} opt_transitionY
+ * @return {!Transition<string>}
+ */
+export function translate(transitionX, opt_transitionY) {
+  return (time) => {
+    let x = transitionX(time);
+    if (typeof x == 'number') {
+      x = st.px(x);
+    }
+    if (!opt_transitionY) {
+      return `translate(${x})`;
+    }
+
+    let y = opt_transitionY(time);
+    if (typeof y == 'number') {
+      y = st.px(y);
+    }
+    return `translate(${x},${y})`;
   };
 }
 
@@ -134,6 +163,6 @@ export function translateX(transition) {
  */
 export function scale(transition) {
   return (time) => {
-    return 'scale(' + transition(time) + ')';
+    return `scale(${transition(time)})`;
   };
 }

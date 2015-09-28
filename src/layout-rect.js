@@ -53,6 +53,24 @@ export function layoutRectLtwh(left, top, width, height) {
 
 
 /**
+ * Creates a layout rect based on the DOMRect, e.g. obtained from calling
+ * getBoundingClientRect.
+ * @param {!DOMRect} rect
+ * @return {!LayoutRect}
+ */
+export function layoutRectFromDomRect(rect) {
+  return {
+    left: rect.left,
+    top: rect.top,
+    width: rect.width,
+    height: rect.height,
+    bottom: rect.top + rect.height,
+    right: rect.left + rect.width
+  };
+}
+
+
+/**
  * Returns true if the specified two rects overlap by a single pixel.
  * @param {!LayoutRect} r1
  * @param {!LayoutRect} r2

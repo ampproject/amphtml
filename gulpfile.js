@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+var fs = require('fs');
 var argv = require('minimist')(process.argv.slice(2));
 var gulp = require('gulp');
 var del = require('del');
@@ -58,12 +59,12 @@ function buildExtensions(options) {
   // We pass watch further in to have browserify watch the built file
   // and update it if any of its required deps changed.
   // Each extension and version must be listed individually here.
-  buildExtension('sample', '0.1', true, options);
   buildExtension('amp-anim', '0.1', false, options);
   buildExtension('amp-audio', '0.1', false, options);
   buildExtension('amp-carousel', '0.1', false, options);
   buildExtension('amp-fit-text', '0.1', true, options);
   buildExtension('amp-iframe', '0.1', false, options);
+  buildExtension('amp-image-lightbox', '0.1', true, options);
   buildExtension('amp-instagram', '0.1', false, options);
   buildExtension('amp-lightbox', '0.1', false, options);
   buildExtension('amp-slides', '0.1', false, options);
@@ -91,7 +92,7 @@ function compile(watch, shouldMinify) {
     watch: watch,
     minify: shouldMinify
   });
-  thirdPartyBootstrap(watch);
+  thirdPartyBootstrap(watch, shouldMinify);
 }
 
 
@@ -168,18 +169,18 @@ function buildExtension(name, version, hasCss, options) {
       console.assert(/\$CSS\$/.test(js),
           'Expected to find $CSS$ marker in extension JS: ' + jsPath);
       js = js.replace(/\$CSS\$/, css);
-      return buildExtensionJs(js, jsPath, name, version, options);
+      return buildExtensionJs(js, path, name, version, options);
     });
   } else {
-    return buildExtensionJs(js, jsPath, name, version, options);
+    return buildExtensionJs(js, path, name, version, options);
   }
 }
 
-function buildExtensionJs(js, jsPath, name, version, options) {
+function buildExtensionJs(js, path, name, version, options) {
   var builtName = name + '-' + version + '.max.js';
   var minifiedName = name + '-' + version + '.js';
   var latestName = name + '-latest.js';
-  return gulp.src(jsPath)
+  return gulp.src(path + '/*.js')
       .pipe(file(builtName, js))
       .pipe(gulp.dest('build/all/v0/'))
       .on('end', function() {
@@ -242,11 +243,11 @@ function examplesWithMinifiedJs(name) {
       .pipe(gulp.dest('examples.build/'));
 }
 
-function thirdPartyBootstrap(watch) {
+function thirdPartyBootstrap(watch, shouldMinify) {
   var input = '3p/frame.max.html';
   if (watch) {
     gulpWatch(input, function() {
-      adsBootstrap(false);
+      thirdPartyBootstrap(false);
     });
   }
   console.log('Processing ' + input);
@@ -255,7 +256,20 @@ function thirdPartyBootstrap(watch) {
   min = min.replace(/\.\/integration\.js/g, './f.js');
   gulp.src(input)
       .pipe(file('frame.html', min))
-      .pipe(gulp.dest('dist.3p/' + internalRuntimeVersion));
+      .pipe(gulp.dest('dist.3p/' + internalRuntimeVersion))
+      .on('end', function() {
+        var aliasToLatestBuild = 'dist.3p/current';
+        if (shouldMinify) {
+          aliasToLatestBuild += '-min';
+        }
+        if (fs.existsSync(aliasToLatestBuild)) {
+          fs.unlinkSync(aliasToLatestBuild);
+        }
+        fs.symlinkSync(
+            './' + internalRuntimeVersion,
+            aliasToLatestBuild,
+            'dir');
+      });
 }
 
 

@@ -77,8 +77,11 @@ In concrete terms this means that:
   Some text
   <amp-img src=sample.jpg width=300 height=300 />
 </p>
-<amp-ad width=100% height=300>
-  <!-- <script>document.write(…)</script> -->
+<amp-ad width=300 height=250
+    type="a9"
+    data-aax_size="300x250"
+    data-aax_pubname="test123"
+    data-aax_src="302">
 </amp-ad>
 </body>
 </html>
@@ -188,7 +191,10 @@ Pseudo selectors are generally forbidden and must be whitelisted 1 by 1. Initial
 
 CSS variables are used to style custom elements.
 
-Class names in author stylesheets may not starts with the string `-amp-`. These are reserved for internal use by the AMP runtime.
+Class names in author stylesheets may not starts with the string `-amp-`. These are reserved for internal use by the AMP runtime. It follows,
+that user stylesheet may not reference CSS selectors for `-amp-` classes and `i-amp` tags. These classes and elements are not meant to
+be customized by authors. Authors, however, can override styles of `amp-` classes and tags for any CSS properties not explicitly
+forbidden by these components' spec.
 
 Usage of the !important qualifier is not allowed.
 

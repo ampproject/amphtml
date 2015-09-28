@@ -75,6 +75,7 @@ var FRAME_CONST_ = Math.round(-16.67 / Math.log(0.95) / 2);
 
 /**
  * A gesture recognizer for swipes in horizontal plane.
+ * @deprecated  Deprecated in preference to motion.js and gestures.js.
  */
 export class SwipeXRecognizer {
 

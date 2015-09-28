@@ -56,6 +56,15 @@ Most ad networks require further configuration. This can be passed to the networ
 
 Optional attribute to pass configuration to the ad as an arbitrarily complex JSON object. The object is passed to the ad as-is with no mangling done on the names.
 
+#### Placeholder
+
+Optionally `amp-ad` supports a child element with the `placeholder` attribute. If supported by the ad network, this element if shown if no ad is available for this slot.
+
+    <amp-ad width=300 height=250
+        type="foo">
+      <div placeholder>Have a great day!</div>
+    </amp-ad>
+
 #### Supported ad networks
 
 - [A9](../ads/a9.md)

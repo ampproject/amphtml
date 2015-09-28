@@ -136,6 +136,38 @@ describe('Animation', () => {
     expect(tr2).to.equal(-1);
   });
 
+
+  it('should animate out-of-bounds time', () => {
+    let tr1 = -1;
+    // Linear curve between -0.5 and 1.5
+    let curve = (time) => {return time * 2 - 0.5;};
+    anim.add(0, (time) => {tr1 = time;}, 1, curve);
+
+    let ap = anim.start(1000);
+    let resolveCalled = false;
+    ap.resolve_ = () => {
+      resolveCalled = true;
+    };
+
+    tr1 = -1;
+    runVsync();
+    expect(tr1).to.equal(-0.5);
+
+    tr1 = -1;
+    clock.tick(500);  // 500
+    runVsync();
+    expect(tr1).to.be.closeTo(0.5, 1e-3);
+
+    tr1 = -1;
+    clock.tick(400);  // 900
+    runVsync();
+    expect(tr1).to.be.closeTo(1.3, 1e-3);
+
+    clock.tick(100);  // 1000
+    runVsync();
+    expect(tr1).to.equal(1);
+  });
+
   it('halt freeze', () => {
     let tr1 = -1;
     let tr2 = -1;

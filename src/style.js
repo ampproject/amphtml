@@ -139,9 +139,29 @@ export function px(value) {
  */
 export function translateX(value) {
   if (typeof value == 'string') {
-    return 'translateX(' + value + ')';
+    return `translateX(${value})`;
   }
-  return 'translateX(' + px(value) + ')';
+  return `translateX(${px(value)})`;
+}
+
+
+/**
+ * Returns a "translateX" for CSS "transform" property.
+ * @param {number|string} x
+ * @param {(number|string)=} opt_y
+ * @return {string}
+ */
+export function translate(x, opt_y) {
+  if (typeof x == 'number') {
+    x = px(x);
+  }
+  if (opt_y === undefined) {
+    return `translate(${x})`;
+  }
+  if (typeof opt_y == 'number') {
+    opt_y = px(opt_y);
+  }
+  return `translate(${x},${opt_y})`;
 }
 
 
@@ -151,5 +171,5 @@ export function translateX(value) {
  * @return {string}
  */
 export function scale(value) {
-  return 'scale(' + value + ')';
+  return `scale(${value})`;
 }

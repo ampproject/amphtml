@@ -18,6 +18,10 @@ import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
 import * as st from '../../../src/style';
 
 
+/** @private @const {number} */
+const LINE_HEIGHT_EM_ = 1.15;
+
+
 class AmpFitText extends AMP.BaseElement {
 
   /** @override */
@@ -41,6 +45,11 @@ class AmpFitText extends AMP.BaseElement {
     st.setStyles(this.content_, {zIndex: 2});
 
     /** @private @const */
+    this.contentWrapper_ = document.createElement('div');
+    st.setStyles(this.contentWrapper_, {lineHeight: `${LINE_HEIGHT_EM_}em`});
+    this.content_.appendChild(this.contentWrapper_);
+
+    /** @private @const */
     this.measurer_ = document.createElement('div');
     // Note that "measurer" cannot be styled with "bottom:0".
     st.setStyles(this.measurer_, {
@@ -49,13 +58,14 @@ class AmpFitText extends AMP.BaseElement {
       left: 0,
       right: 0,
       zIndex: 1,
-      visibility: 'hidden'
+      visibility: 'hidden',
+      lineHeight: `${LINE_HEIGHT_EM_}em`
     });
 
     this.getRealChildNodes().forEach((node) => {
-      this.content_.appendChild(node);
+      this.contentWrapper_.appendChild(node);
     });
-    this.measurer_./*OK*/innerHTML = this.content_./*OK*/innerHTML;
+    this.measurer_./*OK*/innerHTML = this.contentWrapper_./*OK*/innerHTML;
     this.element.appendChild(this.content_);
     this.element.appendChild(this.measurer_);
 
@@ -86,11 +96,12 @@ class AmpFitText extends AMP.BaseElement {
 
   /** @private */
   updateFontSize_() {
-    // TODO(dvoytenko): Add ellipsis if the content is still bigger than
-    // the available size. Ensure that basic tags are supported when
-    // doing the truncation?
-    this.content_.style.fontSize = st.px(calculateFontSize_(this.measurer_,
-        this.element.offsetHeight, this.minFontSize_, this.maxFontSize_));
+    let maxHeight = this.element.offsetHeight;
+    let fontSize = calculateFontSize_(this.measurer_, maxHeight,
+        this.minFontSize_, this.maxFontSize_);
+    this.contentWrapper_.style.fontSize = st.px(fontSize);
+    updateOverflow_(this.contentWrapper_, this.measurer_, maxHeight,
+        fontSize);
   }
 }
 
@@ -100,6 +111,7 @@ class AmpFitText extends AMP.BaseElement {
  * @param {number} expectedHeight
  * @param {number} minFontSize
  * @param {number} maxFontSize
+ * @return {number}
  * @private  Visible for testing only!
  */
 export function calculateFontSize_(measurer, expectedHeight,
@@ -117,7 +129,27 @@ export function calculateFontSize_(measurer, expectedHeight,
     }
   }
   return minFontSize;
-}
+};
+
+
+/**
+ * @param {!Element} content
+ * @param {!Element} measurer
+ * @param {number} maxHeight
+ * @param {number} fontSize
+ * @private  Visible for testing only!
+ */
+export function updateOverflow_(content, measurer, maxHeight, fontSize) {
+  measurer.style.fontSize = st.px(fontSize);
+  let overflown = measurer.offsetHeight > maxHeight;
+  let lineHeight = fontSize * LINE_HEIGHT_EM_;
+  let numberOfLines = Math.floor(maxHeight / lineHeight);
+  content.classList.toggle('-amp-fit-text-content-overflown', overflown);
+  st.setStyles(content, {
+    lineClamp: overflown ? numberOfLines : '',
+    maxHeight: overflown ? st.px(lineHeight * numberOfLines) : ''
+  });
+};
 
 
 AMP.registerElement('amp-fit-text', AmpFitText, $CSS$);

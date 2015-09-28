@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {listenOnce, listenOncePromise, loadPromise} from '../../src/event-helper';
+import {isLoaded, listenOnce, listenOncePromise, loadPromise}
+    from '../../src/event-helper';
 import {Observable} from '../../src/observable';
 
 describe('EventHelper', () => {
@@ -118,6 +119,18 @@ describe('EventHelper', () => {
     });
     loadObservable.fire(event);
     return promise;
+  });
+
+  it('isLoaded for complete property', () => {
+    expect(isLoaded(element)).to.equal(false);
+    element.complete = true;
+    expect(isLoaded(element)).to.equal(true);
+  });
+
+  it('isLoaded for readyState property', () => {
+    expect(isLoaded(element)).to.equal(false);
+    element.readyState = 'complete';
+    expect(isLoaded(element)).to.equal(true);
   });
 
   it('loadPromise - already complete', () => {

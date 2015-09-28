@@ -86,7 +86,9 @@ export class Log {
    * @param {...*} var_args
    */
   fine(tag, var_args) {
-    this.msg_(tag, 'FINE', Array.prototype.slice.call(arguments, 1));
+    if (this.isEnabled_) {
+      this.msg_(tag, 'FINE', Array.prototype.slice.call(arguments, 1));
+    }
   }
 
   /**
@@ -94,7 +96,9 @@ export class Log {
    * @param {...*} var_args
    */
   info(tag, var_args) {
-    this.msg_(tag, 'INFO', Array.prototype.slice.call(arguments, 1));
+    if (this.isEnabled_) {
+      this.msg_(tag, 'INFO', Array.prototype.slice.call(arguments, 1));
+    }
   }
 
   /**
@@ -102,7 +106,9 @@ export class Log {
    * @param {...*} var_args
    */
   warn(tag, var_args) {
-    this.msg_(tag, 'WARN', Array.prototype.slice.call(arguments, 1));
+    if (this.isEnabled_) {
+      this.msg_(tag, 'WARN', Array.prototype.slice.call(arguments, 1));
+    }
   }
 
   /**
@@ -111,7 +117,9 @@ export class Log {
    * @param {?} opt_error
    */
   error(tag, var_args) {
-    this.msg_(tag, 'ERROR', Array.prototype.slice.call(arguments, 1));
+    if (this.isEnabled_) {
+      this.msg_(tag, 'ERROR', Array.prototype.slice.call(arguments, 1));
+    }
   }
 };
 
