@@ -317,6 +317,7 @@ export class ImageViewer {
    * @param {number} min
    * @param {number} max
    * @param {number} extent
+   * @return {number}
    * @private
    */
   boundValue_(v, min, max, extent) {
@@ -327,6 +328,7 @@ export class ImageViewer {
    * Returns the scale within the allowed range with possible extent.
    * @param {number} s
    * @param {boolean} allowExtent
+   * @return {number}
    * @private
    */
   boundScale_(s, allowExtent) {
@@ -338,6 +340,7 @@ export class ImageViewer {
    * Returns the X position within the allowed range with possible extent.
    * @param {number} x
    * @param {boolean} allowExtent
+   * @return {number}
    * @private
    */
   boundX_(x, allowExtent) {
@@ -349,6 +352,7 @@ export class ImageViewer {
    * Returns the Y position within the allowed range with possible extent.
    * @param {number} y
    * @param {boolean} allowExtent
+   * @return {number}
    * @private
    */
   boundY_(y, allowExtent) {
