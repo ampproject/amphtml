@@ -17,7 +17,8 @@
 import {Timer} from '../../../../src/timer';
 import {createIframePromise} from '../../../../testing/iframe';
 require('../../../../build/all/v0/amp-fit-text-0.1.max');
-import {calculateFontSize_} from '../../../../build/all/v0/amp-fit-text-0.1.max';
+import {calculateFontSize_, updateOverflow_}
+    from '../../../../build/all/v0/amp-fit-text-0.1.max';
 import {adopt} from '../../../../src/runtime';
 
 adopt(window);
@@ -100,5 +101,61 @@ describe('amp-fit-text calculateFontSize', () => {
   it('should always fit on two lines', () => {
     element./*OK*/innerHTML = 'A<br>B';
     expect(calculateFontSize_(element, 20, 6, 72)).to.equal(10);
+  });
+});
+
+
+describe('amp-fit-text updateOverflow', () => {
+
+  let content;
+  let classToggles;
+  let measurer;
+
+  beforeEach(() => {
+    classToggles = {};
+    content = {
+      style: {},
+      classList: {
+        toggle: (className, on) => {
+          classToggles[className] = on;
+        }
+      }
+    };
+
+    measurer = document.createElement('div');
+    measurer.style.fontFamily = 'Arial';
+    measurer.style.lineHeight = '1.15em';
+    measurer.style.position = 'absolute';
+    measurer.style.width = '300px';
+    document.body.appendChild(measurer);
+  });
+
+  afterEach(() => {
+    document.body.removeChild(measurer);
+  });
+
+  function getLineClamp() {
+    for (let k in content.style) {
+      if (k == 'lineClamp' || k.match(/.*LineClamp/)) {
+        return content.style[k];
+      }
+    }
+    return null;
+  }
+
+  it('should always fit on one line', () => {
+    measurer./*OK*/innerHTML = 'A';
+    updateOverflow_(content, measurer, 24, 20);
+    expect(classToggles['-amp-fit-text-content-overflown']).to.equal(false);
+    expect(getLineClamp()).to.equal('');
+    expect(content.style.maxHeight).to.equal('');
+  });
+
+  it('should always fit on two lines', () => {
+    measurer./*OK*/innerHTML = 'A<br>B';
+    updateOverflow_(content, measurer, 24, 20);
+    expect(classToggles['-amp-fit-text-content-overflown']).to.equal(true);
+    expect(getLineClamp()).to.equal(1);
+    expect(content.style.maxHeight).to.equal(23 + 'px');  // 23 = 20 * 1.15
   });
 });
