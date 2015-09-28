@@ -26,6 +26,10 @@ content, but it can also contain non-inline content. For the given content
 the `amp-fit-text` will try to find the best font size to fit all of the
 content within the available space.
 
+If content of the `amp-fit-text` is overflowing the available space event with
+the minimum font size, the overflowing content will be cut off and hidden. The
+WebKit and Blink-based browsers will show ellipsis in this case.
+
 The `amp-fit-text` accepts one of the following `layout` values: `fixed`,
 `responsive` or `fill`.
 

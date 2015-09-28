@@ -16,11 +16,21 @@
  */
 /* END COPYRIGHT */
 
-.-amp-fit-text-content {
+.-amp-fit-text-content,
+.-amp-fit-text-content.-amp-fill-content {
   display: block;
   /* @alternative */ display: flex;
   flex-direction: column;
   flex-wrap: nowrap;
   justify-content: center;
   align-items: center;
+}
+
+/* We have to use the old-style flex box with line clamping. It will only
+   work in WebKit, but unfortunately there's no alternative. */
+.-amp-fit-text-content-overflown {
+  display: block;
+  /* @alternative */ display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
