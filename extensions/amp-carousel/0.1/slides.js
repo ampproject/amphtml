@@ -51,6 +51,7 @@ export class AmpSlides extends BaseCarousel {
   layoutCallback() {
     this.scheduleLayout(this.slides_[this.currentIndex_]);
     this.preloadNext_(1);
+    this.setControlsState();
     return Promise.resolve();
   }
 
@@ -297,5 +298,12 @@ export class AmpSlides extends BaseCarousel {
         s.prevTr(0);
       }
     });
+  }
+
+  setControlsState() {
+    let isFirstItem = this.currentIndex_ == 0;
+    let isLastItem = this.currentIndex_ == this.slides_.length - 1;
+    this.prevButton_.classList.toggle('amp-disabled', isFirstItem);
+    this.nextButton_.classList.toggle('amp-disabled', isLastItem);
   }
 }
