@@ -128,6 +128,7 @@ export class AmpSlides extends BaseCarousel {
    * Proceeds to the next slide in the desired direction.
    * @param {number} dir -1 or 1
    * @param {boolean} animate
+   * @override
    */
   go(dir, animate) {
     var newIndex = this.nextIndex_(dir);
