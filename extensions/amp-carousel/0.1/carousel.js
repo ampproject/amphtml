@@ -87,8 +87,6 @@ export class AmpCarousel extends BaseCarousel {
       this.pos_ = e.position;
       this.commitSwitch_(e.startPosition, this.pos_, dir);
     });
-
-    this.addButtons();
   }
 
   /** @override */
@@ -103,12 +101,7 @@ export class AmpCarousel extends BaseCarousel {
     this.updateInViewport_(this.pos_, this.pos_);
   }
 
-  /**
-   * Proceeds to the next slide in the desired direction.
-   * @param {number} dir -1 or 1
-   * @param {boolean} animate
-   * @override
-   */
+  /** @override */
   go(dir, animate) {
     var newPos = this.nextPos_(this.pos_, dir);
     if (newPos != this.pos_) {

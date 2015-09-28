@@ -19,9 +19,10 @@ export class BaseCarousel extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     this.buildCarousel();
+    this.buildButtons();
   }
 
-  addButtons() {
+  buildButtons() {
     this.prevButton_ = document.createElement('button');
     this.prevButton_.textContent = '\u276E';
     this.prevButton_.classList.add('-amp-carousel-button');
@@ -59,6 +60,7 @@ export class BaseCarousel extends AMP.BaseElement {
   /**
    * Override in subclass to provide a way to switch to an image through its
    * index placement.
+   * Proceeds to the next slide in the desired direction.
    * @param {number} dir -1 or 1
    * @param {boolean} animate
    * @override

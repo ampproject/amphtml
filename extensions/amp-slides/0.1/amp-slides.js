@@ -21,7 +21,10 @@ import * as st from '../../../src/style';
 import * as tr from '../../../src/transition';
 
 
-/** @deprecated amp-lides is deprecated and will be deleted before 1.0 */
+/**
+ * @deprecated `amp-slides` is deprecated and will be deleted before 1.0.
+ * Please see {@link AmpCarousel} with `type=slides` attribute instead.
+ */
 class AmpSlides extends AMP.BaseElement {
 
   /** @override */

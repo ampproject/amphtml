@@ -108,8 +108,6 @@ export class AmpSlides extends BaseCarousel {
         s.prevTr(0);
       }
     });
-
-    this.addButtons();
   }
 
   /** @override */
@@ -124,12 +122,7 @@ export class AmpSlides extends BaseCarousel {
     this.updateInViewport(this.slides_[this.currentIndex_], inViewport);
   }
 
-  /**
-   * Proceeds to the next slide in the desired direction.
-   * @param {number} dir -1 or 1
-   * @param {boolean} animate
-   * @override
-   */
+  /** @override */
   go(dir, animate) {
     var newIndex = this.nextIndex_(dir);
     if (newIndex != this.currentIndex_) {
