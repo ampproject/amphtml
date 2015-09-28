@@ -301,3 +301,128 @@ describe('amp-image-lightbox image viewer', () => {
     expect(imageViewer.imageBox_.top).to.equal(0);
   });
 });
+
+
+describe('amp-image-lightbox image viewer gestures', () => {
+
+  let sandbox;
+  let clock;
+  let lightbox;
+  let lightboxMock;
+  let imageViewer;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+    clock = sandbox.useFakeTimers();
+
+    lightbox = {
+      getDpr: () => 1,
+      close: () => {},
+      toggleViewMode: () => {}
+    };
+    lightboxMock = sandbox.mock(lightbox);
+
+    imageViewer = new ImageViewer(lightbox);
+    document.body.appendChild(imageViewer.getElement());
+
+    imageViewer.getElement().style.width = '100px';
+    imageViewer.getElement().style.height = '200px';
+    imageViewer.srcset_ = parseSrcset('image1');
+    imageViewer.sourceWidth_ = 100;
+    imageViewer.sourceHeight_ = 80;
+    imageViewer.measure();
+  });
+
+  afterEach(() => {
+    document.body.removeChild(imageViewer.getElement());
+    lightboxMock.verify();
+    lightboxMock.restore();
+    lightboxMock = null;
+    clock.restore();
+    clock = null;
+    sandbox.restore();
+    sandbox = null;
+  });
+
+
+  it('should have initial bounds', () => {
+    expect(imageViewer.minX_).to.equal(0);
+    expect(imageViewer.maxX_).to.equal(0);
+    expect(imageViewer.minY_).to.equal(0);
+    expect(imageViewer.maxY_).to.equal(0);
+  });
+
+  it('should update bounds but fits Y-axis', () => {
+    imageViewer.updatePanZoomBounds_(2);
+    expect(imageViewer.minX_).to.equal(-50);
+    expect(imageViewer.maxX_).to.equal(50);
+    expect(imageViewer.minY_).to.equal(0);
+    expect(imageViewer.maxY_).to.equal(0);
+  });
+
+  it('should update bounds and covers both axis', () => {
+    imageViewer.updatePanZoomBounds_(3);
+    expect(imageViewer.minX_).to.equal(-100);
+    expect(imageViewer.maxX_).to.equal(100);
+    expect(imageViewer.minY_).to.equal(-20);
+    expect(imageViewer.maxY_).to.equal(20);
+  });
+
+
+  it('should pan on swipe', () => {
+    imageViewer.updatePanZoomBounds_(2);
+    imageViewer.onMove_(-25, -25, false);
+
+    // X is within the bounds and Y is within the extent.
+    expect(imageViewer.posX_).to.equal(-25);
+    expect(imageViewer.posY_).to.equal(-25);
+
+    // Start X/Y don't change until release
+    expect(imageViewer.startX_).to.equal(0);
+    expect(imageViewer.startY_).to.equal(0);
+  });
+
+  it('should correct pan on swipe within bounds', () => {
+    imageViewer.updatePanZoomBounds_(2);
+    imageViewer.onMove_(-100, -100, false);
+
+    // X and Y are constrained by the bounds.
+    expect(imageViewer.posX_).to.equal(-50);
+    expect(imageViewer.posY_).to.equal(-50);
+  });
+
+  it('should cancel lightbox when pulled down at scale = 1', () => {
+    lightboxMock.expects('close').once();
+    imageViewer.onMove_(0, -100, false);
+    imageViewer.onMoveRelease_(0, 0.5);
+  });
+
+
+  it('should zoom step', () => {
+    imageViewer.onZoomInc_(10, 10, -10, -10);
+
+    expect(imageViewer.posX_).to.be.closeTo(6.5, 1e-1);
+    expect(imageViewer.posY_).to.equal(0);
+    expect(imageViewer.scale_).to.be.closeTo(1.1, 1e-1);
+
+    // Start X/Y/scale don't change until release
+    expect(imageViewer.startX_).to.equal(0);
+    expect(imageViewer.startY_).to.equal(0);
+    expect(imageViewer.startScale_).to.equal(1);
+  });
+
+  it('should zoom release', () => {
+    let updateSrc = sinon.spy();
+    imageViewer.updateSrc_ = updateSrc;
+    imageViewer.onZoomInc_(10, 10, -10, -10);
+    return imageViewer.onZoomRelease_(10, 10, -10, -10, 0, 0).then(() => {
+      expect(updateSrc.callCount).to.equal(1);
+      expect(imageViewer.posX_).to.be.closeTo(6.5, 1e-1);
+      expect(imageViewer.startX_).to.be.closeTo(6.5, 1e-1);
+      expect(imageViewer.posY_).to.equal(0);
+      expect(imageViewer.startY_).to.equal(0);
+      expect(imageViewer.scale_).to.be.closeTo(1.1, 1e-1);
+      expect(imageViewer.startScale_).to.be.closeTo(1.1, 1e-1);
+    });
+  });
+});
