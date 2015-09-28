@@ -15,17 +15,14 @@
  */
 
 import {Animation} from '../../../src/animation';
+import {BaseCarousel} from './base-carousel';
 import {SwipeXRecognizer} from '../../../src/swipe';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import * as st from '../../../src/style';
 import * as tr from '../../../src/transition';
 
 
-/**
- * @deprecated `amp-slides` is deprecated and will be deleted before 1.0.
- * Please see {@link AmpCarousel} with `type=slides` attribute instead.
- */
-class AmpSlides extends AMP.BaseElement {
+export class AmpSlides extends BaseCarousel {
 
   /** @override */
   isLayoutSupported(layout) {
@@ -33,12 +30,7 @@ class AmpSlides extends AMP.BaseElement {
   }
 
   /** @override */
-  isReadyToBuild() {
-    return this.getRealChildren().length > 0;
-  }
-
-  /** @override */
-  buildCallback() {
+  buildCarousel() {
     /** @private {!Array<!Element>} */
     this.slides_ = this.getRealChildren();
     this.slides_.forEach((slide, i) => {
@@ -116,48 +108,6 @@ class AmpSlides extends AMP.BaseElement {
         s.prevTr(0);
       }
     });
-
-    this.prevButton_ = document.createElement('button');
-    this.prevButton_.textContent = '\u276E';
-    this.prevButton_.style.opacity = 0.6;
-    this.prevButton_.style.position = 'absolute';
-    this.prevButton_.style.zIndex = 10;
-    this.prevButton_.style.left = '16px';
-    this.prevButton_.style.top = '50%';
-    this.prevButton_.style.padding = '8px';
-    this.prevButton_.style.fontSize = '24px';
-    this.prevButton_.style.marginTop = '-20px';
-    this.prevButton_.style.pointerEvents = 'all';
-    this.prevButton_.onclick = () => {
-      this.go(-1, true);
-    };
-    this.element.appendChild(this.prevButton_);
-
-    this.nextButton_ = document.createElement('button');
-    this.nextButton_.textContent = '\u276F';
-    this.nextButton_.style.opacity = 0.6;
-    this.nextButton_.style.position = 'absolute';
-    this.nextButton_.style.zIndex = 10;
-    this.nextButton_.style.right = '16px';
-    this.nextButton_.style.top = '50%';
-    this.nextButton_.style.padding = '8px';
-    this.nextButton_.style.fontSize = '24px';
-    this.nextButton_.style.marginTop = '-20px';
-    this.nextButton_.style.pointerEvents = 'all';
-    this.nextButton_.onclick = () => {
-      this.go(1, true);
-    };
-    this.element.appendChild(this.nextButton_);
-  }
-
-  /** @override */
-  prerenderAllowed() {
-    return true;
-  }
-
-  /** @override */
-  isRelayoutNeeded() {
-    return true;
   }
 
   /** @override */
@@ -172,11 +122,7 @@ class AmpSlides extends AMP.BaseElement {
     this.updateInViewport(this.slides_[this.currentIndex_], inViewport);
   }
 
-  /**
-   * Proceeds to the next slide in the desired direction.
-   * @param {number} dir -1 or 1
-   * @param {boolean} animate
-   */
+  /** @override */
   go(dir, animate) {
     var newIndex = this.nextIndex_(dir);
     if (newIndex != this.currentIndex_) {
@@ -239,16 +185,18 @@ class AmpSlides extends AMP.BaseElement {
    * @private
    */
   commitSwitch_(oldSlide, newSlide) {
-    oldSlide.style.display = 'none';
-    oldSlide.style.zIndex = 0;
-    oldSlide.style.transform = '';
-    oldSlide.style.transition = '';
-    oldSlide.style.opacity = 1;
-    newSlide.style.display = 'block';
-    newSlide.style.zIndex = 0;
-    newSlide.style.transform = '';
-    newSlide.style.transition = '';
-    newSlide.style.opacity = 1;
+    st.setStyles(oldSlide, {
+      display: 'none',
+      zIndex: 0,
+      transform: '',
+      opacity: 1
+    });
+    st.setStyles(newSlide, {
+      display: 'block',
+      zIndex: 0,
+      transform: '',
+      opacity: 1
+    });
     this.scheduleLayout(newSlide);
     this.updateInViewport(oldSlide, false);
     this.updateInViewport(newSlide, true);
@@ -282,5 +230,3 @@ class AmpSlides extends AMP.BaseElement {
     }
   }
 }
-
-AMP.registerElement('amp-slides', AmpSlides);

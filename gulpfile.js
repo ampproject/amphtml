@@ -61,12 +61,16 @@ function buildExtensions(options) {
   // Each extension and version must be listed individually here.
   buildExtension('amp-anim', '0.1', false, options);
   buildExtension('amp-audio', '0.1', false, options);
-  buildExtension('amp-carousel', '0.1', false, options);
+  buildExtension('amp-carousel', '0.1', true, options);
   buildExtension('amp-fit-text', '0.1', true, options);
   buildExtension('amp-iframe', '0.1', false, options);
   buildExtension('amp-image-lightbox', '0.1', true, options);
   buildExtension('amp-instagram', '0.1', false, options);
   buildExtension('amp-lightbox', '0.1', false, options);
+  /**
+   * @deprecated `amp-slides` is deprecated and will be deleted before 1.0.
+   * Please see {@link AmpCarousel} with `type=slides` attribute instead.
+   */
   buildExtension('amp-slides', '0.1', false, options);
   buildExtension('amp-twitter', '0.1', false, options);
   buildExtension('amp-youtube', '0.1', false, options);
