@@ -101,7 +101,7 @@ export function getIframe(parentWindow, element, opt_type) {
  * Allows listening for message from the iframe.
  * @param {!Element} iframe
  * @param {string} typeOfMessage
- * @param {function()} callback Called when a message of this type
+ * @param {function(!Object)} callback Called when a message of this type
  *     arrives for this iframe.
  */
 export function listen(iframe, typeOfMessage, callback) {
@@ -114,10 +114,13 @@ export function listen(iframe, typeOfMessage, callback) {
     if (event.source != iframe.contentWindow) {
       return;
     }
+    if (!event.data || event.data.sentinel != 'amp-3p') {
+      return
+    }
     if (event.data.type != typeOfMessage) {
       return;
     }
-    callback();
+    callback(event.data);
   });
 }
 

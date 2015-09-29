@@ -88,13 +88,26 @@ window.draw3p = function() {
   window.context.isMaster = window.context.master == window;
   window.context.data = data;
   window.context.noContentAvailable = triggerNoContentAvailable;
+  window.context.updateDimensions = triggerDimensions;
   delete data._context;
   draw3p(window, data);
 };
 
 function triggerNoContentAvailable() {
+  nonSensitiveDataPostMessage('no-content');
+}
+
+function triggerDimensions(width, height) {
+  nonSensitiveDataPostMessage('embed-size', {
+    width: width,
+    height: height,
+  });
+}
+
+function nonSensitiveDataPostMessage(type, opt_object) {
+  var object = opt_object || {};
+  object.type = type;
+  object.sentinel = 'amp-3p'
   // Use of * is OK. We are not worried who gets this message.
-  window.parent./*OK*/postMessage({
-    type: 'no-content'
-  }, '*');
+  window.parent./*OK*/postMessage(object, '*');
 }
