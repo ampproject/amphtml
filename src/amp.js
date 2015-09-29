@@ -47,7 +47,7 @@ installStyles(document, cssText, () => {
   action.addEvent('tap');
 
   maybeValidate(window);
-});
+}, /* opt_isRuntimeCss */ true);
 
 // Output a message to the console and add an attribute to the <html>
 // tag to give some information that can be used in error reports.
