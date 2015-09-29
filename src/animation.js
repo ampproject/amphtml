@@ -21,7 +21,7 @@ import {vsync} from './vsync';
 
 let TAG_ = 'Animation';
 
-let NULL_CALLBACK = function() {};
+let NOOP_CALLBACK = function() {};
 
 
 /**
@@ -205,7 +205,7 @@ class AnimationPlayer {
    * @return {!Promise}
    */
   thenAlways(opt_callback) {
-    let callback = opt_callback || NULL_CALLBACK;
+    let callback = opt_callback || NOOP_CALLBACK;
     return this.then(callback, callback);
   }
 

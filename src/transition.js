@@ -30,7 +30,7 @@ import * as st from './style';
 class Transition {}
 
 
-export const NULL = function(time) {return null;};
+export const NOOP = function(time) {return null;};
 
 
 /**

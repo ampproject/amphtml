@@ -263,6 +263,7 @@ class SwipeRecognizer extends GestureRecognizer {
     if (!touches || touches.length != 1) {
       return false;
     }
+    this.startTime_ = timer.now();
     this.startX_ = touches[0].clientX;
     this.startY_ = touches[0].clientY;
     return true;
@@ -279,14 +280,28 @@ class SwipeRecognizer extends GestureRecognizer {
       if (this.eventing_) {
         this.emit_(false, false, e);
       } else {
-        let dx = Math.abs(x - this.startX_) >= 8;
-        let dy = Math.abs(y - this.startY_) >= 8;
-        if (dx && !this.horiz_ || dy && !this.vert_) {
+        let dx = Math.abs(x - this.startX_);
+        let dy = Math.abs(y - this.startY_);
+        // Swipe is penalized slightly since it's one of the least demanding
+        // gesture, thus -10 in signalReady.
+        if (this.horiz_ && this.vert_) {
+          if (dx >= 8 || dy >= 8) {
+            this.signalReady(-10);
+          }
+        } else if (this.horiz_) {
+          if (dx >= 8 && dx > dy) {
+            this.signalReady(-10);
+          } else if (dy >= 8) {
+            return false;
+          }
+        } else if (this.vert_) {
+          if (dy >= 8 && dy > dx) {
+            this.signalReady(-10);
+          } else if (dx >= 8) {
+            return false;
+          }
+        } else {
           return false;
-        } else if (dx || dy) {
-          // Swipe is penalized slightly since it's one of the least demanding
-          // gesture.
-          this.signalReady(-10);
         }
       }
     }
@@ -301,6 +316,12 @@ class SwipeRecognizer extends GestureRecognizer {
   /** @override */
   acceptStart() {
     this.eventing_ = true;
+    // Reset start coordinates to where the gesture began to avoid visible
+    // jump, but preserve them as "prev" coordinates to calculate the right
+    // velocity.
+    this.prevX_ = this.startX_;
+    this.prevY_ = this.startY_;
+    this.prevTime_ = this.startTime_;
     this.startX_ = this.lastX_;
     this.startY_ = this.lastY_;
     this.emit_(true, false, null);
@@ -319,26 +340,29 @@ class SwipeRecognizer extends GestureRecognizer {
    */
   emit_(first, last, event) {
     this.lastTime_ = timer.now();
-    if (first) {
-      this.startTime_ = this.lastTime_;
-      this.velocityX_ = this.velocityY_ = 0;
-    } else if (this.lastTime_ - this.prevTime_ > 2) {
-      this.velocityX_ = calcVelocity(this.lastX_ - this.prevX_,
-          this.lastTime_ - this.prevTime_, this.velocityX_);
-      this.velocityY_ = calcVelocity(this.lastY_ - this.prevY_,
-          this.lastTime_ - this.prevTime_, this.velocityY_);
+    let deltaTime = this.lastTime_ - this.prevTime_;
+    // It's often that `touchend` arrives on the next frame. These should
+    // be ignored to avoid a significant velocity downgrade.
+    if (!last && deltaTime > 4 || last && deltaTime > 16) {
+      this.velocityX_ = calcVelocity(this.lastX_ - this.prevX_, deltaTime,
+          this.velocityX_);
+      this.velocityY_ = calcVelocity(this.lastY_ - this.prevY_, deltaTime,
+          this.velocityY_);
+      this.velocityX_ = Math.abs(this.velocityX_) > 1e-4 ? this.velocityX_ : 0;
+      this.velocityY_ = Math.abs(this.velocityY_) > 1e-4 ? this.velocityY_ : 0;
+      this.prevX_ = this.lastX_;
+      this.prevY_ = this.lastY_;
+      this.prevTime_ = this.lastTime_;
     }
-    this.prevX_ = this.lastX_;
-    this.prevY_ = this.lastY_;
-    this.prevTime_ = this.lastTime_;
 
     this.signalEmit({
       first: first,
       last: last,
+      time: this.lastTime_,
       deltaX: this.horiz_ ? this.lastX_ - this.startX_ : 0,
       deltaY: this.vert_ ? this.lastY_ - this.startY_ : 0,
-      velocityX: this.velocityX_,
-      velocityY: this.velocityY_
+      velocityX: this.horiz_ ? this.velocityX_ : 0,
+      velocityY: this.vert_ ? this.velocityY_ : 0
     }, event);
   }
 

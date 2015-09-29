@@ -19,20 +19,23 @@ import {timer} from './timer';
 import {vsync} from './vsync';
 
 /** @const {!Funtion} */
-const NULL_CALLBACK_ = function() {};
+const NOOP_CALLBACK_ = function() {};
 
 /** @const {number} */
 const MIN_VELOCITY_ = 0.02;
 
 /** @const {number} */
-const FRAME_CONST_ = Math.round(-16.67 / Math.log(0.95) / 2);
+const FRAME_CONST_ = 16.67;
+
+/** @const {number} */
+const EXP_FRAME_CONST_ = Math.round(-FRAME_CONST_ / Math.log(0.95));
 
 /**
  * Depreciation factor of 1/100 of a millisecond. This is how much previous
  * velocity is depreciated when calculating the new velocity.
  * @const {number}
  */
-const VELOCITY_DEPR_FACTOR_ = 100;
+const VELOCITY_DEPR_FACTOR_ = FRAME_CONST_ * 2;
 
 
 /**
@@ -148,9 +151,6 @@ class Motion {
   /** @private */
   start_() {
     this.continuing_ = true;
-    // First exponential order - 0.95.
-    this.maxVelocityX_ = this.maxVelocityX_ * 0.95;
-    this.maxVelocityY_ = this.maxVelocityY_ * 0.95;
     if (Math.abs(this.maxVelocityX_) <= MIN_VELOCITY_ &&
             Math.abs(this.maxVelocityY_) <= MIN_VELOCITY_) {
       this.fireMove_();
@@ -191,7 +191,7 @@ class Motion {
    * @return {!Promise}
    */
   thenAlways(opt_callback) {
-    let callback = opt_callback || NULL_CALLBACK_;
+    let callback = opt_callback || NOOP_CALLBACK_;
     return this.then(callback, callback);
   }
 
@@ -220,6 +220,9 @@ class Motion {
       return false;
     }
 
+    let prevX = this.lastX_;
+    let prevY = this.lastY_;
+
     this.lastTime_ = timer.now();
     this.lastX_ += timeSincePrev * this.velocityX_;
     this.lastY_ += timeSincePrev * this.velocityY_;
@@ -227,7 +230,7 @@ class Motion {
       return false;
     }
 
-    let decel = Math.exp(-timeSinceStart / FRAME_CONST_);
+    let decel = Math.exp(-timeSinceStart / EXP_FRAME_CONST_);
     this.velocityX_ = this.maxVelocityX_ * decel;
     this.velocityY_ = this.maxVelocityY_ * decel;
     return (Math.abs(this.velocityX_) > MIN_VELOCITY_ ||

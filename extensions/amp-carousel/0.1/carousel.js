@@ -14,12 +14,16 @@
  * limitations under the License.
  */
 
-import {SwipeXRecognizer} from '../../../src/swipe';
-import {BaseCarousel} from './base-carousel';
 import {Animation} from '../../../src/animation';
+import {BaseCarousel} from './base-carousel';
+import {Gestures} from '../../../src/gesture';
 import {Layout} from '../../../src/layout';
+import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
+import {bezierCurve} from '../../../src/curve';
+import {continueMotion} from '../../../src/motion';
 import * as st from '../../../src/style';
 import * as tr from '../../../src/transition';
+
 
 export class AmpCarousel extends BaseCarousel {
 
@@ -41,6 +45,7 @@ export class AmpCarousel extends BaseCarousel {
     st.setStyles(this.container_, {
       whiteSpace: 'nowrap',
       position: 'absolute',
+      zIndex: 1,
       top: 0,
       left: 0,
       bottom: 0
@@ -55,37 +60,6 @@ export class AmpCarousel extends BaseCarousel {
         cell.style.marginLeft = '8px';
       }
       this.container_.appendChild(cell);
-    });
-
-    /** @private @const */
-    this.swipeX_ = new SwipeXRecognizer(this.element);
-
-    this.swipeX_.onStart((e) => {
-      let containerWidth = this.element.offsetWidth;
-      let scrollWidth = this.container_.scrollWidth;
-      let maxPos = Math.max(scrollWidth - containerWidth, 0);
-      let minDelta = this.pos_ - maxPos;
-      let maxDelta = this.pos_;
-      let overshoot = Math.min(containerWidth * 0.4, 200);
-      this.swipeX_.setPositionOffset(this.pos_);
-      this.swipeX_.setPositionMultiplier(-1);
-      this.swipeX_.setBounds(minDelta, maxDelta, overshoot);
-      this.swipeX_.continueMotion(/* snap point */ 0,
-          /* stop on touch */ true);
-    });
-    this.swipeX_.onMove((e) => {
-      this.pos_ = e.position;
-      st.setStyles(this.container_, {
-        transform: st.translateX(-this.pos_)
-      });
-      if (e.velocity < 0.05) {
-        this.commitSwitch_(e.startPosition, this.pos_, 0);
-      }
-    });
-    this.swipeX_.onEnd((e) => {
-      let dir = Math.sign(e.position - this.pos_);
-      this.pos_ = e.position;
-      this.commitSwitch_(e.startPosition, this.pos_, dir);
     });
   }
 
@@ -110,12 +84,12 @@ export class AmpCarousel extends BaseCarousel {
 
       var containerWidth = this.element.offsetWidth;
       if (!animate) {
-        this.commitSwitch_(oldPos, newPos, dir);
+        this.commitSwitch_(oldPos, newPos);
       } else {
         Animation.animate(tr.setStyles(this.container_, {
           transform: tr.translateX(tr.numeric(-oldPos, -newPos))
         }), 200, 'ease-out').thenAlways(() => {
-          this.commitSwitch_(oldPos, newPos, dir);
+          this.commitSwitch_(oldPos, newPos);
         });
       }
     }
@@ -124,15 +98,14 @@ export class AmpCarousel extends BaseCarousel {
   /**
    * @param {number} oldPos
    * @param {number} newPos
-   * @param {number} dir
    * @private
    */
-  commitSwitch_(oldPos, newPos, dir) {
+  commitSwitch_(oldPos, newPos) {
     st.setStyles(this.container_, {
       transform: st.translateX(-newPos)
     });
     this.doLayout_(newPos);
-    this.preloadNext_(newPos, dir);
+    this.preloadNext_(newPos, Math.sign(newPos - oldPos));
     this.updateInViewport_(newPos, oldPos);
   }
 
@@ -213,5 +186,126 @@ export class AmpCarousel extends BaseCarousel {
         }
       });
     }
+  }
+
+  /** @override */
+  setupGestures() {
+    /** @private {number} */
+    this.startPos_ = 0;
+    /** @private {number} */
+    this.minPos_ = 0;
+    /** @private {number} */
+    this.maxPos_ = 0;
+    /** @private {number} */
+    this.extent_ = 0;
+    /** @private {?Motion} */
+    this.motion_ = null;
+
+    let gestures = Gestures.get(this.element);
+    gestures.onGesture(SwipeXRecognizer, (e) => {
+      if (e.data.first) {
+        this.onSwipeStart_(e.data);
+      }
+      this.onSwipe_(e.data);
+      if (e.data.last) {
+        this.onSwipeEnd_(e.data);
+      }
+    });
+    gestures.onPointerDown(() => {
+      if (this.motion_) {
+        this.motion_.halt();
+        this.motion_ = null;
+      }
+    });
+  }
+
+  /**
+   * @param {!Swipe} swipe
+   * @private
+   */
+  onSwipeStart_(swipe) {
+    this.updateBounds_();
+    this.startPos_ = this.pos_;
+    this.motion_ = null;
+  }
+
+  /**
+   * @param {!Swipe} swipe
+   * @private
+   */
+  onSwipe_(swipe) {
+    this.pos_ = this.boundPos_(this.startPos_ - swipe.deltaX, true);
+    st.setStyles(this.container_, {
+      transform: st.translateX(-this.pos_)
+    });
+    if (Math.abs(swipe.velocityX) < 0.05) {
+      this.commitSwitch_(this.startPos_, this.pos_);
+    }
+  }
+
+  /**
+   * @param {!Swipe} swipe
+   * @return {!Promise}
+   * @private
+   */
+  onSwipeEnd_(swipe) {
+    let promise;
+    if (Math.abs(swipe.velocityX) > 0.1) {
+      this.motion_ = continueMotion(this.pos_, 0, -swipe.velocityX, 0,
+          (x, y) => {
+            let newPos = (this.boundPos_(x, true) +
+                this.boundPos_(x, false)) * 0.5;
+            if (Math.abs(newPos - this.pos_) <= 1) {
+              // Hit the wall: stop motion.
+              return false;
+            }
+            this.pos_ = newPos;
+            st.setStyles(this.container_, {
+              transform: st.translateX(-this.pos_)
+            });
+            return true;
+          });
+      promise = this.motion_.thenAlways();
+    } else {
+      promise = Promise.resolve();
+    }
+    return promise.then(() => {
+      let newPos = this.boundPos_(this.pos_, false);
+      if (Math.abs(newPos - this.pos_) < 1) {
+        return undefined;
+      }
+      let posFunc = tr.numeric(this.pos_, newPos);
+      return Animation.animate((time) => {
+        this.pos_ = posFunc(time);
+        st.setStyles(this.container_, {
+          transform: st.translateX(-this.pos_)
+        });
+      }, 250, bezierCurve(0.4, 0, 0.2, 1.4)).thenAlways();
+    }).then(() => {
+      this.commitSwitch_(this.startPos_, this.pos_);
+      this.startPos_ = this.pos_;
+      this.motion_ = null;
+    });
+  }
+
+  /** @private */
+  updateBounds_() {
+    let containerWidth = this.element.offsetWidth;
+    let scrollWidth = this.container_.scrollWidth;
+    this.minPos_ = 0;
+    this.maxPos_ = Math.max(scrollWidth - containerWidth, 0);
+    this.extent_ = Math.min(containerWidth * 0.4, 200);
+  }
+
+  /**
+   * @param {number} pos
+   * @param {boolean} allowExtent
+   * @return {number}
+   * @private
+   */
+  boundPos_(pos, allowExtent) {
+    let extent = allowExtent ? this.extent_ : 0;
+    return Math.min(this.maxPos_ + extent,
+        Math.max(this.minPos_ - extent, pos));
   }
 }

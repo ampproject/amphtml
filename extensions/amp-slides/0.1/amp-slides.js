@@ -15,7 +15,6 @@
  */
 
 import {Animation} from '../../../src/animation';
-import {SwipeXRecognizer} from '../../../src/swipe';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import * as st from '../../../src/style';
 import * as tr from '../../../src/transition';
@@ -50,72 +49,6 @@ class AmpSlides extends AMP.BaseElement {
 
     /** @private {number} */
     this.currentIndex_ = 0;
-
-    /** @private @const */
-    this.swipeX_ = new SwipeXRecognizer(this.element);
-
-    /**
-     * @private {?{
-     *   containerWidth: number,
-     *   prevTr: !Transition,
-     *   nextTr: !Transition
-     * }} */
-    this.swipeState_ = null;
-
-    this.swipeX_.onStart((e) => {
-      let currentSlide = this.slides_[this.currentIndex_];
-      let containerWidth = this.element.offsetWidth;
-      let minDelta = 0;
-      let maxDelta = 0;
-      let prevTr = tr.NULL;
-      let nextTr = tr.NULL;
-      if (this.currentIndex_ - 1 >= 0) {
-        let prevSlide = this.slides_[this.currentIndex_ - 1];
-        this.prepareSlide_(prevSlide, -1);
-        prevTr = this.createTransition_(currentSlide, prevSlide, -1);
-        maxDelta = containerWidth;
-      }
-      if (this.currentIndex_ + 1 < this.slides_.length) {
-        let nextSlide = this.slides_[this.currentIndex_ + 1];
-        this.prepareSlide_(nextSlide, 1);
-        nextTr = this.createTransition_(currentSlide, nextSlide, 1);
-        minDelta = -containerWidth;
-      }
-      this.swipeState_ = {
-        containerWidth: containerWidth,
-        prevTr: prevTr,
-        nextTr: nextTr
-      };
-      // Translate the gesture position to be a number between -1 and 1,
-      // with negative values indiamping sliding to the previous slide and
-      // positive indiamping sliding to the next slide.
-      this.swipeX_.setPositionMultiplier(-1 / containerWidth);
-      this.swipeX_.setBounds(minDelta, maxDelta, /* overshoot */ 0);
-      this.swipeX_.continueMotion(/* snapPoint */ 0.55,
-          /* stopOnTouch */ false);
-    });
-    this.swipeX_.onMove((e) => {
-      let s = this.swipeState_;
-      s.nextTr(e.position > 0 ? e.position : 0);
-      s.prevTr(e.position < 0 ? -e.position : 0);
-    });
-    this.swipeX_.onEnd((e) => {
-      let s = this.swipeState_;
-      this.swipeState_ = null;
-      let oldSlide = this.slides_[this.currentIndex_];
-      if (e.position > 0.5) {
-        s.nextTr(1);
-        this.currentIndex_++;
-        this.commitSwitch_(oldSlide, this.slides_[this.currentIndex_]);
-      } else if (e.position < -0.5) {
-        s.prevTr(-1);
-        this.currentIndex_--;
-        this.commitSwitch_(oldSlide, this.slides_[this.currentIndex_]);
-      } else {
-        s.nextTr(0);
-        s.prevTr(0);
-      }
-    });
 
     this.prevButton_ = document.createElement('button');
     this.prevButton_.textContent = '\u276E';
