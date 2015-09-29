@@ -285,6 +285,9 @@ export function createAmpElementProto(win, name, implementationClass) {
    * @final
    */
   ElementProto.build = function(force) {
+    if (this.isBuilt()) {
+      return true;
+    }
     assert(this.isUpgraded(), 'Cannot build unupgraded element');
     if (!force && !this.implementation_.isReadyToBuild()) {
       return false;
