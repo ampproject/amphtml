@@ -153,6 +153,24 @@ describe('CustomElement', () => {
     expect(testElementBuildCallback.callCount).to.equal(1);
   });
 
+  it('Element - buildCallback cannot be called twice', () => {
+    let element = new ElementClass();
+    expect(element.isBuilt()).to.equal(false);
+    expect(testElementBuildCallback.callCount).to.equal(0);
+
+    testElementIsReadyToBuild = true;
+    let res = element.build(false);
+    expect(res).to.equal(true);
+    expect(element.isBuilt()).to.equal(true);
+    expect(testElementBuildCallback.callCount).to.equal(1);
+
+    // Call again.
+    res = element.build(false);
+    expect(res).to.equal(true);
+    expect(element.isBuilt()).to.equal(true);
+    expect(testElementBuildCallback.callCount).to.equal(1);
+  });
+
   it('Element - build not allowed', () => {
     let element = new ElementClass();
     expect(element.classList.contains('-amp-element')).to.equal(true);
