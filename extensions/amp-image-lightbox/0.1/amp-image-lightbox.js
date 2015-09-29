@@ -662,11 +662,20 @@ class AmpImageLightbox extends AMP.BaseElement {
     this.captionElement_.classList.add('-amp-image-lightbox-caption');
     this.container_.appendChild(this.captionElement_);
 
+    let gestures = Gestures.get(this.element);
     this.element.addEventListener('click', (e) => {
       if (!this.entering_ &&
             !this.imageViewer_.getImage().contains(e.target)) {
         this.close();
       }
+    });
+    gestures.onGesture(TapRecognizer, () => {
+      if (!this.entering_) {
+        this.close();
+      }
+    });
+    gestures.onGesture(SwipeXYRecognizer, () => {
+      // Consume to block scroll events and side-swipe.
     });
   }
 
