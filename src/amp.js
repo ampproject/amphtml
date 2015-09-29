@@ -35,21 +35,25 @@ import {maybeValidate} from './validator-integration';
 // Should happen first.
 installErrorReporting(window);
 installStyles(document, cssText, () => {
-  historyFor(window);
-  viewerFor(window);
+  try {
+    historyFor(window);
+    viewerFor(window);
 
-  installImg(window);
-  installAd(window);
-  installPixel(window);
-  installVideo(window);
+    installImg(window);
+    installAd(window);
+    installPixel(window);
+    installVideo(window);
 
-  adopt(window);
-  stubElements(window);
-  action.addEvent('tap');
+    adopt(window);
+    stubElements(window);
+    action.addEvent('tap');
 
-  installPullToRefreshBlocker(window);
+    installPullToRefreshBlocker(window);
 
-  maybeValidate(window);
+    maybeValidate(window);
+  } finally {
+    window.document.body.style.opacity = 1;
+  }
 }, /* opt_isRuntimeCss */ true);
 
 // Output a message to the console and add an attribute to the <html>
