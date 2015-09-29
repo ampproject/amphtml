@@ -25,7 +25,7 @@ import {parseQueryString} from './url';
 var Mode;
 
 /** @typedef {?Mode} */
-var mode = null;
+var mode = window.AMP_MODE;
 
 /**
  * Provides info about the current app.
@@ -35,7 +35,7 @@ export function getMode() {
   if (mode) {
     return mode;
   }
-  return mode = getMode_();
+  return window.AMP_MODE = mode = getMode_();
 }
 
 /**
