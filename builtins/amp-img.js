@@ -49,6 +49,9 @@ export function installImg(win) {
       this.placeholder_ = this.getPlaceholder();
 
       /** @private {boolean} */
+      this.pendingPlaceholderState_ = false;
+
+      /** @private {boolean} */
       this.isDefaultPlaceholder_ = !this.placeholder_;
 
       /** @private {boolean} */
@@ -69,7 +72,7 @@ export function installImg(win) {
       this.srcset_ = parseSrcset(this.element.getAttribute('srcset') ||
           this.element.getAttribute('src'));
 
-      this.setDefaultPlaceholder_();
+      this.setDefaultPlaceholder_(true);
       // TODO(@dvoytenko) Remove when #254 is fixed.
       // Always immediately request the first two images to make sure
       // we start the HTTP requests for them as early as possible.
@@ -98,7 +101,9 @@ export function installImg(win) {
      * @override
      */
     viewportCallback(inViewport) {
-      this.setDefaultPlaceholder_();
+      if (inViewport) {
+        this.setDefaultPlaceholder_();
+      }
     }
 
     /**
@@ -118,36 +123,40 @@ export function installImg(win) {
     }
 
     /**
+     * @param {boolean=} opt_asyncFlag
      * @private
      */
-    setDefaultPlaceholder_() {
-      if (this.isDefaultPlaceholder_ && !this.placeholder_ &&
-          !this.imgLoadedOnce_ && this.isInViewport()) {
+    setDefaultPlaceholder_(opt_asyncFlag) {
+      if (this.isDefaultPlaceholder_ && !this.placeholder_) {
         this.placeholder_ = createLoaderElement();
         this.placeholder_.setAttribute('placeholder', '');
         this.element.appendChild(this.placeholder_);
+      }
 
+      if (opt_asyncFlag) {
+        this.pendingPlaceholderState_ = true;
         // Set a minimum delay in case the image resource loads much faster
         // than an intermitent loading screen that dissapears right away.
         // This can occur on fast internet connections or on a local server.
-        return timer.delay(() => {
-          this.placeholder_.classList
-              .toggle('hidden', this.imgLoadedOnce_);
-          this.placeholder_.classList
-              .toggle('active', !this.imgLoadedOnce_);
-        }, 100);
+        timer.delay(() => {
+          this.togglePlaceholderState_();
+          this.pendingPlaceholderState_ = false;
+        }, 150);
+      } else if (!this.pendingPlaceholderState_) {
+        this.togglePlaceholderState_();
       }
     }
 
-    /**
-     * @private
-     */
+    /** @private */
+    togglePlaceholderState_() {
+      this.placeholder_.classList.toggle('hidden', this.imgLoadedOnce_);
+      this.placeholder_.classList.toggle('active', !this.imgLoadedOnce_);
+    }
+
+    /** @private */
     cleanupPlaceholder_() {
-      let inViewport = this.isInViewport();
-      if (this.placeholder_ && (!inViewport || this.imgLoadedOnce_)) {
-        if (this.isDefaultPlaceholder_) {
-          this.placeholder_.classList.remove('active');
-        }
+      if (this.placeholder_ && this.imgLoadedOnce_) {
+        this.placeholder_.classList.remove('active');
         this.placeholder_.classList.add('hidden');
       }
     }

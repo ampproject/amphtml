@@ -29,12 +29,12 @@ export function createLoaderElement() {
   placeholder.appendChild(loader);
 
   placeholder.classList.add('hidden');
-  placeholder.classList.add('-amp-autoplaceholder');
-  loader.classList.add('-amp-loader');
+  placeholder.classList.add('amp-autoplaceholder');
+  loader.classList.add('amp-loader');
 
   for (let i = 0; i < 3; i++) {
     let dot = document.createElement('div');
-    dot.classList.add('-amp-loader-dot');
+    dot.classList.add('amp-loader-dot');
     loader.appendChild(dot);
   }
   return placeholder;
