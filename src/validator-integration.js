@@ -15,6 +15,11 @@
  */
 
 import {getMode} from './mode';
+import {log} from './log';
+
+
+/** @const {string} */
+const TAG_ = 'Validator';
 
 
 /**
@@ -40,4 +45,47 @@ export function maybeValidate(win) {
     amp.validator.validateUrlAndLog(filename)
   };
   win.document.head.appendChild(s);
+
+  win.setTimeout(() => {
+    validateLocal(win);
+  }, 3000);
+}
+
+
+function report(element, message) {
+  log.warn(TAG_, message, element);
+}
+
+
+/**
+ * These validations are done locally only in dev mode as warnings. They are
+ * subject to be promoted to our main validator that runs front and back-end.
+ * @param {!Window} win
+ */
+function validateLocal(win) {
+  validateTapActionsA11y(win);
+}
+
+
+/**
+ * All tappable actions should have right a11y configuration.
+ * @param {!Window} win
+ */
+function validateTapActionsA11y(win) {
+  let elements = win.document.querySelectorAll('[on*="tap:"]');
+  for (let i = 0; i < elements.length; i++) {
+    let element = elements[i];
+    if (element.tagName == 'A' || element.tagName == 'BUTTON') {
+      continue;
+    }
+    if (!element.hasAttribute('role')) {
+      report(element,
+          'A11Y: Must have "role" attribute due to "tap" action,' +
+          ' e.g. role="button".');
+    }
+    if (!element.hasAttribute('tabindex')) {
+      report(element,
+          'A11Y: Must have "tabindex" attribute due to "tap" action.');
+    }
+  }
 }
