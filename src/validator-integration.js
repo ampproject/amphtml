@@ -15,11 +15,10 @@
  */
 
 import {getMode} from './mode';
-import {log} from './log';
 
 
 /** @const {string} */
-const TAG_ = 'Validator';
+const TAG_ = '[Validator]';
 
 
 /**
@@ -53,7 +52,7 @@ export function maybeValidate(win) {
 
 
 function report(element, message) {
-  log.warn(TAG_, message, element);
+  console.warn(TAG_, message, element);
 }
 
 
