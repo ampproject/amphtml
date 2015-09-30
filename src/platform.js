@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {getService} from './service';
+
 
 /**
  * A helper class that provides information about device/OS/browser currently
@@ -47,4 +49,14 @@ export class Platform {
 };
 
 
-export const platform = new Platform(window);
+/**
+ * @param {!Window} window
+ * @return {!Platform}
+ */
+export function platformFor(window) {
+  return getService(window, 'platform', () => {
+    return new Platform(window);
+  });
+};
+
+export const platform = platformFor(window);

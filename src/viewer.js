@@ -18,7 +18,6 @@ import {Observable} from './observable';
 import {assert} from './asserts';
 import {documentStateFor} from './document-state';
 import {getService} from './service';
-import {installStyles} from './styles';
 import {log} from './log';
 import {parseQueryString} from './url';
 import {platform} from './platform';
