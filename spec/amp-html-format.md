@@ -145,11 +145,13 @@ Most HTML tags can be used unchanged in AMP HTML. Certain tags, however, have eq
 | applet    | Banned. |
 | embed     | Banned. |
 | form      | Banned. |
-| input elements | Banned. Includes input, button, textarea, select, option. |
+| input elements | Banned. Includes input, textarea, select, option. Notably, button element is allowed. |
+| button    | Allowed. |
 | <a name="cust"></a>style     | [Required style tags for adjusting opacity](#opacity) One additional style tag is allowed in head tag for the purpose of custom styling. This style tag must have the attribute `amp-custom`. [🔗](#cust) |
 | link      | Allowed for certain values of rel: `canonical`. `stylesheet` is generally disallowed, but some values may be whitelisted for font providers. |
 | meta      | The `http-equiv` attribute is banned. Otherwise allowed. |
 | <a name="ancr"></a>a         | The `href` attribute value must not begin with `javascript:`. If set, the `target` attribute value must be `_blank`. Otherwise allowed. [🔗](#ancr) |
+| svg       | Includes svg and svg-family of elements. |
 
 Validator implementations should use a whitelist based on the HTML5 specification with the above tags removed.
 TODO(malteubl): Add addendum with whitelist.
