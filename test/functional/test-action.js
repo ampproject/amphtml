@@ -230,7 +230,14 @@ describe('Action method', () => {
   it('should not allow invoke on non-AMP element', () => {
     expect(() => {
       action.invoke_({tagName: 'img'}, 'method1', 'source1', 'event1');
-    }).to.throw(/target must be an AMP element/);
+    }).to.throw(/Target must be an AMP element/);
+    expect(onEnqueue.callCount).to.equal(0);
+  });
+
+  it('should not allow invoke on unresolved AMP element', () => {
+    expect(() => {
+      action.invoke_({tagName: 'amp-img'}, 'method1', 'source1', 'event1');
+    }).to.throw(/Unrecognized AMP element/);
     expect(onEnqueue.callCount).to.equal(0);
   });
 

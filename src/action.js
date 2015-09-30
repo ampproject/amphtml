@@ -172,8 +172,16 @@ export class Action {
 
     // Only amp elements are allowed to proceed further.
     if (target.tagName.toLowerCase().substring(0, 4) != 'amp-') {
-      this.actionInfoError_('target must be an AMP element', actionInfo,
+      this.actionInfoError_('Target must be an AMP element', actionInfo,
           target);
+      return;
+    }
+
+    if (!target.enqueAction) {
+      this.actionInfoError_('Unrecognized AMP element "' +
+          target.tagName.toLowerCase() + '". ' +
+          'Did you forget to include it via <script custom-element>?',
+          actionInfo, target);
       return;
     }
 
