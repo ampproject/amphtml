@@ -16,7 +16,7 @@
 
 import './polyfills';
 
-import {historyFor} from './history';
+import {historyFor, installGlobalClickListener} from './history';
 import {viewerFor} from './viewer';
 import {installPullToRefreshBlocker} from './pull-to-refresh';
 
@@ -49,6 +49,7 @@ installStyles(document, cssText, () => {
     action.addEvent('tap');
 
     installPullToRefreshBlocker(window);
+    installGlobalClickListener(window);
 
     maybeValidate(window);
   } finally {

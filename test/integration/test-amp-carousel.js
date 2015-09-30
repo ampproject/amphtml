@@ -18,7 +18,7 @@ import {createFixtureIframe} from '../../testing/iframe.js';
 
 describe('amp-carousel', () => {
 
-  var fixture;
+  let fixture;
   beforeEach(() => {
     return createFixtureIframe('test/fixtures/carousels.html', 500).then((f) => {
       fixture = f;
