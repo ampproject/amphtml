@@ -18,6 +18,7 @@ import './polyfills';
 
 import {historyFor} from './history';
 import {viewerFor} from './viewer';
+import {installPullToRefreshBlocker} from './pull-to-refresh';
 
 import {installAd} from '../builtins/amp-ad';
 import {installImg} from '../builtins/amp-img';
@@ -45,6 +46,8 @@ installStyles(document, cssText, () => {
   adopt(window);
   stubElements(window);
   action.addEvent('tap');
+
+  installPullToRefreshBlocker(window);
 
   maybeValidate(window);
 }, /* opt_isRuntimeCss */ true);

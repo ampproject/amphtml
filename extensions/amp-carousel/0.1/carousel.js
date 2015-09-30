@@ -67,6 +67,7 @@ export class AmpCarousel extends BaseCarousel {
   layoutCallback() {
     this.doLayout_(this.pos_);
     this.preloadNext_(this.pos_, 1);
+    this.setControlsState();
     return Promise.resolve();
   }
 
@@ -76,7 +77,7 @@ export class AmpCarousel extends BaseCarousel {
   }
 
   /** @override */
-  go(dir, animate) {
+  goCallback(dir, animate) {
     var newPos = this.nextPos_(this.pos_, dir);
     if (newPos != this.pos_) {
       var oldPos = this.pos_;
@@ -307,5 +308,18 @@ export class AmpCarousel extends BaseCarousel {
     let extent = allowExtent ? this.extent_ : 0;
     return Math.min(this.maxPos_ + extent,
         Math.max(this.minPos_ - extent, pos));
+  }
+
+  /** @override */
+  hasPrev() {
+    return this.pos_ != 0;
+  }
+
+  /** @override */
+  hasNext() {
+    let containerWidth = this.element.offsetWidth;
+    let scrollWidth = this.container_.scrollWidth;
+    let maxPos = Math.max(scrollWidth - containerWidth, 0);
+    return this.pos_ != maxPos;
   }
 }

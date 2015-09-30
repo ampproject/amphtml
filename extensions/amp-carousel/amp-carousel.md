@@ -22,9 +22,9 @@ A generic carousel for displaying multiple similar pieces of content along a hor
 
 Each of the `amp-carousel` component’s immediate children is considered an item in the carousel. Each of these nodes may also have arbitrary HTML children.
 
-The carousel consists of an arbitrary number of items, as well as optional navigational arrows to go forward or backwards a single item, and optional navigational “dots” which indicate where the currently viewed item is in the list of items.
+The carousel consists of an arbitrary number of items, as well as optional navigational arrows to go forward or backwards a single item.
 
-The carousel advances between items if the user swipes, uses arrow keys, clicks an optional navigation arrow, or clicks an option “dot.”
+The carousel advances between items if the user swipes, uses arrow keys, clicks an optional navigation arrow.
 
     <amp-carousel width=300 height=400>
       <amp-img src=”my-img1.png” width=300 height=400></amp-img>
@@ -36,17 +36,12 @@ Note, that while the example shows a carousel of images `amp-carousel` support a
 
 #### Attributes
 
-**loop**
+**controls**
 
-If present, the user may advance past the final item, which is followed by the first item again in the carousel.
-
-**dots**
-
-If present, the carousel includes navigational dots that indicate where the user is in the carousel.
-
-**arrows**
-
-If present, displays left and right arrows for the user to use in navigation on mobile. Visibility of arrows can also be controlled via styling, and a media query can be used to only display arrows at certain screen widths. On desktop, arrows will always be displayed.
+If present, displays left and right arrows for the user to use in navigation on mobile.
+Visibility of arrows can also be controlled via styling, and a media query can be used to
+only display arrows at certain screen widths. On desktop, arrows will always be displayed
+unless only a single child is present.
 
 **type**
 - `carousel` (default) - All slides are shown and are scrollable horizontally.
@@ -55,5 +50,35 @@ If present, displays left and right arrows for the user to use in navigation on 
 
 
 #### Styling
+- You may use the `amp-carousel` element selector to style it freely.
+- `.amp-carousel-button` by default uses an inlined svg as the background-image of the buttons.
+You may override this with your own svg or image like so:
 
-TBD
+  **default**
+
+  ```css
+  .amp-carousel-button-prev {
+    left: 16px;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18"><path d="M15 8.25H5.87l4.19-4.19L9 3 3 9l6 6 1.06-1.06-4.19-4.19H15v-1.5z"/></svg>');
+  }
+  ```
+
+  **override**
+  ```css
+  .amp-carousel-button-prev {
+    left: 5%;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18"><path d="M11.56 5.56L10.5 4.5 6 9l4.5 4.5 1.06-1.06L8.12 9z"/></svg>');
+  }
+  ```
+- By default the visual state of an `amp-carousel` button when it is disabled is that it is hidden.
+  You may override this visual state of an `amp-carousel` button in the disabled state by:
+
+  ```css
+  .amp-carousel-button.amp-disabled {
+    /* make sure we make it visible */
+    visibility: visible;
+    /* choose our own styling */
+    opacity: .7;
+    background-color: red;
+  }
+  ```

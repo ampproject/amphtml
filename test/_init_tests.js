@@ -47,3 +47,57 @@ it.skipOnFirefox = function(desc, fn) {
   }
   it(desc, fn);
 };
+
+chai.Assertion.addMethod('attribute', function(attr) {
+  var obj = this._obj;
+  var tagName = obj.tagName.toLowerCase();
+  this.assert(
+    obj.hasAttribute(attr),
+    'expected element \'' + tagName + '\' to have attribute #{exp}',
+    'expected element \'' + tagName + '\' to not have attribute #{act}',
+    attr,
+    attr
+  );
+});
+
+chai.Assertion.addMethod('class', function(className) {
+  var obj = this._obj;
+  var tagName = obj.tagName.toLowerCase();
+  this.assert(
+    obj.classList.contains(className),
+    'expected element \'' + tagName + '\' to have class #{exp}',
+    'expected element \'' + tagName + '\' to not have class #{act}',
+    className,
+    className
+  );
+});
+
+chai.Assertion.addProperty('visible', function() {
+  var obj = this._obj;
+  var value = window.getComputedStyle(obj).getPropertyValue('visibility');
+  var tagName = obj.tagName.toLowerCase();
+  this.assert(
+    value == 'visible',
+    'expected element \'' +
+        tagName + '\' to be #{exp}, got #{act}. with classes: ' + obj.className,
+    'expected element \'' +
+        tagName + '\' not to be #{act}. with classes: ' + obj.className,
+    'visible',
+    value
+  );
+});
+
+chai.Assertion.addProperty('hidden', function() {
+  var obj = this._obj;
+  var value = window.getComputedStyle(obj).getPropertyValue('visibility');
+  var tagName = obj.tagName.toLowerCase();
+  this.assert(
+     value == 'hidden',
+    'expected element \'' +
+        tagName + '\' to be #{exp}, got #{act}. with classes: ' + obj.className,
+    'expected element \'' +
+        tagName + '\' not to be #{act}. with classes: ' + obj.className,
+    'hidden',
+    value
+  );
+});

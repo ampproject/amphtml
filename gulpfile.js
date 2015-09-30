@@ -37,19 +37,22 @@ var cssnano = require('cssnano');
 require('./build-system/tasks');
 
 // NOTE: see https://github.com/ai/browserslist#queries for `browsers` list
-var cssprefixer = autoprefixer(
-  {
-    browsers: [
-      'last 5 ChromeAndroid versions',
-      'last 5 iOS versions',
-      'last 3 FirefoxAndroid versions',
-      'last 5 Android versions',
-      'last 2 ExplorerMobile versions',
-      'last 2 OperaMobile versions',
-      'last 2 OperaMini versions'
-    ]
-  }
-);
+var cssprefixer = autoprefixer({
+  browsers: [
+    'last 5 ChromeAndroid versions',
+    'last 5 iOS versions',
+    'last 3 FirefoxAndroid versions',
+    'last 5 Android versions',
+    'last 2 ExplorerMobile versions',
+    'last 2 OperaMobile versions',
+    'last 2 OperaMini versions'
+  ]
+});
+
+cssnano = cssnano({
+  convertValues: false,
+  zindex: false
+});
 
 // Used to e.g. references the ads binary from the runtime to get
 // version lock.
@@ -111,7 +114,7 @@ function compileCss() {
 
 function jsifyCssPromise(filename) {
   var css = fs.readFileSync(filename, 'utf8');
-  var transformers = [cssprefixer, cssnano()];
+  var transformers = [cssprefixer, cssnano];
   // Remove copyright comment. Crude hack to get our own copyright out
   // of the string.
   return postcss(transformers).process(css.toString())

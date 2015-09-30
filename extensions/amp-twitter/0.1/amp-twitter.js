@@ -15,9 +15,12 @@
  */
 
 
-import {getIframe} from '../../../src/3p-frame';
+import {getIframe, listen} from '../../../src/3p-frame';
+import * as dom from '../../../src/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
+import {setStyles} from '../../../src/style'
+import {vsync} from '../../../src/vsync'
 
 
 class AmpTwitter extends AMP.BaseElement {
@@ -32,6 +35,33 @@ class AmpTwitter extends AMP.BaseElement {
         this.element, 'twitter');
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
+    // Triggered by context.updateDimensions() inside the iframe.
+    listen(iframe, 'embed-size', (data) => {
+      iframe.height = data.height;
+      iframe.width = data.width;
+      var amp = iframe.parentElement;
+      amp.setAttribute('height', data.height);
+      amp.setAttribute('width', data.width);
+      var sizer = dom.elementByTag(amp, 'i-amp-sizer');
+      // By using a vsync to set the height, we set many tweets in the same
+      // instant because Twitter batches requests, so they come back at
+      // the same time (but each tweet updates comes in its own postMessage).
+      // NOTE: If prerendering is enabled for Twitter we need to move this
+      // into a non-vsync in that case.
+      vsync.mutate(() => {
+        if (sizer) {
+          // The sizer is no longer dynamic, but as soon as the height
+          // was set once we expect it gets reset on resize of the container.
+          setStyles(sizer, {
+            paddingTop: data.height + 'px'
+          });
+        } else {
+          setStyles(amp, {
+            height: data.height + 'px'
+          });
+        }
+      });
+    });
     return loadPromise(iframe);
   }
 };
