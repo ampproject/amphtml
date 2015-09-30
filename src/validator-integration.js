@@ -52,7 +52,7 @@ export function maybeValidate(win) {
 
 
 function report(element, message) {
-  console.warn(TAG_, message, element);
+  console/*OK*/.warn(TAG_, message, element);
 }
 
 
