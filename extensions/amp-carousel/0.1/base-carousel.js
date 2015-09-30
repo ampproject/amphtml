@@ -18,27 +18,42 @@ export class BaseCarousel extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    /** @private {!Element} */
+    this.prevButton_;
+
+    /** @private {!Element} */
+    this.nextButton_;
+
     this.buildCarousel();
     this.buildButtons();
     this.setupGestures();
+    this.setControlsState();
+
+    if (this.element.hasAttribute('controls')) {
+      this.element.classList.add('-amp-carousel-has-controls');
+    }
   }
 
   buildButtons() {
-    this.prevButton_ = document.createElement('button');
-    this.prevButton_.textContent = '\u276E';
-    this.prevButton_.classList.add('-amp-carousel-button');
-    this.prevButton_.classList.add('-amp-carousel-button-prev');
+    this.prevButton_ = document.createElement('div');
+    this.prevButton_.classList.add('amp-carousel-button');
+    this.prevButton_.classList.add('amp-carousel-button-prev');
+    this.prevButton_.setAttribute('role', 'button');
     this.prevButton_.onclick = () => {
-      this.go(-1, true);
+      if (!this.prevButton_.classList.contains('amp-disabled')) {
+        this.go(-1, true);
+      }
     };
     this.element.appendChild(this.prevButton_);
 
-    this.nextButton_ = document.createElement('button');
-    this.nextButton_.textContent = '\u276F';
-    this.nextButton_.classList.add('-amp-carousel-button');
-    this.nextButton_.classList.add('-amp-carousel-button-next');
+    this.nextButton_ = document.createElement('div');
+    this.nextButton_.classList.add('amp-carousel-button');
+    this.nextButton_.classList.add('amp-carousel-button-next');
+    this.nextButton_.setAttribute('role', 'button');
     this.nextButton_.onclick = () => {
-      this.go(1, true);
+      if (!this.nextButton_.classList.contains('amp-disabled')) {
+        this.go(1, true);
+      }
     };
     this.element.appendChild(this.nextButton_);
   }
@@ -68,15 +83,30 @@ export class BaseCarousel extends AMP.BaseElement {
   }
 
   /**
-   * Override in subclass to provide a way to switch to an image through its
-   * index placement.
+   * Calls `goCallback` and `setControlState` for transition behavior.
+   * @param {number} dir -1 or 1
+   * @param {boolean} animate
+   */
+  go(dir, animate) {
+    this.goCallback(dir, animate);
+    this.setControlsState();
+  }
+
+  /**
    * Proceeds to the next slide in the desired direction.
    * @param {number} dir -1 or 1
    * @param {boolean} animate
-   * @override
    */
-  go() {
+  goCallback(dir, animate) {
     // Subclasses may override.
+  }
+
+  /**
+   * Sets the previous and next button visual states.
+   */
+  setControlsState() {
+    this.prevButton_.classList.toggle('amp-disabled', !this.hasPrev());
+    this.nextButton_.classList.toggle('amp-disabled', !this.hasNext());
   }
 
   /**
@@ -85,5 +115,19 @@ export class BaseCarousel extends AMP.BaseElement {
    */
   isReadyToBuild() {
     return this.getRealChildren().length > 0;
+  }
+
+  /**
+   * @return {boolean}
+   */
+  hasPrev() {
+    // Subclasses may override.
+  }
+
+  /**
+   * @return {boolean}
+   */
+  hasNext() {
+    // Subclasses may override.
   }
 }

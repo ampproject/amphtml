@@ -60,7 +60,7 @@ export class AmpSlides extends BaseCarousel {
   }
 
   /** @override */
-  go(dir, animate) {
+  goCallback(dir, animate) {
     var newIndex = this.nextIndex_(dir);
     if (newIndex != this.currentIndex_) {
       var newSlide = this.slides_[newIndex];
@@ -297,5 +297,15 @@ export class AmpSlides extends BaseCarousel {
         s.prevTr(0);
       }
     });
+  }
+
+  /** @override */
+  hasPrev() {
+    return this.currentIndex_ != 0;
+  }
+
+  /** @override */
+  hasNext() {
+    return this.currentIndex_ != this.slides_.length - 1;
   }
 }
