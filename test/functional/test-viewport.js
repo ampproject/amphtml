@@ -16,6 +16,7 @@
 
 import {Viewport, ViewportBindingNatural_, ViewportBindingNaturalIosEmbed_,
           ViewportBindingVirtual_} from '../../src/viewport';
+import {getStyle} from '../../src/style';
 import * as sinon from 'sinon';
 
 
@@ -272,7 +273,8 @@ describe('ViewportBindingNaturalIosEmbed', () => {
         return {
           tagName: tagName,
           id: '',
-          style: {}
+          style: {},
+          scrollIntoView: sinon.spy()
         };
       }
     };
@@ -307,7 +309,8 @@ describe('ViewportBindingNaturalIosEmbed', () => {
     expect(body.style.right).to.equal(0);
     expect(body.style.bottom).to.equal(0);
 
-    expect(bodyChildren.length).to.equal(1);
+    expect(bodyChildren.length).to.equal(2);
+
     expect(bodyChildren[0].id).to.equal('-amp-scrollpos');
     expect(bodyChildren[0].style.position).to.equal('absolute');
     expect(bodyChildren[0].style.top).to.equal(0);
@@ -315,6 +318,14 @@ describe('ViewportBindingNaturalIosEmbed', () => {
     expect(bodyChildren[0].style.width).to.equal(0);
     expect(bodyChildren[0].style.height).to.equal(0);
     expect(bodyChildren[0].style.visibility).to.equal('hidden');
+
+    expect(bodyChildren[1].id).to.equal('-amp-scrollmove');
+    expect(bodyChildren[1].style.position).to.equal('absolute');
+    expect(bodyChildren[1].style.top).to.equal(0);
+    expect(bodyChildren[1].style.left).to.equal(0);
+    expect(bodyChildren[1].style.width).to.equal(0);
+    expect(bodyChildren[1].style.height).to.equal(0);
+    expect(bodyChildren[1].style.visibility).to.equal('hidden');
   });
 
   it('should update padding on BODY', () => {
@@ -357,6 +368,54 @@ describe('ViewportBindingNaturalIosEmbed', () => {
     expect(rect.top).to.equal(213);  // round(200 + 12.5)
     expect(rect.width).to.equal(14);  // round(13.5)
     expect(rect.height).to.equal(15);  // round(14.5)
+  });
+
+  it('should set scroll position via moving element', () => {
+    let moveEl = bodyChildren[1];
+    binding.setScrollPos_(10);
+    expect(getStyle(moveEl, 'transform')).to.equal('translateY(10px)');
+    expect(moveEl.scrollIntoView.callCount).to.equal(1);
+    expect(moveEl.scrollIntoView.firstCall.args[0]).to.equal(true);
+  });
+
+  it('should adjust scroll position when scrolled to 0', () => {
+    let posEl = bodyChildren[0];
+    posEl.getBoundingClientRect = () => {return {top: 0, left: 0};};
+    let moveEl = bodyChildren[1];
+    let event = {preventDefault: sinon.spy()};
+    binding.adjustScrollPos_(event);
+    expect(getStyle(moveEl, 'transform')).to.equal('translateY(1px)');
+    expect(moveEl.scrollIntoView.callCount).to.equal(1);
+    expect(moveEl.scrollIntoView.firstCall.args[0]).to.equal(true);
+    expect(event.preventDefault.callCount).to.equal(1);
+  });
+
+  it('should adjust scroll position when scrolled to 0; w/o event', () => {
+    let posEl = bodyChildren[0];
+    posEl.getBoundingClientRect = () => {return {top: 0, left: 0};};
+    let moveEl = bodyChildren[1];
+    binding.adjustScrollPos_();
+    expect(moveEl.scrollIntoView.callCount).to.equal(1);
+  });
+
+  it('should NOT adjust scroll position when scrolled away from 0', () => {
+    let posEl = bodyChildren[0];
+    posEl.getBoundingClientRect = () => {return {top: -10, left: 0};};
+    let moveEl = bodyChildren[1];
+    let event = {preventDefault: sinon.spy()};
+    binding.adjustScrollPos_(event);
+    expect(moveEl.scrollIntoView.callCount).to.equal(0);
+    expect(event.preventDefault.callCount).to.equal(0);
+  });
+
+  it('should NOT adjust scroll position when overscrolled', () => {
+    let posEl = bodyChildren[0];
+    posEl.getBoundingClientRect = () => {return {top: 10, left: 0};};
+    let moveEl = bodyChildren[1];
+    let event = {preventDefault: sinon.spy()};
+    binding.adjustScrollPos_(event);
+    expect(moveEl.scrollIntoView.callCount).to.equal(0);
+    expect(event.preventDefault.callCount).to.equal(0);
   });
 });
 

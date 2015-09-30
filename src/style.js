@@ -56,7 +56,8 @@ function getVendorJsPropertyName_(object, titleCase) {
  * @export
  * @param {!Object} object
  * @param {string} camelCase the camel cased version of a css property name
- * @param {bool=} opt_bypassCache bypass the memoized cache of property mapping
+ * @param {boolean=} opt_bypassCache bypass the memoized cache of property
+ *   mapping
  * @return {string}
  */
 export function getVendorJsPropertyName(object, camelCase, opt_bypassCache) {
@@ -85,14 +86,31 @@ export function getVendorJsPropertyName(object, camelCase, opt_bypassCache) {
  * @param {string} property
  * @param {*} value
  * @param {string=} opt_units
- * @param {bool=} opt_bypassCache
+ * @param {boolean=} opt_bypassCache
  */
 export function setStyle(element, property, value, opt_units, opt_bypassCache) {
-  let propertyName =
-      getVendorJsPropertyName(element.style, property, opt_bypassCache);
+  let propertyName = getVendorJsPropertyName(element.style, property,
+      opt_bypassCache);
   if (propertyName) {
     element.style[propertyName] = opt_units ? value + opt_units : value;
   }
+}
+
+
+/**
+ * Returns the value of the CSS style of the specified element.
+ * @param {!Element} element
+ * @param {string} property
+ * @param {boolean=} opt_bypassCache
+ * @return {*}
+ */
+export function getStyle(element, property, opt_bypassCache) {
+  let propertyName = getVendorJsPropertyName(element.style, property,
+      opt_bypassCache);
+  if (!propertyName) {
+    return undefined;
+  }
+  return element.style[propertyName];
 }
 
 
