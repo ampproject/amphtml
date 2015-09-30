@@ -77,7 +77,7 @@ export class AmpCarousel extends BaseCarousel {
   }
 
   /** @override */
-  go(dir, animate) {
+  goCallback(dir, animate) {
     var newPos = this.nextPos_(this.pos_, dir);
     if (newPos != this.pos_) {
       var oldPos = this.pos_;
@@ -310,13 +310,16 @@ export class AmpCarousel extends BaseCarousel {
         Math.max(this.minPos_ - extent, pos));
   }
 
-  setControlsState() {
+  /** @override */
+  hasPrev() {
+    return this.pos_ != 0;
+  }
+
+  /** @override */
+  hasNext() {
     let containerWidth = this.element.offsetWidth;
     let scrollWidth = this.container_.scrollWidth;
     let maxPos = Math.max(scrollWidth - containerWidth, 0);
-    let isAtStartPos = this.pos_ == 0;
-    let isAtEndPos = this.pos_ == maxPos;
-    this.prevButton_.classList.toggle('amp-disabled', isAtStartPos);
-    this.nextButton_.classList.toggle('amp-disabled', isAtEndPos);
+    return this.pos_ != maxPos;
   }
 }

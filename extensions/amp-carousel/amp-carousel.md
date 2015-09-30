@@ -51,7 +51,7 @@ unless only a single child is present.
 
 #### Styling
 - You may use the `amp-carousel` element selector to style it freely.
-- `amp-carousel` by default uses an inlined svg as the background-image of the buttons.
+- `.amp-carousel-button` by default uses an inlined svg as the background-image of the buttons.
 You may override this with your own svg or image like so:
 
   **default**
@@ -71,7 +71,7 @@ You may override this with your own svg or image like so:
   }
   ```
 - By default the visual state of an `amp-carousel` button when it is disabled is that it is hidden.
-  You may override this visual state of an `amp-carousel` button by doing:
+  You may override this visual state of an `amp-carousel` button in the disabled state by:
 
   ```css
   .amp-carousel-button.amp-disabled {
