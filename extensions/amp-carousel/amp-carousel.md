@@ -48,6 +48,11 @@ If present, the carousel includes navigational dots that indicate where the user
 
 If present, displays left and right arrows for the user to use in navigation on mobile. Visibility of arrows can also be controlled via styling, and a media query can be used to only display arrows at certain screen widths. On desktop, arrows will always be displayed.
 
+**type**
+- `carousel` (default) - All slides are shown and are scrollable horizontally.
+  Be aware that `type=carousel` does not currently support `layout=responsive`.
+- `slides` - Shows a single slide at a time.
+
 
 #### Styling
 

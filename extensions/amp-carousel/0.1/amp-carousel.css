@@ -14,19 +14,24 @@
  * limitations under the License.
  */
 
-import {AmpSlides} from './slides';
-import {AmpCarousel} from './carousel';
-
-
-class CarouselSelector {
-
-  constructor(element) {
-    if (element.hasAttribute('type') &&
-        element.getAttribute('type') == 'slides') {
-      return new AmpSlides(...arguments);
-    }
-    return new AmpCarousel(...arguments);
-  }
+amp-carousel {
 }
 
-AMP.registerElement('amp-carousel', CarouselSelector, $CSS$);
+.-amp-carousel-button {
+  opacity: 0.6;
+  position: absolute;
+  z-index: 10;
+  top: 50%;
+  padding: 8px;
+  font-size: 24px;
+  margin-top: -20px;
+  pointer-events: all;
+}
+
+.-amp-carousel-button-prev {
+  left: 16px;
+}
+
+.-amp-carousel-button-next {
+  right: 16px;
+}

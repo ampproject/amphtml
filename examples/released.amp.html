@@ -8,8 +8,11 @@
   <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
   <script custom-element="amp-audio" src="../dist/v0/amp-audio-0.1.max.js" async></script>
   <script custom-element="amp-anim" src="../dist/v0/amp-anim-0.1.max.js" async></script>
+  <script custom-element="amp-carousel" src="../dist/v0/amp-carousel-0.1.max.js" async></script>
   <script custom-element="amp-iframe" src="../dist/v0/amp-iframe-0.1.max.js" async></script>
+  <script custom-element="amp-image-lightbox" src="../dist/v0/amp-image-lightbox-0.1.max.js" async></script>
   <script custom-element="amp-instagram" src="../dist/v0/amp-instagram-0.1.max.js" async></script>
+  <script custom-element="amp-fit-text" src="../dist/v0/amp-fit-text-0.1.max.js" async></script>
   <script custom-element="amp-twitter" src="../dist/v0/amp-twitter-0.1.max.js" async></script>
   <script custom-element="amp-youtube" src="../dist/v0/amp-youtube-0.1.max.js" async></script>
   <script src="../dist/amp.js" development async></script>
@@ -19,13 +22,21 @@
       max-width: 527px;
       font-family: 'Questrial', Arial;
     }
+    .box1 {
+      border: 1px solid black;
+      margin: 8px 0;
+    }
   </style>
 </head>
 <body>
   <h1>Released AMP components</h1>
-  <h2>Responsive image</h2>
+  <h2>Responsive image (with lightbox)</h2>
   <p>
-    <amp-img src="https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w2004-h734-no/PANO_20150726_171347%257E2.jpg" width=527 height=193 layout="responsive" ></amp-img>
+    <amp-img
+        on="tap:lightbox1"
+        role="button"
+        tabindex="0"
+        src="https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w2004-h734-no/PANO_20150726_171347%257E2.jpg" width=527 height=193 layout="responsive" ></amp-img>
   </p>
   <h2>Fixed size image</h2>
   <p>
@@ -121,6 +132,12 @@
       data-cards="hidden">
   </amp-twitter>
 
+  <h2>Fit-text</h2>
+  <amp-fit-text width="300" height="200" layout="responsive" class="box1">
+    Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.
+  </amp-fit-text>
+
+  <amp-image-lightbox id="lightbox1" layout="nodisplay"></amp-image-lightbox>
 
   <amp-pixel width=1 height=1 src="https://pubads.g.doubleclick.net/activity;dc_iu=/12344/pixel;ord=$RANDOM?"></amp-pixel>
 </body>

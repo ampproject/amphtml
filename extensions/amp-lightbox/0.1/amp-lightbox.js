@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
+import {Gestures} from '../../../src/gesture';
 import {Layout} from '../../../src/layout';
+import {SwipeXYRecognizer, TapRecognizer}
+    from '../../../src/gesture-recognizers';
 import {historyFor} from '../../../src/history';
 import {timer} from '../../../src/timer';
 import * as st from '../../../src/style';
@@ -53,9 +56,14 @@ class AmpLightbox extends AMP.BaseElement {
       this.container_.appendChild(child);
     });
 
+    let gestures = Gestures.get(this.element);
     // TODO(dvoytenko): configure how to close. Or maybe leave it completely
     // up to "on" element.
     this.element.addEventListener('click', () => this.close());
+    gestures.onGesture(TapRecognizer, () => this.close());
+    gestures.onGesture(SwipeXYRecognizer, () => {
+      // Consume to block scroll events and side-swipe.
+    });
 
     /** @private {number} */
     this.historyId_ = -1;

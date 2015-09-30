@@ -173,13 +173,6 @@ describe('Gestures', () => {
     expect(gestures.tracking_[0]).to.equal(false);
   });
 
-  it('should re-issue move event on touchend if info available', () => {
-    gestures.tracking_[0] = true;
-    recognizerMock.expects('onTouchMove').returns(true).once();
-    recognizerMock.expects('onTouchEnd').once();
-    sendEvent({type: 'touchend', touches: [{}]});
-  });
-
 
   it('should deny ready state if already eventing', () => {
     gestures.eventing_ = {};

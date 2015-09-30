@@ -17,17 +17,33 @@
 
 /**
  * Adds the given css text to the given document.
+ *
+ * The style tags will be at the beginning of the head before all author
+ * styles. One element can be the main runtime CSS. This is guaranteed
+ * to always be the first stylesheet in the doc.
+ *
  * @param {!Document} doc The document that should get the new styles.
  * @param {string} cssText
  * @param {function()} cb Called when the new styles are available.
  *     Not using a promise, because this is synchronous when possible.
  *     for better performance.
+ * @param {boolean=} opt_isRuntimeCss If true, this style tag will be inserted
+ *     as the first element in head and all style elements will be positioned
+ *     after.
  */
-export function installStyles(doc, cssText, cb) {
+export function installStyles(doc, cssText, cb, opt_isRuntimeCss) {
   var length = doc.styleSheets.length;
   var style = doc.createElement('style');
   style.textContent = cssText;
-  doc.head.insertBefore(style, doc.head.firstChild);
+  var afterElement = null;
+  // Make sure that we place style tags after the main runtime CSS. Otherwise
+  // the order is random.
+  if (opt_isRuntimeCss) {
+    style.setAttribute('amp-runtime', '');
+  } else {
+    afterElement = doc.querySelector('style[amp-runtime]');
+  }
+  insertAfterOrAtStart(doc.head, style, afterElement);
   // Styles aren't always available synchronously. E.g. if there is a
   // pending style download, it will have to finish before the new
   // style is visible.
@@ -54,4 +70,24 @@ export function installStyles(doc, cssText, cb) {
       cb();
     }
   }, 4);
+}
+
+/**
+ * Insert the element in the root after the element named after or
+ * if that is null at the beginning.
+ * @param {!Element} root
+ * @param {!Element} element
+ * @param {?Element} after
+ */
+function insertAfterOrAtStart(root, element, after) {
+  if (after) {
+    if (after.nextSibling) {
+      root.insertBefore(element, after.nextSibling);
+    } else {
+      root.appendChild(element);
+    }
+  } else {
+    // Add at the start.
+    root.insertBefore(element, root.firstChild);
+  }
 }

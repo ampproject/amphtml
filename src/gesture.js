@@ -246,8 +246,6 @@ export class Gestures {
   onTouchEnd_(event) {
     let now = timer.now();
 
-    let touches = event.changedTouches || event.touches;
-    let hasTouches = touches && touches.length > 0;
     for (let i = 0; i < this.recognizers_.length; i++) {
       if (!this.tracking_[i]) {
         // The whole touch series are ignored for non-tracking recognizers.
@@ -255,11 +253,6 @@ export class Gestures {
       }
       if (this.pending_[i] && this.pending_[i] < now) {
         // Pending state expired. Reset.
-        this.stopTracking_(i);
-        continue;
-      }
-      // If touchend has move info, run it through touchmove again.
-      if (hasTouches && !this.recognizers_[i].onTouchMove(event)) {
         this.stopTracking_(i);
         continue;
       }
