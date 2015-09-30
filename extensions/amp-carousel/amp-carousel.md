@@ -59,7 +59,7 @@ You may override this with your own svg or image like so:
   ```css
   .amp-carousel-button-prev {
     left: 16px;
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18"><path d="M15 8.25H5.87l4.19-4.19L9 3 3 9l6 6 1.06-1.06-4.19-4.19H15v-1.5z"/></svg>');
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18"><path d="M15 8.25H5.87l4.19-4.19L9 3 3 9l6 6 1.06-1.06-4.19-4.19H15v-1.5z" fill="#fff" /></svg>');
   }
   ```
 
@@ -67,7 +67,7 @@ You may override this with your own svg or image like so:
   ```css
   .amp-carousel-button-prev {
     left: 5%;
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18"><path d="M11.56 5.56L10.5 4.5 6 9l4.5 4.5 1.06-1.06L8.12 9z"/></svg>');
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18"><path d="M11.56 5.56L10.5 4.5 6 9l4.5 4.5 1.06-1.06L8.12 9z" fill="#fff" /></svg>');
   }
   ```
 - By default the visual state of an `amp-carousel` button when it is disabled is that it is hidden.
@@ -77,8 +77,7 @@ You may override this with your own svg or image like so:
   .amp-carousel-button.amp-disabled {
     /* make sure we make it visible */
     visibility: visible;
-    /* choose our own styling */
-    opacity: .7;
-    background-color: red;
+    /* choose our own background styling, red'ish */
+    background-color: rgba(255, 0, 0, .5);
   }
   ```
