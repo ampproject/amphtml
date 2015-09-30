@@ -97,10 +97,13 @@ export function applyLayout_(element) {
 
   // Handle elements that do not specify a width/height and are defined to have
   // natural browser dimensions.
-  if ((!layoutAttr || layoutAttr === Layout.FIXED) &&
+  if ((!layoutAttr || layoutAttr == Layout.FIXED ||
+          layoutAttr == Layout.FIXED_HEIGHT) &&
       (!widthAttr || !heightAttr) && hasNaturalDimensions(element.tagName)) {
     let dimensions = getNaturalDimensions(element.tagName);
-    widthAttr = widthAttr || dimensions.width;
+    if (layoutAttr != Layout.FIXED_HEIGHT) {
+      widthAttr = widthAttr || dimensions.width;
+    }
     heightAttr = heightAttr || dimensions.height;
   }
 
@@ -112,19 +115,34 @@ export function applyLayout_(element) {
     if (!layout) {
       throw new Error('Unknown layout: ' + layoutAttr);
     }
+  } else if (widthAttr || heightAttr) {
+    if (!widthAttr || widthAttr == 'auto') {
+      layout = Layout.FIXED_HEIGHT;
+    } else {
+      layout = Layout.FIXED;
+    }
   } else {
-    layout = (widthAttr || heightAttr) ? Layout.FIXED : Layout.CONTAINER;
+    layout = Layout.CONTAINER;
   }
   element.classList.add(getLayoutClass(layout));
   if (isLayoutSizeDefined(layout)) {
     element.classList.add('-amp-layout-size-defined');
   }
 
-  if (layout == Layout.FIXED || layout == Layout.RESPONSIVE) {
-    let width = parseLength(widthAttr);
-    if (!width) {
-      throw new Error('Expected width to be available and be an ' +
-          'integer/length value: ' + widthAttr);
+  if (layout == Layout.FIXED || layout == Layout.FIXED_HEIGHT ||
+          layout == Layout.RESPONSIVE) {
+    let width = 0;
+    if (layout == Layout.FIXED_HEIGHT) {
+      if (widthAttr && widthAttr != 'auto') {
+        throw new Error('Expected width to be either absent or equal "auto" ' +
+            'for fixed-height layout: ' + widthAttr);
+      }
+    } else {
+      width = parseLength(widthAttr);
+      if (!width) {
+        throw new Error('Expected width to be available and be an ' +
+            'integer/length value: ' + widthAttr);
+      }
     }
     let height = parseLength(heightAttr);
     if (!height) {
@@ -141,6 +159,8 @@ export function applyLayout_(element) {
       sizer.style.paddingTop =
           ((getLengthNumeral(height) / getLengthNumeral(width)) * 100) + '%';
       element.insertBefore(sizer, element.firstChild);
+    } else if (layout == Layout.FIXED_HEIGHT) {
+      element.style.height = height;
     } else {
       element.style.width = width;
       element.style.height = height;

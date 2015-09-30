@@ -19,7 +19,7 @@ import {Layout, getLengthNumeral, getLengthUnits, parseLength, parseLayout} from
 import {applyLayout_} from '../../src/custom-element';
 
 
-describe('Layout', () => {
+describe.only('Layout', () => {
   var div;
 
   beforeEach(() => {
@@ -29,6 +29,7 @@ describe('Layout', () => {
   it('parseLayout', () => {
     expect(parseLayout('nodisplay')).to.equal('nodisplay');
     expect(parseLayout('fixed')).to.equal('fixed');
+    expect(parseLayout('fixed-height')).to.equal('fixed-height');
     expect(parseLayout('responsive')).to.equal('responsive');
     expect(parseLayout('container')).to.equal('container');
     expect(parseLayout('fill')).to.equal('fill');
@@ -74,6 +75,7 @@ describe('Layout', () => {
     expect(div.children.length).to.equal(0);
   });
 
+
   it('layout=fixed', () => {
     div.setAttribute('layout', 'fixed');
     div.setAttribute('width', 100);
@@ -99,6 +101,61 @@ describe('Layout', () => {
     expect(() => applyLayout_(div)).to.throw(
         /to be available and be an integer/);
   });
+
+
+  it('layout=fixed-height', () => {
+    div.setAttribute('layout', 'fixed-height');
+    div.setAttribute('height', 200);
+    expect(applyLayout_(div)).to.equal(Layout.FIXED_HEIGHT);
+    expect(div.style.width).to.equal('');
+    expect(div.style.height).to.equal('200px');
+    expect(div.classList.contains('-amp-layout-fixed-height')).to.equal(true);
+    expect(div.classList.contains('-amp-layout-size-defined')).to.equal(true);
+    expect(div.children.length).to.equal(0);
+  });
+
+  it('layout=fixed-height, with width=auto', () => {
+    div.setAttribute('layout', 'fixed-height');
+    div.setAttribute('height', 200);
+    div.setAttribute('width', 'auto');
+    expect(applyLayout_(div)).to.equal(Layout.FIXED_HEIGHT);
+    expect(div.style.width).to.equal('');
+    expect(div.style.height).to.equal('200px');
+    expect(div.classList.contains('-amp-layout-fixed-height')).to.equal(true);
+    expect(div.classList.contains('-amp-layout-size-defined')).to.equal(true);
+    expect(div.children.length).to.equal(0);
+  });
+
+  it('layout=fixed-height, prohibit width!=auto', () => {
+    div.setAttribute('layout', 'fixed-height');
+    div.setAttribute('height', 200);
+    div.setAttribute('width', 300);
+    expect(function() {
+      applyLayout_(div);
+    }).to.throw(/Expected width to be either absent or equal "auto"/);
+  });
+
+  it('layout=fixed-height - default with height', () => {
+    div.setAttribute('height', 200);
+    expect(applyLayout_(div)).to.equal(Layout.FIXED_HEIGHT);
+    expect(div.style.height).to.equal('200px');
+    expect(div.style.width).to.equal('');
+  });
+
+  it('layout=fixed-height - default with height and width=auto', () => {
+    div.setAttribute('height', 200);
+    div.setAttribute('width', 'auto');
+    expect(applyLayout_(div)).to.equal(Layout.FIXED_HEIGHT);
+    expect(div.style.height).to.equal('200px');
+    expect(div.style.width).to.equal('');
+  });
+
+  it('layout=fixed-height - requires height', () => {
+    div.setAttribute('layout', 'fixed-height');
+    expect(() => applyLayout_(div)).to.throw(
+        /to be available and be an integer/);
+  });
+
 
   it('layout=responsive', () => {
     div.setAttribute('layout', 'responsive');
@@ -141,4 +198,43 @@ describe('Layout', () => {
     }).to.throw(/Unknown layout: foo/);
   });
 
+
+  it('should configure natural dimensions; default layout', () => {
+    let pixel = document.createElement('amp-pixel');
+    expect(applyLayout_(pixel)).to.equal(Layout.FIXED);
+    expect(pixel.style.width).to.equal('1px');
+    expect(pixel.style.height).to.equal('1px');
+  });
+
+  it('should configure natural dimensions; default layout; with width', () => {
+    let pixel = document.createElement('amp-pixel');
+    pixel.setAttribute('width', '11');
+    expect(applyLayout_(pixel)).to.equal(Layout.FIXED);
+    expect(pixel.style.width).to.equal('11px');
+    expect(pixel.style.height).to.equal('1px');
+  });
+
+  it('should configure natural dimensions; default layout; with height', () => {
+    let pixel = document.createElement('amp-pixel');
+    pixel.setAttribute('height', '11');
+    expect(applyLayout_(pixel)).to.equal(Layout.FIXED);
+    expect(pixel.style.width).to.equal('1px');
+    expect(pixel.style.height).to.equal('11px');
+  });
+
+  it('should configure natural dimensions; layout=fixed', () => {
+    let pixel = document.createElement('amp-pixel');
+    pixel.setAttribute('layout', 'fixed');
+    expect(applyLayout_(pixel)).to.equal(Layout.FIXED);
+    expect(pixel.style.width).to.equal('1px');
+    expect(pixel.style.height).to.equal('1px');
+  });
+
+  it('should configure natural dimensions; layout=fixed-height', () => {
+    let pixel = document.createElement('amp-pixel');
+    pixel.setAttribute('layout', 'fixed-height');
+    expect(applyLayout_(pixel)).to.equal(Layout.FIXED_HEIGHT);
+    expect(pixel.style.height).to.equal('1px');
+    expect(pixel.style.width).to.equal('');
+  });
 });

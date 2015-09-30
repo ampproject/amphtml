@@ -28,6 +28,7 @@ import {assert} from './asserts';
 export const Layout = {
   NODISPLAY: 'nodisplay',
   FIXED: 'fixed',
+  FIXED_HEIGHT: 'fixed-height',
   RESPONSIVE: 'responsive',
   CONTAINER: 'container',
   FILL: 'fill'
@@ -65,6 +66,7 @@ export function getLayoutClass(layout) {
  */
 export function isLayoutSizeDefined(layout) {
   return (layout == Layout.FIXED ||
+      layout == Layout.FIXED_HEIGHT ||
       layout == Layout.RESPONSIVE ||
       layout == Layout.FILL);
 }

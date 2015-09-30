@@ -29,7 +29,7 @@ export class AmpCarousel extends BaseCarousel {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.FIXED;
+    return layout == Layout.FIXED || layout == Layout.FIXED_HEIGHT;
   }
 
   /** @override */
