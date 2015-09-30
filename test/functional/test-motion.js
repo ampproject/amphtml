@@ -21,7 +21,7 @@ import * as sinon from 'sinon';
 describe('Motion calcVelocity', () => {
 
   it('should dampen velocity when prevVelocity is 0', () => {
-    expect(calcVelocity(200, 10, 0)).to.be.closeTo(12, 1e-3);
+    expect(calcVelocity(200, 10, 0)).to.be.closeTo(15.999, 1e-3);
   });
 
   it('should not affect velocity when prevVelocity the same', () => {
@@ -29,7 +29,7 @@ describe('Motion calcVelocity', () => {
   });
 
   it('should slow down deceleration when prevVelocity is available', () => {
-    expect(calcVelocity(0, 10, 20)).to.be.closeTo(8, 1e-3);
+    expect(calcVelocity(0, 10, 20)).to.be.closeTo(4.001, 1e-3);
   });
 
   it('should be zero when both new and old velocity are zero', () => {
@@ -43,13 +43,13 @@ describe('Motion calcVelocity', () => {
   it('should calculate continuosly', () => {
     let v = 0;
     v = calcVelocity(-11.25, 16, v);
-    expect(v).to.be.closeTo(-0.464, 1e-3);
+    expect(v).to.be.closeTo(-0.689, 1e-3);
 
     v = calcVelocity(-11.25, 17, v);
-    expect(v).to.be.closeTo(-0.597, 1e-3);
+    expect(v).to.be.closeTo(-0.662, 1e-3);
 
     v = calcVelocity(-11.25, 18, v);
-    expect(v).to.be.closeTo(-0.616, 1e-3);
+    expect(v).to.be.closeTo(-0.625, 1e-3);
   });
 });
 
@@ -125,39 +125,37 @@ describe('Motion continueMotion', () => {
 
   it('should follow positive inertia', () => {
     let values = testContinuation(0.665, 0);
-    expect(values.length).to.equal(6);
-    expect(values[0]).to.be.closeTo(63, 1);
-    expect(values[1]).to.be.closeTo(97, 1);
-    expect(values[2]).to.be.closeTo(115, 1);
-    expect(values[3]).to.be.closeTo(125, 1);
-    expect(values[4]).to.be.closeTo(130, 1);
-    expect(values[5]).to.be.closeTo(133, 1);
+    expect(values.length).to.equal(12);
+    expect(values[0]).to.be.closeTo(66, 1);
+    expect(values[1]).to.be.closeTo(115, 1);
+    expect(values[2]).to.be.closeTo(151, 1);
+    expect(values[values.length - 2]).to.be.closeTo(243, 1);
+    expect(values[values.length - 1]).to.be.closeTo(245, 1);
   });
 
   it('should halt when requested while following positive inertia', () => {
     let values = testContinuation(0.665, 300);
     expect(values.length).to.equal(3);
-    expect(values[0]).to.be.closeTo(63, 1);
-    expect(values[1]).to.be.closeTo(97, 1);
-    expect(values[2]).to.be.closeTo(115, 1);
+    expect(values[0]).to.be.closeTo(66, 1);
+    expect(values[1]).to.be.closeTo(115, 1);
+    expect(values[2]).to.be.closeTo(151, 1);
   });
 
   it('should follow negative inertia', () => {
     let values = testContinuation(-0.665, 0);
-    expect(values.length).to.equal(6);
-    expect(values[0]).to.be.closeTo(-63, 1);
-    expect(values[1]).to.be.closeTo(-97, 1);
-    expect(values[2]).to.be.closeTo(-115, 1);
-    expect(values[3]).to.be.closeTo(-125, 1);
-    expect(values[4]).to.be.closeTo(-130, 1);
-    expect(values[5]).to.be.closeTo(-133, 1);
+    expect(values.length).to.equal(12);
+    expect(values[0]).to.be.closeTo(-66, 1);
+    expect(values[1]).to.be.closeTo(-115, 1);
+    expect(values[2]).to.be.closeTo(-151, 1);
+    expect(values[values.length - 2]).to.be.closeTo(-243, 1);
+    expect(values[values.length - 1]).to.be.closeTo(-245, 1);
   });
 
   it('should halt when requested while following negative inertia', () => {
     let values = testContinuation(-0.665, 300);
     expect(values.length).to.equal(3);
-    expect(values[0]).to.be.closeTo(-63, 1);
-    expect(values[1]).to.be.closeTo(-97, 1);
-    expect(values[2]).to.be.closeTo(-115, 1);
+    expect(values[0]).to.be.closeTo(-66, 1);
+    expect(values[1]).to.be.closeTo(-115, 1);
+    expect(values[2]).to.be.closeTo(-151, 1);
   });
 });

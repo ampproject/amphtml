@@ -16,7 +16,10 @@
 
 import {Animation} from '../../../src/animation';
 import {BaseCarousel} from './base-carousel';
-import {SwipeXRecognizer} from '../../../src/swipe';
+import {Gestures} from '../../../src/gesture';
+import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
+import {bezierCurve} from '../../../src/curve';
+import {continueMotion} from '../../../src/motion';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import * as st from '../../../src/style';
 import * as tr from '../../../src/transition';
@@ -42,72 +45,6 @@ export class AmpSlides extends BaseCarousel {
 
     /** @private {number} */
     this.currentIndex_ = 0;
-
-    /** @private @const */
-    this.swipeX_ = new SwipeXRecognizer(this.element);
-
-    /**
-     * @private {?{
-     *   containerWidth: number,
-     *   prevTr: !Transition,
-     *   nextTr: !Transition
-     * }} */
-    this.swipeState_ = null;
-
-    this.swipeX_.onStart((e) => {
-      let currentSlide = this.slides_[this.currentIndex_];
-      let containerWidth = this.element.offsetWidth;
-      let minDelta = 0;
-      let maxDelta = 0;
-      let prevTr = tr.NULL;
-      let nextTr = tr.NULL;
-      if (this.currentIndex_ - 1 >= 0) {
-        let prevSlide = this.slides_[this.currentIndex_ - 1];
-        this.prepareSlide_(prevSlide, -1);
-        prevTr = this.createTransition_(currentSlide, prevSlide, -1);
-        maxDelta = containerWidth;
-      }
-      if (this.currentIndex_ + 1 < this.slides_.length) {
-        let nextSlide = this.slides_[this.currentIndex_ + 1];
-        this.prepareSlide_(nextSlide, 1);
-        nextTr = this.createTransition_(currentSlide, nextSlide, 1);
-        minDelta = -containerWidth;
-      }
-      this.swipeState_ = {
-        containerWidth: containerWidth,
-        prevTr: prevTr,
-        nextTr: nextTr
-      };
-      // Translate the gesture position to be a number between -1 and 1,
-      // with negative values indiamping sliding to the previous slide and
-      // positive indiamping sliding to the next slide.
-      this.swipeX_.setPositionMultiplier(-1 / containerWidth);
-      this.swipeX_.setBounds(minDelta, maxDelta, /* overshoot */ 0);
-      this.swipeX_.continueMotion(/* snapPoint */ 0.55,
-          /* stopOnTouch */ false);
-    });
-    this.swipeX_.onMove((e) => {
-      let s = this.swipeState_;
-      s.nextTr(e.position > 0 ? e.position : 0);
-      s.prevTr(e.position < 0 ? -e.position : 0);
-    });
-    this.swipeX_.onEnd((e) => {
-      let s = this.swipeState_;
-      this.swipeState_ = null;
-      let oldSlide = this.slides_[this.currentIndex_];
-      if (e.position > 0.5) {
-        s.nextTr(1);
-        this.currentIndex_++;
-        this.commitSwitch_(oldSlide, this.slides_[this.currentIndex_]);
-      } else if (e.position < -0.5) {
-        s.prevTr(-1);
-        this.currentIndex_--;
-        this.commitSwitch_(oldSlide, this.slides_[this.currentIndex_]);
-      } else {
-        s.nextTr(0);
-        s.prevTr(0);
-      }
-    });
   }
 
   /** @override */
@@ -228,5 +165,137 @@ export class AmpSlides extends BaseCarousel {
     if (nextIndex != this.currentIndex_) {
       this.schedulePreload(this.slides_[nextIndex]);
     }
+  }
+
+  /** @override */
+  setupGestures() {
+    /**
+     * @private {?{
+     *   containerWidth: number,
+     *   prevTr: !Transition,
+     *   nextTr: !Transition,
+     *   min: number,
+     *   max: number,
+     *   pos: number,
+     *   currentIndex: number
+     * }} */
+    this.swipeState_ = null;
+
+    let gestures = Gestures.get(this.element);
+    gestures.onGesture(SwipeXRecognizer, (e) => {
+      if (e.data.first) {
+        this.onSwipeStart_(e.data);
+      }
+      this.onSwipe_(e.data);
+      if (e.data.last) {
+        this.onSwipeEnd_(e.data);
+      }
+    });
+  }
+
+  /**
+   * @param {!Swipe} swipe
+   * @private
+   */
+  onSwipeStart_(swipe) {
+    let currentSlide = this.slides_[this.currentIndex_];
+    let containerWidth = this.element.offsetWidth;
+    let minDelta = 0;
+    let maxDelta = 0;
+    let prevTr = tr.NOOP;
+    let nextTr = tr.NOOP;
+    if (this.currentIndex_ - 1 >= 0) {
+      let prevSlide = this.slides_[this.currentIndex_ - 1];
+      this.prepareSlide_(prevSlide, -1);
+      prevTr = this.createTransition_(currentSlide, prevSlide, -1);
+      minDelta = -1;
+    }
+    if (this.currentIndex_ + 1 < this.slides_.length) {
+      let nextSlide = this.slides_[this.currentIndex_ + 1];
+      this.prepareSlide_(nextSlide, 1);
+      nextTr = this.createTransition_(currentSlide, nextSlide, 1);
+      maxDelta = 1;
+    }
+    this.swipeState_ = {
+      containerWidth: containerWidth,
+      prevTr: prevTr,
+      nextTr: nextTr,
+      min: minDelta,
+      max: maxDelta,
+      pos: 0,
+      currentIndex: this.currentIndex_
+    };
+  }
+
+  /**
+   * @param {!Swipe} swipe
+   * @private
+   */
+  onSwipe_(swipe) {
+    let s = this.swipeState_;
+    if (!s || s.currentIndex != this.currentIndex_) {
+      return;
+    }
+
+    // Translate the gesture position to be a number between -1 and 1,
+    // with negative values indiamping sliding to the previous slide and
+    // positive indiamping sliding to the next slide.
+    let pos = Math.min(s.max, Math.max(s.min,
+        -swipe.deltaX / s.containerWidth));
+
+    s.nextTr(pos > 0 ? pos : 0);
+    s.prevTr(pos < 0 ? -pos : 0);
+    s.pos = pos;
+  }
+
+  /**
+   * @param {!Swipe} swipe
+   * @return {!Promise}
+   * @private
+   */
+  onSwipeEnd_(swipe) {
+    let s = this.swipeState_;
+    if (!s || s.currentIndex != this.currentIndex_) {
+      return;
+    }
+    this.swipeState_ = null;
+
+    let advPos = s.pos;
+    if (s.pos * -swipe.velocityX >= 0) {
+      advPos = s.pos - Math.sign(swipe.velocityX) *
+          (Math.abs(swipe.velocityX) > 0.2 ? 1 : 0);
+    }
+    advPos = Math.min(s.max, Math.max(s.min, advPos));
+    let newPos = Math.abs(advPos) >= 0.55 ? Math.sign(advPos) : 0;
+    let promise;
+    if (newPos != s.pos) {
+      let posFunc = tr.numeric(s.pos, newPos);
+      promise = Animation.animate((time) => {
+        let pos = posFunc(time);
+        s.nextTr(pos > 0 ? pos : 0);
+        s.prevTr(pos < 0 ? -pos : 0);
+        s.pos = pos;
+      }, 150, bezierCurve(0.19, 0.49, 0.2, 1)).thenAlways();
+    } else {
+      promise = Promise.resolve();
+    }
+    return promise.then(() => {
+      if (s.currentIndex != this.currentIndex_) {
+        return;
+      }
+      let oldSlide = this.slides_[this.currentIndex_];
+      if (newPos > 0.5) {
+        s.nextTr(1);
+        this.currentIndex_++;
+        this.commitSwitch_(oldSlide, this.slides_[this.currentIndex_]);
+      } else if (newPos < -0.5) {
+        s.prevTr(1);
+        this.currentIndex_--;
+        this.commitSwitch_(oldSlide, this.slides_[this.currentIndex_]);
+      } else {
+        s.nextTr(0);
+        s.prevTr(0);
+      }
+    });
   }
 }

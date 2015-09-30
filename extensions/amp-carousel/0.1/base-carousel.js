@@ -20,6 +20,7 @@ export class BaseCarousel extends AMP.BaseElement {
   buildCallback() {
     this.buildCarousel();
     this.buildButtons();
+    this.setupGestures();
   }
 
   buildButtons() {
@@ -52,8 +53,17 @@ export class BaseCarousel extends AMP.BaseElement {
     return true;
   }
 
-  /** @override */
+  /**
+   * Subclasses should override this method to build the UI for the carousel.
+   */
   buildCarousel() {
+    // Subclasses may override.
+  }
+
+  /**
+   * Subclasses should override this method to configure gestures for carousel.
+   */
+  setupGestures() {
     // Subclasses may override.
   }
 
