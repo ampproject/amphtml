@@ -1,0 +1,54 @@
+/**
+ * Copyright 2015 Pinterest, Inc. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import {createIframePromise} from '../../../../testing/iframe';
+require('../amp-pinterest');
+import {adopt} from '../../../../src/runtime';
+
+adopt(window);
+
+describe('amp-pinterest', () => {
+
+  function getPin(pinDo, pinUrl, pinMedia, pinDescription) {
+    return createIframePromise().then((iframe) => {
+      var pin = iframe.doc.createElement('amp-pinterest');
+      pin.setAttribute('data-do', pinDo);
+      pin.setAttribute('data-url', pinUrl);
+      pin.setAttribute('data-media', pinMedia);
+      pin.setAttribute('data-description', pinDescription);
+      pin.setAttribute('width', '40');
+      pin.setAttribute('height', '20');
+      return iframe.addElement(pin);
+    });
+  }
+
+  it('renders', () => {
+    return getPin('buttonPin',
+      'http://www.flickr.com/photos/kentbrew/6851755809/',
+      'http://farm8.staticflickr.com/7027/6851755809_df5b2051c9_z.jpg',
+      'Next stop: Pinterest'
+    ).then((pin) => {
+      var iframe = pin.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.tagName).to.equal('IFRAME');
+      expect(iframe.src).to.equal('https://assets.pinterest.com/ext/iffy.html?act=buttonPin&url=http%3A%2F%2Fwww.flickr.com%2Fphotos%2Fkentbrew%2F6851755809%2F&media=http%3A%2F%2Ffarm8.staticflickr.com%2F7027%2F6851755809_df5b2051c9_z.jpg&description=Next%20stop%3A%20Pinterest');
+      expect(iframe.getAttribute('width')).to.equal('40');
+      expect(iframe.getAttribute('height')).to.equal('20');
+    });
+  });
+
+});
+

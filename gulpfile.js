@@ -71,6 +71,7 @@ function buildExtensions(options) {
    * @deprecated `amp-slides` is deprecated and will be deleted before 1.0.
    * Please see {@link AmpCarousel} with `type=slides` attribute instead.
    */
+  buildExtension('amp-pinterest', '0.1', false, options);
   buildExtension('amp-slides', '0.1', false, options);
   buildExtension('amp-twitter', '0.1', false, options);
   buildExtension('amp-youtube', '0.1', false, options);
