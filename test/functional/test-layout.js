@@ -19,7 +19,7 @@ import {Layout, getLengthNumeral, getLengthUnits, parseLength, parseLayout} from
 import {applyLayout_} from '../../src/custom-element';
 
 
-describe.only('Layout', () => {
+describe('Layout', () => {
   var div;
 
   beforeEach(() => {
