@@ -33,12 +33,14 @@
         //   * The URL for that "image" must precisely match the src of the
         //   amp-img tag
         //
+        //   * All marked-up URL's should be absolute
+        //
         //   * The "logo" dimensions must not exceed 600x60
         // 
       {
         "@context": "http://schema.org",
         "@type": "NewsArticle",
-        "mainEntityOfPage": "http://example.ampproject.org/article-metadata.html",
+        "mainEntityOfPage": "http://cdn.ampproject.org/article-metadata.html",
         "headline": "Lorem Ipsum",
         "datePublished": "1907-05-05T12:02:41Z",
         "author": {
@@ -50,14 +52,14 @@
           "name": "Google",
           "logo": {
             "@type": "ImageObject",
-            "url": "logo.jpg",
+            "url": "http://cdn.ampproject.org/logo.jpg",
             "width": 600,
             "height": 60
           }
         },
         "image": {
           "@type": "ImageObject",
-          "url": "leader.jpg",
+          "url": "http://cdn.ampproject.org/leader.jpg",
           "height": 2000,
           "width": 800
         }
@@ -77,7 +79,7 @@
   </head>
   <body>
     <h1>Lorem Ipsum</h1>
-    <amp-img src="leader.jpg" alt="Lorem Ipsum?" height="2000" width="800"></amp-img>
+    <amp-img src="http://cdn.ampproject.org/leader.jpg" alt="Lorem Ipsum?" height="2000" width="800"></amp-img>
     <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec
        odio. Praesent libero. Sed cursus ante dapibus diam. Sed nisi. Nulla
        quis sem at nibh elementum imperdiet. Duis sagittis ipsum. Praesent
