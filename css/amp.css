@@ -210,7 +210,6 @@ amp-pixel {
   border-radius: 100%;
   background-color: rgba(0, 0, 0, .3);
 
-  animation: -amp-loader-dots 1s infinite;
   box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, .2);
   will-change: transform;
 }
