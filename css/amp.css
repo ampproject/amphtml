@@ -127,7 +127,8 @@ i-amp-sizer {
   display: block;
 }
 
-[placeholder].hidden {
+[placeholder].hidden,
+[placeholder].-amp-hidden {
   display: none !important;
 }
 
@@ -140,7 +141,8 @@ i-amp-sizer {
   z-index: 1 !important;
 }
 
-.-amp-notbuilt > [placeholder]:not(.hidden) {
+.-amp-notbuilt > [placeholder]:not(.hidden),
+.-amp-notbuilt > [placeholder]:not(.-amp-hidden) {
   display: block !important;
 }
 
@@ -196,7 +198,7 @@ amp-pixel {
  * We want to be a bit more specific here as we don't want a global active
  * to just trigger the loading animation
  */
-.-amp-autoplaceholder.active .-amp-loader-dot {
+.-amp-autoplaceholder.-amp-active .-amp-loader-dot {
   animation: -amp-loader-dots 2s infinite;
 }
 

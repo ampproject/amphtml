@@ -28,7 +28,7 @@ export function createLoaderElement() {
   let loader = document.createElement('div');
   placeholder.appendChild(loader);
 
-  placeholder.classList.add('hidden');
+  placeholder.classList.add('-amp-hidden');
   placeholder.classList.add('-amp-autoplaceholder');
   loader.classList.add('-amp-loader');
 

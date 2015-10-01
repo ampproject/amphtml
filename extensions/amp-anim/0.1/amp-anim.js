@@ -80,7 +80,7 @@ class AmpAnim extends AMP.BaseElement {
   /** @private */
   updateInViewport_() {
     let inViewport = this.isInViewport();
-    this.placeholder_.classList.toggle('hidden', inViewport);
+    this.placeholder_.classList.toggle('-amp-hidden', inViewport);
     st.toggle(this.img_, inViewport);
   }
 

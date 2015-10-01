@@ -45,7 +45,7 @@ export function installAd(win) {
     /** @override */
     buildCallback() {
       if (this.placeholder_) {
-        this.placeholder_.classList.add('hidden');
+        this.placeholder_.classList.add('-amp-hidden');
       }
     }
 
@@ -59,7 +59,7 @@ export function installAd(win) {
         if (this.placeholder_) {
           // Triggered by context.noContentAvailable() inside the ad iframe.
           listen(this.iframe_, 'no-content', () => {
-            this.placeholder_.classList.remove('hidden');
+            this.placeholder_.classList.remove('-amp-hidden');
           });
         }
       }

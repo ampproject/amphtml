@@ -132,9 +132,9 @@ export function installImg(win) {
         // This can occur on fast internet connections or on a local server.
         return timer.delay(() => {
           this.placeholder_.classList
-              .toggle('hidden', this.imgLoadedOnce_);
+              .toggle('-amp-hidden', this.imgLoadedOnce_);
           this.placeholder_.classList
-              .toggle('active', !this.imgLoadedOnce_);
+              .toggle('-amp-active', !this.imgLoadedOnce_);
         }, 100);
       }
     }
@@ -146,9 +146,9 @@ export function installImg(win) {
       let inViewport = this.isInViewport();
       if (this.placeholder_ && (!inViewport || this.imgLoadedOnce_)) {
         if (this.isDefaultPlaceholder_) {
-          this.placeholder_.classList.remove('active');
+          this.placeholder_.classList.remove('-amp-active');
         }
-        this.placeholder_.classList.add('hidden');
+        this.placeholder_.classList.add('-amp-hidden');
       }
     }
 
