@@ -49,37 +49,46 @@ class AmpAnim extends AMP.BaseElement {
     // we need to do is select the first one that's supported, create the 
     // corresponding amp-image/amp-video tag, and move the source tag under
     // that tag, and delete the other source tags.
+    //
+    // We only check for children if no "src" tag is present.
+    //
 
+    if (this.attributes.src == null) { 
+      // run through all SOURCE tags, if they're playable, create a
+      // corresponding amp-img/amp-video tag and move all children under that
+      // tag, then delete all later source tags
+      // if it's not playable, eat it
+      
+        // typemap:
+        //    uppercased mime-type type (before slash) => tag to create
+        var typemap = {
+          "IMAGE": "amp-img",
+          "VIDEO": "amp-video"
+        };
 
-    var children = this.getRealChildNodes();
-    for (child in children) { 
-      if (child.tagName != 'SOURCE') {
-        // only supports <source> tag at the moment
-        // the notable exclusion is <track>
-        continue;
-      }
-      if (child.attributes.type == null) {
-        // XXX warning
-        continue;
-      }
-      // we do want to pass any optional parameters in the typeval media type through to typeSupported.
-      var typeval = child.attributes.type.trim(); 
-      var type = typeval.slice(0, typeval.indexOf('/'));
-      var typemap = {
-        IMAGE: amp-img
-        VIDEO: amp-video
-      };
-      if (!type in typemap) {
-        // only image and video types are supported
-        // XXX warning
-        continue;
-      }
-      if (mimetypeSupported(typeval, type)) {
-          // create a corresponding amp-img/video tag
-          var media_tag = 'amp-' + type.toLowerCase();
-          // XXX create tag, move source under it, escape, delete parent tag
-      }
-    });
+      this.getRealChildNodes().forEach( () => {
+        if (child.nodeType !== Node.ELEMENT_NODE)
+          return; 
+        if (child.tagName != 'SOURCE')
+          return;
+        // eat the <source>
+        if (child.attributes.type === null) {
+          // XXX warning
+          return;
+        }
+        // we do want to pass any optional parameters in the typeval media type through to typeSupported.
+        var type = child.attributes.type.trim().slice(0, typeval.indexOf('/'));
+        if (!type in typemap) {
+          // only image and video types are supported
+          return;
+        }
+        if (mimetypeSupported(typeval, type)) {
+            // create a corresponding amp-img/video tag
+            var media_tag = 'amp-' + type.toLowerCase();
+            // XXX create tag, move source under it, escape, delete parent tag
+        }
+      });
+    }
 
     /** @private @const {!Element} */
     this.img_ = new Image();
