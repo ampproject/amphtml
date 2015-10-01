@@ -324,6 +324,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
       .pipe(sourcemaps.write('./'))
       .pipe(gulp.dest(destDir))
       .on('end', function() {
+        fs.writeFileSync(destDir + '/version.txt', internalRuntimeVersion);
         if (options.latestName) {
           fs.copySync(
               destDir + '/' + options.minifiedName,
