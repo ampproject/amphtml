@@ -40,9 +40,15 @@ import {loadPromise} from '../../../src/event-helper';
 
 class AmpInstagram extends AMP.BaseElement {
   /** @override */
+  createdCallback() {
+    this.preconnect.url('https://instagram.com');
+  }
+
+  /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
   }
+
   /** @override */
   layoutCallback() {
     var width = this.element.getAttribute('width');

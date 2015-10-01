@@ -26,7 +26,6 @@ var count = 0;
 var assert = AMP.assert;
 
 class AmpIframe extends AMP.BaseElement {
-
   /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
@@ -66,6 +65,7 @@ class AmpIframe extends AMP.BaseElement {
     var iframeSrc = this.element.getAttribute('src');
     this.iframeSrc = this.assertSource(iframeSrc, window.location.href,
         this.element.getAttribute('sandbox'));
+    this.preconnect.url(this.iframeSrc);
   }
 
   /** @override */
