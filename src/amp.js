@@ -21,6 +21,7 @@ import {viewerFor} from './viewer';
 import {installPullToRefreshBlocker} from './pull-to-refresh';
 
 import {installAd} from '../builtins/amp-ad';
+import {installGlobalClickListener} from './document-click';
 import {installImg} from '../builtins/amp-img';
 import {installVideo} from '../builtins/amp-video';
 import {installPixel} from '../builtins/amp-pixel';
@@ -49,6 +50,7 @@ installStyles(document, cssText, () => {
     action.addEvent('tap');
 
     installPullToRefreshBlocker(window);
+    installGlobalClickListener(window);
 
     maybeValidate(window);
   } finally {
