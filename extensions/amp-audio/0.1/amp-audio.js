@@ -22,7 +22,7 @@ class AmpAudio extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout === Layout.FIXED;
+    return layout == Layout.FIXED || layout == Layout.FIXED_HEIGHT;
   }
 
 

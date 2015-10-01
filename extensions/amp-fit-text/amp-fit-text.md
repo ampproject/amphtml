@@ -31,7 +31,7 @@ the minimum font size, the overflowing content will be cut off and hidden. The
 WebKit and Blink-based browsers will show ellipsis in this case.
 
 The `amp-fit-text` accepts one of the following `layout` values: `fixed`,
-`responsive` or `fill`.
+`fixed-height`, `responsive` or `fill`.
 
 For example:
 

@@ -42,6 +42,11 @@ body {
   position: relative;
 }
 
+.-amp-layout-fixed-height {
+  display: block;
+  position: relative;
+}
+
 .-amp-layout-container {
   display: block;
   position: relative;
