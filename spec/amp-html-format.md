@@ -75,7 +75,7 @@ In concrete terms this means that:
 <h1>Sample document</h1>
 <p>
   Some text
-  <amp-img src=sample.jpg width=300 height=300 />
+  <amp-img src=sample.jpg width=300 height=300></amp-img>
 </p>
 <amp-ad width=300 height=250
     type="a9"
