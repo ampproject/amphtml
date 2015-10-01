@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {History, HistoryBindingNatural_, HistoryBindingVirtual_,
-    onDocumentClick_} from '../../src/history';
+import {History, HistoryBindingNatural_, HistoryBindingVirtual_} from
+    '../../src/history';
 import {listenOncePromise} from '../../src/event-helper';
 import * as sinon from 'sinon';
 
@@ -313,114 +313,6 @@ describe('HistoryBindingVirtual', () => {
       expect(history.stackIndex_).to.equal(0);
       expect(onStackIndexUpdated.callCount).to.equal(2);
       expect(onStackIndexUpdated.getCall(1).args[0]).to.equal(0);
-    });
-  });
-
-  describe('globalClickHandler', () => {
-    let evt;
-    let doc;
-    let tgt;
-    let elem;
-    let getElementByIdSpy;
-    let preventDefaultSpy;
-    let scrollIntoViewSpy;
-
-    beforeEach(() => {
-      preventDefaultSpy = sinon.spy();
-      scrollIntoViewSpy = sinon.spy();
-      elem = {
-        scrollIntoView: scrollIntoViewSpy
-      };
-      getElementByIdSpy = sinon.stub();
-      tgt = document.createElement('a');
-      tgt.href = 'https://www.google.com';
-      doc = {
-        location: {
-          href: 'https://www.google.com/some-path?hello=world#link'
-        },
-        getElementById: getElementByIdSpy
-      };
-      evt = {
-        currentTarget: doc,
-        target: tgt,
-        preventDefault: preventDefaultSpy
-      };
-    });
-
-    afterEach(() => {
-      evt = null;
-      doc = null;
-      tgt = null;
-      elem = null;
-      getElementByIdSpy = null;
-      preventDefaultSpy = null;
-      scrollIntoViewSpy = null;
-    });
-
-    describe('when linking to the different origin or path', () => {
-
-      beforeEach(() => {
-        doc.location.href = 'https://www.google.com/some-path?hello=world#link';
-      });
-
-      it('should not do anything on path change', () => {
-        tgt.href = 'https://www.google.com/some-other-path';
-        onDocumentClick_(evt);
-
-        expect(getElementByIdSpy.callCount).to.equal(0);
-        expect(preventDefaultSpy.callCount).to.equal(0);
-        expect(scrollIntoViewSpy.callCount).to.equal(0);
-      });
-
-      it('should not do anything on origin change', () => {
-        tgt.href = 'https://maps.google.com/some-path#link';
-        onDocumentClick_(evt);
-
-        expect(getElementByIdSpy.callCount).to.equal(0);
-        expect(preventDefaultSpy.callCount).to.equal(0);
-        expect(scrollIntoViewSpy.callCount).to.equal(0);
-      });
-    });
-
-    describe('when linking to identifier', () => {
-
-      beforeEach(() => {
-        doc.location.href = 'https://www.google.com/some-path?hello=world';
-        tgt.href = 'https://www.google.com/some-path?hello=world#test'
-      });
-
-      it('should call getElementById on document', () => {
-        getElementByIdSpy.returns(false);
-        expect(getElementByIdSpy.callCount).to.equal(0);
-        onDocumentClick_(evt);
-        expect(getElementByIdSpy.callCount).to.equal(1);
-      });
-
-      it('should not call preventDefault and scrollIntoView if element is not found', () => {
-        getElementByIdSpy.returns(null);
-        expect(getElementByIdSpy.callCount).to.equal(0);
-
-        onDocumentClick_(evt);
-        expect(getElementByIdSpy.callCount).to.equal(1);
-        expect(preventDefaultSpy.callCount).to.equal(0);
-        expect(scrollIntoViewSpy.callCount).to.equal(0);
-      });
-
-      it('should call preventDefault if element is found', () => {
-        getElementByIdSpy.returns(elem);
-
-        expect(preventDefaultSpy.callCount).to.equal(0);
-        onDocumentClick_(evt);
-        expect(preventDefaultSpy.callCount).to.equal(1);
-      });
-
-      it('should call scrollIntoView if element is found', () => {
-        getElementByIdSpy.returns(elem);
-
-        expect(scrollIntoViewSpy.callCount).to.equal(0);
-        onDocumentClick_(evt);
-        expect(scrollIntoViewSpy.callCount).to.equal(1);
-      });
     });
   });
 });

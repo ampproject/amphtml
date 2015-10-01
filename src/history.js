@@ -18,7 +18,6 @@ import {Pass} from './pass';
 import {assert} from './asserts';
 import {getService} from './service';
 import {log} from './log';
-import {parseUrl} from './url';
 import {timer} from './timer';
 import {viewerFor} from './viewer';
 
@@ -655,42 +654,3 @@ export function historyFor(window) {
     return createHistory_(window);
   });
 };
-
-/**
- * @param {!Window} window
- */
-export function installGlobalClickListener(window) {
-  window.document.addEventListener('click', onDocumentClick_);
-}
-
-/**
- * @param {!Window} window
- */
-export function uninstallGlobalClickListener(window) {
-  window.document.removeEventListener('click', onDocumentClick_);
-}
-
-/**
- * @param {!Event} e
- * @visibleForTesting
- */
-export function onDocumentClick_(e) {
-  let target = e.target;
-  let doc = e.currentTarget;
-  let elem = null;
-
-  if (target.tagName == 'A') {
-    let tgtLoc = parseUrl(target.href);
-    let curLoc = parseUrl(doc.location.href);
-    let tgtHref = `${tgtLoc.origin}${tgtLoc.pathname}`;
-    let curHref = `${curLoc.origin}${curLoc.pathname}`;
-
-    if (tgtHref == curHref) {
-      elem = doc.getElementById(tgtLoc.hash.slice(1));
-      if (elem) {
-        e.preventDefault();
-        elem.scrollIntoView();
-      }
-    }
-  }
-}

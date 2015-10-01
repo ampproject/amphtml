@@ -16,11 +16,12 @@
 
 import './polyfills';
 
-import {historyFor, installGlobalClickListener} from './history';
+import {historyFor} from './history';
 import {viewerFor} from './viewer';
 import {installPullToRefreshBlocker} from './pull-to-refresh';
 
 import {installAd} from '../builtins/amp-ad';
+import {installGlobalClickListener} from './document-click';
 import {installImg} from '../builtins/amp-img';
 import {installVideo} from '../builtins/amp-video';
 import {installPixel} from '../builtins/amp-pixel';
