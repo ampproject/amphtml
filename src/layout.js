@@ -144,7 +144,7 @@ export function getLengthUnits(length) {
  * @return {number}
  */
 export function getLengthNumeral(length) {
-  return parseFloat(length, 10);
+  return parseFloat(length);
 }
 
 
