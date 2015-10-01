@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {Layout, getLengthNumeral, getLengthUnits, parseLength, parseLayout} from
-    '../../src/layout';
+import {Layout, assertLength, getLengthNumeral, getLengthUnits, parseLength,
+    parseLayout} from '../../src/layout';
 import {applyLayout_} from '../../src/custom-element';
 
 
@@ -46,6 +46,13 @@ describe('Layout', () => {
     expect(parseLength('10px')).to.equal('10px');
     expect(parseLength('10em')).to.equal('10em');
     expect(parseLength('10vmin')).to.equal('10vmin');
+
+    expect(parseLength(10.1)).to.equal('10.1px');
+    expect(parseLength('10.2')).to.equal('10.2px');
+    expect(parseLength('10.1px')).to.equal('10.1px');
+    expect(parseLength('10.1em')).to.equal('10.1em');
+    expect(parseLength('10.1vmin')).to.equal('10.1vmin');
+
     expect(parseLength(undefined)).to.equal(undefined);
     expect(parseLength(null)).to.equal(undefined);
     expect(parseLength('')).to.equal(undefined);
@@ -55,6 +62,10 @@ describe('Layout', () => {
     expect(getLengthUnits('10px')).to.equal('px');
     expect(getLengthUnits('10em')).to.equal('em');
     expect(getLengthUnits('10vmin')).to.equal('vmin');
+
+    expect(getLengthUnits('10.1px')).to.equal('px');
+    expect(getLengthUnits('10.1em')).to.equal('em');
+    expect(getLengthUnits('10.1vmin')).to.equal('vmin');
   });
 
   it('getLengthNumeral', () => {
@@ -62,7 +73,39 @@ describe('Layout', () => {
     expect(getLengthNumeral('10px')).to.equal(10);
     expect(getLengthNumeral('10em')).to.equal(10);
     expect(getLengthNumeral('10vmin')).to.equal(10);
+
+    expect(getLengthNumeral('10.1')).to.equal(10.1);
+    expect(getLengthNumeral('10.1px')).to.equal(10.1);
+    expect(getLengthNumeral('10.1em')).to.equal(10.1);
+    expect(getLengthNumeral('10.1vmin')).to.equal(10.1);
   });
+
+  it('assertLength', () => {
+    expect(assertLength('10px')).to.equal('10px');
+    expect(assertLength('10em')).to.equal('10em');
+    expect(assertLength('10vmin')).to.equal('10vmin');
+
+    expect(assertLength('10.1px')).to.equal('10.1px');
+    expect(assertLength('10.1em')).to.equal('10.1em');
+    expect(assertLength('10.1vmin')).to.equal('10.1vmin');
+
+    expect(function() {
+      assertLength(10);
+    }).to.throw(/Invalid length value/);
+    expect(function() {
+      assertLength('10');
+    }).to.throw(/Invalid length value/);
+    expect(function() {
+      assertLength(undefined);
+    }).to.throw(/Invalid length value/);
+    expect(function() {
+      assertLength(null);
+    }).to.throw(/Invalid length value/);
+    expect(function() {
+      assertLength('');
+    }).to.throw(/Invalid length value/);
+  });
+
 
   it('layout=nodisplay', () => {
     div.setAttribute('layout', 'nodisplay');
