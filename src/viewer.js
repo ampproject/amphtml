@@ -144,7 +144,7 @@ export class Viewer {
 
     log.fine(TAG_, 'Viewer params:', this.params_);
 
-    this.overtakeHistory_ = parseInt(this.params_['history']) ||
+    this.overtakeHistory_ = parseInt(this.params_['history'], 10) ||
         this.overtakeHistory_;
     log.fine(TAG_, '- history:', this.overtakeHistory_);
 
@@ -152,7 +152,7 @@ export class Viewer {
         this.visibilityState_;
     log.fine(TAG_, '- visibilityState:', this.visibilityState_);
 
-    this.prerenderSize_ = parseInt(this.params_['prerenderSize']) ||
+    this.prerenderSize_ = parseInt(this.params_['prerenderSize'], 10) ||
         this.prerenderSize_;
     log.fine(TAG_, '- prerenderSize:', this.prerenderSize_);
 
@@ -164,19 +164,19 @@ export class Viewer {
     }
     log.fine(TAG_, '- viewportType:', this.viewportType_);
 
-    this.viewportWidth_ = parseInt(this.params_['width']) ||
+    this.viewportWidth_ = parseInt(this.params_['width'], 10) ||
         this.viewportWidth_;
     log.fine(TAG_, '- viewportWidth:', this.viewportWidth_);
 
-    this.viewportHeight_ = parseInt(this.params_['height']) ||
+    this.viewportHeight_ = parseInt(this.params_['height'], 10) ||
         this.viewportHeight_;
     log.fine(TAG_, '- viewportHeight:', this.viewportHeight_);
 
-    this./*OK*/scrollTop_ = parseInt(this.params_['scrollTop']) ||
+    this./*OK*/scrollTop_ = parseInt(this.params_['scrollTop'], 10) ||
         this./*OK*/scrollTop_;
     log.fine(TAG_, '- scrollTop:', this./*OK*/scrollTop_);
 
-    this.paddingTop_ = parseInt(this.params_['paddingTop']) || this.paddingTop_;
+    this.paddingTop_ = parseInt(this.params_['paddingTop'], 10) || this.paddingTop_;
     log.fine(TAG_, '- padding-top:', this.paddingTop_);
 
     // Wait for document to become visible.
