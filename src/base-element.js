@@ -16,6 +16,7 @@
 
 import {Layout, isInternalElement} from './layout';
 import {assert} from './asserts';
+import {preconnectFor} from './preconnect';
 import {resources} from './resources';
 import {viewerFor} from './viewer';
 import {viewportFor} from './viewport';
@@ -92,6 +93,9 @@ export class BaseElement {
 
     /** @private {!Object<string, function(!ActionInvocation)>} */
     this.actionMap_ = element.ownerDocument.defaultView.Object.create(null);
+
+    /** @protected {!Preconnect} */
+    this.preconnect = preconnectFor(element.ownerDocument.defaultView);
   }
 
   /** @return {!Layout} */

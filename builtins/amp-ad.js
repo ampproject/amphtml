@@ -93,6 +93,11 @@ export function installAd(win) {
   class AmpAd extends BaseElement {
 
     /** @override */
+    createdCallback() {
+      this.preconnect.threePFrame();
+    }
+
+    /** @override */
     isLayoutSupported(layout) {
       return isLayoutSizeDefined(layout);
     }
