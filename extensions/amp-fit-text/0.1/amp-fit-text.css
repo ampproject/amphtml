@@ -1,4 +1,3 @@
-/* START COPYRIGHT */
 /**
  * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
  *
@@ -14,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/* END COPYRIGHT */
 
 .-amp-fit-text-content,
 .-amp-fit-text-content.-amp-fill-content {
@@ -23,7 +21,6 @@
   flex-direction: column;
   flex-wrap: nowrap;
   justify-content: center;
-  align-items: center;
 }
 
 /* We have to use the old-style flex box with line clamping. It will only
