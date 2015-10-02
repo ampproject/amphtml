@@ -381,8 +381,8 @@ describe('Resources.Resource', () => {
 
   it('should initialize correctly when already built', () => {
     elementMock.expects('isBuilt').returns(true).once();
-    expect(new Resource(1, element, resources).getState()).to.equal(
-        ResourceState_.NEVER_LAID_OUT);
+    expect(new Resource(1, element).getState()).to.equal(
+        ResourceState_.NOT_LAID_OUT);
   });
 
   it('should not build before upgraded', () => {
@@ -409,14 +409,14 @@ describe('Resources.Resource', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
     elementMock.expects('build').withExactArgs(false).returns(true).once();
     expect(resource.build(false)).to.equal(true);
-    expect(resource.getState()).to.equal(ResourceState_.NEVER_LAID_OUT);
+    expect(resource.getState()).to.equal(ResourceState_.NOT_LAID_OUT);
   });
 
   it('should force-build after upgraded', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
     elementMock.expects('build').withExactArgs(true).returns(true).once();
     expect(resource.build(true)).to.equal(true);
-    expect(resource.getState()).to.equal(ResourceState_.NEVER_LAID_OUT);
+    expect(resource.getState()).to.equal(ResourceState_.NOT_LAID_OUT);
   });
 
   it('should blacklist on build failure', () => {
@@ -463,7 +463,7 @@ describe('Resources.Resource', () => {
 
   it('should always layout if has not been laid out before', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
-    resource.state_ = ResourceState_.NEVER_LAID_OUT;
+    resource.state_ = ResourceState_.NOT_LAID_OUT;
     resource.layoutBox_ = {left: 11, top: 12, width: 111, height: 222};
 
     elementMock.expects('getBoundingClientRect').

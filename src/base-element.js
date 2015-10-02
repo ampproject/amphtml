@@ -372,6 +372,7 @@ export class BaseElement {
    * priority of this element and its children.
    * @param {!Element|!Array<!Element>} elements
    * @param {boolean} inLocalViewport
+   * @protected
    */
   scheduleLayout(elements) {
     resources.scheduleLayout(this.element, elements);
@@ -383,6 +384,7 @@ export class BaseElement {
    * priority of this element and its children.
    * @param {!Element|!Array<!Element>} elements
    * @param {boolean} inLocalViewport
+   * @protected
    */
   schedulePreload(elements) {
     resources.schedulePreload(this.element, elements);
@@ -394,13 +396,26 @@ export class BaseElement {
    * based on the state of these elements and their parent subtree.
    * @param {!Element|!Array<!Element>} elements
    * @param {boolean} inLocalViewport
+   * @protected
    */
   updateInViewport(elements, inLocalViewport) {
     resources.updateInViewport(this.element, elements, inLocalViewport);
   }
 
   /**
+   * Requests the runtime to update the height of this element to the specified
+   * value. The runtime will schedule this request and attempt to process it
+   * as soon as possible.
+   * @param {number} newHeight
+   * @protected
+   */
+  changeHeight(newHeight) {
+    resources.changeHeight(this.element, newHeight);
+  }
+
+  /**
    * Requests full overlay mode from the viewer.
+   * @protected
    */
   requestFullOverlay() {
     viewerFor(this.element.ownerDocument.defaultView).requestFullOverlay();
@@ -408,6 +423,7 @@ export class BaseElement {
 
   /**
    * Requests to cancel full overlay mode from the viewer.
+   * @protected
    */
   cancelFullOverlay() {
     viewerFor(this.element.ownerDocument.defaultView).cancelFullOverlay();
