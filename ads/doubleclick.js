@@ -56,6 +56,10 @@ export function doubleclick(global, data) {
             data.tagForChildDirectedTreatment);
       }
 
+      if (data.cookieOptions) {
+        googletag.pubads().setCookieOptions(data.cookieOptions);
+      }
+
       googletag.pubads().addEventListener('slotRenderEnded', function(event) {
         if (event.isEmpty) {
           context.noContentAvailable();

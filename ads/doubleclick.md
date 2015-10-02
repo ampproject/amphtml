@@ -49,6 +49,7 @@ Supported parameters:
 
 Supported via `json` attribute:
 
-- targeting
 - categoryExclusion
+- cookieOptions
 - tagForChildDirectedTreatment
+- targeting
