@@ -38,7 +38,7 @@ var forbiddenTerms = {
   '\\.innerHTML': '',
   '\\.outerHTML': '',
   '\\.postMessage': '',
-  'cookie': '',
+  'cookie\\W': '',
   'eval\\(': '',
   'localStorage': '',
   'sessionStorage': '',
