@@ -19,7 +19,7 @@ import {assert} from './asserts';
 import {documentStateFor} from './document-state';
 import {getService} from './service';
 import {log} from './log';
-import {parseQueryString} from './url';
+import {parseQueryString, removeFragment} from './url';
 import {platform} from './platform';
 
 
@@ -184,11 +184,10 @@ export class Viewer {
       this.visibilityObservable_.fire();
     });
 
-    // Remove hash - no reason to keep it around.
-    var newUrl = this.win.location.href;
-    if (newUrl.indexOf('#') != -1) {
-      newUrl = newUrl.substring(0, newUrl.indexOf('#'));
-      if (this.win.history.replaceState) {
+    // Remove hash - no reason to keep it around, but only when embedded.
+    if (this.win.parent && this.win.parent != this.win) {
+      var newUrl = removeFragment(this.win.location.href);
+      if (newUrl != this.win.location.href && this.win.history.replaceState) {
         this.win.history.replaceState({}, '', newUrl);
         log.fine(TAG_, 'replace url:' + this.win.location.href);
       }
