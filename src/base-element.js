@@ -28,7 +28,7 @@ import {viewportFor} from './viewport';
  * implementation.
  *
  * The base class implements a set of lifecycle methods that are called by
- * the framework as appropriate. These are mostly based on the custom element
+ * the runtime as appropriate. These are mostly based on the custom element
  * lifecycle (See
  * http://www.html5rocks.com/en/tutorials/webcomponents/customelements/)
  * and adding AMP style late loading to the mix.
