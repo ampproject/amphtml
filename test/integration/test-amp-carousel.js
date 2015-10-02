@@ -16,7 +16,7 @@
 
 import {createFixtureIframe} from '../../testing/iframe.js';
 
-describe('amp-carousel', () => {
+describe.skip('amp-carousel', () => {
 
   let fixture;
   beforeEach(() => {

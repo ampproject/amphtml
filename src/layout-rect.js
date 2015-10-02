@@ -99,3 +99,19 @@ export function expandLayoutRect(rect, dw, dh) {
     height: rect.height * (1 + dh * 2)
   };
 }
+
+
+/**
+ * Moves the layout rect using dx and dy.
+ * @param {!LayoutRect} rect Original rect.
+ * @param {number} dx Move horizontally with this value.
+ * @param {number} dy Move vertically with this value.
+ * @return {!LayoutRect}
+ */
+export function moveLayoutRect(rect, dx, dy) {
+  if (dx == 0 && dy == 0) {
+    return rect;
+  }
+  return layoutRectLtwh(rect.left + dx, rect.top + dy,
+      rect.width, rect.height);
+}

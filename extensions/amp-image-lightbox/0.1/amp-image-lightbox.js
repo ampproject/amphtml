@@ -24,7 +24,8 @@ import {bezierCurve} from '../../../src/curve';
 import {continueMotion} from '../../../src/motion';
 import {historyFor} from '../../../src/history';
 import {isLoaded, loadPromise} from '../../../src/event-helper';
-import {layoutRectFromDomRect, layoutRectLtwh} from '../../../src/layout-rect';
+import {layoutRectFromDomRect, layoutRectLtwh, moveLayoutRect}
+    from '../../../src/layout-rect';
 import {parseSrcset} from '../../../src/srcset';
 import {timer} from '../../../src/timer';
 import * as dom from '../../../src/dom';
@@ -150,6 +151,18 @@ export class ImageViewer {
    */
   getImageBox() {
     return this.imageBox_;
+  }
+
+  /**
+   * Returns the boundaries of the image element with the offset if it was
+   * moved by a gesture.
+   * @return {!LayoutRect}
+   */
+  getImageBoxWithOffset() {
+    if (this.posX_ == 0 && this.posY_ == 0) {
+      return this.imageBox_;
+    }
+    return moveLayoutRect(this.imageBox_, this.posX_, this.posY_);
   }
 
   /**
@@ -776,6 +789,7 @@ class AmpImageLightbox extends AMP.BaseElement {
     if (caption) {
       dom.copyChildren(caption, this.captionElement_);
     }
+    this.captionElement_.classList.toggle('-amp-empty', !caption);
   }
 
   /** @private */
@@ -801,7 +815,7 @@ class AmpImageLightbox extends AMP.BaseElement {
     this.imageViewer_.measure();
 
     let anim = new Animation();
-    let dur = 700;
+    let dur = 500;
 
     // Lightbox background fades in.
     anim.add(0, tr.setStyles(this.element, {
@@ -834,9 +848,12 @@ class AmpImageLightbox extends AMP.BaseElement {
       let imageBox = this.imageViewer_.getImageBox();
       let dx = imageBox.left - rect.left;
       let dy = imageBox.top - rect.top;
+      // Duration will be somewhere between 0.2 and 0.8 depending on how far
+      // the image needs to move.
+      let motionTime = Math.max(0.2, Math.min(0.8, Math.abs(dy) / 250 * 0.8));
       anim.add(0, tr.setStyles(clone, {
         transform: tr.translate(tr.numeric(0, dx), tr.numeric(0, dy))
-      }), 0.8, ENTER_CURVE_);
+      }), motionTime, ENTER_CURVE_);
 
       // Fade in the container. This will mostly affect the caption.
       st.setStyles(this.container_, {opacity: 0});
@@ -848,10 +865,6 @@ class AmpImageLightbox extends AMP.BaseElement {
       anim.add(0.9, tr.setStyles(transLayer, {
         opacity: tr.numeric(1, 0.01)
       }), 0.1, EXIT_CURVE_);
-
-      // Duration will be somewhere between 300ms and 700ms depending on
-      // how far the image needs to move.
-      dur = Math.max(Math.min(Math.abs(dy) / 250 * dur, dur), 300);
     }
 
     return anim.start(dur).thenAlways(() => {
@@ -870,10 +883,10 @@ class AmpImageLightbox extends AMP.BaseElement {
    */
   exit_() {
     let image = this.imageViewer_.getImage();
-    let imageBox = this.imageViewer_.getImageBox();
+    let imageBox = this.imageViewer_.getImageBoxWithOffset();
 
     let anim = new Animation();
-    let dur = 600;
+    let dur = 500;
 
     // Lightbox background fades out.
     anim.add(0, tr.setStyles(this.element, {
@@ -913,12 +926,16 @@ class AmpImageLightbox extends AMP.BaseElement {
       let move = tr.setStyles(clone, {
         transform: tr.translate(tr.numeric(0, dx), tr.numeric(0, dy))
       });
-      anim.add(0.1, (time, complete) => {
+      // Duration will be somewhere between 0.2 and 0.8 depending on how far
+      // the image needs to move. Start the motion later too, but no later
+      // than 0.2.
+      let motionTime = Math.max(0.2, Math.min(0.8, Math.abs(dy) / 250 * 0.8));
+      anim.add(Math.min(0.8 - motionTime, 0.2), (time, complete) => {
         move(time);
         if (complete) {
           this.sourceImage_.classList.remove('-amp-ghost');
         }
-      }, 0.7, EXIT_CURVE_);
+      }, motionTime, EXIT_CURVE_);
 
       // Fade out the transition image.
       anim.add(0.8, tr.setStyles(transLayer, {
