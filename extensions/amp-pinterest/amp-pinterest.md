@@ -14,11 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-### <a name=”amp-pinterest”></a> `amp--pinterest`
+### <a name=”amp-pinterest”></a> `amp-pinterest`
 
 Displays a Pinterest widget or Pin It button.
 
 ### Examples:
+
+Pin It button: `data-do="buttonPin"`
 
     <amp-pinterest height=20 width=40
       data-do="buttonPin"
@@ -27,12 +29,14 @@ Displays a Pinterest widget or Pin It button.
       data-description="Next stop: Pinterest">
     </amp-pinterest>
 
+Embedded board widget: `data-do="embedBoard"`
+
     <amp-pinterest width=239 height=400
       data-do="embedBoard"
       data-scale-height="289"
       data-scale-width="107"
-      data-url="http://www.pinterest.com/kentbrew/art-i-wish-i-d-made/"
-    ></amp-pinterest>
+      data-url="http://www.pinterest.com/kentbrew/art-i-wish-i-d-made/">
+    </amp-pinterest>
 
 ## Pin It Button
 
@@ -102,10 +106,10 @@ When building other Pinterest widgets, `data-url` is required and must contain t
 
     data-do="embedUser"
     data-url="https://www.pinterest.com/kentbrew/"
- 
+
 ### Iframe Sizing for Other Widgets
 
-Iframes must be sized properly for the widget they're displaying. This may take some work to get exactly right, as Pinterest widgets may have variable height or width, and have several configuration options available to site operators. Parameters such as `data-height`, `data-width`, `data-board-width`, `data-scale-height`, and `data-scale-width` will alter the rendered size of a grid-based or single-pin widget, and should be used to size your widget to the space you have available in your iframe. 
+Iframes must be sized properly for the widget they're displaying. This may take some work to get exactly right, as Pinterest widgets may have variable height or width, and have several configuration options available to site operators. Parameters such as `data-height`, `data-width`, `data-board-width`, `data-scale-height`, and `data-scale-width` will alter the rendered size of a grid-based or single-pin widget, and should be used to size your widget to the space you have available in your iframe.
 
 For a fast way to preview different parameters, visit the Widget Builder, here:
 

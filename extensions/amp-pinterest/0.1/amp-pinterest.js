@@ -31,8 +31,8 @@
  *    data-do="embedBoard"
  *    data-scale-height="289"
  *    data-scale-width="107"
- *    data-url="http://www.pinterest.com/kentbrew/art-i-wish-i-d-made/"
- *  ></amp-pinterest>
+ *    data-url="http://www.pinterest.com/kentbrew/art-i-wish-i-d-made/">
+ *  </amp-pinterest>
  *
  * </code>
  */
@@ -40,6 +40,16 @@
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
 
+const VALID_PARAMS = [
+    'data-config',
+    'data-height',
+    'data-width',
+    'data-shape',
+    'data-color',
+    'data-lang',
+    'data-scale-width',
+    'data-scale-height',
+    'data-board-width' ];
 
 class AmpPinterest extends AMP.BaseElement {
   /** @override */
@@ -48,10 +58,10 @@ class AmpPinterest extends AMP.BaseElement {
   }
   /** @override */
   layoutCallback() {
-    
-    var height = this.element.getAttribute('height');
-    
-    var width = this.element.getAttribute('width');
+
+    let height = this.element.getAttribute('height');
+
+    let width = this.element.getAttribute('width');
 
     var pinDo = AMP.assert(this.element.getAttribute('data-do'),
         'The data-do attribute is required for <amp-pinterest> %s',
@@ -60,7 +70,8 @@ class AmpPinterest extends AMP.BaseElement {
     var pinUrl = AMP.assert(this.element.getAttribute('data-url'),
         'The data-url attribute is required for <amp-pinterest> %s',
         this.element);
-        
+
+    // set by data-do -- buttonPin renders a Pin It button and requires media and description
     if (pinDo === 'buttonPin') {
 
         var pinMedia = AMP.assert(this.element.getAttribute('data-media'),
@@ -71,13 +82,13 @@ class AmpPinterest extends AMP.BaseElement {
             'The data-description attribute is required when <amp-pinterest> makes a Pin It button %s',
             this.element);
     }
-    
-    var iframe = document.createElement('iframe');
+
+    let iframe = document.createElement('iframe');
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowtransparency', 'true');
 
     // start setting the source of our iframe
-    var src = 'https://assets.pinterest.com/ext/iffy.html?' +
+    let src = 'https://assets.pinterest.com/ext/iffy.html?' +
         'act=' + encodeURIComponent(pinDo) +
         '&url=' + encodeURIComponent(pinUrl);
 
@@ -86,27 +97,15 @@ class AmpPinterest extends AMP.BaseElement {
         src = src + '&media=' + encodeURIComponent(pinMedia);
         src = src + '&description=' + encodeURIComponent(pinDescription);
     }
-    
-    // seek and add any valid parameters
-    var validParams = [ 
-        'data-config',
-        'data-height',
-        'data-width',
-        'data-shape',
-        'data-color',
-        'data-lang',
-        'data-scale-width',
-        'data-scale-height',
-        'data-board-width' ];
 
-    for (var i = 0; i < validParams.length; i = i + 1) {
-        var v = this.element.getAttribute(validParams[i]);
+    for (let i = 0; i < VALID_PARAMS.length; i = i + 1) {
+        let v = this.element.getAttribute(VALID_PARAMS[i]);
         if (v) {
             // remove data- prefix from params
-            src = src + '&' + validParams[i].replace(/data-/, '') + '=' + encodeURIComponent(v);
+            src = src + '&' + VALID_PARAMS[i].replace(/data-/, '') + '=' + encodeURIComponent(v);
         }
     }
-    
+
     iframe.src = src;
 
     this.applyFillContent(iframe);
