@@ -33,8 +33,8 @@ amp-image-lightbox {
 
 /* Overridable properties */
 amp-image-lightbox {
-  background: #222;
-  color: #eee;
+  background: rgba(0, 0, 0, 0.95);
+  color: #f2f2f2;
 }
 
 
@@ -71,13 +71,14 @@ amp-image-lightbox {
   right: 0 !important;
 }
 
+.-amp-image-lightbox-caption.-amp-empty,
 .-amp-image-lightbox-view-mode .-amp-image-lightbox-caption {
   visibility: hidden;
 }
 
 /* Overridable properties */
 .amp-image-lightbox-caption {
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(0, 0, 0, 0.5);
   max-height: 25%;
   padding: 8px;
 }
