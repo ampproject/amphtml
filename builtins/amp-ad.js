@@ -22,7 +22,11 @@ import {registerElement} from '../src/custom-element';
 import {getIframe, listen} from '../src/3p-frame';
 
 
-/** @private @const */
+/**
+ * Preview phase only default backfill for ads. If the ad
+ * cannot fill the slot one of these will be displayed instead.
+ * @private @const
+ */
 const BACKFILL_IMGS_ = {
   '300x200': [
     'backfill-1-300x250.png',
@@ -121,26 +125,37 @@ export function installAd(win) {
     }
 
     /**
+     * This is a preview-phase only thing where if the ad says that it
+     * cannot fill the slot we select from a small set of default
+     * banners.
      * @private
      * @visibleForTesting
      */
     setDefaultPlaceholder_() {
-      this.placeholder_ = new Image();
-      this.placeholder_.setAttribute('placeholder', '');
-      this.placeholder_.classList.add('hidden');
-
-      let winner = this.getPlaceholderImage_();
-      // TODO(erwinm): do we need to link to the ampproject home page
-      // when the user clicks on the link?
-      this.placeholder_.src = `https://ampproject.org/backfill/${winner}`
-      setStyles(this.placeholder_, {
+      var a = document.createElement('a');
+      a.href = 'https://www.ampproject.org';
+      a.target = '_blank';
+      a.setAttribute('placeholder', '');
+      a.classList.add('hidden');
+      var img = new Image();
+      setStyles(img, {
         width: 'auto',
         height: '100%',
         margin: 'auto',
       });
+
+      let winner = this.getPlaceholderImage_();
+      img.src = `https://ampproject.org/backfill/${winner}`;
+      this.placeholder_ = a;
+      a.appendChild(img);
     }
 
-    /** @private */
+    /**
+     * Picks a random backfill image for the case that no real ad can be
+     * shown.
+     * @private
+     * @return {string} The image URL.
+     */
     getPlaceholderImage_() {
       let scores = scoreDimensions_(BACKFILL_DIMENSIONS_,
           this.element.clientWidth, this.element.clientHeight);
