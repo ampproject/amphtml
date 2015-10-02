@@ -15,7 +15,7 @@
  */
 
 import {createIframePromise} from '../../testing/iframe';
-import {installAd} from '../../builtins/amp-ad';
+import {installAd, scoreDimensions_} from '../../builtins/amp-ad';
 
 describe('amp-ad', () => {
 
@@ -80,5 +80,22 @@ describe('amp-ad', () => {
       width: 300,
       height: 250,
     }, null)).to.be.rejectedWith(/type/);
+  });
+
+  describe('scoreDimensions_', () => {
+
+    it('should choose a matching dimension', () => {
+      let dims = [[320, 200], [320, 210], [320, 200]];
+      let scores = scoreDimensions_(dims, 320, 200);
+      let winner = scores.indexOf(Math.max(...scores));
+      expect(winner).to.equal(0);
+    });
+
+    it('should be biased to a smaller height delta', () => {
+      let dims = [[300, 200], [320, 50]];
+      let scores = scoreDimensions_(dims, 300, 50);
+      let winner = scores.indexOf(Math.max(...scores));
+      expect(winner).to.equal(1);
+    });
   });
 });
