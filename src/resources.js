@@ -403,21 +403,30 @@ export class Resources {
     let viewportRect = viewport.getRect();
     // Load viewport = viewport + 3x up/down when document is visible or
     // depending on prerenderSize in pre-render mode.
-    let loadRect = this.visible_ ?
-        expandLayoutRect(viewportRect, 0.25, 2) :
-        expandLayoutRect(viewportRect, 0.25, this.prerenderSize_);
+    let loadRect;
+    if (this.visible_) {
+      loadRect = expandLayoutRect(viewportRect, 0.25, 2);
+    } else if (this.prerenderSize_ > 0) {
+      loadRect = expandLayoutRect(viewportRect, 0.25,
+          this.prerenderSize_ - 1 + 0.25);
+    } else {
+      loadRect = null;
+    }
+
     // Visible viewport = viewport + 25% up/down.
     let visibleRect = expandLayoutRect(viewportRect, 0.25, 0.25);
 
     // Phase 3: Schedule elements for layout within a reasonable distance from
     // current viewport.
-    for (let i = 0; i < this.resources_.length; i++) {
-      let r = this.resources_[i];
-      if (r.getState() != ResourceState_.READY_FOR_LAYOUT || r.hasOwner()) {
-        continue;
-      }
-      if (r.isDisplayed() && r.overlaps(loadRect)) {
-        this.scheduleLayoutOrPreload_(r, /* layout */ true);
+    if (loadRect) {
+      for (let i = 0; i < this.resources_.length; i++) {
+        let r = this.resources_[i];
+        if (r.getState() != ResourceState_.READY_FOR_LAYOUT || r.hasOwner()) {
+          continue;
+        }
+        if (r.isDisplayed() && r.overlaps(loadRect)) {
+          this.scheduleLayoutOrPreload_(r, /* layout */ true);
+        }
       }
     }
 
