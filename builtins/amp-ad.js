@@ -29,15 +29,15 @@ import {getIframe, listen} from '../src/3p-frame';
  */
 const BACKFILL_IMGS_ = {
   '300x200': [
-    'backfill-1-300x250.png',
-    'backfill-2-300x250.png',
-    'backfill-3-300x250.png',
-    'backfill-4-300x250.png',
-    'backfill-5-300x250.png',
+    'backfill-1@1x.png',
+    'backfill-2@1x.png',
+    'backfill-3@1x.png',
+    'backfill-4@1x.png',
+    'backfill-5@1x.png',
   ],
   '320x50': [
-    'backfill-6-320x50.png',
-    'backfill-7-320x50.png',
+    'backfill-6@1x.png',
+    'backfill-7@1x.png',
   ],
 };
 
@@ -48,6 +48,7 @@ const BACKFILL_DIMENSIONS_ = [
 ];
 
 /**
+ * Preview phase helper to score images through their dimensions.
  * @param {!Array<!Array<number>>} dims
  * @param {number} maxWidth
  * @param {number} maxHeight
@@ -65,6 +66,20 @@ export function scoreDimensions_(dims, maxWidth, maxHeight) {
     let heightPenalty = Math.abs((maxHeight - height) * 2.5);
 
     return (widthScore - widthPenalty) + (heightScore - heightPenalty);
+  });
+}
+
+/**
+ * Preview phase helper to update a @1x.png string to @2x.png.
+ * @param {!Object<string, !Array<string>>} images
+ * @visibleForTesting
+ */
+export function upgradeImages_(images) {
+  Object.keys(images).forEach((key) => {
+    let curDimImgs = images[key];
+    curDimImgs.forEach((item, index) => {
+      curDimImgs[index] = item.replace(/@1x\.png$/, '@2x.png');
+    });
   });
 }
 
@@ -92,6 +107,9 @@ export function installAd(win) {
 
       /** @private {boolean} */
       this.isDefaultPlaceholder_ = false;
+
+      /** @private {boolean} */
+      this.isDefaultPlaceholderSet_ = false;
     }
 
     /** @override */
@@ -100,6 +118,9 @@ export function installAd(win) {
         this.placeholder_.classList.add('hidden');
       } else {
         this.isDefaultPlaceholder_ = true;
+        if (this.getDpr() >= 0.5) {
+          upgradeImages_(BACKFILL_IMGS_);
+        }
       }
     }
 
@@ -113,10 +134,13 @@ export function installAd(win) {
 
         // Triggered by context.noContentAvailable() inside the ad iframe.
         listen(this.iframe_, 'no-content', () => {
-          if (this.isDefaultPlaceholder_) {
+          // NOTE(erwinm): guard against an iframe firing off no-content twice.
+          // since there is currently no way to `unlisten`.
+          if (this.isDefaultPlaceholder_ && !this.isDefaultPlaceholderSet_) {
             this.setDefaultPlaceholder_();
             this.element.appendChild(this.placeholder_);
             this.element.removeChild(this.iframe_);
+            this.isDefaultPlaceholderSet_ = true;
           }
           this.placeholder_.classList.remove('hidden');
         });
