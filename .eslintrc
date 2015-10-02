@@ -9,6 +9,7 @@
     "semi": 2,
     "google-camelcase/google-camelcase": 2,
     "no-eval": 2,
-    "curly": 2
+    "curly": 2,
+    "radix": 2
   }
 }
