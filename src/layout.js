@@ -103,10 +103,10 @@ export function parseLength(s) {
   if (!s) {
     return undefined;
   }
-  if (!/^\d+(px|em|rem|vh|vw|vmin|vmax)?$/.test(s)) {
+  if (!/^\d+(\.\d+)?(px|em|rem|vh|vw|vmin|vmax)?$/.test(s)) {
     return undefined;
   }
-  if (/^\d+$/.test(s)) {
+  if (/^\d+(\.\d+)?$/.test(s)) {
     return s + 'px';
   }
   return s;
@@ -119,7 +119,7 @@ export function parseLength(s) {
  * @return {!Length}
  */
 export function assertLength(length) {
-  assert(/^\d+(px|em|rem|vh|vw|vmin|vmax)$/.test(length),
+  assert(/^\d+(\.\d+)?(px|em|rem|vh|vw|vmin|vmax)$/.test(length),
       'Invalid length value: %s', length);
   return length;
 }
@@ -144,7 +144,7 @@ export function getLengthUnits(length) {
  * @return {number}
  */
 export function getLengthNumeral(length) {
-  return parseInt(length, 10);
+  return parseFloat(length);
 }
 
 
