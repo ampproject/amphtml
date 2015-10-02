@@ -19,6 +19,7 @@ import {Layout} from '../src/layout';
 import {assert} from '../src/asserts';
 import {documentInfoFor} from '../src/document-info';
 import {registerElement} from '../src/custom-element';
+import {parseUrl, removeFragment} from '../src/url';
 
 
 /**
@@ -27,6 +28,76 @@ import {registerElement} from '../src/custom-element';
  * @return {undefined}
  */
 export function installPixel(win) {
+
+  /**
+   * @private {!Object<string, function():*>}
+   */
+  const REPLACEMENTS = {
+    /**
+     * Returns a random value for cache busters.
+     */
+    'RANDOM': () => {
+      return Math.random();
+    },
+
+    /**
+     * Returns the canonical URL for this AMP document.
+     */
+    'CANONICAL_URL': () => {
+      return documentInfoFor(win).canonicalUrl;
+    },
+
+    /**
+     * Returns the host of the canonical URL for this AMP document.
+     */
+    'CANONICAL_HOST': () => {
+      let url = parseUrl(documentInfoFor(win).canonicalUrl);
+      return url && url.hostname;
+    },
+
+    /**
+     * Returns the path of the canonical URL for this AMP document.
+     */
+    'CANONICAL_PATH': () => {
+      let url = parseUrl(documentInfoFor(win).canonicalUrl);
+      return url && url.pathname;
+    },
+
+    /**
+     * Returns the title of this AMP document.
+     */
+    'TITLE': () => {
+      return win.document.title;
+    },
+
+    /**
+     * Returns the URL for this AMP document.
+     */
+    'AMPDOC_URL': () => {
+      return removeFragment(win.location.href);
+    },
+
+    /**
+     * Returns the host of the URL for this AMP document.
+     */
+    'AMPDOC_HOST': () => {
+      let url = parseUrl(win.location.href);
+      return url && url.hostname;
+    }
+  };
+
+  /**
+   * @private {!RegExp}
+   */
+  const REPLACEMENT_EXPR = (() => {
+    let all = '';
+    for (let k in REPLACEMENTS) {
+      all += (all.length > 0 ? '|' : '') + k;
+    }
+    return new RegExp('\\$(' + all + ')', 'g');
+  })();
+
+
   class AmpPixel extends BaseElement {
     /** @override */
     isLayoutSupported(layout) {
@@ -46,14 +117,10 @@ export function installPixel(win) {
     layoutCallback() {
       var src = this.element.getAttribute('src');
       src = this.assertSource(src);
-      src = src.replace(/\$(RANDOM|CANONICAL_URL)+/g, function(match, name) {
-        var val = name;
-        switch (name) {
-          case 'RANDOM':
-            val = Math.random();
-            break;
-          case 'CANONICAL_URL':
-            val = documentInfoFor(win).canonicalUrl;
+      src = src.replace(REPLACEMENT_EXPR, function(match, name) {
+        var val = REPLACEMENTS[name]();
+        if (!val && val !== 0) {
+          val = '';
         }
         return encodeURIComponent(val);
       });
