@@ -20,7 +20,7 @@ import {layoutRectLtwh} from './layout-rect';
 import {log} from './log';
 import {onDocumentReady} from './document-state';
 import {platform} from './platform';
-import {px, setStyles} from './style';
+import {px, setStyle, setStyles} from './style';
 import {timer} from './timer';
 import {viewerFor} from './viewer';
 
@@ -422,6 +422,9 @@ export class ViewportBindingNaturalIosEmbed_ {
     /** @private {?Element} */
     this.scrollPosEl_ = null;
 
+    /** @private {?Element} */
+    this.scrollMoveEl_ = null;
+
     /** @private {!{x: number, y: number}} */
     this.pos_ = {x: 0, y: 0};
 
@@ -484,6 +487,20 @@ export class ViewportBindingNaturalIosEmbed_ {
     });
     documentBody.appendChild(this.scrollPosEl_);
 
+    // Insert scrollMove element into DOM. See {@link adjustScrollPos_} for why
+    // this is needed.
+    this.scrollMoveEl_ = this.win.document.createElement('div');
+    this.scrollMoveEl_.id = '-amp-scrollmove'
+    setStyles(this.scrollMoveEl_, {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      width: 0,
+      height: 0,
+      visibility: 'hidden'
+    });
+    documentBody.appendChild(this.scrollMoveEl_);
+
     documentBody.addEventListener('scroll', this.onScrolled_.bind(this));
   }
 
@@ -538,8 +555,11 @@ export class ViewportBindingNaturalIosEmbed_ {
         Math.round(b.height));
   }
 
-  /** @private */
-  onScrolled_() {
+  /**
+   * @param {!Event} event
+   * @private
+   */
+  onScrolled_(event) {
     // We have to use a special "positioning" element on iOS due to the
     // following bugs:
     // - https://code.google.com/p/chromium/issues/detail?id=2891
@@ -558,11 +578,48 @@ export class ViewportBindingNaturalIosEmbed_ {
     if (!this.scrollPosEl_) {
       return;
     }
+    this.adjustScrollPos_(event);
     let rect = this.scrollPosEl_.getBoundingClientRect();
     if (this.pos_.x != -rect.left || this.pos_.y != -rect.top) {
-      this.pos_ = {x: -rect.left, y: -rect.top};
+      this.pos_.x = -rect.left;
+      this.pos_.y = -rect.top;
       this.scrollObservable_.fire();
     }
+  }
+
+  /** @private */
+  setScrollPos_(scrollPos) {
+    if (!this.scrollMoveEl_) {
+      return;
+    }
+    setStyle(this.scrollMoveEl_, 'transform', `translateY(${scrollPos}px)`);
+    this.scrollMoveEl_.scrollIntoView(true);
+  }
+
+  /**
+   * @param {!Event=} opt_event
+   * @private
+   */
+  adjustScrollPos_(opt_event) {
+    if (!this.scrollPosEl_ || !this.scrollMoveEl_) {
+      return;
+    }
+
+    // Scroll document into a safe position to avoid scroll freeze on iOS.
+    // This means avoiding scrollTop to be minimum (0) or maximum value.
+    // This is very sad but very necessary. See #330 for more details.
+    let scrollTop = -this.scrollPosEl_.getBoundingClientRect().top;
+    if (scrollTop == 0) {
+      this.setScrollPos_(1);
+      if (opt_event) {
+        opt_event.preventDefault();
+      }
+      return;
+    }
+
+    // TODO(dvoytenko, #330): Ideally we would do the same for the overscroll
+    // on the bottom. Unfortunately, iOS Safari misreports scrollHeight in
+    // this case.
   }
 }
 

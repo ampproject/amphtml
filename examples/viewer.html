@@ -111,7 +111,7 @@
       this.alreadyLoaded_ = false;
       this.stackIndex_ = 0;
       this.viewportType_ = 'natural';  // "natural" or "virtual"
-      this.visibilityState_ = 'hidden';  // "hidden", "visible"
+      this.visibilityState_ = 'visible';  // "hidden", "visible"
       this.prerenderSize_ = 1;
 
       this.isIos_ = /iPhone|iPad|iPod/i.test(window.navigator.userAgent);
@@ -166,6 +166,9 @@
       log('Params:' + JSON.stringify(params));
 
       var url = './everything.amp.html#' + paramsStr(params);
+      if (window.location.hash && window.location.hash.length > 1) {
+        url += '&' + window.location.hash.substring(1);
+      }
       log('AMP URL = ' + url);
       this.iframe.style.display = 'none';
       this.container.appendChild(this.iframe);
