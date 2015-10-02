@@ -25,7 +25,7 @@ var srcGlobs = srcGlobs.concat([
   '!gulpfile.js',
 ]);
 
-var dedicatedCopyrightNoteSources = /(\.js|.css|\.md)$/;
+var dedicatedCopyrightNoteSources = /(\.js|\.css|\.md|\.html)$/;
 
 // Terms that must not appear in our source files.
 var forbiddenTerms = {
