@@ -909,10 +909,10 @@ export class Resource {
     }
     if (this.element.ownerDocument.defaultView
         .matchMedia(mediaQuery).matches) {
-      log.fine(TAG_, 'media match:', this.debugid)
-      this.element.classList.remove('-amp-hidden-by-media-query')
+      log.fine(TAG_, 'media match:', this.debugid);
+      this.element.classList.remove('-amp-hidden-by-media-query');
     } else {
-      log.fine(TAG_, 'media no match:', this.debugid)
+      log.fine(TAG_, 'media no match:', this.debugid);
       this.element.classList.add('-amp-hidden-by-media-query');
     }
   }

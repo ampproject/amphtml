@@ -27,7 +27,7 @@ describe('CustomElement', () => {
   let testElementCreatedCallback;
   let testElementFirstAttachedCallback;
   let testElementBuildCallback;
-  let testElementLayoutCallback
+  let testElementLayoutCallback;
   let testElementViewportCallback;
   let testElementIsReadyToBuild = true;
 

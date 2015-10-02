@@ -16,15 +16,14 @@
 
 var gulp = require('gulp');
 var util = require('gulp-util');
+var srcGlobs = require('../config').srcGlobs;
 
 // Directories to check for presubmit checks.
-var srcGlobs = [
-  '**/*.{css,js,html,md}',
-  '!{node_modules,dist,build,dist.3p}/**/*.*',
+var srcGlobs = srcGlobs.concat([
   '!build-system/tasks/presubmit-checks.js',
   '!build/polyfills.js',
-  '!gulpfile.js'
-];
+  '!gulpfile.js',
+]);
 
 var dedicatedCopyrightNoteSources = /(\.js|.css|\.md)$/;
 

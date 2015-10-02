@@ -285,7 +285,7 @@ describe('Gestures', () => {
       type: 'touchend',
       preventDefault: sinon.spy(),
       stopPropagation: sinon.spy(),
-    }
+    };
     eventListeners[event.type](event);
     expect(event.preventDefault.callCount).to.equal(0);
     expect(event.stopPropagation.callCount).to.equal(0);
@@ -297,7 +297,7 @@ describe('Gestures', () => {
       type: 'touchend',
       preventDefault: sinon.spy(),
       stopPropagation: sinon.spy(),
-    }
+    };
     eventListeners[event.type](event);
     expect(event.preventDefault.callCount).to.equal(1);
     expect(event.stopPropagation.callCount).to.equal(1);
@@ -313,7 +313,7 @@ describe('Gestures', () => {
       type: 'touchend',
       preventDefault: sinon.spy(),
       stopPropagation: sinon.spy(),
-    }
+    };
     eventListeners[event.type](event);
     expect(event.preventDefault.callCount).to.equal(1);
     expect(event.stopPropagation.callCount).to.equal(1);
@@ -326,7 +326,7 @@ describe('Gestures', () => {
       type: 'touchend',
       preventDefault: sinon.spy(),
       stopPropagation: sinon.spy(),
-    }
+    };
     eventListeners[event.type](event);
     expect(event.preventDefault.callCount).to.equal(1);
     expect(event.stopPropagation.callCount).to.equal(1);
@@ -338,7 +338,7 @@ describe('Gestures', () => {
       type: 'touchend',
       preventDefault: sinon.spy(),
       stopPropagation: sinon.spy(),
-    }
+    };
     eventListeners[event.type](event);
     expect(event.preventDefault.callCount).to.equal(1);
     expect(event.stopPropagation.callCount).to.equal(1);
@@ -348,7 +348,7 @@ describe('Gestures', () => {
       type: 'touchend',
       preventDefault: sinon.spy(),
       stopPropagation: sinon.spy(),
-    }
+    };
     eventListeners[event.type](event);
     expect(event.preventDefault.callCount).to.equal(0);
     expect(event.stopPropagation.callCount).to.equal(0);

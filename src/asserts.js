@@ -35,6 +35,7 @@
  * @return {T} The value of shouldBeTruish.
  * @template T
  */
+/*eslint "google-camelcase/google-camelcase": 0*/
 export function assert(shouldBeTrueish, message, var_args) {
   var firstElement;
   if (!shouldBeTrueish) {
@@ -62,6 +63,7 @@ export function assert(shouldBeTrueish, message, var_args) {
   }
   return shouldBeTrueish;
 }
+/*eslint "google-camelcase/google-camelcase": 2*/
 
 /**
  * @param {*} val

@@ -19,8 +19,8 @@ import {getIframe, listen} from '../../../src/3p-frame';
 import * as dom from '../../../src/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
-import {setStyles} from '../../../src/style'
-import {vsync} from '../../../src/vsync'
+import {setStyles} from '../../../src/style';
+import {vsync} from '../../../src/vsync';
 
 
 class AmpTwitter extends AMP.BaseElement {

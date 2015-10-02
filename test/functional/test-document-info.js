@@ -48,7 +48,7 @@ describe('document-info', () => {
     return getWin(null).then((win) => {
       expect(() => {
         documentInfoFor(win).canonicalUrl;
-      }).to.throw(/AMP files are required to have a/)
+      }).to.throw(/AMP files are required to have a/);
     });
   });
 });

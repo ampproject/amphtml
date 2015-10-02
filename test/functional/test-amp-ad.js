@@ -26,7 +26,7 @@ describe('amp-ad', () => {
         var link = iframe.doc.createElement('link');
         link.setAttribute('rel', 'canonical');
         link.setAttribute('href', canonical);
-        iframe.doc.head.appendChild(link)
+        iframe.doc.head.appendChild(link);
       }
       var a = iframe.doc.createElement('amp-ad');
       for (var key in attributes) {

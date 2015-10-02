@@ -19,7 +19,7 @@ import {Resource, ResourceState_, Resources, TaskQueue_} from
 import {layoutRectLtwh} from '../../src/layout-rect';
 import * as sinon from 'sinon';
 
-
+/*eslint "google-camelcase/google-camelcase": 0*/
 describe('Resources', () => {
 
   let sandbox;
@@ -46,7 +46,7 @@ describe('Resources', () => {
     let task_vp0_p0 = {
       resource: {
         getLayoutBox() {
-          return layoutRectLtwh(0, 100, 300, 100)
+          return layoutRectLtwh(0, 100, 300, 100);
         }
       },
       priority: 0
@@ -55,7 +55,7 @@ describe('Resources', () => {
     let task_vp0_p1 = {
       resource: {
         getLayoutBox() {
-          return layoutRectLtwh(0, 100, 300, 100)
+          return layoutRectLtwh(0, 100, 300, 100);
         }
       },
       priority: 1
@@ -64,7 +64,7 @@ describe('Resources', () => {
     let task_vpu_p0 = {
       resource: {
         getLayoutBox() {
-          return layoutRectLtwh(0, 0, 300, 50)
+          return layoutRectLtwh(0, 0, 300, 50);
         }
       },
       priority: 0
@@ -73,7 +73,7 @@ describe('Resources', () => {
     let task_vpu_p1 = {
       resource: {
         getLayoutBox() {
-          return layoutRectLtwh(0, 0, 300, 50)
+          return layoutRectLtwh(0, 0, 300, 50);
         }
       },
       priority: 1
@@ -82,7 +82,7 @@ describe('Resources', () => {
     let task_vpd_p0 = {
       resource: {
         getLayoutBox() {
-          return layoutRectLtwh(0, 600, 300, 50)
+          return layoutRectLtwh(0, 600, 300, 50);
         }
       },
       priority: 0
@@ -91,7 +91,7 @@ describe('Resources', () => {
     let task_vpd_p1 = {
       resource: {
         getLayoutBox() {
-          return layoutRectLtwh(0, 600, 300, 50)
+          return layoutRectLtwh(0, 600, 300, 50);
         }
       },
       priority: 1

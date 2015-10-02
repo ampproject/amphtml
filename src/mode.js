@@ -62,7 +62,7 @@ function getMode_() {
   var overrideDevelopment = parseQueryString(location.hash)['development'];
   var development = overrideDevelopment != undefined
       ? overrideDevelopment == '1'
-      : !!document.querySelector('script[development]')
+      : !!document.querySelector('script[development]');
 
   return {
     localDev: isLocalDev,

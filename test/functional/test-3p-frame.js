@@ -24,7 +24,7 @@ describe('3p-frame', () => {
     div.setAttribute('data-bar', 'bar');
     div.setAttribute('foo', 'nope');
     var obj = {};
-    addDataAndJsonAttributes_(div, obj)
+    addDataAndJsonAttributes_(div, obj);
     expect(obj).to.deep.equal({
       'foo': 'foo',
       'bar': 'bar'
@@ -33,7 +33,7 @@ describe('3p-frame', () => {
     div.setAttribute('json', '{"abc": [1,2,3]}');
 
     obj = {};
-    addDataAndJsonAttributes_(div, obj)
+    addDataAndJsonAttributes_(div, obj);
     expect(obj).to.deep.equal({
       'foo': 'foo',
       'bar': 'bar',
@@ -67,7 +67,7 @@ describe('3p-frame', () => {
         '#{"testAttr":"value","ping":"pong","width":50,"height":100,"initialWindowWidth' +
         '":100,"initialWindowHeight":200,"type":"_ping_","_context":' +
         '{"location":{"href":"https://foo.bar/baz"},"mode":{"localDev"' +
-        ':true,"development":false,"minified":false}}}'
+        ':true,"development":false,"minified":false}}}';
     expect(src).to.equal(
         'http://ads.localhost:9876/dist.3p/current/frame.max.html' +
         fragment);

@@ -115,7 +115,7 @@ export function listen(iframe, typeOfMessage, callback) {
       return;
     }
     if (!event.data || event.data.sentinel != 'amp-3p') {
-      return
+      return;
     }
     if (event.data.type != typeOfMessage) {
       return;

@@ -111,7 +111,7 @@ describe('example', function() {
       xhr.onreadystatechange = function() {
         if (xhr.readyState == 4) {
           if (xhr.status == 200) {
-            resolve(xhr.responseText)
+            resolve(xhr.responseText);
           } else {
             reject(new Error('Fetching file for validation failed: ' + filename));
           }

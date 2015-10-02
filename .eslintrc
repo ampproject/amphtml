@@ -1,0 +1,14 @@
+{
+  "parser": "babel-eslint",
+  "ecmaFeatures": {
+    "arrowFunctions": true,
+    "blockBindings": true,
+    "forOf": false
+  },
+  "rules": {
+    "semi": 2,
+    "google-camelcase/google-camelcase": 2,
+    "no-eval": 2,
+    "curly": 2
+  }
+}

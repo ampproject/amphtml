@@ -16,26 +16,32 @@
 
 
 var gulp = require('gulp');
-var gjslint = require('gulp-gjslint');
-
-// Directories to check for presubmit checks.
-var srcGlobs = [
-  '**/*.{css,js,html,md}',
-  '!{node_modules,build,dist,dist.ads}/**/*.*',
-];
+var eslint = require('gulp-eslint');
+var util = require('gulp-util');
+var config = require('../config');
 
 var options = {
-  flags: [
-      '--max_line_length 100',
-      '--custom_jsdoc_tags=visibleForTesting',
-      '--limited_doc_files=test-*.js',
-  ]
+  plugins: ['eslint-plugin-google-camelcase'],
+  "ecmaFeatures": {
+    "arrowFunctions": true,
+    "blockBindings": true,
+    "forOf": false
+  },
 };
 
 function lint() {
-  return gulp.src(srcGlobs)
-    .pipe(gjslint(options))
-    .pipe(gjslint.reporter('console'), {fail: true});
+  var errorsFound = false;
+  return gulp.src(['**/*.js', config.src.exclude])
+      .pipe(eslint(options))
+      .pipe(eslint.formatEach('compact', function(msg) {
+        errorsFound = true;
+        util.log(util.colors.red(msg));
+      }))
+      .on('end', function() {
+        if (errorsFound) {
+          process.exit(1);
+        }
+      });
 }
 
 gulp.task('lint', lint);

@@ -13,6 +13,7 @@ before_script:
   - npm install -g gulp
 script:
   - gulp presubmit
+  - gulp lint
   - gulp build
   - gulp minify
   - gulp test

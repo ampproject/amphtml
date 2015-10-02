@@ -49,7 +49,7 @@ describe('amp-instagram', () => {
   it('renders responsively', () => {
     var ins = getIns('fBwFP', true).then((ins) => {
       var iframe = ins.firstChild;
-      expect(iframe.className).to.match(/amp-responsive-item/)
+      expect(iframe.className).to.match(/amp-responsive-item/);
     });
   });
 
