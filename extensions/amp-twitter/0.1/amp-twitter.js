@@ -49,6 +49,7 @@ class AmpTwitter extends AMP.BaseElement {
     listen(iframe, 'embed-size', (data) => {
       iframe.height = data.height;
       iframe.width = data.width;
+      console.error('RESIZE: ', this.element.id, data);
       var amp = iframe.parentElement;
       amp.setAttribute('height', data.height);
       amp.setAttribute('width', data.width);
