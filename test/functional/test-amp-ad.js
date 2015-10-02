@@ -15,7 +15,8 @@
  */
 
 import {createIframePromise} from '../../testing/iframe';
-import {installAd, scoreDimensions_} from '../../builtins/amp-ad';
+import {installAd, scoreDimensions_, upgradeImages_} from
+    '../../builtins/amp-ad';
 
 describe('amp-ad', () => {
 
@@ -96,6 +97,33 @@ describe('amp-ad', () => {
       let scores = scoreDimensions_(dims, 300, 50);
       let winner = scores.indexOf(Math.max(...scores));
       expect(winner).to.equal(1);
+    });
+  });
+
+  describe('upgradeImages_', () => {
+    let images;
+    beforeEach(() => {
+      images = {
+        '300x200': [
+          'backfill-1@1x.png',
+          'backfill-2@1x.png',
+          'backfill-3@1x.png',
+          'backfill-4@1x.png',
+          'backfill-5@1x.png',
+        ],
+        '320x50': [
+          'backfill-6@1x.png',
+          'backfill-7@1x.png',
+        ],
+      };
+    });
+
+    it('should upgrade an image from 1x to 2x', () => {
+      expect(images['300x200'][0]).to.equal('backfill-1@1x.png');
+      expect(images['320x50'][0]).to.equal('backfill-6@1x.png');
+      upgradeImages_(images);
+      expect(images['300x200'][0]).to.equal('backfill-1@2x.png');
+      expect(images['320x50'][0]).to.equal('backfill-6@2x.png');
     });
   });
 });
