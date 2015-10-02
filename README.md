@@ -36,59 +36,38 @@ in particular its [components in form of custom elements](spec/amp-html-componen
   testing/        - testing infrastructure
 </pre>
 
-## Development
+## Contributing
+
+Please see [the CONTRIBUTING file](CONTRIBUTING.md) before developing for the AMP Project.
 
 ### Installation
 
-`npm i`
+1. `npm i`
+2. `edit /etc/hosts` and map `ads.localhost` and `iframe.localhost` to `127.0.0.1`:
+<pre>
+  127.0.0.1               ads.localhost iframe.localhost
+</pre>
 
-Map `ads.localhost` and `iframe.localhost` to `127.0.0.1` in your `/etc/hosts` file.
-
-### Build
+### Build & Test
 
 [![Build Status](https://magnum.travis-ci.com/ampproject/amphtml.svg?token=AmxgqDRzeUjVvqT2oydf&branch=master)](https://magnum.travis-ci.com/ampproject/amphtml)
 
-Builds main binaries for development. Watches and rebuilds as changes are saved.
-`gulp`
+| Command                       | Description                                                           |
+| ----------------------------- | --------------------------------------------------------------------- |
+| `gulp`                        | Same as "watch"                                                       | 
+| `gulp minify`                 | Builds production binaries.                                           |
+| `gulp lint`                   | Validates against Google Closure Linter.                              |
+| `gulp build`                  | Builds the AMP library.                                               |
+| `gulp clean`                  | Removes build output.                                                 |
+| `gulp test`                   | Runs tests in Chrome.                                                 |
+| `gulp test --verbose`         | Runs tests in Chrome with logging enabled.                            |
+| `gulp test --watch`           | Watches for changes in files, runs corresponding test(s) in Chrome.   |
+| `gulp test --watch --verbose` | Same as "watch" with logging enabled.                                 |
+| `gulp test --safari`          | Runs tests in Safari.                                                 |
+| `gulp test --firefox`         | Runs tests in Firefox.                                                |
+| `http-server -p 8000 -c-1`    | serves content in current working dir over http://localhost:8000/     |
 
-`gulp minify`
-Builds production binaries.
-
-### Test
-
-`gulp test`
-Runs tests.
-
-`gulp test --verbose (short name: -v)`
-Runs tests with logging enabled.
-
-`gulp test --watch (short name: -w)`
-Runs tests for changed files.
-
-`gulp test --watch --verbose (short name: -w -v)`
-Runs tests for changed files with logging enabled.
-
-`gulp test --safari`
-Runs tests in Safari. It is required to manually test this before sending PR.
-
-`gulp test --firefox`
-Runs tests in Firefox. It is required to manually test this before sending PR.
-
-To fix issues with Safari test runner launching multiple instances of the test run
-`defaults write com.apple.Safari ApplePersistenceIgnoreState YES`
-
-### Start dev server
-
-Execute in the base dir:
-
-`python -m SimpleHTTPServer`
-
-or:
-
-`npm install http-server -g`
-
-and then:
-
-`http-server -p 8000 -c-1`
-
-Then go to http://localhost:8000/examples/released.amp.html
+To fix issues with Safari test runner launching multiple instances of the test, run:
+<pre>
+  defaults write com.apple.Safari ApplePersistenceIgnoreState YES
+</pre>
