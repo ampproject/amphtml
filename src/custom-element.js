@@ -228,8 +228,8 @@ export function createAmpElementProto(win, name, implementationClass) {
     /** @private {!Layout} */
     this.layout_ = Layout.NODISPLAY;
 
-    /** @private {?string} */
-    this.mediaQuery_ = this.getAttribute('media');
+    /** @private {string|null|undefined} */
+    this.mediaQuery_;
 
     /**
      * This element can be assigned by the {@link applyLayout_} to a child
@@ -350,20 +350,28 @@ export function createAmpElementProto(win, name, implementationClass) {
    * `-amp-hidden-by-media-query`. The class adds display:none to the element
    * which in turn prevents any of the resource loading to happen for the
    * element.
+   *
+   * This method is called by Resources and shouldn't be called by anyone else.
+   *
    * @final
    * @package
    */
   ElementProto.applyMediaQuery = function() {
+    if (this.mediaQuery_ === undefined) {
+      this.mediaQuery_ = this.getAttribute('media') || null;
+    }
     if (!this.mediaQuery_) {
       return;
     }
     this.classList.toggle('-amp-hidden-by-media-query',
-        this.ownerDocument.defaultView.matchMedia(this.mediaQuery_).matches);
+        !this.ownerDocument.defaultView.matchMedia(this.mediaQuery_).matches);
   };
 
   /**
-   * Changes the height of the element. This method must be correctly invoked
-   * in the mutation context since it performs direct style mutation.
+   * Changes the height of the element.
+   *
+   * This method is called by Resources and shouldn't be called by anyone else.
+   *
    * @param {number} newHeight
    * @final
    * @package
@@ -375,7 +383,7 @@ export function createAmpElementProto(win, name, implementationClass) {
       // preserved.
       this.sizerElement_.style.paddingTop = newHeight + 'px';
     } else {
-      this.sizerElement_.style.height = newHeight + 'px';
+      this.style.height = newHeight + 'px';
     }
   };
 

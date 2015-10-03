@@ -350,13 +350,17 @@ export class Resources {
 
   /**
    * Schedules the work pass at the latest with the specified delay.
-   * @param {number=} opt_delay
    */
   schedulePassVsync() {
     if (this.vsyncScheduled_) {
       return;
     }
-    vsync.mutate(() => this.doPass_());
+    this.vsyncScheduled_ = true;
+    if (!this.docState_.isHidden()) {
+      vsync.mutate(() => this.doPass_());
+    } else {
+      this.schedulePass(16);
+    }
   }
 
   /**
@@ -405,7 +409,7 @@ export class Resources {
       for (let i = 0; i < changeHeightRequests.length; i++) {
         let request = changeHeightRequests[i];
         let box = request.resource.getLayoutBox();
-        if (box.top >= 0 && box.height == request.newHeight) {
+        if (box.height == request.newHeight) {
           // Nothing to do.
           continue;
         }
@@ -723,7 +727,7 @@ export class Resources {
 
     let request = null;
     for (let i = 0; i < this.changeHeightRequests_.length; i++) {
-      if (this.changeHeightRequests_[i] == resource) {
+      if (this.changeHeightRequests_[i].resource == resource) {
         request = this.changeHeightRequests_[i];
         break;
       }
@@ -734,11 +738,7 @@ export class Resources {
       this.changeHeightRequests_.push(
           {resource: resource, newHeight: newHeight});
     }
-    if (this.docState_.isHidden()) {
-      this.schedulePass(16);
-    } else {
-      this.schedulePassVsync();
-    }
+    this.schedulePassVsync();
   }
 
   /**
