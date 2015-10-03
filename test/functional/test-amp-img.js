@@ -72,7 +72,7 @@ describe('amp-img', () => {
       height: 200
     }).then((ampImg) => {
       let img = ampImg.querySelector('img');
-      let placeholder = ampImg.querySelector('.-amp-autoplaceholder');
+      let placeholder = ampImg.querySelector('.amp-autoplaceholder');
       expect(placeholder.hasAttribute('placeholder')).to.be.true;
       expect(placeholder).to.not.be.null;
     });

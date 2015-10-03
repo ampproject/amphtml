@@ -29,6 +29,24 @@ The `amp-img` includes attributes for denoting attribution via the attribution a
 
 Additional image features like captions can be implemented with standard HTML - using the `figure` and `figcaption` elements, for example.
 
+By default `amp-img` has a placeholder animation that will be visible until the
+image has finished downloading. You may override the properties in the default
+placeholders classes (see example below in Styling section).
+You may also fully override the default placeholder by adding a child element
+under `amp-img` and adding a `placeholder` attribute on that element and styling that element
+(and its children) as you see fit.  An `active` class is set on the
+element with the `placeholder` attribute if the image has not finished
+loading and this class is subsequently removed when the image has finished
+loading and a `hidden` class will be added to the element.
+
+If you just want to turn off the default placeholder animation add the following to your css:
+```css
+.amp-autoplaceholder.active .amp-loader-dot {
+  visibility: hidden;
+  animation-name: none;
+}
+```
+
 #### Attributes
 
 **src**
@@ -52,9 +70,51 @@ A string that indicates the attribution of the image. E.g. `attribution=“CC co
 
 #### Styling
 
-`amp-img` can be styled directly via CSS properties. Setting a grey background
+- `amp-img` can be styled directly via CSS properties. Setting a grey background
 placeholder for example could be achieved via:
 
     amp-img {
       background-color: grey;
     }
+
+- styling the default auto-placeholder
+
+  ```html
+  <style>
+    .amp-loader-dot {
+      /* lets zero out the border-radius to turn it into a square */
+      border-radius: 0;
+    }
+
+    .amp-autoplaceholder.active .amp-loader-dot {
+      /* replace the animation with ours by replacing the name and switching the timing */
+      animation: my-awesome-animation 1s infinite;
+    }
+
+    /* lets change the delay of the individual dots, the first one stats at 0 delay */
+    .amp-loader .amp-loader-dot:nth-child(2) {
+      animation-delay: .3s;
+    }
+
+    .amp-loader .amp-loader-dot:nth-child(3) {
+      animation-delay: .6s;
+    }
+
+    /* our new animation just alternates from blue and orange */
+    @keyframes my-awesome-animation {
+      0%, 100% {
+        background-color: blue;
+      }
+
+      50% {
+        background-color: orange;
+      }
+    }
+  </style>
+  <amp-img
+      src="../../examples/img/sample.jpg"
+      layout="responsive" width="360"
+      alt="abc"
+      height="216">
+  </amp-img>
+  ```

@@ -181,7 +181,7 @@ amp-pixel {
   visibility: hidden;
 }
 
-.-amp-loader {
+.amp-loader {
   position: absolute;
   display: block;
   height: 10px;
@@ -192,15 +192,15 @@ amp-pixel {
   white-space: nowrap;
 }
 
-/**
- * We want to be a bit more specific here as we don't want a global active
- * to just trigger the loading animation
- */
-.-amp-autoplaceholder.active .-amp-loader-dot {
-  animation: -amp-loader-dots 2s infinite;
+.amp-autoplaceholder.active .amp-loader-dot {
+  animation: amp-loader-dots-animation 2s infinite;
 }
 
-.-amp-loader-dot {
+.amp-autoplaceholder.hidden .amp-loader-dot {
+  animation-iteration-count: 0;
+}
+
+.amp-loader-dot {
   position: relative;
   display: inline-block;
 
@@ -214,19 +214,19 @@ amp-pixel {
   will-change: transform;
 }
 
-.-amp-loader .-amp-loader-dot:nth-child(1) {
+.amp-loader .amp-loader-dot:nth-child(1) {
   animation-delay: 0s;
 }
 
-.-amp-loader .-amp-loader-dot:nth-child(2) {
+.amp-loader .amp-loader-dot:nth-child(2) {
   animation-delay: .1s;
 }
 
-.-amp-loader .-amp-loader-dot:nth-child(3) {
+.amp-loader .amp-loader-dot:nth-child(3) {
   animation-delay: .2s;
 }
 
-@keyframes -amp-loader-dots {
+@keyframes amp-loader-dots-animation {
   0%, 100% {
     transform: scale(.7);
     background-color: rgba(0, 0, 0, .3);
