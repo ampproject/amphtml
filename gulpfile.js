@@ -134,6 +134,7 @@ function watch() {
   buildExtensions({
     watch: true
   });
+  buildExamples(true);
   return compile(true);
 }
 
@@ -204,6 +205,7 @@ function buildExtensionJs(js, path, name, version, options) {
 function build() {
   polyfillsForTests();
   buildExtensions();
+  buildExamples(false);
   return compile();
 }
 
@@ -211,42 +213,52 @@ gulp.task('css', compileCss);
 gulp.task('extensions', buildExtensions);
 gulp.task('clean', clean);
 gulp.task('build', build);
-gulp.task('watch', function() { return watch(); });
+gulp.task('watch', watch);
 gulp.task('minify', function() {
   process.env.NODE_ENV = 'production';
   compile(false, true);
   buildExtensions({minify: true});
-  examplesWithMinifiedJs('ads.amp.html');
-  examplesWithMinifiedJs('everything.amp.html');
-  examplesWithMinifiedJs('released.amp.html');
-  examplesWithMinifiedJs('article.amp.html');
-  examplesWithMinifiedJs('article-metadata.amp.html');
-  examplesWithMinifiedJs('twitter.amp.html');
 });
 
 gulp.task('default', ['watch']);
 
+function buildExamples(watch) {
+  if (watch) {
+    gulpWatch('examples/*.html', function() {
+     buildExamples(false);
+    });
+  }
+
+  buildExample('ads.amp.html');
+  buildExample('everything.amp.html');
+  buildExample('released.amp.html');
+  buildExample('article.amp.html');
+  buildExample('article-metadata.amp.html');
+  buildExample('twitter.amp.html');
+}
 
 /**
- * Copies an examples file to examples.min folder and changes all
- * JS references to point to the minified copies.
- * @param {string} name An html file in examples/
+ * Copies an examples file to examples.build folder and changes all
+ * JS references to local / minified copies.
+ * @param {string} name HTML file in examples/
  */
-function examplesWithMinifiedJs(name) {
+function buildExample(name) {
   var input = 'examples/' + name;
   console.log('Processing ' + name);
   var html = fs.readFileSync(input, 'utf8');
-  var min = html;
-  min = min.replace(/\.max\.js/g, '.js');
-  min = min.replace(/dist\/amp\.js/g, 'dist\/v0\.js');
+  var max = html;
+  max = max.replace(/\.js/g, '.max.js');
+  max = max.replace('https://cdn.ampproject.org/v0.max.js', '../dist/amp.js');
+  max = max.replace(/https:\/\/cdn.ampproject.org\/v0\//g, '../dist/v0/');
   gulp.src(input)
-      .pipe(file(name.replace('.html', '.min.html'), min))
+      .pipe(file(name.replace('.html', '.max.html'),max))
       .pipe(gulp.dest('examples.build/'));
 
-  var prod = min;
-  prod = prod.replace(/\.\.\/dist\//g, 'https://cdn.ampproject.org/');
+  var min = max;
+  min = min.replace(/\.max\.js/g, '.js');
+  min = min.replace('../dist/amp.js', '../dist/v0.js');
   gulp.src(input)
-      .pipe(file(name.replace('.html', '.prod.html'), prod))
+      .pipe(file(name.replace('.html', '.min.html'), min))
       .pipe(gulp.dest('examples.build/'));
 }
 

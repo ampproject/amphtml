@@ -97,13 +97,20 @@ For testing documents on arbitrary URLs with your current local version of the A
 <pre>
   3p/             - Implementation of third party sandbox iframes.
   ads/            - Modules implementing specific ad networks used in <amp-ad>
+  build/          - (generated) intermediate generated files
   build-system/   - build infrastructure
   builtins/       - tags built into the core AMP runtime
       *.md        - documentation for use of the builtin
       *.js        - source code for builtin tag
   css/            - default css
+  dist/           - (generated) main JS binaries are created here. This is what
+                    gets deployed to cdn.ampproject.org.
+  dist.3p/        - (generated) JS binaries and HTML files for 3p embeds and ads.
+                    This is what gets deployed to 3p.ampproject.net.
   docs/           - documentation
   examples/       - example AMP HTML files and corresponding assets
+  examples.build/ - (generated) Same as examples with files pointing to the
+                    local AMP.
   extensions/     - plugins which extend the AMP HTML runtime's core set of tags
   spec/           - The AMP HTML Specification files
   src/            - source code for the AMP runtime
