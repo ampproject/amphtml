@@ -26,24 +26,34 @@ We also have a non-technical description of what we are doing on [www.ampproject
 
 # How does AMP HTML work?
 
-AMP HTML works by including the AMP library in a web page that meets the AMP
+AMP HTML works by including the AMP JS library and adding a bit of boilerplate to a web page so it meets the AMP
 HTML Specification:
 
 ```html
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <link rel="canonical" href="hello-world.html" >
+  <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
   <script src="https://cdn.ampproject.org/v0.js" async></script>
+  <style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
+</head>
+<body></body>
+</html>
 ```
 
 This allows the AMP library to include:
-* The AMP runtime, that manages the loading of external resources to ensure a
+* The AMP JS library, that manages the loading of external resources to ensure a
   fast rendering of the page.
 * An AMP validator that provides a way for web developers to easily validate
   that their code meets the AMP HTML specification. 
 * Some custom elements, called AMP HTML components, which make common patterns
   easy to implement in a performant way.
 
-## The AMP Runtime
+## The AMP JS library
 
-The AMP runtime manipulates the DOM to manage the loading of external resources
+The AMP JS library provides basic AMP Components and manages the loading of external resources
 and ensure a reliably fast time-to-paint.
 
 ## The AMP Validator
