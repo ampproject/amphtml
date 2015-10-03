@@ -20,7 +20,7 @@ import {expandLayoutRect, layoutRectLtwh, layoutRectsOverlap} from
     './layout-rect';
 import {inputFor} from './input';
 import {log} from './log';
-import {onDocumentReady} from './document-state';
+import {documentStateFor} from './document-state';
 import {reportError} from './error';
 import {timer} from './timer';
 import {viewerFor} from './viewer';
@@ -85,6 +85,9 @@ export class Resources {
     /** @private {boolean} */
     this.relayoutAll_ = false;
 
+    /** @private {number} */
+    this.relayoutTop_ = -1;
+
     /** @private {boolean} */
     this.forceBuild_ = false;
 
@@ -100,11 +103,20 @@ export class Resources {
     /** @const {!TaskQueue_} */
     this.queue_ = new TaskQueue_();
 
+    /** @private {!Array<{resource: !Resource, newHeight: number}>} */
+    this.changeHeightRequests_ = [];
+
     /** @private {number} */
     this.scrollHeight_ = 0;
 
     /** @private {!Viewport} */
     this.viewport_ = viewportFor(this.win);
+
+    /** @private {!DocumentState} */
+    this.docState_ = documentStateFor(this.win);
+
+    /** @private {boolean} */
+    this.vsyncScheduled_ = false;
 
     // When viewport is resized, we have to re-measure all elements.
     this.viewport_.onChanged((event) => {
@@ -114,7 +126,7 @@ export class Resources {
     });
 
     // Ensure that we attempt to rebuild things when DOM is ready.
-    onDocumentReady(this.win.document, () => {
+    this.docState_.onReady(() => {
       this.setDocumentReady_();
       this.forceBuild_ = true;
       this.relayoutAll_ = true;
@@ -320,11 +332,35 @@ export class Resources {
   }
 
   /**
+   * Requests the runtime to change the element's height.
+   * @param {!Element} element
+   * @param {number} newHeight
+   */
+  changeHeight(element, newHeight) {
+    this.scheduleChangeHeight_(this.getResourceForElement(element), newHeight);
+  }
+
+  /**
    * Schedules the work pass at the latest with the specified delay.
    * @param {number=} opt_delay
    */
   schedulePass(opt_delay) {
     this.pass_.schedule(opt_delay);
+  }
+
+  /**
+   * Schedules the work pass at the latest with the specified delay.
+   */
+  schedulePassVsync() {
+    if (this.vsyncScheduled_) {
+      return;
+    }
+    this.vsyncScheduled_ = true;
+    if (!this.docState_.isHidden()) {
+      vsync.mutate(() => this.doPass_());
+    } else {
+      this.schedulePass(16);
+    }
   }
 
   /**
@@ -336,11 +372,15 @@ export class Resources {
         ', visible=', this.visible_,
         ', forceBuild=', this.forceBuild_,
         ', relayoutAll=', this.relayoutAll_,
+        ', relayoutTop=', this.relayoutTop_,
         ', viewportSize=', viewportSize.width, viewportSize.height,
         ', prerenderSize=', this.prerenderSize_);
+    this.pass_.cancel();
+    this.vsyncScheduled_ = false;
 
     // If viewport size is 0, the manager will wait for the resize event.
     if (viewportSize.height > 0 && viewportSize.width > 0) {
+      this.mutateWork_();
       this.discoverWork_();
       let delay = this.work_();
       if (this.visible_) {
@@ -350,6 +390,40 @@ export class Resources {
       } else {
         log.fine(TAG_, 'document is not visible: no scheduling');
       }
+    }
+  }
+
+  /**
+   * Performs pre-discovery mutates.
+   * @private
+   */
+  mutateWork_() {
+    if (this.changeHeightRequests_.length > 0) {
+      log.fine(TAG_, 'change height requests:',
+          this.changeHeightRequests_.length);
+      let changeHeightRequests = this.changeHeightRequests_;
+      this.changeHeightRequests_ = [];
+
+      // Find minimum top position and run all mutates.
+      let minTop = -1;
+      for (let i = 0; i < changeHeightRequests.length; i++) {
+        let request = changeHeightRequests[i];
+        let box = request.resource.getLayoutBox();
+        if (box.height == request.newHeight) {
+          // Nothing to do.
+          continue;
+        }
+        if (box.top >= 0) {
+          minTop = minTop == -1 ? box.top : Math.min(minTop, box.top);
+        }
+        request.resource.changeHeight(request.newHeight);
+      }
+
+      if (minTop != -1) {
+        this.relayoutTop_ = minTop;
+      }
+
+      // TODO(dvoytenko, #367): Explore updating scroll position.
     }
   }
 
@@ -375,6 +449,8 @@ export class Resources {
     // force re-layout.
     let relayoutAll = this.relayoutAll_;
     this.relayoutAll_ = false;
+    let relayoutTop = this.relayoutTop_;
+    this.relayoutTop_ = -1;
 
     // Phase 1: Build and relayout as needed. All mutations happen here.
     let relayoutCount = 0;
@@ -383,7 +459,7 @@ export class Resources {
       if (r.getState() == ResourceState_.NOT_BUILT) {
         r.build(this.forceBuild_);
       }
-      if (r.getState() == ResourceState_.NEVER_LAID_OUT || relayoutAll) {
+      if (r.getState() == ResourceState_.NOT_LAID_OUT || relayoutAll) {
         r.applyMediaQuery();
         relayoutCount++;
       }
@@ -391,13 +467,15 @@ export class Resources {
 
     // Phase 2: Remeasure if there were any relayouts. Unfortunately, currently
     // there's no way to optimize this. All reads happen here.
-    if (relayoutCount > 0 || relayoutAll) {
+    if (relayoutCount > 0 || relayoutAll || relayoutTop != -1) {
       for (let i = 0; i < this.resources_.length; i++) {
         let r = this.resources_[i];
         if (r.getState() == ResourceState_.NOT_BUILT || r.hasOwner()) {
           continue;
         }
-        if (r.getState() == ResourceState_.NEVER_LAID_OUT || relayoutAll) {
+        if (relayoutAll ||
+                r.getState() == ResourceState_.NOT_LAID_OUT ||
+                relayoutTop != -1 && r.getLayoutBox().bottom >= relayoutTop) {
           r.measure();
         }
       }
@@ -636,6 +714,34 @@ export class Resources {
   }
 
   /**
+   * Schedules change of the element's height.
+   * @param {!Resource} resource
+   * @param {number} newHeight
+   * @private
+   */
+  scheduleChangeHeight_(resource, newHeight) {
+    if (resource.getLayoutBox().height == newHeight) {
+      // Nothing to do.
+      return;
+    }
+
+    let request = null;
+    for (let i = 0; i < this.changeHeightRequests_.length; i++) {
+      if (this.changeHeightRequests_[i].resource == resource) {
+        request = this.changeHeightRequests_[i];
+        break;
+      }
+    }
+    if (request) {
+      request.newHeight = newHeight;
+    } else {
+      this.changeHeightRequests_.push(
+          {resource: resource, newHeight: newHeight});
+    }
+    this.schedulePassVsync();
+  }
+
+  /**
    * Schedules layout or preload for the specified resource.
    * @param {!Resource} resource
    * @param {boolean} layout
@@ -820,7 +926,7 @@ export class Resource {
     this.priority_ = getElementPriority(element.tagName);
 
     /* @private {!ResourceState_} */
-    this.state_ = element.isBuilt() ? ResourceState_.NEVER_LAID_OUT :
+    this.state_ = element.isBuilt() ? ResourceState_.NOT_LAID_OUT :
         ResourceState_.NOT_BUILT;
 
     /** @private {number} */
@@ -906,30 +1012,27 @@ export class Resource {
     if (!built) {
       return false;
     }
-    this.state_ = ResourceState_.NEVER_LAID_OUT;
+    this.state_ = ResourceState_.NOT_LAID_OUT;
     return true;
   }
 
   /**
-   * If the resource has a media attribute, evaluates the value as a media
-   * query and based on the result adds or removes the class
-   * `-amp-hidden-by-media-query`. The class adds display:none to the element
-   * which in turn prevents any of the resource loading to happen for the
-   * element.
-   * @private
+   * Optionally hides or shows the element depending on the media query.
    */
   applyMediaQuery() {
-    var mediaQuery = this.element.getAttribute('media');
-    if (!mediaQuery) {
-      return;
-    }
-    if (this.element.ownerDocument.defaultView
-        .matchMedia(mediaQuery).matches) {
-      log.fine(TAG_, 'media match:', this.debugid);
-      this.element.classList.remove('-amp-hidden-by-media-query');
-    } else {
-      log.fine(TAG_, 'media no match:', this.debugid);
-      this.element.classList.add('-amp-hidden-by-media-query');
+    this.element.applyMediaQuery();
+  }
+
+  /**
+   * Instructs the element to change its size and transitions to the state
+   * awaiting the measure and possibly layout.
+   * @param {number} newHeight
+   */
+  changeHeight(newHeight) {
+    this.element.changeHeight(newHeight);
+    // Schedule for re-layout.
+    if (this.state_ != ResourceState_.NOT_BUILT) {
+      this.state_ = ResourceState_.NOT_LAID_OUT;
     }
   }
 
@@ -945,11 +1048,11 @@ export class Resource {
     }
     let box = this.resources_.viewport_.getLayoutRect(this.element);
     // Note that "left" doesn't affect readiness for the layout.
-    if (this.state_ == ResourceState_.NEVER_LAID_OUT ||
+    if (this.state_ == ResourceState_.NOT_LAID_OUT ||
           this.layoutBox_.top != box.top ||
           this.layoutBox_.width != box.width ||
           this.layoutBox_.height != box.height) {
-      if (this.state_ == ResourceState_.NEVER_LAID_OUT ||
+      if (this.state_ == ResourceState_.NOT_LAID_OUT ||
               this.element.isRelayoutNeeded()) {
         this.state_ = ResourceState_.READY_FOR_LAYOUT;
       }
@@ -1247,7 +1350,7 @@ export const ResourceState_ = {
    * The resource has been built, but not measured yet and not yet ready
    * for layout.
    */
-  NEVER_LAID_OUT: 1,
+  NOT_LAID_OUT: 1,
 
   /**
    * The resource has been built and measured and ready for layout.

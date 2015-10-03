@@ -192,11 +192,11 @@ describe('Resources discoverWork', () => {
       getAttribute: () => {
         return null;
       },
-      getBoundingClientRect: () => {
-        return rect;
-      },
+      getBoundingClientRect: () => rect,
+      applyMediaQuery: () => {},
       viewportCallback: sinon.spy(),
-      prerenderAllowed: () => {return true;}
+      prerenderAllowed: () => true,
+      isRelayoutNeeded: () => true
     };
   }
 
@@ -235,8 +235,7 @@ describe('Resources discoverWork', () => {
     sandbox = null;
   });
 
-  it('should prerender two screens when visible',
-      () => {
+  it('should render two screens when visible', () => {
     resources.visible_ = true;
     viewportMock.expects('getRect').returns(
         layoutRectLtwh(0, 0, 300, 400)).once();
@@ -246,6 +245,40 @@ describe('Resources discoverWork', () => {
     expect(resources.queue_.getSize()).to.equal(2);
     expect(resources.queue_.tasks_[0].resource).to.equal(resource1);
     expect(resources.queue_.tasks_[1].resource).to.equal(resource2);
+  });
+
+  it('should NOT rerender anything', () => {
+    resource1.state_ = ResourceState_.LAYOUT_COMPLETE;
+    resource2.state_ = ResourceState_.LAYOUT_COMPLETE;
+    resources.visible_ = true;
+    viewportMock.expects('getRect').returns(
+        layoutRectLtwh(0, 0, 300, 400)).once();
+
+    resources.discoverWork_();
+
+    expect(resources.queue_.getSize()).to.equal(0);
+  });
+
+  it('should re-render from requested position', () => {
+    resource1.state_ = ResourceState_.LAYOUT_COMPLETE;
+    resource2.state_ = ResourceState_.LAYOUT_COMPLETE;
+    resource1.element.getBoundingClientRect =
+        () => layoutRectLtwh(10, 10, 100, 101);
+    resource2.element.getBoundingClientRect =
+        () => layoutRectLtwh(10, 1010, 100, 101);
+    resources.visible_ = true;
+    resources.relayoutAll_ = false;
+    resources.relayoutTop_ = 1000;
+    viewportMock.expects('getRect').returns(
+        layoutRectLtwh(0, 0, 300, 400)).once();
+
+    resources.discoverWork_();
+
+    expect(resources.relayoutTop_).to.equal(-1);
+    expect(resources.queue_.getSize()).to.equal(1);
+    expect(resources.queue_.tasks_[0].resource).to.equal(resource2);
+    expect(resource1.state_).to.equal(ResourceState_.LAYOUT_COMPLETE);
+    expect(resource2.state_).to.equal(ResourceState_.LAYOUT_SCHEDULED);
   });
 
   it('should prerender only one screen with prerenderSize = 1', () => {
@@ -269,6 +302,110 @@ describe('Resources discoverWork', () => {
     resources.discoverWork_();
 
     expect(resources.queue_.getSize()).to.equal(0);
+  });
+});
+
+
+describe('Resources changeHeight', () => {
+
+  function createElement(rect) {
+    return {
+      tagName: 'amp-test',
+      isBuilt: () => {
+        return true;
+      },
+      isUpgraded: () => {
+        return true;
+      },
+      getAttribute: () => {
+        return null;
+      },
+      getBoundingClientRect: () => rect,
+      applyMediaQuery: () => {},
+      viewportCallback: sinon.spy(),
+      prerenderAllowed: () => true,
+      isRelayoutNeeded: () => true
+    };
+  }
+
+  function createResource(id, rect) {
+    let resource = new Resource(id, createElement(rect), resources);
+    resource.state_ = ResourceState_.READY_FOR_LAYOUT;
+    resource.layoutBox_ = rect;
+    resource.changeHeight = sinon.spy();
+    return resource;
+  }
+
+  let sandbox;
+  let clock;
+  let viewportMock;
+  let resources;
+  let resource1, resource2;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+    clock = sandbox.useFakeTimers();
+    resources = new Resources(window);
+    viewportMock = sandbox.mock(resources.viewport_);
+
+    resource1 = createResource(1, layoutRectLtwh(10, 10, 100, 100));
+    resource2 = createResource(2, layoutRectLtwh(10, 1010, 100, 100));
+    resources.resources_ = [resource1, resource2];
+  });
+
+  afterEach(() => {
+    viewportMock.verify();
+    viewportMock.restore();
+    viewportMock = null;
+    resources = null;
+    clock.restore();
+    clock = null;
+    sandbox.restore();
+    sandbox = null;
+  });
+
+  it('should schedule separate requests', () => {
+    resources.scheduleChangeHeight_(resource1, 111);
+    resources.scheduleChangeHeight_(resource2, 222);
+
+    expect(resources.changeHeightRequests_.length).to.equal(2);
+    expect(resources.changeHeightRequests_[0].resource).to.equal(resource1);
+    expect(resources.changeHeightRequests_[0].newHeight).to.equal(111);
+    expect(resources.changeHeightRequests_[1].resource).to.equal(resource2);
+    expect(resources.changeHeightRequests_[1].newHeight).to.equal(222);
+  });
+
+  it('should only schedule latest request for the same resource', () => {
+    resources.scheduleChangeHeight_(resource1, 111);
+    resources.scheduleChangeHeight_(resource1, 222);
+
+    expect(resources.changeHeightRequests_.length).to.equal(1);
+    expect(resources.changeHeightRequests_[0].resource).to.equal(resource1);
+    expect(resources.changeHeightRequests_[0].newHeight).to.equal(222);
+  });
+
+  it('should NOT change height if it didn\'t change', () => {
+    resources.scheduleChangeHeight_(resource1, 100);
+    resources.mutateWork_();
+    expect(resources.relayoutTop_).to.equal(-1);
+    expect(resources.changeHeightRequests_.length).to.equal(0);
+    expect(resource1.changeHeight.callCount).to.equal(0);
+  });
+
+  it('should change height', () => {
+    resources.scheduleChangeHeight_(resource1, 111);
+    resources.mutateWork_();
+    expect(resources.relayoutTop_).to.equal(resource1.layoutBox_.top);
+    expect(resources.changeHeightRequests_.length).to.equal(0);
+    expect(resource1.changeHeight.callCount).to.equal(1);
+    expect(resource1.changeHeight.firstCall.args[0]).to.equal(111);
+  });
+
+  it('should pick the smallest relayoutTop', () => {
+    resources.scheduleChangeHeight_(resource2, 111);
+    resources.scheduleChangeHeight_(resource1, 111);
+    resources.mutateWork_();
+    expect(resources.relayoutTop_).to.equal(resource1.layoutBox_.top);
   });
 });
 
@@ -350,7 +487,8 @@ describe('Resources.Resource', () => {
       build: (force) => {return false;},
       getBoundingClientRect: () => {return null;},
       isRelayoutNeeded: () => {return false;},
-      layoutCallback: () => {}
+      layoutCallback: () => {},
+      changeHeight: () => {}
     };
     elementMock = sandbox.mock(element);
 
@@ -381,8 +519,8 @@ describe('Resources.Resource', () => {
 
   it('should initialize correctly when already built', () => {
     elementMock.expects('isBuilt').returns(true).once();
-    expect(new Resource(1, element, resources).getState()).to.equal(
-        ResourceState_.NEVER_LAID_OUT);
+    expect(new Resource(1, element).getState()).to.equal(
+        ResourceState_.NOT_LAID_OUT);
   });
 
   it('should not build before upgraded', () => {
@@ -409,14 +547,14 @@ describe('Resources.Resource', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
     elementMock.expects('build').withExactArgs(false).returns(true).once();
     expect(resource.build(false)).to.equal(true);
-    expect(resource.getState()).to.equal(ResourceState_.NEVER_LAID_OUT);
+    expect(resource.getState()).to.equal(ResourceState_.NOT_LAID_OUT);
   });
 
   it('should force-build after upgraded', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
     elementMock.expects('build').withExactArgs(true).returns(true).once();
     expect(resource.build(true)).to.equal(true);
-    expect(resource.getState()).to.equal(ResourceState_.NEVER_LAID_OUT);
+    expect(resource.getState()).to.equal(ResourceState_.NOT_LAID_OUT);
   });
 
   it('should blacklist on build failure', () => {
@@ -463,7 +601,7 @@ describe('Resources.Resource', () => {
 
   it('should always layout if has not been laid out before', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
-    resource.state_ = ResourceState_.NEVER_LAID_OUT;
+    resource.state_ = ResourceState_.NOT_LAID_OUT;
     resource.layoutBox_ = {left: 11, top: 12, width: 111, height: 222};
 
     elementMock.expects('getBoundingClientRect').
@@ -664,5 +802,20 @@ describe('Resources.Resource', () => {
       expect(resource.getState()).to.equal(ResourceState_.LAYOUT_FAILED);
       expect(resource.layoutPromise_).to.equal(null);
     });
+  });
+
+
+  it('should change height and update state', () => {
+    resource.state_ = ResourceState_.READY_FOR_LAYOUT;
+    elementMock.expects('changeHeight').withExactArgs(111).once();
+    resource.changeHeight(111);
+    expect(resource.getState()).to.equal(ResourceState_.NOT_LAID_OUT);
+  });
+
+  it('should change height but not state', () => {
+    resource.state_ = ResourceState_.NOT_BUILT;
+    elementMock.expects('changeHeight').withExactArgs(111).once();
+    resource.changeHeight(111);
+    expect(resource.getState()).to.equal(ResourceState_.NOT_BUILT);
   });
 });

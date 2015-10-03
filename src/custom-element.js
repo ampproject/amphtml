@@ -88,7 +88,7 @@ export function stubElements(win) {
 
 /**
  * Applies layout to the element. Visible for testing only.
- * @param {!Element}
+ * @param {!AmpElement} element
  */
 export function applyLayout_(element) {
   let widthAttr = element.getAttribute('width');
@@ -159,6 +159,7 @@ export function applyLayout_(element) {
       sizer.style.paddingTop =
           ((getLengthNumeral(height) / getLengthNumeral(width)) * 100) + '%';
       element.insertBefore(sizer, element.firstChild);
+      element.sizerElement_ = sizer;
     } else if (layout == Layout.FIXED_HEIGHT) {
       element.style.height = height;
     } else {
@@ -226,6 +227,16 @@ export function createAmpElementProto(win, name, implementationClass) {
 
     /** @private {!Layout} */
     this.layout_ = Layout.NODISPLAY;
+
+    /** @private {string|null|undefined} */
+    this.mediaQuery_;
+
+    /**
+     * This element can be assigned by the {@link applyLayout_} to a child
+     * element that will be used to size this element.
+     * @private {?Element}
+     */
+    this.sizerElement_ = null;
 
     /** @private {!BaseElement} */
     this.implementation_ = new implementationClass(this);
@@ -331,6 +342,49 @@ export function createAmpElementProto(win, name, implementationClass) {
       }
     }
     return true;
+  };
+
+  /**
+   * If the element has a media attribute, evaluates the value as a media
+   * query and based on the result adds or removes the class
+   * `-amp-hidden-by-media-query`. The class adds display:none to the element
+   * which in turn prevents any of the resource loading to happen for the
+   * element.
+   *
+   * This method is called by Resources and shouldn't be called by anyone else.
+   *
+   * @final
+   * @package
+   */
+  ElementProto.applyMediaQuery = function() {
+    if (this.mediaQuery_ === undefined) {
+      this.mediaQuery_ = this.getAttribute('media') || null;
+    }
+    if (!this.mediaQuery_) {
+      return;
+    }
+    this.classList.toggle('-amp-hidden-by-media-query',
+        !this.ownerDocument.defaultView.matchMedia(this.mediaQuery_).matches);
+  };
+
+  /**
+   * Changes the height of the element.
+   *
+   * This method is called by Resources and shouldn't be called by anyone else.
+   *
+   * @param {number} newHeight
+   * @final
+   * @package
+   */
+  ElementProto.changeHeight = function(newHeight) {
+    if (this.sizerElement_) {
+      // From the moment height is changed the element becomes fully
+      // responsible for managing its height. Aspect ratio is no longer
+      // preserved.
+      this.sizerElement_.style.paddingTop = newHeight + 'px';
+    } else {
+      this.style.height = newHeight + 'px';
+    }
   };
 
   /**

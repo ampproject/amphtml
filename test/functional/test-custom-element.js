@@ -467,4 +467,31 @@ describe('CustomElement', () => {
     expect(handler.getCall(1).args[1]).to.equal(true);
     expect(element.actionQueue_).to.equal(null);
   });
+
+
+  it('should apply media condition', () => {
+    let element1 = new ElementClass();
+    element1.setAttribute('media', '(min-width: 1px)');
+    element1.applyMediaQuery();
+    expect(element1).to.not.have.class('-amp-hidden-by-media-query');
+
+    let element2 = new ElementClass();
+    element2.setAttribute('media', '(min-width: 1111111px)');
+    element2.applyMediaQuery();
+    expect(element2).to.have.class('-amp-hidden-by-media-query');
+  });
+
+  it('should change height without sizer', () => {
+    let element = new ElementClass();
+    element.changeHeight(111);
+    expect(element.style.height).to.equal('111px');
+  });
+
+  it('should change height with sizer', () => {
+    let element = new ElementClass();
+    element.sizerElement_ = document.createElement('div');
+    element.changeHeight(111);
+    expect(element.sizerElement_.style.paddingTop).to.equal('111px');
+    expect(element.style.height).to.equal('');
+  });
 });
