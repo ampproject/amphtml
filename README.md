@@ -14,10 +14,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# The AMP HTML runtime.
+# AMP HTML ⚡
 
-The AMP HTML runtime implements the [AMP HTML format](spec/amp-html-format.md) and
-in particular its [components in form of custom elements](spec/amp-html-components.md).
+AMP HTML is a way to build web pages for static content that render with reliable, fast performance. It is our attempt at fixing what many perceive as painfully slow page load times – especially when reading content on the mobile web.
+
+AMP HTML is entirely built on existing web technologies. It achieves reliable performance by restricting some parts of HTML, CSS and JavaScript. These restrictions are enforced with a validator that ships with AMP HTML. To make up for those limitations AMP HTML provides a set of [custom elements](http://www.html5rocks.com/en/tutorials/webcomponents/customelements/) for rich content beyond basic HTML.
+
+For more info how AMP HTML works and some insights into the design, please read our blog post ["Web performance: An intervention"](https://www.ampproject.org/how-it-works/) (which may be the first AMP HTML file you ever see).
+
+We also have a non-technical description of what we are doing on [www.ampproject.org](https://www.ampproject.org).
+
+For further reading see the [AMP HTML format specification](spec/amp-html-format.md) and the [custom element specification](spec/amp-html-components.md).
 
 ## Repository Layout
 <pre>
@@ -54,7 +61,7 @@ Please see [the CONTRIBUTING file](CONTRIBUTING.md) before developing for the AM
 
 | Command                       | Description                                                           |
 | ----------------------------- | --------------------------------------------------------------------- |
-| `gulp`                        | Same as "watch"                                                       | 
+| `gulp`                        | Same as "watch"                                                       |
 | `gulp minify`                 | Builds production binaries.                                           |
 | `gulp lint`                   | Validates against Google Closure Linter.                              |
 | `gulp build`                  | Builds the AMP library.                                               |
@@ -71,3 +78,7 @@ To fix issues with Safari test runner launching multiple instances of the test, 
 <pre>
   defaults write com.apple.Safari ApplePersistenceIgnoreState YES
 </pre>
+
+### Manual testing
+
+For testing documents on arbitrary URLs with your current local version of the AMP runtime we created a [Chrome extension](testing/local-amp-chrome-extension/README.md).
