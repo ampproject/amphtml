@@ -22,11 +22,6 @@ var config = require('../config');
 
 var options = {
   plugins: ['eslint-plugin-google-camelcase'],
-  "ecmaFeatures": {
-    "arrowFunctions": true,
-    "blockBindings": true,
-    "forOf": false
-  },
 };
 
 function lint() {
