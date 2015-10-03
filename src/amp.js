@@ -25,7 +25,7 @@ import {installGlobalClickListener} from './document-click';
 import {installImg} from '../builtins/amp-img';
 import {installVideo} from '../builtins/amp-video';
 import {installPixel} from '../builtins/amp-pixel';
-import {installStyles} from './styles';
+import {installStyles, makeBodyVisible} from './styles';
 import {installErrorReporting} from './error';
 import {stubElements} from './custom-element';
 import {adopt} from './runtime';
@@ -54,7 +54,7 @@ installStyles(document, cssText, () => {
 
     maybeValidate(window);
   } finally {
-    window.document.body.style.opacity = 1;
+    makeBodyVisible(document);
   }
 }, /* opt_isRuntimeCss */ true);
 
