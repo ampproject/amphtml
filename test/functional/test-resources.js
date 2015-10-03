@@ -19,7 +19,7 @@ import {Resource, ResourceState_, Resources, TaskQueue_} from
 import {layoutRectLtwh} from '../../src/layout-rect';
 import * as sinon from 'sinon';
 
-
+/*eslint "google-camelcase/google-camelcase": 0*/
 describe('Resources', () => {
 
   let sandbox;
@@ -46,7 +46,7 @@ describe('Resources', () => {
     let task_vp0_p0 = {
       resource: {
         getLayoutBox() {
-          return layoutRectLtwh(0, 100, 300, 100)
+          return layoutRectLtwh(0, 100, 300, 100);
         }
       },
       priority: 0
@@ -55,7 +55,7 @@ describe('Resources', () => {
     let task_vp0_p1 = {
       resource: {
         getLayoutBox() {
-          return layoutRectLtwh(0, 100, 300, 100)
+          return layoutRectLtwh(0, 100, 300, 100);
         }
       },
       priority: 1
@@ -64,7 +64,7 @@ describe('Resources', () => {
     let task_vpu_p0 = {
       resource: {
         getLayoutBox() {
-          return layoutRectLtwh(0, 0, 300, 50)
+          return layoutRectLtwh(0, 0, 300, 50);
         }
       },
       priority: 0
@@ -73,7 +73,7 @@ describe('Resources', () => {
     let task_vpu_p1 = {
       resource: {
         getLayoutBox() {
-          return layoutRectLtwh(0, 0, 300, 50)
+          return layoutRectLtwh(0, 0, 300, 50);
         }
       },
       priority: 1
@@ -82,7 +82,7 @@ describe('Resources', () => {
     let task_vpd_p0 = {
       resource: {
         getLayoutBox() {
-          return layoutRectLtwh(0, 600, 300, 50)
+          return layoutRectLtwh(0, 600, 300, 50);
         }
       },
       priority: 0
@@ -91,7 +91,7 @@ describe('Resources', () => {
     let task_vpd_p1 = {
       resource: {
         getLayoutBox() {
-          return layoutRectLtwh(0, 600, 300, 50)
+          return layoutRectLtwh(0, 600, 300, 50);
         }
       },
       priority: 1
@@ -178,6 +178,101 @@ describe('Resources', () => {
 });
 
 
+describe('Resources discoverWork', () => {
+
+  function createElement(rect) {
+    return {
+      tagName: 'amp-test',
+      isBuilt: () => {
+        return true;
+      },
+      isUpgraded: () => {
+        return true;
+      },
+      getAttribute: () => {
+        return null;
+      },
+      getBoundingClientRect: () => {
+        return rect;
+      },
+      viewportCallback: sinon.spy(),
+      prerenderAllowed: () => {return true;}
+    };
+  }
+
+  function createResource(id, rect) {
+    let resource = new Resource(id, createElement(rect), resources);
+    resource.state_ = ResourceState_.READY_FOR_LAYOUT;
+    resource.layoutBox_ = rect;
+    return resource;
+  }
+
+  let sandbox;
+  let clock;
+  let viewportMock;
+  let resources;
+  let resource1, resource2;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+    clock = sandbox.useFakeTimers();
+    resources = new Resources(window);
+    viewportMock = sandbox.mock(resources.viewport_);
+
+    resource1 = createResource(1, layoutRectLtwh(10, 10, 100, 100));
+    resource2 = createResource(2, layoutRectLtwh(10, 1010, 100, 100));
+    resources.resources_ = [resource1, resource2];
+  });
+
+  afterEach(() => {
+    viewportMock.verify();
+    viewportMock.restore();
+    viewportMock = null;
+    resources = null;
+    clock.restore();
+    clock = null;
+    sandbox.restore();
+    sandbox = null;
+  });
+
+  it('should prerender two screens when visible',
+      () => {
+    resources.visible_ = true;
+    viewportMock.expects('getRect').returns(
+        layoutRectLtwh(0, 0, 300, 400)).once();
+
+    resources.discoverWork_();
+
+    expect(resources.queue_.getSize()).to.equal(2);
+    expect(resources.queue_.tasks_[0].resource).to.equal(resource1);
+    expect(resources.queue_.tasks_[1].resource).to.equal(resource2);
+  });
+
+  it('should prerender only one screen with prerenderSize = 1', () => {
+    resources.visible_ = false;
+    resources.prerenderSize_ = 1;
+    viewportMock.expects('getRect').returns(
+        layoutRectLtwh(0, 0, 300, 400)).once();
+
+    resources.discoverWork_();
+
+    expect(resources.queue_.getSize()).to.equal(1);
+    expect(resources.queue_.tasks_[0].resource).to.equal(resource1);
+  });
+
+  it('should NOT prerender anything with prerenderSize = 0', () => {
+    resources.visible_ = false;
+    resources.prerenderSize_ = 0;
+    viewportMock.expects('getRect').returns(
+        layoutRectLtwh(0, 0, 300, 400)).once();
+
+    resources.discoverWork_();
+
+    expect(resources.queue_.getSize()).to.equal(0);
+  });
+});
+
+
 describe('Resources.TaskQueue', () => {
 
   let sandbox;
@@ -240,6 +335,7 @@ describe('Resources.Resource', () => {
   let clock;
   let element;
   let elementMock;
+  let resources;
   let resource;
 
   beforeEach(() => {
@@ -258,7 +354,8 @@ describe('Resources.Resource', () => {
     };
     elementMock = sandbox.mock(element);
 
-    resource = new Resource(1, element);
+    resources = new Resources(window);
+    resource = new Resource(1, element, resources);
   });
 
   afterEach(() => {
@@ -284,7 +381,7 @@ describe('Resources.Resource', () => {
 
   it('should initialize correctly when already built', () => {
     elementMock.expects('isBuilt').returns(true).once();
-    expect(new Resource(1, element).getState()).to.equal(
+    expect(new Resource(1, element, resources).getState()).to.equal(
         ResourceState_.NEVER_LAID_OUT);
   });
 

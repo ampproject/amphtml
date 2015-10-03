@@ -501,7 +501,7 @@ describe('ViewportBindingVirtual', () => {
 
     // Size didn't change.
     viewer.getViewportWidth = () => {return 111;};
-    viewer.getViewportHeight = () => {return 222;}
+    viewer.getViewportHeight = () => {return 222;};
     binding.updateViewerViewport(viewer);
     expect(resizeHandler.callCount).to.equal(0);
     expect(binding.getSize().width).to.equal(111);
@@ -515,7 +515,7 @@ describe('ViewportBindingVirtual', () => {
     expect(binding.getSize().height).to.equal(222);
 
     // Height changed.
-    viewer.getViewportHeight = () => {return 223;}
+    viewer.getViewportHeight = () => {return 223;};
     binding.updateViewerViewport(viewer);
     expect(resizeHandler.callCount).to.equal(2);
     expect(binding.getSize().width).to.equal(112);

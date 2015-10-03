@@ -19,6 +19,12 @@ import {loadPromise} from '../../../src/event-helper';
 
 
 class AmpYoutube extends AMP.BaseElement {
+
+  /** @override */
+  createdCallback() {
+    this.preconnect.url('https://www.youtube.com');
+  }
+
   /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);

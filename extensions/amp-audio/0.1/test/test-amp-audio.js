@@ -28,7 +28,7 @@ describe('amp-audio', () => {
 
   beforeEach(() => {
     return createIframePromise().then(i => {
-      iframe = i
+      iframe = i;
     });
   });
 

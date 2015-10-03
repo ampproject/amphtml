@@ -97,7 +97,7 @@ describe('test-document-click onDocumentElementClick_', () => {
 
     beforeEach(() => {
       doc.location.href = 'https://www.google.com/some-path?hello=world';
-      tgt.href = 'https://www.google.com/some-path?hello=world#test'
+      tgt.href = 'https://www.google.com/some-path?hello=world#test';
     });
 
     it('should call getElementById on document', () => {

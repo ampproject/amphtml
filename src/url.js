@@ -102,3 +102,18 @@ export function parseQueryString(queryString) {
 function getOrigin(info) {
   return info.protocol + '//' + info.host;
 }
+
+
+/**
+ * Returns the URL without fragment. If URL doesn't contain fragment, the same
+ * string is returned.
+ * @param {string} url
+ * @return {string}
+ */
+export function removeFragment(url) {
+  let index = url.indexOf('#');
+  if (index == -1) {
+    return url;
+  }
+  return url.substring(0, index);
+}

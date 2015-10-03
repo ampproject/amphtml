@@ -24,7 +24,7 @@ import {onDocumentReady} from './document-state';
 import {reportError} from './error';
 import {timer} from './timer';
 import {viewerFor} from './viewer';
-import {viewport} from './viewport';
+import {viewportFor} from './viewport';
 import {vsync} from './vsync';
 
 let TAG_ = 'Resources';
@@ -103,8 +103,11 @@ export class Resources {
     /** @private {number} */
     this.scrollHeight_ = 0;
 
+    /** @private {!Viewport} */
+    this.viewport_ = viewportFor(this.win);
+
     // When viewport is resized, we have to re-measure all elements.
-    viewport.onChanged((event) => {
+    this.viewport_.onChanged((event) => {
       this.lastVelocity_ = event.velocity;
       this.relayoutAll_ = this.relayoutAll_ || event.relayoutAll;
       this.schedulePass();
@@ -159,7 +162,7 @@ export class Resources {
   /** @private */
   setDocumentReady_() {
     this.documentReady_ = true;
-    this.viewer_.postDocumentReady(viewport.getSize().width,
+    this.viewer_.postDocumentReady(this.viewport_.getSize().width,
         this.win.document.body.scrollHeight);
     this.updateScrollHeight_();
   }
@@ -172,7 +175,7 @@ export class Resources {
     let scrollHeight = this.win.document.body.scrollHeight;
     if (scrollHeight != this.scrollHeight_) {
       this.scrollHeight_ = scrollHeight;
-      this.viewer_.postDocumentResized(viewport.getSize().width,
+      this.viewer_.postDocumentResized(this.viewport_.getSize().width,
           scrollHeight);
     }
   }
@@ -213,7 +216,7 @@ export class Resources {
    * @package
    */
   add(element) {
-    let resource = new Resource((++this.resourceIdCounter_), element);
+    let resource = new Resource((++this.resourceIdCounter_), element, this);
     if (!element.id) {
       element.id = 'AMP_' + resource.getId();
     }
@@ -328,7 +331,7 @@ export class Resources {
    * @private
    */
   doPass_() {
-    let viewportSize = viewport.getSize();
+    let viewportSize = this.viewport_.getSize();
     log.fine(TAG_, 'PASS: at ' + timer.now() +
         ', visible=', this.visible_,
         ', forceBuild=', this.forceBuild_,
@@ -400,24 +403,33 @@ export class Resources {
       }
     }
 
-    let viewportRect = viewport.getRect();
+    let viewportRect = this.viewport_.getRect();
     // Load viewport = viewport + 3x up/down when document is visible or
     // depending on prerenderSize in pre-render mode.
-    let loadRect = this.visible_ ?
-        expandLayoutRect(viewportRect, 0.25, 2) :
-        expandLayoutRect(viewportRect, 0.25, this.prerenderSize_);
+    let loadRect;
+    if (this.visible_) {
+      loadRect = expandLayoutRect(viewportRect, 0.25, 2);
+    } else if (this.prerenderSize_ > 0) {
+      loadRect = expandLayoutRect(viewportRect, 0.25,
+          this.prerenderSize_ - 1 + 0.25);
+    } else {
+      loadRect = null;
+    }
+
     // Visible viewport = viewport + 25% up/down.
     let visibleRect = expandLayoutRect(viewportRect, 0.25, 0.25);
 
     // Phase 3: Schedule elements for layout within a reasonable distance from
     // current viewport.
-    for (let i = 0; i < this.resources_.length; i++) {
-      let r = this.resources_[i];
-      if (r.getState() != ResourceState_.READY_FOR_LAYOUT || r.hasOwner()) {
-        continue;
-      }
-      if (r.isDisplayed() && r.overlaps(loadRect)) {
-        this.scheduleLayoutOrPreload_(r, /* layout */ true);
+    if (loadRect) {
+      for (let i = 0; i < this.resources_.length; i++) {
+        let r = this.resources_[i];
+        if (r.getState() != ResourceState_.READY_FOR_LAYOUT || r.hasOwner()) {
+          continue;
+        }
+        if (r.isDisplayed() && r.overlaps(loadRect)) {
+          this.scheduleLayoutOrPreload_(r, /* layout */ true);
+        }
       }
     }
 
@@ -473,7 +485,7 @@ export class Resources {
   work_() {
     let now = timer.now();
 
-    let scorer = this.calcTaskScore_.bind(this, viewport.getRect(),
+    let scorer = this.calcTaskScore_.bind(this, this.viewport_.getRect(),
         Math.sign(this.lastVelocity_));
 
     let timeout = -1;
@@ -783,8 +795,9 @@ export class Resource {
   /**
    * @param {number} id
    * @param {!AmpElement} element
+   * @param {!Resources} resources
    */
-  constructor(id, element) {
+  constructor(id, element, resources) {
     /** @private {number} */
     this.id_ = id;
 
@@ -793,6 +806,9 @@ export class Resource {
 
     /* @const {string} */
     this.debugid = element.tagName.toLowerCase() + '#' + id;
+
+    /** @private {!Resources} */
+    this.resources_ = resources;
 
     /* @private {boolean} */
     this.blacklisted_ = false;
@@ -909,10 +925,10 @@ export class Resource {
     }
     if (this.element.ownerDocument.defaultView
         .matchMedia(mediaQuery).matches) {
-      log.fine(TAG_, 'media match:', this.debugid)
-      this.element.classList.remove('-amp-hidden-by-media-query')
+      log.fine(TAG_, 'media match:', this.debugid);
+      this.element.classList.remove('-amp-hidden-by-media-query');
     } else {
-      log.fine(TAG_, 'media no match:', this.debugid)
+      log.fine(TAG_, 'media no match:', this.debugid);
       this.element.classList.add('-amp-hidden-by-media-query');
     }
   }
@@ -927,7 +943,7 @@ export class Resource {
       // Can't measure unbuilt element.
       return;
     }
-    let box = viewport.getLayoutRect(this.element);
+    let box = this.resources_.viewport_.getLayoutRect(this.element);
     // Note that "left" doesn't affect readiness for the layout.
     if (this.state_ == ResourceState_.NEVER_LAID_OUT ||
           this.layoutBox_.top != box.top ||

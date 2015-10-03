@@ -14,29 +14,36 @@
  * limitations under the License.
  */
 
+import {randomUUID} from './uuid';
+import {getService} from './service';
 
-var gulp = require('gulp');
-var eslint = require('gulp-eslint');
-var util = require('gulp-util');
-var config = require('../config');
 
-var options = {
-  plugins: ['eslint-plugin-google-camelcase'],
+/**
+ * @param {!Window} window
+ */
+export function getClientId(window) {
+  return clientIdServiceFor(window).clientId;
 };
 
-function lint() {
-  var errorsFound = false;
-  return gulp.src(['**/*.js', config.src.exclude])
-      .pipe(eslint(options))
-      .pipe(eslint.formatEach('compact', function(msg) {
-        errorsFound = true;
-        util.log(util.colors.red(msg));
-      }))
-      .on('end', function() {
-        if (errorsFound) {
-          process.exit(1);
-        }
-      });
+
+/** @private */
+class ClientIdService {
+  /**
+   * @param {!Window} window
+   */
+  constructor(window) {
+    /** @const {string} */
+    this.clientId = randomUUID();
+  }
 }
 
-gulp.task('lint', lint);
+
+/**
+ * @param {!Window} window
+ * @return {!ClientIdService}
+ */
+function clientIdServiceFor(window) {
+  return getService(window, 'clientId', () => {
+    return new ClientIdService(window);
+  });
+};

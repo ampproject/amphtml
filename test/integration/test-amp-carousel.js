@@ -16,7 +16,7 @@
 
 import {createFixtureIframe} from '../../testing/iframe.js';
 
-describe('amp-carousel', () => {
+describe.skip('amp-carousel', () => {
 
   let fixture;
   beforeEach(() => {
@@ -156,11 +156,8 @@ describe('amp-carousel', () => {
 
   describe('when amp-mode-mouse class is not on body', () => {
 
-    beforeEach(() => {
-      fixture.doc.body.classList.remove('amp-mode-mouse');
-    });
-
     it('should not have the buttons visible', () => {
+      fixture.doc.body.classList.remove('amp-mode-mouse');
       return fixture.awaitEvent('amp:load:start', 1).then(() => {
         let amp = fixture.doc.querySelector('#carousel-1');
         expect(fixture.doc.body).to.not.have.class('amp-mode-mouse');
@@ -173,6 +170,7 @@ describe('amp-carousel', () => {
     });
 
     it('(type=slides) should not have the buttons visible', () => {
+      fixture.doc.body.classList.remove('amp-mode-mouse');
       return fixture.awaitEvent('amp:load:start', 4).then(() => {
         let amp = fixture.doc.querySelector('#slides-1');
         expect(fixture.doc.body).to.not.have.class('amp-mode-mouse');

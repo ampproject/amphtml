@@ -96,7 +96,7 @@ export function createFixtureIframe(fixture, initialIframeHeight, done) {
             file + ':' + line + '\n' +
             (error ? error.stack : 'no stack'));
       };
-      var errors = []
+      var errors = [];
       win.console.error = function() {
         errors.push('Error: ' + [].slice.call(arguments).join(' '));
       };

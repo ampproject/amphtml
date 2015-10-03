@@ -16,8 +16,8 @@
 
 // TODO(malteubl) Move somewhere else since this is not an ad.
 
-import {writeScript, executeAfterWriteScript} from '../src/3p'
-import {setStyles} from '../src/style'
+import {writeScript, executeAfterWriteScript} from '../src/3p';
+import {setStyles} from '../src/style';
 
 /**
  * Returns the Twitter API object. If the current frame is the master
@@ -32,7 +32,7 @@ function getTwttr(global) {
       s.src = 'https://platform.twitter.com/widgets.js';
       s.onload = function() {
         resolve(global.twttr);
-      }
+      };
       s.onerror = reject;
       global.document.body.appendChild(s);
     });
@@ -65,7 +65,7 @@ export function twitter(global, data) {
       // really done.
       iframe.contentWindow.addEventListener('resize', function(e) {
         render();
-      }, true)
+      }, true);
       render();
     });
   });

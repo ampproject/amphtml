@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {assertHttpsUrl, parseQueryString, parseUrl} from '../../src/url';
+import {assertHttpsUrl, parseQueryString, parseUrl, removeFragment}
+    from '../../src/url';
 
 describe('url', () => {
 
@@ -186,5 +187,20 @@ describe('assertHttpsUrl', () => {
     expect(() => {
       assertHttpsUrl('http://foolocalhost', referenceElement);
     }).to.throw(/source must start with/);
+  });
+});
+
+describe('removeFragment', () => {
+  it('should remove fragment', () => {
+    expect(removeFragment('https://twitter.com/path#abc')).to.equal(
+        'https://twitter.com/path');
+  });
+  it('should remove empty fragment', () => {
+    expect(removeFragment('https://twitter.com/path#')).to.equal(
+        'https://twitter.com/path');
+  });
+  it('should ignore when no fragment', () => {
+    expect(removeFragment('https://twitter.com/path')).to.equal(
+        'https://twitter.com/path');
   });
 });

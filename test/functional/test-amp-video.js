@@ -27,16 +27,16 @@ describe('amp-video', () => {
     return createIframePromise().then((iframe) => {
       installVideo(iframe.win);
       var v = iframe.doc.createElement('amp-video');
-      for (var key in attributes) {
+      for (let key in attributes) {
         v.setAttribute(key, attributes[key]);
       }
       if (children != null) {
-        for (var key in children) {
+        for (let key in children) {
           v.appendChild(children[key]);
         }
       }
       return iframe.addElement(v);
-    })
+    });
   }
 
   it('should load a video', () => {

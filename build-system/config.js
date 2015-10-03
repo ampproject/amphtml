@@ -18,7 +18,7 @@ var path = require('path');
 
 var karmaConf = path.resolve('karma.conf.js');
 
-var paths = [
+var testPaths = [
   'test/**/*.js',
   'extensions/**/test/**/*.js',
   'test/fixtures/**/*.html',
@@ -46,7 +46,7 @@ var paths = [
 var karma = {
   default: {
     configFile: karmaConf,
-    files: paths,
+    files: testPaths,
     singleRun: true,
     client: {
       captureConsole: false
@@ -54,7 +54,7 @@ var karma = {
   },
   firefox: {
     configFile: karmaConf,
-    files: paths,
+    files: testPaths,
     singleRun: true,
     browsers: ['Firefox'],
     client: {
@@ -66,7 +66,7 @@ var karma = {
   },
   safari: {
     configFile: karmaConf,
-    files: paths,
+    files: testPaths,
     singleRun: true,
     browsers: ['Safari'],
     client: {
@@ -80,6 +80,13 @@ var karma = {
 
 /** @const  */
 module.exports = {
-  paths: paths,
-  karma: karma
+  testPaths: testPaths,
+  karma: karma,
+  src: {
+    exclude: '!{node_modules,build,dist,dist.3p}/**/*.*',
+  },
+  srcGlobs: [
+    '**/*.{css,js,html,md}',
+    '!{node_modules,build,dist,dist.3p}/**/*.*',
+  ],
 };

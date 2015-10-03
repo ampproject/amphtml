@@ -55,4 +55,6 @@ The maximum font size as an integer that the `amp-fit-text` can use.
 
 #### Styling
 
-The `amp-fit-text` component can be styled with standard CSS.
+The `amp-fit-text` component can be styled with standard CSS. In particular,
+it's possible to use `text-align`, `font-weight`, `color` and many other CSS
+properties with the main exception of `font-size`.

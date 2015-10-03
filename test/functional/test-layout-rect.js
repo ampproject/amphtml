@@ -48,6 +48,17 @@ describe('LayoutRect', () => {
     expect(rect2.height).to.equal(40 + 40 * 6);
   });
 
+  it('moveLayoutRect', () => {
+    let rect1 = lr.layoutRectLtwh(10, 20, 30, 40);
+    let rect2 = lr.moveLayoutRect(rect1, 2, 3);
+    expect(rect2.left).to.equal(rect1.left + 2);
+    expect(rect2.right).to.equal(rect1.right + 2);
+    expect(rect2.width).to.equal(rect1.width);
+    expect(rect2.top).to.equal(rect1.top + 3);
+    expect(rect2.bottom).to.equal(rect1.bottom + 3);
+    expect(rect2.height).to.equal(rect1.height);
+  });
+
   it('layoutRectFromDomRect', () => {
     let rect = lr.layoutRectFromDomRect({top: 11, left: 12, width: 111,
         height: 222});

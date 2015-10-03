@@ -14,29 +14,19 @@
  * limitations under the License.
  */
 
+import {timer} from './timer';
 
-var gulp = require('gulp');
-var eslint = require('gulp-eslint');
-var util = require('gulp-util');
-var config = require('../config');
 
-var options = {
-  plugins: ['eslint-plugin-google-camelcase'],
+/**
+ * Generates a random UUID string that is RFC4122 version 4 compliant.
+ * See http://stackoverflow.com/a/8809472
+ * @return {string}
+ */
+export function randomUUID() {
+  var d = timer.now();
+  return 'aaaaaaaa-aaaa-4aaa-baaa-aaaaaaaaaaaa'.replace(/[ab]/g, (c) => {
+    var r = (d + Math.random() * 16) % 16 | 0;
+    d = Math.floor(d / 16);
+    return (c == 'a' ? r : (r & 0x3 | 0x8)).toString(16);
+  });
 };
-
-function lint() {
-  var errorsFound = false;
-  return gulp.src(['**/*.js', config.src.exclude])
-      .pipe(eslint(options))
-      .pipe(eslint.formatEach('compact', function(msg) {
-        errorsFound = true;
-        util.log(util.colors.red(msg));
-      }))
-      .on('end', function() {
-        if (errorsFound) {
-          process.exit(1);
-        }
-      });
-}
-
-gulp.task('lint', lint);

@@ -19,15 +19,25 @@ import {getIframe, listen} from '../../../src/3p-frame';
 import * as dom from '../../../src/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
-import {setStyles} from '../../../src/style'
-import {vsync} from '../../../src/vsync'
+import {setStyles} from '../../../src/style';
+import {vsync} from '../../../src/vsync';
 
 
 class AmpTwitter extends AMP.BaseElement {
   /** @override */
+  createdCallback() {
+    // This domain serves the actual tweets as JSONP.
+    this.preconnect.url('https://syndication.twitter.com');
+    // Hosts the script that renders tweets.
+    this.preconnect.url('https://platform.twitter.com');
+    this.preconnect.threePFrame();
+  }
+
+  /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
   }
+
   /** @override */
   layoutCallback() {
     // TODO(malteubl): Preconnect to twitter.

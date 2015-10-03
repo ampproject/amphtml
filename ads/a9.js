@@ -21,6 +21,7 @@ import {writeScript} from '../src/3p';
  * @param {!Object} data
  */
 export function a9(global, data) {
+  /*eslint "google-camelcase/google-camelcase": 0*/
   global.aax_size = data.aax_size;
   global.aax_pubname = data.aax_pubname;
   global.aax_src = data.aax_src;
