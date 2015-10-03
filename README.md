@@ -16,10 +16,13 @@ limitations under the License.
 
 # AMP HTML ⚡
 
-AMP HTML is a specified way of building web pages for static content that
-ensures reliably fast performance on mobile devices.  It's made possible by the
-AMP JS library, which, when included in a web page, makes it easy to build fast
-web pages.
+AMP HTML is a way to build web pages for static content that render with reliable, fast performance. It is our attempt at fixing what many perceive as painfully slow page load times – especially when reading content on the mobile web.
+
+AMP HTML is entirely built on existing web technologies. It achieves reliable performance by restricting some parts of HTML, CSS and JavaScript. These restrictions are enforced with a validator that ships with AMP HTML. To make up for those limitations AMP HTML provides a set of [custom elements](http://www.html5rocks.com/en/tutorials/webcomponents/customelements/) for rich content beyond basic HTML.
+
+For more info how AMP HTML works and some insights into the design, please read our blog post ["Web performance: An intervention"](https://www.ampproject.org/how-it-works/) (which may be the first AMP HTML file you ever see).
+
+We also have a non-technical description of what we are doing on [www.ampproject.org](https://www.ampproject.org).
 
 # How does AMP HTML work?
 
@@ -102,9 +105,6 @@ Resources:
 
 AMP HTML is made by the [AMP Project](www.ampproject.org]), and is licensed
 under the [Apache License, Version 2.0](LICENSE.md).
-
-For more info how AMP HTML works and some insights into the design and
-motivation, please read our blog post ["Web performance: An intervention"](https://www.ampproject.org/how-it-works/) 
 
 ## Contributing
 
