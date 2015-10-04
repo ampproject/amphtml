@@ -234,3 +234,13 @@ export function pollForLayout(win, count, opt_timeout) {
         win.document.documentElement./*TEST*/innerHTML);
   }, opt_timeout);
 }
+
+/**
+ * @param {!Window} win
+ * @return {!Promise}
+ */
+export function expectBodyToBecomeVisible(win) {
+  return poll('expect body to become visible', () => {
+    return win.document.body && win.document.body.style.opacity == '1';
+  });
+}

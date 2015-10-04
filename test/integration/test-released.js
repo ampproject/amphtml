@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {createFixtureIframe, pollForLayout} from '../../testing/iframe.js';
+import {createFixtureIframe, pollForLayout, expectBodyToBecomeVisible} from
+    '../../testing/iframe.js';
 
 describe('Rendering of released components', () => {
   var fixture;
@@ -30,6 +31,8 @@ describe('Rendering of released components', () => {
       expect(fixture.doc.querySelectorAll('.-amp-element')).to.have.length(16);
       expect(fixture.doc.querySelectorAll('.-amp-layout')).to.have.length(13);
       expect(fixture.doc.querySelectorAll('.-amp-error')).to.have.length(0);
+    }).then(() => {
+      return expectBodyToBecomeVisible(fixture.win);
     });
   });
 });

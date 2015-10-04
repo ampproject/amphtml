@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {createFixtureIframe} from '../../testing/iframe.js';
+import {createFixtureIframe, expectBodyToBecomeVisible} from
+    '../../testing/iframe.js';
 
 describe.skip('amp-carousel', () => {
 
@@ -23,6 +24,10 @@ describe.skip('amp-carousel', () => {
     return createFixtureIframe('test/fixtures/carousels.html', 500).then((f) => {
       fixture = f;
     });
+  });
+
+  it('should show the body', () => {
+    return expectBodyToBecomeVisible(fixture.win);
   });
 
   it('should be present', () => {
