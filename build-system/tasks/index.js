@@ -16,4 +16,5 @@
 
 require('./lint');
 require('./presubmit-checks');
+require('./size');
 require('./test');

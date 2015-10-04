@@ -1,0 +1,39 @@
+     size   |       gzip   |   file
+      ---   |        ---   |   ---
+387.52 kB   |   85.25 kB   |   amp.js
+136.79 kB   |   37.72 kB   |   v0.js
+  9.77 kB   |     3.6 kB   |   v0/amp-anim-0.1.js
+ 35.77 kB   |    9.02 kB   |   v0/amp-anim-0.1.max.js
+  9.77 kB   |     3.6 kB   |   v0/amp-anim-latest.js
+     7 kB   |    2.81 kB   |   v0/amp-audio-0.1.js
+ 24.32 kB   |    6.61 kB   |   v0/amp-audio-0.1.max.js
+     7 kB   |    2.81 kB   |   v0/amp-audio-latest.js
+ 44.27 kB   |   11.06 kB   |   v0/amp-carousel-0.1.js
+140.91 kB   |   27.97 kB   |   v0/amp-carousel-0.1.max.js
+ 44.27 kB   |   11.06 kB   |   v0/amp-carousel-latest.js
+  6.78 kB   |    2.69 kB   |   v0/amp-fit-text-0.1.js
+ 20.69 kB   |    5.67 kB   |   v0/amp-fit-text-0.1.max.js
+  6.78 kB   |    2.69 kB   |   v0/amp-fit-text-latest.js
+  8.31 kB   |    3.34 kB   |   v0/amp-iframe-0.1.js
+ 26.84 kB   |    7.42 kB   |   v0/amp-iframe-0.1.max.js
+  8.31 kB   |    3.34 kB   |   v0/amp-iframe-latest.js
+ 66.83 kB   |   16.51 kB   |   v0/amp-image-lightbox-0.1.js
+210.11 kB   |   42.84 kB   |   v0/amp-image-lightbox-0.1.max.js
+ 66.83 kB   |   16.51 kB   |   v0/amp-image-lightbox-latest.js
+  5.86 kB   |    2.41 kB   |   v0/amp-instagram-0.1.js
+ 21.35 kB   |    5.96 kB   |   v0/amp-instagram-0.1.max.js
+  5.86 kB   |    2.41 kB   |   v0/amp-instagram-latest.js
+ 44.15 kB   |   10.61 kB   |   v0/amp-lightbox-0.1.js
+137.25 kB   |    27.1 kB   |   v0/amp-lightbox-0.1.max.js
+ 44.15 kB   |   10.61 kB   |   v0/amp-lightbox-latest.js
+ 18.33 kB   |       6 kB   |   v0/amp-slides-0.1.js
+ 66.13 kB   |   15.44 kB   |   v0/amp-slides-0.1.max.js
+ 18.33 kB   |       6 kB   |   v0/amp-slides-latest.js
+ 10.38 kB   |    4.02 kB   |   v0/amp-twitter-0.1.js
+ 36.33 kB   |    9.16 kB   |   v0/amp-twitter-0.1.max.js
+ 10.38 kB   |    4.02 kB   |   v0/amp-twitter-latest.js
+  5.84 kB   |     2.4 kB   |   v0/amp-youtube-0.1.js
+ 20.85 kB   |    5.79 kB   |   v0/amp-youtube-0.1.max.js
+  5.84 kB   |     2.4 kB   |   v0/amp-youtube-latest.js
+125.48 kB   |   31.56 kB   |   current/integration.js
+ 50.36 kB   |      17 kB   |   current-min/f.js
