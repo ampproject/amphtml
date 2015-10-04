@@ -414,6 +414,15 @@ export class BaseElement {
   }
 
   /**
+   * Schedules callback to be complete within the next batch. This call is
+   * intended for heavy DOM mutations that typically cause re-layouts.
+   * @param {!Function} callback
+   */
+  deferMutate(callback) {
+    resources.deferMutate(this.element, callback);
+  }
+
+  /**
    * Requests full overlay mode from the viewer.
    * @protected
    */

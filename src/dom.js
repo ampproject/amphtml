@@ -16,6 +16,17 @@
 
 
 /**
+ * Removes the element.
+ * @param {!Element} element
+ */
+export function removeElement(element) {
+  if (element.parentElement) {
+    element.parentElement.removeChild(element);
+  }
+}
+
+
+/**
  * Removes all child nodes of the specified element.
  * @param {!Element} parent
  */
