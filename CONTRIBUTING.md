@@ -55,6 +55,10 @@ A key feature of the AMP HTML project is its extensibility - it is meant to supp
 
 Because Extended Components may have significant impact on AMP HTML performance, security, and usage, Extended Component contributions will be very carefully analyzed and scrutinized. Before embarking on a major Extended Component, please submit an Issue detailing your proposed component, so that the AMP HTML developers can offer any feedback before you spend lots of time. In particular we strive to design the overall component set, so that a large number of use cases can be composed from them. Instead of creating a new component it may thus be a better solution to combine existing components to a similar effect.
 
+Important criteria for acceptance of an Extended Component is that an [oEmbed](http://oembed.com/) integration already exists and that the thing being integrated has an actively maintained Wikipedia page.
+
+We highly prefer integrations that do not use iframes. JSONP cannot be used for security reasons, but CORS requests are perfectly fine.
+
 Like all contributions, Extended Components will be analyzed for performance impact, code quality and style, and directional alignment with the project.
 
 ### Installation
