@@ -92,7 +92,11 @@ function compile(watch, shouldMinify) {
   compileJs('./src/', 'amp.js', './dist', {
     minifiedName: 'v0.js',
     watch: watch,
-    minify: shouldMinify
+    minify: shouldMinify,
+    // If there is a sync JS error during initial load,
+    // at least try to unhide the body.
+    wrapper: 'try{<%= contents %>}catch(e){setTimeout(function(){' +
+        'document.body.style.opacity=1},1000);throw e};'
   });
   compileJs('./3p/', 'integration.js', './dist.3p/' + internalRuntimeVersion, {
     minifiedName: 'f.js',

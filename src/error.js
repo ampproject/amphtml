@@ -17,6 +17,7 @@
 
 import {getMode} from './mode';
 import {exponentialBackoff} from './exponential-backoff.js';
+import {makeBodyVisible} from './styles';
 
 var globalExponentialBackoff = exponentialBackoff(1.5);
 
@@ -80,6 +81,10 @@ export function installErrorReporting(win) {
  * @param {!Error|undefined} error
  */
 function reportErrorToServer(message, filename, line, col, error) {
+  // Make an attempt to unhide the body.
+  if (this && this.document) {
+    makeBodyVisible(this.document);
+  }
   var mode = getMode();
   if (mode.isLocalDev || mode.development || mode.test) {
     return;
