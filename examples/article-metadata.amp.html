@@ -2,7 +2,7 @@
 <!--
       This sample AMP HTML file aims to be a minimalist document that
       follows best practices and guidances for publishers to mark up
-      content for inclusion in various platforms. 
+      content for inclusion in various platforms.
 -->
 <html AMP lang="en">
   <!-- you can use "amp" or "AMP" or "⚡" -->
@@ -15,7 +15,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
     <script type="application/ld+json">
         //
-        // The HTML file referenced in mainEntityOfPage should be the same as the 
+        // The HTML file referenced in mainEntityOfPage should be the same as the
         // canonical link above.
         //
         // That file should should have a corresponding <link> tag within
@@ -36,7 +36,7 @@
         //   * All marked-up URL's should be absolute
         //
         //   * The "logo" dimensions must not exceed 600x60
-        // 
+        //
       {
         "@context": "http://schema.org",
         "@type": "NewsArticle",
@@ -59,7 +59,7 @@
         },
         "image": {
           "@type": "ImageObject",
-          "url": "http://cdn.ampproject.org/leader.jpg",
+          "url": "/examples/img/hero@1x.jpg",
           "height": 2000,
           "width": 800
         }
@@ -79,7 +79,13 @@
   </head>
   <body>
     <h1>Lorem Ipsum</h1>
-    <amp-img src="http://cdn.ampproject.org/leader.jpg" alt="Lorem Ipsum?" height="2000" width="800"></amp-img>
+    <amp-img
+            src="/examples/img/hero@1x.jpg"
+            srcset="/examples/img/hero@1x.jpg 1x, /examples/img/hero@2x.jpg 2x"
+            layout="responsive" width="360" placeholder
+            alt="Curabitur convallis, urna quis pulvinar feugiat, purus diam posuere turpis, sit amet tincidunt purus justo et mi."
+            height="216" on="tap:headline-img-lightbox">
+        </amp-img>
     <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec
        odio. Praesent libero. Sed cursus ante dapibus diam. Sed nisi. Nulla
        quis sem at nibh elementum imperdiet. Duis sagittis ipsum. Praesent
