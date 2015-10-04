@@ -153,6 +153,7 @@ describe('Resources', () => {
     let resource = {
       getState: () => {return ResourceState_.READY_FOR_LAYOUT;},
       isDisplayed: () => {return true;},
+      isInViewport: () => {return true;},
       prerenderAllowed: () => {return false;},
       startLayout: () => {}
     };
@@ -161,17 +162,49 @@ describe('Resources', () => {
     expect(resources.queue_.getSize()).to.equal(0);
   });
 
-  it('should not schedule prerenderable resource when' +
+  it('should schedule prerenderable resource when' +
         ' document is hidden', () => {
     let resource = {
       getState: () => {return ResourceState_.READY_FOR_LAYOUT;},
       isDisplayed: () => {return true;},
+      isInViewport: () => {return true;},
       prerenderAllowed: () => {return true;},
+      renderOutsideViewport: () => {return true;},
       getPriority: () => {return 1;},
       startLayout: () => {},
       layoutScheduled: () => {}
     };
     resources.visible_ = false;
+    resources.scheduleLayoutOrPreload_(resource, true);
+    expect(resources.queue_.getSize()).to.equal(1);
+  });
+
+  it('should not schedule non-renderOutsideViewport resource when' +
+        ' resource is not visible', () => {
+    let resource = {
+      getState: () => {return ResourceState_.READY_FOR_LAYOUT;},
+      isDisplayed: () => {return true;},
+      isInViewport: () => {return false;},
+      prerenderAllowed: () => {return true;},
+      renderOutsideViewport: () => {return false;},
+      startLayout: () => {},
+    };
+    resources.scheduleLayoutOrPreload_(resource, true);
+    expect(resources.queue_.getSize()).to.equal(0);
+  });
+
+  it('should schedule renderOutsideViewport resource when' +
+        ' resource is not visible', () => {
+    let resource = {
+      getState: () => {return ResourceState_.READY_FOR_LAYOUT;},
+      isDisplayed: () => {return true;},
+      isInViewport: () => {return false;},
+      prerenderAllowed: () => {return true;},
+      renderOutsideViewport: () => {return true;},
+      getPriority: () => {return 1;},
+      startLayout: () => {},
+      layoutScheduled: () => {}
+    };
     resources.scheduleLayoutOrPreload_(resource, true);
     expect(resources.queue_.getSize()).to.equal(1);
   });
@@ -196,7 +229,8 @@ describe('Resources discoverWork', () => {
       applyMediaQuery: () => {},
       viewportCallback: sinon.spy(),
       prerenderAllowed: () => true,
-      isRelayoutNeeded: () => true
+      isRelayoutNeeded: () => true,
+      renderOutsideViewport: () => true,
     };
   }
 
@@ -484,6 +518,7 @@ describe('Resources.Resource', () => {
       isBuilt: () => {return false;},
       isUpgraded: () => {return false;},
       prerenderAllowed: () => {return false;},
+      renderOutsideViewport: () => {return true;},
       build: (force) => {return false;},
       getBoundingClientRect: () => {return null;},
       isRelayoutNeeded: () => {return false;},

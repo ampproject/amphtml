@@ -21,6 +21,7 @@ import {loadPromise} from '../src/event-helper';
 import {parseSrcset} from '../src/srcset';
 import {registerElement} from '../src/custom-element';
 import {timer} from '../src/timer';
+import {vsync} from '../src/vsync';
 import {removeElement} from '../src/dom';
 
 
@@ -76,15 +77,6 @@ export function installImg(win) {
         this.placeholder_.setAttribute('placeholder', '');
         this.element.appendChild(this.placeholder_);
       }
-
-      // TODO(@dvoytenko) Remove when #254 is fixed.
-      // Always immediately request the first two images to make sure
-      // we start the HTTP requests for them as early as possible.
-      /* DO NOT SUBMIT: enable before submit
-      if (count++ < 2 && this.element.offsetWidth > 10) {
-        this.updateImageSrc_();
-      }
-      */
     }
 
     /** @override */
@@ -134,15 +126,17 @@ export function installImg(win) {
           this.placeholder_.classList.toggle('active', false);
         } else {
           // Set a minimum delay in case the image resource loads much faster
-          // than an intermitent loading screen that dissapears right away.
+          // than an intermittent loading screen that disappears right away.
           // This can occur on fast internet connections or on a local server.
           return timer.delay(() => {
-            if (this.placeholder_) {
-              this.placeholder_.classList.toggle('hidden',
-                  !this.isInViewport());
-              this.placeholder_.classList.toggle('active',
-                  this.isInViewport());
-            }
+            vsync.mutate(() => {
+              if (this.placeholder_) {
+                this.placeholder_.classList.toggle('hidden',
+                    !this.isInViewport());
+                this.placeholder_.classList.toggle('active',
+                    this.isInViewport());
+              }
+            });
           }, 100);
         }
       }

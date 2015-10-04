@@ -97,6 +97,11 @@ export function installAd(win) {
       this.preconnect.threePFrame();
     }
 
+    /** @override  */
+    renderOutsideViewport() {
+      return false;
+    }
+
     /** @override */
     isLayoutSupported(layout) {
       return isLayoutSizeDefined(layout);

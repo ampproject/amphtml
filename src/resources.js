@@ -804,6 +804,9 @@ export class Resources {
     if (!this.visible_ && !resource.prerenderAllowed()) {
       return;
     }
+    if (!resource.isInViewport() && !resource.renderOutsideViewport()) {
+      return;
+    }
     if (layout) {
       this.schedule_(resource,
           LAYOUT_TASK_ID_, LAYOUT_TASK_OFFSET_,
@@ -1141,6 +1144,14 @@ export class Resource {
   }
 
   /**
+   * Whether this is allowed to render when not in viewport.
+   * @return {boolean}
+   */
+  renderOutsideViewport() {
+    return this.element.renderOutsideViewport();
+  }
+
+  /**
    * Sets the resource's state to LAYOUT_SCHEDULED.
    */
   layoutScheduled() {
@@ -1170,6 +1181,13 @@ export class Resource {
 
     if (!isDocumentVisible && !this.prerenderAllowed()) {
       log.fine(TAG_, 'layout canceled due to non pre-renderable element:',
+          this.debugid, this.state_);
+      this.state_ = ResourceState_.READY_FOR_LAYOUT;
+      return Promise.resolve();
+    }
+
+    if (!this.renderOutsideViewport() && !this.isInViewport()) {
+      log.fine(TAG_, 'layout canceled due to element not being in viewport:',
           this.debugid, this.state_);
       this.state_ = ResourceState_.READY_FOR_LAYOUT;
       return Promise.resolve();

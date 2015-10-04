@@ -193,6 +193,15 @@ export class BaseElement {
   }
 
   /**
+   * Subclasses can override this method to opt-out of rendering the element
+   * when it is not currently visible.
+   * @return {boolean}
+   */
+  renderOutsideViewport() {
+    return true;
+  }
+
+  /**
    * Subclasses can override this method to opt-in into receiving additional
    * {@link layoutCallback} calls. Note that this method is not consulted for
    * the first layout given that each element must be laid out at least once.

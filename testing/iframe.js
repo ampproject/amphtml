@@ -170,6 +170,8 @@ export function createIframePromise() {
           iframe.contentWindow.document.body.appendChild(element);
           // Wait for mutation observer to fire.
           return new Timer(window).promise(16).then(() => {
+            // Make sure it has dimensions since no styles are available.
+            element.style.display = 'block';
             element.implementation_.layoutCallback();
             return element;
           });
