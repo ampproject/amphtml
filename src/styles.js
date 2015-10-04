@@ -73,6 +73,25 @@ export function installStyles(doc, cssText, cb, opt_isRuntimeCss) {
 }
 
 /**
+ * Sets the document's body opacity to 1.
+ * If the body is not yet available (because our script was loaded
+ * synchronously), polls until it is.
+ * @param {!Document} doc The document who's body we should make visible.
+ */
+export function makeBodyVisible(doc) {
+  let interval;
+  let set = () => {
+    if (doc.body) {
+      doc.body.style.opacity = 1;
+      clearInterval(interval);
+    }
+  };
+  interval = setInterval(set, 4);
+  set();
+}
+
+
+/**
  * Insert the element in the root after the element named after or
  * if that is null at the beginning.
  * @param {!Element} root
