@@ -129,7 +129,7 @@ export function installImg(win) {
     /** @private */
     toggleDefaultPlaceholder_() {
       if (this.isDefaultPlaceholder_) {
-        if (this.isInViewport()) {
+        if (!this.isInViewport()) {
           this.placeholder_.classList.toggle('hidden', true);
           this.placeholder_.classList.toggle('active', false);
         } else {
@@ -137,10 +137,12 @@ export function installImg(win) {
           // than an intermitent loading screen that dissapears right away.
           // This can occur on fast internet connections or on a local server.
           return timer.delay(() => {
-            this.placeholder_.classList
-                .toggle('hidden', this.imgLoadedOnce_);
-            this.placeholder_.classList
-                .toggle('active', !this.imgLoadedOnce_);
+            if (this.placeholder_) {
+              this.placeholder_.classList.toggle('hidden',
+                  !this.isInViewport());
+              this.placeholder_.classList.toggle('active',
+                  this.isInViewport());
+            }
           }, 100);
         }
       }
