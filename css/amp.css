@@ -128,7 +128,7 @@ i-amp-sizer {
 }
 
 [placeholder].hidden {
-  display: none !important;
+  visibility: hidden;
 }
 
 .-amp-layout-size-defined [placeholder] {
@@ -140,7 +140,7 @@ i-amp-sizer {
   z-index: 1 !important;
 }
 
-.-amp-notbuilt > [placeholder]:not(.hidden) {
+.-amp-notbuilt > [placeholder] {
   display: block !important;
 }
 
