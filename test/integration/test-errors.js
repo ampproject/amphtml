@@ -15,7 +15,8 @@
  */
 
 import {Timer} from '../../src/timer';
-import {createFixtureIframe, poll} from '../../testing/iframe.js';
+import {createFixtureIframe, poll, expectBodyToBecomeVisible} from
+    '../../testing/iframe.js';
 import {loadPromise} from '../../src/event-helper';
 
 describe('error page', () => {
@@ -30,6 +31,10 @@ describe('error page', () => {
             fixture.doc.documentElement./*TEST*/innerHTML);
       });
     });
+  });
+
+  it('should show the body', () => {
+    return expectBodyToBecomeVisible(fixture.win);
   });
 
   function shouldFail(id) {

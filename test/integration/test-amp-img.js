@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {createFixtureIframe} from '../../testing/iframe.js';
+import {createFixtureIframe, expectBodyToBecomeVisible} from
+    '../../testing/iframe.js';
 
 describe('Rendering of amp-img', () => {
   var fixture;
@@ -24,7 +25,11 @@ describe('Rendering of amp-img', () => {
     });
   });
 
-  it('amp-img should be present', () => {
+  it('should show the body', () => {
+    return expectBodyToBecomeVisible(fixture.win);
+  });
+
+  it('should be present', () => {
     expect(fixture.doc.querySelectorAll('amp-img')).to.have.length(15);
     // 5 image visible in 500 pixel height.
     return fixture.awaitEvent('amp:load:start', 3).then(function() {
