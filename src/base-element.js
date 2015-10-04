@@ -236,6 +236,18 @@ export class BaseElement {
   }
 
   /**
+   * Requests the resource to stop its activity when the document goes into
+   * inactive state. The scope is up to the actual component. Among other
+   * things the active playback of video or audio content must be stopped.
+   * The component must return `true` if it'd like to later receive
+   * {@link layoutCallback} in case document becomes active again.
+   * @return {boolean}
+   */
+  documentInactiveCallback() {
+    return false;
+  }
+
+  /**
    * Instructs the element that its activation is requested based on some
    * user event. Intended to be implemented by actual components.
    * @param {!ActionInvocation} invocation

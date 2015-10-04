@@ -42,7 +42,8 @@ describe('amp-youtube', () => {
       var iframe = yt.querySelector('iframe');
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
-      expect(iframe.src).to.equal('https://www.youtube.com/embed/mGENRKrdoGY');
+      expect(iframe.src).to.equal(
+          'https://www.youtube.com/embed/mGENRKrdoGY?enablejsapi=1');
       expect(iframe.getAttribute('width')).to.equal('111');
       expect(iframe.getAttribute('height')).to.equal('222');
     });
@@ -57,6 +58,7 @@ describe('amp-youtube', () => {
   });
 
   it('requires video-id', () => {
-    return getYt('').should.eventually.be.rejectedWith(/The video-id attribute is required for/);
+    return getYt('').should.eventually.be.rejectedWith(
+        /The video-id attribute is required for/);
   });
 });

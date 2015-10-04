@@ -50,9 +50,20 @@ class AmpAudio extends AMP.BaseElement {
       audio.appendChild(child);
     });
     this.element.appendChild(audio);
+    /** @private {?HTMLAudioElement} */
+    this.audio_ = audio;
     return loadPromise(audio);
   }
 
+  /** @override */
+  documentInactiveCallback() {
+    if (this.audio_) {
+      this.audio_.pause();
+    }
+    // No need to do layout later - user action will be expect to resume
+    // the playback.
+    return false;
+  }
 }
 
 AMP.registerElement('amp-audio', AmpAudio);

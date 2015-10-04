@@ -29,6 +29,7 @@ describe('CustomElement', () => {
   let testElementBuildCallback;
   let testElementLayoutCallback;
   let testElementViewportCallback;
+  let testElementDocumentInactiveCallback;
   let testElementIsReadyToBuild = true;
 
   class TestElement extends BaseElement {
@@ -54,6 +55,10 @@ describe('CustomElement', () => {
     viewportCallback(inViewport) {
       testElementViewportCallback(inViewport);
     }
+    documentInactiveCallback() {
+      testElementDocumentInactiveCallback();
+      return true;
+    }
   }
 
   let ElementClass = document.registerElement('amp-test',  {
@@ -78,6 +83,7 @@ describe('CustomElement', () => {
     testElementBuildCallback = sinon.spy();
     testElementLayoutCallback = sinon.spy();
     testElementViewportCallback = sinon.spy();
+    testElementDocumentInactiveCallback = sinon.spy();
   });
 
   afterEach(() => {
@@ -493,5 +499,27 @@ describe('CustomElement', () => {
     element.changeHeight(111);
     expect(element.sizerElement_.style.paddingTop).to.equal('111px');
     expect(element.style.height).to.equal('');
+  });
+
+
+  it('Element - documentInactiveCallback', () => {
+    let element = new ElementClass();
+
+    // Non-built element doesn't receive documentInactiveCallback.
+    element.documentInactiveCallback();
+    expect(testElementDocumentInactiveCallback.callCount).to.equal(0);
+
+    // Built element receives documentInactiveCallback.
+    element.build(true);
+    element.documentInactiveCallback();
+    expect(testElementDocumentInactiveCallback.callCount).to.equal(1);
+  });
+
+  it('StubElement - documentInactiveCallback', () => {
+    let element = new StubElementClass();
+
+    // Unupgraded document doesn't receive documentInactiveCallback.
+    element.documentInactiveCallback();
+    expect(testElementDocumentInactiveCallback.callCount).to.equal(0);
   });
 });
