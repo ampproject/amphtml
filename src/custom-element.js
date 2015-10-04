@@ -464,6 +464,15 @@ export function createAmpElementProto(win, name, implementationClass) {
   };
 
   /**
+   * Whether the element should ever render when it is not in viewport.
+   * @return {boolean}
+   * @final
+   */
+  ElementProto.renderOutsideViewport = function() {
+    return this.implementation_.renderOutsideViewport();
+  };
+
+  /**
    * @return {!LayoutRect}
    * @final
    */

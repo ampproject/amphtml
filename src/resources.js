@@ -64,6 +64,9 @@ export class Resources {
     /** @const {!Viewer} */
     this.viewer_ = viewerFor(window);
 
+    /** @private {boolean} */
+    this.isRuntimeOn_ = this.viewer_.isRuntimeOn();
+
     /** @private @const {number} */
     this.maxDpr_ = this.win.devicePixelRatio || 1;
 
@@ -106,6 +109,9 @@ export class Resources {
     /** @private {!Array<{resource: !Resource, newHeight: number}>} */
     this.changeHeightRequests_ = [];
 
+    /** @private {!Array<!Function>} */
+    this.deferredMutates_ = [];
+
     /** @private {number} */
     this.scrollHeight_ = 0;
 
@@ -140,6 +146,12 @@ export class Resources {
       this.visible_ = this.viewer_.isVisible();
       this.prerenderSize_ = this.viewer_.getPrerenderSize();
       this.schedulePass();
+    });
+
+    this.viewer_.onRuntimeState((state) => {
+      log.fine(TAG_, 'Runtime state:', state);
+      this.isRuntimeOn_ = state;
+      this.schedulePass(1);
     });
 
     this.relayoutAll_ = true;
@@ -341,6 +353,16 @@ export class Resources {
   }
 
   /**
+   * Requests mutate callback to executed at the earliest possibility.
+   * @param {!Element} element
+   * @param {!Function} callback
+   */
+  deferMutate(element, callback) {
+    this.scheduleDeferredMutate_(this.getResourceForElement(element), callback);
+    this.schedulePassVsync();
+  }
+
+  /**
    * Schedules the work pass at the latest with the specified delay.
    * @param {number=} opt_delay
    */
@@ -367,6 +389,11 @@ export class Resources {
    * @private
    */
   doPass_() {
+    if (!this.isRuntimeOn_) {
+      log.fine(TAG_, 'runtime is off');
+      return;
+    }
+
     let viewportSize = this.viewport_.getSize();
     log.fine(TAG_, 'PASS: at ' + timer.now() +
         ', visible=', this.visible_,
@@ -398,6 +425,15 @@ export class Resources {
    * @private
    */
   mutateWork_() {
+    if (this.deferredMutates_.length > 0) {
+      log.fine(TAG_, 'deferred mutates:', this.deferredMutates_.length);
+      let deferredMutates = this.deferredMutates_;
+      this.deferredMutates_ = [];
+      for (let i = 0; i < deferredMutates.length; i++) {
+        deferredMutates[i]();
+      }
+    }
+
     if (this.changeHeightRequests_.length > 0) {
       log.fine(TAG_, 'change height requests:',
           this.changeHeightRequests_.length);
@@ -742,6 +778,16 @@ export class Resources {
   }
 
   /**
+   * Schedules deferred mutate.
+   * @param {!Resource} resource
+   * @param {!Function} callback
+   * @private
+   */
+  scheduleDeferredMutate_(resource, callback) {
+    this.deferredMutates_.push(callback);
+  }
+
+  /**
    * Schedules layout or preload for the specified resource.
    * @param {!Resource} resource
    * @param {boolean} layout
@@ -756,6 +802,9 @@ export class Resources {
     // Don't schedule elements that can't prerender, they won't be allowed
     // to execute anyway.
     if (!this.visible_ && !resource.prerenderAllowed()) {
+      return;
+    }
+    if (!resource.isInViewport() && !resource.renderOutsideViewport()) {
       return;
     }
     if (layout) {
@@ -1095,6 +1144,14 @@ export class Resource {
   }
 
   /**
+   * Whether this is allowed to render when not in viewport.
+   * @return {boolean}
+   */
+  renderOutsideViewport() {
+    return this.element.renderOutsideViewport();
+  }
+
+  /**
    * Sets the resource's state to LAYOUT_SCHEDULED.
    */
   layoutScheduled() {
@@ -1124,6 +1181,13 @@ export class Resource {
 
     if (!isDocumentVisible && !this.prerenderAllowed()) {
       log.fine(TAG_, 'layout canceled due to non pre-renderable element:',
+          this.debugid, this.state_);
+      this.state_ = ResourceState_.READY_FOR_LAYOUT;
+      return Promise.resolve();
+    }
+
+    if (!this.renderOutsideViewport() && !this.isInViewport()) {
+      log.fine(TAG_, 'layout canceled due to element not being in viewport:',
           this.debugid, this.state_);
       this.state_ = ResourceState_.READY_FOR_LAYOUT;
       return Promise.resolve();

@@ -91,7 +91,10 @@ export class Viewer {
     /** @const {!DocumentState} */
     this.docState_ = documentStateFor(window);
 
-    /** @const {boolean} */
+    /** @private {boolean} */
+    this.isRuntimeOn_ = true;
+
+    /** @private {boolean} */
     this.overtakeHistory_ = false;
 
     /** @private {string} */
@@ -114,6 +117,9 @@ export class Viewer {
 
     /** @private {number} */
     this.paddingTop_ = 0;
+
+    /** @private {!Observable<boolean>} */
+    this.runtimeOnObservable_ = new Observable();
 
     /** @private {!Observable} */
     this.visibilityObservable_ = new Observable();
@@ -143,6 +149,9 @@ export class Viewer {
     }
 
     log.fine(TAG_, 'Viewer params:', this.params_);
+
+    this.isRuntimeOn_ = !parseInt(this.params_['off'], 10);
+    log.fine(TAG_, '- runtimeOn:', this.isRuntimeOn_);
 
     this.overtakeHistory_ = parseInt(this.params_['history'], 10) ||
         this.overtakeHistory_;
@@ -203,6 +212,29 @@ export class Viewer {
    */
   getParam(name) {
     return this.params_[name];
+  }
+
+  /**
+   * @return {boolean}
+   */
+  isRuntimeOn() {
+    return this.isRuntimeOn_;
+  }
+
+  /**
+   */
+  toggleRuntime() {
+    this.isRuntimeOn_ = !this.isRuntimeOn_;
+    log.fine(TAG_, 'Runtime state:', this.isRuntimeOn_);
+    this.runtimeOnObservable_.fire(this.isRuntimeOn_);
+  }
+
+  /**
+   * @param {function(boolean)} handler
+   * @return {!Unlisten}
+   */
+  onRuntimeState(handler) {
+    return this.runtimeOnObservable_.add(handler);
   }
 
   /**
