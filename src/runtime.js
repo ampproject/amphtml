@@ -16,6 +16,7 @@
 
 import {BaseElement} from './base-element';
 import {assert} from './asserts';
+import {getMode} from './mode';
 import {installStyles} from './styles';
 import {registerElement} from './custom-element';
 import {registerExtendedElement} from './extended-element';
@@ -65,12 +66,23 @@ export function adopt(global) {
     }
 
   };
+
   /** @const */
   global.AMP.BaseElement = BaseElement;
+
   /** @const */
   global.AMP.assert = assert;
+
+  let viewer = viewerFor(global);
+
   /** @const */
-  global.AMP.viewer = viewerFor(global);
+  global.AMP.viewer = viewer;
+
+  if (getMode().development) {
+    /** @const */
+    global.AMP.toggleRuntime = viewer.toggleRuntime.bind(viewer);
+  }
+
   /**
    * Registers a new custom element.
    * @param {GlobalAmp} fn
