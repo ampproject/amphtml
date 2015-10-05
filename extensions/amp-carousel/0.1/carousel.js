@@ -83,7 +83,6 @@ export class AmpCarousel extends BaseCarousel {
       var oldPos = this.pos_;
       this.pos_ = newPos;
 
-      var containerWidth = this.element.offsetWidth;
       if (!animate) {
         this.commitSwitch_(oldPos, newPos);
       } else {
@@ -135,7 +134,7 @@ export class AmpCarousel extends BaseCarousel {
    * @private
    */
   withinWindow_(pos, callback) {
-    let containerWidth = this.element.offsetWidth;
+    let containerWidth = this.getLayoutWidth();
     for (let i = 0; i < this.cells_.length; i++) {
       let cell = this.cells_[i];
       if (cell.offsetLeft + cell.offsetWidth >= pos &&
@@ -317,7 +316,7 @@ export class AmpCarousel extends BaseCarousel {
 
   /** @override */
   hasNext() {
-    let containerWidth = this.element.offsetWidth;
+    let containerWidth = this.getLayoutWidth();
     let scrollWidth = this.container_.scrollWidth;
     let maxPos = Math.max(scrollWidth - containerWidth, 0);
     return this.pos_ != maxPos;

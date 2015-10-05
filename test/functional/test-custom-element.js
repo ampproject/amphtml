@@ -123,12 +123,23 @@ describe('CustomElement', () => {
   });
 
 
+  it('Element - updateLayoutBox', () => {
+    let element = new ElementClass();
+    expect(element.layoutWidth_).to.equal(-1);
+    expect(element.implementation_.layoutWidth_).to.equal(-1);
+
+    element.updateLayoutBox({top: 0, left: 0, width: 111, height: 51});
+    expect(element.layoutWidth_).to.equal(111);
+    expect(element.implementation_.layoutWidth_).to.equal(111);
+  });
+
   it('StubElement - upgrade', () => {
     let element = new StubElementClass();
     expect(element.isUpgraded()).to.equal(false);
     expect(testElementCreatedCallback.callCount).to.equal(0);
 
     element.layout_ = Layout.FILL;
+    element.updateLayoutBox({top: 0, left: 0, width: 111, height: 51});
     resourcesMock.expects('upgraded').withExactArgs(element).once();
 
     element.upgrade(TestElement);
@@ -136,6 +147,7 @@ describe('CustomElement', () => {
     expect(element.isUpgraded()).to.equal(true);
     expect(element.implementation_ instanceof TestElement).to.equal(true);
     expect(element.implementation_.layout_).to.equal(Layout.FILL);
+    expect(element.implementation_.layoutWidth_).to.equal(111);
     expect(testElementCreatedCallback.callCount).to.equal(1);
     expect(testElementFirstAttachedCallback.callCount).to.equal(0);
     expect(element.isBuilt()).to.equal(false);
