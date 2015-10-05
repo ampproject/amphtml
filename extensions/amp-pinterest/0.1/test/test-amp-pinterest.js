@@ -14,41 +14,53 @@
  * limitations under the License.
  */
 
-import {createIframePromise} from '../../../../testing/iframe';
-require('../amp-pinterest');
-import {adopt} from '../../../../src/runtime';
+    require('../../../../build/all/v0/amp-pinterest-0.1.max');
+    import {adopt} from '../../../../src/runtime';
+    import {Timer} from '../../../../src/timer';
 
-adopt(window);
+    adopt(window);
 
-describe('amp-pinterest', () => {
+    describe('amp-pinterest', () => {
 
-  function getPin(pinDo, pinUrl, pinMedia, pinDescription) {
-    return createIframePromise().then((iframe) => {
-      var pin = iframe.doc.createElement('amp-pinterest');
-      pin.setAttribute('data-do', pinDo);
-      pin.setAttribute('data-url', pinUrl);
-      pin.setAttribute('data-media', pinMedia);
-      pin.setAttribute('data-description', pinDescription);
-      pin.setAttribute('width', '40');
-      pin.setAttribute('height', '20');
-      return iframe.addElement(pin);
+      function createDivPromise() {
+        return new Promise(function(resolve, reject) {
+          var div = document.createElement('div');
+          resolve({
+            div: div,
+            addElement: function(element) {
+              div.appendChild(element);
+              return new Timer(window).promise(16).then(() => {
+                element.implementation_.layoutCallback();
+                return element;
+              });
+            }
+          });
+          document.body.appendChild(div);
+        });
+      };
+
+      function getPin(pinDo, pinUrl, pinMedia, pinDescription) {
+        return createDivPromise().then((div) => {
+          var pin = document.createElement('amp-pinterest');
+          pin.setAttribute('data-do', pinDo);
+          pin.setAttribute('data-url', pinUrl);
+          pin.setAttribute('data-media', pinMedia);
+          pin.setAttribute('data-description', pinDescription);
+          return div.addElement(pin);
+        });
+      };
+
+      it('renders', () => {
+        return getPin('buttonPin',
+          'http://www.flickr.com/photos/kentbrew/6851755809/',
+          'http://c2.staticflickr.com/8/7027/6851755809_df5b2051c9_b.jpg',
+          'Next stop: Pinterest'
+        ).then((pin) => {
+          var a = pin.querySelector('a');
+          expect(a).to.not.be.null;
+          expect(a.tagName).to.equal('A');
+          expect(a.href).to.equal('https://www.pinterest.com/pin/create/button/?url=http%3A%2F%2Fwww.flickr.com%2Fphotos%2Fkentbrew%2F6851755809%2F&media=http%3A%2F%2Fc2.staticflickr.com%2F8%2F7027%2F6851755809_df5b2051c9_b.jpg&description=Next%20stop%3A%20Pinterest');
+        });
+      });
+
     });
-  }
-
-  it('renders', () => {
-    return getPin('buttonPin',
-      'http://www.flickr.com/photos/kentbrew/6851755809/',
-      'http://farm8.staticflickr.com/7027/6851755809_df5b2051c9_z.jpg',
-      'Next stop: Pinterest'
-    ).then((pin) => {
-      var iframe = pin.querySelector('iframe');
-      expect(iframe).to.not.be.null;
-      expect(iframe.tagName).to.equal('IFRAME');
-      expect(iframe.src).to.equal('https://assets.pinterest.com/ext/iffy.html?act=buttonPin&url=http%3A%2F%2Fwww.flickr.com%2Fphotos%2Fkentbrew%2F6851755809%2F&media=http%3A%2F%2Ffarm8.staticflickr.com%2F7027%2F6851755809_df5b2051c9_z.jpg&description=Next%20stop%3A%20Pinterest');
-      expect(iframe.getAttribute('width')).to.equal('40');
-      expect(iframe.getAttribute('height')).to.equal('20');
-    });
-  });
-
-});
-

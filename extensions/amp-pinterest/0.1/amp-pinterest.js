@@ -81,39 +81,104 @@ class AmpPinterest extends AMP.BaseElement {
         var pinDescription = AMP.assert(this.element.getAttribute('data-description'),
             'The data-description attribute is required when <amp-pinterest> makes a Pin It button %s',
             this.element);
-    }
 
-    let iframe = document.createElement('iframe');
-    iframe.setAttribute('frameborder', '0');
-    iframe.setAttribute('allowtransparency', 'true');
+        // we're a simple link
+        let a = document.createElement('A');
 
-    // start setting the source of our iframe
-    let src = 'https://assets.pinterest.com/ext/iffy.html?' +
-        'act=' + encodeURIComponent(pinDo) +
-        '&url=' + encodeURIComponent(pinUrl);
+        a.href = 'https://www.pinterest.com/pin/create/button/';
+        a.href = a.href + '?url=' + encodeURIComponent(pinUrl);
+        a.href = a.href + '&media=' + encodeURIComponent(pinMedia);
+        a.href = a.href + '&description=' + encodeURIComponent(pinDescription);
 
-    // if we are making a Pin It button and are missing media or description, we should already have failed
-    if (pinDo === 'buttonPin') {
-        src = src + '&media=' + encodeURIComponent(pinMedia);
-        src = src + '&description=' + encodeURIComponent(pinDescription);
-    }
+        // any special requests?
+        let shape = this.element.getAttribute('data-shape');
+        let color = this.element.getAttribute('data-color');
+        let height = this.element.getAttribute('data-height');
+        let lang = this.element.getAttribute('data-lang');
 
-    for (let i = 0; i < VALID_PARAMS.length; i = i + 1) {
-        let v = this.element.getAttribute(VALID_PARAMS[i]);
-        if (v) {
-            // remove data- prefix from params
-            src = src + '&' + VALID_PARAMS[i].replace(/data-/, '') + '=' + encodeURIComponent(v);
+        // start setting our class name
+        let className = '';
+
+        // first selector: set size and shape
+
+        if (shape === 'round') {
+          // we're round
+          className = 'amp-pinterest-round';
+          if (height === '32') {
+            // we're tall
+            className = 'amp-pinterest-round-32';
+          }
+        } else {
+          // we're rectangular
+          className = 'amp-pinterest-rect';
+          if (height === '28') {
+            // we're tall
+            className = className + '-28';
+          }
+
+          // second selector: set background image
+
+          className = className + ' amp-pinterest';
+          if (lang !== 'ja') {
+            // we're not Japanese
+            lang = 'en';
+          }
+
+          className = className + '-' + lang;
+          if (color !== 'red' && color !== 'white') {
+            // if we're not red or white, we're gray
+            color = 'gray';
+          }
+          className = className + '-' + color;
+
+          // yes, we do this twice; once for container and once for background image
+          if (height === '28') {
+            // we're tall
+            className = className + '-28';
+          }
         }
+
+        a.className = className;
+
+        a.addEventListener('click', function (e) {
+          window.open(this.href, '_pinit', 'status=no,resizable=yes,scrollbars=yes,personalbar=no,directories=no,location=no,toolbar=no,menubar=no,width=900,height=500,left=0,top=0');
+          e.preventDefault();
+        });
+
+        this.applyFillContent(a);
+        this.element.appendChild(a);
+        return loadPromise(a);
+
+    } else {
+
+      // we're a more complex widget, currently rendered in an iframe
+      let iframe = document.createElement('iframe');
+      iframe.setAttribute('frameborder', '0');
+      iframe.setAttribute('allowtransparency', 'true');
+
+      // start setting the source of our iframe
+      let src = 'https://assets.pinterest.com/ext/iffy.html?' +
+          'act=' + encodeURIComponent(pinDo) +
+          '&url=' + encodeURIComponent(pinUrl);
+
+      for (let i = 0; i < VALID_PARAMS.length; i = i + 1) {
+          let v = this.element.getAttribute(VALID_PARAMS[i]);
+          if (v) {
+              // remove data- prefix from params
+              src = src + '&' + VALID_PARAMS[i].replace(/data-/, '') + '=' + encodeURIComponent(v);
+          }
+      }
+
+      iframe.src = src;
+
+      this.applyFillContent(iframe);
+      iframe.width = width;
+      iframe.height = height;
+      this.element.appendChild(iframe);
+      return loadPromise(iframe);
+
     }
-
-    iframe.src = src;
-
-    this.applyFillContent(iframe);
-    iframe.width = width;
-    iframe.height = height;
-    this.element.appendChild(iframe);
-    return loadPromise(iframe);
   }
 };
 
-AMP.registerElement('amp-pinterest', AmpPinterest);
+AMP.registerElement('amp-pinterest', AmpPinterest, $CSS$);
