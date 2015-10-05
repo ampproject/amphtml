@@ -44,7 +44,7 @@ export function installVideo(win) {
         assertHttpsUrl(this.element.getAttribute('src'), this.element);
       }
       this.propagateAttributes(
-          ['src', 'controls', 'autoplay', 'muted', 'loop'],
+          ['src', 'controls', 'autoplay', 'muted', 'loop', 'poster'],
           video);
       video.width = getLengthNumeral(width);
       video.height = getLengthNumeral(height);
@@ -56,7 +56,19 @@ export function installVideo(win) {
         video.appendChild(child);
       });
       this.element.appendChild(video);
+      /** @private {?HTMLVideoElement} */
+      this.video_ = video;
       return loadPromise(video);
+    }
+
+    /** @override */
+    documentInactiveCallback() {
+      if (this.video_) {
+        this.video_.pause();
+      }
+      // No need to do layout later - user action will be expect to resume
+      // the playback.
+      return false;
     }
   }
 

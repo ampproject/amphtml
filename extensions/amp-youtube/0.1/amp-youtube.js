@@ -43,12 +43,28 @@ class AmpYoutube extends AMP.BaseElement {
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
     iframe.src = 'https://www.youtube.com/embed/' + encodeURIComponent(
-        videoId);
+        videoId) + '?enablejsapi=1';
     this.applyFillContent(iframe);
     iframe.width = width;
     iframe.height = height;
     this.element.appendChild(iframe);
+    /** @private {?Element} */
+    this.iframe_ = iframe;
     return loadPromise(iframe);
+  }
+
+  /** @override */
+  documentInactiveCallback() {
+    if (this.iframe_ && this.iframe_.contentWindow) {
+      this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify({
+        'event': 'command',
+        'func': 'pauseVideo',
+        'args': ''
+      }), '*');
+    }
+    // No need to do layout later - user action will be expect to resume
+    // the playback.
+    return false;
   }
 };
 

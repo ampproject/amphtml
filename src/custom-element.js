@@ -534,6 +534,25 @@ export function createAmpElementProto(win, name, implementationClass) {
   };
 
   /**
+   * Requests the resource to stop its activity when the document goes into
+   * inactive state. The scope is up to the actual component. Among other
+   * things the active playback of video or audio content must be stopped.
+   * The component must return `true` if it'd like to later receive
+   * {@link layoutCallback} in case document becomes active again.
+   *
+   * Calling this method on unbuilt ot unupgraded element has no effect.
+   *
+   * @return {!Promise}
+   * @package @final
+   */
+  ElementProto.documentInactiveCallback = function() {
+    if (!this.isBuilt() || !this.isUpgraded()) {
+      return false;
+    }
+    return this.implementation_.documentInactiveCallback();
+  };
+
+  /**
    * Enqueues the action with the element. If element has been upgraded and
    * built, the action is dispatched to the implementation right away.
    * Otherwise the invocation is enqueued until the implementation is ready

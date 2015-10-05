@@ -143,8 +143,6 @@ export class Resources {
     // When document becomes visible, e.g. from "prerender" mode, do a
     // simple pass.
     this.viewer_.onVisibilityChanged(() => {
-      this.visible_ = this.viewer_.isVisible();
-      this.prerenderSize_ = this.viewer_.getPrerenderSize();
       this.schedulePass();
     });
 
@@ -394,6 +392,10 @@ export class Resources {
       return;
     }
 
+    let prevVisible = this.visible_;
+    this.visible_ = this.viewer_.isVisible();
+    this.prerenderSize_ = this.viewer_.getPrerenderSize();
+
     let viewportSize = this.viewport_.getSize();
     log.fine(TAG_, 'PASS: at ' + timer.now() +
         ', visible=', this.visible_,
@@ -404,6 +406,13 @@ export class Resources {
         ', prerenderSize=', this.prerenderSize_);
     this.pass_.cancel();
     this.vsyncScheduled_ = false;
+
+    // If document becomes invisible, bring everything into inactive state.
+    if (prevVisible && !this.visible_) {
+      log.fine(TAG_, 'document become inactive');
+      this.documentBecameInactive_();
+      return;
+    }
 
     // If viewport size is 0, the manager will wait for the resize event.
     if (viewportSize.height > 0 && viewportSize.width > 0) {
@@ -581,6 +590,18 @@ export class Resources {
           }
         }
       }
+    }
+  }
+
+  /**
+   * Brings all resources into inactive state. First it sets "in viewport"
+   * state to false and then it calls documentInactive callback.
+   * @private
+   */
+  documentBecameInactive_() {
+    for (let i = 0; i < this.resources_.length; i++) {
+      let r = this.resources_[i];
+      r.documentBecameInactive();
     }
   }
 
@@ -1264,6 +1285,22 @@ export class Resource {
     log.fine(TAG_, 'inViewport:', this.debugid, inViewport);
     this.isInViewport_ = inViewport;
     this.element.viewportCallback(inViewport);
+  }
+
+  /**
+   * Calls element's documentInactiveCallback callback and resets state for
+   * relayout in case document becomes active again.
+   */
+  documentBecameInactive() {
+    if (this.state_ == ResourceState_.NOT_BUILT) {
+      return;
+    }
+    if (this.isInViewport()) {
+      this.setInViewport(false);
+    }
+    if (this.element.documentInactiveCallback()) {
+      this.state_ = ResourceState_.NOT_LAID_OUT;
+    }
   }
 }
 

@@ -523,7 +523,9 @@ describe('Resources.Resource', () => {
       getBoundingClientRect: () => {return null;},
       isRelayoutNeeded: () => {return false;},
       layoutCallback: () => {},
-      changeHeight: () => {}
+      changeHeight: () => {},
+      documentInactiveCallback: () => false,
+      viewportCallback: () => {}
     };
     elementMock = sandbox.mock(element);
 
@@ -852,5 +854,44 @@ describe('Resources.Resource', () => {
     elementMock.expects('changeHeight').withExactArgs(111).once();
     resource.changeHeight(111);
     expect(resource.getState()).to.equal(ResourceState_.NOT_BUILT);
+  });
+
+
+  it('should NOT call documentInactiveCallback on unbuilt element', () => {
+    resource.state_ = ResourceState_.NOT_BUILT;
+    elementMock.expects('viewportCallback').never();
+    elementMock.expects('documentInactiveCallback').never();
+    resource.documentBecameInactive();
+    expect(resource.getState()).to.equal(ResourceState_.NOT_BUILT);
+  });
+
+  it('should call documentInactiveCallback on built element and update state',
+      () => {
+    resource.state_ = ResourceState_.LAYOUT_COMPLETE;
+    elementMock.expects('documentInactiveCallback').returns(true).once();
+    resource.documentBecameInactive();
+    expect(resource.getState()).to.equal(ResourceState_.NOT_LAID_OUT);
+  });
+
+  it('should call documentInactiveCallback on built element' +
+      ' but NOT update state', () => {
+    resource.state_ = ResourceState_.LAYOUT_COMPLETE;
+    elementMock.expects('documentInactiveCallback').returns(false).once();
+    resource.documentBecameInactive();
+    expect(resource.getState()).to.equal(ResourceState_.LAYOUT_COMPLETE);
+  });
+
+  it('should NOT call viewportCallback when resource not in viewport', () => {
+    resource.state_ = ResourceState_.LAYOUT_COMPLETE;
+    resource.isInViewport_ = false;
+    elementMock.expects('viewportCallback').never();
+    resource.documentBecameInactive();
+  });
+
+  it('should call viewportCallback when resource in viewport', () => {
+    resource.state_ = ResourceState_.LAYOUT_COMPLETE;
+    resource.isInViewport_ = true;
+    elementMock.expects('viewportCallback').withExactArgs(false).once();
+    resource.documentBecameInactive();
   });
 });

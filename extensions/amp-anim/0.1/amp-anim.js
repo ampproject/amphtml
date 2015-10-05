@@ -70,11 +70,18 @@ class AmpAnim extends AMP.BaseElement {
   viewportCallback(inViewport) {
     if (this.placeholder_) {
       if (!inViewport || !this.loadPromise_) {
-        this.updateInViewport_(inViewport);
+        this.updateInViewport_();
       } else {
-        this.loadPromise_.then(() => this.updateInViewport_(inViewport));
+        this.loadPromise_.then(() => this.updateInViewport_());
       }
     }
+  }
+
+  /** @override */
+  documentInactiveCallback() {
+    // Release memory held by the image - animations are typically large.
+    this.img_.src = '';
+    return true;
   }
 
   /** @private */
