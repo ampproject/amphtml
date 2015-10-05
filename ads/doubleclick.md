@@ -34,7 +34,7 @@ limitations under the License.
   <amp-ad width=320 height=50
       type="doubleclick"
       data-slot="/4119129/mobile_ad_banner"
-      json='{"targeting":{"sport":["rugby","cricket"]},"categoryExclusion":"health","tagForChildDirectedTreatment":false}'
+      json='{"targeting":{"sport":["rugby","cricket"]},"categoryExclusion":"health","tagForChildDirectedTreatment":1}'
       >
   </amp-ad>
 ```
