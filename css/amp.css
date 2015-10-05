@@ -127,7 +127,7 @@ i-amp-sizer {
   display: block;
 }
 
-[placeholder].hidden {
+[placeholder].-amp-hidden {
   visibility: hidden;
 }
 
@@ -196,7 +196,7 @@ amp-pixel {
  * We want to be a bit more specific here as we don't want a global active
  * to just trigger the loading animation
  */
-.-amp-autoplaceholder.active .-amp-loader-dot {
+.-amp-autoplaceholder.-amp-active .-amp-loader-dot {
   animation: -amp-loader-dots 2s infinite;
 }
 

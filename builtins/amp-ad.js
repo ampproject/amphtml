@@ -125,7 +125,7 @@ export function installAd(win) {
     /** @override */
     buildCallback() {
       if (this.placeholder_) {
-        this.placeholder_.classList.add('hidden');
+        this.placeholder_.classList.add('-amp-hidden');
       } else {
         this.isDefaultPlaceholder_ = true;
         if (this.getDpr() >= 0.5) {
@@ -152,7 +152,7 @@ export function installAd(win) {
             this.element.removeChild(this.iframe_);
             this.isDefaultPlaceholderSet_ = true;
           }
-          this.placeholder_.classList.remove('hidden');
+          this.placeholder_.classList.remove('-amp-hidden');
         });
       }
       return loadPromise(this.iframe_);
@@ -170,7 +170,7 @@ export function installAd(win) {
       a.href = 'https://www.ampproject.org';
       a.target = '_blank';
       a.setAttribute('placeholder', '');
-      a.classList.add('hidden');
+      a.classList.add('-amp-hidden');
       var img = new Image();
       setStyles(img, {
         width: 'auto',
