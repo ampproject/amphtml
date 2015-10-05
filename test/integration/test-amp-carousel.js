@@ -17,7 +17,7 @@
 import {createFixtureIframe, expectBodyToBecomeVisible} from
     '../../testing/iframe.js';
 
-describe.skip('amp-carousel', () => {
+describe('amp-carousel', () => {
 
   let fixture;
   beforeEach(() => {
@@ -130,6 +130,34 @@ describe.skip('amp-carousel', () => {
         nextBtn.click();
         expect(prevBtn).to.be.visible;
         expect(nextBtn).to.be.hidden;
+      });
+    });
+
+    it('(type=slides loop) should always have a prev and next button be ' +
+       'able to get past the first and last item', () => {
+      return fixture.awaitEvent('amp:load:start', 7).then(() => {
+        let amp = fixture.doc.querySelector('#slides-4');
+        expect(fixture.doc.body).to.have.class('amp-mode-mouse');
+        let prevBtn = amp.querySelector('.amp-carousel-button-prev');
+        let nextBtn = amp.querySelector('.amp-carousel-button-next');
+        expect(prevBtn).to.not.have.class('-amp-disabled');
+        expect(nextBtn).to.not.have.class('-amp-disabled');
+        nextBtn.click();
+        expect(prevBtn).to.not.have.class('-amp-disabled');
+        expect(nextBtn).to.not.have.class('-amp-disabled');
+        nextBtn.click();
+        expect(prevBtn).to.not.have.class('-amp-disabled');
+        expect(nextBtn).to.not.have.class('-amp-disabled');
+        nextBtn.click();
+        expect(prevBtn).to.not.have.class('-amp-disabled');
+        expect(nextBtn).to.not.have.class('-amp-disabled');
+        // TODO(erwinm): figure out why do we need 2 extra clicks here?
+        nextBtn.click();
+        expect(prevBtn).to.not.have.class('-amp-disabled');
+        expect(nextBtn).to.not.have.class('-amp-disabled');
+        nextBtn.click();
+        expect(prevBtn).to.not.have.class('-amp-disabled');
+        expect(nextBtn).to.not.have.class('-amp-disabled');
       });
     });
 
