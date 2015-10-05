@@ -727,6 +727,7 @@ describe('PinchRecognizer', () => {
           return (data.first === true && data.last === false &&
               data.centerClientX == 100 &&
               data.centerClientY == 100 &&
+              data.dir == 1 &&
               data.deltaX == 10 &&
               data.deltaY == 10 &&
               data.time == 11 &&
@@ -774,6 +775,7 @@ describe('PinchRecognizer', () => {
           return (data.first === false && data.last === false &&
               data.centerClientX == 100 &&
               data.centerClientY == 100 &&
+              data.dir == 1 &&
               data.deltaX == 20 &&
               data.deltaY == 20 &&
               data.velocityX > 0 &&
@@ -803,6 +805,7 @@ describe('PinchRecognizer', () => {
     gesturesMock.expects('signalEmit_').withExactArgs(recognizer,
         sinon.match((data) => {
           return (data.first === false && data.last === true &&
+              data.dir == 1 &&
               data.deltaX == 10 &&
               data.deltaY == 10 &&
               diff(data.velocityX, 0.79, 1e-2) &&
@@ -832,6 +835,7 @@ describe('PinchRecognizer', () => {
     gesturesMock.expects('signalEmit_').withExactArgs(recognizer,
         sinon.match((data) => {
           return (data.first === false && data.last === true &&
+              data.dir == 1 &&
               data.deltaX == 10 &&
               data.deltaY == 10 &&
               data.velocityX == 0 &&
