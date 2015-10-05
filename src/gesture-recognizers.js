@@ -614,12 +614,14 @@ export class TapzoomRecognizer extends GestureRecognizer {
 
 /**
  * A "pinch" gesture. It has a center, delta off the center center and
- * the velocity of moving away from the center.
+ * the velocity of moving away from the center. "dir" component of `1`
+ * indicates that it's a expand motion and `-1` indicates pinch motion.
  * @typedef {{
  *   first: boolean,
  *   last: boolean,
  *   centerClientX: number,
  *   centerClientY: number,
+ *   dir: number,
  *   deltaX: number,
  *   deltaY: number,
  *   velocityX: number,
@@ -776,12 +778,17 @@ export class PinchRecognizer extends GestureRecognizer {
       this.prevTime_ = this.lastTime_;
     }
 
+    let startSq = this.sqDist_(this.startX1_, this.startX2_,
+        this.startY1_, this.startY2_);
+    let lastSq = this.sqDist_(this.lastX1_, this.lastX2_,
+        this.lastY1_, this.lastY2_);
     this.signalEmit({
       first: first,
       last: last,
       time: this.lastTime_,
       centerClientX: this.centerClientX_,
       centerClientY: this.centerClientY_,
+      dir: Math.sign(lastSq - startSq),
       deltaX: deltaX * 0.5,
       deltaY: deltaY * 0.5,
       velocityX: this.velocityX_ * 0.5,
@@ -799,6 +806,18 @@ export class PinchRecognizer extends GestureRecognizer {
       this.emit_(false, true, event);
       this.signalEnd();
     }
+  }
+
+  /**
+   * @param {number} x1
+   * @param {number} x2
+   * @param {number} y1
+   * @param {number} y2
+   * @return {number}
+   * @private
+   */
+  sqDist_(x1, x2, y1, y2) {
+    return (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2);
   }
 
   /**
