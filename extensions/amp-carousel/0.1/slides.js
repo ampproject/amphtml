@@ -34,6 +34,9 @@ export class AmpSlides extends BaseCarousel {
 
   /** @override */
   buildCarousel() {
+    /** @private @const {boolean} */
+    this.isLooping_ = this.element.hasAttribute('loop');
+
     /** @private {!Array<!Element>} */
     this.slides_ = this.getRealChildren();
     this.slides_.forEach((slide, i) => {
@@ -301,11 +304,17 @@ export class AmpSlides extends BaseCarousel {
 
   /** @override */
   hasPrev() {
+    if (this.isLooping_) {
+      return true;
+    }
     return this.currentIndex_ != 0;
   }
 
   /** @override */
   hasNext() {
+    if (this.isLooping_) {
+      return true;
+    }
     return this.currentIndex_ != this.slides_.length - 1;
   }
 }
