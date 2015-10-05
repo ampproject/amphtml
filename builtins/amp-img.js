@@ -107,7 +107,10 @@ export function installImg(win) {
      * @private
      */
     updateImageSrc_() {
-      let src = this.srcset_.select(this.element.offsetWidth,
+      if (this.getLayoutWidth() <= 0) {
+        return Promise.resolve();
+      }
+      let src = this.srcset_.select(this.getLayoutWidth(),
           this.getDpr()).url;
       if (src == this.img_.getAttribute('src')) {
         return Promise.resolve();

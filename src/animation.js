@@ -188,7 +188,7 @@ class AnimationPlayer {
   /**
    * Chains to the animation's promise that will resolve when the animation has
    * completed or will reject if animation has failed or was interrupted.
-   * @param {!Function=} opt_resovle
+   * @param {!Function=} opt_resolve
    * @param {!Function=} opt_reject
    * @return {!Promise}
    */

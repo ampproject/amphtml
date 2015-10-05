@@ -228,6 +228,9 @@ export function createAmpElementProto(win, name, implementationClass) {
     /** @private {!Layout} */
     this.layout_ = Layout.NODISPLAY;
 
+    /** @private {number} */
+    this.layoutWidth_ = -1;
+
     /** @private {string|null|undefined} */
     this.mediaQuery_;
 
@@ -278,6 +281,7 @@ export function createAmpElementProto(win, name, implementationClass) {
       throw new Error('Layout not supported: ' + this.layout_);
     }
     this.implementation_.layout_ = this.layout_;
+    this.implementation_.layoutWidth_ = this.layoutWidth_;
     if (this.everAttached) {
       this.implementation_.firstAttachedCallback();
       this.dispatchCustomEvent('amp:attached');
@@ -342,6 +346,18 @@ export function createAmpElementProto(win, name, implementationClass) {
       }
     }
     return true;
+  };
+
+  /**
+   * Updates the layout box of the element.
+   * See {@link BaseElement.getLayoutWidth} for details.
+   * @param {!LayoutRect} layoutBox
+   */
+  ElementProto.updateLayoutBox = function(layoutBox) {
+    this.layoutWidth_ = layoutBox.width;
+    if (this.isUpgraded()) {
+      this.implementation_.layoutWidth_ = this.layoutWidth_;
+    }
   };
 
   /**

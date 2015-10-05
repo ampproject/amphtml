@@ -226,6 +226,7 @@ describe('Resources discoverWork', () => {
         return null;
       },
       getBoundingClientRect: () => rect,
+      updateLayoutBox: () => {},
       applyMediaQuery: () => {},
       viewportCallback: sinon.spy(),
       prerenderAllowed: () => true,
@@ -521,6 +522,7 @@ describe('Resources.Resource', () => {
       renderOutsideViewport: () => {return true;},
       build: (force) => {return false;},
       getBoundingClientRect: () => {return null;},
+      updateLayoutBox: () => {},
       isRelayoutNeeded: () => {return false;},
       layoutCallback: () => {},
       changeHeight: () => {},
@@ -627,6 +629,11 @@ describe('Resources.Resource', () => {
 
     elementMock.expects('getBoundingClientRect').
         returns({left: 11, top: 12, width: 111, height: 222}).
+        once();
+    elementMock.expects('updateLayoutBox').
+        withExactArgs(sinon.match((data) => {
+          return data.width == 111 && data.height == 222;
+        })).
         once();
     resource.measure();
     expect(resource.getState()).to.equal(ResourceState_.READY_FOR_LAYOUT);

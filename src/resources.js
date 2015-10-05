@@ -1002,7 +1002,7 @@ export class Resource {
     /** @private {number} */
     this.layoutCount_ = 0;
 
-    /** @private {?LayoutRect} */
+    /** @private {!LayoutRect} */
     this.layoutBox_ = layoutRectLtwh(-10000, -10000, 0, 0);
 
     /** @private {boolean} */
@@ -1128,6 +1128,7 @@ export class Resource {
       }
     }
     this.layoutBox_ = box;
+    this.element.updateLayoutBox(box);
   }
 
   /**

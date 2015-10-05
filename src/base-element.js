@@ -88,6 +88,9 @@ export class BaseElement {
     /** @package {!Layout} */
     this.layout_ = Layout.NODISPLAY;
 
+    /** @package {number} */
+    this.layoutWidth_ = -1;
+
     /** @package {boolean} */
     this.inViewport_ = false;
 
@@ -101,6 +104,17 @@ export class BaseElement {
   /** @return {!Layout} */
   getLayout() {
     return this.layout_;
+  }
+
+  /**
+   * Returns the layout width for this element. A `-1` value indicates that the
+   * layout is not yet known. A `0` value indicates that the element is not
+   * visible.
+   * @return {number}
+   * @protected
+   */
+  getLayoutWidth() {
+    return this.layoutWidth_;
   }
 
   /**

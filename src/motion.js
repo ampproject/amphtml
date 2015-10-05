@@ -174,7 +174,7 @@ class Motion {
   /**
    * Chains to the motion's promise that will resolve when the motion has
    * completed or will reject if motion has failed or was interrupted.
-   * @param {!Function=} opt_resovle
+   * @param {!Function=} opt_resolve
    * @param {!Function=} opt_reject
    * @return {!Promise}
    */

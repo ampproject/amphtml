@@ -67,7 +67,6 @@ export class AmpSlides extends BaseCarousel {
       var oldSlide = this.slides_[this.currentIndex_];
       this.currentIndex_ = newIndex;
       this.prepareSlide_(newSlide, dir);
-      var containerWidth = this.element.offsetWidth;
       if (!animate) {
         this.commitSwitch_(oldSlide, newSlide);
       } else {
