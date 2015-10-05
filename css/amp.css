@@ -226,6 +226,21 @@ amp-pixel {
   animation-delay: .2s;
 }
 
+/**
+ * Instagram wraps the standard image into a fixed size container.
+ * With these offsets, users can simply specify the the size of the
+ * instagram images and things have the right size.
+ * In particular the effect of adding padding to this container is
+ * that with responsive layouts the responsiveness is based on the
+ * asset while the padding stays constant.
+ * This information is here instead of living with the CSS of the
+ * component, so that the runtime can reserve the correct space
+ * before the instagram implementation loads.
+ */
+amp-instagram {
+  padding: 48px 8px !important;
+}
+
 @keyframes -amp-loader-dots {
   0%, 100% {
     transform: scale(.7);

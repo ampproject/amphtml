@@ -233,11 +233,13 @@ function buildExamples(watch) {
     });
   }
 
+  // Also update test-example-validation.js
   buildExample('ads.amp.html');
-  buildExample('everything.amp.html');
-  buildExample('released.amp.html');
   buildExample('article.amp.html');
   buildExample('article-metadata.amp.html');
+  buildExample('everything.amp.html');
+  buildExample('instagram.amp.html');
+  buildExample('released.amp.html');
   buildExample('twitter.amp.html');
 }
 

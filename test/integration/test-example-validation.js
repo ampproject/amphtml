@@ -39,6 +39,9 @@ describe('example', function() {
     'article-metadata.amp.html',
     'article.amp.html',
     'everything.amp.html',
+    'instagram.amp.html',
+    'released.amp.html',
+    'twitter.amp.html',
   ];
 
   // Only add to this whitelist to temporarily manage discrepancies
