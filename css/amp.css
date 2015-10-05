@@ -24,6 +24,13 @@ body {
   margin: 0 !important;
 }
 
+/** These properties can be overriden by user stylesheets. */
+body {
+  /* Text adjust is set to 100% to avoid iOS Safari bugs where the font-size is
+     sometimes not restored during orientation. See #449. */
+  text-size-adjust: 100%;
+}
+
 .-amp-element {
   display: inline-block;
 }
