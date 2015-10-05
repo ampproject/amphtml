@@ -87,7 +87,7 @@ export class BaseCarousel extends AMP.BaseElement {
   }
 
   /**
-   * Calls `goCallback` and `setControlState` for transition behavior.
+   * Calls `goCallback` and `setControlsState` for transition behavior.
    * @param {number} dir -1 or 1
    * @param {boolean} animate
    */
