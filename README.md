@@ -20,14 +20,13 @@ AMP HTML is a way to build web pages for static content that render with reliabl
 
 AMP HTML is entirely built on existing web technologies. It achieves reliable performance by restricting some parts of HTML, CSS and JavaScript. These restrictions are enforced with a validator that ships with AMP HTML. To make up for those limitations AMP HTML provides a set of [custom elements](http://www.html5rocks.com/en/tutorials/webcomponents/customelements/) for rich content beyond basic HTML.
 
-For more info how AMP HTML works and some insights into the design, please read our blog post ["Web performance: An intervention"](https://www.ampproject.org/how-it-works/) (which may be the first AMP HTML file you ever see).
+For more info how AMP HTML works and some insights into the design, please read our blog post ["A new approach to web performance"](https://www.ampproject.org/how-it-works/) (which may be the first AMP HTML file you ever see :).
 
 We also have a non-technical description of what we are doing on [www.ampproject.org](https://www.ampproject.org).
 
 # How does AMP HTML work?
 
-AMP HTML works by including the AMP JS library and adding a bit of boilerplate to a web page so it meets the AMP
-HTML Specification:
+AMP HTML works by including the AMP JS library and adding a bit of boilerplate to a web page, so that it meets the AMP HTML Specification. The simplest AMP HTML file looks like this:
 
 ```html
 <!doctype html>
@@ -39,7 +38,7 @@ HTML Specification:
   <script src="https://cdn.ampproject.org/v0.js" async></script>
   <style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
 </head>
-<body></body>
+<body>Hello World!</body>
 </html>
 ```
 
