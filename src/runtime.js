@@ -21,6 +21,7 @@ import {installStyles} from './styles';
 import {registerElement} from './custom-element';
 import {registerExtendedElement} from './extended-element';
 import {viewerFor} from './viewer';
+import {viewportFor} from './viewport';
 
 
 /** @type {!Array} */
@@ -82,6 +83,14 @@ export function adopt(global) {
     /** @const */
     global.AMP.toggleRuntime = viewer.toggleRuntime.bind(viewer);
   }
+
+  let viewport = viewportFor(global);
+
+  /** @const */
+  global.AMP.viewport = {};
+  global.AMP.viewport.getScrollLeft = viewport.getScrollLeft.bind(viewport);
+  global.AMP.viewport.getScrollWidth = viewport.getScrollWidth.bind(viewport);
+  global.AMP.viewport.getWidth = viewport.getWidth.bind(viewport);
 
   /**
    * Registers a new custom element.
