@@ -36,7 +36,7 @@ describe('amp-vine', () => {
 
   it('renders', () => {
     return getVine('MdKjXez002d').then((vine) => {
-      var iframe = vines.querySelector('iframe');
+      var iframe = vine.querySelector('iframe');
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.src).to.equal('https://vine.co/v/e2eTlxAYvqO/embed/simple');
