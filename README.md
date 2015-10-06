@@ -53,7 +53,7 @@ This allows the AMP library to include:
 
 ## The AMP JS library
 
-The AMP JS library provides basic AMP Components and manages the loading of external resources
+The AMP JS library provides builtin AMP Components and manages the loading of external resources
 and ensure a reliably fast time-to-paint.
 
 ## The AMP Validator
@@ -110,11 +110,12 @@ Technical Specifications:
 Resources:
 * [AMP HTML samples](examples/)
 * [AMP HTML FAQ](docs/FAQ.md)
+* [AMP-HTML on StackOverflow](https://stackoverflow.com/questions/tagged/amp-html)
 
 # Who made AMP HTML?
 
-AMP HTML is made by the [AMP Project](www.ampproject.org]), and is licensed
-under the [Apache License, Version 2.0](LICENSE.md).
+AMP HTML is made by the [AMP Project](https://www.ampproject.org/), and is licensed
+under the [Apache License, Version 2.0](LICENSE).
 
 ## Contributing
 
