@@ -155,6 +155,12 @@ describe('Viewport', () => {
     bindingMock.expects('setScrollTop').withArgs(111 - /* padding */ 19).once();
     viewport.scrollIntoView(element);
   });
+
+  it('should deletegate scrollWidth', () => {
+    let bindingMock = sandbox.mock(binding);
+    bindingMock.expects('getScrollWidth').withArgs().returns(111).once();
+    expect(viewport.getScrollWidth()).to.equal(111);
+  });
 });
 
 
@@ -223,6 +229,16 @@ describe('ViewportBindingNatural', () => {
     expect(binding.getScrollTop()).to.equal(17);
   });
 
+  it('should calculate scrollWidth from scrollElement', () => {
+    windowApi.pageYOffset = 11;
+    windowApi.document = {
+      scrollingElement: {
+        scrollWidth: 117
+      }
+    };
+    expect(binding.getScrollWidth()).to.equal(117);
+  });
+
   it('should update scrollTop on scrollElement', () => {
     windowApi.pageYOffset = 11;
     windowApi.document = {
@@ -260,6 +276,7 @@ describe('ViewportBindingNatural', () => {
 
 describe('ViewportBindingNaturalIosEmbed', () => {
   let sandbox;
+  let clock;
   let windowMock;
   let binding;
   let windowApi;
@@ -269,6 +286,7 @@ describe('ViewportBindingNaturalIosEmbed', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
+    clock = sandbox.useFakeTimers();
     var WindowApi = function() {};
     windowEventHandlers = {};
     bodyEventListeners = {};
@@ -277,10 +295,12 @@ describe('ViewportBindingNaturalIosEmbed', () => {
       windowEventHandlers[eventType] = handler;
     };
     windowApi = new WindowApi();
+    windowApi.innerWidth = 555;
     windowApi.document = {
       readyState: 'complete',
       documentElement: {style: {}},
       body: {
+        scrollWidth: 777,
         style: {},
         appendChild: (child) => {
           bodyChildren.push(child);
@@ -300,6 +320,8 @@ describe('ViewportBindingNaturalIosEmbed', () => {
     };
     windowMock = sandbox.mock(windowApi);
     binding = new ViewportBindingNaturalIosEmbed_(windowApi);
+    clock.tick(1);
+    return Promise.resolve();
   });
 
   afterEach(() => {
@@ -314,6 +336,19 @@ describe('ViewportBindingNaturalIosEmbed', () => {
     expect(windowEventHandlers['resize']).to.not.equal(undefined);
     expect(windowEventHandlers['scroll']).to.equal(undefined);
     expect(bodyEventListeners['scroll']).to.not.equal(undefined);
+  });
+
+  it('should pre-calculate scrollWidth', () => {
+    expect(binding.scrollWidth_).to.equal(777);
+  });
+
+  it('should defer scrollWidth to max of window.innerHeight ' +
+        ' and body.scrollWidth', () => {
+    binding.scrollWidth_ = 0;
+    expect(binding.getScrollWidth()).to.equal(555);
+
+    binding.scrollWidth_ = 1000;
+    expect(binding.getScrollWidth()).to.equal(1000);
   });
 
   it('should setup document for embed scrolling', () => {

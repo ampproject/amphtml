@@ -65,6 +65,9 @@ export class Viewport {
     this./*OK*/scrollTop_ = this.binding_.getScrollTop();
 
     /** @private {number} */
+    this./*OK*/scrollLeft_ = this.binding_.getScrollLeft();
+
+    /** @private {number} */
     this.paddingTop_ = viewer.getPaddingTop();
 
     /** @private {number} */
@@ -109,9 +112,26 @@ export class Viewport {
    * Returns the viewport's top position in the document. This is essentially
    * the scroll position.
    * @return {number}
+   * @deprecated Use {@link getScrollTop}
    */
   getTop() {
+    return this.getScrollTop();
+  }
+
+  /**
+   * Returns the viewport's vertical scroll position.
+   * @return {number}
+   */
+  getScrollTop() {
     return this./*OK*/scrollTop_;
+  }
+
+  /**
+   * Returns the viewport's horizontal scroll position.
+   * @return {number}
+   */
+  getScrollLeft() {
+    return this./*OK*/scrollLeft_;
   }
 
   /**
@@ -120,6 +140,22 @@ export class Viewport {
    */
   getSize() {
     return this.binding_.getSize();
+  }
+
+  /**
+   * Returns the width of the viewport.
+   * @return {number}
+   */
+  getWidth() {
+    return this.binding_.getSize().width;
+  }
+
+  /**
+   * Returns the scroll width of the content within the viewport.
+   * @return {number}
+   */
+  getScrollWidth() {
+    return this.binding_.getScrollWidth();
   }
 
   /**
@@ -185,6 +221,8 @@ export class Viewport {
 
   /** @private */
   scroll_() {
+    this./*OK*/scrollLeft_ = this.binding_.getScrollLeft();
+
     if (this.scrollTracking_) {
       return;
     }
@@ -296,6 +334,12 @@ class ViewportBinding {
   getScrollLeft() {}
 
   /**
+   * Returns the scroll width of the content within the viewport.
+   * @return {number}
+   */
+  getScrollWidth() {}
+
+  /**
    * Returns the rect of the element within the document.
    * @param {!Element} el
    * @return {!LayoutRect}
@@ -390,6 +434,11 @@ export class ViewportBindingNatural_ {
   }
 
   /** @override */
+  getScrollWidth() {
+    return this.getScrollingElement_().scrollWidth;
+  }
+
+  /** @override */
   getLayoutRect(el) {
     var scrollTop = this.getScrollTop();
     var scrollLeft = this.getScrollLeft();
@@ -441,6 +490,9 @@ export class ViewportBindingNaturalIosEmbed_ {
     /** @const {!Window} */
     this.win = win;
 
+    /** @private {number} */
+    this.scrollWidth_ = 0;
+
     /** @private {?Element} */
     this.scrollPosEl_ = null;
 
@@ -456,7 +508,13 @@ export class ViewportBindingNaturalIosEmbed_ {
     /** @private @const {!Observable} */
     this.resizeObservable_ = new Observable();
 
-    onDocumentReady(this.win.document, this.setup_.bind(this));
+    onDocumentReady(this.win.document, () => {
+      // Microtask is necessary here to let Safari to recalculate scrollWidth
+      // post DocumentReady signal.
+      timer.delay(() => {
+        this.setup_();
+      }, 0);
+    });
     this.win.addEventListener('resize', () => this.resizeObservable_.fire());
 
     log.fine(TAG_, 'initialized natural viewport for iOS embeds');
@@ -466,6 +524,9 @@ export class ViewportBindingNaturalIosEmbed_ {
   setup_() {
     let documentElement = this.win.document.documentElement;
     let documentBody = this.win.document.body;
+
+    // TODO(dvoytenko): need to also find a way to do this on resize.
+    this.scrollWidth_ = documentBody.scrollWidth || 0;
 
     // Embedded scrolling on iOS is rather complicated. IFrames cannot be sized
     // and be scrollable. Sizing iframe by scrolling height has a big negative
@@ -566,6 +627,11 @@ export class ViewportBindingNaturalIosEmbed_ {
   /** @override */
   getScrollLeft() {
     return Math.round(this.pos_.x);
+  }
+
+  /** @override */
+  getScrollWidth() {
+    return Math.max(this.scrollWidth_, this.win.innerWidth);
   }
 
   /** @override */
@@ -736,6 +802,11 @@ export class ViewportBindingVirtual_ {
   /** @override */
   getScrollLeft() {
     return 0;
+  }
+
+  /** @override */
+  getScrollWidth() {
+    return this.win.document.documentElement.scrollWidth;
   }
 
   /**
