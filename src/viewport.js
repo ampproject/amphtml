@@ -179,7 +179,7 @@ export class Viewport {
   }
 
   /**
-   * Scrolls element into view much like Element.scrollIntoView does but
+   * Scrolls element into view much like Element. scrollIntoView does but
    * in the AMP/Viewer environment.
    * @param {!Element} element
    */
@@ -409,40 +409,42 @@ export class ViewportBindingNatural_ {
 
   /** @override */
   getSize() {
-    // Notice, that documentElement.clientHeight is buggy on iOS Safari and thus
-    // cannot be used. But when the values are undefined, fallback to
-    // documentElement.clientHeight.
+    // Notice, that documentElement./*OK*/clientHeight is buggy on iOS Safari
+    // and thus cannot be used. But when the values are undefined, fallback to
+    // documentElement./*OK*/clientHeight.
     if (platform.isIos() && !platform.isChrome()) {
-      var winWidth = this.win.innerWidth;
-      var winHeight = this.win.innerHeight;
+      var winWidth = this.win./*OK*/innerWidth;
+      var winHeight = this.win./*OK*/innerHeight;
       if (winWidth && winHeight) {
         return {width: winWidth, height: winHeight};
       }
     }
     var el = this.win.document.documentElement;
-    return {width: el.clientWidth, height: el.clientHeight};
+    return {width: el./*OK*/clientWidth, height: el./*OK*/clientHeight};
   }
 
   /** @override */
   getScrollTop() {
-    return this.getScrollingElement_()./*OK*/scrollTop || this.win.pageYOffset;
+    return this.getScrollingElement_()./*OK*/scrollTop ||
+        this.win./*OK*/pageYOffset;
   }
 
   /** @override */
   getScrollLeft() {
-    return this.getScrollingElement_().scrollLeft || this.win.pageXOffset;
+    return this.getScrollingElement_()./*OK*/scrollLeft ||
+        this.win./*OK*/pageXOffset;
   }
 
   /** @override */
   getScrollWidth() {
-    return this.getScrollingElement_().scrollWidth;
+    return this.getScrollingElement_()./*OK*/scrollWidth;
   }
 
   /** @override */
   getLayoutRect(el) {
     var scrollTop = this.getScrollTop();
     var scrollLeft = this.getScrollLeft();
-    var b = el.getBoundingClientRect();
+    var b = el./*OK*/getBoundingClientRect();
     return layoutRectLtwh(Math.round(b.left + scrollLeft),
         Math.round(b.top + scrollTop),
         Math.round(b.width),
@@ -460,8 +462,8 @@ export class ViewportBindingNatural_ {
    */
   getScrollingElement_() {
     var doc = this.win.document;
-    if (doc.scrollingElement) {
-      return doc.scrollingElement;
+    if (doc./*OK*/scrollingElement) {
+      return doc./*OK*/scrollingElement;
     }
     if (doc.body) {
       return doc.body;
@@ -526,7 +528,7 @@ export class ViewportBindingNaturalIosEmbed_ {
     let documentBody = this.win.document.body;
 
     // TODO(dvoytenko): need to also find a way to do this on resize.
-    this.scrollWidth_ = documentBody.scrollWidth || 0;
+    this.scrollWidth_ = documentBody./*OK*/scrollWidth || 0;
 
     // Embedded scrolling on iOS is rather complicated. IFrames cannot be sized
     // and be scrollable. Sizing iframe by scrolling height has a big negative
@@ -616,7 +618,10 @@ export class ViewportBindingNaturalIosEmbed_ {
 
   /** @override */
   getSize() {
-    return {width: this.win.innerWidth, height: this.win.innerHeight};
+    return {
+      width: this.win./*OK*/innerWidth,
+      height: this.win./*OK*/innerHeight
+    };
   }
 
   /** @override */
@@ -631,12 +636,12 @@ export class ViewportBindingNaturalIosEmbed_ {
 
   /** @override */
   getScrollWidth() {
-    return Math.max(this.scrollWidth_, this.win.innerWidth);
+    return Math.max(this.scrollWidth_, this.win./*OK*/innerWidth);
   }
 
   /** @override */
   getLayoutRect(el) {
-    var b = el.getBoundingClientRect();
+    var b = el./*OK*/getBoundingClientRect();
     return layoutRectLtwh(Math.round(b.left + this.pos_.x),
         Math.round(b.top + this.pos_.y),
         Math.round(b.width),
@@ -665,14 +670,14 @@ export class ViewportBindingNaturalIosEmbed_ {
     // body. Since in this case we are actually using direct body scrolling,
     // body's scrollTop would always return wrong values.
     // This will all change with a complete migration when
-    // document.scrollingElement will point to document.documentElement. This
-    // already works correctly in Chrome with "scroll-top-left-interop" flag
-    // turned on "chrome://flags/#scroll-top-left-interop".
+    // document./*OK*/scrollingElement will point to document.documentElement.
+    // This already works correctly in Chrome with "scroll-top-left-interop"
+    // flag turned on "chrome://flags/#scroll-top-left-interop".
     if (!this.scrollPosEl_) {
       return;
     }
     this.adjustScrollPos_(event);
-    let rect = this.scrollPosEl_.getBoundingClientRect();
+    let rect = this.scrollPosEl_./*OK*/getBoundingClientRect();
     if (this.pos_.x != -rect.left || this.pos_.y != -rect.top) {
       this.pos_.x = -rect.left;
       this.pos_.y = -rect.top;
@@ -686,7 +691,7 @@ export class ViewportBindingNaturalIosEmbed_ {
       return;
     }
     setStyle(this.scrollMoveEl_, 'transform', `translateY(${scrollPos}px)`);
-    this.scrollMoveEl_.scrollIntoView(true);
+    this.scrollMoveEl_./*OK*/scrollIntoView(true);
   }
 
   /**
@@ -701,7 +706,7 @@ export class ViewportBindingNaturalIosEmbed_ {
     // Scroll document into a safe position to avoid scroll freeze on iOS.
     // This means avoiding scrollTop to be minimum (0) or maximum value.
     // This is very sad but very necessary. See #330 for more details.
-    let scrollTop = -this.scrollPosEl_.getBoundingClientRect().top;
+    let scrollTop = -this.scrollPosEl_./*OK*/getBoundingClientRect().top;
     if (scrollTop == 0) {
       this.setScrollPos_(1);
       if (opt_event) {
@@ -806,7 +811,7 @@ export class ViewportBindingVirtual_ {
 
   /** @override */
   getScrollWidth() {
-    return this.win.document.documentElement.scrollWidth;
+    return this.win.document.documentElement./*OK*/scrollWidth;
   }
 
   /**
@@ -815,7 +820,7 @@ export class ViewportBindingVirtual_ {
    * @return {!LayoutRect}
    */
   getLayoutRect(el) {
-    var b = el.getBoundingClientRect();
+    var b = el./*OK*/getBoundingClientRect();
     return layoutRectLtwh(Math.round(b.left),
         Math.round(b.top),
         Math.round(b.width),

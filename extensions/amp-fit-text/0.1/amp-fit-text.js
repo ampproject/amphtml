@@ -96,7 +96,7 @@ class AmpFitText extends AMP.BaseElement {
 
   /** @private */
   updateFontSize_() {
-    let maxHeight = this.element.offsetHeight;
+    let maxHeight = this.element./*OK*/offsetHeight;
     let fontSize = calculateFontSize_(this.measurer_, maxHeight,
         this.minFontSize_, this.maxFontSize_);
     this.contentWrapper_.style.fontSize = st.px(fontSize);
@@ -121,7 +121,7 @@ export function calculateFontSize_(measurer, expectedHeight,
   while (maxFontSize - minFontSize > 1) {
     let mid = Math.floor((minFontSize + maxFontSize) / 2);
     measurer.style.fontSize = st.px(mid);
-    let height = measurer.offsetHeight;
+    let height = measurer./*OK*/offsetHeight;
     if (height > expectedHeight) {
       maxFontSize = mid;
     } else {
@@ -141,7 +141,7 @@ export function calculateFontSize_(measurer, expectedHeight,
  */
 export function updateOverflow_(content, measurer, maxHeight, fontSize) {
   measurer.style.fontSize = st.px(fontSize);
-  let overflown = measurer.offsetHeight > maxHeight;
+  let overflown = measurer./*OK*/offsetHeight > maxHeight;
   let lineHeight = fontSize * LINE_HEIGHT_EM_;
   let numberOfLines = Math.floor(maxHeight / lineHeight);
   content.classList.toggle('-amp-fit-text-content-overflown', overflown);

@@ -130,7 +130,7 @@ export function onDocumentElementClick_(e, viewport) {
 
     if (elem) {
       // TODO(dvoytenko): consider implementing animated scroll.
-      viewport.scrollIntoView(elem);
+      viewport./*OK*/scrollIntoView(elem);
     } else {
       log.warn('documentElement',
           `failed to find element with id=${hash} or a[name=${hash}]`);

@@ -15,8 +15,9 @@
  */
 
 var gulp = require('gulp');
-var util = require('gulp-util');
+var path = require('path');
 var srcGlobs = require('../config').srcGlobs;
+var util = require('gulp-util');
 
 // Directories to check for presubmit checks.
 var srcGlobs = srcGlobs.concat([
@@ -32,12 +33,8 @@ var forbiddenTerms = {
   'DO NOT SUBMIT': '',
   'describe\\.only': '',
   'it\\.only': '',
-  'XXX': '',
   'console\\.\\w+\\(': 'If you run against this, use console/*OK*/.log to ' +
       'whitelist a legit case.',
-  '\\.innerHTML': '',
-  '\\.outerHTML': '',
-  '\\.postMessage': '',
   'cookie\\W': '',
   'eval\\(': '',
   'localStorage': '',
@@ -45,10 +42,66 @@ var forbiddenTerms = {
   'indexedDB': '',
   'openDatabase': '',
   'requestFileSystem': '',
-  '\\.scrollTop': '',
   'webkitRequestFileSystem': '',
   'debugger': '',
 };
+
+var bannedTermsHelpString = 'Please review viewport.js for a helper method or'
+  'mark with `/*OK*/` or `/*REVIEW*/` and consult the AMP team.';
+
+// Most of the forbidden property/method access banned on the
+// `forbiddenTermsSrcInclusive` object can be found in
+// [What forces layout / reflow gist by Paul Irish]
+// (https://gist.github.com/paulirish/5d52fb081b3570c81e3a)
+// These properties/methods when read/used require the browser
+// to have the up-to-date value to return which might possibly be an
+// expensive computation and could also be triggered multiple times
+// if we are not careful. Please mark the call with `object./*OK*/property`
+// if you explicitly need to read or update the forbidden property/method
+// or mark it `object./*REVIEW*/property` if you are unsure and so that it
+// stands out in code reviews.
+var forbiddenTermsSrcInclusive = {
+  '\\.innerHTML(?!_)': bannedTermsHelpString,
+  '\\.outerHTML(?!_)': bannedTermsHelpString,
+  '\\.postMessage(?!_)': bannedTermsHelpString,
+  '\\.scrollTop(?!_)': bannedTermsHelpString,
+  '\\.offsetLeft(?!_)': bannedTermsHelpString,
+  '\\.offsetTop(?!_)': bannedTermsHelpString,
+  '\\.offsetWidth(?!_)': bannedTermsHelpString,
+  '\\.offsetHeight(?!_)': bannedTermsHelpString,
+  '\\.offsetParent(?!_)': bannedTermsHelpString,
+  '\\.clientLeft(?!_)(?!_)': bannedTermsHelpString,
+  '\\.clientTop(?!_)': bannedTermsHelpString,
+  '\\.clientWidth(?!_)': bannedTermsHelpString,
+  '\\.clientHeight(?!_)': bannedTermsHelpString,
+  '\\.getClientRects(?!_)': bannedTermsHelpString,
+  '\\.getBoundingClientRect(?!_)': bannedTermsHelpString,
+  '\\.scrollBy(?!_)': bannedTermsHelpString,
+  '\\.scrollTo(?!_)': bannedTermsHelpString,
+  '\\.scrollIntoView(?!_)': bannedTermsHelpString,
+  '\\.scrollIntoViewIfNeeded(?!_)': bannedTermsHelpString,
+  '\\.scrollWidth(?!_)': 'please use `getScrollWidth()` from viewport',
+  '\\.scrollHeight(?!_)': bannedTermsHelpString,
+  '\\.scrollLeft(?!_)': bannedTermsHelpString,
+  '\\.scrollTop(?!_)': bannedTermsHelpString,
+  '\\.focus(?!_)': bannedTermsHelpString,
+  '\\.computedRole(?!_)': bannedTermsHelpString,
+  '\\.computedName(?!_)': bannedTermsHelpString,
+  '\\.innerText(?!_)': bannedTermsHelpString,
+  '\\.getComputedStyle(?!_)': bannedTermsHelpString,
+  '\\.scrollX(?!_)': bannedTermsHelpString,
+  '\\.scrollY(?!_)': bannedTermsHelpString,
+  '\\.pageXOffset(?!_)': bannedTermsHelpString,
+  '\\.pageYOffset(?!_)': bannedTermsHelpString,
+  '\\.innerWidth(?!_)': bannedTermsHelpString,
+  '\\.innerHeight(?!_)': bannedTermsHelpString,
+  '\\.getMatchedCSSRules(?!_)': bannedTermsHelpString,
+  '\\.scrollingElement(?!_)': bannedTermsHelpString,
+  '\\.computeCTM(?!_)': bannedTermsHelpString,
+  '\\.getBBox(?!_)': bannedTermsHelpString,
+  '\\.webkitConvertPointFromNodeToPage(?!_)': bannedTermsHelpString,
+  '\\.webkitConvertPointFromPageToNode(?!_)': bannedTermsHelpString,
+}
 
 // Terms that must appear in a source file.
 var requiredTerms = {
@@ -60,20 +113,24 @@ var requiredTerms = {
       dedicatedCopyrightNoteSources,
 };
 
-
-function hasAnyTerms(file) {
-  var content = file.contents.toString();
-  return Object.keys(forbiddenTerms).map(function(term) {
+/**
+ * @param {!File} file file is a vinyl file object
+ * @param {!Array<string, string>} terms
+ * @return boolean
+ */
+function matchTerms(pathname, contents, terms) {
+  return Object.keys(terms).map(function(term) {
     var fix;
     // we can't optimize building the `RegExp` objects early unless we build
     // another mapping of term -> regexp object to be able to get back to the
     // original term to get the possible fix value. This is ok as the
     // presubmit doesn't have to be blazing fast and this is most likely
     // negligible.
-    var matches = content.match(new RegExp(term));
+    var matches = contents.match(new RegExp(term));
+
     if (matches) {
       util.log(util.colors.red('Found forbidden: "' + matches[0] +
-          '" in ' + file.path));
+          '" in ' + pathname));
       fix = forbiddenTerms[term];
       if (fix) {
         util.log(util.colors.blue(fix));
@@ -87,15 +144,34 @@ function hasAnyTerms(file) {
   });
 }
 
+
+function hasAnyTerms(file) {
+  var contents = file.contents.toString();
+  var pathname = file.path;
+  var basename = path.basename(pathname);
+  var hasTerms = false;
+  var hasSrcInclusiveTerms = false;
+
+  hasTerms = matchTerms(pathname, contents, forbiddenTerms)
+
+  var isTestFile = /^test-/.test(basename);
+  if (!isTestFile) {
+    hasSrcInclusiveTerms = matchTerms(pathname, contents,
+        forbiddenTermsSrcInclusive);
+  }
+
+  return hasTerms || hasSrcInclusiveTerms;
+}
+
 function hasAllTerms(file) {
-  var content = file.contents.toString();
+  var contents = file.contents.toString();
   return Object.keys(requiredTerms).map(function(term) {
     var filter = requiredTerms[term];
     if (!filter.test(file.path)) {
       return false;
     }
 
-    var matches = content.match(new RegExp(term));
+    var matches = contents.match(new RegExp(term));
     if (!matches) {
       util.log(util.colors.red('Did not find required: "' + term +
           '" in ' + file.path));
