@@ -61,63 +61,6 @@ We highly prefer integrations that do not use iframes. JSONP cannot be used for 
 
 Like all contributions, Extended Components will be analyzed for performance impact, code quality and style, and directional alignment with the project.
 
-### Installation
+### Next steps
 
-1. `npm i`
-2. `edit /etc/hosts` and map `ads.localhost` and `iframe.localhost` to `127.0.0.1`:
-<pre>
-  127.0.0.1               ads.localhost iframe.localhost
-</pre>
-
-### Build & Test
-
-[![Build Status](https://magnum.travis-ci.com/ampproject/amphtml.svg?token=AmxgqDRzeUjVvqT2oydf&branch=master)](https://magnum.travis-ci.com/ampproject/amphtml)
-
-| Command                       | Description                                                           |
-| ----------------------------- | --------------------------------------------------------------------- |
-| `gulp`                        | Same as "watch"                                                       |
-| `gulp minify`                 | Builds production binaries.                                           |
-| `gulp lint`                   | Validates against Google Closure Linter.                              |
-| `gulp build`                  | Builds the AMP library.                                               |
-| `gulp clean`                  | Removes build output.                                                 |
-| `gulp test`                   | Runs tests in Chrome.                                                 |
-| `gulp test --verbose`         | Runs tests in Chrome with logging enabled.                            |
-| `gulp test --watch`           | Watches for changes in files, runs corresponding test(s) in Chrome.   |
-| `gulp test --watch --verbose` | Same as "watch" with logging enabled.                                 |
-| `gulp test --safari`          | Runs tests in Safari.                                                 |
-| `gulp test --firefox`         | Runs tests in Firefox.                                                |
-| `http-server -p 8000 -c-1`    | serves content in current working dir over http://localhost:8000/     |
-
-To fix issues with Safari test runner launching multiple instances of the test, run:
-<pre>
-  defaults write com.apple.Safari ApplePersistenceIgnoreState YES
-</pre>
-
-### Manual testing
-
-For testing documents on arbitrary URLs with your current local version of the AMP runtime we created a [Chrome extension](testing/local-amp-chrome-extension/README.md).
-
-## Repository Layout
-<pre>
-  3p/             - Implementation of third party sandbox iframes.
-  ads/            - Modules implementing specific ad networks used in <amp-ad>
-  build/          - (generated) intermediate generated files
-  build-system/   - build infrastructure
-  builtins/       - tags built into the core AMP runtime
-      *.md        - documentation for use of the builtin
-      *.js        - source code for builtin tag
-  css/            - default css
-  dist/           - (generated) main JS binaries are created here. This is what
-                    gets deployed to cdn.ampproject.org.
-  dist.3p/        - (generated) JS binaries and HTML files for 3p embeds and ads.
-                    This is what gets deployed to 3p.ampproject.net.
-  docs/           - documentation
-  examples/       - example AMP HTML files and corresponding assets
-  examples.build/ - (generated) Same as examples with files pointing to the
-                    local AMP.
-  extensions/     - plugins which extend the AMP HTML runtime's core set of tags
-  spec/           - The AMP HTML Specification files
-  src/            - source code for the AMP runtime
-  test/           - tests for the AMP runtime and builtins
-  testing/        - testing infrastructure
-</pre>
+See [DEVELOPING](DEVELOPING.md).
