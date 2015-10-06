@@ -237,7 +237,8 @@ function buildExamples(watch) {
   // Also update test-example-validation.js
   buildExample('ads.amp.html');
   buildExample('article.amp.html');
-  buildExample('article-metadata.amp.html');
+  buildExample('article-metadata/json-ld.amp.html');
+  buildExample('article-metadata/microdata.amp.html');
   buildExample('everything.amp.html');
   buildExample('instagram.amp.html');
   buildExample('released.amp.html');
