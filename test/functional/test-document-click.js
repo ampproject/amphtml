@@ -123,7 +123,8 @@ describe('test-document-click onDocumentElementClick_', () => {
       expect(querySelectorSpy.callCount).to.equal(0);
     });
 
-    it('should call querySelector on document if element with id is not found', () => {
+    it('should call querySelector on document if element with id is not ' +
+       'found', () => {
       getElementByIdSpy.returns(null);
       expect(getElementByIdSpy.callCount).to.equal(0);
       onDocumentElementClick_(evt);
@@ -131,7 +132,8 @@ describe('test-document-click onDocumentElementClick_', () => {
       expect(querySelectorSpy.callCount).to.equal(1);
     });
 
-    it('should not call scrollIntoView if element with id is not found or anchor with name is not found', () => {
+    it('should not call scrollIntoView if element with id is not found or ' +
+       'anchor with name is not found', () => {
       getElementByIdSpy.returns(null);
       querySelectorSpy.returns(null);
       expect(getElementByIdSpy.callCount).to.equal(0);

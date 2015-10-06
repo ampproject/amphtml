@@ -21,9 +21,10 @@ describe.skip('amp-carousel', () => {
 
   let fixture;
   beforeEach(() => {
-    return createFixtureIframe('test/fixtures/carousels.html', 500).then((f) => {
-      fixture = f;
-    });
+    return createFixtureIframe('test/fixtures/carousels.html', 500)
+      .then((f) => {
+        fixture = f;
+      });
   });
 
   it('should show the body', () => {
@@ -31,9 +32,11 @@ describe.skip('amp-carousel', () => {
   });
 
   it('should be present', () => {
-    expect(fixture.doc.querySelectorAll('amp-carousel')).to.have.length.above(0);
+    expect(fixture.doc.querySelectorAll('amp-carousel'))
+        .to.have.length.above(0);
     return fixture.awaitEvent('amp:load:start', 1).then(() => {
-      expect(fixture.doc.querySelectorAll('amp-carousel')).to.have.length.above(0);
+      expect(fixture.doc.querySelectorAll('amp-carousel'))
+          .to.have.length.above(0);
     });
   });
 
@@ -81,7 +84,8 @@ describe.skip('amp-carousel', () => {
       });
     });
 
-    it('(type=slide) should only have the next button visible when on first item', () => {
+    it('(type=slide) should only have the next button visible when on ' +
+       'first item', () => {
       return fixture.awaitEvent('amp:load:start', 4).then(() => {
         let amp = fixture.doc.querySelector('#slides-1');
         expect(fixture.doc.body).to.have.class('amp-mode-mouse');
@@ -109,7 +113,8 @@ describe.skip('amp-carousel', () => {
       });
     });
 
-    it('(type=slides) should only have the prev button visible when on last item', () => {
+    it('(type=slides) should only have the prev button visible when ' +
+       'on last item', () => {
       return fixture.awaitEvent('amp:load:start', 4).then(() => {
         let amp = fixture.doc.querySelector('#slides-1');
         expect(fixture.doc.body).to.have.class('amp-mode-mouse');
@@ -128,7 +133,8 @@ describe.skip('amp-carousel', () => {
       });
     });
 
-    it('should not have any buttons visible when theres only a single item', () => {
+    it('should not have any buttons visible when theres only a single ' +
+       'item', () => {
       fixture.doc.body.classList.add('amp-mode-mouse');
       return fixture.awaitEvent('amp:load:start', 2).then(() => {
         let amp = fixture.doc.querySelector('#carousel-2');
@@ -143,7 +149,8 @@ describe.skip('amp-carousel', () => {
       });
     });
 
-    it('(type=slides) should not have any buttons visible when theres only a single item', () => {
+    it('(type=slides) should not have any buttons visible when theres ' +
+       'only a single item', () => {
       fixture.doc.body.classList.add('amp-mode-mouse');
       return fixture.awaitEvent('amp:load:start', 5).then(() => {
         let amp = fixture.doc.querySelector('#slides-2');
@@ -190,7 +197,8 @@ describe.skip('amp-carousel', () => {
 
   describe('when amp-carousel has explicit `controls` attribute', () => {
 
-    it('should have visible buttons even when `amp-mode-mouse` is not on body', () => {
+    it('should have visible buttons even when `amp-mode-mouse` ' +
+       'is not on body', () => {
       fixture.doc.body.classList.remove('amp-mode-mouse');
       return fixture.awaitEvent('amp:load:start', 3).then(() => {
         let amp = fixture.doc.querySelector('#carousel-3');
@@ -206,7 +214,8 @@ describe.skip('amp-carousel', () => {
       });
     });
 
-    it('(type=slides) should have visible buttons even when `amp-mode-mouse` is not on body', () => {
+    it('(type=slides) should have visible buttons even when `amp-mode-mouse`' +
+       ' is not on body', () => {
       fixture.doc.body.classList.remove('amp-mode-mouse');
       return fixture.awaitEvent('amp:load:start', 6).then(() => {
         let amp = fixture.doc.querySelector('#slides-3');

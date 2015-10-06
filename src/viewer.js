@@ -185,7 +185,8 @@ export class Viewer {
         this./*OK*/scrollTop_;
     log.fine(TAG_, '- scrollTop:', this./*OK*/scrollTop_);
 
-    this.paddingTop_ = parseInt(this.params_['paddingTop'], 10) || this.paddingTop_;
+    this.paddingTop_ = parseInt(this.params_['paddingTop'], 10) ||
+        this.paddingTop_;
     log.fine(TAG_, '- padding-top:', this.paddingTop_);
 
     // Wait for document to become visible.

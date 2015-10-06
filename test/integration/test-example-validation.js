@@ -116,7 +116,8 @@ describe('example', function() {
           if (xhr.status == 200) {
             resolve(xhr.responseText);
           } else {
-            reject(new Error('Fetching file for validation failed: ' + filename));
+            reject(new Error('Fetching file for validation failed: ' +
+                filename));
           }
         }
       };

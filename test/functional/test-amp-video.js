@@ -99,7 +99,8 @@ describe('amp-video', () => {
         var mediatype = mediatypes[i];
         expect(video.children.item(i).tagName).to.equal('SOURCE');
         expect(video.children.item(i).hasAttribute('src')).to.be.true;
-        expect(video.children.item(i).getAttribute('src')).to.equal(getFooVideoSrc(mediatype));
+        expect(video.children.item(i).getAttribute('src'))
+            .to.equal(getFooVideoSrc(mediatype));
         expect(video.children.item(i).getAttribute('type')).to.equal(mediatype);
       }
     });

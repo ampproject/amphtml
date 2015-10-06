@@ -404,7 +404,8 @@ export class SwipeXRecognizer {
       let retDelta = delta > this.maxDelta_ ? this.maxDelta_ - delta :
           this.minDelta_ - delta;
       // Reverse the velocity.
-      let maxVelocity = Math.sign(retDelta) * Math.max(Math.abs(this.velocity_) * 0.8, 0.25);
+      let maxVelocity = Math.sign(retDelta) *
+          Math.max(Math.abs(this.velocity_) * 0.8, 0.25);
       this.lastX_ = this.startX_ + delta;
       let endX = this.lastX_ + retDelta;
       let overshoot = Math.abs(retDelta) * maxVelocity;

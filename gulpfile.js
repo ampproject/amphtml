@@ -201,7 +201,8 @@ function buildExtensionJs(js, path, name, version, options) {
           minify: options.minify,
           minifiedName: minifiedName,
           latestName: latestName,
-          wrapper: '(window.AMP = window.AMP || []).push(function(AMP) {<%= contents %>\n});'
+          wrapper: '(window.AMP = window.AMP || [])' +
+              '.push(function(AMP) {<%= contents %>\n});',
         });
       });
 }
@@ -300,7 +301,8 @@ function thirdPartyBootstrap(watch, shouldMinify) {
 
 function compileJs(srcDir, srcFilename, destDir, options) {
   options = options || {};
-  var bundler = browserify(srcDir + srcFilename, { debug: true }).transform(babel);
+  var bundler = browserify(srcDir + srcFilename, { debug: true })
+      .transform(babel);
   if (options.watch) {
     bundler = watchify(bundler);
   }

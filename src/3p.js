@@ -64,7 +64,8 @@ export function run(id, win, data) {
  */
 export function writeScript(win, url, opt_cb) {
   /*eslint no-useless-concat: 0*/
-  win.document.write('<' + 'script src="' + encodeURI(url) + '"><' + '/script>');
+  win.document
+      .write('<' + 'script src="' + encodeURI(url) + '"><' + '/script>');
   if (opt_cb) {
     executeAfterWriteScript(win, opt_cb);
   }

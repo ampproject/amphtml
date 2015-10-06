@@ -64,9 +64,10 @@ describe('3p-frame', () => {
     var iframe = getIframe(window, div, '_ping_');
     var src = iframe.src;
     var fragment =
-        '#{"testAttr":"value","ping":"pong","width":50,"height":100,"initialWindowWidth' +
-        '":100,"initialWindowHeight":200,"type":"_ping_","_context":' +
-        '{"location":{"href":"https://foo.bar/baz"},"mode":{"localDev"' +
+        '#{"testAttr":"value","ping":"pong","width":50,"height":100,' +
+        '"initialWindowWidth":100,"initialWindowHeight":200,'+
+        '"type":"_ping_","_context":{"location":' +
+        '{"href":"https://foo.bar/baz"},"mode":{"localDev"' +
         ':true,"development":false,"minified":false}}}';
     expect(src).to.equal(
         'http://ads.localhost:9876/dist.3p/current/frame.max.html' +
