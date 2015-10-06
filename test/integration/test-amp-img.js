@@ -60,16 +60,16 @@ describe('Rendering of amp-img', () => {
       var largeScreen = fixture.doc.getElementById('img3_1');
       expect(smallScreen.className).to.not.match(/-amp-hidden-by-media-query/);
       expect(largeScreen.className).to.match(/-amp-hidden-by-media-query/);
-      expect(smallScreen.offsetHeight).to.not.equal(0);
-      expect(largeScreen.offsetHeight).to.equal(0);
+      expect(smallScreen./*OK*/offsetHeight).to.not.equal(0);
+      expect(largeScreen./*OK*/offsetHeight).to.equal(0);
       fixture.iframe.width = 600;
       fixture.win.dispatchEvent(new fixture.win.Event('resize'));
       return fixture.awaitEvent('amp:load:start', 4).then(function() {
         expect(smallScreen.className).to.match(/-amp-hidden-by-media-query/);
         expect(largeScreen.className)
             .to.not.match(/-amp-hidden-by-media-query/);
-        expect(smallScreen.offsetHeight).to.equal(0);
-        expect(largeScreen.offsetHeight).to.not.equal(0);
+        expect(smallScreen./*OK*/offsetHeight).to.equal(0);
+        expect(largeScreen./*OK*/offsetHeight).to.not.equal(0);
       });
     });
   });

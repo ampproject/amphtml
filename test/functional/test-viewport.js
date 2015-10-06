@@ -153,7 +153,7 @@ describe('Viewport', () => {
     bindingMock.expects('getLayoutRect').withArgs(element).
         returns({top: 111}).once();
     bindingMock.expects('setScrollTop').withArgs(111 - /* padding */ 19).once();
-    viewport.scrollIntoView(element);
+    viewport./*OK*/scrollIntoView(element);
   });
 });
 
@@ -200,8 +200,8 @@ describe('ViewportBindingNatural', () => {
   });
 
   it('should calculate size', () => {
-    windowApi.innerWidth = 111;
-    windowApi.innerHeight = 222;
+    windowApi./*OK*/innerWidth = 111;
+    windowApi./*OK*/innerHeight = 222;
     windowApi.document = {
       documentElement: {
         clientWidth: 111,
@@ -231,7 +231,8 @@ describe('ViewportBindingNatural', () => {
       }
     };
     binding.setScrollTop(21);
-    expect(windowApi.document.scrollingElement./*OK*/scrollTop).to.equal(21);
+    expect(windowApi.document./*OK*/scrollingElement./*OK*/scrollTop)
+        .to.equal(21);
   });
 
   it('should fallback scrollTop to pageYOffset', () => {
@@ -358,15 +359,15 @@ describe('ViewportBindingNaturalIosEmbed', () => {
   });
 
   it('should calculate size', () => {
-    windowApi.innerWidth = 111;
-    windowApi.innerHeight = 222;
+    windowApi./*OK*/innerWidth = 111;
+    windowApi./*OK*/innerHeight = 222;
     let size = binding.getSize();
     expect(size.width).to.equal(111);
     expect(size.height).to.equal(222);
   });
 
   it('should calculate scrollTop from scrollpos element', () => {
-    bodyChildren[0].getBoundingClientRect = () => {
+    bodyChildren[0]./*OK*/getBoundingClientRect = () => {
       return {top: -17, left: -11};
     };
     binding.onScrolled_();
@@ -377,12 +378,12 @@ describe('ViewportBindingNaturalIosEmbed', () => {
     let moveEl = bodyChildren[1];
     binding.setScrollTop(17);
     expect(getStyle(moveEl, 'transform')).to.equal('translateY(17px)');
-    expect(moveEl.scrollIntoView.callCount).to.equal(1);
-    expect(moveEl.scrollIntoView.firstCall.args[0]).to.equal(true);
+    expect(moveEl./*OK*/scrollIntoView.callCount).to.equal(1);
+    expect(moveEl./*OK*/scrollIntoView.firstCall.args[0]).to.equal(true);
   });
 
   it('should offset client rect for layout', () => {
-    bodyChildren[0].getBoundingClientRect = () => {
+    bodyChildren[0]./*OK*/getBoundingClientRect = () => {
       return {top: -200, left: -100};
     };
     binding.onScrolled_();
@@ -402,47 +403,47 @@ describe('ViewportBindingNaturalIosEmbed', () => {
     let moveEl = bodyChildren[1];
     binding.setScrollPos_(10);
     expect(getStyle(moveEl, 'transform')).to.equal('translateY(10px)');
-    expect(moveEl.scrollIntoView.callCount).to.equal(1);
-    expect(moveEl.scrollIntoView.firstCall.args[0]).to.equal(true);
+    expect(moveEl./*OK*/scrollIntoView.callCount).to.equal(1);
+    expect(moveEl./*OK*/scrollIntoView.firstCall.args[0]).to.equal(true);
   });
 
   it('should adjust scroll position when scrolled to 0', () => {
     let posEl = bodyChildren[0];
-    posEl.getBoundingClientRect = () => {return {top: 0, left: 0};};
+    posEl./*OK*/getBoundingClientRect = () => {return {top: 0, left: 0};};
     let moveEl = bodyChildren[1];
     let event = {preventDefault: sinon.spy()};
     binding.adjustScrollPos_(event);
     expect(getStyle(moveEl, 'transform')).to.equal('translateY(1px)');
-    expect(moveEl.scrollIntoView.callCount).to.equal(1);
-    expect(moveEl.scrollIntoView.firstCall.args[0]).to.equal(true);
+    expect(moveEl./*OK*/scrollIntoView.callCount).to.equal(1);
+    expect(moveEl./*OK*/scrollIntoView.firstCall.args[0]).to.equal(true);
     expect(event.preventDefault.callCount).to.equal(1);
   });
 
   it('should adjust scroll position when scrolled to 0; w/o event', () => {
     let posEl = bodyChildren[0];
-    posEl.getBoundingClientRect = () => {return {top: 0, left: 0};};
+    posEl./*OK*/getBoundingClientRect = () => {return {top: 0, left: 0};};
     let moveEl = bodyChildren[1];
     binding.adjustScrollPos_();
-    expect(moveEl.scrollIntoView.callCount).to.equal(1);
+    expect(moveEl./*OK*/scrollIntoView.callCount).to.equal(1);
   });
 
   it('should NOT adjust scroll position when scrolled away from 0', () => {
     let posEl = bodyChildren[0];
-    posEl.getBoundingClientRect = () => {return {top: -10, left: 0};};
+    posEl./*OK*/getBoundingClientRect = () => {return {top: -10, left: 0};};
     let moveEl = bodyChildren[1];
     let event = {preventDefault: sinon.spy()};
     binding.adjustScrollPos_(event);
-    expect(moveEl.scrollIntoView.callCount).to.equal(0);
+    expect(moveEl./*OK*/scrollIntoView.callCount).to.equal(0);
     expect(event.preventDefault.callCount).to.equal(0);
   });
 
   it('should NOT adjust scroll position when overscrolled', () => {
     let posEl = bodyChildren[0];
-    posEl.getBoundingClientRect = () => {return {top: 10, left: 0};};
+    posEl./*OK*/getBoundingClientRect = () => {return {top: 10, left: 0};};
     let moveEl = bodyChildren[1];
     let event = {preventDefault: sinon.spy()};
     binding.adjustScrollPos_(event);
-    expect(moveEl.scrollIntoView.callCount).to.equal(0);
+    expect(moveEl./*OK*/scrollIntoView.callCount).to.equal(0);
     expect(event.preventDefault.callCount).to.equal(0);
   });
 });

@@ -58,7 +58,7 @@ describe('amp-image-lightbox component', () => {
 
       // Very important. Image must have transform-origin=50% 50%.
       let win = image.ownerDocument.defaultView;
-      expect(win.getComputedStyle(image)['transform-origin']).to.equal(
+      expect(win./*OK*/getComputedStyle(image)['transform-origin']).to.equal(
           '50% 50%');
     });
   });

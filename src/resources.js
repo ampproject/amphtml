@@ -113,7 +113,7 @@ export class Resources {
     this.deferredMutates_ = [];
 
     /** @private {number} */
-    this.scrollHeight_ = 0;
+    this./*OK*/scrollHeight_ = 0;
 
     /** @private {!Viewport} */
     this.viewport_ = viewportFor(this.win);
@@ -185,7 +185,7 @@ export class Resources {
   setDocumentReady_() {
     this.documentReady_ = true;
     this.viewer_.postDocumentReady(this.viewport_.getSize().width,
-        this.win.document.body.scrollHeight);
+        this.win.document.body./*OK*/scrollHeight);
     this.updateScrollHeight_();
   }
 
@@ -194,9 +194,9 @@ export class Resources {
     if (!this.win.document.body) {
       return;
     }
-    let scrollHeight = this.win.document.body.scrollHeight;
-    if (scrollHeight != this.scrollHeight_) {
-      this.scrollHeight_ = scrollHeight;
+    let scrollHeight = this.win.document.body./*OK*/scrollHeight;
+    if (scrollHeight != this./*OK*/scrollHeight_) {
+      this./*OK*/scrollHeight_ = scrollHeight;
       this.viewer_.postDocumentResized(this.viewport_.getSize().width,
           scrollHeight);
     }

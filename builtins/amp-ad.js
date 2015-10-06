@@ -192,7 +192,7 @@ export function installAd(win) {
      */
     getPlaceholderImage_() {
       let scores = scoreDimensions_(BACKFILL_DIMENSIONS_,
-          this.element.clientWidth, this.element.clientHeight);
+          this.element./*OK*/clientWidth, this.element./*OK*/clientHeight);
       let dims = BACKFILL_DIMENSIONS_[scores.indexOf(Math.max(...scores))];
       let images = BACKFILL_IMGS_[dims.join('x')];
       // do we need a more sophisticated randomizer?
