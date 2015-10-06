@@ -91,6 +91,9 @@ These components can:
 
 # Further Reading
 
+Blog posts:
+ * [Accelerated Mobile Pages – A new approach to web performance](https://www.ampproject.org/how-it-works/)
+
 Tutorials:
 * [How to Create a Basic AMP HTML Page](docs/create_page.md)
 * [How to Include Common Features](docs/include_features.md)
