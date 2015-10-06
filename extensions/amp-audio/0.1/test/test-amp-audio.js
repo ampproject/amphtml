@@ -73,7 +73,8 @@ describe('amp-audio', () => {
       var audio = a.querySelector('audio');
       expect(audio).to.be.an.instanceof(Element);
       expect(audio.tagName).to.equal('AUDIO');
-      expect(audio.getAttribute('src')).to.equal('https://origin.com/audio.mp3');
+      expect(audio.getAttribute('src'))
+          .to.equal('https://origin.com/audio.mp3');
       expect(audio.hasAttribute('controls')).to.be.true;
       expect(a.style.width).to.be.equal('300px');
       expect(a.style.height).to.be.equal('30px');
@@ -88,7 +89,8 @@ describe('amp-audio', () => {
       muted: '',
       loop: ''
     }, [
-        {tag: 'source', src: 'https://origin.com/audio.mp3', type: 'audio/mpeg'},
+        {tag: 'source', src: 'https://origin.com/audio.mp3',
+            type: 'audio/mpeg'},
         {tag: 'source', src: 'https://origin.com/audio.ogg', type: 'audio/ogg'},
         {tag: 'text', text: 'Unsupported.'},
     ]).then(a => {

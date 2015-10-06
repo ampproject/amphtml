@@ -33,17 +33,20 @@ describe('Rendering of amp-img', () => {
     expect(fixture.doc.querySelectorAll('amp-img')).to.have.length(15);
     // 5 image visible in 500 pixel height.
     return fixture.awaitEvent('amp:load:start', 3).then(function() {
-      expect(fixture.doc.querySelectorAll('amp-img img[src]')).to.have.length(3);
+      expect(fixture.doc.querySelectorAll('amp-img img[src]')).to
+          .have.length(3);
     });
   });
 
   it('should resize and load more elements', () => {
     var p = fixture.awaitEvent('amp:load:start', 11).then(function() {
-      expect(fixture.doc.querySelectorAll('amp-img img[src]')).to.have.length(11);
+      expect(fixture.doc.querySelectorAll('amp-img img[src]'))
+          .to.have.length(11);
       fixture.iframe.height = 2000;
       fixture.win.dispatchEvent(new fixture.win.Event('resize'));
       return fixture.awaitEvent('amp:load:start', 13).then(function() {
-        expect(fixture.doc.querySelectorAll('amp-img img[src]')).to.have.length(13);
+        expect(fixture.doc.querySelectorAll('amp-img img[src]'))
+            .to.have.length(13);
       });
     });
     fixture.iframe.height = 1500;
@@ -63,7 +66,8 @@ describe('Rendering of amp-img', () => {
       fixture.win.dispatchEvent(new fixture.win.Event('resize'));
       return fixture.awaitEvent('amp:load:start', 4).then(function() {
         expect(smallScreen.className).to.match(/-amp-hidden-by-media-query/);
-        expect(largeScreen.className).to.not.match(/-amp-hidden-by-media-query/);
+        expect(largeScreen.className)
+            .to.not.match(/-amp-hidden-by-media-query/);
         expect(smallScreen.offsetHeight).to.equal(0);
         expect(largeScreen.offsetHeight).to.not.equal(0);
       });

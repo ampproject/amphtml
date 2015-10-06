@@ -54,7 +54,8 @@ class AmpIframe extends AMP.BaseElement {
         '<amp-iframe> elements must be positioned outside the first 75% ' +
         'of the viewport or 600px from the top (whichever is smaller): %s ' +
         'Please contact the AMP team if that is a problem in your project.' +
-        ' We\'d love to learn about your use case. Current position %s. Min: %s',
+        ' We\'d love to learn about your use case. Current position %s. Min:' +
+        ' %s',
         this.element,
         pos.top,
         minTop);

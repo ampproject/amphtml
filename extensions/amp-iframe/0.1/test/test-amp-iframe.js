@@ -179,7 +179,8 @@ describe('amp-iframe', () => {
         amp.assertSource('./foo', 'https://foo.com', '');
       }).to.throw(/Must start with https/);
 
-      amp.assertSource('http://iframe.localhost:123/foo', 'https://foo.com', '');
+      amp.assertSource('http://iframe.localhost:123/foo',
+          'https://foo.com', '');
       amp.assertSource('https://container.com', 'https://foo.com', '');
     });
   });

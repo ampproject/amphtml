@@ -20,9 +20,10 @@ import {createFixtureIframe, pollForLayout, expectBodyToBecomeVisible} from
 describe('Rendering of released components', () => {
   var fixture;
   beforeEach(() => {
-    return createFixtureIframe('test/fixtures/released.html', 3000).then((f) => {
-      fixture = f;
-    });
+    return createFixtureIframe('test/fixtures/released.html', 3000)
+      .then((f) => {
+        fixture = f;
+      });
   });
 
   it('all components should get loaded', function() {
