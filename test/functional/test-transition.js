@@ -56,6 +56,17 @@ describe('Transition', () => {
     expect(func2.calledWithExactly(1, true)).to.equal(true);
   });
 
+  it('withCurve', () => {
+    let func1 = (time, complete) => `${time * 2};${complete}`;
+    let curve = (time) => 0.2;
+    let curved = tr.withCurve(func1, curve);
+
+    expect(curved(0, false)).to.equal('0.4;false');
+    expect(curved(0.5, false)).to.equal('0.4;false');
+    expect(curved(1, false)).to.equal('0.4;false');
+    expect(curved(1, true)).to.equal('2;true');
+  });
+
   it('setStyles', () => {
     let element = document.createElement('div');
     let func = tr.setStyles(element, {

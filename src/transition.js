@@ -50,6 +50,22 @@ export function all(transitions) {
 
 
 /**
+ * Returns the specified transition with the time curved via specified curve
+ * function.
+ * @param {!Transition<RESULT>} transition
+ * @param {!Curve|string} curve
+ * @return {!Transition<RESULT>}
+ * @template RESULT
+ */
+export function withCurve(transition, curve) {
+  curve = getCurve(curve);
+  return (time, complete) => {
+    return transition(complete ? 1 : curve(time), complete);
+  };
+}
+
+
+/**
  * A transition that sets the CSS style of the specified element. The styles
  * a specified as a map from CSS property names to transition functions for
  * each of these properties.

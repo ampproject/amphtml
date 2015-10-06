@@ -15,32 +15,84 @@
  */
 
 import {closestByTag} from './dom';
+import {getService} from './service';
 import {log} from './log';
 import {parseUrl} from './url';
+import {viewportFor} from './viewport';
+
 
 /**
  * @param {!Window} window
  */
 export function installGlobalClickListener(window) {
-  window.document.documentElement
-      .addEventListener('click', onDocumentElementClick_);
+  clickHandlerFor(window);
 }
 
 /**
  * @param {!Window} window
  */
 export function uninstallGlobalClickListener(window) {
-  window.document.documentElement
-      .removeEventListener('click', onDocumentElementClick_);
+  clickHandlerFor(window).cleanup();
+}
+
+/**
+ * @param {!Window} window
+ */
+function clickHandlerFor(window) {
+  return getService(window, 'clickhandler', () => {
+    return new ClickHandler(window);
+  });
 }
 
 /**
  * Intercept any click on the current document and prevent any
  * linking to an identifier from pushing into the history stack.
- * @param {!Event} e
  * @visibleForTesting
  */
-export function onDocumentElementClick_(e) {
+export class ClickHandler {
+  /**
+   * @param {!Window} window
+   */
+  constructor(window) {
+    /** @private @const {!Window} */
+    this.win = window;
+
+    /** @private @const {!Viewport} */
+    this.viewport_ = viewportFor(window);
+
+    /** @private @const {!Function} */
+    this.boundHandle_ = this.handle_.bind(this);
+
+    this.win.document.documentElement.addEventListener('click',
+        this.boundHandle_);
+  }
+
+  /**
+   * Removes all event listeners.
+   */
+  cleanup() {
+    this.win.document.documentElement.removeEventListener('click',
+        this.boundHandle_);
+  }
+
+  /**
+   * Intercept any click on the current document and prevent any
+   * linking to an identifier from pushing into the history stack.
+   * @param {!Event} e
+   */
+  handle_(e) {
+    onDocumentElementClick_(e, this.viewport_);
+  }
+}
+
+
+/**
+ * Intercept any click on the current document and prevent any
+ * linking to an identifier from pushing into the history stack.
+ * @param {!Event} e
+ * @param {!Viewport} viewport
+ */
+export function onDocumentElementClick_(e, viewport) {
   if (e.defaultPrevented) {
     return;
   }
@@ -77,10 +129,11 @@ export function onDocumentElementClick_(e) {
     }
 
     if (elem) {
-      elem.scrollIntoView(true);
+      // TODO(dvoytenko): consider implementing animated scroll.
+      viewport.scrollIntoView(elem);
     } else {
       log.warn('documentElement',
           `failed to find element with id=${hash} or a[name=${hash}]`);
     }
   }
-}
+};

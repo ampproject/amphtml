@@ -143,6 +143,17 @@ export class Viewport {
   }
 
   /**
+   * Scrolls element into view much like Element.scrollIntoView does but
+   * in the AMP/Viewer environment.
+   * @param {!Element} element
+   */
+  scrollIntoView(element) {
+    let elementTop = this.binding_.getLayoutRect(element).top;
+    let newScrollTop = Math.max(0, elementTop - this.paddingTop_);
+    this.binding_.setScrollTop(newScrollTop);
+  }
+
+  /**
    * Registers the handler for ViewportChangedEvent events.
    * @param {!function(!ViewportChangedEvent)} handler
    * @return {!Unlisten}
@@ -273,6 +284,12 @@ class ViewportBinding {
   getScrollTop() {}
 
   /**
+   * Sets scroll top position to the specified value or the nearest possible.
+   * @param {number} scrollTop
+   */
+  setScrollTop(scrollTop) {}
+
+  /**
    * Returns the left scroll position for the viewport.
    * @return {number}
    */
@@ -381,6 +398,11 @@ export class ViewportBindingNatural_ {
         Math.round(b.top + scrollTop),
         Math.round(b.width),
         Math.round(b.height));
+  }
+
+  /** @override */
+  setScrollTop(scrollTop) {
+    this.getScrollingElement_()./*OK*/scrollTop = scrollTop;
   }
 
   /**
@@ -555,6 +577,11 @@ export class ViewportBindingNaturalIosEmbed_ {
         Math.round(b.height));
   }
 
+  /** @override */
+  setScrollTop(scrollTop) {
+    this.setScrollPos_(scrollTop || 1);
+  }
+
   /**
    * @param {!Event} event
    * @private
@@ -722,6 +749,11 @@ export class ViewportBindingVirtual_ {
         Math.round(b.top),
         Math.round(b.width),
         Math.round(b.height));
+  }
+
+  /** @override */
+  setScrollTop(scrollTop) {
+    // TODO(dvoytenko): communicate to the viewer.
   }
 }
 

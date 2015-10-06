@@ -146,6 +146,15 @@ describe('Viewport', () => {
     expect(changeEvent.relayoutAll).to.equal(false);
     expect(changeEvent.velocity).to.be.closeTo(0.002, 1e-4);
   });
+
+  it('should change scrollTop for scrollIntoView and respect padding', () => {
+    let element = document.createElement('div');
+    let bindingMock = sandbox.mock(binding);
+    bindingMock.expects('getLayoutRect').withArgs(element).
+        returns({top: 111}).once();
+    bindingMock.expects('setScrollTop').withArgs(111 - /* padding */ 19).once();
+    viewport.scrollIntoView(element);
+  });
 });
 
 
@@ -212,6 +221,17 @@ describe('ViewportBindingNatural', () => {
       }
     };
     expect(binding.getScrollTop()).to.equal(17);
+  });
+
+  it('should update scrollTop on scrollElement', () => {
+    windowApi.pageYOffset = 11;
+    windowApi.document = {
+      scrollingElement: {
+        scrollTop: 17
+      }
+    };
+    binding.setScrollTop(21);
+    expect(windowApi.document.scrollingElement./*OK*/scrollTop).to.equal(21);
   });
 
   it('should fallback scrollTop to pageYOffset', () => {
@@ -351,6 +371,14 @@ describe('ViewportBindingNaturalIosEmbed', () => {
     };
     binding.onScrolled_();
     expect(binding.getScrollTop()).to.equal(17);
+  });
+
+  it('should update scroll position via moving element', () => {
+    let moveEl = bodyChildren[1];
+    binding.setScrollTop(17);
+    expect(getStyle(moveEl, 'transform')).to.equal('translateY(17px)');
+    expect(moveEl.scrollIntoView.callCount).to.equal(1);
+    expect(moveEl.scrollIntoView.firstCall.args[0]).to.equal(true);
   });
 
   it('should offset client rect for layout', () => {

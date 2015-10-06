@@ -26,13 +26,12 @@ describe('test-document-click onDocumentElementClick_', () => {
   let preventDefaultSpy;
   let scrollIntoViewSpy;
   let querySelectorSpy;
+  let viewport;
 
   beforeEach(() => {
     preventDefaultSpy = sinon.spy();
     scrollIntoViewSpy = sinon.spy();
-    elem = {
-      scrollIntoView: scrollIntoViewSpy
-    };
+    elem = {};
     getElementByIdSpy = sinon.stub();
     querySelectorSpy = sinon.stub();
     tgt = document.createElement('a');
@@ -51,6 +50,9 @@ describe('test-document-click onDocumentElementClick_', () => {
       currentTarget: docElem,
       target: tgt,
       preventDefault: preventDefaultSpy
+    };
+    viewport = {
+      scrollIntoView: scrollIntoViewSpy
     };
   });
 
@@ -74,7 +76,7 @@ describe('test-document-click onDocumentElementClick_', () => {
 
     it('should not do anything on path change', () => {
       tgt.href = 'https://www.google.com/some-other-path';
-      onDocumentElementClick_(evt);
+      onDocumentElementClick_(evt, viewport);
 
       expect(getElementByIdSpy.callCount).to.equal(0);
       expect(querySelectorSpy.callCount).to.equal(0);
@@ -84,7 +86,7 @@ describe('test-document-click onDocumentElementClick_', () => {
 
     it('should not do anything on origin change', () => {
       tgt.href = 'https://maps.google.com/some-path#link';
-      onDocumentElementClick_(evt);
+      onDocumentElementClick_(evt, viewport);
 
       expect(getElementByIdSpy.callCount).to.equal(0);
       expect(querySelectorSpy.callCount).to.equal(0);
@@ -103,7 +105,7 @@ describe('test-document-click onDocumentElementClick_', () => {
     it('should call getElementById on document', () => {
       getElementByIdSpy.returns(elem);
       expect(getElementByIdSpy.callCount).to.equal(0);
-      onDocumentElementClick_(evt);
+      onDocumentElementClick_(evt, viewport);
       expect(getElementByIdSpy.callCount).to.equal(1);
       expect(querySelectorSpy.callCount).to.equal(0);
     });
@@ -112,13 +114,13 @@ describe('test-document-click onDocumentElementClick_', () => {
       getElementByIdSpy.returns(null);
       querySelectorSpy.returns(null);
       expect(preventDefaultSpy.callCount).to.equal(0);
-      onDocumentElementClick_(evt);
+      onDocumentElementClick_(evt, viewport);
       expect(preventDefaultSpy.callCount).to.equal(1);
     });
 
     it('should not do anything if no anchor is found', () => {
       evt.target = document.createElement('span');
-      onDocumentElementClick_(evt);
+      onDocumentElementClick_(evt, viewport);
       expect(getElementByIdSpy.callCount).to.equal(0);
       expect(querySelectorSpy.callCount).to.equal(0);
     });
@@ -127,7 +129,7 @@ describe('test-document-click onDocumentElementClick_', () => {
        'found', () => {
       getElementByIdSpy.returns(null);
       expect(getElementByIdSpy.callCount).to.equal(0);
-      onDocumentElementClick_(evt);
+      onDocumentElementClick_(evt, viewport);
       expect(getElementByIdSpy.callCount).to.equal(1);
       expect(querySelectorSpy.callCount).to.equal(1);
     });
@@ -138,7 +140,7 @@ describe('test-document-click onDocumentElementClick_', () => {
       querySelectorSpy.returns(null);
       expect(getElementByIdSpy.callCount).to.equal(0);
 
-      onDocumentElementClick_(evt);
+      onDocumentElementClick_(evt, viewport);
       expect(getElementByIdSpy.callCount).to.equal(1);
       expect(scrollIntoViewSpy.callCount).to.equal(0);
     });
@@ -147,7 +149,7 @@ describe('test-document-click onDocumentElementClick_', () => {
       getElementByIdSpy.returns(elem);
 
       expect(scrollIntoViewSpy.callCount).to.equal(0);
-      onDocumentElementClick_(evt);
+      onDocumentElementClick_(evt, viewport);
       expect(scrollIntoViewSpy.callCount).to.equal(1);
     });
 
@@ -156,7 +158,7 @@ describe('test-document-click onDocumentElementClick_', () => {
       querySelectorSpy.returns(elem);
 
       expect(scrollIntoViewSpy.callCount).to.equal(0);
-      onDocumentElementClick_(evt);
+      onDocumentElementClick_(evt, viewport);
       expect(scrollIntoViewSpy.callCount).to.equal(1);
     });
   });

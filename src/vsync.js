@@ -83,7 +83,8 @@ export class Vsync {
    * @param {function(time, time, !Object<string,*>):boolean} mutator The
    *   mutator callback. Only expected to do DOM writes, not reads. If the
    *   returned value is true, the vsync task will be repeated, otherwise it
-   *   will be completed.
+   *   will be completed. The arguments are: timeSinceStart:time,
+   *   timeSincePrev:time and state:Object<string, *>.
    * @param {number=} opt_timeout Optional timeout that will force the series
    *   to complete and reject the promise.
    * @return {!Promise} Returns the promise that will either resolve on when
