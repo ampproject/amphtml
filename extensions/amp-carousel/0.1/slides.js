@@ -85,7 +85,7 @@ export class AmpSlides extends BaseCarousel {
    * @param {number} dir
    */
   prepareSlide_(slide, dir) {
-    var containerWidth = this.element.offsetWidth;
+    var containerWidth = this.element./*OK*/offsetWidth;
     st.setStyles(slide, {
       transform: st.translateX(dir * containerWidth),
       zIndex: 1,
@@ -102,7 +102,7 @@ export class AmpSlides extends BaseCarousel {
    * @return {!Transition}
    */
   createTransition_(oldSlide, newSlide, dir) {
-    var containerWidth = this.element.offsetWidth;
+    var containerWidth = this.element./*OK*/offsetWidth;
     return tr.all([
       tr.setStyles(newSlide, {
         transform: tr.translateX(tr.numeric(dir * containerWidth, 0)),
@@ -198,7 +198,7 @@ export class AmpSlides extends BaseCarousel {
    */
   onSwipeStart_(swipe) {
     let currentSlide = this.slides_[this.currentIndex_];
-    let containerWidth = this.element.offsetWidth;
+    let containerWidth = this.element./*OK*/offsetWidth;
     let minDelta = 0;
     let maxDelta = 0;
     let prevTr = tr.NOOP;
