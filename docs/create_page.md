@@ -3,30 +3,6 @@
 Learn how to create a basic AMP HTML page,
 stage it, test it, and get it ready for publication.
 
-**Todo:** Do we want to include an image with a sample AMP HTML page?
-
-# Set up local staging server
-
-Set up a local version of the AMP runtime server,
-so you can test your AMP HTML pages before publishing.
-
-You aren't required to follow these instructions,
-but if you don't have your own production environment in place,
-here's a simple way to get one up and running.
-
-## Set up repository
-
-1. Install [Node.js and npm](https://nodejs.org/en/).
-2. Clone repository: `git clone https://github.com/ampproject/amphtml.git`.
-3. Install dependencies: `npm i`.
-
-## Build and start the dev server
-
-2. Install npm http server: `npm install http-server -g`.
-3. Start the local server: `http-server -p 8000 -c-1`.
-4. Open a sample page, for example, go to
-[http://localhost:8000/examples/released.amp.html](http://localhost:8000/examples/released.amp.html).
-
 # Write the basic AMP HTML page
 
 The basic AMP HTML page includes the following mark-up:
