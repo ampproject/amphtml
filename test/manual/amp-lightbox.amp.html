@@ -7,8 +7,9 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
   <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
   <script custom-element="amp-lightbox" src="../../dist/v0/amp-lightbox-0.1.max.js" async></script>
-  <script src="../../dist/amp.js" development></script>
-  <style>
+  <script src="../../dist/amp.js" development async></script>
+  <style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
+  <style amp-custom>
     body {
       max-width: 527px;
       font-family: 'Questrial', Arial;
@@ -54,7 +55,8 @@
     <amp-img id="img0"
         src="https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w2004-h734-no/PANO_20150726_171347%257E2.jpg"
         width=527 height=193 layout="responsive"
-        on="tap:lightbox1"></amp-img>
+        on="tap:lightbox1"
+        role="button" tabindex="0"></amp-img>
   </p>
   <amp-lightbox id="lightbox1" class="lightbox1" layout="nodisplay">
     <div class="lightbox1-content">
