@@ -16,6 +16,10 @@ limitations under the License.
 
 ## Development on AMP HTML
 
+### Mailing list
+
+We discuss implementation issues on [amphtml-discuss@googlegroups.com](https://groups.google.com/forum/#!forum/amphtml-discuss).
+
 ### Installation
 
 1. `npm i`
