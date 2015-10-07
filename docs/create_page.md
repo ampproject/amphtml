@@ -92,20 +92,6 @@ here's the basic AMP HTML page now with an image:
 Learn more about
 [how to include common features](../docs/include_features.md).
 
-## AMP Layout System
-
-Externally-loaded resources (like images, ads, videos, etc.)
-must have a known height and width,
-so the page doesn't jump (and reflow)
-as the resources load.
-
-The AMP Layout System is designed to support few
-but flexible layout scenarios with solid performance.
-It ensures that sizes of all elements can be calculated
-by the browser via CSS automatically and
-no resource loading can change these sizes.
-Learn more in the [AMP HTML Components specification](../spec/amp-html-components.md).
-
 # Add some styles
 
 AMPs are web pages; add custom styling using common CSS properties.
@@ -156,6 +142,23 @@ inlined stylesheet:
 Learn more about adding elements, including extended components,
 in [How to Include Common Features](../docs/include_features.md).
 
+# Page layout
+
+Externally-loaded resources (like images, ads, videos, etc.) must have height
+and width attributes.  This ensures that sizes of all elements can be
+calculated by the browser via CSS automatically and element sizes won't be
+recalculated because of external resources, preventing the page from jumping
+and around as resources load.
+
+Moreover, use of the style attribute for tags is not permitted, as this
+optimizes impact rendering speed in unpredictable ways.
+
+<!--
+**Todo:** Cover the layout attribute
+-->
+
+Learn more in the [AMP HTML Components specification](../spec/amp-html-components.md).
+
 # Test the page
 
 Test the page by viewing the page in your local server
@@ -183,6 +186,7 @@ and briefly mention that the validator will report these errors.
 
 # Final steps before publishing
 
-You've tested your page local and fixed all validation errors.
+Congrats! You've tested your page locally and fixed all validation errors.
+
 Learn more about tools that can help you get your content production ready in
 [Set Up Your Build Tools](https://developers.google.com/web/tools/setup/workspace/setup-buildtools).

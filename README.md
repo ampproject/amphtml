@@ -18,9 +18,9 @@ limitations under the License.
 
 AMP HTML is a way to build web pages for static content that render with reliable, fast performance. It is our attempt at fixing what many perceive as painfully slow page load times – especially when reading content on the mobile web.
 
-AMP HTML is entirely built on existing web technologies. It achieves reliable performance by restricting some parts of HTML, CSS and JavaScript. These restrictions are enforced with a validator that ships with AMP HTML. To make up for those limitations AMP HTML defines a set of custom elements for rich content beyond basic HTML. Learn how to define new elements in HTML in the [Custom Elements](http://www.html5rocks.com/en/tutorials/webcomponents/customelements/) article.
+AMP HTML is entirely built on existing web technologies. It achieves reliable performance by restricting some parts of HTML, CSS and JavaScript. These restrictions are enforced with a validator that ships with AMP HTML. To make up for those limitations AMP HTML defines a set of [custom elements](http://www.html5rocks.com/en/tutorials/webcomponents/customelements/) for rich content beyond basic HTML.
 
-For more info how AMP HTML works and some insights into the design, please read our blog post ["A new approach to web performance"](https://www.ampproject.org/how-it-works/) (which may be the first AMP HTML file you ever see :). We also have a non-technical description of what we are doing on [www.ampproject.org](https://www.ampproject.org).
+For more info on how AMP HTML works, and some insights into the design, please read our blog post ["A new approach to web performance"](https://www.ampproject.org/how-it-works/) (which may be the first AMP HTML file you ever see :). We also have a non-technical description of what we are doing on [www.ampproject.org](https://www.ampproject.org).
 
 # How does AMP HTML work?
 
@@ -91,8 +91,9 @@ as either image files (GIF) or video files (WebM or MP4) based on browser compat
 
 # Further Reading
 
-Blog posts:
- * [Accelerated Mobile Pages – A new approach to web performance](https://www.ampproject.org/how-it-works/)
+Resources:
+* [AMP HTML samples](examples/)
+* [AMP-HTML on StackOverflow](https://stackoverflow.com/questions/tagged/amp-html)
 
 Tutorials:
 * [How to Create a Basic AMP HTML Page](docs/create_page.md)
@@ -108,17 +109,16 @@ Not yet done.
 Reference:
 * [AMP HTML core built-in elements](builtins/README.md)
 * [AMP HTML optional extended elements](extensions/README.md)
+<!-- * [AMP HTML FAQ](docs/FAQ.md) -->
 
 Technical Specifications:
 * [AMP HTML format specification](spec/amp-html-format.md)
 * [AMP HTML custom element specification](spec/amp-html-components.md)
 
-Resources:
-* [AMP HTML samples](examples/)
-* [AMP HTML FAQ](docs/FAQ.md)
-* [AMP-HTML on StackOverflow](https://stackoverflow.com/questions/tagged/amp-html)
+Blog posts:
+ * [Accelerated Mobile Pages – A new approach to web performance](https://www.ampproject.org/how-it-works/)
 
-# Who made AMP HTML?
+# Who makes AMP HTML?
 
 AMP HTML is made by the [AMP Project](https://www.ampproject.org/), and is licensed
 under the [Apache License, Version 2.0](LICENSE).
