@@ -151,7 +151,7 @@ Most HTML tags can be used unchanged in AMP HTML. Certain tags, however, have eq
 | link      | Allowed for certain values of rel: `canonical`. `stylesheet` is generally disallowed, but some values may be whitelisted for font providers. |
 | meta      | The `http-equiv` attribute is banned. Otherwise allowed. |
 | <a name="ancr"></a>a         | The `href` attribute value must not begin with `javascript:`. If set, the `target` attribute value must be `_blank`. Otherwise allowed. [ðŸ”—](#ancr) |
-| svg       | Includes svg and svg-family of elements. |
+| svg       | Most SVG elements are allowed | 
 
 Validator implementations should use a whitelist based on the HTML5 specification with the above tags removed.
 TODO(malteubl): Add addendum with whitelist.
@@ -347,3 +347,19 @@ AMP documents may only reference versions with one or two components. Version â€
 AMP HTML documents must not trigger errors when served with a Content Security Policy that does not include the keywords `unsafe-inline` and `unsafe-eval`.
 
 The AMP HTML format is designed so that is always the case.
+
+## SVG
+
+Currently, the following SVG elements are allowed:
+
+* basics: "g", "path", "glyph", "glyphRef", "marker", "view"
+* shapes: "circle", "line", "polygone", "polyline", "rect"
+* text: "text", "textPath", "tref", "tspan"
+* rendering: "clipPath", "filter", "lineGradient", "radialGrandient", "mask", "pattern", "vkern", "hkern"
+* special: "defs" (all children above are allowed here), "symbol", "use"
+* aria: "desc", "title"
+
+As well as these attributes:
+
+* "xlink:href" only URIs starting with "#" are allowed
+* "style"
