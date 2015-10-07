@@ -49,7 +49,7 @@ AMP HTML documents MUST
 Most HTML tags can be used unchanged in AMP HTML.
 Certain tags have equivalent custom AMP HTML tags;
 other HTML tags are outright banned
-(see [HTML Tags in the specification](../spec/amp-html-format.md))
+(see [HTML Tags in the specification](../spec/amp-html-format.md)).
 
 # Include an image
 
@@ -57,8 +57,8 @@ Content pages include more features than just the content.
 To get you started,
 here's the basic AMP HTML page now with an image:
 
-  <!doctype html>
-  <html AMP lang="en">
+    <!doctype html>
+    <html AMP lang="en">
       <head>
         <meta charset="utf-8">
         <title>Hello, AMPs</title>
