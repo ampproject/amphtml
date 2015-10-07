@@ -7,7 +7,7 @@ For example, to include a youtube video in your page
 include the following script in the `<head>`:
 
 ```html
-<script custom-element="amp-youtube" src="https:///cdn.ampproject.org/amphtml/v0/amp-youtube-0.1.js" async></script>
+<script custom-element="amp-youtube" src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js" async></script>
 ```
 
 Current list of extended components:
