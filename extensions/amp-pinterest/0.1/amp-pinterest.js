@@ -20,19 +20,19 @@
  * Examples:
  * <code>
  *
- *  <amp-pinterest height=20 width=40
- *    data-do="buttonPin"
- *    data-url="http://www.flickr.com/photos/kentbrew/6851755809/"
- *    data-media="http://farm8.staticflickr.com/7027/6851755809_df5b2051c9_z.jpg"
- *    data-description="Next stop: Pinterest">
- *  </amp-pinterest>
+ * <amp-pinterest height=20 width=40
+ *   data-do="buttonPin"
+ *   data-url="http://www.flickr.com/photos/kentbrew/6851755809/"
+ *   data-media="http://farm8.staticflickr.com/7027/6851755809_df5b2051c9_z.jpg"
+ *   data-description="Next stop: Pinterest">
+ * </amp-pinterest>
  *
- *  <amp-pinterest width=239 height=400
- *    data-do="embedBoard"
- *    data-scale-height="289"
- *    data-scale-width="107"
- *    data-url="http://www.pinterest.com/kentbrew/art-i-wish-i-d-made/">
- *  </amp-pinterest>
+ * <amp-pinterest width=239 height=400
+ *   data-do="embedBoard"
+ *   data-scale-height="289"
+ *   data-scale-width="107"
+ *   data-url="http://www.pinterest.com/kentbrew/art-i-wish-i-d-made/">
+ * </amp-pinterest>
  *
  * </code>
  */
@@ -96,13 +96,15 @@ class AmpPinterest extends AMP.BaseElement {
 
         // buttonPin renders a Pin It button and requires media and description
 
-        var pinMedia = AMP.assert(this.element.getAttribute('data-media'),
-          'The data-media attribute is required when <amp-pinterest> makes a Pin It button %s',
-          this.element);
+        var pinMedia = 
+          AMP.assert(this.element.getAttribute('data-media'),
+          'The data-media attribute is required when <amp-pinterest> ' + 
+          'makes a Pin It button %s', this.element);
 
-        var pinDescription = AMP.assert(this.element.getAttribute('data-description'),
-          'The data-description attribute is required when <amp-pinterest> makes a Pin It button %s',
-          this.element);
+        var pinDescription = 
+           AMP.assert(this.element.getAttribute('data-description'),
+          'The data-description attribute is required when <amp-pinterest> ' + 
+          'makes a Pin It button %s', this.element);
 
         // options
         let shape = this.element.getAttribute('data-shape');
@@ -172,7 +174,7 @@ class AmpPinterest extends AMP.BaseElement {
             }
             className = className + '-' + color;
 
-            // yes, we do this twice; once for container and once for background image
+            // yes, we do this twice; once for container and once for bg image
             if (height === '28') {
               // we're tall
               className = className + '-28';
@@ -181,7 +183,7 @@ class AmpPinterest extends AMP.BaseElement {
 
           if (r) {
 
-            // API reply comes wrapped in a default callback; need to remove if present
+            // API reply comes wrapped in a default callback; remove if present
             r = r.replace(/^receiveCount\(/, '');
             r = r.replace(/\)$/, '');
 
@@ -209,7 +211,9 @@ class AmpPinterest extends AMP.BaseElement {
               }
 
               // fill with text; zero
-              countBubble.appendChild(document.createTextNode(prettyPinCount(data.count - 0) || '0'));
+              countBubble.appendChild(document.createTextNode(
+                prettyPinCount(data.count - 0) || '0'
+              ));
 
               // append
               a.appendChild(countBubble);
@@ -225,12 +229,16 @@ class AmpPinterest extends AMP.BaseElement {
           a.href = 'https://www.pinterest.com/pin/create/button/';
           a.href = a.href + '?url=' + encodeURIComponent(pinUrl);
           a.href = a.href + '&media=' + encodeURIComponent(pinMedia);
-          a.href = a.href + '&description=' + encodeURIComponent(pinDescription);
+          a.href = a.href + '&description=' + 
+            encodeURIComponent(pinDescription);
 
           // listen for clicks
           a.addEventListener('click', function (e) {
             // pop the pin create window on Pinterest
-            window.open(this.href, '_pinit', 'status=no,resizable=yes,scrollbars=yes,personalbar=no,directories=no,location=no,toolbar=no,menubar=no,width=900,height=500,left=0,top=0');
+            let pop = 'status=no,resizable=yes,scrollbars=yes,' + 
+              'personalbar=no,directories=no,location=no,toolbar=no,' +
+              'menubar=no,width=900,height=500,left=0,top=0';
+            window.open(this.href, '_pinit', pop);
             e.preventDefault();
           });
 
@@ -245,7 +253,8 @@ class AmpPinterest extends AMP.BaseElement {
         // only ask for a count if the operator requires it
         if (config === 'above' || config === 'beside') {
           // call the API
-          let call = 'https://widgets.pinterest.com/v1/urls/count.json?url=' + encodeURIComponent(pinUrl);
+          let call = 'https://widgets.pinterest.com/v1/urls/count.json?url=' +
+            encodeURIComponent(pinUrl);
           return get(call).then((r) => {
             render(r);
             return loadPromise(a);
@@ -276,7 +285,8 @@ class AmpPinterest extends AMP.BaseElement {
             let v = this.element.getAttribute(VALID_PARAMS[i]);
             if (v) {
                 // remove data- prefix from params
-                src = src + '&' + VALID_PARAMS[i].replace(/data-/, '') + '=' + encodeURIComponent(v);
+                src = src + '&' + VALID_PARAMS[i].replace(/data-/, '') + 
+                  '=' + encodeURIComponent(v);
             }
         }
 
