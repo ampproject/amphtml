@@ -50,7 +50,7 @@ This allows the AMP library to include:
 
 ## The AMP JS library
 
-The AMP JS library provides [builtin](builtin/README.md) AMP Components, manages the loading of external resources, and ensures a reliably fast time-to-paint.
+The AMP JS library provides [builtin](builtins/README.md) AMP Components, manages the loading of external resources, and ensures a reliably fast time-to-paint.
 
 ## The AMP Validator
 
