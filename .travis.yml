@@ -20,7 +20,7 @@ before_script:
 script:
   - gulp lint
   - gulp build
-  - gulp minify
+  - gulp dist
   - gulp presubmit
   - gulp test
   - gulp test --saucelabs
