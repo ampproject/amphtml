@@ -306,7 +306,7 @@ The `<script>` tag must have an `async` attribute and must have a `custom-elemen
 
 Runtime implementations may use the name to render placeholders for these elements.
 
-The script URL must start with “https://cdn.ampproject.org” and must follow a very strict pattern of “/v\d+/[a-z-]+-(latest|\d+|\d+-\d+)\.js”
+The script URL must start with “https://cdn.ampproject.org” and must follow a very strict pattern of “`/v\d+/[a-z-]+-(latest|\d+|\d+\.\d+)\.js`”
 
 ##### URL
 
