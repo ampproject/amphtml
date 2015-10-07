@@ -2,7 +2,7 @@
 <!--
       This sample AMP HTML file aims to be a minimalist document that
       follows best practices and guidances for publishers to mark up
-      content for inclusion in various platforms. 
+      content for inclusion in various platforms.
 -->
 <html AMP lang="en" itemscope itemtype="http://schema.org/NewsArticle">
   <!-- you can use "amp" or "AMP" or "⚡" -->
@@ -10,31 +10,28 @@
     <meta charset="utf-8">
     <title>Lorem Ipsum</title>
     <link itemprop="mainEntityOfPage" rel="canonical" href="http://example.ampproject.org/article-metadata.html" />
-    <!-- 
+    <!--
         The canonical document for this article should be linked, as above.
 
         The canonical document should also have a corresponding <link> tag
-        within pointing at this AMP HTML file: 
-        
-          <link rel="amphtml" href="http://example.ampproject.org/article-metadata.amp.html" /> 
-        
+        within pointing at this AMP HTML file:
+
+          <link rel="amphtml" href="http://example.ampproject.org/article-metadata.amp.html" />
+
         It is possible that this AMP HTML document is the canonical document
         for this article, in which case, the canonical URL should point to this
         document, and no "amphtml" link is required.
 
         Also, please be aware that some platforms that use AMP HTML have
         further restrictions with regards to some schema components.
-        
+
          For example:
-        
+
            * All marked-up URL's should be absolute.
            * The "logo" dimensions must not exceed 600x60.
     -->
-    <script src="https://cdn.ampproject.org/v0.js" async></script>
     <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
     </script>
-    <!-- this style tag is required -->
-    <style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
     <!-- only one style tag is allowed, and it must have an "amp-custom" attribute -->
     <style amp-custom>
       <!-- any custom style goes here; and remember, body margin can not be declared -->
@@ -45,6 +42,9 @@
         background-color: gray;
       }
     </style>
+    <!-- this style tag is required -->
+    <style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
+    <script src="https://cdn.ampproject.org/v0.js" async></script>
   </head>
   <body>
     <h1 itemprop="headline">Lorem Ipsum</h1>
