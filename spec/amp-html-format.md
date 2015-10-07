@@ -68,8 +68,8 @@ In concrete terms this means that:
   }
   </script>
   <script custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js" async></script>
-  <script src="https://cdn.ampproject.org/v0.js" async></script>
   <style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
+  <script src="https://cdn.ampproject.org/v0.js" async></script>
 </head>
 <body>
 <h1>Sample document</h1>
