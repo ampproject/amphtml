@@ -153,8 +153,7 @@ Most HTML tags can be used unchanged in AMP HTML. Certain tags, however, have eq
 | <a name="ancr"></a>a         | The `href` attribute value must not begin with `javascript:`. If set, the `target` attribute value must be `_blank`. Otherwise allowed. [🔗](#ancr) |
 | svg       | Most SVG elements are allowed | 
 
-Validator implementations should use a whitelist based on the HTML5 specification with the above tags removed.
-TODO(malteubl): Add addendum with whitelist.
+Validator implementations should use a whitelist based on the HTML5 specification with the above tags removed. See [AMP Tag Addendum](amp-tag-addendum.md).
 
 ### Comments
 
