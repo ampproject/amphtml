@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-/* circular buttons */
+/* round buttons */
 
 .amp-pinterest-round {
   height: 16px;
@@ -49,6 +49,8 @@
   background-position: 0 -40px;
 }
 
+/* small background images */
+
 .amp-pinterest-en-gray {
   background-image: url(https://s-passets.pinimg.com/images/pidgets/pinit_bg_en_rect_gray_20_2.png);
 }
@@ -73,7 +75,7 @@
   background-image: url(https://s-passets.pinimg.com/images/pidgets/pinit_bg_ja_rect_white_20_2.png);
 }
 
-/* tall buttons */
+/* large buttons */
 
 .amp-pinterest-rect-28 {
   height: 28px;
@@ -90,9 +92,10 @@
   background-position: 0 -56px;
 }
 
+/* large background images */
+
 .amp-pinterest-en-gray-28 {
-  background: url(https://s-passets.pinimg.com/images/pidgets/pinit_bg_en_rect_gray_28_2.png) 0 -20px no-repeat;
-  background-size: 40px 60px;
+  background-image: url(https://s-passets.pinimg.com/images/pidgets/pinit_bg_en_rect_gray_28_2.png);
 }
 
 .amp-pinterest-en-red-28 {
@@ -113,4 +116,86 @@
 
 .amp-pinterest-ja-white-28 {
   background-image: url(https://s-passets.pinimg.com/images/pidgets/pinit_bg_ja_rect_white_28_2.png);
+}
+
+/* count bubble above */
+
+.amp-pinterest-count-pad-above-20 {
+  margin-top: 30px;
+}
+
+.amp-pinterest-count-pad-above-28 {
+  margin-top: 38px;
+}
+
+.amp-pinterest-bubble-above-20 {
+  position: absolute;
+  left: 0;
+  text-align: center;
+  text-decoration: none;
+  color: #777;
+  bottom: 21px;
+  height: 29px;
+  width: 40px;
+  background: transparent url(https://s-passets.pinimg.com/images/pidgets/count_north_white_rect_20_2.png) 0 0 no-repeat;
+  background-size: 40px 29px;
+  font: 12px Arial, Helvetica, sans-serif;
+  line-height: 24px;
+}
+
+.amp-pinterest-bubble-above-28 {
+  position: absolute;
+  left: 0;
+  text-align: center;
+  text-decoration: none;
+  color: #777;
+  bottom: 29px;
+  height: 37px;
+  width: 56px;
+  background: transparent url(https://s-passets.pinimg.com/images/pidgets/count_north_white_rect_28_2.png) 0 0 no-repeat;
+  background-size: 56px 37px;
+  font: 15px Arial, Helvetica, sans-serif;
+  line-height: 28px;
+}
+
+/* count bubble beside */
+
+.amp-pinterest-count-pad-beside-20 {
+  width: 86px;
+}
+
+.amp-pinterest-count-pad-beside-28 {
+  width: 120px;
+}
+
+.amp-pinterest-bubble-beside-20 {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 20px;
+  width: 45px;
+  text-align: center;
+  text-indent: 5px;
+  text-decoration: none;
+  color: #777;
+  background: transparent url(https://s-passets.pinimg.com/images/pidgets/count_east_white_rect_20_2.png) 0 0 no-repeat;
+  background-size: 45px 20px;
+  font: 12px Arial, Helvetica, sans-serif;
+  line-height: 20px;
+}
+
+.amp-pinterest-bubble-beside-28 {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 28px;
+  width: 63px;
+  text-align: center;
+  text-indent: 7px;
+  text-decoration: none;
+  color: #777;
+  background: transparent url(https://s-passets.pinimg.com/images/pidgets/count_east_white_rect_28_2.png) 0 0 no-repeat;
+  background-size: 63px 28px;
+  font: 15px Arial, Helvetica, sans-serif;
+  line-height: 28px;
 }
