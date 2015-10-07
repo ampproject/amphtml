@@ -100,9 +100,9 @@ Tutorials:
 
 <--
 Not yet done.
-* [Integrating your AMP HTML page](docs/integrating.md)
-* [Extending AMP HTML with new elements](docs/extending.md)
-* [Embedding AMP HTML content in your app](docs/embedding.md)
+[Integrating your AMP HTML page](docs/integrating.md)
+[Extending AMP HTML with new elements](docs/extending.md)
+[Embedding AMP HTML content in your app](docs/embedding.md)
 -->
 
 Reference:
