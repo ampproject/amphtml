@@ -7,6 +7,7 @@ stage it, test it, and get it ready for publication.
 
 The basic AMP HTML page includes the following mark-up:
 
+```html
     <!doctype html>
     <html AMP lang="en">
       <head>
@@ -32,6 +33,7 @@ The basic AMP HTML page includes the following mark-up:
         <h1>Welcome to the mobile web</h1>
       </body>
     </html>
+```
 
 ## Required mark-up
 
@@ -57,6 +59,7 @@ Content pages include more features than just the content.
 To get you started,
 here's the basic AMP HTML page now with an image:
 
+```html
     <!doctype html>
     <html AMP lang="en">
       <head>
@@ -84,6 +87,7 @@ here's the basic AMP HTML page now with an image:
 
       </body>
     </html>
+```
 
 Learn more about
 [how to include common features](../docs/include_features.md).
@@ -110,6 +114,7 @@ Style elements inside `<style amp-custom>`
 using class or element selectors in an author-defined,
 inlined stylesheet: 
 
+```html
     <!doctype html>
     <html AMP lang="en">
       <head>
@@ -146,6 +151,7 @@ inlined stylesheet:
 
       </body>
     </html>
+```
 
 Learn more about adding elements, including extended components,
 in [How to Include Common Features](../docs/include_features.md).
