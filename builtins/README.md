@@ -3,7 +3,6 @@
 The following components are always available in AMP documents:
 
 | Component                   | Description                                         |
-
 | --------------------------  | --------------------------------------------------- |
 | [`amp-ad`](amp-ad.md)       | Container to display an ad.                         |
 | [`amp-img`](amp-img.md)     | Replacement for the HTML `img` tag.                 |
