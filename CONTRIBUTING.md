@@ -41,7 +41,7 @@ The best bug reports include a detailed way to predictably reproduce the issue, 
 
 #### Fixing bugs and runtime features
 
-The AMP HTML project accepts and greatly appreciates contributions. The project follows the [fork & pull](https://help.github.com/articles/using-pull-requests/#fork--pull) model for accepting contributions.
+The AMP HTML project accepts and greatly appreciates contributions. The project follows the [fork & pull](https://help.github.com/articles/using-pull-requests/#fork--pull) model for accepting contributions. Please mark pull requests that are ready for review with the "NEEDS REVIEW" label.
 
 When contributing code, please also include appropriate tests as part of the pull request, and follow the same comment and coding style as the rest of the project. Take a look through the existing code for examples of the testing and style practices the project follows.
 
