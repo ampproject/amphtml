@@ -46,7 +46,7 @@ This allows the AMP library to include:
 * The AMP JS library, that manages the loading of external resources to ensure a
   fast rendering of the page.
 * An AMP validator that provides a way for web developers to easily validate
-  that their code meets the AMP HTML specification. 
+  that their code meets the AMP HTML specification.
 * Some custom elements, called AMP HTML components, which make common patterns
   easy to implement in a performant way.
 
@@ -64,7 +64,7 @@ Adding "#development=1" to the URL of the page instructs the AMP Runtime to run
 a series of assertions confirming the page's markup meets the AMP HTML
 Specification.  Validation errors are logged to the browser's console when the
 page is rendered, allowing web developers to easily see how complex changes in
-web code might impact performance and user experience. 
+web code might impact performance and user experience.
 
 It also allows apps that integrate web content to validate the web page against
 the specification.  This allows an app to make sure the page is fast and
@@ -87,7 +87,7 @@ These components can:
   amp-slides.
 * Make advanced performance techniques easy, such as amp-anim, which allows web
   developers to dynamically serve animated images as either image files (GIF)
-  or video files (WebM or MP4) based on browser compatability.  
+  or video files (WebM or MP4) based on browser compatability.
 
 # Further Reading
 
@@ -121,6 +121,4 @@ under the [Apache License, Version 2.0](LICENSE).
 
 ## Contributing
 
-Please see [the CONTRIBUTING file](CONTRIBUTING.md) for resources on
-contributing to the AMP Project.
-
+Please see [the CONTRIBUTING file](CONTRIBUTING.md) for information on contributing to the AMP Project, and [the DEVELOPING file](DEVELOPING.md) for documentation on the AMP library internals.
