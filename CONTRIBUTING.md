@@ -20,10 +20,11 @@ limitations under the License.
 
 **Google Individual Contributor License**
 
-Code contributors to the AMP HTML project must sign a Contributor License Agreement, either for an individual or corporation. The CLA is meant to protect contributors, users of the AMP HTML runtime, and Google in issues of intellectual property.  You can fill out the appropriate Contributor License Agreement at:
+Code contributors to the AMP HTML project must sign a Contributor License Agreement, either for an individual or corporation. The CLA is meant to protect contributors, users of the AMP HTML runtime, and Google in issues of intellectual property. You can fill out the appropriate Contributor License Agreement at:
 
-https://developers.google.com/open-source/cla/individual
-https://developers.google.com/open-source/cla/corporate
+Individuals - https://developers.google.com/open-source/cla/individual
+
+Corporate - https://developers.google.com/open-source/cla/corporate
 
 ### Contributing
 
