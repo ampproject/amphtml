@@ -109,7 +109,6 @@ Not yet done.
 Reference:
 * [AMP HTML core built-in elements](builtins/README.md)
 * [AMP HTML optional extended elements](extensions/README.md)
-<!-- * [AMP HTML FAQ](docs/FAQ.md) -->
 
 Technical Specifications:
 * [AMP HTML format specification](spec/amp-html-format.md)
