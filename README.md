@@ -98,11 +98,11 @@ Tutorials:
 * [How to Create a Basic AMP HTML Page](docs/create_page.md)
 * [How to Include Common Features](docs/include_features.md)
 
-<--
+<!--
 Not yet done.
-[Integrating your AMP HTML page](docs/integrating.md)
-[Extending AMP HTML with new elements](docs/extending.md)
-[Embedding AMP HTML content in your app](docs/embedding.md)
+* [Integrating your AMP HTML page](docs/integrating.md)
+* [Extending AMP HTML with new elements](docs/extending.md)
+* [Embedding AMP HTML content in your app](docs/embedding.md)
 -->
 
 Reference:
