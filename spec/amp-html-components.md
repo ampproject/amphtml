@@ -14,23 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-Changelog:
-
-0.6
-Added amp-audio
-
-0.5
-Added amp-iframe
-Added amp-twitter
-
-0.4
-Renamed CAT to AMP
-Provisionally removed amp-on spec - subject to be update to “on” attribute.
-Added amp-instagram, amp-youtube
-
-0.3
-Changed `amp-carousel` styling custom properties; from left and right arrow to next and previous
-
 # AMP HTML Components
 
 ## Overview
