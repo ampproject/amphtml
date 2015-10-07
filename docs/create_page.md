@@ -170,9 +170,9 @@ and validating the page using the
 2. Get your web server up and running locally.
 For a quick web server, run `python -m SimpleHTTPServer`.
 4. Open your page, for example, go to
-[http://localhost:8000/examples/hello-AMP-HTML.html](http://localhost:8000/examples/hello-AMP-HTML.html).
+[http://localhost:8000/released.amp.html](http://localhost:8000/released.amp.html).
 5. Add "#development=1" to the URL, for example,
-[http://localhost:8000/examples/hello-AMP-HTML.html#development=1](http://localhost:8000/examples/hello-AMP-HTML.html#development=1).
+[http://localhost:8000/released.amp.html#development=1](http://localhost:8000/released.amp.html#development=1).
 6. Open the Chrome DevTools console and check for validation errors.
 
 <!--
