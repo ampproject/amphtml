@@ -87,7 +87,7 @@ class AmpPinterest extends AMP.BaseElement {
         xhr.open("GET", url, true);
         xhr.send();
       });
-    }
+    };
 
     // pinDo is set by data-do
     switch (pinDo) {
@@ -240,7 +240,7 @@ class AmpPinterest extends AMP.BaseElement {
           that.element.appendChild(a);
           // done
           return loadPromise(a);
-        }
+        };
 
         // only ask for a count if the operator requires it
         if (config === 'above' || config === 'beside') {
