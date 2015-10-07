@@ -209,7 +209,7 @@ class AmpPinterest extends AMP.BaseElement {
               }
 
               // fill with text; zero
-              countBubble.innerHTML = prettyPinCount(data.count - 0) || '0';
+              countBubble.appendChild(document.createTextNode(prettyPinCount(data.count - 0) || '0'));
 
               // append
               a.appendChild(countBubble);
