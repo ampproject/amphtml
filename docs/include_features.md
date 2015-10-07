@@ -1,10 +1,11 @@
 # How to Include Common Features
 
-AMP HTML elements make it simple for you to control your content.
+AMP HTML components make it simple for you to control your content.
 Learn how to include common features in your pages using these elements.
 
-See also the [AMP HTML Built-in Components](../builtins/README.md)
-and the [AMP HTML Extended Components](../extensions/README.md).
+Make sure to review the documentation for each component individually as a reference:
+* [AMP HTML Built-in Components](../builtins/README.md)
+* [AMP HTML Extended Components](../extensions/README.md).
 
 # Display an iframe
 
@@ -13,15 +14,15 @@ Display an iframe in your page using the
 
 `amp-iframe` requirements:
 
-* Must be at least 600px away from the top.
+* Must be at least 600px or 75% of the first viewport away from the top.
 * Can only request resources via HTTPS, and they must not be in the same origin as the container,
-unless they do not allow allow-same-origin.
+unless they do not specify allow-same-origin.
 
 To include an `amp-iframe` in your page,
-first include the following script to the `<head>`:
+first include the following script to the `<head>`, which loads the additional code for the extended component:
 
 ```html
-<script custom-element="amp-iframe" src="https://cdn.ampproject.org//amphtml/v0/amp-iframe-0.1.js" async></script>
+<script custom-element="amp-iframe" src="https://cdn.ampproject.org/amphtml/v0/amp-iframe-0.1.js" async></script>
 ```
 
 An example `amp-iframe` from the
@@ -102,7 +103,7 @@ The placeholder is specified via the `placeholder` attribute:
 ## Embed a Tweet
 
 Embed a Twitter Tweet in your page
-using the [`apm-twitter`](../extensions/amp-twitter/amp-twitter.md) element.
+using the [`amp-twitter`](../extensions/amp-twitter/amp-twitter.md) element.
 
 To include a tweet in your page,
 first include the following script to the `<head>`:
