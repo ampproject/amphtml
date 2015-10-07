@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-var fs = require('fs');
 var gulp = require('gulp');
 var del = require('del');
 var file = require('gulp-file');
