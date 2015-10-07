@@ -18,11 +18,9 @@ limitations under the License.
 
 AMP HTML is a way to build web pages for static content that render with reliable, fast performance. It is our attempt at fixing what many perceive as painfully slow page load times – especially when reading content on the mobile web.
 
-AMP HTML is entirely built on existing web technologies. It achieves reliable performance by restricting some parts of HTML, CSS and JavaScript. These restrictions are enforced with a validator that ships with AMP HTML. To make up for those limitations AMP HTML provides a set of [custom elements](http://www.html5rocks.com/en/tutorials/webcomponents/customelements/) for rich content beyond basic HTML.
+AMP HTML is entirely built on existing web technologies. It achieves reliable performance by restricting some parts of HTML, CSS and JavaScript. These restrictions are enforced with a validator that ships with AMP HTML. To make up for those limitations AMP HTML defines a set of custom elements for rich content beyond basic HTML. Learn how to define new elements in HTML in the [Custom Elements](http://www.html5rocks.com/en/tutorials/webcomponents/customelements/) article.
 
-For more info how AMP HTML works and some insights into the design, please read our blog post ["A new approach to web performance"](https://www.ampproject.org/how-it-works/) (which may be the first AMP HTML file you ever see :).
-
-We also have a non-technical description of what we are doing on [www.ampproject.org](https://www.ampproject.org).
+For more info how AMP HTML works and some insights into the design, please read our blog post ["A new approach to web performance"](https://www.ampproject.org/how-it-works/) (which may be the first AMP HTML file you ever see :). We also have a non-technical description of what we are doing on [www.ampproject.org](https://www.ampproject.org).
 
 # How does AMP HTML work?
 
@@ -52,8 +50,7 @@ This allows the AMP library to include:
 
 ## The AMP JS library
 
-The AMP JS library provides builtin AMP Components and manages the loading of external resources
-and ensure a reliably fast time-to-paint.
+The AMP JS library provides [builtin](builtins/README.md) AMP Components, manages the loading of external resources, and ensures a reliably fast time-to-paint.
 
 ## The AMP Validator
 
@@ -79,15 +76,18 @@ it is solely responsible for loading external assets and to provide for shared
 best practices in implementation.
 
 These components can:
-* Replace HTML5 elements that are not permitted in the specification, typically
-  with added syntax sugar, such as amp-img and amp-video.
-* Implement embedded third-party content, such as amp-youtube, amp-ad, and
-  amp-twitter.
-* Provide for common patterns in web pages, such as amp-lightbox and
-  amp-slides.
-* Make advanced performance techniques easy, such as amp-anim, which allows web
-  developers to dynamically serve animated images as either image files (GIF)
-  or video files (WebM or MP4) based on browser compatability.
+* Replace HTML5 elements that are not directly permitted in the specification
+  such as [amp-img](builtins/amp-img.md) and [amp-video](builtins/amp-video.md).
+* Implement embedded third-party content, such as
+[amp-youtube](extensions/amp-youtube/amp-youtube.md), [amp-ad](builtins/amp-ad.md),
+and [amp-twitter](extensions/amp-twitter/amp-twitter.md).
+* Provide for common patterns in web pages,
+such as [amp-lightbox](extensions/amp-lightbox/amp-lightbox.md)
+and [amp-carousel](extensions/amp-carousel/amp-carousel.md).
+* Make advanced performance techniques easy,
+such as [amp-anim](extensions/amp-anim/amp-anim.md),
+which allows web developers to dynamically serve animated images
+as either image files (GIF) or video files (WebM or MP4) based on browser compatability.
 
 # Further Reading
 

@@ -3,12 +3,13 @@
 AMP HTML elements make it simple for you to control your content.
 Learn how to include common features in your pages using these elements.
 
-See also the complete [AMP HTML Reference](../docs/amp_reference.md).
+See also the [AMP HTML Built-in Components](../builtins/README.md)
+and the [AMP HTML Extended Components](../extensions/README.md).
 
 # Display an iframe
 
 Display an iframe in your page using the
-[`amp-iframe`](../extensions/amp-iframe.md) element.
+[`amp-iframe`](../extensions/amp-iframe/amp-iframe.md) element.
 
 `amp-iframe` requirements:
 
@@ -19,7 +20,9 @@ unless they do not allow allow-same-origin.
 To include an `amp-iframe` in your page,
 first include the following script to the `<head>`:
 
-    <script custom-element="amp-iframe" src="https://cdn.ampproject.org//amphtml/v0/amp-iframe-0.1.js" async></script>
+```html
+<script custom-element="amp-iframe" src="https://cdn.ampproject.org//amphtml/v0/amp-iframe-0.1.js" async></script>
+```
 
 An example `amp-iframe` from the
 [released.amp example](https://github.com/ampproject/amphtml/blob/master/examples/released.amp.html):
@@ -39,9 +42,9 @@ using AMP media elements.
 ## Include an image
 
 Include an image in your page
-using the [`amp-img`](../builtins/amp-img) element.
+using the [`amp-img`](../builtins/amp-img.md) element.
 
-`amp-img` requirement:
+`amp-img` requirements:
 
 * Must include an explicit width and height.
 * Recommended: include a placeholder in case image resource fails to load.
@@ -74,7 +77,7 @@ using CSS selector and style on the element itself:
 ## Include an animated image
 
 Include an animated image in your page
-using the [`amp-anim`](../extensions/amp-anim) element.
+using the [`amp-anim`](../extensions/amp-anim/amp-anim.md) element.
 
 The `amp-anim` element is very similar to the `amp-img` element,
 and provides additional functionality to manage loading and playing
@@ -83,7 +86,9 @@ of animated images such as GIFs.
 To include an `amp-anim` in your page,
 first include the following script to the `<head>`:
 
-    <script custom-element="amp-anim" src="https://cdn.ampproject.org//amphtml/v0/amp-anim-0.1.js" async></script>
+```html
+<script custom-element="amp-anim" src="https://cdn.ampproject.org//amphtml/v0/amp-anim-0.1.js" async></script>
+```
 
 The `amp-anim` component can also have an optional placeholder child
 to display while the `src` file is loading.
@@ -97,12 +102,14 @@ The placeholder is specified via the `placeholder` attribute:
 ## Embed a Tweet
 
 Embed a Twitter Tweet in your page
-using the [`apm-twitter`](../extensions/amp-twitter) element.
+using the [`apm-twitter`](../extensions/amp-twitter/amp-twitter.md) element.
 
 To include a tweet in your page,
 first include the following script to the `<head>`:
 
-    <script custom-element="amp-twitter" src="https://cdn.ampproject.org//amphtml/v0/amp-twitter-0.1.js" async></script>
+```html
+<script custom-element="amp-twitter" src="https://cdn.ampproject.org//amphtml/v0/amp-twitter-0.1.js" async></script>
+```
 
 Currently tweets are automatically proportionally scaled
 to fit the provided size,
@@ -165,11 +172,13 @@ if the browser doesn't support HTML5 video, for example:
 ## Include a youtube video
 
 Include a youtube video in your page
-using the [`amp-youtube](../extensions/amp-youtube.md) element.
+using the [`amp-youtube`](../extensions/amp-youtube/amp-youtube.md) element.
 
 You must include the following script in the `<head>`:
 
-    <script custom-element="amp-youtube" src="https:///cdn.ampproject.org/amphtml/v0/amp-youtube-0.1.js" async></script>
+```html
+<script custom-element="amp-youtube" src="https:///cdn.ampproject.org/amphtml/v0/amp-youtube-0.1.js" async></script>
+```
 
 The Youtube `video-id` can be found in every Youtube video page URL.
 For example, in https://www.youtube.com/watch?v=Z1q71gFeRqM,
@@ -186,11 +195,13 @@ Use `layout="responsive"` to yield correct layouts for 16:9 aspect ration videos
 ## Include an audio resource
 
 Include an audio resource in your page,
-using the [amp-audio](../extensions/amp-audio.md) element.
+using the [`amp-audio`](../extensions/amp-audio/amp-audio.md) element.
 
 You must include the following script in the `<head>`:
  
-    <script custom-element="amp-audio" src="https:///cdn.ampproject.org/amphtml/v0/amp-audio-0.1.js" async></script>
+```html
+<script custom-element="amp-audio" src="https:///cdn.ampproject.org/amphtml/v0/amp-audio-0.1.js" async></script>
+```
 
 Only use this element for direct HTML5 audio file embeds.
 Like all embedded external resources in an AMP page,
@@ -213,7 +224,7 @@ For example:
 # Count user page views
 
 Count user page views
-using the [amp-pixel](../builtins/amp-pixel) element.
+using the [`amp-pixel`](../builtins/amp-pixel.md) element.
 
 The `amp-pixel` element takes a simple URL to send a GET request
 to when the tracking pixel is loaded.
@@ -239,8 +250,6 @@ The following ad networks are supported in AMP HTML pages:
 - [AdSense](../ads/adsense.md)
 - [AdTech](../ads/adtech.md)
 - [Doubleclick](../ads/doubleclick.md)
-
-**Todo:** Should we cover all the different ad networks here?
 
 ## Display an ad
 
