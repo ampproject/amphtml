@@ -70,7 +70,7 @@ here's the basic AMP HTML page now with an image:
             "@context": "http://schema.org",
             "@type": "NewsArticle",
             "headline": "Open-source framework for publishing content everywhere",
-            "datePublished": "1907-05-05T12:02:41Z",
+            "datePublished": "2015-10-07T12:02:41Z",
             "image": [
               "logo.jpg"
             ]
@@ -100,7 +100,7 @@ but flexible layout scenarios with solid performance.
 It ensures that sizes of all elements can be calculated
 by the browser via CSS automatically and
 no resource loading can change these sizes.
-Learn more in the [AMP Components spec](../spec/amp-html-components.md)
+Learn more in the [AMP HTML Components specification](../spec/amp-html-components.md).
 
 # Add some styles
 
@@ -110,8 +110,8 @@ Style elements inside `<style amp-custom>`
 using class or element selectors in an author-defined,
 inlined stylesheet: 
 
-  <!doctype html>
-  <html AMP lang="en">
+    <!doctype html>
+    <html AMP lang="en">
       <head>
         <meta charset="utf-8">
         <title>Hello, AMPs</title>
