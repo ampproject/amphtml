@@ -28,17 +28,18 @@ first include the following script to the `<head>`, which loads the additional c
 An example `amp-iframe` from the
 [released.amp example](https://github.com/ampproject/amphtml/blob/master/examples/released.amp.html):
 
+  ```html
   <amp-iframe width=300 height=300
       sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
       layout="responsive"
       frameborder="0"
       src="https://www.google.com/maps/embed/v1/place?key=AIzaSyDG9YXIhKBhqclZizcSzJ0ROiE0qgVfwzI&q=Alameda,%20CA">
   </amp-iframe>
+  ```
 
 # Media
 
-Include images, video, and audio in your page
-using AMP media elements.
+Include images, video, and audio in your page using AMP media elements.
 
 ## Include an image
 
@@ -62,7 +63,7 @@ Hidden image example:
 
     <amp-img id="img2" src="hidden.jpg" width=527 height=193 layout="nodisplay"></amp-img>
 
-The AMP HTML runtime can affectively manage image resources,
+The AMP HTML runtime can effectively manage image resources,
 choosing to delay or prioritize resource loading
 based on the viewport position, system resources, connection bandwidth, or other factors.
 
@@ -211,8 +212,6 @@ at a time determined by the AMP HTML runtime.
 
 Include a placeholder before the audio starts, and a fallback,
 if the browser doesn't support HTML5 audio, for example:
-
-For example:
 
     <amp-audio width=400 height=300 src=”https://yourhost.com/audios/myaudio.mp3”>
       <div fallback>
