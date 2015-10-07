@@ -128,7 +128,7 @@ It is encouraged that AMP HTML documents are annotated with Open Graph Protocol,
 
 ### HTML Tags
 
-Most HTML tags can be used unchanged in AMP HTML. Certain tags, however, have equivalent custom tags (such as <img> and <amp-img>) and other tags are outright banned:
+Most HTML tags can be used unchanged in AMP HTML. Certain tags, however, have equivalent custom tags (such as `<img>` and `<amp-img>`) and other tags are outright banned:
 
 | Tag       | Status in AMP HTML                             |
 |-----------|------------------------------------------------|
