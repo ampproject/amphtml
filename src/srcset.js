@@ -37,11 +37,20 @@ var SrcsetSource;
  * @return {!Srcset}
  */
 export function parseSrcset(s) {
-  let sSources = s.split(',');
+  // General grammar: (URL [NUM[w|x]],)*
+  // Example 1: "image1.png 100w, image2.png 50w"
+  // Example 2: "image1.png 2x, image2.png"
+  // Example 3: "image1,100w.png 100w, image2.png 50w"
+  let sSources = s.match(
+      /\s*([^\s]*)(\s+(-?(\d+(\.(\d+)?)?|\.\d+)[a-zA-Z]))?(\s*,)?/g);
   assert(sSources.length > 0, 'srcset has to have at least one source');
   let sources = [];
   sSources.forEach((sSource) => {
-    let parts = sSource.trim().split(/\s+/, 2);
+    sSource = sSource.trim();
+    if (sSource.substr(-1) == ',') {
+      sSource = sSource.substr(0, sSource.length - 1).trim();
+    }
+    let parts = sSource.split(/\s+/, 2);
     if (parts.length == 0 ||
           parts.length == 1 && !parts[0] ||
           parts.length == 2 && !parts[0] && !parts[1]) {
