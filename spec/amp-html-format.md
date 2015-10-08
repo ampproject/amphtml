@@ -163,7 +163,7 @@ Conditional HTML comments are not allowed.
 
 Attribute names starting with `on` (such as `onclick` or `onmouseover`) are disallowed in AMP HTML. The attribute with the literal name `on` (no suffix) is allowed.
 
-The style attribute must not be used.
+The `style` attribute must not be used.
 
 ### Links
 
@@ -230,7 +230,7 @@ Font providers can be whitelisted if they support CSS-only integrations and serv
 
 - https://fonts.googleapis.com
 
-Authors are free to include all custom fonts via a `@font-face` CSS instruction via their custom CSS. Fonts included via `@font-face` must be fetched via HTTP or HTTPS scheme.
+Authors are free to include all custom fonts via a `@font-face` CSS instruction via their custom CSS. Fonts included via `@font-face` must be fetched via the HTTP or HTTPS scheme.
 
 
 ## AMP runtime

@@ -9,7 +9,7 @@ The basic AMP HTML page includes the following mark-up:
 
 ```html
     <!doctype html>
-    <html AMP lang="en">
+    <html amp lang="en">
       <head>
         <meta charset="utf-8">
         <title>Hello, AMPs</title>
@@ -148,7 +148,7 @@ Externally-loaded resources (like images, ads, videos, etc.) must have height
 and width attributes.  This ensures that sizes of all elements can be
 calculated by the browser via CSS automatically and element sizes won't be
 recalculated because of external resources, preventing the page from jumping
-and around as resources load.
+around as resources load.
 
 Moreover, use of the style attribute for tags is not permitted, as this
 optimizes impact rendering speed in unpredictable ways.
