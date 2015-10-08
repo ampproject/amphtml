@@ -239,7 +239,7 @@ The AMP runtime is a piece of JavaScript that runs inside every AMP document. It
 
 The AMP runtime is loaded via the mandatory `<script src="https://cdn.ampproject.org/v0.js"></script>` tag in the AMP document head.
 
-Development mode is triggered by including the attribute "development" in the script tag: `<script src="https://cdn.ampproject.org/v0.js" development></script>`
+Development mode is triggered by adding "#development=1" to the URL of the page.
 
 
 ## Resources
