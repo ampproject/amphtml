@@ -67,9 +67,9 @@ In concrete terms this means that:
     "datePublished": "2015-02-05T08:00:00+08:00"
   }
   </script>
-  <script custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js" async></script>
+  <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
   <style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
-  <script src="https://cdn.ampproject.org/v0.js" async></script>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
 <h1>Sample document</h1>
@@ -97,7 +97,7 @@ AMP HTML documents MUST
 - <a name="canon"></a>contain a `<link rel="canonical" href="$SOME_URL" />` tag inside their head that points to the regular HTML version of the AMP HTML document or to itself if no such HTML version exists. [🔗](#canon)
 - <a name="chrs"></a>contain a `<meta charset="utf-8">` tag as the first child of their head tag. [🔗](#chrs)
 - <a name="vprt"></a>contain a `<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">` tag inside their head tag. [🔗](#vprt)
-- <a name="scrpt"></a>contain a `<script src="https://cdn.ampproject.org/v0.js" async></script>` tag as the last element in their head. [🔗](#scrpt)
+- <a name="scrpt"></a>contain a `<script async src="https://cdn.ampproject.org/v0.js"></script>` tag as the last element in their head. [🔗](#scrpt)
 - <a name="opacity"></a>contain `<style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>` in their head tag. [🔗](#opacity)
 
 ### Metadata
@@ -319,7 +319,7 @@ Extended components are components that do not necessarily ship with the AMP run
 Extended components are loaded by including a script tag in the head of the document like this
 
 ```html
-<script custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js" async></script>
+<script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
 ```
 
 The script tag MUST have an async attribute and MUST have an `element` attribute referencing the name of the element.
