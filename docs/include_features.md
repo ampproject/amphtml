@@ -49,7 +49,7 @@ using the [`amp-img`](../builtins/amp-img.md) element.
 `amp-img` requirements:
 
 * Must include an explicit width and height.
-* Recommended: include a placeholder in case image resource fails to load.
+* Recommended: include a placeholder in case the image resource fails to load.
 
 Responsive image example:
 
@@ -70,7 +70,7 @@ based on the viewport position, system resources, connection bandwidth, or other
 If the resource requested by the `amp-img` component fails to load,
 the space will be blank.
 Set a placeholder background color or other visual
-using CSS selector and style on the element itself:
+using a CSS selector and style on the element itself:
 
     amp-img {
       background-color: grey;
@@ -140,7 +140,7 @@ using the [`amp-instagram`]() element.
 Include the Instagrame shortcode found in the Instagram photo URL.
 For example, in `https://instagram.com/p/fBwFP`,
 `fBwFP` is the shortcode.
-Also, Instagram uses a fixed aspect ration for responsive layouts,
+Also, Instagram uses a fixed aspect ratio for responsive layouts,
 so the value for width and height should be universal
 
     <amp-instagram
@@ -186,7 +186,7 @@ The Youtube `video-id` can be found in every Youtube video page URL.
 For example, in https://www.youtube.com/watch?v=Z1q71gFeRqM,
 Z1q71gFeRqM is the video id.
 
-Use `layout="responsive"` to yield correct layouts for 16:9 aspect ration videos:
+Use `layout="responsive"` to yield correct layouts for 16:9 aspect ratio videos:
 
     <amp-youtube
         video-id="mGENRKrdoGY"
