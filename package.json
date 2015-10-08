@@ -59,7 +59,7 @@
     "karma-sinon-chai": "1.0.0",
     "minimist": "1.2.0",
     "mocha": "2.2.5",
-    "postcss": "5.0.5",
+    "postcss": "5.0.9",
     "pretty-bytes": "2.0.1",
     "sinon": "1.15.4",
     "sinon-chai": "2.8.0",
