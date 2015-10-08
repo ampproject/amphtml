@@ -46,25 +46,24 @@ var forbiddenTerms = {
   'debugger': '',
 };
 
-var bannedTermsHelpString = 'Please review viewport.js for a helper method or' +
-  'mark with `/*OK*/` or `/*REVIEW*/` and consult the AMP team.';
+var bannedTermsHelpString = 'Please review viewport.js for a helper method ' +
+    'or mark with `/*OK*/` or `/*REVIEW*/` and consult the AMP team. ' +
+    'Most of the forbidden property/method access banned on the ' +
+    '`forbiddenTermsSrcInclusive` object can be found in ' +
+    '[What forces layout / reflow gist by Paul Irish]' +
+    '(https://gist.github.com/paulirish/5d52fb081b3570c81e3a). ' +
+    'These properties/methods when read/used require the browser ' +
+    'to have the up-to-date value to return which might possibly be an ' +
+    'expensive computation and could also be triggered multiple times ' +
+    'if we are not careful. Please mark the call with ' +
+    '`object./*OK*/property` if you explicitly need to read or update the ' +
+    'forbidden property/method or mark it with `object./*REVIEW*/property` ' +
+    'if you are unsure and so that it stands out in code reviews.';
 
-// Most of the forbidden property/method access banned on the
-// `forbiddenTermsSrcInclusive` object can be found in
-// [What forces layout / reflow gist by Paul Irish]
-// (https://gist.github.com/paulirish/5d52fb081b3570c81e3a)
-// These properties/methods when read/used require the browser
-// to have the up-to-date value to return which might possibly be an
-// expensive computation and could also be triggered multiple times
-// if we are not careful. Please mark the call with `object./*OK*/property`
-// if you explicitly need to read or update the forbidden property/method
-// or mark it `object./*REVIEW*/property` if you are unsure and so that it
-// stands out in code reviews.
 var forbiddenTermsSrcInclusive = {
   '\\.innerHTML(?!_)': bannedTermsHelpString,
   '\\.outerHTML(?!_)': bannedTermsHelpString,
   '\\.postMessage(?!_)': bannedTermsHelpString,
-  '\\.scrollTop(?!_)': bannedTermsHelpString,
   '\\.offsetLeft(?!_)': bannedTermsHelpString,
   '\\.offsetTop(?!_)': bannedTermsHelpString,
   '\\.offsetWidth(?!_)': bannedTermsHelpString,
@@ -77,13 +76,13 @@ var forbiddenTermsSrcInclusive = {
   '\\.getClientRects(?!_)': bannedTermsHelpString,
   '\\.getBoundingClientRect(?!_)': bannedTermsHelpString,
   '\\.scrollBy(?!_)': bannedTermsHelpString,
-  '\\.scrollTo(?!_)': bannedTermsHelpString,
+  '\\.scrollTo(?!_|p|p_)': bannedTermsHelpString,
   '\\.scrollIntoView(?!_)': bannedTermsHelpString,
   '\\.scrollIntoViewIfNeeded(?!_)': bannedTermsHelpString,
   '\\.scrollWidth(?!_)': 'please use `getScrollWidth()` from viewport',
   '\\.scrollHeight(?!_)': bannedTermsHelpString,
-  '\\.scrollLeft(?!_)': bannedTermsHelpString,
   '\\.scrollTop(?!_)': bannedTermsHelpString,
+  '\\.scrollLeft(?!_)': bannedTermsHelpString,
   '\\.focus(?!_)': bannedTermsHelpString,
   '\\.computedRole(?!_)': bannedTermsHelpString,
   '\\.computedName(?!_)': bannedTermsHelpString,
@@ -101,7 +100,7 @@ var forbiddenTermsSrcInclusive = {
   '\\.getBBox(?!_)': bannedTermsHelpString,
   '\\.webkitConvertPointFromNodeToPage(?!_)': bannedTermsHelpString,
   '\\.webkitConvertPointFromPageToNode(?!_)': bannedTermsHelpString,
-}
+};
 
 // Terms that must appear in a source file.
 var requiredTerms = {
@@ -131,7 +130,8 @@ function matchTerms(pathname, contents, terms) {
     if (matches) {
       util.log(util.colors.red('Found forbidden: "' + matches[0] +
           '" in ' + pathname));
-      fix = forbiddenTerms[term];
+      fix = terms[term];
+
       if (fix) {
         util.log(util.colors.blue(fix));
       }
@@ -152,7 +152,7 @@ function hasAnyTerms(file) {
   var hasTerms = false;
   var hasSrcInclusiveTerms = false;
 
-  hasTerms = matchTerms(pathname, contents, forbiddenTerms)
+  hasTerms = matchTerms(pathname, contents, forbiddenTerms);
 
   var isTestFile = /^test-/.test(basename);
   if (!isTestFile) {
