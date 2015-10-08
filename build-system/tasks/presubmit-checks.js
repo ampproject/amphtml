@@ -46,7 +46,7 @@ var forbiddenTerms = {
   'debugger': '',
 };
 
-var bannedTermsHelpString = 'Please review viewport.js for a helper method or'
+var bannedTermsHelpString = 'Please review viewport.js for a helper method or' +
   'mark with `/*OK*/` or `/*REVIEW*/` and consult the AMP team.';
 
 // Most of the forbidden property/method access banned on the
