@@ -475,7 +475,7 @@ export class Resources {
   /**
    * Discovers work that needs to be done since the last pass. If viewport
    * has changed, it will try to build new elements, measure changed elements,
-   * and schedule layouts and preloads within a resonable distance of the
+   * and schedule layouts and preloads within a reasonable distance of the
    * current viewport. Finally, this process also updates inViewport state
    * of changed elements.
    *
@@ -1392,7 +1392,7 @@ export class TaskQueue_ {
   }
 
   /**
-   * Returns the task with the minimal score based on the provided scroing
+   * Returns the task with the minimal score based on the provided scoring
    * callback.
    * @param {function(!Task_):number} scorer
    * @return {?Task_}

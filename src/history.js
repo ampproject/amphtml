@@ -201,7 +201,7 @@ class HistoryBinding {
   cleanup_() {}
 
   /**
-   * Configres a callback to be called when stack index has been updated.
+   * Configures a callback to be called when stack index has been updated.
    * @param {function(number)} callback
    * @protected
    */
@@ -587,7 +587,7 @@ export class HistoryBindingVirtual_ {
 
   /** @override */
   push() {
-    // Current implemention doesn't wait for response from viewer.
+    // Current implementation doesn't wait for response from viewer.
     this.updateStackIndex_(this.stackIndex_ + 1);
     this.viewer_.postPushHistory(this.stackIndex_);
     return Promise.resolve(this.stackIndex_);
