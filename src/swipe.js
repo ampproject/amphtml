@@ -32,7 +32,7 @@ var SwipeStartEvent;
 
 /**
  * A gesture move event includes the following fields:
- * - delta: The number of pixels travelled in either direction from the starting
+ * - delta: The number of pixels traveled in either direction from the starting
  *   point.
  * - velocity: The velocity of motion in pixels per millisecond.
  * - position: A convenience field that translated delta into a client coord
@@ -221,7 +221,7 @@ export class SwipeXRecognizer {
    * event will arrive. However, this method allows the swipe controller to
    * synthesize motion events that emulate rundown of velocity of the original
    * motion.
-   * @param {number} snapPoint If the motion has not travelled this far the
+   * @param {number} snapPoint If the motion has not traveled this far the
    *   motion will return to the original position or otherwise it will
    *   continue until it reaches min/max delta.
    * @param {boolean} stopOnTouch Whether a touchstart event stops continued

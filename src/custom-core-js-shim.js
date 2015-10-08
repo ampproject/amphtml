@@ -23,7 +23,7 @@
 // If you feel strongly that a shim is required or should be used then
 // uncomment it from the list and contact the team.
 //
-// This is temporary until we can build out something more sophistacted with
+// This is temporary until we can build out something more sophisticated with
 // gulp + browserify + cli or switch to webpack.
 
 require('core-js/modules/es5');
