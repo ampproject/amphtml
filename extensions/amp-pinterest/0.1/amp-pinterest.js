@@ -272,19 +272,19 @@ class AmpPinterest extends AMP.BaseElement {
                   ' amp-pinterest-embed-pin-stats'
               }});
               if (p.repin_count) {
-                let repin_count = make({'SPAN': {
+                let repinCount = make({'SPAN': {
                   'className': 'amp-pinterest-embed-pin-stats-repins',
-                  'textContent': '' + p.repin_count
+                  'textContent': String(p.repin_count)
                 }});
-                stats.appendChild(repin_count);
+                stats.appendChild(repinCount);
               }
 
               if (p.like_count) {
-                let like_count = make({'SPAN': {
+                let likeCount = make({'SPAN': {
                   'className': 'amp-pinterest-embed-pin-stats-likes',
-                  'textContent': '' + p.like_count
+                  'textContent': String(p.like_count)
                 }});
-                stats.appendChild(like_count);
+                stats.appendChild(likeCount);
               }
               text.appendChild(stats);
             }
@@ -349,7 +349,7 @@ class AmpPinterest extends AMP.BaseElement {
             return loadPromise(structure);
 
           }
-        }
+        };
 
 
         let query = 'https://widgets.pinterest.com/v3/pidgets/pins/info/' +
