@@ -28,7 +28,7 @@ Also AMP HTML documents can be uploaded to a web server and served just like any
 - Preload extended components.
 - Minify HTML and CSS.
 
-AMP HTML uses a set of contributed but centrally managed and hosted custom elements to implement advanced functionality such as image galleries that might be found in a AMP HTML document. While it does allow styling the document using custom CSS, it does not allow author written JavaScript beyond what is provided through the custom elements to reach its performance goals.
+AMP HTML uses a set of contributed but centrally managed and hosted custom elements to implement advanced functionality such as image galleries that might be found in an AMP HTML document. While it does allow styling the document using custom CSS, it does not allow author written JavaScript beyond what is provided through the custom elements to reach its performance goals.
 
 By using this AMP format, content producers are making the content in AMP files available to be crawled, cached, and displayed by third parties.
 
@@ -192,8 +192,8 @@ Pseudo selectors are generally forbidden and must be whitelisted 1 by 1. Initial
 
 CSS variables are used to style custom elements.
 
-Class names in author stylesheets may not starts with the string `-amp-`. These are reserved for internal use by the AMP runtime. It follows,
-that user stylesheet may not reference CSS selectors for `-amp-` classes and `i-amp` tags. These classes and elements are not meant to
+Class names in author stylesheets may not start with the string `-amp-`. These are reserved for internal use by the AMP runtime. It follows,
+that the user's stylesheet may not reference CSS selectors for `-amp-` classes and `i-amp` tags. These classes and elements are not meant to
 be customized by authors. Authors, however, can override styles of `amp-` classes and tags for any CSS properties not explicitly
 forbidden by these components' spec.
 
@@ -211,7 +211,7 @@ The initial version of AMP will prohibit the use of the following CSS properties
 - `animation`
 - `filter`
 
-`overflow` (and `overflow-y`, etc.) may not be styled as “auto” or “scroll”. No user defined element in a AMP document may have a scrollbar.
+`overflow` (and `overflow-y`, etc.) may not be styled as “auto” or “scroll”. No user defined element in an AMP document may have a scrollbar.
 
 ##### Maximum size
 It is a validation error if the author stylesheet is larger than 50,000 bytes.
@@ -244,7 +244,7 @@ Development mode is triggered by adding "#development=1" to the URL of the page.
 
 ## Resources
 
-Resources such as images, videos, audio files or ads must be included into a AMP HTML file through custom elements such as `<amp-img>`. We call them managed resources because whether and when they will be loaded and displayed to the user is decided by the AMP runtime.
+Resources such as images, videos, audio files or ads must be included into an AMP HTML file through custom elements such as `<amp-img>`. We call them managed resources because whether and when they will be loaded and displayed to the user is decided by the AMP runtime.
 
 There are no particular guarantees as to the loading behavior of the AMP runtime, but it should generally strive to load resources quickly enough, so that they are loaded by the time the user would like to see them if possible. The runtime should prioritize resources currently in viewport and attempt to predict changes to the viewport and preload resources accordingly.
 
@@ -262,7 +262,7 @@ There are 2 types of supported AMP components:
 1. Built-in components.
 2. Extended components.
 
-Built-in components are always available in a AMP document and have a dedicated custom element such as `<amp-img>` while extended components must be explicitly included into the document.
+Built-in components are always available in an AMP document and have a dedicated custom element such as `<amp-img>` while extended components must be explicitly included into the document.
 
 ### Common attributes
 
@@ -322,7 +322,7 @@ Extended components are loaded by including a script tag in the head of the docu
 <script custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js" async></script>
 ```
 
-The script tag MUST have an async attribute and MUST have an `element` attribute referencing the name of the element.
+The script tag MUST have an async attribute and MUST have a `custom-element` attribute referencing the name of the element.
 
 Runtime implementations may use the name to render placeholders for these elements.
 
@@ -339,7 +339,7 @@ https://cdn.ampproject.org/$RUNTIME_VERSION/$ELEMENT_NAME-$ELEMENT_VERSION.js
 Extended components are versioned via [semver](http://semver.org/). The version is referenced explicitly (See $ELEMENT_VERSION above) when loading the component in the URL. It may have the value “latest”.
 Changes to the PATCH version component (x in 1.1.x) must strictly maintain backward compatibility or fix urgent security issues.
 
-AMP documents may only reference versions with one or two components. Version ”1” states “I accepts every version of this component with major version 1”. Version “1.1” states “I accept every PATCH level of 1.1”. It is now allowed to explicitly reference the PATCH level in the version string.
+AMP documents may only reference versions with one or two components. Version ”1” states “I accept every version of this component with major version 1”. Version “1.1” states “I accept every PATCH level of 1.1”. It is now allowed to explicitly reference the PATCH level in the version string.
 
 ## Security
 
@@ -360,5 +360,5 @@ Currently, the following SVG elements are allowed:
 
 As well as these attributes:
 
-* "xlink:href" only URIs starting with "#" are allowed
+* "xlink:href": only URIs starting with "#" are allowed
 * "style"
