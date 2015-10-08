@@ -22,7 +22,7 @@ To include an `amp-iframe` in your page,
 first include the following script to the `<head>`, which loads the additional code for the extended component:
 
 ```html
-<script custom-element="amp-iframe" src="https://cdn.ampproject.org/v0/amp-iframe-0.1.js" async></script>
+<script async custom-element="amp-iframe" src="https://cdn.ampproject.org/v0/amp-iframe-0.1.js"></script>
 ```
 
 An example `amp-iframe` from the
@@ -89,7 +89,7 @@ To include an `amp-anim` in your page,
 first include the following script to the `<head>`:
 
 ```html
-<script custom-element="amp-anim" src="https://cdn.ampproject.org/v0/amp-anim-0.1.js" async></script>
+<script async custom-element="amp-anim" src="https://cdn.ampproject.org/v0/amp-anim-0.1.js"></script>
 ```
 
 The `amp-anim` component can also have an optional placeholder child
@@ -110,7 +110,7 @@ To include a tweet in your page,
 first include the following script to the `<head>`:
 
 ```html
-<script custom-element="amp-twitter" src="https://cdn.ampproject.org/v0/amp-twitter-0.1.js" async></script>
+<script async custom-element="amp-twitter" src="https://cdn.ampproject.org/v0/amp-twitter-0.1.js"></script>
 ```
 
 Currently tweets are automatically proportionally scaled
@@ -179,7 +179,7 @@ using the [`amp-youtube`](../extensions/amp-youtube/amp-youtube.md) element.
 You must include the following script in the `<head>`:
 
 ```html
-<script custom-element="amp-youtube" src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js" async></script>
+<script async custom-element="amp-youtube" src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js"></script>
 ```
 
 The Youtube `video-id` can be found in every Youtube video page URL.
@@ -202,7 +202,7 @@ using the [`amp-audio`](../extensions/amp-audio/amp-audio.md) element.
 You must include the following script in the `<head>`:
  
 ```html
-<script custom-element="amp-audio" src="https://cdn.ampproject.org/v0/amp-audio-0.1.js" async></script>
+<script async custom-element="amp-audio" src="https://cdn.ampproject.org/v0/amp-audio-0.1.js"></script>
 ```
 
 Only use this element for direct HTML5 audio file embeds.
