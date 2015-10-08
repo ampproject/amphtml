@@ -207,12 +207,12 @@ export class Viewport {
     var size = this.getSize();
     log.fine(TAG_, 'changed event: ' +
         'relayoutAll=' + relayoutAll + '; ' +
-        'top=' + this./*OK*/scrollTop_ + '; ' +
-        'bottom=' + (this./*OK*/scrollTop_ + size.height) + '; ' +
+        'top=' + this.scrollTop_ + '; ' +
+        'bottom=' + (this.scrollTop_ + size.height) + '; ' +
         'velocity=' + velocity);
     this.changeObservable_.fire({
       relayoutAll: relayoutAll,
-      top: this./*OK*/scrollTop_,
+      top: this.scrollTop_,
       width: size.width,
       height: size.height,
       velocity: velocity
@@ -221,7 +221,7 @@ export class Viewport {
 
   /** @private */
   scroll_() {
-    this./*OK*/scrollLeft_ = this.binding_.getScrollLeft();
+    this.scrollLeft_ = this.binding_.getScrollLeft();
 
     if (this.scrollTracking_) {
       return;
@@ -236,7 +236,7 @@ export class Viewport {
     }
 
     this.scrollTracking_ = true;
-    this./*OK*/scrollTop_ = newScrollTop;
+    this.scrollTop_ = newScrollTop;
     this.scrollMeasureTime_ = timer.now();
     timer.delay(() => this.scrollDeferred_(), 500);
   }
@@ -248,13 +248,13 @@ export class Viewport {
     var now = timer.now();
     var velocity = 0;
     if (now != this.scrollMeasureTime_) {
-      velocity = (newScrollTop - this./*OK*/scrollTop_) /
+      velocity = (newScrollTop - this.scrollTop_) /
           (now - this.scrollMeasureTime_);
     }
     log.fine(TAG_, 'scroll: ' +
         'scrollTop=' + newScrollTop + '; ' +
         'velocity=' + velocity);
-    this./*OK*/scrollTop_ = newScrollTop;
+    this.scrollTop_ = newScrollTop;
     this.scrollMeasureTime_ = now;
     // TODO(dvoytenko): confirm the desired value and document it well.
     // Currently, this is 20px/second -> 0.02px/millis
