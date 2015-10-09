@@ -516,7 +516,7 @@ export class Gestures {
 export class GestureRecognizer {
 
   /**
-   * @oaram {string} type
+   * @param {string} type
    * @param {!Gestures} manager
    */
   constructor(type, manager) {

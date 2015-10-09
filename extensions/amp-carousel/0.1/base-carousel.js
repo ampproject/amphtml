@@ -40,7 +40,7 @@ export class BaseCarousel extends AMP.BaseElement {
     this.prevButton_.classList.add('amp-carousel-button-prev');
     this.prevButton_.setAttribute('role', 'button');
     // TODO(erwinm): Does label need i18n support in the future? or provide
-    // a way to be overriden.
+    // a way to be overridden.
     this.prevButton_.setAttribute('aria-label', 'previous');
     this.prevButton_.onclick = () => {
       if (!this.prevButton_.classList.contains('amp-disabled')) {

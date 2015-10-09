@@ -154,7 +154,7 @@ class Bezier {
 
     // If the gradient descent got stuck in a local minimum, e.g. because
     // the derivative was close to 0, use a Dichotomy refinement instead.
-    // We limit the number of interations to 8.
+    // We limit the number of iterations to 8.
     for (let i = 0; Math.abs(value - xVal) > epsilon && i < 8; i++) {
       if (value < xVal) {
         tMin = t;

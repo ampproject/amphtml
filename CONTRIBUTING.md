@@ -36,7 +36,7 @@ The AMP HTML project is meant to evolve with feedback - the project and its user
 
 **Bugs**
 
-As with all pieces of software, you may end up running into bugs. Please submit bugs as regular issues on Github - AMP HTML developers are regularly monitoring issues and will try to fix open bugs quickly.
+As with all pieces of software, you may end up running into bugs. Please submit bugs as regular issues on GitHub - AMP HTML developers are regularly monitoring issues and will try to fix open bugs quickly.
 
 The best bug reports include a detailed way to predictably reproduce the issue, and possibly even a working example that demonstrates the issue.
 
