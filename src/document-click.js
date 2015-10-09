@@ -105,7 +105,12 @@ export function onDocumentElementClick_(e, viewport) {
   let elem = null;
   let docElement = e.currentTarget;
   let doc = docElement.ownerDocument;
+
   let tgtLoc = parseUrl(target.href);
+  if (!tgtLoc.hash) {
+    return;
+  }
+
   let curLoc = parseUrl(doc.location.href);
   let tgtHref = `${tgtLoc.origin}${tgtLoc.pathname}`;
   let curHref = `${curLoc.origin}${curLoc.pathname}`;
