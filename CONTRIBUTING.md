@@ -40,7 +40,7 @@ As with all pieces of software, you may end up running into bugs. Please submit 
 
 The best bug reports include a detailed way to predictably reproduce the issue, and possibly even a working example that demonstrates the issue.
 
-#### Fixing bugs and runtime features
+#### Fixing bugs and contributing runtime features
 
 The AMP HTML project accepts and greatly appreciates contributions. The project follows the [fork & pull](https://help.github.com/articles/using-pull-requests/#fork--pull) model for accepting contributions. Please mark pull requests that are ready for review with the "NEEDS REVIEW" label.
 
@@ -50,11 +50,13 @@ A key feature of the AMP HTML project is performance - all pull requests will be
 
 AMP HTML developers will provide feedback on pull requests, looking at code quality, style, tests, performance, and directional alignment with the goals of the project.
 
-#### Contributing Extended Components
+Before making major changes to AMP please submit an Issue titled "Intent to implement: My project" and wait for "LGTM" responses from 2 project committers.
+
+#### Contributing Components
 
 A key feature of the AMP HTML project is its extensibility - it is meant to support “Extended Components” that provide first-class support for additional rich features. The project currently accepts pull requests to include these types of extended components.
 
-Because Extended Components may have significant impact on AMP HTML performance, security, and usage, Extended Component contributions will be very carefully analyzed and scrutinized. Before embarking on a major Extended Component, please submit an Issue detailing your proposed component, so that the AMP HTML developers can offer any feedback before you spend lots of time. In particular we strive to design the overall component set, so that a large number of use cases can be composed from them. Instead of creating a new component it may thus be a better solution to combine existing components to a similar effect.
+Because Extended Components may have significant impact on AMP HTML performance, security, and usage, Extended Component contributions will be very carefully analyzed and scrutinized. Before embarking on a major Extended Component, please submit an Issue titled "Intent to implement: My project" detailing your proposed component, so that the AMP HTML developers can offer any feedback before you spend lots of time. 2 project committers need to respond "LGTM" before development major should begin. In particular we strive to design the overall component set, so that a large number of use cases can be composed from them. Instead of creating a new component it may thus be a better solution to combine existing components to a similar effect.
 
 Important criteria for acceptance of an Extended Component is that an [oEmbed](http://oembed.com/) integration already exists and that the thing being integrated has an actively maintained Wikipedia page.
 
