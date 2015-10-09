@@ -9,7 +9,7 @@ The basic AMP HTML page includes the following mark-up:
 
 ```html
     <!doctype html>
-    <html amp lang="en">
+    <html amp>
       <head>
         <meta charset="utf-8">
         <title>Hello, AMPs</title>
@@ -40,7 +40,7 @@ The basic AMP HTML page includes the following mark-up:
 AMP HTML documents MUST
 
 - <a name="dctp"></a>start with the doctype `<!doctype html>`.
-- <a name="ampd"></a>contain a top-level `<html ⚡>` tag (`<html amp>` is accepted as well).
+- <a name="ampd"></a>contain a top-level `<html ⚡>` tag or `<html amp>` tag (note that the `⚡` is the high voltage sign emoji ⚡).
 - <a name="crps"></a>contain `<head>` and `<body>` tags (They are optional in HTML).
 - <a name="canon"></a>contain a `<link rel="canonical" href="$SOME_URL" />` tag inside their head that points to the regular HTML version of the AMP HTML document or to itself if no such HTML version exists.
 - <a name="chrs"></a>contain a `<meta charset="utf-8">` tag as the first child of their head tag.
@@ -61,7 +61,7 @@ here's the basic AMP HTML page now with an image:
 
 ```html
     <!doctype html>
-    <html AMP lang="en">
+    <html amp>
       <head>
         <meta charset="utf-8">
         <title>Hello, AMPs</title>
@@ -102,7 +102,7 @@ inlined stylesheet:
 
 ```html
     <!doctype html>
-    <html AMP lang="en">
+    <html amp>
       <head>
         <meta charset="utf-8">
         <title>Hello, AMPs</title>

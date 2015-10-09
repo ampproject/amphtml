@@ -45,7 +45,7 @@ author-defined, inlined stylesheet, using most common CSS properties. For
 example:
 
     <!doctype html>
-    <html ⚡>
+    <html amp>
       <head>
         <style>
           amp-img {
@@ -78,7 +78,7 @@ runtime, to achieve the desired style. This way the AMP author does not need to
 know the internals of the component, only its styleable properties. For example:
 
     <!doctype html>
-    <html ⚡>
+    <html amp>
       <head>
         <style>
           amp-carousel {
