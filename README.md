@@ -28,7 +28,7 @@ AMP HTML works by including the AMP JS library and adding a bit of boilerplate t
 
 ```html
 <!doctype html>
-<html ⚡>
+<html amp>
 <head>
   <meta charset="utf-8">
   <link rel="canonical" href="hello-world.html" >

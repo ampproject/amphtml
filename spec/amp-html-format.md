@@ -47,7 +47,7 @@ In concrete terms this means that:
 
 ```html
 <!doctype html>
-<html ⚡>
+<html amp>
 <head>
   <meta charset="utf-8">
   <title>Sample document</title>
