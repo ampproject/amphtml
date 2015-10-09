@@ -40,7 +40,7 @@ export function removeChildren(parent) {
 /**
  * Copies all children nodes of element "from" to element "to". Child nodes
  * are deeply cloned. Notice, that this method should be used with care and
- * preferrably on smaller subtrees.
+ * preferably on smaller subtrees.
  * @param {!Element} from
  * @param {!Element} to
  */

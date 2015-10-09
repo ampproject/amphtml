@@ -157,7 +157,7 @@ export class BaseElement {
    * Override in subclass to indicate if the element is ready to rebuild its
    * DOM subtree.  If the element can proceed with building the content return
    * "true" and return "false" otherwise. The element may not be ready to build
-   * e.g. beacuse its children are not available yet.
+   * e.g. because its children are not available yet.
    *
    * See {@link buildCallback} for more details.
    *

@@ -1392,7 +1392,7 @@ export class TaskQueue_ {
   }
 
   /**
-   * Returns the task with the minimal score based on the provided scroing
+   * Returns the task with the minimal score based on the provided scoring
    * callback.
    * @param {function(!Task_):number} scorer
    * @return {?Task_}

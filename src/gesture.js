@@ -516,7 +516,7 @@ export class Gestures {
 export class GestureRecognizer {
 
   /**
-   * @oaram {string} type
+   * @param {string} type
    * @param {!Gestures} manager
    */
   constructor(type, manager) {
@@ -592,7 +592,7 @@ export class GestureRecognizer {
 
   /**
    * The Gestures instance calls this method to reset the recognizer. At this
-   * point the recognizer is in the intial waiting state.
+   * point the recognizer is in the initial waiting state.
    */
   acceptCancel() {
   }

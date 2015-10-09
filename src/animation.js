@@ -38,7 +38,7 @@ export class Animation {
    * object that can be used to monitor or control animation.
    *
    * @param {!Transition<?>} transition Transition to animate.
-   * @param {time} duration Duration in millseconds.
+   * @param {time} duration Duration in milliseconds.
    * @param {(!Curve|string)=} opt_curve Optional curve to use for animation.
    *   Default is the linear animation.
    * @return {!AnimationPlayer}

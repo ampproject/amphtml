@@ -498,7 +498,7 @@ export class SwipeXRecognizer {
 
   /**
    * @param {number} x
-   * @return {nunber}
+   * @return {number}
    * @private
    */
   calcDelta_(start, end) {
