@@ -137,7 +137,7 @@ using the [`amp-instagram`]() element.
 
 **Todo:** Add proper link to reference doc.
 
-Include the Instagrame shortcode found in the Instagram photo URL.
+Include the Instagram shortcode found in the Instagram photo URL.
 For example, in `https://instagram.com/p/fBwFP`,
 `fBwFP` is the shortcode.
 Also, Instagram uses a fixed aspect ratio for responsive layouts,

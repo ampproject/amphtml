@@ -201,7 +201,7 @@ class HistoryBinding {
   cleanup_() {}
 
   /**
-   * Configres a callback to be called when stack index has been updated.
+   * Configures a callback to be called when stack index has been updated.
    * @param {function(number)} callback
    * @protected
    */

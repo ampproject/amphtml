@@ -87,7 +87,7 @@ and [amp-carousel](extensions/amp-carousel/amp-carousel.md).
 * Make advanced performance techniques easy,
 such as [amp-anim](extensions/amp-anim/amp-anim.md),
 which allows web developers to dynamically serve animated images
-as either image files (GIF) or video files (WebM or MP4) based on browser compatability.
+as either image files (GIF) or video files (WebM or MP4) based on browser compatibility.
 
 # Further Reading
 

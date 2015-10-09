@@ -80,7 +80,7 @@ class AmpLightbox extends AMP.BaseElement {
     this.element.style.display = '';
     this.element.style.opacity = 0;
 
-    // TODO(dvoytenko): use new animatons support instead.
+    // TODO(dvoytenko): use new animations support instead.
     this.element.style.transition = 'opacity 0.1s ease-in';
     requestAnimationFrame(() => {
       this.element.style.opacity = '';

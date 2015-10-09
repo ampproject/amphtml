@@ -48,7 +48,7 @@ export class Vsync {
 
   /**
    * @param {!VsyncTaskSpec} task
-   * @param {!Object<string, *>|udnefined} opt_state
+   * @param {!Object<string, *>|undefined} opt_state
    */
   run(task, opt_state) {
     let state = opt_state || {};
