@@ -20,7 +20,7 @@ AMP HTML is a subset of HTML for authoring content pages such as news articles i
 
 Being a subset of HTML, it puts some restrictions on the full set of tags and functionality available through HTML but it does not require the development of new rendering engines: Existing user agents can render AMP HTML just like all other HTML.
 
-Also AMP HTML documents can be uploaded to a web server and served just like any other HTML document. No special configuration for the server is necessary. However, they are also designed to be optionally served through specialized AMP serving systems that proxy AMP documents, serve them from their own origin and are allowed to apply transformations to the document that provide additional performance benefits. An incomplete list of optimizations such a serving system might do is:
+Also, AMP HTML documents can be uploaded to a web server and served just like any other HTML document; no special configuration for the server is necessary. However, they are also designed to be optionally served through specialized AMP serving systems that proxy AMP documents. These documents serve them from their own origin and are allowed to apply transformations to the document that provide additional performance benefits. An incomplete list of optimizations such a serving system might do is:
 
 - Replace image references with images sized to the viewer’s viewport.
 - Inline images that are visible above the fold.
@@ -124,28 +124,28 @@ The following properties are recommended:
 
 #### Open Graph Protocol, Twitter Cards and similar metadata
 
-It is encouraged that AMP HTML documents are annotated with Open Graph Protocol, Twitter Cards and other similar metadata as appropriate.
+It is encouraged that AMP HTML documents are annotated with standardized metadata: Open Graph Protocol, Twitter Cards, etc.
 
 ### HTML Tags
 
-Most HTML tags can be used unchanged in AMP HTML. Certain tags, however, have equivalent custom tags (such as `<img>` and `<amp-img>`) and other tags are outright banned:
+HTML tags can be used unchanged in AMP HTML. Certain tags have equivalent custom tags (such as `<img>` and `<amp-img>`) and other tags are outright prohibited:
 
 | Tag       | Status in AMP HTML                             |
 |-----------|------------------------------------------------|
-| script    | Banned unless the type is `application/ld+json` (Other non-executable values may be added as needed.). Exception is the mandatory script tag to load the AMP runtime and the script tags to load extended components. |
-| base      | Banned |
+| script    | Prohibited unless the type is `application/ld+json` (Other non-executable values may be added as needed.). Exception is the mandatory script tag to load the AMP runtime and the script tags to load extended components. |
+| base      | Prohibited |
 | img       | Replaced with amp-img |
 | video     | Replaced with amp-video |
 | audio     | Replaced with amp-audio |
-| iframe    | Banned. May be replaced with amp-iframe in the future. |
-| frame     | Banned. |
-| frameset  | Banned. |
-| object    | Banned. |
-| param     | Banned. |
-| applet    | Banned. |
-| embed     | Banned. |
-| form      | Banned. |
-| input elements | Banned. Includes input, textarea, select, option. Notably, button element is allowed. |
+| iframe    | Prohibited. May be replaced with amp-iframe in the future. |
+| frame     | Prohibited. |
+| frameset  | Prohibited. |
+| object    | Prohibited. |
+| param     | Prohibited. |
+| applet    | Prohibited. |
+| embed     | Prohibited. |
+| form      | Prohibited. |
+| input elements | Prohibited. Includes input, textarea, select, option. Notably, button element is allowed. |
 | button    | Allowed. |
 | <a name="cust"></a>style     | [Required style tags for adjusting opacity](#opacity) One additional style tag is allowed in head tag for the purpose of custom styling. This style tag must have the attribute `amp-custom`. [🔗](#cust) |
 | link      | Allowed for certain values of rel: `canonical`. `stylesheet` is generally disallowed, but some values may be whitelisted for font providers. |
@@ -188,11 +188,11 @@ Allowed selectors are of the form:
 - selector, selector
 - media queries
 
-Pseudo selectors are generally forbidden and must be whitelisted 1 by 1. Initially we only allow `:hover`, `:active` and `:visited` with whitelisted CSS properties (For color and underlining).
+Pseudo selectors are generally forbidden and must be whitelisted 1 by 1. Initially, we only allow `:hover`, `:active` and `:visited` with whitelisted CSS properties (For color and underlining).
 
 CSS variables are used to style custom elements.
 
-Class names in author stylesheets may not start with the string `-amp-`. These are reserved for internal use by the AMP runtime. It follows,
+Class names, in author stylesheets, may not start with the string `-amp-`. These are reserved for internal use by the AMP runtime. It follows,
 that the user's stylesheet may not reference CSS selectors for `-amp-` classes and `i-amp` tags. These classes and elements are not meant to
 be customized by authors. Authors, however, can override styles of `amp-` classes and tags for any CSS properties not explicitly
 forbidden by these components' spec.
@@ -253,16 +253,16 @@ The AMP runtime may at any time decide to unload resources that are not currentl
 
 ## AMP Components
 
-AMP HTML uses HTML custom elements called “AMP components” to substitute built-in resource-loading tags such as `<img>` and `<video>` and to implement features with complex interactions such as image lightboxes or carousels.
+AMP HTML uses custom elements called, “AMP components” to substitute built-in resource-loading tags such as `<img>` and `<video>` and to implement features with complex interactions such as image lightboxes or carousels.
 
 See the [AMP component spec](./amp-html-components.md) for details about supported components.
 
 There are 2 types of supported AMP components:
 
-1. Built-in components.
-2. Extended components.
+1. Built-in
+2. Extended
 
-Built-in components are always available in an AMP document and have a dedicated custom element such as `<amp-img>` while extended components must be explicitly included into the document.
+Built-in components are always available in an AMP document and have a dedicated custom element such as `<amp-img>`. Extended components must be explicitly included into the document.
 
 ### Common attributes
 
@@ -284,7 +284,7 @@ The optional layout attribute allows specifying how the component behaves in the
 
 #### `media`
 
-All AMP custom elements support the media attribute. It takes a media query as a value where if the query does not match, the element is not rendered at all and its resources and potentially child resources will not be fetched. If the browser window changes size or orientation the media queries are reevaluated and elements are hidden and shown based on the new results.
+All AMP custom elements support the `media` attribute. The value of media is a media query. If the query does not match, the element is not rendered at all and it's resources and potentially it's child resources will not be fetched. If the browser window changes size or orientation the media queries are re-evaluated and elements are hidden and shown based on the new results.
 
 Example: Here we have 2 images with mutually exclusive media queries. Depending on the screen width one or the other will be fetched and rendered. Note that the media attribute is available on all custom elements, so it can be used with non-image elements such as ads.
 
@@ -303,7 +303,7 @@ Example: Here we have 2 images with mutually exclusive media queries. Depending 
 
 ### `on`
 
-The on attribute is used to install event handlers on elements. The events that are supported depend on the element.
+The `on` attribute is used to install event handlers on elements. The events that are supported depend on the element.
 
 The value for the syntax is a simple domain specific language of the form `eventName:targetId[.methodName]`.
 Example: `on="tap:fooId.showLightbox"`
@@ -314,15 +314,15 @@ Example: `on="tap:fooId"`
 
 ### Extended components
 
-Extended components are components that do not necessarily ship with the AMP runtime but instead must be explicitly included into the document.
+Extended components are components that do not necessarily ship with the AMP runtime. Instead they must be explicitly included into the document.
 
-Extended components are loaded by including a script tag in the head of the document like this
+Extended components are loaded by including a `<script>` tag in the head of the document like this:
 
 ```html
 <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
 ```
 
-The script tag MUST have an async attribute and MUST have a `custom-element` attribute referencing the name of the element.
+The `<script>` tag must have an `async` attribute and must have a `custom-element` attribute referencing the name of the element.
 
 Runtime implementations may use the name to render placeholders for these elements.
 
@@ -332,7 +332,9 @@ The script URL must start with “https://cdn.ampproject.org” and must follow 
 
 The URL for extended components is of the form:
 
+```
 https://cdn.ampproject.org/$RUNTIME_VERSION/$ELEMENT_NAME-$ELEMENT_VERSION.js
+```
 
 ##### Versioning
 
