@@ -30,7 +30,7 @@
     "chai": "3.0.0",
     "chai-as-promised": "5.1.0",
     "core-js": "1.1.4",
-    "cssnano": "3.0.1",
+    "cssnano": "3.3.0",
     "del": "2.0.2",
     "eslint": "1.6.0",
     "eslint-plugin-google-camelcase": "0.0.2",
