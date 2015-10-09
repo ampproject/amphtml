@@ -386,9 +386,12 @@ class AmpPinterest extends AMP.BaseElement {
         let lang = this.element.getAttribute('data-lang');
         let config = this.element.getAttribute('data-config');
 
+        // pass a known guid when testing
+        let theGuid = this.element.getAttribute('data-volkswagen-guid') || guid;
+
         // build our link
         let link = 'https://www.pinterest.com/pin/create/button/';
-        link = link + '?amp=1&guid=' + guid;
+        link = link + '?amp=1&guid=' + theGuid;
         link = link + '&url=' + encodeURIComponent(pinUrl);
         link = link + '&media=' + encodeURIComponent(pinMedia);
         link = link + '&description=' +

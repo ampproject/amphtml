@@ -44,6 +44,8 @@
           var pin = document.createElement('amp-pinterest');
           pin.setAttribute('data-do', pinDo);
           pin.setAttribute('data-url', pinUrl);
+          // force the guid to a known value so test will pass
+          pin.setAttribute('data-volkswagen-guid', '8675309');
           pin.setAttribute('data-media', pinMedia);
           pin.setAttribute('data-description', pinDescription);
           return div.addElement(pin);
@@ -60,10 +62,10 @@
           expect(a).to.not.be.null;
           expect(a.tagName).to.equal('A');
           expect(a.href).to.equal('https://www.pinterest.com/pin/create/' +
-            'button/?url=http%3A%2F%2Fwww.flickr.com%2Fphotos%2Fkentbrew' + 
-            '%2F6851755809%2F&media=http%3A%2F%2Fc2.staticflickr.com%2F8' + 
-            '%2F7027%2F6851755809_df5b2051c9_b.jpg&description=Next%20st' + 
-            'op%3A%20Pinterest');
+            'button/?amp=1&guid=8675309&url=http%3A%2F%2Fwww.flickr.com%' +
+            '2Fphotos%2Fkentbrew%2F6851755809%2F&media=http%3A%2F%2Fc2.s' +
+            'taticflickr.com%2F8%2F7027%2F6851755809_df5b2051c9_b.jpg&de' +
+            'scription=Next%20stop%3A%20Pinterest');
         });
       });
 
