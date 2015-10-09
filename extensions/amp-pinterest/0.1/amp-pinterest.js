@@ -69,31 +69,33 @@ class AmpPinterest extends AMP.BaseElement {
 
     let width = this.element.getAttribute('width');
 
-    var pinDo = AMP.assert(this.element.getAttribute('data-do'),
+    let pinDo = AMP.assert(this.element.getAttribute('data-do'),
       'The data-do attribute is required for <amp-pinterest> %s',
       this.element);
 
-    var pinUrl = AMP.assert(this.element.getAttribute('data-url'),
+    let pinUrl = AMP.assert(this.element.getAttribute('data-url'),
       'The data-url attribute is required for <amp-pinterest> %s',
       this.element);
 
     // make a 12-digit base-60 number for performance tracking
-    var guid = '';
+    let guid = '';
     for (let i = 0; i < 12; i = i + 1) {
       guid = guid + BASE60.substr(Math.floor(Math.random() * 60), 1);
     }
 
     // open a new window
-    var pop = function (url, shouldPop) {
+    let pop = function (url, shouldPop) {
       if (shouldPop) {
+        // amp=1&guid=guid are already in the query before long fields
         window.open(url, '_pinit', POP);
       } else {
-        window.open(url, '_blank');
+        // this is a straight window.open; append amp=1&guid=guid
+        window.open(url + '?amp=1&guid=' + guid, '_blank');
       }
     };
 
     // log a string
-    var log = function (str) {
+    let log = function (str) {
       let call = new Image();
       let query = 'https://log.pinterest.com/?guid=' + guid;
       query = query + '&amp=1';
@@ -106,9 +108,9 @@ class AmpPinterest extends AMP.BaseElement {
     };
 
     // load data from API via XHR
-    var call = function(url) {
+    let call = function(url) {
       return new Promise((resolve, reject) => {
-        var xhr = new XMLHttpRequest();
+        let xhr = new XMLHttpRequest();
         xhr.onreadystatechange = function() {
           if (xhr.readyState == 4) {
             if (xhr.status == 200) {
@@ -130,7 +132,7 @@ class AmpPinterest extends AMP.BaseElement {
     };
 
     // set a DOM property or text attribute
-    var set = function (el, att, string) {
+    let set = function (el, att, string) {
       if (typeof el[att] === 'string') {
         el[att] = string;
       } else {
@@ -139,7 +141,7 @@ class AmpPinterest extends AMP.BaseElement {
     };
 
     // create a DOM element
-    var make = function (obj) {
+    let make = function (obj) {
       let el = false, tag, att;
       for (tag in obj) {
         el = document.createElement(tag);
@@ -154,7 +156,7 @@ class AmpPinterest extends AMP.BaseElement {
     };
 
     // filter tags from API input
-    var filter = function (str) {
+    let filter = function (str) {
       let decoded, ret;
       decoded = '';
       ret = '';
@@ -167,15 +169,16 @@ class AmpPinterest extends AMP.BaseElement {
     };
 
     // save our outside context so we can return properly after rendering
-    var that = this;
+    let that = this;
 
     // pinDo is set by data-do
     switch (pinDo) {
 
       case 'embedPin':
 
+        let pinId = '';
         try {
-          var pinId = pinUrl.split('/pin/')[1].split('/')[0];
+          pinId = pinUrl.split('/pin/')[1].split('/')[0];
         } catch (err) {
           // fail silently
           return;
@@ -183,9 +186,9 @@ class AmpPinterest extends AMP.BaseElement {
 
         let width = this.element.getAttribute('data-width');
 
-        var structure = make({'SPAN':{}});
+        let structure = make({'SPAN':{}});
 
-        var renderPin = function (r) {
+        let renderPin = function (r) {
 
           if (r && r.data && r.data[0] && !r.data[0].error) {
             let p = r.data[0];
@@ -226,7 +229,7 @@ class AmpPinterest extends AMP.BaseElement {
               'data-pin-log': 'embed_pin_repin',
               'data-pin-pop': '1',
               'data-pin-href': 'https://www.pinterest.com/pin/' + p.id +
-                '/repin/x/'
+                '/repin/x/?amp=1&guid=' + guid
             }});
             container.appendChild(repin);
 
@@ -328,7 +331,7 @@ class AmpPinterest extends AMP.BaseElement {
 
             // listen for clicks
             structure.addEventListener('click', function (e) {
-              var el = e.target;
+              let el = e.target;
               let logMe = el.getAttribute('data-pin-log');
               if (logMe) {
                 log('&type=' + logMe);
@@ -366,12 +369,12 @@ class AmpPinterest extends AMP.BaseElement {
 
         // buttonPin renders a Pin It button and requires media and description
 
-        var pinMedia =
+        let pinMedia =
           AMP.assert(this.element.getAttribute('data-media'),
           'The data-media attribute is required when <amp-pinterest> ' +
           'makes a Pin It button %s', this.element);
 
-        var pinDescription =
+        let pinDescription =
            AMP.assert(this.element.getAttribute('data-description'),
           'The data-description attribute is required when <amp-pinterest> ' +
           'makes a Pin It button %s', this.element);
@@ -385,13 +388,14 @@ class AmpPinterest extends AMP.BaseElement {
 
         // build our link
         let link = 'https://www.pinterest.com/pin/create/button/';
-        link = link + '?url=' + encodeURIComponent(pinUrl);
+        link = link + '?amp=1&guid=' + guid;
+        link = link + '&url=' + encodeURIComponent(pinUrl);
         link = link + '&media=' + encodeURIComponent(pinMedia);
         link = link + '&description=' +
           encodeURIComponent(pinDescription);
 
         // start building a link
-        var a = make({'A':{
+        let a = make({'A':{
           'href': link
         }});
 
@@ -403,7 +407,7 @@ class AmpPinterest extends AMP.BaseElement {
         });
 
         // built it
-        var render = function (r) {
+        let render = function (r) {
 
           // shorten the pin count so it will fit in our bubble
           let prettyPinCount = function (n) {
