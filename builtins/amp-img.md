@@ -25,6 +25,13 @@ The runtime may choose to delay or prioritize resource loading based on the view
 `amp-img` components, like all externally fetched AMP resources, must be given an
 explicit size (as in width / height) in advance, so that the aspect ratio can be known without fetching the image. Actual layout behavior is determined by the layout attribute. If the resource requested by the `amp-img` component fails to load, the space will be blank. A placeholder background color or other visual can be set using CSS selector and style on the element itself.
 
+Besides a placeholder background color you may set a child element
+(a `div` for example) with a `placeholder` attribute and this will be
+displayed and be visible until the image has fully loaded. If no `placeholder`
+element is given, a default placeholder animation is placed (3 loading dots)
+until the image has fully loaded. (We are working giving the user the
+ability to override or restyle the default loading animation placeholder)
+
 The `amp-img` includes attributes for denoting attribution via the attribution attribute.
 
 Additional image features like captions can be implemented with standard HTML - using the `figure` and `figcaption` elements, for example.
