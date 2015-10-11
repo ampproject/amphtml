@@ -59,6 +59,11 @@ const BASE60 = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ_abcdefghijkmnopqrstuvwxyz';
 
 class AmpPinterest extends AMP.BaseElement {
   /** @override */
+  createdCallback() {
+    // preconnect to widget API
+    this.preconnect.url('https://widgets.pinterest.com');
+  }
+  /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
   }
@@ -103,7 +108,7 @@ class AmpPinterest extends AMP.BaseElement {
       if (str) {
         query = query + str;
       }
-      query = query + '&via=' + document.URL;
+      query = query + '&via=' + encodeURIComponent(window.location.href);
       call.src = query;
     };
 
@@ -186,7 +191,7 @@ class AmpPinterest extends AMP.BaseElement {
 
         let width = this.element.getAttribute('data-width');
 
-        let structure = make({'SPAN':{}});
+        let structure = make({'span':{}});
 
         let renderPin = function (r) {
 
@@ -194,7 +199,7 @@ class AmpPinterest extends AMP.BaseElement {
             let p = r.data[0];
 
             // start setting our class name
-            let className = 'amp-pinterest-embed-pin';
+            let className = '-amp-pinterest-embed-pin';
             let imgUrl = p.images['237x'].url;
 
             // large widgets may come later
@@ -208,14 +213,14 @@ class AmpPinterest extends AMP.BaseElement {
 
             structure.className = className;
 
-            let container = make({'SPAN':{
-              'className': 'amp-pinterest-embed-pin-inner',
+            let container = make({'span':{
+              'className': '-amp-pinterest-embed-pin-inner',
               'data-pin-log': 'embed_pin'
             }});
 
-            let img = make({'IMG':{
+            let img = make({'img':{
               'src': imgUrl,
-              'className': 'amp-pinterest-embed-pin-image',
+              'className': '-amp-pinterest-embed-pin-image',
               'data-pin-no-hover': true,
               'data-pin-href': 'https://www.pinterest.com/pin/' + p.id + '/',
               'data-pin-log': 'embed_pin_img'
@@ -223,9 +228,9 @@ class AmpPinterest extends AMP.BaseElement {
             container.appendChild(img);
 
             // repin button
-            let repin = make({'SPAN': {
-              'className': 'amp-pinterest-rect amp-pinterest-en-red' +
-                ' amp-pinterest-embed-pin-repin',
+            let repin = make({'span': {
+              'className': '-amp-pinterest-rect -amp-pinterest-en-red' +
+                ' -amp-pinterest-embed-pin-repin',
               'data-pin-log': 'embed_pin_repin',
               'data-pin-pop': '1',
               'data-pin-href': 'https://www.pinterest.com/pin/' + p.id +
@@ -234,15 +239,15 @@ class AmpPinterest extends AMP.BaseElement {
             container.appendChild(repin);
 
             // text container
-            let text = make({'SPAN': {
-              'className': 'amp-pinterest-embed-pin-text'
+            let text = make({'span': {
+              'className': '-amp-pinterest-embed-pin-text'
             }});
 
             // description
             if (p.description) {
-              let description = make({'SPAN':{
-                'className': 'amp-pinterest-embed-pin-text-block ' +
-                  'amp-pinterest-embed-pin-description',
+              let description = make({'span':{
+                'className': '-amp-pinterest-embed-pin-text-block ' +
+                  '-amp-pinterest-embed-pin-description',
                 'textContent': filter(p.description)
               }});
               text.appendChild(description);
@@ -250,18 +255,18 @@ class AmpPinterest extends AMP.BaseElement {
 
             // attribution
             if (p.attribution) {
-              let attribution = make({'SPAN':{
-                'className': 'amp-pinterest-embed-pin-text-block' +
-                  ' amp-pinterest-embed-pin-attribution'
+              let attribution = make({'span':{
+                'className': '-amp-pinterest-embed-pin-text-block' +
+                  ' -amp-pinterest-embed-pin-attribution'
               }});
-              attribution.appendChild(make({'IMG':{
-                'className': 'amp-pinterest-embed-pin-text-icon-attrib',
+              attribution.appendChild(make({'img':{
+                'className': '-amp-pinterest-embed-pin-text-icon-attrib',
                 'src': p.attribution.provider_icon_url
               }}));
-              attribution.appendChild(make({'SPAN':{
+              attribution.appendChild(make({'span':{
                 'textContent': ' by '
               }}));
-              attribution.appendChild(make({'SPAN':{
+              attribution.appendChild(make({'span':{
                 'data-pin-href': p.attribution.url,
                 'textContent': filter(p.attribution.author_name)
               }}));
@@ -270,21 +275,21 @@ class AmpPinterest extends AMP.BaseElement {
 
             // likes and repins
             if (p.repin_count || p.like_count) {
-              let stats = make({'SPAN':{
-                'className': 'amp-pinterest-embed-pin-text-block' +
-                  ' amp-pinterest-embed-pin-stats'
+              let stats = make({'span':{
+                'className': '-amp-pinterest-embed-pin-text-block' +
+                  ' -amp-pinterest-embed-pin-stats'
               }});
               if (p.repin_count) {
-                let repinCount = make({'SPAN': {
-                  'className': 'amp-pinterest-embed-pin-stats-repins',
+                let repinCount = make({'span': {
+                  'className': '-amp-pinterest-embed-pin-stats-repins',
                   'textContent': String(p.repin_count)
                 }});
                 stats.appendChild(repinCount);
               }
 
               if (p.like_count) {
-                let likeCount = make({'SPAN': {
-                  'className': 'amp-pinterest-embed-pin-stats-likes',
+                let likeCount = make({'span': {
+                  'className': '-amp-pinterest-embed-pin-stats-likes',
                   'textContent': String(p.like_count)
                 }});
                 stats.appendChild(likeCount);
@@ -295,14 +300,14 @@ class AmpPinterest extends AMP.BaseElement {
             // pinner
             if (p.pinner) {
 
-              let pinner = make({'SPAN':{
-                'className': 'amp-pinterest-embed-pin-text-block' +
-                  ' amp-pinterest-embed-pin-pinner'
+              let pinner = make({'span':{
+                'className': '-amp-pinterest-embed-pin-text-block' +
+                  ' -amp-pinterest-embed-pin-pinner'
               }});
 
               // avatar
-              pinner.appendChild(make({'IMG':{
-                'className': 'amp-pinterest-embed-pin-pinner-avatar',
+              pinner.appendChild(make({'img':{
+                'className': '-amp-pinterest-embed-pin-pinner-avatar',
                 'alt': filter(p.pinner.full_name),
                 'title': filter(p.pinner.full_name),
                 'src': p.pinner.image_small_url,
@@ -310,15 +315,15 @@ class AmpPinterest extends AMP.BaseElement {
               }}));
 
               // name
-              pinner.appendChild(make({'SPAN': {
-                'className': 'amp-pinterest-embed-pin-pinner-name',
+              pinner.appendChild(make({'span': {
+                'className': '-amp-pinterest-embed-pin-pinner-name',
                 'textContent': filter(p.pinner.full_name),
                 'data-pin-href': p.pinner.profile_url
               }}));
 
               // board
-              pinner.appendChild(make({'SPAN': {
-                'className': 'amp-pinterest-embed-pin-board-name',
+              pinner.appendChild(make({'span': {
+                'className': '-amp-pinterest-embed-pin-board-name',
                 'textContent': filter(p.board.name),
                 'data-pin-href': 'https://www.pinterest.com/' + p.board.url
               }}));
@@ -435,23 +440,23 @@ class AmpPinterest extends AMP.BaseElement {
           if (shape === 'round') {
 
             // we're round
-            className = 'amp-pinterest-round';
+            className = '-amp-pinterest-round';
             if (height === '32') {
               // we're tall
-              className = 'amp-pinterest-round-32';
+              className = '-amp-pinterest-round-32';
             }
 
           } else {
 
             // we're rectangular
-            className = 'amp-pinterest-rect';
+            className = '-amp-pinterest-rect';
             if (height === '28') {
               // we're tall
               className = className + '-28';
             }
 
             // second selector: set background image
-            className = className + ' amp-pinterest';
+            className = className + ' -amp-pinterest';
             if (lang !== 'ja') {
               // we're not Japanese
               lang = 'en';
@@ -477,11 +482,11 @@ class AmpPinterest extends AMP.BaseElement {
 
             // position the count
             if (config === 'above') {
-              className = className + ' amp-pinterest-count-pad-above';
-              countBubble.className = 'amp-pinterest-bubble-above';
+              className = className + ' -amp-pinterest-count-pad-above';
+              countBubble.className = '-amp-pinterest-bubble-above';
             } else {
-              className = className + ' amp-pinterest-count-pad-beside';
-              countBubble.className = 'amp-pinterest-bubble-beside';
+              className = className + ' -amp-pinterest-count-pad-beside';
+              countBubble.className = '-amp-pinterest-bubble-beside';
             }
 
             // size the bubble
@@ -537,18 +542,14 @@ class AmpPinterest extends AMP.BaseElement {
 
       default:
 
-        // we're a more complex widget, currently rendered in an iframe
-        // looking into doing these inline now
+        // we're a complex widget, currently rendered in an iframe
 
-        let iframe = document.createElement('iframe');
-        iframe.setAttribute('frameborder', '0');
-        iframe.setAttribute('allowtransparency', 'true');
-
-        // start setting the source of our iframe
+        // we know we always have an act and a src
         let src = 'https://assets.pinterest.com/ext/iffy.html?' +
             'act=' + encodeURIComponent(pinDo) +
             '&url=' + encodeURIComponent(pinUrl);
 
+        // we may have other valid attributes
         for (let i = 0; i < VALID_PARAMS.length; i = i + 1) {
             let v = this.element.getAttribute(VALID_PARAMS[i]);
             if (v) {
@@ -558,11 +559,16 @@ class AmpPinterest extends AMP.BaseElement {
             }
         }
 
-        iframe.src = src;
+        // make the iframe
+        let iframe = make({'iframe':{
+          'frameborder': '0',
+          'allowtransparency': 'true',
+          'width': width,
+          'height': height,
+          'src': src
+        }});
 
         this.applyFillContent(iframe);
-        iframe.width = width;
-        iframe.height = height;
         this.element.appendChild(iframe);
         return loadPromise(iframe);
 
