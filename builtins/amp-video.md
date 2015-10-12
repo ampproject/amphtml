@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-### <a name=”amp-video”></a> `amp-video`
+### <a name="amp-video"></a> `amp-video`
 
 A replacement for the HTML5 `video` tag. Like all embedded external resources in a AMP file, the video is lazily loaded only when the `amp-video` element is in or near the viewport.
 
@@ -34,8 +34,8 @@ One or zero immediate child nodes can have the `fallback` attribute. If present,
 
 For example:
 ```html
-<amp-video width=400 height=300 src=”https://yourhost.com/videos/myvideo.mp4”>
-  <amp-img placeholder width=400 height=300 src=”myvideo-poster.jpg”></amp-img>
+<amp-video width=400 height=300 src="https://yourhost.com/videos/myvideo.mp4">
+  <amp-img placeholder width=400 height=300 src="myvideo-poster.jpg"></amp-img>
   <div fallback>
     <p>Your browser doesn’t support HTML5 video</p>
   </div>
