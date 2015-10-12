@@ -17,7 +17,7 @@
 
 
 /**
- * Throws an error if the first argument isn't truish.
+ * Throws an error if the first argument isn't trueish.
  *
  * Supports argument substitution into the message via %s placeholders.
  *
@@ -32,7 +32,7 @@
  *     not evaluate to true.
  * @param {string} message The assertion message
  * @param {...*} var_args Arguments substituted into %s in the message.
- * @return {T} The value of shouldBeTruish.
+ * @return {T} The value of shouldBeTrueish.
  * @template T
  */
 /*eslint "google-camelcase/google-camelcase": 0*/

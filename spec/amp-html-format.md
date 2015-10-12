@@ -20,7 +20,7 @@ AMP HTML is a subset of HTML for authoring content pages such as news articles i
 
 Being a subset of HTML, it puts some restrictions on the full set of tags and functionality available through HTML but it does not require the development of new rendering engines: Existing user agents can render AMP HTML just like all other HTML.
 
-Also AMP HTML documents can be uploaded to a web server and served just like any other HTML document. No special configuration for the server is necessary. However, they are also designed to be optionally served through specialized AMP serving systems that proxy AMP documents, serve them from their own origin and are allowed to apply transformations to the document that provide additional performance benefits. An incomplete list of optimizations such a serving system might do is:
+Also, AMP HTML documents can be uploaded to a web server and served just like any other HTML document; no special configuration for the server is necessary. However, they are also designed to be optionally served through specialized AMP serving systems that proxy AMP documents. These documents serve them from their own origin and are allowed to apply transformations to the document that provide additional performance benefits. An incomplete list of optimizations such a serving system might do is:
 
 - Replace image references with images sized to the viewer’s viewport.
 - Inline images that are visible above the fold.
@@ -28,7 +28,7 @@ Also AMP HTML documents can be uploaded to a web server and served just like any
 - Preload extended components.
 - Minify HTML and CSS.
 
-AMP HTML uses a set of contributed but centrally managed and hosted custom elements to implement advanced functionality such as image galleries that might be found in a AMP HTML document. While it does allow styling the document using custom CSS, it does not allow author written JavaScript beyond what is provided through the custom elements to reach its performance goals.
+AMP HTML uses a set of contributed but centrally managed and hosted custom elements to implement advanced functionality such as image galleries that might be found in an AMP HTML document. While it does allow styling the document using custom CSS, it does not allow author written JavaScript beyond what is provided through the custom elements to reach its performance goals.
 
 By using this AMP format, content producers are making the content in AMP files available to be crawled, cached, and displayed by third parties.
 
@@ -67,9 +67,9 @@ In concrete terms this means that:
     "datePublished": "2015-02-05T08:00:00+08:00"
   }
   </script>
-  <script custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js" async></script>
+  <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
   <style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
-  <script src="https://cdn.ampproject.org/v0.js" async></script>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
 <h1>Sample document</h1>
@@ -97,7 +97,7 @@ AMP HTML documents MUST
 - <a name="canon"></a>contain a `<link rel="canonical" href="$SOME_URL" />` tag inside their head that points to the regular HTML version of the AMP HTML document or to itself if no such HTML version exists. [🔗](#canon)
 - <a name="chrs"></a>contain a `<meta charset="utf-8">` tag as the first child of their head tag. [🔗](#chrs)
 - <a name="vprt"></a>contain a `<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">` tag inside their head tag. [🔗](#vprt)
-- <a name="scrpt"></a>contain a `<script src="https://cdn.ampproject.org/v0.js" async></script>` tag as the last element in their head. [🔗](#scrpt)
+- <a name="scrpt"></a>contain a `<script async src="https://cdn.ampproject.org/v0.js"></script>` tag as the last element in their head. [🔗](#scrpt)
 - <a name="opacity"></a>contain `<style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>` in their head tag. [🔗](#opacity)
 
 ### Metadata
@@ -124,28 +124,28 @@ The following properties are recommended:
 
 #### Open Graph Protocol, Twitter Cards and similar metadata
 
-It is encouraged that AMP HTML documents are annotated with Open Graph Protocol, Twitter Cards and other similar metadata as appropriate.
+It is encouraged that AMP HTML documents are annotated with standardized metadata: Open Graph Protocol, Twitter Cards, etc.
 
 ### HTML Tags
 
-Most HTML tags can be used unchanged in AMP HTML. Certain tags, however, have equivalent custom tags (such as `<img>` and `<amp-img>`) and other tags are outright banned:
+HTML tags can be used unchanged in AMP HTML. Certain tags have equivalent custom tags (such as `<img>` and `<amp-img>`) and other tags are outright prohibited:
 
 | Tag       | Status in AMP HTML                             |
 |-----------|------------------------------------------------|
-| script    | Banned unless the type is `application/ld+json` (Other non-executable values may be added as needed.). Exception is the mandatory script tag to load the AMP runtime and the script tags to load extended components. |
-| base      | Banned |
+| script    | Prohibited unless the type is `application/ld+json` (Other non-executable values may be added as needed.). Exception is the mandatory script tag to load the AMP runtime and the script tags to load extended components. |
+| base      | Prohibited |
 | img       | Replaced with amp-img |
 | video     | Replaced with amp-video |
 | audio     | Replaced with amp-audio |
-| iframe    | Banned. May be replaced with amp-iframe in the future. |
-| frame     | Banned. |
-| frameset  | Banned. |
-| object    | Banned. |
-| param     | Banned. |
-| applet    | Banned. |
-| embed     | Banned. |
-| form      | Banned. |
-| input elements | Banned. Includes input, textarea, select, option. Notably, button element is allowed. |
+| iframe    | Prohibited. May be replaced with amp-iframe in the future. |
+| frame     | Prohibited. |
+| frameset  | Prohibited. |
+| object    | Prohibited. |
+| param     | Prohibited. |
+| applet    | Prohibited. |
+| embed     | Prohibited. |
+| form      | Prohibited. |
+| input elements | Prohibited. Includes input, textarea, select, option. Notably, button element is allowed. |
 | button    | Allowed. |
 | <a name="cust"></a>style     | [Required style tags for adjusting opacity](#opacity) One additional style tag is allowed in head tag for the purpose of custom styling. This style tag must have the attribute `amp-custom`. [🔗](#cust) |
 | link      | Allowed for certain values of rel: `canonical`. `stylesheet` is generally disallowed, but some values may be whitelisted for font providers. |
@@ -153,8 +153,7 @@ Most HTML tags can be used unchanged in AMP HTML. Certain tags, however, have eq
 | <a name="ancr"></a>a         | The `href` attribute value must not begin with `javascript:`. If set, the `target` attribute value must be `_blank`. Otherwise allowed. [🔗](#ancr) |
 | svg       | Most SVG elements are allowed | 
 
-Validator implementations should use a whitelist based on the HTML5 specification with the above tags removed.
-TODO(malteubl): Add addendum with whitelist.
+Validator implementations should use a whitelist based on the HTML5 specification with the above tags removed. See [AMP Tag Addendum](amp-tag-addendum.md).
 
 ### Comments
 
@@ -164,7 +163,7 @@ Conditional HTML comments are not allowed.
 
 Attribute names starting with `on` (such as `onclick` or `onmouseover`) are disallowed in AMP HTML. The attribute with the literal name `on` (no suffix) is allowed.
 
-The style attribute must not be used.
+The `style` attribute must not be used.
 
 ### Links
 
@@ -189,12 +188,12 @@ Allowed selectors are of the form:
 - selector, selector
 - media queries
 
-Pseudo selectors are generally forbidden and must be whitelisted 1 by 1. Initially we only allow `:hover`, `:active` and `:visited` with whitelisted CSS properties (For color and underlining).
+Pseudo selectors are generally forbidden and must be whitelisted 1 by 1. Initially, we only allow `:hover`, `:active` and `:visited` with whitelisted CSS properties (For color and underlining).
 
 CSS variables are used to style custom elements.
 
-Class names in author stylesheets may not starts with the string `-amp-`. These are reserved for internal use by the AMP runtime. It follows,
-that user stylesheet may not reference CSS selectors for `-amp-` classes and `i-amp` tags. These classes and elements are not meant to
+Class names, in author stylesheets, may not start with the string `-amp-`. These are reserved for internal use by the AMP runtime. It follows,
+that the user's stylesheet may not reference CSS selectors for `-amp-` classes and `i-amp` tags. These classes and elements are not meant to
 be customized by authors. Authors, however, can override styles of `amp-` classes and tags for any CSS properties not explicitly
 forbidden by these components' spec.
 
@@ -212,7 +211,7 @@ The initial version of AMP will prohibit the use of the following CSS properties
 - `animation`
 - `filter`
 
-`overflow` (and `overflow-y`, etc.) may not be styled as “auto” or “scroll”. No user defined element in a AMP document may have a scrollbar.
+`overflow` (and `overflow-y`, etc.) may not be styled as “auto” or “scroll”. No user defined element in an AMP document may have a scrollbar.
 
 ##### Maximum size
 It is a validation error if the author stylesheet is larger than 50,000 bytes.
@@ -231,7 +230,7 @@ Font providers can be whitelisted if they support CSS-only integrations and serv
 
 - https://fonts.googleapis.com
 
-Authors are free to include all custom fonts via a `@font-face` CSS instruction via their custom CSS. Fonts included via `@font-face` must be fetched via HTTP or HTTPS scheme.
+Authors are free to include all custom fonts via a `@font-face` CSS instruction via their custom CSS. Fonts included via `@font-face` must be fetched via the HTTP or HTTPS scheme.
 
 
 ## AMP runtime
@@ -240,12 +239,12 @@ The AMP runtime is a piece of JavaScript that runs inside every AMP document. It
 
 The AMP runtime is loaded via the mandatory `<script src="https://cdn.ampproject.org/v0.js"></script>` tag in the AMP document head.
 
-Development mode is triggered by including the attribute "development" in the script tag: `<script src="https://cdn.ampproject.org/v0.js" development></script>`
+Development mode is triggered by adding "#development=1" to the URL of the page.
 
 
 ## Resources
 
-Resources such as images, videos, audio files or ads must be included into a AMP HTML file through custom elements such as `<amp-img>`. We call them managed resources because whether and when they will be loaded and displayed to the user is decided by the AMP runtime.
+Resources such as images, videos, audio files or ads must be included into an AMP HTML file through custom elements such as `<amp-img>`. We call them managed resources because whether and when they will be loaded and displayed to the user is decided by the AMP runtime.
 
 There are no particular guarantees as to the loading behavior of the AMP runtime, but it should generally strive to load resources quickly enough, so that they are loaded by the time the user would like to see them if possible. The runtime should prioritize resources currently in viewport and attempt to predict changes to the viewport and preload resources accordingly.
 
@@ -254,16 +253,16 @@ The AMP runtime may at any time decide to unload resources that are not currentl
 
 ## AMP Components
 
-AMP HTML uses HTML custom elements called “AMP components” to substitute built-in resource-loading tags such as `<img>` and `<video>` and to implement features with complex interactions such as image lightboxes or carousels.
+AMP HTML uses custom elements called, “AMP components” to substitute built-in resource-loading tags such as `<img>` and `<video>` and to implement features with complex interactions such as image lightboxes or carousels.
 
 See the [AMP component spec](./amp-html-components.md) for details about supported components.
 
 There are 2 types of supported AMP components:
 
-1. Built-in components.
-2. Extended components.
+1. Built-in
+2. Extended
 
-Built-in components are always available in a AMP document and have a dedicated custom element such as `<amp-img>` while extended components must be explicitly included into the document.
+Built-in components are always available in an AMP document and have a dedicated custom element such as `<amp-img>`. Extended components must be explicitly included into the document.
 
 ### Common attributes
 
@@ -285,7 +284,7 @@ The optional layout attribute allows specifying how the component behaves in the
 
 #### `media`
 
-All AMP custom elements support the media attribute. It takes a media query as a value where if the query does not match, the element is not rendered at all and its resources and potentially child resources will not be fetched. If the browser window changes size or orientation the media queries are reevaluated and elements are hidden and shown based on the new results.
+All AMP custom elements support the `media` attribute. The value of media is a media query. If the query does not match, the element is not rendered at all and it's resources and potentially it's child resources will not be fetched. If the browser window changes size or orientation the media queries are re-evaluated and elements are hidden and shown based on the new results.
 
 Example: Here we have 2 images with mutually exclusive media queries. Depending on the screen width one or the other will be fetched and rendered. Note that the media attribute is available on all custom elements, so it can be used with non-image elements such as ads.
 
@@ -304,7 +303,7 @@ Example: Here we have 2 images with mutually exclusive media queries. Depending 
 
 ### `on`
 
-The on attribute is used to install event handlers on elements. The events that are supported depend on the element.
+The `on` attribute is used to install event handlers on elements. The events that are supported depend on the element.
 
 The value for the syntax is a simple domain specific language of the form `eventName:targetId[.methodName]`.
 Example: `on="tap:fooId.showLightbox"`
@@ -315,15 +314,15 @@ Example: `on="tap:fooId"`
 
 ### Extended components
 
-Extended components are components that do not necessarily ship with the AMP runtime but instead must be explicitly included into the document.
+Extended components are components that do not necessarily ship with the AMP runtime. Instead they must be explicitly included into the document.
 
-Extended components are loaded by including a script tag in the head of the document like this
+Extended components are loaded by including a `<script>` tag in the head of the document like this:
 
 ```html
-<script custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js" async></script>
+<script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
 ```
 
-The script tag MUST have an async attribute and MUST have an `element` attribute referencing the name of the element.
+The `<script>` tag must have an `async` attribute and must have a `custom-element` attribute referencing the name of the element.
 
 Runtime implementations may use the name to render placeholders for these elements.
 
@@ -333,14 +332,16 @@ The script URL must start with “https://cdn.ampproject.org” and must follow 
 
 The URL for extended components is of the form:
 
+```
 https://cdn.ampproject.org/$RUNTIME_VERSION/$ELEMENT_NAME-$ELEMENT_VERSION.js
+```
 
 ##### Versioning
 
 Extended components are versioned via [semver](http://semver.org/). The version is referenced explicitly (See $ELEMENT_VERSION above) when loading the component in the URL. It may have the value “latest”.
 Changes to the PATCH version component (x in 1.1.x) must strictly maintain backward compatibility or fix urgent security issues.
 
-AMP documents may only reference versions with one or two components. Version ”1” states “I accepts every version of this component with major version 1”. Version “1.1” states “I accept every PATCH level of 1.1”. It is now allowed to explicitly reference the PATCH level in the version string.
+AMP documents may only reference versions with one or two components. Version ”1” states “I accept every version of this component with major version 1”. Version “1.1” states “I accept every PATCH level of 1.1”. It is now allowed to explicitly reference the PATCH level in the version string.
 
 ## Security
 
@@ -353,13 +354,13 @@ The AMP HTML format is designed so that is always the case.
 Currently, the following SVG elements are allowed:
 
 * basics: "g", "path", "glyph", "glyphRef", "marker", "view"
-* shapes: "circle", "line", "polygone", "polyline", "rect"
+* shapes: "circle", "line", "polygon", "polyline", "rect"
 * text: "text", "textPath", "tref", "tspan"
-* rendering: "clipPath", "filter", "lineGradient", "radialGrandient", "mask", "pattern", "vkern", "hkern"
+* rendering: "clipPath", "filter", "linearGradient", "radialGradient", "mask", "pattern", "vkern", "hkern"
 * special: "defs" (all children above are allowed here), "symbol", "use"
 * aria: "desc", "title"
 
 As well as these attributes:
 
-* "xlink:href" only URIs starting with "#" are allowed
+* "xlink:href": only URIs starting with "#" are allowed
 * "style"

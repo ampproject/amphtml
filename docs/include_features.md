@@ -22,23 +22,24 @@ To include an `amp-iframe` in your page,
 first include the following script to the `<head>`, which loads the additional code for the extended component:
 
 ```html
-<script custom-element="amp-iframe" src="https://cdn.ampproject.org/v0/amp-iframe-0.1.js" async></script>
+<script async custom-element="amp-iframe" src="https://cdn.ampproject.org/v0/amp-iframe-0.1.js"></script>
 ```
 
 An example `amp-iframe` from the
 [released.amp example](https://github.com/ampproject/amphtml/blob/master/examples/released.amp.html):
 
+  ```html
   <amp-iframe width=300 height=300
       sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
       layout="responsive"
       frameborder="0"
       src="https://www.google.com/maps/embed/v1/place?key=AIzaSyDG9YXIhKBhqclZizcSzJ0ROiE0qgVfwzI&q=Alameda,%20CA">
   </amp-iframe>
+  ```
 
 # Media
 
-Include images, video, and audio in your page
-using AMP media elements.
+Include images, video, and audio in your page using AMP media elements.
 
 ## Include an image
 
@@ -48,7 +49,7 @@ using the [`amp-img`](../builtins/amp-img.md) element.
 `amp-img` requirements:
 
 * Must include an explicit width and height.
-* Recommended: include a placeholder in case image resource fails to load.
+* Recommended: include a placeholder in case the image resource fails to load.
 
 Responsive image example:
 
@@ -62,14 +63,14 @@ Hidden image example:
 
     <amp-img id="img2" src="hidden.jpg" width=527 height=193 layout="nodisplay"></amp-img>
 
-The AMP HTML runtime can affectively manage image resources,
+The AMP HTML runtime can effectively manage image resources,
 choosing to delay or prioritize resource loading
 based on the viewport position, system resources, connection bandwidth, or other factors.
 
 If the resource requested by the `amp-img` component fails to load,
 the space will be blank.
 Set a placeholder background color or other visual
-using CSS selector and style on the element itself:
+using a CSS selector and style on the element itself:
 
     amp-img {
       background-color: grey;
@@ -88,7 +89,7 @@ To include an `amp-anim` in your page,
 first include the following script to the `<head>`:
 
 ```html
-<script custom-element="amp-anim" src="https://cdn.ampproject.org/v0/amp-anim-0.1.js" async></script>
+<script async custom-element="amp-anim" src="https://cdn.ampproject.org/v0/amp-anim-0.1.js"></script>
 ```
 
 The `amp-anim` component can also have an optional placeholder child
@@ -109,7 +110,7 @@ To include a tweet in your page,
 first include the following script to the `<head>`:
 
 ```html
-<script custom-element="amp-twitter" src="https://cdn.ampproject.org/v0/amp-twitter-0.1.js" async></script>
+<script async custom-element="amp-twitter" src="https://cdn.ampproject.org/v0/amp-twitter-0.1.js"></script>
 ```
 
 Currently tweets are automatically proportionally scaled
@@ -136,10 +137,10 @@ using the [`amp-instagram`]() element.
 
 **Todo:** Add proper link to reference doc.
 
-Include the Instagrame shortcode found in the Instagram photo URL.
+Include the Instagram shortcode found in the Instagram photo URL.
 For example, in `https://instagram.com/p/fBwFP`,
 `fBwFP` is the shortcode.
-Also, Instagram uses a fixed aspect ration for responsive layouts,
+Also, Instagram uses a fixed aspect ratio for responsive layouts,
 so the value for width and height should be universal
 
     <amp-instagram
@@ -178,14 +179,14 @@ using the [`amp-youtube`](../extensions/amp-youtube/amp-youtube.md) element.
 You must include the following script in the `<head>`:
 
 ```html
-<script custom-element="amp-youtube" src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js" async></script>
+<script async custom-element="amp-youtube" src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js"></script>
 ```
 
 The Youtube `video-id` can be found in every Youtube video page URL.
 For example, in https://www.youtube.com/watch?v=Z1q71gFeRqM,
 Z1q71gFeRqM is the video id.
 
-Use `layout="responsive"` to yield correct layouts for 16:9 aspect ration videos:
+Use `layout="responsive"` to yield correct layouts for 16:9 aspect ratio videos:
 
     <amp-youtube
         video-id="mGENRKrdoGY"
@@ -201,7 +202,7 @@ using the [`amp-audio`](../extensions/amp-audio/amp-audio.md) element.
 You must include the following script in the `<head>`:
  
 ```html
-<script custom-element="amp-audio" src="https://cdn.ampproject.org/v0/amp-audio-0.1.js" async></script>
+<script async custom-element="amp-audio" src="https://cdn.ampproject.org/v0/amp-audio-0.1.js"></script>
 ```
 
 Only use this element for direct HTML5 audio file embeds.
@@ -211,8 +212,6 @@ at a time determined by the AMP HTML runtime.
 
 Include a placeholder before the audio starts, and a fallback,
 if the browser doesn't support HTML5 audio, for example:
-
-For example:
 
     <amp-audio width=400 height=300 src=”https://yourhost.com/audios/myaudio.mp3”>
       <div fallback>

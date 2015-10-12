@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-var fs = require('fs');
-var argv = require('minimist')(process.argv.slice(2));
 var gulp = require('gulp');
 var del = require('del');
 var file = require('gulp-file');

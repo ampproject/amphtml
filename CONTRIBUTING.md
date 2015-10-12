@@ -20,10 +20,11 @@ limitations under the License.
 
 **Google Individual Contributor License**
 
-Code contributors to the AMP HTML project must sign a Contributor License Agreement, either for an individual or corporation. The CLA is meant to protect contributors, users of the AMP HTML runtime, and Google in issues of intellectual property.  You can fill out the appropriate Contributor License Agreement at:
+Code contributors to the AMP HTML project must sign a Contributor License Agreement, either for an individual or corporation. The CLA is meant to protect contributors, users of the AMP HTML runtime, and Google in issues of intellectual property. You can fill out the appropriate Contributor License Agreement at:
 
-https://developers.google.com/open-source/cla/individual
-https://developers.google.com/open-source/cla/corporate
+Individuals - https://developers.google.com/open-source/cla/individual
+
+Corporate - https://developers.google.com/open-source/cla/corporate
 
 ### Contributing
 
@@ -35,11 +36,11 @@ The AMP HTML project is meant to evolve with feedback - the project and its user
 
 **Bugs**
 
-As with all pieces of software, you may end up running into bugs. Please submit bugs as regular issues on Github - AMP HTML developers are regularly monitoring issues and will try to fix open bugs quickly.
+As with all pieces of software, you may end up running into bugs. Please submit bugs as regular issues on GitHub - AMP HTML developers are regularly monitoring issues and will try to fix open bugs quickly.
 
 The best bug reports include a detailed way to predictably reproduce the issue, and possibly even a working example that demonstrates the issue.
 
-#### Fixing bugs and runtime features
+#### Fixing bugs and contributing runtime features
 
 The AMP HTML project accepts and greatly appreciates contributions. The project follows the [fork & pull](https://help.github.com/articles/using-pull-requests/#fork--pull) model for accepting contributions. Please mark pull requests that are ready for review with the "NEEDS REVIEW" label.
 
@@ -49,11 +50,13 @@ A key feature of the AMP HTML project is performance - all pull requests will be
 
 AMP HTML developers will provide feedback on pull requests, looking at code quality, style, tests, performance, and directional alignment with the goals of the project.
 
-#### Contributing Extended Components
+Before making major changes to AMP please submit an Issue titled "Intent to implement: My project" and wait for "LGTM" responses from 2 project committers.
+
+#### Contributing Components
 
 A key feature of the AMP HTML project is its extensibility - it is meant to support “Extended Components” that provide first-class support for additional rich features. The project currently accepts pull requests to include these types of extended components.
 
-Because Extended Components may have significant impact on AMP HTML performance, security, and usage, Extended Component contributions will be very carefully analyzed and scrutinized. Before embarking on a major Extended Component, please submit an Issue detailing your proposed component, so that the AMP HTML developers can offer any feedback before you spend lots of time. In particular we strive to design the overall component set, so that a large number of use cases can be composed from them. Instead of creating a new component it may thus be a better solution to combine existing components to a similar effect.
+Because Extended Components may have significant impact on AMP HTML performance, security, and usage, Extended Component contributions will be very carefully analyzed and scrutinized. Before embarking on a major Extended Component, please submit an Issue titled "Intent to implement: My project" detailing your proposed component, so that the AMP HTML developers can offer any feedback before you spend lots of time. 2 project committers need to respond "LGTM" before development major should begin. In particular we strive to design the overall component set, so that a large number of use cases can be composed from them. Instead of creating a new component it may thus be a better solution to combine existing components to a similar effect.
 
 Important criteria for acceptance of an Extended Component is that an [oEmbed](http://oembed.com/) integration already exists and that the thing being integrated has an actively maintained Wikipedia page.
 

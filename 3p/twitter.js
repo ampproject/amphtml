@@ -75,7 +75,7 @@ export function twitter(global, data) {
     var iframe = global.document.querySelector('#c iframe');
     var body = iframe.contentWindow.document.body;
     context.updateDimensions(
-        body.offsetWidth,
-        body.offsetHeight + /* margins */ 20);
+        body./*OK*/offsetWidth,
+        body./*OK*/offsetHeight + /* margins */ 20);
   }
 }

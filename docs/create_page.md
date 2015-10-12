@@ -9,12 +9,11 @@ The basic AMP HTML page includes the following mark-up:
 
 ```html
     <!doctype html>
-    <html AMP lang="en">
+    <html amp lang="en">
       <head>
         <meta charset="utf-8">
         <title>Hello, AMPs</title>
         <link rel="canonical" href="http://example.ampproject.org/article-metadata.html" />
-        <script src="https://cdn.ampproject.org/v0.js" async></script>
         <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
         <script type="application/ld+json">
           {
@@ -28,6 +27,7 @@ The basic AMP HTML page includes the following mark-up:
           }
         </script>
         <style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
+        <script async src="https://cdn.ampproject.org/v0.js"></script>
       </head>
       <body>
         <h1>Welcome to the mobile web</h1>
@@ -45,7 +45,7 @@ AMP HTML documents MUST
 - <a name="canon"></a>contain a `<link rel="canonical" href="$SOME_URL" />` tag inside their head that points to the regular HTML version of the AMP HTML document or to itself if no such HTML version exists.
 - <a name="chrs"></a>contain a `<meta charset="utf-8">` tag as the first child of their head tag.
 - <a name="vprt"></a>contain a `<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">` tag inside their head tag.
-- <a name="scrpt"></a>contain a `<script src="https://cdn.ampproject.org/v0.js" async></script>` tag as the last element in their head.
+- <a name="scrpt"></a>contain a `<script async src="https://cdn.ampproject.org/v0.js"></script>` tag as the last element in their head.
 - <a name="opacity"></a>contain `<style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>` in their head tag.
 
 Most HTML tags can be used unchanged in AMP HTML.
@@ -66,7 +66,6 @@ here's the basic AMP HTML page now with an image:
         <meta charset="utf-8">
         <title>Hello, AMPs</title>
         <link rel="canonical" href="http://example.ampproject.org/article-metadata.html" />
-        <script src="https://cdn.ampproject.org/v0.js" async></script>
         <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
         <script type="application/ld+json">
           {
@@ -80,6 +79,7 @@ here's the basic AMP HTML page now with an image:
           }
         </script>
         <style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
+        <script async src="https://cdn.ampproject.org/v0.js"></script>
       </head>
       <body>
         <h1>Welcome to the mobile web</h1>
@@ -107,7 +107,6 @@ inlined stylesheet:
         <meta charset="utf-8">
         <title>Hello, AMPs</title>
         <link rel="canonical" href="http://example.ampproject.org/article-metadata.html" />
-        <script src="https://cdn.ampproject.org/v0.js" async></script>
         <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
         <script type="application/ld+json">
           {
@@ -130,6 +129,7 @@ inlined stylesheet:
             background-color: gray;
           }
         </style>
+        <script async src="https://cdn.ampproject.org/v0.js"></script>
       </head>
       <body>
         <h1>Welcome to the mobile web</h1>
@@ -148,7 +148,7 @@ Externally-loaded resources (like images, ads, videos, etc.) must have height
 and width attributes.  This ensures that sizes of all elements can be
 calculated by the browser via CSS automatically and element sizes won't be
 recalculated because of external resources, preventing the page from jumping
-and around as resources load.
+around as resources load.
 
 Moreover, use of the style attribute for tags is not permitted, as this
 optimizes impact rendering speed in unpredictable ways.

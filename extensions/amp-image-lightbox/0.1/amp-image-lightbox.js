@@ -203,8 +203,8 @@ export class ImageViewer {
    * @param {?Element} sourceImage
    */
   init(sourceElement, sourceImage) {
-    this.sourceWidth_ = sourceElement.offsetWidth;
-    this.sourceHeight_ = sourceElement.offsetHeight;
+    this.sourceWidth_ = sourceElement./*OK*/offsetWidth;
+    this.sourceHeight_ = sourceElement./*OK*/offsetHeight;
     this.srcset_ = parseSrcset(sourceElement.getAttribute('srcset') ||
         sourceElement.getAttribute('src'));
     if (sourceImage && isLoaded(sourceImage) && sourceImage.src) {

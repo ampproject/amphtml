@@ -33,8 +33,8 @@ AMP HTML works by including the AMP JS library and adding a bit of boilerplate t
   <meta charset="utf-8">
   <link rel="canonical" href="hello-world.html" >
   <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
-  <script src="https://cdn.ampproject.org/v0.js" async></script>
   <style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>Hello World!</body>
 </html>
@@ -87,7 +87,7 @@ and [amp-carousel](extensions/amp-carousel/amp-carousel.md).
 * Make advanced performance techniques easy,
 such as [amp-anim](extensions/amp-anim/amp-anim.md),
 which allows web developers to dynamically serve animated images
-as either image files (GIF) or video files (WebM or MP4) based on browser compatability.
+as either image files (GIF) or video files (WebM or MP4) based on browser compatibility.
 
 # Further Reading
 
