@@ -30,8 +30,6 @@ We discuss implementation issues on [amphtml-discuss@googlegroups.com](https://g
 
 ### Build & Test
 
-[![Build Status](https://magnum.travis-ci.com/ampproject/amphtml.svg?token=AmxgqDRzeUjVvqT2oydf&branch=master)](https://magnum.travis-ci.com/ampproject/amphtml)
-
 | Command                       | Description                                                           |
 | ----------------------------- | --------------------------------------------------------------------- |
 | `gulp`                        | Same as "watch"                                                       |
