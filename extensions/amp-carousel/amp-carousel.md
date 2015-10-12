@@ -25,12 +25,13 @@ Each of the `amp-carousel` component’s immediate children is considered an ite
 The carousel consists of an arbitrary number of items, as well as optional navigational arrows to go forward or backwards a single item.
 
 The carousel advances between items if the user swipes, uses arrow keys, clicks an optional navigation arrow.
-
+```html
     <amp-carousel width=300 height=400>
       <amp-img src=”my-img1.png” width=300 height=400></amp-img>
       <amp-img src=”my-img2.png” width=300 height=400></amp-img>
       <amp-img src=”my-img3.png” width=300 height=400></amp-img>
     </amp-carousel>
+```
 
 Note, that while the example shows a carousel of images `amp-carousel` support arbitrary children.
 

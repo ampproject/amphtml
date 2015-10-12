@@ -23,7 +23,7 @@ viewport, until it is closed again by the user.
 #### Behavior
 
 The typical scenario looks like this:
-
+```html
     <amp-img
         on="tap:lightbox1"
         role="button"
@@ -31,6 +31,7 @@ The typical scenario looks like this:
         src="image1" width=200 height=100></amp-img>
 
     <amp-image-lightbox id="lightbox1" layout="nodisplay"></amp-image-lightbox>
+```
 
 The `amp-image-lightbox` is activated using `on` action on the `amp-img` element
 by referencing the lightbox element's ID. When activated, it places the image in
