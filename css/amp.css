@@ -130,15 +130,20 @@ i-amp-sizer {
   /* Just state. */
 }
 
-[placeholder] {
+.-amp-element > [placeholder] {
   display: block;
 }
 
-[placeholder].hidden {
+.-amp-element > [placeholder].hidden {
   visibility: hidden;
 }
 
-.-amp-layout-size-defined [placeholder] {
+.-amp-element:not(.amp-notsupported) > [fallback] {
+  display: none;
+}
+
+.-amp-layout-size-defined > [placeholder],
+.-amp-layout-size-defined > [fallback] {
   position: absolute !important;
   top: 0 !important;
   left: 0 !important;
@@ -186,6 +191,11 @@ amp-pixel {
   height: 1px !important; /* Only things with height are ever loaded. */
   overflow: hidden !important;
   visibility: hidden;
+}
+
+amp-video video {
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 .-amp-loader {

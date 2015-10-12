@@ -15,7 +15,7 @@
  */
 
 import {Layout, getLayoutClass, getLengthNumeral, getLengthUnits,
-          isLayoutSizeDefined, parseLayout, parseLength,
+          isInternalElement, isLayoutSizeDefined, parseLayout, parseLength,
           getNaturalDimensions, hasNaturalDimensions} from './layout';
 import {ElementStub, stubbedElements} from './element-stub';
 import {assert} from './asserts';
@@ -23,6 +23,7 @@ import {log} from './log';
 import {reportError} from './error';
 import {resources} from './resources';
 import {timer} from './timer';
+import * as dom from './dom';
 
 
 let TAG_ = 'CustomElement';
@@ -182,6 +183,23 @@ export function applyLayout_(element) {
 
 
 /**
+ * Returns "true" for internal AMP nodes or for placeholder elements.
+ * @param {!Node} node
+ * @return {boolean}
+ */
+function isInternalOrServiceNode(node) {
+  if (isInternalElement(node)) {
+    return true;
+  }
+  if (node.tagName && (node.hasAttribute('placeholder') ||
+          node.hasAttribute('fallback'))) {
+    return true;
+  }
+  return false;
+}
+
+
+/**
  * The interface that is implemented by all custom elements in the AMP
  * namespace.
  * @interface
@@ -230,6 +248,9 @@ export function createAmpElementProto(win, name, implementationClass) {
 
     /** @private {number} */
     this.layoutWidth_ = -1;
+
+    /** @private {number} */
+    this.layoutCount_ = 0;
 
     /** @private {string|null|undefined} */
     this.mediaQuery_;
@@ -530,6 +551,10 @@ export function createAmpElementProto(win, name, implementationClass) {
         'layoutCallback must return a promise');
     return promise.then(() => {
       this.readyState = 'complete';
+      this.layoutCount_++;
+      if (this.layoutCount_ == 1) {
+        this.implementation_.firstLayoutCompleted();
+      }
     });
   };
 
@@ -615,6 +640,76 @@ export function createAmpElementProto(win, name, implementationClass) {
     } catch (e) {
       log.error(TAG_, 'Action execution failed:', invocation, e);
     }
+  };
+
+
+  /**
+   * Returns the original nodes of the custom element without any service nodes
+   * that could have been added for markup. These nodes can include Text,
+   * Comment and other child nodes.
+   * @return {!Array<!Node>}
+   * @package @final
+   */
+  ElementProto.getRealChildNodes = function() {
+    let nodes = [];
+    for (let n = this.firstChild; n; n = n.nextSibling) {
+      if (!isInternalOrServiceNode(n)) {
+        nodes.push(n);
+      }
+    }
+    return nodes;
+  };
+
+  /**
+   * Returns the original children of the custom element without any service
+   * nodes that could have been added for markup.
+   * @return {!Array<!Element>}
+   * @package @final
+   */
+  ElementProto.getRealChildren = function() {
+    let elements = [];
+    for (let i = 0; i < this.children.length; i++) {
+      let child = this.children[i];
+      if (!isInternalOrServiceNode(child)) {
+        elements.push(child);
+      }
+    }
+    return elements;
+  };
+
+  /**
+   * Returns an optional placeholder element for this custom element.
+   * @return {?Element}
+   * @package @final
+   */
+  ElementProto.getPlaceholder = function() {
+    return dom.childElementByAttr(this, 'placeholder');
+  };
+
+  /**
+   * Hides or shows the placeholder, if available.
+   * @param {boolean} state
+   * @package @final
+   */
+  ElementProto.togglePlaceholder = function(state) {
+    let placeholder = this.getPlaceholder();
+    if (placeholder) {
+      // TODO(dvoytenko): switch to 'amp-hidden'
+      placeholder.classList.toggle('hidden', !state);
+    }
+  };
+
+  /**
+   * Hides or shows the fallback, if available.
+   * @param {boolean} state
+   * @package @final
+   */
+  ElementProto.toggleFallback = function(state) {
+    // This implementation is notably less efficient then placeholder toggling.
+    // The reasons for this are: (a) "not supported" is the state of the whole
+    // element, (b) some realyout is expected and (c) fallback condition would
+    // be rare.
+    this.classList.toggle('amp-notsupported', state);
   };
 
   return ElementProto;

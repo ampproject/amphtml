@@ -93,4 +93,45 @@ describe('DOM', () => {
     expect(dom.elementByTag(parent, 'element')).to.equal(element1);
     expect(dom.elementByTag(parent, 'ELEMENT')).to.equal(element1);
   });
+
+
+  it('childElement should find first match', () => {
+    let parent = document.createElement('parent');
+
+    let element1 = document.createElement('element1');
+    parent.appendChild(element1);
+
+    let element2 = document.createElement('element2');
+    parent.appendChild(element2);
+
+    expect(dom.childElement(parent, (e) => true)).to.equal(element1);
+    expect(dom.childElement(parent, (e) => e.tagName == 'ELEMENT1')).
+        to.equal(element1);
+    expect(dom.childElement(parent, (e) => e.tagName == 'ELEMENT2')).
+        to.equal(element2);
+    expect(dom.childElement(parent, (e) => e.tagName == 'ELEMENT3')).
+        to.be.null;
+  });
+
+  it('childElementByAttr should find first match', () => {
+    let parent = document.createElement('parent');
+
+    let element1 = document.createElement('element1');
+    element1.setAttribute('attr1', '1');
+    element1.setAttribute('attr12', '1');
+    parent.appendChild(element1);
+
+    let element2 = document.createElement('element2');
+    element2.setAttribute('attr2', '2');
+    element2.setAttribute('attr12', '2');
+    parent.appendChild(element2);
+
+    expect(dom.childElementByAttr(parent, 'attr1')).to.equal(element1);
+    expect(dom.childElementByAttr(parent, 'attr2')).to.equal(element2);
+    expect(dom.childElementByAttr(parent, 'attr12')).to.equal(element1);
+    expect(dom.childElementByAttr(parent, 'attr12', '1')).to.equal(element1);
+    expect(dom.childElementByAttr(parent, 'attr12', '2')).to.equal(element2);
+    expect(dom.childElementByAttr(parent, 'attr12', '3')).to.be.null;
+    expect(dom.childElementByAttr(parent, 'attr3')).to.be.null;
+  });
 });

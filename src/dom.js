@@ -95,3 +95,41 @@ export function elementByTag(element, tagName) {
   let elements = element.getElementsByTagName(tagName);
   return elements.length > 0 ? elements[0] : null;
 }
+
+
+/**
+ * Finds the first child element that satisfies the callback.
+ * @param {!Element} parent
+ * @param {function(!Element):boolean} callback
+ * @return {?Element}
+ */
+export function childElement(parent, callback) {
+  let children = parent.children;
+  for (let i = 0; i < children.length; i++) {
+    if (callback(children[i])) {
+      return children[i];
+    }
+  }
+  return null;
+}
+
+
+/**
+ * Finds the first child element that has the specified attribute, optionally
+ * with a value.
+ * @param {!Element} parent
+ * @param {string} attr
+ * @param {string=} opt_value
+ * @return {?Element}
+ */
+export function childElementByAttr(parent, attr, opt_value) {
+  return childElement(parent, (el) => {
+    if (!el.hasAttribute(attr)) {
+      return false;
+    }
+    if (opt_value !== undefined && el.getAttribute(attr) != opt_value) {
+      return false;
+    }
+    return true;
+  });
+}
