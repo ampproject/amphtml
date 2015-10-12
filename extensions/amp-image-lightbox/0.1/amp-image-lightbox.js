@@ -708,6 +708,7 @@ class AmpImageLightbox extends AMP.BaseElement {
 
     // Prepare to enter in lightbox
     this.requestFullOverlay();
+    this.getViewport().disableTouchZoom();
 
     this.enter_();
 
@@ -740,6 +741,7 @@ class AmpImageLightbox extends AMP.BaseElement {
     }
 
     this.cancelFullOverlay();
+    this.getViewport().restoreOriginalTouchZoom();
     if (this.historyId_ != -1) {
       this.getHistory_().pop(this.historyId_);
     }
