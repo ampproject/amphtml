@@ -48,42 +48,42 @@ In concrete terms this means that:
 ```html
 <!doctype html>
 <html ⚡>
-<head>
-  <meta charset="utf-8">
-  <title>Sample document</title>
-  <link rel="canonical" href="./regular-html-version.html">
-  <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
-  <style amp-custom>
-    h1 {color: red}
-  </style>
-  <script type="application/ld+json">
-  {
-    "@context": "http://schema.org",
-    "@type": "NewsArticle",
-    "headline": "Article headline",
-    "image": [
-      "thumbnail1.jpg"
-    ],
-    "datePublished": "2015-02-05T08:00:00+08:00"
-  }
-  </script>
-  <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
-  <style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
-  <script async src="https://cdn.ampproject.org/v0.js"></script>
-</head>
-<body>
-<h1>Sample document</h1>
-<p>
-  Some text
-  <amp-img src=sample.jpg width=300 height=300></amp-img>
-</p>
-<amp-ad width=300 height=250
-    type="a9"
-    data-aax_size="300x250"
-    data-aax_pubname="test123"
-    data-aax_src="302">
-</amp-ad>
-</body>
+  <head>
+    <meta charset="utf-8">
+    <title>Sample document</title>
+    <link rel="canonical" href="./regular-html-version.html">
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
+    <style amp-custom>
+      h1 {color: red}
+    </style>
+    <script type="application/ld+json">
+    {
+      "@context": "http://schema.org",
+      "@type": "NewsArticle",
+      "headline": "Article headline",
+      "image": [
+        "thumbnail1.jpg"
+      ],
+      "datePublished": "2015-02-05T08:00:00+08:00"
+    }
+    </script>
+    <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
+    <style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+  </head>
+  <body>
+    <h1>Sample document</h1>
+    <p>
+      Some text
+      <amp-img src=sample.jpg width=300 height=300></amp-img>
+    </p>
+    <amp-ad width=300 height=250
+        type="a9"
+        data-aax_size="300x250"
+        data-aax_pubname="test123"
+        data-aax_src="302">
+    </amp-ad>
+  </body>
 </html>
 ```
 
@@ -289,16 +289,16 @@ All AMP custom elements support the `media` attribute. The value of media is a m
 Example: Here we have 2 images with mutually exclusive media queries. Depending on the screen width one or the other will be fetched and rendered. Note that the media attribute is available on all custom elements, so it can be used with non-image elements such as ads.
 
 ```html
-    <amp-img
-        media="(min-width: 650px)"
-        src="wide.jpg"
-        width=466
-        height=355 layout="responsive" ></amp-img>
-    <amp-img
-        media="(max-width: 649px)"
-        src="narrow.jpg"
-        width=527
-        height=193 layout="responsive" ></amp-img>
+<amp-img
+    media="(min-width: 650px)"
+    src="wide.jpg"
+    width=466
+    height=355 layout="responsive" ></amp-img>
+<amp-img
+    media="(max-width: 649px)"
+    src="narrow.jpg"
+    width=527
+    height=193 layout="responsive" ></amp-img>
 ```
 
 ### `on`

@@ -19,10 +19,12 @@ limitations under the License.
 Displays a Twitter Tweet.
 
 Example:
-    <amp-twitter width=486 height=657
-        layout="responsive"
-        data-tweetid="585110598171631616"
-        data-cards="hidden">
+```html
+<amp-twitter width=486 height=657
+    layout="responsive"
+    data-tweetid="585110598171631616"
+    data-cards="hidden">
+```
 
 **CAVEATS**
 

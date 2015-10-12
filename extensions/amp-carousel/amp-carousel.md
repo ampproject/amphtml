@@ -25,12 +25,13 @@ Each of the `amp-carousel` component’s immediate children is considered an ite
 The carousel consists of an arbitrary number of items, as well as optional navigational arrows to go forward or backwards a single item.
 
 The carousel advances between items if the user swipes, uses arrow keys, clicks an optional navigation arrow.
-
-    <amp-carousel width=300 height=400>
-      <amp-img src=”my-img1.png” width=300 height=400></amp-img>
-      <amp-img src=”my-img2.png” width=300 height=400></amp-img>
-      <amp-img src=”my-img3.png” width=300 height=400></amp-img>
-    </amp-carousel>
+```html
+<amp-carousel width=300 height=400>
+  <amp-img src=”my-img1.png” width=300 height=400></amp-img>
+  <amp-img src=”my-img2.png” width=300 height=400></amp-img>
+  <amp-img src=”my-img3.png” width=300 height=400></amp-img>
+</amp-carousel>
+```
 
 Note, that while the example shows a carousel of images `amp-carousel` support arbitrary children.
 
@@ -56,28 +57,28 @@ You may override this with your own svg or image like so:
 
   **default**
 
-  ```css
-  .amp-carousel-button-prev {
-    left: 16px;
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18"><path d="M15 8.25H5.87l4.19-4.19L9 3 3 9l6 6 1.06-1.06-4.19-4.19H15v-1.5z" fill="#fff" /></svg>');
-  }
-  ```
+```css
+.amp-carousel-button-prev {
+  left: 16px;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18"><path d="M15 8.25H5.87l4.19-4.19L9 3 3 9l6 6 1.06-1.06-4.19-4.19H15v-1.5z" fill="#fff" /></svg>');
+}
+```
 
   **override**
-  ```css
-  .amp-carousel-button-prev {
-    left: 5%;
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18"><path d="M11.56 5.56L10.5 4.5 6 9l4.5 4.5 1.06-1.06L8.12 9z" fill="#fff" /></svg>');
-  }
-  ```
+```css
+.amp-carousel-button-prev {
+  left: 5%;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18"><path d="M11.56 5.56L10.5 4.5 6 9l4.5 4.5 1.06-1.06L8.12 9z" fill="#fff" /></svg>');
+}
+```
 - By default the visual state of an `amp-carousel` button when it is disabled is that it is hidden.
   You may override this visual state of an `amp-carousel` button in the disabled state by:
 
-  ```css
-  .amp-carousel-button.amp-disabled {
-    /* make sure we make it visible */
-    visibility: visible;
-    /* choose our own background styling, red'ish */
-    background-color: rgba(255, 0, 0, .5);
-  }
-  ```
+```css
+.amp-carousel-button.amp-disabled {
+  /* make sure we make it visible */
+  visibility: visible;
+  /* choose our own background styling, red'ish */
+  background-color: rgba(255, 0, 0, .5);
+}
+```

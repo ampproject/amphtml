@@ -23,12 +23,12 @@ A runtime-managed animated image - most typically a GIF.
 The `amp-anim` component is very similar to the `amp-image` element, and provides additional functionality to manage loading and playing of animated images such as GIFs.
 
 The `amp-anim` component can also have an optional placeholder child, to display while the `src` file is loading. The placeholder is specified via the `placeholder` attribute:
-
-    <amp-anim width=400 height=300 src=”my-gif.gif”>
-      <amp-img placeholder width=400 height=300 src=”my-gif-screencap.jpg”>
-      </amp-img>
-    </amp-anim>
-
+```html
+<amp-anim width=400 height=300 src=”my-gif.gif”>
+  <amp-img placeholder width=400 height=300 src=”my-gif-screencap.jpg”>
+  </amp-img>
+</amp-anim>
+```
 #### Attributes
 
 **src**
@@ -54,7 +54,8 @@ A string that indicates the attribution of the image. E.g. `attribution=“CC co
 
 `amp-img` can be styled directly via CSS properties. Setting a grey background
 placeholder for example could be achieved via:
-
-    amp-anim {
-      background-color: grey;
-    }
+```css
+amp-anim {
+  background-color: grey;
+}
+```

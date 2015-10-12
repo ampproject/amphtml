@@ -33,14 +33,15 @@ One or zero immediate child nodes can have the `placeholder` attribute. If prese
 One or zero immediate child nodes can have the `fallback` attribute. If present, this node and its children form the content that will be displayed if HTML5 audio is not supported on the user’s browser.
 
 For example:
-
-    <amp-audio width=400 height=300 src=”https://yourhost.com/audios/myaudio.mp3”>
-      <div fallback>
-        <p>Your browser doesn’t support HTML5 audio</p>
-      </div>
-      <source type="audio/mpeg" src="foo.mp3">
-      <source type="audio/ogg" src="foo.ogg">
-    </amp-audio>
+```html
+<amp-audio width=400 height=300 src=”https://yourhost.com/audios/myaudio.mp3”>
+  <div fallback>
+    <p>Your browser doesn’t support HTML5 audio</p>
+  </div>
+  <source type="audio/mpeg" src="foo.mp3">
+  <source type="audio/ogg" src="foo.ogg">
+</amp-audio>
+```
 
 #### Attributes
 
