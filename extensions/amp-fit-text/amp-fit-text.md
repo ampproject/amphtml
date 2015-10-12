@@ -36,7 +36,7 @@ The `amp-fit-text` accepts one of the following `layout` values: `fixed`,
 For example:
 ```html
 <amp-fit-text width="300" height="200" layout="responsive"
-  max-font-size="52">
+    max-font-size="52">
   Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque
   inermis reprehendunt.
 </amp-fit-text>

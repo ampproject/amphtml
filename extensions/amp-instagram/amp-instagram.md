@@ -21,10 +21,10 @@ Displays an instagram embed.
 Example:
 ```html
 <amp-instagram
-  shortcode="fBwFP"
-  width="400"
-  height="400"
-  layout="responsive">
+    shortcode="fBwFP"
+    width="400"
+    height="400"
+    layout="responsive">
 </amp-instagram>
 ```
 

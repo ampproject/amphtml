@@ -64,10 +64,10 @@ example:
     </amp-img>
 
     <amp-img
-      class="grey-placeholder"
-      src="https://placekitten.com/g/500/300"
-      width=500
-      height=300>
+        class="grey-placeholder"
+        src="https://placekitten.com/g/500/300"
+        width=500
+        height=300>
     </amp-img>
   </body>
 </html>

@@ -21,9 +21,9 @@ Displays a Youtube video.
 Example:
 ```html
 <amp-youtube
-  video-id="mGENRKrdoGY"
-  layout="responsive"
-  width="480" height="270"></amp-youtube>
+    video-id="mGENRKrdoGY"
+    layout="responsive"
+    width="480" height="270"></amp-youtube>
 ```
 
 
