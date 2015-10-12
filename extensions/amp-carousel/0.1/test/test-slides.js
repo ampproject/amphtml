@@ -14,19 +14,24 @@
  * limitations under the License.
  */
 
-import {AmpSlides} from '../slides';
+import * as sinon from 'sinon';
 import * as tr from '../../../../src/transition';
+import {AmpSlides} from '../slides';
+import {timer} from '../../../../src/timer';
 
 
-describe('Slides gestures', () => {
+describe('Slides functional', () => {
 
+  let sandbox;
+  let clock;
   let element;
   let slide0, slide1, slide2;
   let slides;
   let prepareCallback, switchCallback;
 
-  beforeEach(() => {
+  function setupElements() {
     element = document.createElement('div');
+    element.setAttribute('type', 'slides');
     element.style.width = '320px';
     element.style.height = '200px';
     document.body.appendChild(element);
@@ -37,389 +42,662 @@ describe('Slides gestures', () => {
     slide0.classList.add('slide0');
     slide1.classList.add('slide1');
     slide2.classList.add('slide2');
+    return element;
+  }
 
+  function setupSlides() {
     slides = new AmpSlides(element);
     slides.buildCallback();
+    return slides;
+  }
 
+  function setupSpies() {
     slides.prepareSlide_ = prepareCallback = sinon.spy();
     slides.commitSwitch_ = switchCallback = sinon.spy();
-  });
+  }
 
-  afterEach(() => {
+  function teardownElements() {
     document.body.removeChild(element);
-  });
+  }
 
+  describe('Slides gestures', () => {
 
-  it('should start swiping with slide0', () => {
-    slides.currentIndex_ = 0;
-    slides.onSwipeStart_({});
-    expect(slides.swipeState_).to.not.equal(null);
-    expect(slides.swipeState_.currentIndex).to.equal(0);
-    expect(slides.swipeState_.containerWidth).to.equal(320);
-    expect(slides.swipeState_.prevTr).to.equal(tr.NOOP);
-    expect(slides.swipeState_.nextTr).to.not.equal(tr.NOOP);
-    expect(slides.swipeState_.prevIndex).to.equal(2);
-    expect(slides.swipeState_.nextIndex).to.equal(1);
-    expect(slides.swipeState_.min).to.equal(0);
-    expect(slides.swipeState_.max).to.equal(1);
-    expect(slides.swipeState_.pos).to.equal(0);
-    expect(prepareCallback.callCount).to.equal(1);
-    expect(prepareCallback.getCall(0).args[0]).to.equal(slide1);
-    expect(prepareCallback.getCall(0).args[1]).to.equal(1);
-  });
+    beforeEach(() => {
+      setupElements();
+      setupSlides();
+      setupSpies();
+    });
 
-  it('should allow negative value swipe when looping and on first item', () => {
-    slides.isLooping_ = true;
-    slides.currentIndex_ = 0;
-    slides.onSwipeStart_({});
-    expect(slides.swipeState_).to.not.equal(null);
-    expect(slides.swipeState_.currentIndex).to.equal(0);
-    expect(slides.swipeState_.containerWidth).to.equal(320);
-    expect(slides.swipeState_.prevTr).to.not.equal(tr.NOOP);
-    expect(slides.swipeState_.nextTr).to.not.equal(tr.NOOP);
-    expect(slides.swipeState_.min).to.equal(-1);
-    expect(slides.swipeState_.max).to.equal(1);
-    expect(slides.swipeState_.pos).to.equal(0);
-    expect(prepareCallback.callCount).to.equal(2);
-    expect(prepareCallback.getCall(0).args[0]).to.equal(slide2);
-    expect(prepareCallback.getCall(0).args[1]).to.equal(-1);
-    expect(prepareCallback.getCall(1).args[0]).to.equal(slide1);
-    expect(prepareCallback.getCall(1).args[1]).to.equal(1);
-  });
+    afterEach(() => {
+      teardownElements();
+    });
 
-  it('should allow positive value swipe when looping and on last item', () => {
-    slides.isLooping_ = true;
-    slides.currentIndex_ = 2;
-    slides.onSwipeStart_({});
-    expect(slides.swipeState_).to.not.equal(null);
-    expect(slides.swipeState_.currentIndex).to.equal(2);
-    expect(slides.swipeState_.containerWidth).to.equal(320);
-    expect(slides.swipeState_.prevTr).to.not.equal(tr.NOOP);
-    expect(slides.swipeState_.nextTr).to.not.equal(tr.NOOP);
-    expect(slides.swipeState_.min).to.equal(-1);
-    expect(slides.swipeState_.max).to.equal(1);
-    expect(slides.swipeState_.pos).to.equal(0);
-    expect(prepareCallback.callCount).to.equal(2);
-    expect(prepareCallback.getCall(0).args[0]).to.equal(slide1);
-    expect(prepareCallback.getCall(0).args[1]).to.equal(-1);
-    expect(prepareCallback.getCall(1).args[0]).to.equal(slide0);
-    expect(prepareCallback.getCall(1).args[1]).to.equal(1);
-  });
+    it('should start swiping with slide0', () => {
+      slides.currentIndex_ = 0;
+      slides.onSwipeStart_({});
+      expect(slides.swipeState_).to.not.equal(null);
+      expect(slides.swipeState_.currentIndex).to.equal(0);
+      expect(slides.swipeState_.containerWidth).to.equal(320);
+      expect(slides.swipeState_.prevTr).to.equal(tr.NOOP);
+      expect(slides.swipeState_.nextTr).to.not.equal(tr.NOOP);
+      expect(slides.swipeState_.prevIndex).to.equal(2);
+      expect(slides.swipeState_.nextIndex).to.equal(1);
+      expect(slides.swipeState_.min).to.equal(0);
+      expect(slides.swipeState_.max).to.equal(1);
+      expect(slides.swipeState_.pos).to.equal(0);
+      expect(prepareCallback.callCount).to.equal(1);
+      expect(prepareCallback.getCall(0).args[0]).to.equal(slide1);
+      expect(prepareCallback.getCall(0).args[1]).to.equal(1);
+    });
 
-  it('should start swiping with slide1', () => {
-    slides.currentIndex_ = 1;
-    slides.onSwipeStart_({});
-    expect(slides.swipeState_).to.not.equal(null);
-    expect(slides.swipeState_.currentIndex).to.equal(1);
-    expect(slides.swipeState_.containerWidth).to.equal(320);
-    expect(slides.swipeState_.prevTr).to.not.equal(tr.NOOP);
-    expect(slides.swipeState_.nextTr).to.not.equal(tr.NOOP);
-    expect(slides.swipeState_.min).to.equal(-1);
-    expect(slides.swipeState_.max).to.equal(1);
-    expect(slides.swipeState_.pos).to.equal(0);
-    expect(prepareCallback.callCount).to.equal(2);
-    expect(prepareCallback.getCall(0).args[0]).to.equal(slide0);
-    expect(prepareCallback.getCall(0).args[1]).to.equal(-1);
-    expect(prepareCallback.getCall(1).args[0]).to.equal(slide2);
-    expect(prepareCallback.getCall(1).args[1]).to.equal(1);
-  });
+    it('should allow negative value swipe when looping and on first item', () => {
+      slides.isLooping_ = true;
+      slides.currentIndex_ = 0;
+      slides.onSwipeStart_({});
+      expect(slides.swipeState_).to.not.equal(null);
+      expect(slides.swipeState_.currentIndex).to.equal(0);
+      expect(slides.swipeState_.containerWidth).to.equal(320);
+      expect(slides.swipeState_.prevTr).to.not.equal(tr.NOOP);
+      expect(slides.swipeState_.nextTr).to.not.equal(tr.NOOP);
+      expect(slides.swipeState_.min).to.equal(-1);
+      expect(slides.swipeState_.max).to.equal(1);
+      expect(slides.swipeState_.pos).to.equal(0);
+      expect(prepareCallback.callCount).to.equal(2);
+      expect(prepareCallback.getCall(0).args[0]).to.equal(slide2);
+      expect(prepareCallback.getCall(0).args[1]).to.equal(-1);
+      expect(prepareCallback.getCall(1).args[0]).to.equal(slide1);
+      expect(prepareCallback.getCall(1).args[1]).to.equal(1);
+    });
 
-  it('should start swiping with slide2', () => {
-    slides.currentIndex_ = 2;
-    slides.onSwipeStart_({});
-    expect(slides.swipeState_).to.not.equal(null);
-    expect(slides.swipeState_.currentIndex).to.equal(2);
-    expect(slides.swipeState_.containerWidth).to.equal(320);
-    expect(slides.swipeState_.prevTr).to.not.equal(tr.NOOP);
-    expect(slides.swipeState_.nextTr).to.equal(tr.NOOP);
-    expect(slides.swipeState_.min).to.equal(-1);
-    expect(slides.swipeState_.max).to.equal(0);
-    expect(slides.swipeState_.pos).to.equal(0);
-    expect(prepareCallback.callCount).to.equal(1);
-    expect(prepareCallback.getCall(0).args[0]).to.equal(slide1);
-    expect(prepareCallback.getCall(0).args[1]).to.equal(-1);
-  });
+    it('should allow positive value swipe when looping and on last item', () => {
+      slides.isLooping_ = true;
+      slides.currentIndex_ = 2;
+      slides.onSwipeStart_({});
+      expect(slides.swipeState_).to.not.equal(null);
+      expect(slides.swipeState_.currentIndex).to.equal(2);
+      expect(slides.swipeState_.containerWidth).to.equal(320);
+      expect(slides.swipeState_.prevTr).to.not.equal(tr.NOOP);
+      expect(slides.swipeState_.nextTr).to.not.equal(tr.NOOP);
+      expect(slides.swipeState_.min).to.equal(-1);
+      expect(slides.swipeState_.max).to.equal(1);
+      expect(slides.swipeState_.pos).to.equal(0);
+      expect(prepareCallback.callCount).to.equal(2);
+      expect(prepareCallback.getCall(0).args[0]).to.equal(slide1);
+      expect(prepareCallback.getCall(0).args[1]).to.equal(-1);
+      expect(prepareCallback.getCall(1).args[0]).to.equal(slide0);
+      expect(prepareCallback.getCall(1).args[1]).to.equal(1);
+    });
 
+    it('should start swiping with slide1', () => {
+      slides.currentIndex_ = 1;
+      slides.onSwipeStart_({});
+      expect(slides.swipeState_).to.not.equal(null);
+      expect(slides.swipeState_.currentIndex).to.equal(1);
+      expect(slides.swipeState_.containerWidth).to.equal(320);
+      expect(slides.swipeState_.prevTr).to.not.equal(tr.NOOP);
+      expect(slides.swipeState_.nextTr).to.not.equal(tr.NOOP);
+      expect(slides.swipeState_.min).to.equal(-1);
+      expect(slides.swipeState_.max).to.equal(1);
+      expect(slides.swipeState_.pos).to.equal(0);
+      expect(prepareCallback.callCount).to.equal(2);
+      expect(prepareCallback.getCall(0).args[0]).to.equal(slide0);
+      expect(prepareCallback.getCall(0).args[1]).to.equal(-1);
+      expect(prepareCallback.getCall(1).args[0]).to.equal(slide2);
+      expect(prepareCallback.getCall(1).args[1]).to.equal(1);
+    });
 
-  it('should update on swipe within range in neg direction', () => {
-    let prevTr = sinon.spy();
-    let nextTr = sinon.spy();
-    slides.currentIndex_ = 0;
-    slides.swipeState_ = {
-      currentIndex: 0,
-      prevIndex: 2,
-      nextIndex: 1,
-      containerWidth: 320,
-      pos: 0,
-      min: 0,
-      max: 1,
-      prevTr: prevTr,
-      nextTr: nextTr
-    };
-    slides.onSwipe_({deltaX: -32});
-    expect(slides.swipeState_.pos).to.equal(0.1);
-    expect(nextTr.callCount).to.equal(1);
-    expect(prevTr.callCount).to.equal(1);
-    expect(nextTr.getCall(0).args[0]).to.equal(0.1);
-    expect(prevTr.getCall(0).args[0]).to.equal(0);
-  });
+    it('should start swiping with slide0', () => {
+      slides.currentIndex_ = 0;
+      slides.onSwipeStart_({});
+      expect(slides.swipeState_).to.not.equal(null);
+      expect(slides.swipeState_.currentIndex).to.equal(0);
+      expect(slides.swipeState_.containerWidth).to.equal(320);
+      expect(slides.swipeState_.prevTr).to.equal(tr.NOOP);
+      expect(slides.swipeState_.nextTr).to.not.equal(tr.NOOP);
+      expect(slides.swipeState_.min).to.equal(0);
+      expect(slides.swipeState_.max).to.equal(1);
+      expect(slides.swipeState_.pos).to.equal(0);
+      expect(prepareCallback.callCount).to.equal(1);
+      expect(prepareCallback.getCall(0).args[0]).to.equal(slide1);
+      expect(prepareCallback.getCall(0).args[1]).to.equal(1);
+    });
 
-  it('should update on swipe within range in pos direction', () => {
-    let prevTr = sinon.spy();
-    let nextTr = sinon.spy();
-    slides.currentIndex_ = 1;
-    slides.swipeState_ = {
-      currentIndex: 1,
-      prevIndex: 2,
-      nextIndex: 1,
-      containerWidth: 320,
-      pos: 0,
-      min: -1,
-      max: 1,
-      prevTr: prevTr,
-      nextTr: nextTr
-    };
-    slides.onSwipe_({deltaX: 32});
-    expect(slides.swipeState_.pos).to.equal(-0.1);
-    expect(nextTr.callCount).to.equal(1);
-    expect(prevTr.callCount).to.equal(1);
-    expect(nextTr.getCall(0).args[0]).to.equal(0);
-    expect(prevTr.getCall(0).args[0]).to.equal(0.1);
-  });
+    it('should start swiping with slide1', () => {
+      slides.currentIndex_ = 1;
+      slides.onSwipeStart_({});
+      expect(slides.swipeState_).to.not.equal(null);
+      expect(slides.swipeState_.currentIndex).to.equal(1);
+      expect(slides.swipeState_.containerWidth).to.equal(320);
+      expect(slides.swipeState_.prevTr).to.not.equal(tr.NOOP);
+      expect(slides.swipeState_.nextTr).to.not.equal(tr.NOOP);
+      expect(slides.swipeState_.min).to.equal(-1);
+      expect(slides.swipeState_.max).to.equal(1);
+      expect(slides.swipeState_.pos).to.equal(0);
+      expect(prepareCallback.callCount).to.equal(2);
+      expect(prepareCallback.getCall(0).args[0]).to.equal(slide0);
+      expect(prepareCallback.getCall(0).args[1]).to.equal(-1);
+      expect(prepareCallback.getCall(1).args[0]).to.equal(slide2);
+      expect(prepareCallback.getCall(1).args[1]).to.equal(1);
+    });
 
-  it('should stay in-bounds on swipe', () => {
-    let prevTr = sinon.spy();
-    let nextTr = sinon.spy();
-    slides.currentIndex_ = 0;
-    slides.swipeState_ = {
-      currentIndex: 0,
-      prevIndex: 2,
-      nextIndex: 1,
-      containerWidth: 320,
-      pos: 0,
-      min: 0,
-      max: 1,
-      prevTr: prevTr,
-      nextTr: nextTr
-    };
-    slides.onSwipe_({deltaX: 32});
-    expect(slides.swipeState_.pos).to.equal(0);
-    expect(nextTr.callCount).to.equal(1);
-    expect(prevTr.callCount).to.equal(1);
-    expect(nextTr.getCall(0).args[0]).to.equal(0);
-    expect(prevTr.getCall(0).args[0]).to.equal(0);
-  });
+    it('should update on swipe within range in neg direction', () => {
+      let prevTr = sinon.spy();
+      let nextTr = sinon.spy();
+      slides.currentIndex_ = 0;
+      slides.swipeState_ = {
+        currentIndex: 0,
+        prevIndex: 2,
+        nextIndex: 1,
+        containerWidth: 320,
+        pos: 0,
+        min: 0,
+        max: 1,
+        prevTr: prevTr,
+        nextTr: nextTr
+      };
+      slides.onSwipe_({deltaX: -32});
+      expect(slides.swipeState_.pos).to.equal(0.1);
+      expect(nextTr.callCount).to.equal(1);
+      expect(prevTr.callCount).to.equal(1);
+      expect(nextTr.getCall(0).args[0]).to.equal(0.1);
+      expect(prevTr.getCall(0).args[0]).to.equal(0);
+    });
 
+    it('should update on swipe within range in pos direction', () => {
+      let prevTr = sinon.spy();
+      let nextTr = sinon.spy();
+      slides.currentIndex_ = 1;
+      slides.swipeState_ = {
+        currentIndex: 1,
+        prevIndex: 2,
+        nextIndex: 1,
+        containerWidth: 320,
+        pos: 0,
+        min: -1,
+        max: 1,
+        prevTr: prevTr,
+        nextTr: nextTr
+      };
+      slides.onSwipe_({deltaX: 32});
+      expect(slides.swipeState_.pos).to.equal(-0.1);
+      expect(nextTr.callCount).to.equal(1);
+      expect(prevTr.callCount).to.equal(1);
+      expect(nextTr.getCall(0).args[0]).to.equal(0);
+      expect(prevTr.getCall(0).args[0]).to.equal(0.1);
+    });
 
-  it.skip('should go next after threshold', () => {
-    let prevTr = sinon.spy();
-    let nextTr = sinon.spy();
-    slides.currentIndex_ = 0;
-    let s = {
-      currentIndex: 0,
-      prevIndex: 2,
-      nextIndex: 1,
-      containerWidth: 320,
-      pos: 0.55,
-      min: 0,
-      max: 1,
-      prevTr: prevTr,
-      nextTr: nextTr
-    };
-    slides.swipeState_ = s;
-    let promise = slides.onSwipeEnd_({velocityX: 0});
-    expect(slides.swipeState_).to.equal(null);
-    return promise.then(() => {
-      expect(nextTr.callCount).to.be.gt(1);
-      expect(prevTr.callCount).to.be.gt(1);
-      expect(nextTr.lastCall.args[0]).to.equal(1);
-      expect(prevTr.lastCall.args[0]).to.equal(0);
-      expect(switchCallback.callCount).to.equal(1);
-      expect(switchCallback.firstCall.args[0]).to.equal(slide0);
-      expect(switchCallback.firstCall.args[1]).to.equal(slide1);
+    it('should stay in-bounds on swipe', () => {
+      let prevTr = sinon.spy();
+      let nextTr = sinon.spy();
+      slides.currentIndex_ = 0;
+      slides.swipeState_ = {
+        currentIndex: 0,
+        prevIndex: 2,
+        nextIndex: 1,
+        containerWidth: 320,
+        pos: 0,
+        min: 0,
+        max: 1,
+        prevTr: prevTr,
+        nextTr: nextTr
+      };
+      slides.onSwipe_({deltaX: 32});
+      expect(slides.swipeState_.pos).to.equal(0);
+      expect(nextTr.callCount).to.equal(1);
+      expect(prevTr.callCount).to.equal(1);
+      expect(nextTr.getCall(0).args[0]).to.equal(0);
+      expect(prevTr.getCall(0).args[0]).to.equal(0);
+    });
+
+    it('should start swiping with slide2', () => {
+      slides.currentIndex_ = 2;
+      slides.onSwipeStart_({});
+      expect(slides.swipeState_).to.not.equal(null);
+      expect(slides.swipeState_.currentIndex).to.equal(2);
+      expect(slides.swipeState_.containerWidth).to.equal(320);
+      expect(slides.swipeState_.prevTr).to.not.equal(tr.NOOP);
+      expect(slides.swipeState_.nextTr).to.equal(tr.NOOP);
+      expect(slides.swipeState_.min).to.equal(-1);
+      expect(slides.swipeState_.max).to.equal(0);
+      expect(slides.swipeState_.pos).to.equal(0);
+      expect(prepareCallback.callCount).to.equal(1);
+      expect(prepareCallback.getCall(0).args[0]).to.equal(slide1);
+      expect(prepareCallback.getCall(0).args[1]).to.equal(-1);
+    });
+
+    it('should update on swipe within range in neg direction', () => {
+      let prevTr = sinon.spy();
+      let nextTr = sinon.spy();
+      slides.currentIndex_ = 0;
+      slides.swipeState_ = {
+        currentIndex: 0,
+        containerWidth: 320,
+        pos: 0,
+        min: 0,
+        max: 1,
+        prevTr: prevTr,
+        nextTr: nextTr
+      };
+      slides.onSwipe_({deltaX: -32});
+      expect(slides.swipeState_.pos).to.equal(0.1);
+      expect(nextTr.callCount).to.equal(1);
+      expect(prevTr.callCount).to.equal(1);
+      expect(nextTr.getCall(0).args[0]).to.equal(0.1);
+      expect(prevTr.getCall(0).args[0]).to.equal(0);
+    });
+
+    it('should update on swipe within range in pos direction', () => {
+      let prevTr = sinon.spy();
+      let nextTr = sinon.spy();
+      slides.currentIndex_ = 1;
+      slides.swipeState_ = {
+        currentIndex: 1,
+        containerWidth: 320,
+        pos: 0,
+        min: -1,
+        max: 1,
+        prevTr: prevTr,
+        nextTr: nextTr
+      };
+      slides.onSwipe_({deltaX: 32});
+      expect(slides.swipeState_.pos).to.equal(-0.1);
+      expect(nextTr.callCount).to.equal(1);
+      expect(prevTr.callCount).to.equal(1);
+      expect(nextTr.getCall(0).args[0]).to.equal(0);
+      expect(prevTr.getCall(0).args[0]).to.equal(0.1);
+    });
+
+    it('should go next after threshold', () => {
+      let prevTr = sinon.spy();
+      let nextTr = sinon.spy();
+      slides.currentIndex_ = 0;
+      let s = {
+        currentIndex: 0,
+        prevIndex: 2,
+        nextIndex: 1,
+        containerWidth: 320,
+        pos: 0.55,
+        min: 0,
+        max: 1,
+        prevTr: prevTr,
+        nextTr: nextTr
+      };
+      slides.swipeState_ = s;
+      let promise = slides.onSwipeEnd_({velocityX: 0});
+      expect(slides.swipeState_).to.equal(null);
+      return promise.then(() => {
+        expect(nextTr.callCount).to.be.gt(1);
+        expect(prevTr.callCount).to.be.gt(1);
+        expect(nextTr.lastCall.args[0]).to.equal(1);
+        expect(prevTr.lastCall.args[0]).to.equal(0);
+        expect(switchCallback.callCount).to.equal(1);
+        expect(switchCallback.firstCall.args[0]).to.equal(slide0);
+        expect(switchCallback.firstCall.args[1]).to.equal(slide1);
+      });
+    });
+
+    it('should stay in-bounds on swipe', () => {
+      let prevTr = sinon.spy();
+      let nextTr = sinon.spy();
+      slides.currentIndex_ = 0;
+      slides.swipeState_ = {
+        currentIndex: 0,
+        containerWidth: 320,
+        pos: 0,
+        min: 0,
+        max: 1,
+        prevTr: prevTr,
+        nextTr: nextTr
+      };
+      slides.onSwipe_({deltaX: 32});
+      expect(slides.swipeState_.pos).to.equal(0);
+      expect(nextTr.callCount).to.equal(1);
+      expect(prevTr.callCount).to.equal(1);
+      expect(nextTr.getCall(0).args[0]).to.equal(0);
+      expect(prevTr.getCall(0).args[0]).to.equal(0);
+    });
+
+    it('should not go past first item with a negative value when not ' +
+       ' looping', () => {
+      slides.isLooping_ = true;
+      let prevTr = sinon.spy();
+      let nextTr = sinon.spy();
+      slides.currentIndex_ = 0;
+      let s = {
+        currentIndex: 0,
+        prevIndex: 2,
+        nextIndex: 1,
+        containerWidth: 320,
+        pos: -0.6,
+        min: 0,
+        max: 0,
+        prevTr: prevTr,
+        nextTr: nextTr
+      };
+      slides.swipeState_ = s;
+      let promise = slides.onSwipeEnd_({velocityX: 0});
+      return promise.then(() => {
+        expect(slides.currentIndex_).to.equal(0);
+        expect(switchCallback.callCount).to.equal(0);
+      });
+    });
+
+    it('should go past first item with a negative value when looping', () => {
+      slides.isLooping_ = true;
+      let prevTr = sinon.spy();
+      let nextTr = sinon.spy();
+      slides.currentIndex_ = 0;
+      let s = {
+        currentIndex: 0,
+        prevIndex: 2,
+        nextIndex: 1,
+        containerWidth: 320,
+        pos: -0.6,
+        min: -1,
+        max: 1,
+        prevTr: prevTr,
+        nextTr: nextTr
+      };
+      slides.swipeState_ = s;
+      let promise = slides.onSwipeEnd_({velocityX: 0});
+      return promise.then(() => {
+        expect(slides.currentIndex_).to.equal(2);
+        expect(switchCallback.firstCall.args[0]).to.equal(slide0);
+        expect(switchCallback.firstCall.args[1]).to.equal(slide2);
+      });
+    });
+
+    it('should not go past last item with a positive value when ' +
+       'not looping', () => {
+      slides.isLooping_ = true;
+      let prevTr = sinon.spy();
+      let nextTr = sinon.spy();
+      slides.currentIndex_ = 2;
+      let s = {
+        currentIndex: 2,
+        prevIndex: 1,
+        nextIndex: 0,
+        containerWidth: 320,
+        pos: 0.6,
+        min: 0,
+        max: 0,
+        prevTr: prevTr,
+        nextTr: nextTr
+      };
+      slides.swipeState_ = s;
+      let promise = slides.onSwipeEnd_({velocityX: 0});
+      return promise.then(() => {
+        expect(slides.currentIndex_).to.equal(2);
+        expect(switchCallback.callCount).to.equal(0);
+      });
+    });
+
+    it('should go past last item with a positive value when looping', () => {
+      slides.isLooping_ = true;
+      let prevTr = sinon.spy();
+      let nextTr = sinon.spy();
+      slides.currentIndex_ = 2;
+      let s = {
+        currentIndex: 2,
+        prevIndex: 1,
+        nextIndex: 0,
+        containerWidth: 320,
+        pos: 0.6,
+        min: -1,
+        max: 1,
+        prevTr: prevTr,
+        nextTr: nextTr
+      };
+      slides.swipeState_ = s;
+      let promise = slides.onSwipeEnd_({velocityX: 0});
+      return promise.then(() => {
+        expect(slides.currentIndex_).to.equal(0);
+        expect(switchCallback.firstCall.args[0]).to.equal(slide2);
+        expect(switchCallback.firstCall.args[1]).to.equal(slide0);
+      });
+    });
+
+    it('should go next before threshold but with velocity', () => {
+      let prevTr = sinon.spy();
+      let nextTr = sinon.spy();
+      slides.currentIndex_ = 0;
+      let s = {
+        currentIndex: 0,
+        prevIndex: 2,
+        nextIndex: 1,
+        containerWidth: 320,
+        pos: 0.45,
+        min: 0,
+        max: 1,
+        prevTr: prevTr,
+        nextTr: nextTr
+      };
+      slides.swipeState_ = s;
+      let promise = slides.onSwipeEnd_({velocityX: -0.5});
+      expect(slides.swipeState_).to.equal(null);
+      return promise.then(() => {
+        expect(nextTr.callCount).to.be.gt(1);
+        expect(prevTr.callCount).to.be.gt(1);
+        expect(nextTr.lastCall.args[0]).to.equal(1);
+        expect(prevTr.lastCall.args[0]).to.equal(0);
+        expect(switchCallback.callCount).to.equal(1);
+        expect(switchCallback.firstCall.args[0]).to.equal(slide0);
+        expect(switchCallback.firstCall.args[1]).to.equal(slide1);
+      });
+    });
+
+    it('should go next before threshold but with velocity', () => {
+      let prevTr = sinon.spy();
+      let nextTr = sinon.spy();
+      slides.currentIndex_ = 0;
+      let s = {
+        currentIndex: 0,
+        containerWidth: 320,
+        pos: 0.45,
+        min: 0,
+        max: 1,
+        prevTr: prevTr,
+        nextTr: nextTr
+      };
+      slides.swipeState_ = s;
+      let promise = slides.onSwipeEnd_({velocityX: -0.5});
+      expect(slides.swipeState_).to.equal(null);
+      return promise.then(() => {
+        expect(nextTr.callCount).to.be.gt(1);
+        expect(prevTr.callCount).to.be.gt(1);
+        expect(nextTr.lastCall.args[0]).to.equal(1);
+        expect(prevTr.lastCall.args[0]).to.equal(0);
+        expect(switchCallback.callCount).to.equal(1);
+        expect(switchCallback.firstCall.args[0]).to.equal(slide0);
+        expect(switchCallback.firstCall.args[1]).to.equal(slide1);
+      });
+    });
+
+    it('should bounce back before threshold and no velocity', () => {
+      let prevTr = sinon.spy();
+      let nextTr = sinon.spy();
+      slides.currentIndex_ = 0;
+      let s = {
+        currentIndex: 0,
+        containerWidth: 320,
+        pos: 0.45,
+        min: 0,
+        max: 1,
+        prevTr: prevTr,
+        nextTr: nextTr
+      };
+      slides.swipeState_ = s;
+      let promise = slides.onSwipeEnd_({velocityX: 0});
+      expect(slides.swipeState_).to.equal(null);
+      return promise.then(() => {
+        expect(nextTr.callCount).to.be.gt(1);
+        expect(prevTr.callCount).to.be.gt(1);
+        expect(nextTr.lastCall.args[0]).to.equal(0);
+        expect(prevTr.lastCall.args[0]).to.equal(0);
+        expect(switchCallback.callCount).to.equal(0);
+      });
+    });
+
+    it('should bounce back before threshold and no velocity', () => {
+      let prevTr = sinon.spy();
+      let nextTr = sinon.spy();
+      slides.currentIndex_ = 0;
+      let s = {
+        currentIndex: 0,
+        prevIndex: 2,
+        nextIndex: 1,
+        containerWidth: 320,
+        pos: 0.45,
+        min: 0,
+        max: 1,
+        prevTr: prevTr,
+        nextTr: nextTr
+      };
+      slides.swipeState_ = s;
+      let promise = slides.onSwipeEnd_({velocityX: 0});
+      expect(slides.swipeState_).to.equal(null);
+      return promise.then(() => {
+        expect(nextTr.callCount).to.be.gt(1);
+        expect(prevTr.callCount).to.be.gt(1);
+        expect(nextTr.lastCall.args[0]).to.equal(0);
+        expect(prevTr.lastCall.args[0]).to.equal(0);
+        expect(switchCallback.callCount).to.equal(0);
+      });
+    });
+
+    it('should bounce back before threshold and opposite velocity', () => {
+      let prevTr = sinon.spy();
+      let nextTr = sinon.spy();
+      slides.currentIndex_ = 0;
+      let s = {
+        currentIndex: 0,
+        prevIndex: 2,
+        nextIndex: 1,
+        containerWidth: 320,
+        pos: 0.45,
+        min: 0,
+        max: 1,
+        prevTr: prevTr,
+        nextTr: nextTr
+      };
+      slides.swipeState_ = s;
+      let promise = slides.onSwipeEnd_({velocityX: 0.5});
+      expect(slides.swipeState_).to.equal(null);
+      return promise.then(() => {
+        expect(nextTr.callCount).to.be.gt(1);
+        expect(prevTr.callCount).to.be.gt(1);
+        expect(nextTr.lastCall.args[0]).to.equal(0);
+        expect(prevTr.lastCall.args[0]).to.equal(0);
+        expect(switchCallback.callCount).to.equal(0);
+      });
+    });
+
+    it('should bounce back before threshold and opposite velocity', () => {
+      let prevTr = sinon.spy();
+      let nextTr = sinon.spy();
+      slides.currentIndex_ = 0;
+      let s = {
+        currentIndex: 0,
+        containerWidth: 320,
+        pos: 0.45,
+        min: 0,
+        max: 1,
+        prevTr: prevTr,
+        nextTr: nextTr
+      };
+      slides.swipeState_ = s;
+      let promise = slides.onSwipeEnd_({velocityX: 0.5});
+      expect(slides.swipeState_).to.equal(null);
+      return promise.then(() => {
+        expect(nextTr.callCount).to.be.gt(1);
+        expect(prevTr.callCount).to.be.gt(1);
+        expect(nextTr.lastCall.args[0]).to.equal(0);
+        expect(prevTr.lastCall.args[0]).to.equal(0);
+        expect(switchCallback.callCount).to.equal(0);
+      });
     });
   });
 
-  it('should not go past first item with a negative value when not ' +
-     ' looping', () => {
-    slides.isLooping_ = true;
-    let prevTr = sinon.spy();
-    let nextTr = sinon.spy();
-    slides.currentIndex_ = 0;
-    let s = {
-      currentIndex: 0,
-      prevIndex: 2,
-      nextIndex: 1,
-      containerWidth: 320,
-      pos: -0.6,
-      min: 0,
-      max: 0,
-      prevTr: prevTr,
-      nextTr: nextTr
-    };
-    slides.swipeState_ = s;
-    let promise = slides.onSwipeEnd_({velocityX: 0});
-    return promise.then(() => {
-      expect(slides.currentIndex_).to.equal(0);
-      expect(switchCallback.callCount).to.equal(0);
-    });
-  });
+  describe('Slides autoplay', () => {
+    let tryAutoplaySpy;
+    let setupAutoplaySpy;
+    let goSpy;
+    let items;
 
-  it('should go past first item with a negative value when looping', () => {
-    slides.isLooping_ = true;
-    let prevTr = sinon.spy();
-    let nextTr = sinon.spy();
-    slides.currentIndex_ = 0;
-    let s = {
-      currentIndex: 0,
-      prevIndex: 2,
-      nextIndex: 1,
-      containerWidth: 320,
-      pos: -0.6,
-      min: -1,
-      max: 1,
-      prevTr: prevTr,
-      nextTr: nextTr
-    };
-    slides.swipeState_ = s;
-    let promise = slides.onSwipeEnd_({velocityX: 0});
-    return promise.then(() => {
-      expect(slides.currentIndex_).to.equal(2);
-      expect(switchCallback.firstCall.args[0]).to.equal(slide0);
-      expect(switchCallback.firstCall.args[1]).to.equal(slide2);
-    });
-  });
+    function autoplaySetup(delay = '') {
+      sandbox = sinon.sandbox.create();
+      clock = sandbox.useFakeTimers();
+      setupElements();
+      element.setAttribute('autoplay', delay);
+      element.removeAttribute('loop');
+      setupAutoplaySpy = sinon.spy(AmpSlides.prototype, 'setupAutoplay_');
+      tryAutoplaySpy = sinon.spy(AmpSlides.prototype, 'tryAutoplay_');
+      goSpy = sinon.spy(AmpSlides.prototype, 'go');
+      setupSlides();
+      setupSpies();
+      items = [slide0, slide1, slide2];
+    }
 
-  it('should not go past last item with a positive value when ' +
-     'not looping', () => {
-    slides.isLooping_ = true;
-    let prevTr = sinon.spy();
-    let nextTr = sinon.spy();
-    slides.currentIndex_ = 2;
-    let s = {
-      currentIndex: 2,
-      prevIndex: 1,
-      nextIndex: 0,
-      containerWidth: 320,
-      pos: 0.6,
-      min: 0,
-      max: 0,
-      prevTr: prevTr,
-      nextTr: nextTr
-    };
-    slides.swipeState_ = s;
-    let promise = slides.onSwipeEnd_({velocityX: 0});
-    return promise.then(() => {
-      expect(slides.currentIndex_).to.equal(2);
-      expect(switchCallback.callCount).to.equal(0);
-    });
-  });
 
-  it('should go past last item with a positive value when looping', () => {
-    slides.isLooping_ = true;
-    let prevTr = sinon.spy();
-    let nextTr = sinon.spy();
-    slides.currentIndex_ = 2;
-    let s = {
-      currentIndex: 2,
-      prevIndex: 1,
-      nextIndex: 0,
-      containerWidth: 320,
-      pos: 0.6,
-      min: -1,
-      max: 1,
-      prevTr: prevTr,
-      nextTr: nextTr
-    };
-    slides.swipeState_ = s;
-    let promise = slides.onSwipeEnd_({velocityX: 0});
-    return promise.then(() => {
-      expect(slides.currentIndex_).to.equal(0);
-      expect(switchCallback.firstCall.args[0]).to.equal(slide2);
-      expect(switchCallback.firstCall.args[1]).to.equal(slide0);
+    afterEach(() => {
+      teardownElements();
+      clock.restore();
+      clock = null;
+      sandbox.restore();
+      sandbox = null;
+      setupAutoplaySpy.restore();
+      tryAutoplaySpy.restore();
+      goSpy.restore();
+      items = null;
     });
-  });
 
-  it('should go next before threshold but with velocity', () => {
-    let prevTr = sinon.spy();
-    let nextTr = sinon.spy();
-    slides.currentIndex_ = 0;
-    let s = {
-      currentIndex: 0,
-      prevIndex: 2,
-      nextIndex: 1,
-      containerWidth: 320,
-      pos: 0.45,
-      min: 0,
-      max: 1,
-      prevTr: prevTr,
-      nextTr: nextTr
-    };
-    slides.swipeState_ = s;
-    let promise = slides.onSwipeEnd_({velocityX: -0.5});
-    expect(slides.swipeState_).to.equal(null);
-    return promise.then(() => {
-      expect(nextTr.callCount).to.be.gt(1);
-      expect(prevTr.callCount).to.be.gt(1);
-      expect(nextTr.lastCall.args[0]).to.equal(1);
-      expect(prevTr.lastCall.args[0]).to.equal(0);
-      expect(switchCallback.callCount).to.equal(1);
-      expect(switchCallback.firstCall.args[0]).to.equal(slide0);
-      expect(switchCallback.firstCall.args[1]).to.equal(slide1);
+    it('should call setupAutoplay_', () => {
+      autoplaySetup();
+      expect(setupAutoplaySpy.callCount).to.equal(1);
     });
-  });
 
-  it('should bounce back before threshold and no velocity', () => {
-    let prevTr = sinon.spy();
-    let nextTr = sinon.spy();
-    slides.currentIndex_ = 0;
-    let s = {
-      currentIndex: 0,
-      prevIndex: 2,
-      nextIndex: 1,
-      containerWidth: 320,
-      pos: 0.45,
-      min: 0,
-      max: 1,
-      prevTr: prevTr,
-      nextTr: nextTr
-    };
-    slides.swipeState_ = s;
-    let promise = slides.onSwipeEnd_({velocityX: 0});
-    expect(slides.swipeState_).to.equal(null);
-    return promise.then(() => {
-      expect(nextTr.callCount).to.be.gt(1);
-      expect(prevTr.callCount).to.be.gt(1);
-      expect(nextTr.lastCall.args[0]).to.equal(0);
-      expect(prevTr.lastCall.args[0]).to.equal(0);
-      expect(switchCallback.callCount).to.equal(0);
+    it('should add `loop` attribute', () => {
+      autoplaySetup();
+      expect(element.hasAttribute('loop')).to.be.true;
     });
-  });
 
-  it('should bounce back before threshold and opposite velocity', () => {
-    let prevTr = sinon.spy();
-    let nextTr = sinon.spy();
-    slides.currentIndex_ = 0;
-    let s = {
-      currentIndex: 0,
-      prevIndex: 2,
-      nextIndex: 1,
-      containerWidth: 320,
-      pos: 0.45,
-      min: 0,
-      max: 1,
-      prevTr: prevTr,
-      nextTr: nextTr
-    };
-    slides.swipeState_ = s;
-    let promise = slides.onSwipeEnd_({velocityX: 0.5});
-    expect(slides.swipeState_).to.equal(null);
-    return promise.then(() => {
-      expect(nextTr.callCount).to.be.gt(1);
-      expect(prevTr.callCount).to.be.gt(1);
-      expect(nextTr.lastCall.args[0]).to.equal(0);
-      expect(prevTr.lastCall.args[0]).to.equal(0);
-      expect(switchCallback.callCount).to.equal(0);
+    it('should call tryAutoplay_ after a microtask', () => {
+      autoplaySetup();
+      expect(tryAutoplaySpy.callCount).to.equal(0);
+
+      return timer.promise(0).then(() => {
+        expect(tryAutoplaySpy.callCount).to.equal(1);
+      });
+    });
+
+    it('should call `go` after 5000ms(default)', () => {
+      autoplaySetup();
+      expect(tryAutoplaySpy.callCount).to.equal(0);
+      expect(goSpy.callCount).to.equal(0);
+
+      return timer.promise(0).then(() => {
+        expect(tryAutoplaySpy.callCount).to.equal(1);
+        expect(goSpy.callCount).to.equal(0);
+
+        clock.tick(5000);
+        expect(tryAutoplaySpy.callCount).to.equal(2);
+        expect(goSpy.callCount).to.equal(1);
+      });
+    });
+
+    it('should call `go` after 2000ms (set by user)', () => {
+      autoplaySetup(2000);
+      expect(tryAutoplaySpy.callCount).to.equal(0);
+      expect(goSpy.callCount).to.equal(0);
+
+      return timer.promise(0).then(() => {
+        expect(tryAutoplaySpy.callCount).to.equal(1);
+        expect(goSpy.callCount).to.equal(0);
+
+        clock.tick(2000);
+        expect(tryAutoplaySpy.callCount).to.equal(2);
+        expect(goSpy.callCount).to.equal(1);
+      });
     });
   });
 });

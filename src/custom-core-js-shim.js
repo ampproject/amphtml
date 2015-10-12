@@ -48,7 +48,7 @@ require('core-js/modules/es6.object.keys');
 //require('core-js/modules/es6.number.epsilon');
 //require('core-js/modules/es6.number.is-finite');
 //require('core-js/modules/es6.number.is-integer');
-//require('core-js/modules/es6.number.is-nan');
+require('core-js/modules/es6.number.is-nan');
 //require('core-js/modules/es6.number.is-safe-integer');
 //require('core-js/modules/es6.number.max-safe-integer');
 //require('core-js/modules/es6.number.min-safe-integer');
