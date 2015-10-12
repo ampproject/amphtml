@@ -28,10 +28,10 @@ Displays an iframe.
 Example:
 ```html
 <amp-iframe width=300 height=300
-  sandbox="allow-scripts"
-  layout="responsive"
-  frameborder="0"
-  src="https://foo.com/iframe">
+    sandbox="allow-scripts"
+    layout="responsive"
+    frameborder="0"
+    src="https://foo.com/iframe">
 </amp-iframe>
 ```
 

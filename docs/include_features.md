@@ -30,10 +30,10 @@ An example `amp-iframe` from the
 
 ```html
 <amp-iframe width=300 height=300
-  sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
-  layout="responsive"
-  frameborder="0"
-  src="https://www.google.com/maps/embed/v1/place?key=AIzaSyDG9YXIhKBhqclZizcSzJ0ROiE0qgVfwzI&q=Alameda,%20CA">
+    sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
+    layout="responsive"
+    frameborder="0"
+    src="https://www.google.com/maps/embed/v1/place?key=AIzaSyDG9YXIhKBhqclZizcSzJ0ROiE0qgVfwzI&q=Alameda,%20CA">
 </amp-iframe>
 ```
 
@@ -123,8 +123,8 @@ Example `amp-twitter` from the
 [twitter.amp example](../examples/twitter.amp.html):
 ```html
 <amp-twitter width=390 height=50
-  layout="responsive"
-  data-tweetid="638793490521001985">
+    layout="responsive"
+    data-tweetid="638793490521001985">
 </amp-twitter>
 ```
 
@@ -188,9 +188,9 @@ Z1q71gFeRqM is the video id.
 Use `layout="responsive"` to yield correct layouts for 16:9 aspect ratio videos:
 ```html
 <amp-youtube
-  video-id="mGENRKrdoGY"
-  layout="responsive"
-  width="480" height="270">
+    video-id="mGENRKrdoGY"
+    layout="responsive"
+    width="480" height="270">
 </amp-youtube>
 ```
 ## Include an audio resource
@@ -266,10 +266,10 @@ The `type` identifies the ad network's template.
 Different ad types require different `data-*` attributes.
 ```html
 <amp-ad width=300 height=250
-  type="a9"
-  data-aax_size="300x250"
-  data-aax_pubname="test123"
-  data-aax_src="302">
+    type="a9"
+    data-aax_size="300x250"
+    data-aax_pubname="test123"
+    data-aax_src="302">
 </amp-ad>
 ```
 If supported by the ad network,
@@ -277,10 +277,10 @@ include a `placeholder`
 to be shown if no ad is available:
 ```html
 <amp-ad width=300 height=250
-  type="a9"
-  data-aax_size="300x250"
-  data-aax_pubname="test123"
-  data-aax_src="302">
+    type="a9"
+    data-aax_size="300x250"
+    data-aax_pubname="test123"
+    data-aax_src="302">
   <div placeholder>Have a great day!</div>
 </amp-ad>
 ```

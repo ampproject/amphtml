@@ -20,9 +20,9 @@ limitations under the License.
 
 ```html
 <amp-ad width=300 height=200
-	type="adsense"
-	data-ad-client="ca-pub-8125901705757971"
-	data-ad-slot="7783467241">
+    type="adsense"
+    data-ad-client="ca-pub-8125901705757971"
+    data-ad-slot="7783467241">
 </amp-ad>
 ```
 

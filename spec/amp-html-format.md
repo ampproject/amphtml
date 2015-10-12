@@ -290,15 +290,15 @@ Example: Here we have 2 images with mutually exclusive media queries. Depending 
 
 ```html
 <amp-img
-  media="(min-width: 650px)"
-  src="wide.jpg"
-  width=466
-  height=355 layout="responsive" ></amp-img>
+    media="(min-width: 650px)"
+    src="wide.jpg"
+    width=466
+    height=355 layout="responsive" ></amp-img>
 <amp-img
-  media="(max-width: 649px)"
-  src="narrow.jpg"
-  width=527
-  height=193 layout="responsive" ></amp-img>
+    media="(max-width: 649px)"
+    src="narrow.jpg"
+    width=527
+    height=193 layout="responsive" ></amp-img>
 ```
 
 ### `on`

@@ -25,10 +25,10 @@ viewport, until it is closed again by the user.
 The typical scenario looks like this:
 ```html
 <amp-img
-  on="tap:lightbox1"
-  role="button"
-  tabindex="0"
-  src="image1" width=200 height=100></amp-img>
+    on="tap:lightbox1"
+    role="button"
+    tabindex="0"
+    src="image1" width=200 height=100></amp-img>
 <amp-image-lightbox id="lightbox1" layout="nodisplay"></amp-image-lightbox>
 ```
 

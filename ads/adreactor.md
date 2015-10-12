@@ -20,10 +20,10 @@ limitations under the License.
 
 ```html
 <amp-ad width=728 height=90
-  type="adreactor"
-  data-pid=790
-  data-zid=9
-  data-custom3="No Type">
+    type="adreactor"
+    data-pid=790
+    data-zid=9
+    data-custom3="No Type">
 </amp-ad>
 ```
 
