@@ -26,14 +26,14 @@ One or more elements within the lightbox can be optionally given a `close` attri
 
 For example:
 ```html
-    <button on="tap:my-lightbox">Open lightbox</button>
+<button on="tap:my-lightbox">Open lightbox</button>
 
-    <amp-lightbox id="my-lightbox" layout="nodisplay">
-      <div class="lightbox">
-        <amp-img src="my-full-image.jpg" width=300 height=800>
-        <div close>Close</div>
-      </div>
-    </amp-lightbox>
+<amp-lightbox id="my-lightbox" layout="nodisplay">
+  <div class="lightbox">
+    <amp-img src="my-full-image.jpg" width=300 height=800>
+    <div close>Close</div>
+  </div>
+</amp-lightbox>
 ```
 
 #### Styling

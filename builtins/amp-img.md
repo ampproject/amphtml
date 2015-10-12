@@ -55,7 +55,7 @@ A string that indicates the attribution of the image. E.g. `attribution=“CC co
 `amp-img` can be styled directly via CSS properties. Setting a grey background
 placeholder for example could be achieved via:
 ```css
-    amp-img {
-      background-color: grey;
-    }
+amp-img {
+  background-color: grey;
+}
 ```

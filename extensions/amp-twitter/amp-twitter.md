@@ -20,10 +20,10 @@ Displays a Twitter Tweet.
 
 Example:
 ```html
-    <amp-twitter width=486 height=657
-        layout="responsive"
-        data-tweetid="585110598171631616"
-        data-cards="hidden">
+<amp-twitter width=486 height=657
+  layout="responsive"
+  data-tweetid="585110598171631616"
+  data-cards="hidden">
 ```
 
 **CAVEATS**

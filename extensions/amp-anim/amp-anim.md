@@ -24,10 +24,10 @@ The `amp-anim` component is very similar to the `amp-image` element, and provide
 
 The `amp-anim` component can also have an optional placeholder child, to display while the `src` file is loading. The placeholder is specified via the `placeholder` attribute:
 ```html
-    <amp-anim width=400 height=300 src=”my-gif.gif”>
-      <amp-img placeholder width=400 height=300 src=”my-gif-screencap.jpg”>
-      </amp-img>
-    </amp-anim>
+<amp-anim width=400 height=300 src=”my-gif.gif”>
+  <amp-img placeholder width=400 height=300 src=”my-gif-screencap.jpg”>
+  </amp-img>
+</amp-anim>
 ```
 #### Attributes
 
@@ -55,7 +55,7 @@ A string that indicates the attribution of the image. E.g. `attribution=“CC co
 `amp-img` can be styled directly via CSS properties. Setting a grey background
 placeholder for example could be achieved via:
 ```css
-    amp-anim {
-      background-color: grey;
-    }
+amp-anim {
+  background-color: grey;
+}
 ```
