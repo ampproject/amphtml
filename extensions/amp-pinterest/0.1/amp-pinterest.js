@@ -40,21 +40,21 @@
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
 
+// valid parameters for iframed widgets
 const VALID_PARAMS = [
-    'data-config',
+    'data-lang',
     'data-height',
     'data-width',
-    'data-shape',
-    'data-color',
-    'data-lang',
     'data-scale-width',
     'data-scale-height',
     'data-board-width' ];
 
+// parameters for pop-up windows
 const POP = 'status=no,resizable=yes,scrollbars=yes,' +
   'personalbar=no,directories=no,location=no,toolbar=no,' +
   'menubar=no,width=900,height=500,left=0,top=0';
 
+// characters to be used in the creation of guids
 const BASE60 = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ_abcdefghijkmnopqrstuvwxyz';
 
 class AmpPinterest extends AMP.BaseElement {
@@ -176,236 +176,371 @@ class AmpPinterest extends AMP.BaseElement {
     // save our outside context so we can return properly after rendering
     let that = this;
 
-    // pinDo is set by data-do
-    switch (pinDo) {
+    // catch-all iframe for widgets that don't render inline yet
+    // requires pinUrl
+    let makeIframe = function () {
 
-      case 'embedPin':
+      // we know we always have an act and a src
+      let src = 'https://assets.pinterest.com/ext/iffy.html?' +
+          'act=' + encodeURIComponent(pinDo) +
+          '&url=' + encodeURIComponent(pinUrl);
 
-        let pinId = '';
-        try {
-          pinId = pinUrl.split('/pin/')[1].split('/')[0];
-        } catch (err) {
-          // fail silently
-          return;
-        }
-
-        let width = this.element.getAttribute('data-width');
-
-        let structure = make({'span':{}});
-
-        let renderPin = function (r) {
-
-          if (r && r.data && r.data[0] && !r.data[0].error) {
-            let p = r.data[0];
-
-            // start setting our class name
-            let className = '-amp-pinterest-embed-pin';
-            let imgUrl = p.images['237x'].url;
-
-            // large widgets may come later
-            if (width === 'medium' || width === 'large') {
-              className = className + '-medium';
-              imgUrl = imgUrl.replace(/237/, '345');
-              log('&type=pidget&pin_count_medium=1');
-            } else {
-              log('&type=pidget&pin_count=1');
-            }
-
-            structure.className = className;
-
-            let container = make({'span':{
-              'className': '-amp-pinterest-embed-pin-inner',
-              'data-pin-log': 'embed_pin'
-            }});
-
-            let img = make({'img':{
-              'src': imgUrl,
-              'className': '-amp-pinterest-embed-pin-image',
-              'data-pin-no-hover': true,
-              'data-pin-href': 'https://www.pinterest.com/pin/' + p.id + '/',
-              'data-pin-log': 'embed_pin_img'
-            }});
-            container.appendChild(img);
-
-            // repin button
-            let repin = make({'span': {
-              'className': '-amp-pinterest-rect -amp-pinterest-en-red' +
-                ' -amp-pinterest-embed-pin-repin',
-              'data-pin-log': 'embed_pin_repin',
-              'data-pin-pop': '1',
-              'data-pin-href': 'https://www.pinterest.com/pin/' + p.id +
-                '/repin/x/?amp=1&guid=' + guid
-            }});
-            container.appendChild(repin);
-
-            // text container
-            let text = make({'span': {
-              'className': '-amp-pinterest-embed-pin-text'
-            }});
-
-            // description
-            if (p.description) {
-              let description = make({'span':{
-                'className': '-amp-pinterest-embed-pin-text-block ' +
-                  '-amp-pinterest-embed-pin-description',
-                'textContent': filter(p.description)
-              }});
-              text.appendChild(description);
-            }
-
-            // attribution
-            if (p.attribution) {
-              let attribution = make({'span':{
-                'className': '-amp-pinterest-embed-pin-text-block' +
-                  ' -amp-pinterest-embed-pin-attribution'
-              }});
-              attribution.appendChild(make({'img':{
-                'className': '-amp-pinterest-embed-pin-text-icon-attrib',
-                'src': p.attribution.provider_icon_url
-              }}));
-              attribution.appendChild(make({'span':{
-                'textContent': ' by '
-              }}));
-              attribution.appendChild(make({'span':{
-                'data-pin-href': p.attribution.url,
-                'textContent': filter(p.attribution.author_name)
-              }}));
-              text.appendChild(attribution);
-            }
-
-            // likes and repins
-            if (p.repin_count || p.like_count) {
-              let stats = make({'span':{
-                'className': '-amp-pinterest-embed-pin-text-block' +
-                  ' -amp-pinterest-embed-pin-stats'
-              }});
-              if (p.repin_count) {
-                let repinCount = make({'span': {
-                  'className': '-amp-pinterest-embed-pin-stats-repins',
-                  'textContent': String(p.repin_count)
-                }});
-                stats.appendChild(repinCount);
-              }
-
-              if (p.like_count) {
-                let likeCount = make({'span': {
-                  'className': '-amp-pinterest-embed-pin-stats-likes',
-                  'textContent': String(p.like_count)
-                }});
-                stats.appendChild(likeCount);
-              }
-              text.appendChild(stats);
-            }
-
-            // pinner
-            if (p.pinner) {
-
-              let pinner = make({'span':{
-                'className': '-amp-pinterest-embed-pin-text-block' +
-                  ' -amp-pinterest-embed-pin-pinner'
-              }});
-
-              // avatar
-              pinner.appendChild(make({'img':{
-                'className': '-amp-pinterest-embed-pin-pinner-avatar',
-                'alt': filter(p.pinner.full_name),
-                'title': filter(p.pinner.full_name),
-                'src': p.pinner.image_small_url,
-                'data-pin-href': p.pinner.profile_url
-              }}));
-
-              // name
-              pinner.appendChild(make({'span': {
-                'className': '-amp-pinterest-embed-pin-pinner-name',
-                'textContent': filter(p.pinner.full_name),
-                'data-pin-href': p.pinner.profile_url
-              }}));
-
-              // board
-              pinner.appendChild(make({'span': {
-                'className': '-amp-pinterest-embed-pin-board-name',
-                'textContent': filter(p.board.name),
-                'data-pin-href': 'https://www.pinterest.com/' + p.board.url
-              }}));
-
-              text.appendChild(pinner);
-            }
-
-            container.appendChild(text);
-            structure.appendChild(container);
-
-            // listen for clicks
-            structure.addEventListener('click', function (e) {
-              let el = e.target;
-              let logMe = el.getAttribute('data-pin-log');
-              if (logMe) {
-                log('&type=' + logMe);
-              }
-              let href = el.getAttribute('data-pin-href');
-              if (href) {
-                let popThis = el.getAttribute('data-pin-pop') || false;
-                pop(href, popThis);
-              }
-              e.preventDefault();
-            });
-
-            // fill it
-            that.applyFillContent(structure);
-            // append it
-            that.element.appendChild(structure);
-            // done
-            return loadPromise(structure);
-
+      // we may have other valid attributes
+      for (let i = 0; i < VALID_PARAMS.length; i = i + 1) {
+          let v = that.element.getAttribute(VALID_PARAMS[i]);
+          if (v) {
+              // remove data- prefix from params
+              src = src + '&' + VALID_PARAMS[i].replace(/data-/, '') +
+                '=' + encodeURIComponent(v);
           }
+      }
+
+      // make the iframe
+      let iframe = make({'iframe':{
+        'frameborder': '0',
+        'allowtransparency': 'true',
+        'width': width,
+        'height': height,
+        'src': src
+      }});
+
+      that.applyFillContent(iframe);
+      that.element.appendChild(iframe);
+      return loadPromise(iframe);
+    };
+
+
+    let makePin = function () {
+
+      // make an embedded pin widget
+      // pinId will be inferred from pinUrl
+
+      let pinId = '';
+      try {
+        pinId = pinUrl.split('/pin/')[1].split('/')[0];
+      } catch (err) {
+        // fail silently
+        return;
+      }
+
+      let width = that.element.getAttribute('data-width');
+
+      let structure = make({'span':{}});
+
+      let renderPin = function (r) {
+
+        if (r && r.data && r.data[0] && !r.data[0].error) {
+          let p = r.data[0];
+
+          // start setting our class name
+          let className = '-amp-pinterest-embed-pin';
+          let imgUrl = p.images['237x'].url;
+
+          // large widgets may come later
+          if (width === 'medium' || width === 'large') {
+            className = className + '-medium';
+            imgUrl = imgUrl.replace(/237/, '345');
+            log('&type=pidget&pin_count_medium=1');
+          } else {
+            log('&type=pidget&pin_count=1');
+          }
+
+          structure.className = className;
+
+          let container = make({'span':{
+            'className': '-amp-pinterest-embed-pin-inner',
+            'data-pin-log': 'embed_pin'
+          }});
+
+          let img = make({'img':{
+            'src': imgUrl,
+            'className': '-amp-pinterest-embed-pin-image',
+            'data-pin-no-hover': true,
+            'data-pin-href': 'https://www.pinterest.com/pin/' + p.id + '/',
+            'data-pin-log': 'embed_pin_img'
+          }});
+          container.appendChild(img);
+
+          // repin button
+          let repin = make({'span': {
+            'className': '-amp-pinterest-rect -amp-pinterest-en-red' +
+              ' -amp-pinterest-embed-pin-repin',
+            'data-pin-log': 'embed_pin_repin',
+            'data-pin-pop': '1',
+            'data-pin-href': 'https://www.pinterest.com/pin/' + p.id +
+              '/repin/x/?amp=1&guid=' + guid
+          }});
+          container.appendChild(repin);
+
+          // text container
+          let text = make({'span': {
+            'className': '-amp-pinterest-embed-pin-text'
+          }});
+
+          // description
+          if (p.description) {
+            let description = make({'span':{
+              'className': '-amp-pinterest-embed-pin-text-block ' +
+                '-amp-pinterest-embed-pin-description',
+              'textContent': filter(p.description)
+            }});
+            text.appendChild(description);
+          }
+
+          // attribution
+          if (p.attribution) {
+            let attribution = make({'span':{
+              'className': '-amp-pinterest-embed-pin-text-block' +
+                ' -amp-pinterest-embed-pin-attribution'
+            }});
+            attribution.appendChild(make({'img':{
+              'className': '-amp-pinterest-embed-pin-text-icon-attrib',
+              'src': p.attribution.provider_icon_url
+            }}));
+            attribution.appendChild(make({'span':{
+              'textContent': ' by '
+            }}));
+            attribution.appendChild(make({'span':{
+              'data-pin-href': p.attribution.url,
+              'textContent': filter(p.attribution.author_name)
+            }}));
+            text.appendChild(attribution);
+          }
+
+          // likes and repins
+          if (p.repin_count || p.like_count) {
+            let stats = make({'span':{
+              'className': '-amp-pinterest-embed-pin-text-block' +
+                ' -amp-pinterest-embed-pin-stats'
+            }});
+            if (p.repin_count) {
+              let repinCount = make({'span': {
+                'className': '-amp-pinterest-embed-pin-stats-repins',
+                'textContent': String(p.repin_count)
+              }});
+              stats.appendChild(repinCount);
+            }
+
+            if (p.like_count) {
+              let likeCount = make({'span': {
+                'className': '-amp-pinterest-embed-pin-stats-likes',
+                'textContent': String(p.like_count)
+              }});
+              stats.appendChild(likeCount);
+            }
+            text.appendChild(stats);
+          }
+
+          // pinner
+          if (p.pinner) {
+
+            let pinner = make({'span':{
+              'className': '-amp-pinterest-embed-pin-text-block' +
+                ' -amp-pinterest-embed-pin-pinner'
+            }});
+
+            // avatar
+            pinner.appendChild(make({'img':{
+              'className': '-amp-pinterest-embed-pin-pinner-avatar',
+              'alt': filter(p.pinner.full_name),
+              'title': filter(p.pinner.full_name),
+              'src': p.pinner.image_small_url,
+              'data-pin-href': p.pinner.profile_url
+            }}));
+
+            // name
+            pinner.appendChild(make({'span': {
+              'className': '-amp-pinterest-embed-pin-pinner-name',
+              'textContent': filter(p.pinner.full_name),
+              'data-pin-href': p.pinner.profile_url
+            }}));
+
+            // board
+            pinner.appendChild(make({'span': {
+              'className': '-amp-pinterest-embed-pin-board-name',
+              'textContent': filter(p.board.name),
+              'data-pin-href': 'https://www.pinterest.com/' + p.board.url
+            }}));
+
+            text.appendChild(pinner);
+          }
+
+          container.appendChild(text);
+          structure.appendChild(container);
+
+
+          // listen for clicks
+          structure.addEventListener('click', function (e) {
+            let el = e.target;
+            let logMe = el.getAttribute('data-pin-log');
+            if (logMe) {
+              log('&type=' + logMe);
+            }
+            let href = el.getAttribute('data-pin-href');
+            if (href) {
+              let popThis = el.getAttribute('data-pin-pop') || false;
+              pop(href, popThis);
+            }
+            e.preventDefault();
+          });
+
+          // fill it
+          that.applyFillContent(structure);
+          // append it
+          that.element.appendChild(structure);
+          // done
+          return loadPromise(structure);
+
+        }
+      };
+
+      let query = 'https://widgets.pinterest.com/v3/pidgets/pins/info/' +
+        '?pin_ids=' + pinId +
+        '&sub=www&base_scheme=https';
+      return call(query).then((r) => {
+        renderPin(r);
+        return loadPromise(structure);
+      });
+    };
+
+    let makeButton = function () {
+
+      // render a Pin It button
+      // required: media and description
+      // optional: shape, color, height, lang, config
+
+      let pinMedia =
+        AMP.assert(that.element.getAttribute('data-media'),
+        'The data-media attribute is required when <amp-pinterest> ' +
+        'makes a Pin It button %s', that.element);
+
+      let pinDescription =
+         AMP.assert(that.element.getAttribute('data-description'),
+        'The data-description attribute is required when <amp-pinterest> ' +
+        'makes a Pin It button %s', that.element);
+
+      // options
+      let shape = that.element.getAttribute('data-shape');
+      let color = that.element.getAttribute('data-color');
+      let height = that.element.getAttribute('data-height');
+      let lang = that.element.getAttribute('data-lang');
+      let config = that.element.getAttribute('data-config');
+
+      // pass a known guid when testing
+      let theGuid = that.element.getAttribute('data-volkswagen-guid') || guid;
+
+      // build our link
+      let link = 'https://www.pinterest.com/pin/create/button/';
+      link = link + '?amp=1&guid=' + theGuid;
+      link = link + '&url=' + encodeURIComponent(pinUrl);
+      link = link + '&media=' + encodeURIComponent(pinMedia);
+      link = link + '&description=' +
+        encodeURIComponent(pinDescription);
+
+      // start building a link
+      let a = make({'A':{
+        'href': link
+      }});
+
+      // built it
+      let render = function (r) {
+
+        // shorten the pin count so it will fit in our bubble
+        let prettyPinCount = function (n) {
+          if (n > 999) {
+            if (n < 1000000) {
+              n = parseInt(n / 1000, 10) + 'K+';
+            } else {
+              if (n < 1000000000) {
+                n = parseInt(n / 1000000, 10) + 'M+';
+              } else {
+                n = '++';
+              }
+            }
+          }
+          return n;
         };
 
+        // start setting our class name
+        let className = '';
 
-        let query = 'https://widgets.pinterest.com/v3/pidgets/pins/info/' +
-          '?pin_ids=' + pinId +
-          '&sub=www&base_scheme=https';
-        return call(query).then((r) => {
-          renderPin(r);
-          return loadPromise(structure);
-        });
+        // first selector: set size and shape
+        if (shape === 'round') {
 
-      break;
+          // we're round
+          className = '-amp-pinterest-round';
+          if (height === '32') {
+            // we're tall
+            className = '-amp-pinterest-round-32';
+          }
 
-      case 'buttonPin':
+        } else {
 
-        // buttonPin renders a Pin It button and requires media and description
+          // we're rectangular
+          className = '-amp-pinterest-rect';
+          if (height === '28') {
+            // we're tall
+            className = className + '-28';
+          }
 
-        let pinMedia =
-          AMP.assert(this.element.getAttribute('data-media'),
-          'The data-media attribute is required when <amp-pinterest> ' +
-          'makes a Pin It button %s', this.element);
+          // second selector: set background image
+          className = className + ' -amp-pinterest';
+          if (lang !== 'ja') {
+            // we're not Japanese
+            lang = 'en';
+          }
 
-        let pinDescription =
-           AMP.assert(this.element.getAttribute('data-description'),
-          'The data-description attribute is required when <amp-pinterest> ' +
-          'makes a Pin It button %s', this.element);
+          className = className + '-' + lang;
+          if (color !== 'red' && color !== 'white') {
+            // if we're not red or white, we're gray
+            color = 'gray';
+          }
+          className = className + '-' + color;
 
-        // options
-        let shape = this.element.getAttribute('data-shape');
-        let color = this.element.getAttribute('data-color');
-        let height = this.element.getAttribute('data-height');
-        let lang = this.element.getAttribute('data-lang');
-        let config = this.element.getAttribute('data-config');
+          // yes, we do this twice; once for container and once for bg image
+          if (height === '28') {
+            // we're tall
+            className = className + '-28';
+          }
+        }
 
-        // pass a known guid when testing
-        let theGuid = this.element.getAttribute('data-volkswagen-guid') || guid;
+        if (r) {
 
-        // build our link
-        let link = 'https://www.pinterest.com/pin/create/button/';
-        link = link + '?amp=1&guid=' + theGuid;
-        link = link + '&url=' + encodeURIComponent(pinUrl);
-        link = link + '&media=' + encodeURIComponent(pinMedia);
-        link = link + '&description=' +
-          encodeURIComponent(pinDescription);
+          let countBubble = document.createElement('SPAN');
 
-        // start building a link
-        let a = make({'A':{
-          'href': link
-        }});
+          // position the count
+          if (config === 'above') {
+            className = className + ' -amp-pinterest-count-pad-above';
+            countBubble.className = '-amp-pinterest-bubble-above';
+          } else {
+            className = className + ' -amp-pinterest-count-pad-beside';
+            countBubble.className = '-amp-pinterest-bubble-beside';
+          }
+
+          // size the bubble
+          if (height === '28') {
+            className = className + '-28';
+            countBubble.className = countBubble.className + '-28';
+          } else {
+            className = className + '-20';
+            countBubble.className = countBubble.className + '-20';
+          }
+
+          // fill with text; zero
+          countBubble.appendChild(document.createTextNode(
+            prettyPinCount(r.count - 0) || '0'
+          ));
+
+          // append the count
+          a.appendChild(countBubble);
+
+          log('&type=pidget&button_count=1');
+
+        }
+
+        // set our className
+        a.className = className;
+
 
         // listen for clicks
         a.addEventListener('click', function (e) {
@@ -414,164 +549,44 @@ class AmpPinterest extends AMP.BaseElement {
           e.preventDefault();
         });
 
-        // built it
-        let render = function (r) {
+        // fill it
+        that.applyFillContent(a);
+        // append it
+        that.element.appendChild(a);
+        // done
+        return loadPromise(a);
+      };
 
-          // shorten the pin count so it will fit in our bubble
-          let prettyPinCount = function (n) {
-            if (n > 999) {
-              if (n < 1000000) {
-                n = parseInt(n / 1000, 10) + 'K+';
-              } else {
-                if (n < 1000000000) {
-                  n = parseInt(n / 1000000, 10) + 'M+';
-                } else {
-                  n = '++';
-                }
-              }
-            }
-            return n;
-          };
-
-          // start setting our class name
-          let className = '';
-
-          // first selector: set size and shape
-          if (shape === 'round') {
-
-            // we're round
-            className = '-amp-pinterest-round';
-            if (height === '32') {
-              // we're tall
-              className = '-amp-pinterest-round-32';
-            }
-
-          } else {
-
-            // we're rectangular
-            className = '-amp-pinterest-rect';
-            if (height === '28') {
-              // we're tall
-              className = className + '-28';
-            }
-
-            // second selector: set background image
-            className = className + ' -amp-pinterest';
-            if (lang !== 'ja') {
-              // we're not Japanese
-              lang = 'en';
-            }
-
-            className = className + '-' + lang;
-            if (color !== 'red' && color !== 'white') {
-              // if we're not red or white, we're gray
-              color = 'gray';
-            }
-            className = className + '-' + color;
-
-            // yes, we do this twice; once for container and once for bg image
-            if (height === '28') {
-              // we're tall
-              className = className + '-28';
-            }
-          }
-
-          if (r) {
-
-            let countBubble = document.createElement('SPAN');
-
-            // position the count
-            if (config === 'above') {
-              className = className + ' -amp-pinterest-count-pad-above';
-              countBubble.className = '-amp-pinterest-bubble-above';
-            } else {
-              className = className + ' -amp-pinterest-count-pad-beside';
-              countBubble.className = '-amp-pinterest-bubble-beside';
-            }
-
-            // size the bubble
-            if (height === '28') {
-              className = className + '-28';
-              countBubble.className = countBubble.className + '-28';
-            } else {
-              className = className + '-20';
-              countBubble.className = countBubble.className + '-20';
-            }
-
-            // fill with text; zero
-            countBubble.appendChild(document.createTextNode(
-              prettyPinCount(r.count - 0) || '0'
-            ));
-
-            // append the count
-            a.appendChild(countBubble);
-
-            log('&type=pidget&button_count=1');
-
-          }
-
-          // set our className
-          a.className = className;
-
-          // fill it
-          that.applyFillContent(a);
-          // append it
-          that.element.appendChild(a);
-          // done
+      // only ask for a count if the operator requires it
+      if (config === 'above' || config === 'beside') {
+        // call the API
+        let query = 'https://widgets.pinterest.com/v1/urls/count.json?' +
+          '&return_jsonp=false' +
+          '&url=' + encodeURIComponent(pinUrl);
+        return call(query).then((r) => {
+          render(r);
           return loadPromise(a);
-        };
+        });
+      } else {
+        // you have everything you need to render with no waiting for API
+        render();
+        return loadPromise(a);
+      }
+    };
 
-        // only ask for a count if the operator requires it
-        if (config === 'above' || config === 'beside') {
-          // call the API
-          let query = 'https://widgets.pinterest.com/v1/urls/count.json?' +
-            '&return_jsonp=false' +
-            '&url=' + encodeURIComponent(pinUrl);
-          return call(query).then((r) => {
-            render(r);
-            return loadPromise(a);
-          });
-        } else {
-          // you have everything you need to render with no waiting for API
-          render();
-          return loadPromise(a);
-        }
+    // pinDo is set by data-do
+    switch (pinDo) {
 
+      case 'embedPin':
+        return makePin();
       break;
 
+      case 'buttonPin':
+        return makeButton();
+      break;
 
       default:
-
-        // we're a complex widget, currently rendered in an iframe
-
-        // we know we always have an act and a src
-        let src = 'https://assets.pinterest.com/ext/iffy.html?' +
-            'act=' + encodeURIComponent(pinDo) +
-            '&url=' + encodeURIComponent(pinUrl);
-
-        // we may have other valid attributes
-        for (let i = 0; i < VALID_PARAMS.length; i = i + 1) {
-            let v = this.element.getAttribute(VALID_PARAMS[i]);
-            if (v) {
-                // remove data- prefix from params
-                src = src + '&' + VALID_PARAMS[i].replace(/data-/, '') +
-                  '=' + encodeURIComponent(v);
-            }
-        }
-
-        // make the iframe
-        let iframe = make({'iframe':{
-          'frameborder': '0',
-          'allowtransparency': 'true',
-          'width': width,
-          'height': height,
-          'src': src
-        }});
-
-        this.applyFillContent(iframe);
-        this.element.appendChild(iframe);
-        return loadPromise(iframe);
-
+        return makeIframe();
       break;
     }
   }
