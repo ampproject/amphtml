@@ -30,14 +30,14 @@ AMP documents only support ads served via HTTPS.
 
 The `<amp-ad>` requires width and height values to be specified like all
 resources in AMP. It requires a `type` argument that select what ad network is displayed. All `data-*` attributes on the tag are automatically passed as arguments to the code that eventually renders the ad. What `data-` attributes are required for a given type of network depends and must be documented with the ad network.
-
+```html
     <amp-ad width=300 height=250
         type="a9"
         data-aax_size="300x250"
         data-aax_pubname="test123"
         data-aax_src="302">
     </amp-ad>
-
+```
 #### Attributes
 
 **type**
@@ -59,12 +59,12 @@ Optional attribute to pass configuration to the ad as an arbitrarily complex JSO
 #### Placeholder
 
 Optionally `amp-ad` supports a child element with the `placeholder` attribute. If supported by the ad network, this element if shown if no ad is available for this slot.
-
+```html
     <amp-ad width=300 height=250
         type="foo">
       <div placeholder>Have a great day!</div>
     </amp-ad>
-
+```
 #### Supported ad networks
 
 - [A9](../ads/a9.md)

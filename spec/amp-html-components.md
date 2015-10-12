@@ -44,6 +44,7 @@ elements such as `amp-img` can be styled with class or element selectors in an
 author-defined, inlined stylesheet, using most common CSS properties. For
 example:
 
+```html
     <!doctype html>
     <html ⚡>
       <head>
@@ -70,6 +71,7 @@ example:
         </amp-img>
       </body>
     </html>
+```
 
 AMP HTML components that are more complex and nested, such as `amp-carousel`,
 may be styled with an explicitly defined set of CSS Custom Properties. These
@@ -77,6 +79,7 @@ are propagated to any children elements that are dynamically created by the
 runtime, to achieve the desired style. This way the AMP author does not need to
 know the internals of the component, only its styleable properties. For example:
 
+```html
     <!doctype html>
     <html ⚡>
       <head>
@@ -104,6 +107,7 @@ know the internals of the component, only its styleable properties. For example:
         </amp-carousel>
       </body>
     </html>
+```
 
 Inline `style` attributes are not allowed, as per the AMP spec.
 
