@@ -26,6 +26,7 @@ describe('Carousel gestures', () => {
     element = document.createElement('div');
     element.style.width = '320px';
     element.style.height = '200px';
+    element.getRealChildren = () => [];
     document.body.appendChild(element);
 
     carousel = new AmpCarousel(element);
