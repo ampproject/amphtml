@@ -38,7 +38,7 @@ Use the special string `$RANDOM` to add a random number to the URL if required.
 
 For instance:
 ```html
-    <amp-pixel src="https://foo.com/pixel?$RANDOM"></amp-pixel>
+<amp-pixel src="https://foo.com/pixel?$RANDOM"></amp-pixel>
 ```
 may make a request to something like `https://foo.com/pixel?0.8390278471201` where the $RANDOM value is randomly generated upon each impression.
 
@@ -48,7 +48,7 @@ Use the special string `$CANONICAL_URL` to add the canonical URL of the current 
 
 For instance:
 ```html
-     <amp-pixel src="https://foo.com/pixel?href=$CANONICAL_URL"></amp-pixel>
+<amp-pixel src="https://foo.com/pixel?href=$CANONICAL_URL"></amp-pixel>
 ```
 may make a request to something like `https://foo.com/pixel?href=https%3A%2F%2Fpinterest.com%2F`.
 
@@ -58,7 +58,7 @@ Use the special string `$CANONICAL_HOST` to add the canonical URL's host of the 
 
 For instance:
 ```html
-     <amp-pixel src="https://foo.com/pixel?host=$CANONICAL_HOST"></amp-pixel>
+<amp-pixel src="https://foo.com/pixel?host=$CANONICAL_HOST"></amp-pixel>
 ```
 may make a request to something like `https://foo.com/pixel?host=pinterest.com`.
 
@@ -68,7 +68,7 @@ Use the special string `$CANONICAL_PATH` to add the canonical URL's path of the 
 
 For instance:
 ```html
-     <amp-pixel src="https://foo.com/pixel?path=$CANONICAL_PATH"></amp-pixel>
+<amp-pixel src="https://foo.com/pixel?path=$CANONICAL_PATH"></amp-pixel>
 ```
 may make a request to something like `https://foo.com/pixel?path=%2Fpage1.html`.
 
@@ -78,7 +78,7 @@ Use the special string `$TITLE` to add the title of the current document to the 
 
 For instance:
 ```html
-     <amp-pixel src="https://foo.com/pixel?title=$TITLE"></amp-pixel>
+<amp-pixel src="https://foo.com/pixel?title=$TITLE"></amp-pixel>
 ```
 may make a request to something like `https://foo.com/pixel?title=Breaking%20News`.
 
@@ -88,7 +88,7 @@ Use the special string `$AMPDOC_URL` to add the AMP document's URL.
 
 For instance:
 ```html
-     <amp-pixel src="https://foo.com/pixel?ref=$AMPDOC_URL"></amp-pixel>
+<amp-pixel src="https://foo.com/pixel?ref=$AMPDOC_URL"></amp-pixel>
 ```
 may make a request to something like `https://foo.com/pixel?ref=https%3A%2F%2Fexample.com%2F`.
 
@@ -98,7 +98,7 @@ Use the special string `$AMPDOC_HOST` to add the AMP document's URL host.
 
 For instance:
 ```html
-     <amp-pixel src="https://foo.com/pixel?host=$AMPDOC_HOST"></amp-pixel>
+<amp-pixel src="https://foo.com/pixel?host=$AMPDOC_HOST"></amp-pixel>
 ```
 may make a request to something like `https://foo.com/pixel?host=example.com`.
 

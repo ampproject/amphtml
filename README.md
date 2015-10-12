@@ -29,14 +29,14 @@ AMP HTML works by including the AMP JS library and adding a bit of boilerplate t
 ```html
 <!doctype html>
 <html ⚡>
-<head>
-  <meta charset="utf-8">
-  <link rel="canonical" href="hello-world.html" >
-  <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
-  <style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
-  <script async src="https://cdn.ampproject.org/v0.js"></script>
-</head>
-<body>Hello World!</body>
+  <head>
+    <meta charset="utf-8">
+    <link rel="canonical" href="hello-world.html" >
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
+    <style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+  </head>
+  <body>Hello World!</body>
 </html>
 ```
 
