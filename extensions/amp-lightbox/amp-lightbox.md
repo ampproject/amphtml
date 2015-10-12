@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-### <a name=”amp-lightbox”></a> `amp-lightbox`
+### <a name="amp-lightbox"></a> `amp-lightbox`
 
 The `amp-lightbox` component allows for a “lightbox” or similar experience - where upon user interaction a component expands to fill the viewport, until it is closed again by the user.
 
@@ -26,11 +26,11 @@ One or more elements within the lightbox can be optionally given a `close` attri
 
 For example:
 
-    <button on=”tap:my-lightbox”>Open lightbox</button>
+    <button on="tap:my-lightbox">Open lightbox</button>
 
-    <amp-lightbox id=”my-lightbox” layout=”nodisplay”>
-      <div class=”lightbox”>
-        <amp-img src=”my-full-image.jpg” width=300 height=800>
+    <amp-lightbox id="my-lightbox" layout="nodisplay">
+      <div class="lightbox">
+        <amp-img src="my-full-image.jpg" width=300 height=800>
         <div close>Close</div>
       </div>
     </amp-lightbox>
