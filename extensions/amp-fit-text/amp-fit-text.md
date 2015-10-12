@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-### <a name=”amp-fit-text”></a> `amp-fit-text`
+### <a name="amp-fit-text"></a> `amp-fit-text`
 
 The `amp-fit-text` component can expand or shrink its font size to fit the
 content within the space given to it.

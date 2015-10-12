@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-### <a name=”amp-carousel”></a> `amp-carousel`
+### <a name="amp-carousel"></a> `amp-carousel`
 
 A generic carousel for displaying multiple similar pieces of content along a horizontal axis. It is meant to be highly flexible and performant.
 
@@ -27,9 +27,9 @@ The carousel consists of an arbitrary number of items, as well as optional navig
 The carousel advances between items if the user swipes, uses arrow keys, clicks an optional navigation arrow.
 ```html
 <amp-carousel width=300 height=400>
-  <amp-img src=”my-img1.png” width=300 height=400></amp-img>
-  <amp-img src=”my-img2.png” width=300 height=400></amp-img>
-  <amp-img src=”my-img3.png” width=300 height=400></amp-img>
+  <amp-img src="my-img1.png" width=300 height=400></amp-img>
+  <amp-img src="my-img2.png" width=300 height=400></amp-img>
+  <amp-img src="my-img3.png" width=300 height=400></amp-img>
 </amp-carousel>
 ```
 

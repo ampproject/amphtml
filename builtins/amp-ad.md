@@ -1,4 +1,4 @@
-### <a name=”amp-ad”></a> `amp-ad`
+### <a name="amp-ad"></a> `amp-ad`
 
 NOTE: The specification of `amp-ad` is likely to significantly evolve over time. The current approach is designed to bootstrap the format to be able to show ads.
 
