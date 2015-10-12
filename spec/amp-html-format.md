@@ -137,7 +137,7 @@ HTML tags can be used unchanged in AMP HTML. Certain tags have equivalent custom
 | img       | Replaced with amp-img |
 | video     | Replaced with amp-video |
 | audio     | Replaced with amp-audio |
-| iframe    | Prohibited. May be replaced with amp-iframe in the future. |
+| iframe    | Replaced with amp-iframe |
 | frame     | Prohibited. |
 | frameset  | Prohibited. |
 | object    | Prohibited. |
@@ -151,7 +151,7 @@ HTML tags can be used unchanged in AMP HTML. Certain tags have equivalent custom
 | link      | Allowed for certain values of rel: `canonical`. `stylesheet` is generally disallowed, but some values may be whitelisted for font providers. |
 | meta      | The `http-equiv` attribute is banned. Otherwise allowed. |
 | <a name="ancr"></a>a         | The `href` attribute value must not begin with `javascript:`. If set, the `target` attribute value must be `_blank`. Otherwise allowed. [🔗](#ancr) |
-| svg       | Most SVG elements are allowed | 
+| svg       | Most SVG elements are allowed |
 
 Validator implementations should use a whitelist based on the HTML5 specification with the above tags removed. See [AMP Tag Addendum](amp-tag-addendum.md).
 
