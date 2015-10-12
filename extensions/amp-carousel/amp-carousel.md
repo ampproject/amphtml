@@ -53,6 +53,14 @@ unless only a single child is present.
 
 If present, the user may advance past the first item or the final item.
 
+**autoplay** (type=slides only)
+
+If present, advances the slide to the next slide without user interaction.
+By default it will advance in 5000 milliseconds (5 seconds) but will use the
+value of the `autoplay` attribute if present (minimum of 1000 ms).
+If `autoplay` is present it will also attach the `loop` attribute to
+`amp-carousel` if `loop` is not already present.
+
 #### Styling
 - You may use the `amp-carousel` element selector to style it freely.
 - `.amp-carousel-button` by default uses an inlined svg as the background-image of the buttons.
