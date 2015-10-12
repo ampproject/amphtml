@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-### <a name=”amp-image-lightbox”></a> `amp-image-lightbox`
+### <a name="amp-image-lightbox"></a> `amp-image-lightbox`
 
 The `amp-image-lightbox` component allows for a “image lightbox” or similar
 experience - where upon user interaction an image expands to fill the

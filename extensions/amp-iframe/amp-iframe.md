@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-### <a name=”amp-iframe”></a> `amp-iframe`
+### <a name="amp-iframe"></a> `amp-iframe`
 
 Displays an iframe.
 

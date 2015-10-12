@@ -125,7 +125,7 @@ The height of the component. `width` and `height` attributes imply the aspect ra
 
 **layout**
 
-Defines the way the container is laid out. `layout=”responsive”` will let the container scale with the width of the parent container. `layout=”nodisplay”` indicates that the component should not be initially displayed by the runtime - for example, for an image that will appear in a lightbox when a trigger is tapped.
+Defines the way the container is laid out. `layout="responsive"` will let the container scale with the width of the parent container. `layout="nodisplay"` indicates that the component should not be initially displayed by the runtime - for example, for an image that will appear in a lightbox when a trigger is tapped.
 
 
 

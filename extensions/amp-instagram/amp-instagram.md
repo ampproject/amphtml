@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-### <a name=”amp-instagram”></a> `amp-instagram`
+### <a name="amp-instagram"></a> `amp-instagram`
 
 Displays an instagram embed.
 
