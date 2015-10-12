@@ -24,8 +24,8 @@ The `amp-anim` component is very similar to the `amp-image` element, and provide
 
 The `amp-anim` component can also have an optional placeholder child, to display while the `src` file is loading. The placeholder is specified via the `placeholder` attribute:
 ```html
-<amp-anim width=400 height=300 src=”my-gif.gif”>
-  <amp-img placeholder width=400 height=300 src=”my-gif-screencap.jpg”>
+<amp-anim width=400 height=300 src="my-gif.gif">
+  <amp-img placeholder width=400 height=300 src="my-gif-screencap.jpg">
   </amp-img>
 </amp-anim>
 ```
@@ -47,7 +47,7 @@ A string of alternate text, similar to the `alt` attribute on `img`.
 
 **attribution**
 
-A string that indicates the attribution of the image. E.g. `attribution=“CC courtesy of Cats on Flicker”`
+A string that indicates the attribution of the image. E.g. `attribution="CC courtesy of Cats on Flicker"`
 
 
 #### Styling

@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-### <a name=”amp-youtube”></a> `amp-youtube`
+### <a name="amp-youtube"></a> `amp-youtube`
 
 Displays a Youtube video.
 

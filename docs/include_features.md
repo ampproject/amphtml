@@ -96,8 +96,8 @@ The `amp-anim` component can also have an optional placeholder child
 to display while the `src` file is loading.
 The placeholder is specified via the `placeholder` attribute:
 ```html
-<amp-anim width=400 height=300 src=”my-gif.gif”>
-  <amp-img placeholder width=400 height=300 src=”my-gif-screencap.jpg”>
+<amp-anim width=400 height=300 src="my-gif.gif">
+  <amp-img placeholder width=400 height=300 src="my-gif-screencap.jpg">
   </amp-img>
 </amp-anim>
 ```
@@ -163,8 +163,8 @@ at a time determined by the AMP HTML runtime.
 Include a placeholder before the video starts, and a fallback,
 if the browser doesn't support HTML5 video, for example:
 ```html
-<amp-video width=400 height=300 src=”https://yourhost.com/videos/myvideo.mp4”>
-  <amp-img placeholder width=400 height=300 src=”myvideo-poster.jpg”></amp-img>
+<amp-video width=400 height=300 src="https://yourhost.com/videos/myvideo.mp4">
+  <amp-img placeholder width=400 height=300 src="myvideo-poster.jpg"></amp-img>
   <div fallback>
 		<p>Your browser doesn’t support HTML5 video</p>
   </div>
@@ -199,7 +199,7 @@ Include an audio resource in your page,
 using the [`amp-audio`](../extensions/amp-audio/amp-audio.md) element.
 
 You must include the following script in the `<head>`:
- 
+
 ```html
 <script async custom-element="amp-audio" src="https://cdn.ampproject.org/v0/amp-audio-0.1.js"></script>
 ```
@@ -212,7 +212,7 @@ at a time determined by the AMP HTML runtime.
 Include a placeholder before the audio starts, and a fallback,
 if the browser doesn't support HTML5 audio, for example:
 ```html
-<amp-audio width=400 height=300 src=”https://yourhost.com/audios/myaudio.mp3”>
+<amp-audio width=400 height=300 src="https://yourhost.com/audios/myaudio.mp3">
   <div fallback>
     <p>Your browser doesn’t support HTML5 audio</p>
   </div>
@@ -231,7 +231,7 @@ to when the tracking pixel is loaded.
 Use the special string `$RANDOM` to add a random number
 to the URL if required.
 
-For example, `<amp-pixel src=”https://cdn.ampproject.org/$RANDOM”>`
+For example, `<amp-pixel src="https://cdn.ampproject.org/$RANDOM">`
 makes a request to something like `https://cdn.ampproject.org/8390278471201`,
 where the $RANDOM value is randomly generated upon each impression.
 

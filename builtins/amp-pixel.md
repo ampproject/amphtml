@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-### <a name=”amp-pixel”></a> `amp-pixel`
+### <a name="amp-pixel"></a> `amp-pixel`
 
 The `amp-pixel` element is meant to be used as a typical tracking pixel - to count page views.
 
