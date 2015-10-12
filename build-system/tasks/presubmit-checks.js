@@ -154,7 +154,7 @@ function hasAnyTerms(file) {
 
   hasTerms = matchTerms(pathname, contents, forbiddenTerms);
 
-  var isTestFile = /^test-/.test(basename);
+  var isTestFile = /^test-/.test(basename) || /^_init_tests/.test(basename);
   if (!isTestFile) {
     hasSrcInclusiveTerms = matchTerms(pathname, contents,
         forbiddenTermsSrcInclusive);
