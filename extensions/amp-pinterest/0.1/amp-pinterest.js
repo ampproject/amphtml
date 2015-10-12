@@ -40,15 +40,6 @@
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
 
-// valid parameters for iframed widgets
-const VALID_PARAMS = [
-    'data-lang',
-    'data-height',
-    'data-width',
-    'data-scale-width',
-    'data-scale-height',
-    'data-board-width' ];
-
 // parameters for pop-up windows
 const POP = 'status=no,resizable=yes,scrollbars=yes,' +
   'personalbar=no,directories=no,location=no,toolbar=no,' +
@@ -175,40 +166,6 @@ class AmpPinterest extends AMP.BaseElement {
 
     // save our outside context so we can return properly after rendering
     let that = this;
-
-    // catch-all iframe for widgets that don't render inline yet
-    // requires pinUrl
-    let makeIframe = function () {
-
-      // we know we always have an act and a src
-      let src = 'https://assets.pinterest.com/ext/iffy.html?' +
-          'act=' + encodeURIComponent(pinDo) +
-          '&url=' + encodeURIComponent(pinUrl);
-
-      // we may have other valid attributes
-      for (let i = 0; i < VALID_PARAMS.length; i = i + 1) {
-          let v = that.element.getAttribute(VALID_PARAMS[i]);
-          if (v) {
-              // remove data- prefix from params
-              src = src + '&' + VALID_PARAMS[i].replace(/data-/, '') +
-                '=' + encodeURIComponent(v);
-          }
-      }
-
-      // make the iframe
-      let iframe = make({'iframe':{
-        'frameborder': '0',
-        'allowtransparency': 'true',
-        'width': width,
-        'height': height,
-        'src': src
-      }});
-
-      that.applyFillContent(iframe);
-      that.element.appendChild(iframe);
-      return loadPromise(iframe);
-    };
-
 
     let makePin = function () {
 
@@ -586,7 +543,6 @@ class AmpPinterest extends AMP.BaseElement {
       break;
 
       default:
-        return makeIframe();
       break;
     }
   }
