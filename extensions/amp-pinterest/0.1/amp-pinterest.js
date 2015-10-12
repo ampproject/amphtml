@@ -27,11 +27,9 @@
  *   data-description="Next stop: Pinterest">
  * </amp-pinterest>
  *
- * <amp-pinterest width=239 height=400
- *   data-do="embedBoard"
- *   data-scale-height="289"
- *   data-scale-width="107"
- *   data-url="http://www.pinterest.com/kentbrew/art-i-wish-i-d-made/">
+ * <amp-pinterest width=245 height=330
+ *   data-do="embedPin"
+ *   data-url="https://www.pinterest.com/pin/99360735500167749/">
  * </amp-pinterest>
  *
  * </code>
@@ -364,7 +362,7 @@ class AmpPinterest extends AMP.BaseElement {
 
       // render a Pin It button
       // required: media and description
-      // optional: shape, color, height, lang, config
+      // optional: round, color, tall, lang, count
 
       let pinMedia =
         AMP.assert(that.element.getAttribute('data-media'),
@@ -377,11 +375,11 @@ class AmpPinterest extends AMP.BaseElement {
         'makes a Pin It button %s', that.element);
 
       // options
-      let shape = that.element.getAttribute('data-shape');
+      let round = that.element.getAttribute('data-round');
       let color = that.element.getAttribute('data-color');
-      let height = that.element.getAttribute('data-height');
+      let tall = that.element.getAttribute('data-tall');
       let lang = that.element.getAttribute('data-lang');
-      let config = that.element.getAttribute('data-config');
+      let count = that.element.getAttribute('data-count');
 
       // pass a known guid when testing
       let theGuid = that.element.getAttribute('data-volkswagen-guid') || guid;
@@ -422,22 +420,22 @@ class AmpPinterest extends AMP.BaseElement {
         let className = '';
 
         // first selector: set size and shape
-        if (shape === 'round') {
+        if (round) {
 
           // we're round
           className = '-amp-pinterest-round';
-          if (height === '32') {
+          if (tall) {
             // we're tall
-            className = '-amp-pinterest-round-32';
+            className = '-amp-pinterest-round-tall';
           }
 
         } else {
 
           // we're rectangular
           className = '-amp-pinterest-rect';
-          if (height === '28') {
+          if (tall) {
             // we're tall
-            className = className + '-28';
+            className = className + '-tall';
           }
 
           // second selector: set background image
@@ -455,9 +453,9 @@ class AmpPinterest extends AMP.BaseElement {
           className = className + '-' + color;
 
           // yes, we do this twice; once for container and once for bg image
-          if (height === '28') {
+          if (tall) {
             // we're tall
-            className = className + '-28';
+            className = className + '-tall';
           }
         }
 
@@ -466,7 +464,7 @@ class AmpPinterest extends AMP.BaseElement {
           let countBubble = document.createElement('SPAN');
 
           // position the count
-          if (config === 'above') {
+          if (count === 'above') {
             className = className + ' -amp-pinterest-count-pad-above';
             countBubble.className = '-amp-pinterest-bubble-above';
           } else {
@@ -475,12 +473,9 @@ class AmpPinterest extends AMP.BaseElement {
           }
 
           // size the bubble
-          if (height === '28') {
-            className = className + '-28';
-            countBubble.className = countBubble.className + '-28';
-          } else {
-            className = className + '-20';
-            countBubble.className = countBubble.className + '-20';
+          if (tall) {
+            className = className + '-tall';
+            countBubble.className = countBubble.className + '-tall';
           }
 
           // fill with text; zero
@@ -515,7 +510,7 @@ class AmpPinterest extends AMP.BaseElement {
       };
 
       // only ask for a count if the operator requires it
-      if (config === 'above' || config === 'beside') {
+      if (count === 'above' || count === 'beside') {
         // call the API
         let query = 'https://widgets.pinterest.com/v1/urls/count.json?' +
           '&return_jsonp=false' +

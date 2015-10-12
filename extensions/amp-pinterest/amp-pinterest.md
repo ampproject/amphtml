@@ -36,15 +36,6 @@ Embedded pin widget: `data-do="embedPin"`
       data-url="https://www.pinterest.com/pin/99360735500167749/">
     </amp-pinterest>
 
-Embedded board widget: `data-do="embedBoard"`
-
-    <amp-pinterest width=239 height=400
-      data-do="embedBoard"
-      data-scale-height="289"
-      data-scale-width="107"
-      data-url="http://www.pinterest.com/kentbrew/art-i-wish-i-d-made/">
-    </amp-pinterest>
-
 ## Pin It Button
 
 **data-url**
@@ -65,59 +56,40 @@ Default small rectangular button:
 
     height=20 width=40
 
-Small rectangular button with pin count to the right, using `data-config="beside"`
+Small rectangular button with pin count to the right, using `data-count="beside"`
 
     height=28 width=85
 
-Small rectangular button with pin count on top, using `data-config="above"`
+Small rectangular button with pin count on top, using `data-count="above"`
 
     height=50 width=40
 
-Large rectangular button using data-height="28"
+Large rectangular button using data-height="tall"
 
     height=28 width=56
 
-Large rectangular button with pin count to the right, using `data-height="28"` and `data-config="beside"`
+Large rectangular button with pin count to the right, using `data-tall="true"` and `data-count="beside"`
 
     height=28 width=107
 
-Large rectangular button with pin count on top, using `data-height="28"` and `data-config="above"`
+Large rectangular button with pin count on top, using `data-height="tall"` and `data-count="above"`
 
     height=66 width=56
 
-Small circular button using `data-shape="round"`
+Small circular button using `data-round="true"`
 
     height=16 width=16
 
-Large circular button using `data-shape="round"` and `data-height="32"`
+Large circular button using `data-round="true"` and `data-height="tall"`
 
     height=32 width=32
 
-## Other Widgets
+## Embedded Pin Widget
 
 **data-url**
 
-When building other Pinterest widgets, `data-url` is required and must contain the fully-qualified URL of the Pinterest resource to be shown as a widget.
-
-**Embedded Pin Widget**
+When building the Embedded Pin widget, `data-url` is required and must contain the fully-qualified URL of the Pinterest resource to be shown as a widget.
 
     data-do="embedPin"
     data-url="https://www.pinterest.com/pin/99360735500167749/"
 
-**Embedded Board Widget**
-
-    data-do="embedBoard"
-    data-url="https://www.pinterest.com/kentbrew/high-five/"
-
-**Embedded User Widget**
-
-    data-do="embedUser"
-    data-url="https://www.pinterest.com/kentbrew/"
-
-### Iframe Sizing for Other Widgets
-
-Iframes must be sized properly for the widget they're displaying. This may take some work to get exactly right, as Pinterest widgets may have variable height or width, and have several configuration options available to site operators. Parameters such as `data-height`, `data-width`, `data-board-width`, `data-scale-height`, and `data-scale-width` will alter the rendered size of a grid-based or single-pin widget, and should be used to size your widget to the space you have available in your iframe.
-
-For a fast way to preview different parameters, visit the Widget Builder, here:
-
-https://developers.pinterest.com/tools/widget-builder/

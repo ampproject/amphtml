@@ -23,7 +23,7 @@
   background-size: 16px 16px;
 }
 
-.-amp-pinterest-round-32 {
+.-amp-pinterest-round-tall {
   height: 32px;
   width: 32px;
   background-image: url(https://s-passets.pinimg.com/images/pidgets/pinit_bg_en_round_red_32_2.png);
@@ -77,58 +77,58 @@
 
 /* large buttons */
 
-.-amp-pinterest-rect-28 {
+.-amp-pinterest-rect-tall {
   height: 28px;
   width: 56px;
   background: url() 0 -28px no-repeat;
   background-size: 56px 84px;
 }
 
-.-amp-pinterest-rect-28:hover{
+.-amp-pinterest-rect-tall:hover{
   background-position: 0 0;
 }
 
-.-amp-pinterest-rect-28:active{
+.-amp-pinterest-rect-tall:active{
   background-position: 0 -56px;
 }
 
 /* large background images */
 
-.-amp-pinterest-en-gray-28 {
+.-amp-pinterest-en-gray-tall {
   background-image: url(https://s-passets.pinimg.com/images/pidgets/pinit_bg_en_rect_gray_28_2.png);
 }
 
-.-amp-pinterest-en-red-28 {
+.-amp-pinterest-en-red-tall {
   background-image: url(https://s-passets.pinimg.com/images/pidgets/pinit_bg_en_rect_red_28_2.png);
 }
 
-.-amp-pinterest-en-white-28 {
+.-amp-pinterest-en-white-tall {
   background-image: url(https://s-passets.pinimg.com/images/pidgets/pinit_bg_en_rect_white_28_2.png);
 }
 
-.-amp-pinterest-ja-gray-28 {
+.-amp-pinterest-ja-gray-tall {
   background-image: url(https://s-passets.pinimg.com/images/pidgets/pinit_bg_ja_rect_gray_28_2.png);
 }
 
-.-amp-pinterest-ja-red-28 {
+.-amp-pinterest-ja-red-tall {
   background-image: url(https://s-passets.pinimg.com/images/pidgets/pinit_bg_ja_rect_red_28_2.png);
 }
 
-.-amp-pinterest-ja-white-28 {
+.-amp-pinterest-ja-white-tall {
   background-image: url(https://s-passets.pinimg.com/images/pidgets/pinit_bg_ja_rect_white_28_2.png);
 }
 
 /* count bubble above */
 
-.-amp-pinterest-count-pad-above-20 {
+.-amp-pinterest-count-pad-above {
   margin-top: 30px;
 }
 
-.-amp-pinterest-count-pad-above-28 {
+.-amp-pinterest-count-pad-above-tall {
   margin-top: 38px;
 }
 
-.-amp-pinterest-bubble-above-20 {
+.-amp-pinterest-bubble-above {
   position: absolute;
   left: 0;
   text-align: center;
@@ -143,7 +143,7 @@
   line-height: 24px;
 }
 
-.-amp-pinterest-bubble-above-28 {
+.-amp-pinterest-bubble-above-tall {
   position: absolute;
   left: 0;
   text-align: center;
@@ -160,15 +160,15 @@
 
 /* count bubble beside */
 
-.-amp-pinterest-count-pad-beside-20 {
+.-amp-pinterest-count-pad-beside {
   width: 86px;
 }
 
-.-amp-pinterest-count-pad-beside-28 {
+.-amp-pinterest-count-pad-beside-tall {
   width: 120px;
 }
 
-.-amp-pinterest-bubble-beside-20 {
+.-amp-pinterest-bubble-beside {
   position: absolute;
   top: 0;
   right: 0;
@@ -184,7 +184,7 @@
   line-height: 20px;
 }
 
-.-amp-pinterest-bubble-beside-28 {
+.-amp-pinterest-bubble-beside-tall {
   position: absolute;
   top: 0;
   right: 0;
