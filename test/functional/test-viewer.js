@@ -95,6 +95,19 @@ describe('Viewer', () => {
     expect(viewer.getViewportType()).to.equal('natural-ios-embed');
   });
 
+  it('should NOT configure for iOS embedding if not embedded', () => {
+    windowApi.name = '__AMP__viewportType=natural';
+    windowApi.parent = windowApi;
+    let body = {style: {}};
+    let documentElement = {style: {}};
+    windowApi.document = {body: body, documentElement: documentElement};
+    sandbox.mock(platform).expects('isIos').returns(true).once();
+    expect(new Viewer(windowApi).getViewportType()).to.equal('natural');
+
+    windowApi.parent = null;
+    expect(new Viewer(windowApi).getViewportType()).to.equal('natural');
+  });
+
   it('should receive viewport event', () => {
     let viewportEvent = null;
     viewer.onViewportEvent((event) => {
