@@ -78,7 +78,7 @@ chai.Assertion.addProperty('visible', function() {
       .getPropertyValue('visibility');
   var tagName = obj.tagName.toLowerCase();
   this.assert(
-    value == 'visible',
+    value === 'visible',
     'expected element \'' +
         tagName + '\' to be #{exp}, got #{act}. with classes: ' + obj.className,
     'expected element \'' +
@@ -93,12 +93,25 @@ chai.Assertion.addProperty('hidden', function() {
   var value = window./*OK*/getComputedStyle(obj).getPropertyValue('visibility');
   var tagName = obj.tagName.toLowerCase();
   this.assert(
-     value == 'hidden',
+     value === 'hidden',
     'expected element \'' +
         tagName + '\' to be #{exp}, got #{act}. with classes: ' + obj.className,
     'expected element \'' +
         tagName + '\' not to be #{act}. with classes: ' + obj.className,
     'hidden',
+    value
+  );
+});
+
+chai.Assertion.addMethod('display', function(display) {
+  var obj = this._obj;
+  var value = window.getComputedStyle(obj).getPropertyValue('display');
+  var tagName = obj.tagName.toLowerCase();
+  this.assert(
+     value === display,
+    'expected element \'' + tagName + '\' to be #{exp}, got #{act}.',
+    'expected element \'' + tagName + '\' not to be #{act}.',
+    display,
     value
   );
 });
