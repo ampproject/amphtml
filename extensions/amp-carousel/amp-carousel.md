@@ -49,6 +49,9 @@ unless only a single child is present.
   Be aware that `type=carousel` does not currently support `layout=responsive`.
 - `slides` - Shows a single slide at a time.
 
+**loop** (type=slides only)
+
+If present, the user may advance past the first item or the final item.
 
 #### Styling
 - You may use the `amp-carousel` element selector to style it freely.

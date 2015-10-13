@@ -34,6 +34,9 @@ export class AmpSlides extends BaseCarousel {
 
   /** @override */
   buildCarousel() {
+    /** @private @const {boolean} */
+    this.isLooping_ = this.element.hasAttribute('loop');
+
     /** @private {!Array<!Element>} */
     this.slides_ = this.getRealChildren();
     this.slides_.forEach((slide, i) => {
@@ -203,14 +206,19 @@ export class AmpSlides extends BaseCarousel {
     let maxDelta = 0;
     let prevTr = tr.NOOP;
     let nextTr = tr.NOOP;
-    if (this.currentIndex_ - 1 >= 0) {
-      let prevSlide = this.slides_[this.currentIndex_ - 1];
+    let prevIndex = AmpSlides.getRelativeIndex(this.currentIndex_,
+        -1, this.slides_.length);
+    let nextIndex = AmpSlides.getRelativeIndex(this.currentIndex_,
+        1, this.slides_.length);
+
+    if (this.isLooping_ || this.currentIndex_ - 1 >= 0) {
+      let prevSlide = this.slides_[prevIndex];
       this.prepareSlide_(prevSlide, -1);
       prevTr = this.createTransition_(currentSlide, prevSlide, -1);
       minDelta = -1;
     }
-    if (this.currentIndex_ + 1 < this.slides_.length) {
-      let nextSlide = this.slides_[this.currentIndex_ + 1];
+    if (this.isLooping_ || this.currentIndex_ + 1 < this.slides_.length) {
+      let nextSlide = this.slides_[nextIndex];
       this.prepareSlide_(nextSlide, 1);
       nextTr = this.createTransition_(currentSlide, nextSlide, 1);
       maxDelta = 1;
@@ -219,6 +227,8 @@ export class AmpSlides extends BaseCarousel {
       containerWidth: containerWidth,
       prevTr: prevTr,
       nextTr: nextTr,
+      prevIndex: prevIndex,
+      nextIndex: nextIndex,
       min: minDelta,
       max: maxDelta,
       pos: 0,
@@ -285,11 +295,11 @@ export class AmpSlides extends BaseCarousel {
       let oldSlide = this.slides_[this.currentIndex_];
       if (newPos > 0.5) {
         s.nextTr(1);
-        this.currentIndex_++;
+        this.currentIndex_ = s.nextIndex;
         this.commitSwitch_(oldSlide, this.slides_[this.currentIndex_]);
       } else if (newPos < -0.5) {
         s.prevTr(1);
-        this.currentIndex_--;
+        this.currentIndex_ = s.prevIndex;
         this.commitSwitch_(oldSlide, this.slides_[this.currentIndex_]);
       } else {
         s.nextTr(0);
@@ -300,11 +310,29 @@ export class AmpSlides extends BaseCarousel {
 
   /** @override */
   hasPrev() {
+    if (this.isLooping_) {
+      return true;
+    }
     return this.currentIndex_ != 0;
   }
 
   /** @override */
   hasNext() {
+    if (this.isLooping_) {
+      return true;
+    }
     return this.currentIndex_ != this.slides_.length - 1;
+  }
+
+  /**
+   * Gets the relative index using a step value that loops around even if the
+   * step goes out of bounds of the current length. (less than zero, greater
+   * than current length - 1)
+   * @param {number} index index position of item within length exclusive.
+   * @param {number} step step amount to offset from index.
+   * @param {number} length length of the vector.
+   */
+  static getRelativeIndex(index, step, length) {
+    return (index + step + length) % length;
   }
 }
