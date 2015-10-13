@@ -60,11 +60,6 @@ export class AmpSlides extends BaseCarousel {
     this.autoplayTimeoutId_ = null;
 
     this.setupAutoplay_();
-
-    // Setup microtask to let the runtime settle.
-    // TODO: (erwinm) experiment with only letting autoplay run if the
-    // carouse is in the viewport.
-    timer.delay(this.tryAutoplay_.bind(this , 1, true), 0);
   }
 
   /** @override */
@@ -113,7 +108,7 @@ export class AmpSlides extends BaseCarousel {
     let autoplayValue = Number(this.element.getAttribute('autoplay'));
     // If it isn't a number and is not greater than 0 then don't assign
     // and use the default.
-    if (!Number.isNaN(autoplayValue) && autoplayValue > 0) {
+    if (autoplayValue > 0) {
       // Guard against autoplayValue that is lower than 1s to prevent
       // people from crashing the runtime with providing very low delays.
       this.autoplayDelay_ = autoplayValue < 1000 ? 1000 : autoplayValue;
@@ -124,6 +119,11 @@ export class AmpSlides extends BaseCarousel {
     if (!this.element.hasAttribute('loop')) {
       this.element.setAttribute('loop', '');
     }
+
+    // Setup microtask to let the runtime settle.
+    // TODO: (erwinm) experiment with only letting autoplay run if the
+    // carousel is in the viewport.
+    timer.delay(this.tryAutoplay_.bind(this, 1, true), 0);
   }
 
   /**
