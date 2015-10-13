@@ -147,7 +147,8 @@ SVG tags are not in the HTML5 namespace. They are listed below without section i
 4.10.8 `<button>`  
 ### 4.11 Scripting
 4.11.1 `<script>`  
-### 4.11.2 Non-confirming features
+4.11.2 `<noscript>`  
+### 4.11.3 Non-confirming features
 These may be removed in future versions of AMP
 
 `<acronym>`  
