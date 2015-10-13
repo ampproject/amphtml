@@ -15,7 +15,6 @@
  */
 
 import {Animation} from '../../../src/animation';
-import {assert} from '../../../src/asserts';
 import {BaseCarousel} from './base-carousel';
 import {Gestures} from '../../../src/gesture';
 import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
@@ -334,12 +333,6 @@ export class AmpSlides extends BaseCarousel {
    * @param {number} length length of the vector.
    */
   static getRelativeIndex(index, step, length) {
-    assert(index >= 0 && index < length, 'index passed to getRelativeIndex ' +
-        'must be within the length exclusive. Value: ' + index);
-    let nextItemIndex = index + step;
-    if (nextItemIndex < 0) {
-      return length + (nextItemIndex % length);
-    }
-    return nextItemIndex % length;
+    return (index + step + length) % length;
   }
 }

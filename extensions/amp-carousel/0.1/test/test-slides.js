@@ -439,18 +439,6 @@ describe('slides getRelativeIndex', () => {
     index = AmpSlides.getRelativeIndex(2, -1, slides.length);
     expect(index).to.equal(1);
     expect(slides[index]).to.equal('b');
-
-    index = AmpSlides.getRelativeIndex(0, -6, slides.length);
-    expect(index).to.equal(4);
-    expect(slides[index]).to.equal('e');
-
-    index = AmpSlides.getRelativeIndex(0, -11, slides.length);
-    expect(index).to.equal(4);
-    expect(slides[index]).to.equal('e');
-
-    index = AmpSlides.getRelativeIndex(2, -24, slides.length);
-    expect(index).to.equal(3);
-    expect(slides[index]).to.equal('d');
   });
 
   it('should get correct relative index with a positive step', () => {
@@ -491,17 +479,5 @@ describe('slides getRelativeIndex', () => {
     index = AmpSlides.getRelativeIndex(4, 0, slides.length);
     expect(index).to.equal(4);
     expect(slides[index]).to.equal('e');
-  });
-
-  it('should throw if index is not valid within the length', () => {
-    expect(AmpSlides.getRelativeIndex.bind(null, 7, -1, slides.length))
-        .to.throw(Error);
-    expect(AmpSlides.getRelativeIndex.bind(null, 7, 1, slides.length))
-        .to.throw(Error);
-
-    expect(AmpSlides.getRelativeIndex.bind(null, 5, -1, slides.length))
-        .to.throw(Error);
-    expect(AmpSlides.getRelativeIndex.bind(null, 5, 1, slides.length))
-        .to.throw(Error);
   });
 });
