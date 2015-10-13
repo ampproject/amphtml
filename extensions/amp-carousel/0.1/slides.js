@@ -111,7 +111,7 @@ export class AmpSlides extends BaseCarousel {
     if (autoplayValue > 0) {
       // Guard against autoplayValue that is lower than 1s to prevent
       // people from crashing the runtime with providing very low delays.
-      this.autoplayDelay_ = autoplayValue < 1000 ? 1000 : autoplayValue;
+      this.autoplayDelay_ = Math.max(1000, autoplayValue);
     }
 
     // By default `autoplay` should also mean that the current carousel slide
@@ -140,7 +140,7 @@ export class AmpSlides extends BaseCarousel {
     if (this.autoplayTimeoutId_ !== null) {
       timer.cancel(this.autoplayTimeoutId_);
     }
-    this.autoplayTimeoutId_ = timer.delay(this.go.bind(this, 1, animate),
+    this.autoplayTimeoutId_ = timer.delay(this.go.bind(this, dir, animate),
         this.autoplayDelay_);
   }
 
