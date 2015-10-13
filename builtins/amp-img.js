@@ -125,8 +125,8 @@ export function installImg(win) {
     toggleDefaultPlaceholder_() {
       if (this.isDefaultPlaceholder_) {
         if (!this.isInViewport()) {
-          this.placeholder_.classList.toggle('hidden', true);
-          this.placeholder_.classList.toggle('active', false);
+          this.placeholder_.classList.toggle('-amp-hidden', true);
+          this.placeholder_.classList.toggle('-amp-active', false);
         } else {
           // Set a minimum delay in case the image resource loads much faster
           // than an intermittent loading screen that disappears right away.
@@ -134,9 +134,9 @@ export function installImg(win) {
           return timer.delay(() => {
             vsync.mutate(() => {
               if (this.placeholder_) {
-                this.placeholder_.classList.toggle('hidden',
+                this.placeholder_.classList.toggle('-amp-hidden',
                     !this.isInViewport());
-                this.placeholder_.classList.toggle('active',
+                this.placeholder_.classList.toggle('-amp-active',
                     this.isInViewport());
               }
             });
@@ -153,8 +153,8 @@ export function installImg(win) {
         this.isDefaultPlaceholder_ = false;
         let placeholder = this.placeholder_;
         this.placeholder_ = null;
-        placeholder.classList.remove('active');
-        placeholder.classList.add('hidden');
+        placeholder.classList.remove('-amp-active');
+        placeholder.classList.add('-amp-hidden');
         this.deferMutate(() => {
           removeElement(placeholder);
         });
