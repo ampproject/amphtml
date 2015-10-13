@@ -102,29 +102,9 @@ AMP HTML documents MUST
 
 ### Metadata
 
-#### Schema.org
+It is encouraged that AMP HTML documents are annotated with standardized metadata: [Open Graph Protocol](http://ogp.me/), [Twitter Cards](https://dev.twitter.com/cards/overview), etc.
 
-AMP HTML documents MUST be marked up with [schema.org/CreativeWork](https://schema.org/CreativeWork) or any of its more specific types such as [schema.org/NewsArticle](https://schema.org/NewsArticle) or [schema.org/BlogPosting](https://schema.org/BlogPosting). More types may be added in the future.
-
-Both JSON-LD and microdata serializations of schema.org are supported.
-
-The following properties of `CreativeWork` must be present:
-
-- headline
-- datePublished
-
-The following properties are recommended:
-
-- image
-- description
-- articleBody
-- alternativeHeadline
-- author
-- publisher
-
-#### Open Graph Protocol, Twitter Cards and similar metadata
-
-It is encouraged that AMP HTML documents are annotated with standardized metadata: Open Graph Protocol, Twitter Cards, etc.
+We also recommend that AMP HTML documents are marked up with [schema.org/CreativeWork](https://schema.org/CreativeWork) or any of its more specific types such as [schema.org/NewsArticle](https://schema.org/NewsArticle) or [schema.org/BlogPosting](https://schema.org/BlogPosting).
 
 ### HTML Tags
 
@@ -151,7 +131,7 @@ HTML tags can be used unchanged in AMP HTML. Certain tags have equivalent custom
 | link      | Allowed for certain values of rel: `canonical`. `stylesheet` is generally disallowed, but some values may be whitelisted for font providers. |
 | meta      | The `http-equiv` attribute is banned. Otherwise allowed. |
 | <a name="ancr"></a>a         | The `href` attribute value must not begin with `javascript:`. If set, the `target` attribute value must be `_blank`. Otherwise allowed. [🔗](#ancr) |
-| svg       | Most SVG elements are allowed | 
+| svg       | Most SVG elements are allowed |
 
 Validator implementations should use a whitelist based on the HTML5 specification with the above tags removed. See [AMP Tag Addendum](amp-tag-addendum.md).
 
