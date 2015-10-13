@@ -64,6 +64,8 @@ We highly prefer integrations that do not use iframes. JSONP cannot be used for 
 
 Like all contributions, Extended Components will be analyzed for performance impact, code quality and style, and directional alignment with the project.
 
+### [Code of conduct](CODE_OF_CONDUCT.md)
+
 ### Next steps
 
 See [DEVELOPING](DEVELOPING.md).
