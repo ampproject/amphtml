@@ -102,29 +102,9 @@ AMP HTML documents MUST
 
 ### Metadata
 
-#### Schema.org
+It is encouraged that AMP HTML documents are annotated with standardized metadata: [Open Graph Protocol](http://ogp.me/), [Twitter Cards](https://dev.twitter.com/cards/overview), etc.
 
-AMP HTML documents MUST be marked up with [schema.org/CreativeWork](https://schema.org/CreativeWork) or any of its more specific types such as [schema.org/NewsArticle](https://schema.org/NewsArticle) or [schema.org/BlogPosting](https://schema.org/BlogPosting). More types may be added in the future.
-
-Both JSON-LD and microdata serializations of schema.org are supported.
-
-The following properties of `CreativeWork` must be present:
-
-- headline
-- datePublished
-
-The following properties are recommended:
-
-- image
-- description
-- articleBody
-- alternativeHeadline
-- author
-- publisher
-
-#### Open Graph Protocol, Twitter Cards and similar metadata
-
-It is encouraged that AMP HTML documents are annotated with standardized metadata: Open Graph Protocol, Twitter Cards, etc.
+We also recommend that AMP HTML documents are marked up with [schema.org/CreativeWork](https://schema.org/CreativeWork) or any of its more specific types such as [schema.org/NewsArticle](https://schema.org/NewsArticle) or [schema.org/BlogPosting](https://schema.org/BlogPosting).
 
 ### HTML Tags
 
