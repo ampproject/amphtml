@@ -31,6 +31,11 @@ var dedicatedCopyrightNoteSources = /(\.js|.css)$/;
 var es6polyfill = 'Not available because we do not currently' +
     ' ship with a needed ES6 polyfill.';
 
+var requiresReviewPrivacy =
+    'Usage of this API requires dedicated review due to ' +
+    'being privacy sensitive. Please file an issue asking for permission' +
+    ' to use if you have not yet done so.';
+
 // Terms that must not appear in our source files.
 var forbiddenTerms = {
   'DO NOT SUBMIT': '',
@@ -38,14 +43,14 @@ var forbiddenTerms = {
   'it\\.only': '',
   'console\\.\\w+\\(': 'If you run against this, use console/*OK*/.log to ' +
       'whitelist a legit case.',
-  'cookie\\W': '',
+  'cookie\\W': requiresReviewPrivacy,
   'eval\\(': '',
-  'localStorage': '',
-  'sessionStorage': '',
-  'indexedDB': '',
-  'openDatabase': '',
-  'requestFileSystem': '',
-  'webkitRequestFileSystem': '',
+  'localStorage': requiresReviewPrivacy,
+  'sessionStorage': requiresReviewPrivacy,
+  'indexedDB': requiresReviewPrivacy,
+  'openDatabase': requiresReviewPrivacy,
+  'requestFileSystem': requiresReviewPrivacy,
+  'webkitRequestFileSystem': requiresReviewPrivacy,
   'debugger': '',
 
   // ES6. These are only the most commonly used.
