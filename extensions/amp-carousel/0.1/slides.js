@@ -39,7 +39,7 @@ export class AmpSlides extends BaseCarousel {
     this.isLooping_ = this.element.hasAttribute('loop');
 
     /** @private @const {boolean} */
-    this.isAutoplaying_ = this.element.hasAttribute('autoplay');
+    this.isAutoplayRequested_ = this.element.hasAttribute('autoplay');
 
     /** @private @const {number} */
     this.autoplayDelay_ = 5000;
@@ -101,7 +101,7 @@ export class AmpSlides extends BaseCarousel {
    * @private
    */
   setupAutoplay_() {
-    if (!this.isAutoplaying_) {
+    if (!this.isAutoplayRequested_) {
       return;
     }
 
@@ -118,6 +118,7 @@ export class AmpSlides extends BaseCarousel {
     // is looping. (to be able to advance past the last item)
     if (!this.element.hasAttribute('loop')) {
       this.element.setAttribute('loop', '');
+      this.isLooping_ = true;
     }
 
     // Setup microtask to let the runtime settle.
@@ -133,7 +134,7 @@ export class AmpSlides extends BaseCarousel {
    * @param {boolean} animate
    */
   tryAutoplay_(dir, animate) {
-    if (!this.isAutoplaying_) {
+    if (!this.isAutoplayRequested_) {
       return;
     }
 
