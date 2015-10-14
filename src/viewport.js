@@ -213,8 +213,8 @@ export class Viewport {
    * Resets touch zoom to initial scale of 1.
    */
   resetTouchZoom() {
-    let windowHeight = this.win_.innerHeight;
-    let documentHeight = this.win_.document.documentElement.clientHeight;
+    let windowHeight = this.win_./*OK*/innerHeight;
+    let documentHeight = this.win_.document.documentElement./*OK*/clientHeight;
     if (windowHeight && documentHeight && windowHeight === documentHeight) {
       // This code only works when scrollbar overlay content and take no space,
       // which is fine on mobile. For non-mobile devices this code is
