@@ -21,7 +21,7 @@ import {ElementStub, stubbedElements} from './element-stub';
 import {assert} from './asserts';
 import {log} from './log';
 import {reportError} from './error';
-import {resources} from './resources';
+import {resourcesFor} from './resources';
 import {timer} from './timer';
 import * as dom from './dom';
 
@@ -243,6 +243,9 @@ export function createAmpElementProto(win, name, implementationClass) {
     this.readyState = 'loading';
     this.everAttached = false;
 
+    /** @private @const {!Resources}  */
+    this.resources_ = resourcesFor(win);
+
     /** @private {!Layout} */
     this.layout_ = Layout.NODISPLAY;
 
@@ -307,7 +310,7 @@ export function createAmpElementProto(win, name, implementationClass) {
       this.implementation_.firstAttachedCallback();
       this.dispatchCustomEvent('amp:attached');
     }
-    resources.upgraded(this);
+    this.resources_.upgraded(this);
   };
 
   /**
@@ -439,7 +442,7 @@ export function createAmpElementProto(win, name, implementationClass) {
         reportError(e, this);
       }
     }
-    resources.add(this);
+    this.resources_.add(this);
   };
 
   /**
@@ -447,7 +450,7 @@ export function createAmpElementProto(win, name, implementationClass) {
    * @final
    */
   ElementProto.detachedCallback = function() {
-    resources.remove(this);
+    this.resources_.remove(this);
   };
 
   /**
@@ -514,7 +517,7 @@ export function createAmpElementProto(win, name, implementationClass) {
    * @final
    */
   ElementProto.getLayoutBox = function() {
-    return resources.getResourceForElement(this).getLayoutBox();
+    return this.resources_.getResourceForElement(this).getLayoutBox();
   };
 
   /**
