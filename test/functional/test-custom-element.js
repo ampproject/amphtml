@@ -18,12 +18,13 @@ import {BaseElement} from '../../src/base-element';
 import {ElementStub} from '../../src/element-stub';
 import {Layout} from '../../src/layout';
 import {createAmpElementProto} from '../../src/custom-element';
-import {resources} from '../../src/resources';
+import {resourcesFor} from '../../src/resources';
 import * as sinon from 'sinon';
 
 
 describe('CustomElement', () => {
 
+  let resources = resourcesFor(window);
   let testElementCreatedCallback;
   let testElementFirstAttachedCallback;
   let testElementBuildCallback;

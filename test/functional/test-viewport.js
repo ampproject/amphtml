@@ -52,6 +52,7 @@ describe('Viewport', () => {
     };
     binding = new ViewportBindingVirtual_(windowApi, viewer);
     viewport = new Viewport(windowApi, binding, viewer);
+    viewport.getSize();
   });
 
   afterEach(() => {
