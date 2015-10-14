@@ -19,7 +19,7 @@
  * one of them.
  */
 
-import '../src/polyfills';
+import './polyfills';
 import {a9} from '../ads/a9';
 import {adreactor} from '../ads/adreactor';
 import {adsense} from '../ads/adsense';
