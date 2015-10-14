@@ -19,6 +19,8 @@
  * party iframe.
  */
 
+// Note: loaded by 3p system. Cannot rely on babel polyfills.
+
 
 import {assert} from './asserts';
 

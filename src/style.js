@@ -15,6 +15,8 @@
  */
 
 
+// Note: loaded by 3p system. Cannot rely on babel polyfills.
+
 /** @private @const {!Object<string>} */
 const propertyNameCache_ = Object.create(null);
 
