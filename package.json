@@ -61,7 +61,7 @@
     "mocha": "2.3.3",
     "postcss": "5.0.5",
     "pretty-bytes": "2.0.1",
-    "sinon": "1.15.4",
+    "sinon": "1.17.1",
     "sinon-chai": "2.8.0",
     "text-table": "0.2.0",
     "through2": "2.0.0",
