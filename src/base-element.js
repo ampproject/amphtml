@@ -62,12 +62,13 @@ import {viewportFor} from './viewport';
  *           \/
  *    State: <BUILT>
  *           ||
- *           || layoutCallback      <=
- *           ||                      ||
- *           \/                      || isRelayoutNeeded?
- *    State: <LAID OUT>              ||
- *           ||                      ||
- *           ||                 ======
+ *           || layoutCallback        <==
+             || (firstLayoutCompleted)  ||
+ *           ||                         ||
+ *           \/                         || isRelayoutNeeded?
+ *    State: <LAID OUT>                 ||
+ *           ||                         ||
+ *           ||                 =========
  *           ||
  *           || viewportCallback
  *           ||
