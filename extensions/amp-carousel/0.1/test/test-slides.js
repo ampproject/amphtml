@@ -42,6 +42,7 @@ describe('Slides functional', () => {
     slide0.classList.add('slide0');
     slide1.classList.add('slide1');
     slide2.classList.add('slide2');
+    element.getRealChildren = () => [slide0, slide1, slide2];
     return element;
   }
 

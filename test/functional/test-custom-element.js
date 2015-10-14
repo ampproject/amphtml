@@ -28,6 +28,7 @@ describe('CustomElement', () => {
   let testElementFirstAttachedCallback;
   let testElementBuildCallback;
   let testElementLayoutCallback;
+  let testElementFirstLayoutCompleted;
   let testElementViewportCallback;
   let testElementDocumentInactiveCallback;
   let testElementIsReadyToBuild = true;
@@ -51,6 +52,9 @@ describe('CustomElement', () => {
     layoutCallback() {
       testElementLayoutCallback();
       return Promise.resolve();
+    }
+    firstLayoutCompleted() {
+      testElementFirstLayoutCompleted();
     }
     viewportCallback(inViewport) {
       testElementViewportCallback(inViewport);
@@ -82,6 +86,7 @@ describe('CustomElement', () => {
     testElementFirstAttachedCallback = sinon.spy();
     testElementBuildCallback = sinon.spy();
     testElementLayoutCallback = sinon.spy();
+    testElementFirstLayoutCompleted = sinon.spy();
     testElementViewportCallback = sinon.spy();
     testElementDocumentInactiveCallback = sinon.spy();
   });
@@ -354,6 +359,28 @@ describe('CustomElement', () => {
     });
   });
 
+  it('Element - layoutCallback should call firstLayoutCompleted only once',
+      () => {
+    let element = new ElementClass();
+    element.setAttribute('layout', 'fill');
+    element.build(true);
+
+    let p = element.layoutCallback();
+    expect(testElementLayoutCallback.callCount).to.equal(1);
+    expect(testElementFirstLayoutCompleted.callCount).to.equal(0);
+    return p.then(() => {
+      expect(testElementFirstLayoutCompleted.callCount).to.equal(1);
+
+      // But not second time.
+      let p2 = element.layoutCallback();
+      expect(testElementLayoutCallback.callCount).to.equal(2);
+      expect(testElementFirstLayoutCompleted.callCount).to.equal(1);
+      return p2.then(() => {
+        expect(testElementFirstLayoutCompleted.callCount).to.equal(1);
+      });
+    });
+  });
+
   it('StubElement - layoutCallback', () => {
     let element = new StubElementClass();
     element.setAttribute('layout', 'fill');
@@ -533,5 +560,89 @@ describe('CustomElement', () => {
     // Unupgraded document doesn't receive documentInactiveCallback.
     element.documentInactiveCallback();
     expect(testElementDocumentInactiveCallback.callCount).to.equal(0);
+  });
+});
+
+
+describe('CustomElement Service Elements', () => {
+
+  let StubElementClass = document.registerElement('amp-stub2',  {
+      prototype: createAmpElementProto(window, 'amp-stub2', ElementStub)
+  });
+
+  let sandbox;
+  let element;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+    element = new StubElementClass();
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+    sandbox = null;
+  });
+
+  function createWithAttr(attr) {
+    let child = document.createElement('div');
+    child.setAttribute(attr, '');
+    return child;
+  }
+
+  it('getRealChildren should return nothign', () => {
+    expect(element.getRealChildNodes().length).to.equal(0);
+    expect(element.getRealChildren().length).to.equal(0);
+  });
+
+  it('getRealChildren should return content-only nodes', () => {
+    element.appendChild(document.createElement('i-amp-service'));
+    element.appendChild(createWithAttr('placeholder'));
+    element.appendChild(createWithAttr('fallback'));
+    element.appendChild(document.createTextNode('abc'));
+    element.appendChild(document.createElement('content'));
+
+    let nodes = element.getRealChildNodes();
+    expect(nodes.length).to.equal(2);
+    expect(nodes[0].textContent).to.equal('abc');
+    expect(nodes[1].tagName.toLowerCase()).to.equal('content');
+
+    let elements = element.getRealChildren();
+    expect(elements.length).to.equal(1);
+    expect(elements[0].tagName.toLowerCase()).to.equal('content');
+  });
+
+
+  it('getPlaceholder should return nothing', () => {
+    expect(element.getPlaceholder()).to.be.null;
+  });
+
+  it('getPlaceholder should return the first placeholder', () => {
+    let placeholder1 = element.appendChild(createWithAttr('placeholder'));
+    let placeholder2 = element.appendChild(createWithAttr('placeholder'));
+    expect(element.getPlaceholder()).to.equal(placeholder1);
+  });
+
+  it('togglePlaceholder should do nothing when no placeholder is found', () => {
+    expect(element.getPlaceholder()).to.be.null;
+    element.togglePlaceholder(false);
+  });
+
+  it('togglePlaceholder should do hide placeholder when found', () => {
+    let placeholder1 = element.appendChild(createWithAttr('placeholder'));
+    let placeholder2 = element.appendChild(createWithAttr('placeholder'));
+    element.togglePlaceholder(false);
+    expect(placeholder1).to.have.class('hidden');
+    expect(placeholder2).to.not.have.class('hidden');
+
+    element.togglePlaceholder(true);
+    expect(placeholder1).to.not.have.class('hidden');
+  });
+
+  it('toggleFallback should toggle unsupported class', () => {
+    element.toggleFallback(true);
+    expect(element).to.have.class('amp-notsupported');
+
+    element.toggleFallback(false);
+    expect(element).to.not.have.class('amp-notsupported');
   });
 });

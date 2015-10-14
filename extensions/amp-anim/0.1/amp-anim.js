@@ -33,9 +33,6 @@ class AmpAnim extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    /** @private @const {?Element} */
-    this.placeholder_ = this.getPlaceholder();
-
     /** @private @const {!Element} */
     this.img_ = new Image();
     this.propagateAttributes(['alt'], this.img_);
@@ -43,8 +40,8 @@ class AmpAnim extends AMP.BaseElement {
     this.img_.width = getLengthNumeral(this.element.getAttribute('width'));
     this.img_.height = getLengthNumeral(this.element.getAttribute('height'));
 
-    // The image shown/hidden depends on placeholder.
-    st.toggle(this.img_, !this.placeholder_);
+    // The image is initially hidden if a placeholder is available.
+    st.toggle(this.img_, !this.getPlaceholder());
 
     this.element.appendChild(this.img_);
 
@@ -67,13 +64,16 @@ class AmpAnim extends AMP.BaseElement {
   }
 
   /** @override */
+  firstLayoutCompleted() {
+    // Keep the placeholder: amp-anim is using it to start/stop playing.
+  }
+
+  /** @override */
   viewportCallback(inViewport) {
-    if (this.placeholder_) {
-      if (!inViewport || !this.loadPromise_) {
-        this.updateInViewport_();
-      } else {
-        this.loadPromise_.then(() => this.updateInViewport_());
-      }
+    if (!inViewport || !this.loadPromise_) {
+      this.updateInViewport_();
+    } else {
+      this.loadPromise_.then(() => this.updateInViewport_());
     }
   }
 
@@ -87,7 +87,7 @@ class AmpAnim extends AMP.BaseElement {
   /** @private */
   updateInViewport_() {
     let inViewport = this.isInViewport();
-    this.placeholder_.classList.toggle('hidden', inViewport);
+    this.togglePlaceholder(!inViewport);
     st.toggle(this.img_, inViewport);
   }
 

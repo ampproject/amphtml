@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Layout, isInternalElement} from './layout';
+import {Layout} from './layout';
 import {assert} from './asserts';
 import {preconnectFor} from './preconnect';
 import {resources} from './resources';
@@ -80,7 +80,7 @@ import {viewportFor} from './viewport';
  * is optional.
  */
 export class BaseElement {
-  /** @param {!Element} element */
+  /** @param {!AmpElement} element */
   constructor(element) {
     /** @public @const */
     this.element = element;
@@ -242,6 +242,19 @@ export class BaseElement {
   }
 
   /**
+   * Called to notify the element that the first layout has been successfully
+   * completed.
+   *
+   * The default behavior of this method is to hide the placeholder. However,
+   * a subclass may choose to hide placeholder earlier or not hide it at all.
+   *
+   * @protected
+   */
+  firstLayoutCompleted() {
+    this.togglePlaceholder(false);
+  }
+
+  /**
    * Instructs the resource that it has either entered or exited the visible
    * viewport. Intended to be implemented by actual components.
    * @param {boolean} inViewport
@@ -340,13 +353,25 @@ export class BaseElement {
    * @protected @final
    */
   getPlaceholder() {
-    let children = this.element.children;
-    for (let i = 0; i < children.length; i++) {
-      if (children[i].hasAttribute('placeholder')) {
-        return children[i];
-      }
-    }
-    return null;
+    return this.element.getPlaceholder();
+  }
+
+  /**
+   * Hides or shows the placeholder, if available.
+   * @param {boolean} state
+   * @protected @final
+   */
+  togglePlaceholder(state) {
+    this.element.togglePlaceholder(state);
+  }
+
+  /**
+   * Hides or shows the fallback, if available.
+   * @param {boolean} state
+   * @protected @final
+   */
+  toggleFallback(state) {
+    this.element.toggleFallback(state);
   }
 
   /**
@@ -357,13 +382,7 @@ export class BaseElement {
    * @protected @final
    */
   getRealChildNodes() {
-    let nodes = [];
-    for (let n = this.element.firstChild; n; n = n.nextSibling) {
-      if (!isInternalOrServiceNode(n)) {
-        nodes.push(n);
-      }
-    }
-    return nodes;
+    return this.element.getRealChildNodes();
   }
 
   /**
@@ -373,14 +392,7 @@ export class BaseElement {
    * @protected @final
    */
   getRealChildren() {
-    let elements = [];
-    for (let i = 0; i < this.element.children.length; i++) {
-      let child = this.element.children[i];
-      if (!isInternalOrServiceNode(child)) {
-        elements.push(child);
-      }
-    }
-    return elements;
+    return this.element.getRealChildren();
   }
 
   /**
@@ -473,19 +485,3 @@ export class BaseElement {
     viewerFor(this.element.ownerDocument.defaultView).cancelFullOverlay();
   }
 };
-
-
-/**
- * Returns "true" for internal AMP nodes or for placeholder elements.
- * @param {!Node} node
- * @return {boolean}
- */
-function isInternalOrServiceNode(node) {
-  if (isInternalElement(node)) {
-    return true;
-  }
-  if (node.tagName && node.hasAttribute('placeholder')) {
-    return true;
-  }
-  return false;
-}
