@@ -28,7 +28,7 @@ export function maybeValidate(win) {
     return;
   }
   var filename = win.location.href;
-  if (filename.startsWith('about:')) {  // Should only happen in tests.
+  if (filename.indexOf('about:') == 0) {  // Should only happen in tests.
     return;
   }
   var s = document.createElement('script');

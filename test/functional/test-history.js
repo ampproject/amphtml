@@ -197,14 +197,16 @@ describe('HistoryBindingNatural', () => {
         clock.tick(100);
       });
       let popPromise = history.pop(stackIndex);
-      return Promise.all([histPromise, popPromise]).then((results) => {
-        expect(results[1]).to.equal(window.history.length - 2);
-        expect(history.stackIndex_).to.equal(window.history.length - 2);
-        expect(history.unsupportedState_['AMP.History']).to.equal(
-            window.history.length - 2);
-        expect(onStackIndexUpdated.callCount).to.equal(2);
-        expect(onStackIndexUpdated.getCall(1).args[0]).to.equal(
-            window.history.length - 2);
+      return histPromise.then(hist => {
+        return popPromise.then(pop => {
+          expect(pop).to.equal(window.history.length - 2);
+          expect(history.stackIndex_).to.equal(window.history.length - 2);
+          expect(history.unsupportedState_['AMP.History']).to.equal(
+              window.history.length - 2);
+          expect(onStackIndexUpdated.callCount).to.equal(2);
+          expect(onStackIndexUpdated.getCall(1).args[0]).to.equal(
+              window.history.length - 2);
+        });
       });
     });
   });
