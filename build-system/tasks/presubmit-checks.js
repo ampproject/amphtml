@@ -28,6 +28,9 @@ var srcGlobs = srcGlobs.concat([
 
 var dedicatedCopyrightNoteSources = /(\.js|.css)$/;
 
+var es6polyfill = 'Not available because we do not currently' +
+    ' ship with a needed ES6 polyfill.';
+
 // Terms that must not appear in our source files.
 var forbiddenTerms = {
   'DO NOT SUBMIT': '',
@@ -44,6 +47,16 @@ var forbiddenTerms = {
   'requestFileSystem': '',
   'webkitRequestFileSystem': '',
   'debugger': '',
+
+  // ES6. These are only the most commonly used.
+  'Array\\.from': es6polyfill,
+  'Array\\.of': es6polyfill,
+  // These currently depend on core-js/modules/web.dom.iterable which
+  // we don't want. That decision could be reconsidered.
+  'Promise\\.all': es6polyfill,
+  'Promise\\.race': es6polyfill,
+  '\\.startsWith': es6polyfill,
+  '\\.endsWith': es6polyfill,
 };
 
 var bannedTermsHelpString = 'Please review viewport.js for a helper method ' +
