@@ -196,8 +196,8 @@ function hasAnyTerms(file) {
  * any missing terms
  *
  * @param {!File} file file is a vinyl file object
- * @return {boolean} true if any of the terms are not matched in the file content,
- *   false otherwise
+ * @return {boolean} true if any of the terms are not matched in the file
+ *  content, false otherwise
  */
 function isMissingTerms(file) {
   var contents = file.contents.toString();
