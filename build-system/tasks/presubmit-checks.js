@@ -133,7 +133,7 @@ var requiredTerms = {
  * @param {!File} file a vinyl file object to match terms on content with
  * @param {!Array<string, string>} terms Pairs of regex patterns and possible
  *   fix messages.
- * @return boolean true if any of the terms match the file content,
+ * @return {boolean} true if any of the terms match the file content,
  *   false otherwise
  */
 function matchTerms(file, terms) {
@@ -172,7 +172,7 @@ function matchTerms(file, terms) {
  * forbidden terms
  *
  * @param {!File} file file is a vinyl file object
- * @return boolean true if any of the terms match the file content,
+ * @return {boolean} true if any of the terms match the file content,
  *   false otherwise
  */
 function hasAnyTerms(file) {
@@ -196,7 +196,7 @@ function hasAnyTerms(file) {
  * any missing terms
  *
  * @param {!File} file file is a vinyl file object
- * @return boolean true if any of the terms are not matched in the file content,
+ * @return {boolean} true if any of the terms are not matched in the file content,
  *   false otherwise
  */
 function isMissingTerms(file) {
