@@ -163,8 +163,8 @@ at a time determined by the AMP HTML runtime.
 Include a placeholder before the video starts, and a fallback,
 if the browser doesn't support HTML5 video, for example:
 ```html
-<amp-video width=400 height=300 src="https://yourhost.com/videos/myvideo.mp4">
-  <amp-img placeholder width=400 height=300 src="myvideo-poster.jpg"></amp-img>
+<amp-video width=400 height=300 src="https://yourhost.com/videos/myvideo.mp4"
+    poster="myvideo-poster.jpg">
   <div fallback>
 		<p>Your browser doesn’t support HTML5 video</p>
   </div>
