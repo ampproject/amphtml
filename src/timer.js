@@ -139,7 +139,11 @@ export class Timer {
     if (!opt_racePromise) {
       return delayPromise;
     }
-    return Promise.race([delayPromise, opt_racePromise]);
+    // Avoids Promise->race due to presubmit check against it.
+    return new Promise((resolve, reject) => {
+      delayPromise.then(resolve, reject);
+      opt_racePromise.then(resolve, reject);
+    });
   }
 }
 

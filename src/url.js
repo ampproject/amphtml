@@ -52,7 +52,10 @@ export function assertHttpsUrl(urlString, elementContext) {
   var url = parseUrl(urlString);
   assert(
       url.protocol == 'https:' || /^(\/\/)/.test(urlString) ||
-      url.hostname == 'localhost' || url.hostname.endsWith('.localhost'),
+      url.hostname == 'localhost' ||
+          url.hostname.lastIndexOf('.localhost') ==
+          // Poor person's endsWith
+          url.hostname.length - '.localhost'.length,
       '%s source must start with ' +
       '"https://" or "//" or be relative and served from ' +
       'https. Invalid value: %s',
@@ -71,7 +74,7 @@ export function parseQueryString(queryString) {
   if (!queryString) {
     return params;
   }
-  if (queryString.startsWith('?') || queryString.startsWith('#')) {
+  if (queryString.indexOf('?') == 0 || queryString.indexOf('#') == 0) {
     queryString = queryString.substr(1);
   }
   let pairs = queryString.split('&');
