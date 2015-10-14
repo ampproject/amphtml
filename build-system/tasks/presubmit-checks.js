@@ -130,7 +130,7 @@ var requiredTerms = {
  * patterns), and provides any possible fix information for matched terms if
  * possible
  *
- * @param {!File} file a vinyl file object to match terms on content with
+ * @param {!File} file a vinyl file object to scan for term matches
  * @param {!Array<string, string>} terms Pairs of regex patterns and possible
  *   fix messages.
  * @return {boolean} true if any of the terms match the file content,
