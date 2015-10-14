@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import * as st from '../../../src/style';
+import * as tr from '../../../src/transition';
 import {Animation} from '../../../src/animation';
 import {BaseCarousel} from './base-carousel';
 import {Gestures} from '../../../src/gesture';
@@ -21,8 +23,7 @@ import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {bezierCurve} from '../../../src/curve';
 import {continueMotion} from '../../../src/motion';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import * as st from '../../../src/style';
-import * as tr from '../../../src/transition';
+import {timer} from '../../../src/timer';
 
 
 export class AmpSlides extends BaseCarousel {
@@ -37,6 +38,12 @@ export class AmpSlides extends BaseCarousel {
     /** @private @const {boolean} */
     this.isLooping_ = this.element.hasAttribute('loop');
 
+    /** @private @const {boolean} */
+    this.isAutoplayRequested_ = this.element.hasAttribute('autoplay');
+
+    /** @private @const {number} */
+    this.autoplayDelay_ = 5000;
+
     /** @private {!Array<!Element>} */
     this.slides_ = this.getRealChildren();
     this.slides_.forEach((slide, i) => {
@@ -48,6 +55,11 @@ export class AmpSlides extends BaseCarousel {
 
     /** @private {number} */
     this.currentIndex_ = 0;
+
+    /** @private {?number} */
+    this.autoplayTimeoutId_ = null;
+
+    this.setupAutoplay_();
   }
 
   /** @override */
@@ -81,6 +93,56 @@ export class AmpSlides extends BaseCarousel {
             });
       }
     }
+    this.tryAutoplay_(1, true);
+  }
+
+  /**
+   * Sets up the `autoplay` configuration.
+   * @private
+   */
+  setupAutoplay_() {
+    if (!this.isAutoplayRequested_) {
+      return;
+    }
+
+    let autoplayValue = Number(this.element.getAttribute('autoplay'));
+    // If it isn't a number and is not greater than 0 then don't assign
+    // and use the default.
+    if (autoplayValue > 0) {
+      // Guard against autoplayValue that is lower than 1s to prevent
+      // people from crashing the runtime with providing very low delays.
+      this.autoplayDelay_ = Math.max(1000, autoplayValue);
+    }
+
+    // By default `autoplay` should also mean that the current carousel slide
+    // is looping. (to be able to advance past the last item)
+    if (!this.element.hasAttribute('loop')) {
+      this.element.setAttribute('loop', '');
+      this.isLooping_ = true;
+    }
+
+    // Setup microtask to let the runtime settle.
+    // TODO: (erwinm) experiment with only letting autoplay run if the
+    // carousel is in the viewport.
+    timer.delay(this.tryAutoplay_.bind(this, 1, true), 0);
+  }
+
+  /**
+   * Sets up the autoplay delay if necessary.
+   * @private
+   * @param {number} dir -1 or 1
+   * @param {boolean} animate
+   */
+  tryAutoplay_(dir, animate) {
+    if (!this.isAutoplayRequested_) {
+      return;
+    }
+
+    if (this.autoplayTimeoutId_ !== null) {
+      timer.cancel(this.autoplayTimeoutId_);
+    }
+    this.autoplayTimeoutId_ = timer.delay(this.go.bind(this, dir, animate),
+        this.autoplayDelay_);
   }
 
   /**

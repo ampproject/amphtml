@@ -15,9 +15,9 @@
  */
 
 import {createFixtureIframe, expectBodyToBecomeVisible} from
-    '../../testing/iframe.js';
+    '../../testing/iframe';
 
-describe('amp-carousel', () => {
+describe('integration amp-carousel', () => {
 
   let fixture;
   beforeEach(() => {
