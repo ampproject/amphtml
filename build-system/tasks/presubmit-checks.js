@@ -126,12 +126,15 @@ var requiredTerms = {
 };
 
 /**
- * Logs any issues found in the contents of file based on terms (regex patterns),
- * and provides any possible fix information for matched terms if possible
+ * Logs any issues found in the contents of file based on terms (regex
+ * patterns), and provides any possible fix information for matched terms if
+ * possible
  *
- * @param {!File} file file is a vinyl file object to match terms on content with
- * @param {!Array<string, string>} terms Pairs of regex patterns and possible fix messages.
- * @return boolean true if any of the terms match the file content, false otherwise
+ * @param {!File} file a vinyl file object to match terms on content with
+ * @param {!Array<string, string>} terms Pairs of regex patterns and possible
+ *   fix messages.
+ * @return boolean true if any of the terms match the file content,
+ *   false otherwise
  */
 function matchTerms(file, terms) {
   var pathname = file.path;
@@ -169,7 +172,8 @@ function matchTerms(file, terms) {
  * forbidden terms
  *
  * @param {!File} file file is a vinyl file object
- * @return boolean true if any of the terms match the file content, false otherwise
+ * @return boolean true if any of the terms match the file content,
+ *   false otherwise
  */
 function hasAnyTerms(file) {
   var pathname = file.path;
@@ -188,10 +192,12 @@ function hasAnyTerms(file) {
 }
 
 /**
- * Test if a file's contents fail to match any of the required terms and log any missing terms
+ * Test if a file's contents fail to match any of the required terms and log
+ * any missing terms
  *
  * @param {!File} file file is a vinyl file object
- * @return boolean true if any of the terms are not matched in the file content, false otherwise
+ * @return boolean true if any of the terms are not matched in the file content,
+ *   false otherwise
  */
 function isMissingTerms(file) {
   var contents = file.contents.toString();
@@ -226,7 +232,8 @@ function checkForbiddenAndRequiredTerms() {
       forbiddenFound = files.map(hasAnyTerms).some(function(errorFound) {
         return errorFound;
       });
-      missingRequirements = files.map(isMissingTerms).some(function(errorFound) {
+      missingRequirements = files.map(isMissingTerms).some(
+      	  function(errorFound) {
         return errorFound;
       });
     }))
