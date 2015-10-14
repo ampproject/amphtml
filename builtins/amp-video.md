@@ -43,11 +43,17 @@ For example:
   <source type="video/webm" src="foo.webm">
 </amp-video>
 ```
+
 #### Attributes
 
 **src**
 
 Required if no <source> children are present. Must be HTTPS.
+
+**poster**
+
+The image for the frame to be displayed before video playback has started. By
+default the first frame is displayed.
 
 **autoplay**
 
