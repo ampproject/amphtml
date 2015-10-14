@@ -58,7 +58,7 @@ describe('example', function() {
   });
 
   examples.forEach(filename => {
-    it(filename + ' should validate', () => {
+    it.skipOnTravis(filename + ' should validate', () => {
       var url = '/base/examples/' + filename;
       return get(url).then((html) => {
         var validationResult = amp.validator.validateString(html);

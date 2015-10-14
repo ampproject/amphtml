@@ -15,7 +15,6 @@
  */
 
 import {Observable} from './observable';
-import {assert} from './asserts';
 import {getService} from './service';
 import {layoutRectLtwh} from './layout-rect';
 import {log} from './log';
@@ -239,8 +238,9 @@ export class Viewport {
       // This should never happen in a valid AMP document, thus shortcircuit.
       return false;
     }
-    let currentValue = viewportMeta.content;
-    let newValue = updateViewportMetaString(currentValue, {
+    // Setting maximum-scale=1 and user-scalable=no zooms page back to normal
+    // and prohibit further default zooming.
+    let newValue = updateViewportMetaString(viewportMeta.content, {
       'maximum-scale': '1',
       'user-scalable': 'no'
     });
@@ -280,7 +280,7 @@ export class Viewport {
    */
   getViewportMeta_() {
     if (this.viewer_.isEmbedded()) {
-      // An embedded document does not control its veiwport meta tag.
+      // An embedded document does not control its viewport meta tag.
       return null;
     }
     if (this.viewportMeta_ === undefined) {
@@ -947,16 +947,9 @@ export function parseViewportMeta(content) {
   let pairs = content.split(',');
   for (let i = 0; i < pairs.length; i++) {
     let pair = pairs[i];
-    let eqIndex = pair.indexOf('=');
-    let name;
-    let value;
-    if (eqIndex != -1) {
-      name = pair.substring(0, eqIndex).trim();
-      value = pair.substring(eqIndex + 1).trim();
-    } else {
-      name = pair.trim();
-      value = '';
-    }
+    let [name, value] = pair.split('=');
+    name = name.trim();
+    value = (value || '').trim();
     if (name) {
       params[name] = value;
     }
