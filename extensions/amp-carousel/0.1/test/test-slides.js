@@ -452,8 +452,10 @@ describe('Slides functional', () => {
     let setupAutoplaySpy;
     let goSpy;
     let items;
+    let updateInViewportStub;
+    let isInViewportStub;
 
-    function autoplaySetup(delay = '') {
+    function autoplaySetup(delay = '', inViewport = true) {
       sandbox = sinon.sandbox.create();
       clock = sandbox.useFakeTimers();
       setupElements();
@@ -464,9 +466,14 @@ describe('Slides functional', () => {
       goSpy = sinon.spy(AmpSlides.prototype, 'go');
       setupSlides();
       setupSpies();
+      setupInViewport(inViewport);
       items = [slide0, slide1, slide2];
     }
 
+    function setupInViewport(inViewport) {
+      updateInViewportStub = sinon.stub(slides, 'updateInViewport');
+      isInViewportStub = sinon.stub(slides, 'isInViewport').returns(inViewport);
+    }
 
     afterEach(() => {
       teardownElements();
@@ -476,6 +483,8 @@ describe('Slides functional', () => {
       sandbox = null;
       setupAutoplaySpy.restore();
       tryAutoplaySpy.restore();
+      updateInViewportStub.restore();
+      isInViewportStub.restore();
       goSpy.restore();
       items = null;
     });
@@ -488,44 +497,74 @@ describe('Slides functional', () => {
     it('should add `loop` attribute', () => {
       autoplaySetup();
       expect(element.hasAttribute('loop')).to.be.true;
+      expect(slides.isLooping_).to.be.true;
     });
 
-    it('should call tryAutoplay_ after a microtask', () => {
-      autoplaySetup();
-      expect(tryAutoplaySpy.callCount).to.equal(0);
+    describe('in viewport', () => {
 
-      return timer.promise(0).then(() => {
+      it('should call tryAutoplay_', () => {
+        autoplaySetup();
+        expect(tryAutoplaySpy.callCount).to.equal(0);
+
+        slides.viewportCallback(true);
         expect(tryAutoplaySpy.callCount).to.equal(1);
+        expect(isInViewportStub.callCount).to.equal(1);
       });
-    });
 
-    it('should call `go` after 5000ms(default)', () => {
-      autoplaySetup();
-      expect(tryAutoplaySpy.callCount).to.equal(0);
-      expect(goSpy.callCount).to.equal(0);
+      it('should call `go` after 5000ms(default)', () => {
+        autoplaySetup();
 
-      return timer.promise(0).then(() => {
+        expect(tryAutoplaySpy.callCount).to.equal(0);
+        expect(goSpy.callCount).to.equal(0);
+
+        slides.viewportCallback(true);
+
         expect(tryAutoplaySpy.callCount).to.equal(1);
         expect(goSpy.callCount).to.equal(0);
 
         clock.tick(5000);
+
+        expect(tryAutoplaySpy.callCount).to.equal(2);
+        expect(goSpy.callCount).to.equal(1);
+      });
+
+      it('should call `go` after 2000ms (set by user)', () => {
+        autoplaySetup(2000);
+
+        expect(tryAutoplaySpy.callCount).to.equal(0);
+        expect(goSpy.callCount).to.equal(0);
+
+        slides.viewportCallback(true);
+
+        expect(tryAutoplaySpy.callCount).to.equal(1);
+        expect(goSpy.callCount).to.equal(0);
+
+        clock.tick(2000);
+
         expect(tryAutoplaySpy.callCount).to.equal(2);
         expect(goSpy.callCount).to.equal(1);
       });
     });
 
-    it('should call `go` after 2000ms (set by user)', () => {
-      autoplaySetup(2000);
-      expect(tryAutoplaySpy.callCount).to.equal(0);
-      expect(goSpy.callCount).to.equal(0);
+    describe('not in viewport', () => {
 
-      return timer.promise(0).then(() => {
-        expect(tryAutoplaySpy.callCount).to.equal(1);
+      it('should not call `go`', () => {
+        autoplaySetup(5000, false);
+
+        expect(tryAutoplaySpy.callCount).to.equal(0);
         expect(goSpy.callCount).to.equal(0);
 
-        clock.tick(2000);
-        expect(tryAutoplaySpy.callCount).to.equal(2);
-        expect(goSpy.callCount).to.equal(1);
+        slides.viewportCallback(false);
+
+        expect(tryAutoplaySpy.callCount).to.equal(1);
+        expect(isInViewportStub.callCount).to.equal(1);
+        expect(goSpy.callCount).to.equal(0);
+
+        clock.tick(5000);
+
+        expect(tryAutoplaySpy.callCount).to.equal(1);
+        expect(isInViewportStub.callCount).to.equal(1);
+        expect(goSpy.callCount).to.equal(0);
       });
     });
   });
