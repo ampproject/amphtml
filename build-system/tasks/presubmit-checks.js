@@ -26,7 +26,7 @@ var srcGlobs = srcGlobs.concat([
   '!gulpfile.js',
 ]);
 
-var dedicatedCopyrightNoteSources = /(\.js|.css)$/;
+var dedicatedCopyrightNoteSources = /(\.js|\.css)$/;
 
 var es6polyfill = 'Not available because we do not currently' +
     ' ship with a needed ES6 polyfill.';
