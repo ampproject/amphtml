@@ -15,6 +15,7 @@
  */
 
 import {Observable} from './observable';
+import {assert} from './asserts.js';
 import {getService} from './service';
 import {layoutRectLtwh} from './layout-rect';
 import {log} from './log';
@@ -62,14 +63,19 @@ export class Viewport {
     /** @const {!Viewer} */
     this.viewer_ = viewer;
 
-    /** @private {number} */
-    this.width_ = this.getSize().width;
+    /**
+     * Used to cache the size of the viewport. Also used as last known size,
+     * so users should call getSize early on to get a value. The timing should
+     * be chosen to avoid extra style recalcs.
+     * @private {{width: number, height: number}|null}
+     */
+    this.size_ = null;
 
-    /** @private {number} */
-    this./*OK*/scrollTop_ = this.binding_.getScrollTop();
+    /** @private {?number} */
+    this./*OK*/scrollTop_ = null;
 
-    /** @private {number} */
-    this./*OK*/scrollLeft_ = this.binding_.getScrollLeft();
+    /** @private {?number} */
+    this./*OK*/scrollLeft_ = null;
 
     /** @private {number} */
     this.paddingTop_ = viewer.getPaddingTop();
@@ -102,7 +108,6 @@ export class Viewport {
 
     this.binding_.onScroll(this.scroll_.bind(this));
     this.binding_.onResize(this.resize_.bind(this));
-    this.changed_(/* relayoutAll */ false, /* velocity */ 0);
   }
 
   /** For testing. */
@@ -133,6 +138,9 @@ export class Viewport {
    * @return {number}
    */
   getScrollTop() {
+    if (this./*OK*/scrollTop_ == null) {
+      this./*OK*/scrollTop_ = this.binding_.getScrollTop();
+    }
     return this./*OK*/scrollTop_;
   }
 
@@ -141,6 +149,9 @@ export class Viewport {
    * @return {number}
    */
   getScrollLeft() {
+    if (this./*OK*/scrollleft_ == null) {
+      this./*OK*/scrollLeft_ = this.binding_.getScrollLeft();
+    }
     return this./*OK*/scrollLeft_;
   }
 
@@ -149,7 +160,10 @@ export class Viewport {
    * @return {!{width: number, height: number}}
    */
   getSize() {
-    return this.binding_.getSize();
+    if (this.size_) {
+      return this.size_;
+    }
+    return this.size_ = this.binding_.getSize();
   }
 
   /**
@@ -157,7 +171,7 @@ export class Viewport {
    * @return {number}
    */
   getWidth() {
-    return this.binding_.getSize().width;
+    return this.getSize().width;
   }
 
   /**
@@ -366,9 +380,10 @@ export class Viewport {
 
   /** @private */
   resize_() {
-    let oldWidth = this.width_;
-    this.width_ = this.getSize().width;
-    this.changed_(oldWidth != this.width_, 0);
+    let oldSize = this.size_;
+    this.size_ = null;  // Need to recalc.
+    let newSize = this.getSize();
+    this.changed_(oldSize.width != newSize.width, 0);
   }
 }
 

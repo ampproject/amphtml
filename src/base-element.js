@@ -17,7 +17,7 @@
 import {Layout} from './layout';
 import {assert} from './asserts';
 import {preconnectFor} from './preconnect';
-import {resources} from './resources';
+import {resourcesFor} from './resources';
 import {viewerFor} from './viewer';
 import {viewportFor} from './viewport';
 
@@ -100,6 +100,9 @@ export class BaseElement {
 
     /** @protected {!Preconnect} */
     this.preconnect = preconnectFor(element.ownerDocument.defaultView);
+
+    /** @private {!Resources}  */
+    this.resources_ = resourcesFor(element.ownerDocument.defaultView);
   }
 
   /** @return {!Layout} */
@@ -195,7 +198,7 @@ export class BaseElement {
    * @param {!Element} element
    */
   setAsOwner(element) {
-    resources.setOwner(element, this.element);
+    this.resources_.setOwner(element, this.element);
   }
 
   /**
@@ -320,7 +323,7 @@ export class BaseElement {
    * @return {number}
    */
   getMaxDpr() {
-    return resources.getMaxDpr();
+    return this.resources_.getMaxDpr();
   }
 
   /**
@@ -328,7 +331,7 @@ export class BaseElement {
    * @return {number}
    */
   getDpr() {
-    return resources.getDpr();
+    return this.resources_.getDpr();
   }
 
   /**
@@ -423,7 +426,7 @@ export class BaseElement {
    * @protected
    */
   scheduleLayout(elements) {
-    resources.scheduleLayout(this.element, elements);
+    this.resources_.scheduleLayout(this.element, elements);
   }
 
   /**
@@ -435,7 +438,7 @@ export class BaseElement {
    * @protected
    */
   schedulePreload(elements) {
-    resources.schedulePreload(this.element, elements);
+    this.resources_.schedulePreload(this.element, elements);
   }
 
   /**
@@ -447,7 +450,7 @@ export class BaseElement {
    * @protected
    */
   updateInViewport(elements, inLocalViewport) {
-    resources.updateInViewport(this.element, elements, inLocalViewport);
+    this.resources_.updateInViewport(this.element, elements, inLocalViewport);
   }
 
   /**
@@ -458,7 +461,7 @@ export class BaseElement {
    * @protected
    */
   changeHeight(newHeight) {
-    resources.changeHeight(this.element, newHeight);
+    this.resources_.changeHeight(this.element, newHeight);
   }
 
   /**
@@ -467,7 +470,7 @@ export class BaseElement {
    * @param {!Function} callback
    */
   deferMutate(callback) {
-    resources.deferMutate(this.element, callback);
+    this.resources_.deferMutate(this.element, callback);
   }
 
   /**
