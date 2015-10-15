@@ -20,9 +20,10 @@ import {getLengthNumeral, isLayoutSizeDefined} from '../src/layout';
 import {loadPromise} from '../src/event-helper';
 import {parseSrcset} from '../src/srcset';
 import {registerElement} from '../src/custom-element';
-import {timer} from '../src/timer';
-import {vsync} from '../src/vsync';
 import {removeElement} from '../src/dom';
+import {timer} from '../src/timer';
+import {viewport} from '../src/viewport';
+import {vsync} from '../src/vsync';
 
 
 /**
@@ -51,9 +52,6 @@ export function installImg(win) {
       this.placeholder_ = this.getPlaceholder();
 
       /** @private {boolean} */
-      this.isDefaultPlaceholder_ = !this.placeholder_;
-
-      /** @private {boolean} */
       this.imgLoadedOnce_ = false;
 
       if (this.element.id) {
@@ -65,6 +63,12 @@ export function installImg(win) {
       this.img_.width = getLengthNumeral(this.element.getAttribute('width'));
       this.img_.height = getLengthNumeral(this.element.getAttribute('height'));
 
+      let minPlaceholderWidth = Math.floor(viewport.getSize().width / 3);
+
+      /** @private {boolean} */
+      this.hasDefaultPlaceholder_ = this.img_.width >= minPlaceholderWidth ?
+          !this.placeholder_ : false;
+
       this.element.appendChild(this.img_);
 
       /** @private @const {!Srcset} */
@@ -72,7 +76,7 @@ export function installImg(win) {
           this.element.getAttribute('src'));
 
       // Default placeholdder
-      if (this.isDefaultPlaceholder_) {
+      if (this.hasDefaultPlaceholder_) {
         this.placeholder_ = createLoaderElement();
         this.placeholder_.setAttribute('placeholder', '');
         this.element.appendChild(this.placeholder_);
@@ -123,7 +127,7 @@ export function installImg(win) {
 
     /** @private */
     toggleDefaultPlaceholder_() {
-      if (this.isDefaultPlaceholder_) {
+      if (this.hasDefaultPlaceholder_) {
         if (!this.isInViewport()) {
           this.placeholder_.classList.toggle('hidden', true);
           this.placeholder_.classList.toggle('active', false);
@@ -149,8 +153,8 @@ export function installImg(win) {
      * @private
      */
     cleanupPlaceholder_() {
-      if (this.isDefaultPlaceholder_) {
-        this.isDefaultPlaceholder_ = false;
+      if (this.hasDefaultPlaceholder_) {
+        this.hasDefaultPlaceholder_ = false;
         let placeholder = this.placeholder_;
         this.placeholder_ = null;
         placeholder.classList.remove('active');
