@@ -43,6 +43,7 @@ describe('example', function() {
     'instagram.amp.html',
     'released.amp.html',
     'twitter.amp.html',
+    'vine.amp.html',
   ];
 
   /**

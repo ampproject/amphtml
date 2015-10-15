@@ -80,6 +80,7 @@ function buildExtensions(options) {
    */
   buildExtension('amp-slides', '0.1', false, options);
   buildExtension('amp-twitter', '0.1', false, options);
+  buildExtension('amp-vine', '0.1', false, options);
   buildExtension('amp-youtube', '0.1', false, options);
 }
 
@@ -297,6 +298,7 @@ function buildExamples(watch) {
   buildExample('instagram.amp.html');
   buildExample('released.amp.html');
   buildExample('twitter.amp.html');
+  buildExample('vine.amp.html');
 }
 
 /**
