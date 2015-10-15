@@ -308,7 +308,7 @@ The AMP HTML format is designed so that is always the case.
 
 Currently, the following SVG elements are allowed:
 
-* basics: "g", "path", "glyph", "glyphRef", "marker", "view"
+* basics: "svg", "g", "path", "glyph", "glyphRef", "marker", "view"
 * shapes: "circle", "line", "polygon", "polyline", "rect"
 * text: "text", "textPath", "tref", "tspan"
 * rendering: "clipPath", "filter", "linearGradient", "radialGradient", "mask", "pattern", "vkern", "hkern"
