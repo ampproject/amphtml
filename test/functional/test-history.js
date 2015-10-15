@@ -56,8 +56,8 @@ describe('History', () => {
     sandbox = null;
   });
 
-  it.skipOnFirefox('should initialize correctly', () => {
-    expect(history.stackIndex_).to.equal(window.history.length - 1);
+  it('should initialize correctly', () => {
+    expect(history.stackIndex_).to.equal(0);
     expect(history.stackOnPop_.length).to.equal(0);
     expect(onStackIndexUpdated).to.not.equal(null);
   });
