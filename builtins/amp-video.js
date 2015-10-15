@@ -53,7 +53,7 @@ export function installVideo(win) {
           video);
       video.width = getLengthNumeral(width);
       video.height = getLengthNumeral(height);
-      this.applyFillContent(video);
+      this.applyFillContent(video, true);
       this.getRealChildNodes().forEach(child => {
         if (child.getAttribute && child.getAttribute('src')) {
           assertHttpsUrl(child.getAttribute('src'), child);

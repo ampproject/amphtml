@@ -1287,10 +1287,6 @@ export class Resource {
     if (inViewport == this.isInViewport_) {
       return;
     }
-    if (this.state_ == ResourceState_.NOT_BUILT) {
-      // Can't send any events to unbuilt element.
-      return;
-    }
     log.fine(TAG_, 'inViewport:', this.debugid, inViewport);
     this.isInViewport_ = inViewport;
     this.element.viewportCallback(inViewport);

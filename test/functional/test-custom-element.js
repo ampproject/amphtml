@@ -16,9 +16,10 @@
 
 import {BaseElement} from '../../src/base-element';
 import {ElementStub} from '../../src/element-stub';
-import {Layout} from '../../src/layout';
+import {LOADING_ELEMENTS_, Layout} from '../../src/layout';
 import {createAmpElementProto} from '../../src/custom-element';
 import {resourcesFor} from '../../src/resources';
+import {vsync} from '../../src/vsync';
 import * as sinon from 'sinon';
 
 
@@ -400,70 +401,6 @@ describe('CustomElement', () => {
   });
 
 
-  it('Element - viewportCallback before build', () => {
-    let element = new ElementClass();
-    element.setAttribute('layout', 'fill');
-    expect(testElementViewportCallback.callCount).to.equal(0);
-
-    expect(element.isBuilt()).to.equal(false);
-    expect(() => {
-      element.viewportCallback();
-    }).to.throw(/Must be upgraded and built to receive viewport events/);
-
-    expect(testElementViewportCallback.callCount).to.equal(0);
-  });
-
-  it('StubElement - viewportCallback before build or upgrade', () => {
-    let element = new StubElementClass();
-    element.setAttribute('layout', 'fill');
-    expect(testElementViewportCallback.callCount).to.equal(0);
-
-    expect(element.isUpgraded()).to.equal(false);
-    expect(element.isBuilt()).to.equal(false);
-    expect(() => {
-      element.viewportCallback();
-    }).to.throw(/Must be upgraded and built to receive viewport events/);
-
-    resourcesMock.expects('upgraded').withExactArgs(element).once();
-    element.upgrade(TestElement);
-
-    expect(element.isUpgraded()).to.equal(true);
-    expect(element.isBuilt()).to.equal(false);
-    expect(() => {
-      element.viewportCallback();
-    }).to.throw(/Must be upgraded and built to receive viewport events/);
-
-    expect(testElementViewportCallback.callCount).to.equal(0);
-  });
-
-  it('Element - viewportCallback', () => {
-    let element = new ElementClass();
-    element.setAttribute('layout', 'fill');
-    element.build(true);
-    expect(element.isBuilt()).to.equal(true);
-    expect(testElementViewportCallback.callCount).to.equal(0);
-
-    element.viewportCallback(true);
-    expect(element.implementation_.inViewport_).to.equal(true);
-    expect(testElementViewportCallback.callCount).to.equal(1);
-  });
-
-  it('StubElement - viewportCallback', () => {
-    let element = new StubElementClass();
-    element.setAttribute('layout', 'fill');
-    resourcesMock.expects('upgraded').withExactArgs(element).once();
-    element.upgrade(TestElement);
-    element.build(true);
-    expect(element.isUpgraded()).to.equal(true);
-    expect(element.isBuilt()).to.equal(true);
-    expect(testElementViewportCallback.callCount).to.equal(0);
-
-    element.viewportCallback(true);
-    expect(element.implementation_.inViewport_).to.equal(true);
-    expect(testElementViewportCallback.callCount).to.equal(1);
-  });
-
-
   it('should enqueue actions until built', () => {
     let element = new ElementClass();
     let handler = sinon.spy();
@@ -562,6 +499,79 @@ describe('CustomElement', () => {
     element.documentInactiveCallback();
     expect(testElementDocumentInactiveCallback.callCount).to.equal(0);
   });
+
+  describe('viewportCallback', () => {
+    it('Element should allow, but not delegate before build', () => {
+      let element = new ElementClass();
+      element.setAttribute('layout', 'fill');
+      expect(testElementViewportCallback.callCount).to.equal(0);
+
+      expect(element.isBuilt()).to.equal(false);
+      element.viewportCallback(true);
+      expect(element.isInViewport_).to.equal(true);
+      expect(testElementViewportCallback.callCount).to.equal(0);
+    });
+
+    it('StubElement - should not delegate before build or upgrade', () => {
+      let element = new StubElementClass();
+      element.setAttribute('layout', 'fill');
+      expect(testElementViewportCallback.callCount).to.equal(0);
+
+      expect(element.isUpgraded()).to.equal(false);
+      expect(element.isBuilt()).to.equal(false);
+      element.viewportCallback(true);
+      expect(element.isInViewport_).to.equal(true);
+      expect(testElementViewportCallback.callCount).to.equal(0);
+
+      resourcesMock.expects('upgraded').withExactArgs(element).once();
+      element.upgrade(TestElement);
+
+      expect(element.isUpgraded()).to.equal(true);
+      expect(element.isBuilt()).to.equal(false);
+      element.viewportCallback(false);
+      expect(element.isInViewport_).to.equal(false);
+      expect(testElementViewportCallback.callCount).to.equal(0);
+    });
+
+    it('Element - should be called once built', () => {
+      let element = new ElementClass();
+      element.setAttribute('layout', 'fill');
+      element.build(true);
+      expect(element.isBuilt()).to.equal(true);
+      expect(testElementViewportCallback.callCount).to.equal(0);
+
+      element.viewportCallback(true);
+      expect(element.implementation_.inViewport_).to.equal(true);
+      expect(testElementViewportCallback.callCount).to.equal(1);
+    });
+
+    it('StubElement - should be called once upgraded', () => {
+      let element = new StubElementClass();
+      element.setAttribute('layout', 'fill');
+      resourcesMock.expects('upgraded').withExactArgs(element).once();
+      element.upgrade(TestElement);
+      element.build(true);
+      expect(element.isUpgraded()).to.equal(true);
+      expect(element.isBuilt()).to.equal(true);
+      expect(testElementViewportCallback.callCount).to.equal(0);
+
+      element.viewportCallback(true);
+      expect(element.implementation_.inViewport_).to.equal(true);
+      expect(testElementViewportCallback.callCount).to.equal(1);
+    });
+
+    it('Element - should be called on built if in viewport', () => {
+      let element = new ElementClass();
+      element.setAttribute('layout', 'fill');
+      element.viewportCallback(true);
+      expect(element.isInViewport_).to.equal(true);
+      expect(testElementViewportCallback.callCount).to.equal(0);
+
+      element.build(true);
+      expect(element.isBuilt()).to.equal(true);
+      expect(testElementViewportCallback.callCount).to.equal(1);
+    });
+  });
 });
 
 
@@ -632,11 +642,11 @@ describe('CustomElement Service Elements', () => {
     let placeholder1 = element.appendChild(createWithAttr('placeholder'));
     let placeholder2 = element.appendChild(createWithAttr('placeholder'));
     element.togglePlaceholder(false);
-    expect(placeholder1).to.have.class('hidden');
-    expect(placeholder2).to.not.have.class('hidden');
+    expect(placeholder1).to.have.class('amp-hidden');
+    expect(placeholder2).to.not.have.class('amp-hidden');
 
     element.togglePlaceholder(true);
-    expect(placeholder1).to.not.have.class('hidden');
+    expect(placeholder1).to.not.have.class('amp-hidden');
   });
 
   it('toggleFallback should toggle unsupported class', () => {
@@ -645,5 +655,229 @@ describe('CustomElement Service Elements', () => {
 
     element.toggleFallback(false);
     expect(element).to.not.have.class('amp-notsupported');
+  });
+});
+
+
+describe('CustomElement Loading Indicator', () => {
+
+  class TestElement extends BaseElement {
+  }
+  let ElementClass = document.registerElement('amp-test2',  {
+      prototype: createAmpElementProto(window, 'amp-test2', TestElement)
+  });
+
+  let resources = resourcesFor(window);
+  let sandbox;
+  let clock;
+  let element;
+  let savedMutate;
+  let vsyncTasks;
+  let resourcesMock;
+
+  beforeEach(() => {
+    LOADING_ELEMENTS_['amp-test2'.toUpperCase()] = true;
+    sandbox = sinon.sandbox.create();
+    clock = sandbox.useFakeTimers();
+    resourcesMock = sandbox.mock(resources);
+    element = new ElementClass();
+    element.layoutWidth_ = 300;
+    element.layout_ = Layout.FIXED;
+    savedMutate = vsync.mutate;
+    vsyncTasks = [];
+    vsync.mutate = (mutator) => {
+      vsyncTasks.push(mutator);
+    };
+  });
+
+  afterEach(() => {
+    vsync.mutate = savedMutate;
+    resourcesMock.verify();
+    resourcesMock.restore();
+    clock.restore();
+    sandbox.restore();
+    sandbox = null;
+  });
+
+
+  it('should be enabled by default', () => {
+    expect(element.isLoadingEnabled_()).to.be.true;
+  });
+
+  it('should disable when explicitly disabled by the attribute', () => {
+    element.setAttribute('noloading', '');
+    expect(element.isLoadingEnabled_()).to.be.false;
+  });
+
+  it('should disable when element is not whitelisted', () => {
+    LOADING_ELEMENTS_['amp-test2'.toUpperCase()] = false;
+    expect(element.isLoadingEnabled_()).to.be.false;
+  });
+
+  it('should disable when not measured or too small', () => {
+    element.layoutWidth_ = 0;
+    expect(element.isLoadingEnabled_()).to.be.false;
+
+    element.layoutWidth_ = 10;
+    expect(element.isLoadingEnabled_()).to.be.false;
+  });
+
+  it('should disable when element has already been laid out', () => {
+    element.layoutCount_ = 1;
+    expect(element.isLoadingEnabled_()).to.be.false;
+  });
+
+  it('should disable when element is a placeholder itself', () => {
+    element.setAttribute('placeholder', '');
+    expect(element.isLoadingEnabled_()).to.be.false;
+  });
+
+  it('should disable when element is not sized', () => {
+    element.layout_ = Layout.CONTAINER;
+    expect(element.isLoadingEnabled_()).to.be.false;
+
+    element.layout_ = Layout.NODISPLAY;
+    expect(element.isLoadingEnabled_()).to.be.false;
+  });
+
+
+  it('should ignore loading-off if never created', () => {
+    element.toggleLoading_(false);
+    expect(vsyncTasks).to.be.empty;
+  });
+
+  it('should ignore loading-on if not allowed', () => {
+    element.setAttribute('noloading', '');
+    element.toggleLoading_(true);
+    expect(vsyncTasks).to.be.empty;
+  });
+
+  it('should create and turn on', () => {
+    element.toggleLoading_(true);
+    expect(vsyncTasks).to.have.length.of(1);
+
+    vsyncTasks.shift()();
+    expect(element.loadingContainer_).to.not.be.null;
+    expect(element.loadingContainer_).to.not.have.class('amp-hidden');
+    expect(element.loadingElement_).to.not.be.null;
+    expect(element.loadingElement_).to.have.class('amp-active');
+    expect(vsyncTasks).to.have.length.of(0);
+  });
+
+  it('should turn on already created', () => {
+    element.prepareLoading_();
+    let container = element.loadingContainer_;
+    let indicator = element.loadingElement_;
+    element.toggleLoading_(true);
+    expect(vsyncTasks).to.have.length.of(1);
+
+    vsyncTasks.shift()();
+    expect(element.loadingContainer_).to.equal(container);
+    expect(element.loadingContainer_).to.not.have.class('amp-hidden');
+    expect(element.loadingElement_).to.equal(indicator);
+    expect(element.loadingElement_).to.have.class('amp-active');
+    expect(vsyncTasks).to.have.length.of(0);
+  });
+
+  it('should turn off', () => {
+    element.prepareLoading_();
+    element.toggleLoading_(false);
+    expect(vsyncTasks).to.have.length.of(1);
+
+    vsyncTasks.shift()();
+    expect(element.loadingContainer_).to.not.be.null;
+    expect(element.loadingContainer_).to.have.class('amp-hidden');
+    expect(element.loadingElement_).to.not.be.null;
+    expect(element.loadingElement_).to.not.have.class('amp-active');
+    expect(vsyncTasks).to.have.length.of(0);
+  });
+
+  it('should turn off and cleanup', () => {
+    element.prepareLoading_();
+    resourcesMock.expects('deferMutate').once();
+    element.toggleLoading_(false, true);
+
+    expect(vsyncTasks).to.have.length.of(1);
+    vsyncTasks.shift()();
+    expect(element.loadingContainer_).to.be.null;
+    expect(element.loadingElement_).to.be.null;
+  });
+
+
+  it('should turn off when exits viewport', () => {
+    let toggle = sandbox.spy(element, 'toggleLoading_');
+    element.viewportCallback(false);
+    expect(toggle.callCount).to.equal(1);
+    expect(toggle.firstCall.args[0]).to.equal(false);
+    expect(toggle.firstCall.args[1]).to.be.undefined;
+  });
+
+  it('should NOT turn off when exits viewport but already laid out', () => {
+    let toggle = sandbox.spy(element, 'toggleLoading_');
+    element.layoutCount_ = 1;
+    element.viewportCallback(false);
+    expect(toggle.callCount).to.equal(0);
+  });
+
+  it('should turn on when enters viewport', () => {
+    let toggle = sandbox.spy(element, 'toggleLoading_');
+    element.viewportCallback(true);
+    clock.tick(1000);
+    expect(toggle.callCount).to.equal(1);
+    expect(toggle.firstCall.args[0]).to.equal(true);
+  });
+
+  it('should NOT turn on when enters viewport but already laid out', () => {
+    let toggle = sandbox.spy(element, 'toggleLoading_');
+    element.layoutCount_ = 1;
+    element.viewportCallback(true);
+    clock.tick(1000);
+    expect(toggle.callCount).to.equal(0);
+  });
+
+
+  it('should start loading when measured if already in viewport', () => {
+    let toggle = sandbox.spy(element, 'toggleLoading_');
+    element.isInViewport_ = true;
+    element.updateLayoutBox({top: 0, width: 300});
+    expect(toggle.callCount).to.equal(1);
+    expect(toggle.firstCall.args[0]).to.equal(true);
+  });
+
+  it('should create loading when measured if in the top window', () => {
+    let toggle = sandbox.spy(element, 'toggleLoading_');
+    element.updateLayoutBox({top: 0, width: 300});
+    expect(toggle.callCount).to.equal(0);
+    expect(vsyncTasks).to.have.length.of(1);
+    vsyncTasks.shift()();
+    expect(element.loadingContainer_).to.not.be.null;
+    expect(element.loadingContainer_).to.have.class('amp-hidden');
+  });
+
+
+  it('should toggle loading off after layout complete', () => {
+    let toggle = sandbox.spy(element, 'toggleLoading_');
+    element.build(true);
+    return element.layoutCallback().then(() => {
+      expect(toggle.callCount).to.equal(1);
+      expect(toggle.firstCall.args[0]).to.equal(false);
+      expect(toggle.firstCall.args[1]).to.equal(true);
+    }, () => {
+      throw new Error('Should never happen.');
+    });
+  });
+
+  it('should toggle loading off after layout failed', () => {
+    let toggle = sandbox.spy(element, 'toggleLoading_');
+    let implMock = sandbox.mock(element.implementation_);
+    implMock.expects('layoutCallback').returns(Promise.reject());
+    element.build(true);
+    return element.layoutCallback().then(() => {
+      throw new Error('Should never happen.');
+    }, () => {
+      expect(toggle.callCount).to.equal(1);
+      expect(toggle.firstCall.args[0]).to.equal(false);
+      expect(toggle.firstCall.args[1]).to.equal(true);
+    });
   });
 });
