@@ -1178,6 +1178,7 @@ export class Resource {
    * @return {boolean}
    */
   renderOutsideViewport() {
+
     return this.element.renderOutsideViewport();
   }
 
