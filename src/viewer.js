@@ -213,7 +213,7 @@ export class Viewer {
    * name or "undefined" if the parameter wasn't defined at startup time.
    * @param {string} name
    * @return {string|undefined}
-   * @expose
+   * @export
    */
   getParam(name) {
     return this.params_[name];
@@ -426,7 +426,7 @@ export class Viewer {
    * @param {boolean} awaitResponse
    * @return {(!Promise<*>|undefined)}
    * @package
-   * @expose
+   * @export
    */
   receiveMessage(eventType, data, awaitResponse) {
     if (eventType == 'viewport') {
@@ -472,7 +472,7 @@ export class Viewer {
    * messages to the viewer.
    * @param {function(string, *, boolean):(!Promise<*>|undefined)} deliverer
    * @package
-   * @expose
+   * @export
    */
   setMessageDeliverer(deliverer) {
     assert(!this.messageDeliverer_, 'message deliverer can only be set once');

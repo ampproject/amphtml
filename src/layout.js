@@ -215,8 +215,8 @@ export function getNaturalDimensions(tagName) {
     temp.style.visibility = 'hidden';
     document.body.appendChild(temp);
     naturalDimensions_[tagName] = {
-      width: temp./*OK*/offsetWidth,
-      height: temp./*OK*/offsetHeight
+      width: temp./*OK*/offsetWidth || 1,
+      height: temp./*OK*/offsetHeight || 1
     };
     document.body.removeChild(temp);
   }
