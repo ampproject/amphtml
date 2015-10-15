@@ -23,7 +23,7 @@ var extend = require('util')._extend;
 
 /**
  * Read in and process the configuration settings for karma
- * @return {Object} Karma configuration
+ * @return {!Object} Karma configuration
  */
 function getConfig() {
   var obj = Object.create(null);

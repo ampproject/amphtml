@@ -81,7 +81,7 @@ function onFileThroughEnd(rows , cb) {
 /**
  * Setup through2 to capture size information using the above transform and
  * flush functions on a stream
- * @return {!Object} a Writable Stream
+ * @return {!Stream} a Writable Stream
  */
 function sizer() {
   var rows = [];
