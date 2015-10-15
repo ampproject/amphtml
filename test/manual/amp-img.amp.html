@@ -6,9 +6,8 @@
   <link rel="canonical" href="amps.html" >
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
-  <style>
+  <style amp-custom>
     body {
-      max-width: 527px;
       font-family: 'Questrial', Arial;
     }
 
@@ -22,9 +21,11 @@
   <script async src="../../dist/amp.js" development></script>
 </head>
 <body>
-  <h1>AMP #0</h1>
-  <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no" layout=fill></amp-img>
-  <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w400-h300-no" width=400 height=300></amp-img>
-  <amp-img src="https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w400-h300-no" width=400 height=300></amp-img>
+  <h1>amp-image</h1>
+  <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no" width=400 height=300 layout=responsive noloading>
+    <div placeholder>Waiting for the image!</div>
+  </amp-img>
+  <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w400-h300-no" width=400 height=300 layout=responsive></amp-img>
+  <amp-img src="https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w400-h300-no" width=400 height=300 layout=responsive></amp-img>
 </body>
 </html>
