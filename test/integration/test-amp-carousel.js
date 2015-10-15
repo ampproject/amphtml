@@ -46,7 +46,8 @@ describe('integration amp-carousel', () => {
       fixture.doc.body.classList.add('amp-mode-mouse');
     });
 
-    it.skip('should only have the next button visible when on first item', () => {
+    it.skip('should only have the next button visible' +
+       'when on first item', () => {
       return fixture.awaitEvent('amp:load:start', 1).then(() => {
         let amp = fixture.doc.querySelector('#carousel-1');
         expect(fixture.doc.body).to.have.class('amp-mode-mouse');
