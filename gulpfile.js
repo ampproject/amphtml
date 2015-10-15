@@ -56,6 +56,11 @@ cssnano = cssnano({
 // version lock.
 var internalRuntimeVersion = new Date().getTime();
 
+/**
+ * Build all the AMP extensions
+ *
+ * @param {!Object} options
+ */
 function buildExtensions(options) {
   // We pass watch further in to have browserify watch the built file
   // and update it if any of its required deps changed.
@@ -78,14 +83,29 @@ function buildExtensions(options) {
   buildExtension('amp-youtube', '0.1', false, options);
 }
 
+/**
+ * Clean up the build artifacts
+ *
+ * @param {function} done callback
+ */
 function clean(done) {
   del(['dist', 'dist.3p', 'build', 'examples.build'], done);
 }
 
+/**
+ * Compile the polyfills script and drop it in the build folder
+ */
 function polyfillsForTests() {
   compileJs('./src/', 'polyfills.js', './build/');
 }
 
+/**
+ * Compile and optionally minify the stylesheets and the scripts
+ * and drop them in the dist folder
+ *
+ * @param {boolean} watch
+ * @param {boolean} shouldMinify
+ */
 function compile(watch, shouldMinify) {
   compileCss();
   compileJs('./src/', 'amp.js', './dist', {
@@ -105,7 +125,11 @@ function compile(watch, shouldMinify) {
   thirdPartyBootstrap(watch, shouldMinify);
 }
 
-
+/**
+ * Compile all the css and drop in the build folder
+ *
+ * @return {!Promise} containing a Readable	Stream
+ */
 function compileCss() {
   console.info('Recompiling CSS.');
   return jsifyCssPromise('css/amp.css').then(function(css) {
@@ -115,6 +139,14 @@ function compileCss() {
   });
 }
 
+/**
+ * 'Jsify' a CSS file - Adds vendor specific css prefixes to the css file,
+ * compresses the file, removes the copyright comment, and adds the sourceURL
+ * to the stylesheet
+ *
+ * @param {string} filename css file
+ * @return {!Promise} that resolves with the css content after processing
+ */
 function jsifyCssPromise(filename) {
   var css = fs.readFileSync(filename, 'utf8');
   var transformers = [cssprefixer, cssnano];
@@ -130,6 +162,9 @@ function jsifyCssPromise(filename) {
     });
 }
 
+/**
+ * Enables watching for file changes in css, extensions, and examples.
+ */
 function watch() {
   gulpWatch('css/**/*.css', function() {
     compileCss();
@@ -138,7 +173,7 @@ function watch() {
     watch: true
   });
   buildExamples(true);
-  return compile(true);
+  compile(true);
 }
 
 /**
@@ -155,8 +190,8 @@ function watch() {
  * @param {string} version Version of the extension. Must be identical to
  *     the sub directory inside the extension directory
  * @param {boolean} hasCss Whether there is a CSS file for this extension.
- * @param {!Object} options
- * @return {!Object} Gulp object
+ * @param {?Object} options
+ * @return {!Stream} Gulp object
  */
 function buildExtension(name, version, hasCss, options) {
   options = options || {};
@@ -167,7 +202,7 @@ function buildExtension(name, version, hasCss, options) {
   // and CSS inlining. This watcher watches the original file, copies
   // it to the destination and adds the CSS.
   if (options.watch) {
-    // Do not set watchers agains when we get called by the watcher.
+    // Do not set watchers again when we get called by the watcher.
     var copy = Object.create(options);
     copy.watch = false;
     gulpWatch(path + '/*', function() {
@@ -187,6 +222,18 @@ function buildExtension(name, version, hasCss, options) {
   }
 }
 
+/**
+ * Build the JavaScript for the extension specified
+ *
+ * @param {string} js JavaScript file content
+ * @param {string} path Path to the extensions directory
+ * @param {string} name Name of the extension. Must be the sub directory in
+ *     the extensions directory and the name of the JS and optional CSS file.
+ * @param {string} version Version of the extension. Must be identical to
+ *     the sub directory inside the extension directory
+ * @param {!Object} options
+ * @return {!Stream} Gulp object
+ */
 function buildExtensionJs(js, path, name, version, options) {
   var builtName = name + '-' + version + '.max.js';
   var minifiedName = name + '-' + version + '.js';
@@ -206,11 +253,14 @@ function buildExtensionJs(js, path, name, version, options) {
       });
 }
 
+/**
+ * Main Build
+ */
 function build() {
   polyfillsForTests();
   buildExtensions();
   buildExamples(false);
-  return compile();
+  compile();
 }
 
 gulp.task('css', compileCss);
@@ -226,6 +276,11 @@ gulp.task('minify', function() {
 
 gulp.task('default', ['watch']);
 
+/**
+ * Build the examples
+ *
+ * @param {boolean} watch
+ */
 function buildExamples(watch) {
   if (watch) {
     gulpWatch('examples/*.html', function() {
@@ -247,6 +302,7 @@ function buildExamples(watch) {
 /**
  * Copies an examples file to examples.build folder and changes all
  * JS references to local / minified copies.
+ *
  * @param {string} name HTML file in examples/
  */
 function buildExample(name) {
@@ -269,6 +325,13 @@ function buildExample(name) {
       .pipe(gulp.dest('examples.build/'));
 }
 
+/**
+ * Copies frame.html to output folder, replaces js references to minified
+ * copies, and generates symlink to it.
+ *
+ * @param {boolean} watch
+ * @param {boolean} shouldMinify
+ */
 function thirdPartyBootstrap(watch, shouldMinify) {
   var input = '3p/frame.max.html';
   if (watch) {
@@ -298,7 +361,14 @@ function thirdPartyBootstrap(watch, shouldMinify) {
       });
 }
 
-
+/**
+ * Compile a javascript file
+ *
+ * @param {string} srcDir Path to the src directory
+ * @param {string} srcFilename Name of the JS source file
+ * @param {string} destDir Destination folder for output script
+ * @param {?Object} options
+ */
 function compileJs(srcDir, srcFilename, destDir, options) {
   options = options || {};
   var bundler = browserify(srcDir + srcFilename, { debug: true })
