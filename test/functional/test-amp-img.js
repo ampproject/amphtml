@@ -64,18 +64,4 @@ describe('amp-img', () => {
       expect(img.getAttribute('src')).to.equal('test.jpg');
     });
   });
-
-  // TODO(erwinm): Make stable
-  it.skip('should have a default placeholder', () => {
-    return getImg({
-      src: 'test.jpg',
-      width: 300,
-      height: 200
-    }).then((ampImg) => {
-      let placeholder = ampImg.querySelector('.-amp-autoplaceholder');
-      expect(placeholder).to.not.be.null;
-      expect(placeholder.hasAttribute('placeholder')).to.be.true;
-      expect(placeholder).to.not.be.null;
-    });
-  });
 });
