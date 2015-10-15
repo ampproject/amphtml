@@ -165,6 +165,15 @@ export class Resources {
     this.schedulePass();
   }
 
+  /**
+   * Returns a list of resources.
+   * @return {!Array<!Resource>}
+   * @export
+   */
+  get() {
+    return this.resources_.slice(0);
+  }
+
   /** @private */
   monitorInput_() {
     let input = inputFor(this.win);
@@ -246,10 +255,11 @@ export class Resources {
     element[RESOURCE_PROP_] = resource;
     this.resources_.push(resource);
 
-    // Try to immediately build element, it may already be ready.
-    resource.build(this.forceBuild_);
-
-    this.schedulePass();
+    if (this.isRuntimeOn_) {
+      // Try to immediately build element, it may already be ready.
+      resource.build(this.forceBuild_);
+      this.schedulePass();
+    }
 
     log.fine(TAG_, 'element added:', resource.debugid);
   }
@@ -277,8 +287,12 @@ export class Resources {
    */
   upgraded(element) {
     let resource = this.getResourceForElement(element);
-    resource.build(this.forceBuild_);
-    this.schedulePass();
+    if (this.isRuntimeOn_) {
+      resource.build(this.forceBuild_);
+      this.schedulePass();
+    } else if (resource.onUpgraded_) {
+      resource.onUpgraded_();
+    }
     log.fine(TAG_, 'element upgraded:', resource.debugid);
   }
 
@@ -985,10 +999,10 @@ export class Resource {
     /** @private {number} */
     this.id_ = id;
 
-    /* @const {!AmpElement} */
+    /* @export @const {!AmpElement} */
     this.element = element;
 
-    /* @const {string} */
+    /* @export @const {string} */
     this.debugid = element.tagName.toLowerCase() + '#' + id;
 
     /** @private {!Resources} */
@@ -1015,6 +1029,13 @@ export class Resource {
 
     /** @private {boolean} */
     this.isInViewport_ = false;
+
+    /**
+     * Only used in the "runtime off" case when the monitoring code needs to
+     * known when the element is upgraded.
+     * @private {!Function|undefined}
+     */
+    this.onUpgraded_;
   }
 
   /**
@@ -1306,6 +1327,50 @@ export class Resource {
     if (this.element.documentInactiveCallback()) {
       this.state_ = ResourceState_.NOT_LAID_OUT;
     }
+  }
+
+  /**
+   * Only allowed in dev mode when runtime is turned off. Performs all steps
+   * necessary to render an element.
+   * @return {!Promise}
+   * @export
+   */
+  forceAll() {
+    assert(!this.resources_.isRuntimeOn_);
+    let p = Promise.resolve();
+    if (this.state_ == ResourceState_.NOT_BUILT) {
+      if (!this.element.isUpgraded()) {
+        p = p.then(() => {
+          return new Promise((resolve) => {
+            this.onUpgraded_ = resolve;
+          });
+        });
+      }
+      p = p.then(() => {
+        this.onUpgraded_ = undefined;
+        this.build(true);
+      });
+    }
+    return p.then(() => {
+      this.applyMediaQuery();
+      this.measure();
+      if (this.layoutPromise_) {
+        return this.layoutPromise_;
+      }
+      if (this.state_ == ResourceState_.LAYOUT_COMPLETE ||
+              this.state_ == ResourceState_.LAYOUT_FAILED ||
+              this.layoutCount_ > 0) {
+        return Promise.resolve();
+      }
+      if (!this.isDisplayed()) {
+        return Promise.resolve();
+      }
+      try {
+        return this.element.layoutCallback();
+      } catch (e) {
+        return Promise.reject(e);
+      }
+    });
   }
 }
 

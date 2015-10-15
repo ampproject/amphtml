@@ -20,6 +20,7 @@ import {getMode} from './mode';
 import {installStyles} from './styles';
 import {registerElement} from './custom-element';
 import {registerExtendedElement} from './extended-element';
+import {resourcesFor} from './resources';
 import {viewerFor} from './viewer';
 import {viewportFor} from './viewport';
 
@@ -82,6 +83,8 @@ export function adopt(global) {
   if (getMode().development) {
     /** @const */
     global.AMP.toggleRuntime = viewer.toggleRuntime.bind(viewer);
+    /** @const */
+    global.AMP.resources = resourcesFor(global);
   }
 
   let viewport = viewportFor(global);
