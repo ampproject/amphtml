@@ -22,8 +22,12 @@ We discuss implementation issues on [amphtml-discuss@googlegroups.com](https://g
 
 ### Installation
 
-1. `npm i`
-2. `edit /etc/hosts` and map `ads.localhost` and `iframe.localhost` to `127.0.0.1`:
+1. Install NodeJS from https://nodejs.org/
+2. cd to /path-to-ampfolder/amphtml/
+3. run `npm i` command to install the required npm packages.
+4. run `sudo npm i -g gulp` command to install gulp in your local bin folder '/usr/local/bin/' on Mac.
+5. run `sudo npm i -g http-server` command to install http server in your local bin folder '/usr/local/bin/' on Mac.
+6. `edit /etc/hosts` and map `ads.localhost` and `iframe.localhost` to `127.0.0.1`:
 <pre>
   127.0.0.1               ads.localhost iframe.localhost
 </pre>
