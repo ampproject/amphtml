@@ -36,7 +36,7 @@ class AmpAnim extends AMP.BaseElement {
     /** @private @const {!Element} */
     this.img_ = new Image();
     this.propagateAttributes(['alt'], this.img_);
-    this.applyFillContent(this.img_);
+    this.applyFillContent(this.img_, true);
     this.img_.width = getLengthNumeral(this.element.getAttribute('width'));
     this.img_.height = getLengthNumeral(this.element.getAttribute('height'));
 

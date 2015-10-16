@@ -554,5 +554,3 @@ export function viewerFor(window) {
     return new Viewer(window);
   });
 };
-
-export const viewer = viewerFor(window);

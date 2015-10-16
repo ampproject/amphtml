@@ -864,41 +864,69 @@ describe('Resources.Resource', () => {
   });
 
 
-  it('should NOT call documentInactiveCallback on unbuilt element', () => {
-    resource.state_ = ResourceState_.NOT_BUILT;
-    elementMock.expects('viewportCallback').never();
-    elementMock.expects('documentInactiveCallback').never();
-    resource.documentBecameInactive();
-    expect(resource.getState()).to.equal(ResourceState_.NOT_BUILT);
+  describe('setInViewport', () => {
+    it('should call viewportCallback when not built', () => {
+      resource.state_ = ResourceState_.NOT_BUILT;
+      elementMock.expects('viewportCallback').withExactArgs(true).once();
+      resource.setInViewport(true);
+      expect(resource.isInViewport()).to.equal(true);
+    });
+
+    it('should call viewportCallback when built', () => {
+      resource.state_ = ResourceState_.LAYOUT_COMPLETE;
+      elementMock.expects('viewportCallback').withExactArgs(true).once();
+      resource.setInViewport(true);
+      expect(resource.isInViewport()).to.equal(true);
+    });
+
+    it('should call viewportCallback only once', () => {
+      resource.state_ = ResourceState_.LAYOUT_COMPLETE;
+      elementMock.expects('viewportCallback').withExactArgs(true).once();
+      resource.setInViewport(true);
+      resource.setInViewport(true);
+      resource.setInViewport(true);
+    });
   });
 
-  it('should call documentInactiveCallback on built element and update state',
-      () => {
-    resource.state_ = ResourceState_.LAYOUT_COMPLETE;
-    elementMock.expects('documentInactiveCallback').returns(true).once();
-    resource.documentBecameInactive();
-    expect(resource.getState()).to.equal(ResourceState_.NOT_LAID_OUT);
+
+  describe('documentInactiveCallback', () => {
+    it('should NOT call documentInactiveCallback on unbuilt element', () => {
+      resource.state_ = ResourceState_.NOT_BUILT;
+      elementMock.expects('viewportCallback').never();
+      elementMock.expects('documentInactiveCallback').never();
+      resource.documentBecameInactive();
+      expect(resource.getState()).to.equal(ResourceState_.NOT_BUILT);
+    });
+
+    it('should call documentInactiveCallback on built element and update state',
+        () => {
+      resource.state_ = ResourceState_.LAYOUT_COMPLETE;
+      elementMock.expects('documentInactiveCallback').returns(true).once();
+      resource.documentBecameInactive();
+      expect(resource.getState()).to.equal(ResourceState_.NOT_LAID_OUT);
+    });
+
+    it('should call documentInactiveCallback on built element' +
+        ' but NOT update state', () => {
+      resource.state_ = ResourceState_.LAYOUT_COMPLETE;
+      elementMock.expects('documentInactiveCallback').returns(false).once();
+      resource.documentBecameInactive();
+      expect(resource.getState()).to.equal(ResourceState_.LAYOUT_COMPLETE);
+    });
+
+    it('should NOT call viewportCallback when resource not in viewport', () => {
+      resource.state_ = ResourceState_.LAYOUT_COMPLETE;
+      resource.isInViewport_ = false;
+      elementMock.expects('viewportCallback').never();
+      resource.documentBecameInactive();
+    });
+
+    it('should call viewportCallback when resource in viewport', () => {
+      resource.state_ = ResourceState_.LAYOUT_COMPLETE;
+      resource.isInViewport_ = true;
+      elementMock.expects('viewportCallback').withExactArgs(false).once();
+      resource.documentBecameInactive();
+    });
   });
 
-  it('should call documentInactiveCallback on built element' +
-      ' but NOT update state', () => {
-    resource.state_ = ResourceState_.LAYOUT_COMPLETE;
-    elementMock.expects('documentInactiveCallback').returns(false).once();
-    resource.documentBecameInactive();
-    expect(resource.getState()).to.equal(ResourceState_.LAYOUT_COMPLETE);
-  });
-
-  it('should NOT call viewportCallback when resource not in viewport', () => {
-    resource.state_ = ResourceState_.LAYOUT_COMPLETE;
-    resource.isInViewport_ = false;
-    elementMock.expects('viewportCallback').never();
-    resource.documentBecameInactive();
-  });
-
-  it('should call viewportCallback when resource in viewport', () => {
-    resource.state_ = ResourceState_.LAYOUT_COMPLETE;
-    resource.isInViewport_ = true;
-    elementMock.expects('viewportCallback').withExactArgs(false).once();
-    resource.documentBecameInactive();
-  });
 });

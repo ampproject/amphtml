@@ -129,3 +129,5 @@ under the [Apache License, Version 2.0](LICENSE).
 ## Contributing
 
 Please see [the CONTRIBUTING file](CONTRIBUTING.md) for information on contributing to the AMP Project, and [the DEVELOPING file](DEVELOPING.md) for documentation on the AMP library internals.
+
+### [Code of conduct](CODE_OF_CONDUCT.md)

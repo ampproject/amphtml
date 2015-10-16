@@ -112,6 +112,14 @@ is up to the element's implementation.
     </amp-anim>
 ```
 
+### `noloading`
+
+Whether the "loading indicator" should be turned off for this element. Many AMP elements
+are whitelisted to show a "loading indicator", which is a basic animation that shows that
+the element has not yet fully loaded. The elements can opt out of this behavior by adding
+this attribute.
+
+
 ## Behavior
 
 A non-container (`layout != container`) AMP element starts up in the unresolved/unbuilt mode in which

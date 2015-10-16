@@ -21,8 +21,10 @@ import {expandLayoutRect, layoutRectLtwh, layoutRectsOverlap} from
 import {inputFor} from './input';
 import {log} from './log';
 import {documentStateFor} from './document-state';
+import {getService} from './service';
 import {reportError} from './error';
 import {timer} from './timer';
+import {makeBodyVisible} from './styles';
 import {viewerFor} from './viewer';
 import {viewportFor} from './viewport';
 import {vsync} from './vsync';
@@ -85,6 +87,13 @@ export class Resources {
     /** @private {boolean} */
     this.documentReady_ = false;
 
+    /**
+     * We want to do some work in the first pass after
+     * the document is ready.
+     * @private {boolean}
+     */
+    this.firstPassAfterDocumentReady_ = true;
+
     /** @private {boolean} */
     this.relayoutAll_ = false;
 
@@ -133,7 +142,7 @@ export class Resources {
 
     // Ensure that we attempt to rebuild things when DOM is ready.
     this.docState_.onReady(() => {
-      this.setDocumentReady_();
+      this.documentReady_ = true;
       this.forceBuild_ = true;
       this.relayoutAll_ = true;
       this.schedulePass();
@@ -179,14 +188,6 @@ export class Resources {
     vsync.mutate(() => {
       this.win.document.body.classList.toggle(clazz, on);
     });
-  }
-
-  /** @private */
-  setDocumentReady_() {
-    this.documentReady_ = true;
-    this.viewer_.postDocumentReady(this.viewport_.getSize().width,
-        this.win.document.body./*OK*/scrollHeight);
-    this.updateScrollHeight_();
   }
 
   /** @private */
@@ -395,6 +396,13 @@ export class Resources {
     let prevVisible = this.visible_;
     this.visible_ = this.viewer_.isVisible();
     this.prerenderSize_ = this.viewer_.getPrerenderSize();
+
+    if (this.documentReady_ && this.firstPassAfterDocumentReady_) {
+      this.firstPassAfterDocumentReady_ = false;
+      this.viewer_.postDocumentReady(this.viewport_.getSize().width,
+        this.win.document.body./*OK*/scrollHeight);
+      this.updateScrollHeight_();
+    }
 
     let viewportSize = this.viewport_.getSize();
     log.fine(TAG_, 'PASS: at ' + timer.now() +
@@ -1279,10 +1287,6 @@ export class Resource {
     if (inViewport == this.isInViewport_) {
       return;
     }
-    if (this.state_ == ResourceState_.NOT_BUILT) {
-      // Can't send any events to unbuilt element.
-      return;
-    }
     log.fine(TAG_, 'inViewport:', this.debugid, inViewport);
     this.isInViewport_ = inViewport;
     this.element.viewportCallback(inViewport);
@@ -1491,5 +1495,12 @@ export const ResourceState_ = {
  */
 var Task_;
 
-
-export const resources = new Resources(window);
+/**
+ * @param {!Window} window
+ * @return {!Resources}
+ */
+export function resourcesFor(window) {
+  return getService(window, 'resources', () => {
+    return new Resources(window);
+  });
+};

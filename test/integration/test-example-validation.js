@@ -45,10 +45,16 @@ describe('example', function() {
     'twitter.amp.html',
   ];
 
-  // Only add to this whitelist to temporarily manage discrepancies
-  // between validator and runtime.
-  /** @constructor {!Array<RegExp>}  */
+  /**
+   * Only add to this whitelist to temporarily manage discrepancies
+   * between validator and runtime.
+   *
+   * @constructor {!Array<RegExp>}
+   */
   var errorWhitelist = [
+    // TODO(dvoytenko): Remove. Viewport values changed in #592. Waiting for
+    // the validator to catch up.
+    /INVALID_ATTR_VALUE.*vprt/
   ];
 
   var usedWhitelist = [];
@@ -58,7 +64,7 @@ describe('example', function() {
   });
 
   examples.forEach(filename => {
-    it.skipOnTravis(filename + ' should validate', () => {
+    it(filename + ' should validate', () => {
       var url = '/base/examples/' + filename;
       return get(url).then((html) => {
         var validationResult = amp.validator.validateString(html);
