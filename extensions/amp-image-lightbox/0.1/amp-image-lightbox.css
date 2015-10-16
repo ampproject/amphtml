@@ -27,8 +27,9 @@ amp-image-lightbox {
   padding: 0 !important;
   /* This is necessary due to crbug/248522 where touch events fail after
     transform */
-  overflow: hidden;
-  transform: translate3d(0, 0, 0);
+  overflow: hidden !important;
+  transform: translate3d(0, 0, 0) !important;
+  touch-action: none !important;
 }
 
 /* Overridable properties */

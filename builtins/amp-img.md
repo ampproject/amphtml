@@ -47,14 +47,15 @@ A string of alternate text, similar to the `alt` attribute on `img`.
 
 **attribution**
 
-A string that indicates the attribution of the image. E.g. `attribution=“CC courtesy of Cats on Flicker”`
+A string that indicates the attribution of the image. E.g. `attribution="CC courtesy of Cats on Flicker"`
 
 
 #### Styling
 
 `amp-img` can be styled directly via CSS properties. Setting a grey background
 placeholder for example could be achieved via:
-
-    amp-img {
-      background-color: grey;
-    }
+```css
+amp-img {
+  background-color: grey;
+}
+```

@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-### <a name=”amp-carousel”></a> `amp-carousel`
+### <a name="amp-carousel"></a> `amp-carousel`
 
 A generic carousel for displaying multiple similar pieces of content along a horizontal axis. It is meant to be highly flexible and performant.
 
@@ -25,12 +25,13 @@ Each of the `amp-carousel` component’s immediate children is considered an ite
 The carousel consists of an arbitrary number of items, as well as optional navigational arrows to go forward or backwards a single item.
 
 The carousel advances between items if the user swipes, uses arrow keys, clicks an optional navigation arrow.
-
-    <amp-carousel width=300 height=400>
-      <amp-img src=”my-img1.png” width=300 height=400></amp-img>
-      <amp-img src=”my-img2.png” width=300 height=400></amp-img>
-      <amp-img src=”my-img3.png” width=300 height=400></amp-img>
-    </amp-carousel>
+```html
+<amp-carousel width=300 height=400>
+  <amp-img src="my-img1.png" width=300 height=400></amp-img>
+  <amp-img src="my-img2.png" width=300 height=400></amp-img>
+  <amp-img src="my-img3.png" width=300 height=400></amp-img>
+</amp-carousel>
+```
 
 Note, that while the example shows a carousel of images `amp-carousel` support arbitrary children.
 
@@ -48,6 +49,18 @@ unless only a single child is present.
   Be aware that `type=carousel` does not currently support `layout=responsive`.
 - `slides` - Shows a single slide at a time.
 
+**loop** (type=slides only)
+
+If present, the user may advance past the first item or the final item.
+
+**autoplay** (type=slides only)
+
+If present, advances the slide to the next slide without user interaction.
+By default it will advance a slide in 5000 millisecond intervals (5 seconds)
+but will use the value of the `autoplay` attribute if present (minimum of 1000 ms).
+Value of `autoplay` must be numeric representation in milliseconds, ex. `autoplay=5000`.
+If `autoplay` is present it will also attach the `loop` attribute to
+`amp-carousel` if `loop` is not already present.
 
 #### Styling
 - You may use the `amp-carousel` element selector to style it freely.
@@ -56,28 +69,28 @@ You may override this with your own svg or image like so:
 
   **default**
 
-  ```css
-  .amp-carousel-button-prev {
-    left: 16px;
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18"><path d="M15 8.25H5.87l4.19-4.19L9 3 3 9l6 6 1.06-1.06-4.19-4.19H15v-1.5z" fill="#fff" /></svg>');
-  }
-  ```
+```css
+.amp-carousel-button-prev {
+  left: 16px;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18"><path d="M15 8.25H5.87l4.19-4.19L9 3 3 9l6 6 1.06-1.06-4.19-4.19H15v-1.5z" fill="#fff" /></svg>');
+}
+```
 
   **override**
-  ```css
-  .amp-carousel-button-prev {
-    left: 5%;
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18"><path d="M11.56 5.56L10.5 4.5 6 9l4.5 4.5 1.06-1.06L8.12 9z" fill="#fff" /></svg>');
-  }
-  ```
+```css
+.amp-carousel-button-prev {
+  left: 5%;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18"><path d="M11.56 5.56L10.5 4.5 6 9l4.5 4.5 1.06-1.06L8.12 9z" fill="#fff" /></svg>');
+}
+```
 - By default the visual state of an `amp-carousel` button when it is disabled is that it is hidden.
   You may override this visual state of an `amp-carousel` button in the disabled state by:
 
-  ```css
-  .amp-carousel-button.amp-disabled {
-    /* make sure we make it visible */
-    visibility: visible;
-    /* choose our own background styling, red'ish */
-    background-color: rgba(255, 0, 0, .5);
-  }
-  ```
+```css
+.amp-carousel-button.amp-disabled {
+  /* make sure we make it visible */
+  visibility: visible;
+  /* choose our own background styling, red'ish */
+  background-color: rgba(255, 0, 0, .5);
+}
+```

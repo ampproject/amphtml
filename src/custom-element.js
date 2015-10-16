@@ -15,17 +15,39 @@
  */
 
 import {Layout, getLayoutClass, getLengthNumeral, getLengthUnits,
-          isLayoutSizeDefined, parseLayout, parseLength,
-          getNaturalDimensions, hasNaturalDimensions} from './layout';
+          isInternalElement, isLayoutSizeDefined, isLoadingAllowed,
+          parseLayout, parseLength, getNaturalDimensions,
+          hasNaturalDimensions} from './layout';
 import {ElementStub, stubbedElements} from './element-stub';
 import {assert} from './asserts';
+import {createLoaderElement} from '../src/loader';
 import {log} from './log';
 import {reportError} from './error';
-import {resources} from './resources';
+import {resourcesFor} from './resources';
 import {timer} from './timer';
+import {vsync} from './vsync';
+import * as dom from './dom';
 
 
-let TAG_ = 'CustomElement';
+const TAG_ = 'CustomElement';
+
+/**
+ * This is the minimum width of the element needed to trigger `loading`
+ * animation. This value is justified as about 1/3 of a smallish mobile
+ * device viewport. Trying to put a loading indicator into a small element
+ * is meaningless.
+ * @private @const {number}
+ */
+const MIN_WIDTH_FOR_LOADING_ = 100;
+
+
+/**
+ * The elements positioned ahead of this threshold may have their loading
+ * indicator initialized faster. This is benefitial to avoid relayout during
+ * render phase or scrolling.
+ * @private @const {number}
+ */
+const PREPARE_LOADING_THRESHOLD_ = 1000;
 
 
 /**
@@ -182,6 +204,23 @@ export function applyLayout_(element) {
 
 
 /**
+ * Returns "true" for internal AMP nodes or for placeholder elements.
+ * @param {!Node} node
+ * @return {boolean}
+ */
+function isInternalOrServiceNode(node) {
+  if (isInternalElement(node)) {
+    return true;
+  }
+  if (node.tagName && (node.hasAttribute('placeholder') ||
+          node.hasAttribute('fallback'))) {
+    return true;
+  }
+  return false;
+}
+
+
+/**
  * The interface that is implemented by all custom elements in the AMP
  * namespace.
  * @interface
@@ -225,11 +264,20 @@ export function createAmpElementProto(win, name, implementationClass) {
     this.readyState = 'loading';
     this.everAttached = false;
 
+    /** @private @const {!Resources}  */
+    this.resources_ = resourcesFor(win);
+
     /** @private {!Layout} */
     this.layout_ = Layout.NODISPLAY;
 
     /** @private {number} */
     this.layoutWidth_ = -1;
+
+    /** @private {number} */
+    this.layoutCount_ = 0;
+
+    /** @private {boolean} */
+    this.isInViewport_ = false;
 
     /** @private {string|null|undefined} */
     this.mediaQuery_;
@@ -240,6 +288,15 @@ export function createAmpElementProto(win, name, implementationClass) {
      * @private {?Element}
      */
     this.sizerElement_ = null;
+
+    /** @private {boolean|undefined} */
+    this.loadingDisabled_;
+
+    /** @private {?Element} */
+    this.loadingContainer_ = null;
+
+    /** @private {?Element} */
+    this.loadingElement_ = null;
 
     /** @private {!BaseElement} */
     this.implementation_ = new implementationClass(this);
@@ -286,7 +343,7 @@ export function createAmpElementProto(win, name, implementationClass) {
       this.implementation_.firstAttachedCallback();
       this.dispatchCustomEvent('amp:attached');
     }
-    resources.upgraded(this);
+    this.resources_.upgraded(this);
   };
 
   /**
@@ -336,6 +393,9 @@ export function createAmpElementProto(win, name, implementationClass) {
       reportError(e, this);
       throw e;
     }
+    if (this.built_ && this.isInViewport_) {
+      this.updateInViewport_(true);
+    }
     if (this.actionQueue_) {
       if (this.actionQueue_.length > 0) {
         // Only schedule when the queue is not empty, which should be
@@ -357,6 +417,20 @@ export function createAmpElementProto(win, name, implementationClass) {
     this.layoutWidth_ = layoutBox.width;
     if (this.isUpgraded()) {
       this.implementation_.layoutWidth_ = this.layoutWidth_;
+    }
+
+    if (this.isLoadingEnabled_()) {
+      if (this.isInViewport_) {
+        // Already in viewport - start showing loading.
+        this.toggleLoading_(true);
+      } else if (layoutBox.top < PREPARE_LOADING_THRESHOLD_ &&
+            layoutBox.top >= 0) {
+        // Few top elements will also be pre-initialized with a loading
+        // element.
+        vsync.mutate(() => {
+          this.prepareLoading_();
+        });
+      }
     }
   };
 
@@ -418,7 +492,7 @@ export function createAmpElementProto(win, name, implementationClass) {
         reportError(e, this);
       }
     }
-    resources.add(this);
+    this.resources_.add(this);
   };
 
   /**
@@ -426,7 +500,7 @@ export function createAmpElementProto(win, name, implementationClass) {
    * @final
    */
   ElementProto.detachedCallback = function() {
-    resources.remove(this);
+    this.resources_.remove(this);
   };
 
   /**
@@ -493,7 +567,7 @@ export function createAmpElementProto(win, name, implementationClass) {
    * @final
    */
   ElementProto.getLayoutBox = function() {
-    return resources.getResourceForElement(this).getLayoutBox();
+    return this.resources_.getResourceForElement(this).getLayoutBox();
   };
 
   /**
@@ -530,6 +604,14 @@ export function createAmpElementProto(win, name, implementationClass) {
         'layoutCallback must return a promise');
     return promise.then(() => {
       this.readyState = 'complete';
+      this.layoutCount_++;
+      this.toggleLoading_(false, /* cleanup */ true);
+      if (this.layoutCount_ == 1) {
+        this.implementation_.firstLayoutCompleted();
+      }
+    }, (reason) => {
+      this.toggleLoading_(false, /* cleanup */ true);
+      return Promise.reject(reason);
     });
   };
 
@@ -543,8 +625,30 @@ export function createAmpElementProto(win, name, implementationClass) {
    * @final @package
    */
   ElementProto.viewportCallback = function(inViewport) {
-    assert(this.isUpgraded() && this.isBuilt(),
-        'Must be upgraded and built to receive viewport events');
+    this.isInViewport_ = inViewport;
+    if (this.layoutCount_ == 0) {
+      if (!inViewport) {
+        this.toggleLoading_(false);
+      } else {
+        // Set a minimum delay in case the element loads very fast or if it
+        // leaves the viewport.
+        timer.delay(() => {
+          if (this.layoutCount_ == 0 && this.isInViewport_) {
+            this.toggleLoading_(true);
+          }
+        }, 100);
+      }
+    }
+    if (this.isUpgraded() && this.isBuilt()) {
+      this.updateInViewport_(inViewport);
+    }
+  };
+
+  /**
+   * @param {boolean} inViewport
+   * @private
+   */
+  ElementProto.updateInViewport_ = function(inViewport) {
     this.implementation_.inViewport_ = inViewport;
     this.implementation_.viewportCallback(inViewport);
   };
@@ -615,6 +719,163 @@ export function createAmpElementProto(win, name, implementationClass) {
     } catch (e) {
       log.error(TAG_, 'Action execution failed:', invocation, e);
     }
+  };
+
+
+  /**
+   * Returns the original nodes of the custom element without any service nodes
+   * that could have been added for markup. These nodes can include Text,
+   * Comment and other child nodes.
+   * @return {!Array<!Node>}
+   * @package @final
+   */
+  ElementProto.getRealChildNodes = function() {
+    let nodes = [];
+    for (let n = this.firstChild; n; n = n.nextSibling) {
+      if (!isInternalOrServiceNode(n)) {
+        nodes.push(n);
+      }
+    }
+    return nodes;
+  };
+
+  /**
+   * Returns the original children of the custom element without any service
+   * nodes that could have been added for markup.
+   * @return {!Array<!Element>}
+   * @package @final
+   */
+  ElementProto.getRealChildren = function() {
+    let elements = [];
+    for (let i = 0; i < this.children.length; i++) {
+      let child = this.children[i];
+      if (!isInternalOrServiceNode(child)) {
+        elements.push(child);
+      }
+    }
+    return elements;
+  };
+
+  /**
+   * Returns an optional placeholder element for this custom element.
+   * @return {?Element}
+   * @package @final
+   */
+  ElementProto.getPlaceholder = function() {
+    return dom.childElementByAttr(this, 'placeholder');
+  };
+
+  /**
+   * Hides or shows the placeholder, if available.
+   * @param {boolean} state
+   * @package @final
+   */
+  ElementProto.togglePlaceholder = function(state) {
+    let placeholder = this.getPlaceholder();
+    if (placeholder) {
+      placeholder.classList.toggle('amp-hidden', !state);
+    }
+  };
+
+  /**
+   * Hides or shows the fallback, if available.
+   * @param {boolean} state
+   * @package @final
+   */
+  ElementProto.toggleFallback = function(state) {
+    // This implementation is notably less efficient then placeholder toggling.
+    // The reasons for this are: (a) "not supported" is the state of the whole
+    // element, (b) some realyout is expected and (c) fallback condition would
+    // be rare.
+    this.classList.toggle('amp-notsupported', state);
+  };
+
+  /**
+   * Whether the loading can be shown for this element.
+   * @return {boolean}
+   * @private
+   */
+  ElementProto.isLoadingEnabled_ = function() {
+    // No loading indicator will be shown if either one of these
+    // conditions true:
+    // 1. `noloading` attribute is specified;
+    // 2. The element has not been whitelisted;
+    // 3. The element is too small or has not yet been measured;
+    // 4. The element has already been laid out;
+    // 5. The element is a `placeholder` or a `fallback`;
+    // 6. The element's layout is not a size-defining layout.
+    if (this.loadingDisabled_ === undefined) {
+      this.loadingDisabled_ = this.hasAttribute('noloading');
+    }
+    if (this.loadingDisabled_ ||
+            !isLoadingAllowed(this.tagName) ||
+            this.layoutWidth_ < MIN_WIDTH_FOR_LOADING_ ||
+            this.layoutCount_ > 0 ||
+            isInternalOrServiceNode(this) ||
+            !isLayoutSizeDefined(this.layout_)) {
+      return false;
+    }
+    return true;
+  };
+
+  /**
+   * Creates a loading object. The caller must ensure that loading can
+   * actually be shown. This method must also be called in the mutate
+   * context.
+   * @private
+   */
+  ElementProto.prepareLoading_ = function() {
+    if (!this.loadingContainer_) {
+      let container = document.createElement('div');
+      container.classList.add('-amp-loading-container');
+      container.classList.add('-amp-fill-content');
+      container.classList.add('amp-hidden');
+
+      let element = createLoaderElement();
+      container.appendChild(element);
+
+      this.appendChild(container);
+      this.loadingContainer_ = container;
+      this.loadingElement_ = element;
+    }
+  };
+
+  /**
+   * Turns the loading indicator on or off.
+   * @param {boolean} state
+   * @param {boolean=} opt_cleanup
+   * @private @final
+   */
+  ElementProto.toggleLoading_ = function(state, opt_cleanup) {
+    if (!state && !this.loadingContainer_) {
+      return;
+    }
+
+    // Check if loading should be shown.
+    if (state && !this.isLoadingEnabled_()) {
+      return;
+    }
+
+    vsync.mutate(() => {
+      if (state) {
+        this.prepareLoading_();
+      }
+      if (!this.loadingContainer_) {
+        return;
+      }
+
+      this.loadingContainer_.classList.toggle('amp-hidden', !state);
+      this.loadingElement_.classList.toggle('amp-active', state);
+
+      if (!state && opt_cleanup) {
+        let loadingContainer = this.loadingContainer_;
+        this.loadingContainer_ = null;
+        this.loadingElement_ = null;
+        this.resources_.deferMutate(this, () => {
+          dom.removeElement(loadingContainer);
+        });
+      }
+    });
   };
 
   return ElementProto;

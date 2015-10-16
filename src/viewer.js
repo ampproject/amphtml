@@ -88,6 +88,9 @@ export class Viewer {
     /** @const {!Window} */
     this.win = win;
 
+    /** @private @const {boolean} */
+    this.isEmbedded_ = (this.win.parent && this.win.parent != this.win);
+
     /** @const {!DocumentState} */
     this.docState_ = documentStateFor(window);
 
@@ -167,7 +170,7 @@ export class Viewer {
 
     this.viewportType_ = this.params_['viewportType'] || this.viewportType_;
     // Configure scrolling parameters when AMP is embeded in a viewer on iOS.
-    if (this.viewportType_ == ViewportType.NATURAL && this.win.parent &&
+    if (this.viewportType_ == ViewportType.NATURAL && this.isEmbedded_ &&
             platform.isIos()) {
       this.viewportType_ = ViewportType.NATURAL_IOS_EMBED;
     }
@@ -195,7 +198,7 @@ export class Viewer {
     });
 
     // Remove hash - no reason to keep it around, but only when embedded.
-    if (this.win.parent && this.win.parent != this.win) {
+    if (this.isEmbedded_) {
       var newUrl = removeFragment(this.win.location.href);
       if (newUrl != this.win.location.href && this.win.history.replaceState) {
         this.win.history.replaceState({}, '', newUrl);
@@ -213,6 +216,14 @@ export class Viewer {
    */
   getParam(name) {
     return this.params_[name];
+  }
+
+  /**
+   * Whether the document is embedded in a iframe.
+   * @return {boolean}
+   */
+  isEmbedded() {
+    return this.isEmbedded_;
   }
 
   /**
@@ -543,5 +554,3 @@ export function viewerFor(window) {
     return new Viewer(window);
   });
 };
-
-export const viewer = viewerFor(window);

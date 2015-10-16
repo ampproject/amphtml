@@ -27,37 +27,6 @@ describe('BaseElement', () => {
     element = new BaseElement(div);
   });
 
-  it('getPlaceholder - niente', () => {
-    expect(element.getPlaceholder()).to.equal(null);
-  });
-
-  it('getPlaceholder', () => {
-    let placeholder = document.createElement('div');
-    placeholder.setAttribute('placeholder', '');
-    div.appendChild(placeholder);
-    expect(element.getPlaceholder()).to.equal(placeholder);
-  });
-
-  it('getRealChildren - niente', () => {
-    expect(element.getRealChildNodes().length).to.equal(0);
-    expect(element.getRealChildren().length).to.equal(0);
-  });
-
-  it('getRealChildren', () => {
-    div.appendChild(document.createElement('i-amp-service'));
-    div.appendChild(document.createTextNode('abc'));
-    div.appendChild(document.createElement('content'));
-
-    let nodes = element.getRealChildNodes();
-    expect(nodes.length).to.equal(2);
-    expect(nodes[0].textContent).to.equal('abc');
-    expect(nodes[1].tagName.toLowerCase()).to.equal('content');
-
-    let elements = element.getRealChildren();
-    expect(elements.length).to.equal(1);
-    expect(elements[0].tagName.toLowerCase()).to.equal('content');
-  });
-
   it('propagateAttributes - niente', () => {
     let target = document.createElement('div');
     expect(target.hasAttributes()).to.be.false;

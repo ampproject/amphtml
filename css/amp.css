@@ -92,6 +92,12 @@ i-amp-sizer {
   right: 0;
 }
 
+.-amp-replaced-content {
+  padding: 0 !important;
+  border: none !important;
+  /* TODO(dvoytenko): explore adding here object-fit. */
+}
+
 /* For author styling. */
 .amp-unresolved {
 }
@@ -130,15 +136,21 @@ i-amp-sizer {
   /* Just state. */
 }
 
-[placeholder] {
+.-amp-element > [placeholder] {
   display: block;
 }
 
-[placeholder].hidden {
+.-amp-element > [placeholder].hidden,
+.-amp-element > [placeholder].amp-hidden {
   visibility: hidden;
 }
 
-.-amp-layout-size-defined [placeholder] {
+.-amp-element:not(.amp-notsupported) > [fallback] {
+  display: none;
+}
+
+.-amp-layout-size-defined > [placeholder],
+.-amp-layout-size-defined > [fallback] {
   position: absolute !important;
   top: 0 !important;
   left: 0 !important;
@@ -179,12 +191,16 @@ i-amp-scroll-container {
   overflow: auto;
 }
 
-amp-pixel {
-  position: absolute !important;
-  top: 0 !important;
-  width: 1px !important;
-  height: 1px !important; /* Only things with height are ever loaded. */
-  overflow: hidden !important;
+.-amp-loading-container {
+  display: block !important;
+  z-index: 1;
+}
+
+.-amp-notbuilt > .-amp-loading-container {
+  display: block !important;
+}
+
+.-amp-loading-container.amp-hidden {
   visibility: hidden;
 }
 
@@ -201,9 +217,9 @@ amp-pixel {
 
 /**
  * We want to be a bit more specific here as we don't want a global active
- * to just trigger the loading animation
+ * to just trigger the loading animation.
  */
-.-amp-autoplaceholder.active .-amp-loader-dot {
+.-amp-loader.amp-active .-amp-loader-dot {
   animation: -amp-loader-dots 2s infinite;
 }
 
@@ -233,6 +249,28 @@ amp-pixel {
   animation-delay: .2s;
 }
 
+@keyframes -amp-loader-dots {
+  0%, 100% {
+    transform: scale(.7);
+    background-color: rgba(0, 0, 0, .3);
+  }
+
+  50% {
+    transform: scale(.8);
+    background-color: rgba(0, 0, 0, .5);
+  }
+}
+
+
+amp-pixel {
+  position: absolute !important;
+  top: 0 !important;
+  width: 1px !important;
+  height: 1px !important; /* Only things with height are ever loaded. */
+  overflow: hidden !important;
+  visibility: hidden;
+}
+
 /**
  * Instagram wraps the standard image into a fixed size container.
  * With these offsets, users can simply specify the the size of the
@@ -246,16 +284,4 @@ amp-pixel {
  */
 amp-instagram {
   padding: 48px 8px !important;
-}
-
-@keyframes -amp-loader-dots {
-  0%, 100% {
-    transform: scale(.7);
-    background-color: rgba(0, 0, 0, .3);
-  }
-
-  50% {
-    transform: scale(.8);
-    background-color: rgba(0, 0, 0, .5);
-  }
 }

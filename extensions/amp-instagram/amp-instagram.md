@@ -14,17 +14,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-### <a name=”amp-instagram”></a> `amp-instagram`
+### <a name="amp-instagram"></a> `amp-instagram`
 
 Displays an instagram embed.
 
 Example:
-    <amp-instagram
-      shortcode="fBwFP"
-      width="400"
-      height="400"
-      layout="responsive">
-    </amp-instagram>
+```html
+<amp-instagram
+    shortcode="fBwFP"
+    width="400"
+    height="400"
+    layout="responsive">
+</amp-instagram>
+```
 
 The `width` and `height` attributes are special for the instagram embed.
 These should be the actual width and height of the instagram image.

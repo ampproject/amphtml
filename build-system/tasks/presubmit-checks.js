@@ -26,7 +26,15 @@ var srcGlobs = srcGlobs.concat([
   '!gulpfile.js',
 ]);
 
-var dedicatedCopyrightNoteSources = /(\.js|.css)$/;
+var dedicatedCopyrightNoteSources = /(\.js|\.css)$/;
+
+var es6polyfill = 'Not available because we do not currently' +
+    ' ship with a needed ES6 polyfill.';
+
+var requiresReviewPrivacy =
+    'Usage of this API requires dedicated review due to ' +
+    'being privacy sensitive. Please file an issue asking for permission' +
+    ' to use if you have not yet done so.';
 
 // Terms that must not appear in our source files.
 var forbiddenTerms = {
@@ -35,15 +43,25 @@ var forbiddenTerms = {
   'it\\.only': '',
   'console\\.\\w+\\(': 'If you run against this, use console/*OK*/.log to ' +
       'whitelist a legit case.',
-  'cookie\\W': '',
+  'cookie\\W': requiresReviewPrivacy,
   'eval\\(': '',
-  'localStorage': '',
-  'sessionStorage': '',
-  'indexedDB': '',
-  'openDatabase': '',
-  'requestFileSystem': '',
-  'webkitRequestFileSystem': '',
+  'localStorage': requiresReviewPrivacy,
+  'sessionStorage': requiresReviewPrivacy,
+  'indexedDB': requiresReviewPrivacy,
+  'openDatabase': requiresReviewPrivacy,
+  'requestFileSystem': requiresReviewPrivacy,
+  'webkitRequestFileSystem': requiresReviewPrivacy,
   'debugger': '',
+
+  // ES6. These are only the most commonly used.
+  'Array\\.from': es6polyfill,
+  'Array\\.of': es6polyfill,
+  // These currently depend on core-js/modules/web.dom.iterable which
+  // we don't want. That decision could be reconsidered.
+  'Promise\\.all': es6polyfill,
+  'Promise\\.race': es6polyfill,
+  '\\.startsWith': es6polyfill,
+  '\\.endsWith': es6polyfill,
 };
 
 var bannedTermsHelpString = 'Please review viewport.js for a helper method ' +
@@ -113,11 +131,19 @@ var requiredTerms = {
 };
 
 /**
- * @param {!File} file file is a vinyl file object
- * @param {!Array<string, string>} terms
- * @return boolean
+ * Logs any issues found in the contents of file based on terms (regex
+ * patterns), and provides any possible fix information for matched terms if
+ * possible
+ *
+ * @param {!File} file a vinyl file object to scan for term matches
+ * @param {!Array<string, string>} terms Pairs of regex patterns and possible
+ *   fix messages.
+ * @return {boolean} true if any of the terms match the file content,
+ *   false otherwise
  */
-function matchTerms(pathname, contents, terms) {
+function matchTerms(file, terms) {
+  var pathname = file.path;
+  var contents = file.contents.toString();
   return Object.keys(terms).map(function(term) {
     var fix;
     // we can't optimize building the `RegExp` objects early unless we build
@@ -132,6 +158,7 @@ function matchTerms(pathname, contents, terms) {
           '" in ' + pathname));
       fix = terms[term];
 
+	  // log the possible fix information if provided for the term.
       if (fix) {
         util.log(util.colors.blue(fix));
       }
@@ -145,25 +172,39 @@ function matchTerms(pathname, contents, terms) {
 }
 
 
+/**
+ * Test if a file's contents match any of the
+ * forbidden terms
+ *
+ * @param {!File} file file is a vinyl file object
+ * @return {boolean} true if any of the terms match the file content,
+ *   false otherwise
+ */
 function hasAnyTerms(file) {
-  var contents = file.contents.toString();
   var pathname = file.path;
   var basename = path.basename(pathname);
   var hasTerms = false;
   var hasSrcInclusiveTerms = false;
 
-  hasTerms = matchTerms(pathname, contents, forbiddenTerms);
+  hasTerms = matchTerms(file, forbiddenTerms);
 
-  var isTestFile = /^test-/.test(basename);
+  var isTestFile = /^test-/.test(basename) || /^_init_tests/.test(basename);
   if (!isTestFile) {
-    hasSrcInclusiveTerms = matchTerms(pathname, contents,
-        forbiddenTermsSrcInclusive);
+    hasSrcInclusiveTerms = matchTerms(file, forbiddenTermsSrcInclusive);
   }
 
   return hasTerms || hasSrcInclusiveTerms;
 }
 
-function hasAllTerms(file) {
+/**
+ * Test if a file's contents fail to match any of the required terms and log
+ * any missing terms
+ *
+ * @param {!File} file file is a vinyl file object
+ * @return {boolean} true if any of the terms are not matched in the file
+ *  content, false otherwise
+ */
+function isMissingTerms(file) {
   var contents = file.contents.toString();
   return Object.keys(requiredTerms).map(function(term) {
     var filter = requiredTerms[term];
@@ -179,11 +220,15 @@ function hasAllTerms(file) {
       return true;
     }
     return false;
-  }).some(function(hasAnyTerm) {
-    return hasAnyTerm;
+  }).some(function(hasMissingTerm) {
+    return hasMissingTerm;
   });
 }
 
+/**
+ * Check a file for all the required terms and
+ * any forbidden terms and log any errors found.
+ */
 function checkForbiddenAndRequiredTerms() {
   var forbiddenFound = false;
   var missingRequirements = false;
@@ -192,7 +237,8 @@ function checkForbiddenAndRequiredTerms() {
       forbiddenFound = files.map(hasAnyTerms).some(function(errorFound) {
         return errorFound;
       });
-      missingRequirements = files.map(hasAllTerms).some(function(errorFound) {
+      missingRequirements = files.map(isMissingTerms).some(
+      	  function(errorFound) {
         return errorFound;
       });
     }))

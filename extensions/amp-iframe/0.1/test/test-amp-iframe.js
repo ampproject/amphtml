@@ -18,7 +18,7 @@ import {Timer} from '../../../../src/timer';
 import {adopt} from '../../../../src/runtime';
 import {createIframePromise, pollForLayout} from '../../../../testing/iframe';
 import {loadPromise} from '../../../../src/event-helper';
-import {resources} from '../../../../src/resources';
+import {resourcesFor} from '../../../../src/resources';
 require('../amp-iframe');
 
 adopt(window);

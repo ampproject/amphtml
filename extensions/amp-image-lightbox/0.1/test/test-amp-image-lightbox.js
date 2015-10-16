@@ -69,7 +69,11 @@ describe('amp-image-lightbox component', () => {
       let requestFullOverlay = sinon.spy();
       impl.requestFullOverlay = requestFullOverlay;
       let viewportOnChanged = sinon.spy();
-      impl.getViewport = () => {return {onChanged: viewportOnChanged};};
+      let disableTouchZoom = sinon.spy();
+      impl.getViewport = () => {return {
+        onChanged: viewportOnChanged,
+        disableTouchZoom: disableTouchZoom
+      };};
       let historyPush = sinon.spy();
       impl.getHistory_ = () => {
         return {push: () => {
@@ -90,6 +94,7 @@ describe('amp-image-lightbox component', () => {
       expect(historyPush.callCount).to.equal(1);
       expect(enter.callCount).to.equal(1);
       expect(impl.sourceElement_).to.equal(ampImage);
+      expect(disableTouchZoom.callCount).to.equal(1);
     });
   });
 
@@ -102,6 +107,10 @@ describe('amp-image-lightbox component', () => {
       impl.cancelFullOverlay = cancelFullOverlay;
       let viewportOnChangedUnsubscribed = sinon.spy();
       impl.unlistenViewport_ = viewportOnChangedUnsubscribed;
+      let restoreOriginalTouchZoom = sinon.spy();
+      impl.getViewport = () => {return {
+        restoreOriginalTouchZoom: restoreOriginalTouchZoom
+      };};
       let historyPop = sinon.spy();
       impl.getHistory_ = () => {
         return {pop: historyPop};
@@ -118,6 +127,7 @@ describe('amp-image-lightbox component', () => {
       expect(viewportOnChangedUnsubscribed.callCount).to.equal(1);
       expect(impl.unlistenViewport_).to.equal(null);
       expect(cancelFullOverlay.callCount).to.equal(1);
+      expect(restoreOriginalTouchZoom.callCount).to.equal(1);
       expect(historyPop.callCount).to.equal(1);
     });
   });

@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-### <a name=”amp-fit-text”></a> `amp-fit-text`
+### <a name="amp-fit-text"></a> `amp-fit-text`
 
 The `amp-fit-text` component can expand or shrink its font size to fit the
 content within the space given to it.
@@ -34,12 +34,13 @@ The `amp-fit-text` accepts one of the following `layout` values: `fixed`,
 `fixed-height`, `responsive` or `fill`.
 
 For example:
-
-    <amp-fit-text width="300" height="200" layout="responsive"
-        max-font-size="52">
-      Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque
-      inermis reprehendunt.
-    </amp-fit-text>
+```html
+<amp-fit-text width="300" height="200" layout="responsive"
+    max-font-size="52">
+  Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque
+  inermis reprehendunt.
+</amp-fit-text>
+```
 
 
 #### Attributes

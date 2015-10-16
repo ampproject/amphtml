@@ -77,6 +77,7 @@ class AmpLightbox extends AMP.BaseElement {
   /** @override */
   activate() {
     this.requestFullOverlay();
+    this.getViewport().resetTouchZoom();
     this.element.style.display = '';
     this.element.style.opacity = 0;
 
