@@ -98,7 +98,8 @@ describe('integration amp-carousel', () => {
       });
     });
 
-    it.skip('should only have the prev button visible when on last item', () => {
+    it.skip('should only have the prev button visible' + 
+       'when on last item', () => {
       return fixture.awaitEvent('amp:load:start', 1).then(() => {
         let amp = fixture.doc.querySelector('#carousel-1');
         expect(fixture.doc.body).to.have.class('amp-mode-mouse');
@@ -243,8 +244,8 @@ describe('integration amp-carousel', () => {
       });
     });
 
-    it.skip('(type=slides) should have visible buttons even when `amp-mode-mouse`' +
-       ' is not on body', () => {
+    it.skip('(type=slides) should have visible buttons ' +
+       'even when `amp-mode-mouse` is not on body', () => {
       return fixture.awaitEvent('amp:load:start', 6).then(() => {
         fixture.doc.body.classList.remove('amp-mode-mouse');
         let amp = fixture.doc.querySelector('#carousel-6');
