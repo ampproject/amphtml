@@ -60,14 +60,28 @@ module.exports = function(config) {
       /*eslint "google-camelcase/google-camelcase": 0*/
       Chrome_travis_ci: {
         base: 'Chrome',
-        flags: ['--no-sandbox']
+        flags: ['--no-sandbox'],
+      },
+      SL_Chrome: {
+        base: 'SauceLabs',
+        browserName: 'chrome',
+      },
+    },
+
+    sauceLabs: {
+      testName: 'AMP HTML on Sauce',
+      tunnelIdentifier: process.env.TRAVIS_JOB_NUMBER,
+      startConnect: false,
+      connectOptions: {
+        port: 5757,
+        logfile: 'sauce_connect.log'
       }
     },
 
     // change Karma's debug.html to the mocha web reporter
     client: {
       mocha: {
-        reporter: 'html'
+        reporter: 'html',
       },
       captureConsole: false
     }

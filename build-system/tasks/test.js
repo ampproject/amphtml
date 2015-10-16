@@ -35,6 +35,16 @@ function getConfig() {
     return extend(obj, karmaConfig.firefox);
   }
 
+  if (argv.saucelabs) {
+    if (!process.env.SAUCE_USERNAME) {
+      throw new Error('Missing SAUCE_USERNAME Env variable');
+    }
+    if (!process.env.SAUCE_ACCESS_KEY) {
+      throw new Error('Missing SAUCE_ACCESS_KEY Env variable');
+    }
+    return extend(obj, karmaConfig.saucelabs);
+  }
+
   return extend(obj, karmaConfig.default);
 }
 
@@ -42,6 +52,11 @@ function getConfig() {
  * Run tests.
  */
 gulp.task('test', ['build'], function(done) {
+  if (argv.saucelabs && process.env.MAIN_REPO) {
+    console./*OK*/info('Deactivated for main repo');
+    return;
+  }
+
   var config = getConfig();
   var browsers = [];
 
