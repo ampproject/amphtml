@@ -25,6 +25,7 @@ var buffer = require('vinyl-buffer');
 var browserify = require('browserify');
 var watchify = require('watchify');
 var uglify = require('gulp-uglify');
+var util = require('gulp-util');
 var wrap = require('gulp-wrap');
 var rename = require('gulp-rename');
 var replace = require('gulp-replace');
@@ -288,6 +289,11 @@ function buildExamples(watch) {
     });
   }
 
+  fs.copy('examples/img/', 'examples.build/img/', { clobber: true },
+      copyHandler.bind(null, 'examples/img folder'));
+  fs.copy('examples/video/', 'examples.build/video/', { clobber: true },
+      copyHandler.bind(null, 'examples/video folder'));
+
   // Also update test-example-validation.js
   buildExample('ads.amp.html');
   buildExample('article.amp.html');
@@ -297,6 +303,13 @@ function buildExamples(watch) {
   buildExample('instagram.amp.html');
   buildExample('released.amp.html');
   buildExample('twitter.amp.html');
+
+  function copyHandler(name, err) {
+    if (err) {
+      return util.log(util.colors.red('copy error: ', err));
+    }
+    util.log(util.colors.green('copied ' + name));
+  }
 }
 
 /**
