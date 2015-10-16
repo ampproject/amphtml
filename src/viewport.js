@@ -383,7 +383,7 @@ export class Viewport {
     let oldSize = this.size_;
     this.size_ = null;  // Need to recalc.
     let newSize = this.getSize();
-    this.changed_(oldSize.width != newSize.width, 0);
+    this.changed_(!oldSize || oldSize.width != newSize.width, 0);
   }
 }
 
