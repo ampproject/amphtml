@@ -313,15 +313,16 @@ export class Viewport {
    * @private
    */
   changed_(relayoutAll, velocity) {
-    var size = this.getSize();
-    log.fine(TAG_, 'changed event: ' +
-        'relayoutAll=' + relayoutAll + '; ' +
-        'top=' + this.scrollTop_ + '; ' +
-        'bottom=' + (this.scrollTop_ + size.height) + '; ' +
-        'velocity=' + velocity);
+    let size = this.getSize();
+    let scrollTop = this.getScrollTop();
+    log.fine(TAG_, 'changed event:',
+        'relayoutAll=', relayoutAll,
+        'top=', scrollTop,
+        'bottom=', (scrollTop + size.height),
+        'velocity=', velocity);
     this.changeObservable_.fire({
       relayoutAll: relayoutAll,
-      top: this.scrollTop_,
+      top: scrollTop,
       width: size.width,
       height: size.height,
       velocity: velocity
@@ -353,6 +354,7 @@ export class Viewport {
   /** @private */
   scrollDeferred_() {
     this.scrollTracking_ = false;
+    assert(this.scrollTop_ !== null);
     var newScrollTop = this.binding_.getScrollTop();
     var now = timer.now();
     var velocity = 0;
