@@ -57,7 +57,7 @@ export function run(id, win, data) {
 
 /**
  * Synchronously load the given script URL. Only use this if you need a sync
- * load. Otherwise just insert a script tag into the page.
+ * load. Otherwise use {@link loadScript}.
  * Supports taking a callback that will be called synchronously after the given
  * script was executed.
  * @param {!Window} win
@@ -71,6 +71,19 @@ export function writeScript(win, url, opt_cb) {
   if (opt_cb) {
     executeAfterWriteScript(win, opt_cb);
   }
+}
+
+/**
+ * Asynchronously load the given script URL.
+ * @param {!Window} win
+ * @param {string} url
+ * @param {function()=} cb
+ */
+export function loadScript(win, url, cb) {
+  var s = win.document.createElement('script');
+  s.src = url;
+  s.onload = cb;
+  win.document.body.appendChild(s);
 }
 
 /**
