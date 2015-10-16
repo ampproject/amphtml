@@ -16,15 +16,8 @@
 
 var gulp = require('gulp');
 var path = require('path');
-var srcGlobs = require('../config').srcGlobs;
+var srcGlobs = require('../config').presubmitGlobs;
 var util = require('gulp-util');
-
-// Directories to check for presubmit checks.
-var srcGlobs = srcGlobs.concat([
-  '!build-system/tasks/presubmit-checks.js',
-  '!build/polyfills.js',
-  '!gulpfile.js',
-]);
 
 var dedicatedCopyrightNoteSources = /(\.js|\.css)$/;
 
@@ -54,7 +47,6 @@ var forbiddenTerms = {
   'debugger': '',
 
   // ES6. These are only the most commonly used.
-  'Array\\.from': es6polyfill,
   'Array\\.of': es6polyfill,
   // These currently depend on core-js/modules/web.dom.iterable which
   // we don't want. That decision could be reconsidered.
@@ -62,6 +54,18 @@ var forbiddenTerms = {
   'Promise\\.race': es6polyfill,
   '\\.startsWith': es6polyfill,
   '\\.endsWith': es6polyfill,
+};
+
+var ThreePTermsMessage = 'The 3p bootstrap iframe has no polyfills loaded and' +
+    ' can thus not use most modern web APIs.';
+
+var forbidden3pTerms = {
+  // We need to forbid promise usage because we don't have our own polyfill
+  // available. This whitelisting of callNext is a major hack to allow one
+  // usage in babel's external helpers that is in a code path that we do
+  // not use.
+  '\\.then\\((?!callNext)': ThreePTermsMessage,
+  'Math\\.sign' : ThreePTermsMessage,
 };
 
 var bannedTermsHelpString = 'Please review viewport.js for a helper method ' +
@@ -185,6 +189,7 @@ function hasAnyTerms(file) {
   var basename = path.basename(pathname);
   var hasTerms = false;
   var hasSrcInclusiveTerms = false;
+  var has3pTerms = false;
 
   hasTerms = matchTerms(file, forbiddenTerms);
 
@@ -193,7 +198,14 @@ function hasAnyTerms(file) {
     hasSrcInclusiveTerms = matchTerms(file, forbiddenTermsSrcInclusive);
   }
 
-  return hasTerms || hasSrcInclusiveTerms;
+  var is3pFile = /3p|ads/.test(pathname) ||
+      basename == '3p.js' ||
+      basename == 'style.js';
+  if (is3pFile && !isTestFile) {
+    has3pTerms = matchTerms(file, forbidden3pTerms);
+  }
+
+  return hasTerms || hasSrcInclusiveTerms || has3pTerms;
 }
 
 /**
