@@ -93,3 +93,5 @@ In particular, we try to maintain "it might not be perfect but isn't broken"-sup
 - [AMP Layout system](https://docs.google.com/document/d/1YjFk_B6r97CCaQJf2nXRVuBOuNi_3Fn87Zyf1U7Xoz4/edit)
 
 We also recommend scanning the [spec](spec/). The non-element part should help understand some of the design aspects.
+
+## [Code of conduct](CODE_OF_CONDUCT.md)

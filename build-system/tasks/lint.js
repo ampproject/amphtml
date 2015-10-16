@@ -24,6 +24,10 @@ var options = {
   plugins: ['eslint-plugin-google-camelcase'],
 };
 
+/**
+ * Run the eslinter on the src javascript and log the output
+ * @return {!Stream} Readable stream
+ */
 function lint() {
   var errorsFound = false;
   return gulp.src(['**/*.js', config.src.exclude])

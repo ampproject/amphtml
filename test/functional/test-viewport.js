@@ -15,7 +15,8 @@
  */
 
 import {Viewport, ViewportBindingNatural_, ViewportBindingNaturalIosEmbed_,
-          ViewportBindingVirtual_} from '../../src/viewport';
+          ViewportBindingVirtual_, parseViewportMeta, stringifyViewportMeta,
+          updateViewportMetaString} from '../../src/viewport';
 import {getStyle} from '../../src/style';
 import * as sinon from 'sinon';
 
@@ -50,7 +51,8 @@ describe('Viewport', () => {
       }
     };
     binding = new ViewportBindingVirtual_(windowApi, viewer);
-    viewport = new Viewport(binding, viewer);
+    viewport = new Viewport(windowApi, binding, viewer);
+    viewport.getSize();
   });
 
   afterEach(() => {
@@ -160,6 +162,255 @@ describe('Viewport', () => {
     let bindingMock = sandbox.mock(binding);
     bindingMock.expects('getScrollWidth').withArgs().returns(111).once();
     expect(viewport.getScrollWidth()).to.equal(111);
+  });
+});
+
+
+describe('Viewport META', () => {
+
+  describe('parseViewportMeta', () => {
+    it('should accept null or empty strings', () => {
+      expect(parseViewportMeta(null)).to.be.empty;
+    });
+    it('should parse single key-value', () => {
+      expect(parseViewportMeta('width=device-width')).to.deep.equal({
+        'width': 'device-width'
+      });
+    });
+    it('should parse two key-values', () => {
+      expect(parseViewportMeta('width=device-width,minimum-scale=1')).to.deep.
+          equal({
+        'width': 'device-width',
+        'minimum-scale': '1'
+      });
+    });
+    it('should parse empty value', () => {
+      expect(parseViewportMeta('width=device-width,minimal-ui')).to.deep.equal({
+        'width': 'device-width',
+        'minimal-ui': ''
+      });
+      expect(parseViewportMeta('minimal-ui,width=device-width')).to.deep.equal({
+        'width': 'device-width',
+        'minimal-ui': ''
+      });
+    });
+    it('should return last dupe', () => {
+      expect(parseViewportMeta('width=100,width=200')).to.deep.equal({
+        'width': '200'
+      });
+    });
+    it('should ignore extra delims', () => {
+      expect(parseViewportMeta(',,,width=device-width,,,,minimum-scale=1,,,')).
+          to.deep.equal({
+        'width': 'device-width',
+        'minimum-scale': '1'
+      });
+    });
+  });
+
+  describe('stringifyViewportMeta', () => {
+    it('should stringify empty', () => {
+      expect(stringifyViewportMeta({})).to.equal('');
+    });
+    it('should stringify single key-value', () => {
+      expect(stringifyViewportMeta({'width': 'device-width'})).
+          to.equal('width=device-width');
+    });
+    it('should stringify two key-values', () => {
+      let res = stringifyViewportMeta({
+        'width': 'device-width',
+        'minimum-scale': '1'
+      });
+      expect(res == 'width=device-width,minimum-scale=1' ||
+          res == 'minimum-scale=1,width=device-width').
+          to.be.true;
+    });
+    it('should stringify empty values', () => {
+      let res = stringifyViewportMeta({
+        'width': 'device-width',
+        'minimal-ui': ''
+      });
+      expect(res == 'width=device-width,minimal-ui' ||
+          res == 'minimal-ui,width=device-width').
+          to.be.true;
+    });
+  });
+
+  describe('updateViewportMetaString', () => {
+    it('should do nothing with empty values', () => {
+      expect(updateViewportMetaString(
+          '', {})).to.equal('');
+      expect(updateViewportMetaString(
+          'width=device-width', {})).to.equal('width=device-width');
+    });
+    it('should add a new value', () => {
+      expect(updateViewportMetaString(
+          '', {'minimum-scale': '1'})).to.equal('minimum-scale=1');
+      expect(parseViewportMeta(updateViewportMetaString(
+          'width=device-width', {'minimum-scale': '1'}))).
+          to.deep.equal({
+            'width': 'device-width',
+            'minimum-scale': '1'
+          });
+    });
+    it('should replace the existing value', () => {
+      expect(parseViewportMeta(updateViewportMetaString(
+          'width=device-width,minimum-scale=2', {'minimum-scale': '1'}))).
+          to.deep.equal({
+            'width': 'device-width',
+            'minimum-scale': '1'
+          });
+    });
+    it('should delete the existing value', () => {
+      expect(parseViewportMeta(updateViewportMetaString(
+          'width=device-width,minimum-scale=1', {'minimum-scale': undefined}))).
+          to.deep.equal({
+            'width': 'device-width'
+          });
+    });
+    it('should ignore delete for a non-existing value', () => {
+      expect(parseViewportMeta(updateViewportMetaString(
+          'width=device-width', {'minimum-scale': undefined}))).
+          to.deep.equal({
+            'width': 'device-width'
+          });
+    });
+    it('should do nothing if values did not change', () => {
+      expect(updateViewportMetaString(
+          'width=device-width,minimum-scale=1', {'minimum-scale': '1'})).
+          to.equal('width=device-width,minimum-scale=1');
+    });
+  });
+
+  describe('TouchZoom', () => {
+    let sandbox;
+    let clock;
+    let viewport;
+    let binding;
+    let viewer;
+    let viewerMock;
+    let windowApi;
+    let originalViewportMetaString, viewportMetaString;
+    let viewportMeta;
+    let viewportMetaSetter;
+
+    beforeEach(() => {
+      sandbox = sinon.sandbox.create();
+      clock = sandbox.useFakeTimers();
+      viewer = {
+        getViewportWidth: () => 111,
+        getViewportHeight: () => 222,
+        getScrollTop: () => 0,
+        getPaddingTop: () => 0,
+        onViewportEvent: () => {},
+        isEmbedded: () => false
+      };
+      viewerMock = sandbox.mock(viewer);
+
+      originalViewportMetaString = 'width=device-width,minimum-scale=1';
+      viewportMetaString = originalViewportMetaString;
+      viewportMeta = Object.create(null);
+      viewportMetaSetter = sinon.spy();
+      Object.defineProperty(viewportMeta, 'content', {
+        get: () => viewportMetaString,
+        set: (value) => {
+          viewportMetaSetter(value);
+          viewportMetaString = value;
+        }
+      });
+      windowApi = {
+        document: {
+          documentElement: {style: {}},
+          querySelector: (selector) => {
+            if (selector == 'meta[name=viewport]') {
+              return viewportMeta;
+            }
+            return undefined;
+          }
+        }
+      };
+
+      binding = new ViewportBindingVirtual_(windowApi, viewer);
+      viewport = new Viewport(windowApi, binding, viewer);
+    });
+
+    afterEach(() => {
+      viewport = null;
+      binding = null;
+      viewer = null;
+      clock.restore();
+      clock = null;
+      sandbox.restore();
+      sandbox = null;
+    });
+
+    it('should initialize original viewport meta', () => {
+      viewport.getViewportMeta_();
+      expect(viewport.originalViewportMetaString_).to.equal(viewportMetaString);
+      expect(viewportMetaSetter.callCount).to.equal(0);
+    });
+
+    it('should disable TouchZoom', () => {
+      viewport.disableTouchZoom();
+      expect(viewportMetaSetter.callCount).to.equal(1);
+      expect(viewportMetaString).to.have.string('maximum-scale=1');
+      expect(viewportMetaString).to.have.string('user-scalable=no');
+    });
+
+    it('should ignore disable TouchZoom if already disabled', () => {
+      viewportMetaString = 'width=device-width,minimum-scale=1,' +
+          'maximum-scale=1,user-scalable=no';
+      viewport.disableTouchZoom();
+      expect(viewportMetaSetter.callCount).to.equal(0);
+    });
+
+    it('should ignore disable TouchZoom if embedded', () => {
+      viewerMock.expects('isEmbedded').returns(true).atLeast(1);
+      viewport.disableTouchZoom();
+      expect(viewportMetaSetter.callCount).to.equal(0);
+    });
+
+    it('should restore TouchZoom', () => {
+      viewport.disableTouchZoom();
+      expect(viewportMetaSetter.callCount).to.equal(1);
+      expect(viewportMetaString).to.have.string('maximum-scale=1');
+      expect(viewportMetaString).to.have.string('user-scalable=no');
+
+      viewport.restoreOriginalTouchZoom();
+      expect(viewportMetaSetter.callCount).to.equal(2);
+      expect(viewportMetaString).to.equal(originalViewportMetaString);
+    });
+
+    it('should reset TouchZoom; zooming state unknown', () => {
+      viewport.resetTouchZoom();
+      expect(viewportMetaSetter.callCount).to.equal(1);
+      expect(viewportMetaString).to.have.string('maximum-scale=1');
+      expect(viewportMetaString).to.have.string('user-scalable=no');
+
+      clock.tick(1000);
+      expect(viewportMetaSetter.callCount).to.equal(2);
+      expect(viewportMetaString).to.equal(originalViewportMetaString);
+    });
+
+    it('should ignore reset TouchZoom if not currently zoomed', () => {
+      windowApi.document.documentElement.clientHeight = 500;
+      windowApi.innerHeight = 500;
+      viewport.resetTouchZoom();
+      expect(viewportMetaSetter.callCount).to.equal(0);
+    });
+
+    it('should proceed with reset TouchZoom if currently zoomed', () => {
+      windowApi.document.documentElement.clientHeight = 500;
+      windowApi.innerHeight = 300;
+      viewport.resetTouchZoom();
+      expect(viewportMetaSetter.callCount).to.equal(1);
+    });
+
+    it('should ignore reset TouchZoom if embedded', () => {
+      viewerMock.expects('isEmbedded').returns(true).atLeast(1);
+      viewport.resetTouchZoom();
+      expect(viewportMetaSetter.callCount).to.equal(0);
+    });
   });
 });
 

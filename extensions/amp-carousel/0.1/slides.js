@@ -72,6 +72,7 @@ export class AmpSlides extends BaseCarousel {
   /** @override */
   viewportCallback(inViewport) {
     this.updateInViewport(this.slides_[this.currentIndex_], inViewport);
+    this.tryAutoplay_(1, true);
   }
 
   /** @override */
@@ -120,11 +121,6 @@ export class AmpSlides extends BaseCarousel {
       this.element.setAttribute('loop', '');
       this.isLooping_ = true;
     }
-
-    // Setup microtask to let the runtime settle.
-    // TODO: (erwinm) experiment with only letting autoplay run if the
-    // carousel is in the viewport.
-    timer.delay(this.tryAutoplay_.bind(this, 1, true), 0);
   }
 
   /**
@@ -134,15 +130,27 @@ export class AmpSlides extends BaseCarousel {
    * @param {boolean} animate
    */
   tryAutoplay_(dir, animate) {
-    if (!this.isAutoplayRequested_) {
+    this.tryCancelAutoplayTimeout_();
+
+    // If amp-carousel is not in viewport then no need to queue up new
+    // call to `go`.
+    if (!(this.isAutoplayRequested_ && this.isInViewport())) {
       return;
     }
 
-    if (this.autoplayTimeoutId_ !== null) {
-      timer.cancel(this.autoplayTimeoutId_);
-    }
     this.autoplayTimeoutId_ = timer.delay(this.go.bind(this, dir, animate),
         this.autoplayDelay_);
+  }
+
+  /**
+   * Cancel `autoplay` timeout if one is in queue.
+   * @private
+   */
+  tryCancelAutoplayTimeout_() {
+    if (this.autoplayTimeoutId_ !== null) {
+      timer.cancel(this.autoplayTimeoutId_);
+      this.autoplayTimeoutId_ = null;
+    }
   }
 
   /**

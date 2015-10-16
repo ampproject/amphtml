@@ -15,6 +15,7 @@
  */
 
 import {Observable} from './observable';
+import {assert} from './asserts.js';
 import {getService} from './service';
 import {layoutRectLtwh} from './layout-rect';
 import {log} from './log';
@@ -48,24 +49,33 @@ var ViewportChangedEvent;
 export class Viewport {
 
   /**
+   * @param {!Window} win
    * @param {!ViewportBinding} binding
    * @param {!Viewer} viewer
    */
-  constructor(binding, viewer) {
+  constructor(win, binding, viewer) {
+    /** @const {!Window} */
+    this.win_ = win;
+
     /** @const {!ViewportBinding} */
     this.binding_ = binding;
 
     /** @const {!Viewer} */
     this.viewer_ = viewer;
 
-    /** @private {number} */
-    this.width_ = this.getSize().width;
+    /**
+     * Used to cache the size of the viewport. Also used as last known size,
+     * so users should call getSize early on to get a value. The timing should
+     * be chosen to avoid extra style recalcs.
+     * @private {{width: number, height: number}|null}
+     */
+    this.size_ = null;
 
-    /** @private {number} */
-    this./*OK*/scrollTop_ = this.binding_.getScrollTop();
+    /** @private {?number} */
+    this./*OK*/scrollTop_ = null;
 
-    /** @private {number} */
-    this./*OK*/scrollLeft_ = this.binding_.getScrollLeft();
+    /** @private {?number} */
+    this./*OK*/scrollLeft_ = null;
 
     /** @private {number} */
     this.paddingTop_ = viewer.getPaddingTop();
@@ -78,6 +88,12 @@ export class Viewport {
 
     /** @private @const {!Observable<!ViewportChangedEvent>} */
     this.changeObservable_ = new Observable();
+
+    /** @private {?HTMLMetaElement|undefined} */
+    this.viewportMeta_ = undefined;
+
+    /** @private {string|undefined} */
+    this.originalViewportMetaString_ = undefined;
 
     this.viewer_.onViewportEvent(() => {
       this.binding_.updateViewerViewport(this.viewer_);
@@ -92,7 +108,6 @@ export class Viewport {
 
     this.binding_.onScroll(this.scroll_.bind(this));
     this.binding_.onResize(this.resize_.bind(this));
-    this.changed_(/* relayoutAll */ false, /* velocity */ 0);
   }
 
   /** For testing. */
@@ -123,6 +138,9 @@ export class Viewport {
    * @return {number}
    */
   getScrollTop() {
+    if (this./*OK*/scrollTop_ == null) {
+      this./*OK*/scrollTop_ = this.binding_.getScrollTop();
+    }
     return this./*OK*/scrollTop_;
   }
 
@@ -131,6 +149,9 @@ export class Viewport {
    * @return {number}
    */
   getScrollLeft() {
+    if (this./*OK*/scrollleft_ == null) {
+      this./*OK*/scrollLeft_ = this.binding_.getScrollLeft();
+    }
     return this./*OK*/scrollLeft_;
   }
 
@@ -139,7 +160,10 @@ export class Viewport {
    * @return {!{width: number, height: number}}
    */
   getSize() {
-    return this.binding_.getSize();
+    if (this.size_) {
+      return this.size_;
+    }
+    return this.size_ = this.binding_.getSize();
   }
 
   /**
@@ -147,7 +171,7 @@ export class Viewport {
    * @return {number}
    */
   getWidth() {
-    return this.binding_.getSize().width;
+    return this.getSize().width;
   }
 
   /**
@@ -196,6 +220,91 @@ export class Viewport {
    */
   onChanged(handler) {
     return this.changeObservable_.add(handler);
+  }
+
+  /**
+   * Resets touch zoom to initial scale of 1.
+   */
+  resetTouchZoom() {
+    let windowHeight = this.win_./*OK*/innerHeight;
+    let documentHeight = this.win_.document.documentElement./*OK*/clientHeight;
+    if (windowHeight && documentHeight && windowHeight === documentHeight) {
+      // This code only works when scrollbar overlay content and take no space,
+      // which is fine on mobile. For non-mobile devices this code is
+      // irrelevant.
+      return;
+    }
+    if (this.disableTouchZoom()) {
+      timer.delay(() => {
+        this.restoreOriginalTouchZoom();
+      }, 50);
+    }
+  }
+
+  /**
+   * Disables touch zoom on this viewport. Returns `true` if any actual
+   * changes have been done.
+   * @return {boolean}
+   */
+  disableTouchZoom() {
+    let viewportMeta = this.getViewportMeta_();
+    if (!viewportMeta) {
+      // This should never happen in a valid AMP document, thus shortcircuit.
+      return false;
+    }
+    // Setting maximum-scale=1 and user-scalable=no zooms page back to normal
+    // and prohibit further default zooming.
+    let newValue = updateViewportMetaString(viewportMeta.content, {
+      'maximum-scale': '1',
+      'user-scalable': 'no'
+    });
+    return this.setViewportMetaString_(newValue);
+  }
+
+  /**
+   * Restores original touch zoom parameters. Returns `true` if any actual
+   * changes have been done.
+   * @return {boolean}
+   */
+  restoreOriginalTouchZoom() {
+    if (this.originalViewportMetaString_ !== undefined) {
+      return this.setViewportMetaString_(this.originalViewportMetaString_);
+    }
+    return false;
+  }
+
+  /**
+   * Updates touch zoom meta data. Returns `true` if any actual
+   * changes have been done.
+   * @return {boolean}
+   */
+  setViewportMetaString_(viewportMetaString) {
+    let viewportMeta = this.getViewportMeta_();
+    if (viewportMeta && viewportMeta.content != viewportMetaString) {
+      log.fine(TAG_, 'changed viewport meta to:', viewportMetaString);
+      viewportMeta.content = viewportMetaString;
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * @return {?HTMLMetaElement}
+   * @private
+   */
+  getViewportMeta_() {
+    if (this.viewer_.isEmbedded()) {
+      // An embedded document does not control its viewport meta tag.
+      return null;
+    }
+    if (this.viewportMeta_ === undefined) {
+      this.viewportMeta_ = this.win_.document.querySelector(
+          'meta[name=viewport]');
+      if (this.viewportMeta_) {
+        this.originalViewportMetaString_ = this.viewportMeta_.content;
+      }
+    }
+    return this.viewportMeta_;
   }
 
   /**
@@ -271,9 +380,10 @@ export class Viewport {
 
   /** @private */
   resize_() {
-    let oldWidth = this.width_;
-    this.width_ = this.getSize().width;
-    this.changed_(oldWidth != this.width_, 0);
+    let oldSize = this.size_;
+    this.size_ = null;  // Need to recalc.
+    let newSize = this.getSize();
+    this.changed_(oldSize.width != newSize.width, 0);
   }
 }
 
@@ -835,6 +945,92 @@ export class ViewportBindingVirtual_ {
 
 
 /**
+ * Parses viewport meta value. It usually looks like:
+ * ```
+ * width=device-width,initial-scale=1,minimum-scale=1
+ * ```
+ * @param {string} content
+ * @return {!Object<string, string>}
+ * @private Visible for testing only.
+ */
+export function parseViewportMeta(content) {
+  // Ex: width=device-width,initial-scale=1,minimal-ui
+  let params = Object.create(null);
+  if (!content) {
+    return params;
+  }
+  let pairs = content.split(',');
+  for (let i = 0; i < pairs.length; i++) {
+    let pair = pairs[i];
+    let [name, value] = pair.split('=');
+    name = name.trim();
+    value = (value || '').trim();
+    if (name) {
+      params[name] = value;
+    }
+  }
+  return params;
+}
+
+
+/**
+ * Stringifies viewport meta value based on the provided map. It usually looks
+ * like:
+ * ```
+ * width=device-width,initial-scale=1,minimum-scale=1
+ * ```
+ * @param {!Object<string, string>} params
+ * @return {string}
+ * @private Visible for testing only.
+ */
+export function stringifyViewportMeta(params) {
+  // Ex: width=device-width,initial-scale=1,minimal-ui
+  let content = '';
+  for (let k in params) {
+    if (content.length > 0) {
+      content += ',';
+    }
+    if (params[k]) {
+      content += k + '=' + params[k];
+    } else {
+      content += k;
+    }
+  }
+  return content;
+}
+
+
+/**
+ * This method makes a minimal effort to keep the original viewport string
+ * unchanged if in fact none of the values have been updated. Returns the
+ * updated string or the `currentValue` if no changes were necessary.
+ *
+ * @param {string} currentValue
+ * @param {!Object<string, string|undefined>} updateParams
+ * @return {string}
+ * @private Visible for testing only.
+ */
+export function updateViewportMetaString(currentValue, updateParams) {
+  let params = parseViewportMeta(currentValue);
+  let changed = false;
+  for (let k in updateParams) {
+    if (params[k] !== updateParams[k]) {
+      changed = true;
+      if (updateParams[k] !== undefined) {
+        params[k] = updateParams[k];
+      } else {
+        delete params[k];
+      }
+    }
+  }
+  if (!changed) {
+    return currentValue;
+  }
+  return stringifyViewportMeta(params);
+}
+
+
+/**
  * @param {!Window} window
  * @return {!Viewport}
  * @private
@@ -849,7 +1045,7 @@ function createViewport_(window) {
   } else {
     binding = new ViewportBindingNatural_(window);
   }
-  return new Viewport(binding, viewer);
+  return new Viewport(window, binding, viewer);
 }
 
 

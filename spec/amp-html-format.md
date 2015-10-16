@@ -52,7 +52,7 @@ In concrete terms this means that:
     <meta charset="utf-8">
     <title>Sample document</title>
     <link rel="canonical" href="./regular-html-version.html">
-    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
     <style amp-custom>
       h1 {color: red}
     </style>
@@ -96,9 +96,11 @@ AMP HTML documents MUST
 - <a name="crps"></a>contain `<head>` and `<body>` tags (They are optional in HTML). [🔗](#crps)
 - <a name="canon"></a>contain a `<link rel="canonical" href="$SOME_URL" />` tag inside their head that points to the regular HTML version of the AMP HTML document or to itself if no such HTML version exists. [🔗](#canon)
 - <a name="chrs"></a>contain a `<meta charset="utf-8">` tag as the first child of their head tag. [🔗](#chrs)
-- <a name="vprt"></a>contain a `<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">` tag inside their head tag. [🔗](#vprt)
-- <a name="scrpt"></a>contain a `<script async src="https://cdn.ampproject.org/v0.js"></script>` tag as the last element in their head. [🔗](#scrpt)
+- <a name="vprt"></a>contain a `<meta name="viewport" content="width=device-width,minimum-scale=1">` tag inside their head tag. It's also recommend to include `initial-scale=1` (1). [🔗](#vprt)
+- <a name="scrpt"></a>contain a `<script async src="https://cdn.ampproject.org/v0.js"></script>` tag inside their head tag. [🔗](#scrpt)
 - <a name="opacity"></a>contain `<style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>` in their head tag. [🔗](#opacity)
+
+(1) `width=device-width,minimum-scale=1` is required to ensure [GPU rasterization](https://www.chromium.org/developers/design-documents/chromium-graphics/how-to-get-gpu-rasterization) is enabled.
 
 ### Metadata
 
@@ -246,42 +248,15 @@ Built-in components are always available in an AMP document and have a dedicated
 
 ### Common attributes
 
-#### `width`, `height`
+#### `layout`, `width`, `height`, `media`, `placeholder`, `fallback`
 
-Depending on the value of the `layout` attribute AMP component elements must have a `width` and `height` attribute that contains an integer pixel value. Actual layout behavior is determined by the `layout` attribute.
+These attributes define the layout of an element. The key goal here is to ensure that
+the element can be displayed and its space can be properly reserved before any of the
+JavaScript or remote resources have been downloaded.
 
-#### `layout`
+See the [AMP Layout System](./amp-html-layout.md) for details about the layout system.
 
-The optional layout attribute allows specifying how the component behaves in the document layout. Valid values for the layout attribute are:
-
-- Not present: If `width` equals to `auto` `fixed-height` layout is assumed. If `width` or `height` attributes are present `fixed` layout is assumed. If `width` and `height` are not present `container` layout is assumed (unless otherwise documented with the component) which may not be supported by the element (Would trigger a runtime error).
-- `fixed`: The `width` and `height` attributes must be present. The only exceptions are `amp-pixel` and `amp-audio` elements.
-- `fixed-height`: The `height` attribute must be present. The `width` attribute must not be present or must be equal to `auto`.
-- `responsive`: The `width` and `height` attributes must be present and are used to determine the aspect ratio of the component and the component is sized to the width of its container element while maintaining the height based on the aspect ratio.
-- `nodisplay`: The component takes up zero space on the screen as if its display style was `none`. The `width` and `height` attributes are not required.
-- `fill`: Element size will be determined by the parent element.
-- `container`: The component is assumed to not have specific layout itself but only act as a container. Its children as rendered immediately.
-
-#### `media`
-
-All AMP custom elements support the `media` attribute. The value of media is a media query. If the query does not match, the element is not rendered at all and it's resources and potentially it's child resources will not be fetched. If the browser window changes size or orientation the media queries are re-evaluated and elements are hidden and shown based on the new results.
-
-Example: Here we have 2 images with mutually exclusive media queries. Depending on the screen width one or the other will be fetched and rendered. Note that the media attribute is available on all custom elements, so it can be used with non-image elements such as ads.
-
-```html
-<amp-img
-    media="(min-width: 650px)"
-    src="wide.jpg"
-    width=466
-    height=355 layout="responsive" ></amp-img>
-<amp-img
-    media="(max-width: 649px)"
-    src="narrow.jpg"
-    width=527
-    height=193 layout="responsive" ></amp-img>
-```
-
-### `on`
+#### `on`
 
 The `on` attribute is used to install event handlers on elements. The events that are supported depend on the element.
 
@@ -333,7 +308,7 @@ The AMP HTML format is designed so that is always the case.
 
 Currently, the following SVG elements are allowed:
 
-* basics: "g", "path", "glyph", "glyphRef", "marker", "view"
+* basics: "svg", "g", "path", "glyph", "glyphRef", "marker", "view"
 * shapes: "circle", "line", "polygon", "polyline", "rect"
 * text: "text", "textPath", "tref", "tspan"
 * rendering: "clipPath", "filter", "linearGradient", "radialGradient", "mask", "pattern", "vkern", "hkern"

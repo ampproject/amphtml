@@ -36,7 +36,7 @@ AMP HTML works by including the AMP JS library and adding a bit of boilerplate t
   <head>
     <meta charset="utf-8">
     <link rel="canonical" href="hello-world.html" >
-    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
     <style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
     <script async src="https://cdn.ampproject.org/v0.js"></script>
   </head>
@@ -129,3 +129,5 @@ under the [Apache License, Version 2.0](LICENSE).
 ## Contributing
 
 Please see [the CONTRIBUTING file](CONTRIBUTING.md) for information on contributing to the AMP Project, and [the DEVELOPING file](DEVELOPING.md) for documentation on the AMP library internals.
+
+### [Code of conduct](CODE_OF_CONDUCT.md)

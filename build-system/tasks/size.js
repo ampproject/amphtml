@@ -33,6 +33,15 @@ var tableOptions = {
   hsep: '   |   ',
 };
 
+/**
+ * Through2 transform function - Tracks the original size and the gzipped size
+ * of the file content in the rows array. Passes the file and/or err to the
+ * callback when finished.
+ * @param {!Array<!Array<string>>} rows array to store content size information
+ * @param {!File} file File to process
+ * @param {string} enc Encoding (not used)
+ * @param {function(?Error, !File)} cb Callback function
+ */
 function onFileThrough(rows, file, enc, cb) {
   if (file.isNull()) {
     cb(null, file);
@@ -40,7 +49,7 @@ function onFileThrough(rows, file, enc, cb) {
   }
 
   if (file.isStream()) {
-    callback(new gutil.PluginError('size-task', 'Stream not supported'));
+    cb(new gutil.PluginError('size-task', 'Stream not supported'));
     return;
   }
 
@@ -53,6 +62,14 @@ function onFileThrough(rows, file, enc, cb) {
   cb(null, file);
 }
 
+/**
+ * Through2 flush function - combines headers with the rows and generates
+ * a text-table of the content size information to log to the console and the
+ * test/size.txt logfile.
+ *
+ * @param {!Array<!Array<string>>} rows array of content size information
+ * @param {function()} cb Callback function
+ */
 function onFileThroughEnd(rows , cb) {
   rows.unshift.apply(rows, tableHeaders);
   var tbl = table(rows, tableOptions);
@@ -61,6 +78,11 @@ function onFileThroughEnd(rows , cb) {
   cb();
 }
 
+/**
+ * Setup through2 to capture size information using the above transform and
+ * flush functions on a stream
+ * @return {!Stream} a Writable Stream
+ */
 function sizer() {
   var rows = [];
   return through.obj(
@@ -69,6 +91,11 @@ function sizer() {
   );
 }
 
+/**
+ * Pipe the distributable js files through the sizer to get a record of
+ * the content size before and after gzip and cleanup any temporary file
+ * output from the process.
+ */
 function sizeTask() {
   gulp.src(['dist/**/*.js', 'dist.3p/{current,current-min}/**/*.js'])
     .pipe(sizer())

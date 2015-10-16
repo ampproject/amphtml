@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Layout, isInternalElement} from './layout';
+import {Layout} from './layout';
 import {assert} from './asserts';
 import {preconnectFor} from './preconnect';
-import {resources} from './resources';
+import {resourcesFor} from './resources';
 import {viewerFor} from './viewer';
 import {viewportFor} from './viewport';
 
@@ -62,12 +62,13 @@ import {viewportFor} from './viewport';
  *           \/
  *    State: <BUILT>
  *           ||
- *           || layoutCallback      <=
- *           ||                      ||
- *           \/                      || isRelayoutNeeded?
- *    State: <LAID OUT>              ||
- *           ||                      ||
- *           ||                 ======
+ *           || layoutCallback        <==
+             || (firstLayoutCompleted)  ||
+ *           ||                         ||
+ *           \/                         || isRelayoutNeeded?
+ *    State: <LAID OUT>                 ||
+ *           ||                         ||
+ *           ||                 =========
  *           ||
  *           || viewportCallback
  *           ||
@@ -80,7 +81,7 @@ import {viewportFor} from './viewport';
  * is optional.
  */
 export class BaseElement {
-  /** @param {!Element} element */
+  /** @param {!AmpElement} element */
   constructor(element) {
     /** @public @const */
     this.element = element;
@@ -99,6 +100,9 @@ export class BaseElement {
 
     /** @protected {!Preconnect} */
     this.preconnect = preconnectFor(element.ownerDocument.defaultView);
+
+    /** @private {!Resources}  */
+    this.resources_ = resourcesFor(element.ownerDocument.defaultView);
   }
 
   /** @return {!Layout} */
@@ -194,7 +198,7 @@ export class BaseElement {
    * @param {!Element} element
    */
   setAsOwner(element) {
-    resources.setOwner(element, this.element);
+    this.resources_.setOwner(element, this.element);
   }
 
   /**
@@ -239,6 +243,19 @@ export class BaseElement {
    */
   layoutCallback() {
     return Promise.resolve();
+  }
+
+  /**
+   * Called to notify the element that the first layout has been successfully
+   * completed.
+   *
+   * The default behavior of this method is to hide the placeholder. However,
+   * a subclass may choose to hide placeholder earlier or not hide it at all.
+   *
+   * @protected
+   */
+  firstLayoutCompleted() {
+    this.togglePlaceholder(false);
   }
 
   /**
@@ -306,7 +323,7 @@ export class BaseElement {
    * @return {number}
    */
   getMaxDpr() {
-    return resources.getMaxDpr();
+    return this.resources_.getMaxDpr();
   }
 
   /**
@@ -314,7 +331,7 @@ export class BaseElement {
    * @return {number}
    */
   getDpr() {
-    return resources.getDpr();
+    return this.resources_.getDpr();
   }
 
   /**
@@ -340,13 +357,25 @@ export class BaseElement {
    * @protected @final
    */
   getPlaceholder() {
-    let children = this.element.children;
-    for (let i = 0; i < children.length; i++) {
-      if (children[i].hasAttribute('placeholder')) {
-        return children[i];
-      }
-    }
-    return null;
+    return this.element.getPlaceholder();
+  }
+
+  /**
+   * Hides or shows the placeholder, if available.
+   * @param {boolean} state
+   * @protected @final
+   */
+  togglePlaceholder(state) {
+    this.element.togglePlaceholder(state);
+  }
+
+  /**
+   * Hides or shows the fallback, if available.
+   * @param {boolean} state
+   * @protected @final
+   */
+  toggleFallback(state) {
+    this.element.toggleFallback(state);
   }
 
   /**
@@ -357,13 +386,7 @@ export class BaseElement {
    * @protected @final
    */
   getRealChildNodes() {
-    let nodes = [];
-    for (let n = this.element.firstChild; n; n = n.nextSibling) {
-      if (!isInternalOrServiceNode(n)) {
-        nodes.push(n);
-      }
-    }
-    return nodes;
+    return this.element.getRealChildNodes();
   }
 
   /**
@@ -373,24 +396,26 @@ export class BaseElement {
    * @protected @final
    */
   getRealChildren() {
-    let elements = [];
-    for (let i = 0; i < this.element.children.length; i++) {
-      let child = this.element.children[i];
-      if (!isInternalOrServiceNode(child)) {
-        elements.push(child);
-      }
-    }
-    return elements;
+    return this.element.getRealChildren();
   }
 
   /**
    * Configures the supplied element to have a "fill content" layout. The
    * exact interpretation of "fill content" depends on the element's layout.
+   *
+   * If `opt_replacedContent` is specified, it indicates whether the "replaced
+   * content" styling should be applied. Replaced content is not allowed to
+   * have its own paddings or border.
+   *
    * @param {!Element} element
+   * @param {boolean=} opt_replacedContent
    * @protected @final
    */
-  applyFillContent(element) {
+  applyFillContent(element, opt_replacedContent) {
     element.classList.add('-amp-fill-content');
+    if (opt_replacedContent) {
+      element.classList.add('-amp-replaced-content');
+    }
   }
 
   /**
@@ -410,7 +435,7 @@ export class BaseElement {
    * @protected
    */
   scheduleLayout(elements) {
-    resources.scheduleLayout(this.element, elements);
+    this.resources_.scheduleLayout(this.element, elements);
   }
 
   /**
@@ -422,7 +447,7 @@ export class BaseElement {
    * @protected
    */
   schedulePreload(elements) {
-    resources.schedulePreload(this.element, elements);
+    this.resources_.schedulePreload(this.element, elements);
   }
 
   /**
@@ -434,7 +459,7 @@ export class BaseElement {
    * @protected
    */
   updateInViewport(elements, inLocalViewport) {
-    resources.updateInViewport(this.element, elements, inLocalViewport);
+    this.resources_.updateInViewport(this.element, elements, inLocalViewport);
   }
 
   /**
@@ -445,7 +470,7 @@ export class BaseElement {
    * @protected
    */
   changeHeight(newHeight) {
-    resources.changeHeight(this.element, newHeight);
+    this.resources_.changeHeight(this.element, newHeight);
   }
 
   /**
@@ -454,7 +479,7 @@ export class BaseElement {
    * @param {!Function} callback
    */
   deferMutate(callback) {
-    resources.deferMutate(this.element, callback);
+    this.resources_.deferMutate(this.element, callback);
   }
 
   /**
@@ -473,19 +498,3 @@ export class BaseElement {
     viewerFor(this.element.ownerDocument.defaultView).cancelFullOverlay();
   }
 };
-
-
-/**
- * Returns "true" for internal AMP nodes or for placeholder elements.
- * @param {!Node} node
- * @return {boolean}
- */
-function isInternalOrServiceNode(node) {
-  if (isInternalElement(node)) {
-    return true;
-  }
-  if (node.tagName && node.hasAttribute('placeholder')) {
-    return true;
-  }
-  return false;
-}

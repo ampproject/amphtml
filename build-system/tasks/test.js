@@ -21,6 +21,10 @@ var config = require('../config');
 var karmaConfig = config.karma;
 var extend = require('util')._extend;
 
+/**
+ * Read in and process the configuration settings for karma
+ * @return {!Object} Karma configuration
+ */
 function getConfig() {
   var obj = Object.create(null);
   if (argv.safari) {
@@ -34,7 +38,9 @@ function getConfig() {
   return extend(obj, karmaConfig.default);
 }
 
-
+/**
+ * Run tests.
+ */
 gulp.task('test', ['build'], function(done) {
   var config = getConfig();
   var browsers = [];
