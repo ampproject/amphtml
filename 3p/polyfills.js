@@ -21,3 +21,5 @@
 
 // This list should not get longer without a very good reason.
 import 'babel-core/external-helpers';
+
+require('core-js/modules/es6.array.from');
