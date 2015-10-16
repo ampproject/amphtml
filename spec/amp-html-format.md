@@ -160,26 +160,12 @@ Major semantic tags and the AMP custom elements come with default styles to make
 Authors may add custom styles to a document using a single `<style amp-custom>` tag in the head of the document.
 
 #### Selectors
-The initial version of AMP will only allow very simple CSS selectors in AMPs. The restriction is in place to make overall performance easier to reason about. It may be opened up in the future.
 
-Allowed selectors are of the form:
+The universal selector `*` may not be used in author stylesheets. This is because it can have negative performance implications and could be used to circumvent the rules set out in the following paragraph.
 
-- `.class`
-- `#id`
-- `tag-name`
-- selector, selector
-- media queries
+Class names, in author stylesheets, may not start with the string `-amp-`. These are reserved for internal use by the AMP runtime. It follows, that the user's stylesheet may not reference CSS selectors for `-amp-` classes and `i-amp` tags. These classes and elements are not meant to be customized by authors. Authors, however, can override styles of `amp-` classes and tags for any CSS properties not explicitly forbidden by these components' spec.
 
-Pseudo selectors are generally forbidden and must be whitelisted 1 by 1. Initially, we only allow `:hover`, `:active` and `:visited` with whitelisted CSS properties (For color and underlining).
-
-CSS variables are used to style custom elements.
-
-Class names, in author stylesheets, may not start with the string `-amp-`. These are reserved for internal use by the AMP runtime. It follows,
-that the user's stylesheet may not reference CSS selectors for `-amp-` classes and `i-amp` tags. These classes and elements are not meant to
-be customized by authors. Authors, however, can override styles of `amp-` classes and tags for any CSS properties not explicitly
-forbidden by these components' spec.
-
-Usage of the !important qualifier is not allowed.
+Usage of the !important qualifier is not allowed. This is a necessary requirement to enable AMP to enforce its element sizing invariants.
 
 #### Properties
 These CSS properties are permanently banned:
@@ -187,13 +173,18 @@ These CSS properties are permanently banned:
 - `behavior`
 - `-moz-binding`
 
-The initial version of AMP will prohibit the use of the following CSS properties. This may be relaxed in the future.
+The following properties are currently blacklisted due to performance concerns:
 
-- `transition`
-- `animation`
 - `filter`
 
-`overflow` (and `overflow-y`, etc.) may not be styled as “auto” or “scroll”. No user defined element in an AMP document may have a scrollbar.
+AMP only allows transitions and animations of properties that can be GPU accelerated in common browsers. We currently whitelist: `opacity`, `transform` (also `-vendorPrefix-transform`).
+
+In the following examples `<property>` needs to be in the whitelist above.
+
+- `transition <property>` (Also -vendorPrefix-transition)
+- `@keyframes name { from: {<property>: value} to {<property: value>} }` (also `@-vendorPrefix-keyframes`)
+
+`overflow` (and `overflow-y`, `overflow-x`) may not be styled as “auto” or “scroll”. No user defined element in an AMP document may have a scrollbar.
 
 ##### Maximum size
 It is a validation error if the author stylesheet is larger than 50,000 bytes.
