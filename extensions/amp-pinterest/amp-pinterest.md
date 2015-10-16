@@ -42,11 +42,11 @@ Embedded pin widget: `data-do="embedPin"`
 
 Required when `data-do` is `buttonPin`.  Contains the fully-qualified URL intended to be pinned or re-made into a widget.
 
-**pinMedia**
+**data-media**
 
 Required when `data-do` is `buttonPin`.  Contains the fully-qualified URL of the image intended to be pinned. If the pin will eventually contain multimedia (such as YouTube), should point to a high-resolution thumbnail.
 
-**pinDescription**
+**data-description**
 
 Required when `data-do` is `buttonPin`.  Contains the default description that appears in the pin create form; please choose carefully, since many Pinners will close the form without pinning if it doesn't make sense.
 
