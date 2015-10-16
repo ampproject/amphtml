@@ -75,6 +75,17 @@ var karma = {
       },
       captureConsole: false
     }
+  },
+  saucelabs: {
+    configFile: karmaConf,
+    files: testPaths,
+    reporters: ['dots', 'saucelabs'],
+    browsers: ['SL_Chrome'],
+    singleRun: true,
+    client: {
+      captureConsole: false
+    },
+    browserDisconnectTimeout: 30000,
   }
 };
 
