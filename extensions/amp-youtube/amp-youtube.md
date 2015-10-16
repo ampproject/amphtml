@@ -21,7 +21,7 @@ Displays a Youtube video.
 Example:
 ```html
 <amp-youtube
-    video-id="mGENRKrdoGY"
+    data-videoid="mGENRKrdoGY"
     layout="responsive"
     width="480" height="270"></amp-youtube>
 ```
@@ -31,7 +31,7 @@ With responsive layout the width and height from the example should yield correc
 
 #### Attributes
 
-**video-id**
+**data-videoid**
 
 The Youtube video id found in every Youtube video page URL
 

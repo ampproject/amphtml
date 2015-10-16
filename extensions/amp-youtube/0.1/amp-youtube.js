@@ -34,8 +34,11 @@ class AmpYoutube extends AMP.BaseElement {
   layoutCallback() {
     var width = this.element.getAttribute('width');
     var height = this.element.getAttribute('height');
-    var videoId = AMP.assert(this.element.getAttribute('video-id'),
-        'The video-id attribute is required for <amp-youtube> %s',
+    // The video-id is supported only for backward compatibility.
+    var videoid = AMP.assert(
+        (this.element.getAttribute('data-videoid') ||
+        this.element.getAttribute('video-id')),
+        'The data-videoid attribute is required for <amp-youtube> %s',
         this.element);
     // See
     // https://developers.google.com/youtube/iframe_api_reference
@@ -43,7 +46,7 @@ class AmpYoutube extends AMP.BaseElement {
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
     iframe.src = 'https://www.youtube.com/embed/' + encodeURIComponent(
-        videoId) + '?enablejsapi=1';
+        videoid) + '?enablejsapi=1';
     this.applyFillContent(iframe);
     iframe.width = width;
     iframe.height = height;
