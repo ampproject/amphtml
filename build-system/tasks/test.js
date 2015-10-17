@@ -52,7 +52,8 @@ function getConfig() {
  * Run tests.
  */
 gulp.task('test', ['build'], function(done) {
-  if (argv.saucelabs && process.env.MAIN_REPO) {
+  if (argv.saucelabs && process.env.MAIN_REPO
+        && process.env.TRAVIS_PULL_REQUEST) {
     console./*OK*/info('Deactivated for main repo');
     return;
   }

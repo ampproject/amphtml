@@ -41,6 +41,7 @@ try {
   installErrorReporting(window);  // Also calls makeBodyVisible on errors.
   installStyles(document, cssText, () => {
 
+
     try {
       historyFor(window);
       viewerFor(window);
