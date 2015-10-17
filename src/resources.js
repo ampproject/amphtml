@@ -1196,6 +1196,7 @@ export class Resource {
    * @return {!Promise}
    */
   startLayout(isDocumentVisible) {
+    return;
     if (this.layoutPromise_) {
       return this.layoutPromise_;
     }
