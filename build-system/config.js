@@ -85,7 +85,8 @@ var karma = {
     client: {
       captureConsole: false
     },
-    browserDisconnectTimeout: 30000,
+    browserDisconnectTimeout: 70000,
+    browserNoActivityTimeout: 70000,
   }
 };
 
