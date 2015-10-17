@@ -3,7 +3,7 @@ node_js:
   - "stable"
 notifications:
   webhooks:
-    - http://savage.nonblocking.io/savage/travis
+    - http://savage.nonblocking.io:8080/savage/travis
 addons:
   sauce_connect: true
   hosts:
