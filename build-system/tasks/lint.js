@@ -15,14 +15,23 @@
  */
 
 
-var gulp = require('gulp');
-var eslint = require('gulp-eslint');
-var util = require('gulp-util');
+var argv = require('minimist')(process.argv.slice(2));
 var config = require('../config');
+var eslint = require('gulp-eslint');
+var gulp = require('gulp');
+var lazypipe = require('lazypipe');
+var util = require('gulp-util');
+var watch = require('gulp-watch');
+
+var isWatching = (argv.watch || argv.w) || false;
 
 var options = {
   plugins: ['eslint-plugin-google-camelcase'],
 };
+
+var srcs = ['**/*.js', config.src.exclude];
+
+var watcher = lazypipe().pipe(watch, srcs);
 
 /**
  * Run the eslinter on the src javascript and log the output
@@ -30,17 +39,22 @@ var options = {
  */
 function lint() {
   var errorsFound = false;
-  return gulp.src(['**/*.js', config.src.exclude])
-      .pipe(eslint(options))
-      .pipe(eslint.formatEach('compact', function(msg) {
-        errorsFound = true;
-        util.log(util.colors.red(msg));
-      }))
-      .on('end', function() {
-        if (errorsFound) {
-          process.exit(1);
-        }
-      });
+  var stream = gulp.src(srcs);
+
+  if (isWatching) {
+    stream = stream.pipe(watcher());
+  }
+
+  return stream.pipe(eslint(options))
+    .pipe(eslint.formatEach('compact', function(msg) {
+      errorsFound = true;
+      util.log(util.colors.red(msg));
+    }))
+    .on('end', function() {
+      if (errorsFound) {
+        process.exit(1);
+      }
+    });
 }
 
 gulp.task('lint', lint);
