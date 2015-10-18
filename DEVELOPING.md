@@ -38,6 +38,7 @@ We discuss implementation issues on [amphtml-discuss@googlegroups.com](https://g
 | `gulp`                        | Same as "watch"                                                       |
 | `gulp minify`                 | Builds production binaries.                                           |
 | `gulp lint`                   | Validates against Google Closure Linter.                              |
+| `gulp lint --watch`           | Watches for changes in files, Validates against Google Closure Linter.|
 | `gulp build`                  | Builds the AMP library.                                               |
 | `gulp clean`                  | Removes build output.                                                 |
 | `gulp test`                   | Runs tests in Chrome.                                                 |

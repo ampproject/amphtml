@@ -58,6 +58,7 @@
     "karma-safari-launcher": "0.1.1",
     "karma-sauce-launcher": "0.2.14",
     "karma-sinon-chai": "1.0.0",
+    "lazypipe": "1.0.1",
     "minimist": "1.2.0",
     "mocha": "2.3.3",
     "postcss": "5.0.10",
