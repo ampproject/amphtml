@@ -25,7 +25,7 @@ describe('amp-youtube', () => {
   function getYt(videoId, opt_responsive) {
     return createIframePromise().then((iframe) => {
       var yt = iframe.doc.createElement('amp-youtube');
-      yt.setAttribute('video-id', videoId);
+      yt.setAttribute('data-videoid', videoId);
       yt.setAttribute('width', '111');
       yt.setAttribute('height', '222');
       if (opt_responsive) {
@@ -57,8 +57,8 @@ describe('amp-youtube', () => {
     });
   });
 
-  it('requires video-id', () => {
+  it('requires data-videoid', () => {
     return getYt('').should.eventually.be.rejectedWith(
-        /The video-id attribute is required for/);
+        /The data-videoid attribute is required for/);
   });
 });

@@ -181,14 +181,14 @@ You must include the following script in the `<head>`:
 <script async custom-element="amp-youtube" src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js"></script>
 ```
 
-The Youtube `video-id` can be found in every Youtube video page URL.
+The Youtube `data-videoid` can be found in every Youtube video page URL.
 For example, in https://www.youtube.com/watch?v=Z1q71gFeRqM,
 Z1q71gFeRqM is the video id.
 
 Use `layout="responsive"` to yield correct layouts for 16:9 aspect ratio videos:
 ```html
 <amp-youtube
-    video-id="mGENRKrdoGY"
+    data-videoid="mGENRKrdoGY"
     layout="responsive"
     width="480" height="270">
 </amp-youtube>
