@@ -47,7 +47,8 @@ export const ViewportType = {
    * This is AMP-specific type and doesn't come from viewer. This is the type
    * that AMP sets when Viewer has requested "natural" viewport on a iOS
    * device.
-   * See https://docs.google.com/document/d/1YjFk_B6r97CCaQJf2nXRVuBOuNi_3Fn87Zyf1U7Xoz4/edit
+   * See:
+   * https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md
    * and {@link ViewportBindingNaturalIosEmbed_} for more details.
    */
   NATURAL_IOS_EMBED: 'natural-ios-embed'
