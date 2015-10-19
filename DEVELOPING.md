@@ -44,6 +44,7 @@ We discuss implementation issues on [amphtml-discuss@googlegroups.com](https://g
 | `gulp test --verbose`         | Runs tests in Chrome with logging enabled.                            |
 | `gulp test --watch`           | Watches for changes in files, runs corresponding test(s) in Chrome.   |
 | `gulp test --watch --verbose` | Same as "watch" with logging enabled.                                 |
+| `gulp test --saucelabs`       | Runs test on saucelabs (requires [setup](#saucelabs))                 |
 | `gulp test --safari`          | Runs tests in Safari.                                                 |
 | `gulp test --firefox`         | Runs tests in Firefox.                                                |
 | `http-server -p 8000 -c-1`    | serves content in current working dir over http://localhost:8000/     |
@@ -52,6 +53,17 @@ To fix issues with Safari test runner launching multiple instances of the test, 
 <pre>
   defaults write com.apple.Safari ApplePersistenceIgnoreState YES
 </pre>
+
+#### Saucelabs
+
+Running tests on Sauce Labs requires an account. You can get one by signing up for [Open Sauce](https://saucelabs.com/opensauce/). This will provide you with a user name and access code that you need to add to your `.bashrc` or equivalent like this:
+
+```
+export SAUCE_USERNAME=sauce-labs-user-name
+export SAUCE_ACCESS_KEY=access-key
+```
+
+Because of the user name and password requirement pull requests do not directly run on Travis. If your pull request contains JS or CSS changes and it does not change the build system, it will be automatically build by our bot [@ampsauce](https://github.com/ampsauce/amphtml). Builds can be seen on [@ampsauce's Travis](https://travis-ci.org/ampsauce/amphtml/builds) and after they finished their state will be logged to your PR.
 
 ### Manual testing
 
