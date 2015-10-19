@@ -25,7 +25,7 @@ describe('amp-instagram', () => {
   function getIns(shortcode, opt_responsive) {
     return createIframePromise().then(() => {
       var ins = iframe.doc.createElement('amp-instagram');
-      ins.setAttribute('shortcode', shortcode);
+      ins.setAttribute('data-shortcode', shortcode);
       ins.setAttribute('width', '111');
       ins.setAttribute('height', '222');
       if (opt_responsive) {
@@ -53,8 +53,8 @@ describe('amp-instagram', () => {
     });
   });
 
-  it('requires shortcode', () => {
+  it('requires data-shortcode', () => {
     expect(getIns('')).to.be.rejectedWith(
-        /The shortcode attribute is required for/);
+        /The data-shortcode attribute is required for/);
   });
 });
