@@ -35,6 +35,7 @@
  * </code>
  */
 
+import {assertHttpsUrl} from '../../../src/url';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
 
@@ -189,7 +190,7 @@ class AmpPinterest extends AMP.BaseElement {
 
           // start setting our class name
           let className = '-amp-pinterest-embed-pin';
-          let imgUrl = p.images['237x'].url;
+          let imgUrl = assertHttpsUrl(p.images['237x'].url);
 
           // large widgets may come later
           if (width === 'medium' || width === 'large') {
@@ -344,8 +345,7 @@ class AmpPinterest extends AMP.BaseElement {
           // append it
           that.element.appendChild(structure);
           // done
-          return loadPromise(structure);
-
+          return loadPromise(img);
         }
       };
 
@@ -353,8 +353,7 @@ class AmpPinterest extends AMP.BaseElement {
         '?pin_ids=' + pinId +
         '&sub=www&base_scheme=https';
       return call(query).then((r) => {
-        renderPin(r);
-        return loadPromise(structure);
+        return renderPin(r);
       });
     };
 

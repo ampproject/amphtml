@@ -47,6 +47,7 @@ export function parseUrl(url) {
  * Provides an exception for localhost.
  * @param {string} urlString
  * @param {!Element} elementContext Element where the url was found.
+ * @return {string}
  */
 export function assertHttpsUrl(urlString, elementContext) {
   var url = parseUrl(urlString);
@@ -60,6 +61,7 @@ export function assertHttpsUrl(urlString, elementContext) {
       '"https://" or "//" or be relative and served from ' +
       'https. Invalid value: %s',
       elementContext, urlString);
+  return urlString;
 }
 
 
