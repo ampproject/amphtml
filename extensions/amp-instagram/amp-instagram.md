@@ -21,7 +21,7 @@ Displays an instagram embed.
 Example:
 ```html
 <amp-instagram
-    shortcode="fBwFP"
+    data-shortcode="fBwFP"
     width="400"
     height="400"
     layout="responsive">
@@ -38,8 +38,8 @@ When using non-responsive layout you will need to account for the extra space ad
 
 #### Attributes
 
-**shortcode**
+**data-shortcode**
 
-The instagram shortcode found in every instagram photo URL.
+The instagram data-shortcode found in every instagram photo URL.
 
-E.g. in https://instagram.com/p/fBwFP fBwFP is the shortcode.
+E.g. in https://instagram.com/p/fBwFP fBwFP is the data-shortcode.
