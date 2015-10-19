@@ -15,6 +15,7 @@
  */
 
 require('./lint');
+require('./make-golden');
 require('./presubmit-checks');
 require('./size');
 require('./test');
