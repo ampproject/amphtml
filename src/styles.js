@@ -87,7 +87,6 @@ export function makeBodyVisible(doc) {
     }
   };
   interval = setInterval(set, 4);
-  set();
 }
 
 
