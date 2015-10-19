@@ -37,6 +37,7 @@
     "fs-extra": "0.24.0",
     "gulp": "3.9.0",
     "gulp-eslint": "1.0.0",
+    "gulp-exec": "2.1.2",
     "gulp-file": "0.2.0",
     "gulp-rename": "1.2.2",
     "gulp-replace": "0.5.4",
