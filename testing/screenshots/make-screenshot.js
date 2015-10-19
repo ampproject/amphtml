@@ -64,7 +64,10 @@ if (!FILE) {
   FILE = 'output.png';
 }
 
-var url = BASE + '/' + PATH + '#off=1&development=1';
+if (PATH.substr(0, 1) != '/') {
+  PATH = '/' + PATH;
+}
+var url = BASE + PATH + '#off=1&development=1';
 console./*OK*/log('URL = ' + url);
 
 var DEVICES = {
