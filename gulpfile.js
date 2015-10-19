@@ -258,6 +258,7 @@ function buildExtensionJs(js, path, name, version, options) {
  * Main Build
  */
 function build() {
+  process.env.NODE_ENV = 'development';
   polyfillsForTests();
   buildExtensions();
   buildExamples(false);
