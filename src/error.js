@@ -52,9 +52,13 @@ export function reportError(error, opt_associatedElement) {
     (console.error || console.log).apply(console,
         error.messageArray);
   } else {
-    if (process.env.NODE_ENV == 'production') {
-      (console.error || console.log).call(console, error.message);
+    if (element) {
+      (console.error || console.log).call(console,
+          element.tagName + '#' + element.id, error.message);
     } else {
+      (console.error || console.log).call(console, error.message);
+    }
+    if (!(process.env.NODE_ENV == 'production')) {
       (console.error || console.log).call(console, error.stack);
     }
   }
