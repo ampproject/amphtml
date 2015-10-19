@@ -157,7 +157,7 @@ export class SwipeXRecognizer {
   }
 
   /**
-   * @param {function(!SwipeStartEvent)}
+   * @param {function(!SwipeStartEvent)} handler
    * @return {!Unlisten}
    */
   onStart(handler) {
@@ -165,7 +165,7 @@ export class SwipeXRecognizer {
   }
 
   /**
-   * @param {function(!SwipeMoveEvent)}
+   * @param {function(!SwipeMoveEvent)} handler
    * @return {!Unlisten}
    */
   onMove(handler) {
@@ -173,7 +173,7 @@ export class SwipeXRecognizer {
   }
 
   /**
-   * @param {function(!SwipeEndEvent)}
+   * @param {function(!SwipeEndEvent)} handler
    * @return {!Unlisten}
    */
   onEnd(handler) {

@@ -47,7 +47,7 @@ function clickHandlerFor(window) {
 /**
  * Intercept any click on the current document and prevent any
  * linking to an identifier from pushing into the history stack.
- * @visibleForTesting
+ * visibleForTesting
  */
 export class ClickHandler {
   /**

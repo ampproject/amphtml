@@ -131,7 +131,7 @@ export function listen(iframe, typeOfMessage, callback) {
  * attributes.
  * @param {!Element} element
  * @param {!Object} attributes The destination.
- * @visibleForTesting
+ * visibleForTesting
  */
 export function addDataAndJsonAttributes_(element, attributes) {
   for (var i = 0; i < element.attributes.length; i++) {
