@@ -999,25 +999,25 @@ export class Resource {
     /** @private {number} */
     this.id_ = id;
 
-    /* @export @const {!AmpElement} */
+    /** @export @const {!AmpElement} */
     this.element = element;
 
-    /* @export @const {string} */
+    /** @export @const {string} */
     this.debugid = element.tagName.toLowerCase() + '#' + id;
 
     /** @private {!Resources} */
     this.resources_ = resources;
 
-    /* @private {boolean} */
+    /** @private {boolean} */
     this.blacklisted_ = false;
 
-    /* @const {!AmpElement|undefined|null} */
+    /** @const {!AmpElement|undefined|null} */
     this.owner_ = undefined;
 
     /** @const {number} */
     this.priority_ = getElementPriority(element.tagName);
 
-    /* @private {!ResourceState_} */
+    /** @private {!ResourceState_} */
     this.state_ = element.isBuilt() ? ResourceState_.NOT_LAID_OUT :
         ResourceState_.NOT_BUILT;
 
