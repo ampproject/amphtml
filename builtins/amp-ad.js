@@ -52,7 +52,7 @@ const BACKFILL_DIMENSIONS_ = [
  * @param {!Array<!Array<number>>} dims
  * @param {number} maxWidth
  * @param {number} maxHeight
- * @visibleForTesting
+ * visibleForTesting
  */
 export function scoreDimensions_(dims, maxWidth, maxHeight) {
   return dims.map(function(dim) {
@@ -72,7 +72,7 @@ export function scoreDimensions_(dims, maxWidth, maxHeight) {
 /**
  * Preview phase helper to update a @1x.png string to @2x.png.
  * @param {!Object<string, !Array<string>>} images
- * @visibleForTesting
+ * visibleForTesting
  */
 export function upgradeImages_(images) {
   Object.keys(images).forEach((key) => {
@@ -163,7 +163,7 @@ export function installAd(win) {
      * cannot fill the slot we select from a small set of default
      * banners.
      * @private
-     * @visibleForTesting
+     * visibleForTesting
      */
     setDefaultPlaceholder_() {
       var a = document.createElement('a');

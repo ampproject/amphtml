@@ -17,7 +17,7 @@
 /**
  * @param {string} name Attribute name with dashes
  * @return {string} Dashes removed and character after to upper case.
- * @visibleForTesting
+ * visibleForTesting
  */
 export function dashToCamelCase(name) {
   return name.replace(/-([a-z])/g, function(all, character) {

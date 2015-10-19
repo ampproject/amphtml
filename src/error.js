@@ -106,7 +106,7 @@ function reportErrorToServer(message, filename, line, col, error) {
  * @param {string|undefined} line
  * @param {string|undefined} col
  * @param {!Error|undefined} error
- * @VisibleForTesting
+ * visibleForTesting
  */
 export function getErrorReportUrl(message, filename, line, col, error) {
   message = error ? error.message : message;
