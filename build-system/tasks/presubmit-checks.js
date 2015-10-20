@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-var gulp = require('gulp');
+var gulp = require('gulp-help')(require('gulp'));
 var path = require('path');
 var srcGlobs = require('../config').presubmitGlobs;
 var util = require('gulp-util');
@@ -270,4 +270,5 @@ function checkForbiddenAndRequiredTerms() {
     });
 }
 
-gulp.task('presubmit', checkForbiddenAndRequiredTerms);
+gulp.task('presubmit', 'Run validation against files to check for forbidden '+
+  'and required terms', checkForbiddenAndRequiredTerms);

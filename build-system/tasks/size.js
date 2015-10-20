@@ -17,7 +17,7 @@
 var table = require('text-table');
 var del = require('del');
 var fs = require('fs');
-var gulp = require('gulp');
+var gulp = require('gulp-help')(require('gulp'));
 var gutil = require('gulp-util');
 var gzipSize = require('gzip-size');
 var prettyBytes = require('pretty-bytes');
@@ -103,4 +103,4 @@ function sizeTask() {
     .on('end', del.bind(null, [tempFolderName]));
 }
 
-gulp.task('size', sizeTask);
+gulp.task('size', 'Runs a report on artifact size', sizeTask);
