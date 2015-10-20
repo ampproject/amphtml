@@ -19,6 +19,7 @@ import './polyfills';
 import {historyFor} from './history';
 import {viewerFor} from './viewer';
 import {installPullToRefreshBlocker} from './pull-to-refresh';
+import {performanceFor} from './performance';
 
 import {installAd} from '../builtins/amp-ad';
 import {installGlobalClickListener} from './document-click';
@@ -39,6 +40,9 @@ import {maybeValidate} from './validator-integration';
 try {
   // Should happen first.
   installErrorReporting(window);  // Also calls makeBodyVisible on errors.
+  const perf = performanceFor(window);
+
+  perf.tick('is');
   installStyles(document, cssText, () => {
     try {
       historyFor(window);
@@ -59,6 +63,7 @@ try {
       maybeValidate(window);
     } finally {
       makeBodyVisible(document);
+      perf.tick('e_is');
     }
   }, /* opt_isRuntimeCss */ true);
 } catch (e) {
