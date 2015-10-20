@@ -40,7 +40,7 @@
     "gulp-exec": "2.1.2",
     "gulp-file": "0.2.0",
     "gulp-help": "1.6.1",
-    "gulp-image-diff": "~0.3.0",
+    "gulp-image-diff": "0.3.0",
     "gulp-rename": "1.2.2",
     "gulp-replace": "0.5.4",
     "gulp-sourcemaps": "1.5.2",
