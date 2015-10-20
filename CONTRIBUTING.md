@@ -64,6 +64,8 @@ We highly prefer integrations that do not use iframes. JSONP cannot be used for 
 
 Like all contributions, Extended Components will be analyzed for performance impact, code quality and style, and directional alignment with the project.
 
+For integration third party services, fonts, embeds, etc. see our [3p contribution guidelines](https://github.com/ampproject/amphtml/tree/master/3p).
+
 ### [Code of conduct](CODE_OF_CONDUCT.md)
 
 ### Next steps
