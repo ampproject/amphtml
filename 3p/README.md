@@ -4,16 +4,11 @@ In general all inclusions are subject to [CONTRIBUTING.md](../CONTRIBUTING.md).
 
 This files outlines specific rules for certain types of external embed and other software inclusions.
 
-## Fonts
+## Embeds
 
-- AMP allows inclusion of fonts via the `@font-face` directive.
-- JavaScript can not be involved with the initiation of font loading.
-- AMP by default does not allow inclusion of external stylesheets, but it is happy to whitelist URL prefixes of font providers for font inclusion via link tags. These link tags and their fonts must be served via HTTPS.
-- If a font provider does referrer based "security" it needs to whitelist the AMP proxy origins before being included in the link tag whitelist.
+Examples: Youtube, Vimeo videos; Tweets, Instagrams; comment systems; polls; quizzes; document viewers
 
-## Iframe based embeds
-
-- Our intent is to provide first class support for all
+- Our intent is to provide first class support for all embeds that fulfill the notability guidelines laid out in [CONTRIBUTING.md](../CONTRIBUTING.md).
 - Consider whether a click-to-play solution fits your use case where iframe generation is not done immediately (can be done before user action for instant loading of iframe).
 - Consider whether all that is needed is some documentation for how to use the embed with `amp-iframe`.
 - Iframes and all sub resources must be served from HTTPS.
@@ -25,6 +20,7 @@ This files outlines specific rules for certain types of external embed and other
 - Direct iframe embeds not using our 3p iframe mechanism (used e.g. for ads) are preferred.
 - JavaScript loaded into iframe should be reasonable with respect to functionality.
 - Use the `sandbox` attribute on iframe if possible.
+- Provide unit and integration tests.
 - Embeds that require browser plugins, such as Flash, Java, ActiveX, Silverlight, etc. are disallowed unless necessary. Special review required. We cannot currently see a reason why these should be allowed.
 
 ## Ads
@@ -37,11 +33,13 @@ This files outlines specific rules for certain types of external embed and other
 - Support viewability and other metrics/instrumentation as supplied by AMP (via postMessage API)
 - Try to keep overall iframe count at one per ad. Explain why more are needed.
 - Share JS between iframes on the same page.
+- Provide unit and integration tests.
+- Provide test accounts for inclusion in our open source repository for integration tests.
 
 The following aren't hard requirements, but are performance optimizations we should strive to incorporate. Please provide a timeline as to when you expect to follow these guidelines:
 
 - Support pause and play APIs to turn animations on and off. Ideally also to interrupt loading.
-- Never block the UI thread for longer than 50ms
+- Never block the UI thread for longer than 50ms, so that user action is never blocked for longer than that.
   - Keep individual JS files small enough, so they compile in under 50ms on a 2013 Android phone.
   - Split up other expensive work, so it can be interrupted at 50ms boundary.
 - Creatives should only use animations drive by CSS animation frame.
@@ -52,3 +50,10 @@ The better an ad network does on the above requirements, the earlier ads from it
 
 We are also excited to start conversations how modern web tech could improve overall ads latency, memory usage and framerate impact and how AMP's open source model could be used to inject trust through an auditable common code base into the ads ecosystem which would reduce the necessity of redundant metrics collection.
 
+## Fonts
+
+- AMP allows inclusion of fonts via the `@font-face` directive.
+- JavaScript can not be involved with the initiation of font loading.
+- Font loading gets controlled (but not initiated) by [`<amp-font>`](https://github.com/ampproject/amphtml/issues/648).
+- AMP by default does not allow inclusion of external stylesheets, but it is happy to whitelist URL prefixes of font providers for font inclusion via link tags. These link tags and their fonts must be served via HTTPS.
+- If a font provider does referrer based "security" it needs to whitelist the AMP proxy origins before being included in the link tag whitelist.
