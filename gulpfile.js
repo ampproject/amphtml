@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-var gulp = require('gulp');
+var gulp = require('gulp-help')(require('gulp'));
 var del = require('del');
 var file = require('gulp-file');
 var gulpWatch = require('gulp-watch');
@@ -265,18 +265,18 @@ function build() {
   compile();
 }
 
-gulp.task('css', compileCss);
-gulp.task('extensions', buildExtensions);
-gulp.task('clean', clean);
-gulp.task('build', build);
-gulp.task('watch', watch);
-gulp.task('minify', function() {
+gulp.task('css', 'Recompile css to build directory', compileCss);
+gulp.task('extensions', 'Build AMP Extensions', buildExtensions);
+gulp.task('clean', 'Removes build output', clean);
+gulp.task('build', 'Builds the AMP library', build);
+gulp.task('watch', 'Watches for changes in files, re-build', watch);
+gulp.task('minify', 'Build production binaries', function() {
   process.env.NODE_ENV = 'production';
   compile(false, true);
   buildExtensions({minify: true});
 });
 
-gulp.task('default', ['watch']);
+gulp.task('default', 'Same as "watch"', ['watch']);
 
 /**
  * Build the examples
@@ -443,3 +443,4 @@ function compileJs(srcDir, srcFilename, destDir, options) {
     rebundle();
   }
 }
+

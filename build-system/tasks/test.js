@@ -15,7 +15,7 @@
  */
 
 var argv = require('minimist')(process.argv.slice(2));
-var gulp = require('gulp');
+var gulp = require('gulp-help')(require('gulp'));
 var karma = require('karma').server;
 var config = require('../config');
 var karmaConfig = config.karma;
@@ -51,7 +51,7 @@ function getConfig() {
 /**
  * Run tests.
  */
-gulp.task('test', ['build'], function(done) {
+gulp.task('test', 'Runs tests in chrome', ['build'], function(done) {
   if (argv.saucelabs && process.env.MAIN_REPO &&
       // Sauce Labs does not work on Pull Requests directly.
       // The @ampsauce bot builds these.
@@ -72,4 +72,12 @@ gulp.task('test', ['build'], function(done) {
   }
 
   karma.start(config, done);
+}, {
+  options: {
+    'verbose': 'With logging enabled',
+    'watch': 'Watches for changes in files, runs corresponding test(s)',
+    'saucelabs': 'Runs test on saucelabs (requires setup)',
+    'safari': 'Runs tests in Safari',
+    'firefox': 'Runs tests in Firefox'
+  }
 });
