@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {AmpAudio} from '../amp-audio';
 import {Timer} from '../../../../src/timer';
 import {adopt} from '../../../../src/runtime';
 import {naturalDimensions_} from '../../../../src/layout';
@@ -25,14 +26,18 @@ adopt(window);
 describe('amp-audio', () => {
   var iframe;
   var ampAudio;
+  var sandbox;
 
   beforeEach(() => {
-    return createIframePromise().then(i => {
+    sandbox = sinon.sandbox.create();
+    return createIframePromise(/* runtimeOff */ true).then(i => {
       iframe = i;
     });
   });
 
   afterEach(() => {
+    sandbox.restore();
+    sandbox = null;
     document.body.removeChild(iframe.iframe);
   });
 
@@ -107,7 +112,6 @@ describe('amp-audio', () => {
       expect(audio.hasAttribute('loop')).to.be.true;
       expect(audio.hasAttribute('src')).to.be.false;
       expect(audio.childNodes[0].tagName).to.equal('SOURCE');
-      expect(audio.childNodes[0].tagName).to.equal('SOURCE');
       expect(audio.childNodes[0].getAttribute('src'))
         .to.equal('https://origin.com/audio.mp3');
       expect(audio.childNodes[1].tagName).to.equal('SOURCE');
@@ -143,4 +147,22 @@ describe('amp-audio', () => {
     });
   });
 
+  it('should fallback when not available', () => {
+    let savedCreateElement = document.createElement;
+    document.createElement = (name) => {
+      if (name == 'audio') {
+        return savedCreateElement.call(document, 'audio2');
+      }
+      return savedCreateElement.call(document, name);
+    };
+    let element = document.createElement('div');
+    element.toggleFallback = sinon.spy();
+    let audio = new AmpAudio(element);
+    let promise = audio.layoutCallback();
+    document.createElement = savedCreateElement;
+    return promise.then(() => {
+      expect(audio.audio_).to.be.undefined;
+      expect(element.toggleFallback.callCount).to.equal(1);
+    });
+  });
 });
