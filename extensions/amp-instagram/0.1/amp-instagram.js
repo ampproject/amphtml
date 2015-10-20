@@ -18,12 +18,12 @@
 /**
  * @fileoverview Embeds an instagram photo. Captions are currently
  * not supported.
- * The shortcode attribute can be easily copied from a normal instagram
+ * The data-shortcode attribute can be easily copied from a normal instagram
  * URL.
  * Example:
  * <code>
  * <amp-instagram
- *   shortcode="fBwFP"
+ *   data-shortcode="fBwFP"
  *   width="320"
  *   height="392"
  *   layout="responsive">
@@ -53,8 +53,10 @@ class AmpInstagram extends AMP.BaseElement {
   layoutCallback() {
     var width = this.element.getAttribute('width');
     var height = this.element.getAttribute('height');
-    var shortCode = AMP.assert(this.element.getAttribute('shortcode'),
-        'The shortcode attribute is required for <amp-instagram> %s',
+    var shortcode = AMP.assert(
+        (this.element.getAttribute('data-shortcode') ||
+        this.element.getAttribute('shortcode')),
+        'The data-shortcode attribute is required for <amp-instagram> %s',
         this.element);
     // See
     // https://instagram.com/developer/embedding/?hl=en
@@ -62,7 +64,7 @@ class AmpInstagram extends AMP.BaseElement {
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowtransparency', 'true');
     iframe.src = 'https://instagram.com/p/' +
-        encodeURIComponent(shortCode) + '/embed/?v=4';
+        encodeURIComponent(shortcode) + '/embed/?v=4';
     this.applyFillContent(iframe);
     iframe.width = width;
     iframe.height = height;
