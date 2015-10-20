@@ -1365,6 +1365,7 @@ export class Resource {
       if (!this.isDisplayed()) {
         return Promise.resolve();
       }
+      this.layoutCount_++;
       try {
         return this.element.layoutCallback();
       } catch (e) {
