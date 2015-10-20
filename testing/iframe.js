@@ -158,7 +158,7 @@ export function createIframePromise(opt_runtimeOff) {
     iframe.name = 'test_' + iframeCount++;
     iframe.srcdoc = '<!doctype><html><head>' +
         '<script src="/base/build/polyfills.js"></script>' +
-        '<body style="margin:0">';
+        '<body style="margin:0"><div id=parent></div>';
     iframe.onload = function() {
       // Flag as being a test window.
       iframe.contentWindow.AMP_TEST = true;
@@ -171,7 +171,8 @@ export function createIframePromise(opt_runtimeOff) {
         doc: iframe.contentWindow.document,
         iframe: iframe,
         addElement: function(element) {
-          iframe.contentWindow.document.body.appendChild(element);
+          iframe.contentWindow.document.getElementById('parent')
+              .appendChild(element);
           // Wait for mutation observer to fire.
           return new Timer(window).promise(16).then(() => {
             // Make sure it has dimensions since no styles are available.
