@@ -18,6 +18,7 @@ import {BaseElement} from './base-element';
 import {assert} from './asserts';
 import {getMode} from './mode';
 import {installStyles} from './styles';
+import {performanceFor} from './performance';
 import {registerElement} from './custom-element';
 import {registerExtendedElement} from './extended-element';
 import {resourcesFor} from './resources';
@@ -102,6 +103,16 @@ export function adopt(global) {
   global.AMP.push = function(fn) {
     preregisteredElements.push(fn);
     fn(global.AMP);
+  };
+
+  /**
+   * Sets the function to forward tick events to.
+   * @param {funtion(string,?string=,number=)} fn
+   * @export
+   */
+  global.AMP.setTickFunction = fn => {
+    const perf = performanceFor(global);
+    perf.setTickFunction(fn);
   };
 
   // Execute asynchronously scheduled elements.
