@@ -1,0 +1,54 @@
+# Inclusion of third party software, embeds, and services into AMP
+
+In general all inclusions are subject to [CONTRIBUTING.md](../CONTRIBUTING.md).
+
+This files outlines specific rules for certain types of external embed and other software inclusions.
+
+## Fonts
+
+- AMP allows inclusion of fonts via the `@font-face` directive.
+- JavaScript can not be involved with the initiation of font loading.
+- AMP by default does not allow inclusion of external stylesheets, but it is happy to whitelist URL prefixes of font providers for font inclusion via link tags. These link tags and their fonts must be served via HTTPS.
+- If a font provider does referrer based "security" it needs to whitelist the AMP proxy origins before being included in the link tag whitelist.
+
+## Iframe based embeds
+
+- Our intent is to provide first class support for all
+- Consider whether a click-to-play solution fits your use case where iframe generation is not done immediately (can be done before user action for instant loading of iframe).
+- Consider whether all that is needed is some documentation for how to use the embed with `amp-iframe`.
+- Iframes and all sub resources must be served from HTTPS.
+- Avoid client side rendering of iframe content.
+- If your use of iframes is for style isolation, consider that AMP might provide an iframe-free alternative.
+- If you can make it not iframe based that is much better. (See e.g. the pinterest embed). We will always ask to do this first. E.g. adding a CORS endpoint to your server might make this possible.
+- Must play well within AMP's sizing framework.
+- All JS on container page must be open source and bundled with AMP.
+- Direct iframe embeds not using our 3p iframe mechanism (used e.g. for ads) are preferred.
+- JavaScript loaded into iframe should be reasonable with respect to functionality.
+- Use the `sandbox` attribute on iframe if possible.
+- Embeds that require browser plugins, such as Flash, Java, ActiveX, Silverlight, etc. are disallowed unless necessary. Special review required. We cannot currently see a reason why these should be allowed.
+
+## Ads
+
+- We welcome pull requests by all ad networks for inclusion into AMP.
+- All ads and all sub resources must be served from HTTPS.
+- Must play well within AMP's sizing framework.
+- Direct iframe embeds not using our 3p iframe mechanism (used by most ads) are preferred.
+- Providing an image only zero-iframe embed is appreciated.
+- Support viewability and other metrics/instrumentation as supplied by AMP (via postMessage API)
+- Try to keep overall iframe count at one per ad. Explain why more are needed.
+- Share JS between iframes on the same page.
+
+The following aren't hard requirements, but are performance optimizations we should strive to incorporate. Please provide a timeline as to when you expect to follow these guidelines:
+
+- Support pause and play APIs to turn animations on and off. Ideally also to interrupt loading.
+- Never block the UI thread for longer than 50ms
+  - Keep individual JS files small enough, so they compile in under 50ms on a 2013 Android phone.
+  - Split up other expensive work, so it can be interrupted at 50ms boundary.
+- Creatives should only use animations drive by CSS animation frame.
+- Creatives should only animate using CSS transforms and opacity.
+- When creatives animate they should not use more than 2ms time per frame to allow for other animations to have sufficient time for concurrent animations.
+
+The better an ad network does on the above requirements, the earlier ads from it will be loaded into AMP.
+
+We are also excited to start conversations how modern web tech could improve overall ads latency, memory usage and framerate impact and how AMP's open source model could be used to inject trust through an auditable common code base into the ads ecosystem which would reduce the necessity of redundant metrics collection.
+
