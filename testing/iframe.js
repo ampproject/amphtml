@@ -144,6 +144,7 @@ export function createFixtureIframe(fixture, initialIframeHeight, done) {
  * - addElement: Adds an AMP element to the iframe and returns a promise for
  *   that element. When the promise is resolved we will have called the entire
  *   lifecycle including layoutCallback.
+ * @param {boolean=} opt_runtimeOff Whether runtime should be turned off.
  * @return {!Promise<{
  *   win: !Window,
  *   doc: !Document,
@@ -151,7 +152,7 @@ export function createFixtureIframe(fixture, initialIframeHeight, done) {
  *   addElement: function(!Element):!Promise
  * }>}
  */
-export function createIframePromise() {
+export function createIframePromise(opt_runtimeOff) {
   return new Promise(function(resolve, reject) {
     var iframe = document.createElement('iframe');
     iframe.name = 'test_' + iframeCount++;
@@ -159,9 +160,12 @@ export function createIframePromise() {
         '<script src="/base/build/polyfills.js"></script>' +
         '<body style="margin:0">';
     iframe.onload = function() {
-      registerForUnitTest(iframe.contentWindow);
       // Flag as being a test window.
       iframe.contentWindow.AMP_TEST = true;
+      if (opt_runtimeOff) {
+        iframe.contentWindow.name = '__AMP__off=1';
+      }
+      registerForUnitTest(iframe.contentWindow);
       resolve({
         win: iframe.contentWindow,
         doc: iframe.contentWindow.document,
@@ -172,7 +176,10 @@ export function createIframePromise() {
           return new Timer(window).promise(16).then(() => {
             // Make sure it has dimensions since no styles are available.
             element.style.display = 'block';
-            element.implementation_.layoutCallback();
+            element.build(true);
+            if (element.layoutCount_ == 0) {
+              element.layoutCallback();
+            }
             return element;
           });
         }
