@@ -298,8 +298,14 @@ function buildExamples(watch) {
   // Also update test-example-validation.js
   buildExample('ads.amp.html');
   buildExample('article.amp.html');
-  buildExample('article-metadata/json-ld.amp.html');
-  buildExample('article-metadata/microdata.amp.html');
+  buildExample('metadata-examples/article-json-ld.amp.html');
+  buildExample('metadata-examples/article-microdata.amp.html');
+  buildExample('metadata-examples/recipe-json-ld.amp.html');
+  buildExample('metadata-examples/recipe-microdata.amp.html');
+  buildExample('metadata-examples/review-json-ld.amp.html');
+  buildExample('metadata-examples/review-microdata.amp.html');
+  buildExample('metadata-examples/video-json-ld.amp.html');
+  buildExample('metadata-examples/video-microdata.amp.html');
   buildExample('everything.amp.html');
   buildExample('instagram.amp.html');
   buildExample('released.amp.html');
