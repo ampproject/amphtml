@@ -9,6 +9,11 @@
     amp-ad {
       max-width: 500px;
     }
+    .fixed {
+      position: fixed;
+      top: 0;
+      right: 0;
+    }
   </style>
   <style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
@@ -22,6 +27,16 @@
       data-aax_pubname="test123"
       data-aax_src="302">
   </amp-ad>
+
+  <div class="fixed">
+    <h2>A9</h2>
+    <amp-ad width=300 height=250
+        type="a9"
+        data-aax_size="300x250"
+        data-aax_pubname="test123"
+        data-aax_src="302">
+    </amp-ad>
+  </div>
 
   <h2>AdReactor</h2>
   <amp-ad width=728 height=90

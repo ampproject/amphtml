@@ -38,6 +38,12 @@ resources in AMP. It requires a `type` argument that select what ad network is d
     data-aax_src="302">
 </amp-ad>
 ```
+
+#### Styling
+
+`<amp-ad>` elements may not themselves have or be placed in containers that have CSS `position: fixed` set (with the exception of `amp-lightbox`).
+This is due to the UX implications of full page overlay ads. It may be considered to allow similar ad formats in the future inside of AMP controlled containers that maintain certain UX invariants.
+
 #### Attributes
 
 **type**

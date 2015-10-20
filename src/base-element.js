@@ -75,6 +75,11 @@ import {viewportFor} from './viewport';
  *           \/
  *    State: <IN VIEWPORT>
  *
+ * Additionally whenever the dimensions of an element might have changed
+ * AMP remeasures its dimensions and calls `onLayoutMeasure` on the
+ * element instance. This can be used to do additional style calculations
+ * without triggering style recalculations.
+ *
  * For more details, see {@link custom-element.js}.
  *
  * Each method is called exactly once and overriding them in subclasses
@@ -96,18 +101,23 @@ export class BaseElement {
     this.inViewport_ = false;
 
     /** @private {!Object<string, function(!ActionInvocation)>} */
-    this.actionMap_ = element.ownerDocument.defaultView.Object.create(null);
+    this.actionMap_ = this.getWin().Object.create(null);
 
     /** @protected {!Preconnect} */
-    this.preconnect = preconnectFor(element.ownerDocument.defaultView);
+    this.preconnect = preconnectFor(this.getWin());
 
     /** @private {!Resources}  */
-    this.resources_ = resourcesFor(element.ownerDocument.defaultView);
+    this.resources_ = resourcesFor(this.getWin());
   }
 
   /** @return {!Layout} */
   getLayout() {
     return this.layout_;
+  }
+
+  /** @protected @return {!Window} */
+  getWin() {
+    return this.element.ownerDocument.defaultView;
   }
 
   /**
@@ -423,7 +433,7 @@ export class BaseElement {
    * @return {!Viewport}
    */
   getViewport() {
-    return viewportFor(this.element.ownerDocument.defaultView);
+    return viewportFor(this.getWin());
   }
 
   /**
@@ -487,7 +497,7 @@ export class BaseElement {
    * @protected
    */
   requestFullOverlay() {
-    viewerFor(this.element.ownerDocument.defaultView).requestFullOverlay();
+    viewerFor(this.getWin()).requestFullOverlay();
   }
 
   /**
@@ -495,6 +505,15 @@ export class BaseElement {
    * @protected
    */
   cancelFullOverlay() {
-    viewerFor(this.element.ownerDocument.defaultView).cancelFullOverlay();
+    viewerFor(this.getWin()).cancelFullOverlay();
   }
+
+  /**
+   * Called when we just measured the layout rect of this element. Doing
+   * more expensive style reads should now be cheap.
+   * This may currently not work with extended elements. Please file
+   * an issue if that is required.
+   * @protected
+   */
+  onLayoutMeasure() {}
 };
