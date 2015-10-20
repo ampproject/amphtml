@@ -14,8 +14,8 @@ Examples: Youtube, Vimeo videos; Tweets, Instagrams; comment systems; polls; qui
 - Iframes and all sub resources must be served from HTTPS.
 - Avoid client side rendering of iframe content.
 - If your use of iframes is for style isolation, consider that AMP might provide an iframe-free alternative.
-- If you can make it not iframe based that is much better. (See e.g. the pinterest embed). We will always ask to do this first. E.g. adding a CORS endpoint to your server might make this possible.
-- Must play well within AMP's sizing framework.
+- If you can make it not-iframe-based that is much better. (See e.g. the pinterest embed). We will always ask to do this first. E.g. adding a CORS endpoint to your server might make this possible.
+- Must play well within [AMP's sizing framework](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md).
 - All JS on container page must be open source and bundled with AMP.
 - Direct iframe embeds not using our 3p iframe mechanism (used e.g. for ads) are preferred.
 - JavaScript loaded into iframe should be reasonable with respect to functionality.
@@ -27,9 +27,9 @@ Examples: Youtube, Vimeo videos; Tweets, Instagrams; comment systems; polls; qui
 
 - We welcome pull requests by all ad networks for inclusion into AMP.
 - All ads and all sub resources must be served from HTTPS.
-- Must play well within AMP's sizing framework.
+- Must play well within [AMP's sizing framework](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md).
 - Direct iframe embeds not using our 3p iframe mechanism (used by most ads) are preferred.
-- Providing an image only zero-iframe embed is appreciated.
+- Providing an optional image only zero-iframe embed is appreciated.
 - Support viewability and other metrics/instrumentation as supplied by AMP (via postMessage API)
 - Try to keep overall iframe count at one per ad. Explain why more are needed.
 - Share JS between iframes on the same page.
@@ -46,7 +46,7 @@ The following aren't hard requirements, but are performance optimizations we sho
 - Creatives should only animate using CSS transforms and opacity.
 - When creatives animate they should not use more than 2ms time per frame to allow for other animations to have sufficient time for concurrent animations.
 
-The better an ad network does on the above requirements, the earlier ads from it will be loaded into AMP.
+The better an ad network does on the above requirements, the earlier ads from it will be loaded into AMP. In other words: *The slower the ad loads and the more it interferes with the page, the later AMP will load it.*
 
 We are also excited to start conversations how modern web tech could improve overall ads latency, memory usage and framerate impact and how AMP's open source model could be used to inject trust through an auditable common code base into the ads ecosystem which would reduce the necessity of redundant metrics collection.
 
