@@ -15,6 +15,7 @@
  */
 
 import {BaseElement} from '../src/base-element';
+import {assert} from '../src/asserts';
 import {isLayoutSizeDefined} from '../src/layout';
 import {setStyles} from '../src/style';
 import {loadPromise} from '../src/event-helper';
@@ -46,6 +47,11 @@ const BACKFILL_DIMENSIONS_ = [
   [300, 200],
   [320, 50],
 ];
+
+/** @private @const These tags are allowed to have fixed positioning */
+const POSITION_FIXED_TAG_WHITELIST = {
+  'AMP-LIGHTBOX': true
+};
 
 /**
  * Preview phase helper to score images through their dimensions.
@@ -92,11 +98,6 @@ export function upgradeImages_(images) {
 export function installAd(win) {
   class AmpAd extends BaseElement {
 
-    /** @override */
-    createdCallback() {
-      this.preconnect.threePFrame();
-    }
-
     /** @override  */
     renderOutsideViewport() {
       return false;
@@ -109,6 +110,8 @@ export function installAd(win) {
 
     /** @override */
     createdCallback() {
+       this.preconnect.threePFrame();
+
       /** @private {?Element} */
       this.iframe_ = null;
 
@@ -120,6 +123,9 @@ export function installAd(win) {
 
       /** @private {boolean} */
       this.isDefaultPlaceholderSet_ = false;
+
+      /** @private {boolean} */
+      this.isInFixedContainer_ = false;
     }
 
     /** @override */
@@ -134,8 +140,40 @@ export function installAd(win) {
       }
     }
 
+    /**
+     * @override
+     */
+    onLayoutMeasure() {
+      this.isInFixedContainer_ = this.isPositionFixed();
+    }
+
+    /**
+     * @return {boolean} whether this element or its ancestors have position
+     * fixed (unless they are POSITION_FIXED_TAG_WHITELIST).
+     * This should only be called when a layout on the page was just forced
+     * anyway.
+     */
+    isPositionFixed() {
+      let el = this.element;
+      let body = el.ownerDocument.body;
+      do {
+        if (POSITION_FIXED_TAG_WHITELIST[el.tagName]) {
+          return false;
+        }
+        if (this.getWin()./* OK because only called from onLayoutMeasure */
+            getComputedStyle(el).position == 'fixed') {
+          return true;
+        }
+        el = el.parentNode;
+      } while (el.getAttribute && el != body);
+      return false;
+    }
+
     /** @override */
     layoutCallback() {
+      assert(!this.isInFixedContainer_,
+          '<amp-ad> is not allowed to be placed in elements with ' +
+          'position:fixed: %s', this.element);
       if (!this.iframe_) {
         this.iframe_ = getIframe(this.element.ownerDocument.defaultView,
             this.element);
