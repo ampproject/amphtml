@@ -18,7 +18,10 @@ import {Layout, getLengthNumeral}  from '../../../src/layout';
 import {assertHttpsUrl} from '../../../src/url';
 import {loadPromise} from '../../../src/event-helper';
 
-class AmpAudio extends AMP.BaseElement {
+/**
+ * Visible for testing only.
+ */
+export class AmpAudio extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
@@ -28,11 +31,12 @@ class AmpAudio extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    if (this.didLayout) {
-      return;
-    }
-    this.didLayout = true;
     let audio = document.createElement('audio');
+    if (!audio.play) {
+      this.toggleFallback(true);
+      return Promise.resolve();
+    }
+
     // Force controls otherwise there is no player UI.
     audio.controls = true;
     if (this.element.getAttribute('src')) {

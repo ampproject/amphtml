@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# AMP HTML ⚡ Layout System
+# AMP HTML Layout System
 
 ## Overview
 
