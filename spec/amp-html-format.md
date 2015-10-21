@@ -155,16 +155,41 @@ Links must be relative, protocol relative or use the schemas HTTP or HTTPS.
 
 Major semantic tags and the AMP custom elements come with default styles to make authoring a responsive document reasonably easy. An option to opt out of default styles may be added in the future.
 
+#### @-rules
+
+The following @-rules are allowed in stylesheets:
+
+`@font-face`, '@keyframes', `@media`.
+
+`@import` will not be allowed. Other may be added in the future.
+
 #### Author stylesheets
 
 Authors may add custom styles to a document using a single `<style amp-custom>` tag in the head of the document.
 
 #### Selectors
 
+The following restrictions apply to selectors in author style sheets:
+
+##### Universal selector
 The universal selector `*` may not be used in author stylesheets. This is because it can have negative performance implications and could be used to circumvent the rules set out in the following paragraph.
 
+##### not selector
+`:not()` may not be used in selectors because it can be used to simulate the universal selector.
+
+##### Pseudo-selectors, pseudo-classes and pseudo-elements
+Pseudo-selectors, pseudo-classes and pseudo-elements are only allowed in selectors that contain tag names and those tag names must not start with `amp-`.
+
+Example OK: `a:hover`, `div:last-of-type`
+
+Example not OK:  `amp-img:hover`, `amp-img:last-of-type`
+
+##### Class and tag names
 Class names, in author stylesheets, may not start with the string `-amp-`. These are reserved for internal use by the AMP runtime. It follows, that the user's stylesheet may not reference CSS selectors for `-amp-` classes and `i-amp` tags. These classes and elements are not meant to be customized by authors. Authors, however, can override styles of `amp-` classes and tags for any CSS properties not explicitly forbidden by these components' spec.
 
+To prevent usage of attribute selectors to circumvent class name limitations it is generally not allowed for CSS selectors to contain tokens and strings starting with `-amp-` and `i-amp`.
+
+#### Important
 Usage of the !important qualifier is not allowed. This is a necessary requirement to enable AMP to enforce its element sizing invariants.
 
 #### Properties
