@@ -132,4 +132,5 @@ module.exports = {
     '!gulpfile.js',
     '!third_party/**/*.*',
   ],
+  changelogIgnoreFileTypes: /\.md|\.json|\.yaml|LICENSE|CONTRIBUTORS$/
 };
