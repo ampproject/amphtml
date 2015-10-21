@@ -62,7 +62,8 @@ const POSITION_FIXED_TAG_WHITELIST = {
  */
 export function scoreDimensions_(dims, maxWidth, maxHeight) {
   return dims.map(function(dim) {
-    let [width, height] = dim;
+    let width = dim[0];
+    let height = dim[1];
     let widthScore = Math.abs(width - maxWidth);
     // if the width is over the max then we need to penalize it
     let widthPenalty = Math.abs((maxWidth - width) * 3);
@@ -232,7 +233,8 @@ export function installAd(win) {
       let scores = scoreDimensions_(BACKFILL_DIMENSIONS_,
           this.element./*REVIEW*/clientWidth,
           this.element./*REVIEW*/clientHeight);
-      let dims = BACKFILL_DIMENSIONS_[scores.indexOf(Math.max(...scores))];
+      let dims = BACKFILL_DIMENSIONS_[
+          scores.indexOf(Math.max.apply(Math, scores))];
       let images = BACKFILL_IMGS_[dims.join('x')];
       // do we need a more sophisticated randomizer?
       return images[Math.floor(Math.random() * images.length)];
