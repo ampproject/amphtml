@@ -68,6 +68,7 @@ function buildExtensions(options) {
   buildExtension('amp-audio', '0.1', false, options);
   buildExtension('amp-carousel', '0.1', true, options);
   buildExtension('amp-fit-text', '0.1', true, options);
+  buildExtension('amp-font', '0.1', false, options);
   buildExtension('amp-iframe', '0.1', false, options);
   buildExtension('amp-image-lightbox', '0.1', true, options);
   buildExtension('amp-instagram', '0.1', false, options);
@@ -280,6 +281,8 @@ function buildExamples(watch) {
       copyHandler.bind(null, 'examples/img folder'));
   fs.copy('examples/video/', 'examples.build/video/', {clobber: true},
       copyHandler.bind(null, 'examples/video folder'));
+  fs.copy('examples/fonts/', 'examples.build/fonts/', {clobber: true},
+      copyHandler.bind(null, 'examples/fonts folder'));
 
   // Also update test-example-validation.js
   buildExample('ads.amp.html');
@@ -293,6 +296,7 @@ function buildExamples(watch) {
   buildExample('metadata-examples/video-json-ld.amp.html');
   buildExample('metadata-examples/video-microdata.amp.html');
   buildExample('everything.amp.html');
+  buildExample('font.amp.html');
   buildExample('instagram.amp.html');
   buildExample('released.amp.html');
   buildExample('twitter.amp.html');
