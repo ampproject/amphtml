@@ -36,8 +36,14 @@ describe('example', function() {
 
   var examples = [
     'ads.amp.html',
-    'article-metadata/json-ld.amp.html',
-    'article-metadata/microdata.amp.html',
+    'metadata-examples/article-json-ld.amp.html',
+    'metadata-examples/article-microdata.amp.html',
+    'metadata-examples/recipe-json-ld.amp.html',
+    'metadata-examples/recipe-microdata.amp.html',
+    'metadata-examples/review-json-ld.amp.html',
+    'metadata-examples/review-microdata.amp.html',
+    'metadata-examples/video-json-ld.amp.html',
+    'metadata-examples/video-microdata.amp.html',
     'article.amp.html',
     'everything.amp.html',
     'instagram.amp.html',
