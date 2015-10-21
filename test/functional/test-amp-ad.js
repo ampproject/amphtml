@@ -20,7 +20,7 @@ import {installAd, scoreDimensions_, upgradeImages_} from
 
 describe('amp-ad', () => {
 
-  function getAd(attributes, canonical) {
+  function getAd(attributes, canonical, opt_handleElement) {
     return createIframePromise().then((iframe) => {
       installAd(iframe.win);
       if (canonical) {
@@ -32,6 +32,9 @@ describe('amp-ad', () => {
       var a = iframe.doc.createElement('amp-ad');
       for (var key in attributes) {
         a.setAttribute(key, attributes[key]);
+      }
+      if (opt_handleElement) {
+        a = opt_handleElement(a);
       }
       return iframe.addElement(a);
     });
@@ -81,6 +84,51 @@ describe('amp-ad', () => {
       width: 300,
       height: 250,
     }, null)).to.be.rejectedWith(/type/);
+  });
+
+  it('must not be position:fixed', () => {
+    return expect(getAd({
+      width: 300,
+      height: 250,
+      type: 'a9',
+      src: 'testsrc',
+    }, 'https://schema.org', function(ad) {
+      ad.style.position = 'fixed';
+      return ad;
+    })).to.be.rejectedWith(/fixed/);
+  });
+
+  it('parent must not be position:fixed', () => {
+    return expect(getAd({
+      width: 300,
+      height: 250,
+      type: 'a9',
+      src: 'testsrc',
+    }, 'https://schema.org', function(ad) {
+      var s = document.createElement('style');
+      s.textContent = '.fixed {position:fixed;}';
+      ad.ownerDocument.body.appendChild(s);
+      var p = ad.ownerDocument.getElementById('parent');
+      p.className = 'fixed';
+      return ad;
+    })).to.be.rejectedWith(/fixed/);
+  });
+
+  it('amp-lightbox can be position:fixed', () => {
+    return expect(getAd({
+      width: 300,
+      height: 250,
+      type: 'a9',
+      src: 'testsrc',
+    }, 'https://schema.org', function(ad) {
+      var lightbox = document.createElement('amp-lightbox');
+      lightbox.style.position = 'fixed';
+      var p = ad.ownerDocument.getElementById('parent');
+      p.parentElement.appendChild(lightbox);
+      p.parentElement.removeChild(p);
+      lightbox.appendChild(p);
+      return ad;
+    })).to.be.not.be.rejected;
   });
 
   describe('scoreDimensions_', () => {

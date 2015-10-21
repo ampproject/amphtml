@@ -418,6 +418,8 @@ export function createAmpElementProto(win, name, implementationClass) {
     if (this.isUpgraded()) {
       this.implementation_.layoutWidth_ = this.layoutWidth_;
     }
+    // TODO(malteubl): Forward for stubbed elements.
+    this.implementation_.onLayoutMeasure();
 
     if (this.isLoadingEnabled_()) {
       if (this.isInViewport_) {
