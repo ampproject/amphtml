@@ -54,6 +54,14 @@ var forbiddenTerms = {
   'Promise\\.race': es6polyfill,
   '\\.startsWith': es6polyfill,
   '\\.endsWith': es6polyfill,
+  // TODO: (erwinm) rewrite the destructure and spread warnings as
+  // eslint rules (takes more time than this quick regex fix).
+  // No destructuring allowed since we dont ship with Array polyfills.
+  '^\\s*(?:let|const|var).*(?:\\[|{).*=': es6polyfill,
+  // No spread (eg. test(...args) allowed since we dont ship with Array
+  // polyfills except `arguments` spread as babel does not polyfill
+  // it since it can assume that it can `slice` w/o the use of helpers.
+  '\\.\\.\\.(?!arguments\\))[_$A-Za-z0-9]*(?:\\)|])': es6polyfill
 };
 
 var ThreePTermsMessage = 'The 3p bootstrap iframe has no polyfills loaded and' +
@@ -155,14 +163,14 @@ function matchTerms(file, terms) {
     // original term to get the possible fix value. This is ok as the
     // presubmit doesn't have to be blazing fast and this is most likely
     // negligible.
-    var matches = contents.match(new RegExp(term));
+    var matches = contents.match(new RegExp(term, 'gm'));
 
     if (matches) {
       util.log(util.colors.red('Found forbidden: "' + matches[0] +
           '" in ' + pathname));
       fix = terms[term];
 
-	  // log the possible fix information if provided for the term.
+      // log the possible fix information if provided for the term.
       if (fix) {
         util.log(util.colors.blue(fix));
       }

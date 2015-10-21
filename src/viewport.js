@@ -964,8 +964,9 @@ export function parseViewportMeta(content) {
   let pairs = content.split(',');
   for (let i = 0; i < pairs.length; i++) {
     let pair = pairs[i];
-    let [name, value] = pair.split('=');
-    name = name.trim();
+    let split = pair.split('=');
+    let name = split[0].trim();
+    let value = split[1];
     value = (value || '').trim();
     if (name) {
       params[name] = value;

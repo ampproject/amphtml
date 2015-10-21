@@ -27,6 +27,13 @@ var isWatching = (argv.watch || argv.w) || false;
 
 var options = {
   plugins: ['eslint-plugin-google-camelcase'],
+  "ecmaFeatures": {
+    "modules": true,
+    "arrowFunctions": true,
+    "blockBindings": true,
+    "forOf": false,
+    "destructuring": false
+  },
 };
 
 var srcs = ['**/*.js', config.src.exclude];
