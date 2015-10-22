@@ -1,7 +1,7 @@
      size   |       gzip   |   file
       ---   |        ---   |   ---
-391.17 kB   |   85.51 kB   |   amp.js
-134.66 kB   |   36.26 kB   |   v0.js
+393.41 kB   |   86.25 kB   |   amp.js
+ 135.2 kB   |   36.47 kB   |   v0.js
  10.29 kB   |    3.81 kB   |   v0/amp-anim-0.1.js
  37.56 kB   |    9.59 kB   |   v0/amp-anim-0.1.max.js
  10.29 kB   |    3.81 kB   |   v0/amp-anim-latest.js
@@ -33,7 +33,7 @@
  67.88 kB   |    15.9 kB   |   v0/amp-slides-0.1.max.js
  18.73 kB   |    6.15 kB   |   v0/amp-slides-latest.js
  10.74 kB   |    4.16 kB   |   v0/amp-twitter-0.1.js
- 37.46 kB   |    9.45 kB   |   v0/amp-twitter-0.1.max.js
+ 37.46 kB   |    9.44 kB   |   v0/amp-twitter-0.1.max.js
  10.74 kB   |    4.16 kB   |   v0/amp-twitter-latest.js
   6.37 kB   |    2.63 kB   |   v0/amp-youtube-0.1.js
  22.53 kB   |    6.28 kB   |   v0/amp-youtube-0.1.max.js
