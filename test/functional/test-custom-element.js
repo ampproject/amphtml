@@ -455,13 +455,25 @@ describe('CustomElement', () => {
   it('should apply media condition', () => {
     let element1 = new ElementClass();
     element1.setAttribute('media', '(min-width: 1px)');
-    element1.applyMediaQuery();
+    element1.applySizesAndMediaQuery();
     expect(element1).to.not.have.class('-amp-hidden-by-media-query');
 
     let element2 = new ElementClass();
     element2.setAttribute('media', '(min-width: 1111111px)');
-    element2.applyMediaQuery();
+    element2.applySizesAndMediaQuery();
     expect(element2).to.have.class('-amp-hidden-by-media-query');
+  });
+
+  it('should apply sizes condition', () => {
+    let element1 = new ElementClass();
+    element1.setAttribute('sizes', '(min-width: 1px) 200px, 50vw');
+    element1.applySizesAndMediaQuery();
+    expect(element1.style.width).to.equal('200px');
+
+    let element2 = new ElementClass();
+    element2.setAttribute('sizes', '(min-width: 1111111px) 200px, 50vw');
+    element2.applySizesAndMediaQuery();
+    expect(element2.style.width).to.equal('50vw');
   });
 
   it('should change height without sizer', () => {

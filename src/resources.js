@@ -527,7 +527,7 @@ export class Resources {
         r.build(this.forceBuild_);
       }
       if (r.getState() == ResourceState_.NOT_LAID_OUT || relayoutAll) {
-        r.applyMediaQuery();
+        r.applySizesAndMediaQuery();
         relayoutCount++;
       }
     }
@@ -1118,8 +1118,8 @@ export class Resource {
   /**
    * Optionally hides or shows the element depending on the media query.
    */
-  applyMediaQuery() {
-    this.element.applyMediaQuery();
+  applySizesAndMediaQuery() {
+    this.element.applySizesAndMediaQuery();
   }
 
   /**
@@ -1352,7 +1352,7 @@ export class Resource {
       });
     }
     return p.then(() => {
-      this.applyMediaQuery();
+      this.applySizesAndMediaQuery();
       this.measure();
       if (this.layoutPromise_) {
         return this.layoutPromise_;

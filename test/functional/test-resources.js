@@ -227,7 +227,7 @@ describe('Resources discoverWork', () => {
       },
       getBoundingClientRect: () => rect,
       updateLayoutBox: () => {},
-      applyMediaQuery: () => {},
+      applySizesAndMediaQuery: () => {},
       viewportCallback: sinon.spy(),
       prerenderAllowed: () => true,
       isRelayoutNeeded: () => true,
@@ -356,7 +356,7 @@ describe('Resources changeHeight', () => {
         return null;
       },
       getBoundingClientRect: () => rect,
-      applyMediaQuery: () => {},
+      applySizesAndMediaQuery: () => {},
       viewportCallback: sinon.spy(),
       prerenderAllowed: () => true,
       isRelayoutNeeded: () => true

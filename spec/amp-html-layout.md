@@ -46,7 +46,8 @@ The optional layout attribute allows specifying how the component behaves in the
 Valid values for the layout attribute are:
 
 - Not present: The `layout` will be inferred as following:
-  - if `width` equals to `auto` `fixed-height` layout is assumed;
+  - if `height` is present and `width` is absent or equals to `auto` `fixed-height` layout is assumed;
+  - if `width` or `height` attributes are present along with `sizes` attribute `responsive` layout is assumed;
   - if `width` or `height` attributes are present `fixed` layout is assumed;
   - if `width` and `height` are not present `container` layout is assumed
 - `fixed`: The `width` and `height` attributes must be present. The only exceptions are `amp-pixel`
@@ -64,6 +65,16 @@ The `width` and `height` attributes are not required.
 
 Each element documents which `layout` values it supported. If an element does not support the
 specified value it would trigger a runtime error.
+
+### `sizes`
+
+All AMP custom elements support `sizes` attribute. The value of this attribute is a sizes expression
+as described in the [img sizes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img), but
+extended to all elements, not just images. In short, `sizes` attribute describes how the width of
+the element is calculated depending on the media conditions.
+
+When `sizes` attribute is specified along with `width` and `height`, the `layout` is defaulted to
+the `responsive`.
 
 ### `media`
 
