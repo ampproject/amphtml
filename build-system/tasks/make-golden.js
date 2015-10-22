@@ -225,5 +225,15 @@ function reportRecord(reportFile, file, dir, record) {
 }
 
 
-gulp.task('make-golden', makeGolden);
-gulp.task('test-screenshots', testScreenshots);
+gulp.task('make-golden', 'Creates "golden" screenshots.', makeGolden,
+    {
+      options: {
+        'path': 'path to the html page',
+        'host': 'server host. default is http://localhost:8000',
+        'verbose': 'more logging',
+        'output': 'path to write out the image to',
+        'device': 'device type to pass into phantomjs'
+      }
+    });
+gulp.task('test-screenshots', 'Take screenshots and compare to "golden" images',
+    testScreenshots, { options: { verbose: 'more logging' } });
