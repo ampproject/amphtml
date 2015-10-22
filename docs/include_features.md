@@ -231,8 +231,8 @@ to when the tracking pixel is loaded.
 Use the special string `$RANDOM` to add a random number
 to the URL if required.
 
-For example, `<amp-pixel src="https://cdn.ampproject.org/$RANDOM">`
-makes a request to something like `https://cdn.ampproject.org/8390278471201`,
+For example, `<amp-pixel src="https://www.my-analytics.com/?rand=$RANDOM">`
+makes a request to something like `https://www.my-analytics.com/?rand=8390278471201`,
 where the $RANDOM value is randomly generated upon each impression.
 
 An example `amp-pixel` from the
