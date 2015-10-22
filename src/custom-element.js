@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Layout, getLayoutClass, getLengthNumeral, getLengthUnits,
+import {Layout, assertLength, getLayoutClass, getLengthNumeral, getLengthUnits,
           isInternalElement, isLayoutSizeDefined, isLoadingAllowed,
           parseLayout, parseLength, getNaturalDimensions,
           hasNaturalDimensions} from './layout';
@@ -22,6 +22,7 @@ import {ElementStub, stubbedElements} from './element-stub';
 import {assert} from './asserts';
 import {createLoaderElement} from '../src/loader';
 import {log} from './log';
+import {parseSizeList} from './size-list';
 import {reportError} from './error';
 import {resourcesFor} from './resources';
 import {timer} from './timer';
@@ -115,6 +116,7 @@ export function stubElements(win) {
 export function applyLayout_(element) {
   let widthAttr = element.getAttribute('width');
   let heightAttr = element.getAttribute('height');
+  let sizesAttr = element.getAttribute('sizes');
   let layoutAttr = element.getAttribute('layout');
 
   // Handle elements that do not specify a width/height and are defined to have
@@ -141,7 +143,7 @@ export function applyLayout_(element) {
     if (!widthAttr || widthAttr == 'auto') {
       layout = Layout.FIXED_HEIGHT;
     } else {
-      layout = Layout.FIXED;
+      layout = sizesAttr ? Layout.RESPONSIVE : Layout.FIXED;
     }
   } else {
     layout = Layout.CONTAINER;
@@ -281,6 +283,9 @@ export function createAmpElementProto(win, name, implementationClass) {
 
     /** @private {string|null|undefined} */
     this.mediaQuery_;
+
+    /** @private {!SizeList|null|undefined} */
+    this.sizeList_;
 
     /**
      * This element can be assigned by the {@link applyLayout_} to a child
@@ -448,15 +453,25 @@ export function createAmpElementProto(win, name, implementationClass) {
    * @final
    * @package
    */
-  ElementProto.applyMediaQuery = function() {
+  ElementProto.applySizesAndMediaQuery = function() {
+    // Media query.
     if (this.mediaQuery_ === undefined) {
       this.mediaQuery_ = this.getAttribute('media') || null;
     }
-    if (!this.mediaQuery_) {
-      return;
+    if (this.mediaQuery_) {
+      this.classList.toggle('-amp-hidden-by-media-query',
+          !this.ownerDocument.defaultView.matchMedia(this.mediaQuery_).matches);
     }
-    this.classList.toggle('-amp-hidden-by-media-query',
-        !this.ownerDocument.defaultView.matchMedia(this.mediaQuery_).matches);
+
+    // Sizes.
+    if (this.sizeList_ === undefined) {
+      let sizesAttr = this.getAttribute('sizes');
+      this.sizeList_ = sizesAttr ? parseSizeList(sizesAttr) : null;
+    }
+    if (this.sizeList_) {
+      this.style.width = assertLength(this.sizeList_.select(
+          this.ownerDocument.defaultView));
+    }
   };
 
   /**

@@ -214,6 +214,20 @@ describe('Layout', () => {
     expect(div.children[0].style.paddingTop).to.equal('200%');
   });
 
+  it('layout=responsive - default with sizes', () => {
+    div.setAttribute('sizes', '50vw');
+    div.setAttribute('width', 100);
+    div.setAttribute('height', 200);
+    expect(applyLayout_(div)).to.equal(Layout.RESPONSIVE);
+    expect(div.style.width).to.equal('');
+    expect(div.style.height).to.equal('');
+    expect(div).to.have.class('-amp-layout-responsive');
+    expect(div).to.have.class('-amp-layout-size-defined');
+    expect(div.children.length).to.equal(1);
+    expect(div.children[0].tagName.toLowerCase()).to.equal('i-amp-sizer');
+    expect(div.children[0].style.paddingTop).to.equal('200%');
+  });
+
   it('layout=fill', () => {
     div.setAttribute('layout', 'fill');
     expect(applyLayout_(div)).to.equal(Layout.FILL);
