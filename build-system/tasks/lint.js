@@ -58,8 +58,8 @@ function lint() {
 }
 
 gulp.task('lint', 'Validates against Google Closure Linter', lint,
-{
-  options: {
-    'watch': 'Watches for changes in files, validates against the linter'
-  }
-});
+    {
+      options: {
+        'watch': 'Watches for changes in files, validates against the linter'
+      }
+    });
