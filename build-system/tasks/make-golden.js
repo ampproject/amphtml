@@ -225,5 +225,25 @@ function reportRecord(reportFile, file, dir, record) {
 }
 
 
-gulp.task('make-golden', makeGolden);
-gulp.task('test-screenshots', testScreenshots);
+gulp.task('make-golden', 'Creates a "golden" screenshot', makeGolden, {
+  options: {
+    'host': '  The host. Defaults to "http://localhost:8000".',
+    'path': '  The path of the page URL on the host.' +
+        ' E.g. "/test/manual/amp-img.amp.html"',
+    'output': '  The file where to output the screenshot.' +
+        ' Defaults to "screenshots/{path}.png"',
+    'device': '  The name of the device which parameters to be used for' +
+        ' screenshotting. Defaults to "iPhone6+".',
+    'verbose': '  Verbose logging. Default is false. Shorthand is "-v"'
+  }
+});
+
+gulp.task('test-screenshots', 'Tests screenshots agains "golden" images',
+    testScreenshots, {
+  options: {
+    'host': '  The host. Defaults to "http://localhost:8000".',
+    'name': '  The name of the run. Defaults to "screenshots".' +
+        ' The run files are placed in the "build/{name}" dir.',
+    'verbose': '  Verbose logging. Default is false. Shorthand is "-v"'
+  }
+});
