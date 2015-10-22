@@ -29,7 +29,7 @@
     "browserify": "11.2.0",
     "chai": "3.3.0",
     "chai-as-promised": "5.1.0",
-    "core-js": "1.2.1",
+    "core-js": "1.2.3",
     "cssnano": "3.3.1",
     "del": "2.0.2",
     "eslint": "1.6.0",
