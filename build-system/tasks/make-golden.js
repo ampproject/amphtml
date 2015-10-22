@@ -15,19 +15,26 @@
  */
 
 var argv = require('minimist')(process.argv.slice(2));
+var clone = require('gulp-clone');
 var exec = require('child_process').exec;
+var gExec = require('gulp-exec');
 var gulp = require('gulp');
+var merge = require('merge-stream');
+var rename = require('gulp-rename');
+var runSequence = require('run-sequence');
+var through = require('through2');
 var util = require('gulp-util');
+var del = require('del');
 
 
 function makeGolden(cb) {
-  var path = argv.path;
-  var host = argv.host || 'http://localhost:8000';
-  var output = argv.output;
-  var device = argv.device || 'iPhone6+';
+  var host = 'http://localhost:8000';
+  var device = 'iPhone6+';
 
-  // ex. `gulp make-golden --path=examples.build/everything.amp.max.html
-  // --host=http://localhost:8000 --output=everything.png`
+  gulp.src('build/screenshots/**/*.png')
+  .pipe(through.obj(function(file, enc, cb) {
+  var path = file.path.replace(new RegExp('^' + file.cwd, 'i'), '');
+  var output = path.replace(/\.png$/, '-tmp.png');
   exec('phantomjs --ssl-protocol=any --ignore-ssl-errors=true ' +
        '--load-images=true ' +
       'testing/screenshots/make-screenshot.js ' +
@@ -39,9 +46,25 @@ function makeGolden(cb) {
         if (err != null) {
           util.log(util.colors.red('exec error: ' + err));
         }
-        cb();
+        cb(null, file);
       });
+  }));
 }
 
 
+function moveImages() {
+  return gulp.src('screenshots/**/*.png')
+      .pipe(gulp.dest('build/screenshots'));
+}
+
+function cleanImages() {
+  return del(['build/screenshots']);
+}
+
+
+gulp.task('clean-images', cleanImages);
+gulp.task('move-images', moveImages);
 gulp.task('make-golden', makeGolden);
+gulp.task('image-report', function() {
+  runSequence('clean-images', 'move-images', 'make-golden');
+});
