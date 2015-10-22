@@ -174,10 +174,14 @@ function diffScreenshot_(file, dir, host, verbose, cb) {
 function reportPreambule(reportFile) {
   fs.writeFileSync(reportFile,
       '<html>' +
-      '<head><style>.thumb{display: block; width: 100px; height: 100px;}' +
+      '<head><style>' +
+          ' table {border-collapse: collapse}' +
+          ' tr {border-bottom: 1px solid gray}' +
+          ' td {padding: 8px 0}' +
+          ' .thumb{display: block; width: 100px; height: 100px}' +
           ' .thumb img{display: block; width: auto; height: auto;' +
-              'margin: auto; max-width: 100%; max-height: 100%;}' +
-          ' .result {text-align: center;}' +
+              'margin: auto; max-width: 100%; max-height: 100%}' +
+          ' .result {text-align: center}' +
           ' .error {background: red} .success {background: green}' +
       '</style></head>' +
       '<body><h1>Screenshot Diffs</h1><table width=100%>' +
