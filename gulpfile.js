@@ -14,25 +14,26 @@
  * limitations under the License.
  */
 
-var gulp = require('gulp-help')(require('gulp'));
+var autoprefixer = require('autoprefixer');
+var babel = require('babelify');
+var browserify = require('browserify');
+var buffer = require('vinyl-buffer');
+var cssnano = require('cssnano');
 var del = require('del');
 var file = require('gulp-file');
-var gulpWatch = require('gulp-watch');
 var fs = require('fs-extra');
-var sourcemaps = require('gulp-sourcemaps');
-var source = require('vinyl-source-stream');
-var buffer = require('vinyl-buffer');
-var browserify = require('browserify');
-var watchify = require('watchify');
-var uglify = require('gulp-uglify');
-var util = require('gulp-util');
-var wrap = require('gulp-wrap');
+var gulp = require('gulp-help')(require('gulp'));
+var gulpWatch = require('gulp-watch');
+var lazypipe = require('lazypipe');
+var postcss = require('postcss');
 var rename = require('gulp-rename');
 var replace = require('gulp-replace');
-var babel = require('babelify');
-var postcss = require('postcss');
-var autoprefixer = require('autoprefixer');
-var cssnano = require('cssnano');
+var source = require('vinyl-source-stream');
+var sourcemaps = require('gulp-sourcemaps');
+var uglify = require('gulp-uglify');
+var util = require('gulp-util');
+var watchify = require('watchify');
+var wrap = require('gulp-wrap');
 require('./build-system/tasks');
 
 // NOTE: see https://github.com/ai/browserslist#queries for `browsers` list
@@ -399,16 +400,22 @@ function compileJs(srcDir, srcFilename, destDir, options) {
 
   var wrapper = options.wrapper || '<%= contents %>';
 
+  var lazybuild = lazypipe()
+      .pipe(source, srcFilename)
+      .pipe(buffer)
+      .pipe(replace, /\$internalRuntimeVersion\$/g, internalRuntimeVersion)
+      .pipe(wrap, wrapper)
+      .pipe(sourcemaps.init.bind(sourcemaps), { loadMaps: true });
+
+  var lazywrite = lazypipe()
+      .pipe(sourcemaps.write.bind(sourcemaps), './')
+      .pipe(gulp.dest.bind(gulp), destDir);
+
   function rebundle() {
     bundler.bundle()
       .on('error', function(err) { console.error(err); this.emit('end'); })
-      .pipe(source(srcFilename))
-      .pipe(buffer())
-      .pipe(replace(/\$internalRuntimeVersion\$/g, internalRuntimeVersion))
-      .pipe(wrap(wrapper))
-      .pipe(sourcemaps.init({ loadMaps: true }))
-      .pipe(sourcemaps.write('./'))
-      .pipe(gulp.dest(destDir));
+      .pipe(lazybuild())
+      .pipe(lazywrite());
   }
 
   if (options.watch) {
@@ -422,17 +429,12 @@ function compileJs(srcDir, srcFilename, destDir, options) {
     console.log('Minifying ' + srcFilename);
     bundler.bundle()
       .on('error', function(err) { console.error(err); this.emit('end'); })
-      .pipe(source(srcFilename))
-      .pipe(buffer())
-      .pipe(replace(/\$internalRuntimeVersion\$/g, internalRuntimeVersion))
-      .pipe(sourcemaps.init({ loadMaps: true }))
-      .pipe(wrap(wrapper))
+      .pipe(lazybuild())
       .pipe(uglify({
         preserveComments: 'some'
       }))
       .pipe(rename(options.minifiedName))
-      .pipe(sourcemaps.write('./'))
-      .pipe(gulp.dest(destDir))
+      .pipe(lazywrite())
       .on('end', function() {
         fs.writeFileSync(destDir + '/version.txt', internalRuntimeVersion);
         if (options.latestName) {
