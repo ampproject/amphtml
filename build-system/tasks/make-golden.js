@@ -238,7 +238,7 @@ gulp.task('make-golden', 'Creates a "golden" screenshot', makeGolden, {
   }
 });
 
-gulp.task('test-screenshots', 'Tests screenshots agains "golden" images',
+gulp.task('test-screenshots', 'Tests screenshots against "golden" images',
     testScreenshots, {
   options: {
     'host': '  The host. Defaults to "http://localhost:8000".',
