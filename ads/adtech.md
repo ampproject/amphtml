@@ -31,4 +31,4 @@ For semantics of configuration, please see ad network documentation.
 
 Supported parameters:
 
-- src. Value must start with "https://adserver.adtechus.com/addyn/"
+- src. Value must start with `https:` and contain `/addyn/`
