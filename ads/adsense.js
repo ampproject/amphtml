@@ -22,7 +22,7 @@ import {writeScript} from '../src/3p';
  */
 export function adsense(global, data) {
   /*eslint "google-camelcase/google-camelcase": 0*/
-  global.google_page_url = global.context.location.href;
+  global.google_page_url = global.context.canonicalUrl;
   var s = document.createElement('script');
   s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js';
   global.document.body.appendChild(s);

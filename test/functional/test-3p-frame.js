@@ -63,12 +63,17 @@ describe('3p-frame', () => {
 
     var iframe = getIframe(window, div, '_ping_');
     var src = iframe.src;
+    var referrer = document.referrer;
+    expect(referrer).to.not.be.a.string;
+    var locationHref = location.href;
+    expect(locationHref).to.not.be.a.string;
     var fragment =
         '#{"testAttr":"value","ping":"pong","width":50,"height":100,' +
-        '"initialWindowWidth":100,"initialWindowHeight":200,'+
-        '"type":"_ping_","_context":{"location":' +
-        '{"href":"https://foo.bar/baz"},"mode":{"localDev"' +
-        ':true,"development":false,"minified":false}}}';
+        '"initialWindowWidth":100,"initialWindowHeight":200,"type":"_ping_"' +
+        ',"_context":{"referrer":"' + referrer + '",' +
+        '"canonicalUrl":"https://foo.bar/baz","location":{"href":' +
+        '"' + locationHref + '"},"mode":{"localDev":true,' +
+        '"development":false,"minified":false}}}';
     expect(src).to.equal(
         'http://ads.localhost:9876/dist.3p/current/frame.max.html' +
         fragment);
@@ -79,7 +84,9 @@ describe('3p-frame', () => {
     document.body.appendChild(iframe);
     return loadPromise(iframe).then(() => {
       var win = iframe.contentWindow;
-      expect(win.context.location.href).to.equal('https://foo.bar/baz');
+      expect(win.context.canonicalUrl).to.equal('https://foo.bar/baz');
+      expect(win.context.location.href).to.equal(locationHref);
+      expect(win.context.referrer).to.equal(referrer);
       expect(win.context.data.testAttr).to.equal('value');
       var c = win.document.getElementById('c');
       expect(c).to.not.be.null;
