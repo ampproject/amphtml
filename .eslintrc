@@ -1,9 +1,12 @@
 {
   "parser": "babel-eslint",
   "ecmaFeatures": {
+    "modules": true,
     "arrowFunctions": true,
     "blockBindings": true,
-    "forOf": false
+    "forOf": false,
+    "destructuring": false,
+    "spread": false
   },
   "env": {
     "es6": true,
