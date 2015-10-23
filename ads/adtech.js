@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {writeScript, validateSrcPrefix} from '../src/3p';
+import {writeScript, validateSrcPrefix, validateSrcContains} from '../src/3p';
 
 /**
  * @param {!Window} global
@@ -22,6 +22,7 @@ import {writeScript, validateSrcPrefix} from '../src/3p';
  */
 export function adtech(global, data) {
   var src = data.src;
-  validateSrcPrefix('https://adserver.adtechus.com/addyn/', src);
+  validateSrcPrefix('https:', src);
+  validateSrcContains('/addyn/', src);
   writeScript(global, src);
 }
