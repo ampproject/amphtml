@@ -48,7 +48,7 @@ We discuss implementation issues on [amphtml-discuss@googlegroups.com](https://g
 | `gulp test --saucelabs`       | Runs test on saucelabs (requires [setup](#saucelabs))                 |
 | `gulp test --safari`          | Runs tests in Safari.                                                 |
 | `gulp test --firefox`         | Runs tests in Firefox.                                                |
-| `http-server -p 8000 -c-1`    | serves content in current working dir over http://localhost:8000/     |
+| `http-server -p 8000 -c-1`    | Serves content in current working dir over http://localhost:8000/     |
 
 To fix issues with Safari test runner launching multiple instances of the test, run:
 <pre>

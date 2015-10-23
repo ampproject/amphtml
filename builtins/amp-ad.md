@@ -64,7 +64,7 @@ Optional attribute to pass configuration to the ad as an arbitrarily complex JSO
 
 #### Placeholder
 
-Optionally `amp-ad` supports a child element with the `placeholder` attribute. If supported by the ad network, this element if shown if no ad is available for this slot.
+Optionally `amp-ad` supports a child element with the `placeholder` attribute. If supported by the ad network, this element is shown if no ad is available for this slot.
 ```html
 <amp-ad width=300 height=250
     type="foo">
