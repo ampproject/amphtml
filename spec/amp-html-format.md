@@ -149,7 +149,7 @@ The `style` attribute must not be used.
 
 ### Links
 
-Links must be relative, protocol relative or use the schemas HTTP or HTTPS.
+The `javascript:` schema is disallowed.
 
 ### Stylesheets
 
