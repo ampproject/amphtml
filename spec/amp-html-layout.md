@@ -27,6 +27,47 @@ With this in mind the AMP Layout System is designed to support few but flexible 
 that provide good performance guarantees. This system relies on a set of attributes such
 as `layout`, `width` and `height` to express the element's layout and sizing needs.
 
+
+## Layout Types
+
+AMP provides a set of layouts that AMP elements can use. They are defined using layout
+attributes described below. Not every element supports every layout - you have to refer
+to the element's documentation to know which layouts you can use.
+
+### `nodisplay`
+
+The element is not displayed. This layout can be applied to every AMP element. It assumed
+that the element can display itself on user action, e.g. `amp-lightbox`.
+
+### `fixed`
+
+The element has a fixed width and height with no responsiveness supported.
+
+### `responsive`
+
+The element takes the space available to it and resizes its height automatically to the
+aspect ratio given by `width` and `height` attributes. This layout works very well for
+most of AMP elements, including `amp-img`, `amp-video`, etc.
+
+The available space depends on the parent element and can also be customized using
+`max-width` CSS.
+
+### `fixed-height`
+
+The element takes the space available to it but keeps the height unchanged. This layout
+works well for elements such as `amp-carousel` that involves content positioned
+horizontally.
+
+### `fill`
+
+The element takes the space available to it - both width and height. In other words
+the layout of a `fill` element matches its parent.
+
+### `container`
+
+The element lets its children to define its size, much like a normal HTML `div`.
+
+
 ## Layout Attributes
 
 ### `width` and `height`
