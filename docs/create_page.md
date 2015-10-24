@@ -61,7 +61,7 @@ here's the basic AMP HTML page now with an image:
 
 ```html
 <!doctype html>
-<html AMP lang="en">
+<html amp lang="en">
   <head>
     <meta charset="utf-8">
     <title>Hello, AMPs</title>
@@ -101,7 +101,7 @@ inlined stylesheet:
 
 ```html
 <!doctype html>
-<html AMP lang="en">
+<html amp lang="en">
   <head>
     <meta charset="utf-8">
     <title>Hello, AMPs</title>
