@@ -27,12 +27,12 @@ The ad itself is hosted within a document that has an origin different from the 
 ### Information available to the ad
 We will provide the following information to the ad:
 
-- window.context.referrer contains the origin of the referrer value of the primary document if available.
-- document.referrer will typically contain the URL of the primary document. This may change in the future (See next value for a more reliable method).
-- window.context.location.href contains the sanitized location.href value of the primary document.
-- window.context.canonicalUrl contains the canonical URL of the primary document as defined by its link=canonical tag.
+- `window.context.referrer` contains the origin of the referrer value of the primary document if available.
+- `document.referrer` will typically contain the URL of the primary document. This may change in the future (See next value for a more reliable method).
+- `window.context.location.href` contains the sanitized location.href value of the primary document.
+- `window.context.canonicalUrl` contains the canonical URL of the primary document as defined by its `link rel=canonical` tag.
 - ad viewability: Tracked in https://github.com/ampproject/amphtml/issues/720
-- window.context.noContentAvailable is a function that the ad system can call if the ad slot was not filled. The container page will then react by showing placeholder content (not by collapsing the ad slot; sizing rules apply).
+- `window.context.noContentAvailable` is a function that the ad system can call if the ad slot was not filled. The container page will then react by showing placeholder content (not by collapsing the ad slot; sizing rules apply).
 
 More information can be provided in a similar fashion if needed (Please file an issue).
 
