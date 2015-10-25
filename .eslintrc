@@ -18,6 +18,7 @@
     "no-eval": 2,
     "curly": 2,
     "radix": 2,
+    "eol-last": 2,
     "no-debugger": 2,
     "no-alert": 2,
     "no-extend-native": 2,
