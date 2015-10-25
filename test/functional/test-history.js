@@ -64,8 +64,8 @@ describe('History', () => {
 
   it('should push new state', () => {
     let onPop = sinon.spy();
-    bindingMock.expects('push').withExactArgs().
-        returns(Promise.resolve(11)).once();
+    bindingMock.expects('push').withExactArgs()
+        .returns(Promise.resolve(11)).once();
     return history.push(onPop).then((historyId) => {
       expect(history.stackIndex_).to.equal(11);
       expect(history.stackOnPop_.length).to.equal(12);
@@ -76,10 +76,10 @@ describe('History', () => {
 
   it('should pop previously pushed state', () => {
     let onPop = sinon.spy();
-    bindingMock.expects('push').withExactArgs().
-        returns(Promise.resolve(11)).once();
-    bindingMock.expects('pop').withExactArgs(11).
-        returns(Promise.resolve(10)).once();
+    bindingMock.expects('push').withExactArgs()
+        .returns(Promise.resolve(11)).once();
+    bindingMock.expects('pop').withExactArgs(11)
+        .returns(Promise.resolve(10)).once();
     return history.push(onPop).then((historyId) => {
       expect(historyId).to.equal(11);
       expect(history.stackOnPop_.length).to.equal(12);
@@ -96,8 +96,8 @@ describe('History', () => {
 
   it('should return and call callback when history popped', () => {
     let onPop = sinon.spy();
-    bindingMock.expects('push').withExactArgs().
-        returns(Promise.resolve(11)).once();
+    bindingMock.expects('push').withExactArgs()
+        .returns(Promise.resolve(11)).once();
     return history.push(onPop).then((historyId) => {
       expect(onPop.callCount).to.equal(0);
       onStackIndexUpdated(10);

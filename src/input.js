@@ -201,8 +201,8 @@ export class Input {
     // If "click" arrives within a timeout time, this is most likely a
     // touch/mouse emulation. Otherwise, if timeout exceeded, this looks
     // like a legitimate mouse event.
-    return listenOncePromise(this.win.document, 'click', false, CLICK_TIMEOUT_).
-        then(this.boundMouseCanceled_, this.boundMouseConfirmed_);
+    return listenOncePromise(this.win.document, 'click', false, CLICK_TIMEOUT_)
+        .then(this.boundMouseCanceled_, this.boundMouseConfirmed_);
   }
 
   /** @private */

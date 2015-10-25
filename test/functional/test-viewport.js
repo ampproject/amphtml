@@ -67,8 +67,8 @@ describe('Viewport', () => {
 
   it('should pass through size and scroll', () => {
     expect(viewport.getPaddingTop()).to.equal(19);
-    expect(windowApi.document.documentElement.style.paddingTop).to.
-        equal('19px');
+    expect(windowApi.document.documentElement.style.paddingTop).to
+        .equal('19px');
     expect(viewport.getSize().width).to.equal(111);
     expect(viewport.getSize().height).to.equal(222);
     expect(viewport.getTop()).to.equal(17);
@@ -152,8 +152,8 @@ describe('Viewport', () => {
   it('should change scrollTop for scrollIntoView and respect padding', () => {
     let element = document.createElement('div');
     let bindingMock = sandbox.mock(binding);
-    bindingMock.expects('getLayoutRect').withArgs(element).
-        returns({top: 111}).once();
+    bindingMock.expects('getLayoutRect').withArgs(element)
+        .returns({top: 111}).once();
     bindingMock.expects('setScrollTop').withArgs(111 - /* padding */ 19).once();
     viewport.scrollIntoView(element);
   });
@@ -178,8 +178,8 @@ describe('Viewport META', () => {
       });
     });
     it('should parse two key-values', () => {
-      expect(parseViewportMeta('width=device-width,minimum-scale=1')).to.deep.
-          equal({
+      expect(parseViewportMeta('width=device-width,minimum-scale=1')).to.deep
+          .equal({
         'width': 'device-width',
         'minimum-scale': '1'
       });
@@ -200,8 +200,8 @@ describe('Viewport META', () => {
       });
     });
     it('should ignore extra delims', () => {
-      expect(parseViewportMeta(',,,width=device-width,,,,minimum-scale=1,,,')).
-          to.deep.equal({
+      expect(parseViewportMeta(',,,width=device-width,,,,minimum-scale=1,,,'))
+          .to.deep.equal({
         'width': 'device-width',
         'minimum-scale': '1'
       });
@@ -213,8 +213,8 @@ describe('Viewport META', () => {
       expect(stringifyViewportMeta({})).to.equal('');
     });
     it('should stringify single key-value', () => {
-      expect(stringifyViewportMeta({'width': 'device-width'})).
-          to.equal('width=device-width');
+      expect(stringifyViewportMeta({'width': 'device-width'}))
+          .to.equal('width=device-width');
     });
     it('should stringify two key-values', () => {
       let res = stringifyViewportMeta({
@@ -222,8 +222,8 @@ describe('Viewport META', () => {
         'minimum-scale': '1'
       });
       expect(res == 'width=device-width,minimum-scale=1' ||
-          res == 'minimum-scale=1,width=device-width').
-          to.be.true;
+          res == 'minimum-scale=1,width=device-width')
+          .to.be.true;
     });
     it('should stringify empty values', () => {
       let res = stringifyViewportMeta({
@@ -231,8 +231,8 @@ describe('Viewport META', () => {
         'minimal-ui': ''
       });
       expect(res == 'width=device-width,minimal-ui' ||
-          res == 'minimal-ui,width=device-width').
-          to.be.true;
+          res == 'minimal-ui,width=device-width')
+          .to.be.true;
     });
   });
 
@@ -247,38 +247,38 @@ describe('Viewport META', () => {
       expect(updateViewportMetaString(
           '', {'minimum-scale': '1'})).to.equal('minimum-scale=1');
       expect(parseViewportMeta(updateViewportMetaString(
-          'width=device-width', {'minimum-scale': '1'}))).
-          to.deep.equal({
+          'width=device-width', {'minimum-scale': '1'})))
+          .to.deep.equal({
             'width': 'device-width',
             'minimum-scale': '1'
           });
     });
     it('should replace the existing value', () => {
       expect(parseViewportMeta(updateViewportMetaString(
-          'width=device-width,minimum-scale=2', {'minimum-scale': '1'}))).
-          to.deep.equal({
+          'width=device-width,minimum-scale=2', {'minimum-scale': '1'})))
+          .to.deep.equal({
             'width': 'device-width',
             'minimum-scale': '1'
           });
     });
     it('should delete the existing value', () => {
       expect(parseViewportMeta(updateViewportMetaString(
-          'width=device-width,minimum-scale=1', {'minimum-scale': undefined}))).
-          to.deep.equal({
+          'width=device-width,minimum-scale=1', {'minimum-scale': undefined})))
+          .to.deep.equal({
             'width': 'device-width'
           });
     });
     it('should ignore delete for a non-existing value', () => {
       expect(parseViewportMeta(updateViewportMetaString(
-          'width=device-width', {'minimum-scale': undefined}))).
-          to.deep.equal({
+          'width=device-width', {'minimum-scale': undefined})))
+          .to.deep.equal({
             'width': 'device-width'
           });
     });
     it('should do nothing if values did not change', () => {
       expect(updateViewportMetaString(
-          'width=device-width,minimum-scale=1', {'minimum-scale': '1'})).
-          to.equal('width=device-width,minimum-scale=1');
+          'width=device-width,minimum-scale=1', {'minimum-scale': '1'}))
+          .to.equal('width=device-width,minimum-scale=1');
     });
   });
 
@@ -452,8 +452,8 @@ describe('ViewportBindingNatural', () => {
       documentElement: {style: {}}
     };
     binding.updatePaddingTop(31);
-    expect(windowApi.document.documentElement.style.paddingTop).to.
-        equal('31px');
+    expect(windowApi.document.documentElement.style.paddingTop).to
+        .equal('31px');
   });
 
   it('should calculate size', () => {
@@ -639,8 +639,8 @@ describe('ViewportBindingNaturalIosEmbed', () => {
       body: {style: {}}
     };
     binding.updatePaddingTop(31);
-    expect(windowApi.document.body.style.paddingTop).to.
-        equal('31px');
+    expect(windowApi.document.body.style.paddingTop).to
+        .equal('31px');
   });
 
   it('should calculate size', () => {
@@ -776,8 +776,8 @@ describe('ViewportBindingVirtual', () => {
       documentElement: {style: {}}
     };
     binding.updatePaddingTop(33);
-    expect(windowApi.document.documentElement.style.paddingTop).to.
-        equal('33px');
+    expect(windowApi.document.documentElement.style.paddingTop).to
+        .equal('33px');
   });
 
   it('should send event on scroll changed', () => {
