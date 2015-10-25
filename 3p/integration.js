@@ -88,7 +88,12 @@ window.draw3p = function() {
   window.context.isMaster = window.context.master == window;
   window.context.data = data;
   window.context.noContentAvailable = triggerNoContentAvailable;
-  window.context.updateDimensions = triggerDimensions;
+  if (data.type == 'twitter') {
+    // Only make this available to Twitter for now while
+    // https://github.com/ampproject/amphtml/issues/728
+    // is being implemented.
+    window.context.updateDimensions = triggerDimensions;
+  }
   delete data._context;
   draw3p(window, data);
 };

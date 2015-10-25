@@ -50,6 +50,8 @@ The better an ad network does on the above requirements, the earlier ads from it
 
 We are also excited to start conversations how modern web tech could improve overall ads latency, memory usage and framerate impact and how AMP's open source model could be used to inject trust through an auditable common code base into the ads ecosystem which would reduce the necessity of redundant metrics collection.
 
+Review the [ads/README](../ads/README.md) for further details on ad integration.
+
 ## Fonts
 
 - AMP allows inclusion of fonts via the `@font-face` directive.
