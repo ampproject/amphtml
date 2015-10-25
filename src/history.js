@@ -282,7 +282,13 @@ export class HistoryBindingNatural_ {
       };
       replaceState = (state, opt_title, opt_url) => {
         this.unsupportedState_ = state;
-        this.origReplaceState_(state, opt_title, opt_url);
+        // NOTE: check for `undefined` since IE11 and Edge
+        // unexpectedly coerces it into a `string`.
+        if (opt_url !== undefined) {
+          this.origReplaceState_(state, opt_title, opt_url);
+        } else {
+          this.origReplaceState_(state, opt_title);
+        }
       };
     } else {
       pushState = (state, opt_title, opt_url) => {
