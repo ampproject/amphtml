@@ -176,6 +176,22 @@ describe('HistoryBindingNatural', () => {
     expect(onStackIndexUpdated.callCount).to.equal(0);
   });
 
+  // This prevents IE11/Edge from coercing undefined to become the new url
+  it('should not pass in `url` argument to original replace state if ' +
+    'parameter is undefined', () => {
+    let argumentLength = 0;
+    let origReplace = window.history.replaceState;
+    window.history.replaceState = function() {
+      argumentLength = arguments.length;
+    };
+
+    let history2 = new HistoryBindingNatural_(window);
+
+    expect(argumentLength).to.equal(2);
+
+    window.history.replaceState = origReplace;
+  });
+
   it('should push new state in the window.history and notify', () => {
     return history.push().then((stackIndex) => {
       expect(history.stackIndex_).to.equal(stackIndex);
