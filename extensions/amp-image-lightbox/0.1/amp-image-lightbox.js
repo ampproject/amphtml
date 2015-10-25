@@ -219,8 +219,8 @@ export class ImageViewer {
    * @return {!Promise}
    */
   measure() {
-    this.viewerBox_ = layoutRectFromDomRect(this.viewer_.
-        getBoundingClientRect());
+    this.viewerBox_ = layoutRectFromDomRect(this.viewer_
+        ./*OK*/getBoundingClientRect());
 
     let sf = Math.min(this.viewerBox_.width / this.sourceWidth_,
         this.viewerBox_.height / this.sourceHeight_);
@@ -832,8 +832,8 @@ class AmpImageLightbox extends AMP.BaseElement {
       transLayer.classList.add('-amp-image-lightbox-trans');
       document.body.appendChild(transLayer);
 
-      let rect = layoutRectFromDomRect(this.sourceImage_.
-          getBoundingClientRect());
+      let rect = layoutRectFromDomRect(this.sourceImage_
+          ./*OK*/getBoundingClientRect());
       let clone = this.sourceImage_.cloneNode(true);
       st.setStyles(clone, {
         position: 'absolute',
@@ -902,8 +902,8 @@ class AmpImageLightbox extends AMP.BaseElement {
       transLayer.classList.add('-amp-image-lightbox-trans');
       document.body.appendChild(transLayer);
 
-      let rect = layoutRectFromDomRect(this.sourceImage_.
-          getBoundingClientRect());
+      let rect = layoutRectFromDomRect(this.sourceImage_
+          ./*OK*/getBoundingClientRect());
       let newLeft = imageBox.left + (imageBox.width - rect.width) / 2;
       let newTop = imageBox.top + (imageBox.height - rect.height) / 2;
       let clone = image.cloneNode(true);

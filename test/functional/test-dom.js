@@ -105,12 +105,12 @@ describe('DOM', () => {
     parent.appendChild(element2);
 
     expect(dom.childElement(parent, (e) => true)).to.equal(element1);
-    expect(dom.childElement(parent, (e) => e.tagName == 'ELEMENT1')).
-        to.equal(element1);
-    expect(dom.childElement(parent, (e) => e.tagName == 'ELEMENT2')).
-        to.equal(element2);
-    expect(dom.childElement(parent, (e) => e.tagName == 'ELEMENT3')).
-        to.be.null;
+    expect(dom.childElement(parent, (e) => e.tagName == 'ELEMENT1'))
+        .to.equal(element1);
+    expect(dom.childElement(parent, (e) => e.tagName == 'ELEMENT2'))
+        .to.equal(element2);
+    expect(dom.childElement(parent, (e) => e.tagName == 'ELEMENT3'))
+        .to.be.null;
   });
 
   it('childElementByAttr should find first match', () => {

@@ -270,12 +270,12 @@ export class Action {
 
     let eventSep = s.indexOf(':');
     let methodSep = s.indexOf('.', eventSep + 1);
-    let event = (eventSep != -1 ? s.substring(0, eventSep) : '').toLowerCase().
-        trim() || null;
+    let event = (eventSep != -1 ? s.substring(0, eventSep) : '').toLowerCase()
+        .trim() || null;
     let target = s.substring(eventSep + 1, methodSep != -1 ? methodSep :
         s.length).trim();
-    let method = (methodSep != -1 ? s.substring(methodSep + 1) : '').
-        trim() || DEFAULT_METHOD_;
+    let method = (methodSep != -1 ? s.substring(methodSep + 1) : '')
+        .trim() || DEFAULT_METHOD_;
 
     if (!event || !target) {
       log.error(TAG_, 'invalid action definition: ' + s);

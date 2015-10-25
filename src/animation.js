@@ -44,10 +44,10 @@ export class Animation {
    * @return {!AnimationPlayer}
    */
   static animate(transition, duration, opt_curve) {
-    return new Animation().
-        setCurve(opt_curve).
-        add(0, transition, 1).
-        start(duration);
+    return new Animation()
+        .setCurve(opt_curve)
+        .add(0, transition, 1)
+        .start(duration);
   }
 
   /**

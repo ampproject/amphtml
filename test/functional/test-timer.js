@@ -42,8 +42,8 @@ describe('Timer', () => {
 
   it('delay', () => {
     let handler = () => {};
-    windowMock.expects('setTimeout').withExactArgs(handler, 111).
-        returns(1).once();
+    windowMock.expects('setTimeout').withExactArgs(handler, 111)
+        .returns(1).once();
     windowMock.expects('clearTimeout').never();
     timer.delay(handler, 111);
   });
