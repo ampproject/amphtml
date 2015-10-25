@@ -598,8 +598,8 @@ describe('Resources.Resource', () => {
 
   it('should blacklist on build failure', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
-    elementMock.expects('build').withExactArgs(true).
-        throws('Failed').once();
+    elementMock.expects('build').withExactArgs(true)
+        .throws('Failed').once();
     expect(resource.build(true)).to.equal(false);
     expect(resource.blacklisted_).to.equal(true);
     expect(resource.getState()).to.equal(ResourceState_.NOT_BUILT);
@@ -627,14 +627,14 @@ describe('Resources.Resource', () => {
     elementMock.expects('build').returns(true).once();
     expect(resource.build(true)).to.equal(true);
 
-    elementMock.expects('getBoundingClientRect').
-        returns({left: 11, top: 12, width: 111, height: 222}).
-        once();
-    elementMock.expects('updateLayoutBox').
-        withExactArgs(sinon.match((data) => {
+    elementMock.expects('getBoundingClientRect')
+        .returns({left: 11, top: 12, width: 111, height: 222})
+        .once();
+    elementMock.expects('updateLayoutBox')
+        .withExactArgs(sinon.match((data) => {
           return data.width == 111 && data.height == 222;
-        })).
-        once();
+        }))
+        .once();
     resource.measure();
     expect(resource.getState()).to.equal(ResourceState_.READY_FOR_LAYOUT);
     expect(resource.getLayoutBox().left).to.equal(11);
@@ -648,8 +648,8 @@ describe('Resources.Resource', () => {
     resource.state_ = ResourceState_.NOT_LAID_OUT;
     resource.layoutBox_ = {left: 11, top: 12, width: 111, height: 222};
 
-    elementMock.expects('getBoundingClientRect').
-        returns(resource.layoutBox_).once();
+    elementMock.expects('getBoundingClientRect')
+        .returns(resource.layoutBox_).once();
     resource.measure();
     expect(resource.getState()).to.equal(ResourceState_.READY_FOR_LAYOUT);
   });
@@ -660,8 +660,8 @@ describe('Resources.Resource', () => {
     resource.layoutBox_ = {left: 11, top: 12, width: 111, height: 222};
 
     // Left is not part of validation.
-    elementMock.expects('getBoundingClientRect').
-        returns({left: 11 + 10, top: 12, width: 111, height: 222}).once();
+    elementMock.expects('getBoundingClientRect')
+        .returns({left: 11 + 10, top: 12, width: 111, height: 222}).once();
     resource.measure();
     expect(resource.getState()).to.equal(ResourceState_.LAYOUT_COMPLETE);
     expect(resource.getLayoutBox().left).to.equal(11 + 10);
@@ -673,8 +673,8 @@ describe('Resources.Resource', () => {
     resource.layoutBox_ = {left: 11, top: 12, width: 111, height: 222};
 
     // Width changed.
-    elementMock.expects('getBoundingClientRect').
-        returns({left: 11, top: 12, width: 111 + 10, height: 222}).once();
+    elementMock.expects('getBoundingClientRect')
+        .returns({left: 11, top: 12, width: 111 + 10, height: 222}).once();
     elementMock.expects('isRelayoutNeeded').returns(false).atLeast(1);
     resource.measure();
     expect(resource.getState()).to.equal(ResourceState_.LAYOUT_COMPLETE);
@@ -687,8 +687,8 @@ describe('Resources.Resource', () => {
     resource.layoutBox_ = {left: 11, top: 12, width: 111, height: 222};
 
     // Width changed.
-    elementMock.expects('getBoundingClientRect').
-        returns({left: 11, top: 12, width: 111 + 10, height: 222}).once();
+    elementMock.expects('getBoundingClientRect')
+        .returns({left: 11, top: 12, width: 111 + 10, height: 222}).once();
     elementMock.expects('isRelayoutNeeded').returns(true).atLeast(1);
     resource.measure();
     expect(resource.getState()).to.equal(ResourceState_.READY_FOR_LAYOUT);
@@ -722,8 +722,8 @@ describe('Resources.Resource', () => {
 
   it('should ignore startLayout if not visible', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
-    elementMock.expects('getBoundingClientRect').
-        returns({left: 1, top: 1, width: 1, height: 1}).once();
+    elementMock.expects('getBoundingClientRect')
+        .returns({left: 1, top: 1, width: 1, height: 1}).once();
 
     elementMock.expects('layoutCallback').never();
 
@@ -734,8 +734,8 @@ describe('Resources.Resource', () => {
 
   it('should force startLayout for first layout', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
-    elementMock.expects('getBoundingClientRect').
-        returns({left: 1, top: 1, width: 1, height: 1}).once();
+    elementMock.expects('getBoundingClientRect')
+        .returns({left: 1, top: 1, width: 1, height: 1}).once();
 
     elementMock.expects('layoutCallback').returns(Promise.resolve()).once();
 
@@ -747,8 +747,8 @@ describe('Resources.Resource', () => {
 
   it('should ignore startLayout for re-layout when not opt-in', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
-    elementMock.expects('getBoundingClientRect').
-        returns({left: 1, top: 1, width: 1, height: 1}).once();
+    elementMock.expects('getBoundingClientRect')
+        .returns({left: 1, top: 1, width: 1, height: 1}).once();
 
     elementMock.expects('layoutCallback').never();
 
@@ -762,8 +762,8 @@ describe('Resources.Resource', () => {
 
   it('should force startLayout for re-layout when opt-in', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
-    elementMock.expects('getBoundingClientRect').
-        returns({left: 1, top: 1, width: 1, height: 1}).once();
+    elementMock.expects('getBoundingClientRect')
+        .returns({left: 1, top: 1, width: 1, height: 1}).once();
 
     elementMock.expects('layoutCallback').returns(Promise.resolve()).once();
 
@@ -778,8 +778,8 @@ describe('Resources.Resource', () => {
   it('should ignore startLayout when document is hidden' +
         ' and prerender not allowed', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(0);
-    elementMock.expects('getBoundingClientRect').
-        returns({left: 1, top: 1, width: 1, height: 1}).atLeast(0);
+    elementMock.expects('getBoundingClientRect')
+        .returns({left: 1, top: 1, width: 1, height: 1}).atLeast(0);
     elementMock.expects('prerenderAllowed').returns(false).atLeast(1);
 
     elementMock.expects('layoutCallback').never();
@@ -794,8 +794,8 @@ describe('Resources.Resource', () => {
   it('should proceed startLayout when document is hidden' +
         ' and prerender is allowed', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(0);
-    elementMock.expects('getBoundingClientRect').
-        returns({left: 1, top: 1, width: 1, height: 1}).atLeast(0);
+    elementMock.expects('getBoundingClientRect')
+        .returns({left: 1, top: 1, width: 1, height: 1}).atLeast(0);
     elementMock.expects('prerenderAllowed').returns(true).atLeast(1);
 
     elementMock.expects('layoutCallback').returns(Promise.resolve()).once();
@@ -810,8 +810,8 @@ describe('Resources.Resource', () => {
 
   it('should complete startLayout', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
-    elementMock.expects('getBoundingClientRect').
-        returns({left: 1, top: 1, width: 1, height: 1}).once();
+    elementMock.expects('getBoundingClientRect')
+        .returns({left: 1, top: 1, width: 1, height: 1}).once();
 
     elementMock.expects('layoutCallback').returns(Promise.resolve()).once();
 
@@ -829,8 +829,8 @@ describe('Resources.Resource', () => {
 
   it('should fail startLayout', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
-    elementMock.expects('getBoundingClientRect').
-        returns({left: 1, top: 1, width: 1, height: 1}).once();
+    elementMock.expects('getBoundingClientRect')
+        .returns({left: 1, top: 1, width: 1, height: 1}).once();
 
     elementMock.expects('layoutCallback').returns(Promise.reject()).once();
 

@@ -47,8 +47,8 @@ describe('amp-image-lightbox component', () => {
 
       let caption = container.querySelector('.-amp-image-lightbox-caption');
       expect(caption).to.not.equal(null);
-      expect(caption.classList.contains('amp-image-lightbox-caption')).to.
-          equal(true);
+      expect(caption.classList.contains('amp-image-lightbox-caption')).to
+          .equal(true);
 
       let viewer = container.querySelector('.-amp-image-lightbox-viewer');
       expect(viewer).to.not.equal(null);
@@ -235,8 +235,8 @@ describe('amp-image-lightbox image viewer', () => {
 
     imageViewer.init(sourceElement, sourceImage);
 
-    expect(imageViewer.getImage().getAttribute('src')).to.
-        equal('image1-smaller');
+    expect(imageViewer.getImage().getAttribute('src')).to
+        .equal('image1-smaller');
   });
 
   it('should reset', () => {

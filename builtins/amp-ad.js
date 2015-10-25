@@ -161,8 +161,8 @@ export function installAd(win) {
         if (POSITION_FIXED_TAG_WHITELIST[el.tagName]) {
           return false;
         }
-        if (this.getWin()./* OK because only called from onLayoutMeasure */
-            getComputedStyle(el).position == 'fixed') {
+        if (this.getWin()/*because only called from onLayoutMeasure */
+            ./*OK*/getComputedStyle(el).position == 'fixed') {
           return true;
         }
         el = el.parentNode;
