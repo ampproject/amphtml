@@ -78,3 +78,16 @@ Optionally `amp-ad` supports a child element with the `placeholder` attribute. I
 - [AdSense](../ads/adsense.md)
 - [AdTech](../ads/adtech.md)
 - [Doubleclick](../ads/doubleclick.md)
+
+
+#### Running ads from a custom domain
+
+AMP supports loading the bootstrap iframe that is used to load ads from a custom domain such as your own domain.
+
+To enable this, copy the file [remote.html](../3p/remote.html) to your web server. Next up add the following meta tag to your AMP file(s):
+
+```html
+<meta name="amp-3p-iframe-src" content="https://assets.your-domain.com/path/to/remote.html">
+```
+
+The `content` attribute of the meta tag is the absolute URL to your copy of the remote.html file on your web server. This URL must use a "https" schema. It is not allowed to reside on the same origin as your AMP files. E.g. if you host AMP files on "www.example.com", this URL must not be on "www.example.com" but e.g. "something-else.example.com" is OK.
