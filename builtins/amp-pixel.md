@@ -72,6 +72,15 @@ For instance:
 ```
 may make a request to something like `https://foo.com/pixel?path=%2Fpage1.html`.
 
+**$DOCUMENT_REFERRER**
+
+Use the special string `$DOCUMENT_REFERRER` to add the current document's referrer to the URL.
+
+For instance:
+```html
+<amp-pixel src="https://foo.com/pixel?referrer=$DOCUMENT_REFERRER"></amp-pixel>
+```
+
 **$TITLE**
 
 Use the special string `$TITLE` to add the title of the current document to the URL
