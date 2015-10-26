@@ -95,7 +95,18 @@ describe('amp-pixel', () => {
         });
   });
 
-  it('replace $CANONICAL_TITLE', () => {
+  it('replace $DOCUMENT_REFERRER', () => {
+    return getPixel(
+        'https://foo.com?ref=$DOCUMENT_REFERRER'
+        ).then((p) => {
+          expect(p.querySelector('img')).to.not.be.null;
+          expect(p.children[0].src).to.equal(
+              'https://foo.com/?ref=' +
+              'http%3A%2F%2Flocalhost%3A9876%2Fcontext.html');
+        });
+  });
+
+  it('replace $TITLE', () => {
     return getPixel(
         'https://foo.com?title=$TITLE'
         ).then((p) => {
