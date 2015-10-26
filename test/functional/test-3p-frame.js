@@ -14,10 +14,31 @@
  * limitations under the License.
  */
 
-import {addDataAndJsonAttributes_, getIframe} from '../../src/3p-frame';
+import {addDataAndJsonAttributes_, getIframe, getBootstrapBaseUrl} from
+    '../../src/3p-frame';
 import {loadPromise} from '../../src/event-helper';
+import {setModeForTesting, getMode} from '../../src/mode';
+import {resetServiceForTesting} from '../../src/service';
 
 describe('3p-frame', () => {
+
+  afterEach(() => {
+    resetServiceForTesting(window, 'bootstrapBaseUrl');
+    setModeForTesting(null);
+    let m = document.querySelector(
+        '[name="amp-3p-iframe-src"]');
+    if (m) {
+      m.parentElement.removeChild(m);
+    }
+  });
+
+  function addCustomBootstrap(url) {
+    let meta = document.createElement('meta');
+    meta.setAttribute('name', 'amp-3p-iframe-src');
+    meta.setAttribute('content', url);
+    document.head.appendChild(meta);
+  }
+
   it('add attributes', () => {
     var div = document.createElement('div');
     div.setAttribute('data-foo', 'foo');
@@ -92,5 +113,36 @@ describe('3p-frame', () => {
       expect(c).to.not.be.null;
       expect(c.textContent).to.contain('pong');
     });
+  });
+
+  it('should pick the right bootstrap url (test default)', () => {
+    expect(getBootstrapBaseUrl(window)).to.equal(
+        'http://ads.localhost:9876/dist.3p/current/frame.max.html');
+  });
+
+  it('should pick the right bootstrap url (prod)', () => {
+    setModeForTesting({});
+    expect(getBootstrapBaseUrl(window)).to.equal(
+        'https://3p.ampproject.net/$internalRuntimeVersion$/frame.html');
+  });
+
+  it('should pick the right bootstrap url (custom)', () => {
+    addCustomBootstrap('https://example.com/boot/remote.html');
+    expect(getBootstrapBaseUrl(window)).to.equal(
+        'https://example.com/boot/remote.html?$internalRuntimeVersion$');
+  });
+
+  it('should pick the right bootstrap url (custom)', () => {
+    addCustomBootstrap('http://example.com/boot/remote.html');
+    expect(() => {
+      getBootstrapBaseUrl(window);
+    }).to.throw(/meta source must start with "https/);
+  });
+
+  it('should pick the right bootstrap url (custom)', () => {
+    addCustomBootstrap('http://localhost:9876/boot/remote.html');
+    expect(() => {
+      getBootstrapBaseUrl(window);
+    }).to.throw(/must not be on the same origin as the/);
   });
 });

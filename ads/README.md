@@ -74,21 +74,7 @@ Note, that the network still needs to be whitelisted and provide a prefix to val
 
 Technically the `<amp-ad>` tag loads an iframe to a generic bootstrap URL that knows how to render the ad given the parameters to the tag.
 
-### 1st party cookies (not yet implemented)
-Publishers may choose to instead of running ads in the origin of the default sandbox to load a document from their origin instead by specifying the bootstrap parameter.
+### 1st party cookies
 
-```html
-  <amp-ad width=300 height=250
-      type="a9"
-      data-aax_size="300x250"
-      data-aax_pubname="test123"
-      data-aax_src="302">
-      bootstrap=”https://ads.example.com/amp/ads/v0.html”>
-  </amp-ad>
-```
-
-The file should be based on the default bootstrap file but may contain further customizations.
-
-Note, that while this method gives access to 1p cookies, it may not enable setting those cookies in browsers that prevent setting cookies in cross origin iframes.
-
-The AMP runtime will deny loading the iframe if it is on the same origin as the container.
+Access to a publishers 1st party cookies may be achieved through a custom ad bootstrap
+file. See ["Running ads from a custom domain"](../builtins/amp-ad.md) in the ad documentation for details.
