@@ -132,6 +132,6 @@ function racePromise_(promise, unlisten, timeout) {
     return result;
   }, (reason) => {
     unlisten();
-    return Promise.reject(reason);
+    throw reason;
   });
 }
