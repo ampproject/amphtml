@@ -127,14 +127,13 @@ export function getErrorReportUrl(message, filename, line, col, error) {
     url += '&a=' + (error.fromAssert ? 1 : 0) +
         '&el=' + encodeURIComponent(tagName) +
         '&s=' + encodeURIComponent(error.stack || '');
-    } else {
+    error.message += ' _reported_';
+  } else {
     url += '&f=' + encodeURIComponent(filename) +
         '&l=' + encodeURIComponent(line) +
         '&c=' + encodeURIComponent(col || '');
   }
-  if (error) {
-    error.message += ' _reported_';
-  }
+
   // Shorten URLs to a value all browsers will send.
   return url.substr(0, 2000);
 }
