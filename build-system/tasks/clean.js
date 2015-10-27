@@ -14,9 +14,18 @@
  * limitations under the License.
  */
 
-require('./clean');
-require('./lint');
-require('./make-golden');
-require('./presubmit-checks');
-require('./size');
-require('./test');
+var del = require('del');
+var gulp = require('gulp-help')(require('gulp'));
+
+
+/**
+ * Clean up the build artifacts
+ *
+ * @param {function} done callback
+ */
+function clean(done) {
+  del(['dist', 'dist.3p', 'build', 'examples.build'], done);
+}
+
+
+gulp.task('clean', 'Removes build output', clean);
