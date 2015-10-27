@@ -19,7 +19,6 @@ var babel = require('babelify');
 var browserify = require('browserify');
 var buffer = require('vinyl-buffer');
 var cssnano = require('cssnano');
-var del = require('del');
 var file = require('gulp-file');
 var fs = require('fs-extra');
 var gulp = require('gulp-help')(require('gulp'));
@@ -34,6 +33,7 @@ var uglify = require('gulp-uglify');
 var util = require('gulp-util');
 var watchify = require('watchify');
 var wrap = require('gulp-wrap');
+var internalRuntimeVersion = require('./build-system/internal-version').VERSION;
 require('./build-system/tasks');
 
 // NOTE: see https://github.com/ai/browserslist#queries for `browsers` list
@@ -54,9 +54,6 @@ cssnano = cssnano({
   zindex: false
 });
 
-// Used to e.g. references the ads binary from the runtime to get
-// version lock.
-var internalRuntimeVersion = new Date().getTime();
 
 /**
  * Build all the AMP extensions
@@ -85,14 +82,6 @@ function buildExtensions(options) {
   buildExtension('amp-youtube', '0.1', false, options);
 }
 
-/**
- * Clean up the build artifacts
- *
- * @param {function} done callback
- */
-function clean(done) {
-  del(['dist', 'dist.3p', 'build', 'examples.build'], done);
-}
 
 /**
  * Compile the polyfills script and drop it in the build folder
@@ -452,7 +441,6 @@ function compileJs(srcDir, srcFilename, destDir, options) {
  * Gulp tasks
  */
 gulp.task('build', 'Builds the AMP library', build);
-gulp.task('clean', 'Removes build output', clean);
 gulp.task('css', 'Recompile css to build directory', compileCss);
 gulp.task('default', 'Same as "watch"', ['watch']);
 gulp.task('dist', 'Build production binaries', dist);
