@@ -442,7 +442,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
  */
 gulp.task('build', 'Builds the AMP library', build);
 gulp.task('css', 'Recompile css to build directory', compileCss);
-gulp.task('default', 'Same as "watch"', ['watch']);
+gulp.task('default', 'Same as "watch"', ['watch', 'serve']);
 gulp.task('dist', 'Build production binaries', dist);
 gulp.task('extensions', 'Build AMP Extensions', buildExtensions);
 gulp.task('watch', 'Watches for changes in files, re-build', watch);
