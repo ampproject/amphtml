@@ -14,6 +14,7 @@
     "es6.parameters",
     "es6.properties.computed",
     "es6.properties.shorthand",
-    "es6.templateLiterals"
+    "es6.templateLiterals",
+    "es6.spread"
   ]
 }
