@@ -32,9 +32,6 @@ export function adsense(global, data) {
   if (data['adSlot']) {
     i.setAttribute('data-ad-slot', data['adSlot']);
   }
-  if (data['adFormat']) {
-    i.setAttribute('data-ad-format', data['adFormat']);
-  }
   i.setAttribute('class', 'adsbygoogle');
   i.style.cssText = 'display:inline-block;width:100%;height:100%;';
   global.document.getElementById('c').appendChild(i);
