@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-require('./clean');
-require('./lint');
-require('./make-golden');
-require('./presubmit-checks');
-require('./size');
-require('./test');
+// Used to e.g. references the ads binary from the runtime to get
+// version lock.
+exports.VERSION = new Date().getTime();
