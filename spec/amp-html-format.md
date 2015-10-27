@@ -235,9 +235,18 @@ Authors are free to include all custom fonts via a `@font-face` CSS instruction 
 
 The AMP runtime is a piece of JavaScript that runs inside every AMP document. It provides implementations for AMP custom elements, manages resource loading and prioritization and optionally includes a runtime validator for AMP HTML for use during development.
 
-The AMP runtime is loaded via the mandatory `<script src="https://cdn.ampproject.org/v0.js"></script>` tag in the AMP document head.
+The AMP runtime is loaded via the mandatory `<script src="https://cdn.ampproject.org/v0.js"></script>` tag in the AMP document `<head>`.
 
-Development mode is triggered by adding "#development=1" to the URL of the page.
+The AMP runtime can be placed into a development mode for any page. Development
+mode will trigger AMP validation on the embedded page, which will emit the
+validation status and any errors to the javascript developer console.
+
+Development mode may be triggered in either of these ways:
+
+ - Appending `#development=1` to the URL of the page.
+ - Adding the `development` attribute to the AMP runtime script tag, e.g. `<script src="https://cdn.ampproject.org/v0.js" development></script>`.
+
+The latter approach of triggering development mode with a `development` attribute causes the validator to emit a warning to the javascript developer console which will read `DEV_MODE_ENABLED development - please remove for prod`. This warning becomes an error in a production environment and causes validation to fail for performance reasons. The `development` attribute thus should not be used publicly, and is provided primarily for use with toolchains.
 
 
 ## Resources
