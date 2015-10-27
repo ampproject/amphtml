@@ -266,18 +266,14 @@ function build() {
   compile();
 }
 
-gulp.task('css', 'Recompile css to build directory', compileCss);
-gulp.task('extensions', 'Build AMP Extensions', buildExtensions);
-gulp.task('clean', 'Removes build output', clean);
-gulp.task('build', 'Builds the AMP library', build);
-gulp.task('watch', 'Watches for changes in files, re-build', watch);
-gulp.task('minify', 'Build production binaries', function() {
+/**
+ * Dist Build
+ */
+function dist() {
   process.env.NODE_ENV = 'production';
   compile(false, true);
   buildExtensions({minify: true});
-});
-
-gulp.task('default', 'Same as "watch"', ['watch']);
+}
 
 /**
  * Build the examples
@@ -452,3 +448,13 @@ function compileJs(srcDir, srcFilename, destDir, options) {
   }
 }
 
+/**
+ * Gulp tasks
+ */
+gulp.task('build', 'Builds the AMP library', build);
+gulp.task('clean', 'Removes build output', clean);
+gulp.task('css', 'Recompile css to build directory', compileCss);
+gulp.task('default', 'Same as "watch"', ['watch']);
+gulp.task('dist', 'Build production binaries', dist);
+gulp.task('extensions', 'Build AMP Extensions', buildExtensions);
+gulp.task('watch', 'Watches for changes in files, re-build', watch);

@@ -35,12 +35,15 @@ We discuss implementation issues on [amphtml-discuss@googlegroups.com](https://g
 
 | Command                       | Description                                                           |
 | ----------------------------- | --------------------------------------------------------------------- |
-| `gulp`                        | Same as "watch"                                                       |
-| `gulp minify`                 | Builds production binaries.                                           |
+| `gulp`                        | Same as "watch".                                                      |
+| `gulp dist`                   | Builds production binaries.                                           |
 | `gulp lint`                   | Validates against Google Closure Linter.                              |
 | `gulp lint --watch`           | Watches for changes in files, Validates against Google Closure Linter.|
 | `gulp build`                  | Builds the AMP library.                                               |
 | `gulp clean`                  | Removes build output.                                                 |
+| `gulp css`                    | Recompile css to build directory.                                     |
+| `gulp extensions`             | Build AMP Extensions.                                                 |
+| `gulp watch`                  | Watches for changes in files, re-build.                               |
 | `gulp test`                   | Runs tests in Chrome.                                                 |
 | `gulp test --verbose`         | Runs tests in Chrome with logging enabled.                            |
 | `gulp test --watch`           | Watches for changes in files, runs corresponding test(s) in Chrome.   |
