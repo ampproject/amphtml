@@ -40,7 +40,7 @@ describe('Viewport', () => {
       getViewportHeight: () => 222,
       getScrollTop: () => 17,
       getPaddingTop: () => 19,
-      onViewportEvent: (handler) => {
+      onViewportEvent: handler => {
         viewerViewportHandler = handler;
       }
     };
@@ -80,7 +80,7 @@ describe('Viewport', () => {
 
   it('should not relayout on height resize', () => {
     let changeEvent = null;
-    viewport.onChanged((event) => {
+    viewport.onChanged(event => {
       changeEvent = event;
     });
     viewerMock.expects('getViewportHeight').returns(223).atLeast(1);
@@ -92,7 +92,7 @@ describe('Viewport', () => {
 
   it('should relayout on width resize', () => {
     let changeEvent = null;
-    viewport.onChanged((event) => {
+    viewport.onChanged(event => {
       changeEvent = event;
     });
     viewerMock.expects('getViewportWidth').returns(112).atLeast(1);
@@ -129,7 +129,7 @@ describe('Viewport', () => {
 
   it('should defer scroll events', () => {
     let changeEvent = null;
-    viewport.onChanged((event) => {
+    viewport.onChanged(event => {
       changeEvent = event;
     });
     viewer.getScrollTop = () => {return 34;};
@@ -313,7 +313,7 @@ describe('Viewport META', () => {
       viewportMetaSetter = sinon.spy();
       Object.defineProperty(viewportMeta, 'content', {
         get: () => viewportMetaString,
-        set: (value) => {
+        set: value => {
           viewportMetaSetter(value);
           viewportMetaString = value;
         }
@@ -321,7 +321,7 @@ describe('Viewport META', () => {
       windowApi = {
         document: {
           documentElement: {style: {}},
-          querySelector: (selector) => {
+          querySelector: selector => {
             if (selector == 'meta[name=viewport]') {
               return viewportMeta;
             }
@@ -553,14 +553,14 @@ describe('ViewportBindingNaturalIosEmbed', () => {
       body: {
         scrollWidth: 777,
         style: {},
-        appendChild: (child) => {
+        appendChild: child => {
           bodyChildren.push(child);
         },
         addEventListener: (eventType, handler) => {
           bodyEventListeners[eventType] = handler;
         }
       },
-      createElement: (tagName) => {
+      createElement: tagName => {
         return {
           tagName: tagName,
           id: '',

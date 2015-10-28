@@ -79,7 +79,7 @@ export class History {
    */
   push(opt_onPop) {
     return this.enque_(() => {
-      return this.binding_.push().then((stackIndex) => {
+      return this.binding_.push().then(stackIndex => {
         this.onStackIndexUpdated_(stackIndex);
         if (opt_onPop) {
           this.stackOnPop_[stackIndex] = opt_onPop;
@@ -98,7 +98,7 @@ export class History {
    */
   pop(stateId) {
     return this.enque_(() => {
-      return this.binding_.pop(stateId).then((stackIndex) => {
+      return this.binding_.pop(stateId).then(stackIndex => {
         this.onStackIndexUpdated_(stackIndex);
       });
     });
@@ -175,9 +175,9 @@ export class History {
       promise = Promise.reject(e);
     }
 
-    promise.then((result) => {
+    promise.then(result => {
       task.resolve(result);
-    }, (reason) => {
+    }, reason => {
       log.error(TAG_, 'failed to execute a task:', reason);
       task.reject(reason);
     }).then(() => {
@@ -315,7 +315,7 @@ export class HistoryBindingNatural_ {
     history.replaceState = this.historyReplaceState_.bind(this);
 
     let eventPass = new Pass(this.onHistoryEvent_.bind(this), 50);
-    this.popstateHandler_ = (e) => {
+    this.popstateHandler_ = e => {
       log.fine(TAG_, 'popstate event: ' + this.win.history.length + ', ' +
           JSON.stringify(e.state));
       eventPass.schedule();

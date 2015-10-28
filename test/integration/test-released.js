@@ -21,7 +21,7 @@ describe('Rendering of released components', () => {
   var fixture;
   beforeEach(() => {
     return createFixtureIframe('test/fixtures/released.html', 3000)
-      .then((f) => {
+      .then(f => {
         fixture = f;
       });
   });

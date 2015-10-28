@@ -32,7 +32,7 @@ describe('Swipe', () => {
     clock = sandbox.useFakeTimers();
     vsyncTasks = [];
     vsync = {
-      runMutateSeries: (mutator) => {
+      runMutateSeries: mutator => {
         vsyncTasks.push(mutator);
         return new Promise((resolve, reject) => {});
       }
@@ -115,12 +115,12 @@ describe('Swipe', () => {
 
   it('swipeX - touchMove', () => {
     let startEvent = null;
-    swipeX.onStart((e) => {
+    swipeX.onStart(e => {
       startEvent = e;
     });
 
     let moveEvent = null;
-    swipeX.onMove((e) => {
+    swipeX.onMove(e => {
       moveEvent = e;
     });
 
@@ -172,7 +172,7 @@ describe('Swipe', () => {
 
   it('swipeX - touchEnd', () => {
     let endEvent = null;
-    swipeX.onEnd((e) => {
+    swipeX.onEnd(e => {
       endEvent = e;
     });
 
@@ -195,7 +195,7 @@ describe('Swipe', () => {
 
   it('swipeX - touchCancel', () => {
     let endEvent = null;
-    swipeX.onEnd((e) => {
+    swipeX.onEnd(e => {
       endEvent = e;
     });
 
@@ -234,7 +234,7 @@ describe('Swipe', () => {
     swipeX.setPositionMultiplier(0.1);
 
     let moveEvent = null;
-    swipeX.onMove((e) => {
+    swipeX.onMove(e => {
       moveEvent = e;
     });
 
@@ -254,7 +254,7 @@ describe('Swipe', () => {
     swipeX.setBounds(-10, 10, 0);
 
     let moveEvent = null;
-    swipeX.onMove((e) => {
+    swipeX.onMove(e => {
       moveEvent = e;
     });
 
@@ -288,7 +288,7 @@ describe('Swipe', () => {
     swipeX.continueMotion(0, false);
 
     let moveEvent = null;
-    swipeX.onMove((e) => {
+    swipeX.onMove(e => {
       moveEvent = e;
     });
 

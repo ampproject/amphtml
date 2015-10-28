@@ -48,7 +48,7 @@ describe('Timer', () => {
     timer.delay(handler, 111);
   });
 
-  it('delay default', (done) => {
+  it('delay default', done => {
     windowMock.expects('setTimeout').never();
     windowMock.expects('clearTimeout').never();
     timer.delay(done);
@@ -59,7 +59,7 @@ describe('Timer', () => {
     timer.cancel(1);
   });
 
-  it('cancel default', (done) => {
+  it('cancel default', done => {
     windowMock.expects('setTimeout').never();
     windowMock.expects('clearTimeout').never();
     var id = timer.delay(() => {
@@ -73,13 +73,13 @@ describe('Timer', () => {
   });
 
   it('promise', () => {
-    windowMock.expects('setTimeout').withExactArgs(sinon.match((value) => {
+    windowMock.expects('setTimeout').withExactArgs(sinon.match(value => {
       value();
       return true;
     }), 111).returns(1).once();
 
     let c = 0;
-    return timer.promise(111, 'A').then((result) => {
+    return timer.promise(111, 'A').then(result => {
       c++;
       expect(c).to.equal(1);
       expect(result).to.equal('A');
@@ -87,16 +87,16 @@ describe('Timer', () => {
   });
 
   it('timeoutPromise - no race', () => {
-    windowMock.expects('setTimeout').withExactArgs(sinon.match((value) => {
+    windowMock.expects('setTimeout').withExactArgs(sinon.match(value => {
       value();
       return true;
     }), 111).returns(1).once();
 
     let c = 0;
-    return timer.timeoutPromise(111).then((result) => {
+    return timer.timeoutPromise(111).then(result => {
       c++;
       assert.fail('must never be here: ' + result);
-    }).catch((reason) => {
+    }).catch(reason => {
       c++;
       expect(c).to.equal(1);
       expect(reason).to.equal('timeout');
@@ -104,13 +104,13 @@ describe('Timer', () => {
   });
 
   it('timeoutPromise - race no timeout', () => {
-    windowMock.expects('setTimeout').withExactArgs(sinon.match((value) => {
+    windowMock.expects('setTimeout').withExactArgs(sinon.match(value => {
       // No timeout
       return true;
     }), 111).returns(1).once();
 
     let c = 0;
-    return timer.timeoutPromise(111, Promise.resolve('A')).then((result) => {
+    return timer.timeoutPromise(111, Promise.resolve('A')).then(result => {
       c++;
       expect(c).to.equal(1);
       expect(result).to.equal('A');
@@ -118,17 +118,17 @@ describe('Timer', () => {
   });
 
   it('timeoutPromise - race with timeout', () => {
-    windowMock.expects('setTimeout').withExactArgs(sinon.match((value) => {
+    windowMock.expects('setTimeout').withExactArgs(sinon.match(value => {
       // Immediate timeout
       value();
       return true;
     }), 111).returns(1).once();
 
     let c = 0;
-    return timer.timeoutPromise(111, new Promise(() => {})).then((result) => {
+    return timer.timeoutPromise(111, new Promise(() => {})).then(result => {
       c++;
       assert.fail('must never be here: ' + result);
-    }).catch((reason) => {
+    }).catch(reason => {
       c++;
       expect(c).to.equal(1);
       expect(reason).to.equal('timeout');

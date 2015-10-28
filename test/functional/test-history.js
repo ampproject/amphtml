@@ -34,7 +34,7 @@ describe('History', () => {
 
     let binding = {
       cleanup_: () => {},
-      setOnStackIndexUpdated: (callback) => {
+      setOnStackIndexUpdated: callback => {
         onStackIndexUpdated = callback;
       },
       push: () => {},
@@ -66,7 +66,7 @@ describe('History', () => {
     let onPop = sinon.spy();
     bindingMock.expects('push').withExactArgs()
         .returns(Promise.resolve(11)).once();
-    return history.push(onPop).then((historyId) => {
+    return history.push(onPop).then(historyId => {
       expect(history.stackIndex_).to.equal(11);
       expect(history.stackOnPop_.length).to.equal(12);
       expect(history.stackOnPop_[11]).to.equal(onPop);
@@ -80,7 +80,7 @@ describe('History', () => {
         .returns(Promise.resolve(11)).once();
     bindingMock.expects('pop').withExactArgs(11)
         .returns(Promise.resolve(10)).once();
-    return history.push(onPop).then((historyId) => {
+    return history.push(onPop).then(historyId => {
       expect(historyId).to.equal(11);
       expect(history.stackOnPop_.length).to.equal(12);
       expect(history.stackOnPop_[11]).to.equal(onPop);
@@ -98,7 +98,7 @@ describe('History', () => {
     let onPop = sinon.spy();
     bindingMock.expects('push').withExactArgs()
         .returns(Promise.resolve(11)).once();
-    return history.push(onPop).then((historyId) => {
+    return history.push(onPop).then(historyId => {
       expect(onPop.callCount).to.equal(0);
       onStackIndexUpdated(10);
       clock.tick(1);
@@ -193,7 +193,7 @@ describe('HistoryBindingNatural', () => {
   });
 
   it('should push new state in the window.history and notify', () => {
-    return history.push().then((stackIndex) => {
+    return history.push().then(stackIndex => {
       expect(history.stackIndex_).to.equal(stackIndex);
       expect(history.stackIndex_).to.equal(window.history.length - 1);
       expect(history.unsupportedState_['AMP.History']).to.equal(
@@ -205,7 +205,7 @@ describe('HistoryBindingNatural', () => {
   });
 
   it('should pop a state from the window.history and notify', () => {
-    return history.push().then((stackIndex) => {
+    return history.push().then(stackIndex => {
       expect(onStackIndexUpdated.callCount).to.equal(1);
       expect(onStackIndexUpdated.getCall(0).args[0]).to.equal(
           window.history.length - 1);
@@ -228,7 +228,7 @@ describe('HistoryBindingNatural', () => {
   });
 
   it('should update its state and notify on history.back', () => {
-    return history.push().then((stackIndex) => {
+    return history.push().then(stackIndex => {
       expect(onStackIndexUpdated.callCount).to.equal(1);
       expect(onStackIndexUpdated.getCall(0).args[0]).to.equal(
           window.history.length - 1);
@@ -265,12 +265,12 @@ describe('HistoryBindingVirtual', () => {
     onStackIndexUpdated = sinon.spy();
     viewerHistoryPoppedHandler = undefined;
     let viewer = {
-      onHistoryPoppedEvent: (handler) => {
+      onHistoryPoppedEvent: handler => {
         viewerHistoryPoppedHandler = handler;
         return () => {};
       },
-      postPushHistory: (stackIndex) => {},
-      postPopHistory: (stackIndex) => {}
+      postPushHistory: stackIndex => {},
+      postPopHistory: stackIndex => {}
     };
     viewerMock = sandbox.mock(viewer);
     history = new HistoryBindingVirtual_(viewer);
@@ -296,7 +296,7 @@ describe('HistoryBindingVirtual', () => {
 
   it('should push new state to viewer and notify', () => {
     viewerMock.expects('postPushHistory').withExactArgs(1).once();
-    return history.push().then((stackIndex) => {
+    return history.push().then(stackIndex => {
       expect(stackIndex).to.equal(1);
       expect(history.stackIndex_).to.equal(1);
       expect(onStackIndexUpdated.callCount).to.equal(1);
@@ -307,11 +307,11 @@ describe('HistoryBindingVirtual', () => {
   it('should pop a state from the window.history and notify', () => {
     viewerMock.expects('postPushHistory').withExactArgs(1).once();
     viewerMock.expects('postPopHistory').withExactArgs(1).once();
-    return history.push().then((stackIndex) => {
+    return history.push().then(stackIndex => {
       expect(stackIndex).to.equal(1);
       expect(onStackIndexUpdated.callCount).to.equal(1);
       expect(onStackIndexUpdated.getCall(0).args[0]).to.equal(1);
-      return history.pop(stackIndex).then((newStackIndex) => {
+      return history.pop(stackIndex).then(newStackIndex => {
         expect(newStackIndex).to.equal(0);
         expect(history.stackIndex_).to.equal(0);
         expect(onStackIndexUpdated.callCount).to.equal(2);
@@ -322,7 +322,7 @@ describe('HistoryBindingVirtual', () => {
 
   it('should update its state and notify on history.back', () => {
     viewerMock.expects('postPushHistory').withExactArgs(1).once();
-    return history.push().then((stackIndex) => {
+    return history.push().then(stackIndex => {
       expect(stackIndex).to.equal(1);
       expect(onStackIndexUpdated.callCount).to.equal(1);
       expect(onStackIndexUpdated.getCall(0).args[0]).to.equal(1);

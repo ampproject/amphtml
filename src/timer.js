@@ -100,7 +100,7 @@ export class Timer {
       if (timerKey == -1) {
         reject(new Error('Failed to schedule timer.'));
       }
-    }).catch((error) => {
+    }).catch(error => {
       // Clear the timer. The most likely reason is "cancel" signal.
       if (timerKey != -1) {
         this.cancel(timerKey);
@@ -129,7 +129,7 @@ export class Timer {
       if (timerKey == -1) {
         reject(new Error('Failed to schedule timer.'));
       }
-    }).catch((error) => {
+    }).catch(error => {
       // Clear the timer. The most likely reason is "cancel" signal.
       if (timerKey != -1) {
         this.cancel(timerKey);

@@ -110,7 +110,7 @@ describe('Viewer', () => {
 
   it('should receive viewport event', () => {
     let viewportEvent = null;
-    viewer.onViewportEvent((event) => {
+    viewer.onViewportEvent(event => {
       viewportEvent = event;
     });
     viewer.receiveMessage('viewport', {
@@ -129,7 +129,7 @@ describe('Viewer', () => {
 
   it('should receive visibilitychange event', () => {
     let visEvent = null;
-    viewer.onVisibilityChanged((event) => {
+    viewer.onVisibilityChanged(event => {
       visEvent = event;
     });
     viewer.receiveMessage('visibilitychange', {

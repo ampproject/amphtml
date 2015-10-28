@@ -697,7 +697,7 @@ describe('CustomElement Loading Indicator', () => {
     element.layout_ = Layout.FIXED;
     savedMutate = vsync.mutate;
     vsyncTasks = [];
-    vsync.mutate = (mutator) => {
+    vsync.mutate = mutator => {
       vsyncTasks.push(mutator);
     };
   });

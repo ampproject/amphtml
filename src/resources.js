@@ -134,7 +134,7 @@ export class Resources {
     this.vsyncScheduled_ = false;
 
     // When viewport is resized, we have to re-measure all elements.
-    this.viewport_.onChanged((event) => {
+    this.viewport_.onChanged(event => {
       this.lastVelocity_ = event.velocity;
       this.relayoutAll_ = this.relayoutAll_ || event.relayoutAll;
       this.schedulePass();
@@ -155,7 +155,7 @@ export class Resources {
       this.schedulePass();
     });
 
-    this.viewer_.onRuntimeState((state) => {
+    this.viewer_.onRuntimeState(state => {
       log.fine(TAG_, 'Runtime state:', state);
       this.isRuntimeOn_ = state;
       this.schedulePass(1);
@@ -177,13 +177,13 @@ export class Resources {
   /** @private */
   monitorInput_() {
     let input = inputFor(this.win);
-    input.onTouchDetected((detected) => {
+    input.onTouchDetected(detected => {
       this.toggleInputClass_('amp-mode-touch', detected);
     }, true);
-    input.onMouseDetected((detected) => {
+    input.onMouseDetected(detected => {
       this.toggleInputClass_('amp-mode-mouse', detected);
     }, true);
-    input.onKeyboardStateChanged((active) => {
+    input.onKeyboardStateChanged(active => {
       this.toggleInputClass_('amp-mode-keyboard-active', active);
     }, true);
   }
@@ -753,7 +753,7 @@ export class Resources {
 
     let now = timer.now();
     let timeout = 0;
-    this.exec_.forEach((other) => {
+    this.exec_.forEach(other => {
       // Higher priority tasks get the head start. Currently 500ms per a drop
       // in priority (note that priority is 10-based).
       let penalty = Math.max((task.priority - other.priority) *
@@ -873,13 +873,13 @@ export class Resources {
    */
   scheduleLayoutOrPreloadForSubresources_(parentResource, layout, subElements) {
     let resources = [];
-    this.discoverResourcesForArray_(parentResource, subElements, (resource) => {
+    this.discoverResourcesForArray_(parentResource, subElements, resource => {
       if (resource.getState() != ResourceState_.NOT_BUILT) {
         resources.push(resource);
       }
     });
     if (resources.length > 0) {
-      resources.forEach((resource) => {
+      resources.forEach(resource => {
         resource.measure();
         if (resource.getState() == ResourceState_.READY_FOR_LAYOUT &&
                 resource.isDisplayed()) {
@@ -935,7 +935,7 @@ export class Resources {
   updateInViewportForSubresources_(parentResource, subElements,
       inLocalViewport) {
     let inViewport = parentResource.isInViewport() && inLocalViewport;
-    this.discoverResourcesForArray_(parentResource, subElements, (resource) => {
+    this.discoverResourcesForArray_(parentResource, subElements, resource => {
       resource.setInViewport(inViewport);
     });
   }
@@ -947,7 +947,7 @@ export class Resources {
    * @param {function(!Resource)} callback
    */
   discoverResourcesForArray_(parentResource, elements, callback) {
-    elements.forEach((element) => {
+    elements.forEach(element => {
       assert(parentResource.element.contains(element));
       this.discoverResourcesForElement_(element, callback);
     });
@@ -1271,7 +1271,7 @@ export class Resource {
       return Promise.reject(e);
     }
     this.layoutPromise_ = promise.then(() => this.layoutComplete_(true),
-        (reason) => this.layoutComplete_(false, reason));
+        reason => this.layoutComplete_(false, reason));
     return this.layoutPromise_;
   }
 
@@ -1341,7 +1341,7 @@ export class Resource {
     if (this.state_ == ResourceState_.NOT_BUILT) {
       if (!this.element.isUpgraded()) {
         p = p.then(() => {
-          return new Promise((resolve) => {
+          return new Promise(resolve => {
             this.onUpgraded_ = resolve;
           });
         });

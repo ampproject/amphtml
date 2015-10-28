@@ -45,7 +45,7 @@ export function parseSizeList(s) {
   let sSizes = s.split(',');
   assert(sSizes.length > 0, 'sizes has to have at least one size');
   let sizes = [];
-  sSizes.forEach((sSize) => {
+  sSizes.forEach(sSize => {
     sSize = sSize.replace(/\s+/g, ' ').trim();
     if (sSize.length == 0) {
       return;

@@ -20,7 +20,7 @@ import {createFixtureIframe, expectBodyToBecomeVisible} from
 describe('Rendering of amp-img', () => {
   var fixture;
   beforeEach(() => {
-    return createFixtureIframe('test/fixtures/images.html', 500).then((f) => {
+    return createFixtureIframe('test/fixtures/images.html', 500).then(f => {
       fixture = f;
     });
   });

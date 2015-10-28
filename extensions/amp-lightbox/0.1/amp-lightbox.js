@@ -52,7 +52,7 @@ class AmpLightbox extends AMP.BaseElement {
     this.container_ = document.createElement('div');
     this.applyFillContent(this.container_);
     this.element.appendChild(this.container_);
-    children.forEach((child) => {
+    children.forEach(child => {
       this.container_.appendChild(child);
     });
 
@@ -90,7 +90,7 @@ class AmpLightbox extends AMP.BaseElement {
     this.scheduleLayout(this.container_);
     this.updateInViewport(this.container_, true);
 
-    this.getHistory_().push(this.close.bind(this)).then((historyId) => {
+    this.getHistory_().push(this.close.bind(this)).then(historyId => {
       this.historyId_ = historyId;
     });
   }

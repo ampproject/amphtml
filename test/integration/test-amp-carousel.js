@@ -22,7 +22,7 @@ describe('integration amp-carousel', () => {
   let fixture;
   beforeEach(() => {
     return createFixtureIframe('test/fixtures/carousels.html', 1000)
-      .then((f) => {
+      .then(f => {
         fixture = f;
       });
   });

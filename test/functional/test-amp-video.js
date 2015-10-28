@@ -24,7 +24,7 @@ describe('amp-video', () => {
   }
 
   function getVideo(attributes, children) {
-    return createIframePromise().then((iframe) => {
+    return createIframePromise().then(iframe => {
       installVideo(iframe.win);
       var v = iframe.doc.createElement('amp-video');
       for (let key in attributes) {

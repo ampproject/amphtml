@@ -62,7 +62,7 @@ class AmpFitText extends AMP.BaseElement {
       lineHeight: `${LINE_HEIGHT_EM_}em`
     });
 
-    this.getRealChildNodes().forEach((node) => {
+    this.getRealChildNodes().forEach(node => {
       this.contentWrapper_.appendChild(node);
     });
     this.measurer_./*OK*/innerHTML = this.contentWrapper_./*OK*/innerHTML;

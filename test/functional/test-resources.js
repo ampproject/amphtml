@@ -495,7 +495,7 @@ describe('Resources.TaskQueue', () => {
     queue.enqueue({id: 'B', v: 2});
     queue.enqueue({id: 'C', v: 1});
 
-    let task = queue.peek((task) => 10 - task.v);
+    let task = queue.peek(task => 10 - task.v);
     expect(task.id).to.equal('B');
   });
 });
@@ -520,7 +520,7 @@ describe('Resources.Resource', () => {
       isUpgraded: () => {return false;},
       prerenderAllowed: () => {return false;},
       renderOutsideViewport: () => {return true;},
-      build: (force) => {return false;},
+      build: force => {return false;},
       getBoundingClientRect: () => {return null;},
       updateLayoutBox: () => {},
       isRelayoutNeeded: () => {return false;},
@@ -631,7 +631,7 @@ describe('Resources.Resource', () => {
         .returns({left: 11, top: 12, width: 111, height: 222})
         .once();
     elementMock.expects('updateLayoutBox')
-        .withExactArgs(sinon.match((data) => {
+        .withExactArgs(sinon.match(data => {
           return data.width == 111 && data.height == 222;
         }))
         .once();

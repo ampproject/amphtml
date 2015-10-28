@@ -288,7 +288,7 @@ export class ImageViewer {
     });
 
     // Movable.
-    gestures.onGesture(SwipeXYRecognizer, (e) => {
+    gestures.onGesture(SwipeXYRecognizer, e => {
       this.onMove_(e.data.deltaX, e.data.deltaY, false);
       if (e.data.last) {
         this.onMoveRelease_(e.data.velocityX, e.data.velocityY);
@@ -301,7 +301,7 @@ export class ImageViewer {
     });
 
     // Zoomable.
-    gestures.onGesture(DoubletapRecognizer, (e) => {
+    gestures.onGesture(DoubletapRecognizer, e => {
       let newScale;
       if (this.scale_ == 1) {
         newScale = this.maxScale_;
@@ -314,7 +314,7 @@ export class ImageViewer {
         return this.onZoomRelease_(0, 0, 0, 0, 0, 0);
       });
     });
-    gestures.onGesture(TapzoomRecognizer, (e) => {
+    gestures.onGesture(TapzoomRecognizer, e => {
       this.onZoomInc_(e.data.centerClientX, e.data.centerClientY,
           e.data.deltaX, e.data.deltaY);
       if (e.data.last) {
@@ -577,7 +577,7 @@ export class ImageViewer {
       let scaleFunc = tr.numeric(this.scale_, newScale);
       let xFunc = tr.numeric(this.posX_, newPosX);
       let yFunc = tr.numeric(this.posY_, newPosY);
-      promise = Animation.animate((time) => {
+      promise = Animation.animate(time => {
         this.scale_ = scaleFunc(time);
         this.posX_ = xFunc(time);
         this.posY_ = yFunc(time);
@@ -676,7 +676,7 @@ class AmpImageLightbox extends AMP.BaseElement {
     this.container_.appendChild(this.captionElement_);
 
     let gestures = Gestures.get(this.element);
-    this.element.addEventListener('click', (e) => {
+    this.element.addEventListener('click', e => {
       if (!this.entering_ &&
             !this.imageViewer_.getImage().contains(e.target)) {
         this.close();
@@ -718,7 +718,7 @@ class AmpImageLightbox extends AMP.BaseElement {
       }
     });
 
-    this.getHistory_().push(this.close.bind(this)).then((historyId) => {
+    this.getHistory_().push(this.close.bind(this)).then(historyId => {
       this.historyId_ = historyId;
     });
   }

@@ -45,7 +45,7 @@ export function parseSrcset(s) {
       /\s*([^\s]*)(\s+(-?(\d+(\.(\d+)?)?|\.\d+)[a-zA-Z]))?(\s*,)?/g);
   assert(sSources.length > 0, 'srcset has to have at least one source');
   let sources = [];
-  sSources.forEach((sSource) => {
+  sSources.forEach(sSource => {
     sSource = sSource.trim();
     if (sSource.substr(-1) == ',') {
       sSource = sSource.substr(0, sSource.length - 1).trim();
@@ -98,7 +98,7 @@ export class Srcset {
     // Only one type of source specified can be used - width or DPR.
     let hasWidth = false;
     let hasDpr = false;
-    this.sources_.forEach((source) => {
+    this.sources_.forEach(source => {
       assert((source.width || source.dpr) && (!source.width || !source.dpr),
           'Either dpr or width must be specified');
       hasWidth = hasWidth || !!source.width;

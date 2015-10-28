@@ -43,7 +43,7 @@ class AmpTwitter extends AMP.BaseElement {
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
     // Triggered by context.updateDimensions() inside the iframe.
-    listen(iframe, 'embed-size', (data) => {
+    listen(iframe, 'embed-size', data => {
       iframe.height = data.height;
       iframe.width = data.width;
       var amp = iframe.parentElement;
