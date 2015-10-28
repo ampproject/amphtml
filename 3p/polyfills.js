@@ -18,7 +18,6 @@
  * @fileoverview Loads all polyfills needed by the AMP 3p integration frame.
  */
 
-
 // This list should not get longer without a very good reason.
 import 'babel-core/external-helpers';
 

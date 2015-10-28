@@ -47,7 +47,7 @@ class AmpAnim extends AMP.BaseElement {
 
     /** @private @const {!Srcset} */
     this.srcset_ = parseSrcset(this.element.getAttribute('srcset') ||
-        this.element.getAttribute('src'));
+                               this.element.getAttribute('src'));
 
     /** @private {?Promise} */
     this.loadPromise_ = null;
@@ -99,8 +99,7 @@ class AmpAnim extends AMP.BaseElement {
     if (this.getLayoutWidth() <= 0) {
       return Promise.resolve();
     }
-    let src = this.srcset_.select(this.getLayoutWidth(),
-        this.getDpr()).url;
+    let src = this.srcset_.select(this.getLayoutWidth(), this.getDpr()).url;
     if (src == this.img_.getAttribute('src')) {
       return Promise.resolve();
     }
@@ -108,6 +107,7 @@ class AmpAnim extends AMP.BaseElement {
     this.loadPromise_ = loadPromise(this.img_);
     return this.loadPromise_;
   }
-};
+}
+;
 
 AMP.registerElement('amp-anim', AmpAnim);

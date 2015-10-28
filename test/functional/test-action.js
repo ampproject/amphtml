@@ -16,7 +16,6 @@
 
 import {Action} from '../../src/action';
 
-
 describe('Action parseAction', () => {
 
   let sandbox;
@@ -32,7 +31,6 @@ describe('Action parseAction', () => {
     sandbox.restore();
     sandbox = null;
   });
-
 
   it('should fail parse without event', () => {
     let a = action.parseAction_('target1.method1');
@@ -79,7 +77,6 @@ describe('Action parseAction', () => {
   });
 });
 
-
 describe('Action parseActionMap', () => {
 
   let sandbox;
@@ -120,7 +117,6 @@ describe('Action parseActionMap', () => {
   });
 });
 
-
 describe('Action findAction', () => {
 
   let sandbox;
@@ -152,7 +148,6 @@ describe('Action findAction', () => {
     expect(m1).to.equal(m2);
   });
 
-
   it('should find action on the same element', () => {
     var element = document.createElement('div');
     element.setAttribute('on', 'event1:action1');
@@ -181,7 +176,6 @@ describe('Action findAction', () => {
     expect(action.findAction_(element, 'event3')).to.equal(null);
   });
 });
-
 
 describe('Action method', () => {
 
@@ -215,7 +209,6 @@ describe('Action method', () => {
     sandbox.restore();
     sandbox = null;
   });
-
 
   it('should invoke on the AMP element', () => {
     action.invoke_(execElement, 'method1', 'source1', 'event1');

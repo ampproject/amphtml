@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-
 import {loadPromise} from '../../src/event-helper';
-
 
 // TODO(@cramforce): Use local version. This is non-hermetic
 // and really bad. When the validator is open source we can
@@ -74,8 +72,8 @@ describe('example', function() {
       var url = '/base/examples/' + filename;
       return get(url).then((html) => {
         var validationResult = amp.validator.validateString(html);
-        var rendered = amp.validator.renderValidationResult(validationResult,
-            url);
+        var rendered =
+            amp.validator.renderValidationResult(validationResult, url);
 
         var errors = [];
         LINES: for (let i = 0; i < rendered.length; i++) {
@@ -129,8 +127,8 @@ describe('example', function() {
           if (xhr.status == 200) {
             resolve(xhr.responseText);
           } else {
-            reject(new Error('Fetching file for validation failed: ' +
-                filename));
+            reject(
+                new Error('Fetching file for validation failed: ' + filename));
           }
         }
       };

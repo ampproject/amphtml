@@ -14,8 +14,12 @@
  * limitations under the License.
  */
 
-import {isLoaded, listenOnce, listenOncePromise, loadPromise}
-    from '../../src/event-helper';
+import {
+  isLoaded,
+  listenOnce,
+  listenOncePromise,
+  loadPromise
+} from '../../src/event-helper';
 import {Observable} from '../../src/observable';
 import * as sinon from 'sinon';
 
@@ -116,9 +120,10 @@ describe('EventHelper', () => {
 
   it('listenOncePromise - load event', () => {
     let event = getEvent('load');
-    let promise = listenOncePromise(element, 'load').then((result) => {
-      expect(result).to.equal(event);
-    });
+    let promise = listenOncePromise(element, 'load')
+                      .then((result) => {
+                        expect(result).to.equal(event);
+                      });
     loadObservable.fire(event);
     return promise;
   });
@@ -126,7 +131,7 @@ describe('EventHelper', () => {
   it('listenOncePromise - with time limit', () => {
     let event = getEvent('load');
     let promise = expect(listenOncePromise(element, 'load', false, 100))
-      .to.eventually.become(event);
+                      .to.eventually.become(event);
     sandbox.clock.tick(99);
     loadObservable.fire(event);
     return promise;
@@ -134,7 +139,7 @@ describe('EventHelper', () => {
 
   it('listenOncePromise - timeout', () => {
     let promise = expect(listenOncePromise(element, 'load', false, 100))
-      .to.eventually.be.rejectedWith('timeout');
+                      .to.eventually.be.rejectedWith('timeout');
     sandbox.clock.tick(101);
     return promise;
   });
@@ -174,10 +179,11 @@ describe('EventHelper', () => {
   });
 
   it('loadPromise - error event', () => {
-    let promise = loadPromise(element).then((result) => {
-      assert.fail('must never be here: ' + result);
-    }).catch((reason) => {
-    });
+    let promise = loadPromise(element)
+                      .then((result) => {
+                        assert.fail('must never be here: ' + result);
+                      })
+                      .catch((reason) => {});
     errorObservable.fire(getEvent('error'));
     return promise;
   });

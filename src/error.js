@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-
 import {getMode} from './mode';
 import {exponentialBackoff} from './exponential-backoff.js';
 import {makeBodyVisible} from './styles';
 
 var globalExponentialBackoff = exponentialBackoff(1.5);
-
 
 /**
  * Reports an error. If the error has an "associatedElement" property
@@ -49,12 +47,11 @@ export function reportError(error, opt_associatedElement) {
     }
   }
   if (error.messageArray) {
-    (console.error || console.log).apply(console,
-        error.messageArray);
+    (console.error || console.log).apply(console, error.messageArray);
   } else {
     if (element) {
-      (console.error || console.log).call(console,
-          element.tagName + '#' + element.id, error.message);
+      (console.error || console.log)
+          .call(console, element.tagName + '#' + element.id, error.message);
     } else {
       (console.error || console.log).call(console, error.message);
     }
@@ -115,23 +112,22 @@ export function getErrorReportUrl(message, filename, line, col, error) {
   }
 
   var url = 'https://cdn.ampproject.org/error/report.gif' +
-      '?v=' + encodeURIComponent('$internalRuntimeVersion$') +
-      '&m=' + encodeURIComponent(message);
+            '?v=' + encodeURIComponent('$internalRuntimeVersion$') + '&m=' +
+            encodeURIComponent(message);
 
   if (error) {
     var tagName = error && error.associatedElement
-      ? error.associatedElement.tagName
-      : 'u';  // Unknown
+                      ? error.associatedElement.tagName
+                      : 'u'; // Unknown
     // We may want to consider not reporting asserts but for now
     // this should be helpful.
-    url += '&a=' + (error.fromAssert ? 1 : 0) +
-        '&el=' + encodeURIComponent(tagName) +
-        '&s=' + encodeURIComponent(error.stack || '');
+    url += '&a=' + (error.fromAssert ? 1 : 0) + '&el=' +
+           encodeURIComponent(tagName) + '&s=' +
+           encodeURIComponent(error.stack || '');
     error.message += ' _reported_';
   } else {
-    url += '&f=' + encodeURIComponent(filename) +
-        '&l=' + encodeURIComponent(line) +
-        '&c=' + encodeURIComponent(col || '');
+    url += '&f=' + encodeURIComponent(filename) + '&l=' +
+           encodeURIComponent(line) + '&c=' + encodeURIComponent(col || '');
   }
 
   // Shorten URLs to a value all browsers will send.

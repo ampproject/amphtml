@@ -17,7 +17,6 @@
 import {BaseElement} from './base-element';
 import {Layout} from './layout';
 
-
 /** @type {!Array} */
 export const stubbedElements = [];
 
@@ -46,4 +45,5 @@ export class ElementStub extends BaseElement {
     this.element.classList.remove('-amp-unresolved');
     newImpl.createdCallback();
   }
-};
+}
+;

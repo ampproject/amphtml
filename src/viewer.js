@@ -22,10 +22,8 @@ import {log} from './log';
 import {parseQueryString, removeFragment} from './url';
 import {platform} from './platform';
 
-
 let TAG_ = 'Viewer';
 let SENTINEL_ = '__AMP__';
-
 
 /**
  * The type of the viewport.
@@ -54,7 +52,6 @@ export const ViewportType = {
   NATURAL_IOS_EMBED: 'natural-ios-embed'
 };
 
-
 /**
  * Visibility state of the AMP document.
  * @enum {string}
@@ -72,7 +69,6 @@ export const VisibilityState = {
    */
   HIDDEN: 'hidden'
 };
-
 
 /**
  * An AMP representation of the Viewer. This class doesn't do any work itself
@@ -117,7 +113,7 @@ export class Viewer {
     this.viewportHeight_ = 0;
 
     /** @private {number} */
-    this./*OK*/scrollTop_ = 0;
+    this./*OK*/ scrollTop_ = 0;
 
     /** @private {number} */
     this.paddingTop_ = 0;
@@ -157,40 +153,40 @@ export class Viewer {
     this.isRuntimeOn_ = !parseInt(this.params_['off'], 10);
     log.fine(TAG_, '- runtimeOn:', this.isRuntimeOn_);
 
-    this.overtakeHistory_ = parseInt(this.params_['history'], 10) ||
-        this.overtakeHistory_;
+    this.overtakeHistory_ =
+        parseInt(this.params_['history'], 10) || this.overtakeHistory_;
     log.fine(TAG_, '- history:', this.overtakeHistory_);
 
-    this.visibilityState_ = this.params_['visibilityState'] ||
-        this.visibilityState_;
+    this.visibilityState_ =
+        this.params_['visibilityState'] || this.visibilityState_;
     log.fine(TAG_, '- visibilityState:', this.visibilityState_);
 
-    this.prerenderSize_ = parseInt(this.params_['prerenderSize'], 10) ||
-        this.prerenderSize_;
+    this.prerenderSize_ =
+        parseInt(this.params_['prerenderSize'], 10) || this.prerenderSize_;
     log.fine(TAG_, '- prerenderSize:', this.prerenderSize_);
 
     this.viewportType_ = this.params_['viewportType'] || this.viewportType_;
     // Configure scrolling parameters when AMP is embeded in a viewer on iOS.
     if (this.viewportType_ == ViewportType.NATURAL && this.isEmbedded_ &&
-            platform.isIos()) {
+        platform.isIos()) {
       this.viewportType_ = ViewportType.NATURAL_IOS_EMBED;
     }
     log.fine(TAG_, '- viewportType:', this.viewportType_);
 
-    this.viewportWidth_ = parseInt(this.params_['width'], 10) ||
-        this.viewportWidth_;
+    this.viewportWidth_ =
+        parseInt(this.params_['width'], 10) || this.viewportWidth_;
     log.fine(TAG_, '- viewportWidth:', this.viewportWidth_);
 
-    this.viewportHeight_ = parseInt(this.params_['height'], 10) ||
-        this.viewportHeight_;
+    this.viewportHeight_ =
+        parseInt(this.params_['height'], 10) || this.viewportHeight_;
     log.fine(TAG_, '- viewportHeight:', this.viewportHeight_);
 
-    this./*OK*/scrollTop_ = parseInt(this.params_['scrollTop'], 10) ||
-        this./*OK*/scrollTop_;
-    log.fine(TAG_, '- scrollTop:', this./*OK*/scrollTop_);
+    this./*OK*/ scrollTop_ =
+        parseInt(this.params_['scrollTop'], 10) || this./*OK*/ scrollTop_;
+    log.fine(TAG_, '- scrollTop:', this./*OK*/ scrollTop_);
 
-    this.paddingTop_ = parseInt(this.params_['paddingTop'], 10) ||
-        this.paddingTop_;
+    this.paddingTop_ =
+        parseInt(this.params_['paddingTop'], 10) || this.paddingTop_;
     log.fine(TAG_, '- padding-top:', this.paddingTop_);
 
     // Wait for document to become visible.
@@ -278,7 +274,7 @@ export class Viewer {
    */
   isVisible() {
     return this.visibilityState_ == VisibilityState.VISIBLE &&
-        !this.docState_.isHidden();
+           !this.docState_.isHidden();
   }
 
   /**
@@ -325,7 +321,7 @@ export class Viewer {
    * @return {number}
    */
   getScrollTop() {
-    return this./*OK*/scrollTop_;
+    return this./*OK*/ scrollTop_;
   }
 
   /**
@@ -440,15 +436,14 @@ export class Viewer {
         this.paddingTop_ = data['paddingTop'];
       }
       if (data['scrollTop'] !== undefined) {
-        this./*OK*/scrollTop_ = data['scrollTop'];
+        this./*OK*/ scrollTop_ = data['scrollTop'];
       }
       this.viewportObservable_.fire();
       return undefined;
     }
     if (eventType == 'historyPopped') {
-      this.historyPoppedObservable_.fire({
-        newStackIndex: data['newStackIndex']
-      });
+      this.historyPoppedObservable_.fire(
+          {newStackIndex: data['newStackIndex']});
       return Promise.resolve();
     }
     if (eventType == 'visibilitychange') {
@@ -520,7 +515,6 @@ export class Viewer {
   }
 }
 
-
 /**
  * Parses the viewer parameters as a string.
  *
@@ -537,14 +531,12 @@ export function parseParams_(str, allParams) {
   }
 }
 
-
 /**
  * @typedef {{
  *   newStackIndex: number
  * }}
  */
 var ViewerHistoryPoppedEvent;
-
 
 /**
  * @param {!Window} window

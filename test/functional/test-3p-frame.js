@@ -25,20 +25,13 @@ describe('3p-frame', () => {
     div.setAttribute('foo', 'nope');
     var obj = {};
     addDataAndJsonAttributes_(div, obj);
-    expect(obj).to.deep.equal({
-      'foo': 'foo',
-      'bar': 'bar'
-    });
+    expect(obj).to.deep.equal({'foo': 'foo', 'bar': 'bar'});
 
     div.setAttribute('json', '{"abc": [1,2,3]}');
 
     obj = {};
     addDataAndJsonAttributes_(div, obj);
-    expect(obj).to.deep.equal({
-      'foo': 'foo',
-      'bar': 'bar',
-      'abc': [1, 2, 3]
-    });
+    expect(obj).to.deep.equal({'foo': 'foo', 'bar': 'bar', 'abc': [1, 2, 3]});
   });
 
   it('should create an iframe', () => {
@@ -55,10 +48,7 @@ describe('3p-frame', () => {
     div.setAttribute('height', '100');
 
     div.getLayoutBox = function() {
-      return {
-        width: 100,
-        height: 200
-      };
+      return {width: 100, height: 200};
     };
 
     var iframe = getIframe(window, div, '_ping_');
@@ -75,8 +65,7 @@ describe('3p-frame', () => {
         '"' + locationHref + '"},"mode":{"localDev":true,' +
         '"development":false,"minified":false}}}';
     expect(src).to.equal(
-        'http://ads.localhost:9876/dist.3p/current/frame.max.html' +
-        fragment);
+        'http://ads.localhost:9876/dist.3p/current/frame.max.html' + fragment);
 
     // Switch to same origin for inner tests.
     iframe.src = '/base/dist.3p/current/frame.max.html' + fragment;

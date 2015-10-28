@@ -17,14 +17,12 @@
 import {randomUUID} from './uuid';
 import {getService} from './service';
 
-
 /**
  * @param {!Window} window
  */
 export function getClientId(window) {
   return clientIdServiceFor(window).clientId;
 };
-
 
 /** @private */
 class ClientIdService {
@@ -36,7 +34,6 @@ class ClientIdService {
     this.clientId = randomUUID();
   }
 }
-
 
 /**
  * @param {!Window} window

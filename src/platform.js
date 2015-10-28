@@ -16,7 +16,6 @@
 
 import {getService} from './service';
 
-
 /**
  * A helper class that provides information about device/OS/browser currently
  * running.
@@ -46,8 +45,8 @@ export class Platform {
   isChrome() {
     return /Chrome|CriOS/i.test(this.win.navigator.userAgent);
   }
-};
-
+}
+;
 
 /**
  * @param {!Window} window

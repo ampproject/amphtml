@@ -16,7 +16,6 @@
 
 import {assert} from './asserts';
 
-
 /**
  * A single source within a srcset. Only one: width or DPR can be specified at
  * a time.
@@ -28,11 +27,11 @@ import {assert} from './asserts';
  */
 var SrcsetSource;
 
-
 /**
  * Parses the text representation of srcset into Srcset object.
  * See https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#Attributes.
- * See http://www.w3.org/html/wg/drafts/html/master/semantics.html#attr-img-srcset.
+ * See
+ * http://www.w3.org/html/wg/drafts/html/master/semantics.html#attr-img-srcset.
  * @param {string} s
  * @return {!Srcset}
  */
@@ -41,8 +40,8 @@ export function parseSrcset(s) {
   // Example 1: "image1.png 100w, image2.png 50w"
   // Example 2: "image1.png 2x, image2.png"
   // Example 3: "image1,100w.png 100w, image2.png 50w"
-  let sSources = s.match(
-      /\s*([^\s]*)(\s+(-?(\d+(\.(\d+)?)?|\.\d+)[a-zA-Z]))?(\s*,)?/g);
+  let sSources =
+      s.match(/\s*([^\s]*)(\s+(-?(\d+(\.(\d+)?)?|\.\d+)[a-zA-Z]))?(\s*,)?/g);
   assert(sSources.length > 0, 'srcset has to have at least one source');
   let sources = [];
   sSources.forEach((sSource) => {
@@ -51,9 +50,8 @@ export function parseSrcset(s) {
       sSource = sSource.substr(0, sSource.length - 1).trim();
     }
     let parts = sSource.split(/\s+/, 2);
-    if (parts.length == 0 ||
-          parts.length == 1 && !parts[0] ||
-          parts.length == 2 && !parts[0] && !parts[1]) {
+    if (parts.length == 0 || parts.length == 1 && !parts[0] ||
+        parts.length == 2 && !parts[0] && !parts[1]) {
       return;
     }
     let url = parts[0].trim();
@@ -72,7 +70,6 @@ export function parseSrcset(s) {
   });
   return new Srcset(sources);
 };
-
 
 /**
  * A srcset object contains one or more sources.
@@ -104,8 +101,8 @@ export class Srcset {
       hasWidth = hasWidth || !!source.width;
       hasDpr = hasDpr || !!source.dpr;
     });
-    assert(!hasWidth || !hasDpr,
-        'Srcset cannot have both width and dpr sources');
+    assert(
+        !hasWidth || !hasDpr, 'Srcset cannot have both width and dpr sources');
 
     // Source and assert duplicates.
     if (hasWidth) {

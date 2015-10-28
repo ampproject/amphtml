@@ -51,33 +51,35 @@ function getConfig() {
 /**
  * Run tests.
  */
-gulp.task('test', 'Runs tests in chrome', ['build'], function(done) {
-  if (argv.saucelabs && process.env.MAIN_REPO &&
-      // Sauce Labs does not work on Pull Requests directly.
-      // The @ampsauce bot builds these.
-      process.env.TRAVIS_PULL_REQUEST) {
-    console./*OK*/info('Deactivated for main repo');
-    return;
-  }
+gulp.task('test', 'Runs tests in chrome', ['build'],
+    function(done) {
+      if (argv.saucelabs && process.env.MAIN_REPO &&
+          // Sauce Labs does not work on Pull Requests directly.
+          // The @ampsauce bot builds these.
+          process.env.TRAVIS_PULL_REQUEST) {
+        console./*OK*/ info('Deactivated for main repo');
+        return;
+      }
 
-  var config = getConfig();
-  var browsers = [];
+      var config = getConfig();
+      var browsers = [];
 
-  if (argv.watch || argv.w) {
-    config.singleRun = false;
-  }
+      if (argv.watch || argv.w) {
+        config.singleRun = false;
+      }
 
-  if (argv.verbose || argv.v) {
-    config.client.captureConsole = true;
-  }
+      if (argv.verbose || argv.v) {
+        config.client.captureConsole = true;
+      }
 
-  karma.start(config, done);
-}, {
-  options: {
-    'verbose': 'With logging enabled',
-    'watch': 'Watches for changes in files, runs corresponding test(s)',
-    'saucelabs': 'Runs test on saucelabs (requires setup)',
-    'safari': 'Runs tests in Safari',
-    'firefox': 'Runs tests in Firefox'
-  }
-});
+      karma.start(config, done);
+    },
+    {
+      options: {
+        'verbose': 'With logging enabled',
+        'watch': 'Watches for changes in files, runs corresponding test(s)',
+        'saucelabs': 'Runs test on saucelabs (requires setup)',
+        'safari': 'Runs tests in Safari',
+        'firefox': 'Runs tests in Firefox'
+      }
+    });

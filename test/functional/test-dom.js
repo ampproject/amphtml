@@ -16,7 +16,6 @@
 
 import * as dom from '../../src/dom';
 
-
 describe('DOM', () => {
 
   it('should remove all children', () => {
@@ -94,7 +93,6 @@ describe('DOM', () => {
     expect(dom.elementByTag(parent, 'ELEMENT')).to.equal(element1);
   });
 
-
   it('childElement should find first match', () => {
     let parent = document.createElement('parent');
 
@@ -109,8 +107,7 @@ describe('DOM', () => {
         .to.equal(element1);
     expect(dom.childElement(parent, (e) => e.tagName == 'ELEMENT2'))
         .to.equal(element2);
-    expect(dom.childElement(parent, (e) => e.tagName == 'ELEMENT3'))
-        .to.be.null;
+    expect(dom.childElement(parent, (e) => e.tagName == 'ELEMENT3')).to.be.null;
   });
 
   it('childElementByAttr should find first match', () => {

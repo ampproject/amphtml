@@ -26,21 +26,9 @@ var testPaths = [
     pattern: 'dist/**/*.js',
     included: false,
   },
-  {
-    pattern: 'build/**/*.js',
-    included: false,
-    served: true
-  },
-  {
-    pattern: 'examples/**/*',
-    included: false,
-    served: true
-  },
-  {
-    pattern: 'dist.3p/**/*',
-    included: false,
-    served: true
-  }
+  {pattern: 'build/**/*.js', included: false, served: true},
+  {pattern: 'examples/**/*', included: false, served: true},
+  {pattern: 'dist.3p/**/*', included: false, served: true}
 ];
 
 var karma = {
@@ -48,33 +36,21 @@ var karma = {
     configFile: karmaConf,
     files: testPaths,
     singleRun: true,
-    client: {
-      captureConsole: false
-    }
+    client: {captureConsole: false}
   },
   firefox: {
     configFile: karmaConf,
     files: testPaths,
     singleRun: true,
     browsers: ['Firefox'],
-    client: {
-      mocha: {
-        timeout: 10000
-      },
-      captureConsole: false
-    }
+    client: {mocha: {timeout: 10000}, captureConsole: false}
   },
   safari: {
     configFile: karmaConf,
     files: testPaths,
     singleRun: true,
     browsers: ['Safari'],
-    client: {
-      mocha: {
-        timeout: 10000
-      },
-      captureConsole: false
-    }
+    client: {mocha: {timeout: 10000}, captureConsole: false}
   },
   saucelabs: {
     configFile: karmaConf,
@@ -82,9 +58,7 @@ var karma = {
     reporters: ['dots', 'saucelabs'],
     browsers: ['SL_Chrome'],
     singleRun: true,
-    client: {
-      captureConsole: false
-    },
+    client: {captureConsole: false},
     browserDisconnectTimeout: 70000,
     browserNoActivityTimeout: 70000,
   }

@@ -24,10 +24,8 @@ import {resourcesFor} from './resources';
 import {viewerFor} from './viewer';
 import {viewportFor} from './viewport';
 
-
 /** @type {!Array} */
 const elementsForTesting = [];
-
 
 /**
  * Applies the runtime to a given global scope.
@@ -56,10 +54,8 @@ export function adopt(global) {
   global.AMP.registerElement = function(name, implementationClass, opt_css) {
     var register = function() {
       registerExtendedElement(global, name, implementationClass);
-      elementsForTesting.push({
-        name: name,
-        implementationClass: implementationClass
-      });
+      elementsForTesting.push(
+          {name: name, implementationClass: implementationClass});
     };
     if (opt_css) {
       installStyles(global.document, opt_css, register);
@@ -110,7 +106,6 @@ export function adopt(global) {
     fn(global.AMP);
   }
 }
-
 
 /**
  * Registers all extended elements as normal elements in the given

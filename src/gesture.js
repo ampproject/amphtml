@@ -22,7 +22,6 @@ import {timer} from './timer';
 
 const PROP_ = '__AMP_Gestures';
 
-
 /**
  * A gesture object contains the type and data of the gesture such as
  * a tap or a double-tap or a swipe. See {@link GestureRecognizer} for
@@ -50,7 +49,6 @@ export class Gesture {
     this.event = event;
   }
 }
-
 
 /**
  * Gestures object manages all gestures on a particular element. It listens
@@ -355,8 +353,8 @@ export class Gestures {
         'Recognizer is not currently allowed: %s', recognizer.getType());
     let overserver = this.overservers_[recognizer.getType()];
     if (overserver) {
-      overserver.fire(new Gesture(recognizer.getType(), data, timer.now(),
-          event));
+      overserver.fire(
+          new Gesture(recognizer.getType(), data, timer.now(), event));
     }
   }
 
@@ -370,8 +368,7 @@ export class Gestures {
     if (!cancelEvent) {
       let now = timer.now();
       for (let i = 0; i < this.recognizers_.length; i++) {
-        if (this.ready_[i] ||
-                this.pending_[i] && this.pending_[i] >= now) {
+        if (this.ready_[i] || this.pending_[i] && this.pending_[i] >= now) {
           cancelEvent = true;
           break;
         }
@@ -484,7 +481,6 @@ export class Gestures {
     this.stopTracking_(index);
   }
 }
-
 
 /**
  * The gesture recognizer receives the pointer events from Gestures instance.

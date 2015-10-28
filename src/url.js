@@ -16,7 +16,6 @@
 
 import {assert} from './asserts';
 
-
 /**
  * Returns a Location-like object for the given URL. If it is relative,
  * the URL gets resolved.
@@ -41,7 +40,6 @@ export function parseUrl(url) {
   return info;
 }
 
-
 /**
  * Asserts that a given url is HTTPS or protocol relative.
  * Provides an exception for localhost.
@@ -51,19 +49,17 @@ export function parseUrl(url) {
  */
 export function assertHttpsUrl(urlString, elementContext) {
   var url = parseUrl(urlString);
-  assert(
-      url.protocol == 'https:' || /^(\/\/)/.test(urlString) ||
-      url.hostname == 'localhost' ||
-          url.hostname.lastIndexOf('.localhost') ==
-          // Poor person's endsWith
-          url.hostname.length - '.localhost'.length,
+  assert(url.protocol == 'https:' || /^(\/\/)/.test(urlString) ||
+             url.hostname == 'localhost' ||
+             url.hostname.lastIndexOf('.localhost') ==
+                 // Poor person's endsWith
+                 url.hostname.length - '.localhost'.length,
       '%s source must start with ' +
-      '"https://" or "//" or be relative and served from ' +
-      'https. Invalid value: %s',
+          '"https://" or "//" or be relative and served from ' +
+          'https. Invalid value: %s',
       elementContext, urlString);
   return urlString;
 }
-
 
 /**
  * Parses the query string of an URL. This method returns a simple key/value
@@ -99,7 +95,6 @@ export function parseQueryString(queryString) {
   return params;
 }
 
-
 /**
  * @param {!Location} info
  * @return {string}
@@ -107,7 +102,6 @@ export function parseQueryString(queryString) {
 function getOrigin(info) {
   return info.protocol + '//' + info.host;
 }
-
 
 /**
  * Returns the URL without fragment. If URL doesn't contain fragment, the same

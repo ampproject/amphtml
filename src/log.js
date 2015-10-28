@@ -19,7 +19,6 @@ import {getMode} from './mode';
 /** @const Time when this JS loaded.  */
 var start = new Date().getTime();
 
-
 /**
  * Logging.
  * // TODO(@cramforce): Make this DCRable.
@@ -121,7 +120,7 @@ export class Log {
       this.msg_(tag, 'ERROR', Array.prototype.slice.call(arguments, 1));
     }
   }
-};
-
+}
+;
 
 export const log = new Log(window);

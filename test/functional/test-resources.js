@@ -14,8 +14,12 @@
  * limitations under the License.
  */
 
-import {Resource, ResourceState_, Resources, TaskQueue_} from
-    '../../src/resources';
+import {
+  Resource,
+  ResourceState_,
+  Resources,
+  TaskQueue_
+} from '../../src/resources';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import * as sinon from 'sinon';
 
@@ -111,15 +115,9 @@ describe('Resources', () => {
 
   it('should calculate correct calcTaskTimeout', () => {
     // Task 1 is priority 0
-    let task_p0 = {
-      priority: 0,
-      startTime: 0
-    };
+    let task_p0 = {priority: 0, startTime: 0};
     // Task 2 is priority 1
-    let task_p1 = {
-      priority: 1,
-      startTime: 0
-    };
+    let task_p1 = {priority: 1, startTime: 0};
 
     // Empty pool
     expect(resources.calcTaskTimeout_(task_p0)).to.equal(0);
@@ -149,67 +147,112 @@ describe('Resources', () => {
   });
 
   it('should not schedule non-prerenderable resource when' +
-        ' document is hidden', () => {
-    let resource = {
-      getState: () => {return ResourceState_.READY_FOR_LAYOUT;},
-      isDisplayed: () => {return true;},
-      isInViewport: () => {return true;},
-      prerenderAllowed: () => {return false;},
-      startLayout: () => {}
-    };
-    resources.visible_ = false;
-    resources.scheduleLayoutOrPreload_(resource, true);
-    expect(resources.queue_.getSize()).to.equal(0);
-  });
+          ' document is hidden',
+      () => {
+        let resource = {
+          getState: () => {
+            return ResourceState_.READY_FOR_LAYOUT;
+          },
+          isDisplayed: () => {
+            return true;
+          },
+          isInViewport: () => {
+            return true;
+          },
+          prerenderAllowed: () => {
+            return false;
+          },
+          startLayout: () => {}
+        };
+        resources.visible_ = false;
+        resources.scheduleLayoutOrPreload_(resource, true);
+        expect(resources.queue_.getSize()).to.equal(0);
+      });
 
   it('should schedule prerenderable resource when' +
-        ' document is hidden', () => {
-    let resource = {
-      getState: () => {return ResourceState_.READY_FOR_LAYOUT;},
-      isDisplayed: () => {return true;},
-      isInViewport: () => {return true;},
-      prerenderAllowed: () => {return true;},
-      renderOutsideViewport: () => {return true;},
-      getPriority: () => {return 1;},
-      startLayout: () => {},
-      layoutScheduled: () => {}
-    };
-    resources.visible_ = false;
-    resources.scheduleLayoutOrPreload_(resource, true);
-    expect(resources.queue_.getSize()).to.equal(1);
-  });
+          ' document is hidden',
+      () => {
+        let resource = {
+          getState: () => {
+            return ResourceState_.READY_FOR_LAYOUT;
+          },
+          isDisplayed: () => {
+            return true;
+          },
+          isInViewport: () => {
+            return true;
+          },
+          prerenderAllowed: () => {
+            return true;
+          },
+          renderOutsideViewport: () => {
+            return true;
+          },
+          getPriority: () => {
+            return 1;
+          },
+          startLayout: () => {},
+          layoutScheduled: () => {}
+        };
+        resources.visible_ = false;
+        resources.scheduleLayoutOrPreload_(resource, true);
+        expect(resources.queue_.getSize()).to.equal(1);
+      });
 
   it('should not schedule non-renderOutsideViewport resource when' +
-        ' resource is not visible', () => {
-    let resource = {
-      getState: () => {return ResourceState_.READY_FOR_LAYOUT;},
-      isDisplayed: () => {return true;},
-      isInViewport: () => {return false;},
-      prerenderAllowed: () => {return true;},
-      renderOutsideViewport: () => {return false;},
-      startLayout: () => {},
-    };
-    resources.scheduleLayoutOrPreload_(resource, true);
-    expect(resources.queue_.getSize()).to.equal(0);
-  });
+          ' resource is not visible',
+      () => {
+        let resource = {
+          getState: () => {
+            return ResourceState_.READY_FOR_LAYOUT;
+          },
+          isDisplayed: () => {
+            return true;
+          },
+          isInViewport: () => {
+            return false;
+          },
+          prerenderAllowed: () => {
+            return true;
+          },
+          renderOutsideViewport: () => {
+            return false;
+          },
+          startLayout: () => {},
+        };
+        resources.scheduleLayoutOrPreload_(resource, true);
+        expect(resources.queue_.getSize()).to.equal(0);
+      });
 
   it('should schedule renderOutsideViewport resource when' +
-        ' resource is not visible', () => {
-    let resource = {
-      getState: () => {return ResourceState_.READY_FOR_LAYOUT;},
-      isDisplayed: () => {return true;},
-      isInViewport: () => {return false;},
-      prerenderAllowed: () => {return true;},
-      renderOutsideViewport: () => {return true;},
-      getPriority: () => {return 1;},
-      startLayout: () => {},
-      layoutScheduled: () => {}
-    };
-    resources.scheduleLayoutOrPreload_(resource, true);
-    expect(resources.queue_.getSize()).to.equal(1);
-  });
+          ' resource is not visible',
+      () => {
+        let resource = {
+          getState: () => {
+            return ResourceState_.READY_FOR_LAYOUT;
+          },
+          isDisplayed: () => {
+            return true;
+          },
+          isInViewport: () => {
+            return false;
+          },
+          prerenderAllowed: () => {
+            return true;
+          },
+          renderOutsideViewport: () => {
+            return true;
+          },
+          getPriority: () => {
+            return 1;
+          },
+          startLayout: () => {},
+          layoutScheduled: () => {}
+        };
+        resources.scheduleLayoutOrPreload_(resource, true);
+        expect(resources.queue_.getSize()).to.equal(1);
+      });
 });
-
 
 describe('Resources discoverWork', () => {
 
@@ -272,8 +315,9 @@ describe('Resources discoverWork', () => {
 
   it('should render two screens when visible', () => {
     resources.visible_ = true;
-    viewportMock.expects('getRect').returns(
-        layoutRectLtwh(0, 0, 300, 400)).once();
+    viewportMock.expects('getRect')
+        .returns(layoutRectLtwh(0, 0, 300, 400))
+        .once();
 
     resources.discoverWork_();
 
@@ -286,8 +330,9 @@ describe('Resources discoverWork', () => {
     resource1.state_ = ResourceState_.LAYOUT_COMPLETE;
     resource2.state_ = ResourceState_.LAYOUT_COMPLETE;
     resources.visible_ = true;
-    viewportMock.expects('getRect').returns(
-        layoutRectLtwh(0, 0, 300, 400)).once();
+    viewportMock.expects('getRect')
+        .returns(layoutRectLtwh(0, 0, 300, 400))
+        .once();
 
     resources.discoverWork_();
 
@@ -297,15 +342,16 @@ describe('Resources discoverWork', () => {
   it('should re-render from requested position', () => {
     resource1.state_ = ResourceState_.LAYOUT_COMPLETE;
     resource2.state_ = ResourceState_.LAYOUT_COMPLETE;
-    resource1.element.getBoundingClientRect =
-        () => layoutRectLtwh(10, 10, 100, 101);
-    resource2.element.getBoundingClientRect =
-        () => layoutRectLtwh(10, 1010, 100, 101);
+    resource1.element.getBoundingClientRect = () =>
+        layoutRectLtwh(10, 10, 100, 101);
+    resource2.element.getBoundingClientRect = () =>
+        layoutRectLtwh(10, 1010, 100, 101);
     resources.visible_ = true;
     resources.relayoutAll_ = false;
     resources.relayoutTop_ = 1000;
-    viewportMock.expects('getRect').returns(
-        layoutRectLtwh(0, 0, 300, 400)).once();
+    viewportMock.expects('getRect')
+        .returns(layoutRectLtwh(0, 0, 300, 400))
+        .once();
 
     resources.discoverWork_();
 
@@ -319,8 +365,9 @@ describe('Resources discoverWork', () => {
   it('should prerender only one screen with prerenderSize = 1', () => {
     resources.visible_ = false;
     resources.prerenderSize_ = 1;
-    viewportMock.expects('getRect').returns(
-        layoutRectLtwh(0, 0, 300, 400)).once();
+    viewportMock.expects('getRect')
+        .returns(layoutRectLtwh(0, 0, 300, 400))
+        .once();
 
     resources.discoverWork_();
 
@@ -331,15 +378,15 @@ describe('Resources discoverWork', () => {
   it('should NOT prerender anything with prerenderSize = 0', () => {
     resources.visible_ = false;
     resources.prerenderSize_ = 0;
-    viewportMock.expects('getRect').returns(
-        layoutRectLtwh(0, 0, 300, 400)).once();
+    viewportMock.expects('getRect')
+        .returns(layoutRectLtwh(0, 0, 300, 400))
+        .once();
 
     resources.discoverWork_();
 
     expect(resources.queue_.getSize()).to.equal(0);
   });
 });
-
 
 describe('Resources changeHeight', () => {
 
@@ -444,7 +491,6 @@ describe('Resources changeHeight', () => {
   });
 });
 
-
 describe('Resources.TaskQueue', () => {
 
   let sandbox;
@@ -500,7 +546,6 @@ describe('Resources.TaskQueue', () => {
   });
 });
 
-
 describe('Resources.Resource', () => {
 
   let sandbox;
@@ -516,14 +561,28 @@ describe('Resources.Resource', () => {
 
     element = {
       tagName: 'AMP-AD',
-      isBuilt: () => {return false;},
-      isUpgraded: () => {return false;},
-      prerenderAllowed: () => {return false;},
-      renderOutsideViewport: () => {return true;},
-      build: (force) => {return false;},
-      getBoundingClientRect: () => {return null;},
+      isBuilt: () => {
+        return false;
+      },
+      isUpgraded: () => {
+        return false;
+      },
+      prerenderAllowed: () => {
+        return false;
+      },
+      renderOutsideViewport: () => {
+        return true;
+      },
+      build: (force) => {
+        return false;
+      },
+      getBoundingClientRect: () => {
+        return null;
+      },
       updateLayoutBox: () => {},
-      isRelayoutNeeded: () => {return false;},
+      isRelayoutNeeded: () => {
+        return false;
+      },
       layoutCallback: () => {},
       changeHeight: () => {},
       documentInactiveCallback: () => false,
@@ -558,8 +617,8 @@ describe('Resources.Resource', () => {
 
   it('should initialize correctly when already built', () => {
     elementMock.expects('isBuilt').returns(true).once();
-    expect(new Resource(1, element).getState()).to.equal(
-        ResourceState_.NOT_LAID_OUT);
+    expect(new Resource(1, element).getState())
+        .to.equal(ResourceState_.NOT_LAID_OUT);
   });
 
   it('should not build before upgraded', () => {
@@ -598,8 +657,7 @@ describe('Resources.Resource', () => {
 
   it('should blacklist on build failure', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
-    elementMock.expects('build').withExactArgs(true)
-        .throws('Failed').once();
+    elementMock.expects('build').withExactArgs(true).throws('Failed').once();
     expect(resource.build(true)).to.equal(false);
     expect(resource.blacklisted_).to.equal(true);
     expect(resource.getState()).to.equal(ResourceState_.NOT_BUILT);
@@ -649,7 +707,8 @@ describe('Resources.Resource', () => {
     resource.layoutBox_ = {left: 11, top: 12, width: 111, height: 222};
 
     elementMock.expects('getBoundingClientRect')
-        .returns(resource.layoutBox_).once();
+        .returns(resource.layoutBox_)
+        .once();
     resource.measure();
     expect(resource.getState()).to.equal(ResourceState_.READY_FOR_LAYOUT);
   });
@@ -661,7 +720,8 @@ describe('Resources.Resource', () => {
 
     // Left is not part of validation.
     elementMock.expects('getBoundingClientRect')
-        .returns({left: 11 + 10, top: 12, width: 111, height: 222}).once();
+        .returns({left: 11 + 10, top: 12, width: 111, height: 222})
+        .once();
     resource.measure();
     expect(resource.getState()).to.equal(ResourceState_.LAYOUT_COMPLETE);
     expect(resource.getLayoutBox().left).to.equal(11 + 10);
@@ -674,7 +734,8 @@ describe('Resources.Resource', () => {
 
     // Width changed.
     elementMock.expects('getBoundingClientRect')
-        .returns({left: 11, top: 12, width: 111 + 10, height: 222}).once();
+        .returns({left: 11, top: 12, width: 111 + 10, height: 222})
+        .once();
     elementMock.expects('isRelayoutNeeded').returns(false).atLeast(1);
     resource.measure();
     expect(resource.getState()).to.equal(ResourceState_.LAYOUT_COMPLETE);
@@ -688,28 +749,28 @@ describe('Resources.Resource', () => {
 
     // Width changed.
     elementMock.expects('getBoundingClientRect')
-        .returns({left: 11, top: 12, width: 111 + 10, height: 222}).once();
+        .returns({left: 11, top: 12, width: 111 + 10, height: 222})
+        .once();
     elementMock.expects('isRelayoutNeeded').returns(true).atLeast(1);
     resource.measure();
     expect(resource.getState()).to.equal(ResourceState_.READY_FOR_LAYOUT);
     expect(resource.getLayoutBox().width).to.equal(111 + 10);
   });
 
-
   it('should ignore startLayout if already completed or failed or going',
-        () => {
-    elementMock.expects('layoutCallback').never();
+      () => {
+        elementMock.expects('layoutCallback').never();
 
-    resource.state_ = ResourceState_.LAYOUT_COMPLETE;
-    resource.startLayout(true);
+        resource.state_ = ResourceState_.LAYOUT_COMPLETE;
+        resource.startLayout(true);
 
-    resource.state_ = ResourceState_.LAYOUT_FAILED;
-    resource.startLayout(true);
+        resource.state_ = ResourceState_.LAYOUT_FAILED;
+        resource.startLayout(true);
 
-    resource.state_ = ResourceState_.READY_FOR_LAYOUT;
-    resource.layoutPromise_ = {};
-    resource.startLayout(true);
-  });
+        resource.state_ = ResourceState_.READY_FOR_LAYOUT;
+        resource.layoutPromise_ = {};
+        resource.startLayout(true);
+      });
 
   it('should fail startLayout if not built', () => {
     elementMock.expects('layoutCallback').never();
@@ -723,7 +784,8 @@ describe('Resources.Resource', () => {
   it('should ignore startLayout if not visible', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
     elementMock.expects('getBoundingClientRect')
-        .returns({left: 1, top: 1, width: 1, height: 1}).once();
+        .returns({left: 1, top: 1, width: 1, height: 1})
+        .once();
 
     elementMock.expects('layoutCallback').never();
 
@@ -735,7 +797,8 @@ describe('Resources.Resource', () => {
   it('should force startLayout for first layout', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
     elementMock.expects('getBoundingClientRect')
-        .returns({left: 1, top: 1, width: 1, height: 1}).once();
+        .returns({left: 1, top: 1, width: 1, height: 1})
+        .once();
 
     elementMock.expects('layoutCallback').returns(Promise.resolve()).once();
 
@@ -748,7 +811,8 @@ describe('Resources.Resource', () => {
   it('should ignore startLayout for re-layout when not opt-in', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
     elementMock.expects('getBoundingClientRect')
-        .returns({left: 1, top: 1, width: 1, height: 1}).once();
+        .returns({left: 1, top: 1, width: 1, height: 1})
+        .once();
 
     elementMock.expects('layoutCallback').never();
 
@@ -763,7 +827,8 @@ describe('Resources.Resource', () => {
   it('should force startLayout for re-layout when opt-in', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
     elementMock.expects('getBoundingClientRect')
-        .returns({left: 1, top: 1, width: 1, height: 1}).once();
+        .returns({left: 1, top: 1, width: 1, height: 1})
+        .once();
 
     elementMock.expects('layoutCallback').returns(Promise.resolve()).once();
 
@@ -776,42 +841,46 @@ describe('Resources.Resource', () => {
   });
 
   it('should ignore startLayout when document is hidden' +
-        ' and prerender not allowed', () => {
-    elementMock.expects('isUpgraded').returns(true).atLeast(0);
-    elementMock.expects('getBoundingClientRect')
-        .returns({left: 1, top: 1, width: 1, height: 1}).atLeast(0);
-    elementMock.expects('prerenderAllowed').returns(false).atLeast(1);
+          ' and prerender not allowed',
+      () => {
+        elementMock.expects('isUpgraded').returns(true).atLeast(0);
+        elementMock.expects('getBoundingClientRect')
+            .returns({left: 1, top: 1, width: 1, height: 1})
+            .atLeast(0);
+        elementMock.expects('prerenderAllowed').returns(false).atLeast(1);
 
-    elementMock.expects('layoutCallback').never();
+        elementMock.expects('layoutCallback').never();
 
-    resource.state_ = ResourceState_.READY_FOR_LAYOUT;
-    resource.layoutBox_ = {left: 11, top: 12, width: 10, height: 10};
-    resource.layoutCount_ = 0;
-    resource.startLayout(false);
-    expect(resource.getState()).to.equal(ResourceState_.READY_FOR_LAYOUT);
-  });
+        resource.state_ = ResourceState_.READY_FOR_LAYOUT;
+        resource.layoutBox_ = {left: 11, top: 12, width: 10, height: 10};
+        resource.layoutCount_ = 0;
+        resource.startLayout(false);
+        expect(resource.getState()).to.equal(ResourceState_.READY_FOR_LAYOUT);
+      });
 
   it('should proceed startLayout when document is hidden' +
-        ' and prerender is allowed', () => {
-    elementMock.expects('isUpgraded').returns(true).atLeast(0);
-    elementMock.expects('getBoundingClientRect')
-        .returns({left: 1, top: 1, width: 1, height: 1}).atLeast(0);
-    elementMock.expects('prerenderAllowed').returns(true).atLeast(1);
+          ' and prerender is allowed',
+      () => {
+        elementMock.expects('isUpgraded').returns(true).atLeast(0);
+        elementMock.expects('getBoundingClientRect')
+            .returns({left: 1, top: 1, width: 1, height: 1})
+            .atLeast(0);
+        elementMock.expects('prerenderAllowed').returns(true).atLeast(1);
 
-    elementMock.expects('layoutCallback').returns(Promise.resolve()).once();
+        elementMock.expects('layoutCallback').returns(Promise.resolve()).once();
 
-    resource.state_ = ResourceState_.READY_FOR_LAYOUT;
-    resource.layoutBox_ = {left: 11, top: 12, width: 10, height: 10};
-    resource.layoutCount_ = 0;
-    resource.startLayout(false);
-    expect(resource.getState()).to.equal(ResourceState_.LAYOUT_SCHEDULED);
-  });
-
+        resource.state_ = ResourceState_.READY_FOR_LAYOUT;
+        resource.layoutBox_ = {left: 11, top: 12, width: 10, height: 10};
+        resource.layoutCount_ = 0;
+        resource.startLayout(false);
+        expect(resource.getState()).to.equal(ResourceState_.LAYOUT_SCHEDULED);
+      });
 
   it('should complete startLayout', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
     elementMock.expects('getBoundingClientRect')
-        .returns({left: 1, top: 1, width: 1, height: 1}).once();
+        .returns({left: 1, top: 1, width: 1, height: 1})
+        .once();
 
     elementMock.expects('layoutCallback').returns(Promise.resolve()).once();
 
@@ -830,7 +899,8 @@ describe('Resources.Resource', () => {
   it('should fail startLayout', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
     elementMock.expects('getBoundingClientRect')
-        .returns({left: 1, top: 1, width: 1, height: 1}).once();
+        .returns({left: 1, top: 1, width: 1, height: 1})
+        .once();
 
     elementMock.expects('layoutCallback').returns(Promise.reject()).once();
 
@@ -840,14 +910,15 @@ describe('Resources.Resource', () => {
     expect(resource.layoutPromise_).to.not.equal(null);
     expect(resource.getState()).to.equal(ResourceState_.LAYOUT_SCHEDULED);
 
-    return promise.then(() => {
-      fail('should not be here');
-    }, () => {
-      expect(resource.getState()).to.equal(ResourceState_.LAYOUT_FAILED);
-      expect(resource.layoutPromise_).to.equal(null);
-    });
+    return promise.then(
+        () => {
+          fail('should not be here');
+        },
+        () => {
+          expect(resource.getState()).to.equal(ResourceState_.LAYOUT_FAILED);
+          expect(resource.layoutPromise_).to.equal(null);
+        });
   });
-
 
   it('should change height and update state', () => {
     resource.state_ = ResourceState_.READY_FOR_LAYOUT;
@@ -862,7 +933,6 @@ describe('Resources.Resource', () => {
     resource.changeHeight(111);
     expect(resource.getState()).to.equal(ResourceState_.NOT_BUILT);
   });
-
 
   describe('setInViewport', () => {
     it('should call viewportCallback when not built', () => {
@@ -888,7 +958,6 @@ describe('Resources.Resource', () => {
     });
   });
 
-
   describe('documentInactiveCallback', () => {
     it('should NOT call documentInactiveCallback on unbuilt element', () => {
       resource.state_ = ResourceState_.NOT_BUILT;
@@ -900,19 +969,20 @@ describe('Resources.Resource', () => {
 
     it('should call documentInactiveCallback on built element and update state',
         () => {
-      resource.state_ = ResourceState_.LAYOUT_COMPLETE;
-      elementMock.expects('documentInactiveCallback').returns(true).once();
-      resource.documentBecameInactive();
-      expect(resource.getState()).to.equal(ResourceState_.NOT_LAID_OUT);
-    });
+          resource.state_ = ResourceState_.LAYOUT_COMPLETE;
+          elementMock.expects('documentInactiveCallback').returns(true).once();
+          resource.documentBecameInactive();
+          expect(resource.getState()).to.equal(ResourceState_.NOT_LAID_OUT);
+        });
 
     it('should call documentInactiveCallback on built element' +
-        ' but NOT update state', () => {
-      resource.state_ = ResourceState_.LAYOUT_COMPLETE;
-      elementMock.expects('documentInactiveCallback').returns(false).once();
-      resource.documentBecameInactive();
-      expect(resource.getState()).to.equal(ResourceState_.LAYOUT_COMPLETE);
-    });
+            ' but NOT update state',
+        () => {
+          resource.state_ = ResourceState_.LAYOUT_COMPLETE;
+          elementMock.expects('documentInactiveCallback').returns(false).once();
+          resource.documentBecameInactive();
+          expect(resource.getState()).to.equal(ResourceState_.LAYOUT_COMPLETE);
+        });
 
     it('should NOT call viewportCallback when resource not in viewport', () => {
       resource.state_ = ResourceState_.LAYOUT_COMPLETE;

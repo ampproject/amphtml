@@ -14,8 +14,12 @@
  * limitations under the License.
  */
 
-import {assertHttpsUrl, parseQueryString, parseUrl, removeFragment}
-    from '../../src/url';
+import {
+  assertHttpsUrl,
+  parseQueryString,
+  parseUrl,
+  removeFragment
+} from '../../src/url';
 
 describe('url', () => {
 
@@ -110,56 +114,33 @@ describe('url', () => {
 
 });
 
-
 describe('parseQueryString', () => {
   it('should return empty params when query string is empty or null', () => {
     expect(parseQueryString(null)).to.deep.equal({});
     expect(parseQueryString('')).to.deep.equal({});
   });
   it('should parse single key-value', () => {
-    expect(parseQueryString('a=1')).to.deep.equal({
-      'a': '1'
-    });
+    expect(parseQueryString('a=1')).to.deep.equal({'a': '1'});
   });
   it('should parse two key-values', () => {
-    expect(parseQueryString('a=1&b=2')).to.deep.equal({
-      'a': '1',
-      'b': '2'
-    });
+    expect(parseQueryString('a=1&b=2')).to.deep.equal({'a': '1', 'b': '2'});
   });
   it('should ignore leading ?', () => {
-    expect(parseQueryString('?a=1&b=2')).to.deep.equal({
-      'a': '1',
-      'b': '2'
-    });
+    expect(parseQueryString('?a=1&b=2')).to.deep.equal({'a': '1', 'b': '2'});
   });
   it('should ignore leading #', () => {
-    expect(parseQueryString('#a=1&b=2')).to.deep.equal({
-      'a': '1',
-      'b': '2'
-    });
+    expect(parseQueryString('#a=1&b=2')).to.deep.equal({'a': '1', 'b': '2'});
   });
   it('should parse empty value', () => {
-    expect(parseQueryString('a=&b=2')).to.deep.equal({
-      'a': '',
-      'b': '2'
-    });
-    expect(parseQueryString('a&b=2')).to.deep.equal({
-      'a': '',
-      'b': '2'
-    });
+    expect(parseQueryString('a=&b=2')).to.deep.equal({'a': '', 'b': '2'});
+    expect(parseQueryString('a&b=2')).to.deep.equal({'a': '', 'b': '2'});
   });
   it('should decode names and values', () => {
-    expect(parseQueryString('a%26=1%26&b=2')).to.deep.equal({
-      'a&': '1&',
-      'b': '2'
-    });
+    expect(parseQueryString('a%26=1%26&b=2'))
+        .to.deep.equal({'a&': '1&', 'b': '2'});
   });
   it('should return last dupe', () => {
-    expect(parseQueryString('a=1&b=2&a=3')).to.deep.equal({
-      'a': '3',
-      'b': '2'
-    });
+    expect(parseQueryString('a=1&b=2&a=3')).to.deep.equal({'a': '3', 'b': '2'});
   });
 });
 
@@ -192,15 +173,15 @@ describe('assertHttpsUrl', () => {
 
 describe('removeFragment', () => {
   it('should remove fragment', () => {
-    expect(removeFragment('https://twitter.com/path#abc')).to.equal(
-        'https://twitter.com/path');
+    expect(removeFragment('https://twitter.com/path#abc'))
+        .to.equal('https://twitter.com/path');
   });
   it('should remove empty fragment', () => {
-    expect(removeFragment('https://twitter.com/path#')).to.equal(
-        'https://twitter.com/path');
+    expect(removeFragment('https://twitter.com/path#'))
+        .to.equal('https://twitter.com/path');
   });
   it('should ignore when no fragment', () => {
-    expect(removeFragment('https://twitter.com/path')).to.equal(
-        'https://twitter.com/path');
+    expect(removeFragment('https://twitter.com/path'))
+        .to.equal('https://twitter.com/path');
   });
 });

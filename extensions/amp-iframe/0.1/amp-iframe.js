@@ -18,7 +18,6 @@ import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
 import {parseUrl} from '../../../src/url';
 
-
 /** @type {number}  */
 var count = 0;
 
@@ -33,15 +32,13 @@ class AmpIframe extends AMP.BaseElement {
 
   assertSource(src, containerSrc, sandbox) {
     var url = parseUrl(src);
-    assert(
-        url.protocol == 'https:' ||
-            url.origin.indexOf('http://iframe.localhost:') == 0,
+    assert(url.protocol == 'https:' ||
+               url.origin.indexOf('http://iframe.localhost:') == 0,
         'Invalid <amp-iframe> src. Must start with https://. Found %s',
         this.element);
     var containerUrl = parseUrl(containerSrc);
-    assert(
-        !((' ' + sandbox + ' ').match(/\s+allow-same-origin\s+/)) ||
-        url.origin != containerUrl.origin,
+    assert(!((' ' + sandbox + ' ').match(/\s+allow-same-origin\s+/)) ||
+               url.origin != containerUrl.origin,
         'Origin of <amp-iframe> must not be equal to container %s.',
         this.element);
     return src;
@@ -52,20 +49,18 @@ class AmpIframe extends AMP.BaseElement {
     var minTop = Math.min(600, this.getViewport().getSize().height * .75);
     assert(pos.top >= minTop,
         '<amp-iframe> elements must be positioned outside the first 75% ' +
-        'of the viewport or 600px from the top (whichever is smaller): %s ' +
-        'Please contact the AMP team if that is a problem in your project.' +
-        ' We\'d love to learn about your use case. Current position %s. Min:' +
-        ' %s',
-        this.element,
-        pos.top,
-        minTop);
+            'of the viewport or 600px from the top (whichever is smaller): %s ' +
+            'Please contact the AMP team if that is a problem in your project.' +
+            ' We\'d love to learn about your use case. Current position %s. Min:' +
+            ' %s',
+        this.element, pos.top, minTop);
   }
 
   /** @override */
   firstAttachedCallback() {
     var iframeSrc = this.element.getAttribute('src');
-    this.iframeSrc = this.assertSource(iframeSrc, window.location.href,
-        this.element.getAttribute('sandbox'));
+    this.iframeSrc = this.assertSource(
+        iframeSrc, window.location.href, this.element.getAttribute('sandbox'));
     this.preconnect.url(this.iframeSrc);
   }
 
@@ -96,7 +91,8 @@ class AmpIframe extends AMP.BaseElement {
     this.element.appendChild(makeIOsScrollable(this.element, iframe));
     return loadPromise(iframe);
   }
-};
+}
+;
 
 /**
  * We always set a sandbox. Default is that none of the things that need
@@ -108,7 +104,6 @@ function setSandbox(element, iframe) {
   var allows = element.getAttribute('sandbox') || '';
   iframe.setAttribute('sandbox', allows);
 }
-
 
 /**
  * If scrolling is allowed for the iframe, wraps it into a container

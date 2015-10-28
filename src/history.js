@@ -21,14 +21,11 @@ import {log} from './log';
 import {timer} from './timer';
 import {viewerFor} from './viewer';
 
-
 /** @private @const */
 let TAG_ = 'History';
 
-
 /** @private @const */
 let HISTORY_PROP_ = 'AMP.History';
-
 
 /**
  * @return {*}
@@ -40,10 +37,8 @@ function historyState_(stackIndex) {
   return state;
 }
 
-
 /** @typedef {number} */
 var HistoryId;
-
 
 export class History {
 
@@ -60,7 +55,8 @@ export class History {
     /** @private {!Array<!Function|undefined>} */
     this.stackOnPop_ = [];
 
-    /** @private {!Array<!{callback:function():!Promise>, resolve:!Function,reject:!Function}} */
+    /** @private {!Array<!{callback:function():!Promise>,
+     * resolve:!Function,reject:!Function}} */
     this.queue_ = [];
 
     this.binding_.setOnStackIndexUpdated(this.onStackIndexUpdated_.bind(this));
@@ -175,18 +171,20 @@ export class History {
       promise = Promise.reject(e);
     }
 
-    promise.then((result) => {
-      task.resolve(result);
-    }, (reason) => {
-      log.error(TAG_, 'failed to execute a task:', reason);
-      task.reject(reason);
-    }).then(() => {
-      this.queue_.splice(0, 1);
-      this.deque_();
-    });
+    promise.then(
+               (result) => {
+                 task.resolve(result);
+               },
+               (reason) => {
+                 log.error(TAG_, 'failed to execute a task:', reason);
+                 task.reject(reason);
+               })
+        .then(() => {
+          this.queue_.splice(0, 1);
+          this.deque_();
+        });
   }
 }
-
 
 /**
  * HistoryBinding is an interface that defines an underlying technology behind
@@ -196,21 +194,24 @@ export class History {
 class HistoryBinding {
 
   /** @private */
-  cleanup_() {}
+  cleanup_() {
+  }
 
   /**
    * Configures a callback to be called when stack index has been updated.
    * @param {function(number)} callback
    * @protected
    */
-  setOnStackIndexUpdated(callback) {}
+  setOnStackIndexUpdated(callback) {
+  }
 
   /**
    * Pushes new state into the history stack. Returns promise that yields new
    * stack index.
    * @return {!Promise<number>}
    */
-  push() {}
+  push() {
+  }
 
   /**
    * Pops a previously pushed state from the history stack. All states coming
@@ -219,9 +220,9 @@ class HistoryBinding {
    * @param {number} stackIndex
    * @return {!Promise<number>}
    */
-  pop(stackIndex) {}
+  pop(stackIndex) {
+  }
 }
-
 
 /**
  * Implementation of HistoryBinding based on the native window. It uses
@@ -245,8 +246,8 @@ export class HistoryBindingNatural_ {
     /** @private {number} */
     this.startIndex_ = history.length - 1;
     if (history.state && history.state[HISTORY_PROP_] !== undefined) {
-      this.startIndex_ = Math.min(history.state[HISTORY_PROP_],
-          this.startIndex_);
+      this.startIndex_ =
+          Math.min(history.state[HISTORY_PROP_], this.startIndex_);
     }
 
     /** @private {number} */
@@ -317,12 +318,12 @@ export class HistoryBindingNatural_ {
     let eventPass = new Pass(this.onHistoryEvent_.bind(this), 50);
     this.popstateHandler_ = (e) => {
       log.fine(TAG_, 'popstate event: ' + this.win.history.length + ', ' +
-          JSON.stringify(e.state));
+                         JSON.stringify(e.state));
       eventPass.schedule();
     };
     this.hashchangeHandler_ = () => {
       log.fine(TAG_, 'hashchange event: ' + this.win.history.length + ', ' +
-          this.win.location.hash);
+                         this.win.location.hash);
       eventPass.schedule();
     };
     this.win.addEventListener('popstate', this.popstateHandler_);
@@ -379,7 +380,7 @@ export class HistoryBindingNatural_ {
   onHistoryEvent_() {
     let state = this.getState_();
     log.fine(TAG_, 'history event: ' + this.win.history.length + ', ' +
-        JSON.stringify(state));
+                       JSON.stringify(state));
     let stackIndex = state ? state[HISTORY_PROP_] : undefined;
     let newStackIndex = this.stackIndex_;
     let waitingState = this.waitingState_;
@@ -436,8 +437,7 @@ export class HistoryBindingNatural_ {
 
   /** @private */
   assertReady_() {
-    assert(!this.waitingState_,
-        'The history must not be in the waiting state');
+    assert(!this.waitingState_, 'The history must not be in the waiting state');
   }
 
   /**
@@ -461,16 +461,11 @@ export class HistoryBindingNatural_ {
     this.assertReady_();
     let resolve;
     let reject;
-    let promise = timer.timeoutPromise(500,
-        new Promise((aResolve, aReject) => {
-          resolve = aResolve;
-          reject = aReject;
-        }));
-    this.waitingState_ = {
-      promise: promise,
-      resolve: resolve,
-      reject: reject
-    };
+    let promise = timer.timeoutPromise(500, new Promise((aResolve, aReject) => {
+                                         resolve = aResolve;
+                                         reject = aReject;
+                                       }));
+    this.waitingState_ = {promise: promise, resolve: resolve, reject: reject};
     return promise;
   }
 
@@ -539,8 +534,8 @@ export class HistoryBindingNatural_ {
     this.assertReady_();
     stackIndex = Math.min(stackIndex, this.win.history.length - 1);
     if (this.stackIndex_ != stackIndex) {
-      log.fine(TAG_, 'stack index changed: ' + this.stackIndex_ + ' -> ' +
-          stackIndex);
+      log.fine(TAG_,
+          'stack index changed: ' + this.stackIndex_ + ' -> ' + stackIndex);
       this.stackIndex_ = stackIndex;
       if (this.onStackIndexUpdated_) {
         this.onStackIndexUpdated_(stackIndex);
@@ -548,7 +543,6 @@ export class HistoryBindingNatural_ {
     }
   }
 }
-
 
 /**
  * Implementation of HistoryBinding that assumes a virtual history that
@@ -575,8 +569,8 @@ export class HistoryBindingVirtual_ {
     this.onStackIndexUpdated_ = null;
 
     /** @private {!Unlisten} */
-    this.unlistenOnHistoryPopped_ = this.viewer_.onHistoryPoppedEvent(
-        this.onHistoryPopped_.bind(this));
+    this.unlistenOnHistoryPopped_ =
+        this.viewer_.onHistoryPoppedEvent(this.onHistoryPopped_.bind(this));
   }
 
   /** @override */
@@ -621,8 +615,8 @@ export class HistoryBindingVirtual_ {
    */
   updateStackIndex_(stackIndex) {
     if (this.stackIndex_ != stackIndex) {
-      log.fine(TAG_, 'stack index changed: ' + this.stackIndex_ + ' -> ' +
-          stackIndex);
+      log.fine(TAG_,
+          'stack index changed: ' + this.stackIndex_ + ' -> ' + stackIndex);
       this.stackIndex_ = stackIndex;
       if (this.onStackIndexUpdated_) {
         this.onStackIndexUpdated_(stackIndex);
@@ -630,7 +624,6 @@ export class HistoryBindingVirtual_ {
     }
   }
 }
-
 
 /**
  * @param {!Window} window
@@ -647,7 +640,6 @@ function createHistory_(window) {
   }
   return new History(binding);
 };
-
 
 /**
  * @param {!Window} window

@@ -14,10 +14,15 @@
  * limitations under the License.
  */
 
-import {Layout, assertLength, getLengthNumeral, getLengthUnits, parseLength,
-    parseLayout} from '../../src/layout';
+import {
+  Layout,
+  assertLength,
+  getLengthNumeral,
+  getLengthUnits,
+  parseLength,
+  parseLayout
+} from '../../src/layout';
 import {applyLayout_} from '../../src/custom-element';
-
 
 describe('Layout', () => {
   var div;
@@ -106,7 +111,6 @@ describe('Layout', () => {
     }).to.throw(/Invalid length value/);
   });
 
-
   it('layout=nodisplay', () => {
     div.setAttribute('layout', 'nodisplay');
     expect(applyLayout_(div)).to.equal(Layout.NODISPLAY);
@@ -117,7 +121,6 @@ describe('Layout', () => {
     expect(div).to.not.have.class('-amp-layout-size-defined');
     expect(div.children.length).to.equal(0);
   });
-
 
   it('layout=fixed', () => {
     div.setAttribute('layout', 'fixed');
@@ -141,10 +144,9 @@ describe('Layout', () => {
 
   it('layout=fixed - requires width/height', () => {
     div.setAttribute('layout', 'fixed');
-    expect(() => applyLayout_(div)).to.throw(
-        /to be available and be an integer/);
+    expect(() => applyLayout_(div))
+        .to.throw(/to be available and be an integer/);
   });
-
 
   it('layout=fixed-height', () => {
     div.setAttribute('layout', 'fixed-height');
@@ -195,10 +197,9 @@ describe('Layout', () => {
 
   it('layout=fixed-height - requires height', () => {
     div.setAttribute('layout', 'fixed-height');
-    expect(() => applyLayout_(div)).to.throw(
-        /to be available and be an integer/);
+    expect(() => applyLayout_(div))
+        .to.throw(/to be available and be an integer/);
   });
-
 
   it('layout=responsive', () => {
     div.setAttribute('layout', 'responsive');
@@ -254,7 +255,6 @@ describe('Layout', () => {
       applyLayout_(div);
     }).to.throw(/Unknown layout: foo/);
   });
-
 
   it('should configure natural dimensions; default layout', () => {
     let pixel = document.createElement('amp-pixel');

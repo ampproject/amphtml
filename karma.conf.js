@@ -30,19 +30,15 @@ module.exports = function(config) {
     ],
 
     preprocessors: {
-      'test/fixtures/*.html' : ['html2js'],
+      'test/fixtures/*.html': ['html2js'],
       'src/**/*.js': ['browserify'],
       'test/**/*.js': ['browserify'],
       'extensions/**/test/**/*.js': ['browserify'],
       'testing/**/*.js': ['browserify']
     },
 
-    browserify: {
-      watch: true,
-      debug: true,
-      transform: ['babelify'],
-      bundleDelay: 900
-    },
+    browserify:
+        {watch: true, debug: true, transform: ['babelify'], bundleDelay: 900},
 
     reporters: ['progress'],
 
@@ -72,10 +68,7 @@ module.exports = function(config) {
       testName: 'AMP HTML on Sauce',
       tunnelIdentifier: process.env.TRAVIS_JOB_NUMBER,
       startConnect: false,
-      connectOptions: {
-        port: 5757,
-        logfile: 'sauce_connect.log'
-      }
+      connectOptions: {port: 5757, logfile: 'sauce_connect.log'}
     },
 
     // change Karma's debug.html to the mocha web reporter

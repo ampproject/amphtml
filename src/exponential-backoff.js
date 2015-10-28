@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 /**
  * @param {opt_base} opt_base Exponential base. Defaults to 2.
  * @return {function(function())} Function that when invoked will

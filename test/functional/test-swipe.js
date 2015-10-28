@@ -50,8 +50,8 @@ describe('Swipe', () => {
     sandbox = null;
   });
 
-  function testContinuation(maxVelocity, resetVelocity, repeatContinue,
-        x1, x05, x0) {
+  function testContinuation(
+      maxVelocity, resetVelocity, repeatContinue, x1, x05, x0) {
     let resultMaxVelocity = null;
     let resultRepeatContinue = null;
     let resultVelocityFunc = null;
@@ -64,14 +64,14 @@ describe('Swipe', () => {
     // Start tracking and eventing.
     swipeX.touchStart_({touches: [{clientX: 101, clientY: 102}]});
     swipeX.touchMove_({touches: [{clientX: 121, clientY: 104}]});
-    clock.tick(20);  // 20
+    clock.tick(20); // 20
     swipeX.touchMove_({touches: [{clientX: 141, clientY: 104}]});
     expect(swipeX.velocity_).to.be.closeTo(0.7, 1e-3);
     expect(swipeX.lastX_).to.be.closeTo(141, 1e-3);
 
     // End touch.
     if (resetVelocity) {
-        swipeX.velocity_ = 0;
+      swipeX.velocity_ = 0;
     }
     swipeX.touchEnd_({});
 
@@ -88,30 +88,21 @@ describe('Swipe', () => {
     expect(swipeX.lastX_).to.equal(x0, 1e-3);
   }
 
-
   it('swipeX - touchStart', () => {
     // No touches.
     swipeX.touchStart_({});
     expect(swipeX.tracking_).to.equal(false);
 
     // More than one touch.
-    swipeX.touchStart_({
-      touches: [{}, {}]
-    });
+    swipeX.touchStart_({touches: [{}, {}]});
     expect(swipeX.tracking_).to.equal(false);
 
     // Proper touch.
-    swipeX.touchStart_({
-      touches: [{
-        clientX: 101,
-        clientY: 102
-      }]
-    });
+    swipeX.touchStart_({touches: [{clientX: 101, clientY: 102}]});
     expect(swipeX.tracking_).to.equal(true);
     expect(swipeX.startX_).to.equal(101);
     expect(swipeX.startY_).to.equal(102);
   });
-
 
   it('swipeX - touchMove', () => {
     let startEvent = null;
@@ -169,7 +160,6 @@ describe('Swipe', () => {
     expect(moveEvent.delta).to.equal(0);
   });
 
-
   it('swipeX - touchEnd', () => {
     let endEvent = null;
     swipeX.onEnd((e) => {
@@ -191,7 +181,6 @@ describe('Swipe', () => {
     expect(endEvent).to.not.equal(null);
     expect(endEvent.delta).to.equal(131 - 121);
   });
-
 
   it('swipeX - touchCancel', () => {
     let endEvent = null;
@@ -215,7 +204,6 @@ describe('Swipe', () => {
     expect(endEvent.delta).to.equal(131 - 121);
   });
 
-
   it('swipeX - calcVelocity', () => {
     let v = 0;
     v = swipeX.calcVelocity_(-8.75, -20, 0, 16, v);
@@ -227,7 +215,6 @@ describe('Swipe', () => {
     v = swipeX.calcVelocity_(-31.25, -42.50, 33, 51, v);
     expect(v).to.be.closeTo(-0.616, 1e-3);
   });
-
 
   it('swipeX - position', () => {
     swipeX.setPositionOffset(1);
@@ -245,9 +232,8 @@ describe('Swipe', () => {
 
     expect(moveEvent).to.not.equal(null);
     expect(moveEvent.delta).to.equal(10);
-    expect(moveEvent.position).to.equal(2);  // 1 + 10 * 0.1
+    expect(moveEvent.position).to.equal(2); // 1 + 10 * 0.1
   });
-
 
   it('swipeX - bounds', () => {
     // No overpull.
@@ -282,7 +268,6 @@ describe('Swipe', () => {
     expect(moveEvent.delta).to.equal(20);
   });
 
-
   it('swipeX - continued motion - velocity cycles', () => {
     swipeX.setBounds(-10, 10, 10);
     swipeX.continueMotion(0, false);
@@ -295,7 +280,7 @@ describe('Swipe', () => {
     // Start tracking and eventing.
     swipeX.touchStart_({touches: [{clientX: 101, clientY: 102}]});
     swipeX.touchMove_({touches: [{clientX: 121, clientY: 104}]});
-    clock.tick(20);  // 20
+    clock.tick(20); // 20
     swipeX.touchMove_({touches: [{clientX: 141, clientY: 104}]});
     expect(swipeX.velocity_).to.be.closeTo(0.7, 1e-3);
     expect(swipeX.lastX_).to.be.closeTo(141, 1e-3);
@@ -337,7 +322,6 @@ describe('Swipe', () => {
     expect(swipeX.velocity_).to.be.closeTo(0, 1e-3);
   });
 
-
   it('swipeX - continued motion - overpull', () => {
     swipeX.setBounds(-10, 10, 10);
     swipeX.continueMotion(0, false);
@@ -346,7 +330,6 @@ describe('Swipe', () => {
         /* repeatContinue */ false,
         /* x1 */ 141, /* x05 */ 131.25, /* x0 */ 131);
   });
-
 
   it('swipeX - continued motion - snap back', () => {
     swipeX.setBounds(-40, 40, 0);
@@ -357,7 +340,6 @@ describe('Swipe', () => {
         /* x1 */ 141, /* x05 */ 131, /* x0 */ 121);
   });
 
-
   it('swipeX - continued motion - snap forward', () => {
     swipeX.setBounds(-40, 40, 0);
     swipeX.continueMotion(4, false);
@@ -367,7 +349,6 @@ describe('Swipe', () => {
         /* x1 */ 141, /* x05 */ 151, /* x0 */ 161);
   });
 
-
   it('swipeX - continued motion - inertia', () => {
     swipeX.continueMotion(0, true);
     testContinuation(/* maxVelocity */ 0.665,
@@ -376,14 +357,13 @@ describe('Swipe', () => {
         /* x1 */ 141, /* x05 */ 174.25, /* x0 */ 174.25);
   });
 
-
   it('swipeX - continued motion - inertia - stop on touch', () => {
     swipeX.continueMotion(0, true);
 
     // Start tracking and eventing.
     swipeX.touchStart_({touches: [{clientX: 101, clientY: 102}]});
     swipeX.touchMove_({touches: [{clientX: 121, clientY: 104}]});
-    clock.tick(20);  // 20
+    clock.tick(20); // 20
     swipeX.touchMove_({touches: [{clientX: 141, clientY: 104}]});
     expect(swipeX.velocity_).to.be.closeTo(0.7, 1e-3);
     expect(swipeX.lastX_).to.be.closeTo(141, 1e-3);

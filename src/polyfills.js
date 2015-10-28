@@ -18,7 +18,6 @@
  * @fileoverview Loads all polyfills needed by the AMP runtime.
  */
 
-
 import 'document-register-element/build/document-register-element.max';
 import './custom-core-js-shim';
 import 'babel-core/external-helpers';

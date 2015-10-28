@@ -17,7 +17,6 @@
 import {Input} from '../../src/input';
 import * as sinon from 'sinon';
 
-
 describe('Input', () => {
 
   let sandbox;
@@ -44,11 +43,7 @@ describe('Input', () => {
       }
     };
 
-    windowApi = {
-      document: documentApi,
-      navigator: {},
-      ontouchstart: ''
-    };
+    windowApi = {document: documentApi, navigator: {}, ontouchstart: ''};
 
     input = new Input(windowApi);
   });

@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-import {History, HistoryBindingNatural_, HistoryBindingVirtual_} from
-    '../../src/history';
+import {
+  History,
+  HistoryBindingNatural_,
+  HistoryBindingVirtual_
+} from '../../src/history';
 import {listenOncePromise} from '../../src/event-helper';
 import * as sinon from 'sinon';
-
 
 describe('History', () => {
 
@@ -37,8 +39,7 @@ describe('History', () => {
       setOnStackIndexUpdated: (callback) => {
         onStackIndexUpdated = callback;
       },
-      push: () => {},
-      pop(stackIndex) {}
+      push: () => {}, pop(stackIndex) {}
     };
     bindingMock = sandbox.mock(binding);
 
@@ -64,8 +65,10 @@ describe('History', () => {
 
   it('should push new state', () => {
     let onPop = sinon.spy();
-    bindingMock.expects('push').withExactArgs()
-        .returns(Promise.resolve(11)).once();
+    bindingMock.expects('push')
+        .withExactArgs()
+        .returns(Promise.resolve(11))
+        .once();
     return history.push(onPop).then((historyId) => {
       expect(history.stackIndex_).to.equal(11);
       expect(history.stackOnPop_.length).to.equal(12);
@@ -76,10 +79,14 @@ describe('History', () => {
 
   it('should pop previously pushed state', () => {
     let onPop = sinon.spy();
-    bindingMock.expects('push').withExactArgs()
-        .returns(Promise.resolve(11)).once();
-    bindingMock.expects('pop').withExactArgs(11)
-        .returns(Promise.resolve(10)).once();
+    bindingMock.expects('push')
+        .withExactArgs()
+        .returns(Promise.resolve(11))
+        .once();
+    bindingMock.expects('pop')
+        .withExactArgs(11)
+        .returns(Promise.resolve(10))
+        .once();
     return history.push(onPop).then((historyId) => {
       expect(historyId).to.equal(11);
       expect(history.stackOnPop_.length).to.equal(12);
@@ -96,8 +103,10 @@ describe('History', () => {
 
   it('should return and call callback when history popped', () => {
     let onPop = sinon.spy();
-    bindingMock.expects('push').withExactArgs()
-        .returns(Promise.resolve(11)).once();
+    bindingMock.expects('push')
+        .withExactArgs()
+        .returns(Promise.resolve(11))
+        .once();
     return history.push(onPop).then((historyId) => {
       expect(onPop.callCount).to.equal(0);
       onStackIndexUpdated(10);
@@ -109,7 +118,6 @@ describe('History', () => {
     });
   });
 });
-
 
 describe('HistoryBindingNatural', () => {
 
@@ -138,90 +146,92 @@ describe('HistoryBindingNatural', () => {
   it('should initialize correctly', () => {
     expect(history.stackIndex_).to.equal(window.history.length - 1);
     expect(history.startIndex_).to.equal(window.history.length - 1);
-    expect(history.unsupportedState_['AMP.History']).to.equal(
-        window.history.length - 1);
+    expect(history.unsupportedState_['AMP.History'])
+        .to.equal(window.history.length - 1);
     expect(onStackIndexUpdated.callCount).to.equal(0);
   });
 
   it('should initialize correctly with preexisting state', () => {
     history.origPushState_({'AMP.History': window.history.length}, undefined);
-    history.origReplaceState_({'AMP.History': window.history.length - 2},
-        undefined);
+    history.origReplaceState_(
+        {'AMP.History': window.history.length - 2}, undefined);
     let history2 = new HistoryBindingNatural_(window);
     expect(history2.stackIndex_).to.equal(window.history.length - 2);
     expect(history2.startIndex_).to.equal(window.history.length - 2);
-    expect(history.unsupportedState_['AMP.History']).to.equal(
-        window.history.length - 2);
+    expect(history.unsupportedState_['AMP.History'])
+        .to.equal(window.history.length - 2);
     history2.cleanup_();
-    history.origReplaceState_({'AMP.History': window.history.length - 1},
-        undefined);
+    history.origReplaceState_(
+        {'AMP.History': window.history.length - 1}, undefined);
     expect(onStackIndexUpdated.callCount).to.equal(0);
   });
 
   it('should override history.pushState and set its properties', () => {
     window.history.pushState({a: 111});
     expect(history.unsupportedState_.a).to.equal(111);
-    expect(history.unsupportedState_['AMP.History']).to.equal(
-        window.history.length - 1);
+    expect(history.unsupportedState_['AMP.History'])
+        .to.equal(window.history.length - 1);
     expect(onStackIndexUpdated.callCount).to.equal(1);
-    expect(onStackIndexUpdated.getCall(0).args[0]).to.equal(
-        window.history.length - 1);
+    expect(onStackIndexUpdated.getCall(0).args[0])
+        .to.equal(window.history.length - 1);
   });
 
   it('should override history.replaceState and set its properties', () => {
     window.history.replaceState({a: 112});
     expect(history.unsupportedState_.a).to.equal(112);
-    expect(history.unsupportedState_['AMP.History']).to.equal(
-        window.history.length - 1);
+    expect(history.unsupportedState_['AMP.History'])
+        .to.equal(window.history.length - 1);
     expect(onStackIndexUpdated.callCount).to.equal(0);
   });
 
   // This prevents IE11/Edge from coercing undefined to become the new url
   it('should not pass in `url` argument to original replace state if ' +
-    'parameter is undefined', () => {
-    let argumentLength = 0;
-    let origReplace = window.history.replaceState;
-    window.history.replaceState = function() {
-      argumentLength = arguments.length;
-    };
+          'parameter is undefined',
+      () => {
+        let argumentLength = 0;
+        let origReplace = window.history.replaceState;
+        window.history.replaceState = function() {
+          argumentLength = arguments.length;
+        };
 
-    let history2 = new HistoryBindingNatural_(window);
+        let history2 = new HistoryBindingNatural_(window);
 
-    expect(argumentLength).to.equal(2);
+        expect(argumentLength).to.equal(2);
 
-    window.history.replaceState = origReplace;
-  });
+        window.history.replaceState = origReplace;
+      });
 
   it('should push new state in the window.history and notify', () => {
     return history.push().then((stackIndex) => {
       expect(history.stackIndex_).to.equal(stackIndex);
       expect(history.stackIndex_).to.equal(window.history.length - 1);
-      expect(history.unsupportedState_['AMP.History']).to.equal(
-          window.history.length - 1);
+      expect(history.unsupportedState_['AMP.History'])
+          .to.equal(window.history.length - 1);
       expect(onStackIndexUpdated.callCount).to.equal(1);
-      expect(onStackIndexUpdated.getCall(0).args[0]).to.equal(
-          window.history.length - 1);
+      expect(onStackIndexUpdated.getCall(0).args[0])
+          .to.equal(window.history.length - 1);
     });
   });
 
   it('should pop a state from the window.history and notify', () => {
     return history.push().then((stackIndex) => {
       expect(onStackIndexUpdated.callCount).to.equal(1);
-      expect(onStackIndexUpdated.getCall(0).args[0]).to.equal(
-          window.history.length - 1);
-      let histPromise = listenOncePromise(window, 'popstate').then(() => {
-        clock.tick(100);
-      });
+      expect(onStackIndexUpdated.getCall(0).args[0])
+          .to.equal(window.history.length - 1);
+      let histPromise = listenOncePromise(window, 'popstate')
+                            .then(() => {
+                              clock.tick(100);
+                            });
       let popPromise = history.pop(stackIndex);
       return histPromise.then(hist => {
         return popPromise.then(pop => {
           expect(pop).to.equal(window.history.length - 2);
           expect(history.stackIndex_).to.equal(window.history.length - 2);
-          expect(history.unsupportedState_['AMP.History']).to.equal(
-              window.history.length - 2);
+          expect(history.unsupportedState_['AMP.History'])
+              .to.equal(window.history.length - 2);
           expect(onStackIndexUpdated.callCount).to.equal(2);
-          expect(onStackIndexUpdated.getCall(1).args[0]).to.equal(
-              window.history.length - 2);
+          expect(onStackIndexUpdated.getCall(1).args[0])
+              .to.equal(window.history.length - 2);
         });
       });
     });
@@ -230,25 +240,25 @@ describe('HistoryBindingNatural', () => {
   it('should update its state and notify on history.back', () => {
     return history.push().then((stackIndex) => {
       expect(onStackIndexUpdated.callCount).to.equal(1);
-      expect(onStackIndexUpdated.getCall(0).args[0]).to.equal(
-          window.history.length - 1);
-      let histPromise = listenOncePromise(window, 'popstate').then(() => {
-        clock.tick(100);
-      });
+      expect(onStackIndexUpdated.getCall(0).args[0])
+          .to.equal(window.history.length - 1);
+      let histPromise = listenOncePromise(window, 'popstate')
+                            .then(() => {
+                              clock.tick(100);
+                            });
       window.history.go(-1);
       return histPromise.then(() => {
         clock.tick(100);
         expect(history.stackIndex_).to.equal(window.history.length - 2);
-        expect(history.unsupportedState_['AMP.History']).to.equal(
-            window.history.length - 2);
+        expect(history.unsupportedState_['AMP.History'])
+            .to.equal(window.history.length - 2);
         expect(onStackIndexUpdated.callCount).to.equal(2);
-        expect(onStackIndexUpdated.getCall(1).args[0]).to.equal(
-            window.history.length - 2);
+        expect(onStackIndexUpdated.getCall(1).args[0])
+            .to.equal(window.history.length - 2);
       });
     });
   });
 });
-
 
 describe('HistoryBindingVirtual', () => {
 
@@ -311,12 +321,13 @@ describe('HistoryBindingVirtual', () => {
       expect(stackIndex).to.equal(1);
       expect(onStackIndexUpdated.callCount).to.equal(1);
       expect(onStackIndexUpdated.getCall(0).args[0]).to.equal(1);
-      return history.pop(stackIndex).then((newStackIndex) => {
-        expect(newStackIndex).to.equal(0);
-        expect(history.stackIndex_).to.equal(0);
-        expect(onStackIndexUpdated.callCount).to.equal(2);
-        expect(onStackIndexUpdated.getCall(1).args[0]).to.equal(0);
-      });
+      return history.pop(stackIndex)
+          .then((newStackIndex) => {
+            expect(newStackIndex).to.equal(0);
+            expect(history.stackIndex_).to.equal(0);
+            expect(onStackIndexUpdated.callCount).to.equal(2);
+            expect(onStackIndexUpdated.getCall(1).args[0]).to.equal(0);
+          });
     });
   });
 

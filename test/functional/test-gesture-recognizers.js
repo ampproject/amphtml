@@ -15,10 +15,14 @@
  */
 
 import {Gestures} from '../../src/gesture';
-import {DoubletapRecognizer, PinchRecognizer, SwipeXYRecognizer, TapRecognizer,
-    TapzoomRecognizer} from '../../src/gesture-recognizers';
+import {
+  DoubletapRecognizer,
+  PinchRecognizer,
+  SwipeXYRecognizer,
+  TapRecognizer,
+  TapzoomRecognizer
+} from '../../src/gesture-recognizers';
 import * as sinon from 'sinon';
-
 
 describe('TapRecognizer', () => {
 
@@ -33,9 +37,7 @@ describe('TapRecognizer', () => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
 
-    element = {
-      addEventListener: (eventType, handler) => {}
-    };
+    element = {addEventListener: (eventType, handler) => {}};
 
     gestures = new Gestures(element);
     gesturesMock = sandbox.mock(gestures);
@@ -53,50 +55,45 @@ describe('TapRecognizer', () => {
     sandbox = null;
   });
 
-
   it('should allow single-point touchstart', () => {
-    let res = recognizer.onTouchStart({touches:
-        [{clientX: 101, clientY: 201}]});
+    let res =
+        recognizer.onTouchStart({touches: [{clientX: 101, clientY: 201}]});
     expect(res).to.equal(true);
     expect(recognizer.startX_).to.equal(101);
     expect(recognizer.startY_).to.equal(201);
   });
 
   it('should deny two-point touchstart', () => {
-    let res = recognizer.onTouchStart({touches:
-        [{clientX: 101, clientY: 201}, {}]});
+    let res =
+        recognizer.onTouchStart({touches: [{clientX: 101, clientY: 201}, {}]});
     expect(res).to.equal(false);
     expect(recognizer.startX_).to.equal(0);
     expect(recognizer.startY_).to.equal(0);
   });
 
-
   it('should allow small drift', () => {
-    let res = recognizer.onTouchStart({touches:
-        [{clientX: 101, clientY: 201}]});
+    let res =
+        recognizer.onTouchStart({touches: [{clientX: 101, clientY: 201}]});
     expect(res).to.equal(true);
     expect(recognizer.startX_).to.equal(101);
     expect(recognizer.startY_).to.equal(201);
 
-    res = recognizer.onTouchMove({touches:
-        [{clientX: 102, clientY: 202}]});
+    res = recognizer.onTouchMove({touches: [{clientX: 102, clientY: 202}]});
     expect(res).to.equal(true);
     expect(recognizer.lastX_).to.equal(102);
     expect(recognizer.lastY_).to.equal(202);
   });
 
   it('should deny large drift', () => {
-    let res = recognizer.onTouchStart({touches:
-        [{clientX: 101, clientY: 201}]});
+    let res =
+        recognizer.onTouchStart({touches: [{clientX: 101, clientY: 201}]});
     expect(res).to.equal(true);
     expect(recognizer.startX_).to.equal(101);
     expect(recognizer.startY_).to.equal(201);
 
-    res = recognizer.onTouchMove({touches:
-        [{clientX: 111, clientY: 211}]});
+    res = recognizer.onTouchMove({touches: [{clientX: 111, clientY: 211}]});
     expect(res).to.equal(false);
   });
-
 
   it('should signal ready on touchend', () => {
     gesturesMock.expects('signalReady_').withExactArgs(recognizer, 0).once();
@@ -106,15 +103,16 @@ describe('TapRecognizer', () => {
   it('should emit and end on start', () => {
     recognizer.lastX_ = 101;
     recognizer.lastY_ = 201;
-    gesturesMock.expects('signalEmit_').withExactArgs(recognizer,
-        sinon.match((data) => {
+    gesturesMock.expects('signalEmit_')
+        .withExactArgs(recognizer, sinon.match((data) => {
           return data.clientX == 101 && data.clientY == 201;
-        }), null).once();
+        }),
+            null)
+        .once();
     gesturesMock.expects('signalEnd_').withExactArgs(recognizer).once();
     recognizer.acceptStart();
   });
 });
-
 
 describe('DoubletapRecognizer', () => {
 
@@ -129,9 +127,7 @@ describe('DoubletapRecognizer', () => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
 
-    element = {
-      addEventListener: (eventType, handler) => {}
-    };
+    element = {addEventListener: (eventType, handler) => {}};
 
     gestures = new Gestures(element);
     gesturesMock = sandbox.mock(gestures);
@@ -149,54 +145,50 @@ describe('DoubletapRecognizer', () => {
     sandbox = null;
   });
 
-
   it('should allow single-point touchstart', () => {
-    let res = recognizer.onTouchStart({touches:
-        [{clientX: 101, clientY: 201}]});
+    let res =
+        recognizer.onTouchStart({touches: [{clientX: 101, clientY: 201}]});
     expect(res).to.equal(true);
     expect(recognizer.startX_).to.equal(101);
     expect(recognizer.startY_).to.equal(201);
   });
 
   it('should deny two-point touchstart', () => {
-    let res = recognizer.onTouchStart({touches:
-        [{clientX: 101, clientY: 201}, {}]});
+    let res =
+        recognizer.onTouchStart({touches: [{clientX: 101, clientY: 201}, {}]});
     expect(res).to.equal(false);
     expect(recognizer.startX_).to.equal(0);
     expect(recognizer.startY_).to.equal(0);
   });
 
-
   it('should allow small drift', () => {
-    let res = recognizer.onTouchStart({touches:
-        [{clientX: 101, clientY: 201}]});
+    let res =
+        recognizer.onTouchStart({touches: [{clientX: 101, clientY: 201}]});
     expect(res).to.equal(true);
     expect(recognizer.startX_).to.equal(101);
     expect(recognizer.startY_).to.equal(201);
 
-    res = recognizer.onTouchMove({touches:
-        [{clientX: 102, clientY: 202}]});
+    res = recognizer.onTouchMove({touches: [{clientX: 102, clientY: 202}]});
     expect(res).to.equal(true);
     expect(recognizer.lastX_).to.equal(102);
     expect(recognizer.lastY_).to.equal(202);
   });
 
   it('should deny large drift', () => {
-    let res = recognizer.onTouchStart({touches:
-        [{clientX: 101, clientY: 201}]});
+    let res =
+        recognizer.onTouchStart({touches: [{clientX: 101, clientY: 201}]});
     expect(res).to.equal(true);
     expect(recognizer.startX_).to.equal(101);
     expect(recognizer.startY_).to.equal(201);
 
-    res = recognizer.onTouchMove({touches:
-        [{clientX: 111, clientY: 211}]});
+    res = recognizer.onTouchMove({touches: [{clientX: 111, clientY: 211}]});
     expect(res).to.equal(false);
   });
 
-
   it('should ask pending for first touchend', () => {
-    gesturesMock.expects('signalPending_').withExactArgs(
-        recognizer, 300).once();
+    gesturesMock.expects('signalPending_')
+        .withExactArgs(recognizer, 300)
+        .once();
     gesturesMock.expects('signalReady_').never();
     recognizer.onTouchEnd({});
     expect(recognizer.tapCount_).to.equal(1);
@@ -211,20 +203,20 @@ describe('DoubletapRecognizer', () => {
     expect(recognizer.tapCount_).to.equal(2);
   });
 
-
   it('should emit and end on start', () => {
     recognizer.lastX_ = 101;
     recognizer.lastY_ = 201;
-    gesturesMock.expects('signalEmit_').withExactArgs(recognizer,
-        sinon.match((data) => {
+    gesturesMock.expects('signalEmit_')
+        .withExactArgs(recognizer, sinon.match((data) => {
           return data.clientX == 101 && data.clientY == 201;
-        }), null).once();
+        }),
+            null)
+        .once();
     gesturesMock.expects('signalEnd_').withExactArgs(recognizer).once();
     recognizer.acceptStart();
     expect(recognizer.tapCount_).to.equal(0);
   });
 });
-
 
 describe('SwipeXYRecognizer', () => {
 
@@ -239,9 +231,7 @@ describe('SwipeXYRecognizer', () => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
 
-    element = {
-      addEventListener: (eventType, handler) => {}
-    };
+    element = {addEventListener: (eventType, handler) => {}};
 
     gestures = new Gestures(element);
     gesturesMock = sandbox.mock(gestures);
@@ -263,34 +253,31 @@ describe('SwipeXYRecognizer', () => {
     return Math.abs(value - compare) <= error;
   }
 
-
   it('should allow single-point touchstart', () => {
-    let res = recognizer.onTouchStart({touches:
-        [{clientX: 101, clientY: 201}]});
+    let res =
+        recognizer.onTouchStart({touches: [{clientX: 101, clientY: 201}]});
     expect(res).to.equal(true);
     expect(recognizer.startX_).to.equal(101);
     expect(recognizer.startY_).to.equal(201);
   });
 
   it('should deny two-point touchstart', () => {
-    let res = recognizer.onTouchStart({touches:
-        [{clientX: 101, clientY: 201}, {}]});
+    let res =
+        recognizer.onTouchStart({touches: [{clientX: 101, clientY: 201}, {}]});
     expect(res).to.equal(false);
     expect(recognizer.startX_).to.equal(0);
     expect(recognizer.startY_).to.equal(0);
   });
 
-
   it('should allow small drift before requesting ready', () => {
     gesturesMock.expects('signalReady_').never();
-    let res = recognizer.onTouchStart({touches:
-        [{clientX: 101, clientY: 201}]});
+    let res =
+        recognizer.onTouchStart({touches: [{clientX: 101, clientY: 201}]});
     expect(res).to.equal(true);
     expect(recognizer.startX_).to.equal(101);
     expect(recognizer.startY_).to.equal(201);
 
-    res = recognizer.onTouchMove({touches:
-        [{clientX: 102, clientY: 202}]});
+    res = recognizer.onTouchMove({touches: [{clientX: 102, clientY: 202}]});
     expect(res).to.equal(true);
     expect(recognizer.lastX_).to.equal(102);
     expect(recognizer.lastY_).to.equal(202);
@@ -299,17 +286,15 @@ describe('SwipeXYRecognizer', () => {
   it('should send ready after significant move', () => {
     gesturesMock.expects('signalReady_').withExactArgs(recognizer, -10).once();
 
-    let res = recognizer.onTouchStart({touches:
-        [{clientX: 101, clientY: 201}]});
+    let res =
+        recognizer.onTouchStart({touches: [{clientX: 101, clientY: 201}]});
     expect(res).to.equal(true);
 
-    res = recognizer.onTouchMove({touches:
-        [{clientX: 112, clientY: 212}]});
+    res = recognizer.onTouchMove({touches: [{clientX: 112, clientY: 212}]});
     expect(res).to.equal(true);
     expect(recognizer.lastX_).to.equal(112);
     expect(recognizer.lastY_).to.equal(212);
   });
-
 
   it('should emit on start', () => {
     recognizer.startTime_ = 1;
@@ -317,15 +302,15 @@ describe('SwipeXYRecognizer', () => {
     recognizer.startY_ = recognizer.prevY_ = 201;
     recognizer.lastX_ = 111;
     recognizer.lastY_ = 211;
-    gesturesMock.expects('signalEmit_').withExactArgs(recognizer,
-        sinon.match((data) => {
+    gesturesMock.expects('signalEmit_')
+        .withExactArgs(recognizer, sinon.match((data) => {
           return (data.first === true && data.last === false &&
-              data.deltaX == 0 &&
-              data.deltaY == 0 &&
-              data.time == 10 &&
-              diff(data.velocityX, 0.86, 1e-2) &&
-              diff(data.velocityY, 0.86, 1e-2));
-        }), null).once();
+                  data.deltaX == 0 && data.deltaY == 0 && data.time == 10 &&
+                  diff(data.velocityX, 0.86, 1e-2) &&
+                  diff(data.velocityY, 0.86, 1e-2));
+        }),
+            null)
+        .once();
     gesturesMock.expects('signalEnd_').never();
 
     clock.tick(10);
@@ -346,14 +331,14 @@ describe('SwipeXYRecognizer', () => {
     recognizer.startX_ = recognizer.prevX_ = 101;
     recognizer.startY_ = recognizer.prevY_ = 201;
     recognizer.eventing_ = true;
-    gesturesMock.expects('signalEmit_').withExactArgs(recognizer,
-        sinon.match((data) => {
+    gesturesMock.expects('signalEmit_')
+        .withExactArgs(recognizer, sinon.match((data) => {
           return (data.first === false && data.last === false &&
-              data.deltaX == 10 &&
-              data.deltaY == 10 &&
-              data.velocityX > 0 &&
-              data.velocityY > 0);
-        }), event).once();
+                  data.deltaX == 10 && data.deltaY == 10 &&
+                  data.velocityX > 0 && data.velocityY > 0);
+        }),
+            event)
+        .once();
     gesturesMock.expects('signalEnd_').never();
 
     clock.tick(10);
@@ -373,14 +358,14 @@ describe('SwipeXYRecognizer', () => {
     recognizer.velocityX_ = 0.5;
     recognizer.velocityY_ = 0.5;
     recognizer.eventing_ = true;
-    gesturesMock.expects('signalEmit_').withExactArgs(recognizer,
-        sinon.match((data) => {
+    gesturesMock.expects('signalEmit_')
+        .withExactArgs(recognizer, sinon.match((data) => {
           return (data.first === false && data.last === true &&
-              data.deltaX == 10 &&
-              data.deltaY == 10 &&
-              data.velocityX == 0.5 &&
-              data.velocityY == 0.5);
-        }), event).once();
+                  data.deltaX == 10 && data.deltaY == 10 &&
+                  data.velocityX == 0.5 && data.velocityY == 0.5);
+        }),
+            event)
+        .once();
     gesturesMock.expects('signalEnd_').once();
 
     clock.tick(10);
@@ -398,14 +383,14 @@ describe('SwipeXYRecognizer', () => {
     recognizer.velocityX_ = 0.5;
     recognizer.velocityY_ = 0.5;
     recognizer.eventing_ = true;
-    gesturesMock.expects('signalEmit_').withExactArgs(recognizer,
-        sinon.match((data) => {
+    gesturesMock.expects('signalEmit_')
+        .withExactArgs(recognizer, sinon.match((data) => {
           return (data.first === false && data.last === true &&
-              data.deltaX == 10 &&
-              data.deltaY == 10 &&
-              data.velocityX == 0 &&
-              data.velocityY == 0);
-        }), event).once();
+                  data.deltaX == 10 && data.deltaY == 10 &&
+                  data.velocityX == 0 && data.velocityY == 0);
+        }),
+            event)
+        .once();
     gesturesMock.expects('signalEnd_').once();
 
     clock.tick(50);
@@ -413,7 +398,6 @@ describe('SwipeXYRecognizer', () => {
     expect(recognizer.eventing_).to.equal(false);
   });
 });
-
 
 describe('TapzoomRecognizer', () => {
 
@@ -428,9 +412,7 @@ describe('TapzoomRecognizer', () => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
 
-    element = {
-      addEventListener: (eventType, handler) => {}
-    };
+    element = {addEventListener: (eventType, handler) => {}};
 
     gestures = new Gestures(element);
     gesturesMock = sandbox.mock(gestures);
@@ -448,52 +430,50 @@ describe('TapzoomRecognizer', () => {
     sandbox = null;
   });
 
-
   it('should allow single-point touchstart', () => {
-    let res = recognizer.onTouchStart({touches:
-        [{clientX: 101, clientY: 201}]});
+    let res =
+        recognizer.onTouchStart({touches: [{clientX: 101, clientY: 201}]});
     expect(res).to.equal(true);
     expect(recognizer.startX_).to.equal(101);
     expect(recognizer.startY_).to.equal(201);
   });
 
   it('should deny two-point touchstart', () => {
-    let res = recognizer.onTouchStart({touches:
-        [{clientX: 101, clientY: 201}, {}]});
+    let res =
+        recognizer.onTouchStart({touches: [{clientX: 101, clientY: 201}, {}]});
     expect(res).to.equal(false);
     expect(recognizer.startX_).to.equal(0);
     expect(recognizer.startY_).to.equal(0);
   });
 
   it('should allow small drift for tap', () => {
-    let res = recognizer.onTouchStart({touches:
-        [{clientX: 101, clientY: 201}]});
+    let res =
+        recognizer.onTouchStart({touches: [{clientX: 101, clientY: 201}]});
     expect(res).to.equal(true);
     expect(recognizer.startX_).to.equal(101);
     expect(recognizer.startY_).to.equal(201);
 
-    res = recognizer.onTouchMove({touches:
-        [{clientX: 102, clientY: 202}]});
+    res = recognizer.onTouchMove({touches: [{clientX: 102, clientY: 202}]});
     expect(res).to.equal(true);
     expect(recognizer.lastX_).to.equal(102);
     expect(recognizer.lastY_).to.equal(202);
   });
 
   it('should deny large drift for tap', () => {
-    let res = recognizer.onTouchStart({touches:
-        [{clientX: 101, clientY: 201}]});
+    let res =
+        recognizer.onTouchStart({touches: [{clientX: 101, clientY: 201}]});
     expect(res).to.equal(true);
     expect(recognizer.startX_).to.equal(101);
     expect(recognizer.startY_).to.equal(201);
 
-    res = recognizer.onTouchMove({touches:
-        [{clientX: 111, clientY: 211}]});
+    res = recognizer.onTouchMove({touches: [{clientX: 111, clientY: 211}]});
     expect(res).to.equal(false);
   });
 
   it('should ask pending for first touchend', () => {
-    gesturesMock.expects('signalPending_').withExactArgs(
-        recognizer, 400).once();
+    gesturesMock.expects('signalPending_')
+        .withExactArgs(recognizer, 400)
+        .once();
     gesturesMock.expects('signalReady_').never();
     recognizer.onTouchEnd({});
     expect(recognizer.tapCount_).to.equal(1);
@@ -502,14 +482,13 @@ describe('TapzoomRecognizer', () => {
   it('should ignore small drift after first tap', () => {
     recognizer.tapCount_ = 1;
     gesturesMock.expects('signalReady_').never();
-    let res = recognizer.onTouchStart({touches:
-        [{clientX: 101, clientY: 201}]});
+    let res =
+        recognizer.onTouchStart({touches: [{clientX: 101, clientY: 201}]});
     expect(res).to.equal(true);
     expect(recognizer.startX_).to.equal(101);
     expect(recognizer.startY_).to.equal(201);
 
-    res = recognizer.onTouchMove({touches:
-        [{clientX: 102, clientY: 202}]});
+    res = recognizer.onTouchMove({touches: [{clientX: 102, clientY: 202}]});
     expect(res).to.equal(true);
     expect(recognizer.lastX_).to.equal(102);
     expect(recognizer.lastY_).to.equal(202);
@@ -519,30 +498,30 @@ describe('TapzoomRecognizer', () => {
     recognizer.tapCount_ = 1;
     gesturesMock.expects('signalReady_').withExactArgs(recognizer, 0).once();
 
-    let res = recognizer.onTouchStart({touches:
-        [{clientX: 101, clientY: 201}]});
+    let res =
+        recognizer.onTouchStart({touches: [{clientX: 101, clientY: 201}]});
     expect(res).to.equal(true);
 
-    res = recognizer.onTouchMove({touches:
-        [{clientX: 112, clientY: 212}]});
+    res = recognizer.onTouchMove({touches: [{clientX: 112, clientY: 212}]});
     expect(res).to.equal(true);
     expect(recognizer.lastX_).to.equal(112);
     expect(recognizer.lastY_).to.equal(212);
   });
-
 
   it('should emit on start', () => {
     recognizer.startX_ = recognizer.prevX_ = 101;
     recognizer.startY_ = recognizer.prevY_ = 201;
     recognizer.lastX_ = 111;
     recognizer.lastY_ = 211;
-    gesturesMock.expects('signalEmit_').withExactArgs(recognizer,
-        sinon.match((data) => {
+    gesturesMock.expects('signalEmit_')
+        .withExactArgs(recognizer, sinon.match((data) => {
           return (data.first === true && data.last === false &&
-              data.centerClientX == 101 && data.centerClientY == 201 &&
-              data.deltaX == 10 && data.deltaY == 10 &&
-              data.velocityX == 0 && data.velocityY == 0);
-        }), null).once();
+                  data.centerClientX == 101 && data.centerClientY == 201 &&
+                  data.deltaX == 10 && data.deltaY == 10 &&
+                  data.velocityX == 0 && data.velocityY == 0);
+        }),
+            null)
+        .once();
     gesturesMock.expects('signalEnd_').never();
 
     clock.tick(10);
@@ -557,13 +536,15 @@ describe('TapzoomRecognizer', () => {
     recognizer.startX_ = recognizer.prevX_ = 101;
     recognizer.startY_ = recognizer.prevY_ = 201;
     recognizer.eventing_ = true;
-    gesturesMock.expects('signalEmit_').withExactArgs(recognizer,
-        sinon.match((data) => {
+    gesturesMock.expects('signalEmit_')
+        .withExactArgs(recognizer, sinon.match((data) => {
           return (data.first === false && data.last === false &&
-              data.centerClientX == 101 && data.centerClientY == 201 &&
-              data.deltaX == 10 && data.deltaY == 10 &&
-              data.velocityX > 0 && data.velocityY > 0);
-        }), event).once();
+                  data.centerClientX == 101 && data.centerClientY == 201 &&
+                  data.deltaX == 10 && data.deltaY == 10 &&
+                  data.velocityX > 0 && data.velocityY > 0);
+        }),
+            event)
+        .once();
     gesturesMock.expects('signalEnd_').never();
 
     clock.tick(10);
@@ -581,13 +562,15 @@ describe('TapzoomRecognizer', () => {
     recognizer.lastX_ = 111;
     recognizer.lastY_ = 211;
     recognizer.eventing_ = true;
-    gesturesMock.expects('signalEmit_').withExactArgs(recognizer,
-        sinon.match((data) => {
+    gesturesMock.expects('signalEmit_')
+        .withExactArgs(recognizer, sinon.match((data) => {
           return (data.first === false && data.last === true &&
-              data.centerClientX == 101 && data.centerClientY == 201 &&
-              data.deltaX == 10 && data.deltaY == 10 &&
-              data.velocityX > 0 && data.velocityY > 0);
-        }), event).once();
+                  data.centerClientX == 101 && data.centerClientY == 201 &&
+                  data.deltaX == 10 && data.deltaY == 10 &&
+                  data.velocityX > 0 && data.velocityY > 0);
+        }),
+            event)
+        .once();
     gesturesMock.expects('signalEnd_').once();
 
     clock.tick(10);
@@ -596,7 +579,6 @@ describe('TapzoomRecognizer', () => {
     expect(recognizer.tapCount_).to.equal(0);
   });
 });
-
 
 describe('PinchRecognizer', () => {
 
@@ -611,9 +593,7 @@ describe('PinchRecognizer', () => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
 
-    element = {
-      addEventListener: (eventType, handler) => {}
-    };
+    element = {addEventListener: (eventType, handler) => {}};
 
     gestures = new Gestures(element);
     gesturesMock = sandbox.mock(gestures);
@@ -635,10 +615,9 @@ describe('PinchRecognizer', () => {
     return Math.abs(value - compare) <= error;
   }
 
-
   it('should deny single-point touchstart', () => {
-    let res = recognizer.onTouchStart({touches:
-        [{clientX: 101, clientY: 201}]});
+    let res =
+        recognizer.onTouchStart({touches: [{clientX: 101, clientY: 201}]});
     expect(res).to.equal(false);
     expect(recognizer.startX1_).to.equal(0);
     expect(recognizer.startY1_).to.equal(0);
@@ -647,9 +626,8 @@ describe('PinchRecognizer', () => {
   });
 
   it('should allow two-point touchstart', () => {
-    let res = recognizer.onTouchStart({touches:
-        [{clientX: 90, clientY: 80},
-         {clientX: 110, clientY: 120}]});
+    let res = recognizer.onTouchStart(
+        {touches: [{clientX: 90, clientY: 80}, {clientX: 110, clientY: 120}]});
     expect(res).to.equal(true);
     expect(recognizer.startX1_).to.equal(90);
     expect(recognizer.startY1_).to.equal(80);
@@ -657,21 +635,18 @@ describe('PinchRecognizer', () => {
     expect(recognizer.startY2_).to.equal(120);
   });
 
-
   it('should allow small drift before requesting ready', () => {
     gesturesMock.expects('signalReady_').never();
-    let res = recognizer.onTouchStart({touches:
-        [{clientX: 90, clientY: 80},
-         {clientX: 110, clientY: 120}]});
+    let res = recognizer.onTouchStart(
+        {touches: [{clientX: 90, clientY: 80}, {clientX: 110, clientY: 120}]});
     expect(res).to.equal(true);
     expect(recognizer.startX1_).to.equal(90);
     expect(recognizer.startY1_).to.equal(80);
     expect(recognizer.startX2_).to.equal(110);
     expect(recognizer.startY2_).to.equal(120);
 
-    res = recognizer.onTouchMove({touches:
-        [{clientX: 88, clientY: 78},
-         {clientX: 112, clientY: 122}]});
+    res = recognizer.onTouchMove(
+        {touches: [{clientX: 88, clientY: 78}, {clientX: 112, clientY: 122}]});
     expect(res).to.equal(true);
     expect(recognizer.lastX1_).to.equal(88);
     expect(recognizer.lastY1_).to.equal(78);
@@ -682,58 +657,48 @@ describe('PinchRecognizer', () => {
   it('should send ready after significant move', () => {
     gesturesMock.expects('signalReady_').withExactArgs(recognizer, 0).once();
 
-    let res = recognizer.onTouchStart({touches:
-        [{clientX: 90, clientY: 80},
-         {clientX: 110, clientY: 120}]});
+    let res = recognizer.onTouchStart(
+        {touches: [{clientX: 90, clientY: 80}, {clientX: 110, clientY: 120}]});
     expect(res).to.equal(true);
 
-    res = recognizer.onTouchMove({touches:
-        [{clientX: 80, clientY: 70},
-         {clientX: 120, clientY: 130}]});
+    res = recognizer.onTouchMove(
+        {touches: [{clientX: 80, clientY: 70}, {clientX: 120, clientY: 130}]});
     expect(res).to.equal(true);
   });
 
   it('should allow small drift before cancelling and then cancel', () => {
     gesturesMock.expects('signalReady_').never();
-    let res = recognizer.onTouchStart({touches:
-        [{clientX: 90, clientY: 80},
-         {clientX: 110, clientY: 120}]});
+    let res = recognizer.onTouchStart(
+        {touches: [{clientX: 90, clientY: 80}, {clientX: 110, clientY: 120}]});
     expect(res).to.equal(true);
 
     // Move in the same direction by 2px.
-    res = recognizer.onTouchMove({touches:
-        [{clientX: 88, clientY: 78},
-         {clientX: 108, clientY: 118}]});
+    res = recognizer.onTouchMove(
+        {touches: [{clientX: 88, clientY: 78}, {clientX: 108, clientY: 118}]});
     expect(res).to.equal(true);
 
     // Move in the same direction by 10px.
-    res = recognizer.onTouchMove({touches:
-        [{clientX: 80, clientY: 70},
-         {clientX: 100, clientY: 110}]});
+    res = recognizer.onTouchMove(
+        {touches: [{clientX: 80, clientY: 70}, {clientX: 100, clientY: 110}]});
     expect(res).to.equal(false);
   });
 
-
   it('should emit on start', () => {
     clock.tick(1);
-    recognizer.onTouchStart({touches:
-        [{clientX: 90, clientY: 80},
-         {clientX: 110, clientY: 120}]});
-    recognizer.onTouchMove({touches:
-        [{clientX: 80, clientY: 70},
-         {clientX: 120, clientY: 130}]});
-    gesturesMock.expects('signalEmit_').withExactArgs(recognizer,
-        sinon.match((data) => {
+    recognizer.onTouchStart(
+        {touches: [{clientX: 90, clientY: 80}, {clientX: 110, clientY: 120}]});
+    recognizer.onTouchMove(
+        {touches: [{clientX: 80, clientY: 70}, {clientX: 120, clientY: 130}]});
+    gesturesMock.expects('signalEmit_')
+        .withExactArgs(recognizer, sinon.match((data) => {
           return (data.first === true && data.last === false &&
-              data.centerClientX == 100 &&
-              data.centerClientY == 100 &&
-              data.dir == 1 &&
-              data.deltaX == 10 &&
-              data.deltaY == 10 &&
-              data.time == 11 &&
-              diff(data.velocityX, 0.79, 1e-2) &&
-              diff(data.velocityY, 0.79, 1e-2));
-        }), null).once();
+                  data.centerClientX == 100 && data.centerClientY == 100 &&
+                  data.dir == 1 && data.deltaX == 10 && data.deltaY == 10 &&
+                  data.time == 11 && diff(data.velocityX, 0.79, 1e-2) &&
+                  diff(data.velocityY, 0.79, 1e-2));
+        }),
+            null)
+        .once();
     gesturesMock.expects('signalEnd_').never();
 
     clock.tick(10);
@@ -756,31 +721,28 @@ describe('PinchRecognizer', () => {
 
   it('should emit on touchmove after start', () => {
     clock.tick(1);
-    recognizer.onTouchStart({touches:
-        [{clientX: 90, clientY: 80},
-         {clientX: 110, clientY: 120}]});
-    recognizer.onTouchMove({touches:
-        [{clientX: 80, clientY: 70},
-         {clientX: 120, clientY: 130}]});
-    gesturesMock.expects('signalEmit_').withExactArgs(recognizer,
-        sinon.match((data) => true), null).once();
+    recognizer.onTouchStart(
+        {touches: [{clientX: 90, clientY: 80}, {clientX: 110, clientY: 120}]});
+    recognizer.onTouchMove(
+        {touches: [{clientX: 80, clientY: 70}, {clientX: 120, clientY: 130}]});
+    gesturesMock.expects('signalEmit_')
+        .withExactArgs(recognizer, sinon.match((data) => true), null)
+        .once();
     clock.tick(10);
     recognizer.acceptStart();
 
-    let event = {touches:
-        [{clientX: 70, clientY: 60},
-         {clientX: 130, clientY: 140}]};
-    gesturesMock.expects('signalEmit_').withExactArgs(recognizer,
-        sinon.match((data) => {
+    let event = {
+      touches: [{clientX: 70, clientY: 60}, {clientX: 130, clientY: 140}]
+    };
+    gesturesMock.expects('signalEmit_')
+        .withExactArgs(recognizer, sinon.match((data) => {
           return (data.first === false && data.last === false &&
-              data.centerClientX == 100 &&
-              data.centerClientY == 100 &&
-              data.dir == 1 &&
-              data.deltaX == 20 &&
-              data.deltaY == 20 &&
-              data.velocityX > 0 &&
-              data.velocityY > 0);
-        }), event).once();
+                  data.centerClientX == 100 && data.centerClientY == 100 &&
+                  data.dir == 1 && data.deltaX == 20 && data.deltaY == 20 &&
+                  data.velocityX > 0 && data.velocityY > 0);
+        }),
+            event)
+        .once();
     gesturesMock.expects('signalEnd_').never();
 
     clock.tick(10);
@@ -790,27 +752,26 @@ describe('PinchRecognizer', () => {
 
   it('should stop on touchend; velocity doesn\'t change', () => {
     clock.tick(1);
-    recognizer.onTouchStart({touches:
-        [{clientX: 90, clientY: 80},
-         {clientX: 110, clientY: 120}]});
-    recognizer.onTouchMove({touches:
-        [{clientX: 80, clientY: 70},
-         {clientX: 120, clientY: 130}]});
-    gesturesMock.expects('signalEmit_').withExactArgs(recognizer,
-        sinon.match((data) => true), null).once();
+    recognizer.onTouchStart(
+        {touches: [{clientX: 90, clientY: 80}, {clientX: 110, clientY: 120}]});
+    recognizer.onTouchMove(
+        {touches: [{clientX: 80, clientY: 70}, {clientX: 120, clientY: 130}]});
+    gesturesMock.expects('signalEmit_')
+        .withExactArgs(recognizer, sinon.match((data) => true), null)
+        .once();
     clock.tick(10);
     recognizer.acceptStart();
 
     let event = {};
-    gesturesMock.expects('signalEmit_').withExactArgs(recognizer,
-        sinon.match((data) => {
-          return (data.first === false && data.last === true &&
-              data.dir == 1 &&
-              data.deltaX == 10 &&
-              data.deltaY == 10 &&
-              diff(data.velocityX, 0.79, 1e-2) &&
-              diff(data.velocityY, 0.79, 1e-2));
-        }), event).once();
+    gesturesMock.expects('signalEmit_')
+        .withExactArgs(recognizer, sinon.match((data) => {
+          return (data.first === false && data.last === true && data.dir == 1 &&
+                  data.deltaX == 10 && data.deltaY == 10 &&
+                  diff(data.velocityX, 0.79, 1e-2) &&
+                  diff(data.velocityY, 0.79, 1e-2));
+        }),
+            event)
+        .once();
     gesturesMock.expects('signalEnd_').once();
 
     clock.tick(10);
@@ -820,27 +781,25 @@ describe('PinchRecognizer', () => {
 
   it('should stop on touchend; velocity changes', () => {
     clock.tick(1);
-    recognizer.onTouchStart({touches:
-        [{clientX: 90, clientY: 80},
-         {clientX: 110, clientY: 120}]});
-    recognizer.onTouchMove({touches:
-        [{clientX: 80, clientY: 70},
-         {clientX: 120, clientY: 130}]});
-    gesturesMock.expects('signalEmit_').withExactArgs(recognizer,
-        sinon.match((data) => true), null).once();
+    recognizer.onTouchStart(
+        {touches: [{clientX: 90, clientY: 80}, {clientX: 110, clientY: 120}]});
+    recognizer.onTouchMove(
+        {touches: [{clientX: 80, clientY: 70}, {clientX: 120, clientY: 130}]});
+    gesturesMock.expects('signalEmit_')
+        .withExactArgs(recognizer, sinon.match((data) => true), null)
+        .once();
     clock.tick(10);
     recognizer.acceptStart();
 
     let event = {};
-    gesturesMock.expects('signalEmit_').withExactArgs(recognizer,
-        sinon.match((data) => {
-          return (data.first === false && data.last === true &&
-              data.dir == 1 &&
-              data.deltaX == 10 &&
-              data.deltaY == 10 &&
-              data.velocityX == 0 &&
-              data.velocityY == 0);
-        }), event).once();
+    gesturesMock.expects('signalEmit_')
+        .withExactArgs(recognizer, sinon.match((data) => {
+          return (data.first === false && data.last === true && data.dir == 1 &&
+                  data.deltaX == 10 && data.deltaY == 10 &&
+                  data.velocityX == 0 && data.velocityY == 0);
+        }),
+            event)
+        .once();
     gesturesMock.expects('signalEnd_').once();
 
     clock.tick(50);

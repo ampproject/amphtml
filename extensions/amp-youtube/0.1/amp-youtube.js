@@ -17,7 +17,6 @@
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
 
-
 class AmpYoutube extends AMP.BaseElement {
 
   /** @override */
@@ -35,9 +34,8 @@ class AmpYoutube extends AMP.BaseElement {
     var width = this.element.getAttribute('width');
     var height = this.element.getAttribute('height');
     // The video-id is supported only for backward compatibility.
-    var videoid = AMP.assert(
-        (this.element.getAttribute('data-videoid') ||
-        this.element.getAttribute('video-id')),
+    var videoid = AMP.assert((this.element.getAttribute('data-videoid') ||
+                                 this.element.getAttribute('video-id')),
         'The data-videoid attribute is required for <amp-youtube> %s',
         this.element);
     // See
@@ -45,8 +43,8 @@ class AmpYoutube extends AMP.BaseElement {
     var iframe = document.createElement('iframe');
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
-    iframe.src = 'https://www.youtube.com/embed/' + encodeURIComponent(
-        videoid) + '?enablejsapi=1';
+    iframe.src = 'https://www.youtube.com/embed/' +
+                 encodeURIComponent(videoid) + '?enablejsapi=1';
     this.applyFillContent(iframe);
     iframe.width = width;
     iframe.height = height;
@@ -59,16 +57,16 @@ class AmpYoutube extends AMP.BaseElement {
   /** @override */
   documentInactiveCallback() {
     if (this.iframe_ && this.iframe_.contentWindow) {
-      this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify({
-        'event': 'command',
-        'func': 'pauseVideo',
-        'args': ''
-      }), '*');
+      this.iframe_.contentWindow./*OK*/ postMessage(
+          JSON.stringify(
+              {'event': 'command', 'func': 'pauseVideo', 'args': ''}),
+          '*');
     }
     // No need to do layout later - user action will be expect to resume
     // the playback.
     return false;
   }
-};
+}
+;
 
 AMP.registerElement('amp-youtube', AmpYoutube);

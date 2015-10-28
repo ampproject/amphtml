@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import {DocumentState, isDocumentReady, onDocumentReady} from
-    '../../src/document-state';
+import {
+  DocumentState,
+  isDocumentReady,
+  onDocumentReady
+} from '../../src/document-state';
 import * as sinon from 'sinon';
-
 
 describe('documentReady', () => {
 
@@ -89,7 +91,6 @@ describe('documentReady', () => {
     expect(eventListeners['readystatechange']).to.equal(undefined);
   });
 });
-
 
 describe('DocumentState', () => {
 

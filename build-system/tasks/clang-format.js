@@ -20,9 +20,9 @@ var gulp = require('gulp');
 
 gulp.task('format-check', function() {
   return gulp.src(config.lintGlobs)
-    .pipe(format.checkFormat('file'))
-    .on('warning', function(e) {
+      .pipe(format.checkFormat('file'))
+      .on('warning', function(e) {
         process.stdout.write(e.message);
         process.exit(1);
-    });
+      });
 });

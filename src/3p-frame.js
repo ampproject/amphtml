@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 import {assert} from './asserts';
 import {getLengthNumeral} from '../src/layout';
 import {documentInfoFor} from './document-info';
@@ -22,10 +21,8 @@ import {getMode} from './mode';
 import {dashToCamelCase} from './string';
 import {parseUrl} from './url';
 
-
 /** @type {!Object<string,number>} Number of 3p frames on the for that type. */
 var count = {};
-
 
 /**
  * Produces the attributes for the ad template.
@@ -55,9 +52,7 @@ function getFrameAttributes(parentWindow, element, opt_type) {
   attributes._context = {
     referrer: parentWindow.document.referrer,
     canonicalUrl: documentInfoFor(parentWindow).canonicalUrl,
-    location: {
-      href: parentWindow.location.href
-    },
+    location: {href: parentWindow.location.href},
     mode: getMode()
   };
   var adSrc = element.getAttribute('src');
@@ -84,8 +79,8 @@ export function getIframe(parentWindow, element, opt_type) {
   iframe.name = 'frame_' + attributes.type + '_' + count[attributes.type]++;
 
   // Pass ad attributes to iframe via the fragment.
-  var src = getBootstrapBaseUrl(parentWindow) + '#' +
-      JSON.stringify(attributes);
+  var src =
+      getBootstrapBaseUrl(parentWindow) + '#' + JSON.stringify(attributes);
 
   iframe.src = src;
   iframe.width = attributes.width;
@@ -149,8 +144,8 @@ export function addDataAndJsonAttributes_(element, attributes) {
     try {
       obj = JSON.parse(json);
     } catch (e) {
-      assert(false, 'Error parsing JSON in json attribute in element %s',
-          element);
+      assert(
+          false, 'Error parsing JSON in json attribute in element %s', element);
     }
     for (var key in obj) {
       attributes[key] = obj[key];
@@ -165,13 +160,11 @@ export function addDataAndJsonAttributes_(element, attributes) {
  */
 function getBootstrapBaseUrl(parentWindow) {
   // TODO(malteubl): Change to final URL.
-  var url =
-      'https://3p.ampproject.net/$internalRuntimeVersion$/frame.html';
+  var url = 'https://3p.ampproject.net/$internalRuntimeVersion$/frame.html';
   if (getMode().localDev) {
     url = 'http://ads.localhost:' + parentWindow.location.port +
-        '/dist.3p/current' +
-        (getMode().minified ? '-min/frame' : '/frame.max') +
-        '.html';
+          '/dist.3p/current' +
+          (getMode().minified ? '-min/frame' : '/frame.max') + '.html';
   }
   return url;
 }

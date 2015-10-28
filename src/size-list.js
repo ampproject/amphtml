@@ -17,7 +17,6 @@
 import {assert} from './asserts';
 import {assertLength} from './layout';
 
-
 /**
  * A single option within a SizeList.
  * @typedef {{
@@ -26,7 +25,6 @@ import {assertLength} from './layout';
  * }}
  */
 var SizeListOption;
-
 
 /**
  * Parses the text representation of "sizes" into SizeList object.
@@ -37,7 +35,8 @@ var SizeListOption;
  * specified.
  *
  * See https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#Attributes
- * See http://www.w3.org/html/wg/drafts/html/master/semantics.html#attr-img-sizes
+ * See
+ * http://www.w3.org/html/wg/drafts/html/master/semantics.html#attr-img-sizes
  * @param {string} s
  * @return {!SizeList}
  */
@@ -66,7 +65,6 @@ export function parseSizeList(s) {
   return new SizeList(sizes);
 };
 
-
 /**
  * A SizeList object contains one or more sizes as typically seen in "sizes"
  * attribute.
@@ -74,7 +72,8 @@ export function parseSizeList(s) {
  * See "select" method for details on how the size selection is performed.
  *
  * See https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#Attributes
- * See http://www.w3.org/html/wg/drafts/html/master/semantics.html#attr-img-sizes
+ * See
+ * http://www.w3.org/html/wg/drafts/html/master/semantics.html#attr-img-sizes
  */
 export class SizeList {
   /**
@@ -103,7 +102,8 @@ export class SizeList {
    * Selects the first size that matches media conditions. If no options match,
    * the last option is returned.
    *
-   * See http://www.w3.org/html/wg/drafts/html/master/semantics.html#attr-img-sizes
+   * See
+   * http://www.w3.org/html/wg/drafts/html/master/semantics.html#attr-img-sizes
    * @param {!Window} win
    * @return {!Length}
    */

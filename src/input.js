@@ -20,12 +20,10 @@ import {log} from './log';
 import {listenOnce, listenOncePromise} from './event-helper';
 import {timer} from './timer';
 
-
 let TAG_ = 'Input';
 
 let MAX_MOUSE_CONFIRM_ATTEMPS_ = 3;
 let CLICK_TIMEOUT_ = 300;
-
 
 /**
  * Detects and maintains different types of input such as touch, mouse or
@@ -56,9 +54,9 @@ export class Input {
 
     /** @private {boolean} */
     this.hasTouch_ = ('ontouchstart' in win ||
-        (win.navigator['maxTouchPoints'] !== undefined &&
-            win.navigator['maxTouchPoints'] > 0) ||
-        win['DocumentTouch'] !== undefined);
+                      (win.navigator['maxTouchPoints'] !== undefined &&
+                          win.navigator['maxTouchPoints'] > 0) ||
+                      win['DocumentTouch'] !== undefined);
     log.fine(TAG_, 'touch detected:', this.hasTouch_);
 
     /** @private {boolean} */
@@ -173,11 +171,10 @@ export class Input {
 
     // Ignore inputs.
     let target = e.target;
-    if (target && (target.tagName == 'INPUT' ||
-          target.tagName == 'TEXTAREA' ||
-          target.tagName == 'SELECT' ||
-          target.tagName == 'OPTION' ||
-          target.hasAttribute('contenteditable'))) {
+    if (target &&
+        (target.tagName == 'INPUT' || target.tagName == 'TEXTAREA' ||
+            target.tagName == 'SELECT' || target.tagName == 'OPTION' ||
+            target.hasAttribute('contenteditable'))) {
       return;
     }
 
@@ -223,7 +220,6 @@ export class Input {
     }
   }
 }
-
 
 /**
  * @param {!Window} window

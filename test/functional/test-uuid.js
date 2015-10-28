@@ -16,7 +16,6 @@
 
 import {randomUUID} from '../../src/uuid';
 
-
 describe('UUID', () => {
   it('should generate randomUUID with right pattern', () => {
     let uuid = randomUUID();

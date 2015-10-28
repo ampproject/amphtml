@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-
 require('../src/polyfills');
 import {Timer} from '../src/timer';
 import {registerForUnitTest} from '../src/runtime';
 
 var iframeCount = 0;
-
 
 /**
  * Creates an iframe from an HTML fixture for use in tests.
@@ -78,7 +76,7 @@ export function createFixtureIframe(fixture, initialIframeHeight, done) {
             resolve();
           } else {
             win.addEventListener(eventName, () => {
-              if(events[eventName] == count) {
+              if (events[eventName] == count) {
                 resolve();
               }
             });
@@ -92,9 +90,8 @@ export function createFixtureIframe(fixture, initialIframeHeight, done) {
         });
       }
       win.onerror = function(message, file, line, col, error) {
-        throw new Error('Error in frame: ' + message + '\n' +
-            file + ':' + line + '\n' +
-            (error ? error.stack : 'no stack'));
+        throw new Error('Error in frame: ' + message + '\n' + file + ':' +
+                        line + '\n' + (error ? error.stack : 'no stack'));
       };
       var errors = [];
       win.console.error = function() {
@@ -157,8 +154,8 @@ export function createIframePromise(opt_runtimeOff) {
     var iframe = document.createElement('iframe');
     iframe.name = 'test_' + iframeCount++;
     iframe.srcdoc = '<!doctype><html><head>' +
-        '<script src="/base/build/polyfills.js"></script>' +
-        '<body style="margin:0"><div id=parent></div>';
+                    '<script src="/base/build/polyfills.js"></script>' +
+                    '<body style="margin:0"><div id=parent></div>';
     iframe.onload = function() {
       // Flag as being a test window.
       iframe.contentWindow.AMP_TEST = true;
@@ -171,8 +168,8 @@ export function createIframePromise(opt_runtimeOff) {
         doc: iframe.contentWindow.document,
         iframe: iframe,
         addElement: function(element) {
-          iframe.contentWindow.document.getElementById('parent')
-              .appendChild(element);
+          iframe.contentWindow.document.getElementById('parent').appendChild(
+              element);
           // Wait for mutation observer to fire.
           return new Timer(window).promise(16).then(() => {
             // Make sure it has dimensions since no styles are available.
@@ -236,13 +233,16 @@ export function pollForLayout(win, count, opt_timeout) {
   var getCount = () => {
     return win.document.querySelectorAll('.-amp-layout,.-amp-error').length;
   };
-  return poll('Waiting for elements to layout: ' + count, () => {
-    return getCount() >= count;
-  }, () => {
-    return new Error('Failed to find elements with layout.' +
-        ' Current count: ' + getCount() + ' HTML:\n' +
-        win.document.documentElement./*TEST*/innerHTML);
-  }, opt_timeout);
+  return poll('Waiting for elements to layout: ' + count,
+      () => {
+        return getCount() >= count;
+      },
+      () => {
+        return new Error('Failed to find elements with layout.' +
+                         ' Current count: ' + getCount() + ' HTML:\n' +
+                         win.document.documentElement./*TEST*/ innerHTML);
+      },
+      opt_timeout);
 }
 
 /**

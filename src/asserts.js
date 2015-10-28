@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-
-
 /**
  * Throws an error if the first argument isn't trueish.
  *

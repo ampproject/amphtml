@@ -19,11 +19,9 @@
  * connection before the real request can be made.
  */
 
-
 import {getService} from './service';
 import {parseUrl} from './url';
 import {timer} from './timer';
-
 
 class Preconnect {
 

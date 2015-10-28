@@ -19,7 +19,6 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import * as st from '../../../src/style';
 import * as tr from '../../../src/transition';
 
-
 /**
  * @deprecated `amp-slides` is deprecated and will be deleted before 1.0.
  * Please see {@link AmpCarousel} with `type=slides` attribute instead.
@@ -117,13 +116,14 @@ class AmpSlides extends AMP.BaseElement {
       var oldSlide = this.slides_[this.currentIndex_];
       this.currentIndex_ = newIndex;
       this.prepareSlide_(newSlide, dir);
-      var containerWidth = this.element./*OK*/offsetWidth;
+      var containerWidth = this.element./*OK*/ offsetWidth;
       if (!animate) {
         this.commitSwitch_(oldSlide, newSlide);
       } else {
         oldSlide.style.zIndex = 0;
-        Animation.animate(this.createTransition_(oldSlide, newSlide, dir),
-            200, 'ease-out').thenAlways(() => {
+        Animation.animate(this.createTransition_(oldSlide, newSlide, dir), 200,
+                     'ease-out')
+            .thenAlways(() => {
               this.commitSwitch_(oldSlide, newSlide);
               this.preloadNext_(dir);
             });
@@ -136,7 +136,7 @@ class AmpSlides extends AMP.BaseElement {
    * @param {number} dir
    */
   prepareSlide_(slide, dir) {
-    var containerWidth = this.element./*OK*/offsetWidth;
+    var containerWidth = this.element./*OK*/ offsetWidth;
     st.setStyles(slide, {
       transform: st.translateX(dir * containerWidth),
       zIndex: 1,
@@ -153,7 +153,7 @@ class AmpSlides extends AMP.BaseElement {
    * @return {!Transition}
    */
   createTransition_(oldSlide, newSlide, dir) {
-    var containerWidth = this.element./*OK*/offsetWidth;
+    var containerWidth = this.element./*OK*/ offsetWidth;
     return tr.all([
       tr.setStyles(newSlide, {
         transform: tr.translateX(tr.numeric(dir * containerWidth, 0)),

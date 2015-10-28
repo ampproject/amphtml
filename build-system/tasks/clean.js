@@ -17,7 +17,6 @@
 var del = require('del');
 var gulp = require('gulp-help')(require('gulp'));
 
-
 /**
  * Clean up the build artifacts
  *
@@ -26,6 +25,5 @@ var gulp = require('gulp-help')(require('gulp'));
 function clean(done) {
   del(['dist', 'dist.3p', 'build', 'examples.build'], done);
 }
-
 
 gulp.task('clean', 'Removes build output', clean);

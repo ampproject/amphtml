@@ -50,7 +50,7 @@ describe('asserts', () => {
     } catch (e) {
       error = e;
     }
-    expect(error).to.be.instanceof(Error);
+    expect(error).to.be.instanceof (Error);
     expect(error.message).to.equal('1 a 2 b 3');
     expect(error.messageArray).to.deep.equal([1, 'a', 2, 'b', 3]);
   });
@@ -63,7 +63,7 @@ describe('asserts', () => {
     } catch (e) {
       error = e;
     }
-    expect(error).to.be.instanceof(Error);
+    expect(error).to.be.instanceof (Error);
     expect(error.associatedElement).to.equal(div);
     expect(error.fromAssert).to.equal(true);
   });

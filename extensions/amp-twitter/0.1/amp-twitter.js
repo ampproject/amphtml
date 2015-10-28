@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-
 import {getIframe, listen} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
-
 
 class AmpTwitter extends AMP.BaseElement {
   /** @override */
@@ -38,8 +36,8 @@ class AmpTwitter extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     // TODO(malteubl): Preconnect to twitter.
-    var iframe = getIframe(this.element.ownerDocument.defaultView,
-        this.element, 'twitter');
+    var iframe = getIframe(
+        this.element.ownerDocument.defaultView, this.element, 'twitter');
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
     // Triggered by context.updateDimensions() inside the iframe.
@@ -53,6 +51,7 @@ class AmpTwitter extends AMP.BaseElement {
     });
     return loadPromise(iframe);
   }
-};
+}
+;
 
 AMP.registerElement('amp-twitter', AmpTwitter);

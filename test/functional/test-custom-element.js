@@ -22,7 +22,6 @@ import {resourcesFor} from '../../src/resources';
 import {vsync} from '../../src/vsync';
 import * as sinon from 'sinon';
 
-
 describe('CustomElement', () => {
 
   let resources = resourcesFor(window);
@@ -67,13 +66,11 @@ describe('CustomElement', () => {
     }
   }
 
-  let ElementClass = document.registerElement('amp-test',  {
-      prototype: createAmpElementProto(window, 'amp-test', TestElement)
-  });
+  let ElementClass = document.registerElement('amp-test',
+      {prototype: createAmpElementProto(window, 'amp-test', TestElement)});
 
-  let StubElementClass = document.registerElement('amp-stub',  {
-      prototype: createAmpElementProto(window, 'amp-stub', ElementStub)
-  });
+  let StubElementClass = document.registerElement('amp-stub',
+      {prototype: createAmpElementProto(window, 'amp-stub', ElementStub)});
 
   let sandbox;
   let resourcesMock;
@@ -102,7 +99,6 @@ describe('CustomElement', () => {
     sandbox = null;
   });
 
-
   it('Element - createdCallback', () => {
     let element = new ElementClass();
     expect(element.classList.contains('-amp-element')).to.equal(true);
@@ -128,7 +124,6 @@ describe('CustomElement', () => {
     expect(element.layout_).to.equal(Layout.NODISPLAY);
     expect(testElementCreatedCallback.callCount).to.equal(0);
   });
-
 
   it('Element - updateLayoutBox', () => {
     let element = new ElementClass();
@@ -159,7 +154,6 @@ describe('CustomElement', () => {
     expect(testElementFirstAttachedCallback.callCount).to.equal(0);
     expect(element.isBuilt()).to.equal(false);
   });
-
 
   it('Element - build allowed', () => {
     let element = new ElementClass();
@@ -246,7 +240,6 @@ describe('CustomElement', () => {
     expect(testElementBuildCallback.callCount).to.equal(0);
   });
 
-
   it('Element - attachedCallback', () => {
     let element = new ElementClass();
     element.setAttribute('layout', 'fill');
@@ -310,7 +303,6 @@ describe('CustomElement', () => {
     expect(testElementFirstAttachedCallback.callCount).to.equal(1);
   });
 
-
   it('Element - layoutCallback before build', () => {
     let element = new ElementClass();
     element.setAttribute('layout', 'fill');
@@ -363,25 +355,25 @@ describe('CustomElement', () => {
 
   it('Element - layoutCallback should call firstLayoutCompleted only once',
       () => {
-    let element = new ElementClass();
-    element.setAttribute('layout', 'fill');
-    element.build(true);
+        let element = new ElementClass();
+        element.setAttribute('layout', 'fill');
+        element.build(true);
 
-    let p = element.layoutCallback();
-    expect(testElementLayoutCallback.callCount).to.equal(1);
-    expect(testElementFirstLayoutCompleted.callCount).to.equal(0);
-    return p.then(() => {
-      expect(testElementFirstLayoutCompleted.callCount).to.equal(1);
+        let p = element.layoutCallback();
+        expect(testElementLayoutCallback.callCount).to.equal(1);
+        expect(testElementFirstLayoutCompleted.callCount).to.equal(0);
+        return p.then(() => {
+          expect(testElementFirstLayoutCompleted.callCount).to.equal(1);
 
-      // But not second time.
-      let p2 = element.layoutCallback();
-      expect(testElementLayoutCallback.callCount).to.equal(2);
-      expect(testElementFirstLayoutCompleted.callCount).to.equal(1);
-      return p2.then(() => {
-        expect(testElementFirstLayoutCompleted.callCount).to.equal(1);
+          // But not second time.
+          let p2 = element.layoutCallback();
+          expect(testElementLayoutCallback.callCount).to.equal(2);
+          expect(testElementFirstLayoutCompleted.callCount).to.equal(1);
+          return p2.then(() => {
+            expect(testElementFirstLayoutCompleted.callCount).to.equal(1);
+          });
+        });
       });
-    });
-  });
 
   it('StubElement - layoutCallback', () => {
     let element = new StubElementClass();
@@ -399,7 +391,6 @@ describe('CustomElement', () => {
       expect(element.readyState).to.equal('complete');
     });
   });
-
 
   it('should enqueue actions until built', () => {
     let element = new ElementClass();
@@ -451,7 +442,6 @@ describe('CustomElement', () => {
     expect(element.actionQueue_).to.equal(null);
   });
 
-
   it('should apply media condition', () => {
     let element1 = new ElementClass();
     element1.setAttribute('media', '(min-width: 1px)');
@@ -489,7 +479,6 @@ describe('CustomElement', () => {
     expect(element.sizerElement_.style.paddingTop).to.equal('111px');
     expect(element.style.height).to.equal('');
   });
-
 
   it('Element - documentInactiveCallback', () => {
     let element = new ElementClass();
@@ -586,12 +575,10 @@ describe('CustomElement', () => {
   });
 });
 
-
 describe('CustomElement Service Elements', () => {
 
-  let StubElementClass = document.registerElement('amp-stub2',  {
-      prototype: createAmpElementProto(window, 'amp-stub2', ElementStub)
-  });
+  let StubElementClass = document.registerElement('amp-stub2',
+      {prototype: createAmpElementProto(window, 'amp-stub2', ElementStub)});
 
   let sandbox;
   let element;
@@ -634,7 +621,6 @@ describe('CustomElement Service Elements', () => {
     expect(elements[0].tagName.toLowerCase()).to.equal('content');
   });
 
-
   it('getPlaceholder should return nothing', () => {
     expect(element.getPlaceholder()).to.be.null;
   });
@@ -670,14 +656,11 @@ describe('CustomElement Service Elements', () => {
   });
 });
 
-
 describe('CustomElement Loading Indicator', () => {
 
-  class TestElement extends BaseElement {
-  }
-  let ElementClass = document.registerElement('amp-test2',  {
-      prototype: createAmpElementProto(window, 'amp-test2', TestElement)
-  });
+  class TestElement extends BaseElement {}
+  let ElementClass = document.registerElement('amp-test2',
+      {prototype: createAmpElementProto(window, 'amp-test2', TestElement)});
 
   let resources = resourcesFor(window);
   let sandbox;
@@ -710,7 +693,6 @@ describe('CustomElement Loading Indicator', () => {
     sandbox.restore();
     sandbox = null;
   });
-
 
   it('should be enabled by default', () => {
     expect(element.isLoadingEnabled_()).to.be.true;
@@ -751,7 +733,6 @@ describe('CustomElement Loading Indicator', () => {
     element.layout_ = Layout.NODISPLAY;
     expect(element.isLoadingEnabled_()).to.be.false;
   });
-
 
   it('should ignore loading-off if never created', () => {
     element.toggleLoading_(false);
@@ -815,7 +796,6 @@ describe('CustomElement Loading Indicator', () => {
     expect(element.loadingElement_).to.be.null;
   });
 
-
   it('should turn off when exits viewport', () => {
     let toggle = sandbox.spy(element, 'toggleLoading_');
     element.viewportCallback(false);
@@ -847,7 +827,6 @@ describe('CustomElement Loading Indicator', () => {
     expect(toggle.callCount).to.equal(0);
   });
 
-
   it('should start loading when measured if already in viewport', () => {
     let toggle = sandbox.spy(element, 'toggleLoading_');
     element.isInViewport_ = true;
@@ -866,17 +845,18 @@ describe('CustomElement Loading Indicator', () => {
     expect(element.loadingContainer_).to.have.class('amp-hidden');
   });
 
-
   it('should toggle loading off after layout complete', () => {
     let toggle = sandbox.spy(element, 'toggleLoading_');
     element.build(true);
-    return element.layoutCallback().then(() => {
-      expect(toggle.callCount).to.equal(1);
-      expect(toggle.firstCall.args[0]).to.equal(false);
-      expect(toggle.firstCall.args[1]).to.equal(true);
-    }, () => {
-      throw new Error('Should never happen.');
-    });
+    return element.layoutCallback().then(
+        () => {
+          expect(toggle.callCount).to.equal(1);
+          expect(toggle.firstCall.args[0]).to.equal(false);
+          expect(toggle.firstCall.args[1]).to.equal(true);
+        },
+        () => {
+          throw new Error('Should never happen.');
+        });
   });
 
   it('should toggle loading off after layout failed', () => {
@@ -884,12 +864,14 @@ describe('CustomElement Loading Indicator', () => {
     let implMock = sandbox.mock(element.implementation_);
     implMock.expects('layoutCallback').returns(Promise.reject());
     element.build(true);
-    return element.layoutCallback().then(() => {
-      throw new Error('Should never happen.');
-    }, () => {
-      expect(toggle.callCount).to.equal(1);
-      expect(toggle.firstCall.args[0]).to.equal(false);
-      expect(toggle.firstCall.args[1]).to.equal(true);
-    });
+    return element.layoutCallback().then(
+        () => {
+          throw new Error('Should never happen.');
+        },
+        () => {
+          expect(toggle.callCount).to.equal(1);
+          expect(toggle.firstCall.args[0]).to.equal(false);
+          expect(toggle.firstCall.args[1]).to.equal(true);
+        });
   });
 });

@@ -17,7 +17,6 @@
 import {Viewer} from '../../src/viewer';
 import {platform} from '../../src/platform';
 
-
 describe('Viewer', () => {
 
   let sandbox;
@@ -53,7 +52,7 @@ describe('Viewer', () => {
 
   it('should configure correctly based on window name and hash', () => {
     windowApi.name = '__AMP__viewportType=virtual&width=222&height=333' +
-        '&scrollTop=15';
+                     '&scrollTop=15';
     windowApi.location.hash = '#width=111&paddingTop=17&other=something';
     windowApi.document = {body: {style: {}}};
     let viewer = new Viewer(windowApi);
@@ -113,13 +112,8 @@ describe('Viewer', () => {
     viewer.onViewportEvent((event) => {
       viewportEvent = event;
     });
-    viewer.receiveMessage('viewport', {
-      scrollTop: 11,
-      scrollLeft: 12,
-      width: 13,
-      height: 14,
-      paddingTop: 19
-    });
+    viewer.receiveMessage('viewport',
+        {scrollTop: 11, scrollLeft: 12, width: 13, height: 14, paddingTop: 19});
     expect(viewportEvent).to.not.equal(null);
     expect(viewer.getScrollTop()).to.equal(11);
     expect(viewer.getViewportWidth()).to.equal(13);
@@ -132,10 +126,8 @@ describe('Viewer', () => {
     viewer.onVisibilityChanged((event) => {
       visEvent = event;
     });
-    viewer.receiveMessage('visibilitychange', {
-      state: 'other',
-      prerenderSize: 4
-    });
+    viewer.receiveMessage(
+        'visibilitychange', {state: 'other', prerenderSize: 4});
     expect(visEvent).to.not.equal(null);
     expect(viewer.getVisibilityState()).to.equal('other');
     expect(viewer.isVisible()).to.equal(false);

@@ -16,7 +16,6 @@
 
 import {getMode} from './mode';
 
-
 /**
  * Triggers validation for the current document if there is a script in the
  * page that has a "development" attribute.
@@ -28,7 +27,7 @@ export function maybeValidate(win) {
     return;
   }
   var filename = win.location.href;
-  if (filename.indexOf('about:') == 0) {  // Should only happen in tests.
+  if (filename.indexOf('about:') == 0) { // Should only happen in tests.
     return;
   }
   var s = document.createElement('script');

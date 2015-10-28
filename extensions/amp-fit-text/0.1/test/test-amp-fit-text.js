@@ -17,12 +17,13 @@
 import {Timer} from '../../../../src/timer';
 import {createIframePromise} from '../../../../testing/iframe';
 require('../../../../build/all/v0/amp-fit-text-0.1.max');
-import {calculateFontSize_, updateOverflow_}
-    from '../../../../build/all/v0/amp-fit-text-0.1.max';
+import {
+  calculateFontSize_,
+  updateOverflow_
+} from '../../../../build/all/v0/amp-fit-text-0.1.max';
 import {adopt} from '../../../../src/runtime';
 
 adopt(window);
-
 
 describe('amp-fit-text component', () => {
 
@@ -61,7 +62,6 @@ describe('amp-fit-text component', () => {
 
 });
 
-
 describe('amp-fit-text calculateFontSize', () => {
 
   let element;
@@ -80,30 +80,29 @@ describe('amp-fit-text calculateFontSize', () => {
   });
 
   it('should always fit on one line', () => {
-    element./*OK*/innerHTML = 'A';
+    element./*OK*/ innerHTML = 'A';
     expect(calculateFontSize_(element, 20, 6, 72)).to.equal(20);
     expect(calculateFontSize_(element, 10, 6, 72)).to.equal(10);
     expect(calculateFontSize_(element, 40, 6, 72)).to.equal(40);
   });
 
   it('should hit min', () => {
-    element./*OK*/innerHTML = 'A';
+    element./*OK*/ innerHTML = 'A';
     expect(calculateFontSize_(element, 6, 6, 72)).to.equal(6);
     expect(calculateFontSize_(element, 3, 6, 72)).to.equal(6);
   });
 
   it('should hit max', () => {
-    element./*OK*/innerHTML = 'A';
+    element./*OK*/ innerHTML = 'A';
     expect(calculateFontSize_(element, 72, 6, 72)).to.equal(72);
     expect(calculateFontSize_(element, 80, 6, 72)).to.equal(72);
   });
 
   it('should always fit on two lines', () => {
-    element./*OK*/innerHTML = 'A<br>B';
+    element./*OK*/ innerHTML = 'A<br>B';
     expect(calculateFontSize_(element, 20, 6, 72)).to.equal(10);
   });
 });
-
 
 describe('amp-fit-text updateOverflow', () => {
 
@@ -144,7 +143,7 @@ describe('amp-fit-text updateOverflow', () => {
   }
 
   it('should always fit on one line', () => {
-    measurer./*OK*/innerHTML = 'A';
+    measurer./*OK*/ innerHTML = 'A';
     updateOverflow_(content, measurer, 24, 20);
     expect(classToggles['-amp-fit-text-content-overflown']).to.equal(false);
     expect(getLineClamp()).to.equal('');
@@ -152,10 +151,10 @@ describe('amp-fit-text updateOverflow', () => {
   });
 
   it('should always fit on two lines', () => {
-    measurer./*OK*/innerHTML = 'A<br>B';
+    measurer./*OK*/ innerHTML = 'A<br>B';
     updateOverflow_(content, measurer, 24, 20);
     expect(classToggles['-amp-fit-text-content-overflown']).to.equal(true);
     expect(getLineClamp()).to.equal(1);
-    expect(content.style.maxHeight).to.equal(23 + 'px');  // 23 = 20 * 1.15
+    expect(content.style.maxHeight).to.equal(23 + 'px'); // 23 = 20 * 1.15
   });
 });

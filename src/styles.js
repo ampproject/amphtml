@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 /**
  * Adds the given css text to the given document.
  *
@@ -89,7 +88,6 @@ export function makeBodyVisible(doc) {
   interval = setInterval(set, 4);
   set();
 }
-
 
 /**
  * Insert the element in the root after the element named after or

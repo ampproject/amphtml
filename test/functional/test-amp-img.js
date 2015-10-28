@@ -34,8 +34,8 @@ describe('amp-img', () => {
   });
 
   function getImg(attributes, children) {
-    methodStub = sinon.stub(BaseElement.prototype, 'isInViewport')
-        .returns(true);
+    methodStub =
+        sinon.stub(BaseElement.prototype, 'isInViewport').returns(true);
     return createIframePromise().then((iframe) => {
       installImg(iframe.win);
       let img = iframe.doc.createElement('amp-img');
@@ -53,15 +53,12 @@ describe('amp-img', () => {
   }
 
   it('should load an img', () => {
-    return getImg({
-      src: 'test.jpg',
-      width: 300,
-      height: 200
-    }).then((ampImg) => {
-      let img = ampImg.querySelector('img');
-      expect(img).to.be.an.instanceof(Element);
-      expect(img.tagName).to.equal('IMG');
-      expect(img.getAttribute('src')).to.equal('test.jpg');
-    });
+    return getImg({src: 'test.jpg', width: 300, height: 200})
+        .then((ampImg) => {
+          let img = ampImg.querySelector('img');
+          expect(img).to.be.an.instanceof (Element);
+          expect(img.tagName).to.equal('IMG');
+          expect(img.getAttribute('src')).to.equal('test.jpg');
+        });
   });
 });

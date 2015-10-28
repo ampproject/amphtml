@@ -17,7 +17,6 @@
 import {AmpSlides} from './slides';
 import {AmpCarousel} from './carousel';
 
-
 class CarouselSelector {
 
   constructor(element) {

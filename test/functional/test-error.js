@@ -19,7 +19,6 @@ import {setModeForTesting} from '../../src/mode';
 import {parseUrl, parseQueryString} from '../../src/url';
 import * as sinon from 'sinon';
 
-
 describe('reportErrorToServer', () => {
 
   let sandbox;
@@ -46,8 +45,8 @@ describe('reportErrorToServer', () => {
     var url = parseUrl(
         getErrorReportUrl(undefined, undefined, undefined, undefined, e));
     var query = parseQueryString(url.search);
-    expect(url.href.indexOf(
-        'https://cdn.ampproject.org/error/report.gif')).to.equal(0);
+    expect(url.href.indexOf('https://cdn.ampproject.org/error/report.gif'))
+        .to.equal(0);
 
     expect(query.m).to.equal('XYZ');
     expect(query.el).to.equal('u');
@@ -83,11 +82,11 @@ describe('reportErrorToServer', () => {
   });
 
   it('reportError without error object', () => {
-    var url = parseUrl(
-        getErrorReportUrl('foo bar', 'foo.js', '11', '22', undefined));
+    var url =
+        parseUrl(getErrorReportUrl('foo bar', 'foo.js', '11', '22', undefined));
     var query = parseQueryString(url.search);
-    expect(url.href.indexOf(
-        'https://cdn.ampproject.org/error/report.gif')).to.equal(0);
+    expect(url.href.indexOf('https://cdn.ampproject.org/error/report.gif'))
+        .to.equal(0);
 
     expect(query.m).to.equal('foo bar');
     expect(query.f).to.equal('foo.js');

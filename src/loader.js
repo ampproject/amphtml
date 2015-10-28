@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 /**
  * Creates a default "loading indicator" element. This element accepts
  * `amp-active` class in which case it may choose to run an animation.

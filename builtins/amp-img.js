@@ -20,7 +20,6 @@ import {loadPromise} from '../src/event-helper';
 import {parseSrcset} from '../src/srcset';
 import {registerElement} from '../src/custom-element';
 
-
 /**
  * @param {!Window} win Destination window for the new element.
  * @this {undefined}  // Make linter happy
@@ -56,7 +55,7 @@ export function installImg(win) {
 
       /** @private @const {!Srcset} */
       this.srcset_ = parseSrcset(this.element.getAttribute('srcset') ||
-          this.element.getAttribute('src'));
+                                 this.element.getAttribute('src'));
     }
 
     /** @override */
@@ -90,7 +89,8 @@ export function installImg(win) {
 
       return loadPromise(this.img_);
     }
-  };
+  }
+  ;
 
   registerElement(win, 'amp-img', AmpImg);
 }

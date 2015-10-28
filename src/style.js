@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 // Note: loaded by 3p system. Cannot rely on babel polyfills.
 
 /** @private @const {!Object<string>} */
@@ -22,7 +21,6 @@ const propertyNameCache_ = Object.create(null);
 
 /** @private @const {!Array<string>} */
 const vendorPrefixes_ = ['Webkit', 'webkit', 'Moz', 'moz', 'ms', 'O', 'o'];
-
 
 /**
  * @export
@@ -81,7 +79,6 @@ export function getVendorJsPropertyName(object, camelCase, opt_bypassCache) {
   return propertyName;
 }
 
-
 /**
  * Sets the CSS style of the specified element with optional units, e.g. "px".
  * @param {!Element} element
@@ -91,13 +88,12 @@ export function getVendorJsPropertyName(object, camelCase, opt_bypassCache) {
  * @param {boolean=} opt_bypassCache
  */
 export function setStyle(element, property, value, opt_units, opt_bypassCache) {
-  let propertyName = getVendorJsPropertyName(element.style, property,
-      opt_bypassCache);
+  let propertyName =
+      getVendorJsPropertyName(element.style, property, opt_bypassCache);
   if (propertyName) {
     element.style[propertyName] = opt_units ? value + opt_units : value;
   }
 }
-
 
 /**
  * Returns the value of the CSS style of the specified element.
@@ -107,14 +103,13 @@ export function setStyle(element, property, value, opt_units, opt_bypassCache) {
  * @return {*}
  */
 export function getStyle(element, property, opt_bypassCache) {
-  let propertyName = getVendorJsPropertyName(element.style, property,
-      opt_bypassCache);
+  let propertyName =
+      getVendorJsPropertyName(element.style, property, opt_bypassCache);
   if (!propertyName) {
     return undefined;
   }
   return element.style[propertyName];
 }
-
 
 /**
  * Sets the CSS styles of the specified element. The styles
@@ -128,7 +123,6 @@ export function setStyles(element, styles) {
   }
 }
 
-
 /**
  * Shows or hides the specified element.
  * @param {!Element} element
@@ -141,7 +135,6 @@ export function toggle(element, opt_display) {
   element.style.display = opt_display ? '' : 'none';
 }
 
-
 /**
  * Returns a pixel value.
  * @param {number} value
@@ -150,7 +143,6 @@ export function toggle(element, opt_display) {
 export function px(value) {
   return value + 'px';
 }
-
 
 /**
  * Returns a "translateX" for CSS "transform" property.
@@ -163,7 +155,6 @@ export function translateX(value) {
   }
   return `translateX(${px(value)})`;
 }
-
 
 /**
  * Returns a "translateX" for CSS "transform" property.
@@ -183,7 +174,6 @@ export function translate(x, opt_y) {
   }
   return `translate(${x},${opt_y})`;
 }
-
 
 /**
  * Returns a "scale" for CSS "transform" property.

@@ -14,10 +14,20 @@
  * limitations under the License.
  */
 
-import {Layout, assertLength, getLayoutClass, getLengthNumeral, getLengthUnits,
-          isInternalElement, isLayoutSizeDefined, isLoadingAllowed,
-          parseLayout, parseLength, getNaturalDimensions,
-          hasNaturalDimensions} from './layout';
+import {
+  Layout,
+  assertLength,
+  getLayoutClass,
+  getLengthNumeral,
+  getLengthUnits,
+  isInternalElement,
+  isLayoutSizeDefined,
+  isLoadingAllowed,
+  parseLayout,
+  parseLength,
+  getNaturalDimensions,
+  hasNaturalDimensions
+} from './layout';
 import {ElementStub, stubbedElements} from './element-stub';
 import {assert} from './asserts';
 import {createLoaderElement} from '../src/loader';
@@ -28,7 +38,6 @@ import {resourcesFor} from './resources';
 import {timer} from './timer';
 import {vsync} from './vsync';
 import * as dom from './dom';
-
 
 const TAG_ = 'CustomElement';
 
@@ -41,7 +50,6 @@ const TAG_ = 'CustomElement';
  */
 const MIN_WIDTH_FOR_LOADING_ = 100;
 
-
 /**
  * The elements positioned ahead of this threshold may have their loading
  * indicator initialized faster. This is benefitial to avoid relayout during
@@ -50,13 +58,11 @@ const MIN_WIDTH_FOR_LOADING_ = 100;
  */
 const PREPARE_LOADING_THRESHOLD_ = 1000;
 
-
 /**
  * Map from element name to implementation class.
  * @const {Object}
  */
 let knownElements = {};
-
 
 /**
  * Registers an element. Upgrades it if has previously been stubbed.
@@ -92,7 +98,6 @@ export function upgradeOrRegisterElement(win, name, toClass) {
   }
 }
 
-
 /**
  * Stub extended elements missing an implementation.
  * @param {!Window} win
@@ -107,7 +112,6 @@ export function stubElements(win) {
     registerElement(win, name, ElementStub);
   }
 }
-
 
 /**
  * Applies layout to the element. Visible for testing only.
@@ -154,29 +158,29 @@ export function applyLayout_(element) {
   }
 
   if (layout == Layout.FIXED || layout == Layout.FIXED_HEIGHT ||
-          layout == Layout.RESPONSIVE) {
+      layout == Layout.RESPONSIVE) {
     let width = 0;
     if (layout == Layout.FIXED_HEIGHT) {
       if (widthAttr && widthAttr != 'auto') {
         throw new Error('Expected width to be either absent or equal "auto" ' +
-            'for fixed-height layout: ' + widthAttr);
+                        'for fixed-height layout: ' + widthAttr);
       }
     } else {
       width = parseLength(widthAttr);
       if (!width) {
         throw new Error('Expected width to be available and be an ' +
-            'integer/length value: ' + widthAttr);
+                        'integer/length value: ' + widthAttr);
       }
     }
     let height = parseLength(heightAttr);
     if (!height) {
       throw new Error('Expected height to be available and be an ' +
-          'integer/length value: ' + heightAttr);
+                      'integer/length value: ' + heightAttr);
     }
     if (layout == Layout.RESPONSIVE) {
       if (getLengthUnits(width) != getLengthUnits(height)) {
         throw new Error('Length units should be the same for width ' + width +
-            ' and height ' + height);
+                        ' and height ' + height);
       }
       let sizer = element.ownerDocument.createElement('i-amp-sizer');
       sizer.style.display = 'block';
@@ -204,7 +208,6 @@ export function applyLayout_(element) {
   return layout;
 }
 
-
 /**
  * Returns "true" for internal AMP nodes or for placeholder elements.
  * @param {!Node} node
@@ -214,13 +217,12 @@ function isInternalOrServiceNode(node) {
   if (isInternalElement(node)) {
     return true;
   }
-  if (node.tagName && (node.hasAttribute('placeholder') ||
-          node.hasAttribute('fallback'))) {
+  if (node.tagName &&
+      (node.hasAttribute('placeholder') || node.hasAttribute('fallback'))) {
     return true;
   }
   return false;
 }
-
 
 /**
  * The interface that is implemented by all custom elements in the AMP
@@ -230,7 +232,6 @@ function isInternalOrServiceNode(node) {
 class AmpElement {
   // TODO(dvoytenko): Add all exposed methods.
 }
-
 
 /**
  * Creates a new custom element class prototype.
@@ -339,7 +340,7 @@ export function createAmpElementProto(win, name, implementationClass) {
       registeredStub.upgrade(newImpl);
     }
     if (this.layout_ != Layout.NODISPLAY &&
-          !this.implementation_.isLayoutSupported(this.layout_)) {
+        !this.implementation_.isLayoutSupported(this.layout_)) {
       throw new Error('Layout not supported: ' + this.layout_);
     }
     this.implementation_.layout_ = this.layout_;
@@ -394,7 +395,7 @@ export function createAmpElementProto(win, name, implementationClass) {
       this.built_ = true;
       this.classList.remove('-amp-notbuilt');
       this.classList.remove('amp-notbuilt');
-    } catch(e) {
+    } catch (e) {
       reportError(e, this);
       throw e;
     }
@@ -431,7 +432,7 @@ export function createAmpElementProto(win, name, implementationClass) {
         // Already in viewport - start showing loading.
         this.toggleLoading_(true);
       } else if (layoutBox.top < PREPARE_LOADING_THRESHOLD_ &&
-            layoutBox.top >= 0) {
+                 layoutBox.top >= 0) {
         // Few top elements will also be pre-initialized with a loading
         // element.
         vsync.mutate(() => {
@@ -469,8 +470,8 @@ export function createAmpElementProto(win, name, implementationClass) {
       this.sizeList_ = sizesAttr ? parseSizeList(sizesAttr) : null;
     }
     if (this.sizeList_) {
-      this.style.width = assertLength(this.sizeList_.select(
-          this.ownerDocument.defaultView));
+      this.style.width =
+          assertLength(this.sizeList_.select(this.ownerDocument.defaultView));
     }
   };
 
@@ -504,8 +505,7 @@ export function createAmpElementProto(win, name, implementationClass) {
       this.everAttached = true;
       try {
         this.firstAttachedCallback_();
-      }
-      catch (e) {
+      } catch (e) {
         reportError(e, this);
       }
     }
@@ -528,12 +528,12 @@ export function createAmpElementProto(win, name, implementationClass) {
     try {
       this.layout_ = applyLayout_(this);
       if (this.layout_ != Layout.NODISPLAY &&
-            !this.implementation_.isLayoutSupported(this.layout_)) {
+          !this.implementation_.isLayoutSupported(this.layout_)) {
         throw new Error('Layout not supported for: ' + this.layout_);
       }
       this.implementation_.layout_ = this.layout_;
       this.implementation_.firstAttachedCallback();
-    } catch(e) {
+    } catch (e) {
       reportError(e, this);
       throw e;
     }
@@ -617,19 +617,20 @@ export function createAmpElementProto(win, name, implementationClass) {
     this.dispatchCustomEvent('amp:load:start');
     var promise = this.implementation_.layoutCallback();
     this.classList.add('-amp-layout');
-    assert(promise instanceof Promise,
-        'layoutCallback must return a promise');
-    return promise.then(() => {
-      this.readyState = 'complete';
-      this.layoutCount_++;
-      this.toggleLoading_(false, /* cleanup */ true);
-      if (this.layoutCount_ == 1) {
-        this.implementation_.firstLayoutCompleted();
-      }
-    }, (reason) => {
-      this.toggleLoading_(false, /* cleanup */ true);
-      return Promise.reject(reason);
-    });
+    assert(promise instanceof Promise, 'layoutCallback must return a promise');
+    return promise.then(
+        () => {
+          this.readyState = 'complete';
+          this.layoutCount_++;
+          this.toggleLoading_(false, /* cleanup */ true);
+          if (this.layoutCount_ == 1) {
+            this.implementation_.firstLayoutCompleted();
+          }
+        },
+        (reason) => {
+          this.toggleLoading_(false, /* cleanup */ true);
+          return Promise.reject(reason);
+        });
   };
 
   /**
@@ -738,7 +739,6 @@ export function createAmpElementProto(win, name, implementationClass) {
     }
   };
 
-
   /**
    * Returns the original nodes of the custom element without any service nodes
    * that could have been added for markup. These nodes can include Text,
@@ -824,12 +824,9 @@ export function createAmpElementProto(win, name, implementationClass) {
     if (this.loadingDisabled_ === undefined) {
       this.loadingDisabled_ = this.hasAttribute('noloading');
     }
-    if (this.loadingDisabled_ ||
-            !isLoadingAllowed(this.tagName) ||
-            this.layoutWidth_ < MIN_WIDTH_FOR_LOADING_ ||
-            this.layoutCount_ > 0 ||
-            isInternalOrServiceNode(this) ||
-            !isLayoutSizeDefined(this.layout_)) {
+    if (this.loadingDisabled_ || !isLoadingAllowed(this.tagName) ||
+        this.layoutWidth_ < MIN_WIDTH_FOR_LOADING_ || this.layoutCount_ > 0 ||
+        isInternalOrServiceNode(this) || !isLayoutSizeDefined(this.layout_)) {
       return false;
     }
     return true;
@@ -898,7 +895,6 @@ export function createAmpElementProto(win, name, implementationClass) {
   return ElementProto;
 }
 
-
 /**
  * Registers a new custom element with its implementation class.
  * @param {!Window} win The window in which to register the elements.
@@ -908,7 +904,6 @@ export function createAmpElementProto(win, name, implementationClass) {
 export function registerElement(win, name, implementationClass) {
   knownElements[name] = implementationClass;
 
-  win.document.registerElement(name, {
-    prototype: createAmpElementProto(win, name, implementationClass)
-  });
+  win.document.registerElement(
+      name, {prototype: createAmpElementProto(win, name, implementationClass)});
 }

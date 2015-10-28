@@ -19,7 +19,6 @@ import * as tr from '../../../../src/transition';
 import {AmpSlides} from '../slides';
 import {timer} from '../../../../src/timer';
 
-
 describe('Slides functional', () => {
 
   let sandbox;
@@ -92,44 +91,46 @@ describe('Slides functional', () => {
     });
 
     it('should allow negative value swipe when looping and on ' +
-       'first item', () => {
-      slides.isLooping_ = true;
-      slides.currentIndex_ = 0;
-      slides.onSwipeStart_({});
-      expect(slides.swipeState_).to.not.equal(null);
-      expect(slides.swipeState_.currentIndex).to.equal(0);
-      expect(slides.swipeState_.containerWidth).to.equal(320);
-      expect(slides.swipeState_.prevTr).to.not.equal(tr.NOOP);
-      expect(slides.swipeState_.nextTr).to.not.equal(tr.NOOP);
-      expect(slides.swipeState_.min).to.equal(-1);
-      expect(slides.swipeState_.max).to.equal(1);
-      expect(slides.swipeState_.pos).to.equal(0);
-      expect(prepareCallback.callCount).to.equal(2);
-      expect(prepareCallback.getCall(0).args[0]).to.equal(slide2);
-      expect(prepareCallback.getCall(0).args[1]).to.equal(-1);
-      expect(prepareCallback.getCall(1).args[0]).to.equal(slide1);
-      expect(prepareCallback.getCall(1).args[1]).to.equal(1);
-    });
+            'first item',
+        () => {
+          slides.isLooping_ = true;
+          slides.currentIndex_ = 0;
+          slides.onSwipeStart_({});
+          expect(slides.swipeState_).to.not.equal(null);
+          expect(slides.swipeState_.currentIndex).to.equal(0);
+          expect(slides.swipeState_.containerWidth).to.equal(320);
+          expect(slides.swipeState_.prevTr).to.not.equal(tr.NOOP);
+          expect(slides.swipeState_.nextTr).to.not.equal(tr.NOOP);
+          expect(slides.swipeState_.min).to.equal(-1);
+          expect(slides.swipeState_.max).to.equal(1);
+          expect(slides.swipeState_.pos).to.equal(0);
+          expect(prepareCallback.callCount).to.equal(2);
+          expect(prepareCallback.getCall(0).args[0]).to.equal(slide2);
+          expect(prepareCallback.getCall(0).args[1]).to.equal(-1);
+          expect(prepareCallback.getCall(1).args[0]).to.equal(slide1);
+          expect(prepareCallback.getCall(1).args[1]).to.equal(1);
+        });
 
     it('should allow positive value swipe when looping and on ' +
-       'last item', () => {
-      slides.isLooping_ = true;
-      slides.currentIndex_ = 2;
-      slides.onSwipeStart_({});
-      expect(slides.swipeState_).to.not.equal(null);
-      expect(slides.swipeState_.currentIndex).to.equal(2);
-      expect(slides.swipeState_.containerWidth).to.equal(320);
-      expect(slides.swipeState_.prevTr).to.not.equal(tr.NOOP);
-      expect(slides.swipeState_.nextTr).to.not.equal(tr.NOOP);
-      expect(slides.swipeState_.min).to.equal(-1);
-      expect(slides.swipeState_.max).to.equal(1);
-      expect(slides.swipeState_.pos).to.equal(0);
-      expect(prepareCallback.callCount).to.equal(2);
-      expect(prepareCallback.getCall(0).args[0]).to.equal(slide1);
-      expect(prepareCallback.getCall(0).args[1]).to.equal(-1);
-      expect(prepareCallback.getCall(1).args[0]).to.equal(slide0);
-      expect(prepareCallback.getCall(1).args[1]).to.equal(1);
-    });
+            'last item',
+        () => {
+          slides.isLooping_ = true;
+          slides.currentIndex_ = 2;
+          slides.onSwipeStart_({});
+          expect(slides.swipeState_).to.not.equal(null);
+          expect(slides.swipeState_.currentIndex).to.equal(2);
+          expect(slides.swipeState_.containerWidth).to.equal(320);
+          expect(slides.swipeState_.prevTr).to.not.equal(tr.NOOP);
+          expect(slides.swipeState_.nextTr).to.not.equal(tr.NOOP);
+          expect(slides.swipeState_.min).to.equal(-1);
+          expect(slides.swipeState_.max).to.equal(1);
+          expect(slides.swipeState_.pos).to.equal(0);
+          expect(prepareCallback.callCount).to.equal(2);
+          expect(prepareCallback.getCall(0).args[0]).to.equal(slide1);
+          expect(prepareCallback.getCall(0).args[1]).to.equal(-1);
+          expect(prepareCallback.getCall(1).args[0]).to.equal(slide0);
+          expect(prepareCallback.getCall(1).args[1]).to.equal(1);
+        });
 
     it('should start swiping with slide1', () => {
       slides.currentIndex_ = 1;
@@ -264,29 +265,30 @@ describe('Slides functional', () => {
     });
 
     it('should not go past first item with a negative value when not ' +
-       ' looping', () => {
-      slides.isLooping_ = true;
-      let prevTr = sinon.spy();
-      let nextTr = sinon.spy();
-      slides.currentIndex_ = 0;
-      let s = {
-        currentIndex: 0,
-        prevIndex: 2,
-        nextIndex: 1,
-        containerWidth: 320,
-        pos: -0.6,
-        min: 0,
-        max: 0,
-        prevTr: prevTr,
-        nextTr: nextTr
-      };
-      slides.swipeState_ = s;
-      let promise = slides.onSwipeEnd_({velocityX: 0});
-      return promise.then(() => {
-        expect(slides.currentIndex_).to.equal(0);
-        expect(switchCallback.callCount).to.equal(0);
-      });
-    });
+            ' looping',
+        () => {
+          slides.isLooping_ = true;
+          let prevTr = sinon.spy();
+          let nextTr = sinon.spy();
+          slides.currentIndex_ = 0;
+          let s = {
+            currentIndex: 0,
+            prevIndex: 2,
+            nextIndex: 1,
+            containerWidth: 320,
+            pos: -0.6,
+            min: 0,
+            max: 0,
+            prevTr: prevTr,
+            nextTr: nextTr
+          };
+          slides.swipeState_ = s;
+          let promise = slides.onSwipeEnd_({velocityX: 0});
+          return promise.then(() => {
+            expect(slides.currentIndex_).to.equal(0);
+            expect(switchCallback.callCount).to.equal(0);
+          });
+        });
 
     it('should go past first item with a negative value when looping', () => {
       slides.isLooping_ = true;
@@ -314,29 +316,30 @@ describe('Slides functional', () => {
     });
 
     it('should not go past last item with a positive value when ' +
-       'not looping', () => {
-      slides.isLooping_ = true;
-      let prevTr = sinon.spy();
-      let nextTr = sinon.spy();
-      slides.currentIndex_ = 2;
-      let s = {
-        currentIndex: 2,
-        prevIndex: 1,
-        nextIndex: 0,
-        containerWidth: 320,
-        pos: 0.6,
-        min: 0,
-        max: 0,
-        prevTr: prevTr,
-        nextTr: nextTr
-      };
-      slides.swipeState_ = s;
-      let promise = slides.onSwipeEnd_({velocityX: 0});
-      return promise.then(() => {
-        expect(slides.currentIndex_).to.equal(2);
-        expect(switchCallback.callCount).to.equal(0);
-      });
-    });
+            'not looping',
+        () => {
+          slides.isLooping_ = true;
+          let prevTr = sinon.spy();
+          let nextTr = sinon.spy();
+          slides.currentIndex_ = 2;
+          let s = {
+            currentIndex: 2,
+            prevIndex: 1,
+            nextIndex: 0,
+            containerWidth: 320,
+            pos: 0.6,
+            min: 0,
+            max: 0,
+            prevTr: prevTr,
+            nextTr: nextTr
+          };
+          slides.swipeState_ = s;
+          let promise = slides.onSwipeEnd_({velocityX: 0});
+          return promise.then(() => {
+            expect(slides.currentIndex_).to.equal(2);
+            expect(switchCallback.callCount).to.equal(0);
+          });
+        });
 
     it('should go past last item with a positive value when looping', () => {
       slides.isLooping_ = true;

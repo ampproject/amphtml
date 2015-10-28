@@ -16,7 +16,6 @@
 
 import {timer} from './timer';
 
-
 /**
  * Generates a random UUID string that is RFC4122 version 4 compliant.
  * See http://stackoverflow.com/a/8809472

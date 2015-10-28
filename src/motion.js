@@ -37,7 +37,6 @@ const EXP_FRAME_CONST_ = Math.round(-FRAME_CONST_ / Math.log(0.95));
  */
 const VELOCITY_DEPR_FACTOR_ = FRAME_CONST_ * 2;
 
-
 /**
  * Calculates velocity for an object traveling the distance deltaV in the
  * time deltaTime given the previous velocity prevVelocity. The calculation
@@ -65,7 +64,6 @@ export function calcVelocity(deltaV, deltaTime, prevVelocity) {
   return speed * depr + prevVelocity * (1 - depr);
 }
 
-
 /**
  * Returns a motion process that will yield when the velocity has run down to
  * zerp. For each iteration, the velocity is depreciated and the coordinates
@@ -80,11 +78,10 @@ export function calcVelocity(deltaV, deltaTime, prevVelocity) {
  * @param {!Vsync=} opt_vsync Mostly for testing only.
  * @return {!Motion}
  */
-export function continueMotion(startX, startY, veloX, veloY, callback,
-    opt_vsync) {
+export function continueMotion(
+    startX, startY, veloX, veloY, callback, opt_vsync) {
   return new Motion(startX, startY, veloX, veloY, callback, opt_vsync).start_();
 }
-
 
 /**
  * Motion process that allows tracking and monitoring of the running motion.
@@ -152,7 +149,7 @@ class Motion {
   start_() {
     this.continuing_ = true;
     if (Math.abs(this.maxVelocityX_) <= MIN_VELOCITY_ &&
-            Math.abs(this.maxVelocityY_) <= MIN_VELOCITY_) {
+        Math.abs(this.maxVelocityY_) <= MIN_VELOCITY_) {
       this.fireMove_();
       this.completeContinue_(true);
     } else {
@@ -234,7 +231,7 @@ class Motion {
     this.velocityX_ = this.maxVelocityX_ * decel;
     this.velocityY_ = this.maxVelocityY_ * decel;
     return (Math.abs(this.velocityX_) > MIN_VELOCITY_ ||
-        Math.abs(this.velocityY_) > MIN_VELOCITY_);
+            Math.abs(this.velocityY_) > MIN_VELOCITY_);
   }
 
   /**

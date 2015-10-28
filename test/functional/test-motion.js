@@ -17,7 +17,6 @@
 import {calcVelocity, continueMotion} from '../../src/motion';
 import * as sinon from 'sinon';
 
-
 describe('Motion calcVelocity', () => {
 
   it('should dampen velocity when prevVelocity is 0', () => {
@@ -52,7 +51,6 @@ describe('Motion calcVelocity', () => {
     expect(v).to.be.closeTo(-0.625, 1e-3);
   });
 });
-
 
 describe('Motion continueMotion', () => {
   let sandbox;

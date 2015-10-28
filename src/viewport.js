@@ -25,9 +25,7 @@ import {px, setStyle, setStyles} from './style';
 import {timer} from './timer';
 import {viewerFor} from './viewer';
 
-
 let TAG_ = 'Viewport';
-
 
 /**
  * @typedef {{
@@ -39,7 +37,6 @@ let TAG_ = 'Viewport';
  * }}
  */
 var ViewportChangedEvent;
-
 
 /**
  * This object represents the viewport. It tracks scroll position, resize
@@ -72,10 +69,10 @@ export class Viewport {
     this.size_ = null;
 
     /** @private {?number} */
-    this./*OK*/scrollTop_ = null;
+    this./*OK*/ scrollTop_ = null;
 
     /** @private {?number} */
-    this./*OK*/scrollLeft_ = null;
+    this./*OK*/ scrollLeft_ = null;
 
     /** @private {number} */
     this.paddingTop_ = viewer.getPaddingTop();
@@ -138,10 +135,10 @@ export class Viewport {
    * @return {number}
    */
   getScrollTop() {
-    if (this./*OK*/scrollTop_ == null) {
-      this./*OK*/scrollTop_ = this.binding_.getScrollTop();
+    if (this./*OK*/ scrollTop_ == null) {
+      this./*OK*/ scrollTop_ = this.binding_.getScrollTop();
     }
-    return this./*OK*/scrollTop_;
+    return this./*OK*/ scrollTop_;
   }
 
   /**
@@ -149,10 +146,10 @@ export class Viewport {
    * @return {number}
    */
   getScrollLeft() {
-    if (this./*OK*/scrollleft_ == null) {
-      this./*OK*/scrollLeft_ = this.binding_.getScrollLeft();
+    if (this./*OK*/ scrollleft_ == null) {
+      this./*OK*/ scrollLeft_ = this.binding_.getScrollLeft();
     }
-    return this./*OK*/scrollLeft_;
+    return this./*OK*/ scrollLeft_;
   }
 
   /**
@@ -226,8 +223,8 @@ export class Viewport {
    * Resets touch zoom to initial scale of 1.
    */
   resetTouchZoom() {
-    let windowHeight = this.win_./*OK*/innerHeight;
-    let documentHeight = this.win_.document.documentElement./*OK*/clientHeight;
+    let windowHeight = this.win_./*OK*/ innerHeight;
+    let documentHeight = this.win_.document.documentElement./*OK*/ clientHeight;
     if (windowHeight && documentHeight && windowHeight === documentHeight) {
       // This code only works when scrollbar overlay content and take no space,
       // which is fine on mobile. For non-mobile devices this code is
@@ -254,10 +251,8 @@ export class Viewport {
     }
     // Setting maximum-scale=1 and user-scalable=no zooms page back to normal
     // and prohibit further default zooming.
-    let newValue = updateViewportMetaString(viewportMeta.content, {
-      'maximum-scale': '1',
-      'user-scalable': 'no'
-    });
+    let newValue = updateViewportMetaString(
+        viewportMeta.content, {'maximum-scale': '1', 'user-scalable': 'no'});
     return this.setViewportMetaString_(newValue);
   }
 
@@ -298,8 +293,8 @@ export class Viewport {
       return null;
     }
     if (this.viewportMeta_ === undefined) {
-      this.viewportMeta_ = this.win_.document.querySelector(
-          'meta[name=viewport]');
+      this.viewportMeta_ =
+          this.win_.document.querySelector('meta[name=viewport]');
       if (this.viewportMeta_) {
         this.originalViewportMetaString_ = this.viewportMeta_.content;
       }
@@ -315,11 +310,8 @@ export class Viewport {
   changed_(relayoutAll, velocity) {
     let size = this.getSize();
     let scrollTop = this.getScrollTop();
-    log.fine(TAG_, 'changed event:',
-        'relayoutAll=', relayoutAll,
-        'top=', scrollTop,
-        'bottom=', (scrollTop + size.height),
-        'velocity=', velocity);
+    log.fine(TAG_, 'changed event:', 'relayoutAll=', relayoutAll, 'top=',
+        scrollTop, 'bottom=', (scrollTop + size.height), 'velocity=', velocity);
     this.changeObservable_.fire({
       relayoutAll: relayoutAll,
       top: scrollTop,
@@ -359,12 +351,12 @@ export class Viewport {
     var now = timer.now();
     var velocity = 0;
     if (now != this.scrollMeasureTime_) {
-      velocity = (newScrollTop - this.scrollTop_) /
-          (now - this.scrollMeasureTime_);
+      velocity =
+          (newScrollTop - this.scrollTop_) / (now - this.scrollMeasureTime_);
     }
     log.fine(TAG_, 'scroll: ' +
-        'scrollTop=' + newScrollTop + '; ' +
-        'velocity=' + velocity);
+                       'scrollTop=' + newScrollTop + '; ' +
+                       'velocity=' + velocity);
     this.scrollTop_ = newScrollTop;
     this.scrollMeasureTime_ = now;
     // TODO(dvoytenko): confirm the desired value and document it well.
@@ -383,12 +375,11 @@ export class Viewport {
   /** @private */
   resize_() {
     let oldSize = this.size_;
-    this.size_ = null;  // Need to recalc.
+    this.size_ = null; // Need to recalc.
     let newSize = this.getSize();
     this.changed_(!oldSize || oldSize.width != newSize.width, 0);
   }
 }
-
 
 /**
  * ViewportBinding is an interface that defines an underlying technology behind
@@ -401,67 +392,77 @@ class ViewportBinding {
    * Register a callback for scroll events.
    * @param {function()} callback
    */
-  onScroll(callback) {}
+  onScroll(callback) {
+  }
 
   /**
    * Register a callback for resize events.
    * @param {function()} callback
    */
-  onResize(callback) {}
+  onResize(callback) {
+  }
 
   /**
    * Updates binding with the new viewer's viewport info.
    * @param {!Viewer} viewer
    */
-  updateViewerViewport(viewer) {}
+  updateViewerViewport(viewer) {
+  }
 
   /**
    * Updates binding with the new padding.
    * @param {number} paddingTop
    */
-  updatePaddingTop(paddingTop) {}
+  updatePaddingTop(paddingTop) {
+  }
 
   /**
    * Returns the size of the viewport.
    * @return {!{width: number, height: number}}
    */
-  getSize() {}
+  getSize() {
+  }
 
   /**
    * Returns the top scroll position for the viewport.
    * @return {number}
    */
-  getScrollTop() {}
+  getScrollTop() {
+  }
 
   /**
    * Sets scroll top position to the specified value or the nearest possible.
    * @param {number} scrollTop
    */
-  setScrollTop(scrollTop) {}
+  setScrollTop(scrollTop) {
+  }
 
   /**
    * Returns the left scroll position for the viewport.
    * @return {number}
    */
-  getScrollLeft() {}
+  getScrollLeft() {
+  }
 
   /**
    * Returns the scroll width of the content within the viewport.
    * @return {number}
    */
-  getScrollWidth() {}
+  getScrollWidth() {
+  }
 
   /**
    * Returns the rect of the element within the document.
    * @param {!Element} el
    * @return {!LayoutRect}
    */
-  getLayoutRect(el) {}
+  getLayoutRect(el) {
+  }
 
   /** For testing. */
-  cleanup_() {}
+  cleanup_() {
+  }
 }
-
 
 /**
  * Implementation of ViewportBinding based on the native window. It assumes that
@@ -525,47 +526,46 @@ export class ViewportBindingNatural_ {
     // and thus cannot be used. But when the values are undefined, fallback to
     // documentElement./*OK*/clientHeight.
     if (platform.isIos() && !platform.isChrome()) {
-      var winWidth = this.win./*OK*/innerWidth;
-      var winHeight = this.win./*OK*/innerHeight;
+      var winWidth = this.win./*OK*/ innerWidth;
+      var winHeight = this.win./*OK*/ innerHeight;
       if (winWidth && winHeight) {
         return {width: winWidth, height: winHeight};
       }
     }
     var el = this.win.document.documentElement;
-    return {width: el./*OK*/clientWidth, height: el./*OK*/clientHeight};
+    return {width: el./*OK*/ clientWidth, height: el./*OK*/ clientHeight};
   }
 
   /** @override */
   getScrollTop() {
-    return this.getScrollingElement_()./*OK*/scrollTop ||
-        this.win./*OK*/pageYOffset;
+    return this.getScrollingElement_()./*OK*/ scrollTop ||
+           this.win./*OK*/ pageYOffset;
   }
 
   /** @override */
   getScrollLeft() {
-    return this.getScrollingElement_()./*OK*/scrollLeft ||
-        this.win./*OK*/pageXOffset;
+    return this.getScrollingElement_()./*OK*/ scrollLeft ||
+           this.win./*OK*/ pageXOffset;
   }
 
   /** @override */
   getScrollWidth() {
-    return this.getScrollingElement_()./*OK*/scrollWidth;
+    return this.getScrollingElement_()./*OK*/ scrollWidth;
   }
 
   /** @override */
   getLayoutRect(el) {
     var scrollTop = this.getScrollTop();
     var scrollLeft = this.getScrollLeft();
-    var b = el./*OK*/getBoundingClientRect();
+    var b = el./*OK*/ getBoundingClientRect();
     return layoutRectLtwh(Math.round(b.left + scrollLeft),
-        Math.round(b.top + scrollTop),
-        Math.round(b.width),
+        Math.round(b.top + scrollTop), Math.round(b.width),
         Math.round(b.height));
   }
 
   /** @override */
   setScrollTop(scrollTop) {
-    this.getScrollingElement_()./*OK*/scrollTop = scrollTop;
+    this.getScrollingElement_()./*OK*/ scrollTop = scrollTop;
   }
 
   /**
@@ -574,8 +574,8 @@ export class ViewportBindingNatural_ {
    */
   getScrollingElement_() {
     var doc = this.win.document;
-    if (doc./*OK*/scrollingElement) {
-      return doc./*OK*/scrollingElement;
+    if (doc./*OK*/ scrollingElement) {
+      return doc./*OK*/ scrollingElement;
     }
     if (doc.body) {
       return doc.body;
@@ -583,7 +583,6 @@ export class ViewportBindingNatural_ {
     return doc.documentElement;
   }
 }
-
 
 /**
  * Implementation of ViewportBinding based on the native window in case when
@@ -640,7 +639,7 @@ export class ViewportBindingNaturalIosEmbed_ {
     let documentBody = this.win.document.body;
 
     // TODO(dvoytenko): need to also find a way to do this on resize.
-    this.scrollWidth_ = documentBody./*OK*/scrollWidth || 0;
+    this.scrollWidth_ = documentBody./*OK*/ scrollWidth || 0;
 
     // Embedded scrolling on iOS is rather complicated. IFrames cannot be sized
     // and be scrollable. Sizing iframe by scrolling height has a big negative
@@ -656,10 +655,8 @@ export class ViewportBindingNaturalIosEmbed_ {
     //   overflow: auto;
     //   -webkit-overflow-scrolling: touch;
     // }
-    setStyles(documentElement, {
-      overflow: 'auto',
-      webkitOverflowScrolling: 'touch'
-    });
+    setStyles(
+        documentElement, {overflow: 'auto', webkitOverflowScrolling: 'touch'});
     setStyles(documentBody, {
       overflow: 'auto',
       webkitOverflowScrolling: 'touch',
@@ -731,8 +728,8 @@ export class ViewportBindingNaturalIosEmbed_ {
   /** @override */
   getSize() {
     return {
-      width: this.win./*OK*/innerWidth,
-      height: this.win./*OK*/innerHeight
+      width: this.win./*OK*/ innerWidth,
+      height: this.win./*OK*/ innerHeight
     };
   }
 
@@ -748,15 +745,14 @@ export class ViewportBindingNaturalIosEmbed_ {
 
   /** @override */
   getScrollWidth() {
-    return Math.max(this.scrollWidth_, this.win./*OK*/innerWidth);
+    return Math.max(this.scrollWidth_, this.win./*OK*/ innerWidth);
   }
 
   /** @override */
   getLayoutRect(el) {
-    var b = el./*OK*/getBoundingClientRect();
+    var b = el./*OK*/ getBoundingClientRect();
     return layoutRectLtwh(Math.round(b.left + this.pos_.x),
-        Math.round(b.top + this.pos_.y),
-        Math.round(b.width),
+        Math.round(b.top + this.pos_.y), Math.round(b.width),
         Math.round(b.height));
   }
 
@@ -789,7 +785,7 @@ export class ViewportBindingNaturalIosEmbed_ {
       return;
     }
     this.adjustScrollPos_(event);
-    let rect = this.scrollPosEl_./*OK*/getBoundingClientRect();
+    let rect = this.scrollPosEl_./*OK*/ getBoundingClientRect();
     if (this.pos_.x != -rect.left || this.pos_.y != -rect.top) {
       this.pos_.x = -rect.left;
       this.pos_.y = -rect.top;
@@ -803,7 +799,7 @@ export class ViewportBindingNaturalIosEmbed_ {
       return;
     }
     setStyle(this.scrollMoveEl_, 'transform', `translateY(${scrollPos}px)`);
-    this.scrollMoveEl_./*OK*/scrollIntoView(true);
+    this.scrollMoveEl_./*OK*/ scrollIntoView(true);
   }
 
   /**
@@ -818,7 +814,7 @@ export class ViewportBindingNaturalIosEmbed_ {
     // Scroll document into a safe position to avoid scroll freeze on iOS.
     // This means avoiding scrollTop to be minimum (0) or maximum value.
     // This is very sad but very necessary. See #330 for more details.
-    let scrollTop = -this.scrollPosEl_./*OK*/getBoundingClientRect().top;
+    let scrollTop = -this.scrollPosEl_./*OK*/ getBoundingClientRect().top;
     if (scrollTop == 0) {
       this.setScrollPos_(1);
       if (opt_event) {
@@ -832,7 +828,6 @@ export class ViewportBindingNaturalIosEmbed_ {
     // this case.
   }
 }
-
 
 /**
  * Implementation of ViewportBinding that assumes a virtual viewport that is
@@ -861,7 +856,7 @@ export class ViewportBindingVirtual_ {
     this.height_ = viewer.getViewportHeight();
 
     /** @private {number} */
-    this./*OK*/scrollTop_ = viewer.getScrollTop();
+    this./*OK*/ scrollTop_ = viewer.getScrollTop();
 
     /** @private @const {!Observable} */
     this.scrollObservable_ = new Observable();
@@ -879,12 +874,12 @@ export class ViewportBindingVirtual_ {
 
   /** @override */
   updateViewerViewport(viewer) {
-    if (viewer.getScrollTop() != this./*OK*/scrollTop_) {
-      this./*OK*/scrollTop_ = viewer.getScrollTop();
+    if (viewer.getScrollTop() != this./*OK*/ scrollTop_) {
+      this./*OK*/ scrollTop_ = viewer.getScrollTop();
       this.scrollObservable_.fire();
     }
     if (viewer.getViewportWidth() != this.width_ ||
-            viewer.getViewportHeight() != this.height_) {
+        viewer.getViewportHeight() != this.height_) {
       this.width_ = viewer.getViewportWidth();
       this.height_ = viewer.getViewportHeight();
       this.resizeObservable_.fire();
@@ -913,7 +908,7 @@ export class ViewportBindingVirtual_ {
 
   /** @override */
   getScrollTop() {
-    return this./*OK*/scrollTop_;
+    return this./*OK*/ scrollTop_;
   }
 
   /** @override */
@@ -923,7 +918,7 @@ export class ViewportBindingVirtual_ {
 
   /** @override */
   getScrollWidth() {
-    return this.win.document.documentElement./*OK*/scrollWidth;
+    return this.win.document.documentElement./*OK*/ scrollWidth;
   }
 
   /**
@@ -932,11 +927,9 @@ export class ViewportBindingVirtual_ {
    * @return {!LayoutRect}
    */
   getLayoutRect(el) {
-    var b = el./*OK*/getBoundingClientRect();
-    return layoutRectLtwh(Math.round(b.left),
-        Math.round(b.top),
-        Math.round(b.width),
-        Math.round(b.height));
+    var b = el./*OK*/ getBoundingClientRect();
+    return layoutRectLtwh(Math.round(b.left), Math.round(b.top),
+        Math.round(b.width), Math.round(b.height));
   }
 
   /** @override */
@@ -944,7 +937,6 @@ export class ViewportBindingVirtual_ {
     // TODO(dvoytenko): communicate to the viewer.
   }
 }
-
 
 /**
  * Parses viewport meta value. It usually looks like:
@@ -975,7 +967,6 @@ export function parseViewportMeta(content) {
   return params;
 }
 
-
 /**
  * Stringifies viewport meta value based on the provided map. It usually looks
  * like:
@@ -1001,7 +992,6 @@ export function stringifyViewportMeta(params) {
   }
   return content;
 }
-
 
 /**
  * This method makes a minimal effort to keep the original viewport string
@@ -1032,7 +1022,6 @@ export function updateViewportMetaString(currentValue, updateParams) {
   return stringifyViewportMeta(params);
 }
 
-
 /**
  * @param {!Window} window
  * @return {!Viewport}
@@ -1050,7 +1039,6 @@ function createViewport_(window) {
   }
   return new Viewport(window, binding, viewer);
 }
-
 
 /**
  * @param {!Window} window

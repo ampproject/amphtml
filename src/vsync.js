@@ -16,7 +16,6 @@
 
 import {timer} from './timer';
 
-
 /**
  * TODO(dvoytenko): remove this struct and just supply measure/mutate directly
  * in calls.
@@ -26,7 +25,6 @@ import {timer} from './timer';
  * }}
  */
 class VsyncTaskSpec {}
-
 
 /**
  * TODO(dvoytenko): lots and lots of work to make it actually work right:
@@ -113,6 +111,5 @@ export class Vsync {
     });
   }
 }
-
 
 export const vsync = new Vsync(window);
