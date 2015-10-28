@@ -410,7 +410,7 @@ export class SwipeXRecognizer {
       let endX = this.lastX_ + retDelta;
       let overshoot = Math.abs(retDelta) * maxVelocity;
       let spring = tr.spring(this.lastX_, endX, endX + overshoot, 0.8);
-      return this.runContinuing_(maxVelocity, false, (velocity) => {
+      return this.runContinuing_(maxVelocity, false, velocity => {
         let vnorm = 1 - Math.abs(velocity / maxVelocity);
         return spring(vnorm);
       });
@@ -436,7 +436,7 @@ export class SwipeXRecognizer {
         this.lastX_ = this.startX_ + delta;
         let endX = this.startX_ + newDelta;
         let func = tr.numeric(this.lastX_, endX);
-        return this.runContinuing_(maxVelocity, false, (velocity) => {
+        return this.runContinuing_(maxVelocity, false, velocity => {
           let vnorm = 1 - Math.abs(velocity / maxVelocity);
           return func(vnorm);
         });

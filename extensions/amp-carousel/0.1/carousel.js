@@ -52,7 +52,7 @@ export class AmpCarousel extends BaseCarousel {
     });
     this.element.appendChild(this.container_);
 
-    this.cells_.forEach((cell) => {
+    this.cells_.forEach(cell => {
       this.setAsOwner(cell);
       cell.style.display = 'inline-block';
       if (cell != this.cells_[0]) {
@@ -149,7 +149,7 @@ export class AmpCarousel extends BaseCarousel {
    * @private
    */
   doLayout_(pos) {
-    this.withinWindow_(pos, (cell) => {
+    this.withinWindow_(pos, cell => {
       this.scheduleLayout(cell);
     });
   }
@@ -162,7 +162,7 @@ export class AmpCarousel extends BaseCarousel {
   preloadNext_(pos, dir) {
     var nextPos = this.nextPos_(pos, dir);
     if (nextPos != pos) {
-      this.withinWindow_(nextPos, (cell) => {
+      this.withinWindow_(nextPos, cell => {
         this.schedulePreload(cell);
       });
     }
@@ -175,12 +175,12 @@ export class AmpCarousel extends BaseCarousel {
    */
   updateInViewport_(newPos, oldPos) {
     let seen = [];
-    this.withinWindow_(newPos, (cell) => {
+    this.withinWindow_(newPos, cell => {
       seen.push(cell);
       this.updateInViewport(cell, true);
     });
     if (oldPos != newPos) {
-      this.withinWindow_(oldPos, (cell) => {
+      this.withinWindow_(oldPos, cell => {
         if (seen.indexOf(cell) == -1) {
           this.updateInViewport(cell, false);
         }
@@ -202,7 +202,7 @@ export class AmpCarousel extends BaseCarousel {
     this.motion_ = null;
 
     let gestures = Gestures.get(this.element);
-    gestures.onGesture(SwipeXRecognizer, (e) => {
+    gestures.onGesture(SwipeXRecognizer, e => {
       if (e.data.first) {
         this.onSwipeStart_(e.data);
       }
@@ -275,7 +275,7 @@ export class AmpCarousel extends BaseCarousel {
         return undefined;
       }
       let posFunc = tr.numeric(this.pos_, newPos);
-      return Animation.animate((time) => {
+      return Animation.animate(time => {
         this.pos_ = posFunc(time);
         st.setStyles(this.container_, {
           transform: st.translateX(-this.pos_)

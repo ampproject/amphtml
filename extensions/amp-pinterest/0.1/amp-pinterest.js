@@ -352,7 +352,7 @@ class AmpPinterest extends AMP.BaseElement {
       let query = 'https://widgets.pinterest.com/v3/pidgets/pins/info/' +
         '?pin_ids=' + pinId +
         '&sub=www&base_scheme=https';
-      return call(query).then((r) => {
+      return call(query).then(r => {
         return renderPin(r);
       });
     };
@@ -514,7 +514,7 @@ class AmpPinterest extends AMP.BaseElement {
         let query = 'https://widgets.pinterest.com/v1/urls/count.json?' +
           '&return_jsonp=false' +
           '&url=' + encodeURIComponent(pinUrl);
-        return call(query).then((r) => {
+        return call(query).then(r => {
           render(r);
           return loadPromise(a);
         });

@@ -24,7 +24,7 @@
  */
 export function exponentialBackoff(opt_base) {
   var count = 0;
-  return (work) => {
+  return work => {
     var wait = Math.pow(opt_base || 2, count++);
     // Add jitter to avoid the thundering herd. This can e.g. happen when
     // we poll a backend and it fails for everyone at the same time.

@@ -79,7 +79,7 @@ export function closest(element, callback) {
  */
 export function closestByTag(element, tagName) {
   tagName = tagName.toUpperCase();
-  return closest(element, (el) => {
+  return closest(element, el => {
     return el.tagName == tagName;
   });
 }
@@ -123,7 +123,7 @@ export function childElement(parent, callback) {
  * @return {?Element}
  */
 export function childElementByAttr(parent, attr, opt_value) {
-  return childElement(parent, (el) => {
+  return childElement(parent, el => {
     if (!el.hasAttribute(attr)) {
       return false;
     }

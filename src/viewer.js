@@ -480,7 +480,7 @@ export class Viewer {
     if (this.messageQueue_.length > 0) {
       let queue = this.messageQueue_.slice(0);
       this.messageQueue_ = [];
-      queue.forEach((message) => {
+      queue.forEach(message => {
         this.messageDeliverer_(message.eventType, message.data, false);
       });
     }

@@ -254,7 +254,7 @@ export class AmpSlides extends BaseCarousel {
     this.swipeState_ = null;
 
     let gestures = Gestures.get(this.element);
-    gestures.onGesture(SwipeXRecognizer, (e) => {
+    gestures.onGesture(SwipeXRecognizer, e => {
       if (e.data.first) {
         this.onSwipeStart_(e.data);
       }
@@ -349,7 +349,7 @@ export class AmpSlides extends BaseCarousel {
     let promise;
     if (newPos != s.pos) {
       let posFunc = tr.numeric(s.pos, newPos);
-      promise = Animation.animate((time) => {
+      promise = Animation.animate(time => {
         let pos = posFunc(time);
         s.nextTr(pos > 0 ? pos : 0);
         s.prevTr(pos < 0 ? -pos : 0);

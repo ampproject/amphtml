@@ -73,7 +73,7 @@ export class Vsync {
    * @return {function((!Object<string, *>|undefined))}
    */
   createTask(task) {
-    return (opt_state) => {
+    return opt_state => {
       this.run(task, opt_state);
     };
   }
@@ -96,7 +96,7 @@ export class Vsync {
       let startTime = timer.now();
       let prevTime = 0;
       let task = this.createTask({
-        mutate: (state) => {
+        mutate: state => {
           let timeSinceStart = timer.now() - startTime;
           let res = mutator(timeSinceStart, timeSinceStart - prevTime, state);
           if (!res) {

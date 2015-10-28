@@ -92,7 +92,7 @@ export class Action {
     if (name == 'tap') {
       // TODO(dvoytenko): if needed, also configure touch-based tap, e.g. for
       // fast-click.
-      this.win.document.addEventListener('click', (event) => {
+      this.win.document.addEventListener('click', event => {
         if (!event.defaultPrevented) {
           this.trigger(event.target, 'tap', event);
         }
