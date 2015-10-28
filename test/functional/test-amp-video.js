@@ -79,7 +79,7 @@ describe('amp-video', () => {
     for (var i = 0; i < mediatypes.length; i++) {
       var mediatype = mediatypes[i];
       var source = document.createElement('source');
-      source.setAttribute('src',  getFooVideoSrc(mediatype));
+      source.setAttribute('src', getFooVideoSrc(mediatype));
       source.setAttribute('type', mediatype);
       sources.push(source);
     }

@@ -1103,7 +1103,7 @@ export class Resource {
     let built;
     try {
       built = this.element.build(force);
-    } catch(e) {
+    } catch (e) {
       log.error(TAG_, 'failed to build:', this.debugid, e);
       built = false;
       this.blacklisted_ = true;

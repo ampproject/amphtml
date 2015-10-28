@@ -394,7 +394,7 @@ export function createAmpElementProto(win, name, implementationClass) {
       this.built_ = true;
       this.classList.remove('-amp-notbuilt');
       this.classList.remove('amp-notbuilt');
-    } catch(e) {
+    } catch (e) {
       reportError(e, this);
       throw e;
     }
@@ -533,7 +533,7 @@ export function createAmpElementProto(win, name, implementationClass) {
       }
       this.implementation_.layout_ = this.layout_;
       this.implementation_.firstAttachedCallback();
-    } catch(e) {
+    } catch (e) {
       reportError(e, this);
       throw e;
     }

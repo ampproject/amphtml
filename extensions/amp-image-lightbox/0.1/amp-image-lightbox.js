@@ -486,7 +486,7 @@ export class ImageViewer {
       return;
     }
 
-    let newScale = this.startScale_  * (1 + zoomSign * dist / 100);
+    let newScale = this.startScale_ * (1 + zoomSign * dist / 100);
     let deltaCenterX = this.viewerBox_.width / 2 - centerClientX;
     let deltaCenterY = this.viewerBox_.height / 2 - centerClientY;
     deltaX = Math.min(deltaCenterX, deltaCenterX * (dist / 100));

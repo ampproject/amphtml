@@ -261,7 +261,7 @@ class AnimationPlayer {
             this.segments_[i].func(0, false);
           }
         }
-      } catch(e) {
+      } catch (e) {
         log.error(TAG_, 'completion failed: ' + e, e);
         success = false;
       }
@@ -324,7 +324,7 @@ class AnimationPlayer {
       if (segment.curve && normTime != 1) {
         try {
           normTime = segment.curve(normLinearTime);
-        } catch(e) {
+        } catch (e) {
           log.error(TAG_, 'step curve failed: ' + e, e);
           this.complete_(/* success */ false, /* dir */ 0);
           return;
@@ -339,7 +339,7 @@ class AnimationPlayer {
     }
     try {
       segment.func(normTime, segment.completed);
-    } catch(e) {
+    } catch (e) {
       log.error(TAG_, 'step mutate failed: ' + e, e);
       this.complete_(/* success */ false, /* dir */ 0);
       return;

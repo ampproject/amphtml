@@ -67,7 +67,7 @@ function getMode_() {
   return {
     localDev: isLocalDev,
     // Triggers validation
-    development:  development,
+    development: development,
     minified: process.env.NODE_ENV == 'production',
     test: window.AMP_TEST
   };

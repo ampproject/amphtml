@@ -98,7 +98,7 @@ describe('integration amp-carousel', () => {
       });
     });
 
-    it.skip('should only have the prev button visible' + 
+    it.skip('should only have the prev button visible' +
        'when on last item', () => {
       return fixture.awaitEvent('amp:load:start', 1).then(() => {
         let amp = fixture.doc.querySelector('#carousel-1');
