@@ -19,7 +19,7 @@ The basic AMP HTML page includes the following mark-up:
       {
         "@context": "http://schema.org",
         "@type": "NewsArticle",
-        "headline": "Open-source framework for publishing content everywhere",
+        "headline": "Open-source framework for publishing content",
         "datePublished": "2015-10-07T12:02:41Z",
         "image": [
           "logo.jpg"
