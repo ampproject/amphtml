@@ -67,11 +67,11 @@ describe('CustomElement', () => {
     }
   }
 
-  let ElementClass = document.registerElement('amp-test',  {
+  let ElementClass = document.registerElement('amp-test', {
       prototype: createAmpElementProto(window, 'amp-test', TestElement)
   });
 
-  let StubElementClass = document.registerElement('amp-stub',  {
+  let StubElementClass = document.registerElement('amp-stub', {
       prototype: createAmpElementProto(window, 'amp-stub', ElementStub)
   });
 
@@ -589,7 +589,7 @@ describe('CustomElement', () => {
 
 describe('CustomElement Service Elements', () => {
 
-  let StubElementClass = document.registerElement('amp-stub2',  {
+  let StubElementClass = document.registerElement('amp-stub2', {
       prototype: createAmpElementProto(window, 'amp-stub2', ElementStub)
   });
 
@@ -675,7 +675,7 @@ describe('CustomElement Loading Indicator', () => {
 
   class TestElement extends BaseElement {
   }
-  let ElementClass = document.registerElement('amp-test2',  {
+  let ElementClass = document.registerElement('amp-test2', {
       prototype: createAmpElementProto(window, 'amp-test2', TestElement)
   });
 

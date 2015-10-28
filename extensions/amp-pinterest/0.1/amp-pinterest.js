@@ -79,7 +79,7 @@ class AmpPinterest extends AMP.BaseElement {
     }
 
     // open a new window
-    let pop = function (url, shouldPop) {
+    let pop = function(url, shouldPop) {
       if (shouldPop) {
         // amp=1&guid=guid are already in the query before long fields
         window.open(url, '_pinit', POP);
@@ -90,7 +90,7 @@ class AmpPinterest extends AMP.BaseElement {
     };
 
     // log a string
-    let log = function (str) {
+    let log = function(str) {
       let call = new Image();
       let query = 'https://log.pinterest.com/?guid=' + guid;
       query = query + '&amp=1';
@@ -127,7 +127,7 @@ class AmpPinterest extends AMP.BaseElement {
     };
 
     // set a DOM property or text attribute
-    let set = function (el, att, string) {
+    let set = function(el, att, string) {
       if (typeof el[att] === 'string') {
         el[att] = string;
       } else {
@@ -136,7 +136,7 @@ class AmpPinterest extends AMP.BaseElement {
     };
 
     // create a DOM element
-    let make = function (obj) {
+    let make = function(obj) {
       let el = false, tag, att;
       for (tag in obj) {
         el = document.createElement(tag);
@@ -151,7 +151,7 @@ class AmpPinterest extends AMP.BaseElement {
     };
 
     // filter tags from API input
-    let filter = function (str) {
+    let filter = function(str) {
       let decoded, ret;
       decoded = '';
       ret = '';
@@ -166,7 +166,7 @@ class AmpPinterest extends AMP.BaseElement {
     // save our outside context so we can return properly after rendering
     let that = this;
 
-    let makePin = function () {
+    let makePin = function() {
 
       // make an embedded pin widget
       // pinId will be inferred from pinUrl
@@ -181,9 +181,9 @@ class AmpPinterest extends AMP.BaseElement {
 
       let width = that.element.getAttribute('data-width');
 
-      let structure = make({'span':{}});
+      let structure = make({'span': {}});
 
-      let renderPin = function (r) {
+      let renderPin = function(r) {
 
         if (r && r.data && r.data[0] && !r.data[0].error) {
           let p = r.data[0];
@@ -203,12 +203,12 @@ class AmpPinterest extends AMP.BaseElement {
 
           structure.className = className;
 
-          let container = make({'span':{
+          let container = make({'span': {
             'className': '-amp-pinterest-embed-pin-inner',
             'data-pin-log': 'embed_pin'
           }});
 
-          let img = make({'img':{
+          let img = make({'img': {
             'src': imgUrl,
             'className': '-amp-pinterest-embed-pin-image',
             'data-pin-no-hover': true,
@@ -235,7 +235,7 @@ class AmpPinterest extends AMP.BaseElement {
 
           // description
           if (p.description) {
-            let description = make({'span':{
+            let description = make({'span': {
               'className': '-amp-pinterest-embed-pin-text-block ' +
                 '-amp-pinterest-embed-pin-description',
               'textContent': filter(p.description)
@@ -245,18 +245,18 @@ class AmpPinterest extends AMP.BaseElement {
 
           // attribution
           if (p.attribution) {
-            let attribution = make({'span':{
+            let attribution = make({'span': {
               'className': '-amp-pinterest-embed-pin-text-block' +
                 ' -amp-pinterest-embed-pin-attribution'
             }});
-            attribution.appendChild(make({'img':{
+            attribution.appendChild(make({'img': {
               'className': '-amp-pinterest-embed-pin-text-icon-attrib',
               'src': p.attribution.provider_icon_url
             }}));
-            attribution.appendChild(make({'span':{
+            attribution.appendChild(make({'span': {
               'textContent': ' by '
             }}));
-            attribution.appendChild(make({'span':{
+            attribution.appendChild(make({'span': {
               'data-pin-href': p.attribution.url,
               'textContent': filter(p.attribution.author_name)
             }}));
@@ -265,7 +265,7 @@ class AmpPinterest extends AMP.BaseElement {
 
           // likes and repins
           if (p.repin_count || p.like_count) {
-            let stats = make({'span':{
+            let stats = make({'span': {
               'className': '-amp-pinterest-embed-pin-text-block' +
                 ' -amp-pinterest-embed-pin-stats'
             }});
@@ -290,13 +290,13 @@ class AmpPinterest extends AMP.BaseElement {
           // pinner
           if (p.pinner) {
 
-            let pinner = make({'span':{
+            let pinner = make({'span': {
               'className': '-amp-pinterest-embed-pin-text-block' +
                 ' -amp-pinterest-embed-pin-pinner'
             }});
 
             // avatar
-            pinner.appendChild(make({'img':{
+            pinner.appendChild(make({'img': {
               'className': '-amp-pinterest-embed-pin-pinner-avatar',
               'alt': filter(p.pinner.full_name),
               'title': filter(p.pinner.full_name),
@@ -326,7 +326,7 @@ class AmpPinterest extends AMP.BaseElement {
 
 
           // listen for clicks
-          structure.addEventListener('click', function (e) {
+          structure.addEventListener('click', function(e) {
             let el = e.target;
             let logMe = el.getAttribute('data-pin-log');
             if (logMe) {
@@ -357,7 +357,7 @@ class AmpPinterest extends AMP.BaseElement {
       });
     };
 
-    let makeButton = function () {
+    let makeButton = function() {
 
       // render a Pin It button
       // required: media and description
@@ -392,15 +392,15 @@ class AmpPinterest extends AMP.BaseElement {
         encodeURIComponent(pinDescription);
 
       // start building a link
-      let a = make({'A':{
+      let a = make({'A': {
         'href': link
       }});
 
       // built it
-      let render = function (r) {
+      let render = function(r) {
 
         // shorten the pin count so it will fit in our bubble
-        let prettyPinCount = function (n) {
+        let prettyPinCount = function(n) {
           if (n > 999) {
             if (n < 1000000) {
               n = parseInt(n / 1000, 10) + 'K+';
@@ -494,7 +494,7 @@ class AmpPinterest extends AMP.BaseElement {
 
 
         // listen for clicks
-        a.addEventListener('click', function (e) {
+        a.addEventListener('click', function(e) {
           log('&type=button_pinit');
           pop(this.href, true);
           e.preventDefault();

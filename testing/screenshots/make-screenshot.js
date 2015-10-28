@@ -145,7 +145,7 @@ function logFromPage(channel, message) {
   }
 }
 
-page.onResourceRequested = function (request) {
+page.onResourceRequested = function(request) {
 };
 page.onConsoleMessage = function(message) {
   logFromPage('INFO', message);

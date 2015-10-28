@@ -78,7 +78,7 @@ export function createFixtureIframe(fixture, initialIframeHeight, done) {
             resolve();
           } else {
             win.addEventListener(eventName, () => {
-              if(events[eventName] == count) {
+              if (events[eventName] == count) {
                 resolve();
               }
             });

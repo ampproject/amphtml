@@ -94,9 +94,10 @@ var karma = {
 module.exports = {
   testPaths: testPaths,
   karma: karma,
-  src: {
-    exclude: '!{node_modules,build,dist,dist.3p}/**/*.*',
-  },
+  lintGlobs: [
+    '**/*.js',
+    '!{node_modules,build,dist,dist.3p,third_party,build-system}/**/*.*'
+  ],
   presubmitGlobs: [
     '**/*.{css,js,html,md}',
     // This does match dist.3p/current, so we run presubmit checks on the
