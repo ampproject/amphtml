@@ -14,10 +14,15 @@
  * limitations under the License.
  */
 
-require('./clean');
-require('./clang-format');
-require('./lint');
-require('./make-golden');
-require('./presubmit-checks');
-require('./size');
-require('./test');
+var config = require('../config');
+var format = require('gulp-clang-format');
+var gulp = require('gulp');
+
+gulp.task('format-check', function() {
+  return gulp.src(config.lintGlobs)
+    .pipe(format.checkFormat('file'))
+    .on('warning', function(e) {
+        process.stdout.write(e.message);
+        process.exit(1);
+    });
+});

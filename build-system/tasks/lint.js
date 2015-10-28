@@ -36,9 +36,8 @@ var options = {
   },
 };
 
-var srcs = ['**/*.js', config.src.exclude];
 
-var watcher = lazypipe().pipe(watch, srcs);
+var watcher = lazypipe().pipe(watch, config.lintGlobs);
 
 /**
  * Run the eslinter on the src javascript and log the output
@@ -46,7 +45,7 @@ var watcher = lazypipe().pipe(watch, srcs);
  */
 function lint() {
   var errorsFound = false;
-  var stream = gulp.src(srcs);
+  var stream = gulp.src(config.lintGlobs);
 
   if (isWatching) {
     stream = stream.pipe(watcher());
