@@ -626,7 +626,7 @@ export function createAmpElementProto(win, name, implementationClass) {
       if (this.layoutCount_ == 1) {
         this.implementation_.firstLayoutCompleted();
       }
-    }, (reason) => {
+    }, reason => {
       this.toggleLoading_(false, /* cleanup */ true);
       return Promise.reject(reason);
     });
@@ -718,7 +718,7 @@ export function createAmpElementProto(win, name, implementationClass) {
     let actionQueue = assert(this.actionQueue_);
     this.actionQueue_ = null;
 
-    actionQueue.forEach((invocation) => {
+    actionQueue.forEach(invocation => {
       this.executionAction_(invocation, true);
     });
   };

@@ -40,7 +40,7 @@
       };
 
       function getPin(pinDo, pinUrl, pinMedia, pinDescription) {
-        return createDivPromise().then((div) => {
+        return createDivPromise().then(div => {
           var pin = document.createElement('amp-pinterest');
           pin.setAttribute('data-do', pinDo);
           pin.setAttribute('data-url', pinUrl);
@@ -57,7 +57,7 @@
           'http://www.flickr.com/photos/kentbrew/6851755809/',
           'http://c2.staticflickr.com/8/7027/6851755809_df5b2051c9_b.jpg',
           'Next stop: Pinterest'
-        ).then((pin) => {
+        ).then(pin => {
           var a = pin.querySelector('a');
           expect(a).to.not.be.null;
           expect(a.tagName).to.equal('A');

@@ -39,6 +39,7 @@
     "gulp-eslint": "1.0.0",
     "gulp-exec": "2.1.2",
     "gulp-file": "0.2.0",
+    "gulp-help": "1.6.1",
     "gulp-image-diff": "~0.3.0",
     "gulp-rename": "1.2.2",
     "gulp-replace": "0.5.4",
@@ -72,7 +73,6 @@
     "through2": "2.0.0",
     "vinyl-buffer": "1.0.0",
     "vinyl-source-stream": "1.1.0",
-    "watchify": "3.5.0",
-    "gulp-help": "1.6.1"
+    "watchify": "3.5.0"
   }
 }

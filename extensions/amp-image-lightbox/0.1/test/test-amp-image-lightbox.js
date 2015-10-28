@@ -180,7 +180,7 @@ describe('amp-image-lightbox image viewer', () => {
     let sourceElement = {
       offsetWidth: 101,
       offsetHeight: 201,
-      getAttribute: (name) => {
+      getAttribute: name => {
         if (name == 'src') {
           return 'image1';
         }
@@ -200,7 +200,7 @@ describe('amp-image-lightbox image viewer', () => {
     let sourceElement = {
       offsetWidth: 101,
       offsetHeight: 201,
-      getAttribute: (name) => {
+      getAttribute: name => {
         if (name == 'src') {
           return 'image1';
         }
@@ -221,7 +221,7 @@ describe('amp-image-lightbox image viewer', () => {
     let sourceElement = {
       offsetWidth: 101,
       offsetHeight: 201,
-      getAttribute: (name) => {
+      getAttribute: name => {
         if (name == 'src') {
           return 'image1';
         }

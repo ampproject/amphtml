@@ -82,7 +82,7 @@ export function scoreDimensions_(dims, maxWidth, maxHeight) {
  * visibleForTesting
  */
 export function upgradeImages_(images) {
-  Object.keys(images).forEach((key) => {
+  Object.keys(images).forEach(key => {
     let curDimImgs = images[key];
     curDimImgs.forEach((item, index) => {
       curDimImgs[index] = item.replace(/@1x\.png$/, '@2x.png');

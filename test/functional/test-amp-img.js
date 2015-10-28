@@ -36,7 +36,7 @@ describe('amp-img', () => {
   function getImg(attributes, children) {
     methodStub = sinon.stub(BaseElement.prototype, 'isInViewport')
         .returns(true);
-    return createIframePromise().then((iframe) => {
+    return createIframePromise().then(iframe => {
       installImg(iframe.win);
       let img = iframe.doc.createElement('amp-img');
       for (let key in attributes) {
@@ -57,7 +57,7 @@ describe('amp-img', () => {
       src: 'test.jpg',
       width: 300,
       height: 200
-    }).then((ampImg) => {
+    }).then(ampImg => {
       let img = ampImg.querySelector('img');
       expect(img).to.be.an.instanceof(Element);
       expect(img.tagName).to.equal('IMG');

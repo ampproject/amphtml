@@ -149,7 +149,7 @@ describe('amp-audio', () => {
 
   it('should fallback when not available', () => {
     let savedCreateElement = document.createElement;
-    document.createElement = (name) => {
+    document.createElement = name => {
       if (name == 'audio') {
         return savedCreateElement.call(document, 'audio2');
       }

@@ -71,13 +71,13 @@ describe('DOM', () => {
     let child = document.createElement('child');
     element.appendChild(child);
 
-    expect(dom.closest(child, (e) => e.tagName == 'CHILD')).to.equal(child);
+    expect(dom.closest(child, e => e.tagName == 'CHILD')).to.equal(child);
     expect(dom.closestByTag(child, 'child')).to.equal(child);
 
-    expect(dom.closest(child, (e) => e.tagName == 'ELEMENT')).to.equal(element);
+    expect(dom.closest(child, e => e.tagName == 'ELEMENT')).to.equal(element);
     expect(dom.closestByTag(child, 'element')).to.equal(element);
 
-    expect(dom.closest(child, (e) => e.tagName == 'PARENT')).to.equal(parent);
+    expect(dom.closest(child, e => e.tagName == 'PARENT')).to.equal(parent);
     expect(dom.closestByTag(child, 'parent')).to.equal(parent);
   });
 
@@ -104,12 +104,12 @@ describe('DOM', () => {
     let element2 = document.createElement('element2');
     parent.appendChild(element2);
 
-    expect(dom.childElement(parent, (e) => true)).to.equal(element1);
-    expect(dom.childElement(parent, (e) => e.tagName == 'ELEMENT1'))
+    expect(dom.childElement(parent, e => true)).to.equal(element1);
+    expect(dom.childElement(parent, e => e.tagName == 'ELEMENT1'))
         .to.equal(element1);
-    expect(dom.childElement(parent, (e) => e.tagName == 'ELEMENT2'))
+    expect(dom.childElement(parent, e => e.tagName == 'ELEMENT2'))
         .to.equal(element2);
-    expect(dom.childElement(parent, (e) => e.tagName == 'ELEMENT3'))
+    expect(dom.childElement(parent, e => e.tagName == 'ELEMENT3'))
         .to.be.null;
   });
 

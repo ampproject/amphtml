@@ -17,8 +17,8 @@
 
 var argv = require('minimist')(process.argv.slice(2));
 var config = require('../config');
-var gulp = require('gulp-help')(require('gulp'));
 var eslint = require('gulp-eslint');
+var gulp = require('gulp-help')(require('gulp'));
 var lazypipe = require('lazypipe');
 var util = require('gulp-util');
 var watch = require('gulp-watch');

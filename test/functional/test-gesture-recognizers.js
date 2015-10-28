@@ -107,7 +107,7 @@ describe('TapRecognizer', () => {
     recognizer.lastX_ = 101;
     recognizer.lastY_ = 201;
     gesturesMock.expects('signalEmit_').withExactArgs(recognizer,
-        sinon.match((data) => {
+        sinon.match(data => {
           return data.clientX == 101 && data.clientY == 201;
         }), null).once();
     gesturesMock.expects('signalEnd_').withExactArgs(recognizer).once();
@@ -216,7 +216,7 @@ describe('DoubletapRecognizer', () => {
     recognizer.lastX_ = 101;
     recognizer.lastY_ = 201;
     gesturesMock.expects('signalEmit_').withExactArgs(recognizer,
-        sinon.match((data) => {
+        sinon.match(data => {
           return data.clientX == 101 && data.clientY == 201;
         }), null).once();
     gesturesMock.expects('signalEnd_').withExactArgs(recognizer).once();
@@ -318,7 +318,7 @@ describe('SwipeXYRecognizer', () => {
     recognizer.lastX_ = 111;
     recognizer.lastY_ = 211;
     gesturesMock.expects('signalEmit_').withExactArgs(recognizer,
-        sinon.match((data) => {
+        sinon.match(data => {
           return (data.first === true && data.last === false &&
               data.deltaX == 0 &&
               data.deltaY == 0 &&
@@ -347,7 +347,7 @@ describe('SwipeXYRecognizer', () => {
     recognizer.startY_ = recognizer.prevY_ = 201;
     recognizer.eventing_ = true;
     gesturesMock.expects('signalEmit_').withExactArgs(recognizer,
-        sinon.match((data) => {
+        sinon.match(data => {
           return (data.first === false && data.last === false &&
               data.deltaX == 10 &&
               data.deltaY == 10 &&
@@ -374,7 +374,7 @@ describe('SwipeXYRecognizer', () => {
     recognizer.velocityY_ = 0.5;
     recognizer.eventing_ = true;
     gesturesMock.expects('signalEmit_').withExactArgs(recognizer,
-        sinon.match((data) => {
+        sinon.match(data => {
           return (data.first === false && data.last === true &&
               data.deltaX == 10 &&
               data.deltaY == 10 &&
@@ -399,7 +399,7 @@ describe('SwipeXYRecognizer', () => {
     recognizer.velocityY_ = 0.5;
     recognizer.eventing_ = true;
     gesturesMock.expects('signalEmit_').withExactArgs(recognizer,
-        sinon.match((data) => {
+        sinon.match(data => {
           return (data.first === false && data.last === true &&
               data.deltaX == 10 &&
               data.deltaY == 10 &&
@@ -537,7 +537,7 @@ describe('TapzoomRecognizer', () => {
     recognizer.lastX_ = 111;
     recognizer.lastY_ = 211;
     gesturesMock.expects('signalEmit_').withExactArgs(recognizer,
-        sinon.match((data) => {
+        sinon.match(data => {
           return (data.first === true && data.last === false &&
               data.centerClientX == 101 && data.centerClientY == 201 &&
               data.deltaX == 10 && data.deltaY == 10 &&
@@ -558,7 +558,7 @@ describe('TapzoomRecognizer', () => {
     recognizer.startY_ = recognizer.prevY_ = 201;
     recognizer.eventing_ = true;
     gesturesMock.expects('signalEmit_').withExactArgs(recognizer,
-        sinon.match((data) => {
+        sinon.match(data => {
           return (data.first === false && data.last === false &&
               data.centerClientX == 101 && data.centerClientY == 201 &&
               data.deltaX == 10 && data.deltaY == 10 &&
@@ -582,7 +582,7 @@ describe('TapzoomRecognizer', () => {
     recognizer.lastY_ = 211;
     recognizer.eventing_ = true;
     gesturesMock.expects('signalEmit_').withExactArgs(recognizer,
-        sinon.match((data) => {
+        sinon.match(data => {
           return (data.first === false && data.last === true &&
               data.centerClientX == 101 && data.centerClientY == 201 &&
               data.deltaX == 10 && data.deltaY == 10 &&
@@ -723,7 +723,7 @@ describe('PinchRecognizer', () => {
         [{clientX: 80, clientY: 70},
          {clientX: 120, clientY: 130}]});
     gesturesMock.expects('signalEmit_').withExactArgs(recognizer,
-        sinon.match((data) => {
+        sinon.match(data => {
           return (data.first === true && data.last === false &&
               data.centerClientX == 100 &&
               data.centerClientY == 100 &&
@@ -763,7 +763,7 @@ describe('PinchRecognizer', () => {
         [{clientX: 80, clientY: 70},
          {clientX: 120, clientY: 130}]});
     gesturesMock.expects('signalEmit_').withExactArgs(recognizer,
-        sinon.match((data) => true), null).once();
+        sinon.match(data => true), null).once();
     clock.tick(10);
     recognizer.acceptStart();
 
@@ -771,7 +771,7 @@ describe('PinchRecognizer', () => {
         [{clientX: 70, clientY: 60},
          {clientX: 130, clientY: 140}]};
     gesturesMock.expects('signalEmit_').withExactArgs(recognizer,
-        sinon.match((data) => {
+        sinon.match(data => {
           return (data.first === false && data.last === false &&
               data.centerClientX == 100 &&
               data.centerClientY == 100 &&
@@ -797,13 +797,13 @@ describe('PinchRecognizer', () => {
         [{clientX: 80, clientY: 70},
          {clientX: 120, clientY: 130}]});
     gesturesMock.expects('signalEmit_').withExactArgs(recognizer,
-        sinon.match((data) => true), null).once();
+        sinon.match(data => true), null).once();
     clock.tick(10);
     recognizer.acceptStart();
 
     let event = {};
     gesturesMock.expects('signalEmit_').withExactArgs(recognizer,
-        sinon.match((data) => {
+        sinon.match(data => {
           return (data.first === false && data.last === true &&
               data.dir == 1 &&
               data.deltaX == 10 &&
@@ -827,13 +827,13 @@ describe('PinchRecognizer', () => {
         [{clientX: 80, clientY: 70},
          {clientX: 120, clientY: 130}]});
     gesturesMock.expects('signalEmit_').withExactArgs(recognizer,
-        sinon.match((data) => true), null).once();
+        sinon.match(data => true), null).once();
     clock.tick(10);
     recognizer.acceptStart();
 
     let event = {};
     gesturesMock.expects('signalEmit_').withExactArgs(recognizer,
-        sinon.match((data) => {
+        sinon.match(data => {
           return (data.first === false && data.last === true &&
               data.dir == 1 &&
               data.deltaX == 10 &&

@@ -21,7 +21,7 @@ import {installAd, scoreDimensions_, upgradeImages_} from
 describe('amp-ad', () => {
 
   function getAd(attributes, canonical, opt_handleElement) {
-    return createIframePromise().then((iframe) => {
+    return createIframePromise().then(iframe => {
       installAd(iframe.win);
       if (canonical) {
         var link = iframe.doc.createElement('link');
@@ -51,7 +51,7 @@ describe('amp-ad', () => {
       'data-aax_src': '302',
       // Test precedence
       'data-width': '6666'
-    }, 'https://schema.org').then((ad) => {
+    }, 'https://schema.org').then(ad => {
       var iframe = ad.firstChild;
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');

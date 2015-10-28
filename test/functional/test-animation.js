@@ -30,7 +30,7 @@ describe('Animation', () => {
     clock = sandbox.useFakeTimers();
     vsyncTasks = [];
     vsync = {
-      createTask: (task) => {
+      createTask: task => {
         return () => {
           vsyncTasks.push(task);
         };
@@ -65,8 +65,8 @@ describe('Animation', () => {
   it('animation', () => {
     let tr1 = -1;
     let tr2 = -1;
-    anim.add(0, (time) => {tr1 = time;}, 0.8);
-    anim.add(0.2, (time) => {tr2 = time;}, 0.8);
+    anim.add(0, time => {tr1 = time;}, 0.8);
+    anim.add(0.2, time => {tr2 = time;}, 0.8);
 
     let ap = anim.start(1000);
     let resolveCalled = false;
@@ -140,8 +140,8 @@ describe('Animation', () => {
   it('should animate out-of-bounds time', () => {
     let tr1 = -1;
     // Linear curve between -0.5 and 1.5
-    let curve = (time) => {return time * 2 - 0.5;};
-    anim.add(0, (time) => {tr1 = time;}, 1, curve);
+    let curve = time => {return time * 2 - 0.5;};
+    anim.add(0, time => {tr1 = time;}, 1, curve);
 
     let ap = anim.start(1000);
     let resolveCalled = false;
@@ -171,8 +171,8 @@ describe('Animation', () => {
   it('halt freeze', () => {
     let tr1 = -1;
     let tr2 = -1;
-    anim.add(0, (time) => {tr1 = time;}, 0.8);
-    anim.add(0.2, (time) => {tr2 = time;}, 0.8);
+    anim.add(0, time => {tr1 = time;}, 0.8);
+    anim.add(0.2, time => {tr2 = time;}, 0.8);
 
     let ap = anim.start(1000);
     let rejectCalled = false;
@@ -197,8 +197,8 @@ describe('Animation', () => {
   it('halt reset', () => {
     let tr1 = -1;
     let tr2 = -1;
-    anim.add(0, (time) => {tr1 = time;}, 0.8);
-    anim.add(0.2, (time) => {tr2 = time;}, 0.8);
+    anim.add(0, time => {tr1 = time;}, 0.8);
+    anim.add(0.2, time => {tr2 = time;}, 0.8);
 
     let ap = anim.start(1000);
     let rejectCalled = false;
@@ -223,8 +223,8 @@ describe('Animation', () => {
   it('halt forward', () => {
     let tr1 = -1;
     let tr2 = -1;
-    anim.add(0, (time) => {tr1 = time;}, 0.8);
-    anim.add(0.2, (time) => {tr2 = time;}, 0.8);
+    anim.add(0, time => {tr1 = time;}, 0.8);
+    anim.add(0.2, time => {tr2 = time;}, 0.8);
 
     let ap = anim.start(1000);
     let rejectCalled = false;

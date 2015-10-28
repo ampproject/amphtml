@@ -67,7 +67,7 @@ describe('Motion continueMotion', () => {
     clock = sandbox.useFakeTimers();
     vsyncTasks = [];
     vsync = {
-      runMutateSeries: (mutator) => {
+      runMutateSeries: mutator => {
         vsyncTasks.push(mutator);
         return new Promise((resolve, reject) => {});
       }

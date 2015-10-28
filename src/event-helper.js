@@ -29,7 +29,7 @@ import {timer} from './timer';
 export function listenOnce(element, eventType, listener, opt_capture) {
   let capture = opt_capture || false;
   let unlisten;
-  let proxy = (event) => {
+  let proxy = event => {
     listener(event);
     unlisten();
   };
@@ -127,10 +127,10 @@ function racePromise_(promise, unlisten, timeout) {
   if (!unlisten) {
     return racePromise;
   }
-  return racePromise.then((result) => {
+  return racePromise.then(result => {
     unlisten();
     return result;
-  }, (reason) => {
+  }, reason => {
     unlisten();
     throw reason;
   });

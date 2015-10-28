@@ -87,7 +87,7 @@ describe('amp-iframe', () => {
       src: iframeSrc,
       width: 100,
       height: 100
-    }).then((amp) => {
+    }).then(amp => {
       expect(amp.iframe).to.be.instanceof(Element);
       expect(amp.iframe.src).to.equal(iframeSrc);
       expect(amp.iframe.getAttribute('sandbox')).to.equal('');
@@ -105,7 +105,7 @@ describe('amp-iframe', () => {
       width: 100,
       height: 100,
       scrolling: 'no'
-    }).then((amp) => {
+    }).then(amp => {
       expect(amp.iframe.getAttribute('sandbox')).to.equal('allow-scripts');
       return timer.promise(100).then(() => {
         expect(ranJs).to.equal(1);
@@ -120,7 +120,7 @@ describe('amp-iframe', () => {
       sandbox: 'allow-scripts',
       width: 100,
       height: 100
-    }, '599px', '1000px').then((amp) => {
+    }, '599px', '1000px').then(amp => {
       expect(amp.iframe).to.be.null;
     }).catch(() => {});
   });
@@ -131,7 +131,7 @@ describe('amp-iframe', () => {
       sandbox: 'allow-scripts',
       width: 100,
       height: 100
-    }, '650px', '1000px', '-100px').then((amp) => {
+    }, '650px', '1000px', '-100px').then(amp => {
       expect(amp.iframe).to.be.null;
     }).catch(() => {});
   });
@@ -142,7 +142,7 @@ describe('amp-iframe', () => {
       sandbox: 'allow-scripts',
       width: 100,
       height: 100
-    }, '75px', '100px').then((amp) => {
+    }, '75px', '100px').then(amp => {
       expect(amp.iframe).to.be.not.null;
     });
   });
@@ -155,13 +155,13 @@ describe('amp-iframe', () => {
       sandbox: 'allow-scripts',
       width: 100,
       height: 100
-    }).then((amp) => {
+    }).then(amp => {
       expect(amp.iframe).to.be.null;
     });
   });
 
   it('should deny same origin', () => {
-    return getAmpIframeObject().then((amp) => {
+    return getAmpIframeObject().then(amp => {
       expect(() => {
         amp.assertSource('https://google.com/fpp', 'https://google.com/abc',
             'allow-same-origin');
@@ -190,7 +190,7 @@ describe('amp-iframe', () => {
       src: iframeSrc,
       width: 100,
       height: 100
-    }).then((amp) => {
+    }).then(amp => {
       return amp.container.implementation_;
     });
   }
