@@ -23,6 +23,17 @@ var imageDiff = require('gulp-image-diff');
 var util = require('gulp-util');
 
 
+/**
+ * Use phantomjs to take a screenshot of a page at the given url and save it
+ * to the output path.
+ *
+ * @param {string} host hostname
+ * @param {string} path url path for page to screenshot (minus hostname)
+ * @param {string} output output file path
+ * @param {string} device device type e.g. 'iPhone6+' for screenshot
+ * @param {boolean} verbose use verbose logging
+ * @param {function} cb callback
+ */
 function doScreenshot(host, path, output, device, verbose, cb) {
   fs.mkdirpSync(dirname(output));
   if (verbose) {
@@ -51,9 +62,11 @@ function doScreenshot(host, path, output, device, verbose, cb) {
 
 
 /**
+ * Make a golden image of the url.
  * Ex:
  * `gulp make-golden --path=examples.build/everything.amp.max.html \
  *     --host=http://localhost:8000`
+ *  @param {function} cb callback function
  */
 function makeGolden(cb) {
   var path = argv.path;
@@ -72,8 +85,11 @@ function makeGolden(cb) {
 
 
 /**
+ * Test if screenshots match the golden images, and generate a report to
+ * compare the differences
  * Ex:
  * `gulp diff-screenshots --host=http://localhost:8000`
+ * @param {function} cb callback function
  */
 function testScreenshots(cb) {
   var host = argv.host || 'http://localhost:8000';
@@ -88,11 +104,24 @@ function testScreenshots(cb) {
   reportPreambule(reportFile);
   var errorCount = 0;
 
+  /**
+   * Check if file ends with suffix specified
+   * @param {string} s string to check
+   * @param {string} suffix suffix to look for
+   * @return {boolean} true if suffix matches, false otherwise
+   */
   function endsWith(s, suffix) {
     return s.indexOf(suffix, s.length - suffix.length) != -1;
   }
 
   var goldenFiles = [];
+
+  /**
+   * Recursively scan a directory for png files collecting the
+   * names of them. Add the resulting filenames to the
+   * goldenFiles collection.
+   * @param {string} dir path to directory
+   */
   function scanDir(dir) {
     fs.readdirSync(dir).forEach(function(file) {
       var path = dir + '/' + file;
@@ -136,6 +165,15 @@ function testScreenshots(cb) {
   });
 }
 
+/**
+ * Take a screenshot of the page and diff the result against the golden image.
+ *
+ * @param {string} file filename for file to test
+ * @param {string} dir directory path to test images
+ * @param {string} host hostname
+ * @param {boolean} verbose use verbose logging
+ * @param {function} cb callback function
+ */
 function diffScreenshot_(file, dir, host, verbose, cb) {
   if (verbose) {
     util.log('Screenshot diff for ', file);
@@ -171,6 +209,10 @@ function diffScreenshot_(file, dir, host, verbose, cb) {
   });
 }
 
+/**
+ * Write preambule html into the report file
+ * @param {string} reportFile filepath to report file
+ */
 function reportPreambule(reportFile) {
   fs.writeFileSync(reportFile,
       '<html>' +
@@ -196,14 +238,30 @@ function reportPreambule(reportFile) {
       'utf8');
 }
 
+/**
+ * Append the postambule html to the report file
+ * @param {string} reportFile filepath to report file
+ */
 function reportPostambule(reportFile) {
   fs.appendFileSync(reportFile,
       '</tbody></table></body></html>',
       'utf8');
 }
 
+/**
+ * Create an html report record for an image diff and add it to the report file
+ * @param {string} reportFile report file path
+ * @param {string} file screenshot file path
+ * @param {string} dir screenshot directory path
+ * @param {!Object} record screenshot diff results record
+ */
 function reportRecord(reportFile, file, dir, record) {
 
+  /**
+   * Create html for a thumbnail link
+   * @param {string} file file path to a thumbnail image
+   * @return {string} html anchor tag string
+   */
   function thumb(file) {
     file = file.replace(dir + '/', '');
     return '<a class=thumb target=_blank href="' + file + '">' +
