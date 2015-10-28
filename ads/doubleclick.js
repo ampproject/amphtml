@@ -23,12 +23,9 @@ import {loadScript} from '../src/3p';
 export function doubleclick(global, data) {
   loadScript(global, 'https://www.googletagservices.com/tag/js/gpt.js', () => {
     global.googletag.cmd.push(function() {
-      var dimensions = [[
-        parseInt(data.width, 10),
-        parseInt(data.height, 10)
-      ]];
+      var dimensions = [[parseInt(data.width, 10), parseInt(data.height, 10)]];
       var slot = googletag.defineSlot(data.slot, dimensions, 'c')
-          .addService(googletag.pubads());
+                     .addService(googletag.pubads());
       googletag.pubads().enableSingleRequest();
       googletag.pubads().set('page_url', context.canonicalUrl);
       googletag.enableServices();

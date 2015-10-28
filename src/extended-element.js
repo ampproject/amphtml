@@ -17,7 +17,6 @@
 import {BaseElement} from './base-element';
 import {upgradeOrRegisterElement} from './custom-element';
 
-
 /**
  * Registers an extended element. This function should typically be called
  * through the registerElement method on the AMP runtime.

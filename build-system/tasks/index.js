@@ -15,6 +15,7 @@
  */
 
 require('./clean');
+require('./clang-format');
 require('./lint');
 require('./make-golden');
 require('./presubmit-checks');

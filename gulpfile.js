@@ -49,11 +49,7 @@ var cssprefixer = autoprefixer({
   ]
 });
 
-cssnano = cssnano({
-  convertValues: false,
-  zindex: false
-});
-
+cssnano = cssnano({convertValues: false, zindex: false});
 
 /**
  * Build all the AMP extensions
@@ -82,7 +78,6 @@ function buildExtensions(options) {
   buildExtension('amp-youtube', '0.1', false, options);
 }
 
-
 /**
  * Compile the polyfills script and drop it in the build folder
  */
@@ -106,13 +101,10 @@ function compile(watch, shouldMinify) {
     // If there is a sync JS error during initial load,
     // at least try to unhide the body.
     wrapper: 'try{<%= contents %>}catch(e){setTimeout(function(){' +
-        'document.body.style.opacity=1},1000);throw e};'
+                 'document.body.style.opacity=1},1000);throw e};'
   });
-  compileJs('./3p/', 'integration.js', './dist.3p/' + internalRuntimeVersion, {
-    minifiedName: 'f.js',
-    watch: watch,
-    minify: shouldMinify
-  });
+  compileJs('./3p/', 'integration.js', './dist.3p/' + internalRuntimeVersion,
+      {minifiedName: 'f.js', watch: watch, minify: shouldMinify});
   thirdPartyBootstrap(watch, shouldMinify);
 }
 
@@ -123,11 +115,12 @@ function compile(watch, shouldMinify) {
  */
 function compileCss() {
   console.info('Recompiling CSS.');
-  return jsifyCssPromise('css/amp.css').then(function(css) {
-    return gulp.src('css/**.css')
-        .pipe(file('css.js', 'export const cssText = ' + css))
-        .pipe(gulp.dest('build'));
-  });
+  return jsifyCssPromise('css/amp.css')
+      .then(function(css) {
+        return gulp.src('css/**.css')
+            .pipe(file('css.js', 'export const cssText = ' + css))
+            .pipe(gulp.dest('build'));
+      });
 }
 
 /**
@@ -143,14 +136,15 @@ function jsifyCssPromise(filename) {
   var transformers = [cssprefixer, cssnano];
   // Remove copyright comment. Crude hack to get our own copyright out
   // of the string.
-  return postcss(transformers).process(css.toString())
+  return postcss(transformers)
+      .process(css.toString())
       .then(function(result) {
         result.warnings().forEach(function(warn) {
           console.warn(warn.toString());
         });
-      var css = result.css;
-      return JSON.stringify(css + '\n/*# sourceURL=/' + filename + '*/');
-    });
+        var css = result.css;
+        return JSON.stringify(css + '\n/*# sourceURL=/' + filename + '*/');
+      });
 }
 
 /**
@@ -160,9 +154,7 @@ function watch() {
   gulpWatch('css/**/*.css', function() {
     compileCss();
   });
-  buildExtensions({
-    watch: true
-  });
+  buildExtensions({watch: true});
   buildExamples(true);
   compile(true);
 }
@@ -202,12 +194,13 @@ function buildExtension(name, version, hasCss, options) {
   }
   var js = fs.readFileSync(jsPath, 'utf8');
   if (hasCss) {
-    return jsifyCssPromise(path + '/' + name + '.css').then(function(css) {
-      console.assert(/\$CSS\$/.test(js),
-          'Expected to find $CSS$ marker in extension JS: ' + jsPath);
-      js = js.replace(/\$CSS\$/, css);
-      return buildExtensionJs(js, path, name, version, options);
-    });
+    return jsifyCssPromise(path + '/' + name + '.css')
+        .then(function(css) {
+          console.assert(/\$CSS\$/.test(js),
+              'Expected to find $CSS$ marker in extension JS: ' + jsPath);
+          js = js.replace(/\$CSS\$/, css);
+          return buildExtensionJs(js, path, name, version, options);
+        });
   } else {
     return buildExtensionJs(js, path, name, version, options);
   }
@@ -239,7 +232,7 @@ function buildExtensionJs(js, path, name, version, options) {
           minifiedName: minifiedName,
           latestName: latestName,
           wrapper: '(window.AMP = window.AMP || [])' +
-              '.push(function(AMP) {<%= contents %>\n});',
+                       '.push(function(AMP) {<%= contents %>\n});',
         });
       });
 }
@@ -272,13 +265,13 @@ function dist() {
 function buildExamples(watch) {
   if (watch) {
     gulpWatch('examples/*.html', function() {
-     buildExamples(false);
+      buildExamples(false);
     });
   }
 
-  fs.copy('examples/img/', 'examples.build/img/', { clobber: true },
+  fs.copy('examples/img/', 'examples.build/img/', {clobber: true},
       copyHandler.bind(null, 'examples/img folder'));
-  fs.copy('examples/video/', 'examples.build/video/', { clobber: true },
+  fs.copy('examples/video/', 'examples.build/video/', {clobber: true},
       copyHandler.bind(null, 'examples/video folder'));
 
   // Also update test-example-validation.js
@@ -320,7 +313,7 @@ function buildExample(name) {
   max = max.replace('https://cdn.ampproject.org/v0.max.js', '../dist/amp.js');
   max = max.replace(/https:\/\/cdn.ampproject.org\/v0\//g, '../dist/v0/');
   gulp.src(input)
-      .pipe(file(name.replace('.html', '.max.html'),max))
+      .pipe(file(name.replace('.html', '.max.html'), max))
       .pipe(gulp.dest('examples.build/'));
 
   var min = max;
@@ -361,9 +354,7 @@ function thirdPartyBootstrap(watch, shouldMinify) {
           fs.unlinkSync(aliasToLatestBuild);
         }
         fs.symlinkSync(
-            './' + internalRuntimeVersion,
-            aliasToLatestBuild,
-            'dir');
+            './' + internalRuntimeVersion, aliasToLatestBuild, 'dir');
       });
 }
 
@@ -377,30 +368,31 @@ function thirdPartyBootstrap(watch, shouldMinify) {
  */
 function compileJs(srcDir, srcFilename, destDir, options) {
   options = options || {};
-  var bundler = browserify(srcDir + srcFilename, { debug: true })
-      .transform(babel);
+  var bundler =
+      browserify(srcDir + srcFilename, {debug: true}).transform(babel);
   if (options.watch) {
     bundler = watchify(bundler);
   }
 
   var wrapper = options.wrapper || '<%= contents %>';
 
-  var lazybuild = lazypipe()
-      .pipe(source, srcFilename)
-      .pipe(buffer)
-      .pipe(replace, /\$internalRuntimeVersion\$/g, internalRuntimeVersion)
-      .pipe(wrap, wrapper)
-      .pipe(sourcemaps.init.bind(sourcemaps), { loadMaps: true });
+  var lazybuild =
+      lazypipe()
+          .pipe(source, srcFilename)
+          .pipe(buffer)
+          .pipe(replace, /\$internalRuntimeVersion\$/g, internalRuntimeVersion)
+          .pipe(wrap, wrapper)
+          .pipe(sourcemaps.init.bind(sourcemaps), {loadMaps: true});
 
   var lazywrite = lazypipe()
-      .pipe(sourcemaps.write.bind(sourcemaps), './')
-      .pipe(gulp.dest.bind(gulp), destDir);
+                      .pipe(sourcemaps.write.bind(sourcemaps), './')
+                      .pipe(gulp.dest.bind(gulp), destDir);
 
   function rebundle() {
-    bundler.bundle()
-      .on('error', function(err) { console.error(err); this.emit('end'); })
-      .pipe(lazybuild())
-      .pipe(lazywrite());
+    bundler.bundle().on('error', function(err) {
+                      console.error(err);
+                      this.emit('end');
+                    }).pipe(lazybuild()).pipe(lazywrite());
   }
 
   if (options.watch) {
@@ -413,21 +405,22 @@ function compileJs(srcDir, srcFilename, destDir, options) {
   function minify() {
     console.log('Minifying ' + srcFilename);
     bundler.bundle()
-      .on('error', function(err) { console.error(err); this.emit('end'); })
-      .pipe(lazybuild())
-      .pipe(uglify({
-        preserveComments: 'some'
-      }))
-      .pipe(rename(options.minifiedName))
-      .pipe(lazywrite())
-      .on('end', function() {
-        fs.writeFileSync(destDir + '/version.txt', internalRuntimeVersion);
-        if (options.latestName) {
-          fs.copySync(
-              destDir + '/' + options.minifiedName,
-              destDir + '/' + options.latestName);
-        }
-      });
+        .on('error',
+            function(err) {
+              console.error(err);
+              this.emit('end');
+            })
+        .pipe(lazybuild())
+        .pipe(uglify({preserveComments: 'some'}))
+        .pipe(rename(options.minifiedName))
+        .pipe(lazywrite())
+        .on('end', function() {
+          fs.writeFileSync(destDir + '/version.txt', internalRuntimeVersion);
+          if (options.latestName) {
+            fs.copySync(destDir + '/' + options.minifiedName,
+                destDir + '/' + options.latestName);
+          }
+        });
   }
 
   if (options.minify) {

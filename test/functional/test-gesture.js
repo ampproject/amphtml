@@ -17,7 +17,6 @@
 import {GestureRecognizer, Gestures} from '../../src/gesture';
 import * as sinon from 'sinon';
 
-
 describe('Gestures', () => {
 
   class TestRecognizer extends GestureRecognizer {
@@ -77,14 +76,12 @@ describe('Gestures', () => {
     eventListeners[event.type](event);
   }
 
-
   it('onPointerDown should be called', () => {
     let handler = sinon.spy();
     gestures.onPointerDown(handler);
     sendEvent({type: 'touchstart'});
     expect(handler.callCount).to.equal(1);
   });
-
 
   it('should proceed with series if touchstart returns true', () => {
     recognizerMock.expects('onTouchStart').returns(true).once();
@@ -173,7 +170,6 @@ describe('Gestures', () => {
     expect(gestures.tracking_[0]).to.equal(false);
   });
 
-
   it('should deny ready state if already eventing', () => {
     gestures.eventing_ = {};
     recognizerMock.expects('acceptCancel').once();
@@ -190,7 +186,6 @@ describe('Gestures', () => {
     expect(gestures.passAfterEvent_).to.equal(true);
   });
 
-
   it('should deny pending state if already eventing', () => {
     gestures.eventing_ = {};
     gestures.pending_[0] = 0;
@@ -206,13 +201,11 @@ describe('Gestures', () => {
     expect(gestures.pending_[0]).to.equal(11);
   });
 
-
   it('should stop eventing', () => {
     gestures.eventing_ = recognizer;
     gestures.signalEnd_(recognizer);
     expect(gestures.eventing_).to.equal(null);
   });
-
 
   it('should deny emit if another eventing', () => {
     gestures.eventing_ = {};
@@ -235,7 +228,6 @@ describe('Gestures', () => {
     expect(gesture.event).to.equal(event);
     expect(gesture.time).to.equal(1);
   });
-
 
   it('should ignore pass - nothing to do', () => {
     recognizerMock.expects('acceptStart').never();
@@ -278,7 +270,6 @@ describe('Gestures', () => {
     expect(gestures.pass_.isPending()).to.equal(false);
     expect(gestures.eventing_).to.equal(recognizer);
   });
-
 
   it('should allow event to propagate when nothing happening', () => {
     let event = {

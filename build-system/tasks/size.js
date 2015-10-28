@@ -23,7 +23,6 @@ var gzipSize = require('gzip-size');
 var prettyBytes = require('pretty-bytes');
 var through = require('through2');
 
-
 var tempFolderName = '__size-temp';
 
 var tableHeaders = [['size', 'gzip', 'file'], ['---', '---', '---']];
@@ -70,10 +69,10 @@ function onFileThrough(rows, file, enc, cb) {
  * @param {!Array<!Array<string>>} rows array of content size information
  * @param {function()} cb Callback function
  */
-function onFileThroughEnd(rows , cb) {
+function onFileThroughEnd(rows, cb) {
   rows.unshift.apply(rows, tableHeaders);
   var tbl = table(rows, tableOptions);
-  console/*OK*/.log(tbl);
+  console /*OK*/.log(tbl);
   fs.writeFileSync('test/size.txt', tbl);
   cb();
 }
@@ -86,9 +85,7 @@ function onFileThroughEnd(rows , cb) {
 function sizer() {
   var rows = [];
   return through.obj(
-      onFileThrough.bind(null, rows),
-      onFileThroughEnd.bind(null, rows)
-  );
+      onFileThrough.bind(null, rows), onFileThroughEnd.bind(null, rows));
 }
 
 /**
@@ -98,9 +95,9 @@ function sizer() {
  */
 function sizeTask() {
   gulp.src(['dist/**/*.js', 'dist.3p/{current,current-min}/**/*.js'])
-    .pipe(sizer())
-    .pipe(gulp.dest(tempFolderName))
-    .on('end', del.bind(null, [tempFolderName]));
+      .pipe(sizer())
+      .pipe(gulp.dest(tempFolderName))
+      .on('end', del.bind(null, [tempFolderName]));
 }
 
 gulp.task('size', 'Runs a report on artifact size', sizeTask);

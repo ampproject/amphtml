@@ -21,7 +21,6 @@
 
 import {assert} from './asserts';
 
-
 /**
  * @enum {string}
  */
@@ -34,13 +33,11 @@ export const Layout = {
   FILL: 'fill'
 };
 
-
 /**
  * CSS Length type. E.g. "1px" or "20vh".
  * @typedef {string}
  */
 let Length;
-
 
 /**
  * @typedef {{
@@ -49,7 +46,6 @@ let Length;
  * }}
  */
 let Dimensions;
-
 
 /**
  * Set or cached browser natural dimensions for elements. The tagname
@@ -62,7 +58,6 @@ export const naturalDimensions_ = {
   'AMP-PIXEL': {width: 1, height: 1},
   'AMP-AUDIO': null
 };
-
 
 /**
  * Elements that the progess can be shown for. This set has to be externalized
@@ -79,7 +74,6 @@ export const LOADING_ELEMENTS_ = {
   'AMP-VIDEO': true
 };
 
-
 /**
  * @param {string} s
  * @return {Layout|undefined} Returns undefined in case of failure to parse
@@ -94,7 +88,6 @@ export function parseLayout(s) {
   return undefined;
 }
 
-
 /**
  * @param {!Layout} layout
  * @return {string}
@@ -103,19 +96,15 @@ export function getLayoutClass(layout) {
   return '-amp-layout-' + layout;
 }
 
-
 /**
  * Whether an element with this layout inherently defines the size.
  * @param {!Layout} layout
  * @return {boolean}
  */
 export function isLayoutSizeDefined(layout) {
-  return (layout == Layout.FIXED ||
-      layout == Layout.FIXED_HEIGHT ||
-      layout == Layout.RESPONSIVE ||
-      layout == Layout.FILL);
+  return (layout == Layout.FIXED || layout == Layout.FIXED_HEIGHT ||
+          layout == Layout.RESPONSIVE || layout == Layout.FILL);
 }
-
 
 /**
  * Whether the tag is an internal (service) AMP tag.
@@ -126,7 +115,6 @@ export function isInternalElement(tag) {
   let tagName = (typeof tag == 'string') ? tag : tag.tagName;
   return tagName && tagName.toLowerCase().indexOf('i-') == 0;
 }
-
 
 /**
  * Parses the CSS length value. If no units specified, the assumed value is
@@ -150,7 +138,6 @@ export function parseLength(s) {
   return s;
 }
 
-
 /**
  * Asserts that the supplied value is a CSS Length value.
  * @param {!Length|string} length
@@ -162,7 +149,6 @@ export function assertLength(length) {
   return length;
 }
 
-
 /**
  * Returns units from the CSS length value.
  * @param {!Length} length
@@ -170,11 +156,10 @@ export function assertLength(length) {
  */
 export function getLengthUnits(length) {
   assertLength(length);
-  let m = assert(length.match(/[a-z]+/i),
-      'Failed to read units from %s', length);
+  let m =
+      assert(length.match(/[a-z]+/i), 'Failed to read units from %s', length);
   return m[0];
 }
-
 
 /**
  * Returns the numeric value of a CSS length value.
@@ -184,7 +169,6 @@ export function getLengthUnits(length) {
 export function getLengthNumeral(length) {
   return parseFloat(length);
 }
-
 
 /**
  * Determines whether the tagName is a known element that has natural dimensions
@@ -196,7 +180,6 @@ export function hasNaturalDimensions(tagName) {
   tagName = tagName.toUpperCase();
   return naturalDimensions_[tagName] !== undefined;
 }
-
 
 /**
  * Determines the default dimensions for an element which could vary across
@@ -215,14 +198,13 @@ export function getNaturalDimensions(tagName) {
     temp.style.visibility = 'hidden';
     document.body.appendChild(temp);
     naturalDimensions_[tagName] = {
-      width: temp./*OK*/offsetWidth || 1,
-      height: temp./*OK*/offsetHeight || 1
+      width: temp./*OK*/ offsetWidth || 1,
+      height: temp./*OK*/ offsetHeight || 1
     };
     document.body.removeChild(temp);
   }
   return naturalDimensions_[tagName];
 }
-
 
 /**
  * Whether the loading can be shown for the specified elemeent. This set has

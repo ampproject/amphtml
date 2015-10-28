@@ -21,7 +21,6 @@ import {documentInfoFor} from '../src/document-info';
 import {registerElement} from '../src/custom-element';
 import {parseUrl, removeFragment} from '../src/url';
 
-
 /**
  * @param {!Window} win Destination window for the new element.
  * @this {undefined}  // Make linter happy
@@ -104,7 +103,6 @@ export function installPixel(win) {
     return new RegExp('\\$(' + all + ')', 'g');
   })();
 
-
   class AmpPixel extends BaseElement {
     /** @override */
     isLayoutSupported(layout) {
@@ -142,13 +140,13 @@ export function installPixel(win) {
     }
 
     assertSource(src) {
-      assert(
-          /^(https\:\/\/|\/\/)/i.test(src),
+      assert(/^(https\:\/\/|\/\/)/i.test(src),
           'The <amp-pixel> src attribute must start with ' +
-          '"https://" or "//". Invalid value: ' + src);
+              '"https://" or "//". Invalid value: ' + src);
       return src;
     }
-  };
+  }
+  ;
 
   registerElement(win, 'amp-pixel', AmpPixel);
 }

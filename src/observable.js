@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-
 /**
  * This type signifies a callback that can be called to remove the listener.
  * @typedef {function()}
  */
 class Unlisten {}
-
 
 /**
  * This class helps to manage observers. Observers can be added, removed or

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Layout, getLengthNumeral}  from '../../../src/layout';
+import {Layout, getLengthNumeral} from '../../../src/layout';
 import {assertHttpsUrl} from '../../../src/url';
 import {loadPromise} from '../../../src/event-helper';
 
@@ -27,7 +27,6 @@ export class AmpAudio extends AMP.BaseElement {
   isLayoutSupported(layout) {
     return layout == Layout.FIXED || layout == Layout.FIXED_HEIGHT;
   }
-
 
   /** @override */
   layoutCallback() {
@@ -42,9 +41,7 @@ export class AmpAudio extends AMP.BaseElement {
     if (this.element.getAttribute('src')) {
       assertHttpsUrl(this.element.getAttribute('src'), this.element);
     }
-    this.propagateAttributes(
-        ['src', 'autoplay', 'muted', 'loop'],
-        audio);
+    this.propagateAttributes(['src', 'autoplay', 'muted', 'loop'], audio);
 
     this.applyFillContent(audio);
     this.getRealChildNodes().forEach(child => {

@@ -22,7 +22,6 @@ import {loadPromise} from '../src/event-helper';
 import {registerElement} from '../src/custom-element';
 import {getIframe, listen} from '../src/3p-frame';
 
-
 /**
  * Preview phase only default backfill for ads. If the ad
  * cannot fill the slot one of these will be displayed instead.
@@ -90,7 +89,6 @@ export function upgradeImages_(images) {
   });
 }
 
-
 /**
  * @param {!Window} win Destination window for the new element.
  * @this {undefined}  // Make linter happy
@@ -111,7 +109,7 @@ export function installAd(win) {
 
     /** @override */
     createdCallback() {
-       this.preconnect.threePFrame();
+      this.preconnect.threePFrame();
 
       /** @private {?Element} */
       this.iframe_ = null;
@@ -161,8 +159,9 @@ export function installAd(win) {
         if (POSITION_FIXED_TAG_WHITELIST[el.tagName]) {
           return false;
         }
-        if (this.getWin()/*because only called from onLayoutMeasure */
-            ./*OK*/getComputedStyle(el).position == 'fixed') {
+        if (this.getWin() /*because only called from onLayoutMeasure */
+                ./*OK*/ getComputedStyle(el)
+                .position == 'fixed') {
           return true;
         }
         el = el.parentNode;
@@ -174,10 +173,11 @@ export function installAd(win) {
     layoutCallback() {
       assert(!this.isInFixedContainer_,
           '<amp-ad> is not allowed to be placed in elements with ' +
-          'position:fixed: %s', this.element);
+              'position:fixed: %s',
+          this.element);
       if (!this.iframe_) {
-        this.iframe_ = getIframe(this.element.ownerDocument.defaultView,
-            this.element);
+        this.iframe_ =
+            getIframe(this.element.ownerDocument.defaultView, this.element);
         this.applyFillContent(this.iframe_);
         this.element.appendChild(this.iframe_);
 
@@ -231,15 +231,16 @@ export function installAd(win) {
      */
     getPlaceholderImage_() {
       let scores = scoreDimensions_(BACKFILL_DIMENSIONS_,
-          this.element./*REVIEW*/clientWidth,
-          this.element./*REVIEW*/clientHeight);
-      let dims = BACKFILL_DIMENSIONS_[
-          scores.indexOf(Math.max.apply(Math, scores))];
+          this.element./*REVIEW*/ clientWidth,
+          this.element./*REVIEW*/ clientHeight);
+      let dims =
+          BACKFILL_DIMENSIONS_[scores.indexOf(Math.max.apply(Math, scores))];
       let images = BACKFILL_IMGS_[dims.join('x')];
       // do we need a more sophisticated randomizer?
       return images[Math.floor(Math.random() * images.length)];
     }
-  };
+  }
+  ;
 
   registerElement(win, 'amp-ad', AmpAd);
 }

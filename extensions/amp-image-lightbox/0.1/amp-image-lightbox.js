@@ -16,22 +16,28 @@
 
 import {Animation} from '../../../src/animation';
 import {Gestures} from '../../../src/gesture';
-import {DoubletapRecognizer, SwipeXYRecognizer, TapRecognizer,
-    TapzoomRecognizer} from '../../../src/gesture-recognizers';
+import {
+  DoubletapRecognizer,
+  SwipeXYRecognizer,
+  TapRecognizer,
+  TapzoomRecognizer
+} from '../../../src/gesture-recognizers';
 import {Layout} from '../../../src/layout';
 import {assert} from '../../../src/asserts';
 import {bezierCurve} from '../../../src/curve';
 import {continueMotion} from '../../../src/motion';
 import {historyFor} from '../../../src/history';
 import {isLoaded, loadPromise} from '../../../src/event-helper';
-import {layoutRectFromDomRect, layoutRectLtwh, moveLayoutRect}
-    from '../../../src/layout-rect';
+import {
+  layoutRectFromDomRect,
+  layoutRectLtwh,
+  moveLayoutRect
+} from '../../../src/layout-rect';
 import {parseSrcset} from '../../../src/srcset';
 import {timer} from '../../../src/timer';
 import * as dom from '../../../src/dom';
 import * as st from '../../../src/style';
 import * as tr from '../../../src/transition';
-
 
 /** @private @const {!Object<string, boolean>} */
 const SUPPORTED_ELEMENTS_ = {
@@ -47,7 +53,6 @@ const EXIT_CURVE_ = bezierCurve(0.4, 0, 0.2, 1);
 
 /** @private @const {!Curve} */
 const PAN_ZOOM_CURVE_ = bezierCurve(0.4, 0, 0.2, 1.4);
-
 
 /**
  * This class is responsible providing all operations necessary for viewing
@@ -203,10 +208,10 @@ export class ImageViewer {
    * @param {?Element} sourceImage
    */
   init(sourceElement, sourceImage) {
-    this.sourceWidth_ = sourceElement./*OK*/offsetWidth;
-    this.sourceHeight_ = sourceElement./*OK*/offsetHeight;
+    this.sourceWidth_ = sourceElement./*OK*/ offsetWidth;
+    this.sourceHeight_ = sourceElement./*OK*/ offsetHeight;
     this.srcset_ = parseSrcset(sourceElement.getAttribute('srcset') ||
-        sourceElement.getAttribute('src'));
+                               sourceElement.getAttribute('src'));
     if (sourceImage && isLoaded(sourceImage) && sourceImage.src) {
       // Set src provisionally to the known loaded value for fast display.
       // It will be updated later.
@@ -219,8 +224,8 @@ export class ImageViewer {
    * @return {!Promise}
    */
   measure() {
-    this.viewerBox_ = layoutRectFromDomRect(this.viewer_
-        ./*OK*/getBoundingClientRect());
+    this.viewerBox_ =
+        layoutRectFromDomRect(this.viewer_./*OK*/ getBoundingClientRect());
 
     let sf = Math.min(this.viewerBox_.width / this.sourceWidth_,
         this.viewerBox_.height / this.sourceHeight_);
@@ -235,11 +240,10 @@ export class ImageViewer {
       height = this.sourceHeight_;
     }
 
-    this.imageBox_ = layoutRectLtwh(
-        Math.round((this.viewerBox_.width - width) / 2),
-        Math.round((this.viewerBox_.height - height) / 2),
-        Math.round(width),
-        Math.round(height));
+    this.imageBox_ =
+        layoutRectLtwh(Math.round((this.viewerBox_.width - width) / 2),
+            Math.round((this.viewerBox_.height - height) / 2),
+            Math.round(width), Math.round(height));
 
     st.setStyles(this.image_, {
       top: st.px(this.imageBox_.top),
@@ -310,13 +314,14 @@ export class ImageViewer {
       }
       let deltaX = this.viewerBox_.width / 2 - e.data.clientX;
       let deltaY = this.viewerBox_.height / 2 - e.data.clientY;
-      this.onZoom_(newScale, deltaX, deltaY, true).then(() => {
-        return this.onZoomRelease_(0, 0, 0, 0, 0, 0);
-      });
+      this.onZoom_(newScale, deltaX, deltaY, true)
+          .then(() => {
+            return this.onZoomRelease_(0, 0, 0, 0, 0, 0);
+          });
     });
     gestures.onGesture(TapzoomRecognizer, (e) => {
-      this.onZoomInc_(e.data.centerClientX, e.data.centerClientY,
-          e.data.deltaX, e.data.deltaY);
+      this.onZoomInc_(e.data.centerClientX, e.data.centerClientY, e.data.deltaX,
+          e.data.deltaY);
       if (e.data.last) {
         this.onZoomRelease_(e.data.centerClientX, e.data.centerClientY,
             e.data.deltaX, e.data.deltaY, e.data.velocityY, e.data.velocityY);
@@ -345,8 +350,8 @@ export class ImageViewer {
    * @private
    */
   boundScale_(s, allowExtent) {
-    return this.boundValue_(s, this.minScale_, this.maxScale_,
-        allowExtent ? 0.25 : 0);
+    return this.boundValue_(
+        s, this.minScale_, this.maxScale_, allowExtent ? 0.25 : 0);
   }
 
   /**
@@ -413,8 +418,8 @@ export class ImageViewer {
    */
   updatePanZoom_() {
     st.setStyles(this.image_, {
-      transform: st.translate(this.posX_, this.posY_) +
-          ' ' + st.scale(this.scale_)
+      transform:
+          st.translate(this.posX_, this.posY_) + ' ' + st.scale(this.scale_)
     });
     if (this.scale_ != 1) {
       this.lightbox_.toggleViewMode(true);
@@ -449,12 +454,12 @@ export class ImageViewer {
     }
 
     // Continue motion.
-    this.motion_ = continueMotion(this.posX_, this.posY_, veloX, veloY,
-        (x, y) => {
+    this.motion_ =
+        continueMotion(this.posX_, this.posY_, veloX, veloY, (x, y) => {
           let newPosX = this.boundX_(x, true);
           let newPosY = this.boundY_(y, true);
           if (Math.abs(newPosX - this.posX_) < 1 &&
-                Math.abs(newPosY - this.posY_) < 1) {
+              Math.abs(newPosY - this.posY_) < 1) {
             // Hit the wall: stop motion.
             return false;
           }
@@ -480,13 +485,13 @@ export class ImageViewer {
   onZoomInc_(centerClientX, centerClientY, deltaX, deltaY) {
     let dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
 
-    let zoomSign = Math.abs(deltaY) > Math.abs(deltaX) ?
-        Math.sign(deltaY) : Math.sign(-deltaX);
+    let zoomSign = Math.abs(deltaY) > Math.abs(deltaX) ? Math.sign(deltaY)
+                                                       : Math.sign(-deltaX);
     if (zoomSign == 0) {
       return;
     }
 
-    let newScale = this.startScale_  * (1 + zoomSign * dist / 100);
+    let newScale = this.startScale_ * (1 + zoomSign * dist / 100);
     let deltaCenterX = this.viewerBox_.width / 2 - centerClientX;
     let deltaCenterY = this.viewerBox_.height / 2 - centerClientY;
     deltaX = Math.min(deltaCenterX, deltaCenterX * (dist / 100));
@@ -534,19 +539,20 @@ export class ImageViewer {
       promise = Promise.resolve();
     } else {
       promise = continueMotion(deltaX, deltaY, veloX, veloY, (x, y) => {
-        this.onZoomInc_(centerClientX, centerClientY, x, y);
-        return true;
-      }).thenAlways();
+                  this.onZoomInc_(centerClientX, centerClientY, x, y);
+                  return true;
+                }).thenAlways();
     }
 
     let relayout = this.scale_ > this.startScale_;
     return promise.then(() => {
-      return this.release_();
-    }).then(() => {
-      if (relayout) {
-        this.updateSrc_();
-      }
-    });
+                    return this.release_();
+                  })
+        .then(() => {
+          if (relayout) {
+            this.updateSrc_();
+          }
+        });
   }
 
   /**
@@ -567,9 +573,8 @@ export class ImageViewer {
     let dur = 0;
     if (animate) {
       let maxDur = 250;
-      dur = Math.min(maxDur, Math.max(
-          maxDur * dist * 0.01,      // Moving component.
-          maxDur * Math.abs(ds)));   // Zooming component.
+      dur = Math.min(maxDur, Math.max(maxDur * dist * 0.01, // Moving component.
+                                 maxDur * Math.abs(ds))); // Zooming component.
     }
 
     let promise;
@@ -577,17 +582,20 @@ export class ImageViewer {
       let scaleFunc = tr.numeric(this.scale_, newScale);
       let xFunc = tr.numeric(this.posX_, newPosX);
       let yFunc = tr.numeric(this.posY_, newPosY);
-      promise = Animation.animate((time) => {
-        this.scale_ = scaleFunc(time);
-        this.posX_ = xFunc(time);
-        this.posY_ = yFunc(time);
-        this.updatePanZoom_();
-      }, dur, PAN_ZOOM_CURVE_).thenAlways(() => {
-        this.scale_ = newScale;
-        this.posX_ = newPosX;
-        this.posY_ = newPosY;
-        this.updatePanZoom_();
-      });
+      promise = Animation.animate(
+                             (time) => {
+                               this.scale_ = scaleFunc(time);
+                               this.posX_ = xFunc(time);
+                               this.posY_ = yFunc(time);
+                               this.updatePanZoom_();
+                             },
+                             dur, PAN_ZOOM_CURVE_)
+                    .thenAlways(() => {
+                      this.scale_ = newScale;
+                      this.posX_ = newPosX;
+                      this.posY_ = newPosY;
+                      this.updatePanZoom_();
+                    });
     } else {
       this.scale_ = newScale;
       this.posX_ = newPosX;
@@ -615,14 +623,14 @@ export class ImageViewer {
     }
     let newPosX = this.boundX_(this.posX_ / this.scale_ * newScale, false);
     let newPosY = this.boundY_(this.posY_ / this.scale_ * newScale, false);
-    return this.set_(newScale, newPosX, newPosY, true).then(() => {
-      this.startScale_ = this.scale_;
-      this.startX_ = this.posX_;
-      this.startY_ = this.posY_;
-    });
+    return this.set_(newScale, newPosX, newPosY, true)
+        .then(() => {
+          this.startScale_ = this.scale_;
+          this.startX_ = this.posX_;
+          this.startY_ = this.posY_;
+        });
   }
 }
-
 
 /**
  * This class implements "amp-image-lightbox" extension element.
@@ -677,8 +685,7 @@ class AmpImageLightbox extends AMP.BaseElement {
 
     let gestures = Gestures.get(this.element);
     this.element.addEventListener('click', (e) => {
-      if (!this.entering_ &&
-            !this.imageViewer_.getImage().contains(e.target)) {
+      if (!this.entering_ && !this.imageViewer_.getImage().contains(e.target)) {
         this.close();
       }
     });
@@ -687,9 +694,10 @@ class AmpImageLightbox extends AMP.BaseElement {
         this.close();
       }
     });
-    gestures.onGesture(SwipeXYRecognizer, () => {
-      // Consume to block scroll events and side-swipe.
-    });
+    gestures.onGesture(
+        SwipeXYRecognizer, () => {
+                               // Consume to block scroll events and side-swipe.
+                           });
   }
 
   /** @override */
@@ -718,9 +726,11 @@ class AmpImageLightbox extends AMP.BaseElement {
       }
     });
 
-    this.getHistory_().push(this.close.bind(this)).then((historyId) => {
-      this.historyId_ = historyId;
-    });
+    this.getHistory_()
+        .push(this.close.bind(this))
+        .then((historyId) => {
+          this.historyId_ = historyId;
+        });
   }
 
   /**
@@ -810,30 +820,26 @@ class AmpImageLightbox extends AMP.BaseElement {
   enter_() {
     this.entering_ = true;
 
-    st.setStyles(this.element, {
-      opacity: 0,
-      display: ''
-    });
+    st.setStyles(this.element, {opacity: 0, display: ''});
     this.imageViewer_.measure();
 
     let anim = new Animation();
     let dur = 500;
 
     // Lightbox background fades in.
-    anim.add(0, tr.setStyles(this.element, {
-      opacity: tr.numeric(0, 1)
-    }), 0.6, ENTER_CURVE_);
+    anim.add(0, tr.setStyles(this.element, {opacity: tr.numeric(0, 1)}), 0.6,
+        ENTER_CURVE_);
 
     // Try to transition from the source image.
     let transLayer = null;
     if (this.sourceImage_ && isLoaded(this.sourceImage_) &&
-            this.sourceImage_.src) {
+        this.sourceImage_.src) {
       transLayer = document.createElement('div');
       transLayer.classList.add('-amp-image-lightbox-trans');
       document.body.appendChild(transLayer);
 
-      let rect = layoutRectFromDomRect(this.sourceImage_
-          ./*OK*/getBoundingClientRect());
+      let rect = layoutRectFromDomRect(
+          this.sourceImage_./*OK*/ getBoundingClientRect());
       let clone = this.sourceImage_.cloneNode(true);
       st.setStyles(clone, {
         position: 'absolute',
@@ -853,20 +859,19 @@ class AmpImageLightbox extends AMP.BaseElement {
       // Duration will be somewhere between 0.2 and 0.8 depending on how far
       // the image needs to move.
       let motionTime = Math.max(0.2, Math.min(0.8, Math.abs(dy) / 250 * 0.8));
-      anim.add(0, tr.setStyles(clone, {
-        transform: tr.translate(tr.numeric(0, dx), tr.numeric(0, dy))
-      }), motionTime, ENTER_CURVE_);
+      anim.add(0,
+          tr.setStyles(clone,
+              {transform: tr.translate(tr.numeric(0, dx), tr.numeric(0, dy))}),
+          motionTime, ENTER_CURVE_);
 
       // Fade in the container. This will mostly affect the caption.
       st.setStyles(this.container_, {opacity: 0});
-      anim.add(0.8, tr.setStyles(this.container_, {
-        opacity: tr.numeric(0, 1)
-      }), 0.1, ENTER_CURVE_);
+      anim.add(0.8, tr.setStyles(this.container_, {opacity: tr.numeric(0, 1)}),
+          0.1, ENTER_CURVE_);
 
       // At the end, fade out the transition image.
-      anim.add(0.9, tr.setStyles(transLayer, {
-        opacity: tr.numeric(1, 0.01)
-      }), 0.1, EXIT_CURVE_);
+      anim.add(0.9, tr.setStyles(transLayer, {opacity: tr.numeric(1, 0.01)}),
+          0.1, EXIT_CURVE_);
     }
 
     return anim.start(dur).thenAlways(() => {
@@ -891,9 +896,8 @@ class AmpImageLightbox extends AMP.BaseElement {
     let dur = 500;
 
     // Lightbox background fades out.
-    anim.add(0, tr.setStyles(this.element, {
-      opacity: tr.numeric(1, 0)
-    }), 0.9, EXIT_CURVE_);
+    anim.add(0, tr.setStyles(this.element, {opacity: tr.numeric(1, 0)}), 0.9,
+        EXIT_CURVE_);
 
     // Try to transition to the source image.
     let transLayer = null;
@@ -902,8 +906,8 @@ class AmpImageLightbox extends AMP.BaseElement {
       transLayer.classList.add('-amp-image-lightbox-trans');
       document.body.appendChild(transLayer);
 
-      let rect = layoutRectFromDomRect(this.sourceImage_
-          ./*OK*/getBoundingClientRect());
+      let rect = layoutRectFromDomRect(
+          this.sourceImage_./*OK*/ getBoundingClientRect());
       let newLeft = imageBox.left + (imageBox.width - rect.width) / 2;
       let newTop = imageBox.top + (imageBox.height - rect.height) / 2;
       let clone = image.cloneNode(true);
@@ -918,16 +922,14 @@ class AmpImageLightbox extends AMP.BaseElement {
       transLayer.appendChild(clone);
 
       // Fade out the container.
-      anim.add(0, tr.setStyles(this.container_, {
-        opacity: tr.numeric(1, 0)
-      }), 0.1, EXIT_CURVE_);
+      anim.add(0, tr.setStyles(this.container_, {opacity: tr.numeric(1, 0)}),
+          0.1, EXIT_CURVE_);
 
       // Move the image back to where it is in the article.
       let dx = rect.left - newLeft;
       let dy = rect.top - newTop;
-      let move = tr.setStyles(clone, {
-        transform: tr.translate(tr.numeric(0, dx), tr.numeric(0, dy))
-      });
+      let move = tr.setStyles(clone,
+          {transform: tr.translate(tr.numeric(0, dx), tr.numeric(0, dy))});
       // Duration will be somewhere between 0.2 and 0.8 depending on how far
       // the image needs to move. Start the motion later too, but no later
       // than 0.2.
@@ -940,9 +942,8 @@ class AmpImageLightbox extends AMP.BaseElement {
       }, motionTime, EXIT_CURVE_);
 
       // Fade out the transition image.
-      anim.add(0.8, tr.setStyles(transLayer, {
-        opacity: tr.numeric(1, 0.01)
-      }), 0.2, EXIT_CURVE_);
+      anim.add(0.8, tr.setStyles(transLayer, {opacity: tr.numeric(1, 0.01)}),
+          0.2, EXIT_CURVE_);
 
       // Duration will be somewhere between 300ms and 700ms depending on
       // how far the image needs to move.
@@ -953,10 +954,7 @@ class AmpImageLightbox extends AMP.BaseElement {
       if (this.sourceImage_) {
         this.sourceImage_.classList.remove('-amp-ghost');
       }
-      st.setStyles(this.element, {
-        display: 'none',
-        opacity: ''
-      });
+      st.setStyles(this.element, {display: 'none', opacity: ''});
       st.setStyles(this.container_, {opacity: ''});
       if (transLayer) {
         document.body.removeChild(transLayer);

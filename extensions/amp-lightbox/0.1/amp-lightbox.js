@@ -16,12 +16,13 @@
 
 import {Gestures} from '../../../src/gesture';
 import {Layout} from '../../../src/layout';
-import {SwipeXYRecognizer, TapRecognizer}
-    from '../../../src/gesture-recognizers';
+import {
+  SwipeXYRecognizer,
+  TapRecognizer
+} from '../../../src/gesture-recognizers';
 import {historyFor} from '../../../src/history';
 import {timer} from '../../../src/timer';
 import * as st from '../../../src/style';
-
 
 class AmpLightbox extends AMP.BaseElement {
 
@@ -61,9 +62,10 @@ class AmpLightbox extends AMP.BaseElement {
     // up to "on" element.
     this.element.addEventListener('click', () => this.close());
     gestures.onGesture(TapRecognizer, () => this.close());
-    gestures.onGesture(SwipeXYRecognizer, () => {
-      // Consume to block scroll events and side-swipe.
-    });
+    gestures.onGesture(
+        SwipeXYRecognizer, () => {
+                               // Consume to block scroll events and side-swipe.
+                           });
 
     /** @private {number} */
     this.historyId_ = -1;
@@ -90,9 +92,11 @@ class AmpLightbox extends AMP.BaseElement {
     this.scheduleLayout(this.container_);
     this.updateInViewport(this.container_, true);
 
-    this.getHistory_().push(this.close.bind(this)).then((historyId) => {
-      this.historyId_ = historyId;
-    });
+    this.getHistory_()
+        .push(this.close.bind(this))
+        .then((historyId) => {
+          this.historyId_ = historyId;
+        });
   }
 
   close() {

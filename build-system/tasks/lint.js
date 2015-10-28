@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 var argv = require('minimist')(process.argv.slice(2));
 var config = require('../config');
 var gulp = require('gulp-help')(require('gulp'));
@@ -36,9 +35,7 @@ var options = {
   },
 };
 
-var srcs = ['**/*.js', config.src.exclude];
-
-var watcher = lazypipe().pipe(watch, srcs);
+var watcher = lazypipe().pipe(watch, config.lintGlobs);
 
 /**
  * Run the eslinter on the src javascript and log the output
@@ -46,27 +43,26 @@ var watcher = lazypipe().pipe(watch, srcs);
  */
 function lint() {
   var errorsFound = false;
-  var stream = gulp.src(srcs);
+  var stream = gulp.src(config.lintGlobs);
 
   if (isWatching) {
     stream = stream.pipe(watcher());
   }
 
   return stream.pipe(eslint(options))
-    .pipe(eslint.formatEach('compact', function(msg) {
-      errorsFound = true;
-      util.log(util.colors.red(msg));
-    }))
-    .on('end', function() {
-      if (errorsFound) {
-        process.exit(1);
-      }
-    });
+      .pipe(eslint.formatEach('compact',
+          function(msg) {
+            errorsFound = true;
+            util.log(util.colors.red(msg));
+          }))
+      .on('end', function() {
+        if (errorsFound) {
+          process.exit(1);
+        }
+      });
 }
 
-gulp.task('lint', 'Validates against Google Closure Linter', lint,
-{
-  options: {
-    'watch': 'Watches for changes in files, validates against the linter'
-  }
+gulp.task('lint', 'Validates against Google Closure Linter', lint, {
+  options:
+      {'watch': 'Watches for changes in files, validates against the linter'}
 });

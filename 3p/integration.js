@@ -114,5 +114,5 @@ function nonSensitiveDataPostMessage(type, opt_object) {
   object.type = type;
   object.sentinel = 'amp-3p';
   // Use of * is OK. We are not worried who gets this message.
-  window.parent./*OK*/postMessage(object, '*');
+  window.parent./*OK*/ postMessage(object, '*');
 }

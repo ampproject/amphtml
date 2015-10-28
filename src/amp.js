@@ -38,7 +38,7 @@ import {maybeValidate} from './validator-integration';
 // a completely blank page.
 try {
   // Should happen first.
-  installErrorReporting(window);  // Also calls makeBodyVisible on errors.
+  installErrorReporting(window); // Also calls makeBodyVisible on errors.
   installStyles(document, cssText, () => {
     try {
       historyFor(window);
@@ -71,8 +71,9 @@ try {
 // tag to give some information that can be used in error reports.
 // (At least by sophisticated users).
 if (window.console) {
-  (console.info || console.log).call(console,
-      'Powered by AMP ⚡ HTML – Version $internalRuntimeVersion$');
+  (console.info || console.log)
+      .call(
+          console, 'Powered by AMP ⚡ HTML – Version $internalRuntimeVersion$');
 }
-document.documentElement.setAttribute('amp-version',
-      '$internalRuntimeVersion$');
+document.documentElement.setAttribute(
+    'amp-version', '$internalRuntimeVersion$');

@@ -16,7 +16,6 @@
 
 import {BaseElement} from '../../src/base-element';
 
-
 describe('BaseElement', () => {
 
   let div;

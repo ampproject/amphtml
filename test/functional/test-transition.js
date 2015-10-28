@@ -70,8 +70,12 @@ describe('Transition', () => {
   it('setStyles', () => {
     let element = document.createElement('div');
     let func = tr.setStyles(element, {
-      width: tr.px(function(n) {return n * 100 + 1;}),
-      height: tr.px(function(n) {return n * 100 + 2;}),
+      width: tr.px(function(n) {
+        return n * 100 + 1;
+      }),
+      height: tr.px(function(n) {
+        return n * 100 + 2;
+      }),
     });
 
     func(0);
@@ -112,7 +116,7 @@ describe('Transition', () => {
     expect(func(0)).to.equal(2);
     expect(func(0.3)).to.be.closeTo(5.75, 1e-3);
     expect(func(0.6)).to.be.closeTo(9.5, 1e-3);
-    expect(func(0.8)).to.be.closeTo(12, 1e-3);  // Summit.
+    expect(func(0.8)).to.be.closeTo(12, 1e-3); // Summit.
     expect(func(0.9)).to.be.closeTo(11, 1e-3);
     expect(func(1)).to.equal(10);
 
@@ -120,7 +124,7 @@ describe('Transition', () => {
     expect(func(0)).to.equal(-2);
     expect(func(0.3)).to.be.closeTo(-5.75, 1e-3);
     expect(func(0.6)).to.be.closeTo(-9.5, 1e-3);
-    expect(func(0.8)).to.be.closeTo(-12, 1e-3);  // Summit.
+    expect(func(0.8)).to.be.closeTo(-12, 1e-3); // Summit.
     expect(func(0.9)).to.be.closeTo(-11, 1e-3);
     expect(func(1)).to.equal(-10);
   });
@@ -142,7 +146,9 @@ describe('Transition', () => {
     expect(func(0.9)).to.equal('translateX(9px)');
     expect(func(1)).to.equal('translateX(10px)');
 
-    func = tr.translateX(() => {return '101vw';});
+    func = tr.translateX(() => {
+      return '101vw';
+    });
     expect(func(0)).to.equal('translateX(101vw)');
   });
 
@@ -154,7 +160,13 @@ describe('Transition', () => {
     expect(func(0.9)).to.equal('translate(9px,29px)');
     expect(func(1)).to.equal('translate(10px,30px)');
 
-    func = tr.translate(() => {return '101vw';}, () => {return '201em';});
+    func = tr.translate(
+        () => {
+          return '101vw';
+        },
+        () => {
+          return '201em';
+        });
     expect(func(0)).to.equal('translate(101vw,201em)');
   });
 
@@ -166,7 +178,9 @@ describe('Transition', () => {
     expect(func(0.9)).to.equal('translate(9px)');
     expect(func(1)).to.equal('translate(10px)');
 
-    func = tr.translate(() => {return '101vw';});
+    func = tr.translate(() => {
+      return '101vw';
+    });
     expect(func(0)).to.equal('translate(101vw)');
   });
 });

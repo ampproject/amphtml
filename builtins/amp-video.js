@@ -21,7 +21,6 @@ import {loadPromise} from '../src/event-helper';
 import {registerElement} from '../src/custom-element';
 import {setStyles} from '../src/style';
 
-
 /**
  * @param {!Window} win Destination window for the new element.
  * @this {undefined}  // Make linter happy
@@ -49,8 +48,7 @@ export function installVideo(win) {
         assertHttpsUrl(this.element.getAttribute('src'), this.element);
       }
       this.propagateAttributes(
-          ['src', 'controls', 'autoplay', 'muted', 'loop', 'poster'],
-          video);
+          ['src', 'controls', 'autoplay', 'muted', 'loop', 'poster'], video);
       video.width = getLengthNumeral(width);
       video.height = getLengthNumeral(height);
       this.applyFillContent(video, true);

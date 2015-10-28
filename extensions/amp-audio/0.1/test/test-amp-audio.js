@@ -30,9 +30,10 @@ describe('amp-audio', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    return createIframePromise(/* runtimeOff */ true).then(i => {
-      iframe = i;
-    });
+    return createIframePromise(/* runtimeOff */ true)
+        .then(i => {
+          iframe = i;
+        });
   });
 
   afterEach(() => {
@@ -72,54 +73,57 @@ describe('amp-audio', () => {
   }
 
   it('should load audio through attribute', () => {
-    return attachAndRun({
-      src: 'https://origin.com/audio.mp3'
-    }).then(a => {
-      var audio = a.querySelector('audio');
-      expect(audio).to.be.an.instanceof(Element);
-      expect(audio.tagName).to.equal('AUDIO');
-      expect(audio.getAttribute('src'))
-          .to.equal('https://origin.com/audio.mp3');
-      expect(audio.hasAttribute('controls')).to.be.true;
-      expect(a.style.width).to.be.equal('300px');
-      expect(a.style.height).to.be.equal('30px');
-    });
+    return attachAndRun({src: 'https://origin.com/audio.mp3'})
+        .then(a => {
+          var audio = a.querySelector('audio');
+          expect(audio).to.be.an.instanceof (Element);
+          expect(audio.tagName).to.equal('AUDIO');
+          expect(audio.getAttribute('src'))
+              .to.equal('https://origin.com/audio.mp3');
+          expect(audio.hasAttribute('controls')).to.be.true;
+          expect(a.style.width).to.be.equal('300px');
+          expect(a.style.height).to.be.equal('30px');
+        });
   });
 
   it('should load audio through sources', () => {
-    return attachAndRun({
-      width: 503,
-      height: 53,
-      autoplay: '',
-      muted: '',
-      loop: ''
-    }, [
-        {tag: 'source', src: 'https://origin.com/audio.mp3',
-            type: 'audio/mpeg'},
-        {tag: 'source', src: 'https://origin.com/audio.ogg', type: 'audio/ogg'},
-        {tag: 'text', text: 'Unsupported.'},
-    ]).then(a => {
-      var audio = a.querySelector('audio');
-      expect(audio).to.be.an.instanceof(Element);
-      expect(audio.tagName).to.equal('AUDIO');
-      expect(a.getAttribute('width')).to.be.equal('503');
-      expect(a.getAttribute('height')).to.be.equal('53');
-      expect(audio.offsetWidth).to.be.greaterThan('1');
-      expect(audio.offsetHeight).to.be.greaterThan('1');
-      expect(audio.hasAttribute('controls')).to.be.true;
-      expect(audio.hasAttribute('autoplay')).to.be.true;
-      expect(audio.hasAttribute('muted')).to.be.true;
-      expect(audio.hasAttribute('loop')).to.be.true;
-      expect(audio.hasAttribute('src')).to.be.false;
-      expect(audio.childNodes[0].tagName).to.equal('SOURCE');
-      expect(audio.childNodes[0].getAttribute('src'))
-        .to.equal('https://origin.com/audio.mp3');
-      expect(audio.childNodes[1].tagName).to.equal('SOURCE');
-      expect(audio.childNodes[1].getAttribute('src'))
-        .to.equal('https://origin.com/audio.ogg');
-      expect(audio.childNodes[2].nodeType).to.equal(Node.TEXT_NODE);
-      expect(audio.childNodes[2].textContent).to.equal('Unsupported.');
-    });
+    return attachAndRun(
+               {width: 503, height: 53, autoplay: '', muted: '', loop: ''},
+               [
+                 {
+                   tag: 'source',
+                   src: 'https://origin.com/audio.mp3',
+                   type: 'audio/mpeg'
+                 },
+                 {
+                   tag: 'source',
+                   src: 'https://origin.com/audio.ogg',
+                   type: 'audio/ogg'
+                 },
+                 {tag: 'text', text: 'Unsupported.'},
+               ])
+        .then(a => {
+          var audio = a.querySelector('audio');
+          expect(audio).to.be.an.instanceof (Element);
+          expect(audio.tagName).to.equal('AUDIO');
+          expect(a.getAttribute('width')).to.be.equal('503');
+          expect(a.getAttribute('height')).to.be.equal('53');
+          expect(audio.offsetWidth).to.be.greaterThan('1');
+          expect(audio.offsetHeight).to.be.greaterThan('1');
+          expect(audio.hasAttribute('controls')).to.be.true;
+          expect(audio.hasAttribute('autoplay')).to.be.true;
+          expect(audio.hasAttribute('muted')).to.be.true;
+          expect(audio.hasAttribute('loop')).to.be.true;
+          expect(audio.hasAttribute('src')).to.be.false;
+          expect(audio.childNodes[0].tagName).to.equal('SOURCE');
+          expect(audio.childNodes[0].getAttribute('src'))
+              .to.equal('https://origin.com/audio.mp3');
+          expect(audio.childNodes[1].tagName).to.equal('SOURCE');
+          expect(audio.childNodes[1].getAttribute('src'))
+              .to.equal('https://origin.com/audio.ogg');
+          expect(audio.childNodes[2].nodeType).to.equal(Node.TEXT_NODE);
+          expect(audio.childNodes[2].textContent).to.equal('Unsupported.');
+        });
   });
 
   it('should set its dimensions to the browser natural', () => {
@@ -138,13 +142,12 @@ describe('amp-audio', () => {
   });
 
   it('should set its natural dimension only if not specified', () => {
-    return attachAndRun({
-      'width': '500'
-    }).then(a => {
-      var audio = a.querySelector('audio');
-      expect(a.style.width).to.be.equal('500px');
-      expect(a.style.height).to.be.equal('30px');
-    });
+    return attachAndRun({'width': '500'})
+        .then(a => {
+          var audio = a.querySelector('audio');
+          expect(a.style.width).to.be.equal('500px');
+          expect(a.style.height).to.be.equal('30px');
+        });
   });
 
   it('should fallback when not available', () => {

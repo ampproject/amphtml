@@ -47,14 +47,15 @@ describe('amp-instagram', () => {
   });
 
   it('renders responsively', () => {
-    var ins = getIns('fBwFP', true).then((ins) => {
-      var iframe = ins.firstChild;
-      expect(iframe.className).to.match(/amp-responsive-item/);
-    });
+    var ins = getIns('fBwFP', true)
+                  .then((ins) => {
+                    var iframe = ins.firstChild;
+                    expect(iframe.className).to.match(/amp-responsive-item/);
+                  });
   });
 
   it('requires data-shortcode', () => {
-    expect(getIns('')).to.be.rejectedWith(
-        /The data-shortcode attribute is required for/);
+    expect(getIns(''))
+        .to.be.rejectedWith(/The data-shortcode attribute is required for/);
   });
 });

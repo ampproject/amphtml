@@ -16,8 +16,11 @@
 
 import {Pass} from './pass';
 import {assert} from './asserts';
-import {expandLayoutRect, layoutRectLtwh, layoutRectsOverlap} from
-    './layout-rect';
+import {
+  expandLayoutRect,
+  layoutRectLtwh,
+  layoutRectsOverlap
+} from './layout-rect';
 import {inputFor} from './input';
 import {log} from './log';
 import {documentStateFor} from './document-state';
@@ -40,7 +43,6 @@ let PRIORITY_BASE_ = 10;
 let PRIORITY_PENALTY_TIME_ = 1000;
 let POST_TASK_PASS_DELAY_ = 1000;
 
-
 /**
  * Returns the element-based priority. A value from 0 to 10.
  * @param {string} tagName
@@ -56,7 +58,6 @@ export function getElementPriority(tagName) {
   }
   return 0;
 }
-
 
 export class Resources {
   constructor(window) {
@@ -204,11 +205,11 @@ export class Resources {
     if (!this.win.document.body) {
       return;
     }
-    let scrollHeight = this.win.document.body./*OK*/scrollHeight;
-    if (scrollHeight != this./*OK*/scrollHeight_) {
-      this./*OK*/scrollHeight_ = scrollHeight;
-      this.viewer_.postDocumentResized(this.viewport_.getSize().width,
-          scrollHeight);
+    let scrollHeight = this.win.document.body./*OK*/ scrollHeight;
+    if (scrollHeight != this./*OK*/ scrollHeight_) {
+      this./*OK*/ scrollHeight_ = scrollHeight;
+      this.viewer_.postDocumentResized(
+          this.viewport_.getSize().width, scrollHeight);
     }
   }
 
@@ -320,8 +321,7 @@ export class Resources {
   scheduleLayout(parentElement, subElements) {
     this.scheduleLayoutOrPreloadForSubresources_(
         this.getResourceForElement(parentElement),
-        /* layout */ true,
-        elements_(subElements));
+        /* layout */ true, elements_(subElements));
   }
 
   /**
@@ -336,8 +336,7 @@ export class Resources {
   schedulePreload(parentElement, subElements) {
     this.scheduleLayoutOrPreloadForSubresources_(
         this.getResourceForElement(parentElement),
-        /* layout */ false,
-        elements_(subElements));
+        /* layout */ false, elements_(subElements));
   }
 
   /**
@@ -351,8 +350,7 @@ export class Resources {
    */
   updateInViewport(parentElement, subElements, inLocalViewport) {
     this.updateInViewportForSubresources_(
-        this.getResourceForElement(parentElement),
-        elements_(subElements),
+        this.getResourceForElement(parentElement), elements_(subElements),
         inLocalViewport);
   }
 
@@ -414,18 +412,16 @@ export class Resources {
     if (this.documentReady_ && this.firstPassAfterDocumentReady_) {
       this.firstPassAfterDocumentReady_ = false;
       this.viewer_.postDocumentReady(this.viewport_.getSize().width,
-        this.win.document.body./*OK*/scrollHeight);
+          this.win.document.body./*OK*/ scrollHeight);
       this.updateScrollHeight_();
     }
 
     let viewportSize = this.viewport_.getSize();
-    log.fine(TAG_, 'PASS: at ' + timer.now() +
-        ', visible=', this.visible_,
-        ', forceBuild=', this.forceBuild_,
-        ', relayoutAll=', this.relayoutAll_,
-        ', relayoutTop=', this.relayoutTop_,
-        ', viewportSize=', viewportSize.width, viewportSize.height,
-        ', prerenderSize=', this.prerenderSize_);
+    log.fine(TAG_, 'PASS: at ' + timer.now() + ', visible=', this.visible_,
+        ', forceBuild=', this.forceBuild_, ', relayoutAll=', this.relayoutAll_,
+        ', relayoutTop=', this.relayoutTop_, ', viewportSize=',
+        viewportSize.width, viewportSize.height, ', prerenderSize=',
+        this.prerenderSize_);
     this.pass_.cancel();
     this.vsyncScheduled_ = false;
 
@@ -466,8 +462,8 @@ export class Resources {
     }
 
     if (this.changeHeightRequests_.length > 0) {
-      log.fine(TAG_, 'change height requests:',
-          this.changeHeightRequests_.length);
+      log.fine(
+          TAG_, 'change height requests:', this.changeHeightRequests_.length);
       let changeHeightRequests = this.changeHeightRequests_;
       this.changeHeightRequests_ = [];
 
@@ -540,9 +536,8 @@ export class Resources {
         if (r.getState() == ResourceState_.NOT_BUILT || r.hasOwner()) {
           continue;
         }
-        if (relayoutAll ||
-                r.getState() == ResourceState_.NOT_LAID_OUT ||
-                relayoutTop != -1 && r.getLayoutBox().bottom >= relayoutTop) {
+        if (relayoutAll || r.getState() == ResourceState_.NOT_LAID_OUT ||
+            relayoutTop != -1 && r.getLayoutBox().bottom >= relayoutTop) {
           r.measure();
         }
       }
@@ -555,8 +550,8 @@ export class Resources {
     if (this.visible_) {
       loadRect = expandLayoutRect(viewportRect, 0.25, 2);
     } else if (this.prerenderSize_ > 0) {
-      loadRect = expandLayoutRect(viewportRect, 0.25,
-          this.prerenderSize_ - 1 + 0.25);
+      loadRect =
+          expandLayoutRect(viewportRect, 0.25, this.prerenderSize_ - 1 + 0.25);
     } else {
       loadRect = null;
     }
@@ -586,8 +581,8 @@ export class Resources {
       }
       // Note that when the document is not visible, neither are any of its
       // elements to reduce CPU cycles.
-      var shouldBeInViewport = (this.visible_ && r.isDisplayed() &&
-          r.overlaps(visibleRect));
+      var shouldBeInViewport =
+          (this.visible_ && r.isDisplayed() && r.overlaps(visibleRect));
       if (r.isInViewport() != shouldBeInViewport) {
         r.setInViewport(shouldBeInViewport);
       }
@@ -595,15 +590,14 @@ export class Resources {
 
     // Phase 5: Idle layout: layout more if we are otherwise not doing much.
     // TODO(dvoytenko): document/estimate IDLE timeouts and other constants
-    if (this.visible_ &&
-          this.exec_.getSize() == 0 &&
-          this.queue_.getSize() == 0 &&
-          now > this.exec_.getLastDequeueTime() + 5000) {
+    if (this.visible_ && this.exec_.getSize() == 0 &&
+        this.queue_.getSize() == 0 &&
+        now > this.exec_.getLastDequeueTime() + 5000) {
       let idleScheduledCount = 0;
       for (let i = 0; i < this.resources_.length; i++) {
         let r = this.resources_[i];
-        if (r.getState() == ResourceState_.READY_FOR_LAYOUT &&
-                !r.hasOwner() && r.isDisplayed()) {
+        if (r.getState() == ResourceState_.READY_FOR_LAYOUT && !r.hasOwner() &&
+            r.isDisplayed()) {
           log.fine(TAG_, 'idle layout:', r.debugid);
           this.scheduleLayoutOrPreload_(r, /* layout */ false);
           idleScheduledCount++;
@@ -642,18 +636,16 @@ export class Resources {
   work_() {
     let now = timer.now();
 
-    let scorer = this.calcTaskScore_.bind(this, this.viewport_.getRect(),
-        Math.sign(this.lastVelocity_));
+    let scorer = this.calcTaskScore_.bind(
+        this, this.viewport_.getRect(), Math.sign(this.lastVelocity_));
 
     let timeout = -1;
     let task = this.queue_.peek(scorer);
     if (task) {
       do {
         timeout = this.calcTaskTimeout_(task);
-        log.fine(TAG_, 'peek from queue:', task.id,
-            'sched at', task.scheduleTime,
-            'score', scorer(task),
-            'timeout', timeout);
+        log.fine(TAG_, 'peek from queue:', task.id, 'sched at',
+            task.scheduleTime, 'score', scorer(task), 'timeout', timeout);
         if (timeout > 16) {
           break;
         }
@@ -670,7 +662,7 @@ export class Resources {
           log.fine(TAG_, 'exec:', task.id, 'at', task.startTime);
           this.exec_.enqueue(task);
           task.promise.then(this.taskComplete_.bind(this, task, true),
-              this.taskComplete_.bind(this, task, false))
+                          this.taskComplete_.bind(this, task, false))
               .catch(reportError);
         } else {
           // Reschedule post execution.
@@ -723,8 +715,8 @@ export class Resources {
    */
   calcTaskScore_(viewportRect, dir, task) {
     let box = task.resource.getLayoutBox();
-    let posPriority = Math.floor((box.top - viewportRect.top) /
-        viewportRect.height);
+    let posPriority =
+        Math.floor((box.top - viewportRect.top) / viewportRect.height);
     if (posPriority != 0 && Math.sign(posPriority) != (dir || 1)) {
       posPriority *= 2;
     }
@@ -756,8 +748,8 @@ export class Resources {
     this.exec_.forEach((other) => {
       // Higher priority tasks get the head start. Currently 500ms per a drop
       // in priority (note that priority is 10-based).
-      let penalty = Math.max((task.priority - other.priority) *
-          PRIORITY_PENALTY_TIME_, 0);
+      let penalty = Math.max(
+          (task.priority - other.priority) * PRIORITY_PENALTY_TIME_, 0);
       // TODO(dvoytenko): Consider running total and not maximum.
       timeout = Math.max(timeout, penalty - (now - other.startTime));
     });
@@ -786,8 +778,8 @@ export class Resources {
     this.exec_.dequeue(task);
     this.schedulePass(POST_TASK_PASS_DELAY_);
     if (!success) {
-      log.error(TAG_, 'task failed:',
-          task.id, task.resource.debugid, opt_reason);
+      log.error(
+          TAG_, 'task failed:', task.id, task.resource.debugid, opt_reason);
       return Promise.reject(opt_reason);
     }
   }
@@ -839,9 +831,8 @@ export class Resources {
    */
   scheduleLayoutOrPreload_(resource, layout, opt_parentPriority) {
     assert(resource.getState() != ResourceState_.NOT_BUILT &&
-        resource.isDisplayed(),
-        'Not ready for layout: %s (%s)',
-        resource.debugid, resource.getState());
+               resource.isDisplayed(),
+        'Not ready for layout: %s (%s)', resource.debugid, resource.getState());
     // Don't schedule elements that can't prerender, they won't be allowed
     // to execute anyway.
     if (!this.visible_ && !resource.prerenderAllowed()) {
@@ -851,15 +842,11 @@ export class Resources {
       return;
     }
     if (layout) {
-      this.schedule_(resource,
-          LAYOUT_TASK_ID_, LAYOUT_TASK_OFFSET_,
-          opt_parentPriority || 0,
-          resource.startLayout.bind(resource));
+      this.schedule_(resource, LAYOUT_TASK_ID_, LAYOUT_TASK_OFFSET_,
+          opt_parentPriority || 0, resource.startLayout.bind(resource));
     } else {
-      this.schedule_(resource,
-          PRELOAD_TASK_ID_, PRELOAD_TASK_OFFSET_,
-          opt_parentPriority || 0,
-          resource.startLayout.bind(resource));
+      this.schedule_(resource, PRELOAD_TASK_ID_, PRELOAD_TASK_OFFSET_,
+          opt_parentPriority || 0, resource.startLayout.bind(resource));
     }
   }
 
@@ -882,9 +869,9 @@ export class Resources {
       resources.forEach((resource) => {
         resource.measure();
         if (resource.getState() == ResourceState_.READY_FOR_LAYOUT &&
-                resource.isDisplayed()) {
-          this.scheduleLayoutOrPreload_(resource, layout,
-              parentResource.getPriority());
+            resource.isDisplayed()) {
+          this.scheduleLayoutOrPreload_(
+              resource, layout, parentResource.getPriority());
         }
       });
     }
@@ -905,8 +892,8 @@ export class Resources {
     let task = {
       id: taskId,
       resource: resource,
-      priority: Math.max(resource.getPriority(), parentPriority) +
-          priorityOffset,
+      priority:
+          Math.max(resource.getPriority(), parentPriority) + priorityOffset,
       callback: callback,
       scheduleTime: timer.now()
     };
@@ -932,7 +919,8 @@ export class Resources {
    * @param {boolean} inLocalViewport
    * @private
    */
-  updateInViewportForSubresources_(parentResource, subElements,
+  updateInViewportForSubresources_(parentResource,
+      subElements,
       inLocalViewport) {
     let inViewport = parentResource.isInViewport() && inLocalViewport;
     this.discoverResourcesForArray_(parentResource, subElements, (resource) => {
@@ -982,7 +970,6 @@ export class Resources {
   }
 }
 
-
 /**
  * A Resource binding for an AmpElement.
  *
@@ -1018,8 +1005,8 @@ export class Resource {
     this.priority_ = getElementPriority(element.tagName);
 
     /** @private {!ResourceState_} */
-    this.state_ = element.isBuilt() ? ResourceState_.NOT_LAID_OUT :
-        ResourceState_.NOT_BUILT;
+    this.state_ = element.isBuilt() ? ResourceState_.NOT_LAID_OUT
+                                    : ResourceState_.NOT_BUILT;
 
     /** @private {number} */
     this.layoutCount_ = 0;
@@ -1103,7 +1090,7 @@ export class Resource {
     let built;
     try {
       built = this.element.build(force);
-    } catch(e) {
+    } catch (e) {
       log.error(TAG_, 'failed to build:', this.debugid, e);
       built = false;
       this.blacklisted_ = true;
@@ -1148,11 +1135,10 @@ export class Resource {
     let box = this.resources_.viewport_.getLayoutRect(this.element);
     // Note that "left" doesn't affect readiness for the layout.
     if (this.state_ == ResourceState_.NOT_LAID_OUT ||
-          this.layoutBox_.top != box.top ||
-          this.layoutBox_.width != box.width ||
-          this.layoutBox_.height != box.height) {
+        this.layoutBox_.top != box.top || this.layoutBox_.width != box.width ||
+        this.layoutBox_.height != box.height) {
       if (this.state_ == ResourceState_.NOT_LAID_OUT ||
-              this.element.isRelayoutNeeded()) {
+          this.element.isRelayoutNeeded()) {
         this.state_ = ResourceState_.READY_FOR_LAYOUT;
       }
     }
@@ -1282,8 +1268,8 @@ export class Resource {
    */
   layoutComplete_(success, opt_reason) {
     this.layoutPromise_ = null;
-    this.state_ = success ? ResourceState_.LAYOUT_COMPLETE :
-        ResourceState_.LAYOUT_FAILED;
+    this.state_ =
+        success ? ResourceState_.LAYOUT_COMPLETE : ResourceState_.LAYOUT_FAILED;
     if (success) {
       log.fine(TAG_, 'layout complete:', this.debugid);
     } else {
@@ -1358,8 +1344,8 @@ export class Resource {
         return this.layoutPromise_;
       }
       if (this.state_ == ResourceState_.LAYOUT_COMPLETE ||
-              this.state_ == ResourceState_.LAYOUT_FAILED ||
-              this.layoutCount_ > 0) {
+          this.state_ == ResourceState_.LAYOUT_FAILED ||
+          this.layoutCount_ > 0) {
         return Promise.resolve();
       }
       if (!this.isDisplayed()) {
@@ -1374,7 +1360,6 @@ export class Resource {
     });
   }
 }
-
 
 /**
  * A scheduling queue for Resources.
@@ -1490,7 +1475,6 @@ export class TaskQueue_ {
   }
 }
 
-
 /**
  * @param {!Element|!Array<!Element>} elements
  * @return {!Array<!Element>}
@@ -1501,7 +1485,6 @@ function elements_(elements) {
   }
   return [elements];
 }
-
 
 /**
  * Resource state.
@@ -1544,7 +1527,6 @@ export const ResourceState_ = {
    */
   LAYOUT_FAILED: 5
 };
-
 
 /**
  * The internal structure for the task.

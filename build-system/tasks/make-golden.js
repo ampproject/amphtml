@@ -22,19 +22,18 @@ var gulp = require('gulp');
 var imageDiff = require('gulp-image-diff');
 var util = require('gulp-util');
 
-
 function doScreenshot(host, path, output, device, verbose, cb) {
   fs.mkdirpSync(dirname(output));
   if (verbose) {
     util.log('Output to: ', output);
   }
   exec('phantomjs --ssl-protocol=any --ignore-ssl-errors=true ' +
-       '--load-images=true ' +
-      'testing/screenshots/make-screenshot.js ' +
-      '"' + host + '" ' +
-      '"' + path + '" ' +
-      '"' + output + '" ' +
-      '"' + device + '" ',
+           '--load-images=true ' +
+           'testing/screenshots/make-screenshot.js ' +
+           '"' + host + '" ' +
+           '"' + path + '" ' +
+           '"' + output + '" ' +
+           '"' + device + '" ',
       function(err, stdout, stderr) {
         if (verbose) {
           util.log(util.colors.gray('stdout: ', stdout));
@@ -49,7 +48,6 @@ function doScreenshot(host, path, output, device, verbose, cb) {
       });
 }
 
-
 /**
  * Ex:
  * `gulp make-golden --path=examples.build/everything.amp.max.html \
@@ -63,13 +61,12 @@ function makeGolden(cb) {
   var verbose = (argv.verbose || argv.v);
 
   if (!output) {
-    output = 'screenshots' + (path && path[0] != '/' ? '/' : '') +
-        path + '.png';
+    output =
+        'screenshots' + (path && path[0] != '/' ? '/' : '') + path + '.png';
   }
 
   doScreenshot(host, path, output, device, verbose, cb);
 }
-
 
 /**
  * Ex:
@@ -114,8 +111,8 @@ function testScreenshots(cb) {
       reportRecord(reportFile, file, dir, res);
       if (res.error || res.disparity > 0) {
         errorCount++;
-        util.log(util.colors.red('Screenshot diff failed: ', file,
-            JSON.stringify(res)));
+        util.log(util.colors.red(
+            'Screenshot diff failed: ', file, JSON.stringify(res)));
       } else if (verbose) {
         util.log(util.colors.green('Screenshot diff successful: ', file));
       }
@@ -126,8 +123,8 @@ function testScreenshots(cb) {
         if (errorCount == 0) {
           util.log(util.colors.green('Screenshots tests successful'));
         } else {
-          util.log(util.colors.red('Screenshots tests failed: ', errorCount,
-              reportFile));
+          util.log(util.colors.red(
+              'Screenshots tests failed: ', errorCount, reportFile));
           process.exit(1);
         }
         cb();
@@ -159,10 +156,12 @@ function diffScreenshot_(file, dir, host, verbose, cb) {
         }))
         .pipe(imageDiff.jsonReporter())
         .pipe(gulp.dest(diffFile + '.json'))
-        .on('error', function(error) {
-          util.log(util.colors.red('Screenshot diff failed: ', file, error));
-          cb({error: error});
-        })
+        .on('error',
+            function(error) {
+              util.log(
+                  util.colors.red('Screenshot diff failed: ', file, error));
+              cb({error: error});
+            })
         .on('end', function(res) {
           var contents = fs.readFileSync(diffFile + '.json', 'utf8');
           var json = JSON.parse(contents);
@@ -174,32 +173,30 @@ function diffScreenshot_(file, dir, host, verbose, cb) {
 function reportPreambule(reportFile) {
   fs.writeFileSync(reportFile,
       '<html>' +
-      '<head><style>' +
+          '<head><style>' +
           ' table {border-collapse: collapse}' +
           ' tr {border-bottom: 1px solid gray}' +
           ' td {padding: 8px 0}' +
           ' .thumb{display: block; width: 100px; height: 100px}' +
           ' .thumb img{display: block; width: auto; height: auto;' +
-              'margin: auto; max-width: 100%; max-height: 100%}' +
+          'margin: auto; max-width: 100%; max-height: 100%}' +
           ' .result {text-align: center}' +
           ' .error {background: red} .success {background: green}' +
-      '</style></head>' +
-      '<body><h1>Screenshot Diffs</h1><table width=100%>' +
-      '<thead><tr>' +
-      '<th>Path</th>' +
-      '<th>Result</th>' +
-      '<th>Golden</th>' +
-      '<th>Work</th>' +
-      '<th>Diff</th>' +
-      '</tr></thead>' +
-      '<tbody>',
+          '</style></head>' +
+          '<body><h1>Screenshot Diffs</h1><table width=100%>' +
+          '<thead><tr>' +
+          '<th>Path</th>' +
+          '<th>Result</th>' +
+          '<th>Golden</th>' +
+          '<th>Work</th>' +
+          '<th>Diff</th>' +
+          '</tr></thead>' +
+          '<tbody>',
       'utf8');
 }
 
 function reportPostambule(reportFile) {
-  fs.appendFileSync(reportFile,
-      '</tbody></table></body></html>',
-      'utf8');
+  fs.appendFileSync(reportFile, '</tbody></table></body></html>', 'utf8');
 }
 
 function reportRecord(reportFile, file, dir, record) {
@@ -207,43 +204,42 @@ function reportRecord(reportFile, file, dir, record) {
   function thumb(file) {
     file = file.replace(dir + '/', '');
     return '<a class=thumb target=_blank href="' + file + '">' +
-        '<img src="' + file + '">' +
-        '</a>';
+           '<img src="' + file + '">' +
+           '</a>';
   }
 
   fs.appendFileSync(reportFile,
       '<tr>' +
-      '<td>' + file + '</td>' +
-      '<td><div class="result ' +
+          '<td>' + file + '</td>' +
+          '<td><div class="result ' +
           (record.disparity > 0 ? 'error' : 'success') + '">' +
           record.disparity + '</div></td>' +
-      '<td align=center>' + thumb(record.referenceImage) + '</td>' +
-      '<td align=center>' + thumb(record.compareImage) + '</td>' +
-      '<td align=center>' + thumb(record.differenceMap) + '</td>' +
-      '</tr>',
+          '<td align=center>' + thumb(record.referenceImage) + '</td>' +
+          '<td align=center>' + thumb(record.compareImage) + '</td>' +
+          '<td align=center>' + thumb(record.differenceMap) + '</td>' +
+          '</tr>',
       'utf8');
 }
-
 
 gulp.task('make-golden', 'Creates a "golden" screenshot', makeGolden, {
   options: {
     'host': '  The host. Defaults to "http://localhost:8000".',
     'path': '  The path of the page URL on the host.' +
-        ' E.g. "/test/manual/amp-img.amp.html"',
+                ' E.g. "/test/manual/amp-img.amp.html"',
     'output': '  The file where to output the screenshot.' +
-        ' Defaults to "screenshots/{path}.png"',
+                  ' Defaults to "screenshots/{path}.png"',
     'device': '  The name of the device which parameters to be used for' +
-        ' screenshotting. Defaults to "iPhone6+".',
+                  ' screenshotting. Defaults to "iPhone6+".',
     'verbose': '  Verbose logging. Default is false. Shorthand is "-v"'
   }
 });
 
 gulp.task('test-screenshots', 'Tests screenshots against "golden" images',
     testScreenshots, {
-  options: {
-    'host': '  The host. Defaults to "http://localhost:8000".',
-    'name': '  The name of the run. Defaults to "screenshots".' +
-        ' The run files are placed in the "build/{name}" dir.',
-    'verbose': '  Verbose logging. Default is false. Shorthand is "-v"'
-  }
-});
+      options: {
+        'host': '  The host. Defaults to "http://localhost:8000".',
+        'name': '  The name of the run. Defaults to "screenshots".' +
+                    ' The run files are placed in the "build/{name}" dir.',
+        'verbose': '  Verbose logging. Default is false. Shorthand is "-v"'
+      }
+    });

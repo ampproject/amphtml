@@ -16,7 +16,6 @@
 
 import {AmpCarousel} from '../carousel';
 
-
 describe('Carousel gestures', () => {
 
   let element;
@@ -39,15 +38,14 @@ describe('Carousel gestures', () => {
     document.body.removeChild(element);
   });
 
-
   it('should start swiping; content is bigger than element', () => {
     carousel.pos_ = 1;
     carousel.onSwipeStart_({});
     expect(carousel.startPos_).to.equal(1);
     expect(carousel.motion_).to.equal(null);
     expect(carousel.minPos_).to.equal(0);
-    expect(carousel.maxPos_).to.equal(320);  // 640 - 320
-    expect(carousel.extent_).to.equal(128);  // 40% of 320
+    expect(carousel.maxPos_).to.equal(320); // 640 - 320
+    expect(carousel.extent_).to.equal(128); // 40% of 320
   });
 
   it('should start swiping; content is smaller than element', () => {
@@ -55,7 +53,6 @@ describe('Carousel gestures', () => {
     carousel.onSwipeStart_({});
     expect(carousel.maxPos_).to.equal(0);
   });
-
 
   it('should update on swipe within range in neg direction', () => {
     carousel.onSwipeStart_({});
@@ -85,7 +82,7 @@ describe('Carousel gestures', () => {
   it('should update on swipe overshoot in neg direction out of range', () => {
     carousel.onSwipeStart_({});
     carousel.onSwipe_({deltaX: -500, velocityX: 0.5});
-    expect(carousel.pos_).to.equal(448);  // 320 + 128
+    expect(carousel.pos_).to.equal(448); // 320 + 128
   });
 
   it('should update on swipe overshoot in pos direction out of range', () => {
@@ -93,7 +90,6 @@ describe('Carousel gestures', () => {
     carousel.onSwipe_({deltaX: 200, velocityX: 0.5});
     expect(carousel.pos_).to.equal(-128);
   });
-
 
   it('should continue innertia', () => {
     carousel.onSwipeStart_({});

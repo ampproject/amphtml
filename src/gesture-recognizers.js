@@ -19,7 +19,6 @@ import {assert} from './asserts';
 import {calcVelocity} from './motion';
 import {timer} from './timer';
 
-
 /**
  * A "tap" gesture.
  * @typedef {{
@@ -28,7 +27,6 @@ import {timer} from './timer';
  * }}
  */
 var Tap;
-
 
 /**
  * Recognizes "tap" gestures.
@@ -92,8 +90,6 @@ export class TapRecognizer extends GestureRecognizer {
   }
 }
 
-
-
 /**
  * A "doubletap" gesture.
  * @typedef {{
@@ -102,7 +98,6 @@ export class TapRecognizer extends GestureRecognizer {
  * }}
  */
 var Doubletap;
-
 
 /**
  * Recognizes a "doubletap" gesture. This gesture will block a single "tap"
@@ -185,8 +180,6 @@ export class DoubletapRecognizer extends GestureRecognizer {
   }
 }
 
-
-
 /**
  * A "swipe-xy", "swipe-x" or "swipe-y" gesture. A number of these gestures
  * may be emitted for a single touch series.
@@ -200,7 +193,6 @@ export class DoubletapRecognizer extends GestureRecognizer {
  * }}
  */
 var Swipe;
-
 
 /**
  * Recognizes swipe gestures. This gesture will yield about 10ms to other
@@ -344,10 +336,10 @@ class SwipeRecognizer extends GestureRecognizer {
     // It's often that `touchend` arrives on the next frame. These should
     // be ignored to avoid a significant velocity downgrade.
     if (!last && deltaTime > 4 || last && deltaTime > 16) {
-      this.velocityX_ = calcVelocity(this.lastX_ - this.prevX_, deltaTime,
-          this.velocityX_);
-      this.velocityY_ = calcVelocity(this.lastY_ - this.prevY_, deltaTime,
-          this.velocityY_);
+      this.velocityX_ =
+          calcVelocity(this.lastX_ - this.prevX_, deltaTime, this.velocityX_);
+      this.velocityY_ =
+          calcVelocity(this.lastY_ - this.prevY_, deltaTime, this.velocityY_);
       this.velocityX_ = Math.abs(this.velocityX_) > 1e-4 ? this.velocityX_ : 0;
       this.velocityY_ = Math.abs(this.velocityY_) > 1e-4 ? this.velocityY_ : 0;
       this.prevX_ = this.lastX_;
@@ -355,15 +347,17 @@ class SwipeRecognizer extends GestureRecognizer {
       this.prevTime_ = this.lastTime_;
     }
 
-    this.signalEmit({
-      first: first,
-      last: last,
-      time: this.lastTime_,
-      deltaX: this.horiz_ ? this.lastX_ - this.startX_ : 0,
-      deltaY: this.vert_ ? this.lastY_ - this.startY_ : 0,
-      velocityX: this.horiz_ ? this.velocityX_ : 0,
-      velocityY: this.vert_ ? this.velocityY_ : 0
-    }, event);
+    this.signalEmit(
+        {
+          first: first,
+          last: last,
+          time: this.lastTime_,
+          deltaX: this.horiz_ ? this.lastX_ - this.startX_ : 0,
+          deltaY: this.vert_ ? this.lastY_ - this.startY_ : 0,
+          velocityX: this.horiz_ ? this.velocityX_ : 0,
+          velocityY: this.vert_ ? this.velocityY_ : 0
+        },
+        event);
   }
 
   /**
@@ -379,7 +373,6 @@ class SwipeRecognizer extends GestureRecognizer {
   }
 }
 
-
 /**
  * Recognizes "swipe-xy" gesture. Yields about 10ms to other gestures.
  */
@@ -391,7 +384,6 @@ export class SwipeXYRecognizer extends SwipeRecognizer {
     super('swipe-xy', manager, true, true);
   }
 }
-
 
 /**
  * Recognizes "swipe-x" gesture. Yields about 10ms to other gestures.
@@ -405,7 +397,6 @@ export class SwipeXRecognizer extends SwipeRecognizer {
   }
 }
 
-
 /**
  * Recognizes "swipe-y" gesture. Yields about 10ms to other gestures.
  */
@@ -417,8 +408,6 @@ export class SwipeYRecognizer extends SwipeRecognizer {
     super('swipe-y', manager, false, true);
   }
 }
-
-
 
 /**
  * A "tapzoom" gesture. It has a center, delta off the center center and
@@ -435,7 +424,6 @@ export class SwipeYRecognizer extends SwipeRecognizer {
  * }}
  */
 var Tapzoom;
-
 
 /**
  * Recognizes a "tapzoom" gesture. This gesture will block other gestures
@@ -585,16 +573,18 @@ export class TapzoomRecognizer extends GestureRecognizer {
     this.prevY_ = this.lastY_;
     this.prevTime_ = this.lastTime_;
 
-    this.signalEmit({
-      first: first,
-      last: last,
-      centerClientX: this.startX_,
-      centerClientY: this.startY_,
-      deltaX: this.lastX_ - this.startX_,
-      deltaY: this.lastY_ - this.startY_,
-      velocityX: this.velocityX_,
-      velocityY: this.velocityY_
-    }, event);
+    this.signalEmit(
+        {
+          first: first,
+          last: last,
+          centerClientX: this.startX_,
+          centerClientY: this.startY_,
+          deltaX: this.lastX_ - this.startX_,
+          deltaY: this.lastY_ - this.startY_,
+          velocityX: this.velocityX_,
+          velocityY: this.velocityY_
+        },
+        event);
   }
 
   /**
@@ -609,8 +599,6 @@ export class TapzoomRecognizer extends GestureRecognizer {
     }
   }
 }
-
-
 
 /**
  * A "pinch" gesture. It has a center, delta off the center center and
@@ -629,7 +617,6 @@ export class TapzoomRecognizer extends GestureRecognizer {
  * }}
  */
 var Pinch;
-
 
 /**
  * Recognizes a "pinch" gesture.
@@ -767,10 +754,10 @@ export class PinchRecognizer extends GestureRecognizer {
     // It's often that `touchend` arrives on the next frame. These should
     // be ignored to avoid a significant velocity downgrade.
     if (!last && deltaTime > 4 || last && deltaTime > 16) {
-      this.velocityX_ = calcVelocity(deltaX - this.prevDeltaX_, deltaTime,
-          this.velocityX_);
-      this.velocityY_ = calcVelocity(deltaY - this.prevDeltaY_, deltaTime,
-          this.velocityY_);
+      this.velocityX_ =
+          calcVelocity(deltaX - this.prevDeltaX_, deltaTime, this.velocityX_);
+      this.velocityY_ =
+          calcVelocity(deltaY - this.prevDeltaY_, deltaTime, this.velocityY_);
       this.velocityX_ = Math.abs(this.velocityX_) > 1e-4 ? this.velocityX_ : 0;
       this.velocityY_ = Math.abs(this.velocityY_) > 1e-4 ? this.velocityY_ : 0;
       this.prevDeltaX_ = deltaX;
@@ -778,22 +765,24 @@ export class PinchRecognizer extends GestureRecognizer {
       this.prevTime_ = this.lastTime_;
     }
 
-    let startSq = this.sqDist_(this.startX1_, this.startX2_,
-        this.startY1_, this.startY2_);
-    let lastSq = this.sqDist_(this.lastX1_, this.lastX2_,
-        this.lastY1_, this.lastY2_);
-    this.signalEmit({
-      first: first,
-      last: last,
-      time: this.lastTime_,
-      centerClientX: this.centerClientX_,
-      centerClientY: this.centerClientY_,
-      dir: Math.sign(lastSq - startSq),
-      deltaX: deltaX * 0.5,
-      deltaY: deltaY * 0.5,
-      velocityX: this.velocityX_ * 0.5,
-      velocityY: this.velocityY_ * 0.5
-    }, event);
+    let startSq = this.sqDist_(
+        this.startX1_, this.startX2_, this.startY1_, this.startY2_);
+    let lastSq =
+        this.sqDist_(this.lastX1_, this.lastX2_, this.lastY1_, this.lastY2_);
+    this.signalEmit(
+        {
+          first: first,
+          last: last,
+          time: this.lastTime_,
+          centerClientX: this.centerClientX_,
+          centerClientY: this.centerClientY_,
+          dir: Math.sign(lastSq - startSq),
+          deltaX: deltaX * 0.5,
+          deltaY: deltaY * 0.5,
+          velocityX: this.velocityX_ * 0.5,
+          velocityY: this.velocityY_ * 0.5
+        },
+        event);
   }
 
   /**
@@ -825,8 +814,8 @@ export class PinchRecognizer extends GestureRecognizer {
    * @private
    */
   deltaX_() {
-    return Math.abs((this.lastX1_ - this.startX1_) -
-        (this.lastX2_ - this.startX2_));
+    return Math.abs(
+        (this.lastX1_ - this.startX1_) - (this.lastX2_ - this.startX2_));
   }
 
   /**
@@ -834,7 +823,7 @@ export class PinchRecognizer extends GestureRecognizer {
    * @private
    */
   deltaY_() {
-    return Math.abs((this.lastY1_ - this.startY1_) -
-        (this.lastY2_ - this.startY2_));
+    return Math.abs(
+        (this.lastY1_ - this.startY1_) - (this.lastY2_ - this.startY2_));
   }
 }

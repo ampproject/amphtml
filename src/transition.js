@@ -17,7 +17,6 @@
 import {getCurve} from './curve';
 import * as st from './style';
 
-
 /**
  * Transition function that accepts normtime, typically between 0 and 1 and
  * performs an arbitrary animation action. Notice that sometimes normtime can
@@ -29,9 +28,9 @@ import * as st from './style';
  */
 class Transition {}
 
-
-export const NOOP = function(time) {return null;};
-
+export const NOOP = function(time) {
+  return null;
+};
 
 /**
  * Returns a transition that combines a number of other transitions and
@@ -48,7 +47,6 @@ export function all(transitions) {
   };
 }
 
-
 /**
  * Returns the specified transition with the time curved via specified curve
  * function.
@@ -63,7 +61,6 @@ export function withCurve(transition, curve) {
     return transition(complete ? 1 : curve(time), complete);
   };
 }
-
 
 /**
  * A transition that sets the CSS style of the specified element. The styles
@@ -81,7 +78,6 @@ export function setStyles(element, styles) {
   };
 }
 
-
 /**
  * A basic numeric interpolation.
  * @param {number} start
@@ -93,7 +89,6 @@ export function numeric(start, end) {
     return start + (end - start) * time;
   };
 }
-
 
 /**
  * Spring numeric interpolation.
@@ -113,11 +108,9 @@ export function spring(start, end, extended, threshold) {
     if (time < threshold) {
       return start + (extended - start) * (time / threshold);
     }
-    return extended + (end - extended) * ((time - threshold) /
-        (1 - threshold));
+    return extended + (end - extended) * ((time - threshold) / (1 - threshold));
   };
 }
-
 
 /**
  * Adds "px" units.
@@ -129,7 +122,6 @@ export function px(transition) {
     return transition(time) + 'px';
   };
 }
-
 
 /**
  * A transition for "translateX" of CSS "transform" property.
@@ -145,7 +137,6 @@ export function translateX(transition) {
     return `translateX(${res}px)`;
   };
 }
-
 
 /**
  * A transition for "translate(x, y)" of CSS "transform" property.
@@ -170,7 +161,6 @@ export function translate(transitionX, opt_transitionY) {
     return `translate(${x},${y})`;
   };
 }
-
 
 /**
  * A transition for "scale" of CSS "transform" property.

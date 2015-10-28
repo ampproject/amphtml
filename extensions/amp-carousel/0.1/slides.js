@@ -25,7 +25,6 @@ import {continueMotion} from '../../../src/motion';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {timer} from '../../../src/timer';
 
-
 export class AmpSlides extends BaseCarousel {
 
   /** @override */
@@ -87,8 +86,9 @@ export class AmpSlides extends BaseCarousel {
         this.commitSwitch_(oldSlide, newSlide);
       } else {
         oldSlide.style.zIndex = 0;
-        Animation.animate(this.createTransition_(oldSlide, newSlide, dir),
-            200, 'ease-out').thenAlways(() => {
+        Animation.animate(this.createTransition_(oldSlide, newSlide, dir), 200,
+                     'ease-out')
+            .thenAlways(() => {
               this.commitSwitch_(oldSlide, newSlide);
               this.preloadNext_(dir);
             });
@@ -138,8 +138,8 @@ export class AmpSlides extends BaseCarousel {
       return;
     }
 
-    this.autoplayTimeoutId_ = timer.delay(this.go.bind(this, dir, animate),
-        this.autoplayDelay_);
+    this.autoplayTimeoutId_ =
+        timer.delay(this.go.bind(this, dir, animate), this.autoplayDelay_);
   }
 
   /**
@@ -158,7 +158,7 @@ export class AmpSlides extends BaseCarousel {
    * @param {number} dir
    */
   prepareSlide_(slide, dir) {
-    var containerWidth = this.element./*OK*/offsetWidth;
+    var containerWidth = this.element./*OK*/ offsetWidth;
     st.setStyles(slide, {
       transform: st.translateX(dir * containerWidth),
       zIndex: 1,
@@ -175,7 +175,7 @@ export class AmpSlides extends BaseCarousel {
    * @return {!Transition}
    */
   createTransition_(oldSlide, newSlide, dir) {
-    var containerWidth = this.element./*OK*/offsetWidth;
+    var containerWidth = this.element./*OK*/ offsetWidth;
     return tr.all([
       tr.setStyles(newSlide, {
         transform: tr.translateX(tr.numeric(dir * containerWidth, 0)),
@@ -194,18 +194,10 @@ export class AmpSlides extends BaseCarousel {
    * @private
    */
   commitSwitch_(oldSlide, newSlide) {
-    st.setStyles(oldSlide, {
-      display: 'none',
-      zIndex: 0,
-      transform: '',
-      opacity: 1
-    });
-    st.setStyles(newSlide, {
-      display: 'block',
-      zIndex: 0,
-      transform: '',
-      opacity: 1
-    });
+    st.setStyles(
+        oldSlide, {display: 'none', zIndex: 0, transform: '', opacity: 1});
+    st.setStyles(
+        newSlide, {display: 'block', zIndex: 0, transform: '', opacity: 1});
     this.scheduleLayout(newSlide);
     this.updateInViewport(oldSlide, false);
     this.updateInViewport(newSlide, true);
@@ -271,15 +263,15 @@ export class AmpSlides extends BaseCarousel {
    */
   onSwipeStart_(swipe) {
     let currentSlide = this.slides_[this.currentIndex_];
-    let containerWidth = this.element./*OK*/offsetWidth;
+    let containerWidth = this.element./*OK*/ offsetWidth;
     let minDelta = 0;
     let maxDelta = 0;
     let prevTr = tr.NOOP;
     let nextTr = tr.NOOP;
-    let prevIndex = AmpSlides.getRelativeIndex(this.currentIndex_,
-        -1, this.slides_.length);
-    let nextIndex = AmpSlides.getRelativeIndex(this.currentIndex_,
-        1, this.slides_.length);
+    let prevIndex =
+        AmpSlides.getRelativeIndex(this.currentIndex_, -1, this.slides_.length);
+    let nextIndex =
+        AmpSlides.getRelativeIndex(this.currentIndex_, 1, this.slides_.length);
 
     if (this.isLooping_ || this.currentIndex_ - 1 >= 0) {
       let prevSlide = this.slides_[prevIndex];
@@ -319,8 +311,8 @@ export class AmpSlides extends BaseCarousel {
     // Translate the gesture position to be a number between -1 and 1,
     // with negative values indiamping sliding to the previous slide and
     // positive indiamping sliding to the next slide.
-    let pos = Math.min(s.max, Math.max(s.min,
-        -swipe.deltaX / s.containerWidth));
+    let pos =
+        Math.min(s.max, Math.max(s.min, -swipe.deltaX / s.containerWidth));
 
     s.nextTr(pos > 0 ? pos : 0);
     s.prevTr(pos < 0 ? -pos : 0);
@@ -341,8 +333,9 @@ export class AmpSlides extends BaseCarousel {
 
     let advPos = s.pos;
     if (s.pos * -swipe.velocityX >= 0) {
-      advPos = s.pos - Math.sign(swipe.velocityX) *
-          (Math.abs(swipe.velocityX) > 0.2 ? 1 : 0);
+      advPos = s.pos -
+               Math.sign(swipe.velocityX) *
+                   (Math.abs(swipe.velocityX) > 0.2 ? 1 : 0);
     }
     advPos = Math.min(s.max, Math.max(s.min, advPos));
     let newPos = Math.abs(advPos) >= 0.55 ? Math.sign(advPos) : 0;
@@ -350,11 +343,11 @@ export class AmpSlides extends BaseCarousel {
     if (newPos != s.pos) {
       let posFunc = tr.numeric(s.pos, newPos);
       promise = Animation.animate((time) => {
-        let pos = posFunc(time);
-        s.nextTr(pos > 0 ? pos : 0);
-        s.prevTr(pos < 0 ? -pos : 0);
-        s.pos = pos;
-      }, 150, bezierCurve(0.19, 0.49, 0.2, 1)).thenAlways();
+                           let pos = posFunc(time);
+                           s.nextTr(pos > 0 ? pos : 0);
+                           s.prevTr(pos < 0 ? -pos : 0);
+                           s.pos = pos;
+                         }, 150, bezierCurve(0.19, 0.49, 0.2, 1)).thenAlways();
     } else {
       promise = Promise.resolve();
     }

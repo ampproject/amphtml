@@ -60,24 +60,23 @@ export function twitter(global, data) {
     // Dimensions are given by the parent frame.
     delete data.width;
     delete data.height;
-    twttr.widgets.createTweet(data.tweetid, tweet, data)./*OK*/then(() => {
-      var iframe = global.document.querySelector('#c iframe');
-      // Unfortunately the tweet isn't really done at this time.
-      // We listen for resize to learn when things are
-      // really done.
-      iframe.contentWindow.addEventListener('resize', function(e) {
-        render();
-      }, true);
-      render();
-    });
+    twttr.widgets.createTweet(data.tweetid, tweet, data)
+        ./*OK*/ then(() => {
+          var iframe = global.document.querySelector('#c iframe');
+          // Unfortunately the tweet isn't really done at this time.
+          // We listen for resize to learn when things are
+          // really done.
+          iframe.contentWindow.addEventListener('resize', function(e) {
+            render();
+          }, true);
+          render();
+        });
   });
-
 
   function render() {
     var iframe = global.document.querySelector('#c iframe');
     var body = iframe.contentWindow.document.body;
     context.updateDimensions(
-        body./*OK*/offsetWidth,
-        body./*OK*/offsetHeight + /* margins */ 20);
+        body./*OK*/ offsetWidth, body./*OK*/ offsetHeight + /* margins */ 20);
   }
 }

@@ -18,7 +18,6 @@ import {Observable} from './observable';
 import {getService} from './service';
 import {getVendorJsPropertyName} from './style';
 
-
 /**
  * Whether the document is ready.
  * @param {!Document} doc
@@ -27,7 +26,6 @@ import {getVendorJsPropertyName} from './style';
 export function isDocumentReady(doc) {
   return doc.readyState != 'loading';
 }
-
 
 /**
  * Calls the callback when document is ready.
@@ -52,7 +50,6 @@ export function onDocumentReady(doc, callback) {
   }
 }
 
-
 /**
  */
 export class DocumentState {
@@ -73,8 +70,8 @@ export class DocumentState {
     }
 
     /** @private @const {string|null} */
-    this.visibilityStateProp_ = getVendorJsPropertyName(this.document_,
-        'visibilityState', true);
+    this.visibilityStateProp_ =
+        getVendorJsPropertyName(this.document_, 'visibilityState', true);
     if (this.document_[this.visibilityStateProp_] === undefined) {
       this.visibilityStateProp_ = null;
     }
@@ -96,16 +93,16 @@ export class DocumentState {
     /** @private @const {!Function} */
     this.boundOnVisibilityChanged_ = this.onVisibilityChanged_.bind(this);
     if (this.visibilityChangeEvent_) {
-      this.document_.addEventListener(this.visibilityChangeEvent_,
-          this.boundOnVisibilityChanged_);
+      this.document_.addEventListener(
+          this.visibilityChangeEvent_, this.boundOnVisibilityChanged_);
     }
   }
 
   /** @private */
   cleanup_() {
     if (this.visibilityChangeEvent_) {
-      this.document_.removeEventListener(this.visibilityChangeEvent_,
-          this.boundOnVisibilityChanged_);
+      this.document_.removeEventListener(
+          this.visibilityChangeEvent_, this.boundOnVisibilityChanged_);
     }
   }
 
@@ -164,7 +161,6 @@ export class DocumentState {
   }
 }
 
-
 /**
  * @param {!Window} window
  * @return {!DocumentState}
@@ -173,7 +169,6 @@ export class DocumentState {
 function createDocumentState_(window) {
   return new DocumentState(window);
 }
-
 
 /**
  * @param {!Window} window

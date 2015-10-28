@@ -39,21 +39,15 @@ describe('test-document-click onDocumentElementClick_', () => {
     doc = {
       getElementById: getElementByIdSpy,
       querySelector: querySelectorSpy,
-      location: {
-        href: 'https://www.google.com/some-path?hello=world#link'
-      }
+      location: {href: 'https://www.google.com/some-path?hello=world#link'}
     };
-    docElem = {
-      ownerDocument: doc
-    };
+    docElem = {ownerDocument: doc};
     evt = {
       currentTarget: docElem,
       target: tgt,
       preventDefault: preventDefaultSpy
     };
-    viewport = {
-      scrollIntoView: scrollIntoViewSpy
-    };
+    viewport = {scrollIntoView: scrollIntoViewSpy};
   });
 
   afterEach(() => {
@@ -146,24 +140,26 @@ describe('test-document-click onDocumentElementClick_', () => {
     });
 
     it('should call querySelector on document if element with id is not ' +
-       'found', () => {
-      getElementByIdSpy.returns(null);
-      expect(getElementByIdSpy.callCount).to.equal(0);
-      onDocumentElementClick_(evt, viewport);
-      expect(getElementByIdSpy.callCount).to.equal(1);
-      expect(querySelectorSpy.callCount).to.equal(1);
-    });
+            'found',
+        () => {
+          getElementByIdSpy.returns(null);
+          expect(getElementByIdSpy.callCount).to.equal(0);
+          onDocumentElementClick_(evt, viewport);
+          expect(getElementByIdSpy.callCount).to.equal(1);
+          expect(querySelectorSpy.callCount).to.equal(1);
+        });
 
     it('should not call scrollIntoView if element with id is not found or ' +
-       'anchor with name is not found', () => {
-      getElementByIdSpy.returns(null);
-      querySelectorSpy.returns(null);
-      expect(getElementByIdSpy.callCount).to.equal(0);
+            'anchor with name is not found',
+        () => {
+          getElementByIdSpy.returns(null);
+          querySelectorSpy.returns(null);
+          expect(getElementByIdSpy.callCount).to.equal(0);
 
-      onDocumentElementClick_(evt, viewport);
-      expect(getElementByIdSpy.callCount).to.equal(1);
-      expect(scrollIntoViewSpy.callCount).to.equal(0);
-    });
+          onDocumentElementClick_(evt, viewport);
+          expect(getElementByIdSpy.callCount).to.equal(1);
+          expect(scrollIntoViewSpy.callCount).to.equal(0);
+        });
 
     it('should call scrollIntoView if element with id is found', () => {
       getElementByIdSpy.returns(elem);

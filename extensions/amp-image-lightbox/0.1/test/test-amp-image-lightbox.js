@@ -17,14 +17,12 @@
 import {Timer} from '../../../../src/timer';
 import {createIframePromise} from '../../../../testing/iframe';
 require('../../../../build/all/v0/amp-image-lightbox-0.1.max');
-import {ImageViewer}
-    from '../../../../build/all/v0/amp-image-lightbox-0.1.max';
+import {ImageViewer} from '../../../../build/all/v0/amp-image-lightbox-0.1.max';
 import {adopt} from '../../../../src/runtime';
 import {parseSrcset} from '../../../../src/srcset';
 import * as sinon from 'sinon';
 
 adopt(window);
-
 
 describe('amp-image-lightbox component', () => {
 
@@ -47,8 +45,8 @@ describe('amp-image-lightbox component', () => {
 
       let caption = container.querySelector('.-amp-image-lightbox-caption');
       expect(caption).to.not.equal(null);
-      expect(caption.classList.contains('amp-image-lightbox-caption')).to
-          .equal(true);
+      expect(caption.classList.contains('amp-image-lightbox-caption'))
+          .to.equal(true);
 
       let viewer = container.querySelector('.-amp-image-lightbox-viewer');
       expect(viewer).to.not.equal(null);
@@ -58,8 +56,8 @@ describe('amp-image-lightbox component', () => {
 
       // Very important. Image must have transform-origin=50% 50%.
       let win = image.ownerDocument.defaultView;
-      expect(win.getComputedStyle(image)['transform-origin']).to.equal(
-          '50% 50%');
+      expect(win.getComputedStyle(image)['transform-origin'])
+          .to.equal('50% 50%');
     });
   });
 
@@ -70,16 +68,20 @@ describe('amp-image-lightbox component', () => {
       impl.requestFullOverlay = requestFullOverlay;
       let viewportOnChanged = sinon.spy();
       let disableTouchZoom = sinon.spy();
-      impl.getViewport = () => {return {
-        onChanged: viewportOnChanged,
-        disableTouchZoom: disableTouchZoom
-      };};
+      impl.getViewport = () => {
+        return {
+          onChanged: viewportOnChanged,
+          disableTouchZoom: disableTouchZoom
+        };
+      };
       let historyPush = sinon.spy();
       impl.getHistory_ = () => {
-        return {push: () => {
-          historyPush();
-          return Promise.resolve(11);
-        }};
+        return {
+          push: () => {
+            historyPush();
+            return Promise.resolve(11);
+          }
+        };
       };
       let enter = sinon.spy();
       impl.enter_ = enter;
@@ -108,9 +110,9 @@ describe('amp-image-lightbox component', () => {
       let viewportOnChangedUnsubscribed = sinon.spy();
       impl.unlistenViewport_ = viewportOnChangedUnsubscribed;
       let restoreOriginalTouchZoom = sinon.spy();
-      impl.getViewport = () => {return {
-        restoreOriginalTouchZoom: restoreOriginalTouchZoom
-      };};
+      impl.getViewport = () => {
+        return {restoreOriginalTouchZoom: restoreOriginalTouchZoom};
+      };
       let historyPop = sinon.spy();
       impl.getHistory_ = () => {
         return {pop: historyPop};
@@ -133,7 +135,6 @@ describe('amp-image-lightbox component', () => {
   });
 });
 
-
 describe('amp-image-lightbox image viewer', () => {
 
   let sandbox;
@@ -146,9 +147,7 @@ describe('amp-image-lightbox image viewer', () => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
 
-    lightbox = {
-      getDpr: () => 1
-    };
+    lightbox = {getDpr: () => 1};
     lightboxMock = sandbox.mock(lightbox);
 
     imageViewer = new ImageViewer(lightbox);
@@ -166,7 +165,6 @@ describe('amp-image-lightbox image viewer', () => {
     sandbox = null;
   });
 
-
   it('should have 0 initial dimensions', () => {
     expect(imageViewer.getImage().src).to.equal('');
     expect(imageViewer.getViewerBox().width).to.equal(0);
@@ -174,7 +172,6 @@ describe('amp-image-lightbox image viewer', () => {
     expect(imageViewer.sourceWidth_).to.equal(0);
     expect(imageViewer.sourceHeight_).to.equal(0);
   });
-
 
   it('should init to the source element without image', () => {
     let sourceElement = {
@@ -207,10 +204,7 @@ describe('amp-image-lightbox image viewer', () => {
         return undefined;
       }
     };
-    let sourceImage = {
-      complete: false,
-      src: 'image1-smaller'
-    };
+    let sourceImage = {complete: false, src: 'image1-smaller'};
 
     imageViewer.init(sourceElement, sourceImage);
 
@@ -228,15 +222,12 @@ describe('amp-image-lightbox image viewer', () => {
         return undefined;
       }
     };
-    let sourceImage = {
-      complete: true,
-      src: 'image1-smaller'
-    };
+    let sourceImage = {complete: true, src: 'image1-smaller'};
 
     imageViewer.init(sourceElement, sourceImage);
 
-    expect(imageViewer.getImage().getAttribute('src')).to
-        .equal('image1-smaller');
+    expect(imageViewer.getImage().getAttribute('src'))
+        .to.equal('image1-smaller');
   });
 
   it('should reset', () => {
@@ -252,7 +243,6 @@ describe('amp-image-lightbox image viewer', () => {
     expect(imageViewer.srcset_).to.equal(null);
     expect(imageViewer.imageBox_.width).to.equal(0);
   });
-
 
   it('should measure horiz aspect ratio and assign image.src', () => {
     imageViewer.getElement().style.width = '100px';
@@ -312,7 +302,6 @@ describe('amp-image-lightbox image viewer', () => {
   });
 });
 
-
 describe('amp-image-lightbox image viewer gestures', () => {
 
   let sandbox;
@@ -325,11 +314,7 @@ describe('amp-image-lightbox image viewer gestures', () => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
 
-    lightbox = {
-      getDpr: () => 1,
-      close: () => {},
-      toggleViewMode: () => {}
-    };
+    lightbox = {getDpr: () => 1, close: () => {}, toggleViewMode: () => {}};
     lightboxMock = sandbox.mock(lightbox);
 
     imageViewer = new ImageViewer(lightbox);
@@ -354,7 +339,6 @@ describe('amp-image-lightbox image viewer gestures', () => {
     sandbox = null;
   });
 
-
   it('should have initial bounds', () => {
     expect(imageViewer.minX_).to.equal(0);
     expect(imageViewer.maxX_).to.equal(0);
@@ -377,7 +361,6 @@ describe('amp-image-lightbox image viewer gestures', () => {
     expect(imageViewer.minY_).to.equal(-20);
     expect(imageViewer.maxY_).to.equal(20);
   });
-
 
   it('should pan on swipe', () => {
     imageViewer.updatePanZoomBounds_(2);
@@ -407,7 +390,6 @@ describe('amp-image-lightbox image viewer gestures', () => {
     imageViewer.onMoveRelease_(0, 0.5);
   });
 
-
   it('should zoom step', () => {
     imageViewer.onZoomInc_(10, 10, -10, -10);
 
@@ -425,14 +407,15 @@ describe('amp-image-lightbox image viewer gestures', () => {
     let updateSrc = sinon.spy();
     imageViewer.updateSrc_ = updateSrc;
     imageViewer.onZoomInc_(10, 10, -10, -10);
-    return imageViewer.onZoomRelease_(10, 10, -10, -10, 0, 0).then(() => {
-      expect(updateSrc.callCount).to.equal(1);
-      expect(imageViewer.posX_).to.be.closeTo(6.5, 1e-1);
-      expect(imageViewer.startX_).to.be.closeTo(6.5, 1e-1);
-      expect(imageViewer.posY_).to.equal(0);
-      expect(imageViewer.startY_).to.equal(0);
-      expect(imageViewer.scale_).to.be.closeTo(1.1, 1e-1);
-      expect(imageViewer.startScale_).to.be.closeTo(1.1, 1e-1);
-    });
+    return imageViewer.onZoomRelease_(10, 10, -10, -10, 0, 0)
+        .then(() => {
+          expect(updateSrc.callCount).to.equal(1);
+          expect(imageViewer.posX_).to.be.closeTo(6.5, 1e-1);
+          expect(imageViewer.startX_).to.be.closeTo(6.5, 1e-1);
+          expect(imageViewer.posY_).to.equal(0);
+          expect(imageViewer.startY_).to.equal(0);
+          expect(imageViewer.scale_).to.be.closeTo(1.1, 1e-1);
+          expect(imageViewer.startScale_).to.be.closeTo(1.1, 1e-1);
+        });
   });
 });

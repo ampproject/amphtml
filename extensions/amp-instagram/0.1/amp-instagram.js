@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 /**
  * @fileoverview Embeds an instagram photo. Captions are currently
  * not supported.
@@ -37,7 +36,6 @@
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
 
-
 class AmpInstagram extends AMP.BaseElement {
   /** @override */
   createdCallback() {
@@ -53,9 +51,8 @@ class AmpInstagram extends AMP.BaseElement {
   layoutCallback() {
     var width = this.element.getAttribute('width');
     var height = this.element.getAttribute('height');
-    var shortcode = AMP.assert(
-        (this.element.getAttribute('data-shortcode') ||
-        this.element.getAttribute('shortcode')),
+    var shortcode = AMP.assert((this.element.getAttribute('data-shortcode') ||
+                                   this.element.getAttribute('shortcode')),
         'The data-shortcode attribute is required for <amp-instagram> %s',
         this.element);
     // See
@@ -63,14 +60,15 @@ class AmpInstagram extends AMP.BaseElement {
     var iframe = document.createElement('iframe');
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowtransparency', 'true');
-    iframe.src = 'https://instagram.com/p/' +
-        encodeURIComponent(shortcode) + '/embed/?v=4';
+    iframe.src = 'https://instagram.com/p/' + encodeURIComponent(shortcode) +
+                 '/embed/?v=4';
     this.applyFillContent(iframe);
     iframe.width = width;
     iframe.height = height;
     this.element.appendChild(iframe);
     return loadPromise(iframe);
   }
-};
+}
+;
 
 AMP.registerElement('amp-instagram', AmpInstagram);

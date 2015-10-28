@@ -24,12 +24,14 @@ import {parseUrl} from './url';
  *     - canonicalUrl: The doc's canonical.
  */
 export function documentInfoFor(win) {
- 	return getService(win, 'documentInfo', () => {
+  return getService(win, 'documentInfo', () => {
     return {
-      canonicalUrl: parseUrl(assert(
-          win.document.querySelector('link[rel=canonical]'),
-              'AMP files are required to have a <link rel=canonical> tag.')
-              .href).href
+      canonicalUrl:
+          parseUrl(
+              assert(win.document.querySelector('link[rel=canonical]'),
+                  'AMP files are required to have a <link rel=canonical> tag.')
+                  .href)
+              .href
     };
   });
 }

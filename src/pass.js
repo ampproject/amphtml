@@ -16,7 +16,6 @@
 
 import {timer} from './timer';
 
-
 /**
  * Pass class helps to manage single-pass process. A pass is scheduled using
  * delay method. Only one pass can be pending at a time. If no pass is pending

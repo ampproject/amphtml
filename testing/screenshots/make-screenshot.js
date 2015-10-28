@@ -51,13 +51,13 @@ var PATH = system.args[2];
 var FILE = system.args[3];
 var DEFAULT_DEVICE_ID = 'iPhone6+';
 var DEVICE_ID = system.args[4] || DEFAULT_DEVICE_ID;
-console./*OK*/log('SCRIPT = ' + SCRIPT);
-console./*OK*/log('BASE = ' + BASE);
-console./*OK*/log('PATH = ' + PATH);
-console./*OK*/log('FILE = ' + FILE);
-console./*OK*/log('DEVICE = ' + DEVICE_ID);
+console./*OK*/ log('SCRIPT = ' + SCRIPT);
+console./*OK*/ log('BASE = ' + BASE);
+console./*OK*/ log('PATH = ' + PATH);
+console./*OK*/ log('FILE = ' + FILE);
+console./*OK*/ log('DEVICE = ' + DEVICE_ID);
 if (!BASE || !PATH) {
-  console./*OK*/error('Format: make-screenshot <BASE> <PATH> <FILE> <DEVICE>');
+  console./*OK*/ error('Format: make-screenshot <BASE> <PATH> <FILE> <DEVICE>');
   phantom.exit(1);
 }
 if (!FILE) {
@@ -65,36 +65,40 @@ if (!FILE) {
 }
 
 var url = BASE + '/' + PATH + '#off=1&development=1';
-console./*OK*/log('URL = ' + url);
+console./*OK*/ log('URL = ' + url);
 
 var DEVICES = {
   'IPHONE6+': {
     name: 'iPhone6+',
     viewportSize: {width: 414, height: 736},
-    userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 8_0 like Mac OS X)' +
-        ' AppleWebKit/600.1.3 (KHTML, like Gecko) Version/8.0 Mobile/12A4345d' +
-        ' Safari/600.1.4'
+    userAgent:
+        'Mozilla/5.0 (iPhone; CPU iPhone OS 8_0 like Mac OS X)' +
+            ' AppleWebKit/600.1.3 (KHTML, like Gecko) Version/8.0 Mobile/12A4345d' +
+            ' Safari/600.1.4'
   },
   'IPHONE6': {
     name: 'iPhone6',
     viewportSize: {width: 375, height: 627},
-    userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 8_0 like Mac OS X)' +
-        ' AppleWebKit/600.1.3 (KHTML, like Gecko) Version/8.0 Mobile/12A4345d' +
-        ' Safari/600.1.4'
+    userAgent:
+        'Mozilla/5.0 (iPhone; CPU iPhone OS 8_0 like Mac OS X)' +
+            ' AppleWebKit/600.1.3 (KHTML, like Gecko) Version/8.0 Mobile/12A4345d' +
+            ' Safari/600.1.4'
   },
   'IPHONE5': {
     name: 'iPhone5',
     viewportSize: {width: 320, height: 568},
-    userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 7_0 like Mac OS X; en-us)' +
-        ' AppleWebKit/537.51.1 (KHTML, like Gecko) Version/7.0 Mobile/11A465' +
-        ' Safari/9537.53'
+    userAgent:
+        'Mozilla/5.0 (iPhone; CPU iPhone OS 7_0 like Mac OS X; en-us)' +
+            ' AppleWebKit/537.51.1 (KHTML, like Gecko) Version/7.0 Mobile/11A465' +
+            ' Safari/9537.53'
   },
   'IPAD': {
     name: 'iPad',
     viewportSize: {width: 768, height: 1024},
-    userAgent: 'Mozilla/5.0 (iPad; CPU OS 7_0 like Mac OS X)' +
-        ' AppleWebKit/537.51.1 (KHTML, like Gecko) Version/7.0 Mobile/11A465' +
-        ' Safari/9537.53'
+    userAgent:
+        'Mozilla/5.0 (iPad; CPU OS 7_0 like Mac OS X)' +
+            ' AppleWebKit/537.51.1 (KHTML, like Gecko) Version/7.0 Mobile/11A465' +
+            ' Safari/9537.53'
   }
 };
 var LANDSCAPE_SUFFIX = '-land';
@@ -110,50 +114,48 @@ if (!DEVICE) {
   for (var k in DEVICES) {
     deviceList.push(DEVICES[k].name);
   }
-  console./*OK*/error('Unknown device: ' + DEVICE_ID +
-      '. Use one of: ' + deviceList.join(',') +
-      '. Default is ' + DEFAULT_DEVICE_ID);
+  console./*OK*/ error('Unknown device: ' + DEVICE_ID + '. Use one of: ' +
+                       deviceList.join(',') + '. Default is ' +
+                       DEFAULT_DEVICE_ID);
   phantom.exit(1);
 }
-
 
 var page = require('webpage').create();
 
 // Viewport and User Agent.
-page.viewportSize = !LANDSCAPE_MODE ? DEVICE.viewportSize :
-    {width: DEVICE.viewportSize.height, height: DEVICE.viewportSize.width};
+page.viewportSize = !LANDSCAPE_MODE ? DEVICE.viewportSize : {
+  width: DEVICE.viewportSize.height,
+  height: DEVICE.viewportSize.width
+};
 page.settings.userAgent = DEVICE.userAgent;
-console./*OK*/log('VIEWPORT = ' + page.viewportSize.width + 'x' +
-    page.viewportSize.height);
-console./*OK*/log('USER AGENT = ' + page.settings.userAgent);
-
+console./*OK*/ log(
+    'VIEWPORT = ' + page.viewportSize.width + 'x' + page.viewportSize.height);
+console./*OK*/ log('USER AGENT = ' + page.settings.userAgent);
 
 // Logging.
 var RESOURCE_PREFIX = 'RESOURCE:';
 
 function log(tag, message) {
-  console./*OK*/log(tag, message);
+  console./*OK*/ log(tag, message);
 }
 
 function logFromPage(channel, message) {
-  if (message && message.substring(0, RESOURCE_PREFIX.length) ==
-          RESOURCE_PREFIX) {
-    log('[RESOURCE ' + channel + ']', message.substring(
-        RESOURCE_PREFIX.length));
+  if (message &&
+      message.substring(0, RESOURCE_PREFIX.length) == RESOURCE_PREFIX) {
+    log('[RESOURCE ' + channel + ']',
+        message.substring(RESOURCE_PREFIX.length));
   } else {
     log('[PAGE ' + channel + ']', message);
   }
 }
 
-page.onResourceRequested = function (request) {
-};
+page.onResourceRequested = function(request) {};
 page.onConsoleMessage = function(message) {
   logFromPage('INFO', message);
 };
 page.onError = function(message, trace) {
   logFromPage('ERROR', message);
 };
-
 
 // Rendering.
 function renderAndExit(exitCode) {
@@ -174,7 +176,7 @@ page.open(url, function() {
   page.evaluate(function() {
 
     function log(message) {
-      console./*OK*/log('RESOURCE:' + message);
+      console./*OK*/ log('RESOURCE:' + message);
     }
 
     function removeFromArray(array, item) {
@@ -224,11 +226,13 @@ page.open(url, function() {
       resources.forEach(function(resource) {
         log('Resource started: ' + resource.debugid);
         prepareResource(resource);
-        resource.forceAll().then(function() {
-          completeResource(resource);
-        }, function(reason) {
-          completeResource(resource, reason);
-        });
+        resource.forceAll().then(
+            function() {
+              completeResource(resource);
+            },
+            function(reason) {
+              completeResource(resource, reason);
+            });
       });
     }
 
@@ -251,14 +255,15 @@ page.open(url, function() {
     }
 
     onDocumentReady(function() {
-      (window.AMP = window.AMP || []).push(function(AMP) {
-        layoutAll(AMP.resources);
-      });
+      (window.AMP = window.AMP || [])
+          .push(function(AMP) {
+            layoutAll(AMP.resources);
+          });
     });
   });
 
   setTimeout(function() {
-    console./*OK*/error('TIMEOUT!');
+    console./*OK*/ error('TIMEOUT!');
     page.evaluate(function() {
       var resources = window.AMP_RESOURCES_QUEUE;
       var log = window.AMP_LOG;

@@ -22,7 +22,7 @@ var util = require('gulp-util');
 var dedicatedCopyrightNoteSources = /(\.js|\.css)$/;
 
 var es6polyfill = 'Not available because we do not currently' +
-    ' ship with a needed ES6 polyfill.';
+                  ' ship with a needed ES6 polyfill.';
 
 var requiresReviewPrivacy =
     'Usage of this API requires dedicated review due to ' +
@@ -35,7 +35,7 @@ var forbiddenTerms = {
   'describe\\.only': '',
   'it\\.only': '',
   'console\\.\\w+\\(': 'If you run against this, use console/*OK*/.log to ' +
-      'whitelist a legit case.',
+                           'whitelist a legit case.',
   'cookie\\W': requiresReviewPrivacy,
   'eval\\(': '',
   'localStorage': requiresReviewPrivacy,
@@ -65,7 +65,7 @@ var forbiddenTerms = {
 };
 
 var ThreePTermsMessage = 'The 3p bootstrap iframe has no polyfills loaded and' +
-    ' can thus not use most modern web APIs.';
+                         ' can thus not use most modern web APIs.';
 
 var forbidden3pTerms = {
   // We need to forbid promise usage because we don't have our own polyfill
@@ -73,10 +73,11 @@ var forbidden3pTerms = {
   // usage in babel's external helpers that is in a code path that we do
   // not use.
   '\\.then\\((?!callNext)': ThreePTermsMessage,
-  'Math\\.sign' : ThreePTermsMessage,
+  'Math\\.sign': ThreePTermsMessage,
 };
 
-var bannedTermsHelpString = 'Please review viewport.js for a helper method ' +
+var bannedTermsHelpString =
+    'Please review viewport.js for a helper method ' +
     'or mark with `/*OK*/` or `/*REVIEW*/` and consult the AMP team. ' +
     'Most of the forbidden property/method access banned on the ' +
     '`forbiddenTermsSrcInclusive` object can be found in ' +
@@ -134,8 +135,7 @@ var forbiddenTermsSrcInclusive = {
 
 // Terms that must appear in a source file.
 var requiredTerms = {
-  'Copyright 2015 The AMP HTML Authors\\.':
-      dedicatedCopyrightNoteSources,
+  'Copyright 2015 The AMP HTML Authors\\.': dedicatedCopyrightNoteSources,
   'Licensed under the Apache License, Version 2\\.0':
       dedicatedCopyrightNoteSources,
   'http\\://www\\.apache\\.org/licenses/LICENSE-2\\.0':
@@ -156,33 +156,35 @@ var requiredTerms = {
 function matchTerms(file, terms) {
   var pathname = file.path;
   var contents = file.contents.toString();
-  return Object.keys(terms).map(function(term) {
-    var fix;
-    // we can't optimize building the `RegExp` objects early unless we build
-    // another mapping of term -> regexp object to be able to get back to the
-    // original term to get the possible fix value. This is ok as the
-    // presubmit doesn't have to be blazing fast and this is most likely
-    // negligible.
-    var matches = contents.match(new RegExp(term, 'gm'));
+  return Object.keys(terms)
+      .map(function(term) {
+        var fix;
+        // we can't optimize building the `RegExp` objects early unless we build
+        // another mapping of term -> regexp object to be able to get back to
+        // the
+        // original term to get the possible fix value. This is ok as the
+        // presubmit doesn't have to be blazing fast and this is most likely
+        // negligible.
+        var matches = contents.match(new RegExp(term, 'gm'));
 
-    if (matches) {
-      util.log(util.colors.red('Found forbidden: "' + matches[0] +
-          '" in ' + pathname));
-      fix = terms[term];
+        if (matches) {
+          util.log(util.colors.red(
+              'Found forbidden: "' + matches[0] + '" in ' + pathname));
+          fix = terms[term];
 
-      // log the possible fix information if provided for the term.
-      if (fix) {
-        util.log(util.colors.blue(fix));
-      }
-      util.log(util.colors.blue('=========='));
-      return true;
-    }
-    return false;
-  }).some(function(hasAnyTerm) {
-    return hasAnyTerm;
-  });
+          // log the possible fix information if provided for the term.
+          if (fix) {
+            util.log(util.colors.blue(fix));
+          }
+          util.log(util.colors.blue('=========='));
+          return true;
+        }
+        return false;
+      })
+      .some(function(hasAnyTerm) {
+        return hasAnyTerm;
+      });
 }
-
 
 /**
  * Test if a file's contents match any of the
@@ -206,9 +208,8 @@ function hasAnyTerms(file) {
     hasSrcInclusiveTerms = matchTerms(file, forbiddenTermsSrcInclusive);
   }
 
-  var is3pFile = /3p|ads/.test(pathname) ||
-      basename == '3p.js' ||
-      basename == 'style.js';
+  var is3pFile =
+      /3p|ads/.test(pathname) || basename == '3p.js' || basename == 'style.js';
   if (is3pFile && !isTestFile) {
     has3pTerms = matchTerms(file, forbidden3pTerms);
   }
@@ -226,23 +227,25 @@ function hasAnyTerms(file) {
  */
 function isMissingTerms(file) {
   var contents = file.contents.toString();
-  return Object.keys(requiredTerms).map(function(term) {
-    var filter = requiredTerms[term];
-    if (!filter.test(file.path)) {
-      return false;
-    }
+  return Object.keys(requiredTerms)
+      .map(function(term) {
+        var filter = requiredTerms[term];
+        if (!filter.test(file.path)) {
+          return false;
+        }
 
-    var matches = contents.match(new RegExp(term));
-    if (!matches) {
-      util.log(util.colors.red('Did not find required: "' + term +
-          '" in ' + file.path));
-      util.log(util.colors.blue('=========='));
-      return true;
-    }
-    return false;
-  }).some(function(hasMissingTerm) {
-    return hasMissingTerm;
-  });
+        var matches = contents.match(new RegExp(term));
+        if (!matches) {
+          util.log(util.colors.red(
+              'Did not find required: "' + term + '" in ' + file.path));
+          util.log(util.colors.blue('=========='));
+          return true;
+        }
+        return false;
+      })
+      .some(function(hasMissingTerm) {
+        return hasMissingTerm;
+      });
 }
 
 /**
@@ -253,30 +256,32 @@ function checkForbiddenAndRequiredTerms() {
   var forbiddenFound = false;
   var missingRequirements = false;
   return gulp.src(srcGlobs)
-    .pipe(util.buffer(function(err, files) {
-      forbiddenFound = files.map(hasAnyTerms).some(function(errorFound) {
-        return errorFound;
+      .pipe(util.buffer(function(err, files) {
+        forbiddenFound = files.map(hasAnyTerms)
+                             .some(function(errorFound) {
+                               return errorFound;
+                             });
+        missingRequirements = files.map(isMissingTerms)
+                                  .some(function(errorFound) {
+                                    return errorFound;
+                                  });
+      }))
+      .on('end', function() {
+        if (forbiddenFound) {
+          util.log(util.colors.blue(
+              'Please remove these usages or consult with the AMP team.'));
+        }
+        if (missingRequirements) {
+          util.log(util.colors.blue(
+              'Adding these terms (e.g. by adding a required LICENSE ' +
+              'to the file)'));
+        }
+        if (forbiddenFound || missingRequirements) {
+          process.exit(1);
+        }
       });
-      missingRequirements = files.map(isMissingTerms).some(
-      	  function(errorFound) {
-        return errorFound;
-      });
-    }))
-    .on('end', function() {
-      if (forbiddenFound) {
-        util.log(util.colors.blue(
-            'Please remove these usages or consult with the AMP team.'));
-      }
-      if (missingRequirements) {
-        util.log(util.colors.blue(
-            'Adding these terms (e.g. by adding a required LICENSE ' +
-            'to the file)'));
-      }
-      if (forbiddenFound || missingRequirements) {
-        process.exit(1);
-      }
-    });
 }
 
-gulp.task('presubmit', 'Run validation against files to check for forbidden '+
-  'and required terms', checkForbiddenAndRequiredTerms);
+gulp.task('presubmit', 'Run validation against files to check for forbidden ' +
+                           'and required terms',
+    checkForbiddenAndRequiredTerms);

@@ -27,7 +27,6 @@ const ACTION_MAP_ = '__AMP_ACTION_MAP__' + Math.random();
 /** @const {string} */
 const DEFAULT_METHOD_ = 'activate';
 
-
 /**
  * @typedef {{
  *   event: string,
@@ -36,8 +35,8 @@ const DEFAULT_METHOD_ = 'activate';
  *   str: string
  * }}
  */
-class ActionInfo_ {};
-
+class ActionInfo_ {}
+;
 
 /**
  * The structure that contains all details of the action method invocation.
@@ -63,8 +62,6 @@ class ActionInvocation {
     this.event = event;
   }
 }
-
-
 
 /**
  * TODO(dvoytenko): consider splitting this class into two:
@@ -140,8 +137,8 @@ export class Action {
       return;
     }
 
-    this.invoke_(target, action.actionInfo.method,
-        action.node, event, action.actionInfo);
+    this.invoke_(target, action.actionInfo.method, action.node, event,
+        action.actionInfo);
   }
 
   /**
@@ -154,8 +151,8 @@ export class Action {
   actionInfoError_(s, actionInfo, target) {
     // Method not found "activate" on ' + target
     throw new Error('Action Error: ' + s +
-        (actionInfo ? ' in [' + actionInfo.str + ']' : '') +
-        (target ? ' on [' + target + ']' : ''));
+                    (actionInfo ? ' in [' + actionInfo.str + ']' : '') +
+                    (target ? ' on [' + target + ']' : ''));
   }
 
   /**
@@ -172,15 +169,15 @@ export class Action {
 
     // Only amp elements are allowed to proceed further.
     if (target.tagName.toLowerCase().substring(0, 4) != 'amp-') {
-      this.actionInfoError_('Target must be an AMP element', actionInfo,
-          target);
+      this.actionInfoError_(
+          'Target must be an AMP element', actionInfo, target);
       return;
     }
 
     if (!target.enqueAction) {
-      this.actionInfoError_('Unrecognized AMP element "' +
-          target.tagName.toLowerCase() + '". ' +
-          'Did you forget to include it via <script custom-element>?',
+      this.actionInfoError_(
+          'Unrecognized AMP element "' + target.tagName.toLowerCase() + '". ' +
+              'Did you forget to include it via <script custom-element>?',
           actionInfo, target);
       return;
     }
@@ -270,12 +267,14 @@ export class Action {
 
     let eventSep = s.indexOf(':');
     let methodSep = s.indexOf('.', eventSep + 1);
-    let event = (eventSep != -1 ? s.substring(0, eventSep) : '').toLowerCase()
-        .trim() || null;
-    let target = s.substring(eventSep + 1, methodSep != -1 ? methodSep :
-        s.length).trim();
-    let method = (methodSep != -1 ? s.substring(methodSep + 1) : '')
-        .trim() || DEFAULT_METHOD_;
+    let event =
+        (eventSep != -1 ? s.substring(0, eventSep) : '').toLowerCase().trim() ||
+        null;
+    let target =
+        s.substring(eventSep + 1, methodSep != -1 ? methodSep : s.length)
+            .trim();
+    let method = (methodSep != -1 ? s.substring(methodSep + 1) : '').trim() ||
+                 DEFAULT_METHOD_;
 
     if (!event || !target) {
       log.error(TAG_, 'invalid action definition: ' + s);
@@ -283,7 +282,7 @@ export class Action {
     }
     return {event: event, target: target, method: method, str: s};
   }
-};
-
+}
+;
 
 export const action = new Action(window);

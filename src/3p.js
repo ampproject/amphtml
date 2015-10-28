@@ -21,13 +21,10 @@
 
 // Note: loaded by 3p system. Cannot rely on babel polyfills.
 
-
 import {assert} from './asserts';
-
 
 /** @typedef {function(!Window, !Object)}  */
 var ThirdPartyFunction;
-
 
 /** @const {!Object<ThirdPartyFunction>} */
 var registrations = {};
@@ -66,8 +63,9 @@ export function run(id, win, data) {
  */
 export function writeScript(win, url, opt_cb) {
   /*eslint no-useless-concat: 0*/
-  win.document
-      .write('<' + 'script src="' + encodeURI(url) + '"><' + '/script>');
+  win.document.write('<' +
+                     'script src="' + encodeURI(url) + '"><' +
+                     '/script>');
   if (opt_cb) {
     executeAfterWriteScript(win, opt_cb);
   }
@@ -95,7 +93,9 @@ export function loadScript(win, url, cb) {
 function executeAfterWriteScript(win, fn) {
   var index = syncScriptLoads++;
   win['__runScript' + index] = fn;
-  win.document.write('<' + 'script>__runScript' + index + '()<' + '/script>');
+  win.document.write('<' +
+                     'script>__runScript' + index + '()<' +
+                     '/script>');
 }
 
 /**

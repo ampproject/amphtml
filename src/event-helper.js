@@ -16,7 +16,6 @@
 
 import {timer} from './timer';
 
-
 /**
  * Listens for the specified event on the element and removes the listener
  * as soon as event has been received.
@@ -40,7 +39,6 @@ export function listenOnce(element, eventType, listener, opt_capture) {
   return unlisten;
 }
 
-
 /**
  * Returns  a promise that will resolve as soon as the specified event has
  * fired on the element. Optionally, opt_timeout can be specified that will
@@ -51,15 +49,14 @@ export function listenOnce(element, eventType, listener, opt_capture) {
  * @param {number=} opt_timeout
  * @return {!Promise<!Event>}
  */
-export function listenOncePromise(element, eventType, opt_capture,
-    opt_timeout) {
+export function listenOncePromise(
+    element, eventType, opt_capture, opt_timeout) {
   let unlisten;
   let eventPromise = new Promise((resolve, reject) => {
     unlisten = listenOnce(element, eventType, resolve, opt_capture);
   });
   return racePromise_(eventPromise, unlisten, opt_timeout);
 }
-
 
 /**
  * Whether the specified element has been loaded already.
@@ -69,7 +66,6 @@ export function listenOncePromise(element, eventType, opt_capture,
 export function isLoaded(element) {
   return element.complete || element.readyState == 'complete';
 }
-
 
 /**
  * Returns a promise that will resolve or fail based on the element's 'load'
@@ -107,7 +103,6 @@ export function loadPromise(element, opt_timeout) {
   }, opt_timeout);
 }
 
-
 /**
  * @param {!Promise<TYPE>} promise
  * @param {Unlisten|undefined} unlisten
@@ -127,11 +122,13 @@ function racePromise_(promise, unlisten, timeout) {
   if (!unlisten) {
     return racePromise;
   }
-  return racePromise.then((result) => {
-    unlisten();
-    return result;
-  }, (reason) => {
-    unlisten();
-    throw reason;
-  });
+  return racePromise.then(
+      (result) => {
+        unlisten();
+        return result;
+      },
+      (reason) => {
+        unlisten();
+        throw reason;
+      });
 }

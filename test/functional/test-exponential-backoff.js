@@ -17,7 +17,6 @@
 import {exponentialBackoff} from '../../src/exponential-backoff';
 import * as sinon from 'sinon';
 
-
 describe('exponentialBackoff', () => {
 
   let sandbox;

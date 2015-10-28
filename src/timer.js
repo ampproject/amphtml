@@ -93,20 +93,21 @@ export class Timer {
   promise(opt_delay, opt_result) {
     var timerKey = null;
     return new Promise((resolve, reject) => {
-      timerKey = this.delay(() => {
-        timerKey = -1;
-        resolve(opt_result);
-      }, opt_delay);
-      if (timerKey == -1) {
-        reject(new Error('Failed to schedule timer.'));
-      }
-    }).catch((error) => {
-      // Clear the timer. The most likely reason is "cancel" signal.
-      if (timerKey != -1) {
-        this.cancel(timerKey);
-      }
-      return Promise.reject(error);
-    });
+             timerKey = this.delay(() => {
+               timerKey = -1;
+               resolve(opt_result);
+             }, opt_delay);
+             if (timerKey == -1) {
+               reject(new Error('Failed to schedule timer.'));
+             }
+           })
+        .catch((error) => {
+          // Clear the timer. The most likely reason is "cancel" signal.
+          if (timerKey != -1) {
+            this.cancel(timerKey);
+          }
+          return Promise.reject(error);
+        });
   }
 
   /**
@@ -122,20 +123,22 @@ export class Timer {
   timeoutPromise(delay, opt_racePromise) {
     var timerKey = null;
     var delayPromise = new Promise((resolve, reject) => {
-      timerKey = this.delay(() => {
-        timerKey = -1;
-        reject('timeout');
-      }, delay);
-      if (timerKey == -1) {
-        reject(new Error('Failed to schedule timer.'));
-      }
-    }).catch((error) => {
-      // Clear the timer. The most likely reason is "cancel" signal.
-      if (timerKey != -1) {
-        this.cancel(timerKey);
-      }
-      return Promise.reject(error);
-    });
+                         timerKey = this.delay(() => {
+                           timerKey = -1;
+                           reject('timeout');
+                         }, delay);
+                         if (timerKey == -1) {
+                           reject(new Error('Failed to schedule timer.'));
+                         }
+                       })
+                           .catch((error) => {
+                             // Clear the timer. The most likely reason is
+                             // "cancel" signal.
+                             if (timerKey != -1) {
+                               this.cancel(timerKey);
+                             }
+                             return Promise.reject(error);
+                           });
     if (!opt_racePromise) {
       return delayPromise;
     }
@@ -146,6 +149,5 @@ export class Timer {
     });
   }
 }
-
 
 export const timer = new Timer(window);

@@ -21,7 +21,6 @@ import {resourcesFor} from './resources';
 import {viewerFor} from './viewer';
 import {viewportFor} from './viewport';
 
-
 /**
  * Base class for all custom element implementations. Instead of inheriting
  * from Element this class has an Element. Among other things this allows
@@ -515,5 +514,7 @@ export class BaseElement {
    * an issue if that is required.
    * @protected
    */
-  onLayoutMeasure() {}
-};
+  onLayoutMeasure() {
+  }
+}
+;

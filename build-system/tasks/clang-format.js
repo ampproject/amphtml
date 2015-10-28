@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
-/**
- * @fileoverview Loads all polyfills needed by the AMP 3p integration frame.
- */
+var config = require('../config');
+var format = require('gulp-clang-format');
+var gulp = require('gulp');
 
-// This list should not get longer without a very good reason.
-import 'babel-core/external-helpers';
-
-require('core-js/modules/es6.array.from');
+gulp.task('format-check', function() {
+  return gulp.src(config.lintGlobs)
+      .pipe(format.checkFormat('file'))
+      .on('warning', function(e) {
+        process.stdout.write(e.message);
+        process.exit(1);
+      });
+});

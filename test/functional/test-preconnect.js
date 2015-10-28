@@ -42,8 +42,7 @@ describe('preconnect', () => {
         .to.have.length(1);
     expect(document.querySelector('link[rel=dns-prefetch]').href)
         .to.equal('https://a.preconnect.com/');
-    expect(document.querySelectorAll('link[rel=preconnect]'))
-        .to.have.length(1);
+    expect(document.querySelectorAll('link[rel=preconnect]')).to.have.length(1);
     expect(document.querySelector('link[rel=preconnect]').href)
         .to.equal('https://a.preconnect.com/');
   });
@@ -52,18 +51,15 @@ describe('preconnect', () => {
     preconnect.url('https://c.preconnect.com/foo/bar');
     expect(document.querySelectorAll('link[rel=dns-prefetch]'))
         .to.have.length(1);
-    expect(document.querySelectorAll('link[rel=preconnect]'))
-        .to.have.length(1);
+    expect(document.querySelectorAll('link[rel=preconnect]')).to.have.length(1);
     clock.tick(9000);
     expect(document.querySelectorAll('link[rel=dns-prefetch]'))
         .to.have.length(1);
-    expect(document.querySelectorAll('link[rel=preconnect]'))
-        .to.have.length(1);
+    expect(document.querySelectorAll('link[rel=preconnect]')).to.have.length(1);
     clock.tick(1000);
     expect(document.querySelectorAll('link[rel=dns-prefetch]'))
         .to.have.length(0);
-    expect(document.querySelectorAll('link[rel=preconnect]'))
-        .to.have.length(0);
+    expect(document.querySelectorAll('link[rel=preconnect]')).to.have.length(0);
   });
 
   it('should preconnect to 2 different origins', () => {
@@ -76,7 +72,6 @@ describe('preconnect', () => {
         .to.equal('https://d.preconnect.com/');
     expect(document.querySelectorAll('link[rel=dns-prefetch]')[1].href)
         .to.equal('https://e.preconnect.com/');
-    expect(document.querySelectorAll('link[rel=preconnect]'))
-        .to.have.length(2);
+    expect(document.querySelectorAll('link[rel=preconnect]')).to.have.length(2);
   });
 });

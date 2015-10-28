@@ -20,7 +20,6 @@ import {log} from './log';
 import {parseUrl} from './url';
 import {viewportFor} from './viewport';
 
-
 /**
  * @param {!Window} window
  */
@@ -63,16 +62,16 @@ export class ClickHandler {
     /** @private @const {!Function} */
     this.boundHandle_ = this.handle_.bind(this);
 
-    this.win.document.documentElement.addEventListener('click',
-        this.boundHandle_);
+    this.win.document.documentElement.addEventListener(
+        'click', this.boundHandle_);
   }
 
   /**
    * Removes all event listeners.
    */
   cleanup() {
-    this.win.document.documentElement.removeEventListener('click',
-        this.boundHandle_);
+    this.win.document.documentElement.removeEventListener(
+        'click', this.boundHandle_);
   }
 
   /**
@@ -84,7 +83,6 @@ export class ClickHandler {
     onDocumentElementClick_(e, this.viewport_);
   }
 }
-
 
 /**
  * Intercept any click on the current document and prevent any
@@ -138,7 +136,7 @@ export function onDocumentElementClick_(e, viewport) {
 
   if (elem) {
     // TODO(dvoytenko): consider implementing animated scroll.
-    viewport./*OK*/scrollIntoView(elem);
+    viewport./*OK*/ scrollIntoView(elem);
   } else {
     log.warn('documentElement',
         `failed to find element with id=${hash} or a[name=${hash}]`);
