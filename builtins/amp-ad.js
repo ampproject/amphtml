@@ -111,7 +111,7 @@ export function installAd(win) {
 
     /** @override */
     createdCallback() {
-       this.preconnect.threePFrame();
+      this.preconnect.threePFrame();
 
       /** @private {?Element} */
       this.iframe_ = null;

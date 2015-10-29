@@ -698,18 +698,18 @@ describe('Resources.Resource', () => {
 
   it('should ignore startLayout if already completed or failed or going',
         () => {
-    elementMock.expects('layoutCallback').never();
+          elementMock.expects('layoutCallback').never();
 
-    resource.state_ = ResourceState_.LAYOUT_COMPLETE;
-    resource.startLayout(true);
+          resource.state_ = ResourceState_.LAYOUT_COMPLETE;
+          resource.startLayout(true);
 
-    resource.state_ = ResourceState_.LAYOUT_FAILED;
-    resource.startLayout(true);
+          resource.state_ = ResourceState_.LAYOUT_FAILED;
+          resource.startLayout(true);
 
-    resource.state_ = ResourceState_.READY_FOR_LAYOUT;
-    resource.layoutPromise_ = {};
-    resource.startLayout(true);
-  });
+          resource.state_ = ResourceState_.READY_FOR_LAYOUT;
+          resource.layoutPromise_ = {};
+          resource.startLayout(true);
+        });
 
   it('should fail startLayout if not built', () => {
     elementMock.expects('layoutCallback').never();
@@ -900,11 +900,11 @@ describe('Resources.Resource', () => {
 
     it('should call documentInactiveCallback on built element and update state',
         () => {
-      resource.state_ = ResourceState_.LAYOUT_COMPLETE;
-      elementMock.expects('documentInactiveCallback').returns(true).once();
-      resource.documentBecameInactive();
-      expect(resource.getState()).to.equal(ResourceState_.NOT_LAID_OUT);
-    });
+          resource.state_ = ResourceState_.LAYOUT_COMPLETE;
+          elementMock.expects('documentInactiveCallback').returns(true).once();
+          resource.documentBecameInactive();
+          expect(resource.getState()).to.equal(ResourceState_.NOT_LAID_OUT);
+        });
 
     it('should call documentInactiveCallback on built element' +
         ' but NOT update state', () => {
