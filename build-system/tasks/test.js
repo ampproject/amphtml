@@ -74,10 +74,10 @@ gulp.task('test', 'Runs tests in chrome', ['build'], function(done) {
   karma.start(config, done);
 }, {
   options: {
-    'verbose': 'With logging enabled',
-    'watch': 'Watches for changes in files, runs corresponding test(s)',
-    'saucelabs': 'Runs test on saucelabs (requires setup)',
-    'safari': 'Runs tests in Safari',
-    'firefox': 'Runs tests in Firefox'
+    'verbose': '  With logging enabled',
+    'watch': '  Watches for changes in files, runs corresponding test(s)',
+    'saucelabs': '  Runs test on saucelabs (requires setup)',
+    'safari': '  Runs tests in Safari',
+    'firefox': '  Runs tests in Firefox'
   }
 });
