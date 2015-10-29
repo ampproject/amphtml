@@ -486,8 +486,8 @@ describe('CustomElement', () => {
     let element = new ElementClass();
     element.sizerElement_ = document.createElement('div');
     element.changeHeight(111);
-    expect(element.sizerElement_.style.paddingTop).to.equal('111px');
-    expect(element.style.height).to.equal('');
+    expect(parseInt(element.sizerElement_.style.paddingTop, 10)).to.equal(0);
+    expect(element.style.height).to.equal('111px');
   });
 
 

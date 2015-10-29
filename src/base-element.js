@@ -484,6 +484,21 @@ export class BaseElement {
   }
 
   /**
+   * Requests the runtime to update the height of this element to the specified
+   * value. The runtime will schedule this request and attempt to process it
+   * as soon as possible. However, unlike in {@link changeHeight}, the runtime
+   * may refuse to make a change in which case it will call the provided
+   * fallback with the height value. The fallback is expected to provide the
+   * reader with the user action to update the height manually.
+   * @param {number} newHeight
+   * @param {function(number)} fallback
+   * @protected
+   */
+  requestChangeHeight(newHeight, fallback) {
+    this.resources_.requestChangeHeight(this.element, newHeight, fallback);
+  }
+
+  /**
    * Schedules callback to be complete within the next batch. This call is
    * intended for heavy DOM mutations that typically cause re-layouts.
    * @param {!Function} callback

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {FocusHistory} from './focus-history';
 import {Pass} from './pass';
 import {assert} from './asserts';
 import {expandLayoutRect, layoutRectLtwh, layoutRectsOverlap} from
@@ -22,9 +23,9 @@ import {inputFor} from './input';
 import {log} from './log';
 import {documentStateFor} from './document-state';
 import {getService} from './service';
+import {makeBodyVisible} from './styles';
 import {reportError} from './error';
 import {timer} from './timer';
-import {makeBodyVisible} from './styles';
 import {viewerFor} from './viewer';
 import {viewportFor} from './viewport';
 import {vsync} from './vsync';
@@ -39,6 +40,8 @@ let PRELOAD_TASK_OFFSET_ = 2;
 let PRIORITY_BASE_ = 10;
 let PRIORITY_PENALTY_TIME_ = 1000;
 let POST_TASK_PASS_DELAY_ = 1000;
+let MUTATE_DEFER_DELAY_ = 500;
+let FOCUS_HISTORY_TIMEOUT_ = 1000 * 60;  // 1min
 
 
 /**
@@ -103,6 +106,9 @@ export class Resources {
     /** @private {boolean} */
     this.forceBuild_ = false;
 
+    /** @private {time} */
+    this.lastScrollTime_ = 0;
+
     /** @private {number} */
     this.lastVelocity_ = 0;
 
@@ -115,7 +121,10 @@ export class Resources {
     /** @const {!TaskQueue_} */
     this.queue_ = new TaskQueue_();
 
-    /** @private {!Array<{resource: !Resource, newHeight: number}>} */
+    /**
+     * @private {!Array<{resource: !Resource, newHeight: number,
+     *     force: boolean, fallback:?function(number)}>}
+     */
     this.changeHeightRequests_ = [];
 
     /** @private {!Array<!Function>} */
@@ -124,20 +133,27 @@ export class Resources {
     /** @private {number} */
     this.scrollHeight_ = 0;
 
-    /** @private {!Viewport} */
+    /** @private @const {!Viewport} */
     this.viewport_ = viewportFor(this.win);
 
-    /** @private {!DocumentState} */
+    /** @private @const {!DocumentState} */
     this.docState_ = documentStateFor(this.win);
+
+    /** @private @const {!FocusHistory} */
+    this.activeHistory_ = new FocusHistory(this.win, FOCUS_HISTORY_TIMEOUT_);
 
     /** @private {boolean} */
     this.vsyncScheduled_ = false;
 
     // When viewport is resized, we have to re-measure all elements.
     this.viewport_.onChanged(event => {
+      this.lastScrollTime_ = timer.now();
       this.lastVelocity_ = event.velocity;
       this.relayoutAll_ = this.relayoutAll_ || event.relayoutAll;
       this.schedulePass();
+    });
+    this.viewport_.onScroll(() => {
+      this.lastScrollTime_ = timer.now();
     });
 
     // Ensure that we attempt to rebuild things when DOM is ready.
@@ -362,7 +378,25 @@ export class Resources {
    * @param {number} newHeight
    */
   changeHeight(element, newHeight) {
-    this.scheduleChangeHeight_(this.getResourceForElement(element), newHeight);
+    this.scheduleChangeHeight_(this.getResourceForElement(element), newHeight,
+        /* force */ true, /* fallback */ null);
+  }
+
+  /**
+   * Requests the runtime to update the height of this element to the specified
+   * value. The runtime will schedule this request and attempt to process it
+   * as soon as possible. However, unlike in {@link changeHeight}, the runtime
+   * may refuse to make a change in which case it will call the provided
+   * fallback with the height value. The fallback is expected to provide the
+   * reader with the user action to update the height manually.
+   * @param {!Element} element
+   * @param {number} newHeight
+   * @param {function(number)} fallback
+   * @protected
+   */
+  requestChangeHeight(element, newHeight, fallback) {
+    this.scheduleChangeHeight_(this.getResourceForElement(element), newHeight,
+        /* force */ false, /* fallback */ fallback);
   }
 
   /**
@@ -419,7 +453,8 @@ export class Resources {
     }
 
     let viewportSize = this.viewport_.getSize();
-    log.fine(TAG_, 'PASS: at ' + timer.now() +
+    let now = timer.now();
+    log.fine(TAG_, 'PASS: at ' + now +
         ', visible=', this.visible_,
         ', forceBuild=', this.forceBuild_,
         ', relayoutAll=', this.relayoutAll_,
@@ -438,9 +473,15 @@ export class Resources {
 
     // If viewport size is 0, the manager will wait for the resize event.
     if (viewportSize.height > 0 && viewportSize.width > 0) {
-      this.mutateWork_();
+      if (this.hasMutateWork_()) {
+        this.mutateWork_();
+      }
       this.discoverWork_();
       let delay = this.work_();
+      if (this.hasMutateWork_()) {
+        // Overflow mutate work.
+        delay = Math.min(delay, MUTATE_DEFER_DELAY_);
+      }
       if (this.visible_) {
         log.fine(TAG_, 'next pass:', delay);
         this.schedulePass(delay);
@@ -452,10 +493,28 @@ export class Resources {
   }
 
   /**
+   * Returns `true` when there's mutate work currently batched.
+   * @return {boolean}
+   * @private
+   */
+  hasMutateWork_() {
+    return (this.deferredMutates_.length > 0 ||
+        this.changeHeightRequests_.length > 0);
+  }
+
+  /**
    * Performs pre-discovery mutates.
    * @private
    */
   mutateWork_() {
+    // Read all necessary data before mutates.
+    let now = timer.now();
+    let viewportRect = this.viewport_.getRect();
+    let isScrollingStopped = (Math.abs(this.lastVelocity_) < 1e-2 &&
+        now - this.lastScrollTime_ > MUTATE_DEFER_DELAY_ ||
+        now - this.lastScrollTime_ > MUTATE_DEFER_DELAY_ * 2);
+    let offset = 10;
+
     if (this.deferredMutates_.length > 0) {
       log.fine(TAG_, 'deferred mutates:', this.deferredMutates_.length);
       let deferredMutates = this.deferredMutates_;
@@ -475,22 +534,61 @@ export class Resources {
       let minTop = -1;
       for (let i = 0; i < changeHeightRequests.length; i++) {
         let request = changeHeightRequests[i];
+        let resource = request.resource;
         let box = request.resource.getLayoutBox();
         if (box.height == request.newHeight) {
           // Nothing to do.
           continue;
         }
-        if (box.top >= 0) {
-          minTop = minTop == -1 ? box.top : Math.min(minTop, box.top);
+
+        // Check resize rules. It will either resize element immediately, or
+        // wait until scrolling stops or will call the fallback.
+        let resize = false;
+        if (request.force || !this.visible_) {
+          // 1. An immediate execution requested or the document is hidden.
+          resize = true;
+        } else if (this.activeHistory_.hasDescendantsOf(resource.element)) {
+          // 2. Active elements are immediately resized. The assumption is that
+          // the resize is triggered by the user action or soon after.
+          resize = true;
+        } else if (box.bottom >= viewportRect.bottom - offset) {
+          // 3. Elements under viewport are resized immediately.
+          resize = true;
+        } else if (box.bottom <= viewportRect.top + offset) {
+          // 4. Elements above the viewport can only be resized when scrolling
+          // has stopped, otherwise defer util next cycle.
+          if (isScrollingStopped) {
+            resize = true;
+          } else {
+            // Defer till next cycle.
+            this.changeHeightRequests_.push(request);
+          }
+        } else if (request.newHeight < box.height) {
+          // 5. The new height is smaller than the current one.
+          // TODO(dvoytenko): Enable immediate resize in this case after
+          // potential abuse scenarios are considered.
+          resize = false;
+        } else {
+          // 6. Element is in viewport don't resize and try fallback instead.
+          if (request.fallback) {
+            request.fallback(request.newHeight);
+          }
         }
-        request.resource.changeHeight(request.newHeight);
+
+        if (resize) {
+          if (box.top >= 0) {
+            minTop = minTop == -1 ? box.top : Math.min(minTop, box.top);
+          }
+          request.resource.changeHeight(request.newHeight);
+        }
       }
 
       if (minTop != -1) {
         this.relayoutTop_ = minTop;
       }
 
-      // TODO(dvoytenko, #367): Explore updating scroll position.
+      // TODO(dvoytenko): consider scroll adjustments when resizing is done
+      // above the current scrolling position.
     }
   }
 
@@ -796,9 +894,11 @@ export class Resources {
    * Schedules change of the element's height.
    * @param {!Resource} resource
    * @param {number} newHeight
+   * @param {boolean} force
+   * @param {?function(number)} fallback
    * @private
    */
-  scheduleChangeHeight_(resource, newHeight) {
+  scheduleChangeHeight_(resource, newHeight, force, fallback) {
     if (resource.getLayoutBox().height == newHeight) {
       // Nothing to do.
       return;
@@ -813,9 +913,15 @@ export class Resources {
     }
     if (request) {
       request.newHeight = newHeight;
+      request.force = force || request.force;
+      request.fallback = fallback || request.fallback;
     } else {
-      this.changeHeightRequests_.push(
-          {resource: resource, newHeight: newHeight});
+      this.changeHeightRequests_.push({
+        resource: resource,
+        newHeight: newHeight,
+        force: force,
+        fallback: fallback
+      });
     }
     this.schedulePassVsync();
   }
