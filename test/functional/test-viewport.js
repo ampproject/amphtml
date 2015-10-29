@@ -149,6 +149,36 @@ describe('Viewport', () => {
     expect(changeEvent.velocity).to.be.closeTo(0.002, 1e-4);
   });
 
+  it('should defer scroll events and react to reset of scroll pos', () => {
+    let changeEvent = null;
+    viewport.onChanged(event => {
+      changeEvent = event;
+    });
+    viewer.getScrollTop = () => {return 34;};
+    viewerViewportHandler();
+    expect(changeEvent).to.equal(null);
+
+    // Not enough time past.
+    clock.tick(100);
+    viewer.getScrollTop = () => {return 35;};
+    viewerViewportHandler();
+    expect(changeEvent).to.equal(null);
+
+    // Reset and wait a bit more time.
+    viewport./*OK*/scrollTop_ = null;
+    clock.tick(750);
+    expect(changeEvent).to.not.equal(null);
+    expect(changeEvent.relayoutAll).to.equal(false);
+    expect(changeEvent.velocity).to.equal(0);
+  });
+
+  it('should update scroll pos and reset cache', () => {
+    let bindingMock = sandbox.mock(binding);
+    bindingMock.expects('setScrollTop').withArgs(117).once();
+    viewport.setScrollTop(117);
+    expect(viewport./*OK*/scrollTop_).to.be.null;
+  });
+
   it('should change scrollTop for scrollIntoView and respect padding', () => {
     let element = document.createElement('div');
     let bindingMock = sandbox.mock(binding);

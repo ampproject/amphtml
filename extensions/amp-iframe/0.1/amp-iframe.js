@@ -14,16 +14,20 @@
  * limitations under the License.
  */
 
+import {childElementByAttr} from '../../../src/dom';
 import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
+import {log} from '../../../src/log';
 import {parseUrl} from '../../../src/url';
 
+/** @const {string} */
+const TAG_ = 'AmpIframe';
 
 /** @type {number}  */
 var count = 0;
 
 /** @const */
-var assert = AMP.assert;
+const assert = AMP.assert;
 
 class AmpIframe extends AMP.BaseElement {
   /** @override */
@@ -94,15 +98,30 @@ class AmpIframe extends AMP.BaseElement {
   }
 
   /** @override */
+  buildCallback() {
+    /** @private {?Element} */
+    this.overflowElement_ = childElementByAttr(this.element, 'overflow');
+    if (this.overflowElement_) {
+      this.overflowElement_.classList.add('-amp-overflow');
+      this.overflowElement_.classList.toggle('amp-hidden', true);
+    }
+  }
+
+  /** @override */
   layoutCallback() {
     this.assertPosition();
     if (!this.iframeSrc) {
       // This failed already, lets not signal another error.
       return Promise.resolve();
     }
+
     var width = this.element.getAttribute('width');
     var height = this.element.getAttribute('height');
     var iframe = document.createElement('iframe');
+
+    /** @private @const {!HTMLIFrameElement} */
+    this.iframe_ = iframe;
+
     this.applyFillContent(iframe);
     iframe.width = getLengthNumeral(width);
     iframe.height = getLengthNumeral(height);
@@ -111,6 +130,16 @@ class AmpIframe extends AMP.BaseElement {
       // Chrome does not reflect the iframe readystate.
       this.readyState = 'complete';
     };
+
+    /** @private @const {boolean} */
+    this.isResizable_ = this.element.hasAttribute('resizable');
+    if (this.isResizable_) {
+      this.element.setAttribute('scrolling', 'no');
+      assert(this.overflowElement_,
+          'Overflow element must be defined for resizable frames: %s',
+          this.element);
+    }
+
     /** @const {!Element} */
     this.propagateAttributes(
         ['frameborder', 'allowfullscreen', 'allowtransparency', 'scrolling'],
@@ -118,7 +147,43 @@ class AmpIframe extends AMP.BaseElement {
     setSandbox(this.element, iframe);
     iframe.src = this.iframeSrc;
     this.element.appendChild(makeIOsScrollable(this.element, iframe));
+
+    listen(iframe, 'embed-size', data => {
+      if (data.width !== undefined) {
+        iframe.width = data.width;
+        this.element.setAttribute('width', data.width);
+      }
+      if (data.height !== undefined) {
+        let newHeight = Math.max(this.element./*OK*/offsetHeight + data.height -
+            this.iframe_./*OK*/offsetHeight, data.height);
+        iframe.height = data.height;
+        this.element.setAttribute('height', newHeight);
+        this.updateHeight_(newHeight);
+      }
+    });
     return loadPromise(iframe);
+  }
+
+  /**
+   * Updates the elements height to accommodate the iframe's requested height.
+   * @param {number} newHeight
+   * @private
+   */
+  updateHeight_(newHeight) {
+    if (!this.isResizable_) {
+      log.warn(TAG_,
+          'ignoring embed-size request because this iframe is not resizable',
+          this.element);
+      return;
+    }
+    this.requestChangeHeight(newHeight, actualHeight => {
+      assert(this.overflowElement_);
+      this.overflowElement_.classList.toggle('amp-hidden', false);
+      this.overflowElement_.onclick = () => {
+        this.overflowElement_.classList.toggle('amp-hidden', true);
+        this.changeHeight(actualHeight);
+      };
+    });
   }
 };
 
@@ -148,6 +213,33 @@ function makeIOsScrollable(element, iframe) {
     return wrapper;
   }
   return iframe;
+}
+
+/**
+ * Listens for message from the iframe.
+ * @param {!Element} iframe
+ * @param {string} typeOfMessage
+ * @param {function(!Object)} callback
+ */
+function listen(iframe, typeOfMessage, callback) {
+  assert(iframe.src, 'only iframes with src supported');
+  let origin = parseUrl(iframe.src).origin;
+  let win = iframe.ownerDocument.defaultView;
+  win.addEventListener('message', function(event) {
+    if (event.origin != origin) {
+      return;
+    }
+    if (event.source != iframe.contentWindow) {
+      return;
+    }
+    if (!event.data || event.data.sentinel != 'amp') {
+      return;
+    }
+    if (event.data.type != typeOfMessage) {
+      return;
+    }
+    callback(event.data);
+  });
 }
 
 AMP.registerElement('amp-iframe', AmpIframe);

@@ -3,5 +3,18 @@
 iframe
 <script>
 parent.parent./*OK*/postMessage('loaded-iframe', '*');
+
+window.addEventListener('message', function(event) {
+  if (event.data && event.data.sentinel == 'amp-test') {
+    if (event.data.type == 'requestHeight') {
+      parent./*OK*/postMessage({
+        sentinel: 'amp',
+        type: 'embed-size',
+        height: event.data.height
+      }, '*');
+    }
+  }
+});
+
 </script>
 </body>

@@ -359,7 +359,8 @@ describe('Resources changeHeight', () => {
       applySizesAndMediaQuery: () => {},
       viewportCallback: sinon.spy(),
       prerenderAllowed: () => true,
-      isRelayoutNeeded: () => true
+      isRelayoutNeeded: () => true,
+      contains: otherElement => false
     };
   }
 
@@ -400,27 +401,36 @@ describe('Resources changeHeight', () => {
   });
 
   it('should schedule separate requests', () => {
-    resources.scheduleChangeHeight_(resource1, 111);
-    resources.scheduleChangeHeight_(resource2, 222);
+    let fallback2 = () => {};
+    resources.scheduleChangeHeight_(resource1, 111, false, null);
+    resources.scheduleChangeHeight_(resource2, 222, true, fallback2);
 
     expect(resources.changeHeightRequests_.length).to.equal(2);
     expect(resources.changeHeightRequests_[0].resource).to.equal(resource1);
     expect(resources.changeHeightRequests_[0].newHeight).to.equal(111);
+    expect(resources.changeHeightRequests_[0].force).to.equal(false);
+    expect(resources.changeHeightRequests_[0].fallback).to.equal(null);
+
     expect(resources.changeHeightRequests_[1].resource).to.equal(resource2);
     expect(resources.changeHeightRequests_[1].newHeight).to.equal(222);
+    expect(resources.changeHeightRequests_[1].force).to.equal(true);
+    expect(resources.changeHeightRequests_[1].fallback).to.equal(fallback2);
   });
 
   it('should only schedule latest request for the same resource', () => {
-    resources.scheduleChangeHeight_(resource1, 111);
-    resources.scheduleChangeHeight_(resource1, 222);
+    let fallback1 = () => {};
+    resources.scheduleChangeHeight_(resource1, 111, true, fallback1);
+    resources.scheduleChangeHeight_(resource1, 222, false, null);
 
     expect(resources.changeHeightRequests_.length).to.equal(1);
     expect(resources.changeHeightRequests_[0].resource).to.equal(resource1);
     expect(resources.changeHeightRequests_[0].newHeight).to.equal(222);
+    expect(resources.changeHeightRequests_[0].force).to.equal(true);
+    expect(resources.changeHeightRequests_[0].fallback).to.equal(fallback1);
   });
 
   it('should NOT change height if it didn\'t change', () => {
-    resources.scheduleChangeHeight_(resource1, 100);
+    resources.scheduleChangeHeight_(resource1, 100, true, null);
     resources.mutateWork_();
     expect(resources.relayoutTop_).to.equal(-1);
     expect(resources.changeHeightRequests_.length).to.equal(0);
@@ -428,7 +438,7 @@ describe('Resources changeHeight', () => {
   });
 
   it('should change height', () => {
-    resources.scheduleChangeHeight_(resource1, 111);
+    resources.scheduleChangeHeight_(resource1, 111, true, null);
     resources.mutateWork_();
     expect(resources.relayoutTop_).to.equal(resource1.layoutBox_.top);
     expect(resources.changeHeightRequests_.length).to.equal(0);
@@ -437,10 +447,86 @@ describe('Resources changeHeight', () => {
   });
 
   it('should pick the smallest relayoutTop', () => {
-    resources.scheduleChangeHeight_(resource2, 111);
-    resources.scheduleChangeHeight_(resource1, 111);
+    resources.scheduleChangeHeight_(resource2, 111, true, null);
+    resources.scheduleChangeHeight_(resource1, 111, true, null);
     resources.mutateWork_();
     expect(resources.relayoutTop_).to.equal(resource1.layoutBox_.top);
+  });
+
+  describe('requestChangeHeight rules when element is in viewport', () => {
+    beforeEach(() => {
+      viewportMock.expects('getRect').returns(
+          {top: 0, left: 0, right: 100, bottom: 200}).once();
+      resource1.layoutBox_ = {top: 10, left: 0, right: 100, bottom: 50,
+          height: 50};
+    });
+
+    it('should NOT change height and calls fallback', () => {
+      let fallback = sinon.spy();
+      resources.scheduleChangeHeight_(resource1, 111, false, fallback);
+      resources.mutateWork_();
+      expect(resources.changeHeightRequests_.length).to.equal(0);
+      expect(resource1.changeHeight.callCount).to.equal(0);
+      expect(fallback.callCount).to.equal(1);
+      expect(fallback.firstCall.args[0]).to.equal(111);
+    });
+
+    it('should NOT change height and no fallback', () => {
+      resources.scheduleChangeHeight_(resource1, 111, false, null);
+      resources.mutateWork_();
+      expect(resources.changeHeightRequests_.length).to.equal(0);
+      expect(resource1.changeHeight.callCount).to.equal(0);
+    });
+
+    it('should change height when new height is lower', () => {
+      resources.scheduleChangeHeight_(resource1, 10, false, null);
+      resources.mutateWork_();
+      expect(resources.changeHeightRequests_.length).to.equal(0);
+      expect(resource1.changeHeight.callCount).to.equal(0);
+    });
+
+    it('should change height when forced', () => {
+      resources.scheduleChangeHeight_(resource1, 111, true, null);
+      resources.mutateWork_();
+      expect(resources.changeHeightRequests_.length).to.equal(0);
+      expect(resource1.changeHeight.callCount).to.equal(1);
+    });
+
+    it('should change height when document is invisible', () => {
+      resources.visible_ = false;
+      resources.scheduleChangeHeight_(resource1, 111, false, null);
+      resources.mutateWork_();
+      expect(resources.changeHeightRequests_.length).to.equal(0);
+      expect(resource1.changeHeight.callCount).to.equal(1);
+    });
+
+    it('should change height when active', () => {
+      resource1.element.contains = () => true;
+      resources.scheduleChangeHeight_(resource1, 111, false, null);
+      resources.mutateWork_();
+      expect(resources.changeHeightRequests_.length).to.equal(0);
+      expect(resource1.changeHeight.callCount).to.equal(1);
+    });
+
+    it('should change height when below the viewport', () => {
+      resource1.layoutBox_ = {top: 10, left: 0, right: 100, bottom: 1050,
+          height: 50};
+      resources.scheduleChangeHeight_(resource1, 111, false, null);
+      resources.mutateWork_();
+      expect(resources.changeHeightRequests_.length).to.equal(0);
+      expect(resource1.changeHeight.callCount).to.equal(1);
+    });
+
+    it('should defer when above the viewport and scrolling on', () => {
+      resource1.layoutBox_ = {top: -1200, left: 0, right: 100, bottom: -1050,
+          height: 50};
+      resources.lastVelocity_ = 10;
+      resources.lastScrollTime_ = new Date().getTime();
+      resources.scheduleChangeHeight_(resource1, 111, false, null);
+      resources.mutateWork_();
+      expect(resources.changeHeightRequests_.length).to.equal(1);
+      expect(resource1.changeHeight.callCount).to.equal(0);
+    });
   });
 });
 
