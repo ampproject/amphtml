@@ -64,7 +64,7 @@ export function installPixel(win) {
     },
 
     /**
-     * Returns the path of the canonical URL for this AMP document.
+     * Returns the referrer URL.
      */
     'DOCUMENT_REFERRER': () => {
       return win.document.referrer;
