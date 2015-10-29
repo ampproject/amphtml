@@ -530,14 +530,14 @@ class AmpPinterest extends AMP.BaseElement {
 
       case 'embedPin':
         return makePin();
-      break;
+        break;
 
       case 'buttonPin':
         return makeButton();
-      break;
+        break;
 
       default:
-      break;
+        break;
     }
   }
 };

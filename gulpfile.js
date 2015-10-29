@@ -148,9 +148,9 @@ function jsifyCssPromise(filename) {
         result.warnings().forEach(function(warn) {
           console.warn(warn.toString());
         });
-      var css = result.css;
-      return JSON.stringify(css + '\n/*# sourceURL=/' + filename + '*/');
-    });
+        var css = result.css;
+        return JSON.stringify(css + '\n/*# sourceURL=/' + filename + '*/');
+      });
 }
 
 /**
@@ -272,7 +272,7 @@ function dist() {
 function buildExamples(watch) {
   if (watch) {
     gulpWatch('examples/*.html', function() {
-     buildExamples(false);
+      buildExamples(false);
     });
   }
 

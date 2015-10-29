@@ -180,9 +180,9 @@ describe('Viewport META', () => {
     it('should parse two key-values', () => {
       expect(parseViewportMeta('width=device-width,minimum-scale=1')).to.deep
           .equal({
-        'width': 'device-width',
-        'minimum-scale': '1'
-      });
+            'width': 'device-width',
+            'minimum-scale': '1'
+          });
     });
     it('should parse empty value', () => {
       expect(parseViewportMeta('width=device-width,minimal-ui')).to.deep.equal({
@@ -202,9 +202,9 @@ describe('Viewport META', () => {
     it('should ignore extra delims', () => {
       expect(parseViewportMeta(',,,width=device-width,,,,minimum-scale=1,,,'))
           .to.deep.equal({
-        'width': 'device-width',
-        'minimum-scale': '1'
-      });
+            'width': 'device-width',
+            'minimum-scale': '1'
+          });
     });
   });
 

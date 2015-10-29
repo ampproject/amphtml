@@ -68,11 +68,11 @@ describe('CustomElement', () => {
   }
 
   let ElementClass = document.registerElement('amp-test', {
-      prototype: createAmpElementProto(window, 'amp-test', TestElement)
+    prototype: createAmpElementProto(window, 'amp-test', TestElement)
   });
 
   let StubElementClass = document.registerElement('amp-stub', {
-      prototype: createAmpElementProto(window, 'amp-stub', ElementStub)
+    prototype: createAmpElementProto(window, 'amp-stub', ElementStub)
   });
 
   let sandbox;
@@ -363,25 +363,25 @@ describe('CustomElement', () => {
 
   it('Element - layoutCallback should call firstLayoutCompleted only once',
       () => {
-    let element = new ElementClass();
-    element.setAttribute('layout', 'fill');
-    element.build(true);
+        let element = new ElementClass();
+        element.setAttribute('layout', 'fill');
+        element.build(true);
 
-    let p = element.layoutCallback();
-    expect(testElementLayoutCallback.callCount).to.equal(1);
-    expect(testElementFirstLayoutCompleted.callCount).to.equal(0);
-    return p.then(() => {
-      expect(testElementFirstLayoutCompleted.callCount).to.equal(1);
+        let p = element.layoutCallback();
+        expect(testElementLayoutCallback.callCount).to.equal(1);
+        expect(testElementFirstLayoutCompleted.callCount).to.equal(0);
+        return p.then(() => {
+          expect(testElementFirstLayoutCompleted.callCount).to.equal(1);
 
       // But not second time.
-      let p2 = element.layoutCallback();
-      expect(testElementLayoutCallback.callCount).to.equal(2);
-      expect(testElementFirstLayoutCompleted.callCount).to.equal(1);
-      return p2.then(() => {
-        expect(testElementFirstLayoutCompleted.callCount).to.equal(1);
+          let p2 = element.layoutCallback();
+          expect(testElementLayoutCallback.callCount).to.equal(2);
+          expect(testElementFirstLayoutCompleted.callCount).to.equal(1);
+          return p2.then(() => {
+            expect(testElementFirstLayoutCompleted.callCount).to.equal(1);
+          });
+        });
       });
-    });
-  });
 
   it('StubElement - layoutCallback', () => {
     let element = new StubElementClass();
@@ -590,7 +590,7 @@ describe('CustomElement', () => {
 describe('CustomElement Service Elements', () => {
 
   let StubElementClass = document.registerElement('amp-stub2', {
-      prototype: createAmpElementProto(window, 'amp-stub2', ElementStub)
+    prototype: createAmpElementProto(window, 'amp-stub2', ElementStub)
   });
 
   let sandbox;
@@ -676,7 +676,7 @@ describe('CustomElement Loading Indicator', () => {
   class TestElement extends BaseElement {
   }
   let ElementClass = document.registerElement('amp-test2', {
-      prototype: createAmpElementProto(window, 'amp-test2', TestElement)
+    prototype: createAmpElementProto(window, 'amp-test2', TestElement)
   });
 
   let resources = resourcesFor(window);

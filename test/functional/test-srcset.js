@@ -227,7 +227,7 @@ describe('Srcset construct', () => {
     let res = new Srcset([
         {url: 'image-10w', width: 10},
         {url: 'image-100w', width: 100}
-      ]);
+    ]);
     expect(res.sources_[0].url).to.equal('image-100w');
     expect(res.sources_[1].url).to.equal('image-10w');
 
@@ -235,7 +235,7 @@ describe('Srcset construct', () => {
     res = new Srcset([
         {url: 'image-1x', dpr: 1},
         {url: 'image-2x', dpr: 2}
-      ]);
+    ]);
     expect(res.sources_[0].url).to.equal('image-2x');
     expect(res.sources_[1].url).to.equal('image-1x');
   });
@@ -249,7 +249,7 @@ describe('Srcset select', () => {
         {url: 'image-500', width: 500},
         {url: 'image-250', width: 250},
         {url: 'image', width: 50}
-      ]);
+    ]);
 
     // DPR = 1
     expect(srcset.select(2000, 1).url).to.equal('image-1000');
@@ -287,7 +287,7 @@ describe('Srcset select', () => {
         {url: 'image-3x', dpr: 3},
         {url: 'image-2x', dpr: 2},
         {url: 'image', dpr: 1}
-      ]);
+    ]);
 
     expect(srcset.select(2000, 4).url).to.equal('image-3x', 'dpr=4');
     expect(srcset.select(2000, 3.5).url).to.equal('image-3x', 'dpr=3.5');
