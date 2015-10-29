@@ -18,6 +18,7 @@
 var argv = require('minimist')(process.argv.slice(2));
 var config = require('../config');
 var eslint = require('gulp-eslint');
+var exec = require('child_process').exec;
 var gulp = require('gulp-help')(require('gulp'));
 var lazypipe = require('lazypipe');
 var util = require('gulp-util');
@@ -26,6 +27,7 @@ var watch = require('gulp-watch');
 var isWatching = (argv.watch || argv.w) || false;
 
 var options = {
+  fix: false,
   plugins: ['eslint-plugin-google-camelcase'],
   "ecmaFeatures": {
     "modules": true,
@@ -36,9 +38,7 @@ var options = {
   },
 };
 
-var srcs = ['**/*.js', config.src.exclude];
-
-var watcher = lazypipe().pipe(watch, srcs);
+var watcher = lazypipe().pipe(watch, config.lintGlobs);
 
 /**
  * Run the eslinter on the src javascript and log the output
@@ -46,7 +46,7 @@ var watcher = lazypipe().pipe(watch, srcs);
  */
 function lint() {
   var errorsFound = false;
-  var stream = gulp.src(srcs);
+  var stream = gulp.src(config.lintGlobs);
 
   if (isWatching) {
     stream = stream.pipe(watcher());
@@ -59,9 +59,20 @@ function lint() {
     }))
     .on('end', function() {
       if (errorsFound) {
+        util.log(util.colors.blue('Run `gulp lint-fix` to automatically ' +
+            'fix some of these lint warnings/errors. This is a destructive ' +
+            'operation (operates on the file system) so please make sure ' +
+            'you commit before running.'));
         process.exit(1);
       }
     });
+}
+
+function lintFix() {
+  // Temporary until we figure out gulp-eslint fix and destination write.
+  exec('node_modules/eslint/bin/eslint.js ' +
+       '{src,3p,ads,builtins,extensions,testing,test}/**/*.js ' +
+       '-c .eslintrc --fix --plugin google-camelcase');
 }
 
 gulp.task('lint', 'Validates against Google Closure Linter', lint,
@@ -70,3 +81,4 @@ gulp.task('lint', 'Validates against Google Closure Linter', lint,
     'watch': '  Watches for changes in files, validates against the linter'
   }
 });
+gulp.task('lint-fix', 'Auto fixes some simple lint errors', lintFix);

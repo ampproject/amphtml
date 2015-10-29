@@ -522,7 +522,7 @@ export class SwipeXRecognizer {
     }
 
     // Calculate speed and speed depreciation.
-    let speed = dx/dt;
+    let speed = dx / dt;
 
     // Depreciation is simply an informational quality. It basically means:
     // we can't ignore the velocity we knew recently, but we'd only consider
