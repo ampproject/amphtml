@@ -107,7 +107,7 @@ describe('SizeList select', () => {
         {mediaQuery: 'media2', size: '333px'},
         {mediaQuery: 'media3', size: '222px'},
         {size: '111px'}
-      ]);
+    ]);
     expect(sizeList.select({matchMedia: () => {
       return {};
     }})).to.equal('111px');
@@ -119,7 +119,7 @@ describe('SizeList select', () => {
         {mediaQuery: 'media2', size: '333px'},
         {mediaQuery: 'media3', size: '222px'},
         {size: '111px'}
-      ]);
+    ]);
     expect(sizeList.select({matchMedia: mq => {
       if (mq == 'media2') {
         return {matches: true};
@@ -134,7 +134,7 @@ describe('SizeList select', () => {
         {mediaQuery: 'media2', size: '333px'},
         {mediaQuery: 'media3', size: '222px'},
         {size: '111px'}
-      ]);
+    ]);
     expect(sizeList.select({matchMedia: mq => {
       if (mq == 'media1' || mq == 'media2') {
         return {matches: true};

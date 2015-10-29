@@ -68,11 +68,17 @@ function lint() {
     });
 }
 
-function lintFix() {
+function lintFix(done) {
   // Temporary until we figure out gulp-eslint fix and destination write.
   exec('node_modules/eslint/bin/eslint.js ' +
-       '{src,3p,ads,builtins,extensions,testing,test}/**/*.js ' +
-       '-c .eslintrc --fix --plugin google-camelcase');
+      '{src,3p,ads,builtins,extensions,testing,test}/**/*.js ' +
+      '-c .eslintrc --fix --plugin google-camelcase',
+      function(err, stdout, stderr) {
+        if (err) {
+          util.log(util.colors.red(err.message));
+        }
+        done();
+      });
 }
 
 gulp.task('lint', 'Validates against Google Closure Linter', lint,

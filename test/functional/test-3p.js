@@ -17,28 +17,28 @@
  import {validateSrcPrefix, validateSrcContains} from '../../src/3p';
 
  describe('3p', () => {
-  it('should throw an error if prefix is not https:', () => {
-    expect(() => {
-      validateSrcPrefix('https:', 'http://adserver.adtechus.com');
-    }).to.throw(/Invalid src/);
-  });
+   it('should throw an error if prefix is not https:', () => {
+     expect(() => {
+       validateSrcPrefix('https:', 'http://adserver.adtechus.com');
+     }).to.throw(/Invalid src/);
+   });
 
-  it('should not throw if source starts with https', () => {
-    expect(
+   it('should not throw if source starts with https', () => {
+     expect(
       validateSrcPrefix('https:', 'https://adserver.adtechus.com')
     ).to.not.throw;
-  });
+   });
 
-  it('should throw an error if src does not contain addyn', () => {
-    expect(() => {
-      validateSrcContains('/addyn/', 'http://adserver.adtechus.com/');
-    }).to.throw(/Invalid src/);
-  });
+   it('should throw an error if src does not contain addyn', () => {
+     expect(() => {
+       validateSrcContains('/addyn/', 'http://adserver.adtechus.com/');
+     }).to.throw(/Invalid src/);
+   });
 
-  it('should not throw if source contains /addyn/', () => {
-    expect(
+   it('should not throw if source contains /addyn/', () => {
+     expect(
       validateSrcContains('/addyn/', 'http://adserver.adtechus.com/addyn/')
     ).to.not.throw;
-  });
+   });
  });
 

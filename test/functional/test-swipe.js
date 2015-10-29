@@ -71,7 +71,7 @@ describe('Swipe', () => {
 
     // End touch.
     if (resetVelocity) {
-        swipeX.velocity_ = 0;
+      swipeX.velocity_ = 0;
     }
     swipeX.touchEnd_({});
 

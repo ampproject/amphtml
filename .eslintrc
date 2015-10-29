@@ -15,10 +15,12 @@
   "rules": {
     "array-bracket-spacing": [2, "never"],
     "arrow-parens": [2, "as-needed"],
+    "computed-property-spacing": [2, "never"],
     "curly": 2,
     "dot-location": [2, "property"],
     "eol-last": 2,
     "google-camelcase/google-camelcase": 2,
+    "indent": [2, 2, { "SwitchCase": 1 }],
     "key-spacing": 2,
     "max-len": [2, 80, 4, { "ignoreComments": true, "ignoreUrls": true, "ignorePattern": "" }],
     "no-alert": 2,
