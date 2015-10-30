@@ -276,9 +276,9 @@ function buildExamples(watch) {
     });
   }
 
-  fs.copy('examples/img/', 'examples.build/img/', { clobber: true },
+  fs.copy('examples/img/', 'examples.build/img/', {clobber: true},
       copyHandler.bind(null, 'examples/img folder'));
-  fs.copy('examples/video/', 'examples.build/video/', { clobber: true },
+  fs.copy('examples/video/', 'examples.build/video/', {clobber: true},
       copyHandler.bind(null, 'examples/video folder'));
 
   // Also update test-example-validation.js
@@ -377,7 +377,7 @@ function thirdPartyBootstrap(watch, shouldMinify) {
  */
 function compileJs(srcDir, srcFilename, destDir, options) {
   options = options || {};
-  var bundler = browserify(srcDir + srcFilename, { debug: true })
+  var bundler = browserify(srcDir + srcFilename, {debug: true})
       .transform(babel);
   if (options.watch) {
     bundler = watchify(bundler);
@@ -390,7 +390,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
       .pipe(buffer)
       .pipe(replace, /\$internalRuntimeVersion\$/g, internalRuntimeVersion)
       .pipe(wrap, wrapper)
-      .pipe(sourcemaps.init.bind(sourcemaps), { loadMaps: true });
+      .pipe(sourcemaps.init.bind(sourcemaps), {loadMaps: true});
 
   var lazywrite = lazypipe()
       .pipe(sourcemaps.write.bind(sourcemaps), './')
