@@ -15,11 +15,17 @@
  */
 
 /**
+ * Returns a service for the given id and window (a per-window singleton).
+ * If the service is not yet available the factory function is invoked and
+ * expected to return the service.
+ * Users should typically wrap this is a special purpose function (e.g.
+ * viewportFor(win)) for type safety and because the factory should not be
+ * passed around.
  * @param {!Window} win
- * @param {string} id
+ * @param {string} id of the service.
  * @param {function(!Window):!Object} factory Should create the service if it
  *     does not exist yet.
- * @return {!Object}
+ * @return {*}
  */
 export function getService(win, id, factory) {
   var services = win.services;
@@ -31,4 +37,15 @@ export function getService(win, id, factory) {
     return services[id] = factory(win);
   }
   return s;
+}
+
+/**
+ * Resets a single service, so it gets recreated on next getService invocation.
+ * @param {!Window} win
+ * @param {string} id of the service.
+ */
+export function resetServiceForTesting(win, id) {
+  if (win.services) {
+    win.services[id] = null;
+  }
 }
