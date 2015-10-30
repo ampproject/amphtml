@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {addDataAndJsonAttributes_, getIframe, getBootstrapBaseUrl} from
-    '../../src/3p-frame';
+import {addDataAndJsonAttributes_, getIframe, getBootstrapBaseUrl,
+    prefetchBootstrap} from '../../src/3p-frame';
 import {loadPromise} from '../../src/event-helper';
 import {setModeForTesting, getMode} from '../../src/mode';
 import {resetServiceForTesting} from '../../src/service';
@@ -144,5 +144,16 @@ describe('3p-frame', () => {
     expect(() => {
       getBootstrapBaseUrl(window);
     }).to.throw(/must not be on the same origin as the/);
+  });
+
+  it('should prefetch bootstrap frame and JS', () => {
+    prefetchBootstrap(window);
+    var fetches = document.querySelectorAll(
+        'link[rel=prefetch]');
+    expect(fetches).to.have.length(2);
+    expect(fetches[0].href).to.equal(
+        'http://ads.localhost:9876/dist.3p/current/frame.max.html');
+    expect(fetches[1].href).to.equal(
+        'https://3p.ampproject.net/$internalRuntimeVersion$/f.js');
   });
 });

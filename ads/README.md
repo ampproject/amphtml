@@ -37,7 +37,14 @@ We will provide the following information to the ad:
 More information can be provided in a similar fashion if needed (Please file an issue).
 
 ### Minimizing HTTP requests
+
+#### JS reuse across iframes
 To allow ads to bundle HTTP requests across multiple ad units on the same page the object `window.context.master` will contain the window object of the iframe being elected master iframe for the current page.
+
+#### Preconnect and prefetch
+Add the JS URLs that an ad **always** fetches or always connects to (if you know the origin but not the path) to [_prefetch.js](_prefetch.js).
+
+This triggers prefetch/preconnect when the ad is first seen, so that loads are faster when they come into view.
 
 
 ### Ad markup

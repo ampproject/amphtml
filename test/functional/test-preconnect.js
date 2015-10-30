@@ -23,6 +23,10 @@ describe('preconnect', () => {
   let clock;
   let preconnect;
 
+  // Factored out to make our linter happy since we don't allow
+  // bare javascript URLs.
+  const javascriptUrlPrefix = 'javascript';
+
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
@@ -38,6 +42,7 @@ describe('preconnect', () => {
   it('should preconnect', () => {
     preconnect.url('https://a.preconnect.com/foo/bar');
     preconnect.url('https://a.preconnect.com/other');
+    preconnect.url(javascriptUrlPrefix + ':alert()');
     expect(document.querySelectorAll('link[rel=dns-prefetch]'))
         .to.have.length(1);
     expect(document.querySelector('link[rel=dns-prefetch]').href)
@@ -46,6 +51,8 @@ describe('preconnect', () => {
         .to.have.length(1);
     expect(document.querySelector('link[rel=preconnect]').href)
         .to.equal('https://a.preconnect.com/');
+    expect(document.querySelectorAll('link[rel=prefetch]'))
+        .to.have.length(0);
   });
 
   it('should cleanup', () => {
@@ -78,5 +85,27 @@ describe('preconnect', () => {
         .to.equal('https://e.preconnect.com/');
     expect(document.querySelectorAll('link[rel=preconnect]'))
         .to.have.length(2);
+  });
+
+  it('should prefetch', () => {
+    preconnect.prefetch('https://a.prefetch.com/foo/bar');
+    preconnect.prefetch('https://a.prefetch.com/foo/bar');
+    preconnect.prefetch('https://a.prefetch.com/other');
+    preconnect.prefetch(javascriptUrlPrefix + ':alert()');
+    // Also preconnects.
+    expect(document.querySelectorAll('link[rel=dns-prefetch]'))
+        .to.have.length(1);
+    expect(document.querySelector('link[rel=dns-prefetch]').href)
+        .to.equal('https://a.prefetch.com/');
+    expect(document.querySelectorAll('link[rel=preconnect]'))
+        .to.have.length(1);
+    expect(document.querySelector('link[rel=preconnect]').href)
+        .to.equal('https://a.prefetch.com/');
+    // Actual prefetch
+    var fetches = document.querySelectorAll(
+        'link[rel=prefetch]');
+    expect(fetches).to.have.length(2);
+    expect(fetches[0].href).to.equal('https://a.prefetch.com/foo/bar');
+    expect(fetches[1].href).to.equal('https://a.prefetch.com/other');
   });
 });

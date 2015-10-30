@@ -45,7 +45,7 @@ describe('amp-ad', () => {
       width: 300,
       height: 250,
       type: 'a9',
-      src: 'testsrc',
+      src: 'https://testsrc',
       'data-aax_size': '300x250',
       'data-aax_pubname': 'test123',
       'data-aax_src': '302',
@@ -63,11 +63,24 @@ describe('amp-ad', () => {
       var data = JSON.parse(fragment);
 
       expect(data.type).to.equal('a9');
-      expect(data.src).to.equal('testsrc');
+      expect(data.src).to.equal('https://testsrc');
       expect(data.width).to.equal(300);
       expect(data.height).to.equal(250);
       expect(data._context.canonicalUrl).to.equal('https://schema.org/');
       expect(data.aax_size).to.equal('300x250');
+
+      var doc = iframe.ownerDocument;
+      var fetches = doc.querySelectorAll(
+          'link[rel=prefetch]');
+      expect(fetches).to.have.length(4);
+      expect(fetches[0].href).to.equal(
+          'http://ads.localhost/dist.3p/current/frame.max.html');
+      expect(fetches[1].href).to.equal(
+          'https://3p.ampproject.net/$internalRuntimeVersion$/f.js');
+      expect(fetches[2].href).to.equal(
+          'https://c.amazon-adsystem.com/aax2/assoc.js');
+      expect(fetches[3].href).to.equal(
+          'https://testsrc/');
     });
   });
 
