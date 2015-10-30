@@ -41,28 +41,28 @@ export function parseSrcset(s) {
   // Example 1: "image1.png 100w, image2.png 50w"
   // Example 2: "image1.png 2x, image2.png"
   // Example 3: "image1,100w.png 100w, image2.png 50w"
-  let sSources = s.match(
+  const sSources = s.match(
       /\s*([^\s]*)(\s+(-?(\d+(\.(\d+)?)?|\.\d+)[a-zA-Z]))?(\s*,)?/g);
   assert(sSources.length > 0, 'srcset has to have at least one source');
-  let sources = [];
+  const sources = [];
   sSources.forEach(sSource => {
     sSource = sSource.trim();
     if (sSource.substr(-1) == ',') {
       sSource = sSource.substr(0, sSource.length - 1).trim();
     }
-    let parts = sSource.split(/\s+/, 2);
+    const parts = sSource.split(/\s+/, 2);
     if (parts.length == 0 ||
           parts.length == 1 && !parts[0] ||
           parts.length == 2 && !parts[0] && !parts[1]) {
       return;
     }
-    let url = parts[0].trim();
+    const url = parts[0].trim();
     if (parts.length == 1 || parts.length == 2 && !parts[1]) {
       // If no "w" or "x" specified, we assume it's "1x".
       sources.push({url: url, dpr: 1});
     } else {
-      let spec = parts[1].trim().toLowerCase();
-      let lastChar = spec.substring(spec.length - 1);
+      const spec = parts[1].trim().toLowerCase();
+      const lastChar = spec.substring(spec.length - 1);
       if (lastChar == 'w') {
         sources.push({url: url, width: parseFloat(spec)});
       } else if (lastChar == 'x') {
@@ -181,7 +181,7 @@ export class Srcset {
     let minWidth = 1000000;
     let minScore = 1000000;
     for (let i = 0; i < this.sources_.length; i++) {
-      let source = this.sources_[i];
+      const source = this.sources_[i];
       let sourceWidth;
       if (source.width) {
         sourceWidth = source.width / dpr;
@@ -193,7 +193,7 @@ export class Srcset {
       minWidth = Math.min(minWidth, sourceWidth);
       // The calculation is slightly biased toward higher width by offsetting
       // score by negative 0.2.
-      let score = Math.abs((sourceWidth - width) / width - 0.2);
+      const score = Math.abs((sourceWidth - width) / width - 0.2);
       if (score < minScore) {
         minScore = score;
         minIndex = i;
@@ -212,10 +212,10 @@ export class Srcset {
     let minIndex = -1;
     let minScore = 1000000;
     for (let i = 0; i < this.sources_.length; i++) {
-      let source = this.sources_[i];
+      const source = this.sources_[i];
       // Default DPR = 1.
-      let sourceDpr = source.dpr || 1;
-      let score = Math.abs(sourceDpr - dpr);
+      const sourceDpr = source.dpr || 1;
+      const score = Math.abs(sourceDpr - dpr);
       if (score < minScore) {
         minScore = score;
         minIndex = i;

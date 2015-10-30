@@ -26,7 +26,7 @@ import {timer} from './timer';
 import {viewerFor} from './viewer';
 
 
-let TAG_ = 'Viewport';
+const TAG_ = 'Viewport';
 
 
 /**
@@ -100,7 +100,7 @@ export class Viewport {
 
     this.viewer_.onViewportEvent(() => {
       this.binding_.updateViewerViewport(this.viewer_);
-      let paddingTop = this.viewer_.getPaddingTop();
+      const paddingTop = this.viewer_.getPaddingTop();
       if (paddingTop != this.paddingTop_) {
         this.paddingTop_ = paddingTop;
         this.binding_.updatePaddingTop(this.paddingTop_);
@@ -220,8 +220,8 @@ export class Viewport {
    * @param {!Element} element
    */
   scrollIntoView(element) {
-    let elementTop = this.binding_.getLayoutRect(element).top;
-    let newScrollTop = Math.max(0, elementTop - this.paddingTop_);
+    const elementTop = this.binding_.getLayoutRect(element).top;
+    const newScrollTop = Math.max(0, elementTop - this.paddingTop_);
     this.binding_.setScrollTop(newScrollTop);
   }
 
@@ -251,8 +251,9 @@ export class Viewport {
    * Resets touch zoom to initial scale of 1.
    */
   resetTouchZoom() {
-    let windowHeight = this.win_./*OK*/innerHeight;
-    let documentHeight = this.win_.document.documentElement./*OK*/clientHeight;
+    const windowHeight = this.win_./*OK*/innerHeight;
+    const documentHeight = this.win_.document
+        .documentElement./*OK*/clientHeight;
     if (windowHeight && documentHeight && windowHeight === documentHeight) {
       // This code only works when scrollbar overlay content and take no space,
       // which is fine on mobile. For non-mobile devices this code is
@@ -272,14 +273,14 @@ export class Viewport {
    * @return {boolean}
    */
   disableTouchZoom() {
-    let viewportMeta = this.getViewportMeta_();
+    const viewportMeta = this.getViewportMeta_();
     if (!viewportMeta) {
       // This should never happen in a valid AMP document, thus shortcircuit.
       return false;
     }
     // Setting maximum-scale=1 and user-scalable=no zooms page back to normal
     // and prohibit further default zooming.
-    let newValue = updateViewportMetaString(viewportMeta.content, {
+    const newValue = updateViewportMetaString(viewportMeta.content, {
       'maximum-scale': '1',
       'user-scalable': 'no'
     });
@@ -304,7 +305,7 @@ export class Viewport {
    * @return {boolean}
    */
   setViewportMetaString_(viewportMetaString) {
-    let viewportMeta = this.getViewportMeta_();
+    const viewportMeta = this.getViewportMeta_();
     if (viewportMeta && viewportMeta.content != viewportMetaString) {
       log.fine(TAG_, 'changed viewport meta to:', viewportMetaString);
       viewportMeta.content = viewportMetaString;
@@ -338,8 +339,8 @@ export class Viewport {
    * @private
    */
   changed_(relayoutAll, velocity) {
-    let size = this.getSize();
-    let scrollTop = this.getScrollTop();
+    const size = this.getSize();
+    const scrollTop = this.getScrollTop();
     log.fine(TAG_, 'changed event:',
         'relayoutAll=', relayoutAll,
         'top=', scrollTop,
@@ -414,9 +415,9 @@ export class Viewport {
 
   /** @private */
   resize_() {
-    let oldSize = this.size_;
+    const oldSize = this.size_;
     this.size_ = null;  // Need to recalc.
-    let newSize = this.getSize();
+    const newSize = this.getSize();
     this.changed_(!oldSize || oldSize.width != newSize.width, 0);
   }
 }
@@ -668,8 +669,8 @@ export class ViewportBindingNaturalIosEmbed_ {
 
   /** @private */
   setup_() {
-    let documentElement = this.win.document.documentElement;
-    let documentBody = this.win.document.body;
+    const documentElement = this.win.document.documentElement;
+    const documentBody = this.win.document.body;
 
     // TODO(dvoytenko): need to also find a way to do this on resize.
     this.scrollWidth_ = documentBody./*OK*/scrollWidth || 0;
@@ -821,7 +822,7 @@ export class ViewportBindingNaturalIosEmbed_ {
       return;
     }
     this.adjustScrollPos_(event);
-    let rect = this.scrollPosEl_./*OK*/getBoundingClientRect();
+    const rect = this.scrollPosEl_./*OK*/getBoundingClientRect();
     if (this.pos_.x != -rect.left || this.pos_.y != -rect.top) {
       this.pos_.x = -rect.left;
       this.pos_.y = -rect.top;
@@ -850,7 +851,7 @@ export class ViewportBindingNaturalIosEmbed_ {
     // Scroll document into a safe position to avoid scroll freeze on iOS.
     // This means avoiding scrollTop to be minimum (0) or maximum value.
     // This is very sad but very necessary. See #330 for more details.
-    let scrollTop = -this.scrollPosEl_./*OK*/getBoundingClientRect().top;
+    const scrollTop = -this.scrollPosEl_./*OK*/getBoundingClientRect().top;
     if (scrollTop == 0) {
       this.setScrollPos_(1);
       if (opt_event) {
@@ -989,15 +990,15 @@ export class ViewportBindingVirtual_ {
  */
 export function parseViewportMeta(content) {
   // Ex: width=device-width,initial-scale=1,minimal-ui
-  let params = Object.create(null);
+  const params = Object.create(null);
   if (!content) {
     return params;
   }
-  let pairs = content.split(',');
+  const pairs = content.split(',');
   for (let i = 0; i < pairs.length; i++) {
-    let pair = pairs[i];
-    let split = pair.split('=');
-    let name = split[0].trim();
+    const pair = pairs[i];
+    const split = pair.split('=');
+    const name = split[0].trim();
     let value = split[1];
     value = (value || '').trim();
     if (name) {
@@ -1021,7 +1022,7 @@ export function parseViewportMeta(content) {
 export function stringifyViewportMeta(params) {
   // Ex: width=device-width,initial-scale=1,minimal-ui
   let content = '';
-  for (let k in params) {
+  for (const k in params) {
     if (content.length > 0) {
       content += ',';
     }
@@ -1046,9 +1047,9 @@ export function stringifyViewportMeta(params) {
  * @private Visible for testing only.
  */
 export function updateViewportMetaString(currentValue, updateParams) {
-  let params = parseViewportMeta(currentValue);
+  const params = parseViewportMeta(currentValue);
   let changed = false;
-  for (let k in updateParams) {
+  for (const k in updateParams) {
     if (params[k] !== updateParams[k]) {
       changed = true;
       if (updateParams[k] !== undefined) {
@@ -1071,7 +1072,7 @@ export function updateViewportMetaString(currentValue, updateParams) {
  * @private
  */
 function createViewport_(window) {
-  let viewer = viewerFor(window);
+  const viewer = viewerFor(window);
   let binding;
   if (viewer.getViewportType() == 'virtual') {
     binding = new ViewportBindingVirtual_(window, viewer);

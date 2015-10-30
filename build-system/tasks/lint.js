@@ -53,7 +53,7 @@ function lint() {
   }
 
   return stream.pipe(eslint(options))
-    .pipe(eslint.formatEach('compact', function(msg) {
+    .pipe(eslint.formatEach('stylish', function(msg) {
       errorsFound = true;
       util.log(util.colors.red(msg));
     }))

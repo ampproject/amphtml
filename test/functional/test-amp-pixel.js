@@ -121,7 +121,7 @@ describe('amp-pixel', () => {
         'https://foo.com?ref=$AMPDOC_URL'
         ).then(p => {
           expect(p.querySelector('img')).to.not.be.null;
-          let query = parseQueryString(parseUrl(p.children[0].src).search);
+          const query = parseQueryString(parseUrl(p.children[0].src).search);
           expect(query['ref']).to.not.equal('$AMPDOC_URL');
         });
   });
@@ -131,7 +131,7 @@ describe('amp-pixel', () => {
         'https://foo.com?ref=$AMPDOC_HOST'
         ).then(p => {
           expect(p.querySelector('img')).to.not.be.null;
-          let query = parseQueryString(parseUrl(p.children[0].src).search);
+          const query = parseQueryString(parseUrl(p.children[0].src).search);
           expect(query['ref']).to.not.equal('$AMPDOC_HOST');
         });
   });

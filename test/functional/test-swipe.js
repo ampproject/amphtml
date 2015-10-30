@@ -304,7 +304,7 @@ describe('Swipe', () => {
     swipeX.touchEnd_({});
 
     expect(vsyncTasks.length).to.equal(1);
-    let mutator = vsyncTasks[0];
+    const mutator = vsyncTasks[0];
     vsyncTasks = [];
     let cont = false;
 

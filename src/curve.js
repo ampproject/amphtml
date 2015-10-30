@@ -32,7 +32,7 @@ class Curve {};
  * @return {!Curve}
  */
 export function bezierCurve(x1, y1, x2, y2) {
-  let bezier = new Bezier(0, 0, x1, y1, x2, y2, 1, 1);
+  const bezier = new Bezier(0, 0, x1, y1, x2, y2, 1, 1);
   return bezier.solveYValueFromXValue.bind(bezier);
 }
 

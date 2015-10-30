@@ -23,11 +23,11 @@ import {viewerFor} from './viewer';
 
 
 /** @private @const */
-let TAG_ = 'History';
+const TAG_ = 'History';
 
 
 /** @private @const */
-let HISTORY_PROP_ = 'AMP.History';
+const HISTORY_PROP_ = 'AMP.History';
 
 
 /**
@@ -35,7 +35,7 @@ let HISTORY_PROP_ = 'AMP.History';
  * @private
  */
 function historyState_(stackIndex) {
-  let state = {};
+  const state = {};
   state[HISTORY_PROP_] = stackIndex;
   return state;
 }
@@ -119,7 +119,7 @@ export class History {
       return;
     }
 
-    let toPop = [];
+    const toPop = [];
     for (let i = this.stackOnPop_.length - 1; i > this.stackIndex_; i--) {
       if (this.stackOnPop_[i]) {
         toPop.push(this.stackOnPop_[i]);
@@ -167,7 +167,7 @@ export class History {
       return;
     }
 
-    let task = this.queue_[0];
+    const task = this.queue_[0];
     let promise;
     try {
       promise = task.callback();
@@ -240,7 +240,7 @@ export class HistoryBindingNatural_ {
     /** @const {!Window} */
     this.win = win;
 
-    let history = this.win.history;
+    const history = this.win.history;
 
     /** @private {number} */
     this.startIndex_ = history.length - 1;
@@ -314,7 +314,7 @@ export class HistoryBindingNatural_ {
     history.pushState = this.historyPushState_.bind(this);
     history.replaceState = this.historyReplaceState_.bind(this);
 
-    let eventPass = new Pass(this.onHistoryEvent_.bind(this), 50);
+    const eventPass = new Pass(this.onHistoryEvent_.bind(this), 50);
     this.popstateHandler_ = e => {
       log.fine(TAG_, 'popstate event: ' + this.win.history.length + ', ' +
           JSON.stringify(e.state));
@@ -380,9 +380,9 @@ export class HistoryBindingNatural_ {
     let state = this.getState_();
     log.fine(TAG_, 'history event: ' + this.win.history.length + ', ' +
         JSON.stringify(state));
-    let stackIndex = state ? state[HISTORY_PROP_] : undefined;
+    const stackIndex = state ? state[HISTORY_PROP_] : undefined;
     let newStackIndex = this.stackIndex_;
-    let waitingState = this.waitingState_;
+    const waitingState = this.waitingState_;
     this.waitingState_ = undefined;
 
     if (newStackIndex > this.win.history.length - 2) {
@@ -461,7 +461,7 @@ export class HistoryBindingNatural_ {
     this.assertReady_();
     let resolve;
     let reject;
-    let promise = timer.timeoutPromise(500,
+    const promise = timer.timeoutPromise(500,
         new Promise((aResolve, aReject) => {
           resolve = aResolve;
           reject = aReject;
@@ -484,7 +484,7 @@ export class HistoryBindingNatural_ {
       return Promise.resolve(this.stackIndex_);
     }
     this.unsupportedState_ = historyState_(this.stackIndex_ - steps);
-    let promise = this.wait_();
+    const promise = this.wait_();
     this.win.history.go(-steps);
     return promise.then(() => {
       return Promise.resolve(this.stackIndex_);
@@ -502,7 +502,7 @@ export class HistoryBindingNatural_ {
     if (!state) {
       state = {};
     }
-    let len = this.win.history.length;
+    const len = this.win.history.length;
     let stackIndex = this.stackIndex_ + 1;
     state[HISTORY_PROP_] = stackIndex;
     this.pushState_(state, title, url);
@@ -525,7 +525,7 @@ export class HistoryBindingNatural_ {
     if (!state) {
       state = {};
     }
-    let stackIndex = Math.min(this.stackIndex_, this.win.history.length - 1);
+    const stackIndex = Math.min(this.stackIndex_, this.win.history.length - 1);
     state[HISTORY_PROP_] = stackIndex;
     this.replaceState_(state, title, url);
     this.updateStackIndex_(stackIndex);
@@ -638,7 +638,7 @@ export class HistoryBindingVirtual_ {
  * @private
  */
 function createHistory_(window) {
-  let viewer = viewerFor(window);
+  const viewer = viewerFor(window);
   let binding;
   if (viewer.isOvertakeHistory()) {
     binding = new HistoryBindingVirtual_(viewer);

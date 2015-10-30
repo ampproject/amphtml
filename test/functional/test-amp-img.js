@@ -38,13 +38,13 @@ describe('amp-img', () => {
         .returns(true);
     return createIframePromise().then(iframe => {
       installImg(iframe.win);
-      let img = iframe.doc.createElement('amp-img');
-      for (let key in attributes) {
+      const img = iframe.doc.createElement('amp-img');
+      for (const key in attributes) {
         img.setAttribute(key, attributes[key]);
       }
 
       if (children != null) {
-        for (let key in children) {
+        for (const key in children) {
           img.appendChild(children[key]);
         }
       }
@@ -58,7 +58,7 @@ describe('amp-img', () => {
       width: 300,
       height: 200
     }).then(ampImg => {
-      let img = ampImg.querySelector('img');
+      const img = ampImg.querySelector('img');
       expect(img).to.be.an.instanceof(Element);
       expect(img.tagName).to.equal('IMG');
       expect(img.getAttribute('src')).to.equal('test.jpg');

@@ -51,7 +51,7 @@ export class Vsync {
    * @param {!Object<string, *>|undefined} opt_state
    */
   run(task, opt_state) {
-    let state = opt_state || {};
+    const state = opt_state || {};
     this.win.requestAnimationFrame(() => {
       if (task.measure) {
         task.measure(state);
@@ -93,12 +93,12 @@ export class Vsync {
    */
   runMutateSeries(mutator, opt_timeout) {
     return new Promise((resolve, reject) => {
-      let startTime = timer.now();
+      const startTime = timer.now();
       let prevTime = 0;
-      let task = this.createTask({
+      const task = this.createTask({
         mutate: state => {
-          let timeSinceStart = timer.now() - startTime;
-          let res = mutator(timeSinceStart, timeSinceStart - prevTime, state);
+          const timeSinceStart = timer.now() - startTime;
+          const res = mutator(timeSinceStart, timeSinceStart - prevTime, state);
           if (!res) {
             resolve();
           } else if (opt_timeout && timeSinceStart > opt_timeout) {

@@ -86,7 +86,7 @@ class AmpAnim extends AMP.BaseElement {
 
   /** @private */
   updateInViewport_() {
-    let inViewport = this.isInViewport();
+    const inViewport = this.isInViewport();
     this.togglePlaceholder(!inViewport);
     st.toggle(this.img_, inViewport);
   }
@@ -99,7 +99,7 @@ class AmpAnim extends AMP.BaseElement {
     if (this.getLayoutWidth() <= 0) {
       return Promise.resolve();
     }
-    let src = this.srcset_.select(this.getLayoutWidth(),
+    const src = this.srcset_.select(this.getLayoutWidth(),
         this.getDpr()).url;
     if (src == this.img_.getAttribute('src')) {
       return Promise.resolve();

@@ -55,7 +55,7 @@ const PREPARE_LOADING_THRESHOLD_ = 1000;
  * Map from element name to implementation class.
  * @const {Object}
  */
-let knownElements = {};
+const knownElements = {};
 
 
 /**
@@ -72,7 +72,7 @@ export function upgradeOrRegisterElement(win, name, toClass) {
   assert(knownElements[name] == ElementStub,
       'Expected ' + name + ' to be an ElementStub.');
   for (let i = 0; i < stubbedElements.length; i++) {
-    let stub = stubbedElements[i];
+    const stub = stubbedElements[i];
     // There are 3 possible states here:
     // 1. We never made the stub because the extended impl. loaded first.
     //    In that case the element won't be in the array.
@@ -98,9 +98,9 @@ export function upgradeOrRegisterElement(win, name, toClass) {
  * @param {!Window} win
  */
 export function stubElements(win) {
-  let list = win.document.querySelectorAll('[custom-element]');
+  const list = win.document.querySelectorAll('[custom-element]');
   for (let i = 0; i < list.length; i++) {
-    let name = list[i].getAttribute('custom-element');
+    const name = list[i].getAttribute('custom-element');
     if (knownElements[name]) {
       continue;
     }
@@ -116,15 +116,15 @@ export function stubElements(win) {
 export function applyLayout_(element) {
   let widthAttr = element.getAttribute('width');
   let heightAttr = element.getAttribute('height');
-  let sizesAttr = element.getAttribute('sizes');
-  let layoutAttr = element.getAttribute('layout');
+  const sizesAttr = element.getAttribute('sizes');
+  const layoutAttr = element.getAttribute('layout');
 
   // Handle elements that do not specify a width/height and are defined to have
   // natural browser dimensions.
   if ((!layoutAttr || layoutAttr == Layout.FIXED ||
           layoutAttr == Layout.FIXED_HEIGHT) &&
       (!widthAttr || !heightAttr) && hasNaturalDimensions(element.tagName)) {
-    let dimensions = getNaturalDimensions(element.tagName);
+    const dimensions = getNaturalDimensions(element.tagName);
     if (layoutAttr != Layout.FIXED_HEIGHT) {
       widthAttr = widthAttr || dimensions.width;
     }
@@ -168,7 +168,7 @@ export function applyLayout_(element) {
             'integer/length value: ' + widthAttr);
       }
     }
-    let height = parseLength(heightAttr);
+    const height = parseLength(heightAttr);
     if (!height) {
       throw new Error('Expected height to be available and be an ' +
           'integer/length value: ' + heightAttr);
@@ -178,7 +178,7 @@ export function applyLayout_(element) {
         throw new Error('Length units should be the same for width ' + width +
             ' and height ' + height);
       }
-      let sizer = element.ownerDocument.createElement('i-amp-sizer');
+      const sizer = element.ownerDocument.createElement('i-amp-sizer');
       sizer.style.display = 'block';
       sizer.style.paddingTop =
           ((getLengthNumeral(height) / getLengthNumeral(width)) * 100) + '%';
@@ -332,8 +332,8 @@ export function createAmpElementProto(win, name, implementationClass) {
    * @final @package
    */
   ElementProto.upgrade = function(newImplClass) {
-    let registeredStub = this.implementation_;
-    let newImpl = new newImplClass(this);
+    const registeredStub = this.implementation_;
+    const newImpl = new newImplClass(this);
     this.implementation_ = newImpl;
     if (registeredStub) {
       registeredStub.upgrade(newImpl);
@@ -465,7 +465,7 @@ export function createAmpElementProto(win, name, implementationClass) {
 
     // Sizes.
     if (this.sizeList_ === undefined) {
-      let sizesAttr = this.getAttribute('sizes');
+      const sizesAttr = this.getAttribute('sizes');
       this.sizeList_ = sizesAttr ? parseSizeList(sizesAttr) : null;
     }
     if (this.sizeList_) {
@@ -714,7 +714,7 @@ export function createAmpElementProto(win, name, implementationClass) {
       return;
     }
 
-    let actionQueue = assert(this.actionQueue_);
+    const actionQueue = assert(this.actionQueue_);
     this.actionQueue_ = null;
 
     actionQueue.forEach(invocation => {
@@ -746,7 +746,7 @@ export function createAmpElementProto(win, name, implementationClass) {
    * @package @final
    */
   ElementProto.getRealChildNodes = function() {
-    let nodes = [];
+    const nodes = [];
     for (let n = this.firstChild; n; n = n.nextSibling) {
       if (!isInternalOrServiceNode(n)) {
         nodes.push(n);
@@ -762,9 +762,9 @@ export function createAmpElementProto(win, name, implementationClass) {
    * @package @final
    */
   ElementProto.getRealChildren = function() {
-    let elements = [];
+    const elements = [];
     for (let i = 0; i < this.children.length; i++) {
-      let child = this.children[i];
+      const child = this.children[i];
       if (!isInternalOrServiceNode(child)) {
         elements.push(child);
       }
@@ -787,7 +787,7 @@ export function createAmpElementProto(win, name, implementationClass) {
    * @package @final
    */
   ElementProto.togglePlaceholder = function(state) {
-    let placeholder = this.getPlaceholder();
+    const placeholder = this.getPlaceholder();
     if (placeholder) {
       placeholder.classList.toggle('amp-hidden', !state);
     }
@@ -842,12 +842,12 @@ export function createAmpElementProto(win, name, implementationClass) {
    */
   ElementProto.prepareLoading_ = function() {
     if (!this.loadingContainer_) {
-      let container = document.createElement('div');
+      const container = document.createElement('div');
       container.classList.add('-amp-loading-container');
       container.classList.add('-amp-fill-content');
       container.classList.add('amp-hidden');
 
-      let element = createLoaderElement();
+      const element = createLoaderElement();
       container.appendChild(element);
 
       this.appendChild(container);
@@ -884,7 +884,7 @@ export function createAmpElementProto(win, name, implementationClass) {
       this.loadingElement_.classList.toggle('amp-active', state);
 
       if (!state && opt_cleanup) {
-        let loadingContainer = this.loadingContainer_;
+        const loadingContainer = this.loadingContainer_;
         this.loadingContainer_ = null;
         this.loadingElement_ = null;
         this.resources_.deferMutate(this, () => {

@@ -51,10 +51,10 @@ describe('Animation', () => {
   });
 
   function runVsync() {
-    let tasks = vsyncTasks.slice(0);
+    const tasks = vsyncTasks.slice(0);
     vsyncTasks = [];
     tasks.forEach(function(task) {
-      let state = {};
+      const state = {};
       if (task.measure) {
         task.measure(state);
       }
@@ -68,7 +68,7 @@ describe('Animation', () => {
     anim.add(0, time => {tr1 = time;}, 0.8);
     anim.add(0.2, time => {tr2 = time;}, 0.8);
 
-    let ap = anim.start(1000);
+    const ap = anim.start(1000);
     let resolveCalled = false;
     ap.resolve_ = () => {
       resolveCalled = true;
@@ -140,10 +140,10 @@ describe('Animation', () => {
   it('should animate out-of-bounds time', () => {
     let tr1 = -1;
     // Linear curve between -0.5 and 1.5
-    let curve = time => {return time * 2 - 0.5;};
+    const curve = time => {return time * 2 - 0.5;};
     anim.add(0, time => {tr1 = time;}, 1, curve);
 
-    let ap = anim.start(1000);
+    const ap = anim.start(1000);
     let resolveCalled = false;
     ap.resolve_ = () => {
       resolveCalled = true;
@@ -174,7 +174,7 @@ describe('Animation', () => {
     anim.add(0, time => {tr1 = time;}, 0.8);
     anim.add(0.2, time => {tr2 = time;}, 0.8);
 
-    let ap = anim.start(1000);
+    const ap = anim.start(1000);
     let rejectCalled = false;
     ap.reject_ = () => {
       rejectCalled = true;
@@ -200,7 +200,7 @@ describe('Animation', () => {
     anim.add(0, time => {tr1 = time;}, 0.8);
     anim.add(0.2, time => {tr2 = time;}, 0.8);
 
-    let ap = anim.start(1000);
+    const ap = anim.start(1000);
     let rejectCalled = false;
     ap.reject_ = () => {
       rejectCalled = true;
@@ -226,7 +226,7 @@ describe('Animation', () => {
     anim.add(0, time => {tr1 = time;}, 0.8);
     anim.add(0.2, time => {tr2 = time;}, 0.8);
 
-    let ap = anim.start(1000);
+    const ap = anim.start(1000);
     let rejectCalled = false;
     ap.reject_ = () => {
       rejectCalled = true;

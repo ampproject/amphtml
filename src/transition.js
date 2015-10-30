@@ -42,7 +42,7 @@ export const NOOP = function(time) {return null;};
 export function all(transitions) {
   return (time, complete) => {
     for (let i = 0; i < transitions.length; i++) {
-      let tr = transitions[i];
+      const tr = transitions[i];
       tr(time, complete);
     }
   };
@@ -75,7 +75,7 @@ export function withCurve(transition, curve) {
  */
 export function setStyles(element, styles) {
   return (time, complete) => {
-    for (let k in styles) {
+    for (const k in styles) {
       st.setStyle(element, k, styles[k](time, complete));
     }
   };
@@ -138,7 +138,7 @@ export function px(transition) {
  */
 export function translateX(transition) {
   return time => {
-    let res = transition(time);
+    const res = transition(time);
     if (typeof res == 'string') {
       return `translateX(${res})`;
     }

@@ -154,8 +154,8 @@ class AmpIframe extends AMP.BaseElement {
         this.element.setAttribute('width', data.width);
       }
       if (data.height !== undefined) {
-        let newHeight = Math.max(this.element./*OK*/offsetHeight + data.height -
-            this.iframe_./*OK*/offsetHeight, data.height);
+        const newHeight = Math.max(this.element./*OK*/offsetHeight +
+            data.height - this.iframe_./*OK*/offsetHeight, data.height);
         iframe.height = data.height;
         this.element.setAttribute('height', newHeight);
         this.updateHeight_(newHeight);
@@ -223,8 +223,8 @@ function makeIOsScrollable(element, iframe) {
  */
 function listen(iframe, typeOfMessage, callback) {
   assert(iframe.src, 'only iframes with src supported');
-  let origin = parseUrl(iframe.src).origin;
-  let win = iframe.ownerDocument.defaultView;
+  const origin = parseUrl(iframe.src).origin;
+  const win = iframe.ownerDocument.defaultView;
   win.addEventListener('message', function(event) {
     if (event.origin != origin) {
       return;

@@ -86,7 +86,7 @@ export function createFixtureIframe(fixture, initialIframeHeight, done) {
         });
       };
       // Record firing of custom events.
-      for (let name in events) {
+      for (const name in events) {
         win.addEventListener(name, () => {
           events[name]++;
         });

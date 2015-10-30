@@ -97,13 +97,13 @@ describe('Carousel gestures', () => {
 
   it('should continue innertia', () => {
     carousel.onSwipeStart_({});
-    let promise = carousel.onSwipeEnd_({deltaX: 0, velocityX: -0.11});
+    const promise = carousel.onSwipeEnd_({deltaX: 0, velocityX: -0.11});
     expect(carousel.motion_).to.not.equal(null);
   });
 
   it('should not continue innertia', () => {
     carousel.onSwipeStart_({});
-    let promise = carousel.onSwipeEnd_({deltaX: 0, velocityX: -0.01});
+    const promise = carousel.onSwipeEnd_({deltaX: 0, velocityX: -0.01});
     expect(carousel.motion_).to.equal(null);
   });
 });

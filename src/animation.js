@@ -19,9 +19,9 @@ import {log} from './log';
 import {timer} from './timer';
 import {vsync} from './vsync';
 
-let TAG_ = 'Animation';
+const TAG_ = 'Animation';
 
-let NOOP_CALLBACK = function() {};
+const NOOP_CALLBACK = function() {};
 
 
 /**
@@ -106,7 +106,7 @@ export class Animation {
    * @return {!AnimationPlayer}
    */
   start(duration) {
-    let player = new AnimationPlayer(this.vsync_, this.segments_, this.curve_,
+    const player = new AnimationPlayer(this.vsync_, this.segments_, this.curve_,
         duration);
     player.start_();
     return player;
@@ -135,7 +135,7 @@ class AnimationPlayer {
     /** @private @const {!Array<!SegmentRuntime_>} */
     this.segments_ = [];
     for (let i = 0; i < segments.length; i++) {
-      let segment = segments[i];
+      const segment = segments[i];
       this.segments_.push({
         delay: segment.delay,
         func: segment.func,
@@ -205,7 +205,7 @@ class AnimationPlayer {
    * @return {!Promise}
    */
   thenAlways(opt_callback) {
-    let callback = opt_callback || NOOP_CALLBACK;
+    const callback = opt_callback || NOOP_CALLBACK;
     return this.then(callback, callback);
   }
 
@@ -281,13 +281,13 @@ class AnimationPlayer {
     if (!this.running_) {
       return;
     }
-    let currentTime = timer.now();
-    let normLinearTime = Math.min((currentTime - this.startTime_) /
+    const currentTime = timer.now();
+    const normLinearTime = Math.min((currentTime - this.startTime_) /
         this.duration_, 1);
 
     // Start segments due to be started
     for (let i = 0; i < this.segments_.length; i++) {
-      let segment = this.segments_[i];
+      const segment = this.segments_[i];
       if (!segment.started && normLinearTime >= segment.delay) {
         segment.started = true;
       }
@@ -295,7 +295,7 @@ class AnimationPlayer {
 
     // Execute all pending segments.
     for (let i = 0; i < this.segments_.length; i++) {
-      let segment = this.segments_[i];
+      const segment = this.segments_[i];
       if (!segment.started || segment.completed) {
         continue;
       }

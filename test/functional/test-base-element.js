@@ -28,7 +28,7 @@ describe('BaseElement', () => {
   });
 
   it('propagateAttributes - niente', () => {
-    let target = document.createElement('div');
+    const target = document.createElement('div');
     expect(target.hasAttributes()).to.be.false;
 
     element.propagateAttributes(['data-test1'], target);
@@ -39,7 +39,7 @@ describe('BaseElement', () => {
   });
 
   it('propagateAttributes', () => {
-    let target = document.createElement('div');
+    const target = document.createElement('div');
     expect(target.hasAttributes()).to.be.false;
 
     div.setAttribute('data-test1', 'abc');
@@ -59,7 +59,7 @@ describe('BaseElement', () => {
   });
 
   it('should register action', () => {
-    let handler = () => {};
+    const handler = () => {};
     element.registerAction('method1', handler);
     expect(element.actionMap_['method1']).to.equal(handler);
   });
@@ -71,14 +71,14 @@ describe('BaseElement', () => {
   });
 
   it('should execute registered action', () => {
-    let handler = sinon.spy();
+    const handler = sinon.spy();
     element.registerAction('method1', handler);
     element.executeAction({method: 'method1'}, false);
     expect(handler.callCount).to.equal(1);
   });
 
   it('should execute "activate" action without registration', () => {
-    let handler = sinon.spy();
+    const handler = sinon.spy();
     element.activate = handler;
     element.executeAction({method: 'activate'}, false);
     expect(handler.callCount).to.equal(1);

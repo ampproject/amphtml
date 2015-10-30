@@ -80,7 +80,7 @@ describe('Pass', () => {
     timerMock.expects('cancel').never();
     pass.schedule(111);
     // Will never schedule b/c there's an earlier pass still pending.
-    let isScheduled = pass.schedule(222);
+    const isScheduled = pass.schedule(222);
     expect(isScheduled).to.equal(false);
   });
 
@@ -92,7 +92,7 @@ describe('Pass', () => {
     timerMock.expects('cancel').withExactArgs(1).once();
     pass.schedule(222);
     // Will re-schedule b/c the existing pass is later.
-    let isScheduled = pass.schedule(111);
+    const isScheduled = pass.schedule(111);
     expect(isScheduled).to.equal(true);
   });
 

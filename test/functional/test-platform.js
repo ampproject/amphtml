@@ -28,7 +28,7 @@ describe('Platform', () => {
   });
 
   function testUserAgent(userAgentString) {
-    let platform = new Platform({navigator: {userAgent: userAgentString}});
+    const platform = new Platform({navigator: {userAgent: userAgentString}});
     expect(platform.isIos()).to.equal(isIos);
     expect(platform.isChrome()).to.equal(isChrome);
     expect(platform.isSafari()).to.equal(isSafari);
