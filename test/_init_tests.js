@@ -48,6 +48,20 @@ it.skipOnFirefox = function(desc, fn) {
   it(desc, fn);
 };
 
+// Global cleanup of tags added during tests. Cool to add more
+// to selector.
+afterEach(() => {
+  var cleanup = document.querySelectorAll('link,meta');
+  for (var i = 0; i < cleanup.length; i++) {
+    try {
+      cleanup[i].parentNode.removeChild(cleanup[i]);
+    } catch (e) {
+      // This sometimes fails for unknown reasons.
+      console./*OK*/log(e);
+    }
+  }
+});
+
 chai.Assertion.addMethod('attribute', function(attr) {
   var obj = this._obj;
   var tagName = obj.tagName.toLowerCase();

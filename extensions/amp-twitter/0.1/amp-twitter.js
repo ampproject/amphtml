@@ -15,7 +15,7 @@
  */
 
 
-import {getIframe, listen} from '../../../src/3p-frame';
+import {getIframe, listen, prefetchBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
 
@@ -26,8 +26,8 @@ class AmpTwitter extends AMP.BaseElement {
     // This domain serves the actual tweets as JSONP.
     this.preconnect.url('https://syndication.twitter.com');
     // Hosts the script that renders tweets.
-    this.preconnect.url('https://platform.twitter.com');
-    this.preconnect.threePFrame();
+    this.preconnect.prefetch('https://platform.twitter.com/widgets.js');
+    prefetchBootstrap(this.getWin());
   }
 
   /** @override */
