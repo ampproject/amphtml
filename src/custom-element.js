@@ -488,10 +488,9 @@ export function createAmpElementProto(win, name, implementationClass) {
       // From the moment height is changed the element becomes fully
       // responsible for managing its height. Aspect ratio is no longer
       // preserved.
-      this.sizerElement_.style.paddingTop = newHeight + 'px';
-    } else {
-      this.style.height = newHeight + 'px';
+      this.sizerElement_.style.paddingTop = '0';
     }
+    this.style.height = newHeight + 'px';
   };
 
   /**

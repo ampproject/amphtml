@@ -89,6 +89,9 @@ export class Viewport {
     /** @private @const {!Observable<!ViewportChangedEvent>} */
     this.changeObservable_ = new Observable();
 
+    /** @private @const {!Observable} */
+    this.scrollObservable_ = new Observable();
+
     /** @private {?HTMLMetaElement|undefined} */
     this.viewportMeta_ = undefined;
 
@@ -156,6 +159,15 @@ export class Viewport {
   }
 
   /**
+   * Sets the desired scroll position on the viewport.
+   * @param {number} scrollPos
+   */
+  setScrollTop(scrollPos) {
+    this./*OK*/scrollTop_ = null;
+    this.binding_.setScrollTop(scrollPos);
+  }
+
+  /**
    * Returns the size of the viewport.
    * @return {!{width: number, height: number}}
    */
@@ -220,6 +232,19 @@ export class Viewport {
    */
   onChanged(handler) {
     return this.changeObservable_.add(handler);
+  }
+
+  /**
+   * Registers the handler for scroll events. These events DO NOT contain
+   * scrolling offset and it's discouraged to read scrolling offset in the
+   * event handler. The primary use case for this handler is to inform that
+   * scrolling might be going on. To get more information {@link onChanged}
+   * handler should be used.
+   * @param {!function()} handler
+   * @return {!Unlisten}
+   */
+  onScroll(handler) {
+    return this.scrollObservable_.add(handler);
   }
 
   /**
@@ -331,6 +356,8 @@ export class Viewport {
 
   /** @private */
   scroll_() {
+    this.scrollObservable_.fire();
+
     this.scrollLeft_ = this.binding_.getScrollLeft();
 
     if (this.scrollTracking_) {
@@ -354,8 +381,13 @@ export class Viewport {
   /** @private */
   scrollDeferred_() {
     this.scrollTracking_ = false;
-    assert(this.scrollTop_ !== null);
     var newScrollTop = this.binding_.getScrollTop();
+    if (this.scrollTop_ === null) {
+      // If the scrollTop was reset while waiting for the next scroll event
+      // we have to assume that velocity is 0 - there's no other way we can
+      // calculate it.
+      this.scrollTop_ = newScrollTop;
+    }
     var now = timer.now();
     var velocity = 0;
     if (now != this.scrollMeasureTime_) {

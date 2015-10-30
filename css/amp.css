@@ -201,6 +201,13 @@ i-amp-scroll-container {
   display: block !important;
 }
 
+/**
+ * `-amp-loading-container`, `-amp-loader` and `-amp-loader-dot` all support
+ * a "loading indicator" usecase. `-amp-loading-container` is mostly responsible
+ * for alighning the loading indicator, while `-amp-loader` and
+ * `-amp-loader-dot` are an implementation for a default loading indicator. The
+ * default implementation includes the three-dot layout and animation.
+ */
 .-amp-loading-container.amp-hidden {
   visibility: hidden;
 }
@@ -216,10 +223,6 @@ i-amp-scroll-container {
   white-space: nowrap;
 }
 
-/**
- * We want to be a bit more specific here as we don't want a global active
- * to just trigger the loading animation.
- */
 .-amp-loader.amp-active .-amp-loader-dot {
   animation: -amp-loader-dots 2s infinite;
 }
@@ -260,6 +263,20 @@ i-amp-scroll-container {
     transform: scale(.8);
     background-color: rgba(0, 0, 0, .5);
   }
+}
+
+
+/**
+ * `-amp-overflow` is a support for "overflow" element. This is
+ * an element shown when more content is available. Typically tapping on this
+ * element shows the full content.
+ */
+.-amp-overflow {
+  z-index: 1;
+}
+
+.-amp-overflow.amp-hidden {
+  visibility: hidden;
 }
 
 

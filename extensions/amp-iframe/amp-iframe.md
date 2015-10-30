@@ -40,3 +40,47 @@ Example:
 **src, srcdoc, sandbox, frameborder, allowfullscreen, allowtransparency**
 
 The attributes above should all behave like they do on standard iframes.
+
+
+#### IFrame Resizing
+
+An `amp-iframe` must have static layout defined as is the case with any other AMP element. However,
+it's possible to resize an `amp-iframe` in runtime. To do so:
+
+1. The `amp-iframe` must be defined with `resizable` attribute;
+2. The `amp-iframe` must have `overflow` child element;
+3. The IFrame document has to send a `embed-size` request as a window message.
+
+Notice that `resizable` overrides `scrolling` value to `no`.
+
+Example of `amp-iframe` with `overflow` element:
+```html
+<amp-iframe width=300 height=300
+    layout="responsive"
+    sandbox="allow-scripts"
+    resizable
+    src="https://foo.com/iframe">
+  <div overflow tabindex=0 role=button aria-label="Read more">Read more!</div>
+</amp-iframe>
+```
+
+Example of IFrame resize request:
+```javascript
+window.parent./*OK*/postMessage({
+  sentinel: 'amp',
+  type: 'embed-size',
+  height: document.body./*OK*/scrollHeight
+}, '*');
+```
+
+Once this message is received the AMP runtime will try to accommodate this request as soon as
+possible, but it will take into account where the reader is currently reading, whether the scrolling
+is ongoing and any other UX or performance factors. If the runtime cannot satisfy the resize events
+the `amp-iframe` will show an `overflow` element. Clicking on the `overflow` element will immediately
+resize the `amp-iframe` since it's triggered by a user action.
+
+Here are some factors that affect how fast the resize will be executed:
+
+- Whether the resize is triggered by the user action;
+- Whether the resize is requested for a currently active IFrame;
+- Whether the resize is requested for an IFrame below the viewport or above the viewport.
