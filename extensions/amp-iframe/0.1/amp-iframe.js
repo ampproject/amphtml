@@ -35,6 +35,7 @@ class AmpIframe extends AMP.BaseElement {
     var url = parseUrl(src);
     assert(
         url.protocol == 'https:' ||
+        url.protocol == 'data:' ||
             url.origin.indexOf('http://iframe.localhost:') == 0,
         'Invalid <amp-iframe> src. Must start with https://. Found %s',
         this.element);
@@ -42,7 +43,8 @@ class AmpIframe extends AMP.BaseElement {
     assert(
         !((' ' + sandbox + ' ').match(/\s+allow-same-origin\s+/)) ||
         url.origin != containerUrl.origin,
-        'Origin of <amp-iframe> must not be equal to container %s.',
+        'Origin of <amp-iframe> must not be equal to container %s' +
+        'if allow-same-origin is set.',
         this.element);
     return src;
   }
@@ -61,9 +63,31 @@ class AmpIframe extends AMP.BaseElement {
         minTop);
   }
 
+  /**
+   * Transforms the srcdoc attribute if present to an equivalent data URI.
+   *
+   * It may be OK to change this later to leave the `srcdoc` in place and
+   * instead ensure that `allow-same-origin` is not present, but this
+   * implementation has the right security behavior which is that the document
+   * may under no circumstances be able to run JS on the parent.
+   * @return {string} Data URI for the srcdoc
+   */
+  transformSrcDoc() {
+    var srcdoc = this.element.getAttribute('srcdoc');
+    if (!srcdoc) {
+      return;
+    }
+    var sandbox = this.element.getAttribute('sandbox');
+    assert(
+        !((' ' + sandbox + ' ').match(/\s+allow-same-origin\s+/)),
+        'allow-same-origin is not allowed with the srcdoc attribute %s.',
+        this.element);
+    return 'data:text/html;charset=utf-8;base64,' + btoa(srcdoc);
+  }
+
   /** @override */
   firstAttachedCallback() {
-    var iframeSrc = this.element.getAttribute('src');
+    var iframeSrc = this.element.getAttribute('src') || this.transformSrcDoc();
     this.iframeSrc = this.assertSource(iframeSrc, window.location.href,
         this.element.getAttribute('sandbox'));
     this.preconnect.url(this.iframeSrc);
