@@ -163,10 +163,7 @@ class AmpPinterest extends AMP.BaseElement {
       return ret;
     };
 
-    // save our outside context so we can return properly after rendering
-    const that = this;
-
-    const makePin = function() {
+    const makePin = () => {
 
       // make an embedded pin widget
       // pinId will be inferred from pinUrl
@@ -179,7 +176,7 @@ class AmpPinterest extends AMP.BaseElement {
         return;
       }
 
-      const width = that.element.getAttribute('data-width');
+      const width = this.element.getAttribute('data-width');
 
       const structure = make({'span': {}});
 
@@ -341,9 +338,9 @@ class AmpPinterest extends AMP.BaseElement {
           });
 
           // fill it
-          that.applyFillContent(structure);
+          this.applyFillContent(structure);
           // append it
-          that.element.appendChild(structure);
+          this.element.appendChild(structure);
           // done
           return loadPromise(img);
         }
@@ -357,31 +354,31 @@ class AmpPinterest extends AMP.BaseElement {
       });
     };
 
-    const makeButton = function() {
+    const makeButton = () => {
 
       // render a Pin It button
       // required: media and description
       // optional: round, color, tall, lang, count
 
       const pinMedia =
-        AMP.assert(that.element.getAttribute('data-media'),
+        AMP.assert(this.element.getAttribute('data-media'),
         'The data-media attribute is required when <amp-pinterest> ' +
-        'makes a Pin It button %s', that.element);
+        'makes a Pin It button %s', this.element);
 
       const pinDescription =
-         AMP.assert(that.element.getAttribute('data-description'),
+         AMP.assert(this.element.getAttribute('data-description'),
         'The data-description attribute is required when <amp-pinterest> ' +
-        'makes a Pin It button %s', that.element);
+        'makes a Pin It button %s', this.element);
 
       // options
-      const round = that.element.getAttribute('data-round');
-      let color = that.element.getAttribute('data-color');
-      const tall = that.element.getAttribute('data-tall');
-      let lang = that.element.getAttribute('data-lang');
-      const count = that.element.getAttribute('data-count');
+      const round = this.element.getAttribute('data-round');
+      let color = this.element.getAttribute('data-color');
+      const tall = this.element.getAttribute('data-tall');
+      let lang = this.element.getAttribute('data-lang');
+      const count = this.element.getAttribute('data-count');
 
       // pass a known guid when testing
-      const theGuid = that.element.getAttribute('data-volkswagen-guid') || guid;
+      const theGuid = this.element.getAttribute('data-volkswagen-guid') || guid;
 
       // build our link
       let link = 'https://www.pinterest.com/pin/create/button/';
@@ -397,7 +394,7 @@ class AmpPinterest extends AMP.BaseElement {
       }});
 
       // built it
-      const render = function(r) {
+      const render = r => {
 
         // shorten the pin count so it will fit in our bubble
         const prettyPinCount = function(n) {
@@ -501,9 +498,9 @@ class AmpPinterest extends AMP.BaseElement {
         });
 
         // fill it
-        that.applyFillContent(a);
+        this.applyFillContent(a);
         // append it
-        that.element.appendChild(a);
+        this.element.appendChild(a);
         // done
         return loadPromise(a);
       };
