@@ -2,7 +2,6 @@
 .g4ignore
 build
 dist
-dist.ads
 dist.3p
 examples.build
 examples.min
