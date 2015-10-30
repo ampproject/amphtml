@@ -20,6 +20,7 @@ import {getLengthNumeral} from '../src/layout';
 import {getService} from './service';
 import {documentInfoFor} from './document-info';
 import {getMode} from './mode';
+import {preconnectFor} from './preconnect';
 import {dashToCamelCase} from './string';
 import {parseUrl, assertHttpsUrl} from './url';
 
@@ -157,6 +158,21 @@ export function addDataAndJsonAttributes_(element, attributes) {
       attributes[key] = obj[key];
     }
   }
+}
+
+/**
+ * Prefetches URLs related to the bootstrap iframe.
+ * @param {!Window} parentWindow
+ * @return {string}
+ */
+export function prefetchBootstrap(window) {
+  var url = getBootstrapBaseUrl(window);
+  var preconnect = preconnectFor(window);
+  preconnect.prefetch(url);
+  // While the URL may point to a custom domain, this URL will always be
+  // fetched by it.
+  preconnect.prefetch(
+      'https://3p.ampproject.net/$internalRuntimeVersion$/f.js');
 }
 
 /**

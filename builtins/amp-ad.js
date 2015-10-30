@@ -20,7 +20,8 @@ import {isLayoutSizeDefined} from '../src/layout';
 import {setStyles} from '../src/style';
 import {loadPromise} from '../src/event-helper';
 import {registerElement} from '../src/custom-element';
-import {getIframe, listen} from '../src/3p-frame';
+import {getIframe, listen, prefetchBootstrap} from '../src/3p-frame';
+import {adPrefetch, adPreconnect} from '../ads/_prefetch';
 
 
 /**
@@ -111,8 +112,6 @@ export function installAd(win) {
 
     /** @override */
     createdCallback() {
-      this.preconnect.threePFrame();
-
       /** @private {?Element} */
       this.iframe_ = null;
 
@@ -131,6 +130,7 @@ export function installAd(win) {
 
     /** @override */
     buildCallback() {
+      this.prefetchAd_();
       if (this.placeholder_) {
         this.placeholder_.classList.add('hidden');
       } else {
@@ -138,6 +138,37 @@ export function installAd(win) {
         if (this.getDpr() >= 0.5) {
           upgradeImages_(BACKFILL_IMGS_);
         }
+      }
+    }
+
+    /**
+     * Prefetches and preconnects URLs related to the ad.
+     * @private
+     */
+    prefetchAd_() {
+      // We always need the bootstrap.
+      prefetchBootstrap(this.getWin());
+      let type = this.element.getAttribute('type');
+      let prefetch = adPrefetch[type];
+      let preconnect = adPreconnect[type];
+      if (typeof prefetch == 'string') {
+        this.preconnect.prefetch(prefetch);
+      } else if (prefetch) {
+        prefetch.forEach(p => {
+          this.preconnect.prefetch(p);
+        });
+      }
+      if (typeof preconnect == 'string') {
+        this.preconnect.url(preconnect);
+      } else if (preconnect) {
+        preconnect.forEach(p => {
+          this.preconnect.url(p);
+        });
+      }
+      // If fully qualified src for ad script is specified we prefetch that.
+      let src = this.element.getAttribute('src');
+      if (src) {
+        this.preconnect.prefetch(src);
       }
     }
 
