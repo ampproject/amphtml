@@ -1,8 +1,10 @@
 # Inclusion of third party software, embeds, and services into AMP
 
-In general all inclusions are subject to [CONTRIBUTING.md](../CONTRIBUTING.md).
+In general all inclusions are subject to [CONTRIBUTING.md](../CONTRIBUTING.md).  This files outlines specific rules for certain types of external embed and other software inclusions.
 
-This files outlines specific rules for certain types of external embed and other software inclusions.
+In order to qualify for inclusion, an extended component that integrates a third-party service must generally meet the notability requirements of the English Wikipedia, and is in common use in Internet publishing.  As a rough rule of thumb, it should be used or requested by 5% of the top 10,000 websites as noted on builtwith.com, or already integrated into [oEmbed](http://oembed.com/).
+
+We highly prefer integrations that do not use iframes. JSONP cannot be used for security reasons, but CORS requests are perfectly fine.
 
 ## Embeds
 
