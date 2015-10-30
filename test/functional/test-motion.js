@@ -87,14 +87,16 @@ describe('Motion continueMotion', () => {
   function testContinuation(maxVelocity, haltAfterTime) {
     let resultX = null;
     let resultY = null;
-    let motion = continueMotion(141, 104, maxVelocity, maxVelocity, (x, y) => {
-      resultX = x;
-      resultY = y;
-      return true;
-    }, vsync);
+    const motion = continueMotion(141, 104, maxVelocity, maxVelocity,
+        (x, y) => {
+          resultX = x;
+          resultY = y;
+          return true;
+        },
+        vsync);
 
     expect(vsyncTasks.length).to.equal(1);
-    let mutator = vsyncTasks[0];
+    const mutator = vsyncTasks[0];
     vsyncTasks = [];
 
     resultX = resultY = null;
@@ -102,13 +104,13 @@ describe('Motion continueMotion', () => {
     expect(resultX).to.be.closeTo(141, 1e-3);
     expect(resultY).to.be.closeTo(104, 1e-3);
 
-    let values = [];
+    const values = [];
     let time = 0;
     let continuing = true;
     do {
       resultX = resultY = null;
       clock.tick(100);
-      let prev = time;
+      const prev = time;
       time += 100;
       continuing = mutator(time, time - prev, {});
       if (resultX != null) {
@@ -124,7 +126,7 @@ describe('Motion continueMotion', () => {
   }
 
   it('should follow positive inertia', () => {
-    let values = testContinuation(0.665, 0);
+    const values = testContinuation(0.665, 0);
     expect(values.length).to.equal(12);
     expect(values[0]).to.be.closeTo(66, 1);
     expect(values[1]).to.be.closeTo(115, 1);
@@ -134,7 +136,7 @@ describe('Motion continueMotion', () => {
   });
 
   it('should halt when requested while following positive inertia', () => {
-    let values = testContinuation(0.665, 300);
+    const values = testContinuation(0.665, 300);
     expect(values.length).to.equal(3);
     expect(values[0]).to.be.closeTo(66, 1);
     expect(values[1]).to.be.closeTo(115, 1);
@@ -142,7 +144,7 @@ describe('Motion continueMotion', () => {
   });
 
   it('should follow negative inertia', () => {
-    let values = testContinuation(-0.665, 0);
+    const values = testContinuation(-0.665, 0);
     expect(values.length).to.equal(12);
     expect(values[0]).to.be.closeTo(-66, 1);
     expect(values[1]).to.be.closeTo(-115, 1);
@@ -152,7 +154,7 @@ describe('Motion continueMotion', () => {
   });
 
   it('should halt when requested while following negative inertia', () => {
-    let values = testContinuation(-0.665, 300);
+    const values = testContinuation(-0.665, 300);
     expect(values.length).to.equal(3);
     expect(values[0]).to.be.closeTo(-66, 1);
     expect(values[1]).to.be.closeTo(-115, 1);

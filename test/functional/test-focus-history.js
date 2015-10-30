@@ -65,8 +65,8 @@ describe('FocusHistory', () => {
   });
 
   it('should push focused elements with timestamp', () => {
-    let el1 = document.createElement('div');
-    let el2 = document.createElement('div');
+    const el1 = document.createElement('div');
+    const el2 = document.createElement('div');
     eventListeners['focus']({target: el1});
     clock.tick(100);
     eventListeners['focus']({target: el2});
@@ -81,7 +81,7 @@ describe('FocusHistory', () => {
     windowEventListeners['blur']({});
     expect(focusHistory.history_.length).to.equal(0);
 
-    let el1 = document.createElement('div');
+    const el1 = document.createElement('div');
     testDoc.activeElement = el1;
     clock.tick(1000);
     expect(focusHistory.history_.length).to.equal(1);
@@ -89,8 +89,8 @@ describe('FocusHistory', () => {
   });
 
   it('should push and purge', () => {
-    let el1 = document.createElement('div');
-    let el2 = document.createElement('div');
+    const el1 = document.createElement('div');
+    const el2 = document.createElement('div');
     eventListeners['focus']({target: el1});
     clock.tick(100000);
     eventListeners['focus']({target: el2});
@@ -101,8 +101,8 @@ describe('FocusHistory', () => {
   });
 
   it('should replace second push with a new timestamp', () => {
-    let el1 = document.createElement('div');
-    let el2 = document.createElement('div');
+    const el1 = document.createElement('div');
+    const el2 = document.createElement('div');
     eventListeners['focus']({target: el1});
     clock.tick(100);
     eventListeners['focus']({target: el2});
@@ -117,8 +117,8 @@ describe('FocusHistory', () => {
   });
 
   it('should purge elements before timestamp', () => {
-    let el1 = document.createElement('div');
-    let el2 = document.createElement('div');
+    const el1 = document.createElement('div');
+    const el2 = document.createElement('div');
     clock.tick(100);
     eventListeners['focus']({target: el1});  // time=100
     clock.tick(100);
@@ -139,7 +139,7 @@ describe('FocusHistory', () => {
   });
 
   it('should return false when nothing matches descendants', () => {
-    let el0 = document.createElement('div');
+    const el0 = document.createElement('div');
     expect(focusHistory.hasDescendantsOf(el0)).to.be.false;
 
     eventListeners['focus']({target: document.createElement('div')});
@@ -147,8 +147,8 @@ describe('FocusHistory', () => {
   });
 
   it('should check active element for descendants', () => {
-    let el0 = document.createElement('div');
-    let el01 = document.createElement('div');
+    const el0 = document.createElement('div');
+    const el01 = document.createElement('div');
     el0.appendChild(el01);
 
     testDoc.activeElement = el0;
@@ -161,8 +161,8 @@ describe('FocusHistory', () => {
   });
 
   it('should check history descendants', () => {
-    let el0 = document.createElement('div');
-    let el01 = document.createElement('div');
+    const el0 = document.createElement('div');
+    const el01 = document.createElement('div');
     el0.appendChild(el01);
     eventListeners['focus']({target: el01});
     expect(focusHistory.hasDescendantsOf(el0)).to.be.true;

@@ -46,7 +46,7 @@ class AmpLightbox extends AMP.BaseElement {
       right: 0
     });
 
-    let children = this.getRealChildren();
+    const children = this.getRealChildren();
 
     /** @private {!Element} */
     this.container_ = document.createElement('div');
@@ -56,7 +56,7 @@ class AmpLightbox extends AMP.BaseElement {
       this.container_.appendChild(child);
     });
 
-    let gestures = Gestures.get(this.element);
+    const gestures = Gestures.get(this.element);
     // TODO(dvoytenko): configure how to close. Or maybe leave it completely
     // up to "on" element.
     this.element.addEventListener('click', () => this.close());

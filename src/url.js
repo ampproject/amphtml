@@ -81,10 +81,10 @@ export function parseQueryString(queryString) {
   if (queryString.indexOf('?') == 0 || queryString.indexOf('#') == 0) {
     queryString = queryString.substr(1);
   }
-  let pairs = queryString.split('&');
+  const pairs = queryString.split('&');
   for (let i = 0; i < pairs.length; i++) {
-    let pair = pairs[i];
-    let eqIndex = pair.indexOf('=');
+    const pair = pairs[i];
+    const eqIndex = pair.indexOf('=');
     let name;
     let value;
     if (eqIndex != -1) {
@@ -125,7 +125,7 @@ export function getOrigin(info) {
  * @return {string}
  */
 export function removeFragment(url) {
-  let index = url.indexOf('#');
+  const index = url.indexOf('#');
   if (index == -1) {
     return url;
   }

@@ -246,7 +246,7 @@ export class SwipeXRecognizer {
       this.velocity_ = 0;
       this.end_(/* allowContinuing */ false);
     }
-    let touches = e.changedTouches || e.touches;
+    const touches = e.changedTouches || e.touches;
     if (touches && touches.length == 1) {
       this.tracking_ = true;
       this.startX_ = touches[0].clientX;
@@ -262,10 +262,10 @@ export class SwipeXRecognizer {
     if (!this.tracking_) {
       return;
     }
-    let touches = e.changedTouches || e.touches;
+    const touches = e.changedTouches || e.touches;
     if (touches && touches.length > 0) {
-      let x = touches[0].clientX;
-      let y = touches[0].clientY;
+      const x = touches[0].clientX;
+      const y = touches[0].clientY;
       if (this.eventing_) {
         this.move_(x);
       } else {
@@ -286,7 +286,7 @@ export class SwipeXRecognizer {
     if (!this.tracking_) {
       return;
     }
-    let touches = e.changedTouches || e.touches;
+    const touches = e.changedTouches || e.touches;
     if (this.eventing_ && touches && touches.length > 0) {
       if (this.lastX != touches[0].clientX) {
         this.move_(touches[0].clientX);
@@ -324,8 +324,8 @@ export class SwipeXRecognizer {
    * @private
    */
   move_(x) {
-    let prevX = this.lastX_;
-    let prevTime = this.lastTime_;
+    const prevX = this.lastX_;
+    const prevTime = this.lastTime_;
     this.lastX_ = x;
     this.lastTime_ = timer.now();
     if (this.lastTime_ - prevTime > 2) {
@@ -341,7 +341,7 @@ export class SwipeXRecognizer {
    * @private
    */
   fireMove_(synthetic, continued) {
-    let delta = this.calcDelta_(this.startX_, this.lastX_);
+    const delta = this.calcDelta_(this.startX_, this.lastX_);
     this.moveObservable_.fire({
       delta: delta,
       velocity: this.velocity_,
@@ -364,7 +364,7 @@ export class SwipeXRecognizer {
     if (!this.eventing_) {
       return;
     }
-    let endTime = timer.now();
+    const endTime = timer.now();
     if (endTime - this.lastTime_ > 2) {
       this.velocity_ = this.calcVelocity_(this.lastX_, this.lastX_,
           this.lastTime_, endTime, this.velocity_);
@@ -381,7 +381,7 @@ export class SwipeXRecognizer {
   endFinal_() {
     this.continuing_ = false;
     this.eventing_ = false;
-    let delta = this.calcDelta_(this.startX_, this.lastX_);
+    const delta = this.calcDelta_(this.startX_, this.lastX_);
     this.endObservable_.fire({
       delta: delta,
       velocity: this.velocity_,
@@ -397,28 +397,28 @@ export class SwipeXRecognizer {
   startContinuing_() {
     this.continuing_ = true;
 
-    let delta = this.calcDelta_(this.startX_, this.lastX_);
+    const delta = this.calcDelta_(this.startX_, this.lastX_);
 
     // 1. The user overpulls - spring back
     if (delta > this.maxDelta_ || delta < this.minDelta_) {
-      let retDelta = delta > this.maxDelta_ ? this.maxDelta_ - delta :
+      const retDelta = delta > this.maxDelta_ ? this.maxDelta_ - delta :
           this.minDelta_ - delta;
       // Reverse the velocity.
-      let maxVelocity = Math.sign(retDelta) *
+      const maxVelocity = Math.sign(retDelta) *
           Math.max(Math.abs(this.velocity_) * 0.8, 0.25);
       this.lastX_ = this.startX_ + delta;
-      let endX = this.lastX_ + retDelta;
-      let overshoot = Math.abs(retDelta) * maxVelocity;
-      let spring = tr.spring(this.lastX_, endX, endX + overshoot, 0.8);
+      const endX = this.lastX_ + retDelta;
+      const overshoot = Math.abs(retDelta) * maxVelocity;
+      const spring = tr.spring(this.lastX_, endX, endX + overshoot, 0.8);
       return this.runContinuing_(maxVelocity, false, velocity => {
-        let vnorm = 1 - Math.abs(velocity / maxVelocity);
+        const vnorm = 1 - Math.abs(velocity / maxVelocity);
         return spring(vnorm);
       });
     }
 
     // 2. Pull to one of the boundaries
     if (this.snapPoint_) {
-      let snapPoint = Math.abs(this.snapPoint_ / this.positionMultiplier_);
+      const snapPoint = Math.abs(this.snapPoint_ / this.positionMultiplier_);
       let newDelta = 0;
       if (delta < 0 && Math.abs(delta) > snapPoint ||
               this.velocity_ < -0.1) {
@@ -431,13 +431,13 @@ export class SwipeXRecognizer {
       }
       if (newDelta != delta) {
         // Reverse the velocity.
-        let maxVelocity = Math.sign(newDelta - delta) *
+        const maxVelocity = Math.sign(newDelta - delta) *
             Math.max(Math.abs(this.velocity_) * 0.95, 0.5);
         this.lastX_ = this.startX_ + delta;
-        let endX = this.startX_ + newDelta;
-        let func = tr.numeric(this.lastX_, endX);
+        const endX = this.startX_ + newDelta;
+        const func = tr.numeric(this.lastX_, endX);
         return this.runContinuing_(maxVelocity, false, velocity => {
-          let vnorm = 1 - Math.abs(velocity / maxVelocity);
+          const vnorm = 1 - Math.abs(velocity / maxVelocity);
           return func(vnorm);
         });
       }
@@ -445,7 +445,7 @@ export class SwipeXRecognizer {
 
     // Intertia.
     if (Math.abs(this.velocity_) > MIN_VELOCITY_) {
-      let maxVelocity = this.velocity_ * 0.95;  // First exponential order
+      const maxVelocity = this.velocity_ * 0.95;  // First exponential order
       return this.runContinuing_(maxVelocity, true,
           (velocity, timeSinceStart, timeSincePrev) => {
             return this.lastX_ + timeSincePrev * velocity;
@@ -472,7 +472,7 @@ export class SwipeXRecognizer {
     }
 
     this.velocity_ = maxVelocity;
-    let completeContinue = () => {
+    const completeContinue = () => {
       this.lastTime_ = timer.now();
       this.lastX_ = velocityFunc(0, 0, 0);
       this.fireMove_(/* synthetic */ true, /* continued */ true);
@@ -490,7 +490,7 @@ export class SwipeXRecognizer {
       this.lastX_ = velocityFunc(this.velocity_, timeSinceStart,
           timeSincePrev);
       this.fireMove_(/* synthetic */ true, /* continued */ true);
-      let prevVelocity = this.velocity_;
+      const prevVelocity = this.velocity_;
       this.velocity_ = maxVelocity * Math.exp(-timeSinceStart / FRAME_CONST_);
       return Math.abs(this.velocity_) > MIN_VELOCITY_;
     }, 5000).then(completeContinue, completeContinue);
@@ -515,14 +515,14 @@ export class SwipeXRecognizer {
    * @private
    */
   calcVelocity_(prevX, newX, prevTime, newTime, prevVelocity) {
-    let dx = newX - prevX;
-    let dt = newTime - prevTime;
+    const dx = newX - prevX;
+    const dt = newTime - prevTime;
     if (Math.abs(dt) < 2) {
       return 0;
     }
 
     // Calculate speed and speed depreciation.
-    let speed = dx / dt;
+    const speed = dx / dt;
 
     // Depreciation is simply an informational quality. It basically means:
     // we can't ignore the velocity we knew recently, but we'd only consider
@@ -530,8 +530,8 @@ export class SwipeXRecognizer {
     // depreciation factor is 1/100 of a millisecond. New average velocity is
     // calculated by weighing toward the new velocity and away from old
     // velocity based on the depreciation.
-    let deprFactor = 100;
-    let depr = 0.5 + Math.min(dt / deprFactor, 0.5);
+    const deprFactor = 100;
+    const depr = 0.5 + Math.min(dt / deprFactor, 0.5);
     return speed * depr + prevVelocity * (1 - depr);
   }
 }

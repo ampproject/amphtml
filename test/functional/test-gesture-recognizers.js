@@ -55,7 +55,7 @@ describe('TapRecognizer', () => {
 
 
   it('should allow single-point touchstart', () => {
-    let res = recognizer.onTouchStart({touches:
+    const res = recognizer.onTouchStart({touches:
         [{clientX: 101, clientY: 201}]});
     expect(res).to.equal(true);
     expect(recognizer.startX_).to.equal(101);
@@ -63,7 +63,7 @@ describe('TapRecognizer', () => {
   });
 
   it('should deny two-point touchstart', () => {
-    let res = recognizer.onTouchStart({touches:
+    const res = recognizer.onTouchStart({touches:
         [{clientX: 101, clientY: 201}, {}]});
     expect(res).to.equal(false);
     expect(recognizer.startX_).to.equal(0);
@@ -151,7 +151,7 @@ describe('DoubletapRecognizer', () => {
 
 
   it('should allow single-point touchstart', () => {
-    let res = recognizer.onTouchStart({touches:
+    const res = recognizer.onTouchStart({touches:
         [{clientX: 101, clientY: 201}]});
     expect(res).to.equal(true);
     expect(recognizer.startX_).to.equal(101);
@@ -159,7 +159,7 @@ describe('DoubletapRecognizer', () => {
   });
 
   it('should deny two-point touchstart', () => {
-    let res = recognizer.onTouchStart({touches:
+    const res = recognizer.onTouchStart({touches:
         [{clientX: 101, clientY: 201}, {}]});
     expect(res).to.equal(false);
     expect(recognizer.startX_).to.equal(0);
@@ -265,7 +265,7 @@ describe('SwipeXYRecognizer', () => {
 
 
   it('should allow single-point touchstart', () => {
-    let res = recognizer.onTouchStart({touches:
+    const res = recognizer.onTouchStart({touches:
         [{clientX: 101, clientY: 201}]});
     expect(res).to.equal(true);
     expect(recognizer.startX_).to.equal(101);
@@ -273,7 +273,7 @@ describe('SwipeXYRecognizer', () => {
   });
 
   it('should deny two-point touchstart', () => {
-    let res = recognizer.onTouchStart({touches:
+    const res = recognizer.onTouchStart({touches:
         [{clientX: 101, clientY: 201}, {}]});
     expect(res).to.equal(false);
     expect(recognizer.startX_).to.equal(0);
@@ -341,7 +341,7 @@ describe('SwipeXYRecognizer', () => {
   });
 
   it('should emit on touchmove after start', () => {
-    let event = {touches: [{clientX: 111, clientY: 211}]};
+    const event = {touches: [{clientX: 111, clientY: 211}]};
 
     recognizer.startX_ = recognizer.prevX_ = 101;
     recognizer.startY_ = recognizer.prevY_ = 201;
@@ -357,14 +357,14 @@ describe('SwipeXYRecognizer', () => {
     gesturesMock.expects('signalEnd_').never();
 
     clock.tick(10);
-    let res = recognizer.onTouchMove(event);
+    const res = recognizer.onTouchMove(event);
     expect(res).to.equal(true);
     expect(recognizer.lastX_).to.equal(111);
     expect(recognizer.lastY_).to.equal(211);
   });
 
   it('should stop on touchend; velocity doesn\'t change', () => {
-    let event = {};
+    const event = {};
 
     recognizer.startX_ = recognizer.prevX_ = 101;
     recognizer.startY_ = recognizer.prevY_ = 201;
@@ -389,7 +389,7 @@ describe('SwipeXYRecognizer', () => {
   });
 
   it('should stop on touchend; velocity changes', () => {
-    let event = {};
+    const event = {};
 
     recognizer.startX_ = 101;
     recognizer.startY_ = 201;
@@ -450,7 +450,7 @@ describe('TapzoomRecognizer', () => {
 
 
   it('should allow single-point touchstart', () => {
-    let res = recognizer.onTouchStart({touches:
+    const res = recognizer.onTouchStart({touches:
         [{clientX: 101, clientY: 201}]});
     expect(res).to.equal(true);
     expect(recognizer.startX_).to.equal(101);
@@ -458,7 +458,7 @@ describe('TapzoomRecognizer', () => {
   });
 
   it('should deny two-point touchstart', () => {
-    let res = recognizer.onTouchStart({touches:
+    const res = recognizer.onTouchStart({touches:
         [{clientX: 101, clientY: 201}, {}]});
     expect(res).to.equal(false);
     expect(recognizer.startX_).to.equal(0);
@@ -552,7 +552,7 @@ describe('TapzoomRecognizer', () => {
   });
 
   it('should emit on touchmove after start', () => {
-    let event = {touches: [{clientX: 111, clientY: 211}]};
+    const event = {touches: [{clientX: 111, clientY: 211}]};
 
     recognizer.startX_ = recognizer.prevX_ = 101;
     recognizer.startY_ = recognizer.prevY_ = 201;
@@ -567,14 +567,14 @@ describe('TapzoomRecognizer', () => {
     gesturesMock.expects('signalEnd_').never();
 
     clock.tick(10);
-    let res = recognizer.onTouchMove(event);
+    const res = recognizer.onTouchMove(event);
     expect(res).to.equal(true);
     expect(recognizer.lastX_).to.equal(111);
     expect(recognizer.lastY_).to.equal(211);
   });
 
   it('should stop on touchend', () => {
-    let event = {};
+    const event = {};
 
     recognizer.startX_ = recognizer.prevX_ = 101;
     recognizer.startY_ = recognizer.prevY_ = 201;
@@ -637,7 +637,7 @@ describe('PinchRecognizer', () => {
 
 
   it('should deny single-point touchstart', () => {
-    let res = recognizer.onTouchStart({touches:
+    const res = recognizer.onTouchStart({touches:
         [{clientX: 101, clientY: 201}]});
     expect(res).to.equal(false);
     expect(recognizer.startX1_).to.equal(0);
@@ -647,7 +647,7 @@ describe('PinchRecognizer', () => {
   });
 
   it('should allow two-point touchstart', () => {
-    let res = recognizer.onTouchStart({touches:
+    const res = recognizer.onTouchStart({touches:
         [{clientX: 90, clientY: 80},
          {clientX: 110, clientY: 120}]});
     expect(res).to.equal(true);
@@ -767,7 +767,7 @@ describe('PinchRecognizer', () => {
     clock.tick(10);
     recognizer.acceptStart();
 
-    let event = {touches:
+    const event = {touches:
         [{clientX: 70, clientY: 60},
          {clientX: 130, clientY: 140}]};
     gesturesMock.expects('signalEmit_').withExactArgs(recognizer,
@@ -784,7 +784,7 @@ describe('PinchRecognizer', () => {
     gesturesMock.expects('signalEnd_').never();
 
     clock.tick(10);
-    let res = recognizer.onTouchMove(event);
+    const res = recognizer.onTouchMove(event);
     expect(res).to.equal(true);
   });
 
@@ -801,7 +801,7 @@ describe('PinchRecognizer', () => {
     clock.tick(10);
     recognizer.acceptStart();
 
-    let event = {};
+    const event = {};
     gesturesMock.expects('signalEmit_').withExactArgs(recognizer,
         sinon.match(data => {
           return (data.first === false && data.last === true &&
@@ -831,7 +831,7 @@ describe('PinchRecognizer', () => {
     clock.tick(10);
     recognizer.acceptStart();
 
-    let event = {};
+    const event = {};
     gesturesMock.expects('signalEmit_').withExactArgs(recognizer,
         sinon.match(data => {
           return (data.first === false && data.last === true &&

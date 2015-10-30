@@ -25,7 +25,7 @@ describe('3p-frame', () => {
   afterEach(() => {
     resetServiceForTesting(window, 'bootstrapBaseUrl');
     setModeForTesting(null);
-    let m = document.querySelector(
+    const m = document.querySelector(
         '[name="amp-3p-iframe-src"]');
     if (m) {
       m.parentElement.removeChild(m);
@@ -33,7 +33,7 @@ describe('3p-frame', () => {
   });
 
   function addCustomBootstrap(url) {
-    let meta = document.createElement('meta');
+    const meta = document.createElement('meta');
     meta.setAttribute('name', 'amp-3p-iframe-src');
     meta.setAttribute('content', url);
     document.head.appendChild(meta);

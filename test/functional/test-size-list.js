@@ -102,7 +102,7 @@ describe('SizeList construct', () => {
 
 describe('SizeList select', () => {
   it('should select default last option', () => {
-    let sizeList = new SizeList([
+    const sizeList = new SizeList([
         {mediaQuery: 'media1', size: '444px'},
         {mediaQuery: 'media2', size: '333px'},
         {mediaQuery: 'media3', size: '222px'},
@@ -114,7 +114,7 @@ describe('SizeList select', () => {
   });
 
   it('should select a matching option', () => {
-    let sizeList = new SizeList([
+    const sizeList = new SizeList([
         {mediaQuery: 'media1', size: '444px'},
         {mediaQuery: 'media2', size: '333px'},
         {mediaQuery: 'media3', size: '222px'},
@@ -129,7 +129,7 @@ describe('SizeList select', () => {
   });
 
   it('should select first matching option', () => {
-    let sizeList = new SizeList([
+    const sizeList = new SizeList([
         {mediaQuery: 'media1', size: '444px'},
         {mediaQuery: 'media2', size: '333px'},
         {mediaQuery: 'media3', size: '222px'},

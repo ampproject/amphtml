@@ -45,7 +45,7 @@ export function removeChildren(parent) {
  * @param {!Element} to
  */
 export function copyChildren(from, to) {
-  let frag = to.ownerDocument.createDocumentFragment();
+  const frag = to.ownerDocument.createDocumentFragment();
   for (let n = from.firstChild; n; n = n.nextSibling) {
     frag.appendChild(n.cloneNode(true));
   }
@@ -92,7 +92,7 @@ export function closestByTag(element, tagName) {
  * @return {?Element}
  */
 export function elementByTag(element, tagName) {
-  let elements = element.getElementsByTagName(tagName);
+  const elements = element.getElementsByTagName(tagName);
   return elements.length > 0 ? elements[0] : null;
 }
 
@@ -104,7 +104,7 @@ export function elementByTag(element, tagName) {
  * @return {?Element}
  */
 export function childElement(parent, callback) {
-  let children = parent.children;
+  const children = parent.children;
   for (let i = 0; i < children.length; i++) {
     if (callback(children[i])) {
       return children[i];

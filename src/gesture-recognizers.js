@@ -56,7 +56,7 @@ export class TapRecognizer extends GestureRecognizer {
 
   /** @override */
   onTouchStart(e) {
-    let touches = e.touches;
+    const touches = e.touches;
     if (!touches || touches.length != 1) {
       return false;
     }
@@ -67,12 +67,12 @@ export class TapRecognizer extends GestureRecognizer {
 
   /** @override */
   onTouchMove(e) {
-    let touches = e.changedTouches || e.touches;
+    const touches = e.changedTouches || e.touches;
     if (touches && touches.length == 1) {
       this.lastX_ = touches[0].clientX;
       this.lastY_ = touches[0].clientY;
-      let dx = Math.abs(this.lastX_ - this.startX_) >= 8;
-      let dy = Math.abs(this.lastY_ - this.startY_) >= 8;
+      const dx = Math.abs(this.lastX_ - this.startX_) >= 8;
+      const dy = Math.abs(this.lastY_ - this.startY_) >= 8;
       if (dx || dy) {
         return false;
       }
@@ -137,7 +137,7 @@ export class DoubletapRecognizer extends GestureRecognizer {
     if (this.tapCount_ > 1) {
       return false;
     }
-    let touches = e.touches;
+    const touches = e.touches;
     if (!touches || touches.length != 1) {
       return false;
     }
@@ -148,12 +148,12 @@ export class DoubletapRecognizer extends GestureRecognizer {
 
   /** @override */
   onTouchMove(e) {
-    let touches = e.changedTouches || e.touches;
+    const touches = e.changedTouches || e.touches;
     if (touches && touches.length == 1) {
       this.lastX_ = touches[0].clientX;
       this.lastY_ = touches[0].clientY;
-      let dx = Math.abs(this.lastX_ - this.startX_) >= 8;
-      let dy = Math.abs(this.lastY_ - this.startY_) >= 8;
+      const dx = Math.abs(this.lastX_ - this.startX_) >= 8;
+      const dy = Math.abs(this.lastY_ - this.startY_) >= 8;
       if (dx || dy) {
         this.acceptCancel();
         return false;
@@ -259,7 +259,7 @@ class SwipeRecognizer extends GestureRecognizer {
 
   /** @override */
   onTouchStart(e) {
-    let touches = e.touches;
+    const touches = e.touches;
     if (!touches || touches.length != 1) {
       return false;
     }
@@ -271,17 +271,17 @@ class SwipeRecognizer extends GestureRecognizer {
 
   /** @override */
   onTouchMove(e) {
-    let touches = e.changedTouches || e.touches;
+    const touches = e.changedTouches || e.touches;
     if (touches && touches.length == 1) {
-      let x = touches[0].clientX;
-      let y = touches[0].clientY;
+      const x = touches[0].clientX;
+      const y = touches[0].clientY;
       this.lastX_ = x;
       this.lastY_ = y;
       if (this.eventing_) {
         this.emit_(false, false, e);
       } else {
-        let dx = Math.abs(x - this.startX_);
-        let dy = Math.abs(y - this.startY_);
+        const dx = Math.abs(x - this.startX_);
+        const dy = Math.abs(y - this.startY_);
         // Swipe is penalized slightly since it's one of the least demanding
         // gesture, thus -10 in signalReady.
         if (this.horiz_ && this.vert_) {
@@ -340,7 +340,7 @@ class SwipeRecognizer extends GestureRecognizer {
    */
   emit_(first, last, event) {
     this.lastTime_ = timer.now();
-    let deltaTime = this.lastTime_ - this.prevTime_;
+    const deltaTime = this.lastTime_ - this.prevTime_;
     // It's often that `touchend` arrives on the next frame. These should
     // be ignored to avoid a significant velocity downgrade.
     if (!last && deltaTime > 4 || last && deltaTime > 16) {
@@ -500,7 +500,7 @@ export class TapzoomRecognizer extends GestureRecognizer {
     if (this.eventing_) {
       return false;
     }
-    let touches = e.touches;
+    const touches = e.touches;
     if (!touches || touches.length != 1) {
       return false;
     }
@@ -511,15 +511,15 @@ export class TapzoomRecognizer extends GestureRecognizer {
 
   /** @override */
   onTouchMove(e) {
-    let touches = e.changedTouches || e.touches;
+    const touches = e.changedTouches || e.touches;
     if (touches && touches.length == 1) {
       this.lastX_ = touches[0].clientX;
       this.lastY_ = touches[0].clientY;
       if (this.eventing_) {
         this.emit_(false, false, e);
       } else {
-        let dx = Math.abs(this.lastX_ - this.startX_) >= 8;
-        let dy = Math.abs(this.lastY_ - this.startY_) >= 8;
+        const dx = Math.abs(this.lastX_ - this.startX_) >= 8;
+        const dy = Math.abs(this.lastY_ - this.startY_) >= 8;
         if (dx || dy) {
           if (this.tapCount_ == 0) {
             this.acceptCancel();
@@ -690,7 +690,7 @@ export class PinchRecognizer extends GestureRecognizer {
 
   /** @override */
   onTouchStart(e) {
-    let touches = e.touches;
+    const touches = e.touches;
     if (!touches || touches.length != 2) {
       return false;
     }
@@ -704,7 +704,7 @@ export class PinchRecognizer extends GestureRecognizer {
 
   /** @override */
   onTouchMove(e) {
-    let touches = e.touches;
+    const touches = e.touches;
     if (!touches || touches.length != 2) {
       return false;
     }
@@ -715,10 +715,10 @@ export class PinchRecognizer extends GestureRecognizer {
     if (this.eventing_) {
       this.emit_(false, false, e);
     } else {
-      let dx1 = this.lastX1_ - this.startX1_;
-      let dy1 = this.lastY1_ - this.startY1_;
-      let dx2 = this.lastX2_ - this.startX2_;
-      let dy2 = this.lastY2_ - this.startY2_;
+      const dx1 = this.lastX1_ - this.startX1_;
+      const dy1 = this.lastY1_ - this.startY1_;
+      const dx2 = this.lastX2_ - this.startX2_;
+      const dy2 = this.lastY2_ - this.startY2_;
       // Fingers should move in opposite directions and go over the threshold.
       if (dx1 * dx2 <= 0 && dy1 * dy2 <= 0) {
         if (Math.abs(dx1 - dx2) >= 8 || Math.abs(dy1 - dy2) >= 8) {
@@ -761,9 +761,9 @@ export class PinchRecognizer extends GestureRecognizer {
    */
   emit_(first, last, event) {
     this.lastTime_ = timer.now();
-    let deltaTime = this.lastTime_ - this.prevTime_;
-    let deltaX = this.deltaX_();
-    let deltaY = this.deltaY_();
+    const deltaTime = this.lastTime_ - this.prevTime_;
+    const deltaX = this.deltaX_();
+    const deltaY = this.deltaY_();
     // It's often that `touchend` arrives on the next frame. These should
     // be ignored to avoid a significant velocity downgrade.
     if (!last && deltaTime > 4 || last && deltaTime > 16) {
@@ -778,9 +778,9 @@ export class PinchRecognizer extends GestureRecognizer {
       this.prevTime_ = this.lastTime_;
     }
 
-    let startSq = this.sqDist_(this.startX1_, this.startX2_,
+    const startSq = this.sqDist_(this.startX1_, this.startX2_,
         this.startY1_, this.startY2_);
-    let lastSq = this.sqDist_(this.lastX1_, this.lastX2_,
+    const lastSq = this.sqDist_(this.lastX1_, this.lastX2_,
         this.lastY1_, this.lastY2_);
     this.signalEmit({
       first: first,

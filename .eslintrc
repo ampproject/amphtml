@@ -46,6 +46,7 @@
     "no-useless-call": 2,
     "no-useless-concat": 2,
     "no-warning-comments": [2, { "terms": ["do not submit"], "location": "anywhere" }],
+    "prefer-const": 2,
     "radix": 2,
     "semi": 2,
     "space-after-keywords": 2,

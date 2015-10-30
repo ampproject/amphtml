@@ -106,7 +106,7 @@ describe('Input', () => {
     });
     expect(mouseDetected).to.equal(undefined);
 
-    let p = input.onMouseMove_();
+    const p = input.onMouseMove_();
     expect(eventListeners['click']).to.not.equal(undefined);
     clock.tick(350);
 
@@ -126,7 +126,7 @@ describe('Input', () => {
     });
     expect(mouseDetected).to.equal(undefined);
 
-    let p = input.onMouseMove_();
+    const p = input.onMouseMove_();
     eventListeners['click']();
 
     return p.then(() => {
@@ -146,7 +146,7 @@ describe('Input', () => {
     });
     expect(mouseDetected).to.equal(undefined);
 
-    let p = input.onMouseMove_();
+    const p = input.onMouseMove_();
     input.mouseConfirmAttemptCount_ = 100;
     eventListeners['mousemove'] = undefined;
     eventListeners['click']();

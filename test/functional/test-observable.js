@@ -34,16 +34,16 @@ describe('Observable', () => {
 
   it('add-remove-fire', () => {
     let observer1Called = 0;
-    let observer1 = () => {
+    const observer1 = () => {
       observer1Called++;
     };
-    let observer1Key = observable.add(observer1);
+    const observer1Key = observable.add(observer1);
 
     let observer2Called = 0;
-    let observer2 = () => {
+    const observer2 = () => {
       observer2Called++;
     };
-    let observer2Key = observable.add(observer2);
+    const observer2Key = observable.add(observer2);
 
     expect(observer1Called).to.equal(0);
     expect(observer2Called).to.equal(0);

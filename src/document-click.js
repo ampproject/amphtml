@@ -97,23 +97,23 @@ export function onDocumentElementClick_(e, viewport) {
     return;
   }
 
-  let target = closestByTag(e.target, 'A');
+  const target = closestByTag(e.target, 'A');
   if (!target) {
     return;
   }
 
   let elem = null;
-  let docElement = e.currentTarget;
-  let doc = docElement.ownerDocument;
+  const docElement = e.currentTarget;
+  const doc = docElement.ownerDocument;
 
-  let tgtLoc = parseUrl(target.href);
+  const tgtLoc = parseUrl(target.href);
   if (!tgtLoc.hash) {
     return;
   }
 
-  let curLoc = parseUrl(doc.location.href);
-  let tgtHref = `${tgtLoc.origin}${tgtLoc.pathname}${tgtLoc.search}`;
-  let curHref = `${curLoc.origin}${curLoc.pathname}${curLoc.search}`;
+  const curLoc = parseUrl(doc.location.href);
+  const tgtHref = `${tgtLoc.origin}${tgtLoc.pathname}${tgtLoc.search}`;
+  const curHref = `${curLoc.origin}${curLoc.pathname}${curLoc.search}`;
 
   // If the current target anchor link is the same origin + path
   // as the current document then we know we are just linking to an
@@ -127,7 +127,7 @@ export function onDocumentElementClick_(e, viewport) {
   // history which contains the amp document.
   e.preventDefault();
 
-  let hash = tgtLoc.hash.slice(1);
+  const hash = tgtLoc.hash.slice(1);
   elem = doc.getElementById(hash);
 
   if (!elem) {

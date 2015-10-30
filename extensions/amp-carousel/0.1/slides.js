@@ -106,7 +106,7 @@ export class AmpSlides extends BaseCarousel {
       return;
     }
 
-    let autoplayValue = Number(this.element.getAttribute('autoplay'));
+    const autoplayValue = Number(this.element.getAttribute('autoplay'));
     // If it isn't a number and is not greater than 0 then don't assign
     // and use the default.
     if (autoplayValue > 0) {
@@ -253,7 +253,7 @@ export class AmpSlides extends BaseCarousel {
      * }} */
     this.swipeState_ = null;
 
-    let gestures = Gestures.get(this.element);
+    const gestures = Gestures.get(this.element);
     gestures.onGesture(SwipeXRecognizer, e => {
       if (e.data.first) {
         this.onSwipeStart_(e.data);
@@ -270,25 +270,25 @@ export class AmpSlides extends BaseCarousel {
    * @private
    */
   onSwipeStart_(swipe) {
-    let currentSlide = this.slides_[this.currentIndex_];
-    let containerWidth = this.element./*OK*/offsetWidth;
+    const currentSlide = this.slides_[this.currentIndex_];
+    const containerWidth = this.element./*OK*/offsetWidth;
     let minDelta = 0;
     let maxDelta = 0;
     let prevTr = tr.NOOP;
     let nextTr = tr.NOOP;
-    let prevIndex = AmpSlides.getRelativeIndex(this.currentIndex_,
+    const prevIndex = AmpSlides.getRelativeIndex(this.currentIndex_,
         -1, this.slides_.length);
-    let nextIndex = AmpSlides.getRelativeIndex(this.currentIndex_,
+    const nextIndex = AmpSlides.getRelativeIndex(this.currentIndex_,
         1, this.slides_.length);
 
     if (this.isLooping_ || this.currentIndex_ - 1 >= 0) {
-      let prevSlide = this.slides_[prevIndex];
+      const prevSlide = this.slides_[prevIndex];
       this.prepareSlide_(prevSlide, -1);
       prevTr = this.createTransition_(currentSlide, prevSlide, -1);
       minDelta = -1;
     }
     if (this.isLooping_ || this.currentIndex_ + 1 < this.slides_.length) {
-      let nextSlide = this.slides_[nextIndex];
+      const nextSlide = this.slides_[nextIndex];
       this.prepareSlide_(nextSlide, 1);
       nextTr = this.createTransition_(currentSlide, nextSlide, 1);
       maxDelta = 1;
@@ -311,7 +311,7 @@ export class AmpSlides extends BaseCarousel {
    * @private
    */
   onSwipe_(swipe) {
-    let s = this.swipeState_;
+    const s = this.swipeState_;
     if (!s || s.currentIndex != this.currentIndex_) {
       return;
     }
@@ -319,7 +319,7 @@ export class AmpSlides extends BaseCarousel {
     // Translate the gesture position to be a number between -1 and 1,
     // with negative values indiamping sliding to the previous slide and
     // positive indiamping sliding to the next slide.
-    let pos = Math.min(s.max, Math.max(s.min,
+    const pos = Math.min(s.max, Math.max(s.min,
         -swipe.deltaX / s.containerWidth));
 
     s.nextTr(pos > 0 ? pos : 0);
@@ -333,7 +333,7 @@ export class AmpSlides extends BaseCarousel {
    * @private
    */
   onSwipeEnd_(swipe) {
-    let s = this.swipeState_;
+    const s = this.swipeState_;
     if (!s || s.currentIndex != this.currentIndex_) {
       return;
     }
@@ -345,12 +345,12 @@ export class AmpSlides extends BaseCarousel {
           (Math.abs(swipe.velocityX) > 0.2 ? 1 : 0);
     }
     advPos = Math.min(s.max, Math.max(s.min, advPos));
-    let newPos = Math.abs(advPos) >= 0.55 ? Math.sign(advPos) : 0;
+    const newPos = Math.abs(advPos) >= 0.55 ? Math.sign(advPos) : 0;
     let promise;
     if (newPos != s.pos) {
-      let posFunc = tr.numeric(s.pos, newPos);
+      const posFunc = tr.numeric(s.pos, newPos);
       promise = Animation.animate(time => {
-        let pos = posFunc(time);
+        const pos = posFunc(time);
         s.nextTr(pos > 0 ? pos : 0);
         s.prevTr(pos < 0 ? -pos : 0);
         s.pos = pos;
@@ -362,7 +362,7 @@ export class AmpSlides extends BaseCarousel {
       if (s.currentIndex != this.currentIndex_) {
         return;
       }
-      let oldSlide = this.slides_[this.currentIndex_];
+      const oldSlide = this.slides_[this.currentIndex_];
       if (newPos > 0.5) {
         s.nextTr(1);
         this.currentIndex_ = s.nextIndex;

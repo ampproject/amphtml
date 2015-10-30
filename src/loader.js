@@ -21,10 +21,10 @@
  * @return {!Element}
  */
 export function createLoaderElement() {
-  let loader = document.createElement('div');
+  const loader = document.createElement('div');
   loader.classList.add('-amp-loader');
   for (let i = 0; i < 3; i++) {
-    let dot = document.createElement('div');
+    const dot = document.createElement('div');
     dot.classList.add('-amp-loader-dot');
     loader.appendChild(dot);
   }

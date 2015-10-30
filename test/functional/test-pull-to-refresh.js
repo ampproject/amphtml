@@ -29,7 +29,7 @@ describe('PullToRefreshBlocker', () => {
     sandbox = sinon.sandbox.create();
 
     eventListeners = {};
-    let documentApi = {
+    const documentApi = {
       addEventListener: (eventType, handler) => {
         eventListeners[eventType] = handler;
       },
@@ -40,7 +40,7 @@ describe('PullToRefreshBlocker', () => {
       }
     };
 
-    let viewportApi = {
+    const viewportApi = {
       getTop: () => 0
     };
     viewportMock = sandbox.mock(viewportApi);
@@ -134,7 +134,7 @@ describe('PullToRefreshBlocker', () => {
     sendEvent({type: 'touchstart', touches: [{clientY: 111}]});
     expect(blocker.tracking_).to.equal(true);
 
-    let preventDefault = sinon.spy();
+    const preventDefault = sinon.spy();
     sendEvent({type: 'touchmove', touches: [{clientY: 112}]},
         preventDefault);
     expect(blocker.tracking_).to.equal(false);
@@ -150,7 +150,7 @@ describe('PullToRefreshBlocker', () => {
     sendEvent({type: 'touchstart', touches: [{clientY: 111}]});
     expect(blocker.tracking_).to.equal(true);
 
-    let preventDefault = sinon.spy();
+    const preventDefault = sinon.spy();
     sendEvent({type: 'touchmove', touches: [{clientY: 100}]},
         preventDefault);
     expect(blocker.tracking_).to.equal(false);
@@ -166,7 +166,7 @@ describe('PullToRefreshBlocker', () => {
     sendEvent({type: 'touchstart', touches: [{clientY: 111}]});
     expect(blocker.tracking_).to.equal(true);
 
-    let preventDefault = sinon.spy();
+    const preventDefault = sinon.spy();
     sendEvent({type: 'touchmove', touches: [{clientY: 111}]},
         preventDefault);
     expect(blocker.tracking_).to.equal(true);
