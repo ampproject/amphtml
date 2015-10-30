@@ -22,7 +22,7 @@ Displays an iframe.
 
 - `amp-iframe` may not appear close to the top of the document. They must be either 600px away from the top or not within the first 75% of the viewport when scrolled to the top – whichever is smaller. NOTE: We are currently looking for feedback as to how well this restriction works in practice.
 - They are sandboxed by default. That means that authors needs to be explicit about what should be allowed in the iframe. See the [the docs on MDN](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe) for details on the sandbox attribute.
-- They must only request resources via HTTPS.
+- They must only request resources via HTTPS or from a data-URI or via the srcdoc attribute.
 - They must not be in the same origin as the container unless they do not allow `allow-same-origin` in the sandbox attribute.
 
 Example:
@@ -37,6 +37,6 @@ Example:
 
 #### Attributes
 
-**src, sandbox, frameborder, allowfullscreen, allowtransparency**
+**src, srcdoc, sandbox, frameborder, allowfullscreen, allowtransparency**
 
 The attributes above should all behave like they do on standard iframes.

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {assertHttpsUrl, parseQueryString, parseUrl, removeFragment}
+import {assertHttpsUrl, parseQueryString, parseUrl, removeFragment, getOrigin}
     from '../../src/url';
 
 describe('url', () => {
@@ -202,5 +202,21 @@ describe('removeFragment', () => {
   it('should ignore when no fragment', () => {
     expect(removeFragment('https://twitter.com/path')).to.equal(
         'https://twitter.com/path');
+  });
+});
+
+describe('getOrigin', () => {
+  it('should parse https://twitter.com/path#abc', () => {
+    expect(getOrigin(parseUrl('https://twitter.com/path#abc')))
+        .to.equal('https://twitter.com');
+    expect(parseUrl('https://twitter.com/path#abc').origin)
+        .to.equal('https://twitter.com');
+  });
+
+  it('should parse data:12345', () => {
+    expect(getOrigin(parseUrl('data:12345')))
+        .to.equal('data:12345');
+    expect(parseUrl('data:12345').origin)
+        .to.equal('data:12345');
   });
 });

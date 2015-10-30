@@ -160,6 +160,58 @@ describe('amp-iframe', () => {
     });
   });
 
+  it('should allow data-uri', () => {
+    var dataUri = 'data:text/html;charset=utf-8;base64,' +
+        'PHNjcmlwdD5kb2N1bWVudC53cml0ZSgnUiAnICsgZG9jdW1lbnQucmVmZXJyZXIgK' +
+        'yAnLCAnICsgbG9jYXRpb24uaHJlZik8L3NjcmlwdD4=';
+    return getAmpIframe({
+      src: dataUri,
+      width: 100,
+      height: 100
+    }).then(amp => {
+      expect(amp.iframe).to.be.instanceof(Element);
+      expect(amp.iframe.src).to.equal(dataUri);
+      expect(amp.iframe.getAttribute('sandbox')).to.equal('');
+      expect(amp.iframe.parentNode).to.equal(amp.scrollWrapper);
+      return timer.promise(0).then(() => {
+        expect(ranJs).to.equal(0);
+      });
+    });
+  });
+
+  it('should support srcdoc', () => {
+    return getAmpIframe({
+      width: 100,
+      height: 100,
+      sandbox: 'allow-scripts',
+      srcdoc: '<script>try{parent.location.href}catch(e){' +
+          'parent.parent./*OK*/postMessage(\'loaded-iframe\', \'*\');}' +
+          '</script>',
+    }).then(amp => {
+      expect(amp.iframe).to.be.instanceof(Element);
+      expect(amp.iframe.src).to.match(
+          /^data\:text\/html;charset=utf-8;base64,/);
+      expect(amp.iframe.getAttribute('srcdoc')).to.be.null;
+      expect(amp.iframe.getAttribute('sandbox')).to.equal(
+          'allow-scripts');
+      expect(amp.iframe.parentNode).to.equal(amp.scrollWrapper);
+      return timer.promise(0).then(() => {
+        expect(ranJs).to.equal(1);
+      });
+    });
+  });
+
+  it('should deny srcdoc with allow-same-origin', () => {
+    return getAmpIframe({
+      width: 100,
+      height: 100,
+      sandbox: 'allow-same-origin',
+      srcdoc: '',
+    }).then(amp => {
+      expect(amp.iframe).to.be.null;
+    });
+  });
+
   it('should deny same origin', () => {
     return getAmpIframeObject().then(amp => {
       expect(() => {
@@ -182,6 +234,12 @@ describe('amp-iframe', () => {
       amp.assertSource('http://iframe.localhost:123/foo',
           'https://foo.com', '');
       amp.assertSource('https://container.com', 'https://foo.com', '');
+
+      amp.element.setAttribute('srcdoc', 'abc');
+      amp.element.setAttribute('sandbox', 'allow-same-origin');
+      expect(() => {
+        amp.transformSrcDoc();
+      }).to.throw(/allow-same-origin is not allowed with the srcdoc attribute/);
     });
   });
 

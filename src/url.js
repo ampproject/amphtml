@@ -36,7 +36,9 @@ export function parseUrl(url) {
     search: a.search,
     hash: a.hash
   };
-  info.origin = a.origin || getOrigin(info);
+  // For data URI a.origin is equal to the string 'null' which is not useful.
+  // We instead return the actual origin which is the full URL.
+  info.origin = (a.origin && a.origin != 'null') ? a.origin : getOrigin(info);
   assert(info.origin, 'Origin must exist');
   return info;
 }
@@ -101,10 +103,17 @@ export function parseQueryString(queryString) {
 
 
 /**
+ * Don't use this directly, only exported for testing. The value
+ * is available via the origin property of the object returned by
+ * parseUrl.
  * @param {!Location} info
  * @return {string}
+ * @visibleForTesting
  */
-function getOrigin(info) {
+export function getOrigin(info) {
+  if (info.protocol == 'data:' || !info.host) {
+    return info.href;
+  }
   return info.protocol + '//' + info.host;
 }
 
