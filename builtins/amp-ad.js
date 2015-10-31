@@ -22,6 +22,7 @@ import {loadPromise} from '../src/event-helper';
 import {registerElement} from '../src/custom-element';
 import {getIframe, listen, prefetchBootstrap} from '../src/3p-frame';
 import {adPrefetch, adPreconnect} from '../ads/_prefetch';
+import {timer} from '../src/timer';
 
 
 /**
@@ -98,11 +99,31 @@ export function upgradeImages_(images) {
  * @return {undefined}
  */
 export function installAd(win) {
+
+  /**
+   * @type {boolean} Heuristic boolean as for whether another ad is currently
+   *     loading.
+   */
+  let loadingAdsCount = 0;
+
   class AmpAd extends BaseElement {
 
     /** @override  */
     renderOutsideViewport() {
-      return false;
+      // Before the user has scrolled we only render ads in view. This prevents
+      // excessive jank in situations like swiping through a lot of articles.
+      if (!this.getViewport().hasScrolled()) {
+        return false;
+      };
+
+      // If another ad is currently loading we only load ads that are currently
+      // in viewport.
+      if (loadingAdsCount > 0) {
+        return false;
+      }
+
+      // Otherwise the ad is good to go.
+      return true;
     }
 
     /** @override */
@@ -205,6 +226,13 @@ export function installAd(win) {
 
     /** @override */
     layoutCallback() {
+      loadingAdsCount++;
+      timer.delay(() => {
+        // Unfortunately we don't really have a good way to measure how long it
+        // takes to load an ad, so we'll just pretend it takes 1 second for
+        // now.
+        loadingAdsCount--;
+      }, 1000);
       assert(!this.isInFixedContainer_,
           '<amp-ad> is not allowed to be placed in elements with ' +
           'position:fixed: %s', this.element);
