@@ -15,29 +15,34 @@
  */
 
 import {createIframePromise} from '../../testing/iframe';
-import {installAd, scoreDimensions_, upgradeImages_} from
+import {installAd, scoreDimensions_, upgradeImages_, AD_LOAD_TIME_MS} from
     '../../builtins/amp-ad';
+import {viewportFor} from
+    '../../src/viewport';
+import * as sinon from 'sinon';
 
 describe('amp-ad', () => {
 
-  function getAd(attributes, canonical, opt_handleElement) {
-    return createIframePromise().then(iframe => {
-      installAd(iframe.win);
-      if (canonical) {
-        var link = iframe.doc.createElement('link');
-        link.setAttribute('rel', 'canonical');
-        link.setAttribute('href', canonical);
-        iframe.doc.head.appendChild(link);
-      }
-      var a = iframe.doc.createElement('amp-ad');
-      for (var key in attributes) {
-        a.setAttribute(key, attributes[key]);
-      }
-      if (opt_handleElement) {
-        a = opt_handleElement(a);
-      }
-      return iframe.addElement(a);
-    });
+  function getAd(attributes, canonical, opt_handleElement,
+      opt_beforeLayoutCallback) {
+    return createIframePromise(undefined, opt_beforeLayoutCallback)
+        .then(iframe => {
+          installAd(iframe.win);
+          if (canonical) {
+            var link = iframe.doc.createElement('link');
+            link.setAttribute('rel', 'canonical');
+            link.setAttribute('href', canonical);
+            iframe.doc.head.appendChild(link);
+          }
+          var a = iframe.doc.createElement('amp-ad');
+          for (var key in attributes) {
+            a.setAttribute(key, attributes[key]);
+          }
+          if (opt_handleElement) {
+            a = opt_handleElement(a);
+          }
+          return iframe.addElement(a);
+        });
   }
 
   it('render an ad', () => {
@@ -187,6 +192,68 @@ describe('amp-ad', () => {
       upgradeImages_(images);
       expect(images['300x200'][0]).to.equal('backfill-1@2x.png');
       expect(images['320x50'][0]).to.equal('backfill-6@2x.png');
+    });
+  });
+
+  describe('renderOutsideViewport', () => {
+
+    let clock;
+    let sandbox;
+
+    afterEach(() => {
+      if (clock) {
+        clock.restore();
+      }
+      if (sandbox) {
+        sandbox.restore();
+      }
+    });
+
+    function getGoodAd(cb, layoutCb) {
+      return getAd({
+        width: 300,
+        height: 250,
+        type: 'a9',
+        src: 'https://testsrc',
+        'data-aax_size': '300x250',
+        'data-aax_pubname': 'test123',
+        'data-aax_src': '302',
+        // Test precedence
+        'data-width': '6666'
+      }, 'https://schema.org', element => {
+        cb(element.implementation_);
+        return element;
+      }, layoutCb);
+    }
+
+    it('should return false before scrolling', () => {
+      return getGoodAd(ad => {
+        expect(ad.renderOutsideViewport()).to.be.false;
+      });
+    });
+
+    it('should return true after scrolling', () => {
+      return getGoodAd(ad => {
+        viewportFor(ad.element.ownerDocument.defaultView).scrollCount_++;
+        expect(ad.renderOutsideViewport()).to.be.true;
+      });
+    });
+
+    it('should return true after scrolling and then false for 1s', () => {
+      return getGoodAd(ad => {
+        viewportFor(ad.element.ownerDocument.defaultView).scrollCount_++;
+        expect(ad.renderOutsideViewport()).to.be.true;
+      }, () => {
+        sandbox = sinon.sandbox.create();
+        clock = sandbox.useFakeTimers();
+      }).then(ad => {
+        // False because we just rendered one.
+        expect(ad.renderOutsideViewport()).to.be.false;
+        clock.tick(900);
+        expect(ad.renderOutsideViewport()).to.be.false;
+        clock.tick(100);
+        expect(ad.renderOutsideViewport()).to.be.true;
+      });
     });
   });
 });

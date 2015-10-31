@@ -86,6 +86,9 @@ export class Viewport {
     /** @private {boolean} */
     this.scrollTracking_ = false;
 
+    /** @private {number} */
+    this.scrollCount_ = 0;
+
     /** @private @const {!Observable<!ViewportChangedEvent>} */
     this.changeObservable_ = new Observable();
 
@@ -300,6 +303,14 @@ export class Viewport {
   }
 
   /**
+   * Returns whether the user has scrolled yet.
+   * @return {boolean}
+   */
+  hasScrolled() {
+    return this.scrollCount_ > 0;
+  }
+
+  /**
    * Updates touch zoom meta data. Returns `true` if any actual
    * changes have been done.
    * @return {boolean}
@@ -357,6 +368,7 @@ export class Viewport {
 
   /** @private */
   scroll_() {
+    this.scrollCount_++;
     this.scrollObservable_.fire();
 
     this.scrollLeft_ = this.binding_.getScrollLeft();
