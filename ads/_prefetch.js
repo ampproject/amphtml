@@ -39,5 +39,6 @@ export const adPreconnect = {
   doubleclick: [
     'https://partner.googleadservices.com',
     'https://securepubads.g.doubleclick.net',
+    'https://tpc.googlesyndication.com',
   ],
 };
