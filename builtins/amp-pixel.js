@@ -51,7 +51,7 @@ export function installPixel(win) {
      * Returns the host of the canonical URL for this AMP document.
      */
     'CANONICAL_HOST': () => {
-      let url = parseUrl(documentInfoFor(win).canonicalUrl);
+      const url = parseUrl(documentInfoFor(win).canonicalUrl);
       return url && url.hostname;
     },
 
@@ -59,7 +59,7 @@ export function installPixel(win) {
      * Returns the path of the canonical URL for this AMP document.
      */
     'CANONICAL_PATH': () => {
-      let url = parseUrl(documentInfoFor(win).canonicalUrl);
+      const url = parseUrl(documentInfoFor(win).canonicalUrl);
       return url && url.pathname;
     },
 
@@ -88,7 +88,7 @@ export function installPixel(win) {
      * Returns the host of the URL for this AMP document.
      */
     'AMPDOC_HOST': () => {
-      let url = parseUrl(win.location.href);
+      const url = parseUrl(win.location.href);
       return url && url.hostname;
     }
   };
@@ -98,7 +98,7 @@ export function installPixel(win) {
    */
   const REPLACEMENT_EXPR = (() => {
     let all = '';
-    for (let k in REPLACEMENTS) {
+    for (const k in REPLACEMENTS) {
       all += (all.length > 0 ? '|' : '') + k;
     }
     return new RegExp('\\$(' + all + ')', 'g');

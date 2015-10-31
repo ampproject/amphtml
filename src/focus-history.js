@@ -66,7 +66,7 @@ export class FocusHistory {
    * @private
    */
   pushFocus_(element) {
-    let now = timer.now();
+    const now = timer.now();
     if (this.history_.length == 0 ||
             this.history_[this.history_.length - 1].el != element) {
       this.history_.push({el: element, time: now});

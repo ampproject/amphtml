@@ -150,8 +150,8 @@ describe('Slides functional', () => {
     });
 
     it('should update on swipe within range in neg direction', () => {
-      let prevTr = sinon.spy();
-      let nextTr = sinon.spy();
+      const prevTr = sinon.spy();
+      const nextTr = sinon.spy();
       slides.currentIndex_ = 0;
       slides.swipeState_ = {
         currentIndex: 0,
@@ -173,8 +173,8 @@ describe('Slides functional', () => {
     });
 
     it('should update on swipe within range in pos direction', () => {
-      let prevTr = sinon.spy();
-      let nextTr = sinon.spy();
+      const prevTr = sinon.spy();
+      const nextTr = sinon.spy();
       slides.currentIndex_ = 1;
       slides.swipeState_ = {
         currentIndex: 1,
@@ -196,8 +196,8 @@ describe('Slides functional', () => {
     });
 
     it('should stay in-bounds on swipe', () => {
-      let prevTr = sinon.spy();
-      let nextTr = sinon.spy();
+      const prevTr = sinon.spy();
+      const nextTr = sinon.spy();
       slides.currentIndex_ = 0;
       slides.swipeState_ = {
         currentIndex: 0,
@@ -235,10 +235,10 @@ describe('Slides functional', () => {
     });
 
     it.skip('should go next after threshold', () => {
-      let prevTr = sinon.spy();
-      let nextTr = sinon.spy();
+      const prevTr = sinon.spy();
+      const nextTr = sinon.spy();
       slides.currentIndex_ = 0;
-      let s = {
+      const s = {
         currentIndex: 0,
         prevIndex: 2,
         nextIndex: 1,
@@ -250,7 +250,7 @@ describe('Slides functional', () => {
         nextTr: nextTr
       };
       slides.swipeState_ = s;
-      let promise = slides.onSwipeEnd_({velocityX: 0});
+      const promise = slides.onSwipeEnd_({velocityX: 0});
       expect(slides.swipeState_).to.equal(null);
       return promise.then(() => {
         expect(nextTr.callCount).to.be.gt(1);
@@ -266,10 +266,10 @@ describe('Slides functional', () => {
     it('should not go past first item with a negative value when not ' +
        ' looping', () => {
       slides.isLooping_ = true;
-      let prevTr = sinon.spy();
-      let nextTr = sinon.spy();
+      const prevTr = sinon.spy();
+      const nextTr = sinon.spy();
       slides.currentIndex_ = 0;
-      let s = {
+      const s = {
         currentIndex: 0,
         prevIndex: 2,
         nextIndex: 1,
@@ -281,7 +281,7 @@ describe('Slides functional', () => {
         nextTr: nextTr
       };
       slides.swipeState_ = s;
-      let promise = slides.onSwipeEnd_({velocityX: 0});
+      const promise = slides.onSwipeEnd_({velocityX: 0});
       return promise.then(() => {
         expect(slides.currentIndex_).to.equal(0);
         expect(switchCallback.callCount).to.equal(0);
@@ -290,10 +290,10 @@ describe('Slides functional', () => {
 
     it('should go past first item with a negative value when looping', () => {
       slides.isLooping_ = true;
-      let prevTr = sinon.spy();
-      let nextTr = sinon.spy();
+      const prevTr = sinon.spy();
+      const nextTr = sinon.spy();
       slides.currentIndex_ = 0;
-      let s = {
+      const s = {
         currentIndex: 0,
         prevIndex: 2,
         nextIndex: 1,
@@ -305,7 +305,7 @@ describe('Slides functional', () => {
         nextTr: nextTr
       };
       slides.swipeState_ = s;
-      let promise = slides.onSwipeEnd_({velocityX: 0});
+      const promise = slides.onSwipeEnd_({velocityX: 0});
       return promise.then(() => {
         expect(slides.currentIndex_).to.equal(2);
         expect(switchCallback.firstCall.args[0]).to.equal(slide0);
@@ -316,10 +316,10 @@ describe('Slides functional', () => {
     it('should not go past last item with a positive value when ' +
        'not looping', () => {
       slides.isLooping_ = true;
-      let prevTr = sinon.spy();
-      let nextTr = sinon.spy();
+      const prevTr = sinon.spy();
+      const nextTr = sinon.spy();
       slides.currentIndex_ = 2;
-      let s = {
+      const s = {
         currentIndex: 2,
         prevIndex: 1,
         nextIndex: 0,
@@ -331,7 +331,7 @@ describe('Slides functional', () => {
         nextTr: nextTr
       };
       slides.swipeState_ = s;
-      let promise = slides.onSwipeEnd_({velocityX: 0});
+      const promise = slides.onSwipeEnd_({velocityX: 0});
       return promise.then(() => {
         expect(slides.currentIndex_).to.equal(2);
         expect(switchCallback.callCount).to.equal(0);
@@ -340,10 +340,10 @@ describe('Slides functional', () => {
 
     it('should go past last item with a positive value when looping', () => {
       slides.isLooping_ = true;
-      let prevTr = sinon.spy();
-      let nextTr = sinon.spy();
+      const prevTr = sinon.spy();
+      const nextTr = sinon.spy();
       slides.currentIndex_ = 2;
-      let s = {
+      const s = {
         currentIndex: 2,
         prevIndex: 1,
         nextIndex: 0,
@@ -355,7 +355,7 @@ describe('Slides functional', () => {
         nextTr: nextTr
       };
       slides.swipeState_ = s;
-      let promise = slides.onSwipeEnd_({velocityX: 0});
+      const promise = slides.onSwipeEnd_({velocityX: 0});
       return promise.then(() => {
         expect(slides.currentIndex_).to.equal(0);
         expect(switchCallback.firstCall.args[0]).to.equal(slide2);
@@ -364,10 +364,10 @@ describe('Slides functional', () => {
     });
 
     it('should go next before threshold but with velocity', () => {
-      let prevTr = sinon.spy();
-      let nextTr = sinon.spy();
+      const prevTr = sinon.spy();
+      const nextTr = sinon.spy();
       slides.currentIndex_ = 0;
-      let s = {
+      const s = {
         currentIndex: 0,
         prevIndex: 2,
         nextIndex: 1,
@@ -379,7 +379,7 @@ describe('Slides functional', () => {
         nextTr: nextTr
       };
       slides.swipeState_ = s;
-      let promise = slides.onSwipeEnd_({velocityX: -0.5});
+      const promise = slides.onSwipeEnd_({velocityX: -0.5});
       expect(slides.swipeState_).to.equal(null);
       return promise.then(() => {
         expect(nextTr.callCount).to.be.gt(1);
@@ -393,10 +393,10 @@ describe('Slides functional', () => {
     });
 
     it('should bounce back before threshold and no velocity', () => {
-      let prevTr = sinon.spy();
-      let nextTr = sinon.spy();
+      const prevTr = sinon.spy();
+      const nextTr = sinon.spy();
       slides.currentIndex_ = 0;
-      let s = {
+      const s = {
         currentIndex: 0,
         prevIndex: 2,
         nextIndex: 1,
@@ -408,7 +408,7 @@ describe('Slides functional', () => {
         nextTr: nextTr
       };
       slides.swipeState_ = s;
-      let promise = slides.onSwipeEnd_({velocityX: 0});
+      const promise = slides.onSwipeEnd_({velocityX: 0});
       expect(slides.swipeState_).to.equal(null);
       return promise.then(() => {
         expect(nextTr.callCount).to.be.gt(1);
@@ -420,10 +420,10 @@ describe('Slides functional', () => {
     });
 
     it('should bounce back before threshold and opposite velocity', () => {
-      let prevTr = sinon.spy();
-      let nextTr = sinon.spy();
+      const prevTr = sinon.spy();
+      const nextTr = sinon.spy();
       slides.currentIndex_ = 0;
-      let s = {
+      const s = {
         currentIndex: 0,
         prevIndex: 2,
         nextIndex: 1,
@@ -435,7 +435,7 @@ describe('Slides functional', () => {
         nextTr: nextTr
       };
       slides.swipeState_ = s;
-      let promise = slides.onSwipeEnd_({velocityX: 0.5});
+      const promise = slides.onSwipeEnd_({velocityX: 0.5});
       expect(slides.swipeState_).to.equal(null);
       return promise.then(() => {
         expect(nextTr.callCount).to.be.gt(1);

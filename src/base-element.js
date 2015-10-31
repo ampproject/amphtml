@@ -320,7 +320,7 @@ export class BaseElement {
     if (invocation.method == 'activate') {
       this.activate(invocation);
     } else {
-      let handler = this.actionMap_[invocation.method];
+      const handler = this.actionMap_[invocation.method];
       if (!handler) {
         throw new Error(`Method not found: ${invocation.method}`);
       }
@@ -353,7 +353,7 @@ export class BaseElement {
    */
   propagateAttributes(attributes, element) {
     for (let i = 0; i < attributes.length; i++) {
-      let attr = attributes[i];
+      const attr = attributes[i];
       if (!this.element.hasAttribute(attr)) {
         continue;
       }

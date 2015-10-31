@@ -63,15 +63,15 @@ const POSITION_FIXED_TAG_WHITELIST = {
  */
 export function scoreDimensions_(dims, maxWidth, maxHeight) {
   return dims.map(function(dim) {
-    let width = dim[0];
-    let height = dim[1];
-    let widthScore = Math.abs(width - maxWidth);
+    const width = dim[0];
+    const height = dim[1];
+    const widthScore = Math.abs(width - maxWidth);
     // if the width is over the max then we need to penalize it
-    let widthPenalty = Math.abs((maxWidth - width) * 3);
+    const widthPenalty = Math.abs((maxWidth - width) * 3);
     // we add a multiplier to height as we prioritize it more than width
-    let heightScore = Math.abs(height - maxHeight) * 2;
+    const heightScore = Math.abs(height - maxHeight) * 2;
     // if the height is over the max then we need to penalize it
-    let heightPenalty = Math.abs((maxHeight - height) * 2.5);
+    const heightPenalty = Math.abs((maxHeight - height) * 2.5);
 
     return (widthScore - widthPenalty) + (heightScore - heightPenalty);
   });
@@ -84,7 +84,7 @@ export function scoreDimensions_(dims, maxWidth, maxHeight) {
  */
 export function upgradeImages_(images) {
   Object.keys(images).forEach(key => {
-    let curDimImgs = images[key];
+    const curDimImgs = images[key];
     curDimImgs.forEach((item, index) => {
       curDimImgs[index] = item.replace(/@1x\.png$/, '@2x.png');
     });
@@ -148,9 +148,9 @@ export function installAd(win) {
     prefetchAd_() {
       // We always need the bootstrap.
       prefetchBootstrap(this.getWin());
-      let type = this.element.getAttribute('type');
-      let prefetch = adPrefetch[type];
-      let preconnect = adPreconnect[type];
+      const type = this.element.getAttribute('type');
+      const prefetch = adPrefetch[type];
+      const preconnect = adPreconnect[type];
       if (typeof prefetch == 'string') {
         this.preconnect.prefetch(prefetch);
       } else if (prefetch) {
@@ -166,7 +166,7 @@ export function installAd(win) {
         });
       }
       // If fully qualified src for ad script is specified we prefetch that.
-      let src = this.element.getAttribute('src');
+      const src = this.element.getAttribute('src');
       if (src) {
         this.preconnect.prefetch(src);
       }
@@ -187,7 +187,7 @@ export function installAd(win) {
      */
     isPositionFixed() {
       let el = this.element;
-      let body = el.ownerDocument.body;
+      const body = el.ownerDocument.body;
       do {
         if (POSITION_FIXED_TAG_WHITELIST[el.tagName]) {
           return false;
@@ -248,7 +248,7 @@ export function installAd(win) {
         margin: 'auto',
       });
 
-      let winner = this.getPlaceholderImage_();
+      const winner = this.getPlaceholderImage_();
       img.src = `https://ampproject.org/backfill/${winner}`;
       this.placeholder_ = a;
       a.appendChild(img);
@@ -261,12 +261,12 @@ export function installAd(win) {
      * @return {string} The image URL.
      */
     getPlaceholderImage_() {
-      let scores = scoreDimensions_(BACKFILL_DIMENSIONS_,
+      const scores = scoreDimensions_(BACKFILL_DIMENSIONS_,
           this.element./*REVIEW*/clientWidth,
           this.element./*REVIEW*/clientHeight);
-      let dims = BACKFILL_DIMENSIONS_[
+      const dims = BACKFILL_DIMENSIONS_[
           scores.indexOf(Math.max.apply(Math, scores))];
-      let images = BACKFILL_IMGS_[dims.join('x')];
+      const images = BACKFILL_IMGS_[dims.join('x')];
       // do we need a more sophisticated randomizer?
       return images[Math.floor(Math.random() * images.length)];
     }

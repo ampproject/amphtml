@@ -47,7 +47,7 @@ describe('Curve', () => {
     expect(getCurve(undefined)).to.equal(null);
 
     // Function is passed through.
-    let func = () => {};
+    const func = () => {};
     expect(getCurve(func)).to.equal(func);
 
     // String is translated.

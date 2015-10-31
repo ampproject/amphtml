@@ -41,9 +41,9 @@ describe('Resources', () => {
   });
 
   it('should calculate correct calcTaskScore', () => {
-    let viewportRect = layoutRectLtwh(0, 100, 300, 400);
+    const viewportRect = layoutRectLtwh(0, 100, 300, 400);
     // Task 1 is right in the middle of the viewport and priority 0
-    let task_vp0_p0 = {
+    const task_vp0_p0 = {
       resource: {
         getLayoutBox() {
           return layoutRectLtwh(0, 100, 300, 100);
@@ -52,7 +52,7 @@ describe('Resources', () => {
       priority: 0
     };
     // Task 2 is in the viewport and priority 1
-    let task_vp0_p1 = {
+    const task_vp0_p1 = {
       resource: {
         getLayoutBox() {
           return layoutRectLtwh(0, 100, 300, 100);
@@ -61,7 +61,7 @@ describe('Resources', () => {
       priority: 1
     };
     // Task 3 is above viewport and priority 0
-    let task_vpu_p0 = {
+    const task_vpu_p0 = {
       resource: {
         getLayoutBox() {
           return layoutRectLtwh(0, 0, 300, 50);
@@ -70,7 +70,7 @@ describe('Resources', () => {
       priority: 0
     };
     // Task 4 is above viewport and priority 0
-    let task_vpu_p1 = {
+    const task_vpu_p1 = {
       resource: {
         getLayoutBox() {
           return layoutRectLtwh(0, 0, 300, 50);
@@ -79,7 +79,7 @@ describe('Resources', () => {
       priority: 1
     };
     // Task 5 is below viewport and priority 0
-    let task_vpd_p0 = {
+    const task_vpd_p0 = {
       resource: {
         getLayoutBox() {
           return layoutRectLtwh(0, 600, 300, 50);
@@ -88,7 +88,7 @@ describe('Resources', () => {
       priority: 0
     };
     // Task 6 is below viewport and priority 0
-    let task_vpd_p1 = {
+    const task_vpd_p1 = {
       resource: {
         getLayoutBox() {
           return layoutRectLtwh(0, 600, 300, 50);
@@ -111,12 +111,12 @@ describe('Resources', () => {
 
   it('should calculate correct calcTaskTimeout', () => {
     // Task 1 is priority 0
-    let task_p0 = {
+    const task_p0 = {
       priority: 0,
       startTime: 0
     };
     // Task 2 is priority 1
-    let task_p1 = {
+    const task_p1 = {
       priority: 1,
       startTime: 0
     };
@@ -150,7 +150,7 @@ describe('Resources', () => {
 
   it('should not schedule non-prerenderable resource when' +
         ' document is hidden', () => {
-    let resource = {
+    const resource = {
       getState: () => {return ResourceState_.READY_FOR_LAYOUT;},
       isDisplayed: () => {return true;},
       isInViewport: () => {return true;},
@@ -164,7 +164,7 @@ describe('Resources', () => {
 
   it('should schedule prerenderable resource when' +
         ' document is hidden', () => {
-    let resource = {
+    const resource = {
       getState: () => {return ResourceState_.READY_FOR_LAYOUT;},
       isDisplayed: () => {return true;},
       isInViewport: () => {return true;},
@@ -181,7 +181,7 @@ describe('Resources', () => {
 
   it('should not schedule non-renderOutsideViewport resource when' +
         ' resource is not visible', () => {
-    let resource = {
+    const resource = {
       getState: () => {return ResourceState_.READY_FOR_LAYOUT;},
       isDisplayed: () => {return true;},
       isInViewport: () => {return false;},
@@ -195,7 +195,7 @@ describe('Resources', () => {
 
   it('should schedule renderOutsideViewport resource when' +
         ' resource is not visible', () => {
-    let resource = {
+    const resource = {
       getState: () => {return ResourceState_.READY_FOR_LAYOUT;},
       isDisplayed: () => {return true;},
       isInViewport: () => {return false;},
@@ -236,7 +236,7 @@ describe('Resources discoverWork', () => {
   }
 
   function createResource(id, rect) {
-    let resource = new Resource(id, createElement(rect), resources);
+    const resource = new Resource(id, createElement(rect), resources);
     resource.state_ = ResourceState_.READY_FOR_LAYOUT;
     resource.layoutBox_ = rect;
     return resource;
@@ -365,7 +365,7 @@ describe('Resources changeHeight', () => {
   }
 
   function createResource(id, rect) {
-    let resource = new Resource(id, createElement(rect), resources);
+    const resource = new Resource(id, createElement(rect), resources);
     resource.state_ = ResourceState_.READY_FOR_LAYOUT;
     resource.layoutBox_ = rect;
     resource.changeHeight = sinon.spy();
@@ -401,7 +401,7 @@ describe('Resources changeHeight', () => {
   });
 
   it('should schedule separate requests', () => {
-    let fallback2 = () => {};
+    const fallback2 = () => {};
     resources.scheduleChangeHeight_(resource1, 111, false, null);
     resources.scheduleChangeHeight_(resource2, 222, true, fallback2);
 
@@ -418,7 +418,7 @@ describe('Resources changeHeight', () => {
   });
 
   it('should only schedule latest request for the same resource', () => {
-    let fallback1 = () => {};
+    const fallback1 = () => {};
     resources.scheduleChangeHeight_(resource1, 111, true, fallback1);
     resources.scheduleChangeHeight_(resource1, 222, false, null);
 
@@ -462,7 +462,7 @@ describe('Resources changeHeight', () => {
     });
 
     it('should NOT change height and calls fallback', () => {
-      let fallback = sinon.spy();
+      const fallback = sinon.spy();
       resources.scheduleChangeHeight_(resource1, 111, false, fallback);
       resources.mutateWork_();
       expect(resources.changeHeightRequests_.length).to.equal(0);
@@ -581,7 +581,7 @@ describe('Resources.TaskQueue', () => {
     queue.enqueue({id: 'B', v: 2});
     queue.enqueue({id: 'C', v: 1});
 
-    let task = queue.peek(task => 10 - task.v);
+    const task = queue.peek(task => 10 - task.v);
     expect(task.id).to.equal('B');
   });
 });
@@ -903,7 +903,7 @@ describe('Resources.Resource', () => {
 
     resource.state_ = ResourceState_.READY_FOR_LAYOUT;
     resource.layoutBox_ = {left: 11, top: 12, width: 10, height: 10};
-    let promise = resource.startLayout(true);
+    const promise = resource.startLayout(true);
     expect(resource.layoutPromise_).to.not.equal(null);
     expect(resource.getState()).to.equal(ResourceState_.LAYOUT_SCHEDULED);
 
@@ -922,7 +922,7 @@ describe('Resources.Resource', () => {
 
     resource.state_ = ResourceState_.READY_FOR_LAYOUT;
     resource.layoutBox_ = {left: 11, top: 12, width: 10, height: 10};
-    let promise = resource.startLayout(true);
+    const promise = resource.startLayout(true);
     expect(resource.layoutPromise_).to.not.equal(null);
     expect(resource.getState()).to.equal(ResourceState_.LAYOUT_SCHEDULED);
 

@@ -42,7 +42,7 @@ export function adopt(global) {
   global.AMP_TAG = true;
   // If there is already a global AMP object we assume it is an array
   // of functions
-  let preregisteredElements = global.AMP || [];
+  const preregisteredElements = global.AMP || [];
 
   global.AMP = {};
   /**
@@ -75,7 +75,7 @@ export function adopt(global) {
   /** @const */
   global.AMP.assert = assert;
 
-  let viewer = viewerFor(global);
+  const viewer = viewerFor(global);
 
   /** @const */
   global.AMP.viewer = viewer;
@@ -87,7 +87,7 @@ export function adopt(global) {
     global.AMP.resources = resourcesFor(global);
   }
 
-  let viewport = viewportFor(global);
+  const viewport = viewportFor(global);
 
   /** @const */
   global.AMP.viewport = {};
@@ -106,7 +106,7 @@ export function adopt(global) {
 
   // Execute asynchronously scheduled elements.
   for (let i = 0; i < preregisteredElements.length; i++) {
-    let fn = preregisteredElements[i];
+    const fn = preregisteredElements[i];
     fn(global.AMP);
   }
 }
@@ -121,7 +121,7 @@ export function adopt(global) {
  */
 export function registerForUnitTest(win) {
   for (let i = 0; i < elementsForTesting.length; i++) {
-    let element = elementsForTesting[i];
+    const element = elementsForTesting[i];
     registerElement(win, element.name, element.implementationClass);
   }
 }

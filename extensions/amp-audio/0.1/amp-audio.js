@@ -31,7 +31,7 @@ export class AmpAudio extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    let audio = document.createElement('audio');
+    const audio = document.createElement('audio');
     if (!audio.play) {
       this.toggleFallback(true);
       return Promise.resolve();

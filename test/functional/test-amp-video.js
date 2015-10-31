@@ -27,11 +27,11 @@ describe('amp-video', () => {
     return createIframePromise().then(iframe => {
       installVideo(iframe.win);
       var v = iframe.doc.createElement('amp-video');
-      for (let key in attributes) {
+      for (const key in attributes) {
         v.setAttribute(key, attributes[key]);
       }
       if (children != null) {
-        for (let key in children) {
+        for (const key in children) {
           v.appendChild(children[key]);
         }
       }

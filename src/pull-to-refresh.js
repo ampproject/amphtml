@@ -120,7 +120,7 @@ export class PullToRefreshBlocker {
       return;
     }
 
-    let dy = event.touches[0].clientY - this.startPos_;
+    const dy = event.touches[0].clientY - this.startPos_;
 
     // Immediately cancel the P2R if dragging down.
     if (dy > 0) {

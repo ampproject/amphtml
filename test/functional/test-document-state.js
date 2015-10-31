@@ -51,14 +51,14 @@ describe('documentReady', () => {
 
   it('should call callback immediately when ready', () => {
     testDoc.readyState = 'complete';
-    let callback = sinon.spy();
+    const callback = sinon.spy();
     onDocumentReady(testDoc, callback);
     expect(callback.callCount).to.equal(1);
   });
 
   it('should wait to call callback until ready', () => {
     testDoc.readyState = 'loading';
-    let callback = sinon.spy();
+    const callback = sinon.spy();
     onDocumentReady(testDoc, callback);
     expect(callback.callCount).to.equal(0);
     expect(eventListeners['readystatechange']).to.not.equal(undefined);
@@ -72,7 +72,7 @@ describe('documentReady', () => {
 
   it('should wait to call callback for several loading events', () => {
     testDoc.readyState = 'loading';
-    let callback = sinon.spy();
+    const callback = sinon.spy();
     onDocumentReady(testDoc, callback);
     expect(callback.callCount).to.equal(0);
     expect(eventListeners['readystatechange']).to.not.equal(undefined);
@@ -125,41 +125,41 @@ describe('DocumentState', () => {
   });
 
   it('resolve vendor-prefixed properties', () => {
-    let otherDoc = {
+    const otherDoc = {
       webkitHidden: false,
       webkitVisibilityState: 'visible',
       addEventListener: (eventType, handler) => {},
       removeEventListener: (eventType, handler) => {}
     };
-    let other = new DocumentState({document: otherDoc});
+    const other = new DocumentState({document: otherDoc});
     expect(other.hiddenProp_).to.equal('webkitHidden');
     expect(other.visibilityStateProp_).to.equal('webkitVisibilityState');
     expect(other.visibilityChangeEvent_).to.equal('webkitVisibilitychange');
   });
 
   it('resolve no properties', () => {
-    let otherDoc = {
+    const otherDoc = {
       addEventListener: (eventType, handler) => {},
       removeEventListener: (eventType, handler) => {}
     };
-    let other = new DocumentState({document: otherDoc});
+    const other = new DocumentState({document: otherDoc});
     expect(other.hiddenProp_).to.equal(null);
     expect(other.visibilityStateProp_).to.equal(null);
     expect(other.visibilityChangeEvent_).to.equal(null);
   });
 
   it('should default hidden and visibilityState if unknown', () => {
-    let otherDoc = {
+    const otherDoc = {
       addEventListener: (eventType, handler) => {},
       removeEventListener: (eventType, handler) => {}
     };
-    let other = new DocumentState({document: otherDoc});
+    const other = new DocumentState({document: otherDoc});
     expect(other.isHidden()).to.equal(false);
     expect(other.getVisibilityState()).to.equal('visible');
   });
 
   it('should fire visibility change', () => {
-    let callback = sinon.spy();
+    const callback = sinon.spy();
     docState.onVisibilityChanged(callback);
 
     expect(docState.isHidden()).to.equal(false);

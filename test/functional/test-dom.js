@@ -20,7 +20,7 @@ import * as dom from '../../src/dom';
 describe('DOM', () => {
 
   it('should remove all children', () => {
-    let element = document.createElement('div');
+    const element = document.createElement('div');
     element.appendChild(document.createElement('div'));
     element.appendChild(document.createTextNode('ABC'));
     expect(element.children.length).to.equal(1);
@@ -34,11 +34,11 @@ describe('DOM', () => {
   });
 
   it('should copy all children', () => {
-    let element = document.createElement('div');
+    const element = document.createElement('div');
     element.appendChild(document.createElement('div'));
     element.appendChild(document.createTextNode('ABC'));
 
-    let other = document.createElement('div');
+    const other = document.createElement('div');
     dom.copyChildren(element, other);
 
     expect(element.children.length).to.equal(1);
@@ -52,9 +52,9 @@ describe('DOM', () => {
   });
 
   it('closest should find itself', () => {
-    let element = document.createElement('div');
+    const element = document.createElement('div');
 
-    let child = document.createElement('div');
+    const child = document.createElement('div');
     element.appendChild(child);
 
     expect(dom.closest(child, () => true)).to.equal(child);
@@ -63,12 +63,12 @@ describe('DOM', () => {
   });
 
   it('closest should find first match', () => {
-    let parent = document.createElement('parent');
+    const parent = document.createElement('parent');
 
-    let element = document.createElement('element');
+    const element = document.createElement('element');
     parent.appendChild(element);
 
-    let child = document.createElement('child');
+    const child = document.createElement('child');
     element.appendChild(child);
 
     expect(dom.closest(child, e => e.tagName == 'CHILD')).to.equal(child);
@@ -82,12 +82,12 @@ describe('DOM', () => {
   });
 
   it('closest should find first match', () => {
-    let parent = document.createElement('parent');
+    const parent = document.createElement('parent');
 
-    let element1 = document.createElement('element');
+    const element1 = document.createElement('element');
     parent.appendChild(element1);
 
-    let element2 = document.createElement('element');
+    const element2 = document.createElement('element');
     parent.appendChild(element2);
 
     expect(dom.elementByTag(parent, 'element')).to.equal(element1);
@@ -96,12 +96,12 @@ describe('DOM', () => {
 
 
   it('childElement should find first match', () => {
-    let parent = document.createElement('parent');
+    const parent = document.createElement('parent');
 
-    let element1 = document.createElement('element1');
+    const element1 = document.createElement('element1');
     parent.appendChild(element1);
 
-    let element2 = document.createElement('element2');
+    const element2 = document.createElement('element2');
     parent.appendChild(element2);
 
     expect(dom.childElement(parent, e => true)).to.equal(element1);
@@ -114,14 +114,14 @@ describe('DOM', () => {
   });
 
   it('childElementByAttr should find first match', () => {
-    let parent = document.createElement('parent');
+    const parent = document.createElement('parent');
 
-    let element1 = document.createElement('element1');
+    const element1 = document.createElement('element1');
     element1.setAttribute('attr1', '1');
     element1.setAttribute('attr12', '1');
     parent.appendChild(element1);
 
-    let element2 = document.createElement('element2');
+    const element2 = document.createElement('element2');
     element2.setAttribute('attr2', '2');
     element2.setAttribute('attr12', '2');
     parent.appendChild(element2);

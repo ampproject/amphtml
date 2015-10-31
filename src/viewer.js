@@ -23,8 +23,8 @@ import {parseQueryString, removeFragment} from './url';
 import {platform} from './platform';
 
 
-let TAG_ = 'Viewer';
-let SENTINEL_ = '__AMP__';
+const TAG_ = 'Viewer';
+const SENTINEL_ = '__AMP__';
 
 
 /**
@@ -478,7 +478,7 @@ export class Viewer {
     assert(!this.messageDeliverer_, 'message deliverer can only be set once');
     this.messageDeliverer_ = deliverer;
     if (this.messageQueue_.length > 0) {
-      let queue = this.messageQueue_.slice(0);
+      const queue = this.messageQueue_.slice(0);
       this.messageQueue_ = [];
       queue.forEach(message => {
         this.messageDeliverer_(message.eventType, message.data, false);
@@ -531,8 +531,8 @@ export class Viewer {
  * @private
  */
 export function parseParams_(str, allParams) {
-  let params = parseQueryString(str);
-  for (let k in params) {
+  const params = parseQueryString(str);
+  for (const k in params) {
     allParams[k] = params[k];
   }
 }

@@ -53,7 +53,7 @@ describe('amp-audio', () => {
           child = iframe.doc.createTextNode(childNodeAttrs.text);
         } else {
           child = iframe.doc.createElement(childNodeAttrs.tag);
-          for (let key in childNodeAttrs) {
+          for (const key in childNodeAttrs) {
             if (key !== 'tag') {
               child.setAttribute(key, childNodeAttrs[key]);
             }
@@ -148,17 +148,17 @@ describe('amp-audio', () => {
   });
 
   it('should fallback when not available', () => {
-    let savedCreateElement = document.createElement;
+    const savedCreateElement = document.createElement;
     document.createElement = name => {
       if (name == 'audio') {
         return savedCreateElement.call(document, 'audio2');
       }
       return savedCreateElement.call(document, name);
     };
-    let element = document.createElement('div');
+    const element = document.createElement('div');
     element.toggleFallback = sinon.spy();
-    let audio = new AmpAudio(element);
-    let promise = audio.layoutCallback();
+    const audio = new AmpAudio(element);
+    const promise = audio.layoutCallback();
     document.createElement = savedCreateElement;
     return promise.then(() => {
       expect(audio.audio_).to.be.undefined;

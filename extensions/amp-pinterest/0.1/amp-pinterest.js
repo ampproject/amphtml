@@ -60,15 +60,15 @@ class AmpPinterest extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
 
-    let height = this.element.getAttribute('height');
+    const height = this.element.getAttribute('height');
 
-    let width = this.element.getAttribute('width');
+    const width = this.element.getAttribute('width');
 
-    let pinDo = AMP.assert(this.element.getAttribute('data-do'),
+    const pinDo = AMP.assert(this.element.getAttribute('data-do'),
       'The data-do attribute is required for <amp-pinterest> %s',
       this.element);
 
-    let pinUrl = AMP.assert(this.element.getAttribute('data-url'),
+    const pinUrl = AMP.assert(this.element.getAttribute('data-url'),
       'The data-url attribute is required for <amp-pinterest> %s',
       this.element);
 
@@ -79,7 +79,7 @@ class AmpPinterest extends AMP.BaseElement {
     }
 
     // open a new window
-    let pop = function(url, shouldPop) {
+    const pop = function(url, shouldPop) {
       if (shouldPop) {
         // amp=1&guid=guid are already in the query before long fields
         window.open(url, '_pinit', POP);
@@ -90,8 +90,8 @@ class AmpPinterest extends AMP.BaseElement {
     };
 
     // log a string
-    let log = function(str) {
-      let call = new Image();
+    const log = function(str) {
+      const call = new Image();
       let query = 'https://log.pinterest.com/?guid=' + guid;
       query = query + '&amp=1';
       // add optional string &foo=bar
@@ -103,15 +103,15 @@ class AmpPinterest extends AMP.BaseElement {
     };
 
     // load data from API via XHR
-    let call = function(url) {
+    const call = function(url) {
       return new Promise((resolve, reject) => {
-        let xhr = new XMLHttpRequest();
+        const xhr = new XMLHttpRequest();
         xhr.onreadystatechange = function() {
           if (xhr.readyState == 4) {
             if (xhr.status == 200) {
               // all replies are JSON and should parse
               try {
-                let data = JSON.parse(xhr.responseText);
+                const data = JSON.parse(xhr.responseText);
                 resolve(data);
               } catch (err) {
                 reject(new Error('API reply was not JSON: ' + url));
@@ -127,7 +127,7 @@ class AmpPinterest extends AMP.BaseElement {
     };
 
     // set a DOM property or text attribute
-    let set = function(el, att, string) {
+    const set = function(el, att, string) {
       if (typeof el[att] === 'string') {
         el[att] = string;
       } else {
@@ -136,7 +136,7 @@ class AmpPinterest extends AMP.BaseElement {
     };
 
     // create a DOM element
-    let make = function(obj) {
+    const make = function(obj) {
       let el = false, tag, att;
       for (tag in obj) {
         el = document.createElement(tag);
@@ -151,7 +151,7 @@ class AmpPinterest extends AMP.BaseElement {
     };
 
     // filter tags from API input
-    let filter = function(str) {
+    const filter = function(str) {
       let decoded, ret;
       decoded = '';
       ret = '';
@@ -164,9 +164,9 @@ class AmpPinterest extends AMP.BaseElement {
     };
 
     // save our outside context so we can return properly after rendering
-    let that = this;
+    const that = this;
 
-    let makePin = function() {
+    const makePin = function() {
 
       // make an embedded pin widget
       // pinId will be inferred from pinUrl
@@ -179,14 +179,14 @@ class AmpPinterest extends AMP.BaseElement {
         return;
       }
 
-      let width = that.element.getAttribute('data-width');
+      const width = that.element.getAttribute('data-width');
 
-      let structure = make({'span': {}});
+      const structure = make({'span': {}});
 
-      let renderPin = function(r) {
+      const renderPin = function(r) {
 
         if (r && r.data && r.data[0] && !r.data[0].error) {
-          let p = r.data[0];
+          const p = r.data[0];
 
           // start setting our class name
           let className = '-amp-pinterest-embed-pin';
@@ -203,12 +203,12 @@ class AmpPinterest extends AMP.BaseElement {
 
           structure.className = className;
 
-          let container = make({'span': {
+          const container = make({'span': {
             'className': '-amp-pinterest-embed-pin-inner',
             'data-pin-log': 'embed_pin'
           }});
 
-          let img = make({'img': {
+          const img = make({'img': {
             'src': imgUrl,
             'className': '-amp-pinterest-embed-pin-image',
             'data-pin-no-hover': true,
@@ -218,7 +218,7 @@ class AmpPinterest extends AMP.BaseElement {
           container.appendChild(img);
 
           // repin button
-          let repin = make({'span': {
+          const repin = make({'span': {
             'className': '-amp-pinterest-rect -amp-pinterest-en-red' +
               ' -amp-pinterest-embed-pin-repin',
             'data-pin-log': 'embed_pin_repin',
@@ -229,13 +229,13 @@ class AmpPinterest extends AMP.BaseElement {
           container.appendChild(repin);
 
           // text container
-          let text = make({'span': {
+          const text = make({'span': {
             'className': '-amp-pinterest-embed-pin-text'
           }});
 
           // description
           if (p.description) {
-            let description = make({'span': {
+            const description = make({'span': {
               'className': '-amp-pinterest-embed-pin-text-block ' +
                 '-amp-pinterest-embed-pin-description',
               'textContent': filter(p.description)
@@ -245,7 +245,7 @@ class AmpPinterest extends AMP.BaseElement {
 
           // attribution
           if (p.attribution) {
-            let attribution = make({'span': {
+            const attribution = make({'span': {
               'className': '-amp-pinterest-embed-pin-text-block' +
                 ' -amp-pinterest-embed-pin-attribution'
             }});
@@ -265,12 +265,12 @@ class AmpPinterest extends AMP.BaseElement {
 
           // likes and repins
           if (p.repin_count || p.like_count) {
-            let stats = make({'span': {
+            const stats = make({'span': {
               'className': '-amp-pinterest-embed-pin-text-block' +
                 ' -amp-pinterest-embed-pin-stats'
             }});
             if (p.repin_count) {
-              let repinCount = make({'span': {
+              const repinCount = make({'span': {
                 'className': '-amp-pinterest-embed-pin-stats-repins',
                 'textContent': String(p.repin_count)
               }});
@@ -278,7 +278,7 @@ class AmpPinterest extends AMP.BaseElement {
             }
 
             if (p.like_count) {
-              let likeCount = make({'span': {
+              const likeCount = make({'span': {
                 'className': '-amp-pinterest-embed-pin-stats-likes',
                 'textContent': String(p.like_count)
               }});
@@ -290,7 +290,7 @@ class AmpPinterest extends AMP.BaseElement {
           // pinner
           if (p.pinner) {
 
-            let pinner = make({'span': {
+            const pinner = make({'span': {
               'className': '-amp-pinterest-embed-pin-text-block' +
                 ' -amp-pinterest-embed-pin-pinner'
             }});
@@ -327,14 +327,14 @@ class AmpPinterest extends AMP.BaseElement {
 
           // listen for clicks
           structure.addEventListener('click', function(e) {
-            let el = e.target;
-            let logMe = el.getAttribute('data-pin-log');
+            const el = e.target;
+            const logMe = el.getAttribute('data-pin-log');
             if (logMe) {
               log('&type=' + logMe);
             }
-            let href = el.getAttribute('data-pin-href');
+            const href = el.getAttribute('data-pin-href');
             if (href) {
-              let popThis = el.getAttribute('data-pin-pop') || false;
+              const popThis = el.getAttribute('data-pin-pop') || false;
               pop(href, popThis);
             }
             e.preventDefault();
@@ -349,7 +349,7 @@ class AmpPinterest extends AMP.BaseElement {
         }
       };
 
-      let query = 'https://widgets.pinterest.com/v3/pidgets/pins/info/' +
+      const query = 'https://widgets.pinterest.com/v3/pidgets/pins/info/' +
         '?pin_ids=' + pinId +
         '&sub=www&base_scheme=https';
       return call(query).then(r => {
@@ -357,31 +357,31 @@ class AmpPinterest extends AMP.BaseElement {
       });
     };
 
-    let makeButton = function() {
+    const makeButton = function() {
 
       // render a Pin It button
       // required: media and description
       // optional: round, color, tall, lang, count
 
-      let pinMedia =
+      const pinMedia =
         AMP.assert(that.element.getAttribute('data-media'),
         'The data-media attribute is required when <amp-pinterest> ' +
         'makes a Pin It button %s', that.element);
 
-      let pinDescription =
+      const pinDescription =
          AMP.assert(that.element.getAttribute('data-description'),
         'The data-description attribute is required when <amp-pinterest> ' +
         'makes a Pin It button %s', that.element);
 
       // options
-      let round = that.element.getAttribute('data-round');
+      const round = that.element.getAttribute('data-round');
       let color = that.element.getAttribute('data-color');
-      let tall = that.element.getAttribute('data-tall');
+      const tall = that.element.getAttribute('data-tall');
       let lang = that.element.getAttribute('data-lang');
-      let count = that.element.getAttribute('data-count');
+      const count = that.element.getAttribute('data-count');
 
       // pass a known guid when testing
-      let theGuid = that.element.getAttribute('data-volkswagen-guid') || guid;
+      const theGuid = that.element.getAttribute('data-volkswagen-guid') || guid;
 
       // build our link
       let link = 'https://www.pinterest.com/pin/create/button/';
@@ -392,15 +392,15 @@ class AmpPinterest extends AMP.BaseElement {
         encodeURIComponent(pinDescription);
 
       // start building a link
-      let a = make({'A': {
+      const a = make({'A': {
         'href': link
       }});
 
       // built it
-      let render = function(r) {
+      const render = function(r) {
 
         // shorten the pin count so it will fit in our bubble
-        let prettyPinCount = function(n) {
+        const prettyPinCount = function(n) {
           if (n > 999) {
             if (n < 1000000) {
               n = parseInt(n / 1000, 10) + 'K+';
@@ -460,7 +460,7 @@ class AmpPinterest extends AMP.BaseElement {
 
         if (r) {
 
-          let countBubble = document.createElement('SPAN');
+          const countBubble = document.createElement('SPAN');
 
           // position the count
           if (count === 'above') {
@@ -511,7 +511,7 @@ class AmpPinterest extends AMP.BaseElement {
       // only ask for a count if the operator requires it
       if (count === 'above' || count === 'beside') {
         // call the API
-        let query = 'https://widgets.pinterest.com/v1/urls/count.json?' +
+        const query = 'https://widgets.pinterest.com/v1/urls/count.json?' +
           '&return_jsonp=false' +
           '&url=' + encodeURIComponent(pinUrl);
         return call(query).then(r => {

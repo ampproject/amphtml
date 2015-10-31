@@ -30,18 +30,18 @@ import {viewerFor} from './viewer';
 import {viewportFor} from './viewport';
 import {vsync} from './vsync';
 
-let TAG_ = 'Resources';
-let RESOURCE_PROP_ = '__AMP__RESOURCE';
-let OWNER_PROP_ = '__AMP__OWNER';
-let LAYOUT_TASK_ID_ = 'L';
-let LAYOUT_TASK_OFFSET_ = 0;
-let PRELOAD_TASK_ID_ = 'P';
-let PRELOAD_TASK_OFFSET_ = 2;
-let PRIORITY_BASE_ = 10;
-let PRIORITY_PENALTY_TIME_ = 1000;
-let POST_TASK_PASS_DELAY_ = 1000;
-let MUTATE_DEFER_DELAY_ = 500;
-let FOCUS_HISTORY_TIMEOUT_ = 1000 * 60;  // 1min
+const TAG_ = 'Resources';
+const RESOURCE_PROP_ = '__AMP__RESOURCE';
+const OWNER_PROP_ = '__AMP__OWNER';
+const LAYOUT_TASK_ID_ = 'L';
+const LAYOUT_TASK_OFFSET_ = 0;
+const PRELOAD_TASK_ID_ = 'P';
+const PRELOAD_TASK_OFFSET_ = 2;
+const PRIORITY_BASE_ = 10;
+const PRIORITY_PENALTY_TIME_ = 1000;
+const POST_TASK_PASS_DELAY_ = 1000;
+const MUTATE_DEFER_DELAY_ = 500;
+const FOCUS_HISTORY_TIMEOUT_ = 1000 * 60;  // 1min
 
 
 /**
@@ -192,7 +192,7 @@ export class Resources {
 
   /** @private */
   monitorInput_() {
-    let input = inputFor(this.win);
+    const input = inputFor(this.win);
     input.onTouchDetected(detected => {
       this.toggleInputClass_('amp-mode-touch', detected);
     }, true);
@@ -220,7 +220,7 @@ export class Resources {
     if (!this.win.document.body) {
       return;
     }
-    let scrollHeight = this.win.document.body./*OK*/scrollHeight;
+    const scrollHeight = this.win.document.body./*OK*/scrollHeight;
     if (scrollHeight != this./*OK*/scrollHeight_) {
       this./*OK*/scrollHeight_ = scrollHeight;
       this.viewer_.postDocumentResized(this.viewport_.getSize().width,
@@ -264,7 +264,7 @@ export class Resources {
    * @package
    */
   add(element) {
-    let resource = new Resource((++this.resourceIdCounter_), element, this);
+    const resource = new Resource((++this.resourceIdCounter_), element, this);
     if (!element.id) {
       element.id = 'AMP_' + resource.getId();
     }
@@ -287,8 +287,8 @@ export class Resources {
    * @package
    */
   remove(element) {
-    let resource = this.getResourceForElement(element);
-    let index = resource ? this.resources_.indexOf(resource) : -1;
+    const resource = this.getResourceForElement(element);
+    const index = resource ? this.resources_.indexOf(resource) : -1;
     if (index != -1) {
       this.resources_.splice(index, 1);
     }
@@ -302,7 +302,7 @@ export class Resources {
    * @package
    */
   upgraded(element) {
-    let resource = this.getResourceForElement(element);
+    const resource = this.getResourceForElement(element);
     if (this.isRuntimeOn_) {
       resource.build(this.forceBuild_);
       this.schedulePass();
@@ -441,7 +441,7 @@ export class Resources {
       return;
     }
 
-    let prevVisible = this.visible_;
+    const prevVisible = this.visible_;
     this.visible_ = this.viewer_.isVisible();
     this.prerenderSize_ = this.viewer_.getPrerenderSize();
 
@@ -452,8 +452,8 @@ export class Resources {
       this.updateScrollHeight_();
     }
 
-    let viewportSize = this.viewport_.getSize();
-    let now = timer.now();
+    const viewportSize = this.viewport_.getSize();
+    const now = timer.now();
     log.fine(TAG_, 'PASS: at ' + now +
         ', visible=', this.visible_,
         ', forceBuild=', this.forceBuild_,
@@ -508,16 +508,16 @@ export class Resources {
    */
   mutateWork_() {
     // Read all necessary data before mutates.
-    let now = timer.now();
-    let viewportRect = this.viewport_.getRect();
-    let isScrollingStopped = (Math.abs(this.lastVelocity_) < 1e-2 &&
+    const now = timer.now();
+    const viewportRect = this.viewport_.getRect();
+    const isScrollingStopped = (Math.abs(this.lastVelocity_) < 1e-2 &&
         now - this.lastScrollTime_ > MUTATE_DEFER_DELAY_ ||
         now - this.lastScrollTime_ > MUTATE_DEFER_DELAY_ * 2);
-    let offset = 10;
+    const offset = 10;
 
     if (this.deferredMutates_.length > 0) {
       log.fine(TAG_, 'deferred mutates:', this.deferredMutates_.length);
-      let deferredMutates = this.deferredMutates_;
+      const deferredMutates = this.deferredMutates_;
       this.deferredMutates_ = [];
       for (let i = 0; i < deferredMutates.length; i++) {
         deferredMutates[i]();
@@ -527,15 +527,15 @@ export class Resources {
     if (this.changeHeightRequests_.length > 0) {
       log.fine(TAG_, 'change height requests:',
           this.changeHeightRequests_.length);
-      let changeHeightRequests = this.changeHeightRequests_;
+      const changeHeightRequests = this.changeHeightRequests_;
       this.changeHeightRequests_ = [];
 
       // Find minimum top position and run all mutates.
       let minTop = -1;
       for (let i = 0; i < changeHeightRequests.length; i++) {
-        let request = changeHeightRequests[i];
-        let resource = request.resource;
-        let box = request.resource.getLayoutBox();
+        const request = changeHeightRequests[i];
+        const resource = request.resource;
+        const box = request.resource.getLayoutBox();
         if (box.height == request.newHeight) {
           // Nothing to do.
           continue;
@@ -608,19 +608,19 @@ export class Resources {
 
     // TODO(dvoytenko): vsync separation may be needed for different phases
 
-    let now = timer.now();
+    const now = timer.now();
 
     // Ensure all resources layout phase complete; when relayoutAll is requested
     // force re-layout.
-    let relayoutAll = this.relayoutAll_;
+    const relayoutAll = this.relayoutAll_;
     this.relayoutAll_ = false;
-    let relayoutTop = this.relayoutTop_;
+    const relayoutTop = this.relayoutTop_;
     this.relayoutTop_ = -1;
 
     // Phase 1: Build and relayout as needed. All mutations happen here.
     let relayoutCount = 0;
     for (let i = 0; i < this.resources_.length; i++) {
-      let r = this.resources_[i];
+      const r = this.resources_[i];
       if (r.getState() == ResourceState_.NOT_BUILT) {
         r.build(this.forceBuild_);
       }
@@ -634,7 +634,7 @@ export class Resources {
     // there's no way to optimize this. All reads happen here.
     if (relayoutCount > 0 || relayoutAll || relayoutTop != -1) {
       for (let i = 0; i < this.resources_.length; i++) {
-        let r = this.resources_[i];
+        const r = this.resources_[i];
         if (r.getState() == ResourceState_.NOT_BUILT || r.hasOwner()) {
           continue;
         }
@@ -646,7 +646,7 @@ export class Resources {
       }
     }
 
-    let viewportRect = this.viewport_.getRect();
+    const viewportRect = this.viewport_.getRect();
     // Load viewport = viewport + 3x up/down when document is visible or
     // depending on prerenderSize in pre-render mode.
     let loadRect;
@@ -660,13 +660,13 @@ export class Resources {
     }
 
     // Visible viewport = viewport + 25% up/down.
-    let visibleRect = expandLayoutRect(viewportRect, 0.25, 0.25);
+    const visibleRect = expandLayoutRect(viewportRect, 0.25, 0.25);
 
     // Phase 3: Schedule elements for layout within a reasonable distance from
     // current viewport.
     if (loadRect) {
       for (let i = 0; i < this.resources_.length; i++) {
-        let r = this.resources_[i];
+        const r = this.resources_[i];
         if (r.getState() != ResourceState_.READY_FOR_LAYOUT || r.hasOwner()) {
           continue;
         }
@@ -678,7 +678,7 @@ export class Resources {
 
     // Phase 4: Trigger "viewport enter/exit" events.
     for (let i = 0; i < this.resources_.length; i++) {
-      let r = this.resources_[i];
+      const r = this.resources_[i];
       if (r.hasOwner()) {
         continue;
       }
@@ -699,7 +699,7 @@ export class Resources {
           now > this.exec_.getLastDequeueTime() + 5000) {
       let idleScheduledCount = 0;
       for (let i = 0; i < this.resources_.length; i++) {
-        let r = this.resources_[i];
+        const r = this.resources_[i];
         if (r.getState() == ResourceState_.READY_FOR_LAYOUT &&
                 !r.hasOwner() && r.isDisplayed()) {
           log.fine(TAG_, 'idle layout:', r.debugid);
@@ -720,7 +720,7 @@ export class Resources {
    */
   documentBecameInactive_() {
     for (let i = 0; i < this.resources_.length; i++) {
-      let r = this.resources_[i];
+      const r = this.resources_[i];
       r.documentBecameInactive();
     }
   }
@@ -738,9 +738,9 @@ export class Resources {
    * @private
    */
   work_() {
-    let now = timer.now();
+    const now = timer.now();
 
-    let scorer = this.calcTaskScore_.bind(this, this.viewport_.getRect(),
+    const scorer = this.calcTaskScore_.bind(this, this.viewport_.getRect(),
         Math.sign(this.lastVelocity_));
 
     let timeout = -1;
@@ -760,7 +760,7 @@ export class Resources {
 
         // Do not override a task in execution. This task will have to wait
         // until the current one finished the execution.
-        let executing = this.exec_.getTaskById(task.id);
+        const executing = this.exec_.getTaskById(task.id);
         if (!executing) {
           // Ensure that task can prerender
           task.promise = task.callback(this.visible_);
@@ -820,7 +820,7 @@ export class Resources {
    * @private
    */
   calcTaskScore_(viewportRect, dir, task) {
-    let box = task.resource.getLayoutBox();
+    const box = task.resource.getLayoutBox();
     let posPriority = Math.floor((box.top - viewportRect.top) /
         viewportRect.height);
     if (posPriority != 0 && Math.sign(posPriority) != (dir || 1)) {
@@ -849,12 +849,12 @@ export class Resources {
       return 0;
     }
 
-    let now = timer.now();
+    const now = timer.now();
     let timeout = 0;
     this.exec_.forEach(other => {
       // Higher priority tasks get the head start. Currently 500ms per a drop
       // in priority (note that priority is 10-based).
-      let penalty = Math.max((task.priority - other.priority) *
+      const penalty = Math.max((task.priority - other.priority) *
           PRIORITY_PENALTY_TIME_, 0);
       // TODO(dvoytenko): Consider running total and not maximum.
       timeout = Math.max(timeout, penalty - (now - other.startTime));
@@ -978,7 +978,7 @@ export class Resources {
    * @private
    */
   scheduleLayoutOrPreloadForSubresources_(parentResource, layout, subElements) {
-    let resources = [];
+    const resources = [];
     this.discoverResourcesForArray_(parentResource, subElements, resource => {
       if (resource.getState() != ResourceState_.NOT_BUILT) {
         resources.push(resource);
@@ -1006,9 +1006,9 @@ export class Resources {
    * @private
    */
   schedule_(resource, localId, priorityOffset, parentPriority, callback) {
-    let taskId = resource.debugid + '#' + localId;
+    const taskId = resource.debugid + '#' + localId;
 
-    let task = {
+    const task = {
       id: taskId,
       resource: resource,
       priority: Math.max(resource.getPriority(), parentPriority) +
@@ -1020,7 +1020,7 @@ export class Resources {
 
     // Only schedule a new task if there's no one enqueued yet or if this task
     // has a higher priority.
-    let queued = this.queue_.getTaskById(taskId);
+    const queued = this.queue_.getTaskById(taskId);
     if (!queued || task.priority < queued.priority) {
       if (queued) {
         this.queue_.dequeue(queued);
@@ -1040,7 +1040,7 @@ export class Resources {
    */
   updateInViewportForSubresources_(parentResource, subElements,
       inLocalViewport) {
-    let inViewport = parentResource.isInViewport() && inLocalViewport;
+    const inViewport = parentResource.isInViewport() && inLocalViewport;
     this.discoverResourcesForArray_(parentResource, subElements, resource => {
       resource.setInViewport(inViewport);
     });
@@ -1068,10 +1068,10 @@ export class Resources {
     if (element.classList.contains('-amp-element')) {
       callback(this.getResourceForElement(element));
     } else {
-      let ampElements = element.getElementsByClassName('-amp-element');
-      let seen = [];
+      const ampElements = element.getElementsByClassName('-amp-element');
+      const seen = [];
       for (let i = 0; i < ampElements.length; i++) {
-        let ampElement = ampElements[i];
+        const ampElement = ampElements[i];
         let covered = false;
         for (let j = 0; j < seen.length; j++) {
           if (seen[j].contains(ampElement)) {
@@ -1158,7 +1158,7 @@ export class Resource {
    */
   getOwner() {
     if (this.owner_ === undefined) {
-      let n = this.element;
+      const n = this.element;
       for (let n = this.element; n; n = n.parentElement) {
         if (n[OWNER_PROP_]) {
           this.owner_ = n[OWNER_PROP_];
@@ -1251,7 +1251,7 @@ export class Resource {
       // Can't measure unbuilt element.
       return;
     }
-    let box = this.resources_.viewport_.getLayoutRect(this.element);
+    const box = this.resources_.viewport_.getLayoutRect(this.element);
     // Note that "left" doesn't affect readiness for the layout.
     if (this.state_ == ResourceState_.NOT_LAID_OUT ||
           this.layoutBox_.top != box.top ||
@@ -1557,7 +1557,7 @@ export class TaskQueue_ {
    * @return {boolean}
    */
   dequeue(task) {
-    let existing = this.taskIdMap_[task.id];
+    const existing = this.taskIdMap_[task.id];
     if (!existing) {
       return false;
     }
@@ -1577,8 +1577,8 @@ export class TaskQueue_ {
     let minScore = 1e6;
     let minTask = null;
     for (let i = 0; i < this.tasks_.length; i++) {
-      let task = this.tasks_[i];
-      let score = scorer(task);
+      const task = this.tasks_[i];
+      const score = scorer(task);
       if (score < minScore) {
         minScore = score;
         minTask = task;

@@ -86,7 +86,7 @@ export const LOADING_ELEMENTS_ = {
  *   the layout string.
  */
 export function parseLayout(s) {
-  for (let k in Layout) {
+  for (const k in Layout) {
     if (Layout[k] == s) {
       return Layout[k];
     }
@@ -123,7 +123,7 @@ export function isLayoutSizeDefined(layout) {
  * @return {boolean}
  */
 export function isInternalElement(tag) {
-  let tagName = (typeof tag == 'string') ? tag : tag.tagName;
+  const tagName = (typeof tag == 'string') ? tag : tag.tagName;
   return tagName && tagName.toLowerCase().indexOf('i-') == 0;
 }
 
@@ -170,7 +170,7 @@ export function assertLength(length) {
  */
 export function getLengthUnits(length) {
   assertLength(length);
-  let m = assert(length.match(/[a-z]+/i),
+  const m = assert(length.match(/[a-z]+/i),
       'Failed to read units from %s', length);
   return m[0];
 }
@@ -207,8 +207,8 @@ export function hasNaturalDimensions(tagName) {
 export function getNaturalDimensions(tagName) {
   tagName = tagName.toUpperCase();
   if (!naturalDimensions_[tagName]) {
-    let naturalTagName = tagName.replace(/^AMP\-/, '');
-    let temp = document.createElement(naturalTagName);
+    const naturalTagName = tagName.replace(/^AMP\-/, '');
+    const temp = document.createElement(naturalTagName);
     // For audio, should no-op elsewhere.
     temp.controls = true;
     temp.style.position = 'absolute';

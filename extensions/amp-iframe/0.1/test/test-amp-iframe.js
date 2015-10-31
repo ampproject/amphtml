@@ -56,7 +56,7 @@ describe('amp-iframe', () => {
         i.style.transform = 'translateY(' + opt_translateY + ')';
       }
       if (attributes.resizable !== undefined) {
-        let overflowEl = iframe.doc.createElement('div');
+        const overflowEl = iframe.doc.createElement('div');
         overflowEl.setAttribute('overflow', '');
         i.appendChild(overflowEl);
       }
@@ -266,9 +266,9 @@ describe('amp-iframe', () => {
       height: 100,
       resizable: ''
     }).then(amp => {
-      let impl = amp.container.implementation_;
+      const impl = amp.container.implementation_;
       impl.layoutCallback();
-      let p = new Promise((resolve, reject) => {
+      const p = new Promise((resolve, reject) => {
         impl.updateHeight_ = newHeight => {
           resolve({amp: amp, newHeight: newHeight});
         };
@@ -293,7 +293,7 @@ describe('amp-iframe', () => {
       height: 100,
       resizable: ''
     }).then(amp => {
-      let impl = amp.container.implementation_;
+      const impl = amp.container.implementation_;
       impl.requestChangeHeight = sinon.spy();
       impl.changeHeight = sinon.spy();
       impl.updateHeight_(217);
@@ -301,7 +301,7 @@ describe('amp-iframe', () => {
       expect(impl.requestChangeHeight.callCount).to.equal(1);
       expect(impl.requestChangeHeight.firstCall.args[0]).to.equal(217);
 
-      let fallback = impl.requestChangeHeight.firstCall.args[1];
+      const fallback = impl.requestChangeHeight.firstCall.args[1];
       fallback(219);
       expect(impl.overflowElement_).to.not.be.null;
       expect(impl.overflowElement_).to.have.class('-amp-overflow');
@@ -320,7 +320,7 @@ describe('amp-iframe', () => {
       width: 100,
       height: 100
     }).then(amp => {
-      let impl = amp.container.implementation_;
+      const impl = amp.container.implementation_;
       impl.requestChangeHeight = sinon.spy();
       impl.changeHeight = sinon.spy();
       impl.updateHeight_(217);

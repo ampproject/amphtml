@@ -80,7 +80,7 @@ export function installStyles(doc, cssText, cb, opt_isRuntimeCss) {
  */
 export function makeBodyVisible(doc) {
   let interval;
-  let set = () => {
+  const set = () => {
     if (doc.body) {
       doc.body.style.opacity = 1;
       clearInterval(interval);

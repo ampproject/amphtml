@@ -135,7 +135,7 @@ describe('amp-fit-text updateOverflow', () => {
   });
 
   function getLineClamp() {
-    for (let k in content.style) {
+    for (const k in content.style) {
       if (k == 'lineClamp' || k.match(/.*LineClamp/)) {
         return content.style[k];
       }

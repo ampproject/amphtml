@@ -23,8 +23,8 @@ describe('Srcset parseSrcset', () => {
     var res = parseSrcset(s);
     expect(res.sources_.length).to.equal(expected.length);
     for (let i = 0; i < expected.length; i++) {
-      let r = res.sources_[i];
-      let e = expected[i];
+      const r = res.sources_[i];
+      const e = expected[i];
       expect(r.url).to.equal(e.url);
       expect(r.width).to.equal(e.width);
       expect(r.dpr).to.equal(e.dpr);
@@ -244,7 +244,7 @@ describe('Srcset construct', () => {
 
 describe('Srcset select', () => {
   it('select by width', () => {
-    let srcset = new Srcset([
+    const srcset = new Srcset([
         {url: 'image-1000', width: 1000},
         {url: 'image-500', width: 500},
         {url: 'image-250', width: 250},
@@ -283,7 +283,7 @@ describe('Srcset select', () => {
   });
 
   it('select by dpr', () => {
-    let srcset = new Srcset([
+    const srcset = new Srcset([
         {url: 'image-3x', dpr: 3},
         {url: 'image-2x', dpr: 2},
         {url: 'image', dpr: 1}

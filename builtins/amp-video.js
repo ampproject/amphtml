@@ -37,9 +37,9 @@ export function installVideo(win) {
 
     /** @override */
     layoutCallback() {
-      let width = this.element.getAttribute('width');
-      let height = this.element.getAttribute('height');
-      let video = document.createElement('video');
+      const width = this.element.getAttribute('width');
+      const height = this.element.getAttribute('height');
+      const video = document.createElement('video');
       if (!video.play) {
         this.toggleFallback(true);
         return Promise.resolve();
