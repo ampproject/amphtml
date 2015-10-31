@@ -72,14 +72,16 @@ describe('amp-ad', () => {
       var doc = iframe.ownerDocument;
       var fetches = doc.querySelectorAll(
           'link[rel=prefetch]');
-      expect(fetches).to.have.length(4);
+      expect(fetches).to.have.length(3);
       expect(fetches[0].href).to.equal(
           'http://ads.localhost/dist.3p/current/frame.max.html');
       expect(fetches[1].href).to.equal(
           'https://3p.ampproject.net/$internalRuntimeVersion$/f.js');
       expect(fetches[2].href).to.equal(
           'https://c.amazon-adsystem.com/aax2/assoc.js');
-      expect(fetches[3].href).to.equal(
+      var preconnects = doc.querySelectorAll(
+          'link[rel=preconnect]');
+      expect(preconnects[preconnects.length - 1].href).to.equal(
           'https://testsrc/');
     });
   });

@@ -165,10 +165,12 @@ export function installAd(win) {
           this.preconnect.url(p);
         });
       }
-      // If fully qualified src for ad script is specified we prefetch that.
+      // If fully qualified src for ad script is specified we preconnect to it.
       const src = this.element.getAttribute('src');
       if (src) {
-        this.preconnect.prefetch(src);
+        // We only preconnect to the src because we cannot know whether the URL
+        // will have caching headers set.
+        this.preconnect.url(src);
       }
     }
 
