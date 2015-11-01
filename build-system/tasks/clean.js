@@ -24,7 +24,7 @@ var gulp = require('gulp-help')(require('gulp'));
  * @param {function} done callback
  */
 function clean(done) {
-  del(['dist', 'dist.3p', 'build', 'examples.build'], done);
+  return del(['dist', 'dist.3p', 'build', 'examples.build']);
 }
 
 

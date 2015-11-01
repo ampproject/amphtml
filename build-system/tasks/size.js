@@ -14,35 +14,31 @@
  * limitations under the License.
  */
 
-var table = require('text-table');
 var del = require('del');
 var fs = require('fs');
 var gulp = require('gulp-help')(require('gulp'));
 var gutil = require('gulp-util');
 var gzipSize = require('gzip-size');
 var prettyBytes = require('pretty-bytes');
+var runSequence = require('run-sequence');
+var sortedObject = require('sorted-object');
 var through = require('through2');
 
 
 var tempFolderName = '__size-temp';
 
-var tableHeaders = [['size', 'gzip', 'file'], ['---', '---', '---']];
-
-var tableOptions = {
-  align: ['r', 'r', 'l'],
-  hsep: '   |   ',
-};
 
 /**
  * Through2 transform function - Tracks the original size and the gzipped size
  * of the file content in the rows array. Passes the file and/or err to the
  * callback when finished.
- * @param {!Array<!Array<string>>} rows array to store content size information
+ * @param {!Object} files
+ * @param {!Object} gzipFiles
  * @param {!File} file File to process
  * @param {string} enc Encoding (not used)
  * @param {function(?Error, !File)} cb Callback function
  */
-function onFileThrough(rows, file, enc, cb) {
+function onFileThrough(files, gzipFiles, file, enc, cb) {
   if (file.isNull()) {
     cb(null, file);
     return;
@@ -53,28 +49,25 @@ function onFileThrough(rows, file, enc, cb) {
     return;
   }
 
-  rows.push([
-    prettyBytes(file.contents.length),
-    prettyBytes(gzipSize.sync(file.contents)),
-    file.relative,
-  ]);
+  files[file.relative] = prettyBytes(file.contents.length);
+  gzipFiles[file.relative] = prettyBytes(gzipSize.sync(file.contents));
 
   cb(null, file);
 }
 
 /**
- * Through2 flush function - combines headers with the rows and generates
- * a text-table of the content size information to log to the console and the
- * test/size.txt logfile.
- *
- * @param {!Array<!Array<string>>} rows array of content size information
+ * Through2 flush function - write the json files to disk.
+ * @param {!Object} files
+ * @param {!Object} gzipFiles
  * @param {function()} cb Callback function
  */
-function onFileThroughEnd(rows , cb) {
-  rows.unshift.apply(rows, tableHeaders);
-  var tbl = table(rows, tableOptions);
-  console/*OK*/.log(tbl);
-  fs.writeFileSync('test/size.txt', tbl);
+function onFileThroughEnd(files, gzipFiles, cb) {
+  files = sortedObject(files);
+  gzipFiles = sortedObject(gzipFiles);
+  var jsonUnmin = JSON.stringify(files, null, 2);
+  var jsonMin = JSON.stringify(gzipFiles, null, 2);
+  fs.writeFileSync('test/sizes.json', jsonUnmin + '\n');
+  fs.writeFileSync('test/sizes.gzip.json', jsonMin + '\n');
   cb();
 }
 
@@ -84,10 +77,11 @@ function onFileThroughEnd(rows , cb) {
  * @return {!Stream} a Writable Stream
  */
 function sizer() {
-  var rows = [];
+  var files = Object.create(null);
+  var gzipFiles = Object.create(null);
   return through.obj(
-      onFileThrough.bind(null, rows),
-      onFileThroughEnd.bind(null, rows)
+      onFileThrough.bind(null, files, gzipFiles),
+      onFileThroughEnd.bind(null, files, gzipFiles)
   );
 }
 
@@ -97,10 +91,18 @@ function sizer() {
  * output from the process.
  */
 function sizeTask() {
-  gulp.src(['dist/**/*.js', 'dist.3p/{current,current-min}/**/*.js'])
+  return gulp.src(['dist/**/*.js', 'dist.3p/{current,current-min}/**/*.js'])
     .pipe(sizer())
     .pipe(gulp.dest(tempFolderName))
     .on('end', del.bind(null, [tempFolderName]));
 }
 
+function rebuildAndSize() {
+  runSequence('clean', 'build', 'dist', 'size');
+}
+
 gulp.task('size', 'Runs a report on artifact size', sizeTask);
+
+// NOTE: (erwinm) this does not currently work properly as `build`
+// and or `dist` are currently not fully asynchronous.
+gulp.task('dist:size', 'Rebuilds and runs size', rebuildAndSize);
