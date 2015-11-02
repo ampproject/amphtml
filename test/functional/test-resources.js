@@ -362,7 +362,8 @@ describe('Resources changeHeight', () => {
       prerenderAllowed: () => true,
       renderOutsideViewport: () => false,
       isRelayoutNeeded: () => true,
-      contains: otherElement => false
+      contains: otherElement => false,
+      updateLayoutBox: () => {},
     };
   }
 
