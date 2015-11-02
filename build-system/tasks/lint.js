@@ -71,7 +71,7 @@ function lint() {
 function lintFix(done) {
   // Temporary until we figure out gulp-eslint fix and destination write.
   exec('node_modules/eslint/bin/eslint.js ' +
-      '{src,3p,ads,builtins,extensions,testing,test}/**/*.js ' +
+      '{src,3p,ads,builtins,extensions,testing,test}/**/*.js gulpfile.js ' +
       '-c .eslintrc --fix --plugin google-camelcase',
       function(err, stdout, stderr) {
         if (err) {
