@@ -101,7 +101,7 @@ export function installPixel(win) {
     for (const k in REPLACEMENTS) {
       all += (all.length > 0 ? '|' : '') + k;
     }
-    return new RegExp('\\$(' + all + ')', 'g');
+    return new RegExp('\\$?(' + all + ')', 'g');
   })();
 
 
