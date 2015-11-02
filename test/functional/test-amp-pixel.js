@@ -136,7 +136,17 @@ describe('amp-pixel', () => {
         });
   });
 
-  it('replace $UNKNOWN', () => {
+  it('replace %24CANONICAL_URL', () => {
+    return getPixel(
+        'https://foo.com?href=%24CANONICAL_URL'
+        ).then(p => {
+          expect(p.querySelector('img')).to.not.be.null;
+          expect(p.children[0].src).to.equal(
+              'https://foo.com/?href=https%3A%2F%2Fpinterest.com%2Fpin1');
+        });
+  });
+
+  it('not replace $UNKNOWN', () => {
     return getPixel(
         'https://foo.com/?a=$UNKNOWN'
         ).then(p => {
