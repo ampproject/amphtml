@@ -151,10 +151,11 @@ describe('Resources', () => {
   it('should not schedule non-prerenderable resource when' +
         ' document is hidden', () => {
     const resource = {
-      getState: () => {return ResourceState_.READY_FOR_LAYOUT;},
-      isDisplayed: () => {return true;},
-      isInViewport: () => {return true;},
-      prerenderAllowed: () => {return false;},
+      getState: () => ResourceState_.READY_FOR_LAYOUT,
+      isDisplayed: () => true,
+      isInViewport: () => true,
+      prerenderAllowed: () => false,
+      renderOutsideViewport: () => false,
       startLayout: () => {}
     };
     resources.visible_ = false;
@@ -165,12 +166,12 @@ describe('Resources', () => {
   it('should schedule prerenderable resource when' +
         ' document is hidden', () => {
     const resource = {
-      getState: () => {return ResourceState_.READY_FOR_LAYOUT;},
-      isDisplayed: () => {return true;},
-      isInViewport: () => {return true;},
-      prerenderAllowed: () => {return true;},
-      renderOutsideViewport: () => {return true;},
-      getPriority: () => {return 1;},
+      getState: () => ResourceState_.READY_FOR_LAYOUT,
+      isDisplayed: () => true,
+      isInViewport: () => true,
+      prerenderAllowed: () => true,
+      renderOutsideViewport: () => true,
+      getPriority: () => 1,
       startLayout: () => {},
       layoutScheduled: () => {}
     };
@@ -182,11 +183,11 @@ describe('Resources', () => {
   it('should not schedule non-renderOutsideViewport resource when' +
         ' resource is not visible', () => {
     const resource = {
-      getState: () => {return ResourceState_.READY_FOR_LAYOUT;},
-      isDisplayed: () => {return true;},
-      isInViewport: () => {return false;},
-      prerenderAllowed: () => {return true;},
-      renderOutsideViewport: () => {return false;},
+      getState: () => ResourceState_.READY_FOR_LAYOUT,
+      isDisplayed: () => true,
+      isInViewport: () => false,
+      prerenderAllowed: () => true,
+      renderOutsideViewport: () => false,
       startLayout: () => {},
     };
     resources.scheduleLayoutOrPreload_(resource, true);
@@ -196,12 +197,12 @@ describe('Resources', () => {
   it('should schedule renderOutsideViewport resource when' +
         ' resource is not visible', () => {
     const resource = {
-      getState: () => {return ResourceState_.READY_FOR_LAYOUT;},
-      isDisplayed: () => {return true;},
-      isInViewport: () => {return false;},
-      prerenderAllowed: () => {return true;},
-      renderOutsideViewport: () => {return true;},
-      getPriority: () => {return 1;},
+      getState: () => ResourceState_.READY_FOR_LAYOUT,
+      isDisplayed: () => true,
+      isInViewport: () => false,
+      prerenderAllowed: () => true,
+      renderOutsideViewport: () => true,
+      getPriority: () => 1,
       startLayout: () => {},
       layoutScheduled: () => {}
     };
@@ -230,8 +231,8 @@ describe('Resources discoverWork', () => {
       applySizesAndMediaQuery: () => {},
       viewportCallback: sinon.spy(),
       prerenderAllowed: () => true,
-      isRelayoutNeeded: () => true,
       renderOutsideViewport: () => true,
+      isRelayoutNeeded: () => true,
     };
   }
 
@@ -359,6 +360,7 @@ describe('Resources changeHeight', () => {
       applySizesAndMediaQuery: () => {},
       viewportCallback: sinon.spy(),
       prerenderAllowed: () => true,
+      renderOutsideViewport: () => false,
       isRelayoutNeeded: () => true,
       contains: otherElement => false
     };
@@ -602,14 +604,14 @@ describe('Resources.Resource', () => {
 
     element = {
       tagName: 'AMP-AD',
-      isBuilt: () => {return false;},
-      isUpgraded: () => {return false;},
-      prerenderAllowed: () => {return false;},
-      renderOutsideViewport: () => {return true;},
-      build: force => {return false;},
-      getBoundingClientRect: () => {return null;},
+      isBuilt: () => false,
+      isUpgraded: () => false,
+      prerenderAllowed: () => false,
+      renderOutsideViewport: () => true,
+      build: force => false,
+      getBoundingClientRect: () => null,
       updateLayoutBox: () => {},
-      isRelayoutNeeded: () => {return false;},
+      isRelayoutNeeded: () => false,
       layoutCallback: () => {},
       changeHeight: () => {},
       documentInactiveCallback: () => false,
