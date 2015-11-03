@@ -32,9 +32,8 @@ If you have any questions, feel free to ask on the issue or join us on [Slack](h
 
 1. Install [NodeJS](https://nodejs.org).
 2. In the repo directory, run `npm i` command to install the required npm packages.
-4. run `sudo npm i -g gulp` command to install gulp in your local bin folder ('/usr/local/bin/' on Mac).
-5. run `sudo npm i -g http-server` command to install http server in your local bin folder ('/usr/local/bin/' on Mac).
-6. `edit /etc/hosts` and map `ads.localhost` and `iframe.localhost` to `127.0.0.1`.
+3. run `sudo npm i -g gulp` command to install gulp in your local bin folder ('/usr/local/bin/' on Mac).
+4. `edit /etc/hosts` and map `ads.localhost` and `iframe.localhost` to `127.0.0.1`.
 <pre>
   127.0.0.1               ads.localhost iframe.localhost
 </pre>
@@ -43,7 +42,7 @@ If you have any questions, feel free to ask on the issue or join us on [Slack](h
 
 | Command                       | Description                                                           |
 | ----------------------------- | --------------------------------------------------------------------- |
-| `gulp`                        | Same as "watch".                                                      |
+| `gulp`                        | Runs "watch" and "serve".                                             |
 | `gulp dist`                   | Builds production binaries.                                           |
 | `gulp lint`                   | Validates against Google Closure Linter.                              |
 | `gulp lint --watch`           | Watches for changes in files, Validates against Google Closure Linter.|
@@ -57,10 +56,11 @@ If you have any questions, feel free to ask on the issue or join us on [Slack](h
 | `gulp test --verbose`         | Runs tests in Chrome with logging enabled.                            |
 | `gulp test --watch`           | Watches for changes in files, runs corresponding test(s) in Chrome.   |
 | `gulp test --watch --verbose` | Same as "watch" with logging enabled.                                 |
-| `gulp test --saucelabs`       | Runs test on saucelabs (requires [setup](#saucelabs))                 |
+| `gulp test --saucelabs`       | Runs test on saucelabs (requires [setup](#saucelabs)).                |
 | `gulp test --safari`          | Runs tests in Safari.                                                 |
 | `gulp test --firefox`         | Runs tests in Firefox.                                                |
-| `http-server -p 8000 -c-1`    | Serves content in current working dir over http://localhost:8000/     |
+| `gulp serve`                  | Serves content in repo root dir over http://localhost:8000/.          |
+|-------------------------------|-----------------------------------------------------------------------|
 
 To fix issues with Safari test runner launching multiple instances of the test, run:
 <pre>
