@@ -258,7 +258,7 @@ function checkForbiddenAndRequiredTerms() {
         return errorFound;
       });
       missingRequirements = files.map(isMissingTerms).some(
-      	  function(errorFound) {
+          function(errorFound) {
         return errorFound;
       });
     }))

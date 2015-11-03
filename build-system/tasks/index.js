@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+require('./babel-helpers');
 require('./clean');
 require('./lint');
 require('./make-golden');

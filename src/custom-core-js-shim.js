@@ -80,7 +80,7 @@ require('core-js/modules/es6.math.sign');
 //require('core-js/modules/es6.string.includes');
 //require('core-js/modules/es6.string.repeat');
 //require('core-js/modules/es6.string.starts-with');
-require('core-js/modules/es6.array.from');
+//require('core-js/modules/es6.array.from');
 //require('core-js/modules/es6.array.of');
 //require('core-js/modules/es6.array.iterator');
 //require('core-js/modules/es6.array.species');

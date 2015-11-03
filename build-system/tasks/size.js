@@ -17,7 +17,7 @@
 var del = require('del');
 var fs = require('fs');
 var gulp = require('gulp-help')(require('gulp'));
-var gutil = require('gulp-util');
+var util = require('gulp-util');
 var gzipSize = require('gzip-size');
 var prettyBytes = require('pretty-bytes');
 var runSequence = require('run-sequence');
@@ -45,7 +45,7 @@ function onFileThrough(files, gzipFiles, file, enc, cb) {
   }
 
   if (file.isStream()) {
-    cb(new gutil.PluginError('size-task', 'Stream not supported'));
+    cb(new util.PluginError('size', 'Stream not supported'));
     return;
   }
 
