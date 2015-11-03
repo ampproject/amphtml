@@ -34,7 +34,7 @@
     "del": "2.0.2",
     "eslint": "1.7.3",
     "eslint-plugin-google-camelcase": "0.0.2",
-    "fs-extra": "0.26.0",
+    "fs-extra": "0.26.2",
     "gulp": "3.9.0",
     "gulp-eslint": "1.0.0",
     "gulp-exec": "2.1.2",
