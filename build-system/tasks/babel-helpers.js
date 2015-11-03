@@ -58,7 +58,7 @@ function onFileThrough(helpers, file, enc, cb) {
 function onFileThroughEnd(usedHelpers, cb) {
   var helpers = [].concat.apply([], usedHelpers);
   var content = babel.buildExternalHelpers(helpers);
-  fs.writeFileSync('third_party/babel/custom-babel-helpers.js', `${content}\n`);
+  fs.writeFileSync('third_party/babel/custom-babel-helpers.js', content +'\n');
   cb();
 }
 
