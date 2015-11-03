@@ -25,7 +25,6 @@ goog.provide('goog.crypt.base64');
 
 goog.require('goog.asserts');
 goog.require('goog.crypt');
-goog.require('goog.userAgent');
 
 // Static lookup maps, lazily populated by init_()
 
@@ -90,17 +89,12 @@ goog.crypt.base64.ENCODED_VALS_WEBSAFE =
 
 
 /**
- * Whether this browser supports the atob and btoa functions. This extension
- * started at Mozilla but is now implemented by many browsers. We use the
- * ASSUME_* variables to avoid pulling in the full useragent detection library
- * but still allowing the standard per-browser compilations.
+ * FORK in AMP HTML: We assume all supported browsers have native support
+ * for base64.
  *
- * @type {boolean}
+ * @const {boolean}
  */
-goog.crypt.base64.HAS_NATIVE_SUPPORT = goog.userAgent.GECKO ||
-                                       goog.userAgent.WEBKIT ||
-                                       goog.userAgent.OPERA ||
-                                       typeof(goog.global.atob) == 'function';
+goog.crypt.base64.HAS_NATIVE_SUPPORT = true;
 
 
 /**
