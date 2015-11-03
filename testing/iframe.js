@@ -145,6 +145,7 @@ export function createFixtureIframe(fixture, initialIframeHeight, done) {
  *   that element. When the promise is resolved we will have called the entire
  *   lifecycle including layoutCallback.
  * @param {boolean=} opt_runtimeOff Whether runtime should be turned off.
+ * @param {function()=} opt_beforeLayoutCallback
  * @return {!Promise<{
  *   win: !Window,
  *   doc: !Document,
@@ -152,7 +153,7 @@ export function createFixtureIframe(fixture, initialIframeHeight, done) {
  *   addElement: function(!Element):!Promise
  * }>}
  */
-export function createIframePromise(opt_runtimeOff) {
+export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
   return new Promise(function(resolve, reject) {
     var iframe = document.createElement('iframe');
     iframe.name = 'test_' + iframeCount++;
@@ -179,6 +180,9 @@ export function createIframePromise(opt_runtimeOff) {
             element.style.display = 'block';
             element.build(true);
             if (element.layoutCount_ == 0) {
+              if (opt_beforeLayoutCallback) {
+                opt_beforeLayoutCallback();
+              }
               element.layoutCallback();
             }
             return element;
