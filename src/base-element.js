@@ -389,7 +389,8 @@ export class BaseElement {
   }
 
   /**
-   * Hides or shows the fallback, if available.
+   * Hides or shows the fallback, if available. This function must only
+   * be called inside a mutate context.
    * @param {boolean} state
    * @protected @final
    */

@@ -245,7 +245,7 @@ export function installAd(win) {
 
         // Triggered by context.noContentAvailable() inside the ad iframe.
         const unlisten = listen(this.iframe_, 'no-content', () => {
-          this.noContentHandler_();
+          this.deferMutate(this.noContentHandler_.bind(this));
           unlisten();
         });
       }
@@ -257,7 +257,6 @@ export function installAd(win) {
         this.setDefaultFallback_();
         this.element.appendChild(this.fallback_);
       }
-
       this.element.removeChild(this.iframe_);
       this.toggleFallback(true);
     }
