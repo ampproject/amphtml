@@ -139,11 +139,11 @@ export function installAd(win) {
       /** @private {?Element} */
       this.placeholder_ = this.getPlaceholder();
 
-      /** @private {boolean} */
-      this.isDefaultPlaceholder_ = false;
+      /** @private {?Element} */
+      this.fallback_ = this.getFallback();
 
       /** @private {boolean} */
-      this.isDefaultPlaceholderSet_ = false;
+      this.isDefaultFallback_ = false;
 
       /** @private {boolean} */
       this.isInFixedContainer_ = false;
@@ -152,10 +152,10 @@ export function installAd(win) {
     /** @override */
     buildCallback() {
       this.prefetchAd_();
-      if (this.placeholder_) {
-        this.placeholder_.classList.add('hidden');
-      } else {
-        this.isDefaultPlaceholder_ = true;
+
+      if (!this.fallback_) {
+        this.isDefaultFallback_ = true;
+
         if (this.getDpr() >= 0.5) {
           upgradeImages_(BACKFILL_IMGS_);
         }
@@ -224,6 +224,7 @@ export function installAd(win) {
       return false;
     }
 
+
     /** @override */
     layoutCallback() {
       loadingAdsCount++;
@@ -243,19 +244,22 @@ export function installAd(win) {
         this.element.appendChild(this.iframe_);
 
         // Triggered by context.noContentAvailable() inside the ad iframe.
-        listen(this.iframe_, 'no-content', () => {
-          // NOTE(erwinm): guard against an iframe firing off no-content twice.
-          // since there is currently no way to `unlisten`.
-          if (this.isDefaultPlaceholder_ && !this.isDefaultPlaceholderSet_) {
-            this.setDefaultPlaceholder_();
-            this.element.appendChild(this.placeholder_);
-            this.element.removeChild(this.iframe_);
-            this.isDefaultPlaceholderSet_ = true;
-          }
-          this.placeholder_.classList.remove('hidden');
+        const unlisten = listen(this.iframe_, 'no-content', () => {
+          this.noContentHandler_();
+          unlisten();
         });
       }
       return loadPromise(this.iframe_);
+    }
+
+    noContentHandler_() {
+      if (this.isDefaultFallback_) {
+        this.setDefaultFallback_();
+        this.element.appendChild(this.fallback_);
+      }
+
+      this.element.removeChild(this.iframe_);
+      this.toggleFallback(true);
     }
 
     /**
@@ -265,12 +269,11 @@ export function installAd(win) {
      * @private
      * visibleForTesting
      */
-    setDefaultPlaceholder_() {
-      var a = document.createElement('a');
+    setDefaultFallback_() {
+      const a = document.createElement('a');
       a.href = 'https://www.ampproject.org';
       a.target = '_blank';
-      a.setAttribute('placeholder', '');
-      a.classList.add('hidden');
+      a.setAttribute('fallback', '');
       var img = new Image();
       setStyles(img, {
         width: 'auto',
@@ -278,9 +281,9 @@ export function installAd(win) {
         margin: 'auto',
       });
 
-      const winner = this.getPlaceholderImage_();
+      const winner = this.getFallbackImage_();
       img.src = `https://ampproject.org/backfill/${winner}`;
-      this.placeholder_ = a;
+      this.fallback_ = a;
       a.appendChild(img);
     }
 
@@ -290,7 +293,7 @@ export function installAd(win) {
      * @private
      * @return {string} The image URL.
      */
-    getPlaceholderImage_() {
+    getFallbackImage_() {
       const scores = scoreDimensions_(BACKFILL_DIMENSIONS_,
           this.element./*REVIEW*/clientWidth,
           this.element./*REVIEW*/clientHeight);
