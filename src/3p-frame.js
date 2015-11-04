@@ -102,16 +102,19 @@ export function getIframe(parentWindow, element, opt_type) {
 }
 
 /**
- * Allows listening for message from the iframe.
+ * Allows listening for message from the iframe. Returns an unlisten
+ * function to remove the listener.
+ *
  * @param {!Element} iframe
  * @param {string} typeOfMessage
  * @param {function(!Object)} callback Called when a message of this type
  *     arrives for this iframe.
+ * @return {!Unlisten}
  */
 export function listen(iframe, typeOfMessage, callback) {
   var win = iframe.ownerDocument.defaultView;
   var origin = parseUrl(getBootstrapBaseUrl(win)).origin;
-  win.addEventListener('message', function(event) {
+  const listener = function(event) {
     if (event.origin != origin) {
       return;
     }
@@ -125,7 +128,13 @@ export function listen(iframe, typeOfMessage, callback) {
       return;
     }
     callback(event.data);
-  });
+  };
+
+  win.addEventListener('message', listener);
+
+  return function() {
+    win.removeEventListener('message', listener);
+  };
 }
 
 /**

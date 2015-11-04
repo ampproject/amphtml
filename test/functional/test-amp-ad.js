@@ -19,6 +19,7 @@ import {installAd, scoreDimensions_, upgradeImages_, AD_LOAD_TIME_MS} from
     '../../builtins/amp-ad';
 import {viewportFor} from
     '../../src/viewport';
+import {timer} from '../../src/timer';
 import * as sinon from 'sinon';
 
 describe('amp-ad', () => {
@@ -149,6 +150,27 @@ describe('amp-ad', () => {
       lightbox.appendChild(p);
       return ad;
     })).to.be.not.be.rejected;
+  });
+
+  describe('has no-content', () => {
+
+    it('should display fallback', () => {
+      return getAd({
+        width: 300,
+        height: 250,
+        type: 'a9',
+        src: 'testsrc',
+      }, 'https://schema.org', ad => {
+        const fallback = document.createElement('div');
+        fallback.setAttribute('fallback', '');
+        ad.appendChild(fallback);
+        return ad;
+      }).then(ad => {
+        expect(ad).to.not.have.class('amp-notsupported');
+        ad.implementation_.noContentHandler_();
+        expect(ad).to.have.class('amp-notsupported');
+      });
+    });
   });
 
   describe('scoreDimensions_', () => {
