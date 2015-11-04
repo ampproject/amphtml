@@ -380,6 +380,15 @@ export class BaseElement {
   }
 
   /**
+   * Returns an optional fallback element for this custom element.
+   * @return {?Element}
+   * @protected @final
+   */
+  getFallback() {
+    return this.element.getFallback();
+  }
+
+  /**
    * Hides or shows the fallback, if available.
    * @param {boolean} state
    * @protected @final

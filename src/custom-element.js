@@ -794,6 +794,15 @@ export function createAmpElementProto(win, name, implementationClass) {
   };
 
   /**
+   * Returns an optional fallback element for this custom element.
+   * @return {?Element}
+   * @package @final
+   */
+  ElementProto.getFallback = function() {
+    return dom.childElementByAttr(this, 'fallback');
+  };
+
+  /**
    * Hides or shows the fallback, if available.
    * @param {boolean} state
    * @package @final
