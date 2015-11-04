@@ -107,6 +107,6 @@ module.exports = {
     '!build-system/tasks/presubmit-checks.js',
     '!build/polyfills.js',
     '!gulpfile.js',
-    '!third_party/babel/custom-babel-helpers.js',
+    '!third_party/**/*.*',
   ],
 };
