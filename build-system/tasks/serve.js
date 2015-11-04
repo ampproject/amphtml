@@ -17,6 +17,7 @@
 var argv = require('minimist')(process.argv.slice(2));
 var gulp = require('gulp-help')(require('gulp'));
 var gls = require('gulp-live-server');
+var path = require('path');
 var util = require('gulp-util');
 
 var port = argv.port || process.env.PORT || 8000;
@@ -25,7 +26,8 @@ var port = argv.port || process.env.PORT || 8000;
  * Starts a simple http server at the repository root
  */
 function serve() {
-  var server = gls.static(argv.path || '/', port);
+  var serverScript = path.join(__dirname, '../server.js')
+  var server = gls.new([serverScript, (argv.path || '/'), port]);
   server.start();
   util.log(util.colors.yellow(
     'Run `gulp build` then go to http://localhost:' + port + '/examples.build/article.amp.max.html'
