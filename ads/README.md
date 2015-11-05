@@ -29,12 +29,31 @@ We will provide the following information to the ad:
 
 - `window.context.referrer` contains the origin of the referrer value of the primary document if available.
 - `document.referrer` will typically contain the URL of the primary document. This may change in the future (See next value for a more reliable method).
-- `window.context.location.href` contains the sanitized location.href value of the primary document.
+- `window.context.location` contains the sanitized `Location` object of the primary document.
+  This object contains keys like `href`, `origin` and other keys common for [Location](https://developer.mozilla.org/en-US/docs/Web/API/Location) objects.
+  In browsers that support `location.ancestorOrigins` you can trust that the `origin` of the
+  location is actually correct (So rogue pages cannot claim they represent an origin they do not actually represent).
 - `window.context.canonicalUrl` contains the canonical URL of the primary document as defined by its `link rel=canonical` tag.
-- ad viewability: Tracked in https://github.com/ampproject/amphtml/issues/720
+- [ad viewability](#ad-viewability)
 - `window.context.noContentAvailable` is a function that the ad system can call if the ad slot was not filled. The container page will then react by showing placeholder content (not by collapsing the ad slot; sizing rules apply).
 
 More information can be provided in a similar fashion if needed (Please file an issue).
+
+### Ad viewability
+
+Ads can call the special API `window.context.observeIntersection(changesCallback)` to receive IntersectionObserver style [change records](http://rawgit.com/slightlyoff/IntersectionObserver/master/index.html#intersectionobserverentry) of the ad's intersection with the parent viewport.
+
+The API allows specifying a callback that fires with change records when AMP observes that an ad becomes visible and then while it is visible, changes are reported as they happen.
+
+Example usage:
+
+```js
+  window.context.observeIntersection(function(changes) {
+    changes.forEach(function(c) {
+      console.info('Height of intersection', c.intersectionRect.height);
+    });
+  });
+```
 
 ### Minimizing HTTP requests
 

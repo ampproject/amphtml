@@ -202,9 +202,9 @@ export class Viewport {
    * @return {!LayoutRect}
    */
   getRect() {
-    var scrollTop = this.binding_.getScrollTop();
-    var scrollLeft = this.binding_.getScrollLeft();
-    var size = this.binding_.getSize();
+    const scrollTop = this.getScrollTop();
+    const scrollLeft = this.getScrollLeft();
+    const size = this.getSize();
     return layoutRectLtwh(scrollLeft, scrollTop, size.width, size.height);
   }
 

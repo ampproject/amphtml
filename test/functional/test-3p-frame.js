@@ -107,8 +107,16 @@ describe('3p-frame', () => {
       var win = iframe.contentWindow;
       expect(win.context.canonicalUrl).to.equal('https://foo.bar/baz');
       expect(win.context.location.href).to.equal(locationHref);
+      expect(win.context.location.origin).to.equal('http://localhost:9876');
+      if (location.ancestorOrigins) {
+        expect(win.context.location.originValidated).to.be.true;
+      } else {
+        expect(win.context.location.originValidated).to.be.false;
+      }
       expect(win.context.referrer).to.equal(referrer);
       expect(win.context.data.testAttr).to.equal('value');
+      expect(win.context.noContentAvailable).to.be.function;
+      expect(win.context.observeIntersection).to.be.function;
       var c = win.document.getElementById('c');
       expect(c).to.not.be.null;
       expect(c.textContent).to.contain('pong');
