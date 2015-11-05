@@ -59,8 +59,12 @@ describe('vsync', () => {
         result += 'mu4';
         resolve();
       });
+      vsync.measure(() => {
+        result += 'me4';
+        resolve();
+      });
     }).then(() => {
-      expect(result).to.equal('me1me2me3mu1mu2mu3mu4');
+      expect(result).to.equal('me1me2me3me4mu1mu2mu3mu4');
     });
   });
 

@@ -129,3 +129,17 @@ chai.Assertion.addMethod('display', function(display) {
     value
   );
 });
+
+chai.Assertion.addMethod('jsonEqual', function(compare) {
+  var obj = this._obj;
+  var a = JSON.stringify(compare);
+  var b = JSON.stringify(obj);
+  this.assert(
+    a == b,
+    'expected JSON to be equal.\nExp: #{exp}\nAct: #{act}',
+    'expected JSON to not be equal.\nExp: #{exp}\nAct: #{act}',
+    a,
+    b
+  );
+});
+

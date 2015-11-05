@@ -88,24 +88,35 @@ export class Vsync {
     }
     this.scheduled_ = true;
 
+    // Schedule actual animation frame and then run tasks.
     this.raf_(() => {
-      this.scheduled_ = false;
-      // TODO(malteubl) Avoid array allocation with a double buffer.
-      const tasks = this.tasks_;
-      const states = this.states_;
-      this.tasks_ = [];
-      this.states_ = [];
-      for (let i = 0; i < tasks.length; i++) {
-        if (tasks[i].measure) {
-          tasks[i].measure(states[i]);
-        }
-      }
-      for (let i = 0; i < tasks.length; i++) {
-        if (tasks[i].mutate) {
-          tasks[i].mutate(states[i]);
-        }
-      }
+      this.runScheduledTasks();
     });
+  }
+
+  /**
+   * Runs all scheduled tasks. This is typically called in an RAF
+   * callback. Tests may call this method to force execution of
+   * tasks without waiting.
+   * @visibleForTesting
+   */
+  runScheduledTasks() {
+    this.scheduled_ = false;
+    // TODO(malteubl) Avoid array allocation with a double buffer.
+    const tasks = this.tasks_;
+    const states = this.states_;
+    this.tasks_ = [];
+    this.states_ = [];
+    for (let i = 0; i < tasks.length; i++) {
+      if (tasks[i].measure) {
+        tasks[i].measure(states[i]);
+      }
+    }
+    for (let i = 0; i < tasks.length; i++) {
+      if (tasks[i].mutate) {
+        tasks[i].mutate(states[i]);
+      }
+    }
   }
 
   /**
@@ -114,6 +125,14 @@ export class Vsync {
    */
   mutate(mutator) {
     this.run({mutate: mutator});
+  }
+
+  /**
+   * Runs the measure operation via vsync.
+   * @param {function()} measurer
+   */
+  measure(measurer) {
+    this.run({measure: measurer});
   }
 
   /**

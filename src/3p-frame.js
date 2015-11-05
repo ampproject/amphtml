@@ -90,6 +90,7 @@ export function getIframe(parentWindow, element, opt_type) {
       JSON.stringify(attributes);
 
   iframe.src = src;
+  iframe.ampLocation = parseUrl(src);
   iframe.width = attributes.width;
   iframe.height = attributes.height;
   iframe.style.border = 'none';
@@ -113,7 +114,7 @@ export function getIframe(parentWindow, element, opt_type) {
  */
 export function listen(iframe, typeOfMessage, callback) {
   var win = iframe.ownerDocument.defaultView;
-  var origin = parseUrl(getBootstrapBaseUrl(win)).origin;
+  var origin = iframe.ampLocation.origin;
   const listener = function(event) {
     if (event.origin != origin) {
       return;
@@ -135,6 +136,35 @@ export function listen(iframe, typeOfMessage, callback) {
   return function() {
     win.removeEventListener('message', listener);
   };
+}
+
+/**
+ * Allows listening for a message from the iframe and then removes the listener
+ *
+ * @param {!Element} iframe
+ * @param {string} typeOfMessage
+ * @param {function(!Object)} callback Called when a message of this type
+ *     arrives for this iframe.
+ * @return {!Unlisten}
+ */
+export function listenOnce(iframe, typeOfMessage, callback) {
+  const unlisten = listen(iframe, typeOfMessage, data => {
+    unlisten();
+    return callback(data);
+  });
+  return unlisten;
+}
+
+/**
+ * Posts a message to the iframe;
+ * @param {!Element} element The 3p iframe.
+ * @param {string} type Type of the message.
+ * @param {!Object} object Message payload.
+ */
+export function postMessage(iframe, type, object) {
+  object.type = type;
+  object.sentinel = 'amp-3p';
+  iframe.contentWindow./*OK*/postMessage(object, iframe.ampLocation.origin);
 }
 
 /**

@@ -20,6 +20,7 @@ import {installAd, scoreDimensions_, upgradeImages_, AD_LOAD_TIME_MS} from
 import {viewportFor} from
     '../../src/viewport';
 import {timer} from '../../src/timer';
+import {vsync} from '../../src/vsync';
 import * as sinon from 'sinon';
 
 describe('amp-ad', () => {
@@ -28,6 +29,8 @@ describe('amp-ad', () => {
       opt_beforeLayoutCallback) {
     return createIframePromise(undefined, opt_beforeLayoutCallback)
         .then(iframe => {
+          iframe.iframe.style.height = '400px';
+          iframe.iframe.style.width = '400px';
           installAd(iframe.win);
           if (canonical) {
             var link = iframe.doc.createElement('link');
@@ -39,6 +42,8 @@ describe('amp-ad', () => {
           for (var key in attributes) {
             a.setAttribute(key, attributes[key]);
           }
+          // Make document long.
+          a.style.marginBottom = '1000px';
           if (opt_handleElement) {
             a = opt_handleElement(a);
           }
@@ -152,8 +157,91 @@ describe('amp-ad', () => {
     })).to.be.not.be.rejected;
   });
 
-  describe('has no-content', () => {
+  describe('ad intersection', () => {
 
+    let ampAd;
+    let posts;
+
+    beforeEach(() => {
+      posts = [];
+      return getAd({
+        width: 300,
+        height: 250,
+        type: 'a9',
+        src: 'testsrc',
+      }, 'https://schema.org').then(element => {
+        element.style.position = 'absolute';
+        element.style.top = '300px';
+        element.style.left = '50px';
+        viewportFor(element.ownerDocument.defaultView).setScrollTop(50);
+        ampAd = element.implementation_;
+        ampAd.iframe_.contentWindow.postMessage = function(data, origin) {
+          posts.push({
+            data: data,
+            targetOrigin: origin,
+          });
+        };
+        expect(ampAd.shouldSendIntersectionChanges_).to.be.false;
+        ampAd.startSendingIntersectionChanges_();
+        expect(ampAd.shouldSendIntersectionChanges_).to.be.true;
+        expect(ampAd.iframeLayoutBox_).to.be.null;
+        expect(posts).to.have.length(0);
+        ampAd.getVsync().runScheduledTasks();
+        expect(posts).to.have.length(1);
+      });
+    });
+
+    it('should calculate intersection', () => {
+      expect(ampAd.iframeLayoutBox_).to.not.be.null;
+      expect(posts).to.have.length(1);
+      expect(posts[0].targetOrigin).to.equal('http://ads.localhost');
+      const changes = posts[0].data.changes;
+      expect(changes).to.be.array;
+      expect(changes).to.have.length(1);
+      expect(changes[0].time).to.be.number;
+      expect(changes[0].intersectionRect.height).to.equal(150);
+      expect(changes[0].intersectionRect.width).to.equal(300);
+    });
+
+    it('reflect viewport changes', () => {
+      const win = ampAd.element.ownerDocument.defaultView;
+      const viewport = viewportFor(win);
+      expect(posts).to.have.length(1);
+      viewport.setScrollTop(0);
+      ampAd.sendAdIntersection_();
+      expect(posts).to.have.length(2);
+      const changes = posts[1].data.changes;
+      expect(changes).to.have.length(1);
+      expect(changes[0].time).to.be.number;
+      expect(changes[0].intersectionRect.height).to.equal(100);
+      expect(changes[0].intersectionRect.width).to.equal(300);
+
+      viewport.setScrollTop(350);
+      ampAd.sendAdIntersection_();
+      expect(posts).to.have.length(3);
+      const changes2 = posts[2].data.changes;
+      expect(changes2).to.have.length(1);
+      expect(changes2[0].time).to.be.number;
+      expect(changes2[0].intersectionRect.height).to.equal(200);
+    });
+
+    it('observe the viewport', () => {
+      const win = ampAd.element.ownerDocument.defaultView;
+      const viewport = viewportFor(win);
+      expect(posts).to.have.length(1);
+      ampAd.viewportCallback(true);
+      expect(posts).to.have.length(2);
+      viewport.changed_(false, 0);
+      expect(posts).to.have.length(3);
+      ampAd.viewportCallback(false);
+      expect(posts).to.have.length(4);
+      // No longer listening.
+      viewport.changed_(false, 0);
+      expect(posts).to.have.length(4);
+    });
+  });
+
+  describe('has no-content', () => {
     it('should display fallback', () => {
       return getAd({
         width: 300,

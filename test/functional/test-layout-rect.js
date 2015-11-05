@@ -69,4 +69,20 @@ describe('LayoutRect', () => {
     expect(rect.bottom).to.equal(11 + 222);
     expect(rect.right).to.equal(12 + 111);
   });
+
+  it('rectIntersection', () => {
+    const rect1 = lr.layoutRectLtwh(10, 20, 40, 50);
+    const rect2 = lr.layoutRectLtwh(40, 60, 10, 10);
+    const rect3 = lr.layoutRectLtwh(1000, 60, 10, 10);
+    expect(lr.rectIntersection(rect1, rect2)).to.jsonEqual({
+      "left": 40,
+      "top": 60,
+      "width": 10,
+      "height": 10,
+      "bottom": 70,
+      "right": 50
+    });
+    expect(lr.rectIntersection(rect1, rect3)).to.be.null;
+    expect(lr.rectIntersection(rect2, rect3)).to.be.null;
+  });
 });
