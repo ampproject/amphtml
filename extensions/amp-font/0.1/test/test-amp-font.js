@@ -102,7 +102,7 @@ describe('amp-font', () => {
     });
   });
 
-  it.only('should load custom-font from cache via polyfill', () => {
+  it('should load custom-font from cache via polyfill', () => {
     let setupCanUseNativeApisSpy =
         sinon.stub(FontLoader.prototype, 'canUseNativeApis_').returns(false);
     return getFont(0).then(doc => {
