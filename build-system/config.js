@@ -131,7 +131,7 @@ module.exports = {
     '!**/local-amp-chrome-extension/background.js',
   ],
   presubmitGlobs: [
-    '**/*.{css,js}',
+    '**/*.{css,js,go}',
     // This does match dist.3p/current, so we run presubmit checks on the
     // built 3p binary. This is done, so we make sure our special 3p checks
     // run against the entire transitive closure of deps.
