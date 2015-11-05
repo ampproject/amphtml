@@ -19,7 +19,7 @@ var path = require('path');
 var srcGlobs = require('../config').presubmitGlobs;
 var util = require('gulp-util');
 
-var dedicatedCopyrightNoteSources = /(\.js|\.css)$/;
+var dedicatedCopyrightNoteSources = /(\.js|\.css|\.go)$/;
 
 var es6polyfill = 'Not available because we do not currently' +
     ' ship with a needed ES6 polyfill.';
