@@ -45,7 +45,7 @@ const CSS_RULES_ = "\
   }\
   ";
 
-describe('amp-font', () => {
+describe.only('amp-font', () => {
 
   let sandbox;
 
