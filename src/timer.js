@@ -32,6 +32,9 @@ export class Timer {
     this.taskCount_ = 0;
 
     this.canceled_ = {};
+
+    /** @const {number} */
+    this.startTime_ = this.now();
   }
 
   /**
@@ -41,6 +44,10 @@ export class Timer {
   now() {
     // TODO(dvoytenko): when can we use Date.now?
     return Number(new Date());
+  }
+
+  timeSinceStart() {
+    return this.now() - this.startTime_;
   }
 
   /**
