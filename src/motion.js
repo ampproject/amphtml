@@ -16,7 +16,7 @@
 
 import {assert} from './asserts';
 import {timer} from './timer';
-import {vsync} from './vsync';
+import {vsyncFor} from './vsync';
 
 /** @const {!Funtion} */
 const NOOP_CALLBACK_ = function() {};
@@ -106,7 +106,7 @@ class Motion {
    */
   constructor(startX, startY, veloX, veloY, callback, opt_vsync) {
     /** @private @const */
-    this.vsync_ = opt_vsync || vsync;
+    this.vsync_ = opt_vsync || vsyncFor(window);
 
     /** @private @const */
     this.callback_ = callback;

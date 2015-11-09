@@ -20,6 +20,7 @@ import {preconnectFor} from './preconnect';
 import {resourcesFor} from './resources';
 import {viewerFor} from './viewer';
 import {viewportFor} from './viewport';
+import {vsyncFor} from './vsync';
 
 
 /**
@@ -118,6 +119,11 @@ export class BaseElement {
   /** @protected @return {!Window} */
   getWin() {
     return this.element.ownerDocument.defaultView;
+  }
+
+  /** @protected @return {!Vsync} */
+  getVsync() {
+    return vsyncFor(this.getWin());
   }
 
   /**

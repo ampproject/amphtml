@@ -28,7 +28,7 @@ import {reportError} from './error';
 import {timer} from './timer';
 import {viewerFor} from './viewer';
 import {viewportFor} from './viewport';
-import {vsync} from './vsync';
+import {vsyncFor} from './vsync';
 
 const TAG_ = 'Resources';
 const RESOURCE_PROP_ = '__AMP__RESOURCE';
@@ -136,6 +136,9 @@ export class Resources {
     /** @private @const {!Viewport} */
     this.viewport_ = viewportFor(this.win);
 
+    /** @private @const {!Vsync} */
+    this.vsync_ = vsyncFor(this.win);
+
     /** @private @const {!DocumentState} */
     this.docState_ = documentStateFor(this.win);
 
@@ -210,7 +213,7 @@ export class Resources {
    * @private
    */
   toggleInputClass_(clazz, on) {
-    vsync.mutate(() => {
+    this.vsync_.mutate(() => {
       this.win.document.body.classList.toggle(clazz, on);
     });
   }
@@ -426,7 +429,7 @@ export class Resources {
     }
     this.vsyncScheduled_ = true;
     if (!this.docState_.isHidden()) {
-      vsync.mutate(() => this.doPass_());
+      this.vsync_.mutate(() => this.doPass_());
     } else {
       this.schedulePass(16);
     }

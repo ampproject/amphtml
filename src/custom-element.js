@@ -26,7 +26,7 @@ import {parseSizeList} from './size-list';
 import {reportError} from './error';
 import {resourcesFor} from './resources';
 import {timer} from './timer';
-import {vsync} from './vsync';
+import {vsyncFor} from './vsync';
 import * as dom from './dom';
 
 
@@ -414,6 +414,14 @@ export function createAmpElementProto(win, name, implementationClass) {
   };
 
   /**
+   * @return {!Vsync}
+   * @private
+   */
+  ElementProto.getVsync_ = function() {
+    return vsyncFor(this.ownerDocument.defaultView);
+  };
+
+  /**
    * Updates the layout box of the element.
    * See {@link BaseElement.getLayoutWidth} for details.
    * @param {!LayoutRect} layoutBox
@@ -434,7 +442,7 @@ export function createAmpElementProto(win, name, implementationClass) {
             layoutBox.top >= 0) {
         // Few top elements will also be pre-initialized with a loading
         // element.
-        vsync.mutate(() => {
+        this.getVsync_().mutate(() => {
           this.prepareLoading_();
         });
       }
@@ -882,7 +890,7 @@ export function createAmpElementProto(win, name, implementationClass) {
       return;
     }
 
-    vsync.mutate(() => {
+    this.getVsync_().mutate(() => {
       if (state) {
         this.prepareLoading_();
       }
