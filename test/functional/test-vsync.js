@@ -14,12 +14,18 @@
  * limitations under the License.
  */
 
-import {Vsync, vsync} from '../../src/vsync';
+import {Vsync} from '../../src/vsync';
 import {viewerFor} from '../../src/viewer';
 import * as sinon from 'sinon';
 
 
 describe('vsync', () => {
+  let vsync;
+
+  beforeEach(() => {
+    vsync = new Vsync(window);
+  });
+
   it('should generate a frame and run callbacks', () => {
     var result = '';
     return new Promise(resolve => {

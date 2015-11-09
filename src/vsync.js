@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {getService} from './service';
 import {log} from './log';
 import {timer} from './timer';
 import {viewerFor} from './viewer';
@@ -182,4 +183,12 @@ export class Vsync {
 }
 
 
-export const vsync = new Vsync(window);
+/**
+ * @param {!Window} window
+ * @return {!Vsync}
+ */
+export function vsyncFor(window) {
+  return getService(window, 'vsync', () => {
+    return new Vsync(window);
+  });
+};
