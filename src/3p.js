@@ -26,13 +26,17 @@ import {assert} from './asserts';
 
 
 /** @typedef {function(!Window, !Object)}  */
-var ThirdPartyFunction;
+let ThirdPartyFunction;
 
 
-/** @const {!Object<ThirdPartyFunction>} */
-var registrations = {};
+/**
+ * @const {!Object<ThirdPartyFunction>}
+ * @visibleForTesting
+ */
+export const registrations = {};
 
-var syncScriptLoads = 0;
+/** @type {number} */
+let syncScriptLoads = 0;
 
 /**
  * @param {string} id The specific 3p integration.

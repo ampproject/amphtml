@@ -17,6 +17,9 @@
 /**
  * @fileoverview Registers all known ad network factories and then executes
  * one of them.
+ *
+ * This files gets minified and published to
+ * https://3p.ampproject.net/$version/f.js
  */
 
 import './polyfills';
@@ -28,6 +31,7 @@ import {doubleclick} from '../ads/doubleclick';
 import {twitter} from './twitter';
 import {register, run} from '../src/3p';
 import {parseUrl} from '../src/url';
+import {assert} from '../src/asserts';
 
 register('a9', a9);
 register('adreactor', adreactor);
@@ -47,6 +51,8 @@ register('twitter', twitter);
  */
 export function draw3p(win, data) {
   var type = data.type;
+  assert(window.context.location.originValidated != null,
+      'Origin should have been validated');
   run(type, win, data);
 };
 
@@ -84,6 +90,8 @@ window.draw3p = function() {
   var fragment = location.hash;
   var data = fragment ? JSON.parse(fragment.substr(1)) : {};
   window.context = data._context;
+  window.context.location = parseUrl(data._context.location.href);
+  validateParentOrigin(window, window.context.location);
   window.context.master = masterSelection(data.type);
   window.context.isMaster = window.context.master == window;
   window.context.data = data;
@@ -94,6 +102,8 @@ window.draw3p = function() {
     // is being implemented.
     window.context.updateDimensions = triggerDimensions;
   }
+  // This only actually works for ads.
+  window.context.observeIntersection = observeIntersection;
   delete data._context;
   draw3p(window, data);
 };
@@ -113,6 +123,53 @@ function nonSensitiveDataPostMessage(type, opt_object) {
   var object = opt_object || {};
   object.type = type;
   object.sentinel = 'amp-3p';
-  // Use of * is OK. We are not worried who gets this message.
-  window.parent./*OK*/postMessage(object, '*');
+  window.parent./*OK*/postMessage(object,
+      window.context.location.origin);
+}
+
+/**
+ * Registers a callback for intersections of this iframe with the current
+ * viewport.
+ * The passed in array has entries that aim to be compatible with
+ * the IntersectionObserver spec callback.
+ * http://rawgit.com/slightlyoff/IntersectionObserver/master/index.html#callbackdef-intersectionobservercallback
+ * @param {function(!Array<IntersectionObserverEntry>)} observerCallback
+ */
+function observeIntersection(observerCallback) {
+  // Send request to received records.
+  nonSensitiveDataPostMessage('send-intersections');
+  window.addEventListener('message', function(event) {
+    if (event.source != window.parent ||
+        event.origin != window.context.location.origin ||
+        !event.data ||
+        event.data.sentinel != 'amp-3p' ||
+        event.data.type != 'intersection') {
+      return;
+    }
+    observerCallback(event.data.changes);
+  });
+}
+
+/**
+ * Throws if the current frame's parent origin is not equal to
+ * the claimed origin.
+ * For browsers that don't support ancestorOrigins it adds
+ * `originValidated = false` to the location object.
+ * @param {!Window} window
+ * @param {!Location} parentLocation
+ * @visibleForTesting
+ */
+export function validateParentOrigin(window, parentLocation) {
+  const ancestors = window.location.ancestorOrigins;
+  // Currently only webkit and blink based browsers support
+  // ancestorOrigins. In that case we proceed but mark the origin
+  // as non-validated.
+  if (!ancestors || !ancestors.length) {
+    parentLocation.originValidated = false;
+    return;
+  }
+  assert(ancestors[0] == parentLocation.origin,
+      'Parent origin mismatch: %s, %s, %s',
+      ancestors[0], parentLocation.origin);
+  parentLocation.originValidated = true;
 }

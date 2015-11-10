@@ -16,13 +16,16 @@
 
 import {BaseElement} from '../src/base-element';
 import {assert} from '../src/asserts';
+import {getIntersectionChangeEntry} from '../src/intersection-observer';
 import {isLayoutSizeDefined} from '../src/layout';
 import {setStyles} from '../src/style';
 import {loadPromise} from '../src/event-helper';
 import {registerElement} from '../src/custom-element';
-import {getIframe, listen, prefetchBootstrap} from '../src/3p-frame';
+import {getIframe, listenOnce, postMessage, prefetchBootstrap} from
+    '../src/3p-frame';
 import {adPrefetch, adPreconnect} from '../ads/_prefetch';
 import {timer} from '../src/timer';
+import {vsyncFor} from '../src/vsync';
 
 
 /**
@@ -156,6 +159,23 @@ export function installAd(win) {
       /** @private {boolean} */
       this.isInFixedContainer_ = false;
 
+      /**
+       * The layout box of the ad iframe (as opposed to the amp-ad tag).
+       * In practice it often has padding to create a grey or similar box
+       * around ads.
+       * @private {!LayoutRect}
+       */
+      this.iframeLayoutBox_ = null;
+
+      /**
+       * Call to stop listening to viewport changes.
+       * @private {?function()}
+       */
+      this.unlistenViewportChanges_ = null;
+
+      /** @private {boolean} */
+      this.shouldSendIntersectionChanges_ = false;
+
       this.prefetchAd_();
 
       if (!this.fallback_) {
@@ -205,6 +225,20 @@ export function installAd(win) {
      */
     onLayoutMeasure() {
       this.isInFixedContainer_ = this.isPositionFixed();
+      // We remeasured this tag, lets also remeasure the iframe. Should be
+      // free now and it might have changed.
+      this.measureIframeLayoutBox_();
+    }
+
+    /**
+     * Measure the layout box of the iframe if we rendered it already.
+     * @private
+     */
+    measureIframeLayoutBox_() {
+      if (this.iframe_) {
+        this.iframeLayoutBox_ =
+            this.getViewport().getLayoutRect(this.iframe_);
+      }
     }
 
     /**
@@ -249,14 +283,73 @@ export function installAd(win) {
         this.element.appendChild(this.iframe_);
 
         // Triggered by context.noContentAvailable() inside the ad iframe.
-        const unlisten = listen(this.iframe_, 'no-content', () => {
+        listenOnce(this.iframe_, 'no-content', () => {
           this.deferMutate(this.noContentHandler_.bind(this));
-          unlisten();
+        });
+        // Triggered by context.observeIntersection(…) inside the ad iframe.
+        listenOnce(this.iframe_, 'send-intersections', () => {
+          this.startSendingIntersectionChanges_();
         });
       }
       return loadPromise(this.iframe_);
     }
 
+    /** @override  */
+    viewportCallback(inViewport) {
+      // Lets the ad know that it became visible or no longer is.
+      this.sendAdIntersection_();
+      // And update the ad about its position in the viewport while
+      // it is visible.
+      if (inViewport) {
+        this.unlistenViewportChanges_ =
+            this.getViewport().onChanged(this.sendAdIntersection_.bind(this));
+      } else if (this.unlistenViewportChanges_) {
+        this.unlistenViewportChanges_();
+        this.unlistenViewportChanges_ = null;
+      }
+    }
+
+    /**
+     * Called via postMessage from the child iframe when the ad starts
+     * observing its position in the viewport.
+     * Sets a flag, measures the iframe position if necessary and sends
+     * one change record to the iframe.
+     * @private
+     */
+    startSendingIntersectionChanges_() {
+      this.shouldSendIntersectionChanges_ = true;
+      this.getVsync().measure(() => {
+        if (!this.iframeLayoutBox_) {
+          this.measureIframeLayoutBox_();
+        }
+        this.sendAdIntersection_();
+      });
+    }
+
+    /**
+     * Sends 'intersection' message to ad with intersection change records
+     * if this has been activated and we measured the layout box of the iframe
+     * at least once.
+     * @private
+     */
+    sendAdIntersection_() {
+      if (!this.shouldSendIntersectionChanges_ ||
+          !this.iframeLayoutBox_) {
+        return;
+      }
+      const rootBounds = this.getViewport().getRect();
+      const change = getIntersectionChangeEntry(
+          timer.now(),
+          rootBounds,
+          this.iframeLayoutBox_);
+      postMessage(this.iframe_, 'intersection', {changes: [change]});
+    }
+
+    /**
+     * Activates the fallback if the ad reports that the ad slot cannot
+     * be filled.
+     * @private
+     */
     noContentHandler_() {
       if (this.isDefaultFallback_) {
         this.setDefaultFallback_();
