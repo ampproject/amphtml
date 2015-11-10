@@ -49,9 +49,9 @@ const BASE60 = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ_abcdefghijkmnopqrstuvwxyz';
 
 class AmpPinterest extends AMP.BaseElement {
   /** @override */
-  createdCallback() {
+  preconnectCallback(onLayout) {
     // preconnect to widget API
-    this.preconnect.url('https://widgets.pinterest.com');
+    this.preconnect.url('https://widgets.pinterest.com', onLayout);
   }
   /** @override */
   isLayoutSupported(layout) {
