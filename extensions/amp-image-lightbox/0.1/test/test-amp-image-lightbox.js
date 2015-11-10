@@ -30,7 +30,7 @@ describe('amp-image-lightbox component', () => {
 
   function getImageLightbox() {
     return createIframePromise().then(iframe => {
-      var el = iframe.doc.createElement('amp-image-lightbox');
+      const el = iframe.doc.createElement('amp-image-lightbox');
       el.setAttribute('layout', 'nodisplay');
       iframe.doc.body.appendChild(el);
       return new Timer(window).promise(16).then(() => {

@@ -28,9 +28,6 @@ import {registerElement} from '../src/custom-element';
  */
 export function installImg(win) {
 
-  /** @type {number} Count of images */
-  var count = 0;
-
   class AmpImg extends BaseElement {
 
     /** @override */

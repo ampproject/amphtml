@@ -18,7 +18,7 @@ import {createFixtureIframe, pollForLayout, expectBodyToBecomeVisible} from
     '../../testing/iframe.js';
 
 describe('Rendering of released components', () => {
-  var fixture;
+  let fixture;
   beforeEach(() => {
     return createFixtureIframe('test/fixtures/released.html', 3000)
       .then(f => {

@@ -51,16 +51,16 @@ class AmpInstagram extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    var width = this.element.getAttribute('width');
-    var height = this.element.getAttribute('height');
-    var shortcode = AMP.assert(
+    const width = this.element.getAttribute('width');
+    const height = this.element.getAttribute('height');
+    const shortcode = AMP.assert(
         (this.element.getAttribute('data-shortcode') ||
         this.element.getAttribute('shortcode')),
         'The data-shortcode attribute is required for <amp-instagram> %s',
         this.element);
     // See
     // https://instagram.com/developer/embedding/?hl=en
-    var iframe = document.createElement('iframe');
+    const iframe = document.createElement('iframe');
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowtransparency', 'true');
     iframe.src = 'https://instagram.com/p/' +

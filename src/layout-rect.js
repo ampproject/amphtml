@@ -28,7 +28,7 @@
  *   height: number
  * }}
  */
-var LayoutRect;
+let LayoutRect;
 
 
 /**

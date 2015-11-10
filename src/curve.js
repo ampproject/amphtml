@@ -122,10 +122,10 @@ class Bezier {
    */
   solvePositionFromXValue(xVal) {
     // Desired precision on the computation.
-    var epsilon = 1e-6;
+    const epsilon = 1e-6;
 
     // Initial estimate of t using linear interpolation.
-    var t = (xVal - this.x0) / (this.x3 - this.x0);
+    let t = (xVal - this.x0) / (this.x3 - this.x0);
     if (t <= 0) {
       return 0;
     } else if (t >= 1) {
@@ -133,11 +133,11 @@ class Bezier {
     }
 
     // Try gradient descent to solve for t. If it works, it is very fast.
-    var tMin = 0;
-    var tMax = 1;
-    for (var i = 0; i < 8; i++) {
-      var value = this.getPointX(t);
-      var derivative = (this.getPointX(t + epsilon) - value) / epsilon;
+    let tMin = 0;
+    let tMax = 1;
+    for (let i = 0; i < 8; i++) {
+      const value = this.getPointX(t);
+      const derivative = (this.getPointX(t + epsilon) - value) / epsilon;
       if (Math.abs(value - xVal) < epsilon) {
         return t;
       } else if (Math.abs(derivative) < epsilon) {
@@ -182,9 +182,9 @@ class Bezier {
     }
 
     // Step one - from 4 points to 3
-    var ix0 = this.lerp(this.x0, this.x1, t);
-    var ix1 = this.lerp(this.x1, this.x2, t);
-    var ix2 = this.lerp(this.x2, this.x3, t);
+    let ix0 = this.lerp(this.x0, this.x1, t);
+    let ix1 = this.lerp(this.x1, this.x2, t);
+    const ix2 = this.lerp(this.x2, this.x3, t);
 
     // Step two - from 3 points to 2
     ix0 = this.lerp(ix0, ix1, t);
@@ -208,9 +208,9 @@ class Bezier {
     }
 
     // Step one - from 4 points to 3
-    var iy0 = this.lerp(this.y0, this.y1, t);
-    var iy1 = this.lerp(this.y1, this.y2, t);
-    var iy2 = this.lerp(this.y2, this.y3, t);
+    let iy0 = this.lerp(this.y0, this.y1, t);
+    let iy1 = this.lerp(this.y1, this.y2, t);
+    const iy2 = this.lerp(this.y2, this.y3, t);
 
     // Step two - from 3 points to 2
     iy0 = this.lerp(iy0, iy1, t);
@@ -273,7 +273,7 @@ export const Curves = {
 /**
  * @const {!Object<string, !Curve>}
  */
-var NAME_MAP = {
+const NAME_MAP = {
   'linear': Curves.LINEAR,
   'ease': Curves.EASE,
   'ease-in': Curves.EASE_IN,

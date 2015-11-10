@@ -24,9 +24,9 @@ import {assert} from './asserts';
  * @return {!Location}
  */
 export function parseUrl(url) {
-  var a = document.createElement('a');
+  const a = document.createElement('a');
   a.href = url;
-  var info = {
+  const info = {
     href: a.href,
     protocol: a.protocol,
     host: a.host,
@@ -52,7 +52,7 @@ export function parseUrl(url) {
  * @return {string}
  */
 export function assertHttpsUrl(urlString, elementContext) {
-  var url = parseUrl(urlString);
+  const url = parseUrl(urlString);
   assert(
       url.protocol == 'https:' || /^(\/\/)/.test(urlString) ||
       url.hostname == 'localhost' ||
@@ -74,7 +74,7 @@ export function assertHttpsUrl(urlString, elementContext) {
  * @return {!Object<string, string>}
  */
 export function parseQueryString(queryString) {
-  var params = Object.create(null);
+  const params = Object.create(null);
   if (!queryString) {
     return params;
   }

@@ -50,7 +50,7 @@ register('twitter', twitter);
  * @param {!Object} data
  */
 export function draw3p(win, data) {
-  var type = data.type;
+  const type = data.type;
   assert(window.context.location.originValidated != null,
       'Origin should have been validated');
   run(type, win, data);
@@ -65,8 +65,8 @@ export function draw3p(win, data) {
  */
 function masterSelection(type) {
   // The master has a special name.
-  var masterName = 'frame_' + type + '_master';
-  var master;
+  const masterName = 'frame_' + type + '_master';
+  let master;
   try {
     // Try to get the master from the parent. If it does not
     // exist yet we get a security exception that we catch
@@ -87,8 +87,8 @@ function masterSelection(type) {
  * Draws an optionally synchronously to the DOM.
  */
 window.draw3p = function() {
-  var fragment = location.hash;
-  var data = fragment ? JSON.parse(fragment.substr(1)) : {};
+  const fragment = location.hash;
+  const data = fragment ? JSON.parse(fragment.substr(1)) : {};
   window.context = data._context;
   window.context.location = parseUrl(data._context.location.href);
   validateParentOrigin(window, window.context.location);
@@ -120,7 +120,7 @@ function triggerDimensions(width, height) {
 }
 
 function nonSensitiveDataPostMessage(type, opt_object) {
-  var object = opt_object || {};
+  const object = opt_object || {};
   object.type = type;
   object.sentinel = 'amp-3p';
   window.parent./*OK*/postMessage(object,

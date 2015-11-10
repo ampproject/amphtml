@@ -88,7 +88,7 @@ export function upgradeOrRegisterElement(win, name, toClass) {
     //    implementation.
     // 3. A stub was attached. We upgrade which means we replay the
     //    implementation.
-    var element = stub.element;
+    const element = stub.element;
     if (element.tagName.toLowerCase() == name) {
       try {
         element.upgrade(toClass);
@@ -253,7 +253,7 @@ export function createAmpElementProto(win, name, implementationClass) {
   /**
    * @lends {AmpElement.prototype}
    */
-  var ElementProto = win.Object.create(win.HTMLElement.prototype);
+  const ElementProto = win.Object.create(win.HTMLElement.prototype);
 
   /**
    * Called when elements is created. Sets instance vars since there is no
@@ -594,10 +594,10 @@ export function createAmpElementProto(win, name, implementationClass) {
    * @final
    */
   ElementProto.dispatchCustomEvent = function(name, opt_data) {
-    var data = opt_data || {};
+    const data = opt_data || {};
     // Constructors of events need to come from the correct window. Sigh.
-    var win = this.ownerDocument.defaultView;
-    var event = document.createEvent('Event');
+    const win = this.ownerDocument.defaultView;
+    const event = document.createEvent('Event');
     event.data = data;
     event.initEvent(name, true, true);
     this.dispatchEvent(event);
@@ -658,7 +658,7 @@ export function createAmpElementProto(win, name, implementationClass) {
     assert(this.isUpgraded() && this.isBuilt(),
         'Must be upgraded and built to receive viewport events');
     this.dispatchCustomEvent('amp:load:start');
-    var promise = this.implementation_.layoutCallback();
+    const promise = this.implementation_.layoutCallback();
     this.classList.add('-amp-layout');
     assert(promise instanceof Promise,
         'layoutCallback must return a promise');

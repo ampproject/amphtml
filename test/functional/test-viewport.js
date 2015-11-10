@@ -454,7 +454,7 @@ describe('ViewportBindingNatural', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    var WindowApi = function() {};
+    const WindowApi = function() {};
     windowEventHandlers = {};
     WindowApi.prototype.addEventListener = function(eventType, handler) {
       windowEventHandlers[eventType] = handler;
@@ -568,7 +568,7 @@ describe('ViewportBindingNaturalIosEmbed', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
-    var WindowApi = function() {};
+    const WindowApi = function() {};
     windowEventHandlers = {};
     bodyEventListeners = {};
     bodyChildren = [];

@@ -19,7 +19,7 @@ require('../src/polyfills');
 import {Timer} from '../src/timer';
 import {registerForUnitTest} from '../src/runtime';
 
-var iframeCount = 0;
+let iframeCount = 0;
 
 
 /**
@@ -55,11 +55,11 @@ export function createFixtureIframe(fixture, initialIframeHeight, done) {
       'amp:stubbed': 0,
       'amp:load:start': 0
     };
-    var html = __html__[fixture];
+    let html = __html__[fixture];
     if (!html) {
       throw new Error('Cannot find fixture: ' + fixture);
     }
-    var firstLoad = true;
+    let firstLoad = true;
     // This global function will be called by the iframe immediately when it
     // starts loading. This appears to be the only way to get the correct
     // window object early enough to not miss any events that may get fired
@@ -69,7 +69,7 @@ export function createFixtureIframe(fixture, initialIframeHeight, done) {
       win.AMP_TEST = true;
       // Function that returns a promise for when the given event fired at
       // least count times.
-      var awaitEvent = (eventName, count) => {
+      let awaitEvent = (eventName, count) => {
         if (!(eventName in events)) {
           throw new Error('Unknown custom event ' + eventName);
         }
@@ -96,7 +96,7 @@ export function createFixtureIframe(fixture, initialIframeHeight, done) {
             file + ':' + line + '\n' +
             (error ? error.stack : 'no stack'));
       };
-      var errors = [];
+      let errors = [];
       win.console.error = function() {
         errors.push('Error: ' + [].slice.call(arguments).join(' '));
       };
@@ -105,7 +105,7 @@ export function createFixtureIframe(fixture, initialIframeHeight, done) {
         ms = ms || 0;
         setTimeout(fn, ms / 10);
       };
-      var timeout = setTimeout(function() {
+      let timeout = setTimeout(function() {
         reject(new Error('Timeout waiting for elements to start loading.'));
       }, 1000);
       // Declare the test ready to run when the document was fully parsed.
@@ -122,7 +122,7 @@ export function createFixtureIframe(fixture, initialIframeHeight, done) {
     // Add before and after load callbacks to the document.
     html = html.replace('>', '><script>parent.beforeLoad(window);</script>');
     html += '<script>parent.afterLoad(window);</script>';
-    var iframe = document.createElement('iframe');
+    let iframe = document.createElement('iframe');
     iframe.name = 'test_' + fixture + iframeCount++;
     iframe.onerror = function(event) {
       throw event.error;
@@ -155,7 +155,7 @@ export function createFixtureIframe(fixture, initialIframeHeight, done) {
  */
 export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
   return new Promise(function(resolve, reject) {
-    var iframe = document.createElement('iframe');
+    let iframe = document.createElement('iframe');
     iframe.name = 'test_' + iframeCount++;
     iframe.srcdoc = '<!doctype><html><head>' +
         '<script src="/base/build/polyfills.js"></script>' +
@@ -205,7 +205,7 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
  */
 export function poll(description, condition, opt_onError, opt_timeout) {
   return new Promise((resolve, reject) => {
-    var start = new Date().getTime();
+    let start = new Date().getTime();
     function poll() {
       if (condition()) {
         clearInterval(interval);
@@ -221,7 +221,7 @@ export function poll(description, condition, opt_onError, opt_timeout) {
         }
       }
     }
-    var interval = setInterval(poll, 50);
+    let interval = setInterval(poll, 50);
     poll();
   });
 }
@@ -237,7 +237,7 @@ export function poll(description, condition, opt_onError, opt_timeout) {
  * @return {!Promise}
  */
 export function pollForLayout(win, count, opt_timeout) {
-  var getCount = () => {
+  let getCount = () => {
     return win.document.querySelectorAll('.-amp-layout,.-amp-error').length;
   };
   return poll('Waiting for elements to layout: ' + count, () => {

@@ -44,7 +44,7 @@ describe('Pass', () => {
   });
 
   it('handler called', () => {
-    var delayedFunc = null;
+    let delayedFunc = null;
     timerMock.expects('delay').withExactArgs(sinon.match(value => {
       delayedFunc = value;
       return true;

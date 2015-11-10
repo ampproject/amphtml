@@ -19,13 +19,13 @@ import {assertHttpsUrl, parseQueryString, parseUrl, removeFragment, getOrigin}
 
 describe('url', () => {
 
-  var currentPort = location.port;
+  const currentPort = location.port;
 
   function compareParse(url, result) {
     // Using JSON string comparison because Chai's deeply equal
     // errors are impossible to debug.
-    var parsed = JSON.stringify(parseUrl(url));
-    var expected = JSON.stringify(result);
+    const parsed = JSON.stringify(parseUrl(url));
+    const expected = JSON.stringify(result);
     expect(parsed).to.equal(expected);
   }
 
@@ -164,7 +164,7 @@ describe('parseQueryString', () => {
 });
 
 describe('assertHttpsUrl', () => {
-  var referenceElement = document.createElement('div');
+  const referenceElement = document.createElement('div');
   it('should allow https', () => {
     assertHttpsUrl('https://twitter.com', referenceElement);
   });

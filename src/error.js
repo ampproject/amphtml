@@ -19,7 +19,7 @@ import {getMode} from './mode';
 import {exponentialBackoff} from './exponential-backoff.js';
 import {makeBodyVisible} from './styles';
 
-var globalExponentialBackoff = exponentialBackoff(1.5);
+const globalExponentialBackoff = exponentialBackoff(1.5);
 
 
 /**
@@ -40,7 +40,7 @@ export function reportError(error, opt_associatedElement) {
     return;
   }
   error.reported = true;
-  var element = opt_associatedElement || error.associatedElement;
+  const element = opt_associatedElement || error.associatedElement;
   if (element) {
     element.classList.add('-amp-error');
     if (getMode().development) {
@@ -89,11 +89,11 @@ function reportErrorToServer(message, filename, line, col, error) {
   if (this && this.document) {
     makeBodyVisible(this.document);
   }
-  var mode = getMode();
+  const mode = getMode();
   if (mode.isLocalDev || mode.development || mode.test) {
     return;
   }
-  var url = getErrorReportUrl(message, filename, line, col, error);
+  const url = getErrorReportUrl(message, filename, line, col, error);
   globalExponentialBackoff(() => {
     new Image().src = url;
   });
@@ -114,12 +114,12 @@ export function getErrorReportUrl(message, filename, line, col, error) {
     return;
   }
 
-  var url = 'https://cdn.ampproject.org/error/report.gif' +
+  let url = 'https://cdn.ampproject.org/error/report.gif' +
       '?v=' + encodeURIComponent('$internalRuntimeVersion$') +
       '&m=' + encodeURIComponent(message);
 
   if (error) {
-    var tagName = error && error.associatedElement
+    const tagName = error && error.associatedElement
       ? error.associatedElement.tagName
       : 'u';  // Unknown
     // We may want to consider not reporting asserts but for now

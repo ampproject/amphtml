@@ -27,7 +27,7 @@ describe('Viewer', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    var WindowApi = function() {};
+    const WindowApi = function() {};
     WindowApi.prototype.setTimeout = function(callback, delay) {};
     windowApi = new WindowApi();
     windowApi.location = {hash: '', href: '/test/viewer'};

@@ -96,7 +96,11 @@ module.exports = {
   karma: karma,
   lintGlobs: [
     '**/*.js',
-    '!{node_modules,build,dist,dist.3p,third_party,build-system}/**/*.*'
+    '!{node_modules,build,dist,dist.3p,third_party,build-system}/**/*.*',
+    '!{testing,examples}/**/*.*',
+    '!gulpfile.js',
+    '!karma.conf.js',
+    '!**/local-amp-chrome-extension/background.js',
   ],
   presubmitGlobs: [
     '**/*.{css,js}',

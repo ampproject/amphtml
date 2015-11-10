@@ -24,7 +24,7 @@ describe('amp-instagram', () => {
 
   function getIns(shortcode, opt_responsive) {
     return createIframePromise().then(() => {
-      var ins = iframe.doc.createElement('amp-instagram');
+      const ins = iframe.doc.createElement('amp-instagram');
       ins.setAttribute('data-shortcode', shortcode);
       ins.setAttribute('width', '111');
       ins.setAttribute('height', '222');
@@ -37,7 +37,7 @@ describe('amp-instagram', () => {
 
   it('renders', () => {
     getIns('fBwFP').then(ins => {
-      var iframe = ins.firstChild;
+      const iframe = ins.firstChild;
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.src).to.equal('https://instagram.com/p/fBwFP/embed/?v=4');
@@ -47,8 +47,8 @@ describe('amp-instagram', () => {
   });
 
   it('renders responsively', () => {
-    var ins = getIns('fBwFP', true).then(ins => {
-      var iframe = ins.firstChild;
+    const ins = getIns('fBwFP', true).then(ins => {
+      const iframe = ins.firstChild;
       expect(iframe.className).to.match(/amp-responsive-item/);
     });
   });

@@ -39,7 +39,7 @@ export function onDocumentReady(doc, callback) {
   if (ready) {
     callback();
   } else {
-    var readyListener = () => {
+    const readyListener = () => {
       if (doc.readyState != 'loading') {
         if (!ready) {
           ready = true;
