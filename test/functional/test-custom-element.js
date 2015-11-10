@@ -19,7 +19,7 @@ import {ElementStub} from '../../src/element-stub';
 import {LOADING_ELEMENTS_, Layout} from '../../src/layout';
 import {createAmpElementProto} from '../../src/custom-element';
 import {resourcesFor} from '../../src/resources';
-import {vsync} from '../../src/vsync';
+import {vsyncFor} from '../../src/vsync';
 import * as sinon from 'sinon';
 
 
@@ -684,6 +684,7 @@ describe('CustomElement Loading Indicator', () => {
   let clock;
   let element;
   let savedMutate;
+  let vsync;
   let vsyncTasks;
   let resourcesMock;
 
@@ -695,6 +696,7 @@ describe('CustomElement Loading Indicator', () => {
     element = new ElementClass();
     element.layoutWidth_ = 300;
     element.layout_ = Layout.FIXED;
+    vsync = vsyncFor(window);
     savedMutate = vsync.mutate;
     vsyncTasks = [];
     vsync.mutate = mutator => {

@@ -17,7 +17,7 @@
 import {getCurve} from './curve';
 import {log} from './log';
 import {timer} from './timer';
-import {vsync} from './vsync';
+import {vsyncFor} from './vsync';
 
 const TAG_ = 'Animation';
 
@@ -55,7 +55,7 @@ export class Animation {
    */
   constructor(opt_vsync) {
     /** @private @const */
-    this.vsync_ = opt_vsync || vsync;
+    this.vsync_ = opt_vsync || vsyncFor(window);
 
     /** @private {?Curve} */
     this.curve_ = null;
