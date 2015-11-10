@@ -62,9 +62,36 @@ module.exports = function(config) {
         base: 'Chrome',
         flags: ['--no-sandbox'],
       },
-      SL_Chrome: {
+      SL_Chrome_android: {
+        base: 'SauceLabs',
+        browserName: 'android',
+      },
+      SL_Chrome_latest: {
         base: 'SauceLabs',
         browserName: 'chrome',
+      },
+      SL_Chrome_37: {
+        base: 'SauceLabs',
+        browserName: 'chrome',
+        version: 37,
+      },
+      SL_iOS_9_1: {
+        base: 'SauceLabs',
+        browserName: 'iphone',
+        version: '9.1'
+      },
+      SL_Firefox_latest: {
+        base: 'SauceLabs',
+        browserName: 'firefox',
+      },
+      SL_IE_11: {
+        base: 'SauceLabs',
+        browserName: 'internet explorer',
+        version: 11,
+      },
+      SL_Edge_latest: {
+        base: 'SauceLabs',
+        browserName: 'microsoftedge',
       },
     },
 

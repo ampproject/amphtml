@@ -18,9 +18,8 @@ var path = require('path');
 
 var karmaConf = path.resolve('karma.conf.js');
 
-var testPaths = [
-  'test/**/*.js',
-  'extensions/**/test/**/*.js',
+var commonTestPaths = [
+  'test/_init_tests.js',
   'test/fixtures/**/*.html',
   {
     pattern: 'dist/**/*.js',
@@ -41,12 +40,21 @@ var testPaths = [
     included: false,
     served: true
   }
-];
+]
+
+var testPaths = commonTestPaths.concat([
+  'test/**/*.js',
+  'extensions/**/test/**/*.js',
+]);
+
+var integrationTestPaths = commonTestPaths.concat([
+  'test/integration/**/*.js',
+  'extensions/**/test/integration/**/*.js',
+]);
 
 var karma = {
   default: {
     configFile: karmaConf,
-    files: testPaths,
     singleRun: true,
     client: {
       captureConsole: false
@@ -54,7 +62,6 @@ var karma = {
   },
   firefox: {
     configFile: karmaConf,
-    files: testPaths,
     singleRun: true,
     browsers: ['Firefox'],
     client: {
@@ -66,7 +73,6 @@ var karma = {
   },
   safari: {
     configFile: karmaConf,
-    files: testPaths,
     singleRun: true,
     browsers: ['Safari'],
     client: {
@@ -78,21 +84,34 @@ var karma = {
   },
   saucelabs: {
     configFile: karmaConf,
-    files: testPaths,
     reporters: ['dots', 'saucelabs'],
-    browsers: ['SL_Chrome'],
+    browsers: [
+      'SL_Chrome_android',
+      'SL_Chrome_latest',
+      'SL_Chrome_37',
+      'SL_Firefox_latest',
+      // TODO(#895) Enable these.
+      //'SL_iOS_9_1',
+      //'SL_IE_11',
+      //'SL_Edge_latest',
+    ],
     singleRun: true,
     client: {
-      captureConsole: false
+      mocha: {
+        timeout: 10000
+      },
+      captureConsole: false,
     },
-    browserDisconnectTimeout: 70000,
-    browserNoActivityTimeout: 70000,
+    captureTimeout: 120000,
+    browserDisconnectTimeout: 120000,
+    browserNoActivityTimeout: 120000,
   }
 };
 
 /** @const  */
 module.exports = {
   testPaths: testPaths,
+  integrationTestPaths: integrationTestPaths,
   karma: karma,
   lintGlobs: [
     '**/*.js',
