@@ -95,7 +95,13 @@ class AmpIframe extends AMP.BaseElement {
         this.transformSrcDoc();
     this.iframeSrc = this.assertSource(iframeSrc, window.location.href,
         this.element.getAttribute('sandbox'));
-    this.preconnect.url(this.iframeSrc);
+  }
+
+  /** @override */
+  preconnectCallback(onLayout) {
+    if (this.iframeSrc) {
+      this.preconnect.url(this.iframeSrc, onLayout);
+    }
   }
 
   /** @override */

@@ -59,6 +59,7 @@ import {vsyncFor} from './vsync';
  *    State: <NOT BUILT>
  *           ||
  *           || buildCallback
+ *           || preconnectCallback may be called N times after this.
  *           ||
  *           \/
  *    State: <BUILT>
@@ -75,6 +76,11 @@ import {vsyncFor} from './vsync';
  *           ||
  *           \/
  *    State: <IN VIEWPORT>
+ *
+ * The preconnectCallback is called when the systems thinks it is good
+ * to preconnect to hosts needed by an element. It will never be called
+ * before buildCallback and it might be called multiple times including
+ * after layoutCallback.
  *
  * Additionally whenever the dimensions of an element might have changed
  * AMP remeasures its dimensions and calls `onLayoutMeasure` on the
@@ -202,6 +208,15 @@ export class BaseElement {
    * consulted in the later case.
    */
   buildCallback() {
+    // Subclasses may override.
+  }
+
+  /**
+   * Called by the framework to give the element a chance to preconnect to
+   * hosts and prefetch resources it is likely to need. May be called
+   * multiple times because connections can time out.
+   */
+  preconnectCallback() {
     // Subclasses may override.
   }
 

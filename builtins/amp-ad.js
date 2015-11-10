@@ -176,8 +176,6 @@ export function installAd(win) {
       /** @private {boolean} */
       this.shouldSendIntersectionChanges_ = false;
 
-      this.prefetchAd_();
-
       if (!this.fallback_) {
         this.isDefaultFallback_ = true;
 
@@ -189,9 +187,9 @@ export function installAd(win) {
 
     /**
      * Prefetches and preconnects URLs related to the ad.
-     * @private
+     * @override
      */
-    prefetchAd_() {
+    preconnectCallback(onLayout) {
       // We always need the bootstrap.
       prefetchBootstrap(this.getWin());
       const type = this.element.getAttribute('type');
@@ -205,10 +203,10 @@ export function installAd(win) {
         });
       }
       if (typeof preconnect == 'string') {
-        this.preconnect.url(preconnect);
+        this.preconnect.url(preconnect, onLayout);
       } else if (preconnect) {
         preconnect.forEach(p => {
-          this.preconnect.url(p);
+          this.preconnect.url(p, onLayout);
         });
       }
       // If fully qualified src for ad script is specified we preconnect to it.

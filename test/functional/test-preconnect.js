@@ -34,7 +34,7 @@ describe('preconnect', () => {
   });
 
   afterEach(() => {
-    clock.tick(20000);
+    clock.tick(200000);
     clock.restore();
     sandbox.restore();
   });
@@ -85,6 +85,40 @@ describe('preconnect', () => {
         .to.equal('https://e.preconnect.com/');
     expect(document.querySelectorAll('link[rel=preconnect]'))
         .to.have.length(2);
+  });
+
+  it('should timeout preconnects', () => {
+    preconnect.url('https://x.preconnect.com/foo/bar');
+    expect(document.querySelectorAll('link[rel=preconnect]'))
+        .to.have.length(1);
+    clock.tick(9000);
+    preconnect.url('https://x.preconnect.com/foo/bar');
+    expect(document.querySelectorAll('link[rel=preconnect]'))
+        .to.have.length(1);
+    clock.tick(1000);
+    expect(document.querySelectorAll('link[rel=preconnect]'))
+        .to.have.length(0);
+    // After timeout preconnect creates a new tag.
+    preconnect.url('https://x.preconnect.com/foo/bar');
+    expect(document.querySelectorAll('link[rel=preconnect]'))
+        .to.have.length(1);
+  });
+
+  it('should timeout preconnects longer with active connect', () => {
+    preconnect.url('https://y.preconnect.com/foo/bar',
+        /* opt_alsoConnecting */ true);
+    expect(document.querySelectorAll('link[rel=preconnect]'))
+        .to.have.length(1);
+    clock.tick(10000);
+    expect(document.querySelectorAll('link[rel=preconnect]'))
+        .to.have.length(0);
+    preconnect.url('https://y.preconnect.com/foo/bar');
+    expect(document.querySelectorAll('link[rel=preconnect]'))
+        .to.have.length(0);
+    clock.tick(180 * 1000);
+    preconnect.url('https://y.preconnect.com/foo/bar');
+    expect(document.querySelectorAll('link[rel=preconnect]'))
+        .to.have.length(1);
   });
 
   it('should prefetch', () => {

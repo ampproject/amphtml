@@ -27,6 +27,7 @@ describe('CustomElement', () => {
 
   const resources = resourcesFor(window);
   let testElementCreatedCallback;
+  let testElementPreconnectCallback;
   let testElementFirstAttachedCallback;
   let testElementBuildCallback;
   let testElementLayoutCallback;
@@ -41,6 +42,9 @@ describe('CustomElement', () => {
     }
     createdCallback() {
       testElementCreatedCallback();
+    }
+    preconnectCallback(onLayout) {
+      testElementPreconnectCallback(onLayout);
     }
     firstAttachedCallback() {
       testElementFirstAttachedCallback();
@@ -85,6 +89,7 @@ describe('CustomElement', () => {
     clock = sandbox.useFakeTimers();
 
     testElementCreatedCallback = sinon.spy();
+    testElementPreconnectCallback = sinon.spy();
     testElementFirstAttachedCallback = sinon.spy();
     testElementBuildCallback = sinon.spy();
     testElementLayoutCallback = sinon.spy();
@@ -200,12 +205,14 @@ describe('CustomElement', () => {
     expect(res).to.equal(true);
     expect(element.isBuilt()).to.equal(true);
     expect(testElementBuildCallback.callCount).to.equal(1);
+    expect(testElementPreconnectCallback.callCount).to.equal(1);
 
     // Call again.
     res = element.build(false);
     expect(res).to.equal(true);
     expect(element.isBuilt()).to.equal(true);
     expect(testElementBuildCallback.callCount).to.equal(1);
+    expect(testElementPreconnectCallback.callCount).to.equal(1);
   });
 
   it('Element - build not allowed', () => {
@@ -387,9 +394,13 @@ describe('CustomElement', () => {
     element.build(true);
     expect(element.isBuilt()).to.equal(true);
     expect(testElementLayoutCallback.callCount).to.equal(0);
+    expect(testElementPreconnectCallback.callCount).to.equal(1);
+    expect(testElementPreconnectCallback.getCall(0).args[0]).to.be.false;
 
     const p = element.layoutCallback();
     expect(testElementLayoutCallback.callCount).to.equal(1);
+    expect(testElementPreconnectCallback.callCount).to.equal(2);
+    expect(testElementPreconnectCallback.getCall(1).args[0]).to.be.true;
     return p.then(() => {
       expect(element.readyState).to.equal('complete');
     });

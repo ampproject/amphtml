@@ -412,6 +412,7 @@ export function createAmpElementProto(win, name, implementationClass) {
     }
     try {
       this.implementation_.buildCallback();
+      this.preconnect(/* onLayout */ false);
       this.built_ = true;
       this.classList.remove('-amp-notbuilt');
       this.classList.remove('amp-notbuilt');
@@ -432,6 +433,15 @@ export function createAmpElementProto(win, name, implementationClass) {
       }
     }
     return true;
+  };
+
+  /**
+   * Called to instruct the element to preconnect to hosts it uses during
+   * layout.
+   * @param {boolean} onLayout Whether this was called after a layout.
+   */
+  ElementProto.preconnect = function(onLayout) {
+    this.implementation_.preconnectCallback(onLayout);
   };
 
   /**
@@ -659,6 +669,7 @@ export function createAmpElementProto(win, name, implementationClass) {
         'Must be upgraded and built to receive viewport events');
     this.dispatchCustomEvent('amp:load:start');
     const promise = this.implementation_.layoutCallback();
+    this.preconnect(/* onLayout */ true);
     this.classList.add('-amp-layout');
     assert(promise instanceof Promise,
         'layoutCallback must return a promise');

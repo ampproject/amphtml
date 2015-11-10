@@ -22,9 +22,9 @@ import {loadPromise} from '../../../src/event-helper';
 
 class AmpTwitter extends AMP.BaseElement {
   /** @override */
-  createdCallback() {
+  preconnectCallback(onLayout) {
     // This domain serves the actual tweets as JSONP.
-    this.preconnect.url('https://syndication.twitter.com');
+    this.preconnect.url('https://syndication.twitter.com', onLayout);
     // Hosts the script that renders tweets.
     this.preconnect.prefetch('https://platform.twitter.com/widgets.js');
     prefetchBootstrap(this.getWin());
