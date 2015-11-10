@@ -55,7 +55,7 @@ export function adopt(global) {
    *     CSS file associated with the element.
    */
   global.AMP.registerElement = function(name, implementationClass, opt_css) {
-    var register = function() {
+    const register = function() {
       registerExtendedElement(global, name, implementationClass);
       elementsForTesting.push({
         name: name,

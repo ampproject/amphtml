@@ -27,7 +27,7 @@ describe('vsync', () => {
   });
 
   it('should generate a frame and run callbacks', () => {
-    var result = '';
+    let result = '';
     return new Promise(resolve => {
       vsync.run({
         measure: () => {
@@ -69,7 +69,7 @@ describe('vsync', () => {
   });
 
   it('should schedule nested vsyncs', () => {
-    var result = '';
+    let result = '';
     return new Promise(resolve => {
       vsync.run({
         measure: () => {

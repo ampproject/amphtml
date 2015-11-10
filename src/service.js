@@ -28,11 +28,11 @@
  * @return {*}
  */
 export function getService(win, id, factory) {
-  var services = win.services;
+  let services = win.services;
   if (!services) {
     services = win.services = {};
   }
-  var s = services[id];
+  const s = services[id];
   if (!s) {
     return services[id] = factory(win);
   }

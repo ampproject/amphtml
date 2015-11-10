@@ -42,10 +42,10 @@ describe('reportErrorToServer', () => {
   });
 
   it('reportError with error object', () => {
-    var e = new Error('XYZ');
-    var url = parseUrl(
+    const e = new Error('XYZ');
+    const url = parseUrl(
         getErrorReportUrl(undefined, undefined, undefined, undefined, e));
-    var query = parseQueryString(url.search);
+    const query = parseQueryString(url.search);
     expect(url.href.indexOf(
         'https://cdn.ampproject.org/error/report.gif')).to.equal(0);
 
@@ -57,12 +57,12 @@ describe('reportErrorToServer', () => {
   });
 
   it('reportError with associatedElement', () => {
-    var e = new Error('XYZ');
-    var el = document.createElement('foo-bar');
+    const e = new Error('XYZ');
+    const el = document.createElement('foo-bar');
     e.associatedElement = el;
-    var url = parseUrl(
+    const url = parseUrl(
         getErrorReportUrl(undefined, undefined, undefined, undefined, e));
-    var query = parseQueryString(url.search);
+    const query = parseQueryString(url.search);
 
     expect(query.m).to.equal('XYZ');
     expect(query.el).to.equal('FOO-BAR');
@@ -71,11 +71,11 @@ describe('reportErrorToServer', () => {
   });
 
   it('reportError mark asserts', () => {
-    var e = new Error('XYZ');
+    const e = new Error('XYZ');
     e.fromAssert = true;
-    var url = parseUrl(
+    const url = parseUrl(
         getErrorReportUrl(undefined, undefined, undefined, undefined, e));
-    var query = parseQueryString(url.search);
+    const query = parseQueryString(url.search);
 
     expect(query.m).to.equal('XYZ');
     expect(query.a).to.equal('1');
@@ -83,9 +83,9 @@ describe('reportErrorToServer', () => {
   });
 
   it('reportError without error object', () => {
-    var url = parseUrl(
+    const url = parseUrl(
         getErrorReportUrl('foo bar', 'foo.js', '11', '22', undefined));
-    var query = parseQueryString(url.search);
+    const query = parseQueryString(url.search);
     expect(url.href.indexOf(
         'https://cdn.ampproject.org/error/report.gif')).to.equal(0);
 

@@ -371,7 +371,7 @@ export function installAd(win) {
       a.href = 'https://www.ampproject.org';
       a.target = '_blank';
       a.setAttribute('fallback', '');
-      var img = new Image();
+      const img = new Image();
       setStyles(img, {
         width: 'auto',
         height: '100%',

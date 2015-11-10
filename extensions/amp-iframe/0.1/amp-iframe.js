@@ -24,7 +24,7 @@ import {parseUrl} from '../../../src/url';
 const TAG_ = 'AmpIframe';
 
 /** @type {number}  */
-var count = 0;
+let count = 0;
 
 /** @const */
 const assert = AMP.assert;
@@ -36,14 +36,14 @@ class AmpIframe extends AMP.BaseElement {
   }
 
   assertSource(src, containerSrc, sandbox) {
-    var url = parseUrl(src);
+    const url = parseUrl(src);
     assert(
         url.protocol == 'https:' ||
         url.protocol == 'data:' ||
             url.origin.indexOf('http://iframe.localhost:') == 0,
         'Invalid <amp-iframe> src. Must start with https://. Found %s',
         this.element);
-    var containerUrl = parseUrl(containerSrc);
+    const containerUrl = parseUrl(containerSrc);
     assert(
         !((' ' + sandbox + ' ').match(/\s+allow-same-origin\s+/)) ||
         url.origin != containerUrl.origin,
@@ -54,8 +54,8 @@ class AmpIframe extends AMP.BaseElement {
   }
 
   assertPosition() {
-    var pos = this.element.getLayoutBox();
-    var minTop = Math.min(600, this.getViewport().getSize().height * .75);
+    const pos = this.element.getLayoutBox();
+    const minTop = Math.min(600, this.getViewport().getSize().height * .75);
     assert(pos.top >= minTop,
         '<amp-iframe> elements must be positioned outside the first 75% ' +
         'of the viewport or 600px from the top (whichever is smaller): %s ' +
@@ -77,11 +77,11 @@ class AmpIframe extends AMP.BaseElement {
    * @return {string} Data URI for the srcdoc
    */
   transformSrcDoc() {
-    var srcdoc = this.element.getAttribute('srcdoc');
+    const srcdoc = this.element.getAttribute('srcdoc');
     if (!srcdoc) {
       return;
     }
-    var sandbox = this.element.getAttribute('sandbox');
+    const sandbox = this.element.getAttribute('sandbox');
     assert(
         !((' ' + sandbox + ' ').match(/\s+allow-same-origin\s+/)),
         'allow-same-origin is not allowed with the srcdoc attribute %s.',
@@ -91,7 +91,8 @@ class AmpIframe extends AMP.BaseElement {
 
   /** @override */
   firstAttachedCallback() {
-    var iframeSrc = this.element.getAttribute('src') || this.transformSrcDoc();
+    const iframeSrc = this.element.getAttribute('src') ||
+        this.transformSrcDoc();
     this.iframeSrc = this.assertSource(iframeSrc, window.location.href,
         this.element.getAttribute('sandbox'));
     this.preconnect.url(this.iframeSrc);
@@ -115,9 +116,9 @@ class AmpIframe extends AMP.BaseElement {
       return Promise.resolve();
     }
 
-    var width = this.element.getAttribute('width');
-    var height = this.element.getAttribute('height');
-    var iframe = document.createElement('iframe');
+    const width = this.element.getAttribute('width');
+    const height = this.element.getAttribute('height');
+    const iframe = document.createElement('iframe');
 
     /** @private @const {!HTMLIFrameElement} */
     this.iframe_ = iframe;
@@ -194,7 +195,7 @@ class AmpIframe extends AMP.BaseElement {
  * @param {!Element} iframe
  */
 function setSandbox(element, iframe) {
-  var allows = element.getAttribute('sandbox') || '';
+  const allows = element.getAttribute('sandbox') || '';
   iframe.setAttribute('sandbox', allows);
 }
 
@@ -208,7 +209,7 @@ function setSandbox(element, iframe) {
  */
 function makeIOsScrollable(element, iframe) {
   if (element.getAttribute('scrolling') != 'no') {
-    var wrapper = document.createElement('i-amp-scroll-container');
+    const wrapper = document.createElement('i-amp-scroll-container');
     wrapper.appendChild(iframe);
     return wrapper;
   }

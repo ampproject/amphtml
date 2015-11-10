@@ -18,7 +18,7 @@ import {createFixtureIframe, expectBodyToBecomeVisible} from
     '../../testing/iframe.js';
 
 describe('Rendering of amp-img', () => {
-  var fixture;
+  let fixture;
   beforeEach(() => {
     return createFixtureIframe('test/fixtures/images.html', 500).then(f => {
       fixture = f;
@@ -39,7 +39,7 @@ describe('Rendering of amp-img', () => {
   });
 
   it('should resize and load more elements', () => {
-    var p = fixture.awaitEvent('amp:load:start', 11).then(function() {
+    const p = fixture.awaitEvent('amp:load:start', 11).then(function() {
       expect(fixture.doc.querySelectorAll('amp-img img[src]'))
           .to.have.length(11);
       fixture.iframe.height = 2000;
@@ -56,8 +56,8 @@ describe('Rendering of amp-img', () => {
 
   it('should respect media queries', () => {
     return fixture.awaitEvent('amp:load:start', 3).then(function() {
-      var smallScreen = fixture.doc.getElementById('img3');
-      var largeScreen = fixture.doc.getElementById('img3_1');
+      const smallScreen = fixture.doc.getElementById('img3');
+      const largeScreen = fixture.doc.getElementById('img3_1');
       expect(smallScreen.className).to.not.match(/-amp-hidden-by-media-query/);
       expect(largeScreen.className).to.match(/-amp-hidden-by-media-query/);
       expect(smallScreen.offsetHeight).to.not.equal(0);

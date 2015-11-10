@@ -20,7 +20,7 @@ import {Srcset, parseSrcset} from '../../src/srcset';
 describe('Srcset parseSrcset', () => {
 
   function test(s, expected) {
-    var res = parseSrcset(s);
+    const res = parseSrcset(s);
     expect(res.sources_.length).to.equal(expected.length);
     for (let i = 0; i < expected.length; i++) {
       const r = res.sources_[i];

@@ -20,7 +20,7 @@ import {applyLayout_} from '../../src/custom-element';
 
 
 describe('Layout', () => {
-  var div;
+  let div;
 
   beforeEach(() => {
     div = document.createElement('div');

@@ -21,7 +21,7 @@ import {writeScript, validateSrcPrefix, validateSrcContains} from '../src/3p';
  * @param {!Object} data
  */
 export function adtech(global, data) {
-  var src = data.src;
+  const src = data.src;
   validateSrcPrefix('https:', src);
   validateSrcContains('/addyn/', src);
   writeScript(global, src);

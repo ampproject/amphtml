@@ -38,7 +38,7 @@ const TAG_ = 'Viewport';
  *   velocity: number
  * }}
  */
-var ViewportChangedEvent;
+let ViewportChangedEvent;
 
 
 /**
@@ -377,7 +377,7 @@ export class Viewport {
       return;
     }
 
-    var newScrollTop = this.binding_.getScrollTop();
+    const newScrollTop = this.binding_.getScrollTop();
     if (newScrollTop < 0) {
       // iOS and some other browsers use negative values of scrollTop for
       // overscroll. Overscroll does not affect the viewport and thus should
@@ -394,15 +394,15 @@ export class Viewport {
   /** @private */
   scrollDeferred_() {
     this.scrollTracking_ = false;
-    var newScrollTop = this.binding_.getScrollTop();
+    const newScrollTop = this.binding_.getScrollTop();
     if (this.scrollTop_ === null) {
       // If the scrollTop was reset while waiting for the next scroll event
       // we have to assume that velocity is 0 - there's no other way we can
       // calculate it.
       this.scrollTop_ = newScrollTop;
     }
-    var now = timer.now();
-    var velocity = 0;
+    const now = timer.now();
+    let velocity = 0;
     if (now != this.scrollMeasureTime_) {
       velocity = (newScrollTop - this.scrollTop_) /
           (now - this.scrollMeasureTime_);
@@ -570,13 +570,13 @@ export class ViewportBindingNatural_ {
     // and thus cannot be used. But when the values are undefined, fallback to
     // documentElement./*OK*/clientHeight.
     if (platform.isIos() && !platform.isChrome()) {
-      var winWidth = this.win./*OK*/innerWidth;
-      var winHeight = this.win./*OK*/innerHeight;
+      const winWidth = this.win./*OK*/innerWidth;
+      const winHeight = this.win./*OK*/innerHeight;
       if (winWidth && winHeight) {
         return {width: winWidth, height: winHeight};
       }
     }
-    var el = this.win.document.documentElement;
+    const el = this.win.document.documentElement;
     return {width: el./*OK*/clientWidth, height: el./*OK*/clientHeight};
   }
 
@@ -599,9 +599,9 @@ export class ViewportBindingNatural_ {
 
   /** @override */
   getLayoutRect(el) {
-    var scrollTop = this.getScrollTop();
-    var scrollLeft = this.getScrollLeft();
-    var b = el./*OK*/getBoundingClientRect();
+    const scrollTop = this.getScrollTop();
+    const scrollLeft = this.getScrollLeft();
+    const b = el./*OK*/getBoundingClientRect();
     return layoutRectLtwh(Math.round(b.left + scrollLeft),
         Math.round(b.top + scrollTop),
         Math.round(b.width),
@@ -618,7 +618,7 @@ export class ViewportBindingNatural_ {
    * @private
    */
   getScrollingElement_() {
-    var doc = this.win.document;
+    const doc = this.win.document;
     if (doc./*OK*/scrollingElement) {
       return doc./*OK*/scrollingElement;
     }
@@ -798,7 +798,7 @@ export class ViewportBindingNaturalIosEmbed_ {
 
   /** @override */
   getLayoutRect(el) {
-    var b = el./*OK*/getBoundingClientRect();
+    const b = el./*OK*/getBoundingClientRect();
     return layoutRectLtwh(Math.round(b.left + this.pos_.x),
         Math.round(b.top + this.pos_.y),
         Math.round(b.width),
@@ -977,7 +977,7 @@ export class ViewportBindingVirtual_ {
    * @return {!LayoutRect}
    */
   getLayoutRect(el) {
-    var b = el./*OK*/getBoundingClientRect();
+    const b = el./*OK*/getBoundingClientRect();
     return layoutRectLtwh(Math.round(b.left),
         Math.round(b.top),
         Math.round(b.width),

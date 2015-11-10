@@ -27,11 +27,11 @@ export function maybeValidate(win) {
   if (!getMode().development) {
     return;
   }
-  var filename = win.location.href;
+  const filename = win.location.href;
   if (filename.indexOf('about:') == 0) {  // Should only happen in tests.
     return;
   }
-  var s = document.createElement('script');
+  const s = document.createElement('script');
   // TODO(@cramforce): Switch to locally build version when we integrated
   // the validator and switch to production URL.
   s.src = 'https://www.gstatic.com/amphtml/v0/validator.js';

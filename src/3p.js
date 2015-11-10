@@ -54,7 +54,7 @@ export function register(id, draw) {
  * @param {!Object} data
  */
 export function run(id, win, data) {
-  var fn = registrations[id];
+  const fn = registrations[id];
   assert(fn, 'Unknown 3p: ' + id);
   fn(win, data);
 }
@@ -84,7 +84,7 @@ export function writeScript(win, url, opt_cb) {
  * @param {function()=} cb
  */
 export function loadScript(win, url, cb) {
-  var s = win.document.createElement('script');
+  const s = win.document.createElement('script');
   s.src = url;
   s.onload = cb;
   win.document.body.appendChild(s);
@@ -97,7 +97,7 @@ export function loadScript(win, url, cb) {
  * @param {function()} fn
  */
 function executeAfterWriteScript(win, fn) {
-  var index = syncScriptLoads++;
+  const index = syncScriptLoads++;
   win['__runScript' + index] = fn;
   win.document.write('<' + 'script>__runScript' + index + '()<' + '/script>');
 }

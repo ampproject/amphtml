@@ -27,7 +27,7 @@ import {timer} from './timer';
  *   clientY: number
  * }}
  */
-var Tap;
+let Tap;
 
 
 /**
@@ -101,7 +101,7 @@ export class TapRecognizer extends GestureRecognizer {
  *   clientY: number
  * }}
  */
-var Doubletap;
+let Doubletap;
 
 
 /**
@@ -199,7 +199,7 @@ export class DoubletapRecognizer extends GestureRecognizer {
  *   velocityY: number
  * }}
  */
-var Swipe;
+let Swipe;
 
 
 /**
@@ -434,7 +434,7 @@ export class SwipeYRecognizer extends SwipeRecognizer {
  *   velocityY: number
  * }}
  */
-var Tapzoom;
+let Tapzoom;
 
 
 /**
@@ -628,7 +628,7 @@ export class TapzoomRecognizer extends GestureRecognizer {
  *   velocityY: number
  * }}
  */
-var Pinch;
+let Pinch;
 
 
 /**

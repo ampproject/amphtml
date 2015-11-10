@@ -102,7 +102,7 @@ describe('preconnect', () => {
     expect(document.querySelector('link[rel=preconnect]').href)
         .to.equal('https://a.prefetch.com/');
     // Actual prefetch
-    var fetches = document.querySelectorAll(
+    const fetches = document.querySelectorAll(
         'link[rel=prefetch]');
     expect(fetches).to.have.length(2);
     expect(fetches[0].href).to.equal('https://a.prefetch.com/foo/bar');

@@ -18,18 +18,18 @@ import {getService} from '../../src/service';
 
 describe('service`', () => {
 
-  var count = 1;
+  let count = 1;
   function inc() {
     return count++;
   }
 
   it('should make per window singletons', () => {
-    var a1 = getService(window, 'a', inc);
-    var a2 = getService(window, 'a', inc);
+    const a1 = getService(window, 'a', inc);
+    const a2 = getService(window, 'a', inc);
     expect(a1).to.equal(a2);
     expect(a1).to.equal(1);
-    var b1 = getService(window, 'b', inc);
-    var b2 = getService(window, 'b', inc);
+    const b1 = getService(window, 'b', inc);
+    const b2 = getService(window, 'b', inc);
     expect(b1).to.equal(b2);
     expect(b1).to.not.equal(a1);
   });

@@ -40,11 +40,11 @@ describe('3p-frame', () => {
   }
 
   it('add attributes', () => {
-    var div = document.createElement('div');
+    const div = document.createElement('div');
     div.setAttribute('data-foo', 'foo');
     div.setAttribute('data-bar', 'bar');
     div.setAttribute('foo', 'nope');
-    var obj = {};
+    let obj = {};
     addDataAndJsonAttributes_(div, obj);
     expect(obj).to.deep.equal({
       'foo': 'foo',
@@ -64,12 +64,12 @@ describe('3p-frame', () => {
 
   it('should create an iframe', () => {
 
-    var link = document.createElement('link');
+    const link = document.createElement('link');
     link.setAttribute('rel', 'canonical');
     link.setAttribute('href', 'https://foo.bar/baz');
     document.head.appendChild(link);
 
-    var div = document.createElement('div');
+    const div = document.createElement('div');
     div.setAttribute('data-test-attr', 'value');
     div.setAttribute('data-ping', 'pong');
     div.setAttribute('width', '50');
@@ -82,13 +82,13 @@ describe('3p-frame', () => {
       };
     };
 
-    var iframe = getIframe(window, div, '_ping_');
-    var src = iframe.src;
-    var referrer = document.referrer;
+    const iframe = getIframe(window, div, '_ping_');
+    const src = iframe.src;
+    const referrer = document.referrer;
     expect(referrer).to.not.be.a.string;
-    var locationHref = location.href;
+    const locationHref = location.href;
     expect(locationHref).to.not.be.a.string;
-    var fragment =
+    const fragment =
         '#{"testAttr":"value","ping":"pong","width":50,"height":100,' +
         '"initialWindowWidth":100,"initialWindowHeight":200,"type":"_ping_"' +
         ',"_context":{"referrer":"' + referrer + '",' +
@@ -104,7 +104,7 @@ describe('3p-frame', () => {
 
     document.body.appendChild(iframe);
     return loadPromise(iframe).then(() => {
-      var win = iframe.contentWindow;
+      const win = iframe.contentWindow;
       expect(win.context.canonicalUrl).to.equal('https://foo.bar/baz');
       expect(win.context.location.href).to.equal(locationHref);
       expect(win.context.location.origin).to.equal('http://localhost:9876');
@@ -117,7 +117,7 @@ describe('3p-frame', () => {
       expect(win.context.data.testAttr).to.equal('value');
       expect(win.context.noContentAvailable).to.be.function;
       expect(win.context.observeIntersection).to.be.function;
-      var c = win.document.getElementById('c');
+      const c = win.document.getElementById('c');
       expect(c).to.not.be.null;
       expect(c.textContent).to.contain('pong');
     });
@@ -156,7 +156,7 @@ describe('3p-frame', () => {
 
   it('should prefetch bootstrap frame and JS', () => {
     prefetchBootstrap(window);
-    var fetches = document.querySelectorAll(
+    const fetches = document.querySelectorAll(
         'link[rel=prefetch]');
     expect(fetches).to.have.length(2);
     expect(fetches[0].href).to.equal(

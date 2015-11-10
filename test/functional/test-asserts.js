@@ -37,14 +37,14 @@ describe('asserts', () => {
     expect(function() {
       assert(false, 'should fail %s %s', 'XYZ', 'YYY');
     }).to.throw(/should fail XYZ YYY/);
-    var div = document.createElement('div');
+    const div = document.createElement('div');
     div.id = 'abc';
     div.textContent = 'foo';
     expect(function() {
       assert(false, 'should fail %s', div);
     }).to.throw(/should fail div#abc/);
 
-    var error;
+    let error;
     try {
       assert(false, '%s a %s b %s', 1, 2, 3);
     } catch (e) {
@@ -56,8 +56,8 @@ describe('asserts', () => {
   });
 
   it('should add element and assert info', () => {
-    var div = document.createElement('div');
-    var error;
+    const div = document.createElement('div');
+    let error;
     try {
       assert(false, '%s a %s b %s', div, 2, 3);
     } catch (e) {

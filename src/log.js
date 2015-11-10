@@ -17,7 +17,7 @@
 import {getMode} from './mode';
 
 /** @const Time when this JS loaded.  */
-var start = new Date().getTime();
+const start = new Date().getTime();
 
 
 /**
@@ -49,8 +49,8 @@ export class Log {
       return false;
     }
     // Search for #log=0 or log=1
-    var match = this.win.location.hash.match(/log=(\d)/);
-    var shouldLog = match && match[1];
+    const match = this.win.location.hash.match(/log=(\d)/);
+    const shouldLog = match && match[1];
     if (getMode().localDev && shouldLog != '0') {
       return true;
     }
@@ -68,7 +68,7 @@ export class Log {
    */
   msg_(tag, level, messages) {
     if (this.isEnabled_) {
-      var fn = this.win.console.log;
+      let fn = this.win.console.log;
       if (level == 'ERROR') {
         fn = this.win.console.error || fn;
       } else if (level == 'INFO') {

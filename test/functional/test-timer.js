@@ -24,10 +24,10 @@ describe('Timer', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    var WindowApi = function() {};
+    const WindowApi = function() {};
     WindowApi.prototype.setTimeout = function(callback, delay) {};
     WindowApi.prototype.clearTimeout = function(timerId) {};
-    var windowApi = new WindowApi();
+    const windowApi = new WindowApi();
     windowMock = sandbox.mock(windowApi);
     timer = new Timer(windowApi);
   });
@@ -62,7 +62,7 @@ describe('Timer', () => {
   it('cancel default', done => {
     windowMock.expects('setTimeout').never();
     windowMock.expects('clearTimeout').never();
-    var id = timer.delay(() => {
+    const id = timer.delay(() => {
       throw new Error('should have been cancelled');
     });
     timer.cancel(id);

@@ -26,7 +26,7 @@ import {assert} from './asserts';
  *   dpr: (number|undefined)
  * }}
  */
-var SrcsetSource;
+let SrcsetSource;
 
 
 /**

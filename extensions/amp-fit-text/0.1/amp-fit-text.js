@@ -36,7 +36,7 @@ class AmpFitText extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    var childNodes = this.getRealChildNodes();
+    const childNodes = this.getRealChildNodes();
 
     /** @private @const */
     this.content_ = document.createElement('div');
