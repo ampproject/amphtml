@@ -60,24 +60,35 @@ gulp.task('test', 'Runs tests in chrome', ['build'], function(done) {
     return;
   }
 
-  var config = getConfig();
+  if (!argv.integration && process.env.AMPSAUCE_REPO) {
+    console./*OK*/info('Deactivated for ampsauce repo')
+  }
+
+  var c = getConfig();
   var browsers = [];
 
   if (argv.watch || argv.w) {
-    config.singleRun = false;
+    c.singleRun = false;
   }
 
   if (argv.verbose || argv.v) {
-    config.client.captureConsole = true;
+    c.client.captureConsole = true;
   }
 
-  karma.start(config, done);
+  if (argv.integration) {
+    c.files = config.integrationTestPaths;
+  } else {
+    c.files = config.testPaths;
+  }
+
+  karma.start(c, done);
 }, {
   options: {
     'verbose': '  With logging enabled',
     'watch': '  Watches for changes in files, runs corresponding test(s)',
     'saucelabs': '  Runs test on saucelabs (requires setup)',
     'safari': '  Runs tests in Safari',
-    'firefox': '  Runs tests in Firefox'
+    'firefox': '  Runs tests in Firefox',
+    'integration': 'Run only integration tests.'
   }
 });
