@@ -160,6 +160,18 @@ describe('CustomElement', () => {
     expect(element.isBuilt()).to.equal(false);
   });
 
+  it('StubElement - should NOT allow upgrade for a template element', () => {
+    const element = new StubElementClass();
+    expect(element.isUpgraded()).to.equal(false);
+    element.isInTemplate_ = true;
+
+    resourcesMock.expects('upgraded').withExactArgs(element).never();
+
+    element.upgrade(TestElement);
+    expect(element.isUpgraded()).to.equal(false);
+    expect(element.isBuilt()).to.equal(false);
+  });
+
 
   it('Element - build allowed', () => {
     const element = new ElementClass();
@@ -230,6 +242,24 @@ describe('CustomElement', () => {
     expect(testElementBuildCallback.callCount).to.equal(1);
   });
 
+  it('Element - build NOT allowed when in template', () => {
+    const element = new ElementClass();
+    expect(element.classList.contains('-amp-element')).to.equal(true);
+    expect(element.isBuilt()).to.equal(false);
+    expect(element.classList.contains('-amp-notbuilt')).to.equal(true);
+    expect(element.classList.contains('amp-notbuilt')).to.equal(true);
+    expect(testElementBuildCallback.callCount).to.equal(0);
+
+    element.isInTemplate_ = true;
+    testElementIsReadyToBuild = true;
+    expect(() => {
+      element.build(false);
+    }).to.throw(/Must never be called in template/);
+
+    expect(element.isBuilt()).to.equal(false);
+    expect(testElementBuildCallback.callCount).to.equal(0);
+  });
+
   it('StubElement - build never allowed', () => {
     const element = new StubElementClass();
     expect(element.classList.contains('-amp-element')).to.equal(true);
@@ -279,6 +309,8 @@ describe('CustomElement', () => {
     // Not upgraded yet!
     expect(testElementCreatedCallback.callCount).to.equal(0);
     expect(testElementFirstAttachedCallback.callCount).to.equal(0);
+    expect(element).to.have.class('amp-unresolved');
+    expect(element).to.have.class('-amp-unresolved');
 
     // Upgrade
     resourcesMock.expects('upgraded').withExactArgs(element).once();
@@ -289,6 +321,8 @@ describe('CustomElement', () => {
     // Now it's called.
     expect(testElementCreatedCallback.callCount).to.equal(1);
     expect(testElementFirstAttachedCallback.callCount).to.equal(1);
+    expect(element).to.not.have.class('amp-unresolved');
+    expect(element).to.not.have.class('-amp-unresolved');
   });
 
   it('Element - detachedCallback', () => {
@@ -383,6 +417,19 @@ describe('CustomElement', () => {
         });
       });
 
+  it('Element - layoutCallback is NOT allowed in template', () => {
+    const element = new ElementClass();
+    element.setAttribute('layout', 'fill');
+    element.build(true);
+    expect(element.isBuilt()).to.equal(true);
+    expect(testElementLayoutCallback.callCount).to.equal(0);
+
+    element.isInTemplate_ = true;
+    expect(() => {
+      element.layoutCallback();
+    }).to.throw(/Must never be called in template/);
+  });
+
   it('StubElement - layoutCallback', () => {
     const element = new StubElementClass();
     element.setAttribute('layout', 'fill');
@@ -451,6 +498,19 @@ describe('CustomElement', () => {
     expect(element.actionQueue_).to.equal(null);
   });
 
+  it('should NOT enqueue actions when in template', () => {
+    const element = new ElementClass();
+    const handler = sinon.spy();
+    element.implementation_.executeAction = handler;
+    expect(element.actionQueue_).to.not.equal(null);
+
+    const inv = {};
+    element.isInTemplate_ = true;
+    expect(() => {
+      element.enqueAction(inv);
+    }).to.throw(/Must never be called in template/);
+  });
+
 
   it('should apply media condition', () => {
     const element1 = new ElementClass();
@@ -488,6 +548,15 @@ describe('CustomElement', () => {
     element.changeHeight(111);
     expect(parseInt(element.sizerElement_.style.paddingTop, 10)).to.equal(0);
     expect(element.style.height).to.equal('111px');
+  });
+
+  it('should NOT apply media condition in template', () => {
+    const element1 = new ElementClass();
+    element1.setAttribute('media', '(min-width: 1px)');
+    element1.isInTemplate_ = true;
+    expect(() => {
+      element1.applySizesAndMediaQuery();
+    }).to.throw(/Must never be called in template/);
   });
 
 
@@ -583,6 +652,19 @@ describe('CustomElement', () => {
       expect(element.isBuilt()).to.equal(true);
       expect(testElementViewportCallback.callCount).to.equal(1);
     });
+
+    it('Element - should NOT be called in template', () => {
+      const element = new ElementClass();
+      element.setAttribute('layout', 'fill');
+      element.build(true);
+      expect(element.isBuilt()).to.equal(true);
+      expect(testElementViewportCallback.callCount).to.equal(0);
+
+      element.isInTemplate_ = true;
+      expect(() => {
+        element.viewportCallback(true);
+      }).to.throw(/Must never be called in template/);
+    });
   });
 });
 
@@ -667,6 +749,13 @@ describe('CustomElement Service Elements', () => {
 
     element.toggleFallback(false);
     expect(element).to.not.have.class('amp-notsupported');
+  });
+
+  it('togglePlaceholder should NOT call in template', () => {
+    element.isInTemplate_ = true;
+    expect(() => {
+      element.togglePlaceholder(false);
+    }).to.throw(/Must never be called in template/);
   });
 });
 
@@ -813,6 +902,13 @@ describe('CustomElement Loading Indicator', () => {
     vsyncTasks.shift()();
     expect(element.loadingContainer_).to.be.null;
     expect(element.loadingElement_).to.be.null;
+  });
+
+  it('should ignore loading-off if never created', () => {
+    element.isInTemplate_ = true;
+    expect(() => {
+      element.toggleLoading_(false);
+    }).to.throw(/Must never be called in template/);
   });
 
 

@@ -59,6 +59,13 @@ const knownElements = {};
 
 
 /**
+ * Whether this platform supports template tags.
+ * @const {boolean}
+ */
+const TEMPLATE_TAG_SUPPORTED = 'content' in document.createElement('template');
+
+
+/**
  * Registers an element. Upgrades it if has previously been stubbed.
  * @param {!Window} win
  * @param {string}
@@ -313,6 +320,17 @@ export function createAmpElementProto(win, name, implementationClass) {
      * @private {?Array<!ActionInvocation>}
      */
     this.actionQueue_ = [];
+
+    /**
+     * Whether the element is in the template.
+     * @private {boolean|undefined}
+     */
+    this.isInTemplate_;
+  };
+
+  /** @private */
+  ElementProto.assertNotTemplate_ = function() {
+    assert(!this.isInTemplate_, 'Must never be called in template');
   };
 
   /**
@@ -332,12 +350,14 @@ export function createAmpElementProto(win, name, implementationClass) {
    * @final @package
    */
   ElementProto.upgrade = function(newImplClass) {
-    const registeredStub = this.implementation_;
-    const newImpl = new newImplClass(this);
-    this.implementation_ = newImpl;
-    if (registeredStub) {
-      registeredStub.upgrade(newImpl);
+    if (this.isInTemplate_) {
+      return;
     }
+    const registeredStub = this.implementation_;
+    this.implementation_ = new newImplClass(this);
+    this.classList.remove('amp-unresolved');
+    this.classList.remove('-amp-unresolved');
+    this.implementation_.createdCallback();
     if (this.layout_ != Layout.NODISPLAY &&
           !this.implementation_.isLayoutSupported(this.layout_)) {
       throw new Error('Layout not supported: ' + this.layout_);
@@ -382,6 +402,7 @@ export function createAmpElementProto(win, name, implementationClass) {
    * @final
    */
   ElementProto.build = function(force) {
+    this.assertNotTemplate_();
     if (this.isBuilt()) {
       return true;
     }
@@ -454,6 +475,8 @@ export function createAmpElementProto(win, name, implementationClass) {
    * @package
    */
   ElementProto.applySizesAndMediaQuery = function() {
+    this.assertNotTemplate_();
+
     // Media query.
     if (this.mediaQuery_ === undefined) {
       this.mediaQuery_ = this.getAttribute('media') || null;
@@ -499,12 +522,17 @@ export function createAmpElementProto(win, name, implementationClass) {
    * @final
    */
   ElementProto.attachedCallback = function() {
+    if (!TEMPLATE_TAG_SUPPORTED) {
+      this.isInTemplate_ = !!dom.closestByTag(this, 'template');
+    }
+    if (this.isInTemplate_) {
+      return;
+    }
     if (!this.everAttached) {
       this.everAttached = true;
       try {
         this.firstAttachedCallback_();
-      }
-      catch (e) {
+      } catch (e) {
         reportError(e, this);
       }
     }
@@ -516,6 +544,9 @@ export function createAmpElementProto(win, name, implementationClass) {
    * @final
    */
   ElementProto.detachedCallback = function() {
+    if (this.isInTemplate_) {
+      return;
+    }
     this.resources_.remove(this);
   };
 
@@ -524,6 +555,10 @@ export function createAmpElementProto(win, name, implementationClass) {
    * @private @final
    */
   ElementProto.firstAttachedCallback_ = function() {
+    if (!this.isUpgraded()) {
+      this.classList.add('amp-unresolved');
+      this.classList.add('-amp-unresolved');
+    }
     try {
       this.layout_ = applyLayout_(this);
       if (this.layout_ != Layout.NODISPLAY &&
@@ -611,6 +646,7 @@ export function createAmpElementProto(win, name, implementationClass) {
    * @package @final
    */
   ElementProto.layoutCallback = function() {
+    this.assertNotTemplate_();
     assert(this.isUpgraded() && this.isBuilt(),
         'Must be upgraded and built to receive viewport events');
     this.dispatchCustomEvent('amp:load:start');
@@ -641,6 +677,7 @@ export function createAmpElementProto(win, name, implementationClass) {
    * @final @package
    */
   ElementProto.viewportCallback = function(inViewport) {
+    this.assertNotTemplate_();
     this.isInViewport_ = inViewport;
     if (this.layoutCount_ == 0) {
       if (!inViewport) {
@@ -682,6 +719,7 @@ export function createAmpElementProto(win, name, implementationClass) {
    * @package @final
    */
   ElementProto.documentInactiveCallback = function() {
+    this.assertNotTemplate_();
     if (!this.isBuilt() || !this.isUpgraded()) {
       return false;
     }
@@ -697,6 +735,7 @@ export function createAmpElementProto(win, name, implementationClass) {
    * @final
    */
   ElementProto.enqueAction = function(invocation) {
+    this.assertNotTemplate_();
     if (!this.isBuilt()) {
       assert(this.actionQueue_).push(invocation);
     } else {
@@ -787,6 +826,7 @@ export function createAmpElementProto(win, name, implementationClass) {
    * @package @final
    */
   ElementProto.togglePlaceholder = function(state) {
+    this.assertNotTemplate_();
     const placeholder = this.getPlaceholder();
     if (placeholder) {
       placeholder.classList.toggle('amp-hidden', !state);
@@ -809,6 +849,7 @@ export function createAmpElementProto(win, name, implementationClass) {
    * @package @final
    */
   ElementProto.toggleFallback = function(state) {
+    this.assertNotTemplate_();
     // This implementation is notably less efficient then placeholder toggling.
     // The reasons for this are: (a) "not supported" is the state of the whole
     // element, (b) some realyout is expected and (c) fallback condition would
@@ -873,6 +914,7 @@ export function createAmpElementProto(win, name, implementationClass) {
    * @private @final
    */
   ElementProto.toggleLoading_ = function(state, opt_cleanup) {
+    this.assertNotTemplate_();
     if (!state && !this.loadingContainer_) {
       return;
     }

@@ -131,8 +131,16 @@ export function installAd(win) {
       return isLayoutSizeDefined(layout);
     }
 
+    /**
+     * @return {boolean}
+     * @override
+     */
+    isReadyToBuild() {
+      return this.element.firstChild != null;
+    }
+
     /** @override */
-    createdCallback() {
+    buildCallback() {
       /** @private {?Element} */
       this.iframe_ = null;
 
@@ -147,10 +155,7 @@ export function installAd(win) {
 
       /** @private {boolean} */
       this.isInFixedContainer_ = false;
-    }
 
-    /** @override */
-    buildCallback() {
       this.prefetchAd_();
 
       if (!this.fallback_) {
