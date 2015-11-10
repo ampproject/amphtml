@@ -25,7 +25,7 @@ import {assertLength} from './layout';
  *   size: (!Length)
  * }}
  */
-var SizeListOption;
+let SizeListOption;
 
 
 /**

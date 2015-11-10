@@ -138,14 +138,14 @@ describe('Action findAction', () => {
   });
 
   it('should create action map in getActionMap_', () => {
-    var element = document.createElement('div');
+    const element = document.createElement('div');
     element.setAttribute('on', 'event1:action1');
     const m = action.getActionMap_(element);
     expect(m['event1'].target).to.equal('action1');
   });
 
   it('should cache action map', () => {
-    var element = document.createElement('div');
+    const element = document.createElement('div');
     element.setAttribute('on', 'event1:action1');
     const m1 = action.getActionMap_(element);
     const m2 = action.getActionMap_(element);
@@ -154,7 +154,7 @@ describe('Action findAction', () => {
 
 
   it('should find action on the same element', () => {
-    var element = document.createElement('div');
+    const element = document.createElement('div');
     element.setAttribute('on', 'event1:action1');
     const a = action.findAction_(element, 'event1');
     expect(a.node).to.equal(element);
@@ -164,9 +164,9 @@ describe('Action findAction', () => {
   });
 
   it('should find action in subtree', () => {
-    var parent = document.createElement('div');
+    const parent = document.createElement('div');
     parent.setAttribute('on', 'event1:action1');
-    var element = document.createElement('div');
+    const element = document.createElement('div');
     element.setAttribute('on', 'event2:action2');
     parent.appendChild(element);
 

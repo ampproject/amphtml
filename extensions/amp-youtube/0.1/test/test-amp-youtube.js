@@ -24,7 +24,7 @@ describe('amp-youtube', () => {
 
   function getYt(videoId, opt_responsive) {
     return createIframePromise().then(iframe => {
-      var yt = iframe.doc.createElement('amp-youtube');
+      const yt = iframe.doc.createElement('amp-youtube');
       yt.setAttribute('data-videoid', videoId);
       yt.setAttribute('width', '111');
       yt.setAttribute('height', '222');
@@ -39,7 +39,7 @@ describe('amp-youtube', () => {
 
   it('renders', () => {
     return getYt('mGENRKrdoGY').then(yt => {
-      var iframe = yt.querySelector('iframe');
+      const iframe = yt.querySelector('iframe');
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.src).to.equal(
@@ -51,7 +51,7 @@ describe('amp-youtube', () => {
 
   it('renders responsively', () => {
     return getYt('mGENRKrdoGY', true).then(yt => {
-      var iframe = yt.querySelector('iframe');
+      const iframe = yt.querySelector('iframe');
       expect(iframe).to.not.be.null;
       expect(iframe.className).to.match(/-amp-fill-content/);
     });

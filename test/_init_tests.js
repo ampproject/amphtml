@@ -51,8 +51,8 @@ it.skipOnFirefox = function(desc, fn) {
 // Global cleanup of tags added during tests. Cool to add more
 // to selector.
 afterEach(() => {
-  var cleanup = document.querySelectorAll('link,meta');
-  for (var i = 0; i < cleanup.length; i++) {
+  const cleanup = document.querySelectorAll('link,meta');
+  for (let i = 0; i < cleanup.length; i++) {
     try {
       cleanup[i].parentNode.removeChild(cleanup[i]);
     } catch (e) {
@@ -63,8 +63,8 @@ afterEach(() => {
 });
 
 chai.Assertion.addMethod('attribute', function(attr) {
-  var obj = this._obj;
-  var tagName = obj.tagName.toLowerCase();
+  const obj = this._obj;
+  const tagName = obj.tagName.toLowerCase();
   this.assert(
     obj.hasAttribute(attr),
     'expected element \'' + tagName + '\' to have attribute #{exp}',
@@ -75,8 +75,8 @@ chai.Assertion.addMethod('attribute', function(attr) {
 });
 
 chai.Assertion.addMethod('class', function(className) {
-  var obj = this._obj;
-  var tagName = obj.tagName.toLowerCase();
+  const obj = this._obj;
+  const tagName = obj.tagName.toLowerCase();
   this.assert(
     obj.classList.contains(className),
     'expected element \'' + tagName + '\' to have class #{exp}',
@@ -87,10 +87,10 @@ chai.Assertion.addMethod('class', function(className) {
 });
 
 chai.Assertion.addProperty('visible', function() {
-  var obj = this._obj;
-  var value = window.getComputedStyle(obj)
+  const obj = this._obj;
+  const value = window.getComputedStyle(obj)
       .getPropertyValue('visibility');
-  var tagName = obj.tagName.toLowerCase();
+  const tagName = obj.tagName.toLowerCase();
   this.assert(
     value === 'visible',
     'expected element \'' +
@@ -103,9 +103,9 @@ chai.Assertion.addProperty('visible', function() {
 });
 
 chai.Assertion.addProperty('hidden', function() {
-  var obj = this._obj;
-  var value = window.getComputedStyle(obj).getPropertyValue('visibility');
-  var tagName = obj.tagName.toLowerCase();
+  const obj = this._obj;
+  const value = window.getComputedStyle(obj).getPropertyValue('visibility');
+  const tagName = obj.tagName.toLowerCase();
   this.assert(
      value === 'hidden',
     'expected element \'' +
@@ -118,9 +118,9 @@ chai.Assertion.addProperty('hidden', function() {
 });
 
 chai.Assertion.addMethod('display', function(display) {
-  var obj = this._obj;
-  var value = window.getComputedStyle(obj).getPropertyValue('display');
-  var tagName = obj.tagName.toLowerCase();
+  const obj = this._obj;
+  const value = window.getComputedStyle(obj).getPropertyValue('display');
+  const tagName = obj.tagName.toLowerCase();
   this.assert(
      value === display,
     'expected element \'' + tagName + '\' to be #{exp}, got #{act}.',
@@ -131,9 +131,9 @@ chai.Assertion.addMethod('display', function(display) {
 });
 
 chai.Assertion.addMethod('jsonEqual', function(compare) {
-  var obj = this._obj;
-  var a = JSON.stringify(compare);
-  var b = JSON.stringify(obj);
+  const obj = this._obj;
+  const a = JSON.stringify(compare);
+  const b = JSON.stringify(obj);
   this.assert(
     a == b,
     'expected JSON to be equal.\nExp: #{exp}\nAct: #{act}',

@@ -32,10 +32,10 @@
  *     after.
  */
 export function installStyles(doc, cssText, cb, opt_isRuntimeCss) {
-  var length = doc.styleSheets.length;
-  var style = doc.createElement('style');
+  const length = doc.styleSheets.length;
+  const style = doc.createElement('style');
   style.textContent = cssText;
-  var afterElement = null;
+  let afterElement = null;
   // Make sure that we place style tags after the main runtime CSS. Otherwise
   // the order is random.
   if (opt_isRuntimeCss) {
@@ -48,10 +48,10 @@ export function installStyles(doc, cssText, cb, opt_isRuntimeCss) {
   // pending style download, it will have to finish before the new
   // style is visible.
   // For this reason we poll until the style becomes available.
-  var done = () => {
-    var sheets = doc.styleSheets;
-    for (var i = 0; i < sheets.length; i++) {
-      var sheet = sheets[i];
+  const done = () => {
+    const sheets = doc.styleSheets;
+    for (let i = 0; i < sheets.length; i++) {
+      const sheet = sheets[i];
       if (sheet.ownerNode == style) {
         return true;
       }
@@ -64,7 +64,7 @@ export function installStyles(doc, cssText, cb, opt_isRuntimeCss) {
     return;
   }
   // Poll until styles are available.
-  var interval = setInterval(() => {
+  const interval = setInterval(() => {
     if (done()) {
       clearInterval(interval);
       cb();

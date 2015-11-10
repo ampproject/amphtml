@@ -28,7 +28,7 @@ describe('amp-fit-text component', () => {
 
   function getFitText(text, opt_responsive) {
     return createIframePromise().then(iframe => {
-      var ft = iframe.doc.createElement('amp-fit-text');
+      const ft = iframe.doc.createElement('amp-fit-text');
       ft.setAttribute('width', '111');
       ft.setAttribute('height', '222');
       ft.style.fontFamily = 'Arial';
@@ -51,9 +51,9 @@ describe('amp-fit-text component', () => {
   }
 
   it('renders', () => {
-    var text = 'Lorem ipsum';
+    const text = 'Lorem ipsum';
     return getFitText(text).then(ft => {
-      var content = ft.querySelector('.-amp-fit-text-content');
+      const content = ft.querySelector('.-amp-fit-text-content');
       expect(content).to.not.equal(null);
       expect(content.textContent).to.equal(text);
     });

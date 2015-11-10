@@ -50,10 +50,10 @@ function getTwttr(global, cb) {
  * @param {!Object} data
  */
 export function twitter(global, data) {
-  var tweet = document.createElement('div');
+  const tweet = document.createElement('div');
   tweet.id = 'tweet';
-  var width = data.initialWindowWidth;
-  var height = data.initialWindowHeight;
+  const width = data.initialWindowWidth;
+  const height = data.initialWindowHeight;
   tweet.style.width = '100%';
   global.document.getElementById('c').appendChild(tweet);
   getTwttr(global, function(twttr) {
@@ -61,7 +61,7 @@ export function twitter(global, data) {
     delete data.width;
     delete data.height;
     twttr.widgets.createTweet(data.tweetid, tweet, data)./*OK*/then(() => {
-      var iframe = global.document.querySelector('#c iframe');
+      const iframe = global.document.querySelector('#c iframe');
       // Unfortunately the tweet isn't really done at this time.
       // We listen for resize to learn when things are
       // really done.
@@ -74,8 +74,8 @@ export function twitter(global, data) {
 
 
   function render() {
-    var iframe = global.document.querySelector('#c iframe');
-    var body = iframe.contentWindow.document.body;
+    const iframe = global.document.querySelector('#c iframe');
+    const body = iframe.contentWindow.document.body;
     context.updateDimensions(
         body./*OK*/offsetWidth,
         body./*OK*/offsetHeight + /* margins */ 20);

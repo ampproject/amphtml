@@ -26,7 +26,7 @@ describe('amp-video', () => {
   function getVideo(attributes, children) {
     return createIframePromise().then(iframe => {
       installVideo(iframe.win);
-      var v = iframe.doc.createElement('amp-video');
+      const v = iframe.doc.createElement('amp-video');
       for (const key in attributes) {
         v.setAttribute(key, attributes[key]);
       }
@@ -45,7 +45,7 @@ describe('amp-video', () => {
       width: 160,
       height: 90
     }).then(v => {
-      var video = v.querySelector('video');
+      const video = v.querySelector('video');
       expect(video).to.be.an.instanceof(Element);
       expect(video.tagName).to.equal('VIDEO');
       expect(video.getAttribute('src')).to.equal('video.mp4');
@@ -63,7 +63,7 @@ describe('amp-video', () => {
       'muted': '',
       'loop': ''
     }).then(v => {
-      var video = v.querySelector('video');
+      const video = v.querySelector('video');
       expect(video).to.be.an.instanceof(Element);
       expect(video.tagName).to.equal('VIDEO');
       expect(video.hasAttribute('controls')).to.be.true;
@@ -74,11 +74,11 @@ describe('amp-video', () => {
   });
 
   it('should load a video with source children', () => {
-    var sources = [];
-    var mediatypes = ['video/ogg', 'video/mp4', 'video/webm'];
-    for (var i = 0; i < mediatypes.length; i++) {
-      var mediatype = mediatypes[i];
-      var source = document.createElement('source');
+    const sources = [];
+    const mediatypes = ['video/ogg', 'video/mp4', 'video/webm'];
+    for (let i = 0; i < mediatypes.length; i++) {
+      const mediatype = mediatypes[i];
+      const source = document.createElement('source');
       source.setAttribute('src', getFooVideoSrc(mediatype));
       source.setAttribute('type', mediatype);
       sources.push(source);
@@ -92,11 +92,11 @@ describe('amp-video', () => {
       'muted': '',
       'loop': ''
     }, sources).then(v => {
-      var video = v.querySelector('video');
+      const video = v.querySelector('video');
       // check that the source tags were propogated
       expect(video.children.length).to.equal(mediatypes.length);
-      for (var i = 0; i < mediatypes.length; i++) {
-        var mediatype = mediatypes[i];
+      for (let i = 0; i < mediatypes.length; i++) {
+        const mediatype = mediatypes[i];
         expect(video.children.item(i).tagName).to.equal('SOURCE');
         expect(video.children.item(i).hasAttribute('src')).to.be.true;
         expect(video.children.item(i).getAttribute('src'))
@@ -107,11 +107,11 @@ describe('amp-video', () => {
   });
 
   it('should not load a video with http source children', () => {
-    var sources = [];
-    var mediatypes = ['video/ogg', 'video/mp4', 'video/webm'];
-    for (var i = 0; i < mediatypes.length; i++) {
-      var mediatype = mediatypes[i];
-      var source = document.createElement('source');
+    const sources = [];
+    const mediatypes = ['video/ogg', 'video/mp4', 'video/webm'];
+    for (let i = 0; i < mediatypes.length; i++) {
+      const mediatype = mediatypes[i];
+      const source = document.createElement('source');
       source.setAttribute('src', 'http:' + getFooVideoSrc(mediatype));
       source.setAttribute('type', mediatype);
       sources.push(source);

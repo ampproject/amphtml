@@ -24,7 +24,7 @@
 
       function createDivPromise() {
         return new Promise(function(resolve, reject) {
-          var div = document.createElement('div');
+          const div = document.createElement('div');
           resolve({
             div: div,
             addElement: function(element) {
@@ -41,7 +41,7 @@
 
       function getPin(pinDo, pinUrl, pinMedia, pinDescription) {
         return createDivPromise().then(div => {
-          var pin = document.createElement('amp-pinterest');
+          const pin = document.createElement('amp-pinterest');
           pin.setAttribute('data-do', pinDo);
           pin.setAttribute('data-url', pinUrl);
           // force the guid to a known value so test will pass
@@ -58,7 +58,7 @@
           'http://c2.staticflickr.com/8/7027/6851755809_df5b2051c9_b.jpg',
           'Next stop: Pinterest'
         ).then(pin => {
-          var a = pin.querySelector('a');
+          const a = pin.querySelector('a');
           expect(a).to.not.be.null;
           expect(a.tagName).to.equal('A');
           expect(a.href).to.equal('https://www.pinterest.com/pin/create/' +

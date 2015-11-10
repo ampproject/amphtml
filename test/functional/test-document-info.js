@@ -21,7 +21,7 @@ describe('document-info', () => {
   function getWin(canonical) {
     return createIframePromise().then(iframe => {
       if (canonical) {
-        var link = iframe.doc.createElement('link');
+        const link = iframe.doc.createElement('link');
         link.setAttribute('href', canonical);
         link.setAttribute('rel', 'canonical');
         iframe.doc.head.appendChild(link);

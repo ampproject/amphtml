@@ -77,10 +77,10 @@ export class AmpSlides extends BaseCarousel {
 
   /** @override */
   goCallback(dir, animate) {
-    var newIndex = this.nextIndex_(dir);
+    const newIndex = this.nextIndex_(dir);
     if (newIndex != this.currentIndex_) {
-      var newSlide = this.slides_[newIndex];
-      var oldSlide = this.slides_[this.currentIndex_];
+      const newSlide = this.slides_[newIndex];
+      const oldSlide = this.slides_[this.currentIndex_];
       this.currentIndex_ = newIndex;
       this.prepareSlide_(newSlide, dir);
       if (!animate) {
@@ -158,7 +158,7 @@ export class AmpSlides extends BaseCarousel {
    * @param {number} dir
    */
   prepareSlide_(slide, dir) {
-    var containerWidth = this.element./*OK*/offsetWidth;
+    const containerWidth = this.element./*OK*/offsetWidth;
     st.setStyles(slide, {
       transform: st.translateX(dir * containerWidth),
       zIndex: 1,
@@ -175,7 +175,7 @@ export class AmpSlides extends BaseCarousel {
    * @return {!Transition}
    */
   createTransition_(oldSlide, newSlide, dir) {
-    var containerWidth = this.element./*OK*/offsetWidth;
+    const containerWidth = this.element./*OK*/offsetWidth;
     return tr.all([
       tr.setStyles(newSlide, {
         transform: tr.translateX(tr.numeric(dir * containerWidth, 0)),
@@ -233,7 +233,7 @@ export class AmpSlides extends BaseCarousel {
   preloadNext_(dir) {
     // TODO(dvoytenko): can we actually preload it here? There's no
     // guarantee of it has display!=none.
-    var nextIndex = this.nextIndex_(dir);
+    const nextIndex = this.nextIndex_(dir);
     if (nextIndex != this.currentIndex_) {
       this.schedulePreload(this.slides_[nextIndex]);
     }

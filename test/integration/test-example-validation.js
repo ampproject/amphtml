@@ -23,7 +23,7 @@ import {loadPromise} from '../../src/event-helper';
 // use it directly.
 if (!window.validatorLoad) {
   window.validatorLoad = (function() {
-    var s = document.createElement('script');
+    const s = document.createElement('script');
     s.src = 'https://www.gstatic.com/amphtml/v0/validator.js';
     document.body.appendChild(s);
     return loadPromise(s);
@@ -34,7 +34,7 @@ describe('example', function() {
   // TODO(@cramforce): Remove when test is hermetic.
   this.timeout(5000);
 
-  var examples = [
+  const examples = [
     'ads.amp.html',
     'metadata-examples/article-json-ld.amp.html',
     'metadata-examples/article-microdata.amp.html',
@@ -57,13 +57,13 @@ describe('example', function() {
    *
    * @constructor {!Array<RegExp>}
    */
-  var errorWhitelist = [
+  const errorWhitelist = [
     // TODO(dvoytenko): Remove. Viewport values changed in #592. Waiting for
     // the validator to catch up.
     /INVALID_ATTR_VALUE.*vprt/
   ];
 
-  var usedWhitelist = [];
+  const usedWhitelist = [];
 
   beforeEach(() => {
     return window.validatorLoad;
@@ -71,15 +71,15 @@ describe('example', function() {
 
   examples.forEach(filename => {
     it(filename + ' should validate', () => {
-      var url = '/base/examples/' + filename;
+      const url = '/base/examples/' + filename;
       return get(url).then(html => {
-        var validationResult = amp.validator.validateString(html);
-        var rendered = amp.validator.renderValidationResult(validationResult,
+        const validationResult = amp.validator.validateString(html);
+        const rendered = amp.validator.renderValidationResult(validationResult,
             url);
 
-        var errors = [];
+        const errors = [];
         LINES: for (let i = 0; i < rendered.length; i++) {
-          var line = rendered[i];
+          const line = rendered[i];
           if (line == 'PASS') {
             continue;
           }
@@ -97,7 +97,7 @@ describe('example', function() {
             continue;
           }
           for (let n = 0; n < errorWhitelist.length; n++) {
-            var ok = errorWhitelist[n];
+            const ok = errorWhitelist[n];
             if (ok.test(rendered)) {
               usedWhitelist.push(ok);
               continue LINES;
@@ -122,7 +122,7 @@ describe('example', function() {
    */
   function get(filename) {
     return new Promise((resolve, reject) => {
-      var xhr = new XMLHttpRequest();
+      const xhr = new XMLHttpRequest();
 
       xhr.onreadystatechange = function() {
         if (xhr.readyState == 4) {

@@ -42,7 +42,7 @@ function historyState_(stackIndex) {
 
 
 /** @typedef {number} */
-var HistoryId;
+let HistoryId;
 
 
 export class History {
@@ -146,7 +146,7 @@ export class History {
   enque_(callback) {
     let resolve;
     let reject;
-    var promise = new Promise((aResolve, aReject) => {
+    const promise = new Promise((aResolve, aReject) => {
       resolve = aResolve;
       reject = aReject;
     });

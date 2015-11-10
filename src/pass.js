@@ -66,8 +66,8 @@ export class Pass {
    * @return {boolean}
    */
   schedule(opt_delay) {
-    var delay = opt_delay || this.defaultDelay_;
-    var nextTime = timer.now() + delay;
+    const delay = opt_delay || this.defaultDelay_;
+    const nextTime = timer.now() + delay;
     // Schedule anew if nothing is scheduled currently of if the new time is
     // sooner then previously requested.
     if (this.scheduled_ == -1 || nextTime - this.nextTime_ < -10) {

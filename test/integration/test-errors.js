@@ -20,7 +20,7 @@ import {createFixtureIframe, poll, expectBodyToBecomeVisible} from
 import {loadPromise} from '../../src/event-helper';
 
 describe('error page', () => {
-  var fixture;
+  let fixture;
   beforeEach(() => {
     return createFixtureIframe('test/fixtures/errors.html', 500).then(f => {
       fixture = f;
@@ -40,7 +40,7 @@ describe('error page', () => {
   function shouldFail(id) {
     // Skip for issue #110
     it('should fail to load #' + id, () => {
-      var e = fixture.doc.getElementById(id);
+      const e = fixture.doc.getElementById(id);
       expect(fixture.errors.join('\n')).to.contain(
           e.getAttribute('data-expectederror'));
       expect(e.getAttribute('error-message')).to.contain(

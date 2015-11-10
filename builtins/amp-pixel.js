@@ -122,16 +122,16 @@ export function installPixel(win) {
 
     /** @override */
     layoutCallback() {
-      var src = this.element.getAttribute('src');
+      let src = this.element.getAttribute('src');
       src = this.assertSource(src);
       src = src.replace(REPLACEMENT_EXPR, function(match, name) {
-        var val = REPLACEMENTS[name]();
+        let val = REPLACEMENTS[name]();
         if (!val && val !== 0) {
           val = '';
         }
         return encodeURIComponent(val);
       });
-      var image = new Image();
+      const image = new Image();
       image.src = src;
       image.width = 1;
       image.height = 1;

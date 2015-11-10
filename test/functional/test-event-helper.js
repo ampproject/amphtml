@@ -22,7 +22,7 @@ import * as sinon from 'sinon';
 describe('EventHelper', () => {
 
   function getEvent(name) {
-    var event = document.createEvent('Event');
+    const event = document.createEvent('Event');
     event.initEvent(name, true, true);
     return event;
   }

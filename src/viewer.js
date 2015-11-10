@@ -200,7 +200,7 @@ export class Viewer {
 
     // Remove hash - no reason to keep it around, but only when embedded.
     if (this.isEmbedded_) {
-      var newUrl = removeFragment(this.win.location.href);
+      const newUrl = removeFragment(this.win.location.href);
       if (newUrl != this.win.location.href && this.win.history.replaceState) {
         this.win.history.replaceState({}, '', newUrl);
         log.fine(TAG_, 'replace url:' + this.win.location.href);
@@ -543,7 +543,7 @@ export function parseParams_(str, allParams) {
  *   newStackIndex: number
  * }}
  */
-var ViewerHistoryPoppedEvent;
+let ViewerHistoryPoppedEvent;
 
 
 /**

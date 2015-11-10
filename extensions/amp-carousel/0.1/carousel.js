@@ -78,9 +78,9 @@ export class AmpCarousel extends BaseCarousel {
 
   /** @override */
   goCallback(dir, animate) {
-    var newPos = this.nextPos_(this.pos_, dir);
+    const newPos = this.nextPos_(this.pos_, dir);
     if (newPos != this.pos_) {
-      var oldPos = this.pos_;
+      const oldPos = this.pos_;
       this.pos_ = newPos;
 
       if (!animate) {
@@ -160,7 +160,7 @@ export class AmpCarousel extends BaseCarousel {
    * @private
    */
   preloadNext_(pos, dir) {
-    var nextPos = this.nextPos_(pos, dir);
+    const nextPos = this.nextPos_(pos, dir);
     if (nextPos != pos) {
       this.withinWindow_(nextPos, cell => {
         this.schedulePreload(cell);

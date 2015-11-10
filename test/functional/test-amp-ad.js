@@ -33,13 +33,13 @@ describe('amp-ad', () => {
           iframe.iframe.style.width = '400px';
           installAd(iframe.win);
           if (canonical) {
-            var link = iframe.doc.createElement('link');
+            const link = iframe.doc.createElement('link');
             link.setAttribute('rel', 'canonical');
             link.setAttribute('href', canonical);
             iframe.doc.head.appendChild(link);
           }
-          var a = iframe.doc.createElement('amp-ad');
-          for (var key in attributes) {
+          let a = iframe.doc.createElement('amp-ad');
+          for (const key in attributes) {
             a.setAttribute(key, attributes[key]);
           }
           // Make document long.
@@ -63,15 +63,15 @@ describe('amp-ad', () => {
       // Test precedence
       'data-width': '6666'
     }, 'https://schema.org').then(ad => {
-      var iframe = ad.firstChild;
+      const iframe = ad.firstChild;
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
-      var url = iframe.getAttribute('src');
+      const url = iframe.getAttribute('src');
       expect(url).to.match(/^http:\/\/ads.localhost:/);
       expect(url).to.match(/frame(.max)?.html#{/);
 
-      var fragment = url.substr(url.indexOf('#') + 1);
-      var data = JSON.parse(fragment);
+      const fragment = url.substr(url.indexOf('#') + 1);
+      const data = JSON.parse(fragment);
 
       expect(data.type).to.equal('a9');
       expect(data.src).to.equal('https://testsrc');
@@ -80,8 +80,8 @@ describe('amp-ad', () => {
       expect(data._context.canonicalUrl).to.equal('https://schema.org/');
       expect(data.aax_size).to.equal('300x250');
 
-      var doc = iframe.ownerDocument;
-      var fetches = doc.querySelectorAll(
+      const doc = iframe.ownerDocument;
+      const fetches = doc.querySelectorAll(
           'link[rel=prefetch]');
       expect(fetches).to.have.length(3);
       expect(fetches[0].href).to.equal(
@@ -90,7 +90,7 @@ describe('amp-ad', () => {
           'https://3p.ampproject.net/$internalRuntimeVersion$/f.js');
       expect(fetches[2].href).to.equal(
           'https://c.amazon-adsystem.com/aax2/assoc.js');
-      var preconnects = doc.querySelectorAll(
+      const preconnects = doc.querySelectorAll(
           'link[rel=preconnect]');
       expect(preconnects[preconnects.length - 1].href).to.equal(
           'https://testsrc/');
@@ -131,10 +131,10 @@ describe('amp-ad', () => {
       type: 'a9',
       src: 'testsrc',
     }, 'https://schema.org', function(ad) {
-      var s = document.createElement('style');
+      const s = document.createElement('style');
       s.textContent = '.fixed {position:fixed;}';
       ad.ownerDocument.body.appendChild(s);
-      var p = ad.ownerDocument.getElementById('parent');
+      const p = ad.ownerDocument.getElementById('parent');
       p.className = 'fixed';
       return ad;
     })).to.be.rejectedWith(/fixed/);
@@ -147,9 +147,9 @@ describe('amp-ad', () => {
       type: 'a9',
       src: 'testsrc',
     }, 'https://schema.org', function(ad) {
-      var lightbox = document.createElement('amp-lightbox');
+      const lightbox = document.createElement('amp-lightbox');
       lightbox.style.position = 'fixed';
-      var p = ad.ownerDocument.getElementById('parent');
+      const p = ad.ownerDocument.getElementById('parent');
       p.parentElement.appendChild(lightbox);
       p.parentElement.removeChild(p);
       lightbox.appendChild(p);

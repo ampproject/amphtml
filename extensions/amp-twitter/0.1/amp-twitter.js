@@ -38,7 +38,7 @@ class AmpTwitter extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     // TODO(malteubl): Preconnect to twitter.
-    var iframe = getIframe(this.element.ownerDocument.defaultView,
+    const iframe = getIframe(this.element.ownerDocument.defaultView,
         this.element, 'twitter');
     this.applyFillContent(iframe);
     this.element.appendChild(iframe);
@@ -46,7 +46,7 @@ class AmpTwitter extends AMP.BaseElement {
     listen(iframe, 'embed-size', data => {
       iframe.height = data.height;
       iframe.width = data.width;
-      var amp = iframe.parentElement;
+      const amp = iframe.parentElement;
       amp.setAttribute('height', data.height);
       amp.setAttribute('width', data.width);
       this.changeHeight(data.height);

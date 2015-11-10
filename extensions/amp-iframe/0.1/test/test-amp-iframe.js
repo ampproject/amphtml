@@ -25,11 +25,11 @@ adopt(window);
 
 describe('amp-iframe', () => {
 
-  var iframeSrc = 'http://iframe.localhost:' + location.port +
+  const iframeSrc = 'http://iframe.localhost:' + location.port +
       '/base/test/fixtures/served/iframe.html';
 
-  var timer = new Timer(window);
-  var ranJs = 0;
+  const timer = new Timer(window);
+  let ranJs = 0;
   beforeEach(() => {
     ranJs = 0;
   });
@@ -42,14 +42,14 @@ describe('amp-iframe', () => {
 
   function getAmpIframe(attributes, opt_top, opt_height, opt_translateY) {
     return createIframePromise().then(function(iframe) {
-      var i = iframe.doc.createElement('amp-iframe');
-      for (var key in attributes) {
+      const i = iframe.doc.createElement('amp-iframe');
+      for (const key in attributes) {
         i.setAttribute(key, attributes[key]);
       }
       if (opt_height) {
         iframe.iframe.style.height = opt_height;
       }
-      var top = opt_top || '600px';
+      const top = opt_top || '600px';
       i.style.position = 'absolute';
       i.style.top = top;
       if (opt_translateY) {
@@ -63,7 +63,7 @@ describe('amp-iframe', () => {
       iframe.doc.body.appendChild(i);
       // Wait an event loop for the iframe to be created.
       return pollForLayout(iframe.win, 1).then(() => {
-        var created = i.querySelector('iframe');
+        const created = i.querySelector('iframe');
         if (created) {
           // Wait for the iframe to load
           return loadPromise(created).then(() => {
@@ -176,7 +176,7 @@ describe('amp-iframe', () => {
   });
 
   it('should allow data-uri', () => {
-    var dataUri = 'data:text/html;charset=utf-8;base64,' +
+    const dataUri = 'data:text/html;charset=utf-8;base64,' +
         'PHNjcmlwdD5kb2N1bWVudC53cml0ZSgnUiAnICsgZG9jdW1lbnQucmVmZXJyZXIgK' +
         'yAnLCAnICsgbG9jYXRpb24uaHJlZik8L3NjcmlwdD4=';
     return getAmpIframe({

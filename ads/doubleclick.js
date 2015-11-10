@@ -23,18 +23,18 @@ import {loadScript} from '../src/3p';
 export function doubleclick(global, data) {
   loadScript(global, 'https://www.googletagservices.com/tag/js/gpt.js', () => {
     global.googletag.cmd.push(function() {
-      var dimensions = [[
+      const dimensions = [[
         parseInt(data.width, 10),
         parseInt(data.height, 10)
       ]];
-      var slot = googletag.defineSlot(data.slot, dimensions, 'c')
+      const slot = googletag.defineSlot(data.slot, dimensions, 'c')
           .addService(googletag.pubads());
       googletag.pubads().enableSingleRequest();
       googletag.pubads().set('page_url', context.canonicalUrl);
       googletag.enableServices();
 
       if (data.targeting) {
-        for (var key in data.targeting) {
+        for (const key in data.targeting) {
           slot.setTargeting(key, data.targeting[key]);
         }
       }

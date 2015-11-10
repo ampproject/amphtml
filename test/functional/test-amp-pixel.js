@@ -24,10 +24,10 @@ describe('amp-pixel', () => {
   function getPixel(src) {
     return createIframePromise().then(iframe => {
       installPixel(iframe.win);
-      var p = iframe.doc.createElement('amp-pixel');
+      const p = iframe.doc.createElement('amp-pixel');
       p.setAttribute('src', src);
       iframe.doc.title = 'Pixel Test';
-      var link = iframe.doc.createElement('link');
+      const link = iframe.doc.createElement('link');
       link.setAttribute('href', 'https://pinterest.com/pin1');
       link.setAttribute('rel', 'canonical');
       iframe.doc.head.appendChild(link);

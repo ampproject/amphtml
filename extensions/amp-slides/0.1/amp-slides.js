@@ -111,13 +111,13 @@ class AmpSlides extends AMP.BaseElement {
    * @param {boolean} animate
    */
   go(dir, animate) {
-    var newIndex = this.nextIndex_(dir);
+    const newIndex = this.nextIndex_(dir);
     if (newIndex != this.currentIndex_) {
-      var newSlide = this.slides_[newIndex];
-      var oldSlide = this.slides_[this.currentIndex_];
+      const newSlide = this.slides_[newIndex];
+      const oldSlide = this.slides_[this.currentIndex_];
       this.currentIndex_ = newIndex;
       this.prepareSlide_(newSlide, dir);
-      var containerWidth = this.element./*OK*/offsetWidth;
+      const containerWidth = this.element./*OK*/offsetWidth;
       if (!animate) {
         this.commitSwitch_(oldSlide, newSlide);
       } else {
@@ -136,7 +136,7 @@ class AmpSlides extends AMP.BaseElement {
    * @param {number} dir
    */
   prepareSlide_(slide, dir) {
-    var containerWidth = this.element./*OK*/offsetWidth;
+    const containerWidth = this.element./*OK*/offsetWidth;
     st.setStyles(slide, {
       transform: st.translateX(dir * containerWidth),
       zIndex: 1,
@@ -153,7 +153,7 @@ class AmpSlides extends AMP.BaseElement {
    * @return {!Transition}
    */
   createTransition_(oldSlide, newSlide, dir) {
-    var containerWidth = this.element./*OK*/offsetWidth;
+    const containerWidth = this.element./*OK*/offsetWidth;
     return tr.all([
       tr.setStyles(newSlide, {
         transform: tr.translateX(tr.numeric(dir * containerWidth, 0)),
@@ -209,7 +209,7 @@ class AmpSlides extends AMP.BaseElement {
   preloadNext_(dir) {
     // TODO(dvoytenko): can we actually preload it here? There's no
     // guarantee of it has display!=none.
-    var nextIndex = this.nextIndex_(dir);
+    const nextIndex = this.nextIndex_(dir);
     if (nextIndex != this.currentIndex_) {
       this.schedulePreload(this.slides_[nextIndex]);
     }
