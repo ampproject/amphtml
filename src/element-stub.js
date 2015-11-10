@@ -33,17 +33,4 @@ export class ElementStub extends BaseElement {
     // element.
     return true;
   }
-
-  createdCallback() {
-    this.element.classList.add('amp-unresolved');
-    this.element.classList.add('-amp-unresolved');
-  }
-
-  upgrade(newImpl) {
-    // TODO(dvoytenko): this might be too early given that the children may
-    // not be available yet.
-    this.element.classList.remove('amp-unresolved');
-    this.element.classList.remove('-amp-unresolved');
-    newImpl.createdCallback();
-  }
-};
+}
