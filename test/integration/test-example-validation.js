@@ -55,12 +55,17 @@ describe('example', function() {
    * Only add to this whitelist to temporarily manage discrepancies
    * between validator and runtime.
    *
-   * @constructor {!Array<RegExp>}
+   * Ex: `/INVALID_ATTR_VALUE.*vprt/`
+   *
+   * @constructor {!Array<!RegExp>}
    */
   const errorWhitelist = [
-    // TODO(dvoytenko): Remove. Viewport values changed in #592. Waiting for
-    // the validator to catch up.
-    /INVALID_ATTR_VALUE.*vprt/
+    // TODO(dvoytenko): Remove once validator supports "data-videoid" for
+    // "amp-youtube" elements.
+    /MANDATORY_ATTR_MISSING video-id/,
+
+    // TODO(dvoytenko): Remove once validator supports "amp-font" element.
+    /DISALLOWED_TAG amp-font/,
   ];
 
   const usedWhitelist = [];
@@ -78,32 +83,31 @@ describe('example', function() {
             url);
 
         const errors = [];
-        LINES: for (let i = 0; i < rendered.length; i++) {
-          const line = rendered[i];
-          if (line == 'PASS') {
-            continue;
-          }
-          if (line == 'FAIL') {
-            // We only look at individual error lines.
-            continue;
-          }
-          if (/DEV_MODE_ENABLED/.test(line)) {
-            // This error is expected since we have to be in dev mode to
-            // run the validator. It is only a warning and we'd probably
-            // see that by looking for PASS / FAIL. By itself it doesn't
-            // make things fail.
-            // TODO(johannes): Add warning prefixes to such events so they
-            // can be detected systematically.
-            continue;
-          }
-          for (let n = 0; n < errorWhitelist.length; n++) {
-            const ok = errorWhitelist[n];
-            if (ok.test(rendered)) {
-              usedWhitelist.push(ok);
-              continue LINES;
+        if (rendered[0] == 'FAIL') {
+          for (let i = 1; i < rendered.length; i++) {
+            const line = rendered[i];
+            if (/DEV_MODE_ENABLED/.test(line)) {
+              // This error is expected since we have to be in dev mode to
+              // run the validator. It is only a warning and we'd probably
+              // see that by looking for PASS / FAIL. By itself it doesn't
+              // make things fail.
+              // TODO(johannes): Add warning prefixes to such events so they
+              // can be detected systematically.
+              continue;
+            }
+            let whitelisted = false;
+            for (let n = 0; n < errorWhitelist.length; n++) {
+              const ok = errorWhitelist[n];
+              if (ok.test(line)) {
+                whitelisted = true;
+                usedWhitelist.push(ok);
+                break;
+              }
+            }
+            if (!whitelisted) {
+              errors.push(line);
             }
           }
-          errors.push(line);
         }
         expect(errors.join('\n')).to.equal('');
       });
