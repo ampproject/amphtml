@@ -73,6 +73,7 @@ function buildExtensions(options) {
   buildExtension('amp-image-lightbox', '0.1', true, options);
   buildExtension('amp-instagram', '0.1', false, options);
   buildExtension('amp-lightbox', '0.1', false, options);
+  buildExtension('amp-mustache', '0.1', false, options);
   buildExtension('amp-pinterest', '0.1', true, options);
   /**
    * @deprecated `amp-slides` is deprecated and will be deleted before 1.0.
