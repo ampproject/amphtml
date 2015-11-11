@@ -80,4 +80,4 @@ CSS class that would be removed from the `document.documentElement` and `documen
 
 **font-weight, font-style, font-variant**
 
-The attributes above should all behave like they do on standard iframes.
+The attributes above should all behave like they do on standard elements.
