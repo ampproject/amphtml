@@ -36,7 +36,10 @@ var forbiddenTerms = {
   'it\\.only': '',
   'console\\.\\w+\\(': 'If you run against this, use console/*OK*/.log to ' +
       'whitelist a legit case.',
-  'cookie\\W': requiresReviewPrivacy,
+  'cookie\\W': {
+    message: requiresReviewPrivacy,
+    whitelist: []
+  },
   'eval\\(': '',
   'localStorage': requiresReviewPrivacy,
   'sessionStorage': requiresReviewPrivacy,
@@ -156,8 +159,15 @@ var requiredTerms = {
 function matchTerms(file, terms) {
   var pathname = file.path;
   var contents = file.contents.toString();
+  var relative = file.relative;
   return Object.keys(terms).map(function(term) {
     var fix;
+    var whitelist = terms[term].whitelist;
+    // NOTE: we could do a glob test instead of exact check in the future
+    // if needed but that might be too permissive.
+    if (Array.isArray(whitelist) && whitelist.indexOf(relative) != -1) {
+      return false;
+    }
     // we can't optimize building the `RegExp` objects early unless we build
     // another mapping of term -> regexp object to be able to get back to the
     // original term to get the possible fix value. This is ok as the
@@ -167,8 +177,12 @@ function matchTerms(file, terms) {
 
     if (matches) {
       util.log(util.colors.red('Found forbidden: "' + matches[0] +
-          '" in ' + pathname));
-      fix = terms[term];
+          '" in ' + relative));
+      if (typeof terms[term] == 'string') {
+        fix = terms[term];
+      } else {
+        fix = terms[term].message;
+      }
 
       // log the possible fix information if provided for the term.
       if (fix) {
@@ -235,7 +249,7 @@ function isMissingTerms(file) {
     var matches = contents.match(new RegExp(term));
     if (!matches) {
       util.log(util.colors.red('Did not find required: "' + term +
-          '" in ' + file.path));
+          '" in ' + file.relative));
       util.log(util.colors.blue('=========='));
       return true;
     }
@@ -278,5 +292,5 @@ function checkForbiddenAndRequiredTerms() {
     });
 }
 
-gulp.task('presubmit', 'Run validation against files to check for forbidden '+
+gulp.task('presubmit', 'Run validation against files to check for forbidden ' +
   'and required terms', checkForbiddenAndRequiredTerms);
