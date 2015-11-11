@@ -38,7 +38,19 @@ var forbiddenTerms = {
       'whitelist a legit case.',
   'cookie\\W': {
     message: requiresReviewPrivacy,
-    whitelist: []
+    whitelist: [
+      'src/cookies.js',
+      'test/functional/test-cookies.js',
+      'test/functional/test-experiments.js',
+    ]
+  },
+  'getCookie\\W': {
+    message: requiresReviewPrivacy,
+    whitelist: [
+      'src/cookies.js',
+      'src/experiments.js',
+      'test/functional/test-cookies.js',
+    ]
   },
   'eval\\(': '',
   'localStorage': requiresReviewPrivacy,
