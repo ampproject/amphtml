@@ -133,3 +133,17 @@ export function childElementByAttr(parent, attr, opt_value) {
     return true;
   });
 }
+
+
+/**
+ * Finds the first child element that has the specified tag name.
+ * @param {!Element} parent
+ * @param {string} tagName
+ * @return {?Element}
+ */
+export function childElementByTag(parent, tagName) {
+  tagName = tagName.toUpperCase();
+  return childElement(parent, el => {
+    return el.tagName == tagName;
+  });
+}
