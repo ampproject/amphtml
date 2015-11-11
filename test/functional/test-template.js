@@ -1,0 +1,226 @@
+/**
+ * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import {BaseTemplate, findAndRenderTemplate, registerExtendedTemplate,
+    renderTemplate} from '../../src/template';
+
+
+describe('Template', () => {
+
+  class TemplateImpl extends BaseTemplate {
+    render(data) {
+      return 'abc' + data.value;
+    }
+  }
+
+  class TemplateDeferredImpl extends BaseTemplate {
+    render(data) {
+      return Promise.resolve('ABC' + data.value);
+    }
+  }
+
+  let count = 0;
+
+  function createTemplateElement() {
+    const id = ++count;
+    const type = `amp-template-${id}`;
+    const element = document.createElement('template');
+    element.setAttribute('type', type);
+    return element;
+  }
+
+  beforeEach(() => {
+  });
+
+  it('should render immediately', () => {
+    const templateElement = createTemplateElement();
+    registerExtendedTemplate(window, templateElement.getAttribute('type'),
+        TemplateImpl);
+    return renderTemplate(templateElement, {value: 1}).then(res => {
+      expect(res).to.equal('abc1');
+    });
+  });
+
+  it('should render deferred immediately', () => {
+    const templateElement = createTemplateElement();
+    registerExtendedTemplate(window, templateElement.getAttribute('type'),
+        TemplateDeferredImpl);
+    return renderTemplate(templateElement, {value: 2}).then(res => {
+      expect(res).to.equal('ABC2');
+    });
+  });
+
+  it('should NOT allow registering template class twice', () => {
+    const templateElement = createTemplateElement();
+    registerExtendedTemplate(window, templateElement.getAttribute('type'),
+        TemplateImpl);
+    expect(() => {
+      registerExtendedTemplate(window, templateElement.getAttribute('type'),
+          TemplateImpl);
+    }).to.throw(/Duplicate template type/);
+  });
+
+  it('should fail render if template is not declared', () => {
+    const templateElement = createTemplateElement();
+    expect(() => {
+      renderTemplate(templateElement, {value: 0});
+    }).to.throw(/Template must be declared/);
+  });
+
+  it('should block render until template registered', () => {
+    const templateElement = createTemplateElement();
+    const scriptElement = document.createElement('script');
+    scriptElement.setAttribute('custom-template',
+        templateElement.getAttribute('type'));
+    document.body.appendChild(scriptElement);
+    let result = undefined;
+    renderTemplate(templateElement, {value: 0}).then(res => {
+      result = res;
+    });
+    return Promise.resolve().then(() => {
+      return Promise.resolve().then(() => {
+        expect(result).to.be.undefined;
+      });
+    });
+  });
+
+  it('should unblock render when template registered', () => {
+    const templateElement = createTemplateElement();
+    const scriptElement = document.createElement('script');
+    scriptElement.setAttribute('custom-template',
+        templateElement.getAttribute('type'));
+    document.body.appendChild(scriptElement);
+    const p = renderTemplate(templateElement, {value: 1});
+    registerExtendedTemplate(window, templateElement.getAttribute('type'),
+        TemplateImpl);
+    return p.then(res => {
+      expect(res).to.equal('abc1');
+    });
+  });
+
+  it('should unblock render for parallel templates', () => {
+    const templateElement = createTemplateElement();
+    const scriptElement = document.createElement('script');
+    scriptElement.setAttribute('custom-template',
+        templateElement.getAttribute('type'));
+    document.body.appendChild(scriptElement);
+    const p1 = renderTemplate(templateElement, {value: 1});
+    const p2 = renderTemplate(templateElement, {value: 2});
+    registerExtendedTemplate(window, templateElement.getAttribute('type'),
+        TemplateImpl);
+    // This is just a complicated way to say Promise -> all.
+    return p1.then(res1 => {
+      return p2.then(res2 => {
+        return [res1, res2];
+      });
+    }).then(res => {
+      expect(res[0]).to.equal('abc1');
+      expect(res[1]).to.equal('abc2');
+    });
+  });
+
+  it('should discover template via ID', () => {
+    const templateElement = createTemplateElement();
+    const type = templateElement.getAttribute('type');
+    const id = type + Math.random();
+    templateElement.setAttribute('id', id);
+    document.body.appendChild(templateElement);
+    registerExtendedTemplate(window, type, TemplateImpl);
+
+    const parentElement = document.createElement('div');
+    parentElement.setAttribute('template', id);
+    return findAndRenderTemplate(parentElement, {value: 1}).then(res => {
+      expect(res).to.equal('abc1');
+    });
+  });
+
+  it('should require discovered template via ID to be "template"', () => {
+    const nonTemplateElement = document.createElement('div');
+    const id = 'nontemplate' + Math.random();
+    nonTemplateElement.setAttribute('id', id);
+    document.body.appendChild(nonTemplateElement);
+
+    const parentElement = document.createElement('div');
+    parentElement.setAttribute('template', id);
+    expect(() => {
+      findAndRenderTemplate(parentElement, {value: 0});
+    }).to.throw(/Template element must be a "template" tag/);
+  });
+
+  it('should discover template via children', () => {
+    const templateElement = createTemplateElement();
+    const type = templateElement.getAttribute('type');
+    registerExtendedTemplate(window, type, TemplateImpl);
+
+    const parentElement = document.createElement('div');
+    parentElement.appendChild(templateElement);
+    return findAndRenderTemplate(parentElement, {value: 1}).then(res => {
+      expect(res).to.equal('abc1');
+    });
+  });
+
+  it('should fail when template not found', () => {
+    const parentElement = document.createElement('div');
+    expect(() => {
+      findAndRenderTemplate(parentElement, {value: 0});
+    }).to.throw(/Template not found/);
+
+    parentElement.setAttribute('template', 'notemplate' + Math.random());
+    expect(() => {
+      findAndRenderTemplate(parentElement, {value: 0});
+    }).to.throw(/Template not found/);
+  });
+});
+
+
+describe('BaseTemplate', () => {
+
+  it('should require render override', () => {
+    expect(() => {
+      new BaseTemplate().render();
+    }).to.throw(/Not implemented/);
+  });
+
+  it('should unwrap single element', () => {
+    const root = document.createElement('div');
+    const element1 = document.createElement('div');
+    root.appendChild(element1);
+    expect(new BaseTemplate().unwrap(root)).to.equal(element1);
+  });
+
+  it('should unwrap with empty/whitespace text', () => {
+    const root = document.createElement('div');
+    const element1 = document.createElement('div');
+    root.appendChild(document.createTextNode('   '));
+    root.appendChild(element1);
+    root.appendChild(document.createTextNode(' \n\t  '));
+    expect(new BaseTemplate().unwrap(root)).to.equal(element1);
+  });
+
+  it('should NOT unwrap multiple elements', () => {
+    const root = document.createElement('div');
+    root.appendChild(document.createElement('div'));
+    root.appendChild(document.createElement('div'));
+    expect(new BaseTemplate().unwrap(root)).to.equal(root);
+  });
+
+  it('should NOT unwrap with non-empty/whitespace text', () => {
+    const root = document.createElement('div');
+    root.appendChild(document.createTextNode('a'));
+    root.appendChild(document.createElement('div'));
+    expect(new BaseTemplate().unwrap(root)).to.equal(root);
+  });
+});

@@ -1,7 +1,11 @@
-# AMP HTML Extended Components
+# AMP HTML Extensions
 
-Extended components must be explicitly included
-into the document as custom elements.
+AMP Extensions are either extended components or extended templates.
+
+
+## AMP HTML Extended Components
+
+Extended components must be explicitly included into the document as custom elements.
 
 For example, to include a youtube video in your page
 include the following script in the `<head>`:
@@ -24,3 +28,22 @@ Current list of extended components:
 | [`amp-lightbox`](amp-lightbox/amp-lightbox.md)             | Allows for a “lightbox” or similar experience.                                              |
 | [`amp-twitter`](amp-twitter/amp-twitter.md)               | Displays a Twitter Tweet.                                                                   |
 | [`amp-youtube`](amp-youtube/amp-youtube.md)               | Displays a Youtube video.                                                                   |
+
+
+## AMP HTML Extended Templates
+
+NOT LAUNCHED YET
+
+Extended templates must be explicitly included into the document as custom templates.
+
+For example, to include a amp-mustache template in your page
+include the following script in the `<head>`:
+
+```html
+<script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+```
+
+Current list of extended templates:
+
+| Component                                     | Description                                                                                 |
+| --------------------------------------------- | -------------------------------------------------------------------------------------------

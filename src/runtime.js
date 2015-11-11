@@ -15,6 +15,8 @@
  */
 
 import {BaseElement} from './base-element';
+import {BaseTemplate, findAndRenderTemplate, registerExtendedTemplate,
+    renderTemplate} from './template';
 import {assert} from './asserts';
 import {getMode} from './mode';
 import {installStyles} from './styles';
@@ -46,6 +48,7 @@ export function adopt(global) {
   const preregisteredElements = global.AMP || [];
 
   global.AMP = {};
+
   /**
    * Registers an extended element and installs its styles.
    * @param {string} name
@@ -67,11 +70,45 @@ export function adopt(global) {
     } else {
       register();
     }
-
   };
 
   /** @const */
   global.AMP.BaseElement = BaseElement;
+
+  /** @const */
+  global.AMP.BaseTemplate = BaseTemplate;
+
+  /**
+   * Registers an extended template.
+   * @param {string} name
+   * @param {!Function} implementationClass
+   */
+  global.AMP.registerTemplate = function(name, implementationClass) {
+    registerExtendedTemplate(global, name, implementationClass);
+  };
+
+  /**
+   * Renders the specified element template using the supplied data.
+   * See {@link template.renderTemplate} for more info.
+   * @param {!Element} templateElement
+   * @param {!Object<string, *>} data
+   * @return {!Promise<!Element>}
+   */
+  global.AMP.renderTemplate = function(templateElement, data) {
+    return renderTemplate(templateElement, data);
+  };
+
+  /**
+   * Discovers the template for the specified parent and renders it using the
+   * supplied data.
+   * See {@link template.findAndRenderTemplate} for more info.
+   * @param {!Element} parent
+   * @param {!Object<string, *>} data
+   * @return {!Promise<!Element>}
+   */
+  global.AMP.findAndRenderTemplate = function(parent, data) {
+    return findAndRenderTemplate(parent, data);
+  };
 
   /** @const */
   global.AMP.assert = assert;

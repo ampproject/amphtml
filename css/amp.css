@@ -280,6 +280,12 @@ i-amp-scroll-container {
 }
 
 
+/* Polyfill for IE and any other browser that don't understand templates . */
+template {
+  display: none !important;
+}
+
+
 amp-pixel {
   position: absolute !important;
   top: 0 !important;
