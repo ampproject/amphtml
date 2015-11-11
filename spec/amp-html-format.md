@@ -323,11 +323,64 @@ Changes to the PATCH version component (x in 1.1.x) must strictly maintain backw
 
 AMP documents may only reference versions with one or two components. Version “1” states “I accept every version of this component with major version 1”. Version “1.1” states “I accept every PATCH level of 1.1”. It is now allowed to explicitly reference the PATCH level in the version string.
 
+
+### Extended templates
+
+Templates render HTML content based on the language-specific template and provided JSON data.
+
+See the [AMP template spec](./amp-html-templates.md) for details about supported templates.
+
+Extended templates are not shipped with the AMP runtime and have to be downloaded just as with extended elements.
+Extended components are loaded by including a `<script>` tag in the head of the document like this:
+
+```html
+<script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
+```
+
+The `<script>` tag must have an `async` attribute and must have a `custom-template` attribute referencing the type of the
+template. The script URL must start with “https://cdn.ampproject.org” and must follow a very strict pattern of
+“/v\d+/[a-z-]+-(latest|\d+|\d+-\d+)\.js”
+
+The templates are declared in the document as following:
+
+```html
+<template type="amp-mustache" id="template1">
+  Hello {{you}}!
+</template>
+```
+
+The `type` attribute is required and must reference a declared `custom-element` script.
+
+The `id` attribute is optional. Individual AMP elements discover their own templates. Typical scenario
+would involve an AMP element looking for a `<template>` either among its children or referenced by ID.
+
+The syntax within the template element depends on the specific template language. However, the template language
+could be restricted within AMP. For instance, in accordance with the "template" element, all productions have to
+be over a valid well-formed DOM. All of the template outputs are also subject to sanitizing to ensure AMP-valid
+output.
+
+See documentation for a specific extended template on the syntax and restrictions.
+
+##### URL
+
+The URL for extended components is of the form:
+
+```
+https://cdn.ampproject.org/$RUNTIME_VERSION/$TEMPLATE_TYPE-$TEMPLATE_VERSION.js
+```
+
+##### Versioning
+
+See versioning of custom elements for more details.
+
+
 ## Security
 
 AMP HTML documents must not trigger errors when served with a Content Security Policy that does not include the keywords `unsafe-inline` and `unsafe-eval`.
 
 The AMP HTML format is designed so that is always the case.
+
+All AMP template elements must go through AMP security review before they can be submitted into AMP repository.
 
 ## SVG
 

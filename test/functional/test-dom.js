@@ -113,6 +113,20 @@ describe('DOM', () => {
         .to.be.null;
   });
 
+  it('childElementByTag should find first match', () => {
+    const parent = document.createElement('parent');
+
+    const element1 = document.createElement('element1');
+    parent.appendChild(element1);
+
+    const element2 = document.createElement('element2');
+    parent.appendChild(element2);
+
+    expect(dom.childElementByTag(parent, 'element1')).to.equal(element1);
+    expect(dom.childElementByTag(parent, 'element2')).to.equal(element2);
+    expect(dom.childElementByTag(parent, 'element3')).to.be.null;
+  });
+
   it('childElementByAttr should find first match', () => {
     const parent = document.createElement('parent');
 
