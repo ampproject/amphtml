@@ -9,6 +9,7 @@
 226.87 kB   |    73.15 kB   |   18.14 kB   |   v0/amp-image-lightbox-0.1.js
  22.32 kB   |     6.07 kB   |    2.52 kB   |   v0/amp-instagram-0.1.js
 152.02 kB   |     49.8 kB   |   11.96 kB   |   v0/amp-lightbox-0.1.js
+124.08 kB   |    35.05 kB   |   11.83 kB   |   v0/amp-mustache-0.1.js
  47.33 kB   |    19.34 kB   |    6.27 kB   |   v0/amp-pinterest-0.1.js
 102.38 kB   |    30.51 kB   |    8.97 kB   |   v0/amp-slides-0.1.js
  50.58 kB   |     14.9 kB   |     5.4 kB   |   v0/amp-twitter-0.1.js

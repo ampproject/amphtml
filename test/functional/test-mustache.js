@@ -14,29 +14,30 @@
  * limitations under the License.
  */
 
-import {render, setUnescapedSanitizier} from
-    '../../third_party/mustache/mustache';
-
+const mustache = require('../../third_party/mustache/mustache');
 
 describe('Mustache', () => {
 
+  let savedSanitizer;
+
   beforeEach(() => {
-    setUnescapedSanitizier(function(value) {
+    savedSanitizer = mustache.sanitizeUnescaped;
+    mustache.setUnescapedSanitizier(function(value) {
       return value.toUpperCase();
     });
   });
 
   afterEach(() => {
-    setUnescapedSanitizier(null);
+    mustache.setUnescapedSanitizier(savedSanitizer);
   });
 
   it('should escape html', () => {
-    expect(render('{{value}}', {value: '<b>abc</b>'})).to.equal(
+    expect(mustache.render('{{value}}', {value: '<b>abc</b>'})).to.equal(
         '&lt;b&gt;abc&lt;&#x2F;b&gt;');
   });
 
   it('should transform unescaped html', () => {
-    expect(render('{{{value}}}', {value: '<b>abc</b>'})).to.equal(
+    expect(mustache.render('{{{value}}}', {value: '<b>abc</b>'})).to.equal(
         '<B>ABC</B>');
   });
 });
