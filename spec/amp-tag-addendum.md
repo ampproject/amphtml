@@ -169,6 +169,7 @@ These may be removed in future versions of AMP
 `<amp-video>`  
 `<amp-ad>`  
 `<amp-fit-text>`  
+`<amp-font>`  
 `<amp-carousel>`  
 `<amp-anim>`  
 `<amp-youtube>`  
