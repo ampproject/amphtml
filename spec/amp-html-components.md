@@ -186,6 +186,7 @@ In these cases, services may set up endpoints that produce data that conforms to
 - [amp-pixel](../builtins/amp-pixel.md)
 - [amp-video](../builtins/amp-video.md)
 - [amp-carousel](../extensions/amp-carousel/amp-carousel.md)
+- [amp-font](../extensions/amp-font/amp-font.md)
 - [amp-lightbox](../extensions/amp-lightbox/amp-lightbox.md)
 - [amp-iframe](../extensions/amp-iframe/amp-iframe.md)
 - [amp-instagram](../extensions/amp-instagram/amp-instagram.md)
