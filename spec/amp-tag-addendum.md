@@ -29,7 +29,7 @@ validation requirements for each tag.
 Below we list the allowed tags in the order in which they are appear in the HTML5 spec in section 4 [The Elements of HTML](http://www.w3.org/TR/html5/single-page.html#html-elements).
 
 ### 4.1 The root element
-4.1.1 `<html>`  
+4.1.1 `<html>`
 ### 4.2 Document metadata
 4.2.1 `<head>`  
 4.2.2 `<title>`  
@@ -179,4 +179,4 @@ These may be removed in future versions of AMP
 `<amp-pixel>`  
 `<amp-audio>`  
 `<amp-lightbox>`  
-`<amp-image-lightbox>`  
+`<amp-image-lightbox>`
