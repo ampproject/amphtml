@@ -184,6 +184,16 @@ describe('performance', () => {
       expect(spy.secondCall.args[1]).to.equal('start0');
       expect(spy.secondCall.args[2]).to.equal(300);
     });
+
+    it('should call the flush callback', () => {
+      perf.setTickFunction(function() {}, spy);
+
+      expect(spy.callCount).to.equal(0);
+      perf.flush();
+      expect(spy.callCount).to.equal(1);
+      perf.flush();
+      expect(spy.callCount).to.equal(2);
+    });
   });
 
   it('can set the performance function through the runtime', () => {
@@ -196,6 +206,20 @@ describe('performance', () => {
     window.AMP.setTickFunction(fn);
 
     expect(spy.firstCall.args[0]).to.equal(fn);
+
+    spy.restore();
+  });
+
+  it('can set the flush function through the runtime', () => {
+    const perf = performanceFor(window);
+    const spy = sinon.spy(perf, 'setTickFunction');
+    const fn = function() {};
+
+    adopt(window);
+
+    window.AMP.setTickFunction(function() {}, fn);
+
+    expect(spy.firstCall.args[1]).to.equal(fn);
 
     spy.restore();
   });

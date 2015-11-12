@@ -53,6 +53,9 @@ export class Performance {
     /** @const @private {funtion(string,?string=,number=)|undefined} */
     this.tick_;
 
+    /** @const @private {funtion()|undefined} */
+    this.flush_;
+
     /** @const @private {!Array<TickEvent>} */
     this.events_ = [];
   }
@@ -74,6 +77,17 @@ export class Performance {
       this.tick_(label, opt_from, opt_value);
     } else {
       this.queueTick_(label, opt_from, opt_value);
+    }
+  }
+
+
+  /**
+   * Calls the flush callback function set through setTickFunction.
+   * @export
+   */
+  flush() {
+    if (this.flush_) {
+      this.flush_();
     }
   }
 
@@ -128,10 +142,13 @@ export class Performance {
    *   argument and an optional `opt_from` label to use
    *   as a relative start for this tick. A third argument `opt_value` can
    *   also be provided to indicate when to record the tick at.
+   * @param {function()=} opt_flush callback function that is called
+   *   when we are ready for the ticks to be forwarded to an endpoint.
    * @export
    */
-  setTickFunction(tick) {
+  setTickFunction(tick, opt_flush) {
     this.tick_ = tick;
+    this.flush_ = opt_flush;
     this.flushQueuedTicks_();
   }
 }
