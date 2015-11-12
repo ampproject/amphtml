@@ -145,11 +145,12 @@ export function adopt(global) {
   /**
    * Sets the function to forward tick events to.
    * @param {funtion(string,?string=,number=)} fn
+   * @param {function()=} opt_flush
    * @export
    */
-  global.AMP.setTickFunction = fn => {
+  global.AMP.setTickFunction = (fn, opt_flush) => {
     const perf = performanceFor(global);
-    perf.setTickFunction(fn);
+    perf.setTickFunction(fn, opt_flush);
   };
 
   // Execute asynchronously scheduled elements.
