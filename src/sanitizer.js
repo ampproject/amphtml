@@ -162,7 +162,8 @@ export function isValidAttr(attrName, attrValue) {
   }
 
   // No attributes with "javascript" in them.
-  if (attrValue.indexOf(/*eslint no-script-url: 0*/ 'javascript:') != -1) {
+  if (attrValue.toLowerCase().indexOf(
+          /*eslint no-script-url: 0*/ 'javascript:') != -1) {
     return false;
   }
 
