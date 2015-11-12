@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+var argv = require('minimist')(process.argv.slice(2));
 var autoprefixer = require('autoprefixer');
 var babel = require('babelify');
 var browserify = require('browserify');
@@ -264,6 +265,7 @@ function dist() {
   process.env.NODE_ENV = 'production';
   compile(false, true);
   buildExtensions({minify: true});
+  buildExperiments({minify: true, watch: false});
 }
 
 /**
@@ -443,6 +445,68 @@ function compileJs(srcDir, srcFilename, destDir, options) {
 }
 
 /**
+ * Build all the AMP experiments.html/js.
+ *
+ * @param {!Object} options
+ */
+function buildExperiments(options) {
+  options = options || {};
+  console.log('Bundling experiments.html/js');
+
+  function copyHandler(name, err) {
+    if (err) {
+      return util.log(util.colors.red('copy error: ', err));
+    }
+    util.log(util.colors.green('copied ' + name));
+  }
+
+  var path = 'tools/experiments';
+  var htmlPath = path + '/experiments.html';
+  var jsPath = path + '/experiments.js';
+  var watch = options.watch;
+  if (watch === undefined) {
+    watch = argv.watch || argv.w;
+  }
+
+  // Building extensions is a 2 step process because of the renaming
+  // and CSS inlining. This watcher watches the original file, copies
+  // it to the destination and adds the CSS.
+  if (watch) {
+    // Do not set watchers again when we get called by the watcher.
+    var copy = Object.create(options);
+    copy.watch = false;
+    gulpWatch(path + '/*', function() {
+      buildExperiments(copy);
+    });
+  }
+
+  // Build HTML.
+  console.log('Processing ' + htmlPath);
+  var html = fs.readFileSync(htmlPath, 'utf8');
+  var minHtml = html.replace('../../dist/experiments/experiments.max.js',
+      'https://cdn.ampproject.org/experiments.js');
+  gulp.src(htmlPath)
+      .pipe(file('experiments.cdn.html', minHtml))
+      .pipe(gulp.dest('dist/experiments/'));
+
+  // Build JS.
+  var js = fs.readFileSync(jsPath, 'utf8');
+  var builtName = 'experiments.max.js';
+  var minifiedName = 'experiments.js';
+  return gulp.src(path + '/*.js')
+      .pipe(file(builtName, js))
+      .pipe(gulp.dest('build/experiments/'))
+      .on('end', function() {
+        compileJs('build/experiments/', builtName, 'dist/experiments/', {
+          watch: false,
+          minify: options.minify || argv.minify,
+          minifiedName: minifiedName,
+        });
+      });
+}
+
+
+/**
  * Gulp tasks
  */
 gulp.task('build', 'Builds the AMP library', build);
@@ -451,3 +515,4 @@ gulp.task('default', 'Same as "watch"', ['watch', 'serve']);
 gulp.task('dist', 'Build production binaries', dist);
 gulp.task('extensions', 'Build AMP Extensions', buildExtensions);
 gulp.task('watch', 'Watches for changes in files, re-build', watch);
+gulp.task('build-experiments', 'Builds experiments.html/js', buildExperiments);
