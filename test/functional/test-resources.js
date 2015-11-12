@@ -459,7 +459,7 @@ describe('Resources changeHeight', () => {
   describe('requestChangeHeight rules when element is in viewport', () => {
     beforeEach(() => {
       viewportMock.expects('getRect').returns(
-          {top: 0, left: 0, right: 100, bottom: 200}).once();
+          {top: 0, left: 0, right: 100, bottom: 200, height: 200}).once();
       resource1.layoutBox_ = {top: 10, left: 0, right: 100, bottom: 50,
           height: 50};
     });
@@ -518,6 +518,23 @@ describe('Resources changeHeight', () => {
       resources.mutateWork_();
       expect(resources.changeHeightRequests_.length).to.equal(0);
       expect(resource1.changeHeight.callCount).to.equal(1);
+    });
+
+    it('should change height when slightly above the viewport', () => {
+      resource1.layoutBox_ = {top: 10, left: 0, right: 100, bottom: 180,
+          height: 50};
+      resources.scheduleChangeHeight_(resource1, 111, false, null);
+      resources.mutateWork_();
+      expect(resources.changeHeightRequests_.length).to.equal(0);
+      expect(resource1.changeHeight.callCount).to.equal(1);
+    });
+
+    it('should NOT change height when significantly above the viewport', () => {
+      resource1.layoutBox_ = {top: 10, left: 0, right: 100, bottom: 100,
+          height: 50};
+      resources.scheduleChangeHeight_(resource1, 111, false, null);
+      resources.mutateWork_();
+      expect(resource1.changeHeight.callCount).to.equal(0);
     });
 
     it('should defer when above the viewport and scrolling on', () => {

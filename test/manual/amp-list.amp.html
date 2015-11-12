@@ -14,15 +14,31 @@
       display: block;
       margin: 8px;
     }
-    figure {
-      margin: 0;
-    }
+
     amp-list {
       border: 1px solid green;
+    }
+    amp-list [overflow] {
+      background: gray;
+      color: #fff;
+      cursor: pointer;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 2;
+      padding: 16px;
+    }
+    amp-list [overflow].amp-hidden {
+      visibility: hidden;
     }
     .story-entry {
       padding: 40px;
       border-bottom: 1px solid green;
+    }
+
+    .split {
+      height: 300px;
     }
   </style>
   <style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
@@ -34,7 +50,7 @@
 <article>
   <h1>amp-list</h1>
 
-  <amp-list width="396" height="200" layout=responsive
+  <amp-list width="396" height="80" layout=responsive
       src="http://localhost:8000/test/manual/amp-list-data.json?RANDOM">
     <template type="amp-mustache">
       <div class="story-entry">
@@ -42,6 +58,24 @@
         {{title}}
       </div>
     </template>
+    <div overflow>
+      SEE MORE
+    </div>
+  </amp-list>
+
+  <div class="split"></div>
+
+  <amp-list width="396" height="80" layout=responsive
+      src="http://localhost:8000/test/manual/amp-list-data.json?RANDOM">
+    <template type="amp-mustache">
+      <div class="story-entry">
+        <amp-img src="{{imageUrl}}" width=80 height=60></amp-img>
+        {{title}}
+      </div>
+    </template>
+    <div overflow>
+      SEE MORE
+    </div>
   </amp-list>
 </article>
 </body>
