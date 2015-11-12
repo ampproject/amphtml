@@ -28,6 +28,7 @@ Current list of extended components:
 | [`amp-image-lightbox`](amp-image-lightbox/amp-image-lightbox.md) | Allows for a “image lightbox” or similar experience.                                        |
 | [`amp-instagram`](amp-instagram/amp-instagram.md)           | Displays an instagram embed.                                                                |
 | [`amp-lightbox`](amp-lightbox/amp-lightbox.md)             | Allows for a “lightbox” or similar experience.                                              |
+| [`amp-list`](amp-list/amp-list.md)             | A dynamic list that can download data and create list items using a template |
 | [`amp-twitter`](amp-twitter/amp-twitter.md)               | Displays a Twitter Tweet.                                                                   |
 | [`amp-youtube`](amp-youtube/amp-youtube.md)               | Displays a Youtube video.                                                                   |
 

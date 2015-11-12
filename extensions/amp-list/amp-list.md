@@ -28,11 +28,6 @@ The `amp-list` defines data source using the following attributes:
 [Fetch API](https://fetch.spec.whatwg.org/). To send credentials, pass the
 value of "include".
 
-The request URL is allowed to contain the following substitutions:
-
-- CANONICAL_URL
-- TODO
-
 The response must be a JSON object that contains an array property "items":
 ```json
 {
@@ -47,6 +42,9 @@ The template can be specified using either of the following two ways:
 
 For more details on templates see [AMP HTML Templates](../../spec/amp-html-templates.md).
 
+Optionally, `amp-list` element can contain an element with `overflow` attribute. This
+element will be shown if AMP Runtime cannot resize the `amp-list` element as requested.
+
 An example:
 ```html
 <amp-list src="https://data.com/articles.json?ref=CANONICAL_URL">
@@ -56,7 +54,20 @@ An example:
       {{title}}
     </div>
   </template>
+  <div overflow role=button aria-lable="Show more" class="list-overflow">
+    Show more
+  </div>
 </amp-list>
+```
+
+```css
+.list-overflow {
+  position: absolute;
+  bottom: 0;
+}
+.list-overflow.amp-hidden {
+  visibility: hidden;
+}
 ```
 
 #### Substitutions
@@ -76,7 +87,10 @@ The loading is triggered using normal AMP rules depending on how far the element
 the current viewport.
 
 If `amp-list` needs more space after loading it requests the AMP runtime to update its
-height using the normal AMP flow.
+height using the normal AMP flow. If AMP Runtime cannot satisfy the request for new
+height, it will display `overflow` element when available. Notice however, the typical
+placement of `amp-list` elements at the bottom of the document almost always guarantees
+that AMP Runtime can resize it.
 
 By default, `amp-list` adds `list` ARIA role to the list element and `listitem` role to item
 elements rendered via the template.
