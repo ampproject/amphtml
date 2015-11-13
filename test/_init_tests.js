@@ -60,6 +60,7 @@ afterEach(() => {
       console./*OK*/log(e);
     }
   }
+  window.localStorage.clear();
 });
 
 chai.Assertion.addMethod('attribute', function(attr) {
