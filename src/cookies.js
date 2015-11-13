@@ -58,5 +58,6 @@ export function getCookie(win, name) {
 export function setCookie(win, name, value, expirationTime) {
   win.document.cookie = encodeURIComponent(name) + '=' +
       encodeURIComponent(value) +
+      '; path=/' +
       '; expires=' + new Date(expirationTime).toUTCString();
 }
