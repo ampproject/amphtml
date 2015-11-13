@@ -20,6 +20,7 @@ var config = require('../config');
 var eslint = require('gulp-eslint');
 var exec = require('child_process').exec;
 var gulp = require('gulp-help')(require('gulp'));
+var gulpIf = require('gulp-if');
 var lazypipe = require('lazypipe');
 var util = require('gulp-util');
 var watch = require('gulp-watch');
@@ -41,6 +42,16 @@ var options = {
 var watcher = lazypipe().pipe(watch, config.lintGlobs);
 
 /**
+ * Checks if current Vinyl file has been fixed by eslint.
+ * @param {!Vinyl} file
+ * @return {boolean}
+ */
+function isFixed(file) {
+  // Has ESLint fixed the file contents?
+  return file.eslint != null && file.eslint.fixed;
+}
+
+/**
  * Run the eslinter on the src javascript and log the output
  * @return {!Stream} Readable stream
  */
@@ -52,14 +63,19 @@ function lint() {
     stream = stream.pipe(watcher());
   }
 
+  if (argv.fix) {
+    options.fix = true;
+  }
+
   return stream.pipe(eslint(options))
     .pipe(eslint.formatEach('stylish', function(msg) {
       errorsFound = true;
       util.log(util.colors.red(msg));
     }))
+    .pipe(gulpIf(isFixed, gulp.dest('.')))
     .on('end', function() {
-      if (errorsFound) {
-        util.log(util.colors.blue('Run `gulp lint-fix` to automatically ' +
+      if (errorsFound && !options.fix) {
+        util.log(util.colors.blue('Run `gulp lint --fix` to automatically ' +
             'fix some of these lint warnings/errors. This is a destructive ' +
             'operation (operates on the file system) so please make sure ' +
             'you commit before running.'));
@@ -68,23 +84,10 @@ function lint() {
     });
 }
 
-function lintFix(done) {
-  // Temporary until we figure out gulp-eslint fix and destination write.
-  exec('node_modules/eslint/bin/eslint.js ' +
-      '{src,3p,ads,builtins,extensions,testing,test}/**/*.js gulpfile.js ' +
-      '-c .eslintrc --fix --plugin google-camelcase',
-      function(err, stdout, stderr) {
-        if (err) {
-          util.log(util.colors.red(err.message));
-        }
-        done();
-      });
-}
-
 gulp.task('lint', 'Validates against Google Closure Linter', lint,
 {
   options: {
-    'watch': '  Watches for changes in files, validates against the linter'
+    'watch': '  Watches for changes in files, validates against the linter',
+    'fix': '  Fixes simple lint errors (spacing etc).'
   }
 });
-gulp.task('lint-fix', 'Auto fixes some simple lint errors', lintFix);
