@@ -70,7 +70,7 @@ function buildExperimentRow(experiment) {
   tr.appendChild(tdId);
 
   const tdName = document.createElement('td');
-  tdName.appendChild(buildLinkMaybe(experiment.name, experiment.spec));
+  tdName.textContent = experiment.name;
   tr.appendChild(tdName);
 
   const tdOn = document.createElement('td');

@@ -54,6 +54,6 @@ describe('getCookie', () => {
     const doc = {};
     setCookie({document: doc}, 'c&1', 'v&1', 1447383159853);
     expect(doc.cookie).to.equal(
-        'c%261=v%261; expires=Fri, 13 Nov 2015 02:52:39 GMT');
+        'c%261=v%261; path=/; expires=Fri, 13 Nov 2015 02:52:39 GMT');
   });
 });
