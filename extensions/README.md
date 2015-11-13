@@ -22,6 +22,7 @@ Current list of extended components:
 | [`amp-audio`](amp-audio/amp-audio.md)                      | Replacement for the HTML5 `audio` tag.                                                      |
 | [`amp-carousel`](amp-carousel/amp-carousel.md)                | Generic carousel for displaying multiple similar pieces of content along a horizontal axis. |
 | [`amp-fit-text`](amp-fit-text/amp-fit-text.md)                | Expand or shrink font size to fit the content within the space given.                       |
+| [`amp-font`](amp-font/amp-font.md)                | Trigger and monitor the loading of custom fonts.                       |
 | [`amp-iframe`](amp-iframe/amp-iframe.md)                 | Displays an iframe.                                                                         |
 | [`amp-image-lightbox`](amp-image-lightbox/amp-image-lightbox.md) | Allows for a “image lightbox” or similar experience.                                        |
 | [`amp-instagram`](amp-instagram/amp-instagram.md)           | Displays an instagram embed.                                                                |
