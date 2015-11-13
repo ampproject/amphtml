@@ -483,11 +483,11 @@ function buildExperiments(options) {
   // Build HTML.
   console.log('Processing ' + htmlPath);
   var html = fs.readFileSync(htmlPath, 'utf8');
-  var minHtml = html.replace('../../dist/experiments/experiments.max.js',
+  var minHtml = html.replace('../../dist.tools/experiments/experiments.max.js',
       'https://cdn.ampproject.org/experiments.js');
   gulp.src(htmlPath)
       .pipe(file('experiments.cdn.html', minHtml))
-      .pipe(gulp.dest('dist/experiments/'));
+      .pipe(gulp.dest('dist.tools/experiments/'));
 
   // Build JS.
   var js = fs.readFileSync(jsPath, 'utf8');
@@ -497,7 +497,7 @@ function buildExperiments(options) {
       .pipe(file(builtName, js))
       .pipe(gulp.dest('build/experiments/'))
       .on('end', function() {
-        compileJs('build/experiments/', builtName, 'dist/experiments/', {
+        compileJs('build/experiments/', builtName, 'dist.tools/experiments/', {
           watch: false,
           minify: options.minify || argv.minify,
           minifiedName: minifiedName,
