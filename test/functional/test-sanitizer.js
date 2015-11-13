@@ -56,6 +56,7 @@ describe('sanitizeHtml', () => {
 
   it('should NOT output security-sensitive markup when broken', () => {
     expect(sanitizeHtml('a<script>bc')).to.be.equal('a');
+    expect(sanitizeHtml('a<SCRIPT>bc')).to.be.equal('a');
   });
 
   it('should output "on" attribute', () => {
@@ -72,7 +73,11 @@ describe('sanitizeHtml', () => {
     expect(sanitizeHtml('a<a onclick="alert">b</a>')).to.be.equal('a<a>b</a>');
     expect(sanitizeHtml('a<a style="color: red;">b</a>')).to.be.equal(
         'a<a>b</a>');
+    expect(sanitizeHtml('a<a STYLE="color: red;">b</a>')).to.be.equal(
+        'a<a>b</a>');
     expect(sanitizeHtml('a<a href="javascript:alert">b</a>')).to.be.equal(
+        'a<a>b</a>');
+    expect(sanitizeHtml('a<a href="JAVASCRIPT:alert">b</a>')).to.be.equal(
         'a<a>b</a>');
   });
 
