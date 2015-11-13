@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getCookie} from '../../src/cookies';
+import {getCookie, setCookie} from '../../src/cookies';
 
 
 describe('getCookie', () => {
@@ -48,5 +48,12 @@ describe('getCookie', () => {
 
   it('should return an unescaped value', () => {
     expectCookie('c1=1%26', 'c1').to.equal('1&');
+  });
+
+  it('should write the cookie', () => {
+    const doc = {};
+    setCookie({document: doc}, 'c&1', 'v&1', 1447383159853);
+    expect(doc.cookie).to.equal(
+        'c%261=v%261; expires=Fri, 13 Nov 2015 02:52:39 GMT');
   });
 });

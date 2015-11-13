@@ -44,3 +44,19 @@ export function getCookie(win, name) {
   }
   return null;
 }
+
+/**
+ * Sets the value of the cookie. The cookie access is restricted and must
+ * go through the privacy review. Before using this method please file a
+ * GitHub issue with "Privacy Review" label.
+ *
+ * @param {!Window} win
+ * @param {string} name
+ * @param {string} value
+ * @param {time} expirationTime
+ */
+export function setCookie(win, name, value, expirationTime) {
+  win.document.cookie = encodeURIComponent(name) + '=' +
+      encodeURIComponent(value) +
+      '; expires=' + new Date(expirationTime).toUTCString();
+}
