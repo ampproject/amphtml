@@ -70,7 +70,7 @@
     "karma-sinon-chai": "1.0.0",
     "lazypipe": "1.0.1",
     "minimist": "1.2.0",
-    "mocha": "2.3.3",
+    "mocha": "2.3.4",
     "path": "0.12.7",
     "postcss": "5.0.10",
     "pretty-bytes": "2.0.1",
