@@ -323,7 +323,7 @@ function buildExample(name) {
   console.log('Processing ' + name);
   var html = fs.readFileSync(input, 'utf8');
   var max = html;
-  max = max.replace(/\.js/g, '.max.js');
+  max = max.replace(/(https:\/\/cdn.ampproject.org\/.+?).js/g, '$1.max.js');
   max = max.replace('https://cdn.ampproject.org/v0.max.js', '../dist/amp.js');
   max = max.replace(/https:\/\/cdn.ampproject.org\/v0\//g, '../dist/v0/');
   gulp.src(input)
