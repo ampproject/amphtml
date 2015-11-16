@@ -63,7 +63,7 @@ may (in the future) use a CORS endpoint and an AMP template to load and render a
 
 ## API
 
-AMP elements can use `AMP.renderTemplate(templateElement, data)` method to render a template. It is up to
+AMP elements can use `templates.renderTemplate` methods to render a template. It is up to
 a specific AMP element how `templateElement` and `data` are provided.
 
 ## Templates
