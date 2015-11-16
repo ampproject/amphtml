@@ -77,6 +77,7 @@ function buildExtensions(options) {
   buildExtension('amp-list', '0.1', false, options);
   buildExtension('amp-mustache', '0.1', false, options);
   buildExtension('amp-pinterest', '0.1', true, options);
+  buildExtension('amp-install-serviceworker', '0.1', false, options);
   /**
    * @deprecated `amp-slides` is deprecated and will be deleted before 1.0.
    * Please see {@link AmpCarousel} with `type=slides` attribute instead.
