@@ -17,9 +17,10 @@
 import './polyfills';
 
 import {historyFor} from './history';
-import {viewerFor} from './viewer';
 import {installPullToRefreshBlocker} from './pull-to-refresh';
 import {performanceFor} from './performance';
+import {viewerFor} from './viewer';
+import {vsyncFor} from './vsync';
 
 import {installAd} from '../builtins/amp-ad';
 import {installGlobalClickListener} from './document-click';
@@ -47,6 +48,7 @@ try {
     try {
       historyFor(window);
       viewerFor(window);
+      vsyncFor(window);
 
       installImg(window);
       installAd(window);
