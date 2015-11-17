@@ -52,7 +52,7 @@ class Xhr {
    *
    * @param {string} input
    * @param {?FetchInit=} opt_init
-   * @return {!Promise<!JSON>}
+   * @return {!Promise<!JSONValue>}
    */
   fetchJson(input, opt_init) {
     return this.fetch_.call(null, input, opt_init).then(response => {
@@ -184,7 +184,7 @@ class FetchResponse {
 
   /**
    * Drains the response and returns the JSON object.
-   * @return {!Promise<!JSON>}
+   * @return {!Promise<!JSONValue>}
    */
   json() {
     return this.drainText_().then(JSON.parse);
