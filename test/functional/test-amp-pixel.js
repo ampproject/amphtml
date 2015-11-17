@@ -56,7 +56,7 @@ describe('amp-pixel', () => {
         });
   });
 
-  it('replace RANDOM', () => {
+  it('should replace RANDOM', () => {
     return getPixel(
         'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=RANDOM?'
         ).then(p => {
@@ -65,96 +65,13 @@ describe('amp-pixel', () => {
         });
   });
 
-  it('replace CANONICAL_URL', () => {
+  it('should replace CANONICAL_URL', () => {
     return getPixel(
         'https://foo.com?href=CANONICAL_URL'
         ).then(p => {
           expect(p.querySelector('img')).to.not.be.null;
           expect(p.children[0].src).to.equal(
               'https://foo.com/?href=https%3A%2F%2Fpinterest.com%2Fpin1');
-        });
-  });
-
-  it('replace CANONICAL_HOST', () => {
-    return getPixel(
-        'https://foo.com?host=CANONICAL_HOST'
-        ).then(p => {
-          expect(p.querySelector('img')).to.not.be.null;
-          expect(p.children[0].src).to.equal(
-              'https://foo.com/?host=pinterest.com');
-        });
-  });
-
-  it('replace CANONICAL_PATH', () => {
-    return getPixel(
-        'https://foo.com?path=CANONICAL_PATH'
-        ).then(p => {
-          expect(p.querySelector('img')).to.not.be.null;
-          expect(p.children[0].src).to.equal(
-              'https://foo.com/?path=%2Fpin1');
-        });
-  });
-
-  it('replace DOCUMENT_REFERRER', () => {
-    return getPixel(
-        'https://foo.com?ref=DOCUMENT_REFERRER'
-        ).then(p => {
-          expect(p.querySelector('img')).to.not.be.null;
-          expect(p.children[0].src).to.equal(
-              'https://foo.com/?ref=' +
-              'http%3A%2F%2Flocalhost%3A9876%2Fcontext.html');
-        });
-  });
-
-  it('replace TITLE', () => {
-    return getPixel(
-        'https://foo.com?title=TITLE'
-        ).then(p => {
-          expect(p.querySelector('img')).to.not.be.null;
-          expect(p.children[0].src).to.equal(
-              'https://foo.com/?title=Pixel%20Test');
-        });
-  });
-
-  it('replace AMPDOC_URL', () => {
-    return getPixel(
-        'https://foo.com?ref=AMPDOC_URL'
-        ).then(p => {
-          expect(p.querySelector('img')).to.not.be.null;
-          const query = parseQueryString(parseUrl(p.children[0].src).search);
-          expect(query['ref']).to.not.equal('$AMPDOC_URL');
-        });
-  });
-
-  it('replace AMPDOC_HOST', () => {
-    return getPixel(
-        'https://foo.com?ref=AMPDOC_HOST'
-        ).then(p => {
-          expect(p.querySelector('img')).to.not.be.null;
-          const query = parseQueryString(parseUrl(p.children[0].src).search);
-          expect(query['ref']).to.not.equal('$AMPDOC_HOST');
-        });
-  });
-
-  it('replace $CANONICAL_URL', () => {
-    return getPixel(
-        'https://foo.com?href=$CANONICAL_URL'
-        ).then(p => {
-          expect(p.querySelector('img')).to.not.be.null;
-          expect(p.children[0].src).to.equal(
-              'https://foo.com/?href=https%3A%2F%2Fpinterest.com%2Fpin1');
-        });
-  });
-
-  it('replace several substitutions', () => {
-    return getPixel(
-        'https://foo.com/?a=UNKNOWN&href=CANONICAL_URL&title=TITLE'
-        ).then(p => {
-          expect(p.querySelector('img')).to.not.be.null;
-          expect(p.children[0].src).to.equal(
-              'https://foo.com/?a=UNKNOWN' +
-              '&href=https%3A%2F%2Fpinterest.com%2Fpin1' +
-              '&title=Pixel%20Test');
         });
   });
 
