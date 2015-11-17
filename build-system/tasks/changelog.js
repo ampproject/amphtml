@@ -21,11 +21,12 @@
  * json, and yaml changes.
  */
 
+var argv = require('minimist')(process.argv.slice(2));
 var BBPromise = require('bluebird');
 var config = require('../config');
 var extend = require('util')._extend;
 var git = require('gulp-git');
-var gulp = require('gulp');
+var gulp = require('gulp-help')(require('gulp'));
 var request = BBPromise.promisify(require('request'));
 var util = require('gulp-util');
 
@@ -48,19 +49,53 @@ function changelog() {
 }
 
 function getGitMetadata() {
+  var version = argv.version;
+
+  if (!version) {
+    throw new Error('No version option passed');
+  }
+
   var gitMetadata = {};
-  return getGitTag(gitMetadata)
+  return getLastGitTag()
       .then(onGitTagSuccess.bind(null, gitMetadata))
       .then(getGitLog)
       .then(onGitLogSuccess.bind(null, gitMetadata))
       .then(fetchGithubMetadata)
       .then(buildChangelog.bind(null, gitMetadata))
       .then(function(gitMetadata) {
-        // output to the console so that an external script
-        // can read the information.
-        console/*OK*/.log(gitMetadata.changelog);
+        return submitReleaseNotes(version, gitMetadata.changelog);
       })
       .catch(errHandler);
+}
+
+function submitReleaseNotes(version, changelog) {
+  var options = {
+    url: 'https://api.github.com/repos/ampproject/amphtml/releases',
+    method: 'POST',
+    headers: {
+      'User-Agent': 'amp-changelog-gulp-task',
+      'Accept': 'application/vnd.github.v3+json'
+    },
+    json: true,
+    body: {
+      'tag_name': version,
+      'target_commitish': 'release',
+      'name': version,
+      'body': changelog,
+      'draft': true,
+      'prerelease': false
+    }
+  };
+
+  if (GITHUB_ACCESS_TOKEN) {
+    options.qs = {
+      access_token: GITHUB_ACCESS_TOKEN
+    }
+  }
+
+  return request(options).then(function() {
+    util.log(util.colors.green('Release Notes submitted'));
+  });
 }
 
 function buildChangelog(gitMetadata, githubMetadata) {
@@ -77,18 +112,28 @@ function buildChangelog(gitMetadata, githubMetadata) {
   return gitMetadata;
 }
 
-function getGitTag() {
+function getLastGitTag() {
   var options = {
     args: 'describe --abbrev=0 --tags'
   };
-  return gitExec(options);
+  return gitExec(options).then(function(tag) {
+    if (typeof tag == 'string') {
+      return tag.replace(/\n/, '');
+    }
+    throw new Error('No tag found.');
+  });
 }
 
 function getGitLog(tag) {
   var options = {
-    args: 'log master...' + tag + ' --pretty=format:%s --merges'
+    args: 'log release...' + tag + ' --pretty=format:%s --merges'
   };
-  return gitExec(options);
+  return gitExec(options).then(function(log) {
+    if (!log) {
+      throw new Error('No log found from log master...' + tag + ' --merges');
+    }
+    return log;
+  });
 }
 
 function fetchGithubMetadata(ids) {
@@ -124,7 +169,9 @@ function fetchGithubMetadata(ids) {
 function getPullRequestTitle(prOption) {
   return request(prOption).then(function(res) {
     var body = JSON.parse(res.body);
-    return body.title;
+    var url = body.url.split('/');
+    var pr = url[url.length - 1];
+    return body.title + ' (#' + pr + ')';
   });
 }
 
@@ -147,8 +194,6 @@ function getPullRequestFiles(title, filesOption) {
 }
 
 function onGitTagSuccess(gitMetadata, tag) {
-  tag = tag.replace(/\n/, '');
-
   if (!tag) {
     throw new Error('Could not find latest tag.');
   }
@@ -170,4 +215,8 @@ function errHandler(err) {
   return err;
 }
 
-gulp.task('changelog', changelog);
+gulp.task('changelog', 'Create github release draft', changelog, {
+  options: {
+    version: '  Label to be used for this tag release'
+  }
+});
