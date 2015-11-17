@@ -103,6 +103,8 @@ module.exports = {
     '!{node_modules,build,dist,dist.3p,dist.tools,' +
         'third_party,build-system}/**/*.*',
     '!{testing,examples}/**/*.*',
+    // TODO: temporary, remove when validator is up to date
+    '!validator/**/*.*',
     '!gulpfile.js',
     '!karma.conf.js',
     '!**/local-amp-chrome-extension/background.js',
@@ -114,6 +116,7 @@ module.exports = {
     // run against the entire transitive closure of deps.
     '!{node_modules,build,dist,dist.tools,' +
         'dist.3p/[0-9]*,dist.3p/current-min}/**/*.*',
+    '!validator/node_modules/**/*.*',
     '!build-system/tasks/presubmit-checks.js',
     '!build/polyfills.js',
     '!gulpfile.js',

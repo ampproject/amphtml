@@ -34,8 +34,16 @@ var forbiddenTerms = {
   'DO NOT SUBMIT': '',
   'describe\\.only': '',
   'it\\.only': '',
-  'console\\.\\w+\\(': 'If you run against this, use console/*OK*/.log to ' +
+  'console\\.\\w+\\(': {
+    message: 'If you run against this, use console/*OK*/.log to ' +
       'whitelist a legit case.',
+    // TODO: temporary, remove when validator is up to date
+    whitelist: [
+      'validator/validator.js',
+      'validator/parse-css.js',
+      'validator/validator-in-browser.js',
+    ]
+  },
   'cookie\\W': {
     message: requiresReviewPrivacy,
     whitelist: [
@@ -76,7 +84,13 @@ var forbiddenTerms = {
   // we don't want. That decision could be reconsidered.
   'Promise\\.all': es6polyfill,
   'Promise\\.race': es6polyfill,
-  '\\.startsWith': es6polyfill,
+  '\\.startsWith': {
+    message: es6polyfill,
+    whitelist: [
+      'validator/tokenize-css.js',
+      'validator/validator.js'
+    ]
+  },
   '\\.endsWith': es6polyfill,
   // TODO: (erwinm) rewrite the destructure and spread warnings as
   // eslint rules (takes more time than this quick regex fix).
