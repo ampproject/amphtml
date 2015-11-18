@@ -29,7 +29,7 @@ import {getCookie} from './cookies';
  * @return {boolean}
  */
 export function isExperimentOn(win, experimentId) {
-  const experimentCookie = getCookie(win, 'amp-exp');
+  const experimentCookie = getCookie(win, 'AMP_EXP');
   if (!experimentCookie) {
     return false;
   }
