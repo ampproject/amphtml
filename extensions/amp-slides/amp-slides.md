@@ -16,5 +16,5 @@ limitations under the License.
 
 ### <a name="amp-slides"></a> `amp-slides`
 
-WARNING: amp-slides is deprecated please see [`amp-carousel`](../amp-carousel/amp-carousel.md)
+WARNING: amp-slides is no longer supported. Please see [`amp-carousel`](../amp-carousel/amp-carousel.md)
 with `type=slides` attributes instead.
