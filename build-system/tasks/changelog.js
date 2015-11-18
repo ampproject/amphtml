@@ -78,9 +78,9 @@ function submitReleaseNotes(version, changelog) {
     },
     json: true,
     body: {
-      'tag_name': version,
+      'tag_name': String(version),
       'target_commitish': 'release',
-      'name': version,
+      'name': String(version),
       'body': changelog,
       'draft': true,
       'prerelease': false
