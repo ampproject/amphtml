@@ -40,8 +40,8 @@ import {loadPromise} from '../../../src/event-helper';
 
 class AmpInstagram extends AMP.BaseElement {
   /** @override */
-  createdCallback() {
-    this.preconnect.url('https://instagram.com');
+  preconnectCallback(onLayout) {
+    this.preconnect.url('https://instagram.com', onLayout);
   }
 
   /** @override */

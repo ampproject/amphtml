@@ -21,8 +21,10 @@ import {loadPromise} from '../../../src/event-helper';
 class AmpYoutube extends AMP.BaseElement {
 
   /** @override */
-  createdCallback() {
-    this.preconnect.url('https://www.youtube.com');
+  preconnectCallback(onLayout) {
+    this.preconnect.url('https://www.youtube.com', onLayout);
+    // Host that YT uses to serve JS needed by player.
+    this.preconnect.url('https://s.ytimg.com', onLayout);
   }
 
   /** @override */
