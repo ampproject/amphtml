@@ -31,18 +31,18 @@ describe('isExperimentOn', () => {
     expectExperiment(null, 'e1').to.be.false;
     expectExperiment(undefined, 'e1').to.be.false;
     expectExperiment('', 'e1').to.be.false;
-    expectExperiment('amp-exp', 'e1').to.be.false;
-    expectExperiment('amp-exp=', 'e1').to.be.false;
+    expectExperiment('AMP_EXP', 'e1').to.be.false;
+    expectExperiment('AMP_EXP=', 'e1').to.be.false;
   });
 
   it('should return "off" when value is not in the list', () => {
-    expectExperiment('amp-exp=e1a,e2', 'e1').to.be.false;
+    expectExperiment('AMP_EXP=e1a,e2', 'e1').to.be.false;
   });
 
   it('should return "on" when value is in the list', () => {
-    expectExperiment('amp-exp=e1', 'e1').to.be.true;
-    expectExperiment('amp-exp=e1,e2', 'e1').to.be.true;
-    expectExperiment('amp-exp=e2,e1', 'e1').to.be.true;
-    expectExperiment('amp-exp=e2 , e1', 'e1').to.be.true;
+    expectExperiment('AMP_EXP=e1', 'e1').to.be.true;
+    expectExperiment('AMP_EXP=e1,e2', 'e1').to.be.true;
+    expectExperiment('AMP_EXP=e2,e1', 'e1').to.be.true;
+    expectExperiment('AMP_EXP=e2 , e1', 'e1').to.be.true;
   });
 });

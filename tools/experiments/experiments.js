@@ -20,7 +20,7 @@ import {getCookie, setCookie} from '../../src/cookies';
 
 
 /** @const {number} */
-const COOKIE_MAX_AGE_DAYS = 365;  // 1 year by default
+const COOKIE_MAX_AGE_DAYS = 180;  // 6 month
 
 
 /**
@@ -145,7 +145,7 @@ function updateExperimentRow(experiment) {
  * @return {!Array<string>}
  */
 function getExperimentIds() {
-  const experimentCookie = getCookie(window, 'amp-exp');
+  const experimentCookie = getCookie(window, 'AMP_EXP');
   return experimentCookie ? experimentCookie.split(/\s*,\s*/g) : [];
 }
 
@@ -175,7 +175,7 @@ function toggleExperiment(id, opt_on) {
     } else {
       experimentIds.splice(experimentIds.indexOf(id), 1);
     }
-    setCookie(window, 'amp-exp', experimentIds.join(','),
+    setCookie(window, 'AMP_EXP', experimentIds.join(','),
         new Date().getTime() + COOKIE_MAX_AGE_DAYS * 24 * 60 * 60 * 1000);
   }
   update();
