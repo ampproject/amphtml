@@ -84,11 +84,10 @@ function masterSelection(type) {
 }
 
 /**
- * Draws an optionally synchronously to the DOM.
+ * Draws an embed, optionally synchronously, to the DOM.
  */
 window.draw3p = function() {
-  const fragment = location.hash;
-  const data = fragment ? JSON.parse(fragment.substr(1)) : {};
+  const data = parseFragment(location.hash);
   window.context = data._context;
   window.context.location = parseUrl(data._context.location.href);
   validateParentOrigin(window, window.context.location);
@@ -120,6 +119,9 @@ function triggerDimensions(width, height) {
 }
 
 function nonSensitiveDataPostMessage(type, opt_object) {
+  if (window.parent == window) {
+    return;  // Nothing to do.
+  }
   const object = opt_object || {};
   object.type = type;
   object.sentinel = 'amp-3p';
@@ -172,4 +174,21 @@ export function validateParentOrigin(window, parentLocation) {
       'Parent origin mismatch: %s, %s, %s',
       ancestors[0], parentLocation.origin);
   parentLocation.originValidated = true;
+}
+
+/**
+ * Expects the fragment to contain JSON.
+ * @param {string} fragment Value of location.fragment
+ * @return {!JSONObject}
+ * @visibleForTesting
+ */
+export function parseFragment(fragment) {
+  let json = fragment.substr(1);
+  // Some browser, notably Firefox produce an encoded version of the fragment
+  // while most don't. Since we know how the string should start, this is easy
+  // to detect.
+  if (json.indexOf('{%22') == 0) {
+    json = decodeURIComponent(json);
+  }
+  return json ? JSON.parse(json) : {};
 }
