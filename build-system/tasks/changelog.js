@@ -205,9 +205,15 @@ function onGitTagSuccess(gitMetadata, tag) {
 
 function onGitLogSuccess(gitMetadata, logs) {
   var commits = logs.split('\n');
-  return commits.map(function(commit) {
-    return commit.split(' ')[3].slice(1);
-  });
+  return commits
+    .filter(function(commit) {
+      // filter non Pull request merges
+      return commit.indexOf('Merge pull') == 0;
+    })
+    .map(function(commit) {
+      // We only need the PR id
+      return commit.split(' ')[3].slice(1);
+    });
 }
 
 function errHandler(err) {
