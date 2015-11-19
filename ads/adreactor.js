@@ -21,7 +21,8 @@ import {writeScript} from '../src/3p';
  * @param {!Object} data
  */
 export function adreactor(global, data) {
-  var url = 'https://adserver.adreactor.com/servlet/view/banner/javascript/zone?' +
+  const url = 'https://adserver.adreactor.com' +
+      '/servlet/view/banner/javascript/zone?' +
       'zid=' + encodeURIComponent(data.zid) +
       '&pid=' + encodeURIComponent(data.pid) +
       '&custom3=' + encodeURIComponent(data.custom3) +

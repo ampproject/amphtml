@@ -19,12 +19,12 @@ limitations under the License.
 ## Example
 
 ```html
-  <amp-ad width=728 height=90
-      type="adreactor"
-      data-pid=790
-      data-zid=9
-      data-custom3="No Type">
-  </amp-ad>
+<amp-ad width=728 height=90
+    type="adreactor"
+    data-pid=790
+    data-zid=9
+    data-custom3="No Type">
+</amp-ad>
 ```
 
 ## Configuration

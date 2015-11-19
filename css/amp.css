@@ -16,12 +16,20 @@
 
 /**
  * Margin:0 is currently needed for iOS viewer embeds.
- * See https://docs.google.com/document/d/1YjFk_B6r97CCaQJf2nXRVuBOuNi_3Fn87Zyf1U7Xoz4/edit
+ * See:
+ * https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md
  * and {@link ViewportBindingNaturalIosEmbed_} for more info.
  */
 body {
   /* Undoes mandatory opacity: 0 in doc. */
   margin: 0 !important;
+}
+
+/** These properties can be overriden by user stylesheets. */
+body {
+  /* Text adjust is set to 100% to avoid iOS Safari bugs where the font-size is
+     sometimes not restored during orientation. See #449. */
+  text-size-adjust: 100%;
 }
 
 .-amp-element {
@@ -85,6 +93,12 @@ i-amp-sizer {
   right: 0;
 }
 
+.-amp-replaced-content {
+  padding: 0 !important;
+  border: none !important;
+  /* TODO(dvoytenko): explore adding here object-fit. */
+}
+
 /* For author styling. */
 .amp-unresolved {
 }
@@ -123,15 +137,21 @@ i-amp-sizer {
   /* Just state. */
 }
 
-[placeholder] {
+.-amp-element > [placeholder] {
   display: block;
 }
 
-[placeholder].hidden {
-  display: none !important;
+.-amp-element > [placeholder].hidden,
+.-amp-element > [placeholder].amp-hidden {
+  visibility: hidden;
 }
 
-.-amp-layout-size-defined [placeholder] {
+.-amp-element:not(.amp-notsupported) > [fallback] {
+  display: none;
+}
+
+.-amp-layout-size-defined > [placeholder],
+.-amp-layout-size-defined > [fallback] {
   position: absolute !important;
   top: 0 !important;
   left: 0 !important;
@@ -140,7 +160,7 @@ i-amp-sizer {
   z-index: 1 !important;
 }
 
-.-amp-notbuilt > [placeholder]:not(.hidden) {
+.-amp-notbuilt > [placeholder] {
   display: block !important;
 }
 
@@ -172,12 +192,23 @@ i-amp-scroll-container {
   overflow: auto;
 }
 
-amp-pixel {
-  position: absolute !important;
-  top: 0 !important;
-  width: 1px !important;
-  height: 1px !important; /* Only things with height are ever loaded. */
-  overflow: hidden !important;
+.-amp-loading-container {
+  display: block !important;
+  z-index: 1;
+}
+
+.-amp-notbuilt > .-amp-loading-container {
+  display: block !important;
+}
+
+/**
+ * `-amp-loading-container`, `-amp-loader` and `-amp-loader-dot` all support
+ * a "loading indicator" usecase. `-amp-loading-container` is mostly responsible
+ * for alighning the loading indicator, while `-amp-loader` and
+ * `-amp-loader-dot` are an implementation for a default loading indicator. The
+ * default implementation includes the three-dot layout and animation.
+ */
+.-amp-loading-container.amp-hidden {
   visibility: hidden;
 }
 
@@ -192,11 +223,7 @@ amp-pixel {
   white-space: nowrap;
 }
 
-/**
- * We want to be a bit more specific here as we don't want a global active
- * to just trigger the loading animation
- */
-.-amp-autoplaceholder.active .-amp-loader-dot {
+.-amp-loader.amp-active .-amp-loader-dot {
   animation: -amp-loader-dots 2s infinite;
 }
 
@@ -236,4 +263,59 @@ amp-pixel {
     transform: scale(.8);
     background-color: rgba(0, 0, 0, .5);
   }
+}
+
+
+/**
+ * `-amp-overflow` is a support for "overflow" element. This is
+ * an element shown when more content is available. Typically tapping on this
+ * element shows the full content.
+ */
+.-amp-overflow {
+  z-index: 1;
+}
+
+.-amp-overflow.amp-hidden {
+  visibility: hidden;
+}
+
+
+/* Polyfill for IE and any other browser that don't understand templates . */
+template {
+  display: none !important;
+}
+
+
+amp-pixel {
+  position: absolute !important;
+  top: 0 !important;
+  width: 1px !important;
+  height: 1px !important; /* Only things with height are ever loaded. */
+  overflow: hidden !important;
+  visibility: hidden;
+}
+
+/**
+ * Force the layout box of the ad iframe to be exactly as big as the actual
+ * iframe. The `amp-ad` tag itself can be freely styled.
+ */
+amp-ad iframe {
+  border: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/**
+ * Instagram wraps the standard image into a fixed size container.
+ * With these offsets, users can simply specify the the size of the
+ * instagram images and things have the right size.
+ * In particular the effect of adding padding to this container is
+ * that with responsive layouts the responsiveness is based on the
+ * asset while the padding stays constant.
+ * This information is here instead of living with the CSS of the
+ * component, so that the runtime can reserve the correct space
+ * before the instagram implementation loads.
+ */
+amp-instagram {
+  padding: 48px 8px !important;
 }

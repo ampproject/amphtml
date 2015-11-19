@@ -46,17 +46,17 @@ class AmpLightbox extends AMP.BaseElement {
       right: 0
     });
 
-    let children = this.getRealChildren();
+    const children = this.getRealChildren();
 
     /** @private {!Element} */
     this.container_ = document.createElement('div');
     this.applyFillContent(this.container_);
     this.element.appendChild(this.container_);
-    children.forEach((child) => {
+    children.forEach(child => {
       this.container_.appendChild(child);
     });
 
-    let gestures = Gestures.get(this.element);
+    const gestures = Gestures.get(this.element);
     // TODO(dvoytenko): configure how to close. Or maybe leave it completely
     // up to "on" element.
     this.element.addEventListener('click', () => this.close());
@@ -77,10 +77,11 @@ class AmpLightbox extends AMP.BaseElement {
   /** @override */
   activate() {
     this.requestFullOverlay();
+    this.getViewport().resetTouchZoom();
     this.element.style.display = '';
     this.element.style.opacity = 0;
 
-    // TODO(dvoytenko): use new animatons support instead.
+    // TODO(dvoytenko): use new animations support instead.
     this.element.style.transition = 'opacity 0.1s ease-in';
     requestAnimationFrame(() => {
       this.element.style.opacity = '';
@@ -89,7 +90,7 @@ class AmpLightbox extends AMP.BaseElement {
     this.scheduleLayout(this.container_);
     this.updateInViewport(this.container_, true);
 
-    this.getHistory_().push(this.close.bind(this)).then((historyId) => {
+    this.getHistory_().push(this.close.bind(this)).then(historyId => {
       this.historyId_ = historyId;
     });
   }

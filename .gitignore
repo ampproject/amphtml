@@ -2,8 +2,8 @@
 .g4ignore
 build
 dist
-dist.ads
 dist.3p
+dist.tools
 examples.build
 examples.min
 node_modules

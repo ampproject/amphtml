@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-### <a name=”amp-video”></a> `amp-video`
+### <a name="amp-video"></a> `amp-video`
 
 A replacement for the HTML5 `video` tag. Like all embedded external resources in a AMP file, the video is lazily loaded only when the `amp-video` element is in or near the viewport.
 
@@ -33,21 +33,27 @@ One or zero immediate child nodes can have the `placeholder` attribute. If prese
 One or zero immediate child nodes can have the `fallback` attribute. If present, this node and its children form the content that will be displayed if HTML5 video is not supported on the user’s browser.
 
 For example:
-
-    <amp-video width=400 height=300 src=”https://yourhost.com/videos/myvideo.mp4”>
-      <amp-img placeholder width=400 height=300 src=”myvideo-poster.jpg”></amp-img>
-      <div fallback>
-        <p>Your browser doesn’t support HTML5 video</p>
-      </div>
-      <source type="video/mp4" src="foo.mp4">
-      <source type="video/webm" src="foo.webm">
-    </amp-video>
+```html
+<amp-video width=400 height=300 src="https://yourhost.com/videos/myvideo.mp4"
+    poster="myvideo-poster.jpg">
+  <div fallback>
+    <p>Your browser doesn’t support HTML5 video</p>
+  </div>
+  <source type="video/mp4" src="foo.mp4">
+  <source type="video/webm" src="foo.webm">
+</amp-video>
+```
 
 #### Attributes
 
 **src**
 
 Required if no <source> children are present. Must be HTTPS.
+
+**poster**
+
+The image for the frame to be displayed before video playback has started. By
+default the first frame is displayed.
 
 **autoplay**
 

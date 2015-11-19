@@ -4,29 +4,42 @@
   <meta charset="utf-8">
   <title>AMP #0</title>
   <link rel="canonical" href="amps.html" >
-  <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
-  <script src="../../dist/amp.js" development></script>
-  <style>
+  <style amp-custom>
     body {
       max-width: 527px;
       font-family: 'Questrial', Arial;
     }
 
-    amp-video video {
-      margin: 30px;
-      padding: 30px;
-      border: 10px solid red;
+    [fallback] {
+      display: block;
+      /* @alternative */ display: flex;
+      flex-direction: column;
+      flex-wrap: nowrap;
+      justify-content: center;
+      align-items: center;
+      background: rgba(0, 0, 0, 0.5);
+      color: #fff;
     }
   </style>
+  <style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
+  <script async src="../../dist/amp.js" development></script>
 </head>
 <body>
-  <h1>amp #0</h1>
+  <h1>amp-video</h1>
   <amp-video
       src="http://techslides.com/demos/sample-videos/small.mp4"
       width="358"
       height="204"
       layout="responsive"
-      controls></amp-video>
+      controls>
+    <div placeholder>
+      This is a placeholder
+    </div>
+    <div fallback>
+      This is a fallback
+    </div>
+  </amp-video>
 </body>
 </html>

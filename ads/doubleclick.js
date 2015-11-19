@@ -14,35 +14,27 @@
  * limitations under the License.
  */
 
-import {writeScript} from '../src/3p';
+import {loadScript} from '../src/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function doubleclick(global, data) {
-  var loaded = new Promise((resolve, reject) => {
-    var s = document.createElement('script');
-    s.src = 'https://www.googletagservices.com/tag/js/gpt.js';
-    s.onload = resolve;
-    s.onerror = reject;
-    global.document.body.appendChild(s);
-  });
-
-  loaded.then(() => {
+  loadScript(global, 'https://www.googletagservices.com/tag/js/gpt.js', () => {
     global.googletag.cmd.push(function() {
-      var dimensions = [[
+      const dimensions = [[
         parseInt(data.width, 10),
         parseInt(data.height, 10)
       ]];
-      var slot = googletag.defineSlot(data.slot, dimensions, 'c')
+      const slot = googletag.defineSlot(data.slot, dimensions, 'c')
           .addService(googletag.pubads());
       googletag.pubads().enableSingleRequest();
-      googletag.pubads().set('page_url', context.location.href);
+      googletag.pubads().set('page_url', context.canonicalUrl);
       googletag.enableServices();
 
       if (data.targeting) {
-        for (var key in data.targeting) {
+        for (const key in data.targeting) {
           slot.setTargeting(key, data.targeting[key]);
         }
       }

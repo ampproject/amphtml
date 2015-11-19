@@ -4,19 +4,8 @@
   <meta charset="utf-8">
   <title>Released AMP components</title>
   <link rel="canonical" href="amps.html" >
-  <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
-  <script custom-element="amp-audio" src="../dist/v0/amp-audio-0.1.max.js" async></script>
-  <script custom-element="amp-anim" src="../dist/v0/amp-anim-0.1.max.js" async></script>
-  <script custom-element="amp-carousel" src="../dist/v0/amp-carousel-0.1.max.js" async></script>
-  <script custom-element="amp-iframe" src="../dist/v0/amp-iframe-0.1.max.js" async></script>
-  <script custom-element="amp-image-lightbox" src="../dist/v0/amp-image-lightbox-0.1.max.js" async></script>
-  <script custom-element="amp-instagram" src="../dist/v0/amp-instagram-0.1.max.js" async></script>
-  <script custom-element="amp-fit-text" src="../dist/v0/amp-fit-text-0.1.max.js" async></script>
-  <script custom-element="amp-twitter" src="../dist/v0/amp-twitter-0.1.max.js" async></script>
-  <script custom-element="amp-youtube" src="../dist/v0/amp-youtube-0.1.max.js" async></script>
-  <script src="../dist/amp.js" development async></script>
-  <style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
   <style amp-custom>
     body {
       max-width: 527px;
@@ -27,6 +16,17 @@
       margin: 8px 0;
     }
   </style>
+  <script async custom-element="amp-audio" src="https://cdn.ampproject.org/v0/amp-audio-0.1.js"></script>
+  <script async custom-element="amp-anim" src="https://cdn.ampproject.org/v0/amp-anim-0.1.js"></script>
+  <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
+  <script async custom-element="amp-iframe" src="https://cdn.ampproject.org/v0/amp-iframe-0.1.js"></script>
+  <script async custom-element="amp-image-lightbox" src="https://cdn.ampproject.org/v0/amp-image-lightbox-0.1.js"></script>
+  <script async custom-element="amp-instagram" src="https://cdn.ampproject.org/v0/amp-instagram-0.1.js"></script>
+  <script async custom-element="amp-fit-text" src="https://cdn.ampproject.org/v0/amp-fit-text-0.1.js"></script>
+  <script async custom-element="amp-twitter" src="https://cdn.ampproject.org/v0/amp-twitter-0.1.js"></script>
+  <script async custom-element="amp-youtube" src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js"></script>
+  <style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
   <h1>Released AMP components</h1>
@@ -78,7 +78,7 @@
 
   <h2>Video</h2>
   <amp-video
-      src="/examples/video/The-Audience-Is-Programming.mp4"
+      src="video/The-Audience-Is-Programming.mp4"
       width="358"
       height="204"
       layout="responsive"
@@ -87,7 +87,7 @@
 
   <h2>Youtube</h2>
   <amp-youtube
-      video-id="mGENRKrdoGY"
+      data-videoid="mGENRKrdoGY"
       layout="responsive"
       width="480" height="270"></amp-youtube>
 
@@ -111,7 +111,7 @@
 
   <h2>Instagram</h2>
   <amp-instagram
-      shortcode="fBwFP"
+      data-shortcode="fBwFP"
       width="320"
       height="392"
       layout="responsive">

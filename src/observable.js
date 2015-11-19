@@ -64,7 +64,7 @@ export class Observable {
    * @param {TYPE} event
    */
   fire(event) {
-    this.handlers_.forEach((handler) => {
+    this.handlers_.forEach(handler => {
       handler(event);
     });
   }

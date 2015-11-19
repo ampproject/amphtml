@@ -27,7 +27,7 @@ describe('Viewer', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    var WindowApi = function() {};
+    const WindowApi = function() {};
     WindowApi.prototype.setTimeout = function(callback, delay) {};
     windowApi = new WindowApi();
     windowApi.location = {hash: '', href: '/test/viewer'};
@@ -56,7 +56,7 @@ describe('Viewer', () => {
         '&scrollTop=15';
     windowApi.location.hash = '#width=111&paddingTop=17&other=something';
     windowApi.document = {body: {style: {}}};
-    let viewer = new Viewer(windowApi);
+    const viewer = new Viewer(windowApi);
     expect(viewer.getViewportType()).to.equal('virtual');
     expect(viewer.getViewportWidth()).to.equal(111);
     expect(viewer.getViewportHeight()).to.equal(333);
@@ -77,7 +77,7 @@ describe('Viewer', () => {
 
   it('should configure visibilityState and prerender', () => {
     windowApi.location.hash = '#visibilityState=hidden&prerenderSize=3';
-    let viewer = new Viewer(windowApi);
+    const viewer = new Viewer(windowApi);
     expect(viewer.getVisibilityState()).to.equal('hidden');
     expect(viewer.isVisible()).to.equal(false);
     expect(viewer.getPrerenderSize()).to.equal(3);
@@ -86,18 +86,31 @@ describe('Viewer', () => {
   it('should configure correctly for iOS embedding', () => {
     windowApi.name = '__AMP__viewportType=natural';
     windowApi.parent = {};
-    let body = {style: {}};
-    let documentElement = {style: {}};
+    const body = {style: {}};
+    const documentElement = {style: {}};
     windowApi.document = {body: body, documentElement: documentElement};
     sandbox.mock(platform).expects('isIos').returns(true).once();
-    let viewer = new Viewer(windowApi);
+    const viewer = new Viewer(windowApi);
 
     expect(viewer.getViewportType()).to.equal('natural-ios-embed');
   });
 
+  it('should NOT configure for iOS embedding if not embedded', () => {
+    windowApi.name = '__AMP__viewportType=natural';
+    windowApi.parent = windowApi;
+    const body = {style: {}};
+    const documentElement = {style: {}};
+    windowApi.document = {body: body, documentElement: documentElement};
+    sandbox.mock(platform).expects('isIos').returns(true).once();
+    expect(new Viewer(windowApi).getViewportType()).to.equal('natural');
+
+    windowApi.parent = null;
+    expect(new Viewer(windowApi).getViewportType()).to.equal('natural');
+  });
+
   it('should receive viewport event', () => {
     let viewportEvent = null;
-    viewer.onViewportEvent((event) => {
+    viewer.onViewportEvent(event => {
       viewportEvent = event;
     });
     viewer.receiveMessage('viewport', {
@@ -116,7 +129,7 @@ describe('Viewer', () => {
 
   it('should receive visibilitychange event', () => {
     let visEvent = null;
-    viewer.onVisibilityChanged((event) => {
+    viewer.onVisibilityChanged(event => {
       visEvent = event;
     });
     viewer.receiveMessage('visibilitychange', {
@@ -131,7 +144,7 @@ describe('Viewer', () => {
 
   it('should post documentLoaded event', () => {
     viewer.postDocumentReady(11, 12);
-    let m = viewer.messageQueue_[0];
+    const m = viewer.messageQueue_[0];
     expect(m.eventType).to.equal('documentLoaded');
     expect(m.data.width).to.equal(11);
     expect(m.data.height).to.equal(12);
@@ -139,7 +152,7 @@ describe('Viewer', () => {
 
   it('should post documentResized event', () => {
     viewer.postDocumentResized(13, 14);
-    let m = viewer.messageQueue_[0];
+    const m = viewer.messageQueue_[0];
     expect(m.eventType).to.equal('documentResized');
     expect(m.data.width).to.equal(13);
     expect(m.data.height).to.equal(14);
@@ -158,7 +171,7 @@ describe('Viewer', () => {
     viewer.postDocumentResized(15, 16);
     expect(viewer.messageQueue_.length).to.equal(2);
     expect(viewer.messageQueue_[0].eventType).to.equal('documentLoaded');
-    let m = viewer.messageQueue_[1];
+    const m = viewer.messageQueue_[1];
     expect(m.eventType).to.equal('documentResized');
     expect(m.data.width).to.equal(15);
     expect(m.data.height).to.equal(16);
@@ -169,7 +182,7 @@ describe('Viewer', () => {
     viewer.postDocumentResized(13, 14);
     expect(viewer.messageQueue_.length).to.equal(2);
 
-    let delivered = [];
+    const delivered = [];
     viewer.setMessageDeliverer((eventType, data) => {
       delivered.push({eventType: eventType, data: data});
     });

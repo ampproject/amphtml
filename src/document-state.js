@@ -39,7 +39,7 @@ export function onDocumentReady(doc, callback) {
   if (ready) {
     callback();
   } else {
-    var readyListener = () => {
+    const readyListener = () => {
       if (doc.readyState != 'loading') {
         if (!ready) {
           ready = true;
@@ -86,7 +86,7 @@ export class DocumentState {
     this.visibilityChangeEvent_ = null;
     if (this.hiddenProp_) {
       this.visibilityChangeEvent_ = 'visibilitychange';
-      let vendorStop = this.hiddenProp_.indexOf('Hidden');
+      const vendorStop = this.hiddenProp_.indexOf('Hidden');
       if (vendorStop != -1) {
         this.visibilityChangeEvent_ =
             this.hiddenProp_.substring(0, vendorStop) + 'Visibilitychange';

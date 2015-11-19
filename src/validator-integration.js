@@ -27,17 +27,17 @@ export function maybeValidate(win) {
   if (!getMode().development) {
     return;
   }
-  var filename = win.location.href;
-  if (filename.startsWith('about:')) {  // Should only happen in tests.
+  const filename = win.location.href;
+  if (filename.indexOf('about:') == 0) {  // Should only happen in tests.
     return;
   }
-  var s = document.createElement('script');
+  const s = document.createElement('script');
   // TODO(@cramforce): Switch to locally build version when we integrated
   // the validator and switch to production URL.
   s.src = 'https://www.gstatic.com/amphtml/v0/validator.js';
   s.onload = () => {
     win.document.head.removeChild(s);
-    amp.validator.validateUrlAndLog(filename);
+    amp.validator.validateUrlAndLog(filename, win.document);
   };
   win.document.head.appendChild(s);
 }

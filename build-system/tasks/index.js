@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
+require('./babel-helpers');
+require('./changelog');
+require('./clean');
 require('./lint');
+require('./make-golden');
 require('./presubmit-checks');
+require('./serve');
+require('./size');
 require('./test');

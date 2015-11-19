@@ -27,7 +27,7 @@ import {timer} from './timer';
  *   clientY: number
  * }}
  */
-var Tap;
+let Tap;
 
 
 /**
@@ -56,7 +56,7 @@ export class TapRecognizer extends GestureRecognizer {
 
   /** @override */
   onTouchStart(e) {
-    let touches = e.touches;
+    const touches = e.touches;
     if (!touches || touches.length != 1) {
       return false;
     }
@@ -67,12 +67,12 @@ export class TapRecognizer extends GestureRecognizer {
 
   /** @override */
   onTouchMove(e) {
-    let touches = e.changedTouches || e.touches;
+    const touches = e.changedTouches || e.touches;
     if (touches && touches.length == 1) {
       this.lastX_ = touches[0].clientX;
       this.lastY_ = touches[0].clientY;
-      let dx = Math.abs(this.lastX_ - this.startX_) >= 8;
-      let dy = Math.abs(this.lastY_ - this.startY_) >= 8;
+      const dx = Math.abs(this.lastX_ - this.startX_) >= 8;
+      const dy = Math.abs(this.lastY_ - this.startY_) >= 8;
       if (dx || dy) {
         return false;
       }
@@ -101,7 +101,7 @@ export class TapRecognizer extends GestureRecognizer {
  *   clientY: number
  * }}
  */
-var Doubletap;
+let Doubletap;
 
 
 /**
@@ -137,7 +137,7 @@ export class DoubletapRecognizer extends GestureRecognizer {
     if (this.tapCount_ > 1) {
       return false;
     }
-    let touches = e.touches;
+    const touches = e.touches;
     if (!touches || touches.length != 1) {
       return false;
     }
@@ -148,12 +148,12 @@ export class DoubletapRecognizer extends GestureRecognizer {
 
   /** @override */
   onTouchMove(e) {
-    let touches = e.changedTouches || e.touches;
+    const touches = e.changedTouches || e.touches;
     if (touches && touches.length == 1) {
       this.lastX_ = touches[0].clientX;
       this.lastY_ = touches[0].clientY;
-      let dx = Math.abs(this.lastX_ - this.startX_) >= 8;
-      let dy = Math.abs(this.lastY_ - this.startY_) >= 8;
+      const dx = Math.abs(this.lastX_ - this.startX_) >= 8;
+      const dy = Math.abs(this.lastY_ - this.startY_) >= 8;
       if (dx || dy) {
         this.acceptCancel();
         return false;
@@ -199,7 +199,7 @@ export class DoubletapRecognizer extends GestureRecognizer {
  *   velocityY: number
  * }}
  */
-var Swipe;
+let Swipe;
 
 
 /**
@@ -259,7 +259,7 @@ class SwipeRecognizer extends GestureRecognizer {
 
   /** @override */
   onTouchStart(e) {
-    let touches = e.touches;
+    const touches = e.touches;
     if (!touches || touches.length != 1) {
       return false;
     }
@@ -271,17 +271,17 @@ class SwipeRecognizer extends GestureRecognizer {
 
   /** @override */
   onTouchMove(e) {
-    let touches = e.changedTouches || e.touches;
+    const touches = e.changedTouches || e.touches;
     if (touches && touches.length == 1) {
-      let x = touches[0].clientX;
-      let y = touches[0].clientY;
+      const x = touches[0].clientX;
+      const y = touches[0].clientY;
       this.lastX_ = x;
       this.lastY_ = y;
       if (this.eventing_) {
         this.emit_(false, false, e);
       } else {
-        let dx = Math.abs(x - this.startX_);
-        let dy = Math.abs(y - this.startY_);
+        const dx = Math.abs(x - this.startX_);
+        const dy = Math.abs(y - this.startY_);
         // Swipe is penalized slightly since it's one of the least demanding
         // gesture, thus -10 in signalReady.
         if (this.horiz_ && this.vert_) {
@@ -340,7 +340,7 @@ class SwipeRecognizer extends GestureRecognizer {
    */
   emit_(first, last, event) {
     this.lastTime_ = timer.now();
-    let deltaTime = this.lastTime_ - this.prevTime_;
+    const deltaTime = this.lastTime_ - this.prevTime_;
     // It's often that `touchend` arrives on the next frame. These should
     // be ignored to avoid a significant velocity downgrade.
     if (!last && deltaTime > 4 || last && deltaTime > 16) {
@@ -434,7 +434,7 @@ export class SwipeYRecognizer extends SwipeRecognizer {
  *   velocityY: number
  * }}
  */
-var Tapzoom;
+let Tapzoom;
 
 
 /**
@@ -500,7 +500,7 @@ export class TapzoomRecognizer extends GestureRecognizer {
     if (this.eventing_) {
       return false;
     }
-    let touches = e.touches;
+    const touches = e.touches;
     if (!touches || touches.length != 1) {
       return false;
     }
@@ -511,15 +511,15 @@ export class TapzoomRecognizer extends GestureRecognizer {
 
   /** @override */
   onTouchMove(e) {
-    let touches = e.changedTouches || e.touches;
+    const touches = e.changedTouches || e.touches;
     if (touches && touches.length == 1) {
       this.lastX_ = touches[0].clientX;
       this.lastY_ = touches[0].clientY;
       if (this.eventing_) {
         this.emit_(false, false, e);
       } else {
-        let dx = Math.abs(this.lastX_ - this.startX_) >= 8;
-        let dy = Math.abs(this.lastY_ - this.startY_) >= 8;
+        const dx = Math.abs(this.lastX_ - this.startX_) >= 8;
+        const dy = Math.abs(this.lastY_ - this.startY_) >= 8;
         if (dx || dy) {
           if (this.tapCount_ == 0) {
             this.acceptCancel();
@@ -607,5 +607,234 @@ export class TapzoomRecognizer extends GestureRecognizer {
       this.emit_(false, true, event);
       this.signalEnd();
     }
+  }
+}
+
+
+
+/**
+ * A "pinch" gesture. It has a center, delta off the center center and
+ * the velocity of moving away from the center. "dir" component of `1`
+ * indicates that it's a expand motion and `-1` indicates pinch motion.
+ * @typedef {{
+ *   first: boolean,
+ *   last: boolean,
+ *   centerClientX: number,
+ *   centerClientY: number,
+ *   dir: number,
+ *   deltaX: number,
+ *   deltaY: number,
+ *   velocityX: number,
+ *   velocityY: number
+ * }}
+ */
+let Pinch;
+
+
+/**
+ * Recognizes a "pinch" gesture.
+ * @extends {GestureRecognizer<Pinch>}
+ */
+export class PinchRecognizer extends GestureRecognizer {
+  /**
+   * @param {!Gestures} manager
+   */
+  constructor(manager) {
+    super('pinch', manager);
+
+    /** @private {boolean} */
+    this.eventing_ = false;
+
+    /** @private {number} */
+    this.startX1_ = 0;
+    /** @private {number} */
+    this.startY1_ = 0;
+
+    /** @private {number} */
+    this.startX2_ = 0;
+    /** @private {number} */
+    this.startY2_ = 0;
+
+    /** @private {number} */
+    this.lastX1_ = 0;
+    /** @private {number} */
+    this.lastY1_ = 0;
+
+    /** @private {number} */
+    this.lastX2_ = 0;
+    /** @private {number} */
+    this.lastY2_ = 0;
+
+    /** @private {number} */
+    this.prevDeltaX_ = 0;
+    /** @private {number} */
+    this.prevDeltaY_ = 0;
+
+    /** @private {number} */
+    this.centerClientX_ = 0;
+    /** @private {number} */
+    this.centerClientY_ = 0;
+
+    /** @private {time} */
+    this.startTime_ = 0;
+    /** @private {time} */
+    this.lastTime_ = 0;
+    /** @private {time} */
+    this.prevTime_ = 0;
+
+    /** @private {number} */
+    this.velocityX_ = 0;
+    /** @private {number} */
+    this.velocityY_ = 0;
+  }
+
+  /** @override */
+  onTouchStart(e) {
+    const touches = e.touches;
+    if (!touches || touches.length != 2) {
+      return false;
+    }
+    this.startTime_ = timer.now();
+    this.startX1_ = touches[0].clientX;
+    this.startY1_ = touches[0].clientY;
+    this.startX2_ = touches[1].clientX;
+    this.startY2_ = touches[1].clientY;
+    return true;
+  }
+
+  /** @override */
+  onTouchMove(e) {
+    const touches = e.touches;
+    if (!touches || touches.length != 2) {
+      return false;
+    }
+    this.lastX1_ = touches[0].clientX;
+    this.lastY1_ = touches[0].clientY;
+    this.lastX2_ = touches[1].clientX;
+    this.lastY2_ = touches[1].clientY;
+    if (this.eventing_) {
+      this.emit_(false, false, e);
+    } else {
+      const dx1 = this.lastX1_ - this.startX1_;
+      const dy1 = this.lastY1_ - this.startY1_;
+      const dx2 = this.lastX2_ - this.startX2_;
+      const dy2 = this.lastY2_ - this.startY2_;
+      // Fingers should move in opposite directions and go over the threshold.
+      if (dx1 * dx2 <= 0 && dy1 * dy2 <= 0) {
+        if (Math.abs(dx1 - dx2) >= 8 || Math.abs(dy1 - dy2) >= 8) {
+          this.signalReady(0);
+        }
+      } else if (Math.abs(dx1 + dx2) >= 8 || Math.abs(dy1 + dy2) >= 8) {
+        // Moving in the same direction over a threshold.
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /** @override */
+  onTouchEnd(e) {
+    this.end_(e);
+  }
+
+  /** @override */
+  acceptStart() {
+    this.eventing_ = true;
+    this.prevTime_ = this.startTime_;
+    this.prevDeltaX_ = 0;
+    this.prevDeltaY_ = 0;
+    this.centerClientX_ = (this.startX1_ + this.startX2_) * 0.5;
+    this.centerClientY_ = (this.startY1_ + this.startY2_) * 0.5;
+    this.emit_(true, false, null);
+  }
+
+  /** @override */
+  acceptCancel() {
+    this.eventing_ = false;
+  }
+
+  /**
+   * @param {boolean} first
+   * @param {boolean} last
+   * @param {?Event} event
+   * @private
+   */
+  emit_(first, last, event) {
+    this.lastTime_ = timer.now();
+    const deltaTime = this.lastTime_ - this.prevTime_;
+    const deltaX = this.deltaX_();
+    const deltaY = this.deltaY_();
+    // It's often that `touchend` arrives on the next frame. These should
+    // be ignored to avoid a significant velocity downgrade.
+    if (!last && deltaTime > 4 || last && deltaTime > 16) {
+      this.velocityX_ = calcVelocity(deltaX - this.prevDeltaX_, deltaTime,
+          this.velocityX_);
+      this.velocityY_ = calcVelocity(deltaY - this.prevDeltaY_, deltaTime,
+          this.velocityY_);
+      this.velocityX_ = Math.abs(this.velocityX_) > 1e-4 ? this.velocityX_ : 0;
+      this.velocityY_ = Math.abs(this.velocityY_) > 1e-4 ? this.velocityY_ : 0;
+      this.prevDeltaX_ = deltaX;
+      this.prevDeltaY_ = deltaY;
+      this.prevTime_ = this.lastTime_;
+    }
+
+    const startSq = this.sqDist_(this.startX1_, this.startX2_,
+        this.startY1_, this.startY2_);
+    const lastSq = this.sqDist_(this.lastX1_, this.lastX2_,
+        this.lastY1_, this.lastY2_);
+    this.signalEmit({
+      first: first,
+      last: last,
+      time: this.lastTime_,
+      centerClientX: this.centerClientX_,
+      centerClientY: this.centerClientY_,
+      dir: Math.sign(lastSq - startSq),
+      deltaX: deltaX * 0.5,
+      deltaY: deltaY * 0.5,
+      velocityX: this.velocityX_ * 0.5,
+      velocityY: this.velocityY_ * 0.5
+    }, event);
+  }
+
+  /**
+   * @param {?Event} event
+   * @private
+   */
+  end_(event) {
+    if (this.eventing_) {
+      this.eventing_ = false;
+      this.emit_(false, true, event);
+      this.signalEnd();
+    }
+  }
+
+  /**
+   * @param {number} x1
+   * @param {number} x2
+   * @param {number} y1
+   * @param {number} y2
+   * @return {number}
+   * @private
+   */
+  sqDist_(x1, x2, y1, y2) {
+    return (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2);
+  }
+
+  /**
+   * @return {number}
+   * @private
+   */
+  deltaX_() {
+    return Math.abs((this.lastX1_ - this.startX1_) -
+        (this.lastX2_ - this.startX2_));
+  }
+
+  /**
+   * @return {number}
+   * @private
+   */
+  deltaY_() {
+    return Math.abs((this.lastY1_ - this.startY1_) -
+        (this.lastY2_ - this.startY2_));
   }
 }

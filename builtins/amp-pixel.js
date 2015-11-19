@@ -16,10 +16,9 @@
 
 import {BaseElement} from '../src/base-element';
 import {Layout} from '../src/layout';
+import {UrlReplacements} from '../src/url-replacements';
 import {assert} from '../src/asserts';
-import {documentInfoFor} from '../src/document-info';
 import {registerElement} from '../src/custom-element';
-import {parseUrl, removeFragment} from '../src/url';
 
 
 /**
@@ -29,74 +28,7 @@ import {parseUrl, removeFragment} from '../src/url';
  */
 export function installPixel(win) {
 
-  /**
-   * @private {!Object<string, function():*>}
-   */
-  const REPLACEMENTS = {
-    /**
-     * Returns a random value for cache busters.
-     */
-    'RANDOM': () => {
-      return Math.random();
-    },
-
-    /**
-     * Returns the canonical URL for this AMP document.
-     */
-    'CANONICAL_URL': () => {
-      return documentInfoFor(win).canonicalUrl;
-    },
-
-    /**
-     * Returns the host of the canonical URL for this AMP document.
-     */
-    'CANONICAL_HOST': () => {
-      let url = parseUrl(documentInfoFor(win).canonicalUrl);
-      return url && url.hostname;
-    },
-
-    /**
-     * Returns the path of the canonical URL for this AMP document.
-     */
-    'CANONICAL_PATH': () => {
-      let url = parseUrl(documentInfoFor(win).canonicalUrl);
-      return url && url.pathname;
-    },
-
-    /**
-     * Returns the title of this AMP document.
-     */
-    'TITLE': () => {
-      return win.document.title;
-    },
-
-    /**
-     * Returns the URL for this AMP document.
-     */
-    'AMPDOC_URL': () => {
-      return removeFragment(win.location.href);
-    },
-
-    /**
-     * Returns the host of the URL for this AMP document.
-     */
-    'AMPDOC_HOST': () => {
-      let url = parseUrl(win.location.href);
-      return url && url.hostname;
-    }
-  };
-
-  /**
-   * @private {!RegExp}
-   */
-  const REPLACEMENT_EXPR = (() => {
-    let all = '';
-    for (let k in REPLACEMENTS) {
-      all += (all.length > 0 ? '|' : '') + k;
-    }
-    return new RegExp('\\$(' + all + ')', 'g');
-  })();
-
+  const urlReplacements = new UrlReplacements(win);
 
   class AmpPixel extends BaseElement {
     /** @override */
@@ -115,16 +47,9 @@ export function installPixel(win) {
 
     /** @override */
     layoutCallback() {
-      var src = this.element.getAttribute('src');
-      src = this.assertSource(src);
-      src = src.replace(REPLACEMENT_EXPR, function(match, name) {
-        var val = REPLACEMENTS[name]();
-        if (!val && val !== 0) {
-          val = '';
-        }
-        return encodeURIComponent(val);
-      });
-      var image = new Image();
+      let src = this.element.getAttribute('src');
+      src = urlReplacements.expand(this.assertSource(src));
+      const image = new Image();
       image.src = src;
       image.width = 1;
       image.height = 1;

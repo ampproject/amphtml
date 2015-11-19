@@ -17,11 +17,12 @@
 import {isLoaded, listenOnce, listenOncePromise, loadPromise}
     from '../../src/event-helper';
 import {Observable} from '../../src/observable';
+import * as sinon from 'sinon';
 
 describe('EventHelper', () => {
 
   function getEvent(name) {
-    var event = document.createEvent('Event');
+    const event = document.createEvent('Event');
     event.initEvent(name, true, true);
     return event;
   }
@@ -33,6 +34,7 @@ describe('EventHelper', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
+    sandbox.useFakeTimers();
     loadObservable = new Observable();
     errorObservable = new Observable();
     element = {
@@ -72,9 +74,9 @@ describe('EventHelper', () => {
   });
 
   it('listenOnce', () => {
-    let event = getEvent('load');
+    const event = getEvent('load');
     let c = 0;
-    let handler = (e) => {
+    const handler = e => {
       c++;
       expect(e).to.equal(event);
     };
@@ -93,13 +95,13 @@ describe('EventHelper', () => {
   });
 
   it('listenOnce - cancel', () => {
-    let event = getEvent('load');
+    const event = getEvent('load');
     let c = 0;
-    let handler = (e) => {
+    const handler = e => {
       c++;
       expect(e).to.equal(event);
     };
-    let unlisten = listenOnce(element, 'load', handler);
+    const unlisten = listenOnce(element, 'load', handler);
 
     // Not fired yet.
     expect(c).to.equal(0);
@@ -113,11 +115,27 @@ describe('EventHelper', () => {
   });
 
   it('listenOncePromise - load event', () => {
-    let event = getEvent('load');
-    let promise = listenOncePromise(element, 'load').then((result) => {
+    const event = getEvent('load');
+    const promise = listenOncePromise(element, 'load').then(result => {
       expect(result).to.equal(event);
     });
     loadObservable.fire(event);
+    return promise;
+  });
+
+  it('listenOncePromise - with time limit', () => {
+    const event = getEvent('load');
+    const promise = expect(listenOncePromise(element, 'load', false, 100))
+      .to.eventually.become(event);
+    sandbox.clock.tick(99);
+    loadObservable.fire(event);
+    return promise;
+  });
+
+  it('listenOncePromise - timeout', () => {
+    const promise = expect(listenOncePromise(element, 'load', false, 100))
+      .to.eventually.be.rejectedWith('timeout');
+    sandbox.clock.tick(101);
     return promise;
   });
 
@@ -135,20 +153,20 @@ describe('EventHelper', () => {
 
   it('loadPromise - already complete', () => {
     element.complete = true;
-    return loadPromise(element).then((result) => {
+    return loadPromise(element).then(result => {
       expect(result).to.equal(element);
     });
   });
 
   it('loadPromise - already readyState == complete', () => {
     element.readyState = 'complete';
-    return loadPromise(element).then((result) => {
+    return loadPromise(element).then(result => {
       expect(result).to.equal(element);
     });
   });
 
   it('loadPromise - load event', () => {
-    let promise = loadPromise(element).then((result) => {
+    const promise = loadPromise(element).then(result => {
       expect(result).to.equal(element);
     });
     loadObservable.fire(getEvent('load'));
@@ -156,9 +174,9 @@ describe('EventHelper', () => {
   });
 
   it('loadPromise - error event', () => {
-    let promise = loadPromise(element).then((result) => {
+    const promise = loadPromise(element).then(result => {
       assert.fail('must never be here: ' + result);
-    }).catch((reason) => {
+    }).catch(reason => {
     });
     errorObservable.fire(getEvent('error'));
     return promise;

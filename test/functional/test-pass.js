@@ -44,8 +44,8 @@ describe('Pass', () => {
   });
 
   it('handler called', () => {
-    var delayedFunc = null;
-    timerMock.expects('delay').withExactArgs(sinon.match((value) => {
+    let delayedFunc = null;
+    timerMock.expects('delay').withExactArgs(sinon.match(value => {
       delayedFunc = value;
       return true;
     }), 0).returns(1).once();
@@ -61,38 +61,38 @@ describe('Pass', () => {
   });
 
   it('schedule no delay', () => {
-    timerMock.expects('delay').withExactArgs(sinon.match.func, 0).
-        returns(1).once();
+    timerMock.expects('delay').withExactArgs(sinon.match.func, 0)
+        .returns(1).once();
     timerMock.expects('cancel').never();
     pass.schedule();
   });
 
   it('schedule with delay', () => {
-    timerMock.expects('delay').withExactArgs(sinon.match.func, 111).
-        returns(1).once();
+    timerMock.expects('delay').withExactArgs(sinon.match.func, 111)
+        .returns(1).once();
     timerMock.expects('cancel').never();
     pass.schedule(111);
   });
 
   it('schedule later', () => {
-    timerMock.expects('delay').withExactArgs(sinon.match.func, 111).
-        returns(1).once();
+    timerMock.expects('delay').withExactArgs(sinon.match.func, 111)
+        .returns(1).once();
     timerMock.expects('cancel').never();
     pass.schedule(111);
     // Will never schedule b/c there's an earlier pass still pending.
-    let isScheduled = pass.schedule(222);
+    const isScheduled = pass.schedule(222);
     expect(isScheduled).to.equal(false);
   });
 
   it('schedule earlier', () => {
-    timerMock.expects('delay').withExactArgs(sinon.match.func, 222).
-        returns(1).once();
-    timerMock.expects('delay').withExactArgs(sinon.match.func, 111).
-        returns(2).once();
+    timerMock.expects('delay').withExactArgs(sinon.match.func, 222)
+        .returns(1).once();
+    timerMock.expects('delay').withExactArgs(sinon.match.func, 111)
+        .returns(2).once();
     timerMock.expects('cancel').withExactArgs(1).once();
     pass.schedule(222);
     // Will re-schedule b/c the existing pass is later.
-    let isScheduled = pass.schedule(111);
+    const isScheduled = pass.schedule(111);
     expect(isScheduled).to.equal(true);
   });
 

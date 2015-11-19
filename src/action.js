@@ -92,7 +92,7 @@ export class Action {
     if (name == 'tap') {
       // TODO(dvoytenko): if needed, also configure touch-based tap, e.g. for
       // fast-click.
-      this.win.document.addEventListener('click', (event) => {
+      this.win.document.addEventListener('click', event => {
         if (!event.defaultPrevented) {
           this.trigger(event.target, 'tap', event);
         }
@@ -128,13 +128,13 @@ export class Action {
    * @private
    */
   action_(source, actionEventType, event) {
-    let action = this.findAction_(source, actionEventType);
+    const action = this.findAction_(source, actionEventType);
     if (!action) {
       // TODO(dvoytenko): implement default (catch-all) actions.
       return;
     }
 
-    let target = document.getElementById(action.actionInfo.target);
+    const target = document.getElementById(action.actionInfo.target);
     if (!target) {
       this.actionInfoError_('target not found', action.actionInfo, target);
       return;
@@ -166,7 +166,7 @@ export class Action {
    * @param {?ActionInfo} actionInfo
    */
   invoke_(target, method, source, event, actionInfo) {
-    let invocation = new ActionInvocation(target, method, source, event);
+    const invocation = new ActionInvocation(target, method, source, event);
 
     // TODO(dvoytenko): implement common method handlers, e.g. "toggleClass"
 
@@ -213,7 +213,7 @@ export class Action {
    * @return {?ActionInfo_}
    */
   matchActionInfo_(node, actionEventType) {
-    let actionMap = this.getActionMap_(node);
+    const actionMap = this.getActionMap_(node);
     if (!actionMap) {
       return null;
     }
@@ -242,11 +242,11 @@ export class Action {
    */
   parseActionMap_(s) {
     let actionMap = null;
-    let actions = s.split(';');
+    const actions = s.split(';');
     if (actions && actions.length > 0) {
       for (let i = 0; i < actions.length; i++) {
-        let actionStr = actions[i];
-        let actionInfo = this.parseAction_(actionStr);
+        const actionStr = actions[i];
+        const actionInfo = this.parseAction_(actionStr);
         if (actionInfo) {
           if (!actionMap) {
             actionMap = {};
@@ -268,14 +268,14 @@ export class Action {
       return null;
     }
 
-    let eventSep = s.indexOf(':');
-    let methodSep = s.indexOf('.', eventSep + 1);
-    let event = (eventSep != -1 ? s.substring(0, eventSep) : '').toLowerCase().
-        trim() || null;
-    let target = s.substring(eventSep + 1, methodSep != -1 ? methodSep :
+    const eventSep = s.indexOf(':');
+    const methodSep = s.indexOf('.', eventSep + 1);
+    const event = (eventSep != -1 ? s.substring(0, eventSep) : '').toLowerCase()
+        .trim() || null;
+    const target = s.substring(eventSep + 1, methodSep != -1 ? methodSep :
         s.length).trim();
-    let method = (methodSep != -1 ? s.substring(methodSep + 1) : '').
-        trim() || DEFAULT_METHOD_;
+    const method = (methodSep != -1 ? s.substring(methodSep + 1) : '')
+        .trim() || DEFAULT_METHOD_;
 
     if (!event || !target) {
       log.error(TAG_, 'invalid action definition: ' + s);

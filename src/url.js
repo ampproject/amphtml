@@ -24,9 +24,9 @@ import {assert} from './asserts';
  * @return {!Location}
  */
 export function parseUrl(url) {
-  var a = document.createElement('a');
+  const a = document.createElement('a');
   a.href = url;
-  var info = {
+  const info = {
     href: a.href,
     protocol: a.protocol,
     host: a.host,
@@ -36,7 +36,9 @@ export function parseUrl(url) {
     search: a.search,
     hash: a.hash
   };
-  info.origin = a.origin || getOrigin(info);
+  // For data URI a.origin is equal to the string 'null' which is not useful.
+  // We instead return the actual origin which is the full URL.
+  info.origin = (a.origin && a.origin != 'null') ? a.origin : getOrigin(info);
   assert(info.origin, 'Origin must exist');
   return info;
 }
@@ -47,16 +49,21 @@ export function parseUrl(url) {
  * Provides an exception for localhost.
  * @param {string} urlString
  * @param {!Element} elementContext Element where the url was found.
+ * @return {string}
  */
 export function assertHttpsUrl(urlString, elementContext) {
-  var url = parseUrl(urlString);
+  const url = parseUrl(urlString);
   assert(
       url.protocol == 'https:' || /^(\/\/)/.test(urlString) ||
-      url.hostname == 'localhost' || url.hostname.endsWith('.localhost'),
+      url.hostname == 'localhost' ||
+          url.hostname.lastIndexOf('.localhost') ==
+          // Poor person's endsWith
+          url.hostname.length - '.localhost'.length,
       '%s source must start with ' +
       '"https://" or "//" or be relative and served from ' +
       'https. Invalid value: %s',
       elementContext, urlString);
+  return urlString;
 }
 
 
@@ -67,17 +74,17 @@ export function assertHttpsUrl(urlString, elementContext) {
  * @return {!Object<string, string>}
  */
 export function parseQueryString(queryString) {
-  var params = Object.create(null);
+  const params = Object.create(null);
   if (!queryString) {
     return params;
   }
-  if (queryString.startsWith('?') || queryString.startsWith('#')) {
+  if (queryString.indexOf('?') == 0 || queryString.indexOf('#') == 0) {
     queryString = queryString.substr(1);
   }
-  let pairs = queryString.split('&');
+  const pairs = queryString.split('&');
   for (let i = 0; i < pairs.length; i++) {
-    let pair = pairs[i];
-    let eqIndex = pair.indexOf('=');
+    const pair = pairs[i];
+    const eqIndex = pair.indexOf('=');
     let name;
     let value;
     if (eqIndex != -1) {
@@ -96,10 +103,17 @@ export function parseQueryString(queryString) {
 
 
 /**
+ * Don't use this directly, only exported for testing. The value
+ * is available via the origin property of the object returned by
+ * parseUrl.
  * @param {!Location} info
  * @return {string}
+ * @visibleForTesting
  */
-function getOrigin(info) {
+export function getOrigin(info) {
+  if (info.protocol == 'data:' || !info.host) {
+    return info.href;
+  }
   return info.protocol + '//' + info.host;
 }
 
@@ -111,7 +125,7 @@ function getOrigin(info) {
  * @return {string}
  */
 export function removeFragment(url) {
-  let index = url.indexOf('#');
+  const index = url.indexOf('#');
   if (index == -1) {
     return url;
   }

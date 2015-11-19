@@ -17,15 +17,17 @@
 import './polyfills';
 
 import {historyFor} from './history';
-import {viewerFor} from './viewer';
 import {installPullToRefreshBlocker} from './pull-to-refresh';
+import {performanceFor} from './performance';
+import {viewerFor} from './viewer';
+import {vsyncFor} from './vsync';
 
 import {installAd} from '../builtins/amp-ad';
 import {installGlobalClickListener} from './document-click';
 import {installImg} from '../builtins/amp-img';
 import {installVideo} from '../builtins/amp-video';
 import {installPixel} from '../builtins/amp-pixel';
-import {installStyles} from './styles';
+import {installStyles, makeBodyVisible} from './styles';
 import {installErrorReporting} from './error';
 import {stubElements} from './custom-element';
 import {adopt} from './runtime';
@@ -33,30 +35,44 @@ import {cssText} from '../build/css.js';
 import {action} from './action';
 import {maybeValidate} from './validator-integration';
 
-// Should happen first.
-installErrorReporting(window);
-installStyles(document, cssText, () => {
-  try {
-    historyFor(window);
-    viewerFor(window);
+// We must under all circumstances call makeBodyVisible.
+// It is much better to have AMP tags not rendered than having
+// a completely blank page.
+try {
+  // Should happen first.
+  installErrorReporting(window);  // Also calls makeBodyVisible on errors.
+  const perf = performanceFor(window);
 
-    installImg(window);
-    installAd(window);
-    installPixel(window);
-    installVideo(window);
+  perf.tick('is');
+  installStyles(document, cssText, () => {
+    try {
+      historyFor(window);
+      viewerFor(window);
+      vsyncFor(window);
 
-    adopt(window);
-    stubElements(window);
-    action.addEvent('tap');
+      installImg(window);
+      installAd(window);
+      installPixel(window);
+      installVideo(window);
 
-    installPullToRefreshBlocker(window);
-    installGlobalClickListener(window);
+      adopt(window);
+      stubElements(window);
+      action.addEvent('tap');
 
-    maybeValidate(window);
-  } finally {
-    window.document.body.style.opacity = 1;
-  }
-}, /* opt_isRuntimeCss */ true);
+      installPullToRefreshBlocker(window);
+      installGlobalClickListener(window);
+
+      maybeValidate(window);
+    } finally {
+      makeBodyVisible(document);
+      perf.tick('e_is');
+    }
+  }, /* opt_isRuntimeCss */ true);
+} catch (e) {
+  // In case of an error call this.
+  makeBodyVisible(document);
+  throw e;
+}
 
 // Output a message to the console and add an attribute to the <html>
 // tag to give some information that can be used in error reports.

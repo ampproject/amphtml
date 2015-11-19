@@ -17,7 +17,7 @@
 
 
 /**
- * Throws an error if the first argument isn't truish.
+ * Throws an error if the first argument isn't trueish.
  *
  * Supports argument substitution into the message via %s placeholders.
  *
@@ -32,30 +32,30 @@
  *     not evaluate to true.
  * @param {string} message The assertion message
  * @param {...*} var_args Arguments substituted into %s in the message.
- * @return {T} The value of shouldBeTruish.
+ * @return {T} The value of shouldBeTrueish.
  * @template T
  */
 /*eslint "google-camelcase/google-camelcase": 0*/
 export function assert(shouldBeTrueish, message, var_args) {
-  var firstElement;
+  let firstElement;
   if (!shouldBeTrueish) {
     message = message || 'Assertion failed';
-    var splitMessage = message.split('%s');
-    var first = splitMessage.shift();
-    var formatted = first;
-    var messageArray = [];
+    const splitMessage = message.split('%s');
+    const first = splitMessage.shift();
+    let formatted = first;
+    const messageArray = [];
     pushIfNonEmpty(messageArray, first);
-    for (var i = 2; i < arguments.length; i++) {
-      var val = arguments[i];
+    for (let i = 2; i < arguments.length; i++) {
+      const val = arguments[i];
       if (val && val.tagName) {
         firstElement = val;
       }
-      var nextConstant = splitMessage.shift();
+      const nextConstant = splitMessage.shift();
       messageArray.push(val);
       pushIfNonEmpty(messageArray, nextConstant.trim());
       formatted += toString(val) + nextConstant;
     }
-    var e = new Error(formatted);
+    const e = new Error(formatted);
     e.fromAssert = true;
     e.associatedElement = firstElement;
     e.messageArray = messageArray;

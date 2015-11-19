@@ -14,22 +14,24 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-### <a name=”amp-youtube”></a> `amp-youtube`
+### <a name="amp-youtube"></a> `amp-youtube`
 
 Displays a Youtube video.
 
 Example:
-    <amp-youtube
-        video-id="mGENRKrdoGY"
-        layout="responsive"
-        width="480" height="270"></amp-youtube>
+```html
+<amp-youtube
+    data-videoid="mGENRKrdoGY"
+    layout="responsive"
+    width="480" height="270"></amp-youtube>
+```
 
 
 With responsive layout the width and height from the example should yield correct layouts for 16:9 aspect ratio videos
 
 #### Attributes
 
-**video-id**
+**data-videoid**
 
 The Youtube video id found in every Youtube video page URL
 

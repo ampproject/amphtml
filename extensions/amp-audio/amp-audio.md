@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-### <a name=”amp-audio”></a> `amp-audio`
+### <a name="amp-audio"></a> `amp-audio`
 
 A replacement for the HTML5 `audio` tag. Like all embedded external resources in a AMP file, the audio is lazily loaded only when the `amp-audio` element is in or near the viewport.
 
@@ -33,14 +33,15 @@ One or zero immediate child nodes can have the `placeholder` attribute. If prese
 One or zero immediate child nodes can have the `fallback` attribute. If present, this node and its children form the content that will be displayed if HTML5 audio is not supported on the user’s browser.
 
 For example:
-
-    <amp-audio width=400 height=300 src=”https://yourhost.com/audios/myaudio.mp3”>
-      <div fallback>
-        <p>Your browser doesn’t support HTML5 audio</p>
-      </div>
-      <source type="audio/mpeg" src="foo.mp3">
-      <source type="audio/ogg" src="foo.ogg">
-    </amp-audio>
+```html
+<amp-audio width=400 height=300 src="https://yourhost.com/audios/myaudio.mp3">
+  <div fallback>
+    <p>Your browser doesn’t support HTML5 audio</p>
+  </div>
+  <source type="audio/mpeg" src="foo.mp3">
+  <source type="audio/ogg" src="foo.ogg">
+</amp-audio>
+```
 
 #### Attributes
 

@@ -22,12 +22,12 @@ import {parseQueryString, parseUrl} from '../../src/url';
 describe('amp-pixel', () => {
 
   function getPixel(src) {
-    return createIframePromise().then((iframe) => {
+    return createIframePromise().then(iframe => {
       installPixel(iframe.win);
-      var p = iframe.doc.createElement('amp-pixel');
+      const p = iframe.doc.createElement('amp-pixel');
       p.setAttribute('src', src);
       iframe.doc.title = 'Pixel Test';
-      var link = iframe.doc.createElement('link');
+      const link = iframe.doc.createElement('link');
       link.setAttribute('href', 'https://pinterest.com/pin1');
       link.setAttribute('rel', 'canonical');
       iframe.doc.head.appendChild(link);
@@ -38,7 +38,7 @@ describe('amp-pixel', () => {
   it('should load a pixel', () => {
     return getPixel(
         'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?'
-        ).then((p) => {
+        ).then(p => {
           expect(p.querySelector('img')).to.not.be.null;
           expect(p.children[0].src).to.equal(
               'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?');
@@ -49,106 +49,35 @@ describe('amp-pixel', () => {
   it('should load a pixel with protocol relative URL', () => {
     return getPixel(
         '//pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?'
-        ).then((p) => {
+        ).then(p => {
           expect(p.querySelector('img')).to.not.be.null;
           expect(p.children[0].src).to.equal(
               'http://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=1?');
         });
   });
 
-  it('replace $RANDOM', () => {
+  it('should replace RANDOM', () => {
     return getPixel(
-        'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=$RANDOM?'
-        ).then((p) => {
+        'https://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=RANDOM?'
+        ).then(p => {
           expect(p.querySelector('img')).to.not.be.null;
           expect(p.children[0].src).to.match(/ord=(\d\.\d+)\?$/);
         });
   });
 
-  it('replace $CANONICAL_URL', () => {
+  it('should replace CANONICAL_URL', () => {
     return getPixel(
-        'https://foo.com?href=$CANONICAL_URL'
-        ).then((p) => {
+        'https://foo.com?href=CANONICAL_URL'
+        ).then(p => {
           expect(p.querySelector('img')).to.not.be.null;
           expect(p.children[0].src).to.equal(
               'https://foo.com/?href=https%3A%2F%2Fpinterest.com%2Fpin1');
         });
   });
 
-  it('replace $CANONICAL_HOST', () => {
-    return getPixel(
-        'https://foo.com?host=$CANONICAL_HOST'
-        ).then((p) => {
-          expect(p.querySelector('img')).to.not.be.null;
-          expect(p.children[0].src).to.equal(
-              'https://foo.com/?host=pinterest.com');
-        });
-  });
-
-  it('replace $CANONICAL_PATH', () => {
-    return getPixel(
-        'https://foo.com?path=$CANONICAL_PATH'
-        ).then((p) => {
-          expect(p.querySelector('img')).to.not.be.null;
-          expect(p.children[0].src).to.equal(
-              'https://foo.com/?path=%2Fpin1');
-        });
-  });
-
-  it('replace $CANONICAL_TITLE', () => {
-    return getPixel(
-        'https://foo.com?title=$TITLE'
-        ).then((p) => {
-          expect(p.querySelector('img')).to.not.be.null;
-          expect(p.children[0].src).to.equal(
-              'https://foo.com/?title=Pixel%20Test');
-        });
-  });
-
-  it('replace $AMPDOC_URL', () => {
-    return getPixel(
-        'https://foo.com?ref=$AMPDOC_URL'
-        ).then((p) => {
-          expect(p.querySelector('img')).to.not.be.null;
-          let query = parseQueryString(parseUrl(p.children[0].src).search);
-          expect(query['ref']).to.not.equal('$AMPDOC_URL');
-        });
-  });
-
-  it('replace $AMPDOC_HOST', () => {
-    return getPixel(
-        'https://foo.com?ref=$AMPDOC_HOST'
-        ).then((p) => {
-          expect(p.querySelector('img')).to.not.be.null;
-          let query = parseQueryString(parseUrl(p.children[0].src).search);
-          expect(query['ref']).to.not.equal('$AMPDOC_HOST');
-        });
-  });
-
-  it('replace $UNKNOWN', () => {
-    return getPixel(
-        'https://foo.com/?a=$UNKNOWN'
-        ).then((p) => {
-          expect(p.querySelector('img')).to.not.be.null;
-          expect(p.children[0].src).to.equal('https://foo.com/?a=$UNKNOWN');
-        });
-  });
-
-  it('replace several substitutions', () => {
-    return getPixel(
-        'https://foo.com/?a=$UNKNOWN&href=$CANONICAL_URL&title=$TITLE'
-        ).then((p) => {
-          expect(p.querySelector('img')).to.not.be.null;
-          expect(p.children[0].src).to.equal(
-              'https://foo.com/?a=$UNKNOWN' +
-              '&href=https%3A%2F%2Fpinterest.com%2Fpin1' +
-              '&title=Pixel%20Test');
-        });
-  });
-
   it('should throw for invalid URL', () => {
     return getPixel(
-        'http://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=$RANDOM?')
+        'http://pubads.g.doubleclick.net/activity;dc_iu=1/abc;ord=RANDOM?')
         .should.be.rejectedWith(/src attribute must start with/);
   });
 });

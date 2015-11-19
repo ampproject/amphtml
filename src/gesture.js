@@ -154,8 +154,8 @@ export class Gestures {
    * @template DATA
    */
   onGesture(recognizerConstr, handler) {
-    let recognizer = new recognizerConstr(this);
-    let type = recognizer.getType();
+    const recognizer = new recognizerConstr(this);
+    const type = recognizer.getType();
     let overserver = this.overservers_[type];
     if (!overserver) {
       this.recognizers_.push(recognizer);
@@ -181,7 +181,7 @@ export class Gestures {
    * @private
    */
   onTouchStart_(event) {
-    let now = timer.now();
+    const now = timer.now();
     this.wasEventing_ = false;
 
     this.pointerDownObservable_.fire(event);
@@ -216,7 +216,7 @@ export class Gestures {
    * @private
    */
   onTouchMove_(event) {
-    let now = timer.now();
+    const now = timer.now();
 
     for (let i = 0; i < this.recognizers_.length; i++) {
       if (!this.tracking_[i]) {
@@ -244,7 +244,7 @@ export class Gestures {
    * @private
    */
   onTouchEnd_(event) {
-    let now = timer.now();
+    const now = timer.now();
 
     for (let i = 0; i < this.recognizers_.length; i++) {
       if (!this.tracking_[i]) {
@@ -295,7 +295,7 @@ export class Gestures {
 
     // Set the recognizer as ready and wait for the pass to
     // make the decision.
-    let now = timer.now();
+    const now = timer.now();
     for (let i = 0; i < this.recognizers_.length; i++) {
       if (this.recognizers_[i] == recognizer) {
         this.ready_[i] = now + offset;
@@ -321,7 +321,7 @@ export class Gestures {
       return;
     }
 
-    let now = timer.now();
+    const now = timer.now();
     for (let i = 0; i < this.recognizers_.length; i++) {
       if (this.recognizers_[i] == recognizer) {
         this.pending_[i] = now + timeLeft;
@@ -353,7 +353,7 @@ export class Gestures {
   signalEmit_(recognizer, data, event) {
     assert(this.eventing_ == recognizer,
         'Recognizer is not currently allowed: %s', recognizer.getType());
-    let overserver = this.overservers_[recognizer.getType()];
+    const overserver = this.overservers_[recognizer.getType()];
     if (overserver) {
       overserver.fire(new Gesture(recognizer.getType(), data, timer.now(),
           event));
@@ -368,7 +368,7 @@ export class Gestures {
     let cancelEvent = !!this.eventing_ || this.wasEventing_;
     this.wasEventing_ = false;
     if (!cancelEvent) {
-      let now = timer.now();
+      const now = timer.now();
       for (let i = 0; i < this.recognizers_.length; i++) {
         if (this.ready_[i] ||
                 this.pending_[i] && this.pending_[i] >= now) {
@@ -394,7 +394,7 @@ export class Gestures {
    * @private
    */
   doPass_() {
-    let now = timer.now();
+    const now = timer.now();
 
     // The "most ready" recognizer is the youngest in the "ready" set.
     // Otherwise we wouldn't wait for it at all.
@@ -442,7 +442,7 @@ export class Gestures {
    * @private
    */
   startEventing_(index) {
-    let recognizer = this.recognizers_[index];
+    const recognizer = this.recognizers_[index];
     for (let i = 0; i < this.recognizers_.length; i++) {
       if (i != index) {
         this.cancelEventing_(i);
@@ -516,7 +516,7 @@ export class Gestures {
 export class GestureRecognizer {
 
   /**
-   * @oaram {string} type
+   * @param {string} type
    * @param {!Gestures} manager
    */
   constructor(type, manager) {
@@ -592,7 +592,7 @@ export class GestureRecognizer {
 
   /**
    * The Gestures instance calls this method to reset the recognizer. At this
-   * point the recognizer is in the intial waiting state.
+   * point the recognizer is in the initial waiting state.
    */
   acceptCancel() {
   }

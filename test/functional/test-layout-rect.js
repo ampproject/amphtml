@@ -19,7 +19,7 @@ import * as lr from '../../src/layout-rect';
 describe('LayoutRect', () => {
 
   it('layoutRectLtwh', () => {
-    let rect = lr.layoutRectLtwh(1, 2, 3, 4);
+    const rect = lr.layoutRectLtwh(1, 2, 3, 4);
     expect(rect.left).to.equal(1);
     expect(rect.top).to.equal(2);
     expect(rect.width).to.equal(3);
@@ -29,17 +29,17 @@ describe('LayoutRect', () => {
   });
 
   it('layoutRectsOverlap', () => {
-    let rect1 = lr.layoutRectLtwh(10, 20, 30, 40);
-    let rect2 = lr.layoutRectLtwh(40, 60, 10, 10);
-    let rect3 = lr.layoutRectLtwh(41, 60, 10, 10);
+    const rect1 = lr.layoutRectLtwh(10, 20, 30, 40);
+    const rect2 = lr.layoutRectLtwh(40, 60, 10, 10);
+    const rect3 = lr.layoutRectLtwh(41, 60, 10, 10);
     expect(lr.layoutRectsOverlap(rect1, rect2)).to.equal(true);
     expect(lr.layoutRectsOverlap(rect1, rect3)).to.equal(false);
     expect(lr.layoutRectsOverlap(rect2, rect3)).to.equal(true);
   });
 
   it('expandLayoutRect', () => {
-    let rect1 = lr.layoutRectLtwh(10, 20, 30, 40);
-    let rect2 = lr.expandLayoutRect(rect1, 2, 3);
+    const rect1 = lr.layoutRectLtwh(10, 20, 30, 40);
+    const rect2 = lr.expandLayoutRect(rect1, 2, 3);
     expect(rect2.left).to.equal(10 - 30 * 2);
     expect(rect2.right).to.equal(40 + 30 * 2);
     expect(rect2.width).to.equal(30 + 30 * 4);
@@ -49,8 +49,8 @@ describe('LayoutRect', () => {
   });
 
   it('moveLayoutRect', () => {
-    let rect1 = lr.layoutRectLtwh(10, 20, 30, 40);
-    let rect2 = lr.moveLayoutRect(rect1, 2, 3);
+    const rect1 = lr.layoutRectLtwh(10, 20, 30, 40);
+    const rect2 = lr.moveLayoutRect(rect1, 2, 3);
     expect(rect2.left).to.equal(rect1.left + 2);
     expect(rect2.right).to.equal(rect1.right + 2);
     expect(rect2.width).to.equal(rect1.width);
@@ -60,7 +60,7 @@ describe('LayoutRect', () => {
   });
 
   it('layoutRectFromDomRect', () => {
-    let rect = lr.layoutRectFromDomRect({top: 11, left: 12, width: 111,
+    const rect = lr.layoutRectFromDomRect({top: 11, left: 12, width: 111,
         height: 222});
     expect(rect.top).to.equal(11);
     expect(rect.left).to.equal(12);
@@ -68,5 +68,21 @@ describe('LayoutRect', () => {
     expect(rect.height).to.equal(222);
     expect(rect.bottom).to.equal(11 + 222);
     expect(rect.right).to.equal(12 + 111);
+  });
+
+  it('rectIntersection', () => {
+    const rect1 = lr.layoutRectLtwh(10, 20, 40, 50);
+    const rect2 = lr.layoutRectLtwh(40, 60, 10, 10);
+    const rect3 = lr.layoutRectLtwh(1000, 60, 10, 10);
+    expect(lr.rectIntersection(rect1, rect2)).to.jsonEqual({
+      "left": 40,
+      "top": 60,
+      "width": 10,
+      "height": 10,
+      "bottom": 70,
+      "right": 50
+    });
+    expect(lr.rectIntersection(rect1, rect3)).to.be.null;
+    expect(lr.rectIntersection(rect2, rect3)).to.be.null;
   });
 });

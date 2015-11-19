@@ -14,31 +14,39 @@
  * limitations under the License.
  */
 
-import {createFixtureIframe} from '../../testing/iframe.js';
+import {createFixtureIframe, expectBodyToBecomeVisible} from
+    '../../testing/iframe.js';
 
 describe('Rendering of amp-img', () => {
-  var fixture;
+  let fixture;
   beforeEach(() => {
-    return createFixtureIframe('test/fixtures/images.html', 500).then((f) => {
+    return createFixtureIframe('test/fixtures/images.html', 500).then(f => {
       fixture = f;
     });
   });
 
-  it('amp-img should be present', () => {
+  it('should show the body', () => {
+    return expectBodyToBecomeVisible(fixture.win);
+  });
+
+  it('should be present', () => {
     expect(fixture.doc.querySelectorAll('amp-img')).to.have.length(15);
     // 5 image visible in 500 pixel height.
     return fixture.awaitEvent('amp:load:start', 3).then(function() {
-      expect(fixture.doc.querySelectorAll('amp-img img[src]')).to.have.length(3);
+      expect(fixture.doc.querySelectorAll('amp-img img[src]')).to
+          .have.length(3);
     });
   });
 
   it('should resize and load more elements', () => {
-    var p = fixture.awaitEvent('amp:load:start', 11).then(function() {
-      expect(fixture.doc.querySelectorAll('amp-img img[src]')).to.have.length(11);
+    const p = fixture.awaitEvent('amp:load:start', 11).then(function() {
+      expect(fixture.doc.querySelectorAll('amp-img img[src]'))
+          .to.have.length(11);
       fixture.iframe.height = 2000;
       fixture.win.dispatchEvent(new fixture.win.Event('resize'));
       return fixture.awaitEvent('amp:load:start', 13).then(function() {
-        expect(fixture.doc.querySelectorAll('amp-img img[src]')).to.have.length(13);
+        expect(fixture.doc.querySelectorAll('amp-img img[src]'))
+            .to.have.length(13);
       });
     });
     fixture.iframe.height = 1500;
@@ -48,8 +56,8 @@ describe('Rendering of amp-img', () => {
 
   it('should respect media queries', () => {
     return fixture.awaitEvent('amp:load:start', 3).then(function() {
-      var smallScreen = fixture.doc.getElementById('img3');
-      var largeScreen = fixture.doc.getElementById('img3_1');
+      const smallScreen = fixture.doc.getElementById('img3');
+      const largeScreen = fixture.doc.getElementById('img3_1');
       expect(smallScreen.className).to.not.match(/-amp-hidden-by-media-query/);
       expect(largeScreen.className).to.match(/-amp-hidden-by-media-query/);
       expect(smallScreen.offsetHeight).to.not.equal(0);
@@ -58,7 +66,8 @@ describe('Rendering of amp-img', () => {
       fixture.win.dispatchEvent(new fixture.win.Event('resize'));
       return fixture.awaitEvent('amp:load:start', 4).then(function() {
         expect(smallScreen.className).to.match(/-amp-hidden-by-media-query/);
-        expect(largeScreen.className).to.not.match(/-amp-hidden-by-media-query/);
+        expect(largeScreen.className)
+            .to.not.match(/-amp-hidden-by-media-query/);
         expect(smallScreen.offsetHeight).to.equal(0);
         expect(largeScreen.offsetHeight).to.not.equal(0);
       });

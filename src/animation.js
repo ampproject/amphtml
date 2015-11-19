@@ -17,11 +17,11 @@
 import {getCurve} from './curve';
 import {log} from './log';
 import {timer} from './timer';
-import {vsync} from './vsync';
+import {vsyncFor} from './vsync';
 
-let TAG_ = 'Animation';
+const TAG_ = 'Animation';
 
-let NOOP_CALLBACK = function() {};
+const NOOP_CALLBACK = function() {};
 
 
 /**
@@ -38,16 +38,16 @@ export class Animation {
    * object that can be used to monitor or control animation.
    *
    * @param {!Transition<?>} transition Transition to animate.
-   * @param {time} duration Duration in millseconds.
+   * @param {time} duration Duration in milliseconds.
    * @param {(!Curve|string)=} opt_curve Optional curve to use for animation.
    *   Default is the linear animation.
    * @return {!AnimationPlayer}
    */
   static animate(transition, duration, opt_curve) {
-    return new Animation().
-        setCurve(opt_curve).
-        add(0, transition, 1).
-        start(duration);
+    return new Animation()
+        .setCurve(opt_curve)
+        .add(0, transition, 1)
+        .start(duration);
   }
 
   /**
@@ -55,7 +55,7 @@ export class Animation {
    */
   constructor(opt_vsync) {
     /** @private @const */
-    this.vsync_ = opt_vsync || vsync;
+    this.vsync_ = opt_vsync || vsyncFor(window);
 
     /** @private {?Curve} */
     this.curve_ = null;
@@ -106,7 +106,7 @@ export class Animation {
    * @return {!AnimationPlayer}
    */
   start(duration) {
-    let player = new AnimationPlayer(this.vsync_, this.segments_, this.curve_,
+    const player = new AnimationPlayer(this.vsync_, this.segments_, this.curve_,
         duration);
     player.start_();
     return player;
@@ -135,7 +135,7 @@ class AnimationPlayer {
     /** @private @const {!Array<!SegmentRuntime_>} */
     this.segments_ = [];
     for (let i = 0; i < segments.length; i++) {
-      let segment = segments[i];
+      const segment = segments[i];
       this.segments_.push({
         delay: segment.delay,
         func: segment.func,
@@ -188,7 +188,7 @@ class AnimationPlayer {
   /**
    * Chains to the animation's promise that will resolve when the animation has
    * completed or will reject if animation has failed or was interrupted.
-   * @param {!Function=} opt_resovle
+   * @param {!Function=} opt_resolve
    * @param {!Function=} opt_reject
    * @return {!Promise}
    */
@@ -205,7 +205,7 @@ class AnimationPlayer {
    * @return {!Promise}
    */
   thenAlways(opt_callback) {
-    let callback = opt_callback || NOOP_CALLBACK;
+    const callback = opt_callback || NOOP_CALLBACK;
     return this.then(callback, callback);
   }
 
@@ -261,7 +261,7 @@ class AnimationPlayer {
             this.segments_[i].func(0, false);
           }
         }
-      } catch(e) {
+      } catch (e) {
         log.error(TAG_, 'completion failed: ' + e, e);
         success = false;
       }
@@ -281,13 +281,13 @@ class AnimationPlayer {
     if (!this.running_) {
       return;
     }
-    let currentTime = timer.now();
-    let normLinearTime = Math.min((currentTime - this.startTime_) /
+    const currentTime = timer.now();
+    const normLinearTime = Math.min((currentTime - this.startTime_) /
         this.duration_, 1);
 
     // Start segments due to be started
     for (let i = 0; i < this.segments_.length; i++) {
-      let segment = this.segments_[i];
+      const segment = this.segments_[i];
       if (!segment.started && normLinearTime >= segment.delay) {
         segment.started = true;
       }
@@ -295,7 +295,7 @@ class AnimationPlayer {
 
     // Execute all pending segments.
     for (let i = 0; i < this.segments_.length; i++) {
-      let segment = this.segments_[i];
+      const segment = this.segments_[i];
       if (!segment.started || segment.completed) {
         continue;
       }
@@ -324,7 +324,7 @@ class AnimationPlayer {
       if (segment.curve && normTime != 1) {
         try {
           normTime = segment.curve(normLinearTime);
-        } catch(e) {
+        } catch (e) {
           log.error(TAG_, 'step curve failed: ' + e, e);
           this.complete_(/* success */ false, /* dir */ 0);
           return;
@@ -339,7 +339,7 @@ class AnimationPlayer {
     }
     try {
       segment.func(normTime, segment.completed);
-    } catch(e) {
+    } catch (e) {
       log.error(TAG_, 'step mutate failed: ' + e, e);
       this.complete_(/* success */ false, /* dir */ 0);
       return;

@@ -23,11 +23,11 @@ import {viewerFor} from './viewer';
 
 
 /** @private @const */
-let TAG_ = 'History';
+const TAG_ = 'History';
 
 
 /** @private @const */
-let HISTORY_PROP_ = 'AMP.History';
+const HISTORY_PROP_ = 'AMP.History';
 
 
 /**
@@ -35,14 +35,14 @@ let HISTORY_PROP_ = 'AMP.History';
  * @private
  */
 function historyState_(stackIndex) {
-  let state = {};
+  const state = {};
   state[HISTORY_PROP_] = stackIndex;
   return state;
 }
 
 
 /** @typedef {number} */
-var HistoryId;
+let HistoryId;
 
 
 export class History {
@@ -60,9 +60,7 @@ export class History {
     /** @private {!Array<!Function|undefined>} */
     this.stackOnPop_ = [];
 
-    /**
-     * @private {!Array<!{callback: function():!Promise>,
-     *   resolve: !Function, reject: !Function}} */
+    /** @private {!Array<!{callback:function():!Promise>, resolve:!Function,reject:!Function}} */
     this.queue_ = [];
 
     this.binding_.setOnStackIndexUpdated(this.onStackIndexUpdated_.bind(this));
@@ -81,7 +79,7 @@ export class History {
    */
   push(opt_onPop) {
     return this.enque_(() => {
-      return this.binding_.push().then((stackIndex) => {
+      return this.binding_.push().then(stackIndex => {
         this.onStackIndexUpdated_(stackIndex);
         if (opt_onPop) {
           this.stackOnPop_[stackIndex] = opt_onPop;
@@ -100,7 +98,7 @@ export class History {
    */
   pop(stateId) {
     return this.enque_(() => {
-      return this.binding_.pop(stateId).then((stackIndex) => {
+      return this.binding_.pop(stateId).then(stackIndex => {
         this.onStackIndexUpdated_(stackIndex);
       });
     });
@@ -121,7 +119,7 @@ export class History {
       return;
     }
 
-    let toPop = [];
+    const toPop = [];
     for (let i = this.stackOnPop_.length - 1; i > this.stackIndex_; i--) {
       if (this.stackOnPop_[i]) {
         toPop.push(this.stackOnPop_[i]);
@@ -148,7 +146,7 @@ export class History {
   enque_(callback) {
     let resolve;
     let reject;
-    var promise = new Promise((aResolve, aReject) => {
+    const promise = new Promise((aResolve, aReject) => {
       resolve = aResolve;
       reject = aReject;
     });
@@ -169,7 +167,7 @@ export class History {
       return;
     }
 
-    let task = this.queue_[0];
+    const task = this.queue_[0];
     let promise;
     try {
       promise = task.callback();
@@ -177,9 +175,9 @@ export class History {
       promise = Promise.reject(e);
     }
 
-    promise.then((result) => {
+    promise.then(result => {
       task.resolve(result);
-    }, (reason) => {
+    }, reason => {
       log.error(TAG_, 'failed to execute a task:', reason);
       task.reject(reason);
     }).then(() => {
@@ -201,7 +199,7 @@ class HistoryBinding {
   cleanup_() {}
 
   /**
-   * Configres a callback to be called when stack index has been updated.
+   * Configures a callback to be called when stack index has been updated.
    * @param {function(number)} callback
    * @protected
    */
@@ -242,7 +240,7 @@ export class HistoryBindingNatural_ {
     /** @const {!Window} */
     this.win = win;
 
-    let history = this.win.history;
+    const history = this.win.history;
 
     /** @private {number} */
     this.startIndex_ = history.length - 1;
@@ -284,7 +282,13 @@ export class HistoryBindingNatural_ {
       };
       replaceState = (state, opt_title, opt_url) => {
         this.unsupportedState_ = state;
-        this.origReplaceState_(state, opt_title, opt_url);
+        // NOTE: check for `undefined` since IE11 and Edge
+        // unexpectedly coerces it into a `string`.
+        if (opt_url !== undefined) {
+          this.origReplaceState_(state, opt_title, opt_url);
+        } else {
+          this.origReplaceState_(state, opt_title);
+        }
       };
     } else {
       pushState = (state, opt_title, opt_url) => {
@@ -310,8 +314,8 @@ export class HistoryBindingNatural_ {
     history.pushState = this.historyPushState_.bind(this);
     history.replaceState = this.historyReplaceState_.bind(this);
 
-    let eventPass = new Pass(this.onHistoryEvent_.bind(this), 50);
-    this.popstateHandler_ = (e) => {
+    const eventPass = new Pass(this.onHistoryEvent_.bind(this), 50);
+    this.popstateHandler_ = e => {
       log.fine(TAG_, 'popstate event: ' + this.win.history.length + ', ' +
           JSON.stringify(e.state));
       eventPass.schedule();
@@ -376,9 +380,9 @@ export class HistoryBindingNatural_ {
     let state = this.getState_();
     log.fine(TAG_, 'history event: ' + this.win.history.length + ', ' +
         JSON.stringify(state));
-    let stackIndex = state ? state[HISTORY_PROP_] : undefined;
+    const stackIndex = state ? state[HISTORY_PROP_] : undefined;
     let newStackIndex = this.stackIndex_;
-    let waitingState = this.waitingState_;
+    const waitingState = this.waitingState_;
     this.waitingState_ = undefined;
 
     if (newStackIndex > this.win.history.length - 2) {
@@ -457,7 +461,7 @@ export class HistoryBindingNatural_ {
     this.assertReady_();
     let resolve;
     let reject;
-    let promise = timer.timeoutPromise(500,
+    const promise = timer.timeoutPromise(500,
         new Promise((aResolve, aReject) => {
           resolve = aResolve;
           reject = aReject;
@@ -480,7 +484,7 @@ export class HistoryBindingNatural_ {
       return Promise.resolve(this.stackIndex_);
     }
     this.unsupportedState_ = historyState_(this.stackIndex_ - steps);
-    let promise = this.wait_();
+    const promise = this.wait_();
     this.win.history.go(-steps);
     return promise.then(() => {
       return Promise.resolve(this.stackIndex_);
@@ -498,7 +502,7 @@ export class HistoryBindingNatural_ {
     if (!state) {
       state = {};
     }
-    let len = this.win.history.length;
+    const len = this.win.history.length;
     let stackIndex = this.stackIndex_ + 1;
     state[HISTORY_PROP_] = stackIndex;
     this.pushState_(state, title, url);
@@ -521,7 +525,7 @@ export class HistoryBindingNatural_ {
     if (!state) {
       state = {};
     }
-    let stackIndex = Math.min(this.stackIndex_, this.win.history.length - 1);
+    const stackIndex = Math.min(this.stackIndex_, this.win.history.length - 1);
     state[HISTORY_PROP_] = stackIndex;
     this.replaceState_(state, title, url);
     this.updateStackIndex_(stackIndex);
@@ -587,7 +591,7 @@ export class HistoryBindingVirtual_ {
 
   /** @override */
   push() {
-    // Current implemention doesn't wait for response from viewer.
+    // Current implementation doesn't wait for response from viewer.
     this.updateStackIndex_(this.stackIndex_ + 1);
     this.viewer_.postPushHistory(this.stackIndex_);
     return Promise.resolve(this.stackIndex_);
@@ -634,7 +638,7 @@ export class HistoryBindingVirtual_ {
  * @private
  */
 function createHistory_(window) {
-  let viewer = viewerFor(window);
+  const viewer = viewerFor(window);
   let binding;
   if (viewer.isOvertakeHistory()) {
     binding = new HistoryBindingVirtual_(viewer);

@@ -14,15 +14,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-### <a name=”amp-twitter”></a> `amp-twitter`
+### <a name="amp-twitter"></a> `amp-twitter`
 
 Displays a Twitter Tweet.
 
 Example:
-    <amp-twitter width=486 height=657
-        layout="responsive"
-        data-tweetid="585110598171631616"
-        data-cards="hidden">
+```html
+<amp-twitter width=486 height=657
+    layout="responsive"
+    data-tweetid="585110598171631616"
+    data-cards="hidden">
+```
 
 **CAVEATS**
 

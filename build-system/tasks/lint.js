@@ -15,28 +15,79 @@
  */
 
 
-var gulp = require('gulp');
-var eslint = require('gulp-eslint');
-var util = require('gulp-util');
+var argv = require('minimist')(process.argv.slice(2));
 var config = require('../config');
+var eslint = require('gulp-eslint');
+var exec = require('child_process').exec;
+var gulp = require('gulp-help')(require('gulp'));
+var gulpIf = require('gulp-if');
+var lazypipe = require('lazypipe');
+var util = require('gulp-util');
+var watch = require('gulp-watch');
+
+var isWatching = (argv.watch || argv.w) || false;
 
 var options = {
+  fix: false,
   plugins: ['eslint-plugin-google-camelcase'],
+  "ecmaFeatures": {
+    "modules": true,
+    "arrowFunctions": true,
+    "blockBindings": true,
+    "forOf": false,
+    "destructuring": false
+  },
 };
 
-function lint() {
-  var errorsFound = false;
-  return gulp.src(['**/*.js', config.src.exclude])
-      .pipe(eslint(options))
-      .pipe(eslint.formatEach('compact', function(msg) {
-        errorsFound = true;
-        util.log(util.colors.red(msg));
-      }))
-      .on('end', function() {
-        if (errorsFound) {
-          process.exit(1);
-        }
-      });
+var watcher = lazypipe().pipe(watch, config.lintGlobs);
+
+/**
+ * Checks if current Vinyl file has been fixed by eslint.
+ * @param {!Vinyl} file
+ * @return {boolean}
+ */
+function isFixed(file) {
+  // Has ESLint fixed the file contents?
+  return file.eslint != null && file.eslint.fixed;
 }
 
-gulp.task('lint', lint);
+/**
+ * Run the eslinter on the src javascript and log the output
+ * @return {!Stream} Readable stream
+ */
+function lint() {
+  var errorsFound = false;
+  var stream = gulp.src(config.lintGlobs);
+
+  if (isWatching) {
+    stream = stream.pipe(watcher());
+  }
+
+  if (argv.fix) {
+    options.fix = true;
+  }
+
+  return stream.pipe(eslint(options))
+    .pipe(eslint.formatEach('stylish', function(msg) {
+      errorsFound = true;
+      util.log(util.colors.red(msg));
+    }))
+    .pipe(gulpIf(isFixed, gulp.dest('.')))
+    .on('end', function() {
+      if (errorsFound && !options.fix) {
+        util.log(util.colors.blue('Run `gulp lint --fix` to automatically ' +
+            'fix some of these lint warnings/errors. This is a destructive ' +
+            'operation (operates on the file system) so please make sure ' +
+            'you commit before running.'));
+        process.exit(1);
+      }
+    });
+}
+
+gulp.task('lint', 'Validates against Google Closure Linter', lint,
+{
+  options: {
+    'watch': '  Watches for changes in files, validates against the linter',
+    'fix': '  Fixes simple lint errors (spacing etc).'
+  }
+});

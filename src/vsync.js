@@ -14,26 +14,28 @@
  * limitations under the License.
  */
 
+import {getService} from './service';
+import {log} from './log';
 import {timer} from './timer';
+import {viewerFor} from './viewer';
 
 
 /**
- * TODO(dvoytenko): remove this struct and just supply measure/mutate directly
- * in calls.
  * @typedef {{
  *   measure: (function(Object<string,*>)|undefined),
- *   mutate: (function(Object<string,*>))
+ *   mutate: (function(Object<string,*>)|undefined)
  * }}
  */
 class VsyncTaskSpec {}
 
 
 /**
- * TODO(dvoytenko): lots and lots of work to make it actually work right:
- * queue, scheduling, measures/mutates separation, etc.
+ * Abstraction over requestAnimationFrame that align DOM read (measure)
+ * and write (mutate) tasks in a single frame.
  *
- * TODO(dvoytenko): split into clear APIs for measure+mutate vs only mutate
- * since that will be the main use case.
+ * NOTE: If the document is invisible due to prerendering (this includes
+ * application level prerendering where the doc is rendered in a hidden
+ * iframe or webview), then no frame will be scheduled.
  */
 export class Vsync {
 
@@ -43,21 +45,78 @@ export class Vsync {
   constructor(win) {
     /** @const {!Window} */
     this.win = win;
-    // TODO(dvoytenko): polyfill requestAnimationFrame?
+
+    /** @private @const {function(function())}  */
+    this.raf_ = this.getRaf_();
+
+    /**
+     * Tasks to run in the next frame.
+     * @private {!Array<!VsyncTaskSpec>}
+     */
+    this.tasks_ = [];
+
+    /**
+     * States for tasks in the next frame in the same order.
+     * @private {!Array<!Object>}
+     */
+    this.states_ = [];
+
+    /**
+     * Whether a new animation frame has been scheduled.
+     * @private {boolean}
+     */
+    this.scheduled_ = false;
   }
 
   /**
    * @param {!VsyncTaskSpec} task
-   * @param {!Object<string, *>|udnefined} opt_state
+   * @param {!Object<string, *>|undefined} opt_state
    */
   run(task, opt_state) {
-    let state = opt_state || {};
-    this.win.requestAnimationFrame(() => {
-      if (task.measure) {
-        task.measure(state);
-      }
-      task.mutate(state);
+    // Do not request animation frames when the document is not visible.
+    if (!viewerFor(this.win).isVisible()) {
+      log.fine('VSYNC', 'Did not schedule a vsync request, ' +
+          'because document was invisible.');
+      return;
+    }
+    const state = opt_state || {};
+    this.tasks_.push(task);
+    this.states_.push(state);
+
+    if (this.scheduled_) {
+      return;
+    }
+    this.scheduled_ = true;
+
+    // Schedule actual animation frame and then run tasks.
+    this.raf_(() => {
+      this.runScheduledTasks();
     });
+  }
+
+  /**
+   * Runs all scheduled tasks. This is typically called in an RAF
+   * callback. Tests may call this method to force execution of
+   * tasks without waiting.
+   * @visibleForTesting
+   */
+  runScheduledTasks() {
+    this.scheduled_ = false;
+    // TODO(malteubl) Avoid array allocation with a double buffer.
+    const tasks = this.tasks_;
+    const states = this.states_;
+    this.tasks_ = [];
+    this.states_ = [];
+    for (let i = 0; i < tasks.length; i++) {
+      if (tasks[i].measure) {
+        tasks[i].measure(states[i]);
+      }
+    }
+    for (let i = 0; i < tasks.length; i++) {
+      if (tasks[i].mutate) {
+        tasks[i].mutate(states[i]);
+      }
+    }
   }
 
   /**
@@ -69,11 +128,19 @@ export class Vsync {
   }
 
   /**
+   * Runs the measure operation via vsync.
+   * @param {function()} measurer
+   */
+  measure(measurer) {
+    this.run({measure: measurer});
+  }
+
+  /**
    * @param {!VsyncTaskSpec} task
    * @return {function((!Object<string, *>|undefined))}
    */
   createTask(task) {
-    return (opt_state) => {
+    return opt_state => {
       this.run(task, opt_state);
     };
   }
@@ -83,7 +150,8 @@ export class Vsync {
    * @param {function(time, time, !Object<string,*>):boolean} mutator The
    *   mutator callback. Only expected to do DOM writes, not reads. If the
    *   returned value is true, the vsync task will be repeated, otherwise it
-   *   will be completed.
+   *   will be completed. The arguments are: timeSinceStart:time,
+   *   timeSincePrev:time and state:Object<string, *>.
    * @param {number=} opt_timeout Optional timeout that will force the series
    *   to complete and reject the promise.
    * @return {!Promise} Returns the promise that will either resolve on when
@@ -92,12 +160,12 @@ export class Vsync {
    */
   runMutateSeries(mutator, opt_timeout) {
     return new Promise((resolve, reject) => {
-      let startTime = timer.now();
+      const startTime = timer.now();
       let prevTime = 0;
-      let task = this.createTask({
-        mutate: (state) => {
-          let timeSinceStart = timer.now() - startTime;
-          let res = mutator(timeSinceStart, timeSinceStart - prevTime, state);
+      const task = this.createTask({
+        mutate: state => {
+          const timeSinceStart = timer.now() - startTime;
+          const res = mutator(timeSinceStart, timeSinceStart - prevTime, state);
           if (!res) {
             resolve();
           } else if (opt_timeout && timeSinceStart > opt_timeout) {
@@ -111,7 +179,35 @@ export class Vsync {
       task({});
     });
   }
+
+  /**
+   * @return {function(function())} requestAnimationFrame or polyfill.
+   */
+  getRaf_() {
+    const raf = this.win.requestAnimationFrame
+        || this.win.webkitRequestAnimationFrame;
+    if (raf) {
+      return raf.bind(this.win);
+    }
+    let lastTime = 0;
+    return fn => {
+      const now = new Date().getTime();
+      // By default we take 16ms between frames, but if the last frame is say
+      // 10ms ago, we only want to wait 6ms.
+      const timeToCall = Math.max(0, 16 - (now - lastTime));
+      lastTime = now + timeToCall;
+      this.win.setTimeout(fn, timeToCall);
+    };
+  }
 }
 
 
-export const vsync = new Vsync(window);
+/**
+ * @param {!Window} window
+ * @return {!Vsync}
+ */
+export function vsyncFor(window) {
+  return getService(window, 'vsync', () => {
+    return new Vsync(window);
+  });
+};

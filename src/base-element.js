@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import {Layout, isInternalElement} from './layout';
+import {Layout} from './layout';
 import {assert} from './asserts';
 import {preconnectFor} from './preconnect';
-import {resources} from './resources';
+import {resourcesFor} from './resources';
 import {viewerFor} from './viewer';
 import {viewportFor} from './viewport';
+import {vsyncFor} from './vsync';
 
 
 /**
@@ -58,21 +59,33 @@ import {viewportFor} from './viewport';
  *    State: <NOT BUILT>
  *           ||
  *           || buildCallback
+ *           || preconnectCallback may be called N times after this.
  *           ||
  *           \/
  *    State: <BUILT>
  *           ||
- *           || layoutCallback      <=
- *           ||                      ||
- *           \/                      || isRelayoutNeeded?
- *    State: <LAID OUT>              ||
- *           ||                      ||
- *           ||                 ======
+ *           || layoutCallback        <==
+             || (firstLayoutCompleted)  ||
+ *           ||                         ||
+ *           \/                         || isRelayoutNeeded?
+ *    State: <LAID OUT>                 ||
+ *           ||                         ||
+ *           ||                 =========
  *           ||
  *           || viewportCallback
  *           ||
  *           \/
  *    State: <IN VIEWPORT>
+ *
+ * The preconnectCallback is called when the systems thinks it is good
+ * to preconnect to hosts needed by an element. It will never be called
+ * before buildCallback and it might be called multiple times including
+ * after layoutCallback.
+ *
+ * Additionally whenever the dimensions of an element might have changed
+ * AMP remeasures its dimensions and calls `onLayoutMeasure` on the
+ * element instance. This can be used to do additional style calculations
+ * without triggering style recalculations.
  *
  * For more details, see {@link custom-element.js}.
  *
@@ -80,7 +93,7 @@ import {viewportFor} from './viewport';
  * is optional.
  */
 export class BaseElement {
-  /** @param {!Element} element */
+  /** @param {!AmpElement} element */
   constructor(element) {
     /** @public @const */
     this.element = element;
@@ -88,19 +101,46 @@ export class BaseElement {
     /** @package {!Layout} */
     this.layout_ = Layout.NODISPLAY;
 
+    /** @package {number} */
+    this.layoutWidth_ = -1;
+
     /** @package {boolean} */
     this.inViewport_ = false;
 
     /** @private {!Object<string, function(!ActionInvocation)>} */
-    this.actionMap_ = element.ownerDocument.defaultView.Object.create(null);
+    this.actionMap_ = this.getWin().Object.create(null);
 
     /** @protected {!Preconnect} */
-    this.preconnect = preconnectFor(element.ownerDocument.defaultView);
+    this.preconnect = preconnectFor(this.getWin());
+
+    /** @private {!Resources}  */
+    this.resources_ = resourcesFor(this.getWin());
   }
 
   /** @return {!Layout} */
   getLayout() {
     return this.layout_;
+  }
+
+  /** @protected @return {!Window} */
+  getWin() {
+    return this.element.ownerDocument.defaultView;
+  }
+
+  /** @protected @return {!Vsync} */
+  getVsync() {
+    return vsyncFor(this.getWin());
+  }
+
+  /**
+   * Returns the layout width for this element. A `-1` value indicates that the
+   * layout is not yet known. A `0` value indicates that the element is not
+   * visible.
+   * @return {number}
+   * @protected
+   */
+  getLayoutWidth() {
+    return this.layoutWidth_;
   }
 
   /**
@@ -143,7 +183,7 @@ export class BaseElement {
    * Override in subclass to indicate if the element is ready to rebuild its
    * DOM subtree.  If the element can proceed with building the content return
    * "true" and return "false" otherwise. The element may not be ready to build
-   * e.g. beacuse its children are not available yet.
+   * e.g. because its children are not available yet.
    *
    * See {@link buildCallback} for more details.
    *
@@ -172,6 +212,15 @@ export class BaseElement {
   }
 
   /**
+   * Called by the framework to give the element a chance to preconnect to
+   * hosts and prefetch resources it is likely to need. May be called
+   * multiple times because connections can time out.
+   */
+  preconnectCallback() {
+    // Subclasses may override.
+  }
+
+  /**
    * Sets this element as the owner of the specified element. By setting itself
    * as an owner, the element declares that it will manage the lifecycle of
    * the owned element itself. This element, as an owner, will have to call
@@ -180,7 +229,7 @@ export class BaseElement {
    * @param {!Element} element
    */
   setAsOwner(element) {
-    resources.setOwner(element, this.element);
+    this.resources_.setOwner(element, this.element);
   }
 
   /**
@@ -190,6 +239,15 @@ export class BaseElement {
    */
   prerenderAllowed() {
     return false;
+  }
+
+  /**
+   * Subclasses can override this method to opt-out of rendering the element
+   * when it is not currently visible.
+   * @return {boolean}
+   */
+  renderOutsideViewport() {
+    return true;
   }
 
   /**
@@ -219,11 +277,36 @@ export class BaseElement {
   }
 
   /**
+   * Called to notify the element that the first layout has been successfully
+   * completed.
+   *
+   * The default behavior of this method is to hide the placeholder. However,
+   * a subclass may choose to hide placeholder earlier or not hide it at all.
+   *
+   * @protected
+   */
+  firstLayoutCompleted() {
+    this.togglePlaceholder(false);
+  }
+
+  /**
    * Instructs the resource that it has either entered or exited the visible
    * viewport. Intended to be implemented by actual components.
    * @param {boolean} inViewport
    */
   viewportCallback(inViewport) {
+  }
+
+  /**
+   * Requests the resource to stop its activity when the document goes into
+   * inactive state. The scope is up to the actual component. Among other
+   * things the active playback of video or audio content must be stopped.
+   * The component must return `true` if it'd like to later receive
+   * {@link layoutCallback} in case document becomes active again.
+   * @return {boolean}
+   */
+  documentInactiveCallback() {
+    return false;
   }
 
   /**
@@ -258,7 +341,7 @@ export class BaseElement {
     if (invocation.method == 'activate') {
       this.activate(invocation);
     } else {
-      let handler = this.actionMap_[invocation.method];
+      const handler = this.actionMap_[invocation.method];
       if (!handler) {
         throw new Error(`Method not found: ${invocation.method}`);
       }
@@ -271,7 +354,7 @@ export class BaseElement {
    * @return {number}
    */
   getMaxDpr() {
-    return resources.getMaxDpr();
+    return this.resources_.getMaxDpr();
   }
 
   /**
@@ -279,7 +362,7 @@ export class BaseElement {
    * @return {number}
    */
   getDpr() {
-    return resources.getDpr();
+    return this.resources_.getDpr();
   }
 
   /**
@@ -291,7 +374,7 @@ export class BaseElement {
    */
   propagateAttributes(attributes, element) {
     for (let i = 0; i < attributes.length; i++) {
-      let attr = attributes[i];
+      const attr = attributes[i];
       if (!this.element.hasAttribute(attr)) {
         continue;
       }
@@ -305,13 +388,35 @@ export class BaseElement {
    * @protected @final
    */
   getPlaceholder() {
-    let children = this.element.children;
-    for (let i = 0; i < children.length; i++) {
-      if (children[i].hasAttribute('placeholder')) {
-        return children[i];
-      }
-    }
-    return null;
+    return this.element.getPlaceholder();
+  }
+
+  /**
+   * Hides or shows the placeholder, if available.
+   * @param {boolean} state
+   * @protected @final
+   */
+  togglePlaceholder(state) {
+    this.element.togglePlaceholder(state);
+  }
+
+  /**
+   * Returns an optional fallback element for this custom element.
+   * @return {?Element}
+   * @protected @final
+   */
+  getFallback() {
+    return this.element.getFallback();
+  }
+
+  /**
+   * Hides or shows the fallback, if available. This function must only
+   * be called inside a mutate context.
+   * @param {boolean} state
+   * @protected @final
+   */
+  toggleFallback(state) {
+    this.element.toggleFallback(state);
   }
 
   /**
@@ -322,13 +427,7 @@ export class BaseElement {
    * @protected @final
    */
   getRealChildNodes() {
-    let nodes = [];
-    for (let n = this.element.firstChild; n; n = n.nextSibling) {
-      if (!isInternalOrServiceNode(n)) {
-        nodes.push(n);
-      }
-    }
-    return nodes;
+    return this.element.getRealChildNodes();
   }
 
   /**
@@ -338,24 +437,26 @@ export class BaseElement {
    * @protected @final
    */
   getRealChildren() {
-    let elements = [];
-    for (let i = 0; i < this.element.children.length; i++) {
-      let child = this.element.children[i];
-      if (!isInternalOrServiceNode(child)) {
-        elements.push(child);
-      }
-    }
-    return elements;
+    return this.element.getRealChildren();
   }
 
   /**
    * Configures the supplied element to have a "fill content" layout. The
    * exact interpretation of "fill content" depends on the element's layout.
+   *
+   * If `opt_replacedContent` is specified, it indicates whether the "replaced
+   * content" styling should be applied. Replaced content is not allowed to
+   * have its own paddings or border.
+   *
    * @param {!Element} element
+   * @param {boolean=} opt_replacedContent
    * @protected @final
    */
-  applyFillContent(element) {
+  applyFillContent(element, opt_replacedContent) {
     element.classList.add('-amp-fill-content');
+    if (opt_replacedContent) {
+      element.classList.add('-amp-replaced-content');
+    }
   }
 
   /**
@@ -363,7 +464,7 @@ export class BaseElement {
    * @return {!Viewport}
    */
   getViewport() {
-    return viewportFor(this.element.ownerDocument.defaultView);
+    return viewportFor(this.getWin());
   }
 
   /**
@@ -372,9 +473,10 @@ export class BaseElement {
    * priority of this element and its children.
    * @param {!Element|!Array<!Element>} elements
    * @param {boolean} inLocalViewport
+   * @protected
    */
   scheduleLayout(elements) {
-    resources.scheduleLayout(this.element, elements);
+    this.resources_.scheduleLayout(this.element, elements);
   }
 
   /**
@@ -383,9 +485,10 @@ export class BaseElement {
    * priority of this element and its children.
    * @param {!Element|!Array<!Element>} elements
    * @param {boolean} inLocalViewport
+   * @protected
    */
   schedulePreload(elements) {
-    resources.schedulePreload(this.element, elements);
+    this.resources_.schedulePreload(this.element, elements);
   }
 
   /**
@@ -394,38 +497,69 @@ export class BaseElement {
    * based on the state of these elements and their parent subtree.
    * @param {!Element|!Array<!Element>} elements
    * @param {boolean} inLocalViewport
+   * @protected
    */
   updateInViewport(elements, inLocalViewport) {
-    resources.updateInViewport(this.element, elements, inLocalViewport);
+    this.resources_.updateInViewport(this.element, elements, inLocalViewport);
+  }
+
+  /**
+   * Requests the runtime to update the height of this element to the specified
+   * value. The runtime will schedule this request and attempt to process it
+   * as soon as possible.
+   * @param {number} newHeight
+   * @protected
+   */
+  changeHeight(newHeight) {
+    this.resources_.changeHeight(this.element, newHeight);
+  }
+
+  /**
+   * Requests the runtime to update the height of this element to the specified
+   * value. The runtime will schedule this request and attempt to process it
+   * as soon as possible. However, unlike in {@link changeHeight}, the runtime
+   * may refuse to make a change in which case it will call the provided
+   * fallback with the height value. The fallback is expected to provide the
+   * reader with the user action to update the height manually.
+   * @param {number} newHeight
+   * @param {function(number)} fallback
+   * @protected
+   */
+  requestChangeHeight(newHeight, fallback) {
+    this.resources_.requestChangeHeight(this.element, newHeight, fallback);
+  }
+
+  /**
+   * Schedules callback to be complete within the next batch. This call is
+   * intended for heavy DOM mutations that typically cause re-layouts.
+   * @param {!Function} callback
+   */
+  deferMutate(callback) {
+    this.resources_.deferMutate(this.element, callback);
   }
 
   /**
    * Requests full overlay mode from the viewer.
+   * @protected
    */
   requestFullOverlay() {
-    viewerFor(this.element.ownerDocument.defaultView).requestFullOverlay();
+    viewerFor(this.getWin()).requestFullOverlay();
   }
 
   /**
    * Requests to cancel full overlay mode from the viewer.
+   * @protected
    */
   cancelFullOverlay() {
-    viewerFor(this.element.ownerDocument.defaultView).cancelFullOverlay();
+    viewerFor(this.getWin()).cancelFullOverlay();
   }
+
+  /**
+   * Called when we just measured the layout rect of this element. Doing
+   * more expensive style reads should now be cheap.
+   * This may currently not work with extended elements. Please file
+   * an issue if that is required.
+   * @protected
+   */
+  onLayoutMeasure() {}
 };
-
-
-/**
- * Returns "true" for internal AMP nodes or for placeholder elements.
- * @param {!Node} node
- * @return {boolean}
- */
-function isInternalOrServiceNode(node) {
-  if (isInternalElement(node)) {
-    return true;
-  }
-  if (node.tagName && node.hasAttribute('placeholder')) {
-    return true;
-  }
-  return false;
-}

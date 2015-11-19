@@ -1,0 +1,121 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>AMP Experiments</title>
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <meta name="robots" content="noindex">
+  <script async src="../../dist.tools/experiments/experiments.max.js"></script>
+  <style>
+    body {
+      max-width: 600px;
+      margin: auto;
+      font-family: Roboto, verdana, arial, sans-serif;
+    }
+
+    .header-title {
+      color: #1b1464;
+      font-family: Roboto, verdana, arial, sans-serif;
+      letter-spacing: 2px;
+      padding-left: 0;
+      padding-top: 18px;
+      text-transform: uppercase;
+      width: 10%;
+      display: inline-block;
+      padding: 10px 15px;
+      text-decoration: none;
+    }
+
+    .hero {
+      padding: 16px;
+      background-color: #147bc1;
+      color: #fff;
+    }
+
+    .content {
+      margin: 16px;
+      display: block;
+    }
+
+    .desc {
+      padding: 16px;
+      display: block;
+      color: orange;
+    }
+
+    .desc a {
+      color: #cc7a00;
+    }
+
+    a {
+      color: #3ab3eb;
+      text-decoration: none;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    td {
+      padding: 4px;
+    }
+
+    .button-cell {
+      text-align: center;
+    }
+
+    button {
+      min-width: 60px;
+    }
+
+    tr[data-on='0'] button {
+      background: #aaa;
+      color: #777;
+    }
+
+    tr[data-on='1'] button {
+      background: green;
+      color: #fff;
+    }
+
+    .on, .off {
+      display: none;
+    }
+
+    tr[data-on='0'] .off {
+      display: block;
+    }
+
+    tr[data-on='1'] .on {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="tab header-title">
+      Accelerated
+      Mobile
+      Pages
+      Project
+    </div>
+  </header>
+
+  <section class="hero">
+    <h1>AMP Experiments</h1>
+  </section>
+
+  <section class="desc">
+    Please exercise caution. These experiments are not fully tested and might
+    contain bugs or have unexpected side effects. Please only activate them if
+    you work on the
+    <a href="https://github.com/ampproject/amphtml/">AMP project</a>
+    or plan to create AMP documents that use unreleased features.
+  </section>
+
+  <section class="content">
+    <table id="experiments-table" border=1></table>
+  </section>
+</body>
+</html>

@@ -1,7 +1,13 @@
 language: node_js
+sudo: required  # See http://docs.travis-ci.com/user/trusty-ci-environment/
+dist: trusty
 node_js:
   - "stable"
+notifications:
+  webhooks:
+    - http://savage.nonblocking.io:8080/savage/travis
 addons:
+  sauce_connect: true
   hosts:
     - ads.localhost
     - iframe.localhost
@@ -12,8 +18,9 @@ before_install:
 before_script:
   - npm install -g gulp
 script:
-  - gulp presubmit
   - gulp lint
   - gulp build
-  - gulp minify
+  - gulp dist
+  - gulp presubmit
   - gulp test
+  - gulp test --saucelabs --integration

@@ -74,19 +74,19 @@ describe('Input', () => {
 
   it('should fire states immediately', () => {
     let touchDetected = undefined;
-    input.onTouchDetected((detected) => {
+    input.onTouchDetected(detected => {
       touchDetected = detected;
     }, true);
     expect(touchDetected).to.equal(true);
 
     let mouseDetected = undefined;
-    input.onMouseDetected((detected) => {
+    input.onMouseDetected(detected => {
       mouseDetected = detected;
     }, true);
     expect(mouseDetected).to.equal(false);
 
     let kbActive = undefined;
-    input.onKeyboardStateChanged((active) => {
+    input.onKeyboardStateChanged(active => {
       kbActive = active;
     }, true);
     expect(kbActive).to.equal(false);
@@ -101,12 +101,12 @@ describe('Input', () => {
   it('should detect mouse', () => {
     expect(input.isMouseDetected()).to.equal(false);
     let mouseDetected = undefined;
-    input.onMouseDetected((detected) => {
+    input.onMouseDetected(detected => {
       mouseDetected = detected;
     });
     expect(mouseDetected).to.equal(undefined);
 
-    let p = input.onMouseMove_();
+    const p = input.onMouseMove_();
     expect(eventListeners['click']).to.not.equal(undefined);
     clock.tick(350);
 
@@ -121,12 +121,12 @@ describe('Input', () => {
   it('should try to detect mouse again', () => {
     expect(input.isMouseDetected()).to.equal(false);
     let mouseDetected = undefined;
-    input.onMouseDetected((detected) => {
+    input.onMouseDetected(detected => {
       mouseDetected = detected;
     });
     expect(mouseDetected).to.equal(undefined);
 
-    let p = input.onMouseMove_();
+    const p = input.onMouseMove_();
     eventListeners['click']();
 
     return p.then(() => {
@@ -141,12 +141,12 @@ describe('Input', () => {
   it('should stop trying to detect mouse after few attempts', () => {
     expect(input.isMouseDetected()).to.equal(false);
     let mouseDetected = undefined;
-    input.onMouseDetected((detected) => {
+    input.onMouseDetected(detected => {
       mouseDetected = detected;
     });
     expect(mouseDetected).to.equal(undefined);
 
-    let p = input.onMouseMove_();
+    const p = input.onMouseMove_();
     input.mouseConfirmAttemptCount_ = 100;
     eventListeners['mousemove'] = undefined;
     eventListeners['click']();
@@ -163,7 +163,7 @@ describe('Input', () => {
   it('should detect keyboard states', () => {
     expect(input.isKeyboardActive()).to.equal(false);
     let kbActive = undefined;
-    input.onKeyboardStateChanged((active) => {
+    input.onKeyboardStateChanged(active => {
       kbActive = active;
     });
     expect(kbActive).to.equal(undefined);
@@ -189,7 +189,7 @@ describe('Input', () => {
   it('should ignore keyboard state on input', () => {
     expect(input.isKeyboardActive()).to.equal(false);
     let kbActive = undefined;
-    input.onKeyboardStateChanged((active) => {
+    input.onKeyboardStateChanged(active => {
       kbActive = active;
     });
     expect(kbActive).to.equal(undefined);

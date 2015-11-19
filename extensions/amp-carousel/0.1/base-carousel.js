@@ -39,6 +39,9 @@ export class BaseCarousel extends AMP.BaseElement {
     this.prevButton_.classList.add('amp-carousel-button');
     this.prevButton_.classList.add('amp-carousel-button-prev');
     this.prevButton_.setAttribute('role', 'button');
+    // TODO(erwinm): Does label need i18n support in the future? or provide
+    // a way to be overridden.
+    this.prevButton_.setAttribute('aria-label', 'previous');
     this.prevButton_.onclick = () => {
       if (!this.prevButton_.classList.contains('amp-disabled')) {
         this.go(-1, true);
@@ -50,6 +53,7 @@ export class BaseCarousel extends AMP.BaseElement {
     this.nextButton_.classList.add('amp-carousel-button');
     this.nextButton_.classList.add('amp-carousel-button-next');
     this.nextButton_.setAttribute('role', 'button');
+    this.nextButton_.setAttribute('aria-label', 'next');
     this.nextButton_.onclick = () => {
       if (!this.nextButton_.classList.contains('amp-disabled')) {
         this.go(1, true);
@@ -83,7 +87,7 @@ export class BaseCarousel extends AMP.BaseElement {
   }
 
   /**
-   * Calls `goCallback` and `setControlState` for transition behavior.
+   * Calls `goCallback` and `setControlsState` for transition behavior.
    * @param {number} dir -1 or 1
    * @param {boolean} animate
    */
@@ -106,7 +110,9 @@ export class BaseCarousel extends AMP.BaseElement {
    */
   setControlsState() {
     this.prevButton_.classList.toggle('amp-disabled', !this.hasPrev());
+    this.prevButton_.setAttribute('aria-disabled', !this.hasPrev());
     this.nextButton_.classList.toggle('amp-disabled', !this.hasNext());
+    this.nextButton_.setAttribute('aria-disabled', !this.hasNext());
   }
 
   /**

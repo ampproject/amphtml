@@ -33,18 +33,15 @@ class AmpAnim extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    /** @private @const {?Element} */
-    this.placeholder_ = this.getPlaceholder();
-
     /** @private @const {!Element} */
     this.img_ = new Image();
     this.propagateAttributes(['alt'], this.img_);
-    this.applyFillContent(this.img_);
+    this.applyFillContent(this.img_, true);
     this.img_.width = getLengthNumeral(this.element.getAttribute('width'));
     this.img_.height = getLengthNumeral(this.element.getAttribute('height'));
 
-    // The image shown/hidden depends on placeholder.
-    st.toggle(this.img_, !this.placeholder_);
+    // The image is initially hidden if a placeholder is available.
+    st.toggle(this.img_, !this.getPlaceholder());
 
     this.element.appendChild(this.img_);
 
@@ -67,20 +64,30 @@ class AmpAnim extends AMP.BaseElement {
   }
 
   /** @override */
+  firstLayoutCompleted() {
+    // Keep the placeholder: amp-anim is using it to start/stop playing.
+  }
+
+  /** @override */
   viewportCallback(inViewport) {
-    if (this.placeholder_) {
-      if (!inViewport || !this.loadPromise_) {
-        this.updateInViewport_(inViewport);
-      } else {
-        this.loadPromise_.then(() => this.updateInViewport_(inViewport));
-      }
+    if (!inViewport || !this.loadPromise_) {
+      this.updateInViewport_();
+    } else {
+      this.loadPromise_.then(() => this.updateInViewport_());
     }
+  }
+
+  /** @override */
+  documentInactiveCallback() {
+    // Release memory held by the image - animations are typically large.
+    this.img_.src = '';
+    return true;
   }
 
   /** @private */
   updateInViewport_() {
-    let inViewport = this.isInViewport();
-    this.placeholder_.classList.toggle('hidden', inViewport);
+    const inViewport = this.isInViewport();
+    this.togglePlaceholder(!inViewport);
     st.toggle(this.img_, inViewport);
   }
 
@@ -89,7 +96,10 @@ class AmpAnim extends AMP.BaseElement {
    * @private
    */
   updateImageSrc_() {
-    let src = this.srcset_.select(this.element.offsetWidth,
+    if (this.getLayoutWidth() <= 0) {
+      return Promise.resolve();
+    }
+    const src = this.srcset_.select(this.getLayoutWidth(),
         this.getDpr()).url;
     if (src == this.img_.getAttribute('src')) {
       return Promise.resolve();

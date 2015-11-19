@@ -4,21 +4,8 @@
   <meta charset="utf-8">
   <title>AMP #0</title>
   <link rel="canonical" href="amps.html" >
-  <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
-  <script custom-element="amp-anim" src="../dist/v0/amp-anim-0.1.max.js" async></script>
-  <script custom-element="amp-audio" src="../dist/v0/amp-audio-0.1.max.js" async></script>
-  <script custom-element="amp-carousel" src="../dist/v0/amp-carousel-0.1.max.js" async></script>
-  <script custom-element="amp-fit-text" src="../dist/v0/amp-fit-text-0.1.max.js" async></script>
-  <script custom-element="amp-iframe" src="../dist/v0/amp-iframe-0.1.max.js" async></script>
-  <script custom-element="amp-instagram" src="../dist/v0/amp-instagram-0.1.max.js" async></script>
-  <script custom-element="amp-image-lightbox" src="../dist/v0/amp-image-lightbox-0.1.max.js" async></script>
-  <script custom-element="amp-lightbox" src="../dist/v0/amp-lightbox-0.1.max.js" async></script>
-  <script custom-element="amp-twitter" src="../dist/v0/amp-twitter-0.1.max.js" async></script>
-  <script custom-element="amp-youtube" src="../dist/v0/amp-youtube-0.1.max.js" async></script>
-  <script src="../dist/amp.js" development async></script>
-  <script src="./viewer-integr.js" async></script>
-  <style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
   <style amp-custom>
     body {
       font-family: 'Questrial', Arial;
@@ -72,15 +59,54 @@
       width: 40px;
       height: 40px;
     }
+
+    .goto {
+      display: block;
+      margin: 16px;
+    }
+    @font-face {
+      font-family: 'Comic AMP';
+      font-style: bold;
+      font-weight: 700;
+      src: url(fonts/ComicAMP.ttf) format('truetype');
+    }
+    .comic-amp-font-loaded .comic-amp {
+      font-family: 'Comic AMP', serif, sans-serif;
+    }
+
+    .comic-amp-font-loading .comic-amp {
+      color: #0ff;
+    }
+
+    .comic-amp-font-missing .comic-amp {
+      color: #f00;
+    }
   </style>
+  <script async custom-element="amp-anim" src="https://cdn.ampproject.org/v0/amp-anim-0.1.js"></script>
+  <script async custom-element="amp-audio" src="https://cdn.ampproject.org/v0/amp-audio-0.1.js"></script>
+  <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
+  <script async custom-element="amp-fit-text" src="https://cdn.ampproject.org/v0/amp-fit-text-0.1.js"></script>
+  <script async custom-element="amp-font" src="https://cdn.ampproject.org/v0/amp-font-0.1.js"></script>
+  <script async custom-element="amp-iframe" src="https://cdn.ampproject.org/v0/amp-iframe-0.1.js"></script>
+  <script async custom-element="amp-instagram" src="https://cdn.ampproject.org/v0/amp-instagram-0.1.js"></script>
+  <script async custom-element="amp-image-lightbox" src="https://cdn.ampproject.org/v0/amp-image-lightbox-0.1.js"></script>
+  <script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js"></script>
+  <script async custom-element="amp-twitter" src="https://cdn.ampproject.org/v0/amp-twitter-0.1.js"></script>
+  <script async custom-element="amp-youtube" src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js"></script>
+  <style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async src="./viewer-integr.js"></script>
 </head>
-<body>
+<body class="comic-amp-font-loading">
 
 <article>
 
 <div class="logo"></div>
 
-<h1>AMP #0</h1>
+<h1 id="top">AMP #0</h1>
+  <p class="comic-amp">
+    Quisque ultricies id augue a convallis. Vivamus euismod est quis tellus laoreet lacinia. In quam tellus, mollis nec porta eget, volutpat sit amet nibh. Duis ac odio sem. Sed consequat, ante gravida fringilla suscipit, libero libero ullamcorper metus, nec porta est elit at est. Curabitur vel diam ligula. Nulla bibendum malesuada odio.
+  </p>
   <p>
     <amp-fit-text width="300" height="200" layout="responsive" class="box1">
       Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.
@@ -91,11 +117,18 @@
       Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.
     </div>
   </p>
+
   <p>
-    <amp-carousel width=400 height=300 type=slides>
-      <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no" layout=fill></amp-img>
-      <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w400-h300-no" width=400 height=300></amp-img>
-      <amp-img src="https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w400-h300-no" width=400 height=300></amp-img>
+    <a class="goto" href="#top">Top</a>
+    <a class="goto" href="#img0">Image0</a>
+    <a class="goto" href="#footer">Footer</a>
+  </p>
+
+  <p>
+    <amp-carousel width=400 height=300 layout=responsive type=slides>
+      <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n" layout=fill></amp-img>
+      <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w400-h300-no-n" width=400 height=300 layout=responsive></amp-img>
+      <amp-img src="https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w400-h300-no-n" width=400 height=300 layout=responsive></amp-img>
       <amp-anim
           src="https://lh3.googleusercontent.com/qNn8GDz8Jfd-s9lt3Nc4lJeLjVyEaqGJTk1vuCUWazCmAeOBVjSWDD0SMTU7x0zhVe5UzOTKR0n-kN4SXx7yElvpKYvCMaRyS_g-jydhJ_cEVYmYPiZ_j1Y9de43mlKxU6s06uK1NAlpbSkL_046amEKOdgIACICkuWfOBwlw2hUDfjPOWskeyMrcTu8XOEerCLuVqXugG31QC345hz3lUyOlkdT9fMYVUynSERGNzHba7bXMOxKRe3izS5DIWUgJs3oeKYqA-V8iqgCvneD1jj0Ff68V_ajm4BDchQubBJU0ytXVkoWh27ngeEHubpnApOS6fcGsjPxeuMjnzAUtoTsiXz2FZi1mMrxrblJ-kZoAq1DJ95cnoqoa2CYq3BTgq2E8BRe2paNxLJ5GXBCTpNdXMpVJc6eD7ceijQyn-2qanilX-iK3ChbOq0uBHMvsdoC_LsFOu5KzbbNH71vM3DPkvDGmHJmF67Vj8sQ6uBrLnzpYlCyN4-Y9frR8zugDcqX5Q=w400-h300-no"
           width="400" height="300">
@@ -107,9 +140,9 @@
   </p>
   <p>
     <amp-carousel width=auto height=200>
-      <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w300-h200-no" width=300 height=200></amp-img>
-      <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no" width=300 height=200></amp-img>
-      <amp-img src="https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w300-h200-no" width=300 height=200></amp-img>
+      <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w300-h200-no-n" width=300 height=200></amp-img>
+      <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no-n" width=300 height=200></amp-img>
+      <amp-img src="https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w300-h200-no-n" width=300 height=200></amp-img>
       <amp-anim
           src="https://lh3.googleusercontent.com/qNn8GDz8Jfd-s9lt3Nc4lJeLjVyEaqGJTk1vuCUWazCmAeOBVjSWDD0SMTU7x0zhVe5UzOTKR0n-kN4SXx7yElvpKYvCMaRyS_g-jydhJ_cEVYmYPiZ_j1Y9de43mlKxU6s06uK1NAlpbSkL_046amEKOdgIACICkuWfOBwlw2hUDfjPOWskeyMrcTu8XOEerCLuVqXugG31QC345hz3lUyOlkdT9fMYVUynSERGNzHba7bXMOxKRe3izS5DIWUgJs3oeKYqA-V8iqgCvneD1jj0Ff68V_ajm4BDchQubBJU0ytXVkoWh27ngeEHubpnApOS6fcGsjPxeuMjnzAUtoTsiXz2FZi1mMrxrblJ-kZoAq1DJ95cnoqoa2CYq3BTgq2E8BRe2paNxLJ5GXBCTpNdXMpVJc6eD7ceijQyn-2qanilX-iK3ChbOq0uBHMvsdoC_LsFOu5KzbbNH71vM3DPkvDGmHJmF67Vj8sQ6uBrLnzpYlCyN4-Y9frR8zugDcqX5Q=w300-h200-no"
           width="300" height="200">
@@ -131,7 +164,7 @@
 
   <h2>Video</h2>
   <amp-video
-      src="/examples/video/The-Audience-Is-Programming.mp4"
+      src="video/The-Audience-Is-Programming.mp4"
       width="358"
       height="204"
       layout="responsive"
@@ -139,11 +172,11 @@
 
   <h2>Youtube</h2>
   <amp-youtube
-      video-id="mGENRKrdoGY"
+      data-videoid="mGENRKrdoGY"
       width="480" height="270"></amp-youtube>
 
   <amp-youtube
-      video-id="mGENRKrdoGY"
+      data-videoid="mGENRKrdoGY"
       layout="responsive"
       width="480" height="270"></amp-youtube>
 
@@ -266,7 +299,7 @@
   </p>
   <h2>Instagram</h2>
   <amp-instagram
-    shortcode="fBwFP"
+    data-shortcode="fBwFP"
     width="320"
     height="392"
     layout="responsive">
@@ -303,7 +336,19 @@
     <path d="m 2377.3238,1269.2624 c -26.787,279.7212 111.0044,672.201 309.1165,843.6212 80.8729,69.9767 240.8138,-4.026 318.9086,-41.6454 45.2094,-35.9724 35.0313,-101.296 26.1997,-150.9873 -17.4339,-69.7557 -49.832,-121.797 -100.685,-116.1204 -45.4057,5.0682 -68.5356,8.8251 -64.9322,120.9642 1.3601,42.327 -40.4759,93.1741 -89.0657,90.4079 -52.9357,4.327 -75.8994,-38.881 -101.1012,-69.9814 -212.4085,-262.1247 -233.2146,-599.5762 -162.849,-813.093 10.758,-32.6441 5.6189,-86.0919 -34.34,-65.3213 -75.6217,39.3078 -93.8408,124.7689 -101.2517,202.1555 z" fill="#ff6600"/>
   </svg>
 
+  <div id="footer">The end. <a href="#top">Back to top.</a></div>
+
   <amp-pixel src="https://pubads.g.doubleclick.net/activity;dc_iu=/12344/pixel;ord=$RANDOM?"></amp-pixel>
+
+  <amp-font
+    layout="nodisplay"
+    font-family="Comic Amp"
+    timeout="3000"
+    on-load-remove-class="comic-amp-font-loading"
+    on-error-remove-class="comic-amp-font-loading"
+    on-error-add-class="comic-amp-font-missing"
+    on-load-add-class="comic-amp-font-loaded">
+  </amp-font>
 </article>
 </body>
 </html>

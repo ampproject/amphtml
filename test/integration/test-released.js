@@ -14,22 +14,26 @@
  * limitations under the License.
  */
 
-import {createFixtureIframe, pollForLayout} from '../../testing/iframe.js';
+import {createFixtureIframe, pollForLayout, expectBodyToBecomeVisible} from
+    '../../testing/iframe.js';
 
 describe('Rendering of released components', () => {
-  var fixture;
+  let fixture;
   beforeEach(() => {
-    return createFixtureIframe('test/fixtures/released.html', 3000).then((f) => {
-      fixture = f;
-    });
+    return createFixtureIframe('test/fixtures/released.html', 3000)
+      .then(f => {
+        fixture = f;
+      });
   });
 
   it('all components should get loaded', function() {
     this.timeout(5000);
     return pollForLayout(fixture.win, 13, 5500).then(function() {
-      expect(fixture.doc.querySelectorAll('.-amp-element')).to.have.length(16);
+      expect(fixture.doc.querySelectorAll('.-amp-element')).to.have.length(15);
       expect(fixture.doc.querySelectorAll('.-amp-layout')).to.have.length(13);
       expect(fixture.doc.querySelectorAll('.-amp-error')).to.have.length(0);
+    }).then(() => {
+      return expectBodyToBecomeVisible(fixture.win);
     });
   });
 });

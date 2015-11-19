@@ -1,4 +1,4 @@
-### <a name=”amp-ad”></a> `amp-ad`
+### <a name="amp-ad"></a> `amp-ad`
 
 NOTE: The specification of `amp-ad` is likely to significantly evolve over time. The current approach is designed to bootstrap the format to be able to show ads.
 
@@ -30,13 +30,19 @@ AMP documents only support ads served via HTTPS.
 
 The `<amp-ad>` requires width and height values to be specified like all
 resources in AMP. It requires a `type` argument that select what ad network is displayed. All `data-*` attributes on the tag are automatically passed as arguments to the code that eventually renders the ad. What `data-` attributes are required for a given type of network depends and must be documented with the ad network.
+```html
+<amp-ad width=300 height=250
+    type="a9"
+    data-aax_size="300x250"
+    data-aax_pubname="test123"
+    data-aax_src="302">
+</amp-ad>
+```
 
-    <amp-ad width=300 height=250
-        type="a9"
-        data-aax_size="300x250"
-        data-aax_pubname="test123"
-        data-aax_src="302">
-    </amp-ad>
+#### Styling
+
+`<amp-ad>` elements may not themselves have or be placed in containers that have CSS `position: fixed` set (with the exception of `amp-lightbox`).
+This is due to the UX implications of full page overlay ads. It may be considered to allow similar ad formats in the future inside of AMP controlled containers that maintain certain UX invariants.
 
 #### Attributes
 
@@ -58,13 +64,13 @@ Optional attribute to pass configuration to the ad as an arbitrarily complex JSO
 
 #### Placeholder
 
-Optionally `amp-ad` supports a child element with the `placeholder` attribute. If supported by the ad network, this element if shown if no ad is available for this slot.
-
-    <amp-ad width=300 height=250
-        type="foo">
-      <div placeholder>Have a great day!</div>
-    </amp-ad>
-
+Optionally `amp-ad` supports a child element with the `placeholder` attribute. If supported by the ad network, this element is shown if no ad is available for this slot.
+```html
+<amp-ad width=300 height=250
+    type="foo">
+  <div placeholder>Have a great day!</div>
+</amp-ad>
+```
 #### Supported ad networks
 
 - [A9](../ads/a9.md)
@@ -72,3 +78,16 @@ Optionally `amp-ad` supports a child element with the `placeholder` attribute. I
 - [AdSense](../ads/adsense.md)
 - [AdTech](../ads/adtech.md)
 - [Doubleclick](../ads/doubleclick.md)
+
+
+#### Running ads from a custom domain
+
+AMP supports loading the bootstrap iframe that is used to load ads from a custom domain such as your own domain.
+
+To enable this, copy the file [remote.html](../3p/remote.html) to your web server. Next up add the following meta tag to your AMP file(s):
+
+```html
+<meta name="amp-3p-iframe-src" content="https://assets.your-domain.com/path/to/remote.html">
+```
+
+The `content` attribute of the meta tag is the absolute URL to your copy of the remote.html file on your web server. This URL must use a "https" schema. It is not allowed to reside on the same origin as your AMP files. E.g. if you host AMP files on "www.example.com", this URL must not be on "www.example.com" but e.g. "something-else.example.com" is OK.

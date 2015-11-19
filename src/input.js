@@ -21,10 +21,10 @@ import {listenOnce, listenOncePromise} from './event-helper';
 import {timer} from './timer';
 
 
-let TAG_ = 'Input';
+const TAG_ = 'Input';
 
-let MAX_MOUSE_CONFIRM_ATTEMPS_ = 3;
-let CLICK_TIMEOUT_ = 300;
+const MAX_MOUSE_CONFIRM_ATTEMPS_ = 3;
+const CLICK_TIMEOUT_ = 300;
 
 
 /**
@@ -172,7 +172,7 @@ export class Input {
     }
 
     // Ignore inputs.
-    let target = e.target;
+    const target = e.target;
     if (target && (target.tagName == 'INPUT' ||
           target.tagName == 'TEXTAREA' ||
           target.tagName == 'SELECT' ||
@@ -201,8 +201,8 @@ export class Input {
     // If "click" arrives within a timeout time, this is most likely a
     // touch/mouse emulation. Otherwise, if timeout exceeded, this looks
     // like a legitimate mouse event.
-    return listenOncePromise(this.win.document, 'click', false, CLICK_TIMEOUT_).
-        then(this.boundMouseCanceled_, this.boundMouseConfirmed_);
+    return listenOncePromise(this.win.document, 'click', false, CLICK_TIMEOUT_)
+        .then(this.boundMouseCanceled_, this.boundMouseConfirmed_);
   }
 
   /** @private */

@@ -32,6 +32,9 @@ export class Timer {
     this.taskCount_ = 0;
 
     this.canceled_ = {};
+
+    /** @const {number} */
+    this.startTime_ = this.now();
   }
 
   /**
@@ -41,6 +44,14 @@ export class Timer {
   now() {
     // TODO(dvoytenko): when can we use Date.now?
     return Number(new Date());
+  }
+
+ /**
+  * Returns time since start in milliseconds.
+  * @return {number}
+  */
+  timeSinceStart() {
+    return this.now() - this.startTime_;
   }
 
   /**
@@ -57,7 +68,7 @@ export class Timer {
     if (!opt_delay) {
       // For a delay of zero,  schedule a promise based micro task since
       // they are predictably fast.
-      var id = 'p' + this.taskCount_++;
+      const id = 'p' + this.taskCount_++;
       this.resolved_.then(() => {
         if (this.canceled_[id]) {
           delete this.canceled_[id];
@@ -91,7 +102,7 @@ export class Timer {
    * @template RESULT
    */
   promise(opt_delay, opt_result) {
-    var timerKey = null;
+    let timerKey = null;
     return new Promise((resolve, reject) => {
       timerKey = this.delay(() => {
         timerKey = -1;
@@ -100,7 +111,7 @@ export class Timer {
       if (timerKey == -1) {
         reject(new Error('Failed to schedule timer.'));
       }
-    }).catch((error) => {
+    }).catch(error => {
       // Clear the timer. The most likely reason is "cancel" signal.
       if (timerKey != -1) {
         this.cancel(timerKey);
@@ -120,8 +131,8 @@ export class Timer {
    * @template RESULT
    */
   timeoutPromise(delay, opt_racePromise) {
-    var timerKey = null;
-    var delayPromise = new Promise((resolve, reject) => {
+    let timerKey = null;
+    const delayPromise = new Promise((resolve, reject) => {
       timerKey = this.delay(() => {
         timerKey = -1;
         reject('timeout');
@@ -129,7 +140,7 @@ export class Timer {
       if (timerKey == -1) {
         reject(new Error('Failed to schedule timer.'));
       }
-    }).catch((error) => {
+    }).catch(error => {
       // Clear the timer. The most likely reason is "cancel" signal.
       if (timerKey != -1) {
         this.cancel(timerKey);
@@ -139,7 +150,11 @@ export class Timer {
     if (!opt_racePromise) {
       return delayPromise;
     }
-    return Promise.race([delayPromise, opt_racePromise]);
+    // Avoids Promise->race due to presubmit check against it.
+    return new Promise((resolve, reject) => {
+      delayPromise.then(resolve, reject);
+      opt_racePromise.then(resolve, reject);
+    });
   }
 }
 

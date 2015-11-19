@@ -25,7 +25,7 @@ import {assertLength} from './layout';
  *   size: (!Length)
  * }}
  */
-var SizeListOption;
+let SizeListOption;
 
 
 /**
@@ -42,10 +42,10 @@ var SizeListOption;
  * @return {!SizeList}
  */
 export function parseSizeList(s) {
-  let sSizes = s.split(',');
+  const sSizes = s.split(',');
   assert(sSizes.length > 0, 'sizes has to have at least one size');
-  let sizes = [];
-  sSizes.forEach((sSize) => {
+  const sizes = [];
+  sSizes.forEach(sSize => {
     sSize = sSize.replace(/\s+/g, ' ').trim();
     if (sSize.length == 0) {
       return;
@@ -53,7 +53,7 @@ export function parseSizeList(s) {
 
     let mediaStr;
     let sizeStr;
-    let spaceIndex = sSize.lastIndexOf(' ');
+    const spaceIndex = sSize.lastIndexOf(' ');
     if (spaceIndex != -1) {
       mediaStr = sSize.substring(0, spaceIndex).trim();
       sizeStr = sSize.substring(spaceIndex + 1).trim();
@@ -88,7 +88,7 @@ export class SizeList {
     // All sources except for last must have a media query. The last one must
     // not.
     for (let i = 0; i < sizes.length; i++) {
-      let option = sizes[i];
+      const option = sizes[i];
       if (i < sizes.length - 1) {
         assert(option.mediaQuery,
             'All options except for the last must have a media condition');
@@ -109,7 +109,7 @@ export class SizeList {
    */
   select(win) {
     for (let i = 0; i < this.sizes_.length - 1; i++) {
-      let option = this.sizes_[i];
+      const option = this.sizes_[i];
       if (win.matchMedia(option.mediaQuery).matches) {
         return option.size;
       }

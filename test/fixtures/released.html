@@ -4,24 +4,33 @@
   <meta charset="utf-8">
   <title>Released AMP components</title>
   <link rel="canonical" href="amps.html" >
-  <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
-  <script custom-element="amp-audio" src="/base/dist/v0/amp-audio-0.1.max.js" async></script>
-  <script custom-element="amp-anim" src="/base/dist/v0/amp-anim-0.1.max.js" async></script>
-  <script custom-element="amp-iframe" src="/base/dist/v0/amp-iframe-0.1.max.js" async></script>
-  <script custom-element="amp-instagram" src="/base/dist/v0/amp-instagram-0.1.max.js" async></script>
-  <script custom-element="amp-twitter" src="/base/dist/v0/amp-twitter-0.1.max.js" async></script>
-  <script custom-element="amp-youtube" src="/base/dist/v0/amp-youtube-0.1.max.js" async></script>
-  <script src="/base/dist/amp.js"></script>
+  <script async custom-element="amp-audio" src="/base/dist/v0/amp-audio-0.1.max.js"></script>
+  <script async custom-element="amp-anim" src="/base/dist/v0/amp-anim-0.1.max.js"></script>
+  <script async custom-element="amp-iframe" src="/base/dist/v0/amp-iframe-0.1.max.js"></script>
+  <script async custom-element="amp-instagram" src="/base/dist/v0/amp-instagram-0.1.max.js"></script>
+  <script async custom-element="amp-twitter" src="/base/dist/v0/amp-twitter-0.1.max.js"></script>
+  <script async custom-element="amp-youtube" src="/base/dist/v0/amp-youtube-0.1.max.js"></script>
   <style>
     body {
       max-width: 527px;
       font-family: 'Questrial', Arial;
     }
   </style>
+  <style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
+  <script async src="/base/dist/amp.js"></script>
 </head>
 <body>
   <h1>Released AMP components</h1>
+  <h2>Ad A9</h2>
+  <amp-ad width=300 height=250
+      id="ad"
+      type="a9"
+      data-aax_size="300x250"
+      data-aax_pubname="abc123"
+      data-aax_src="302">
+  </amp-ad>
   <h2>Responsive image</h2>
   <p>
     <amp-img src="/base/examples/img/sample.jpg" width=527 height=193 layout="responsive" ></amp-img>
@@ -75,18 +84,9 @@
 
   <h2>Youtube</h2>
   <amp-youtube
-      video-id="mGENRKrdoGY"
+      data-videoid="mGENRKrdoGY"
       layout="responsive"
       width="480" height="270"></amp-youtube>
-
-  <h2>Ad A9</h2>
-  <amp-ad width=300 height=250
-      type="a9"
-      data-aax_size="300x250"
-      data-aax_pubname="abc123"
-      data-aax_src="302">
-  </amp-ad>
-
 
   <h2>Iframe</h2>
   <amp-iframe width=300 height=300
@@ -99,18 +99,11 @@
 
   <h2>Instagram</h2>
   <amp-instagram
-      shortcode="fBwFP"
+      data-shortcode="fBwFP"
       width="320"
       height="392"
       layout="responsive">
   </amp-instagram>
-
-
-  <h2>Ad AdSense</h2>
-  <amp-ad width=300 height=200
-      type="adsense"
-      data-ad-client="ca-pub-9350112648257122">
-  </amp-ad>
 
 
   <h2>Twitter</h2>

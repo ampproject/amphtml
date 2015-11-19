@@ -26,6 +26,7 @@ describe('Carousel gestures', () => {
     element = document.createElement('div');
     element.style.width = '320px';
     element.style.height = '200px';
+    element.getRealChildren = () => [];
     document.body.appendChild(element);
 
     carousel = new AmpCarousel(element);
@@ -96,13 +97,13 @@ describe('Carousel gestures', () => {
 
   it('should continue innertia', () => {
     carousel.onSwipeStart_({});
-    let promise = carousel.onSwipeEnd_({deltaX: 0, velocityX: -0.11});
+    const promise = carousel.onSwipeEnd_({deltaX: 0, velocityX: -0.11});
     expect(carousel.motion_).to.not.equal(null);
   });
 
   it('should not continue innertia', () => {
     carousel.onSwipeStart_({});
-    let promise = carousel.onSwipeEnd_({deltaX: 0, velocityX: -0.01});
+    const promise = carousel.onSwipeEnd_({deltaX: 0, velocityX: -0.01});
     expect(carousel.motion_).to.equal(null);
   });
 });

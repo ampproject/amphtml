@@ -23,7 +23,10 @@
 import {getService} from './service';
 import {parseUrl} from './url';
 import {timer} from './timer';
+import {platformFor} from './platform';
 
+const ACTIVE_CONNECTION_TIMEOUT_MS = 180 * 1000;
+const PRECONNECT_TIMEOUT_MS = 10 * 1000;
 
 class Preconnect {
 
@@ -33,26 +36,58 @@ class Preconnect {
   constructor(win) {
     /** @private @const {!Element} */
     this.head_ = win.document.head;
-    /** @private @const {!Object<string, boolean>}  */
+    /**
+     * Origin we've preconnected to and when that connection
+     * expires as a timestamp in MS.
+     * @private @const {!Object<string, number>}
+     */
     this.origins_ = {};
+    /**
+     * Urls we've prefetched.
+     * @private @const {!Object<string, boolean>}
+     */
+    this.urls_ = {};
+    /** @private @const {!Platform}  */
+    this.platform_ = platformFor(win);
     // Mark current origin as preconnected.
     this.origins_[parseUrl(win.location.href).origin] = true;
   }
 
   /**
-   * Preconnects to a URL.
+   * Preconnects to a URL. Always also does a dns-prefetch because
+   * browser support for that is better.
    * @param {string} url
+   * @param {boolean=} opt_alsoConnecting Set this flag if you also just
+   *    did or are about to connect to this host. This is for the case
+   *    where preconnect is issued immediate before or after actual connect
+   *    and preconnect is used to flatten a deep HTTP request chain.
+   *    E.g. when you preconnect to a host that an embed will connect to
+   *    when it is more fully rendered, you already know that the connection
+   *    will be used very soon.
    */
-  url(url) {
-    var origin = parseUrl(url).origin;
-    if (this.origins_[origin]) {
+  url(url, opt_alsoConnecting) {
+    if (!this.isInterestingUrl_(url)) {
       return;
     }
-    this.origins_[origin] = true;
-    var dns = document.createElement('link');
+    const origin = parseUrl(url).origin;
+    const now = timer.now();
+    const lastPreconnectTimeout = this.origins_[origin];
+    if (lastPreconnectTimeout && now < lastPreconnectTimeout) {
+      if (opt_alsoConnecting) {
+        this.origins_[origin] = now + ACTIVE_CONNECTION_TIMEOUT_MS ;
+      }
+      return;
+    }
+    // If we are about to use the connection, don't re-preconnect for
+    // 180 seconds.
+    const timeout = opt_alsoConnecting
+        ? ACTIVE_CONNECTION_TIMEOUT_MS
+        : PRECONNECT_TIMEOUT_MS;
+    this.origins_[origin] = now + timeout;
+    const dns = document.createElement('link');
     dns.setAttribute('rel', 'dns-prefetch');
     dns.setAttribute('href', origin);
-    var preconnect = document.createElement('link');
+    const preconnect = document.createElement('link');
     preconnect.setAttribute('rel', 'preconnect');
     preconnect.setAttribute('href', origin);
     this.head_.appendChild(dns);
@@ -60,13 +95,80 @@ class Preconnect {
 
     // Remove the tags eventually to free up memory.
     timer.delay(() => {
-      this.head_.removeChild(dns);
-      this.head_.removeChild(preconnect);
+      if (dns.parentNode) {
+        dns.parentNode.removeChild(dns);
+      }
+      if (preconnect.parentNode) {
+        preconnect.parentNode.removeChild(preconnect);
+      }
     }, 10000);
+
+    this.preconnectPolyfill_(origin);
   }
 
-  threePFrame() {
-    this.url('https://3p.ampproject.net');
+  /**
+   * Asks the browser to prefetch a URL. Always also does a preconnect
+   * because browser support for that is better.
+   * @param {string} url
+   */
+  prefetch(url) {
+    if (!this.isInterestingUrl_(url)) {
+      return;
+    }
+    if (this.urls_[url]) {
+      return;
+    }
+    this.urls_[url] = true;
+    this.url(url, /* opt_alsoConnecting */ true);
+    const prefetch = document.createElement('link');
+    prefetch.setAttribute('rel', 'prefetch');
+    prefetch.setAttribute('href', url);
+    this.head_.appendChild(prefetch);
+    // As opposed to preconnect we do not clean this tag up, because there is
+    // no expectation as to it having an immediate effect.
+  }
+
+  isInterestingUrl_(url) {
+    if (url.indexOf('https:') == 0 || url.indexOf('http:') == 0) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Safari does not support preconnecting, but due to its significant
+   * performance benefits we implement this crude polyfill.
+   *
+   * We make an image connection to a "well-known" file on the origin adding
+   * a random query string to bust the cache (no caching because we do want to
+   * actually open the connection).
+   *
+   * This should get us an open SSL connection to these hosts and significantly
+   * speed up the next connections.
+   *
+   * The actual URL is expected to 404. If you see errors for
+   * amp_preconnect_polyfill in your DevTools console or server log:
+   * This is expected and fine to leave as is. Its fine to send a non 404
+   * response, but please make it small :)
+   */
+  preconnectPolyfill_(origin) {
+    // Unfortunately there is no way to feature detect whether preconnect is
+    // supported, so we do this only in Safari, which is the most important
+    // browser without support for it. This needs to be removed should it
+    // ever add support.
+    if (!this.platform_.isSafari()) {
+      return;
+    }
+    // Don't attempt to preconnect for ACTIVE_CONNECTION_TIMEOUT_MS since
+    // we effectively create an active connection.
+    // TODO(@cramforce): Confirm actual http2 timeout in Safari.
+    this.origins_[origin] = timer.now() + ACTIVE_CONNECTION_TIMEOUT_MS;
+    const url = origin + '/amp_preconnect_polyfill?' + Math.random();
+    // We use an XHR without withCredentials(true), so we do not send cookies
+    // to the host and the host cannot set cookies.
+    const xhr = new XMLHttpRequest();
+    xhr.open('HEAD', url, true);
+    xhr.send();
   }
 }
 

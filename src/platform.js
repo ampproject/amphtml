@@ -40,10 +40,19 @@ export class Platform {
   }
 
   /**
+   * Whether the current browser is Safari.
+   * @return {boolean}
+   */
+  isSafari() {
+    return /Safari/i.test(this.win.navigator.userAgent) && !this.isChrome();
+  }
+
+  /**
    * Whether the current browser a Chrome browser.
    * @return {boolean}
    */
   isChrome() {
+    // Also true for MS Edge :)
     return /Chrome|CriOS/i.test(this.win.navigator.userAgent);
   }
 };

@@ -27,9 +27,9 @@ import {timer} from './timer';
  * @return {!Unlisten}
  */
 export function listenOnce(element, eventType, listener, opt_capture) {
-  let capture = opt_capture || false;
+  const capture = opt_capture || false;
   let unlisten;
-  let proxy = (event) => {
+  const proxy = event => {
     listener(event);
     unlisten();
   };
@@ -54,7 +54,7 @@ export function listenOnce(element, eventType, listener, opt_capture) {
 export function listenOncePromise(element, eventType, opt_capture,
     opt_timeout) {
   let unlisten;
-  let eventPromise = new Promise((resolve, reject) => {
+  const eventPromise = new Promise((resolve, reject) => {
     unlisten = listenOnce(element, eventType, resolve, opt_capture);
   });
   return racePromise_(eventPromise, unlisten, opt_timeout);
@@ -82,7 +82,7 @@ export function isLoaded(element) {
 export function loadPromise(element, opt_timeout) {
   let unlistenLoad;
   let unlistenError;
-  let loadingPromise = new Promise((resolve, reject) => {
+  const loadingPromise = new Promise((resolve, reject) => {
     if (isLoaded(element)) {
       resolve(element);
     } else {
@@ -127,11 +127,11 @@ function racePromise_(promise, unlisten, timeout) {
   if (!unlisten) {
     return racePromise;
   }
-  return racePromise.then((result) => {
+  return racePromise.then(result => {
     unlisten();
     return result;
-  }, (reason) => {
+  }, reason => {
     unlisten();
-    return Promise.reject(reason);
+    throw reason;
   });
 }
