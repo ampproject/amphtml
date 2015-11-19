@@ -62,6 +62,9 @@ module.exports = function(config) {
         base: 'Chrome',
         flags: ['--no-sandbox'],
       },
+      // SauceLabs configurations.
+      // New configurations can be created here:
+      // https://wiki.saucelabs.com/display/DOCS/Platform+Configurator#/
       SL_Chrome_android: {
         base: 'SauceLabs',
         browserName: 'android',
@@ -92,6 +95,16 @@ module.exports = function(config) {
       SL_Edge_latest: {
         base: 'SauceLabs',
         browserName: 'microsoftedge',
+      },
+      SL_Safari_9: {
+        base: 'SauceLabs',
+        browserName: 'safari',
+        version: 9,
+      },
+      SL_Safari_8: {
+        base: 'SauceLabs',
+        browserName: 'safari',
+        version: 8,
       },
     },
 
