@@ -54,9 +54,11 @@ function getFrameAttributes(parentWindow, element, opt_type) {
   attributes.initialWindowWidth = box.width;
   attributes.initialWindowHeight = box.height;
   attributes.type = type;
+  const docInfo = documentInfoFor(parentWindow);
   attributes._context = {
     referrer: parentWindow.document.referrer,
-    canonicalUrl: documentInfoFor(parentWindow).canonicalUrl,
+    canonicalUrl: docInfo.canonicalUrl,
+    pageViewId: docInfo.pageViewId,
     location: {
       href: parentWindow.location.href
     },

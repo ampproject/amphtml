@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {UrlReplacements} from '../../../src/url-replacements';
+import {urlReplacementsFor} from '../../../src/url-replacements';
 import {assertHttpsUrl} from '../../../src/url';
 import {childElementByAttr} from '../../../src/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';
@@ -51,7 +51,7 @@ export class AmpList extends AMP.BaseElement {
     }
 
     /** @private @const {!UrlReplacements} */
-    this.urlReplacements_ = new UrlReplacements(this.getWin());
+    this.urlReplacements_ = urlReplacementsFor(this.getWin());
   }
 
   /** @override */
