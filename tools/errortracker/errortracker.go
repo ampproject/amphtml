@@ -99,13 +99,17 @@ func handle(w http.ResponseWriter, r *http.Request) {
 
 	// Fill query params into JSON struct.
 	line, _ := strconv.Atoi(r.URL.Query().Get("l"))
+	errorType := "default"
+	if r.URL.Query().Get("a") == "1" {
+		errorType = "assert"
+	}
 
 	event := &ErrorEvent{
 		Message:     r.URL.Query().Get("m"),
 		Exception:   r.URL.Query().Get("s"),
 		Version:     r.URL.Query().Get("v"),
 		Environment: "prod",
-		Application: appengine.ModuleName(c),
+		Application: errorType,
 		AppID:       appengine.AppID(c),
 		Filename:    r.URL.Query().Get("f"),
 		Line:        int32(line),
@@ -116,6 +120,12 @@ func handle(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "One of 'message' or 'exception' must be present.",
 			http.StatusBadRequest)
 		log.Errorf(c, "Malformed request: %v", event)
+		return
+	}
+
+	// Don't log testing traffic in production
+	if event.Version == "$internalRuntimeVersion$" {
+		w.WriteHeader(http.StatusNoContent)
 		return
 	}
 
@@ -141,7 +151,13 @@ func handle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-	w.WriteHeader(http.StatusOK)
-	fmt.Fprintln(w, "OK")
+	// When debug param is present, return a document. This is nicer because
+	// browsers otherwise revert the URL during manual testing.
+	if r.URL.Query().Get("debug") == "1" {
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintln(w, "OK")
+	} else {
+		w.WriteHeader(http.StatusNoContent)
+	}
 }
