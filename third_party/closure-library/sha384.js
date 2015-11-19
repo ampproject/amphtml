@@ -18,7 +18,7 @@ goog.require('goog.crypt.Sha384');
 goog.require('goog.crypt.base64');
 
 /**
- * @param {string} input The value to hash.
+ * @param {!Uint8Array|string} input The value to hash.
  * @return {string} Web safe base64 of the digest of the input string.
  */
 var digest = function(input) {

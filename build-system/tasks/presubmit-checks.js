@@ -44,17 +44,27 @@ var forbiddenTerms = {
       'validator/validator-in-browser.js',
     ]
   },
+  'cidFor': {
+    message: requiresReviewPrivacy,
+    whitelist: [
+      'src/cid.js',
+      'test/functional/test-cid.js',
+    ],
+  },
   'cookie\\W': {
     message: requiresReviewPrivacy,
     whitelist: [
       'src/cookies.js',
+      'src/cid.js',
+      'test/functional/test-cid.js',
       'test/functional/test-cookies.js',
       'test/functional/test-experiments.js',
-    ]
+    ],
   },
   'getCookie\\W': {
     message: requiresReviewPrivacy,
     whitelist: [
+      'src/cid.js',
       'src/cookies.js',
       'src/experiments.js',
       'test/functional/test-cookies.js',
@@ -70,7 +80,14 @@ var forbiddenTerms = {
     ]
   },
   'eval\\(': '',
-  'localStorage': requiresReviewPrivacy,
+  'localStorage': {
+    message: requiresReviewPrivacy,
+    whitelist: [
+      'test/_init_tests.js',
+      'src/cid.js',
+      'test/functional/test-cid.js',
+    ],
+  },
   'sessionStorage': requiresReviewPrivacy,
   'indexedDB': requiresReviewPrivacy,
   'openDatabase': requiresReviewPrivacy,
