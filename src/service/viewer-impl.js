@@ -143,6 +143,14 @@ export class Viewer {
     /** @const @private {!Object<string, string>} */
     this.params_ = {};
 
+    /** @private {?function()} */
+    this.whenVisibleResolve_ = null;
+
+    /** @private @const {!Promise} */
+    this.whenVisiblePromise_ = new Promise(resolve => {
+      this.whenVisibleResolve_ = resolve;
+    });
+
     // Params can be passed either via iframe name or via hash. Hash currently
     // has precedence.
     if (this.win.name && this.win.name.indexOf(SENTINEL_) == 0) {
@@ -194,9 +202,7 @@ export class Viewer {
     log.fine(TAG_, '- padding-top:', this.paddingTop_);
 
     // Wait for document to become visible.
-    this.docState_.onVisibilityChanged(() => {
-      this.visibilityObservable_.fire();
-    });
+    this.docState_.onVisibilityChanged(this.onVisibilityChange_.bind(this));
 
     // Remove hash - no reason to keep it around, but only when embedded.
     if (this.isEmbedded_) {
@@ -206,6 +212,21 @@ export class Viewer {
         log.fine(TAG_, 'replace url:' + this.win.location.href);
       }
     }
+
+    // Check if by the time the `Viewer`
+    // instance is constructed, the document is already `visible`.
+    this.onVisibilityChange_();
+  }
+
+  /**
+   * Handler for visibility change.
+   * @private
+   */
+  onVisibilityChange_() {
+    if (this.isVisible()) {
+      this.whenVisibleResolve_();
+    }
+    this.visibilityObservable_.fire();
   }
 
   /**
@@ -279,6 +300,15 @@ export class Viewer {
   isVisible() {
     return this.visibilityState_ == VisibilityState.VISIBLE &&
         !this.docState_.isHidden();
+  }
+
+ /**
+  * Returns a Promise that only ever resolved when the current
+  * AMP document becomes visible.
+  * @return {!Promise}
+  */
+  whenVisible() {
+    return this.whenVisiblePromise_;
   }
 
   /**
@@ -468,7 +498,7 @@ export class Viewer {
       }
       log.fine(TAG_, 'visibilitychange event:', this.visibilityState_,
           this.prerenderSize_);
-      this.visibilityObservable_.fire();
+      this.onVisibilityChange_();
       return Promise.resolve();
     }
     log.fine(TAG_, 'unknown message:', eventType);

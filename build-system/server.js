@@ -19,6 +19,7 @@
  * files and list directories for use with the gulp live server
  */
 var app = require('connect')();
+var bodyParser = require('body-parser');
 var clr = require('connect-livereload');
 var finalhandler = require('finalhandler');
 var path = require('path');
@@ -29,9 +30,31 @@ var args = Array.prototype.slice.call(process.argv, 2, 4);
 var paths = args[0];
 var port = args[1];
 
+app.use(bodyParser.json());
+
+app.use('/api/show', function(req, res) {
+  res.setHeader('Content-Type', 'application/json');
+  res.end(JSON.stringify({
+    showNotification: true
+  }));
+});
+
+app.use('/api/dont-show', function(req, res) {
+  res.setHeader('Content-Type', 'application/json');
+  res.end(JSON.stringify({
+    showNotification: false
+  }));
+});
+
+
+app.use('/api/echo/post', function(req, res) {
+  res.setHeader('Content-Type', 'application/json');
+  res.end(JSON.stringify(req.body, null, 2));
+});
+
 app.use(clr());
 
-paths.split(",").forEach(function(pth){
+paths.split(',').forEach(function(pth) {
   // Serve static files that exist
   app.use(serveStatic(path.join(process.cwd(), pth)));
   // Serve directory listings

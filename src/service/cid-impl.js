@@ -24,6 +24,7 @@
 
 import {assert} from '../asserts';
 import {getCookie} from '../cookies';
+import {getMode} from '../mode';
 import {getService} from '../service';
 import {parseUrl} from '../url';
 import {timer} from '../timer';
@@ -86,8 +87,8 @@ class Cid {
    */
   get(externalCidScope, consent, opt_persistenceConsent) {
     assert(/^[a-zA-Z0-9-_]+$/.test(externalCidScope),
-        'The client id name must match only use the characters ' +
-        '[a-zA-Z0-9-_]+\nInstead found %s', externalCidScope);
+        'The client id name must only use the characters ' +
+        '[a-zA-Z0-9-_]+\nInstead found: %s', externalCidScope);
     return consent.then(() => {
       return getExternalCid(this, externalCidScope,
           opt_persistenceConsent || consent);
@@ -146,8 +147,13 @@ export function getSourceOrigin(url) {
   // The /s/ is optional and signals a secure origin.
   const path = url.pathname.split('/');
   const prefix = path[1];
-  assert(prefix == 'c' || prefix == 'v',
-      'Unknown path prefix in url %s', url.href);
+  const mode = getMode();
+  // whitelist while localdev and file is in build/ or examples/
+  if (!(mode.localDev &&
+        (prefix == 'examples.build' || prefix == 'examples'))) {
+    assert(prefix == 'c' || prefix == 'v',
+        'Unknown path prefix in url %s', url.href);
+  }
   const domainOrHttpsSignal = path[2];
   const origin = domainOrHttpsSignal == 's'
       ? 'https://' + path[3]
