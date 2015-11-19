@@ -88,6 +88,7 @@ var forbiddenTerms = {
       'src/cid.js',
       'src/service/cid-impl.js',
       'src/url-replacements.js',
+      'extensions/amp-user-notification/0.1/amp-user-notification.js',
     ],
   },
   'getBaseCid': {
