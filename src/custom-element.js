@@ -671,8 +671,6 @@ export function createAmpElementProto(win, name, implementationClass) {
     const promise = this.implementation_.layoutCallback();
     this.preconnect(/* onLayout */ true);
     this.classList.add('-amp-layout');
-    assert(promise instanceof Promise,
-        'layoutCallback must return a promise');
     return promise.then(() => {
       this.readyState = 'complete';
       this.layoutCount_++;

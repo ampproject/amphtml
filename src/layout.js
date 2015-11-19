@@ -75,6 +75,7 @@ export const LOADING_ELEMENTS_ = {
   'AMP-IFRAME': true,
   'AMP-IMG': true,
   'AMP-INSTAGRAM': true,
+  'AMP-LIST': true,
   'AMP-PINTEREST': true,
   'AMP-VIDEO': true
 };
