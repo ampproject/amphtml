@@ -16,7 +16,9 @@
 
 import {xhrFor, fetchPolyfill} from '../../src/xhr';
 
-describe('XHR', () => {
+describe('XHR', function() {
+  // Given XHR calls give tests more time.
+  this.timeout(5000);
 
   const scenarios = [
     {xhr: xhrFor(window), desc: 'Native'},
