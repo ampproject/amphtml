@@ -1,0 +1,67 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>AMP #0</title>
+  <link rel="canonical" href="amps.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
+  <style amp-custom>
+    body {
+      font-family: 'Questrial', Arial;
+    }
+    article {
+      display: block;
+      margin: 8px;
+    }
+    figure {
+      margin: 0;
+    }
+  </style>
+  <style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
+  <script async src="../../dist/amp.js" development></script>
+  <script async custom-element="amp-render" src="../../dist/v0/amp-render-0.1.max.js"></script>
+  <script async custom-template="amp-mustache" src="../../dist/v0/amp-mustache-0.1.max.js"></script>
+</head>
+<body>
+<article>
+  <h1>amp-render</h1>
+
+  <template type="amp-mustache" id="templ1">
+    Other: {{name}} at {{time}}
+    <STYLE>body {background: red;}</STYLE>
+    <img src="1" onclick="alert('HERE');">
+    {{{inline}}}
+    and other things
+    <amp-img
+        src="{{imageUrl}}"
+        width=300 height=200 layout="responsive"></amp-img>
+  </template>
+
+  <amp-render width="300" height="300" template="templ1"></amp-render>
+
+  <amp-render width="300" height="300">
+    <template type="amp-mustache">
+      {{name}} at {{time}}
+      <amp-img
+          src="{{imageUrl}}"
+          width=300 height=200 layout="responsive"></amp-img>
+    </template>
+  </amp-render>
+
+  <p>
+    Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt. Propriae tincidunt id nec, elit nusquam te mea, ius noster platonem in. Mea an idque minim, sit sale deleniti apeirian et. Omnium legendos tractatos cu mea. Vix in stet dolorem accusamus. Iisque rationibus consetetur in cum, quo unum nulla legere ut. Simul numquam saperet no sit.
+  </p>
+
+  <p>
+    Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt. Propriae tincidunt id nec, elit nusquam te mea, ius noster platonem in. Mea an idque minim, sit sale deleniti apeirian et. Omnium legendos tractatos cu mea. Vix in stet dolorem accusamus. Iisque rationibus consetetur in cum, quo unum nulla legere ut. Simul numquam saperet no sit.
+  </p>
+
+  <p>
+    Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt. Propriae tincidunt id nec, elit nusquam te mea, ius noster platonem in. Mea an idque minim, sit sale deleniti apeirian et. Omnium legendos tractatos cu mea. Vix in stet dolorem accusamus. Iisque rationibus consetetur in cum, quo unum nulla legere ut. Simul numquam saperet no sit.
+  </p>
+
+</article>
+</body>
+</html>
+
