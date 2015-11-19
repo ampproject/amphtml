@@ -19,130 +19,129 @@
 package errortracker
 
 import (
-  "fmt"
-  "net/http"
-  "strconv"
-  "time"
+	"fmt"
+	"net/http"
+	"strconv"
+	"time"
 
-  "golang.org/x/net/context"
-  "golang.org/x/oauth2"
-  "golang.org/x/oauth2/google"
-  "google.golang.org/appengine"
-  "google.golang.org/appengine/log"
-  "google.golang.org/appengine/urlfetch"
-  "google.golang.org/cloud"
-  "google.golang.org/cloud/logging"
+	"golang.org/x/net/context"
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/google"
+	"google.golang.org/appengine"
+	"google.golang.org/appengine/log"
+	"google.golang.org/appengine/urlfetch"
+	"google.golang.org/cloud"
+	"google.golang.org/cloud/logging"
 )
 
 // Magic fields documented here
 // https://cloud.google.com/error-reporting/#error_message_fields
 type ErrorRequestMeta struct {
-  HTTPReferrer  string `json:"http_referrer,omitempty"`
-  HTTPUserAgent string `json:"http_user_agent,omitempty"`
+	HTTPReferrer  string `json:"http_referrer,omitempty"`
+	HTTPUserAgent string `json:"http_user_agent,omitempty"`
 }
 
 type ErrorRequest struct {
-  URL    string            `json:"url,omitempty"`
-  Method string            `json:"method,omitempty"`
-  Meta   *ErrorRequestMeta `json:"meta,omitempty"`
+	URL    string            `json:"url,omitempty"`
+	Method string            `json:"method,omitempty"`
+	Meta   *ErrorRequestMeta `json:"meta,omitempty"`
 }
 
 type ErrorEvent struct {
-  Application string `json:"application,omitempty"`
-  AppID       string `json:"app_id,omitempty"`
-  Environment string `json:"environment,omitempty"`
-  Version     string `json:"version,omitempty"`
+	Application string `json:"application,omitempty"`
+	AppID       string `json:"app_id,omitempty"`
+	Environment string `json:"environment,omitempty"`
+	Version     string `json:"version,omitempty"`
 
-  Message   string `json:"message,omitempty"`
-  Exception string `json:"exception,omitempty"`
+	Message   string `json:"message,omitempty"`
+	Exception string `json:"exception,omitempty"`
 
-  Request *ErrorRequest `json:"request,omitempty"`
+	Request *ErrorRequest `json:"request,omitempty"`
 
-  Filename  string `json:"filename,omitempty"`
-  Line      int32  `json:"line,omitempty"`
-  Classname string `json:"classname,omitempty"`
-  Function  string `json:"function,omitempty"`
+	Filename  string `json:"filename,omitempty"`
+	Line      int32  `json:"line,omitempty"`
+	Classname string `json:"classname,omitempty"`
+	Function  string `json:"function,omitempty"`
 }
 
 func init() {
-  http.HandleFunc("/r", handle)
+	http.HandleFunc("/r", handle)
 }
 
 // Get an auth context for logging RPC.
 func cloudAuthContext(r *http.Request) (context.Context, error) {
-  c := appengine.NewContext(r)
+	c := appengine.NewContext(r)
 
-  hc := &http.Client{
-    Transport: &oauth2.Transport{
-      Source: google.AppEngineTokenSource(c, logging.Scope),
-      Base:   &urlfetch.Transport{Context: c},
-    },
-  }
-  return cloud.WithContext(c, appengine.AppID(c), hc), nil
+	hc := &http.Client{
+		Transport: &oauth2.Transport{
+			Source: google.AppEngineTokenSource(c, logging.Scope),
+			Base:   &urlfetch.Transport{Context: c},
+		},
+	}
+	return cloud.WithContext(c, appengine.AppID(c), hc), nil
 }
 
 func handle(w http.ResponseWriter, r *http.Request) {
-  c, _ := cloudAuthContext(r)
-  logc, err := logging.NewClient(c, appengine.AppID(c), "javascript.errors")
-  if err != nil {
-    http.Error(w, "Cannot connect to Google Cloud Logging",
-      http.StatusInternalServerError)
-    log.Errorf(c, "Cannot connect to Google Cloud Logging: %v", err)
-    return
-  }
+	c, _ := cloudAuthContext(r)
+	logc, err := logging.NewClient(c, appengine.AppID(c), "javascript.errors")
+	if err != nil {
+		http.Error(w, "Cannot connect to Google Cloud Logging",
+			http.StatusInternalServerError)
+		log.Errorf(c, "Cannot connect to Google Cloud Logging: %v", err)
+		return
+	}
 
-  // Note: Error Reporting currently ignores non-GCE and non-AWS logs.
-  logc.ServiceName = "compute.googleapis.com"
-  logc.CommonLabels = map[string]string{
-    "compute.googleapis.com/resource_type": "logger",
-    "compute.googleapis.com/resource_id":   "errors"}
+	// Note: Error Reporting currently ignores non-GCE and non-AWS logs.
+	logc.ServiceName = "compute.googleapis.com"
+	logc.CommonLabels = map[string]string{
+		"compute.googleapis.com/resource_type": "logger",
+		"compute.googleapis.com/resource_id":   "errors"}
 
+	// Fill query params into JSON struct.
+	line, _ := strconv.Atoi(r.URL.Query().Get("l"))
 
-  // Fill query params into JSON struct.
-  line, _ := strconv.Atoi(r.URL.Query().Get("l"))
+	event := &ErrorEvent{
+		Message:     r.URL.Query().Get("m"),
+		Exception:   r.URL.Query().Get("s"),
+		Version:     r.URL.Query().Get("v"),
+		Environment: "prod",
+		Application: appengine.ModuleName(c),
+		AppID:       appengine.AppID(c),
+		Filename:    r.URL.Query().Get("f"),
+		Line:        int32(line),
+		Classname:   r.URL.Query().Get("el"),
+	}
 
-  event := &ErrorEvent{
-    Message: r.URL.Query().Get("m"),
-    Exception: r.URL.Query().Get("s"),
-    Version: r.URL.Query().Get("v"),
-    Environment: "prod",
-    Application: appengine.ModuleName(c),
-    AppID: appengine.AppID(c),
-    Filename: r.URL.Query().Get("f"),
-    Line: int32(line),
-    Classname: r.URL.Query().Get("el"),
-  }
+	if event.Message == "" && event.Exception == "" {
+		http.Error(w, "One of 'message' or 'exception' must be present.",
+			http.StatusBadRequest)
+		log.Errorf(c, "Malformed request: %v", event)
+		return
+	}
 
-  if event.Message == "" && event.Exception == "" {
-    http.Error(w, "One of 'message' or 'exception' must be present.",
-      http.StatusBadRequest)
-    log.Errorf(c, "Malformed request: %v", event)
-    return
-  }
+	event.Request = &ErrorRequest{
+		URL: r.Referer(),
+	}
+	event.Request.Meta = &ErrorRequestMeta{
+		HTTPReferrer:  r.Referer(),
+		HTTPUserAgent: r.UserAgent(),
+		// Intentionally not logged.
+		// RemoteIP:   r.RemoteAddr,
+	}
 
-  event.Request = &ErrorRequest{
-    URL: r.Referer(),
-  }
-  event.Request.Meta = &ErrorRequestMeta{
-    HTTPReferrer:  r.Referer(),
-    HTTPUserAgent: r.UserAgent(),
-    // Intentionally not logged.
-    // RemoteIP:   r.RemoteAddr,
-  }
+	err = logc.LogSync(logging.Entry{
+		Time:    time.Now().UTC(),
+		Payload: event,
+	})
 
-  err = logc.LogSync(logging.Entry{
-    Time:    time.Now().UTC(),
-    Payload: event,
-  })
+	if err != nil {
+		http.Error(w, "Cannot write to Google Cloud Logging",
+			http.StatusInternalServerError)
+		log.Errorf(c, "Cannot write to Google Cloud Logging: %v", err)
+		return
+	}
 
-  if err != nil {
-    http.Error(w, "Cannot write to Google Cloud Logging",
-      http.StatusInternalServerError)
-    log.Errorf(c, "Cannot write to Google Cloud Logging: %v", err)
-    return
-  }
-
-  w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-  w.WriteHeader(http.StatusOK)
-  fmt.Fprintln(w, "OK")
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintln(w, "OK")
 }

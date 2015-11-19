@@ -114,7 +114,11 @@ export function getErrorReportUrl(message, filename, line, col, error) {
     return;
   }
 
-  let url = 'https://cdn.ampproject.org/error/report.gif' +
+  // This is the App Engine app in
+  // ../tools/errortracker
+  // It stores error reports via https://cloud.google.com/error-reporting/
+  // for analyzing production issues.
+  let url = 'https://amp-error-reporting.appspot.com/r' +
       '?v=' + encodeURIComponent('$internalRuntimeVersion$') +
       '&m=' + encodeURIComponent(message);
 
