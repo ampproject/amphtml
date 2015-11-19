@@ -47,7 +47,7 @@ describe('reportErrorToServer', () => {
         getErrorReportUrl(undefined, undefined, undefined, undefined, e));
     const query = parseQueryString(url.search);
     expect(url.href.indexOf(
-        'https://cdn.ampproject.org/error/report.gif')).to.equal(0);
+        'https://amp-error-reporting.appspot.com/r?')).to.equal(0);
 
     expect(query.m).to.equal('XYZ');
     expect(query.el).to.equal('u');
@@ -87,7 +87,7 @@ describe('reportErrorToServer', () => {
         getErrorReportUrl('foo bar', 'foo.js', '11', '22', undefined));
     const query = parseQueryString(url.search);
     expect(url.href.indexOf(
-        'https://cdn.ampproject.org/error/report.gif')).to.equal(0);
+        'https://amp-error-reporting.appspot.com/r?')).to.equal(0);
 
     expect(query.m).to.equal('foo bar');
     expect(query.f).to.equal('foo.js');
