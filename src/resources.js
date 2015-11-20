@@ -517,6 +517,7 @@ export class Resources {
         now - this.lastScrollTime_ > MUTATE_DEFER_DELAY_ ||
         now - this.lastScrollTime_ > MUTATE_DEFER_DELAY_ * 2);
     const offset = 10;
+    const bottomOffset = viewportRect.height / 4;
 
     if (this.deferredMutates_.length > 0) {
       log.fine(TAG_, 'deferred mutates:', this.deferredMutates_.length);
@@ -554,7 +555,7 @@ export class Resources {
           // 2. Active elements are immediately resized. The assumption is that
           // the resize is triggered by the user action or soon after.
           resize = true;
-        } else if (box.bottom >= viewportRect.bottom - offset) {
+        } else if (box.bottom >= viewportRect.bottom - bottomOffset) {
           // 3. Elements under viewport are resized immediately.
           resize = true;
         } else if (box.bottom <= viewportRect.top + offset) {

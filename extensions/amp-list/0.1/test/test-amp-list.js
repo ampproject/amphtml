@@ -154,4 +154,77 @@ describe('amp-list component', () => {
         .returns(Promise.resolve([])).once();
     return list.layoutCallback();
   });
+
+  it('should fallback resize without overflow', () => {
+    const items = [{title: 'Title1'}];
+    const newHeight = 127;
+    const itemElement = document.createElement('div');
+    itemElement.style.height = newHeight + 'px';
+    const xhrPromise = Promise.resolve({items: items});
+    const renderPromise = Promise.resolve([itemElement]);
+    let measureFunc;
+    let resizeFallbackFunc;
+    xhrMock.expects('fetchJson').withExactArgs('https://data.com/list.json',
+        sinon.match(opts => !opts.credentials))
+        .returns(xhrPromise).once();
+    templatesMock.expects('findAndRenderTemplateArray').withExactArgs(
+        element, items)
+        .returns(renderPromise).once();
+    listMock.expects('getVsync').returns({
+      measure: func => {
+        measureFunc = func;
+      }
+    }).once();
+    listMock.expects('requestChangeHeight').withExactArgs(newHeight,
+        sinon.match(fallback => resizeFallbackFunc = fallback));
+    return list.layoutCallback().then(() => {
+      return promise.all([xhrPromise, renderPromise]).then(() => {
+        expect(list.container_.contains(itemElement)).to.be.true;
+        expect(measureFunc).to.exist;
+        measureFunc();
+        expect(resizeFallbackFunc).to.exist;
+        resizeFallbackFunc();
+      });
+    });
+  });
+
+  it('should fallback resize with overflow', () => {
+    const overflow = document.createElement('div');
+    overflow.setAttribute('overflow', '');
+    element.appendChild(overflow);
+    list.buildCallback();
+
+    const items = [{title: 'Title1'}];
+    const newHeight = 127;
+    const itemElement = document.createElement('div');
+    itemElement.style.height = newHeight + 'px';
+    const xhrPromise = Promise.resolve({items: items});
+    const renderPromise = Promise.resolve([itemElement]);
+    let measureFunc;
+    let resizeFallbackFunc;
+    xhrMock.expects('fetchJson').withExactArgs('https://data.com/list.json',
+        sinon.match(opts => !opts.credentials))
+        .returns(xhrPromise).once();
+    templatesMock.expects('findAndRenderTemplateArray').withExactArgs(
+        element, items)
+        .returns(renderPromise).once();
+    listMock.expects('getVsync').returns({
+      measure: func => {
+        measureFunc = func;
+      }
+    }).once();
+    listMock.expects('requestChangeHeight').withExactArgs(newHeight,
+        sinon.match(fallback => resizeFallbackFunc = fallback));
+    return list.layoutCallback().then(() => {
+      return promise.all([xhrPromise, renderPromise]).then(() => {
+        expect(list.container_.contains(itemElement)).to.be.true;
+        expect(measureFunc).to.exist;
+        measureFunc();
+        expect(resizeFallbackFunc).to.exist;
+        expect(overflow).to.have.class('amp-hidden');
+        resizeFallbackFunc();
+        expect(overflow).to.not.have.class('amp-hidden');
+      });
+    });
+  });
 });

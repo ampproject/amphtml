@@ -16,12 +16,17 @@
 
 import {UrlReplacements} from '../../../src/url-replacements';
 import {assertHttpsUrl} from '../../../src/url';
+import {childElementByAttr} from '../../../src/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {log} from '../../../src/log';
 import {templatesFor} from '../../../src/template';
 import {xhrFor} from '../../../src/xhr';
 
 /** @const {!Function} */
 const assert = AMP.assert;
+
+/** @const {string} */
+const TAG = 'AmpList';
 
 
 /**
@@ -47,6 +52,13 @@ export class AmpList extends AMP.BaseElement {
 
     /** @private @const {!UrlReplacements} */
     this.urlReplacements_ = new UrlReplacements(this.getWin());
+
+    /** @private {?Element} */
+    this.overflowElement_ = childElementByAttr(this.element, 'overflow');
+    if (this.overflowElement_) {
+      this.overflowElement_.classList.add('-amp-overflow');
+      this.overflowElement_.classList.toggle('amp-hidden', true);
+    }
   }
 
   /** @override */
@@ -83,8 +95,18 @@ export class AmpList extends AMP.BaseElement {
       const scrollHeight = this.container_./*OK*/scrollHeight;
       const height = this.element./*OK*/offsetHeight;
       if (scrollHeight > height) {
-        this.requestChangeHeight(scrollHeight, newHeight => {
-          // TODO(dvoytenko): Implement fallback.
+        this.requestChangeHeight(scrollHeight, actualHeight => {
+          if (this.overflowElement_) {
+            this.overflowElement_.classList.toggle('amp-hidden', false);
+            this.overflowElement_.onclick = () => {
+              this.overflowElement_.classList.toggle('amp-hidden', true);
+              this.changeHeight(actualHeight);
+            };
+          } else {
+            log.warn(TAG,
+                'Cannot resize element and overlfow is not available',
+                this.element);
+          }
         });
       }
     });
