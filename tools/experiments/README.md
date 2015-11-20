@@ -8,3 +8,8 @@ Experiments UI is a available at:
 
 [https://cdn.ampproject.org/experiments.js](https://cdn.ampproject.org/experiments.js)
 
+Alternatively, the expriments can be toggled in the devtools console in the development
+mode using:
+```
+AMP.toggleExperiment('experiment name')
+```

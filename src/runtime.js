@@ -19,6 +19,7 @@ import {BaseTemplate, registerExtendedTemplate} from './template';
 import {assert} from './asserts';
 import {getMode} from './mode';
 import {installStyles} from './styles';
+import {isExperimentOn, toggleExperiment} from './experiments';
 import {performanceFor} from './performance';
 import {registerElement} from './custom-element';
 import {registerExtendedElement} from './extended-element';
@@ -99,6 +100,10 @@ export function adopt(global) {
     global.AMP.toggleRuntime = viewer.toggleRuntime.bind(viewer);
     /** @const */
     global.AMP.resources = resourcesFor(global);
+    /** @const */
+    global.AMP.isExperimentOn = isExperimentOn.bind(null, global);
+    /** @const */
+    global.AMP.toggleExperiment = toggleExperiment.bind(null, global);
   }
 
   const viewport = viewportFor(global);
