@@ -109,9 +109,12 @@ function reportErrorToServer(message, filename, line, col, error) {
  * visibleForTesting
  */
 export function getErrorReportUrl(message, filename, line, col, error) {
-  message = error ? error.message : message;
+  message = error && error.message ? error.message : message;
   if (/_reported_/.test(message)) {
     return;
+  }
+  if (!message) {
+    message = 'Unknown error';
   }
 
   // This is the App Engine app in
