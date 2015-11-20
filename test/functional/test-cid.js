@@ -146,12 +146,12 @@ describe('cid', () => {
 
   it('should pick up the cid value from storage', () => {
     storage['amp-cid'] = JSON.stringify({
-      cid: 'XXX',
+      cid: 'YYY',
       time: timer.now(),
     });
     return compare(
         'e2',
-        'sha384(XXXhttp://www.origin.come2)');
+        'sha384(YYYhttp://www.origin.come2)');
   });
 
   it('should work without mocking', () => {
@@ -309,8 +309,8 @@ describe('getSourceOrigin', () => {
 
   it('should fail on invalid source origin', () => {
     expect(() => {
-      getSourceOrigin(parseUrl('https://cdn.ampproject.org/v/xxx/'));
-    }).to.throw(/Expected a \. in origin http:\/\/xxx/);
+      getSourceOrigin(parseUrl('https://cdn.ampproject.org/v/yyy/'));
+    }).to.throw(/Expected a \. in origin http:\/\/yyy/);
   });
 
   it('should fail on non-proxy origin', () => {
