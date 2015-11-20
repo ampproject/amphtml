@@ -16,11 +16,7 @@
 
 import '../../src/polyfills';
 import {onDocumentReady} from '../../src/document-state';
-import {getCookie, setCookie} from '../../src/cookies';
-
-
-/** @const {number} */
-const COOKIE_MAX_AGE_DAYS = 180;  // 6 month
+import {isExperimentOn, toggleExperiment} from '../../src/experiments';
 
 
 /**
@@ -90,8 +86,10 @@ function buildExperimentRow(experiment) {
   buttonOff.textContent = 'Off';
   button.appendChild(buttonOff);
 
-  button.addEventListener('click', toggleExperiment.bind(null, experiment.id,
-      undefined));
+  button.addEventListener('click', () => {
+    toggleExperiment(window, experiment.id);
+    update();
+  });
 
   return tr;
 }
@@ -136,49 +134,7 @@ function updateExperimentRow(experiment) {
   if (!tr) {
     return;
   }
-  tr.setAttribute('data-on', isExperimentOn(experiment.id) ? 1 : 0);
-}
-
-
-/**
- * Returns a set of experiment IDs currently on.
- * @return {!Array<string>}
- */
-function getExperimentIds() {
-  const experimentCookie = getCookie(window, 'AMP_EXP');
-  return experimentCookie ? experimentCookie.split(/\s*,\s*/g) : [];
-}
-
-
-/**
- * Returns whether the experiment is on or off.
- * @param {string} id
- * @return {boolean}
- */
-function isExperimentOn(id) {
-  return getExperimentIds().indexOf(id) != -1;
-}
-
-
-/**
- * Toggles the expriment.
- * @param {string} id
- * @param {boolean=} opt_on
- */
-function toggleExperiment(id, opt_on) {
-  const experimentIds = getExperimentIds();
-  const currentlyOn = experimentIds.indexOf(id) != -1;
-  const on = opt_on !== undefined ? opt_on : !currentlyOn;
-  if (on != currentlyOn) {
-    if (on) {
-      experimentIds.push(id);
-    } else {
-      experimentIds.splice(experimentIds.indexOf(id), 1);
-    }
-    setCookie(window, 'AMP_EXP', experimentIds.join(','),
-        new Date().getTime() + COOKIE_MAX_AGE_DAYS * 24 * 60 * 60 * 1000);
-  }
-  update();
+  tr.setAttribute('data-on', isExperimentOn(window, experiment.id) ? 1 : 0);
 }
 
 
