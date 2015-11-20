@@ -28,6 +28,7 @@ import {registerElement} from '../src/custom-element';
  */
 export function installPixel(win) {
 
+  /** @const {!UrlReplacements} */
   const urlReplacements = new UrlReplacements(win);
 
   class AmpPixel extends BaseElement {

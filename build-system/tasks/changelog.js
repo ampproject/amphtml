@@ -22,6 +22,7 @@
  */
 
 var argv = require('minimist')(process.argv.slice(2));
+var assert = require('assert');
 var BBPromise = require('bluebird');
 var config = require('../config');
 var extend = require('util')._extend;
@@ -50,9 +51,11 @@ function changelog() {
 
 function getGitMetadata() {
   var version = argv.version;
+  var versionErrMsg = 'No version option passed';
 
   if (!version) {
-    throw new Error('No version option passed');
+    util.log(util.colors.red(versionErrMsg));
+    throw new Error(versionErrMsg);
   }
 
   var gitMetadata = {};
@@ -63,12 +66,14 @@ function getGitMetadata() {
       .then(fetchGithubMetadata)
       .then(buildChangelog.bind(null, gitMetadata))
       .then(function(gitMetadata) {
+        util.log(util.colors.blue('\n' + gitMetadata.changelog));
         return submitReleaseNotes(version, gitMetadata.changelog);
       })
       .catch(errHandler);
 }
 
 function submitReleaseNotes(version, changelog) {
+  assert(typeof version == 'number', 'version should be a number. ' + version);
   var options = {
     url: 'https://api.github.com/repos/ampproject/amphtml/releases',
     method: 'POST',
@@ -169,6 +174,7 @@ function fetchGithubMetadata(ids) {
 function getPullRequestTitle(prOption) {
   return request(prOption).then(function(res) {
     var body = JSON.parse(res.body);
+    assert(typeof body.url == 'string', 'should have url string. ' + res.body);
     var url = body.url.split('/');
     var pr = url[url.length - 1];
     return body.title + ' (#' + pr + ')';
@@ -179,9 +185,8 @@ function getPullRequestFiles(title, filesOption) {
   return request(filesOption).then(function(res) {
     var body = JSON.parse(res.body);
 
-    if (!body || !Array.isArray(body)) {
-      throw new Error('Could not get Pull Request Files.');
-    }
+    assert(Array.isArray(body) && body.length > 0,
+        'Pull request response must not be empty. ' + res.body);
     var filenames = body.map(function(file) {
       return file.filename;
     });
@@ -205,6 +210,7 @@ function onGitTagSuccess(gitMetadata, tag) {
 
 function onGitLogSuccess(gitMetadata, logs) {
   var commits = logs.split('\n');
+  assert(typeof logs == 'string', 'git log should be a string.\n' + logs);
   return commits
     .filter(function(commit) {
       // filter non Pull request merges
@@ -212,12 +218,19 @@ function onGitLogSuccess(gitMetadata, logs) {
     })
     .map(function(commit) {
       // We only need the PR id
-      return commit.split(' ')[3].slice(1);
+      var id = commit.split(' ')[3].slice(1);
+      var value = parseInt(id, 10);
+      assert(value > 0, 'Should be an integer greater than 0. ' + value);
+      return id;
     });
 }
 
 function errHandler(err) {
-  util.log(util.colors.red(err));
+  var msg = err;
+  if (err.message) {
+    msg = err.message;
+  }
+  util.log(util.colors.red(msg));
   return err;
 }
 

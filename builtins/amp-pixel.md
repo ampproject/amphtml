@@ -37,7 +37,7 @@ For instance:
 ```html
 <amp-pixel src="https://foo.com/pixel?RANDOM"></amp-pixel>
 ```
-may make a request to something like `https://foo.com/pixel?0.8390278471201` where the $RANDOM value is randomly generated upon each impression.
+may make a request to something like `https://foo.com/pixel?0.8390278471201` where the RANDOM value is randomly generated upon each impression.
 
 #### Styling
 
