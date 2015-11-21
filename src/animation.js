@@ -132,6 +132,9 @@ class AnimationPlayer {
    */
   constructor(vsync, segments, defaultCurve, duration) {
 
+    /** @private @const {!Vsync} */
+    this.vsync_ = vsync;
+
     /** @private @const {!Array<!SegmentRuntime_>} */
     this.segments_ = [];
     for (let i = 0; i < segments.length; i++) {
@@ -177,12 +180,9 @@ class AnimationPlayer {
     });
 
     /** @const */
-    this.task_ = vsync.createTask({
+    this.task_ = this.vsync_.createAnimTask({
       mutate: this.stepMutate_.bind(this)
     });
-
-    // TODO(dvoytenko): slow requestAnimationFrame buster, e.g. when Tab becomes
-    // inactive.
   }
 
   /**
@@ -229,7 +229,12 @@ class AnimationPlayer {
   start_() {
     this.startTime_ = timer.now();
     this.running_ = true;
-    this.task_(this.state_);
+    if (this.vsync_.canAnimate()) {
+      this.task_(this.state_);
+    } else {
+      log.warn(TAG_, 'cannot animate');
+      this.complete_(/* success */ false, /* dir */ 0);
+    }
   }
 
   /**
@@ -306,7 +311,12 @@ class AnimationPlayer {
     if (normLinearTime == 1) {
       this.complete_(/* success */ true, /* dir */ 0);
     } else {
-      this.task_(this.state_);
+      if (this.vsync_.canAnimate()) {
+        this.task_(this.state_);
+      } else {
+        log.warn(TAG_, 'cancel animation');
+        this.complete_(/* success */ false, /* dir */ 0);
+      }
     }
   }
 
