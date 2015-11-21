@@ -17,7 +17,9 @@
 import '../../src/polyfills';
 import {onDocumentReady} from '../../src/document-state';
 import {isExperimentOn, toggleExperiment} from '../../src/experiments';
+import {getCookie, setCookie} from '../../src/cookies';
 
+const COOKIE_MAX_AGE_DAYS = 180;  // 6 month
 
 /**
  * @typedef {{
@@ -28,9 +30,23 @@ import {isExperimentOn, toggleExperiment} from '../../src/experiments';
  */
 const Experiment = {};
 
+/**
+ * This experiment is special because it uses a different mechanism that is
+ * interpreted by the server to deliver a different version of the AMP
+ * JS libraries.
+ */
+const CANARY_EXPERIMENT_ID = 'dev-channel';
+
 
 /** @const {!Array<!Experiment>} */
 const EXPERIMENTS = [
+  // Canary (Dev Channel)
+  {
+    id: CANARY_EXPERIMENT_ID,
+    name: 'AMP Dev Channel (more info)',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/' +
+        'DEVELOPING.md#amp-dev-channel',
+  },
 
   // Mustache
   {
@@ -66,7 +82,7 @@ function buildExperimentRow(experiment) {
   tr.appendChild(tdId);
 
   const tdName = document.createElement('td');
-  tdName.textContent = experiment.name;
+  tdName.appendChild(buildLinkMaybe(experiment.name, experiment.spec));
   tr.appendChild(tdName);
 
   const tdOn = document.createElement('td');
@@ -86,10 +102,8 @@ function buildExperimentRow(experiment) {
   buttonOff.textContent = 'Off';
   button.appendChild(buttonOff);
 
-  button.addEventListener('click', () => {
-    toggleExperiment(window, experiment.id);
-    update();
-  });
+  button.addEventListener('click', toggleExperiment_.bind(null, experiment.id,
+      experiment.name, undefined));
 
   return tr;
 }
@@ -134,7 +148,45 @@ function updateExperimentRow(experiment) {
   if (!tr) {
     return;
   }
-  tr.setAttribute('data-on', isExperimentOn(window, experiment.id) ? 1 : 0);
+  tr.setAttribute('data-on', isExperimentOn_(experiment.id) ? 1 : 0);
+}
+
+
+/**
+ * Returns whether the experiment is on or off.
+ * @param {string} id
+ * @return {boolean}
+ */
+function isExperimentOn_(id) {
+  if (id == CANARY_EXPERIMENT_ID) {
+    return getCookie(window, 'AMP_CANARY') == '1';
+  }
+  return isExperimentOn(window, id);
+}
+
+
+/**
+ * Toggles the experiment.
+ * @param {string} id
+ * @param {boolean=} opt_on
+ */
+function toggleExperiment_(id, name, opt_on) {
+  // Protect against click jacking.
+  const confirmAndmakeLinterHappy = 'confirm';
+  if (!window[confirmAndmakeLinterHappy](
+        'Do you really want to activate the AMP experiment: ' + name)) {
+    return;
+  }
+  if (id == CANARY_EXPERIMENT_ID) {
+    const currentlyOn = getCookie(window, 'AMP_CANARY') == '1';
+    const validUntil = new Date().getTime() +
+        COOKIE_MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
+    const on = opt_on !== undefined ? opt_on : !currentlyOn;
+    setCookie(window, 'AMP_CANARY', (on ? '1' : '0'), (on ? validUntil : 0));
+  } else {
+    toggleExperiment(window, id, opt_on);
+  }
+  update();
 }
 
 
