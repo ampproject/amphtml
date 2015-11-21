@@ -20,10 +20,31 @@ import * as sinon from 'sinon';
 
 
 describe('vsync', () => {
+  let sandbox;
+  let clock;
   let vsync;
+  let viewer;
+  let saveVisibilityChangedHandler;
 
   beforeEach(() => {
-    vsync = new Vsync(window);
+    sandbox = sinon.sandbox.create();
+    clock = sandbox.useFakeTimers();
+    saveVisibilityChangedHandler = undefined;
+    viewer = {
+      isVisible: () => true,
+      onVisibilityChanged: handler => saveVisibilityChangedHandler = handler
+    };
+    vsync = new Vsync(window, viewer);
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+    sandbox = null;
+  });
+
+  it('should init correctly', () => {
+    expect(vsync.canAnimate()).to.be.true;
+    expect(saveVisibilityChangedHandler).to.exist;
   });
 
   it('should generate a frame and run callbacks', () => {
@@ -102,9 +123,230 @@ describe('vsync', () => {
       expect(result).to.equal('me1mu1me2mu2me3mu3');
     });
   });
+
+  it('should schedule via animation frames when doc is visible', () => {
+    let rafHandler;
+    vsync.raf_ = handler => rafHandler = handler;
+    viewer.isVisible = () => true;
+
+    let result = '';
+    vsync.run({
+      mutate: () => {
+        result += 'mu1';
+      }
+    });
+
+    expect(vsync.tasks_).to.have.length(1);
+    expect(vsync.scheduled_).to.be.true;
+    expect(rafHandler).to.exist;
+    expect(vsync.pass_.isPending()).to.be.false;
+
+    rafHandler();
+    expect(result).to.equal('mu1');
+    expect(vsync.tasks_).to.have.length(0);
+    expect(vsync.scheduled_).to.be.false;
+  });
+
+  it('should schedule via timer frames when doc is not visible', () => {
+    let rafHandler;
+    vsync.raf_ = handler => rafHandler = handler;
+    viewer.isVisible = () => false;
+
+    let result = '';
+    vsync.run({
+      mutate: () => {
+        result += 'mu1';
+      }
+    });
+
+    expect(vsync.tasks_).to.have.length(1);
+    expect(vsync.scheduled_).to.be.true;
+    expect(rafHandler).to.be.undefined;
+    expect(vsync.pass_.isPending()).to.be.true;
+
+    clock.tick(17);
+    expect(result).to.equal('mu1');
+    expect(vsync.tasks_).to.have.length(0);
+    expect(vsync.scheduled_).to.be.false;
+    expect(vsync.pass_.isPending()).to.be.false;
+  });
+
+  it('should re-schedule when doc goes invisible', () => {
+    let rafHandler;
+    vsync.raf_ = handler => rafHandler = handler;
+    viewer.isVisible = () => true;
+
+    let result = '';
+    vsync.run({
+      mutate: () => {
+        result += 'mu1';
+      }
+    });
+
+    expect(vsync.tasks_).to.have.length(1);
+    expect(vsync.scheduled_).to.be.true;
+    expect(rafHandler).to.exist;
+    expect(vsync.pass_.isPending()).to.be.false;
+
+    viewer.isVisible = () => false;
+    saveVisibilityChangedHandler();
+
+    expect(vsync.tasks_).to.have.length(1);
+    expect(vsync.scheduled_).to.be.true;
+    expect(vsync.pass_.isPending()).to.be.true;
+
+    clock.tick(17);
+    expect(result).to.equal('mu1');
+    expect(vsync.tasks_).to.have.length(0);
+    expect(vsync.scheduled_).to.be.false;
+    expect(vsync.pass_.isPending()).to.be.false;
+  });
+
+  it('should re-schedule when doc goes visible', () => {
+    let rafHandler;
+    vsync.raf_ = handler => rafHandler = handler;
+    viewer.isVisible = () => false;
+
+    let result = '';
+    vsync.run({
+      mutate: () => {
+        result += 'mu1';
+      }
+    });
+
+    expect(vsync.tasks_).to.have.length(1);
+    expect(vsync.scheduled_).to.be.true;
+    expect(rafHandler).to.be.undefined;
+    expect(vsync.pass_.isPending()).to.be.true;
+
+    viewer.isVisible = () => true;
+    saveVisibilityChangedHandler();
+
+    expect(vsync.tasks_).to.have.length(1);
+    expect(vsync.scheduled_).to.be.true;
+    expect(rafHandler).to.exist;
+
+    rafHandler();
+    expect(result).to.equal('mu1');
+    expect(vsync.tasks_).to.have.length(0);
+    expect(vsync.scheduled_).to.be.false;
+  });
+
+  it('should NOT re-schedule when no tasks pending', () => {
+    let rafHandler;
+    vsync.raf_ = handler => rafHandler = handler;
+    viewer.isVisible = () => true;
+
+    expect(vsync.tasks_).to.have.length(0);
+    expect(vsync.scheduled_).to.be.false;
+    expect(rafHandler).to.be.undefined;
+    expect(vsync.pass_.isPending()).to.be.false;
+
+    viewer.isVisible = () => false;
+    saveVisibilityChangedHandler();
+
+    expect(vsync.tasks_).to.have.length(0);
+    expect(vsync.scheduled_).to.be.false;
+    expect(rafHandler).to.be.undefined;
+    expect(vsync.pass_.isPending()).to.be.false;
+  });
+
+  it('should run anim task when visible', () => {
+    let rafHandler;
+    vsync.raf_ = handler => rafHandler = handler;
+    viewer.isVisible = () => true;
+
+    let result = '';
+    const res = vsync.runAnim({
+      mutate: () => {
+        result += 'mu1';
+      }
+    });
+
+    expect(res).to.be.true;
+    expect(rafHandler).to.exist;
+    expect(vsync.scheduled_).to.be.true;
+
+    rafHandler();
+    expect(result).to.equal('mu1');
+  });
+
+  it('should create and run anim task when visible', () => {
+    let rafHandler;
+    vsync.raf_ = handler => rafHandler = handler;
+    viewer.isVisible = () => true;
+
+    let result = '';
+    const task = vsync.createAnimTask({
+      mutate: () => {
+        result += 'mu1';
+      }
+    });
+    const res = task();
+
+    expect(res).to.be.true;
+    expect(rafHandler).to.exist;
+    expect(vsync.scheduled_).to.be.true;
+
+    rafHandler();
+    expect(result).to.equal('mu1');
+  });
+
+  it('should NOT run anim task when invisible', () => {
+    let rafHandler;
+    vsync.raf_ = handler => rafHandler = handler;
+    viewer.isVisible = () => false;
+
+    let result = '';
+    const res = vsync.runAnim({
+      mutate: () => {
+        result += 'mu1';
+      }
+    });
+
+    expect(res).to.be.false;
+    expect(rafHandler).to.be.undefined;
+    expect(vsync.scheduled_).to.be.false;
+  });
+
+  it('should create but NOT run anim task when invisible', () => {
+    let rafHandler;
+    vsync.raf_ = handler => rafHandler = handler;
+    viewer.isVisible = () => false;
+
+    let result = '';
+    const task = vsync.createAnimTask({
+      mutate: () => {
+        result += 'mu1';
+      }
+    });
+    const res = task();
+
+    expect(res).to.be.false;
+    expect(rafHandler).to.be.undefined;
+    expect(vsync.scheduled_).to.be.false;
+  });
+
+  it('should reject mutate series when invisible', () => {
+    let rafHandler;
+    vsync.raf_ = handler => rafHandler = handler;
+    viewer.isVisible = () => false;
+    const mutatorSpy = sinon.spy();
+
+    const promise = vsync.runAnimMutateSeries(mutatorSpy);
+    return promise.then(() => {
+      return 'SUCCESS';
+    }, error => {
+      return 'ERROR: ' + error;
+    }).then(response => {
+      expect(response).to.match(/^ERROR/);
+      expect(mutatorSpy.callCount).to.equal(0);
+    });
+  });
 });
 
-describe('raf polyfill', () => {
+
+describe('RAF polyfill', () => {
   let sandbox;
   let clock;
   let visible;
@@ -120,18 +362,16 @@ describe('raf polyfill', () => {
     sandbox.restore();
   });
 
+  const viewer = {
+    isVisible: () => true,
+    onVisibilityChanged: handler => {}
+  };
+
   const vsync = new Vsync({
     setTimeout: (fn, t) => {
       window.setTimeout(fn, t);
-    },
-    services: {
-      viewer: {
-        isVisible: () => {
-          return visible;
-        }
-      }
     }
-  });
+  }, viewer);
 
   it('should schedule frames using the polyfill', () => {
     let calls = 0;
@@ -152,23 +392,5 @@ describe('raf polyfill', () => {
     expect(calls).to.equal(2);
     clock.tick(6);
     expect(calls).to.equal(3);
-  });
-
-  it('should not schedule for invisible docs', () => {
-    visible = false;
-    let calls = 0;
-    vsync.mutate(() => {
-      calls++;
-    });
-    clock.tick(1000);
-    expect(calls).to.equal(0);
-    visible = true;
-    clock.tick(1000);
-    expect(calls).to.equal(0);
-    vsync.mutate(() => {
-      calls++;
-    });
-    clock.tick(16);
-    expect(calls).to.equal(1);
   });
 });

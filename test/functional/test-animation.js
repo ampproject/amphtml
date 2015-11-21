@@ -30,7 +30,8 @@ describe('Animation', () => {
     clock = sandbox.useFakeTimers();
     vsyncTasks = [];
     vsync = {
-      createTask: task => {
+      canAnimate: () => true,
+      createAnimTask: task => {
         return () => {
           vsyncTasks.push(task);
         };
@@ -244,5 +245,47 @@ describe('Animation', () => {
 
     runVsync();
     expect(rejectCalled).to.equal(true);
+  });
+
+  it('should NOT start animation when cannot animate', () => {
+    let tr1 = -1;
+    let tr2 = -1;
+    anim.add(0, time => {tr1 = time;}, 0.8);
+    anim.add(0.2, time => {tr2 = time;}, 0.8);
+    vsync.canAnimate = () => false;
+
+    const ap = anim.start(1000);
+    expect(vsyncTasks).to.have.length(0);
+    expect(ap.running_).to.be.false;
+    return ap.then(() => {
+      return 'SUCCESS';
+    }, () => {
+      return 'ERROR';
+    }).then(response => {
+      expect(tr1).to.equal(-1);
+      expect(tr2).to.equal(-1);
+      expect(response).to.equal('ERROR');
+    });
+  });
+
+  it('should halt-freeze animation when cannot animate', () => {
+    let tr1 = -1;
+    let tr2 = -1;
+    anim.add(0, time => {tr1 = time;}, 0.8);
+    anim.add(0.2, time => {tr2 = time;}, 0.8);
+
+    const ap = anim.start(1000);
+    let rejectCalled = false;
+    ap.reject_ = () => {
+      rejectCalled = true;
+    };
+    expect(vsyncTasks).to.have.length(1);
+    expect(ap.running_).to.be.true;
+    expect(rejectCalled).to.be.false;
+
+    vsync.canAnimate = () => false;
+    runVsync();
+    expect(ap.running_).to.be.false;
+    expect(rejectCalled).to.be.true;
   });
 });

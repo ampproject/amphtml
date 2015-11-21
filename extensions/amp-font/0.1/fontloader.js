@@ -151,7 +151,7 @@ export class FontLoader {
       // Create DOM elements
       this.createElements_();
       // Measure until timeout (or font load).
-      const vsyncTask = {
+      const vsyncTask = vsync.createTask({
         measure: () => {
           if (this.fontLoadResolved_) {
             resolve();
@@ -160,13 +160,11 @@ export class FontLoader {
           } else if (this.compareMeasurements_()) {
             resolve();
           } else {
-            vsync.run(vsyncTask);
+            vsyncTask();
           }
-        },
-        mutate: () => {}
-      };
-      // TODO(dvoytenko): Fix https://github.com/ampproject/amphtml/issues/839.
-      vsync.run(vsyncTask);
+        }
+      });
+      vsyncTask();
     });
   }
 

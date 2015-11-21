@@ -428,11 +428,7 @@ export class Resources {
       return;
     }
     this.vsyncScheduled_ = true;
-    if (!this.docState_.isHidden()) {
-      this.vsync_.mutate(() => this.doPass_());
-    } else {
-      this.schedulePass(16);
-    }
+    this.vsync_.mutate(() => this.doPass_());
   }
 
   /**

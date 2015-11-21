@@ -204,7 +204,7 @@ class Motion {
     this.velocityY_ = this.maxVelocityY_;
     const boundStep = this.stepContinue_.bind(this);
     const boundComplete = this.completeContinue_.bind(this, true);
-    return this.vsync_.runMutateSeries(boundStep, 5000)
+    return this.vsync_.runAnimMutateSeries(boundStep, 5000)
         .then(boundComplete, boundComplete);
   }
 
