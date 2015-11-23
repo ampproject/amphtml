@@ -255,6 +255,9 @@ export function pollForLayout(win, count, opt_timeout) {
  */
 export function expectBodyToBecomeVisible(win) {
   return poll('expect body to become visible', () => {
-    return win.document.body && win.document.body.style.opacity == '1';
+    return win.document.body && (
+        (win.document.body.style.visibility == 'visible'
+            && win.document.body.style.opacity != '0')
+        || win.document.body.style.opacity == '1');
   });
 }
