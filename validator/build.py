@@ -17,6 +17,7 @@
 
 """A build script which (thus far) works on Ubuntu 14."""
 
+import logging
 import os
 import platform
 import re
@@ -36,6 +37,7 @@ def Die(msg):
 
 def CheckPrereqs():
   """Checks that various prerequisites for this script are satisfied."""
+  logging.info('entering ...')
 
   if platform.system() != 'Linux':
     Die('Sorry, this script assumes Linux thus far, e.g. Ubuntu 14. '
@@ -43,7 +45,8 @@ def CheckPrereqs():
 
   # Ensure source files are available.
   for f in ['validator.protoascii', 'validator.proto', 'validator_gen.py',
-            'package.json']:
+            'package.json', 'validator.js', 'validator_test.js',
+            'validator-in-browser.js', 'tokenize-css.js', 'parse-css.js']:
     if not os.path.exists(f):
       Die('%s not found. Must run in amp_validator source directory.' % f)
 
@@ -83,6 +86,7 @@ def CheckPrereqs():
     subprocess.check_output(['java', '-version'], stderr=subprocess.STDOUT)
   except:
     Die('Java missing. Try "apt-get install openjdk-7-jre"')
+  logging.info('... done')
 
 
 def SetupOutDir(out_dir):
@@ -92,17 +96,21 @@ def SetupOutDir(out_dir):
     out_dir: directory name of the output directory. Must not have slashes,
       dots, etc.
   """
+  logging.info('entering ...')
   assert re.match(r'^[a-zA-Z_\-0-9]+$', out_dir), 'bad out_dir: %s' % out_dir
 
   if os.path.exists(out_dir):
     subprocess.check_call(['rm', '-rf', out_dir])
   os.mkdir(out_dir)
+  logging.info('... done')
 
 
 def InstallNodeDependencies():
+  logging.info('entering ...')
   # Install the project dependencies specified in package.json into
   # node_modules.
   subprocess.check_call(['npm', 'install'])
+  logging.info('... done')
 
 
 def GenValidatorPb2Py(out_dir):
@@ -112,11 +120,13 @@ def GenValidatorPb2Py(out_dir):
     out_dir: directory name of the output directory. Must not have slashes,
       dots, etc.
   """
+  logging.info('entering ...')
   assert re.match(r'^[a-zA-Z_\-0-9]+$', out_dir), 'bad out_dir: %s' % out_dir
 
   subprocess.check_call(['protoc', 'validator.proto',
                          '--python_out=%s' % out_dir])
-  open('codegen/__init__.py', 'w').close()
+  open('%s/__init__.py' % out_dir, 'w').close()
+  logging.info('... done')
 
 
 def GenValidatorGeneratedJs(out_dir):
@@ -126,6 +136,7 @@ def GenValidatorGeneratedJs(out_dir):
     out_dir: directory name of the output directory. Must not have slashes,
       dots, etc.
   """
+  logging.info('entering ...')
   assert re.match(r'^[a-zA-Z_\-0-9]+$', out_dir), 'bad out_dir: %s' % out_dir
 
   # These imports happen late, within this method because they don't necessarily
@@ -142,34 +153,40 @@ def GenValidatorGeneratedJs(out_dir):
                                              descriptor=descriptor,
                                              out=out)
   out.append('')
-  f = open('codegen/validator-generated.js', 'w')
+  f = open('%s/validator-generated.js' % out_dir, 'w')
   f.write('\n'.join(out))
   f.close()
+  logging.info('... done')
+
+
+def CompileWithClosure(js_files, closure_entry_points, output_file):
+  cmd = ['java', '-jar', 'node_modules/google-closure-compiler/compiler.jar',
+         '--language_in=ECMASCRIPT6_STRICT', '--language_out=ES5_STRICT',
+         '--js_output_file=%s' % output_file,
+         '--only_closure_dependencies']
+  cmd += ['--closure_entry_point=%s' % e for e in closure_entry_points]
+  cmd += ['node_modules/google-closure-library/closure/**.js',
+          '!node_modules/google-closure-library/closure/**_test.js',
+          'node_modules/google-closure-library/third_party/closure/**.js',
+          '!node_modules/google-closure-library/third_party/closure/**_test.js']
+  cmd += js_files
+  subprocess.check_call(cmd)
 
 
 def CompileValidatorMinified(out_dir):
-  GOOG = 'node_modules/google-closure-library/closure/goog/'
-  subprocess.check_call([
-      'node_modules/google-closure-library/closure/bin/build/closurebuilder.py',
-      '--output_mode=compiled',
-      '--compiler_jar=node_modules/google-closure-compiler/compiler.jar',
-      '--root=node_modules/google-closure-library/closure',
-      '--root=node_modules/google-closure-library/third_party/closure',
-      '--output_file=codegen/validator_minified.js',
-      '--input=codegen/validator-generated.js',
-      '--input=validator-in-browser.js',
-      '--input=validator.js',
-      '--compiler_flags=--language_in=ECMASCRIPT6_STRICT',
-      '--compiler_flags=--language_out=ES5_STRICT',
-      'htmlparser.js',
-      'parse-css.js',
-      'tokenize-css.js',
-      'codegen/validator-generated.js',
-      'validator-in-browser.js',
-      'validator.js'])
+  logging.info('entering ...')
+  CompileWithClosure(
+      js_files=['htmlparser.js', 'parse-css.js', 'tokenize-css.js',
+                '%s/validator-generated.js' % out_dir,
+                'validator-in-browser.js', 'validator.js'],
+      closure_entry_points=['amp.validator.validateString',
+                            'amp.validator.renderValidationResult'],
+      output_file='%s/validator_minified.js' % out_dir)
+  logging.info('... done')
 
 
 def GenerateValidateBin(out_dir):
+  logging.info('entering ...')
   f = open('%s/validate' % out_dir, 'w')
   f.write('#!/usr/bin/nodejs\n')
   for l in open('%s/validator_minified.js' % out_dir):
@@ -208,11 +225,14 @@ def GenerateValidateBin(out_dir):
       }
       """)
   os.chmod('%s/validate' % out_dir, 0750)
+  logging.info('... done')
 
 
 def RunSmokeTest(out_dir):
+  logging.info('entering ...')
   # Run codegen/validate on the minimum valid amp and observe that it passes.
-  p = subprocess.Popen(['codegen/validate', 'testdata/minimum_valid_amp.html'],
+  p = subprocess.Popen(['%s/validate' % out_dir,
+                        'testdata/feature_tests/minimum_valid_amp.html'],
                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
   (stdout, stderr) = p.communicate()
   if ('PASS\n', '', p.returncode) != (stdout, stderr, 0):
@@ -221,15 +241,56 @@ def RunSmokeTest(out_dir):
 
   # Run codegen/validate on an empty file and observe that it fails.
   open('%s/empty.html' % out_dir, 'w').close()
-  p = subprocess.Popen(['codegen/validate', '%s/empty.html' % out_dir],
+  p = subprocess.Popen(['%s/validate' % out_dir, '%s/empty.html' % out_dir],
                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
   (stdout, stderr) = p.communicate()
   if p.returncode != 1:
     Die('smoke test failed. Expected p.returncode==1, saw: %s' % p.returncode)
   if not stderr.startswith('FAIL\nempty.html:1:0 MANDATORY_TAG_MISSING'):
     Die('smoke test failed; stderr was: "%s"' % stdout)
+  logging.info('... done')
 
 
+def CompileValidatorTestMinified(out_dir):
+  logging.info('entering ...')
+  CompileWithClosure(
+      js_files=['htmlparser.js', 'parse-css.js', 'tokenize-css.js',
+                '%s/validator-generated.js' % out_dir,
+                'validator-in-browser.js', 'validator.js', 'validator_test.js'],
+      closure_entry_points=['amp.validator.validatorTest'],
+      output_file='%s/validator_test_minified.js' % out_dir)
+  logging.info('... success')
+
+
+def GenerateValidatorTest(out_dir):
+  logging.info('entering ...')
+  f = open('%s/validator_test' % out_dir, 'w')
+  f.write('#!/usr/bin/nodejs\n')
+  for l in open('%s/validator_test_minified.js' % out_dir):
+    f.write(l)
+  f.write("""
+      var assert = require('assert');
+      var fs = require('fs');
+      var path = require('path');
+      var JasmineRunner = require('jasmine');
+      var jasmine = new JasmineRunner();
+      amp.validator.validatorTest(['testdata'], assert, fs, path, describe, it);
+      jasmine.onComplete(function (passed) { process.exit(passed ? 0 : 1); });
+      jasmine.execute();
+      """)
+  os.chmod('%s/validator_test' % out_dir, 0750)
+  logging.info('... success')
+
+
+def RunValidatorTest(out_dir):
+  logging.info('entering ...')
+  # Run codegen/validate on the minimum valid amp and observe that it passes.
+  subprocess.check_call(['%s/validator_test' % out_dir])
+  logging.info('... success')
+
+
+logging.basicConfig(format='[[%(filename)s %(funcName)s]] - %(message)s',
+                    level=logging.INFO)
 CheckPrereqs()
 InstallNodeDependencies()
 SetupOutDir(out_dir='codegen')
@@ -238,4 +299,6 @@ GenValidatorGeneratedJs(out_dir='codegen')
 CompileValidatorMinified(out_dir='codegen')
 GenerateValidateBin(out_dir='codegen')
 RunSmokeTest(out_dir='codegen')
-print 'Success - codegen/validate built and tested.'
+CompileValidatorTestMinified(out_dir='codegen')
+GenerateValidatorTest(out_dir='codegen')
+RunValidatorTest(out_dir='codegen')
