@@ -394,7 +394,7 @@ const MarkedPosition = function MarkedPosition(tokenizer) {
 
 /**
  * Adds position data to the given token, returning it for chaining.
- * @param {!parse_css.CSSParserToken|!parse_css.ErrorToken} token
+ * @param {!parse_css.CSSParserToken} token
  * @return {!parse_css.CSSParserToken}
  */
 MarkedPosition.prototype.addPositionTo = function(token) {
