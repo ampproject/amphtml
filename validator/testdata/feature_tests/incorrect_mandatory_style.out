@@ -1,0 +1,3 @@
+FAIL
+feature_tests/incorrect_mandatory_style.html:28:2 MANDATORY_CDATA_MISSING_OR_INCORRECT mandatory style (js enabled) opacity 0 (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#opacity)
+feature_tests/incorrect_mandatory_style.html:28:74 MANDATORY_CDATA_MISSING_OR_INCORRECT mandatory style (noscript) opacity 1 (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#opacity)

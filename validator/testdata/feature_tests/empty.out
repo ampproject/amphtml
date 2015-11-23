@@ -1,0 +1,10 @@
+FAIL
+feature_tests/empty.html:1:0 MANDATORY_TAG_MISSING html ⚡ for top-level html (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#ampd)
+feature_tests/empty.html:1:0 MANDATORY_TAG_MISSING head (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#crps)
+feature_tests/empty.html:1:0 MANDATORY_TAG_MISSING charset utf-8 declaration (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#chrs)
+feature_tests/empty.html:1:0 MANDATORY_TAG_MISSING viewport declaration (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#vprt)
+feature_tests/empty.html:1:0 MANDATORY_TAG_MISSING mandatory style (js enabled) opacity 0 (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#opacity)
+feature_tests/empty.html:1:0 MANDATORY_TAG_MISSING mandatory style (noscript) opacity 1 (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#opacity)
+feature_tests/empty.html:1:0 MANDATORY_TAG_MISSING noscript enclosure for mandatory style (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#opacity)
+feature_tests/empty.html:1:0 MANDATORY_TAG_MISSING body (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#crps)
+feature_tests/empty.html:1:0 MANDATORY_TAG_MISSING amphtml engine v1.js script (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#scrpt)

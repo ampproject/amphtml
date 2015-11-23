@@ -1,0 +1,9 @@
+FAIL
+feature_tests/several_errors.html:23:2 INVALID_ATTR_VALUE charset=pick-a-key (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#chrs)
+feature_tests/several_errors.html:26:2 INVALID_ATTR_VALUE type=javascript
+feature_tests/several_errors.html:32:2 MANDATORY_ATTR_MISSING width (see https://github.com/ampproject/amphtml/blob/master/builtins/amp-img.md)
+feature_tests/several_errors.html:32:2 MANDATORY_ATTR_MISSING height (see https://github.com/ampproject/amphtml/blob/master/builtins/amp-img.md)
+feature_tests/several_errors.html:33:0 DISALLOWED_ATTR made_up_attribute (see https://github.com/ampproject/amphtml/blob/master/builtins/amp-ad.md)
+feature_tests/several_errors.html:37:7 MANDATORY_TAG_MISSING charset utf-8 declaration (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#chrs)
+feature_tests/several_errors.html:37:7 MANDATORY_TAG_MISSING viewport declaration (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#vprt)
+feature_tests/several_errors.html:37:7 MANDATORY_TAG_MISSING amphtml engine v1.js script (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#scrpt)
