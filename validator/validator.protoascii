@@ -25,7 +25,7 @@ min_validator_revision_required: 63
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 87
+spec_file_revision: 89
 
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
@@ -1483,6 +1483,7 @@ tags: {
 }
 # 4.11.2 Non-conforming features
 tags: { name: "acronym" }
+tags: { name: "big" }
 tags: { name: "center" }
 tags: { name: "dir" }
 tags: { name: "hgroup" }
@@ -2098,7 +2099,11 @@ tags: {
   attr_lists: "extended-amp-global"
   attrs: { name: "controls" }
 }
-
+tags: {
+  name: "amp-install-serviceworker"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-install-serviceworker/amp-install-serviceworker.md"
+  attrs: { name: "src" }
+}
 #
 # Global attributes: These can be used in all tags.
 #
