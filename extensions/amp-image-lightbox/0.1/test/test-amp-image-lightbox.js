@@ -48,8 +48,7 @@ describe('amp-image-lightbox component', () => {
 
       const caption = container.querySelector('.-amp-image-lightbox-caption');
       expect(caption).to.not.equal(null);
-      expect(caption.classList.contains('amp-image-lightbox-caption')).to
-          .equal(true);
+      expect(caption).to.have.class('amp-image-lightbox-caption');
 
       const viewer = container.querySelector('.-amp-image-lightbox-viewer');
       expect(viewer).to.not.equal(null);
