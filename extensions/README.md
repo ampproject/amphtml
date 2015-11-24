@@ -24,9 +24,9 @@ Current list of extended components:
 | [`amp-fit-text`](amp-fit-text/amp-fit-text.md)                | Expand or shrink font size to fit the content within the space given.                       |
 | [`amp-font`](amp-font/amp-font.md)                | Trigger and monitor the loading of custom fonts.                       |
 | [`amp-iframe`](amp-iframe/amp-iframe.md)                 | Displays an iframe.                                                                         |
-| [`amp-install-serviceworker`](amp-install-serviceworker/amp-install-serviceworker.md)               | Installs a ServiceWorker.
 | [`amp-image-lightbox`](amp-image-lightbox/amp-image-lightbox.md) | Allows for a “image lightbox” or similar experience.                                        |
 | [`amp-instagram`](amp-instagram/amp-instagram.md)           | Displays an instagram embed.                                                                |
+| [`amp-install-serviceworker`](amp-install-serviceworker/amp-install-serviceworker.md)               | Installs a ServiceWorker.
 | [`amp-lightbox`](amp-lightbox/amp-lightbox.md)             | Allows for a “lightbox” or similar experience.                                              |
 | [`amp-list`](amp-list/amp-list.md)             | A dynamic list that can download data and create list items using a template |
 | [`amp-twitter`](amp-twitter/amp-twitter.md)               | Displays a Twitter Tweet.                                                                   |
