@@ -43,7 +43,7 @@ Then, the Mustache templates can be defined in the `template` tags like this:
 
 ```html
 <template type="amp-mustache">
-  Hello {{world!}}
+  Hello {{world}}!
 </template>
 ```
 
@@ -55,7 +55,7 @@ target AMP element that uses this template to render its content.
 Like all AMP templates, `amp-mustache` templates are required to be well-formed DOM fragments. This means
 that among other things, you can't use `amp-mustache` to:
 
-- Calculate tag name. E.g. `<{{tagName}}` is not allowed.
-- Calculate attribute name. E.g. `<div {{class=my-class}}>` is not allowed.
+- Calculate tag name. E.g. `<{{tagName}}>` is not allowed.
+- Calculate attribute name. E.g. `<div {{attrName}}=something>` is not allowed.
 - Output arbitrary HTML using `{{{unescaped}}}`. The output of "triple-mustache" is sanitized to only allow
 formatting tags such as `<b>`, `<i>`, and so on.
