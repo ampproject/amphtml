@@ -110,10 +110,10 @@ describe('CustomElement', () => {
 
   it('Element - createdCallback', () => {
     const element = new ElementClass();
-    expect(element.classList.contains('-amp-element')).to.equal(true);
+    expect(element).to.have.class('-amp-element');
     expect(element.isBuilt()).to.equal(false);
-    expect(element.classList.contains('-amp-notbuilt')).to.equal(true);
-    expect(element.classList.contains('amp-notbuilt')).to.equal(true);
+    expect(element).to.have.class('-amp-notbuilt');
+    expect(element).to.have.class('amp-notbuilt');
     expect(element.isUpgraded()).to.equal(true);
     expect(element.readyState).to.equal('loading');
     expect(element.everAttached).to.equal(false);
@@ -123,10 +123,10 @@ describe('CustomElement', () => {
 
   it('StubElement - createdCallback', () => {
     const element = new StubElementClass();
-    expect(element.classList.contains('-amp-element')).to.equal(true);
+    expect(element).to.have.class('-amp-element');
     expect(element.isBuilt()).to.equal(false);
-    expect(element.classList.contains('-amp-notbuilt')).to.equal(true);
-    expect(element.classList.contains('amp-notbuilt')).to.equal(true);
+    expect(element).to.have.class('-amp-notbuilt');
+    expect(element).to.have.class('amp-notbuilt');
     expect(element.isUpgraded()).to.equal(false);
     expect(element.readyState).to.equal('loading');
     expect(element.everAttached).to.equal(false);
@@ -180,18 +180,18 @@ describe('CustomElement', () => {
 
   it('Element - build allowed', () => {
     const element = new ElementClass();
-    expect(element.classList.contains('-amp-element')).to.equal(true);
+    expect(element).to.have.class('-amp-element');
     expect(element.isBuilt()).to.equal(false);
-    expect(element.classList.contains('-amp-notbuilt')).to.equal(true);
-    expect(element.classList.contains('amp-notbuilt')).to.equal(true);
+    expect(element).to.have.class('-amp-notbuilt');
+    expect(element).to.have.class('amp-notbuilt');
     expect(testElementBuildCallback.callCount).to.equal(0);
 
     testElementIsReadyToBuild = true;
     element.build(false);
 
     expect(element.isBuilt()).to.equal(true);
-    expect(element.classList.contains('-amp-notbuilt')).to.equal(false);
-    expect(element.classList.contains('amp-notbuilt')).to.equal(false);
+    expect(element).to.not.have.class('-amp-notbuilt');
+    expect(element).to.not.have.class('amp-notbuilt');
     expect(testElementBuildCallback.callCount).to.equal(1);
   });
 
@@ -217,44 +217,44 @@ describe('CustomElement', () => {
 
   it('Element - build not allowed', () => {
     const element = new ElementClass();
-    expect(element.classList.contains('-amp-element')).to.equal(true);
+    expect(element).to.have.class('-amp-element');
     expect(element.isBuilt()).to.equal(false);
-    expect(element.classList.contains('-amp-notbuilt')).to.equal(true);
-    expect(element.classList.contains('amp-notbuilt')).to.equal(true);
+    expect(element).to.have.class('-amp-notbuilt');
+    expect(element).to.have.class('amp-notbuilt');
     expect(testElementBuildCallback.callCount).to.equal(0);
 
     testElementIsReadyToBuild = false;
     element.build(false);
 
     expect(element.isBuilt()).to.equal(false);
-    expect(element.classList.contains('-amp-notbuilt')).to.equal(true);
-    expect(element.classList.contains('amp-notbuilt')).to.equal(true);
+    expect(element).to.have.class('-amp-notbuilt');
+    expect(element).to.have.class('amp-notbuilt');
     expect(testElementBuildCallback.callCount).to.equal(0);
   });
 
   it('Element - build not allowed but forced', () => {
     const element = new ElementClass();
-    expect(element.classList.contains('-amp-element')).to.equal(true);
+    expect(element).to.have.class('-amp-element');
     expect(element.isBuilt()).to.equal(false);
-    expect(element.classList.contains('-amp-notbuilt')).to.equal(true);
-    expect(element.classList.contains('amp-notbuilt')).to.equal(true);
+    expect(element).to.have.class('-amp-notbuilt');
+    expect(element).to.have.class('amp-notbuilt');
     expect(testElementBuildCallback.callCount).to.equal(0);
 
     testElementIsReadyToBuild = false;
     element.build(true);
 
     expect(element.isBuilt()).to.equal(true);
-    expect(element.classList.contains('-amp-notbuilt')).to.equal(false);
-    expect(element.classList.contains('amp-notbuilt')).to.equal(false);
+    expect(element).to.not.have.class('-amp-notbuilt');
+    expect(element).to.not.have.class('amp-notbuilt');
     expect(testElementBuildCallback.callCount).to.equal(1);
   });
 
   it('Element - build NOT allowed when in template', () => {
     const element = new ElementClass();
-    expect(element.classList.contains('-amp-element')).to.equal(true);
+    expect(element).to.have.class('-amp-element');
     expect(element.isBuilt()).to.equal(false);
-    expect(element.classList.contains('-amp-notbuilt')).to.equal(true);
-    expect(element.classList.contains('amp-notbuilt')).to.equal(true);
+    expect(element).to.have.class('-amp-notbuilt');
+    expect(element).to.have.class('amp-notbuilt');
     expect(testElementBuildCallback.callCount).to.equal(0);
 
     element.isInTemplate_ = true;
@@ -269,10 +269,10 @@ describe('CustomElement', () => {
 
   it('StubElement - build never allowed', () => {
     const element = new StubElementClass();
-    expect(element.classList.contains('-amp-element')).to.equal(true);
+    expect(element).to.have.class('-amp-element');
     expect(element.isBuilt()).to.equal(false);
-    expect(element.classList.contains('-amp-notbuilt')).to.equal(true);
-    expect(element.classList.contains('amp-notbuilt')).to.equal(true);
+    expect(element).to.have.class('-amp-notbuilt');
+    expect(element).to.have.class('amp-notbuilt');
     expect(testElementBuildCallback.callCount).to.equal(0);
 
     expect(() => {
