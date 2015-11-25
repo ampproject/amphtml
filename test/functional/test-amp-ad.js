@@ -186,7 +186,7 @@ describe('amp-ad', () => {
         expect(ampAd.shouldSendIntersectionChanges_).to.be.true;
         expect(ampAd.iframeLayoutBox_).to.be.null;
         expect(posts).to.have.length(0);
-        ampAd.getVsync().runScheduledTasks();
+        ampAd.getVsync().runScheduledTasks_();
         expect(posts).to.have.length(1);
       });
     });

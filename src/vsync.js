@@ -14,19 +14,28 @@
  * limitations under the License.
  */
 
+import {Pass} from './pass';
 import {getService} from './service';
 import {log} from './log';
 import {timer} from './timer';
 import {viewerFor} from './viewer';
 
 
+/** @const {time} */
+const FRAME_TIME = 16;
+
+/**
+ * @typedef {Object<string, *>}
+ */
+let VsyncState;
+
 /**
  * @typedef {{
- *   measure: (function(Object<string,*>)|undefined),
- *   mutate: (function(Object<string,*>)|undefined)
+ *   measure: (function(!VsyncState)|undefined),
+ *   mutate: (function(!VsyncState)|undefined)
  * }}
  */
-class VsyncTaskSpec {}
+let VsyncTaskSpec;
 
 
 /**
@@ -41,10 +50,14 @@ export class Vsync {
 
   /**
    * @param {!Window} win
+   * @param {!Viewer} viewer
    */
-  constructor(win) {
+  constructor(win, viewer) {
     /** @const {!Window} */
     this.win = win;
+
+    /** @private @const {!Viewer} */
+    this.viewer_ = viewer;
 
     /** @private @const {function(function())}  */
     this.raf_ = this.getRaf_();
@@ -57,7 +70,7 @@ export class Vsync {
 
     /**
      * States for tasks in the next frame in the same order.
-     * @private {!Array<!Object>}
+     * @private {!Array<!VsyncState>}
      */
     this.states_ = [];
 
@@ -66,57 +79,46 @@ export class Vsync {
      * @private {boolean}
      */
     this.scheduled_ = false;
-  }
 
-  /**
-   * @param {!VsyncTaskSpec} task
-   * @param {!Object<string, *>|undefined} opt_state
-   */
-  run(task, opt_state) {
-    // Do not request animation frames when the document is not visible.
-    if (!viewerFor(this.win).isVisible()) {
-      log.fine('VSYNC', 'Did not schedule a vsync request, ' +
-          'because document was invisible.');
-      return;
-    }
-    const state = opt_state || {};
-    this.tasks_.push(task);
-    this.states_.push(state);
+    /** @const {!Function} */
+    this.boundRunScheduledTasks_ = this.runScheduledTasks_.bind(this);
 
-    if (this.scheduled_) {
-      return;
-    }
-    this.scheduled_ = true;
+    /** @const {!Pass} */
+    this.pass_ = new Pass(this.boundRunScheduledTasks_, FRAME_TIME);
 
-    // Schedule actual animation frame and then run tasks.
-    this.raf_(() => {
-      this.runScheduledTasks();
+    // When the document changes visibility, vsync has to reschedule the queue
+    // processing.
+    this.viewer_.onVisibilityChanged(() => {
+      if (this.scheduled_) {
+        this.forceSchedule_();
+      }
     });
   }
 
   /**
-   * Runs all scheduled tasks. This is typically called in an RAF
-   * callback. Tests may call this method to force execution of
-   * tasks without waiting.
-   * @visibleForTesting
+   * Runs vsync task: measure followed by mutate.
+   *
+   * If state is not provided, the value passed to the measure and mutate
+   * will be undefined.
+   *
+   * @param {!VsyncTaskSpec} task
+   * @param {!VsyncState=} opt_state
    */
-  runScheduledTasks() {
-    this.scheduled_ = false;
-    // TODO(malteubl) Avoid array allocation with a double buffer.
-    const tasks = this.tasks_;
-    const states = this.states_;
-    this.tasks_ = [];
-    this.states_ = [];
-    for (let i = 0; i < tasks.length; i++) {
-      if (tasks[i].measure) {
-        tasks[i].measure(states[i]);
-      }
-    }
-    for (let i = 0; i < tasks.length; i++) {
-      if (tasks[i].mutate) {
-        tasks[i].mutate(states[i]);
-      }
-    }
+  run(task, opt_state) {
+    this.tasks_.push(task);
+    this.states_.push(opt_state || {});
+    this.schedule_();
+  }
+
+  /**
+   * Creates a function that will call {@link run} method.
+   * @param {!VsyncTaskSpec} task
+   * @return {function(!VsyncState=)}
+   */
+  createTask(task) {
+    return opt_state => {
+      this.run(task, opt_state);
+    };
   }
 
   /**
@@ -136,33 +138,64 @@ export class Vsync {
   }
 
   /**
-   * @param {!VsyncTaskSpec} task
-   * @return {function((!Object<string, *>|undefined))}
+   * Whether the runtime is allowed to animate at this time.
+   * @return {boolean}
    */
-  createTask(task) {
+  canAnimate() {
+    return this.viewer_.isVisible();
+  }
+
+  /**
+   * Runs the animation vsync task. This operation can only run when animations
+   * are allowed. Otherwise, this method returns `false` and exits.
+   * @param {!VsyncTaskSpec} task
+   * @param {!VsyncState=} opt_state
+   * @return {boolean}
+   */
+  runAnim(task, opt_state) {
+    // Do not request animation frames when the document is not visible.
+    if (!this.canAnimate()) {
+      log.warn('Vsync',
+          'Did not schedule a vsync request, because document was invisible');
+      return false;
+    }
+    this.run(task, opt_state);
+    return true;
+  }
+
+  /**
+   * Creates an animation vsync task. This operation can only run when
+   * animations are allowed. Otherwise, this closure returns `false` and exits.
+   * @param {!VsyncTaskSpec} task
+   * @return {function(!VsyncState=):boolean}
+   */
+  createAnimTask(task) {
     return opt_state => {
-      this.run(task, opt_state);
+      return this.runAnim(task, opt_state);
     };
   }
 
   /**
    * Runs the series of mutates until the mutator returns a false value.
-   * @param {function(time, time, !Object<string,*>):boolean} mutator The
+   * @param {function(time, time, !VsyncState):boolean} mutator The
    *   mutator callback. Only expected to do DOM writes, not reads. If the
    *   returned value is true, the vsync task will be repeated, otherwise it
    *   will be completed. The arguments are: timeSinceStart:time,
-   *   timeSincePrev:time and state:Object<string, *>.
+   *   timeSincePrev:time and state:VsyncState.
    * @param {number=} opt_timeout Optional timeout that will force the series
    *   to complete and reject the promise.
    * @return {!Promise} Returns the promise that will either resolve on when
    *   the vsync series are completed or reject in case of failure, such as
    *   timeout.
    */
-  runMutateSeries(mutator, opt_timeout) {
+  runAnimMutateSeries(mutator, opt_timeout) {
+    if (!this.canAnimate()) {
+      return Promise.reject();
+    }
     return new Promise((resolve, reject) => {
       const startTime = timer.now();
       let prevTime = 0;
-      const task = this.createTask({
+      const task = this.createAnimTask({
         mutate: state => {
           const timeSinceStart = timer.now() - startTime;
           const res = mutator(timeSinceStart, timeSinceStart - prevTime, state);
@@ -180,6 +213,50 @@ export class Vsync {
     });
   }
 
+  /** @private */
+  schedule_() {
+    if (this.scheduled_) {
+      return;
+    }
+    // Schedule actual animation frame and then run tasks.
+    this.scheduled_ = true;
+    this.forceSchedule_();
+  }
+
+  /** @private */
+  forceSchedule_() {
+    if (this.canAnimate()) {
+      this.raf_(this.boundRunScheduledTasks_);
+    } else {
+      this.pass_.schedule();
+    }
+  }
+
+  /**
+   * Runs all scheduled tasks. This is typically called in an RAF
+   * callback. Tests may call this method to force execution of
+   * tasks without waiting.
+   * @private
+   */
+  runScheduledTasks_() {
+    this.scheduled_ = false;
+    // TODO(malteubl) Avoid array allocation with a double buffer.
+    const tasks = this.tasks_;
+    const states = this.states_;
+    this.tasks_ = [];
+    this.states_ = [];
+    for (let i = 0; i < tasks.length; i++) {
+      if (tasks[i].measure) {
+        tasks[i].measure(states[i]);
+      }
+    }
+    for (let i = 0; i < tasks.length; i++) {
+      if (tasks[i].mutate) {
+        tasks[i].mutate(states[i]);
+      }
+    }
+  }
+
   /**
    * @return {function(function())} requestAnimationFrame or polyfill.
    */
@@ -194,7 +271,7 @@ export class Vsync {
       const now = new Date().getTime();
       // By default we take 16ms between frames, but if the last frame is say
       // 10ms ago, we only want to wait 6ms.
-      const timeToCall = Math.max(0, 16 - (now - lastTime));
+      const timeToCall = Math.max(0, FRAME_TIME - (now - lastTime));
       lastTime = now + timeToCall;
       this.win.setTimeout(fn, timeToCall);
     };
@@ -208,6 +285,6 @@ export class Vsync {
  */
 export function vsyncFor(window) {
   return getService(window, 'vsync', () => {
-    return new Vsync(window);
+    return new Vsync(window, viewerFor(window));
   });
 };
