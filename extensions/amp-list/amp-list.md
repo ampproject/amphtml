@@ -65,9 +65,6 @@ An example:
   position: absolute;
   bottom: 0;
 }
-.list-overflow.amp-hidden {
-  visibility: hidden;
-}
 ```
 
 #### Substitutions

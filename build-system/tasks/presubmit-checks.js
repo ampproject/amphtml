@@ -186,6 +186,7 @@ var forbiddenTermsSrcInclusive = {
   '\\.getBBox(?!_)': bannedTermsHelpString,
   '\\.webkitConvertPointFromNodeToPage(?!_)': bannedTermsHelpString,
   '\\.webkitConvertPointFromPageToNode(?!_)': bannedTermsHelpString,
+  '\\.changeHeight(?!_)': bannedTermsHelpString,
 };
 
 // Terms that must appear in a source file.
