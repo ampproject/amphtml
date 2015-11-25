@@ -123,9 +123,9 @@ export class Resources {
 
     /**
      * @private {!Array<{resource: !Resource, newHeight: number,
-     *     force: boolean, fallback:?function(number)}>}
+     *     force: boolean}>}
      */
-    this.changeHeightRequests_ = [];
+    this.requestsChangeHeight_ = [];
 
     /** @private {!Array<!Function>} */
     this.deferredMutates_ = [];
@@ -382,24 +382,24 @@ export class Resources {
    */
   changeHeight(element, newHeight) {
     this.scheduleChangeHeight_(this.getResourceForElement(element), newHeight,
-        /* force */ true, /* fallback */ null);
+        /* force */ true);
   }
 
   /**
    * Requests the runtime to update the height of this element to the specified
    * value. The runtime will schedule this request and attempt to process it
    * as soon as possible. However, unlike in {@link changeHeight}, the runtime
-   * may refuse to make a change in which case it will call the provided
-   * fallback with the height value. The fallback is expected to provide the
-   * reader with the user action to update the height manually.
+   * may refuse to make a change in which case it will call the
+   * `overflowCallback` method on the target resource with the height value.
+   * Overflow callback is expected to provide the reader with the user action
+   * to update the height manually.
    * @param {!Element} element
    * @param {number} newHeight
-   * @param {function(number)} fallback
    * @protected
    */
-  requestChangeHeight(element, newHeight, fallback) {
+  requestChangeHeight(element, newHeight) {
     this.scheduleChangeHeight_(this.getResourceForElement(element), newHeight,
-        /* force */ false, /* fallback */ fallback);
+        /* force */ false);
   }
 
   /**
@@ -502,7 +502,7 @@ export class Resources {
    */
   hasMutateWork_() {
     return (this.deferredMutates_.length > 0 ||
-        this.changeHeightRequests_.length > 0);
+        this.requestsChangeHeight_.length > 0);
   }
 
   /**
@@ -528,16 +528,16 @@ export class Resources {
       }
     }
 
-    if (this.changeHeightRequests_.length > 0) {
+    if (this.requestsChangeHeight_.length > 0) {
       log.fine(TAG_, 'change height requests:',
-          this.changeHeightRequests_.length);
-      const changeHeightRequests = this.changeHeightRequests_;
-      this.changeHeightRequests_ = [];
+          this.requestsChangeHeight_.length);
+      const requestsChangeHeight = this.requestsChangeHeight_;
+      this.requestsChangeHeight_ = [];
 
       // Find minimum top position and run all mutates.
       let minTop = -1;
-      for (let i = 0; i < changeHeightRequests.length; i++) {
-        const request = changeHeightRequests[i];
+      for (let i = 0; i < requestsChangeHeight.length; i++) {
+        const request = requestsChangeHeight[i];
         const resource = request.resource;
         const box = request.resource.getLayoutBox();
         if (box.height == request.newHeight) {
@@ -546,7 +546,7 @@ export class Resources {
         }
 
         // Check resize rules. It will either resize element immediately, or
-        // wait until scrolling stops or will call the fallback.
+        // wait until scrolling stops or will call the overflow callback.
         let resize = false;
         if (request.force || !this.visible_) {
           // 1. An immediate execution requested or the document is hidden.
@@ -565,7 +565,7 @@ export class Resources {
             resize = true;
           } else {
             // Defer till next cycle.
-            this.changeHeightRequests_.push(request);
+            this.requestsChangeHeight_.push(request);
           }
         } else if (request.newHeight < box.height) {
           // 5. The new height is smaller than the current one.
@@ -573,17 +573,17 @@ export class Resources {
           // potential abuse scenarios are considered.
           resize = false;
         } else {
-          // 6. Element is in viewport don't resize and try fallback instead.
-          if (request.fallback) {
-            request.fallback(request.newHeight);
-          }
+          // 6. Element is in viewport don't resize and try overflow callback
+          // instead.
+          request.resource.overflowCallback(/* overflown */ true,
+              request.newHeight);
         }
 
         if (resize) {
           if (box.top >= 0) {
             minTop = minTop == -1 ? box.top : Math.min(minTop, box.top);
           }
-          request.resource.changeHeight(request.newHeight);
+          request.resource./*OK*/changeHeight(request.newHeight);
         }
       }
 
@@ -899,32 +899,29 @@ export class Resources {
    * @param {!Resource} resource
    * @param {number} newHeight
    * @param {boolean} force
-   * @param {?function(number)} fallback
    * @private
    */
-  scheduleChangeHeight_(resource, newHeight, force, fallback) {
+  scheduleChangeHeight_(resource, newHeight, force) {
     if (resource.getLayoutBox().height == newHeight) {
       // Nothing to do.
       return;
     }
 
     let request = null;
-    for (let i = 0; i < this.changeHeightRequests_.length; i++) {
-      if (this.changeHeightRequests_[i].resource == resource) {
-        request = this.changeHeightRequests_[i];
+    for (let i = 0; i < this.requestsChangeHeight_.length; i++) {
+      if (this.requestsChangeHeight_[i].resource == resource) {
+        request = this.requestsChangeHeight_[i];
         break;
       }
     }
     if (request) {
       request.newHeight = newHeight;
       request.force = force || request.force;
-      request.fallback = fallback || request.fallback;
     } else {
-      this.changeHeightRequests_.push({
+      this.requestsChangeHeight_.push({
         resource: resource,
         newHeight: newHeight,
-        force: force,
-        fallback: fallback
+        force: force
       });
     }
     this.schedulePassVsync();
@@ -1238,11 +1235,20 @@ export class Resource {
    * @param {number} newHeight
    */
   changeHeight(newHeight) {
-    this.element.changeHeight(newHeight);
+    this.element./*OK*/changeHeight(newHeight);
     // Schedule for re-layout.
     if (this.state_ != ResourceState_.NOT_BUILT) {
       this.state_ = ResourceState_.NOT_LAID_OUT;
     }
+  }
+
+  /**
+   * Informs the element that it's either overflown or not.
+   * @param {boolean} overflown
+   * @param {number} requestedHeight
+   */
+  overflowCallback(overflown, requestedHeight) {
+    this.element.overflowCallback(overflown, requestedHeight);
   }
 
   /**

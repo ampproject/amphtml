@@ -300,16 +300,6 @@ describe('amp-iframe', () => {
       expect(impl.changeHeight.callCount).to.equal(0);
       expect(impl.requestChangeHeight.callCount).to.equal(1);
       expect(impl.requestChangeHeight.firstCall.args[0]).to.equal(217);
-
-      const fallback = impl.requestChangeHeight.firstCall.args[1];
-      fallback(219);
-      expect(impl.overflowElement_).to.not.be.null;
-      expect(impl.overflowElement_).to.have.class('-amp-overflow');
-      expect(impl.overflowElement_).to.not.have.class('amp-hidden');
-      impl.overflowElement_.onclick();
-      expect(impl.overflowElement_).to.have.class('amp-hidden');
-      expect(impl.changeHeight.callCount).to.equal(1);
-      expect(impl.changeHeight.firstCall.args[0]).to.equal(219);
     });
   });
 
