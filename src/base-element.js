@@ -51,9 +51,9 @@ import {vsyncFor} from './vsync';
  *           || firstAttachedCallback
  *           ||
  *           \/
- *    State: <NOT BUILT>           <=
- *           ||                     ||
- *           || isBuildReady?  ======
+ *    State: <NOT BUILT>             <=
+ *           ||                       ||
+ *           || isReadyToBuild?  ======
  *           ||
  *           \/
  *    State: <NOT BUILT>
