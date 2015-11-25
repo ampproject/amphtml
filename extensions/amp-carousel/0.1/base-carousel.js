@@ -120,7 +120,9 @@ export class BaseCarousel extends AMP.BaseElement {
    * @override
    */
   isReadyToBuild() {
-    return this.getRealChildren().length > 0;
+    // TODO(dvoytenko, #1014): Review and try a more immediate approach.
+    // Wait until DOMReady.
+    return false;
   }
 
   /**

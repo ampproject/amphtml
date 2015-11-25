@@ -32,7 +32,8 @@ class AmpLightbox extends AMP.BaseElement {
 
   /** @override */
   isReadyToBuild() {
-    return this.element.firstChild != null;
+    // Always defer building until DOMReady.
+    return false;
   }
 
   /** @override */

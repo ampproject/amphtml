@@ -139,7 +139,9 @@ export function installAd(win) {
      * @override
      */
     isReadyToBuild() {
-      return this.element.firstChild != null;
+      // TODO(dvoytenko, #1014): Review and try a more immediate approach.
+      // Wait until DOMReady.
+      return false;
     }
 
     /** @override */
