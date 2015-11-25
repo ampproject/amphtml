@@ -23,7 +23,7 @@ so that the runtime is able to infer sizing of elements before any remote resour
 JavaScript and data calls, have been completed. This is important since this significantly
 reduces rendering and scrolling jank.
 
-With this in mind the AMP Layout System is designed to support few but flexible layout
+With this in mind the AMP Layout System is designed to support few but flexible layouts
 that provide good performance guarantees. This system relies on a set of attributes such
 as `layout`, `width` and `height` to express the element's layout and sizing needs.
 
@@ -36,7 +36,7 @@ to the element's documentation to know which layouts you can use.
 
 ### `nodisplay`
 
-The element is not displayed. This layout can be applied to every AMP element. It assumed
+The element is not displayed. This layout can be applied to every AMP element. It assumes
 that the element can display itself on user action, e.g. `amp-lightbox`.
 
 ### `fixed`
