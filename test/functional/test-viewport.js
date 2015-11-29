@@ -193,6 +193,12 @@ describe('Viewport', () => {
     bindingMock.expects('getScrollWidth').withArgs().returns(111).once();
     expect(viewport.getScrollWidth()).to.equal(111);
   });
+
+  it('should deletegate scrollHeight', () => {
+    const bindingMock = sandbox.mock(binding);
+    bindingMock.expects('getScrollHeight').withArgs().returns(117).once();
+    expect(viewport.getScrollHeight()).to.equal(117);
+  });
 });
 
 
@@ -520,6 +526,16 @@ describe('ViewportBindingNatural', () => {
     expect(binding.getScrollWidth()).to.equal(117);
   });
 
+  it('should calculate scrollHeight from scrollElement', () => {
+    windowApi.pageYOffset = 11;
+    windowApi.document = {
+      scrollingElement: {
+        scrollHeight: 119
+      }
+    };
+    expect(binding.getScrollHeight()).to.equal(119);
+  });
+
   it('should update scrollTop on scrollElement', () => {
     windowApi.pageYOffset = 11;
     windowApi.document = {
@@ -582,6 +598,7 @@ describe('ViewportBindingNaturalIosEmbed', () => {
       documentElement: {style: {}},
       body: {
         scrollWidth: 777,
+        scrollHeight: 999,
         style: {},
         appendChild: child => {
           bodyChildren.push(child);
@@ -645,7 +662,7 @@ describe('ViewportBindingNaturalIosEmbed', () => {
     expect(body.style.right).to.equal(0);
     expect(body.style.bottom).to.equal(0);
 
-    expect(bodyChildren.length).to.equal(2);
+    expect(bodyChildren.length).to.equal(3);
 
     expect(bodyChildren[0].id).to.equal('-amp-scrollpos');
     expect(bodyChildren[0].style.position).to.equal('absolute');
@@ -662,6 +679,13 @@ describe('ViewportBindingNaturalIosEmbed', () => {
     expect(bodyChildren[1].style.width).to.equal(0);
     expect(bodyChildren[1].style.height).to.equal(0);
     expect(bodyChildren[1].style.visibility).to.equal('hidden');
+
+    expect(bodyChildren[2].id).to.equal('-amp-endpos');
+    expect(bodyChildren[2].style.position).to.be.undefined;
+    expect(bodyChildren[2].style.top).to.be.undefined;
+    expect(bodyChildren[2].style.width).to.equal(0);
+    expect(bodyChildren[2].style.height).to.equal(0);
+    expect(bodyChildren[2].style.visibility).to.equal('hidden');
   });
 
   it('should update padding on BODY', () => {
@@ -687,6 +711,16 @@ describe('ViewportBindingNaturalIosEmbed', () => {
     };
     binding.onScrolled_();
     expect(binding.getScrollTop()).to.equal(17);
+  });
+
+  it('should calculate scrollHeight from scrollpos/endpos elements', () => {
+    bodyChildren[0].getBoundingClientRect = () => {
+      return {top: -17, left: -11};
+    };
+    bodyChildren[2].getBoundingClientRect = () => {
+      return {top: 100, left: -11};
+    };
+    expect(binding.getScrollHeight()).to.equal(117);
   });
 
   it('should update scroll position via moving element', () => {

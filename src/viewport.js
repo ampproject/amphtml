@@ -190,11 +190,21 @@ export class Viewport {
   }
 
   /**
-   * Returns the scroll width of the content within the viewport.
+   * Returns the scroll width of the content of the document. Note that this
+   * method is not cached since we there's no indication when it might change.
    * @return {number}
    */
   getScrollWidth() {
     return this.binding_.getScrollWidth();
+  }
+
+  /**
+   * Returns the scroll height of the content of the document. Note that this
+   * method is not cached since we there's no indication when it might change.
+   * @return {number}
+   */
+  getScrollHeight() {
+    return this.binding_.getScrollHeight();
   }
 
   /**
@@ -491,10 +501,16 @@ class ViewportBinding {
   getScrollLeft() {}
 
   /**
-   * Returns the scroll width of the content within the viewport.
+   * Returns the scroll width of the content of the document.
    * @return {number}
    */
   getScrollWidth() {}
+
+  /**
+   * Returns the scroll height of the content of the document.
+   * @return {number}
+   */
+  getScrollHeight() {}
 
   /**
    * Returns the rect of the element within the document.
@@ -595,6 +611,11 @@ export class ViewportBindingNatural_ {
   /** @override */
   getScrollWidth() {
     return this.getScrollingElement_()./*OK*/scrollWidth;
+  }
+
+  /** @override */
+  getScrollHeight() {
+    return this.getScrollingElement_()./*OK*/scrollHeight;
   }
 
   /** @override */
@@ -743,6 +764,21 @@ export class ViewportBindingNaturalIosEmbed_ {
     });
     documentBody.appendChild(this.scrollMoveEl_);
 
+    // Insert endPos element into DOM. See {@link getScrollHeight} for why
+    // this is needed.
+    this.endPosEl_ = this.win.document.createElement('div');
+    this.endPosEl_.id = '-amp-endpos';
+    setStyles(this.endPosEl_, {
+      width: 0,
+      height: 0,
+      visibility: 'hidden'
+    });
+    // TODO(dvoytenko): not only it should be at the bottom at setup time,
+    // but it must always be at the bottom. Consider using BODY "childList"
+    // mutations to track this. For now, however, this is ok since we don't
+    // allow arbitrary content inserted into BODY.
+    documentBody.appendChild(this.endPosEl_);
+
     documentBody.addEventListener('scroll', this.onScrolled_.bind(this));
   }
 
@@ -794,6 +830,21 @@ export class ViewportBindingNaturalIosEmbed_ {
   /** @override */
   getScrollWidth() {
     return Math.max(this.scrollWidth_, this.win./*OK*/innerWidth);
+  }
+
+  /** @override */
+  getScrollHeight() {
+    // We have to use a special "tail" element on iOS due to the issues outlined
+    // in the {@link onScrolled_} method. Because we are forced to layout BODY
+    // with position:absolute, we can no longer use BODY's scrollHeight to
+    // determine scrolling height - it will always return the viewport height.
+    // Instead, we append the "tail" element as the last child of BODY and use
+    // it's viewport-relative position to calculate scrolling height.
+    if (!this.endPosEl_) {
+      return 0;
+    }
+    return Math.round(this.endPosEl_./*OK*/getBoundingClientRect().top -
+        this.scrollPosEl_./*OK*/getBoundingClientRect().top);
   }
 
   /** @override */
@@ -969,6 +1020,11 @@ export class ViewportBindingVirtual_ {
   /** @override */
   getScrollWidth() {
     return this.win.document.documentElement./*OK*/scrollWidth;
+  }
+
+  /** @override */
+  getScrollHeight() {
+    return this.win.document.documentElement./*OK*/scrollHeight;
   }
 
   /**
