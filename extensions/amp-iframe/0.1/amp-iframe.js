@@ -106,12 +106,6 @@ class AmpIframe extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-    /** @private {?Element} */
-    this.overflowElement_ = childElementByAttr(this.element, 'overflow');
-    if (this.overflowElement_) {
-      this.overflowElement_.classList.add('-amp-overflow');
-      this.overflowElement_.classList.toggle('amp-hidden', true);
-    }
   }
 
   /** @override */
@@ -142,7 +136,7 @@ class AmpIframe extends AMP.BaseElement {
     this.isResizable_ = this.element.hasAttribute('resizable');
     if (this.isResizable_) {
       this.element.setAttribute('scrolling', 'no');
-      assert(this.overflowElement_,
+      assert(this.getOverflowElement(),
           'Overflow element must be defined for resizable frames: %s',
           this.element);
     }
@@ -183,14 +177,7 @@ class AmpIframe extends AMP.BaseElement {
           this.element);
       return;
     }
-    this.requestChangeHeight(newHeight, actualHeight => {
-      assert(this.overflowElement_);
-      this.overflowElement_.classList.toggle('amp-hidden', false);
-      this.overflowElement_.onclick = () => {
-        this.overflowElement_.classList.toggle('amp-hidden', true);
-        this.changeHeight(actualHeight);
-      };
-    });
+    this.requestChangeHeight(newHeight);
   }
 };
 

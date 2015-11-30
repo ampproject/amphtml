@@ -714,6 +714,7 @@ describe('CustomElement Service Elements', () => {
     element.appendChild(document.createElement('i-amp-service'));
     element.appendChild(createWithAttr('placeholder'));
     element.appendChild(createWithAttr('fallback'));
+    element.appendChild(createWithAttr('overflow'));
     element.appendChild(document.createTextNode('abc'));
     element.appendChild(document.createElement('content'));
 
@@ -775,8 +776,8 @@ describe('CustomElement Loading Indicator', () => {
 
   class TestElement extends BaseElement {
   }
-  const ElementClass = document.registerElement('amp-test2', {
-    prototype: createAmpElementProto(window, 'amp-test2', TestElement)
+  const ElementClass = document.registerElement('amp-test-loader', {
+    prototype: createAmpElementProto(window, 'amp-test-loader', TestElement)
   });
 
   const resources = resourcesFor(window);
@@ -789,7 +790,7 @@ describe('CustomElement Loading Indicator', () => {
   let resourcesMock;
 
   beforeEach(() => {
-    LOADING_ELEMENTS_['amp-test2'.toUpperCase()] = true;
+    LOADING_ELEMENTS_['amp-test-loader'.toUpperCase()] = true;
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
     resourcesMock = sandbox.mock(resources);
@@ -824,7 +825,7 @@ describe('CustomElement Loading Indicator', () => {
   });
 
   it('should disable when element is not whitelisted', () => {
-    LOADING_ELEMENTS_['amp-test2'.toUpperCase()] = false;
+    LOADING_ELEMENTS_['amp-test-loader'.toUpperCase()] = false;
     expect(element.isLoadingEnabled_()).to.be.false;
   });
 
@@ -1000,5 +1001,115 @@ describe('CustomElement Loading Indicator', () => {
       expect(toggle.firstCall.args[0]).to.equal(false);
       expect(toggle.firstCall.args[1]).to.equal(true);
     });
+  });
+});
+
+
+describe('CustomElement Overflow Element', () => {
+
+  class TestElement extends BaseElement {
+  }
+  const ElementClass = document.registerElement('amp-test-overflow', {
+    prototype: createAmpElementProto(window, 'amp-test-overflow', TestElement)
+  });
+
+  const resources = resourcesFor(window);
+  let sandbox;
+  let clock;
+  let element;
+  let overflowElement;
+  let savedMutate;
+  let vsync;
+  let vsyncTasks;
+  let resourcesMock;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+    clock = sandbox.useFakeTimers();
+    resourcesMock = sandbox.mock(resources);
+    element = new ElementClass();
+    element.layoutWidth_ = 300;
+    element.layout_ = Layout.FIXED;
+    overflowElement = document.createElement('div');
+    overflowElement.setAttribute('overflow', '');
+    element.appendChild(overflowElement);
+    vsync = vsyncFor(window);
+    savedMutate = vsync.mutate;
+    vsyncTasks = [];
+    vsync.mutate = mutator => {
+      vsyncTasks.push(mutator);
+    };
+  });
+
+  afterEach(() => {
+    vsync.mutate = savedMutate;
+    resourcesMock.verify();
+    resourcesMock.restore();
+    clock.restore();
+    sandbox.restore();
+    sandbox = null;
+  });
+
+  it('should NOT be initialized by default', () => {
+    expect(element.overflowElement_).to.be.undefined;
+  });
+
+  it('should be initialized to null when absent', () => {
+    element.removeChild(overflowElement);
+    expect(element.getOverflowElement()).to.be.null;
+    expect(element.overflowElement_).to.be.null;
+  });
+
+  it('should be initialized correctly when present', () => {
+    expect(element.getOverflowElement()).to.exist;
+    expect(element.overflowElement_).to.equal(overflowElement);
+    expect(overflowElement).to.not.have.class('amp-visible');
+    expect(overflowElement.getAttribute('tabindex')).to.equal('0');
+    expect(overflowElement.getAttribute('role')).to.equal('button');
+  });
+
+  it('should NOT override role and tabindex', () => {
+    overflowElement.setAttribute('tabindex', '1');
+    overflowElement.setAttribute('role', 'list');
+    expect(element.getOverflowElement()).to.equal(overflowElement);
+    expect(overflowElement.getAttribute('tabindex')).to.equal('1');
+    expect(overflowElement.getAttribute('role')).to.equal('list');
+  });
+
+  it('should noop when overflow is missing', () => {
+    element.removeChild(overflowElement);
+    expect(() => {
+      element.overflowCallback(true, 111);
+      element.overflowCallback(false, 111);
+    }).to.not.throw();
+  });
+
+  it('should set overflow', () => {
+    element.overflowCallback(true, 117);
+    expect(element.overflowElement_).to.equal(overflowElement);
+    expect(overflowElement).to.have.class('amp-visible');
+    expect(overflowElement.onclick).to.exist;
+  });
+
+  it('should unset overflow', () => {
+    overflowElement.classList.toggle('amp-visible', true);
+    element.overflowCallback(false, 117);
+    expect(element.overflowElement_).to.equal(overflowElement);
+    expect(overflowElement).to.not.have.class('amp-visible');
+    expect(overflowElement.onclick).to.not.exist;
+  });
+
+  it('should force change height when clicked', () => {
+    element.overflowCallback(true, 117);
+    expect(overflowElement).to.have.class('amp-visible');
+    resourcesMock.expects('changeHeight').withExactArgs(element, 117).once();
+
+    overflowElement.onclick();
+
+    expect(vsyncTasks).to.have.length(1);
+    vsyncTasks[0]();
+
+    expect(overflowElement.onclick).to.not.exist;
+    expect(overflowElement).to.not.have.class('amp-visible');
   });
 });

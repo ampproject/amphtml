@@ -49,7 +49,7 @@ class AmpTwitter extends AMP.BaseElement {
       const amp = iframe.parentElement;
       amp.setAttribute('height', data.height);
       amp.setAttribute('width', data.width);
-      this.changeHeight(data.height);
+      this./*OK*/changeHeight(data.height);
     });
     return loadPromise(iframe);
   }

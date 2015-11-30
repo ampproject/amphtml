@@ -420,6 +420,15 @@ export class BaseElement {
   }
 
   /**
+   * Returns an optional overflow element for this custom element.
+   * @return {?Element}
+   * @protected @final
+   */
+  getOverflowElement() {
+    return this.element.getOverflowElement();
+  }
+
+  /**
    * Returns the original nodes of the custom element without any service nodes
    * that could have been added for markup. These nodes can include Text,
    * Comment and other child nodes.
@@ -511,22 +520,21 @@ export class BaseElement {
    * @protected
    */
   changeHeight(newHeight) {
-    this.resources_.changeHeight(this.element, newHeight);
+    this.resources_./*OK*/changeHeight(this.element, newHeight);
   }
 
   /**
    * Requests the runtime to update the height of this element to the specified
    * value. The runtime will schedule this request and attempt to process it
    * as soon as possible. However, unlike in {@link changeHeight}, the runtime
-   * may refuse to make a change in which case it will call the provided
-   * fallback with the height value. The fallback is expected to provide the
-   * reader with the user action to update the height manually.
+   * may refuse to make a change in which case it will show the element's
+   * overflow element if provided, which is supposed to provide the reader with
+   * the necessary user action.
    * @param {number} newHeight
-   * @param {function(number)} fallback
    * @protected
    */
-  requestChangeHeight(newHeight, fallback) {
-    this.resources_.requestChangeHeight(this.element, newHeight, fallback);
+  requestChangeHeight(newHeight) {
+    this.resources_.requestChangeHeight(this.element, newHeight);
   }
 
   /**
