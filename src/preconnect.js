@@ -120,10 +120,13 @@ class Preconnect {
     }
     this.urls_[url] = true;
     this.url(url, /* opt_alsoConnecting */ true);
-    const prefetch = document.createElement('link');
-    prefetch.setAttribute('rel', 'prefetch');
-    prefetch.setAttribute('href', url);
-    this.head_.appendChild(prefetch);
+    // TODO(erwinm): rename back to prefetch after babel 6 fix has fixed
+    // the bug where const and method names collide.
+    // https://phabricator.babeljs.io/T2892
+    const prefetchLink = document.createElement('link');
+    prefetchLink.setAttribute('rel', 'prefetch');
+    prefetchLink.setAttribute('href', url);
+    this.head_.appendChild(prefetchLink);
     // As opposed to preconnect we do not clean this tag up, because there is
     // no expectation as to it having an immediate effect.
   }
