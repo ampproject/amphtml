@@ -172,6 +172,7 @@ class AmpIframe extends AMP.BaseElement {
    */
   updateHeight_(newHeight) {
     if (!this.isResizable_) {
+      // @pub-dev
       log.warn(TAG_,
           'ignoring embed-size request because this iframe is not resizable',
           this.element);

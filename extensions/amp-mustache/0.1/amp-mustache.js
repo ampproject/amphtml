@@ -64,6 +64,7 @@ export class AmpMustache extends AMP.BaseTemplate {
   /** @override */
   render(data) {
     if (!this.isExperimentOn_()) {
+      // @pub-dev
       const m = `Experiment "${EXPERIMENT}" disabled`;
       log.warn(TAG, m, this.element);
       const fallback = document.createElement('div');

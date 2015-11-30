@@ -175,6 +175,7 @@ export class Resources {
     });
 
     this.viewer_.onRuntimeState(state => {
+      // @amp-dev
       log.fine(TAG_, 'Runtime state:', state);
       this.isRuntimeOn_ = state;
       this.schedulePass(1);
@@ -280,6 +281,7 @@ export class Resources {
       this.schedulePass();
     }
 
+    // @amp-dev
     log.fine(TAG_, 'element added:', resource.debugid);
   }
 
@@ -295,6 +297,7 @@ export class Resources {
     if (index != -1) {
       this.resources_.splice(index, 1);
     }
+    // @amp-dev
     log.fine(TAG_, 'element removed:', resource.debugid);
   }
 
@@ -312,6 +315,7 @@ export class Resources {
     } else if (resource.onUpgraded_) {
       resource.onUpgraded_();
     }
+    // @amp-dev
     log.fine(TAG_, 'element upgraded:', resource.debugid);
   }
 
@@ -436,6 +440,7 @@ export class Resources {
    */
   doPass_() {
     if (!this.isRuntimeOn_) {
+      // @amp-dev
       log.fine(TAG_, 'runtime is off');
       return;
     }
@@ -453,6 +458,7 @@ export class Resources {
 
     const viewportSize = this.viewport_.getSize();
     const now = timer.now();
+    // @amp-dev
     log.fine(TAG_, 'PASS: at ' + now +
         ', visible=', this.visible_,
         ', forceBuild=', this.forceBuild_,
@@ -465,6 +471,7 @@ export class Resources {
 
     // If document becomes invisible, bring everything into inactive state.
     if (prevVisible && !this.visible_) {
+      // @amp-dev
       log.fine(TAG_, 'document become inactive');
       this.documentBecameInactive_();
       return;
@@ -482,10 +489,12 @@ export class Resources {
         delay = Math.min(delay, MUTATE_DEFER_DELAY_);
       }
       if (this.visible_) {
+        // @amp-dev
         log.fine(TAG_, 'next pass:', delay);
         this.schedulePass(delay);
         this.updateScrollHeight_();
       } else {
+        // @amp-dev
         log.fine(TAG_, 'document is not visible: no scheduling');
       }
     }
@@ -516,6 +525,7 @@ export class Resources {
     const bottomOffset = viewportRect.height / 4;
 
     if (this.deferredMutates_.length > 0) {
+      // @amp-dev
       log.fine(TAG_, 'deferred mutates:', this.deferredMutates_.length);
       const deferredMutates = this.deferredMutates_;
       this.deferredMutates_ = [];
@@ -525,6 +535,7 @@ export class Resources {
     }
 
     if (this.requestsChangeHeight_.length > 0) {
+      // @pub-dev
       log.fine(TAG_, 'change height requests:',
           this.requestsChangeHeight_.length);
       const requestsChangeHeight = this.requestsChangeHeight_;
@@ -702,6 +713,7 @@ export class Resources {
         const r = this.resources_[i];
         if (r.getState() == ResourceState_.READY_FOR_LAYOUT &&
                 !r.hasOwner() && r.isDisplayed()) {
+          // @pub-dev
           log.fine(TAG_, 'idle layout:', r.debugid);
           this.scheduleLayoutOrPreload_(r, /* layout */ false);
           idleScheduledCount++;
@@ -748,6 +760,7 @@ export class Resources {
     if (task) {
       do {
         timeout = this.calcTaskTimeout_(task);
+        // @amp-dev
         log.fine(TAG_, 'peek from queue:', task.id,
             'sched at', task.scheduleTime,
             'score', scorer(task),
@@ -765,6 +778,7 @@ export class Resources {
           // Ensure that task can prerender
           task.promise = task.callback(this.visible_);
           task.startTime = now;
+          // @amp-dev
           log.fine(TAG_, 'exec:', task.id, 'at', task.startTime);
           this.exec_.enqueue(task);
           task.promise.then(this.taskComplete_.bind(this, task, true),
@@ -781,7 +795,9 @@ export class Resources {
       } while (task);
     }
 
+    // @amp-dev
     log.fine(TAG_, 'queue size:', this.queue_.getSize());
+    // @amp-dev
     log.fine(TAG_, 'exec size:', this.exec_.getSize());
 
     if (timeout >= 0) {
@@ -884,6 +900,7 @@ export class Resources {
     this.exec_.dequeue(task);
     this.schedulePass(POST_TASK_PASS_DELAY_);
     if (!success) {
+      // @amp-dev
       log.error(TAG_, 'task failed:',
           task.id, task.resource.debugid, opt_reason);
       return Promise.reject(opt_reason);
@@ -1013,6 +1030,7 @@ export class Resources {
       callback: callback,
       scheduleTime: timer.now()
     };
+    // @amp-dev
     log.fine(TAG_, 'schedule:', task.id, 'at', task.scheduleTime);
 
     // Only schedule a new task if there's no one enqueued yet or if this task
@@ -1207,6 +1225,7 @@ export class Resource {
     try {
       built = this.element.build(force);
     } catch (e) {
+      // @pub-dev
       log.error(TAG_, 'failed to build:', this.debugid, e);
       built = false;
       this.blacklisted_ = true;
@@ -1343,6 +1362,7 @@ export class Resource {
         'Not ready to start layout: %s (%s)', this.debugid, this.state_);
 
     if (!isDocumentVisible && !this.prerenderAllowed()) {
+      // @pub-dev
       log.fine(TAG_, 'layout canceled due to non pre-renderable element:',
           this.debugid, this.state_);
       this.state_ = ResourceState_.READY_FOR_LAYOUT;
@@ -1350,6 +1370,7 @@ export class Resource {
     }
 
     if (!this.renderOutsideViewport() && !this.isInViewport()) {
+      // @pub-dev
       log.fine(TAG_, 'layout canceled due to element not being in viewport:',
           this.debugid, this.state_);
       this.state_ = ResourceState_.READY_FOR_LAYOUT;
@@ -1359,19 +1380,22 @@ export class Resource {
     // Double check that the element has not disappeared since scheduling
     this.measure();
     if (!this.isDisplayed()) {
-      log.fine(TAG_, 'layout canceled due to element loosing display:',
+      // @pub-dev
+      log.fine(TAG_, 'layout canceled due to element losing display:',
           this.debugid, this.state_);
       return Promise.resolve();
     }
 
     // Not-wanted re-layouts are ignored.
     if (this.layoutCount_ > 0 && !this.element.isRelayoutNeeded()) {
+      // @pub-dev
       log.fine(TAG_, 'layout canceled since it wasn\'t requested:',
           this.debugid, this.state_);
       this.state_ = ResourceState_.LAYOUT_COMPLETE;
       return Promise.resolve();
     }
 
+    // @pub-dev
     log.fine(TAG_, 'start layout:', this.debugid, 'count:', this.layoutCount_);
     this.layoutCount_++;
     this.state_ = ResourceState_.LAYOUT_SCHEDULED;
@@ -1397,8 +1421,10 @@ export class Resource {
     this.state_ = success ? ResourceState_.LAYOUT_COMPLETE :
         ResourceState_.LAYOUT_FAILED;
     if (success) {
+      // @pub-dev
       log.fine(TAG_, 'layout complete:', this.debugid);
     } else {
+      // @pub-dev
       log.fine(TAG_, 'loading failed:', this.debugid, opt_reason);
       return Promise.reject(opt_reason);
     }
@@ -1420,6 +1446,7 @@ export class Resource {
     if (inViewport == this.isInViewport_) {
       return;
     }
+    // @pub-dev
     log.fine(TAG_, 'inViewport:', this.debugid, inViewport);
     this.isInViewport_ = inViewport;
     this.element.viewportCallback(inViewport);

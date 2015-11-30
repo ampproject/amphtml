@@ -59,6 +59,7 @@ export class Input {
         (win.navigator['maxTouchPoints'] !== undefined &&
             win.navigator['maxTouchPoints'] > 0) ||
         win['DocumentTouch'] !== undefined);
+    // @amp-dev
     log.fine(TAG_, 'touch detected:', this.hasTouch_);
 
     /** @private {boolean} */
@@ -183,6 +184,7 @@ export class Input {
 
     this.keyboardActive_ = true;
     this.keyboardStateObservable_.fire(true);
+    // @amp-dev
     log.fine(TAG_, 'keyboard activated');
   }
 
@@ -193,6 +195,7 @@ export class Input {
     }
     this.keyboardActive_ = false;
     this.keyboardStateObservable_.fire(false);
+    // @amp-dev
     log.fine(TAG_, 'keyboard deactivated');
   }
 
@@ -209,6 +212,7 @@ export class Input {
   mouseConfirmed_() {
     this.hasMouse_ = true;
     this.mouseDetectedObservable_.fire(true);
+    // @amp-dev
     log.fine(TAG_, 'mouse detected');
   }
 
@@ -219,6 +223,7 @@ export class Input {
     if (this.mouseConfirmAttemptCount_ <= MAX_MOUSE_CONFIRM_ATTEMPS_) {
       listenOnce(this.win.document, 'mousemove', this.boundOnMouseMove_);
     } else {
+      // @amp-dev
       log.fine(TAG_, 'mouse detection failed');
     }
   }

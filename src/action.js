@@ -278,6 +278,7 @@ export class Action {
         .trim() || DEFAULT_METHOD_;
 
     if (!event || !target) {
+      // @pub-dev
       log.error(TAG_, 'invalid action definition: ' + s);
       return null;
     }

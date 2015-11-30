@@ -155,6 +155,7 @@ export class Vsync {
   runAnim(task, opt_state) {
     // Do not request animation frames when the document is not visible.
     if (!this.canAnimate()) {
+      // @amp-dev
       log.warn('Vsync',
           'Did not schedule a vsync request, because document was invisible');
       return false;
