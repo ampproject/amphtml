@@ -48,7 +48,7 @@ function absolutePathFor(testFile) {
       return candidate;
     }
   }
-  throw 'Could not find ' + testFile;
+  goog.asserts.fail('Could not find ' + testFile);
 }
 
 /**
