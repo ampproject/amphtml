@@ -370,6 +370,7 @@ describe('Resources changeHeight', () => {
 
   function createResource(id, rect) {
     const resource = new Resource(id, createElement(rect), resources);
+    resource.element['__AMP__RESOURCE'] = resource;
     resource.state_ = ResourceState_.READY_FOR_LAYOUT;
     resource.layoutBox_ = rect;
     resource.changeHeight = sinon.spy();
@@ -460,7 +461,7 @@ describe('Resources changeHeight', () => {
       overflowCallbackSpy = sinon.spy();
       resource1.element.overflowCallback = overflowCallbackSpy;
       viewportMock.expects('getRect').returns(
-          {top: 0, left: 0, right: 100, bottom: 200, height: 200}).once();
+          {top: 0, left: 0, right: 100, bottom: 200, height: 200}).atLeast(1);
       resource1.layoutBox_ = {top: 10, left: 0, right: 100, bottom: 50,
           height: 50};
       vsyncSpy = sandbox.stub(resources.vsync_, 'run');
@@ -479,6 +480,7 @@ describe('Resources changeHeight', () => {
       expect(overflowCallbackSpy.callCount).to.equal(1);
       expect(overflowCallbackSpy.firstCall.args[0]).to.equal(true);
       expect(overflowCallbackSpy.firstCall.args[1]).to.equal(111);
+      expect(resource1.getPendingChangeHeight()).to.equal(111);
     });
 
     it('should change height when new height is lower', () => {
@@ -494,7 +496,8 @@ describe('Resources changeHeight', () => {
       resources.mutateWork_();
       expect(resources.requestsChangeHeight_.length).to.equal(0);
       expect(resource1.changeHeight.callCount).to.equal(1);
-      expect(overflowCallbackSpy.callCount).to.equal(0);
+      expect(overflowCallbackSpy.callCount).to.equal(1);
+      expect(overflowCallbackSpy.firstCall.args[0]).to.equal(false);
     });
 
     it('should change height when document is invisible', () => {
@@ -503,7 +506,8 @@ describe('Resources changeHeight', () => {
       resources.mutateWork_();
       expect(resources.requestsChangeHeight_.length).to.equal(0);
       expect(resource1.changeHeight.callCount).to.equal(1);
-      expect(overflowCallbackSpy.callCount).to.equal(0);
+      expect(overflowCallbackSpy.callCount).to.equal(1);
+      expect(overflowCallbackSpy.firstCall.args[0]).to.equal(false);
     });
 
     it('should change height when active', () => {
@@ -512,7 +516,8 @@ describe('Resources changeHeight', () => {
       resources.mutateWork_();
       expect(resources.requestsChangeHeight_.length).to.equal(0);
       expect(resource1.changeHeight.callCount).to.equal(1);
-      expect(overflowCallbackSpy.callCount).to.equal(0);
+      expect(overflowCallbackSpy.callCount).to.equal(1);
+      expect(overflowCallbackSpy.firstCall.args[0]).to.equal(false);
     });
 
     it('should change height when below the viewport', () => {
@@ -522,7 +527,8 @@ describe('Resources changeHeight', () => {
       resources.mutateWork_();
       expect(resources.requestsChangeHeight_.length).to.equal(0);
       expect(resource1.changeHeight.callCount).to.equal(1);
-      expect(overflowCallbackSpy.callCount).to.equal(0);
+      expect(overflowCallbackSpy.callCount).to.equal(1);
+      expect(overflowCallbackSpy.firstCall.args[0]).to.equal(false);
     });
 
     it('should change height when slightly above the viewport', () => {
@@ -532,7 +538,8 @@ describe('Resources changeHeight', () => {
       resources.mutateWork_();
       expect(resources.requestsChangeHeight_.length).to.equal(0);
       expect(resource1.changeHeight.callCount).to.equal(1);
-      expect(overflowCallbackSpy.callCount).to.equal(0);
+      expect(overflowCallbackSpy.callCount).to.equal(1);
+      expect(overflowCallbackSpy.firstCall.args[0]).to.equal(false);
     });
 
     it('should NOT change height when significantly above the viewport', () => {
@@ -544,6 +551,7 @@ describe('Resources changeHeight', () => {
       expect(overflowCallbackSpy.callCount).to.equal(1);
       expect(overflowCallbackSpy.firstCall.args[0]).to.equal(true);
       expect(overflowCallbackSpy.firstCall.args[1]).to.equal(111);
+      expect(resource1.getPendingChangeHeight()).to.equal(111);
     });
 
     it('should defer when above the viewport and scrolling on', () => {
@@ -610,6 +618,33 @@ describe('Resources changeHeight', () => {
       expect(resource1.changeHeight.callCount).to.equal(1);
       expect(resource1.changeHeight.firstCall.args[0]).to.equal(111);
       expect(resources.relayoutTop_).to.equal(resource1.layoutBox_.top);
+    });
+
+    it('should reset pending change height when rescheduling', () => {
+      resources.scheduleChangeHeight_(resource1, 111, false);
+      resources.mutateWork_();
+      expect(resource1.getPendingChangeHeight()).to.equal(111);
+
+      resources.scheduleChangeHeight_(resource1, 112, false);
+      expect(resource1.getPendingChangeHeight()).to.be.undefined;
+    });
+
+    it('should force resize after focus', () => {
+      resources.scheduleChangeHeight_(resource1, 111, false);
+      resources.mutateWork_();
+      expect(resource1.getPendingChangeHeight()).to.equal(111);
+      expect(resources.requestsChangeHeight_.length).to.equal(0);
+
+      resources.checkPendingChangeHeight_(resource1.element);
+      expect(resource1.getPendingChangeHeight()).to.be.undefined;
+      expect(resources.requestsChangeHeight_.length).to.equal(1);
+
+      resources.mutateWork_();
+      expect(resources.requestsChangeHeight_.length).to.equal(0);
+      expect(resource1.changeHeight.callCount).to.equal(1);
+      expect(resource1.changeHeight.firstCall.args[0]).to.equal(111);
+      expect(overflowCallbackSpy.callCount).to.equal(2);
+      expect(overflowCallbackSpy.lastCall.args[0]).to.equal(false);
     });
   });
 });
