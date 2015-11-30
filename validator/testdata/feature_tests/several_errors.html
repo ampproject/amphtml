@@ -1,5 +1,3 @@
-<!doctype html>
-<html ⚡>
 <!--
   Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
@@ -15,14 +13,25 @@
   See the License for the specific language governing permissions and
   limitations under the license.
 -->
+<!--
+  Test Description:
+  This example has several problems - see the .out file.
+-->
+<!doctype html>
+<html ⚡>
 <head>
-  <meta charset="utf-8">
-  <link rel="canonical" href="./regular-html-version.html" />
-  <meta name="viewport" content="width=device-width,minimum-scale=1">
-  <style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
-  <script async src="https://ssl.gstatic.com/amphtml/v0.js"></script>
+  <meta charset='pick-a-key'>
+  <link rel='canonical' href='./regular-html-version.html' />
+  <style amp-custom>h1 {color: red}</style><style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
+  <script type='javascript'>
+  // Let's go crazy. Uhm, no, hahaha.
+  </script>
 </head>
 <body>
-Hello, world.
+  <table><tr><td>Tables are allowed</td></tr></table>
+  <amp-img src=dimensions_are_missing.jpg layout="fixed"/>
+<amp-ad width=100% height=300 made_up_attribute="oh hi">
+    <!-- <script>document.write(…)</script> -->
+</amp-ad>
 </body>
 </html>

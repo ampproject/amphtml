@@ -1,0 +1,3 @@
+FAIL
+feature_tests/youtube.html:38:2 MANDATORY_ATTR_MISSING src or data-videoid or video-id (see https://github.com/ampproject/amphtml/blob/master/extensions/amp-youtube/amp-youtube.md)
+feature_tests/youtube.html:40:2 MUTUALLY_EXCLUSIVE_ATTRS src or data-videoid or video-id (see https://github.com/ampproject/amphtml/blob/master/extensions/amp-youtube/amp-youtube.md)
