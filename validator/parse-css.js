@@ -58,12 +58,11 @@ function arrayToJSON(arr) {
 parse_css.TokenStream = function(tokens) {
   /** @type {!Array<!parse_css.CSSParserToken>} */
   this.tokens = tokens;
-  if (this.tokens.length === 0) {
-    throw 'Internal Error: empty TokenStream - must have EOF token';
-  }
-  if (!(this.tokens[tokens.length - 1] instanceof parse_css.EOFToken)) {
-    throw 'Internal Error: TokenStream must end with EOF';
-  }
+  goog.asserts.assert(this.tokens.length > 0,
+      'Internal Error: empty TokenStream - must have EOF token');
+  goog.asserts.assertInstanceof(
+      this.tokens[tokens.length - 1], parse_css.EOFToken,
+      'Internal Error: TokenStream must end with EOF');
   this.pos = -1;
 };
 
@@ -153,17 +152,14 @@ function createParseErrorTokenAt(positionToken, detail) {
  */
 parse_css.parseAStylesheet = function(
     tokenList, atRuleSpec, defaultSpec, errors) {
-  /** @type {!Canonicalizer} */
   const canonicalizer = new Canonicalizer(atRuleSpec, defaultSpec);
-
-  /** @type {!parse_css.Stylesheet} */
   const stylesheet = new parse_css.Stylesheet();
 
   stylesheet.rules = canonicalizer.parseAListOfRules(
-      tokenList, /*topLevel=*/true, errors);
+      tokenList, /* topLevel */ true, errors);
   stylesheet.line = tokenList[0].line;
   stylesheet.col = tokenList[0].col;
-  const eof = /** @type {parse_css.EOFToken} */
+  const eof = /** @type {!parse_css.EOFToken} */
       (tokenList[tokenList.length - 1]);
   stylesheet.eof = eof;
 
@@ -389,8 +385,8 @@ Canonicalizer.prototype.parseAListOfRules = function(
  * @return {!parse_css.AtRule}
  */
 Canonicalizer.prototype.parseAnAtRule = function(tokenStream, errors) {
-  if (!(tokenStream.current() instanceof parse_css.AtKeywordToken))
-    throw 'Internal Error: parseAnAtRule precondition not met';
+  goog.asserts.assertInstanceof(tokenStream.current(), parse_css.AtKeywordToken,
+      'Internal Error: parseAnAtRule precondition not met');
 
   const startToken =
       /** @type {!parse_css.AtKeywordToken} */ (tokenStream.current());
@@ -410,15 +406,20 @@ Canonicalizer.prototype.parseAnAtRule = function(tokenStream, errors) {
 
       const contents = parse_css.extractASimpleBlock(tokenStream);
 
-      /** @type {!parse_css.BlockType} */
-      const blockType = this.blockTypeFor(rule);
-      if (blockType === parse_css.BlockType.PARSE_AS_RULES) {
-        rule.rules = this.parseAListOfRules(
-            contents, /*topLevel=*/false, errors);
-      } else if (blockType === parse_css.BlockType.PARSE_AS_DECLARATIONS) {
-        rule.declarations = this.parseAListOfDeclarations(contents, errors);
-      } else {
-        goog.asserts.assert(blockType === parse_css.BlockType.PARSE_AS_IGNORE);
+      switch (this.blockTypeFor(rule)) {
+        case parse_css.BlockType.PARSE_AS_RULES:
+          rule.rules = this.parseAListOfRules(
+              contents, /* topLevel */ false, errors);
+          break;
+        case parse_css.BlockType.PARSE_AS_DECLARATIONS:
+          rule.declarations = this.parseAListOfDeclarations(contents, errors);
+          break;
+        case parse_css.BlockType.PARSE_AS_IGNORE:
+          break;
+        default:
+          goog.asserts.fail(
+              'Unrecognized blockType ' + this.blockTypeFor(rule));
+          break;
       }
 
       return rule;
@@ -438,9 +439,10 @@ Canonicalizer.prototype.parseAnAtRule = function(tokenStream, errors) {
  */
 Canonicalizer.prototype.parseAQualifiedRule = function(
     tokenStream, rules, errors) {
-  if (tokenStream.current() instanceof parse_css.EOFToken ||
-      tokenStream.current() instanceof parse_css.AtKeywordToken)
-    throw 'Internal Error: parseAQualifiedRule precondition not met';
+  goog.asserts.assert(
+      !(tokenStream.current() instanceof parse_css.EOFToken) &&
+      !(tokenStream.current() instanceof parse_css.AtKeywordToken),
+      'Internal Error: parseAQualifiedRule precondition not met');
 
   const rule = new parse_css.QualifiedRule();
   rule.line = tokenStream.current().line;
@@ -477,7 +479,6 @@ Canonicalizer.prototype.parseAQualifiedRule = function(
 Canonicalizer.prototype.parseAListOfDeclarations = function(tokenList, errors) {
   /** @type {!Array<!parse_css.Declaration>} */
   const decls = [];
-  /** @type {!parse_css.TokenStream} */
   const tokenStream = new parse_css.TokenStream(tokenList);
   while (true) {
     tokenStream.consume();
@@ -518,8 +519,8 @@ Canonicalizer.prototype.parseAListOfDeclarations = function(tokenList, errors) {
  */
 Canonicalizer.prototype.parseADeclaration = function(
     tokenStream, declarations, errors) {
-  if (!(tokenStream.current() instanceof parse_css.IdentToken))
-    throw 'Internal Error: parseADeclaration precondition not met';
+  goog.asserts.assertInstanceof(tokenStream.current(), parse_css.IdentToken,
+      'Internal Error: parseADeclaration precondition not met');
 
   const startToken =
       /** @type {!parse_css.IdentToken} */ (tokenStream.current());
@@ -596,10 +597,11 @@ function consumeAComponentValue(tokenStream, tokenList) {
  * @param {!Array<!parse_css.CSSParserToken>} tokenList output array for tokens.
  */
 function consumeASimpleBlock(tokenStream, tokenList) {
-  if (!(tokenStream.current() instanceof parse_css.OpenCurlyToken ||
-        tokenStream.current() instanceof parse_css.OpenSquareToken ||
-        tokenStream.current() instanceof parse_css.OpenParenToken))
-    throw 'Internal Error: consumeASimpleBlock precondition not met';
+  goog.asserts.assert(
+    (tokenStream.current() instanceof parse_css.OpenCurlyToken ||
+     tokenStream.current() instanceof parse_css.OpenSquareToken ||
+     tokenStream.current() instanceof parse_css.OpenParenToken),
+    'Internal Error: consumeASimpleBlock precondition not met');
 
   const startToken =
       /** @type {!parse_css.GroupingToken} */ (tokenStream.current());
@@ -650,8 +652,8 @@ parse_css.extractASimpleBlock = function(tokenStream) {
  * @param {!Array<!parse_css.CSSParserToken>} tokenList output array for tokens.
  */
 function consumeAFunction(tokenStream, tokenList) {
-  if (!(tokenStream.current() instanceof parse_css.FunctionToken))
-    throw 'Internal Error: consumeAFunction precondition not met';
+  goog.asserts.assertInstanceof(tokenStream.current(), parse_css.FunctionToken,
+      'Internal Error: consumeAFunction precondition not met');
   tokenList.push(tokenStream.current());
   while (true) {
     tokenStream.consume();
