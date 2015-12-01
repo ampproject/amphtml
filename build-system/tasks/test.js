@@ -42,7 +42,10 @@ function getConfig() {
     if (!process.env.SAUCE_ACCESS_KEY) {
       throw new Error('Missing SAUCE_ACCESS_KEY Env variable');
     }
-    return extend(obj, karmaConfig.saucelabs);
+    const c = extend(obj, karmaConfig.saucelabs);
+    if (argv.oldchrome) {
+      c.browsers = ['SL_Chrome_37']
+    }
   }
 
   return extend(obj, karmaConfig.default);
@@ -89,6 +92,7 @@ gulp.task('test', 'Runs tests in chrome', ['build'], function(done) {
     'saucelabs': '  Runs test on saucelabs (requires setup)',
     'safari': '  Runs tests in Safari',
     'firefox': '  Runs tests in Firefox',
-    'integration': 'Run only integration tests.'
+    'integration': 'Run only integration tests.',
+    'oldchrome': 'Runs test with an old chrome. Saucelabs only.',
   }
 });
