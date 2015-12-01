@@ -305,6 +305,9 @@ export function createAmpElementProto(win, name, implementationClass) {
     /** @private {boolean|undefined} */
     this.loadingDisabled_;
 
+    /** @private {boolean|undefined} */
+    this.loadingState_;
+
     /** @private {?Element} */
     this.loadingContainer_ = null;
 
@@ -937,16 +940,24 @@ export function createAmpElementProto(win, name, implementationClass) {
    */
   ElementProto.toggleLoading_ = function(state, opt_cleanup) {
     this.assertNotTemplate_();
+    this.loadingState_ = state;
     if (!state && !this.loadingContainer_) {
       return;
     }
 
     // Check if loading should be shown.
     if (state && !this.isLoadingEnabled_()) {
+      this.loadingState_ = false;
       return;
     }
 
     this.getVsync_().mutate(() => {
+      let state = this.loadingState_;
+      // Repeat "loading enabled" check because it could have changed while
+      // waiting for vsync.
+      if (state && !this.isLoadingEnabled_()) {
+        state = false;
+      }
       if (state) {
         this.prepareLoading_();
       }
