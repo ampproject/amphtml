@@ -26,8 +26,8 @@
  *
  * Examples of usage of the {@code goog.string.html.HtmlParser}:
  * <pre>
- *   var handler = new MyCustomHtmlVisitorHandlerThatExtendsHtmlSaxHandler();
- *   var parser = new goog.string.html.HtmlParser();
+ *   const handler = new MyCustomHtmlVisitorHandlerThatExtendsHtmlSaxHandler();
+ *   const parser = new goog.string.html.HtmlParser();
  *   parser.parse(handler, '<html><a href="google.com">link found!</a></html>');
  * </pre>
  */
@@ -370,9 +370,9 @@ amp.htmlparser.HtmlParser.DocLocatorImpl = function(htmlText) {
   // can probably do better, but it's also quite simple so here we are for now.
   this.lineByPos_ = [];
   this.colByPos_ = [];
-  var currentLine = 1;
-  var currentCol = 0;
-  for (var i = 0; i < htmlText.length; ++i) {
+  let currentLine = 1;
+  let currentCol = 0;
+  for (let i = 0; i < htmlText.length; ++i) {
     this.lineByPos_[i] = currentLine;
     this.colByPos_[i] = currentCol;
     if (htmlText.charAt(i) == '\n') {
@@ -449,16 +449,16 @@ amp.htmlparser.HtmlParser.DocLocatorImpl.prototype.getCol = function() {
  * @param {string} htmlText The html text.
  */
 amp.htmlparser.HtmlParser.prototype.parse = function(handler, htmlText) {
-  var htmlLower = null;
-  var inTag = false;  // True iff we're currently processing a tag.
-  var attribs = [];  // Accumulates attribute names and values.
-  var tagName;  // The name of the tag currently being processed.
-  var eflags;  // The element flags for the current tag.
-  var openTag;  // True if the current tag is an open tag.
+  let htmlLower = null;
+  let inTag = false;  // True iff we're currently processing a tag.
+  const attribs = [];  // Accumulates attribute names and values.
+  let tagName;  // The name of the tag currently being processed.
+  let eflags;  // The element flags for the current tag.
+  let openTag;  // True if the current tag is an open tag.
 
   // Only provide location information if the handler implements the
   // setDocLocator method.
-  var locator = null;
+  let locator = null;
   if (handler.setDocLocator && handler.setDocLocator !== goog.abstractMethod) {
     locator = new amp.htmlparser.HtmlParser.DocLocatorImpl(htmlText);
     handler.setDocLocator(locator);
@@ -469,11 +469,11 @@ amp.htmlparser.HtmlParser.prototype.parse = function(handler, htmlText) {
 
   // Consumes tokens from the htmlText and stops once all tokens are processed.
   while (htmlText) {
-    var regex = inTag ?
+    const regex = inTag ?
         amp.htmlparser.HtmlParser.INSIDE_TAG_TOKEN_ :
         amp.htmlparser.HtmlParser.OUTSIDE_TAG_TOKEN_;
     // Gets the next token
-    var m = htmlText.match(regex);
+    const m = htmlText.match(regex);
     if (locator) {
       locator.advancePos(m[0]);
     }
@@ -484,22 +484,21 @@ amp.htmlparser.HtmlParser.prototype.parse = function(handler, htmlText) {
     if (inTag) {
       if (m[1]) { // Attribute.
         // SetAttribute with uppercase names doesn't work on IE6.
-        var attribName = amp.htmlparser.toLowerCase(m[1]);
-        var decodedValue;
+        const attribName = amp.htmlparser.toLowerCase(m[1]);
+        // Use name as value for valueless attribs, so
+        //   <input type=checkbox checked>
+        // gets attributes ['type', 'checkbox', 'checked', 'checked']
+        let decodedValue = attribName;
         if (m[2]) {
-          var encodedValue = m[3];
+          let encodedValue = m[3];
           switch (encodedValue.charCodeAt(0)) {  // Strip quotes.
-            case 34: case 39:
+            case 34:  // double quote "
+            case 39:  // single quote '
               encodedValue = encodedValue.substring(
                   1, encodedValue.length - 1);
               break;
           }
           decodedValue = this.unescapeEntities_(this.stripNULs_(encodedValue));
-        } else {
-          // Use name as value for valueless attribs, so
-          //   <input type=checkbox checked>
-          // gets attributes ['type', 'checkbox', 'checked', 'checked']
-          decodedValue = attribName;
         }
         attribs.push(attribName, decodedValue);
       } else if (m[4]) {
@@ -524,7 +523,7 @@ amp.htmlparser.HtmlParser.prototype.parse = function(handler, htmlText) {
             htmlLower = htmlLower.substring(
                 htmlLower.length - htmlText.length);
           }
-          var dataEnd = htmlLower.indexOf('</' + tagName);
+          let dataEnd = htmlLower.indexOf('</' + tagName);
           if (dataEnd < 0) {
             dataEnd = htmlText.length;
           }
@@ -596,7 +595,7 @@ amp.htmlparser.HtmlParser.prototype.lookupEntity_ = function(name) {
   if (amp.htmlparser.HtmlParser.Entities.hasOwnProperty(name)) {
     return amp.htmlparser.HtmlParser.Entities[name];
   }
-  var m = name.match(amp.htmlparser.HtmlParser.DECIMAL_ESCAPE_RE_);
+  let m = name.match(amp.htmlparser.HtmlParser.DECIMAL_ESCAPE_RE_);
   if (m) {
     return String.fromCharCode(parseInt(m[1], 10));
   } else if (

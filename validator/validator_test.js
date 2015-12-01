@@ -16,23 +16,7 @@
  */
 goog.require('amp.validator.validateString');
 goog.require('amp.validator.renderValidationResult');
-goog.provide('amp.validator.validatorTest');
-
-/**
- * This function allows us to inject NodeJS dependencies into the test.
- * It encloses the contents of the remainder of the file. This
- * function gets called from a small NodeJS script (e.g. in our github
- * project, see build.py, GenerateValidatorTest).
- * @param {!Array<string>} testdataDirs
- * @param {?} assert The NodeJS assert module.
- * @param {?} fs The NodeJS fs module.
- * @param {?} path The NodeJS path module.
- * @param {?} describe The describe function from jasmin.
- * @param {?} it The it function from jasmin.
- * @export
- */
-amp.validator.validatorTest = function(testdataDirs, assert, fs,
-                                       path, describe, it) {
+goog.provide('amp.validator.ValidatorTest');
 
 /**
  * Returns the absolute path for a given test file, that is, a file
@@ -42,7 +26,7 @@ amp.validator.validatorTest = function(testdataDirs, assert, fs,
  * @return {!string}
  */
 function absolutePathFor(testFile) {
-  for (const dir of testdataDirs) {
+  for (const dir of process.env['TESTDATA_DIRS'].split(':')) {
     const candidate = path.join(dir, testFile);
     if (fs.existsSync(candidate)) {
       return candidate;
@@ -59,7 +43,7 @@ function absolutePathFor(testFile) {
  */
 function findHtmlFilesRelativeToTestdata() {
   const testFiles = [];
-  for (const dir of testdataDirs) {
+  for (const dir of process.env['TESTDATA_DIRS'].split(':')) {
     for (const subdir of /** @type {!Array<!string>} */(
         fs.readdirSync(path.join(dir)))) {
       for (const candidate of /** @type {!Array<!string>} */(
@@ -185,4 +169,3 @@ describe('ValidatorCssLengthValidation', () => {
         'amp-html-format.md#maximum-size)';
   });
 });
-};
