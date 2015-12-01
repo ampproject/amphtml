@@ -40,7 +40,7 @@ create more advanced and customized UI.
 Styling and theming of AMP-provided components is all done via CSS. See the [AMP Spec](amp-html-format.md) for more detail.
 
 AMP elements can be styled with class or element selectors using most common CSS properties.
-Add any styles to an AMP page using a single <style amp-custom> tag in the head of the document.
+Add any styles to an AMP page using a single `<style amp-custom>` tag in the head of the document.
 For example:
 
     <!doctype html>
