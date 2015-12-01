@@ -328,6 +328,7 @@ export class Viewport {
   setViewportMetaString_(viewportMetaString) {
     const viewportMeta = this.getViewportMeta_();
     if (viewportMeta && viewportMeta.content != viewportMetaString) {
+      // @pub-dev
       log.fine(TAG_, 'changed viewport meta to:', viewportMetaString);
       viewportMeta.content = viewportMetaString;
       return true;
@@ -362,6 +363,7 @@ export class Viewport {
   changed_(relayoutAll, velocity) {
     const size = this.getSize();
     const scrollTop = this.getScrollTop();
+    // @pub-dev
     log.fine(TAG_, 'changed event:',
         'relayoutAll=', relayoutAll,
         'top=', scrollTop,
@@ -417,6 +419,7 @@ export class Viewport {
       velocity = (newScrollTop - this.scrollTop_) /
           (now - this.scrollMeasureTime_);
     }
+    // @pub-dev
     log.fine(TAG_, 'scroll: ' +
         'scrollTop=' + newScrollTop + '; ' +
         'velocity=' + velocity);
@@ -552,6 +555,7 @@ export class ViewportBindingNatural_ {
     this.win.addEventListener('scroll', () => this.scrollObservable_.fire());
     this.win.addEventListener('resize', () => this.resizeObservable_.fire());
 
+    // @pub-dev
     log.fine(TAG_, 'initialized natural viewport');
   }
 
@@ -697,6 +701,7 @@ export class ViewportBindingNaturalIosEmbed_ {
     });
     this.win.addEventListener('resize', () => this.resizeObservable_.fire());
 
+    // @pub-dev
     log.fine(TAG_, 'initialized natural viewport for iOS embeds');
   }
 
@@ -965,6 +970,7 @@ export class ViewportBindingVirtual_ {
     /** @private @const {!Observable} */
     this.resizeObservable_ = new Observable();
 
+    // @pub-dev
     log.fine(TAG_, 'initialized virtual viewport');
   }
 

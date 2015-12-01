@@ -178,6 +178,7 @@ export class History {
     promise.then(result => {
       task.resolve(result);
     }, reason => {
+      // @amp-dev
       log.error(TAG_, 'failed to execute a task:', reason);
       task.reject(reason);
     }).then(() => {
@@ -308,6 +309,7 @@ export class HistoryBindingNatural_ {
     try {
       this.replaceState_(historyState_(this.stackIndex_));
     } catch (e) {
+      // @amp-dev
       log.error(TAG_, 'Initial replaceState failed: ' + e.message);
     }
 
@@ -316,11 +318,13 @@ export class HistoryBindingNatural_ {
 
     const eventPass = new Pass(this.onHistoryEvent_.bind(this), 50);
     this.popstateHandler_ = e => {
+      // @amp-dev
       log.fine(TAG_, 'popstate event: ' + this.win.history.length + ', ' +
           JSON.stringify(e.state));
       eventPass.schedule();
     };
     this.hashchangeHandler_ = () => {
+      // @amp-dev
       log.fine(TAG_, 'hashchange event: ' + this.win.history.length + ', ' +
           this.win.location.hash);
       eventPass.schedule();
@@ -378,6 +382,7 @@ export class HistoryBindingNatural_ {
   /** @private */
   onHistoryEvent_() {
     let state = this.getState_();
+    // @amp-dev
     log.fine(TAG_, 'history event: ' + this.win.history.length + ', ' +
         JSON.stringify(state));
     const stackIndex = state ? state[HISTORY_PROP_] : undefined;
@@ -539,6 +544,7 @@ export class HistoryBindingNatural_ {
     this.assertReady_();
     stackIndex = Math.min(stackIndex, this.win.history.length - 1);
     if (this.stackIndex_ != stackIndex) {
+      // @amp-dev
       log.fine(TAG_, 'stack index changed: ' + this.stackIndex_ + ' -> ' +
           stackIndex);
       this.stackIndex_ = stackIndex;
@@ -621,6 +627,7 @@ export class HistoryBindingVirtual_ {
    */
   updateStackIndex_(stackIndex) {
     if (this.stackIndex_ != stackIndex) {
+      // @amp-dev
       log.fine(TAG_, 'stack index changed: ' + this.stackIndex_ + ' -> ' +
           stackIndex);
       this.stackIndex_ = stackIndex;

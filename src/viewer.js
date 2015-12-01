@@ -152,21 +152,26 @@ export class Viewer {
       parseParams_(this.win.location.hash, this.params_);
     }
 
+    // @pub-dev
     log.fine(TAG_, 'Viewer params:', this.params_);
 
     this.isRuntimeOn_ = !parseInt(this.params_['off'], 10);
+    // @pub-dev
     log.fine(TAG_, '- runtimeOn:', this.isRuntimeOn_);
 
     this.overtakeHistory_ = parseInt(this.params_['history'], 10) ||
         this.overtakeHistory_;
+    // @pub-dev
     log.fine(TAG_, '- history:', this.overtakeHistory_);
 
     this.visibilityState_ = this.params_['visibilityState'] ||
         this.visibilityState_;
+    // @pub-dev
     log.fine(TAG_, '- visibilityState:', this.visibilityState_);
 
     this.prerenderSize_ = parseInt(this.params_['prerenderSize'], 10) ||
         this.prerenderSize_;
+    // @pub-dev
     log.fine(TAG_, '- prerenderSize:', this.prerenderSize_);
 
     this.viewportType_ = this.params_['viewportType'] || this.viewportType_;
@@ -175,22 +180,27 @@ export class Viewer {
             platform.isIos()) {
       this.viewportType_ = ViewportType.NATURAL_IOS_EMBED;
     }
+    // @pub-dev
     log.fine(TAG_, '- viewportType:', this.viewportType_);
 
     this.viewportWidth_ = parseInt(this.params_['width'], 10) ||
         this.viewportWidth_;
+    // @pub-dev
     log.fine(TAG_, '- viewportWidth:', this.viewportWidth_);
 
     this.viewportHeight_ = parseInt(this.params_['height'], 10) ||
         this.viewportHeight_;
+    // @pub-dev
     log.fine(TAG_, '- viewportHeight:', this.viewportHeight_);
 
     this./*OK*/scrollTop_ = parseInt(this.params_['scrollTop'], 10) ||
         this./*OK*/scrollTop_;
+    // @pub-dev
     log.fine(TAG_, '- scrollTop:', this./*OK*/scrollTop_);
 
     this.paddingTop_ = parseInt(this.params_['paddingTop'], 10) ||
         this.paddingTop_;
+    // @pub-dev
     log.fine(TAG_, '- padding-top:', this.paddingTop_);
 
     // Wait for document to become visible.
@@ -203,6 +213,7 @@ export class Viewer {
       const newUrl = removeFragment(this.win.location.href);
       if (newUrl != this.win.location.href && this.win.history.replaceState) {
         this.win.history.replaceState({}, '', newUrl);
+        // @pub-dev
         log.fine(TAG_, 'replace url:' + this.win.location.href);
       }
     }
@@ -238,6 +249,7 @@ export class Viewer {
    */
   toggleRuntime() {
     this.isRuntimeOn_ = !this.isRuntimeOn_;
+    // @pub-dev
     log.fine(TAG_, 'Runtime state:', this.isRuntimeOn_);
     this.runtimeOnObservable_.fire(this.isRuntimeOn_);
   }
@@ -458,11 +470,13 @@ export class Viewer {
       if (data['prerenderSize'] !== undefined) {
         this.prerenderSize_ = data['prerenderSize'];
       }
+      // @pub-dev
       log.fine(TAG_, 'visibilitychange event:', this.visibilityState_,
           this.prerenderSize_);
       this.visibilityObservable_.fire();
       return Promise.resolve();
     }
+    // @pub-dev
     log.fine(TAG_, 'unknown message:', eventType);
     return undefined;
   }

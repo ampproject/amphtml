@@ -81,6 +81,7 @@ try {
 // tag to give some information that can be used in error reports.
 // (At least by sophisticated users).
 if (window.console) {
+  // @user
   (console.info || console.log).call(console,
       'Powered by AMP ⚡ HTML – Version $internalRuntimeVersion$');
 }
