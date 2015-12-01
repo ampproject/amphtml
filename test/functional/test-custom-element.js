@@ -1003,7 +1003,7 @@ describe('CustomElement Loading Indicator', () => {
     });
   });
 
-  it('should ignore loading on if layout completed before vsync', () => {
+  it('should ignore loading "on" if layout completed before vsync', () => {
     resourcesMock.expects('deferMutate').once();
     element.prepareLoading_();
     element.toggleLoading_(true);
