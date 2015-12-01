@@ -66,6 +66,9 @@ try {
     } finally {
       makeBodyVisible(document);
       perf.tick('e_is');
+      // TODO(erwinm): move invocation of the `flush` method when we have the
+      // new ticks in place to batch the ticks properly.
+      perf.flush();
     }
   }, /* opt_isRuntimeCss */ true);
 } catch (e) {
