@@ -16,7 +16,7 @@
 
 import {BaseElement} from '../src/base-element';
 import {Layout} from '../src/layout';
-import {UrlReplacements} from '../src/url-replacements';
+import {urlReplacementsFor} from '../src/url-replacements';
 import {assert} from '../src/asserts';
 import {registerElement} from '../src/custom-element';
 
@@ -27,10 +27,6 @@ import {registerElement} from '../src/custom-element';
  * @return {undefined}
  */
 export function installPixel(win) {
-
-  /** @const {!UrlReplacements} */
-  const urlReplacements = new UrlReplacements(win);
-
   class AmpPixel extends BaseElement {
     /** @override */
     isLayoutSupported(layout) {
@@ -49,7 +45,7 @@ export function installPixel(win) {
     /** @override */
     layoutCallback() {
       let src = this.element.getAttribute('src');
-      src = urlReplacements.expand(this.assertSource(src));
+      src = urlReplacementsFor(this.getWin()).expand(this.assertSource(src));
       const image = new Image();
       image.src = src;
       image.width = 1;

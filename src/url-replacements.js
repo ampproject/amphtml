@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-import {assert} from '../src/asserts';
-import {documentInfoFor} from '../src/document-info';
-import {parseUrl, removeFragment} from '../src/url';
+import {assert} from './asserts';
+import {documentInfoFor} from './document-info';
+import {getService} from './service';
+import {parseUrl, removeFragment} from './url';
 
 
 /**
  * This class replaces substitution variables with their values.
  */
-export class UrlReplacements {
+class UrlReplacements {
   /** @param {!Window} win */
   constructor(win) {
     /** @private @const {!Window} */
@@ -35,46 +36,53 @@ export class UrlReplacements {
     this.replacements_ = this.win_.Object.create(null);
 
     // Returns a random value for cache busters.
-    this.set('RANDOM', () => {
+    this.set_('RANDOM', () => {
       return Math.random();
     });
 
     // Returns the canonical URL for this AMP document.
-    this.set('CANONICAL_URL', () => {
+    this.set_('CANONICAL_URL', () => {
       return documentInfoFor(this.win_).canonicalUrl;
     });
 
     // Returns the host of the canonical URL for this AMP document.
-    this.set('CANONICAL_HOST', () => {
+    this.set_('CANONICAL_HOST', () => {
       const url = parseUrl(documentInfoFor(this.win_).canonicalUrl);
       return url && url.hostname;
     });
 
     // Returns the path of the canonical URL for this AMP document.
-    this.set('CANONICAL_PATH', () => {
+    this.set_('CANONICAL_PATH', () => {
       const url = parseUrl(documentInfoFor(this.win_).canonicalUrl);
       return url && url.pathname;
     });
 
     // Returns the referrer URL.
-    this.set('DOCUMENT_REFERRER', () => {
+    this.set_('DOCUMENT_REFERRER', () => {
       return this.win_.document.referrer;
     });
 
     // Returns the title of this AMP document.
-    this.set('TITLE', () => {
+    this.set_('TITLE', () => {
       return this.win_.document.title;
     });
 
     // Returns the URL for this AMP document.
-    this.set('AMPDOC_URL', () => {
+    this.set_('AMPDOC_URL', () => {
       return removeFragment(this.win_.location.href);
     });
 
     // Returns the host of the URL for this AMP document.
-    this.set('AMPDOC_HOST', () => {
+    this.set_('AMPDOC_HOST', () => {
       const url = parseUrl(this.win_.location.href);
       return url && url.hostname;
+    });
+
+    // Returns a random string that will be the constant for the duration of
+    // single page view. It should have sufficient entropy to be unique for
+    // all the page views a single user is making at a time.
+    this.set_('PAGE_VIEW_ID', () => {
+      documentInfoFor(this.win_).pageViewId;
     });
   }
 
@@ -84,8 +92,9 @@ export class UrlReplacements {
    * @param {string} varName
    * @param {function(*):*} resolver
    * @return {!UrlReplacements}
+   * @private
    */
-  set(varName, resolver) {
+  set_(varName, resolver) {
     assert(varName == varName.toUpperCase(),
         'Variable name must be in upper case: %s', varName);
     this.replacements_[varName] = resolver;
@@ -128,3 +137,13 @@ export class UrlReplacements {
     return this.replacementExpr_;
   }
 }
+
+/**
+ * @param {!Window} window
+ * @return {!UrlReplacements}
+ */
+export function urlReplacementsFor(window) {
+  return getService(window, 'url-replace', () => {
+    return new UrlReplacements(window);
+  });
+};

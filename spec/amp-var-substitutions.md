@@ -103,3 +103,7 @@ For instance:
 <amp-pixel src="https://foo.com/pixel?host=AMPDOC_HOST"></amp-pixel>
 ```
 may make a request to something like `https://foo.com/pixel?host=example.com`.
+
+**PAGE_VIEW_ID**
+
+Contains a string that is intended to be random and likely to be unique per URL, user and day.

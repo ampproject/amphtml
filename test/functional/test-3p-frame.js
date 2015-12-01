@@ -16,6 +16,7 @@
 
 import {addDataAndJsonAttributes_, getIframe, getBootstrapBaseUrl,
     prefetchBootstrap} from '../../src/3p-frame';
+import {documentInfoFor} from '../../src/document-info';
 import {loadPromise} from '../../src/event-helper';
 import {setModeForTesting, getMode} from '../../src/mode';
 import {resetServiceForTesting} from '../../src/service';
@@ -84,15 +85,18 @@ describe('3p-frame', () => {
 
     const iframe = getIframe(window, div, '_ping_');
     const src = iframe.src;
-    const referrer = document.referrer;
-    expect(referrer).to.not.be.a.string;
+    const referrer = window.document.referrer;
+    expect(referrer).to.not.be.empty;
     const locationHref = location.href;
-    expect(locationHref).to.not.be.a.string;
+    expect(locationHref).to.not.be.empty;
+    const docInfo = documentInfoFor(window);
+    expect(docInfo.pageViewId).to.not.be.empty;
     const fragment =
         '#{"testAttr":"value","ping":"pong","width":50,"height":100,' +
         '"initialWindowWidth":100,"initialWindowHeight":200,"type":"_ping_"' +
         ',"_context":{"referrer":"' + referrer + '",' +
-        '"canonicalUrl":"https://foo.bar/baz","location":{"href":' +
+        '"canonicalUrl":"https://foo.bar/baz",' +
+        '"pageViewId":"' + docInfo.pageViewId + '","location":{"href":' +
         '"' + locationHref + '"},"mode":{"localDev":true,' +
         '"development":false,"minified":false}}}';
     expect(src).to.equal(
@@ -113,6 +117,7 @@ describe('3p-frame', () => {
       } else {
         expect(win.context.location.originValidated).to.be.false;
       }
+      expect(win.context.pageViewId).to.equal(docInfo.pageViewId);
       expect(win.context.referrer).to.equal(referrer);
       expect(win.context.data.testAttr).to.equal('value');
       expect(win.context.noContentAvailable).to.be.function;
