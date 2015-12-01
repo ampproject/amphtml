@@ -1002,6 +1002,28 @@ describe('CustomElement Loading Indicator', () => {
       expect(toggle.firstCall.args[1]).to.equal(true);
     });
   });
+
+  it('should ignore loading "on" if layout completed before vsync', () => {
+    resourcesMock.expects('deferMutate').once();
+    element.prepareLoading_();
+    element.toggleLoading_(true);
+    element.build(true);
+    return element.layoutCallback().then(() => {
+      expect(vsyncTasks).to.have.length(2);
+
+      // The first mutate started by toggleLoading_(true), but it must
+      // immediately proceed to switch it to off.
+      vsyncTasks.shift()();
+      expect(element.loadingContainer_).to.have.class('amp-hidden');
+      expect(element.loadingElement_).to.not.have.class('amp-active');
+
+      // Second vsync should perform cleanup.
+      vsyncTasks.shift()();
+      expect(element.loadingContainer_).to.be.null;
+    }, () => {
+      throw new Error('Should never happen.');
+    });
+  });
 });
 
 
