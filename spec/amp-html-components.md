@@ -43,32 +43,34 @@ AMP elements can be styled with class or element selectors using most common CSS
 Add any styles to an AMP page using a single `<style amp-custom>` tag in the head of the document.
 For example:
 
-    <!doctype html>
-    <html ⚡>
-      <head>
-        <style amp-custom>
-          amp-img {
-            border: 5px solid black;
-          }
+```html
+<!doctype html>
+<html ⚡>
+  <head>
+    <style amp-custom>
+      amp-img {
+        border: 5px solid black;
+      }
 
-          amp-img.grey-placeholder {
-            background-color: grey;
-          }
-        </style>
-      </head>
+      amp-img.grey-placeholder {
+        background-color: grey;
+      }
+    </style>
+  </head>
 
-      <body>
-        <amp-img src="https://placekitten.com/g/200/300" width=200 height=300>
-        </amp-img>
+  <body>
+    <amp-img src="https://placekitten.com/g/200/300" width=200 height=300>
+    </amp-img>
 
-        <amp-img
-          class="grey-placeholder"
-          src="https://placekitten.com/g/500/300"
-          width=500
-          height=300>
-        </amp-img>
-      </body>
-    </html>
+    <amp-img
+      class="grey-placeholder"
+      src="https://placekitten.com/g/500/300"
+      width=500
+      height=300>
+    </amp-img>
+  </body>
+</html>
+```
 
 AMP HTML components that are more complex and nested, such as `amp-iframe`,
 may define their own custom children that maybe styled separately, e.g. iframe's
