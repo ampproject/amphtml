@@ -996,6 +996,11 @@ export function createAmpElementProto(win, name, implementationClass) {
    * @package @final
    */
   ElementProto.overflowCallback = function(overflown, requestedHeight) {
+    if (!overflown && !this.overflowElement_) {
+      // Overflow has never been initialized and not wanted.
+      return;
+    }
+
     const overflowElement = this.getOverflowElement();
     if (!overflowElement) {
       if (overflown) {

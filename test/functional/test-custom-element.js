@@ -1092,6 +1092,7 @@ describe('CustomElement Overflow Element', () => {
   });
 
   it('should unset overflow', () => {
+    element.getOverflowElement();
     overflowElement.classList.toggle('amp-visible', true);
     element.overflowCallback(false, 117);
     expect(element.overflowElement_).to.equal(overflowElement);

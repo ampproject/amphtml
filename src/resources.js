@@ -17,12 +17,13 @@
 import {FocusHistory} from './focus-history';
 import {Pass} from './pass';
 import {assert} from './asserts';
+import {closest} from './dom';
+import {documentStateFor} from './document-state';
 import {expandLayoutRect, layoutRectLtwh, layoutRectsOverlap} from
     './layout-rect';
+import {getService} from './service';
 import {inputFor} from './input';
 import {log} from './log';
-import {documentStateFor} from './document-state';
-import {getService} from './service';
 import {makeBodyVisible} from './styles';
 import {reportError} from './error';
 import {timer} from './timer';
@@ -178,6 +179,10 @@ export class Resources {
       log.fine(TAG_, 'Runtime state:', state);
       this.isRuntimeOn_ = state;
       this.schedulePass(1);
+    });
+
+    this.activeHistory_.onFocus(element => {
+      this.checkPendingChangeHeight_(element);
     });
 
     this.relayoutAll_ = true;
@@ -594,6 +599,8 @@ export class Resources {
             minTop = minTop == -1 ? box.top : Math.min(minTop, box.top);
           }
           request.resource./*OK*/changeHeight(request.newHeight);
+          request.resource.overflowCallback(/* overflown */ false,
+              request.newHeight);
         }
       }
 
@@ -627,6 +634,24 @@ export class Resources {
           }
         });
       }
+    }
+  }
+
+  /**
+   * Reschedules change height request when an overflown element is activated.
+   * @param {!Element} element
+   * @private
+   */
+  checkPendingChangeHeight_(element) {
+    const resourceElement = closest(element, el => el[RESOURCE_PROP_]);
+    if (!resourceElement) {
+      return;
+    }
+    const resource = this.getResourceForElement(resourceElement);
+    const pendingChangeHeight = resource.getPendingChangeHeight();
+    if (pendingChangeHeight !== undefined) {
+      this.scheduleChangeHeight_(resource, pendingChangeHeight,
+          /* force */ true);
     }
   }
 
@@ -936,6 +961,7 @@ export class Resources {
    * @private
    */
   scheduleChangeHeight_(resource, newHeight, force) {
+    resource.resetPendingChangeHeight();
     if (resource.getLayoutBox().height == newHeight) {
       // Nothing to do.
       return;
@@ -1177,6 +1203,12 @@ export class Resource {
      * @private {!Function|undefined}
      */
     this.onUpgraded_;
+
+    /**
+     * Pending change height that was requested but could not be satisfied.
+     * @private {number|undefined}
+     */
+    this.pendingChangeHeight_;
   }
 
   /**
@@ -1282,7 +1314,22 @@ export class Resource {
    * @param {number} requestedHeight
    */
   overflowCallback(overflown, requestedHeight) {
+    if (overflown) {
+      this.pendingChangeHeight_ = requestedHeight;
+    }
     this.element.overflowCallback(overflown, requestedHeight);
+  }
+
+  /** @private */
+  resetPendingChangeHeight() {
+    this.pendingChangeHeight_ = undefined;
+  }
+
+  /**
+   * @return {number|undefined}
+   */
+  getPendingChangeHeight() {
+    return this.pendingChangeHeight_;
   }
 
   /**
