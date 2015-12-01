@@ -27,10 +27,11 @@ goog.provide('parse_css.Declaration');
 goog.provide('parse_css.QualifiedRule');
 goog.provide('parse_css.Stylesheet');
 goog.provide('parse_css.TokenStream');
-goog.provide('parse_css.parseAStylesheet');
-goog.provide('parse_css.extractASimpleBlock');
 goog.provide('parse_css.extractAFunction');
+goog.provide('parse_css.extractASimpleBlock');
+goog.provide('parse_css.parseAStylesheet');
 
+goog.require('goog.asserts');
 goog.require('parse_css.tokenize');
 
 /**
@@ -375,7 +376,7 @@ Canonicalizer.prototype.parseAListOfRules = function(
       this.parseAQualifiedRule(tokenStream, rules, errors);
     }
   }
-}
+};
 
 /**
  * Parses an At Rule.
@@ -426,7 +427,7 @@ Canonicalizer.prototype.parseAnAtRule = function(tokenStream, errors) {
     }
     consumeAComponentValue(tokenStream, rule.prelude);
   }
-}
+};
 
 /**
  * Parses one Qualified rule or ErrorToken appended to either rules or errors
@@ -469,7 +470,7 @@ Canonicalizer.prototype.parseAQualifiedRule = function(
     // This consumes a CSS selector as the rules prelude.
     consumeAComponentValue(tokenStream, rule.prelude);
   }
-}
+};
 
 /**
  * @param {!Array<!parse_css.CSSParserToken>} tokenList
@@ -508,7 +509,7 @@ Canonicalizer.prototype.parseAListOfDeclarations = function(tokenList, errors) {
       }
     }
   }
-}
+};
 
 /**
  * Adds one element to either declarations or errors.
@@ -569,7 +570,7 @@ Canonicalizer.prototype.parseADeclaration = function(
   }
 
   declarations.push(decl);
-}
+};
 
 /**
  * Consumes one or more tokens from a tokenStream, appending them to a
@@ -642,7 +643,7 @@ parse_css.extractASimpleBlock = function(tokenStream) {
   const tokenList = consumedTokens.slice(1, -1);
   tokenList.push(createEOFTokenAt(consumedTokens[consumedTokens.length - 1]));
   return tokenList;
-}
+};
 
 /**
  * consumeAFunction appends a functions contents to a tokenList,

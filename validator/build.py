@@ -144,7 +144,7 @@ def GenValidatorGeneratedJs(out_dir):
   # are checked by CheckPrereqs.
   from google.protobuf import text_format
   from google.protobuf import descriptor
-  from codegen import validator_pb2
+  from dist import validator_pb2
   import validator_gen
   out = []
   validator_gen.GenerateValidatorGeneratedJs(specfile='validator.protoascii',
@@ -230,7 +230,7 @@ def GenerateValidateBin(out_dir):
 
 def RunSmokeTest(out_dir):
   logging.info('entering ...')
-  # Run codegen/validate on the minimum valid amp and observe that it passes.
+  # Run dist/validate on the minimum valid amp and observe that it passes.
   p = subprocess.Popen(['%s/validate' % out_dir,
                         'testdata/feature_tests/minimum_valid_amp.html'],
                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -239,7 +239,7 @@ def RunSmokeTest(out_dir):
     Die('Smoke test failed. returncode=%d stdout="%s" stderr="%s"' % (
         p.returncode, stdout, stderr))
 
-  # Run codegen/validate on an empty file and observe that it fails.
+  # Run dist/validate on an empty file and observe that it fails.
   open('%s/empty.html' % out_dir, 'w').close()
   p = subprocess.Popen(['%s/validate' % out_dir, '%s/empty.html' % out_dir],
                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -257,35 +257,55 @@ def CompileValidatorTestMinified(out_dir):
       js_files=['htmlparser.js', 'parse-css.js', 'tokenize-css.js',
                 '%s/validator-generated.js' % out_dir,
                 'validator-in-browser.js', 'validator.js', 'validator_test.js'],
-      closure_entry_points=['amp.validator.validatorTest'],
+      closure_entry_points=['amp.validator.ValidatorTest'],
       output_file='%s/validator_test_minified.js' % out_dir)
   logging.info('... success')
 
 
-def GenerateValidatorTest(out_dir):
+def CompileHtmlparserTestMinified(out_dir):
   logging.info('entering ...')
-  f = open('%s/validator_test' % out_dir, 'w')
-  f.write('#!/usr/bin/nodejs\n')
-  for l in open('%s/validator_test_minified.js' % out_dir):
-    f.write(l)
-  f.write("""
-      var assert = require('assert');
-      var fs = require('fs');
-      var path = require('path');
-      var JasmineRunner = require('jasmine');
-      var jasmine = new JasmineRunner();
-      amp.validator.validatorTest(['testdata'], assert, fs, path, describe, it);
-      jasmine.onComplete(function (passed) { process.exit(passed ? 0 : 1); });
-      jasmine.execute();
-      """)
-  os.chmod('%s/validator_test' % out_dir, 0750)
+  CompileWithClosure(
+      js_files=['htmlparser.js', 'htmlparser_test.js'],
+      closure_entry_points=['amp.htmlparser.HtmlParserTest'],
+      output_file='%s/htmlparser_test_minified.js' % out_dir)
   logging.info('... success')
 
 
-def RunValidatorTest(out_dir):
+def CompileParseCssTestMinified(out_dir):
   logging.info('entering ...')
-  # Run codegen/validate on the minimum valid amp and observe that it passes.
-  subprocess.check_call(['%s/validator_test' % out_dir])
+  CompileWithClosure(
+      js_files=['parse-css.js', 'tokenize-css.js', 'css-selectors.js',
+                'json-testutil.js', 'parse-css_test.js'],
+      closure_entry_points=['parse_css.ParseCssTest'],
+      output_file='%s/parse-css_test_minified.js' % out_dir)
+  logging.info('... success')
+
+
+def GenerateTestRunner(out_dir):
+  logging.info('entering ...')
+  f = open('%s/test_runner' % out_dir, 'w')
+  f.write("""#!/usr/bin/nodejs
+             global.assert = require('assert');
+             global.fs = require('fs');
+             global.path = require('path');
+             var JasmineRunner = require('jasmine');
+             var jasmine = new JasmineRunner();
+             process.env.TESTDATA_DIRS = 'testdata'
+             require('./validator_test_minified');
+             require('./htmlparser_test_minified');
+             require('./parse-css_test_minified');
+             jasmine.onComplete(function (passed) {
+                 process.exit(passed ? 0 : 1);
+             });
+             jasmine.execute();
+          """)
+  os.chmod('%s/test_runner' % out_dir, 0750)
+  logging.info('... success')
+
+
+def RunTests(out_dir):
+  logging.info('entering ...')
+  subprocess.check_call(['%s/test_runner' % out_dir])
   logging.info('... success')
 
 
@@ -293,12 +313,14 @@ logging.basicConfig(format='[[%(filename)s %(funcName)s]] - %(message)s',
                     level=logging.INFO)
 CheckPrereqs()
 InstallNodeDependencies()
-SetupOutDir(out_dir='codegen')
-GenValidatorPb2Py(out_dir='codegen')
-GenValidatorGeneratedJs(out_dir='codegen')
-CompileValidatorMinified(out_dir='codegen')
-GenerateValidateBin(out_dir='codegen')
-RunSmokeTest(out_dir='codegen')
-CompileValidatorTestMinified(out_dir='codegen')
-GenerateValidatorTest(out_dir='codegen')
-RunValidatorTest(out_dir='codegen')
+SetupOutDir(out_dir='dist')
+GenValidatorPb2Py(out_dir='dist')
+GenValidatorGeneratedJs(out_dir='dist')
+CompileValidatorMinified(out_dir='dist')
+GenerateValidateBin(out_dir='dist')
+RunSmokeTest(out_dir='dist')
+CompileValidatorTestMinified(out_dir='dist')
+CompileHtmlparserTestMinified(out_dir='dist')
+CompileParseCssTestMinified(out_dir='dist')
+GenerateTestRunner(out_dir='dist')
+RunTests(out_dir='dist')
