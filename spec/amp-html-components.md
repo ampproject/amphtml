@@ -73,38 +73,32 @@ example:
 </html>
 ```
 
-AMP HTML components that are more complex and nested, such as `amp-carousel`,
-may be styled with an explicitly defined set of CSS Custom Properties. These
-are propagated to any children elements that are dynamically created by the
-runtime, to achieve the desired style. This way the AMP author does not need to
-know the internals of the component, only its styleable properties. For example:
+AMP HTML components that are more complex and nested, such as `amp-iframe`,
+may define their own custom children that maybe styled separately, e.g. iframe's
+overflow element. These custom children are typically defined either via special
+attribute names such as `placeholder` or `overflow` or AMP class names. For
+example:
 
 ```html
 <!doctype html>
 <html ⚡>
   <head>
     <style>
-      amp-carousel {
-        --arrow-color: green;
-        --dots: {
-          opacity: 50%;
-          color: blue;
-        }
+      .my-frame > [overflow] {
+        background: green;
+        opacity: 50%;
       }
     </style>
   </head>
 
   <body>
-    <amp-carousel width=500 height=500>
-      <div>
-        <amp-img width=500 height=500 src="https://placekitten.com/g/500/500">
-        </amp-img>
-      </div>
-      <div>
-        <amp-img width=500 height=500 src="https://placekitten.com/g/500/500">
-        </amp-img>
-      </div>
-    </amp-carousel>
+    <amp-iframe class="my-frame" width=300 height=300
+        layout="responsive"
+        sandbox="allow-scripts"
+        resizable
+        src="https://foo.com/iframe">
+      <div overflow>Read more!</div>
+    </amp-iframe>
   </body>
 </html>
 ```
