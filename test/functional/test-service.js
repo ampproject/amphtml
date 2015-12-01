@@ -33,4 +33,15 @@ describe('service`', () => {
     expect(b1).to.equal(b2);
     expect(b1).to.not.equal(a1);
   });
+
+  it('should work without a factory', () => {
+    const c1 = getService(window, 'c', inc);
+    const c2 = getService(window, 'c');
+  });
+
+  it('should fail without factory on initial setup', () => {
+    expect(() => {
+      getService(window, 'not-present');
+    }).to.throw(/Factory not given and service missing not-present/);
+  });
 });

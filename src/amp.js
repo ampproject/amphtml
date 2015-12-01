@@ -16,7 +16,7 @@
 
 import './polyfills';
 
-import {historyFor} from './history';
+import {installHistoryService} from './service/history-impl';
 import {installPullToRefreshBlocker} from './pull-to-refresh';
 import {performanceFor} from './performance';
 import {viewerFor} from './viewer';
@@ -46,7 +46,7 @@ try {
   perf.tick('is');
   installStyles(document, cssText, () => {
     try {
-      historyFor(window);
+      installHistoryService(window);
       viewerFor(window);
       vsyncFor(window);
 
