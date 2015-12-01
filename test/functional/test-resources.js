@@ -454,6 +454,7 @@ describe('Resources changeHeight', () => {
 
   describe('requestChangeHeight rules when element is in viewport', () => {
     let overflowCallbackSpy;
+    let vsyncSpy;
 
     beforeEach(() => {
       overflowCallbackSpy = sinon.spy();
@@ -462,6 +463,12 @@ describe('Resources changeHeight', () => {
           {top: 0, left: 0, right: 100, bottom: 200, height: 200}).once();
       resource1.layoutBox_ = {top: 10, left: 0, right: 100, bottom: 50,
           height: 50};
+      vsyncSpy = sandbox.stub(resources.vsync_, 'run');
+    });
+
+    afterEach(() => {
+      vsyncSpy.reset();
+      vsyncSpy.restore();
     });
 
     it('should NOT change height and calls overflowCallback', () => {
@@ -549,6 +556,60 @@ describe('Resources changeHeight', () => {
       expect(resources.requestsChangeHeight_.length).to.equal(1);
       expect(resource1.changeHeight.callCount).to.equal(0);
       expect(overflowCallbackSpy.callCount).to.equal(0);
+    });
+
+    it('should change height when above the vp and adjust scrolling', () => {
+      viewportMock.expects('getScrollHeight').returns(2999).once();
+      viewportMock.expects('getScrollTop').returns(1777).once();
+      resource1.layoutBox_ = {top: -1200, left: 0, right: 100, bottom: -1050,
+          height: 50};
+      resources.lastVelocity_ = 0;
+      clock.tick(5000);
+      resources.scheduleChangeHeight_(resource1, 111, false);
+      resources.mutateWork_();
+      expect(resources.requestsChangeHeight_.length).to.equal(0);
+      expect(resource1.changeHeight.callCount).to.equal(0);
+
+      expect(vsyncSpy.callCount).to.be.greaterThan(1);
+      const task = vsyncSpy.lastCall.args[0];
+      const state = {};
+      task.measure(state);
+      expect(state.scrollTop).to.equal(1777);
+      expect(state.scrollHeight).to.equal(2999);
+
+      viewportMock.expects('getScrollHeight').returns(3999).once();
+      viewportMock.expects('setScrollTop').withExactArgs(2777).once();
+      task.mutate(state);
+      expect(resource1.changeHeight.callCount).to.equal(1);
+      expect(resource1.changeHeight.firstCall.args[0]).to.equal(111);
+      expect(resources.relayoutTop_).to.equal(resource1.layoutBox_.top);
+    });
+
+    it('should NOT adjust scrolling if height did not increase', () => {
+      viewportMock.expects('getScrollHeight').returns(2999).once();
+      viewportMock.expects('getScrollTop').returns(1777).once();
+      resource1.layoutBox_ = {top: -1200, left: 0, right: 100, bottom: -1050,
+          height: 50};
+      resources.lastVelocity_ = 0;
+      clock.tick(5000);
+      resources.scheduleChangeHeight_(resource1, 111, false);
+      resources.mutateWork_();
+      expect(resources.requestsChangeHeight_.length).to.equal(0);
+      expect(resource1.changeHeight.callCount).to.equal(0);
+
+      expect(vsyncSpy.callCount).to.be.greaterThan(1);
+      const task = vsyncSpy.lastCall.args[0];
+      const state = {};
+      task.measure(state);
+      expect(state.scrollTop).to.equal(1777);
+      expect(state.scrollHeight).to.equal(2999);
+
+      viewportMock.expects('getScrollHeight').returns(2999).once();
+      viewportMock.expects('setScrollTop').never();
+      task.mutate(state);
+      expect(resource1.changeHeight.callCount).to.equal(1);
+      expect(resource1.changeHeight.firstCall.args[0]).to.equal(111);
+      expect(resources.relayoutTop_).to.equal(resource1.layoutBox_.top);
     });
   });
 });

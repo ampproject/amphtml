@@ -507,13 +507,23 @@ export class Resources {
    */
   mutateWork_() {
     // Read all necessary data before mutates.
+    // The height changing depends largely on the target element's position
+    // in the active viewport. We consider the active viewport the part of the
+    // visible viewport below 10% from the top and above 25% from the bottom.
+    // This is basically the portion of the viewport where the reader is most
+    // likely focused right now. The main goal is to avoid drastic UI changes
+    // in that part of the content. The elements below the active viewport are
+    // freely resized. The elements above the viewport are resized and request
+    // scroll adjustment to avoid active viewport changing without user's
+    // action. The elements in the active viewport are not resized and instead
+    // the overflow callbacks are called.
     const now = timer.now();
     const viewportRect = this.viewport_.getRect();
+    const topOffset = viewportRect.height / 10;
+    const bottomOffset = viewportRect.height / 4;
     const isScrollingStopped = (Math.abs(this.lastVelocity_) < 1e-2 &&
         now - this.lastScrollTime_ > MUTATE_DEFER_DELAY_ ||
         now - this.lastScrollTime_ > MUTATE_DEFER_DELAY_ * 2);
-    const offset = 10;
-    const bottomOffset = viewportRect.height / 4;
 
     if (this.deferredMutates_.length > 0) {
       log.fine(TAG_, 'deferred mutates:', this.deferredMutates_.length);
@@ -532,6 +542,7 @@ export class Resources {
 
       // Find minimum top position and run all mutates.
       let minTop = -1;
+      const scrollAdjSet = [];
       for (let i = 0; i < requestsChangeHeight.length; i++) {
         const request = requestsChangeHeight[i];
         const resource = request.resource;
@@ -554,11 +565,14 @@ export class Resources {
         } else if (box.bottom >= viewportRect.bottom - bottomOffset) {
           // 3. Elements under viewport are resized immediately.
           resize = true;
-        } else if (box.bottom <= viewportRect.top + offset) {
+        } else if (box.bottom <= viewportRect.top + topOffset) {
           // 4. Elements above the viewport can only be resized when scrolling
           // has stopped, otherwise defer util next cycle.
           if (isScrollingStopped) {
-            resize = true;
+            // These requests will be executed in the next animation cycle and
+            // adjust the scroll position.
+            resize = false;
+            scrollAdjSet.push(request);
           } else {
             // Defer till next cycle.
             this.requestsChangeHeight_.push(request);
@@ -587,8 +601,32 @@ export class Resources {
         this.relayoutTop_ = minTop;
       }
 
-      // TODO(dvoytenko): consider scroll adjustments when resizing is done
-      // above the current scrolling position.
+      // Execute scroll-adjusting resize requests, if any.
+      if (scrollAdjSet.length > 0) {
+        this.vsync_.run({
+          measure: state => {
+            state./*OK*/scrollHeight = this.viewport_./*OK*/getScrollHeight();
+            state./*OK*/scrollTop = this.viewport_./*OK*/getScrollTop();
+          },
+          mutate: state => {
+            let minTop = -1;
+            scrollAdjSet.forEach(request => {
+              const box = request.resource.getLayoutBox();
+              minTop = minTop == -1 ? box.top : Math.min(minTop, box.top);
+              request.resource./*OK*/changeHeight(request.newHeight);
+            });
+            if (minTop != -1) {
+              this.relayoutTop_ = minTop;
+            }
+            // Sync is necessary here to avoid UI jump in the next frame.
+            const newScrollHeight = this.viewport_./*OK*/getScrollHeight();
+            if (newScrollHeight > state./*OK*/scrollHeight) {
+              this.viewport_.setScrollTop(state./*OK*/scrollTop +
+                  (newScrollHeight - state./*OK*/scrollHeight));
+            }
+          }
+        });
+      }
     }
   }
 
