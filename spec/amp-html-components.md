@@ -184,4 +184,5 @@ In these cases, services may set up endpoints that produce data that conforms to
 - [amp-iframe](../extensions/amp-iframe/amp-iframe.md)
 - [amp-instagram](../extensions/amp-instagram/amp-instagram.md)
 - [amp-twitter](../extensions/amp-twitter/amp-twitter.md)
+- [amp-vine](../extensions/amp-vine/amp-vine.md)
 - [amp-youtube](../extensions/amp-youtube/amp-youtube.md)

@@ -30,6 +30,7 @@ Current list of extended components:
 | [`amp-lightbox`](amp-lightbox/amp-lightbox.md)             | Allows for a “lightbox” or similar experience.                                              |
 | [`amp-list`](amp-list/amp-list.md)             | A dynamic list that can download data and create list items using a template |
 | [`amp-twitter`](amp-twitter/amp-twitter.md)               | Displays a Twitter Tweet.                                                                   |
+| [`amp-vine`](amp-vine/amp-vine.md)               | Displays a Vine simple embed.                                                                   |
 | [`amp-youtube`](amp-youtube/amp-youtube.md)               | Displays a Youtube video.                                                                   |
 
 

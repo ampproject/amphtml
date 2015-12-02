@@ -174,6 +174,7 @@ These may be removed in future versions of AMP
 `<amp-anim>`  
 `<amp-youtube>`  
 `<amp-twitter>`  
+`<amp-vine>`
 `<amp-instagram>`  
 `<amp-iframe>`  
 `<amp-pixel>`  
