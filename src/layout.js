@@ -52,9 +52,12 @@ let Dimensions;
 
 
 /**
- * Set or cached browser natural dimensions for elements. The tagname
- * initialized here will return true `hasNaturalDimensions`, even if yet to be
- * calculated. Exported for testing.
+ * The set of elements with natural dimensions, that is, elements
+ * which have a known dimension either based on their value specified here,
+ * or, if the value is null, a dimension specific to the browser.
+ * `hasNaturalDimensions` checks for membership in this set.
+ * `getNaturalDimensions` determines the dimensions for an element in the
+ *    set and caches it.
  * @type {!Object<string, Dimensions>}
  * @private  Visible for testing only!
  */
@@ -202,11 +205,14 @@ export function hasNaturalDimensions(tagName) {
 /**
  * Determines the default dimensions for an element which could vary across
  * different browser implementations, like <audio> for instance.
+ * This operation can only be completed for an element whitelisted by
+ * `hasNaturalDimensions`.
  * @param {string} tagName The element tag name.
  * @return {Dimensions}
  */
 export function getNaturalDimensions(tagName) {
   tagName = tagName.toUpperCase();
+  assert(naturalDimensions_[tagName] !== undefined);
   if (!naturalDimensions_[tagName]) {
     const naturalTagName = tagName.replace(/^AMP\-/, '');
     const temp = document.createElement(naturalTagName);
