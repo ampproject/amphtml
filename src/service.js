@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import {assert} from './asserts';
+
 /**
  * Returns a service for the given id and window (a per-window singleton).
  * If the service is not yet available the factory function is invoked and
@@ -23,18 +25,20 @@
  * passed around.
  * @param {!Window} win
  * @param {string} id of the service.
- * @param {function(!Window):!Object} factory Should create the service if it
- *     does not exist yet.
+ * @param {function(!Window):!Object=} opt_factory Should create the service
+ *     if it does not exist yet. If the factory is not given, it is an error
+ *     if the service does not exist yet.
  * @return {*}
  */
-export function getService(win, id, factory) {
+export function getService(win, id, opt_factory) {
   let services = win.services;
   if (!services) {
     services = win.services = {};
   }
   const s = services[id];
   if (!s) {
-    return services[id] = factory(win);
+    assert(opt_factory, 'Factory not given and service missing %s', id);
+    return services[id] = opt_factory(win);
   }
   return s;
 }

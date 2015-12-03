@@ -15,7 +15,7 @@
  */
 
 import {History, HistoryBindingNatural_, HistoryBindingVirtual_} from
-    '../../src/history';
+    '../../src/service/history-impl';
 import {listenOncePromise} from '../../src/event-helper';
 import * as sinon from 'sinon';
 
