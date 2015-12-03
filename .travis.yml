@@ -22,5 +22,10 @@ script:
   - gulp build
   - gulp dist
   - gulp presubmit
+  # Unit tests with Travis' default chromium
   - gulp test
+  # Integration tests with all saucelabs browsers
   - gulp test --saucelabs --integration
+  # All unit tests with an old chrome (best we can do right now to pass tests
+  # and not start relying on new features).
+  - gulp test --saucelabs --oldchrome

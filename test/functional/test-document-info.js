@@ -37,6 +37,16 @@ describe('document-info', () => {
     });
   });
 
+  it('should provide the pageViewId', () => {
+    return getWin('https://twitter.com/').then(win => {
+      win.Math.random = () => {
+        return 0.123456789;
+      };
+      expect(documentInfoFor(win).pageViewId).to.equal('1234');
+      expect(documentInfoFor(win).pageViewId).to.equal('1234');
+    });
+  });
+
   it('should provide the relative canonicalUrl as absolute', () => {
     return getWin('./foo.html').then(win => {
       expect(documentInfoFor(win).canonicalUrl).to.equal(

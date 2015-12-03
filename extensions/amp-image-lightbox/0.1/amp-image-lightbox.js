@@ -706,6 +706,11 @@ class AmpImageLightbox extends AMP.BaseElement {
     this.reset_();
     this.init_(source);
 
+    /**  @private {function(this:AmpImageLightbox, Event)}*/
+    this.boundCloseOnEscape_ = this.closeOnEscape_.bind(this);
+    this.getWin().document.documentElement.addEventListener(
+        'keydown', this.boundCloseOnEscape_);
+
     // Prepare to enter in lightbox
     this.requestFullOverlay();
     this.getViewport().disableTouchZoom();
@@ -721,6 +726,17 @@ class AmpImageLightbox extends AMP.BaseElement {
     this.getHistory_().push(this.close.bind(this)).then(historyId => {
       this.historyId_ = historyId;
     });
+  }
+
+  /**
+   * Handles closing the lightbox when the ESC key is pressed.
+   * @param {!Event} event.
+   * @private
+   */
+  closeOnEscape_(event) {
+    if (event.keyCode == 27) {
+      this.close();
+    }
   }
 
   /**
@@ -745,6 +761,9 @@ class AmpImageLightbox extends AMP.BaseElement {
     if (this.historyId_ != -1) {
       this.getHistory_().pop(this.historyId_);
     }
+    this.getWin().document.documentElement.removeEventListener(
+        'keydown', this.boundCloseOnEscape_);
+    this.boundCloseOnEscape_ = null;
   }
 
   /**

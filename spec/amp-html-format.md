@@ -30,7 +30,7 @@ Also, AMP HTML documents can be uploaded to a web server and served just like an
 
 AMP HTML uses a set of contributed but centrally managed and hosted custom elements to implement advanced functionality such as image galleries that might be found in an AMP HTML document. While it does allow styling the document using custom CSS, it does not allow author written JavaScript beyond what is provided through the custom elements to reach its performance goals.
 
-By using this AMP format, content producers are making the content in AMP files available to be crawled, cached, and displayed by third parties.
+By using the AMP format, content producers are making the content in AMP files available to be crawled (subject to robots.txt restrictions), cached, and displayed by third parties.
 
 ## Performance
 
@@ -226,6 +226,7 @@ Example:
 
 Font providers can be whitelisted if they support CSS-only integrations and serve over HTTPS. The following origins are currently allowed for font serving via link tags:
 
+- https://fast.fonts.net
 - https://fonts.googleapis.com
 
 Authors are free to include all custom fonts via a `@font-face` CSS instruction via their custom CSS. Fonts included via `@font-face` must be fetched via the HTTP or HTTPS scheme.
@@ -397,3 +398,17 @@ As well as these attributes:
 
 * "xlink:href": only URIs starting with "#" are allowed
 * "style"
+
+## AMP document discovery
+
+If AMP documents are alternative representations of a canonical document, then the canonical document should point to the AMP document via a `link` tag with the [relation "amphtml"](http://microformats.org/wiki/existing-rel-values#HTML5_link_type_extensions).
+
+Example:
+
+```html
+<link rel="amphtml" href="https://www.example.com/url/to/amp/document.html">
+```
+
+The AMP document itself is expected to point back with its canonical relation to a document that has the "amphtml" relation.
+
+Note, that AMP document may also be linked to directly. The mechanism described here provides a standardized way for software to discover whether an AMP version exists for a canonical document.

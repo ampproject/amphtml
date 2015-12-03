@@ -48,8 +48,7 @@ describe('amp-image-lightbox component', () => {
 
       const caption = container.querySelector('.-amp-image-lightbox-caption');
       expect(caption).to.not.equal(null);
-      expect(caption.classList.contains('amp-image-lightbox-caption')).to
-          .equal(true);
+      expect(caption).to.have.class('amp-image-lightbox-caption');
 
       const viewer = container.querySelector('.-amp-image-lightbox-viewer');
       expect(viewer).to.not.equal(null);
@@ -130,6 +129,39 @@ describe('amp-image-lightbox component', () => {
       expect(cancelFullOverlay.callCount).to.equal(1);
       expect(restoreOriginalTouchZoom.callCount).to.equal(1);
       expect(historyPop.callCount).to.equal(1);
+    });
+  });
+
+  it('should close on ESC', () => {
+    return getImageLightbox().then(lightbox => {
+      const impl = lightbox.implementation_;
+      const setupCloseSpy = sinon.spy(impl, 'close');
+      const viewportOnChanged = sinon.spy();
+      const disableTouchZoom = sinon.spy();
+      const restoreOriginalTouchZoom = sinon.spy();
+      impl.getViewport = () => {return {
+        onChanged: viewportOnChanged,
+        disableTouchZoom: disableTouchZoom,
+        restoreOriginalTouchZoom: restoreOriginalTouchZoom
+      };};
+      const historyPush = sinon.spy();
+      impl.getHistory_ = () => {
+        return {push: () => {
+          historyPush();
+          return Promise.resolve(11);
+        }};
+      };
+      const enter = sinon.spy();
+      impl.enter_ = enter;
+
+      const ampImage = document.createElement('amp-img');
+      ampImage.setAttribute('src', 'data:');
+      ampImage.setAttribute('width', '100');
+      ampImage.setAttribute('height', '100');
+      impl.activate({source: ampImage});
+      impl.closeOnEscape_({keyCode: 27});
+      expect(setupCloseSpy.callCount).to.equal(1);
+      setupCloseSpy.restore();
     });
   });
 });
@@ -354,7 +386,6 @@ describe('amp-image-lightbox image viewer gestures', () => {
     sandbox.restore();
     sandbox = null;
   });
-
 
   it('should have initial bounds', () => {
     expect(imageViewer.minX_).to.equal(0);

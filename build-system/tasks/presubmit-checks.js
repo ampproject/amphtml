@@ -68,6 +68,7 @@ var forbiddenTerms = {
       'src/cookies.js',
       'src/experiments.js',
       'test/functional/test-cookies.js',
+      'tools/experiments/experiments.js',
     ]
   },
   'setCookie\\W': {
@@ -76,6 +77,7 @@ var forbiddenTerms = {
       'src/cookies.js',
       'src/experiments.js',
       'test/functional/test-cookies.js',
+      'tools/experiments/experiments.js',
     ]
   },
   'eval\\(': '',
@@ -184,6 +186,7 @@ var forbiddenTermsSrcInclusive = {
   '\\.getBBox(?!_)': bannedTermsHelpString,
   '\\.webkitConvertPointFromNodeToPage(?!_)': bannedTermsHelpString,
   '\\.webkitConvertPointFromPageToNode(?!_)': bannedTermsHelpString,
+  '\\.changeHeight(?!_)': bannedTermsHelpString,
 };
 
 // Terms that must appear in a source file.

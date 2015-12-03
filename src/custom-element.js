@@ -222,7 +222,8 @@ function isInternalOrServiceNode(node) {
     return true;
   }
   if (node.tagName && (node.hasAttribute('placeholder') ||
-          node.hasAttribute('fallback'))) {
+          node.hasAttribute('fallback') ||
+          node.hasAttribute('overflow'))) {
     return true;
   }
   return false;
@@ -304,11 +305,17 @@ export function createAmpElementProto(win, name, implementationClass) {
     /** @private {boolean|undefined} */
     this.loadingDisabled_;
 
+    /** @private {boolean|undefined} */
+    this.loadingState_;
+
     /** @private {?Element} */
     this.loadingContainer_ = null;
 
     /** @private {?Element} */
     this.loadingElement_ = null;
+
+    /** @private {?Element|undefined} */
+    this.overflowElement_;
 
     /** @private {!BaseElement} */
     this.implementation_ = new implementationClass(this);
@@ -519,12 +526,13 @@ export function createAmpElementProto(win, name, implementationClass) {
    * Changes the height of the element.
    *
    * This method is called by Resources and shouldn't be called by anyone else.
+   * This method must always be called in the mutation context.
    *
    * @param {number} newHeight
    * @final
    * @package
    */
-  ElementProto.changeHeight = function(newHeight) {
+  ElementProto./*OK*/changeHeight = function(newHeight) {
     if (this.sizerElement_) {
       // From the moment height is changed the element becomes fully
       // responsible for managing its height. Aspect ratio is no longer
@@ -932,16 +940,24 @@ export function createAmpElementProto(win, name, implementationClass) {
    */
   ElementProto.toggleLoading_ = function(state, opt_cleanup) {
     this.assertNotTemplate_();
+    this.loadingState_ = state;
     if (!state && !this.loadingContainer_) {
       return;
     }
 
     // Check if loading should be shown.
     if (state && !this.isLoadingEnabled_()) {
+      this.loadingState_ = false;
       return;
     }
 
     this.getVsync_().mutate(() => {
+      let state = this.loadingState_;
+      // Repeat "loading enabled" check because it could have changed while
+      // waiting for vsync.
+      if (state && !this.isLoadingEnabled_()) {
+        state = false;
+      }
       if (state) {
         this.prepareLoading_();
       }
@@ -961,6 +977,62 @@ export function createAmpElementProto(win, name, implementationClass) {
         });
       }
     });
+  };
+
+  /**
+   * Returns an optional overflow element for this custom element.
+   * @return {?Element}
+   * @private
+   */
+  ElementProto.getOverflowElement = function() {
+    if (this.overflowElement_ === undefined) {
+      this.overflowElement_ = dom.childElementByAttr(this, 'overflow');
+      if (this.overflowElement_) {
+        if (!this.overflowElement_.hasAttribute('tabindex')) {
+          this.overflowElement_.setAttribute('tabindex', '0');
+        }
+        if (!this.overflowElement_.hasAttribute('role')) {
+          this.overflowElement_.setAttribute('role', 'button');
+        }
+      }
+    }
+    return this.overflowElement_;
+  };
+
+  /**
+   * Hides or shows the overflow, if available. This function must only
+   * be called inside a mutate context.
+   * @param {boolean} overflown
+   * @param {number} requestedHeight
+   * @package @final
+   */
+  ElementProto.overflowCallback = function(overflown, requestedHeight) {
+    if (!overflown && !this.overflowElement_) {
+      // Overflow has never been initialized and not wanted.
+      return;
+    }
+
+    const overflowElement = this.getOverflowElement();
+    if (!overflowElement) {
+      if (overflown) {
+        log.warn(TAG_,
+            'Cannot resize element and overlfow is not available', this);
+      }
+      return;
+    }
+
+    overflowElement.classList.toggle('amp-visible', overflown);
+
+    if (overflown) {
+      this.overflowElement_.onclick = () => {
+        this.resources_./*OK*/changeHeight(this, requestedHeight);
+        this.getVsync_().mutate(() => {
+          this.overflowCallback(/* overflown */ false, requestedHeight);
+        });
+      };
+    } else {
+      this.overflowElement_.onclick = null;
+    }
   };
 
   return ElementProto;

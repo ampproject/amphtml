@@ -267,16 +267,18 @@ i-amp-scroll-container {
 
 
 /**
- * `-amp-overflow` is a support for "overflow" element. This is
- * an element shown when more content is available. Typically tapping on this
- * element shows the full content.
+ * "overflow" element is an element shown when more content is available but
+ * not currently visible. Typically tapping on this element shows the full
+ * content.
  */
-.-amp-overflow {
-  z-index: 1;
+.-amp-element > [overflow] {
+  cursor: pointer;
+  z-index: 2;
+  visibility: hidden;
 }
 
-.-amp-overflow.amp-hidden {
-  visibility: hidden;
+.-amp-element > [overflow].amp-visible {
+  visibility: visible;
 }
 
 

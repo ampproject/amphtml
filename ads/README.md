@@ -34,6 +34,7 @@ We will provide the following information to the ad:
   In browsers that support `location.ancestorOrigins` you can trust that the `origin` of the
   location is actually correct (So rogue pages cannot claim they represent an origin they do not actually represent).
 - `window.context.canonicalUrl` contains the canonical URL of the primary document as defined by its `link rel=canonical` tag.
+- `window.context.pageViewId` contains a relatively low entropy id that is the same for all ads shown on a page.
 - [ad viewability](#ad-viewability)
 - `window.context.noContentAvailable` is a function that the ad system can call if the ad slot was not filled. The container page will then react by showing placeholder content (not by collapsing the ad slot; sizing rules apply).
 

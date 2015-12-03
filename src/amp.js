@@ -16,7 +16,7 @@
 
 import './polyfills';
 
-import {historyFor} from './history';
+import {installHistoryService} from './service/history-impl';
 import {installPullToRefreshBlocker} from './pull-to-refresh';
 import {performanceFor} from './performance';
 import {viewerFor} from './viewer';
@@ -46,7 +46,7 @@ try {
   perf.tick('is');
   installStyles(document, cssText, () => {
     try {
-      historyFor(window);
+      installHistoryService(window);
       viewerFor(window);
       vsyncFor(window);
 
@@ -66,6 +66,9 @@ try {
     } finally {
       makeBodyVisible(document);
       perf.tick('e_is');
+      // TODO(erwinm): move invocation of the `flush` method when we have the
+      // new ticks in place to batch the ticks properly.
+      perf.flush();
     }
   }, /* opt_isRuntimeCss */ true);
 } catch (e) {

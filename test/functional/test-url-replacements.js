@@ -15,7 +15,7 @@
  */
 
 import {createIframePromise} from '../../testing/iframe';
-import {UrlReplacements} from '../../src/url-replacements';
+import {urlReplacementsFor} from '../../src/url-replacements';
 
 
 describe('UrlReplacements', () => {
@@ -27,7 +27,7 @@ describe('UrlReplacements', () => {
       link.setAttribute('href', 'https://pinterest.com/pin1');
       link.setAttribute('rel', 'canonical');
       iframe.doc.head.appendChild(link);
-      const replacements = new UrlReplacements(iframe.win);
+      const replacements = urlReplacementsFor(iframe.win);
       return replacements.expand(url);
     });
   }
@@ -80,6 +80,12 @@ describe('UrlReplacements', () => {
     });
   });
 
+  it('should replace PAGE_VIEW_ID', () => {
+    return expand('?pid=PAGE_VIEW_ID').then(res => {
+      expect(res).to.not.match(/pid=\d+/);
+    });
+  });
+
   it('should accept $expressions', () => {
     return expand('?href=$CANONICAL_URL').then(res => {
       expect(res).to.equal('?href=https%3A%2F%2Fpinterest.com%2Fpin1');
@@ -101,14 +107,14 @@ describe('UrlReplacements', () => {
   });
 
   it('should replace new substitutions', () => {
-    const replacements = new UrlReplacements(window);
-    replacements.set('ONE', () => 'a');
+    const replacements = urlReplacementsFor(window);
+    replacements.set_('ONE', () => 'a');
     expect(replacements.expand('?a=ONE')).to.equal('?a=a');
 
-    replacements.set('ONE', () => 'b');
+    replacements.set_('ONE', () => 'b');
     expect(replacements.expand('?a=ONE')).to.equal('?a=b');
 
-    replacements.set('TWO', () => 'b');
+    replacements.set_('TWO', () => 'b');
     expect(replacements.expand('?b=TWO')).to.equal('?b=b');
   });
 });

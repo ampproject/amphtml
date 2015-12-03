@@ -320,9 +320,8 @@ const Tokenizer = function Tokenizer(strIn, line, col, errors) {
       this.tokens_.push(token);
     }
     iterationCount++;
-    if (iterationCount > this.codepoints_.length * 2) {
-      throw 'Internal Error: infinite-looping';
-    }
+    goog.asserts.assert(iterationCount <= this.codepoints_.length * 2,
+                        'Internal Error: infinite-looping');
   }
   const eofToken = new parse_css.EOFToken();
   eofToken.line = currentLine;
@@ -372,9 +371,8 @@ Tokenizer.prototype.codepoint = function(num) {
  */
 Tokenizer.prototype.next = function(opt_num) {
   const num = opt_num || 1;
-  if (num > 3) {
-    throw 'Spec Error: no more than three codepoints of lookahead.';
-  }
+  goog.asserts.assert(
+      num <= 3, 'Spec Error: no more than three codepoints of lookahead.');
   return this.codepoint(this.pos_ + num);
 };
 
@@ -394,7 +392,7 @@ const MarkedPosition = function MarkedPosition(tokenizer) {
 
 /**
  * Adds position data to the given token, returning it for chaining.
- * @param {!parse_css.CSSParserToken|!parse_css.ErrorToken} token
+ * @param {!parse_css.CSSParserToken} token
  * @return {!parse_css.CSSParserToken}
  */
 MarkedPosition.prototype.addPositionTo = function(token) {
@@ -618,8 +616,9 @@ Tokenizer.prototype.consumeComments = function() {
  *   NumberToken, DimensionToken, PercentageToken
  * @return {!parse_css.CSSParserToken} */
 Tokenizer.prototype.consumeANumericToken = function() {
-  if (!this.wouldStartANumber(this.next(1), this.next(2), this.next(3)))
-    throw 'Internal Error: consumeANumericToken precondition not met';
+  goog.asserts.assert(
+      this.wouldStartANumber(this.next(1), this.next(2), this.next(3)),
+      'Internal Error: consumeANumericToken precondition not met');
   /** @type {!parse_css.NumberToken} */
   const num = this.consumeANumber();
   if (this.wouldStartAnIdentifier(this.next(1), this.next(2), this.next(3))) {
@@ -676,8 +675,9 @@ Tokenizer.prototype.consumeAnIdentlikeToken = function() {
  * @return {!parse_css.CSSParserToken}
  */
 Tokenizer.prototype.consumeAStringToken = function() {
-  if ((this.code_ !== /* '"' */ 0x22) && (this.code_ !== /* ''' */ 0x27))
-    throw 'Internal Error: consumeAStringToken precondition not met';
+  goog.asserts.assert(
+      (this.code_ === /* '"' */ 0x22) || (this.code_ === /* ''' */ 0x27),
+      'Internal Error: consumeAStringToken precondition not met');
   const endingCodePoint = this.code_;
   let string = '';
   while (true) {
@@ -903,8 +903,9 @@ Tokenizer.prototype.consumeAName = function() {
  * @return {!parse_css.NumberToken}
  */
 Tokenizer.prototype.consumeANumber = function() {
-  if (!this.wouldStartANumber(this.next(1), this.next(2), this.next(3)))
-    throw 'Internal Error: consumeANumber precondition not met';
+  goog.asserts.assert(
+      this.wouldStartANumber(this.next(1), this.next(2), this.next(3)),
+      'Internal Error: consumeANumber precondition not met');
   /** @type {string} */
   let repr = '';
   /** @type {string} */
@@ -1684,11 +1685,10 @@ function escapeIdent(string) {
   const firstcode = string.charCodeAt(0);
   for (let i = 0; i < string.length; i++) {
     const code = string.charCodeAt(i);
-    if (code === 0x0) {
-      // Preprocessor removes this character. Cannot happen.
-      throw new InvalidCharacterError(
-          'Internal Error: Invalid character. The input contains U+0000.');
-    }
+    // Preprocessor removes this character. Cannot happen.
+    goog.asserts.assert(
+        code !== 0x0,
+        'Internal Error: Invalid character. The input contains U+0000.');
     if (between(code, 0x1, 0x1f) || code === 0x7f ||
         (i === 0 && digit(code)) ||
         (i === 1 && digit(code) && firstcode === /* '-' */ 0x2d)) {
@@ -1717,11 +1717,10 @@ function escapeHash(string) {
   const firstcode = string.charCodeAt(0);
   for (let i = 0; i < string.length; i++) {
     const code = string.charCodeAt(i);
-    if (code === 0x0) {
-      // Preprocessor removes this character. Cannot happen.
-      throw new InvalidCharacterError(
-          'Internal Error: Invalid character. The input contains U+0000.');
-    }
+    // Preprocessor removes this character. Cannot happen.
+    goog.asserts.assert(
+        code !== 0x0,
+        'Internal Error: Invalid character. The input contains U+0000.');
 
     if (code >= 0x80 || code === /* '-' */ 0x2d || code === /* '_' */ 0x5f ||
         digit(code) || letter(code)) {
@@ -1743,11 +1742,10 @@ function escapeString(string) {
   for (let i = 0; i < string.length; i++) {
     const code = string.charCodeAt(i);
 
-    if (code === 0x0) {
-      // Preprocessor removes this character. Cannot happen.
-      throw new InvalidCharacterError(
-          'Internal Error: Invalid character. The input contains U+0000.');
-    }
+    // Preprocessor removes this character. Cannot happen.
+    goog.asserts.assert(
+        code !== 0x0,
+        'Internal Error: Invalid character. The input contains U+0000.');
 
     if (between(code, 0x1, 0x1f) || code === 0x7f) {
       result += '\\' + code.toString(16) + ' ';

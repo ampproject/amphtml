@@ -1,0 +1,4 @@
+FAIL
+feature_tests/duplicate_unique_tags_and_wrong_parents.html:31:2 DUPLICATE_UNIQUE_TAG author stylesheet (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#stylesheets)
+feature_tests/duplicate_unique_tags_and_wrong_parents.html:35:0 DISALLOWED_ATTR amp-custom (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#opacity)
+feature_tests/duplicate_unique_tags_and_wrong_parents.html:35:0 WRONG_PARENT_TAG body > style (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#opacity)

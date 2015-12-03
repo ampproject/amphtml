@@ -50,7 +50,7 @@ The template can be defined anywhere in the AMP document's `body` like this:
 
 ```html
 <template type="amp-mustache">
-  Hello {{world!}}
+  Hello {{world}}!
 </template>
 ```
 
