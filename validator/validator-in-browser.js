@@ -80,7 +80,7 @@ amp.validator.validateTapActionsA11y = function(doc, validationResult) {
     }
     if (!element.hasAttribute('role')) {
       const error = new amp.validator.ValidationError();
-      error.severity = amp.validator.ValidationError.Severity.PROD_WARNING;
+      error.severity = amp.validator.ValidationError.Severity.ERROR;
       error.code = amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING;
       error.detail =
           'A11Y: ' + printElementRef(element) + ' must have "role" attribute ' +
@@ -90,7 +90,7 @@ amp.validator.validateTapActionsA11y = function(doc, validationResult) {
     }
     if (!element.hasAttribute('tabindex')) {
       const error = new amp.validator.ValidationError();
-      error.severity = amp.validator.ValidationError.Severity.PROD_WARNING;
+      error.severity = amp.validator.ValidationError.Severity.ERROR;
       error.code = amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING;
       error.detail =
           'A11Y: ' + printElementRef(element) + ' must have "tabindex" ' +

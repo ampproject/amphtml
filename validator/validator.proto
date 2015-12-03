@@ -69,10 +69,12 @@ message AttrSpec {
   // If set, then the attribute value may not match this regex, which is
   // always applied case-insensitively.
   optional string blacklisted_value_regex = 6;
-  // If set, generates a DEPRECATED_ATTR error of severity PROD_WARNING.
+  // If set, generates a DEPRECATED_ATTR error with severity WARNING.
   optional string deprecation = 7;
   optional string deprecation_url = 8;
-  // If set, generates a DEV_MODE_ENABLED error of severity DEV_WARNING.
+  // This feature specifically addresses the development attribute on
+  // the top-level html tag. When set, a DEV_MODE_ENABLED error with
+  // severity ERROR is generated.
   optional string dev_mode_enabled = 9;
   optional string dev_mode_enabled_url = 10;
 }
@@ -215,13 +217,18 @@ message ValidatorRules {
 message ValidationError {
   enum Severity {
     UNKNOWN_SEVERITY = 0;
+    // A document with at least one error of this severity fails validation.
     ERROR = 1;
+    // A document may have warnings and still pass validation.
+    WARNING = 4;
+    // No longer used.
     // A prod warning is OK in prod mode (the overall status of a validation
     // result is still PASS) but an error in dev mode.
-    PROD_WARNING = 2;
+    PROD_WARNING = 2; // DEPRECATED DO NOT USE.
+    // No longer used.
     // A dev warning is OK in dev mode (the overall status of a validation
     // result is still PASS) but an error in prod mode.
-    DEV_WARNING = 3;
+    DEV_WARNING = 3; // DEPRECATED DO NOT USE.
   }
   optional Severity severity = 6 [ default = ERROR ];
   enum Code {

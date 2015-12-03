@@ -292,9 +292,7 @@ amp.validator.ValidationResult.prototype.outputToTerminal =
   }
   for (const error of this.errors) {
     if (error.severity ===
-        amp.validator.ValidationError.Severity.ERROR ||
-        error.severity ===
-        amp.validator.ValidationError.Severity.PROD_WARNING) {
+        amp.validator.ValidationError.Severity.ERROR) {
       terminal.error(errorLine(url, error));
     } else {
       terminal.warn(errorLine(url, error));
@@ -631,15 +629,12 @@ CdataMatcher.prototype.getLineCol = function() {
  * @return {amp.validator.ValidationError.Severity}
  */
 function SeverityFor(code) {
-  if (code === amp.validator.ValidationError.Code.DEV_MODE_ENABLED) {
-    return amp.validator.ValidationError.Severity.DEV_WARNING;
+  if (code === amp.validator.ValidationError.Code.DEPRECATED_TAG) {
+    return amp.validator.ValidationError.Severity.WARNING;
   } else if (code === amp.validator.ValidationError.Code.DEPRECATED_ATTR) {
-    return amp.validator.ValidationError.Severity.PROD_WARNING;
-  } else if (code === amp.validator.ValidationError.Code.DEPRECATED_TAG) {
-    return amp.validator.ValidationError.Severity.PROD_WARNING;
-  } else {
-    return amp.validator.ValidationError.Severity.ERROR;
+    return amp.validator.ValidationError.Severity.WARNING;
   }
+  return amp.validator.ValidationError.Severity.ERROR;
 }
 
 
@@ -762,9 +757,8 @@ Context.prototype.addErrorWithLineCol = function(
   }
   const severity = SeverityFor(validationErrorCode);
 
-  // The Javascript Validator is always in dev mode, so unless the severity
-  // is a DEV_WARNING we have a failure.
-  if (severity !== amp.validator.ValidationError.Severity.DEV_WARNING) {
+  // If any of the errors amount to more than a WARNING, validation fails.
+  if (severity !== amp.validator.ValidationError.Severity.WARNING) {
     validationResult.status = amp.validator.ValidationResult.Status.FAIL;
   }
   if (progress.wantsMoreErrors) {
@@ -1366,7 +1360,7 @@ ParsedValidatorRules.prototype.validateTag = function(
       // went fine.
 
       // However we still want to merge the "errors" because warnings should
-      // be reported as well (e.g., the development mode warning).
+      // be reported as well (e.g., the deprecation warnings).
       validationResult.mergeFrom(resultForAttempt);
 
       if (parsedSpec.getSpec().mandatory)
