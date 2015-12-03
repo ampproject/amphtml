@@ -406,7 +406,7 @@ If AMP documents are alternative representations of a canonical document, then t
 Example:
 
 ```html
-<link rel="amphtml" href="https://www.domain.com/url/to/amp/document.html">
+<link rel="amphtml" href="https://www.example.com/url/to/amp/document.html">
 ```
 
 The AMP document itself is expected to point back with its canonical relation to a document that has the "amphtml" relation.
