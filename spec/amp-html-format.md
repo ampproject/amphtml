@@ -30,7 +30,7 @@ Also, AMP HTML documents can be uploaded to a web server and served just like an
 
 AMP HTML uses a set of contributed but centrally managed and hosted custom elements to implement advanced functionality such as image galleries that might be found in an AMP HTML document. While it does allow styling the document using custom CSS, it does not allow author written JavaScript beyond what is provided through the custom elements to reach its performance goals.
 
-By using this AMP format, content producers are making the content in AMP files available to be crawled, cached, and displayed by third parties.
+By using the AMP format, content producers are making the content in AMP files available to be crawled (subject to robots.txt restrictions), cached, and displayed by third parties.
 
 ## Performance
 
