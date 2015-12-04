@@ -51,6 +51,7 @@ describe('example', function() {
     'released.amp.html',
     'twitter.amp.html',
     'vine.amp.html',
+    'old-boilerplate.amp.html',
   ];
 
   /**
