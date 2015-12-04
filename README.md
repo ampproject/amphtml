@@ -83,8 +83,10 @@ These components can:
 * Replace HTML5 elements that are not directly permitted in the specification
   such as [amp-img](builtins/amp-img.md) and [amp-video](builtins/amp-video.md).
 * Implement embedded third-party content, such as
-[amp-youtube](extensions/amp-youtube/amp-youtube.md), [amp-ad](builtins/amp-ad.md),
-and [amp-twitter](extensions/amp-twitter/amp-twitter.md).
+[amp-ad](builtins/amp-ad.md),
+[amp-pinterest](extensions/amp-pinterest/amp-pinterest.md),
+[amp-twitter](extensions/amp-twitter/amp-twitter.md),
+and [amp-youtube](extensions/amp-youtube/amp-youtube.md).
 * Provide for common patterns in web pages,
 such as [amp-lightbox](extensions/amp-lightbox/amp-lightbox.md)
 and [amp-carousel](extensions/amp-carousel/amp-carousel.md).

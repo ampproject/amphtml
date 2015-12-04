@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the license.
  */
+goog.require('goog.asserts');
 goog.require('parse_css.EOFToken');
 goog.require('parse_css.ErrorToken');
 goog.require('parse_css.TokenStream');
@@ -116,13 +117,14 @@ css_selectors.NodeVisitor.prototype.visitSelectorsGroup =
  * @param {!css_selectors.NodeVisitor} visitor
  */
 css_selectors.traverse = function(selectorNode, visitor) {
-  var toVisit = [selectorNode];
+  /** @type {!Array<!css_selectors.SelectorNode>} */
+  const toVisit = [selectorNode];
   while (toVisit.length > 0) {
-    var node = toVisit.shift();
+    /** @type {!css_selectors.SelectorNode} */
+    const node = toVisit.shift();
     node.accept(visitor);
-    var children = node.getChildNodes();
-    for (var i = 0; i < children.length; ++i) {
-      toVisit.push(children[i]);
+    for (const child of node.getChildNodes()) {
+      toVisit.push(child);
     }
   }
 };
@@ -173,7 +175,7 @@ css_selectors.TypeSelector.prototype.toString = function() {
 
 /** @return {!Object} */
 css_selectors.TypeSelector.prototype.toJSON = function() {
-  var json = goog.base(this, 'toJSON');
+  const json = goog.base(this, 'toJSON');
   json['namespacePrefix'] = this.namespacePrefix;
   json['elementName'] = this.elementName;
   return json;
@@ -195,7 +197,7 @@ function isDelim(token, delimChar) {
   if (!(token instanceof parse_css.DelimToken)) {
     return false;
   }
-  var delimToken = /** @type {parse_css.DelimToken} */ (token);
+  const delimToken = goog.asserts.assertInstanceof(token, parse_css.DelimToken);
   return delimToken.value === delimChar;
 }
 
@@ -206,11 +208,11 @@ function isDelim(token, delimChar) {
  */
 css_selectors.parseATypeSelector = function(tokenStream) {
   /** @type {?string} */
-  var namespacePrefix = null;
+  let namespacePrefix = null;
   /** @type {string} */
-  var elementName = '*';
-  var line = tokenStream.current().line;
-  var col = tokenStream.current().col;
+  let elementName = '*';
+  const line = tokenStream.current().line;
+  const col = tokenStream.current().col;
 
   if (isDelim(tokenStream.current(), '|')) {
     namespacePrefix = '';
@@ -222,7 +224,8 @@ css_selectors.parseATypeSelector = function(tokenStream) {
     tokenStream.consume();
   } else if (tokenStream.current() instanceof parse_css.IdentToken &&
       isDelim(tokenStream.next(), '|')) {
-    var ident = /** @type {parse_css.IdentToken} */ (tokenStream.current());
+    const ident = goog.asserts.assertInstanceof(
+        tokenStream.current(), parse_css.IdentToken);
     namespacePrefix = ident.value;
     tokenStream.consume();
     tokenStream.consume();
@@ -232,7 +235,8 @@ css_selectors.parseATypeSelector = function(tokenStream) {
     elementName = '*';
     tokenStream.consume();
   } else if (tokenStream.current() instanceof parse_css.IdentToken) {
-    var ident = /** @type {parse_css.IdentToken} */ (tokenStream.current());
+    const ident = goog.asserts.assertInstanceof(
+        tokenStream.current(), parse_css.IdentToken);
     elementName = ident.value;
     tokenStream.consume();
   }
@@ -267,7 +271,7 @@ css_selectors.IdSelector.prototype.toString = function() {
 
 /** @return {!Object} */
 css_selectors.IdSelector.prototype.toJSON = function() {
-  var json = goog.base(this, 'toJSON');
+  const json = goog.base(this, 'toJSON');
   json['value'] = this.value;
   return json;
 };
@@ -286,7 +290,8 @@ css_selectors.parseAnIdSelector = function(tokenStream) {
   goog.asserts.assertInstanceof(
       tokenStream.current(), parse_css.HashToken,
       'Precondition violated: must start with HashToken');
-  var hash = /** @type {parse_css.HashToken} */ (tokenStream.current());
+  const hash = goog.asserts.assertInstanceof(
+      tokenStream.current(), parse_css.HashToken);
   tokenStream.consume();
   return new css_selectors.IdSelector(hash.line, hash.col, hash.value);
 };
@@ -316,7 +321,7 @@ css_selectors.AttrSelector.prototype.nodeType = 'ATTR_SELECTOR';
 
 /** @return {!Object} */
 css_selectors.AttrSelector.prototype.toJSON = function() {
-  var json = goog.base(this, 'toJSON');
+  const json = goog.base(this, 'toJSON');
   json['value'] = recursiveArrayToJSON(this.value);
   return json;
 };
@@ -335,8 +340,8 @@ css_selectors.parseAnAttrSelector = function(tokenStream) {
   goog.asserts.assert(
       tokenStream.current() instanceof parse_css.OpenSquareToken,
       'Precondition violated: must be an OpenSquareToken');
-  var start = tokenStream.current();
-  var block = parse_css.extractASimpleBlock(tokenStream);
+  const start = tokenStream.current();
+  const block = parse_css.extractASimpleBlock(tokenStream);
   tokenStream.consume();
   return new css_selectors.AttrSelector(start.line, start.col, block);
 };
@@ -375,7 +380,7 @@ css_selectors.PseudoSelector.prototype.nodeType = 'PSEUDO_SELECTOR';
 
 /** @return {!Object} */
 css_selectors.PseudoSelector.prototype.toJSON = function() {
-  var json = goog.base(this, 'toJSON');
+  const json = goog.base(this, 'toJSON');
   json['isClass'] = this.isClass;
   json['name'] = this.name;
   if (this.func.length !== 0) {
@@ -398,27 +403,28 @@ css_selectors.PseudoSelector.prototype.accept = function(visitor) {
 css_selectors.parseAPseudoSelector = function(tokenStream) {
   goog.asserts.assert(tokenStream.current() instanceof parse_css.ColonToken,
                       'Precondition violated: must be a ":"');
-  var firstColon = tokenStream.current();
+  const firstColon = tokenStream.current();
   tokenStream.consume();
-  var isClass = true;
+  let isClass = true;
   if (tokenStream.current() instanceof parse_css.ColonToken) {
     isClass = false;
     tokenStream.consume();
   }
-  var name = '';
+  let name = '';
   /** @type {!Array<!parse_css.CSSParserToken>} */
-  var func = [];
+  let func = [];
   if (tokenStream.current() instanceof parse_css.IdentToken) {
-    var ident = /** @type {!parse_css.IdentToken} */(tokenStream.current());
+    const ident = goog.asserts.assertInstanceof(
+        tokenStream.current(), parse_css.IdentToken);
     name = ident.value;
     tokenStream.consume();
   } else if (tokenStream.current() instanceof parse_css.FunctionToken) {
-    var funcToken =
-        /** @type {parse_css.FunctionToken} */ (tokenStream.current());
+    const funcToken = goog.asserts.assertInstanceof(
+        tokenStream.current(), parse_css.FunctionToken);
     name = funcToken.value;
     func = parse_css.extractAFunction(tokenStream);
   } else {
-    var error = new parse_css.ErrorToken(
+    const error = new parse_css.ErrorToken(
         parse_css.ErrorType.SELECTORS,
         'syntax error in pseudo specification');
     error.line = firstColon.line;
@@ -456,7 +462,7 @@ css_selectors.ClassSelector.prototype.toString = function() {
 
 /** @return {!Object} */
 css_selectors.ClassSelector.prototype.toJSON = function() {
-  var json = goog.base(this, 'toJSON');
+  const json = goog.base(this, 'toJSON');
   json['value'] = this.value;
   return json;
 };
@@ -476,9 +482,10 @@ css_selectors.parseAClassSelector = function(tokenStream) {
       isDelim(tokenStream.current(), '.') &&
       tokenStream.next() instanceof parse_css.IdentToken,
       'Precondition violated: must start with "." and follow with ident');
-  var dot = tokenStream.current();
+  const dot = tokenStream.current();
   tokenStream.consume();
-  var ident = /** @type {parse_css.IdentToken} */ (tokenStream.current());
+  const ident = goog.asserts.assertInstanceof(
+      tokenStream.current(), parse_css.IdentToken);
   tokenStream.consume();
   return new css_selectors.ClassSelector(dot.line, dot.col, ident.value);
 };
@@ -505,16 +512,16 @@ css_selectors.SimpleSelectorSequence.prototype.nodeType =
     'SIMPLE_SELECTOR_SEQUENCE';
 
 function recursiveArrayToJSON(array) {
-  var json = [];
-  for (var i = 0; i < array.length; i++) {
-    json.push(array[i].toJSON());
+  const json = [];
+  for (const entry of array) {
+    json.push(entry.toJSON());
   }
   return json;
 }
 
 /** @return {!Object} */
 css_selectors.SimpleSelectorSequence.prototype.toJSON = function() {
-  var json = goog.base(this, 'toJSON');
+  const json = goog.base(this, 'toJSON');
   json['typeSelector'] = this.typeSelector.toJSON();
   json['otherSelectors'] = recursiveArrayToJSON(this.otherSelectors);
   return json;
@@ -522,9 +529,9 @@ css_selectors.SimpleSelectorSequence.prototype.toJSON = function() {
 
 /** @return {!Array<!css_selectors.SelectorNode>} */
 css_selectors.SimpleSelectorSequence.prototype.getChildNodes = function() {
-  var children = [this.typeSelector];
-  for (var i = 0; i < this.otherSelectors.length; ++i) {
-    children.push(this.otherSelectors[i]);
+  const children = [this.typeSelector];
+  for (const other of this.otherSelectors) {
+    children.push(other);
   }
   return children;
 };
@@ -541,15 +548,15 @@ css_selectors.SimpleSelectorSequence.prototype.accept = function(visitor) {
  * @return {!css_selectors.SimpleSelectorSequence|!parse_css.ErrorToken}
  */
 css_selectors.parseASimpleSelectorSequence = function(tokenStream) {
-  var line = tokenStream.current().line;
-  var col = tokenStream.current().col;
-  var typeSelector = null;
+  const line = tokenStream.current().line;
+  const col = tokenStream.current().col;
+  let typeSelector = null;
   if (isDelim(tokenStream.current(), '*') ||
       isDelim(tokenStream.current(), '|') ||
       tokenStream.current() instanceof parse_css.IdentToken) {
     typeSelector = css_selectors.parseATypeSelector(tokenStream);
   }
-  var otherSelectors = [];
+  const otherSelectors = [];
   while (true) {
     if (tokenStream.current() instanceof parse_css.HashToken) {
       otherSelectors.push(css_selectors.parseAnIdSelector(tokenStream));
@@ -559,7 +566,7 @@ css_selectors.parseASimpleSelectorSequence = function(tokenStream) {
     } else if (tokenStream.current() instanceof parse_css.OpenSquareToken) {
       otherSelectors.push(css_selectors.parseAnAttrSelector(tokenStream));
     } else if (tokenStream.current() instanceof parse_css.ColonToken) {
-      var pseudo = css_selectors.parseAPseudoSelector(tokenStream);
+      const pseudo = css_selectors.parseAPseudoSelector(tokenStream);
       if (pseudo instanceof parse_css.ErrorToken) {
         return pseudo;
       }
@@ -569,7 +576,7 @@ css_selectors.parseASimpleSelectorSequence = function(tokenStream) {
     } else {
       if (typeSelector === null) {
         if (otherSelectors.length == 0) {
-          var error = new parse_css.ErrorToken(parse_css.ErrorType.SELECTORS,
+          const error = new parse_css.ErrorToken(parse_css.ErrorType.SELECTORS,
                                                'no selector found');
           error.line = tokenStream.current().line;
           error.col = tokenStream.current().col;
@@ -622,7 +629,7 @@ css_selectors.Combinator.prototype.nodeType = 'COMBINATOR';
 
 /** @return {!Object} */
 css_selectors.Combinator.prototype.toJSON = function() {
-  var json = goog.base(this, 'toJSON');
+  const json = goog.base(this, 'toJSON');
   json['combinatorType'] = this.combinatorType;
   json['left'] = this.left.toJSON();
   json['right'] = this.right.toJSON();
@@ -701,13 +708,13 @@ function isSimpleSelectorSequenceStart(token) {
  */
 css_selectors.parseASelector = function(tokenStream) {
   if (!isSimpleSelectorSequenceStart(tokenStream.current())) {
-    var error = new parse_css.ErrorToken(parse_css.ErrorType.SELECTORS,
+    const error = new parse_css.ErrorToken(parse_css.ErrorType.SELECTORS,
                                          'not a selector start');
     error.line = tokenStream.current().line;
     error.col = tokenStream.current().col;
     return error;
   }
-  var left = css_selectors.parseASimpleSelectorSequence(tokenStream);
+  let left = css_selectors.parseASimpleSelectorSequence(tokenStream);
   if (left instanceof parse_css.ErrorToken) {
     return left;
   }
@@ -727,12 +734,12 @@ css_selectors.parseASelector = function(tokenStream) {
         isDelim(tokenStream.current(), '~'))) {
       return left;
     }
-    var combinatorToken = tokenStream.current();
+    const combinatorToken = tokenStream.current();
     tokenStream.consume();
     if (tokenStream.current() instanceof parse_css.WhitespaceToken) {
       tokenStream.consume();
     }
-    var right = css_selectors.parseASimpleSelectorSequence(tokenStream);
+    const right = css_selectors.parseASimpleSelectorSequence(tokenStream);
     if (right instanceof parse_css.ErrorToken) {
       return right;  // TODO(johannes): more than one error / partial tree.
     }
@@ -765,7 +772,7 @@ css_selectors.SelectorsGroup.prototype.nodeType = 'SELECTORS_GROUP';
 
 /** @return {!Object} */
 css_selectors.SelectorsGroup.prototype.toJSON = function() {
-  var json = goog.base(this, 'toJSON');
+  const json = goog.base(this, 'toJSON');
   json['elements'] = recursiveArrayToJSON(this.elements);
   return json;
 };
@@ -790,15 +797,15 @@ css_selectors.SelectorsGroup.prototype.accept = function(visitor) {
  */
 css_selectors.parseASelectorsGroup = function(tokenStream) {
   if (!isSimpleSelectorSequenceStart(tokenStream.current())) {
-    var error = new parse_css.ErrorToken(parse_css.ErrorType.SELECTORS,
-                                         'not a selector start');
+    const error = new parse_css.ErrorToken(parse_css.ErrorType.SELECTORS,
+                                           'not a selector start');
     error.line = tokenStream.current().line;
     error.col = tokenStream.current().col;
     return error;
   }
-  var line = tokenStream.current().line;
-  var col = tokenStream.current().col;
-  var elements = [css_selectors.parseASelector(tokenStream)];
+  const line = tokenStream.current().line;
+  const col = tokenStream.current().col;
+  const elements = [css_selectors.parseASelector(tokenStream)];
   if (elements[0] instanceof parse_css.ErrorToken) {
     return elements[0];
   }
@@ -830,13 +837,13 @@ css_selectors.parseASelectorsGroup = function(tokenStream) {
  * @return {css_selectors.SelectorsGroup|css_selectors.SimpleSelectorSequence|css_selectors.Combinator}
  */
 css_selectors.parse = function(tokenStream, errors) {
-  var group = css_selectors.parseASelectorsGroup(tokenStream);
+  const group = css_selectors.parseASelectorsGroup(tokenStream);
   if (group instanceof parse_css.ErrorToken) {
     errors.push(group);
   }
   if (!(tokenStream.current() instanceof parse_css.EOFToken)) {
-    var error = new parse_css.ErrorToken(parse_css.ErrorType.SELECTORS,
-                                         'unparsed input remains');
+    const error = new parse_css.ErrorToken(parse_css.ErrorType.SELECTORS,
+                                           'unparsed input remains');
     error.line = tokenStream.current().line;
     error.col = tokenStream.current().col;
     errors.push(error);

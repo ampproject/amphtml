@@ -36,6 +36,7 @@ describe('example', function() {
 
   const examples = [
     'ads.amp.html',
+    'brightcove.amp.html',
     'metadata-examples/article-json-ld.amp.html',
     'metadata-examples/article-microdata.amp.html',
     'metadata-examples/recipe-json-ld.amp.html',
@@ -67,6 +68,9 @@ describe('example', function() {
 
     // TODO(dvoytenko): Remove once validator supports "amp-font" element.
     /DISALLOWED_TAG amp-font/,
+
+    // Remove once validator supports "amp-brightcove".
+    /DISALLOWED_TAG amp-brightcove/
   ];
 
   const usedWhitelist = [];
