@@ -178,6 +178,7 @@ In these cases, services may set up endpoints that produce data that conforms to
 - [amp-ad](../builtins/amp-ad.md)
 - [amp-pixel](../builtins/amp-pixel.md)
 - [amp-video](../builtins/amp-video.md)
+- [amp-brightcove](../extensions/amp-brightcove/amp-brightcove.md)
 - [amp-carousel](../extensions/amp-carousel/amp-carousel.md)
 - [amp-font](../extensions/amp-font/amp-font.md)
 - [amp-lightbox](../extensions/amp-lightbox/amp-lightbox.md)
