@@ -150,6 +150,10 @@ export class Performance {
     this.tick_ = tick;
     this.flush_ = opt_flush;
     this.flushQueuedTicks_();
+    // We need to call flush right away in case `setTickFunction` is called
+    // later than the amp codebase had invoked the performance services'
+    // `flush` method to forward ticks.
+    this.flush();
   }
 }
 

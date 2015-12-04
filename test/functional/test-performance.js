@@ -188,11 +188,13 @@ describe('performance', () => {
     it('should call the flush callback', () => {
       perf.setTickFunction(function() {}, spy);
 
-      expect(spy.callCount).to.equal(0);
-      perf.flush();
+      // We start at 1 since setting the tick function and flush
+      // causes 1 flush call for any queued events.
       expect(spy.callCount).to.equal(1);
       perf.flush();
       expect(spy.callCount).to.equal(2);
+      perf.flush();
+      expect(spy.callCount).to.equal(3);
     });
   });
 
@@ -222,5 +224,16 @@ describe('performance', () => {
     expect(spy.firstCall.args[1]).to.equal(fn);
 
     spy.restore();
+  });
+
+  it('should call the flush function after its set', () => {
+    const perf = performanceFor(window);
+    const flushSpy = sinon.spy();
+
+    adopt(window);
+
+    window.AMP.setTickFunction(function() {}, flushSpy);
+
+    expect(flushSpy.calledOnce).to.be.true;
   });
 });
