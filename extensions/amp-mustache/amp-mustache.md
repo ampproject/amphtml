@@ -59,3 +59,7 @@ that among other things, you can't use `amp-mustache` to:
 - Calculate attribute name. E.g. `<div {{attrName}}=something>` is not allowed.
 - Output arbitrary HTML using `{{{unescaped}}}`. The output of "triple-mustache" is sanitized to only allow
 formatting tags such as `<b>`, `<i>`, and so on.
+
+Notice also that because the body of the template has to be specified within the `template` element, it is
+impossible to specify `{{&var}}` expressions - they will always be escaped as `{{&amp;var}}`. The triple-mustache
+`{{{var}}}` has to be used for these cases.
