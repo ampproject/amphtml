@@ -6,7 +6,7 @@ before they are fully released.
 
 Experiments UI is a available at:
 
-[https://cdn.ampproject.org/experiments.js](https://cdn.ampproject.org/experiments.js)
+[https://cdn.ampproject.org/experiments.html](https://cdn.ampproject.org/experiments.html)
 
 Alternatively, the expriments can be toggled in the devtools console in the development
 mode using:
