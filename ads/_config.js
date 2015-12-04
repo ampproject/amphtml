@@ -33,6 +33,7 @@ export const adPrefetch = {
   smartadserver: 'https://ec-ns.sascdn.com/diff/js/smart.js',
   yieldmo: 'https://static.yieldmo.com/ym.amp1.js',
   revcontent: 'https://labs-cdn.revcontent.com/build/amphtml/revcontent.amp.min.js',
+  teads: 'https://cdn.teads.tv/media/format/v3/teads-format.min.js',
 };
 
 /**
@@ -50,6 +51,12 @@ export const adPreconnect = {
     'https://cdn.taboola.com',
     'https://trc.taboola.com',
     'https://images.taboola.com',
+  ],
+  teads: [
+    'https://cdn.teads.tv',
+    'https://cdn2.teads.tv',
+    'https://a.teads.tv',
+    'https://t.teads.tv',
   ],
   doubleclick: [
     'https://partner.googleadservices.com',
