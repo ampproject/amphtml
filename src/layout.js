@@ -63,6 +63,7 @@ let Dimensions;
  */
 export const naturalDimensions_ = {
   'AMP-PIXEL': {width: 1, height: 1},
+  'AMP-ANALYTICS': {width: 1, height: 1},
   'AMP-AUDIO': null
 };
 
