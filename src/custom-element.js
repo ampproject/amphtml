@@ -105,9 +105,11 @@ export function upgradeOrRegisterElement(win, name, toClass) {
  * @param {!Window} win
  */
 export function stubElements(win) {
+  win.ampExtendedElements = {};
   const list = win.document.querySelectorAll('[custom-element]');
   for (let i = 0; i < list.length; i++) {
     const name = list[i].getAttribute('custom-element');
+    win.ampExtendedElements[name] = true;
     if (knownElements[name]) {
       continue;
     }

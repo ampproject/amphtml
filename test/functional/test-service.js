@@ -14,14 +14,18 @@
  * limitations under the License.
  */
 
-import {getService} from '../../src/service';
+import {getService, getElementService} from '../../src/service';
 
-describe('service`', () => {
+describe('service', () => {
 
   let count = 1;
   function inc() {
     return count++;
   }
+
+  beforeEach(() => {
+    window.ampExtendedElements = {};
+  });
 
   it('should make per window singletons', () => {
     const a1 = getService(window, 'a', inc);
@@ -43,5 +47,28 @@ describe('service`', () => {
     expect(() => {
       getService(window, 'not-present');
     }).to.throw(/Factory not given and service missing not-present/);
+  });
+
+  it('should be provided by element', () => {
+    window.ampExtendedElements['element-1'] = true;
+    const p1 = getElementService(window, 'e1', 'element-1');
+    const p2 = getElementService(window, 'e1', 'element-1');
+    getService(window, 'e1', function() {
+      return 'from e1';
+    });
+    return p1.then(s1 => {
+      expect(s1).to.equal('from e1');
+      return p2.then(s2 => {
+        expect(s1).to.equal(s2);
+      });
+    });
+  });
+
+  it('should fail if element is not in page.', () => {
+    window.ampExtendedElements['element-foo'] = true;
+    expect(() => {
+      getElementService(window, 'e1', 'element-bar');
+    }).to.throw(
+        /Service e1 was requested to be provided through element-bar/);
   });
 });

@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-import {cidFor, getSourceOrigin, isProxyOrigin} from '../../src/cid';
+import {cidFor} from '../../src/cid';
+import {installCidService, getSourceOrigin, isProxyOrigin} from
+    '../../src/service/cid-impl';
 import {parseUrl} from '../../src/url';
 import {timer} from '../../src/timer';
 import * as sinon from 'sinon';
@@ -57,16 +59,22 @@ describe('cid', () => {
         }
       },
       document: {},
-    };
-    cid = cidFor(fakeWin);
-    cid.origSha384Base64_ = cid.sha384Base64_;
-    cid.sha384Base64_ = val => {
-      if (val instanceof Array) {
-        val = '[' + val + ']';
+      ampExtendedElements: {
+        'amp-analytics': true
       }
-
-      return 'sha384(' + val + ')';
     };
+    installCidService(fakeWin);
+    return cidFor(fakeWin).then(c => {
+      cid = c;
+      cid.origSha384Base64_ = cid.sha384Base64_;
+      cid.sha384Base64_ = val => {
+        if (val instanceof Array) {
+          val = '[' + val + ']';
+        }
+
+        return 'sha384(' + val + ')';
+      };
+    });
   });
 
   afterEach(() => {
@@ -160,17 +168,22 @@ describe('cid', () => {
         href: 'https://cdn.ampproject.org/v/www.origin.com/',
       },
       services: {},
+      ampExtendedElements: {
+        'amp-analytics': true
+      }
     };
     win.__proto__ = window;
     expect(win.location.href).to.equal('https://cdn.ampproject.org/v/www.origin.com/');
-    const cid = cidFor(win);
-    return cid.get('foo', hasConsent).then(c1 => {
-      return cid.get('foo', hasConsent).then(c2 => {
-        expect(c1).to.equal(c2);
-        window.localStorage.removeItem('amp-cid');
-        removeMemoryCacheOfCid(cid);
-        return cid.get('foo', hasConsent).then(c3 => {
-          expect(c1).to.not.equal(c3);
+    installCidService(win);
+    return cidFor(win).then(cid => {
+      return cid.get('foo', hasConsent).then(c1 => {
+        return cid.get('foo', hasConsent).then(c2 => {
+          expect(c1).to.equal(c2);
+          window.localStorage.removeItem('amp-cid');
+          removeMemoryCacheOfCid(cid);
+          return cid.get('foo', hasConsent).then(c3 => {
+            expect(c1).to.not.equal(c3);
+          });
         });
       });
     });
