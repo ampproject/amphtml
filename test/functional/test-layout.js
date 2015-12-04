@@ -36,8 +36,8 @@ describe('Layout', () => {
   });
 
   it('parseLayout - failure', () => {
-    expect(parseLayout('abc')).to.be.undefined;
-    expect(parseLayout('xyz')).to.be.undefined;
+    expect(() => parseLayout('abc')).to.throw('Layout attr value invalid: abc');
+    expect(() => parseLayout('xyz')).to.throw('Layout attr value invalid: xyz');
   });
 
   it('parseLength', () => {
@@ -252,7 +252,7 @@ describe('Layout', () => {
     div.setAttribute('layout', 'foo');
     expect(function() {
       applyLayout_(div);
-    }).to.throw(/Unknown layout: foo/);
+    }).to.throw(/Layout attr value invalid: foo/);
   });
 
 
@@ -294,4 +294,13 @@ describe('Layout', () => {
     expect(pixel.style.height).to.equal('1px');
     expect(pixel.style.width).to.equal('');
   });
+
+  it('should configure natural dimensions; implied fixed-height by width=auto',
+     () => {
+       const pixel = document.createElement('amp-pixel');
+       pixel.setAttribute('width', 'auto');
+       expect(applyLayout_(pixel)).to.equal(Layout.FIXED_HEIGHT);
+       expect(pixel.style.height).to.equal('1px');
+       expect(pixel.style.width).to.equal('');
+     });
 });

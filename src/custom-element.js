@@ -117,96 +117,118 @@ export function stubElements(win) {
 
 
 /**
+ * Determines the layout of the element from the layout attribute, and if
+ * not specified, by considering hasNaturalDimensions() and the width,
+ * height, and sizes attributes.
+ * @param {!AmpElement} element
+ * @param {string} widthAttr
+ * @param {string} heightAttr
+ * @return {!Layout}
+ */
+function determineLayout(element, widthAttr, heightAttr) {
+  const layoutAttr = element.getAttribute('layout');
+  if (layoutAttr) {
+    return parseLayout(layoutAttr);
+  }
+  if (widthAttr == 'auto') {
+    return Layout.FIXED_HEIGHT;
+  }
+  if (hasNaturalDimensions(element.tagName)) {
+    return Layout.FIXED;
+  }
+  if (!widthAttr && !heightAttr) {
+    return Layout.CONTAINER;
+  }
+  if (!widthAttr) {
+    return Layout.FIXED_HEIGHT;
+  }
+  const sizesAttr = element.getAttribute('sizes');
+  return sizesAttr ? Layout.RESPONSIVE : Layout.FIXED;
+}
+
+/**
  * Applies layout to the element. Visible for testing only.
  * @param {!AmpElement} element
+ * @return {!Layout}
  */
 export function applyLayout_(element) {
   let widthAttr = element.getAttribute('width');
   let heightAttr = element.getAttribute('height');
-  const sizesAttr = element.getAttribute('sizes');
-  const layoutAttr = element.getAttribute('layout');
+  const layout = determineLayout(element, widthAttr, heightAttr);
 
-  // Handle elements that do not specify a width/height and are defined to have
-  // natural browser dimensions.
-  if ((!layoutAttr || layoutAttr == Layout.FIXED ||
-          layoutAttr == Layout.FIXED_HEIGHT) &&
-      (!widthAttr || !heightAttr) && hasNaturalDimensions(element.tagName)) {
-    const dimensions = getNaturalDimensions(element.tagName);
-    if (layoutAttr != Layout.FIXED_HEIGHT) {
-      widthAttr = widthAttr || dimensions.width;
-    }
-    heightAttr = heightAttr || dimensions.height;
-  }
-
-  let layout;
-  if (layoutAttr) {
-    // TODO(dvoytenko): show error state visually in the dev mode, e.g.
-    // red background + error message.
-    layout = parseLayout(layoutAttr.trim());
-    if (!layout) {
-      throw new Error('Unknown layout: ' + layoutAttr);
-    }
-  } else if (widthAttr || heightAttr) {
-    if (!widthAttr || widthAttr == 'auto') {
-      layout = Layout.FIXED_HEIGHT;
-    } else {
-      layout = sizesAttr ? Layout.RESPONSIVE : Layout.FIXED;
-    }
-  } else {
-    layout = Layout.CONTAINER;
-  }
   element.classList.add(getLayoutClass(layout));
   if (isLayoutSizeDefined(layout)) {
     element.classList.add('-amp-layout-size-defined');
   }
 
-  if (layout == Layout.FIXED || layout == Layout.FIXED_HEIGHT ||
-          layout == Layout.RESPONSIVE) {
-    let width = 0;
-    if (layout == Layout.FIXED_HEIGHT) {
-      if (widthAttr && widthAttr != 'auto') {
-        throw new Error('Expected width to be either absent or equal "auto" ' +
-            'for fixed-height layout: ' + widthAttr);
-      }
-    } else {
-      width = parseLength(widthAttr);
-      if (!width) {
-        throw new Error('Expected width to be available and be an ' +
-            'integer/length value: ' + widthAttr);
-      }
-    }
-    const height = parseLength(heightAttr);
-    if (!height) {
-      throw new Error('Expected height to be available and be an ' +
-          'integer/length value: ' + heightAttr);
-    }
-    if (layout == Layout.RESPONSIVE) {
-      if (getLengthUnits(width) != getLengthUnits(height)) {
-        throw new Error('Length units should be the same for width ' + width +
-            ' and height ' + height);
-      }
-      const sizer = element.ownerDocument.createElement('i-amp-sizer');
-      sizer.style.display = 'block';
-      sizer.style.paddingTop =
-          ((getLengthNumeral(height) / getLengthNumeral(width)) * 100) + '%';
-      element.insertBefore(sizer, element.firstChild);
-      element.sizerElement_ = sizer;
-    } else if (layout == Layout.FIXED_HEIGHT) {
-      element.style.height = height;
-    } else {
-      element.style.width = width;
-      element.style.height = height;
-    }
-  } else if (layout == Layout.FILL) {
+  // Handle layouts which don't care about width or height.
+  if (layout == Layout.FILL) {
     // Do nothing.
-  } else if (layout == Layout.CONTAINER) {
+    return layout;
+  }
+  if (layout == Layout.CONTAINER) {
     // Do nothing. Elements themselves will check whether the supplied
     // layout value is acceptable. In particular container is only OK
     // sometimes.
-  } else if (layout == Layout.NODISPLAY) {
+    return layout;
+  }
+  if (layout == Layout.NODISPLAY) {
     element.style.display = 'none';
+    return layout;
+  }
+
+  // Now handle the remaining layouts, all of which end up computing
+  // or requiring width and height.
+  assert(layout == Layout.FIXED || layout == Layout.FIXED_HEIGHT ||
+         layout == Layout.RESPONSIVE);
+
+  // Handle elements that do not specify a width or height attribute
+  // and are defined to have natural browser dimensions, by assigning
+  // defaults to their attribute values.
+  if ((layout == Layout.FIXED || layout == Layout.FIXED_HEIGHT) &&
+      (!widthAttr || !heightAttr) && hasNaturalDimensions(element.tagName)) {
+    const dimensions = getNaturalDimensions(element.tagName);
+    if (layout == Layout.FIXED) {
+      widthAttr = widthAttr || dimensions.width;
+    }
+    heightAttr = heightAttr || dimensions.height;
+  }
+  let width;
+  if (layout == Layout.FIXED_HEIGHT) {
+    if (!widthAttr || widthAttr == 'auto') {
+      width = 0;
+    } else {
+      throw new Error('Expected width to be either absent or equal "auto" ' +
+          'for fixed-height layout: ' + widthAttr);
+    }
   } else {
-    throw new Error('Unsupported layout value: ' + layout);
+    width = parseLength(widthAttr);
+    if (!width) {
+      throw new Error('Expected width to be available and be an ' +
+          'integer/length value: ' + widthAttr);
+    }
+  }
+  const height = parseLength(heightAttr);
+  if (!height) {
+    throw new Error('Expected height to be available and be an ' +
+        'integer/length value: ' + heightAttr);
+  }
+  if (layout == Layout.RESPONSIVE) {
+    if (getLengthUnits(width) != getLengthUnits(height)) {
+      throw new Error('Length units should be the same for width ' + width +
+          ' and height ' + height);
+    }
+    const sizer = element.ownerDocument.createElement('i-amp-sizer');
+    sizer.style.display = 'block';
+    sizer.style.paddingTop =
+        ((getLengthNumeral(height) / getLengthNumeral(width)) * 100) + '%';
+    element.insertBefore(sizer, element.firstChild);
+    element.sizerElement_ = sizer;
+  } else if (layout == Layout.FIXED_HEIGHT) {
+    element.style.height = height;
+  } else {
+    element.style.width = width;
+    element.style.height = height;
   }
   return layout;
 }
