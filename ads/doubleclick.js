@@ -30,6 +30,7 @@ export function doubleclick(global, data) {
       const slot = googletag.defineSlot(data.slot, dimensions, 'c')
           .addService(googletag.pubads());
       googletag.pubads().enableSingleRequest();
+      googletag.pubads().markAsAmp();
       googletag.pubads().set('page_url', context.canonicalUrl);
       googletag.enableServices();
 
