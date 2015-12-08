@@ -133,7 +133,7 @@ export function applyLayout_(element) {
 
   // Layout specified directly.
   if (layoutAttr) {
-    layout = parseLayout(layoutAttr.trim());
+    layout = parseLayout(layoutAttr);
     if (!layout) {
       throw new Error('Unknown layout: ' + layoutAttr);
     }
