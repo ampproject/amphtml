@@ -227,6 +227,32 @@ describe('amp-iframe', () => {
     });
   });
 
+  it('should deny data uri with allow-same-origin', () => {
+    return getAmpIframe({
+      width: 100,
+      height: 100,
+      sandbox: 'allow-same-origin',
+      src: 'data:text/html;charset=utf-8;base64,' +
+        'PHNjcmlwdD5kb2N1bWVudC53cml0ZSgnUiAnICsgZG9jdW1lbnQucmVmZXJyZXIgK' +
+        'yAnLCAnICsgbG9jYXRpb24uaHJlZik8L3NjcmlwdD4='
+    }).then(amp => {
+      expect(amp.iframe).to.be.null;
+    });
+  });
+
+  it('should deny DATA uri with allow-same-origin', () => {
+    return getAmpIframe({
+      width: 100,
+      height: 100,
+      sandbox: 'allow-same-origin',
+      src: 'DATA:text/html;charset=utf-8;base64,' +
+        'PHNjcmlwdD5kb2N1bWVudC53cml0ZSgnUiAnICsgZG9jdW1lbnQucmVmZXJyZXIgK' +
+        'yAnLCAnICsgbG9jYXRpb24uaHJlZik8L3NjcmlwdD4='
+    }).then(amp => {
+      expect(amp.iframe).to.be.null;
+    });
+  });
+
   it('should deny same origin', () => {
     return getAmpIframeObject().then(amp => {
       expect(() => {
