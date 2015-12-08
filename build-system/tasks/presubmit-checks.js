@@ -29,6 +29,10 @@ var requiresReviewPrivacy =
     'being privacy sensitive. Please file an issue asking for permission' +
     ' to use if you have not yet done so.';
 
+var privateServiceFactory = 'This service should only be installed in ' +
+    'the whitelisted files. Other modules should use a public function ' +
+    'typically called serviceNameFor.';
+
 // Terms that must not appear in our source files.
 var forbiddenTerms = {
   'DO NOT SUBMIT': '',
@@ -44,11 +48,24 @@ var forbiddenTerms = {
       'validator/validator-in-browser.js',
     ]
   },
+  // Service factories that should only be installed once.
+  'installCidService': {
+    message: privateServiceFactory,
+    whitelist: [
+      'src/service/cid-impl.js',
+      'extensions/amp-analytics/0.1/amp-analytics.js',
+      'extensions/amp-analytics/0.1/test/test-amp-analytics.js',
+      'test/functional/test-cid.js',
+      'test/functional/test-url-replacements.js'
+    ],
+  },
+  // Privacy sensitive
   'cidFor': {
     message: requiresReviewPrivacy,
     whitelist: [
       'src/cid.js',
       'src/service/cid-impl.js',
+      'src/url-replacements.js',
       'test/functional/test-cid.js',
     ],
   },
@@ -78,6 +95,7 @@ var forbiddenTerms = {
       'src/cookies.js',
       'src/experiments.js',
       'test/functional/test-cookies.js',
+      'test/functional/test-url-replacements.js',
       'tools/experiments/experiments.js',
     ]
   },
@@ -85,6 +103,7 @@ var forbiddenTerms = {
   'localStorage': {
     message: requiresReviewPrivacy,
     whitelist: [
+      'extensions/amp-analytics/0.1/test/test-amp-analytics.js',
       'test/_init_tests.js',
       'src/service/cid-impl.js',
       'test/functional/test-cid.js',

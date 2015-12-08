@@ -15,6 +15,7 @@
  */
 
 import {isExperimentOn} from '../../../src/experiments';
+import {installCidService} from '../../../src/service/cid-impl';
 import {Layout} from '../../../src/layout';
 import {log} from '../../../src/log';
 import {loadPromise} from '../../../src/event-helper';
@@ -23,6 +24,9 @@ import {expandTemplate} from '../../../src/string';
 
 import {addListener} from './instrumentation';
 import {ANALYTICS_CONFIG} from './vendors';
+
+
+installCidService(AMP.win);
 
 
 /** @const */
@@ -59,9 +63,9 @@ export class AmpAnalytics extends AMP.BaseElement {
   }
 
   /** @override */
-  buildCallback() {
+  layoutCallback() {
     if (!this.isExperimentOn_()) {
-      return;
+      return Promise.resolve();
     }
 
     /**
@@ -85,7 +89,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (this.hasOptedOut_()) {
       // Nothing to do when the user has opted out.
       log.fine(this.getName_(), 'User has opted out. No hits will be sent.');
-      return;
+      return Promise.resolve();
     }
 
     this.generateRequests_();
@@ -93,7 +97,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (!Array.isArray(this.config_['triggers'])) {
       log.error(this.getName_(), 'No triggers were found in the config. No ' +
           'analytics data will be sent.');
-      return;
+      return Promise.resolve();
     }
 
     // Trigger callback can be synchronous. Do the registration at the end.
@@ -107,6 +111,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       addListener(this.getWin(), trigger['on'],
           this.handleEvent_.bind(this, trigger));
     }
+    return Promise.resolve();
   }
 
   /**
@@ -227,12 +232,12 @@ export class AmpAnalytics extends AMP.BaseElement {
     });
 
     // For consistentcy with amp-pixel we also expand any url replacements.
-    request = urlReplacementsFor(this.getWin()).expand(request);
-
-    // TODO(btownsend, #1061): Add support for sendBeacon.
-    if (host && request) {
-      this.sendRequest_('https://' + host + request);
-    }
+    urlReplacementsFor(this.getWin()).expand(request).then(request => {
+      // TODO(btownsend, #1061): Add support for sendBeacon.
+      if (host && request) {
+        this.sendRequest_('https://' + host + request);
+      }
+    });
   }
 
   /**

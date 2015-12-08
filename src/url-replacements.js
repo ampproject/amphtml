@@ -15,8 +15,9 @@
  */
 
 import {assert} from './asserts';
+import {cidFor} from './cid';
 import {documentInfoFor} from './document-info';
-import {getService} from './service';
+import {getService, getElementService} from './service';
 import {parseUrl, removeFragment} from './url';
 
 
@@ -82,7 +83,16 @@ class UrlReplacements {
     // single page view. It should have sufficient entropy to be unique for
     // all the page views a single user is making at a time.
     this.set_('PAGE_VIEW_ID', () => {
-      documentInfoFor(this.win_).pageViewId;
+      return documentInfoFor(this.win_).pageViewId;
+    });
+
+    this.set_('CLIENT_ID', (data, name) => {
+      return cidFor(this.win_).then(cid => {
+        return cid.get(name,
+            // TODO(@cramforce): Hook up mechanism to get consent to id
+            // generation.
+            Promise.resolve());
+      });
     });
   }
 
@@ -95,8 +105,6 @@ class UrlReplacements {
    * @private
    */
   set_(varName, resolver) {
-    assert(varName == varName.toUpperCase(),
-        'Variable name must be in upper case: %s', varName);
     this.replacements_[varName] = resolver;
     this.replacementExpr_ = undefined;
     return this;
@@ -107,19 +115,42 @@ class UrlReplacements {
    * resolved values.
    * @param {string} url
    * @param {*} opt_data
-   * @return {string}
+   * @return {!Promise<string>}
    */
   expand(url, opt_data) {
     const expr = this.getExpr_();
-    return url.replace(expr, (match, name) => {
-      let val = this.replacements_[name](opt_data);
+    let replacementPromise;
+    const encodeValue = val => {
       // Value 0 is specialcased because the numeric 0 is a valid substitution
       // value.
       if (!val && val !== 0) {
         val = '';
       }
       return encodeURIComponent(val);
+    };
+    url = url.replace(expr, (match, name, arg) => {
+      const val = this.replacements_[name](opt_data, arg);
+      // In case the produced value is a promise, we don't actually
+      // replace anything here, but do it again when the promise resolves.
+      if (val && val.then) {
+        const p = val.then(v => {
+          url = url.replace(match, encodeValue(v));
+        });
+        if (replacementPromise) {
+          replacementPromise = replacementPromise.then(() => p);
+        } else {
+          replacementPromise = p;
+        }
+        return match;
+      }
+      return encodeValue(val);
     });
+
+    if (replacementPromise) {
+      replacementPromise = replacementPromise.then(() => url);
+    }
+
+    return replacementPromise || Promise.resolve(url);
   }
 
   /**
@@ -132,7 +163,13 @@ class UrlReplacements {
       for (const k in this.replacements_) {
         all += (all.length > 0 ? '|' : '') + k;
       }
-      this.replacementExpr_ = new RegExp('\\$?(' + all + ')', 'g');
+      this.replacementExpr_ =
+          // Match the given replacement patterns, as well as optionally
+          // arguments to the replacement behind it in parantheses.
+          // Example string that match
+          // FOO_BAR
+          // FOO_BAR(arg1)
+          new RegExp('\\$?(' + all + ')(?:\\(([a-zA-Z-_]+)\\))?', 'g');
     }
     return this.replacementExpr_;
   }

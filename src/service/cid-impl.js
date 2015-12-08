@@ -84,6 +84,9 @@ class Cid {
    *      given.
    */
   get(externalCidScope, consent, opt_persistenceConsent) {
+    assert(/^[a-zA-Z0-9-_]+$/.test(externalCidScope),
+        'The client id name must match only use the characters ' +
+        '[a-zA-Z0-9-_]+\nInstead found %s', externalCidScope);
     return consent.then(() => {
       return getExternalCid(this, externalCidScope,
           opt_persistenceConsent || consent);

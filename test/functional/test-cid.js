@@ -235,7 +235,7 @@ describe('cid', () => {
     const consent = timer.promise(100).then(() => {
       nonce = 'timer fired';
     });
-    const p = cid.get('', consent).then(c => {
+    const p = cid.get('test', consent).then(c => {
       expect(nonce).to.equal('timer fired');
     });
     clock.tick(100);
@@ -244,6 +244,12 @@ describe('cid', () => {
 
   it('should fail on failed consent', () => {
     return expect(cid.get('abc', Promise.reject())).to.be.rejected;
+  });
+
+  it('should fail on invalid scope', () => {
+    expect(() => {
+      cid.get('$$$', Promise.resolve());
+    }).to.throw(/\$\$\$/);
   });
 
   it('should not store until persistence promise resolves', () => {
