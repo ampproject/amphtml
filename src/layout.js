@@ -44,8 +44,8 @@ let Length;
 
 /**
  * @typedef {{
- *   width: number,
- *   height: number
+ *   width: string,
+ *   height: string
  * }}
  */
 let Dimensions;
@@ -58,12 +58,12 @@ let Dimensions;
  * `hasNaturalDimensions` checks for membership in this set.
  * `getNaturalDimensions` determines the dimensions for an element in the
  *    set and caches it.
- * @type {!Object<string, Dimensions>}
+ * @type {!Object<string, ?Dimensions>}
  * @private  Visible for testing only!
  */
 export const naturalDimensions_ = {
-  'AMP-PIXEL': {width: 1, height: 1},
-  'AMP-ANALYTICS': {width: 1, height: 1},
+  'AMP-PIXEL': {width: '1px', height: '1px'},
+  'AMP-ANALYTICS': {width: '1px', height: '1px'},
   'AMP-AUDIO': null
 };
 
@@ -224,8 +224,8 @@ export function getNaturalDimensions(tagName) {
     temp.style.visibility = 'hidden';
     document.body.appendChild(temp);
     naturalDimensions_[tagName] = {
-      width: temp./*OK*/offsetWidth || 1,
-      height: temp./*OK*/offsetHeight || 1
+      width: (temp./*OK*/offsetWidth || 1) + 'px',
+      height: (temp./*OK*/offsetHeight || 1) + 'px'
     };
     document.body.removeChild(temp);
   }

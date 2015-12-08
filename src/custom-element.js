@@ -124,36 +124,47 @@ export function stubElements(win) {
  */
 export function applyLayout_(element) {
   const layoutAttr = element.getAttribute('layout');
-  let widthAttr = element.getAttribute('width');
-  let heightAttr = element.getAttribute('height');
+  const widthAttr = element.getAttribute('width');
+  const heightAttr = element.getAttribute('height');
   const sizesAttr = element.getAttribute('sizes');
-  let layout = null;
-  let width = null;
-  let height = null;
 
-  // Layout specified directly.
-  if (layoutAttr) {
-    layout = parseLayout(layoutAttr);
-    if (!layout) {
-      throw new Error('Unknown layout: ' + layoutAttr);
-    }
-  }
+  // Input layout attributes.
+  const inputLayout = layoutAttr ? parseLayout(layoutAttr) : null;
+  assert(inputLayout || !layoutAttr, 'Unknown layout: %s', layoutAttr);
+  const inputWidth = widthAttr && widthAttr != 'auto' ?
+      parseLength(widthAttr) : widthAttr;
+  assert(inputWidth || !widthAttr, 'Invalid width value: %s', widthAttr);
+  const inputHeight = heightAttr ? parseLength(heightAttr) : null;
+  assert(inputHeight || !heightAttr, 'Invalid height value: %s', heightAttr);
 
-  // Default width and height: handle elements that do not specify a
-  // width/height and are defined to have natural browser dimensions.
-  if ((!layout || layout == Layout.FIXED || layout == Layout.FIXED_HEIGHT) &&
-      (!widthAttr || !heightAttr) && hasNaturalDimensions(element.tagName)) {
+  // Effective layout attributes. These are effectively constants.
+  let width;
+  let height;
+  let layout;
+
+  // Calculate effective width and height.
+  if ((!inputLayout || inputLayout == Layout.FIXED ||
+          inputLayout == Layout.FIXED_HEIGHT) &&
+      (!inputWidth || !inputHeight) && hasNaturalDimensions(element.tagName)) {
+    // Default width and height: handle elements that do not specify a
+    // width/height and are defined to have natural browser dimensions.
     const dimensions = getNaturalDimensions(element.tagName);
-    if (layout != Layout.FIXED_HEIGHT) {
-      widthAttr = widthAttr || dimensions.width;
-    }
-    heightAttr = heightAttr || dimensions.height;
+    width = inputWidth || inputLayout == Layout.FIXED_HEIGHT ? inputWidth :
+        dimensions.width;
+    height = inputHeight || dimensions.height;
+  } else {
+    width = inputWidth;
+    height = inputHeight;
   }
 
-  // Default layout value.
-  if (!layout) {
-    if (widthAttr || heightAttr) {
-      if (!widthAttr || widthAttr == 'auto') {
+  // Calculate effective layout.
+  if (inputLayout) {
+    // Layout specified directly.
+    layout = inputLayout;
+  } else {
+    // Default layout value.
+    if (width || height) {
+      if (!width || width == 'auto') {
         layout = Layout.FIXED_HEIGHT;
       } else {
         layout = sizesAttr ? Layout.RESPONSIVE : Layout.FIXED;
@@ -167,28 +178,20 @@ export function applyLayout_(element) {
   if (layout == Layout.FIXED || layout == Layout.FIXED_HEIGHT ||
           layout == Layout.RESPONSIVE) {
     // These layouts must specify height and, in most cases, width.
-    height = parseLength(heightAttr);
-    if (!height) {
-      throw new Error('Expected height to be available and be an ' +
-          'integer/length value: ' + heightAttr);
-    }
+    assert(height, 'Expected height to be available: %s', heightAttr);
     if (layout == Layout.FIXED_HEIGHT) {
-      if (widthAttr && widthAttr != 'auto') {
-        throw new Error('Expected width to be either absent or equal "auto" ' +
-            'for fixed-height layout: ' + widthAttr);
-      }
+      assert(!width || width == 'auto',
+          'Expected width to be either absent or equal "auto" ' +
+          'for fixed-height layout: %s', width);//XXX: widthAttr
     } else {
-      width = parseLength(widthAttr);
-      if (!width) {
-        throw new Error('Expected width to be available and be an ' +
-            'integer/length value: ' + widthAttr);
-      }
+      assert(width && width != 'auto',
+            'Expected width to be available and not equal to "auto": %s',
+            widthAttr);
     }
     if (layout == Layout.RESPONSIVE) {
-      if (getLengthUnits(width) != getLengthUnits(height)) {
-        throw new Error('Length units should be the same for width ' + width +
-            ' and height ' + height);
-      }
+      assert(getLengthUnits(width) == getLengthUnits(height),
+          'Length units should be the same for width and height: %s, %s',
+          widthAttr, heightAttr);
     }
   }
 
@@ -200,10 +203,10 @@ export function applyLayout_(element) {
   if (layout == Layout.NODISPLAY) {
     element.style.display = 'none';
   } else if (layout == Layout.FIXED) {
-    element.style.width = assertLength(width);
-    element.style.height = assertLength(height);
+    element.style.width = width;
+    element.style.height = height;
   } else if (layout == Layout.FIXED_HEIGHT) {
-    element.style.height = assertLength(height);
+    element.style.height = height;
   } else if (layout == Layout.RESPONSIVE) {
     const sizer = element.ownerDocument.createElement('i-amp-sizer');
     sizer.style.display = 'block';
