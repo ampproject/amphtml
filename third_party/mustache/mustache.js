@@ -42,7 +42,8 @@
    * including its prototype, has a given property
    */
   function hasProperty (obj, propName) {
-    return obj != null && typeof obj === 'object' && (propName in obj);
+    return obj != null && typeof obj === 'object' &&
+        Object.prototype.hasOwnProperty.call(obj, propName);
   }
 
   // Workaround for https://issues.apache.org/jira/browse/COUCHDB-577
@@ -397,14 +398,21 @@
            * `undefined` and we want to avoid looking up parent contexts.
            **/
           while (value != null && index < names.length) {
+            if (!hasProperty(value, names[index])) {
+              value = null;
+              break;
+            }
             if (index === names.length - 1)
-              lookupHit = hasProperty(value, names[index]);
-
+              lookupHit = true;
             value = value[names[index++]];
           }
         } else {
-          value = context.view[name];
-          lookupHit = hasProperty(context.view, name);
+          if (!hasProperty(context.view, name)) {
+            value = null;
+          } else {
+            value = context.view[name];
+            lookupHit = true;
+          }
         }
 
         if (lookupHit)

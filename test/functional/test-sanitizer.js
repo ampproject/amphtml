@@ -79,6 +79,10 @@ describe('sanitizeHtml', () => {
         'a<a>b</a>');
     expect(sanitizeHtml('a<a href="JAVASCRIPT:alert">b</a>')).to.be.equal(
         'a<a>b</a>');
+    expect(sanitizeHtml('a<a href="vbscript:alert">b</a>')).to.be.equal(
+        'a<a>b</a>');
+    expect(sanitizeHtml('a<a href="VBSCRIPT:alert">b</a>')).to.be.equal(
+        'a<a>b</a>');
   });
 
   it('should NOT output security-sensitive attributes', () => {
