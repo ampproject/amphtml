@@ -46,7 +46,7 @@ class AmpIframe extends AMP.BaseElement {
     const containerUrl = parseUrl(containerSrc);
     assert(
         !((' ' + sandbox + ' ').match(/\s+allow-same-origin\s+/)) ||
-        url.origin != containerUrl.origin,
+        (url.origin != containerUrl.origin && url.protocol != 'data:'),
         'Origin of <amp-iframe> must not be equal to container %s' +
         'if allow-same-origin is set.',
         this.element);
