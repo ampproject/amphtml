@@ -142,7 +142,7 @@ describe('Layout', () => {
   it('layout=fixed - requires width/height', () => {
     div.setAttribute('layout', 'fixed');
     expect(() => applyLayout_(div)).to.throw(
-        /to be available and be an integer/);
+        /Expected height to be available/);
   });
 
 
@@ -196,7 +196,7 @@ describe('Layout', () => {
   it('layout=fixed-height - requires height', () => {
     div.setAttribute('layout', 'fixed-height');
     expect(() => applyLayout_(div)).to.throw(
-        /to be available and be an integer/);
+        /Expected height to be available/);
   });
 
 
@@ -293,5 +293,35 @@ describe('Layout', () => {
     expect(applyLayout_(pixel)).to.equal(Layout.FIXED_HEIGHT);
     expect(pixel.style.height).to.equal('1px');
     expect(pixel.style.width).to.equal('');
+  });
+
+  it('should fail invalid width and height', () => {
+    const pixel = document.createElement('amp-pixel');
+
+    // Everything is good.
+    pixel.setAttribute('width', '1px');
+    pixel.setAttribute('height', '1px');
+    expect(() => {
+      applyLayout_(pixel);
+    }).to.not.throw();
+
+    // Width=auto is also correct.
+    pixel.setAttribute('width', 'auto');
+    expect(() => {
+      applyLayout_(pixel);
+    }).to.not.throw();
+
+    // Width=X is invalid.
+    pixel.setAttribute('width', 'X');
+    expect(() => {
+      applyLayout_(pixel);
+    }).to.throw(/Invalid width value/);
+
+    // Height=X is invalid.
+    pixel.setAttribute('height', 'X');
+    pixel.setAttribute('width', '1px');
+    expect(() => {
+      applyLayout_(pixel);
+    }).to.throw(/Invalid height value/);
   });
 });

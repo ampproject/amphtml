@@ -25,7 +25,7 @@ min_validator_revision_required: 63
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 89
+spec_file_revision: 92
 
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
@@ -593,9 +593,7 @@ tags: {
   name: "a"
   attrs: {
     name: "href"
-    # TODO(johannes): It would be better to use a URL parser and assert
-    # that the protocol be one of "", "https", or "http".
-    blacklisted_value_regex: "javascript:.*"
+    blacklisted_value_regex: "(javascript|vbscript):.*"
   }
   attrs: {
     name: "target"
@@ -1836,15 +1834,17 @@ attr_lists: {
   name: "amp-youtube-nonlayout-attrs"
   attrs: {
     name: "src"
-    mandatory_oneof: "src or data-videoid or video-id"
+    mandatory_oneof: "src or data-videoid"
   }
   attrs: {
     name: "data-videoid"
-    mandatory_oneof: "src or data-videoid or video-id"
+    mandatory_oneof: "src or data-videoid"
   }
   attrs: {
     name: "video-id"
-    mandatory_oneof: "src or data-videoid or video-id"
+    deprecation: "use data-videoid instead"
+    deprecation_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-youtube/amp-youtube.md"
+    mandatory_oneof: "src or data-videoid"
   }
 }
 tags: {
@@ -1961,12 +1961,18 @@ tags: {
 attr_lists: {
   name: "amp-instagram-nonlayout-attrs"
   attrs: {
-    name: "shortcode"
-    mandatory_oneof: "shortcode or src"
+    name: "data-shortcode"
+    mandatory_oneof: "data-shortcode or src"
   }
   attrs: {
     name: "src"
-    mandatory_oneof: "shortcode or src"
+    mandatory_oneof: "data-shortcode or src"
+  }
+  attrs: {
+    name: "shortcode"
+    deprecation: "use data-shortcode instead"
+    deprecation_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-instagram/amp-instagram.md"
+    mandatory_oneof: "data-shortcode or src"
   }
 }
 tags: {
@@ -2090,6 +2096,35 @@ tags: {
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-lightbox/amp-lightbox.md"
   attrs: { name: "from" }
   attrs: { name: "controls" }
+}
+attr_lists: {
+  name: "amp-list-nonlayout-attrs"
+  attrs: {
+    name: "src"
+    mandatory: true
+  }
+  attrs: { name: "credentials" }
+}
+tags: {
+  name: "amp-list"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-list/amp-list.md"
+  attr_lists: "amp-list-nonlayout-attrs"
+  attr_lists: "extended-amp-global"
+  attr_lists: "mandatory-dimensions-missing-layout"
+}
+tags: {
+  name: "amp-list"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-list/amp-list.md"
+  attr_lists: "amp-list-nonlayout-attrs"
+  attr_lists: "extended-amp-global"
+  attr_lists: "mandatory-dimensions-with-width-height"
+}
+tags: {
+  name: "amp-list"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-list/amp-list.md"
+  attr_lists: "amp-list-nonlayout-attrs"
+  attr_lists: "extended-amp-global"
+  attr_lists: "mandatory-dimensions-without-width-height"
 }
 tags: {
   name: "amp-image-lightbox"  # See http://b/24381009.

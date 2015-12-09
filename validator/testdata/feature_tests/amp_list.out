@@ -1,0 +1,2 @@
+FAIL
+feature_tests/amp_list.html:35:2 MANDATORY_ATTR_MISSING src (see https://github.com/ampproject/amphtml/blob/master/extensions/amp-list/amp-list.md)

@@ -105,9 +105,11 @@ export function upgradeOrRegisterElement(win, name, toClass) {
  * @param {!Window} win
  */
 export function stubElements(win) {
+  win.ampExtendedElements = {};
   const list = win.document.querySelectorAll('[custom-element]');
   for (let i = 0; i < list.length; i++) {
     const name = list[i].getAttribute('custom-element');
+    win.ampExtendedElements[name] = true;
     if (knownElements[name]) {
       continue;
     }
@@ -121,92 +123,99 @@ export function stubElements(win) {
  * @param {!AmpElement} element
  */
 export function applyLayout_(element) {
-  let widthAttr = element.getAttribute('width');
-  let heightAttr = element.getAttribute('height');
-  const sizesAttr = element.getAttribute('sizes');
   const layoutAttr = element.getAttribute('layout');
+  const widthAttr = element.getAttribute('width');
+  const heightAttr = element.getAttribute('height');
+  const sizesAttr = element.getAttribute('sizes');
 
-  // Handle elements that do not specify a width/height and are defined to have
-  // natural browser dimensions.
-  if ((!layoutAttr || layoutAttr == Layout.FIXED ||
-          layoutAttr == Layout.FIXED_HEIGHT) &&
-      (!widthAttr || !heightAttr) && hasNaturalDimensions(element.tagName)) {
-    const dimensions = getNaturalDimensions(element.tagName);
-    if (layoutAttr != Layout.FIXED_HEIGHT) {
-      widthAttr = widthAttr || dimensions.width;
-    }
-    heightAttr = heightAttr || dimensions.height;
-  }
+  // Input layout attributes.
+  const inputLayout = layoutAttr ? parseLayout(layoutAttr) : null;
+  assert(inputLayout !== undefined, 'Unknown layout: %s', layoutAttr);
+  const inputWidth = (widthAttr && widthAttr != 'auto') ?
+      parseLength(widthAttr) : widthAttr;
+  assert(inputWidth !== undefined, 'Invalid width value: %s', widthAttr);
+  const inputHeight = heightAttr ? parseLength(heightAttr) : null;
+  assert(inputHeight !== undefined, 'Invalid height value: %s', heightAttr);
 
+  // Effective layout attributes. These are effectively constants.
+  let width;
+  let height;
   let layout;
-  if (layoutAttr) {
-    // TODO(dvoytenko): show error state visually in the dev mode, e.g.
-    // red background + error message.
-    layout = parseLayout(layoutAttr.trim());
-    if (!layout) {
-      throw new Error('Unknown layout: ' + layoutAttr);
-    }
-  } else if (widthAttr || heightAttr) {
-    if (!widthAttr || widthAttr == 'auto') {
-      layout = Layout.FIXED_HEIGHT;
-    } else {
-      layout = sizesAttr ? Layout.RESPONSIVE : Layout.FIXED;
-    }
+
+  // Calculate effective width and height.
+  if ((!inputLayout || inputLayout == Layout.FIXED ||
+          inputLayout == Layout.FIXED_HEIGHT) &&
+      (!inputWidth || !inputHeight) && hasNaturalDimensions(element.tagName)) {
+    // Default width and height: handle elements that do not specify a
+    // width/height and are defined to have natural browser dimensions.
+    const dimensions = getNaturalDimensions(element.tagName);
+    width = (inputWidth || inputLayout == Layout.FIXED_HEIGHT) ? inputWidth :
+        dimensions.width;
+    height = inputHeight || dimensions.height;
   } else {
-    layout = Layout.CONTAINER;
+    width = inputWidth;
+    height = inputHeight;
   }
+
+  // Calculate effective layout.
+  if (inputLayout) {
+    layout = inputLayout;
+  } else if (!width && !height) {
+    layout = Layout.CONTAINER;
+  } else if (height && (!width || width == 'auto')) {
+    layout = Layout.FIXED_HEIGHT;
+  } else if (height && width && sizesAttr) {
+    layout = Layout.RESPONSIVE;
+  } else {
+    layout = Layout.FIXED;
+  }
+
+  // Verify layout attributes.
+  if (layout == Layout.FIXED || layout == Layout.FIXED_HEIGHT ||
+          layout == Layout.RESPONSIVE) {
+    assert(height, 'Expected height to be available: %s', heightAttr);
+  }
+  if (layout == Layout.FIXED_HEIGHT) {
+    assert(!width || width == 'auto',
+        'Expected width to be either absent or equal "auto" ' +
+        'for fixed-height layout: %s', widthAttr);
+  }
+  if (layout == Layout.FIXED || layout == Layout.RESPONSIVE) {
+    assert(width && width != 'auto',
+          'Expected width to be available and not equal to "auto": %s',
+          widthAttr);
+  }
+  if (layout == Layout.RESPONSIVE) {
+    assert(getLengthUnits(width) == getLengthUnits(height),
+        'Length units should be the same for width and height: %s, %s',
+        widthAttr, heightAttr);
+  }
+
+  // Apply UI.
   element.classList.add(getLayoutClass(layout));
   if (isLayoutSizeDefined(layout)) {
     element.classList.add('-amp-layout-size-defined');
   }
-
-  if (layout == Layout.FIXED || layout == Layout.FIXED_HEIGHT ||
-          layout == Layout.RESPONSIVE) {
-    let width = 0;
-    if (layout == Layout.FIXED_HEIGHT) {
-      if (widthAttr && widthAttr != 'auto') {
-        throw new Error('Expected width to be either absent or equal "auto" ' +
-            'for fixed-height layout: ' + widthAttr);
-      }
-    } else {
-      width = parseLength(widthAttr);
-      if (!width) {
-        throw new Error('Expected width to be available and be an ' +
-            'integer/length value: ' + widthAttr);
-      }
-    }
-    const height = parseLength(heightAttr);
-    if (!height) {
-      throw new Error('Expected height to be available and be an ' +
-          'integer/length value: ' + heightAttr);
-    }
-    if (layout == Layout.RESPONSIVE) {
-      if (getLengthUnits(width) != getLengthUnits(height)) {
-        throw new Error('Length units should be the same for width ' + width +
-            ' and height ' + height);
-      }
-      const sizer = element.ownerDocument.createElement('i-amp-sizer');
-      sizer.style.display = 'block';
-      sizer.style.paddingTop =
-          ((getLengthNumeral(height) / getLengthNumeral(width)) * 100) + '%';
-      element.insertBefore(sizer, element.firstChild);
-      element.sizerElement_ = sizer;
-    } else if (layout == Layout.FIXED_HEIGHT) {
-      element.style.height = height;
-    } else {
-      element.style.width = width;
-      element.style.height = height;
-    }
+  if (layout == Layout.NODISPLAY) {
+    element.style.display = 'none';
+  } else if (layout == Layout.FIXED) {
+    element.style.width = width;
+    element.style.height = height;
+  } else if (layout == Layout.FIXED_HEIGHT) {
+    element.style.height = height;
+  } else if (layout == Layout.RESPONSIVE) {
+    const sizer = element.ownerDocument.createElement('i-amp-sizer');
+    sizer.style.display = 'block';
+    sizer.style.paddingTop =
+        ((getLengthNumeral(height) / getLengthNumeral(width)) * 100) + '%';
+    element.insertBefore(sizer, element.firstChild);
+    element.sizerElement_ = sizer;
   } else if (layout == Layout.FILL) {
     // Do nothing.
   } else if (layout == Layout.CONTAINER) {
     // Do nothing. Elements themselves will check whether the supplied
     // layout value is acceptable. In particular container is only OK
     // sometimes.
-  } else if (layout == Layout.NODISPLAY) {
-    element.style.display = 'none';
-  } else {
-    throw new Error('Unsupported layout value: ' + layout);
   }
   return layout;
 }

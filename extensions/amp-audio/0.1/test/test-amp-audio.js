@@ -67,7 +67,7 @@ describe('amp-audio', () => {
 
   function attachAndRun(attributes, opt_childNodesAttrs) {
     const ampAudio = getAmpAudio(attributes, opt_childNodesAttrs);
-    naturalDimensions_['AMP-AUDIO'] = {width: 300, height: 30};
+    naturalDimensions_['AMP-AUDIO'] = {width: '300px', height: '30px'};
     return iframe.addElement(ampAudio);
   }
 

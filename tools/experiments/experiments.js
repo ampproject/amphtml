@@ -55,6 +55,14 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
         'amp-mustache/amp-mustache.md',
   },
+
+  // Amp Analytics
+  {
+    id: 'amp-analytics',
+    name: 'Amp Analytics)',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
+        'amp-analytics/amp-analytics.md',
+  },
 ];
 
 

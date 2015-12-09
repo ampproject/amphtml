@@ -33,25 +33,35 @@ const SELF_CLOSING_TAGS = {
 };
 
 
-/** @const {!Object<string, boolean>} */
-const WHITELISTED_FORMAT_TAGS = {
-  'b': true,
-  'br': true,
-  'code': true,
-  'del': true,
-  'em': true,
-  'i': true,
-  'ins': true,
-  'mark': true,
-  'q': true,
-  's': true,
-  'small': true,
-  'strong': true,
-  'sub': true,
-  'sup': true,
-  'time': true,
-  'u': true,
-};
+/** @const {!Array<string>} */
+const WHITELISTED_FORMAT_TAGS = [
+  'b',
+  'br',
+  'code',
+  'del',
+  'em',
+  'i',
+  'ins',
+  'mark',
+  'q',
+  's',
+  'small',
+  'strong',
+  'sub',
+  'sup',
+  'time',
+  'u',
+];
+
+
+/** @const {!Array<string>} */
+const BLACKLISTED_ATTR_VALUES = [
+  /*eslint no-script-url: 0*/ 'javascript:',
+  /*eslint no-script-url: 0*/ 'vbscript:',
+  /*eslint no-script-url: 0*/ 'data:',
+  /*eslint no-script-url: 0*/ '<script',
+  /*eslint no-script-url: 0*/ '</script',
+];
 
 
 /**
@@ -132,7 +142,7 @@ export function sanitizeHtml(html) {
  */
 export function sanitizeFormattingHtml(html) {
   return htmlSanitizer.sanitizeWithPolicy(html, function(tagName, attrs) {
-    if (!WHITELISTED_FORMAT_TAGS[tagName]) {
+    if (WHITELISTED_FORMAT_TAGS.indexOf(tagName) == -1) {
       return null;
     }
     return {
@@ -161,10 +171,12 @@ export function isValidAttr(attrName, attrValue) {
     return false;
   }
 
-  // No attributes with "javascript" in them.
-  if (attrValue.toLowerCase().indexOf(
-          /*eslint no-script-url: 0*/ 'javascript:') != -1) {
-    return false;
+  // No attributes with "javascript" or other blacklisted substrings in them.
+  const attrValueNorm = attrValue.toLowerCase().replace(/[\s,\u0000]+/g, '');
+  for (let i = 0; i < BLACKLISTED_ATTR_VALUES.length; i++) {
+    if (attrValueNorm.indexOf(BLACKLISTED_ATTR_VALUES[i]) != -1) {
+      return false;
+    }
   }
 
   return true;
