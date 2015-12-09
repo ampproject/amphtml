@@ -25,7 +25,7 @@ min_validator_revision_required: 63
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 92
+spec_file_revision: 93
 
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
@@ -593,7 +593,7 @@ tags: {
   name: "a"
   attrs: {
     name: "href"
-    blacklisted_value_regex: "(javascript|vbscript):.*"
+    blacklisted_value_regex: "(javascript|vbscript|data):.*"
   }
   attrs: {
     name: "target"
