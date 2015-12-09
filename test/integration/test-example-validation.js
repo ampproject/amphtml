@@ -62,15 +62,11 @@ describe('example', function() {
    * @constructor {!Array<!RegExp>}
    */
   const errorWhitelist = [
-    // TODO(dvoytenko): Remove once validator supports "data-videoid" for
-    // "amp-youtube" elements.
-    /MANDATORY_ATTR_MISSING video-id/,
-
-    // TODO(dvoytenko): Remove once validator supports "amp-font" element.
-    /DISALLOWED_TAG amp-font/,
-
     // Remove once validator supports "amp-brightcove".
-    /DISALLOWED_TAG amp-brightcove/
+    /DISALLOWED_TAG amp-brightcove/,
+
+    //Remove once validator is fixed.
+    /MANDATORY_ATTR_MISSING shortcode or src/
   ];
 
   const usedWhitelist = [];

@@ -72,6 +72,9 @@ const DEFAULT_SIZE_ = 'medium';
  */
 const CACHED_FONT_LOAD_TIME_ = 100;
 
+/** @const {string} */
+const TAG_ = 'AmpFont';
+
 
 export class AmpFont extends AMP.BaseElement {
 
@@ -124,7 +127,8 @@ export class AmpFont extends AMP.BaseElement {
       this.onFontLoadSuccess_();
     }).catch(error => {
       this.onFontLoadError_();
-      throw error;
+      console./* OK */warn(
+          'Font download timed out for ' + this.fontFamily_);
     });
   }
 
