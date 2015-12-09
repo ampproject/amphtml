@@ -88,8 +88,7 @@ export const LOADING_ELEMENTS_ = {
 
 /**
  * @param {string} s
- * @return {Layout|undefined} Returns undefined in case of failure to parse
- *   the layout string.
+ * @return {Layout} Returns parsed layout or throws an error.
  */
 export function parseLayout(s) {
   for (const k in Layout) {
@@ -97,7 +96,7 @@ export function parseLayout(s) {
       return Layout[k];
     }
   }
-  return undefined;
+  throw new Error('Layout attr value invalid: ' + s);
 }
 
 
