@@ -134,7 +134,7 @@ export class FontLoader {
    * @private
    */
   canUseNativeApis_() {
-    return 'fonts' in this.document_ && false;
+    return 'fonts' in this.document_;
   }
 
 

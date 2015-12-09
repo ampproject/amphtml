@@ -63,10 +63,7 @@ describe('example', function() {
    */
   const errorWhitelist = [
     // Remove once validator supports "amp-brightcove".
-    /DISALLOWED_TAG amp-brightcove/,
-
-    //Remove once validator is fixed.
-    /MANDATORY_ATTR_MISSING shortcode or src/
+    /DISALLOWED_TAG amp-brightcove/
   ];
 
   const usedWhitelist = [];
