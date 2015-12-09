@@ -83,6 +83,19 @@ describe('sanitizeHtml', () => {
         'a<a>b</a>');
     expect(sanitizeHtml('a<a href="VBSCRIPT:alert">b</a>')).to.be.equal(
         'a<a>b</a>');
+    expect(sanitizeHtml('a<a href="data:alert">b</a>')).to.be.equal(
+        'a<a>b</a>');
+    expect(sanitizeHtml('a<a href="DATA:alert">b</a>')).to.be.equal(
+        'a<a>b</a>');
+    expect(sanitizeHtml('a<a href="<script">b</a>')).to.be.equal(
+        'a<a>b</a>');
+    expect(sanitizeHtml('a<a href="</script">b</a>')).to.be.equal(
+        'a<a>b</a>');
+  });
+
+  it('should catch attribute value whitespace variations', () => {
+    expect(sanitizeHtml('a<a href=" j\na\tv\ra s&#00;cript:alert">b</a>'))
+        .to.be.equal('a<a>b</a>');
   });
 
   it('should NOT output security-sensitive attributes', () => {
