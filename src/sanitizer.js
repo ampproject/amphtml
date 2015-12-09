@@ -58,6 +58,9 @@ const WHITELISTED_FORMAT_TAGS = [
 const BLACKLISTED_ATTR_VALUES = [
   /*eslint no-script-url: 0*/ 'javascript:',
   /*eslint no-script-url: 0*/ 'vbscript:',
+  /*eslint no-script-url: 0*/ 'data:',
+  /*eslint no-script-url: 0*/ '<script',
+  /*eslint no-script-url: 0*/ '</script',
 ];
 
 
@@ -169,9 +172,9 @@ export function isValidAttr(attrName, attrValue) {
   }
 
   // No attributes with "javascript" or other blacklisted substrings in them.
-  const attrValueLowercase = attrValue.toLowerCase();
+  const attrValueNorm = attrValue.toLowerCase().replace(/[\s,\u0000]+/g, '');
   for (let i = 0; i < BLACKLISTED_ATTR_VALUES.length; i++) {
-    if (attrValueLowercase.indexOf(BLACKLISTED_ATTR_VALUES[i]) != -1) {
+    if (attrValueNorm.indexOf(BLACKLISTED_ATTR_VALUES[i]) != -1) {
       return false;
     }
   }
