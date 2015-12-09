@@ -179,7 +179,8 @@ export function applyLayout_(element) {
     assert(!width || width == 'auto',
         'Expected width to be either absent or equal "auto" ' +
         'for fixed-height layout: %s', widthAttr);
-  } else if (layout == Layout.FIXED || layout == Layout.RESPONSIVE) {
+  }
+  if (layout == Layout.FIXED || layout == Layout.RESPONSIVE) {
     assert(width && width != 'auto',
           'Expected width to be available and not equal to "auto": %s',
           widthAttr);
