@@ -25,7 +25,7 @@ min_validator_revision_required: 63
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 91
+spec_file_revision: 92
 
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
@@ -1834,15 +1834,17 @@ attr_lists: {
   name: "amp-youtube-nonlayout-attrs"
   attrs: {
     name: "src"
-    mandatory_oneof: "src or data-videoid or video-id"
+    mandatory_oneof: "src or data-videoid"
   }
   attrs: {
     name: "data-videoid"
-    mandatory_oneof: "src or data-videoid or video-id"
+    mandatory_oneof: "src or data-videoid"
   }
   attrs: {
     name: "video-id"
-    mandatory_oneof: "src or data-videoid or video-id"
+    deprecation: "use data-videoid instead"
+    deprecation_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-youtube/amp-youtube.md"
+    mandatory_oneof: "src or data-videoid"
   }
 }
 tags: {
@@ -1959,12 +1961,18 @@ tags: {
 attr_lists: {
   name: "amp-instagram-nonlayout-attrs"
   attrs: {
-    name: "shortcode"
-    mandatory_oneof: "shortcode or src"
+    name: "data-shortcode"
+    mandatory_oneof: "data-shortcode or src"
   }
   attrs: {
     name: "src"
-    mandatory_oneof: "shortcode or src"
+    mandatory_oneof: "data-shortcode or src"
+  }
+  attrs: {
+    name: "shortcode"
+    deprecation: "use data-shortcode instead"
+    deprecation_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-instagram/amp-instagram.md"
+    mandatory_oneof: "data-shortcode or src"
   }
 }
 tags: {
