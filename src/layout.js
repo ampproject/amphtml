@@ -64,6 +64,7 @@ let Dimensions;
 export const naturalDimensions_ = {
   'AMP-PIXEL': {width: '1px', height: '1px'},
   'AMP-ANALYTICS': {width: '1px', height: '1px'},
+  // TODO(dvoytenko): audio should have width:auto.
   'AMP-AUDIO': null
 };
 

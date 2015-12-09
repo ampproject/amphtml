@@ -130,12 +130,12 @@ export function applyLayout_(element) {
 
   // Input layout attributes.
   const inputLayout = layoutAttr ? parseLayout(layoutAttr) : null;
-  assert(inputLayout || !layoutAttr, 'Unknown layout: %s', layoutAttr);
-  const inputWidth = widthAttr && widthAttr != 'auto' ?
+  assert(inputLayout !== undefined, 'Unknown layout: %s', layoutAttr);
+  const inputWidth = (widthAttr && widthAttr != 'auto') ?
       parseLength(widthAttr) : widthAttr;
-  assert(inputWidth || !widthAttr, 'Invalid width value: %s', widthAttr);
+  assert(inputWidth !== undefined, 'Invalid width value: %s', widthAttr);
   const inputHeight = heightAttr ? parseLength(heightAttr) : null;
-  assert(inputHeight || !heightAttr, 'Invalid height value: %s', heightAttr);
+  assert(inputHeight !== undefined, 'Invalid height value: %s', heightAttr);
 
   // Effective layout attributes. These are effectively constants.
   let width;
@@ -149,7 +149,7 @@ export function applyLayout_(element) {
     // Default width and height: handle elements that do not specify a
     // width/height and are defined to have natural browser dimensions.
     const dimensions = getNaturalDimensions(element.tagName);
-    width = inputWidth || inputLayout == Layout.FIXED_HEIGHT ? inputWidth :
+    width = (inputWidth || inputLayout == Layout.FIXED_HEIGHT) ? inputWidth :
         dimensions.width;
     height = inputHeight || dimensions.height;
   } else {
@@ -159,40 +159,35 @@ export function applyLayout_(element) {
 
   // Calculate effective layout.
   if (inputLayout) {
-    // Layout specified directly.
     layout = inputLayout;
+  } else if (!width && !height) {
+    layout = Layout.CONTAINER;
+  } else if (height && (!width || width == 'auto')) {
+    layout = Layout.FIXED_HEIGHT;
+  } else if (height && width && sizesAttr) {
+    layout = Layout.RESPONSIVE;
   } else {
-    // Default layout value.
-    if (width || height) {
-      if (!width || width == 'auto') {
-        layout = Layout.FIXED_HEIGHT;
-      } else {
-        layout = sizesAttr ? Layout.RESPONSIVE : Layout.FIXED;
-      }
-    } else {
-      layout = Layout.CONTAINER;
-    }
+    layout = Layout.FIXED;
   }
 
   // Verify layout attributes.
   if (layout == Layout.FIXED || layout == Layout.FIXED_HEIGHT ||
           layout == Layout.RESPONSIVE) {
-    // These layouts must specify height and, in most cases, width.
     assert(height, 'Expected height to be available: %s', heightAttr);
-    if (layout == Layout.FIXED_HEIGHT) {
-      assert(!width || width == 'auto',
-          'Expected width to be either absent or equal "auto" ' +
-          'for fixed-height layout: %s', width);//XXX: widthAttr
-    } else {
-      assert(width && width != 'auto',
-            'Expected width to be available and not equal to "auto": %s',
-            widthAttr);
-    }
-    if (layout == Layout.RESPONSIVE) {
-      assert(getLengthUnits(width) == getLengthUnits(height),
-          'Length units should be the same for width and height: %s, %s',
-          widthAttr, heightAttr);
-    }
+  }
+  if (layout == Layout.FIXED_HEIGHT) {
+    assert(!width || width == 'auto',
+        'Expected width to be either absent or equal "auto" ' +
+        'for fixed-height layout: %s', widthAttr);
+  } else if (layout == Layout.FIXED || layout == Layout.RESPONSIVE) {
+    assert(width && width != 'auto',
+          'Expected width to be available and not equal to "auto": %s',
+          widthAttr);
+  }
+  if (layout == Layout.RESPONSIVE) {
+    assert(getLengthUnits(width) == getLengthUnits(height),
+        'Length units should be the same for width and height: %s, %s',
+        widthAttr, heightAttr);
   }
 
   // Apply UI.
