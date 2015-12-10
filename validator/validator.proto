@@ -210,6 +210,9 @@ message ValidatorRules {
   // See comment in validator.protoascii.
   optional int32 spec_file_revision = 6 [ default = -1 ];
 
+  // Spec URL for information about mustache templates.
+  optional string template_spec_url = 8;
+
   // Deprecated fields, do not reuse.
   extensions 5, 2;
 }
@@ -250,6 +253,9 @@ message ValidationError {
     INVALID_PROPERTY_VALUE_IN_ATTR_VALUE = 15;
     DISALLOWED_PROPERTY_IN_ATTR_VALUE = 16;
     MUTUALLY_EXCLUSIVE_ATTRS = 17;
+    UNESCAPED_TEMPLATE_IN_ATTR_VALUE = 18;
+    TEMPLATE_PARTIAL_IN_ATTR_VALUE = 19;
+    TEMPLATE_IN_ATTR_NAME = 20;
   }
   optional Code code = 1;
   optional int32 line = 2 [ default = 1 ];

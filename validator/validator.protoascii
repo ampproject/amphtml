@@ -20,13 +20,12 @@
 # in production from crashing. This id is not relevant to validator.js
 # because thus far, engine (validator.js) and spec file (validator.protoascii)
 # are always released together.
-min_validator_revision_required: 65
+min_validator_revision_required: 66
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 95
-
+spec_file_revision: 96
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
 # These rules are just enough to validate the example from the spec.
@@ -34,6 +33,11 @@ spec_file_revision: 95
 # Also we may want to allow some attribute definitions to be shared
 # between tags. As in, we may almost certainly need to revisit this format,
 # but it's a starting point.
+#
+# Specific URL to reference for violations having to do with mustache
+# templates. These are specific to any particular tag, so must live at
+# the top level of this rules file.
+template_spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-templates.md"
 tags: {
   name: "!doctype"
   detail: "html doctype"
@@ -1479,6 +1483,27 @@ tags: {
     mandatory: true
   }
 }
+tags: {
+  name: "script"
+  mandatory_parent: "head"
+  detail: "amp-mustache runtime"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-templates.md"
+  attrs: {
+    name: "custom-template"
+    value: "amp-mustache"
+    mandatory: true
+  }
+  attrs: {
+    name: "async"
+    value: ""
+    mandatory: true
+  }
+  attrs: {
+    name: "src"
+    value: "https://cdn.ampproject.org/v0/amp-mustache-0.1.js"
+    mandatory: true
+  }
+}
 # 4.11.2 Non-conforming features
 tags: { name: "acronym" }
 tags: { name: "big" }
@@ -1493,6 +1518,17 @@ tags: { name: "spacer" }
 tags: { name: "strike" }
 tags: { name: "tt" }
 tags: { name: "xmp" }
+
+# 4.11.3 The template element
+tags: {
+  name: "template"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-templates.md"
+  attrs: {
+    name: "type"
+    value: "amp-mustache"
+    mandatory: true
+  }
+}
 
 # Some additional tags, microformats, allowances.
 #
