@@ -15,8 +15,7 @@
  */
 
 import {createIframePromise} from '../../testing/iframe';
-import {installAd, scoreDimensions_, upgradeImages_, AD_LOAD_TIME_MS} from
-    '../../builtins/amp-ad';
+import {installAd, AD_LOAD_TIME_MS} from '../../builtins/amp-ad';
 import {viewportFor} from
     '../../src/viewport';
 import {timer} from '../../src/timer';
@@ -258,50 +257,6 @@ describe('amp-ad', () => {
         ad.implementation_.noContentHandler_();
         expect(ad).to.have.class('amp-notsupported');
       });
-    });
-  });
-
-  describe('scoreDimensions_', () => {
-
-    it('should choose a matching dimension', () => {
-      const dims = [[320, 200], [320, 210], [320, 200]];
-      const scores = scoreDimensions_(dims, 320, 200);
-      const winner = scores.indexOf(Math.max.apply(Math, scores));
-      expect(winner).to.equal(0);
-    });
-
-    it('should be biased to a smaller height delta', () => {
-      const dims = [[300, 200], [320, 50]];
-      const scores = scoreDimensions_(dims, 300, 50);
-      const winner = scores.indexOf(Math.max.apply(Math, scores));
-      expect(winner).to.equal(1);
-    });
-  });
-
-  describe('upgradeImages_', () => {
-    let images;
-    beforeEach(() => {
-      images = {
-        '300x200': [
-          'backfill-1@1x.png',
-          'backfill-2@1x.png',
-          'backfill-3@1x.png',
-          'backfill-4@1x.png',
-          'backfill-5@1x.png',
-        ],
-        '320x50': [
-          'backfill-6@1x.png',
-          'backfill-7@1x.png',
-        ],
-      };
-    });
-
-    it('should upgrade an image from 1x to 2x', () => {
-      expect(images['300x200'][0]).to.equal('backfill-1@1x.png');
-      expect(images['320x50'][0]).to.equal('backfill-6@1x.png');
-      upgradeImages_(images);
-      expect(images['300x200'][0]).to.equal('backfill-1@2x.png');
-      expect(images['320x50'][0]).to.equal('backfill-6@2x.png');
     });
   });
 
