@@ -17,13 +17,28 @@
 import {htmlSanitizer} from '../third_party/caja/html-sanitizer';
 
 
-/** @const {!Object<string, boolean>} */
+/**
+ * @const {!Object<string, boolean>}
+ * See https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md
+ */
 const BLACKLISTED_TAGS = {
+  'applet': true,
+  'audio': true,
+  'base': true,
+  'embed': true,
+  'form': true,
+  'frame': true,
+  'frameset': true,
   'iframe': true,
   'img': true,
+  'input': true,
+  'link': true,
+  'meta': true,
+  'object': true,
   'script': true,
   'style': true,
   'template': true,
+  'video': true,
 };
 
 

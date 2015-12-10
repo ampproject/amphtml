@@ -43,6 +43,13 @@ describe('sanitizeHtml', () => {
     expect(sanitizeHtml('a<img>c')).to.be.equal('ac');
     expect(sanitizeHtml('a<iframe></iframe>c')).to.be.equal('ac');
     expect(sanitizeHtml('a<template></template>c')).to.be.equal('ac');
+    expect(sanitizeHtml('a<frame></frame>c')).to.be.equal('ac');
+    expect(sanitizeHtml('a<video></video>c')).to.be.equal('ac');
+    expect(sanitizeHtml('a<audio></audio>c')).to.be.equal('ac');
+    expect(sanitizeHtml('a<applet></applet>c')).to.be.equal('ac');
+    expect(sanitizeHtml('a<form></form>c')).to.be.equal('ac');
+    expect(sanitizeHtml('a<link></link>c')).to.be.equal('ac');
+    expect(sanitizeHtml('a<meta></meta>c')).to.be.equal('ac');
   });
 
   it('should NOT output security-sensitive markup when nested', () => {
