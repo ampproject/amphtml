@@ -149,12 +149,25 @@ function specificity(code) {
       return 13;
     case amp.validator.ValidationError.Code.MUTUALLY_EXCLUSIVE_ATTRS:
       return 14;
-    case amp.validator.ValidationError.Code.DEV_MODE_ENABLED:
+    case amp.validator.ValidationError.Code.UNESCAPED_TEMPLATE_IN_ATTR_VALUE:
       return 15;
-    case amp.validator.ValidationError.Code.DEPRECATED_ATTR:
+    case amp.validator.ValidationError.Code.TEMPLATE_PARTIAL_IN_ATTR_VALUE:
       return 16;
-    case amp.validator.ValidationError.Code.DEPRECATED_TAG:
+    case amp.validator.ValidationError.Code.TEMPLATE_IN_ATTR_NAME:
       return 17;
+
+    // TODO(johannes): The last three are fairly specific but not necessarily
+    // errors. We may need to take that into account to prevent a non-error
+    // from getting rendered as the sole explanation for an overall failure.
+    // I have not seen this happening but it probably could for edge cases
+    // (e.g. maxerrors set too low, etc.).
+    case amp.validator.ValidationError.Code.DEV_MODE_ENABLED:
+      return 100;
+    case amp.validator.ValidationError.Code.DEPRECATED_ATTR:
+      return 101;
+    case amp.validator.ValidationError.Code.DEPRECATED_TAG:
+      return 102;
+
     default:
       goog.asserts.fail('Unrecognized Code: ' + code);
   }
@@ -1035,12 +1048,14 @@ function getDetailOrName(tagSpec) {
 /**
  * This wrapper class provides access to a TagSpec and a tag id
  * which is unique within its context, the ParsedValidatorRules.
+ * @param {!string} templateSpecUrl
  * @param {!amp.validator.TagSpec} tagSpec
  * @param {number} tagId
  * @param {!goog.structs.Map<string, !amp.validator.AttrList>} attrListsByName
  * @constructor
  */
-const ParsedTagSpec = function ParsedTagSpec(tagSpec, tagId, attrListsByName) {
+const ParsedTagSpec = function ParsedTagSpec(
+    templateSpecUrl, tagSpec, tagId, attrListsByName) {
   /**
    * @type {!amp.validator.TagSpec}
    * @private
@@ -1075,6 +1090,11 @@ const ParsedTagSpec = function ParsedTagSpec(tagSpec, tagId, attrListsByName) {
    * @private
    */
   this.mandatoryOneofs_ = [];
+  /**
+   * @type {string}
+   * @private
+   */
+  this.templateSpecUrl_ = /** @type {string} */ templateSpecUrl;
 
   const attrs = GetAttrsFor(tagSpec, attrListsByName);
   for (let i = 0; i < attrs.length; ++i) {
@@ -1119,6 +1139,23 @@ ParsedTagSpec.prototype.getSpec = function() {
   return this.spec_;
 };
 
+ParsedTagSpec.prototype.valueHasUnescapedTemplateSyntax = function(value) {
+  // Mustache (https://mustache.github.io/mustache.5.html), our template
+  // system, supports {{{unescaped}}} or {{{&unescaped}}} and there can
+  // be whitespace after the 2nd '{'. We disallow these in attribute Values.
+  const unescapedOpenTag = new RegExp('{{\\s*[&{]', 'g');
+  return unescapedOpenTag.test(value);
+};
+
+ParsedTagSpec.prototype.valueHasPartialsTemplateSyntax = function(value) {
+  // Mustache (https://mustache.github.io/mustache.5.html), our template
+  // system, supports 'partials' which include other Mustache templates
+  // in the format of {{>partial}} and there can be whitespace after the {{.
+  // We disallow partials in attribute values.
+  const unescapedOpenTag = new RegExp('{{\\s*>', 'g');
+  return unescapedOpenTag.test(value);
+};
+
 /**
  * Validates whether the attributes set on |encountered_tag| conform to this
  * tag specification. All mandatory attributes must appear. Only attributes
@@ -1151,14 +1188,42 @@ ParsedTagSpec.prototype.validateAttributes = function(
       // in practice, some type of ad or perhaps other custom elements require
       // particular data attributes.
       // http://www.w3.org/TR/html5/single-page.html#attr-data-*
-      if (goog.string.startsWith(encounteredAttrKey, 'data-'))
+      // http://w3c.github.io/aria-in-html/
+      // However, mostly to avoid confusion, we want to make sure that
+      // nobody tries to make a Mustache template data attribute,
+      // e.g. <div data-{{foo}}>, so we also exclude those characters.
+      if (goog.string.startsWith(encounteredAttrKey, 'data-') &&
+          !goog.string.contains(encounteredAttrKey, '}') &&
+          !goog.string.contains(encounteredAttrKey, '{')) {
         continue;
+      }
 
-      context.addError(amp.validator.ValidationError.Code.DISALLOWED_ATTR,
-                       encounteredAttrName, this.spec_.specUrl,
-                       resultForAttempt);
+      // At this point, it's an error either way, but we try to give a
+      // more specific error in the case of Mustache template characters.
+      if (encounteredAttrName.indexOf('{{') != -1) {
+        context.addError(
+            amp.validator.ValidationError.Code.TEMPLATE_IN_ATTR_NAME,
+            encounteredAttrName, this.templateSpecUrl_, resultForAttempt);
+      } else {
+        context.addError(amp.validator.ValidationError.Code.DISALLOWED_ATTR,
+                         encounteredAttrName, this.spec_.specUrl,
+                         resultForAttempt);
+      }
       return;
     }
+    if (parsedSpec.valueHasUnescapedTemplateSyntax(encounteredAttrValue)) {
+      context.addError(
+          amp.validator.ValidationError.Code.UNESCAPED_TEMPLATE_IN_ATTR_VALUE,
+          encounteredAttrName + '=' + encounteredAttrValue,
+          this.templateSpecUrl_, resultForAttempt);
+    }
+    if (parsedSpec.valueHasPartialsTemplateSyntax(encounteredAttrValue)) {
+      context.addError(
+          amp.validator.ValidationError.Code.TEMPLATE_PARTIAL_IN_ATTR_VALUE,
+          encounteredAttrName + '=' + encounteredAttrValue,
+          this.templateSpecUrl_, resultForAttempt);
+    }
+
     if (parsedSpec.getSpec().deprecation !== null) {
       context.addError(amp.validator.ValidationError.Code.DEPRECATED_ATTR,
                        encounteredAttrName + ' - ' +
@@ -1310,7 +1375,8 @@ const ParsedValidatorRules = function ParsedValidatorRules() {
 
   for (let i = 0; i < rules.tags.length; ++i) {
     const spec = rules.tags[i];
-    const parsedTagSpec = new ParsedTagSpec(spec, i, attrListsByName);
+    const parsedTagSpec = new ParsedTagSpec(
+        rules.templateSpecUrl, spec, i, attrListsByName);
     this.tagSpecById_.push(parsedTagSpec);
     goog.asserts.assert(spec.name !== null);
     if (!this.tagSpecByTagName_.containsKey(spec.name)) {
