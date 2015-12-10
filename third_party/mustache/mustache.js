@@ -216,7 +216,10 @@
         nonSpace = true;
       } else if (type === '=') {
         // Set the tags for the next time around.
-        compileTags(value);
+        // ORIGINAL CODE: compileTags(value);
+        // Fail quitely but do not allow delimiter substitutions. This is
+        // important from the security point of view so that our validators
+        // do not have to parse and interprete all of the mustache's syntax.
       }
     }
 
