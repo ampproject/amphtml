@@ -348,4 +348,29 @@ describe('amp-analytics', function() {
         '&title=Test%20Title');
   });
 
+  it('respects optout', function() {
+    const config = {
+      'host': 'example.com',
+      'requests': {'foo': '/bar'},
+      'triggers': [{'on': 'visible', 'request': 'foo'}],
+      'optout': 'foo.bar'
+    };
+    let analytics = getAnalyticsTag(config);
+    analytics.buildCallback();
+    expect(sendRequestSpy.withArgs('https://example.com/bar').calledOnce)
+        .to.be.true;
+
+    sendRequestSpy.reset();
+    windowApi['foo'] = {'bar': function() { return true; }};
+    analytics = getAnalyticsTag(config);
+    analytics.buildCallback();
+    expect(sendRequestSpy.callCount).to.be.equal(0);
+
+    sendRequestSpy.reset();
+    windowApi['foo'] = {'bar': function() { return false; }};
+    analytics = getAnalyticsTag(config);
+    analytics.buildCallback();
+    expect(sendRequestSpy.withArgs('https://example.com/bar').calledOnce)
+        .to.be.true;
+  });
 });
