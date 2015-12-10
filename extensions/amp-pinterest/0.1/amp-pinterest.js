@@ -180,7 +180,7 @@ class AmpPinterest extends AMP.BaseElement {
 
       const structure = make({'span': {}});
 
-      const renderPin = function(r) {
+      const renderPin = function(self, r) {
 
         if (r && r.data && r.data[0] && !r.data[0].error) {
           const p = r.data[0];
@@ -338,11 +338,11 @@ class AmpPinterest extends AMP.BaseElement {
           });
 
           // fill it
-          this.applyFillContent(structure);
+          self.applyFillContent(structure);
           // append it
-          this.element.appendChild(structure);
+          self.element.appendChild(structure);
           // done
-          return loadPromise(img);
+          return loadPromise(structure);
         }
       };
 
@@ -350,7 +350,7 @@ class AmpPinterest extends AMP.BaseElement {
         '?pin_ids=' + pinId +
         '&sub=www&base_scheme=https';
       return call(query).then(r => {
-        return renderPin(r);
+        return renderPin(this, r);
       });
     };
 
