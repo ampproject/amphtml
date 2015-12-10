@@ -19,7 +19,7 @@ import './polyfills';
 import {installHistoryService} from './service/history-impl';
 import {installPullToRefreshBlocker} from './pull-to-refresh';
 import {performanceFor} from './performance';
-import {viewerFor} from './viewer';
+import {installViewerService} from './service/viewer-impl';
 import {vsyncFor} from './vsync';
 
 import {installAd} from '../builtins/amp-ad';
@@ -47,7 +47,7 @@ try {
   installStyles(document, cssText, () => {
     try {
       installHistoryService(window);
-      viewerFor(window);
+      installViewerService(window);
       vsyncFor(window);
 
       installImg(window);
