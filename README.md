@@ -20,7 +20,7 @@ limitations under the License.
 
 # AMP HTML ⚡
 
-AMP HTML is a way to build web pages for static content that render with reliable, fast performance. It is our attempt at fixing what many perceive as painfully slow page load times – especially when reading content on the mobile web (see also [What Is AMP?](https://www.ampproject.org/docs/get_started/about-amp.html)). 
+AMP HTML is a way to build web pages for static content that render with reliable, fast performance. It is our attempt at fixing what many perceive as painfully slow page load times – especially when reading content on the mobile web. See also: [What Is AMP?](https://www.ampproject.org/docs/get_started/about-amp.html). 
 
 AMP HTML is entirely built on existing web technologies. It achieves reliable performance by restricting some parts of HTML, CSS and JavaScript. These restrictions are enforced with a validator that ships with AMP HTML. To make up for those limitations AMP HTML defines a set of [custom elements](http://www.html5rocks.com/en/tutorials/webcomponents/customelements/) for rich content beyond basic HTML. Learn more about [how AMP speeds up performance](https://www.ampproject.org/docs/get_started/technical_overview.html).
 
@@ -100,7 +100,7 @@ as either image files (GIF) or video files (WebM or MP4) based on browser compat
 # Further Reading
 
 If you are creating AMP pages,
-check out the docs on [ampproject.org site](https://www.ampproject.org/).
+check out the docs on [ampproject.org](https://www.ampproject.org/).
 
 These docs are public and open-source: [https://github.com/ampproject/docs/](https://github.com/ampproject/docs/).
 See something that's missing from the docs, or that could be worded better?
