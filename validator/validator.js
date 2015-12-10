@@ -1165,9 +1165,7 @@ ParsedTagSpec.prototype.validateAttributes = function(
                            parsedSpec.getSpec().deprecation,
                        parsedSpec.getSpec().deprecationUrl,
                        resultForAttempt);
-      // Since the Javascript is always in development mode, deprecation
-      // is an error. So we return.
-      return;
+      // Deprecation is only a warning, so we don't return.
     }
     if (parsedSpec.getSpec().devModeEnabled !== null) {
       context.addError(amp.validator.ValidationError.Code.DEV_MODE_ENABLED,
@@ -1175,9 +1173,15 @@ ParsedTagSpec.prototype.validateAttributes = function(
                            parsedSpec.getSpec().devModeEnabled,
                        parsedSpec.getSpec().devModeEnabledUrl,
                        resultForAttempt);
-      // Since the Javascript is always in development mode, developer mode
-      // enabled is not an error, so no need to return.
+      // Enabling the developer attribute is now always an error, so we
+      // return.
+      return;
     }
+    // The value, value_regex, and value_properties fields are
+    // treated like a oneof, but we're not using oneof because it's
+    // a feature that was added after protobuf 2.5.0 (which our
+    // open-source version uses).
+    // begin oneof {
     if (parsedSpec.getSpec().value !== null) {
       if (encounteredAttrValue != parsedSpec.getSpec().value) {
         context.addError(amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
@@ -1204,6 +1208,7 @@ ParsedTagSpec.prototype.validateAttributes = function(
         return;
       }
     }
+    // } end oneof
     if (parsedSpec.getSpec().blacklistedValueRegex !== null) {
       const blacklistedValueRegex =
           new RegExp(parsedSpec.getSpec().blacklistedValueRegex, 'gi');
@@ -1217,6 +1222,9 @@ ParsedTagSpec.prototype.validateAttributes = function(
     if (parsedSpec.getSpec().mandatory) {
       mandatoryAttrsSeen.push(parsedSpec.getId());
     }
+    // The "at most 1" part of mandatory_oneof: mandatory_oneof
+    // wants exactly one of the alternatives, so here
+    // we check whether we already saw another alternative
     if (parsedSpec.getSpec().mandatoryOneof &&
         mandatoryOneofsSeen.contains(parsedSpec.getSpec().mandatoryOneof)) {
       context.addError(
@@ -1227,6 +1235,8 @@ ParsedTagSpec.prototype.validateAttributes = function(
     }
     mandatoryOneofsSeen.add(parsedSpec.getSpec().mandatoryOneof);
   }
+  // The "at least 1" part of mandatory_oneof: If none of the
+  // alternatives were present, we report that an attribute is missing.
   for (const mandatoryOneof of this.mandatoryOneofs_) {
     if (!mandatoryOneofsSeen.contains(mandatoryOneof)) {
       context.addError(
