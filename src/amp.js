@@ -16,10 +16,10 @@
 
 import './polyfills';
 
+import {installViewerService} from './service/viewer-impl';
 import {installHistoryService} from './service/history-impl';
 import {installPullToRefreshBlocker} from './pull-to-refresh';
 import {performanceFor} from './performance';
-import {installViewerService} from './service/viewer-impl';
 import {vsyncFor} from './vsync';
 
 import {installAd} from '../builtins/amp-ad';
@@ -46,8 +46,8 @@ try {
   perf.tick('is');
   installStyles(document, cssText, () => {
     try {
-      installHistoryService(window);
       installViewerService(window);
+      installHistoryService(window);
       vsyncFor(window);
 
       installImg(window);

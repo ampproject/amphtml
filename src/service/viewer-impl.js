@@ -547,25 +547,9 @@ let ViewerHistoryPoppedEvent;
 
 /**
  * @param {!Window} window
- * @return {!Viewer}
- * @private
- */
-function createViewer_(window) {
-  const viewer = viewerFor(window);
-  let binding;
-  if (viewer.isOvertakeHistory()) {
-    binding = new ViewerBindingVirtual_(viewer);
-  } else {
-    binding = new ViewerBindingNatural_(window);
-  }
-  return new Viewer(binding);
-};
-
-/**
- * @param {!Window} window
  */
 export function installViewerService(window) {
   getService(window, 'viewer', () => {
-    return createViewer_(window);
+    return new Viewer(window);
   });
 };
