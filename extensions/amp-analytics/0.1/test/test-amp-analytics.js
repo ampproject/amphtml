@@ -31,8 +31,12 @@ describe('amp-analytics', function() {
     const WindowApi = function() {};
     windowApi = new WindowApi();
     windowApi.location = {hash: '', href: '/test/viewer'};
+    windowApi.document = {
+      createElement: document.createElement,
+      title: 'Test Title',
+      referrer: 'https://www.google.com/'
+    };
     windowApi.Object = window.Object;
-    windowApi.document = document;
   });
 
   afterEach(() => {
@@ -114,32 +118,32 @@ describe('amp-analytics', function() {
   it('expands nested requests', function() {
     const analytics = getAnalyticsTag({
       'host': 'example.com',
-      'requests': {'foo': '/bar&{foobar}&baz', 'foobar': 'foobar'},
+      'requests': {'foo': '/bar&${foobar}&baz', 'foobar': 'f1'},
       'triggers': [{'on': 'visible', 'request': 'foo'}]
     });
 
     analytics.buildCallback();
     expect(sendRequestSpy.calledOnce).to.be.true;
     expect(sendRequestSpy.args[0][0])
-        .to.equal('https://example.com/bar&foobar&baz');
+        .to.equal('https://example.com/bar&f1&baz');
   });
 
   it('expands nested requests', function() {
     const analytics = getAnalyticsTag({
       'host': 'example.com',
-      'requests': {'foo': '/bar&{foobar}', 'foobar': '{baz}', 'baz': 'baz'},
+      'requests': {'foo': '/bar&${foobar}', 'foobar': '${baz}', 'baz': 'b1'},
       'triggers': [{'on': 'visible', 'request': 'foo'}]
     });
 
     analytics.buildCallback();
     expect(sendRequestSpy.calledOnce).to.be.true;
-    expect(sendRequestSpy.args[0][0]).to.equal('https://example.com/bar&baz');
+    expect(sendRequestSpy.args[0][0]).to.equal('https://example.com/bar&b1');
   });
 
   it('expands recursive requests', function() {
     const analytics = getAnalyticsTag({
       'host': 'example.com',
-      'requests': {'foo': '/bar&{foobar}&baz', 'foobar': '{foo}'},
+      'requests': {'foo': '/bar&${foobar}&baz', 'foobar': '${foo}'},
       'triggers': [{'on': 'visible', 'request': 'foo'}]
     });
 
@@ -180,7 +184,7 @@ describe('amp-analytics', function() {
   it('merges requests correctly', function() {
     const analytics = getAnalyticsTag({
       'host': 'example.com',
-      'requests': {'foo': '/{bar}'},
+      'requests': {'foo': '/${bar}'},
       'triggers': [{'on': 'visible', 'request': 'foo'}]
     }, {'type': 'xyz'});
 
@@ -229,4 +233,119 @@ describe('amp-analytics', function() {
           'foobar': {'foobar': ['abc', 'def']}
         });
   });
+
+  it('expands trigger vars', () => {
+    const analytics = getAnalyticsTag({
+      'host': 'example.com',
+      'requests': {'pageview': '/test1=${var1}&test2=${var2}'},
+      'triggers': [{
+        'on': 'visible',
+        'request': 'pageview',
+        'vars': {
+          'var1': 'x',
+          'var2': 'test2'
+        }
+      }]});
+    analytics.buildCallback();
+    expect(sendRequestSpy.calledOnce).to.be.true;
+    expect(sendRequestSpy.args[0][0]).to.equal(
+        'https://example.com/test1=x&test2=test2');
+  });
+
+  it('expands config vars', () => {
+    const analytics = getAnalyticsTag({
+      'host': 'example.com',
+      'vars': {
+        'var1': 'x',
+        'var2': 'test2'
+      },
+      'requests': {'pageview': '/test1=${var1}&test2=${var2}'},
+      'triggers': [{'on': 'visible', 'request': 'pageview'}]});
+    analytics.buildCallback();
+    expect(sendRequestSpy.calledOnce).to.be.true;
+    expect(sendRequestSpy.args[0][0]).to.equal(
+        'https://example.com/test1=x&test2=test2');
+  });
+
+  it('expands trigger vars with higher precedence than config vars', () => {
+    const analytics = getAnalyticsTag({
+      'host': 'example.com',
+      'vars': {
+        'var1': 'config1',
+        'var2': 'config2'
+      },
+      'requests': {'pageview': '/test1=${var1}&test2=${var2}'},
+      'triggers': [{
+        'on': 'visible',
+        'request': 'pageview',
+        'vars': {
+          'var1': 'trigger1'
+        }}]});
+    analytics.buildCallback();
+    expect(sendRequestSpy.calledOnce).to.be.true;
+    expect(sendRequestSpy.args[0][0]).to.equal(
+        'https://example.com/test1=trigger1&test2=config2');
+  });
+
+  it('does not expand nested vars', () => {
+    const analytics = getAnalyticsTag({
+      'host': 'example.com',
+      'requests': {'pageview': '/test=${var1}'},
+      'triggers': [{
+        'on': 'visible',
+        'request': 'pageview',
+        'vars': {
+          'var1': '${var2}',
+          'var2': 't2'
+        }}]});
+    analytics.buildCallback();
+    expect(sendRequestSpy.calledOnce).to.be.true;
+    expect(sendRequestSpy.args[0][0]).to.equal(
+        'https://example.com/test=%24%7Bvar2%7D');
+  });
+
+  it('expands and encodes requests, config vars, and trigger vars', () => {
+    const analytics = getAnalyticsTag({
+      'host': 'example.com',
+      'vars': {
+        'c1': 'config 1',
+        'c2': 'config&2'
+      },
+      'requests': {
+        'base': '/test?c1=${c1}&t1=${t1}',
+        'pageview': '${base}&c2=${c2}&t2=${t2}'
+      },
+      'triggers': [{
+        'on': 'visible',
+        'request': 'pageview',
+        'vars': {
+          't1': 'trigger=1',
+          't2': 'trigger?2'
+        }}]});
+    analytics.buildCallback();
+    expect(sendRequestSpy.calledOnce).to.be.true;
+    expect(sendRequestSpy.args[0][0]).to.equal(
+        'https://example.com/test?c1=config%201&t1=trigger%3D1&' +
+        'c2=config%262&t2=trigger%3F2');
+  });
+
+  it('expands url-replacements vars', () => {
+    const analytics = getAnalyticsTag({
+      'host': 'example.com',
+      'requests': {'pageview': '/test1=${var1}&test2=${var2}&title=TITLE'},
+      'triggers': [{
+        'on': 'visible',
+        'request': 'pageview',
+        'vars': {
+          'var1': 'x',
+          'var2': 'DOCUMENT_REFERRER'
+        }
+      }]});
+    analytics.buildCallback();
+    expect(sendRequestSpy.calledOnce).to.be.true;
+    expect(sendRequestSpy.args[0][0]).to.equal(
+        'https://example.com/test1=x&test2=https%3A%2F%2Fwww.google.com%2F' +
+        '&title=Test%20Title');
+  });
+
 });

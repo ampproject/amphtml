@@ -2,78 +2,53 @@
 <html ⚡>
 <head>
   <meta charset="utf-8">
-  <title>AMP #0</title>
-  <link rel="canonical" href="amps.html" >
+  <title>AMP Analytics</title>
+  <link rel="canonical" href="analytics.amp.html" >
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
-  <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
-  <style amp-custom>
-    amp-img {
-      max-width: 80%;
-      max-height: 80%;
-      width: 100%;
-    }
-  </style>
   <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
   <style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
 
-<article>
-  <amp-analytics id="analytics1">
-  {
-    "host": "my-analytics.com",
-    "requests": {
-      "default": "/log?domain=DOMAIN&amp;path=PATH"
-    },
-    "triggers": [{
-      "on": "visible",
-      "request": "default"
-    }]
-  }
-  </amp-analytics>
-  <amp-analytics type="googleanalytics" id="analytics2">
-  {
+<amp-analytics id="analytics1">
+{
+  "host": "example.com",
+  "requests": {
+    "base": "/log?domain=DOMAIN&amp;path=PATH&amp;title=${title}",
+    "event": "${base}&amp;name=${eventName}&amp;type=${eventId}"
+  },
+  "vars": {
+    "title": "Example Request"
+  },
+  "triggers": [{
+    "on": "visible",
+    "request": "event",
     "vars": {
-      "account": "UA-123456-1",
-      "anonymize_ip": true
-    },
-    "triggers": [{
-      "on": "visible",
-      "request": "pageview"
-    }]
-  }
-  </amp-analytics>
+      "eventName": "page-loaded",
+      "eventId": "42"
+    }
+  }]
+}
+</amp-analytics>
+
+<amp-analytics type="googleanalytics" id="analytics2">
+{
+  "vars": {
+    "account": "UA-XXXX-Y"
+  },
+  "triggers": [{
+    "on": "visible",
+    "request": "pageview",
+    "vars" : {
+      "title": "Example Pageview"
+    }
+  }]
+}
+</amp-analytics>
+
 <div class="logo"></div>
-
-<h1 id="top">AMP #0</h1>
-  <p>
-    <amp-fit-text width="300" height="200" layout="responsive" class="box1">
-      Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.
-    </amp-fit-text>
-  </p>
-  <p>
-    <div class="box1">
-      Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt.
-    </div>
-  </p>
-  <p>
-  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse semper aliquet turpis ac fringilla. Cras dolor nisi, malesuada eu semper non, faucibus sed nisl. Quisque urna velit, accumsan non ante ac, fermentum dignissim justo. Etiam libero massa, commodo a dignissim eu, fringilla eu ante. Nam neque diam, tincidunt in rhoncus a, luctus ac eros. Integer tellus mauris, convallis quis mauris et, tincidunt venenatis lorem. Maecenas vulputate pulvinar quam. Phasellus nec felis ultrices, faucibus dui eu, sodales arcu. Nullam pellentesque erat at lorem volutpat vehicula. Phasellus id lectus risus. Proin consectetur dapibus nulla eget viverra. Donec a scelerisque metus. Morbi vitae diam tempor, facilisis risus id, cursus erat.
-
-  Maecenas tellus dolor, euismod eget porta eu, pretium in diam. Nulla fermentum iaculis leo et ornare. Mauris euismod, risus vitae auctor lacinia, massa elit eleifend neque, sit amet tincidunt nisi diam quis quam. Donec id vestibulum leo, tempor lobortis erat. Nunc eget porta eros. Proin mi leo, iaculis vitae dui at, euismod auctor ante. Integer ut mi nisl. Morbi ut ipsum vel quam fermentum maximus. Morbi aliquet massa quis justo malesuada, sit amet tempus est tempor. Nulla tincidunt orci odio, sed porta nisl fermentum quis. Etiam rhoncus vel eros ut mollis. Nulla vitae risus vel diam porta rutrum vitae a mi. Curabitur id bibendum mi. Morbi sagittis id dui eu suscipit. Pellentesque porttitor placerat nisi non volutpat.
-
-  Curabitur mattis libero a venenatis porta. Integer ac aliquam nulla. Nunc non orci sit amet metus consectetur fermentum. Suspendisse et velit sit amet nulla rhoncus semper. Vivamus et dolor tempus, ultricies metus at, lacinia nisi. Nunc justo dui, efficitur ut orci eget, vehicula feugiat est. Suspendisse non urna congue, feugiat est nec, tempus nisi. In convallis vitae lectus eu finibus. Vestibulum ullamcorper id turpis id pulvinar. Nulla facilisi. Aenean purus odio, imperdiet sed nisl ut, luctus ullamcorper leo. Aenean sit amet pharetra nunc. Integer maximus diam vitae tortor lobortis, sed facilisis ante vehicula. Mauris rutrum pharetra pretium. Praesent laoreet faucibus odio, quis fringilla libero convallis quis.
-
-  Suspendisse viverra augue nec elementum ornare. Nulla vel dui at leo pharetra dapibus non nec risus. Vestibulum hendrerit leo felis, vel accumsan mi molestie vel. Aenean nisi quam, iaculis eu erat euismod, tristique euismod magna. Maecenas sem ante, consectetur et magna ut, pulvinar euismod arcu. Nullam eget mollis dolor, ac tristique ex. Nulla at elit pretium elit aliquam facilisis nec ut sapien. Duis et sem dapibus, pharetra risus sit amet, vulputate libero. Fusce commodo tellus sit amet arcu egestas varius. Integer nunc nisl, maximus tincidunt magna sed, aliquam molestie lectus. Suspendisse mollis ac diam et ornare. Nam ut suscipit odio. Integer arcu tellus, sagittis in tempus gravida, elementum sit amet nulla. Sed non nisl odio.
-
-  Nunc a ipsum nisi. Proin sodales vestibulum nisl, non viverra ipsum efficitur eu. Sed vitae mi congue, vestibulum diam nec, semper odio. Nulla nec luctus mauris. Pellentesque ornare nulla at mi tempor bibendum. Cras quis viverra nunc. Nulla condimentum neque a dictum ullamcorper.
-
-  </p>
-  <p>
-    <amp-img id="img1" src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n" width=800 height=600></amp-img>
-    <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w400-h300-no-n" width=400 height=300 layout=responsive></amp-img>
-    <amp-img src="https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w400-h300-no-n" width=400 height=300></amp-img>
-  </p>
-</article>
+<h1 id="top">AMP Analytics</h1>
 </body>
 </html>
+

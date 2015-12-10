@@ -24,20 +24,30 @@ export const ANALYTICS_CONFIG = {
   'googleanalytics': {
     'host': 'www.google-analytics.com',
     'method': 'GET',
+    'vars': {
+      // TODO(btownsend, #1116) These are placeholders to temporarily simulate
+      // built-in vars. To be removed when amp-analytics.js is updated with
+      // real built-in var support.
+      'title': 'TITLE',
+      'domain': 'CANONICAL_HOST',
+      'path': 'CANONICAL_PATH',
+      'hitCount': 'HIT_COUNT',
+      'screenWidth': 'SCREEN_WIDTH',
+      'screenHeight': 'SCREEN_HEIGHT',
+      'timestamp': 'TIMESTAMP',
+      'clientId': 'CLIENT_IDENTIFIER'
+    },
     'requests': {
-      'baseHit': '/collect?v=1&_v=a0&aip=true&_s=HIT_COUNT&dp=PATH&' +
-          'dl=DOMAIN&dt=TITLE&sr=SCREEN_WIDTHxSCREEN_HEIGHT&' +
-          '_utmht=TIMESTAMP&jid=&cid=CLIENT_IDENTIFIER&tid=ACCOUNT',
-      'pageview': '/r{baseHit}&t=pageview&_r=1',
-      'event': '{baseHit}&t=event&ec=EVENT_CATEGORY&ea=EVENT_ACTION&' +
-          'el=EVENT_LABEL&ev=EVENT_VALUE',
-      'timing': '{baseHit}&t=timing&plt={}&dns={}&pdt={}&rrt={}&tcp={}&' +
-          'srt={}&dit={}&clt={}',
-      'social': '{baseHit}&t=social&sa=SOCIAL_ACTION&sn=SOCIAL_NETWORK&' +
-          'st=SOCIAL_ACTION_TARGET'
+      'baseHit': '/collect?v=1&_v=a0&aip=true&_s=${hitCount}&dp=${path}&' +
+          'dl=${domain}&dt=${title}&sr=${screenWidth}x${screenHeight}&' +
+          '_utmht=${timestamp}&jid=&cid=${clientId}&tid=${account}',
+      'pageview': '/r${baseHit}&t=pageview&_r=1',
+      'event': '${baseHit}&t=event&ec=${eventCategory}&ea=${eventAction}&' +
+          'el=${eventLabel}&ev=${eventValue}',
+      'social': '${baseHit}&t=social&sa=${socialAction}&sn=${socialNetwork}&' +
+          'st=${socialActionTarget}'
     },
     'optout': '_gaUserPrefs.ioo'
   }
 };
-
 

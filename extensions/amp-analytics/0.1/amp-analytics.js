@@ -19,6 +19,7 @@ import {Layout} from '../../../src/layout';
 import {log} from '../../../src/log';
 import {loadPromise} from '../../../src/event-helper';
 import {urlReplacementsFor} from '../../../src/url-replacements';
+import {expandTemplate} from '../../../src/string';
 
 import {addListener} from './instrumentation';
 import {ANALYTICS_CONFIG} from './vendors';
@@ -132,6 +133,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     }
     const config = this.predefinedConfig_[this.element.getAttribute('type')]
         || {};
+
     return this.mergeObjects_(remote, this.mergeObjects_(inline, config));
   }
 
@@ -168,7 +170,6 @@ export class AmpAnalytics extends AMP.BaseElement {
           'will not be sent from this page.');
       return;
     }
-
     for (const k in this.config_['requests']) {
       if (this.config_['requests'].hasOwnProperty(k)) {
         requests[k] = this.config_['requests'][k];
@@ -176,37 +177,13 @@ export class AmpAnalytics extends AMP.BaseElement {
     }
     this.requests_ = requests;
 
-    // Now replace any request templates with their values.
-    const all = Object.keys(this.requests_).join('|');
-    const requestExpr = new RegExp('\{(' + all + ')\}', 'g');
+    // Expand any placeholders. For requests, we expand each string up to 5
+    // times to support nested requests. Leave any unresolved placeholders.
     for (const k in this.requests_) {
-      this.requests_[k] = this.expandRequest_(this.requests_[k], requestExpr,
-          this.requests_, 5);
+      this.requests_[k] = expandTemplate(this.requests_[k], key => {
+        return this.requests_[key] || '${' + key + '}';
+      }, 5);
     }
-  }
-
-  /**
-   * Replaces template variables corresponding to a request with the value of
-   * that request. If no request is found, an empty string is inserted instead.
-   *
-   * @param {string} formatString The request string to be expanded
-   * @param {!RegExp} expression The regular expression used to detect request
-   *          templates
-   * @param {!Object<string, string> requests Map of requests to lookup template
-   *          values from
-   * @param {number} depth Depth of recursion for nested templates
-   * @return {string} the expanded request string
-   * @private
-   */
-  expandRequest_(formatString, expression, requests, depth) {
-    if (depth <= 0) {
-      return '';
-    }
-    depth--;
-    return formatString.replace(expression, (match, name) => {
-      return this.expandRequest_(requests[name], expression, requests, depth) ||
-          '';
-    });
   }
 
   /**
@@ -224,7 +201,18 @@ export class AmpAnalytics extends AMP.BaseElement {
       return;
     }
 
-    // TODO(btownsend, #871): Add support for variables from inline config.
+    // Replace placeholders with URI encoded values.
+    // Precedence is trigger.vars > config.vars > built-in.vars.
+    // Nested expansion not supported.
+    // TODO(btownsend, #1116) Add support for built-in vars.
+    request = expandTemplate(request, key => {
+      return encodeURIComponent(
+          (trigger['vars'] && trigger['vars'][key]) ||
+          (this.config_['vars'] && this.config_['vars'][key]) ||
+          '');
+    });
+
+    // For consistentcy with amp-pixel we also expand any url replacements.
     request = urlReplacementsFor(this.getWin()).expand(request);
 
     // TODO(btownsend, #1061): Add support for sendBeacon.
