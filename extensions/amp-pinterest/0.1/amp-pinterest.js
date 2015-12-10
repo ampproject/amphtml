@@ -180,7 +180,7 @@ class AmpPinterest extends AMP.BaseElement {
 
       const structure = make({'span': {}});
 
-      const renderPin = function(r) {
+      const renderPin = r => {
 
         if (r && r.data && r.data[0] && !r.data[0].error) {
           const p = r.data[0];
@@ -349,9 +349,7 @@ class AmpPinterest extends AMP.BaseElement {
       const query = 'https://widgets.pinterest.com/v3/pidgets/pins/info/' +
         '?pin_ids=' + pinId +
         '&sub=www&base_scheme=https';
-      return call(query).then(r => {
-        return renderPin(r);
-      });
+      return call(query).then(renderPin);
     };
 
     const makeButton = () => {
