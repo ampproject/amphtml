@@ -82,7 +82,7 @@ class UrlReplacements {
     // single page view. It should have sufficient entropy to be unique for
     // all the page views a single user is making at a time.
     this.set_('PAGE_VIEW_ID', () => {
-      documentInfoFor(this.win_).pageViewId;
+      return documentInfoFor(this.win_).pageViewId;
     });
   }
 
@@ -103,6 +103,19 @@ class UrlReplacements {
   }
 
   /**
+   * Returns the value associated with the given variable name, or null if no
+   * such variable exists.
+   * @param {string} varName
+   * @param {*} opt_data
+   * @return {string|null}
+   */
+  get(varName, opt_data) {
+    const val = this.replacements_[varName] &&
+        this.replacements_[varName](opt_data);
+    return val || val === 0 ? val : '';
+  }
+
+  /**
    * Expands the provided URL by replacing all known variables with their
    * resolved values.
    * @param {string} url
@@ -111,15 +124,8 @@ class UrlReplacements {
    */
   expand(url, opt_data) {
     const expr = this.getExpr_();
-    return url.replace(expr, (match, name) => {
-      let val = this.replacements_[name](opt_data);
-      // Value 0 is specialcased because the numeric 0 is a valid substitution
-      // value.
-      if (!val && val !== 0) {
-        val = '';
-      }
-      return encodeURIComponent(val);
-    });
+    return url.replace(expr, (match, name) =>
+        encodeURIComponent(this.get(name, opt_data)));
   }
 
   /**
