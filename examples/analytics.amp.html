@@ -5,6 +5,14 @@
   <title>AMP Analytics</title>
   <link rel="canonical" href="analytics.amp.html" >
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style amp-custom>
+    .box {
+      background: #ccc;
+      border: 1px solid #aaa;
+      padding: 10px;
+      margin: 10px;
+    }
+  </style>
   <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
   <style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
@@ -43,8 +51,24 @@
   "triggers": [{
     "on": "visible",
     "request": "pageview",
-    "vars" : {
+    "vars": {
       "title": "Example Pageview"
+    }
+  }, {
+    "on": "click",
+    "selector": "#test1",
+    "request": "event",
+    "vars": {
+      "eventCategory": "examples",
+      "eventAction": "clicked-test1"
+    }
+  }, {
+    "on": "click",
+    "selector": "#top",
+    "request": "event",
+    "vars": {
+      "eventCategory": "examples",
+      "eventAction": "clicked-header"
     }
   }]
 }
@@ -53,6 +77,11 @@
 
 <div class="logo"></div>
 <h1 id="top">AMP Analytics</h1>
+
+<span id="test1" class="box">
+  Click here to generate an event
+</span>
+
 </body>
 </html>
 
