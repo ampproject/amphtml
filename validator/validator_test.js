@@ -169,3 +169,93 @@ describe('ValidatorCssLengthValidation', () => {
         'amp-html-format.md#maximum-size)';
   });
 });
+
+describe('CssLengthAndUnit', () => {
+  it('parses a basic example', () => {
+    const parsed = new amp.validator.CssLengthAndUnit(
+        '10.1em', /* allowAuto */ false);
+    expect(parsed.isSet).toBe(true);
+    expect(parsed.isValid).toBe(true);
+    expect(parsed.unit).toEqual('em');
+    expect(parsed.isAuto).toBe(false);
+  });
+
+  it('supports several units', () => {
+    for (const allowedUnit of ['px', 'em', 'rem', 'vh', 'vmin', 'vmax']) {
+      const example = '10' + allowedUnit;
+      const parsed = new amp.validator.CssLengthAndUnit(
+          example, /* allowAuto */ false);
+      expect(parsed.isSet).toBe(true);
+      expect(parsed.isValid).toBe(true);
+      expect(parsed.unit).toEqual(allowedUnit);
+      expect(parsed.isAuto).toBe(false);
+    }
+  });
+
+  it('understands empty unit as "px"', () => {
+    const parsed = new amp.validator.CssLengthAndUnit(
+        '10', /* allowAuto */ false);
+    expect(parsed.isSet).toBe(true);
+    expect(parsed.isValid).toBe(true);
+    expect(parsed.unit).toEqual('px');
+    expect(parsed.isAuto).toBe(false);
+  });
+
+  it('understands undefined input as valid (means attr is not set)', () => {
+    const parsed = new amp.validator.CssLengthAndUnit(
+        undefined, /* allowAuto */ false);
+    expect(parsed.isSet).toBe(false);
+    expect(parsed.isValid).toBe(true);
+    expect(parsed.unit).toEqual('px');
+    expect(parsed.isAuto).toBe(false);
+  });
+
+  it('understands empty string as invalid (means attr value is empty)', () => {
+    const parsed = new amp.validator.CssLengthAndUnit(
+        "", /* allowAuto */ false);
+    expect(parsed.isValid).toBe(false);
+  });
+
+  it('considers other garbage as invalid', () => {
+    expect(new amp.validator.CssLengthAndUnit(
+        '100%', /* allowAuto */ false).isValid).toBe(false);
+    expect(new amp.validator.CssLengthAndUnit(
+        'not a number', /* allowAuto */ false).isValid).toBe(false);
+    expect(new amp.validator.CssLengthAndUnit(
+        '1.1.1', /* allowAuto */ false).isValid).toBe(false);
+    expect(new amp.validator.CssLengthAndUnit(
+        '5 inches', /* allowAuto */ false).isValid).toBe(false);
+    expect(new amp.validator.CssLengthAndUnit(
+        'fahrenheit', /* allowAuto */ false).isValid).toBe(false);
+    expect(new amp.validator.CssLengthAndUnit(
+        'px', /* allowAuto */ false).isValid).toBe(false);
+    expect(new amp.validator.CssLengthAndUnit(  // screen size in ancient Rome.
+        'ix unciae', /* allowAuto */ false).isValid).toBe(false);
+  });
+
+  it('recongizes auto if allowed', () => {
+    {  // allow_auto = false with input != auto
+      const parsed = new amp.validator.CssLengthAndUnit(
+          "1", /* allowAuto */ false);
+      expect(parsed.isValid).toBe(true);
+      expect(parsed.isAuto).toBe(false);
+    }
+    {  // allow_auto = true with input == auto
+      const parsed = new amp.validator.CssLengthAndUnit(
+          "1", /* allowAuto */ true);
+      expect(parsed.isValid).toBe(true);
+      expect(parsed.isAuto).toBe(false);
+    }
+    {  // allow_auto = false with input = auto
+      const parsed = new amp.validator.CssLengthAndUnit(
+          "auto", /* allowAuto */ false);
+      expect(parsed.isValid).toBe(false);
+    }
+    {  // allow_auto = true with input = auto
+      const parsed = new amp.validator.CssLengthAndUnit(
+          "auto", /* allowAuto */ true);
+      expect(parsed.isValid).toBe(true);
+      expect(parsed.isAuto).toBe(true);
+    }
+  });
+});

@@ -20,12 +20,12 @@
 # in production from crashing. This id is not relevant to validator.js
 # because thus far, engine (validator.js) and spec file (validator.protoascii)
 # are always released together.
-min_validator_revision_required: 66
+min_validator_revision_required: 67
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 96
+spec_file_revision: 97
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
 # These rules are just enough to validate the example from the spec.
@@ -1579,46 +1579,6 @@ tags: {
 #
 # Tags and attributes specific to AMP HTML.
 #
-
-# Any amp elements, which are rendered asynchronously (ex: amp-img), must have
-# specified dimensions. See https://docs.google.com/document/d/1YjFk_B6r97CCaQJf2nXRVuBOuNi_3Fn87Zyf1U7Xoz4/edit for the layout rules.
-# If layout is "responsive" or "fixed", then both "width" and "height" are
-# required.
-attr_lists: {
-  name: "mandatory-dimensions-with-width-height"
-  attrs: {
-    name: "layout"
-    mandatory: true
-    value_regex: "responsive|fixed"
-  }
-  attrs: {
-    name: "width"
-    mandatory: true
-  }
-  attrs: {
-    name: "height"
-    mandatory: true
-  }
-}
-# If layout is "nodisplay", "fill", or "container", then "width"/"height"
-# are optional.
-attr_lists: {
-  name: "mandatory-dimensions-without-width-height"
-  attrs: {
-    name: "layout"
-    mandatory: true
-    value_regex: "nodisplay|fill|container"
-  }
-  attrs: { name: "width" }
-  attrs: { name: "height" }
-}
-# If layout is missing, the default value is "container", so the same rules
-# as above: "width"/"height" are optional.
-attr_lists: {
-  name: "mandatory-dimensions-missing-layout"
-  attrs: { name: "width" }
-  attrs: { name: "height" }
-}
 # AMP Custom elements require a "src" or a "srcset" attribute,
 # having both is also allowed.
 # TODO(greggrothaus): These probably need to validate http*s* only URLs
@@ -1639,49 +1599,27 @@ attr_lists: {
 }
 
 # <amp-brightcove>
-attr_lists: {
-  name: "amp-brightcove-nonlayout-attrs"
-  attrs: {
-    name: "data-account"
-    mandatory: true
-  }
-  attrs: {
-    # If data-player is missing, the default value is "default".
-    name: "data-player"
-  }
-  attrs: {
-    # If data-embed is missing, the default value is "default".
-    name: "data-embed"
-  }
-  attrs: {
-    # If data-video-id is not used for perform player and hence it is optional.
-    name: "data-video-id"
-  }
-  attrs: {
-    # If data-playlist-id is not used for perform player and hence it is optional.
-    name: "data-playlist-id"
-  }
-}
 tags: {
   name: "amp-brightcove"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-brightcove/amp-brightcove.md"
-  attr_lists: "amp-brightcove-nonlayout-attrs"
   attr_lists: "extended-amp-global"
-  attr_lists: "mandatory-dimensions-missing-layout"
-}
-tags: {
-  name: "amp-brightcove"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-brightcove/amp-brightcove.md"
-  attr_lists: "amp-brightcove-nonlayout-attrs"
-  attr_lists: "extended-amp-global"
-  attr_lists: "mandatory-dimensions-with-width-height"
-}
-tags: {
-  name: "amp-brightcove"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-brightcove/amp-brightcove.md"
-  attr_lists: "amp-brightcove-nonlayout-attrs"
-  attr_lists: "extended-amp-global"
-  attr_lists: "mandatory-dimensions-without-width-height"
+
+  attrs: { name: "data-account" mandatory: true }
+  # If data-player is missing, the default value is "default".
+  attrs: { name: "data-player" }
+  # If data-embed is missing, the default value is "default".
+  attrs: { name: "data-embed" }
+  # If data-video-id is not used for perform player and hence it is optional.
+  attrs: { name: "data-video-id" }
+  # If data-playlist-id is not used for perform player and hence it is optional.
+  attrs: { name: "data-playlist-id" }
+  amp_layout: {
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: RESPONSIVE
+    supported_layouts: FILL
+    supported_layouts: NODISPLAY
+  }
 }
 
 # <amp-font>
@@ -1689,11 +1627,6 @@ tags: {
   name: "amp-font"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-font/amp-font.md"
   attr_lists: "extended-amp-global"
-  attrs: {
-    name: "layout"
-    value: "nodisplay"
-    mandatory: true
-  }
   attrs: {
     name: "font-family"
     mandatory: true
@@ -1709,48 +1642,34 @@ tags: {
   attrs: { name: "on-load-remove-class" }
   attrs: { name: "on-error-add-class" }
   attrs: { name: "on-error-remove-class" }
+  amp_layout: {
+    supported_layouts: NODISPLAY
+  }
 }
-# Currently, the mechanics of this spec file force us to repeat
-# each tag several times.
-# TODO(greggrothaus): Add more expressive power to the validator to simplify
-# this a bit and improve the error messages. Low priority.
+
 # <amp-img>
-attr_lists: {
-  name: "amp-img-nonlayout-attrs"
+tags: {
+  name: "amp-img"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/builtins/amp-img.md"
+  attr_lists: "extended-amp-global"
+  attr_lists: "mandatory-src-or-srcset"
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
   attrs: { name: "placeholder" }
-  # stricly speaking it would be layout but isn't used thus far, just tolerated.
-  # See http://b//24376754.
-  attrs: { name: "sizes" }
+  amp_layout: {
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: RESPONSIVE
+    supported_layouts: FILL
+    supported_layouts: NODISPLAY
+  }
 }
-tags: {
-  name: "amp-img"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/builtins/amp-img.md"
-  attr_lists: "amp-img-nonlayout-attrs"
-  attr_lists: "extended-amp-global"
-  attr_lists: "mandatory-src-or-srcset"
-  attr_lists: "mandatory-dimensions-missing-layout"
-}
-tags: {
-  name: "amp-img"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/builtins/amp-img.md"
-  attr_lists: "amp-img-nonlayout-attrs"
-  attr_lists: "extended-amp-global"
-  attr_lists: "mandatory-src-or-srcset"
-  attr_lists: "mandatory-dimensions-with-width-height"
-}
-tags: {
-  name: "amp-img"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/builtins/amp-img.md"
-  attr_lists: "amp-img-nonlayout-attrs"
-  attr_lists: "extended-amp-global"
-  attr_lists: "mandatory-src-or-srcset"
-  attr_lists: "mandatory-dimensions-without-width-height"
-}
+
 # <amp-video>
-attr_lists: {
-  name: "amp-video-nonlayout-attrs"
+tags: {
+  name: "amp-video"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/builtins/amp-video.md"
+  attr_lists: "extended-amp-global"
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
   attrs: { name: "placeholder" }
@@ -1760,160 +1679,97 @@ attr_lists: {
   attrs: { name: "loop"     value: "" }
   attrs: { name: "muted"    value: "" }
   attrs: { name: "poster" }
+  amp_layout: {
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: RESPONSIVE
+    supported_layouts: FILL
+    supported_layouts: NODISPLAY
+  }
 }
-tags: {
-  name: "amp-video"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/builtins/amp-video.md"
-  attr_lists: "amp-video-nonlayout-attrs"
-  attr_lists: "extended-amp-global"
-  attr_lists: "mandatory-dimensions-missing-layout"
-}
-tags: {
-  name: "amp-video"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/builtins/amp-video.md"
-  attr_lists: "amp-video-nonlayout-attrs"
-  attr_lists: "extended-amp-global"
-  attr_lists: "mandatory-dimensions-with-width-height"
-}
-tags: {
-  name: "amp-video"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/builtins/amp-video.md"
-  attr_lists: "amp-video-nonlayout-attrs"
-  attr_lists: "extended-amp-global"
-  attr_lists: "mandatory-dimensions-without-width-height"
-}
+
 # <amp-ad>
-attr_lists: {
-  name: "amp-ad-nonlayout-attrs"
+tags: {
+  name: "amp-ad"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/builtins/amp-ad.md"
+  attr_lists: "extended-amp-global"
   attrs: { name: "alt" }
   attrs: { name: "src" }
-  attrs: {
-    name: "type"
-    mandatory: true
-  }
+  attrs: { name: "type" mandatory: true }
   attrs: { name: "json" }
+  amp_layout: {
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: RESPONSIVE
+    supported_layouts: FILL
+    supported_layouts: NODISPLAY
+  }
 }
-tags: {
-  name: "amp-ad"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/builtins/amp-ad.md"
-  attr_lists: "amp-ad-nonlayout-attrs"
-  attr_lists: "extended-amp-global"
-  attr_lists: "mandatory-dimensions-missing-layout"
-}
-tags: {
-  name: "amp-ad"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/builtins/amp-ad.md"
-  attr_lists: "amp-ad-nonlayout-attrs"
-  attr_lists: "extended-amp-global"
-  attr_lists: "mandatory-dimensions-with-width-height"
-}
-tags: {
-  name: "amp-ad"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/builtins/amp-ad.md"
-  attr_lists: "amp-ad-nonlayout-attrs"
-  attr_lists: "extended-amp-global"
-  attr_lists: "mandatory-dimensions-without-width-height"
-}
+
+# <amp-fit-text>
 # TODO(greggrothaus): amp-fit-text's attribute spec need flushing
 # out now that the spec is available.
-# <amp-fit-text>
-attr_lists: {
-  name: "amp-fit-text-attrs"
+tags: {
+  name: "amp-fit-text"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-fit-text/amp-fit-text.md"
+  attr_lists: "extended-amp-global"
   attrs: { name: "min-font-size" }
   attrs: { name: "max-font-size" }
+  amp_layout: {
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: RESPONSIVE
+    supported_layouts: FILL
+    supported_layouts: NODISPLAY
+  }
 }
-tags: {
-  name: "amp-fit-text"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-fit-text/amp-fit-text.md"
-  attr_lists: "extended-amp-global"
-  attr_lists: "mandatory-dimensions-missing-layout"
-  attr_lists: "amp-fit-text-attrs"
-}
-tags: {
-  name: "amp-fit-text"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-fit-text/amp-fit-text.md"
-  attr_lists: "extended-amp-global"
-  attr_lists: "mandatory-dimensions-with-width-height"
-  attr_lists: "amp-fit-text-attrs"
-}
-tags: {
-  name: "amp-fit-text"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-fit-text/amp-fit-text.md"
-  attr_lists: "extended-amp-global"
-  attr_lists: "mandatory-dimensions-without-width-height"
-  attr_lists: "amp-fit-text-attrs"
-}
+
 # <amp-carousel>
-attr_lists: {
-  name: "amp-carousel-nonlayout-attrs"
+tags: {
+  name: "amp-carousel"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-carousel/amp-carousel.md"
+  attr_lists: "extended-amp-global"
   attrs: { name: "autoplay" value: "" }
   attrs: { name: "loop" value: "" }
   attrs: { name: "dots" value: "" }
   attrs: { name: "arrows" value: "" }
   attrs: { name: "type" value_regex: "slides|carousel" }
   attrs: { name: "controls" }
+  amp_layout: {
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+    supported_layouts: FILL
+  }
 }
-tags: {
-  name: "amp-carousel"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-carousel/amp-carousel.md"
-  attr_lists: "amp-carousel-nonlayout-attrs"
-  attr_lists: "extended-amp-global"
-  attr_lists: "mandatory-dimensions-missing-layout"
-}
-tags: {
-  name: "amp-carousel"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-carousel/amp-carousel.md"
-  attr_lists: "amp-carousel-nonlayout-attrs"
-  attr_lists: "extended-amp-global"
-  attr_lists: "mandatory-dimensions-with-width-height"
-}
-tags: {
-  name: "amp-carousel"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-carousel/amp-carousel.md"
-  attr_lists: "amp-carousel-nonlayout-attrs"
-  attr_lists: "extended-amp-global"
-  attr_lists: "mandatory-dimensions-without-width-height"
-}
+
 # <amp-anim>
-attr_lists: {
-  name: "amp-anim-nonlayout-attrs"
+tags: {
+  name: "amp-anim"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-anim/amp-anim.md"
+  attr_lists: "extended-amp-global"
+  attr_lists: "mandatory-src-or-srcset"
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
   attrs: { name: "autoplay" value: "" }
-  # stricly speaking it would be layout but isn't used thus far, just tolerated.
-  # See http://b//24376754.
-  attrs: { name: "sizes" value: "" }
   attrs: { name: "controls" }
+  amp_layout: {
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: RESPONSIVE
+    supported_layouts: FILL
+    supported_layouts: NODISPLAY
+  }
 }
-tags: {
-  name: "amp-anim"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-anim/amp-anim.md"
-  attr_lists: "amp-anim-nonlayout-attrs"
-  attr_lists: "extended-amp-global"
-  attr_lists: "mandatory-src-or-srcset"
-  attr_lists: "mandatory-dimensions-missing-layout"
-}
-tags: {
-  name: "amp-anim"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-anim/amp-anim.md"
-  attr_lists: "amp-anim-nonlayout-attrs"
-  attr_lists: "extended-amp-global"
-  attr_lists: "mandatory-src-or-srcset"
-  attr_lists: "mandatory-dimensions-with-width-height"
-}
-tags: {
-  name: "amp-anim"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-anim/amp-anim.md"
-  attr_lists: "amp-anim-nonlayout-attrs"
-  attr_lists: "extended-amp-global"
-  attr_lists: "mandatory-src-or-srcset"
-  attr_lists: "mandatory-dimensions-without-width-height"
-}
+
 # <amp-youtube>
 # amp-youtube either comes with a video-id attribute, or with
 # a data-videoid attribute.
-attr_lists: {
-  name: "amp-youtube-nonlayout-attrs"
+tags: {
+  name: "amp-youtube"
+  attr_lists: "extended-amp-global"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-youtube/amp-youtube.md"
   attrs: {
     name: "src"
     mandatory_oneof: "src or data-videoid"
@@ -1928,120 +1784,69 @@ attr_lists: {
     deprecation_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-youtube/amp-youtube.md"
     mandatory_oneof: "src or data-videoid"
   }
-}
-tags: {
-  name: "amp-youtube"
-  attr_lists: "amp-youtube-nonlayout-attrs"
-  attr_lists: "extended-amp-global"
-  attr_lists: "mandatory-dimensions-missing-layout"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-youtube/amp-youtube.md"
-}
-tags: {
-  name: "amp-youtube"
-  attr_lists: "amp-youtube-nonlayout-attrs"
-  attr_lists: "extended-amp-global"
-  attr_lists: "mandatory-dimensions-with-width-height"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-youtube/amp-youtube.md"
-}
-tags: {
-  name: "amp-youtube"
-  attr_lists: "amp-youtube-nonlayout-attrs"
-  attr_lists: "extended-amp-global"
-  attr_lists: "mandatory-dimensions-without-width-height"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-youtube/amp-youtube.md"
-}
-# <amp-vine>
-attr_lists: {
-  name: "amp-vine-nonlayout-attrs"
-  # data-* is generally allowed, but it's not generally mandatory.
-  attrs: {
-    name: "data-vineid"
-    mandatory: true
+  amp_layout: {
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: RESPONSIVE
+    supported_layouts: FILL
+    supported_layouts: NODISPLAY
   }
 }
+
+# <amp-vine>
 tags: {
   name: "amp-vine"
-  attr_lists: "amp-vine-nonlayout-attrs"
   attr_lists: "extended-amp-global"
-  attr_lists: "mandatory-dimensions-missing-layout"
+  # data-* is generally allowed, but it's not generally mandatory.
+  attrs: { name: "data-vineid" mandatory: true }
+  amp_layout: {
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: RESPONSIVE
+    supported_layouts: FILL
+    supported_layouts: NODISPLAY
+  }
 }
-tags: {
-  name: "amp-vine"
-  attr_lists: "amp-vine-nonlayout-attrs"
-  attr_lists: "extended-amp-global"
-  attr_lists: "mandatory-dimensions-with-width-height"
-}
-tags: {
-  name: "amp-vine"
-  attr_lists: "amp-vine-nonlayout-attrs"
-  attr_lists: "extended-amp-global"
-  attr_lists: "mandatory-dimensions-without-width-height"
-}
+
 # <amp-pinterest>
 # https://github.com/ampproject/amphtml/blob/master/extensions/amp-pinterest/amp-pinterest.md
-attr_lists: {
-  name: "amp-pinterest-nonlayout-attrs"
+tags: {
+  name: "amp-pinterest"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-pinterest/amp-pinterest.md"
+  attr_lists: "extended-amp-global"
   # data-* is generally allowed, but it's not generally mandatory.
   attrs: { name: "data-do" mandatory: true }
   attrs: { name: "data-url" mandatory: true }
+  amp_layout: {
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: RESPONSIVE
+    supported_layouts: FILL
+    supported_layouts: NODISPLAY
+  }
 }
-tags: {
-  name: "amp-pinterest"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-pinterest/amp-pinterest.md"
-  attr_lists: "amp-pinterest-nonlayout-attrs"
-  attr_lists: "extended-amp-global"
-  attr_lists: "mandatory-dimensions-missing-layout"
-}
-tags: {
-  name: "amp-pinterest"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-pinterest/amp-pinterest.md"
-  attr_lists: "amp-pinterest-nonlayout-attrs"
-  attr_lists: "extended-amp-global"
-  attr_lists: "mandatory-dimensions-with-width-height"
-}
-tags: {
-  name: "amp-pinterest"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-pinterest/amp-pinterest.md"
-  attr_lists: "amp-pinterest-nonlayout-attrs"
-  attr_lists: "extended-amp-global"
-  attr_lists: "mandatory-dimensions-without-width-height"
-}
+
 # <amp-twitter>
-attr_lists: {
-  name: "amp-twitter-nonlayout-attrs"
-  attrs: {
-    name: "data-tweetid"
-    mandatory_oneof: "data-tweetid or src"
+tags: {
+  name: "amp-twitter"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-twitter/amp-twitter.md"
+  attr_lists: "extended-amp-global"
+  attrs: { name: "data-tweetid" mandatory_oneof: "data-tweetid or src" }
+  attrs: { name: "src" mandatory_oneof: "data-tweetid or src" }
+  amp_layout: {
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: RESPONSIVE
+    supported_layouts: FILL
+    supported_layouts: NODISPLAY
   }
-  attrs: {
-    name: "src"
-    mandatory_oneof: "data-tweetid or src"
-  }
 }
-tags: {
-  name: "amp-twitter"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-twitter/amp-twitter.md"
-  attr_lists: "amp-twitter-nonlayout-attrs"
-  attr_lists: "extended-amp-global"
-  attr_lists: "mandatory-dimensions-missing-layout"
-}
-tags: {
-  name: "amp-twitter"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-twitter/amp-twitter.md"
-  attr_lists: "amp-twitter-nonlayout-attrs"
-  attr_lists: "extended-amp-global"
-  attr_lists: "mandatory-dimensions-with-width-height"
-}
-tags: {
-  name: "amp-twitter"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-twitter/amp-twitter.md"
-  attr_lists: "amp-twitter-nonlayout-attrs"
-  attr_lists: "extended-amp-global"
-  attr_lists: "mandatory-dimensions-without-width-height"
-}
+
 # <amp-instagram>
-attr_lists: {
-  name: "amp-instagram-nonlayout-attrs"
+tags: {
+  name: "amp-instagram"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-instagram/amp-instagram.md"
+  attr_lists: "extended-amp-global"
   attrs: {
     name: "data-shortcode"
     mandatory_oneof: "data-shortcode or src"
@@ -2056,104 +1861,58 @@ attr_lists: {
     deprecation_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-instagram/amp-instagram.md"
     mandatory_oneof: "data-shortcode or src"
   }
-}
-tags: {
-  name: "amp-instagram"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-instagram/amp-instagram.md"
-  attr_lists: "amp-instagram-nonlayout-attrs"
-  attr_lists: "extended-amp-global"
-  attr_lists: "mandatory-dimensions-missing-layout"
-}
-tags: {
-  name: "amp-instagram"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-instagram/amp-instagram.md"
-  attr_lists: "amp-instagram-nonlayout-attrs"
-  attr_lists: "extended-amp-global"
-  attr_lists: "mandatory-dimensions-with-width-height"
-}
-tags: {
-  name: "amp-instagram"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-instagram/amp-instagram.md"
-  attr_lists: "amp-instagram-nonlayout-attrs"
-  attr_lists: "extended-amp-global"
-  attr_lists: "mandatory-dimensions-without-width-height"
-}
-# <amp-iframe>
-attr_lists: {
-  name: "amp-iframe-nonlayout-attrs"
-  attrs: { name: "sandbox" }
-  attrs: {
-    name: "scrolling"
-    value_regex: "auto|yes|no"
+  amp_layout: {
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: RESPONSIVE
+    supported_layouts: FILL
+    supported_layouts: NODISPLAY
   }
-  attrs: {
-    name: "allowfullscreen"
-    value: ""
-  }
-  attrs: {
-    name: "allowtransparency"
-    value: ""
-  }
-  attrs: {
-    name: "resizable"
-    value: ""
-  }
-  attrs: {
-    name: "frameborder"
-    value_regex: "0|1"
-  }
-  attrs: { name: "src" mandatory_oneof: "src or srcdoc" }
-  attrs: { name: "srcdoc" mandatory_oneof: "src or srcdoc" }
-}
-tags: {
-  name: "amp-iframe"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-iframe/amp-iframe.md"
-  attr_lists: "amp-iframe-nonlayout-attrs"
-  attr_lists: "extended-amp-global"
-  attr_lists: "mandatory-dimensions-missing-layout"
-}
-tags: {
-  name: "amp-iframe"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-iframe/amp-iframe.md"
-  attr_lists: "amp-iframe-nonlayout-attrs"
-  attr_lists: "extended-amp-global"
-  attr_lists: "mandatory-dimensions-with-width-height"
-}
-tags: {
-  name: "amp-iframe"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-iframe/amp-iframe.md"
-  attr_lists: "amp-iframe-nonlayout-attrs"
-  attr_lists: "extended-amp-global"
-  attr_lists: "mandatory-dimensions-without-width-height"
 }
 
-# amp-pixel, amp-lightbox, and amp-audio have relaxed layout requirements.
-# These elements can have missing width/height attributes even in the case
-# of a fixed layout.
-attr_lists: {
-  name: "optional-dimensions"
-  attrs: {
-    name: "layout"
-    # | prefix intended. empty value is valid, defaults to container.
-    value_regex: "|nodisplay|fixed|responsive|fill|container"
+# <amp-iframe>
+tags: {
+  name: "amp-iframe"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-iframe/amp-iframe.md"
+  attr_lists: "extended-amp-global"
+  attrs: { name: "sandbox" }
+  attrs: { name: "scrolling" value_regex: "auto|yes|no" }
+  attrs: { name: "allowfullscreen" value: "" }
+  attrs: { name: "allowtransparency" value: "" }
+  attrs: { name: "resizable" value: "" }
+  attrs: { name: "frameborder" value_regex: "0|1" }
+  attrs: { name: "src" mandatory_oneof: "src or srcdoc" }
+  attrs: { name: "srcdoc" mandatory_oneof: "src or srcdoc" }
+  amp_layout: {
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: RESPONSIVE
+    supported_layouts: FILL
+    supported_layouts: NODISPLAY
   }
-  attrs: { name: "width" }
-  attrs: { name: "height" }
 }
+
+# <amp-pixel>
 tags: {
   name: "amp-pixel"
-  attr_lists: "optional-dimensions"
   attr_lists: "extended-amp-global"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/builtins/amp-pixel.md"
   attrs: {
     name: "src"
     mandatory: true
   }
+  amp_layout {
+    supported_layouts: FIXED
+    supported_layouts: NODISPLAY
+    defines_default_width: true
+    defines_default_height: true
+  }
 }
+
+# <amp-audio>
 tags: {
   name: "amp-audio"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-audio/amp-audio.md"
-  attr_lists: "optional-dimensions"
   attr_lists: "extended-amp-global"
   attrs: { name: "src" }
   attrs: {
@@ -2161,71 +1920,88 @@ tags: {
     # | prefix intended. empty string is valid.
     value_regex: "|desktop|tablet|mobile"
   }
-  attrs: {
-    name: "loop"
-    value: ""
-  }
-  attrs: {
-    name: "muted"
-    value: ""
-  }
+  attrs: { name: "loop"  value: "" }
+  attrs: { name: "muted" value: "" }
   attrs: { name: "controls" }
+  amp_layout {
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: NODISPLAY
+    # TODO(johannes): in the longer run, defines_default_width should
+    # be false, to make it a fixed height layout per default, rather
+    # than a fixed one.
+    defines_default_width: true
+    defines_default_height: true
+  }
 }
+
+# <amp-lightbox>
 tags: {
   name: "amp-lightbox"
-  attr_lists: "optional-dimensions"
   attr_lists: "extended-amp-global"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-lightbox/amp-lightbox.md"
   attrs: { name: "from" }
   attrs: { name: "controls" }
-}
-attr_lists: {
-  name: "amp-list-nonlayout-attrs"
-  attrs: {
-    name: "src"
-    mandatory: true
+  amp_layout: {
+    supported_layouts: NODISPLAY
   }
-  attrs: { name: "credentials" }
 }
-tags: {
-  name: "amp-list"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-list/amp-list.md"
-  attr_lists: "amp-list-nonlayout-attrs"
-  attr_lists: "extended-amp-global"
-  attr_lists: "mandatory-dimensions-missing-layout"
-}
-tags: {
-  name: "amp-list"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-list/amp-list.md"
-  attr_lists: "amp-list-nonlayout-attrs"
-  attr_lists: "extended-amp-global"
-  attr_lists: "mandatory-dimensions-with-width-height"
-}
-tags: {
-  name: "amp-list"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-list/amp-list.md"
-  attr_lists: "amp-list-nonlayout-attrs"
-  attr_lists: "extended-amp-global"
-  attr_lists: "mandatory-dimensions-without-width-height"
-}
+
+# <amp-image-lightbox>
 tags: {
   name: "amp-image-lightbox"  # See http://b/24381009.
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-image-lightbox/amp-image-lightbox.md"
   # Support dimensions / sizes / etc. like an amp-lightbox.
-  attr_lists: "optional-dimensions"
   attr_lists: "extended-amp-global"
   attrs: { name: "controls" }
+  amp_layout: {
+    supported_layouts: NODISPLAY
+  }
 }
+
+# <amp-list>
+tags: {
+  name: "amp-list"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-list/amp-list.md"
+  attr_lists: "extended-amp-global"
+
+  attrs: { name: "src" mandatory: true }
+  attrs: { name: "credentials" }
+  amp_layout: {
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: RESPONSIVE
+    supported_layouts: FILL
+    supported_layouts: NODISPLAY
+  }
+}
+
+# <amp-image-serviceworker>
 tags: {
   name: "amp-install-serviceworker"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-install-serviceworker/amp-install-serviceworker.md"
   attrs: { name: "src" }
 }
+
+#
+# AMP Layout attributes: implied for TagSpecs with amp_layout field
+# set. Note that while these attributes are defined as optional here,
+# depending on amp layout the validator will examine these fields and
+# their values.
+#
+attr_lists: {
+  name: "$AMP_LAYOUT_ATTRS"
+  attrs: { name: "layout" }
+  attrs: { name: "width" }
+  attrs: { name: "height" }
+  attrs: { name: "sizes" }
+}
+
 #
 # Global attributes: These can be used in all tags.
 #
 attr_lists: {
-  name: "$GLOBAL_ATTRIBUTES"
+  name: "$GLOBAL_ATTRS"
   # For schema.org annotations.
   attrs: { name: "itemprop" }
   attrs: { name: "itemscope" }
