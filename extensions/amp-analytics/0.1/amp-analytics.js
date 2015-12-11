@@ -84,7 +84,7 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     if (this.hasOptedOut_()) {
       // Nothing to do when the user has opted out.
-      log.fine(this.getName_(), "User has opted out. No hits will be sent.");
+      log.fine(this.getName_(), 'User has opted out. No hits will be sent.');
       return;
     }
 
@@ -126,10 +126,17 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     let inline = {};
     try {
-      inline = JSON.parse(this.element.textContent);
+      const children = this.element.children;
+      if (children.length == 1 && children[0].tagName.toUpperCase() == 'SCRIPT') {
+        inline = JSON.parse(children[0].textContent);
+      } else if (children.length > 1) {
+        log.warn(this.getName_(),
+            'The tag should contain only one <script> child.');
+      }
     }
     catch (er) {
-      log.warn(this.getName(), "Analytics config could not be parsed.");
+      log.warn(this.getName(), 'Analytics config could not be parsed. ' +
+          'Is it in a valid JSON format?');
     }
     const config = this.predefinedConfig_[this.element.getAttribute('type')]
         || {};
