@@ -20,12 +20,12 @@
 # in production from crashing. This id is not relevant to validator.js
 # because thus far, engine (validator.js) and spec file (validator.protoascii)
 # are always released together.
-min_validator_revision_required: 63
+min_validator_revision_required: 65
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 93
+spec_file_revision: 95
 
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
@@ -1600,6 +1600,52 @@ attr_lists: {
   name: "extended-amp-global"
   attrs: { name: "media" }
   attrs: { name: "noloading" value: "" }
+}
+
+# <amp-brightcove>
+attr_lists: {
+  name: "amp-brightcove-nonlayout-attrs"
+  attrs: {
+    name: "data-account"
+    mandatory: true
+  }
+  attrs: {
+    # If data-player is missing, the default value is "default".
+    name: "data-player"
+  }
+  attrs: {
+    # If data-embed is missing, the default value is "default".
+    name: "data-embed"
+  }
+  attrs: {
+    # If data-video-id is not used for perform player and hence it is optional.
+    name: "data-video-id"
+  }
+  attrs: {
+    # If data-playlist-id is not used for perform player and hence it is optional.
+    name: "data-playlist-id"
+  }
+}
+tags: {
+  name: "amp-brightcove"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-brightcove/amp-brightcove.md"
+  attr_lists: "amp-brightcove-nonlayout-attrs"
+  attr_lists: "extended-amp-global"
+  attr_lists: "mandatory-dimensions-missing-layout"
+}
+tags: {
+  name: "amp-brightcove"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-brightcove/amp-brightcove.md"
+  attr_lists: "amp-brightcove-nonlayout-attrs"
+  attr_lists: "extended-amp-global"
+  attr_lists: "mandatory-dimensions-with-width-height"
+}
+tags: {
+  name: "amp-brightcove"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-brightcove/amp-brightcove.md"
+  attr_lists: "amp-brightcove-nonlayout-attrs"
+  attr_lists: "extended-amp-global"
+  attr_lists: "mandatory-dimensions-without-width-height"
 }
 
 # <amp-font>
