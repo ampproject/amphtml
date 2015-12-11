@@ -127,16 +127,23 @@ export class AmpAnalytics extends AMP.BaseElement {
     let inline = {};
     try {
       const children = this.element.children;
-      if (children.length == 1 && children[0].tagName.toUpperCase() == 'SCRIPT') {
-        inline = JSON.parse(children[0].textContent);
+      if (children.length == 1) {
+        const child = children[0];
+        if (child.tagName.toUpperCase() == 'SCRIPT' &&
+            child.getAttribute('type').toUpperCase() == 'APPLICATION/JSON') {
+          inline = JSON.parse(children[0].textContent);
+        } else {
+          log.warn(this.getName_(), 'The analytics config should be put in a ' +
+              '<script> tag with type=application/json');
+        }
       } else if (children.length > 1) {
         log.warn(this.getName_(),
             'The tag should contain only one <script> child.');
       }
     }
     catch (er) {
-      log.warn(this.getName(), 'Analytics config could not be parsed. ' +
-          'Is it in a valid JSON format?');
+      log.warn(this.getName_(), 'Analytics config could not be parsed. ' +
+          'Is it in a valid JSON format?', er);
     }
     const config = this.predefinedConfig_[this.element.getAttribute('type')]
         || {};

@@ -51,6 +51,7 @@ describe('amp-analytics', function() {
     const el = document.createElement('amp-analytics');
     const script = document.createElement('script');
     script.textContent = config;
+    script.setAttribute('type', 'application/json');
     el.appendChild(script);
     for (const k in attrs) {
       el.setAttribute(k, attrs[k]);
@@ -87,7 +88,7 @@ describe('amp-analytics', function() {
   });
 
   it('does not send a hit when config is not in a script tag', function() {
-    let config = JSON.stringify({
+    const config = JSON.stringify({
       'host': 'example.com',
       'requests': {'foo': '/bar'},
       'triggers': [{'on': 'visible', 'request': 'foo'}]
@@ -110,10 +111,32 @@ describe('amp-analytics', function() {
       'requests': {'foo': '/bar'},
       'triggers': [{'on': 'visible', 'request': 'foo'}]
     });
-    analytics.element.appendChild(document.createElement('script'));
+    const script2 = document.createElement('script');
+    script2.setAttribute('type', 'application/json');
+    analytics.element.appendChild(script2);
     analytics.buildCallback();
     expect(sendRequestSpy.callCount).to.equal(0);
   });
+
+  it('does not send a hit when script tag does not have a type attribute',
+      function() {
+        const el = document.createElement('amp-analytics');
+        const script = document.createElement('script');
+        script.textContent = JSON.stringify({
+          'host': 'example.com',
+          'requests': {'foo': '/bar'},
+          'triggers': [{'on': 'visible', 'request': 'foo'}]
+        });
+        el.appendChild(script);
+        const analytics = new AmpAnalytics(el);
+        sandbox.stub(analytics, 'getWin').returns(windowApi);
+        analytics.isExperimentOn_ = () => true;
+        analytics.createdCallback();
+        sendRequestSpy = sandbox.spy(analytics, 'sendRequest_');
+
+        analytics.buildCallback();
+        expect(sendRequestSpy.callCount).to.equal(0);
+      });
 
   it('does not send a hit when host is not provided', function() {
     const analytics = getAnalyticsTag({
