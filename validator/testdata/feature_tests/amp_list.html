@@ -32,8 +32,13 @@
             src="https://data.com/articles.json?ref=CANONICAL_URL">
     <div></div>
   </amp-list>
-  <!-- Invalid: src attribute is missing. -->
-  <amp-list wdith=10 height=10>
+  <!-- Invalid: width is mistyped. -->
+  <amp-list src="https://data.com/articles.json?ref=CANONICAL_URL"
+            wdith=10 height=10>
+    <div></div>
+  </amp-list>
+  <!-- Invalid: src is missing. -->
+  <amp-list width=10 height=10>
     <div></div>
   </amp-list>
   <!-- also invalid: width/height missing, so it's container layout
