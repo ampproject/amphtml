@@ -1286,6 +1286,11 @@ ParsedTagSpec.prototype.getSpec = function() {
   return this.spec_;
 };
 
+/**
+ * Returns true if |value| contains a mustache unescaped template syntax.
+ * @param {!string} value
+ * @return {boolean}
+ */
 ParsedTagSpec.prototype.valueHasUnescapedTemplateSyntax = function(value) {
   // Mustache (https://mustache.github.io/mustache.5.html), our template
   // system, supports {{{unescaped}}} or {{{&unescaped}}} and there can
@@ -1294,13 +1299,18 @@ ParsedTagSpec.prototype.valueHasUnescapedTemplateSyntax = function(value) {
   return unescapedOpenTag.test(value);
 };
 
+/**
+ * Returns true if |value| contains a mustache partials template syntax.
+ * @param {!string} value
+ * @return {boolean}
+ */
 ParsedTagSpec.prototype.valueHasPartialsTemplateSyntax = function(value) {
   // Mustache (https://mustache.github.io/mustache.5.html), our template
   // system, supports 'partials' which include other Mustache templates
   // in the format of {{>partial}} and there can be whitespace after the {{.
   // We disallow partials in attribute values.
-  const unescapedOpenTag = new RegExp('{{\\s*>', 'g');
-  return unescapedOpenTag.test(value);
+  const partialsTag = new RegExp('{{\\s*>', 'g');
+  return partialsTag.test(value);
 };
 
 /**
@@ -1463,17 +1473,19 @@ ParsedTagSpec.prototype.validateAttributes = function(
       }
       return;
     }
-    if (parsedSpec.valueHasUnescapedTemplateSyntax(encounteredAttrValue)) {
+    if (this.valueHasUnescapedTemplateSyntax(encounteredAttrValue)) {
       context.addError(
           amp.validator.ValidationError.Code.UNESCAPED_TEMPLATE_IN_ATTR_VALUE,
           encounteredAttrName + '=' + encounteredAttrValue,
           this.templateSpecUrl_, resultForAttempt);
+      return;
     }
-    if (parsedSpec.valueHasPartialsTemplateSyntax(encounteredAttrValue)) {
+    if (this.valueHasPartialsTemplateSyntax(encounteredAttrValue)) {
       context.addError(
           amp.validator.ValidationError.Code.TEMPLATE_PARTIAL_IN_ATTR_VALUE,
           encounteredAttrName + '=' + encounteredAttrValue,
           this.templateSpecUrl_, resultForAttempt);
+      return;
     }
 
     if (parsedSpec.getSpec().deprecation !== null) {
