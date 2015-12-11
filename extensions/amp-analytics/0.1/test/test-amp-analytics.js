@@ -49,7 +49,10 @@ describe('amp-analytics', function() {
   function getAnalyticsTag(config, attrs) {
     config = JSON.stringify(config);
     const el = document.createElement('amp-analytics');
-    el.textContent = config;
+    const script = document.createElement('script');
+    script.textContent = config;
+    script.setAttribute('type', 'application/json');
+    el.appendChild(script);
     for (const k in attrs) {
       el.setAttribute(k, attrs[k]);
     }
@@ -83,6 +86,57 @@ describe('amp-analytics', function() {
     analytics.buildCallback();
     expect(sendRequestSpy.withArgs('https://example.com/bar').calledOnce).to.be.true;
   });
+
+  it('does not send a hit when config is not in a script tag', function() {
+    const config = JSON.stringify({
+      'host': 'example.com',
+      'requests': {'foo': '/bar'},
+      'triggers': [{'on': 'visible', 'request': 'foo'}]
+    });
+    const el = document.createElement('amp-analytics');
+    el.textContent = config;
+    const analytics = new AmpAnalytics(el);
+    sandbox.stub(analytics, 'getWin').returns(windowApi);
+    analytics.isExperimentOn_ = () => true;
+    analytics.createdCallback();
+    sendRequestSpy = sandbox.spy(analytics, 'sendRequest_');
+
+    analytics.buildCallback();
+    expect(sendRequestSpy.callCount).to.equal(0);
+  });
+
+  it('does not send a hit when multiple child tags exist', function() {
+    const analytics = getAnalyticsTag({
+      'host': 'example.com',
+      'requests': {'foo': '/bar'},
+      'triggers': [{'on': 'visible', 'request': 'foo'}]
+    });
+    const script2 = document.createElement('script');
+    script2.setAttribute('type', 'application/json');
+    analytics.element.appendChild(script2);
+    analytics.buildCallback();
+    expect(sendRequestSpy.callCount).to.equal(0);
+  });
+
+  it('does not send a hit when script tag does not have a type attribute',
+      function() {
+        const el = document.createElement('amp-analytics');
+        const script = document.createElement('script');
+        script.textContent = JSON.stringify({
+          'host': 'example.com',
+          'requests': {'foo': '/bar'},
+          'triggers': [{'on': 'visible', 'request': 'foo'}]
+        });
+        el.appendChild(script);
+        const analytics = new AmpAnalytics(el);
+        sandbox.stub(analytics, 'getWin').returns(windowApi);
+        analytics.isExperimentOn_ = () => true;
+        analytics.createdCallback();
+        sendRequestSpy = sandbox.spy(analytics, 'sendRequest_');
+
+        analytics.buildCallback();
+        expect(sendRequestSpy.callCount).to.equal(0);
+      });
 
   it('does not send a hit when host is not provided', function() {
     const analytics = getAnalyticsTag({
