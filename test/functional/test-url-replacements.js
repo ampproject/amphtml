@@ -20,14 +20,19 @@ import {urlReplacementsFor} from '../../src/url-replacements';
 
 describe('UrlReplacements', () => {
 
-  function expand(url) {
+  function createTestFrame() {
     return createIframePromise().then(iframe => {
       iframe.doc.title = 'Pixel Test';
       const link = iframe.doc.createElement('link');
       link.setAttribute('href', 'https://pinterest.com/pin1');
       link.setAttribute('rel', 'canonical');
       iframe.doc.head.appendChild(link);
-      const replacements = urlReplacementsFor(iframe.win);
+      return urlReplacementsFor(iframe.win);
+    });
+  }
+
+  function expand(url) {
+    return createTestFrame().then(replacements => {
       return replacements.expand(url);
     });
   }
@@ -82,7 +87,7 @@ describe('UrlReplacements', () => {
 
   it('should replace PAGE_VIEW_ID', () => {
     return expand('?pid=PAGE_VIEW_ID').then(res => {
-      expect(res).to.not.match(/pid=\d+/);
+      expect(res).to.match(/pid=\d+/);
     });
   });
 
@@ -116,5 +121,22 @@ describe('UrlReplacements', () => {
 
     replacements.set_('TWO', () => 'b');
     expect(replacements.expand('?b=TWO')).to.equal('?b=b');
+  });
+
+  it('should allow direct value access', () => {
+    return createTestFrame().then(replacements => {
+      expect(replacements.get('RANDOM')).to.match(/\d\.\d+/);
+      expect(replacements.get('CANONICAL_URL')).to.equal(
+          'https://pinterest.com/pin1');
+      expect(replacements.get('CANONICAL_HOST')).to.equal('pinterest.com');
+      expect(replacements.get('CANONICAL_PATH')).to.equal('/pin1');
+      expect(replacements.get('DOCUMENT_REFERRER')).to.equal(
+          'http://localhost:9876/context.html');
+      expect(replacements.get('TITLE')).to.equal('Pixel Test');
+      expect(replacements.get('AMPDOC_URL')).to.not.match(/AMPDOC_URL/);
+      expect(replacements.get('AMPDOC_HOST')).to.not.match(/AMPDOC_HOST/);
+      expect(replacements.get('PAGE_VIEW_ID')).to.match(/\d+/);
+      expect(replacements.get('UNKNOWN')).to.equal('');
+    });
   });
 });

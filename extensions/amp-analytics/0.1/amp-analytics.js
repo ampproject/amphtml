@@ -22,6 +22,7 @@ import {urlReplacementsFor} from '../../../src/url-replacements';
 import {expandTemplate} from '../../../src/string';
 
 import {addListener} from './instrumentation';
+import {analyticsPlatformVarsFor} from './analytics-platform-vars.js';
 import {ANALYTICS_CONFIG} from './vendors';
 
 
@@ -80,6 +81,7 @@ export class AmpAnalytics extends AMP.BaseElement {
      * format string used by the tag to send data
      */
     this.requests_ = {};
+
     this.element.setAttribute('aria-hidden', 'true');
 
     if (this.hasOptedOut_()) {
@@ -147,8 +149,11 @@ export class AmpAnalytics extends AMP.BaseElement {
     }
     const config = this.predefinedConfig_[this.element.getAttribute('type')]
         || {};
-
-    return this.mergeObjects_(remote, this.mergeObjects_(inline, config));
+    const mergedConfig = this.mergeObjects_(remote,
+        this.mergeObjects_(inline, config));
+    mergedConfig['vars'] = mergedConfig['vars'] || {};
+    mergedConfig['vars']['hitCount'] = 0;
+    return mergedConfig;
   }
 
   /**
@@ -209,25 +214,28 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @private
    */
   handleEvent_(trigger, event) {
+    const win = this.getWin();
     const host = this.config_['host'];
     let request = this.requests_[trigger['request']];
     if (!host || !request) {
       return;
     }
 
+    this.config_['vars']['hitCount']++;
+
     // Replace placeholders with URI encoded values.
-    // Precedence is trigger.vars > config.vars > built-in.vars.
+    // Precedence is trigger.vars > config.vars > platform.vars.
     // Nested expansion not supported.
-    // TODO(btownsend, #1116) Add support for built-in vars.
     request = expandTemplate(request, key => {
       return encodeURIComponent(
           (trigger['vars'] && trigger['vars'][key]) ||
-          (this.config_['vars'] && this.config_['vars'][key]) ||
+          this.config_['vars'][key] ||
+          analyticsPlatformVarsFor(win).get(key) ||
           '');
     });
 
     // For consistentcy with amp-pixel we also expand any url replacements.
-    request = urlReplacementsFor(this.getWin()).expand(request);
+    request = urlReplacementsFor(win).expand(request);
 
     // TODO(btownsend, #1061): Add support for sendBeacon.
     if (host && request) {
