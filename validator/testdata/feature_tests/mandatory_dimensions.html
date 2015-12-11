@@ -35,27 +35,34 @@
     <amp-img src="" layout="responsive" width="42" height="42"></amp-img>
     <amp-img src="" layout="fixed" width="42" height="42"></amp-img>
 
-    <!-- Layout of nodisplay/fill/container with/without width/height -->
+    <!-- Layout of nodisplay/fill with/without width/height -->
     <amp-img src="" layout="nodisplay" width="42" height="42"></amp-img>
     <amp-img src="" layout="fill" width="42" height="42"></amp-img>
-    <amp-img src="" layout="container" width="42" height="42"></amp-img>
     <amp-img src="" layout="nodisplay"></amp-img>
     <amp-img src="" layout="fill"></amp-img>
-    <amp-img src="" layout="container"></amp-img>
 
-    <!-- Layout of nodisplay/fill/container with partial width/height.
+    <!-- Layout of nodisplay/fill with partial width/height.
          These should not validate, but currently do. -->
     <amp-img src="" layout="nodisplay" width="42"></amp-img>
     <amp-img src="" layout="fill" height="42"></amp-img>
-    <amp-img src="" layout="container" width="42"></amp-img>
 
-    <!-- Missing layout implies layout="container", width/height optional -->
+    <!-- Missing layout implies layout="fixed" when width and height are set. -->
     <amp-img src="" width="42" height="42"></amp-img>
-    <amp-img src="" width="42"></amp-img>
-    <amp-img src=""></amp-img>
+
+    <!-- fixed-height layout allows width=auto. -->
+    <amp-img layout="fixed-height" src="" width="auto" height="42"></amp-img>
+    <amp-img layout="fixed-height" src="" height="42"></amp-img>
+
+    <!-- Missing layout implies layout="fixed-height" when height is set. -->
+    <amp-img src="" width="auto" height="42"></amp-img>
+    <amp-img src="" height="42"></amp-img>
+
+    <!-- It's OK to have inconsistent units for layout="fixed" -->
+    <amp-img src="" layout="fixed" width="42px" height="42rem">
+
 
     <!-- throw in some fully optional attrs -->
-    <amp-img src="" placeholder=""></amp-img>
+    <amp-img src="" width=42 height=42 placeholder=""></amp-img>
     <amp-img src="" layout="nodisplay" alt="" attribution=""></amp-img>
     <amp-img src="" layout="fixed" width="42" height="42" on="" media="">
     </amp-img>
@@ -65,67 +72,77 @@
     <amp-audio src="" layout="fixed"></amp-audio>
     <amp-pixel src="" layout="fixed" width="42"></amp-pixel>
     <amp-pixel src="" layout="fixed"></amp-pixel>
-    <amp-lightbox layout="fixed" width="42"></amp-lightbox>
-    <amp-lightbox layout="fixed"></amp-lightbox>
+    <amp-lightbox layout="nodisplay" width="42"></amp-lightbox>
+    <amp-lightbox layout="nodisplay"></amp-lightbox>
 
     <!-- src or srcset or both are all valid -->
-    <amp-img src=""></amp-img>
-    <amp-img srcset=""></amp-img>
-    <amp-img src="" srcset=""></amp-img>
-    <amp-anim src=""></amp-anim>
-    <amp-anim srcset=""></amp-anim>
-    <amp-anim src="" srcset=""></amp-anim>
+    <amp-img width="42" height="42" src=""></amp-img>
+    <amp-img width="42" height="42" srcset=""></amp-img>
+    <amp-img width="42" height="42" src="" srcset=""></amp-img>
+    <amp-anim width="42" height="42" src=""></amp-anim>
+    <amp-anim width="42" height="42" srcset=""></amp-anim>
+    <amp-anim width="42" height="42" src="" srcset=""></amp-anim>
 
     <!-- src optional -->
     <amp-audio src=""></amp-audio>
     <amp-audio></amp-audio>
-    <amp-video src=""></amp-video>
-    <amp-video></amp-video>
-    <amp-ad type="" src=""></amp-ad>
-    <amp-ad type=""></amp-ad>
+    <amp-video width="42" height="42" src=""></amp-video>
+    <amp-video width="42" height="42"></amp-video>
+    <amp-ad width="42" height="42" type="" src=""></amp-ad>
+    <amp-ad width="42" height="42" type=""></amp-ad>
 
     <!-- src required -->
-    <amp-iframe src=""></amp-iframe>
+    <amp-iframe width="42" height="42" src=""></amp-iframe>
     <amp-pixel src=""></amp-pixel>
 
     <!-- disallow a src or srcset -->
-    <amp-fit-text></amp-fit-text>
-    <amp-carousel></amp-carousel>
-    <amp-youtube data-videoid=""></amp-youtube>
-    <amp-twitter data-tweetid=""></amp-twitter>
-    <amp-instagram data-shortcode=""></amp-instagram>
-    <amp-lightbox></amp-lightbox>
+    <amp-fit-text height="42"></amp-fit-text>
+    <amp-carousel height="42"></amp-carousel>
+    <amp-youtube data-videoid="" height="42"></amp-youtube>
+    <amp-twitter data-tweetid="" height="42"></amp-twitter>
+    <amp-instagram data-shortcode="" height="42"></amp-instagram>
+    <amp-lightbox layout="nodisplay"></amp-lightbox>
   <!-- /Valid Examples -->
 
   <!-- Invalid Examples -->
+    <!-- Container layout isn't supported by amp-img. -->
+    <amp-img src="" layout="container">
+    <amp-img src="" layout="container" width="42" height="42">
+    <amp-img src="">
+
     <!-- Layout of responsive/fixed without width/height -->
     <amp-img src="" layout="responsive">
     <amp-img src="" layout="fixed">
     <amp-img src="" layout="responsive" width="42">
     <amp-img src="" layout="fixed" height="42">
+    <amp-img src="" layout="fixed" height="auto">
+    <amp-img src="" layout="fixed" width="auto" height="42">
+
+    <!-- Inconsistent units -->
+    <amp-img src="" layout="responsive" width="42px" height="42rem">
 
     <!-- src or srcset or both are all valid -->
-    <amp-img></amp-img>
-    <amp-anim></amp-anum>
+    <amp-img width="42" height="42"></amp-img>
+    <amp-anim width="42" height="42"></amp-anum>
 
     <!-- src optional -->
     <amp-audio srcset=""></amp-audio>
-    <amp-ad type="" srcset=""></amp-ad>
+    <amp-ad height="42" type="" srcset=""></amp-ad>
 
     <!-- src required -->
-    <amp-iframe></amp-iframe>
+    <amp-iframe height="42"></amp-iframe>
     <amp-pixel></amp-pixel>
 
     <!-- disallow a src or srcset -->
-    <amp-fit-text src=""></amp-fit-text>
-    <amp-carousel src=""></amp-carousel>
-    <amp-youtube data-videoid="" srcset=""></amp-youtube>
-    <amp-twitter data-tweetid="" srcset=""></amp-twitter>
-    <amp-instagram data-shortcode="" srcset=""></amp-instagram>
-    <amp-lightbox src=""></amp-lightbox>
+    <amp-fit-text height="42" src=""></amp-fit-text>
+    <amp-carousel height="42" src=""></amp-carousel>
+    <amp-youtube height="42" data-videoid="" srcset=""></amp-youtube>
+    <amp-twitter height="42" data-tweetid="" srcset=""></amp-twitter>
+    <amp-instagram height="42" data-shortcode="" srcset=""></amp-instagram>
+    <amp-lightbox layout="nodisplay" src=""></amp-lightbox>
 
     <!-- Not-whitelisted attributes -->
-    <amp-img src="" foo="bar"></amp-img>
+    <amp-img height="42" src="" foo="bar"></amp-img>
   <!-- /Invalid Examples -->
 
 </body>

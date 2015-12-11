@@ -28,11 +28,17 @@
 </head>
 <body>
   <!-- Example of a valid amp-list -->
-  <amp-list src="https://data.com/articles.json?ref=CANONICAL_URL">
+  <amp-list width=10 height=10
+            src="https://data.com/articles.json?ref=CANONICAL_URL">
     <div></div>
   </amp-list>
   <!-- Invalid: src attribute is missing. -->
-  <amp-list>
+  <amp-list wdith=10 height=10>
+    <div></div>
+  </amp-list>
+  <!-- also invalid: width/height missing, so it's container layout
+       which isn't supported. -->
+  <amp-list src="https://data.com/articles.json?ref=CANONICAL_URL">
     <div></div>
   </amp-list>
 </body>

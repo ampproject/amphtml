@@ -30,8 +30,10 @@
 <body>
   <table><tr><td>Tables are allowed</td></tr></table>
   <amp-img src=dimensions_are_missing.jpg layout="fixed"/>
-<amp-ad width=100% height=300 made_up_attribute="oh hi">
+  <!-- We don't allow percent as a size unit either. -->
+  <amp-ad width=100% height=300>
     <!-- <script>document.write(…)</script> -->
-</amp-ad>
+  </amp-ad>
+  <amp-ad width="42" height="42" made_up_attribute="oh hi"></amp-ad>
 </body>
 </html>
