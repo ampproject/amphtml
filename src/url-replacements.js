@@ -18,8 +18,13 @@ import {assert} from './asserts';
 import {cidFor} from './cid';
 import {documentInfoFor} from './document-info';
 import {getService, getElementService} from './service';
+import {log} from './log';
 import {parseUrl, removeFragment} from './url';
+import {viewportFor} from './viewport';
+import {vsyncFor} from './vsync';
 
+/** @private {string} */
+const TAG_ = 'UrlReplacements';
 
 /**
  * This class replaces substitution variables with their values.
@@ -94,6 +99,44 @@ class UrlReplacements {
             Promise.resolve());
       });
     });
+
+    // Returns the number of milliseconds since 1 Jan 1970 00:00:00 UTC.
+    this.set_('TIMESTAMP', () => {
+      return new Date().getTime();
+    });
+
+    // Returns the user's time-zone offset from UTC, in minutes.
+    this.set_('TIMEZONE', () => {
+      return new Date().getTimezoneOffset();
+    });
+
+    // Returns a promise resolving to viewport.getScrollTop.
+    this.set_('SCROLL_TOP', () => {
+      return vsyncFor(this.win_).measurePromise(
+        () => viewportFor(this.win_).getScrollTop());
+    });
+
+    // Returns a promise resolving to viewport.getScrollLeft.
+    this.set_('SCROLL_LEFT', () => {
+      return vsyncFor(this.win_).measurePromise(
+        () => viewportFor(this.win_).getScrollLeft());
+    });
+
+    // Returns a promise resolving to viewport.getScrollHeight.
+    this.set_('SCROLL_HEIGHT', () => {
+      return vsyncFor(this.win_).measurePromise(
+        () => viewportFor(this.win_).getScrollHeight());
+    });
+
+    // Returns screen.width.
+    this.set_('SCREEN_WIDTH', () => {
+      return this.win_.screen.width;
+    });
+
+    // Returns screen.height.
+    this.set_('SCREEN_HEIGHT', () => {
+      return this.win_.screen.height;
+    });
   }
 
   /**
@@ -135,6 +178,8 @@ class UrlReplacements {
       if (val && val.then) {
         const p = val.then(v => {
           url = url.replace(match, encodeValue(v));
+        }, err => {
+          log.error(TAG_, 'Failed to expand: ' + name, err);
         });
         if (replacementPromise) {
           replacementPromise = replacementPromise.then(() => p);

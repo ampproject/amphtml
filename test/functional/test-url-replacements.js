@@ -103,6 +103,48 @@ describe('UrlReplacements', () => {
         });
   });
 
+  it('should replace TIMESTAMP', () => {
+    return expand('?ts=TIMESTAMP').then(res => {
+      expect(res).to.match(/ts=\d+/);
+    });
+  });
+
+  it('should replace TIMEZONE', () => {
+    return expand('?tz=TIMEZONE').then(res => {
+      expect(res).to.match(/tz=\d+/);
+    });
+  });
+
+  it('should replace SCROLL_TOP', () => {
+    return expand('?scrollTop=SCROLL_TOP').then(res => {
+      expect(res).to.match(/scrollTop=\d+/);
+    });
+  });
+
+  it('should replace SCROLL_LEFT', () => {
+    return expand('?scrollLeft=SCROLL_LEFT').then(res => {
+      expect(res).to.match(/scrollLeft=\d+/);
+    });
+  });
+
+  it('should replace SCROLL_HEIGHT', () => {
+    return expand('?scrollHeight=SCROLL_HEIGHT').then(res => {
+      expect(res).to.match(/scrollHeight=\d+/);
+    });
+  });
+
+  it('should replace SCREEN_WIDTH', () => {
+    return expand('?sw=SCREEN_WIDTH').then(res => {
+      expect(res).to.match(/sw=\d+/);
+    });
+  });
+
+  it('should replace SCREEN_HEIGHT', () => {
+    return expand('?sh=SCREEN_HEIGHT').then(res => {
+      expect(res).to.match(/sh=\d+/);
+    });
+  });
+
   it('should accept $expressions', () => {
     return expand('?href=$CANONICAL_URL').then(res => {
       expect(res).to.equal('?href=https%3A%2F%2Fpinterest.com%2Fpin1');

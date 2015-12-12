@@ -16,8 +16,8 @@
 {
   "host": "example.com",
   "requests": {
-    "base": "/log?domain=DOMAIN&path=PATH&title=${title}",
-    "event": "${base}&name=${eventName}&type=${eventId}"
+    "base": "?domain=${canonicalHost}&path=${canonicalPath}&title=${title}",
+    "event": "${base}&name=${eventName}&type=${eventId}&time=${timestamp}&tz=${timezone}&pid=${pageViewId}&screenSize=${screenWidth}x${screenHeight}"
   },
   "vars": {
     "title": "Example Request"
