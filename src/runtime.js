@@ -47,7 +47,9 @@ export function adopt(global) {
   // of functions
   const preregisteredElements = global.AMP || [];
 
-  global.AMP = {};
+  global.AMP = {
+    win: global
+  };
 
   /**
    * Registers an extended element and installs its styles.
