@@ -69,6 +69,14 @@ var forbiddenTerms = {
       'test/functional/test-cid.js',
     ],
   },
+  'getBaseCid': {
+    message: requiresReviewPrivacy,
+    whitelist: [
+      'src/service/cid-impl.js',
+      'src/viewer.js',
+      'test/functional/test-cid.js',
+    ],
+  },
   'cookie\\W': {
     message: requiresReviewPrivacy,
     whitelist: [

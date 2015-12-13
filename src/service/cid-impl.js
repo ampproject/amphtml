@@ -27,6 +27,7 @@ import {getCookie} from '../cookies';
 import {getService} from '../service';
 import {parseUrl} from '../url';
 import {timer} from '../timer';
+import {viewerFor} from '../viewer';
 import {sha384Base64} from
     '../../third_party/closure-library/sha384-generated';
 
@@ -182,6 +183,13 @@ function getBaseCid(cid, persistenceConsent) {
     cid.baseCid_ = stored.cid;
     return Promise.resolve(stored.cid);
   }
+  // If we are being embedded, try to get the base cid from the viewer.
+  // Note, that we never try to persist to localStorage in this case.
+  const viewer = viewerFor(win);
+  if (viewer.isEmbedded()) {
+    return viewer.getBaseCid();
+  }
+
   // We need to make a new one.
   const seed = getEntropy(win);
   const newVal = cid.sha384Base64_(seed);
@@ -208,7 +216,15 @@ function store(win, cidString) {
   const item = {};
   item['time'] = timer.now();
   item['cid'] = cidString;
-  win.localStorage.setItem('amp-cid', JSON.stringify(item));
+  const data = JSON.stringify(item);
+  try {
+    win.localStorage.setItem('amp-cid', data);
+  } catch (ignore) {
+    // Setting localStorage may fail. In practice we don't expect that to
+    // happen a lot (since we don't go anywhere near the quote, but
+    // in particular in Safari private browsing mode it always fails.
+    // In that case we just don't store anything, which is just fine.
+  }
 }
 
 /**
@@ -218,7 +234,12 @@ function store(win, cidString) {
  * @return {!BaseCidInfo|undefined}
  */
 function read(win) {
-  const val = win.localStorage.getItem('amp-cid');
+  let val;
+  try {
+    val = win.localStorage.getItem('amp-cid');
+  } catch (ignore) {
+    // If reading from localStorage fails, we assume it is empty.
+  }
   if (!val) {
     return undefined;
   }
