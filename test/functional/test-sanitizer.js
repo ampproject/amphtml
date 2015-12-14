@@ -39,6 +39,7 @@ describe('sanitizeHtml', () => {
 
   it('should NOT output security-sensitive markup', () => {
     expect(sanitizeHtml('a<script>b</script>c')).to.be.equal('ac');
+    expect(sanitizeHtml('a<script>b<img>d</script>c')).to.be.equal('ac');
     expect(sanitizeHtml('a<style>b</style>c')).to.be.equal('ac');
     expect(sanitizeHtml('a<img>c')).to.be.equal('ac');
     expect(sanitizeHtml('a<iframe></iframe>c')).to.be.equal('ac');
@@ -107,6 +108,13 @@ describe('sanitizeHtml', () => {
 
   it('should NOT output security-sensitive attributes', () => {
     expect(sanitizeHtml('a<a onclick="alert">b</a>')).to.be.equal('a<a>b</a>');
+  });
+
+  it('should apply html4/caja restrictions', () => {
+    expect(sanitizeHtml('a<dialog>b</dialog>c')).to.be.equal('ac');
+    expect(sanitizeHtml('a<dialog>b<img>d</dialog>c')).to.be.equal('ac');
+    expect(sanitizeHtml('<div class="c" src="d">b</div>')).to.be
+        .equal('<div class="c" src="">b</div>');
   });
 });
 
