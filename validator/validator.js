@@ -1068,13 +1068,13 @@ function parseLayout(layout) {
   if (layout === undefined) {
     return amp.validator.AmpLayout.Layout.UNKNOWN;
   }
-  const value = amp.validator.AmpLayout.Layout[
-    layout.toUpperCase().replace('-', '_')];
-  if (value) {
-    return value;
-  } else {
-    return amp.validator.AmpLayout.Layout.UNKNOWN;
+  const normLayout = layout.toUpperCase().replace('-', '_');
+  for (const k in amp.validator.AmpLayout.Layout) {
+    if (amp.validator.AmpLayout.Layout[k] == normLayout) {
+      return amp.validator.AmpLayout.Layout[k];
+    }
   }
+  return amp.validator.AmpLayout.Layout.UNKNOWN;
 }
 
 

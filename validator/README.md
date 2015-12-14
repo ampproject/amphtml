@@ -32,16 +32,16 @@ Install these packages using apt-get:
 * python-protobuf
 * python2.7
 
-Then, run `build.py`. It creates `codegen/validate`, a script which
+Then, run `build.py`. It creates `dist/validate`, a script which
 can print AMP HTML validation errors to the console.
 
 ```
-$ codegen/validate
+$ dist/validate
 usage: validate <file.html>
-$ codegen/validate testdata/minimum_valid_amp.html
+$ dist/validate testdata/minimum_valid_amp.html
 PASS
 $ touch empty.html
-$ codegen/validate empty.html
+$ dist/validate empty.html
 FAIL
 empty.html:1:0 MANDATORY_TAG_MISSING html ⚡ for top-level html (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#ampd)
 empty.html:1:0 MANDATORY_TAG_MISSING head (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#crps)
