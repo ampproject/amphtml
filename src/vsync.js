@@ -138,6 +138,19 @@ export class Vsync {
   }
 
   /**
+   * @param {function():TYPE} measurer
+   * @return {!Promise<TYPE>}
+   * @templates TYPE
+   */
+  measurePromise(measurer) {
+    return new Promise(resolve => {
+      this.measure(() => {
+        resolve(measurer());
+      });
+    });
+  }
+
+  /**
    * Whether the runtime is allowed to animate at this time.
    * @return {boolean}
    */

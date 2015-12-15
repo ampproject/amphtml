@@ -224,19 +224,6 @@ describe('amp-analytics', function() {
     });
   });
 
-  it('fills in the platform variables', function() {
-    const analytics = getAnalyticsTag({
-      'host': 'example.com',
-      'requests': {'foo': '/AMPDOC_URL&TITLE'},
-      'triggers': [{'on': 'visible', 'request': 'foo'}]
-    });
-
-    return analytics.layoutCallback().then(() => {
-      expect(sendRequestSpy.calledOnce).to.be.true;
-      expect(sendRequestSpy.args[0][0]).to.not.match(/AMPDOC_URL/);
-    });
-  });
-
   it('fills cid for proxy host', function() {
     windowApi.localStorage = {
       getItem: function(name) {
@@ -249,7 +236,7 @@ describe('amp-analytics', function() {
     windowApi.location.href = '/c/www.test.com/abc';
     const analytics = getAnalyticsTag({
       'host': 'example.com',
-      'requests': {'foo': 'cid=CLIENT_ID(analytics-abc)'},
+      'requests': {'foo': 'cid=${clientId(analytics-abc)}'},
       'triggers': [{'on': 'visible', 'request': 'foo'}]
     });
 
@@ -368,6 +355,33 @@ describe('amp-analytics', function() {
     });
   });
 
+  it('expands platform vars', () => {
+    const analytics = getAnalyticsTag({
+      'host': 'example.com',
+      'requests': {'pageview': '/title=${title}&ref=${documentReferrer}'},
+      'triggers': [{'on': 'visible', 'request': 'pageview'}]});
+    return analytics.layoutCallback().then(() => {
+      expect(sendRequestSpy.calledOnce).to.be.true;
+      expect(sendRequestSpy.args[0][0]).to.equal(
+          'https://example.com/title=Test%20Title&' +
+          'ref=https%3A%2F%2Fwww.google.com%2F');
+    });
+  });
+
+  it('expands url-replacements vars', function() {
+    const analytics = getAnalyticsTag({
+      'host': 'example.com',
+      'requests': {'foo': '/AMPDOC_URL&TITLE'},
+      'triggers': [{'on': 'visible', 'request': 'foo'}]
+    });
+
+    return analytics.layoutCallback().then(() => {
+      expect(sendRequestSpy.calledOnce).to.be.true;
+      expect(sendRequestSpy.args[0][0]).to.not.match(/AMPDOC_URL/);
+    });
+  });
+
+
   it('expands trigger vars with higher precedence than config vars', () => {
     const analytics = getAnalyticsTag({
       'host': 'example.com',
@@ -386,6 +400,20 @@ describe('amp-analytics', function() {
       expect(sendRequestSpy.calledOnce).to.be.true;
       expect(sendRequestSpy.args[0][0]).to.equal(
           'https://example.com/test1=trigger1&test2=config2');
+    });
+  });
+
+  it('expands config vars with higher precedence than platform vars', () => {
+    const analytics = getAnalyticsTag({
+      'host': 'example.com',
+      'vars': {'random': 428},
+      'requests': {'pageview': '/test1=${title}&test2=${random}'},
+      'triggers': [{'on': 'visible', 'request': 'pageview',}]
+    });
+    return analytics.layoutCallback().then(() => {
+      expect(sendRequestSpy.calledOnce).to.be.true;
+      expect(sendRequestSpy.args[0][0]).to.equal(
+          'https://example.com/test1=Test%20Title&test2=428');
     });
   });
 

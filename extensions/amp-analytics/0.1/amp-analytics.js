@@ -121,22 +121,22 @@ export class AmpAnalytics extends AMP.BaseElement {
    * - Remote config: specified through an attribute of the tag.
    * - Inline config: specified insize the tag.
    * - Predefined config: Defined as part of the platform.
+   * - Default config: Built-in config shared by all amp-analytics tags.
    *
    * @return {!JSONObject} the merged config.
    * @private
    */
   mergeConfigs_() {
     // TODO(btownsend, #871): Implement support for remote configuration.
-    const remote = {};
-
-    let inline = {};
+    const remoteConfig = {};
+    let inlineConfig = {};
     try {
       const children = this.element.children;
       if (children.length == 1) {
         const child = children[0];
         if (child.tagName.toUpperCase() == 'SCRIPT' &&
             child.getAttribute('type').toUpperCase() == 'APPLICATION/JSON') {
-          inline = JSON.parse(children[0].textContent);
+          inlineConfig = JSON.parse(children[0].textContent);
         } else {
           log.warn(this.getName_(), 'The analytics config should be put in a ' +
               '<script> tag with type=application/json');
@@ -150,10 +150,19 @@ export class AmpAnalytics extends AMP.BaseElement {
       log.warn(this.getName_(), 'Analytics config could not be parsed. ' +
           'Is it in a valid JSON format?', er);
     }
-    const config = this.predefinedConfig_[this.element.getAttribute('type')]
-        || {};
 
-    return this.mergeObjects_(remote, this.mergeObjects_(inline, config));
+    const config = {};
+    const defaultConfig = this.predefinedConfig_['default'] || {};
+    const typeConfig = this.predefinedConfig_[
+      this.element.getAttribute('type')] || {};
+
+    config['vars'] = config['vars'] || {};
+
+    this.mergeObjects_(defaultConfig, config);
+    this.mergeObjects_(typeConfig, config);
+    this.mergeObjects_(inlineConfig, config);
+    this.mergeObjects_(remoteConfig, config);
+    return config;
   }
 
   /**
@@ -221,14 +230,16 @@ export class AmpAnalytics extends AMP.BaseElement {
     }
 
     // Replace placeholders with URI encoded values.
-    // Precedence is trigger.vars > config.vars > built-in.vars.
+    // Precedence is trigger.vars > config.vars.
     // Nested expansion not supported.
-    // TODO(btownsend, #1116) Add support for built-in vars.
     request = expandTemplate(request, key => {
-      return encodeURIComponent(
-          (trigger['vars'] && trigger['vars'][key]) ||
-          (this.config_['vars'] && this.config_['vars'][key]) ||
-          '');
+      const match = key.match(/([^(]*)(\([^)]*\))?/);
+      const name = match[1];
+      const argList = match[2] || '';
+      const val = encodeURIComponent(
+          (trigger['vars'] && trigger['vars'][name]) ||
+          (this.config_['vars'] && this.config_['vars'][name]) || '');
+      return val + argList;
     });
 
     // For consistentcy with amp-pixel we also expand any url replacements.

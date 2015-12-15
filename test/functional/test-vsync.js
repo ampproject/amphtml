@@ -124,6 +124,15 @@ describe('vsync', () => {
     });
   });
 
+  it('should return a promise from measurePromise that runs measurer', () => {
+    let measured = false;
+    return vsync.measurePromise(() => {
+      measured = true;
+    }).then(() => {
+      expect(measured).to.be.true;
+    });
+  });
+
   it('should schedule via animation frames when doc is visible', () => {
     let rafHandler;
     vsync.raf_ = handler => rafHandler = handler;
