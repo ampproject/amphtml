@@ -19,19 +19,10 @@ import {AmpMustache}
 
 describe('amp-mustache template', () => {
 
-  it('should be blocked by the experiment', () => {
-    const templateElement = document.createElement('div');
-    const template = new AmpMustache(templateElement);
-    template.isExperimentOn_ = () => false;
-    const result = template.render({});
-    expect(result./*OK*/innerHTML).to.equal('Experiment "mustache" disabled');
-  });
-
-  it('should render with the experiment', () => {
+  it('should render', () => {
     const templateElement = document.createElement('div');
     templateElement.textContent = 'value = {{value}}';
     const template = new AmpMustache(templateElement);
-    template.isExperimentOn_ = () => true;
     template.compileCallback();
     const result = template.render({value: 'abc'});
     expect(result./*OK*/innerHTML).to.equal('value = abc');
@@ -41,7 +32,6 @@ describe('amp-mustache template', () => {
     const templateElement = document.createElement('div');
     templateElement./*OK*/innerHTML = 'value = <a href="{{value}}">abc</a>';
     const template = new AmpMustache(templateElement);
-    template.isExperimentOn_ = () => true;
     template.compileCallback();
     const result = template.render({
       value: /*eslint no-script-url: 0*/ 'javascript:alert();'
@@ -53,7 +43,6 @@ describe('amp-mustache template', () => {
     const templateElement = document.createElement('div');
     templateElement.textContent = 'value = {{{value}}}';
     const template = new AmpMustache(templateElement);
-    template.isExperimentOn_ = () => true;
     template.compileCallback();
     const result = template.render({value: '<b>abc</b><img><div>def</div>'});
     expect(result./*OK*/innerHTML).to.equal('value = <b>abc</b>');
@@ -63,7 +52,6 @@ describe('amp-mustache template', () => {
     const templateElement = document.createElement('div');
     templateElement./*OK*/innerHTML = '<a>abc</a>';
     const template = new AmpMustache(templateElement);
-    template.isExperimentOn_ = () => true;
     template.compileCallback();
     const result = template.render({});
     expect(result.tagName).to.equal('A');
