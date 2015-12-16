@@ -19,7 +19,7 @@ import {installAd, AD_LOAD_TIME_MS} from '../../builtins/amp-ad';
 import {viewportFor} from
     '../../src/viewport';
 import {timer} from '../../src/timer';
-import {vsync} from '../../src/vsync';
+import {vsyncFor} from '../../src/vsync';
 import * as sinon from 'sinon';
 
 describe('amp-ad', () => {
@@ -230,12 +230,12 @@ describe('amp-ad', () => {
       expect(posts).to.have.length(1);
       ampAd.viewportCallback(true);
       expect(posts).to.have.length(2);
-      viewport.changed_(false, 0);
+      viewport.scroll_();
       expect(posts).to.have.length(3);
       ampAd.viewportCallback(false);
       expect(posts).to.have.length(4);
       // No longer listening.
-      viewport.changed_(false, 0);
+      viewport.scroll_();
       expect(posts).to.have.length(4);
     });
   });
