@@ -1436,7 +1436,7 @@ tags: {
   mandatory: true
   mandatory_parent: "head"
   unique: true
-  detail: "amphtml engine v1.js script"
+  detail: "amphtml engine v0.js script"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#scrpt"
   attrs: {
     name: "src"
