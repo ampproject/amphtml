@@ -15,13 +15,18 @@
  */
 
 import {isExperimentOn} from '../../../src/experiments';
+import {installCidService} from '../../../src/service/cid-impl';
 import {Layout} from '../../../src/layout';
 import {log} from '../../../src/log';
 import {loadPromise} from '../../../src/event-helper';
 import {urlReplacementsFor} from '../../../src/url-replacements';
+import {expandTemplate} from '../../../src/string';
 
 import {addListener} from './instrumentation';
 import {ANALYTICS_CONFIG} from './vendors';
+
+
+installCidService(AMP.win);
 
 
 /** @const */
@@ -58,9 +63,9 @@ export class AmpAnalytics extends AMP.BaseElement {
   }
 
   /** @override */
-  buildCallback() {
+  layoutCallback() {
     if (!this.isExperimentOn_()) {
-      return;
+      return Promise.resolve();
     }
 
     /**
@@ -83,8 +88,8 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     if (this.hasOptedOut_()) {
       // Nothing to do when the user has opted out.
-      log.fine(this.getName_(), "User has opted out. No hits will be sent.");
-      return;
+      log.fine(this.getName_(), 'User has opted out. No hits will be sent.');
+      return Promise.resolve();
     }
 
     this.generateRequests_();
@@ -92,7 +97,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (!Array.isArray(this.config_['triggers'])) {
       log.error(this.getName_(), 'No triggers were found in the config. No ' +
           'analytics data will be sent.');
-      return;
+      return Promise.resolve();
     }
 
     // Trigger callback can be synchronous. Do the registration at the end.
@@ -104,8 +109,9 @@ export class AmpAnalytics extends AMP.BaseElement {
         continue;
       }
       addListener(this.getWin(), trigger['on'],
-          this.handleEvent_.bind(this, trigger));
+          this.handleEvent_.bind(this, trigger), trigger['selector']);
     }
+    return Promise.resolve();
   }
 
   /**
@@ -115,24 +121,48 @@ export class AmpAnalytics extends AMP.BaseElement {
    * - Remote config: specified through an attribute of the tag.
    * - Inline config: specified insize the tag.
    * - Predefined config: Defined as part of the platform.
+   * - Default config: Built-in config shared by all amp-analytics tags.
    *
    * @return {!JSONObject} the merged config.
    * @private
    */
   mergeConfigs_() {
     // TODO(btownsend, #871): Implement support for remote configuration.
-    const remote = {};
-
-    let inline = {};
+    const remoteConfig = {};
+    let inlineConfig = {};
     try {
-      inline = JSON.parse(this.element.textContent);
+      const children = this.element.children;
+      if (children.length == 1) {
+        const child = children[0];
+        if (child.tagName.toUpperCase() == 'SCRIPT' &&
+            child.getAttribute('type').toUpperCase() == 'APPLICATION/JSON') {
+          inlineConfig = JSON.parse(children[0].textContent);
+        } else {
+          log.warn(this.getName_(), 'The analytics config should be put in a ' +
+              '<script> tag with type=application/json');
+        }
+      } else if (children.length > 1) {
+        log.warn(this.getName_(),
+            'The tag should contain only one <script> child.');
+      }
     }
     catch (er) {
-      log.warn(this.getName(), "Analytics config could not be parsed.");
+      log.warn(this.getName_(), 'Analytics config could not be parsed. ' +
+          'Is it in a valid JSON format?', er);
     }
-    const config = this.predefinedConfig_[this.element.getAttribute('type')]
-        || {};
-    return this.mergeObjects_(remote, this.mergeObjects_(inline, config));
+
+    const config = {};
+    const defaultConfig = this.predefinedConfig_['default'] || {};
+    const typeConfig = this.predefinedConfig_[
+      this.element.getAttribute('type')] || {};
+
+    config['vars'] = config['vars'] || {};
+
+    this.mergeObjects_(defaultConfig, config);
+    this.mergeObjects_(typeConfig, config);
+    this.mergeObjects_(inlineConfig, config);
+    this.mergeObjects_(remoteConfig, config);
+    return config;
   }
 
   /**
@@ -168,7 +198,6 @@ export class AmpAnalytics extends AMP.BaseElement {
           'will not be sent from this page.');
       return;
     }
-
     for (const k in this.config_['requests']) {
       if (this.config_['requests'].hasOwnProperty(k)) {
         requests[k] = this.config_['requests'][k];
@@ -176,37 +205,13 @@ export class AmpAnalytics extends AMP.BaseElement {
     }
     this.requests_ = requests;
 
-    // Now replace any request templates with their values.
-    const all = Object.keys(this.requests_).join('|');
-    const requestExpr = new RegExp('\{(' + all + ')\}', 'g');
+    // Expand any placeholders. For requests, we expand each string up to 5
+    // times to support nested requests. Leave any unresolved placeholders.
     for (const k in this.requests_) {
-      this.requests_[k] = this.expandRequest_(this.requests_[k], requestExpr,
-          this.requests_, 5);
+      this.requests_[k] = expandTemplate(this.requests_[k], key => {
+        return this.requests_[key] || '${' + key + '}';
+      }, 5);
     }
-  }
-
-  /**
-   * Replaces template variables corresponding to a request with the value of
-   * that request. If no request is found, an empty string is inserted instead.
-   *
-   * @param {string} formatString The request string to be expanded
-   * @param {!RegExp} expression The regular expression used to detect request
-   *          templates
-   * @param {!Object<string, string> requests Map of requests to lookup template
-   *          values from
-   * @param {number} depth Depth of recursion for nested templates
-   * @return {string} the expanded request string
-   * @private
-   */
-  expandRequest_(formatString, expression, requests, depth) {
-    if (depth <= 0) {
-      return '';
-    }
-    depth--;
-    return formatString.replace(expression, (match, name) => {
-      return this.expandRequest_(requests[name], expression, requests, depth) ||
-          '';
-    });
   }
 
   /**
@@ -224,13 +229,26 @@ export class AmpAnalytics extends AMP.BaseElement {
       return;
     }
 
-    // TODO(btownsend, #871): Add support for variables from inline config.
-    request = urlReplacementsFor(this.getWin()).expand(request);
+    // Replace placeholders with URI encoded values.
+    // Precedence is trigger.vars > config.vars.
+    // Nested expansion not supported.
+    request = expandTemplate(request, key => {
+      const match = key.match(/([^(]*)(\([^)]*\))?/);
+      const name = match[1];
+      const argList = match[2] || '';
+      const val = encodeURIComponent(
+          (trigger['vars'] && trigger['vars'][name]) ||
+          (this.config_['vars'] && this.config_['vars'][name]) || '');
+      return val + argList;
+    });
 
-    // TODO(btownsend, #1061): Add support for sendBeacon.
-    if (host && request) {
-      this.sendRequest_('https://' + host + request);
-    }
+    // For consistentcy with amp-pixel we also expand any url replacements.
+    urlReplacementsFor(this.getWin()).expand(request).then(request => {
+      // TODO(btownsend, #1061): Add support for sendBeacon.
+      if (host && request) {
+        this.sendRequest_('https://' + host + request);
+      }
+    });
   }
 
   /**

@@ -18,26 +18,47 @@
  * @const {!JSONObject}
  */
 export const ANALYTICS_CONFIG = {
-  // TODO(btownsend, #871): Add a generic hit format to make custom analytics
-  // easier.
+
+  // Default parent configuration applied to all amp-analytics tags.
+  'default': {
+    'vars': {
+      'random': 'RANDOM',
+      'canonicalUrl': 'CANONICAL_URL',
+      'canonicalHost': 'CANONICAL_HOST',
+      'canonicalPath': 'CANONICAL_PATH',
+      'documentReferrer': 'DOCUMENT_REFERRER',
+      'title': 'TITLE',
+      'ampdocUrl': 'AMPDOC_URL',
+      'ampdocHost': 'AMPDOC_HOST',
+      'pageViewId': 'PAGE_VIEW_ID',
+      'clientId': 'CLIENT_ID',
+      'timestamp': 'TIMESTAMP',
+      'timezone': 'TIMEZONE',
+      'scrollTop': 'SCROLL_TOP',
+      'scrollLeft': 'SCROLL_LEFT',
+      'scrollWidth': 'SCROLL_WIDTH',
+      'scrollHeight': 'SCROLL_HEIGHT',
+      'screenWidth': 'SCREEN_WIDTH',
+      'screenHeight': 'SCREEN_HEIGHT'
+    }
+    // TODO(btownsend, #871): Add a generic hit format to make custom analytics
+    // easier.
+  },
 
   'googleanalytics': {
     'host': 'www.google-analytics.com',
     'method': 'GET',
     'requests': {
-      'baseHit': '/collect?v=1&_v=a0&aip=true&_s=HIT_COUNT&dp=PATH&' +
-          'dl=DOMAIN&dt=TITLE&sr=SCREEN_WIDTHxSCREEN_HEIGHT&' +
-          '_utmht=TIMESTAMP&jid=&cid=CLIENT_IDENTIFIER&tid=ACCOUNT',
-      'pageview': '/r{baseHit}&t=pageview&_r=1',
-      'event': '{baseHit}&t=event&ec=EVENT_CATEGORY&ea=EVENT_ACTION&' +
-          'el=EVENT_LABEL&ev=EVENT_VALUE',
-      'timing': '{baseHit}&t=timing&plt={}&dns={}&pdt={}&rrt={}&tcp={}&' +
-          'srt={}&dit={}&clt={}',
-      'social': '{baseHit}&t=social&sa=SOCIAL_ACTION&sn=SOCIAL_NETWORK&' +
-          'st=SOCIAL_ACTION_TARGET'
+      'baseHit': '/collect?v=1&_v=a0&aip=true&_s=${hitCount}&' +
+          'dl=${canonicalUrl}&dt=${title}&sr=${screenWidth}x${screenHeight}&' +
+          '_utmht=${timestamp}&jid=&cid=${clientId(_ga)}&tid=${account}',
+      'pageview': '/r${baseHit}&t=pageview&_r=1',
+      'event': '${baseHit}&t=event&ec=${eventCategory}&ea=${eventAction}&' +
+          'el=${eventLabel}&ev=${eventValue}',
+      'social': '${baseHit}&t=social&sa=${socialAction}&sn=${socialNetwork}&' +
+          'st=${socialActionTarget}'
     },
     'optout': '_gaUserPrefs.ioo'
   }
 };
-
 

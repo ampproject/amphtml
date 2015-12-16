@@ -56,19 +56,20 @@ export class AmpList extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const src = this.urlReplacements_.expand(assertHttpsUrl(
-        this.element.getAttribute('src'), this.element));
-    const opts = {
-      credentials: this.element.getAttribute('credentials')
-    };
-    return xhrFor(this.getWin()).fetchJson(src, opts).then(data => {
-      assert(typeof data == 'object' && Array.isArray(data['items']),
-          'Response must be {items: []} object %s %s',
-          this.element, data);
-      const items = data['items'];
-      return templatesFor(this.getWin()).findAndRenderTemplateArray(
-          this.element, items).then(this.rendered_.bind(this));
-    });
+    return this.urlReplacements_.expand(assertHttpsUrl(
+        this.element.getAttribute('src'), this.element)).then(src => {
+          const opts = {
+            credentials: this.element.getAttribute('credentials')
+          };
+          return xhrFor(this.getWin()).fetchJson(src, opts);
+        }).then(data => {
+          assert(typeof data == 'object' && Array.isArray(data['items']),
+              'Response must be {items: []} object %s %s',
+              this.element, data);
+          const items = data['items'];
+          return templatesFor(this.getWin()).findAndRenderTemplateArray(
+              this.element, items).then(this.rendered_.bind(this));
+        });
   }
 
   /**

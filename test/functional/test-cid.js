@@ -19,10 +19,12 @@ import {installCidService, getSourceOrigin, isProxyOrigin} from
     '../../src/service/cid-impl';
 import {parseUrl} from '../../src/url';
 import {timer} from '../../src/timer';
+import {viewerFor} from '../../src/viewer';
 import * as sinon from 'sinon';
 
 describe('cid', () => {
 
+  let isEmbedded;
   let sandbox;
   let clock;
   let fakeWin;
@@ -32,6 +34,7 @@ describe('cid', () => {
 
   beforeEach(() => {
     let call = 1;
+    isEmbedded = false;
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
     storage = {};
@@ -63,6 +66,13 @@ describe('cid', () => {
         'amp-analytics': true
       }
     };
+    const viewer = viewerFor(fakeWin);
+    sandbox.stub(viewer, 'isEmbedded', function() {
+      return isEmbedded;
+    });
+    sandbox.stub(viewer, 'getBaseCid', function() {
+      return Promise.resolve('from-viewer');
+    });
     installCidService(fakeWin);
     return cidFor(fakeWin).then(c => {
       cid = c;
@@ -162,6 +172,25 @@ describe('cid', () => {
         'sha384(YYYhttp://www.origin.come2)');
   });
 
+  it('should retrieve cid from viewer if embedded', () => {
+    isEmbedded = true;
+    return compare(
+        'e2',
+        'sha384(from-viewerhttp://www.origin.come2)');
+  });
+
+  it('should prefer value in storage if present', () => {
+    isEmbedded = true;
+    storage['amp-cid'] = JSON.stringify({
+      cid: 'in-storage',
+      time: timer.now(),
+    });
+    return compare(
+        'e2',
+        'sha384(in-storagehttp://www.origin.come2)');
+  });
+
+
   it('should work without mocking', () => {
     const win = {
       location: {
@@ -174,6 +203,7 @@ describe('cid', () => {
     };
     win.__proto__ = window;
     expect(win.location.href).to.equal('https://cdn.ampproject.org/v/www.origin.com/');
+    viewerFor(win).isEmbedded = () => false;
     installCidService(win);
     return cidFor(win).then(cid => {
       return cid.get('foo', hasConsent).then(c1 => {
@@ -235,7 +265,7 @@ describe('cid', () => {
     const consent = timer.promise(100).then(() => {
       nonce = 'timer fired';
     });
-    const p = cid.get('', consent).then(c => {
+    const p = cid.get('test', consent).then(c => {
       expect(nonce).to.equal('timer fired');
     });
     clock.tick(100);
@@ -244,6 +274,12 @@ describe('cid', () => {
 
   it('should fail on failed consent', () => {
     return expect(cid.get('abc', Promise.reject())).to.be.rejected;
+  });
+
+  it('should fail on invalid scope', () => {
+    expect(() => {
+      cid.get('$$$', Promise.resolve());
+    }).to.throw(/\$\$\$/);
   });
 
   it('should not store until persistence promise resolves', () => {

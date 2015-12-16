@@ -38,6 +38,7 @@ If more than one methods of specifying the config are used, the configs are merg
 ##### <a name="inline"></a>Inline Config with a custom host & url format
 ```javascript
 <amp-analytics>
+<script type="application/json">
 {
   "host": "my-analytics.com:8080",
   "requests": {
@@ -52,12 +53,14 @@ If more than one methods of specifying the config are used, the configs are merg
     "request": "pageview"
   }]
 }
+</script>
 </amp-analytics>
 ```
 ##### <a name="builtin"></a>Built-in tag for a service `XYZ` with inline config
 
 ```javascript
 <amp-analytics type="xyz">
+<script type="application/json">
 {
   "vars": { "account_id": "123456" }
   "triggers": [{
@@ -65,6 +68,7 @@ If more than one methods of specifying the config are used, the configs are merg
     "request": "pageview"
   }]
 }
+</script>
 </amp-analytics>
 ```
 

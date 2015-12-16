@@ -154,6 +154,34 @@ message CdataSpec {
   repeated BlackListedCDataRegex blacklisted_cdata_regex = 4;
 }
 
+// Specifies which AMP Layouts are supported by a given element.
+// For the purpose of the validator, this specifies which
+// values for layout, height, and width attributes are allowed. Also see
+// https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md
+// TODO(johannes): Make the error messages around layouts better. This
+// may require revamping the documentation for elements and/or the above spec,
+// so that a user gets more clearly informed about which layouts are
+// applicable to a given tag, what happens when layout attribute or other
+// attributes are not set, etc.
+message AmpLayout {
+  enum Layout {
+    UNKNOWN = 0;
+    NODISPLAY = 1;
+    FIXED = 2;
+    FIXED_HEIGHT = 3;
+    RESPONSIVE = 4;
+    CONTAINER = 5;
+    FILL = 6;
+  }
+  // Specifies which layouts are supported by this element.
+  repeated Layout supported_layouts = 1;
+  // Specifies whether this element has default dimensions. This corresponds
+  // to being whitelisted in naturalDimensions_ in
+  // https://github.com/ampproject/amphtml/blob/master/src/layout.js.
+  optional bool defines_default_width = 2;
+  optional bool defines_default_height = 3;
+}
+
 // Tags that are not covered by at least one of these specs are disallowed.
 // Some tags are mandatory. Note that the tag name is not unique, that is,
 // there can be multiple tag specs covering the same name, e.g., for
@@ -197,6 +225,9 @@ message TagSpec {
   // If provided, a URL which linking to a section / sentence in the
   // AMP HTML spec.
   optional string spec_url = 10;
+
+  // If set, specifies which AMP Layouts are supported by this element.
+  optional AmpLayout amp_layout = 11;
 }
 
 // Top level message - start reading here.
@@ -209,6 +240,9 @@ message ValidatorRules {
   optional int32 min_validator_revision_required = 4;
   // See comment in validator.protoascii.
   optional int32 spec_file_revision = 6 [ default = -1 ];
+
+  // Spec URL for information about mustache templates.
+  optional string template_spec_url = 8;
 
   // Deprecated fields, do not reuse.
   extensions 5, 2;
@@ -250,6 +284,11 @@ message ValidationError {
     INVALID_PROPERTY_VALUE_IN_ATTR_VALUE = 15;
     DISALLOWED_PROPERTY_IN_ATTR_VALUE = 16;
     MUTUALLY_EXCLUSIVE_ATTRS = 17;
+    UNESCAPED_TEMPLATE_IN_ATTR_VALUE = 18;
+    TEMPLATE_PARTIAL_IN_ATTR_VALUE = 19;
+    TEMPLATE_IN_ATTR_NAME = 20;
+    INCONSISTENT_UNITS_FOR_WIDTH_AND_HEIGHT = 21;
+    IMPLIED_LAYOUT_INVALID = 22;
   }
   optional Code code = 1;
   optional int32 line = 2 [ default = 1 ];

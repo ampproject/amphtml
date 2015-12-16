@@ -24,6 +24,7 @@ import {performanceFor} from './performance';
 import {registerElement} from './custom-element';
 import {registerExtendedElement} from './extended-element';
 import {resourcesFor} from './resources';
+import {timer} from './timer';
 import {viewerFor} from './viewer';
 import {viewportFor} from './viewport';
 
@@ -47,7 +48,9 @@ export function adopt(global) {
   // of functions
   const preregisteredElements = global.AMP || [];
 
-  global.AMP = {};
+  global.AMP = {
+    win: global
+  };
 
   /**
    * Registers an extended element and installs its styles.
@@ -137,7 +140,13 @@ export function adopt(global) {
   // Execute asynchronously scheduled elements.
   for (let i = 0; i < preregisteredElements.length; i++) {
     const fn = preregisteredElements[i];
-    fn(global.AMP);
+    try {
+      fn(global.AMP);
+    } catch (e) {
+      // Throw errors outside of loop in its own micro task to
+      // avoid on error stopping other extensions from loading.
+      timer.delay(() => {throw e;}, 1);
+    }
   }
 }
 

@@ -50,7 +50,7 @@ Required when `data-do` is `buttonPin`.  Contains the fully-qualified URL of the
 
 Required when `data-do` is `buttonPin`.  Contains the default description that appears in the pin create form; please choose carefully, since many Pinners will close the form without pinning if it doesn't make sense.
 
-### Iframe Sizing for the Pin It Button
+### Sizing the Pin It Button
 
 Default small rectangular button:
 

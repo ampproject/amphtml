@@ -420,6 +420,14 @@ export class Viewer {
   }
 
   /**
+   * Retrieves the Base CID from the viewer
+   * @return {!Promise<string>}
+   */
+    getBaseCid() {
+      return this.sendMessage_('cid', undefined, true);
+    }
+
+  /**
    * Requests AMP document to receive a message from Viewer.
    * @param {string} eventType
    * @param {*} data

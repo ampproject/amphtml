@@ -62,8 +62,6 @@ describe('example', function() {
    * @constructor {!Array<!RegExp>}
    */
   const errorWhitelist = [
-    // Remove once validator supports "amp-brightcove".
-    /DISALLOWED_TAG amp-brightcove/
   ];
 
   const usedWhitelist = [];

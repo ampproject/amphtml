@@ -27,24 +27,26 @@
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
-  <!-- Example of a valid amp-list -->
-  <amp-list width=10 height=10
-            src="https://data.com/articles.json?ref=CANONICAL_URL">
-    <div></div>
-  </amp-list>
-  <!-- Invalid: width is mistyped. -->
-  <amp-list src="https://data.com/articles.json?ref=CANONICAL_URL"
-            wdith=10 height=10>
-    <div></div>
-  </amp-list>
-  <!-- Invalid: src is missing. -->
-  <amp-list width=10 height=10>
-    <div></div>
-  </amp-list>
-  <!-- also invalid: width/height missing, so it's container layout
-       which isn't supported. -->
-  <amp-list src="https://data.com/articles.json?ref=CANONICAL_URL">
-    <div></div>
-  </amp-list>
+  <!--
+    Test Description:
+    Tests support for the amp-brightcove tag.
+    https://github.com/ampproject/amphtml/blob/master/extensions/amp-brightcove/amp-brightcove.md
+  -->
+  <amp-brightcove
+      data-account="906043040001"
+      data-video-id="1401169490001"
+      data-player-id="180a5658-8be8-4f33-8eba-d562ab41b40c"
+      layout="responsive" width="480" height="270">
+  </amp-brightcove>
+  <!-- data-video-id, data-player-id are optional;
+       leaving them out results in the default config. -->
+  <amp-brightcove
+      data-account="906043040001"
+      layout="responsive" width="480" height="270">
+  </amp-brightcove>
+  <!-- data-account is mandatory; leaving them out results in an error. -->
+  <amp-brightcove
+      layout="responsive" width="480" height="270">
+  </amp-brightcove>
 </body>
 </html>

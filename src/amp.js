@@ -21,6 +21,7 @@ import {installHistoryService} from './service/history-impl';
 import {installPullToRefreshBlocker} from './pull-to-refresh';
 import {performanceFor} from './performance';
 import {vsyncFor} from './vsync';
+import {templatesFor} from './template';
 
 import {installAd} from '../builtins/amp-ad';
 import {installGlobalClickListener} from './document-click';
@@ -49,6 +50,7 @@ try {
       installViewerService(window);
       installHistoryService(window);
       vsyncFor(window);
+      templatesFor(window);
 
       installImg(window);
       installAd(window);
