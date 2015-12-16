@@ -22,9 +22,9 @@
 <amp-analytics id="analytics1">
 <script type="application/json">
 {
-  "host": "example.com",
+  "transport": {"beacon": false, "xhrpost": false},
   "requests": {
-    "base": "?domain=${canonicalHost}&path=${canonicalPath}&title=${title}",
+    "base": "https://example.com/?domain=${canonicalHost}&path=${canonicalPath}&title=${title}",
     "event": "${base}&name=${eventName}&type=${eventId}&time=${timestamp}&tz=${timezone}&pid=${pageViewId}&screenSize=${screenWidth}x${screenHeight}"
   },
   "vars": {
