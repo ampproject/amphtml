@@ -21,6 +21,7 @@ export const ANALYTICS_CONFIG = {
 
   // Default parent configuration applied to all amp-analytics tags.
   'default': {
+    'transport': 'image',
     'vars': {
       'random': 'RANDOM',
       'canonicalUrl': 'CANONICAL_URL',
@@ -47,18 +48,22 @@ export const ANALYTICS_CONFIG = {
 
   'googleanalytics': {
     'host': 'www.google-analytics.com',
-    'method': 'GET',
+    'path': '/collect',
+    'transport': 'beacon',
+    'optout': '_gaUserPrefs.ioo',
     'requests': {
-      'baseHit': '/collect?v=1&_v=a0&aip=true&_s=${hitCount}&' +
-          'dl=${canonicalUrl}&dt=${title}&sr=${screenWidth}x${screenHeight}&' +
+      'baseHit': 'v=1&_v=a0&aip=true&_s=${hitCount}&dl=${canonicalUrl}&' +
+          'dt=${title}&sr=${screenWidth}x${screenHeight}&' +
           '_utmht=${timestamp}&jid=&cid=${clientId(_ga)}&tid=${account}',
-      'pageview': '/r${baseHit}&t=pageview&_r=1',
+      'pageview': {
+        path: '/r/collect',
+        data: '${baseHit}&t=pageview&_r=1'
+      },
       'event': '${baseHit}&t=event&ec=${eventCategory}&ea=${eventAction}&' +
           'el=${eventLabel}&ev=${eventValue}',
       'social': '${baseHit}&t=social&sa=${socialAction}&sn=${socialNetwork}&' +
           'st=${socialActionTarget}'
     },
-    'optout': '_gaUserPrefs.ioo'
   }
 };
 
