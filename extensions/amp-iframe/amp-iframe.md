@@ -20,7 +20,7 @@ Displays an iframe.
 
 `amp-iframe` has several important differences from vanilla iframes that are designed to make it more secure and avoid AMP files that are dominated by a single iframe:
 
-- `amp-iframe` may not appear close to the top of the document. They must be either 600px away from the top or not within the first 75% of the viewport when scrolled to the top – whichever is smaller. NOTE: We are currently looking for feedback as to how well this restriction works in practice.
+- `amp-iframe` may not appear close to the top of the document (except for `click-to-play` iframes as described below). They must be either 600px away from the top or not within the first 75% of the viewport when scrolled to the top – whichever is smaller. NOTE: We are currently looking for feedback as to how well this restriction works in practice.
 - They are sandboxed by default. That means that authors needs to be explicit about what should be allowed in the iframe. See the [the docs on MDN](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe) for details on the sandbox attribute.
 - They must only request resources via HTTPS or from a data-URI or via the srcdoc attribute.
 - They must not be in the same origin as the container unless they do not allow `allow-same-origin` in the sandbox attribute.
@@ -42,7 +42,7 @@ Example:
 The attributes above should all behave like they do on standard iframes.
 
 
-#### IFrame Resizing
+#### Iframe Resizing
 
 An `amp-iframe` must have static layout defined as is the case with any other AMP element. However,
 it's possible to resize an `amp-iframe` in runtime. To do so:
@@ -84,3 +84,25 @@ Here are some factors that affect how fast the resize will be executed:
 - Whether the resize is triggered by the user action;
 - Whether the resize is requested for a currently active IFrame;
 - Whether the resize is requested for an IFrame below the viewport or above the viewport.
+
+#### Iframe Click-To-Play
+It is possible to have an `amp-iframe` appear on the top of a document when the `amp-ifame` has a `placeholder` element as shown in the example below.
+
+```html
+<amp-iframe width=300 height=300
+   layout="responsive"
+   sandbox="allow-scripts"
+   src="https://foo.com/iframe">
+ <amp-img layout="fill" src="https://foo.com/foo.png" placeholder></amp-img>
+</amp-iframe>
+```
+- The `amp-iframe` must contain an element with the `placeholder` attribute, (for instance an `amp-img` element) which would be rendered as a placeholder till the iframe is ready to be displayed.
+- Iframe readiness can be known by listening to `onload` of the iframe or an `embed-ready` postmesssage which would be sent by the Iframe document, whichever comes first.
+
+Example of IFrame embed-ready request:
+```javascript
+window.parent./*OK*/postMessage({
+  sentinel: 'amp',
+  type: 'embed-ready'
+}, '*');
+```
