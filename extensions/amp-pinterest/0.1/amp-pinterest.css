@@ -200,6 +200,36 @@
   line-height: 28px;
 }
 
+.-amp-pinterest-follow-button {
+    background: transparent url(https://s-passets.pinimg.com/images/pidgets/bfs2.png) 0 0 no-repeat;
+    background-size: 200px 60px;
+    border-right: 1px solid #D0D0D0;
+    border-radius: 4px;
+    color: #444;
+    cursor: pointer;
+    display: inline-block;
+    font: bold normal normal 11px/20px "Helvetica Neue",helvetica,arial,san-serif;
+    padding-right: 3px;
+    position: relative;
+    text-decoration: none;
+    text-indent: 20px;
+}
+
+.-amp-pinterest-follow-button:hover {
+    background-position: 0 -20px;
+    border-right-color: #919191;
+}
+
+.-amp-pinterest-follow-button i {
+    background-image: url(https://s-passets.pinimg.com/images/pidgets/log2.png);
+    background-size: 14px 14px;
+    height: 14px;
+    left: 3px;
+    position: absolute;
+    top: 3px;
+    width: 14px;
+}
+
 /* using this button as a repin button on a widget */
 
 .-amp-pinterest-embed-pin,
