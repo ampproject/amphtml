@@ -15,11 +15,12 @@
  */
 
 import {Timer} from '../../../../src/timer';
+import {AmpIframe, listen} from '../amp-iframe';
 import {adopt} from '../../../../src/runtime';
 import {createIframePromise, pollForLayout} from '../../../../testing/iframe';
 import {loadPromise} from '../../../../src/event-helper';
 import {resourcesFor} from '../../../../src/resources';
-require('../amp-iframe');
+import * as sinon from 'sinon';
 
 adopt(window);
 
@@ -27,6 +28,8 @@ describe('amp-iframe', () => {
 
   const iframeSrc = 'http://iframe.localhost:' + location.port +
       '/base/test/fixtures/served/iframe.html';
+  const clickableIframeSrc = 'http://iframe.localhost:' + location.port +
+      '/base/test/fixtures/served/iframe-clicktoplay.html';
 
   const timer = new Timer(window);
   let ranJs = 0;
@@ -59,6 +62,13 @@ describe('amp-iframe', () => {
         const overflowEl = iframe.doc.createElement('div');
         overflowEl.setAttribute('overflow', '');
         i.appendChild(overflowEl);
+      }
+      if (attributes.poster) {
+        const img = iframe.doc.createElement('amp-img');
+        img.setAttribute('layout', 'fill');
+        img.setAttribute('src', attributes.poster);
+        img.setAttribute('placeholder', '');
+        i.appendChild(img);
       }
       iframe.doc.body.appendChild(i);
       // Wait an event loop for the iframe to be created.
@@ -342,6 +352,27 @@ describe('amp-iframe', () => {
       impl.updateHeight_(217);
       expect(impl.changeHeight.callCount).to.equal(0);
       expect(impl.requestChangeHeight.callCount).to.equal(0);
+    });
+  });
+
+  it('should listen for embed-ready event', () => {
+    const sandbox = sinon.sandbox.create();
+    const activateIframeSpy_ =
+        sinon.spy(AmpIframe.prototype, 'activateIframe_');
+    return getAmpIframe({
+      src: clickableIframeSrc,
+      sandbox: 'allow-scripts',
+      width: 480,
+      height: 360,
+      poster: 'https://i.ytimg.com/vi/cMcCTVAFBWM/hqdefault.jpg'
+    }).then(amp => {
+      const impl = amp.container.implementation_;
+      return timer.promise(0).then(() => {
+        expect(impl.iframe_.style.zIndex).to.equal('');
+        expect(impl.placeholder_).to.be.null;
+        expect(activateIframeSpy_.callCount).to.equal(2);
+        activateIframeSpy_.restore();
+      });
     });
   });
 });
