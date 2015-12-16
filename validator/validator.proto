@@ -186,7 +186,7 @@ message AmpLayout {
 // Some tags are mandatory. Note that the tag name is not unique, that is,
 // there can be multiple tag specs covering the same name, e.g., for
 // multiple meta tags (with different attributes).
-// NEXT AVAILABLE TAG: 13
+// NEXT AVAILABLE TAG: 14
 message TagSpec {
   // Use lower-case tag names only.
   optional string name = 1;
@@ -211,6 +211,9 @@ message TagSpec {
   //   specified mandatory parent tag.
   optional string mandatory_parent = 6;
 
+  // This tag may not descend from any tag with any of these tag names.
+  repeated string disallowed_ancestor = 13;
+
   // Attribute specifications related to this tag.
   repeated AttrSpec attrs = 7;
   // Top level attr lists of shared tags, identified by unique key
@@ -232,7 +235,7 @@ message TagSpec {
 
 // Top level message - start reading here.
 // The validator knows about a set of tag specifications.
-// NEXT AVAILABLE TAG: 8
+// NEXT AVAILABLE TAG: 9
 message ValidatorRules {
   repeated TagSpec tags = 1;
   repeated AttrList attr_lists = 7;
@@ -289,6 +292,7 @@ message ValidationError {
     TEMPLATE_IN_ATTR_NAME = 20;
     INCONSISTENT_UNITS_FOR_WIDTH_AND_HEIGHT = 21;
     IMPLIED_LAYOUT_INVALID = 22;
+    DISALLOWED_TAG_ANCESTOR = 23;
   }
   optional Code code = 1;
   optional int32 line = 2 [ default = 1 ];
