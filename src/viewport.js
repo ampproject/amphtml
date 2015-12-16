@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {installViewerService} from './service/viewer-impl';
 import {Observable} from './observable';
 import {assert} from './asserts.js';
 import {getService} from './service';
@@ -25,6 +26,7 @@ import {px, setStyle, setStyles} from './style';
 import {timer} from './timer';
 import {viewerFor} from './viewer';
 
+installViewerService(window);
 
 const TAG_ = 'Viewport';
 
