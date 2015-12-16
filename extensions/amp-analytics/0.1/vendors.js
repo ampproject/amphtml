@@ -21,6 +21,7 @@ export const ANALYTICS_CONFIG = {
 
   // Default parent configuration applied to all amp-analytics tags.
   'default': {
+    'transport': {'beacon': true, 'xhrpost': true, 'image': true},
     'vars': {
       'random': 'RANDOM',
       'canonicalUrl': 'CANONICAL_URL',
@@ -46,17 +47,20 @@ export const ANALYTICS_CONFIG = {
   },
 
   'googleanalytics': {
-    'host': 'www.google-analytics.com',
-    'method': 'GET',
     'requests': {
-      'baseHit': '/collect?v=1&_v=a0&aip=true&_s=${hitCount}&' +
-          'dl=${canonicalUrl}&dt=${title}&sr=${screenWidth}x${screenHeight}&' +
-          '_utmht=${timestamp}&jid=&cid=${clientId(_ga)}&tid=${account}',
-      'pageview': '/r${baseHit}&t=pageview&_r=1',
-      'event': '${baseHit}&t=event&ec=${eventCategory}&ea=${eventAction}&' +
-          'el=${eventLabel}&ev=${eventValue}',
-      'social': '${baseHit}&t=social&sa=${socialAction}&sn=${socialNetwork}&' +
-          'st=${socialActionTarget}'
+      'host': 'https://www.google-analytics.com',
+      'basePrefix': 'v=1&_v=a0&aip=true&_s=${hitCount}&dl=${canonicalUrl}&' +
+          'dt=${title}&sr=${screenWidth}x${screenHeight}&_utmht=${timestamp}&' +
+          'jid=&cid=${clientId(_ga)}&tid=${account}',
+      'baseSuffix': '&z=${random}',
+      'pageview': '${host}/r/collect?${basePrefix}&t=pageview&' +
+          '_r=1${baseSuffix}',
+      'event': '${host}/collect?${basePrefix}&t=event&' +
+          'ec=${eventCategory}&ea=${eventAction}&el=${eventLabel}&' +
+          'ev=${eventValue}${baseSuffix}',
+      'social': '${host}/collect?${basePrefix}&t=social&' +
+          'sa=${socialAction}&sn=${socialNetwork}&st=${socialActionTarget}' +
+          '${baseSuffix}'
     },
     'optout': '_gaUserPrefs.ioo'
   }
