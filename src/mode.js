@@ -59,15 +59,10 @@ function getMode_() {
       // occur during local dev.
       !!document.querySelector('script[src*="/dist/"],script[src*="/base/"]');
 
-  const overrideDevelopment = parseQueryString(location.hash)['development'];
-  const development = overrideDevelopment != undefined
-      ? overrideDevelopment == '1'
-      : !!document.querySelector('script[development]');
-
   return {
     localDev: isLocalDev,
     // Triggers validation
-    development: development,
+    development: !!parseQueryString(location.hash)['development'],
     minified: process.env.NODE_ENV == 'production',
     test: window.AMP_TEST
   };
