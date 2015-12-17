@@ -122,47 +122,49 @@ function specificity(code) {
     case amp.validator.ValidationError.Code.
         MANDATORY_CDATA_MISSING_OR_INCORRECT:
       return 1;
-    case amp.validator.ValidationError.Code.WRONG_PARENT_TAG:
+    case amp.validator.ValidationError.Code.DISALLOWED_TAG_ANCESTOR:
       return 2;
-    case amp.validator.ValidationError.Code.MANDATORY_TAG_MISSING:
+    case amp.validator.ValidationError.Code.WRONG_PARENT_TAG:
       return 3;
-    case amp.validator.ValidationError.Code.DISALLOWED_TAG:
+    case amp.validator.ValidationError.Code.MANDATORY_TAG_MISSING:
       return 4;
-    case amp.validator.ValidationError.Code.DISALLOWED_ATTR:
+    case amp.validator.ValidationError.Code.DISALLOWED_TAG:
       return 5;
-    case amp.validator.ValidationError.Code.INVALID_ATTR_VALUE:
+    case amp.validator.ValidationError.Code.DISALLOWED_ATTR:
       return 6;
-    case amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING:
+    case amp.validator.ValidationError.Code.INVALID_ATTR_VALUE:
       return 7;
-    case amp.validator.ValidationError.Code.DUPLICATE_UNIQUE_TAG:
+    case amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING:
       return 8;
-    case amp.validator.ValidationError.Code.STYLESHEET_TOO_LONG:
+    case amp.validator.ValidationError.Code.DUPLICATE_UNIQUE_TAG:
       return 9;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX:
+    case amp.validator.ValidationError.Code.STYLESHEET_TOO_LONG:
       return 10;
-    case amp.validator.ValidationError.Code.
-        MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX:
       return 11;
     case amp.validator.ValidationError.Code.
-        INVALID_PROPERTY_VALUE_IN_ATTR_VALUE:
+        MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE:
       return 12;
-    case amp.validator.ValidationError.Code.DISALLOWED_PROPERTY_IN_ATTR_VALUE:
+    case amp.validator.ValidationError.Code.
+        INVALID_PROPERTY_VALUE_IN_ATTR_VALUE:
       return 13;
-    case amp.validator.ValidationError.Code.MUTUALLY_EXCLUSIVE_ATTRS:
+    case amp.validator.ValidationError.Code.DISALLOWED_PROPERTY_IN_ATTR_VALUE:
       return 14;
-    case amp.validator.ValidationError.Code.UNESCAPED_TEMPLATE_IN_ATTR_VALUE:
+    case amp.validator.ValidationError.Code.MUTUALLY_EXCLUSIVE_ATTRS:
       return 15;
-    case amp.validator.ValidationError.Code.TEMPLATE_PARTIAL_IN_ATTR_VALUE:
+    case amp.validator.ValidationError.Code.UNESCAPED_TEMPLATE_IN_ATTR_VALUE:
       return 16;
-    case amp.validator.ValidationError.Code.TEMPLATE_IN_ATTR_NAME:
+    case amp.validator.ValidationError.Code.TEMPLATE_PARTIAL_IN_ATTR_VALUE:
       return 17;
+    case amp.validator.ValidationError.Code.TEMPLATE_IN_ATTR_NAME:
+      return 18;
     case amp.validator.ValidationError.Code.
         INCONSISTENT_UNITS_FOR_WIDTH_AND_HEIGHT:
-      return 18;
-    case amp.validator.ValidationError.Code.IMPLIED_LAYOUT_INVALID:
       return 19;
-    case amp.validator.ValidationError.Code.DEV_MODE_ENABLED:
+    case amp.validator.ValidationError.Code.IMPLIED_LAYOUT_INVALID:
       return 20;
+    case amp.validator.ValidationError.Code.DEV_MODE_ENABLED:
+      return 21;
     case amp.validator.ValidationError.Code.DEPRECATED_ATTR:
       return 101;
     case amp.validator.ValidationError.Code.DEPRECATED_TAG:
@@ -420,6 +422,19 @@ TagNameStack.prototype.getParent = function() {
   return '$ROOT';
 };
 
+/**
+ * Returns true if the current tag has ancestor with the given tag name.
+ * @param {!string} ancestor
+ * @return {boolean}
+ */
+TagNameStack.prototype.hasAncestor = function(ancestor) {
+  // Skip the last element, which is the current tag.
+  for (let i = 0; i < this.stack_.length - 1; ++i) {
+    if (this.stack_[i] === ancestor)
+      return true;
+  }
+  return false;
+};
 
 /**
  * This matcher maintains a constraint to check which an opening tag
@@ -1603,6 +1618,23 @@ ParsedTagSpec.prototype.validateParentTag = function(
   }
 };
 
+/**
+ * Validates if the tag ancestors satisfied the spec.
+ * @param {!Context} context
+ * @param {!amp.validator.ValidationResult} validationResult
+ */
+ParsedTagSpec.prototype.validateDisallowedAncestorTags = function(
+    context, validationResult) {
+  for (const disallowedAncestor of this.spec_.disallowedAncestor) {
+    if (context.getTagNames().hasAncestor(disallowedAncestor)) {
+      context.addError(
+          amp.validator.ValidationError.Code.DISALLOWED_TAG_ANCESTOR,
+          disallowedAncestor + ' > ... > ' + this.spec_.name,
+          this.spec_.specUrl, validationResult);
+      return;
+    }
+  }
+};
 
 /**
  * This wrapper class provides access to the validation rules.
@@ -1681,6 +1713,7 @@ ParsedValidatorRules.prototype.validateTag = function(
     parsedSpec.validateAttributes(
         context, encounteredAttrs, resultForAttempt);
     parsedSpec.validateParentTag(context, resultForAttempt);
+    parsedSpec.validateDisallowedAncestorTags(context, resultForAttempt);
     if (resultForAttempt.status !==
         amp.validator.ValidationResult.Status.FAIL &&
         parsedSpec.getSpec().unique) {
