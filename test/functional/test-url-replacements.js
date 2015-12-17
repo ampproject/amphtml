@@ -16,17 +16,25 @@
 
 import {createIframePromise} from '../../testing/iframe';
 import {urlReplacementsFor} from '../../src/url-replacements';
+import {markElementScheduledForTesting} from '../../src/service';
+import {installCidService} from '../../src/service/cid-impl';
+import {setCookie} from '../../src/cookies';
 
 
 describe('UrlReplacements', () => {
 
-  function expand(url) {
+  function expand(url, withCid) {
     return createIframePromise().then(iframe => {
       iframe.doc.title = 'Pixel Test';
       const link = iframe.doc.createElement('link');
       link.setAttribute('href', 'https://pinterest.com/pin1');
       link.setAttribute('rel', 'canonical');
       iframe.doc.head.appendChild(link);
+      if (withCid) {
+        markElementScheduledForTesting(iframe.win, 'amp-analytics');
+        installCidService(iframe.win);
+      }
+
       const replacements = urlReplacementsFor(iframe.win);
       return replacements.expand(url);
     });
@@ -82,7 +90,58 @@ describe('UrlReplacements', () => {
 
   it('should replace PAGE_VIEW_ID', () => {
     return expand('?pid=PAGE_VIEW_ID').then(res => {
-      expect(res).to.not.match(/pid=\d+/);
+      expect(res).to.match(/pid=\d+/);
+    });
+  });
+
+  it('should replace CLIENT_ID', () => {
+    setCookie(window, 'url-abc', 'cid-for-abc');
+    setCookie(window, 'url-xyz', 'cid-for-xyz');
+    return expand('?a=CLIENT_ID(url-abc)&b=CLIENT_ID(url-xyz)', true)
+        .then(res => {
+          expect(res).to.equal('?a=cid-for-abc&b=cid-for-xyz');
+        });
+  });
+
+  it('should replace TIMESTAMP', () => {
+    return expand('?ts=TIMESTAMP').then(res => {
+      expect(res).to.match(/ts=\d+/);
+    });
+  });
+
+  it('should replace TIMEZONE', () => {
+    return expand('?tz=TIMEZONE').then(res => {
+      expect(res).to.match(/tz=\d+/);
+    });
+  });
+
+  it('should replace SCROLL_TOP', () => {
+    return expand('?scrollTop=SCROLL_TOP').then(res => {
+      expect(res).to.match(/scrollTop=\d+/);
+    });
+  });
+
+  it('should replace SCROLL_LEFT', () => {
+    return expand('?scrollLeft=SCROLL_LEFT').then(res => {
+      expect(res).to.match(/scrollLeft=\d+/);
+    });
+  });
+
+  it('should replace SCROLL_HEIGHT', () => {
+    return expand('?scrollHeight=SCROLL_HEIGHT').then(res => {
+      expect(res).to.match(/scrollHeight=\d+/);
+    });
+  });
+
+  it('should replace SCREEN_WIDTH', () => {
+    return expand('?sw=SCREEN_WIDTH').then(res => {
+      expect(res).to.match(/sw=\d+/);
+    });
+  });
+
+  it('should replace SCREEN_HEIGHT', () => {
+    return expand('?sh=SCREEN_HEIGHT').then(res => {
+      expect(res).to.match(/sh=\d+/);
     });
   });
 
@@ -109,12 +168,26 @@ describe('UrlReplacements', () => {
   it('should replace new substitutions', () => {
     const replacements = urlReplacementsFor(window);
     replacements.set_('ONE', () => 'a');
-    expect(replacements.expand('?a=ONE')).to.equal('?a=a');
-
+    expect(replacements.expand('?a=ONE')).to.eventually.equal('?a=a');
     replacements.set_('ONE', () => 'b');
-    expect(replacements.expand('?a=ONE')).to.equal('?a=b');
-
     replacements.set_('TWO', () => 'b');
-    expect(replacements.expand('?b=TWO')).to.equal('?b=b');
+    return expect(replacements.expand('?a=ONE&b=TWO'))
+        .to.eventually.equal('?a=b&b=b');
+  });
+
+  it('should support positional arguments', () => {
+    const replacements = urlReplacementsFor(window);
+    replacements.set_('FN', (data, one) => one);
+    expect(replacements.expand('?a=FN(xyz)')).to.eventually.equal('?a=xyz');
+  });
+
+  it('should support promises as replacements', () => {
+    const replacements = urlReplacementsFor(window);
+    replacements.set_('P1', () => Promise.resolve('abc '));
+    replacements.set_('P2', () => Promise.resolve('xyz'));
+    replacements.set_('P3', () => Promise.resolve('123'));
+    replacements.set_('OTHER', () => 'foo');
+    return expect(replacements.expand('?a=P1&b=P2&c=P3&d=OTHER'))
+        .to.eventually.equal('?a=abc%20&b=xyz&c=123&d=foo');
   });
 });

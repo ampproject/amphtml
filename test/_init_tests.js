@@ -61,6 +61,7 @@ afterEach(() => {
     }
   }
   window.localStorage.clear();
+  window.ampExtendedElements = {};
 });
 
 chai.Assertion.addMethod('attribute', function(attr) {

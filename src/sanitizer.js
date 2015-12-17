@@ -37,14 +37,24 @@ const BLACKLISTED_TAGS = {
   'object': true,
   'script': true,
   'style': true,
+  // TODO(dvoytenko, #1156): SVG is blacklisted temporarily. There's no
+  // intention to keep this block for any longer than we have to.
+  'svg': true,
   'template': true,
+  'textarea': true,
   'video': true,
 };
 
 
 /** @const {!Object<string, boolean>} */
 const SELF_CLOSING_TAGS = {
+  'br': true,
+  'col': true,
+  'hr': true,
   'img': true,
+  'source': true,
+  'track': true,
+  'wbr': true,
 };
 
 
@@ -70,6 +80,15 @@ const WHITELISTED_FORMAT_TAGS = [
 
 
 /** @const {!Array<string>} */
+const WHITELISTED_ATTRS = [
+  'fallback',
+  'href',
+  'on',
+  'placeholder',
+];
+
+
+/** @const {!Array<string>} */
 const BLACKLISTED_ATTR_VALUES = [
   /*eslint no-script-url: 0*/ 'javascript:',
   /*eslint no-script-url: 0*/ 'vbscript:',
@@ -90,6 +109,7 @@ const BLACKLISTED_ATTR_VALUES = [
  * @return {string}
  */
 export function sanitizeHtml(html) {
+  const tagPolicy = htmlSanitizer.makeTagPolicy();
   const output = [];
   let ignore = 0;
 
@@ -101,8 +121,31 @@ export function sanitizeHtml(html) {
 
   const parser = htmlSanitizer.makeSaxParser({
     'startTag': function(tagName, attribs) {
+      if (ignore > 0) {
+        if (!SELF_CLOSING_TAGS[tagName]) {
+          ignore++;
+        }
+        return;
+      }
       if (BLACKLISTED_TAGS[tagName]) {
         ignore++;
+      } else if (tagName.indexOf('amp-') != 0) {
+        // Ask Caja to validate the element as well.
+        // Use the resulting properties.
+        const savedAttribs = attribs.slice(0);
+        const scrubbed = tagPolicy(tagName, attribs);
+        if (!scrubbed) {
+          ignore++;
+        } else {
+          attribs = scrubbed.attribs;
+          // Restore some of the attributes that AMP is directly responsible
+          // for, such as "on".
+          for (let i = 0; i < attribs.length; i += 2) {
+            if (WHITELISTED_ATTRS.indexOf(attribs[i]) != -1) {
+              attribs[i + 1] = savedAttribs[i + 1];
+            }
+          }
+        }
       }
       if (ignore > 0) {
         if (SELF_CLOSING_TAGS[tagName]) {
@@ -130,9 +173,7 @@ export function sanitizeHtml(html) {
     },
     'endTag': function(tagName) {
       if (ignore > 0) {
-        if (BLACKLISTED_TAGS[tagName]) {
-          ignore--;
-        }
+        ignore--;
         return;
       }
       emit('</');
@@ -187,10 +228,12 @@ export function isValidAttr(attrName, attrValue) {
   }
 
   // No attributes with "javascript" or other blacklisted substrings in them.
-  const attrValueNorm = attrValue.toLowerCase().replace(/[\s,\u0000]+/g, '');
-  for (let i = 0; i < BLACKLISTED_ATTR_VALUES.length; i++) {
-    if (attrValueNorm.indexOf(BLACKLISTED_ATTR_VALUES[i]) != -1) {
-      return false;
+  if (attrValue) {
+    const attrValueNorm = attrValue.toLowerCase().replace(/[\s,\u0000]+/g, '');
+    for (let i = 0; i < BLACKLISTED_ATTR_VALUES.length; i++) {
+      if (attrValueNorm.indexOf(BLACKLISTED_ATTR_VALUES[i]) != -1) {
+        return false;
+      }
     }
   }
 

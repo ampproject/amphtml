@@ -27,17 +27,23 @@
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
-  <!-- This is deprecated, we now prefer data-videoid. -->
-  <amp-youtube video-id="https://www.youtube.com/watch?v=9bZkp7q19f0">
+  <!-- This deprecated, we now prefer data-videoid. -->
+  <amp-youtube width="480" height="270"
+               video-id="https://www.youtube.com/watch?v=9bZkp7q19f0">
   </amp-youtube>
   <!-- This is the current way to do it, according to
 https://github.com/ampproject/amphtml/blob/master/extensions/amp-youtube/amp-youtube.md -->
-  <amp-youtube data-videoid="https://www.youtube.com/watch?v=dQw4w9WgXcQ">
+  <amp-youtube width="480" height="270"
+               data-videoid="https://www.youtube.com/watch?v=dQw4w9WgXcQ">
   </amp-youtube>
   <!-- This is invalid, the video id is missing. -->
-  <amp-youtube></amp-youtube>
+  <amp-youtube width="480" height="270"></amp-youtube>
+  <!-- This is also invalid, dimensions are missing. -->
+  <amp-youtube data-videoid="https://www.youtube.com/watch?v=dQw4w9WgXcQ">
+  </amp-youtube>
   <!-- This is invalid, one can only have one of these two. -->
-  <amp-youtube src="https://www.youtube.com/watch?v=9bZkp7q19f0"
+  <amp-youtube width="480" height="270"
+               video-id="https://www.youtube.com/watch?v=9bZkp7q19f0"
                data-videoid="https://www.youtube.com/watch?v=dQw4w9WgXcQ">
   </amp-youtube>
 </body>

@@ -75,8 +75,9 @@ export function getService(win, id, opt_factory) {
 export function getElementService(win, id, providedByElement) {
   assert(isElementScheduled(win, providedByElement),
       'Service %s was requested to be provided through %s, ' +
-      'but %s is not loaded in the current page.',
-      id, providedByElement, providedByElement);
+      'but %s is not loaded in the current page. To fix this ' +
+      'problem load the JavaScript file for %s in this page.',
+      id, providedByElement, providedByElement, providedByElement);
   const services = getServices(win, id);
   const s = services[id];
   if (s) {
@@ -113,6 +114,20 @@ export function getElementService(win, id, providedByElement) {
 function isElementScheduled(win, elementName) {
   assert(win.ampExtendedElements, 'win.ampExtendedElements not created yet');
   return !!win.ampExtendedElements[elementName];
+}
+
+/**
+ * In order to provide better error messages we only allow to retrieve
+ * services from other elements if those elements are loaded in the page.
+ * This makes it possible to mark an element as loaded in a test.
+ * @param {!Window} win
+ * @param {string} elementName Name of an extended custom element.
+ */
+export function markElementScheduledForTesting(win, elementName) {
+  if (!win.ampExtendedElements) {
+    win.ampExtendedElements = {};
+  }
+  win.ampExtendedElements[elementName] = true;
 }
 
 /**

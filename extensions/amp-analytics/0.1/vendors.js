@@ -18,29 +18,40 @@
  * @const {!JSONObject}
  */
 export const ANALYTICS_CONFIG = {
-  // TODO(btownsend, #871): Add a generic hit format to make custom analytics
-  // easier.
+
+  // Default parent configuration applied to all amp-analytics tags.
+  'default': {
+    'vars': {
+      'random': 'RANDOM',
+      'canonicalUrl': 'CANONICAL_URL',
+      'canonicalHost': 'CANONICAL_HOST',
+      'canonicalPath': 'CANONICAL_PATH',
+      'documentReferrer': 'DOCUMENT_REFERRER',
+      'title': 'TITLE',
+      'ampdocUrl': 'AMPDOC_URL',
+      'ampdocHost': 'AMPDOC_HOST',
+      'pageViewId': 'PAGE_VIEW_ID',
+      'clientId': 'CLIENT_ID',
+      'timestamp': 'TIMESTAMP',
+      'timezone': 'TIMEZONE',
+      'scrollTop': 'SCROLL_TOP',
+      'scrollLeft': 'SCROLL_LEFT',
+      'scrollWidth': 'SCROLL_WIDTH',
+      'scrollHeight': 'SCROLL_HEIGHT',
+      'screenWidth': 'SCREEN_WIDTH',
+      'screenHeight': 'SCREEN_HEIGHT'
+    }
+    // TODO(btownsend, #871): Add a generic hit format to make custom analytics
+    // easier.
+  },
 
   'googleanalytics': {
     'host': 'www.google-analytics.com',
     'method': 'GET',
-    'vars': {
-      // TODO(btownsend, #1116) These are placeholders to temporarily simulate
-      // built-in vars. To be removed when amp-analytics.js is updated with
-      // real built-in var support.
-      'title': 'TITLE',
-      'domain': 'CANONICAL_HOST',
-      'path': 'CANONICAL_PATH',
-      'hitCount': 'HIT_COUNT',
-      'screenWidth': 'SCREEN_WIDTH',
-      'screenHeight': 'SCREEN_HEIGHT',
-      'timestamp': 'TIMESTAMP',
-      'clientId': 'CLIENT_IDENTIFIER'
-    },
     'requests': {
-      'baseHit': '/collect?v=1&_v=a0&aip=true&_s=${hitCount}&dp=${path}&' +
-          'dl=${domain}&dt=${title}&sr=${screenWidth}x${screenHeight}&' +
-          '_utmht=${timestamp}&jid=&cid=${clientId}&tid=${account}',
+      'baseHit': '/collect?v=1&_v=a0&aip=true&_s=${hitCount}&' +
+          'dl=${canonicalUrl}&dt=${title}&sr=${screenWidth}x${screenHeight}&' +
+          '_utmht=${timestamp}&jid=&cid=${clientId(_ga)}&tid=${account}',
       'pageview': '/r${baseHit}&t=pageview&_r=1',
       'event': '${baseHit}&t=event&ec=${eventCategory}&ea=${eventAction}&' +
           'el=${eventLabel}&ev=${eventValue}',

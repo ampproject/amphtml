@@ -52,5 +52,4 @@ Current list of extended templates:
 
 | Component                                     | Description                                                                                 |
 | --------------------------------------------- | -------------------------------------------------------------------------------------------
-|
 | [`amp-mustache`](amp-mustache/amp-mustache.md) | Mustache template.                                       |

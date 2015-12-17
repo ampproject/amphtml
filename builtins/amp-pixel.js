@@ -44,16 +44,17 @@ export function installPixel(win) {
 
     /** @override */
     layoutCallback() {
-      let src = this.element.getAttribute('src');
-      src = urlReplacementsFor(this.getWin()).expand(this.assertSource(src));
-      const image = new Image();
-      image.src = src;
-      image.width = 1;
-      image.height = 1;
-      // Make it take zero space
-      this.element.style.width = 0;
-      this.element.appendChild(image);
-      return Promise.resolve();
+      const src = this.element.getAttribute('src');
+      return urlReplacementsFor(this.getWin()).expand(this.assertSource(src))
+          .then(src => {
+            const image = new Image();
+            image.src = src;
+            image.width = 1;
+            image.height = 1;
+            // Make it take zero space
+            this.element.style.width = 0;
+            this.element.appendChild(image);
+          });
     }
 
     assertSource(src) {

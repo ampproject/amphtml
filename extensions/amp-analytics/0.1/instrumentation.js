@@ -17,6 +17,7 @@
 import {getService} from '../../../src/service';
 import {viewerFor} from '../../../src/viewer';
 import {Observable} from '../../../src/observable';
+import {log} from '../../../src/log';
 
 /**
  * This type signifies a callback that gets called when an analytics event that
@@ -30,9 +31,12 @@ let AnalyticsEventListener;
  * @param {!AnalyticsEventType} type Event type to listen to.
  * @param {!AnalyticsEventListener} listener Callback to call when the event
  *          fires.
+ * @param {string=} opt_selector If specified, the given listener
+ *   should only be called if the event target matches this selector.
  */
-export function addListener(window, type, listener) {
-  return instrumentationServiceFor(window).addListener(type, listener);
+export function addListener(window, type, listener, opt_selector) {
+  return instrumentationServiceFor(window).addListener(
+      type, listener, opt_selector);
 }
 
 /**
@@ -42,10 +46,7 @@ export function addListener(window, type, listener) {
  */
 export const AnalyticsEventType = {
   VISIBLE: 'visible',
-  TIMER: 'timer', // Not supported yet.
-  CLICK: 'click', // Not supported yet.
-  TAP: 'tap', // Not supported yet.
-  HIDDEN: 'hidden' // Not supported yet.
+  CLICK: 'click'
 };
 
 /**
@@ -68,21 +69,30 @@ class InstrumentationService {
    * @param {!Window} window
    */
   constructor(window) {
+    /** @const {!Window} */
+    this.win_ = window;
 
-    /**
-     * @consti {!Viewer}
-     */
+    /** @const {string} */
+    this.TAG_ = "Analytics.Instrumentation";
+
+    /** @const {!Viewer} */
     this.viewer_ = viewerFor(window);
+
+    /** @private {boolean} */
+    this.clickHandlerRegistered_ = false;
+
+    /** @private {!Observable<Event>} */
+    this.clickObservable_ = new Observable();
   }
 
   /**
    * @param {!AnalyticsEventType} eventType The type of event
    * @param {!AnalyticsEventListener} The callback to call when the event
-   *          occurs.
+   *   occurs.
+   * @param {string=} opt_selector If specified, the given listener
+   *   should only be called if the event target matches this selector.
    */
-  addListener(eventType, listener) {
-
-    // TODO(btownsend, #871): Add support for clicks, timers, scroll etc.
+  addListener(eventType, listener, opt_selector) {
     if (eventType === AnalyticsEventType.VISIBLE) {
       if (this.viewer_.isVisible()) {
         listener(new AnalyticsEvent(AnalyticsEventType.VISIBLE));
@@ -93,7 +103,70 @@ class InstrumentationService {
           }
         });
       }
+    } else if (eventType === AnalyticsEventType.CLICK) {
+      if (!opt_selector) {
+        log.warn(this.TAG_, 'Missing required selector on click trigger');
+      } else {
+        this.ensureClickListener_();
+        this.clickObservable_.add(
+            this.createSelectiveListener_(listener, opt_selector));
+      }
     }
+  }
+
+  /**
+   * Ensure we have a click listener registered on the document.
+   */
+  ensureClickListener_() {
+    if (!this.clickHandlerRegistered_) {
+      this.clickHandlerRegistered_ = true;
+      this.win_.document.documentElement.addEventListener(
+          'click', this.onClick_.bind(this));
+    }
+  }
+
+  /**
+   * @param {!Event} e
+   */
+  onClick_(e) {
+    this.clickObservable_.fire(e);
+  }
+
+  /**
+   * @param {!Function} listener
+   * @param {string} selector
+   */
+  createSelectiveListener_(listener, selector) {
+    return e => {
+      if (selector === '*' || this.matchesSelector_(e.target, selector)) {
+        listener(new AnalyticsEvent(AnalyticsEventType.CLICK));
+      }
+    };
+  }
+
+  /**
+   * @param {!Element} el
+   * @param {string} selector
+   * @return {boolean} True if the given element matches the given selector.
+   */
+  matchesSelector_(el, selector) {
+    try {
+      const matcher = el.matches ||
+          el.webkitMatchesSelector ||
+          el.mozMatchesSelector ||
+          el.msMatchesSelector ||
+          el.oMatchesSelector;
+      if (matcher) {
+        return matcher.call(el, selector);
+      }
+      const matches = this.win_.document.querySelectorAll(selector);
+      let i = matches.length;
+      while (i-- > 0 && matches.item(i) != el) {};
+      return i > -1;
+    } catch (selectorError) {
+      log.error(this.TAG_, 'Bad query selector: ', selector, selectorError);
+    }
+    return false;
   }
 }
 
@@ -101,8 +174,9 @@ class InstrumentationService {
  * @param {!Window} window
  * @return {!InstrumentationService}
  */
-function instrumentationServiceFor(window) {
+export function instrumentationServiceFor(window) {
   return getService(window, 'amp-analytics-instrumentation', () => {
     return new InstrumentationService(window);
   });
 }
+
