@@ -59,6 +59,23 @@ export const ANALYTICS_CONFIG = {
           'st=${socialActionTarget}'
     },
     'optout': '_gaUserPrefs.ioo'
+  },
+
+  'parsely': {
+    // TODO: Can we support dynamic hosts like srv-2015-12-17-02.pixel.parsely.com
+    'host': 'pixel.parsely.com',
+    'method': 'GET',
+    'requests': {
+      // TODO: screenAvailWidth (screen.availWidth)
+      // TODO: screenAvailHeight (screen.availHeight)
+      // TODO: pixelDepth (screen.pixelDepth)
+      // TODO: JSON encode object {"parsely_uuid":"47edddc7-b80a-4a39-82ff-e87612469b59","parsely_site_uuid":"0765d266-80eb-45b3-bd50-81db037498a0"}
+      // TODO: client-side sessionization for session id, session initial URL, session referrer, session start time, last session start time
+      'baseHit': '/plogger/?rand={{timestamp}}&idsite={{apikey}}&url={{ampdocUrl}}&urlref={{documentReferrer}}&screen={{screenWidth}}x{{screenHeight}}%7C{{screenAvailWidth}}x{{screenAvailHeight}}%7C{{pixelDepth}}&data=TODO&title={{title}}&date={{timestamp}}'
+      'pageview': '{{baseHit}}&action=pageview',
+      // TODO: Engaged Time
+      'heartbeat': '{{baseHit}}&action=heartbeat&inc={{engagedTime}}'
+    }
   }
 };
 
