@@ -27,6 +27,8 @@ describe('amp-analytics', function() {
   let sandbox;
   let windowApi;
   let sendRequestSpy;
+  let sendRequestUsingImageSpy;
+  let sendRequestUsingBeaconSpy;
 
   beforeEach(() => {
     markElementScheduledForTesting(window, 'amp-analytics');
@@ -66,6 +68,10 @@ describe('amp-analytics', function() {
     analytics.isExperimentOn_ = () => true;
     analytics.createdCallback();
     sendRequestSpy = sandbox.spy(analytics, 'sendRequest_');
+    sendRequestUsingImageSpy = sandbox.spy(
+        analytics, 'sendRequestUsingImage_');
+    sendRequestUsingBeaconSpy = sandbox.spy(
+        analytics, 'sendRequestUsingBeacon_');
     return analytics;
   }
 
@@ -90,7 +96,8 @@ describe('amp-analytics', function() {
     });
 
     return analytics.layoutCallback().then(() => {
-      expect(sendRequestSpy.withArgs('https://example.com/bar').calledOnce)
+      expect(sendRequestSpy.withArgs({
+        host: 'example.com', path: '', data: '/bar'}).calledOnce)
           .to.be.true;
     });
   });
@@ -156,7 +163,9 @@ describe('amp-analytics', function() {
     });
 
     return analytics.layoutCallback().then(() => {
-      expect(sendRequestSpy.callCount).to.equal(0);
+      expect(sendRequestSpy.callCount).to.equal(1);
+      expect(sendRequestUsingImageSpy.callCount).to.equal(0);
+      expect(sendRequestUsingBeaconSpy.callCount).to.equal(0);
     });
   });
 
@@ -193,7 +202,7 @@ describe('amp-analytics', function() {
     return analytics.layoutCallback().then(() => {
       expect(sendRequestSpy.calledOnce).to.be.true;
       expect(sendRequestSpy.args[0][0])
-        .to.equal('https://example.com/bar&f1&baz');
+        .to.deep.equal({host: 'example.com', path: '', data: '/bar&f1&baz'});
     });
   });
 
@@ -206,7 +215,8 @@ describe('amp-analytics', function() {
 
     return analytics.layoutCallback().then(() => {
       expect(sendRequestSpy.calledOnce).to.be.true;
-      expect(sendRequestSpy.args[0][0]).to.equal('https://example.com/bar&b1');
+      expect(sendRequestSpy.args[0][0]).to.deep.equal(
+          {host: 'example.com', path: '', data: '/bar&b1'});
     });
   });
 
@@ -219,8 +229,10 @@ describe('amp-analytics', function() {
 
     return analytics.layoutCallback().then(() => {
       expect(sendRequestSpy.calledOnce).to.be.true;
-      expect(sendRequestSpy.args[0][0])
-          .to.equal('https://example.com/bar&/bar&/bar&&baz&baz&baz');
+      expect(sendRequestSpy.args[0][0]).to.deep.equal({
+        host: 'example.com',
+        path: '',
+        data: '/bar&/bar&/bar&&baz&baz&baz'});
     });
   });
 
@@ -242,9 +254,11 @@ describe('amp-analytics', function() {
 
     analytics.layoutCallback().then(() => {
       expect(sendRequestSpy.calledOnce).to.be.true;
-      expect(sendRequestSpy.args[0][0]).to.equal(
-         'https://example.comcid=uQVAtQyO978OPCNBZXWOKRDcxSORw9GQfB' +
-          'x2CyJSF0MnkIPeeX9ruacSFPgQ0HSD');
+      expect(sendRequestSpy.args[0][0]).to.deep.equal({
+        host: 'example.com',
+        path: '',
+        data: 'cid=uQVAtQyO978OPCNBZXWOKRDcxSORw9GQfB' +
+          'x2CyJSF0MnkIPeeX9ruacSFPgQ0HSD'});
     });
   });
 
@@ -261,7 +275,10 @@ describe('amp-analytics', function() {
     };
     return analytics.layoutCallback().then(() => {
       expect(sendRequestSpy.calledOnce).to.be.true;
-      expect(sendRequestSpy.args[0][0]).to.equal('https://example.com/bar');
+      expect(sendRequestSpy.args[0][0]).to.deep.equal({
+        host: 'example.com',
+        path: '',
+        data: '/bar'});
     });
   });
 
@@ -279,7 +296,10 @@ describe('amp-analytics', function() {
     };
     return analytics.layoutCallback().then(() => {
       expect(sendRequestSpy.calledOnce).to.be.true;
-      expect(sendRequestSpy.args[0][0]).to.equal('https://example.com/foobar');
+      expect(sendRequestSpy.args[0][0]).to.deep.equal({
+        host: 'example.com',
+        path: '',
+        data: '/foobar'});
     });
   });
 
@@ -334,8 +354,10 @@ describe('amp-analytics', function() {
       }]});
     return analytics.layoutCallback().then(() => {
       expect(sendRequestSpy.calledOnce).to.be.true;
-      expect(sendRequestSpy.args[0][0]).to.equal(
-          'https://example.com/test1=x&test2=test2');
+      expect(sendRequestSpy.args[0][0]).to.deep.equal({
+        host: 'example.com',
+        path: '',
+        data: '/test1=x&test2=test2'});
     });
   });
 
@@ -350,8 +372,10 @@ describe('amp-analytics', function() {
       'triggers': [{'on': 'visible', 'request': 'pageview'}]});
     return analytics.layoutCallback().then(() => {
       expect(sendRequestSpy.calledOnce).to.be.true;
-      expect(sendRequestSpy.args[0][0]).to.equal(
-          'https://example.com/test1=x&test2=test2');
+      expect(sendRequestSpy.args[0][0]).to.deep.equal({
+        host: 'example.com',
+        path: '',
+        data: '/test1=x&test2=test2'});
     });
   });
 
@@ -362,9 +386,10 @@ describe('amp-analytics', function() {
       'triggers': [{'on': 'visible', 'request': 'pageview'}]});
     return analytics.layoutCallback().then(() => {
       expect(sendRequestSpy.calledOnce).to.be.true;
-      expect(sendRequestSpy.args[0][0]).to.equal(
-          'https://example.com/title=Test%20Title&' +
-          'ref=https%3A%2F%2Fwww.google.com%2F');
+      expect(sendRequestSpy.args[0][0]).to.deep.equal({
+        host: 'example.com',
+        path: '',
+        data: '/title=Test%20Title&ref=https%3A%2F%2Fwww.google.com%2F'});
     });
   });
 
@@ -398,8 +423,10 @@ describe('amp-analytics', function() {
         }}]});
     return analytics.layoutCallback().then(() => {
       expect(sendRequestSpy.calledOnce).to.be.true;
-      expect(sendRequestSpy.args[0][0]).to.equal(
-          'https://example.com/test1=trigger1&test2=config2');
+      expect(sendRequestSpy.args[0][0]).to.deep.equal({
+        host: 'example.com',
+        path: '',
+        data: '/test1=trigger1&test2=config2'});
     });
   });
 
@@ -412,8 +439,10 @@ describe('amp-analytics', function() {
     });
     return analytics.layoutCallback().then(() => {
       expect(sendRequestSpy.calledOnce).to.be.true;
-      expect(sendRequestSpy.args[0][0]).to.equal(
-          'https://example.com/test1=Test%20Title&test2=428');
+      expect(sendRequestSpy.args[0][0]).to.deep.equal({
+        host: 'example.com',
+        path: '',
+        data: '/test1=Test%20Title&test2=428'});
     });
   });
 
@@ -430,8 +459,10 @@ describe('amp-analytics', function() {
         }}]});
     return analytics.layoutCallback().then(() => {
       expect(sendRequestSpy.calledOnce).to.be.true;
-      expect(sendRequestSpy.args[0][0]).to.equal(
-          'https://example.com/test=%24%7Bvar2%7D');
+      expect(sendRequestSpy.args[0][0]).to.deep.equal({
+        host: 'example.com',
+        path: '',
+        data: '/test=%24%7Bvar2%7D'});
     });
   });
 
@@ -455,9 +486,11 @@ describe('amp-analytics', function() {
         }}]});
     return analytics.layoutCallback().then(() => {
       expect(sendRequestSpy.calledOnce).to.be.true;
-      expect(sendRequestSpy.args[0][0]).to.equal(
-          'https://example.com/test?c1=config%201&t1=trigger%3D1&' +
-          'c2=config%262&t2=trigger%3F2');
+      expect(sendRequestSpy.args[0][0]).to.deep.equal({
+        host: 'example.com',
+        path: '',
+        data: '/test?c1=config%201&t1=trigger%3D1&' +
+          'c2=config%262&t2=trigger%3F2'});
     });
   });
 
@@ -475,9 +508,11 @@ describe('amp-analytics', function() {
       }]});
     return analytics.layoutCallback().then(() => {
       expect(sendRequestSpy.calledOnce).to.be.true;
-      expect(sendRequestSpy.args[0][0]).to.equal(
-          'https://example.com/test1=x&test2=https%3A%2F%2Fwww.google.com%2F' +
-          '&title=Test%20Title');
+      expect(sendRequestSpy.args[0][0]).to.deep.equal({
+        host: 'example.com',
+        path: '',
+        data: '/test1=x&test2=https%3A%2F%2Fwww.google.com%2F' +
+          '&title=Test%20Title'});
     });
   });
 
@@ -490,8 +525,8 @@ describe('amp-analytics', function() {
     };
     let analytics = getAnalyticsTag(config);
     return analytics.layoutCallback().then(() => {
-      expect(sendRequestSpy.withArgs('https://example.com/bar').calledOnce)
-          .to.be.true;
+      expect(sendRequestSpy.withArgs({
+        host: 'example.com', path: '', data: '/bar'}).calledOnce).to.be.true;
       sendRequestSpy.reset();
       windowApi['foo'] = {'bar': function() { return true; }};
       analytics = getAnalyticsTag(config);
@@ -501,10 +536,133 @@ describe('amp-analytics', function() {
         windowApi['foo'] = {'bar': function() { return false; }};
         analytics = getAnalyticsTag(config);
         analytics.layoutCallback().then(() => {
-          expect(sendRequestSpy.withArgs('https://example.com/bar').calledOnce)
+          expect(sendRequestSpy.withArgs({
+            host: 'example.com', path: '', data: '/bar'}).calledOnce)
               .to.be.true;
         });
       });
+    });
+  });
+
+  it('sends image requests when transport is not set', () => {
+    const analytics = getAnalyticsTag({
+      'host': 'example.com',
+      'path': '/test',
+      'requests': {'pageview': '?x=y'},
+      'triggers': [{'on': 'visible', 'request': 'pageview'}]});
+    return analytics.layoutCallback().then(() => {
+      expect(sendRequestSpy.calledOnce).to.be.true;
+      expect(sendRequestUsingImageSpy.calledOnce).to.be.true;
+      expect(sendRequestUsingImageSpy.args[0][0]).to.equal(
+          'https://example.com/test?x=y');
+      expect(sendRequestUsingBeaconSpy.callCount).to.be.equal(0);
+    });
+  });
+
+  it('sends image requests when transport is image', () => {
+    const analytics = getAnalyticsTag({
+      'host': 'example.com',
+      'path': '/test',
+      'transport': 'image',
+      'requests': {'pageview': '?x=y'},
+      'triggers': [{'on': 'visible', 'request': 'pageview'}]});
+    return analytics.layoutCallback().then(() => {
+      expect(sendRequestSpy.calledOnce).to.be.true;
+      expect(sendRequestUsingImageSpy.calledOnce).to.be.true;
+      expect(sendRequestUsingImageSpy.args[0][0]).to.equal(
+          'https://example.com/test?x=y');
+      expect(sendRequestUsingBeaconSpy.callCount).to.be.equal(0);
+    });
+  });
+
+  it('sends beacon requests when transport is beacon', () => {
+    const analytics = getAnalyticsTag({
+      'host': 'example.com',
+      'path': '/test',
+      'transport': 'beacon',
+      'requests': {'pageview': '?x=y'},
+      'triggers': [{'on': 'visible', 'request': 'pageview'}]});
+    return analytics.layoutCallback().then(() => {
+      expect(sendRequestSpy.calledOnce).to.be.true;
+      expect(sendRequestUsingBeaconSpy.calledOnce).to.be.true;
+      expect(sendRequestUsingBeaconSpy.args[0]).to.deep.equal([
+        'https://example.com/test', '?x=y']);
+      expect(sendRequestUsingImageSpy.callCount).to.be.equal(0);
+    });
+  });
+
+  it('allows overriding host and path in a request', () => {
+    const analytics = getAnalyticsTag({
+      'host': 'example.com',
+      'path': '/test',
+      'transport': 'image',
+      'requests': {
+        'pageview': {
+          host: 'test.com',
+          path: '/other',
+          data: '?x=y'
+        }
+      },
+      'triggers': [{'on': 'visible', 'request': 'pageview'}]});
+    return analytics.layoutCallback().then(() => {
+      expect(sendRequestSpy.calledOnce).to.be.true;
+      expect(sendRequestUsingImageSpy.calledOnce).to.be.true;
+      expect(sendRequestUsingImageSpy.args[0][0]).to.equal(
+          'https://test.com/other?x=y');
+    });
+  });
+
+  it('allows overriding host without path in a request', () => {
+    const analytics = getAnalyticsTag({
+      'host': 'example.com',
+      'path': '/test',
+      'transport': 'image',
+      'requests': {
+        'pageview': {
+          host: 'test.com',
+          data: '?x=y'
+        }
+      },
+      'triggers': [{'on': 'visible', 'request': 'pageview'}]});
+    return analytics.layoutCallback().then(() => {
+      expect(sendRequestSpy.calledOnce).to.be.true;
+      expect(sendRequestUsingImageSpy.calledOnce).to.be.true;
+      expect(sendRequestUsingImageSpy.args[0][0]).to.equal(
+          'https://test.com/test?x=y');
+    });
+  });
+
+  it('allows overriding path without host in a request', () => {
+    const analytics = getAnalyticsTag({
+      'host': 'example.com',
+      'path': '/test',
+      'transport': 'image',
+      'requests': {
+        'pageview': {
+          path: '/other',
+          data: '?x=y'
+        }
+      },
+      'triggers': [{'on': 'visible', 'request': 'pageview'}]});
+    return analytics.layoutCallback().then(() => {
+      expect(sendRequestSpy.calledOnce).to.be.true;
+      expect(sendRequestUsingImageSpy.calledOnce).to.be.true;
+      expect(sendRequestUsingImageSpy.args[0][0]).to.equal(
+          'https://example.com/other?x=y');
+    });
+  });
+
+  it('does not send a request if transport is unknown', () => {
+    const analytics = getAnalyticsTag({
+      'host': 'example.com',
+      'path': '/test',
+      'transport': 'bus',
+      'requests': {'pageview': '?x=y'},
+      'triggers': [{'on': 'visible', 'request': 'pageview'}]});
+    return analytics.layoutCallback().then(() => {
+      expect(sendRequestSpy.calledOnce).to.be.true;
+      expect(sendRequestUsingImageSpy.callCount).to.be.equal(0);
+      expect(sendRequestUsingBeaconSpy.callCount).to.be.equal(0);
     });
   });
 });

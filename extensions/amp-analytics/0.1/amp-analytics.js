@@ -28,6 +28,12 @@ import {ANALYTICS_CONFIG} from './vendors';
 
 installCidService(AMP.win);
 
+/**
+ * A request template object, extracted from an amp-analytics config block.
+ * @typedef {{host: string, path: string, data: string}}
+ */
+let RequestData;
+
 
 /** @const */
 const EXPERIMENT = 'amp-analytics';
@@ -80,10 +86,10 @@ export class AmpAnalytics extends AMP.BaseElement {
     this.type_ = null;
 
     /**
-     * @private {Object<string, string>} A map of request names to the request
-     * format string used by the tag to send data
+     * @private {Object<string, !RequestData>} Maps request names to configs.
      */
     this.requests_ = {};
+
     this.element.setAttribute('aria-hidden', 'true');
 
     if (this.hasOptedOut_()) {
@@ -200,7 +206,10 @@ export class AmpAnalytics extends AMP.BaseElement {
     }
     for (const k in this.config_['requests']) {
       if (this.config_['requests'].hasOwnProperty(k)) {
-        requests[k] = this.config_['requests'][k];
+        requests[k] = this.normalizeRequest_(
+            this.config_['requests'][k],
+            this.config_['host'],
+            this.config_['path'] || '');
       }
     }
     this.requests_ = requests;
@@ -208,9 +217,34 @@ export class AmpAnalytics extends AMP.BaseElement {
     // Expand any placeholders. For requests, we expand each string up to 5
     // times to support nested requests. Leave any unresolved placeholders.
     for (const k in this.requests_) {
-      this.requests_[k] = expandTemplate(this.requests_[k], key => {
-        return this.requests_[key] || '${' + key + '}';
+      this.requests_[k].data = expandTemplate(this.requests_[k].data, key => {
+        return this.requests_[key] && this.requests_[key].data ||
+            '${' + key + '}';
       }, 5);
+    }
+  }
+
+  /**
+   * The amp-analytics config block supports two formats for specifying a
+   * request template - either a single string value, or an object specifying
+   * a host, path, and data strings. This method normalizes both forms into
+   * a RequestData object.
+   * @param {string} request The request value from config.
+   * @param {string} defaultHost The default host value to use if the given
+   *   request does not provide an overridden host.
+   * @param {string} defaultPath The default path value to use if the given
+   *   request does not provide an overriden path.
+   * @return {!RequestData}
+   */
+  normalizeRequest_(request, defaultHost, defaultPath) {
+    if (request['host'] || request['path'] || request['data']) {
+      return {
+        host: request['host'] || defaultHost,
+        path: request['path'] || defaultPath,
+        data: request['data'] || ''
+      };
+    } else {
+      return {host: defaultHost, path: defaultPath, data: request};
     }
   }
 
@@ -223,16 +257,18 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @private
    */
   handleEvent_(trigger, event) {
-    const host = this.config_['host'];
-    let request = this.requests_[trigger['request']];
-    if (!host || !request) {
+    const request = this.requests_[trigger['request']];
+    if (!request) {
+      log.warn(this.getName_(),
+          'No request template found matching trigger.request value: ',
+          trigger['request']);
       return;
     }
 
     // Replace placeholders with URI encoded values.
     // Precedence is trigger.vars > config.vars.
     // Nested expansion not supported.
-    request = expandTemplate(request, key => {
+    const data = expandTemplate(request.data, key => {
       const match = key.match(/([^(]*)(\([^)]*\))?/);
       const name = match[1];
       const argList = match[2] || '';
@@ -243,29 +279,59 @@ export class AmpAnalytics extends AMP.BaseElement {
     });
 
     // For consistentcy with amp-pixel we also expand any url replacements.
-    urlReplacementsFor(this.getWin()).expand(request).then(request => {
-      // TODO(btownsend, #1061): Add support for sendBeacon.
-      if (host && request) {
-        this.sendRequest_('https://' + host + request);
-      }
+    urlReplacementsFor(this.getWin()).expand(data).then(data => {
+      this.sendRequest_({host: request.host, path: request.path, data: data});
     });
   }
 
   /**
-   * Sends a request via GET method.
-   *
-   * @param {!string} request The request to be sent over wire.
+   * @param {!RequestData}
    * @private
    */
   sendRequest_(request) {
+    if (!request.host) {
+      log.warn(this.getName_(),
+          'Failed to send request. No host specified in config.');
+      return;
+    }
+    const transport = this.config_['transport'] || 'image';
+    if (transport == 'image') {
+      this.sendRequestUsingImage_(
+          'https://' + request.host + request.path + request.data);
+    } else if (transport == 'beacon') {
+      this.sendRequestUsingBeacon_(
+          'https://' + request.host + request.path, request.data);
+    } else {
+      log.warn(this.getName_(),
+          'Failed to send request. Unsupported transport: ', transport);
+    }
+  }
+
+  /**
+   * Transmits a POST request using navigator.sendBeacon.
+   * @param {string} url
+   * @param {string} data
+   * @private
+   */
+  sendRequestUsingBeacon_(url, data) {
+    this.getWin().navigator.sendBeacon(url, data);
+    log.fine(this.getName_(), 'Sent beacon: ', url, data);
+  }
+
+  /**
+   * Transmits a GET request using an Image tag.
+   * @param {string} url The full url to load.
+   * @private
+   */
+  sendRequestUsingImage_(url) {
     const image = new Image();
-    image.src = request;
+    image.src = url;
     image.width = 1;
     image.height = 1;
     loadPromise(image).then(() => {
-      log.fine(this.getName_(), 'Sent request: ', request);
+      log.fine(this.getName_(), 'Sent request: ', url);
     }).catch(() => {
-      log.warn(this.getName_(), 'Failed to send request: ', request);
+      log.warn(this.getName_(), 'Failed to send request: ', url);
     });
   }
 
