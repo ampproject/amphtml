@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+
+import {getService} from './service';
+
+
 /**
  * Returns service implemented in service/history-impl.
  * @param {!Window} window
