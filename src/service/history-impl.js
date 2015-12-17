@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {installViewerService} from '../service/viewer-impl';
 import {Pass} from '../pass';
 import {assert} from '../asserts';
 import {getService} from '../service';
@@ -21,6 +22,7 @@ import {log} from '../log';
 import {timer} from '../timer';
 import {viewerFor} from '../viewer';
 
+installViewerService(window);
 
 /** @private @const */
 const TAG_ = 'History';
