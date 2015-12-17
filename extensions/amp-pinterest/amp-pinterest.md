@@ -84,6 +84,16 @@ Large circular button using `data-round="true"` and `data-height="tall"`
 
     height=32 width=32
 
+## Follow Button
+
+**data-href**
+
+Required when `data-do` is `buttonFollow`.  Contains the fully qualified Pinterest user profile url to follow.
+
+**data-label**
+
+Required when `data-do` is `buttonFollow`.  Contains the text to display on the follow button.
+
 ## Embedded Pin Widget
 
 **data-url**
