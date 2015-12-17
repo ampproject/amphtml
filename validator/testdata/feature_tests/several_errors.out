@@ -6,4 +6,4 @@ feature_tests/several_errors.html:34:2 INVALID_ATTR_VALUE width (see https://git
 feature_tests/several_errors.html:37:2 DISALLOWED_ATTR made_up_attribute (see https://github.com/ampproject/amphtml/blob/master/builtins/amp-ad.md)
 feature_tests/several_errors.html:39:7 MANDATORY_TAG_MISSING charset utf-8 declaration (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#chrs)
 feature_tests/several_errors.html:39:7 MANDATORY_TAG_MISSING viewport declaration (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#vprt)
-feature_tests/several_errors.html:39:7 MANDATORY_TAG_MISSING amphtml engine v1.js script (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#scrpt)
+feature_tests/several_errors.html:39:7 MANDATORY_TAG_MISSING amphtml engine v0.js script (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#scrpt)

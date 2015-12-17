@@ -1279,7 +1279,7 @@ const ParsedTagSpec = function ParsedTagSpec(
   // script, in addition to the official allowances. This would be dangerous
   // in production so the rule is not in the official validator file
   // (validator.protoascii) but we hack it into here.
-  if (tagSpec.detail == 'amphtml engine v1.js script') {
+  if (tagSpec.detail == 'amphtml engine v0.js script') {
     const parsedAttrSpec = this.attrsByName_['src'];
     parsedAttrSpec.spec_.valueRegex += '|\\.\\./dist/amp\\.js';
   }

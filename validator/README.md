@@ -51,5 +51,5 @@ empty.html:1:0 MANDATORY_TAG_MISSING mandatory style (js enabled) opacity 0 (see
 empty.html:1:0 MANDATORY_TAG_MISSING mandatory style (noscript) opacity 1 (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#opacity)
 empty.html:1:0 MANDATORY_TAG_MISSING noscript enclosure for mandatory style (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#opacity)
 empty.html:1:0 MANDATORY_TAG_MISSING body (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#crps)
-empty.html:1:0 MANDATORY_TAG_MISSING amphtml engine v1.js script (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#scrpt)
+empty.html:1:0 MANDATORY_TAG_MISSING amphtml engine v0.js script (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#scrpt)
 ```

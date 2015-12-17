@@ -25,7 +25,7 @@ min_validator_revision_required: 67
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 99
+spec_file_revision: 100
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
 # These rules are just enough to validate the example from the spec.
@@ -1448,13 +1448,13 @@ tags: { name: "button" }
 # attribute shows up as the disallowed attribute instead of 'src' for a
 # development flagged AMP engine script.
 # Note that validator.js finds and modifies this rule, by looking for
-# detail == "amphtml engine v1.js script".
+# detail == "amphtml engine v0.js script".
 tags: {
   name: "script"
   mandatory: true
   mandatory_parent: "head"
   unique: true
-  detail: "amphtml engine v1.js script"
+  detail: "amphtml engine v0.js script"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#scrpt"
   attrs: {
     name: "src"
