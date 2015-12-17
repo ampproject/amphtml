@@ -41,7 +41,7 @@ describe('New Visibility Boilerplate', () => {
   let fixture;
   beforeEach(() => {
     return createFixtureIframe(
-      'test/fixtures/boilerplate-new-visibility.html', 1000).then(f => {
+      'test/fixtures/boilerplate-new-visibility.html', 2000).then(f => {
         fixture = f;
       });
   });
