@@ -15,15 +15,19 @@
  */
 
 import {IntersectionObserver} from '../../src/intersection-observer';
+import {clientIdScope} from '../../ads/_config';
 import {createIframePromise} from '../../testing/iframe';
 import {installAd} from '../../builtins/amp-ad';
 import {installEmbed} from '../../builtins/amp-embed';
-import {viewportFor} from
-    '../../src/viewport';
+import {installCidService} from '../../src/service/cid-impl';
+import {viewportFor} from '../../src/viewport';
+import {setCookie} from '../../src/cookies';
+import {timer} from '../../src/timer';
 import * as sinon from 'sinon';
 
 runAdTestSuiteAgainstInstaller('amp-ad', installAd);
 runAdTestSuiteAgainstInstaller('amp-embed', installEmbed);
+
 
 function runAdTestSuiteAgainstInstaller(name, installer) {
   return describe(name, () => {
@@ -154,6 +158,8 @@ function runAdTestSuiteAgainstInstaller(name, installer) {
               'link[rel=preconnect]');
           expect(preconnects[preconnects.length - 1].href).to.equal(
               'https://testsrc/');
+          // Make sure we run tests without CID available by default.
+          expect(ad.ownerDocument.defaultView.services.cid).to.be.undefined;
         });
       });
 
@@ -296,23 +302,30 @@ function runAdTestSuiteAgainstInstaller(name, installer) {
             type: 'a9',
             src: 'testsrc',
           }, 'https://schema.org').then(element => {
-            element.style.position = 'absolute';
-            element.style.top = '300px';
-            element.style.left = '50px';
-            viewportFor(element.ownerDocument.defaultView).setScrollTop(50);
             ampAd = element.implementation_;
-            ampAd.iframe_.contentWindow.postMessage = function(data, origin) {
-              posts.push({
-                data: data,
-                targetOrigin: origin,
-              });
-            };
-            ampAd.intersectionObserver_ =
-                new IntersectionObserver(ampAd, ampAd.iframe_, true);
-            ampAd.intersectionObserver_.startSendingIntersectionChanges_();
-            expect(posts).to.have.length(0);
-            ampAd.getVsync().runScheduledTasks_();
-            expect(posts).to.have.length(1);
+            // Neutralize the frame origin since we don't care about it and
+            // would like to record postMessage calls.
+            ampAd.iframe_.src = 'about:blank';
+            // Timeout to let the src change take effect.
+            return timer.promise(10).then(() => {
+              element.style.position = 'absolute';
+              element.style.top = '300px';
+              element.style.left = '50px';
+              viewportFor(element.ownerDocument.defaultView).setScrollTop(50);
+              // Record postMessage calls.
+              ampAd.iframe_.contentWindow.postMessage = function(data, origin) {
+                posts.push({
+                  data: data,
+                  targetOrigin: origin,
+                });
+              };
+              ampAd.intersectionObserver_ =
+                  new IntersectionObserver(ampAd, ampAd.iframe_, true);
+              ampAd.intersectionObserver_.startSendingIntersectionChanges_();
+              expect(posts).to.have.length(0);
+              ampAd.getVsync().runScheduledTasks_();
+              expect(posts).to.have.length(1);
+            });
           });
         });
 
@@ -323,6 +336,9 @@ function runAdTestSuiteAgainstInstaller(name, installer) {
         it('should calculate intersection', () => {
           expect(ampAd.iframeLayoutBox_).to.not.be.null;
           expect(posts).to.have.length(1);
+          // The about:blank is due to the test setup. It should be whatever
+          // is the origin of the iframed document.
+          expect(posts[0].targetOrigin).to.equal('about:blank');
           expect(posts[0].targetOrigin).to.equal('http://ads.localhost');
           const changes = posts[0].data.changes;
           expect(changes).to.be.array;
@@ -445,6 +461,84 @@ function runAdTestSuiteAgainstInstaller(name, installer) {
             expect(ad.style.display).to.equal('none');
             deferMutateStub.restore();
             attemptChangeHeightStub.restore();
+          });
+        });
+      });
+
+      describe('cid-ad support', () => {
+        const cidScope = 'cid-in-ads-test';
+        let sandbox;
+
+        beforeEach(() => {
+          sandbox = sinon.sandbox.create();
+        });
+
+        afterEach(() => {
+          sandbox.restore();
+          setCookie(window, cidScope, '', new Date().getTime() - 5000);
+        });
+
+        it('provides cid to ad', () => {
+          clientIdScope['with_cid'] = cidScope;
+          return getAd({
+            width: 300,
+            height: 250,
+            type: 'with_cid',
+            src: 'testsrc',
+          }, 'https://schema.org', function(ad) {
+            const win = ad.ownerDocument.defaultView;
+            setCookie(window, cidScope, 'sentinel123',
+                new Date().getTime() + 5000);
+            installCidService(win);
+            return ad;
+          }).then(ad => {
+            expect(ad.getAttribute('ampcid')).to.equal('sentinel123');
+          });
+        });
+
+        it('waits for consent', () => {
+          clientIdScope['with_cid'] = cidScope;
+          return getAd({
+            width: 300,
+            height: 250,
+            type: 'with_cid',
+            src: 'testsrc',
+            'data-consent-notification-id': 'uid'
+          }, 'https://schema.org', function(ad) {
+            const win = ad.ownerDocument.defaultView;
+            const cidService = installCidService(win);
+            const uidService = installUserNotificationManager(win);
+            sandbox.stub(uidService, 'get', id => {
+              expect(id).to.equal('uid');
+              const p = Promise.resolve();
+              p.TEST_TAG = 'cid';
+              return p;
+            });
+            sandbox.stub(cidService, 'get', (scope, consent) => {
+              expect(scope).to.equal(cidScope);
+              expect(consent.TEST_TAG).to.equal('cid');
+              return Promise.resolve('cid-uid-test');
+            });
+            return ad;
+          }).then(ad => {
+            expect(consent).to.not.be.null;
+            expect(ad.getAttribute('ampcid')).to.equal('cid-uid-test');
+          });
+        });
+
+        it('provides null if cid service not available', () => {
+          clientIdScope['with_cid'] = cidScope;
+          return getAd({
+            width: 300,
+            height: 250,
+            type: 'with_cid',
+            src: 'testsrc',
+          }, 'https://schema.org', function(ad) {
+            setCookie(window, cidScope, 'XXX',
+                new Date().getTime() + 5000);
+            return ad;
+          }).then(ad => {
+            expect(ad.getAttribute('ampcid')).to.be.null;
           });
         });
       });

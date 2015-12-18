@@ -176,6 +176,8 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
       }
       installCoreServices(iframe.contentWindow);
       registerForUnitTest(iframe.contentWindow);
+      // Act like no other elements were loaded by default.
+      iframe.contentWindow.ampExtendedElements = {};
       resolve({
         win: iframe.contentWindow,
         doc: iframe.contentWindow.document,
@@ -192,7 +194,9 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
               if (opt_beforeLayoutCallback) {
                 opt_beforeLayoutCallback();
               }
-              element.layoutCallback();
+              return element.layoutCallback().then(() => {
+                return element;
+              });
             }
             return element;
           });

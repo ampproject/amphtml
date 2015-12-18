@@ -34,6 +34,9 @@ We will provide the following information to the ad:
   In browsers that support `location.ancestorOrigins` you can trust that the `origin` of the
   location is actually correct (So rogue pages cannot claim they represent an origin they do not actually represent).
 - `window.context.canonicalUrl` contains the canonical URL of the primary document as defined by its `link rel=canonical` tag.
+- `window.context.clientId` contains a unique id that is persistently the same for a given user and AMP origin site in their current browser until local data is deleted or the value expires (expiration is currently set to 1 year).
+  - Ad networks must register their cid scope in the variable clientIdScope in [_config.js](./_config.js).
+  - Only available on pages that load `amp-analytics`. The clientId will be null if `amp-analytics` was not loaded on the given page.
 - `window.context.pageViewId` contains a relatively low entropy id that is the same for all ads shown on a page.
 - [ad viewability](#ad-viewability)
 
@@ -130,7 +133,7 @@ Here are some factors that affect how fast the resize will be executed:
 To allow ads to bundle HTTP requests across multiple ad units on the same page the object `window.context.master` will contain the window object of the iframe being elected master iframe for the current page.
 
 #### Preconnect and prefetch
-Add the JS URLs that an ad **always** fetches or always connects to (if you know the origin but not the path) to [_prefetch.js](_prefetch.js).
+Add the JS URLs that an ad **always** fetches or always connects to (if you know the origin but not the path) to [_config.js](_config.js).
 
 This triggers prefetch/preconnect when the ad is first seen, so that loads are faster when they come into view.
 
