@@ -1,0 +1,16 @@
+<!doctype html>
+<body style="background-color: red">
+iframe - Click to play
+<script>
+parent./*OK*/postMessage({
+  sentinel: 'amp',
+  type: 'embed-ready'
+}, '*');
+document.addEventListener("DOMContentLoaded", function(event) {
+});
+// Add a few elements below to slow triggering of onload function.
+</script>
+<img src="https://i.ytimg.com/vi/1NDkVx9AzSY/hqdefault.jpg"></img>
+<img src="https://i.ytimg.com/vi/RK-oQfFToVg/maxresdefault.jpg"></img>
+<img src="https://i.ytimg.com/vi/RK-oQfFToVg/maxresdefault.jpg"></img>
+</body>
