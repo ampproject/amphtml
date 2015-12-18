@@ -94,22 +94,24 @@ export class AmpAnalytics extends AMP.BaseElement {
 
     this.generateRequests_();
 
-    if (!Array.isArray(this.config_['triggers'])) {
+    if (!this.config_['triggers']) {
       log.error(this.getName_(), 'No triggers were found in the config. No ' +
           'analytics data will be sent.');
       return Promise.resolve();
     }
 
     // Trigger callback can be synchronous. Do the registration at the end.
-    for (let k = 0; k < this.config_['triggers'].length; k++) {
-      const trigger = this.config_['triggers'][k];
-      if (!trigger['on'] || !trigger['request']) {
-        log.warn(this.getName_(), '"on" and "request" attributes are ' +
-            'required for data to be collected.');
-        continue;
+    for (const k in this.config_['triggers']) {
+      if (this.config_['triggers'].hasOwnProperty(k)) {
+        const trigger = this.config_['triggers'][k];
+        if (!trigger['on'] || !trigger['request']) {
+          log.warn(this.getName_(), '"on" and "request" attributes are ' +
+              'required for data to be collected.');
+          continue;
+        }
+        addListener(this.getWin(), trigger['on'],
+            this.handleEvent_.bind(this, trigger), trigger['selector']);
       }
-      addListener(this.getWin(), trigger['on'],
-          this.handleEvent_.bind(this, trigger), trigger['selector']);
     }
     return Promise.resolve();
   }
