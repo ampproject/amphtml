@@ -30,14 +30,16 @@
   "vars": {
     "title": "Example Request"
   },
-  "triggers": [{
-    "on": "visible",
-    "request": "event",
-    "vars": {
-      "eventName": "page-loaded",
-      "eventId": "42"
+  "triggers": {
+    "default pageview": {
+      "on": "visible",
+      "request": "event",
+      "vars": {
+        "eventName": "page-loaded",
+        "eventId": "42"
+      }
     }
-  }]
+  }
 }
 </script>
 </amp-analytics>
@@ -48,29 +50,33 @@
   "vars": {
     "account": "UA-XXXX-Y"
   },
-  "triggers": [{
-    "on": "visible",
-    "request": "pageview",
-    "vars": {
-      "title": "Example Pageview"
+  "triggers": {
+    "default pageview": {
+      "on": "visible",
+      "request": "pageview",
+      "vars": {
+        "title": "Example Pageview"
+      }
+    },
+    "click on #test1 trigger": {
+      "on": "click",
+      "selector": "#test1",
+      "request": "event",
+      "vars": {
+        "eventCategory": "examples",
+        "eventAction": "clicked-test1"
+      }
+    },
+    "click on #top trigger": {
+      "on": "click",
+      "selector": "#top",
+      "request": "event",
+      "vars": {
+        "eventCategory": "examples",
+        "eventAction": "clicked-header"
+      }
     }
-  }, {
-    "on": "click",
-    "selector": "#test1",
-    "request": "event",
-    "vars": {
-      "eventCategory": "examples",
-      "eventAction": "clicked-test1"
-    }
-  }, {
-    "on": "click",
-    "selector": "#top",
-    "request": "event",
-    "vars": {
-      "eventCategory": "examples",
-      "eventAction": "clicked-header"
-    }
-  }]
+  }
 }
 </script>
 </amp-analytics>
