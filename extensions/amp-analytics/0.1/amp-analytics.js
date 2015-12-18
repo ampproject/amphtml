@@ -18,11 +18,11 @@ import {isExperimentOn} from '../../../src/experiments';
 import {installCidService} from '../../../src/service/cid-impl';
 import {Layout} from '../../../src/layout';
 import {log} from '../../../src/log';
-import {loadPromise} from '../../../src/event-helper';
 import {urlReplacementsFor} from '../../../src/url-replacements';
 import {expandTemplate} from '../../../src/string';
 
 import {addListener} from './instrumentation';
+import {sendRequest} from './transport';
 import {ANALYTICS_CONFIG} from './vendors';
 
 
@@ -225,9 +225,10 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @private
    */
   handleEvent_(trigger, event) {
-    const host = this.config_['host'];
     let request = this.requests_[trigger['request']];
-    if (!host || !request) {
+    if (!request) {
+      log.warn(this.getName_(),
+          'Ignoring event. Request string not found', trigger['request']);
       return;
     }
 
@@ -245,30 +246,20 @@ export class AmpAnalytics extends AMP.BaseElement {
     });
 
     // For consistentcy with amp-pixel we also expand any url replacements.
-    urlReplacementsFor(this.getWin()).expand(request).then(request => {
-      // TODO(btownsend, #1061): Add support for sendBeacon.
-      if (host && request) {
-        this.sendRequest_('https://' + host + request);
-      }
-    });
+    urlReplacementsFor(this.getWin()).expand(request).then(
+        request => this.sendRequest_(request));
   }
 
   /**
-   * Sends a request via GET method.
-   *
-   * @param {!string} request The request to be sent over wire.
+   * @param {string} request The full request string to send.
    * @private
    */
   sendRequest_(request) {
-    const image = new Image();
-    image.src = request;
-    image.width = 1;
-    image.height = 1;
-    loadPromise(image).then(() => {
-      log.fine(this.getName_(), 'Sent request: ', request);
-    }).catch(() => {
-      log.warn(this.getName_(), 'Failed to send request: ', request);
-    });
+    if (!request) {
+      log.warn(this.getName_(), 'Request not sent. Contents empty.');
+      return;
+    }
+    sendRequest(this.getWin(), request, this.config_['transport'] || {});
   }
 
   /**
