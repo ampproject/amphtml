@@ -16,6 +16,7 @@
 
 import {AmpAnalytics} from '../../../../build/all/v0/amp-analytics-0.1.max';
 import {adopt} from '../../../../src/runtime';
+import {getService} from '../../../../src/service';
 import {markElementScheduledForTesting} from '../../../../src/service';
 import {installCidService} from '../../../../src/service/cid-impl';
 import * as sinon from 'sinon';
@@ -27,6 +28,11 @@ describe('amp-analytics', function() {
   let sandbox;
   let windowApi;
   let sendRequestSpy;
+  let fetchJsonResponse;
+
+  const jsonMockResponses = {
+    'config1': '{"vars": {"title": "remote"}}'
+  };
 
   beforeEach(() => {
     markElementScheduledForTesting(window, 'amp-analytics');
@@ -42,6 +48,9 @@ describe('amp-analytics', function() {
     windowApi.Object = window.Object;
     markElementScheduledForTesting(windowApi, 'amp-analytics');
     installCidService(windowApi);
+    getService(windowApi, 'xhr', () => {return {
+      fetchJson: url => Promise.resolve(JSON.parse(jsonMockResponses[url]))
+    };});
   });
 
   afterEach(() => {
@@ -462,6 +471,19 @@ describe('amp-analytics', function() {
               .to.be.true;
         });
       });
+    });
+  });
+
+  it('fetches and merges remote config', () => {
+    const analytics = getAnalyticsTag({
+      'vars': {'title': 'local'},
+      'requests': {'foo': 'https://example.com/${title}'},
+      'triggers': [{'on': 'visible', 'request': 'foo'}]
+    }, {
+      'config': 'config1'
+    });
+    return analytics.layoutCallback().then(() => {
+      expect(sendRequestSpy.args[0][0]).to.equal('https://example.com/remote');
     });
   });
 });
