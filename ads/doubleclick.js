@@ -23,15 +23,17 @@ import {loadScript} from '../src/3p';
 export function doubleclick(global, data) {
   loadScript(global, 'https://www.googletagservices.com/tag/js/gpt.js', () => {
     global.googletag.cmd.push(function() {
+      const googletag = global.googletag;
       const dimensions = [[
         parseInt(data.width, 10),
         parseInt(data.height, 10)
       ]];
+      const pubads = googletag.pubads();
       const slot = googletag.defineSlot(data.slot, dimensions, 'c')
-          .addService(googletag.pubads());
-      googletag.pubads().enableSingleRequest();
-      googletag.pubads().markAsAmp();
-      googletag.pubads().set('page_url', context.canonicalUrl);
+          .addService(pubads);
+      pubads.enableSingleRequest();
+      pubads.markAsAmp();
+      pubads.set('page_url', context.canonicalUrl);
       googletag.enableServices();
 
       if (data.targeting) {
@@ -45,21 +47,24 @@ export function doubleclick(global, data) {
       }
 
       if (data.tagForChildDirectedTreatment != undefined) {
-        googletag.pubads().setTagForChildDirectedTreatment(
+        pubads.setTagForChildDirectedTreatment(
             data.tagForChildDirectedTreatment);
       }
 
       if (data.cookieOptions) {
-        googletag.pubads().setCookieOptions(data.cookieOptions);
+        pubads.setCookieOptions(data.cookieOptions);
       }
 
-      googletag.pubads().addEventListener('slotRenderEnded', function(event) {
+      pubads.addEventListener('slotRenderEnded', function(event) {
         if (event.isEmpty) {
           context.noContentAvailable();
         }
       });
 
-      global.googletag.display('c');
+      const canvas = global.document.getElementById('c');
+      // Exported for testing.
+      c.slot = slot;
+      googletag.display('c');
     });
   });
 }
