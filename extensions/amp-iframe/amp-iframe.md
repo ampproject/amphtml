@@ -21,7 +21,7 @@ Displays an iframe.
 `amp-iframe` has several important differences from vanilla iframes that are designed to make it more secure and avoid AMP files that are dominated by a single iframe:
 
 - `amp-iframe` may not appear close to the top of the document (except for `click-to-play` iframes as described below). They must be either 600px away from the top or not within the first 75% of the viewport when scrolled to the top – whichever is smaller. NOTE: We are currently looking for feedback as to how well this restriction works in practice.
-- They are sandboxed by default. That means that authors needs to be explicit about what should be allowed in the iframe. See the [the docs on MDN](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe) for details on the sandbox attribute.
+- They are sandboxed by default. [Details](#sandbox)
 - They must only request resources via HTTPS or from a data-URI or via the srcdoc attribute.
 - They must not be in the same origin as the container unless they do not allow `allow-same-origin` in the sandbox attribute.
 
@@ -37,10 +37,15 @@ Example:
 
 #### Attributes
 
-**src, srcdoc, sandbox, frameborder, allowfullscreen, allowtransparency**
+##### src, srcdoc, frameborder, allowfullscreen, allowtransparency
 
 The attributes above should all behave like they do on standard iframes.
 
+##### sandbox
+
+Iframes created by `amp-iframe` always have the `sandbox` attribute defined on them. By default the value is empty. That means that they are "maximum sandboxed" by default. By setting sandbox values, one can opt the iframe into being less sandboxed. All values supported by browsers are allowed. E.g. setting `sandbox="allow-scripts"` allows the iframe to run JavaScript, or `sandbox="allow-popups allow-popups"` allows the iframe to run JavaScript and open new windows.
+
+See the [the docs on MDN](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe#attr-sandbox) for further details on the sandbox attribute.
 
 #### Iframe Resizing
 
