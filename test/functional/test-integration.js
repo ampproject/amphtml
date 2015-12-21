@@ -17,10 +17,16 @@
 // Tests integration.js
 // Most coverage through test-3p-frame
 
-import {validateParentOrigin, parseFragment} from '../../3p/integration';
-import {registrations} from '../../src/3p';
+import {draw3p, validateParentOrigin, parseFragment}
+    from '../../3p/integration';
+import {registrations, register} from '../../src/3p';
 
 describe('3p integration.js', () => {
+
+  afterEach(() => {
+    delete registrations.testAction;
+  });
+
   it('should register integrations', () => {
     expect(registrations).to.include.key('a9');
     expect(registrations).to.include.key('adsense');
@@ -108,5 +114,79 @@ describe('3p integration.js', () => {
   it('should be ok with empty fragment', () => {
     expect(parseFragment('')).to.be.empty;
     expect(parseFragment('#')).to.be.empty;
+  });
+
+  it('should call the right action based on type', () => {
+    const data = {
+      type: 'testAction',
+    };
+    const win = {
+      context: {
+        location: {
+          originValidated: true
+        },
+        data: data,
+      }
+    };
+    let called = false;
+    register('testAction', function(myWin, myData) {
+      called = true;
+      expect(myWin).to.equal(win);
+      expect(myData).to.equal(myData);
+    });
+    const domNode = {};
+    expect(called).to.be.false;
+    draw3p(win, data);
+    expect(called).to.be.true;
+  });
+
+  it('should support config processing in draw3p', () => {
+    const data = {
+      type: 'testAction2',
+    };
+    const win = {
+      context: {
+        location: {
+          originValidated: true
+        },
+        data: data,
+      }
+    };
+    let called = false;
+    register('testAction2', function(myWin, myData) {
+      expect(called).to.be.false;
+      called = true;
+      expect(myWin).to.equal(win);
+      expect(myData).to.not.equal(data);
+      expect(myData).to.have.property('custom');
+    });
+    const domNode = {};
+    expect(called).to.be.false;
+    let finish;
+    draw3p(win, data, (config, done) => {
+      finish = () => {
+        done({
+          custom: true
+        });
+      };
+    });
+    expect(called).to.be.false;
+    finish();
+    expect(called).to.be.true;
+  });
+
+  it('should throw if origin was never validated', () => {
+    const data = {
+      type: 'testAction',
+    };
+    const win = {
+      context: {
+        location: {},
+        data: data,
+      }
+    };
+    expect(() => {
+      draw3p(win, data);
+    }).to.throw(/Origin should have been validated/);
   });
 });
