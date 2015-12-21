@@ -104,7 +104,7 @@ i-amp-sizer {
 }
 
 .-amp-unresolved {
-  position: relative !important;
+  position: relative;
   overflow: hidden !important;
 }
 
@@ -116,7 +116,7 @@ i-amp-sizer {
 }
 
 .-amp-notbuilt {
-  position: relative !important;
+  position: relative;
   overflow: hidden !important;
   color: transparent !important;
 }
