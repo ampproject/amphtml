@@ -45,15 +45,27 @@ register('twitter', twitter);
 
 /**
  * Visible for testing.
- * Draws an ad to the window. Expects the data to include the ad type.
+ * Draws a 3p embed to the window. Expects the data to include the 3p type.
  * @param {!Window} win
  * @param {!Object} data
+ * @param {function(!Object, function(!Object))|undefined} configCallback
+ *     Optional callback that allows user code to manipulate the incoming
+ *     configuration. See
+ *     https://github.com/ampproject/amphtml/issues/1210 for some context
+ *     on this.
  */
-export function draw3p(win, data) {
+export function draw3p(win, data, configCallback) {
   const type = data.type;
-  assert(window.context.location.originValidated != null,
+  assert(win.context.location.originValidated != null,
       'Origin should have been validated');
-  run(type, win, data);
+  if (configCallback) {
+    configCallback(data, data => {
+      assert(data, 'Expected configuration to be passed as first argument');
+      run(type, win, data);
+    });
+  } else {
+    run(type, win, data);
+  }
 };
 
 /**
@@ -85,8 +97,13 @@ function masterSelection(type) {
 
 /**
  * Draws an embed, optionally synchronously, to the DOM.
+ * @param {function(!Object, function(!Object))} opt_configCallback If provided
+ *     will be invoked with two arguments:
+ *     1. The configuration parameters supplied to this embed.
+ *     2. A callback that MUST be called for rendering to proceed. It takes
+ *        no arguments. Configuration is expected to be modified in-place.
  */
-window.draw3p = function() {
+window.draw3p = function(opt_configCallback) {
   const data = parseFragment(location.hash);
   window.context = data._context;
   window.context.location = parseUrl(data._context.location.href);
@@ -104,7 +121,7 @@ window.draw3p = function() {
   // This only actually works for ads.
   window.context.observeIntersection = observeIntersection;
   delete data._context;
-  draw3p(window, data);
+  draw3p(window, data, opt_configCallback);
 };
 
 function triggerNoContentAvailable() {
