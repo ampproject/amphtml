@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
-import {loadScript} from '../src/3p';
+import {loadScript, checkData} from '../src/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function doubleclick(global, data) {
+  checkData(data, [
+    'slot', 'targeting', 'categoryExclusion',
+    'tagForChildDirectedTreatment', 'cookieOptions'
+  ]);
   loadScript(global, 'https://www.googletagservices.com/tag/js/gpt.js', () => {
     global.googletag.cmd.push(function() {
       const googletag = global.googletag;
