@@ -123,3 +123,51 @@ export function validateSrcContains(string, src) {
     throw new Error('Invalid src ' + src);
   }
 }
+
+/**
+ * Throws a non-interrupting exception if data contains a field not supported
+ * by this embed type.
+ * @param {!Object} data
+ * @param {!Array<string>} allowedFields
+ */
+export function checkData(data, allowedFields) {
+  // Throw in a timeout, because we do not want to interrupt execution,
+  // because that would make each removal an instant backward incompatible
+  // change.
+  try {
+    validateData(data, allowedFields);
+  } catch (e) {
+    setTimeout(() => {
+      throw e;
+    });
+  }
+}
+
+/**
+ * Throws an exception if data contains a field not supported
+ * by this embed type.
+ * @param {!Object} data
+ * @param {!Array<string>} allowedFields
+ */
+export function validateData(data, allowedFields) {
+  const defaultAvailableFields = {
+    width: true,
+    height: true,
+    initialWindowWidth: true,
+    initialWindowHeight: true,
+    type: true,
+    referrer: true,
+    canonicalUrl: true,
+    pageViewId: true,
+    location: true,
+    mode: true,
+  };
+  for (const field in data) {
+    if (!data.hasOwnProperty(field) ||
+        field in defaultAvailableFields) {
+      continue;
+    }
+    assert(allowedFields.indexOf(field) != -1,
+        'Unknown attribute for %s: %s.', data.type, field);
+  }
+}

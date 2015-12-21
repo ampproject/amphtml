@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import {writeScript} from '../src/3p';
+import {writeScript, checkData} from '../src/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function a9(global, data) {
+  checkData(data, ['aax_size', 'aax_pubname', 'aax_src']);
   /*eslint "google-camelcase/google-camelcase": 0*/
   global.aax_size = data.aax_size;
   global.aax_pubname = data.aax_pubname;

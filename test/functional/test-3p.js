@@ -14,31 +14,88 @@
  * limitations under the License.
  */
 
- import {validateSrcPrefix, validateSrcContains} from '../../src/3p';
+import {validateSrcPrefix, validateSrcContains, checkData, validateData}
+    from '../../src/3p';
+import * as sinon from 'sinon';
 
- describe('3p', () => {
-   it('should throw an error if prefix is not https:', () => {
-     expect(() => {
-       validateSrcPrefix('https:', 'http://adserver.adtechus.com');
-     }).to.throw(/Invalid src/);
-   });
+describe('3p', () => {
 
-   it('should not throw if source starts with https', () => {
-     expect(
-      validateSrcPrefix('https:', 'https://adserver.adtechus.com')
-    ).to.not.throw;
-   });
+  let sandbox;
+  let clock;
 
-   it('should throw an error if src does not contain addyn', () => {
-     expect(() => {
-       validateSrcContains('/addyn/', 'http://adserver.adtechus.com/');
-     }).to.throw(/Invalid src/);
-   });
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+    clock = sandbox.useFakeTimers();
+  });
 
-   it('should not throw if source contains /addyn/', () => {
-     expect(
-      validateSrcContains('/addyn/', 'http://adserver.adtechus.com/addyn/')
-    ).to.not.throw;
-   });
- });
+  afterEach(() => {
+    clock.tick(1000);
+    clock.restore();
+    sandbox.restore();
+  });
+
+  it('should throw an error if prefix is not https:', () => {
+    expect(() => {
+      validateSrcPrefix('https:', 'http://adserver.adtechus.com');
+    }).to.throw(/Invalid src/);
+  });
+
+  it('should not throw if source starts with https', () => {
+    validateSrcPrefix('https:', 'https://adserver.adtechus.com');
+  });
+
+  it('should throw an error if src does not contain addyn', () => {
+    expect(() => {
+      validateSrcContains('/addyn/', 'http://adserver.adtechus.com/');
+    }).to.throw(/Invalid src/);
+  });
+
+  it('should not throw if source contains /addyn/', () => {
+    validateSrcContains('/addyn/', 'http://adserver.adtechus.com/addyn/');
+  });
+
+  it('should accept good host supplied data', () => {
+    checkData({
+      width: '',
+      height: false,
+      initialWindowWidth: 1,
+      initialWindowHeight: 2,
+      type: true,
+      referrer: true,
+      canonicalUrl: true,
+      pageViewId: true,
+      location: true,
+      mode: true,
+    }, []);
+    clock.tick(1);
+
+    checkData({
+      width: "",
+      foo: true,
+      bar: true,
+    }, ['foo', 'bar']);
+    clock.tick(1);
+  });
+
+  it('should complain about unexpected args', () => {
+    checkData({
+      type: 'TEST',
+      foo: true,
+      'not-whitelisted': true,
+    }, ['foo']);
+    expect(() => {
+      clock.tick(1);
+    }).to.throw(/Unknown attribute for TEST: not-whitelisted./);
+
+
+    expect(() => {
+      // Sync throw, not validateData vs. checkData
+      validateData({
+        type: 'TEST',
+        foo: true,
+        'not-whitelisted2': true,
+      }, ['not-whitelisted', 'foo']);
+    }).to.throw(/Unknown attribute for TEST: not-whitelisted2./);
+  });
+});
 

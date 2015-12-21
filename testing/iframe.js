@@ -225,7 +225,7 @@ export function poll(description, condition, opt_onError, opt_timeout) {
         }
       }
     }
-    let interval = setInterval(poll, 50);
+    let interval = setInterval(poll, 8);
     poll();
   });
 }
