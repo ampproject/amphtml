@@ -23,7 +23,7 @@ adopt(window);
 describe('amp-instagram', () => {
 
   function getIns(shortcode, opt_responsive) {
-    return createIframePromise().then(() => {
+    return createIframePromise().then(iframe => {
       const ins = iframe.doc.createElement('amp-instagram');
       ins.setAttribute('data-shortcode', shortcode);
       ins.setAttribute('width', '111');
@@ -36,7 +36,7 @@ describe('amp-instagram', () => {
   }
 
   it('renders', () => {
-    getIns('fBwFP').then(ins => {
+    return getIns('fBwFP').then(ins => {
       const iframe = ins.firstChild;
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
@@ -47,9 +47,8 @@ describe('amp-instagram', () => {
   });
 
   it('renders responsively', () => {
-    const ins = getIns('fBwFP', true).then(ins => {
-      const iframe = ins.firstChild;
-      expect(iframe.className).to.match(/amp-responsive-item/);
+    return getIns('fBwFP', true).then(ins => {
+      expect(ins.className).to.match(/amp-layout-responsive/);
     });
   });
 
