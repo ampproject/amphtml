@@ -40,6 +40,7 @@
     "finalhandler": "0.4.0",
     "fs-extra": "0.26.0",
     "gulp": "3.9.0",
+    "gulp-closure-compiler": "^0.4.0",
     "gulp-eslint": "1.1.0",
     "gulp-exec": "2.1.2",
     "gulp-file": "0.2.0",

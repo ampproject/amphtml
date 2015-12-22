@@ -14,11 +14,5 @@
  * limitations under the License.
  */
 
-/**
- * @fileoverview Loads all polyfills needed by the AMP runtime.
- */
-
-
 import 'document-register-element/build/document-register-element.max';
-import '../third_party/babel/custom-babel-helpers';
 import './custom-core-js-shim';
