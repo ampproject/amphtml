@@ -74,6 +74,7 @@ function buildExtensions(options) {
   buildExtension('amp-audio', '0.1', false, options);
   buildExtension('amp-brightcove', '0.1', false, options);
   buildExtension('amp-carousel', '0.1', true, options);
+  buildExtension('amp-dynamic-css-classes', '0.1', false, options);
   buildExtension('amp-fit-text', '0.1', true, options);
   buildExtension('amp-font', '0.1', false, options);
   buildExtension('amp-iframe', '0.1', false, options);
