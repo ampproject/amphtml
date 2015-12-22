@@ -26,7 +26,7 @@ import {assert} from './asserts';
  *   dpr: (number|undefined)
  * }}
  */
-let SrcsetSource;
+let SrcsetSourceDef;
 
 
 /**
@@ -88,11 +88,11 @@ export function parseSrcset(s) {
 export class Srcset {
 
   /**
-   * @param {!Array<!SrcsetSource>} sources
+   * @param {!Array<!SrcsetSourceDef>} sources
    */
   constructor(sources) {
     assert(sources.length > 0, 'Srcset must have at least one source');
-    /** @private @const {!Array<!SrcsetSource>} */
+    /** @private @const {!Array<!SrcsetSourceDef>} */
     this.sources_ = sources;
 
     // Only one type of source specified can be used - width or DPR.
@@ -153,7 +153,7 @@ export class Srcset {
    * http://www.w3.org/html/wg/drafts/html/master/semantics.html#attr-img-srcset.
    * @param {number} width
    * @param {number} dpr
-   * @return {!SrcsetSource}
+   * @return {!SrcsetSourceDef}
    */
   select(width, dpr) {
     assert(width, 'width=%s', width);
@@ -208,7 +208,7 @@ export class Srcset {
    * @return {number}
    * @private
    */
-  selectByDpr_(width, dpr) {
+  selectByDpr_(_width, dpr) {
     let minIndex = -1;
     let minScore = 1000000;
     for (let i = 0; i < this.sources_.length; i++) {
@@ -226,7 +226,7 @@ export class Srcset {
 
   /**
    * Returns the last source in the srcset, which is the default source.
-   * @return {!SrcsetSource}
+   * @return {!SrcsetSourceDef}
    */
   getLast() {
     return this.sources_[this.sources_.length - 1];

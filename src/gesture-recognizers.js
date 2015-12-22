@@ -15,7 +15,6 @@
  */
 
 import {GestureRecognizer} from './gesture';
-import {assert} from './asserts';
 import {calcVelocity} from './motion';
 import {timer} from './timer';
 
@@ -27,12 +26,12 @@ import {timer} from './timer';
  *   clientY: number
  * }}
  */
-let Tap;
+let TapDef;
 
 
 /**
  * Recognizes "tap" gestures.
- * @extends {GestureRecognizer<Tap>}
+ * @extends {GestureRecognizer<TapDef>}
  */
 export class TapRecognizer extends GestureRecognizer {
   /**
@@ -81,7 +80,7 @@ export class TapRecognizer extends GestureRecognizer {
   }
 
   /** @override */
-  onTouchEnd(e) {
+  onTouchEnd(unusedE) {
     this.signalReady(0);
   }
 
@@ -101,13 +100,13 @@ export class TapRecognizer extends GestureRecognizer {
  *   clientY: number
  * }}
  */
-let Doubletap;
+let DoubletapDef;
 
 
 /**
  * Recognizes a "doubletap" gesture. This gesture will block a single "tap"
  * for about 300ms while it's expecting the second "tap".
- * @extends {GestureRecognizer<Doubletap>}
+ * @extends {GestureRecognizer<DoubletapDef>}
  */
 export class DoubletapRecognizer extends GestureRecognizer {
   /**
@@ -163,7 +162,7 @@ export class DoubletapRecognizer extends GestureRecognizer {
   }
 
   /** @override */
-  onTouchEnd(e) {
+  onTouchEnd(unusedE) {
     this.tapCount_++;
     if (this.tapCount_ < 2) {
       this.signalPending(300);
@@ -199,13 +198,13 @@ export class DoubletapRecognizer extends GestureRecognizer {
  *   velocityY: number
  * }}
  */
-let Swipe;
+let SwipeDef;
 
 
 /**
  * Recognizes swipe gestures. This gesture will yield about 10ms to other
  * gestures.
- * @extends {GestureRecognizer<Swipe>}
+ * @extends {GestureRecognizer<SwipeDef>}
  */
 class SwipeRecognizer extends GestureRecognizer {
   /**
@@ -434,13 +433,13 @@ export class SwipeYRecognizer extends SwipeRecognizer {
  *   velocityY: number
  * }}
  */
-let Tapzoom;
+let TapzoomDef;
 
 
 /**
  * Recognizes a "tapzoom" gesture. This gesture will block other gestures
  * for about 400ms after first "tap" while it's expecting swipe.
- * @extends {GestureRecognizer<Tapzoom>}
+ * @extends {GestureRecognizer<TapzoomDef>}
  */
 export class TapzoomRecognizer extends GestureRecognizer {
   /**
@@ -628,12 +627,12 @@ export class TapzoomRecognizer extends GestureRecognizer {
  *   velocityY: number
  * }}
  */
-let Pinch;
+let PinchDef;
 
 
 /**
  * Recognizes a "pinch" gesture.
- * @extends {GestureRecognizer<Pinch>}
+ * @extends {GestureRecognizer<PinchDef>}
  */
 export class PinchRecognizer extends GestureRecognizer {
   /**

@@ -47,7 +47,7 @@ export class FocusHistory {
       }
     };
     /** @private @const {function(!Event)} */
-    this.captureBlur_ = e => {
+    this.captureBlur_ = unusedE => {
       // IFrame elements do not receive `focus` event. An alternative way is
       // implemented here. We wait for a blur to arrive on the main window
       // and after a short time check which element is active.
@@ -68,7 +68,7 @@ export class FocusHistory {
   /**
    * Add a listener for focus events.
    * @param {function(!Element)} handler
-   * @return {!Unlisten}
+   * @return {!UnlistenDef}
    */
   onFocus(handler) {
     return this.observeFocus_.add(handler);

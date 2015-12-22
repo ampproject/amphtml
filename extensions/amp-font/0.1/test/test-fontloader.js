@@ -141,7 +141,7 @@ describe('FontLoader', () => {
   });
 
   it('should error when font is not available', () => {
-    return getIframe().then(iframe => {
+    return getIframe().then(unusedIframe => {
       fontloader.load(FAILURE_FONT_CONFIG, 3000).then(() => {
         assert.fail('Font loaded when it should have failed.');
       }).catch(() => {

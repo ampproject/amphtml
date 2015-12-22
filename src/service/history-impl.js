@@ -42,16 +42,16 @@ function historyState_(stackIndex) {
 
 
 /** @typedef {number} */
-let HistoryId;
+let HistoryIdDef;
 
 
 export class History {
 
   /**
-   * @param {!HistoryBinding} binding
+   * @param {!HistoryBindingInterface} binding
    */
   constructor(binding) {
-    /** @private @const {!HistoryBinding} */
+    /** @private @const {!HistoryBindingInterface} */
     this.binding_ = binding;
 
     /** @private {number} */
@@ -75,7 +75,7 @@ export class History {
    * Pushes new state into history stack with an optional callback to be called
    * when this state is popped.
    * @param {!Function=} opt_onPop
-   * @return {!Promise<!HistoryId>}
+   * @return {!Promise<!HistoryIdDef>}
    */
   push(opt_onPop) {
     return this.enque_(() => {
@@ -93,7 +93,7 @@ export class History {
    * Pops a previously pushed state from the history stack. If onPop callback
    * has been registered, it will be called. All states coming after this
    * state will also be popped and their callbacks executed.
-   * @param {!HistoryId} stateId
+   * @param {!HistoryIdDef} stateId
    * @return {!Promise}
    */
   pop(stateId) {
@@ -189,21 +189,21 @@ export class History {
 
 
 /**
- * HistoryBinding is an interface that defines an underlying technology behind
+ * HistoryBindingInterface is an interface that defines an underlying technology behind
  * the {@link History}.
  * @interface
  */
-class HistoryBinding {
+class HistoryBindingInterface {
 
   /** @private */
   cleanup_() {}
 
   /**
    * Configures a callback to be called when stack index has been updated.
-   * @param {function(number)} callback
+   * @param {function(number)} unusedCallback
    * @protected
    */
-  setOnStackIndexUpdated(callback) {}
+  setOnStackIndexUpdated(unusedCallback) {}
 
   /**
    * Pushes new state into the history stack. Returns promise that yields new
@@ -216,20 +216,20 @@ class HistoryBinding {
    * Pops a previously pushed state from the history stack. All states coming
    * after this state will also be popped. Returns promise that yields new
    * state index.
-   * @param {number} stackIndex
+   * @param {number} unusedStackIndex
    * @return {!Promise<number>}
    */
-  pop(stackIndex) {}
+  pop(unusedStackIndex) {}
 }
 
 
 /**
- * Implementation of HistoryBinding based on the native window. It uses
+ * Implementation of HistoryBindingInterface based on the native window. It uses
  * window.history properties and events.
  *
  * Visible for testing.
  *
- * @implements {HistoryBinding}
+ * @implements {HistoryBindingInterface}
  */
 export class HistoryBindingNatural_ {
 
@@ -502,7 +502,6 @@ export class HistoryBindingNatural_ {
     if (!state) {
       state = {};
     }
-    const len = this.win.history.length;
     let stackIndex = this.stackIndex_ + 1;
     state[HISTORY_PROP_] = stackIndex;
     this.pushState_(state, title, url);
@@ -551,13 +550,13 @@ export class HistoryBindingNatural_ {
 
 
 /**
- * Implementation of HistoryBinding that assumes a virtual history that
+ * Implementation of HistoryBindingInterface that assumes a virtual history that
  * relies on viewer's "pushHistory", "popHistory" and "historyPopped"
  * protocol.
  *
  * Visible for testing.
  *
- * @implements {HistoryBinding}
+ * @implements {HistoryBindingInterface}
  */
 export class HistoryBindingVirtual_ {
 
@@ -574,7 +573,7 @@ export class HistoryBindingVirtual_ {
     /** @private {?function(number)} */
     this.onStackIndexUpdated_ = null;
 
-    /** @private {!Unlisten} */
+    /** @private {!UnlistenDef} */
     this.unlistenOnHistoryPopped_ = this.viewer_.onHistoryPoppedEvent(
         this.onHistoryPopped_.bind(this));
   }

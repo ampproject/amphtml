@@ -152,7 +152,7 @@ export class DocumentState {
 
   /**
    * @param {function()} handler
-   * @return {!Unlisten}
+   * @return {!UnlistenDef}
    */
   onVisibilityChanged(handler) {
     return this.visibilityObservable_.add(handler);

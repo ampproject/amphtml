@@ -21,7 +21,6 @@ import {BaseCarousel} from './base-carousel';
 import {Gestures} from '../../../src/gesture';
 import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {bezierCurve} from '../../../src/curve';
-import {continueMotion} from '../../../src/motion';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {timer} from '../../../src/timer';
 
@@ -266,10 +265,10 @@ export class AmpSlides extends BaseCarousel {
   }
 
   /**
-   * @param {!Swipe} swipe
+   * @param {!Swipe} unusedSwipe
    * @private
    */
-  onSwipeStart_(swipe) {
+  onSwipeStart_(unusedSwipe) {
     const currentSlide = this.slides_[this.currentIndex_];
     const containerWidth = this.element./*OK*/offsetWidth;
     let minDelta = 0;

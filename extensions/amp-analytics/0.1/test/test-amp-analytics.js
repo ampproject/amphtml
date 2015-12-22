@@ -29,7 +29,6 @@ describe('amp-analytics', function() {
   let sandbox;
   let windowApi;
   let sendRequestSpy;
-  let fetchJsonResponse;
 
   const jsonMockResponses = {
     'config1': '{"vars": {"title": "remote"}}'
@@ -218,7 +217,7 @@ describe('amp-analytics', function() {
 
   it('fills cid for proxy host', function() {
     windowApi.localStorage = {
-      getItem: function(name) {
+      getItem: function(unusedName) {
         return JSON.stringify({
           time: new Date().getTime(),
           cid: 'base'

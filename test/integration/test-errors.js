@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-import {Timer} from '../../src/timer';
 import {createFixtureIframe, poll, expectBodyToBecomeVisible} from
     '../../testing/iframe.js';
-import {loadPromise} from '../../src/event-helper';
 
 describe('error page', () => {
   let fixture;

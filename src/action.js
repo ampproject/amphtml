@@ -15,8 +15,6 @@
  */
 
 import {log} from './log';
-import {platform} from './platform';
-import {timer} from './timer';
 
 /** @const {string} */
 const TAG_ = 'Action';
@@ -36,7 +34,7 @@ const DEFAULT_METHOD_ = 'activate';
  *   str: string
  * }}
  */
-class ActionInfo_ {};
+class ActionInfoDef {};
 
 
 /**
@@ -191,7 +189,7 @@ export class Action {
   /**
    * @param {!Element} target
    * @param {string} actionEventType
-   * @return {?{node: !Element, actionInfo: !ActionInfo_}}
+   * @return {?{node: !Element, actionInfo: !ActionInfoDef}}
    */
   findAction_(target, actionEventType) {
     // Go from target up the DOM tree and find the applicable action.
@@ -210,7 +208,7 @@ export class Action {
   /**
    * @param {!Element} node
    * @param {string} actionEventType
-   * @return {?ActionInfo_}
+   * @return {?ActionInfoDef}
    */
   matchActionInfo_(node, actionEventType) {
     const actionMap = this.getActionMap_(node);
@@ -222,7 +220,7 @@ export class Action {
 
   /**
    * @param {!Element} node
-   * @return {?Object<string, ActionInfo_>}
+   * @return {?Object<string, ActionInfoDef>}
    */
   getActionMap_(node) {
     let actionMap = node[ACTION_MAP_];
@@ -238,7 +236,7 @@ export class Action {
 
   /**
    * @param {string} s
-   * @return {?Object<string, ActionInfo_>}
+   * @return {?Object<string, ActionInfoDef>}
    */
   parseActionMap_(s) {
     let actionMap = null;
@@ -260,7 +258,7 @@ export class Action {
 
   /**
    * @param {string} s
-   * @return {?ActionInfo_}
+   * @return {?ActionInfoDef}
    */
   parseAction_(s) {
     s = s.trim();

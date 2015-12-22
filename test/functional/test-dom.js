@@ -104,7 +104,7 @@ describe('DOM', () => {
     const element2 = document.createElement('element2');
     parent.appendChild(element2);
 
-    expect(dom.childElement(parent, e => true)).to.equal(element1);
+    expect(dom.childElement(parent, () => true)).to.equal(element1);
     expect(dom.childElement(parent, e => e.tagName == 'ELEMENT1'))
         .to.equal(element1);
     expect(dom.childElement(parent, e => e.tagName == 'ELEMENT2'))

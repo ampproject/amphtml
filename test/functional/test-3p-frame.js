@@ -19,7 +19,7 @@ import {addDataAndJsonAttributes_, getIframe, getBootstrapBaseUrl,
 import {validateData} from '../../src/3p';
 import {documentInfoFor} from '../../src/document-info';
 import {loadPromise} from '../../src/event-helper';
-import {setModeForTesting, getMode} from '../../src/mode';
+import {setModeForTesting} from '../../src/mode';
 import {resetServiceForTesting} from '../../src/service';
 
 describe('3p-frame', () => {

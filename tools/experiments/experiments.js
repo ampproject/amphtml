@@ -28,7 +28,7 @@ const COOKIE_MAX_AGE_DAYS = 180;  // 6 month
  *   spec: string
  * }}
  */
-const Experiment = {};
+let ExperimentDef;
 
 /**
  * This experiment is special because it uses a different mechanism that is
@@ -38,7 +38,7 @@ const Experiment = {};
 const CANARY_EXPERIMENT_ID = 'dev-channel';
 
 
-/** @const {!Array<!Experiment>} */
+/** @const {!Array<!ExperimentDef>} */
 const EXPERIMENTS = [
   // Canary (Dev Channel)
   {
@@ -79,7 +79,7 @@ function build() {
 
 /**
  * Builds one row of the experiments table.
- * @param {!Experiment} experiment
+ * @param {!ExperimentDef} experiment
  */
 function buildExperimentRow(experiment) {
   const tr = document.createElement('tr');
@@ -149,7 +149,7 @@ function update() {
 
 /**
  * Updates the state of a single experiment.
- * @param {!Experiment} experiment
+ * @param {!ExperimentDef} experiment
  */
 function updateExperimentRow(experiment) {
   const tr = document.getElementById('exp-tr-' + experiment.id);

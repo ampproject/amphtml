@@ -17,7 +17,6 @@
 import {assertHttpsUrl} from '../../../src/url';
 import {isExperimentOn} from '../../../src/experiments';
 import {installCidService} from '../../../src/service/cid-impl';
-import {Layout} from '../../../src/layout';
 import {log} from '../../../src/log';
 import {urlReplacementsFor} from '../../../src/url-replacements';
 import {expandTemplate} from '../../../src/string';
@@ -45,7 +44,7 @@ export class AmpAnalytics extends AMP.BaseElement {
   }
 
   /** @override */
-  isLayoutSupported(layout) {
+  isLayoutSupported(unusedLayout) {
     return true;
   }
 
@@ -250,10 +249,10 @@ export class AmpAnalytics extends AMP.BaseElement {
    * method generates the request and sends the request out.
    *
    * @param {!JSONObject} trigger JSON config block that resulted in this event.
-   * @param {!Object} event Object with details about the event.
+   * @param {!Object} unusedEvent Object with details about the event.
    * @private
    */
-  handleEvent_(trigger, event) {
+  handleEvent_(trigger, unusedEvent) {
     let request = this.requests_[trigger['request']];
     if (!request) {
       log.warn(this.getName_(),

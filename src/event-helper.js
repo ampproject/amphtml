@@ -24,7 +24,7 @@ import {timer} from './timer';
  * @param {string} eventType
  * @param {function(Event)} listener
  * @param {boolean=} opt_capture
- * @return {!Unlisten}
+ * @return {!UnlistenDef}
  */
 export function listenOnce(element, eventType, listener, opt_capture) {
   const capture = opt_capture || false;
@@ -54,7 +54,7 @@ export function listenOnce(element, eventType, listener, opt_capture) {
 export function listenOncePromise(element, eventType, opt_capture,
     opt_timeout) {
   let unlisten;
-  const eventPromise = new Promise((resolve, reject) => {
+  const eventPromise = new Promise((resolve, unusedReject) => {
     unlisten = listenOnce(element, eventType, resolve, opt_capture);
   });
   return racePromise_(eventPromise, unlisten, opt_timeout);
