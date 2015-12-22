@@ -80,6 +80,8 @@ gulp.task('test', 'Runs tests in chrome', ['build'], function(done) {
 
   if (argv.integration) {
     c.files = config.integrationTestPaths;
+  } else if (argv.path) {
+    c.files = config.customTestPaths(argv.path);
   } else {
     c.files = config.testPaths;
   }

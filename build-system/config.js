@@ -118,6 +118,9 @@ var karma = {
 module.exports = {
   testPaths: testPaths,
   integrationTestPaths: integrationTestPaths,
+  customTestPaths: function(path) {
+    return commonTestPaths.concat(path);
+  },
   karma: karma,
   lintGlobs: [
     '**/*.js',
