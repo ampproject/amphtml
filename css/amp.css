@@ -179,6 +179,16 @@ i-amp-sizer {
 }
 
 /**
+ * New build system: all children are by default hidden until they are
+ * whitelisted explicitly by adding `-amp-child` class.
+ * TODO(dvoytenko, #1230): Replace `-amp-parent` with `-amp-element`. And
+ * remove `-amp-notbuilt`.
+ */
+.-amp-parent > *:not([placeholder]):not(.-amp-child) {
+  display: none !important;
+}
+
+/**
  * Wraps an element to make the contents scrollable. This is
  * used to wrap iframes which in iOS always behave as if they had the
  * seamless attribute.

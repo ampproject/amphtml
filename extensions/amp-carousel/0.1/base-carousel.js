@@ -17,14 +17,33 @@
 export class BaseCarousel extends AMP.BaseElement {
 
   /** @override */
-  buildCallback() {
+  startBuildCallback() {
+    this.startBuildCallbackCarousel();
+  }
+
+  /** Internal startBuild callback */
+  startBuildCallbackCarousel() {
+    // Subclasses may override.
+  }
+
+  /** @override */
+  continueBuildCallback() {
+    this.continueBuildCallbackCarousel();
+  }
+
+  /** Internal continueBuild callback */
+  continueBuildCallbackCarousel() {
+    // Subclasses may override.
+  }
+
+  /** @override */
+  completeBuildCallback() {
     /** @private {!Element} */
     this.prevButton_;
 
     /** @private {!Element} */
     this.nextButton_;
 
-    this.buildCarousel();
     this.buildButtons();
     this.setupGestures();
     this.setControlsState();
@@ -32,8 +51,16 @@ export class BaseCarousel extends AMP.BaseElement {
     if (this.element.hasAttribute('controls')) {
       this.element.classList.add('-amp-carousel-has-controls');
     }
+
+    this.completeBuildCallbackCarousel();
   }
 
+  /** Internal completeBuild callback */
+  completeBuildCallbackCarousel() {
+    // Subclasses may override.
+  }
+
+  /** Builds navigation buttons for carousels. */
   buildButtons() {
     this.prevButton_ = document.createElement('div');
     this.prevButton_.classList.add('amp-carousel-button');
@@ -113,16 +140,6 @@ export class BaseCarousel extends AMP.BaseElement {
     this.prevButton_.setAttribute('aria-disabled', !this.hasPrev());
     this.nextButton_.classList.toggle('amp-disabled', !this.hasNext());
     this.nextButton_.setAttribute('aria-disabled', !this.hasNext());
-  }
-
-  /**
-   * @return {boolean}
-   * @override
-   */
-  isReadyToBuild() {
-    // TODO(dvoytenko, #1014): Review and try a more immediate approach.
-    // Wait until DOMReady.
-    return false;
   }
 
   /**

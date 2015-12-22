@@ -273,10 +273,11 @@ export function createAmpElementProto(win, name, implementationClass) {
   ElementProto.createdCallback = function() {
     this.classList.add('-amp-element');
 
-    // Flag "notbuilt" is removed by Resource manager when the resource is
-    // considered to be built. See "setBuilt" method.
     /** @private {boolean} */
-    this.built_ = false;
+    this.buildComplete_ = false;
+
+    // TODO(dvoytenko, #1230): remove `-amp-notbuilt` classes once we
+    // completely switch to new build system.
     this.classList.add('-amp-notbuilt');
     this.classList.add('amp-notbuilt');
 
@@ -388,55 +389,82 @@ export function createAmpElementProto(win, name, implementationClass) {
   };
 
   /**
-   * Whether the element has been built. A built element had its
-   * {@link buildCallback} method successfully invoked.
+   * Whether the element has been built. A built element has had its
+   * `completeBuildCallback` method successfully invoked.
    * @return {boolean}
    * @final
    */
-  ElementProto.isBuilt = function() {
-    return this.built_;
+  ElementProto.isBuildComplete = function() {
+    return this.buildComplete_;
   };
 
   /**
-   * Requests or requires the element to be built. The build is done by
-   * invoking {@link BaseElement.buildCallback} method.
-   *
-   * If the "force" argument is "false", the element will first check if
-   * implementation is ready to build by calling
-   * {@link BaseElement.isReadyToBuild} method. If this method returns "true"
-   * the build proceeds, otherwise no build is done.
-   *
-   * If the "force" argument is "true", the element performs build regardless
-   * of what {@link BaseElement.isReadyToBuild} would return.
-   *
-   * Returned value indicates whether or not build has been performed.
+   * The runtime signals to the element that it can start build operations.
+   * This callback will be followed by 1 or more `continueBuildCallback` calls
+   * and will finally be complete with a single call to `completeBuildCallback`.
    *
    * This method can only be called on a upgraded element.
    *
-   * @param {boolean} force Whether or not force the build.
-   * @return {boolean}
    * @final
    */
-  ElementProto.build = function(force) {
+  ElementProto.startBuildCallback = function() {
     this.assertNotTemplate_();
-    if (this.isBuilt()) {
-      return true;
-    }
-    assert(this.isUpgraded(), 'Cannot build unupgraded element');
-    if (!force && !this.implementation_.isReadyToBuild()) {
-      return false;
-    }
+    this.assertCanBuild_();
     try {
-      this.implementation_.buildCallback();
+      this.implementation_.startBuildCallback();
       this.preconnect(/* onLayout */ false);
-      this.built_ = true;
       this.classList.remove('-amp-notbuilt');
       this.classList.remove('amp-notbuilt');
     } catch (e) {
       reportError(e, this);
       throw e;
     }
-    if (this.built_ && this.isInViewport_) {
+  };
+
+  /**
+   * The runtime calls this callback each time it believes the DOM subtree for
+   * this element has changed. This callback will be called at least once if
+   * the DOM subtree is not empty. This callback will no longer be called
+   * after `completeBuildCallback` has been called.
+   *
+   * This method can only be called on a upgraded element.
+   *
+   * @final
+   */
+  ElementProto.continueBuildCallback = function() {
+    this.assertNotTemplate_();
+    this.assertCanBuild_();
+    try {
+      this.implementation_.continueBuildCallback();
+    } catch (e) {
+      reportError(e, this);
+      throw e;
+    }
+  };
+
+  /**
+   * The runtime calls this callback once after it believes that the DOM subtree
+   * of this element has been complete. The element should now be fully
+   * functional: it can accept layout and viewport events and it's ready to
+   * process actions.
+   *
+   * This method can only be called on a upgraded element.
+   *
+   * @final
+   */
+  ElementProto.completeBuildCallback = function() {
+    this.assertNotTemplate_();
+    this.assertCanBuild_();
+    try {
+      this.implementation_.completeBuildCallback();
+      // TODO(dvoytenko, #1230): Remove once migration is done.
+      this.buildCallback();
+      this.buildComplete_ = true;
+    } catch (e) {
+      reportError(e, this);
+      throw e;
+    }
+    if (this.isInViewport_) {
       this.updateInViewport_(true);
     }
     if (this.actionQueue_) {
@@ -448,7 +476,11 @@ export function createAmpElementProto(win, name, implementationClass) {
         this.actionQueue_ = null;
       }
     }
-    return true;
+  };
+
+  /** @private */
+  ElementProto.assertCanBuild_ = function() {
+    assert(this.isUpgraded(), 'Cannot build unupgraded element');
   };
 
   /**
@@ -682,7 +714,7 @@ export function createAmpElementProto(win, name, implementationClass) {
    */
   ElementProto.layoutCallback = function() {
     this.assertNotTemplate_();
-    assert(this.isUpgraded() && this.isBuilt(),
+    assert(this.isUpgraded() && this.isBuildComplete(),
         'Must be upgraded and built to receive viewport events');
     this.dispatchCustomEvent('amp:load:start');
     const promise = this.implementation_.layoutCallback();
@@ -726,7 +758,7 @@ export function createAmpElementProto(win, name, implementationClass) {
         }, 100);
       }
     }
-    if (this.isUpgraded() && this.isBuilt()) {
+    if (this.isUpgraded() && this.isBuildComplete()) {
       this.updateInViewport_(inViewport);
     }
   };
@@ -754,7 +786,7 @@ export function createAmpElementProto(win, name, implementationClass) {
    */
   ElementProto.documentInactiveCallback = function() {
     this.assertNotTemplate_();
-    if (!this.isBuilt() || !this.isUpgraded()) {
+    if (!this.isBuildComplete() || !this.isUpgraded()) {
       return false;
     }
     return this.implementation_.documentInactiveCallback();
@@ -770,7 +802,7 @@ export function createAmpElementProto(win, name, implementationClass) {
    */
   ElementProto.enqueAction = function(invocation) {
     this.assertNotTemplate_();
-    if (!this.isBuilt()) {
+    if (!this.isBuildComplete()) {
       assert(this.actionQueue_).push(invocation);
     } else {
       this.executionAction_(invocation, false);

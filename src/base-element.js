@@ -51,15 +51,16 @@ import {vsyncFor} from './vsync';
  *           || firstAttachedCallback
  *           ||
  *           \/
- *    State: <NOT BUILT>             <=
- *           ||                       ||
- *           || isReadyToBuild?  ======
- *           ||
- *           \/
  *    State: <NOT BUILT>
  *           ||
- *           || buildCallback
+ *           || startBuildCallback
  *           || preconnectCallback may be called N times after this.
+ *           ||
+ *           || continueBuildCallback  <==
+ *           ||                          ||
+ *           ||            ===============
+ *           ||
+ *           || completeBuildCallback
  *           ||
  *           \/
  *    State: <BUILT>
@@ -180,34 +181,46 @@ export class BaseElement {
   }
 
   /**
-   * Override in subclass to indicate if the element is ready to rebuild its
-   * DOM subtree.  If the element can proceed with building the content return
-   * "true" and return "false" otherwise. The element may not be ready to build
-   * e.g. because its children are not available yet.
+   * A deprecated callback for build. Currently called at the same time as
+   * completeBuildCallback.
    *
-   * See {@link buildCallback} for more details.
-   *
-   * @return {boolean}
+   * TODO(dvoytenko, #1230): Remove once migration is complete.
    */
-  isReadyToBuild() {
+  buildCallback() {
     // Subclasses may override.
-    return true;
   }
 
   /**
-   * Override in subclass if the element needs to rebuilt its DOM content.
-   * Until the element has been rebuilt its content are not shown with an only
-   * exception of [placeholder] elements. From the moment the element is created
-   * and until the building phase is complete it will have "amp-notbuilt" CSS
-   * class set on it.
-   *
-   * This callback is executed early after the element has been attached to DOM
-   * if "isReadyToBuild" callback returns "true" or its called later upon the
-   * determination of Resources manager but definitely before first
-   * "layoutCallback" is called. Notice that "isReadyToBuild" call is not
-   * consulted in the later case.
+   * The first build operation. Override in subclasses to initiate building of
+   * the element. The runtime calls this callback early after the element has
+   * been atatched to DOM. The element's subtree may not be yet complete and
+   * thus the implementation cannot assume anything about it until
+   * `completeBuildCallback` arrives. However, the runtime will call
+   * `continueBuildCallback` if it believes the DOM subtree has changed.
    */
-  buildCallback() {
+  startBuildCallback() {
+    // Subclasses may override.
+  }
+
+  /**
+   * An interim build operation. The runtime can call this callback as many
+   * times as it believes that the immediate DOM inside of this element has
+   * changed. A subclasses can review the state of DOM and make appropriate
+   * changes. A non-placeholder child element will not be shown until this
+   * element whitelists it using `-amp-child` CSS class.
+   */
+  continueBuildCallback() {
+    // Subclasses may override.
+  }
+
+  /**
+   * The runtime uses this callback to signal that the DOM subtree is complete.
+   * No further `continueBuildCallback` calls will be sent. The implementation
+   * can complete its final build operations.
+   *
+   * The `layoutCallback` will not arrive until this callback returns.
+   */
+  completeBuildCallback() {
     // Subclasses may override.
   }
 

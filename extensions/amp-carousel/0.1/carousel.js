@@ -33,15 +33,18 @@ export class AmpCarousel extends BaseCarousel {
   }
 
   /** @override */
-  buildCarousel() {
+  startBuildCallbackCarousel() {
     /** @private {number} */
     this.pos_ = 0;
 
     /** @private {!Array<!Element>} */
-    this.cells_ = this.getRealChildren();
+    this.cells_ = [];
+
+    this.element.classList.add('-amp-parent');
 
     /** @private {!Element} */
     this.container_ = document.createElement('div');
+    this.container_.classList.add('-amp-child');
     st.setStyles(this.container_, {
       whiteSpace: 'nowrap',
       position: 'absolute',
@@ -51,15 +54,23 @@ export class AmpCarousel extends BaseCarousel {
       bottom: 0
     });
     this.element.appendChild(this.container_);
+  }
 
-    this.cells_.forEach(cell => {
-      this.setAsOwner(cell);
-      cell.style.display = 'inline-block';
-      if (cell != this.cells_[0]) {
-        // TODO(dvoytenko): this has to be customizable
-        cell.style.marginLeft = '8px';
+  /** @override */
+  continueBuildCallbackCarousel() {
+    const children = this.getRealChildren();
+    children.forEach(child => {
+      if (child == this.container_) {
+        return;
       }
-      this.container_.appendChild(cell);
+      this.cells_.push(child);
+      this.setAsOwner(child);
+      child.style.display = 'inline-block';
+      if (this.cells_.length > 1) {
+        // TODO(dvoytenko): this has to be customizable
+        child.style.marginLeft = '8px';
+      }
+      this.container_.appendChild(child);
     });
   }
 
