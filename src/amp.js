@@ -28,7 +28,7 @@ import {installStyles, makeBodyVisible} from './styles';
 import {installErrorReporting} from './error';
 import {stubElements} from './custom-element';
 import {adopt} from './runtime';
-import {cssText} from '../build/css.js';
+import {cssText} from '../build/css';
 import {action} from './action';
 import {maybeValidate} from './validator-integration';
 

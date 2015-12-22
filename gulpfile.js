@@ -110,7 +110,10 @@ function polyfillsForTests() {
  */
 function compile(watch, shouldMinify) {
   compileCss();
-  compileJs('./src/', 'amp.js', './dist', {
+  // For compilation with babel we start with the amp-babel entry point,
+  // but then rename to the amp.js which we've been using all along.
+  compileJs('./src/', 'amp-babel.js', './dist', {
+    toName: 'amp.js',
     minifiedName: 'v0.js',
     watch: watch,
     minify: shouldMinify,
@@ -418,6 +421,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
     bundler.bundle()
       .on('error', function(err) { console.error(err); this.emit('end'); })
       .pipe(lazybuild())
+      .pipe(rename(options.toName || srcFilename))
       .pipe(lazywrite());
   }
 

@@ -15,7 +15,6 @@
  */
 
 
-require('../src/polyfills');
 import {Timer} from '../src/timer';
 import {installCoreServices} from '../src/amp-core-service';
 import {registerForUnitTest} from '../src/runtime';
