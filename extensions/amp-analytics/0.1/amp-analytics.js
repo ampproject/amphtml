@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
+import {assertHttpsUrl} from '../../../src/url';
 import {isExperimentOn} from '../../../src/experiments';
 import {installCidService} from '../../../src/service/cid-impl';
 import {Layout} from '../../../src/layout';
 import {log} from '../../../src/log';
-import {loadPromise} from '../../../src/event-helper';
 import {urlReplacementsFor} from '../../../src/url-replacements';
 import {expandTemplate} from '../../../src/string';
+import {xhrFor} from '../../../src/xhr';
 
 import {addListener} from './instrumentation';
+import {sendRequest} from './transport';
 import {ANALYTICS_CONFIG} from './vendors';
 
 
@@ -68,10 +70,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       return Promise.resolve();
     }
 
-    /**
-     * @private {!JSONObject} The analytics config associated with the tag
-     */
-    this.config_ = this.mergeConfigs_();
+    this.element.setAttribute('aria-hidden', 'true');
 
     /**
      * @private {?string} Predefinedtype associated with the tag. If specified,
@@ -84,34 +83,68 @@ export class AmpAnalytics extends AMP.BaseElement {
      * format string used by the tag to send data
      */
     this.requests_ = {};
-    this.element.setAttribute('aria-hidden', 'true');
 
-    if (this.hasOptedOut_()) {
-      // Nothing to do when the user has opted out.
-      log.fine(this.getName_(), 'User has opted out. No hits will be sent.');
-      return Promise.resolve();
-    }
+    /**
+     * @private {JSONObject}
+     */
+    this.remoteConfig = {};
 
-    this.generateRequests_();
+    return this.fetchRemoteConfig_().then(() => {
+      /**
+       * @private {!JSONObject} The analytics config associated with the tag
+       */
+      this.config_ = this.mergeConfigs_();
 
-    if (!Array.isArray(this.config_['triggers'])) {
-      log.error(this.getName_(), 'No triggers were found in the config. No ' +
-          'analytics data will be sent.');
-      return Promise.resolve();
-    }
-
-    // Trigger callback can be synchronous. Do the registration at the end.
-    for (let k = 0; k < this.config_['triggers'].length; k++) {
-      const trigger = this.config_['triggers'][k];
-      if (!trigger['on'] || !trigger['request']) {
-        log.warn(this.getName_(), '"on" and "request" attributes are ' +
-            'required for data to be collected.');
-        continue;
+      if (this.hasOptedOut_()) {
+        // Nothing to do when the user has opted out.
+        log.fine(this.getName_(), 'User has opted out. No hits will be sent.');
+        return Promise.resolve();
       }
-      addListener(this.getWin(), trigger['on'],
-          this.handleEvent_.bind(this, trigger), trigger['selector']);
+
+      this.generateRequests_();
+
+      if (!this.config_['triggers']) {
+        log.error(this.getName_(), 'No triggers were found in the config. No ' +
+            'analytics data will be sent.');
+        return Promise.resolve();
+      }
+
+      // Trigger callback can be synchronous. Do the registration at the end.
+      for (const k in this.config_['triggers']) {
+        if (this.config_['triggers'].hasOwnProperty(k)) {
+          const trigger = this.config_['triggers'][k];
+          if (!trigger['on'] || !trigger['request']) {
+            log.warn(this.getName_(), '"on" and "request" attributes are ' +
+                'required for data to be collected.');
+            continue;
+          }
+          addListener(this.getWin(), trigger['on'],
+              this.handleEvent_.bind(this, trigger), trigger['selector']);
+        }
+      }
+    });
+  }
+
+  /**
+   * Returns a promise that resolves when remote config is ready (or
+   * immediately if no remote config is specified.)
+   * @private
+   * @return {!Promise<>}
+   */
+  fetchRemoteConfig_() {
+    const remoteConfigUrl = this.element.getAttribute('config');
+    if (!remoteConfigUrl) {
+      return Promise.resolve();
     }
-    return Promise.resolve();
+    assertHttpsUrl(remoteConfigUrl);
+    log.fine(this.getName_(), 'Fetching remote config', remoteConfigUrl);
+    return xhrFor(this.getWin()).fetchJson(remoteConfigUrl).then(jsonValue => {
+      this.remoteConfig_ = jsonValue;
+      log.fine(this.getName_(), 'Remote config loaded', remoteConfigUrl);
+    }, err => {
+      log.warn(this.getName_(), 'Error loading remote config',
+          remoteConfigUrl, err);
+    });
   }
 
   /**
@@ -123,12 +156,10 @@ export class AmpAnalytics extends AMP.BaseElement {
    * - Predefined config: Defined as part of the platform.
    * - Default config: Built-in config shared by all amp-analytics tags.
    *
-   * @return {!JSONObject} the merged config.
    * @private
+   * @return {!JSONObject}
    */
   mergeConfigs_() {
-    // TODO(btownsend, #871): Implement support for remote configuration.
-    const remoteConfig = {};
     let inlineConfig = {};
     try {
       const children = this.element.children;
@@ -161,7 +192,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     this.mergeObjects_(defaultConfig, config);
     this.mergeObjects_(typeConfig, config);
     this.mergeObjects_(inlineConfig, config);
-    this.mergeObjects_(remoteConfig, config);
+    this.mergeObjects_(this.remoteConfig_, config);
     return config;
   }
 
@@ -223,9 +254,10 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @private
    */
   handleEvent_(trigger, event) {
-    const host = this.config_['host'];
     let request = this.requests_[trigger['request']];
-    if (!host || !request) {
+    if (!request) {
+      log.warn(this.getName_(),
+          'Ignoring event. Request string not found', trigger['request']);
       return;
     }
 
@@ -243,30 +275,20 @@ export class AmpAnalytics extends AMP.BaseElement {
     });
 
     // For consistentcy with amp-pixel we also expand any url replacements.
-    urlReplacementsFor(this.getWin()).expand(request).then(request => {
-      // TODO(btownsend, #1061): Add support for sendBeacon.
-      if (host && request) {
-        this.sendRequest_('https://' + host + request);
-      }
-    });
+    urlReplacementsFor(this.getWin()).expand(request).then(
+        request => this.sendRequest_(request));
   }
 
   /**
-   * Sends a request via GET method.
-   *
-   * @param {!string} request The request to be sent over wire.
+   * @param {string} request The full request string to send.
    * @private
    */
   sendRequest_(request) {
-    const image = new Image();
-    image.src = request;
-    image.width = 1;
-    image.height = 1;
-    loadPromise(image).then(() => {
-      log.fine(this.getName_(), 'Sent request: ', request);
-    }).catch(() => {
-      log.warn(this.getName_(), 'Failed to send request: ', request);
-    });
+    if (!request) {
+      log.warn(this.getName_(), 'Request not sent. Contents empty.');
+      return;
+    }
+    sendRequest(this.getWin(), request, this.config_['transport'] || {});
   }
 
   /**
@@ -294,7 +316,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     };
 
     if (to === null || to === undefined) {
-      return from;
+      to = {};
     }
 
     for (const property in from) {
@@ -309,8 +331,7 @@ export class AmpAnalytics extends AMP.BaseElement {
           if (!isObject(to[property])) {
             to[property] = {};
           }
-          to[property] = this.mergeObjects_(from[property],
-              to[property]);
+          to[property] = this.mergeObjects_(from[property], to[property]);
         } else {
           to[property] = from[property];
         }

@@ -23,6 +23,7 @@ import {onDocumentReady} from './document-state';
 import {platform} from './platform';
 import {px, setStyle, setStyles} from './style';
 import {timer} from './timer';
+import {vsyncFor} from './vsync';
 import {viewerFor} from './viewer';
 
 
@@ -75,6 +76,9 @@ export class Viewport {
     this./*OK*/scrollTop_ = null;
 
     /** @private {?number} */
+    this.lastMeasureScrollTop_ = null;
+
+    /** @private {?number} */
     this./*OK*/scrollLeft_ = null;
 
     /** @private {number} */
@@ -82,6 +86,9 @@ export class Viewport {
 
     /** @private {number} */
     this.scrollMeasureTime_ = 0;
+
+    /** @private {Vsync} */
+    this.vsync_ = vsyncFor(win);
 
     /** @private {boolean} */
     this.scrollTracking_ = false;
@@ -100,6 +107,9 @@ export class Viewport {
 
     /** @private {string|undefined} */
     this.originalViewportMetaString_ = undefined;
+
+    /** @private @const (function()) */
+    this.boundThrottledScroll_ = this.throttledScroll_.bind(this);
 
     this.viewer_.onViewportEvent(() => {
       this.binding_.updateViewerViewport(this.viewer_);
@@ -155,7 +165,7 @@ export class Viewport {
    * @return {number}
    */
   getScrollLeft() {
-    if (this./*OK*/scrollleft_ == null) {
+    if (this./*OK*/scrollLeft_ == null) {
       this./*OK*/scrollLeft_ = this.binding_.getScrollLeft();
     }
     return this./*OK*/scrollLeft_;
@@ -379,14 +389,7 @@ export class Viewport {
   /** @private */
   scroll_() {
     this.scrollCount_++;
-    this.scrollObservable_.fire();
-
     this.scrollLeft_ = this.binding_.getScrollLeft();
-
-    if (this.scrollTracking_) {
-      return;
-    }
-
     const newScrollTop = this.binding_.getScrollTop();
     if (newScrollTop < 0) {
       // iOS and some other browsers use negative values of scrollTop for
@@ -394,44 +397,44 @@ export class Viewport {
       // be ignored here.
       return;
     }
-
-    this.scrollTracking_ = true;
     this.scrollTop_ = newScrollTop;
-    this.scrollMeasureTime_ = timer.now();
-    timer.delay(() => this.scrollDeferred_(), 500);
+    if (!this.scrollTracking_) {
+      this.scrollTracking_ = true;
+      const now = timer.now();
+      // Wait 2 frames and then request an animation frame.
+      timer.delay(() => this.vsync_.measure(
+          this.throttledScroll_.bind(this, now, newScrollTop)), 36);
+    }
+    this.scrollObservable_.fire();
   }
 
-  /** @private */
-  scrollDeferred_() {
+  /**
+   * This method is called about every 3 frames (assuming 60hz) and it
+   * is called in a vsync measure task.
+   * @param {number} referenceTime Time when the scroll measurement, that
+   *     triggered this call made, was made.
+   * @param {number} referenceTop Scrolltop at that time.
+   * @private
+   */
+  throttledScroll_(referenceTime, referenceTop) {
     this.scrollTracking_ = false;
-    const newScrollTop = this.binding_.getScrollTop();
-    if (this.scrollTop_ === null) {
-      // If the scrollTop was reset while waiting for the next scroll event
-      // we have to assume that velocity is 0 - there's no other way we can
-      // calculate it.
-      this.scrollTop_ = newScrollTop;
-    }
+    const newScrollTop = this.scrollTop_ = this.binding_.getScrollTop();
     const now = timer.now();
     let velocity = 0;
-    if (now != this.scrollMeasureTime_) {
-      velocity = (newScrollTop - this.scrollTop_) /
-          (now - this.scrollMeasureTime_);
+    if (now != referenceTime) {
+      velocity = (newScrollTop - referenceTop) /
+          (now - referenceTime);
     }
     log.fine(TAG_, 'scroll: ' +
         'scrollTop=' + newScrollTop + '; ' +
         'velocity=' + velocity);
-    this.scrollTop_ = newScrollTop;
-    this.scrollMeasureTime_ = now;
     // TODO(dvoytenko): confirm the desired value and document it well.
-    // Currently, this is 20px/second -> 0.02px/millis
-    if (Math.abs(velocity) < 0.02) {
+    // Currently, this is 30px/second -> 0.03px/millis
+    if (Math.abs(velocity) < 0.03) {
       this.changed_(/* relayoutAll */ false, velocity);
     } else {
-      timer.delay(() => {
-        if (!this.scrollTracking_) {
-          this.scrollDeferred_();
-        }
-      }, 250);
+      timer.delay(() => this.vsync_.measure(
+          this.throttledScroll_.bind(this, now, newScrollTop)), 20);
     }
   }
 

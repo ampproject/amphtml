@@ -47,7 +47,8 @@ element will be shown if AMP Runtime cannot resize the `amp-list` element as req
 
 An example:
 ```html
-<amp-list src="https://data.com/articles.json?ref=CANONICAL_URL">
+<amp-list src="https://data.com/articles.json?ref=CANONICAL_URL"
+    width=300 height=200 layout=responsive>
   <template type="amp-mustache">
     <div>
       <amp-img src="{{imageUrl}}" width=50 height=50></amp-img>
@@ -66,6 +67,10 @@ An example:
   bottom: 0;
 }
 ```
+
+The `amp-list` supports the following layouts: `fixed`, `fixed-height`,
+`responsive`, `fill`. See [AMP HTML Layout System](../../spec/amp-html-layout.md)
+for details.
 
 #### Substitutions
 

@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import {writeScript} from '../src/3p';
+import {writeScript, checkData} from '../src/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function adsense(global, data) {
+  checkData(data, ['adClient', 'adSlot']);
   /*eslint "google-camelcase/google-camelcase": 0*/
   global.google_page_url = global.context.canonicalUrl;
   const s = document.createElement('script');

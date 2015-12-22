@@ -16,6 +16,7 @@
 
 import {AmpAnalytics} from '../../../../build/all/v0/amp-analytics-0.1.max';
 import {adopt} from '../../../../src/runtime';
+import {getService} from '../../../../src/service';
 import {markElementScheduledForTesting} from '../../../../src/service';
 import {installCidService} from '../../../../src/service/cid-impl';
 import * as sinon from 'sinon';
@@ -27,6 +28,11 @@ describe('amp-analytics', function() {
   let sandbox;
   let windowApi;
   let sendRequestSpy;
+  let fetchJsonResponse;
+
+  const jsonMockResponses = {
+    'config1': '{"vars": {"title": "remote"}}'
+  };
 
   beforeEach(() => {
     markElementScheduledForTesting(window, 'amp-analytics');
@@ -42,6 +48,9 @@ describe('amp-analytics', function() {
     windowApi.Object = window.Object;
     markElementScheduledForTesting(windowApi, 'amp-analytics');
     installCidService(windowApi);
+    getService(windowApi, 'xhr', () => {return {
+      fetchJson: url => Promise.resolve(JSON.parse(jsonMockResponses[url]))
+    };});
   });
 
   afterEach(() => {
@@ -71,8 +80,7 @@ describe('amp-analytics', function() {
 
   it('is blocked when experiment is off', function() {
     const analytics = getAnalyticsTag({
-      'host': 'example.com',
-      'requests': {'foo': '/bar'},
+      'requests': {'foo': 'https://example.com/bar'},
       'triggers': [{'on': 'visible', 'request': 'foo'}]
     });
 
@@ -84,8 +92,7 @@ describe('amp-analytics', function() {
 
   it('sends a basic hit', function() {
     const analytics = getAnalyticsTag({
-      'host': 'example.com',
-      'requests': {'foo': '/bar'},
+      'requests': {'foo': 'https://example.com/bar'},
       'triggers': [{'on': 'visible', 'request': 'foo'}]
     });
 
@@ -97,8 +104,7 @@ describe('amp-analytics', function() {
 
   it('does not send a hit when config is not in a script tag', function() {
     const config = JSON.stringify({
-      'host': 'example.com',
-      'requests': {'foo': '/bar'},
+      'requests': {'foo': 'https://example.com/bar'},
       'triggers': [{'on': 'visible', 'request': 'foo'}]
     });
     const el = document.createElement('amp-analytics');
@@ -116,8 +122,7 @@ describe('amp-analytics', function() {
 
   it('does not send a hit when multiple child tags exist', function() {
     const analytics = getAnalyticsTag({
-      'host': 'example.com',
-      'requests': {'foo': '/bar'},
+      'requests': {'foo': 'https://example.com/bar'},
       'triggers': [{'on': 'visible', 'request': 'foo'}]
     });
     const script2 = document.createElement('script');
@@ -133,8 +138,7 @@ describe('amp-analytics', function() {
         const el = document.createElement('amp-analytics');
         const script = document.createElement('script');
         script.textContent = JSON.stringify({
-          'host': 'example.com',
-          'requests': {'foo': '/bar'},
+          'requests': {'foo': 'https://example.com/bar'},
           'triggers': [{'on': 'visible', 'request': 'foo'}]
         });
         el.appendChild(script);
@@ -149,21 +153,9 @@ describe('amp-analytics', function() {
         });
       });
 
-  it('does not send a hit when host is not provided', function() {
-    const analytics = getAnalyticsTag({
-      'requests': {'foo': '/bar'},
-      'triggers': [{'on': 'visible', 'request': 'foo'}]
-    });
-
-    return analytics.layoutCallback().then(() => {
-      expect(sendRequestSpy.callCount).to.equal(0);
-    });
-  });
-
   it('does not send a hit when request is not provided', function() {
     const analytics = getAnalyticsTag({
-      'host': 'example.com',
-      'requests': {'foo': '/bar'},
+      'requests': {'foo': 'https://example.com/bar'},
       'triggers': [{'on': 'visible'}]
     });
 
@@ -174,7 +166,6 @@ describe('amp-analytics', function() {
 
   it('does not send a hit when request type is not defined', function() {
     const analytics = getAnalyticsTag({
-      'host': 'example.com',
       'triggers': [{'on': 'visible', 'request': 'foo'}]
     });
 
@@ -185,8 +176,8 @@ describe('amp-analytics', function() {
 
   it('expands nested requests', function() {
     const analytics = getAnalyticsTag({
-      'host': 'example.com',
-      'requests': {'foo': '/bar&${foobar}&baz', 'foobar': 'f1'},
+      'requests': {'foo':
+        'https://example.com/bar&${foobar}&baz', 'foobar': 'f1'},
       'triggers': [{'on': 'visible', 'request': 'foo'}]
     });
 
@@ -199,8 +190,8 @@ describe('amp-analytics', function() {
 
   it('expands nested requests', function() {
     const analytics = getAnalyticsTag({
-      'host': 'example.com',
-      'requests': {'foo': '/bar&${foobar}', 'foobar': '${baz}', 'baz': 'b1'},
+      'requests': {'foo':
+        'https://example.com/bar&${foobar}', 'foobar': '${baz}', 'baz': 'b1'},
       'triggers': [{'on': 'visible', 'request': 'foo'}]
     });
 
@@ -212,7 +203,6 @@ describe('amp-analytics', function() {
 
   it('expands recursive requests', function() {
     const analytics = getAnalyticsTag({
-      'host': 'example.com',
       'requests': {'foo': '/bar&${foobar}&baz', 'foobar': '${foo}'},
       'triggers': [{'on': 'visible', 'request': 'foo'}]
     });
@@ -220,7 +210,7 @@ describe('amp-analytics', function() {
     return analytics.layoutCallback().then(() => {
       expect(sendRequestSpy.calledOnce).to.be.true;
       expect(sendRequestSpy.args[0][0])
-          .to.equal('https://example.com/bar&/bar&/bar&&baz&baz&baz');
+          .to.equal('/bar&/bar&/bar&&baz&baz&baz');
     });
   });
 
@@ -235,8 +225,7 @@ describe('amp-analytics', function() {
     };
     windowApi.location.href = '/c/www.test.com/abc';
     const analytics = getAnalyticsTag({
-      'host': 'example.com',
-      'requests': {'foo': 'cid=${clientId(analytics-abc)}'},
+      'requests': {'foo': 'https://example.com/cid=${clientId(analytics-abc)}'},
       'triggers': [{'on': 'visible', 'request': 'foo'}]
     });
 
@@ -248,27 +237,9 @@ describe('amp-analytics', function() {
     });
   });
 
-  it('merges host correctly', function() {
-    const analytics = getAnalyticsTag({
-      'requests': {'foo': '/bar'},
-      'triggers': [{'on': 'visible', 'request': 'foo'}]
-    }, {'type': 'xyz'});
-
-    analytics.predefinedConfig_ = {
-      'xyz': {
-        'host': 'example.com'
-      }
-    };
-    return analytics.layoutCallback().then(() => {
-      expect(sendRequestSpy.calledOnce).to.be.true;
-      expect(sendRequestSpy.args[0][0]).to.equal('https://example.com/bar');
-    });
-  });
-
   it('merges requests correctly', function() {
     const analytics = getAnalyticsTag({
-      'host': 'example.com',
-      'requests': {'foo': '/${bar}'},
+      'requests': {'foo': 'https://example.com/${bar}'},
       'triggers': [{'on': 'visible', 'request': 'foo'}]
     }, {'type': 'xyz'});
 
@@ -285,8 +256,7 @@ describe('amp-analytics', function() {
 
   it('merges objects correctly', function() {
     const analytics = getAnalyticsTag({
-      'host': 'example.com',
-      'requests': {'foo': '/bar'},
+      'requests': {'foo': 'https://example.com/bar'},
       'triggers': [{'on': 'visible', 'request': 'foo'}]
     });
 
@@ -322,8 +292,8 @@ describe('amp-analytics', function() {
 
   it('expands trigger vars', () => {
     const analytics = getAnalyticsTag({
-      'host': 'example.com',
-      'requests': {'pageview': '/test1=${var1}&test2=${var2}'},
+      'requests': {'pageview':
+        'https://example.com/test1=${var1}&test2=${var2}'},
       'triggers': [{
         'on': 'visible',
         'request': 'pageview',
@@ -341,12 +311,12 @@ describe('amp-analytics', function() {
 
   it('expands config vars', () => {
     const analytics = getAnalyticsTag({
-      'host': 'example.com',
       'vars': {
         'var1': 'x',
         'var2': 'test2'
       },
-      'requests': {'pageview': '/test1=${var1}&test2=${var2}'},
+      'requests': {'pageview':
+        'https://example.com/test1=${var1}&test2=${var2}'},
       'triggers': [{'on': 'visible', 'request': 'pageview'}]});
     return analytics.layoutCallback().then(() => {
       expect(sendRequestSpy.calledOnce).to.be.true;
@@ -357,8 +327,8 @@ describe('amp-analytics', function() {
 
   it('expands platform vars', () => {
     const analytics = getAnalyticsTag({
-      'host': 'example.com',
-      'requests': {'pageview': '/title=${title}&ref=${documentReferrer}'},
+      'requests': {'pageview':
+        'https://example.com/title=${title}&ref=${documentReferrer}'},
       'triggers': [{'on': 'visible', 'request': 'pageview'}]});
     return analytics.layoutCallback().then(() => {
       expect(sendRequestSpy.calledOnce).to.be.true;
@@ -370,8 +340,7 @@ describe('amp-analytics', function() {
 
   it('expands url-replacements vars', function() {
     const analytics = getAnalyticsTag({
-      'host': 'example.com',
-      'requests': {'foo': '/AMPDOC_URL&TITLE'},
+      'requests': {'foo': 'https://example.com/AMPDOC_URL&TITLE'},
       'triggers': [{'on': 'visible', 'request': 'foo'}]
     });
 
@@ -384,12 +353,12 @@ describe('amp-analytics', function() {
 
   it('expands trigger vars with higher precedence than config vars', () => {
     const analytics = getAnalyticsTag({
-      'host': 'example.com',
       'vars': {
         'var1': 'config1',
         'var2': 'config2'
       },
-      'requests': {'pageview': '/test1=${var1}&test2=${var2}'},
+      'requests': {'pageview':
+        'https://example.com/test1=${var1}&test2=${var2}'},
       'triggers': [{
         'on': 'visible',
         'request': 'pageview',
@@ -405,9 +374,9 @@ describe('amp-analytics', function() {
 
   it('expands config vars with higher precedence than platform vars', () => {
     const analytics = getAnalyticsTag({
-      'host': 'example.com',
       'vars': {'random': 428},
-      'requests': {'pageview': '/test1=${title}&test2=${random}'},
+      'requests': {'pageview':
+        'https://example.com/test1=${title}&test2=${random}'},
       'triggers': [{'on': 'visible', 'request': 'pageview',}]
     });
     return analytics.layoutCallback().then(() => {
@@ -419,8 +388,7 @@ describe('amp-analytics', function() {
 
   it('does not expand nested vars', () => {
     const analytics = getAnalyticsTag({
-      'host': 'example.com',
-      'requests': {'pageview': '/test=${var1}'},
+      'requests': {'pageview': 'https://example.com/test=${var1}'},
       'triggers': [{
         'on': 'visible',
         'request': 'pageview',
@@ -437,13 +405,12 @@ describe('amp-analytics', function() {
 
   it('expands and encodes requests, config vars, and trigger vars', () => {
     const analytics = getAnalyticsTag({
-      'host': 'example.com',
       'vars': {
         'c1': 'config 1',
         'c2': 'config&2'
       },
       'requests': {
-        'base': '/test?c1=${c1}&t1=${t1}',
+        'base': 'https://example.com/test?c1=${c1}&t1=${t1}',
         'pageview': '${base}&c2=${c2}&t2=${t2}'
       },
       'triggers': [{
@@ -463,8 +430,8 @@ describe('amp-analytics', function() {
 
   it('expands url-replacements vars', () => {
     const analytics = getAnalyticsTag({
-      'host': 'example.com',
-      'requests': {'pageview': '/test1=${var1}&test2=${var2}&title=TITLE'},
+      'requests': {'pageview':
+        'https://example.com/test1=${var1}&test2=${var2}&title=TITLE'},
       'triggers': [{
         'on': 'visible',
         'request': 'pageview',
@@ -483,8 +450,7 @@ describe('amp-analytics', function() {
 
   it('respects optout', function() {
     const config = {
-      'host': 'example.com',
-      'requests': {'foo': '/bar'},
+      'requests': {'foo': 'https://example.com/bar'},
       'triggers': [{'on': 'visible', 'request': 'foo'}],
       'optout': 'foo.bar'
     };
@@ -505,6 +471,19 @@ describe('amp-analytics', function() {
               .to.be.true;
         });
       });
+    });
+  });
+
+  it('fetches and merges remote config', () => {
+    const analytics = getAnalyticsTag({
+      'vars': {'title': 'local'},
+      'requests': {'foo': 'https://example.com/${title}'},
+      'triggers': [{'on': 'visible', 'request': 'foo'}]
+    }, {
+      'config': 'config1'
+    });
+    return analytics.layoutCallback().then(() => {
+      expect(sendRequestSpy.args[0][0]).to.equal('https://example.com/remote');
     });
   });
 });

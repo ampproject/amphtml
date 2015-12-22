@@ -198,18 +198,22 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
 /**
  * Returns a promise for when the condition becomes true.
  * @param {string} description
- * @param {fn():boolean} condition
+ * @param {fn():T} condition Should return a truthy value when the poll
+ *     is done. The return value is then returned with the promise
+ *     returned by this function.
  * @param {fn():!Error=} opt_onError
  * @param {number=} opt_timeout
- * @return {!Promise}
+ * @return {!Promise<T>} The polled for value.
+ * @template T
  */
 export function poll(description, condition, opt_onError, opt_timeout) {
   return new Promise((resolve, reject) => {
     let start = new Date().getTime();
     function poll() {
-      if (condition()) {
+      const ret = condition();
+      if (ret) {
         clearInterval(interval);
-        resolve();
+        resolve(ret);
       } else {
         if (new Date().getTime() - start > (opt_timeout || 1600)) {
           clearInterval(interval);
@@ -221,7 +225,7 @@ export function poll(description, condition, opt_onError, opt_timeout) {
         }
       }
     }
-    let interval = setInterval(poll, 50);
+    let interval = setInterval(poll, 8);
     poll();
   });
 }

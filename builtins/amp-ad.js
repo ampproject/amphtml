@@ -20,7 +20,7 @@ import {getIntersectionChangeEntry} from '../src/intersection-observer';
 import {isLayoutSizeDefined} from '../src/layout';
 import {loadPromise} from '../src/event-helper';
 import {registerElement} from '../src/custom-element';
-import {getIframe, listenOnce, postMessage, prefetchBootstrap} from
+import {getIframe, listen, listenOnce, postMessage, prefetchBootstrap} from
     '../src/3p-frame';
 import {adPrefetch, adPreconnect} from '../ads/_prefetch';
 import {timer} from '../src/timer';
@@ -212,7 +212,12 @@ export function installAd(win) {
           this.deferMutate(this.noContentHandler_.bind(this));
         });
         // Triggered by context.observeIntersection(…) inside the ad iframe.
-        listenOnce(this.iframe_, 'send-intersections', () => {
+        // We use listen instead of listenOnce, because a single ad might
+        // have multiple parties wanting to receive viewability data.
+        // The second time this is called, it doesn't do much but it
+        // guarantees that the receiver gets an initial intersection change
+        // record.
+        listen(this.iframe_, 'send-intersections', () => {
           this.startSendingIntersectionChanges_();
         });
       }
@@ -227,7 +232,7 @@ export function installAd(win) {
       // it is visible.
       if (inViewport) {
         this.unlistenViewportChanges_ =
-            this.getViewport().onChanged(this.sendAdIntersection_.bind(this));
+            this.getViewport().onScroll(this.sendAdIntersection_.bind(this));
       } else if (this.unlistenViewportChanges_) {
         this.unlistenViewportChanges_();
         this.unlistenViewportChanges_ = null;
@@ -239,6 +244,8 @@ export function installAd(win) {
      * observing its position in the viewport.
      * Sets a flag, measures the iframe position if necessary and sends
      * one change record to the iframe.
+     * Note that this method may be called more than once if a single ad
+     * has multiple parties interested in viewability data.
      * @private
      */
     startSendingIntersectionChanges_() {

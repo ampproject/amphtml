@@ -15,11 +15,13 @@
  */
 
 import {Timer} from '../../../../src/timer';
+import {AmpIframe, listen} from '../amp-iframe';
 import {adopt} from '../../../../src/runtime';
-import {createIframePromise, pollForLayout} from '../../../../testing/iframe';
+import {createIframePromise, pollForLayout, poll}
+    from '../../../../testing/iframe';
 import {loadPromise} from '../../../../src/event-helper';
 import {resourcesFor} from '../../../../src/resources';
-require('../amp-iframe');
+import * as sinon from 'sinon';
 
 adopt(window);
 
@@ -27,6 +29,8 @@ describe('amp-iframe', () => {
 
   const iframeSrc = 'http://iframe.localhost:' + location.port +
       '/base/test/fixtures/served/iframe.html';
+  const clickableIframeSrc = 'http://iframe.localhost:' + location.port +
+      '/base/test/fixtures/served/iframe-clicktoplay.html';
 
   const timer = new Timer(window);
   let ranJs = 0;
@@ -39,6 +43,12 @@ describe('amp-iframe', () => {
       ranJs++;
     }
   };
+
+  function waitForJsInIframe() {
+    return poll('waiting for JS to run', () => {
+      return ranJs > 0;
+    }, undefined, 300);
+  }
 
   function getAmpIframe(attributes, opt_top, opt_height, opt_translateY) {
     return createIframePromise().then(function(iframe) {
@@ -59,6 +69,13 @@ describe('amp-iframe', () => {
         const overflowEl = iframe.doc.createElement('div');
         overflowEl.setAttribute('overflow', '');
         i.appendChild(overflowEl);
+      }
+      if (attributes.poster) {
+        const img = iframe.doc.createElement('amp-img');
+        img.setAttribute('layout', 'fill');
+        img.setAttribute('src', attributes.poster);
+        img.setAttribute('placeholder', '');
+        i.appendChild(img);
       }
       iframe.doc.body.appendChild(i);
       // Wait an event loop for the iframe to be created.
@@ -107,7 +124,7 @@ describe('amp-iframe', () => {
       expect(amp.iframe.src).to.equal(iframeSrc);
       expect(amp.iframe.getAttribute('sandbox')).to.equal('');
       expect(amp.iframe.parentNode).to.equal(amp.scrollWrapper);
-      return timer.promise(0).then(() => {
+      return timer.promise(50).then(() => {
         expect(ranJs).to.equal(0);
       });
     });
@@ -122,7 +139,7 @@ describe('amp-iframe', () => {
       scrolling: 'no'
     }).then(amp => {
       expect(amp.iframe.getAttribute('sandbox')).to.equal('allow-scripts');
-      return timer.promise(100).then(() => {
+      return waitForJsInIframe().then(() => {
         expect(ranJs).to.equal(1);
         expect(amp.scrollWrapper).to.be.null;
       });
@@ -188,7 +205,7 @@ describe('amp-iframe', () => {
       expect(amp.iframe.src).to.equal(dataUri);
       expect(amp.iframe.getAttribute('sandbox')).to.equal('');
       expect(amp.iframe.parentNode).to.equal(amp.scrollWrapper);
-      return timer.promise(0).then(() => {
+      return timer.promise(50).then(() => {
         expect(ranJs).to.equal(0);
       });
     });
@@ -210,7 +227,7 @@ describe('amp-iframe', () => {
       expect(amp.iframe.getAttribute('sandbox')).to.equal(
           'allow-scripts');
       expect(amp.iframe.parentNode).to.equal(amp.scrollWrapper);
-      return timer.promise(0).then(() => {
+      return waitForJsInIframe().then(() => {
         expect(ranJs).to.equal(1);
       });
     });
@@ -342,6 +359,27 @@ describe('amp-iframe', () => {
       impl.updateHeight_(217);
       expect(impl.changeHeight.callCount).to.equal(0);
       expect(impl.requestChangeHeight.callCount).to.equal(0);
+    });
+  });
+
+  it('should listen for embed-ready event', () => {
+    const sandbox = sinon.sandbox.create();
+    const activateIframeSpy_ =
+        sinon.spy(AmpIframe.prototype, 'activateIframe_');
+    return getAmpIframe({
+      src: clickableIframeSrc,
+      sandbox: 'allow-scripts',
+      width: 480,
+      height: 360,
+      poster: 'https://i.ytimg.com/vi/cMcCTVAFBWM/hqdefault.jpg'
+    }).then(amp => {
+      const impl = amp.container.implementation_;
+      return timer.promise(100).then(() => {
+        expect(impl.iframe_.style.zIndex).to.equal('');
+        expect(impl.placeholder_).to.be.null;
+        expect(activateIframeSpy_.callCount).to.equal(2);
+        activateIframeSpy_.restore();
+      });
     });
   });
 });

@@ -32,9 +32,9 @@ export function maybeValidate(win) {
     return;
   }
   const s = document.createElement('script');
-  // TODO(@cramforce): Switch to locally build version when we integrated
-  // the validator and switch to production URL.
-  s.src = 'https://www.gstatic.com/amphtml/v0/validator.js';
+  // TODO(@cramforce): Introduce a switch to locally built version for local
+  // development.
+  s.src = 'https://cdn.ampproject.org/v0/validator.js';
   s.onload = () => {
     win.document.head.removeChild(s);
     amp.validator.validateUrlAndLog(filename, win.document);

@@ -22,22 +22,24 @@
 <amp-analytics id="analytics1">
 <script type="application/json">
 {
-  "host": "example.com",
+  "transport": {"beacon": false, "xhrpost": false},
   "requests": {
-    "base": "?domain=${canonicalHost}&path=${canonicalPath}&title=${title}",
+    "base": "https://example.com/?domain=${canonicalHost}&path=${canonicalPath}&title=${title}",
     "event": "${base}&name=${eventName}&type=${eventId}&time=${timestamp}&tz=${timezone}&pid=${pageViewId}&screenSize=${screenWidth}x${screenHeight}"
   },
   "vars": {
     "title": "Example Request"
   },
-  "triggers": [{
-    "on": "visible",
-    "request": "event",
-    "vars": {
-      "eventName": "page-loaded",
-      "eventId": "42"
+  "triggers": {
+    "default pageview": {
+      "on": "visible",
+      "request": "event",
+      "vars": {
+        "eventName": "page-loaded",
+        "eventId": "42"
+      }
     }
-  }]
+  }
 }
 </script>
 </amp-analytics>
@@ -48,32 +50,38 @@
   "vars": {
     "account": "UA-XXXX-Y"
   },
-  "triggers": [{
-    "on": "visible",
-    "request": "pageview",
-    "vars": {
-      "title": "Example Pageview"
+  "triggers": {
+    "default pageview": {
+      "on": "visible",
+      "request": "pageview",
+      "vars": {
+        "title": "Example Pageview"
+      }
+    },
+    "click on #test1 trigger": {
+      "on": "click",
+      "selector": "#test1",
+      "request": "event",
+      "vars": {
+        "eventCategory": "examples",
+        "eventAction": "clicked-test1"
+      }
+    },
+    "click on #top trigger": {
+      "on": "click",
+      "selector": "#top",
+      "request": "event",
+      "vars": {
+        "eventCategory": "examples",
+        "eventAction": "clicked-header"
+      }
     }
-  }, {
-    "on": "click",
-    "selector": "#test1",
-    "request": "event",
-    "vars": {
-      "eventCategory": "examples",
-      "eventAction": "clicked-test1"
-    }
-  }, {
-    "on": "click",
-    "selector": "#top",
-    "request": "event",
-    "vars": {
-      "eventCategory": "examples",
-      "eventAction": "clicked-header"
-    }
-  }]
+  }
 }
 </script>
 </amp-analytics>
+
+<amp-analytics id="analytics3" config="./analytics.config.json"></amp-analytics>
 
 <div class="logo"></div>
 <h1 id="top">AMP Analytics</h1>

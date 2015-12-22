@@ -91,3 +91,21 @@ To enable this, copy the file [remote.html](../3p/remote.html) to your web serve
 ```
 
 The `content` attribute of the meta tag is the absolute URL to your copy of the remote.html file on your web server. This URL must use a "https" schema. It is not allowed to reside on the same origin as your AMP files. E.g. if you host AMP files on "www.example.com", this URL must not be on "www.example.com" but e.g. "something-else.example.com" is OK.
+
+##### Enhance incoming ad configuration
+
+This is completely optional: It is sometimes desired to further process the incoming iframe configuration before drawing the ad using AMP's built-in system.
+
+This is supported by passing a callback to the `draw3p` function call in the [remote.html](../3p/remote.html) file. The callback receives the incoming configuration as first argument and then receives another callback as second argument (Called `done` in the example below). This callback must be called with the updated config in order for ad rendering to proceed.
+
+Example:
+
+```JS
+draw3p(function(config, done) {
+  config.targeting = Math.random() > 0.5 ? 'sport' : 'fashion';
+  // Don't actually call setTimeout here. This should only serve as an
+  // example that is OK to call the done callback asynchronously.
+  setTimeout(function() {
+    done(config);
+  }, 100)
+});

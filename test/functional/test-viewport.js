@@ -48,7 +48,10 @@ describe('Viewport', () => {
     windowApi = {
       document: {
         documentElement: {style: {}}
-      }
+      },
+      location: {},
+      setTimeout: window.setTimeout,
+      requestAnimationFrame: fn => window.setTimeout(fn, 16)
     };
     binding = new ViewportBindingVirtual_(windowApi, viewer);
     viewport = new Viewport(windowApi, binding, viewer);
@@ -132,44 +135,27 @@ describe('Viewport', () => {
     viewport.onChanged(event => {
       changeEvent = event;
     });
-    viewer.getScrollTop = () => {return 34;};
+    viewer.getScrollTop = () => 34;
     viewerViewportHandler();
     expect(changeEvent).to.equal(null);
 
     // Not enough time past.
-    clock.tick(100);
-    viewer.getScrollTop = () => {return 35;};
+    clock.tick(8);
+    expect(changeEvent).to.equal(null);
+    clock.tick(8);
+    expect(changeEvent).to.equal(null);
+    viewer.getScrollTop = () => 35;
     viewerViewportHandler();
+    clock.tick(16);
     expect(changeEvent).to.equal(null);
 
     // A bit more time.
-    clock.tick(750);
+    clock.tick(16);
+    expect(changeEvent).to.equal(null);
+    clock.tick(4);
     expect(changeEvent).to.not.equal(null);
     expect(changeEvent.relayoutAll).to.equal(false);
-    expect(changeEvent.velocity).to.be.closeTo(0.002, 1e-4);
-  });
-
-  it('should defer scroll events and react to reset of scroll pos', () => {
-    let changeEvent = null;
-    viewport.onChanged(event => {
-      changeEvent = event;
-    });
-    viewer.getScrollTop = () => {return 34;};
-    viewerViewportHandler();
-    expect(changeEvent).to.equal(null);
-
-    // Not enough time past.
-    clock.tick(100);
-    viewer.getScrollTop = () => {return 35;};
-    viewerViewportHandler();
-    expect(changeEvent).to.equal(null);
-
-    // Reset and wait a bit more time.
-    viewport./*OK*/scrollTop_ = null;
-    clock.tick(750);
-    expect(changeEvent).to.not.equal(null);
-    expect(changeEvent.relayoutAll).to.equal(false);
-    expect(changeEvent.velocity).to.equal(0);
+    expect(changeEvent.velocity).to.be.closeTo(0.019230, 1e-4);
   });
 
   it('should update scroll pos and reset cache', () => {
@@ -363,7 +349,8 @@ describe('Viewport META', () => {
             }
             return undefined;
           }
-        }
+        },
+        location: {}
       };
 
       binding = new ViewportBindingVirtual_(windowApi, viewer);

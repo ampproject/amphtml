@@ -16,6 +16,7 @@
 
 import {addDataAndJsonAttributes_, getIframe, getBootstrapBaseUrl,
     prefetchBootstrap} from '../../src/3p-frame';
+import {validateData} from '../../src/3p';
 import {documentInfoFor} from '../../src/document-info';
 import {loadPromise} from '../../src/event-helper';
 import {setModeForTesting, getMode} from '../../src/mode';
@@ -125,6 +126,7 @@ describe('3p-frame', () => {
       const c = win.document.getElementById('c');
       expect(c).to.not.be.null;
       expect(c.textContent).to.contain('pong');
+      validateData(win.context.data, ['ping', 'testAttr']);
     });
   });
 
