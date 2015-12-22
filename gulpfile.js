@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-var argv = require('minimist')(process.argv.slice(2));
 var autoprefixer = require('autoprefixer');
 var babel = require('babelify');
 var browserify = require('browserify');
@@ -25,6 +24,7 @@ var fs = require('fs-extra');
 var gulp = require('gulp-help')(require('gulp'));
 var gulpWatch = require('gulp-watch');
 var lazypipe = require('lazypipe');
+var minimist = require('minimist');
 var postcss = require('postcss');
 var rename = require('gulp-rename');
 var replace = require('gulp-replace');
@@ -35,6 +35,9 @@ var util = require('gulp-util');
 var watchify = require('watchify');
 var wrap = require('gulp-wrap');
 var internalRuntimeVersion = require('./build-system/internal-version').VERSION;
+
+var argv = minimist(process.argv.slice(2), { boolean: ['strictBabelTransform'] });
+
 require('./build-system/tasks');
 
 // NOTE: see https://github.com/ai/browserslist#queries for `browsers` list
@@ -393,7 +396,7 @@ function thirdPartyBootstrap(watch, shouldMinify) {
 function compileJs(srcDir, srcFilename, destDir, options) {
   options = options || {};
   var bundler = browserify(srcDir + srcFilename, {debug: true})
-      .transform(babel);
+      .transform(babel, { loose: argv.strictBabelTransform ? undefined : 'all' });
   if (options.watch) {
     bundler = watchify(bundler);
   }
