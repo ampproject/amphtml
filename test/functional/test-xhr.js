@@ -127,7 +127,7 @@ describe('XHR', function() {
 
       it('should fail fetch for 400-error', () => {
         const url = 'https://httpbin.org/status/404';
-        return xhr.fetchJson(url).then(res => {
+        return xhr.fetchJson(url).then(unusedRes => {
           return 'SUCCESS';
         }, error => {
           return 'ERROR: ' + error;
@@ -138,7 +138,7 @@ describe('XHR', function() {
 
       it('should fail fetch for 500-error', () => {
         const url = 'https://httpbin.org/status/500';
-        return xhr.fetchJson(url).then(res => {
+        return xhr.fetchJson(url).then(unusedRes => {
           return 'SUCCESS';
         }, error => {
           return 'ERROR: ' + error;

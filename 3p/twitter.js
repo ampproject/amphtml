@@ -17,7 +17,6 @@
 // TODO(malteubl) Move somewhere else since this is not an ad.
 
 import {loadScript} from '../src/3p';
-import {setStyles} from '../src/style';
 
 /**
  * Produces the Twitter API object for the passed in callback. If the current
@@ -52,8 +51,6 @@ function getTwttr(global, cb) {
 export function twitter(global, data) {
   const tweet = document.createElement('div');
   tweet.id = 'tweet';
-  const width = data.initialWindowWidth;
-  const height = data.initialWindowHeight;
   tweet.style.width = '100%';
   global.document.getElementById('c').appendChild(tweet);
   getTwttr(global, function(twttr) {
@@ -65,7 +62,7 @@ export function twitter(global, data) {
       // Unfortunately the tweet isn't really done at this time.
       // We listen for resize to learn when things are
       // really done.
-      iframe.contentWindow.addEventListener('resize', function(e) {
+      iframe.contentWindow.addEventListener('resize', function() {
         render();
       }, true);
       render();

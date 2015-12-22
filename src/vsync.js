@@ -27,15 +27,15 @@ const FRAME_TIME = 16;
 /**
  * @typedef {Object<string, *>}
  */
-let VsyncState;
+let VsyncStateDef;
 
 /**
  * @typedef {{
- *   measure: (function(!VsyncState)|undefined),
- *   mutate: (function(!VsyncState)|undefined)
+ *   measure: (function(!VsyncStateDef)|undefined),
+ *   mutate: (function(!VsyncStateDef)|undefined)
  * }}
  */
-let VsyncTaskSpec;
+let VsyncTaskSpecDef;
 
 
 /**
@@ -64,13 +64,13 @@ export class Vsync {
 
     /**
      * Tasks to run in the next frame.
-     * @private {!Array<!VsyncTaskSpec>}
+     * @private {!Array<!VsyncTaskSpecDef>}
      */
     this.tasks_ = [];
 
     /**
      * States for tasks in the next frame in the same order.
-     * @private {!Array<!VsyncState>}
+     * @private {!Array<!VsyncStateDef>}
      */
     this.states_ = [];
 
@@ -101,8 +101,8 @@ export class Vsync {
    * If state is not provided, the value passed to the measure and mutate
    * will be undefined.
    *
-   * @param {!VsyncTaskSpec} task
-   * @param {!VsyncState=} opt_state
+   * @param {!VsyncTaskSpecDef} task
+   * @param {!VsyncStateDef=} opt_state
    */
   run(task, opt_state) {
     this.tasks_.push(task);
@@ -112,8 +112,8 @@ export class Vsync {
 
   /**
    * Creates a function that will call {@link run} method.
-   * @param {!VsyncTaskSpec} task
-   * @return {function(!VsyncState=)}
+   * @param {!VsyncTaskSpecDef} task
+   * @return {function(!VsyncStateDef=)}
    */
   createTask(task) {
     return opt_state => {
@@ -161,8 +161,8 @@ export class Vsync {
   /**
    * Runs the animation vsync task. This operation can only run when animations
    * are allowed. Otherwise, this method returns `false` and exits.
-   * @param {!VsyncTaskSpec} task
-   * @param {!VsyncState=} opt_state
+   * @param {!VsyncTaskSpecDef} task
+   * @param {!VsyncStateDef=} opt_state
    * @return {boolean}
    */
   runAnim(task, opt_state) {
@@ -179,8 +179,8 @@ export class Vsync {
   /**
    * Creates an animation vsync task. This operation can only run when
    * animations are allowed. Otherwise, this closure returns `false` and exits.
-   * @param {!VsyncTaskSpec} task
-   * @return {function(!VsyncState=):boolean}
+   * @param {!VsyncTaskSpecDef} task
+   * @return {function(!VsyncStateDef=):boolean}
    */
   createAnimTask(task) {
     return opt_state => {
@@ -190,11 +190,11 @@ export class Vsync {
 
   /**
    * Runs the series of mutates until the mutator returns a false value.
-   * @param {function(time, time, !VsyncState):boolean} mutator The
+   * @param {function(time, time, !VsyncStateDef):boolean} mutator The
    *   mutator callback. Only expected to do DOM writes, not reads. If the
    *   returned value is true, the vsync task will be repeated, otherwise it
    *   will be completed. The arguments are: timeSinceStart:time,
-   *   timeSincePrev:time and state:VsyncState.
+   *   timeSincePrev:time and state:VsyncStateDef.
    * @param {number=} opt_timeout Optional timeout that will force the series
    *   to complete and reject the promise.
    * @return {!Promise} Returns the promise that will either resolve on when

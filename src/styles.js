@@ -33,7 +33,6 @@ import {setStyles} from './style';
  *     after.
  */
 export function installStyles(doc, cssText, cb, opt_isRuntimeCss) {
-  const length = doc.styleSheets.length;
   const style = doc.createElement('style');
   style.textContent = cssText;
   let afterElement = null;

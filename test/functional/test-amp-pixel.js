@@ -16,7 +16,6 @@
 
 import {createIframePromise} from '../../testing/iframe';
 import {installPixel} from '../../builtins/amp-pixel';
-import {parseQueryString, parseUrl} from '../../src/url';
 
 
 describe('amp-pixel', () => {

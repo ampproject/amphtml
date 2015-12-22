@@ -176,7 +176,7 @@ describe('EventHelper', () => {
   it('loadPromise - error event', () => {
     const promise = loadPromise(element).then(result => {
       assert.fail('must never be here: ' + result);
-    }).catch(reason => {
+    }).catch(unusedReason => {
     });
     errorObservable.fire(getEvent('error'));
     return promise;

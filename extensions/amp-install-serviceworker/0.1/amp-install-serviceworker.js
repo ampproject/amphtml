@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {Layout} from '../../../src/layout';
 import {parseUrl, assertHttpsUrl} from '../../../src/url';
 import {getMode} from '../../../src/mode';
 

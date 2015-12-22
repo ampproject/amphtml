@@ -19,7 +19,7 @@
  * Absolute time in milliseconds.
  * @typedef {number}
  */
-class time {};
+class timeDef {};
 
 
 /**
@@ -27,4 +27,4 @@ class time {};
  * end".
  * @typedef {number}
  */
-class normtime {};
+class normtimeDef {};

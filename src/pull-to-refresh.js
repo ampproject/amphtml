@@ -134,18 +134,18 @@ export class PullToRefreshBlocker {
   }
 
   /**
-   * @param {!Event} event
+   * @param {!Event} unusedEvent
    * @private
    */
-  onTouchEnd_(event) {
+  onTouchEnd_(unusedEvent) {
     this.stopTracking_();
   }
 
   /**
-   * @param {!Event} event
+   * @param {!Event} unusedEvent
    * @private
    */
-  onTouchCancel_(event) {
+  onTouchCancel_(unusedEvent) {
     this.stopTracking_();
   }
 }

@@ -65,7 +65,6 @@ export function doubleclick(global, data) {
         }
       });
 
-      const canvas = global.document.getElementById('c');
       // Exported for testing.
       c.slot = slot;
       googletag.display('c');

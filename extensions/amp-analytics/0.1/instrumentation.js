@@ -24,12 +24,12 @@ import {log} from '../../../src/log';
  * the listener subscribed to fires.
  * @typedef {function(!AnalyticsEvent)}
  */
-let AnalyticsEventListener;
+let AnalyticsEventListenerDef;
 
 /**
  * @param {!Window} window Window object to listen on.
  * @param {!AnalyticsEventType} type Event type to listen to.
- * @param {!AnalyticsEventListener} listener Callback to call when the event
+ * @param {!AnalyticsEventListenerDef} listener Callback to call when the event
  *          fires.
  * @param {string=} opt_selector If specified, the given listener
  *   should only be called if the event target matches this selector.
@@ -87,7 +87,7 @@ class InstrumentationService {
 
   /**
    * @param {!AnalyticsEventType} eventType The type of event
-   * @param {!AnalyticsEventListener} The callback to call when the event
+   * @param {!AnalyticsEventListenerDef} The callback to call when the event
    *   occurs.
    * @param {string=} opt_selector If specified, the given listener
    *   should only be called if the event target matches this selector.

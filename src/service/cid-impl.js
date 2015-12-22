@@ -43,7 +43,7 @@ const BASE_CID_MAX_AGE_MILLIS = 365 * ONE_DAY_MILLIS;
  * A base cid string value and the time it was last read / stored.
  * @typedef {{time: number, cid: string}}
  */
-let BaseCidInfo;
+let BaseCidInfoDef;
 
 
 class Cid {
@@ -231,7 +231,7 @@ function store(win, cidString) {
  * Retrieves a stored cid item from localStorage. Returns undefined if
  * none was found
  * @param {!Window} win
- * @return {!BaseCidInfo|undefined}
+ * @return {!BaseCidInfoDef|undefined}
  */
 function read(win) {
   let val;
@@ -252,7 +252,7 @@ function read(win) {
 
 /**
  * Whether the retrieved cid object is expired and should be ignored.
- * @param {!BaseCidInfo} storedCidInfo
+ * @param {!BaseCidInfoDef} storedCidInfo
  * @return {boolean}
  */
 function isExpired(storedCidInfo) {
@@ -265,7 +265,7 @@ function isExpired(storedCidInfo) {
  * Whether we should write a new timestamp to the stored cid value.
  * We say yes if it is older than 1 day, so we only do this max once
  * per day to avoid writing to localStorage all the time.
- * @param {!BaseCidInfo} storedCidInfo
+ * @param {!BaseCidInfoDef} storedCidInfo
  * @return {boolean}
  */
 function shouldUpdateStoredTime(storedCidInfo) {

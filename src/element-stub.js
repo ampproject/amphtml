@@ -15,7 +15,6 @@
  */
 
 import {BaseElement} from './base-element';
-import {Layout} from './layout';
 
 
 /** @type {!Array} */
@@ -28,7 +27,7 @@ export class ElementStub extends BaseElement {
   }
 
   /** @override */
-  isLayoutSupported(layout) {
+  isLayoutSupported(unusedLayout) {
     // Always returns true and will eventually call this method on the actual
     // element.
     return true;

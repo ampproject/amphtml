@@ -58,7 +58,7 @@ describe('Transition', () => {
 
   it('withCurve', () => {
     const func1 = (time, complete) => `${time * 2};${complete}`;
-    const curve = time => 0.2;
+    const curve = unusedTime => 0.2;
     const curved = tr.withCurve(func1, curve);
 
     expect(curved(0, false)).to.equal('0.4;false');

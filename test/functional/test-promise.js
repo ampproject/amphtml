@@ -63,9 +63,9 @@ describe('promise', () => {
     const promises = [
       Promise.resolve('A'),
       Promise.reject('ERROR1'),
-      new Promise(resolve => {})  // Will never yield.
+      new Promise(unusedResolve => {})  // Will never yield.
     ];
-    return promise.all(promises).then(results => {
+    return promise.all(promises).then(unusedResults => {
       return 'SUCCESS';
     }, error => {
       return error;

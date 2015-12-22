@@ -117,7 +117,6 @@ class AmpSlides extends AMP.BaseElement {
       const oldSlide = this.slides_[this.currentIndex_];
       this.currentIndex_ = newIndex;
       this.prepareSlide_(newSlide, dir);
-      const containerWidth = this.element./*OK*/offsetWidth;
       if (!animate) {
         this.commitSwitch_(oldSlide, newSlide);
       } else {

@@ -72,7 +72,7 @@ export class AmpCarousel extends BaseCarousel {
   }
 
   /** @override */
-  viewportCallback(inViewport) {
+  viewportCallback(unusedInViewport) {
     this.updateInViewport_(this.pos_, this.pos_);
   }
 
@@ -220,10 +220,10 @@ export class AmpCarousel extends BaseCarousel {
   }
 
   /**
-   * @param {!Swipe} swipe
+   * @param {!Swipe} unusedSwipe
    * @private
    */
-  onSwipeStart_(swipe) {
+  onSwipeStart_(unusedSwipe) {
     this.updateBounds_();
     this.startPos_ = this.pos_;
     this.motion_ = null;
@@ -252,7 +252,7 @@ export class AmpCarousel extends BaseCarousel {
     let promise;
     if (Math.abs(swipe.velocityX) > 0.1) {
       this.motion_ = continueMotion(this.pos_, 0, -swipe.velocityX, 0,
-          (x, y) => {
+          (x, unusedY) => {
             const newPos = (this.boundPos_(x, true) +
                 this.boundPos_(x, false)) * 0.5;
             if (Math.abs(newPos - this.pos_) <= 1) {

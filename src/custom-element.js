@@ -369,7 +369,6 @@ export function createAmpElementProto(win, name, implementationClass) {
     if (this.isInTemplate_) {
       return;
     }
-    const registeredStub = this.implementation_;
     this.implementation_ = new newImplClass(this);
     this.classList.remove('amp-unresolved');
     this.classList.remove('-amp-unresolved');
@@ -624,7 +623,7 @@ export function createAmpElementProto(win, name, implementationClass) {
     const data = opt_data || {};
     // Constructors of events need to come from the correct window. Sigh.
     const win = this.ownerDocument.defaultView;
-    const event = document.createEvent('Event');
+    const event = win.document.createEvent('Event');
     event.data = data;
     event.initEvent(name, true, true);
     this.dispatchEvent(event);

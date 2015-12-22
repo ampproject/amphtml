@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {assert} from './asserts';
 import {timer} from './timer';
 import {vsyncFor} from './vsync';
 
@@ -219,9 +218,6 @@ class Motion {
     if (!this.continuing_) {
       return false;
     }
-
-    const prevX = this.lastX_;
-    const prevY = this.lastY_;
 
     this.lastTime_ = timer.now();
     this.lastX_ += timeSincePrev * this.velocityX_;

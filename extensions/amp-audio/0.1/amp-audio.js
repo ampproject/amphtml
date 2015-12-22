@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Layout, getLengthNumeral} from '../../../src/layout';
+import {Layout} from '../../../src/layout';
 import {assertHttpsUrl} from '../../../src/url';
 import {loadPromise} from '../../../src/event-helper';
 

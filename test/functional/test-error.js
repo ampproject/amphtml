@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getErrorReportUrl, installErrorReporting} from '../../src/error';
+import {getErrorReportUrl} from '../../src/error';
 import {setModeForTesting} from '../../src/mode';
 import {parseUrl, parseQueryString} from '../../src/url';
 import * as sinon from 'sinon';

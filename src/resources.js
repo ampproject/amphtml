@@ -24,7 +24,6 @@ import {expandLayoutRect, layoutRectLtwh, layoutRectsOverlap} from
 import {getService} from './service';
 import {inputFor} from './input';
 import {log} from './log';
-import {makeBodyVisible} from './styles';
 import {reportError} from './error';
 import {timer} from './timer';
 import {viewerFor} from './viewer';
@@ -879,7 +878,7 @@ export class Resources {
    *
    * @param {!LayoutRect} viewportRect
    * @param {number} dir
-   * @param {!Task_} task
+   * @param {!TaskDef} task
    * @private
    */
   calcTaskScore_(viewportRect, dir, task) {
@@ -904,7 +903,7 @@ export class Resources {
    * against the age of the executing task. If it has been in executing for
    * some time, the penalty is reduced.
    *
-   * @param {!Task_} task
+   * @param {!TaskDef} task
    * @private
    */
   calcTaskTimeout_(task) {
@@ -927,7 +926,7 @@ export class Resources {
   }
 
   /**
-   * @param {!Task_} task
+   * @param {!TaskDef} task
    * @private
    */
   reschedule_(task) {
@@ -937,7 +936,7 @@ export class Resources {
   }
 
   /**
-   * @param {!Task_} task
+   * @param {!TaskDef} task
    * @param {boolean} success
    * @param {*=} opt_reason
    * @return {!Promise|undefined}
@@ -1225,7 +1224,6 @@ export class Resource {
    */
   getOwner() {
     if (this.owner_ === undefined) {
-      const n = this.element;
       for (let n = this.element; n; n = n.parentElement) {
         if (n[OWNER_PROP_]) {
           this.owner_ = n[OWNER_PROP_];
@@ -1583,10 +1581,10 @@ export class Resource {
 export class TaskQueue_ {
 
   constructor() {
-    /** @private @const {!Array<!Task_>} */
+    /** @private @const {!Array<!TaskDef>} */
     this.tasks_ = [];
 
-    /** @private @const {!Object<string, !Task_>} */
+    /** @private @const {!Object<string, !TaskDef>} */
     this.taskIdMap_ = {};
 
     /** @private {!time} */
@@ -1623,7 +1621,7 @@ export class TaskQueue_ {
   /**
    * Returns the task with the specified ID or null.
    * @param {string} taskId
-   * @return {?Task_}
+   * @return {?TaskDef}
    */
   getTaskById(taskId) {
     return this.taskIdMap_[taskId] || null;
@@ -1632,7 +1630,7 @@ export class TaskQueue_ {
   /**
    * Enqueues the task. If the task is already in the queue, the error is
    * thrown.
-   * @param {!Task_} task
+   * @param {!TaskDef} task
    */
   enqueue(task) {
     assert(!this.taskIdMap_[task.id], 'Task already enqueued: %s', task.id);
@@ -1644,7 +1642,7 @@ export class TaskQueue_ {
   /**
    * Dequeues the task and returns "true" if dequeueing is successful. Otherwise
    * returns "false", e.g. when this task is not currently enqueued.
-   * @param {!Task_} task
+   * @param {!TaskDef} task
    * @return {boolean}
    */
   dequeue(task) {
@@ -1661,8 +1659,8 @@ export class TaskQueue_ {
   /**
    * Returns the task with the minimal score based on the provided scoring
    * callback.
-   * @param {function(!Task_):number} scorer
-   * @return {?Task_}
+   * @param {function(!TaskDef):number} scorer
+   * @return {?TaskDef}
    */
   peek(scorer) {
     let minScore = 1e6;
@@ -1680,7 +1678,7 @@ export class TaskQueue_ {
 
   /**
    * Iterates over all tasks in queue in the insertion order.
-   * @param {function(!Task_)} callback
+   * @param {function(!TaskDef)} callback
    */
   forEach(callback) {
     this.tasks_.forEach(callback);
@@ -1756,7 +1754,7 @@ export const ResourceState_ = {
  * }}
  * @private
  */
-let Task_;
+let TaskDef;
 
 /**
  * @param {!Window} window

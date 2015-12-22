@@ -362,9 +362,9 @@ describe('Resources changeHeight', () => {
       prerenderAllowed: () => true,
       renderOutsideViewport: () => false,
       isRelayoutNeeded: () => true,
-      contains: otherElement => false,
+      contains: unused_otherElement => false,
       updateLayoutBox: () => {},
-      overflowCallback: (overflown, requestedHeight) => {},
+      overflowCallback: (unused_overflown, unused_requestedHeight) => {},
     };
   }
 
@@ -654,18 +654,15 @@ describe('Resources.TaskQueue', () => {
 
   let sandbox;
   let clock;
-  let resources;
   let queue;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
-    resources = new Resources(window);
     queue = new TaskQueue_();
   });
 
   afterEach(() => {
-    resources = null;
     clock.restore();
     clock = null;
     sandbox.restore();
@@ -725,7 +722,7 @@ describe('Resources.Resource', () => {
       isUpgraded: () => false,
       prerenderAllowed: () => false,
       renderOutsideViewport: () => true,
-      build: force => false,
+      build: unused_force => false,
       getBoundingClientRect: () => null,
       updateLayoutBox: () => {},
       isRelayoutNeeded: () => false,

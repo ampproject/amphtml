@@ -17,7 +17,6 @@
 import * as sinon from 'sinon';
 import * as tr from '../../../../src/transition';
 import {AmpSlides} from '../slides';
-import {timer} from '../../../../src/timer';
 
 
 describe('Slides functional', () => {
@@ -451,7 +450,6 @@ describe('Slides functional', () => {
     let tryAutoplaySpy;
     let setupAutoplaySpy;
     let goSpy;
-    let items;
     let updateInViewportStub;
     let isInViewportStub;
 
@@ -467,7 +465,6 @@ describe('Slides functional', () => {
       setupSlides();
       setupSpies();
       setupInViewport(inViewport);
-      items = [slide0, slide1, slide2];
     }
 
     function setupInViewport(inViewport) {
@@ -486,7 +483,6 @@ describe('Slides functional', () => {
       updateInViewportStub.restore();
       isInViewportStub.restore();
       goSpy.restore();
-      items = null;
     });
 
     it('should call setupAutoplay_', () => {

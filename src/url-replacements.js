@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import {assert} from './asserts';
 import {cidFor} from './cid';
 import {documentInfoFor} from './document-info';
-import {getService, getElementService} from './service';
+import {getService} from './service';
 import {log} from './log';
 import {parseUrl, removeFragment} from './url';
 import {viewportFor} from './viewport';
@@ -91,7 +90,7 @@ class UrlReplacements {
       return documentInfoFor(this.win_).pageViewId;
     });
 
-    this.set_('CLIENT_ID', (data, name) => {
+    this.set_('CLIENT_ID', (_data, name) => {
       return cidFor(this.win_).then(cid => {
         return cid.get(name,
             // TODO(@cramforce): Hook up mechanism to get consent to id

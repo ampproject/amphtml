@@ -15,7 +15,6 @@
  */
 
 import {Observable} from '../observable';
-import {assert} from '../asserts';
 import {getService} from '../service';
 import {layoutRectLtwh} from '../layout-rect';
 import {log} from '../log';
@@ -39,7 +38,7 @@ const TAG_ = 'Viewport';
  *   velocity: number
  * }}
  */
-let ViewportChangedEvent;
+let ViewportChangedEventDef;
 
 
 /**
@@ -51,14 +50,14 @@ export class Viewport {
 
   /**
    * @param {!Window} win
-   * @param {!ViewportBinding} binding
+   * @param {!ViewportBindingDef} binding
    * @param {!Viewer} viewer
    */
   constructor(win, binding, viewer) {
     /** @const {!Window} */
     this.win_ = win;
 
-    /** @const {!ViewportBinding} */
+    /** @const {!ViewportBindingDef} */
     this.binding_ = binding;
 
     /** @const {!Viewer} */
@@ -96,7 +95,7 @@ export class Viewport {
     /** @private {number} */
     this.scrollCount_ = 0;
 
-    /** @private @const {!Observable<!ViewportChangedEvent>} */
+    /** @private @const {!Observable<!ViewportChangedEventDef>} */
     this.changeObservable_ = new Observable();
 
     /** @private @const {!Observable} */
@@ -249,8 +248,8 @@ export class Viewport {
   }
 
   /**
-   * Registers the handler for ViewportChangedEvent events.
-   * @param {!function(!ViewportChangedEvent)} handler
+   * Registers the handler for ViewportChangedEventDef events.
+   * @param {!function(!ViewportChangedEventDef)} handler
    * @return {!Unlisten}
    */
   onChanged(handler) {
@@ -449,35 +448,35 @@ export class Viewport {
 
 
 /**
- * ViewportBinding is an interface that defines an underlying technology behind
+ * ViewportBindingDef is an interface that defines an underlying technology behind
  * the {@link Viewport}.
  * @interface
  */
-class ViewportBinding {
+class ViewportBindingDef {
 
   /**
    * Register a callback for scroll events.
-   * @param {function()} callback
+   * @param {function()} unusedCallback
    */
-  onScroll(callback) {}
+  onScroll(unusedCallback) {}
 
   /**
    * Register a callback for resize events.
-   * @param {function()} callback
+   * @param {function()} unusedCallback
    */
-  onResize(callback) {}
+  onResize(unusedCallback) {}
 
   /**
    * Updates binding with the new viewer's viewport info.
-   * @param {!Viewer} viewer
+   * @param {!Viewer} unusedViewer
    */
-  updateViewerViewport(viewer) {}
+  updateViewerViewport(unusedViewer) {}
 
   /**
    * Updates binding with the new padding.
-   * @param {number} paddingTop
+   * @param {number} unusedPaddingTop
    */
-  updatePaddingTop(paddingTop) {}
+  updatePaddingTop(unusedPaddingTop) {}
 
   /**
    * Returns the size of the viewport.
@@ -493,9 +492,9 @@ class ViewportBinding {
 
   /**
    * Sets scroll top position to the specified value or the nearest possible.
-   * @param {number} scrollTop
+   * @param {number} unusedScrollTop
    */
-  setScrollTop(scrollTop) {}
+  setScrollTop(unusedScrollTop) {}
 
   /**
    * Returns the left scroll position for the viewport.
@@ -517,10 +516,10 @@ class ViewportBinding {
 
   /**
    * Returns the rect of the element within the document.
-   * @param {!Element} el
+   * @param {!Element} unusedEl
    * @return {!LayoutRect}
    */
-  getLayoutRect(el) {}
+  getLayoutRect(unusedEl) {}
 
   /** For testing. */
   cleanup_() {}
@@ -528,14 +527,14 @@ class ViewportBinding {
 
 
 /**
- * Implementation of ViewportBinding based on the native window. It assumes that
+ * Implementation of ViewportBindingDef based on the native window. It assumes that
  * the native window is sized properly and events represent the actual
  * scroll/resize events. This mode is applicable to a standalone document
  * display or when an iframe has a fixed size.
  *
  * Visible for testing.
  *
- * @implements {ViewportBinding}
+ * @implements {ViewportBindingDef}
  */
 export class ViewportBindingNatural_ {
 
@@ -574,7 +573,7 @@ export class ViewportBindingNatural_ {
   }
 
   /** @override */
-  updateViewerViewport(viewer) {
+  updateViewerViewport(unusedViewer) {
     // Viewer's viewport is ignored since this window is fully accurate.
   }
 
@@ -655,7 +654,7 @@ export class ViewportBindingNatural_ {
 
 
 /**
- * Implementation of ViewportBinding based on the native window in case when
+ * Implementation of ViewportBindingDef based on the native window in case when
  * the AMP document is embedded in a IFrame on iOS. It assumes that the native
  * window is sized properly and events represent the actual resize events.
  * The main difference from natural binding is that in this case, the document
@@ -663,7 +662,7 @@ export class ViewportBindingNatural_ {
  *
  * Visible for testing.
  *
- * @implements {ViewportBinding}
+ * @implements {ViewportBindingDef}
  */
 export class ViewportBindingNaturalIosEmbed_ {
   /**
@@ -786,7 +785,7 @@ export class ViewportBindingNaturalIosEmbed_ {
   }
 
   /** @override */
-  updateViewerViewport(viewer) {
+  updateViewerViewport(unusedViewer) {
     // Viewer's viewport is ignored since this window is fully accurate.
   }
 
@@ -934,14 +933,14 @@ export class ViewportBindingNaturalIosEmbed_ {
 
 
 /**
- * Implementation of ViewportBinding that assumes a virtual viewport that is
+ * Implementation of ViewportBindingDef that assumes a virtual viewport that is
  * sized outside of the AMP runtime (e.g. in a parent window) and passed here
  * via config and events. Applicable to cases where a parent window expands the
  * iframe to all available height and leaves scrolling to the parent window.
  *
  * Visible for testing.
  *
- * @implements {ViewportBinding}
+ * @implements {ViewportBindingDef}
  */
 export class ViewportBindingVirtual_ {
 
@@ -1044,7 +1043,7 @@ export class ViewportBindingVirtual_ {
   }
 
   /** @override */
-  setScrollTop(scrollTop) {
+  setScrollTop(unusedScrollTop) {
     // TODO(dvoytenko): communicate to the viewer.
   }
 }

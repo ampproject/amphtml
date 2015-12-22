@@ -36,7 +36,6 @@
 
 import {FontLoader} from './fontloader';
 import {timer} from '../../../src/timer';
-import * as style from '../../../src/style';
 
 /** @private @const {number} */
 const DEFAULT_TIMEOUT_ = 3000;
@@ -71,9 +70,6 @@ const DEFAULT_SIZE_ = 'medium';
  * Nexus5 (Android 6.0.0) - Chrome(46.0.2) - 46ms ~ 100ms
  */
 const CACHED_FONT_LOAD_TIME_ = 100;
-
-/** @const {string} */
-const TAG_ = 'AmpFont';
 
 
 export class AmpFont extends AMP.BaseElement {
@@ -125,7 +121,7 @@ export class AmpFont extends AMP.BaseElement {
     };
     this.fontLoader_.load(fontConfig, this.getTimeout_()).then(() => {
       this.onFontLoadSuccess_();
-    }).catch(error => {
+    }).catch(unusedError => {
       this.onFontLoadError_();
       console./* OK */warn(
           'Font download timed out for ' + this.fontFamily_);

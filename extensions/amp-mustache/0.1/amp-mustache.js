@@ -14,15 +14,11 @@
  * limitations under the License.
  */
 
-import {childElementByTag} from '../../../src/dom';
 import {isExperimentOn} from '../../../src/experiments';
 import {log} from '../../../src/log';
 import {parse as mustacheParse, render as mustacheRender,
     setUnescapedSanitizier} from '../../../third_party/mustache/mustache';
 import {sanitizeHtml, sanitizeFormattingHtml} from '../../../src/sanitizer';
-
-/** @const */
-const assert = AMP.assert;
 
 /** @const */
 const EXPERIMENT = 'mustache';

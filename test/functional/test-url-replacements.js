@@ -177,7 +177,7 @@ describe('UrlReplacements', () => {
 
   it('should support positional arguments', () => {
     const replacements = urlReplacementsFor(window);
-    replacements.set_('FN', (data, one) => one);
+    replacements.set_('FN', (_data, one) => one);
     expect(replacements.expand('?a=FN(xyz)')).to.eventually.equal('?a=xyz');
   });
 

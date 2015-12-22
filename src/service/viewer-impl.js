@@ -131,7 +131,7 @@ export class Viewer {
     /** @private {!Observable} */
     this.viewportObservable_ = new Observable();
 
-    /** @private {!Observable<!ViewerHistoryPoppedEvent>} */
+    /** @private {!Observable<!ViewerHistoryPoppedEventDef>} */
     this.historyPoppedObservable_ = new Observable();
 
     /** @private {?function(string, *, boolean):(Promise<*>|undefined)} */
@@ -358,7 +358,7 @@ export class Viewer {
 
   /**
    * Adds a "history popped" event listener for viewer events.
-   * @param {function(ViewerHistoryPoppedEvent)} handler
+   * @param {function(ViewerHistoryPoppedEventDef)} handler
    * @return {!Unlisten}
    */
   onHistoryPoppedEvent(handler) {
@@ -431,12 +431,12 @@ export class Viewer {
    * Requests AMP document to receive a message from Viewer.
    * @param {string} eventType
    * @param {*} data
-   * @param {boolean} awaitResponse
+   * @param {boolean} unusedAwaitResponse
    * @return {(!Promise<*>|undefined)}
    * @package
    * @export
    */
-  receiveMessage(eventType, data, awaitResponse) {
+  receiveMessage(eventType, data, unusedAwaitResponse) {
     if (eventType == 'viewport') {
       if (data['width'] !== undefined) {
         this.viewportWidth_ = data['width'];
@@ -551,7 +551,7 @@ export function parseParams_(str, allParams) {
  *   newStackIndex: number
  * }}
  */
-let ViewerHistoryPoppedEvent;
+let ViewerHistoryPoppedEventDef;
 
 
 /**

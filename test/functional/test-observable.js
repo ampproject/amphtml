@@ -37,7 +37,7 @@ describe('Observable', () => {
     const observer1 = () => {
       observer1Called++;
     };
-    const observer1Key = observable.add(observer1);
+    observable.add(observer1);
 
     let observer2Called = 0;
     const observer2 = () => {
