@@ -15,7 +15,7 @@
  */
 
 import {Observable} from './observable';
-import {assert} from './asserts.js';
+import {assert} from './asserts';
 import {getService} from './service';
 import {layoutRectLtwh} from './layout-rect';
 import {log} from './log';

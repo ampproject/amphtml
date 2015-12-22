@@ -68,8 +68,9 @@ const TEMPLATE_TAG_SUPPORTED = 'content' in document.createElement('template');
 /**
  * Registers an element. Upgrades it if has previously been stubbed.
  * @param {!Window} win
- * @param {string}
+ * @param {string} name
  * @param {function(!Function)} toClass
+ * @export
  */
 export function upgradeOrRegisterElement(win, name, toClass) {
   if (!knownElements[name]) {

@@ -32,9 +32,10 @@ import {installStyles, makeBodyVisible} from './styles';
 import {installErrorReporting} from './error';
 import {stubElements} from './custom-element';
 import {adopt} from './runtime';
-import {cssText} from '../build/css.js';
+import {cssText} from '../build/css';
 import {action} from './action';
 import {maybeValidate} from './validator-integration';
+
 
 // We must under all circumstances call makeBodyVisible.
 // It is much better to have AMP tags not rendered than having

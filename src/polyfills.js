@@ -20,5 +20,5 @@
 
 
 import 'document-register-element/build/document-register-element.max';
-import '../third_party/babel/custom-babel-helpers';
+//import '../third_party/babel/custom-babel-helpers';
 import './custom-core-js-shim';
