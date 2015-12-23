@@ -22,7 +22,7 @@ import {onDocumentReady} from '../document-state';
 import {platform} from '../platform';
 import {px, setStyle, setStyles} from '../style';
 import {timer} from '../timer';
-import {vsyncFor} from '../vsync';
+import {installVsyncService} from './vsync-impl';
 import {installViewerService} from './viewer-impl';
 
 
@@ -87,7 +87,7 @@ export class Viewport {
     this.scrollMeasureTime_ = 0;
 
     /** @private {Vsync} */
-    this.vsync_ = vsyncFor(win);
+    this.vsync_ = installVsyncService(win);
 
     /** @private {boolean} */
     this.scrollTracking_ = false;
