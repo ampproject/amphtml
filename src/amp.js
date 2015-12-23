@@ -17,7 +17,6 @@
 import './polyfills';
 import {installPullToRefreshBlocker} from './pull-to-refresh';
 import {performanceFor} from './performance';
-import {vsyncFor} from './vsync';
 import {templatesFor} from './template';
 import {installCoreServices} from './amp-core-service';
 import {installAd} from '../builtins/amp-ad';
@@ -45,7 +44,6 @@ try {
   installStyles(document, cssText, () => {
     try {
       installCoreServices(window);
-      vsyncFor(window);
       templatesFor(window);
 
       installImg(window);

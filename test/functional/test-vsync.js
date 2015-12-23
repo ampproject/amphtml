@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Vsync} from '../../src/vsync';
+import {Vsync} from '../../src/service/vsync-impl';
 import * as sinon from 'sinon';
 
 

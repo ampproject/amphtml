@@ -63,6 +63,7 @@ var forbiddenTerms = {
       'src/service/history-impl.js',
       'src/service/viewer-impl.js',
       'src/service/viewport-impl.js',
+      'src/service/vsync-impl.js',
     ],
   },
   'installViewportService': {
@@ -70,6 +71,14 @@ var forbiddenTerms = {
     whitelist: [
       'src/amp-core-service.js',
       'src/service/viewport-impl.js',
+    ],
+  },
+  'installVsyncService': {
+    message: privateServiceFactory,
+    whitelist: [
+      'src/amp-core-service.js',
+      'src/service/viewport-impl.js',
+      'src/service/vsync-impl.js',
     ],
   },
   // Privacy sensitive
