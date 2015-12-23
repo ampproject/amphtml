@@ -54,9 +54,6 @@ var forbiddenTerms = {
     whitelist: [
       'src/service/cid-impl.js',
       'extensions/amp-analytics/0.1/amp-analytics.js',
-      'extensions/amp-analytics/0.1/test/test-amp-analytics.js',
-      'test/functional/test-cid.js',
-      'test/functional/test-url-replacements.js'
     ],
   },
   'installViewerService': {
@@ -66,9 +63,6 @@ var forbiddenTerms = {
       'src/service/history-impl.js',
       'src/service/viewer-impl.js',
       'src/service/viewport-impl.js',
-      'test/functional/test-cid.js',
-      'test/functional/test-viewport.js',
-      'extensions/amp-analytics/0.1/test/test-amp-analytics.js',
     ],
   },
   'installViewportService': {
@@ -85,7 +79,6 @@ var forbiddenTerms = {
       'src/cid.js',
       'src/service/cid-impl.js',
       'src/url-replacements.js',
-      'test/functional/test-cid.js',
     ],
   },
   'getBaseCid': {
@@ -93,7 +86,6 @@ var forbiddenTerms = {
     whitelist: [
       'src/service/cid-impl.js',
       'src/service/viewer-impl.js',
-      'test/functional/test-cid.js',
     ],
   },
   'cookie\\W': {
@@ -101,9 +93,6 @@ var forbiddenTerms = {
     whitelist: [
       'src/cookies.js',
       'src/service/cid-impl.js',
-      'test/functional/test-cid.js',
-      'test/functional/test-cookies.js',
-      'test/functional/test-experiments.js',
     ],
   },
   'getCookie\\W': {
@@ -112,7 +101,6 @@ var forbiddenTerms = {
       'src/service/cid-impl.js',
       'src/cookies.js',
       'src/experiments.js',
-      'test/functional/test-cookies.js',
       'tools/experiments/experiments.js',
     ]
   },
@@ -121,8 +109,6 @@ var forbiddenTerms = {
     whitelist: [
       'src/cookies.js',
       'src/experiments.js',
-      'test/functional/test-cookies.js',
-      'test/functional/test-url-replacements.js',
       'tools/experiments/experiments.js',
     ]
   },
@@ -130,10 +116,7 @@ var forbiddenTerms = {
   'localStorage': {
     message: requiresReviewPrivacy,
     whitelist: [
-      'extensions/amp-analytics/0.1/test/test-amp-analytics.js',
-      'test/_init_tests.js',
       'src/service/cid-impl.js',
-      'test/functional/test-cid.js',
     ],
   },
   'sessionStorage': requiresReviewPrivacy,
@@ -246,6 +229,18 @@ var requiredTerms = {
       dedicatedCopyrightNoteSources,
 };
 
+
+/**
+ * Check if root of path is test/ or file is in a folder named test.
+ * @param {string} path
+ * @return {boolean}
+ */
+function isInTestFolder(path) {
+  var dirs = path.split('/');
+  var folder = dirs[dirs.length - 2];
+  return path.startsWith('test/') || folder == 'test';
+}
+
 /**
  * Logs any issues found in the contents of file based on terms (regex
  * patterns), and provides any possible fix information for matched terms if
@@ -266,7 +261,8 @@ function matchTerms(file, terms) {
     var whitelist = terms[term].whitelist;
     // NOTE: we could do a glob test instead of exact check in the future
     // if needed but that might be too permissive.
-    if (Array.isArray(whitelist) && whitelist.indexOf(relative) != -1) {
+    if (Array.isArray(whitelist) && (whitelist.indexOf(relative) != -1 ||
+        isInTestFolder(relative))) {
       return false;
     }
     // we can't optimize building the `RegExp` objects early unless we build
