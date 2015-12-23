@@ -33,7 +33,7 @@ const QUEUE_LIMIT_ = 50;
  *   opt_value: (number|undefined)
  * }}
  */
-class TickEvent {}
+class TickEventDef {}
 
 
 /**
@@ -56,7 +56,7 @@ export class Performance {
     /** @const @private {funtion()|undefined} */
     this.flush_;
 
-    /** @const @private {!Array<TickEvent>} */
+    /** @const @private {!Array<TickEventDef>} */
     this.events_ = [];
   }
 

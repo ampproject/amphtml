@@ -792,7 +792,6 @@ describe('ViewportBindingVirtual', () => {
   let binding;
   let windowApi;
   let viewer;
-  let viewerMock;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -802,7 +801,7 @@ describe('ViewportBindingVirtual', () => {
       getScrollTop: () => 17,
       getPaddingTop: () => 19
     };
-    viewerMock = sandbox.mock(viewer);
+    sandbox.mock(viewer);
     windowApi = {
       document: {
         documentElement: {style: {}}

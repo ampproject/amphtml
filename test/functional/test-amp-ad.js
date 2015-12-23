@@ -15,11 +15,9 @@
  */
 
 import {createIframePromise} from '../../testing/iframe';
-import {installAd, AD_LOAD_TIME_MS} from '../../builtins/amp-ad';
+import {installAd} from '../../builtins/amp-ad';
 import {viewportFor} from
     '../../src/viewport';
-import {timer} from '../../src/timer';
-import {vsyncFor} from '../../src/vsync';
 import * as sinon from 'sinon';
 
 describe('amp-ad', () => {

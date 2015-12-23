@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import {assert} from './asserts';
-
 
 /**
  * Waits for all promises to yield and resolves with the position array of

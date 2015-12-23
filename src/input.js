@@ -18,7 +18,6 @@ import {Observable} from './observable';
 import {getService} from './service';
 import {log} from './log';
 import {listenOnce, listenOncePromise} from './event-helper';
-import {timer} from './timer';
 
 
 const TAG_ = 'Input';
@@ -107,7 +106,7 @@ export class Input {
    * Registers an event handle in case if the touch is detected.
    * @param {function(boolean)} handler
    * @param {boolean=} opt_fireImmediately
-   * @return {!Unlisten}
+   * @return {!UnlistenDef}
    */
   onTouchDetected(handler, opt_fireImmediately) {
     if (opt_fireImmediately) {
@@ -128,7 +127,7 @@ export class Input {
    * Registers an event handle in case if the mouse is detected.
    * @param {function(boolean)} handler
    * @param {boolean=} opt_fireImmediately
-   * @return {!Unlisten}
+   * @return {!UnlistenDef}
    */
   onMouseDetected(handler, opt_fireImmediately) {
     if (opt_fireImmediately) {
@@ -149,7 +148,7 @@ export class Input {
    * Registers an event handle for changes in the keyboard input.
    * @param {function(boolean)} handler
    * @param {boolean=} opt_fireImmediately
-   * @return {!Unlisten}
+   * @return {!UnlistenDef}
    */
   onKeyboardStateChanged(handler, opt_fireImmediately) {
     if (opt_fireImmediately) {

@@ -49,7 +49,7 @@ describe('Rendering of one ad', () => {
         return iframe.contentWindow && iframe.contentWindow.document &&
             iframe.contentWindow.document.getElementById('c');
       });
-    }).then(canvas => {
+    }).then(unusedCanvas => {
       return poll('3p JS to load.', () => iframe.contentWindow.context);
     }).then(context => {
       expect(context.data.tagForChildDirectedTreatment).to.be.false;
@@ -60,7 +60,7 @@ describe('Rendering of one ad', () => {
         return iframe.contentWindow.document.querySelector(
             'script[src="https://www.googletagservices.com/tag/js/gpt.js"]');
       });
-    }).then(canvas => {
+    }).then(unusedCanvas => {
       const win = iframe.contentWindow;
       return poll('GPT loaded', () => {
         return win.googletag && win.googletag.pubads && win.googletag.pubads();
@@ -79,7 +79,7 @@ describe('Rendering of one ad', () => {
             return canvas.querySelector(
                 '[id="google_ads_iframe_/4119129/mobile_ad_banner_0"]');
           }, null, 5000);
-    }).then(adIframe => {
+    }).then(unusedAdIframe => {
       expect(iframe.getAttribute('width')).to.equal('320');
       expect(iframe.getAttribute('height')).to.equal('50');
     });

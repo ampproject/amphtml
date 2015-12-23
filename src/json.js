@@ -24,25 +24,25 @@
  * JSON scalar. It's either string, number or boolean.
  * @typedef {string|number|boolean}
  */
-let JSONScalar;
+let JSONScalarDef;
 
 
 /**
  * JSON object. It's a map with string keys and JSON values.
- * @typedef {!Object<string, ?JSONValue>}
+ * @typedef {!Object<string, ?JSONValueDef>}
  */
-let JSONObject;
+let JSONObjectDef;
 
 
 /**
  * JSON array. It's an array with JSON values.
- * @typedef {!Array<?JSONValue>}
+ * @typedef {!Array<?JSONValueDef>}
  */
-let JSONArray;
+let JSONArrayDef;
 
 
 /**
  * JSON value. It's either a scalar, an object or an array.
- * @typedef {!JSONScalar|!JSONObject|!JSONArray}
+ * @typedef {!JSONScalarDef|!JSONObjectDef|!JSONArrayDef}
  */
-let JSONValue;
+let JSONValueDef;

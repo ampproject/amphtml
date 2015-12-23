@@ -16,7 +16,6 @@
 
 import {Observable} from './observable';
 import {assert} from './asserts';
-import {calcVelocity} from './motion';
 import {Pass} from './pass';
 import {timer} from './timer';
 
@@ -150,7 +149,7 @@ export class Gestures {
    *
    * @param {function(new:GestureRecognizer<DATA>)} recognizerConstr
    * @param {function(!Gesture<!DATA>)} handler
-   * @return {!Unlisten}
+   * @return {!UnlistenDef}
    * @template DATA
    */
   onGesture(recognizerConstr, handler) {
@@ -168,7 +167,7 @@ export class Gestures {
   /**
    * Subscribes to pointer down events, such as "touchstart" or "mousedown".
    * @param {!Function} handler
-   * @return {!Unlisten}
+   * @return {!UnlistenDef}
    */
   onPointerDown(handler) {
     return this.pointerDownObservable_.add(handler);
@@ -601,10 +600,10 @@ export class GestureRecognizer {
    * The Gestures instance calls this method for each "touchstart" event. If
    * the recognizer wants to receive other touch events in the series, it has
    * to return "true".
-   * @param {!Event} event
+   * @param {!Event} unusedEvent
    * @return {boolean}
    */
-  onTouchStart(event) {
+  onTouchStart(unusedEvent) {
     return false;
   }
 
@@ -612,10 +611,10 @@ export class GestureRecognizer {
    * The Gestures instance calls this method for each "touchmove" event. If
    * the recognizer wants to continue receiving touch events in the series,
    * it has to return "true".
-   * @param {!Event} event
+   * @param {!Event} unusedEvent
    * @return {boolean}
    */
-  onTouchMove(event) {
+  onTouchMove(unusedEvent) {
     return false;
   }
 
@@ -624,8 +623,8 @@ export class GestureRecognizer {
    * Somewhere within this touch series the recognizer has to call
    * {@link signalReady} or {@link signalPending} or it will be reset for the
    * next touch series.
-   * @param {!Event} event
+   * @param {!Event} unusedEvent
    */
-  onTouchEnd(event) {
+  onTouchEnd(unusedEvent) {
   }
 }

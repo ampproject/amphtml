@@ -16,17 +16,13 @@
 
 import {urlReplacementsFor} from '../../../src/url-replacements';
 import {assertHttpsUrl} from '../../../src/url';
-import {childElementByAttr} from '../../../src/dom';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {log} from '../../../src/log';
 import {templatesFor} from '../../../src/template';
 import {xhrFor} from '../../../src/xhr';
 
+
 /** @const {!Function} */
 const assert = AMP.assert;
-
-/** @const {string} */
-const TAG = 'AmpList';
 
 
 /**

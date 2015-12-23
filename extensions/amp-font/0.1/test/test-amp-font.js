@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpFont} from '../amp-font';
+import '../amp-font';
 import {FontLoader} from '../fontloader';
 import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
@@ -50,7 +50,7 @@ describe('amp-font', function() {
       font.setAttribute('on-load-add-class', 'comic-amp-font-loaded');
       font.setAttribute('on-error-remove-class', 'comic-amp-font-loading');
       font.setAttribute('on-load-remove-class', 'comic-amp-font-loading');
-      return iframe.addElement(font).then(f => {
+      return iframe.addElement(font).then(unusedF => {
         return Promise.resolve(iframe);
       });
     });

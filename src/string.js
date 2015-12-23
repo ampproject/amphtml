@@ -20,7 +20,7 @@
  * visibleForTesting
  */
 export function dashToCamelCase(name) {
-  return name.replace(/-([a-z])/g, function(all, character) {
+  return name.replace(/-([a-z])/g, function(_all, character) {
     return character.toUpperCase();
   });
 }
@@ -43,7 +43,7 @@ export function expandTemplate(template, getter, opt_maxIterations) {
   const maxIterations = opt_maxIterations || 1;
   for (let i = 0; i < maxIterations; i++) {
     let matches = 0;
-    template = template.replace(/\${([^}]*)}/g, (a, b) => {
+    template = template.replace(/\${([^}]*)}/g, (_a, b) => {
       matches++;
       return getter(b);
     });

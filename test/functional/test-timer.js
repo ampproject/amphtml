@@ -25,8 +25,8 @@ describe('Timer', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     const WindowApi = function() {};
-    WindowApi.prototype.setTimeout = function(callback, delay) {};
-    WindowApi.prototype.clearTimeout = function(timerId) {};
+    WindowApi.prototype.setTimeout = function(unusedCallback, unusedDelay) {};
+    WindowApi.prototype.clearTimeout = function(unusedTimerId) {};
     const windowApi = new WindowApi();
     windowMock = sandbox.mock(windowApi);
     timer = new Timer(windowApi);
@@ -104,7 +104,7 @@ describe('Timer', () => {
   });
 
   it('timeoutPromise - race no timeout', () => {
-    windowMock.expects('setTimeout').withExactArgs(sinon.match(value => {
+    windowMock.expects('setTimeout').withExactArgs(sinon.match(unusedValue => {
       // No timeout
       return true;
     }), 111).returns(1).once();

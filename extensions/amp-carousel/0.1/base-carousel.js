@@ -98,10 +98,10 @@ export class BaseCarousel extends AMP.BaseElement {
 
   /**
    * Proceeds to the next slide in the desired direction.
-   * @param {number} dir -1 or 1
-   * @param {boolean} animate
+   * @param {number} unusedDir -1 or 1
+   * @param {boolean} unusedAnimate
    */
-  goCallback(dir, animate) {
+  goCallback(unusedDir, unusedAnimate) {
     // Subclasses may override.
   }
 

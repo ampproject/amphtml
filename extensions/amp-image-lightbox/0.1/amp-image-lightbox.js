@@ -657,7 +657,7 @@ class AmpImageLightbox extends AMP.BaseElement {
     /** @private {?Element} */
     this.sourceImage_ = null;
 
-    /** @private {?Unlisten} */
+    /** @private {?UnlistenDef} */
     this.unlistenViewport_ = null;
 
     /** @private {!Element} */

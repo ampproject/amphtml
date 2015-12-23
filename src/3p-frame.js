@@ -112,7 +112,7 @@ export function getIframe(parentWindow, element, opt_type) {
  * @param {string} typeOfMessage
  * @param {function(!Object)} callback Called when a message of this type
  *     arrives for this iframe.
- * @return {!Unlisten}
+ * @return {!UnlistenDef}
  */
 export function listen(iframe, typeOfMessage, callback) {
   const win = iframe.ownerDocument.defaultView;
@@ -147,7 +147,7 @@ export function listen(iframe, typeOfMessage, callback) {
  * @param {string} typeOfMessage
  * @param {function(!Object)} callback Called when a message of this type
  *     arrives for this iframe.
- * @return {!Unlisten}
+ * @return {!UnlistenDef}
  */
 export function listenOnce(iframe, typeOfMessage, callback) {
   const unlisten = listen(iframe, typeOfMessage, data => {

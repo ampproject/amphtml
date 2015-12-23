@@ -27,7 +27,7 @@ import {assert} from './asserts';
  *   resolve: (?function(!Object)|undefined),
  * }}
  */
-let ServiceHolder;
+let ServiceHolderDef;
 
 /**
  * Returns a service for the given id and window (a per-window singleton).
@@ -133,7 +133,7 @@ export function markElementScheduledForTesting(win, elementName) {
 /**
  * Returns the object that holds the services registered in a window.
  * @param {!Window} win
- * @return {!Object<string,!ServiceHolder>}
+ * @return {!Object<string,!ServiceHolderDef>}
  */
 function getServices(win) {
   let services = win.services;

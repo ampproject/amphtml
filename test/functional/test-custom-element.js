@@ -37,7 +37,7 @@ describe('CustomElement', () => {
   let testElementIsReadyToBuild = true;
 
   class TestElement extends BaseElement {
-    isLayoutSupported(layout) {
+    isLayoutSupported(unusedLayout) {
       return true;
     }
     createdCallback() {
@@ -735,7 +735,7 @@ describe('CustomElement Service Elements', () => {
 
   it('getPlaceholder should return the first placeholder', () => {
     const placeholder1 = element.appendChild(createWithAttr('placeholder'));
-    const placeholder2 = element.appendChild(createWithAttr('placeholder'));
+    element.appendChild(createWithAttr('placeholder'));
     expect(element.getPlaceholder()).to.equal(placeholder1);
   });
 

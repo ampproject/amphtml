@@ -23,7 +23,7 @@
     describe('amp-pinterest', () => {
 
       function createDivPromise() {
-        return new Promise(function(resolve, reject) {
+        return new Promise(function(resolve) {
           const div = document.createElement('div');
           resolve({
             div: div,

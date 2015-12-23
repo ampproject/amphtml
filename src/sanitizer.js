@@ -197,15 +197,17 @@ export function sanitizeHtml(html) {
  * @return {string}
  */
 export function sanitizeFormattingHtml(html) {
-  return htmlSanitizer.sanitizeWithPolicy(html, function(tagName, attrs) {
-    if (WHITELISTED_FORMAT_TAGS.indexOf(tagName) == -1) {
-      return null;
-    }
-    return {
-      'tagName': tagName,
-      'attribs': []
-    };
-  });
+  return htmlSanitizer.sanitizeWithPolicy(html,
+      function(tagName, unusedAttrs) {
+        if (WHITELISTED_FORMAT_TAGS.indexOf(tagName) == -1) {
+          return null;
+        }
+        return {
+          'tagName': tagName,
+          'attribs': []
+        };
+      }
+  );
 }
 
 

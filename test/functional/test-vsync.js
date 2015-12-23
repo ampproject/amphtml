@@ -15,7 +15,6 @@
  */
 
 import {Vsync} from '../../src/vsync';
-import {viewerFor} from '../../src/viewer';
 import * as sinon from 'sinon';
 
 
@@ -337,8 +336,6 @@ describe('vsync', () => {
   });
 
   it('should reject mutate series when invisible', () => {
-    let rafHandler;
-    vsync.raf_ = handler => rafHandler = handler;
     viewer.isVisible = () => false;
     const mutatorSpy = sinon.spy();
 
@@ -358,12 +355,10 @@ describe('vsync', () => {
 describe('RAF polyfill', () => {
   let sandbox;
   let clock;
-  let visible;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
-    visible = true;
   });
 
   afterEach(() => {
@@ -373,7 +368,7 @@ describe('RAF polyfill', () => {
 
   const viewer = {
     isVisible: () => true,
-    onVisibilityChanged: handler => {}
+    onVisibilityChanged: unusedHandler => {}
   };
 
   const vsync = new Vsync({
