@@ -96,4 +96,34 @@ describe('Pass', () => {
     expect(isScheduled).to.equal(true);
   });
 
+  it('should have a min delay for recursive schedule', () => {
+    pass = new Pass(() => {
+      expect(pass.running_).to.equal(true);
+      if (handlerCalled++ == 0) {
+        pass.schedule();
+      }
+    });
+    let delayedFunc0 = null;
+    let delayedFunc1 = null;
+    timerMock.expects('delay').withExactArgs(sinon.match(value => {
+      delayedFunc0 = value;
+      return true;
+    }), 0).returns(1).once();
+    timerMock.expects('delay').withExactArgs(sinon.match(value => {
+      delayedFunc1 = value;
+      return true;
+    }), 10).returns(1).once();
+    pass.schedule();
+    expect(pass.isPending()).to.equal(true);
+
+    delayedFunc0();
+    expect(handlerCalled).to.equal(1);
+    delayedFunc1();
+    expect(handlerCalled).to.equal(2);
+    expect(pass.isPending()).to.equal(false);
+    expect(pass.running_).to.equal(false);
+
+    // RESET
+    handlerCalled = 0;
+  });
 });
