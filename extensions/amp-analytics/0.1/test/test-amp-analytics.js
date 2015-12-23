@@ -19,6 +19,7 @@ import {adopt} from '../../../../src/runtime';
 import {getService} from '../../../../src/service';
 import {markElementScheduledForTesting} from '../../../../src/service';
 import {installCidService} from '../../../../src/service/cid-impl';
+import {installViewerService} from '../../../../src/service/viewer-impl';
 import * as sinon from 'sinon';
 
 adopt(window);
@@ -47,6 +48,7 @@ describe('amp-analytics', function() {
     };
     windowApi.Object = window.Object;
     markElementScheduledForTesting(windowApi, 'amp-analytics');
+    installViewerService(windowApi);
     installCidService(windowApi);
     getService(windowApi, 'xhr', () => {return {
       fetchJson: url => Promise.resolve(JSON.parse(jsonMockResponses[url]))

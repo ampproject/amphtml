@@ -15,14 +15,11 @@
  */
 
 import './polyfills';
-
-import {installHistoryService} from './service/history-impl';
 import {installPullToRefreshBlocker} from './pull-to-refresh';
 import {performanceFor} from './performance';
-import {viewerFor} from './viewer';
 import {vsyncFor} from './vsync';
 import {templatesFor} from './template';
-
+import {installCoreServices} from './amp-core-service';
 import {installAd} from '../builtins/amp-ad';
 import {installGlobalClickListener} from './document-click';
 import {installImg} from '../builtins/amp-img';
@@ -47,8 +44,7 @@ try {
   perf.tick('is');
   installStyles(document, cssText, () => {
     try {
-      installHistoryService(window);
-      viewerFor(window);
+      installCoreServices(window);
       vsyncFor(window);
       templatesFor(window);
 

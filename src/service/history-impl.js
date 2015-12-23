@@ -19,7 +19,7 @@ import {assert} from '../asserts';
 import {getService} from '../service';
 import {log} from '../log';
 import {timer} from '../timer';
-import {viewerFor} from '../viewer';
+import {installViewerService} from './viewer-impl';
 
 
 /** @private @const */
@@ -638,7 +638,7 @@ export class HistoryBindingVirtual_ {
  * @private
  */
 function createHistory_(window) {
-  const viewer = viewerFor(window);
+  const viewer = installViewerService(window);
   let binding;
   if (viewer.isOvertakeHistory()) {
     binding = new HistoryBindingVirtual_(viewer);

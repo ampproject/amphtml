@@ -17,6 +17,7 @@
 
 require('../src/polyfills');
 import {Timer} from '../src/timer';
+import {installCoreServices} from '../src/amp-core-service';
 import {registerForUnitTest} from '../src/runtime';
 
 let iframeCount = 0;
@@ -166,6 +167,7 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
       if (opt_runtimeOff) {
         iframe.contentWindow.name = '__AMP__off=1';
       }
+      installCoreServices(iframe.contentWindow);
       registerForUnitTest(iframe.contentWindow);
       resolve({
         win: iframe.contentWindow,
