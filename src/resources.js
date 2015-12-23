@@ -99,7 +99,7 @@ export class Resources {
     this.firstPassAfterDocumentReady_ = true;
 
     /** @private {boolean} */
-    this.relayoutAll_ = false;
+    this.relayoutAll_ = true;
 
     /** @private {number} */
     this.relayoutTop_ = -1;
@@ -160,15 +160,6 @@ export class Resources {
       this.lastScrollTime_ = timer.now();
     });
 
-    // Ensure that we attempt to rebuild things when DOM is ready.
-    this.docState_.onReady(() => {
-      this.documentReady_ = true;
-      this.forceBuild_ = true;
-      this.relayoutAll_ = true;
-      this.schedulePass();
-      this.monitorInput_();
-    });
-
     // When document becomes visible, e.g. from "prerender" mode, do a
     // simple pass.
     this.viewer_.onVisibilityChanged(() => {
@@ -185,7 +176,15 @@ export class Resources {
       this.checkPendingChangeHeight_(element);
     });
 
-    this.relayoutAll_ = true;
+    // Ensure that we attempt to rebuild things when DOM is ready.
+    this.docState_.onReady(() => {
+      this.documentReady_ = true;
+      this.forceBuild_ = true;
+      this.relayoutAll_ = true;
+      this.schedulePass();
+      this.monitorInput_();
+    });
+
     this.schedulePass();
   }
 
