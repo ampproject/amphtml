@@ -30,7 +30,8 @@ describe('runtime', () => {
       AMP: [],
       location: {},
       addEventListener: () => {},
-      document: window.document
+      document: window.document,
+      history: {},
     };
   });
 

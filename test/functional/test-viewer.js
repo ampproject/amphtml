@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Viewer} from '../../src/viewer';
+import {Viewer} from '../../src/service/viewer-impl';
 import {platform} from '../../src/platform';
 
 
