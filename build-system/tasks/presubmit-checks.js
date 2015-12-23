@@ -59,6 +59,25 @@ var forbiddenTerms = {
       'test/functional/test-url-replacements.js'
     ],
   },
+  'installViewerService': {
+    message: privateServiceFactory,
+    whitelist: [
+      'src/amp-core-service.js',
+      'src/service/history-impl.js',
+      'src/service/viewer-impl.js',
+      'src/service/viewport-impl.js',
+      'test/functional/test-cid.js',
+      'test/functional/test-viewport.js',
+      'extensions/amp-analytics/0.1/test/test-amp-analytics.js',
+    ],
+  },
+  'installViewportService': {
+    message: privateServiceFactory,
+    whitelist: [
+      'src/amp-core-service.js',
+      'src/service/viewport-impl.js',
+    ],
+  },
   // Privacy sensitive
   'cidFor': {
     message: requiresReviewPrivacy,
@@ -73,7 +92,7 @@ var forbiddenTerms = {
     message: requiresReviewPrivacy,
     whitelist: [
       'src/service/cid-impl.js',
-      'src/viewer.js',
+      'src/service/viewer-impl.js',
       'test/functional/test-cid.js',
     ],
   },

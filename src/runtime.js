@@ -19,6 +19,7 @@ import {BaseTemplate, registerExtendedTemplate} from './template';
 import {assert} from './asserts';
 import {getMode} from './mode';
 import {installStyles} from './styles';
+import {installCoreServices} from './amp-core-service';
 import {isExperimentOn, toggleExperiment} from './experiments';
 import {performanceFor} from './performance';
 import {registerElement} from './custom-element';
@@ -93,6 +94,7 @@ export function adopt(global) {
   /** @const */
   global.AMP.assert = assert;
 
+  installCoreServices(global);
   const viewer = viewerFor(global);
 
   /** @const */

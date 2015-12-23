@@ -14,13 +14,18 @@
  * limitations under the License.
  */
 
-import {getService} from './service';
+import {installHistoryService} from './service/history-impl';
+import {installViewerService} from './service/viewer-impl';
+import {installViewportService} from './service/viewport-impl';
 
 
 /**
+ * Services that can be assumed are always available in AMP.
+ * They are installed in amp.js very early in the application lifecyle.
  * @param {!Window} window
- * @return {!Viewer}
  */
-export function viewerFor(window) {
-  return getService(window, 'viewer');
-};
+export function installCoreServices(window) {
+  installViewerService(window);
+  installViewportService(window);
+  installHistoryService(window);
+}
