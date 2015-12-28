@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import {Action} from '../../src/action';
+import {ActionService} from '../../src/service/action-impl';
 
 
-describe('Action parseAction', () => {
+describe('ActionService parseAction', () => {
 
   let sandbox;
   let action;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    action = new Action(window);
+    action = new ActionService(window);
   });
 
   afterEach(() => {
@@ -87,7 +87,7 @@ describe('Action parseActionMap', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    action = new Action(window);
+    action = new ActionService(window);
   });
 
   afterEach(() => {
@@ -128,7 +128,7 @@ describe('Action findAction', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    action = new Action(window);
+    action = new ActionService(window);
   });
 
   afterEach(() => {
@@ -192,7 +192,7 @@ describe('Action method', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    action = new Action(window);
+    action = new ActionService(window);
     onEnqueue = sinon.spy();
     targetElement = document.createElement('target');
     const id = ('E' + Math.random()).replace('.', '');
