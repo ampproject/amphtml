@@ -415,6 +415,7 @@ export function createAmpElementProto(win, name, implementationClass) {
       this.preconnect(/* onLayout */ false);
       this.classList.remove('-amp-notbuilt');
       this.classList.remove('amp-notbuilt');
+      this.buildComplete_ = true;
     } catch (e) {
       reportError(e, this);
       throw e;
@@ -458,7 +459,7 @@ export function createAmpElementProto(win, name, implementationClass) {
     try {
       this.implementation_.completeBuildCallback();
       // TODO(dvoytenko, #1230): Remove once migration is done.
-      this.buildCallback();
+      this.implementation_.buildCallback();
       this.buildComplete_ = true;
     } catch (e) {
       reportError(e, this);

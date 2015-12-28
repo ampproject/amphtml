@@ -24,6 +24,12 @@ import {continueMotion} from '../../../src/motion';
 import * as st from '../../../src/style';
 import * as tr from '../../../src/transition';
 
+// XXX
+var other = [
+  'https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no',
+  'https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w300-h200-no'
+];
+
 
 export class AmpCarousel extends BaseCarousel {
 
@@ -72,6 +78,21 @@ export class AmpCarousel extends BaseCarousel {
       }
       this.container_.appendChild(child);
     });
+
+    // XXX
+    const buildCount = this.buildCount || 0;
+    this.buildCount = buildCount + 1;
+    if (buildCount < other.length) {
+      var el = document.createElement('amp-img');
+      el.setAttribute('src', other[buildCount]);
+      el.setAttribute('width', '300');
+      el.setAttribute('height', '200');
+      console.error('will add more: ', el);
+      Promise.resolve().then(() => {
+        console.error('add more: ', el);
+        this.element.appendChild(el);
+      });
+    }
   }
 
   /** @override */

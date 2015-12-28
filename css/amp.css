@@ -21,7 +21,6 @@
  * and {@link ViewportBindingNaturalIosEmbed_} for more info.
  */
 body {
-  /* Undoes mandatory opacity: 0 in doc. */
   margin: 0 !important;
 }
 
@@ -118,6 +117,7 @@ i-amp-sizer {
 .-amp-notbuilt {
   position: relative;
   overflow: hidden !important;
+  /* XXX: extend this to amp-fit-text post first build */
   color: transparent !important;
 }
 
@@ -183,6 +183,9 @@ i-amp-sizer {
  * whitelisted explicitly by adding `-amp-child` class.
  * TODO(dvoytenko, #1230): Replace `-amp-parent` with `-amp-element`. And
  * remove `-amp-notbuilt`.
+ * XXX: what about fallback?
+ * XXX: loader
+ * XXX: overflow
  */
 .-amp-parent > *:not([placeholder]):not(.-amp-child) {
   display: none !important;

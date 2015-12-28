@@ -1277,6 +1277,16 @@ export class Resource {
    * @param {boolean} completeBuild
    */
   build(completeBuild) {
+    // XXX
+    if (this.element.tagName == 'AMP-CAROUSEL') {
+      console.error(this.debugid, 'build ',
+          'buildCount: ', buildCount,
+          'completeBuild: ', completeBuild,
+          'buildNodeCount_: ', this.buildNodeCount_,
+          'childNodes.length: ', this.element.childNodes.length,
+          'changes: ', this.buildNodeCount_ != this.element.childNodes.length,
+          'childNodes: ', this.element.childNodes);
+    }
     if (this.blacklisted_ || !this.element.isUpgraded() ||
             this.state_ != ResourceState_.NOT_BUILT) {
       return;
