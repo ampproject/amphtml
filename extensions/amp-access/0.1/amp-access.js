@@ -21,7 +21,6 @@ import {isExperimentOn} from '../../../src/experiments';
 import {log} from '../../../src/log';
 
 
-/*eslint no-unused-vars: 0*/
 /**
  * The configuration properties are:
  * - authorization: The URL of the Authorization endpoint.
@@ -34,7 +33,7 @@ import {log} from '../../../src/log';
  *   login: string
  * }}
  */
-let AccessConfig;
+let AccessConfigDef;
 
 /** @const {!Function} */
 const assert = AMP.assert;
@@ -72,12 +71,12 @@ export class AccessService {
     /** @const @private {!Element} */
     this.accessElement_ = accessElement;
 
-    /** @const {!AccessConfig} */
+    /** @const {!AccessConfigDef} */
     this.config_ = this.buildConfig_();
   }
 
   /**
-   * @return {!AccessConfig}
+   * @return {!AccessConfigDef}
    * @private
    */
   buildConfig_() {
