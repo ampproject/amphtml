@@ -44,3 +44,38 @@ export function all(promises) {
     });
   });
 }
+
+
+/**
+ * Returns a promise resolver - a construct that contains the promise itself
+ * as well as resolve and reject functions.
+ * @return {!Resolver<T>}
+ * @template T
+ */
+export function newResolver() {
+  let resolve, reject;
+  const promise = new Promise((aResolve, aReject) => {
+    resolve = aResolve;
+    reject = aReject;
+  });
+  return new Resolver(promise, resolve, reject);
+}
+
+/**
+ * @template T
+ */
+class Resolver {
+  /**
+   * @param {!Promise<T>} promise
+   * @param {function(T)} resolve
+   * @param {function(*=)} reject
+   */
+  constructor(promise, resolve, reject) {
+    /** @const @type {!Promise<T>} */
+    this.promise = promise;
+    /** @const @type {function(T)} */
+    this.resolve = resolve.bind(null);
+    /** @const @type {function(*=)} */
+    this.reject = reject.bind(null);
+  }
+}
