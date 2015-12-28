@@ -29,7 +29,6 @@ import {installErrorReporting} from './error';
 import {stubElements} from './custom-element';
 import {adopt} from './runtime';
 import {cssText} from '../build/css';
-import {action} from './action';
 import {maybeValidate} from './validator-integration';
 
 // We must under all circumstances call makeBodyVisible.
@@ -53,7 +52,6 @@ try {
 
       adopt(window);
       stubElements(window);
-      action.addEvent('tap');
 
       installPullToRefreshBlocker(window);
       installGlobalClickListener(window);
