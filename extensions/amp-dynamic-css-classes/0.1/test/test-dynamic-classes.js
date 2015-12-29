@@ -19,7 +19,7 @@ import {referrers_} from '../amp-dynamic-css-classes';
 describe('amp-dynamic-css-classes', () => {
   describe('referrers_', () => {
     describe('when referrer is TLD-less', () => {
-      const referrer = 'http://localhost/test/ing?this#referrer';
+      const referrer = 'localhost';
 
       it('contains the domain', () => {
         expect(referrers_(referrer)).to.deep.equal(['localhost']);
@@ -27,7 +27,7 @@ describe('amp-dynamic-css-classes', () => {
     });
 
     describe('when referrer has no subdomains', () => {
-      const referrer = 'http://google.com/test/ing?this#referrer';
+      const referrer = 'google.com';
       const referrers = referrers_(referrer);
 
       it('contains the TLD', () => {
@@ -35,13 +35,13 @@ describe('amp-dynamic-css-classes', () => {
       });
 
       it('contains the domain', () => {
-        expect(referrers).to.contain('google-com');
+        expect(referrers).to.contain('google.com');
         expect(referrers.length).to.equal(2);
       });
     });
 
     describe('when referrer has subdomains', () => {
-      const referrer = 'http://a.b.c.google.com/test/ing?this#referrer';
+      const referrer = 'a.b.c.google.com';
       const referrers = referrers_(referrer);
 
       it('contains the TLD', () => {
@@ -49,14 +49,14 @@ describe('amp-dynamic-css-classes', () => {
       });
 
       it('contains the domain', () => {
-        expect(referrers).to.contain('google-com');
+        expect(referrers).to.contain('google.com');
       });
 
       it('contains each subdomain', () => {
         expect(referrers).to.include.members([
-          'c-google-com',
-          'b-c-google-com',
-          'a-b-c-google-com'
+          'c.google.com',
+          'b.c.google.com',
+          'a.b.c.google.com'
         ]);
         expect(referrers.length).to.equal(5);
       });

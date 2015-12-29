@@ -17,21 +17,46 @@
 import {createServedIframe} from '../../../../testing/iframe';
 import {toggleExperiment} from '../../../../src/experiments';
 
+function overwrite(object, property, value) {
+  Object.defineProperty(object, property, {
+    enumerable: true,
+    writeable: false,
+    configurable: true,
+    value: value
+  });
+}
+
 const iframeSrc = '/base/test/fixtures/served/amp-dynamic-css-classes.html';
 
+const tcoReferrer = 'http://t.co/xyzabc123';
+const PinterestUA = 'Mozilla/5.0 (Linux; Android 5.1.1; SM-G920F' +
+  ' Build/LMY47X; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0' +
+  ' Chrome/47.0.2526.100 Mobile Safari/537.36 [Pinterest/Android]';
+
 describe('dynamic classes are inserted at runtime', () => {
-  let documentElement, win;
-  beforeEach(() => {
+  let documentElement;
+
+  function setup(enabled, userAgent, referrer) {
     return createServedIframe(iframeSrc).then(fixture => {
-      win = fixture.win;
+      const win = fixture.win;
       documentElement = fixture.doc.documentElement;
+
+      toggleExperiment(win, 'dynamic-css-classes', enabled);
+
+      if (userAgent !== undefined) {
+        overwrite(win.navigator, 'userAgent', userAgent);
+      }
+      if (referrer !== undefined) {
+        overwrite(fixture.doc, 'referrer', referrer);
+      }
+
+      return win.insertDynamicCssScript();
     });
-  });
+  }
 
   describe('when experiment is disabled', () => {
     beforeEach(() => {
-      toggleExperiment(win, 'dynamic-css-classes', false);
-      return win.insertDynamicCssScript();
+      return setup(false);
     });
 
     it('should not include referrer classes', () => {
@@ -45,8 +70,7 @@ describe('dynamic classes are inserted at runtime', () => {
 
   describe('when experiment is enabled', () => {
     beforeEach(() => {
-      toggleExperiment(win, 'dynamic-css-classes', true);
-      return win.insertDynamicCssScript();
+      return setup(true);
     });
 
     it('should include referrer classes', () => {
@@ -55,6 +79,23 @@ describe('dynamic classes are inserted at runtime', () => {
 
     it('should include viewer class', () => {
       expect(documentElement).to.have.class('amp-viewer');
+    });
+  });
+
+  describe('Normalizing Referrers', () => {
+    it('should normalize twitter shortlinks to twitter', () => {
+      return setup(true, '', tcoReferrer).then(() => {
+        expect(documentElement).to.have.class('amp-referrer-com');
+        expect(documentElement).to.have.class('amp-referrer-twitter-com');
+      });
+    });
+
+    it('should normalize pinterest on android', () => {
+      return setup(true, PinterestUA, '').then(() => {
+        expect(documentElement).to.have.class('amp-referrer-com');
+        expect(documentElement).to.have.class('amp-referrer-pinterest-com');
+        expect(documentElement).to.have.class('amp-referrer-www-pinterest-com');
+      });
     });
   });
 });

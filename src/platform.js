@@ -27,8 +27,8 @@ export class Platform {
    * @param {!Window} win
    */
   constructor(win) {
-    /** @const {!Window} */
-    this.win = win;
+    /** @const {!Navigator} */
+    this.navigator = win.navigator;
   }
 
   /**
@@ -36,7 +36,7 @@ export class Platform {
    * @return {boolean}
    */
   isIos() {
-    return /iPhone|iPad|iPod/i.test(this.win.navigator.userAgent);
+    return /iPhone|iPad|iPod/i.test(this.navigator.userAgent);
   }
 
   /**
@@ -44,16 +44,16 @@ export class Platform {
    * @return {boolean}
    */
   isSafari() {
-    return /Safari/i.test(this.win.navigator.userAgent) && !this.isChrome();
+    return /Safari/i.test(this.navigator.userAgent) && !this.isChrome();
   }
 
   /**
-   * Whether the current browser a Chrome browser.
+   * Whether the current browser is a Chrome browser.
    * @return {boolean}
    */
   isChrome() {
     // Also true for MS Edge :)
-    return /Chrome|CriOS/i.test(this.win.navigator.userAgent);
+    return /Chrome|CriOS/i.test(this.navigator.userAgent);
   }
 };
 
