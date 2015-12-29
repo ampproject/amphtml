@@ -121,9 +121,20 @@ export class Resources {
     /** @const {!TaskQueue_} */
     this.queue_ = new TaskQueue_();
 
+   /**
+    * The internal structure of a ChangeHeightRequest.
+    * @typedef {{
+    *   resource: !Resource,
+    *   newHeight: number,
+    *   force: boolean,
+    *   callback: (function()|undefined)
+    * }}
+    * @private
+    */
+    let ChangeHeightRequestDef;
+
     /**
-     * @private {!Array<{resource: !Resource, newHeight: number,
-     *     force: boolean}>}
+     * @private {!Array<!ChangeHeightRequestDef>}
      */
     this.requestsChangeHeight_ = [];
 
@@ -379,13 +390,15 @@ export class Resources {
   }
 
   /**
-   * Requests the runtime to change the element's height.
+   * Requests the runtime to change the element's height. When the height is
+   * successfully updated then the opt_callback is called.
    * @param {!Element} element
    * @param {number} newHeight
+   * @param {function=} opt_callback A callback function.
    */
-  changeHeight(element, newHeight) {
+  changeHeight(element, newHeight, opt_callback) {
     this.scheduleChangeHeight_(this.getResourceForElement(element), newHeight,
-        /* force */ true);
+        /* force */ true, opt_callback);
   }
 
   /**
@@ -396,13 +409,18 @@ export class Resources {
    * `overflowCallback` method on the target resource with the height value.
    * Overflow callback is expected to provide the reader with the user action
    * to update the height manually.
+   * Note that the runtime does not call the `overflowCallback` method if the
+   * requested height is 0 or negative.
+   * If the height is successfully updated then the opt_callback is called.
    * @param {!Element} element
    * @param {number} newHeight
+   * @param {function=} opt_callback A callback function to be called if the
+   *    height is updated.
    * @protected
    */
-  requestChangeHeight(element, newHeight) {
+  attemptChangeHeight(element, newHeight, opt_callback) {
     this.scheduleChangeHeight_(this.getResourceForElement(element), newHeight,
-        /* force */ false);
+        /* force */ false, opt_callback);
   }
 
   /**
@@ -596,9 +614,13 @@ export class Resources {
           if (box.top >= 0) {
             minTop = minTop == -1 ? box.top : Math.min(minTop, box.top);
           }
-          request.resource./*OK*/changeHeight(request.newHeight);
-          request.resource.overflowCallback(/* overflown */ false,
-              request.newHeight);
+          request.resource./*OK*/changeHeight(
+              request.newHeight, request.callback);
+          // Skip the overflowCallback if the newHeight is 0 or less.
+          if (request.newHeight > 0) {
+            request.resource.overflowCallback(/* overflown */ false,
+                request.newHeight);
+          }
         }
       }
 
@@ -956,9 +978,10 @@ export class Resources {
    * @param {!Resource} resource
    * @param {number} newHeight
    * @param {boolean} force
+   * @param {function=} opt_callback A callback function.
    * @private
    */
-  scheduleChangeHeight_(resource, newHeight, force) {
+  scheduleChangeHeight_(resource, newHeight, force, opt_callback) {
     resource.resetPendingChangeHeight();
     if (resource.getLayoutBox().height == newHeight) {
       // Nothing to do.
@@ -975,11 +998,13 @@ export class Resources {
     if (request) {
       request.newHeight = newHeight;
       request.force = force || request.force;
+      request.callback = opt_callback;
     } else {
-      this.requestsChangeHeight_.push({
+      this.requestsChangeHeight_.push(/** {!ChangeHeightRequestDef}*/{
         resource: resource,
         newHeight: newHeight,
-        force: force
+        force: force,
+        callback: opt_callback
       });
     }
     this.schedulePassVsync();
@@ -1296,12 +1321,16 @@ export class Resource {
    * Instructs the element to change its size and transitions to the state
    * awaiting the measure and possibly layout.
    * @param {number} newHeight
+   * @param {function=} opt_callback A callback function.
    */
-  changeHeight(newHeight) {
+  changeHeight(newHeight, opt_callback) {
     this.element./*OK*/changeHeight(newHeight);
     // Schedule for re-layout.
     if (this.state_ != ResourceState_.NOT_BUILT) {
       this.state_ = ResourceState_.NOT_LAID_OUT;
+    }
+    if (opt_callback) {
+      opt_callback();
     }
   }
 

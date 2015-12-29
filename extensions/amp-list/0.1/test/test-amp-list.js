@@ -87,7 +87,7 @@ describe('amp-list component', () => {
         measureFunc = func;
       }
     }).once();
-    listMock.expects('requestChangeHeight').withExactArgs(newHeight);
+    listMock.expects('attemptChangeHeight').withExactArgs(newHeight);
     return list.layoutCallback().then(() => {
       return promise.all([xhrPromise, renderPromise]).then(() => {
         expect(list.container_.contains(itemElement)).to.be.true;
