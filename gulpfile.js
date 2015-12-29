@@ -91,6 +91,7 @@ function buildExtensions(options) {
   buildExtension('amp-twitter', '0.1', false, options);
   buildExtension('amp-vine', '0.1', false, options);
   buildExtension('amp-youtube', '0.1', false, options);
+  buildExtension('amp-fabric-component', '0.1', false, options);
 }
 
 
@@ -277,6 +278,7 @@ function dist() {
   compile(false, true);
   buildExtensions({minify: true});
   buildExperiments({minify: true, watch: false});
+  buildFabricWorker({minify: true, watch: false});
 }
 
 /**
@@ -522,6 +524,50 @@ function buildExperiments(options) {
 
 
 /**
+ * Build the specified worker.
+ *
+ * @param {!Object} options
+ */
+function buildFabricWorker(options) {
+  options = options || {};
+  console.log('Bundling Fabric worker');
+  var path = 'workers/fabric';
+  var jsPath = path + '/amp-fabric.js';
+
+  var watch = options.watch;
+  if (watch === undefined) {
+    watch = argv.watch || argv.w;
+  }
+
+  // Building extensions is a 2 step process because of the renaming
+  // and CSS inlining. This watcher watches the original file, copies
+  // it to the destination and adds the CSS.
+  if (watch) {
+    // Do not set watchers again when we get called by the watcher.
+    var copy = Object.create(options);
+    copy.watch = false;
+    gulpWatch(path + '/*', function() {
+      buildFabricWorker(copy);
+    });
+  }
+
+  var js = fs.readFileSync(jsPath, 'utf8');
+  var builtName = 'amp-fabric.max.js';
+  var minifiedName = 'amp-fabric.js';
+  return gulp.src(path + '/*.js')
+      .pipe(file(builtName, js))
+      .pipe(gulp.dest('build/workers/'))
+      .on('end', function() {
+        compileJs('build/workers/', builtName, 'dist/workers/', {
+          watch: false,
+          minify: options.minify || argv.minify,
+          minifiedName: minifiedName,
+        });
+      });
+}
+
+
+/**
  * Gulp tasks
  */
 gulp.task('build', 'Builds the AMP library', build);
@@ -531,3 +577,4 @@ gulp.task('dist', 'Build production binaries', dist);
 gulp.task('extensions', 'Build AMP Extensions', buildExtensions);
 gulp.task('watch', 'Watches for changes in files, re-build', watch);
 gulp.task('build-experiments', 'Builds experiments.html/js', buildExperiments);
+gulp.task('build-fabric-worker', 'Builds Fabric worker', buildFabricWorker);

@@ -1,0 +1,9 @@
+URL: https://github.com/kangax/fabric.js
+License: Custom
+License File: https://github.com/kangax/fabric.js/blob/master/LICENSE
+
+Description:
+For of fabric.js library
+
+Local Modifications:
+Adds headless mode to function in a worker.
