@@ -18,6 +18,7 @@ import {parseUrl} from '../../../src/url';
 import {viewerFor} from '../../../src/viewer';
 import {log} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
+import {platform} from '../../../src/platform';
 
 /** @const */
 const TAG = 'AmpDynamicCssClasses';
@@ -86,6 +87,14 @@ function addViewerClass(win) {
   }
 }
 
+
+function addUserAgentClasses(win) {
+  const classes = ['Facebook', 'Twitter', 'Pinterest'].filter(service => {
+    return platform[`is${service}`]();
+  }).map(service => `amp-ua-${service.toLowerCase()}`);
+  addDynamicCssClasses(win, classes);
+}
+
 /**
  * @param {!Window} win
  */
@@ -93,6 +102,7 @@ function addRuntimeClasses(win) {
   if (isExperimentOn(win, EXPERIMENT)) {
     addReferrerClasses(win);
     addViewerClass(win);
+    addUserAgentClasses(win);
   } else {
     log.warn(TAG, `Experiment ${EXPERIMENT} disabled`);
   }

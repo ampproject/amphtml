@@ -35,3 +35,14 @@ classes: `amp-referrer-www-google-com`, `amp-referrer-google-com`, and
 
 The `amp-viewer` class will be set if the current document is being
 displayed inside a Viewer.
+
+**amp-ua-***
+
+A User Agent class will be added when we detect that the document is
+being displayed inside a supported native app's web view.
+
+|    App    |       Class        |
+| --------- | ------------------ |
+| Facebook  | `amp-ua-facebook`  |
+| Twitter   | `amp-ua-twitter`   |
+| Pinterest | `amp-ua-pinterest` |
