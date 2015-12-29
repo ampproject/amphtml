@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {installActionService} from './service/action-impl';
 import {installHistoryService} from './service/history-impl';
 import {installViewerService} from './service/viewer-impl';
 import {installViewportService} from './service/viewport-impl';
@@ -30,4 +31,5 @@ export function installCoreServices(window) {
   installViewportService(window);
   installHistoryService(window);
   installVsyncService(window);
+  installActionService(window).addEvent('tap');
 }
