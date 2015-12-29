@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {actionServiceFor} from '../../../src/action';
 import {assertHttpsUrl} from '../../../src/url';
 import {getService} from '../../../src/service';
 import {installStyles} from '../../../src/styles';
@@ -122,6 +123,16 @@ export class AccessService {
 
   /** @private */
   startInternal_() {
+    actionServiceFor(this.win).installActionHandler(
+        this.accessElement_, this.handleAction_.bind(this));
+  }
+
+  /**
+   * @param {!ActionInvocation} invocation
+   * @private
+   */
+  handleAction_(invocation) {
+    log.fine(TAG, 'Invocation: ', invocation);
   }
 }
 

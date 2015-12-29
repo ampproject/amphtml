@@ -123,6 +123,14 @@
     amp-img {
       background-color: #f4f4f4;
     }
+
+    .login-section {
+      margin: 16px;
+      margin-top: 24px;
+      padding: 16px;
+      background: #ffc;
+    }
+
   </style>
   <script async custom-element="amp-access" src="https://cdn.ampproject.org/v0/amp-access-0.1.js"></script>
   <style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
@@ -170,6 +178,11 @@
             <p class="brand">PublisherName News Reporter<p>
           </div>
         </div>
+
+        <section class="login-section">
+          <a on="tap:amp-access.login">Login to read more!</a>
+        </section>
+
         <div class="article-body" itemprop="articleBody">
           <p>
             Lorem ipsum dolor sit amet, consectetur adipiscing elit.
