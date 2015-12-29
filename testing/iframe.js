@@ -196,6 +196,27 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
   });
 }
 
+export function createServedIframe(src) {
+  return new Promise(function(resolve, reject) {
+    const iframe = document.createElement('iframe');
+    iframe.name = 'test_' + iframeCount++;
+    iframe.src = src;
+    iframe.onload = function() {
+      const win = iframe.contentWindow;
+      win.AMP_TEST = true;
+      installCoreServices(win);
+      registerForUnitTest(win);
+      resolve({
+        win: win,
+        doc: win.document,
+        iframe: iframe
+      });
+    };
+    iframe.onerror = reject;
+    document.body.appendChild(iframe);
+  });
+}
+
 /**
  * Returns a promise for when the condition becomes true.
  * @param {string} description
