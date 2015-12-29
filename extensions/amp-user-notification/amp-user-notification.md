@@ -1,0 +1,149 @@
+<!--
+Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS-IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+### <a name="amp-user-notification"></a> `amp-user-notification`
+
+Displays a dismissable notification to the user. By supplying two URLs that
+get called before the notification is shown and after it is dismissed,
+it is possible to control per user as to whether the notification should
+be shown (using the `ampUserId` value).
+E.g. it could only be shown to users in certain geo locations or
+it could not be shown against after the user has dismissed it once.
+
+---
+
+#### Usage
+
+`amp-user-notification` requires 2 URLs which can be provided by
+the `data-show-if-href` and `data-dismiss-href` attributes. An `id` is required
+as multiple `amp-user-notification` elements are allowed and the
+id is used to differentiate them.
+
+To close `amp-user-notification` add a `on` attribute to a button with the
+following value scheme `on="event:idOfUserNotificationElement.dismiss"`
+(see example below). This user action also triggers the `POST` to the
+`data-dismiss-href` URL.
+
+When multiple `amp-user-notification` elements are on a page, only one is shown
+at a single time (Once one is dismissed the next one is shown).
+The order of the notifications being shown is currently not deterministic. (TODO:
+follow up task #1229 to fix this).
+
+Example:
+
+```html
+<amp-user-notification
+    layout=container
+    id="amp-user-notification1"
+    data-show-if-href="http://localhost:8000/api/notification"
+    data-dismiss-href="http://localhost:8000/api/notification">
+    This site uses cookies to personalize content.
+    <a href="">Learn more.</a>
+   <button on="tap:amp-user-notification1.dismiss">I accept</button>
+</amp-user-notification>
+```
+
+---
+
+#### Attributes
+
+**data-show-if-href** (Required)
+
+AMP will make a [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS)
+POST request to this URL to determine whether the notification should be shown.
+
+ - `CORS POST request` json fields
+    - `elementId`
+    - `ampUserId`
+
+  Example:
+    ```json
+    { "elementId": "id-of-amp-user-notification", "ampUserId": "ampUserIdString" }
+    ```
+
+ - `CORS POST response` json fields
+    The response must contain a single JSON object with a field
+    "showNotification" of type boolean. If this field is `true` the
+    notification will be shown, otherwise it will not be shown.
+
+    - `showNotification`
+
+    Example:
+    ```json
+    { "showNotification": true }
+    ```
+
+**data-dismiss-href** (Required)
+
+AMP will make a [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS)
+POST request to this URL transmitting the `elementId` and
+`ampUserId` only when the user has explicitly agreed.
+
+Use the `ampUserId` field to store that the user has seen the notification before
+if you want to avoid showing it in the future. (It is the same value that
+will be passed in future requests to data-show-if-href)
+
+  - `POST request` json fields
+
+    - `elementId`
+    - `ampUserId`
+
+    Example:
+    ```json
+    { "elementId": "id-of-amp-user-notification", "ampUserId": "ampUserIdString" }
+    ```
+  - `POST response` should be a 200 HTTP code and no data is expected back.
+
+---
+
+#### JSON Fields
+
+- `elementId` (string) - The HTML id used on `amp-user-notification` element.
+- `ampUserId` (string) - This id is passed to both this request and the dismiss request.
+    The id will be the same for this user going forward, but no other requests
+    in AMP send the same id.
+    You can use the id on your side to lookup/store whether the user has
+    dismissed the notification before.
+- `showNotification` (boolean) - Boolean value wether the notification should be shown.
+    If `false` the promise associated to the element is resolved right away.
+
+---
+
+#### Styling
+
+The `amp-user-notification` component will always be `position: fixed`.
+If a page has more than 1 `amp-user-notification` element then the notifications
+are queued up and only shown when the previous notification has been dismissed.
+
+The `amp-active` (visibility: visible) class is added when the notification is displayed and
+and removed when the notification has been dismissed.
+`amp-hidden` (visibility: hidden) is added when the notification has been dismissed.
+
+You can for example hook into these classes for a "fade in" transition.
+
+ex. (w/o vendor prefixes)
+
+```css
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  amp-user-notification.amp-active {
+    opacity: 0;
+    animation: fadeIn ease-in 1s 1 forwards;
+  }
+```

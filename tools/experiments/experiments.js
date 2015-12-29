@@ -71,6 +71,14 @@ const EXPERIMENTS = [
     name: 'AMP Access',
     spec: '',  // TODO(dvoytenko): link spec when ready.
   },
+
+  // Amp User Notification
+  {
+    id: 'amp-user-notification',
+    name: 'Amp User Notification',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
+        'amp-user-notification/amp-user-notification.md',
+  },
 ];
 
 

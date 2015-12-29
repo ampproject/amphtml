@@ -177,8 +177,18 @@ describe('UrlReplacements', () => {
 
   it('should support positional arguments', () => {
     const replacements = urlReplacementsFor(window);
-    replacements.set_('FN', (_data, one) => one);
-    expect(replacements.expand('?a=FN(xyz)')).to.eventually.equal('?a=xyz');
+    replacements.set_('FN', (data, one) => one);
+    return expect(replacements.expand('?a=FN(xyz1)')).to
+        .eventually.equal('?a=xyz1');
+  });
+
+  it('should support multiple positional arguments', () => {
+    const replacements = urlReplacementsFor(window);
+    replacements.set_('FN', (data, one, two) => {
+      return one + '-' + two;
+    });
+    return expect(replacements.expand('?a=FN(xyz,abc)')).to
+        .eventually.equal('?a=xyz-abc');
   });
 
   it('should support promises as replacements', () => {

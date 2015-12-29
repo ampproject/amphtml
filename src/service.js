@@ -92,7 +92,7 @@ export function getElementService(win, id, providedByElement) {
     }
   }
   // TODO(@cramforce): Add a check that if the element is eventually registered
-  // that the service is actually provided and this promise resoles.
+  // that the service is actually provided and this promise resolves.
   let resolve;
   const p = new Promise(r => {
     resolve = r;
