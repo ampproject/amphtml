@@ -209,7 +209,7 @@ export function installAd(win) {
 
         // Triggered by context.noContentAvailable() inside the ad iframe.
         listenOnce(this.iframe_, 'no-content', () => {
-          this.deferMutate(this.noContentHandler_.bind(this));
+          this.noContentHandler_();
         });
         // Triggered by context.observeIntersection(…) inside the ad iframe.
         // We use listen instead of listenOnce, because a single ad might
@@ -283,8 +283,18 @@ export function installAd(win) {
      * @private
      */
     noContentHandler_() {
-      this.element.removeChild(this.iframe_);
-      this.toggleFallback(true);
+      // If a fallback does not exist attempt to collapse the ad.
+      if (!this.fallback_) {
+        this.attemptChangeHeight(0, () => {
+          this.element.style.display = 'none';
+        });
+      }
+      this.deferMutate(() => {
+        if (this.fallback_) {
+          this.toggleFallback(true);
+        }
+        this.element.removeChild(this.iframe_);
+      });
     }
   }
 

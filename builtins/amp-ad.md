@@ -64,13 +64,25 @@ Optional attribute to pass configuration to the ad as an arbitrarily complex JSO
 
 #### Placeholder
 
-Optionally `amp-ad` supports a child element with the `placeholder` attribute. If supported by the ad network, this element is shown if no ad is available for this slot.
+Optionally `amp-ad` supports a child element with the `placeholder` attribute. If supported by the ad network, this element is shown until the ad is available for viewing.
 ```html
 <amp-ad width=300 height=250
     type="foo">
   <div placeholder>Have a great day!</div>
 </amp-ad>
 ```
+
+#### No Ad available
+- `amp-ad` supports a child element with the `fallback` attribute. If supported by the ad network, this element is shown if no ad is available for this slot.
+```html
+<amp-ad width=300 height=250
+    type="foo">
+  <div fallback>Have a great day!</div>
+</amp-ad>
+```
+
+- If there is no fallback element available, the amp-ad tag will be collapsed (set to display: none) if the ad sends a message that the ad slot cannot be filled and AMP determines that this operation can be performed without affecting the user's scroll position.
+
 #### Supported ad networks
 
 - [A9](../ads/a9.md)
