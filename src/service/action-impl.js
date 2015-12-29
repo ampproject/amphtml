@@ -14,14 +14,19 @@
  * limitations under the License.
  */
 
+import {assert} from '../asserts';
 import {getService} from '../service';
 import {log} from '../log';
+import {timer} from '../timer';
 
 /** @const {string} */
 const TAG_ = 'Action';
 
 /** @const {string} */
 const ACTION_MAP_ = '__AMP_ACTION_MAP__' + Math.random();
+
+/** @const {string} */
+const ACTION_QUEUE_ = '__AMP_ACTION_QUEUE__';
 
 /** @const {string} */
 const DEFAULT_METHOD_ = 'activate';
@@ -121,6 +126,40 @@ export class ActionService {
   }
 
   /**
+   * Installs action handler for the specified element.
+   * @param {!Element} target
+   * @param {function(!ActionInvocation)} handler
+   */
+  installActionHandler(target, handler) {
+    const debugid = target.tagName + '#' + target.id;
+    assert(target.id && target.id.substring(0, 4) == 'amp-',
+        'AMP element is expected: %s', debugid);
+
+    const currentQueue = target[ACTION_QUEUE_];
+    if (currentQueue) {
+      assert(Object.prototype.toString.call(currentQueue) == '[object Array]',
+          'Expected queue to be an array: %s', debugid);
+    }
+
+    // Override queue with the handler.
+    target[ACTION_QUEUE_] = {'push': handler};
+
+    // Dequeue the current queue.
+    if (currentQueue) {
+      timer.delay(() => {
+        // TODO(dvoytenko, #1260): dedupe actions.
+        currentQueue.forEach(invocation => {
+          try {
+            handler(invocation);
+          } catch (e) {
+            log.error(TAG_, 'Action execution failed:', invocation, e);
+          }
+        });
+      }, 1);
+    }
+  }
+
+  /**
    * @param {!Element} source
    * @param {string} actionEventType
    * @param {!Event} event
@@ -169,22 +208,32 @@ export class ActionService {
 
     // TODO(dvoytenko): implement common method handlers, e.g. "toggleClass"
 
-    // Only amp elements are allowed to proceed further.
-    if (target.tagName.toLowerCase().substring(0, 4) != 'amp-') {
-      this.actionInfoError_('Target must be an AMP element', actionInfo,
-          target);
+    // AMP elements.
+    if (target.tagName.toLowerCase().substring(0, 4) == 'amp-') {
+      if (target.enqueAction) {
+        target.enqueAction(invocation);
+      } else {
+        this.actionInfoError_('Unrecognized AMP element "' +
+            target.tagName.toLowerCase() + '". ' +
+            'Did you forget to include it via <script custom-element>?',
+            actionInfo, target);
+      }
       return;
     }
 
-    if (!target.enqueAction) {
-      this.actionInfoError_('Unrecognized AMP element "' +
-          target.tagName.toLowerCase() + '". ' +
-          'Did you forget to include it via <script custom-element>?',
-          actionInfo, target);
+    // Special elements with AMP ID.
+    if (target.id && target.id.substring(0, 4) == 'amp-') {
+      if (!target[ACTION_QUEUE_]) {
+        target[ACTION_QUEUE_] = [];
+      }
+      target[ACTION_QUEUE_].push(invocation);
       return;
     }
 
-    target.enqueAction(invocation);
+    // Unsupported target.
+    this.actionInfoError_(
+        'Target must be an AMP element or have an AMP ID',
+        actionInfo, target);
   }
 
   /**

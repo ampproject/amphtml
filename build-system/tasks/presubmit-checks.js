@@ -49,6 +49,20 @@ var forbiddenTerms = {
     ]
   },
   // Service factories that should only be installed once.
+  'installActionService': {
+    message: privateServiceFactory,
+    whitelist: [
+      'src/service/action-impl.js',
+      'src/amp-core-service.js',
+    ],
+  },
+  'installActionHandler': {
+    message: privateServiceFactory,
+    whitelist: [
+      'src/service/action-impl.js',
+      'extensions/amp-access/0.1/amp-access.js',
+    ],
+  },
   'installCidService': {
     message: privateServiceFactory,
     whitelist: [

@@ -789,6 +789,7 @@ export function createAmpElementProto(win, name, implementationClass) {
     const actionQueue = assert(this.actionQueue_);
     this.actionQueue_ = null;
 
+    // TODO(dvoytenko, #1260): dedupe actions.
     actionQueue.forEach(invocation => {
       this.executionAction_(invocation, true);
     });
