@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import '../../third_party/babel/custom-babel-helpers';
 import '../../src/polyfills';
 import {onDocumentReady} from '../../src/document-state';
 import {isExperimentOn, toggleExperiment} from '../../src/experiments';
