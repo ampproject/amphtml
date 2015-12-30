@@ -144,3 +144,105 @@ describe('AccessService', () => {
     expect(service.startInternal_.callCount).to.equal(1);
   });
 });
+
+
+describe('AccessService authorization', () => {
+
+  let sandbox;
+  let configElement, elementOn, elementOff;
+  let vsyncMutates;
+  let urlReplacementsMock;
+  let xhrMock;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+
+    configElement = document.createElement('script');
+    configElement.setAttribute('id', 'amp-access');
+    configElement.setAttribute('type', 'application/json');
+    configElement.textContent = JSON.stringify({
+      'authorization': 'https://acme.com/a?rid=READER_ID',
+      'pingback': 'https://acme.com/p?rid=READER_ID',
+      'login': 'https://acme.com/l?rid=READER_ID'
+    });
+    document.body.appendChild(configElement);
+
+    elementOn = document.createElement('div');
+    elementOn.setAttribute('amp-access', 'access');
+    document.body.appendChild(elementOn);
+
+    elementOff = document.createElement('div');
+    elementOff.setAttribute('amp-access', 'NOT access');
+    document.body.appendChild(elementOff);
+
+    service = new AccessService(window);
+    service.isExperimentOn_ = true;
+
+    vsyncMutates = [];
+    service.vsync_ = {mutate: callback => vsyncMutates.push(callback)};
+    urlReplacementsMock = sandbox.mock(service.urlReplacements_);
+    xhrMock = sandbox.mock(service.xhr_);
+  });
+
+  afterEach(() => {
+    if (configElement.parentElement) {
+      configElement.parentElement.removeChild(configElement);
+    }
+    if (elementOn.parentElement) {
+      elementOn.parentElement.removeChild(elementOn);
+    }
+    if (elementOff.parentElement) {
+      elementOff.parentElement.removeChild(elementOff);
+    }
+    sandbox.restore();
+    sandbox = null;
+  });
+
+  it('should run authorization flow', () => {
+    urlReplacementsMock.expects('expand')
+        .withExactArgs('https://acme.com/a?rid=READER_ID')
+        .returns(Promise.resolve('https://acme.com/a?rid=reader1'))
+        .once();
+    xhrMock.expects('fetchJson')
+        .withExactArgs('https://acme.com/a?rid=reader1',
+            {credentials: 'include'})
+        .returns(Promise.resolve({access: true}))
+        .once();
+    return service.runAuthorization_().then(() => {
+      expect(vsyncMutates).to.have.length.greaterThan(2);
+      vsyncMutates.shift()();
+      expect(document.documentElement).to.have.class('amp-access-loading');
+
+      while (vsyncMutates.length > 0) {
+        vsyncMutates.shift()();
+      }
+      expect(document.documentElement).not.to.have.class('amp-access-loading');
+      expect(elementOn).not.to.have.attribute('amp-access-off');
+      expect(elementOff).to.have.attribute('amp-access-off');
+    });
+  });
+
+  it('should recover from authorization failure', () => {
+    urlReplacementsMock.expects('expand')
+        .withExactArgs('https://acme.com/a?rid=READER_ID')
+        .returns(Promise.resolve('https://acme.com/a?rid=reader1'))
+        .once();
+    xhrMock.expects('fetchJson')
+        .withExactArgs('https://acme.com/a?rid=reader1',
+            {credentials: 'include'})
+        .returns(Promise.reject())
+        .once();
+    return service.runAuthorization_().then(() => {
+      expect(vsyncMutates).to.have.length.greaterThan(1);
+      vsyncMutates.shift()();
+      expect(document.documentElement).to.have.class('amp-access-loading');
+
+      while (vsyncMutates.length > 0) {
+        vsyncMutates.shift()();
+      }
+      expect(document.documentElement).not.to.have.class('amp-access-loading');
+      expect(elementOn).not.to.have.attribute('amp-access-off');
+      expect(elementOff).not.to.have.attribute('amp-access-off');
+    });
+  });
+});
