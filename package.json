@@ -75,7 +75,7 @@
     "mocha": "2.3.3",
     "path": "0.12.7",
     "postcss": "5.0.12",
-    "pretty-bytes": "2.0.1",
+    "pretty-bytes": "3.0.0",
     "request": "2.67.0",
     "serve-index": "1.7.2",
     "serve-static": "1.9.1",
