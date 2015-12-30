@@ -52,6 +52,17 @@ export function onDocumentReady(doc, callback) {
   }
 }
 
+/**
+ * Returns a promise that is resolved when document is ready.
+ * @param {!Document} doc
+ * @return {!Promise}
+ */
+export function whenDocumentReady(doc) {
+  return new Promise(resolve => {
+    onDocumentReady(doc, resolve);
+  });
+}
+
 
 /**
  */
