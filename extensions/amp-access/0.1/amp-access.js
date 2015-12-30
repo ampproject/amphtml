@@ -16,10 +16,15 @@
 
 import {actionServiceFor} from '../../../src/action';
 import {assertHttpsUrl} from '../../../src/url';
+import {evaluateAccessExpr} from './access-expr';
 import {getService} from '../../../src/service';
 import {installStyles} from '../../../src/styles';
 import {isExperimentOn} from '../../../src/experiments';
 import {log} from '../../../src/log';
+import {onDocumentReady} from '../../../src/document-state';
+import {urlReplacementsFor} from '../../../src/url-replacements';
+import {vsyncFor} from '../../../src/vsync';
+import {xhrFor} from '../../../src/xhr';
 
 
 /**
@@ -72,8 +77,17 @@ export class AccessService {
     /** @const @private {!Element} */
     this.accessElement_ = accessElement;
 
-    /** @const {!AccessConfigDef} */
+    /** @const @private {!AccessConfigDef} */
     this.config_ = this.buildConfig_();
+
+    /** @const @private {!Vsync} */
+    this.vsync_ = vsyncFor(this.win);
+
+    /** @const @private {!Xhr} */
+    this.xhr_ = xhrFor(this.win);
+
+    /** @const @private {!UrlReplacements} */
+    this.urlReplacements_ = urlReplacementsFor(this.win);
   }
 
   /**
@@ -125,6 +139,78 @@ export class AccessService {
   startInternal_() {
     actionServiceFor(this.win).installActionHandler(
         this.accessElement_, this.handleAction_.bind(this));
+
+    // Start authorization XHR immediately.
+    this.runAuthorization_();
+  }
+
+  /**
+   * @return {!Promise}
+   * @private
+   */
+  runAuthorization_() {
+    log.fine(TAG, 'Start authorization via ', this.config_.authorization);
+    this.toggleTopClass_('amp-access-loading', true);
+
+    // TODO(dvoytenko): produce READER_ID and create the URL substition for it.
+    return this.urlReplacements_.expand(this.config_.authorization)
+        .then(url => {
+          log.fine(TAG, 'Authorization URL: ', url);
+          return this.xhr_.fetchJson(url, {credentials: 'include'});
+        })
+        .then(response => {
+          log.fine(TAG, 'Authorization response: ', response);
+          this.toggleTopClass_('amp-access-loading', false);
+          onDocumentReady(this.win.document, () => {
+            this.applyAuthorization_(response);
+          });
+        })
+        .catch(error => {
+          log.error(TAG, 'Authorization failed: ', error);
+          this.toggleTopClass_('amp-access-loading', false);
+        });
+  }
+
+  /**
+   * @param {!JSONObjectDef} response
+   * @private
+   */
+  applyAuthorization_(response) {
+    const elements = this.win.document.querySelectorAll('[amp-access]');
+    for (let i = 0; i < elements.length; i++) {
+      this.applyAuthorizationToElement_(elements[i], response);
+    }
+  }
+
+  /**
+   * @param {!Element} element
+   * @param {!JSONObjectDef} response
+   * @private
+   */
+  applyAuthorizationToElement_(element, response) {
+    const expr = element.getAttribute('amp-access');
+    const on = evaluateAccessExpr(expr, response);
+
+    // TODO(dvoytenko): support templates
+
+    this.vsync_.mutate(() => {
+      if (on) {
+        element.removeAttribute('amp-access-off');
+      } else {
+        element.setAttribute('amp-access-off', '');
+      }
+    });
+  }
+
+  /**
+   * @param {string} className
+   * @param {boolean} on
+   * @private
+   */
+  toggleTopClass_(className, on) {
+    this.vsync_.mutate(() => {
+      this.win.document.documentElement.classList.toggle(className, on);
+    });
   }
 
   /**
