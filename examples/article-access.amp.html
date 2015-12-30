@@ -7,9 +7,9 @@
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
   <script id="amp-access" type="application/json">
     {
-      "authorization": "http://localhost:8002/amp-authorization",
-      "pingback": "http://localhost:8002/amp-pingback",
-      "login": "http://localhost:8002/amp-login"
+      "authorization": "http://localhost:8002/amp-authorization.json?rid=READER_ID&url=CANONICAL_URL&_=RANDOM",
+      "pingback": "http://localhost:8002/amp-pingback?rid=READER_ID&url=CANONICAL_URL",
+      "login": "http://localhost:8002/amp-login?rid=READER_ID&url=CANONICAL_URL"
     }
   </script>
   <link href='https://fonts.googleapis.com/css?family=Georgia|Open+Sans|Roboto' rel='stylesheet' type='text/css'>
@@ -179,11 +179,11 @@
           </div>
         </div>
 
-        <section class="login-section">
+        <section amp-access="NOT access" class="login-section">
           <a on="tap:amp-access.login">Login to read more!</a>
         </section>
 
-        <div class="article-body" itemprop="articleBody">
+        <div amp-access="access" class="article-body" itemprop="articleBody">
           <p>
             Lorem ipsum dolor sit amet, consectetur adipiscing elit.
             Curabitur ullamcorper turpis vel commodo scelerisque. Phasellus
