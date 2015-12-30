@@ -144,11 +144,7 @@ describe('Animation', () => {
     const curve = time => {return time * 2 - 0.5;};
     anim.add(0, time => {tr1 = time;}, 1, curve);
 
-    const ap = anim.start(1000);
-    let resolveCalled = false;
-    ap.resolve_ = () => {
-      resolveCalled = true;
-    };
+    anim.start(1000);
 
     tr1 = -1;
     runVsync();
@@ -269,8 +265,6 @@ describe('Animation', () => {
   });
 
   it('should halt-freeze animation when cannot animate', () => {
-    let tr1 = -1;
-    let tr2 = -1;
     anim.add(0, time => {tr1 = time;}, 0.8);
     anim.add(0.2, time => {tr2 = time;}, 0.8);
 

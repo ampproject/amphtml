@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-import {Action} from '../../src/action';
+import {ActionService} from '../../src/service/action-impl';
+import * as sinon from 'sinon';
 
 
-describe('Action parseAction', () => {
+describe('ActionService parseAction', () => {
 
   let sandbox;
   let action;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    action = new Action(window);
+    action = new ActionService(window);
   });
 
   afterEach(() => {
@@ -87,7 +88,7 @@ describe('Action parseActionMap', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    action = new Action(window);
+    action = new ActionService(window);
   });
 
   afterEach(() => {
@@ -128,7 +129,7 @@ describe('Action findAction', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    action = new Action(window);
+    action = new ActionService(window);
   });
 
   afterEach(() => {
@@ -192,7 +193,7 @@ describe('Action method', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    action = new Action(window);
+    action = new ActionService(window);
     onEnqueue = sinon.spy();
     targetElement = document.createElement('target');
     const id = ('E' + Math.random()).replace('.', '');
@@ -257,5 +258,97 @@ describe('Action method', () => {
     expect(inv.target).to.equal(execElement);
     expect(inv.method).to.equal('method1');
     expect(inv.source).to.equal(child);
+  });
+});
+
+
+describe('Action interceptor', () => {
+
+  let sandbox;
+  let clock;
+  let action;
+  let target;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+    clock = sandbox.useFakeTimers();
+    action = new ActionService(window);
+    target = document.createElement('target');
+    target.setAttribute('id', 'amp-test-1');
+  });
+
+  afterEach(() => {
+    action = null;
+    clock.restore();
+    clock = null;
+    sandbox.restore();
+    sandbox = null;
+  });
+
+  function getQueue() {
+    return target['__AMP_ACTION_QUEUE__'];
+  }
+
+
+  it('should not initialize until called', () => {
+    expect(getQueue()).to.be.undefined;
+  });
+
+  it('should queue actions', () => {
+    action.invoke_(target, 'method1', 'source1', 'event1');
+    action.invoke_(target, 'method2', 'source2', 'event2');
+
+    const queue = getQueue();
+    expect(Array.isArray(queue)).to.be.true;
+    expect(queue).to.have.length(2);
+
+    const inv0 = queue[0];
+    expect(inv0.target).to.equal(target);
+    expect(inv0.method).to.equal('method1');
+    expect(inv0.source).to.equal('source1');
+    expect(inv0.event).to.equal('event1');
+
+    const inv1 = queue[1];
+    expect(inv1.target).to.equal(target);
+    expect(inv1.method).to.equal('method2');
+    expect(inv1.source).to.equal('source2');
+    expect(inv1.event).to.equal('event2');
+  });
+
+  it('should dequeue actions after handler set', () => {
+    action.invoke_(target, 'method1', 'source1', 'event1');
+    action.invoke_(target, 'method2', 'source2', 'event2');
+
+    expect(Array.isArray(getQueue())).to.be.true;
+    expect(getQueue()).to.have.length(2);
+
+    const handler = sinon.spy();
+    action.installActionHandler(target, handler);
+    expect(Array.isArray(getQueue())).to.be.false;
+    expect(handler.callCount).to.equal(0);
+
+    clock.tick(10);
+    expect(handler.callCount).to.equal(2);
+
+    const inv0 = handler.getCall(0).args[0];
+    expect(inv0.target).to.equal(target);
+    expect(inv0.method).to.equal('method1');
+    expect(inv0.source).to.equal('source1');
+    expect(inv0.event).to.equal('event1');
+
+    const inv1 = handler.getCall(1).args[0];
+    expect(inv1.target).to.equal(target);
+    expect(inv1.method).to.equal('method2');
+    expect(inv1.source).to.equal('source2');
+    expect(inv1.event).to.equal('event2');
+
+    action.invoke_(target, 'method3', 'source3', 'event3');
+    expect(Array.isArray(getQueue())).to.be.false;
+    expect(handler.callCount).to.equal(3);
+    const inv2 = handler.getCall(2).args[0];
+    expect(inv2.target).to.equal(target);
+    expect(inv2.method).to.equal('method3');
+    expect(inv2.source).to.equal('source3');
+    expect(inv2.event).to.equal('event3');
   });
 });

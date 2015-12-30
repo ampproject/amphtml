@@ -15,7 +15,6 @@
  */
 
 import {AmpAudio} from '../amp-audio';
-import {Timer} from '../../../../src/timer';
 import {adopt} from '../../../../src/runtime';
 import {naturalDimensions_} from '../../../../src/layout';
 import {createIframePromise} from '../../../../testing/iframe';
@@ -141,7 +140,6 @@ describe('amp-audio', () => {
     return attachAndRun({
       'width': '500'
     }).then(a => {
-      const audio = a.querySelector('audio');
       expect(a.style.width).to.be.equal('500px');
       expect(a.style.height).to.be.equal('30px');
     });

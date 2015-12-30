@@ -16,11 +16,11 @@
 
 
 /**
- * A Curve is a function that returns a normtime value (0 to 1) for another
+ * A CurveDef is a function that returns a normtime value (0 to 1) for another
  * normtime value.
  * @typedef {function(normtime):normtime}
  */
-class Curve {};
+class CurveDef {};
 
 
 /**
@@ -29,7 +29,7 @@ class Curve {};
  * @param {number} y1 Y coordinate of the first control point.
  * @param {number} x2 X coordinate of the second control point.
  * @param {number} y2 Y coordinate of the second control point.
- * @return {!Curve}
+ * @return {!CurveDef}
  */
 export function bezierCurve(x1, y1, x2, y2) {
   const bezier = new Bezier(0, 0, x1, y1, x2, y2, 1, 1);
@@ -238,7 +238,7 @@ class Bezier {
 /**
  * A collection of common curves.
  * See https://developer.mozilla.org/en-US/docs/Web/CSS/timing-function
- * @enum {!Curve}
+ * @enum {!CurveDef}
  */
 export const Curves = {
   /**
@@ -271,7 +271,7 @@ export const Curves = {
 
 
 /**
- * @const {!Object<string, !Curve>}
+ * @const {!Object<string, !CurveDef>}
  */
 const NAME_MAP = {
   'linear': Curves.LINEAR,
@@ -284,8 +284,8 @@ const NAME_MAP = {
 
 /**
  * If the argument is a string, this methods matches an existing curve by name.
- * @param {?Curve|string|undefined} curve
- * @return {?Curve}
+ * @param {?CurveDef|string|undefined} curve
+ * @return {?CurveDef}
  */
 export function getCurve(curve) {
   if (!curve) {

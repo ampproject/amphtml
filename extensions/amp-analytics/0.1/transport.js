@@ -49,10 +49,10 @@ export function sendRequest(win, request, transportOptions) {
 export class Transport {
 
   /**
-   * @param {!Window} win
+   * @param {!Window} unusedWin
    * @param {string} request
    */
-  static sendRequestUsingImage(win, request) {
+  static sendRequestUsingImage(unusedWin, request) {
     const image = new Image();
     image.src = request;
     image.width = 1;

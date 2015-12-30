@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import '../../third_party/babel/custom-babel-helpers';
 import '../../src/polyfills';
 import {onDocumentReady} from '../../src/document-state';
 import {isExperimentOn, toggleExperiment} from '../../src/experiments';
@@ -28,7 +29,7 @@ const COOKIE_MAX_AGE_DAYS = 180;  // 6 month
  *   spec: string
  * }}
  */
-const Experiment = {};
+let ExperimentDef;
 
 /**
  * This experiment is special because it uses a different mechanism that is
@@ -38,7 +39,7 @@ const Experiment = {};
 const CANARY_EXPERIMENT_ID = 'dev-channel';
 
 
-/** @const {!Array<!Experiment>} */
+/** @const {!Array<!ExperimentDef>} */
 const EXPERIMENTS = [
   // Canary (Dev Channel)
   {
@@ -56,12 +57,35 @@ const EXPERIMENTS = [
         'amp-mustache/amp-mustache.md',
   },
 
-  // Amp Analytics
+  // AMP Analytics
   {
     id: 'amp-analytics',
-    name: 'Amp Analytics)',
+    name: 'AMP Analytics',
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
         'amp-analytics/amp-analytics.md',
+  },
+
+  // AMP Access
+  {
+    id: 'amp-access',
+    name: 'AMP Access',
+    spec: '',  // TODO(dvoytenko): link spec when ready.
+  },
+
+  // Amp User Notification
+  {
+    id: 'amp-user-notification',
+    name: 'Amp User Notification',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
+        'amp-user-notification/amp-user-notification.md',
+  },
+
+  // Dynamic CSS Classes
+  {
+    id: 'dynamic-css-classes',
+    name: 'Dynamic CSS Classes',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
+        'amp-dynamic-css-classes/amp-dynamic-css-classes.md',
   },
 ];
 
@@ -79,7 +103,7 @@ function build() {
 
 /**
  * Builds one row of the experiments table.
- * @param {!Experiment} experiment
+ * @param {!ExperimentDef} experiment
  */
 function buildExperimentRow(experiment) {
   const tr = document.createElement('tr');
@@ -149,7 +173,7 @@ function update() {
 
 /**
  * Updates the state of a single experiment.
- * @param {!Experiment} experiment
+ * @param {!ExperimentDef} experiment
  */
 function updateExperimentRow(experiment) {
   const tr = document.getElementById('exp-tr-' + experiment.id);

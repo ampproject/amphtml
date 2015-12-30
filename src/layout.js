@@ -39,7 +39,7 @@ export const Layout = {
  * CSS Length type. E.g. "1px" or "20vh".
  * @typedef {string}
  */
-let Length;
+let LengthDef;
 
 
 /**
@@ -48,7 +48,7 @@ let Length;
  *   height: string
  * }}
  */
-let Dimensions;
+let DimensionsDef;
 
 
 /**
@@ -58,7 +58,7 @@ let Dimensions;
  * `hasNaturalDimensions` checks for membership in this set.
  * `getNaturalDimensions` determines the dimensions for an element in the
  *    set and caches it.
- * @type {!Object<string, ?Dimensions>}
+ * @type {!Object<string, ?DimensionsDef>}
  * @private  Visible for testing only!
  */
 export const naturalDimensions_ = {
@@ -139,7 +139,7 @@ export function isInternalElement(tag) {
  * Parses the CSS length value. If no units specified, the assumed value is
  * "px". Returns undefined in case of parsing error.
  * @param {string|undefined} s
- * @return {!Length|undefined}
+ * @return {!LengthDef|undefined}
  */
 export function parseLength(s) {
   if (typeof s == 'number') {
@@ -160,8 +160,8 @@ export function parseLength(s) {
 
 /**
  * Asserts that the supplied value is a CSS Length value.
- * @param {!Length|string} length
- * @return {!Length}
+ * @param {!LengthDef|string} length
+ * @return {!LengthDef}
  */
 export function assertLength(length) {
   assert(/^\d+(\.\d+)?(px|em|rem|vh|vw|vmin|vmax)$/.test(length),
@@ -172,7 +172,7 @@ export function assertLength(length) {
 
 /**
  * Returns units from the CSS length value.
- * @param {!Length} length
+ * @param {!LengthDef} length
  * @return {string}
  */
 export function getLengthUnits(length) {
@@ -185,7 +185,7 @@ export function getLengthUnits(length) {
 
 /**
  * Returns the numeric value of a CSS length value.
- * @param {!Length|string} length
+ * @param {!LengthDef|string} length
  * @return {number}
  */
 export function getLengthNumeral(length) {
@@ -197,7 +197,7 @@ export function getLengthNumeral(length) {
  * Determines whether the tagName is a known element that has natural dimensions
  * in our runtime or the browser.
  * @param {string} tagName The element tag name.
- * @return {Dimensions}
+ * @return {DimensionsDef}
  */
 export function hasNaturalDimensions(tagName) {
   tagName = tagName.toUpperCase();
@@ -211,7 +211,7 @@ export function hasNaturalDimensions(tagName) {
  * This operation can only be completed for an element whitelisted by
  * `hasNaturalDimensions`.
  * @param {string} tagName The element tag name.
- * @return {Dimensions}
+ * @return {DimensionsDef}
  */
 export function getNaturalDimensions(tagName) {
   tagName = tagName.toUpperCase();

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {assert} from './asserts';
 import {cidFor} from './cid';
 import {documentInfoFor} from './document-info';
-import {getService, getElementService} from './service';
+import {getService} from './service';
+import {userNotificationManagerFor} from './user-notification';
 import {log} from './log';
 import {parseUrl, removeFragment} from './url';
 import {viewportFor} from './viewport';
@@ -91,12 +91,19 @@ class UrlReplacements {
       return documentInfoFor(this.win_).pageViewId;
     });
 
-    this.set_('CLIENT_ID', (data, name) => {
+    this.set_('CLIENT_ID', (data, opt_name, opt_userNotificationId) => {
+      let consent = Promise.resolve();
+
+      // If no `opt_userNotificationId` argument is provided then
+      // assume consent is given by default.
+      if (opt_userNotificationId) {
+        consent = userNotificationManagerFor(this.win_).then(service => {
+          return service.get(opt_userNotificationId);
+        });
+      }
+
       return cidFor(this.win_).then(cid => {
-        return cid.get(name,
-            // TODO(@cramforce): Hook up mechanism to get consent to id
-            // generation.
-            Promise.resolve());
+        return cid.get(opt_name, consent);
       });
     });
 
@@ -171,8 +178,13 @@ class UrlReplacements {
       }
       return encodeURIComponent(val);
     };
-    url = url.replace(expr, (match, name, arg) => {
-      const val = this.replacements_[name](opt_data, arg);
+    url = url.replace(expr, (match, name, opt_strargs) => {
+      let args = [];
+      if (typeof opt_strargs == 'string') {
+        args = opt_strargs.split(',');
+      }
+      const val = this.replacements_[name]
+          .apply(this.replacements_, [opt_data].concat(args));
       // In case the produced value is a promise, we don't actually
       // replace anything here, but do it again when the promise resolves.
       if (val && val.then) {
@@ -214,7 +226,8 @@ class UrlReplacements {
           // Example string that match
           // FOO_BAR
           // FOO_BAR(arg1)
-          new RegExp('\\$?(' + all + ')(?:\\(([a-zA-Z-_]+)\\))?', 'g');
+          // FOO_BAR(arg1,arg2)
+          new RegExp('\\$?(' + all + ')(?:\\(([0-9a-zA-Z-_,]+)\\))?', 'g');
     }
     return this.replacementExpr_;
   }

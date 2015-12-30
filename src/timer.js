@@ -132,7 +132,7 @@ export class Timer {
    */
   timeoutPromise(delay, opt_racePromise) {
     let timerKey = null;
-    const delayPromise = new Promise((resolve, reject) => {
+    const delayPromise = new Promise((_resolve, reject) => {
       timerKey = this.delay(() => {
         timerKey = -1;
         reject('timeout');

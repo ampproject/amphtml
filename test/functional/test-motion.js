@@ -56,20 +56,18 @@ describe('Motion calcVelocity', () => {
 
 describe('Motion continueMotion', () => {
   let sandbox;
-  let element;
   let clock;
   let vsync;
   let vsyncTasks;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    element = document.createElement('div');
     clock = sandbox.useFakeTimers();
     vsyncTasks = [];
     vsync = {
       runAnimMutateSeries: mutator => {
         vsyncTasks.push(mutator);
-        return new Promise((resolve, reject) => {});
+        return new Promise((unusedResolve, unusedReject) => {});
       }
     };
   });

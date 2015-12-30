@@ -227,7 +227,6 @@ describe('performance', () => {
   });
 
   it('should call the flush function after its set', () => {
-    const perf = performanceFor(window);
     const flushSpy = sinon.spy();
 
     adopt(window);

@@ -19,7 +19,6 @@ import {Layout} from '../../../src/layout';
 import {SwipeXYRecognizer, TapRecognizer}
     from '../../../src/gesture-recognizers';
 import {historyFor} from '../../../src/history';
-import {timer} from '../../../src/timer';
 import * as st from '../../../src/style';
 
 

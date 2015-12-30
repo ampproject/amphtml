@@ -15,12 +15,11 @@
  */
 
 import {Timer} from '../../../../src/timer';
-import {AmpIframe, listen} from '../amp-iframe';
+import {AmpIframe} from '../amp-iframe';
 import {adopt} from '../../../../src/runtime';
 import {createIframePromise, pollForLayout, poll}
     from '../../../../testing/iframe';
 import {loadPromise} from '../../../../src/event-helper';
-import {resourcesFor} from '../../../../src/resources';
 import * as sinon from 'sinon';
 
 adopt(window);
@@ -311,7 +310,7 @@ describe('amp-iframe', () => {
     }).then(amp => {
       const impl = amp.container.implementation_;
       impl.layoutCallback();
-      const p = new Promise((resolve, reject) => {
+      const p = new Promise((resolve, unusedReject) => {
         impl.updateHeight_ = newHeight => {
           resolve({amp: amp, newHeight: newHeight});
         };
@@ -363,7 +362,7 @@ describe('amp-iframe', () => {
   });
 
   it('should listen for embed-ready event', () => {
-    const sandbox = sinon.sandbox.create();
+    sinon.sandbox.create();
     const activateIframeSpy_ =
         sinon.spy(AmpIframe.prototype, 'activateIframe_');
     return getAmpIframe({

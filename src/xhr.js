@@ -31,7 +31,7 @@ import {getService} from './service';
  *   method: (string|undefined)
  * }}
  */
-const FetchInit = {};
+let FetchInitDef;
 
 /** @private @const {!Array<string>} */
 const allowedMethods_ = ['GET', 'POST'];
@@ -52,7 +52,7 @@ class Xhr {
     /**
      * We want to call `fetch_` unbound from any context since it could
      * be either the native fetch or our polyfill.
-     * @private @const {function(string, ?FetchInit=):!Promise<!FetchResponse>}
+     * @private @const {function(string, ?FetchInitDef=):!Promise<!FetchResponse>}
      */
     this.fetch_ = (win.fetch || fetchPolyfill).bind(null);
   }
@@ -63,7 +63,7 @@ class Xhr {
    * See https://developer.mozilla.org/en-US/docs/Web/API/GlobalFetch/fetch
    *
    * @param {string} input
-   * @param {?FetchInit=} opt_init
+   * @param {?FetchInitDef=} opt_init
    * @return {!Promise<!JSONValue>}
    */
   fetchJson(input, opt_init) {
@@ -93,7 +93,7 @@ export function normalizeMethod_(method) {
 
 /**
 * Initialize init object with headers and stringifies the body.
- * @param {!FetchInit} init
+ * @param {!FetchInitDef} init
  * @private
  */
 function setupJson_(init) {
@@ -129,7 +129,7 @@ function setupJson_(init) {
  * us to immediately support a much wide API.
  *
  * @param {string} input
- * @param {!FetchInit=} opt_init
+ * @param {!FetchInitDef=} opt_init
  * @return {!Promise<!FetchResponse>}
  * @private Visible for testing
  */
@@ -182,7 +182,7 @@ export function fetchPolyfill(input, opt_init) {
 /**
  * @param {string} method
  * @param {string} url
- * @param {!FetchInit} init
+ * @param {!FetchInitDef} init
  * @return {!XMLHttpRequest}
  * @private
  */

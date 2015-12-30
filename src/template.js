@@ -28,7 +28,7 @@ import {getService} from './service';
 /**
  * @typedef {function(new:!BaseTemplate, !Element)}
  */
-const TemplateClass = {};
+const TemplateClassDef = {};
 
 /** @private @const {string} */
 const PROP_ = '__AMP_IMPL_';
@@ -65,10 +65,10 @@ export class BaseTemplate {
 
   /**
    * To be implemented by subclasses.
-   * @param {!JSONObject} data
+   * @param {!JSONObject} unusedData
    * @return {!Element}
    */
-  render(data) {
+  render(unusedData) {
     throw new Error('Not implemented');
   }
 
@@ -118,14 +118,14 @@ export class Templates {
 
     /**
      * A map from template type to template's class promise.
-     * @private @const {!Object<string, !Promise<!TemplateClass>>}
+     * @private @const {!Object<string, !Promise<!TemplateClassDef>>}
      */
     this.templateClassMap_ = {};
 
     /**
      * A map from template type to template's class promise. This is a transient
      * storage. As soon as the template class loaded, the entry is removed.
-     * @private @const {!Object<string, function(!TemplateClass)>}
+     * @private @const {!Object<string, function(!TemplateClassDef)>}
      */
     this.templateClassResolvers_ = {};
 
@@ -247,7 +247,7 @@ export class Templates {
    * wait until the actual template script has been downloaded and parsed.
    * @param {!Element} element
    * @param {string} type
-   * @return {!Promise<!TemplateClass>}
+   * @return {!Promise<!TemplateClassDef>}
    * @private
    */
   waitForTemplateClass_(element, type) {
@@ -257,7 +257,7 @@ export class Templates {
 
     this.checkTemplateDeclared_(element, type);
     let aResolve;
-    const promise = new Promise((resolve, reject) => {
+    const promise = new Promise((resolve, unusedReject) => {
       aResolve = resolve;
     });
     this.templateClassMap_[type] = promise;
@@ -292,7 +292,7 @@ export class Templates {
    * Registers an extended template. This function should typically be called
    * through the registerTemplate method on the AMP runtime.
    * @param {string} type
-   * @param {!TemplateClass} templateClass
+   * @param {!TemplateClassDef} templateClass
    * @private
    */
   registerTemplate_(type, templateClass) {
@@ -313,7 +313,7 @@ export class Templates {
  * through the registerTemplate method on the AMP runtime.
  * @param {!Window} win
  * @param {string} type
- * @param {!TemplateClass} templateClass
+ * @param {!TemplateClassDef} templateClass
  * @package
  */
 export function registerExtendedTemplate(win, type, templateClass) {

@@ -16,7 +16,8 @@
 
 import {Viewport, ViewportBindingNatural_, ViewportBindingNaturalIosEmbed_,
           ViewportBindingVirtual_, parseViewportMeta, stringifyViewportMeta,
-          updateViewportMetaString} from '../../src/viewport';
+          updateViewportMetaString} from '../../src/service/viewport-impl';
+import {installViewerService} from '../../src/service/viewer-impl';
 import {getStyle} from '../../src/style';
 import * as sinon from 'sinon';
 
@@ -53,6 +54,7 @@ describe('Viewport', () => {
       setTimeout: window.setTimeout,
       requestAnimationFrame: fn => window.setTimeout(fn, 16)
     };
+    installViewerService(windowApi);
     binding = new ViewportBindingVirtual_(windowApi, viewer);
     viewport = new Viewport(windowApi, binding, viewer);
     viewport.getSize();
@@ -352,7 +354,7 @@ describe('Viewport META', () => {
         },
         location: {}
       };
-
+      installViewerService(windowApi);
       binding = new ViewportBindingVirtual_(windowApi, viewer);
       viewport = new Viewport(windowApi, binding, viewer);
     });
@@ -790,7 +792,6 @@ describe('ViewportBindingVirtual', () => {
   let binding;
   let windowApi;
   let viewer;
-  let viewerMock;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -800,7 +801,7 @@ describe('ViewportBindingVirtual', () => {
       getScrollTop: () => 17,
       getPaddingTop: () => 19
     };
-    viewerMock = sandbox.mock(viewer);
+    sandbox.mock(viewer);
     windowApi = {
       document: {
         documentElement: {style: {}}

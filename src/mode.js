@@ -22,14 +22,14 @@ import {parseQueryString} from './url';
  *   localDev: boolean
  * }}
  */
-let Mode;
+let ModeDef;
 
-/** @typedef {?Mode} */
+/** @typedef {?ModeDef} */
 let mode = null;
 
 /**
  * Provides info about the current app.
- * @return {!Mode}
+ * @return {!ModeDef}
  */
 export function getMode() {
   if (mode) {
@@ -40,7 +40,7 @@ export function getMode() {
 
 /**
  * Set mode in a test. Pass null in afterEach function to reset.
- * @param {?Mode} m
+ * @param {?ModeDef} m
  */
 export function setModeForTesting(m) {
   mode = m;
@@ -48,7 +48,7 @@ export function setModeForTesting(m) {
 
 /**
  * Provides info about the current app.
- * @return {!Mode}
+ * @return {!ModeDef}
  */
 function getMode_() {
   const isLocalDev = (location.hostname == 'localhost' ||

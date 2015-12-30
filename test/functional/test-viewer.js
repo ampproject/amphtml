@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Viewer} from '../../src/viewer';
+import {Viewer} from '../../src/service/viewer-impl';
 import {platform} from '../../src/platform';
 
 
@@ -28,7 +28,7 @@ describe('Viewer', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     const WindowApi = function() {};
-    WindowApi.prototype.setTimeout = function(callback, delay) {};
+    WindowApi.prototype.setTimeout = function() {};
     windowApi = new WindowApi();
     windowApi.location = {hash: '', href: '/test/viewer'};
     windowMock = sandbox.mock(windowApi);

@@ -15,8 +15,8 @@
  */
 
 
-require('../src/polyfills');
 import {Timer} from '../src/timer';
+import {installCoreServices} from '../src/amp-core-service';
 import {registerForUnitTest} from '../src/runtime';
 
 let iframeCount = 0;
@@ -166,6 +166,7 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
       if (opt_runtimeOff) {
         iframe.contentWindow.name = '__AMP__off=1';
       }
+      installCoreServices(iframe.contentWindow);
       registerForUnitTest(iframe.contentWindow);
       resolve({
         win: iframe.contentWindow,
@@ -188,6 +189,27 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
             return element;
           });
         }
+      });
+    };
+    iframe.onerror = reject;
+    document.body.appendChild(iframe);
+  });
+}
+
+export function createServedIframe(src) {
+  return new Promise(function(resolve, reject) {
+    const iframe = document.createElement('iframe');
+    iframe.name = 'test_' + iframeCount++;
+    iframe.src = src;
+    iframe.onload = function() {
+      const win = iframe.contentWindow;
+      win.AMP_TEST = true;
+      installCoreServices(win);
+      registerForUnitTest(win);
+      resolve({
+        win: win,
+        doc: win.document,
+        iframe: iframe
       });
     };
     iframe.onerror = reject;

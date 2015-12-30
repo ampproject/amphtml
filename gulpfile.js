@@ -68,11 +68,13 @@ function buildExtensions(options) {
   // We pass watch further in to have browserify watch the built file
   // and update it if any of its required deps changed.
   // Each extension and version must be listed individually here.
+  buildExtension('amp-access', '0.1', true, options);
   buildExtension('amp-analytics', '0.1', false, options);
   buildExtension('amp-anim', '0.1', false, options);
   buildExtension('amp-audio', '0.1', false, options);
   buildExtension('amp-brightcove', '0.1', false, options);
   buildExtension('amp-carousel', '0.1', true, options);
+  buildExtension('amp-dynamic-css-classes', '0.1', false, options);
   buildExtension('amp-fit-text', '0.1', true, options);
   buildExtension('amp-font', '0.1', false, options);
   buildExtension('amp-iframe', '0.1', false, options);
@@ -89,6 +91,7 @@ function buildExtensions(options) {
    */
   buildExtension('amp-slides', '0.1', false, options);
   buildExtension('amp-twitter', '0.1', false, options);
+  buildExtension('amp-user-notification', '0.1', true, options);
   buildExtension('amp-vine', '0.1', false, options);
   buildExtension('amp-youtube', '0.1', false, options);
 }
@@ -110,7 +113,10 @@ function polyfillsForTests() {
  */
 function compile(watch, shouldMinify) {
   compileCss();
-  compileJs('./src/', 'amp.js', './dist', {
+  // For compilation with babel we start with the amp-babel entry point,
+  // but then rename to the amp.js which we've been using all along.
+  compileJs('./src/', 'amp-babel.js', './dist', {
+    toName: 'amp.js',
     minifiedName: 'v0.js',
     watch: watch,
     minify: shouldMinify,
@@ -299,6 +305,7 @@ function buildExamples(watch) {
   buildExample('ads.amp.html');
   buildExample('analytics.amp.html');
   buildExample('article.amp.html');
+  buildExample('article-access.amp.html');
   buildExample('metadata-examples/article-json-ld.amp.html');
   buildExample('metadata-examples/article-microdata.amp.html');
   buildExample('metadata-examples/recipe-json-ld.amp.html');
@@ -313,6 +320,7 @@ function buildExamples(watch) {
   buildExample('pinterest.amp.html');
   buildExample('released.amp.html');
   buildExample('twitter.amp.html');
+  buildExample('user-notification.amp.html');
   buildExample('vine.amp.html');
 
   function copyHandler(name, err) {
@@ -418,6 +426,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
     bundler.bundle()
       .on('error', function(err) { console.error(err); this.emit('end'); })
       .pipe(lazybuild())
+      .pipe(rename(options.toName || srcFilename))
       .pipe(lazywrite());
   }
 

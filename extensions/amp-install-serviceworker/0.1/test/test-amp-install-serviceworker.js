@@ -26,7 +26,7 @@ describe('amp-install-serviceworker', () => {
     expect(implementation).to.be.defined;
     install.setAttribute('src', 'https://example.com/sw.js');
     let calledSrc;
-    const p = new Promise(resolve => {});
+    const p = new Promise(() => {});
     implementation.getWin = () => {
       return {
         location: {
@@ -70,7 +70,7 @@ describe('amp-install-serviceworker', () => {
     expect(implementation).to.be.defined;
     install.setAttribute('src', 'https://other-origin.com/sw.js');
     let calledSrc;
-    const p = new Promise(resolve => {});
+    const p = new Promise(() => {});
     implementation.getWin = () => {
       return {
         location: {

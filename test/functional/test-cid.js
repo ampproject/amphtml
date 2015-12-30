@@ -19,7 +19,7 @@ import {installCidService, getSourceOrigin, isProxyOrigin} from
     '../../src/service/cid-impl';
 import {parseUrl} from '../../src/url';
 import {timer} from '../../src/timer';
-import {viewerFor} from '../../src/viewer';
+import {installViewerService} from '../../src/service/viewer-impl';
 import * as sinon from 'sinon';
 
 describe('cid', () => {
@@ -66,7 +66,7 @@ describe('cid', () => {
         'amp-analytics': true
       }
     };
-    const viewer = viewerFor(fakeWin);
+    const viewer = installViewerService(fakeWin);
     sandbox.stub(viewer, 'isEmbedded', function() {
       return isEmbedded;
     });
@@ -203,7 +203,7 @@ describe('cid', () => {
     };
     win.__proto__ = window;
     expect(win.location.href).to.equal('https://cdn.ampproject.org/v/www.origin.com/');
-    viewerFor(win).isEmbedded = () => false;
+    installViewerService(win).isEmbedded = () => false;
     installCidService(win);
     return cidFor(win).then(cid => {
       return cid.get('foo', hasConsent).then(c1 => {
@@ -265,7 +265,7 @@ describe('cid', () => {
     const consent = timer.promise(100).then(() => {
       nonce = 'timer fired';
     });
-    const p = cid.get('test', consent).then(c => {
+    const p = cid.get('test', consent).then(unusedC => {
       expect(nonce).to.equal('timer fired');
     });
     clock.tick(100);

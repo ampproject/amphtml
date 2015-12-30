@@ -41,6 +41,7 @@ describe('service', () => {
   it('should work without a factory', () => {
     const c1 = getService(window, 'c', inc);
     const c2 = getService(window, 'c');
+    expect(c1).to.equal(c2);
   });
 
   it('should fail without factory on initial setup', () => {

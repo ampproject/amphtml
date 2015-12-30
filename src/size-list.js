@@ -25,7 +25,7 @@ import {assertLength} from './layout';
  *   size: (!Length)
  * }}
  */
-let SizeListOption;
+let SizeListOptionDef;
 
 
 /**
@@ -78,11 +78,11 @@ export function parseSizeList(s) {
  */
 export class SizeList {
   /**
-   * @param {!Array<!SizeListOption>} sizes
+   * @param {!Array<!SizeListOptionDef>} sizes
    */
   constructor(sizes) {
     assert(sizes.length > 0, 'SizeList must have at least one option');
-    /** @private @const {!Array<!SizeListOption>} */
+    /** @private @const {!Array<!SizeListOptionDef>} */
     this.sizes_ = sizes;
 
     // All sources except for last must have a media query. The last one must

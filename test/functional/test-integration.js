@@ -134,7 +134,6 @@ describe('3p integration.js', () => {
       expect(myWin).to.equal(win);
       expect(myData).to.equal(myData);
     });
-    const domNode = {};
     expect(called).to.be.false;
     draw3p(win, data);
     expect(called).to.be.true;
@@ -160,10 +159,9 @@ describe('3p integration.js', () => {
       expect(myData).to.not.equal(data);
       expect(myData).to.have.property('custom');
     });
-    const domNode = {};
     expect(called).to.be.false;
     let finish;
-    draw3p(win, data, (config, done) => {
+    draw3p(win, data, (_config, done) => {
       finish = () => {
         done({
           custom: true

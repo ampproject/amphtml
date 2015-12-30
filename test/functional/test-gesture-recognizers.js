@@ -34,7 +34,7 @@ describe('TapRecognizer', () => {
     clock = sandbox.useFakeTimers();
 
     element = {
-      addEventListener: (eventType, handler) => {}
+      addEventListener: (unusedEventType, unusedHandler) => {}
     };
 
     gestures = new Gestures(element);
@@ -130,7 +130,7 @@ describe('DoubletapRecognizer', () => {
     clock = sandbox.useFakeTimers();
 
     element = {
-      addEventListener: (eventType, handler) => {}
+      addEventListener: (unusedEventType, unusedHandler) => {}
     };
 
     gestures = new Gestures(element);
@@ -240,7 +240,7 @@ describe('SwipeXYRecognizer', () => {
     clock = sandbox.useFakeTimers();
 
     element = {
-      addEventListener: (eventType, handler) => {}
+      addEventListener: (unusedEventType, unusedHandler) => {}
     };
 
     gestures = new Gestures(element);
@@ -429,7 +429,7 @@ describe('TapzoomRecognizer', () => {
     clock = sandbox.useFakeTimers();
 
     element = {
-      addEventListener: (eventType, handler) => {}
+      addEventListener: (unusedEventType, unusedHandler) => {}
     };
 
     gestures = new Gestures(element);
@@ -612,7 +612,7 @@ describe('PinchRecognizer', () => {
     clock = sandbox.useFakeTimers();
 
     element = {
-      addEventListener: (eventType, handler) => {}
+      addEventListener: (unusedEventType, unusedHandler) => {}
     };
 
     gestures = new Gestures(element);
@@ -763,7 +763,7 @@ describe('PinchRecognizer', () => {
         [{clientX: 80, clientY: 70},
          {clientX: 120, clientY: 130}]});
     gesturesMock.expects('signalEmit_').withExactArgs(recognizer,
-        sinon.match(data => true), null).once();
+        sinon.match(unusedData => true), null).once();
     clock.tick(10);
     recognizer.acceptStart();
 
@@ -797,7 +797,7 @@ describe('PinchRecognizer', () => {
         [{clientX: 80, clientY: 70},
          {clientX: 120, clientY: 130}]});
     gesturesMock.expects('signalEmit_').withExactArgs(recognizer,
-        sinon.match(data => true), null).once();
+        sinon.match(unusedData => true), null).once();
     clock.tick(10);
     recognizer.acceptStart();
 
@@ -827,7 +827,7 @@ describe('PinchRecognizer', () => {
         [{clientX: 80, clientY: 70},
          {clientX: 120, clientY: 130}]});
     gesturesMock.expects('signalEmit_').withExactArgs(recognizer,
-        sinon.match(data => true), null).once();
+        sinon.match(unusedData => true), null).once();
     clock.tick(10);
     recognizer.acceptStart();
 

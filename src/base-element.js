@@ -15,7 +15,6 @@
  */
 
 import {Layout} from './layout';
-import {assert} from './asserts';
 import {preconnectFor} from './preconnect';
 import {resourcesFor} from './resources';
 import {viewerFor} from './viewer';
@@ -292,9 +291,9 @@ export class BaseElement {
   /**
    * Instructs the resource that it has either entered or exited the visible
    * viewport. Intended to be implemented by actual components.
-   * @param {boolean} inViewport
+   * @param {boolean} unusedInViewport
    */
-  viewportCallback(inViewport) {
+  viewportCallback(unusedInViewport) {
   }
 
   /**
@@ -312,9 +311,9 @@ export class BaseElement {
   /**
    * Instructs the element that its activation is requested based on some
    * user event. Intended to be implemented by actual components.
-   * @param {!ActionInvocation} invocation
+   * @param {!ActionInvocation} unusedInvocation
    */
-  activate(invocation) {
+  activate(unusedInvocation) {
   }
 
   /**
@@ -332,12 +331,12 @@ export class BaseElement {
    * been previously registered using {@link registerAction}, otherwise an
    * error is thrown.
    * @param {!ActionInvocation} invocation The invocation data.
-   * @param {boolean} deferred Whether the invocation has had to wait any time
+   * @param {boolean} unusedDeferred Whether the invocation has had to wait any time
    *   for the element to be resolved, upgraded and built.
    * @final
    * @package
    */
-  executeAction(invocation, deferred) {
+  executeAction(invocation, unusedDeferred) {
     if (invocation.method == 'activate') {
       this.activate(invocation);
     } else {

@@ -26,11 +26,11 @@ import {assert} from './asserts';
 
 
 /** @typedef {function(!Window, !Object)}  */
-let ThirdPartyFunction;
+let ThirdPartyFunctionDef;
 
 
 /**
- * @const {!Object<ThirdPartyFunction>}
+ * @const {!Object<ThirdPartyFunctionDef>}
  * @visibleForTesting
  */
 export const registrations = {};
@@ -40,7 +40,7 @@ let syncScriptLoads = 0;
 
 /**
  * @param {string} id The specific 3p integration.
- * @param {ThirdPartyFunction} draw Function that draws the 3p integration.
+ * @param {ThirdPartyFunctionDef} draw Function that draws the 3p integration.
  */
 export function register(id, draw) {
   assert(!registrations[id], 'Double registration %s', id);

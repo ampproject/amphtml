@@ -38,7 +38,7 @@ export class Animation {
    * object that can be used to monitor or control animation.
    *
    * @param {!Transition<?>} transition Transition to animate.
-   * @param {time} duration Duration in milliseconds.
+   * @param {timeDef} duration Duration in milliseconds.
    * @param {(!Curve|string)=} opt_curve Optional curve to use for animation.
    *   Default is the linear animation.
    * @return {!AnimationPlayer}
@@ -61,7 +61,7 @@ export class Animation {
     this.curve_ = null;
 
     /**
-     * @private @const {!Array<!Segment_>}
+     * @private @const {!Array<!SegmentDef>}
      */
     this.segments_ = [];
   }
@@ -81,14 +81,14 @@ export class Animation {
   /**
    * Adds a segment to the animation. Each segment starts at offset (delay)
    * and runs for a portion of the overall animation (duration). Note that
-   * both delay and duration and normtime types which accept values from 0 to 1.
+   * both delay and duration and normtimeDef types which accept values from 0 to 1.
    * Optionally, the time is pushed through a curve. If curve is not specified,
    * the default animation curve will be used. The specified transition is
    * animated over the specified duration from 0 to 1.
    *
-   * @param {normtime} delay
+   * @param {normtimeDef} delay
    * @param {!Transition<?>} transition
-   * @param {normtime} duration
+   * @param {normtimeDef} duration
    * @param {(!Curve|string)=} opt_curve
    * @return {!Animation}
    */
@@ -102,7 +102,7 @@ export class Animation {
    * Starts the animation and returns the AnimationPlayer object that can be
    * used to monitor and control the animation.
    *
-   * @param {time} duration Absolute time in milliseconds.
+   * @param {timeDef} duration Absolute time in milliseconds.
    * @return {!AnimationPlayer}
    */
   start(duration) {
@@ -126,16 +126,16 @@ class AnimationPlayer {
 
   /**
    * @param {!Vsync} vsync
-   * @param {!Array<!Segment_>} segments
+   * @param {!Array<!SegmentDef>} segments
    * @param {?Curve} defaultCurve
-   * @param {time} duration
+   * @param {timeDef} duration
    */
   constructor(vsync, segments, defaultCurve, duration) {
 
     /** @private @const {!Vsync} */
     this.vsync_ = vsync;
 
-    /** @private @const {!Array<!SegmentRuntime_>} */
+    /** @private @const {!Array<!SegmentRuntimeDef>} */
     this.segments_ = [];
     for (let i = 0; i < segments.length; i++) {
       const segment = segments[i];
@@ -152,13 +152,13 @@ class AnimationPlayer {
     /** @private @const */
     this.duration_ = duration;
 
-    /** @private {time} */
+    /** @private {timeDef} */
     this.startTime_ = 0;
 
-    /** @private {normtime} */
+    /** @private {normtimeDef} */
     this.normLinearTime_ = 0;
 
-    /** @private {normtime} */
+    /** @private {normtimeDef} */
     this.normTime_ = 0;
 
     /** @private {boolean} */
@@ -279,10 +279,10 @@ class AnimationPlayer {
   }
 
   /**
-   * @param {!Object<string, *>} state
+   * @param {!Object<string, *>} unusedState
    * @private
    */
-  stepMutate_(state) {
+  stepMutate_(unusedState) {
     if (!this.running_) {
       return;
     }
@@ -321,7 +321,7 @@ class AnimationPlayer {
   }
 
   /**
-   * @param {!SegmentRuntime_} segment
+   * @param {!SegmentRuntimeDef} segment
    * @param {number} totalLinearTime
    */
   mutateSegment_(segment, totalLinearTime) {
@@ -360,23 +360,23 @@ class AnimationPlayer {
 
 /**
  * @typedef {{
- *   delay: normtime,
+ *   delay: normtimeDef,
  *   func: !Transition,
- *   duration: normtime,
+ *   duration: normtimeDef,
  *   curve: ?Curve
  * }}
  */
-class Segment_ {}
+class SegmentDef {}
 
 
 /**
  * @typedef {{
- *   delay: normtime,
+ *   delay: normtimeDef,
  *   func: !Transition,
- *   duration: normtime,
+ *   duration: normtimeDef,
  *   curve: ?Curve,
  *   started: boolean,
  *   completed: boolean
  * }}
  */
-class SegmentRuntime_ {}
+class SegmentRuntimeDef {}
