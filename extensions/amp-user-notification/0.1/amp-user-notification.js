@@ -21,7 +21,7 @@ import {cidFor} from '../../../src/cid';
 import {getService} from '../../../src/service';
 import {isExperimentOn} from '../../../src/experiments';
 import {log} from '../../../src/log';
-import {onDocumentReady} from '../../../src/document-state';
+import {whenDocumentReady} from '../../../src/document-state';
 import {viewerFor} from '../../../src/viewer';
 import {xhrFor} from '../../../src/xhr';
 
@@ -258,17 +258,10 @@ export class UserNotificationManager {
     /** @private @const {!Viewer} */
     this.viewer_ = viewerFor(this.win_);
 
-    // TODO(erwinm, #1226)
-    // Add `whenDocumentReady` function in document-state
-    // that returns a promise.
-    const documentReadyPromise_ = new Promise(resolve => {
-      onDocumentReady(this.win_.document, resolve);
-    });
-
     /** @private {!Promise} */
     this.managerReadyPromise_ = all([
       this.viewer_.whenVisible(),
-      documentReadyPromise_
+      whenDocumentReady(this.win_.document)
     ]);
 
     /** @private {!Promise} */
