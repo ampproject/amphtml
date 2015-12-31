@@ -275,15 +275,18 @@ describe('amp-iframe', () => {
         amp.assertSource('https://google.com/fpp', 'https://google.com/abc',
             'allow-same-origin');
       }).to.throw(/must not be equal to container/);
+
       expect(() => {
         amp.assertSource('https://google.com/fpp', 'https://google.com/abc',
             'allow-same-origin allow-scripts');
       }).to.throw(/must not be equal to container/);
       // Same origin, but sandboxed.
       amp.assertSource('https://google.com/fpp', 'https://google.com/abc', '');
+
       expect(() => {
         amp.assertSource('http://google.com/', 'https://foo.com', '');
       }).to.throw(/Must start with https/);
+
       expect(() => {
         amp.assertSource('./foo', 'https://foo.com', '');
       }).to.throw(/Must start with https/);
@@ -291,11 +294,13 @@ describe('amp-iframe', () => {
       amp.assertSource('http://iframe.localhost:123/foo',
           'https://foo.com', '');
       amp.assertSource('https://container.com', 'https://foo.com', '');
-
       amp.element.setAttribute('srcdoc', 'abc');
       amp.element.setAttribute('sandbox', 'allow-same-origin');
+
       expect(() => {
-        amp.transformSrcDoc();
+        amp.transformSrcDoc('<script>try{parent.location.href}catch(e){' +
+          'parent.parent./*OK*/postMessage(\'loaded-iframe\', \'*\');}' +
+          '</script>', 'Allow-Same-Origin');
       }).to.throw(/allow-same-origin is not allowed with the srcdoc attribute/);
     });
   });
