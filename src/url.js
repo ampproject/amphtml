@@ -43,6 +43,35 @@ export function parseUrl(url) {
   return info;
 }
 
+/**
+ * Appends a query string field and value to a url. `key` and `value`
+ * will be ran through `encodeURIComponent` before appending.
+ * @param {string} url
+ * @param {string} key
+ * @param {string} value
+ * @return {string}
+ */
+export function addParamToUrl(url, key, value) {
+  // TODO(erwinm, #1376) improve perf possibly by just doing a string
+  // scan instead of having to create an element for the parsing.
+  const urlObj = parseUrl(url);
+  const field = `${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
+  const search = urlObj.search ? `${urlObj.search}&${field}` : `?${field}`;
+  return urlObj.origin + urlObj.pathname + search + urlObj.hash;
+}
+
+/**
+ * Appends query string fields and values to a url. The `params` objects'
+ * `key`s and `value`s will be transformed into query string keys/values.
+ * @param {string} url
+ * @param {!Object<string, string>} params
+ * @return {string}
+ */
+export function addParamsToUrl(url, params) {
+  return Object.keys(params).reduce((url, key) => {
+    return addParamToUrl(url, key, params[key]);
+  }, url);
+}
 
 /**
  * Asserts that a given url is HTTPS or protocol relative.
