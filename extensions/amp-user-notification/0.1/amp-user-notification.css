@@ -17,7 +17,7 @@
 
 amp-user-notification {
   position: fixed !important;
-  top: 0;
+  bottom: 0;
   left: 0;
   overflow: hidden !important;
   visibility: hidden;
