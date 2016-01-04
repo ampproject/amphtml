@@ -16,6 +16,7 @@
 
 import {actionServiceFor} from '../../../src/action';
 import {assertHttpsUrl} from '../../../src/url';
+import {cidFor} from '../../../src/cid';
 import {evaluateAccessExpr} from './access-expr';
 import {getService} from '../../../src/service';
 import {installStyles} from '../../../src/styles';
@@ -88,6 +89,12 @@ export class AccessService {
 
     /** @const @private {!UrlReplacements} */
     this.urlReplacements_ = urlReplacementsFor(this.win);
+
+    /** @private @const {!Cid} */
+    this.cid_ = cidFor(this.win);
+
+    /** @private {!Promise<string>|undefined} */
+    this.readerIdPromise_ = undefined;
   }
 
   /**
@@ -145,30 +152,53 @@ export class AccessService {
   }
 
   /**
+   * @return {!Promise<string>}
+   * @private
+   */
+  getReaderId_() {
+    if (!this.readerIdPromise_) {
+      // No consent - an essential part of the access system.
+      const consent = Promise.resolve();
+      this.readerIdPromise_ = this.cid_.then(cid => {
+        return cid.get('amp-access', consent);
+      });
+    }
+    return this.readerIdPromise_;
+  }
+
+  /**
+   * @param {string} url
+   * @return {!Promise<string>}
+   * @private
+   */
+  buildUrl_(url) {
+    return this.getReaderId_().then(readerId => {
+      return this.urlReplacements_.expand(url, {
+        'READER_ID': readerId
+      });
+    });
+  }
+
+  /**
    * @return {!Promise}
    * @private
    */
   runAuthorization_() {
     log.fine(TAG, 'Start authorization via ', this.config_.authorization);
     this.toggleTopClass_('amp-access-loading', true);
-
-    // TODO(dvoytenko): produce READER_ID and create the URL substition for it.
-    return this.urlReplacements_.expand(this.config_.authorization)
-        .then(url => {
-          log.fine(TAG, 'Authorization URL: ', url);
-          return this.xhr_.fetchJson(url, {credentials: 'include'});
-        })
-        .then(response => {
-          log.fine(TAG, 'Authorization response: ', response);
-          this.toggleTopClass_('amp-access-loading', false);
-          onDocumentReady(this.win.document, () => {
-            this.applyAuthorization_(response);
-          });
-        })
-        .catch(error => {
-          log.error(TAG, 'Authorization failed: ', error);
-          this.toggleTopClass_('amp-access-loading', false);
-        });
+    return this.buildUrl_(this.config_.authorization).then(url => {
+      log.fine(TAG, 'Authorization URL: ', url);
+      return this.xhr_.fetchJson(url, {credentials: 'include'});
+    }).then(response => {
+      log.fine(TAG, 'Authorization response: ', response);
+      this.toggleTopClass_('amp-access-loading', false);
+      onDocumentReady(this.win.document, () => {
+        this.applyAuthorization_(response);
+      });
+    }).catch(error => {
+      log.error(TAG, 'Authorization failed: ', error);
+      this.toggleTopClass_('amp-access-loading', false);
+    });
   }
 
   /**

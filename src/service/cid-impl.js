@@ -310,9 +310,10 @@ function getEntropy(win) {
 
 /**
  * @param {!Window} window
+ * @return {!Cid}
  */
 export function installCidService(window) {
-  getService(window, 'cid', () => {
+  return getService(window, 'cid', () => {
     return new Cid(window);
   });
 };

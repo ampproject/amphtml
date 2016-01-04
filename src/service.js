@@ -75,6 +75,22 @@ export function getService(win, id, opt_factory) {
  * @return {!Promise<*>}
  */
 export function getElementService(win, id, providedByElement) {
+  // Call `getElementService_` in a micro-task to ensure that `stubElements`
+  // has been called.
+  return Promise.resolve().then(() => {
+    return getElementService_(win, id, providedByElement);
+  });
+}
+
+/**
+ * @param {!Window} win
+ * @param {string} id of the service.
+ * @param {string} provideByElement Name of the custom element that provides
+ *     the implementation of this service.
+ * @return {!Promise<*>}
+ * @private
+ */
+function getElementService_(win, id, providedByElement) {
   assert(isElementScheduled(win, providedByElement),
       'Service %s was requested to be provided through %s, ' +
       'but %s is not loaded in the current page. To fix this ' +
