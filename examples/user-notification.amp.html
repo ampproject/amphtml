@@ -205,7 +205,7 @@
   <amp-user-notification
       layout=nodisplay
       id="amp-user-notification1"
-      data-show-if-href="http://localhost:8000/api/show"
+      data-show-if-href="http://localhost:8000/api/show?timestamp=TIMESTAMP"
       data-dismiss-href="http://localhost:8000/api/echo/post">
       This site uses cookies to personalize content.
       <a href="#learn-more">Learn more.</a>
@@ -415,10 +415,10 @@
   </script>
   </amp-analytics>
 
-  <amp-pixel src="https://pubads.g.doubleclick.net/activity;dc_iu=/12344/pixel;ord=$CLIENT_ID(google_analytics,amp-user-notification1)?"></amp-pixel>
+  <amp-pixel src="https://pubads.g.doubleclick.net/activity;dc_iu=/12344/pixel;ord=CLIENT_ID(google_analytics,amp-user-notification1)?"></amp-pixel>
 
-  <amp-pixel src="https://pubads.g.doubleclick.net/activity;dc_iu=/12344/pixel;ord=$CLIENT_ID(google_analytics,amp-user-notification2)?"></amp-pixel>
+  <amp-pixel src="https://pubads.g.doubleclick.net/activity;dc_iu=/12344/pixel;ord=CLIENT_ID(google_analytics,amp-user-notification2)?"></amp-pixel>
 
-  <amp-pixel src="https://pubads.g.doubleclick.net/activity;dc_iu=/12344/pixel;ord=$CLIENT_ID(google_analytics,amp-user-notification3)?"></amp-pixel>
+  <amp-pixel src="https://pubads.g.doubleclick.net/activity;dc_iu=/12344/pixel;ord=CLIENT_ID(google_analytics,amp-user-notification3)?"></amp-pixel>
 </body>
 </html>

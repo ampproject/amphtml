@@ -28,13 +28,7 @@ describe('amp-user-notification', () => {
   let stub1;
   let stub2;
   let notifStub;
-
-  const dftAttrs = {
-    id: 'n1',
-    'data-show-if-href': '/get/here',
-    'data-dismiss-href': '/post/here',
-    'layout': 'nodisplay',
-  };
+  let dftAttrs;
 
   function getUserNotification(attrs = {}) {
     return createIframePromise().then(iframe_ => {
@@ -57,6 +51,12 @@ describe('amp-user-notification', () => {
   }
 
   beforeEach(() => {
+    dftAttrs = {
+      id: 'n1',
+      'data-show-if-href': 'https://www.ampproject.org/get/here',
+      'data-dismiss-href': 'https://www.ampproject.org/post/here',
+      'layout': 'nodisplay',
+    };
     notifStub = sinon.stub(AmpUserNotification.prototype, 'isExperimentOn_')
         .returns(true);
   });
@@ -112,7 +112,7 @@ describe('amp-user-notification', () => {
   it('should show should return a boolean', () => {
     stub = sinon.stub(AmpUserNotification.prototype, 'getAsyncCid_')
         .returns(Promise.resolve('12345'));
-    stub1 = sinon.stub(AmpUserNotification.prototype, 'postShowEndpoint_')
+    stub1 = sinon.stub(AmpUserNotification.prototype, 'getShowEndpoint_')
         .returns(Promise.resolve({showNotification: true}));
     return getUserNotification(dftAttrs).then(el => {
       const impl = el.implementation_;
@@ -127,7 +127,7 @@ describe('amp-user-notification', () => {
   it('should have class `amp-active`', () => {
     stub = sinon.stub(AmpUserNotification.prototype, 'getAsyncCid_')
         .returns(Promise.resolve('12345'));
-    stub1 = sinon.stub(AmpUserNotification.prototype, 'postShowEndpoint_')
+    stub1 = sinon.stub(AmpUserNotification.prototype, 'getShowEndpoint_')
         .returns(Promise.resolve({showNotification: true}));
 
     return getUserNotification(dftAttrs).then(el => {
@@ -149,7 +149,7 @@ describe('amp-user-notification', () => {
   it('should not have `amp-active`', () => {
     stub = sinon.stub(AmpUserNotification.prototype, 'getAsyncCid_')
         .returns(Promise.resolve('12345'));
-    stub1 = sinon.stub(AmpUserNotification.prototype, 'postShowEndpoint_')
+    stub1 = sinon.stub(AmpUserNotification.prototype, 'getShowEndpoint_')
         .returns(Promise.resolve({showNotification: false}));
 
     return getUserNotification(dftAttrs).then(el => {
@@ -173,7 +173,7 @@ describe('amp-user-notification', () => {
   it('should have `amp-hidden` and no `amp-active`', () => {
     stub = sinon.stub(AmpUserNotification.prototype, 'getAsyncCid_')
         .returns(Promise.resolve('12345'));
-    stub1 = sinon.stub(AmpUserNotification.prototype, 'postShowEndpoint_')
+    stub1 = sinon.stub(AmpUserNotification.prototype, 'getShowEndpoint_')
         .returns(Promise.resolve({showNotification: true}));
     stub2 = sinon.stub(AmpUserNotification.prototype, 'postDismissEnpoint_')
         .returns(Promise.resolve());
@@ -196,6 +196,33 @@ describe('amp-user-notification', () => {
         expect(el).to.not.have.class('amp-active');
         expect(el).to.have.class('amp-hidden');
         expect(stub2.calledOnce).to.be.true;
+      });
+    });
+  });
+
+  describe('buildGetHref_', () => {
+
+    it('should do url replacement', () => {
+      dftAttrs['data-show-if-href'] = 'https://www.ampproject.org/path/?ord=RANDOM';
+      return getUserNotification(dftAttrs).then(el => {
+        const impl = el.implementation_;
+        impl.buildCallback();
+        return impl.buildGetHref_('12345').then(href => {
+          const value = href.match(/\?ord=(.*)$/)[1];
+          expect(href).to.not.contain('RANDOM');
+          expect(parseInt(value, 10)).to.be.a.number;
+        });
+      });
+    });
+
+    it('should build a valid url', () => {
+      return getUserNotification(dftAttrs).then(el => {
+        const impl = el.implementation_;
+        impl.buildCallback();
+        return impl.buildGetHref_('12345').then(href => {
+          expect(href).to
+              .equal('https://www.ampproject.org/get/here?elementId=n1&ampUserId=12345');
+        });
       });
     });
   });

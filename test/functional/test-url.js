@@ -14,8 +14,15 @@
  * limitations under the License.
  */
 
-import {assertHttpsUrl, parseQueryString, parseUrl, removeFragment, getOrigin}
-    from '../../src/url';
+import {
+  addParamToUrl,
+  addParamsToUrl,
+  assertHttpsUrl,
+  getOrigin,
+  parseQueryString,
+  parseUrl,
+  removeFragment
+} from '../../src/url';
 
 describe('url', () => {
 
@@ -218,5 +225,52 @@ describe('getOrigin', () => {
         .to.equal('data:12345');
     expect(parseUrl('data:12345').origin)
         .to.equal('data:12345');
+  });
+});
+
+describe('addParamToUrl', () => {
+  let url;
+
+  beforeEach(() => {
+    url = 'https://www.ampproject.org/get/here#hash-value';
+  });
+
+  it('should preserve hash value', () => {
+    url = addParamToUrl(url, 'elementId', 'n1');
+    expect(url).to.equal('https://www.ampproject.org/get/here?elementId=n1#hash-value');
+
+    url = addParamToUrl(url, 'ampUserId', '12345');
+    expect(url).to.equal('https://www.ampproject.org/get/here?elementId=n1&ampUserId=12345#hash-value');
+  });
+
+  it('should preserve query values', () => {
+    url = 'https://www.ampproject.org/get/here?hello=world&foo=bar';
+
+    url = addParamToUrl(url, 'elementId', 'n1');
+    expect(url).to.equal('https://www.ampproject.org/get/here?hello=world&foo=bar&elementId=n1');
+    url = addParamToUrl(url, 'ampUserId', '12345');
+    expect(url).to.equal('https://www.ampproject.org/get/here?hello=world&foo=bar&elementId=n1&ampUserId=12345');
+  });
+
+  it('should encode uri values', () => {
+    url = addParamToUrl(url, 'foo', 'b ar');
+    expect(url).to.equal('https://www.ampproject.org/get/here?foo=b%20ar#hash-value');
+  });
+});
+
+describe('addParamsToUrl', () => {
+  let url;
+
+  beforeEach(() => {
+    url = 'https://www.ampproject.org/get/here#hash-value';
+  });
+
+  it('should loop over the keys and values correctly', () => {
+    url = addParamsToUrl(url, {
+      hello: 'world',
+      foo: 'bar'
+    });
+
+    expect(url).to.equal('https://www.ampproject.org/get/here?hello=world&foo=bar#hash-value');
   });
 });
