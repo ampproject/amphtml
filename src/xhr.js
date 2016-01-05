@@ -103,7 +103,16 @@ export function normalizeMethod_(method) {
   if (method === undefined) {
     return 'GET';
   }
-  return method.toUpperCase();
+  method = method.toUpperCase();
+
+  assert(
+    allowedMethods_.indexOf(method) > -1,
+    'Only one of %s is currently allowed. Got %s',
+    allowedMethods_.join(', '),
+    method
+  );
+
+  return method;
 }
 
 /**
@@ -112,10 +121,6 @@ export function normalizeMethod_(method) {
  * @private
  */
 function setupJson_(init) {
-  assert(allowedMethods_.indexOf(init.method) != -1, 'Only one of ' +
-      allowedMethods_.join(', ') + ' is currently allowed. Got %s',
-      init.method);
-
   init.headers = {
     'Accept': 'application/json'
   };
