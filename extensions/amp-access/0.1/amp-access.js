@@ -17,13 +17,18 @@
 import {actionServiceFor} from '../../../src/action';
 import {assertHttpsUrl} from '../../../src/url';
 import {cidFor} from '../../../src/cid';
+import {documentStateFor} from '../../../src/document-state';
 import {evaluateAccessExpr} from './access-expr';
 import {getService} from '../../../src/service';
 import {installStyles} from '../../../src/styles';
 import {isExperimentOn} from '../../../src/experiments';
+import {listenOnce} from '../../../src/event-helper';
 import {log} from '../../../src/log';
 import {onDocumentReady} from '../../../src/document-state';
+import {timer} from '../../../src/timer';
 import {urlReplacementsFor} from '../../../src/url-replacements';
+import {viewerFor} from '../../../src/viewer';
+import {viewportFor} from '../../../src/viewport';
 import {vsyncFor} from '../../../src/vsync';
 import {xhrFor} from '../../../src/xhr';
 
@@ -50,6 +55,9 @@ const EXPERIMENT = 'amp-access';
 
 /** @const */
 const TAG = 'AmpAccess';
+
+/** @const {number} */
+const VIEW_TIMEOUT = 2000;
 
 
 /**
@@ -93,8 +101,20 @@ export class AccessService {
     /** @private @const {!Cid} */
     this.cid_ = cidFor(this.win);
 
-    /** @private {!Promise<string>|undefined} */
-    this.readerIdPromise_ = undefined;
+    /** @private @const {!Viewer} */
+    this.viewer_ = viewerFor(this.win);
+
+    /** @private @const {!DocumentState} */
+    this.docState_ = documentStateFor(this.win);
+
+    /** @private @const {!Viewport} */
+    this.viewport_ = viewportFor(this.win);
+
+    /** @private {?Promise<string>} */
+    this.readerIdPromise_ = null;
+
+    /** @private {?Promise} */
+    this.reportViewPromise_ = null;
   }
 
   /**
@@ -149,6 +169,9 @@ export class AccessService {
 
     // Start authorization XHR immediately.
     this.runAuthorization_();
+
+    // Wait for the "view" signal.
+    this.scheduleView_();
   }
 
   /**
@@ -229,6 +252,100 @@ export class AccessService {
       } else {
         element.setAttribute('amp-access-off', '');
       }
+    });
+  }
+
+  /**
+   * @private
+   */
+  scheduleView_() {
+    this.docState_.onReady(() => {
+      if (this.viewer_.isVisible()) {
+        this.reportWhenViewed_();
+      }
+      this.viewer_.onVisibilityChanged(() => {
+        if (this.viewer_.isVisible()) {
+          this.reportWhenViewed_();
+        }
+      });
+    });
+  }
+
+  /**
+   * @return {!Promise}
+   * @private
+   */
+  reportWhenViewed_() {
+    if (this.reportViewPromise_) {
+      return this.reportViewPromise_;
+    }
+    log.fine(TAG, 'start view monitoring');
+    this.reportViewPromise_ = this.whenViewed_().then(
+        this.reportViewToServer_.bind(this),
+        reason => {
+          // Ignore - view has been canceled.
+          log.fine(TAG, 'view cancelled:', reason);
+          this.reportViewPromise_ = null;
+          throw reason;
+        });
+    return this.reportViewPromise_;
+  }
+
+  /**
+   * The promise will be resolved when a view of this document has occurred. It
+   * will be rejected if the current impression should not be counted as a view.
+   * @return {!Promise}
+   * @private
+   */
+  whenViewed_() {
+    // Viewing kick off: document is visible.
+    const unlistenSet = [];
+    return new Promise((resolve, reject) => {
+      // 1. Document becomes invisible again: cancel.
+      unlistenSet.push(this.viewer_.onVisibilityChanged(() => {
+        if (!this.viewer_.isVisible()) {
+          reject();
+        }
+      }));
+
+      // 2. After a few seconds: register a view.
+      const timeoutId = timer.delay(resolve, VIEW_TIMEOUT);
+      unlistenSet.push(() => timer.cancel(timeoutId));
+
+      // 3. If scrolled: register a view.
+      unlistenSet.push(this.viewport_.onScroll(resolve));
+
+      // 4. Tap: register a view.
+      unlistenSet.push(listenOnce(this.win.document.documentElement,
+          'click', resolve));
+    }).then(() => {
+      unlistenSet.forEach(unlisten => unlisten());
+    }, reason => {
+      unlistenSet.forEach(unlisten => unlisten());
+      throw reason;
+    });
+  }
+
+  /**
+   * @return {!Promise}
+   * @private
+   */
+  reportViewToServer_() {
+    return this.buildUrl_(this.config_.pingback).then(url => {
+      log.fine(TAG, 'Pingback URL: ', url);
+      return this.xhr_.sendSignal(url, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: ''
+      });
+    }).then(() => {
+      log.fine(TAG, 'Pingback complete');
+    }).catch(error => {
+      log.error(TAG, 'Pingback failed: ', error);
+      throw error;
     });
   }
 
