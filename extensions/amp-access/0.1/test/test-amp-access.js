@@ -15,6 +15,8 @@
  */
 
 import {AccessService} from '../../../../build/all/v0/amp-access-0.1.max';
+import {installCidService} from '../../../../src/service/cid-impl';
+import {markElementScheduledForTesting} from '../../../../src/service';
 import * as sinon from 'sinon';
 
 
@@ -25,6 +27,9 @@ describe('AccessService', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
+
+    markElementScheduledForTesting(window, 'amp-analytics');
+    installCidService(window);
 
     element = document.createElement('script');
     element.setAttribute('id', 'amp-access');
@@ -151,11 +156,14 @@ describe('AccessService authorization', () => {
   let sandbox;
   let configElement, elementOn, elementOff;
   let vsyncMutates;
-  let urlReplacementsMock;
   let xhrMock;
+  let cidMock;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
+
+    markElementScheduledForTesting(window, 'amp-analytics');
+    installCidService(window);
 
     configElement = document.createElement('script');
     configElement.setAttribute('id', 'amp-access');
@@ -180,8 +188,12 @@ describe('AccessService authorization', () => {
 
     vsyncMutates = [];
     service.vsync_ = {mutate: callback => vsyncMutates.push(callback)};
-    urlReplacementsMock = sandbox.mock(service.urlReplacements_);
     xhrMock = sandbox.mock(service.xhr_);
+    const cid = {
+      get: () => {}
+    };
+    cidMock = sandbox.mock(cid);
+    service.cid_ = Promise.resolve(cid);
   });
 
   afterEach(() => {
@@ -199,9 +211,9 @@ describe('AccessService authorization', () => {
   });
 
   it('should run authorization flow', () => {
-    urlReplacementsMock.expects('expand')
-        .withExactArgs('https://acme.com/a?rid=READER_ID')
-        .returns(Promise.resolve('https://acme.com/a?rid=reader1'))
+    cidMock.expects('get')
+        .withExactArgs('amp-access', sinon.match(() => true))
+        .returns(Promise.resolve('reader1'))
         .once();
     xhrMock.expects('fetchJson')
         .withExactArgs('https://acme.com/a?rid=reader1',
@@ -223,14 +235,14 @@ describe('AccessService authorization', () => {
   });
 
   it('should recover from authorization failure', () => {
-    urlReplacementsMock.expects('expand')
-        .withExactArgs('https://acme.com/a?rid=READER_ID')
-        .returns(Promise.resolve('https://acme.com/a?rid=reader1'))
+    cidMock.expects('get')
+        .withExactArgs('amp-access', sinon.match(() => true))
+        .returns(Promise.resolve('reader1'))
         .once();
     xhrMock.expects('fetchJson')
         .withExactArgs('https://acme.com/a?rid=reader1',
             {credentials: 'include'})
-        .returns(Promise.reject())
+        .returns(Promise.reject('intentional'))
         .once();
     return service.runAuthorization_().then(() => {
       expect(vsyncMutates).to.have.length.greaterThan(1);
