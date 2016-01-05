@@ -31,5 +31,5 @@ export function installCoreServices(window) {
   installViewportService(window);
   installHistoryService(window);
   installVsyncService(window);
-  installActionService(window).addEvent('tap');
+  installActionService(window);
 }
