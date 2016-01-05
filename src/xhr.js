@@ -16,6 +16,7 @@
 
 import {assert} from './asserts';
 import {getService} from './service';
+import {isArray, isObject} from './types';
 
 
 /**
@@ -36,8 +37,8 @@ let FetchInitDef;
 /** @private @const {!Array<string>} */
 const allowedMethods_ = ['GET', 'POST'];
 
-/** @private @const {!Array<string>} */
-const allowedBodyTypes_ = ['[object Object]', '[object Array]'];
+/** @private @const {!Array<function:boolean>} */
+const allowedBodyTypes_ = [isArray, isObject];
 
 
 /**
@@ -126,13 +127,13 @@ function setupJson_(init) {
   };
 
   if (init.method == 'POST') {
-    const bodyType = Object.prototype.toString.call(init.body);
-
     // Assume JSON strict mode where only objects or arrays are allowed
     // as body.
-    assert(allowedBodyTypes_.indexOf(bodyType) > -1,
-        'body must be of type object or array. %s',
-        init.body);
+    assert(
+      allowedBodyTypes_.some(test => test(init.body)),
+      'body must be of type object or array. %s',
+      init.body
+    );
 
     init.headers['Content-Type'] = 'application/json;charset=utf-8';
     init.body = JSON.stringify(init.body);
