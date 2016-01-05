@@ -75,6 +75,21 @@ class Xhr {
       return assertSuccess(response).json();
     });
   }
+
+  /**
+   * Sends the request, awaits result and confirms that it was successful.
+   *
+   * See https://developer.mozilla.org/en-US/docs/Web/API/GlobalFetch/fetch
+   *
+   * @param {string} input
+   * @param {?FetchInitDef=} opt_init
+   * @return {!Promise}
+   */
+  sendSignal(input, opt_init) {
+    return this.fetch_(input, opt_init).then(response => {
+      assertSuccess(response);
+    });
+  }
 }
 
 
@@ -213,7 +228,7 @@ function createXhrRequest(method, url, init) {
  * @return {!FetchResponse}
  */
 function assertSuccess(response) {
-  if (response.status != 200) {
+  if (response.status < 200 || response.status > 299) {
     throw new Error(`HTTP error ${response.status}`);
   }
   return response;

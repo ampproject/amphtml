@@ -15,6 +15,7 @@
  */
 
 import {AccessService} from '../../../../build/all/v0/amp-access-0.1.max';
+import {Observable} from '../../../../src/observable';
 import {installCidService} from '../../../../src/service/cid-impl';
 import {markElementScheduledForTesting} from '../../../../src/service';
 import * as sinon from 'sinon';
@@ -255,6 +256,209 @@ describe('AccessService authorization', () => {
       expect(document.documentElement).not.to.have.class('amp-access-loading');
       expect(elementOn).not.to.have.attribute('amp-access-off');
       expect(elementOff).not.to.have.attribute('amp-access-off');
+    });
+  });
+});
+
+
+describe('AccessService pingback', () => {
+
+  let sandbox;
+  let clock;
+  let configElement;
+  let vsyncMutates;
+  let xhrMock;
+  let cidMock;
+  let visibilityChanged;
+  let scrolled;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+    clock = sandbox.useFakeTimers();
+
+    markElementScheduledForTesting(window, 'amp-analytics');
+    installCidService(window);
+
+    configElement = document.createElement('script');
+    configElement.setAttribute('id', 'amp-access');
+    configElement.setAttribute('type', 'application/json');
+    configElement.textContent = JSON.stringify({
+      'authorization': 'https://acme.com/a?rid=READER_ID',
+      'pingback': 'https://acme.com/p?rid=READER_ID',
+      'login': 'https://acme.com/l?rid=READER_ID'
+    });
+    document.body.appendChild(configElement);
+
+    service = new AccessService(window);
+    service.isExperimentOn_ = true;
+
+    vsyncMutates = [];
+    service.vsync_ = {mutate: callback => vsyncMutates.push(callback)};
+    xhrMock = sandbox.mock(service.xhr_);
+
+    const cid = {
+      get: () => {}
+    };
+    cidMock = sandbox.mock(cid);
+    service.cid_ = Promise.resolve(cid);
+
+    this.docState_ = {
+      onReady: callback => callback()
+    };
+
+    visibilityChanged = new Observable();
+    service.viewer_ = {
+      isVisible: () => true,
+      whenVisible: () => Promise.resolve(),
+      onVisibilityChanged: callback => visibilityChanged.add(callback)
+    };
+
+    scrolled = new Observable();
+    service.viewport_ = {
+      onScroll: callback => scrolled.add(callback)
+    };
+  });
+
+  afterEach(() => {
+    if (configElement.parentElement) {
+      configElement.parentElement.removeChild(configElement);
+    }
+    sandbox.restore();
+    sandbox = null;
+  });
+
+  it('should register "viewed" signal after timeout', () => {
+    service.reportViewToServer_ = sandbox.spy();
+    const p = service.reportWhenViewed_();
+    return Promise.resolve().then(() => {
+      clock.tick(2001);
+      return p;
+    }).then(() => {}, () => {}).then(() => {
+      expect(service.reportViewToServer_.callCount).to.equal(1);
+      expect(visibilityChanged.getHandlerCount()).to.equal(0);
+      expect(scrolled.getHandlerCount()).to.equal(0);
+    });
+  });
+
+  it('should register "viewed" signal after scroll', () => {
+    service.reportViewToServer_ = sandbox.spy();
+    const p = service.reportWhenViewed_();
+    return Promise.resolve().then(() => {
+      scrolled.fire();
+      return p;
+    }).then(() => {}, () => {}).then(() => {
+      expect(service.reportViewToServer_.callCount).to.equal(1);
+      expect(visibilityChanged.getHandlerCount()).to.equal(0);
+      expect(scrolled.getHandlerCount()).to.equal(0);
+    });
+  });
+
+  it('should register "viewed" signal after click', () => {
+    service.reportViewToServer_ = sandbox.spy();
+    const p = service.reportWhenViewed_();
+    return Promise.resolve().then(() => {
+      let clickEvent;
+      if (document.createEvent) {
+        clickEvent = document.createEvent('MouseEvent');
+        clickEvent.initMouseEvent('click', true, true, window, 1);
+      } else {
+        clickEvent = document.createEventObject();
+        clickEvent.type = 'click';
+      }
+      document.documentElement.dispatchEvent(clickEvent);
+      return p;
+    }).then(() => {}, () => {}).then(() => {
+      expect(service.reportViewToServer_.callCount).to.equal(1);
+      expect(visibilityChanged.getHandlerCount()).to.equal(0);
+      expect(scrolled.getHandlerCount()).to.equal(0);
+    });
+  });
+
+  it('should cancel "viewed" signal after click', () => {
+    service.reportViewToServer_ = sandbox.spy();
+    const p = service.reportWhenViewed_();
+    return Promise.resolve().then(() => {
+      service.viewer_.isVisible = () => false;
+      visibilityChanged.fire();
+      return p;
+    }).then(() => {}, () => {}).then(() => {
+      expect(service.reportViewToServer_.callCount).to.equal(0);
+      expect(visibilityChanged.getHandlerCount()).to.equal(0);
+      expect(scrolled.getHandlerCount()).to.equal(0);
+    });
+  });
+
+  it('should schedule "viewed" monitoring only once', () => {
+    service.whenViewed_ = () => Promise.resolve();
+    service.reportViewToServer_ = sandbox.spy();
+    const p1 = service.reportWhenViewed_();
+    const p2 = service.reportWhenViewed_();
+    expect(p2).to.equal(p1);
+    return p1.then(() => {
+      const p3 = service.reportWhenViewed_();
+      expect(p3).to.equal(p1);
+      return p3;
+    }).then(() => {
+      expect(service.reportViewToServer_.callCount).to.equal(1);
+    });
+  });
+
+  it('should re-schedule "viewed" monitoring after visibility change', () => {
+    service.reportViewToServer_ = sandbox.spy();
+
+    service.scheduleView_();
+
+    // 1. First attempt fails due to document becoming invisible.
+    const p1 = service.reportViewPromise_;
+    return Promise.resolve().then(() => {
+      service.viewer_.isVisible = () => false;
+      visibilityChanged.fire();
+      return p1;
+    }).then(() => 'SUCCESS', () => 'ERROR').then(result => {
+      expect(result).to.equal('ERROR');
+      expect(service.reportViewToServer_.callCount).to.equal(0);
+      expect(service.reportViewPromise_).to.not.exist;
+    }).then(() => {
+      // 2. Second attempt is rescheduled and will complete.
+      service.viewer_.isVisible = () => true;
+      visibilityChanged.fire();
+      const p2 = service.reportViewPromise_;
+      expect(p2).to.exist;
+      expect(p2).to.not.equal(p1);
+      expect(service.reportViewToServer_.callCount).to.equal(0);
+      return Promise.resolve().then(() => {
+        clock.tick(2001);
+        expect(service.reportViewToServer_.callCount).to.equal(0);
+        return p2;
+      });
+    }).then(() => 'SUCCESS', () => 'ERROR').then(result => {
+      expect(result).to.equal('SUCCESS');
+      expect(service.reportViewToServer_.callCount).to.equal(1);
+      expect(service.reportViewPromise_).to.exist;
+    });
+  });
+
+  it('should send POST pingback', () => {
+    cidMock.expects('get')
+        .withExactArgs('amp-access', sinon.match(() => true))
+        .returns(Promise.resolve('reader1'))
+        .once();
+    xhrMock.expects('sendSignal')
+        .withExactArgs('https://acme.com/p?rid=reader1', sinon.match(init => {
+          return (init.method == 'POST' &&
+              init.credentials == 'include' &&
+              init.body == '' &&
+              init.headers['Content-Type'] ==
+                  'application/x-www-form-urlencoded');
+        }))
+        .returns(Promise.resolve())
+        .once();
+    return service.reportViewToServer_().then(() => {
+      return 'SUCCESS';
+    }, error => {
+      return 'ERROR ' + error;
+    }).then(result => {
+      expect(result).to.equal('SUCCESS');
     });
   });
 });
