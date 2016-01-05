@@ -44,14 +44,16 @@ let ServiceHolderDef;
  * @return {*}
  */
 export function getService(win, id, opt_factory) {
-  const services = getServices(win, id);
+  const services = getServices(win);
   let s = services[id];
-  if (!s || !s.obj) {
+  if (!s) {
+    s = services[id] = {};
+  }
+  if (!s.obj) {
     assert(opt_factory, 'Factory not given and service missing %s', id);
-    if (!s) {
-      s = services[id] = {};
-    }
     s.obj = opt_factory(win);
+    // The service may have been requested already, in which case we have a
+    // pending promise we need to fulfill.
     if (s.resolve) {
       s.resolve(s.obj);
     }
@@ -94,18 +96,15 @@ function getElementService_(win, id, providedByElement) {
       'but %s is not loaded in the current page. To fix this ' +
       'problem load the JavaScript file for %s in this page.',
       id, providedByElement, providedByElement, providedByElement);
-  const services = getServices(win, id);
+  const services = getServices(win);
   const s = services[id];
   if (s) {
-    // If we have a promise we return the promise
-    if (s.promise) {
-      return s.promise;
-    }
-    // If meanwhile an object was created, we make a promise from it
+    // If a service was registered with getService, we make a promise from it
     // which we will return in future invocations.
-    if (s.obj) {
-      return s.promise = Promise.resolve(s.obj);
+    if (!s.promise) {
+      s.promise = Promise.resolve(s.obj);
     }
+    return s.promise;
   }
   // TODO(@cramforce): Add a check that if the element is eventually registered
   // that the service is actually provided and this promise resolves.
