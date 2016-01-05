@@ -25,6 +25,8 @@ import {isExperimentOn} from '../../../src/experiments';
 import {listenOnce} from '../../../src/event-helper';
 import {log} from '../../../src/log';
 import {onDocumentReady} from '../../../src/document-state';
+import {openLoginDialog} from './login-dialog';
+import {parseQueryString} from '../../../src/url';
 import {timer} from '../../../src/timer';
 import {urlReplacementsFor} from '../../../src/url-replacements';
 import {viewerFor} from '../../../src/viewer';
@@ -110,11 +112,17 @@ export class AccessService {
     /** @private @const {!Viewport} */
     this.viewport_ = viewportFor(this.win);
 
+    /** @private @const {function(string):Promise<string>} */
+    this.openLoginDialog_ = openLoginDialog.bind(null, this.win);
+
     /** @private {?Promise<string>} */
     this.readerIdPromise_ = null;
 
     /** @private {?Promise} */
     this.reportViewPromise_ = null;
+
+    /** @private {?Promise} */
+    this.loginPromise_ = null;
   }
 
   /**
@@ -365,7 +373,40 @@ export class AccessService {
    * @private
    */
   handleAction_(invocation) {
-    log.fine(TAG, 'Invocation: ', invocation);
+    if (invocation.method == 'login') {
+      this.login();
+    }
+  }
+
+  /**
+   * Runs the Login flow. Returns a promise that is resolved if login succeeds
+   * or is rejected if login fails. Login flow is performed as an external
+   * 1st party Web dialog. It's goal is to authenticate the reader.
+   * @return {!Promise}
+   */
+  login() {
+    if (this.loginPromise_) {
+      return this.loginPromise_;
+    }
+
+    log.fine(TAG, 'Start login');
+    const urlPromise = this.buildUrl_(this.config_.login);
+    this.loginPromise_ = this.openLoginDialog_(urlPromise).then(result => {
+      log.fine(TAG, 'Login dialog completed: ', result);
+      this.loginPromise_ = null;
+      const query = parseQueryString(result);
+      const s = query['success'];
+      const success = (s == 'true' || s == 'yes' || s == '1');
+      if (success) {
+        // Repeat the authorization flow.
+        return this.runAuthorization_();
+      }
+    }).catch(reason => {
+      log.fine(TAG, 'Login dialog failed: ', reason);
+      this.loginPromise_ = null;
+      throw reason;
+    });
+    return this.loginPromise_;
   }
 }
 
