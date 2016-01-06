@@ -462,3 +462,150 @@ describe('AccessService pingback', () => {
     });
   });
 });
+
+
+describe('AccessService login', () => {
+
+  let sandbox;
+  let configElement;
+  let cidMock;
+  let serviceMock;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+
+    markElementScheduledForTesting(window, 'amp-analytics');
+    installCidService(window);
+
+    configElement = document.createElement('script');
+    configElement.setAttribute('id', 'amp-access');
+    configElement.setAttribute('type', 'application/json');
+    configElement.textContent = JSON.stringify({
+      'authorization': 'https://acme.com/a?rid=READER_ID',
+      'pingback': 'https://acme.com/p?rid=READER_ID',
+      'login': 'https://acme.com/l?rid=READER_ID'
+    });
+    document.body.appendChild(configElement);
+
+    service = new AccessService(window);
+    service.isExperimentOn_ = true;
+
+    const cid = {
+      get: () => {}
+    };
+    cidMock = sandbox.mock(cid);
+    service.cid_ = Promise.resolve(cid);
+
+    service.openLoginDialog_ = () => {};
+    serviceMock = sandbox.mock(service);
+  });
+
+  afterEach(() => {
+    if (configElement.parentElement) {
+      configElement.parentElement.removeChild(configElement);
+    }
+    sandbox.restore();
+    sandbox = null;
+  });
+
+  it('should open dialog in the same microtask', () => {
+    service.openLoginDialog_ = sandbox.stub();
+    service.openLoginDialog_.returns(Promise.resolve());
+    cidMock.expects('get')
+        .withExactArgs('amp-access', sinon.match(() => true))
+        .returns(Promise.resolve('reader1'))
+        .once();
+    service.login();
+    expect(service.openLoginDialog_.callCount).to.equal(1);
+    expect(service.openLoginDialog_.firstCall.args[0].then).to.exist;
+  });
+
+  it('should succeed login with success=true', () => {
+    service.runAuthorization_ = sandbox.spy();
+    cidMock.expects('get')
+        .withExactArgs('amp-access', sinon.match(() => true))
+        .returns(Promise.resolve('reader1'))
+        .once();
+    let urlPromise = null;
+    serviceMock.expects('openLoginDialog_')
+        .withExactArgs(sinon.match(arg => {
+          urlPromise = arg;
+          return !!arg.then;
+        }))
+        .returns(Promise.resolve('#success=true'))
+        .once();
+    return service.login().then(() => {
+      expect(service.loginPromise_).to.not.exist;
+      expect(service.runAuthorization_.callCount).to.equal(1);
+      expect(urlPromise).to.exist;
+      return urlPromise;
+    }).then(url => {
+      expect(url).to.equal('https://acme.com/l?rid=reader1');
+    });
+  });
+
+  it('should fail login with success=no', () => {
+    service.runAuthorization_ = sandbox.spy();
+    cidMock.expects('get')
+        .withExactArgs('amp-access', sinon.match(() => true))
+        .returns(Promise.resolve('reader1'))
+        .once();
+    serviceMock.expects('openLoginDialog_')
+        .withExactArgs(sinon.match(arg => !!arg.then))
+        .returns(Promise.resolve('#success=no'))
+        .once();
+    return service.login().then(() => {
+      expect(service.loginPromise_).to.not.exist;
+      expect(service.runAuthorization_.callCount).to.equal(0);
+    });
+  });
+
+  it('should fail login with empty response', () => {
+    service.runAuthorization_ = sandbox.spy();
+    cidMock.expects('get')
+        .withExactArgs('amp-access', sinon.match(() => true))
+        .returns(Promise.resolve('reader1'))
+        .once();
+    serviceMock.expects('openLoginDialog_')
+        .withExactArgs(sinon.match(arg => !!arg.then))
+        .returns(Promise.resolve(''))
+        .once();
+    return service.login().then(() => {
+      expect(service.loginPromise_).to.not.exist;
+      expect(service.runAuthorization_.callCount).to.equal(0);
+    });
+  });
+
+  it('should fail login with aborted dialog', () => {
+    service.runAuthorization_ = sandbox.spy();
+    cidMock.expects('get')
+        .withExactArgs('amp-access', sinon.match(() => true))
+        .returns(Promise.resolve('reader1'))
+        .once();
+    serviceMock.expects('openLoginDialog_')
+        .withExactArgs(sinon.match(arg => !!arg.then))
+        .returns(Promise.reject('abort'))
+        .once();
+    return service.login().then(() => 'SUCCESS', () => 'ERROR').then(result => {
+      expect(result).to.equal('ERROR');
+      expect(service.loginPromise_).to.not.exist;
+      expect(service.runAuthorization_.callCount).to.equal(0);
+    });
+  });
+
+  it('should run login only once at a time', () => {
+    service.runAuthorization_ = sandbox.spy();
+    cidMock.expects('get')
+        .withExactArgs('amp-access', sinon.match(() => true))
+        .returns(Promise.resolve('reader1'))
+        .once();
+    serviceMock.expects('openLoginDialog_')
+        .withExactArgs(sinon.match(arg => !!arg.then))
+        .returns(new Promise(() => {}))
+        .once();
+    const p1 = service.login();
+    const p2 = service.login();
+    expect(p1).to.equal(service.loginPromise_);
+    expect(p2).to.equal(p1);
+  });
+});
