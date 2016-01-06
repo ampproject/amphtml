@@ -153,6 +153,10 @@ export function installAd(win) {
       // We remeasured this tag, lets also remeasure the iframe. Should be
       // free now and it might have changed.
       this.measureIframeLayoutBox_();
+      // When the framework has the need to remeasure us, our position might
+      // have changed. Send an intersection record if needed. This does nothing
+      // if we aren't currently in view.
+      this.sendAdIntersection_();
     }
 
     /**
@@ -231,8 +235,15 @@ export function installAd(win) {
       // And update the ad about its position in the viewport while
       // it is visible.
       if (inViewport) {
-        this.unlistenViewportChanges_ =
-            this.getViewport().onScroll(this.sendAdIntersection_.bind(this));
+        const send = this.sendAdIntersection_.bind(this);
+        // Scroll events.
+        const unlistenScroll = this.getViewport().onScroll(send);
+        // Throttled scroll events. Also fires for resize events.
+        const unlistenChanged = this.getViewport().onChanged(send);
+        this.unlistenViewportChanges_ = () => {
+          unlistenScroll();
+          unlistenChanged();
+        };
       } else if (this.unlistenViewportChanges_) {
         this.unlistenViewportChanges_();
         this.unlistenViewportChanges_ = null;
