@@ -211,7 +211,7 @@ export class AmpIframe extends AMP.BaseElement {
           this.element);
       return;
     }
-    this.requestChangeHeight(newHeight);
+    this.attemptChangeHeight(newHeight);
   }
 };
 

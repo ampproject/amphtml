@@ -515,11 +515,13 @@ export class BaseElement {
    * Requests the runtime to update the height of this element to the specified
    * value. The runtime will schedule this request and attempt to process it
    * as soon as possible.
+   * When the height is successfully updated then the opt_callback is called.
    * @param {number} newHeight
+   * @param {function=} opt_callback A callback function.
    * @protected
    */
-  changeHeight(newHeight) {
-    this.resources_./*OK*/changeHeight(this.element, newHeight);
+  changeHeight(newHeight, opt_callback) {
+    this.resources_./*OK*/changeHeight(this.element, newHeight, opt_callback);
   }
 
   /**
@@ -528,12 +530,15 @@ export class BaseElement {
    * as soon as possible. However, unlike in {@link changeHeight}, the runtime
    * may refuse to make a change in which case it will show the element's
    * overflow element if provided, which is supposed to provide the reader with
-   * the necessary user action.
+   * the necessary user action. (The overflow element is shown only if the
+   * requested height is greater than 0.)
+   * If the height is successfully updated then the opt_callback is called.
    * @param {number} newHeight
+   * @param {function=} opt_callback A callback function.
    * @protected
    */
-  requestChangeHeight(newHeight) {
-    this.resources_.requestChangeHeight(this.element, newHeight);
+  attemptChangeHeight(newHeight, opt_callback) {
+    this.resources_.attemptChangeHeight(this.element, newHeight, opt_callback);
   }
 
   /**
