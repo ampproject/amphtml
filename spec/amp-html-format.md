@@ -159,7 +159,7 @@ Major semantic tags and the AMP custom elements come with default styles to make
 
 The following @-rules are allowed in stylesheets:
 
-`@font-face`, `@keyframes`, `@media`.
+`@font-face`, `@keyframes`, `@media`, `@supports`.
 
 `@import` will not be allowed. Other may be added in the future.
 
