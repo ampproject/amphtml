@@ -20,12 +20,12 @@
 # in production from crashing. This id is not relevant to validator.js
 # because thus far, engine (validator.js) and spec file (validator.protoascii)
 # are always released together.
-min_validator_revision_required: 67
+min_validator_revision_required: 70
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 102
+spec_file_revision: 103
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
 # These rules are just enough to validate the example from the spec.
@@ -418,7 +418,7 @@ tags: {
   attrs: {
     name: "name"
     mandatory: true
-    blacklisted_value_regex: "viewport|content-disposition|revisit-after"
+    blacklisted_value_regex: "(^|\\s)(viewport|content-disposition|revisit-after)(\\s|$)"
   }
   attrs: {
     name: "content"
@@ -479,41 +479,41 @@ cdata: {
   # These regex blacklists are temporary hacks to validate essential CSS
   # rules. They will be replaced later with more principalled solutions.
   blacklisted_cdata_regex: {
-    regex: ".*\\.i?-amp-.*"
+    regex: "\\.i?-amp-"
     error_message: "CSS -amp- class name prefix"
   }
   blacklisted_cdata_regex: {
-    regex: ".*!important.*"
+    regex: "!important"
     error_message: "CSS !important"
   }
   # All known @ rules except for media and font-face are disabled.
   # See http://b/24415204.
   blacklisted_cdata_regex: {
-    regex: ".*charset.*"
+    regex: "charset"
     error_message: "CSS @charset"
   }
   blacklisted_cdata_regex: {
-    regex: ".*@import.*"
+    regex: "@import"
     error_message: "CSS @import"
   }
   blacklisted_cdata_regex: {
-    regex: ".*@namespace.*"
+    regex: "@namespace"
     error_message: "CSS @namespace"
   }
   blacklisted_cdata_regex: {
-    regex: ".*@supports.*"
+    regex: "@supports"
     error_message: "CSS @supports"
   }
   blacklisted_cdata_regex: {
-    regex: ".*@document.*"
+    regex: "@document"
     error_message: "CSS @document"
   }
   blacklisted_cdata_regex: {
-    regex: ".*@page.*"
+    regex: "@page"
     error_message: "CSS @page"
   }
   blacklisted_cdata_regex: {
-    regex: ".*@viewport.*"
+    regex: "@viewport"
     error_message: "CSS @viewport"
   }
 }
@@ -527,7 +527,7 @@ tags: {
   mandatory: true
   spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#opacity"
   cdata: {
-    cdata_regex: "^body ?{opacity: ?0}$"
+    cdata_regex: "body ?{opacity: ?0}"
   }
 }
 tags: {
@@ -538,7 +538,7 @@ tags: {
   unique: true
   mandatory: true
   cdata {
-    cdata_regex: "^body ?{opacity: ?1}$"
+    cdata_regex: "body ?{opacity: ?1}"
   }
 }
 tags: {
@@ -615,7 +615,7 @@ tags: {
   name: "a"
   attrs: {
     name: "href"
-    blacklisted_value_regex: "(javascript|vbscript|data):.*"
+    blacklisted_value_regex: "^\\s*(javascript|vbscript|data):"
   }
   attrs: {
     name: "target"
@@ -1939,8 +1939,8 @@ tags: {
   attrs: { name: "src" }
   attrs: {
     name: "autoplay"
-    # | prefix intended. empty string is valid.
-    value_regex: "|desktop|tablet|mobile"
+    # ^$| prefix intended. empty string is valid.
+    value_regex: "^$|desktop|tablet|mobile"
   }
   attrs: { name: "loop"  value: "" }
   attrs: { name: "muted" value: "" }
