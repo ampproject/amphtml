@@ -85,6 +85,9 @@ export class ActionService {
   constructor(win) {
     /** @const {!Window} */
     this.win = win;
+
+    // Add core events.
+    this.addEvent('tap');
   }
 
   /**

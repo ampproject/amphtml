@@ -277,4 +277,57 @@ describe('HtmlParser with location', () => {
       ':9:0: endTag(html)',
       ':9:6: endDoc()' ]);
   });
+
+  // This covers a bugfix for http://b/26381818; the key of this test is
+  // that the cdata contains newlines etc.
+  it('tracks line and column past complex cdata sections', () => {
+    const handler = new LoggingHandlerWithLocation();
+    const parser = new amp.htmlparser.HtmlParser();
+    parser.parse(handler,
+                 '<html>\n' +
+                 '<body>\n' +
+                 '<script type="application/json">\n' +
+                 '{\n' +
+                 '"vars": {\n' +
+                 '"account": "UA-XXXX-Y"\n' +
+                 '},\n' +
+                 '"triggers": {\n' +
+                 '"default pageview": {\n' +
+                 '"on": "visible"\n' +
+                 '}\n' +
+                 '}\n' +
+                 '}\n' +
+                 '</script>\n' +
+                 '<amp-analytics></amp-analytics>\n' +
+                 '</body>\n' +
+                 '</html>');
+    expect(handler.log).toEqual([
+      ':1:0: startDoc()',
+      ':1:0: startTag(html,[])',
+      ':1:5: pcdata("\n")',
+      ':2:0: startTag(body,[])',
+      ':2:5: pcdata("\n")',
+      ':3:0: startTag(script,[type,application/json])',
+      ':3:0: cdata("\n' +
+          '{\n' +
+          '"vars": {\n' +
+          '"account": "UA-XXXX-Y"\n' +
+          '},\n' +
+          '"triggers": {\n' +
+          '"default pageview": {\n' +
+          '"on": "visible"\n' +
+          '}\n' +
+          '}\n' +
+          '}\n' +
+          '")',
+      ':14:0: endTag(script)',
+      ':14:8: pcdata("\n")',
+      ':15:0: startTag(amp-analytics,[])',
+      ':15:15: endTag(amp-analytics)',
+      ':15:30: pcdata("\n")',
+      ':16:0: endTag(body)',
+      ':16:6: pcdata("\n")',
+      ':17:0: endTag(html)',
+      ':17:6: endDoc()']);
+  });
 });

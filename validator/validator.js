@@ -43,6 +43,7 @@ goog.require('goog.asserts');
 goog.require('goog.string');
 goog.require('goog.structs.Map');
 goog.require('goog.structs.Set');
+goog.require('goog.uri.utils');
 goog.require('parse_css.BlockType');
 goog.require('parse_css.parseAStylesheet');
 goog.require('parse_css.tokenize');
@@ -259,7 +260,8 @@ amp.validator.Terminal.prototype.error = function(msg) {
 function errorLine(filenameOrUrl, error) {
   const line = error.line || 1;
   const col = error.col || 0;
-  let errorLine = filenameOrUrl + ':' + line + ':' + col + ' ' +
+  let errorLine = goog.uri.utils.removeFragment(filenameOrUrl) +
+      ':' + line + ':' + col + ' ' +
       error.code + ' ' + error.detail;
   if (error.specUrl) {
     errorLine += ' (see ' + error.specUrl + ')';
@@ -568,7 +570,7 @@ CdataMatcher.prototype.match = function(cdata, context, validationResult) {
     return;
   }
   if (cdataSpec.cdataRegex !== null) {
-    const cdataRegex = new RegExp(cdataSpec.cdataRegex, 'g');
+    const cdataRegex = new RegExp('^(' + cdataSpec.cdataRegex + ')$');
     if (!cdataRegex.test(cdata)) {
       context.addError(
           amp.validator.ValidationError.Code.
@@ -612,8 +614,7 @@ CdataMatcher.prototype.match = function(cdata, context, validationResult) {
           const lineCol = new LineCol(cssRule.line, cssRule.col);
           context.addErrorWithLineCol(
               lineCol, amp.validator.ValidationError.Code.CSS_SYNTAX,
-              'Invalid CSS rule of type: @' + cssRule.name,
-              /* url */ '', validationResult);
+              'CSS @' + cssRule.name, /* url */ '', validationResult);
         }
       }
     }
@@ -630,7 +631,7 @@ CdataMatcher.prototype.match = function(cdata, context, validationResult) {
     if (context.getProgress(validationResult).complete) {
       return;
     }
-    const blacklistRegex = new RegExp(blacklist.regex, 'gi');
+    const blacklistRegex = new RegExp(blacklist.regex, 'i');
     if (blacklistRegex.test(cdata)) {
       context.addError(
           amp.validator.ValidationError.Code.
@@ -1136,7 +1137,7 @@ amp.validator.CssLengthAndUnit = function(input, allowAuto) {
     this.isValid = allowAuto;
     return;
   }
-  const re = new RegExp('^\\d+(?:\\.\\d+)?(px|em|rem|vh|vw|vmin|vmax)?$', 'g');
+  const re = new RegExp('^\\d+(?:\\.\\d+)?(px|em|rem|vh|vw|vmin|vmax)?$');
   const match = re.exec(input);
   if (match !== null) {
     this.isValid = true;
@@ -1275,14 +1276,6 @@ const ParsedTagSpec = function ParsedTagSpec(
     }
   }
   this.mandatoryOneofs_ = sortAndUniquify(this.mandatoryOneofs_);
-  // The Javascript validator allows a relative location of the ampengine
-  // script, in addition to the official allowances. This would be dangerous
-  // in production so the rule is not in the official validator file
-  // (validator.protoascii) but we hack it into here.
-  if (tagSpec.detail == 'amphtml engine v0.js script') {
-    const parsedAttrSpec = this.attrsByName_['src'];
-    parsedAttrSpec.spec_.valueRegex += '|\\.\\./dist/amp\\.js';
-  }
 };
 
 /**
@@ -1310,7 +1303,7 @@ ParsedTagSpec.prototype.valueHasUnescapedTemplateSyntax = function(value) {
   // Mustache (https://mustache.github.io/mustache.5.html), our template
   // system, supports {{{unescaped}}} or {{{&unescaped}}} and there can
   // be whitespace after the 2nd '{'. We disallow these in attribute Values.
-  const unescapedOpenTag = new RegExp('{{\\s*[&{]', 'g');
+  const unescapedOpenTag = new RegExp('{{\\s*[&{]');
   return unescapedOpenTag.test(value);
 };
 
@@ -1324,7 +1317,7 @@ ParsedTagSpec.prototype.valueHasPartialsTemplateSyntax = function(value) {
   // system, supports 'partials' which include other Mustache templates
   // in the format of {{>partial}} and there can be whitespace after the {{.
   // We disallow partials in attribute values.
-  const partialsTag = new RegExp('{{\\s*>', 'g');
+  const partialsTag = new RegExp('{{\\s*>');
   return partialsTag.test(value);
 };
 
@@ -1535,7 +1528,8 @@ ParsedTagSpec.prototype.validateAttributes = function(
       }
     }
     if (parsedSpec.getSpec().valueRegex !== null) {
-      const valueRegex = new RegExp(parsedSpec.getSpec().valueRegex, 'g');
+      const valueRegex =
+          new RegExp('^(' + parsedSpec.getSpec().valueRegex + ')$');
       if (!valueRegex.test(encounteredAttrValue)) {
         context.addError(amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
                          encounteredAttrName + '=' + encounteredAttrValue,
@@ -1554,8 +1548,8 @@ ParsedTagSpec.prototype.validateAttributes = function(
     }
     // } end oneof
     if (parsedSpec.getSpec().blacklistedValueRegex !== null) {
-      const blacklistedValueRegex =
-          new RegExp(parsedSpec.getSpec().blacklistedValueRegex, 'gi');
+      const blacklistedValueRegex = new RegExp(
+          parsedSpec.getSpec().blacklistedValueRegex, 'i');
       if (blacklistedValueRegex.test(encounteredAttrValue)) {
         context.addError(amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
                          encounteredAttrName + '=' + encounteredAttrValue,
@@ -1783,7 +1777,7 @@ ParsedValidatorRules.prototype.maybeEmitMandatoryTagValidationErrors = function(
       const alternative = spec.mandatoryAlternatives;
       if (!satisfied.contains(alternative)) {
         missing.push(alternative);
-        specUrlsByMissing[missing] = spec.specUrl;
+        specUrlsByMissing[alternative] = spec.specUrl;
       }
     }
   }

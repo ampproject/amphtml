@@ -67,9 +67,13 @@ describe('service', () => {
 
   it('should fail if element is not in page.', () => {
     window.ampExtendedElements['element-foo'] = true;
-    expect(() => {
-      getElementService(window, 'e1', 'element-bar');
-    }).to.throw(
-        /Service e1 was requested to be provided through element-bar/);
+    return getElementService(window, 'e1', 'element-bar').then(() => {
+      return 'SUCCESS';
+    }, error => {
+      return 'ERROR ' + error;
+    }).then(result => {
+      expect(result).to.match(
+          /Service e1 was requested to be provided through element-bar/);
+    });
   });
 });

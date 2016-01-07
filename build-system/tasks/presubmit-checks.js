@@ -67,6 +67,7 @@ var forbiddenTerms = {
     message: privateServiceFactory,
     whitelist: [
       'src/service/cid-impl.js',
+      'extensions/amp-access/0.1/amp-access.js',
       'extensions/amp-analytics/0.1/amp-analytics.js',
     ],
   },
@@ -102,6 +103,7 @@ var forbiddenTerms = {
       'src/cid.js',
       'src/service/cid-impl.js',
       'src/url-replacements.js',
+      'extensions/amp-access/0.1/amp-access.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js',
     ],
   },

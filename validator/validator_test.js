@@ -62,11 +62,13 @@ function findHtmlFilesRelativeToTestdata() {
  * and also find the adjacent .out file.
  * @constructor
  */
-const ValidatorTestCase = function(ampHtmlFile) {
+const ValidatorTestCase = function(ampHtmlFile, opt_ampUrl) {
   /** @type {!string} */
   this.name = ampHtmlFile;
   /** @type {!string} */
   this.ampHtmlFile = ampHtmlFile;
+  /** @type {!string} */
+  this.ampUrl = opt_ampUrl || ampHtmlFile;
   /**
    * This field can be null, indicating that the expectedOutput did not
    * come from a file.
@@ -89,7 +91,7 @@ const ValidatorTestCase = function(ampHtmlFile) {
 ValidatorTestCase.prototype.run = function() {
   const results = amp.validator.validateString(this.ampHtmlFileContents);
   const observed = amp.validator.renderValidationResult(
-      results, this.ampHtmlFile).join('\n');
+      results, this.ampUrl).join('\n');
   if (observed === this.expectedOutput) {
     return;
   }
@@ -119,6 +121,27 @@ describe('ValidatorFeatures', () => {
   }
 });
 
+describe('ValidatorOutput', () => {
+  const validStyleBlob = 'h1 {a: b}\n';
+
+  it('produces expected output with hash in the URL', () => {
+    const oneTooMany = Array(5001).join(validStyleBlob) + ' ';
+    assertStrictEqual(50001, oneTooMany.length);
+    const test = new ValidatorTestCase('feature_tests/css_length.html',
+        'http://google.com/foo.html#development=1');
+    test.ampHtmlFileContents = test.ampHtmlFileContents.replace(
+        '.replaceme {}', oneTooMany);
+    test.expectedOutputFile = null;
+    test.expectedOutput =
+        'FAIL\n' +
+        'http://google.com/foo.html:28:2 STYLESHEET_TOO_LONG ' +
+        'seen: 50001 bytes, limit: 50000 bytes ' +
+        '(see https://github.com/ampproject/amphtml/blob/master/spec/' +
+        'amp-html-format.md#maximum-size)';
+    test.run();
+  });
+});
+
 describe('ValidatorCssLengthValidation', () => {
   // Rather than encoding some really long author stylesheets in
   // testcases, which would be difficult to read/verify that the
@@ -137,6 +160,7 @@ describe('ValidatorCssLengthValidation', () => {
     const test = new ValidatorTestCase('feature_tests/css_length.html');
     test.ampHtmlFileContents = test.ampHtmlFileContents.replace(
         '.replaceme {}', maxBytes);
+    test.run();
   });
 
   it('will not accept 50001 bytes in author stylesheet - one too many', () => {
@@ -152,6 +176,7 @@ describe('ValidatorCssLengthValidation', () => {
         'seen: 50001 bytes, limit: 50000 bytes ' +
         '(see https://github.com/ampproject/amphtml/blob/master/spec/' +
         'amp-html-format.md#maximum-size)';
+    test.run();
   });
 
   it('knows utf8 and rejects file w/ 50002 bytes but 49999 characters', () => {
@@ -167,6 +192,7 @@ describe('ValidatorCssLengthValidation', () => {
         'seen: 50002 bytes, limit: 50000 bytes ' +
         '(see https://github.com/ampproject/amphtml/blob/master/spec/' +
         'amp-html-format.md#maximum-size)';
+    test.run();
   });
 });
 

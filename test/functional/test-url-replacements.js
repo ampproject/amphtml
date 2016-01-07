@@ -23,7 +23,7 @@ import {setCookie} from '../../src/cookies';
 
 describe('UrlReplacements', () => {
 
-  function expand(url, withCid) {
+  function expand(url, withCid, opt_bindings) {
     return createIframePromise().then(iframe => {
       iframe.doc.title = 'Pixel Test';
       const link = iframe.doc.createElement('link');
@@ -36,7 +36,7 @@ describe('UrlReplacements', () => {
       }
 
       const replacements = urlReplacementsFor(iframe.win);
-      return replacements.expand(url);
+      return replacements.expand(url, opt_bindings);
     });
   }
 
@@ -177,14 +177,14 @@ describe('UrlReplacements', () => {
 
   it('should support positional arguments', () => {
     const replacements = urlReplacementsFor(window);
-    replacements.set_('FN', (data, one) => one);
+    replacements.set_('FN', one => one);
     return expect(replacements.expand('?a=FN(xyz1)')).to
         .eventually.equal('?a=xyz1');
   });
 
   it('should support multiple positional arguments', () => {
     const replacements = urlReplacementsFor(window);
-    replacements.set_('FN', (data, one, two) => {
+    replacements.set_('FN', (one, two) => {
       return one + '-' + two;
     });
     return expect(replacements.expand('?a=FN(xyz,abc)')).to
@@ -199,5 +199,28 @@ describe('UrlReplacements', () => {
     replacements.set_('OTHER', () => 'foo');
     return expect(replacements.expand('?a=P1&b=P2&c=P3&d=OTHER'))
         .to.eventually.equal('?a=abc%20&b=xyz&c=123&d=foo');
+  });
+
+  it('should override an existing binding', () => {
+    return expand('ord=RANDOM?', false, {'RANDOM': 'abc'}).then(res => {
+      expect(res).to.match(/ord=abc\?$/);
+    });
+  });
+
+  it('should add an additional binding', () => {
+    return expand('rid=NONSTANDARD?', false, {'NONSTANDARD': 'abc'}).then(
+        res => {
+          expect(res).to.match(/rid=abc\?$/);
+        });
+  });
+
+  it('should NOT overwrite the cached expression with new bindings', () => {
+    return expand('rid=NONSTANDARD?', false, {'NONSTANDARD': 'abc'}).then(
+      res => {
+        expect(res).to.match(/rid=abc\?$/);
+        return expand('rid=NONSTANDARD?').then(res => {
+          expect(res).to.match(/rid=NONSTANDARD\?$/);
+        });
+      });
   });
 });

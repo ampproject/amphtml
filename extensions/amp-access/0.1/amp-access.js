@@ -16,13 +16,21 @@
 
 import {actionServiceFor} from '../../../src/action';
 import {assertHttpsUrl} from '../../../src/url';
+import {cidFor} from '../../../src/cid';
+import {documentStateFor} from '../../../src/document-state';
 import {evaluateAccessExpr} from './access-expr';
 import {getService} from '../../../src/service';
 import {installStyles} from '../../../src/styles';
 import {isExperimentOn} from '../../../src/experiments';
+import {listenOnce} from '../../../src/event-helper';
 import {log} from '../../../src/log';
 import {onDocumentReady} from '../../../src/document-state';
+import {openLoginDialog} from './login-dialog';
+import {parseQueryString} from '../../../src/url';
+import {timer} from '../../../src/timer';
 import {urlReplacementsFor} from '../../../src/url-replacements';
+import {viewerFor} from '../../../src/viewer';
+import {viewportFor} from '../../../src/viewport';
 import {vsyncFor} from '../../../src/vsync';
 import {xhrFor} from '../../../src/xhr';
 
@@ -49,6 +57,9 @@ const EXPERIMENT = 'amp-access';
 
 /** @const */
 const TAG = 'AmpAccess';
+
+/** @const {number} */
+const VIEW_TIMEOUT = 2000;
 
 
 /**
@@ -88,6 +99,30 @@ export class AccessService {
 
     /** @const @private {!UrlReplacements} */
     this.urlReplacements_ = urlReplacementsFor(this.win);
+
+    /** @private @const {!Cid} */
+    this.cid_ = cidFor(this.win);
+
+    /** @private @const {!Viewer} */
+    this.viewer_ = viewerFor(this.win);
+
+    /** @private @const {!DocumentState} */
+    this.docState_ = documentStateFor(this.win);
+
+    /** @private @const {!Viewport} */
+    this.viewport_ = viewportFor(this.win);
+
+    /** @private @const {function(string):Promise<string>} */
+    this.openLoginDialog_ = openLoginDialog.bind(null, this.win);
+
+    /** @private {?Promise<string>} */
+    this.readerIdPromise_ = null;
+
+    /** @private {?Promise} */
+    this.reportViewPromise_ = null;
+
+    /** @private {?Promise} */
+    this.loginPromise_ = null;
   }
 
   /**
@@ -142,6 +177,37 @@ export class AccessService {
 
     // Start authorization XHR immediately.
     this.runAuthorization_();
+
+    // Wait for the "view" signal.
+    this.scheduleView_();
+  }
+
+  /**
+   * @return {!Promise<string>}
+   * @private
+   */
+  getReaderId_() {
+    if (!this.readerIdPromise_) {
+      // No consent - an essential part of the access system.
+      const consent = Promise.resolve();
+      this.readerIdPromise_ = this.cid_.then(cid => {
+        return cid.get('amp-access', consent);
+      });
+    }
+    return this.readerIdPromise_;
+  }
+
+  /**
+   * @param {string} url
+   * @return {!Promise<string>}
+   * @private
+   */
+  buildUrl_(url) {
+    return this.getReaderId_().then(readerId => {
+      return this.urlReplacements_.expand(url, {
+        'READER_ID': readerId
+      });
+    });
   }
 
   /**
@@ -151,24 +217,19 @@ export class AccessService {
   runAuthorization_() {
     log.fine(TAG, 'Start authorization via ', this.config_.authorization);
     this.toggleTopClass_('amp-access-loading', true);
-
-    // TODO(dvoytenko): produce READER_ID and create the URL substition for it.
-    return this.urlReplacements_.expand(this.config_.authorization)
-        .then(url => {
-          log.fine(TAG, 'Authorization URL: ', url);
-          return this.xhr_.fetchJson(url, {credentials: 'include'});
-        })
-        .then(response => {
-          log.fine(TAG, 'Authorization response: ', response);
-          this.toggleTopClass_('amp-access-loading', false);
-          onDocumentReady(this.win.document, () => {
-            this.applyAuthorization_(response);
-          });
-        })
-        .catch(error => {
-          log.error(TAG, 'Authorization failed: ', error);
-          this.toggleTopClass_('amp-access-loading', false);
-        });
+    return this.buildUrl_(this.config_.authorization).then(url => {
+      log.fine(TAG, 'Authorization URL: ', url);
+      return this.xhr_.fetchJson(url, {credentials: 'include'});
+    }).then(response => {
+      log.fine(TAG, 'Authorization response: ', response);
+      this.toggleTopClass_('amp-access-loading', false);
+      onDocumentReady(this.win.document, () => {
+        this.applyAuthorization_(response);
+      });
+    }).catch(error => {
+      log.error(TAG, 'Authorization failed: ', error);
+      this.toggleTopClass_('amp-access-loading', false);
+    });
   }
 
   /**
@@ -203,6 +264,100 @@ export class AccessService {
   }
 
   /**
+   * @private
+   */
+  scheduleView_() {
+    this.docState_.onReady(() => {
+      if (this.viewer_.isVisible()) {
+        this.reportWhenViewed_();
+      }
+      this.viewer_.onVisibilityChanged(() => {
+        if (this.viewer_.isVisible()) {
+          this.reportWhenViewed_();
+        }
+      });
+    });
+  }
+
+  /**
+   * @return {!Promise}
+   * @private
+   */
+  reportWhenViewed_() {
+    if (this.reportViewPromise_) {
+      return this.reportViewPromise_;
+    }
+    log.fine(TAG, 'start view monitoring');
+    this.reportViewPromise_ = this.whenViewed_().then(
+        this.reportViewToServer_.bind(this),
+        reason => {
+          // Ignore - view has been canceled.
+          log.fine(TAG, 'view cancelled:', reason);
+          this.reportViewPromise_ = null;
+          throw reason;
+        });
+    return this.reportViewPromise_;
+  }
+
+  /**
+   * The promise will be resolved when a view of this document has occurred. It
+   * will be rejected if the current impression should not be counted as a view.
+   * @return {!Promise}
+   * @private
+   */
+  whenViewed_() {
+    // Viewing kick off: document is visible.
+    const unlistenSet = [];
+    return new Promise((resolve, reject) => {
+      // 1. Document becomes invisible again: cancel.
+      unlistenSet.push(this.viewer_.onVisibilityChanged(() => {
+        if (!this.viewer_.isVisible()) {
+          reject();
+        }
+      }));
+
+      // 2. After a few seconds: register a view.
+      const timeoutId = timer.delay(resolve, VIEW_TIMEOUT);
+      unlistenSet.push(() => timer.cancel(timeoutId));
+
+      // 3. If scrolled: register a view.
+      unlistenSet.push(this.viewport_.onScroll(resolve));
+
+      // 4. Tap: register a view.
+      unlistenSet.push(listenOnce(this.win.document.documentElement,
+          'click', resolve));
+    }).then(() => {
+      unlistenSet.forEach(unlisten => unlisten());
+    }, reason => {
+      unlistenSet.forEach(unlisten => unlisten());
+      throw reason;
+    });
+  }
+
+  /**
+   * @return {!Promise}
+   * @private
+   */
+  reportViewToServer_() {
+    return this.buildUrl_(this.config_.pingback).then(url => {
+      log.fine(TAG, 'Pingback URL: ', url);
+      return this.xhr_.sendSignal(url, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: ''
+      });
+    }).then(() => {
+      log.fine(TAG, 'Pingback complete');
+    }).catch(error => {
+      log.error(TAG, 'Pingback failed: ', error);
+      throw error;
+    });
+  }
+
+  /**
    * @param {string} className
    * @param {boolean} on
    * @private
@@ -218,7 +373,40 @@ export class AccessService {
    * @private
    */
   handleAction_(invocation) {
-    log.fine(TAG, 'Invocation: ', invocation);
+    if (invocation.method == 'login') {
+      this.login();
+    }
+  }
+
+  /**
+   * Runs the Login flow. Returns a promise that is resolved if login succeeds
+   * or is rejected if login fails. Login flow is performed as an external
+   * 1st party Web dialog. It's goal is to authenticate the reader.
+   * @return {!Promise}
+   */
+  login() {
+    if (this.loginPromise_) {
+      return this.loginPromise_;
+    }
+
+    log.fine(TAG, 'Start login');
+    const urlPromise = this.buildUrl_(this.config_.login);
+    this.loginPromise_ = this.openLoginDialog_(urlPromise).then(result => {
+      log.fine(TAG, 'Login dialog completed: ', result);
+      this.loginPromise_ = null;
+      const query = parseQueryString(result);
+      const s = query['success'];
+      const success = (s == 'true' || s == 'yes' || s == '1');
+      if (success) {
+        // Repeat the authorization flow.
+        return this.runAuthorization_();
+      }
+    }).catch(reason => {
+      log.fine(TAG, 'Login dialog failed: ', reason);
+      this.loginPromise_ = null;
+      throw reason;
+    });
+    return this.loginPromise_;
   }
 }
 

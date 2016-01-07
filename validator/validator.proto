@@ -67,7 +67,7 @@ message AttrSpec {
   // } end oneof
 
   // If set, then the attribute value may not match this regex, which is
-  // always applied case-insensitively.
+  // always applied case-insensitively and as a partial match.
   optional string blacklisted_value_regex = 6;
   // If set, generates a DEPRECATED_ATTR error with severity WARNING.
   optional string deprecation = 7;
@@ -89,6 +89,7 @@ message AttrList {
 // Regex which, if matches the cdata of a tag, causes the tag validation to
 // fail.
 message BlackListedCDataRegex {
+  // Syntax is partial match, use ^ and $ if you want global match.
   optional string regex = 1;
   optional string error_message = 2;
 }

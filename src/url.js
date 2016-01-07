@@ -61,7 +61,7 @@ export function assertHttpsUrl(urlString, elementContext) {
           url.hostname.length - '.localhost'.length,
       '%s source must start with ' +
       '"https://" or "//" or be relative and served from ' +
-      'https. Invalid value: %s',
+      'either https or from localhost. Invalid value: %s',
       elementContext, urlString);
   return urlString;
 }

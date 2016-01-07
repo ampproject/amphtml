@@ -380,7 +380,11 @@ describe('isProxyOrigin', () => {
   testProxyOrigin(
       'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0', true);
   testProxyOrigin(
-      'http://localhost:123', true);
+      'http://localhost:123', false);
+  testProxyOrigin(
+      'http://localhost:123/c', true);
+  testProxyOrigin(
+      'http://localhost:123/v', true);
   testProxyOrigin(
       'https://cdn.ampproject.net/v/www.origin.com/foo/?f=0', false);
   testProxyOrigin(
