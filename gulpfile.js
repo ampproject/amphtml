@@ -313,6 +313,7 @@ function buildExamples(watch) {
   buildExample('ads.amp.html');
   buildExample('analytics.amp.html');
   buildExample('article.amp.html');
+  buildExample('responsive.amp.html');
   buildExample('article-access.amp.html');
   buildExample('csp.amp.html');
   buildExample('metadata-examples/article-json-ld.amp.html');
