@@ -1,0 +1,3 @@
+FAIL
+feature_tests/amp_identification_missing.html:22:0 MANDATORY_ATTR_MISSING ⚡ (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#ampd)
+feature_tests/amp_identification_missing.html:33:7 MANDATORY_TAG_MISSING html ⚡ for top-level html (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#ampd)

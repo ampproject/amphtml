@@ -187,14 +187,15 @@ message AmpLayout {
 // Some tags are mandatory. Note that the tag name is not unique, that is,
 // there can be multiple tag specs covering the same name, e.g., for
 // multiple meta tags (with different attributes).
-// NEXT AVAILABLE TAG: 14
+// NEXT AVAILABLE TAG: 15
 message TagSpec {
   // Use lower-case tag names only.
   optional string name = 1;
 
   // The detail will be copied as is into ValidationError::detail for
   // MANDATORY_TAG_MISSING and other errors. It is especially useful
-  // when the tag name by itself isn't sufficient to identify the tag spec.
+  // when the tag name by itself isn't sufficient to uniquely identify
+  // the tag spec.
   optional string detail = 2;
 
   // If true, a tag conforming to this tag spec must occur at least once
@@ -214,6 +215,10 @@ message TagSpec {
 
   // This tag may not descend from any tag with any of these tag names.
   repeated string disallowed_ancestor = 13;
+
+  // If set, other tags - identified by their detail string - must be
+  // present as well.
+  repeated string also_requires = 14;
 
   // Attribute specifications related to this tag.
   repeated AttrSpec attrs = 7;
