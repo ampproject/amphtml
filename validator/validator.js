@@ -612,8 +612,7 @@ CdataMatcher.prototype.match = function(cdata, context, validationResult) {
           const lineCol = new LineCol(cssRule.line, cssRule.col);
           context.addErrorWithLineCol(
               lineCol, amp.validator.ValidationError.Code.CSS_SYNTAX,
-              'Invalid CSS rule of type: @' + cssRule.name,
-              /* url */ '', validationResult);
+              'CSS @' + cssRule.name, /* url */ '', validationResult);
         }
       }
     }
