@@ -122,22 +122,20 @@ describe('ValidatorFeatures', () => {
 });
 
 describe('ValidatorOutput', () => {
-  const validStyleBlob = 'h1 {a: b}\n';
-
+  // What's tested here is that if a URL with #development=1 is passed
+  // (or any other hash), the validator output won't include the hash.
   it('produces expected output with hash in the URL', () => {
-    const oneTooMany = Array(5001).join(validStyleBlob) + ' ';
-    assertStrictEqual(50001, oneTooMany.length);
-    const test = new ValidatorTestCase('feature_tests/css_length.html',
+    const test = new ValidatorTestCase('feature_tests/no_custom_js.html',
         'http://google.com/foo.html#development=1');
-    test.ampHtmlFileContents = test.ampHtmlFileContents.replace(
-        '.replaceme {}', oneTooMany);
     test.expectedOutputFile = null;
     test.expectedOutput =
         'FAIL\n' +
-        'http://google.com/foo.html:28:2 STYLESHEET_TOO_LONG ' +
-        'seen: 50001 bytes, limit: 50000 bytes ' +
-        '(see https://github.com/ampproject/amphtml/blob/master/spec/' +
-        'amp-html-format.md#maximum-size)';
+        'http://google.com/foo.html:28:3 INVALID_ATTR_VALUE ' +
+        'src=https://example.com/v0-not-allowed.js ' +
+        '(see https://github.com/ampproject/amphtml/blob/master/' +
+        'spec/amp-html-format.md#scrpt)\n' +
+        'http://google.com/foo.html:29:3 INVALID_ATTR_VALUE ' +
+        'src=https://example.com/v0/not-allowed.js';
     test.run();
   });
 });
