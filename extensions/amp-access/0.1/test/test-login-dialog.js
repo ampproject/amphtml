@@ -17,6 +17,9 @@
 import {openLoginDialog} from '../login-dialog';
 import * as sinon from 'sinon';
 
+const RETURN_URL_ESC = 'http%3A%2F%2Flocalhost%3A8000%2Fextensions' +
+    '%2Famp-access%2F0.1%2Famp-login-done.html';
+
 
 describe('LoginDialog', () => {
 
@@ -26,6 +29,7 @@ describe('LoginDialog', () => {
   let windowMock;
   let dialog;
   let dialogUrl;
+  let dialogMock;
   let messageListener;
 
   beforeEach(() => {
@@ -67,6 +71,7 @@ describe('LoginDialog', () => {
       },
       postMessage: () => {}
     };
+    dialogMock = sandbox.mock(dialog);
   });
 
   afterEach(() => {
@@ -147,11 +152,17 @@ describe('LoginDialog', () => {
   it('should have correct window.open params', () => {
     windowMock.expects('open')
         .withExactArgs(
-            'http://acme.com/login?return=' +
-            'http%3A%2F%2Flocalhost%3A8000%2Fdist%2Fv0%2Famp-login-done.html',
+            'http://acme.com/login?return=' + RETURN_URL_ESC,
             '_blank',
             'height=450,width=700,left=150,top=275')
         .returns(dialog)
+        .once();
+    dialogMock.expects('postMessage')
+        .withExactArgs(
+            sinon.match(arg => {
+              return (arg.sentinel == 'amp' && arg.type == 'result-ack');
+            }),
+            'http://localhost:8000')
         .once();
     const promise = openLoginDialog(windowApi, 'http://acme.com/login');
     return Promise.resolve()
@@ -167,8 +178,7 @@ describe('LoginDialog', () => {
   it('should have correct URL with other parameters', () => {
     windowMock.expects('open')
         .withExactArgs(
-            'http://acme.com/login?a=1&return=' +
-            'http%3A%2F%2Flocalhost%3A8000%2Fdist%2Fv0%2Famp-login-done.html',
+            'http://acme.com/login?a=1&return=' + RETURN_URL_ESC,
             '_blank',
             'height=450,width=700,left=150,top=275')
         .returns(dialog)
@@ -219,8 +229,7 @@ describe('LoginDialog', () => {
         })
         .then(() => {
           expect(dialogUrl).to.be.equal(
-            'http://acme.com/login?a=1&return=' +
-            'http%3A%2F%2Flocalhost%3A8000%2Fdist%2Fv0%2Famp-login-done.html');
+            'http://acme.com/login?a=1&return=' + RETURN_URL_ESC);
           succeed();
           return promise;
         })
