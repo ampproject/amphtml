@@ -98,5 +98,15 @@
   </div>
 </template>
 
+<!-- Not descendant from a template, so mustache attribute values are OK -->
+<p title="{{{allowed }}}"></p>
+<p title="{{&allowed }}"></p>
+<p title="{{>allowed }}"></p>
+
+<!-- Inside a template, attribute value restrictions are relaxed. -->
+<amp-audio src="" layout="fixed" autoplay="{{invalid}}">
+<template type="amp-mustache">
+<amp-audio src="" layout="fixed" autoplay="{{valid}}">
+</template>
 </body>
 </html>
