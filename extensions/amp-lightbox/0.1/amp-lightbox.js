@@ -16,8 +16,7 @@
 
 import {Gestures} from '../../../src/gesture';
 import {Layout} from '../../../src/layout';
-import {SwipeXYRecognizer, TapRecognizer}
-    from '../../../src/gesture-recognizers';
+import {SwipeXYRecognizer} from '../../../src/gesture-recognizers';
 import {historyFor} from '../../../src/history';
 import * as st from '../../../src/style';
 
@@ -59,7 +58,6 @@ class AmpLightbox extends AMP.BaseElement {
     this.registerAction('close', this.close.bind(this));
 
     const gestures = Gestures.get(this.element);
-    gestures.onGesture(TapRecognizer, () => this.close());
     gestures.onGesture(SwipeXYRecognizer, () => {
       // Consume to block scroll events and side-swipe.
     });

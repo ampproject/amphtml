@@ -153,6 +153,10 @@ export function installAd(win) {
       // We remeasured this tag, lets also remeasure the iframe. Should be
       // free now and it might have changed.
       this.measureIframeLayoutBox_();
+      // When the framework has the need to remeasure us, our position might
+      // have changed. Send an intersection record if needed. This does nothing
+      // if we aren't currently in view.
+      this.sendAdIntersection_();
     }
 
     /**
@@ -209,7 +213,7 @@ export function installAd(win) {
 
         // Triggered by context.noContentAvailable() inside the ad iframe.
         listenOnce(this.iframe_, 'no-content', () => {
-          this.deferMutate(this.noContentHandler_.bind(this));
+          this.noContentHandler_();
         });
         // Triggered by context.observeIntersection(…) inside the ad iframe.
         // We use listen instead of listenOnce, because a single ad might
@@ -231,8 +235,15 @@ export function installAd(win) {
       // And update the ad about its position in the viewport while
       // it is visible.
       if (inViewport) {
-        this.unlistenViewportChanges_ =
-            this.getViewport().onScroll(this.sendAdIntersection_.bind(this));
+        const send = this.sendAdIntersection_.bind(this);
+        // Scroll events.
+        const unlistenScroll = this.getViewport().onScroll(send);
+        // Throttled scroll events. Also fires for resize events.
+        const unlistenChanged = this.getViewport().onChanged(send);
+        this.unlistenViewportChanges_ = () => {
+          unlistenScroll();
+          unlistenChanged();
+        };
       } else if (this.unlistenViewportChanges_) {
         this.unlistenViewportChanges_();
         this.unlistenViewportChanges_ = null;
@@ -283,8 +294,18 @@ export function installAd(win) {
      * @private
      */
     noContentHandler_() {
-      this.element.removeChild(this.iframe_);
-      this.toggleFallback(true);
+      // If a fallback does not exist attempt to collapse the ad.
+      if (!this.fallback_) {
+        this.attemptChangeHeight(0, () => {
+          this.element.style.display = 'none';
+        });
+      }
+      this.deferMutate(() => {
+        if (this.fallback_) {
+          this.toggleFallback(true);
+        }
+        this.element.removeChild(this.iframe_);
+      });
     }
   }
 

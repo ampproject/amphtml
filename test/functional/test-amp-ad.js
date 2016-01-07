@@ -230,11 +230,31 @@ describe('amp-ad', () => {
       expect(posts).to.have.length(2);
       viewport.scroll_();
       expect(posts).to.have.length(3);
-      ampAd.viewportCallback(false);
+      viewport.resize_();
       expect(posts).to.have.length(4);
+      ampAd.viewportCallback(false);
+      expect(posts).to.have.length(5);
       // No longer listening.
       viewport.scroll_();
+      expect(posts).to.have.length(5);
+      viewport.resize_();
+      expect(posts).to.have.length(5);
+    });
+
+    it('report changes upon remeasure', () => {
+      expect(posts).to.have.length(1);
+      ampAd.viewportCallback(true);
+      expect(posts).to.have.length(2);
+      ampAd.onLayoutMeasure();
+      expect(posts).to.have.length(3);
+      ampAd.onLayoutMeasure();
       expect(posts).to.have.length(4);
+      ampAd.viewportCallback(false);
+      expect(posts).to.have.length(5);
+      // We also send a new record when we are currently not in the
+      // viewport, because that might have just changed.
+      ampAd.onLayoutMeasure();
+      expect(posts).to.have.length(6);
     });
   });
 
@@ -251,9 +271,44 @@ describe('amp-ad', () => {
         ad.appendChild(fallback);
         return ad;
       }).then(ad => {
+        const deferMutateStub = sinon.stub(
+          ad.implementation_, 'deferMutate', function(callback) {
+            callback();
+          });
         expect(ad).to.not.have.class('amp-notsupported');
         ad.implementation_.noContentHandler_();
         expect(ad).to.have.class('amp-notsupported');
+        deferMutateStub.restore();
+      });
+    });
+
+    it('should collapse when equestChangeHeight succeeds', () => {
+      return getAd({
+        width: 300,
+        height: 750,
+        type: 'a9',
+        src: 'testsrc',
+      }, 'https://schema.org', ad => {
+        return ad;
+      }).then(ad => {
+        const deferMutateStub = sinon.stub(
+          ad.implementation_, 'deferMutate', function(callback) {
+            callback();
+          });
+        const attemptChangeHeightStub = sinon.stub(ad.implementation_,
+          'attemptChangeHeight',
+          function(height, callback) {
+            ad.style.height = height;
+            callback();
+          });
+        ad.style.position = 'absolute';
+        ad.style.top = '300px';
+        ad.style.left = '50px';
+        expect(ad.style.display).to.not.equal('none');
+        ad.implementation_.noContentHandler_();
+        expect(ad.style.display).to.equal('none');
+        deferMutateStub.restore();
+        attemptChangeHeightStub.restore();
       });
     });
   });

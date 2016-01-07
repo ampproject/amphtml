@@ -46,7 +46,7 @@ export class AmpIframe extends AMP.BaseElement {
         this.element);
     const containerUrl = parseUrl(containerSrc);
     assert(
-        !((' ' + sandbox + ' ').match(/\s+allow-same-origin\s+/)) ||
+        !((' ' + sandbox + ' ').match(/\s+allow-same-origin\s+/i)) ||
         (url.origin != containerUrl.origin && url.protocol != 'data:'),
         'Origin of <amp-iframe> must not be equal to container %s' +
         'if allow-same-origin is set.',
@@ -75,16 +75,16 @@ export class AmpIframe extends AMP.BaseElement {
    * instead ensure that `allow-same-origin` is not present, but this
    * implementation has the right security behavior which is that the document
    * may under no circumstances be able to run JS on the parent.
+   * @param {string} srcdoc
+   * @param {string} sandbox
    * @return {string} Data URI for the srcdoc
    */
-  transformSrcDoc() {
-    const srcdoc = this.element.getAttribute('srcdoc');
+  transformSrcDoc(srcdoc, sandbox) {
     if (!srcdoc) {
       return;
     }
-    const sandbox = this.element.getAttribute('sandbox');
     assert(
-        !((' ' + sandbox + ' ').match(/\s+allow-same-origin\s+/)),
+        !((' ' + sandbox + ' ').match(/\s+allow-same-origin\s+/i)),
         'allow-same-origin is not allowed with the srcdoc attribute %s.',
         this.element);
     return 'data:text/html;charset=utf-8;base64,' + btoa(srcdoc);
@@ -92,10 +92,14 @@ export class AmpIframe extends AMP.BaseElement {
 
   /** @override */
   firstAttachedCallback() {
-    const iframeSrc = this.element.getAttribute('src') ||
-        this.transformSrcDoc();
-    this.iframeSrc = this.assertSource(iframeSrc, window.location.href,
-        this.element.getAttribute('sandbox'));
+    /** @private @const {string} */
+    this.sandbox_ = this.element.getAttribute('sandbox');
+    const iframeSrc =
+        this.element.getAttribute('src') ||
+        this.transformSrcDoc(
+            this.element.getAttribute('srcdoc'), this.sandbox_);
+    this.iframeSrc = this.assertSource(
+        iframeSrc, window.location.href, this.sandbox_);
   }
 
   /** @override */
@@ -152,7 +156,7 @@ export class AmpIframe extends AMP.BaseElement {
     this.propagateAttributes(
         ['frameborder', 'allowfullscreen', 'allowtransparency', 'scrolling'],
         iframe);
-    setSandbox(this.element, iframe);
+    setSandbox(this.element, iframe, this.sandbox_);
     iframe.src = this.iframeSrc;
     this.element.appendChild(makeIOsScrollable(this.element, iframe));
 
@@ -207,7 +211,7 @@ export class AmpIframe extends AMP.BaseElement {
           this.element);
       return;
     }
-    this.requestChangeHeight(newHeight);
+    this.attemptChangeHeight(newHeight);
   }
 };
 
@@ -216,9 +220,10 @@ export class AmpIframe extends AMP.BaseElement {
  * to be opted in are allowed.
  * @param {!Element} element
  * @param {!Element} iframe
+ * @param {string} sandbox
  */
-function setSandbox(element, iframe) {
-  const allows = element.getAttribute('sandbox') || '';
+function setSandbox(element, iframe, sandbox) {
+  const allows = sandbox || '';
   iframe.setAttribute('sandbox', allows);
 }
 

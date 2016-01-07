@@ -24,7 +24,6 @@
 
 import {assert} from '../asserts';
 import {getCookie} from '../cookies';
-import {getMode} from '../mode';
 import {getService} from '../service';
 import {parseUrl} from '../url';
 import {timer} from '../timer';
@@ -126,10 +125,13 @@ function getExternalCid(cid, externalCidScope, persistenceConsent) {
  *     factored into its own package.
  */
 export function isProxyOrigin(url) {
+  const path = url.pathname.split('/');
+  const prefix = path[1];
   // List of well known proxy hosts. New proxies must be added here
   // to generate correct tokens.
   return (url.origin == 'https://cdn.ampproject.org' ||
-      url.origin.indexOf('http://localhost:') == 0);
+      (url.origin.indexOf('http://localhost:') == 0 &&
+       (prefix == 'c' || prefix == 'v')));
 }
 
 /**
@@ -147,13 +149,8 @@ export function getSourceOrigin(url) {
   // The /s/ is optional and signals a secure origin.
   const path = url.pathname.split('/');
   const prefix = path[1];
-  const mode = getMode();
-  // whitelist while localdev and file is in build/ or examples/
-  if (!(mode.localDev &&
-        (prefix == 'examples.build' || prefix == 'examples'))) {
-    assert(prefix == 'c' || prefix == 'v',
-        'Unknown path prefix in url %s', url.href);
-  }
+  assert(prefix == 'c' || prefix == 'v',
+      'Unknown path prefix in url %s', url.href);
   const domainOrHttpsSignal = path[2];
   const origin = domainOrHttpsSignal == 's'
       ? 'https://' + path[3]
@@ -310,9 +307,10 @@ function getEntropy(win) {
 
 /**
  * @param {!Window} window
+ * @return {!Cid}
  */
 export function installCidService(window) {
-  getService(window, 'cid', () => {
+  return getService(window, 'cid', () => {
     return new Cid(window);
   });
 };
