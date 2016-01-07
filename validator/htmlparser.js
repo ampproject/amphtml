@@ -538,10 +538,10 @@ amp.htmlparser.HtmlParser.prototype.parse = function(handler, htmlText) {
             handler.rcdata(
                 this.normalizeRCData_(htmlText.substring(0, dataEnd)));
           }
-          htmlText = htmlText.substring(dataEnd);
           if (locator) {
             locator.advancePos(htmlText.substring(0, dataEnd));
           }
+          htmlText = htmlText.substring(dataEnd);
         }
 
         tagName = eflags = openTag = void 0;
