@@ -98,7 +98,7 @@ AMP HTML documents MUST
 - <a name="chrs"></a>contain a `<meta charset="utf-8">` tag as the first child of their head tag. [🔗](#chrs)
 - <a name="vprt"></a>contain a `<meta name="viewport" content="width=device-width,minimum-scale=1">` tag inside their head tag. It's also recommend to include `initial-scale=1` (1). [🔗](#vprt)
 - <a name="scrpt"></a>contain a `<script async src="https://cdn.ampproject.org/v0.js"></script>` tag inside their head tag. [🔗](#scrpt)
-- <a name="opacity"></a>contain `<style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>` in their head tag. [🔗](#opacity)
+- <a name="opacity"></a><a name="boilerplate"></a>contain `<style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>` in their head tag. [🔗](#boilerplate)
 
 (1) `width=device-width,minimum-scale=1` is required to ensure [GPU rasterization](https://www.chromium.org/developers/design-documents/chromium-graphics/how-to-get-gpu-rasterization) is enabled.
 
@@ -159,7 +159,7 @@ Major semantic tags and the AMP custom elements come with default styles to make
 
 The following @-rules are allowed in stylesheets:
 
-`@font-face`, `@keyframes`, `@media`.
+`@font-face`, `@keyframes`, `@media`, `@supports`.
 
 `@import` will not be allowed. Other may be added in the future.
 
@@ -228,6 +228,8 @@ Font providers can be whitelisted if they support CSS-only integrations and serv
 
 - https://fast.fonts.net
 - https://fonts.googleapis.com
+
+IMPLEMENTERS NOTE: Adding to this list requires a change to the AMP CDN CSP rule.
 
 Authors are free to include all custom fonts via a `@font-face` CSS instruction via their custom CSS. Fonts included via `@font-face` must be fetched via the HTTP or HTTPS scheme.
 

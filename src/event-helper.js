@@ -18,6 +18,23 @@ import {timer} from './timer';
 
 
 /**
+ * Listens for the specified event on the element.
+ * @param {!EventTarget} element
+ * @param {string} eventType
+ * @param {function(Event)} listener
+ * @param {boolean=} opt_capture
+ * @return {!UnlistenDef}
+ */
+export function listen(element, eventType, listener, opt_capture) {
+  const capture = opt_capture || false;
+  element.addEventListener(eventType, listener, capture);
+  return () => {
+    element.removeEventListener(eventType, listener, capture);
+  };
+}
+
+
+/**
  * Listens for the specified event on the element and removes the listener
  * as soon as event has been received.
  * @param {!EventTarget} element

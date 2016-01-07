@@ -20,12 +20,12 @@
 # in production from crashing. This id is not relevant to validator.js
 # because thus far, engine (validator.js) and spec file (validator.protoascii)
 # are always released together.
-min_validator_revision_required: 67
+min_validator_revision_required: 70
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 100
+spec_file_revision: 103
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
 # These rules are just enough to validate the example from the spec.
@@ -418,7 +418,7 @@ tags: {
   attrs: {
     name: "name"
     mandatory: true
-    blacklisted_value_regex: "viewport|content-disposition|revisit-after"
+    blacklisted_value_regex: "(^|\\s)(viewport|content-disposition|revisit-after)(\\s|$)"
   }
   attrs: {
     name: "content"
@@ -479,42 +479,42 @@ cdata: {
   # These regex blacklists are temporary hacks to validate essential CSS
   # rules. They will be replaced later with more principalled solutions.
   blacklisted_cdata_regex: {
-    regex: ".*\\.i?-amp-.*"
-    error_message: "Disallowed -amp- CSS class name prefix."
+    regex: "\\.i?-amp-"
+    error_message: "CSS -amp- class name prefix"
   }
   blacklisted_cdata_regex: {
-    regex: ".*!important.*"
-    error_message: "Disallowed !important attribute in CSS."
+    regex: "!important"
+    error_message: "CSS !important"
   }
   # All known @ rules except for media and font-face are disabled.
   # See http://b/24415204.
   blacklisted_cdata_regex: {
-    regex: ".*charset.*"
-    error_message: "Disallowed @charset in CSS"
+    regex: "charset"
+    error_message: "CSS @charset"
   }
   blacklisted_cdata_regex: {
-    regex: ".*@import.*"
-    error_message: "Disallowed @import in CSS."
+    regex: "@import"
+    error_message: "CSS @import"
   }
   blacklisted_cdata_regex: {
-    regex: ".*@namespace.*"
-    error_message: "Disallowed @namespace in CSS."
+    regex: "@namespace"
+    error_message: "CSS @namespace"
   }
   blacklisted_cdata_regex: {
-    regex: ".*@supports.*"
-    error_message: "Disallowed @supports in CSS."
+    regex: "@supports"
+    error_message: "CSS @supports"
   }
   blacklisted_cdata_regex: {
-    regex: ".*@document.*"
-    error_message: "Disallowed @document in CSS."
+    regex: "@document"
+    error_message: "CSS @document"
   }
   blacklisted_cdata_regex: {
-    regex: ".*@page.*"
-    error_message: "Disallowed @page in CSS."
+    regex: "@page"
+    error_message: "CSS @page"
   }
   blacklisted_cdata_regex: {
-    regex: ".*@viewport.*"
-    error_message: "Disallowed @viewport in CSS."
+    regex: "@viewport"
+    error_message: "CSS @viewport"
   }
 }
 spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#stylesheets"
@@ -527,7 +527,7 @@ tags: {
   mandatory: true
   spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#opacity"
   cdata: {
-    cdata_regex: "^body ?{opacity: ?0}$"
+    cdata_regex: "body ?{opacity: ?0}"
   }
 }
 tags: {
@@ -538,7 +538,7 @@ tags: {
   unique: true
   mandatory: true
   cdata {
-    cdata_regex: "^body ?{opacity: ?1}$"
+    cdata_regex: "body ?{opacity: ?1}"
   }
 }
 tags: {
@@ -615,7 +615,7 @@ tags: {
   name: "a"
   attrs: {
     name: "href"
-    blacklisted_value_regex: "(javascript|vbscript|data):.*"
+    blacklisted_value_regex: "^\\s*(javascript|vbscript|data):"
   }
   attrs: {
     name: "target"
@@ -1489,11 +1489,13 @@ tags: {
   name: "script"
   mandatory_parent: "head"
   detail: "amphtml custom element"
-  attrs: { name: "custom-element" value_regex: "amp-.*" }
+  attrs: { mandatory: true name: "custom-element" value_regex: "amp-.*" }
   attrs: {
     name: "src"
     mandatory: true
-    # TODO(johannes): Should the location be restricted?
+    value_regex: "https://cdn\\.ampproject\\.org/v\\d+/[\\w\\.-]+\\.js|"
+                 "https://ssl\\.gstatic\\.com/amphtml/v\\d+/[\\w\\.-]+\\.js|"
+                 "https://www\\.gstatic\\.com/amphtml/v\\d+/[\\w\\.-]+\\.js"
   }
   attrs: {
     name: "async"
@@ -1937,8 +1939,8 @@ tags: {
   attrs: { name: "src" }
   attrs: {
     name: "autoplay"
-    # | prefix intended. empty string is valid.
-    value_regex: "|desktop|tablet|mobile"
+    # ^$| prefix intended. empty string is valid.
+    value_regex: "^$|desktop|tablet|mobile"
   }
   attrs: { name: "loop"  value: "" }
   attrs: { name: "muted" value: "" }

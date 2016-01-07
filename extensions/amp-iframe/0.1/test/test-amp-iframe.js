@@ -275,15 +275,18 @@ describe('amp-iframe', () => {
         amp.assertSource('https://google.com/fpp', 'https://google.com/abc',
             'allow-same-origin');
       }).to.throw(/must not be equal to container/);
+
       expect(() => {
         amp.assertSource('https://google.com/fpp', 'https://google.com/abc',
             'allow-same-origin allow-scripts');
       }).to.throw(/must not be equal to container/);
       // Same origin, but sandboxed.
       amp.assertSource('https://google.com/fpp', 'https://google.com/abc', '');
+
       expect(() => {
         amp.assertSource('http://google.com/', 'https://foo.com', '');
       }).to.throw(/Must start with https/);
+
       expect(() => {
         amp.assertSource('./foo', 'https://foo.com', '');
       }).to.throw(/Must start with https/);
@@ -291,11 +294,13 @@ describe('amp-iframe', () => {
       amp.assertSource('http://iframe.localhost:123/foo',
           'https://foo.com', '');
       amp.assertSource('https://container.com', 'https://foo.com', '');
-
       amp.element.setAttribute('srcdoc', 'abc');
       amp.element.setAttribute('sandbox', 'allow-same-origin');
+
       expect(() => {
-        amp.transformSrcDoc();
+        amp.transformSrcDoc('<script>try{parent.location.href}catch(e){' +
+          'parent.parent./*OK*/postMessage(\'loaded-iframe\', \'*\');}' +
+          '</script>', 'Allow-Same-Origin');
       }).to.throw(/allow-same-origin is not allowed with the srcdoc attribute/);
     });
   });
@@ -336,12 +341,12 @@ describe('amp-iframe', () => {
       resizable: ''
     }).then(amp => {
       const impl = amp.container.implementation_;
-      impl.requestChangeHeight = sinon.spy();
+      impl.attemptChangeHeight = sinon.spy();
       impl.changeHeight = sinon.spy();
       impl.updateHeight_(217);
       expect(impl.changeHeight.callCount).to.equal(0);
-      expect(impl.requestChangeHeight.callCount).to.equal(1);
-      expect(impl.requestChangeHeight.firstCall.args[0]).to.equal(217);
+      expect(impl.attemptChangeHeight.callCount).to.equal(1);
+      expect(impl.attemptChangeHeight.firstCall.args[0]).to.equal(217);
     });
   });
 
@@ -353,11 +358,11 @@ describe('amp-iframe', () => {
       height: 100
     }).then(amp => {
       const impl = amp.container.implementation_;
-      impl.requestChangeHeight = sinon.spy();
+      impl.attemptChangeHeight = sinon.spy();
       impl.changeHeight = sinon.spy();
       impl.updateHeight_(217);
       expect(impl.changeHeight.callCount).to.equal(0);
-      expect(impl.requestChangeHeight.callCount).to.equal(0);
+      expect(impl.attemptChangeHeight.callCount).to.equal(0);
     });
   });
 

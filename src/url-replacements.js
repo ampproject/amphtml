@@ -91,7 +91,7 @@ class UrlReplacements {
       return documentInfoFor(this.win_).pageViewId;
     });
 
-    this.set_('CLIENT_ID', (data, opt_name, opt_userNotificationId) => {
+    this.set_('CLIENT_ID', (opt_name, opt_userNotificationId) => {
       let consent = Promise.resolve();
 
       // If no `opt_userNotificationId` argument is provided then
@@ -162,13 +162,14 @@ class UrlReplacements {
 
   /**
    * Expands the provided URL by replacing all known variables with their
-   * resolved values.
+   * resolved values. Optional `opt_bindings` can be used to add new variables
+   * or override existing ones.
    * @param {string} url
-   * @param {*} opt_data
+   * @param {!Object<string, *>=} opt_bindings
    * @return {!Promise<string>}
    */
-  expand(url, opt_data) {
-    const expr = this.getExpr_();
+  expand(url, opt_bindings) {
+    const expr = this.getExpr_(opt_bindings);
     let replacementPromise;
     const encodeValue = val => {
       // Value 0 is specialcased because the numeric 0 is a valid substitution
@@ -183,8 +184,10 @@ class UrlReplacements {
       if (typeof opt_strargs == 'string') {
         args = opt_strargs.split(',');
       }
-      const val = this.replacements_[name]
-          .apply(this.replacements_, [opt_data].concat(args));
+      const val =
+          (args.length == 0 && opt_bindings && (name in opt_bindings)) ?
+          opt_bindings[name] :
+          this.replacements_[name].apply(this.replacements_, args);
       // In case the produced value is a promise, we don't actually
       // replace anything here, but do it again when the promise resolves.
       if (val && val.then) {
@@ -211,25 +214,41 @@ class UrlReplacements {
   }
 
   /**
+   * @param {!Object<string, *>=} opt_bindings
    * @return {!RegExp}
    * @private
    */
-  getExpr_() {
+  getExpr_(opt_bindings) {
+    const additionalKeys = opt_bindings ? Object.keys(opt_bindings) : null;
+    if (additionalKeys && additionalKeys.length > 0) {
+      const allKeys = Object.keys(this.replacements_);
+      additionalKeys.forEach(key => {
+        if (allKeys[key] === undefined) {
+          allKeys.push(key);
+        }
+      });
+      return this.buildExpr_(allKeys);
+    }
     if (!this.replacementExpr_) {
-      let all = '';
-      for (const k in this.replacements_) {
-        all += (all.length > 0 ? '|' : '') + k;
-      }
-      this.replacementExpr_ =
-          // Match the given replacement patterns, as well as optionally
-          // arguments to the replacement behind it in parantheses.
-          // Example string that match
-          // FOO_BAR
-          // FOO_BAR(arg1)
-          // FOO_BAR(arg1,arg2)
-          new RegExp('\\$?(' + all + ')(?:\\(([0-9a-zA-Z-_,]+)\\))?', 'g');
+      this.replacementExpr_ = this.buildExpr_(Object.keys(this.replacements_));
     }
     return this.replacementExpr_;
+  }
+
+  /**
+   * @param {!Array<string>} keys
+   * @return {!RegExp}
+   * @private
+   */
+  buildExpr_(keys) {
+    const all = keys.join('|');
+    // Match the given replacement patterns, as well as optionally
+    // arguments to the replacement behind it in parantheses.
+    // Example string that match
+    // FOO_BAR
+    // FOO_BAR(arg1)
+    // FOO_BAR(arg1,arg2)
+    return new RegExp('\\$?(' + all + ')(?:\\(([0-9a-zA-Z-_,]+)\\))?', 'g');
   }
 }
 

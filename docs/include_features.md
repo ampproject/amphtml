@@ -14,7 +14,7 @@ Display an iframe in your page using the
 
 `amp-iframe` requirements:
 
-* Must be at least 600px or 75% of the first viewport away from the top.
+* Must be at least 600px or 75% of the first viewport away from the top (except for `click-to-play` iframes as described below).
 * Can only request resources via HTTPS, and they must not be in the same origin as the container,
 unless they do not specify allow-same-origin.
 
@@ -35,6 +35,27 @@ An example `amp-iframe` from the
     frameborder="0"
     src="https://www.google.com/maps/embed/v1/place?key=AIzaSyDG9YXIhKBhqclZizcSzJ0ROiE0qgVfwzI&q=Alameda,%20CA">
 </amp-iframe>
+```
+
+* It is possible to have an `amp-iframe` appear on the top of a document when the `amp-ifame` has a `placeholder` element as shown in the example below.
+
+```html
+<amp-iframe width=300 height=300
+   layout="responsive"
+   sandbox="allow-scripts"
+   src="https://foo.com/iframe">
+ <amp-img layout="fill" src="https://foo.com/foo.png" placeholder></amp-img>
+</amp-iframe>
+```
+- The `amp-iframe` must contain an element with the `placeholder` attribute, (for instance an `amp-img` element) which would be rendered as a placeholder till the iframe is ready to be displayed.
+- Iframe readiness will be inferred by listening to `onload` of the iframe or an `embed-ready` postmesssage which would be sent by the Iframe document, whichever comes first.
+
+Example of IFrame embed-ready request:
+```javascript
+window.parent./*OK*/postMessage({
+  sentinel: 'amp',
+  type: 'embed-ready'
+}, '*');
 ```
 
 # Media
