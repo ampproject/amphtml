@@ -1295,6 +1295,20 @@ ParsedTagSpec.prototype.getSpec = function() {
 };
 
 /**
+ * Returns true if |value| contains mustache template syntax.
+ * @param {!string} value
+ * @return {boolean}
+ */
+ParsedTagSpec.prototype.valueHasTemplateSyntax = function(value) {
+  // Mustache (https://mustache.github.io/mustache.5.html), our template
+  // system, supports replacement tags that start with {{ and end with }}.
+  // We relax attribute value rules if the value contains this syntax as we
+  // will validate the post-processed tag instead.
+  const mustacheTag = new RegExp('{{.*}}');
+  return mustacheTag.test(value);
+};
+
+/**
  * Returns true if |value| contains a mustache unescaped template syntax.
  * @param {!string} value
  * @return {boolean}
@@ -1436,7 +1450,7 @@ ParsedTagSpec.prototype.validateAttributes = function(
       return;
     }
   }
-
+  const hasTemplateAncestor = context.getTagNames().hasAncestor("template");
   let mandatoryAttrsSeen = [];
   /** @type {!goog.structs.Set<string>} */
   const mandatoryOneofsSeen = new goog.structs.Set();
@@ -1445,6 +1459,7 @@ ParsedTagSpec.prototype.validateAttributes = function(
   for (let i = 0; i < encounteredAttrs.length; i += 2) {
     const encounteredAttrKey = encounteredAttrs[i];
     let encounteredAttrValue = encounteredAttrs[i + 1];
+
     // Our html parser repeats the key as the value if there is no value. We
     // replace the value with an empty string instead in this case.
     if (encounteredAttrKey === encounteredAttrValue)
@@ -1481,19 +1496,22 @@ ParsedTagSpec.prototype.validateAttributes = function(
       }
       return;
     }
-    if (this.valueHasUnescapedTemplateSyntax(encounteredAttrValue)) {
-      context.addError(
-          amp.validator.ValidationError.Code.UNESCAPED_TEMPLATE_IN_ATTR_VALUE,
-          encounteredAttrName + '=' + encounteredAttrValue,
-          this.templateSpecUrl_, resultForAttempt);
-      return;
-    }
-    if (this.valueHasPartialsTemplateSyntax(encounteredAttrValue)) {
-      context.addError(
-          amp.validator.ValidationError.Code.TEMPLATE_PARTIAL_IN_ATTR_VALUE,
-          encounteredAttrName + '=' + encounteredAttrValue,
-          this.templateSpecUrl_, resultForAttempt);
-      return;
+    // Specific checks for attribute values descending from a template tag.
+    if (hasTemplateAncestor) {
+      if (this.valueHasUnescapedTemplateSyntax(encounteredAttrValue)) {
+        context.addError(
+            amp.validator.ValidationError.Code.UNESCAPED_TEMPLATE_IN_ATTR_VALUE,
+            encounteredAttrName + '=' + encounteredAttrValue,
+            this.templateSpecUrl_, resultForAttempt);
+        return;
+      }
+      if (this.valueHasPartialsTemplateSyntax(encounteredAttrValue)) {
+        context.addError(
+            amp.validator.ValidationError.Code.TEMPLATE_PARTIAL_IN_ATTR_VALUE,
+            encounteredAttrName + '=' + encounteredAttrValue,
+            this.templateSpecUrl_, resultForAttempt);
+        return;
+      }
     }
 
     if (parsedSpec.getSpec().deprecation !== null) {
@@ -1514,39 +1532,44 @@ ParsedTagSpec.prototype.validateAttributes = function(
       // return.
       return;
     }
-    // The value, value_regex, and value_properties fields are
-    // treated like a oneof, but we're not using oneof because it's
-    // a feature that was added after protobuf 2.5.0 (which our
-    // open-source version uses).
-    // begin oneof {
-    if (parsedSpec.getSpec().value !== null) {
-      if (encounteredAttrValue != parsedSpec.getSpec().value) {
-        context.addError(amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
-                         encounteredAttrName + '=' + encounteredAttrValue,
-                         this.spec_.specUrl, resultForAttempt);
-        return;
+    if (!hasTemplateAncestor || 
+        !this.valueHasTemplateSyntax(encounteredAttrValue)) {
+      // The value, value_regex, and value_properties fields are
+      // treated like a oneof, but we're not using oneof because it's
+      // a feature that was added after protobuf 2.5.0 (which our
+      // open-source version uses).
+      // begin oneof {
+      if (parsedSpec.getSpec().value !== null) {
+        if (encounteredAttrValue != parsedSpec.getSpec().value) {
+          context.addError(
+              amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
+              encounteredAttrName + '=' + encounteredAttrValue,
+              this.spec_.specUrl, resultForAttempt);
+          return;
+        }
       }
-    }
-    if (parsedSpec.getSpec().valueRegex !== null) {
-      const valueRegex =
-          new RegExp('^(' + parsedSpec.getSpec().valueRegex + ')$');
-      if (!valueRegex.test(encounteredAttrValue)) {
-        context.addError(amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
-                         encounteredAttrName + '=' + encounteredAttrValue,
-                         this.spec_.specUrl, resultForAttempt);
-        return;
+      if (parsedSpec.getSpec().valueRegex !== null) {
+        const valueRegex =
+            new RegExp('^(' + parsedSpec.getSpec().valueRegex + ')$');
+        if (!valueRegex.test(encounteredAttrValue)) {
+          context.addError(
+              amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
+              encounteredAttrName + '=' + encounteredAttrValue,
+              this.spec_.specUrl, resultForAttempt);
+          return;
+        }
       }
-    }
-    if (parsedSpec.getSpec().valueProperties !== null) {
-      parsedSpec.validateAttrValueProperties(
-          context, encounteredAttrName, encounteredAttrValue,
-          this.spec_.specUrl, resultForAttempt);
-      if (resultForAttempt.status ===
-          amp.validator.ValidationResult.Status.FAIL) {
-        return;
+      if (parsedSpec.getSpec().valueProperties !== null) {
+        parsedSpec.validateAttrValueProperties(
+            context, encounteredAttrName, encounteredAttrValue,
+            this.spec_.specUrl, resultForAttempt);
+        if (resultForAttempt.status ===
+            amp.validator.ValidationResult.Status.FAIL) {
+          return;
+        }
       }
+      // } end oneof
     }
-    // } end oneof
     if (parsedSpec.getSpec().blacklistedValueRegex !== null) {
       const blacklistedValueRegex = new RegExp(
           parsedSpec.getSpec().blacklistedValueRegex, 'i');

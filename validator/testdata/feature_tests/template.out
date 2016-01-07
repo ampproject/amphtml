@@ -33,3 +33,4 @@ feature_tests/template.html:68:2 TEMPLATE_PARTIAL_IN_ATTR_VALUE title={{> notall
 feature_tests/template.html:69:2 UNESCAPED_TEMPLATE_IN_ATTR_VALUE title={{ & notallowed }} (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-templates.md)
 feature_tests/template.html:70:2 TEMPLATE_PARTIAL_IN_ATTR_VALUE title={{ > notallowed }} (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-templates.md)
 feature_tests/template.html:95:4 DISALLOWED_TAG_ANCESTOR template > ... > template (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-templates.md)
+feature_tests/template.html:107:0 INVALID_ATTR_VALUE autoplay={{invalid}} (see https://github.com/ampproject/amphtml/blob/master/extensions/amp-audio/amp-audio.md)
