@@ -25,7 +25,7 @@ min_validator_revision_required: 70
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 104
+spec_file_revision: 105
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
 # These rules are just enough to validate the example from the spec.
@@ -1459,10 +1459,7 @@ tags: {
   attrs: {
     name: "src"
     mandatory: true
-    # TODO(johannes): Tighten this down.
-    value_regex: "https://cdn\\.ampproject\\.org/v\\d+\\.js|"
-    "https://ssl\\.gstatic\\.com/amphtml/v\\d+\\.js|"
-    "https://www\\.gstatic\\.com/amphtml/v\\d+\\.js"
+    value_regex: "https://cdn\\.ampproject\\.org/v\\d+\\.js"
   }
   attrs: {
     name: "async"
@@ -1493,9 +1490,7 @@ tags: {
   attrs: {
     name: "src"
     mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v\\d+/[\\w\\.-]+\\.js|"
-                 "https://ssl\\.gstatic\\.com/amphtml/v\\d+/[\\w\\.-]+\\.js|"
-                 "https://www\\.gstatic\\.com/amphtml/v\\d+/[\\w\\.-]+\\.js"
+    value_regex: "https://cdn\\.ampproject\\.org/v\\d+/[\\w\\.-]+\\.js"
   }
   attrs: {
     name: "async"
