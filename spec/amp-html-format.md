@@ -229,6 +229,8 @@ Font providers can be whitelisted if they support CSS-only integrations and serv
 - https://fast.fonts.net
 - https://fonts.googleapis.com
 
+IMPLEMENTERS NOTE: Adding to this list requires a change to the AMP CDN CSP rule.
+
 Authors are free to include all custom fonts via a `@font-face` CSS instruction via their custom CSS. Fonts included via `@font-face` must be fetched via the HTTP or HTTPS scheme.
 
 
