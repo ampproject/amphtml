@@ -14,20 +14,34 @@
  * limitations under the License.
  */
 
+import {parser} from './access-expr-impl';
+
 
 /**
  * Evaluates access expression.
+ *
+ * The grammar is defined in the `access-expr-impl.jison` and compiled using
+ * (Jison)[https://zaach.github.io/jison/] parser. The compilation steps are
+ * described in the [access-expr-impl.md].
+ *
+ * Grammar highlights:
+ * - Shorthand truthy expressions are allowed, such as `field`. Truthy value
+ *   is defined as `X !== null && X !== '' && X !== 0 && X !== false`.
+ * - Basic equality expressions: `X = 1`, `X = true`, `X = "A"`. And also,
+ *   non-equality: `X != 1` and so on.
+ * - Basic comparison expressions only defined for numbers: `X < 1`,
+ *   `X >= 10`.
+ * - Boolean logic: `X = 1 OR Y = 1`, `X = 1 AND Y = 2`, `NOT X`, `NOT (X = 1)`.
+ *
  * @param {string} expr
  * @param {!JSONObjectDef} data
  * @return {boolean}
  */
 export function evaluateAccessExpr(expr, data) {
-  // TODO(dvoytenko): the complete expression semantics
-  if (expr == 'access') {
-    return !!data.access;
+  try {
+    parser.yy = data;
+    return !!parser.parse(expr);
+  } finally {
+    parser.yy = null;
   }
-  if (expr == 'NOT access') {
-    return !data.access;
-  }
-  return false;
 }
