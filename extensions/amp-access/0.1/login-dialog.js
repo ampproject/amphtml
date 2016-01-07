@@ -185,6 +185,12 @@ class LoginDialog {
       }
       log.fine(TAG, 'Received message from dialog: ', e.data);
       if (e.data.type == 'result') {
+        if (this.dialog_) {
+          this.dialog_./*OK*/postMessage({
+            sentinel: 'amp',
+            type: 'result-ack'
+          }, returnOrigin);
+        }
         this.loginDone_(e.data.result);
       }
     });
@@ -227,8 +233,9 @@ class LoginDialog {
   getReturnUrl_() {
     if (getMode().localDev) {
       const loc = this.win.location;
-      return loc.protocol + '//' + loc.host + '/dist/v0/amp-login-done.html';
+      return loc.protocol + '//' + loc.host +
+          '/extensions/amp-access/0.1/amp-login-done.html';
     }
-    return 'https://cdn.ampproject.org/v0/amp-login-done.html';
+    return 'https://cdn.ampproject.org/v0/amp-login-done-0.1.html';
   }
 }
