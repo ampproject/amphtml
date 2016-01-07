@@ -230,11 +230,31 @@ describe('amp-ad', () => {
       expect(posts).to.have.length(2);
       viewport.scroll_();
       expect(posts).to.have.length(3);
-      ampAd.viewportCallback(false);
+      viewport.resize_();
       expect(posts).to.have.length(4);
+      ampAd.viewportCallback(false);
+      expect(posts).to.have.length(5);
       // No longer listening.
       viewport.scroll_();
+      expect(posts).to.have.length(5);
+      viewport.resize_();
+      expect(posts).to.have.length(5);
+    });
+
+    it('report changes upon remeasure', () => {
+      expect(posts).to.have.length(1);
+      ampAd.viewportCallback(true);
+      expect(posts).to.have.length(2);
+      ampAd.onLayoutMeasure();
+      expect(posts).to.have.length(3);
+      ampAd.onLayoutMeasure();
       expect(posts).to.have.length(4);
+      ampAd.viewportCallback(false);
+      expect(posts).to.have.length(5);
+      // We also send a new record when we are currently not in the
+      // viewport, because that might have just changed.
+      ampAd.onLayoutMeasure();
+      expect(posts).to.have.length(6);
     });
   });
 
