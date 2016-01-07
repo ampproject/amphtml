@@ -25,7 +25,7 @@ min_validator_revision_required: 70
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 103
+spec_file_revision: 104
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
 # These rules are just enough to validate the example from the spec.
@@ -1524,6 +1524,18 @@ tags: {
     mandatory: true
   }
 }
+# Specific json data, descendant from an <amp-analytics> tag.
+tags: {
+  name: "script"
+  mandatory_parent: "amp-analytics"
+  detail: "amp-analytics json script"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-analytics.md"
+  attrs: {
+    name: "type"
+    mandatory: true
+    value: "application/json"
+  }
+}
 # 4.11.2 Non-conforming features
 tags: { name: "acronym" }
 tags: { name: "big" }
@@ -1783,6 +1795,15 @@ tags: {
     supported_layouts: FILL
     supported_layouts: NODISPLAY
   }
+}
+
+# <amp-analytics>
+tags: {
+  name: "amp-analytics"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-analytics.md"
+  attrs: { name: "type" value: "googleanalytics" }
+  # TODO(gregable): This should require a valid https URL as the attr value.
+  attrs: { name: "config" }
 }
 
 # <amp-youtube>
