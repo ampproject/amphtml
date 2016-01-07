@@ -59,6 +59,7 @@ import {vsyncFor} from './vsync';
  *           ||
  *           || buildCallback
  *           || preconnectCallback may be called N times after this.
+ *           || documentInactiveCallback may be called N times after this.
  *           ||
  *           \/
  *    State: <BUILT>
@@ -80,6 +81,10 @@ import {vsyncFor} from './vsync';
  * to preconnect to hosts needed by an element. It will never be called
  * before buildCallback and it might be called multiple times including
  * after layoutCallback.
+ * 
+ * The documentInactiveCallback is called when the document becomes
+ * inactive. E.g. when the user swipes away from the document or
+ * focuses a different tab.
  *
  * Additionally whenever the dimensions of an element might have changed
  * AMP remeasures its dimensions and calls `onLayoutMeasure` on the
