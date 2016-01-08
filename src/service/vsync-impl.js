@@ -130,6 +130,20 @@ export class Vsync {
   }
 
   /**
+   * Runs `mutate` wrapped in a promise.
+   * @param {function()} mutator
+   * @return {!Promise}
+   */
+  mutatePromise(mutator) {
+    return new Promise(resolve => {
+      this.mutate(() => {
+        mutator();
+        resolve();
+      });
+    });
+  }
+
+  /**
    * Runs the measure operation via vsync.
    * @param {function()} measurer
    */
@@ -138,6 +152,7 @@ export class Vsync {
   }
 
   /**
+   * Runs `measure` wrapped in a promise.
    * @param {function():TYPE} measurer
    * @return {!Promise<TYPE>}
    * @templates TYPE
