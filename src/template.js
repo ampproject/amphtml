@@ -323,7 +323,7 @@ export function registerExtendedTemplate(win, type, templateClass) {
 
 /**
  * @param {!Window} window
- * @return {!History}
+ * @return {!Templates}
  */
 export function templatesFor(window) {
   return getService(window, 'templates', () => {

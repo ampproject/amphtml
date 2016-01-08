@@ -132,6 +132,13 @@ describe('vsync', () => {
     });
   });
 
+  it('should return a promise from mutatePromise that runs mutator', () => {
+    const mutator = sandbox.spy();
+    return vsync.mutatePromise(mutator).then(() => {
+      expect(mutator.callCount).to.equal(1);
+    });
+  });
+
   it('should schedule via animation frames when doc is visible', () => {
     let rafHandler;
     vsync.raf_ = handler => rafHandler = handler;

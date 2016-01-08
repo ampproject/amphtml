@@ -156,7 +156,6 @@ describe('AccessService authorization', () => {
 
   let sandbox;
   let configElement, elementOn, elementOff;
-  let vsyncMutates;
   let xhrMock;
   let cidMock;
 
@@ -187,8 +186,15 @@ describe('AccessService authorization', () => {
     service = new AccessService(window);
     service.isExperimentOn_ = true;
 
-    vsyncMutates = [];
-    service.vsync_ = {mutate: callback => vsyncMutates.push(callback)};
+    service.vsync_ = {
+      mutate: callback => {
+        callback();
+      },
+      mutatePromise: callback => {
+        callback();
+        return Promise.resolve();
+      }
+    };
     xhrMock = sandbox.mock(service.xhr_);
     const cid = {
       get: () => {}
@@ -221,14 +227,9 @@ describe('AccessService authorization', () => {
             {credentials: 'include'})
         .returns(Promise.resolve({access: true}))
         .once();
-    return service.runAuthorization_().then(() => {
-      expect(vsyncMutates).to.have.length.greaterThan(2);
-      vsyncMutates.shift()();
-      expect(document.documentElement).to.have.class('amp-access-loading');
-
-      while (vsyncMutates.length > 0) {
-        vsyncMutates.shift()();
-      }
+    const promise = service.runAuthorization_();
+    expect(document.documentElement).to.have.class('amp-access-loading');
+    return promise.then(() => {
       expect(document.documentElement).not.to.have.class('amp-access-loading');
       expect(elementOn).not.to.have.attribute('amp-access-off');
       expect(elementOff).to.have.attribute('amp-access-off');
@@ -245,14 +246,9 @@ describe('AccessService authorization', () => {
             {credentials: 'include'})
         .returns(Promise.reject('intentional'))
         .once();
-    return service.runAuthorization_().then(() => {
-      expect(vsyncMutates).to.have.length.greaterThan(1);
-      vsyncMutates.shift()();
-      expect(document.documentElement).to.have.class('amp-access-loading');
-
-      while (vsyncMutates.length > 0) {
-        vsyncMutates.shift()();
-      }
+    const promise = service.runAuthorization_();
+    expect(document.documentElement).to.have.class('amp-access-loading');
+    return promise.then(() => {
       expect(document.documentElement).not.to.have.class('amp-access-loading');
       expect(elementOn).not.to.have.attribute('amp-access-off');
       expect(elementOff).not.to.have.attribute('amp-access-off');
@@ -299,12 +295,141 @@ describe('AccessService authorization', () => {
 });
 
 
+describe('AccessService applyAuthorizationToElement_', () => {
+
+  let sandbox;
+  let configElement, elementOn, elementOff;
+  let templatesMock;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+
+    markElementScheduledForTesting(window, 'amp-analytics');
+    installCidService(window);
+
+    configElement = document.createElement('script');
+    configElement.setAttribute('id', 'amp-access');
+    configElement.setAttribute('type', 'application/json');
+    configElement.textContent = JSON.stringify({
+      'authorization': 'https://acme.com/a?rid=READER_ID',
+      'pingback': 'https://acme.com/p?rid=READER_ID',
+      'login': 'https://acme.com/l?rid=READER_ID'
+    });
+    document.body.appendChild(configElement);
+
+    elementOn = document.createElement('div');
+    elementOn.setAttribute('amp-access', 'access');
+    document.body.appendChild(elementOn);
+
+    elementOff = document.createElement('div');
+    elementOff.setAttribute('amp-access', 'NOT access');
+    document.body.appendChild(elementOff);
+
+    service = new AccessService(window);
+    service.isExperimentOn_ = true;
+
+    service.vsync_ = {
+      mutatePromise: callback => {
+        callback();
+        return Promise.resolve();
+      }
+    };
+    templatesMock = sandbox.mock(service.templates_);
+  });
+
+  afterEach(() => {
+    if (configElement.parentElement) {
+      configElement.parentElement.removeChild(configElement);
+    }
+    if (elementOn.parentElement) {
+      elementOn.parentElement.removeChild(elementOn);
+    }
+    if (elementOff.parentElement) {
+      elementOff.parentElement.removeChild(elementOff);
+    }
+    sandbox.restore();
+    sandbox = null;
+  });
+
+  function createTemplate() {
+    const template = document.createElement('template');
+    template.setAttribute('amp-access-template', '');
+    return template;
+  }
+
+  it('should toggle authorization attribute', () => {
+    expect(elementOn).not.to.have.attribute('amp-access-off');
+    expect(elementOff).not.to.have.attribute('amp-access-off');
+
+    service.applyAuthorizationToElement_(elementOn, {access: true});
+    service.applyAuthorizationToElement_(elementOff, {access: true});
+    expect(elementOn).not.to.have.attribute('amp-access-off');
+    expect(elementOff).to.have.attribute('amp-access-off');
+
+    service.applyAuthorizationToElement_(elementOn, {access: false});
+    service.applyAuthorizationToElement_(elementOff, {access: false});
+    expect(elementOn).to.have.attribute('amp-access-off');
+    expect(elementOff).not.to.have.attribute('amp-access-off');
+  });
+
+  it('should render and re-render templates when access is on', () => {
+    const template1 = createTemplate();
+    const template2 = createTemplate();
+    elementOn.appendChild(template1);
+    elementOn.appendChild(template2);
+
+    function renderAndCheck() {
+      templatesMock = sandbox.mock(service.templates_);
+      const result1 = document.createElement('div');
+      const result2 = document.createElement('div');
+      templatesMock.expects('renderTemplate')
+          .withExactArgs(template1, {access: true})
+          .returns(Promise.resolve(result1))
+          .once();
+      templatesMock.expects('renderTemplate')
+          .withExactArgs(template2, {access: true})
+          .returns(Promise.resolve(result2))
+          .once();
+      const p = service.applyAuthorizationToElement_(elementOn, {access: true});
+      return p.then(() => {
+        expect(elementOn.contains(template1)).to.be.false;
+        expect(elementOn.contains(result1)).to.be.true;
+        expect(result1).to.have.attribute('amp-access-template');
+        expect(result1['__AMP_ACCESS__TEMPLATE']).to.equal(template1);
+
+        expect(elementOn.contains(template2)).to.be.false;
+        expect(elementOn.contains(result2)).to.be.true;
+        expect(result2).to.have.attribute('amp-access-template');
+        expect(result2['__AMP_ACCESS__TEMPLATE']).to.equal(template2);
+
+        expect(elementOn.querySelectorAll('[amp-access-template]').length)
+            .to.equal(2);
+        templatesMock.verify();
+      });
+    }
+
+    return renderAndCheck().then(() => {
+      // Render second time.
+      return renderAndCheck();
+    }).then(() => {
+      // Render third time.
+      return renderAndCheck();
+    });
+  });
+
+  it('should NOT render templates when access is off', () => {
+    elementOff.appendChild(createTemplate());
+    templatesMock.expects('renderTemplate').never();
+    service.applyAuthorizationToElement_(elementOff, {access: true});
+  });
+});
+
+
 describe('AccessService pingback', () => {
 
   let sandbox;
   let clock;
   let configElement;
-  let vsyncMutates;
   let xhrMock;
   let cidMock;
   let visibilityChanged;
@@ -330,8 +455,6 @@ describe('AccessService pingback', () => {
     service = new AccessService(window);
     service.isExperimentOn_ = true;
 
-    vsyncMutates = [];
-    service.vsync_ = {mutate: callback => vsyncMutates.push(callback)};
     xhrMock = sandbox.mock(service.xhr_);
 
     const cid = {
