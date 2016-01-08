@@ -176,6 +176,12 @@ Type attribute value: `simplereach`
 
 Adds support for SimpleReach.  Configuration details can be found at [simplereach.com/docs](http://docs.simplereach.com/dev-guide/implementation/google-amp-implementation)
 
+### Snowplow Analytics
+
+Type attribute value: `snowplow`
+
+Adds support for Snowplow Analytics. More details for adding Snowplow Analytics support can be found at [github.com/snowplow/snowplow/wiki](https://github.com/snowplow/snowplow/wiki/Google-AMP-Tracker).
+
 ### Webtrekk
 
 Type attribute value: `webtrekk`

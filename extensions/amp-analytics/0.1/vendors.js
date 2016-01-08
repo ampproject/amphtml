@@ -407,6 +407,25 @@ export const ANALYTICS_CONFIG = {
     },
   },
 
+  'snowplow': {
+    'requests': {
+      'aaVersion': 'amp-0.1',
+      'basePrefix': 'https://${collectorHost}/i?url=${canonicalUrl}&page=${title}&' +
+          'res=${screenWidth}x${screenHeight}&stm=${timestamp}&' +
+          'tz=${timezone}&aid=${appId}&p=web&tv=${aaVersion}',
+      'pageView': '${basePrefix}&e=pv',
+      'structEvent': '${basePrefix}&e=se&' +
+          'se_ca=${structEventCategory}&se_ac=${structEventAction}&' +
+          'se_la=${structEventLabel}&se_pr=${structEventProperty}&' +
+          'se_va=${structEventValue}',
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
+    },
+  },
+
   'webtrekk': {
     'requests': {
       'trackURL': 'https://${trackDomain}/${trackId}/wt',
