@@ -9,7 +9,7 @@
   <script async src="/base/dist/amp.js"></script>
   <script>
       function insertDynamicCssScript() {
-          return new Promise((resolve, reject) => {
+          return new Promise(function(resolve, reject) {
               var script = document.createElement('script');
               script.src = '/base/dist/v0/amp-dynamic-css-classes-0.1.max.js';
               script.onload = resolve;
