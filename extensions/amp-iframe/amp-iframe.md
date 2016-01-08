@@ -23,7 +23,7 @@ Displays an iframe.
 - `amp-iframe` may not appear close to the top of the document (except for `click-to-play` iframes as described below). They must be either 600px away from the top or not within the first 75% of the viewport when scrolled to the top – whichever is smaller. NOTE: We are currently looking for feedback as to how well this restriction works in practice.
 - They are sandboxed by default. [Details](#sandbox)
 - They must only request resources via HTTPS or from a data-URI or via the srcdoc attribute.
-- They must not be in the same origin as the container unless they do not allow `allow-same-origin` in the sandbox attribute.
+- They must not be (or expect to be) in the same origin as the container. If you want this behaviour you should add the `allow-same-origin` attribute.
 
 Example:
 ```html
