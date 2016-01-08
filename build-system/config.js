@@ -129,6 +129,7 @@ module.exports = {
     '!gulpfile.js',
     '!karma.conf.js',
     '!**/local-amp-chrome-extension/background.js',
+    '!extensions/amp-access/0.1/access-expr-impl.js',
   ],
   presubmitGlobs: [
     '**/*.{css,js,go}',
