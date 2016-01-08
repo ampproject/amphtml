@@ -25,7 +25,7 @@ min_validator_revision_required: 72
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 107
+spec_file_revision: 108
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
 # These rules are just enough to validate the example from the spec.
@@ -515,9 +515,9 @@ spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-forma
 tags: {
   name: "style"
   mandatory_parent: "head"
-  detail: "mandatory boilerplate (js enabled) - old variant"
+  detail: "boilerplate (js enabled) - old variant"
   unique: true
-  mandatory_alternatives: "mandatory boilerplate (js enabled)"
+  mandatory_alternatives: "boilerplate (js enabled)"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#boilerplate"
   cdata: {
     cdata_regex: "body ?{opacity: ?0}"
@@ -526,10 +526,10 @@ tags: {
 tags: {
   name: "style"
   mandatory_parent: "noscript"
-  detail: "mandatory boilerplate (noscript) - old variant"
+  detail: "boilerplate (noscript) - old variant"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#boilerplate"
   unique: true
-  mandatory_alternatives: "mandatory boilerplate (noscript)"
+  mandatory_alternatives: "boilerplate (noscript)"
   cdata {
     cdata_regex: "body ?{opacity: ?1}"
   }
@@ -537,7 +537,7 @@ tags: {
 tags: {
   name: "noscript"
   mandatory_parent: "head"
-  detail: "noscript enclosure for mandatory style"
+  detail: "noscript enclosure for boilerplate"
   unique: true
   mandatory: true
   spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#boilerplate"
@@ -546,10 +546,10 @@ tags: {
 tags: {
   name: "style"
   mandatory_parent: "head"
-  detail: "mandatory boilerplate (js enabled)"
-  also_requires: "mandatory boilerplate (noscript)"
+  detail: "boilerplate (js enabled)"
+  also_requires: "boilerplate (noscript)"
   unique: true
-  mandatory_alternatives: "mandatory boilerplate (js enabled)"
+  mandatory_alternatives: "boilerplate (js enabled)"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#boilerplate"
   cdata: {
     # This regex allows arbitrary whitespace whenever some whitespace
@@ -565,11 +565,11 @@ tags: {
 tags: {
   name: "style"
   mandatory_parent: "noscript"
-  detail: "mandatory boilerplate (noscript)"
-  also_requires: "mandatory boilerplate (js enabled)"
+  detail: "boilerplate (noscript)"
+  also_requires: "boilerplate (js enabled)"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#boilerplate"
   unique: true
-  mandatory_alternatives: "mandatory boilerplate (noscript)"
+  mandatory_alternatives: "boilerplate (noscript)"
   cdata {
     mandatory_cdata: "body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}"
   }
