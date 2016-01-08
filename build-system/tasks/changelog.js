@@ -16,14 +16,15 @@
 
 /**
  * @fileoverview Creates a gulp task that fetches the titles and files
- * of pull requests using the github API, from master up to the last git tag.
+ * of pull requests using the github API, from `branch` up to the last git tag.
  * Only includes pull requests that have code changes and not only markdown,
  * json, and yaml changes.
  */
 
+var BBPromise = require('bluebird');
 var argv = require('minimist')(process.argv.slice(2));
 var assert = require('assert');
-var BBPromise = require('bluebird');
+var child_process = require('child_process');
 var config = require('../config');
 var extend = require('util')._extend;
 var git = require('gulp-git');
@@ -32,8 +33,13 @@ var request = BBPromise.promisify(require('request'));
 var util = require('gulp-util');
 
 var GITHUB_ACCESS_TOKEN = process.env.GITHUB_ACCESS_TOKEN;
+var exec = BBPromise.promisify(child_process.exec);
 var gitExec = BBPromise.promisify(git.exec);
 
+var isCanary = argv.type == 'canary';
+var suffix =  isCanary ? '-canary' : '';
+var branch = isCanary ? 'canary' : 'release';
+var isDryrun = argv.dryrun;
 
 function changelog() {
   if (!GITHUB_ACCESS_TOKEN) {
@@ -67,6 +73,9 @@ function getGitMetadata() {
       .then(buildChangelog.bind(null, gitMetadata))
       .then(function(gitMetadata) {
         util.log(util.colors.blue('\n' + gitMetadata.changelog));
+        if (isDryrun) {
+          return;
+        }
         return submitReleaseNotes(version, gitMetadata.changelog);
       })
       .catch(errHandler);
@@ -74,6 +83,8 @@ function getGitMetadata() {
 
 function submitReleaseNotes(version, changelog) {
   assert(typeof version == 'number', 'version should be a number. ' + version);
+
+  var name = String(version) + suffix;
   var options = {
     url: 'https://api.github.com/repos/ampproject/amphtml/releases',
     method: 'POST',
@@ -83,12 +94,12 @@ function submitReleaseNotes(version, changelog) {
     },
     json: true,
     body: {
-      'tag_name': String(version),
+      'tag_name': name,
       'target_commitish': 'release',
-      'name': String(version),
+      'name': name,
       'body': changelog,
       'draft': true,
-      'prerelease': false
+      'prerelease': isCanary
     }
   };
 
@@ -117,25 +128,36 @@ function buildChangelog(gitMetadata, githubMetadata) {
   return gitMetadata;
 }
 
+/**
+ * Get the latest git tag from either a normal release or from a canary release.
+ * @return {!Promise<string>}
+ */
 function getLastGitTag() {
   var options = {
     args: 'describe --abbrev=0 --tags'
   };
-  return gitExec(options).then(function(tag) {
-    if (typeof tag == 'string') {
-      return tag.replace(/\n/, '');
-    }
-    throw new Error('No tag found.');
-  });
+  var canaryGrep = isCanary ? 'grep canary$' : 'grep -v canary$';
+  return exec('git tag | ' + canaryGrep + ' | ' +
+      'xargs -I@ git log --format=format:"%ai @%n" -1 @ | ' +
+      'sort -r | awk \'{print $4}\' | head -1').then(function(tag) {
+        return tag.replace('\n', '');
+      });
 }
 
+/**
+ * @param {string} tag
+ * @return {!Promise<string>}
+ */
 function getGitLog(tag) {
   var options = {
-    args: 'log release...' + tag + ' --pretty=format:%s --merges'
+    args: 'log ' + branch + '...' + tag + ' --pretty=format:%s --merges'
   };
   return gitExec(options).then(function(log) {
     if (!log) {
-      throw new Error('No log found from log master...' + tag + ' --merges');
+      throw new Error('No log found "git log ' + branch +
+          '...' + tag + '".\nIs it possible that there is no delta?\n' +
+          'Make sure to fetch and rebase (or reset --hard) the latest ' +
+          'from remote upstream.');
     }
     return log;
   });
@@ -200,11 +222,11 @@ function getPullRequestFiles(title, filesOption) {
 
 function onGitTagSuccess(gitMetadata, tag) {
   if (!tag) {
-    throw new Error('Could not find latest tag.');
+    throw new Error('Could not find latest ' + branch + ' tag.');
   }
 
   gitMetadata.tag = tag;
-  util.log(util.colors.green('Prevous Tag: ' + tag));
+  util.log(util.colors.green('Current latest tag: ' + tag));
   return tag;
 }
 
@@ -236,6 +258,8 @@ function errHandler(err) {
 
 gulp.task('changelog', 'Create github release draft', changelog, {
   options: {
-    version: '  Label to be used for this tag release'
+    dryrun: '  Generate changelog but dont push it out',
+    type: '  Pass in "canary" to generate a canary changelog',
+    version: '  Label to be used for this tag release',
   }
 });
