@@ -258,6 +258,44 @@ describe('AccessService authorization', () => {
       expect(elementOff).not.to.have.attribute('amp-access-off');
     });
   });
+
+  it('should resolve first-authorization promise after success', () => {
+    cidMock.expects('get')
+        .withExactArgs('amp-access', sinon.match(() => true))
+        .returns(Promise.resolve('reader1'))
+        .once();
+    xhrMock.expects('fetchJson')
+        .withExactArgs('https://acme.com/a?rid=reader1',
+            {credentials: 'include'})
+        .returns(Promise.resolve({access: true}))
+        .once();
+    return service.runAuthorization_().then(() => {
+      expect(service.firstAuthorizationPromise_).to.exist;
+      return service.firstAuthorizationPromise_;
+    });
+  });
+
+  it('should NOT resolve first-authorization promise after failure', () => {
+    cidMock.expects('get')
+        .withExactArgs('amp-access', sinon.match(() => true))
+        .returns(Promise.resolve('reader1'))
+        .once();
+    xhrMock.expects('fetchJson')
+        .withExactArgs('https://acme.com/a?rid=reader1',
+            {credentials: 'include'})
+        .returns(Promise.reject('intentional'))
+        .once();
+    return service.runAuthorization_().then(() => {
+      expect(service.firstAuthorizationPromise_).to.exist;
+      let resolved = false;
+      service.firstAuthorizationPromise_.then(() => {
+        resolved = true;
+      });
+      return Promise.resolve().then(() => {
+        expect(resolved).to.be.false;
+      });
+    });
+  });
 });
 
 
@@ -317,6 +355,9 @@ describe('AccessService pingback', () => {
     service.viewport_ = {
       onScroll: callback => scrolled.add(callback)
     };
+
+    // Emulate first authorization complete.
+    service.firstAuthorizationResolver_();
   });
 
   afterEach(() => {
@@ -371,6 +412,26 @@ describe('AccessService pingback', () => {
       expect(service.reportViewToServer_.callCount).to.equal(1);
       expect(visibilityChanged.getHandlerCount()).to.equal(0);
       expect(scrolled.getHandlerCount()).to.equal(0);
+    });
+  });
+
+  it('should wait for authorization completion', () => {
+    expect(service.firstAuthorizationPromise_).to.exist;
+    let firstAuthorizationResolver;
+    service.firstAuthorizationPromise_ = new Promise(resolve => {
+      firstAuthorizationResolver = resolve;
+    });
+    service.reportViewToServer_ = sandbox.spy();
+    service.reportWhenViewed_();
+    return Promise.resolve().then(() => {
+      clock.tick(2001);
+      return Promise.resolve();
+    }).then(() => {}, () => {}).then(() => {
+      expect(service.reportViewToServer_.callCount).to.equal(0);
+      firstAuthorizationResolver();
+      return service.firstAuthorizationPromise_;
+    }).then(() => {}, () => {}).then(() => {
+      expect(service.reportViewToServer_.callCount).to.equal(1);
     });
   });
 

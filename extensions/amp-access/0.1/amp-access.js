@@ -118,6 +118,12 @@ export class AccessService {
     /** @private {?Promise<string>} */
     this.readerIdPromise_ = null;
 
+    /** @private {!Promise} */
+    this.firstAuthorizationPromise_ = new Promise(resolve => {
+      /** @private {!Promise} */
+      this.firstAuthorizationResolver_ = resolve;
+    });
+
     /** @private {?Promise} */
     this.reportViewPromise_ = null;
 
@@ -222,6 +228,7 @@ export class AccessService {
       return this.xhr_.fetchJson(url, {credentials: 'include'});
     }).then(response => {
       log.fine(TAG, 'Authorization response: ', response);
+      this.firstAuthorizationResolver_();
       this.toggleTopClass_('amp-access-loading', false);
       onDocumentReady(this.win.document, () => {
         this.applyAuthorization_(response);
@@ -288,14 +295,19 @@ export class AccessService {
       return this.reportViewPromise_;
     }
     log.fine(TAG, 'start view monitoring');
-    this.reportViewPromise_ = this.whenViewed_().then(
-        this.reportViewToServer_.bind(this),
-        reason => {
-          // Ignore - view has been canceled.
-          log.fine(TAG, 'view cancelled:', reason);
-          this.reportViewPromise_ = null;
-          throw reason;
-        });
+    this.reportViewPromise_ = this.whenViewed_()
+        .then(() => {
+          // Wait for the first authorization flow to complete.
+          return this.firstAuthorizationPromise_;
+        })
+        .then(
+            this.reportViewToServer_.bind(this),
+            reason => {
+              // Ignore - view has been canceled.
+              log.fine(TAG, 'view cancelled:', reason);
+              this.reportViewPromise_ = null;
+              throw reason;
+            });
     return this.reportViewPromise_;
   }
 
