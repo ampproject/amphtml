@@ -46,7 +46,7 @@ Example:
 
 ```html
 <amp-user-notification
-    layout=container
+    layout=nodisplay
     id="amp-user-notification1"
     data-show-if-href="http://localhost:8000/api/notification"
     data-dismiss-href="http://localhost:8000/api/notification">
@@ -124,7 +124,8 @@ will be passed in future requests to data-show-if-href)
 
 #### Styling
 
-The `amp-user-notification` component will always be `position: fixed`.
+The `amp-user-notification` component should always have `layout=nodisplay`
+and will be `position: fixed` after layout (default is bottom: 0, which can be overridden).
 If a page has more than 1 `amp-user-notification` element then the notifications
 are queued up and only shown when the previous notification has been dismissed.
 
