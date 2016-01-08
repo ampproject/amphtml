@@ -29,20 +29,17 @@ describe('Rendering of one ad', () => {
   });
 
   it('ad should create an iframe loaded', function() {
-    this.timeout(5000);
+    this.timeout(10000);
     let iframe;
+    let ampAd;
     return pollForLayout(fixture.win, 1, 5500).then(function() {
       expect(fixture.doc.querySelectorAll('iframe')).to.have.length(1);
       iframe = fixture.doc.querySelector('iframe');
+      ampAd = iframe.parentElement;
       expect(iframe.src).to.contain('categoryExclusion');
       expect(iframe.src).to.contain('health');
       expect(iframe.src).to.contain('tagForChildDirectedTreatment');
-      expect(iframe.src).to.match(/^http\:\/\/ads\.localhost\//);
-      // Switch ad to be loaded from same origin.
-      iframe.src = iframe.src.replace(/^http\:\/\/ads\.localhost\//,
-          'http://' + window.location.host + '/base/')
-          .replace('{"href":"about:srcdoc"}',
-              '{"href":"http://' + window.location.host + '"}');
+      expect(iframe.src).to.match(/http\:\/\/localhost:9876\/base\/dist\.3p\//);
       return timer.promise(10);
     }).then(() => {
       return poll('frame to load', () => {
@@ -74,7 +71,7 @@ describe('Rendering of one ad', () => {
       expect(slot.getCategoryExclusions()).to.jsonEqual(['health']);
       expect(slot.getTargeting('sport')).to.jsonEqual(['rugby', 'cricket']);
       return poll(
-          'ad iframe to be initialized. Means that an actual ad was loaded',
+          'ad iframe to be initialized. Means that an actual ad was loaded.',
           () => {
             return canvas.querySelector(
                 '[id="google_ads_iframe_/4119129/mobile_ad_banner_0"]');
@@ -82,6 +79,11 @@ describe('Rendering of one ad', () => {
     }).then(unusedAdIframe => {
       expect(iframe.getAttribute('width')).to.equal('320');
       expect(iframe.getAttribute('height')).to.equal('50');
+      return poll('Creative id transmitted. Ad fully rendered.', () => {
+        return ampAd.getAttribute('creative-id');
+      }, null, 5000);
+    }).then(creativeId => {
+      expect(creativeId).to.match(/^dfp-/);
     });
   });
 });

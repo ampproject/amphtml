@@ -120,6 +120,8 @@ window.draw3p = function(opt_configCallback) {
   }
   // This only actually works for ads.
   window.context.observeIntersection = observeIntersection;
+  window.context.reportRenderedEntityIdentifier =
+      reportRenderedEntityIdentifier;
   delete data._context;
   draw3p(window, data, opt_configCallback);
 };
@@ -170,6 +172,23 @@ function observeIntersection(observerCallback) {
 }
 
 /**
+ * Reports the "entity" that was rendered to this frame to the parent for
+ * reporting purposes.
+ * The entityId MUST NOT contain user data or personal identifiable
+ * information. One example for an acceptable data item would be the
+ * creative id of an ad, while the user's location would not be
+ * acceptable.
+ * @param {string} entityId See comment above for content.
+ */
+function reportRenderedEntityIdentifier(entityId) {
+  assert(typeof entityId == 'string',
+      'entityId should be a string %s', entityId);
+  nonSensitiveDataPostMessage('entity-id', {
+    id: entityId
+  });
+}
+
+/**
  * Throws if the current frame's parent origin is not equal to
  * the claimed origin.
  * For browsers that don't support ancestorOrigins it adds
@@ -188,7 +207,7 @@ export function validateParentOrigin(window, parentLocation) {
     return;
   }
   assert(ancestors[0] == parentLocation.origin,
-      'Parent origin mismatch: %s, %s, %s',
+      'Parent origin mismatch: %s, %s',
       ancestors[0], parentLocation.origin);
   parentLocation.originValidated = true;
 }

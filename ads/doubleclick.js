@@ -60,9 +60,14 @@ export function doubleclick(global, data) {
       }
 
       pubads.addEventListener('slotRenderEnded', function(event) {
+        let creativeId = event.creativeId ||
+            // Full for backfill or empty case. Empty is handled below.
+            '_backfill_';
         if (event.isEmpty) {
           context.noContentAvailable();
+          creativeId = '_empty_';
         }
+        context.reportRenderedEntityIdentifier('dfp-' + creativeId);
       });
 
       // Exported for testing.

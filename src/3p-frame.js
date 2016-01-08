@@ -55,12 +55,19 @@ function getFrameAttributes(parentWindow, element, opt_type) {
   attributes.initialWindowHeight = box.height;
   attributes.type = type;
   const docInfo = documentInfoFor(parentWindow);
+  let locationHref = parentWindow.location.href;
+  // This is really only needed for tests, but whatever. Children
+  // see us as the logical origin, so telling them we are about:srcdoc
+  // will fail ancestor checks.
+  if (locationHref == 'about:srcdoc') {
+    locationHref = parentWindow.parent.location.href;
+  }
   attributes._context = {
     referrer: parentWindow.document.referrer,
     canonicalUrl: docInfo.canonicalUrl,
     pageViewId: docInfo.pageViewId,
     location: {
-      href: parentWindow.location.href
+      href: locationHref
     },
     mode: getMode()
   };
