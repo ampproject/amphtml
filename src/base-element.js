@@ -81,7 +81,7 @@ import {vsyncFor} from './vsync';
  * to preconnect to hosts needed by an element. It will never be called
  * before buildCallback and it might be called multiple times including
  * after layoutCallback.
- * 
+ *
  * The documentInactiveCallback is called when the document becomes
  * inactive. E.g. when the user swipes away from the document or
  * focuses a different tab.
