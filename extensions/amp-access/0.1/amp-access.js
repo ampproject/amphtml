@@ -286,10 +286,11 @@ export class AccessService {
   /**
    * @param {!Element} element
    * @param {boolean} on
+   * @return {!Promise}
    * @private
    */
   applyAuthorizationAttrs_(element, on) {
-    this.vsync_.mutatePromise(() => {
+    return this.vsync_.mutatePromise(() => {
       if (on) {
         element.removeAttribute('amp-access-off');
       } else {
