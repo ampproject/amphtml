@@ -18,6 +18,7 @@ import {assert} from '../asserts';
 import {getService} from '../service';
 import {log} from '../log';
 import {timer} from '../timer';
+import {vsyncFor} from '../vsync';
 
 /** @const {string} */
 const TAG_ = 'Action';
@@ -86,6 +87,12 @@ export class ActionService {
     /** @const {!Window} */
     this.win = win;
 
+    /** @const @private {!Object<string, function(!ActionInvocation)>} */
+    this.globalMethodHandlers_ = {};
+
+    /** @param {!Vsync} */
+    this.vsync_ = vsyncFor(this.win);
+
     // Add core events.
     this.addEvent('tap');
   }
@@ -105,6 +112,15 @@ export class ActionService {
         }
       });
     }
+  }
+
+  /**
+   * Registers the action handler for a common method.
+   * @param {string} name
+   * @param {function(!ActionInvocation)} handler
+   */
+  addGlobalMethodHandler(name, handler) {
+    this.globalMethodHandlers_[name] = handler;
   }
 
   /**
@@ -209,7 +225,11 @@ export class ActionService {
   invoke_(target, method, source, event, actionInfo) {
     const invocation = new ActionInvocation(target, method, source, event);
 
-    // TODO(dvoytenko): implement common method handlers, e.g. "toggleClass"
+    // Try a global method handler first.
+    if (this.globalMethodHandlers_[invocation.method]) {
+      this.globalMethodHandlers_[invocation.method](invocation);
+      return;
+    }
 
     // AMP elements.
     if (target.tagName.toLowerCase().substring(0, 4) == 'amp-') {
