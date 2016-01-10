@@ -14,6 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
+[![Build Status](https://travis-ci.org/ampproject/amphtml.svg?branch=master)](https://travis-ci.org/ampproject/amphtml)
+[![Issue Stats](http://issuestats.com/github/ampproject/amphtml/badge/pr)](http://issuestats.com/github/ampproject/amphtml)
+[![Issue Stats](http://issuestats.com/github/ampproject/amphtml/badge/issue)](http://issuestats.com/github/ampproject/amphtml)
+
 # AMP HTML ⚡
 
 AMP HTML is a way to build web pages for static content that render with reliable, fast performance. It is our attempt at fixing what many perceive as painfully slow page load times – especially when reading content on the mobile web.
@@ -29,14 +33,14 @@ AMP HTML works by including the AMP JS library and adding a bit of boilerplate t
 ```html
 <!doctype html>
 <html ⚡>
-<head>
-  <meta charset="utf-8">
-  <link rel="canonical" href="hello-world.html" >
-  <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
-  <style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
-  <script async src="https://cdn.ampproject.org/v0.js"></script>
-</head>
-<body>Hello World!</body>
+  <head>
+    <meta charset="utf-8">
+    <link rel="canonical" href="hello-world.html" >
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+  </head>
+  <body>Hello World!</body>
 </html>
 ```
 
@@ -79,15 +83,17 @@ These components can:
 * Replace HTML5 elements that are not directly permitted in the specification
   such as [amp-img](builtins/amp-img.md) and [amp-video](builtins/amp-video.md).
 * Implement embedded third-party content, such as
-[amp-youtube](extensions/amp-youtube/amp-youtube.md), [amp-ad](builtins/amp-ad.md),
-and [amp-twitter](extensions/amp-twitter/amp-twitter.md).
+[amp-ad](builtins/amp-ad.md),
+[amp-pinterest](extensions/amp-pinterest/amp-pinterest.md),
+[amp-twitter](extensions/amp-twitter/amp-twitter.md),
+and [amp-youtube](extensions/amp-youtube/amp-youtube.md).
 * Provide for common patterns in web pages,
 such as [amp-lightbox](extensions/amp-lightbox/amp-lightbox.md)
 and [amp-carousel](extensions/amp-carousel/amp-carousel.md).
 * Make advanced performance techniques easy,
 such as [amp-anim](extensions/amp-anim/amp-anim.md),
 which allows web developers to dynamically serve animated images
-as either image files (GIF) or video files (WebM or MP4) based on browser compatability.
+as either image files (GIF) or video files (WebM or MP4) based on browser compatibility.
 
 # Further Reading
 
@@ -124,4 +130,6 @@ under the [Apache License, Version 2.0](LICENSE).
 
 ## Contributing
 
-Please see [the CONTRIBUTING file](CONTRIBUTING.md) for information on contributing to the AMP Project, and [the DEVELOPING file](DEVELOPING.md) for documentation on the AMP library internals.
+Please see [the CONTRIBUTING file](CONTRIBUTING.md) for information on contributing to the AMP Project, and [the DEVELOPING file](DEVELOPING.md) for documentation on the AMP library internals and [hints how to get started](DEVELOPING.md#starter-issues).
+
+### [Code of conduct](CODE_OF_CONDUCT.md)

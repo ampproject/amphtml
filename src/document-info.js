@@ -20,16 +20,30 @@ import {parseUrl} from './url';
 
 /**
  * @param {!Window} win
- * @return {{canonicalUrl: string}} Info about the doc
+ * @return {{canonicalUrl: string, pageViewId: string}} Info about the doc
  *     - canonicalUrl: The doc's canonical.
+ *     - pageViewId: Id for this page view. Low entropy but should be unique
+ *       for concurrent page views of a user.
  */
 export function documentInfoFor(win) {
- 	return getService(win, 'documentInfo', () => {
+  return getService(win, 'documentInfo', () => {
     return {
       canonicalUrl: parseUrl(assert(
           win.document.querySelector('link[rel=canonical]'),
               'AMP files are required to have a <link rel=canonical> tag.')
-              .href).href
+              .href).href,
+      pageViewId: getPageViewId(win),
     };
   });
+}
+
+/**
+ * Returns a relatively low entropy random string.
+ * This should be called once per window and then cached for subsequent
+ * access to the same value to be persistent per page.
+ * @param {!Window} win
+ * @return {string}
+ */
+function getPageViewId(win) {
+  return String(Math.floor(win.Math.random() * 10000));
 }

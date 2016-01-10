@@ -30,7 +30,7 @@ describe('amp-image-lightbox component', () => {
 
   function getImageLightbox() {
     return createIframePromise().then(iframe => {
-      var el = iframe.doc.createElement('amp-image-lightbox');
+      const el = iframe.doc.createElement('amp-image-lightbox');
       el.setAttribute('layout', 'nodisplay');
       iframe.doc.body.appendChild(el);
       return new Timer(window).promise(16).then(() => {
@@ -42,22 +42,22 @@ describe('amp-image-lightbox component', () => {
 
   it('should render correctly', () => {
     return getImageLightbox().then(lightbox => {
-      let container = lightbox.querySelector('.-amp-image-lightbox-container');
+      const container = lightbox
+          .querySelector('.-amp-image-lightbox-container');
       expect(container).to.not.equal(null);
 
-      let caption = container.querySelector('.-amp-image-lightbox-caption');
+      const caption = container.querySelector('.-amp-image-lightbox-caption');
       expect(caption).to.not.equal(null);
-      expect(caption.classList.contains('amp-image-lightbox-caption')).to.
-          equal(true);
+      expect(caption).to.have.class('amp-image-lightbox-caption');
 
-      let viewer = container.querySelector('.-amp-image-lightbox-viewer');
+      const viewer = container.querySelector('.-amp-image-lightbox-viewer');
       expect(viewer).to.not.equal(null);
 
-      let image = viewer.querySelector('.-amp-image-lightbox-viewer-image');
+      const image = viewer.querySelector('.-amp-image-lightbox-viewer-image');
       expect(image).to.not.equal(null);
 
       // Very important. Image must have transform-origin=50% 50%.
-      let win = image.ownerDocument.defaultView;
+      const win = image.ownerDocument.defaultView;
       expect(win.getComputedStyle(image)['transform-origin']).to.equal(
           '50% 50%');
     });
@@ -65,22 +65,26 @@ describe('amp-image-lightbox component', () => {
 
   it('should activate all steps', () => {
     return getImageLightbox().then(lightbox => {
-      let impl = lightbox.implementation_;
-      let requestFullOverlay = sinon.spy();
+      const impl = lightbox.implementation_;
+      const requestFullOverlay = sinon.spy();
       impl.requestFullOverlay = requestFullOverlay;
-      let viewportOnChanged = sinon.spy();
-      impl.getViewport = () => {return {onChanged: viewportOnChanged};};
-      let historyPush = sinon.spy();
+      const viewportOnChanged = sinon.spy();
+      const disableTouchZoom = sinon.spy();
+      impl.getViewport = () => {return {
+        onChanged: viewportOnChanged,
+        disableTouchZoom: disableTouchZoom
+      };};
+      const historyPush = sinon.spy();
       impl.getHistory_ = () => {
         return {push: () => {
           historyPush();
           return Promise.resolve(11);
         }};
       };
-      let enter = sinon.spy();
+      const enter = sinon.spy();
       impl.enter_ = enter;
 
-      let ampImage = document.createElement('amp-img');
+      const ampImage = document.createElement('amp-img');
       ampImage.setAttribute('src', 'data:');
       impl.activate({source: ampImage});
 
@@ -90,26 +94,31 @@ describe('amp-image-lightbox component', () => {
       expect(historyPush.callCount).to.equal(1);
       expect(enter.callCount).to.equal(1);
       expect(impl.sourceElement_).to.equal(ampImage);
+      expect(disableTouchZoom.callCount).to.equal(1);
     });
   });
 
   it('should deactivate all steps', () => {
     return getImageLightbox().then(lightbox => {
-      let impl = lightbox.implementation_;
+      const impl = lightbox.implementation_;
       impl.active_ = true;
       impl.historyId_ = 11;
-      let cancelFullOverlay = sinon.spy();
+      const cancelFullOverlay = sinon.spy();
       impl.cancelFullOverlay = cancelFullOverlay;
-      let viewportOnChangedUnsubscribed = sinon.spy();
+      const viewportOnChangedUnsubscribed = sinon.spy();
       impl.unlistenViewport_ = viewportOnChangedUnsubscribed;
-      let historyPop = sinon.spy();
+      const restoreOriginalTouchZoom = sinon.spy();
+      impl.getViewport = () => {return {
+        restoreOriginalTouchZoom: restoreOriginalTouchZoom
+      };};
+      const historyPop = sinon.spy();
       impl.getHistory_ = () => {
         return {pop: historyPop};
       };
-      let exit = sinon.spy();
+      const exit = sinon.spy();
       impl.exit_ = exit;
 
-      let ampImage = document.createElement('amp-img');
+      const ampImage = document.createElement('amp-img');
       ampImage.setAttribute('src', 'data:');
       impl.close();
 
@@ -118,7 +127,41 @@ describe('amp-image-lightbox component', () => {
       expect(viewportOnChangedUnsubscribed.callCount).to.equal(1);
       expect(impl.unlistenViewport_).to.equal(null);
       expect(cancelFullOverlay.callCount).to.equal(1);
+      expect(restoreOriginalTouchZoom.callCount).to.equal(1);
       expect(historyPop.callCount).to.equal(1);
+    });
+  });
+
+  it('should close on ESC', () => {
+    return getImageLightbox().then(lightbox => {
+      const impl = lightbox.implementation_;
+      const setupCloseSpy = sinon.spy(impl, 'close');
+      const viewportOnChanged = sinon.spy();
+      const disableTouchZoom = sinon.spy();
+      const restoreOriginalTouchZoom = sinon.spy();
+      impl.getViewport = () => {return {
+        onChanged: viewportOnChanged,
+        disableTouchZoom: disableTouchZoom,
+        restoreOriginalTouchZoom: restoreOriginalTouchZoom
+      };};
+      const historyPush = sinon.spy();
+      impl.getHistory_ = () => {
+        return {push: () => {
+          historyPush();
+          return Promise.resolve(11);
+        }};
+      };
+      const enter = sinon.spy();
+      impl.enter_ = enter;
+
+      const ampImage = document.createElement('amp-img');
+      ampImage.setAttribute('src', 'data:');
+      ampImage.setAttribute('width', '100');
+      ampImage.setAttribute('height', '100');
+      impl.activate({source: ampImage});
+      impl.closeOnEscape_({keyCode: 27});
+      expect(setupCloseSpy.callCount).to.equal(1);
+      setupCloseSpy.restore();
     });
   });
 });
@@ -167,10 +210,10 @@ describe('amp-image-lightbox image viewer', () => {
 
 
   it('should init to the source element without image', () => {
-    let sourceElement = {
+    const sourceElement = {
       offsetWidth: 101,
       offsetHeight: 201,
-      getAttribute: (name) => {
+      getAttribute: name => {
         if (name == 'src') {
           return 'image1';
         }
@@ -187,17 +230,17 @@ describe('amp-image-lightbox image viewer', () => {
   });
 
   it('should init to the source element with unloaded image', () => {
-    let sourceElement = {
+    const sourceElement = {
       offsetWidth: 101,
       offsetHeight: 201,
-      getAttribute: (name) => {
+      getAttribute: name => {
         if (name == 'src') {
           return 'image1';
         }
         return undefined;
       }
     };
-    let sourceImage = {
+    const sourceImage = {
       complete: false,
       src: 'image1-smaller'
     };
@@ -208,25 +251,25 @@ describe('amp-image-lightbox image viewer', () => {
   });
 
   it('should init to the source element with loaded image', () => {
-    let sourceElement = {
+    const sourceElement = {
       offsetWidth: 101,
       offsetHeight: 201,
-      getAttribute: (name) => {
+      getAttribute: name => {
         if (name == 'src') {
           return 'image1';
         }
         return undefined;
       }
     };
-    let sourceImage = {
+    const sourceImage = {
       complete: true,
       src: 'image1-smaller'
     };
 
     imageViewer.init(sourceElement, sourceImage);
 
-    expect(imageViewer.getImage().getAttribute('src')).to.
-        equal('image1-smaller');
+    expect(imageViewer.getImage().getAttribute('src')).to
+        .equal('image1-smaller');
   });
 
   it('should reset', () => {
@@ -251,7 +294,7 @@ describe('amp-image-lightbox image viewer', () => {
     imageViewer.sourceWidth_ = 80;
     imageViewer.sourceHeight_ = 60;
 
-    let promise = imageViewer.measure();
+    const promise = imageViewer.measure();
 
     expect(imageViewer.viewerBox_.width).to.equal(100);
     expect(imageViewer.viewerBox_.height).to.equal(200);
@@ -267,7 +310,7 @@ describe('amp-image-lightbox image viewer', () => {
     expect(imageViewer.getImage().style.height).to.equal('75px');
 
     clock.tick(10);
-    let checkSrc = () => {
+    const checkSrc = () => {
       expect(imageViewer.getImage().getAttribute('src')).to.equal('image1');
     };
     return promise.then(checkSrc, checkSrc);
@@ -344,7 +387,6 @@ describe('amp-image-lightbox image viewer gestures', () => {
     sandbox = null;
   });
 
-
   it('should have initial bounds', () => {
     expect(imageViewer.minX_).to.equal(0);
     expect(imageViewer.maxX_).to.equal(0);
@@ -412,7 +454,7 @@ describe('amp-image-lightbox image viewer gestures', () => {
   });
 
   it('should zoom release', () => {
-    let updateSrc = sinon.spy();
+    const updateSrc = sinon.spy();
     imageViewer.updateSrc_ = updateSrc;
     imageViewer.onZoomInc_(10, 10, -10, -10);
     return imageViewer.onZoomRelease_(10, 10, -10, -10, 0, 0).then(() => {

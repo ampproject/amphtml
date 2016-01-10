@@ -1,0 +1,64 @@
+<!doctype html>
+<!--
+      This sample AMP HTML file aims to be a minimalist document that
+      follows best practices and guidances for publishers to mark up
+      content for inclusion in various platforms.
+-->
+<html AMP lang="en" itemscope itemtype="http://schema.org/Review">
+  <!-- you can use "amp" or "AMP" or "⚡" -->
+  <head>
+    <meta charset="utf-8">
+    <title>Lorem Ipsum</title>
+    <link itemprop="mainEntityOfPage" rel="canonical" href="http://example.ampproject.org/review-metadata.html" />
+    <!--
+        The canonical document for this article should be linked, as above.
+        The canonical document should also have a corresponding <link> tag
+        within pointing at this AMP HTML file:
+          <link rel="amphtml" href="http://example.ampproject.org/recipe-metadata.amp.html" />
+        It is possible that this AMP HTML document is the canonical document
+        for this article, in which case, the canonical URL should point to this
+        document, and no "amphtml" link is required.
+        Also, please be aware that some platforms that use AMP HTML have
+        further restrictions with regards to some schema components.
+         For example:
+           * All marked-up URL's should be absolute.
+           * The "logo" dimensions must not exceed 600x60.
+    -->
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
+    </script>
+    <!-- only one style tag is allowed, and it must have an "amp-custom" attribute -->
+    <style amp-custom>
+      <!-- any custom style goes here; and remember, body margin can not be declared -->
+      body {
+        background-color: white;
+      }
+      amp-img {
+        background-color: gray;
+      }
+    </style>
+    <!-- this style tag is required -->
+    <style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+  </head>
+  <body>
+    <div itemprop="itemReviewed" itemscope itemtype="http://schema.org/Restaurant">
+      <h1 itemprop="name">Legal Seafood</h1>
+    </div>
+    <p itemprop="name">A good seafood place</p>
+    <p itemprop="reviewBody">The Seafood is great</p>
+    <div itemprop="reviewRating" itemscope itemtype="http://schema.org/Rating">
+      <p><span itemprop="ratingValue">4.0</span> out of 5</p>
+    </div>
+    <p>By <span itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <span itemprop="name">Bob Smith</span></span> from Google</p>
+    <div itemprop="publisher" itemscope itemtype="https://schema.org/Organization">
+      <div itemprop="logo" itemscope itemtype="https://schema.org/ImageObject">
+        <amp-img width="600" height="60" src="http://cdn.ampproject.org/logo.jpg"></amp-img>
+        <meta itemprop="url" content="http://cdn.ampproject.org/logo.jpg"></meta>
+        <meta itemprop="width" content="600"></meta>
+        <meta itemprop="height" content="60"></meta>
+      </div>
+      <meta itemprop="name" content="Google"></meta>
+    </div>
+  </body>
+</html>

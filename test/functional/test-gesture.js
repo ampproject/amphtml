@@ -79,7 +79,7 @@ describe('Gestures', () => {
 
 
   it('onPointerDown should be called', () => {
-    let handler = sinon.spy();
+    const handler = sinon.spy();
     gestures.onPointerDown(handler);
     sendEvent({type: 'touchstart'});
     expect(handler.callCount).to.equal(1);
@@ -223,13 +223,13 @@ describe('Gestures', () => {
   });
 
   it('should allow emit', () => {
-    let data = {};
-    let event = {};
+    const data = {};
+    const event = {};
     clock.tick(1);
     gestures.eventing_ = recognizer;
     gestures.signalEmit_(recognizer, data, event);
     expect(onGesture.callCount).to.equal(1);
-    let gesture = onGesture.getCall(0).args[0];
+    const gesture = onGesture.getCall(0).args[0];
     expect(gesture.type).to.equal('test');
     expect(gesture.data).to.equal(data);
     expect(gesture.event).to.equal(event);
@@ -267,7 +267,7 @@ describe('Gestures', () => {
 
   it('should allow youngest to start', () => {
     gestures.onGesture(Test2Recognizer, () => {});
-    let recognizer2Mock = sandbox.mock(gestures.recognizers_[1]);
+    const recognizer2Mock = sandbox.mock(gestures.recognizers_[1]);
 
     gestures.ready_[0] = 10;
     gestures.ready_[1] = 9;
@@ -281,7 +281,7 @@ describe('Gestures', () => {
 
 
   it('should allow event to propagate when nothing happening', () => {
-    let event = {
+    const event = {
       type: 'touchend',
       preventDefault: sinon.spy(),
       stopPropagation: sinon.spy(),
@@ -293,7 +293,7 @@ describe('Gestures', () => {
 
   it('should cancel event when eventing', () => {
     gestures.eventing_ = recognizer;
-    let event = {
+    const event = {
       type: 'touchend',
       preventDefault: sinon.spy(),
       stopPropagation: sinon.spy(),
@@ -309,7 +309,7 @@ describe('Gestures', () => {
     expect(gestures.eventing_).to.equal(null);
     expect(gestures.wasEventing_).to.equal(true);
 
-    let event = {
+    const event = {
       type: 'touchend',
       preventDefault: sinon.spy(),
       stopPropagation: sinon.spy(),
@@ -322,7 +322,7 @@ describe('Gestures', () => {
 
   it('should cancel event when anyone is ready', () => {
     gestures.ready_[0] = 1;
-    let event = {
+    const event = {
       type: 'touchend',
       preventDefault: sinon.spy(),
       stopPropagation: sinon.spy(),

@@ -14,36 +14,183 @@
  * limitations under the License.
  */
 
-var gulp = require('gulp');
+var gulp = require('gulp-help')(require('gulp'));
 var path = require('path');
-var srcGlobs = require('../config').srcGlobs;
+var srcGlobs = require('../config').presubmitGlobs;
 var util = require('gulp-util');
 
-// Directories to check for presubmit checks.
-var srcGlobs = srcGlobs.concat([
-  '!build-system/tasks/presubmit-checks.js',
-  '!build/polyfills.js',
-  '!gulpfile.js',
-]);
+var dedicatedCopyrightNoteSources = /(\.js|\.css|\.go)$/;
 
-var dedicatedCopyrightNoteSources = /(\.js|.css)$/;
+var es6polyfill = 'Not available because we do not currently' +
+    ' ship with a needed ES6 polyfill.';
+
+var requiresReviewPrivacy =
+    'Usage of this API requires dedicated review due to ' +
+    'being privacy sensitive. Please file an issue asking for permission' +
+    ' to use if you have not yet done so.';
+
+var privateServiceFactory = 'This service should only be installed in ' +
+    'the whitelisted files. Other modules should use a public function ' +
+    'typically called serviceNameFor.';
 
 // Terms that must not appear in our source files.
 var forbiddenTerms = {
   'DO NOT SUBMIT': '',
   'describe\\.only': '',
   'it\\.only': '',
-  'console\\.\\w+\\(': 'If you run against this, use console/*OK*/.log to ' +
+  'console\\.\\w+\\(': {
+    message: 'If you run against this, use console/*OK*/.log to ' +
       'whitelist a legit case.',
-  'cookie\\W': '',
+    // TODO: temporary, remove when validator is up to date
+    whitelist: [
+      'validator/validator.js',
+      'validator/parse-css.js',
+      'validator/validator-in-browser.js',
+    ]
+  },
+  // Service factories that should only be installed once.
+  'installActionService': {
+    message: privateServiceFactory,
+    whitelist: [
+      'src/service/action-impl.js',
+      'src/amp-core-service.js',
+    ],
+  },
+  'installActionHandler': {
+    message: privateServiceFactory,
+    whitelist: [
+      'src/service/action-impl.js',
+      'extensions/amp-access/0.1/amp-access.js',
+    ],
+  },
+  'installCidService': {
+    message: privateServiceFactory,
+    whitelist: [
+      'src/service/cid-impl.js',
+      'extensions/amp-access/0.1/amp-access.js',
+      'extensions/amp-analytics/0.1/amp-analytics.js',
+    ],
+  },
+  'installViewerService': {
+    message: privateServiceFactory,
+    whitelist: [
+      'src/amp-core-service.js',
+      'src/service/history-impl.js',
+      'src/service/viewer-impl.js',
+      'src/service/viewport-impl.js',
+      'src/service/vsync-impl.js',
+    ],
+  },
+  'installViewportService': {
+    message: privateServiceFactory,
+    whitelist: [
+      'src/amp-core-service.js',
+      'src/service/viewport-impl.js',
+    ],
+  },
+  'installVsyncService': {
+    message: privateServiceFactory,
+    whitelist: [
+      'src/amp-core-service.js',
+      'src/service/viewport-impl.js',
+      'src/service/vsync-impl.js',
+    ],
+  },
+  // Privacy sensitive
+  'cidFor': {
+    message: requiresReviewPrivacy,
+    whitelist: [
+      'src/cid.js',
+      'src/service/cid-impl.js',
+      'src/url-replacements.js',
+      'extensions/amp-access/0.1/amp-access.js',
+      'extensions/amp-user-notification/0.1/amp-user-notification.js',
+    ],
+  },
+  'getBaseCid': {
+    message: requiresReviewPrivacy,
+    whitelist: [
+      'src/service/cid-impl.js',
+      'src/service/viewer-impl.js',
+    ],
+  },
+  'cookie\\W': {
+    message: requiresReviewPrivacy,
+    whitelist: [
+      'src/cookies.js',
+      'src/service/cid-impl.js',
+    ],
+  },
+  'getCookie\\W': {
+    message: requiresReviewPrivacy,
+    whitelist: [
+      'src/service/cid-impl.js',
+      'src/cookies.js',
+      'src/experiments.js',
+      'tools/experiments/experiments.js',
+    ]
+  },
+  'setCookie\\W': {
+    message: requiresReviewPrivacy,
+    whitelist: [
+      'src/cookies.js',
+      'src/experiments.js',
+      'tools/experiments/experiments.js',
+    ]
+  },
   'eval\\(': '',
-  'localStorage': '',
-  'sessionStorage': '',
-  'indexedDB': '',
-  'openDatabase': '',
-  'requestFileSystem': '',
-  'webkitRequestFileSystem': '',
+  'localStorage': {
+    message: requiresReviewPrivacy,
+    whitelist: [
+      'src/service/cid-impl.js',
+    ],
+  },
+  'sessionStorage': requiresReviewPrivacy,
+  'indexedDB': requiresReviewPrivacy,
+  'openDatabase': requiresReviewPrivacy,
+  'requestFileSystem': requiresReviewPrivacy,
+  'webkitRequestFileSystem': requiresReviewPrivacy,
   'debugger': '',
+
+  // ES6. These are only the most commonly used.
+  'Array\\.of': es6polyfill,
+  // These currently depend on core-js/modules/web.dom.iterable which
+  // we don't want. That decision could be reconsidered.
+  'Promise\\.all': es6polyfill,
+  'Promise\\.race': es6polyfill,
+  '\\.startsWith': {
+    message: es6polyfill,
+    whitelist: [
+      'validator/tokenize-css.js',
+      'validator/validator.js'
+    ]
+  },
+  '\\.endsWith': es6polyfill,
+  // TODO: (erwinm) rewrite the destructure and spread warnings as
+  // eslint rules (takes more time than this quick regex fix).
+  // No destructuring allowed since we dont ship with Array polyfills.
+  '^\\s*(?:let|const|var) *(?:\\[[^\\]]+\\]|{[^}]+}) *=': es6polyfill,
+  // No spread (eg. test(...args) allowed since we dont ship with Array
+  // polyfills except `arguments` spread as babel does not polyfill
+  // it since it can assume that it can `slice` w/o the use of helpers.
+  '\\.\\.\\.(?!arguments\\))[_$A-Za-z0-9]*(?:\\)|])': {
+    message: es6polyfill,
+    whitelist: [
+      'extensions/amp-access/0.1/access-expr-impl.js',
+    ],
+  }
+};
+
+var ThreePTermsMessage = 'The 3p bootstrap iframe has no polyfills loaded and' +
+    ' can thus not use most modern web APIs.';
+
+var forbidden3pTerms = {
+  // We need to forbid promise usage because we don't have our own polyfill
+  // available. This whitelisting of callNext is a major hack to allow one
+  // usage in babel's external helpers that is in a code path that we do
+  // not use.
+  '\\.then\\((?!callNext)': ThreePTermsMessage,
+  'Math\\.sign' : ThreePTermsMessage,
 };
 
 var bannedTermsHelpString = 'Please review viewport.js for a helper method ' +
@@ -100,6 +247,7 @@ var forbiddenTermsSrcInclusive = {
   '\\.getBBox(?!_)': bannedTermsHelpString,
   '\\.webkitConvertPointFromNodeToPage(?!_)': bannedTermsHelpString,
   '\\.webkitConvertPointFromPageToNode(?!_)': bannedTermsHelpString,
+  '\\.changeHeight(?!_)': bannedTermsHelpString,
 };
 
 // Terms that must appear in a source file.
@@ -112,26 +260,59 @@ var requiredTerms = {
       dedicatedCopyrightNoteSources,
 };
 
+
 /**
- * @param {!File} file file is a vinyl file object
- * @param {!Array<string, string>} terms
- * @return boolean
+ * Check if root of path is test/ or file is in a folder named test.
+ * @param {string} path
+ * @return {boolean}
  */
-function matchTerms(pathname, contents, terms) {
+function isInTestFolder(path) {
+  var dirs = path.split('/');
+  var folder = dirs[dirs.length - 2];
+  return path.startsWith('test/') || folder == 'test';
+}
+
+/**
+ * Logs any issues found in the contents of file based on terms (regex
+ * patterns), and provides any possible fix information for matched terms if
+ * possible
+ *
+ * @param {!File} file a vinyl file object to scan for term matches
+ * @param {!Array<string, string>} terms Pairs of regex patterns and possible
+ *   fix messages.
+ * @return {boolean} true if any of the terms match the file content,
+ *   false otherwise
+ */
+function matchTerms(file, terms) {
+  var pathname = file.path;
+  var contents = file.contents.toString();
+  var relative = file.relative;
   return Object.keys(terms).map(function(term) {
     var fix;
+    var whitelist = terms[term].whitelist;
+    // NOTE: we could do a glob test instead of exact check in the future
+    // if needed but that might be too permissive.
+    if (Array.isArray(whitelist) && (whitelist.indexOf(relative) != -1 ||
+        isInTestFolder(relative))) {
+      return false;
+    }
     // we can't optimize building the `RegExp` objects early unless we build
     // another mapping of term -> regexp object to be able to get back to the
     // original term to get the possible fix value. This is ok as the
     // presubmit doesn't have to be blazing fast and this is most likely
     // negligible.
-    var matches = contents.match(new RegExp(term));
+    var matches = contents.match(new RegExp(term, 'gm'));
 
     if (matches) {
       util.log(util.colors.red('Found forbidden: "' + matches[0] +
-          '" in ' + pathname));
-      fix = terms[term];
+          '" in ' + relative));
+      if (typeof terms[term] == 'string') {
+        fix = terms[term];
+      } else {
+        fix = terms[term].message;
+      }
 
+      // log the possible fix information if provided for the term.
       if (fix) {
         util.log(util.colors.blue(fix));
       }
@@ -145,25 +326,47 @@ function matchTerms(pathname, contents, terms) {
 }
 
 
+/**
+ * Test if a file's contents match any of the
+ * forbidden terms
+ *
+ * @param {!File} file file is a vinyl file object
+ * @return {boolean} true if any of the terms match the file content,
+ *   false otherwise
+ */
 function hasAnyTerms(file) {
-  var contents = file.contents.toString();
   var pathname = file.path;
   var basename = path.basename(pathname);
   var hasTerms = false;
   var hasSrcInclusiveTerms = false;
+  var has3pTerms = false;
 
-  hasTerms = matchTerms(pathname, contents, forbiddenTerms);
+  hasTerms = matchTerms(file, forbiddenTerms);
 
-  var isTestFile = /^test-/.test(basename);
+  var isTestFile = /^test-/.test(basename) || /^_init_tests/.test(basename);
   if (!isTestFile) {
-    hasSrcInclusiveTerms = matchTerms(pathname, contents,
-        forbiddenTermsSrcInclusive);
+    hasSrcInclusiveTerms = matchTerms(file, forbiddenTermsSrcInclusive);
   }
 
-  return hasTerms || hasSrcInclusiveTerms;
+  var is3pFile = /3p|ads/.test(pathname) ||
+      basename == '3p.js' ||
+      basename == 'style.js';
+  if (is3pFile && !isTestFile) {
+    has3pTerms = matchTerms(file, forbidden3pTerms);
+  }
+
+  return hasTerms || hasSrcInclusiveTerms || has3pTerms;
 }
 
-function hasAllTerms(file) {
+/**
+ * Test if a file's contents fail to match any of the required terms and log
+ * any missing terms
+ *
+ * @param {!File} file file is a vinyl file object
+ * @return {boolean} true if any of the terms are not matched in the file
+ *  content, false otherwise
+ */
+function isMissingTerms(file) {
   var contents = file.contents.toString();
   return Object.keys(requiredTerms).map(function(term) {
     var filter = requiredTerms[term];
@@ -174,16 +377,20 @@ function hasAllTerms(file) {
     var matches = contents.match(new RegExp(term));
     if (!matches) {
       util.log(util.colors.red('Did not find required: "' + term +
-          '" in ' + file.path));
+          '" in ' + file.relative));
       util.log(util.colors.blue('=========='));
       return true;
     }
     return false;
-  }).some(function(hasAnyTerm) {
-    return hasAnyTerm;
+  }).some(function(hasMissingTerm) {
+    return hasMissingTerm;
   });
 }
 
+/**
+ * Check a file for all the required terms and
+ * any forbidden terms and log any errors found.
+ */
 function checkForbiddenAndRequiredTerms() {
   var forbiddenFound = false;
   var missingRequirements = false;
@@ -192,7 +399,8 @@ function checkForbiddenAndRequiredTerms() {
       forbiddenFound = files.map(hasAnyTerms).some(function(errorFound) {
         return errorFound;
       });
-      missingRequirements = files.map(hasAllTerms).some(function(errorFound) {
+      missingRequirements = files.map(isMissingTerms).some(
+          function(errorFound) {
         return errorFound;
       });
     }))
@@ -212,4 +420,5 @@ function checkForbiddenAndRequiredTerms() {
     });
 }
 
-gulp.task('presubmit', checkForbiddenAndRequiredTerms);
+gulp.task('presubmit', 'Run validation against files to check for forbidden ' +
+  'and required terms', checkForbiddenAndRequiredTerms);

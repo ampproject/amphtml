@@ -18,18 +18,35 @@ import {timer} from './timer';
 
 
 /**
+ * Listens for the specified event on the element.
+ * @param {!EventTarget} element
+ * @param {string} eventType
+ * @param {function(Event)} listener
+ * @param {boolean=} opt_capture
+ * @return {!UnlistenDef}
+ */
+export function listen(element, eventType, listener, opt_capture) {
+  const capture = opt_capture || false;
+  element.addEventListener(eventType, listener, capture);
+  return () => {
+    element.removeEventListener(eventType, listener, capture);
+  };
+}
+
+
+/**
  * Listens for the specified event on the element and removes the listener
  * as soon as event has been received.
  * @param {!EventTarget} element
  * @param {string} eventType
  * @param {function(Event)} listener
  * @param {boolean=} opt_capture
- * @return {!Unlisten}
+ * @return {!UnlistenDef}
  */
 export function listenOnce(element, eventType, listener, opt_capture) {
-  let capture = opt_capture || false;
+  const capture = opt_capture || false;
   let unlisten;
-  let proxy = (event) => {
+  const proxy = event => {
     listener(event);
     unlisten();
   };
@@ -54,7 +71,7 @@ export function listenOnce(element, eventType, listener, opt_capture) {
 export function listenOncePromise(element, eventType, opt_capture,
     opt_timeout) {
   let unlisten;
-  let eventPromise = new Promise((resolve, reject) => {
+  const eventPromise = new Promise((resolve, unusedReject) => {
     unlisten = listenOnce(element, eventType, resolve, opt_capture);
   });
   return racePromise_(eventPromise, unlisten, opt_timeout);
@@ -82,7 +99,7 @@ export function isLoaded(element) {
 export function loadPromise(element, opt_timeout) {
   let unlistenLoad;
   let unlistenError;
-  let loadingPromise = new Promise((resolve, reject) => {
+  const loadingPromise = new Promise((resolve, reject) => {
     if (isLoaded(element)) {
       resolve(element);
     } else {
@@ -127,11 +144,11 @@ function racePromise_(promise, unlisten, timeout) {
   if (!unlisten) {
     return racePromise;
   }
-  return racePromise.then((result) => {
+  return racePromise.then(result => {
     unlisten();
     return result;
-  }, (reason) => {
+  }, reason => {
     unlisten();
-    return Promise.reject(reason);
+    throw reason;
   });
 }

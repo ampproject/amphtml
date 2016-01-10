@@ -14,35 +14,34 @@
  * limitations under the License.
  */
 
-import {writeScript} from '../src/3p';
+import {loadScript, checkData} from '../src/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function doubleclick(global, data) {
-  var loaded = new Promise((resolve, reject) => {
-    var s = document.createElement('script');
-    s.src = 'https://www.googletagservices.com/tag/js/gpt.js';
-    s.onload = resolve;
-    s.onerror = reject;
-    global.document.body.appendChild(s);
-  });
-
-  loaded.then(() => {
+  checkData(data, [
+    'slot', 'targeting', 'categoryExclusion',
+    'tagForChildDirectedTreatment', 'cookieOptions'
+  ]);
+  loadScript(global, 'https://www.googletagservices.com/tag/js/gpt.js', () => {
     global.googletag.cmd.push(function() {
-      var dimensions = [[
+      const googletag = global.googletag;
+      const dimensions = [[
         parseInt(data.width, 10),
         parseInt(data.height, 10)
       ]];
-      var slot = googletag.defineSlot(data.slot, dimensions, 'c')
-          .addService(googletag.pubads());
-      googletag.pubads().enableSingleRequest();
-      googletag.pubads().set('page_url', context.location.href);
+      const pubads = googletag.pubads();
+      const slot = googletag.defineSlot(data.slot, dimensions, 'c')
+          .addService(pubads);
+      pubads.enableSingleRequest();
+      pubads.markAsAmp();
+      pubads.set('page_url', context.canonicalUrl);
       googletag.enableServices();
 
       if (data.targeting) {
-        for (var key in data.targeting) {
+        for (const key in data.targeting) {
           slot.setTargeting(key, data.targeting[key]);
         }
       }
@@ -52,21 +51,28 @@ export function doubleclick(global, data) {
       }
 
       if (data.tagForChildDirectedTreatment != undefined) {
-        googletag.pubads().setTagForChildDirectedTreatment(
+        pubads.setTagForChildDirectedTreatment(
             data.tagForChildDirectedTreatment);
       }
 
       if (data.cookieOptions) {
-        googletag.pubads().setCookieOptions(data.cookieOptions);
+        pubads.setCookieOptions(data.cookieOptions);
       }
 
-      googletag.pubads().addEventListener('slotRenderEnded', function(event) {
+      pubads.addEventListener('slotRenderEnded', function(event) {
+        let creativeId = event.creativeId ||
+            // Full for backfill or empty case. Empty is handled below.
+            '_backfill_';
         if (event.isEmpty) {
           context.noContentAvailable();
+          creativeId = '_empty_';
         }
+        context.reportRenderedEntityIdentifier('dfp-' + creativeId);
       });
 
-      global.googletag.display('c');
+      // Exported for testing.
+      c.slot = slot;
+      googletag.display('c');
     });
   });
 }

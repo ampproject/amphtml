@@ -17,14 +17,16 @@
 
 import {assert} from './asserts';
 import {getLengthNumeral} from '../src/layout';
+import {getService} from './service';
 import {documentInfoFor} from './document-info';
 import {getMode} from './mode';
+import {preconnectFor} from './preconnect';
 import {dashToCamelCase} from './string';
-import {parseUrl} from './url';
+import {parseUrl, assertHttpsUrl} from './url';
 
 
 /** @type {!Object<string,number>} Number of 3p frames on the for that type. */
-var count = {};
+const count = {};
 
 
 /**
@@ -39,26 +41,37 @@ var count = {};
  *     - A _context object for internal use.
  */
 function getFrameAttributes(parentWindow, element, opt_type) {
-  var width = element.getAttribute('width');
-  var height = element.getAttribute('height');
-  var type = opt_type || element.getAttribute('type');
+  const width = element.getAttribute('width');
+  const height = element.getAttribute('height');
+  const type = opt_type || element.getAttribute('type');
   assert(type, 'Attribute type required for <amp-ad>: %s', element);
-  var attributes = {};
+  const attributes = {};
   // Do these first, as the other attributes have precedence.
   addDataAndJsonAttributes_(element, attributes);
   attributes.width = getLengthNumeral(width);
   attributes.height = getLengthNumeral(height);
-  var box = element.getLayoutBox();
+  const box = element.getLayoutBox();
   attributes.initialWindowWidth = box.width;
   attributes.initialWindowHeight = box.height;
   attributes.type = type;
+  const docInfo = documentInfoFor(parentWindow);
+  let locationHref = parentWindow.location.href;
+  // This is really only needed for tests, but whatever. Children
+  // see us as the logical origin, so telling them we are about:srcdoc
+  // will fail ancestor checks.
+  if (locationHref == 'about:srcdoc') {
+    locationHref = parentWindow.parent.location.href;
+  }
   attributes._context = {
+    referrer: parentWindow.document.referrer,
+    canonicalUrl: docInfo.canonicalUrl,
+    pageViewId: docInfo.pageViewId,
     location: {
-      href: documentInfoFor(parentWindow).canonicalUrl
+      href: locationHref
     },
     mode: getMode()
   };
-  var adSrc = element.getAttribute('src');
+  const adSrc = element.getAttribute('src');
   if (adSrc) {
     attributes.src = adSrc;
   }
@@ -74,18 +87,19 @@ function getFrameAttributes(parentWindow, element, opt_type) {
  * @return {!Element} The iframe.
  */
 export function getIframe(parentWindow, element, opt_type) {
-  var attributes = getFrameAttributes(parentWindow, element, opt_type);
-  var iframe = document.createElement('iframe');
+  const attributes = getFrameAttributes(parentWindow, element, opt_type);
+  const iframe = document.createElement('iframe');
   if (!count[attributes.type]) {
     count[attributes.type] = 0;
   }
   iframe.name = 'frame_' + attributes.type + '_' + count[attributes.type]++;
 
   // Pass ad attributes to iframe via the fragment.
-  var src = getBootstrapBaseUrl(parentWindow) + '#' +
+  const src = getBootstrapBaseUrl(parentWindow) + '#' +
       JSON.stringify(attributes);
 
   iframe.src = src;
+  iframe.ampLocation = parseUrl(src);
   iframe.width = attributes.width;
   iframe.height = attributes.height;
   iframe.style.border = 'none';
@@ -98,16 +112,19 @@ export function getIframe(parentWindow, element, opt_type) {
 }
 
 /**
- * Allows listening for message from the iframe.
+ * Allows listening for message from the iframe. Returns an unlisten
+ * function to remove the listener.
+ *
  * @param {!Element} iframe
  * @param {string} typeOfMessage
  * @param {function(!Object)} callback Called when a message of this type
  *     arrives for this iframe.
+ * @return {!UnlistenDef}
  */
 export function listen(iframe, typeOfMessage, callback) {
-  var win = iframe.ownerDocument.defaultView;
-  var origin = parseUrl(getBootstrapBaseUrl(win)).origin;
-  win.addEventListener('message', function(event) {
+  const win = iframe.ownerDocument.defaultView;
+  const origin = iframe.ampLocation.origin;
+  const listener = function(event) {
     if (event.origin != origin) {
       return;
     }
@@ -121,7 +138,42 @@ export function listen(iframe, typeOfMessage, callback) {
       return;
     }
     callback(event.data);
+  };
+
+  win.addEventListener('message', listener);
+
+  return function() {
+    win.removeEventListener('message', listener);
+  };
+}
+
+/**
+ * Allows listening for a message from the iframe and then removes the listener
+ *
+ * @param {!Element} iframe
+ * @param {string} typeOfMessage
+ * @param {function(!Object)} callback Called when a message of this type
+ *     arrives for this iframe.
+ * @return {!UnlistenDef}
+ */
+export function listenOnce(iframe, typeOfMessage, callback) {
+  const unlisten = listen(iframe, typeOfMessage, data => {
+    unlisten();
+    return callback(data);
   });
+  return unlisten;
+}
+
+/**
+ * Posts a message to the iframe;
+ * @param {!Element} element The 3p iframe.
+ * @param {string} type Type of the message.
+ * @param {!Object} object Message payload.
+ */
+export function postMessage(iframe, type, object) {
+  object.type = type;
+  object.sentinel = 'amp-3p';
+  iframe.contentWindow./*OK*/postMessage(object, iframe.ampLocation.origin);
 }
 
 /**
@@ -131,39 +183,66 @@ export function listen(iframe, typeOfMessage, callback) {
  * attributes.
  * @param {!Element} element
  * @param {!Object} attributes The destination.
- * @visibleForTesting
+ * visibleForTesting
  */
 export function addDataAndJsonAttributes_(element, attributes) {
-  for (var i = 0; i < element.attributes.length; i++) {
-    var attr = element.attributes[i];
+  for (let i = 0; i < element.attributes.length; i++) {
+    const attr = element.attributes[i];
     if (attr.name.indexOf('data-') != 0) {
       continue;
     }
     attributes[dashToCamelCase(attr.name.substr(5))] = attr.value;
   }
-  var json = element.getAttribute('json');
+  const json = element.getAttribute('json');
   if (json) {
-    var obj;
+    let obj;
     try {
       obj = JSON.parse(json);
     } catch (e) {
       assert(false, 'Error parsing JSON in json attribute in element %s',
           element);
     }
-    for (var key in obj) {
+    for (const key in obj) {
       attributes[key] = obj[key];
     }
   }
 }
 
 /**
- * Returns the base URL for ad bootstrap iframes.
+ * Prefetches URLs related to the bootstrap iframe.
  * @param {!Window} parentWindow
  * @return {string}
  */
-function getBootstrapBaseUrl(parentWindow) {
-  // TODO(malteubl): Change to final URL.
-  var url =
+export function prefetchBootstrap(window) {
+  const url = getBootstrapBaseUrl(window);
+  const preconnect = preconnectFor(window);
+  preconnect.prefetch(url);
+  // While the URL may point to a custom domain, this URL will always be
+  // fetched by it.
+  preconnect.prefetch(
+      'https://3p.ampproject.net/$internalRuntimeVersion$/f.js');
+}
+
+/**
+ * Returns the base URL for 3p bootstrap iframes.
+ * @param {!Window} parentWindow
+ * @return {string}
+ * @visibleForTesting
+ */
+export function getBootstrapBaseUrl(parentWindow) {
+  return getService(window, 'bootstrapBaseUrl', () => {
+    return getCustomBootstrapBaseUrl(parentWindow) ||
+      getDefaultBootstrapBaseUrl(parentWindow);
+  });
+}
+
+/**
+ * Returns the default base URL for 3p bootstrap iframes.
+ * @param {!Window} parentWindow
+ * @return {string}
+ */
+function getDefaultBootstrapBaseUrl(parentWindow) {
+  let url =
       'https://3p.ampproject.net/$internalRuntimeVersion$/frame.html';
   if (getMode().localDev) {
     url = 'http://ads.localhost:' + parentWindow.location.port +
@@ -172,4 +251,29 @@ function getBootstrapBaseUrl(parentWindow) {
         '.html';
   }
   return url;
+}
+
+/**
+ * Returns the custom base URL for 3p bootstrap iframes if it exists.
+ * Otherwise null.
+ * @param {!Window} parentWindow
+ * @return {?string}
+ */
+function getCustomBootstrapBaseUrl(parentWindow) {
+  const meta = parentWindow.document
+      .querySelector('meta[name="amp-3p-iframe-src"]');
+  if (!meta) {
+    return null;
+  }
+  const url = assertHttpsUrl(meta.getAttribute('content'), meta);
+  assert(url.indexOf('?') == -1,
+      '3p iframe url must not include query string %s in element %s.',
+      url, meta);
+  // This is not a security primitive, we just don't want this to happen in
+  // practice. People could still redirect to the same origin, but they cannot
+  // redirect to the proxy origin which is the important one.
+  assert(parseUrl(url).origin != parseUrl(parentWindow.location.href).origin,
+      '3p iframe url must not be on the same origin as the current document ' +
+      '%s in element %s.', url, meta);
+  return url + '?$internalRuntimeVersion$';
 }

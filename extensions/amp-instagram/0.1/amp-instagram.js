@@ -18,12 +18,12 @@
 /**
  * @fileoverview Embeds an instagram photo. Captions are currently
  * not supported.
- * The shortcode attribute can be easily copied from a normal instagram
+ * The data-shortcode attribute can be easily copied from a normal instagram
  * URL.
  * Example:
  * <code>
  * <amp-instagram
- *   shortcode="fBwFP"
+ *   data-shortcode="fBwFP"
  *   width="320"
  *   height="392"
  *   layout="responsive">
@@ -40,8 +40,8 @@ import {loadPromise} from '../../../src/event-helper';
 
 class AmpInstagram extends AMP.BaseElement {
   /** @override */
-  createdCallback() {
-    this.preconnect.url('https://instagram.com');
+  preconnectCallback(onLayout) {
+    this.preconnect.url('https://instagram.com', onLayout);
   }
 
   /** @override */
@@ -51,18 +51,20 @@ class AmpInstagram extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    var width = this.element.getAttribute('width');
-    var height = this.element.getAttribute('height');
-    var shortCode = AMP.assert(this.element.getAttribute('shortcode'),
-        'The shortcode attribute is required for <amp-instagram> %s',
+    const width = this.element.getAttribute('width');
+    const height = this.element.getAttribute('height');
+    const shortcode = AMP.assert(
+        (this.element.getAttribute('data-shortcode') ||
+        this.element.getAttribute('shortcode')),
+        'The data-shortcode attribute is required for <amp-instagram> %s',
         this.element);
     // See
     // https://instagram.com/developer/embedding/?hl=en
-    var iframe = document.createElement('iframe');
+    const iframe = document.createElement('iframe');
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowtransparency', 'true');
     iframe.src = 'https://instagram.com/p/' +
-        encodeURIComponent(shortCode) + '/embed/?v=4';
+        encodeURIComponent(shortcode) + '/embed/?v=4';
     this.applyFillContent(iframe);
     iframe.width = width;
     iframe.height = height;

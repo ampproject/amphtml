@@ -19,7 +19,7 @@
  * This type signifies a callback that can be called to remove the listener.
  * @typedef {function()}
  */
-class Unlisten {}
+class UnlistenDef {}
 
 
 /**
@@ -37,7 +37,7 @@ export class Observable {
   /**
    * Adds the observer to this instance.
    * @param {function(TYPE)} handler Observer's handler.
-   * @return {!Unlisten}
+   * @return {!UnlistenDef}
    */
   add(handler) {
     this.handlers_.push(handler);
@@ -64,7 +64,7 @@ export class Observable {
    * @param {TYPE} event
    */
   fire(event) {
-    this.handlers_.forEach((handler) => {
+    this.handlers_.forEach(handler => {
       handler(event);
     });
   }

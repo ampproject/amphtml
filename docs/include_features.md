@@ -14,7 +14,7 @@ Display an iframe in your page using the
 
 `amp-iframe` requirements:
 
-* Must be at least 600px or 75% of the first viewport away from the top.
+* Must be at least 600px or 75% of the first viewport away from the top (except for `click-to-play` iframes as described below).
 * Can only request resources via HTTPS, and they must not be in the same origin as the container,
 unless they do not specify allow-same-origin.
 
@@ -28,14 +28,35 @@ first include the following script to the `<head>`, which loads the additional c
 An example `amp-iframe` from the
 [released.amp example](https://github.com/ampproject/amphtml/blob/master/examples/released.amp.html):
 
-  ```html
-  <amp-iframe width=300 height=300
-      sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
-      layout="responsive"
-      frameborder="0"
-      src="https://www.google.com/maps/embed/v1/place?key=AIzaSyDG9YXIhKBhqclZizcSzJ0ROiE0qgVfwzI&q=Alameda,%20CA">
-  </amp-iframe>
-  ```
+```html
+<amp-iframe width=300 height=300
+    sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
+    layout="responsive"
+    frameborder="0"
+    src="https://www.google.com/maps/embed/v1/place?key=AIzaSyDG9YXIhKBhqclZizcSzJ0ROiE0qgVfwzI&q=Alameda,%20CA">
+</amp-iframe>
+```
+
+* It is possible to have an `amp-iframe` appear on the top of a document when the `amp-ifame` has a `placeholder` element as shown in the example below.
+
+```html
+<amp-iframe width=300 height=300
+   layout="responsive"
+   sandbox="allow-scripts"
+   src="https://foo.com/iframe">
+ <amp-img layout="fill" src="https://foo.com/foo.png" placeholder></amp-img>
+</amp-iframe>
+```
+- The `amp-iframe` must contain an element with the `placeholder` attribute, (for instance an `amp-img` element) which would be rendered as a placeholder till the iframe is ready to be displayed.
+- Iframe readiness will be inferred by listening to `onload` of the iframe or an `embed-ready` postmesssage which would be sent by the Iframe document, whichever comes first.
+
+Example of IFrame embed-ready request:
+```javascript
+window.parent./*OK*/postMessage({
+  sentinel: 'amp',
+  type: 'embed-ready'
+}, '*');
+```
 
 # Media
 
@@ -52,17 +73,17 @@ using the [`amp-img`](../builtins/amp-img.md) element.
 * Recommended: include a placeholder in case the image resource fails to load.
 
 Responsive image example:
-
-    <amp-img src="responsive.jpg" width=527 height=193 layout="responsive" ></amp-img>
-
+```html
+<amp-img src="responsive.jpg" width=527 height=193 layout="responsive" ></amp-img>
+```
 Fixed-size image example:
-
-    <amp-img id="img1" src="fixed.jpg" width=264 height=96></amp-img>
-
+```html
+<amp-img id="img1" src="fixed.jpg" width=264 height=96></amp-img>
+```
 Hidden image example:
-
-    <amp-img id="img2" src="hidden.jpg" width=527 height=193 layout="nodisplay"></amp-img>
-
+```html
+<amp-img id="img2" src="hidden.jpg" width=527 height=193 layout="nodisplay"></amp-img>
+```
 The AMP HTML runtime can effectively manage image resources,
 choosing to delay or prioritize resource loading
 based on the viewport position, system resources, connection bandwidth, or other factors.
@@ -71,11 +92,11 @@ If the resource requested by the `amp-img` component fails to load,
 the space will be blank.
 Set a placeholder background color or other visual
 using a CSS selector and style on the element itself:
-
-    amp-img {
-      background-color: grey;
-    }
-
+```css
+amp-img {
+  background-color: grey;
+}
+```
 ## Include an animated image
 
 Include an animated image in your page
@@ -95,12 +116,12 @@ first include the following script to the `<head>`:
 The `amp-anim` component can also have an optional placeholder child
 to display while the `src` file is loading.
 The placeholder is specified via the `placeholder` attribute:
-
-    <amp-anim width=400 height=300 src=”my-gif.gif”>
-      <amp-img placeholder width=400 height=300 src=”my-gif-screencap.jpg”>
-      </amp-img>
-    </amp-anim>
-
+```html
+<amp-anim width=400 height=300 src="my-gif.gif">
+  <amp-img placeholder width=400 height=300 src="my-gif-screencap.jpg">
+  </amp-img>
+</amp-anim>
+```
 ## Embed a Tweet
 
 Embed a Twitter Tweet in your page
@@ -121,12 +142,12 @@ to select the aspect ratio based on screen width.
 
 Example `amp-twitter` from the
 [twitter.amp example](../examples/twitter.amp.html):
-
-    <amp-twitter width=390 height=50
-        layout="responsive"
-        data-tweetid="638793490521001985">
-    </amp-twitter>
-
+```html
+<amp-twitter width=390 height=50
+    layout="responsive"
+    data-tweetid="638793490521001985">
+</amp-twitter>
+```
 
 <!--## Embed an Instagram
 
@@ -137,14 +158,14 @@ using the [`amp-instagram`]() element.
 
 **Todo:** Add proper link to reference doc.
 
-Include the Instagrame shortcode found in the Instagram photo URL.
+Include the Instagram data-shortcode found in the Instagram photo URL.
 For example, in `https://instagram.com/p/fBwFP`,
-`fBwFP` is the shortcode.
+`fBwFP` is the data-shortcode.
 Also, Instagram uses a fixed aspect ratio for responsive layouts,
 so the value for width and height should be universal
 
     <amp-instagram
-      shortcode="fBwFP"
+      data-shortcode="fBwFP"
       width="320"
       height="392"
       layout="responsive">
@@ -162,15 +183,14 @@ at a time determined by the AMP HTML runtime.
 
 Include a placeholder before the video starts, and a fallback,
 if the browser doesn't support HTML5 video, for example:
-
-    <amp-video width=400 height=300 src=”https://yourhost.com/videos/myvideo.mp4”>
-	
-      <amp-img placeholder width=400 height=300 src=”myvideo-poster.jpg”></amp-img>
-	  <div fallback>
+```html
+<amp-video width=400 height=300 src="https://yourhost.com/videos/myvideo.mp4"
+    poster="myvideo-poster.jpg">
+  <div fallback>
 		<p>Your browser doesn’t support HTML5 video</p>
-	  </div>
-    </amp-video>
-
+  </div>
+</amp-video>
+```
 ## Include a youtube video
 
 Include a youtube video in your page
@@ -182,25 +202,25 @@ You must include the following script in the `<head>`:
 <script async custom-element="amp-youtube" src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js"></script>
 ```
 
-The Youtube `video-id` can be found in every Youtube video page URL.
+The Youtube `data-videoid` can be found in every Youtube video page URL.
 For example, in https://www.youtube.com/watch?v=Z1q71gFeRqM,
 Z1q71gFeRqM is the video id.
 
 Use `layout="responsive"` to yield correct layouts for 16:9 aspect ratio videos:
-
-    <amp-youtube
-        video-id="mGENRKrdoGY"
-        layout="responsive"
-        width="480" height="270">
-    </amp-youtube>
-
+```html
+<amp-youtube
+    data-videoid="mGENRKrdoGY"
+    layout="responsive"
+    width="480" height="270">
+</amp-youtube>
+```
 ## Include an audio resource
 
 Include an audio resource in your page,
 using the [`amp-audio`](../extensions/amp-audio/amp-audio.md) element.
 
 You must include the following script in the `<head>`:
- 
+
 ```html
 <script async custom-element="amp-audio" src="https://cdn.ampproject.org/v0/amp-audio-0.1.js"></script>
 ```
@@ -212,15 +232,15 @@ at a time determined by the AMP HTML runtime.
 
 Include a placeholder before the audio starts, and a fallback,
 if the browser doesn't support HTML5 audio, for example:
-
-    <amp-audio width=400 height=300 src=”https://yourhost.com/audios/myaudio.mp3”>
-      <div fallback>
-        <p>Your browser doesn’t support HTML5 audio</p>
-      </div>
-      <source type="audio/mpeg" src="foo.mp3">
-      <source type="audio/ogg" src="foo.ogg">
-    </amp-audio>
-
+```html
+<amp-audio width=400 height=300 src="https://yourhost.com/audios/myaudio.mp3">
+  <div fallback>
+    <p>Your browser doesn’t support HTML5 audio</p>
+  </div>
+  <source type="audio/mpeg" src="foo.mp3">
+  <source type="audio/ogg" src="foo.ogg">
+</amp-audio>
+```
 # Count user page views
 
 Count user page views
@@ -232,15 +252,15 @@ to when the tracking pixel is loaded.
 Use the special string `$RANDOM` to add a random number
 to the URL if required.
 
-For example, `<amp-pixel src=”https://cdn.ampproject.org/$RANDOM”>`
-makes a request to something like `https://cdn.ampproject.org/8390278471201`,
+For example, `<amp-pixel src="https://www.my-analytics.com/?rand=$RANDOM">`
+makes a request to something like `https://www.my-analytics.com/?rand=8390278471201`,
 where the $RANDOM value is randomly generated upon each impression.
 
 An example `amp-pixel` from the
 [everything.amp example](https://github.com/ampproject/amphtml/blob/master/examples/everything.amp.html):
-
-    <amp-pixel src="https://pubads.g.doubleclick.net/activity;dc_iu=/12344/pixel;ord=$RANDOM?"></amp-pixel>
-
+```html
+<amp-pixel src="https://pubads.g.doubleclick.net/activity;dc_iu=/12344/pixel;ord=$RANDOM?"></amp-pixel>
+```
 # Monetization through ads
 
 The following ad networks are supported in AMP HTML pages:
@@ -265,22 +285,23 @@ and executes the ad network’s JS inside that iframe sandbox.
 You must specify the ad width and height, and the ad network type.
 The `type` identifies the ad network's template.
 Different ad types require different `data-*` attributes.
-
-    <amp-ad width=300 height=250
-        type="a9"
-        data-aax_size="300x250"
-        data-aax_pubname="test123"
-        data-aax_src="302">
-    </amp-ad>
-
+```html
+<amp-ad width=300 height=250
+    type="a9"
+    data-aax_size="300x250"
+    data-aax_pubname="test123"
+    data-aax_src="302">
+</amp-ad>
+```
 If supported by the ad network,
 include a `placeholder`
 to be shown if no ad is available:
-
-    <amp-ad width=300 height=250
-        type="a9"
-        data-aax_size="300x250"
-        data-aax_pubname="test123"
-        data-aax_src="302">
-        <div placeholder>Have a great day!</div>
-    </amp-ad>
+```html
+<amp-ad width=300 height=250
+    type="a9"
+    data-aax_size="300x250"
+    data-aax_pubname="test123"
+    data-aax_src="302">
+  <div placeholder>Have a great day!</div>
+</amp-ad>
+```

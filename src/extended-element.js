@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {BaseElement} from './base-element';
 import {upgradeOrRegisterElement} from './custom-element';
 
 

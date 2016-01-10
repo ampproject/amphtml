@@ -28,7 +28,7 @@
  *   height: number
  * }}
  */
-var LayoutRect;
+let LayoutRectDef;
 
 
 /**
@@ -38,7 +38,7 @@ var LayoutRect;
  * @param {number} top
  * @param {number} width
  * @param {number} height
- * @return {!LayoutRect}
+ * @return {!LayoutRectDef}
  */
 export function layoutRectLtwh(left, top, width, height) {
   return {
@@ -56,7 +56,7 @@ export function layoutRectLtwh(left, top, width, height) {
  * Creates a layout rect based on the DOMRect, e.g. obtained from calling
  * getBoundingClientRect.
  * @param {!DOMRect} rect
- * @return {!LayoutRect}
+ * @return {!LayoutRectDef}
  */
 export function layoutRectFromDomRect(rect) {
   return {
@@ -72,8 +72,8 @@ export function layoutRectFromDomRect(rect) {
 
 /**
  * Returns true if the specified two rects overlap by a single pixel.
- * @param {!LayoutRect} r1
- * @param {!LayoutRect} r2
+ * @param {!LayoutRectDef} r1
+ * @param {!LayoutRectDef} r2
  * @return {boolean}
  */
 export function layoutRectsOverlap(r1, r2) {
@@ -83,11 +83,33 @@ export function layoutRectsOverlap(r1, r2) {
 
 
 /**
+ * Returns the intersection between a, b or null if there is none.
+ * @param {!LayoutRectDef} a
+ * @param {!LayoutRectDef} b
+ * @return {?LayoutRectDef}
+ */
+export function rectIntersection(a, b) {
+  const x0 = Math.max(a.left, b.left);
+  const x1 = Math.min(a.left + a.width, b.left + b.width);
+
+  if (x0 <= x1) {
+    const y0 = Math.max(a.top, b.top);
+    const y1 = Math.min(a.top + a.height, b.top + b.height);
+
+    if (y0 <= y1) {
+      return layoutRectLtwh(x0, y0, x1 - x0, y1 - y0);
+    }
+  }
+  return null;
+}
+
+
+/**
  * Expand the layout rect using multiples of width and height.
- * @param {!LayoutRect} rect Original rect.
+ * @param {!LayoutRectDef} rect Original rect.
  * @param {number} dw Expansion in width, specified as a multiple of width.
  * @param {number} dh Expansion in height, specified as a multiple of height.
- * @return {!LayoutRect}
+ * @return {!LayoutRectDef}
  */
 export function expandLayoutRect(rect, dw, dh) {
   return {
@@ -103,10 +125,10 @@ export function expandLayoutRect(rect, dw, dh) {
 
 /**
  * Moves the layout rect using dx and dy.
- * @param {!LayoutRect} rect Original rect.
+ * @param {!LayoutRectDef} rect Original rect.
  * @param {number} dx Move horizontally with this value.
  * @param {number} dy Move vertically with this value.
- * @return {!LayoutRect}
+ * @return {!LayoutRectDef}
  */
 export function moveLayoutRect(rect, dx, dy) {
   if (dx == 0 && dy == 0) {

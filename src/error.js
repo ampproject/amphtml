@@ -16,10 +16,10 @@
 
 
 import {getMode} from './mode';
-import {exponentialBackoff} from './exponential-backoff.js';
+import {exponentialBackoff} from './exponential-backoff';
 import {makeBodyVisible} from './styles';
 
-var globalExponentialBackoff = exponentialBackoff(1.5);
+const globalExponentialBackoff = exponentialBackoff(1.5);
 
 
 /**
@@ -40,7 +40,7 @@ export function reportError(error, opt_associatedElement) {
     return;
   }
   error.reported = true;
-  var element = opt_associatedElement || error.associatedElement;
+  const element = opt_associatedElement || error.associatedElement;
   if (element) {
     element.classList.add('-amp-error');
     if (getMode().development) {
@@ -52,9 +52,13 @@ export function reportError(error, opt_associatedElement) {
     (console.error || console.log).apply(console,
         error.messageArray);
   } else {
-    if (process.env.NODE_ENV == 'production') {
-      (console.error || console.log).call(console, error.message);
+    if (element) {
+      (console.error || console.log).call(console,
+          element.tagName + '#' + element.id, error.message);
     } else {
+      (console.error || console.log).call(console, error.message);
+    }
+    if (!(process.env.NODE_ENV == 'production')) {
       (console.error || console.log).call(console, error.stack);
     }
   }
@@ -85,11 +89,11 @@ function reportErrorToServer(message, filename, line, col, error) {
   if (this && this.document) {
     makeBodyVisible(this.document);
   }
-  var mode = getMode();
+  const mode = getMode();
   if (mode.isLocalDev || mode.development || mode.test) {
     return;
   }
-  var url = getErrorReportUrl(message, filename, line, col, error);
+  const url = getErrorReportUrl(message, filename, line, col, error);
   globalExponentialBackoff(() => {
     new Image().src = url;
   });
@@ -102,20 +106,27 @@ function reportErrorToServer(message, filename, line, col, error) {
  * @param {string|undefined} line
  * @param {string|undefined} col
  * @param {!Error|undefined} error
- * @VisibleForTesting
+ * visibleForTesting
  */
 export function getErrorReportUrl(message, filename, line, col, error) {
-  message = error ? error.message : message;
+  message = error && error.message ? error.message : message;
   if (/_reported_/.test(message)) {
     return;
   }
+  if (!message) {
+    message = 'Unknown error';
+  }
 
-  var url = 'https://cdn.ampproject.org/error/report.gif' +
+  // This is the App Engine app in
+  // ../tools/errortracker
+  // It stores error reports via https://cloud.google.com/error-reporting/
+  // for analyzing production issues.
+  let url = 'https://amp-error-reporting.appspot.com/r' +
       '?v=' + encodeURIComponent('$internalRuntimeVersion$') +
       '&m=' + encodeURIComponent(message);
 
   if (error) {
-    var tagName = error && error.associatedElement
+    const tagName = error && error.associatedElement
       ? error.associatedElement.tagName
       : 'u';  // Unknown
     // We may want to consider not reporting asserts but for now
@@ -123,14 +134,13 @@ export function getErrorReportUrl(message, filename, line, col, error) {
     url += '&a=' + (error.fromAssert ? 1 : 0) +
         '&el=' + encodeURIComponent(tagName) +
         '&s=' + encodeURIComponent(error.stack || '');
-    } else {
+    error.message += ' _reported_';
+  } else {
     url += '&f=' + encodeURIComponent(filename) +
         '&l=' + encodeURIComponent(line) +
         '&c=' + encodeURIComponent(col || '');
   }
-  if (error) {
-    error.message += ' _reported_';
-  }
+
   // Shorten URLs to a value all browsers will send.
   return url.substr(0, 2000);
 }

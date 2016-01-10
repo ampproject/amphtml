@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-### <a name=”amp-image-lightbox”></a> `amp-image-lightbox`
+### <a name="amp-image-lightbox"></a> `amp-image-lightbox`
 
 The `amp-image-lightbox` component allows for a “image lightbox” or similar
 experience - where upon user interaction an image expands to fill the
@@ -23,14 +23,14 @@ viewport, until it is closed again by the user.
 #### Behavior
 
 The typical scenario looks like this:
-
-    <amp-img
-        on="tap:lightbox1"
-        role="button"
-        tabindex="0"
-        src="image1" width=200 height=100></amp-img>
-
-    <amp-image-lightbox id="lightbox1" layout="nodisplay"></amp-image-lightbox>
+```html
+<amp-img
+    on="tap:lightbox1"
+    role="button"
+    tabindex="0"
+    src="image1" width=200 height=100></amp-img>
+<amp-image-lightbox id="lightbox1" layout="nodisplay"></amp-image-lightbox>
+```
 
 The `amp-image-lightbox` is activated using `on` action on the `amp-img` element
 by referencing the lightbox element's ID. When activated, it places the image in
@@ -46,6 +46,7 @@ at the bottom of the viewport. The caption is discovered as following:
 
 Among other things the `amp-image-lightbox` allows the following user manipulations:
 zooming, panning, showing/hiding of the description.
+Pressing the escape key on the keyboard will close the lightbox.
 
 #### Styling
 

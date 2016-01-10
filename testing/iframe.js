@@ -15,11 +15,11 @@
  */
 
 
-require('../src/polyfills');
 import {Timer} from '../src/timer';
+import {installCoreServices} from '../src/amp-core-service';
 import {registerForUnitTest} from '../src/runtime';
 
-var iframeCount = 0;
+let iframeCount = 0;
 
 
 /**
@@ -55,11 +55,11 @@ export function createFixtureIframe(fixture, initialIframeHeight, done) {
       'amp:stubbed': 0,
       'amp:load:start': 0
     };
-    var html = __html__[fixture];
+    let html = __html__[fixture];
     if (!html) {
       throw new Error('Cannot find fixture: ' + fixture);
     }
-    var firstLoad = true;
+    let firstLoad = true;
     // This global function will be called by the iframe immediately when it
     // starts loading. This appears to be the only way to get the correct
     // window object early enough to not miss any events that may get fired
@@ -69,7 +69,7 @@ export function createFixtureIframe(fixture, initialIframeHeight, done) {
       win.AMP_TEST = true;
       // Function that returns a promise for when the given event fired at
       // least count times.
-      var awaitEvent = (eventName, count) => {
+      let awaitEvent = (eventName, count) => {
         if (!(eventName in events)) {
           throw new Error('Unknown custom event ' + eventName);
         }
@@ -78,7 +78,7 @@ export function createFixtureIframe(fixture, initialIframeHeight, done) {
             resolve();
           } else {
             win.addEventListener(eventName, () => {
-              if(events[eventName] == count) {
+              if (events[eventName] == count) {
                 resolve();
               }
             });
@@ -86,7 +86,7 @@ export function createFixtureIframe(fixture, initialIframeHeight, done) {
         });
       };
       // Record firing of custom events.
-      for (let name in events) {
+      for (const name in events) {
         win.addEventListener(name, () => {
           events[name]++;
         });
@@ -96,7 +96,7 @@ export function createFixtureIframe(fixture, initialIframeHeight, done) {
             file + ':' + line + '\n' +
             (error ? error.stack : 'no stack'));
       };
-      var errors = [];
+      let errors = [];
       win.console.error = function() {
         errors.push('Error: ' + [].slice.call(arguments).join(' '));
       };
@@ -105,7 +105,7 @@ export function createFixtureIframe(fixture, initialIframeHeight, done) {
         ms = ms || 0;
         setTimeout(fn, ms / 10);
       };
-      var timeout = setTimeout(function() {
+      let timeout = setTimeout(function() {
         reject(new Error('Timeout waiting for elements to start loading.'));
       }, 1000);
       // Declare the test ready to run when the document was fully parsed.
@@ -122,7 +122,7 @@ export function createFixtureIframe(fixture, initialIframeHeight, done) {
     // Add before and after load callbacks to the document.
     html = html.replace('>', '><script>parent.beforeLoad(window);</script>');
     html += '<script>parent.afterLoad(window);</script>';
-    var iframe = document.createElement('iframe');
+    let iframe = document.createElement('iframe');
     iframe.name = 'test_' + fixture + iframeCount++;
     iframe.onerror = function(event) {
       throw event.error;
@@ -144,6 +144,8 @@ export function createFixtureIframe(fixture, initialIframeHeight, done) {
  * - addElement: Adds an AMP element to the iframe and returns a promise for
  *   that element. When the promise is resolved we will have called the entire
  *   lifecycle including layoutCallback.
+ * @param {boolean=} opt_runtimeOff Whether runtime should be turned off.
+ * @param {function()=} opt_beforeLayoutCallback
  * @return {!Promise<{
  *   win: !Window,
  *   doc: !Document,
@@ -151,28 +153,39 @@ export function createFixtureIframe(fixture, initialIframeHeight, done) {
  *   addElement: function(!Element):!Promise
  * }>}
  */
-export function createIframePromise() {
+export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
   return new Promise(function(resolve, reject) {
-    var iframe = document.createElement('iframe');
+    let iframe = document.createElement('iframe');
     iframe.name = 'test_' + iframeCount++;
     iframe.srcdoc = '<!doctype><html><head>' +
         '<script src="/base/build/polyfills.js"></script>' +
-        '<body style="margin:0">';
+        '<body style="margin:0"><div id=parent></div>';
     iframe.onload = function() {
-      registerForUnitTest(iframe.contentWindow);
       // Flag as being a test window.
       iframe.contentWindow.AMP_TEST = true;
+      if (opt_runtimeOff) {
+        iframe.contentWindow.name = '__AMP__off=1';
+      }
+      installCoreServices(iframe.contentWindow);
+      registerForUnitTest(iframe.contentWindow);
       resolve({
         win: iframe.contentWindow,
         doc: iframe.contentWindow.document,
         iframe: iframe,
         addElement: function(element) {
-          iframe.contentWindow.document.body.appendChild(element);
+          iframe.contentWindow.document.getElementById('parent')
+              .appendChild(element);
           // Wait for mutation observer to fire.
           return new Timer(window).promise(16).then(() => {
             // Make sure it has dimensions since no styles are available.
             element.style.display = 'block';
-            element.implementation_.layoutCallback();
+            element.build(true);
+            if (element.layoutCount_ == 0) {
+              if (opt_beforeLayoutCallback) {
+                opt_beforeLayoutCallback();
+              }
+              element.layoutCallback();
+            }
             return element;
           });
         }
@@ -183,21 +196,46 @@ export function createIframePromise() {
   });
 }
 
+export function createServedIframe(src) {
+  return new Promise(function(resolve, reject) {
+    const iframe = document.createElement('iframe');
+    iframe.name = 'test_' + iframeCount++;
+    iframe.src = src;
+    iframe.onload = function() {
+      const win = iframe.contentWindow;
+      win.AMP_TEST = true;
+      installCoreServices(win);
+      registerForUnitTest(win);
+      resolve({
+        win: win,
+        doc: win.document,
+        iframe: iframe
+      });
+    };
+    iframe.onerror = reject;
+    document.body.appendChild(iframe);
+  });
+}
+
 /**
  * Returns a promise for when the condition becomes true.
  * @param {string} description
- * @param {fn():boolean} condition
+ * @param {fn():T} condition Should return a truthy value when the poll
+ *     is done. The return value is then returned with the promise
+ *     returned by this function.
  * @param {fn():!Error=} opt_onError
  * @param {number=} opt_timeout
- * @return {!Promise}
+ * @return {!Promise<T>} The polled for value.
+ * @template T
  */
 export function poll(description, condition, opt_onError, opt_timeout) {
   return new Promise((resolve, reject) => {
-    var start = new Date().getTime();
+    let start = new Date().getTime();
     function poll() {
-      if (condition()) {
+      const ret = condition();
+      if (ret) {
         clearInterval(interval);
-        resolve();
+        resolve(ret);
       } else {
         if (new Date().getTime() - start > (opt_timeout || 1600)) {
           clearInterval(interval);
@@ -209,7 +247,7 @@ export function poll(description, condition, opt_onError, opt_timeout) {
         }
       }
     }
-    var interval = setInterval(poll, 50);
+    let interval = setInterval(poll, 8);
     poll();
   });
 }
@@ -225,7 +263,7 @@ export function poll(description, condition, opt_onError, opt_timeout) {
  * @return {!Promise}
  */
 export function pollForLayout(win, count, opt_timeout) {
-  var getCount = () => {
+  let getCount = () => {
     return win.document.querySelectorAll('.-amp-layout,.-amp-error').length;
   };
   return poll('Waiting for elements to layout: ' + count, () => {
@@ -243,6 +281,9 @@ export function pollForLayout(win, count, opt_timeout) {
  */
 export function expectBodyToBecomeVisible(win) {
   return poll('expect body to become visible', () => {
-    return win.document.body && win.document.body.style.opacity == '1';
+    return win.document.body && (
+        (win.document.body.style.visibility == 'visible'
+            && win.document.body.style.opacity != '0')
+        || win.document.body.style.opacity == '1');
   });
 }

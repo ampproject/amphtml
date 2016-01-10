@@ -1,0 +1,5 @@
+FAIL
+feature_tests/javascript_xss.html:27:0 INVALID_ATTR_VALUE href=javascript:alert('boo')
+feature_tests/javascript_xss.html:28:0 INVALID_ATTR_VALUE href=JavaScript:alert('boo')
+feature_tests/javascript_xss.html:29:0 INVALID_ATTR_VALUE href=vbscript:bar
+feature_tests/javascript_xss.html:30:0 INVALID_ATTR_VALUE href=data:baz

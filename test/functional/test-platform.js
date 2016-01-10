@@ -24,16 +24,19 @@ describe('Platform', () => {
   beforeEach(() => {
     isIos = false;
     isChrome = false;
+    isSafari = false;
   });
 
   function testUserAgent(userAgentString) {
-    let platform = new Platform({navigator: {userAgent: userAgentString}});
+    const platform = new Platform({navigator: {userAgent: userAgentString}});
     expect(platform.isIos()).to.equal(isIos);
     expect(platform.isChrome()).to.equal(isChrome);
+    expect(platform.isSafari()).to.equal(isSafari);
   }
 
   it('iPhone 6 Plus', () => {
     isIos = true;
+    isSafari = true;
     testUserAgent('Mozilla/5.0 (iPhone; CPU iPhone OS 8_0 like Mac OS X)' +
         ' AppleWebKit/600.1.3 (KHTML, like Gecko) Version/8.0' +
         ' Mobile/12A4345d Safari/600.1.4');
@@ -41,9 +44,17 @@ describe('Platform', () => {
 
   it('iPad 2', () => {
     isIos = true;
+    isSafari = true;
     testUserAgent('Mozilla/5.0 (iPad; CPU OS 7_0 like Mac OS X)' +
         ' AppleWebKit/537.51.1 (KHTML, like Gecko) Version/7.0' +
         ' Mobile/11A465 Safari/9537.53');
+  });
+
+  it('Desktop Safari', () => {
+    isSafari = true;
+    testUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) ' +
+        'AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 ' +
+        'Safari/7046A194A');
   });
 
   it('Nexus 6 Chrome', () => {

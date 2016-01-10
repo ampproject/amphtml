@@ -1,0 +1,13 @@
+FAIL
+feature_tests/regexps.html:27:2 MANDATORY_CDATA_MISSING_OR_INCORRECT boilerplate (js enabled) - old variant (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#boilerplate)
+feature_tests/regexps.html:37:2 INVALID_ATTR_VALUE rel=stylesheet (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#canon)
+feature_tests/regexps.html:47:2 INVALID_ATTR_VALUE rel=foo (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#canon)
+feature_tests/regexps.html:48:2 INVALID_ATTR_VALUE rel=accessibility foo (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#canon)
+feature_tests/regexps.html:49:2 INVALID_ATTR_VALUE rel=foo accessibility (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#canon)
+feature_tests/regexps.html:57:2 INVALID_ATTR_VALUE name=content-disposition (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#vprt)
+feature_tests/regexps.html:58:2 INVALID_ATTR_VALUE name=invalid content-disposition (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#vprt)
+feature_tests/regexps.html:69:2 INVALID_ATTR_VALUE autoplay=invalid (see https://github.com/ampproject/amphtml/blob/master/extensions/amp-audio/amp-audio.md)
+feature_tests/regexps.html:70:2 INVALID_ATTR_VALUE autoplay=desktopfoo (see https://github.com/ampproject/amphtml/blob/master/extensions/amp-audio/amp-audio.md)
+feature_tests/regexps.html:71:2 INVALID_ATTR_VALUE autoplay=foodesktop (see https://github.com/ampproject/amphtml/blob/master/extensions/amp-audio/amp-audio.md)
+feature_tests/regexps.html:78:2 INVALID_ATTR_VALUE href=javascript:alert
+feature_tests/regexps.html:79:2 INVALID_ATTR_VALUE href= javascript:alert

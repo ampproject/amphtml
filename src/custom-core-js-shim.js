@@ -23,10 +23,10 @@
 // If you feel strongly that a shim is required or should be used then
 // uncomment it from the list and contact the team.
 //
-// This is temporary until we can build out something more sophistacted with
+// This is temporary until we can build out something more sophisticated with
 // gulp + browserify + cli or switch to webpack.
 
-require('core-js/modules/es5');
+//require('core-js/modules/es5');
 //require('core-js/modules/es6.symbol');
 //require('core-js/modules/es6.object.assign');
 //require('core-js/modules/es6.object.is');
@@ -40,7 +40,7 @@ require('core-js/modules/es5');
 //require('core-js/modules/es6.object.is-extensible');
 //require('core-js/modules/es6.object.get-own-property-descriptor');
 //require('core-js/modules/es6.object.get-prototype-of');
-require('core-js/modules/es6.object.keys');
+//require('core-js/modules/es6.object.keys');
 //require('core-js/modules/es6.object.get-own-property-names');
 //require('core-js/modules/es6.function.name');
 //require('core-js/modules/es6.function.has-instance');
@@ -73,21 +73,21 @@ require('core-js/modules/es6.math.sign');
 //require('core-js/modules/es6.math.trunc');
 //require('core-js/modules/es6.string.from-code-point');
 //require('core-js/modules/es6.string.raw');
-require('core-js/modules/es6.string.trim');
+//require('core-js/modules/es6.string.trim');
 //require('core-js/modules/es6.string.iterator');
 //require('core-js/modules/es6.string.code-point-at');
-require('core-js/modules/es6.string.ends-with');
-require('core-js/modules/es6.string.includes');
+//require('core-js/modules/es6.string.ends-with');
+//require('core-js/modules/es6.string.includes');
 //require('core-js/modules/es6.string.repeat');
-require('core-js/modules/es6.string.starts-with');
-require('core-js/modules/es6.array.from');
-require('core-js/modules/es6.array.of');
+//require('core-js/modules/es6.string.starts-with');
+//require('core-js/modules/es6.array.from');
+//require('core-js/modules/es6.array.of');
 //require('core-js/modules/es6.array.iterator');
 //require('core-js/modules/es6.array.species');
 //require('core-js/modules/es6.array.copy-within');
-require('core-js/modules/es6.array.fill');
-require('core-js/modules/es6.array.find');
-require('core-js/modules/es6.array.find-index');
+//require('core-js/modules/es6.array.fill');
+//require('core-js/modules/es6.array.find');
+//require('core-js/modules/es6.array.find-index');
 //require('core-js/modules/es6.regexp.constructor');
 //require('core-js/modules/es6.regexp.flags');
 //require('core-js/modules/es6.regexp.match');
@@ -128,6 +128,6 @@ require('core-js/modules/es6.promise');
 //require('core-js/modules/js.array.statics');
 //require('core-js/modules/web.timers');
 //require('core-js/modules/web.immediate');
-require('core-js/modules/web.dom.iterable');
+//require('core-js/modules/web.dom.iterable');
 /** @const  */
 module.exports = require('core-js/modules/$.core');

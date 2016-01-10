@@ -14,105 +14,13 @@
  * limitations under the License.
  */
 
-import {timer} from './timer';
+import {getService} from './service';
 
 
 /**
- * TODO(dvoytenko): remove this struct and just supply measure/mutate directly
- * in calls.
- * @typedef {{
- *   measure: (function(Object<string,*>)|undefined),
- *   mutate: (function(Object<string,*>))
- * }}
+ * @param {!Window} window
+ * @return {!Vsync}
  */
-class VsyncTaskSpec {}
-
-
-/**
- * TODO(dvoytenko): lots and lots of work to make it actually work right:
- * queue, scheduling, measures/mutates separation, etc.
- *
- * TODO(dvoytenko): split into clear APIs for measure+mutate vs only mutate
- * since that will be the main use case.
- */
-export class Vsync {
-
-  /**
-   * @param {!Window} win
-   */
-  constructor(win) {
-    /** @const {!Window} */
-    this.win = win;
-    // TODO(dvoytenko): polyfill requestAnimationFrame?
-  }
-
-  /**
-   * @param {!VsyncTaskSpec} task
-   * @param {!Object<string, *>|udnefined} opt_state
-   */
-  run(task, opt_state) {
-    let state = opt_state || {};
-    this.win.requestAnimationFrame(() => {
-      if (task.measure) {
-        task.measure(state);
-      }
-      task.mutate(state);
-    });
-  }
-
-  /**
-   * Runs the mutate operation via vsync.
-   * @param {function()} mutator
-   */
-  mutate(mutator) {
-    this.run({mutate: mutator});
-  }
-
-  /**
-   * @param {!VsyncTaskSpec} task
-   * @return {function((!Object<string, *>|undefined))}
-   */
-  createTask(task) {
-    return (opt_state) => {
-      this.run(task, opt_state);
-    };
-  }
-
-  /**
-   * Runs the series of mutates until the mutator returns a false value.
-   * @param {function(time, time, !Object<string,*>):boolean} mutator The
-   *   mutator callback. Only expected to do DOM writes, not reads. If the
-   *   returned value is true, the vsync task will be repeated, otherwise it
-   *   will be completed. The arguments are: timeSinceStart:time,
-   *   timeSincePrev:time and state:Object<string, *>.
-   * @param {number=} opt_timeout Optional timeout that will force the series
-   *   to complete and reject the promise.
-   * @return {!Promise} Returns the promise that will either resolve on when
-   *   the vsync series are completed or reject in case of failure, such as
-   *   timeout.
-   */
-  runMutateSeries(mutator, opt_timeout) {
-    return new Promise((resolve, reject) => {
-      let startTime = timer.now();
-      let prevTime = 0;
-      let task = this.createTask({
-        mutate: (state) => {
-          let timeSinceStart = timer.now() - startTime;
-          let res = mutator(timeSinceStart, timeSinceStart - prevTime, state);
-          if (!res) {
-            resolve();
-          } else if (opt_timeout && timeSinceStart > opt_timeout) {
-            reject('timeout');
-          } else {
-            prevTime = timeSinceStart;
-            task(state);
-          }
-        }
-      });
-      task({});
-    });
-  }
-}
-
-
-export const vsync = new Vsync(window);
+export function vsyncFor(window) {
+  return getService(window, 'vsync');
+};

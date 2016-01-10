@@ -18,13 +18,12 @@ import {Observable} from './observable';
 import {getService} from './service';
 import {log} from './log';
 import {listenOnce, listenOncePromise} from './event-helper';
-import {timer} from './timer';
 
 
-let TAG_ = 'Input';
+const TAG_ = 'Input';
 
-let MAX_MOUSE_CONFIRM_ATTEMPS_ = 3;
-let CLICK_TIMEOUT_ = 300;
+const MAX_MOUSE_CONFIRM_ATTEMPS_ = 3;
+const CLICK_TIMEOUT_ = 300;
 
 
 /**
@@ -107,7 +106,7 @@ export class Input {
    * Registers an event handle in case if the touch is detected.
    * @param {function(boolean)} handler
    * @param {boolean=} opt_fireImmediately
-   * @return {!Unlisten}
+   * @return {!UnlistenDef}
    */
   onTouchDetected(handler, opt_fireImmediately) {
     if (opt_fireImmediately) {
@@ -128,7 +127,7 @@ export class Input {
    * Registers an event handle in case if the mouse is detected.
    * @param {function(boolean)} handler
    * @param {boolean=} opt_fireImmediately
-   * @return {!Unlisten}
+   * @return {!UnlistenDef}
    */
   onMouseDetected(handler, opt_fireImmediately) {
     if (opt_fireImmediately) {
@@ -149,7 +148,7 @@ export class Input {
    * Registers an event handle for changes in the keyboard input.
    * @param {function(boolean)} handler
    * @param {boolean=} opt_fireImmediately
-   * @return {!Unlisten}
+   * @return {!UnlistenDef}
    */
   onKeyboardStateChanged(handler, opt_fireImmediately) {
     if (opt_fireImmediately) {
@@ -172,7 +171,7 @@ export class Input {
     }
 
     // Ignore inputs.
-    let target = e.target;
+    const target = e.target;
     if (target && (target.tagName == 'INPUT' ||
           target.tagName == 'TEXTAREA' ||
           target.tagName == 'SELECT' ||
@@ -201,8 +200,8 @@ export class Input {
     // If "click" arrives within a timeout time, this is most likely a
     // touch/mouse emulation. Otherwise, if timeout exceeded, this looks
     // like a legitimate mouse event.
-    return listenOncePromise(this.win.document, 'click', false, CLICK_TIMEOUT_).
-        then(this.boundMouseCanceled_, this.boundMouseConfirmed_);
+    return listenOncePromise(this.win.document, 'click', false, CLICK_TIMEOUT_)
+        .then(this.boundMouseCanceled_, this.boundMouseConfirmed_);
   }
 
   /** @private */

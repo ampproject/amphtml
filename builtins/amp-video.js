@@ -19,6 +19,7 @@ import {assertHttpsUrl} from '../src/url';
 import {getLengthNumeral, isLayoutSizeDefined} from '../src/layout';
 import {loadPromise} from '../src/event-helper';
 import {registerElement} from '../src/custom-element';
+import {setStyles} from '../src/style';
 
 
 /**
@@ -36,10 +37,14 @@ export function installVideo(win) {
 
     /** @override */
     layoutCallback() {
-      // TODO(dvoytenko): Add re-layout as well.
-      var width = this.element.getAttribute('width');
-      var height = this.element.getAttribute('height');
-      var video = document.createElement('video');
+      const width = this.element.getAttribute('width');
+      const height = this.element.getAttribute('height');
+      const video = document.createElement('video');
+      if (!video.play) {
+        this.toggleFallback(true);
+        return Promise.resolve();
+      }
+
       if (this.element.getAttribute('src')) {
         assertHttpsUrl(this.element.getAttribute('src'), this.element);
       }
@@ -48,7 +53,7 @@ export function installVideo(win) {
           video);
       video.width = getLengthNumeral(width);
       video.height = getLengthNumeral(height);
-      this.applyFillContent(video);
+      this.applyFillContent(video, true);
       this.getRealChildNodes().forEach(child => {
         if (child.getAttribute && child.getAttribute('src')) {
           assertHttpsUrl(child.getAttribute('src'), child);
@@ -56,9 +61,13 @@ export function installVideo(win) {
         video.appendChild(child);
       });
       this.element.appendChild(video);
+
       /** @private {?HTMLVideoElement} */
       this.video_ = video;
-      return loadPromise(video);
+      setStyles(video, {visibility: 'hidden'});
+      return loadPromise(video).then(() => {
+        setStyles(video, {visibility: ''});
+      });
     }
 
     /** @override */

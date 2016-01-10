@@ -16,26 +16,17 @@
 
 
 /**
- * Usage notes:
- * Element is initialized with a `hidden` class which needs to be removed
- * for it to be visible, and then the `active` class needs to be added
- * for animation to actually start running.
- * NOTE(erwinm): Possibly create this as its own builtin component.
+ * Creates a default "loading indicator" element. This element accepts
+ * `amp-active` class in which case it may choose to run an animation.
  * @return {!Element}
  */
 export function createLoaderElement() {
-  let placeholder = document.createElement('div');
-  let loader = document.createElement('div');
-  placeholder.appendChild(loader);
-
-  placeholder.classList.add('hidden');
-  placeholder.classList.add('-amp-autoplaceholder');
+  const loader = document.createElement('div');
   loader.classList.add('-amp-loader');
-
   for (let i = 0; i < 3; i++) {
-    let dot = document.createElement('div');
+    const dot = document.createElement('div');
     dot.classList.add('-amp-loader-dot');
     loader.appendChild(dot);
   }
-  return placeholder;
+  return loader;
 }

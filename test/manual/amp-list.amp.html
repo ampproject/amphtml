@@ -1,0 +1,81 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>AMP #0</title>
+  <link rel="canonical" href="amps.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <link href='https://fonts.googleapis.com/css?family=Questrial' rel='stylesheet' type='text/css'>
+  <style amp-custom>
+    body {
+      font-family: 'Questrial', Arial;
+    }
+    article {
+      display: block;
+      margin: 8px;
+    }
+
+    amp-list {
+      border: 1px solid green;
+    }
+
+    [overflow] {
+      background: gray;
+      color: #fff;
+      cursor: pointer;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 2;
+      padding: 16px;
+    }
+
+    .story-entry {
+      padding: 40px;
+      border-bottom: 1px solid green;
+    }
+
+    .split {
+      height: 300px;
+    }
+  </style>
+  <style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
+  <script async src="../../dist/amp.js" development></script>
+  <script async custom-element="amp-list" src="../../dist/v0/amp-list-0.1.max.js"></script>
+  <script async custom-template="amp-mustache" src="../../dist/v0/amp-mustache-0.1.max.js"></script>
+</head>
+<body>
+<article>
+  <h1>amp-list</h1>
+
+  <amp-list width="396" height="80" layout=responsive
+      src="http://localhost:8000/test/manual/amp-list-data.json?RANDOM">
+    <template type="amp-mustache">
+      <div class="story-entry">
+        <amp-img src="{{imageUrl}}" width=80 height=60></amp-img>
+        {{title}}
+      </div>
+    </template>
+    <div overflow>
+      SEE MORE
+    </div>
+  </amp-list>
+
+  <div class="split"></div>
+
+  <amp-list width="396" height="80" layout=responsive
+      src="http://localhost:8000/test/manual/amp-list-data.json?RANDOM">
+    <template type="amp-mustache">
+      <div class="story-entry">
+        <amp-img src="{{imageUrl}}" width=80 height=60></amp-img>
+        {{title}}
+      </div>
+    </template>
+    <div overflow>
+      SEE MORE
+    </div>
+  </amp-list>
+</article>
+</body>
+</html>

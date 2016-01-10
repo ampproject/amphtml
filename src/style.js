@@ -15,6 +15,8 @@
  */
 
 
+// Note: loaded by 3p system. Cannot rely on babel polyfills.
+
 /** @private @const {!Object<string>} */
 const propertyNameCache_ = Object.create(null);
 
@@ -41,7 +43,7 @@ export function camelCaseToTitleCase(camelCase) {
  */
 function getVendorJsPropertyName_(object, titleCase) {
   for (let i = 0; i < vendorPrefixes_.length; i++) {
-    let propertyName = vendorPrefixes_[i] + titleCase;
+    const propertyName = vendorPrefixes_[i] + titleCase;
     if (object[propertyName] !== undefined) {
       return propertyName;
     }
@@ -65,8 +67,8 @@ export function getVendorJsPropertyName(object, camelCase, opt_bypassCache) {
   if (!propertyName || opt_bypassCache) {
     propertyName = camelCase;
     if (object[camelCase] === undefined) {
-      let titleCase = camelCaseToTitleCase(camelCase);
-      let prefixedPropertyName = getVendorJsPropertyName_(object, titleCase);
+      const titleCase = camelCaseToTitleCase(camelCase);
+      const prefixedPropertyName = getVendorJsPropertyName_(object, titleCase);
 
       if (object[prefixedPropertyName] !== undefined) {
         propertyName = prefixedPropertyName;
@@ -89,7 +91,7 @@ export function getVendorJsPropertyName(object, camelCase, opt_bypassCache) {
  * @param {boolean=} opt_bypassCache
  */
 export function setStyle(element, property, value, opt_units, opt_bypassCache) {
-  let propertyName = getVendorJsPropertyName(element.style, property,
+  const propertyName = getVendorJsPropertyName(element.style, property,
       opt_bypassCache);
   if (propertyName) {
     element.style[propertyName] = opt_units ? value + opt_units : value;
@@ -105,7 +107,7 @@ export function setStyle(element, property, value, opt_units, opt_bypassCache) {
  * @return {*}
  */
 export function getStyle(element, property, opt_bypassCache) {
-  let propertyName = getVendorJsPropertyName(element.style, property,
+  const propertyName = getVendorJsPropertyName(element.style, property,
       opt_bypassCache);
   if (!propertyName) {
     return undefined;
@@ -121,7 +123,7 @@ export function getStyle(element, property, opt_bypassCache) {
  * @param {!Object<string, *>} styles
  */
 export function setStyles(element, styles) {
-  for (let k in styles) {
+  for (const k in styles) {
     setStyle(element, k, styles[k]);
   }
 }

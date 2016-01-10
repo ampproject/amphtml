@@ -19,9 +19,9 @@ import {documentInfoFor} from '../../src/document-info';
 
 describe('document-info', () => {
   function getWin(canonical) {
-    return createIframePromise().then((iframe) => {
+    return createIframePromise().then(iframe => {
       if (canonical) {
-        var link = iframe.doc.createElement('link');
+        const link = iframe.doc.createElement('link');
         link.setAttribute('href', canonical);
         link.setAttribute('rel', 'canonical');
         iframe.doc.head.appendChild(link);
@@ -31,21 +31,31 @@ describe('document-info', () => {
   }
 
   it('should provide the canonicalUrl', () => {
-    return getWin('https://twitter.com/').then((win) => {
+    return getWin('https://twitter.com/').then(win => {
       expect(documentInfoFor(win).canonicalUrl).to.equal(
           'https://twitter.com/');
     });
   });
 
+  it('should provide the pageViewId', () => {
+    return getWin('https://twitter.com/').then(win => {
+      win.Math.random = () => {
+        return 0.123456789;
+      };
+      expect(documentInfoFor(win).pageViewId).to.equal('1234');
+      expect(documentInfoFor(win).pageViewId).to.equal('1234');
+    });
+  });
+
   it('should provide the relative canonicalUrl as absolute', () => {
-    return getWin('./foo.html').then((win) => {
+    return getWin('./foo.html').then(win => {
       expect(documentInfoFor(win).canonicalUrl).to.equal(
           'http://localhost:' + location.port + '/foo.html');
     });
   });
 
   it('should throw if no canonical is available.', () => {
-    return getWin(null).then((win) => {
+    return getWin(null).then(win => {
       expect(() => {
         documentInfoFor(win).canonicalUrl;
       }).to.throw(/AMP files are required to have a/);

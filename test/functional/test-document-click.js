@@ -93,6 +93,26 @@ describe('test-document-click onDocumentElementClick_', () => {
       expect(preventDefaultSpy.callCount).to.equal(0);
       expect(scrollIntoViewSpy.callCount).to.equal(0);
     });
+
+    it('should not do anything when there is no hash', () => {
+      tgt.href = 'https://www.google.com/some-path';
+      onDocumentElementClick_(evt, viewport);
+
+      expect(getElementByIdSpy.callCount).to.equal(0);
+      expect(querySelectorSpy.callCount).to.equal(0);
+      expect(preventDefaultSpy.callCount).to.equal(0);
+      expect(scrollIntoViewSpy.callCount).to.equal(0);
+    });
+
+    it('should not do anything on a query change', () => {
+      tgt.href = 'https://www.google.com/some-path?hello=foo#link';
+      onDocumentElementClick_(evt, viewport);
+
+      expect(getElementByIdSpy.callCount).to.equal(0);
+      expect(querySelectorSpy.callCount).to.equal(0);
+      expect(preventDefaultSpy.callCount).to.equal(0);
+      expect(scrollIntoViewSpy.callCount).to.equal(0);
+    });
   });
 
   describe('when linking to identifier', () => {

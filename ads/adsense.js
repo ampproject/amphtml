@@ -14,26 +14,24 @@
  * limitations under the License.
  */
 
-import {writeScript} from '../src/3p';
+import {checkData} from '../src/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function adsense(global, data) {
+  checkData(data, ['adClient', 'adSlot']);
   /*eslint "google-camelcase/google-camelcase": 0*/
-  global.google_page_url = global.context.location.href;
-  var s = document.createElement('script');
+  global.google_page_url = global.context.canonicalUrl;
+  const s = document.createElement('script');
   s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js';
   global.document.body.appendChild(s);
 
-  var i = document.createElement('ins');
+  const i = document.createElement('ins');
   i.setAttribute('data-ad-client', data['adClient']);
   if (data['adSlot']) {
     i.setAttribute('data-ad-slot', data['adSlot']);
-  }
-  if (data['adFormat']) {
-    i.setAttribute('data-ad-format', data['adFormat']);
   }
   i.setAttribute('class', 'adsbygoogle');
   i.style.cssText = 'display:inline-block;width:100%;height:100%;';

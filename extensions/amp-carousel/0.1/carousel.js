@@ -52,7 +52,7 @@ export class AmpCarousel extends BaseCarousel {
     });
     this.element.appendChild(this.container_);
 
-    this.cells_.forEach((cell) => {
+    this.cells_.forEach(cell => {
       this.setAsOwner(cell);
       cell.style.display = 'inline-block';
       if (cell != this.cells_[0]) {
@@ -72,15 +72,15 @@ export class AmpCarousel extends BaseCarousel {
   }
 
   /** @override */
-  viewportCallback(inViewport) {
+  viewportCallback(unusedInViewport) {
     this.updateInViewport_(this.pos_, this.pos_);
   }
 
   /** @override */
   goCallback(dir, animate) {
-    var newPos = this.nextPos_(this.pos_, dir);
+    const newPos = this.nextPos_(this.pos_, dir);
     if (newPos != this.pos_) {
-      var oldPos = this.pos_;
+      const oldPos = this.pos_;
       this.pos_ = newPos;
 
       if (!animate) {
@@ -115,9 +115,9 @@ export class AmpCarousel extends BaseCarousel {
    * @private
    */
   nextPos_(pos, dir) {
-    let containerWidth = this.element./*OK*/offsetWidth;
-    let fullWidth = this.container_./*OK*/scrollWidth;
-    let newPos = pos + dir * containerWidth;
+    const containerWidth = this.element./*OK*/offsetWidth;
+    const fullWidth = this.container_./*OK*/scrollWidth;
+    const newPos = pos + dir * containerWidth;
     if (newPos < 0) {
       return 0;
     }
@@ -134,9 +134,9 @@ export class AmpCarousel extends BaseCarousel {
    * @private
    */
   withinWindow_(pos, callback) {
-    let containerWidth = this.getLayoutWidth();
+    const containerWidth = this.getLayoutWidth();
     for (let i = 0; i < this.cells_.length; i++) {
-      let cell = this.cells_[i];
+      const cell = this.cells_[i];
       if (cell./*OK*/offsetLeft + cell./*OK*/offsetWidth >= pos &&
             cell./*OK*/offsetLeft <= pos + containerWidth) {
         callback(cell);
@@ -149,7 +149,7 @@ export class AmpCarousel extends BaseCarousel {
    * @private
    */
   doLayout_(pos) {
-    this.withinWindow_(pos, (cell) => {
+    this.withinWindow_(pos, cell => {
       this.scheduleLayout(cell);
     });
   }
@@ -160,9 +160,9 @@ export class AmpCarousel extends BaseCarousel {
    * @private
    */
   preloadNext_(pos, dir) {
-    var nextPos = this.nextPos_(pos, dir);
+    const nextPos = this.nextPos_(pos, dir);
     if (nextPos != pos) {
-      this.withinWindow_(nextPos, (cell) => {
+      this.withinWindow_(nextPos, cell => {
         this.schedulePreload(cell);
       });
     }
@@ -174,13 +174,13 @@ export class AmpCarousel extends BaseCarousel {
    * @private
    */
   updateInViewport_(newPos, oldPos) {
-    let seen = [];
-    this.withinWindow_(newPos, (cell) => {
+    const seen = [];
+    this.withinWindow_(newPos, cell => {
       seen.push(cell);
       this.updateInViewport(cell, true);
     });
     if (oldPos != newPos) {
-      this.withinWindow_(oldPos, (cell) => {
+      this.withinWindow_(oldPos, cell => {
         if (seen.indexOf(cell) == -1) {
           this.updateInViewport(cell, false);
         }
@@ -201,8 +201,8 @@ export class AmpCarousel extends BaseCarousel {
     /** @private {?Motion} */
     this.motion_ = null;
 
-    let gestures = Gestures.get(this.element);
-    gestures.onGesture(SwipeXRecognizer, (e) => {
+    const gestures = Gestures.get(this.element);
+    gestures.onGesture(SwipeXRecognizer, e => {
       if (e.data.first) {
         this.onSwipeStart_(e.data);
       }
@@ -220,10 +220,10 @@ export class AmpCarousel extends BaseCarousel {
   }
 
   /**
-   * @param {!Swipe} swipe
+   * @param {!Swipe} unusedSwipe
    * @private
    */
-  onSwipeStart_(swipe) {
+  onSwipeStart_(unusedSwipe) {
     this.updateBounds_();
     this.startPos_ = this.pos_;
     this.motion_ = null;
@@ -252,8 +252,8 @@ export class AmpCarousel extends BaseCarousel {
     let promise;
     if (Math.abs(swipe.velocityX) > 0.1) {
       this.motion_ = continueMotion(this.pos_, 0, -swipe.velocityX, 0,
-          (x, y) => {
-            let newPos = (this.boundPos_(x, true) +
+          (x, unusedY) => {
+            const newPos = (this.boundPos_(x, true) +
                 this.boundPos_(x, false)) * 0.5;
             if (Math.abs(newPos - this.pos_) <= 1) {
               // Hit the wall: stop motion.
@@ -270,12 +270,12 @@ export class AmpCarousel extends BaseCarousel {
       promise = Promise.resolve();
     }
     return promise.then(() => {
-      let newPos = this.boundPos_(this.pos_, false);
+      const newPos = this.boundPos_(this.pos_, false);
       if (Math.abs(newPos - this.pos_) < 1) {
         return undefined;
       }
-      let posFunc = tr.numeric(this.pos_, newPos);
-      return Animation.animate((time) => {
+      const posFunc = tr.numeric(this.pos_, newPos);
+      return Animation.animate(time => {
         this.pos_ = posFunc(time);
         st.setStyles(this.container_, {
           transform: st.translateX(-this.pos_)
@@ -290,8 +290,8 @@ export class AmpCarousel extends BaseCarousel {
 
   /** @private */
   updateBounds_() {
-    let containerWidth = this.element./*OK*/offsetWidth;
-    let scrollWidth = this.container_./*OK*/scrollWidth;
+    const containerWidth = this.element./*OK*/offsetWidth;
+    const scrollWidth = this.container_./*OK*/scrollWidth;
     this.minPos_ = 0;
     this.maxPos_ = Math.max(scrollWidth - containerWidth, 0);
     this.extent_ = Math.min(containerWidth * 0.4, 200);
@@ -304,7 +304,7 @@ export class AmpCarousel extends BaseCarousel {
    * @private
    */
   boundPos_(pos, allowExtent) {
-    let extent = allowExtent ? this.extent_ : 0;
+    const extent = allowExtent ? this.extent_ : 0;
     return Math.min(this.maxPos_ + extent,
         Math.max(this.minPos_ - extent, pos));
   }
@@ -316,9 +316,9 @@ export class AmpCarousel extends BaseCarousel {
 
   /** @override */
   hasNext() {
-    let containerWidth = this.getLayoutWidth();
-    let scrollWidth = this.container_./*OK*/scrollWidth;
-    let maxPos = Math.max(scrollWidth - containerWidth, 0);
+    const containerWidth = this.getLayoutWidth();
+    const scrollWidth = this.container_./*OK*/scrollWidth;
+    const maxPos = Math.max(scrollWidth - containerWidth, 0);
     return this.pos_ != maxPos;
   }
 }

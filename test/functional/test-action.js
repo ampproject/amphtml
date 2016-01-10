@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-import {Action} from '../../src/action';
+import {ActionService} from '../../src/service/action-impl';
+import * as sinon from 'sinon';
 
 
-describe('Action parseAction', () => {
+describe('ActionService parseAction', () => {
 
   let sandbox;
   let action;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    action = new Action(window);
+    action = new ActionService(window);
   });
 
   afterEach(() => {
@@ -35,33 +36,33 @@ describe('Action parseAction', () => {
 
 
   it('should fail parse without event', () => {
-    let a = action.parseAction_('target1.method1');
+    const a = action.parseAction_('target1.method1');
     expect(a).to.equal(null);
   });
 
   it('should parse with default method', () => {
-    let a = action.parseAction_('event1:target1');
+    const a = action.parseAction_('event1:target1');
     expect(a.event).to.equal('event1');
     expect(a.target).to.equal('target1');
     expect(a.method).to.equal('activate');
   });
 
   it('should parse full form', () => {
-    let a = action.parseAction_('event1:target1.method1');
+    const a = action.parseAction_('event1:target1.method1');
     expect(a.event).to.equal('event1');
     expect(a.target).to.equal('target1');
     expect(a.method).to.equal('method1');
   });
 
   it('should parse with lots of whitespace', () => {
-    let a = action.parseAction_('  event1  :  target1  .  method1  ');
+    const a = action.parseAction_('  event1  :  target1  .  method1  ');
     expect(a.event).to.equal('event1');
     expect(a.target).to.equal('target1');
     expect(a.method).to.equal('method1');
   });
 
   it('should parse empty to null', () => {
-    let a = action.parseAction_('');
+    const a = action.parseAction_('');
     expect(a).to.equal(null);
   });
 
@@ -72,7 +73,7 @@ describe('Action parseAction', () => {
   });
 
   it('should parse with period in event or method', () => {
-    let a = action.parseAction_('event.1:target1.method.1');
+    const a = action.parseAction_('event.1:target1.method.1');
     expect(a.event).to.equal('event.1');
     expect(a.target).to.equal('target1');
     expect(a.method).to.equal('method.1');
@@ -87,7 +88,7 @@ describe('Action parseActionMap', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    action = new Action(window);
+    action = new ActionService(window);
   });
 
   afterEach(() => {
@@ -97,18 +98,18 @@ describe('Action parseActionMap', () => {
   });
 
   it('should parse with a single action', () => {
-    let m = action.parseActionMap_('event1:action1');
+    const m = action.parseActionMap_('event1:action1');
     expect(m['event1'].target).to.equal('action1');
   });
 
   it('should parse with two actions', () => {
-    let m = action.parseActionMap_('event1:action1; event2: action2');
+    const m = action.parseActionMap_('event1:action1; event2: action2');
     expect(m['event1'].target).to.equal('action1');
     expect(m['event2'].target).to.equal('action2');
   });
 
   it('should parse with dupe actions by overriding with last', () => {
-    let m = action.parseActionMap_('event1:action1; event1: action2');
+    const m = action.parseActionMap_('event1:action1; event1: action2');
     // Currently, we overwrite the events.
     expect(m['event1'].target).to.equal('action2');
   });
@@ -128,7 +129,7 @@ describe('Action findAction', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    action = new Action(window);
+    action = new ActionService(window);
   });
 
   afterEach(() => {
@@ -138,25 +139,25 @@ describe('Action findAction', () => {
   });
 
   it('should create action map in getActionMap_', () => {
-    var element = document.createElement('div');
+    const element = document.createElement('div');
     element.setAttribute('on', 'event1:action1');
-    let m = action.getActionMap_(element);
+    const m = action.getActionMap_(element);
     expect(m['event1'].target).to.equal('action1');
   });
 
   it('should cache action map', () => {
-    var element = document.createElement('div');
+    const element = document.createElement('div');
     element.setAttribute('on', 'event1:action1');
-    let m1 = action.getActionMap_(element);
-    let m2 = action.getActionMap_(element);
+    const m1 = action.getActionMap_(element);
+    const m2 = action.getActionMap_(element);
     expect(m1).to.equal(m2);
   });
 
 
   it('should find action on the same element', () => {
-    var element = document.createElement('div');
+    const element = document.createElement('div');
     element.setAttribute('on', 'event1:action1');
-    let a = action.findAction_(element, 'event1');
+    const a = action.findAction_(element, 'event1');
     expect(a.node).to.equal(element);
     expect(a.actionInfo.target).to.equal('action1');
 
@@ -164,9 +165,9 @@ describe('Action findAction', () => {
   });
 
   it('should find action in subtree', () => {
-    var parent = document.createElement('div');
+    const parent = document.createElement('div');
     parent.setAttribute('on', 'event1:action1');
-    var element = document.createElement('div');
+    const element = document.createElement('div');
     element.setAttribute('on', 'event2:action2');
     parent.appendChild(element);
 
@@ -192,10 +193,10 @@ describe('Action method', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    action = new Action(window);
+    action = new ActionService(window);
     onEnqueue = sinon.spy();
     targetElement = document.createElement('target');
-    let id = ('E' + Math.random()).replace('.', '');
+    const id = ('E' + Math.random()).replace('.', '');
     targetElement.setAttribute('on', 'tap:' + id + '.method1');
     parent = document.createElement('parent');
     child = document.createElement('child');
@@ -220,7 +221,7 @@ describe('Action method', () => {
   it('should invoke on the AMP element', () => {
     action.invoke_(execElement, 'method1', 'source1', 'event1');
     expect(onEnqueue.callCount).to.equal(1);
-    let inv = onEnqueue.getCall(0).args[0];
+    const inv = onEnqueue.getCall(0).args[0];
     expect(inv.target).to.equal(execElement);
     expect(inv.method).to.equal('method1');
     expect(inv.source).to.equal('source1');
@@ -244,7 +245,7 @@ describe('Action method', () => {
   it('should trigger event', () => {
     action.trigger(child, 'tap', null);
     expect(onEnqueue.callCount).to.equal(1);
-    let inv = onEnqueue.getCall(0).args[0];
+    const inv = onEnqueue.getCall(0).args[0];
     expect(inv.target).to.equal(execElement);
     expect(inv.method).to.equal('method1');
     expect(inv.source).to.equal(targetElement);
@@ -253,9 +254,101 @@ describe('Action method', () => {
   it('should execute method', () => {
     action.execute(execElement, 'method1', child, null);
     expect(onEnqueue.callCount).to.equal(1);
-    let inv = onEnqueue.getCall(0).args[0];
+    const inv = onEnqueue.getCall(0).args[0];
     expect(inv.target).to.equal(execElement);
     expect(inv.method).to.equal('method1');
     expect(inv.source).to.equal(child);
+  });
+});
+
+
+describe('Action interceptor', () => {
+
+  let sandbox;
+  let clock;
+  let action;
+  let target;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+    clock = sandbox.useFakeTimers();
+    action = new ActionService(window);
+    target = document.createElement('target');
+    target.setAttribute('id', 'amp-test-1');
+  });
+
+  afterEach(() => {
+    action = null;
+    clock.restore();
+    clock = null;
+    sandbox.restore();
+    sandbox = null;
+  });
+
+  function getQueue() {
+    return target['__AMP_ACTION_QUEUE__'];
+  }
+
+
+  it('should not initialize until called', () => {
+    expect(getQueue()).to.be.undefined;
+  });
+
+  it('should queue actions', () => {
+    action.invoke_(target, 'method1', 'source1', 'event1');
+    action.invoke_(target, 'method2', 'source2', 'event2');
+
+    const queue = getQueue();
+    expect(Array.isArray(queue)).to.be.true;
+    expect(queue).to.have.length(2);
+
+    const inv0 = queue[0];
+    expect(inv0.target).to.equal(target);
+    expect(inv0.method).to.equal('method1');
+    expect(inv0.source).to.equal('source1');
+    expect(inv0.event).to.equal('event1');
+
+    const inv1 = queue[1];
+    expect(inv1.target).to.equal(target);
+    expect(inv1.method).to.equal('method2');
+    expect(inv1.source).to.equal('source2');
+    expect(inv1.event).to.equal('event2');
+  });
+
+  it('should dequeue actions after handler set', () => {
+    action.invoke_(target, 'method1', 'source1', 'event1');
+    action.invoke_(target, 'method2', 'source2', 'event2');
+
+    expect(Array.isArray(getQueue())).to.be.true;
+    expect(getQueue()).to.have.length(2);
+
+    const handler = sinon.spy();
+    action.installActionHandler(target, handler);
+    expect(Array.isArray(getQueue())).to.be.false;
+    expect(handler.callCount).to.equal(0);
+
+    clock.tick(10);
+    expect(handler.callCount).to.equal(2);
+
+    const inv0 = handler.getCall(0).args[0];
+    expect(inv0.target).to.equal(target);
+    expect(inv0.method).to.equal('method1');
+    expect(inv0.source).to.equal('source1');
+    expect(inv0.event).to.equal('event1');
+
+    const inv1 = handler.getCall(1).args[0];
+    expect(inv1.target).to.equal(target);
+    expect(inv1.method).to.equal('method2');
+    expect(inv1.source).to.equal('source2');
+    expect(inv1.event).to.equal('event2');
+
+    action.invoke_(target, 'method3', 'source3', 'event3');
+    expect(Array.isArray(getQueue())).to.be.false;
+    expect(handler.callCount).to.equal(3);
+    const inv2 = handler.getCall(2).args[0];
+    expect(inv2.target).to.equal(target);
+    expect(inv2.method).to.equal('method3');
+    expect(inv2.source).to.equal('source3');
+    expect(inv2.event).to.equal('event3');
   });
 });

@@ -20,14 +20,14 @@ import {SizeList, parseSizeList} from '../../src/size-list';
 describe('SizeList parseSizeList', () => {
 
   it('should accept single option', () => {
-    var res = parseSizeList(' \n 111px \n ');
+    const res = parseSizeList(' \n 111px \n ');
     expect(res.sizes_.length).to.equal(1);
     expect(res.sizes_[0].mediaQuery).to.equal(undefined);
     expect(res.sizes_[0].size).to.equal('111px');
   });
 
   it('should accept multiple options', () => {
-    var res = parseSizeList(' \n print 222px \n, 111px \n');
+    const res = parseSizeList(' \n print 222px \n, 111px \n');
     expect(res.sizes_.length).to.equal(2);
     expect(res.sizes_[0].mediaQuery).to.equal('print');
     expect(res.sizes_[0].size).to.equal('222px');
@@ -36,7 +36,7 @@ describe('SizeList parseSizeList', () => {
   });
 
   it('should accept even more multiple options', () => {
-    var res = parseSizeList(' \n screen 333px, print 222px \n, 111px \n');
+    const res = parseSizeList(' \n screen 333px, print 222px \n, 111px \n');
     expect(res.sizes_.length).to.equal(3);
     expect(res.sizes_[0].mediaQuery).to.equal('screen');
     expect(res.sizes_[0].size).to.equal('333px');
@@ -47,7 +47,7 @@ describe('SizeList parseSizeList', () => {
   });
 
   it('should accept complicated media conditions', () => {
-    var res = parseSizeList(
+    const res = parseSizeList(
         ' \n screen and (min-width: 1000px) \t ' +
         ' and    (max-width: 2000px) 222px \n,' +
         ' 111px \n');
@@ -60,7 +60,7 @@ describe('SizeList parseSizeList', () => {
   });
 
   it('should accept different length units', () => {
-    var res = parseSizeList(' \n 111vw \n ');
+    const res = parseSizeList(' \n 111vw \n ');
     expect(res.sizes_.length).to.equal(1);
     expect(res.sizes_[0].mediaQuery).to.equal(undefined);
     expect(res.sizes_[0].size).to.equal('111vw');
@@ -102,25 +102,25 @@ describe('SizeList construct', () => {
 
 describe('SizeList select', () => {
   it('should select default last option', () => {
-    let sizeList = new SizeList([
+    const sizeList = new SizeList([
         {mediaQuery: 'media1', size: '444px'},
         {mediaQuery: 'media2', size: '333px'},
         {mediaQuery: 'media3', size: '222px'},
         {size: '111px'}
-      ]);
+    ]);
     expect(sizeList.select({matchMedia: () => {
       return {};
     }})).to.equal('111px');
   });
 
   it('should select a matching option', () => {
-    let sizeList = new SizeList([
+    const sizeList = new SizeList([
         {mediaQuery: 'media1', size: '444px'},
         {mediaQuery: 'media2', size: '333px'},
         {mediaQuery: 'media3', size: '222px'},
         {size: '111px'}
-      ]);
-    expect(sizeList.select({matchMedia: (mq) => {
+    ]);
+    expect(sizeList.select({matchMedia: mq => {
       if (mq == 'media2') {
         return {matches: true};
       }
@@ -129,13 +129,13 @@ describe('SizeList select', () => {
   });
 
   it('should select first matching option', () => {
-    let sizeList = new SizeList([
+    const sizeList = new SizeList([
         {mediaQuery: 'media1', size: '444px'},
         {mediaQuery: 'media2', size: '333px'},
         {mediaQuery: 'media3', size: '222px'},
         {size: '111px'}
-      ]);
-    expect(sizeList.select({matchMedia: (mq) => {
+    ]);
+    expect(sizeList.select({matchMedia: mq => {
       if (mq == 'media1' || mq == 'media2') {
         return {matches: true};
       }

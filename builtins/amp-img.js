@@ -15,14 +15,10 @@
  */
 
 import {BaseElement} from '../src/base-element';
-import {createLoaderElement} from '../src/loader';
 import {getLengthNumeral, isLayoutSizeDefined} from '../src/layout';
 import {loadPromise} from '../src/event-helper';
 import {parseSrcset} from '../src/srcset';
 import {registerElement} from '../src/custom-element';
-import {timer} from '../src/timer';
-import {vsync} from '../src/vsync';
-import {removeElement} from '../src/dom';
 
 
 /**
@@ -31,9 +27,6 @@ import {removeElement} from '../src/dom';
  * @return {undefined}
  */
 export function installImg(win) {
-
-  /** @type {number} Count of images */
-  var count = 0;
 
   class AmpImg extends BaseElement {
 
@@ -47,20 +40,11 @@ export function installImg(win) {
       /** @private @const {!Element} */
       this.img_ = new Image();
 
-      /** @private {?Element} */
-      this.placeholder_ = this.getPlaceholder();
-
-      /** @private {boolean} */
-      this.isDefaultPlaceholder_ = !this.placeholder_;
-
-      /** @private {boolean} */
-      this.imgLoadedOnce_ = false;
-
       if (this.element.id) {
         this.img_.setAttribute('amp-img-id', this.element.id);
       }
       this.propagateAttributes(['alt'], this.img_);
-      this.applyFillContent(this.img_);
+      this.applyFillContent(this.img_, true);
 
       this.img_.width = getLengthNumeral(this.element.getAttribute('width'));
       this.img_.height = getLengthNumeral(this.element.getAttribute('height'));
@@ -70,13 +54,6 @@ export function installImg(win) {
       /** @private @const {!Srcset} */
       this.srcset_ = parseSrcset(this.element.getAttribute('srcset') ||
           this.element.getAttribute('src'));
-
-      // Default placeholdder
-      if (this.isDefaultPlaceholder_) {
-        this.placeholder_ = createLoaderElement();
-        this.placeholder_.setAttribute('placeholder', '');
-        this.element.appendChild(this.placeholder_);
-      }
     }
 
     /** @override */
@@ -95,14 +72,6 @@ export function installImg(win) {
     }
 
     /**
-     * @param {boolean} inViewport
-     * @override
-     */
-    viewportCallback(inViewport) {
-      this.toggleDefaultPlaceholder_();
-    }
-
-    /**
      * @return {!Promise}
      * @private
      */
@@ -110,66 +79,13 @@ export function installImg(win) {
       if (this.getLayoutWidth() <= 0) {
         return Promise.resolve();
       }
-      let src = this.srcset_.select(this.getLayoutWidth(),
-          this.getDpr()).url;
+      const src = this.srcset_.select(this.getLayoutWidth(), this.getDpr()).url;
       if (src == this.img_.getAttribute('src')) {
         return Promise.resolve();
       }
       this.img_.setAttribute('src', src);
 
-      let onImgLoaded = this.onImgLoaded_.bind(this);
-      return loadPromise(this.img_).then(onImgLoaded, onImgLoaded);
-    }
-
-    /** @private */
-    toggleDefaultPlaceholder_() {
-      if (this.isDefaultPlaceholder_) {
-        if (!this.isInViewport()) {
-          this.placeholder_.classList.toggle('hidden', true);
-          this.placeholder_.classList.toggle('active', false);
-        } else {
-          // Set a minimum delay in case the image resource loads much faster
-          // than an intermittent loading screen that disappears right away.
-          // This can occur on fast internet connections or on a local server.
-          return timer.delay(() => {
-            vsync.mutate(() => {
-              if (this.placeholder_) {
-                this.placeholder_.classList.toggle('hidden',
-                    !this.isInViewport());
-                this.placeholder_.classList.toggle('active',
-                    this.isInViewport());
-              }
-            });
-          }, 100);
-        }
-      }
-    }
-
-    /**
-     * @private
-     */
-    cleanupPlaceholder_() {
-      if (this.isDefaultPlaceholder_) {
-        this.isDefaultPlaceholder_ = false;
-        let placeholder = this.placeholder_;
-        this.placeholder_ = null;
-        placeholder.classList.remove('active');
-        placeholder.classList.add('hidden');
-        this.deferMutate(() => {
-          removeElement(placeholder);
-        });
-      }
-    }
-
-    /**
-     * @param {!Element} element
-     * @return {!Element}
-     * @private
-     */
-    onImgLoaded_(element) {
-      this.imgLoadedOnce_ = true;
-      this.cleanupPlaceholder_();
-      return element;
+      return loadPromise(this.img_);
     }
   };
 

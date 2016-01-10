@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-import {writeScript} from '../src/3p';
+import {writeScript, checkData} from '../src/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function adreactor(global, data) {
-  var url = 'https://adserver.adreactor.com' +
+  checkData(data, ['zid', 'pid', 'custom3']);
+  const url = 'https://adserver.adreactor.com' +
       '/servlet/view/banner/javascript/zone?' +
       'zid=' + encodeURIComponent(data.zid) +
       '&pid=' + encodeURIComponent(data.pid) +

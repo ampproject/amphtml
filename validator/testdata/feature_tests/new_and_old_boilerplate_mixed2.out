@@ -1,0 +1,2 @@
+FAIL
+feature_tests/new_and_old_boilerplate_mixed2.html:35:7 MANDATORY_TAG_MISSING boilerplate (js enabled) required by boilerplate (noscript) (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#boilerplate)

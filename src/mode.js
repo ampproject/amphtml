@@ -22,25 +22,25 @@ import {parseQueryString} from './url';
  *   localDev: boolean
  * }}
  */
-var Mode;
+let ModeDef;
 
-/** @typedef {?Mode} */
-var mode = window.AMP_MODE;
+/** @typedef {?ModeDef} */
+let mode = null;
 
 /**
  * Provides info about the current app.
- * @return {!Mode}
+ * @return {!ModeDef}
  */
 export function getMode() {
   if (mode) {
     return mode;
   }
-  return window.AMP_MODE = mode = getMode_();
+  return mode = getMode_();
 }
 
 /**
  * Set mode in a test. Pass null in afterEach function to reset.
- * @param {?Mode} m
+ * @param {?ModeDef} m
  */
 export function setModeForTesting(m) {
   mode = m;
@@ -48,10 +48,10 @@ export function setModeForTesting(m) {
 
 /**
  * Provides info about the current app.
- * @return {!Mode}
+ * @return {!ModeDef}
  */
 function getMode_() {
-  var isLocalDev = (location.hostname == 'localhost' ||
+  const isLocalDev = (location.hostname == 'localhost' ||
       (location.ancestorOrigins && location.ancestorOrigins[0] &&
           location.ancestorOrigins[0].indexOf('http://localhost:') == 0)) &&
       // Filter out localhost running against a prod script.
@@ -59,15 +59,15 @@ function getMode_() {
       // occur during local dev.
       !!document.querySelector('script[src*="/dist/"],script[src*="/base/"]');
 
-  var overrideDevelopment = parseQueryString(location.hash)['development'];
-  var development = overrideDevelopment != undefined
+  const overrideDevelopment = parseQueryString(location.hash)['development'];
+  const development = overrideDevelopment != undefined
       ? overrideDevelopment == '1'
       : !!document.querySelector('script[development]');
 
   return {
     localDev: isLocalDev,
     // Triggers validation
-    development:  development,
+    development: development,
     minified: process.env.NODE_ENV == 'production',
     test: window.AMP_TEST
   };

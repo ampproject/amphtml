@@ -42,6 +42,9 @@ export class Pass {
 
     /** @private {number} */
     this.nextTime_ = 0;
+
+    /** @private {boolean} */
+    this.running_ = false;
   }
 
   /**
@@ -66,8 +69,13 @@ export class Pass {
    * @return {boolean}
    */
   schedule(opt_delay) {
-    var delay = opt_delay || this.defaultDelay_;
-    var nextTime = timer.now() + delay;
+    let delay = opt_delay || this.defaultDelay_;
+    if (this.running_ && delay < 10) {
+      // If we get called recursively, wait at least 10ms for the next
+      // execution.
+      delay = 10;
+    }
+    const nextTime = timer.now() + delay;
     // Schedule anew if nothing is scheduled currently of if the new time is
     // sooner then previously requested.
     if (this.scheduled_ == -1 || nextTime - this.nextTime_ < -10) {
@@ -78,7 +86,9 @@ export class Pass {
       this.scheduled_ = timer.delay(() => {
         this.scheduled_ = -1;
         this.nextTime_ = 0;
+        this.running_ = true;
         this.handler_();
+        this.running_ = false;
       }, delay);
       return true;
     }

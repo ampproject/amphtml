@@ -30,7 +30,7 @@ describe('Style', () => {
   });
 
   it('toggle', () => {
-    let element = document.createElement('div');
+    const element = document.createElement('div');
     st.toggle(element);
     expect(element.style.display).to.equal('none');
     st.toggle(element);
@@ -42,19 +42,19 @@ describe('Style', () => {
   });
 
   it('setStyle', () => {
-    let element = document.createElement('div');
+    const element = document.createElement('div');
     st.setStyle(element, 'width', '1px');
     expect(element.style.width).to.equal('1px');
   });
 
   it('setStyle with vendor prefix', () => {
-    let element = { style: { WebkitTransitionDuration: '' } };
+    const element = {style: {WebkitTransitionDuration: ''}};
     st.setStyle(element, 'transitionDuration', '1s', undefined, true);
     expect(element.style.WebkitTransitionDuration).to.equal('1s');
   });
 
   it('setStyles', () => {
-    let element = document.createElement('div');
+    const element = document.createElement('div');
     st.setStyles(element, {
       width: st.px(101),
       height: st.px(102)
@@ -81,55 +81,55 @@ describe('Style', () => {
   });
 
   it('camelCaseToTitleCase', () => {
-    let str = 'theQuickBrownFox';
+    const str = 'theQuickBrownFox';
     expect(st.camelCaseToTitleCase(str)).to.equal('TheQuickBrownFox');
   });
 
   describe('getVendorJsPropertyName', () => {
 
     it('no prefix', () => {
-      let element = { style: { transitionDuration: '' } };
-      let prop = st
+      const element = {style: {transitionDuration: ''}};
+      const prop = st
           .getVendorJsPropertyName(element.style, 'transitionDuration', true);
       expect(prop).to.equal('transitionDuration');
     });
 
     it('should use cached previous result', () => {
-      let element = { style: { transitionDuration: '' } };
+      let element = {style: {transitionDuration: ''}};
       let prop = st
           .getVendorJsPropertyName(element.style, 'transitionDuration');
       expect(prop).to.equal('transitionDuration');
 
-      element = { style: { WebkitTransitionDuration: '' } };
+      element = {style: {WebkitTransitionDuration: ''}};
       prop = st
           .getVendorJsPropertyName(element.style, 'transitionDuration');
       expect(prop).to.equal('transitionDuration');
     });
 
     it('Webkit', () => {
-      let element = { style: { WebkitTransitionDuration: '' } };
-      let prop = st
+      const element = {style: {WebkitTransitionDuration: ''}};
+      const prop = st
           .getVendorJsPropertyName(element.style, 'transitionDuration', true);
       expect(prop).to.equal('WebkitTransitionDuration');
     });
 
     it('Moz', () => {
-      let element = { style: { MozTransitionDuration: '' } };
-      let prop = st
+      const element = {style: {MozTransitionDuration: ''}};
+      const prop = st
           .getVendorJsPropertyName(element.style, 'transitionDuration', true);
       expect(prop).to.equal('MozTransitionDuration');
     });
 
     it('ms', () => {
-      let element = { style: { msTransitionDuration: '' } };
-      let prop = st
+      const element = {style: {msTransitionDuration: ''}};
+      const prop = st
           .getVendorJsPropertyName(element.style, 'transitionDuration', true);
       expect(prop).to.equal('msTransitionDuration');
     });
 
     it('O opera', () => {
-      let element = { style: { OTransitionDuration: '' } };
-      let prop = st
+      const element = {style: {OTransitionDuration: ''}};
+      const prop = st
           .getVendorJsPropertyName(element.style, 'transitionDuration', true);
       expect(prop).to.equal('OTransitionDuration');
     });

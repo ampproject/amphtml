@@ -40,12 +40,12 @@ export function removeChildren(parent) {
 /**
  * Copies all children nodes of element "from" to element "to". Child nodes
  * are deeply cloned. Notice, that this method should be used with care and
- * preferrably on smaller subtrees.
+ * preferably on smaller subtrees.
  * @param {!Element} from
  * @param {!Element} to
  */
 export function copyChildren(from, to) {
-  let frag = to.ownerDocument.createDocumentFragment();
+  const frag = to.ownerDocument.createDocumentFragment();
   for (let n = from.firstChild; n; n = n.nextSibling) {
     frag.appendChild(n.cloneNode(true));
   }
@@ -79,7 +79,7 @@ export function closest(element, callback) {
  */
 export function closestByTag(element, tagName) {
   tagName = tagName.toUpperCase();
-  return closest(element, (el) => {
+  return closest(element, el => {
     return el.tagName == tagName;
   });
 }
@@ -92,6 +92,58 @@ export function closestByTag(element, tagName) {
  * @return {?Element}
  */
 export function elementByTag(element, tagName) {
-  let elements = element.getElementsByTagName(tagName);
+  const elements = element.getElementsByTagName(tagName);
   return elements.length > 0 ? elements[0] : null;
+}
+
+
+/**
+ * Finds the first child element that satisfies the callback.
+ * @param {!Element} parent
+ * @param {function(!Element):boolean} callback
+ * @return {?Element}
+ */
+export function childElement(parent, callback) {
+  const children = parent.children;
+  for (let i = 0; i < children.length; i++) {
+    if (callback(children[i])) {
+      return children[i];
+    }
+  }
+  return null;
+}
+
+
+/**
+ * Finds the first child element that has the specified attribute, optionally
+ * with a value.
+ * @param {!Element} parent
+ * @param {string} attr
+ * @param {string=} opt_value
+ * @return {?Element}
+ */
+export function childElementByAttr(parent, attr, opt_value) {
+  return childElement(parent, el => {
+    if (!el.hasAttribute(attr)) {
+      return false;
+    }
+    if (opt_value !== undefined && el.getAttribute(attr) != opt_value) {
+      return false;
+    }
+    return true;
+  });
+}
+
+
+/**
+ * Finds the first child element that has the specified tag name.
+ * @param {!Element} parent
+ * @param {string} tagName
+ * @return {?Element}
+ */
+export function childElementByTag(parent, tagName) {
+  tagName = tagName.toUpperCase();
+  return childElement(parent, el => {
+    return el.tagName == tagName;
+  });
 }

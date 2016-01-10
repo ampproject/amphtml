@@ -14,25 +14,55 @@
  * limitations under the License.
  */
 
-import {Layout, getLayoutClass, getLengthNumeral, getLengthUnits,
-          isLayoutSizeDefined, parseLayout, parseLength,
-          getNaturalDimensions, hasNaturalDimensions} from './layout';
+import {Layout, assertLength, getLayoutClass, getLengthNumeral, getLengthUnits,
+          isInternalElement, isLayoutSizeDefined, isLoadingAllowed,
+          parseLayout, parseLength, getNaturalDimensions,
+          hasNaturalDimensions} from './layout';
 import {ElementStub, stubbedElements} from './element-stub';
 import {assert} from './asserts';
+import {createLoaderElement} from '../src/loader';
 import {log} from './log';
+import {parseSizeList} from './size-list';
 import {reportError} from './error';
-import {resources} from './resources';
+import {resourcesFor} from './resources';
 import {timer} from './timer';
+import {vsyncFor} from './vsync';
+import * as dom from './dom';
 
 
-let TAG_ = 'CustomElement';
+const TAG_ = 'CustomElement';
+
+/**
+ * This is the minimum width of the element needed to trigger `loading`
+ * animation. This value is justified as about 1/3 of a smallish mobile
+ * device viewport. Trying to put a loading indicator into a small element
+ * is meaningless.
+ * @private @const {number}
+ */
+const MIN_WIDTH_FOR_LOADING_ = 100;
+
+
+/**
+ * The elements positioned ahead of this threshold may have their loading
+ * indicator initialized faster. This is benefitial to avoid relayout during
+ * render phase or scrolling.
+ * @private @const {number}
+ */
+const PREPARE_LOADING_THRESHOLD_ = 1000;
 
 
 /**
  * Map from element name to implementation class.
  * @const {Object}
  */
-let knownElements = {};
+const knownElements = {};
+
+
+/**
+ * Whether this platform supports template tags.
+ * @const {boolean}
+ */
+const TEMPLATE_TAG_SUPPORTED = 'content' in document.createElement('template');
 
 
 /**
@@ -49,7 +79,7 @@ export function upgradeOrRegisterElement(win, name, toClass) {
   assert(knownElements[name] == ElementStub,
       'Expected ' + name + ' to be an ElementStub.');
   for (let i = 0; i < stubbedElements.length; i++) {
-    let stub = stubbedElements[i];
+    const stub = stubbedElements[i];
     // There are 3 possible states here:
     // 1. We never made the stub because the extended impl. loaded first.
     //    In that case the element won't be in the array.
@@ -58,7 +88,7 @@ export function upgradeOrRegisterElement(win, name, toClass) {
     //    implementation.
     // 3. A stub was attached. We upgrade which means we replay the
     //    implementation.
-    var element = stub.element;
+    const element = stub.element;
     if (element.tagName.toLowerCase() == name) {
       try {
         element.upgrade(toClass);
@@ -75,9 +105,11 @@ export function upgradeOrRegisterElement(win, name, toClass) {
  * @param {!Window} win
  */
 export function stubElements(win) {
-  let list = win.document.querySelectorAll('[custom-element]');
+  win.ampExtendedElements = {};
+  const list = win.document.querySelectorAll('[custom-element]');
   for (let i = 0; i < list.length; i++) {
-    let name = list[i].getAttribute('custom-element');
+    const name = list[i].getAttribute('custom-element');
+    win.ampExtendedElements[name] = true;
     if (knownElements[name]) {
       continue;
     }
@@ -91,93 +123,119 @@ export function stubElements(win) {
  * @param {!AmpElement} element
  */
 export function applyLayout_(element) {
-  let widthAttr = element.getAttribute('width');
-  let heightAttr = element.getAttribute('height');
-  let layoutAttr = element.getAttribute('layout');
+  const layoutAttr = element.getAttribute('layout');
+  const widthAttr = element.getAttribute('width');
+  const heightAttr = element.getAttribute('height');
+  const sizesAttr = element.getAttribute('sizes');
 
-  // Handle elements that do not specify a width/height and are defined to have
-  // natural browser dimensions.
-  if ((!layoutAttr || layoutAttr == Layout.FIXED ||
-          layoutAttr == Layout.FIXED_HEIGHT) &&
-      (!widthAttr || !heightAttr) && hasNaturalDimensions(element.tagName)) {
-    let dimensions = getNaturalDimensions(element.tagName);
-    if (layoutAttr != Layout.FIXED_HEIGHT) {
-      widthAttr = widthAttr || dimensions.width;
-    }
-    heightAttr = heightAttr || dimensions.height;
-  }
+  // Input layout attributes.
+  const inputLayout = layoutAttr ? parseLayout(layoutAttr) : null;
+  assert(inputLayout !== undefined, 'Unknown layout: %s', layoutAttr);
+  const inputWidth = (widthAttr && widthAttr != 'auto') ?
+      parseLength(widthAttr) : widthAttr;
+  assert(inputWidth !== undefined, 'Invalid width value: %s', widthAttr);
+  const inputHeight = heightAttr ? parseLength(heightAttr) : null;
+  assert(inputHeight !== undefined, 'Invalid height value: %s', heightAttr);
 
+  // Effective layout attributes. These are effectively constants.
+  let width;
+  let height;
   let layout;
-  if (layoutAttr) {
-    // TODO(dvoytenko): show error state visually in the dev mode, e.g.
-    // red background + error message.
-    layout = parseLayout(layoutAttr.trim());
-    if (!layout) {
-      throw new Error('Unknown layout: ' + layoutAttr);
-    }
-  } else if (widthAttr || heightAttr) {
-    if (!widthAttr || widthAttr == 'auto') {
-      layout = Layout.FIXED_HEIGHT;
-    } else {
-      layout = Layout.FIXED;
-    }
+
+  // Calculate effective width and height.
+  if ((!inputLayout || inputLayout == Layout.FIXED ||
+          inputLayout == Layout.FIXED_HEIGHT) &&
+      (!inputWidth || !inputHeight) && hasNaturalDimensions(element.tagName)) {
+    // Default width and height: handle elements that do not specify a
+    // width/height and are defined to have natural browser dimensions.
+    const dimensions = getNaturalDimensions(element.tagName);
+    width = (inputWidth || inputLayout == Layout.FIXED_HEIGHT) ? inputWidth :
+        dimensions.width;
+    height = inputHeight || dimensions.height;
   } else {
-    layout = Layout.CONTAINER;
+    width = inputWidth;
+    height = inputHeight;
   }
+
+  // Calculate effective layout.
+  if (inputLayout) {
+    layout = inputLayout;
+  } else if (!width && !height) {
+    layout = Layout.CONTAINER;
+  } else if (height && (!width || width == 'auto')) {
+    layout = Layout.FIXED_HEIGHT;
+  } else if (height && width && sizesAttr) {
+    layout = Layout.RESPONSIVE;
+  } else {
+    layout = Layout.FIXED;
+  }
+
+  // Verify layout attributes.
+  if (layout == Layout.FIXED || layout == Layout.FIXED_HEIGHT ||
+          layout == Layout.RESPONSIVE) {
+    assert(height, 'Expected height to be available: %s', heightAttr);
+  }
+  if (layout == Layout.FIXED_HEIGHT) {
+    assert(!width || width == 'auto',
+        'Expected width to be either absent or equal "auto" ' +
+        'for fixed-height layout: %s', widthAttr);
+  }
+  if (layout == Layout.FIXED || layout == Layout.RESPONSIVE) {
+    assert(width && width != 'auto',
+          'Expected width to be available and not equal to "auto": %s',
+          widthAttr);
+  }
+  if (layout == Layout.RESPONSIVE) {
+    assert(getLengthUnits(width) == getLengthUnits(height),
+        'Length units should be the same for width and height: %s, %s',
+        widthAttr, heightAttr);
+  }
+
+  // Apply UI.
   element.classList.add(getLayoutClass(layout));
   if (isLayoutSizeDefined(layout)) {
     element.classList.add('-amp-layout-size-defined');
   }
-
-  if (layout == Layout.FIXED || layout == Layout.FIXED_HEIGHT ||
-          layout == Layout.RESPONSIVE) {
-    let width = 0;
-    if (layout == Layout.FIXED_HEIGHT) {
-      if (widthAttr && widthAttr != 'auto') {
-        throw new Error('Expected width to be either absent or equal "auto" ' +
-            'for fixed-height layout: ' + widthAttr);
-      }
-    } else {
-      width = parseLength(widthAttr);
-      if (!width) {
-        throw new Error('Expected width to be available and be an ' +
-            'integer/length value: ' + widthAttr);
-      }
-    }
-    let height = parseLength(heightAttr);
-    if (!height) {
-      throw new Error('Expected height to be available and be an ' +
-          'integer/length value: ' + heightAttr);
-    }
-    if (layout == Layout.RESPONSIVE) {
-      if (getLengthUnits(width) != getLengthUnits(height)) {
-        throw new Error('Length units should be the same for width ' + width +
-            ' and height ' + height);
-      }
-      let sizer = element.ownerDocument.createElement('i-amp-sizer');
-      sizer.style.display = 'block';
-      sizer.style.paddingTop =
-          ((getLengthNumeral(height) / getLengthNumeral(width)) * 100) + '%';
-      element.insertBefore(sizer, element.firstChild);
-      element.sizerElement_ = sizer;
-    } else if (layout == Layout.FIXED_HEIGHT) {
-      element.style.height = height;
-    } else {
-      element.style.width = width;
-      element.style.height = height;
-    }
+  if (layout == Layout.NODISPLAY) {
+    element.style.display = 'none';
+  } else if (layout == Layout.FIXED) {
+    element.style.width = width;
+    element.style.height = height;
+  } else if (layout == Layout.FIXED_HEIGHT) {
+    element.style.height = height;
+  } else if (layout == Layout.RESPONSIVE) {
+    const sizer = element.ownerDocument.createElement('i-amp-sizer');
+    sizer.style.display = 'block';
+    sizer.style.paddingTop =
+        ((getLengthNumeral(height) / getLengthNumeral(width)) * 100) + '%';
+    element.insertBefore(sizer, element.firstChild);
+    element.sizerElement_ = sizer;
   } else if (layout == Layout.FILL) {
     // Do nothing.
   } else if (layout == Layout.CONTAINER) {
     // Do nothing. Elements themselves will check whether the supplied
     // layout value is acceptable. In particular container is only OK
     // sometimes.
-  } else if (layout == Layout.NODISPLAY) {
-    element.style.display = 'none';
-  } else {
-    throw new Error('Unsupported layout value: ' + layout);
   }
   return layout;
+}
+
+
+/**
+ * Returns "true" for internal AMP nodes or for placeholder elements.
+ * @param {!Node} node
+ * @return {boolean}
+ */
+function isInternalOrServiceNode(node) {
+  if (isInternalElement(node)) {
+    return true;
+  }
+  if (node.tagName && (node.hasAttribute('placeholder') ||
+          node.hasAttribute('fallback') ||
+          node.hasAttribute('overflow'))) {
+    return true;
+  }
+  return false;
 }
 
 
@@ -205,7 +263,7 @@ export function createAmpElementProto(win, name, implementationClass) {
   /**
    * @lends {AmpElement.prototype}
    */
-  var ElementProto = win.Object.create(win.HTMLElement.prototype);
+  const ElementProto = win.Object.create(win.HTMLElement.prototype);
 
   /**
    * Called when elements is created. Sets instance vars since there is no
@@ -225,14 +283,26 @@ export function createAmpElementProto(win, name, implementationClass) {
     this.readyState = 'loading';
     this.everAttached = false;
 
+    /** @private @const {!Resources}  */
+    this.resources_ = resourcesFor(win);
+
     /** @private {!Layout} */
     this.layout_ = Layout.NODISPLAY;
 
     /** @private {number} */
     this.layoutWidth_ = -1;
 
+    /** @private {number} */
+    this.layoutCount_ = 0;
+
+    /** @private {boolean} */
+    this.isInViewport_ = false;
+
     /** @private {string|null|undefined} */
     this.mediaQuery_;
+
+    /** @private {!SizeList|null|undefined} */
+    this.sizeList_;
 
     /**
      * This element can be assigned by the {@link applyLayout_} to a child
@@ -240,6 +310,21 @@ export function createAmpElementProto(win, name, implementationClass) {
      * @private {?Element}
      */
     this.sizerElement_ = null;
+
+    /** @private {boolean|undefined} */
+    this.loadingDisabled_;
+
+    /** @private {boolean|undefined} */
+    this.loadingState_;
+
+    /** @private {?Element} */
+    this.loadingContainer_ = null;
+
+    /** @private {?Element} */
+    this.loadingElement_ = null;
+
+    /** @private {?Element|undefined} */
+    this.overflowElement_;
 
     /** @private {!BaseElement} */
     this.implementation_ = new implementationClass(this);
@@ -251,6 +336,17 @@ export function createAmpElementProto(win, name, implementationClass) {
      * @private {?Array<!ActionInvocation>}
      */
     this.actionQueue_ = [];
+
+    /**
+     * Whether the element is in the template.
+     * @private {boolean|undefined}
+     */
+    this.isInTemplate_;
+  };
+
+  /** @private */
+  ElementProto.assertNotTemplate_ = function() {
+    assert(!this.isInTemplate_, 'Must never be called in template');
   };
 
   /**
@@ -270,12 +366,13 @@ export function createAmpElementProto(win, name, implementationClass) {
    * @final @package
    */
   ElementProto.upgrade = function(newImplClass) {
-    let registeredStub = this.implementation_;
-    let newImpl = new newImplClass(this);
-    this.implementation_ = newImpl;
-    if (registeredStub) {
-      registeredStub.upgrade(newImpl);
+    if (this.isInTemplate_) {
+      return;
     }
+    this.implementation_ = new newImplClass(this);
+    this.classList.remove('amp-unresolved');
+    this.classList.remove('-amp-unresolved');
+    this.implementation_.createdCallback();
     if (this.layout_ != Layout.NODISPLAY &&
           !this.implementation_.isLayoutSupported(this.layout_)) {
       throw new Error('Layout not supported: ' + this.layout_);
@@ -286,7 +383,7 @@ export function createAmpElementProto(win, name, implementationClass) {
       this.implementation_.firstAttachedCallback();
       this.dispatchCustomEvent('amp:attached');
     }
-    resources.upgraded(this);
+    this.resources_.upgraded(this);
   };
 
   /**
@@ -320,6 +417,7 @@ export function createAmpElementProto(win, name, implementationClass) {
    * @final
    */
   ElementProto.build = function(force) {
+    this.assertNotTemplate_();
     if (this.isBuilt()) {
       return true;
     }
@@ -329,12 +427,16 @@ export function createAmpElementProto(win, name, implementationClass) {
     }
     try {
       this.implementation_.buildCallback();
+      this.preconnect(/* onLayout */ false);
       this.built_ = true;
       this.classList.remove('-amp-notbuilt');
       this.classList.remove('amp-notbuilt');
-    } catch(e) {
+    } catch (e) {
       reportError(e, this);
       throw e;
+    }
+    if (this.built_ && this.isInViewport_) {
+      this.updateInViewport_(true);
     }
     if (this.actionQueue_) {
       if (this.actionQueue_.length > 0) {
@@ -349,6 +451,23 @@ export function createAmpElementProto(win, name, implementationClass) {
   };
 
   /**
+   * Called to instruct the element to preconnect to hosts it uses during
+   * layout.
+   * @param {boolean} onLayout Whether this was called after a layout.
+   */
+  ElementProto.preconnect = function(onLayout) {
+    this.implementation_.preconnectCallback(onLayout);
+  };
+
+  /**
+   * @return {!Vsync}
+   * @private
+   */
+  ElementProto.getVsync_ = function() {
+    return vsyncFor(this.ownerDocument.defaultView);
+  };
+
+  /**
    * Updates the layout box of the element.
    * See {@link BaseElement.getLayoutWidth} for details.
    * @param {!LayoutRect} layoutBox
@@ -357,6 +476,22 @@ export function createAmpElementProto(win, name, implementationClass) {
     this.layoutWidth_ = layoutBox.width;
     if (this.isUpgraded()) {
       this.implementation_.layoutWidth_ = this.layoutWidth_;
+    }
+    // TODO(malteubl): Forward for stubbed elements.
+    this.implementation_.onLayoutMeasure();
+
+    if (this.isLoadingEnabled_()) {
+      if (this.isInViewport_) {
+        // Already in viewport - start showing loading.
+        this.toggleLoading_(true);
+      } else if (layoutBox.top < PREPARE_LOADING_THRESHOLD_ &&
+            layoutBox.top >= 0) {
+        // Few top elements will also be pre-initialized with a loading
+        // element.
+        this.getVsync_().mutate(() => {
+          this.prepareLoading_();
+        });
+      }
     }
   };
 
@@ -372,35 +507,47 @@ export function createAmpElementProto(win, name, implementationClass) {
    * @final
    * @package
    */
-  ElementProto.applyMediaQuery = function() {
+  ElementProto.applySizesAndMediaQuery = function() {
+    this.assertNotTemplate_();
+
+    // Media query.
     if (this.mediaQuery_ === undefined) {
       this.mediaQuery_ = this.getAttribute('media') || null;
     }
-    if (!this.mediaQuery_) {
-      return;
+    if (this.mediaQuery_) {
+      this.classList.toggle('-amp-hidden-by-media-query',
+          !this.ownerDocument.defaultView.matchMedia(this.mediaQuery_).matches);
     }
-    this.classList.toggle('-amp-hidden-by-media-query',
-        !this.ownerDocument.defaultView.matchMedia(this.mediaQuery_).matches);
+
+    // Sizes.
+    if (this.sizeList_ === undefined) {
+      const sizesAttr = this.getAttribute('sizes');
+      this.sizeList_ = sizesAttr ? parseSizeList(sizesAttr) : null;
+    }
+    if (this.sizeList_) {
+      this.style.width = assertLength(this.sizeList_.select(
+          this.ownerDocument.defaultView));
+    }
   };
 
   /**
    * Changes the height of the element.
    *
    * This method is called by Resources and shouldn't be called by anyone else.
+   * This method must always be called in the mutation context.
    *
    * @param {number} newHeight
    * @final
    * @package
    */
-  ElementProto.changeHeight = function(newHeight) {
+  ElementProto./*OK*/changeHeight = function(newHeight) {
     if (this.sizerElement_) {
       // From the moment height is changed the element becomes fully
       // responsible for managing its height. Aspect ratio is no longer
       // preserved.
-      this.sizerElement_.style.paddingTop = newHeight + 'px';
-    } else {
-      this.style.height = newHeight + 'px';
+      this.sizerElement_.style.paddingTop = '0';
     }
+    this.style.height = newHeight + 'px';
   };
 
   /**
@@ -409,16 +556,21 @@ export function createAmpElementProto(win, name, implementationClass) {
    * @final
    */
   ElementProto.attachedCallback = function() {
+    if (!TEMPLATE_TAG_SUPPORTED) {
+      this.isInTemplate_ = !!dom.closestByTag(this, 'template');
+    }
+    if (this.isInTemplate_) {
+      return;
+    }
     if (!this.everAttached) {
       this.everAttached = true;
       try {
         this.firstAttachedCallback_();
-      }
-      catch (e) {
+      } catch (e) {
         reportError(e, this);
       }
     }
-    resources.add(this);
+    this.resources_.add(this);
   };
 
   /**
@@ -426,7 +578,10 @@ export function createAmpElementProto(win, name, implementationClass) {
    * @final
    */
   ElementProto.detachedCallback = function() {
-    resources.remove(this);
+    if (this.isInTemplate_) {
+      return;
+    }
+    this.resources_.remove(this);
   };
 
   /**
@@ -434,6 +589,10 @@ export function createAmpElementProto(win, name, implementationClass) {
    * @private @final
    */
   ElementProto.firstAttachedCallback_ = function() {
+    if (!this.isUpgraded()) {
+      this.classList.add('amp-unresolved');
+      this.classList.add('-amp-unresolved');
+    }
     try {
       this.layout_ = applyLayout_(this);
       if (this.layout_ != Layout.NODISPLAY &&
@@ -442,7 +601,7 @@ export function createAmpElementProto(win, name, implementationClass) {
       }
       this.implementation_.layout_ = this.layout_;
       this.implementation_.firstAttachedCallback();
-    } catch(e) {
+    } catch (e) {
       reportError(e, this);
       throw e;
     }
@@ -461,10 +620,10 @@ export function createAmpElementProto(win, name, implementationClass) {
    * @final
    */
   ElementProto.dispatchCustomEvent = function(name, opt_data) {
-    var data = opt_data || {};
+    const data = opt_data || {};
     // Constructors of events need to come from the correct window. Sigh.
-    var win = this.ownerDocument.defaultView;
-    var event = document.createEvent('Event');
+    const win = this.ownerDocument.defaultView;
+    const event = win.document.createEvent('Event');
     event.data = data;
     event.initEvent(name, true, true);
     this.dispatchEvent(event);
@@ -493,7 +652,7 @@ export function createAmpElementProto(win, name, implementationClass) {
    * @final
    */
   ElementProto.getLayoutBox = function() {
-    return resources.getResourceForElement(this).getLayoutBox();
+    return this.resources_.getResourceForElement(this).getLayoutBox();
   };
 
   /**
@@ -521,15 +680,23 @@ export function createAmpElementProto(win, name, implementationClass) {
    * @package @final
    */
   ElementProto.layoutCallback = function() {
+    this.assertNotTemplate_();
     assert(this.isUpgraded() && this.isBuilt(),
         'Must be upgraded and built to receive viewport events');
     this.dispatchCustomEvent('amp:load:start');
-    var promise = this.implementation_.layoutCallback();
+    const promise = this.implementation_.layoutCallback();
+    this.preconnect(/* onLayout */ true);
     this.classList.add('-amp-layout');
-    assert(promise instanceof Promise,
-        'layoutCallback must return a promise');
     return promise.then(() => {
       this.readyState = 'complete';
+      this.layoutCount_++;
+      this.toggleLoading_(false, /* cleanup */ true);
+      if (this.layoutCount_ == 1) {
+        this.implementation_.firstLayoutCompleted();
+      }
+    }, reason => {
+      this.toggleLoading_(false, /* cleanup */ true);
+      return Promise.reject(reason);
     });
   };
 
@@ -543,8 +710,31 @@ export function createAmpElementProto(win, name, implementationClass) {
    * @final @package
    */
   ElementProto.viewportCallback = function(inViewport) {
-    assert(this.isUpgraded() && this.isBuilt(),
-        'Must be upgraded and built to receive viewport events');
+    this.assertNotTemplate_();
+    this.isInViewport_ = inViewport;
+    if (this.layoutCount_ == 0) {
+      if (!inViewport) {
+        this.toggleLoading_(false);
+      } else {
+        // Set a minimum delay in case the element loads very fast or if it
+        // leaves the viewport.
+        timer.delay(() => {
+          if (this.layoutCount_ == 0 && this.isInViewport_) {
+            this.toggleLoading_(true);
+          }
+        }, 100);
+      }
+    }
+    if (this.isUpgraded() && this.isBuilt()) {
+      this.updateInViewport_(inViewport);
+    }
+  };
+
+  /**
+   * @param {boolean} inViewport
+   * @private
+   */
+  ElementProto.updateInViewport_ = function(inViewport) {
     this.implementation_.inViewport_ = inViewport;
     this.implementation_.viewportCallback(inViewport);
   };
@@ -562,6 +752,7 @@ export function createAmpElementProto(win, name, implementationClass) {
    * @package @final
    */
   ElementProto.documentInactiveCallback = function() {
+    this.assertNotTemplate_();
     if (!this.isBuilt() || !this.isUpgraded()) {
       return false;
     }
@@ -577,6 +768,7 @@ export function createAmpElementProto(win, name, implementationClass) {
    * @final
    */
   ElementProto.enqueAction = function(invocation) {
+    this.assertNotTemplate_();
     if (!this.isBuilt()) {
       assert(this.actionQueue_).push(invocation);
     } else {
@@ -594,10 +786,11 @@ export function createAmpElementProto(win, name, implementationClass) {
       return;
     }
 
-    let actionQueue = assert(this.actionQueue_);
+    const actionQueue = assert(this.actionQueue_);
     this.actionQueue_ = null;
 
-    actionQueue.forEach((invocation) => {
+    // TODO(dvoytenko, #1260): dedupe actions.
+    actionQueue.forEach(invocation => {
       this.executionAction_(invocation, true);
     });
   };
@@ -614,6 +807,240 @@ export function createAmpElementProto(win, name, implementationClass) {
       this.implementation_.executeAction(invocation, deferred);
     } catch (e) {
       log.error(TAG_, 'Action execution failed:', invocation, e);
+    }
+  };
+
+
+  /**
+   * Returns the original nodes of the custom element without any service nodes
+   * that could have been added for markup. These nodes can include Text,
+   * Comment and other child nodes.
+   * @return {!Array<!Node>}
+   * @package @final
+   */
+  ElementProto.getRealChildNodes = function() {
+    const nodes = [];
+    for (let n = this.firstChild; n; n = n.nextSibling) {
+      if (!isInternalOrServiceNode(n)) {
+        nodes.push(n);
+      }
+    }
+    return nodes;
+  };
+
+  /**
+   * Returns the original children of the custom element without any service
+   * nodes that could have been added for markup.
+   * @return {!Array<!Element>}
+   * @package @final
+   */
+  ElementProto.getRealChildren = function() {
+    const elements = [];
+    for (let i = 0; i < this.children.length; i++) {
+      const child = this.children[i];
+      if (!isInternalOrServiceNode(child)) {
+        elements.push(child);
+      }
+    }
+    return elements;
+  };
+
+  /**
+   * Returns an optional placeholder element for this custom element.
+   * @return {?Element}
+   * @package @final
+   */
+  ElementProto.getPlaceholder = function() {
+    return dom.childElementByAttr(this, 'placeholder');
+  };
+
+  /**
+   * Hides or shows the placeholder, if available.
+   * @param {boolean} state
+   * @package @final
+   */
+  ElementProto.togglePlaceholder = function(state) {
+    this.assertNotTemplate_();
+    const placeholder = this.getPlaceholder();
+    if (placeholder) {
+      placeholder.classList.toggle('amp-hidden', !state);
+    }
+  };
+
+  /**
+   * Returns an optional fallback element for this custom element.
+   * @return {?Element}
+   * @package @final
+   */
+  ElementProto.getFallback = function() {
+    return dom.childElementByAttr(this, 'fallback');
+  };
+
+  /**
+   * Hides or shows the fallback, if available. This function must only
+   * be called inside a mutate context.
+   * @param {boolean} state
+   * @package @final
+   */
+  ElementProto.toggleFallback = function(state) {
+    this.assertNotTemplate_();
+    // This implementation is notably less efficient then placeholder toggling.
+    // The reasons for this are: (a) "not supported" is the state of the whole
+    // element, (b) some realyout is expected and (c) fallback condition would
+    // be rare.
+    this.classList.toggle('amp-notsupported', state);
+  };
+
+  /**
+   * Whether the loading can be shown for this element.
+   * @return {boolean}
+   * @private
+   */
+  ElementProto.isLoadingEnabled_ = function() {
+    // No loading indicator will be shown if either one of these
+    // conditions true:
+    // 1. `noloading` attribute is specified;
+    // 2. The element has not been whitelisted;
+    // 3. The element is too small or has not yet been measured;
+    // 4. The element has already been laid out;
+    // 5. The element is a `placeholder` or a `fallback`;
+    // 6. The element's layout is not a size-defining layout.
+    if (this.loadingDisabled_ === undefined) {
+      this.loadingDisabled_ = this.hasAttribute('noloading');
+    }
+    if (this.loadingDisabled_ ||
+            !isLoadingAllowed(this.tagName) ||
+            this.layoutWidth_ < MIN_WIDTH_FOR_LOADING_ ||
+            this.layoutCount_ > 0 ||
+            isInternalOrServiceNode(this) ||
+            !isLayoutSizeDefined(this.layout_)) {
+      return false;
+    }
+    return true;
+  };
+
+  /**
+   * Creates a loading object. The caller must ensure that loading can
+   * actually be shown. This method must also be called in the mutate
+   * context.
+   * @private
+   */
+  ElementProto.prepareLoading_ = function() {
+    if (!this.loadingContainer_) {
+      const container = document.createElement('div');
+      container.classList.add('-amp-loading-container');
+      container.classList.add('-amp-fill-content');
+      container.classList.add('amp-hidden');
+
+      const element = createLoaderElement();
+      container.appendChild(element);
+
+      this.appendChild(container);
+      this.loadingContainer_ = container;
+      this.loadingElement_ = element;
+    }
+  };
+
+  /**
+   * Turns the loading indicator on or off.
+   * @param {boolean} state
+   * @param {boolean=} opt_cleanup
+   * @private @final
+   */
+  ElementProto.toggleLoading_ = function(state, opt_cleanup) {
+    this.assertNotTemplate_();
+    this.loadingState_ = state;
+    if (!state && !this.loadingContainer_) {
+      return;
+    }
+
+    // Check if loading should be shown.
+    if (state && !this.isLoadingEnabled_()) {
+      this.loadingState_ = false;
+      return;
+    }
+
+    this.getVsync_().mutate(() => {
+      let state = this.loadingState_;
+      // Repeat "loading enabled" check because it could have changed while
+      // waiting for vsync.
+      if (state && !this.isLoadingEnabled_()) {
+        state = false;
+      }
+      if (state) {
+        this.prepareLoading_();
+      }
+      if (!this.loadingContainer_) {
+        return;
+      }
+
+      this.loadingContainer_.classList.toggle('amp-hidden', !state);
+      this.loadingElement_.classList.toggle('amp-active', state);
+
+      if (!state && opt_cleanup) {
+        const loadingContainer = this.loadingContainer_;
+        this.loadingContainer_ = null;
+        this.loadingElement_ = null;
+        this.resources_.deferMutate(this, () => {
+          dom.removeElement(loadingContainer);
+        });
+      }
+    });
+  };
+
+  /**
+   * Returns an optional overflow element for this custom element.
+   * @return {?Element}
+   * @private
+   */
+  ElementProto.getOverflowElement = function() {
+    if (this.overflowElement_ === undefined) {
+      this.overflowElement_ = dom.childElementByAttr(this, 'overflow');
+      if (this.overflowElement_) {
+        if (!this.overflowElement_.hasAttribute('tabindex')) {
+          this.overflowElement_.setAttribute('tabindex', '0');
+        }
+        if (!this.overflowElement_.hasAttribute('role')) {
+          this.overflowElement_.setAttribute('role', 'button');
+        }
+      }
+    }
+    return this.overflowElement_;
+  };
+
+  /**
+   * Hides or shows the overflow, if available. This function must only
+   * be called inside a mutate context.
+   * @param {boolean} overflown
+   * @param {number} requestedHeight
+   * @package @final
+   */
+  ElementProto.overflowCallback = function(overflown, requestedHeight) {
+    if (!overflown && !this.overflowElement_) {
+      // Overflow has never been initialized and not wanted.
+      return;
+    }
+
+    const overflowElement = this.getOverflowElement();
+    if (!overflowElement) {
+      if (overflown) {
+        log.warn(TAG_,
+            'Cannot resize element and overlfow is not available', this);
+      }
+      return;
+    }
+
+    overflowElement.classList.toggle('amp-visible', overflown);
+
+    if (overflown) {
+      this.overflowElement_.onclick = () => {
+        this.resources_./*OK*/changeHeight(this, requestedHeight);
+        this.getVsync_().mutate(() => {
+          this.overflowCallback(/* overflown */ false, requestedHeight);
+        });
+      };
+    } else {
+      this.overflowElement_.onclick = null;
     }
   };
 

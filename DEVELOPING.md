@@ -16,41 +16,71 @@ limitations under the License.
 
 ## Development on AMP HTML
 
-### Mailing list
+### Slack and mailing list
 
 We discuss implementation issues on [amphtml-discuss@googlegroups.com](https://groups.google.com/forum/#!forum/amphtml-discuss).
 
+For more immediate feedback, [sign up for our Slack](https://docs.google.com/forms/d/1wAE8w3K5preZnBkRk-MD1QkX8FmlRDxd_vs4bFSeJlQ/viewform?fbzx=4406980310789882877).
+
+### Starter issues
+
+We're curating a [list of GitHub "starter issues"](https://github.com/ampproject/amphtml/issues?q=is%3Aopen+is%3Aissue+label%3Astarter) of small to medium complexity that are great to jump into development on AMP.
+
+If you have any questions, feel free to ask on the issue or join us on [Slack](https://docs.google.com/forms/d/1wAE8w3K5preZnBkRk-MD1QkX8FmlRDxd_vs4bFSeJlQ/viewform?fbzx=4406980310789882877)!
+
 ### Installation
 
-1. `npm i`
-2. `edit /etc/hosts` and map `ads.localhost` and `iframe.localhost` to `127.0.0.1`:
+1. Install [NodeJS](https://nodejs.org).
+2. In the repo directory, run `npm i` command to install the required npm packages.
+3. run `sudo npm i -g gulp` command to install gulp in your local bin folder ('/usr/local/bin/' on Mac).
+4. `edit /etc/hosts` and map `ads.localhost` and `iframe.localhost` to `127.0.0.1`.
 <pre>
   127.0.0.1               ads.localhost iframe.localhost
 </pre>
 
 ### Build & Test
 
-[![Build Status](https://magnum.travis-ci.com/ampproject/amphtml.svg?token=AmxgqDRzeUjVvqT2oydf&branch=master)](https://magnum.travis-ci.com/ampproject/amphtml)
-
 | Command                       | Description                                                           |
 | ----------------------------- | --------------------------------------------------------------------- |
-| `gulp`                        | Same as "watch"                                                       |
-| `gulp minify`                 | Builds production binaries.                                           |
+| `gulp`                        | Runs "watch" and "serve".                                             |
+| `gulp dist`                   | Builds production binaries.                                           |
 | `gulp lint`                   | Validates against Google Closure Linter.                              |
+| `gulp lint --watch`           | Watches for changes in files, Validates against Google Closure Linter.|
+| `gulp lint-fix`               | Fixes simple lint warnings/errors automatically.                      |
 | `gulp build`                  | Builds the AMP library.                                               |
 | `gulp clean`                  | Removes build output.                                                 |
+| `gulp css`                    | Recompile css to build directory.                                     |
+| `gulp extensions`             | Build AMP Extensions.                                                 |
+| `gulp watch`                  | Watches for changes in files, re-build.                               |
 | `gulp test`                   | Runs tests in Chrome.                                                 |
 | `gulp test --verbose`         | Runs tests in Chrome with logging enabled.                            |
 | `gulp test --watch`           | Watches for changes in files, runs corresponding test(s) in Chrome.   |
 | `gulp test --watch --verbose` | Same as "watch" with logging enabled.                                 |
+| `gulp test --saucelabs`       | Runs test on saucelabs (requires [setup](#saucelabs)).                |
 | `gulp test --safari`          | Runs tests in Safari.                                                 |
 | `gulp test --firefox`         | Runs tests in Firefox.                                                |
-| `http-server -p 8000 -c-1`    | serves content in current working dir over http://localhost:8000/     |
+| `gulp serve`                  | Serves content in repo root dir over http://localhost:8000/.          |
+|-------------------------------|-----------------------------------------------------------------------|
 
 To fix issues with Safari test runner launching multiple instances of the test, run:
 <pre>
   defaults write com.apple.Safari ApplePersistenceIgnoreState YES
 </pre>
+
+#### Saucelabs
+
+Running tests on Sauce Labs requires an account. You can get one by signing up for [Open Sauce](https://saucelabs.com/opensauce/). This will provide you with a user name and access code that you need to add to your `.bashrc` or equivalent like this:
+
+```
+export SAUCE_USERNAME=sauce-labs-user-name
+export SAUCE_ACCESS_KEY=access-key
+```
+
+Also for local testing, download [saucelabs connect](https://docs.saucelabs.com/reference/sauce-connect/) (If you are having trouble, downgrade to 4.3.10) and establish a tunnel by running the `sc` before running tests.
+
+Because of the user name and password requirement pull requests do not directly run on Travis. If your pull request contains JS or CSS changes and it does not change the build system, it will be automatically build by our bot [@ampsauce](https://github.com/ampsauce/amphtml). Builds can be seen on [@ampsauce's Travis](https://travis-ci.org/ampsauce/amphtml/builds) and after they finished their state will be logged to your PR.
+
+If a test flaked on a pull request you can ask for a retry by sending the comment `@ampsauce retry`. This will only be accepted if you are a member of the "ampproject" org. Ping us if you'd like to be added. You may also need to publicly reveal your membership.
 
 ### Manual testing
 
@@ -92,6 +122,17 @@ In particular, we try to maintain "it might not be perfect but isn't broken"-sup
 ## Eng docs
 
 - [Life of an AMP *](https://docs.google.com/document/d/1WdNj3qNFDmtI--c2PqyRYrPrxSg2a-93z5iX0SzoQS0/edit#)
-- [AMP Layout system](https://docs.google.com/document/d/1YjFk_B6r97CCaQJf2nXRVuBOuNi_3Fn87Zyf1U7Xoz4/edit)
+- [AMP Layout system](spec/amp-html-layout.md)
 
 We also recommend scanning the [spec](spec/). The non-element part should help understand some of the design aspects.
+
+## AMP Dev Channel (Experimental)
+
+AMP Dev Channel is a way to opt a browser into using a newer version of the AMP JS libraries.
+
+This release may be less stable and it may contain features not available to all users. Opt into this option if you'd like to help test new versions of AMP, report bugs or build documents that require a new feature that is not yet available to everyone.
+
+To opt your browser into the AMP Dev Channel, go to [the AMP experiments page](https://cdn.ampproject.org/experiments.html) and activate the "AMP Dev Channel" experiment.
+
+
+## [Code of conduct](CODE_OF_CONDUCT.md)

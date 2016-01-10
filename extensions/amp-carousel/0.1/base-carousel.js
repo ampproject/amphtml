@@ -40,7 +40,7 @@ export class BaseCarousel extends AMP.BaseElement {
     this.prevButton_.classList.add('amp-carousel-button-prev');
     this.prevButton_.setAttribute('role', 'button');
     // TODO(erwinm): Does label need i18n support in the future? or provide
-    // a way to be overriden.
+    // a way to be overridden.
     this.prevButton_.setAttribute('aria-label', 'previous');
     this.prevButton_.onclick = () => {
       if (!this.prevButton_.classList.contains('amp-disabled')) {
@@ -87,7 +87,7 @@ export class BaseCarousel extends AMP.BaseElement {
   }
 
   /**
-   * Calls `goCallback` and `setControlState` for transition behavior.
+   * Calls `goCallback` and `setControlsState` for transition behavior.
    * @param {number} dir -1 or 1
    * @param {boolean} animate
    */
@@ -98,10 +98,10 @@ export class BaseCarousel extends AMP.BaseElement {
 
   /**
    * Proceeds to the next slide in the desired direction.
-   * @param {number} dir -1 or 1
-   * @param {boolean} animate
+   * @param {number} unusedDir -1 or 1
+   * @param {boolean} unusedAnimate
    */
-  goCallback(dir, animate) {
+  goCallback(unusedDir, unusedAnimate) {
     // Subclasses may override.
   }
 
@@ -120,7 +120,9 @@ export class BaseCarousel extends AMP.BaseElement {
    * @override
    */
   isReadyToBuild() {
-    return this.getRealChildren().length > 0;
+    // TODO(dvoytenko, #1014): Review and try a more immediate approach.
+    // Wait until DOMReady.
+    return false;
   }
 
   /**

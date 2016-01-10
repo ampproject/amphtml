@@ -1,7 +1,13 @@
 language: node_js
+sudo: required  # See http://docs.travis-ci.com/user/trusty-ci-environment/
+dist: trusty
 node_js:
   - "stable"
+notifications:
+  webhooks:
+    - http://savage.nonblocking.io:8080/savage/travis
 addons:
+  sauce_connect: true
   hosts:
     - ads.localhost
     - iframe.localhost
@@ -12,8 +18,15 @@ before_install:
 before_script:
   - npm install -g gulp
 script:
-  - gulp presubmit
   - gulp lint
   - gulp build
-  - gulp minify
+  - gulp dist
+  - gulp presubmit
+  - gulp compile
+  # Unit tests with Travis' default chromium
   - gulp test
+  # Integration tests with all saucelabs browsers
+  - gulp test --saucelabs --integration
+  # All unit tests with an old chrome (best we can do right now to pass tests
+  # and not start relying on new features).
+  - gulp test --saucelabs --oldchrome

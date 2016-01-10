@@ -20,7 +20,7 @@ import {applyLayout_} from '../../src/custom-element';
 
 
 describe('Layout', () => {
-  var div;
+  let div;
 
   beforeEach(() => {
     div = document.createElement('div');
@@ -142,7 +142,7 @@ describe('Layout', () => {
   it('layout=fixed - requires width/height', () => {
     div.setAttribute('layout', 'fixed');
     expect(() => applyLayout_(div)).to.throw(
-        /to be available and be an integer/);
+        /Expected height to be available/);
   });
 
 
@@ -196,12 +196,26 @@ describe('Layout', () => {
   it('layout=fixed-height - requires height', () => {
     div.setAttribute('layout', 'fixed-height');
     expect(() => applyLayout_(div)).to.throw(
-        /to be available and be an integer/);
+        /Expected height to be available/);
   });
 
 
   it('layout=responsive', () => {
     div.setAttribute('layout', 'responsive');
+    div.setAttribute('width', 100);
+    div.setAttribute('height', 200);
+    expect(applyLayout_(div)).to.equal(Layout.RESPONSIVE);
+    expect(div.style.width).to.equal('');
+    expect(div.style.height).to.equal('');
+    expect(div).to.have.class('-amp-layout-responsive');
+    expect(div).to.have.class('-amp-layout-size-defined');
+    expect(div.children.length).to.equal(1);
+    expect(div.children[0].tagName.toLowerCase()).to.equal('i-amp-sizer');
+    expect(div.children[0].style.paddingTop).to.equal('200%');
+  });
+
+  it('layout=responsive - default with sizes', () => {
+    div.setAttribute('sizes', '50vw');
     div.setAttribute('width', 100);
     div.setAttribute('height', 200);
     expect(applyLayout_(div)).to.equal(Layout.RESPONSIVE);
@@ -243,14 +257,14 @@ describe('Layout', () => {
 
 
   it('should configure natural dimensions; default layout', () => {
-    let pixel = document.createElement('amp-pixel');
+    const pixel = document.createElement('amp-pixel');
     expect(applyLayout_(pixel)).to.equal(Layout.FIXED);
     expect(pixel.style.width).to.equal('1px');
     expect(pixel.style.height).to.equal('1px');
   });
 
   it('should configure natural dimensions; default layout; with width', () => {
-    let pixel = document.createElement('amp-pixel');
+    const pixel = document.createElement('amp-pixel');
     pixel.setAttribute('width', '11');
     expect(applyLayout_(pixel)).to.equal(Layout.FIXED);
     expect(pixel.style.width).to.equal('11px');
@@ -258,7 +272,7 @@ describe('Layout', () => {
   });
 
   it('should configure natural dimensions; default layout; with height', () => {
-    let pixel = document.createElement('amp-pixel');
+    const pixel = document.createElement('amp-pixel');
     pixel.setAttribute('height', '11');
     expect(applyLayout_(pixel)).to.equal(Layout.FIXED);
     expect(pixel.style.width).to.equal('1px');
@@ -266,7 +280,7 @@ describe('Layout', () => {
   });
 
   it('should configure natural dimensions; layout=fixed', () => {
-    let pixel = document.createElement('amp-pixel');
+    const pixel = document.createElement('amp-pixel');
     pixel.setAttribute('layout', 'fixed');
     expect(applyLayout_(pixel)).to.equal(Layout.FIXED);
     expect(pixel.style.width).to.equal('1px');
@@ -274,10 +288,40 @@ describe('Layout', () => {
   });
 
   it('should configure natural dimensions; layout=fixed-height', () => {
-    let pixel = document.createElement('amp-pixel');
+    const pixel = document.createElement('amp-pixel');
     pixel.setAttribute('layout', 'fixed-height');
     expect(applyLayout_(pixel)).to.equal(Layout.FIXED_HEIGHT);
     expect(pixel.style.height).to.equal('1px');
     expect(pixel.style.width).to.equal('');
+  });
+
+  it('should fail invalid width and height', () => {
+    const pixel = document.createElement('amp-pixel');
+
+    // Everything is good.
+    pixel.setAttribute('width', '1px');
+    pixel.setAttribute('height', '1px');
+    expect(() => {
+      applyLayout_(pixel);
+    }).to.not.throw();
+
+    // Width=auto is also correct.
+    pixel.setAttribute('width', 'auto');
+    expect(() => {
+      applyLayout_(pixel);
+    }).to.not.throw();
+
+    // Width=X is invalid.
+    pixel.setAttribute('width', 'X');
+    expect(() => {
+      applyLayout_(pixel);
+    }).to.throw(/Invalid width value/);
+
+    // Height=X is invalid.
+    pixel.setAttribute('height', 'X');
+    pixel.setAttribute('width', '1px');
+    expect(() => {
+      applyLayout_(pixel);
+    }).to.throw(/Invalid height value/);
   });
 });

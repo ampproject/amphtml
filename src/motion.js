@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import {assert} from './asserts';
 import {timer} from './timer';
-import {vsync} from './vsync';
+import {vsyncFor} from './vsync';
 
 /** @const {!Funtion} */
 const NOOP_CALLBACK_ = function() {};
@@ -53,7 +52,7 @@ export function calcVelocity(deltaV, deltaTime, prevVelocity) {
   }
 
   // Calculate speed and speed depreciation.
-  let speed = deltaV / deltaTime;
+  const speed = deltaV / deltaTime;
 
   // Depreciation is simply an informational quality. It basically means:
   // we can't ignore the velocity we knew recently, but we'd only consider
@@ -61,7 +60,7 @@ export function calcVelocity(deltaV, deltaTime, prevVelocity) {
   // depreciation factor is 1/100 of a millisecond. New average velocity is
   // calculated by weighing toward the new velocity and away from old
   // velocity based on the depreciation.
-  let depr = 0.5 + Math.min(deltaTime / VELOCITY_DEPR_FACTOR_, 0.5);
+  const depr = 0.5 + Math.min(deltaTime / VELOCITY_DEPR_FACTOR_, 0.5);
   return speed * depr + prevVelocity * (1 - depr);
 }
 
@@ -106,7 +105,7 @@ class Motion {
    */
   constructor(startX, startY, veloX, veloY, callback, opt_vsync) {
     /** @private @const */
-    this.vsync_ = opt_vsync || vsync;
+    this.vsync_ = opt_vsync || vsyncFor(window);
 
     /** @private @const */
     this.callback_ = callback;
@@ -191,7 +190,7 @@ class Motion {
    * @return {!Promise}
    */
   thenAlways(opt_callback) {
-    let callback = opt_callback || NOOP_CALLBACK_;
+    const callback = opt_callback || NOOP_CALLBACK_;
     return this.then(callback, callback);
   }
 
@@ -202,10 +201,10 @@ class Motion {
   runContinuing_() {
     this.velocityX_ = this.maxVelocityX_;
     this.velocityY_ = this.maxVelocityY_;
-    let boundStep = this.stepContinue_.bind(this);
-    let boundComplete = this.completeContinue_.bind(this, true);
-    return this.vsync_.runMutateSeries(boundStep, 5000).
-        then(boundComplete, boundComplete);
+    const boundStep = this.stepContinue_.bind(this);
+    const boundComplete = this.completeContinue_.bind(this, true);
+    return this.vsync_.runAnimMutateSeries(boundStep, 5000)
+        .then(boundComplete, boundComplete);
   }
 
   /**
@@ -220,9 +219,6 @@ class Motion {
       return false;
     }
 
-    let prevX = this.lastX_;
-    let prevY = this.lastY_;
-
     this.lastTime_ = timer.now();
     this.lastX_ += timeSincePrev * this.velocityX_;
     this.lastY_ += timeSincePrev * this.velocityY_;
@@ -230,7 +226,7 @@ class Motion {
       return false;
     }
 
-    let decel = Math.exp(-timeSinceStart / EXP_FRAME_CONST_);
+    const decel = Math.exp(-timeSinceStart / EXP_FRAME_CONST_);
     this.velocityX_ = this.maxVelocityX_ * decel;
     this.velocityY_ = this.maxVelocityY_ * decel;
     return (Math.abs(this.velocityX_) > MIN_VELOCITY_ ||

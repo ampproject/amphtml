@@ -1,0 +1,10 @@
+URL: https://github.com/janl/mustache.js/
+License: The MIT License
+License File: https://github.com/janl/mustache.js/blob/master/LICENSE
+
+Description:
+Fork of mustache.js library.
+
+Local Modifications:
+None yet, but expected changes for restricting instructions and sanitizing
+of the output.

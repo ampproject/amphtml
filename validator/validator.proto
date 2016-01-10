@@ -1,0 +1,333 @@
+//
+// Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS-IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the license.
+//
+syntax = "proto2";
+
+package amp.validator;
+
+// Used for validating properties in attribute values. Our validator
+// (via parse-viewport.h) implements the parsing algorithm as described here:
+// https://drafts.csswg.org/css-device-adapt/#parsing-algorithm
+message PropertySpec {
+  // Must be lowercase, and will be matched case-insensitively.
+  optional string name = 1;
+  optional bool mandatory = 2;
+
+  // This would be a oneof, but this file only uses features in protobuf 2.5.0.
+  // begin oneof {
+
+  // Must be lowercase, and will be matched case-insensitively.
+  optional string value = 3;
+  optional double value_double = 4;
+  // } end oneof
+}
+
+message PropertySpecList {
+  repeated PropertySpec properties = 1;
+}
+
+// Attributes that are not covered by at least one of these specs are
+// disallowed. Within a given context (e.g., for a given TagSpec),
+// names are unique.
+message AttrSpec {
+  // Use lower-case attribute names only.
+  optional string name = 1;
+  repeated string alternative_names = 2;
+  optional bool mandatory = 3;
+  // Within the context of the tag, exactly one of the attributes tagged
+  // with this identifier must be present. Per convention, this identifier
+  // should list the tags participating in the mandatory oneof, with or,
+  // e.g. "foo or bar or baz".
+  optional string mandatory_oneof = 12;
+
+  // This would be a oneof, but this file only uses features in protobuf 2.5.0.
+  // begin oneof {
+
+  // If none of value, value_regex, value_properties are set, any
+  // value is accepted. Note that prior to comparing, the attributes
+  // in a given HTML document will be unescaped.
+
+  // The attribute value must be equal to the value in this field.
+  optional string value = 4;
+  optional string value_regex = 5;
+  // validates against a list of properties (see PropertySpec).
+  optional PropertySpecList value_properties = 11;
+  // } end oneof
+
+  // If set, then the attribute value may not match this regex, which is
+  // always applied case-insensitively and as a partial match.
+  optional string blacklisted_value_regex = 6;
+  // If set, generates a DEPRECATED_ATTR error with severity WARNING.
+  optional string deprecation = 7;
+  optional string deprecation_url = 8;
+  // This feature specifically addresses the development attribute on
+  // the top-level html tag. When set, a DEV_MODE_ENABLED error with
+  // severity ERROR is generated.
+  optional string dev_mode_enabled = 9;
+  optional string dev_mode_enabled_url = 10;
+}
+
+// Some tags share several attributes, so they're identified by unique key
+// (see the attr_lists map in ValidatorRules).
+message AttrList {
+  optional string name = 1;
+  repeated AttrSpec attrs = 2;
+}
+
+// Regex which, if matches the cdata of a tag, causes the tag validation to
+// fail.
+message BlackListedCDataRegex {
+  // Syntax is partial match, use ^ and $ if you want global match.
+  optional string regex = 1;
+  optional string error_message = 2;
+}
+
+// This spec is used by our CSS parser to determine how the contents of a given
+// AT rule should be parsed, if at all. The term 'rule' here refers to the AT
+// Rule in CSS, not a validation rule.
+message AtRuleSpec {
+  enum BlockType {
+    // Invalid, ignore contents.
+    PARSE_AS_ERROR = 0;
+    // Valid, ignore contents.
+    PARSE_AS_IGNORE = 1;
+    // Valid, parse contents (as CSS rules).
+    PARSE_AS_RULES = 2;
+    // Valid, parse contents (as CSS declarations).
+    PARSE_AS_DECLARATIONS = 3;
+  }
+  // Name of the AT rule to parse. Do not include the '@' symbol (e.g. '@media'
+  // should be encoded as 'media'. A value of '$DEFAULT' indicates the default
+  // AT rule which will match any AT rule not present in any other AtRuleSpec.
+  optional string name = 1;
+  optional BlockType type = 2 [default=PARSE_AS_ERROR];
+}
+
+message CssRuleSpec {
+  // TODO: Add fields such as
+  // optional bool top_level_only = 1;
+  // optional bool mandatory = 2;
+  // optional string selector_tag_regex = 3;
+  // optional string selector_id_regex = 4;
+  // repeated string pseudo_selector = 5;
+}
+
+message CssSpec {
+  // Spec for how to parse CSS AT rules, one per AT rule. Must not contain
+  // duplicate names, and must contain at least one entry for the default.
+  repeated AtRuleSpec at_rule_spec = 1;
+  repeated CssRuleSpec css_rule = 2;
+}
+
+// NEXT AVAILABLE TAG: 8
+message CdataSpec {
+  // If set, the cdata contents cannot be greater than this length, in bytes.
+  optional int32 max_bytes = 1 [ default = -1 ];
+  // If provided, a URL which linking to a section / sentence in the
+  // AMP HTML spec.
+  optional string max_bytes_spec_url = 2;
+
+  // This would be a oneof, but this file only uses features in protobuf 2.5.0.
+  // begin oneof {
+
+  // If non-empty, the text between the start / end tag must match this value.
+  optional string mandatory_cdata = 3;
+  // If non-empty, the text between the start / end tag must match this regex.
+  optional string cdata_regex = 6;
+  // If at least one CssSpec is provided, this cdata field will be parsed
+  // as CSS3, and any parsing errors will become validation errors.
+  optional CssSpec css_spec = 7;
+  // } end oneof
+
+  // If any of these regexes match, then this cdata spec does not validate.
+  repeated BlackListedCDataRegex blacklisted_cdata_regex = 4;
+}
+
+// Specifies which AMP Layouts are supported by a given element.
+// For the purpose of the validator, this specifies which
+// values for layout, height, and width attributes are allowed. Also see
+// https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md
+// TODO(johannes): Make the error messages around layouts better. This
+// may require revamping the documentation for elements and/or the above spec,
+// so that a user gets more clearly informed about which layouts are
+// applicable to a given tag, what happens when layout attribute or other
+// attributes are not set, etc.
+message AmpLayout {
+  enum Layout {
+    UNKNOWN = 0;
+    NODISPLAY = 1;
+    FIXED = 2;
+    FIXED_HEIGHT = 3;
+    RESPONSIVE = 4;
+    CONTAINER = 5;
+    FILL = 6;
+  }
+  // Specifies which layouts are supported by this element.
+  repeated Layout supported_layouts = 1;
+  // Specifies whether this element has default dimensions. This corresponds
+  // to being whitelisted in naturalDimensions_ in
+  // https://github.com/ampproject/amphtml/blob/master/src/layout.js.
+  optional bool defines_default_width = 2;
+  optional bool defines_default_height = 3;
+}
+
+// Tags that are not covered by at least one of these specs are disallowed.
+// Some tags are mandatory. Note that the tag name is not unique, that is,
+// there can be multiple tag specs covering the same name, e.g., for
+// multiple meta tags (with different attributes).
+// NEXT AVAILABLE TAG: 15
+message TagSpec {
+  // Use lower-case tag names only.
+  optional string name = 1;
+
+  // The detail will be copied as is into ValidationError::detail for
+  // MANDATORY_TAG_MISSING and other errors. It is especially useful
+  // when the tag name by itself isn't sufficient to uniquely identify
+  // the tag spec.
+  optional string detail = 2;
+
+  // If true, a tag conforming to this tag spec must occur at least once
+  // within the document.
+  optional bool mandatory = 3;
+  // A string identifying that this tag belongs to a set of alternative
+  // choices from which at least one needs to be satisfied.
+  optional string mandatory_alternatives = 4;
+  // If true, a tag conforming to this tag spec may occur at most once within
+  // the document.
+  optional bool unique = 5;
+  // If not set, any tag can be the parent of this tag.
+  // If set to "$ROOT", this tag must be the root tag.
+  // If set to any other string, the tag must be nested inside the
+  //   specified mandatory parent tag.
+  optional string mandatory_parent = 6;
+
+  // This tag may not descend from any tag with any of these tag names.
+  repeated string disallowed_ancestor = 13;
+
+  // If set, other tags - identified by their detail string - must be
+  // present as well.
+  repeated string also_requires = 14;
+
+  // Attribute specifications related to this tag.
+  repeated AttrSpec attrs = 7;
+  // Top level attr lists of shared tags, identified by unique key
+  // (see attr_lists map in ValidatorRules).
+  repeated string attr_lists = 8;
+
+  // Note that these are evaluated after a particular TagSpec
+  // has been evaluated. Unlike other checks in this TagSpec, we
+  // no longer have the ability to fall back on a different TagSpec.
+  optional CdataSpec cdata = 12;
+
+  // If provided, a URL which linking to a section / sentence in the
+  // AMP HTML spec.
+  optional string spec_url = 10;
+
+  // If set, specifies which AMP Layouts are supported by this element.
+  optional AmpLayout amp_layout = 11;
+}
+
+// Top level message - start reading here.
+// The validator knows about a set of tag specifications.
+// NEXT AVAILABLE TAG: 9
+message ValidatorRules {
+  repeated TagSpec tags = 1;
+  repeated AttrList attr_lists = 7;
+  // The min file revision for validator.cc which can digest this file.
+  optional int32 min_validator_revision_required = 4;
+  // See comment in validator.protoascii.
+  optional int32 spec_file_revision = 6 [ default = -1 ];
+
+  // Spec URL for information about mustache templates.
+  optional string template_spec_url = 8;
+
+  // Deprecated fields, do not reuse.
+  extensions 5, 2;
+}
+
+message ValidationError {
+  enum Severity {
+    UNKNOWN_SEVERITY = 0;
+    // A document with at least one error of this severity fails validation.
+    ERROR = 1;
+    // A document may have warnings and still pass validation.
+    WARNING = 4;
+    // No longer used.
+    // A prod warning is OK in prod mode (the overall status of a validation
+    // result is still PASS) but an error in dev mode.
+    PROD_WARNING = 2; // DEPRECATED DO NOT USE.
+    // No longer used.
+    // A dev warning is OK in dev mode (the overall status of a validation
+    // result is still PASS) but an error in prod mode.
+    DEV_WARNING = 3; // DEPRECATED DO NOT USE.
+  }
+  optional Severity severity = 6 [ default = ERROR ];
+  enum Code {
+    UNKNOWN_CODE = 0;
+    MANDATORY_TAG_MISSING = 1;
+    DISALLOWED_TAG = 2;
+    DISALLOWED_ATTR = 3;
+    INVALID_ATTR_VALUE = 4;
+    MANDATORY_ATTR_MISSING = 5;
+    DUPLICATE_UNIQUE_TAG = 6;
+    WRONG_PARENT_TAG = 7;
+    STYLESHEET_TOO_LONG = 8;
+    MANDATORY_CDATA_MISSING_OR_INCORRECT = 9;
+    DEV_MODE_ENABLED = 10;
+    DEPRECATED_ATTR = 11;
+    DEPRECATED_TAG = 12;
+    CSS_SYNTAX = 13;
+    MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE = 14;
+    INVALID_PROPERTY_VALUE_IN_ATTR_VALUE = 15;
+    DISALLOWED_PROPERTY_IN_ATTR_VALUE = 16;
+    MUTUALLY_EXCLUSIVE_ATTRS = 17;
+    UNESCAPED_TEMPLATE_IN_ATTR_VALUE = 18;
+    TEMPLATE_PARTIAL_IN_ATTR_VALUE = 19;
+    TEMPLATE_IN_ATTR_NAME = 20;
+    INCONSISTENT_UNITS_FOR_WIDTH_AND_HEIGHT = 21;
+    IMPLIED_LAYOUT_INVALID = 22;
+    DISALLOWED_TAG_ANCESTOR = 23;
+  }
+  optional Code code = 1;
+  optional int32 line = 2 [ default = 1 ];
+  optional int32 col = 3;
+  optional string detail = 4;
+  optional string spec_url = 5;
+}
+
+// The validation result provided by Validator instances (see Validator::Result
+// in validator.h). To render such a proto see RenderValidationResult.
+message ValidationResult {
+  enum Status {
+    UNKNOWN = 0;
+    PASS = 1;
+    FAIL = 2;
+  }
+  optional Status status = 2;
+  repeated ValidationError errors = 1;
+  optional int32 validator_revision = 3 [ default = -1];
+  optional int32 spec_file_revision = 4 [ default = -1];
+}
+
+// Information about the validator returned by ValidatorFactory
+// (see validator.h).
+message ValidatorInfo {
+  // Path from which the spec file was loaded.
+  optional string rules_path = 1;
+  // The file revision of validator.cc.
+  optional int32 validator_revision = 2 [ default = -1];
+  // The file revision of the spec file (validator.protoascii).
+  optional int32 spec_file_revision = 3 [ default = -1];
+}

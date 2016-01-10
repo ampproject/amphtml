@@ -14,24 +14,30 @@
  * limitations under the License.
  */
 
-var gulp = require('gulp');
-var del = require('del');
-var file = require('gulp-file');
-var gulpWatch = require('gulp-watch');
-var fs = require('fs-extra');
-var sourcemaps = require('gulp-sourcemaps');
-var source = require('vinyl-source-stream');
-var buffer = require('vinyl-buffer');
+var autoprefixer = require('autoprefixer');
+var babel = require('babelify');
 var browserify = require('browserify');
-var watchify = require('watchify');
-var uglify = require('gulp-uglify');
-var wrap = require('gulp-wrap');
+var buffer = require('vinyl-buffer');
+var cssnano = require('cssnano');
+var file = require('gulp-file');
+var fs = require('fs-extra');
+var gulp = require('gulp-help')(require('gulp'));
+var gulpWatch = require('gulp-watch');
+var lazypipe = require('lazypipe');
+var minimist = require('minimist');
+var postcss = require('postcss');
 var rename = require('gulp-rename');
 var replace = require('gulp-replace');
-var babel = require('babelify');
-var postcss = require('postcss');
-var autoprefixer = require('autoprefixer');
-var cssnano = require('cssnano');
+var source = require('vinyl-source-stream');
+var sourcemaps = require('gulp-sourcemaps');
+var uglify = require('gulp-uglify');
+var util = require('gulp-util');
+var watchify = require('watchify');
+var wrap = require('gulp-wrap');
+var internalRuntimeVersion = require('./build-system/internal-version').VERSION;
+
+var argv = minimist(process.argv.slice(2), { boolean: ['strictBabelTransform'] });
+
 require('./build-system/tasks');
 
 // NOTE: see https://github.com/ai/browserslist#queries for `browsers` list
@@ -52,42 +58,65 @@ cssnano = cssnano({
   zindex: false
 });
 
-// Used to e.g. references the ads binary from the runtime to get
-// version lock.
-var internalRuntimeVersion = new Date().getTime();
 
+/**
+ * Build all the AMP extensions
+ *
+ * @param {!Object} options
+ */
 function buildExtensions(options) {
   // We pass watch further in to have browserify watch the built file
   // and update it if any of its required deps changed.
   // Each extension and version must be listed individually here.
+  buildExtension('amp-access', '0.1', true, options);
+  buildExtension('amp-analytics', '0.1', false, options);
   buildExtension('amp-anim', '0.1', false, options);
   buildExtension('amp-audio', '0.1', false, options);
+  buildExtension('amp-brightcove', '0.1', false, options);
   buildExtension('amp-carousel', '0.1', true, options);
+  buildExtension('amp-dynamic-css-classes', '0.1', false, options);
   buildExtension('amp-fit-text', '0.1', true, options);
+  buildExtension('amp-font', '0.1', false, options);
   buildExtension('amp-iframe', '0.1', false, options);
   buildExtension('amp-image-lightbox', '0.1', true, options);
   buildExtension('amp-instagram', '0.1', false, options);
   buildExtension('amp-lightbox', '0.1', false, options);
+  buildExtension('amp-list', '0.1', false, options);
+  buildExtension('amp-mustache', '0.1', false, options);
+  buildExtension('amp-pinterest', '0.1', true, options);
+  buildExtension('amp-install-serviceworker', '0.1', false, options);
   /**
    * @deprecated `amp-slides` is deprecated and will be deleted before 1.0.
    * Please see {@link AmpCarousel} with `type=slides` attribute instead.
    */
   buildExtension('amp-slides', '0.1', false, options);
   buildExtension('amp-twitter', '0.1', false, options);
+  buildExtension('amp-user-notification', '0.1', true, options);
+  buildExtension('amp-vine', '0.1', false, options);
   buildExtension('amp-youtube', '0.1', false, options);
 }
 
-function clean(done) {
-  del(['dist', 'dist.3p', 'build', 'examples.build'], done);
-}
 
+/**
+ * Compile the polyfills script and drop it in the build folder
+ */
 function polyfillsForTests() {
   compileJs('./src/', 'polyfills.js', './build/');
 }
 
+/**
+ * Compile and optionally minify the stylesheets and the scripts
+ * and drop them in the dist folder
+ *
+ * @param {boolean} watch
+ * @param {boolean} shouldMinify
+ */
 function compile(watch, shouldMinify) {
   compileCss();
-  compileJs('./src/', 'amp.js', './dist', {
+  // For compilation with babel we start with the amp-babel entry point,
+  // but then rename to the amp.js which we've been using all along.
+  compileJs('./src/', 'amp-babel.js', './dist', {
+    toName: 'amp.js',
     minifiedName: 'v0.js',
     watch: watch,
     minify: shouldMinify,
@@ -104,7 +133,11 @@ function compile(watch, shouldMinify) {
   thirdPartyBootstrap(watch, shouldMinify);
 }
 
-
+/**
+ * Compile all the css and drop in the build folder
+ *
+ * @return {!Promise} containing a Readable	Stream
+ */
 function compileCss() {
   console.info('Recompiling CSS.');
   return jsifyCssPromise('css/amp.css').then(function(css) {
@@ -114,6 +147,14 @@ function compileCss() {
   });
 }
 
+/**
+ * 'Jsify' a CSS file - Adds vendor specific css prefixes to the css file,
+ * compresses the file, removes the copyright comment, and adds the sourceURL
+ * to the stylesheet
+ *
+ * @param {string} filename css file
+ * @return {!Promise} that resolves with the css content after processing
+ */
 function jsifyCssPromise(filename) {
   var css = fs.readFileSync(filename, 'utf8');
   var transformers = [cssprefixer, cssnano];
@@ -124,11 +165,14 @@ function jsifyCssPromise(filename) {
         result.warnings().forEach(function(warn) {
           console.warn(warn.toString());
         });
-      var css = result.css;
-      return JSON.stringify(css + '\n/*# sourceURL=/' + filename + '*/');
-    });
+        var css = result.css;
+        return JSON.stringify(css + '\n/*# sourceURL=/' + filename + '*/');
+      });
 }
 
+/**
+ * Enables watching for file changes in css, extensions, and examples.
+ */
 function watch() {
   gulpWatch('css/**/*.css', function() {
     compileCss();
@@ -137,7 +181,7 @@ function watch() {
     watch: true
   });
   buildExamples(true);
-  return compile(true);
+  compile(true);
 }
 
 /**
@@ -154,8 +198,8 @@ function watch() {
  * @param {string} version Version of the extension. Must be identical to
  *     the sub directory inside the extension directory
  * @param {boolean} hasCss Whether there is a CSS file for this extension.
- * @param {!Object} options
- * @return {!Object} Gulp object
+ * @param {?Object} options
+ * @return {!Stream} Gulp object
  */
 function buildExtension(name, version, hasCss, options) {
   options = options || {};
@@ -166,7 +210,7 @@ function buildExtension(name, version, hasCss, options) {
   // and CSS inlining. This watcher watches the original file, copies
   // it to the destination and adds the CSS.
   if (options.watch) {
-    // Do not set watchers agains when we get called by the watcher.
+    // Do not set watchers again when we get called by the watcher.
     var copy = Object.create(options);
     copy.watch = false;
     gulpWatch(path + '/*', function() {
@@ -186,6 +230,18 @@ function buildExtension(name, version, hasCss, options) {
   }
 }
 
+/**
+ * Build the JavaScript for the extension specified
+ *
+ * @param {string} js JavaScript file content
+ * @param {string} path Path to the extensions directory
+ * @param {string} name Name of the extension. Must be the sub directory in
+ *     the extensions directory and the name of the JS and optional CSS file.
+ * @param {string} version Version of the extension. Must be identical to
+ *     the sub directory inside the extension directory
+ * @param {!Object} options
+ * @return {!Stream} Gulp object
+ */
 function buildExtensionJs(js, path, name, version, options) {
   var builtName = name + '-' + version + '.max.js';
   var minifiedName = name + '-' + version + '.js';
@@ -205,47 +261,85 @@ function buildExtensionJs(js, path, name, version, options) {
       });
 }
 
+/**
+ * Main Build
+ */
 function build() {
+  process.env.NODE_ENV = 'development';
   polyfillsForTests();
   buildExtensions();
   buildExamples(false);
-  return compile();
+  compile();
 }
 
-gulp.task('css', compileCss);
-gulp.task('extensions', buildExtensions);
-gulp.task('clean', clean);
-gulp.task('build', build);
-gulp.task('watch', watch);
-gulp.task('minify', function() {
+/**
+ * Dist Build
+ */
+function dist() {
   process.env.NODE_ENV = 'production';
   compile(false, true);
   buildExtensions({minify: true});
-});
+  buildExperiments({minify: true, watch: false});
+  buildLoginDone({minify: true, watch: false});
+}
 
-gulp.task('default', ['watch']);
-
+/**
+ * Build the examples
+ *
+ * @param {boolean} watch
+ */
 function buildExamples(watch) {
   if (watch) {
     gulpWatch('examples/*.html', function() {
-     buildExamples(false);
+      buildExamples(false);
     });
   }
 
+  fs.copy('examples/img/', 'examples.build/img/', {clobber: true},
+      copyHandler.bind(null, 'examples/img folder'));
+  fs.copy('examples/video/', 'examples.build/video/', {clobber: true},
+      copyHandler.bind(null, 'examples/video folder'));
+  fs.copy('examples/fonts/', 'examples.build/fonts/', {clobber: true},
+      copyHandler.bind(null, 'examples/fonts folder'));
+
   // Also update test-example-validation.js
   buildExample('ads.amp.html');
+  buildExample('analytics.amp.html');
   buildExample('article.amp.html');
-  buildExample('article-metadata/json-ld.amp.html');
-  buildExample('article-metadata/microdata.amp.html');
+  buildExample('article-access.amp.html');
+  buildExample('metadata-examples/article-json-ld.amp.html');
+  buildExample('metadata-examples/article-microdata.amp.html');
+  buildExample('metadata-examples/recipe-json-ld.amp.html');
+  buildExample('metadata-examples/recipe-microdata.amp.html');
+  buildExample('metadata-examples/review-json-ld.amp.html');
+  buildExample('metadata-examples/review-microdata.amp.html');
+  buildExample('metadata-examples/video-json-ld.amp.html');
+  buildExample('metadata-examples/video-microdata.amp.html');
   buildExample('everything.amp.html');
+  buildExample('font.amp.html');
   buildExample('instagram.amp.html');
+  buildExample('pinterest.amp.html');
   buildExample('released.amp.html');
   buildExample('twitter.amp.html');
+  buildExample('user-notification.amp.html');
+  buildExample('vine.amp.html');
+
+  // Examples are also copied into `c/` directory for AMP-proxy testing.
+  fs.copy('examples.build/', 'c/', {clobber: true},
+      copyHandler.bind(null, 'examples.build to c folder'));
+
+  function copyHandler(name, err) {
+    if (err) {
+      return util.log(util.colors.red('copy error: ', err));
+    }
+    util.log(util.colors.green('copied ' + name));
+  }
 }
 
 /**
  * Copies an examples file to examples.build folder and changes all
  * JS references to local / minified copies.
+ *
  * @param {string} name HTML file in examples/
  */
 function buildExample(name) {
@@ -253,7 +347,7 @@ function buildExample(name) {
   console.log('Processing ' + name);
   var html = fs.readFileSync(input, 'utf8');
   var max = html;
-  max = max.replace(/\.js/g, '.max.js');
+  max = max.replace(/(https:\/\/cdn.ampproject.org\/.+?).js/g, '$1.max.js');
   max = max.replace('https://cdn.ampproject.org/v0.max.js', '../dist/amp.js');
   max = max.replace(/https:\/\/cdn.ampproject.org\/v0\//g, '../dist/v0/');
   gulp.src(input)
@@ -268,6 +362,13 @@ function buildExample(name) {
       .pipe(gulp.dest('examples.build/'));
 }
 
+/**
+ * Copies frame.html to output folder, replaces js references to minified
+ * copies, and generates symlink to it.
+ *
+ * @param {boolean} watch
+ * @param {boolean} shouldMinify
+ */
 function thirdPartyBootstrap(watch, shouldMinify) {
   var input = '3p/frame.max.html';
   if (watch) {
@@ -297,27 +398,41 @@ function thirdPartyBootstrap(watch, shouldMinify) {
       });
 }
 
-
+/**
+ * Compile a javascript file
+ *
+ * @param {string} srcDir Path to the src directory
+ * @param {string} srcFilename Name of the JS source file
+ * @param {string} destDir Destination folder for output script
+ * @param {?Object} options
+ */
 function compileJs(srcDir, srcFilename, destDir, options) {
   options = options || {};
-  var bundler = browserify(srcDir + srcFilename, { debug: true })
-      .transform(babel);
+  var bundler = browserify(srcDir + srcFilename, {debug: true})
+      .transform(babel, { loose: argv.strictBabelTransform ? undefined : 'all' });
   if (options.watch) {
     bundler = watchify(bundler);
   }
 
   var wrapper = options.wrapper || '<%= contents %>';
 
+  var lazybuild = lazypipe()
+      .pipe(source, srcFilename)
+      .pipe(buffer)
+      .pipe(replace, /\$internalRuntimeVersion\$/g, internalRuntimeVersion)
+      .pipe(wrap, wrapper)
+      .pipe(sourcemaps.init.bind(sourcemaps), {loadMaps: true});
+
+  var lazywrite = lazypipe()
+      .pipe(sourcemaps.write.bind(sourcemaps), './')
+      .pipe(gulp.dest.bind(gulp), destDir);
+
   function rebundle() {
     bundler.bundle()
       .on('error', function(err) { console.error(err); this.emit('end'); })
-      .pipe(source(srcFilename))
-      .pipe(buffer())
-      .pipe(replace(/\$internalRuntimeVersion\$/g, internalRuntimeVersion))
-      .pipe(wrap(wrapper))
-      .pipe(sourcemaps.init({ loadMaps: true }))
-      .pipe(sourcemaps.write('./'))
-      .pipe(gulp.dest(destDir));
+      .pipe(lazybuild())
+      .pipe(rename(options.toName || srcFilename))
+      .pipe(lazywrite());
   }
 
   if (options.watch) {
@@ -331,17 +446,12 @@ function compileJs(srcDir, srcFilename, destDir, options) {
     console.log('Minifying ' + srcFilename);
     bundler.bundle()
       .on('error', function(err) { console.error(err); this.emit('end'); })
-      .pipe(source(srcFilename))
-      .pipe(buffer())
-      .pipe(replace(/\$internalRuntimeVersion\$/g, internalRuntimeVersion))
-      .pipe(sourcemaps.init({ loadMaps: true }))
-      .pipe(wrap(wrapper))
+      .pipe(lazybuild())
       .pipe(uglify({
         preserveComments: 'some'
       }))
       .pipe(rename(options.minifiedName))
-      .pipe(sourcemaps.write('./'))
-      .pipe(gulp.dest(destDir))
+      .pipe(lazywrite())
       .on('end', function() {
         fs.writeFileSync(destDir + '/version.txt', internalRuntimeVersion);
         if (options.latestName) {
@@ -358,3 +468,150 @@ function compileJs(srcDir, srcFilename, destDir, options) {
     rebundle();
   }
 }
+
+/**
+ * Build all the AMP experiments.html/js.
+ *
+ * @param {!Object} options
+ */
+function buildExperiments(options) {
+  options = options || {};
+  console.log('Bundling experiments.html/js');
+
+  function copyHandler(name, err) {
+    if (err) {
+      return util.log(util.colors.red('copy error: ', err));
+    }
+    util.log(util.colors.green('copied ' + name));
+  }
+
+  var path = 'tools/experiments';
+  var htmlPath = path + '/experiments.html';
+  var jsPath = path + '/experiments.js';
+  var watch = options.watch;
+  if (watch === undefined) {
+    watch = argv.watch || argv.w;
+  }
+
+  // Building extensions is a 2 step process because of the renaming
+  // and CSS inlining. This watcher watches the original file, copies
+  // it to the destination and adds the CSS.
+  if (watch) {
+    // Do not set watchers again when we get called by the watcher.
+    var copy = Object.create(options);
+    copy.watch = false;
+    gulpWatch(path + '/*', function() {
+      buildExperiments(copy);
+    });
+  }
+
+  // Build HTML.
+  console.log('Processing ' + htmlPath);
+  var html = fs.readFileSync(htmlPath, 'utf8');
+  var minHtml = html.replace('../../dist.tools/experiments/experiments.max.js',
+      'https://cdn.ampproject.org/experiments.js');
+  gulp.src(htmlPath)
+      .pipe(file('experiments.cdn.html', minHtml))
+      .pipe(gulp.dest('dist.tools/experiments/'));
+
+  // Build JS.
+  var js = fs.readFileSync(jsPath, 'utf8');
+  var builtName = 'experiments.max.js';
+  var minifiedName = 'experiments.js';
+  return gulp.src(path + '/*.js')
+      .pipe(file(builtName, js))
+      .pipe(gulp.dest('build/experiments/'))
+      .on('end', function() {
+        compileJs('build/experiments/', builtName, 'dist.tools/experiments/', {
+          watch: false,
+          minify: options.minify || argv.minify,
+          minifiedName: minifiedName,
+        });
+      });
+}
+
+
+/**
+ * Build "Login Done" page.
+ *
+ * @param {!Object} options
+ */
+function buildLoginDone(options) {
+  return buildLoginDoneVersion('0.1', options);
+}
+
+/**
+ * Build "Login Done" page for the specified version.
+ *
+ * @param {!Object} options
+ */
+function buildLoginDoneVersion(version, options) {
+  options = options || {};
+  console.log('Bundling amp-login-done.html/js');
+
+  function copyHandler(name, err) {
+    if (err) {
+      return util.log(util.colors.red('copy error: ', err));
+    }
+    util.log(util.colors.green('copied ' + name));
+  }
+
+  var path = 'extensions/amp-access/' + version + '/';
+  var htmlPath = path + 'amp-login-done.html';
+  var jsPath = path + 'amp-login-done.js';
+  var watch = options.watch;
+  if (watch === undefined) {
+    watch = argv.watch || argv.w;
+  }
+
+  // Building extensions is a 2 step process because of the renaming
+  // and CSS inlining. This watcher watches the original file, copies
+  // it to the destination and adds the CSS.
+  if (watch) {
+    // Do not set watchers again when we get called by the watcher.
+    var copy = Object.create(options);
+    copy.watch = false;
+    gulpWatch(path + '/*', function() {
+      buildLoginDoneVersion(version, copy);
+    });
+  }
+
+  // Build HTML.
+  console.log('Processing ' + htmlPath);
+  var html = fs.readFileSync(htmlPath, 'utf8');
+  var minHtml = html.replace(
+      '../../../dist/v0/amp-login-done-' + version + '.max.js',
+      'https://cdn.ampproject.org/v0/amp-login-done-' + version + '.js');
+  fs.writeFileSync('dist/v0/amp-login-done-' + version + '.html',
+      minHtml);
+
+  // Build JS.
+  var js = fs.readFileSync(jsPath, 'utf8');
+  var builtName = 'amp-login-done-' + version + '.max.js';
+  var minifiedName = 'amp-login-done-' + version + '.js';
+  var latestName = 'amp-login-done-latest.js';
+  return gulp.src(path + '/*.js')
+      .pipe(file(builtName, js))
+      .pipe(gulp.dest('build/all/v0/'))
+      .on('end', function() {
+        compileJs('build/all/v0/', builtName, 'dist/v0/', {
+          watch: false,
+          minify: options.minify || argv.minify,
+          minifiedName: minifiedName,
+          latestName: latestName,
+        });
+      });
+}
+
+
+/**
+ * Gulp tasks
+ */
+gulp.task('build', 'Builds the AMP library', build);
+gulp.task('css', 'Recompile css to build directory', compileCss);
+gulp.task('default', 'Same as "watch"', ['watch', 'serve']);
+gulp.task('dist', 'Build production binaries', dist);
+gulp.task('extensions', 'Build AMP Extensions', buildExtensions);
+gulp.task('watch', 'Watches for changes in files, re-build', watch);
+gulp.task('build-experiments', 'Builds experiments.html/js', buildExperiments);
+gulp.task('build-login-done', 'Builds login-done.html/js', buildLoginDone);

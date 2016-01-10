@@ -14,23 +14,66 @@
  * limitations under the License.
  */
 
-import {getService} from '../../src/service';
+import {getService, getElementService} from '../../src/service';
 
-describe('service`', () => {
+describe('service', () => {
 
-  var count = 1;
+  let count = 1;
   function inc() {
     return count++;
   }
 
+  beforeEach(() => {
+    window.ampExtendedElements = {};
+  });
+
   it('should make per window singletons', () => {
-    var a1 = getService(window, 'a', inc);
-    var a2 = getService(window, 'a', inc);
+    const a1 = getService(window, 'a', inc);
+    const a2 = getService(window, 'a', inc);
     expect(a1).to.equal(a2);
     expect(a1).to.equal(1);
-    var b1 = getService(window, 'b', inc);
-    var b2 = getService(window, 'b', inc);
+    const b1 = getService(window, 'b', inc);
+    const b2 = getService(window, 'b', inc);
     expect(b1).to.equal(b2);
     expect(b1).to.not.equal(a1);
+  });
+
+  it('should work without a factory', () => {
+    const c1 = getService(window, 'c', inc);
+    const c2 = getService(window, 'c');
+    expect(c1).to.equal(c2);
+  });
+
+  it('should fail without factory on initial setup', () => {
+    expect(() => {
+      getService(window, 'not-present');
+    }).to.throw(/Factory not given and service missing not-present/);
+  });
+
+  it('should be provided by element', () => {
+    window.ampExtendedElements['element-1'] = true;
+    const p1 = getElementService(window, 'e1', 'element-1');
+    const p2 = getElementService(window, 'e1', 'element-1');
+    getService(window, 'e1', function() {
+      return 'from e1';
+    });
+    return p1.then(s1 => {
+      expect(s1).to.equal('from e1');
+      return p2.then(s2 => {
+        expect(s1).to.equal(s2);
+      });
+    });
+  });
+
+  it('should fail if element is not in page.', () => {
+    window.ampExtendedElements['element-foo'] = true;
+    return getElementService(window, 'e1', 'element-bar').then(() => {
+      return 'SUCCESS';
+    }, error => {
+      return 'ERROR ' + error;
+    }).then(result => {
+      expect(result).to.match(
+          /Service e1 was requested to be provided through element-bar/);
+    });
   });
 });

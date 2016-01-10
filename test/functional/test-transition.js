@@ -30,9 +30,9 @@ describe('Transition', () => {
   });
 
   it('all', () => {
-    let func1 = sinon.spy();
-    let func2 = sinon.spy();
-    let all = tr.all([func1, func2]);
+    const func1 = sinon.spy();
+    const func2 = sinon.spy();
+    const all = tr.all([func1, func2]);
 
     expect(func1.callCount).to.equal(0);
     expect(func2.callCount).to.equal(0);
@@ -57,9 +57,9 @@ describe('Transition', () => {
   });
 
   it('withCurve', () => {
-    let func1 = (time, complete) => `${time * 2};${complete}`;
-    let curve = (time) => 0.2;
-    let curved = tr.withCurve(func1, curve);
+    const func1 = (time, complete) => `${time * 2};${complete}`;
+    const curve = unusedTime => 0.2;
+    const curved = tr.withCurve(func1, curve);
 
     expect(curved(0, false)).to.equal('0.4;false');
     expect(curved(0.5, false)).to.equal('0.4;false');
@@ -68,8 +68,8 @@ describe('Transition', () => {
   });
 
   it('setStyles', () => {
-    let element = document.createElement('div');
-    let func = tr.setStyles(element, {
+    const element = document.createElement('div');
+    const func = tr.setStyles(element, {
       width: tr.px(function(n) {return n * 100 + 1;}),
       height: tr.px(function(n) {return n * 100 + 2;}),
     });
@@ -126,7 +126,7 @@ describe('Transition', () => {
   });
 
   it('px', () => {
-    let func = tr.px(tr.numeric(0, 10));
+    const func = tr.px(tr.numeric(0, 10));
     expect(func(0)).to.equal('0px');
     expect(func(0.3)).to.equal('3px');
     expect(func(0.6)).to.equal('6px');

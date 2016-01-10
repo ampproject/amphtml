@@ -21,8 +21,10 @@ import {loadPromise} from '../../../src/event-helper';
 class AmpYoutube extends AMP.BaseElement {
 
   /** @override */
-  createdCallback() {
-    this.preconnect.url('https://www.youtube.com');
+  preconnectCallback(onLayout) {
+    this.preconnect.url('https://www.youtube.com', onLayout);
+    // Host that YT uses to serve JS needed by player.
+    this.preconnect.url('https://s.ytimg.com', onLayout);
   }
 
   /** @override */
@@ -32,18 +34,21 @@ class AmpYoutube extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    var width = this.element.getAttribute('width');
-    var height = this.element.getAttribute('height');
-    var videoId = AMP.assert(this.element.getAttribute('video-id'),
-        'The video-id attribute is required for <amp-youtube> %s',
+    const width = this.element.getAttribute('width');
+    const height = this.element.getAttribute('height');
+    // The video-id is supported only for backward compatibility.
+    const videoid = AMP.assert(
+        (this.element.getAttribute('data-videoid') ||
+        this.element.getAttribute('video-id')),
+        'The data-videoid attribute is required for <amp-youtube> %s',
         this.element);
     // See
     // https://developers.google.com/youtube/iframe_api_reference
-    var iframe = document.createElement('iframe');
+    const iframe = document.createElement('iframe');
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
     iframe.src = 'https://www.youtube.com/embed/' + encodeURIComponent(
-        videoId) + '?enablejsapi=1';
+        videoid) + '?enablejsapi=1';
     this.applyFillContent(iframe);
     iframe.width = width;
     iframe.height = height;

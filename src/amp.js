@@ -15,11 +15,10 @@
  */
 
 import './polyfills';
-
-import {historyFor} from './history';
-import {viewerFor} from './viewer';
 import {installPullToRefreshBlocker} from './pull-to-refresh';
-
+import {performanceFor} from './performance';
+import {templatesFor} from './template';
+import {installCoreServices} from './amp-core-service';
 import {installAd} from '../builtins/amp-ad';
 import {installGlobalClickListener} from './document-click';
 import {installImg} from '../builtins/amp-img';
@@ -29,8 +28,7 @@ import {installStyles, makeBodyVisible} from './styles';
 import {installErrorReporting} from './error';
 import {stubElements} from './custom-element';
 import {adopt} from './runtime';
-import {cssText} from '../build/css.js';
-import {action} from './action';
+import {cssText} from '../build/css';
 import {maybeValidate} from './validator-integration';
 
 // We must under all circumstances call makeBodyVisible.
@@ -39,10 +37,13 @@ import {maybeValidate} from './validator-integration';
 try {
   // Should happen first.
   installErrorReporting(window);  // Also calls makeBodyVisible on errors.
+  const perf = performanceFor(window);
+
+  perf.tick('is');
   installStyles(document, cssText, () => {
     try {
-      historyFor(window);
-      viewerFor(window);
+      installCoreServices(window);
+      templatesFor(window);
 
       installImg(window);
       installAd(window);
@@ -51,7 +52,6 @@ try {
 
       adopt(window);
       stubElements(window);
-      action.addEvent('tap');
 
       installPullToRefreshBlocker(window);
       installGlobalClickListener(window);
@@ -59,6 +59,10 @@ try {
       maybeValidate(window);
     } finally {
       makeBodyVisible(document);
+      perf.tick('e_is');
+      // TODO(erwinm): move invocation of the `flush` method when we have the
+      // new ticks in place to batch the ticks properly.
+      perf.flush();
     }
   }, /* opt_isRuntimeCss */ true);
 } catch (e) {

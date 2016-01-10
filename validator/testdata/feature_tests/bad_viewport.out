@@ -1,0 +1,5 @@
+FAIL
+feature_tests/bad_viewport.html:25:2 DISALLOWED_PROPERTY_IN_ATTR_VALUE content="...foo=..." (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#vprt)
+feature_tests/bad_viewport.html:25:2 INVALID_PROPERTY_VALUE_IN_ATTR_VALUE content="...minimum-scale=not-a-number..." (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#vprt)
+feature_tests/bad_viewport.html:25:2 MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE content="...width=..." (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#vprt)
+feature_tests/bad_viewport.html:32:7 MANDATORY_TAG_MISSING viewport declaration (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#vprt)

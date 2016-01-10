@@ -15,12 +15,16 @@
  */
 
 var argv = require('minimist')(process.argv.slice(2));
-var gulp = require('gulp');
+var gulp = require('gulp-help')(require('gulp'));
 var karma = require('karma').server;
 var config = require('../config');
 var karmaConfig = config.karma;
 var extend = require('util')._extend;
 
+/**
+ * Read in and process the configuration settings for karma
+ * @return {!Object} Karma configuration
+ */
 function getConfig() {
   var obj = Object.create(null);
   if (argv.safari) {
@@ -31,21 +35,64 @@ function getConfig() {
     return extend(obj, karmaConfig.firefox);
   }
 
+  if (argv.saucelabs) {
+    if (!process.env.SAUCE_USERNAME) {
+      throw new Error('Missing SAUCE_USERNAME Env variable');
+    }
+    if (!process.env.SAUCE_ACCESS_KEY) {
+      throw new Error('Missing SAUCE_ACCESS_KEY Env variable');
+    }
+    const c = extend(obj, karmaConfig.saucelabs);
+    if (argv.oldchrome) {
+      c.browsers = ['SL_Chrome_37']
+    }
+  }
+
   return extend(obj, karmaConfig.default);
 }
 
+/**
+ * Run tests.
+ */
+gulp.task('test', 'Runs tests in chrome', ['build'], function(done) {
+  if (argv.saucelabs && process.env.MAIN_REPO &&
+      // Sauce Labs does not work on Pull Requests directly.
+      // The @ampsauce bot builds these.
+      process.env.TRAVIS_PULL_REQUEST) {
+    console./*OK*/info('Deactivated for main repo');
+    return;
+  }
 
-gulp.task('test', ['build'], function(done) {
-  var config = getConfig();
+  if (!argv.integration && process.env.AMPSAUCE_REPO) {
+    console./*OK*/info('Deactivated for ampsauce repo')
+  }
+
+  var c = getConfig();
   var browsers = [];
 
   if (argv.watch || argv.w) {
-    config.singleRun = false;
+    c.singleRun = false;
   }
 
   if (argv.verbose || argv.v) {
-    config.client.captureConsole = true;
+    c.client.captureConsole = true;
   }
 
-  karma.start(config, done);
+  if (argv.integration) {
+    c.files = config.integrationTestPaths;
+  } else {
+    c.files = config.testPaths;
+  }
+
+  karma.start(c, done);
+}, {
+  options: {
+    'verbose': '  With logging enabled',
+    'watch': '  Watches for changes in files, runs corresponding test(s)',
+    'saucelabs': '  Runs test on saucelabs (requires setup)',
+    'safari': '  Runs tests in Safari',
+    'firefox': '  Runs tests in Firefox',
+    'integration': 'Run only integration tests.',
+    'oldchrome': 'Runs test with an old chrome. Saucelabs only.',
+  }
 });

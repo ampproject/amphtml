@@ -19,7 +19,7 @@ import * as st from './style';
 
 
 /**
- * Transition function that accepts normtime, typically between 0 and 1 and
+ * TransitionDef function that accepts normtime, typically between 0 and 1 and
  * performs an arbitrary animation action. Notice that sometimes normtime can
  * dip above 1 or below 0. This is an acceptable case for some curves. The
  * second argument is a boolean value that equals "true" for the completed
@@ -27,22 +27,22 @@ import * as st from './style';
  * @typedef {function(normtime, boolean):RESULT}
  * @template RESULT
  */
-class Transition {}
+class TransitionDef {}
 
 
-export const NOOP = function(time) {return null;};
+export const NOOP = function(unusedTime) {return null;};
 
 
 /**
  * Returns a transition that combines a number of other transitions and
  * invokes them all in parallel.
- * @param {!Array<!Transition>} transitions
- * @return {!Transition<void>}
+ * @param {!Array<!TransitionDef>} transitions
+ * @return {!TransitionDef<void>}
  */
 export function all(transitions) {
   return (time, complete) => {
     for (let i = 0; i < transitions.length; i++) {
-      let tr = transitions[i];
+      const tr = transitions[i];
       tr(time, complete);
     }
   };
@@ -52,9 +52,9 @@ export function all(transitions) {
 /**
  * Returns the specified transition with the time curved via specified curve
  * function.
- * @param {!Transition<RESULT>} transition
+ * @param {!TransitionDef<RESULT>} transition
  * @param {!Curve|string} curve
- * @return {!Transition<RESULT>}
+ * @return {!TransitionDef<RESULT>}
  * @template RESULT
  */
 export function withCurve(transition, curve) {
@@ -70,12 +70,12 @@ export function withCurve(transition, curve) {
  * a specified as a map from CSS property names to transition functions for
  * each of these properties.
  * @param {!Element} element
- * @param {!Object<string, !Transition>} styles
- * @return {!Transition<void>}
+ * @param {!Object<string, !TransitionDef>} styles
+ * @return {!TransitionDef<void>}
  */
 export function setStyles(element, styles) {
   return (time, complete) => {
-    for (let k in styles) {
+    for (const k in styles) {
       st.setStyle(element, k, styles[k](time, complete));
     }
   };
@@ -86,10 +86,10 @@ export function setStyles(element, styles) {
  * A basic numeric interpolation.
  * @param {number} start
  * @param {number} end
- * @return {!Transition<number>}
+ * @return {!TransitionDef<number>}
  */
 export function numeric(start, end) {
-  return (time) => {
+  return time => {
     return start + (end - start) * time;
   };
 }
@@ -101,15 +101,15 @@ export function numeric(start, end) {
  * @param {number} end
  * @param {number} extended
  * @param {number} threshold
- * @return {!Transition<number>}
+ * @return {!TransitionDef<number>}
  */
 export function spring(start, end, extended, threshold) {
   if (end == extended) {
-    return (time) => {
+    return time => {
       return numeric(start, end)(time);
     };
   }
-  return (time) => {
+  return time => {
     if (time < threshold) {
       return start + (extended - start) * (time / threshold);
     }
@@ -121,11 +121,11 @@ export function spring(start, end, extended, threshold) {
 
 /**
  * Adds "px" units.
- * @param {!Transition<number>} transition
- * @return {!Transition<string>}
+ * @param {!TransitionDef<number>} transition
+ * @return {!TransitionDef<string>}
  */
 export function px(transition) {
-  return (time) => {
+  return time => {
     return transition(time) + 'px';
   };
 }
@@ -133,12 +133,12 @@ export function px(transition) {
 
 /**
  * A transition for "translateX" of CSS "transform" property.
- * @param {!Transition<number|string>} transition
- * @return {!Transition<string>}
+ * @param {!TransitionDef<number|string>} transition
+ * @return {!TransitionDef<string>}
  */
 export function translateX(transition) {
-  return (time) => {
-    let res = transition(time);
+  return time => {
+    const res = transition(time);
     if (typeof res == 'string') {
       return `translateX(${res})`;
     }
@@ -149,12 +149,12 @@ export function translateX(transition) {
 
 /**
  * A transition for "translate(x, y)" of CSS "transform" property.
- * @param {!Transition<number|string>} transitionX
- * @param {!Transition<number|string>|undefined} opt_transitionY
- * @return {!Transition<string>}
+ * @param {!TransitionDef<number|string>} transitionX
+ * @param {!TransitionDef<number|string>|undefined} opt_transitionY
+ * @return {!TransitionDef<string>}
  */
 export function translate(transitionX, opt_transitionY) {
-  return (time) => {
+  return time => {
     let x = transitionX(time);
     if (typeof x == 'number') {
       x = st.px(x);
@@ -174,11 +174,11 @@ export function translate(transitionX, opt_transitionY) {
 
 /**
  * A transition for "scale" of CSS "transform" property.
- * @param {!Transition<number|string>} transition
- * @return {!Transition<string>}
+ * @param {!TransitionDef<number|string>} transition
+ * @return {!TransitionDef<string>}
  */
 export function scale(transition) {
-  return (time) => {
+  return time => {
     return `scale(${transition(time)})`;
   };
 }
