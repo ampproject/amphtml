@@ -122,6 +122,49 @@ describe('AccessService', () => {
     expect(service.config_.login).to.equal('https://acme.com/l');
   });
 
+  it('should default type to "client"', () => {
+    const config = {
+      'authorization': 'https://acme.com/a',
+      'pingback': 'https://acme.com/p',
+      'login': 'https://acme.com/l'
+    };
+    element.textContent = JSON.stringify(config);
+    const service = new AccessService(window);
+    expect(service.config_.type).to.equal('client');
+  });
+
+  it('should parse type', () => {
+    const config = {
+      'type': 'client',
+      'authorization': 'https://acme.com/a',
+      'pingback': 'https://acme.com/p',
+      'login': 'https://acme.com/l'
+    };
+    element.textContent = JSON.stringify(config);
+    expect(new AccessService(window).config_.type).to.equal('client');
+
+    config['type'] = 'server';
+    element.textContent = JSON.stringify(config);
+    expect(new AccessService(window).config_.type).to.equal('server');
+
+    config['type'] = 'other';
+    element.textContent = JSON.stringify(config);
+    expect(new AccessService(window).config_.type).to.equal('other');
+  });
+
+  it('should fail if type is unknown', () => {
+    const config = {
+      'type': 'unknown',
+      'authorization': 'https://acme.com/a',
+      'pingback': 'https://acme.com/p',
+      'login': 'https://acme.com/l'
+    };
+    element.textContent = JSON.stringify(config);
+    expect(() => {
+      new AccessService(window);
+    }).to.throw(/Unknown access type/);
+  });
+
   it('should NOT start when experiment is off or disabled', () => {
     document.body.removeChild(element);
     const service = new AccessService(window);
@@ -215,6 +258,25 @@ describe('AccessService authorization', () => {
     }
     sandbox.restore();
     sandbox = null;
+  });
+
+  it('should run authorization flow', () => {
+    cidMock.expects('get')
+        .withExactArgs('amp-access', sinon.match(() => true))
+        .returns(Promise.resolve('reader1'))
+        .once();
+    xhrMock.expects('fetchJson')
+        .withExactArgs('https://acme.com/a?rid=reader1',
+            {credentials: 'include'})
+        .returns(Promise.resolve({access: true}))
+        .once();
+    const promise = service.runAuthorization_();
+    expect(document.documentElement).to.have.class('amp-access-loading');
+    return promise.then(() => {
+      expect(document.documentElement).not.to.have.class('amp-access-loading');
+      expect(elementOn).not.to.have.attribute('amp-access-hide');
+      expect(elementOff).to.have.attribute('amp-access-hide');
+    });
   });
 
   it('should run authorization flow', () => {
@@ -791,5 +853,76 @@ describe('AccessService login', () => {
     const p2 = service.login();
     expect(p1).to.equal(service.loginPromise_);
     expect(p2).to.equal(p1);
+  });
+});
+
+
+describe('AccessService type=other', () => {
+
+  let sandbox;
+  let configElement;
+  let xhrMock;
+  let cidMock;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+
+    markElementScheduledForTesting(window, 'amp-analytics');
+    installCidService(window);
+
+    configElement = document.createElement('script');
+    configElement.setAttribute('id', 'amp-access');
+    configElement.setAttribute('type', 'application/json');
+    configElement.textContent = JSON.stringify({'type': 'other'});
+    document.body.appendChild(configElement);
+
+    service = new AccessService(window);
+    service.isExperimentOn_ = true;
+
+    service.vsync_ = {
+      mutate: callback => {
+        callback();
+      },
+      mutatePromise: callback => {
+        callback();
+        return Promise.resolve();
+      }
+    };
+    xhrMock = sandbox.mock(service.xhr_);
+    const cid = {
+      get: () => {}
+    };
+    cidMock = sandbox.mock(cid);
+    service.cid_ = Promise.resolve(cid);
+  });
+
+  afterEach(() => {
+    if (configElement.parentElement) {
+      configElement.parentElement.removeChild(configElement);
+    }
+    sandbox.restore();
+    sandbox = null;
+  });
+
+  it('should short-circuit authorization flow', () => {
+    cidMock.expects('get').never();
+    xhrMock.expects('fetchJson').never();
+    const promise = service.runAuthorization_();
+    expect(document.documentElement).to.not.have.class('amp-access-loading');
+    return promise.then(() => {
+      expect(document.documentElement).not.to.have.class('amp-access-loading');
+      expect(service.firstAuthorizationPromise_).to.exist;
+      return service.firstAuthorizationPromise_;
+    });
+  });
+
+  it('should short-circuit pingback flow', () => {
+    cidMock.expects('get').never();
+    xhrMock.expects('fetchJson').never();
+    return service.reportViewToServer_();
+  });
+
+  it('should short-circuit login flow', () => {
+    expect(() => service.login()).to.throw(/Login URL is not configured/);
   });
 });

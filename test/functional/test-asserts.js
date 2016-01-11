@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {assert} from '../../src/asserts';
+import {assert, assertEnumValue} from '../../src/asserts';
 
 describe('asserts', () => {
 
@@ -66,5 +66,29 @@ describe('asserts', () => {
     expect(error).to.be.instanceof(Error);
     expect(error.associatedElement).to.equal(div);
     expect(error.fromAssert).to.equal(true);
+  });
+});
+
+
+describe('assertEnumValue', () => {
+
+  it('should return the enum value', () => {
+    const enum1 = {a: 'value1', b: 'value2'};
+    expect(assertEnumValue(enum1, 'value1')).to.equal('value1');
+    expect(assertEnumValue(enum1, 'value2')).to.equal('value2');
+  });
+
+  it('should fail with unknown enum value', () => {
+    const enum1 = {a: 'value1', b: 'value2'};
+    expect(() => assertEnumValue(enum1, 'value3'))
+        .to.throw('Unknown enum value: "value3"');
+    expect(() => assertEnumValue(enum1, 'value3', 'MyEnum'))
+        .to.throw('Unknown MyEnum value: "value3"');
+  });
+
+  it('should fail with values of different case', () => {
+    const enum1 = {a: 'value1', b: 'value2'};
+    expect(() => assertEnumValue(enum1, 'VALUE1'))
+        .to.throw('Unknown enum value: "VALUE1"');
   });
 });
