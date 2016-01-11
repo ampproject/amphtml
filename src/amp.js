@@ -44,6 +44,8 @@ try {
   installStyles(document, cssText, () => {
     try {
       installCoreServices(window);
+      // We need the core services (viewer/resources) to start instrumenting
+      perf.coreServicesAvailable();
       templatesFor(window);
 
       installImg(window);

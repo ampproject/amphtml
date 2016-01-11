@@ -214,6 +214,26 @@ export class Resources {
     return this.resources_.slice(0);
   }
 
+  /**
+   * Returns a subset of resources which is identified as being in the current
+   * viewport.
+   * @param {boolean=} opt_isInPrerender signifies if we are in prerender mode.
+   * @return {!Array<!Resource>}
+   */
+  getResourcesInViewport(opt_isInPrerender) {
+    opt_isInPrerender = opt_isInPrerender || false;
+    const viewportRect = this.viewport_.getRect();
+    return this.resources_.filter(r => {
+      if (r.hasOwner() || !r.isDisplayed() || !r.overlaps(viewportRect)) {
+        return false;
+      }
+      if (opt_isInPrerender && !r.prerenderAllowed()) {
+        return false;
+      }
+      return true;
+    });
+  }
+
   /** @private */
   monitorInput_() {
     const input = inputFor(this.win);
@@ -1340,6 +1360,12 @@ export class Resource {
      * @private {number|undefined}
      */
     this.pendingChangeHeight_;
+
+    /** @private {?function(*)} */
+    this.whenFirstLayoutCompleteResolve_ = null;
+
+    /** @private @const {?Promise} */
+    this.whenFirstLayoutCompletePromise_ = null;
   }
 
   /**
@@ -1414,7 +1440,12 @@ export class Resource {
     if (!built) {
       return false;
     }
-    this.state_ = ResourceState_.NOT_LAID_OUT;
+
+    if (this.hasBeenMeasured()) {
+      this.state_ = ResourceState_.READY_FOR_LAYOUT;
+    } else {
+      this.state_ = ResourceState_.NOT_LAID_OUT;
+    }
     return true;
   }
 
@@ -1470,25 +1501,22 @@ export class Resource {
    * Measures the resource's boundaries. Only allowed for upgraded elements.
    */
   measure() {
-    assert(this.element.isUpgraded(), 'Must be upgraded to measure: %s',
-        this.debugid);
     this.isMeasureRequested_ = false;
-    if (this.state_ == ResourceState_.NOT_BUILT) {
-      // Can't measure unbuilt element.
-      return;
-    }
     const box = this.resources_.viewport_.getLayoutRect(this.element);
     // Note that "left" doesn't affect readiness for the layout.
     if (this.state_ == ResourceState_.NOT_LAID_OUT ||
           this.layoutBox_.top != box.top ||
           this.layoutBox_.width != box.width ||
           this.layoutBox_.height != box.height) {
-      if (this.state_ == ResourceState_.NOT_LAID_OUT ||
-              this.element.isRelayoutNeeded()) {
+
+      if (this.element.isUpgraded() &&
+              this.state_ != ResourceState_.NOT_BUILT &&
+              (this.state_ == ResourceState_.NOT_LAID_OUT ||
+                  this.element.isRelayoutNeeded())) {
         this.state_ = ResourceState_.READY_FOR_LAYOUT;
       }
     }
-    if (this.layoutBox_.top == -10000) {
+    if (!this.hasBeenMeasured()) {
       this.initialLayoutBox_ = box;
     }
     this.layoutBox_ = box;
@@ -1500,6 +1528,14 @@ export class Resource {
    */
   isMeasureRequested() {
     return this.isMeasureRequested_;
+  }
+
+  /**
+   * Checks if the current resource has been measured.
+   * @return {boolean}
+   */
+  hasBeenMeasured() {
+    return this.layoutBox_.top != -10000;
   }
 
   /**
@@ -1632,8 +1668,10 @@ export class Resource {
     } catch (e) {
       return Promise.reject(e);
     }
+
     this.layoutPromise_ = promise.then(() => this.layoutComplete_(true),
         reason => this.layoutComplete_(false, reason));
+    this.layoutPromise_.then(this.whenFirstLayoutCompleteResolve_);
     return this.layoutPromise_;
   }
 
@@ -1652,6 +1690,20 @@ export class Resource {
       log.fine(TAG_, 'loading failed:', this.debugid, opt_reason);
       return Promise.reject(opt_reason);
     }
+  }
+
+  /**
+   * Returns a promise that is resolved when this resource is laid out
+   * for the first time.
+   * @return {!Promise}
+   */
+  whenFirstLayoutComplete() {
+    if (!this.whenFirstLayoutCompletePromise_) {
+      this.whenFirstLayoutCompletePromise_ = new Promise(resolve => {
+        this.whenFirstLayoutCompleteResolve_ = resolve;
+      });
+    }
+    return this.whenFirstLayoutCompletePromise_;
   }
 
   /**

@@ -258,7 +258,7 @@ export class UserNotificationManager {
 
     /** @private {!Promise} */
     this.managerReadyPromise_ = all([
-      this.viewer_.whenVisible(),
+      this.viewer_.whenFirstVisible(),
       whenDocumentReady(this.win_.document)
     ]);
 
