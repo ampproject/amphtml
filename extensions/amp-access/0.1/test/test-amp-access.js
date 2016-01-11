@@ -231,8 +231,8 @@ describe('AccessService authorization', () => {
     expect(document.documentElement).to.have.class('amp-access-loading');
     return promise.then(() => {
       expect(document.documentElement).not.to.have.class('amp-access-loading');
-      expect(elementOn).not.to.have.attribute('amp-access-off');
-      expect(elementOff).to.have.attribute('amp-access-off');
+      expect(elementOn).not.to.have.attribute('amp-access-hide');
+      expect(elementOff).to.have.attribute('amp-access-hide');
     });
   });
 
@@ -250,8 +250,8 @@ describe('AccessService authorization', () => {
     expect(document.documentElement).to.have.class('amp-access-loading');
     return promise.then(() => {
       expect(document.documentElement).not.to.have.class('amp-access-loading');
-      expect(elementOn).not.to.have.attribute('amp-access-off');
-      expect(elementOff).not.to.have.attribute('amp-access-off');
+      expect(elementOn).not.to.have.attribute('amp-access-hide');
+      expect(elementOff).not.to.have.attribute('amp-access-hide');
     });
   });
 
@@ -358,18 +358,18 @@ describe('AccessService applyAuthorizationToElement_', () => {
   }
 
   it('should toggle authorization attribute', () => {
-    expect(elementOn).not.to.have.attribute('amp-access-off');
-    expect(elementOff).not.to.have.attribute('amp-access-off');
+    expect(elementOn).not.to.have.attribute('amp-access-hide');
+    expect(elementOff).not.to.have.attribute('amp-access-hide');
 
     service.applyAuthorizationToElement_(elementOn, {access: true});
     service.applyAuthorizationToElement_(elementOff, {access: true});
-    expect(elementOn).not.to.have.attribute('amp-access-off');
-    expect(elementOff).to.have.attribute('amp-access-off');
+    expect(elementOn).not.to.have.attribute('amp-access-hide');
+    expect(elementOff).to.have.attribute('amp-access-hide');
 
     service.applyAuthorizationToElement_(elementOn, {access: false});
     service.applyAuthorizationToElement_(elementOff, {access: false});
-    expect(elementOn).to.have.attribute('amp-access-off');
-    expect(elementOff).not.to.have.attribute('amp-access-off');
+    expect(elementOn).to.have.attribute('amp-access-hide');
+    expect(elementOff).not.to.have.attribute('amp-access-hide');
   });
 
   it('should render and re-render templates when access is on', () => {
