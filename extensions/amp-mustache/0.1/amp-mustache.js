@@ -14,18 +14,9 @@
  * limitations under the License.
  */
 
-import {isExperimentOn} from '../../../src/experiments';
-import {log} from '../../../src/log';
 import {parse as mustacheParse, render as mustacheRender,
     setUnescapedSanitizier} from '../../../third_party/mustache/mustache';
 import {sanitizeHtml, sanitizeFormattingHtml} from '../../../src/sanitizer';
-
-/** @const */
-const EXPERIMENT = 'mustache';
-
-/** @const */
-const TAG = 'AmpMustache';
-
 
 // Configure inline sanitizer for unescaped values.
 setUnescapedSanitizier(sanitizeFormattingHtml);
@@ -39,19 +30,8 @@ setUnescapedSanitizier(sanitizeFormattingHtml);
  */
 export class AmpMustache extends AMP.BaseTemplate {
 
-  /**
-   * @return {boolean}
-   * @private
-   */
-  isExperimentOn_() {
-    return isExperimentOn(this.getWin(), EXPERIMENT);
-  }
-
   /** @override */
   compileCallback() {
-    if (!this.isExperimentOn_()) {
-      return;
-    }
     /** @private @const {string} */
     this.template_ = this.element./*OK*/innerHTML;
     mustacheParse(this.template_);
@@ -59,14 +39,6 @@ export class AmpMustache extends AMP.BaseTemplate {
 
   /** @override */
   render(data) {
-    if (!this.isExperimentOn_()) {
-      const m = `Experiment "${EXPERIMENT}" disabled`;
-      log.warn(TAG, m, this.element);
-      const fallback = document.createElement('div');
-      fallback.textContent = m;
-      return fallback;
-    }
-
     const html = mustacheRender(this.template_, data);
     const sanitized = sanitizeHtml(html);
     const root = this.getWin().document.createElement('div');

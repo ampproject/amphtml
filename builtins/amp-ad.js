@@ -215,6 +215,11 @@ export function installAd(win) {
         listenOnce(this.iframe_, 'no-content', () => {
           this.noContentHandler_();
         });
+        // Triggered by context.reportRenderedEntityIdentifier(…) inside the ad
+        // iframe.
+        listenOnce(this.iframe_, 'entity-id', info => {
+          this.element.setAttribute('creative-id', info.id);
+        });
         // Triggered by context.observeIntersection(…) inside the ad iframe.
         // We use listen instead of listenOnce, because a single ad might
         // have multiple parties wanting to receive viewability data.

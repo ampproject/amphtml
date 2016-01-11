@@ -121,8 +121,9 @@ describe('3p-frame', () => {
       expect(win.context.pageViewId).to.equal(docInfo.pageViewId);
       expect(win.context.referrer).to.equal(referrer);
       expect(win.context.data.testAttr).to.equal('value');
-      expect(win.context.noContentAvailable).to.be.function;
-      expect(win.context.observeIntersection).to.be.function;
+      expect(win.context.noContentAvailable).to.be.a('function');
+      expect(win.context.observeIntersection).to.be.a('function');
+      expect(win.context.reportRenderedEntityIdentifier).to.be.a('function');
       const c = win.document.getElementById('c');
       expect(c).to.not.be.null;
       expect(c.textContent).to.contain('pong');

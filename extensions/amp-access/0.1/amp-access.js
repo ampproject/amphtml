@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {all} from '../../../src/promise';
 import {actionServiceFor} from '../../../src/action';
 import {assertHttpsUrl} from '../../../src/url';
 import {cidFor} from '../../../src/cid';
@@ -27,6 +28,7 @@ import {log} from '../../../src/log';
 import {onDocumentReady} from '../../../src/document-state';
 import {openLoginDialog} from './login-dialog';
 import {parseQueryString} from '../../../src/url';
+import {templatesFor} from '../../../src/template';
 import {timer} from '../../../src/timer';
 import {urlReplacementsFor} from '../../../src/url-replacements';
 import {viewerFor} from '../../../src/viewer';
@@ -60,6 +62,9 @@ const TAG = 'AmpAccess';
 
 /** @const {number} */
 const VIEW_TIMEOUT = 2000;
+
+/** @const {string} */
+const TEMPLATE_PROP = '__AMP_ACCESS__TEMPLATE';
 
 
 /**
@@ -112,11 +117,20 @@ export class AccessService {
     /** @private @const {!Viewport} */
     this.viewport_ = viewportFor(this.win);
 
+    /** @private @const {!Templates} */
+    this.templates_ = templatesFor(this.win);
+
     /** @private @const {function(string):Promise<string>} */
     this.openLoginDialog_ = openLoginDialog.bind(null, this.win);
 
     /** @private {?Promise<string>} */
     this.readerIdPromise_ = null;
+
+    /** @private {!Promise} */
+    this.firstAuthorizationPromise_ = new Promise(resolve => {
+      /** @private {!Promise} */
+      this.firstAuthorizationResolver_ = resolve;
+    });
 
     /** @private {?Promise} */
     this.reportViewPromise_ = null;
@@ -222,9 +236,12 @@ export class AccessService {
       return this.xhr_.fetchJson(url, {credentials: 'include'});
     }).then(response => {
       log.fine(TAG, 'Authorization response: ', response);
+      this.firstAuthorizationResolver_();
       this.toggleTopClass_('amp-access-loading', false);
-      onDocumentReady(this.win.document, () => {
-        this.applyAuthorization_(response);
+      return new Promise((resolve, reject) => {
+        onDocumentReady(this.win.document, () => {
+          this.applyAuthorization_(response).then(resolve, reject);
+        });
       });
     }).catch(error => {
       log.error(TAG, 'Authorization failed: ', error);
@@ -234,32 +251,107 @@ export class AccessService {
 
   /**
    * @param {!JSONObjectDef} response
+   * @return {!Promise}
    * @private
    */
   applyAuthorization_(response) {
     const elements = this.win.document.querySelectorAll('[amp-access]');
+    const promises = [];
     for (let i = 0; i < elements.length; i++) {
-      this.applyAuthorizationToElement_(elements[i], response);
+      promises.push(this.applyAuthorizationToElement_(elements[i], response));
     }
+    return all(promises);
   }
 
   /**
    * @param {!Element} element
    * @param {!JSONObjectDef} response
+   * @return {!Promise}
    * @private
    */
   applyAuthorizationToElement_(element, response) {
     const expr = element.getAttribute('amp-access');
     const on = evaluateAccessExpr(expr, response);
+    let renderPromise = null;
+    if (on) {
+      renderPromise = this.renderTemplates_(element, response);
+    }
+    if (renderPromise) {
+      return renderPromise.then(() =>
+          this.applyAuthorizationAttrs_(element, on));
+    }
+    return this.applyAuthorizationAttrs_(element, on);
+  }
 
-    // TODO(dvoytenko): support templates
-
-    this.vsync_.mutate(() => {
+  /**
+   * @param {!Element} element
+   * @param {boolean} on
+   * @return {!Promise}
+   * @private
+   */
+  applyAuthorizationAttrs_(element, on) {
+    return this.vsync_.mutatePromise(() => {
       if (on) {
-        element.removeAttribute('amp-access-off');
+        element.removeAttribute('amp-access-hide');
       } else {
-        element.setAttribute('amp-access-off', '');
+        element.setAttribute('amp-access-hide', '');
       }
+    });
+  }
+
+  /**
+   * Discovers and renders templates.
+   * @param {!Element} element
+   * @param {!JSONObjectDef} response
+   * @return {!Promise}
+   * @private
+   */
+  renderTemplates_(element, response) {
+    const promises = [];
+    const templateElements = element.querySelectorAll('[amp-access-template]');
+    if (templateElements.length > 0) {
+      for (let i = 0; i < templateElements.length; i++) {
+        const p = this.renderTemplate_(element, templateElements[i], response)
+            .catch(error => {
+              // Ignore the error.
+              log.error(TAG, 'Template failed: ', error,
+                  templateElements[i], element);
+            });
+        promises.push(p);
+      }
+    }
+    return promises.length > 0 ? all(promises) : null;
+  }
+
+  /**
+   * @param {!Element} element
+   * @param {!Element} templateOrPrev
+   * @param {!JSONObjectDef} response
+   * @return {!Promise}
+   * @private
+   */
+  renderTemplate_(element, templateOrPrev, response) {
+    let template = templateOrPrev;
+    let prev = null;
+    if (template.tagName != 'TEMPLATE') {
+      prev = template;
+      template = prev[TEMPLATE_PROP];
+    }
+    if (!template) {
+      return Promise.reject(new Error('template not found'));
+    }
+
+    const rendered = this.templates_.renderTemplate(template, response);
+    return rendered.then(element => {
+      return this.vsync_.mutatePromise(() => {
+        element.setAttribute('amp-access-template', '');
+        element[TEMPLATE_PROP] = template;
+        if (template.parentElement) {
+          template.parentElement.replaceChild(element, template);
+        } else if (prev && prev.parentElement) {
+          prev.parentElement.replaceChild(element, prev);
+        }
+      });
     });
   }
 
@@ -288,14 +380,19 @@ export class AccessService {
       return this.reportViewPromise_;
     }
     log.fine(TAG, 'start view monitoring');
-    this.reportViewPromise_ = this.whenViewed_().then(
-        this.reportViewToServer_.bind(this),
-        reason => {
-          // Ignore - view has been canceled.
-          log.fine(TAG, 'view cancelled:', reason);
-          this.reportViewPromise_ = null;
-          throw reason;
-        });
+    this.reportViewPromise_ = this.whenViewed_()
+        .then(() => {
+          // Wait for the first authorization flow to complete.
+          return this.firstAuthorizationPromise_;
+        })
+        .then(
+            this.reportViewToServer_.bind(this),
+            reason => {
+              // Ignore - view has been canceled.
+              log.fine(TAG, 'view cancelled:', reason);
+              this.reportViewPromise_ = null;
+              throw reason;
+            });
     return this.reportViewPromise_;
   }
 

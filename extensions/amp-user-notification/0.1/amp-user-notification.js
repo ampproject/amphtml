@@ -15,14 +15,15 @@
  */
 
 import {all} from '../../../src/promise';
-import {assertHttpsUrl} from '../../../src/url';
+import {assertHttpsUrl, addParamsToUrl} from '../../../src/url';
 import {assert} from '../../../src/asserts';
 import {cidFor} from '../../../src/cid';
 import {getService} from '../../../src/service';
 import {isExperimentOn} from '../../../src/experiments';
 import {log} from '../../../src/log';
-import {whenDocumentReady} from '../../../src/document-state';
+import {urlReplacementsFor} from '../../../src/url-replacements';
 import {viewerFor} from '../../../src/viewer';
+import {whenDocumentReady} from '../../../src/document-state';
 import {xhrFor} from '../../../src/xhr';
 
 
@@ -95,6 +96,9 @@ export class AmpUserNotification extends AMP.BaseElement {
     /** @private @const {!Window} */
     this.win_ = this.getWin();
 
+    /** @private @const {!UrlReplacements} */
+    this.urlReplacements_ = urlReplacementsFor(this.win_);
+
     /** @private {?string} */
     this.ampUserId_ = null;
 
@@ -136,28 +140,36 @@ export class AmpUserNotification extends AMP.BaseElement {
   }
 
   /**
+   * Constructs the new href to execute a `GET` request with the
+   * `elementId` and `ampUserId` query params appended.
+   * @param {string} ampUserId
+   * @return {!Promise<string>}
+   * @private
+   */
+  buildGetHref_(ampUserId) {
+    return this.urlReplacements_.expand(this.showIfHref_).then(href => {
+      return addParamsToUrl(href, {
+        elementId: this.elementId_,
+        ampUserId: ampUserId
+      });
+    });
+  }
+
+  /**
    * Executes a `POST` request to the url given on the `data-show-if-href`
    * attribute.
    * @param {string} ampUserId
    * @return {!Promise<!PostResponseMetadataDef>}
    * @private
    */
-  postShowEndpoint_(ampUserId) {
-    // TODO(erwinm, #1228)
-    // Determine wether this should be a POST with json body
-    // or a GET with data on the query params.
+  getShowEndpoint_(ampUserId) {
     this.ampUserId_ = ampUserId;
-    const getReq = {
-      method: 'POST',
-      credentials: 'include',
-      /** @type {PostRequestMetadataDef} */
-      body: {
-        'elementId': this.elementId_,
-        'ampUserId': ampUserId
-      }
-    };
-
-    return xhrFor(this.win_).fetchJson(this.showIfHref_, getReq);
+    return this.buildGetHref_(ampUserId).then(href => {
+      const getReq = {
+        credentials: 'include'
+      };
+      return xhrFor(this.win_).fetchJson(href, getReq);
+    });
   }
 
   /**
@@ -177,12 +189,12 @@ export class AmpUserNotification extends AMP.BaseElement {
   }
 
   /**
-   * Success handler for `postShowEndpoint_`.
+   * Success handler for `getShowEndpoint_`.
    * @param {!PostResponseMetadataDef}
    * @return {!Promise<boolean>}
    * @private
    */
-  onPostShowEndpointSuccess_(data) {
+  onGetShowEndpointSuccess_(data) {
     assert(typeof data['showNotification'] == 'boolean', '`showNotification` ' +
         'should be a boolean. Got "%s" which is of type %s.',
         data['showNotification'], typeof data['showNotification']);
@@ -218,8 +230,8 @@ export class AmpUserNotification extends AMP.BaseElement {
   /** @override */
   shouldShow() {
     return this.getAsyncCid_()
-        .then(this.postShowEndpoint_.bind(this))
-        .then(this.onPostShowEndpointSuccess_.bind(this));
+        .then(this.getShowEndpoint_.bind(this))
+        .then(this.onGetShowEndpointSuccess_.bind(this));
   }
 
   /** @override */

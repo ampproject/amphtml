@@ -20,12 +20,12 @@
 # in production from crashing. This id is not relevant to validator.js
 # because thus far, engine (validator.js) and spec file (validator.protoascii)
 # are always released together.
-min_validator_revision_required: 70
+min_validator_revision_required: 72
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 103
+spec_file_revision: 108
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
 # These rules are just enough to validate the example from the spec.
@@ -67,13 +67,6 @@ tags: {
     value: ""
     alternative_names: "amp"
   }
-}
-# Legacy support for when the amp identification is done by doctype.
-tags: {
-  name: "html"
-  detail: "top-level html"
-  mandatory_parent: "!doctype"
-  unique: true
 }
 # 4.2 Document metadata
 # 4.2.1 The head element
@@ -522,10 +515,10 @@ spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-forma
 tags: {
   name: "style"
   mandatory_parent: "head"
-  detail: "mandatory style (js enabled) opacity 0"
+  detail: "boilerplate (js enabled) - old variant"
   unique: true
-  mandatory: true
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#opacity"
+  mandatory_alternatives: "boilerplate (js enabled)"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#boilerplate"
   cdata: {
     cdata_regex: "body ?{opacity: ?0}"
   }
@@ -533,10 +526,10 @@ tags: {
 tags: {
   name: "style"
   mandatory_parent: "noscript"
-  detail: "mandatory style (noscript) opacity 1"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#opacity"
+  detail: "boilerplate (noscript) - old variant"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#boilerplate"
   unique: true
-  mandatory: true
+  mandatory_alternatives: "boilerplate (noscript)"
   cdata {
     cdata_regex: "body ?{opacity: ?1}"
   }
@@ -544,10 +537,47 @@ tags: {
 tags: {
   name: "noscript"
   mandatory_parent: "head"
-  detail: "noscript enclosure for mandatory style"
+  detail: "noscript enclosure for boilerplate"
   unique: true
   mandatory: true
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#opacity"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#boilerplate"
+}
+
+tags: {
+  name: "style"
+  mandatory_parent: "head"
+  detail: "boilerplate (js enabled)"
+  also_requires: "boilerplate (noscript)"
+  unique: true
+  mandatory_alternatives: "boilerplate (js enabled)"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#boilerplate"
+  cdata: {
+    # This regex allows arbitrary whitespace whenever some whitespace
+    # is required in the boilerplate. It was made by replacing ' ' with \\s+.
+    cdata_regex: "body{-webkit-animation:-amp-start\\s+1s\\s+steps\\(1,end\\)\\s+0s\\s+1\\s+normal\\s+both;-moz-animation:-amp-start\\s+1s\\s+steps\\(1,end\\)\\s+0s\\s+1\\s+normal\\s+both;-ms-animation:-amp-start\\s+1s\\s+steps\\(1,end\\)\\s+0s\\s+1\\s+normal\\s+both;animation:-amp-start\\s+1s\\s+steps\\(1,end\\)\\s+0s\\s+1\\s+normal\\s+both}@-webkit-keyframes\\s+-amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes\\s+-amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes\\s+-amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes\\s+-amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes\\s+-amp-start{from{visibility:hidden}to{visibility:visible}}"
+  }
+  attrs: {
+    name: "amp-boilerplate"
+    mandatory: true
+    value: ""
+  }
+}
+tags: {
+  name: "style"
+  mandatory_parent: "noscript"
+  detail: "boilerplate (noscript)"
+  also_requires: "boilerplate (js enabled)"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#boilerplate"
+  unique: true
+  mandatory_alternatives: "boilerplate (noscript)"
+  cdata {
+    mandatory_cdata: "body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}"
+  }
+  attrs: {
+    name: "amp-boilerplate"
+    mandatory: true
+    value: ""
+  }
 }
 
 # 4.3 Sections
@@ -1459,10 +1489,7 @@ tags: {
   attrs: {
     name: "src"
     mandatory: true
-    # TODO(johannes): Tighten this down.
-    value_regex: "https://cdn\\.ampproject\\.org/v\\d+\\.js|"
-    "https://ssl\\.gstatic\\.com/amphtml/v\\d+\\.js|"
-    "https://www\\.gstatic\\.com/amphtml/v\\d+\\.js"
+    value_regex: "https://cdn\\.ampproject\\.org/v\\d+\\.js"
   }
   attrs: {
     name: "async"
@@ -1493,9 +1520,7 @@ tags: {
   attrs: {
     name: "src"
     mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v\\d+/[\\w\\.-]+\\.js|"
-                 "https://ssl\\.gstatic\\.com/amphtml/v\\d+/[\\w\\.-]+\\.js|"
-                 "https://www\\.gstatic\\.com/amphtml/v\\d+/[\\w\\.-]+\\.js"
+    value_regex: "https://cdn\\.ampproject\\.org/v\\d+/[\\w\\.-]+\\.js"
   }
   attrs: {
     name: "async"
@@ -1522,6 +1547,18 @@ tags: {
     name: "src"
     value: "https://cdn.ampproject.org/v0/amp-mustache-0.1.js"
     mandatory: true
+  }
+}
+# Specific json data, descendant from an <amp-analytics> tag.
+tags: {
+  name: "script"
+  mandatory_parent: "amp-analytics"
+  detail: "amp-analytics json script"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-analytics.md"
+  attrs: {
+    name: "type"
+    mandatory: true
+    value: "application/json"
   }
 }
 # 4.11.2 Non-conforming features
@@ -1783,6 +1820,15 @@ tags: {
     supported_layouts: FILL
     supported_layouts: NODISPLAY
   }
+}
+
+# <amp-analytics>
+tags: {
+  name: "amp-analytics"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-analytics.md"
+  attrs: { name: "type" value: "googleanalytics" }
+  # TODO(gregable): This should require a valid https URL as the attr value.
+  attrs: { name: "config" }
 }
 
 # <amp-youtube>

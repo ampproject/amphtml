@@ -33,6 +33,9 @@ gulp.task('compile', function() {
     'src/**/*.js',
     // We do not want to load the entry point that loads the babel helpers.
     '!src/amp-babel.js',
+    '!third_party/babel/custom-babel-helpers.js',
+    // Exclude since it's not part of the runtime/extension binaries.
+    '!extensions/amp-access/0.1/amp-login-done.js',
     'builtins/**.js',
     'third_party/caja/html-sanitizer.js',
     'third_party/closure-library/sha384-generated.js',

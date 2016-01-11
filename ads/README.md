@@ -36,9 +36,13 @@ We will provide the following information to the ad:
 - `window.context.canonicalUrl` contains the canonical URL of the primary document as defined by its `link rel=canonical` tag.
 - `window.context.pageViewId` contains a relatively low entropy id that is the same for all ads shown on a page.
 - [ad viewability](#ad-viewability)
-- `window.context.noContentAvailable` is a function that the ad system can call if the ad slot was not filled. The container page will then react by showing placeholder content (not by collapsing the ad slot; sizing rules apply).
 
 More information can be provided in a similar fashion if needed (Please file an issue).
+
+### Methods available to the ad.
+
+- `window.context.noContentAvailable` is a function that the ad system can call if the ad slot was not filled. The container page will then react by showing placeholder content or collapsing the ad if allowed by AMP resizing rules.
+- `window.context.reportRenderedEntityIdentifier` MUST be called by ads, when they know information about which creative was rendered into a particular ad frame and should contain information to allow identifying the creative. Consider including a small string identifying the ad network. This is used by AMP for reporting purposes. The value MUST NOT contain user data or personal identifiable information.
 
 ### Ad viewability
 

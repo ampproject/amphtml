@@ -131,9 +131,17 @@
       background: #ffc;
     }
 
+    .meter-section {
+      margin: 16px;
+      margin-top: 24px;
+      padding: 16px;
+      background: #ffa;
+    }
+
   </style>
   <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
   <script async custom-element="amp-access" src="https://cdn.ampproject.org/v0/amp-access-0.1.js"></script>
+  <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
   <style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
@@ -180,7 +188,13 @@
           </div>
         </div>
 
-        <section amp-access="NOT access" class="login-section">
+        <section amp-access="views > 0" amp-access-hide class="meter-section">
+          <template amp-access-template type="amp-mustache">
+            You are viewing article {{views}} of {{maxViews}}!
+          </template>
+        </section>
+
+        <section amp-access="NOT access" amp-access-hide class="login-section">
           <a on="tap:amp-access.login">Login to read more!</a>
         </section>
 

@@ -352,3 +352,47 @@ describe('Action interceptor', () => {
     expect(inv2.event).to.equal('event3');
   });
 });
+
+
+describe('Action common handler', () => {
+
+  let sandbox;
+  let clock;
+  let action;
+  let target;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+    clock = sandbox.useFakeTimers();
+    action = new ActionService(window);
+    target = document.createElement('target');
+    target.setAttribute('id', 'amp-test-1');
+
+    action.vsync_ = {mutate: callback => callback()};
+  });
+
+  afterEach(() => {
+    action = null;
+    clock.restore();
+    clock = null;
+    sandbox.restore();
+    sandbox = null;
+  });
+
+  it('should execute actions registered', () => {
+    const action1 = sandbox.spy();
+    const action2 = sandbox.spy();
+    action.addGlobalMethodHandler('action1', action1);
+    action.addGlobalMethodHandler('action2', action2);
+
+    action.invoke_(target, 'action1', 'source1', 'event1');
+    expect(action1.callCount).to.equal(1);
+    expect(action2.callCount).to.equal(0);
+
+    action.invoke_(target, 'action2', 'source2', 'event2');
+    expect(action2.callCount).to.equal(1);
+    expect(action1.callCount).to.equal(1);
+
+    expect(target['__AMP_ACTION_QUEUE__']).to.not.exist;
+  });
+});

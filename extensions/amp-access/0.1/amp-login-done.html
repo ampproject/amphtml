@@ -1,0 +1,72 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
+  <meta name="robots" content="noindex">
+  <title>AMP Login Complete</title>
+  <script async src="../../../dist/v0/amp-login-done-0.1.max.js"></script>
+  <style>
+    body {
+      margin: 0;
+    }
+
+    section {
+      margin: 16px;
+    }
+
+    [lang] {
+      display: none;
+    }
+
+    .button-section {
+      display: none;
+    }
+    .amp-postback-error .button-section {
+      display: block;
+    }
+    .amp-postback-error .progress-section {
+      display: none;
+    }
+
+    .button-section {
+      text-align: center;
+    }
+
+    #closeButton {
+      background: #4285f4;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 10px 20px;
+      border-radius: 2px;
+      box-shadow: 0 2px 5px 0 rgba(0,0,0,0.4);
+      outline: none;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+
+  <section class="progress-section">
+    <div lang="en">
+      Returning back...
+    </div>
+    <div lang="fr">
+      Retour...
+    </div>
+  </section>
+
+  <section class="button-section">
+    <button id="closeButton">
+      <div lang="en">
+        Close
+      </div>
+      <div lang="fr">
+        Fermer
+      </div>
+    </button>
+  </section>
+
+</body>
+</html>
