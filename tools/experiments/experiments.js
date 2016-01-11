@@ -49,14 +49,6 @@ const EXPERIMENTS = [
         'DEVELOPING.md#amp-dev-channel-experimental',
   },
 
-  // Mustache
-  {
-    id: 'mustache',
-    name: 'Mustache templates (amp-mustache)',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-        'amp-mustache/amp-mustache.md',
-  },
-
   // AMP Analytics
   {
     id: 'amp-analytics',
