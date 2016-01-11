@@ -29,7 +29,7 @@ describe('Rendering of one ad', () => {
   });
 
   it('ad should create an iframe loaded', function() {
-    this.timeout(10000);
+    this.timeout(20000);
     let iframe;
     let ampAd;
     return pollForLayout(fixture.win, 1, 5500).then(function() {
@@ -81,7 +81,7 @@ describe('Rendering of one ad', () => {
       expect(iframe.getAttribute('height')).to.equal('50');
       return poll('Creative id transmitted. Ad fully rendered.', () => {
         return ampAd.getAttribute('creative-id');
-      }, null, 5000);
+      }, null, 15000);
     }).then(creativeId => {
       expect(creativeId).to.match(/^dfp-/);
     });
