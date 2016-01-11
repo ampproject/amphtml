@@ -188,13 +188,13 @@
           </div>
         </div>
 
-        <section amp-access="views > 0" amp-access-off class="meter-section">
+        <section amp-access="views > 0" amp-access-hide class="meter-section">
           <template amp-access-template type="amp-mustache">
             You are viewing article {{views}} of {{maxViews}}!
           </template>
         </section>
 
-        <section amp-access="NOT access" amp-access-off class="login-section">
+        <section amp-access="NOT access" amp-access-hide class="login-section">
           <a on="tap:amp-access.login">Login to read more!</a>
         </section>
 

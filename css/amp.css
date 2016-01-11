@@ -340,6 +340,6 @@ amp-analytics {
  * Minimal AMP Access CSS. This part has to be here so that the correct UI
  * can be provided before AMP Access JS has been loaded.
  */
-[amp-access][amp-access-off] {
+[amp-access][amp-access-hide] {
   display: none;
 }
