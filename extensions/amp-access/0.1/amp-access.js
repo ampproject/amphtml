@@ -292,9 +292,9 @@ export class AccessService {
   applyAuthorizationAttrs_(element, on) {
     return this.vsync_.mutatePromise(() => {
       if (on) {
-        element.removeAttribute('amp-access-off');
+        element.removeAttribute('amp-access-hide');
       } else {
-        element.setAttribute('amp-access-off', '');
+        element.setAttribute('amp-access-hide', '');
       }
     });
   }
