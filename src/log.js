@@ -48,6 +48,9 @@ export class Log {
     if (!this.win.console || !this.win.console.log) {
       return false;
     }
+    if (this.win.ENABLE_LOG) {
+      return true;
+    }
     // Search for #log=0 or log=1
     const match = this.win.location.hash.match(/log=(\d)/);
     const shouldLog = match && match[1];
