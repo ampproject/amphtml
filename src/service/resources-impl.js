@@ -43,6 +43,7 @@ const PRIORITY_PENALTY_TIME_ = 1000;
 const POST_TASK_PASS_DELAY_ = 1000;
 const MUTATE_DEFER_DELAY_ = 500;
 const FOCUS_HISTORY_TIMEOUT_ = 1000 * 60;  // 1min
+const FOUR_FRAME_DELAY_ = 70;
 
 
 /**
@@ -437,6 +438,13 @@ export class Resources {
   /**
    * Runs the specified mutation on the element and ensures that measures
    * and layouts performed for the affected elements.
+   *
+   * This method should be called whenever a significant mutations are done
+   * on the DOM that could affect layout of elements inside this subtree or
+   * its siblings. The top-most affected element should be specified as the
+   * first argument to this method and all the mutation work should be done
+   * in the mutator callback which is called in the "mutation" vsync phase.
+   *
    * @param {!Element} element
    * @param {function()} mutator
    * @return {!Promise}
@@ -466,7 +474,7 @@ export class Resources {
         if (relayoutTop != -1) {
           this.setRelayoutTop_(relayoutTop);
         }
-        this.schedulePass(100);
+        this.schedulePass(FOUR_FRAME_DELAY_);
 
         // Need to measure again in case the element has become visible or
         // shifted.
@@ -474,7 +482,7 @@ export class Resources {
           const updatedRelayoutTop = calcRelayoutTop();
           if (updatedRelayoutTop != -1 && updatedRelayoutTop != relayoutTop) {
             this.setRelayoutTop_(updatedRelayoutTop);
-            this.schedulePass(100);
+            this.schedulePass(FOUR_FRAME_DELAY_);
           }
         });
       }
