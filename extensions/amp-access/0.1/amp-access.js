@@ -239,7 +239,8 @@ export class AccessService {
       // No consent - an essential part of the access system.
       const consent = Promise.resolve();
       this.readerIdPromise_ = this.cid_.then(cid => {
-        return cid.get('amp-access', consent);
+        return cid.get({scope: 'amp-access', createCookieIfNotPresent: true},
+            consent);
       });
     }
     return this.readerIdPromise_;
