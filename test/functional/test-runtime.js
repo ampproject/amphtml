@@ -32,6 +32,8 @@ describe('runtime', () => {
       addEventListener: () => {},
       document: window.document,
       history: {},
+      navigator: {},
+      setTimeout: () => {},
     };
   });
 
