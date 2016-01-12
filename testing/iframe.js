@@ -61,6 +61,7 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
     if (!html) {
       throw new Error('Cannot find fixture: ' + fixture);
     }
+    html = maybeSwitchToCompiledJs(html);
     let firstLoad = true;
     window.ENABLE_LOG = true;
     // This global function will be called by the iframe immediately when it
@@ -293,4 +294,26 @@ export function expectBodyToBecomeVisible(win) {
             && win.document.body.style.opacity != '0')
         || win.document.body.style.opacity == '1');
   });
+}
+
+/**
+ * Takes a HTML document that is pointing to unminified JS and HTML
+ * binaries and massages the URLs to pointed to compiled binaries
+ * instead.
+ * @param {string} html
+ * @return {string}
+ */
+function maybeSwitchToCompiledJs(html) {
+  if (window.ampTestRuntimeConfig.useCompiledJs) {
+    return html
+        // Main JS
+        .replace(/\/dist\/amp\.js/, '/dist/v0.js')
+        // Extensions
+        .replace(/\.max\.js/g, '.js')
+        // 3p html binary
+        .replace(/\.max\.html/g, '.html')
+        // 3p path
+        .replace(/dist\.3p\/current\//g, 'dist.3p/current-min/');
+  }
+  return html;
 }
