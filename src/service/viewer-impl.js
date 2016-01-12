@@ -208,6 +208,9 @@ export class Viewer {
     if (this.isEmbedded_) {
       const newUrl = removeFragment(this.win.location.href);
       if (newUrl != this.win.location.href && this.win.history.replaceState) {
+        // Persist the hash that we removed has location.originalHash.
+        // This is currently used my mode.js to infer development mode.
+        this.win.location.originalHash = this.win.location.hash;
         this.win.history.replaceState({}, '', newUrl);
         log.fine(TAG_, 'replace url:' + this.win.location.href);
       }

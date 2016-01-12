@@ -24,7 +24,7 @@ import {loadPromise} from '../../src/event-helper';
 if (!window.validatorLoad) {
   window.validatorLoad = (function() {
     const s = document.createElement('script');
-    s.src = 'https://www.gstatic.com/amphtml/v0/validator.js';
+    s.src = 'https://cdn.ampproject.org/v0/validator.js';
     document.body.appendChild(s);
     return loadPromise(s);
   })();

@@ -20,7 +20,11 @@ import {createFixtureIframe, poll, expectBodyToBecomeVisible} from
 describe('error page', () => {
   let fixture;
   beforeEach(() => {
-    return createFixtureIframe('test/fixtures/errors.html', 500).then(f => {
+    return createFixtureIframe('test/fixtures/errors.html', 500, win => {
+      // Trigger dev mode.
+      win.history.pushState({}, '', 'test2.html#development=1');
+      console.error('updated', win.location.hash);
+    }).then(f => {
       fixture = f;
       return poll('errors to happen', () => {
         return fixture.doc.querySelectorAll('[error-message]').length >= 2;
