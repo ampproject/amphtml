@@ -582,6 +582,20 @@ function buildLoginDoneVersion(version, options) {
   var minHtml = html.replace(
       '../../../dist/v0/amp-login-done-' + version + '.max.js',
       'https://cdn.ampproject.org/v0/amp-login-done-' + version + '.js');
+
+  function mkdirSync(path) {
+    try {
+      fs.mkdirSync(path);
+    } catch(e) {
+      if (e.code != 'EEXIST') {
+        throw e;
+      }
+    }
+  }
+
+  mkdirSync('dist');
+  mkdirSync('dist/v0');
+
   fs.writeFileSync('dist/v0/amp-login-done-' + version + '.html',
       minHtml);
 

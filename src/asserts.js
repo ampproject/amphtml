@@ -66,6 +66,25 @@ export function assert(shouldBeTrueish, message, var_args) {
 /*eslint "google-camelcase/google-camelcase": 2*/
 
 /**
+ * Asserts and returns the enum value. If the enum doesn't contain such a value,
+ * the error is thrown.
+ *
+ * @param {!Enum<T>} enumObj
+ * @param {string} s
+ * @param {string=} opt_enumName
+ * @return T
+ * @template T
+ */
+export function assertEnumValue(enumObj, s, opt_enumName) {
+  for (const k in enumObj) {
+    if (enumObj[k] == s) {
+      return enumObj[k];
+    }
+  }
+  throw new Error(`Unknown ${opt_enumName || 'enum'} value: "${s}"`);
+}
+
+/**
  * @param {*} val
  * @return {string}
  */
