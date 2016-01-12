@@ -1198,6 +1198,12 @@ export class Resource {
     /** @private {!Resources} */
     this.resources_ = resources;
 
+    /** @private {number} */
+    this.buildCount_ = 0;
+
+    /** @private {number} */
+    this.buildNodeCount_ = 0;
+
     /** @private {boolean} */
     this.blacklisted_ = false;
 
@@ -1208,7 +1214,7 @@ export class Resource {
     this.priority_ = getElementPriority(element.tagName);
 
     /** @private {!ResourceState_} */
-    this.state_ = element.isBuilt() ? ResourceState_.NOT_LAID_OUT :
+    this.state_ = element.isBuildComplete() ? ResourceState_.NOT_LAID_OUT :
         ResourceState_.NOT_BUILT;
 
     /** @private {number} */
@@ -1286,28 +1292,49 @@ export class Resource {
   }
 
   /**
-   * Requests the resource's element to be built. See {@link AmpElement.build}
-   * for details.
-   * @param {boolean} force
-   * @return {boolean}
+   * Requests the resource's element to be built. See
+   * {@link BaseElement.startBuildCallback},
+   * {@link BaseElement.continueBuildCallback} and
+   * {@link BaseElement.completeBuildCallback} for details.
+   * @param {boolean} completeBuild
    */
-  build(force) {
-    if (this.blacklisted_ || !this.element.isUpgraded()) {
-      return false;
+  build(completeBuild) {
+    // XXX
+    if (this.element.tagName == 'AMP-CAROUSEL') {
+      console.error(this.debugid, 'build ',
+          'buildCount: ', buildCount,
+          'completeBuild: ', completeBuild,
+          'buildNodeCount_: ', this.buildNodeCount_,
+          'childNodes.length: ', this.element.childNodes.length,
+          'changes: ', this.buildNodeCount_ != this.element.childNodes.length,
+          'childNodes: ', this.element.childNodes);
     }
-    let built;
+    if (this.blacklisted_ || !this.element.isUpgraded() ||
+            this.state_ != ResourceState_.NOT_BUILT) {
+      return;
+    }
+    const buildCount = this.buildCount_++;
     try {
-      built = this.element.build(force);
+      // First build: execute startBuildCallback.
+      if (buildCount == 0) {
+        this.element.startBuildCallback();
+      }
+
+      // If children changed: execute continueBuildCallback.
+      if (this.buildNodeCount_ != this.element.childNodes.length) {
+        this.element.continueBuildCallback();
+        this.buildNodeCount_ = this.element.childNodes.length;
+      }
+
+      // Final build: execute completeBuildCallback.
+      if (completeBuild) {
+        this.element.completeBuildCallback();
+        this.state_ = ResourceState_.NOT_LAID_OUT;
+      }
     } catch (e) {
       log.error(TAG_, 'failed to build:', this.debugid, e);
-      built = false;
       this.blacklisted_ = true;
     }
-    if (!built) {
-      return false;
-    }
-    this.state_ = ResourceState_.NOT_LAID_OUT;
-    return true;
   }
 
   /**
@@ -1571,7 +1598,7 @@ export class Resource {
       }
       p = p.then(() => {
         this.onUpgraded_ = undefined;
-        this.build(true);
+        this.build(/* completeBuild */ true);
       });
     }
     return p.then(() => {

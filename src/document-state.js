@@ -37,13 +37,15 @@ export function isDocumentReady(doc) {
 export function onDocumentReady(doc, callback) {
   let ready = isDocumentReady(doc);
   if (ready) {
-    callback();
+    // XXX callback();
+    setTimeout(callback, 30000);
   } else {
     const readyListener = () => {
       if (doc.readyState != 'loading') {
         if (!ready) {
           ready = true;
-          callback();
+          // XXX: callback();
+          setTimeout(callback, 30000);
         }
         doc.removeEventListener('readystatechange', readyListener);
       }

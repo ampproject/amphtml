@@ -24,6 +24,12 @@ import {continueMotion} from '../../../src/motion';
 import * as st from '../../../src/style';
 import * as tr from '../../../src/transition';
 
+// XXX
+var other = [
+  'https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w300-h200-no',
+  'https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w300-h200-no'
+];
+
 
 export class AmpCarousel extends BaseCarousel {
 
@@ -33,15 +39,18 @@ export class AmpCarousel extends BaseCarousel {
   }
 
   /** @override */
-  buildCarousel() {
+  startBuildCallbackCarousel() {
     /** @private {number} */
     this.pos_ = 0;
 
     /** @private {!Array<!Element>} */
-    this.cells_ = this.getRealChildren();
+    this.cells_ = [];
+
+    this.element.classList.add('-amp-parent');
 
     /** @private {!Element} */
     this.container_ = document.createElement('div');
+    this.container_.classList.add('-amp-child');
     st.setStyles(this.container_, {
       whiteSpace: 'nowrap',
       position: 'absolute',
@@ -51,16 +60,39 @@ export class AmpCarousel extends BaseCarousel {
       bottom: 0
     });
     this.element.appendChild(this.container_);
+  }
 
-    this.cells_.forEach(cell => {
-      this.setAsOwner(cell);
-      cell.style.display = 'inline-block';
-      if (cell != this.cells_[0]) {
-        // TODO(dvoytenko): this has to be customizable
-        cell.style.marginLeft = '8px';
+  /** @override */
+  continueBuildCallbackCarousel() {
+    const children = this.getRealChildren();
+    children.forEach(child => {
+      if (child == this.container_) {
+        return;
       }
-      this.container_.appendChild(cell);
+      this.cells_.push(child);
+      this.setAsOwner(child);
+      child.style.display = 'inline-block';
+      if (this.cells_.length > 1) {
+        // TODO(dvoytenko): this has to be customizable
+        child.style.marginLeft = '8px';
+      }
+      this.container_.appendChild(child);
     });
+
+    // XXX
+    const buildCount = this.buildCount || 0;
+    this.buildCount = buildCount + 1;
+    if (buildCount < other.length) {
+      var el = document.createElement('amp-img');
+      el.setAttribute('src', other[buildCount]);
+      el.setAttribute('width', '300');
+      el.setAttribute('height', '200');
+      console.error('will add more: ', el);
+      Promise.resolve().then(() => {
+        console.error('add more: ', el);
+        this.element.appendChild(el);
+      });
+    }
   }
 
   /** @override */
