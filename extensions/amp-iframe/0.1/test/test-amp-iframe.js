@@ -20,6 +20,7 @@ import {adopt} from '../../../../src/runtime';
 import {createIframePromise, pollForLayout, poll}
     from '../../../../testing/iframe';
 import {loadPromise} from '../../../../src/event-helper';
+import {viewportFor} from '../../../../src/viewport';
 import * as sinon from 'sinon';
 
 adopt(window);
@@ -58,6 +59,7 @@ describe('amp-iframe', () => {
       if (opt_height) {
         iframe.iframe.style.height = opt_height;
       }
+      viewportFor(iframe.win).resize_();
       const top = opt_top || '600px';
       i.style.position = 'absolute';
       i.style.top = top;

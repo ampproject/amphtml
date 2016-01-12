@@ -76,6 +76,7 @@ var forbiddenTerms = {
     whitelist: [
       'src/amp-core-service.js',
       'src/service/history-impl.js',
+      'src/service/resources-impl.js',
       'src/service/viewer-impl.js',
       'src/service/viewport-impl.js',
       'src/service/vsync-impl.js',
@@ -85,6 +86,7 @@ var forbiddenTerms = {
     message: privateServiceFactory,
     whitelist: [
       'src/amp-core-service.js',
+      'src/service/resources-impl.js',
       'src/service/viewport-impl.js',
     ],
   },
@@ -92,8 +94,16 @@ var forbiddenTerms = {
     message: privateServiceFactory,
     whitelist: [
       'src/amp-core-service.js',
+      'src/service/resources-impl.js',
       'src/service/viewport-impl.js',
       'src/service/vsync-impl.js',
+    ],
+  },
+  'installResourcesService': {
+    message: privateServiceFactory,
+    whitelist: [
+      'src/amp-core-service.js',
+      'src/service/resources-impl.js',
     ],
   },
   // Privacy sensitive
