@@ -321,7 +321,7 @@ describe('Resources discoverWork', () => {
     resources.visible_ = false;
     resources.prerenderSize_ = 1;
     viewportMock.expects('getRect').returns(
-        layoutRectLtwh(0, 0, 300, 400)).once();
+        layoutRectLtwh(0, 0, 300, 1009)).once();
 
     resources.discoverWork_();
 

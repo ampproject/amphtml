@@ -529,8 +529,9 @@ export class Resources {
   mutateWork_() {
     // Read all necessary data before mutates.
     // The height changing depends largely on the target element's position
-    // in the active viewport. We consider the active viewport the part of the
-    // visible viewport below 10% from the top and above 25% from the bottom.
+    // in the active viewport. When not in prerendering, we also consider the
+    // active viewport the part of the visible viewport below 10% from the top
+    // and above 25% from the bottom.
     // This is basically the portion of the viewport where the reader is most
     // likely focused right now. The main goal is to avoid drastic UI changes
     // in that part of the content. The elements below the active viewport are
@@ -736,14 +737,17 @@ export class Resources {
     if (this.visible_) {
       loadRect = expandLayoutRect(viewportRect, 0.25, 2);
     } else if (this.prerenderSize_ > 0) {
-      loadRect = expandLayoutRect(viewportRect, 0.25,
-          this.prerenderSize_ - 1 + 0.25);
+      loadRect = expandLayoutRect(viewportRect, 0, this.prerenderSize_ - 1);
     } else {
       loadRect = null;
     }
 
-    // Visible viewport = viewport + 25% up/down.
-    const visibleRect = expandLayoutRect(viewportRect, 0.25, 0.25);
+    const visibleRect = this.visible_
+      // When the doc is visible, consider the viewport to be 25% larger,
+      // to minimize effect from small scrolling and notify things that
+      // they are in viewport just before they are actually visible.
+      ? expandLayoutRect(viewportRect, 0.25, 0.25)
+      : viewportRect;
 
     // Phase 3: Schedule elements for layout within a reasonable distance from
     // current viewport.
