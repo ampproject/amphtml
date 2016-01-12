@@ -60,6 +60,7 @@ export function createFixtureIframe(fixture, initialIframeHeight, done) {
       throw new Error('Cannot find fixture: ' + fixture);
     }
     let firstLoad = true;
+    window.ENABLE_LOG = true;
     // This global function will be called by the iframe immediately when it
     // starts loading. This appears to be the only way to get the correct
     // window object early enough to not miss any events that may get fired
