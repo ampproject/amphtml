@@ -16,6 +16,7 @@
 
 import {all} from '../../../src/promise';
 import {actionServiceFor} from '../../../src/action';
+import {assert, assertEnumValue} from '../../../src/asserts';
 import {assertHttpsUrl} from '../../../src/url';
 import {cidFor} from '../../../src/cid';
 import {documentStateFor} from '../../../src/document-state';
@@ -39,20 +40,29 @@ import {xhrFor} from '../../../src/xhr';
 
 /**
  * The configuration properties are:
+ * - type: The type of access workflow: client, server or other.
  * - authorization: The URL of the Authorization endpoint.
  * - pingback: The URL of the Pingback endpoint.
  * - login: The URL of the Login Page.
  *
  * @typedef {{
- *   authorization: string,
- *   pingback: string,
- *   login: string
+ *   type: !AccessType,
+ *   authorization: (string|undefined),
+ *   pingback: (string|undefined),
+ *   login: (string|undefined)
  * }}
  */
 let AccessConfigDef;
 
-/** @const {!Function} */
-const assert = AMP.assert;
+/**
+ * The type of access flow.
+ * @enum {string}
+ */
+const AccessType = {
+  CLIENT: 'client',
+  SERVER: 'server',
+  OTHER: 'other',
+};
 
 /** @const */
 const EXPERIMENT = 'amp-access';
@@ -144,20 +154,42 @@ export class AccessService {
    * @private
    */
   buildConfig_() {
-    let config;
+    let configJson;
     try {
-      config = JSON.parse(this.accessElement_.textContent);
+      configJson = JSON.parse(this.accessElement_.textContent);
     } catch (e) {
       throw new Error('Failed to parse "amp-access" JSON: ' + e);
     }
-    return {
-      authorization: assertHttpsUrl(assert(config['authorization'],
-          '"authorization" URL must be specified')),
-      pingback: assertHttpsUrl(assert(config['pingback'],
-          '"pingback" URL must be specified')),
-      login: assertHttpsUrl(assert(config['login'],
-          '"login" URL must be specified')),
+
+    // Access type.
+    const type = configJson['type'] ?
+        assertEnumValue(AccessType, configJson['type'], 'access type') :
+        AccessType.CLIENT;
+    const config = {
+      type: type,
+      authorization: configJson['authorization'],
+      pingback: configJson['pingback'],
+      login: configJson['login'],
     };
+
+    // Check that all URLs are valid.
+    if (config.authorization) {
+      assertHttpsUrl(config.authorization);
+    }
+    if (config.pingback) {
+      assertHttpsUrl(config.pingback);
+    }
+    if (config.login) {
+      assertHttpsUrl(config.login);
+    }
+
+    // Validate type = client/server.
+    if (type == AccessType.CLIENT || type == AccessType.SERVER) {
+      assert(config.authorization, '"authorization" URL must be specified');
+      assert(config.pingback, '"pingback" URL must be specified');
+      assert(config.login, '"login" URL must be specified');
+    }
+    return config;
   }
 
   /**
@@ -186,6 +218,8 @@ export class AccessService {
 
   /** @private */
   startInternal_() {
+    log.fine(TAG, 'config:', this.config_);
+
     actionServiceFor(this.win).installActionHandler(
         this.accessElement_, this.handleAction_.bind(this));
 
@@ -229,6 +263,12 @@ export class AccessService {
    * @private
    */
   runAuthorization_() {
+    if (this.config_.type == AccessType.OTHER) {
+      log.fine(TAG, 'Ignore authorization due to type=other');
+      this.firstAuthorizationResolver_();
+      return Promise.resolve();
+    }
+
     log.fine(TAG, 'Start authorization via ', this.config_.authorization);
     this.toggleTopClass_('amp-access-loading', true);
     return this.buildUrl_(this.config_.authorization).then(url => {
@@ -436,6 +476,10 @@ export class AccessService {
    * @private
    */
   reportViewToServer_() {
+    if (!this.config_.pingback) {
+      log.fine(TAG, 'Ignore pingback');
+      return Promise.resolve();
+    }
     return this.buildUrl_(this.config_.pingback).then(url => {
       log.fine(TAG, 'Pingback URL: ', url);
       return this.xhr_.sendSignal(url, {
@@ -487,7 +531,8 @@ export class AccessService {
     }
 
     log.fine(TAG, 'Start login');
-    const urlPromise = this.buildUrl_(this.config_.login);
+    const urlPromise = this.buildUrl_(assert(this.config_.login,
+        'Login URL is not configured'));
     this.loginPromise_ = this.openLoginDialog_(urlPromise).then(result => {
       log.fine(TAG, 'Login dialog completed: ', result);
       this.loginPromise_ = null;
