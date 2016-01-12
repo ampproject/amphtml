@@ -61,7 +61,10 @@ var karma = {
     configFile: karmaConf,
     singleRun: true,
     client: {
-      captureConsole: false
+      captureConsole: false,
+      amp: {
+        useCompiledJs: false
+      }
     }
   },
   firefox: {
