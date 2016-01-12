@@ -321,6 +321,38 @@ describe('cid', () => {
         '/www.origin.com/foo/?f=07777999111222)http://www.origin.come2)');
   });
 
+  it('should NOT create fallback cookie by default with string scope', () => {
+    fakeWin.location.href =
+        'https://abc.org/v/www.DIFFERENT.com/foo/?f=0';
+    return cid.get('cookie_name', hasConsent).then(c => {
+      expect(c).to.not.exist;
+      expect(fakeWin.document.cookie).to.not.exist;
+    });
+  });
+
+  it('should NOT create fallback cookie by default with struct scope', () => {
+    fakeWin.location.href =
+        'https://abc.org/v/www.DIFFERENT.com/foo/?f=0';
+    return cid.get({scope: 'cookie_name'}, hasConsent).then(c => {
+      expect(c).to.not.exist;
+      expect(fakeWin.document.cookie).to.not.exist;
+    });
+  });
+
+  it('should create fallback cookie when asked', () => {
+    fakeWin.location.href =
+        'https://abc.org/v/www.DIFFERENT.com/foo/?f=0';
+    return cid.get({scope: 'cookie_name', createCookieIfNotPresent: true},
+        hasConsent).then(c => {
+          expect(c).to.exist;
+          expect(c).to.equal('amp-sha384([1,2,3,0,0,0,0,0,0,0,0,0,0,0,0,15])');
+          expect(fakeWin.document.cookie).to.equal(
+              'cookie_name=' + encodeURIComponent(c) +
+              '; path=/' +
+              '; expires=Fri, 01 Jan 1971 00:00:00 GMT');  // 1 year from 0.
+        });
+  });
+
   function compare(externalCidScope, compareValue) {
     return cid.get(externalCidScope, hasConsent).then(c => {
       expect(c).to.equal(compareValue);

@@ -14,7 +14,7 @@ Display an iframe in your page using the
 
 `amp-iframe` requirements:
 
-* Must be at least 600px or 75% of the first viewport away from the top (except for `click-to-play` iframes as described below).
+* Must be at least 600px or 75% of the first viewport away from the top (except for iframes implemented with a placeholder, as described below).
 * Can only request resources via HTTPS, and they must not be in the same origin as the container,
 unless they do not specify allow-same-origin.
 
