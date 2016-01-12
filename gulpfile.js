@@ -17,8 +17,10 @@
 checkMinVersion();
 
 var autoprefixer = require('autoprefixer');
-var babel = require('babelify');
-var browserify = require('browserify');
+var rollup = require('gulp-rollup');
+var babel = require('rollup-plugin-babel');
+var commonjs = require('rollup-plugin-commonjs');
+var uglify = require('rollup-plugin-uglify');
 var buffer = require('vinyl-buffer');
 var closureCompile = require('./build-system/tasks/compile').closureCompile;
 var cssnano = require('cssnano');
@@ -298,7 +300,7 @@ function dist() {
   compile(false, true);
   buildExtensions({minify: true});
   buildExperiments({minify: true, watch: false});
-  buildLoginDone({minify: true, watch: false});
+  //buildLoginDone({minify: true, watch: false});
 }
 
 /**
@@ -434,16 +436,9 @@ var activeBundleOperationCount = 0;
  */
 function compileJs(srcDir, srcFilename, destDir, options) {
   options = options || {};
-  var bundler = browserify(srcDir + srcFilename, {debug: true})
-      .transform(babel, { loose: argv.strictBabelTransform ? undefined : 'all' });
-  if (options.watch) {
-    bundler = watchify(bundler);
-  }
-
   var wrapper = options.wrapper || '<%= contents %>';
 
   var lazybuild = lazypipe()
-      .pipe(source, srcFilename)
       .pipe(buffer)
       .pipe(replace, /\$internalRuntimeVersion\$/g, internalRuntimeVersion)
       .pipe(replace, /\$internalRuntimeToken\$/g, internalRuntimeToken)
@@ -456,22 +451,38 @@ function compileJs(srcDir, srcFilename, destDir, options) {
 
   function rebundle() {
     activeBundleOperationCount++;
-    bundler.bundle()
-      .on('error', function(err) {
-        activeBundleOperationCount--;
-        if (err instanceof SyntaxError) {
-          console.error(util.colors.red('Syntax error:', err.message));
-        } else {
-          console.error(err);
-        }
-      })
+    gulp.src(srcDir + srcFilename)
+      .pipe(rollup({
+        sourceMap: true,
+        format: 'iife',
+        globals: {
+          'document-register-element/build/document-register-element.max': 'registerElement'
+        },
+        plugins: [
+          babel({
+            runtimeHelpers: true,
+            exclude: 'node_modules/**'
+          }),
+          commonjs({
+            include: [
+              'node_modules/**',
+              'document-register-element/**',
+              './third_party/mustache/**',
+              './extensions/amp-access/0.1/access-expr-impl.js'
+            ]
+          })
+        ]
+      }))
+      .on('error', function(err) { console.error(err); this.emit('end'); })
       .pipe(lazybuild())
       .pipe(rename(options.toName || srcFilename))
       .pipe(lazywrite())
       .on('end', function() {
         activeBundleOperationCount--;
-        if (activeBundleOperationCount == 0) {
-          console.info(util.colors.green('All current JS updates done.'));
+        if (err instanceof SyntaxError) {
+          console.error(util.colors.red('Syntax error:', err.message));
+        } else {
+          console.error(err);
         }
       });
   }
@@ -488,42 +499,28 @@ function compileJs(srcDir, srcFilename, destDir, options) {
   }
 
   function minify() {
-    console.log('Minifying ' + srcFilename);
-    closureCompile(srcDir + srcFilename, destDir, options.minifiedName,
-        options)
-        .then(function() {
-          fs.writeFileSync(destDir + '/version.txt', internalRuntimeVersion);
-          if (options.latestName) {
-            fs.copySync(
-                destDir + '/' + options.minifiedName,
-                destDir + '/' + options.latestName);
-          }
-        });
-  }
-
-  /*
-  Pre closure compiler minification. Add this back, should we have problems
-  with closure.
-  function minify() {
-    console.log('Minifying ' + srcFilename);
-    bundler.bundle()
-      .on('error', function(err) { console.error(err); this.emit('end'); })
-      .pipe(lazybuild())
-      .pipe(uglify({
-        preserveComments: 'some'
+    gulp.src(srcDir + srcFilename)
+      .pipe(rollup({
+        sourceMap: true,
+        format: 'iife',
+        globals: {
+        },
+        plugins: [
+          babel({
+            runtimeHelpers: true,
+            exclude: 'node_modules/**'
+          }),
+          commonjs({
+            include: [
+              'node_modules/**',
+              'document-register-element/**',
+              './third_party/mustache/**',
+              './extensions/amp-access/0.1/access-expr-impl.js'
+            ]
+          }),
+          uglify({ preserveComments: true })
+        ]
       }))
-      .pipe(rename(options.minifiedName))
-      .pipe(lazywrite())
-      .on('end', function() {
-        fs.writeFileSync(destDir + '/version.txt', internalRuntimeVersion);
-        if (options.latestName) {
-          fs.copySync(
-              destDir + '/' + options.minifiedName,
-              destDir + '/' + options.latestName);
-        }
-      });
-  }
-  */
 
   if (options.minify) {
     minify();
