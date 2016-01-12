@@ -435,6 +435,69 @@ export class Resources {
   }
 
   /**
+   * Runs the specified subtree "show" mutation and ensures that measures
+   * and layouts performed for the affected elements.
+   * @param {!Element} root
+   * @param {function()} mutator
+   * @return {!Promise}
+   */
+  showSubtree(root, mutator) {
+    // This is a two-vsync operation: we can only measure after the mutation
+    // has been done.
+    return new Promise(resolve => {
+      this.vsync_.mutate(() => {
+        mutator();
+        this.vsync_.measure(() => {
+          const newTop = this.viewport_.getLayoutRect(root).top;
+          this.setRelayoutTop_(newTop);
+
+          // Remeasure the previously hidden elements.
+          const ampElements = root.getElementsByClassName('-amp-element');
+          for (let i = 0; i < ampElements.length; i++) {
+            const r = this.getResourceForElement(ampElements[i]);
+            r.requestMeasure();
+          }
+
+          this.schedulePass(100);
+          resolve();
+        });
+      });
+    });
+  }
+
+  /**
+   * Runs the specified subtree "hide" mutation and ensures that the affected
+   * elements are unloaded and other elements are remeasured.
+   * @param {!Element} root
+   * @param {function()} mutator
+   * @return {!Promise}
+   */
+  hideSubtree(root, mutator) {
+    return new Promise(resolve => {
+      this.vsync_.run({
+        measure: state => {
+          state.oldTop = this.viewport_.getLayoutRect(root).top;
+        },
+        mutate: state => {
+          mutator();
+          this.setRelayoutTop_(state.oldTop);
+
+          // Unload AMP elements within.
+          const ampElements = root.getElementsByClassName('-amp-element');
+          for (let i = 0; i < ampElements.length; i++) {
+            const r = this.getResourceForElement(ampElements[i]);
+            // TODO(dvoytenko): clarify what type of unload is necessary here.
+            r.documentBecameInactive();
+          }
+
+          this.schedulePass(100);
+          resolve();
+        }
+      });
+    });
+  }
+
+  /**
    * Schedules the work pass at the latest with the specified delay.
    * @param {number=} opt_delay
    */
@@ -627,7 +690,7 @@ export class Resources {
       }
 
       if (minTop != -1) {
-        this.relayoutTop_ = minTop;
+        this.setRelayoutTop_(minTop);
       }
 
       // Execute scroll-adjusting resize requests, if any.
@@ -645,7 +708,7 @@ export class Resources {
               request.resource./*OK*/changeHeight(request.newHeight);
             });
             if (minTop != -1) {
-              this.relayoutTop_ = minTop;
+              this.setRelayoutTop_(minTop);
             }
             // Sync is necessary here to avoid UI jump in the next frame.
             const newScrollHeight = this.viewport_./*OK*/getScrollHeight();
@@ -656,6 +719,18 @@ export class Resources {
           }
         });
       }
+    }
+  }
+
+  /**
+   * @param {number} relayoutTop
+   * @private
+   */
+  setRelayoutTop_(relayoutTop) {
+    if (this.relayoutTop_ == -1) {
+      this.relayoutTop_ = relayoutTop;
+    } else {
+      this.relayoutTop_ = Math.min(relayoutTop, this.relayoutTop_);
     }
   }
 
@@ -704,6 +779,7 @@ export class Resources {
 
     // Phase 1: Build and relayout as needed. All mutations happen here.
     let relayoutCount = 0;
+    let remeasureCount = 0;
     for (let i = 0; i < this.resources_.length; i++) {
       const r = this.resources_[i];
       if (r.getState() == ResourceState_.NOT_BUILT) {
@@ -713,11 +789,15 @@ export class Resources {
         r.applySizesAndMediaQuery();
         relayoutCount++;
       }
+      if (r.isMeasureRequested()) {
+        remeasureCount++;
+      }
     }
 
     // Phase 2: Remeasure if there were any relayouts. Unfortunately, currently
     // there's no way to optimize this. All reads happen here.
-    if (relayoutCount > 0 || relayoutAll || relayoutTop != -1) {
+    if (relayoutCount > 0 || remeasureCount > 0 ||
+            relayoutAll || relayoutTop != -1) {
       for (let i = 0; i < this.resources_.length; i++) {
         const r = this.resources_[i];
         if (r.getState() == ResourceState_.NOT_BUILT || r.hasOwner()) {
@@ -725,6 +805,7 @@ export class Resources {
         }
         if (relayoutAll ||
                 r.getState() == ResourceState_.NOT_LAID_OUT ||
+                r.isMeasureRequested() ||
                 relayoutTop != -1 && r.getLayoutBox().bottom >= relayoutTop) {
           r.measure();
         }
@@ -1223,6 +1304,9 @@ export class Resource {
     this.layoutBox_ = layoutRectLtwh(-10000, -10000, 0, 0);
 
     /** @private {boolean} */
+    this.isMeasureRequested_ = false;
+
+    /** @private {boolean} */
     this.isInViewport_ = false;
 
     /**
@@ -1369,6 +1453,7 @@ export class Resource {
   measure() {
     assert(this.element.isUpgraded(), 'Must be upgraded to measure: %s',
         this.debugid);
+    this.isMeasureRequested_ = false;
     if (this.state_ == ResourceState_.NOT_BUILT) {
       // Can't measure unbuilt element.
       return;
@@ -1386,6 +1471,24 @@ export class Resource {
     }
     this.layoutBox_ = box;
     this.element.updateLayoutBox(box);
+  }
+
+  /**
+   * @return {boolean}
+   */
+  isMeasureRequested() {
+    return this.isMeasureRequested_;
+  }
+
+  /**
+   * Requests the element to be remeasured on the next pass.
+   */
+  requestMeasure() {
+    if (this.state_ == ResourceState_.NOT_BUILT) {
+      // Can't measure unbuilt element.
+      return;
+    }
+    this.isMeasureRequested_ = true;
   }
 
   /**

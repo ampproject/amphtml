@@ -29,6 +29,7 @@ import {log} from '../../../src/log';
 import {onDocumentReady} from '../../../src/document-state';
 import {openLoginDialog} from './login-dialog';
 import {parseQueryString} from '../../../src/url';
+import {resourcesFor} from '../../../src/resources';
 import {templatesFor} from '../../../src/template';
 import {timer} from '../../../src/timer';
 import {urlReplacementsFor} from '../../../src/url-replacements';
@@ -129,6 +130,9 @@ export class AccessService {
 
     /** @private @const {!Templates} */
     this.templates_ = templatesFor(this.win);
+
+    /** @private @const {!Resources} */
+    this.resources_ = resourcesFor(this.win);
 
     /** @private @const {function(string):Promise<string>} */
     this.openLoginDialog_ = openLoginDialog.bind(null, this.win);
@@ -331,12 +335,17 @@ export class AccessService {
    * @private
    */
   applyAuthorizationAttrs_(element, on) {
-    return this.vsync_.mutatePromise(() => {
-      if (on) {
+    const wasOn = !element.hasAttribute('amp-access-hide');
+    if (on == wasOn) {
+      return Promise.resolve();
+    }
+    if (on) {
+      return this.resources_.showSubtree(element, () => {
         element.removeAttribute('amp-access-hide');
-      } else {
-        element.setAttribute('amp-access-hide', '');
-      }
+      });
+    }
+    return this.resources_.hideSubtree(element, () => {
+      element.setAttribute('amp-access-hide', '');
     });
   }
 
