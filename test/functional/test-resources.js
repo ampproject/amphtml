@@ -15,7 +15,7 @@
  */
 
 import {Resource, ResourceState_, Resources, TaskQueue_} from
-    '../../src/resources';
+    '../../src/service/resources-impl';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import * as sinon from 'sinon';
 

@@ -31,6 +31,7 @@ var git = require('gulp-git');
 var gulp = require('gulp-help')(require('gulp'));
 var request = BBPromise.promisify(require('request'));
 var util = require('gulp-util');
+var version = require('../internal-version').VERSION;
 
 var GITHUB_ACCESS_TOKEN = process.env.GITHUB_ACCESS_TOKEN;
 var exec = BBPromise.promisify(child_process.exec);
@@ -56,13 +57,6 @@ function changelog() {
 }
 
 function getGitMetadata() {
-  var version = argv.version;
-  var versionErrMsg = 'No version option passed';
-
-  if (!version) {
-    util.log(util.colors.red(versionErrMsg));
-    throw new Error(versionErrMsg);
-  }
 
   var gitMetadata = {};
   return getLastGitTag()
@@ -82,9 +76,7 @@ function getGitMetadata() {
 }
 
 function submitReleaseNotes(version, changelog) {
-  assert(typeof version == 'number', 'version should be a number. ' + version);
-
-  var name = String(version) + suffix;
+  var name = String(version);
   var options = {
     url: 'https://api.github.com/repos/ampproject/amphtml/releases',
     method: 'POST',
@@ -95,7 +87,7 @@ function submitReleaseNotes(version, changelog) {
     json: true,
     body: {
       'tag_name': name,
-      'target_commitish': 'release',
+      'target_commitish': branch,
       'name': name,
       'body': changelog,
       'draft': true,
@@ -260,6 +252,5 @@ gulp.task('changelog', 'Create github release draft', changelog, {
   options: {
     dryrun: '  Generate changelog but dont push it out',
     type: '  Pass in "canary" to generate a canary changelog',
-    version: '  Label to be used for this tag release',
   }
 });

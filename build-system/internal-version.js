@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+var argv = require('minimist')(process.argv.slice(2));
+var suffix = argv.type == 'canary' ? '-canary' : '';
+
 // Used to e.g. references the ads binary from the runtime to get
 // version lock.
-exports.VERSION = new Date().getTime();
+exports.VERSION = new Date().getTime() + suffix;
