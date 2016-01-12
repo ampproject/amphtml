@@ -11,7 +11,7 @@ We highly prefer integrations that do not use iframes. JSONP cannot be used for 
 Examples: Youtube, Vimeo videos; Tweets, Instagrams; comment systems; polls; quizzes; document viewers
 
 - Our intent is to provide first class support for all embeds that fulfill the notability guidelines laid out in [CONTRIBUTING.md](../CONTRIBUTING.md).
-- Consider whether a click-to-play solution fits your use case where iframe generation is not done immediately (can be done before user action for instant loading of iframe).
+- Consider whether a iframe-with-placeholder solution fits your use case where iframe generation is not done immediately (can be done before user action for instant loading of iframe).
 - Consider whether all that is needed is some documentation for how to use the embed with `amp-iframe`.
 - Iframes and all sub resources must be served from HTTPS.
 - Avoid client side rendering of iframe content.

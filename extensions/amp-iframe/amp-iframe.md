@@ -90,7 +90,7 @@ Here are some factors that affect how fast the resize will be executed:
 - Whether the resize is requested for a currently active IFrame;
 - Whether the resize is requested for an IFrame below the viewport or above the viewport.
 
-#### Iframe Click-To-Play
+#### Iframe with Placeholder
 It is possible to have an `amp-iframe` appear on the top of a document when the `amp-iframe` has a `placeholder` element as shown in the example below.
 
 ```html
