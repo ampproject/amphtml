@@ -260,30 +260,17 @@ describe('AccessService authorization', () => {
     sandbox = null;
   });
 
-  it('should run authorization flow', () => {
+  function expectGetReaderId(result) {
     cidMock.expects('get')
-        .withExactArgs('amp-access', sinon.match(() => true))
-        .returns(Promise.resolve('reader1'))
+        .withExactArgs(
+            {scope: 'amp-access', createCookieIfNotPresent: true},
+            sinon.match(() => true))
+        .returns(Promise.resolve(result))
         .once();
-    xhrMock.expects('fetchJson')
-        .withExactArgs('https://acme.com/a?rid=reader1',
-            {credentials: 'include'})
-        .returns(Promise.resolve({access: true}))
-        .once();
-    const promise = service.runAuthorization_();
-    expect(document.documentElement).to.have.class('amp-access-loading');
-    return promise.then(() => {
-      expect(document.documentElement).not.to.have.class('amp-access-loading');
-      expect(elementOn).not.to.have.attribute('amp-access-hide');
-      expect(elementOff).to.have.attribute('amp-access-hide');
-    });
-  });
+  }
 
   it('should run authorization flow', () => {
-    cidMock.expects('get')
-        .withExactArgs('amp-access', sinon.match(() => true))
-        .returns(Promise.resolve('reader1'))
-        .once();
+    expectGetReaderId('reader1');
     xhrMock.expects('fetchJson')
         .withExactArgs('https://acme.com/a?rid=reader1',
             {credentials: 'include'})
@@ -299,10 +286,7 @@ describe('AccessService authorization', () => {
   });
 
   it('should recover from authorization failure', () => {
-    cidMock.expects('get')
-        .withExactArgs('amp-access', sinon.match(() => true))
-        .returns(Promise.resolve('reader1'))
-        .once();
+    expectGetReaderId('reader1');
     xhrMock.expects('fetchJson')
         .withExactArgs('https://acme.com/a?rid=reader1',
             {credentials: 'include'})
@@ -318,10 +302,7 @@ describe('AccessService authorization', () => {
   });
 
   it('should resolve first-authorization promise after success', () => {
-    cidMock.expects('get')
-        .withExactArgs('amp-access', sinon.match(() => true))
-        .returns(Promise.resolve('reader1'))
-        .once();
+    expectGetReaderId('reader1');
     xhrMock.expects('fetchJson')
         .withExactArgs('https://acme.com/a?rid=reader1',
             {credentials: 'include'})
@@ -334,10 +315,7 @@ describe('AccessService authorization', () => {
   });
 
   it('should NOT resolve first-authorization promise after failure', () => {
-    cidMock.expects('get')
-        .withExactArgs('amp-access', sinon.match(() => true))
-        .returns(Promise.resolve('reader1'))
-        .once();
+    expectGetReaderId('reader1');
     xhrMock.expects('fetchJson')
         .withExactArgs('https://acme.com/a?rid=reader1',
             {credentials: 'include'})
@@ -553,6 +531,15 @@ describe('AccessService pingback', () => {
     sandbox = null;
   });
 
+  function expectGetReaderId(result) {
+    cidMock.expects('get')
+        .withExactArgs(
+            {scope: 'amp-access', createCookieIfNotPresent: true},
+            sinon.match(() => true))
+        .returns(Promise.resolve(result))
+        .once();
+  }
+
   it('should register "viewed" signal after timeout', () => {
     service.reportViewToServer_ = sandbox.spy();
     const p = service.reportWhenViewed_();
@@ -685,10 +672,7 @@ describe('AccessService pingback', () => {
   });
 
   it('should send POST pingback', () => {
-    cidMock.expects('get')
-        .withExactArgs('amp-access', sinon.match(() => true))
-        .returns(Promise.resolve('reader1'))
-        .once();
+    expectGetReaderId('reader1');
     xhrMock.expects('sendSignal')
         .withExactArgs('https://acme.com/p?rid=reader1', sinon.match(init => {
           return (init.method == 'POST' &&
@@ -754,13 +738,19 @@ describe('AccessService login', () => {
     sandbox = null;
   });
 
+  function expectGetReaderId(result) {
+    cidMock.expects('get')
+        .withExactArgs(
+            {scope: 'amp-access', createCookieIfNotPresent: true},
+            sinon.match(() => true))
+        .returns(Promise.resolve(result))
+        .once();
+  }
+
   it('should open dialog in the same microtask', () => {
     service.openLoginDialog_ = sandbox.stub();
     service.openLoginDialog_.returns(Promise.resolve());
-    cidMock.expects('get')
-        .withExactArgs('amp-access', sinon.match(() => true))
-        .returns(Promise.resolve('reader1'))
-        .once();
+    expectGetReaderId('reader1');
     service.login();
     expect(service.openLoginDialog_.callCount).to.equal(1);
     expect(service.openLoginDialog_.firstCall.args[0].then).to.exist;
@@ -768,10 +758,7 @@ describe('AccessService login', () => {
 
   it('should succeed login with success=true', () => {
     service.runAuthorization_ = sandbox.spy();
-    cidMock.expects('get')
-        .withExactArgs('amp-access', sinon.match(() => true))
-        .returns(Promise.resolve('reader1'))
-        .once();
+    expectGetReaderId('reader1');
     let urlPromise = null;
     serviceMock.expects('openLoginDialog_')
         .withExactArgs(sinon.match(arg => {
@@ -792,10 +779,7 @@ describe('AccessService login', () => {
 
   it('should fail login with success=no', () => {
     service.runAuthorization_ = sandbox.spy();
-    cidMock.expects('get')
-        .withExactArgs('amp-access', sinon.match(() => true))
-        .returns(Promise.resolve('reader1'))
-        .once();
+    expectGetReaderId('reader1');
     serviceMock.expects('openLoginDialog_')
         .withExactArgs(sinon.match(arg => !!arg.then))
         .returns(Promise.resolve('#success=no'))
@@ -808,10 +792,7 @@ describe('AccessService login', () => {
 
   it('should fail login with empty response', () => {
     service.runAuthorization_ = sandbox.spy();
-    cidMock.expects('get')
-        .withExactArgs('amp-access', sinon.match(() => true))
-        .returns(Promise.resolve('reader1'))
-        .once();
+    expectGetReaderId('reader1');
     serviceMock.expects('openLoginDialog_')
         .withExactArgs(sinon.match(arg => !!arg.then))
         .returns(Promise.resolve(''))
@@ -824,10 +805,7 @@ describe('AccessService login', () => {
 
   it('should fail login with aborted dialog', () => {
     service.runAuthorization_ = sandbox.spy();
-    cidMock.expects('get')
-        .withExactArgs('amp-access', sinon.match(() => true))
-        .returns(Promise.resolve('reader1'))
-        .once();
+    expectGetReaderId('reader1');
     serviceMock.expects('openLoginDialog_')
         .withExactArgs(sinon.match(arg => !!arg.then))
         .returns(Promise.reject('abort'))
@@ -841,10 +819,7 @@ describe('AccessService login', () => {
 
   it('should run login only once at a time', () => {
     service.runAuthorization_ = sandbox.spy();
-    cidMock.expects('get')
-        .withExactArgs('amp-access', sinon.match(() => true))
-        .returns(Promise.resolve('reader1'))
-        .once();
+    expectGetReaderId('reader1');
     serviceMock.expects('openLoginDialog_')
         .withExactArgs(sinon.match(arg => !!arg.then))
         .returns(new Promise(() => {}))
