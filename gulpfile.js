@@ -18,6 +18,7 @@ var autoprefixer = require('autoprefixer');
 var babel = require('babelify');
 var browserify = require('browserify');
 var buffer = require('vinyl-buffer');
+var closureCompile = require('./build-system/tasks/compile').closureCompile;
 var cssnano = require('cssnano');
 var file = require('gulp-file');
 var fs = require('fs-extra');
@@ -122,7 +123,7 @@ function compile(watch, shouldMinify) {
     minify: shouldMinify,
     // If there is a sync JS error during initial load,
     // at least try to unhide the body.
-    wrapper: 'try{<%= contents %>}catch(e){setTimeout(function(){' +
+    wrapper: 'try{(function(){<%= contents %>})()}catch(e){setTimeout(function(){' +
         'document.body.style.opacity=1},1000);throw e};'
   });
   compileJs('./3p/', 'integration.js', './dist.3p/' + internalRuntimeVersion, {
@@ -250,7 +251,7 @@ function buildExtensionJs(js, path, name, version, options) {
       .pipe(file(builtName, js))
       .pipe(gulp.dest('build/all/v0/'))
       .on('end', function() {
-        compileJs('build/all/v0/', builtName, 'dist/v0/', {
+        compileJs('./build/all/v0/', builtName, './dist/v0', {
           watch: options.watch,
           minify: options.minify,
           minifiedName: minifiedName,
@@ -439,6 +440,23 @@ function compileJs(srcDir, srcFilename, destDir, options) {
 
   function minify() {
     console.log('Minifying ' + srcFilename);
+    closureCompile(srcDir + srcFilename, destDir, options.minifiedName,
+        options)
+        .then(function() {
+          fs.writeFileSync(destDir + '/version.txt', internalRuntimeVersion);
+          if (options.latestName) {
+            fs.copySync(
+                destDir + '/' + options.minifiedName,
+                destDir + '/' + options.latestName);
+          }
+        });
+  }
+
+  /*
+  Pre closure compiler minification. Add this back, should we have problems
+  with closure.
+  function minify() {
+    console.log('Minifying ' + srcFilename);
     bundler.bundle()
       .on('error', function(err) { console.error(err); this.emit('end'); })
       .pipe(lazybuild())
@@ -456,6 +474,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
         }
       });
   }
+  */
 
   if (options.minify) {
     minify();
@@ -517,7 +536,7 @@ function buildExperiments(options) {
       .pipe(file(builtName, js))
       .pipe(gulp.dest('build/experiments/'))
       .on('end', function() {
-        compileJs('build/experiments/', builtName, 'dist.tools/experiments/', {
+        compileJs('./build/experiments/', builtName, './dist.tools/experiments/', {
           watch: false,
           minify: options.minify || argv.minify,
           minifiedName: minifiedName,
@@ -603,7 +622,7 @@ function buildLoginDoneVersion(version, options) {
       .pipe(file(builtName, js))
       .pipe(gulp.dest('build/all/v0/'))
       .on('end', function() {
-        compileJs('build/all/v0/', builtName, 'dist/v0/', {
+        compileJs('./build/all/v0/', builtName, './dist/v0/', {
           watch: false,
           minify: options.minify || argv.minify,
           minifiedName: minifiedName,

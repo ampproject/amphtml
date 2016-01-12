@@ -23,9 +23,9 @@ class CarouselSelector {
   constructor(element) {
     if (element.hasAttribute('type') &&
         element.getAttribute('type') == 'slides') {
-      return new AmpSlides(...arguments);
+      return new AmpSlides(element);
     }
-    return new AmpCarousel(...arguments);
+    return new AmpCarousel(element);
   }
 }
 
