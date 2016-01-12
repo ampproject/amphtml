@@ -27,6 +27,7 @@ script:
   - gulp test
   # Integration tests with all saucelabs browsers
   - gulp test --saucelabs --integration
+  - gulp test --saucelabs --integration --compiled
   # All unit tests with an old chrome (best we can do right now to pass tests
   # and not start relying on new features).
   - gulp test --saucelabs --oldchrome
