@@ -68,7 +68,12 @@ function buildExtensions(options) {
   // We pass watch further in to have browserify watch the built file
   // and update it if any of its required deps changed.
   // Each extension and version must be listed individually here.
-  buildExtension('amp-access', '0.1', true, options);
+  buildExtension('amp-access', '0.1', true, options)
+      // TODO (erwinm, #1346): Currently just a hacky way to get around the race
+      // condition. Fix in refactor issue above.
+    .then(function(stream) {
+      stream.on('end', buildLoginDone.bind(null, {minify: true, watch: false}));
+    });
   buildExtension('amp-analytics', '0.1', false, options);
   buildExtension('amp-anim', '0.1', false, options);
   buildExtension('amp-audio', '0.1', false, options);
@@ -199,7 +204,7 @@ function watch() {
  *     the sub directory inside the extension directory
  * @param {boolean} hasCss Whether there is a CSS file for this extension.
  * @param {?Object} options
- * @return {!Stream} Gulp object
+ * @return {!Promise<!Stream>} Gulp object
  */
 function buildExtension(name, version, hasCss, options) {
   options = options || {};
@@ -226,7 +231,7 @@ function buildExtension(name, version, hasCss, options) {
       return buildExtensionJs(js, path, name, version, options);
     });
   } else {
-    return buildExtensionJs(js, path, name, version, options);
+    return Promise.resolve(buildExtensionJs(js, path, name, version, options));
   }
 }
 
@@ -280,7 +285,6 @@ function dist() {
   compile(false, true);
   buildExtensions({minify: true});
   buildExperiments({minify: true, watch: false});
-  buildLoginDone({minify: true, watch: false});
 }
 
 /**
@@ -295,12 +299,19 @@ function buildExamples(watch) {
     });
   }
 
-  fs.copy('examples/img/', 'examples.build/img/', {clobber: true},
-      copyHandler.bind(null, 'examples/img folder'));
-  fs.copy('examples/video/', 'examples.build/video/', {clobber: true},
-      copyHandler.bind(null, 'examples/video folder'));
-  fs.copy('examples/fonts/', 'examples.build/fonts/', {clobber: true},
-      copyHandler.bind(null, 'examples/fonts folder'));
+  try {
+    fs.copySync('examples/img/', 'examples.build/img/', {clobber: true});
+    util.log(util.colors.green('copied examples/img/'));
+    fs.copySync('examples/video/', 'examples.build/video/', {clobber: true});
+    util.log(util.colors.green('copied examples/video/'));
+    fs.copySync('examples/fonts/', 'examples.build/fonts/', {clobber: true});
+    util.log(util.colors.green('copied examples/fonts/'));
+    // Examples are also copied into `c/` directory for AMP-proxy testing.
+    fs.copySync('examples.build/', 'c/', {clobber: true});
+    util.log(util.colors.green('copied examples.build/ to c/'));
+  } catch (e) {
+    util.log(util.colors.red('copy error', e));
+  }
 
   // Also update test-example-validation.js
   buildExample('ads.amp.html');
@@ -323,17 +334,6 @@ function buildExamples(watch) {
   buildExample('twitter.amp.html');
   buildExample('user-notification.amp.html');
   buildExample('vine.amp.html');
-
-  // Examples are also copied into `c/` directory for AMP-proxy testing.
-  fs.copy('examples.build/', 'c/', {clobber: true},
-      copyHandler.bind(null, 'examples.build to c folder'));
-
-  function copyHandler(name, err) {
-    if (err) {
-      return util.log(util.colors.red('copy error: ', err));
-    }
-    util.log(util.colors.green('copied ' + name));
-  }
 }
 
 /**
