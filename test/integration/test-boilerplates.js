@@ -50,7 +50,14 @@ describe('New Visibility Boilerplate', () => {
     return expectBodyToBecomeVisible(fixture.win).then(() => {
       expect(getStyle(
           fixture.win.document.body, 'visibility')).to.equal('visible');
-      expect(getStyle(fixture.win.document.body, 'animation')).to.equal('none');
+      // Firefox spells out the values when assigning none.
+      const ffValue = '0s ease 0s normal none 1 running none';
+      const animation = getStyle(fixture.win.document.body, 'animation');
+      if (animation == ffValue) {
+        expect(animation).to.equal(ffValue);
+      } else {
+        expect(animation).to.equal('none');
+      }
     });
   });
 });
