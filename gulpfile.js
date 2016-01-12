@@ -324,9 +324,10 @@ function buildExamples(watch) {
   buildExample('user-notification.amp.html');
   buildExample('vine.amp.html');
 
-  // Examples are also copied into `c/` directory for AMP-proxy testing.
-  fs.copy('examples.build/', 'c/', {clobber: true},
-      copyHandler.bind(null, 'examples.build to c folder'));
+  // TODO(dvoytenko, #1393): Enable for proxy-testing.
+  // // Examples are also copied into `c/` directory for AMP-proxy testing.
+  // fs.copy('examples.build/', 'c/', {clobber: true},
+  //     copyHandler.bind(null, 'examples.build to c folder'));
 
   function copyHandler(name, err) {
     if (err) {
