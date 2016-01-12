@@ -105,11 +105,13 @@ export function adopt(global) {
     global.AMP.toggleRuntime = viewer.toggleRuntime.bind(viewer);
     /** @const */
     global.AMP.resources = resourcesFor(global);
-    /** @const */
-    global.AMP.isExperimentOn = isExperimentOn.bind(null, global);
-    /** @const */
-    global.AMP.toggleExperiment = toggleExperiment.bind(null, global);
   }
+
+  // Experiments.
+  /** @const */
+  global.AMP.isExperimentOn = isExperimentOn.bind(null, global);
+  /** @const */
+  global.AMP.toggleExperiment = toggleExperiment.bind(null, global);
 
   const viewport = viewportFor(global);
 
