@@ -339,13 +339,12 @@ export class AccessService {
     if (on == wasOn) {
       return Promise.resolve();
     }
-    if (on) {
-      return this.resources_.showSubtree(element, () => {
+    return this.resources_.mutateElement(element, () => {
+      if (on) {
         element.removeAttribute('amp-access-hide');
-      });
-    }
-    return this.resources_.hideSubtree(element, () => {
-      element.setAttribute('amp-access-hide', '');
+      } else {
+        element.setAttribute('amp-access-hide', '');
+      }
     });
   }
 

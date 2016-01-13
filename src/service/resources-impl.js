@@ -435,65 +435,49 @@ export class Resources {
   }
 
   /**
-   * Runs the specified subtree "show" mutation and ensures that measures
+   * Runs the specified mutation on the element and ensures that measures
    * and layouts performed for the affected elements.
-   * @param {!Element} root
+   * @param {!Element} element
    * @param {function()} mutator
    * @return {!Promise}
    */
-  showSubtree(root, mutator) {
-    // This is a two-vsync operation: we can only measure after the mutation
-    // has been done.
-    return new Promise(resolve => {
-      this.vsync_.mutate(() => {
+  mutateElement(element, mutator) {
+    const calcRelayoutTop = () => {
+      const box = this.viewport_.getLayoutRect(element);
+      if (box.width != 0 && box.height != 0) {
+        return box.top;
+      }
+      return -1;
+    };
+    let relayoutTop = -1;
+    return this.vsync_.runPromise({
+      measure: () => {
+        relayoutTop = calcRelayoutTop();
+      },
+      mutate: () => {
         mutator();
-        this.vsync_.measure(() => {
-          const newTop = this.viewport_.getLayoutRect(root).top;
-          this.setRelayoutTop_(newTop);
 
-          // Remeasure the previously hidden elements.
-          const ampElements = root.getElementsByClassName('-amp-element');
-          for (let i = 0; i < ampElements.length; i++) {
-            const r = this.getResourceForElement(ampElements[i]);
-            r.requestMeasure();
-          }
-
-          this.schedulePass(100);
-          resolve();
-        });
-      });
-    });
-  }
-
-  /**
-   * Runs the specified subtree "hide" mutation and ensures that the affected
-   * elements are unloaded and other elements are remeasured.
-   * @param {!Element} root
-   * @param {function()} mutator
-   * @return {!Promise}
-   */
-  hideSubtree(root, mutator) {
-    return new Promise(resolve => {
-      this.vsync_.run({
-        measure: state => {
-          state.oldTop = this.viewport_.getLayoutRect(root).top;
-        },
-        mutate: state => {
-          mutator();
-          this.setRelayoutTop_(state.oldTop);
-
-          // Unload AMP elements within.
-          const ampElements = root.getElementsByClassName('-amp-element');
-          for (let i = 0; i < ampElements.length; i++) {
-            const r = this.getResourceForElement(ampElements[i]);
-            // TODO(dvoytenko): clarify what type of unload is necessary here.
-            r.documentBecameInactive();
-          }
-
-          this.schedulePass(100);
-          resolve();
+        // Mark children for re-measurement.
+        const ampElements = element.getElementsByClassName('-amp-element');
+        for (let i = 0; i < ampElements.length; i++) {
+          const r = this.getResourceForElement(ampElements[i]);
+          r.requestMeasure();
         }
-      });
+        if (relayoutTop != -1) {
+          this.setRelayoutTop_(relayoutTop);
+        }
+        this.schedulePass(100);
+
+        // Need to measure again in case the element has become visible or
+        // shifted.
+        this.vsync_.measure(() => {
+          const updatedRelayoutTop = calcRelayoutTop();
+          if (updatedRelayoutTop != -1 && updatedRelayoutTop != relayoutTop) {
+            this.setRelayoutTop_(updatedRelayoutTop);
+            this.schedulePass(100);
+          }
+        });
+      }
     });
   }
 
@@ -807,7 +791,11 @@ export class Resources {
                 r.getState() == ResourceState_.NOT_LAID_OUT ||
                 r.isMeasureRequested() ||
                 relayoutTop != -1 && r.getLayoutBox().bottom >= relayoutTop) {
+          const wasDisplayed = r.isDisplayed();
           r.measure();
+          if (wasDisplayed && !r.isDisplayed()) {
+            r.unload();
+          }
         }
       }
     }
@@ -1658,6 +1646,14 @@ export class Resource {
     if (this.element.documentInactiveCallback()) {
       this.state_ = ResourceState_.NOT_LAID_OUT;
     }
+  }
+
+  /**
+   * Called when a previously visible element has become invisible.
+   */
+  unload() {
+    // TODO(dvoytenko): Likely warrants its own callback and re-layout rules.
+    this.documentBecameInactive();
   }
 
   /**
