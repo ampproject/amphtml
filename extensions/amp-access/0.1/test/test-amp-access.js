@@ -192,6 +192,18 @@ describe('AccessService', () => {
     service.start_();
     expect(service.startInternal_.callCount).to.equal(1);
   });
+
+  it('should initialize publisher origin', () => {
+    element.textContent = JSON.stringify({
+      'authorization': 'https://acme.com/a',
+      'pingback': 'https://acme.com/p',
+      'login': 'https://acme.com/l'
+    });
+    const service = new AccessService(window);
+    service.isExperimentOn_ = true;
+    expect(service.pubOrigin_).to.exist;
+    expect(service.pubOrigin_).to.match(/^http.*/);
+  });
 });
 
 
@@ -331,6 +343,29 @@ describe('AccessService authorization', () => {
         expect(resolved).to.be.false;
       });
     });
+  });
+
+  it('should run authorization for broadcast events on same origin', () => {
+    let broadcastHandler;
+    sandbox.stub(service.viewer_, 'onBroadcast', handler => {
+      broadcastHandler = handler;
+    });
+    service.runAuthorization_ = sandbox.spy();
+    service.listenToBroadcasts_();
+    expect(broadcastHandler).to.exist;
+
+    // Unknown message.
+    broadcastHandler({});
+    expect(service.runAuthorization_.callCount).to.equal(0);
+
+    // Wrong origin.
+    broadcastHandler({type: 'amp-access-reauthorize', origin: 'other'});
+    expect(service.runAuthorization_.callCount).to.equal(0);
+
+    // Broadcast with the right origin.
+    broadcastHandler({type: 'amp-access-reauthorize',
+        origin: service.pubOrigin_});
+    expect(service.runAuthorization_.callCount).to.equal(1);
   });
 });
 
@@ -511,7 +546,8 @@ describe('AccessService pingback', () => {
     service.viewer_ = {
       isVisible: () => true,
       whenVisible: () => Promise.resolve(),
-      onVisibilityChanged: callback => visibilityChanged.add(callback)
+      onVisibilityChanged: callback => visibilityChanged.add(callback),
+      broadcast: () => {},
     };
 
     scrolled = new Observable();
@@ -691,6 +727,23 @@ describe('AccessService pingback', () => {
       expect(result).to.equal('SUCCESS');
     });
   });
+
+  it('should broadcast "viewed" signal to other documents', () => {
+    service.reportViewToServer_ = sandbox.stub().returns(Promise.resolve());
+    const broadcastStub = sandbox.stub(service.viewer_, 'broadcast');
+    const p = service.reportWhenViewed_();
+    return Promise.resolve().then(() => {
+      clock.tick(2001);
+      return p;
+    }).then(() => {}, () => {}).then(() => {
+      expect(service.reportViewToServer_.callCount).to.equal(1);
+      expect(broadcastStub.callCount).to.equal(1);
+      expect(broadcastStub.firstCall.args[0]).to.deep.equal({
+        'type': 'amp-access-reauthorize',
+        'origin': service.pubOrigin_
+      });
+    });
+  });
 });
 
 
@@ -758,6 +811,7 @@ describe('AccessService login', () => {
 
   it('should succeed login with success=true', () => {
     service.runAuthorization_ = sandbox.spy();
+    const broadcastStub = sandbox.stub(service.viewer_, 'broadcast');
     expectGetReaderId('reader1');
     let urlPromise = null;
     serviceMock.expects('openLoginDialog_')
@@ -770,6 +824,11 @@ describe('AccessService login', () => {
     return service.login().then(() => {
       expect(service.loginPromise_).to.not.exist;
       expect(service.runAuthorization_.callCount).to.equal(1);
+      expect(broadcastStub.callCount).to.equal(1);
+      expect(broadcastStub.firstCall.args[0]).to.deep.equal({
+        'type': 'amp-access-reauthorize',
+        'origin': service.pubOrigin_
+      });
       expect(urlPromise).to.exist;
       return urlPromise;
     }).then(url => {
