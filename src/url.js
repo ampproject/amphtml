@@ -160,3 +160,54 @@ export function removeFragment(url) {
   }
   return url.substring(0, index);
 }
+
+
+/**
+ * Returns whether the URL has the origin of a proxy.
+ * @param {string|!Location} url URL of an AMP document.
+ * @return {boolean}
+ */
+export function isProxyOrigin(url) {
+  if (typeof url == 'string') {
+    url = parseUrl(url);
+  }
+  const path = url.pathname.split('/');
+  const prefix = path[1];
+  // List of well known proxy hosts. New proxies must be added here.
+  return (url.origin == 'https://cdn.ampproject.org' ||
+      (url.origin.indexOf('http://localhost:') == 0 &&
+       (prefix == 'c' || prefix == 'v')));
+}
+
+/**
+ * Returns the source origin of an AMP document for documents served
+ * on a proxy origin or directly.
+ * @param {string|!Location} url URL of an AMP document.
+ * @return {string} The source origin of the URL.
+ */
+export function getSourceOrigin(url) {
+  if (typeof url == 'string') {
+    url = parseUrl(url);
+  }
+
+  // Not a proxy URL - return the URL's origin.
+  if (!isProxyOrigin(url)) {
+    return getOrigin(url);
+  }
+
+  // A proxy URL.
+  // Example path that is being matched here.
+  // https://cdn.ampproject.org/c/s/www.origin.com/foo/
+  // The /s/ is optional and signals a secure origin.
+  const path = url.pathname.split('/');
+  const prefix = path[1];
+  assert(prefix == 'c' || prefix == 'v',
+      'Unknown path prefix in url %s', url.href);
+  const domainOrHttpsSignal = path[2];
+  const origin = domainOrHttpsSignal == 's'
+      ? 'https://' + path[3]
+      : 'http://' + domainOrHttpsSignal;
+  // Sanity test that what we found looks like a domain.
+  assert(origin.indexOf('.') > 0, 'Expected a . in origin %s', origin);
+  return origin;
+}
