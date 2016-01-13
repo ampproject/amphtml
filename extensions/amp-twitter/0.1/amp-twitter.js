@@ -15,8 +15,9 @@
  */
 
 
-import {getIframe, listen, prefetchBootstrap} from '../../../src/3p-frame';
+import {getIframe, prefetchBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
+import {listen} from '../../../src/iframe-helper';
 import {loadPromise} from '../../../src/event-helper';
 
 
@@ -50,7 +51,7 @@ class AmpTwitter extends AMP.BaseElement {
       amp.setAttribute('height', data.height);
       amp.setAttribute('width', data.width);
       this./*OK*/changeHeight(data.height);
-    });
+    }, /* opt_is3P */true);
     return loadPromise(iframe);
   }
 };

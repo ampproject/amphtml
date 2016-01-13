@@ -72,6 +72,10 @@ describe('CustomElement', () => {
     viewportCallback(inViewport) {
       testElementViewportCallback(inViewport);
     }
+    getInsersectionElementLayoutBox() {
+      testElementGetInsersectionElementLayoutBox();
+      return {top: 10, left: 10, width: 11, height: 1};
+    }
     documentInactiveCallback() {
       testElementDocumentInactiveCallback();
       return true;
@@ -102,6 +106,7 @@ describe('CustomElement', () => {
     testElementLayoutCallback = sinon.spy();
     testElementFirstLayoutCompleted = sinon.spy();
     testElementViewportCallback = sinon.spy();
+    testElementGetInsersectionElementLayoutBox = sinon.spy();
     testElementDocumentInactiveCallback = sinon.spy();
   });
 
@@ -141,6 +146,12 @@ describe('CustomElement', () => {
     expect(testElementCreatedCallback.callCount).to.equal(0);
   });
 
+  it('Element - getIntersectionChangeEntry', () => {
+    const element = new ElementClass();
+    element.updateLayoutBox({top: 0, left: 0, width: 111, height: 51});
+    element.getIntersectionChangeEntry();
+    expect(testElementGetInsersectionElementLayoutBox.callCount).to.equal(1);
+  });
 
   it('Element - updateLayoutBox', () => {
     const element = new ElementClass();

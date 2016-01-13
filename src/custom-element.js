@@ -21,6 +21,7 @@ import {Layout, assertLength, getLayoutClass, getLengthNumeral, getLengthUnits,
 import {ElementStub, stubbedElements} from './element-stub';
 import {assert} from './asserts';
 import {createLoaderElement} from '../src/loader';
+import {getIntersectionChangeEntry} from '../src/intersection-observer';
 import {log} from './log';
 import {parseSizeList} from './size-list';
 import {reportError} from './error';
@@ -654,6 +655,21 @@ export function createAmpElementProto(win, name, implementationClass) {
    */
   ElementProto.getLayoutBox = function() {
     return this.resources_.getResourceForElement(this).getLayoutBox();
+  };
+
+ /**
+  * Returns a change entry for that should be compatible with
+  * IntersectionObserverEntry.
+  * @return {!IntersectionObserverEntry} A change entry.
+  * @final
+  */
+  ElementProto.getIntersectionChangeEntry = function() {
+    const box = this.implementation_.getInsersectionElementLayoutBox();
+    const rootBounds = this.implementation_.getViewport().getRect();
+    return getIntersectionChangeEntry(
+        timer.now(),
+        rootBounds,
+        box);
   };
 
   /**
