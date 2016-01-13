@@ -59,6 +59,13 @@ when the document is first loaded, and each time an `<a>` tag is clicked:
 </amp-analytics>
 ```
 
+#### <a name="attributes"></a>Attributes
+
+  - `type` This optional attribute can be specified to use one of the built-in analytics providers. Currently supported types:
+    - `googleanalytics`: This type defines the basic requests like `pageview`,  `event`, `social` and `timing`.
+
+  - `config` This attribute can be used to load a configuration from some remote url. The url specified here should use https scheme.
+
 ##### Configuration
 
 Configuration may be specified inline (as shown in the example above) or fetched remotely by specifying a URL in the
@@ -99,15 +106,14 @@ is an https URL. These values may include placeholder tokens that can reference 
 
 ```javascript
 "requests": {
-  "base": "https://example.com/analytics?a=${account}&u={$canonicalUrl}&t=${title}",
+  "base": "https://example.com/analytics?a=${account}&u=${canonicalUrl}&t=${title}",
   "pageview": "${base}&type=pageview",
   "event": "${base}&type=event&eventId=${eventId}"
 }
 ```
 
 ###### Vars
-The `vars` attribute specifies key-value pairs that can be referenced in `request` values. These are commonly used to
-specify publisher specific information.
+`amp-analytics` defines many basic variables that can be used in the requests. A list of all such variables is available [here](./analytics-vars.md). In addition, all the variables supported by [AMP HTML URL Variable Substitutions](../../spec/amp-var-substitutions.md) are also supported. The `vars` attribute in the configuration can be used to define new key-value pairs or override existing variables that can be referenced in `request` values. New variables are commonly used to specify publisher specific information.
 
 ```javascript
 "vars": {
@@ -160,11 +166,3 @@ By default, all three methods above are enabled.
 #####
 
 
-#### <a name="attributes"></a>Attributes
-
-**type**
-This optional attribute can be specified to use one of the built-in analytics providers. Currently supported types:
-- `googleanalytics`: This type defines the basic requests like `pageview`,  `event`, `social` and `timing`.
-
-**config**
-This attribute can be used to load a configuration from some remote url. The url specified here should use https scheme.
