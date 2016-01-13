@@ -19,6 +19,7 @@ import {getService} from '../service';
 import {log} from '../log';
 import {timer} from '../timer';
 import {vsyncFor} from '../vsync';
+import {isArray} from '../types';
 
 /** @const {string} */
 const TAG_ = 'Action';
@@ -156,8 +157,11 @@ export class ActionService {
 
     const currentQueue = target[ACTION_QUEUE_];
     if (currentQueue) {
-      assert(Object.prototype.toString.call(currentQueue) == '[object Array]',
-          'Expected queue to be an array: %s', debugid);
+      assert(
+        isArray(currentQueue),
+        'Expected queue to be an array: %s',
+        debugid
+      );
     }
 
     // Override queue with the handler.

@@ -21,6 +21,7 @@ import {log} from '../../../src/log';
 import {urlReplacementsFor} from '../../../src/url-replacements';
 import {expandTemplate} from '../../../src/string';
 import {xhrFor} from '../../../src/xhr';
+import {isArray, isObject} from '../../../src/types';
 
 import {addListener} from './instrumentation';
 import {sendRequest} from './transport';
@@ -309,20 +310,15 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @private
    */
   mergeObjects_(from, to) {
-    // Checks if the given object is a plain object.
-    const isObject = function(someObj) {
-      return Object.prototype.toString.call(someObj) === '[object Object]';
-    };
-
     if (to === null || to === undefined) {
       to = {};
     }
 
     for (const property in from) {
+      // Only deal with own properties.
       if (from.hasOwnProperty(property)) {
-        // Only deal with own properties.
-        if (Array.isArray(from[property])) {
-          if (!Array.isArray(to[property])) {
+        if (isArray(from[property])) {
+          if (!isArray(to[property])) {
             to[property] = [];
           }
           to[property] = this.mergeObjects_(from[property], to[property]);
