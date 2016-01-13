@@ -1,0 +1,68 @@
+<!doctype html>
+<html amp lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Hello, AMP Analytics Analysts</title>
+  <link rel="canonical" href="http://amp.example.com/index.html" />
+  <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
+  <style amp-custom>
+    body {
+      padding: 1em;
+      background-color: #ffffff;
+      color: #1e1e1e;
+      font: 1em sans-serif;
+    }
+
+    div {
+      margin-bottom: 1em;
+    }
+
+    #test1 {
+      border: solid 1px black;
+      background-color: #dedede;
+      width: 338px;
+    }
+  </style>
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+</head>
+<body>
+  <div>
+    <h2>IFrame Analytics</h2>
+    <div>An event is generated on page load.</div>
+    <div id="test1">Click on this line to generate even more events.</div>
+  </div>
+  <amp-analytics>
+  <script type="application/json">
+  {
+    "requests": {
+      "iframe": "iframe://amp.example.com/analytics_frame.html"
+    },
+    "vars": {
+      "type":"AnalyticsMessage",
+      "pagename": "IFrame Analytics",
+      "id": "1"
+    },
+    "triggers": {
+      "default pageview": {
+        "on": "visible",
+        "request": "iframe",
+        "vars": {
+          "v1":"visible"
+        }
+      },
+      "click on #test1 trigger": {
+        "on": "click",
+        "selector": "#test1",
+        "request": "iframe",
+        "vars": {
+          "v1": "click"
+        }
+      }
+    }
+  }
+  </script>
+  </amp-analytics>
+</body>
+</html>
