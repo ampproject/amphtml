@@ -26,6 +26,28 @@ const TAG = 'AmpDynamicCssClasses';
 const EXPERIMENT = 'dynamic-css-classes';
 
 /**
+ * Strips everything but the domain from referrer string.
+ * @param {!Window} win
+ * @returns {string}
+ */
+function referrerDomain(win) {
+  const referrer = win.document.referrer;
+  if (referrer) {
+    return parseUrl(referrer).hostname;
+  }
+  return '';
+}
+
+/**
+ * Grabs the User Agent string.
+ * @param {!Window} win
+ * @returns {string}
+ */
+function userAgent(win) {
+  return win.navigator.userAgent;
+}
+
+/**
  * Returns an array of referrers which vary in level of subdomain specificity.
  *
  * @param {string} referrer
@@ -33,19 +55,41 @@ const EXPERIMENT = 'dynamic-css-classes';
  * @private Visible for testing only!
  */
 export function referrers_(referrer) {
-  referrer = parseUrl(referrer).hostname;
   const domains = referrer.split('.');
   let domainBase = '';
 
   return domains.reduceRight((referrers, domain) => {
     if (domainBase) {
-      domain += '-' + domainBase;
+      domain += '.' + domainBase;
     }
     domainBase = domain;
     referrers.push(domain);
     return referrers;
   }, []);
 }
+
+/**
+ * Normalizes certain referrers across devices.
+ * @param {!Window} win
+ * @returns {!Array<string>}
+ */
+function normalizedReferrers(win) {
+  const referrer = referrerDomain(win);
+
+  // Normalize t.co names to twitter.com
+  if (referrer === 't.co') {
+    return referrers_('twitter.com');
+  }
+
+  // Pinterest does not reliably set the referrer on Android
+  // Instead, we inspect the User Agent string.
+  if (!referrer && /Pinterest/.test(userAgent(win))) {
+    return referrers_('www.pinterest.com');
+  }
+
+  return referrers_(referrer);
+}
+
 
 /**
  * Adds CSS classes onto the HTML element.
@@ -68,8 +112,9 @@ function addDynamicCssClasses(win, classes) {
  * @param {!Window} win
  */
 function addReferrerClasses(win) {
-  const classes = referrers_(win.document.referrer).map(referrer => {
-    return `amp-referrer-${referrer}`;
+  const referrers = normalizedReferrers(win);
+  const classes = referrers.map(referrer => {
+    return `amp-referrer-${referrer.replace(/\./g, '-')}`;
   });
   addDynamicCssClasses(win, classes);
 }
@@ -85,6 +130,7 @@ function addViewerClass(win) {
     addDynamicCssClasses(win, ['amp-viewer']);
   }
 }
+
 
 /**
  * @param {!Window} win
