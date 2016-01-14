@@ -26,6 +26,7 @@ import {inputFor} from '../input';
 import {log} from '../log';
 import {reportError} from '../error';
 import {timer} from '../timer';
+import {installFramerateService} from './framerate-impl';
 import {installViewerService} from './viewer-impl';
 import {installViewportService} from './viewport-impl';
 import {installVsyncService} from './vsync-impl';
@@ -161,6 +162,9 @@ export class Resources {
     /** @private {boolean} */
     this.vsyncScheduled_ = false;
 
+    /** @private @const {!Framerate}  */
+    this.framerate_ = installFramerateService(this.win);
+
     // When viewport is resized, we have to re-measure all elements.
     this.viewport_.onChanged(event => {
       this.lastScrollTime_ = timer.now();
@@ -170,6 +174,7 @@ export class Resources {
     });
     this.viewport_.onScroll(() => {
       this.lastScrollTime_ = timer.now();
+      this.framerate_.collect();
     });
 
     // When document becomes visible, e.g. from "prerender" mode, do a
@@ -1620,6 +1625,7 @@ export class Resource {
     this.layoutCount_++;
     this.state_ = ResourceState_.LAYOUT_SCHEDULED;
 
+    this.resources_.framerate_.collect(this.element);
     let promise;
     try {
       promise = this.element.layoutCallback();
