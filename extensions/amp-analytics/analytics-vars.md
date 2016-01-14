@@ -1,105 +1,150 @@
 # <a name="amp-analytics"></a> Variables supported in `amp-analytics`
 
-## Using the `vars`
+Use the format `${varName}` in a request string for a page or platform-defined variable. `amp-analytics` tag will replace the template with its actual value at the time of construction of the analytics request.
 
-The format `${var-name}` can be used when a page or platform defined variable needs to be used in a request string. The `amp-analytics` tag will replace the template with the actual value at the time of construction of the analytics request. All the values substituted using this method are first url encoded using `encodeUrlComponent`. For example:
+Since the request that is constructed is sent over HTTP, the request needs to be encoded. To achieve this, the `var` values are url-encoded using [encodeUrlComponent`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/encodeURIComponent) before being inserted into the request.
+
+Vars can be defined and used as follows:
 
 ```html
-<amp-analytics>
+<amp-analytics config="http://example.com/config.json">
 <script type="application/json">
 {
   "requests": {
-    "pageview": "https://example.com/analytics?url=${canonicalUrl}&title=${title}&acct=${account}",
-    ...
+    "pageview": "https://example.com/analytics?url=${canonicalUrl}&title=${title}&acct=${account}&clientId=${clientId}",
   },
   "vars": {
     "account": "ABC123"
   },
   "triggers": {
-    ...
+    "some-event": {
+      "on": "visible"
+      "request": "pageview",
+      "vars": {
+        "title": "My homepage"
+      }
   }
 }
 </script>
 </amp-analytics>
 ```
 
-## Supported Vars
+As shown above, the vars can be defined by the platform, in the config at the top level, inside the triggers or in a remote config. When the same `var` is found in multiple locations, the value is picked from the first available place in the list below.
 
-**random** provides a random value every time a request is being constructed.
+  - Remote config
+  - Inside triggers
+  - At top level of config
+  - Platform
+
+## random
+
+This variable provides a random value every time a request is being constructed.
 
 Example value: `0.12345632345`
 
-**canonicalUrl** provides the canonical URL of the current document.
+## canonicalUrl
+
+This variable provides the canonical URL of the current document.
 
 Example value: `http%3A%2F%2Fexample.com%3A8000%2Fanalytics.html`
 
-**canonicalHost** provides the canonical URL's host.
+## canonicalHost
+
+This variable provides the canonical URL's host.
 
 Example value: `example.com`
 
-**canonicalPath** provides the canonical URL's path part.
+## canonicalPath
+
+This variable provides the canonical URL's path part.
 
 Example value: `%2Fanalytics.html`
 
-**clientId** provides a per document-source-origin (The origin of the website where you publish your AMP doc) and user identifier. The client id will be the same for the same user if they visit again within one year. If the AMP document is not served through the AMP CDN, the client id will be replaced with a cookie of the name of the cid scope below. If the cookie is not present, an empty string will be returned.
+## clientId
+
+This variable provides a per document-source-origin (the origin of the website where you publish your AMP doc) and user identifier. The client id will be the same for the same user if they visit again within one year.
 
 Please see below the required and optional arguments you may pass into `clientId` like a function. (spaces between arguments and values are not allowed)
 
-arguments:
+**arguments**:
 
-`cid-scope` (Required) - Name of the fallback cookie when the document is not served by an AMP proxy.
-`amp-user-notification` id (Optional) - Optionally make the clientId substitution be dependent on the dismissal of a user notification shown to the visitor of the page.
+  - `cid-scope` (Required) - Name of the fallback cookie when the document is loaded by the user directly.
+  - `amp-user-notification-id` (Optional) - Optionally make the clientId substitution be dependent on the dismissal of a user notification shown to the visitor of the page.
 
 Example usage: `${clientId(foo)}`
 
 Example value: `U6XEpUs3yaeQyR2DKATQH1pTZ6kg140fvuLbtl5nynbUWtIodJxP5TEIYBic4qcV`
 
 
-**documentReferrer** provides the referrer where the user came from. It is read from `document.referrer`. The value is empty for direct visitors.
+## documentReferrer
+
+This variable provides the referrer where the user came from. It is read from `document.referrer`. The value is empty for direct visitors.
 
 Example value: `https://www.google.com`
 
-**title** provides the title of the current document.
+## title
 
-Example value: `Example Pageview`
+This variable provides the title of the current document.
 
-**ampdocUrl** provides the AMP document's URL. The url contains the scheme, domain, port and full path. It does not contian the fragment part of the URL.
+Example value: `The New York Times - Breaking News, World News...`
+
+## ampdocUrl
+
+This variable provides the AMP document's URL. The URL contains the scheme, domain, port and full path. It does not contain the fragment part of the URL.
 
 Example value: `http://example.com:8000/examples.build/analytics.amp.max.html`
 
-**ampdocHost** provides the AMP document's URL host.
+## ampdocHost
+
+This variable provides the AMP document's URL host.
 
 Example value: `example.com`
 
-**pageViewId** provides a string that is intended to be random and likely to be unique per URL, user and day.
+## pageViewId
+
+This variable provides a string that is intended to be random and likely to be unique per URL, user and day.
 
 Example value: `978`
 
-**timestamp** provides the number of seconds that have elapsed since 1970. (Epoch time)
+## timestamp
+
+This variable provides the number of seconds that have elapsed since 1970. (Epoch time)
 
 Example value: `1452710304312`
 
-**timezone** provides the user's time-zone offset from UTC, in minutes.
+## timezone
 
-Example value: `480` for pacific time.
+This variable provides the user's time-zone offset from UTC, in minutes.
 
-**scrollTop** provides the number of pixels that the user has scrolled from top. The value is generated by `viewport.getScrollTop()`.
+Example value: `480` for [Pacific Standard Time](https://en.wikipedia.org/wiki/Pacific_Time_Zone).
+
+## scrollTop
+
+This variable provides the number of pixels that the user has scrolled from top.
 
 Example value: `0`
 
-**scrollLeft** provides the number of pixels that the user has scrolled from left. The value is generated using `viewport.getScrollLeft()`.
+## scrollLeft
+
+This variable provides the number of pixels that the user has scrolled from left.
 
 Example value: `100`
 
-**scrollHeight** provides the total size of the page in pixels.
+## scrollHeight
+
+This variable provides the total size of the page in pixels.
 
 Example value: `400`
 
-**screenHeight** provides the screen height in pixels. The value is retrieved from `window.screen.height`.
+## screenHeight
+
+This variable provides the screen height in pixels. The value is retrieved from `window.screen.height`.
 
 Example value: `1600`
 
-**screenWidth** provides the screen width in pixels. The value is retrieved from `window.screen.width`.
+## screenWidth
+
+This variable provides the screen width in pixels. The value is retrieved from `window.screen.width`.
 
 Example value: `2560`
 
