@@ -37,6 +37,7 @@ export const adPrefetch = {
 export const adPreconnect = {
   adreactor: 'https://adserver.adreactor.com',
   adsense: 'https://googleads.g.doubleclick.net',
+  taboola: 'https://cdn.taboola.com',
   doubleclick: [
     'https://partner.googleadservices.com',
     'https://securepubads.g.doubleclick.net',
