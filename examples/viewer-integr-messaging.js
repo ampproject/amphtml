@@ -65,6 +65,9 @@ ViewerMessaging.prototype.sendRequest = function(eventType, payload,
  * @private
  */
 ViewerMessaging.prototype.onMessage_ = function(event) {
+  if (event.source != this.target_) {
+    return;
+  }
   // TODO: must check for origin/target.
   var message = event.data;
   if (message.sentinel == this.requestSentinel_) {
