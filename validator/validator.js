@@ -123,49 +123,61 @@ function specificity(code) {
     case amp.validator.ValidationError.Code.
         MANDATORY_CDATA_MISSING_OR_INCORRECT:
       return 1;
-    case amp.validator.ValidationError.Code.DISALLOWED_TAG_ANCESTOR:
+    case amp.validator.ValidationError.Code.MANDATORY_CDATA_VIOLATES_BLACKLIST:
       return 2;
-    case amp.validator.ValidationError.Code.WRONG_PARENT_TAG:
+    case amp.validator.ValidationError.Code.DISALLOWED_TAG_ANCESTOR:
       return 3;
-    case amp.validator.ValidationError.Code.MANDATORY_TAG_MISSING:
+    case amp.validator.ValidationError.Code.WRONG_PARENT_TAG:
       return 4;
-    case amp.validator.ValidationError.Code.DISALLOWED_TAG:
+    case amp.validator.ValidationError.Code.MANDATORY_TAG_MISSING:
       return 5;
-    case amp.validator.ValidationError.Code.DISALLOWED_ATTR:
+    case amp.validator.ValidationError.Code.TAG_REQUIRED_BY_MISSING:
       return 6;
-    case amp.validator.ValidationError.Code.INVALID_ATTR_VALUE:
+    case amp.validator.ValidationError.Code.DISALLOWED_TAG:
       return 7;
-    case amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING:
+    case amp.validator.ValidationError.Code.DISALLOWED_ATTR:
       return 8;
-    case amp.validator.ValidationError.Code.DUPLICATE_UNIQUE_TAG:
+    case amp.validator.ValidationError.Code.INVALID_ATTR_VALUE:
       return 9;
-    case amp.validator.ValidationError.Code.STYLESHEET_TOO_LONG:
+    case amp.validator.ValidationError.Code.ATTR_VALUE_REQUIRED_BY_LAYOUT:
       return 10;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX:
+    case amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING:
       return 11;
+    case amp.validator.ValidationError.Code.MANDATORY_ONEOF_ATTR_MISSING:
+      return 12;
+    case amp.validator.ValidationError.Code.DUPLICATE_UNIQUE_TAG:
+      return 13;
+    case amp.validator.ValidationError.Code.STYLESHEET_TOO_LONG:
+      return 14;
+    case amp.validator.ValidationError.Code.CSS_SYNTAX:
+      return 15;
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_AT_RULE:
+      return 16;
     case amp.validator.ValidationError.Code.
         MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE:
-      return 12;
+      return 17;
     case amp.validator.ValidationError.Code.
         INVALID_PROPERTY_VALUE_IN_ATTR_VALUE:
-      return 13;
-    case amp.validator.ValidationError.Code.DISALLOWED_PROPERTY_IN_ATTR_VALUE:
-      return 14;
-    case amp.validator.ValidationError.Code.MUTUALLY_EXCLUSIVE_ATTRS:
-      return 15;
-    case amp.validator.ValidationError.Code.UNESCAPED_TEMPLATE_IN_ATTR_VALUE:
-      return 16;
-    case amp.validator.ValidationError.Code.TEMPLATE_PARTIAL_IN_ATTR_VALUE:
-      return 17;
-    case amp.validator.ValidationError.Code.TEMPLATE_IN_ATTR_NAME:
       return 18;
+    case amp.validator.ValidationError.Code.DISALLOWED_PROPERTY_IN_ATTR_VALUE:
+      return 19;
+    case amp.validator.ValidationError.Code.MUTUALLY_EXCLUSIVE_ATTRS:
+      return 20;
+    case amp.validator.ValidationError.Code.UNESCAPED_TEMPLATE_IN_ATTR_VALUE:
+      return 21;
+    case amp.validator.ValidationError.Code.TEMPLATE_PARTIAL_IN_ATTR_VALUE:
+      return 22;
+    case amp.validator.ValidationError.Code.TEMPLATE_IN_ATTR_NAME:
+      return 23;
     case amp.validator.ValidationError.Code.
         INCONSISTENT_UNITS_FOR_WIDTH_AND_HEIGHT:
-      return 19;
+      return 24;
     case amp.validator.ValidationError.Code.IMPLIED_LAYOUT_INVALID:
-      return 20;
+      return 25;
+    case amp.validator.ValidationError.Code.SPECIFIED_LAYOUT_INVALID:
+      return 26;
     case amp.validator.ValidationError.Code.DEV_MODE_ENABLED:
-      return 21;
+      return 27;
     case amp.validator.ValidationError.Code.DEPRECATED_ATTR:
       return 101;
     case amp.validator.ValidationError.Code.DEPRECATED_TAG:
@@ -251,41 +263,6 @@ amp.validator.Terminal.prototype.error = function(msg) {
   }
 };
 
-/**
- * Renders one line of error output.
- * @param {!string} filenameOrUrl
- * @param {!amp.validator.ValidationError} error
- * @return {!string}
- */
-function errorLine(filenameOrUrl, error) {
-  const line = error.line || 1;
-  const col = error.col || 0;
-  let errorLine = goog.uri.utils.removeFragment(filenameOrUrl) +
-      ':' + line + ':' + col + ' ' +
-      error.code + ' ' + error.detail;
-  if (error.specUrl) {
-    errorLine += ' (see ' + error.specUrl + ')';
-  }
-  return errorLine;
-}
-
-/**
- * Renders the validation results into an array of human readable strings.
- * Careful when modifying this - it's called from
- * https://github.com/ampproject/amphtml/blob/master/test/integration/test-example-validation.js.
- * @param {!Object} validationResult
- * @param {string} filename to use in rendering error messages.
- * @return {!Array<string>}
- * @export
- */
-amp.validator.renderValidationResult = function(validationResult, filename) {
-  const rendered = [];
-  rendered.push(validationResult.status);
-  for (const error of validationResult.errors) {
-    rendered.push(errorLine(filename, error));
-  }
-  return rendered;
-};
 
 /**
  * Emits this validation result to the terminal, distinguishing warnings and
@@ -545,6 +522,7 @@ CdataMatcher.prototype.match = function(cdata, context, validationResult) {
       context.addError(amp.validator.ValidationError.Code.STYLESHEET_TOO_LONG,
                        'seen: ' + bytes + ' bytes, limit: ' +
                        cdataSpec.maxBytes + ' bytes',
+                       /* params */ [bytes, cdataSpec.maxBytes],
                        cdataSpec.maxBytesSpecUrl, validationResult);
       // We return early if the byte length is violated as parsing
       // really long stylesheets is slow and not worth our time.
@@ -563,6 +541,7 @@ CdataMatcher.prototype.match = function(cdata, context, validationResult) {
           amp.validator.ValidationError.Code.
               MANDATORY_CDATA_MISSING_OR_INCORRECT,
           getDetailOrName(this.tagSpec_),
+          /* params */ [getDetailOrName(this.tagSpec_)],
           this.tagSpec_.specUrl, validationResult);
     }
     // We return early if the cdata has an exact match rule. The
@@ -576,6 +555,7 @@ CdataMatcher.prototype.match = function(cdata, context, validationResult) {
           amp.validator.ValidationError.Code.
               MANDATORY_CDATA_MISSING_OR_INCORRECT,
           getDetailOrName(this.tagSpec_),
+          /* params */ [getDetailOrName(this.tagSpec_)],
           this.tagSpec_.specUrl, validationResult);
       return;
     }
@@ -601,7 +581,9 @@ CdataMatcher.prototype.match = function(cdata, context, validationResult) {
       const lineCol = new LineCol(errorToken.line, errorToken.col);
       context.addErrorWithLineCol(
           lineCol, amp.validator.ValidationError.Code.CSS_SYNTAX,
-          errorToken.msg, /* url */ '', validationResult);
+          errorToken.msg,
+          /* params */ [getDetailOrName(this.tagSpec_), errorToken.msg],
+          /* url */ '', validationResult);
     }
 
     // TODO: This needs improvement to validate all fields recursively. For now,
@@ -613,8 +595,11 @@ CdataMatcher.prototype.match = function(cdata, context, validationResult) {
           reportCdataRegexpErrors = false;
           const lineCol = new LineCol(cssRule.line, cssRule.col);
           context.addErrorWithLineCol(
-              lineCol, amp.validator.ValidationError.Code.CSS_SYNTAX,
-              'CSS @' + cssRule.name, /* url */ '', validationResult);
+              lineCol,
+              amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_AT_RULE,
+              cssRule.name,
+              /* params */ [getDetailOrName(this.tagSpec_), cssRule.name],
+              /* url */ '', validationResult);
         }
       }
     }
@@ -635,8 +620,10 @@ CdataMatcher.prototype.match = function(cdata, context, validationResult) {
     if (blacklistRegex.test(cdata)) {
       context.addError(
           amp.validator.ValidationError.Code.
-              MANDATORY_CDATA_MISSING_OR_INCORRECT,
-          blacklist.errorMessage, this.tagSpec_.specUrl, validationResult);
+              MANDATORY_CDATA_VIOLATES_BLACKLIST,
+          blacklist.errorMessage,
+          /* params */ [getDetailOrName(this.tagSpec_), blacklist.errorMessage],
+          this.tagSpec_.specUrl, validationResult);
     }
   }
 };
@@ -763,12 +750,13 @@ Context.prototype.getProgress = function(validationResult) {
  * @param {LineCol|amp.htmlparser.DocLocator} lineCol a line / column pair.
  * @param {!amp.validator.ValidationError.Code} validationErrorCode Error code
  * @param {string} validationErrorDetail Error detail
+ * @param {!Array<!string>} params
  * @param {string} specUrl a link (URL) to the amphtml spec
  * @param {!amp.validator.ValidationResult} validationResult
  * @return {boolean}
  */
 Context.prototype.addErrorWithLineCol = function(
-    lineCol, validationErrorCode, validationErrorDetail, specUrl,
+    lineCol, validationErrorCode, validationErrorDetail, params, specUrl,
     validationResult) {
   const progress = this.getProgress(validationResult);
   if (progress.complete) {
@@ -788,9 +776,11 @@ Context.prototype.addErrorWithLineCol = function(
     error.severity = severity;
     error.code = validationErrorCode;
     error.detail = validationErrorDetail;
+    error.params = params;
     error.line = lineCol.getLine();
     error.col = lineCol.getCol();
     error.specUrl = specUrl;
+    goog.asserts.assert(validationResult.errors !== undefined);
     validationResult.errors.push(error);
   }
   return true;
@@ -800,12 +790,14 @@ Context.prototype.addErrorWithLineCol = function(
  * Returns true if the result was changed; false otherwise.
  * @param {!amp.validator.ValidationError.Code} validationErrorCode Error code
  * @param {?string} validationErrorDetail Error detail
+ * @param {!Array<!string>} params
  * @param {?string} specUrl a link (URL) to the amphtml spec
  * @param {!amp.validator.ValidationResult} validationResult
  * @return {boolean}
  */
 Context.prototype.addError = function(
-    validationErrorCode, validationErrorDetail, specUrl, validationResult) {
+    validationErrorCode, validationErrorDetail, params, specUrl,
+    validationResult) {
   if (validationErrorDetail === null) {
     validationErrorDetail = '';
   }
@@ -813,8 +805,8 @@ Context.prototype.addError = function(
     specUrl = '';
   }
   return this.addErrorWithLineCol(
-      this.docLocator_, validationErrorCode, validationErrorDetail, specUrl,
-      validationResult);
+      this.docLocator_, validationErrorCode, validationErrorDetail, params,
+      specUrl, validationResult);
 };
 
 /**
@@ -930,11 +922,12 @@ ParsedAttrSpec.prototype.getSpec = function() {
  * @param {!Context} context
  * @param {!string} attrName
  * @param {!string} attrValue
+ * @param {!amp.validator.TagSpec} tagSpec
  * @param {!string} specUrl
  * @param {!amp.validator.ValidationResult} result
  */
 ParsedAttrSpec.prototype.validateAttrValueProperties = function(
-    context, attrName, attrValue, specUrl, result) {
+    context, attrName, attrValue, tagSpec, specUrl, result) {
   // TODO(johannes): Replace this hack with a parser.
   const segments = attrValue.split(',');
   const properties = new goog.structs.Map();
@@ -953,7 +946,9 @@ ParsedAttrSpec.prototype.validateAttrValueProperties = function(
     if (!this.valuePropertyByName_.containsKey(name)) {
       context.addError(
           amp.validator.ValidationError.Code.DISALLOWED_PROPERTY_IN_ATTR_VALUE,
-          attrName + '="...' + name + '=..."', specUrl, result);
+          attrName + '="...' + name + '=..."',
+          /* params */ [name, attrName, getDetailOrName(tagSpec)],
+          specUrl, result);
       continue;
     }
     const propertySpec = this.valuePropertyByName_.get(name);
@@ -962,14 +957,18 @@ ParsedAttrSpec.prototype.validateAttrValueProperties = function(
         context.addError(
             amp.validator.ValidationError.Code.
                 INVALID_PROPERTY_VALUE_IN_ATTR_VALUE,
-            attrName + '="...' + name + '=' + value + '..."', specUrl, result);
+            attrName + '="...' + name + '=' + value + '..."',
+            /* params */ [name, attrName, getDetailOrName(tagSpec), value],
+            specUrl, result);
       }
     } else if (propertySpec.valueDouble !== null) {
       if (parseFloat(value) != propertySpec.valueDouble) {
         context.addError(
             amp.validator.ValidationError.Code.
                 INVALID_PROPERTY_VALUE_IN_ATTR_VALUE,
-            attrName + '="...' + name + '=' + value + '..."', specUrl, result);
+            attrName + '="...' + name + '=' + value + '..."',
+            /* params */ [name, attrName, getDetailOrName(tagSpec), value],
+            specUrl, result);
       }
     }
   }
@@ -978,7 +977,9 @@ ParsedAttrSpec.prototype.validateAttrValueProperties = function(
     context.addError(
         amp.validator.ValidationError.Code.
             MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE,
-        attrName + '="...' + name + '=' + '..."', specUrl, result);
+        attrName + '="...' + name + '=' + '..."',
+        /* params */ [name, attrName, getDetailOrName(tagSpec)],
+        specUrl, result);
   }
 };
 
@@ -1390,22 +1391,31 @@ ParsedTagSpec.prototype.validateLayout = function(context, attrsByKey, result) {
   const inputLayout = parseLayout(layoutAttr);
   if (layoutAttr !== undefined &&
       inputLayout === amp.validator.AmpLayout.Layout.UNKNOWN) {
-    context.addError(amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
-                     'layout', this.spec_.specUrl, result);
+    context.addError(
+        amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
+        'layout',
+        /* params */ ["layout", getDetailOrName(this.spec_), layoutAttr],
+        this.spec_.specUrl, result);
     return;
   }
   const inputWidth = new amp.validator.CssLengthAndUnit(
       widthAttr, /* allowAuto */ true);
   if (!inputWidth.isValid) {
-    context.addError(amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
-                     'width', this.spec_.specUrl, result);
+    context.addError(
+        amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
+        'width',
+        /* params */ ["width", getDetailOrName(this.spec_), widthAttr],
+        this.spec_.specUrl, result);
     return;
   }
   const inputHeight = new amp.validator.CssLengthAndUnit(
       heightAttr, /* allowAuto */ false);
   if (!inputHeight.isValid) {
-    context.addError(amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
-                     'height', this.spec_.specUrl, result);
+    context.addError(
+        amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
+        'height',
+        /* params */ ["height", getDetailOrName(this.spec_), heightAttr],
+        this.spec_.specUrl, result);
     return;
   }
 
@@ -1417,10 +1427,11 @@ ParsedTagSpec.prototype.validateLayout = function(context, attrsByKey, result) {
 
   // Does the tag support the computed layout?
   if (this.spec_.ampLayout.supportedLayouts.indexOf(layout) === -1) {
-    const code = layoutAttr !== undefined ?
-        amp.validator.ValidationError.Code.INVALID_ATTR_VALUE :
-        amp.validator.ValidationError.Code.IMPLIED_LAYOUT_INVALID;
+    const code = layoutAttr === undefined ?
+        amp.validator.ValidationError.Code.IMPLIED_LAYOUT_INVALID :
+        amp.validator.ValidationError.Code.SPECIFIED_LAYOUT_INVALID;
     context.addError(code, 'layout ' + layout + ' not supported',
+                     /* params */ [layout, getDetailOrName(this.spec_)],
                      this.spec_.specUrl, result);
     return;
   }
@@ -1430,14 +1441,19 @@ ParsedTagSpec.prototype.validateLayout = function(context, attrsByKey, result) {
        layout === amp.validator.AmpLayout.Layout.RESPONSIVE) &&
       !height.isSet) {
     context.addError(amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
-                     'height', this.spec_.specUrl, result);
+                     'height',
+                     /* params */ ['height', getDetailOrName(this.spec_)],
+                     this.spec_.specUrl, result);
     return;
   }
   if (layout === amp.validator.AmpLayout.Layout.FIXED_HEIGHT &&
       width.isSet && !width.isAuto) {
-    context.addError(amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
-                     "layout FIXED_HEIGHT requires width='auto'",
-                     this.spec_.specUrl, result);
+    context.addError(
+        amp.validator.ValidationError.Code.ATTR_VALUE_REQUIRED_BY_LAYOUT,
+        "layout FIXED_HEIGHT requires width='auto'",
+        /* params */ [widthAttr, 'width', getDetailOrName(this.spec_),
+                      'FIXED_HEIGHT', 'auto'],
+        this.spec_.specUrl, result);
     return;
   }
   if (layout === amp.validator.AmpLayout.Layout.FIXED ||
@@ -1445,12 +1461,16 @@ ParsedTagSpec.prototype.validateLayout = function(context, attrsByKey, result) {
     if (!width.isSet) {
       context.addError(
           amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
-          'width', this.spec_.specUrl, result);
+          'width',
+          /* params */ ['width', getDetailOrName(this.spec_)],
+          this.spec_.specUrl, result);
       return;
     } else if (width.isAuto) {
       context.addError(
           amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
-          'width=auto', this.spec_.specUrl, result);
+          'width=auto',
+          /* params */ ['width', getDetailOrName(this.spec_), 'auto'],
+          this.spec_.specUrl, result);
       return;
     }
   }
@@ -1459,7 +1479,9 @@ ParsedTagSpec.prototype.validateLayout = function(context, attrsByKey, result) {
       context.addError(
           amp.validator.ValidationError.Code.
               INCONSISTENT_UNITS_FOR_WIDTH_AND_HEIGHT,
-          width.unit + ' != ' + height.unit, this.spec_.specUrl, result);
+          width.unit + ' != ' + height.unit,
+          /* params */ [getDetailOrName(this.spec_), width.unit, height.unit],
+          this.spec_.specUrl, result);
       return;
   }
 };
@@ -1524,11 +1546,15 @@ ParsedTagSpec.prototype.validateAttributes = function(
       if (encounteredAttrName.indexOf('{{') != -1) {
         context.addError(
             amp.validator.ValidationError.Code.TEMPLATE_IN_ATTR_NAME,
-            encounteredAttrName, this.templateSpecUrl_, resultForAttempt);
+            encounteredAttrName,
+            /* params */ [encounteredAttrName, getDetailOrName(this.spec_)],
+            this.templateSpecUrl_, resultForAttempt);
       } else {
-        context.addError(amp.validator.ValidationError.Code.DISALLOWED_ATTR,
-                         encounteredAttrName, this.spec_.specUrl,
-                         resultForAttempt);
+        context.addError(
+            amp.validator.ValidationError.Code.DISALLOWED_ATTR,
+            encounteredAttrName,
+            /* params */ [encounteredAttrName, getDetailOrName(this.spec_)],
+            this.spec_.specUrl, resultForAttempt);
       }
       return;
     }
@@ -1538,6 +1564,8 @@ ParsedTagSpec.prototype.validateAttributes = function(
         context.addError(
             amp.validator.ValidationError.Code.UNESCAPED_TEMPLATE_IN_ATTR_VALUE,
             encounteredAttrName + '=' + encounteredAttrValue,
+            /* params */ [encounteredAttrName, getDetailOrName(this.spec_),
+                         encounteredAttrValue],
             this.templateSpecUrl_, resultForAttempt);
         return;
       }
@@ -1545,30 +1573,35 @@ ParsedTagSpec.prototype.validateAttributes = function(
         context.addError(
             amp.validator.ValidationError.Code.TEMPLATE_PARTIAL_IN_ATTR_VALUE,
             encounteredAttrName + '=' + encounteredAttrValue,
+            /* params */ [encounteredAttrName, getDetailOrName(this.spec_),
+                         encounteredAttrValue],
             this.templateSpecUrl_, resultForAttempt);
         return;
       }
     }
 
     if (parsedSpec.getSpec().deprecation !== null) {
-      context.addError(amp.validator.ValidationError.Code.DEPRECATED_ATTR,
-                       encounteredAttrName + ' - ' +
-                           parsedSpec.getSpec().deprecation,
-                       parsedSpec.getSpec().deprecationUrl,
-                       resultForAttempt);
+      context.addError(
+          amp.validator.ValidationError.Code.DEPRECATED_ATTR,
+          encounteredAttrName + ' - ' + parsedSpec.getSpec().deprecation,
+          /* params */ [encounteredAttrName, getDetailOrName(this.spec_),
+                        parsedSpec.getSpec().deprecation],
+          parsedSpec.getSpec().deprecationUrl, resultForAttempt);
       // Deprecation is only a warning, so we don't return.
     }
     if (parsedSpec.getSpec().devModeEnabled !== null) {
-      context.addError(amp.validator.ValidationError.Code.DEV_MODE_ENABLED,
-                       encounteredAttrName + ' - ' +
-                           parsedSpec.getSpec().devModeEnabled,
-                       parsedSpec.getSpec().devModeEnabledUrl,
-                       resultForAttempt);
+      context.addError(
+          amp.validator.ValidationError.Code.DEV_MODE_ENABLED,
+          encounteredAttrName + ' - ' +
+              parsedSpec.getSpec().devModeEnabled,
+          /* params */ [encounteredAttrName, getDetailOrName(this.spec_)],
+          parsedSpec.getSpec().devModeEnabledUrl,
+          resultForAttempt);
       // Enabling the developer attribute is now always an error, so we
       // return.
       return;
     }
-    if (!hasTemplateAncestor || 
+    if (!hasTemplateAncestor ||
         !this.valueHasTemplateSyntax(encounteredAttrValue)) {
       // The value, value_regex, and value_properties fields are
       // treated like a oneof, but we're not using oneof because it's
@@ -1580,6 +1613,8 @@ ParsedTagSpec.prototype.validateAttributes = function(
           context.addError(
               amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
               encounteredAttrName + '=' + encounteredAttrValue,
+              /* params */ [encounteredAttrName, getDetailOrName(this.spec_),
+                            encounteredAttrValue],
               this.spec_.specUrl, resultForAttempt);
           return;
         }
@@ -1591,6 +1626,8 @@ ParsedTagSpec.prototype.validateAttributes = function(
           context.addError(
               amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
               encounteredAttrName + '=' + encounteredAttrValue,
+              /* params */ [encounteredAttrName, getDetailOrName(this.spec_),
+                            encounteredAttrValue],
               this.spec_.specUrl, resultForAttempt);
           return;
         }
@@ -1598,7 +1635,7 @@ ParsedTagSpec.prototype.validateAttributes = function(
       if (parsedSpec.getSpec().valueProperties !== null) {
         parsedSpec.validateAttrValueProperties(
             context, encounteredAttrName, encounteredAttrValue,
-            this.spec_.specUrl, resultForAttempt);
+            this.spec_, this.spec_.specUrl, resultForAttempt);
         if (resultForAttempt.status ===
             amp.validator.ValidationResult.Status.FAIL) {
           return;
@@ -1610,9 +1647,12 @@ ParsedTagSpec.prototype.validateAttributes = function(
       const blacklistedValueRegex = new RegExp(
           parsedSpec.getSpec().blacklistedValueRegex, 'i');
       if (blacklistedValueRegex.test(encounteredAttrValue)) {
-        context.addError(amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
-                         encounteredAttrName + '=' + encounteredAttrValue,
-                         this.spec_.specUrl, resultForAttempt);
+        context.addError(
+            amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
+            encounteredAttrName + '=' + encounteredAttrValue,
+            /* params */ [encounteredAttrName, getDetailOrName(this.spec_),
+                          encounteredAttrValue],
+            this.spec_.specUrl, resultForAttempt);
         return;
       }
     }
@@ -1626,8 +1666,10 @@ ParsedTagSpec.prototype.validateAttributes = function(
         mandatoryOneofsSeen.contains(parsedSpec.getSpec().mandatoryOneof)) {
       context.addError(
           amp.validator.ValidationError.Code.MUTUALLY_EXCLUSIVE_ATTRS,
-          parsedSpec.getSpec().mandatoryOneof, this.spec_.specUrl,
-          resultForAttempt);
+          parsedSpec.getSpec().mandatoryOneof,
+          /* params */ [getDetailOrName(this.spec_),
+                        parsedSpec.getSpec().mandatoryOneof],
+          this.spec_.specUrl, resultForAttempt);
       return;
     }
     mandatoryOneofsSeen.add(parsedSpec.getSpec().mandatoryOneof);
@@ -1637,17 +1679,22 @@ ParsedTagSpec.prototype.validateAttributes = function(
   for (const mandatoryOneof of this.mandatoryOneofs_) {
     if (!mandatoryOneofsSeen.contains(mandatoryOneof)) {
       context.addError(
-          amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
-          mandatoryOneof, this.spec_.specUrl, resultForAttempt);
+          amp.validator.ValidationError.Code.MANDATORY_ONEOF_ATTR_MISSING,
+          'pick one of ' + mandatoryOneof,
+          /* params */ [getDetailOrName(this.spec_), mandatoryOneof],
+          this.spec_.specUrl, resultForAttempt);
     }
   }
 
   mandatoryAttrsSeen = sortAndUniquify(mandatoryAttrsSeen);
   const diffs = subtractDiff(this.mandatoryAttrIds_, mandatoryAttrsSeen);
   for (const diff of diffs) {
-    context.addError(amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
-                     this.attrsById_[diff].getSpec().name,
-                     this.spec_.specUrl, resultForAttempt);
+    context.addError(
+        amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
+        this.attrsById_[diff].getSpec().name,
+        /* params */ [this.attrsById_[diff].getSpec().name,
+                      getDetailOrName(this.spec_)],
+        this.spec_.specUrl, resultForAttempt);
   }
 };
 
@@ -1667,6 +1714,8 @@ ParsedTagSpec.prototype.validateParentTag = function(
     context.addError(
         amp.validator.ValidationError.Code.WRONG_PARENT_TAG,
         context.getTagNames().getParent() + ' > ' + this.spec_.name,
+        /* params */ [this.spec_.name, context.getTagNames().getParent(),
+                      this.spec_.mandatoryParent],
         this.spec_.specUrl, validationResult);
   }
 };
@@ -1683,6 +1732,7 @@ ParsedTagSpec.prototype.validateDisallowedAncestorTags = function(
       context.addError(
           amp.validator.ValidationError.Code.DISALLOWED_TAG_ANCESTOR,
           disallowedAncestor + ' > ... > ' + this.spec_.name,
+          /* params */ [this.spec_.name, disallowedAncestor],
           this.spec_.specUrl, validationResult);
       return;
     }
@@ -1752,6 +1802,20 @@ const ParsedValidatorRules = function ParsedValidatorRules() {
     if (tag.mandatory)
       this.mandatoryTagSpecs_.push(i);
   }
+  /** type {!goog.structs.Map<!amp.validator.ValidationError.Code, !string>} */
+  this.formatByCode_ = new goog.structs.Map();
+  for (let i = 0; i < rules.errorFormats.length; ++i) {
+    const errorFormat = rules.errorFormats[i];
+    goog.asserts.assert(errorFormat !== null);
+    this.formatByCode_.set(errorFormat.code, errorFormat.format);
+  }
+};
+
+/**
+ * @return {!goog.structs.Map<!amp.validator.ValidationError.Code, !string>}
+ */
+ParsedValidatorRules.prototype.getFormatByCode = function() {
+  return this.formatByCode_;
 };
 
 /**
@@ -1768,8 +1832,11 @@ ParsedValidatorRules.prototype.validateTag = function(
     context, tagName, encounteredAttrs, validationResult) {
   const allTagSpecs = this.tagSpecByTagName_.get(tagName);
   if (allTagSpecs === undefined) {
-    context.addError(amp.validator.ValidationError.Code.DISALLOWED_TAG,
-                     tagName, /* specUrl */ '', validationResult);
+    context.addError(
+        amp.validator.ValidationError.Code.DISALLOWED_TAG,
+        tagName,
+        /* params */ [tagName],
+        /* specUrl */ '', validationResult);
     return;
   }
   let resultForBestAttempt = new amp.validator.ValidationResult();
@@ -1822,14 +1889,17 @@ ParsedValidatorRules.prototype.validateTagAgainstSpec = function(
       const spec = parsedSpec.getSpec();
       context.addError(
           amp.validator.ValidationError.Code.DUPLICATE_UNIQUE_TAG,
-          getDetailOrName(spec), spec.specUrl, resultForBestAttempt);
+          getDetailOrName(spec), /* params */ [getDetailOrName(spec)],
+          spec.specUrl, resultForBestAttempt);
       return;
     }
   }
 
-  if (parsedSpec.getSpec().mandatoryAlternatives !== null)
-    context.recordMandatoryAlternativeSatisfied(
-        parsedSpec.getSpec().mandatoryAlternatives);
+  if (parsedSpec.getSpec().mandatoryAlternatives !== null) {
+    const satisfied = parsedSpec.getSpec().mandatoryAlternatives;
+    goog.asserts.assert(satisfied !== null);
+    context.recordMandatoryAlternativeSatisfied(satisfied);
+  }
   // (Re)set the cdata matcher to the expectations that this tag
   // brings with it.
   context.setCdataMatcher(new CdataMatcher(parsedSpec.getSpec()));
@@ -1847,7 +1917,9 @@ ParsedValidatorRules.prototype.maybeEmitMandatoryTagValidationErrors =
       const spec = this.tagSpecById_[tagspecId].getSpec();
       if (!context.addError(
           amp.validator.ValidationError.Code.MANDATORY_TAG_MISSING,
-          getDetailOrName(spec), spec.specUrl, validationResult)) {
+          getDetailOrName(spec),
+          /* params */ [getDetailOrName(spec)],
+          spec.specUrl, validationResult)) {
         return;
       }
     }
@@ -1870,9 +1942,12 @@ ParsedValidatorRules.prototype.maybeEmitAlsoRequiresValidationErrors =
       if (!context.getTagspecsValidated().contains(alsoRequiresTagspecId)) {
         const alsoRequiresSpec = this.tagSpecById_[alsoRequiresTagspecId];
         if (!context.addError(
-            amp.validator.ValidationError.Code.MANDATORY_TAG_MISSING,
+            amp.validator.ValidationError.Code.TAG_REQUIRED_BY_MISSING,
             getDetailOrName(alsoRequiresSpec.getSpec()) + ' required by ' +
-            getDetailOrName(spec.getSpec()), spec.getSpec().specUrl,
+            getDetailOrName(spec.getSpec()),
+            /* params */ [getDetailOrName(
+                alsoRequiresSpec.getSpec()), getDetailOrName(spec.getSpec())],
+            spec.getSpec().specUrl,
             validationResult)) {
           return;
         }
@@ -1906,7 +1981,8 @@ ParsedValidatorRules.prototype.maybeEmitMandatoryAlternativesSatisfiedErrors =
   for (const tagMissing of sortAndUniquify(missing)) {
     if (!context.addError(
         amp.validator.ValidationError.Code.MANDATORY_TAG_MISSING,
-        tagMissing, /* specUrl */ specUrlsByMissing[tagMissing],
+        tagMissing, /* params */ [tagMissing],
+        /* specUrl */ specUrlsByMissing[tagMissing],
         validationResult)) {
       return;
     }
@@ -1931,6 +2007,8 @@ ParsedValidatorRules.prototype.maybeEmitGlobalTagValidationErrors = function(
     return;
   this.maybeEmitMandatoryAlternativesSatisfiedErrors(context, validationResult);
 };
+
+const parsedValidatorRulesSingleton = new ParsedValidatorRules();
 
 /**
  * Computes the byte length, rather than character length, of a utf8 string.
@@ -1971,7 +2049,7 @@ const ValidationHandler = function ValidationHandler() {
    * @type {!ParsedValidatorRules}
    * @private
    */
-  this.rules_ = new ParsedValidatorRules();
+  this.rules_ = parsedValidatorRulesSingleton;
 
   /**
    * Set to true when we encounter a start <style> tag, false when we encounter
@@ -2094,4 +2172,62 @@ amp.validator.validateString = function(inputDocContents) {
 
   // TODO: This returns SUCCESS even if there are errors. Should be fixed.
   return handler.Result();
+};
+
+/**
+ * Applies the format to render the params in the provided error.
+ * @param {!string} format
+ * @param {!amp.validator.ValidationError} error
+ * @return {!string}
+ */
+function applyFormat(format, error) {
+  let message = format;
+  for (let param = 1; param <= error.params.length; ++param) {
+    message = message.replace(new RegExp('%' + param, 'g'),
+                              error.params[param - 1]);
+  }
+  return message.replace(new RegExp('%%', 'g'), '%');
+}
+
+/**
+ * Renders one line of error output.
+ * @param {!string} filenameOrUrl
+ * @param {!amp.validator.ValidationError} error
+ * @return {!string}
+ */
+function errorLine(filenameOrUrl, error) {
+  const line = error.line || 1;
+  const col = error.col || 0;
+  let message = error.code + ' ' + error.detail;
+  if (error.params.length > 0) {
+    const format =
+        parsedValidatorRulesSingleton.getFormatByCode().get(error.code);
+    if (format !== undefined) {
+      message = applyFormat(format, error);
+    }
+  }
+  let errorLine = goog.uri.utils.removeFragment(filenameOrUrl) +
+      ':' + line + ':' + col + ' ' + message;
+  if (error.specUrl) {
+    errorLine += ' (see ' + error.specUrl + ')';
+  }
+  return errorLine;
+}
+
+/**
+ * Renders the validation results into an array of human readable strings.
+ * Careful when modifying this - it's called from
+ * https://github.com/ampproject/amphtml/blob/master/test/integration/test-example-validation.js.
+ * @param {!Object} validationResult
+ * @param {string} filename to use in rendering error messages.
+ * @return {!Array<string>}
+ * @export
+ */
+amp.validator.renderValidationResult = function(validationResult, filename) {
+  const rendered = [];
+  rendered.push(validationResult.status);
+  for (const error of validationResult.errors) {
+    rendered.push(errorLine(filename, error));
+  }
+  return rendered;
 };

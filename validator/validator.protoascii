@@ -20,12 +20,12 @@
 # in production from crashing. This id is not relevant to validator.js
 # because thus far, engine (validator.js) and spec file (validator.protoascii)
 # are always released together.
-min_validator_revision_required: 72
+min_validator_revision_required: 74
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 108
+spec_file_revision: 109
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
 # These rules are just enough to validate the example from the spec.
@@ -1840,17 +1840,17 @@ tags: {
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-youtube/amp-youtube.md"
   attrs: {
     name: "src"
-    mandatory_oneof: "src or data-videoid"
+    mandatory_oneof: "['src', 'data-videoid']"
   }
   attrs: {
     name: "data-videoid"
-    mandatory_oneof: "src or data-videoid"
+    mandatory_oneof: "['src', 'data-videoid']"
   }
   attrs: {
     name: "video-id"
-    deprecation: "use data-videoid instead"
+    deprecation: "data-videoid"
     deprecation_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-youtube/amp-youtube.md"
-    mandatory_oneof: "src or data-videoid"
+    mandatory_oneof: "['src', 'data-videoid']"
   }
   amp_layout: {
     supported_layouts: FIXED
@@ -1899,8 +1899,8 @@ tags: {
   name: "amp-twitter"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-twitter/amp-twitter.md"
   attr_lists: "extended-amp-global"
-  attrs: { name: "data-tweetid" mandatory_oneof: "data-tweetid or src" }
-  attrs: { name: "src" mandatory_oneof: "data-tweetid or src" }
+  attrs: { name: "data-tweetid" mandatory_oneof: "['data-tweetid', 'src']" }
+  attrs: { name: "src" mandatory_oneof: "['data-tweetid', 'src']" }
   amp_layout: {
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
@@ -1917,17 +1917,17 @@ tags: {
   attr_lists: "extended-amp-global"
   attrs: {
     name: "data-shortcode"
-    mandatory_oneof: "data-shortcode or src"
+    mandatory_oneof: "['data-shortcode', 'src']"
   }
   attrs: {
     name: "src"
-    mandatory_oneof: "data-shortcode or src"
+    mandatory_oneof: "['data-shortcode', 'src']"
   }
   attrs: {
     name: "shortcode"
-    deprecation: "use data-shortcode instead"
+    deprecation: "data-shortcode"
     deprecation_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-instagram/amp-instagram.md"
-    mandatory_oneof: "data-shortcode or src"
+    mandatory_oneof: "['data-shortcode', 'src']"
   }
   amp_layout: {
     supported_layouts: FIXED
@@ -1949,8 +1949,8 @@ tags: {
   attrs: { name: "allowtransparency" value: "" }
   attrs: { name: "resizable" value: "" }
   attrs: { name: "frameborder" value_regex: "0|1" }
-  attrs: { name: "src" mandatory_oneof: "src or srcdoc" }
-  attrs: { name: "srcdoc" mandatory_oneof: "src or srcdoc" }
+  attrs: { name: "src" mandatory_oneof: "['src', 'srcdoc']" }
+  attrs: { name: "srcdoc" mandatory_oneof: "['src', 'srcdoc']" }
   amp_layout: {
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
@@ -2140,4 +2140,127 @@ attr_lists: {
 
   # Allowed on all elements per http://b/25392418.
   attrs: { name: "overflow" }
+}
+
+error_formats {
+  code: MANDATORY_TAG_MISSING
+  format: "The mandatory tag '%1' is missing or incorrect."
+}
+error_formats {
+  code: TAG_REQUIRED_BY_MISSING
+  format: "The '%1' tag is missing or incorrect, but required by '%2'."
+}
+error_formats {
+  code: DISALLOWED_TAG
+  format: "The tag '%1' is disallowed."
+}
+error_formats {
+  code: DISALLOWED_ATTR
+  format: "The attribute '%1' may not appear in tag '%2'."
+}
+error_formats {
+  code: INVALID_ATTR_VALUE
+  format: "The attribute '%1' in tag '%2' is set "
+          "to the invalid value '%3'."
+}
+error_formats {
+  code: ATTR_VALUE_REQUIRED_BY_LAYOUT
+  format: "Invalid value '%1' for attribute '%2' in tag '%3' - "
+          "for layout '%4', set the attribute '%2' to value '%5'."
+}
+error_formats {
+  code: IMPLIED_LAYOUT_INVALID
+  format: "The implied layout '%1' is not supported by tag '%2'."
+}
+error_formats {
+  code: SPECIFIED_LAYOUT_INVALID
+  format: "The specified layout '%1' is not supported by tag '%2'."
+}
+error_formats {
+  code: MANDATORY_ATTR_MISSING
+  format: "The mandatory attribute '%1' missing in tag '%2'."
+}
+error_formats {
+  code: INCONSISTENT_UNITS_FOR_WIDTH_AND_HEIGHT
+  format: "Inconsistent units for width and height in tag '%1' - "
+          "width is specified in '%2' whereas height is specified in '%3'."
+}
+error_formats {
+  code: STYLESHEET_TOO_LONG
+  format: "The author stylesheet specified in tag 'style' is too long - "
+          "we saw %1 bytes whereas the limit is %2 bytes."
+}
+error_formats {
+  code: MANDATORY_CDATA_MISSING_OR_INCORRECT
+  format: "The mandatory text (CDATA) inside tag '%1' is missing or incorrect."
+}
+error_formats {
+  code: MANDATORY_CDATA_VIOLATES_BLACKLIST
+  format: "The mandatory text (CDATA) inside tag '%1' matches '%2', "
+          "which is disallowed."
+}
+error_formats {
+  code: DISALLOWED_PROPERTY_IN_ATTR_VALUE
+  format: "The property '%1' in attribute '%2' in tag '%3' is disallowed."
+}
+error_formats {
+  code: INVALID_PROPERTY_VALUE_IN_ATTR_VALUE,
+  format: "The property '%1' in attribute '%2' in tag '%3' is set to "
+          "'%4', which is invalid."
+}
+error_formats {
+  code: MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE,
+  format: "The property '%1' is missing from attribute '%2' in tag '%3'."
+}
+error_formats {
+  code: UNESCAPED_TEMPLATE_IN_ATTR_VALUE
+  format: "The attribute '%1' in tag '%2' is set to '%3', which contains "
+          "unescaped Mustache template syntax."
+}
+error_formats {
+  code: TEMPLATE_PARTIAL_IN_ATTR_VALUE
+  format: "The attribute '%1' in tag '%2' is set to '%3', which contains "
+          "a Mustache template partial."
+}
+error_formats {
+  code: DEPRECATED_ATTR
+  format: "The attribute '%1' in tag '%2' is deprecated - use '%3' instead."
+}
+error_formats {
+  code: DEV_MODE_ENABLED
+  format: "The attribute '%1' in tag '%2' enables the development mode. "
+          "Please remove, this feature is obsolete."
+}
+error_formats {
+  code: MUTUALLY_EXCLUSIVE_ATTRS
+  format: "Mutually exclusive attributes encountered in tag '%1' - "
+          "pick one of %2."
+}
+error_formats {
+  code: MANDATORY_ONEOF_ATTR_MISSING
+  format: "The tag '%1' is missing a mandatory attribute - pick one of %2."
+}
+error_formats {
+  code: WRONG_PARENT_TAG
+  format: "The parent tag of tag '%1' is '%2', but it must be '%3'."
+}
+error_formats {
+  code: DISALLOWED_TAG_ANCESTOR
+  format: "The tag '%1' may not appear as a descendant of tag '%2'."
+}
+error_formats {
+  code: DUPLICATE_UNIQUE_TAG
+  format: "The tag '%1' appears more than once in the document."
+}
+error_formats {
+  code: CSS_SYNTAX
+  format: "CSS syntax error in tag '%1' - %2."
+}
+error_formats {
+  code: CSS_SYNTAX_INVALID_AT_RULE
+  format: "CSS syntax error in tag '%1' - saw invalid at rule '%2'."
+}
+error_formats {
+  code: TEMPLATE_IN_ATTR_NAME
+  format: "Mustache template syntax in attribute name '%1' in tag '%2'."
 }
