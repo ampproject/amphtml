@@ -19,7 +19,10 @@ import {installActionService} from './action-impl';
 import {installResourcesService} from './resources-impl';
 
 
-class StandardActions {
+/**
+ * @private Visible for testing.
+ */
+export class StandardActions {
   /**
    * @param {!Window} win
    */
@@ -30,10 +33,17 @@ class StandardActions {
     /** @const @private {!Resources} */
     this.resources_ = installResourcesService(win);
 
-    this.actions_.addGlobalMethodHandler('hide', invocation => {
-      this.resources_.mutateElement(invocation.target, () => {
-        invocation.target.style.display = 'none';
-      });
+    this.actions_.addGlobalMethodHandler('hide', this.handleHide.bind(this));
+  }
+
+  /**
+   * Handles "hide" action. This is a very simple action where "display: none"
+   * is applied to the target element.
+   * @param {!ActionInvocation} invocation
+   */
+  handleHide(invocation) {
+    this.resources_.mutateElement(invocation.target, () => {
+      invocation.target.style.display = 'none';
     });
   }
 }
