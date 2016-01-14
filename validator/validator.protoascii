@@ -20,12 +20,12 @@
 # in production from crashing. This id is not relevant to validator.js
 # because thus far, engine (validator.js) and spec file (validator.protoascii)
 # are always released together.
-min_validator_revision_required: 74
+min_validator_revision_required: 75
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 111
+spec_file_revision: 112
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
 # These rules are just enough to validate the example from the spec.
@@ -1477,6 +1477,7 @@ tags: { name: "button" }
 # allowed. The AMP Engine is the first in this specfile so that the
 # 'development' attribute shows up as the disallowed attribute instead of
 # 'src' for a development flagged AMP engine script.
+
 tags: {
   name: "script"
   mandatory: true
@@ -1510,40 +1511,400 @@ tags: {
     value: "application/ld+json"
   }
 }
-tags: {
+# Specific script tags for custom elements and runtime imports.
+tags: {  # amp-access
   name: "script"
   mandatory_parent: "head"
-  detail: "amphtml custom element"
-  attrs: { mandatory: true name: "custom-element" value_regex: "amp-.*" }
+  detail: "amp-access extension .js script"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-access/amp-access.md"
+  attrs: {
+    name: "custom-element"
+    value: "amp-access"
+    mandatory: true
+    dispatch_key: true
+  }
+  attrs: { name: "async" value: "" mandatory: true }
   attrs: {
     name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v\\d+/[\\w\\.-]+\\.js"
-  }
-  attrs: {
-    name: "async"
-    value: ""
+    value: "https://cdn.ampproject.org/v0/amp-access-0.1.js"
     mandatory: true
   }
 }
-tags: {
+tags: {  # amp-analytics
   name: "script"
   mandatory_parent: "head"
-  detail: "amp-mustache runtime"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-templates.md"
+  detail: "amp-analytics extension .js script"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-analytics.md"
+  attrs: {
+    name: "custom-element"
+    value: "amp-analytics"
+    mandatory: true
+    dispatch_key: true
+  }
+  attrs: { name: "async" value: "" mandatory: true }
+  attrs: {
+    name: "src"
+    value: "https://cdn.ampproject.org/v0/amp-analytics-0.1.js"
+    mandatory: true
+  }
+}
+tags: {  # amp-anim
+  name: "script"
+  mandatory_parent: "head"
+  detail: "amp-anim extension .js script"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-anim/amp-anim.md"
+  attrs: {
+    name: "custom-element"
+    value: "amp-anim"
+    mandatory: true
+    dispatch_key: true
+  }
+  attrs: { name: "async" value: "" mandatory: true }
+  attrs: {
+    name: "src"
+    value: "https://cdn.ampproject.org/v0/amp-anim-0.1.js"
+    mandatory: true
+  }
+}
+tags: {  # amp-audio
+  name: "script"
+  mandatory_parent: "head"
+  detail: "amp-audio extension .js script"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-audio/amp-audio.md"
+  attrs: {
+    name: "custom-element"
+    value: "amp-audio"
+    mandatory: true
+    dispatch_key: true
+  }
+  attrs: { name: "async" value: "" mandatory: true }
+  attrs: {
+    name: "src"
+    value: "https://cdn.ampproject.org/v0/amp-audio-0.1.js"
+    mandatory: true
+  }
+}
+tags: {  # amp-brightcove
+  name: "script"
+  mandatory_parent: "head"
+  detail: "amp-brightcove extension .js script"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-brightcove/amp-brightcove.md"
+  attrs: {
+    name: "custom-element"
+    value: "amp-brightcove"
+    mandatory: true
+    dispatch_key: true
+  }
+  attrs: { name: "async" value: "" mandatory: true }
+  attrs: {
+    name: "src"
+    value: "https://cdn.ampproject.org/v0/amp-brightcove-0.1.js"
+    mandatory: true
+  }
+}
+tags: {  # amp-carousel
+  name: "script"
+  mandatory_parent: "head"
+  detail: "amp-carousel extension .js script"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-carousel/amp-carousel.md"
+  attrs: {
+    name: "custom-element"
+    value: "amp-carousel"
+    mandatory: true
+    dispatch_key: true
+  }
+  attrs: { name: "async" value: "" mandatory: true }
+  attrs: {
+    name: "src"
+    value: "https://cdn.ampproject.org/v0/amp-carousel-0.1.js"
+    mandatory: true
+  }
+}
+tags: {  # amp-dynamic-css-classes
+  name: "script"
+  mandatory_parent: "head"
+  detail: "amp-dynamic-css-classes extension .js script"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-dynamic-css-classes/amp-dynamic-css-classes.md"
+  attrs: {
+    name: "custom-element"
+    value: "amp-dynamic-css-classes"
+    mandatory: true
+    dispatch_key: true
+  }
+  attrs: { name: "async" value: "" mandatory: true }
+  attrs: {
+    name: "src"
+    value: "https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.js"
+    mandatory: true
+  }
+}
+tags: {  # amp-fit-text
+  name: "script"
+  mandatory_parent: "head"
+  detail: "amp-fit-text extension .js script"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-fit-text/amp-fit-text.md"
+  attrs: {
+    name: "custom-element"
+    value: "amp-fit-text"
+    mandatory: true
+    dispatch_key: true
+  }
+  attrs: { name: "async" value: "" mandatory: true }
+  attrs: {
+    name: "src"
+    value: "https://cdn.ampproject.org/v0/amp-fit-text-0.1.js"
+    mandatory: true
+  }
+}
+tags: {  # amp-font
+  name: "script"
+  mandatory_parent: "head"
+  detail: "amp-font extension .js script"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-font/amp-font.md"
+  attrs: {
+    name: "custom-element"
+    value: "amp-font"
+    mandatory: true
+    dispatch_key: true
+  }
+  attrs: { name: "async" value: "" mandatory: true }
+  attrs: {
+    name: "src"
+    value: "https://cdn.ampproject.org/v0/amp-font-0.1.js"
+    mandatory: true
+  }
+}
+tags: {  # amp-iframe
+  name: "script"
+  mandatory_parent: "head"
+  detail: "amp-iframe extension .js script"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-iframe/amp-iframe.md"
+  attrs: {
+    name: "custom-element"
+    value: "amp-iframe"
+    mandatory: true
+    dispatch_key: true
+  }
+  attrs: { name: "async" value: "" mandatory: true }
+  attrs: {
+    name: "src"
+    value: "https://cdn.ampproject.org/v0/amp-iframe-0.1.js"
+    mandatory: true
+  }
+}
+tags: {  # amp-image-lightbox
+  name: "script"
+  mandatory_parent: "head"
+  detail: "amp-image-lightbox extension .js script"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-image-lightbox/amp-image-lightbox.md"
+  attrs: {
+    name: "custom-element"
+    value: "amp-image-lightbox"
+    mandatory: true
+    dispatch_key: true
+  }
+  attrs: { name: "async" value: "" mandatory: true }
+  attrs: {
+    name: "src"
+    value: "https://cdn.ampproject.org/v0/amp-image-lightbox-0.1.js"
+    mandatory: true
+  }
+}
+tags: {  # amp-instagram
+  name: "script"
+  mandatory_parent: "head"
+  detail: "amp-instagram extension .js script"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-instagram/amp-instagram.md"
+  attrs: {
+    name: "custom-element"
+    value: "amp-instagram"
+    mandatory: true
+    dispatch_key: true
+  }
+  attrs: { name: "async" value: "" mandatory: true }
+  attrs: {
+    name: "src"
+    value: "https://cdn.ampproject.org/v0/amp-instagram-0.1.js"
+    mandatory: true
+  }
+}
+tags: {  # amp-install-serviceworker
+  name: "script"
+  mandatory_parent: "head"
+  detail: "amp-install-serviceworker extension .js script"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-install-serviceworker/amp-install-serviceworker.md"
+  attrs: {
+    name: "custom-element"
+    value: "amp-install-serviceworker"
+    mandatory: true
+    dispatch_key: true
+  }
+  attrs: { name: "async" value: "" mandatory: true }
+  attrs: {
+    name: "src"
+    value: "https://cdn.ampproject.org/v0/amp-install-serviceworker-0.1.js"
+    mandatory: true
+  }
+}
+tags: {  # amp-lightbox
+  name: "script"
+  mandatory_parent: "head"
+  detail: "amp-lightbox extension .js script"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-lightbox/amp-lightbox.md"
+  attrs: {
+    name: "custom-element"
+    value: "amp-lightbox"
+    mandatory: true
+    dispatch_key: true
+  }
+  attrs: { name: "async" value: "" mandatory: true }
+  attrs: {
+    name: "src"
+    value: "https://cdn.ampproject.org/v0/amp-lightbox-0.1.js"
+    mandatory: true
+  }
+}
+tags: {  # amp-mustache
+  name: "script"
+  mandatory_parent: "head"
+  detail: "amp-mustache extension"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-mustache/amp-mustache.md"
   attrs: {
     name: "custom-template"
     value: "amp-mustache"
     mandatory: true
+    dispatch_key: true
   }
-  attrs: {
-    name: "async"
-    value: ""
-    mandatory: true
-  }
+  attrs: { name: "async" value: "" mandatory: true }
   attrs: {
     name: "src"
     value: "https://cdn.ampproject.org/v0/amp-mustache-0.1.js"
+    mandatory: true
+  }
+}
+tags: {  # amp-list
+  name: "script"
+  mandatory_parent: "head"
+  detail: "amp-list extension .js script"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-list/amp-list.md"
+  attrs: {
+    name: "custom-element"
+    value: "amp-list"
+    mandatory: true
+    dispatch_key: true
+  }
+  attrs: { name: "async" value: "" mandatory: true }
+  attrs: {
+    name: "src"
+    value: "https://cdn.ampproject.org/v0/amp-list-0.1.js"
+    mandatory: true
+  }
+}
+tags: {  # amp-pinterest
+  name: "script"
+  mandatory_parent: "head"
+  detail: "amp-pinterest extension .js script"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-pinterest/amp-pinterest.md"
+  attrs: {
+    name: "custom-element"
+    value: "amp-pinterest"
+    mandatory: true
+    dispatch_key: true
+  }
+  attrs: { name: "async" value: "" mandatory: true }
+  attrs: {
+    name: "src"
+    value: "https://cdn.ampproject.org/v0/amp-pinterest-0.1.js"
+    mandatory: true
+  }
+}
+tags: {  # amp-slides
+  name: "script"
+  mandatory_parent: "head"
+  detail: "amp-slides extension .js script"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-slides/amp-slides.md"
+  attrs: {
+    name: "custom-element"
+    value: "amp-slides"
+    mandatory: true
+    dispatch_key: true
+  }
+  attrs: { name: "async" value: "" mandatory: true }
+  attrs: {
+    name: "src"
+    value: "https://cdn.ampproject.org/v0/amp-slides-0.1.js"
+    mandatory: true
+  }
+}
+tags: {  # amp-twitter
+  name: "script"
+  mandatory_parent: "head"
+  detail: "amp-twitter extension .js script"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-twitter/amp-twitter.md"
+  attrs: {
+    name: "custom-element"
+    value: "amp-twitter"
+    mandatory: true
+    dispatch_key: true
+  }
+  attrs: { name: "async" value: "" mandatory: true }
+  attrs: {
+    name: "src"
+    value: "https://cdn.ampproject.org/v0/amp-twitter-0.1.js"
+    mandatory: true
+  }
+}
+tags: {  # amp-user-notification
+  name: "script"
+  mandatory_parent: "head"
+  detail: "amp-user-notification extension .js script"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-user-notification/amp-user-notification.md"
+  attrs: {
+    name: "custom-element"
+    value: "amp-user-notification"
+    mandatory: true
+    dispatch_key: true
+  }
+  attrs: { name: "async" value: "" mandatory: true }
+  attrs: {
+    name: "src"
+    value: "https://cdn.ampproject.org/v0/amp-user-notification-0.1.js"
+    mandatory: true
+  }
+}
+tags: {  # amp-vine
+  name: "script"
+  mandatory_parent: "head"
+  detail: "amp-vine extension .js script"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-vine/amp-vine.md"
+  attrs: {
+    name: "custom-element"
+    value: "amp-vine"
+    mandatory: true
+    dispatch_key: true
+  }
+  attrs: { name: "async" value: "" mandatory: true }
+  attrs: {
+    name: "src"
+    value: "https://cdn.ampproject.org/v0/amp-vine-0.1.js"
+    mandatory: true
+  }
+}
+tags: {  # amp-youtube
+  name: "script"
+  mandatory_parent: "head"
+  detail: "amp-youtube extension .js script"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-youtube/amp-youtube.md"
+  attrs: {
+    name: "custom-element"
+    value: "amp-youtube"
+    mandatory: true
+    dispatch_key: true
+  }
+  attrs: { name: "async" value: "" mandatory: true }
+  attrs: {
+    name: "src"
+    value: "https://cdn.ampproject.org/v0/amp-youtube-0.1.js"
     mandatory: true
   }
 }
@@ -1585,6 +1946,7 @@ tags: {
     value: "amp-mustache"
     mandatory: true
   }
+  also_requires: "amp-mustache extension"
 }
 
 # Some additional tags, microformats, allowances.
@@ -1659,6 +2021,7 @@ attr_lists: {
 tags: {
   name: "amp-brightcove"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-brightcove/amp-brightcove.md"
+  also_requires: "amp-brightcove extension .js script"
   attr_lists: "extended-amp-global"
 
   attrs: { name: "data-account" mandatory: true }
@@ -1683,6 +2046,7 @@ tags: {
 tags: {
   name: "amp-font"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-font/amp-font.md"
+  also_requires: "amp-font extension .js script"
   attr_lists: "extended-amp-global"
   attrs: {
     name: "font-family"
@@ -1769,6 +2133,7 @@ tags: {
 tags: {
   name: "amp-fit-text"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-fit-text/amp-fit-text.md"
+  also_requires: "amp-fit-text extension .js script"
   attr_lists: "extended-amp-global"
   attrs: { name: "min-font-size" }
   attrs: { name: "max-font-size" }
@@ -1785,6 +2150,7 @@ tags: {
 tags: {
   name: "amp-carousel"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-carousel/amp-carousel.md"
+  also_requires: "amp-carousel extension .js script"
   attr_lists: "extended-amp-global"
   attrs: { name: "autoplay" value: "" }
   attrs: { name: "loop" value: "" }
@@ -1805,6 +2171,7 @@ tags: {
 tags: {
   name: "amp-anim"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-anim/amp-anim.md"
+  also_requires: "amp-anim extension .js script"
   attr_lists: "extended-amp-global"
   attr_lists: "mandatory-src-or-srcset"
   attrs: { name: "alt" }
@@ -1824,6 +2191,7 @@ tags: {
 tags: {
   name: "amp-analytics"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-analytics.md"
+  also_requires: "amp-analytics extension .js script"
   attrs: { name: "type" value: "googleanalytics" }
   # TODO(gregable): This should require a valid https URL as the attr value.
   attrs: { name: "config" }
@@ -1836,6 +2204,7 @@ tags: {
   name: "amp-youtube"
   attr_lists: "extended-amp-global"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-youtube/amp-youtube.md"
+  also_requires: "amp-youtube extension .js script"
   attrs: {
     name: "src"
     mandatory_oneof: "['src', 'data-videoid']"
@@ -1862,6 +2231,8 @@ tags: {
 # <amp-vine>
 tags: {
   name: "amp-vine"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-vine/amp-vine.md"
+  also_requires: "amp-vine extension .js script"
   attr_lists: "extended-amp-global"
   # data-* is generally allowed, but it's not generally mandatory.
   attrs: { name: "data-vineid" mandatory: true }
@@ -1879,6 +2250,7 @@ tags: {
 tags: {
   name: "amp-pinterest"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-pinterest/amp-pinterest.md"
+  also_requires: "amp-pinterest extension .js script"
   attr_lists: "extended-amp-global"
   # data-* is generally allowed, but it's not generally mandatory.
   attrs: { name: "data-do" mandatory: true }
@@ -1896,6 +2268,7 @@ tags: {
 tags: {
   name: "amp-twitter"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-twitter/amp-twitter.md"
+  also_requires: "amp-twitter extension .js script"
   attr_lists: "extended-amp-global"
   attrs: { name: "data-tweetid" mandatory_oneof: "['data-tweetid', 'src']" }
   attrs: { name: "src" mandatory_oneof: "['data-tweetid', 'src']" }
@@ -1912,6 +2285,7 @@ tags: {
 tags: {
   name: "amp-instagram"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-instagram/amp-instagram.md"
+  also_requires: "amp-instagram extension .js script"
   attr_lists: "extended-amp-global"
   attrs: {
     name: "data-shortcode"
@@ -1940,6 +2314,7 @@ tags: {
 tags: {
   name: "amp-iframe"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-iframe/amp-iframe.md"
+  also_requires: "amp-iframe extension .js script"
   attr_lists: "extended-amp-global"
   attrs: { name: "sandbox" }
   attrs: { name: "scrolling" value_regex: "auto|yes|no" }
@@ -1979,6 +2354,7 @@ tags: {
 tags: {
   name: "amp-audio"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-audio/amp-audio.md"
+  also_requires: "amp-audio extension .js script"
   attr_lists: "extended-amp-global"
   attrs: { name: "src" }
   attrs: {
@@ -2006,6 +2382,7 @@ tags: {
   name: "amp-lightbox"
   attr_lists: "extended-amp-global"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-lightbox/amp-lightbox.md"
+  also_requires: "amp-lightbox extension .js script"
   attrs: { name: "from" }
   attrs: { name: "controls" }
   amp_layout: {
@@ -2017,6 +2394,7 @@ tags: {
 tags: {
   name: "amp-image-lightbox"  # See http://b/24381009.
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-image-lightbox/amp-image-lightbox.md"
+  also_requires: "amp-image-lightbox extension .js script"
   # Support dimensions / sizes / etc. like an amp-lightbox.
   attr_lists: "extended-amp-global"
   attrs: { name: "controls" }
@@ -2029,6 +2407,7 @@ tags: {
 tags: {
   name: "amp-list"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-list/amp-list.md"
+  also_requires: "amp-list extension .js script"
   attr_lists: "extended-amp-global"
 
   attrs: { name: "src" mandatory: true }
@@ -2046,6 +2425,7 @@ tags: {
 tags: {
   name: "amp-install-serviceworker"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-install-serviceworker/amp-install-serviceworker.md"
+  also_requires: "amp-install-serviceworker extension .js script"
   attrs: { name: "src" }
 }
 
@@ -2262,3 +2642,4 @@ error_formats {
   code: TEMPLATE_IN_ATTR_NAME
   format: "Mustache template syntax in attribute name '%1' in tag '%2'."
 }
+
