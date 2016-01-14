@@ -43,6 +43,7 @@ const PRIORITY_PENALTY_TIME_ = 1000;
 const POST_TASK_PASS_DELAY_ = 1000;
 const MUTATE_DEFER_DELAY_ = 500;
 const FOCUS_HISTORY_TIMEOUT_ = 1000 * 60;  // 1min
+const FOUR_FRAME_DELAY_ = 70;
 
 
 /**
@@ -435,6 +436,60 @@ export class Resources {
   }
 
   /**
+   * Runs the specified mutation on the element and ensures that measures
+   * and layouts performed for the affected elements.
+   *
+   * This method should be called whenever a significant mutations are done
+   * on the DOM that could affect layout of elements inside this subtree or
+   * its siblings. The top-most affected element should be specified as the
+   * first argument to this method and all the mutation work should be done
+   * in the mutator callback which is called in the "mutation" vsync phase.
+   *
+   * @param {!Element} element
+   * @param {function()} mutator
+   * @return {!Promise}
+   */
+  mutateElement(element, mutator) {
+    const calcRelayoutTop = () => {
+      const box = this.viewport_.getLayoutRect(element);
+      if (box.width != 0 && box.height != 0) {
+        return box.top;
+      }
+      return -1;
+    };
+    let relayoutTop = -1;
+    return this.vsync_.runPromise({
+      measure: () => {
+        relayoutTop = calcRelayoutTop();
+      },
+      mutate: () => {
+        mutator();
+
+        // Mark children for re-measurement.
+        const ampElements = element.getElementsByClassName('-amp-element');
+        for (let i = 0; i < ampElements.length; i++) {
+          const r = this.getResourceForElement(ampElements[i]);
+          r.requestMeasure();
+        }
+        if (relayoutTop != -1) {
+          this.setRelayoutTop_(relayoutTop);
+        }
+        this.schedulePass(FOUR_FRAME_DELAY_);
+
+        // Need to measure again in case the element has become visible or
+        // shifted.
+        this.vsync_.measure(() => {
+          const updatedRelayoutTop = calcRelayoutTop();
+          if (updatedRelayoutTop != -1 && updatedRelayoutTop != relayoutTop) {
+            this.setRelayoutTop_(updatedRelayoutTop);
+            this.schedulePass(FOUR_FRAME_DELAY_);
+          }
+        });
+      }
+    });
+  }
+
+  /**
    * Schedules the work pass at the latest with the specified delay.
    * @param {number=} opt_delay
    */
@@ -627,7 +682,7 @@ export class Resources {
       }
 
       if (minTop != -1) {
-        this.relayoutTop_ = minTop;
+        this.setRelayoutTop_(minTop);
       }
 
       // Execute scroll-adjusting resize requests, if any.
@@ -645,7 +700,7 @@ export class Resources {
               request.resource./*OK*/changeHeight(request.newHeight);
             });
             if (minTop != -1) {
-              this.relayoutTop_ = minTop;
+              this.setRelayoutTop_(minTop);
             }
             // Sync is necessary here to avoid UI jump in the next frame.
             const newScrollHeight = this.viewport_./*OK*/getScrollHeight();
@@ -656,6 +711,18 @@ export class Resources {
           }
         });
       }
+    }
+  }
+
+  /**
+   * @param {number} relayoutTop
+   * @private
+   */
+  setRelayoutTop_(relayoutTop) {
+    if (this.relayoutTop_ == -1) {
+      this.relayoutTop_ = relayoutTop;
+    } else {
+      this.relayoutTop_ = Math.min(relayoutTop, this.relayoutTop_);
     }
   }
 
@@ -704,6 +771,7 @@ export class Resources {
 
     // Phase 1: Build and relayout as needed. All mutations happen here.
     let relayoutCount = 0;
+    let remeasureCount = 0;
     for (let i = 0; i < this.resources_.length; i++) {
       const r = this.resources_[i];
       if (r.getState() == ResourceState_.NOT_BUILT) {
@@ -713,11 +781,16 @@ export class Resources {
         r.applySizesAndMediaQuery();
         relayoutCount++;
       }
+      if (r.isMeasureRequested()) {
+        remeasureCount++;
+      }
     }
 
     // Phase 2: Remeasure if there were any relayouts. Unfortunately, currently
     // there's no way to optimize this. All reads happen here.
-    if (relayoutCount > 0 || relayoutAll || relayoutTop != -1) {
+    const toUnload = [];
+    if (relayoutCount > 0 || remeasureCount > 0 ||
+            relayoutAll || relayoutTop != -1) {
       for (let i = 0; i < this.resources_.length; i++) {
         const r = this.resources_[i];
         if (r.getState() == ResourceState_.NOT_BUILT || r.hasOwner()) {
@@ -725,10 +798,22 @@ export class Resources {
         }
         if (relayoutAll ||
                 r.getState() == ResourceState_.NOT_LAID_OUT ||
+                r.isMeasureRequested() ||
                 relayoutTop != -1 && r.getLayoutBox().bottom >= relayoutTop) {
+          const wasDisplayed = r.isDisplayed();
           r.measure();
+          if (wasDisplayed && !r.isDisplayed()) {
+            toUnload.push(r);
+          }
         }
       }
+    }
+
+    // Unload all in one cycle.
+    if (toUnload.length > 0) {
+      this.vsync_.mutate(() => {
+        toUnload.forEach(r => r.unload());
+      });
     }
 
     const viewportRect = this.viewport_.getRect();
@@ -1223,6 +1308,9 @@ export class Resource {
     this.layoutBox_ = layoutRectLtwh(-10000, -10000, 0, 0);
 
     /** @private {boolean} */
+    this.isMeasureRequested_ = false;
+
+    /** @private {boolean} */
     this.isInViewport_ = false;
 
     /**
@@ -1369,6 +1457,7 @@ export class Resource {
   measure() {
     assert(this.element.isUpgraded(), 'Must be upgraded to measure: %s',
         this.debugid);
+    this.isMeasureRequested_ = false;
     if (this.state_ == ResourceState_.NOT_BUILT) {
       // Can't measure unbuilt element.
       return;
@@ -1386,6 +1475,24 @@ export class Resource {
     }
     this.layoutBox_ = box;
     this.element.updateLayoutBox(box);
+  }
+
+  /**
+   * @return {boolean}
+   */
+  isMeasureRequested() {
+    return this.isMeasureRequested_;
+  }
+
+  /**
+   * Requests the element to be remeasured on the next pass.
+   */
+  requestMeasure() {
+    if (this.state_ == ResourceState_.NOT_BUILT) {
+      // Can't measure unbuilt element.
+      return;
+    }
+    this.isMeasureRequested_ = true;
   }
 
   /**
@@ -1555,6 +1662,14 @@ export class Resource {
     if (this.element.documentInactiveCallback()) {
       this.state_ = ResourceState_.NOT_LAID_OUT;
     }
+  }
+
+  /**
+   * Called when a previously visible element has become invisible.
+   */
+  unload() {
+    // TODO(dvoytenko): Likely warrants its own callback and re-layout rules.
+    this.documentBecameInactive();
   }
 
   /**
