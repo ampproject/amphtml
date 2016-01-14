@@ -37,13 +37,14 @@ import {twitter} from './twitter';
 import {register, run} from '../src/3p';
 import {parseUrl} from '../src/url';
 import {assert} from '../src/asserts';
+import {taboola} from '../ads/taboola';
 
 /**
  * Whether the embed type may be used with amp-embed tag.
  * @const {!Object<string: boolean>}
  */
 const AMP_EMBED_ALLOWED = {
-  /* embed type: true */
+  taboola: true
 };
 
 register('a9', a9);
@@ -53,6 +54,7 @@ register('adtech', adtech);
 register('smartadserver', smartadserver);
 register('plista', plista);
 register('doubleclick', doubleclick);
+register('taboola', taboola);
 register('_ping_', function(win, data) {
   win.document.getElementById('c').textContent = data.ping;
 });
