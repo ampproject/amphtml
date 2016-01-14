@@ -1265,6 +1265,16 @@ const ParsedTagSpec = function ParsedTagSpec(
    * @private
    */
   this.shouldRecordTagspecValidated_ = shouldRecordTagspecValidated;
+  /**
+   * @type {!Array<number>}
+   * @private
+   */
+  this.alsoRequires_ = [];
+  /**
+   * @type {number}
+   * @private
+   */
+  this.dispatchKeyAttrSpec_ = -1;
 
   const attrs = GetAttrsFor(tagSpec, attrListsByName);
   for (let i = 0; i < attrs.length; ++i) {
@@ -1281,14 +1291,12 @@ const ParsedTagSpec = function ParsedTagSpec(
     for (const altName of altNames) {
       this.attrsByName_[altName] = parsedAttrSpec;
     }
+    if (parsedAttrSpec.getSpec().dispatchKey) {
+      this.dispatchKeyAttrSpec_ = i;
+    }
   }
   this.mandatoryOneofs_ = sortAndUniquify(this.mandatoryOneofs_);
 
-  /**
-   * @type {!Array<number>}
-   * @private
-   */
-  this.alsoRequires_ = [];
   for (const detail of tagSpec.alsoRequires) {
     this.alsoRequires_.push(tagspecIdsByDetail.get(detail));
   }
@@ -1308,6 +1316,27 @@ ParsedTagSpec.prototype.getId = function() {
  */
 ParsedTagSpec.prototype.getSpec = function() {
   return this.spec_;
+};
+
+/**
+ * A dispatch key is a mandatory attribute name/value unique to this
+ * TagSpec. If an encountered tag matches this dispatch key, it is
+ * validated first against this TagSpec in order to improve validation
+ * performance and error message selection. Not all TagSpecs have a
+ * dispatch key.
+ * @return {boolean}
+ */
+ParsedTagSpec.prototype.hasDispatchKey = function() {
+  return this.dispatchKeyAttrSpec_ !== -1;
+}
+/**
+ * You must check hasDispatchKey before accessing
+ * @return {string}
+ */
+ParsedTagSpec.prototype.getDispatchKey = function() {
+  goog.asserts.assert(this.hasDispatchKey());
+  const parsedSpec = this.attrsById_[this.dispatchKeyAttrSpec_];
+  return parsedSpec.getSpec().name + '=' + parsedSpec.getSpec().value;
 };
 
 /**
@@ -1740,6 +1769,25 @@ ParsedTagSpec.prototype.validateDisallowedAncestorTags = function(
 };
 
 /**
+ * This small class (struct) stores the dispatch rules for all TagSpecs
+ * with the same tag name.
+ * @constructor
+ */
+const TagSpecDispatch = function TagSpecDispatch() {
+  /**
+   * TagSpecs for a specific attribute name/value dispatch key.
+   * @type {!goog.structs.Map<!Array<string>, number>}
+   * @public
+   */
+  this.tagSpecsByDispatch = new goog.structs.Map();
+  /**
+   * @type {!Array<number>}
+   * @public
+   */
+  this.allTagSpecs = [];
+};
+
+/**
  * This wrapper class provides access to the validation rules.
  * @constructor
  */
@@ -1752,7 +1800,7 @@ const ParsedValidatorRules = function ParsedValidatorRules() {
   this.tagSpecById_ = [];
   /**
    * ParsedTagSpecs keyed by name
-   * @type {!goog.structs.Map<string, !Array<!ParsedTagSpec>>}
+   * @type {!goog.structs.Map<string, !TagSpecDispatch>}
    * @private
    */
   this.tagSpecByTagName_ = new goog.structs.Map();
@@ -1796,9 +1844,12 @@ const ParsedValidatorRules = function ParsedValidatorRules() {
     this.tagSpecById_.push(parsedTagSpec);
     goog.asserts.assert(tag.name !== null);
     if (!this.tagSpecByTagName_.containsKey(tag.name)) {
-      this.tagSpecByTagName_.set(tag.name, []);
+      this.tagSpecByTagName_.set(tag.name, new TagSpecDispatch());
     }
-    this.tagSpecByTagName_.get(tag.name).push(parsedTagSpec);
+    const tagnameDispatch = this.tagSpecByTagName_.get(tag.name);
+    if (parsedTagSpec.hasDispatchKey())
+      tagnameDispatch.tagSpecsByDispatch.set(parsedTagSpec.getDispatchKey(), i);
+    tagnameDispatch.allTagSpecs.push(parsedTagSpec);
     if (tag.mandatory)
       this.mandatoryTagSpecs_.push(i);
   }
@@ -1830,8 +1881,8 @@ ParsedValidatorRules.prototype.getFormatByCode = function() {
  */
 ParsedValidatorRules.prototype.validateTag = function(
     context, tagName, encounteredAttrs, validationResult) {
-  const allTagSpecs = this.tagSpecByTagName_.get(tagName);
-  if (allTagSpecs === undefined) {
+  const tagSpecDispatch = this.tagSpecByTagName_.get(tagName);
+  if (tagSpecDispatch === undefined) {
     context.addError(
         amp.validator.ValidationError.Code.DISALLOWED_TAG,
         tagName,
@@ -1840,13 +1891,43 @@ ParsedValidatorRules.prototype.validateTag = function(
     return;
   }
   let resultForBestAttempt = new amp.validator.ValidationResult();
-  resultForBestAttempt.status = amp.validator.ValidationResult.Status.UNKNOWN;
-  for (const parsedSpec of allTagSpecs) {
-    this.validateTagAgainstSpec(parsedSpec, context, encounteredAttrs,
-                                resultForBestAttempt);
-    if (resultForBestAttempt.status !==
-        amp.validator.ValidationResult.Status.FAIL) {
-      break;  // Exit early on success
+  resultForBestAttempt.status = amp.validator.ValidationResult.Status.FAIL;
+  // Attempt to validate against dispatched tagspecs first.
+  if (!tagSpecDispatch.tagSpecsByDispatch.isEmpty()) {
+    for (let i = 0; i < encounteredAttrs.length; i += 2) {
+      let attrName = encounteredAttrs[i];
+      let attrValue = encounteredAttrs[i + 1];
+      // Our html parser repeats the key as the value if there is no value. We
+      // replace the value with an empty string instead in this case.
+      if (attrName === attrValue)
+        attrValue = '';
+      attrName = attrName.toLowerCase();
+
+      const match = tagSpecDispatch.tagSpecsByDispatch.get(
+          attrName + '=' + attrValue);
+      if (match !== undefined) {
+        const parsedSpec = this.tagSpecById_[match];
+        this.validateTagAgainstSpec(parsedSpec, context, encounteredAttrs,
+                                    resultForBestAttempt);
+        if (resultForBestAttempt.status !==
+            amp.validator.ValidationResult.Status.FAIL) {
+          validationResult.mergeFrom(resultForBestAttempt);
+          return;  // Exit early on success
+        }
+      }
+    }
+  }
+  // Validate against all tagspecs if we still haven't matched.
+  if (resultForBestAttempt.status ===
+      amp.validator.ValidationResult.Status.FAIL) {
+    for (const parsedSpec of tagSpecDispatch.allTagSpecs) {
+      this.validateTagAgainstSpec(parsedSpec, context, encounteredAttrs,
+                                  resultForBestAttempt);
+      if (resultForBestAttempt.status !==
+          amp.validator.ValidationResult.Status.FAIL) {
+        validationResult.mergeFrom(resultForBestAttempt);
+        return;  // Exit early on success
+      }
     }
   }
   validationResult.mergeFrom(resultForBestAttempt);
@@ -1861,8 +1942,8 @@ ParsedValidatorRules.prototype.validateTag = function(
  */
 ParsedValidatorRules.prototype.validateTagAgainstSpec = function(
     parsedSpec, context, encounteredAttrs, resultForBestAttempt) {
-  goog.asserts.assert(resultForBestAttempt.status !==
-      amp.validator.ValidationResult.Status.PASS);
+  goog.asserts.assert(resultForBestAttempt.status ===
+      amp.validator.ValidationResult.Status.FAIL);
   let resultForAttempt = new amp.validator.ValidationResult();
   resultForAttempt.status = amp.validator.ValidationResult.Status.UNKNOWN;
   parsedSpec.validateAttributes(context, encounteredAttrs, resultForAttempt);
