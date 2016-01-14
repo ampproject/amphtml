@@ -124,8 +124,12 @@ function compile(watch, shouldMinify) {
     minify: shouldMinify,
     // If there is a sync JS error during initial load,
     // at least try to unhide the body.
-    wrapper: 'try{(function(){<%= contents %>})()}catch(e){setTimeout(function(){' +
-        'document.body.style.opacity=1},1000);throw e};'
+    wrapper: 'try{<%= contents %>}catch(e){setTimeout(function(){' +
+        'var s=document.body.style;' +
+        's.opacity=1;' +
+        's.visibility="visible";' +
+        's.animation="none";' +
+        's.WebkitAnimation="none;"},1000);throw e};'
   });
   compileJs('./3p/', 'integration.js', './dist.3p/' + internalRuntimeVersion, {
     minifiedName: 'f.js',
