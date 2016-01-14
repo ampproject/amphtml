@@ -229,6 +229,10 @@ describe('AccessService authorization', () => {
     service = new AccessService(window);
     service.isExperimentOn_ = true;
 
+    sandbox.stub(service.resources_, 'mutateElement',
+        (unusedElement, mutator) => {
+          mutator();
+        });
     service.vsync_ = {
       mutate: callback => {
         callback();
@@ -340,6 +344,7 @@ describe('AccessService applyAuthorizationToElement_', () => {
   let sandbox;
   let configElement, elementOn, elementOff;
   let templatesMock;
+  let mutateElementStub;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -368,6 +373,10 @@ describe('AccessService applyAuthorizationToElement_', () => {
     service = new AccessService(window);
     service.isExperimentOn_ = true;
 
+    mutateElementStub = sandbox.stub(service.resources_, 'mutateElement',
+        (unusedElement, mutator) => {
+          mutator();
+        });
     service.vsync_ = {
       mutatePromise: callback => {
         callback();
@@ -405,11 +414,16 @@ describe('AccessService applyAuthorizationToElement_', () => {
     service.applyAuthorizationToElement_(elementOff, {access: true});
     expect(elementOn).not.to.have.attribute('amp-access-hide');
     expect(elementOff).to.have.attribute('amp-access-hide');
+    expect(mutateElementStub.callCount).to.equal(1);
+    expect(mutateElementStub.getCall(0).args[0]).to.equal(elementOff);
 
     service.applyAuthorizationToElement_(elementOn, {access: false});
     service.applyAuthorizationToElement_(elementOff, {access: false});
     expect(elementOn).to.have.attribute('amp-access-hide');
     expect(elementOff).not.to.have.attribute('amp-access-hide');
+    expect(mutateElementStub.callCount).to.equal(3);
+    expect(mutateElementStub.getCall(1).args[0]).to.equal(elementOn);
+    expect(mutateElementStub.getCall(2).args[0]).to.equal(elementOff);
   });
 
   it('should render and re-render templates when access is on', () => {
