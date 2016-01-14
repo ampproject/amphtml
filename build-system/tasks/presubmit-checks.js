@@ -53,6 +53,7 @@ var forbiddenTerms = {
     message: privateServiceFactory,
     whitelist: [
       'src/service/action-impl.js',
+      'src/service/standard-actions-impl.js',
       'src/amp-core-service.js',
     ],
   },
@@ -104,6 +105,7 @@ var forbiddenTerms = {
     whitelist: [
       'src/amp-core-service.js',
       'src/service/resources-impl.js',
+      'src/service/standard-actions-impl.js',
     ],
   },
   // Privacy sensitive
