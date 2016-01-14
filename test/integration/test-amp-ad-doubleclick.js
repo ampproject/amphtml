@@ -28,7 +28,7 @@ describe('Rendering of one ad', () => {
       });
   });
 
-  it('ad should create an iframe loaded', function() {
+  it('should create an iframe loaded', function() {
     this.timeout(20000);
     let iframe;
     let ampAd;
