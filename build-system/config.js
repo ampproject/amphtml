@@ -126,7 +126,7 @@ module.exports = {
     '**/*.js',
     '!{node_modules,build,dist,dist.3p,dist.tools,' +
         'third_party,build-system}/**/*.*',
-    '!{testing,examples}/**/*.*',
+    '!{testing,examples,examples.build}/**/*.*',
     // TODO: temporary, remove when validator is up to date
     '!validator/**/*.*',
     '!gulpfile.js',
