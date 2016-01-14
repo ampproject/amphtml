@@ -19,6 +19,8 @@ import {
   addParamsToUrl,
   assertHttpsUrl,
   getOrigin,
+  getSourceOrigin,
+  isProxyOrigin,
   parseQueryString,
   parseUrl,
   removeFragment
@@ -272,5 +274,61 @@ describe('addParamsToUrl', () => {
     });
 
     expect(url).to.equal('https://www.ampproject.org/get/here?hello=world&foo=bar#hash-value');
+  });
+});
+
+describe('isProxyOrigin', () => {
+
+  function testProxyOrigin(href, bool) {
+    it('should return whether it is a proxy origin origin for ' + href, () => {
+      expect(isProxyOrigin(parseUrl(href))).to.equal(bool);
+    });
+  }
+
+  testProxyOrigin(
+      'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0', true);
+  testProxyOrigin(
+      'http://localhost:123', false);
+  testProxyOrigin(
+      'http://localhost:123/c', true);
+  testProxyOrigin(
+      'http://localhost:123/v', true);
+  testProxyOrigin(
+      'https://cdn.ampproject.net/v/www.origin.com/foo/?f=0', false);
+  testProxyOrigin(
+      'https://medium.com/swlh/nobody-wants-your-app-6af1f7f69cb7', false);
+  testProxyOrigin(
+      'http://www.spiegel.de/politik/deutschland/angela-merkel-a-1062761.html',
+      false);
+});
+
+describe('getSourceOrigin', () => {
+
+  function testOrigin(href, origin) {
+    it('should return the origin from ' + href, () => {
+      expect(getSourceOrigin(parseUrl(href))).to.equal(origin);
+    });
+  }
+
+  testOrigin(
+      'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0',
+      'http://www.origin.com');
+  testOrigin(
+      'https://cdn.ampproject.org/v/s/www.origin.com/foo/?f=0',
+      'https://www.origin.com');
+  testOrigin(
+      'https://cdn.ampproject.org/c/www.origin.com/foo/?f=0',
+      'http://www.origin.com');
+  testOrigin(
+      'https://cdn.ampproject.org/c/s/www.origin.com/foo/?f=0',
+      'https://www.origin.com');
+  testOrigin(
+      'https://cdn.ampproject.org/c/s/origin.com/foo/?f=0',
+      'https://origin.com');
+
+  it('should fail on invalid source origin', () => {
+    expect(() => {
+      getSourceOrigin(parseUrl('https://cdn.ampproject.org/v/yyy/'));
+    }).to.throw(/Expected a \. in origin http:\/\/yyy/);
   });
 });
