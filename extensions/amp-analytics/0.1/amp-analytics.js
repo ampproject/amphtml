@@ -290,7 +290,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       return val + argList;
     });
 
-    if (request.startsWith("iframe")) {
+    if (request.indexOf("iframe") === 0) {
       this.handleIframe_(request, trigger, unusedEvent);
     }
     else {
