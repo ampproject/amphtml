@@ -1303,7 +1303,7 @@ ParsedTagSpec.prototype.getId = function() {
 /**
  * Return the original tag spec. This is the json object representation from
  * amp.validator.rules.
- * @return {!Object}
+ * @return {!amp.validator.TagSpec}
  */
 ParsedTagSpec.prototype.getSpec = function() {
   return this.spec_;
@@ -1774,52 +1774,65 @@ ParsedValidatorRules.prototype.validateTag = function(
   }
   let resultForBestAttempt = new amp.validator.ValidationResult();
   resultForBestAttempt.status = amp.validator.ValidationResult.Status.UNKNOWN;
-  let resultForAttempt = new amp.validator.ValidationResult();
-  resultForAttempt.status = amp.validator.ValidationResult.Status.UNKNOWN;
   for (const parsedSpec of allTagSpecs) {
-    resultForAttempt = new amp.validator.ValidationResult();
-    resultForAttempt.status = amp.validator.ValidationResult.Status.UNKNOWN;
-
-    parsedSpec.validateAttributes(
-        context, encounteredAttrs, resultForAttempt);
-    parsedSpec.validateParentTag(context, resultForAttempt);
-    parsedSpec.validateDisallowedAncestorTags(context, resultForAttempt);
-
-    if (resultForAttempt.status !==
+    this.validateTagAgainstSpec(parsedSpec, context, encounteredAttrs,
+                                resultForBestAttempt);
+    if (resultForBestAttempt.status !==
         amp.validator.ValidationResult.Status.FAIL) {
-      // This is the successful branch of the code: thus far everything
-      // went fine.
-
-      if (parsedSpec.shouldRecordTagspecValidated()) {
-        const isUnique = context.recordTagspecValidated(parsedSpec.getId());
-        // If a duplicate tag is encountered for a spec that's supposed
-        // to be unique, we've found an error that we must report.
-        if (parsedSpec.getSpec().unique && !isUnique) {
-          const spec = parsedSpec.getSpec();
-          context.addError(
-              amp.validator.ValidationError.Code.DUPLICATE_UNIQUE_TAG,
-              getDetailOrName(spec), spec.specUrl, validationResult);
-          return;
-        }
-      }
-
-      // However we still want to merge the "errors" because warnings should
-      // be reported as well (e.g., the deprecation warnings).
-      validationResult.mergeFrom(resultForAttempt);
-
-      if (parsedSpec.getSpec().mandatoryAlternatives !== null)
-        context.recordMandatoryAlternativeSatisfied(
-            parsedSpec.getSpec().mandatoryAlternatives);
-      // (Re)set the cdata matcher to the expectations that this tag
-      // brings with it.
-      context.setCdataMatcher(new CdataMatcher(parsedSpec.getSpec()));
-      return;
+      break;  // Exit early on success
     }
-    if (maxSpecificity(resultForAttempt) >
-        maxSpecificity(resultForBestAttempt))
-      resultForBestAttempt = resultForAttempt;
   }
   validationResult.mergeFrom(resultForBestAttempt);
+};
+
+/**
+ * Validates the provided |tagName| with respect to a single tag specification.
+ * @param {!ParsedTagSpec} parsedSpec
+ * @param {!Context} context
+ * @param {!Array<string>} encounteredAttrs Alternating key/value pain the array
+ * @param {!amp.validator.ValidationResult} resultForBestAttempt
+ */
+ParsedValidatorRules.prototype.validateTagAgainstSpec = function(
+    parsedSpec, context, encounteredAttrs, resultForBestAttempt) {
+  goog.asserts.assert(resultForBestAttempt.status !==
+      amp.validator.ValidationResult.Status.PASS);
+  let resultForAttempt = new amp.validator.ValidationResult();
+  resultForAttempt.status = amp.validator.ValidationResult.Status.UNKNOWN;
+  parsedSpec.validateAttributes(context, encounteredAttrs, resultForAttempt);
+  parsedSpec.validateParentTag(context, resultForAttempt);
+  parsedSpec.validateDisallowedAncestorTags(context, resultForAttempt);
+
+  if (resultForAttempt.status === amp.validator.ValidationResult.Status.FAIL) {
+    if (maxSpecificity(resultForAttempt) >
+        maxSpecificity(resultForBestAttempt)) {
+      resultForBestAttempt.status = resultForAttempt.status;
+      resultForBestAttempt.errors = resultForAttempt.errors;
+    }
+    return;
+  }
+  // This is the successful branch of the code: locally the tagspec matches.
+  resultForBestAttempt.status = resultForAttempt.status;
+  resultForBestAttempt.errors = resultForAttempt.errors;
+
+  if (parsedSpec.shouldRecordTagspecValidated()) {
+    const isUnique = context.recordTagspecValidated(parsedSpec.getId());
+    // If a duplicate tag is encountered for a spec that's supposed
+    // to be unique, we've found an error that we must report.
+    if (parsedSpec.getSpec().unique && !isUnique) {
+      const spec = parsedSpec.getSpec();
+      context.addError(
+          amp.validator.ValidationError.Code.DUPLICATE_UNIQUE_TAG,
+          getDetailOrName(spec), spec.specUrl, resultForBestAttempt);
+      return;
+    }
+  }
+
+  if (parsedSpec.getSpec().mandatoryAlternatives !== null)
+    context.recordMandatoryAlternativeSatisfied(
+        parsedSpec.getSpec().mandatoryAlternatives);
+  // (Re)set the cdata matcher to the expectations that this tag
+  // brings with it.
+  context.setCdataMatcher(new CdataMatcher(parsedSpec.getSpec()));
 };
 
 /**
