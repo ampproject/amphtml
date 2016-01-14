@@ -32,12 +32,14 @@ import {twitter} from './twitter';
 import {register, run} from '../src/3p';
 import {parseUrl} from '../src/url';
 import {assert} from '../src/asserts';
+import {taboola} from '../ads/taboola';
 
 register('a9', a9);
 register('adreactor', adreactor);
 register('adsense', adsense);
 register('adtech', adtech);
 register('doubleclick', doubleclick);
+register('taboola', taboola);
 register('_ping_', function(win, data) {
   win.document.getElementById('c').textContent = data.ping;
 });

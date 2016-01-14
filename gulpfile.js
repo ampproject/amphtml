@@ -306,6 +306,7 @@ function buildExamples(watch) {
   buildExample('ads.amp.html');
   buildExample('analytics.amp.html');
   buildExample('article.amp.html');
+  buildExample('taboola.amp.html');
   buildExample('article-access.amp.html');
   buildExample('metadata-examples/article-json-ld.amp.html');
   buildExample('metadata-examples/article-microdata.amp.html');
