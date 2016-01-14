@@ -194,16 +194,11 @@ def GenerateValidateBin(out_dir):
   f.write("""
       var fs = require('fs');
       var path = require('path');
+      var http = require('http');
+      var https = require('https');
+      var url = require('url');
 
-      function main() {
-        if (process.argv.length < 3) {
-          console.error('usage: validate <file.html>');
-          process.exit(1)
-        }
-        var args = process.argv.slice(2);
-        var full_path = args[0];
-        var filename = path.basename(full_path);
-        var contents = fs.readFileSync(full_path, 'utf8');
+      function validateFile(contents, filename) {
         var results = amp.validator.validateString(contents);
         var output = amp.validator.renderValidationResult(results, filename);
 
@@ -217,6 +212,40 @@ def GenerateValidateBin(out_dir):
             console.error(output[i]);
           }
           process.exit(1);
+        }
+      }
+
+      function main() {
+        if (process.argv.length < 3) {
+          console.error('usage: validate <file.html or url>');
+          process.exit(1)
+        }
+        var args = process.argv.slice(2);
+        var full_path = args[0];
+
+        if (full_path.indexOf('http://') === 0 || full_path.indexOf('https://') === 0) {
+          var callback = function(response) {
+            var chunks = [];
+
+            response.on('data', function (chunk) {
+              chunks.push(chunk);
+            });
+
+            response.on('end', function () {
+              validateFile(chunks.join(''), full_path);
+            });
+          };
+
+          var clientModule = http;
+          if (full_path.indexOf('https://') === 0) {
+            clientModule = https;
+          }
+
+          clientModule.request(url.parse(full_path), callback).end();
+        } else {
+          var filename = path.basename(full_path);
+          var contents = fs.readFileSync(full_path, 'utf8');
+          validateFile(contents, filename);
         }
       }
 
