@@ -231,7 +231,7 @@ def GenerateValidateBin(out_dir):
 def RunSmokeTest(out_dir):
   logging.info('entering ...')
   # Run dist/validate on the minimum valid amp and observe that it passes.
-  p = subprocess.Popen(['%s/validate' % out_dir,
+  p = subprocess.Popen(['node', '%s/validate' % out_dir,
                         'testdata/feature_tests/minimum_valid_amp.html'],
                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
   (stdout, stderr) = p.communicate()
@@ -241,7 +241,7 @@ def RunSmokeTest(out_dir):
 
   # Run dist/validate on an empty file and observe that it fails.
   open('%s/empty.html' % out_dir, 'w').close()
-  p = subprocess.Popen(['%s/validate' % out_dir, '%s/empty.html' % out_dir],
+  p = subprocess.Popen(['node', '%s/validate' % out_dir, '%s/empty.html' % out_dir],
                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
   (stdout, stderr) = p.communicate()
   if p.returncode != 1:
@@ -305,7 +305,7 @@ def GenerateTestRunner(out_dir):
 
 def RunTests(out_dir):
   logging.info('entering ...')
-  subprocess.check_call(['%s/test_runner' % out_dir])
+  subprocess.check_call(['node', '%s/test_runner' % out_dir])
   logging.info('... success')
 
 
