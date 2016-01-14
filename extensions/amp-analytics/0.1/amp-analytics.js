@@ -266,10 +266,10 @@ export class AmpAnalytics extends AMP.BaseElement {
    * the request to the appropriate handler
    *
    * @param {!JSONObject} trigger JSON config block that resulted in this event.
-   * @param {!Object} unusedEvent Object with details about the event.
+   * @param {!Object} event Object with details about the event.
    * @private
    */
-  handleEvent_(trigger, unusedEvent) {
+  handleEvent_(trigger, event) {
     let request = this.requests_[trigger['request']];
     if (!request) {
       log.warn(this.getName_(),
@@ -291,10 +291,10 @@ export class AmpAnalytics extends AMP.BaseElement {
     });
 
     if (request.indexOf("iframe") === 0) {
-      this.handleIframe_(request, trigger, unusedEvent);
+      this.handleIframe_(request, trigger, event);
     }
     else {
-      this.handleGet_(request, trigger, unusedEvent);
+      this.handleGet_(request, trigger, event);
     }
   }
 
@@ -305,13 +305,13 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @param {!JSONObject} request string which contains the url to be loaded
    *                              into the iframe
    * @param {!JSONObject} trigger JSON config block that resulted in this event.
-   * @param {!Object} unusedEvent Object with details about the event.
+   * @param {!Object} event Object with details about the event.
    * @private
    */
-  handleIframe_(request, trigger, unusedEvent) {
+  handleIframe_(request, trigger, event) {
     const vars = this.mergeObjects_(this.config_.vars, trigger.vars);
     vars.trigger = trigger;
-    vars.event = unusedEvent;
+    vars.event = event;
 
     // While queuing is enabled load all requests into the queue
     if (this.iframeQueueing_) {
@@ -361,10 +361,10 @@ export class AmpAnalytics extends AMP.BaseElement {
    * This method generates the request and sends the request out.
    *
    * @param {!JSONObject} trigger JSON config block that resulted in this event.
-   * @param {!Object} unusedEvent Object with details about the event.
+   * @param {!Object} event Object with details about the event.
    * @private
    */
-  handleGet_(request, trigger, unusedEvent) {
+  handleGet_(request, trigger, event) {
     // For consistentcy with amp-pixel we also expand any url replacements.
     urlReplacementsFor(this.getWin()).expand(request).then(
         request => this.sendRequest_(request));
