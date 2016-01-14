@@ -29,8 +29,8 @@ export function doubleclick(global, data) {
     global.googletag.cmd.push(function() {
       const googletag = global.googletag;
       const dimensions = [[
-        parseInt(data.width, 10),
-        parseInt(data.height, 10)
+        parseInt(data.overrideWidth || data.width, 10),
+        parseInt(data.overrideHeight || data.height, 10)
       ]];
       const pubads = googletag.pubads();
       const slot = googletag.defineSlot(data.slot, dimensions, 'c')
