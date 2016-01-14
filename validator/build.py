@@ -246,7 +246,7 @@ def RunSmokeTest(out_dir):
   (stdout, stderr) = p.communicate()
   if p.returncode != 1:
     Die('smoke test failed. Expected p.returncode==1, saw: %s' % p.returncode)
-  if not stderr.startswith('FAIL\nempty.html:1:0 MANDATORY_TAG_MISSING'):
+  if not stderr.startswith('FAIL\nempty.html:1:0 The mandatory tag \'html'):
     Die('smoke test failed; stderr was: "%s"' % stdout)
   logging.info('... done')
 
