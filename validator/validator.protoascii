@@ -25,7 +25,7 @@ min_validator_revision_required: 74
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 110
+spec_file_revision: 111
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
 # These rules are just enough to validate the example from the spec.
@@ -1473,12 +1473,10 @@ tags: {
 tags: { name: "button" }
 # 4.11 Scripting
 # 4.11.1 The script element
-# Only the amphtml script and the LD/JSON description are allowed / mandatory.
-# The AMP Engine is the first in this specfile so that the 'development'
-# attribute shows up as the disallowed attribute instead of 'src' for a
-# development flagged AMP engine script.
-# Note that validator.js finds and modifies this rule, by looking for
-# detail == "amphtml engine v0.js script".
+# Only the amphtml script, custom extensions and the LD/JSON description are
+# allowed. The AMP Engine is the first in this specfile so that the
+# 'development' attribute shows up as the disallowed attribute instead of
+# 'src' for a development flagged AMP engine script.
 tags: {
   name: "script"
   mandatory: true
@@ -1489,7 +1487,7 @@ tags: {
   attrs: {
     name: "src"
     mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v\\d+\\.js"
+    value: "https://cdn.ampproject.org/v0.js"
   }
   attrs: {
     name: "async"
@@ -2044,7 +2042,7 @@ tags: {
   }
 }
 
-# <amp-image-serviceworker>
+# <amp-install-serviceworker>
 tags: {
   name: "amp-install-serviceworker"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-install-serviceworker/amp-install-serviceworker.md"
