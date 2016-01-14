@@ -295,12 +295,13 @@ function buildExamples(watch) {
     });
   }
 
-  fs.copy('examples/img/', 'examples.build/img/', {clobber: true},
-      copyHandler.bind(null, 'examples/img folder'));
-  fs.copy('examples/video/', 'examples.build/video/', {clobber: true},
-      copyHandler.bind(null, 'examples/video folder'));
-  fs.copy('examples/fonts/', 'examples.build/fonts/', {clobber: true},
-      copyHandler.bind(null, 'examples/fonts folder'));
+  fs.copy('examples/', 'examples.build/', {clobber: true},
+      function(err) {
+        if (err) {
+          return util.log(util.colors.red('copy error: ', err));
+        }
+        util.log(util.colors.green('copied examples to examples.build'));
+      });
 
   // Also update test-example-validation.js
   buildExample('ads.amp.html');
@@ -328,13 +329,6 @@ function buildExamples(watch) {
   // // Examples are also copied into `c/` directory for AMP-proxy testing.
   // fs.copy('examples.build/', 'c/', {clobber: true},
   //     copyHandler.bind(null, 'examples.build to c folder'));
-
-  function copyHandler(name, err) {
-    if (err) {
-      return util.log(util.colors.red('copy error: ', err));
-    }
-    util.log(util.colors.green('copied ' + name));
-  }
 }
 
 /**
