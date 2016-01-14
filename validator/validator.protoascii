@@ -25,7 +25,7 @@ min_validator_revision_required: 74
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 109
+spec_file_revision: 110
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
 # These rules are just enough to validate the example from the spec.
@@ -2204,12 +2204,12 @@ error_formats {
   format: "The property '%1' in attribute '%2' in tag '%3' is disallowed."
 }
 error_formats {
-  code: INVALID_PROPERTY_VALUE_IN_ATTR_VALUE,
+  code: INVALID_PROPERTY_VALUE_IN_ATTR_VALUE
   format: "The property '%1' in attribute '%2' in tag '%3' is set to "
           "'%4', which is invalid."
 }
 error_formats {
-  code: MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE,
+  code: MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE
   format: "The property '%1' is missing from attribute '%2' in tag '%3'."
 }
 error_formats {
