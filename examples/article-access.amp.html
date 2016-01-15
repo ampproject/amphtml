@@ -144,6 +144,7 @@
   <script async custom-template="amp-mustache" src="https://cdn.ampproject.org/v0/amp-mustache-0.1.js"></script>
   <style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
+  <script async src="./viewer-integr.js"></script>
 </head>
 <body>
   <header>
@@ -188,10 +189,11 @@
           </div>
         </div>
 
-        <section amp-access="views > 0" amp-access-hide class="meter-section">
+        <section id="meter-notif" amp-access="views > 0" amp-access-hide class="meter-section">
           <template amp-access-template type="amp-mustache">
             You are viewing article {{views}} of {{maxViews}}!
           </template>
+          <a on="tap:meter-notif.hide">[Close]</a>
         </section>
 
         <section amp-access="NOT access" amp-access-hide class="login-section">

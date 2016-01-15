@@ -194,16 +194,11 @@ def GenerateValidateBin(out_dir):
   f.write("""
       var fs = require('fs');
       var path = require('path');
+      var http = require('http');
+      var https = require('https');
+      var url = require('url');
 
-      function main() {
-        if (process.argv.length < 3) {
-          console.error('usage: validate <file.html>');
-          process.exit(1)
-        }
-        var args = process.argv.slice(2);
-        var full_path = args[0];
-        var filename = path.basename(full_path);
-        var contents = fs.readFileSync(full_path, 'utf8');
+      function validateFile(contents, filename) {
         var results = amp.validator.validateString(contents);
         var output = amp.validator.renderValidationResult(results, filename);
 
@@ -220,6 +215,41 @@ def GenerateValidateBin(out_dir):
         }
       }
 
+      function main() {
+        if (process.argv.length < 3) {
+          console.error('usage: validate <file.html or url>');
+          process.exit(1)
+        }
+        var args = process.argv.slice(2);
+        var full_path = args[0];
+
+        if (full_path.indexOf('http://') === 0 ||
+            full_path.indexOf('https://') === 0) {
+          var callback = function(response) {
+            var chunks = [];
+
+            response.on('data', function (chunk) {
+              chunks.push(chunk);
+            });
+
+            response.on('end', function () {
+              validateFile(chunks.join(''), full_path);
+            });
+          };
+
+          var clientModule = http;
+          if (full_path.indexOf('https://') === 0) {
+            clientModule = https;
+          }
+
+          clientModule.request(url.parse(full_path), callback).end();
+        } else {
+          var filename = path.basename(full_path);
+          var contents = fs.readFileSync(full_path, 'utf8');
+          validateFile(contents, filename);
+        }
+      }
+
       if (require.main === module) {
         main();
       }
@@ -231,7 +261,7 @@ def GenerateValidateBin(out_dir):
 def RunSmokeTest(out_dir):
   logging.info('entering ...')
   # Run dist/validate on the minimum valid amp and observe that it passes.
-  p = subprocess.Popen(['%s/validate' % out_dir,
+  p = subprocess.Popen(['node', '%s/validate' % out_dir,
                         'testdata/feature_tests/minimum_valid_amp.html'],
                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
   (stdout, stderr) = p.communicate()
@@ -241,12 +271,13 @@ def RunSmokeTest(out_dir):
 
   # Run dist/validate on an empty file and observe that it fails.
   open('%s/empty.html' % out_dir, 'w').close()
-  p = subprocess.Popen(['%s/validate' % out_dir, '%s/empty.html' % out_dir],
+  p = subprocess.Popen(['node', '%s/validate' % out_dir, '%s/empty.html' %
+                        out_dir],
                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
   (stdout, stderr) = p.communicate()
   if p.returncode != 1:
     Die('smoke test failed. Expected p.returncode==1, saw: %s' % p.returncode)
-  if not stderr.startswith('FAIL\nempty.html:1:0 MANDATORY_TAG_MISSING'):
+  if not stderr.startswith('FAIL\nempty.html:1:0 The mandatory tag \'html'):
     Die('smoke test failed; stderr was: "%s"' % stdout)
   logging.info('... done')
 
@@ -305,7 +336,7 @@ def GenerateTestRunner(out_dir):
 
 def RunTests(out_dir):
   logging.info('entering ...')
-  subprocess.check_call(['%s/test_runner' % out_dir])
+  subprocess.check_call(['node', '%s/test_runner' % out_dir])
   logging.info('... success')
 
 

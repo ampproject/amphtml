@@ -41,6 +41,7 @@ message PropertySpecList {
 // Attributes that are not covered by at least one of these specs are
 // disallowed. Within a given context (e.g., for a given TagSpec),
 // names are unique.
+// NEXT AVAILABLE TAG: 14
 message AttrSpec {
   // Use lower-case attribute names only.
   optional string name = 1;
@@ -70,6 +71,8 @@ message AttrSpec {
   // always applied case-insensitively and as a partial match.
   optional string blacklisted_value_regex = 6;
   // If set, generates a DEPRECATED_ATTR error with severity WARNING.
+  // The value of the deprecation field indicates what to use instead,
+  // e.g. the name of an attribute or tag.
   optional string deprecation = 7;
   optional string deprecation_url = 8;
   // This feature specifically addresses the development attribute on
@@ -77,6 +80,12 @@ message AttrSpec {
   // severity ERROR is generated.
   optional string dev_mode_enabled = 9;
   optional string dev_mode_enabled_url = 10;
+
+  // If set true, the TagSpec containing this AttrSpec will be evaluated first
+  // for any encountered tag which matches the tag name and this attribute spec.
+  // May only be set for an AttrSpec where mandatory=true and the value field
+  // is set.
+  optional bool dispatch_key = 13;
 }
 
 // Some tags share several attributes, so they're identified by unique key
@@ -241,7 +250,7 @@ message TagSpec {
 
 // Top level message - start reading here.
 // The validator knows about a set of tag specifications.
-// NEXT AVAILABLE TAG: 9
+// NEXT AVAILABLE TAG: 10
 message ValidatorRules {
   repeated TagSpec tags = 1;
   repeated AttrList attr_lists = 7;
@@ -252,6 +261,8 @@ message ValidatorRules {
 
   // Spec URL for information about mustache templates.
   optional string template_spec_url = 8;
+
+  repeated ErrorFormat error_formats = 9;
 
   // Deprecated fields, do not reuse.
   extensions 5, 2;
@@ -277,18 +288,25 @@ message ValidationError {
   enum Code {
     UNKNOWN_CODE = 0;
     MANDATORY_TAG_MISSING = 1;
+    TAG_REQUIRED_BY_MISSING = 24;
     DISALLOWED_TAG = 2;
     DISALLOWED_ATTR = 3;
     INVALID_ATTR_VALUE = 4;
+    ATTR_VALUE_REQUIRED_BY_LAYOUT = 27;
+    IMPLIED_LAYOUT_INVALID = 22;
+    SPECIFIED_LAYOUT_INVALID = 26;
     MANDATORY_ATTR_MISSING = 5;
+    MANDATORY_ONEOF_ATTR_MISSING = 28;
     DUPLICATE_UNIQUE_TAG = 6;
     WRONG_PARENT_TAG = 7;
     STYLESHEET_TOO_LONG = 8;
     MANDATORY_CDATA_MISSING_OR_INCORRECT = 9;
+    MANDATORY_CDATA_VIOLATES_BLACKLIST = 30;
     DEV_MODE_ENABLED = 10;
     DEPRECATED_ATTR = 11;
     DEPRECATED_TAG = 12;
     CSS_SYNTAX = 13;
+    CSS_SYNTAX_INVALID_AT_RULE = 29;
     MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE = 14;
     INVALID_PROPERTY_VALUE_IN_ATTR_VALUE = 15;
     DISALLOWED_PROPERTY_IN_ATTR_VALUE = 16;
@@ -297,7 +315,6 @@ message ValidationError {
     TEMPLATE_PARTIAL_IN_ATTR_VALUE = 19;
     TEMPLATE_IN_ATTR_NAME = 20;
     INCONSISTENT_UNITS_FOR_WIDTH_AND_HEIGHT = 21;
-    IMPLIED_LAYOUT_INVALID = 22;
     DISALLOWED_TAG_ANCESTOR = 23;
   }
   optional Code code = 1;
@@ -305,6 +322,12 @@ message ValidationError {
   optional int32 col = 3;
   optional string detail = 4;
   optional string spec_url = 5;
+  repeated string params = 7;
+}
+
+message ErrorFormat {
+  optional ValidationError.Code code = 1;
+  optional string format = 2;
 }
 
 // The validation result provided by Validator instances (see Validator::Result

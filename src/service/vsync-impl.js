@@ -111,6 +111,31 @@ export class Vsync {
   }
 
   /**
+   * Runs vsync task: measure followed by mutate. Returns the promise that
+   * will be resolved as soon as the task has been completed.
+   *
+   * If state is not provided, the value passed to the measure and mutate
+   * will be undefined.
+   *
+   * @param {!VsyncTaskSpecDef} task
+   * @param {!VsyncStateDef=} opt_state
+   * @return {!Promise}
+   */
+  runPromise(task, opt_state) {
+    return new Promise(resolve => {
+      this.run({
+        measure: state => {
+          task.measure(state);
+        },
+        mutate: state => {
+          task.mutate(state);
+          resolve();
+        }
+      }, opt_state);
+    });
+  }
+
+  /**
    * Creates a function that will call {@link run} method.
    * @param {!VsyncTaskSpecDef} task
    * @return {function(!VsyncStateDef=)}

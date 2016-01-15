@@ -59,11 +59,13 @@ function getMode_() {
       // occur during local dev.
       !!document.querySelector('script[src*="/dist/"],script[src*="/base/"]');
 
-  const overrideDevelopment = parseQueryString(location.hash)['development'];
+  const overrideDevelopment = parseQueryString(
+      // location.originalHash is set by the viewer when it removes the fragment
+      // from the URL.
+      location.originalHash || location.hash)['development'];
   const development = overrideDevelopment != undefined
       ? overrideDevelopment == '1'
       : !!document.querySelector('script[development]');
-
   return {
     localDev: isLocalDev,
     // Triggers validation

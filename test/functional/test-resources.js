@@ -229,6 +229,7 @@ describe('Resources discoverWork', () => {
       getBoundingClientRect: () => rect,
       updateLayoutBox: () => {},
       applySizesAndMediaQuery: () => {},
+      layoutCallback: () => Promise.resolve(),
       viewportCallback: sinon.spy(),
       prerenderAllowed: () => true,
       renderOutsideViewport: () => true,
@@ -258,6 +259,9 @@ describe('Resources discoverWork', () => {
     resource1 = createResource(1, layoutRectLtwh(10, 10, 100, 100));
     resource2 = createResource(2, layoutRectLtwh(10, 1010, 100, 100));
     resources.resources_ = [resource1, resource2];
+    resources.vsync_ = {
+      mutate: callback => callback()
+    };
   });
 
   afterEach(() => {
@@ -339,6 +343,48 @@ describe('Resources discoverWork', () => {
 
     expect(resources.queue_.getSize()).to.equal(0);
   });
+
+  it('should remeasure when requested and scheduled unloads', () => {
+    resource1.state_ = ResourceState_.LAYOUT_COMPLETE;
+    resource2.state_ = ResourceState_.LAYOUT_COMPLETE;
+    resources.visible_ = true;
+    viewportMock.expects('getRect').returns(
+        layoutRectLtwh(0, 0, 300, 400)).atLeast(1);
+
+    const resource1MeasureStub = sandbox.stub(resource1, 'measure',
+        resource1.measure.bind(resource1));
+    const resource1UnloadStub = sandbox.stub(resource1, 'unload');
+    const resource2MeasureStub = sandbox.stub(resource2, 'measure',
+        resource2.measure.bind(resource2));
+    const resource2UnloadStub = sandbox.stub(resource2, 'unload');
+
+    // 1st pass: measure for the first time.
+    resources.discoverWork_();
+    expect(resource1MeasureStub.callCount).to.equal(1);
+    expect(resource1UnloadStub.callCount).to.equal(0);
+    expect(resource2MeasureStub.callCount).to.equal(1);
+    expect(resource2UnloadStub.callCount).to.equal(0);
+
+    // 2nd pass: do not remeasure anything.
+    resources.discoverWork_();
+    expect(resource1MeasureStub.callCount).to.equal(1);
+    expect(resource1UnloadStub.callCount).to.equal(0);
+    expect(resource2MeasureStub.callCount).to.equal(1);
+    expect(resource2UnloadStub.callCount).to.equal(0);
+
+    // 3rd pass: request remeasures and an unload.
+    resource1.requestMeasure();
+    resource2.requestMeasure();
+    expect(resource1.isMeasureRequested()).to.be.true;
+    expect(resource2.isMeasureRequested()).to.be.true;
+    resource2.element.getBoundingClientRect =
+        () => layoutRectLtwh(0, 0, 0, 0);  // Equiv to display:none.
+    resources.discoverWork_();
+    expect(resource1MeasureStub.callCount).to.equal(2);
+    expect(resource1UnloadStub.callCount).to.equal(0);
+    expect(resource2MeasureStub.callCount).to.equal(2);
+    expect(resource2UnloadStub.callCount).to.equal(1);
+  });
 });
 
 
@@ -358,6 +404,7 @@ describe('Resources changeHeight', () => {
       },
       getBoundingClientRect: () => rect,
       applySizesAndMediaQuery: () => {},
+      layoutCallback: () => Promise.resolve(),
       viewportCallback: sinon.spy(),
       prerenderAllowed: () => true,
       renderOutsideViewport: () => false,
@@ -650,6 +697,156 @@ describe('Resources changeHeight', () => {
 });
 
 
+describe('Resources mutateElement', () => {
+
+  function createElement(rect) {
+    return {
+      tagName: 'amp-test',
+      isBuilt: () => {
+        return true;
+      },
+      isUpgraded: () => {
+        return true;
+      },
+      getAttribute: () => {
+        return null;
+      },
+      getBoundingClientRect: () => rect,
+      applySizesAndMediaQuery: () => {},
+      layoutCallback: () => Promise.resolve(),
+      viewportCallback: sinon.spy(),
+      prerenderAllowed: () => true,
+      renderOutsideViewport: () => false,
+      isRelayoutNeeded: () => true,
+      contains: unused_otherElement => false,
+      updateLayoutBox: () => {},
+      overflowCallback: (unused_overflown, unused_requestedHeight) => {},
+    };
+  }
+
+  function createResource(id, rect) {
+    const resource = new Resource(id, createElement(rect), resources);
+    resource.element['__AMP__RESOURCE'] = resource;
+    resource.state_ = ResourceState_.READY_FOR_LAYOUT;
+    resource.layoutBox_ = rect;
+    resource.changeHeight = sinon.spy();
+    return resource;
+  }
+
+  let sandbox;
+  let clock;
+  let viewportMock;
+  let resources;
+  let resource1, resource2;
+  let parent1, parent2;
+  let relayoutTopStub;
+  let resource1RequestMeasureStub, resource2RequestMeasureStub;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+    clock = sandbox.useFakeTimers();
+    resources = new Resources(window);
+    viewportMock = sandbox.mock(resources.viewport_);
+    resources.vsync_ = {
+      mutate: callback => callback(),
+      measure: callback => callback(),
+      runPromise: task => {
+        const state = {};
+        if (task.measure) {
+          task.measure(state);
+        }
+        if (task.mutate) {
+          task.mutate(state);
+        }
+        return Promise.resolve();
+      },
+    };
+    relayoutTopStub = sandbox.stub(resources, 'setRelayoutTop_');
+    sandbox.stub(resources, 'schedulePass');
+
+    resource1 = createResource(1, layoutRectLtwh(10, 10, 100, 100));
+    resource2 = createResource(2, layoutRectLtwh(10, 1010, 100, 100));
+    resources.resources_ = [resource1, resource2];
+
+    resource1RequestMeasureStub = sandbox.stub(resource1, 'requestMeasure');
+    resource2RequestMeasureStub = sandbox.stub(resource2, 'requestMeasure');
+
+    parent1 = createElement(layoutRectLtwh(10, 10, 100, 100));
+    parent2 = createElement(layoutRectLtwh(10, 1010, 100, 100));
+
+    parent1.getElementsByClassName = className => {
+      if (className == '-amp-element') {
+        return [resource1.element];
+      }
+    };
+    parent2.getElementsByClassName = className => {
+      if (className == '-amp-element') {
+        return [resource2.element];
+      }
+    };
+  });
+
+  afterEach(() => {
+    viewportMock.verify();
+    viewportMock.restore();
+    viewportMock = null;
+    resources = null;
+    clock.restore();
+    clock = null;
+    sandbox.restore();
+    sandbox = null;
+  });
+
+  it('should mutate from visible to invisible', () => {
+    const mutateSpy = sandbox.spy();
+    const promise = resources.mutateElement(parent1, () => {
+      parent1.getBoundingClientRect = () => layoutRectLtwh(0, 0, 0, 0);
+      mutateSpy();
+    });
+    return promise.then(() => {
+      expect(mutateSpy.callCount).to.equal(1);
+      expect(resource1RequestMeasureStub.callCount).to.equal(1);
+      expect(resource2RequestMeasureStub.callCount).to.equal(0);
+      expect(relayoutTopStub.callCount).to.equal(1);
+      expect(relayoutTopStub.getCall(0).args[0]).to.equal(10);
+    });
+  });
+
+  it('should mutate from invisible to visible', () => {
+    const mutateSpy = sandbox.spy();
+    parent1.getBoundingClientRect = () => layoutRectLtwh(0, 0, 0, 0);
+    const promise = resources.mutateElement(parent1, () => {
+      parent1.getBoundingClientRect = () => layoutRectLtwh(10, 10, 100, 100);
+      mutateSpy();
+    });
+    return promise.then(() => {
+      expect(mutateSpy.callCount).to.equal(1);
+      expect(resource1RequestMeasureStub.callCount).to.equal(1);
+      expect(resource2RequestMeasureStub.callCount).to.equal(0);
+      expect(relayoutTopStub.callCount).to.equal(1);
+      expect(relayoutTopStub.getCall(0).args[0]).to.equal(10);
+    });
+  });
+
+  it('should mutate from visible to visible', () => {
+    const mutateSpy = sandbox.spy();
+    parent1.getBoundingClientRect = () => layoutRectLtwh(10, 10, 100, 100);
+    const promise = resources.mutateElement(parent1, () => {
+      parent1.getBoundingClientRect = () => layoutRectLtwh(10, 1010, 100, 100);
+      mutateSpy();
+    });
+    return promise.then(() => {
+      expect(mutateSpy.callCount).to.equal(1);
+      expect(resource1RequestMeasureStub.callCount).to.equal(1);
+      expect(resource2RequestMeasureStub.callCount).to.equal(0);
+      expect(relayoutTopStub.callCount).to.equal(2);
+      expect(relayoutTopStub.getCall(0).args[0]).to.equal(10);
+      expect(relayoutTopStub.getCall(1).args[0]).to.equal(1010);
+    });
+  });
+});
+
+
 describe('Resources.TaskQueue', () => {
 
   let sandbox;
@@ -843,6 +1040,21 @@ describe('Resources.Resource', () => {
     expect(resource.getLayoutBox().top).to.equal(12);
     expect(resource.getLayoutBox().width).to.equal(111);
     expect(resource.getLayoutBox().height).to.equal(222);
+  });
+
+  it('should noop request measure when not built', () => {
+    expect(resource.isMeasureRequested()).to.be.false;
+    elementMock.expects('getBoundingClientRect').never();
+    resource.requestMeasure();
+    expect(resource.isMeasureRequested()).to.be.false;
+  });
+
+  it('should request measure when built', () => {
+    expect(resource.isMeasureRequested()).to.be.false;
+    elementMock.expects('getBoundingClientRect').never();
+    resource.state_ = ResourceState_.READY_FOR_LAYOUT;
+    resource.requestMeasure();
+    expect(resource.isMeasureRequested()).to.be.true;
   });
 
   it('should always layout if has not been laid out before', () => {
@@ -1128,6 +1340,13 @@ describe('Resources.Resource', () => {
       resource.isInViewport_ = true;
       elementMock.expects('viewportCallback').withExactArgs(false).once();
       resource.documentBecameInactive();
+    });
+
+    it('should delegate unload to documentInactiveCallback', () => {
+      resource.state_ = ResourceState_.LAYOUT_COMPLETE;
+      elementMock.expects('documentInactiveCallback').returns(false).once();
+      resource.unload();
+      expect(resource.getState()).to.equal(ResourceState_.LAYOUT_COMPLETE);
     });
   });
 

@@ -165,6 +165,23 @@ describe('Viewer', () => {
     expect(viewer.messageQueue_[1].eventType).to.equal('cancelFullOverlay');
   });
 
+  it('should receive broadcast event', () => {
+    let broadcastMessage = null;
+    viewer.onBroadcast(message => {
+      broadcastMessage = message;
+    });
+    viewer.receiveMessage('broadcast', {type: 'type1'});
+    expect(broadcastMessage).to.exist;
+    expect(broadcastMessage.type).to.equal('type1');
+  });
+
+  it('should post broadcast event', () => {
+    viewer.broadcast({type: 'type1'});
+    const m = viewer.messageQueue_[0];
+    expect(m.eventType).to.equal('broadcast');
+    expect(m.data.type).to.equal('type1');
+  });
+
   it('should queue non-dupe events', () => {
     viewer.postDocumentReady(11, 12);
     viewer.postDocumentResized(13, 14);

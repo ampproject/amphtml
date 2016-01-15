@@ -1,4 +1,4 @@
 FAIL
-feature_tests/amp_list.html:36:2 DISALLOWED_ATTR wdith (see https://github.com/ampproject/amphtml/blob/master/extensions/amp-list/amp-list.md)
-feature_tests/amp_list.html:41:2 MANDATORY_ATTR_MISSING src (see https://github.com/ampproject/amphtml/blob/master/extensions/amp-list/amp-list.md)
-feature_tests/amp_list.html:46:2 IMPLIED_LAYOUT_INVALID layout CONTAINER not supported (see https://github.com/ampproject/amphtml/blob/master/extensions/amp-list/amp-list.md)
+feature_tests/amp_list.html:36:2 The attribute 'wdith' may not appear in tag 'amp-list'. (see https://github.com/ampproject/amphtml/blob/master/extensions/amp-list/amp-list.md)
+feature_tests/amp_list.html:41:2 The mandatory attribute 'src' is missing in tag 'amp-list'. (see https://github.com/ampproject/amphtml/blob/master/extensions/amp-list/amp-list.md)
+feature_tests/amp_list.html:46:2 The implied layout 'CONTAINER' is not supported by tag 'amp-list'. (see https://github.com/ampproject/amphtml/blob/master/extensions/amp-list/amp-list.md)

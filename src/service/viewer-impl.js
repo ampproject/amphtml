@@ -134,6 +134,9 @@ export class Viewer {
     /** @private {!Observable<!ViewerHistoryPoppedEventDef>} */
     this.historyPoppedObservable_ = new Observable();
 
+    /** @private {!Observable<!JSONObject>} */
+    this.broadcastObservable_ = new Observable();
+
     /** @private {?function(string, *, boolean):(Promise<*>|undefined)} */
     this.messageDeliverer_ = null;
 
@@ -208,6 +211,9 @@ export class Viewer {
     if (this.isEmbedded_) {
       const newUrl = removeFragment(this.win.location.href);
       if (newUrl != this.win.location.href && this.win.history.replaceState) {
+        // Persist the hash that we removed has location.originalHash.
+        // This is currently used my mode.js to infer development mode.
+        this.win.location.originalHash = this.win.location.hash;
         this.win.history.replaceState({}, '', newUrl);
         log.fine(TAG_, 'replace url:' + this.win.location.href);
       }
@@ -458,6 +464,23 @@ export class Viewer {
   }
 
   /**
+   * Broadcasts a message to all other AMP documents under the same viewer.
+   * @param {!JSONObject} message
+   */
+  broadcast(message) {
+    this.sendMessage_('broadcast', message, false);
+  }
+
+  /**
+   * Registers receiver for the broadcast events.
+   * @param {function(!JSONObject)} handler
+   * @return {!Unlisten}
+   */
+  onBroadcast(handler) {
+    return this.broadcastObservable_.add(handler);
+  }
+
+  /**
    * Requests AMP document to receive a message from Viewer.
    * @param {string} eventType
    * @param {*} data
@@ -499,6 +522,10 @@ export class Viewer {
       log.fine(TAG_, 'visibilitychange event:', this.visibilityState_,
           this.prerenderSize_);
       this.onVisibilityChange_();
+      return Promise.resolve();
+    }
+    if (eventType == 'broadcast') {
+      this.broadcastObservable_.fire(data);
       return Promise.resolve();
     }
     log.fine(TAG_, 'unknown message:', eventType);

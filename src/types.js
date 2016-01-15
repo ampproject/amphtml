@@ -14,15 +14,32 @@
  * limitations under the License.
  */
 
-require('./babel-helpers');
-require('./changelog');
-require('./clean');
-require('./compile');
-require('./compile-access-expr');
-require('./lint');
-require('./make-golden');
-require('./presubmit-checks');
-require('./serve');
-require('./size');
-require('./test');
-require('./validator');
+/* @const */
+const toString_ = Object.prototype.toString;
+
+/**
+ * Returns the ECMA [[Class]] of a value
+ * @param {*} value
+ * @return {string}
+ */
+function toString(value) {
+  return toString_.call(value);
+}
+
+/**
+ * Determines if value is actually an Array.
+ * @param {*} value
+ * @return {boolean}
+ */
+export function isArray(value) {
+  return toString(value) === '[object Array]';
+}
+
+/**
+ * Determines if value is actually an Object.
+ * @param {*} value
+ * @return {boolean}
+ */
+export function isObject(value) {
+  return toString(value) === '[object Object]';
+}

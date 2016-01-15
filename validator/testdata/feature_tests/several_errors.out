@@ -1,9 +1,9 @@
 FAIL
-feature_tests/several_errors.html:23:2 INVALID_ATTR_VALUE charset=pick-a-key (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#chrs)
-feature_tests/several_errors.html:26:2 INVALID_ATTR_VALUE type=javascript
-feature_tests/several_errors.html:32:2 MANDATORY_ATTR_MISSING height (see https://github.com/ampproject/amphtml/blob/master/builtins/amp-img.md)
-feature_tests/several_errors.html:34:2 INVALID_ATTR_VALUE width (see https://github.com/ampproject/amphtml/blob/master/builtins/amp-ad.md)
-feature_tests/several_errors.html:37:2 DISALLOWED_ATTR made_up_attribute (see https://github.com/ampproject/amphtml/blob/master/builtins/amp-ad.md)
-feature_tests/several_errors.html:39:7 MANDATORY_TAG_MISSING charset utf-8 declaration (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#chrs)
-feature_tests/several_errors.html:39:7 MANDATORY_TAG_MISSING viewport declaration (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#vprt)
-feature_tests/several_errors.html:39:7 MANDATORY_TAG_MISSING amphtml engine v0.js script (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#scrpt)
+feature_tests/several_errors.html:23:2 The attribute 'charset' in tag 'charset utf-8 declaration' is set to the invalid value 'pick-a-key'. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#chrs)
+feature_tests/several_errors.html:26:2 The attribute 'type' in tag 'script' is set to the invalid value 'javascript'.
+feature_tests/several_errors.html:32:2 The mandatory attribute 'height' is missing in tag 'amp-img'. (see https://github.com/ampproject/amphtml/blob/master/builtins/amp-img.md)
+feature_tests/several_errors.html:34:2 The attribute 'width' in tag 'amp-ad' is set to the invalid value '100%'. (see https://github.com/ampproject/amphtml/blob/master/builtins/amp-ad.md)
+feature_tests/several_errors.html:37:2 The attribute 'made_up_attribute' may not appear in tag 'amp-ad'. (see https://github.com/ampproject/amphtml/blob/master/builtins/amp-ad.md)
+feature_tests/several_errors.html:39:7 The mandatory tag 'charset utf-8 declaration' is missing or incorrect. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#chrs)
+feature_tests/several_errors.html:39:7 The mandatory tag 'viewport declaration' is missing or incorrect. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#vprt)
+feature_tests/several_errors.html:39:7 The mandatory tag 'amphtml engine v0.js script' is missing or incorrect. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#scrpt)

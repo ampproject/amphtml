@@ -39,6 +39,8 @@ let iframeCount = 0;
  *
  * @param {string} fixture The name of the fixture file.
  * @param {number} initialIframeHeight in px.
+ * @param {function(!Window)} opt_beforeLoad Called just before any other JS
+ *     executes in the window.
  * @return {!Promise<{
  *   win: !Window,
  *   doc: !Document,
@@ -46,7 +48,7 @@ let iframeCount = 0;
  *   awaitEvent: function(string, number):!Promise
  * }>}
  */
-export function createFixtureIframe(fixture, initialIframeHeight, done) {
+export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad) {
   return new Promise((resolve, reject) => {
     // Counts the supported custom events.
     const events = {
@@ -69,6 +71,9 @@ export function createFixtureIframe(fixture, initialIframeHeight, done) {
     window.beforeLoad = function(win) {
       // Flag as being a test window.
       win.AMP_TEST = true;
+      if (opt_beforeLoad) {
+        opt_beforeLoad(win);
+      }
       // Function that returns a promise for when the given event fired at
       // least count times.
       let awaitEvent = (eventName, count) => {
@@ -101,6 +106,7 @@ export function createFixtureIframe(fixture, initialIframeHeight, done) {
       let errors = [];
       win.console.error = function() {
         errors.push('Error: ' + [].slice.call(arguments).join(' '));
+        console.error.apply(console, arguments);
       };
       // Make time go 10x as fast
       win.setTimeout = function(fn, ms) {

@@ -25,7 +25,7 @@
 import {assert} from '../asserts';
 import {getCookie, setCookie} from '../cookies';
 import {getService} from '../service';
-import {parseUrl} from '../url';
+import {getSourceOrigin, isProxyOrigin, parseUrl} from '../url';
 import {timer} from '../timer';
 import {viewerFor} from '../viewer';
 import {sha384Base64} from
@@ -132,7 +132,7 @@ function getExternalCid(cid, getCidStruct, persistenceConsent) {
   return getBaseCid(cid, persistenceConsent).then(baseCid => {
     return cid.sha384Base64_(
         baseCid +
-        getSourceOrigin(url) +
+        getProxySourceOrigin(url) +
         getCidStruct.scope);
   });
 }
@@ -171,46 +171,16 @@ function getOrCreateCookie(cid, getCidStruct, persistenceConsent) {
 }
 
 /**
- * Returns whether the URL has the origin of a proxy.
- * @param {!Url} url URL of an AMP document.
- * @return {boolean}
- * @visibleForTesting BUT if this is needed elsewhere it could be
- *     factored into its own package.
- */
-export function isProxyOrigin(url) {
-  const path = url.pathname.split('/');
-  const prefix = path[1];
-  // List of well known proxy hosts. New proxies must be added here
-  // to generate correct tokens.
-  return (url.origin == 'https://cdn.ampproject.org' ||
-      (url.origin.indexOf('http://localhost:') == 0 &&
-       (prefix == 'c' || prefix == 'v')));
-}
-
-/**
  * Returns the source origin of an AMP document for documents served
  * on a proxy origin. Throws an error if the doc is not on a proxy origin.
- * @param {!Url} url URL of an AMP document.
+ * @param {!Location} url URL of an AMP document.
  * @return {string} The source origin of the URL.
  * @visibleForTesting BUT if this is needed elsewhere it could be
  *     factored into its own package.
  */
-export function getSourceOrigin(url) {
+export function getProxySourceOrigin(url) {
   assert(isProxyOrigin(url), 'Expected proxy origin %s', url.origin);
-  // Example path that is being matched here.
-  // https://cdn.ampproject.org/c/s/www.origin.com/foo/
-  // The /s/ is optional and signals a secure origin.
-  const path = url.pathname.split('/');
-  const prefix = path[1];
-  assert(prefix == 'c' || prefix == 'v',
-      'Unknown path prefix in url %s', url.href);
-  const domainOrHttpsSignal = path[2];
-  const origin = domainOrHttpsSignal == 's'
-      ? 'https://' + path[3]
-      : 'http://' + domainOrHttpsSignal;
-  // Sanity test that what we found looks like a domain.
-  assert(origin.indexOf('.') > 0, 'Expected a . in origin %s', origin);
-  return origin;
+  return getSourceOrigin(url);
 }
 
 /**

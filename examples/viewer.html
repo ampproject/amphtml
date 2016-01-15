@@ -57,6 +57,12 @@
       flex-grow: 1;
     }
 
+    header .show-container-anchor {
+      flex-grow: 0;
+      flex-shrink: 0;
+      padding: 8px;
+    }
+
     header #visibilityToggle {
       flex-grow: 0;
       flex-shrink: 0;
@@ -78,6 +84,23 @@
       right: 0;
       bottom: 0;
       overflow-x: hidden;
+      visibility: hidden;
+    }
+
+    viewer[data-show-container="1"] #container1 {
+      visibility: visible;
+    }
+
+    viewer[data-show-container="1"] #show-container1-anchor {
+      text-decoration: underline;
+    }
+
+    viewer[data-show-container="2"] #container2 {
+      visibility: visible;
+    }
+
+    viewer[data-show-container="2"] #show-container2-anchor {
+      text-decoration: underline;
     }
 
     viewer.natural container {
@@ -107,35 +130,34 @@
 
     var SENTINEL = '__AMP__';
 
-    function Viewer() {
+    var allViewers = [];
+
+    function Viewer(containerId, id, visible) {
+      this.id = id;
       this.alreadyLoaded_ = false;
       this.stackIndex_ = 0;
       this.viewportType_ = 'natural';  // "natural" or "virtual"
-      this.visibilityState_ = 'visible';  // "hidden", "visible"
+      this.visibilityState_ = visible ? 'visible' : 'hidden';
       this.prerenderSize_ = 1;
 
       this.isIos_ = /iPhone|iPad|iPod/i.test(window.navigator.userAgent);
 
       this.viewer = document.querySelector('viewer');
       this.header = document.querySelector('header');
-      this.container = document.querySelector('container');
+      this.container = document.getElementById(containerId);
       this.iframe = document.createElement('iframe');
-      this.iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+      // TODO(dvoytenko): Set to the final value when crbug/577330 is fixed:
+      // this.iframe.setAttribute('sandbox',
+      //     'allow-popups allow-scripts allow-forms allow-pointer-lock' +
+      //     ' allow-popups-to-escape-sandbox allow-same-origin');
 
       this.visibilityToggle_ = document.getElementById('visibilityToggle');
       this.visibilityToggle_.onclick = function() {
-        if (this.visibilityState_ == 'visible') {
-          this.visibilityState_ = 'hidden';
-        } else {
-          this.visibilityState_ = 'visible';
-        }
-        this.messaging_.sendRequest('visibilitychange', {
-          state: this.visibilityState_,
-          prerenderSize: this.prerenderSize
-        }, true);
-        this.updateVisibilityToggle_();
+        this.toggleVisibility(this.visibilityState_ != 'visible');
       }.bind(this);
-      this.updateVisibilityToggle_();
+      if (visible) {
+        this.updateVisibilityToggle_();
+      }
 
       this.viewer.classList.add(this.viewportType_);
 
@@ -154,6 +176,8 @@
 
 
     Viewer.prototype.start = function() {
+      allViewers.push(this);
+
       var params = {
         history: 1,
         viewportType: this.viewportType_,
@@ -165,11 +189,11 @@
       };
       log('Params:' + JSON.stringify(params));
 
-      var url = './everything.amp.html#' + paramsStr(params);
+      var url = './article-access.amp.max.html#' + paramsStr(params);
       if (window.location.hash && window.location.hash.length > 1) {
         url += '&' + window.location.hash.substring(1);
       }
-      log('AMP URL = ' + url);
+      log('AMP URL = ', url);
       this.iframe.style.display = 'none';
       this.container.appendChild(this.iframe);
 
@@ -191,6 +215,19 @@
     };
 
 
+    Viewer.prototype.toggleVisibility = function(visible) {
+      log('Viewer ' + this.id + ' visibility -> ', visible);
+      this.visibilityState_ = visible ? 'visible' : 'hidden';
+      this.messaging_.sendRequest('visibilitychange', {
+        state: this.visibilityState_,
+        prerenderSize: this.prerenderSize
+      }, true);
+      if (visible) {
+        this.updateVisibilityToggle_();
+      }
+    };
+
+
     Viewer.prototype.loaded_ = function() {
       if (this.alreadyLoaded_) {
         return;
@@ -198,7 +235,7 @@
       log('AMP Loaded');
       this.alreadyLoaded_ = true;
 
-      var waiter = document.querySelector('.wait');
+      var waiter = this.container.querySelector('.wait');
       if (waiter) {
         waiter.parentElement.removeChild(waiter);
       }
@@ -286,7 +323,9 @@
       // Even more trivial. Always assumes that only one step was popped in
       // history.
       this.stackIndex_--;
-      this.sendMessage_('historyPopped', {newStackIndex: this.stackIndex_});
+      this.messaging_.sendRequest('historyPopped', {
+        newStackIndex: this.stackIndex_
+      }, false);
       log('history popped to ', this.stackIndex_);
     };
 
@@ -294,6 +333,16 @@
     Viewer.prototype.updateVisibilityToggle_ = function() {
       this.visibilityToggle_.textContent = this.visibilityState_ == 'visible' ?
           'Visible' : 'Prerendering';
+    };
+
+    Viewer.prototype.broadcast_ = function(message) {
+      log('broadcast: ', message);
+      var self = this;
+      allViewers.forEach(function(viewer) {
+        if (viewer != self) {
+          viewer.messaging_.sendRequest('broadcast', message, false);
+        }
+      });
     };
 
 
@@ -310,11 +359,14 @@
       if (type == 'cancelFullOverlay') {
         return this.cancelFullOverlay_();
       }
-      if (data.type == 'pushHistory') {
+      if (type == 'pushHistory') {
         return this.pushHistory_(data.stackIndex);
       }
-      if (data.type == 'popHistory') {
+      if (type == 'popHistory') {
         return this.popHistory_(data.stackIndex);
+      }
+      if (type == 'broadcast') {
+        return this.broadcast_(data);
       }
       return Promise.reject('request not supported: ' + type);
     };
@@ -343,11 +395,30 @@
     }
 
 
-    var viewer;
-
     function loadAmpDoc() {
-      viewer = new Viewer();
-      viewer.start();
+      new Viewer('container1', '1', true).start();
+      addShowContainer('1');
+
+      new Viewer('container2', '2', false).start();
+      addShowContainer('2');
+
+      showContainer('1');
+    }
+
+    function addShowContainer(id) {
+      var anchor = document.getElementById('show-container' + id + '-anchor');
+      anchor.onclick = function() {
+        showContainer(id);
+      };
+    }
+
+    function showContainer(id) {
+      log('Show container: ', id);
+      var viewerEl = document.querySelector('viewer');
+      viewerEl.setAttribute('data-show-container', id);
+      allViewers.forEach(function(viewer) {
+        viewer.toggleVisibility(viewer.id == id);
+      });
     }
 
     window.onload = loadAmpDoc;
@@ -357,9 +428,17 @@
   <viewer>
     <header>
       <h1>Viewer</h1>
+      <a class="show-container-anchor" id="show-container1-anchor">One</a>
+      <a class="show-container-anchor" id="show-container2-anchor">Two</a>
+      <a>|</a>
       <a id="visibilityToggle">Visible</a>
     </header>
-    <container>
+    <container id="container1">
+      <div class="wait">
+        Please wait, the AMP doc will appear here...
+      </div>
+    </container>
+    <container id="container2">
       <div class="wait">
         Please wait, the AMP doc will appear here...
       </div>

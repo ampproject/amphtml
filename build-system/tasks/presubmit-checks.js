@@ -53,6 +53,7 @@ var forbiddenTerms = {
     message: privateServiceFactory,
     whitelist: [
       'src/service/action-impl.js',
+      'src/service/standard-actions-impl.js',
       'src/amp-core-service.js',
     ],
   },
@@ -104,6 +105,7 @@ var forbiddenTerms = {
     whitelist: [
       'src/amp-core-service.js',
       'src/service/resources-impl.js',
+      'src/service/standard-actions-impl.js',
     ],
   },
   // Privacy sensitive
@@ -263,7 +265,7 @@ var forbiddenTermsSrcInclusive = {
 
 // Terms that must appear in a source file.
 var requiredTerms = {
-  'Copyright 2015 The AMP HTML Authors\\.':
+  'Copyright 20(15|16) The AMP HTML Authors\\.':
       dedicatedCopyrightNoteSources,
   'Licensed under the Apache License, Version 2\\.0':
       dedicatedCopyrightNoteSources,
