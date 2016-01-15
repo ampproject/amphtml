@@ -16,6 +16,7 @@
 
 import {createServedIframe} from '../../../../testing/iframe';
 import {toggleExperiment} from '../../../../src/experiments';
+import {vsyncFor} from '../../../../src/vsync';
 
 function overwrite(object, property, value) {
   Object.defineProperty(object, property, {
@@ -36,12 +37,20 @@ const PinterestUA = 'Mozilla/5.0 (Linux; Android 5.1.1; SM-G920F' +
 describe('dynamic classes are inserted at runtime', () => {
   let documentElement;
 
+  function mockVsync(win) {
+    const vsync = vsyncFor(win);
+    vsync.schedule_ = () => {
+      vsync.runScheduledTasks_();
+    };
+  }
+
   function setup(enabled, userAgent, referrer) {
     return createServedIframe(iframeSrc).then(fixture => {
       const win = fixture.win;
       documentElement = fixture.doc.documentElement;
 
       toggleExperiment(win, 'dynamic-css-classes', enabled);
+      mockVsync(win);
 
       if (userAgent !== undefined) {
         overwrite(win.navigator, 'userAgent', userAgent);
@@ -96,6 +105,18 @@ describe('dynamic classes are inserted at runtime', () => {
         expect(documentElement).to.have.class('amp-referrer-pinterest-com');
         expect(documentElement).to.have.class('amp-referrer-www-pinterest-com');
       });
+    });
+  });
+
+  it('should delay unhiding the body', () => {
+    return createServedIframe(iframeSrc).then(fixture => {
+      expect(fixture.doc.body).to.be.hidden;
+
+      const win = fixture.win;
+      mockVsync(win);
+      return win.insertDynamicCssScript().then(() => fixture);
+    }).then(fixture => {
+      expect(fixture.doc.body).to.be.visible;
     });
   });
 });

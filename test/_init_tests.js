@@ -100,8 +100,9 @@ chai.Assertion.addMethod('class', function(className) {
 
 chai.Assertion.addProperty('visible', function() {
   const obj = this._obj;
-  const visibility = window.getComputedStyle(obj).getPropertyValue('visibility');
-  const opacity = window.getComputedStyle(obj).getPropertyValue('opacity');
+  const computedStyle = window.getComputedStyle(obj);
+  const visibility = computedStyle.getPropertyValue('visibility');
+  const opacity = computedStyle.getPropertyValue('opacity');
   const tagName = obj.tagName.toLowerCase();
   this.assert(
     visibility === 'visible' || parseInt(opacity, 10) > 0,
@@ -116,8 +117,9 @@ chai.Assertion.addProperty('visible', function() {
 
 chai.Assertion.addProperty('hidden', function() {
   const obj = this._obj;
-  const visibility = window.getComputedStyle(obj).getPropertyValue('visibility');
-  const opacity = window.getComputedStyle(obj).getPropertyValue('opacity');
+  const computedStyle = window.getComputedStyle(obj);
+  const visibility = computedStyle.getPropertyValue('visibility');
+  const opacity = computedStyle.getPropertyValue('opacity');
   const tagName = obj.tagName.toLowerCase();
   this.assert(
      visibility === 'hidden' || parseInt(opacity, 10) == 0,
