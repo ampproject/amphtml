@@ -23,7 +23,7 @@ import {documentStateFor} from '../../../src/document-state';
 import {evaluateAccessExpr} from './access-expr';
 import {getService} from '../../../src/service';
 import {installStyles} from '../../../src/styles';
-import {isExperimentOn} from '../../../src/experiments';
+import {isDevChannel, isExperimentOn} from '../../../src/experiments';
 import {listenOnce} from '../../../src/event-helper';
 import {log} from '../../../src/log';
 import {onDocumentReady} from '../../../src/document-state';
@@ -91,7 +91,8 @@ export class AccessService {
     installStyles(this.win.document, $CSS$, () => {});
 
     /** @const @private {boolean} */
-    this.isExperimentOn_ = isExperimentOn(this.win, EXPERIMENT);
+    this.isExperimentOn_ = (isExperimentOn(this.win, EXPERIMENT) ||
+        isDevChannel(this.win));
 
     const accessElement = document.getElementById('amp-access');
 
