@@ -17,7 +17,7 @@
 import {all} from '../../../src/promise';
 import {actionServiceFor} from '../../../src/action';
 import {assert, assertEnumValue} from '../../../src/asserts';
-import {assertHttpsUrl} from '../../../src/url';
+import {assertHttpsUrl, getSourceOrigin} from '../../../src/url';
 import {cidFor} from '../../../src/cid';
 import {documentStateFor} from '../../../src/document-state';
 import {evaluateAccessExpr} from './access-expr';
@@ -106,6 +106,9 @@ export class AccessService {
 
     /** @const @private {!AccessConfigDef} */
     this.config_ = this.buildConfig_();
+
+    /** @const @private {string} */
+    this.pubOrigin_ = getSourceOrigin(this.win.location);
 
     /** @const @private {!Vsync} */
     this.vsync_ = vsyncFor(this.win);
@@ -232,6 +235,27 @@ export class AccessService {
 
     // Wait for the "view" signal.
     this.scheduleView_();
+
+    // Listen to amp-access broadcasts from other pages.
+    this.listenToBroadcasts_();
+  }
+
+  /** @private */
+  listenToBroadcasts_() {
+    this.viewer_.onBroadcast(message => {
+      if (message['type'] == 'amp-access-reauthorize' &&
+              message['origin'] == this.pubOrigin_) {
+        this.runAuthorization_();
+      }
+    });
+  }
+
+  /** @private */
+  broadcastReauthorize_() {
+    this.viewer_.broadcast({
+      'type': 'amp-access-reauthorize',
+      'origin': this.pubOrigin_
+    });
   }
 
   /**
@@ -442,6 +466,7 @@ export class AccessService {
               this.reportViewPromise_ = null;
               throw reason;
             });
+    this.reportViewPromise_.then(this.broadcastReauthorize_.bind(this));
     return this.reportViewPromise_;
   }
 
@@ -549,6 +574,7 @@ export class AccessService {
       const s = query['success'];
       const success = (s == 'true' || s == 'yes' || s == '1');
       if (success) {
+        this.broadcastReauthorize_();
         // Repeat the authorization flow.
         return this.runAuthorization_();
       }
