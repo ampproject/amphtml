@@ -509,6 +509,7 @@ describe('Resources changeHeight', () => {
       resource1.element.overflowCallback = overflowCallbackSpy;
       viewportMock.expects('getRect').returns(
           {top: 0, left: 0, right: 100, bottom: 200, height: 200}).atLeast(1);
+      viewportMock.expects('getScrollHeight').returns(10000).atLeast(1);
       resource1.layoutBox_ = {top: 10, left: 0, right: 100, bottom: 50,
           height: 50};
       vsyncSpy = sandbox.stub(resources.vsync_, 'run');
@@ -579,7 +580,7 @@ describe('Resources changeHeight', () => {
     });
 
     it('should change height when slightly above the viewport', () => {
-      resource1.layoutBox_ = {top: 10, left: 0, right: 100, bottom: 180,
+      resource1.layoutBox_ = {top: 10, left: 0, right: 100, bottom: 190,
           height: 50};
       resources.scheduleChangeHeight_(resource1, 111, false);
       resources.mutateWork_();
@@ -589,7 +590,7 @@ describe('Resources changeHeight', () => {
       expect(overflowCallbackSpy.firstCall.args[0]).to.equal(false);
     });
 
-    it('should NOT change height when significantly above the viewport', () => {
+    it('should NOT change height when in the middle of the viewport', () => {
       resource1.layoutBox_ = {top: 10, left: 0, right: 100, bottom: 100,
           height: 50};
       resources.scheduleChangeHeight_(resource1, 111, false);
@@ -599,6 +600,15 @@ describe('Resources changeHeight', () => {
       expect(overflowCallbackSpy.firstCall.args[0]).to.equal(true);
       expect(overflowCallbackSpy.firstCall.args[1]).to.equal(111);
       expect(resource1.getPendingChangeHeight()).to.equal(111);
+    });
+
+    it('should NOT change height when below viewport, but decreases', () => {
+      resource1.layoutBox_ = {top: 10, left: 0, right: 100, bottom: 210,
+          height: 50};
+      resources.scheduleChangeHeight_(resource1, 50, false);
+      resources.mutateWork_();
+      expect(resource1.changeHeight.callCount).to.equal(0);
+      expect(overflowCallbackSpy.callCount).to.equal(0);
     });
 
     it('should defer when above the viewport and scrolling on', () => {
@@ -692,6 +702,30 @@ describe('Resources changeHeight', () => {
       expect(resource1.changeHeight.firstCall.args[0]).to.equal(111);
       expect(overflowCallbackSpy.callCount).to.equal(2);
       expect(overflowCallbackSpy.lastCall.args[0]).to.equal(false);
+    });
+  });
+
+  describe('attemptChangeHeight rules for element wrt document', () => {
+
+    beforeEach(() => {
+      viewportMock.expects('getRect').returns(
+          {top: 0, left: 0, right: 100, bottom: 10000, height: 200}).atLeast(1);
+      resource1.layoutBox_ = resource1.initialLayoutBox_ =
+          layoutRectLtwh(0, 10, 100, 100);
+    });
+
+    it('should NOT change height when far the bottom of the document', () => {
+      viewportMock.expects('getScrollHeight').returns(10000).once();
+      resources.scheduleChangeHeight_(resource1, 111, false);
+      resources.mutateWork_();
+      expect(resource1.changeHeight.callCount).to.equal(0);
+    });
+
+    it('should change height when close to the bottom of the document', () => {
+      viewportMock.expects('getScrollHeight').returns(110).once();
+      resources.scheduleChangeHeight_(resource1, 111, false);
+      resources.mutateWork_();
+      expect(resource1.changeHeight.callCount).to.equal(1);
     });
   });
 });
@@ -1040,6 +1074,24 @@ describe('Resources.Resource', () => {
     expect(resource.getLayoutBox().top).to.equal(12);
     expect(resource.getLayoutBox().width).to.equal(111);
     expect(resource.getLayoutBox().height).to.equal(222);
+  });
+
+  it('should update initial box only on first measure', () => {
+    elementMock.expects('isUpgraded').returns(true).atLeast(1);
+    elementMock.expects('build').returns(true).once();
+    expect(resource.build(true)).to.equal(true);
+
+    element.getBoundingClientRect = () =>
+        ({left: 11, top: 12, width: 111, height: 222});
+    resource.measure();
+    expect(resource.getLayoutBox().top).to.equal(12);
+    expect(resource.getInitialLayoutBox().top).to.equal(12);
+
+    element.getBoundingClientRect = () =>
+        ({left: 11, top: 22, width: 111, height: 222});
+    resource.measure();
+    expect(resource.getLayoutBox().top).to.equal(22);
+    expect(resource.getInitialLayoutBox().top).to.equal(12);
   });
 
   it('should noop request measure when not built', () => {
