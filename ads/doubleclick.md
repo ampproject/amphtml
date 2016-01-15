@@ -39,15 +39,31 @@ limitations under the License.
 
 ## Configuration
 
-For semantics of configuration, please see ad network documentation.
+For semantics of configuration, please see [ad network documentation](https://developers.google.com/doubleclick-gpt/reference).
 
-Supported parameters:
 
-- data-slot
+### Ad size
+
+By default the ad size is based on the `width` and `height` attributes of the `amp-ad` tag. In order to explicitly request different ad dimensions from those values, pass the attributes `data-override-width` and `data-override-height` to the ad.
+
+Example:
+
+```html
+<amp-ad width=320 height=50
+    data-override-width=111
+    data-override-height=222
+    type="doubleclick"
+    data-slot="/4119129/mobile_ad_banner">
+</amp-ad>
+```
+
+### Supported parameters
+
+- `data-slot`
 
 Supported via `json` attribute:
 
-- categoryExclusion
-- cookieOptions
-- tagForChildDirectedTreatment
-- targeting
+- `categoryExclusion`
+- `cookieOptions`
+- `tagForChildDirectedTreatment`
+- `targeting`

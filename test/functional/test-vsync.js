@@ -123,6 +123,16 @@ describe('vsync', () => {
     });
   });
 
+  it('should return a promise from runPromise that executes "run"', () => {
+    const measureSpy = sandbox.spy();
+    const mutateSpy = sandbox.spy();
+    return vsync.runPromise({measure: measureSpy, mutate: mutateSpy})
+        .then(() => {
+          expect(mutateSpy.callCount).to.equal(1);
+          expect(measureSpy.callCount).to.equal(1);
+        });
+  });
+
   it('should return a promise from measurePromise that runs measurer', () => {
     let measured = false;
     return vsync.measurePromise(() => {

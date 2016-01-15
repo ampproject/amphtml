@@ -135,9 +135,11 @@ describe('ValidatorOutput', () => {
         '\'https://example.com/v0-not-allowed.js\'. ' +
         '(see https://github.com/ampproject/amphtml/blob/master/spec/' +
         'amp-html-format.md#scrpt)\n' +
-        'http://google.com/foo.html:29:3 The attribute \'src\' in tag ' +
-        '\'amphtml custom element\' is set to the invalid value ' +
-        '\'https://example.com/v0/not-allowed.js\'.';
+        'http://google.com/foo.html:29:3 The attribute \'custom-element\' ' +
+        'in tag \'amp-access extension .js script\' is set to the invalid ' +
+        'value \'amp-foo\'. ' +
+        '(see https://github.com/ampproject/amphtml/blob/master/extensions/' +
+        'amp-access/amp-access.md)';
     test.run();
   });
 });
