@@ -223,7 +223,8 @@ def GenerateValidateBin(out_dir):
         var args = process.argv.slice(2);
         var full_path = args[0];
 
-        if (full_path.indexOf('http://') === 0 || full_path.indexOf('https://') === 0) {
+        if (full_path.indexOf('http://') === 0 ||
+            full_path.indexOf('https://') === 0) {
           var callback = function(response) {
             var chunks = [];
 
@@ -270,7 +271,8 @@ def RunSmokeTest(out_dir):
 
   # Run dist/validate on an empty file and observe that it fails.
   open('%s/empty.html' % out_dir, 'w').close()
-  p = subprocess.Popen(['node', '%s/validate' % out_dir, '%s/empty.html' % out_dir],
+  p = subprocess.Popen(['node', '%s/validate' % out_dir, '%s/empty.html' %
+                        out_dir],
                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
   (stdout, stderr) = p.communicate()
   if p.returncode != 1:

@@ -41,6 +41,7 @@ message PropertySpecList {
 // Attributes that are not covered by at least one of these specs are
 // disallowed. Within a given context (e.g., for a given TagSpec),
 // names are unique.
+// NEXT AVAILABLE TAG: 14
 message AttrSpec {
   // Use lower-case attribute names only.
   optional string name = 1;
@@ -79,6 +80,12 @@ message AttrSpec {
   // severity ERROR is generated.
   optional string dev_mode_enabled = 9;
   optional string dev_mode_enabled_url = 10;
+
+  // If set true, the TagSpec containing this AttrSpec will be evaluated first
+  // for any encountered tag which matches the tag name and this attribute spec.
+  // May only be set for an AttrSpec where mandatory=true and the value field
+  // is set.
+  optional bool dispatch_key = 13;
 }
 
 // Some tags share several attributes, so they're identified by unique key
