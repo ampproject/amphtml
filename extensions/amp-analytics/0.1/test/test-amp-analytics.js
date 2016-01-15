@@ -17,7 +17,7 @@
 import {AmpAnalytics} from '../../../../build/all/v0/amp-analytics-0.1.max';
 import {adopt} from '../../../../src/runtime';
 import {getService} from '../../../../src/service';
-import {markElementScheduledForTesting} from '../../../../src/service';
+import {markElementScheduledForTesting} from '../../../../src/custom-element';
 import {installCidService} from '../../../../src/service/cid-impl';
 import {installViewerService} from '../../../../src/service/viewer-impl';
 import * as sinon from 'sinon';

@@ -22,6 +22,13 @@ import {resourcesFor} from '../../src/resources';
 import {vsyncFor} from '../../src/vsync';
 import * as sinon from 'sinon';
 
+import {getService, resetServiceForTesting} from '../../src/service';
+import {
+  getElementService,
+  markElementScheduledForTesting,
+  resetScheduledElementForTesting
+} from '../../src/custom-element';
+
 
 describe('CustomElement', () => {
 
@@ -1135,4 +1142,44 @@ describe('CustomElement Overflow Element', () => {
     expect(overflowElement.onclick).to.not.exist;
     expect(overflowElement).to.not.have.class('amp-visible');
   });
+
+  describe('services', () => {
+
+    beforeEach(() => {
+      resetServiceForTesting(window, 'e1');
+      resetScheduledElementForTesting(window, 'element-1');
+      resetScheduledElementForTesting(window, 'element-foo');
+    });
+
+    it('should be provided by element', () => {
+      markElementScheduledForTesting(window, 'element-1');
+      const p1 = getElementService(window, 'e1', 'element-1');
+      const p2 = getElementService(window, 'e1', 'element-1');
+
+      getService(window, 'e1', function() {
+        return 'from e1';
+      });
+
+      return p1.then(s1 => {
+        expect(s1).to.equal('from e1');
+        return p2.then(s2 => {
+          expect(s1).to.equal(s2);
+        });
+      });
+    });
+
+    it('should fail if element is not in page.', () => {
+      markElementScheduledForTesting(window, 'element-foo');
+
+      return getElementService(window, 'e1', 'element-bar').then(() => {
+        return 'SUCCESS';
+      }, error => {
+        return 'ERROR ' + error;
+      }).then(result => {
+        expect(result).to.match(
+          /Service e1 was requested to be provided through element-bar/);
+      });
+    });
+  });
+
 });

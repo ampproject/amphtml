@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import {getService, getElementService} from '../../src/service';
+import {
+  getService,
+  getServicePromise,
+  resetServiceForTesting
+} from '../../src/service';
 
 describe('service', () => {
 
@@ -24,7 +28,10 @@ describe('service', () => {
   }
 
   beforeEach(() => {
-    window.ampExtendedElements = {};
+    resetServiceForTesting(window, 'a');
+    resetServiceForTesting(window, 'b');
+    resetServiceForTesting(window, 'c');
+    resetServiceForTesting(window, 'e1');
   });
 
   it('should make per window singletons', () => {
@@ -50,30 +57,17 @@ describe('service', () => {
     }).to.throw(/Factory not given and service missing not-present/);
   });
 
-  it('should be provided by element', () => {
-    window.ampExtendedElements['element-1'] = true;
-    const p1 = getElementService(window, 'e1', 'element-1');
-    const p2 = getElementService(window, 'e1', 'element-1');
+  it('should provide a promise that resolves when registered', () => {
+    const p1 = getServicePromise(window, 'e1');
+    const p2 = getServicePromise(window, 'e1');
     getService(window, 'e1', function() {
       return 'from e1';
     });
     return p1.then(s1 => {
       expect(s1).to.equal('from e1');
       return p2.then(s2 => {
-        expect(s1).to.equal(s2);
+        expect(s2).to.equal(s1);
       });
-    });
-  });
-
-  it('should fail if element is not in page.', () => {
-    window.ampExtendedElements['element-foo'] = true;
-    return getElementService(window, 'e1', 'element-bar').then(() => {
-      return 'SUCCESS';
-    }, error => {
-      return 'ERROR ' + error;
-    }).then(result => {
-      expect(result).to.match(
-          /Service e1 was requested to be provided through element-bar/);
     });
   });
 });

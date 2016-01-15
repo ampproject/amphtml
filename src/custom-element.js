@@ -27,6 +27,7 @@ import {reportError} from './error';
 import {resourcesFor} from './resources';
 import {timer} from './timer';
 import {vsyncFor} from './vsync';
+import {getServicePromise} from './service';
 import * as dom from './dom';
 
 
@@ -1059,5 +1060,65 @@ export function registerElement(win, name, implementationClass) {
 
   win.document.registerElement(name, {
     prototype: createAmpElementProto(win, name, implementationClass)
+  });
+}
+
+/**
+ * @param {!Window} win
+ * @param {string} elementName Name of an extended custom element.
+ * @return {boolean} Whether this element is scheduled to be loaded.
+ */
+function isElementScheduled(win, elementName) {
+  assert(win.ampExtendedElements, 'win.ampExtendedElements not created yet');
+  return !!win.ampExtendedElements[elementName];
+}
+
+/**
+ * In order to provide better error messages we only allow to retrieve
+ * services from other elements if those elements are loaded in the page.
+ * This makes it possible to mark an element as loaded in a test.
+ * @param {!Window} win
+ * @param {string} elementName Name of an extended custom element.
+ */
+export function markElementScheduledForTesting(win, elementName) {
+  if (!win.ampExtendedElements) {
+    win.ampExtendedElements = {};
+  }
+  win.ampExtendedElements[elementName] = true;
+}
+
+/**
+ * Resets our scheduled elements.
+ * @param {!Window} win
+ * @param {string} elementName Name of an extended custom element.
+ */
+export function resetScheduledElementForTesting(win, elementName) {
+  if (win.ampExtendedElements) {
+    win.ampExtendedElements[elementName] = null;
+  }
+}
+
+
+/**
+ * Returns a promise for a service for the given id and window. Also expects
+ * an element that has the actual implementation. The promise resolves when
+ * the implementation loaded.
+ * Users should typically wrap this as a special purpose function (e.g.
+ * viewportFor(win)) for type safety and because the factory should not be
+ * passed around.
+ * @param {!Window} win
+ * @param {string} id of the service.
+ * @param {string} provideByElement Name of the custom element that provides
+ *     the implementation of this service.
+ * @return {!Promise<*>}
+ */
+export function getElementService(win, id, providedByElement) {
+  return Promise.resolve().then(() => {
+    assert(isElementScheduled(win, providedByElement),
+        'Service %s was requested to be provided through %s, ' +
+        'but %s is not loaded in the current page. To fix this ' +
+        'problem load the JavaScript file for %s in this page.',
+        id, providedByElement, providedByElement, providedByElement);
+    return getServicePromise(win, id);
   });
 }

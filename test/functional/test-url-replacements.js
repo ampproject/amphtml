@@ -16,7 +16,7 @@
 
 import {createIframePromise} from '../../testing/iframe';
 import {urlReplacementsFor} from '../../src/url-replacements';
-import {markElementScheduledForTesting} from '../../src/service';
+import {markElementScheduledForTesting} from '../../src/custom-element';
 import {installCidService} from '../../src/service/cid-impl';
 import {setCookie} from '../../src/cookies';
 
