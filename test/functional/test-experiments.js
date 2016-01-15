@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {isExperimentOn, toggleExperiment} from '../../src/experiments';
+import {isDevChannel, isDevChannelVersionDoNotUse_,
+    isExperimentOn, toggleExperiment} from '../../src/experiments';
 import * as sinon from 'sinon';
 
 
@@ -108,5 +109,27 @@ describe('toggleExperiment', () => {
   it('should set "off" when requested', () => {
     expectToggle('AMP_EXP=e2,e1', 'e1', false).to.equal('false; AMP_EXP=e2');
     expectToggle('AMP_EXP=e1', 'e1', false).to.equal('false; AMP_EXP=');
+  });
+});
+
+
+describe('isDevChannel', () => {
+
+  function expectDevChannel(cookiesString) {
+    return expect(isDevChannel({
+      document: {
+        cookie: cookiesString
+      }
+    }));
+  }
+
+  it('should return value based on cookie', () => {
+    expectDevChannel('AMP_EXP=other').to.be.false;
+    expectDevChannel('AMP_EXP=dev-channel').to.be.true;
+  });
+
+  it('should return value based on binary version', () => {
+    expect(isDevChannelVersionDoNotUse_('123456789')).to.be.false;
+    expect(isDevChannelVersionDoNotUse_('123456789-canary')).to.be.true;
   });
 });
