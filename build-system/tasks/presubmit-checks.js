@@ -33,6 +33,9 @@ var privateServiceFactory = 'This service should only be installed in ' +
     'the whitelisted files. Other modules should use a public function ' +
     'typically called serviceNameFor.';
 
+var shouldNeverBeUsed =
+    'Usage of this API is not allowed - only for internal purposes.';
+
 // Terms that must not appear in our source files.
 var forbiddenTerms = {
   'DO NOT SUBMIT': '',
@@ -149,6 +152,20 @@ var forbiddenTerms = {
       'src/cookies.js',
       'src/experiments.js',
       'tools/experiments/experiments.js',
+    ]
+  },
+  'isDevChannel\\W': {
+    message: requiresReviewPrivacy,
+    whitelist: [
+      'extensions/amp-access/0.1/amp-access.js',
+      'src/experiments.js',
+      'tools/experiments/experiments.js',
+    ]
+  },
+  'isDevChannelVersionDoNotUse_\\W': {
+    message: shouldNeverBeUsed,
+    whitelist: [
+      'src/experiments.js',
     ]
   },
   'eval\\(': '',

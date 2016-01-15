@@ -34,6 +34,36 @@ const COOKIE_MAX_AGE_DAYS = 180;  // 6 month
 /** @const {time} */
 const COOKIE_EXPIRATION_INTERVAL = COOKIE_MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
 
+/** @const {string} */
+const CANARY_EXPERIMENT_ID = 'dev-channel';
+
+
+/**
+ * Whether the scripts come from a dev channel.
+ * @param {!Window} win
+ * @return {boolean}
+ */
+export function isDevChannel(win) {
+  if (isExperimentOn(win, CANARY_EXPERIMENT_ID)) {
+    return true;
+  }
+  if (isDevChannelVersionDoNotUse_('$internalRuntimeVersion$')) {
+    return true;
+  }
+  return false;
+}
+
+
+/**
+ * Whether the version corresponds to the dev-channel binary.
+ * @param {string} version
+ * @return {boolean}
+ * @private Visible for testing only!
+ */
+export function isDevChannelVersionDoNotUse_(version) {
+  return !!version.match(/\-canary$/);
+}
+
 
 /**
  * Whether the specified experiment is on or off.
