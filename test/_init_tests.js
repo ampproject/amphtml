@@ -68,6 +68,10 @@ afterEach(() => {
   window.localStorage.clear();
   window.ampExtendedElements = {};
   window.ENABLE_LOG = false;
+  if (!/native/.test(window.setTimeout)) {
+    throw new Error('You likely forgot to restore sinon timers ' +
+        '(installed via sandbox.useFakeTimers).');
+  }
 });
 
 chai.Assertion.addMethod('attribute', function(attr) {
