@@ -15,6 +15,7 @@
  */
 
 import {installActionService} from './service/action-impl';
+import {installFramerateService} from './service/framerate-impl';
 import {installHistoryService} from './service/history-impl';
 import {installResourcesService} from './service/resources-impl';
 import {installStandardActions} from './service/standard-actions-impl';
@@ -36,4 +37,5 @@ export function installCoreServices(window) {
   installActionService(window);
   installResourcesService(window);
   installStandardActions(window);
+  installFramerateService(window);
 }
