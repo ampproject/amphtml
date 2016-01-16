@@ -310,8 +310,8 @@ amp.htmlparser.HtmlParser.INSIDE_TAG_TOKEN_ = new RegExp(
     // We don't allow attribute names starting with '/', but we allow them
     // to contain '/' (differing from HTML5 spec), so that we can identify
     // full mustache template variables and emit matching errors.
-    '([^\\t\\r\\n /=>\\"][^\\t\\r\\n =>\\"]*)' +  // attribute name
-    ('(' +                                        // optionally followed
+    '([^\\t\\r\\n /=>][^\\t\\r\\n =>]*)' +  // attribute name
+    ('(' +                                  // optionally followed
     '\\s*=\\s*' +
     ('(' +
              // A double quoted string.

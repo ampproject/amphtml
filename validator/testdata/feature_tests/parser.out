@@ -1,0 +1,17 @@
+FAIL
+feature_tests/parser.html:32:0 The attribute '"' may not appear in tag 'a'.
+feature_tests/parser.html:33:0 The attribute ''' may not appear in tag 'a'.
+feature_tests/parser.html:34:0 The attribute 'foo.html"' may not appear in tag 'a'.
+feature_tests/parser.html:35:0 The attribute 'foo.html'' may not appear in tag 'a'.
+feature_tests/parser.html:36:0 The attribute 'foo.html""' may not appear in tag 'a'.
+feature_tests/parser.html:37:0 The attribute 'foo.html''' may not appear in tag 'a'.
+feature_tests/parser.html:38:0 The attribute ''' may not appear in tag 'a'.
+feature_tests/parser.html:39:0 The attribute '"' may not appear in tag 'a'.
+feature_tests/parser.html:40:0 The attribute 'href"foo.html"' may not appear in tag 'a'.
+feature_tests/parser.html:41:0 The attribute 'href'foo.html'' may not appear in tag 'a'.
+feature_tests/parser.html:42:0 The attribute 'href"foo.html""' may not appear in tag 'a'.
+feature_tests/parser.html:43:0 The attribute 'href'foo.html''' may not appear in tag 'a'.
+feature_tests/parser.html:44:0 The attribute 'href""foo.html"' may not appear in tag 'a'.
+feature_tests/parser.html:45:0 The attribute 'href''foo.html'' may not appear in tag 'a'.
+feature_tests/parser.html:46:0 The attribute 'href""foo.html""' may not appear in tag 'a'.
+feature_tests/parser.html:47:0 The attribute 'href''foo.html''' may not appear in tag 'a'.
