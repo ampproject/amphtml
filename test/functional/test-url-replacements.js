@@ -223,4 +223,20 @@ describe('UrlReplacements', () => {
         });
       });
   });
+
+  it('should expand bindings as functions', () => {
+    return expand('rid=FUNC(abc)?', false, {
+      'FUNC': value => 'func_' + value
+    }).then(res => {
+      expect(res).to.match(/rid=func_abc\?$/);
+    });
+  });
+
+  it('should expand bindings as functions with promise', () => {
+    return expand('rid=FUNC(abc)?', false, {
+      'FUNC': value => Promise.resolve('func_' + value)
+    }).then(res => {
+      expect(res).to.match(/rid=func_abc\?$/);
+    });
+  });
 });
