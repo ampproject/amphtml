@@ -280,6 +280,11 @@ describe('amp-iframe', () => {
 
       expect(() => {
         amp.assertSource('https://google.com/fpp', 'https://google.com/abc',
+            'Allow-same-origin');
+      }).to.throw(/must not be equal to container/);
+
+      expect(() => {
+        amp.assertSource('https://google.com/fpp', 'https://google.com/abc',
             'allow-same-origin allow-scripts');
       }).to.throw(/must not be equal to container/);
       // Same origin, but sandboxed.
