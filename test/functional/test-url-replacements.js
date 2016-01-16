@@ -239,4 +239,44 @@ describe('UrlReplacements', () => {
       expect(res).to.match(/rid=func_abc\?$/);
     });
   });
+
+  it('should expand null as empty string', () => {
+    return expand('v=VALUE', false, {
+      'VALUE': null
+    }).then(res => {
+      expect(res).to.equal('v=');
+    });
+  });
+
+  it('should expand undefined as empty string', () => {
+    return expand('v=VALUE', false, {
+      'VALUE': undefined
+    }).then(res => {
+      expect(res).to.equal('v=');
+    });
+  });
+
+  it('should expand empty string as empty string', () => {
+    return expand('v=VALUE', false, {
+      'VALUE': ''
+    }).then(res => {
+      expect(res).to.equal('v=');
+    });
+  });
+
+  it('should expand zero as zero', () => {
+    return expand('v=VALUE', false, {
+      'VALUE': 0
+    }).then(res => {
+      expect(res).to.equal('v=0');
+    });
+  });
+
+  it('should expand false as false', () => {
+    return expand('v=VALUE', false, {
+      'VALUE': false
+    }).then(res => {
+      expect(res).to.equal('v=false');
+    });
+  });
 });
