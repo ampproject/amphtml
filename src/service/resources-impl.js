@@ -597,8 +597,10 @@ export class Resources {
     // the overflow callbacks are called.
     const now = timer.now();
     const viewportRect = this.viewport_.getRect();
+    const scrollHeight = this.viewport_.getScrollHeight();
     const topOffset = viewportRect.height / 10;
-    const bottomOffset = viewportRect.height / 4;
+    const bottomOffset = viewportRect.height / 10;
+    const docBottomOffset = scrollHeight * 0.85;
     const isScrollingStopped = (Math.abs(this.lastVelocity_) < 1e-2 &&
         now - this.lastScrollTime_ > MUTATE_DEFER_DELAY_ ||
         now - this.lastScrollTime_ > MUTATE_DEFER_DELAY_ * 2);
@@ -624,8 +626,10 @@ export class Resources {
       for (let i = 0; i < requestsChangeHeight.length; i++) {
         const request = requestsChangeHeight[i];
         const resource = request.resource;
-        const box = request.resource.getLayoutBox();
-        if (box.height == request.newHeight) {
+        const box = resource.getLayoutBox();
+        const iniBox = resource.getInitialLayoutBox();
+        const diff = request.newHeight - box.height;
+        if (diff == 0) {
           // Nothing to do.
           continue;
         }
@@ -640,8 +644,11 @@ export class Resources {
           // 2. Active elements are immediately resized. The assumption is that
           // the resize is triggered by the user action or soon after.
           resize = true;
-        } else if (box.bottom >= viewportRect.bottom - bottomOffset) {
-          // 3. Elements under viewport are resized immediately.
+        } else if (box.bottom + Math.min(diff, 0) >=
+                      viewportRect.bottom - bottomOffset) {
+          // 3. Elements under viewport are resized immediately, but only if
+          // an element's boundary is not changed above the viewport after
+          // resize.
           resize = true;
         } else if (box.bottom <= viewportRect.top + topOffset) {
           // 4. Elements above the viewport can only be resized when scrolling
@@ -655,13 +662,16 @@ export class Resources {
             // Defer till next cycle.
             this.requestsChangeHeight_.push(request);
           }
-        } else if (request.newHeight < box.height) {
-          // 5. The new height is smaller than the current one.
-          // TODO(dvoytenko): Enable immediate resize in this case after
-          // potential abuse scenarios are considered.
+        } else if (iniBox.bottom >= docBottomOffset ||
+                      box.bottom >= docBottomOffset) {
+          // 5. Elements close to the bottom of the document (not viewport)
+          // are resized immediately.
+          resize = true;
+        } else if (diff < 0) {
+          // 6. The new height is smaller than the current one.
           resize = false;
         } else {
-          // 6. Element is in viewport don't resize and try overflow callback
+          // 7. Element is in viewport don't resize and try overflow callback
           // instead.
           request.resource.overflowCallback(/* overflown */ true,
               request.newHeight);
@@ -673,11 +683,8 @@ export class Resources {
           }
           request.resource./*OK*/changeHeight(
               request.newHeight, request.callback);
-          // Skip the overflowCallback if the newHeight is 0 or less.
-          if (request.newHeight > 0) {
-            request.resource.overflowCallback(/* overflown */ false,
-                request.newHeight);
-          }
+          request.resource.overflowCallback(/* overflown */ false,
+              request.newHeight);
         }
       }
 
@@ -1307,6 +1314,9 @@ export class Resource {
     /** @private {!LayoutRect} */
     this.layoutBox_ = layoutRectLtwh(-10000, -10000, 0, 0);
 
+    /** @private {!LayoutRect} */
+    this.initialLayoutBox_ = this.layoutBox_;
+
     /** @private {boolean} */
     this.isMeasureRequested_ = false;
 
@@ -1473,6 +1483,9 @@ export class Resource {
         this.state_ = ResourceState_.READY_FOR_LAYOUT;
       }
     }
+    if (this.layoutBox_.top == -10000) {
+      this.initialLayoutBox_ = box;
+    }
     this.layoutBox_ = box;
     this.element.updateLayoutBox(box);
   }
@@ -1501,6 +1514,14 @@ export class Resource {
    */
   getLayoutBox() {
     return this.layoutBox_;
+  }
+
+  /**
+   * Returns the first measured layout box.
+   * @return {!LayoutRect}
+   */
+  getInitialLayoutBox() {
+    return this.initialLayoutBox_;
   }
 
   /**
