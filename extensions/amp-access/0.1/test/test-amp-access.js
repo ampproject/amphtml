@@ -298,6 +298,8 @@ describe('AccessService authorization', () => {
       expect(document.documentElement).not.to.have.class('amp-access-loading');
       expect(elementOn).not.to.have.attribute('amp-access-hide');
       expect(elementOff).to.have.attribute('amp-access-hide');
+      expect(service.authResponse_).to.exist;
+      expect(service.authResponse_.access).to.be.true;
     });
   });
 
@@ -536,7 +538,7 @@ describe('AccessService pingback', () => {
     configElement.setAttribute('type', 'application/json');
     configElement.textContent = JSON.stringify({
       'authorization': 'https://acme.com/a?rid=READER_ID',
-      'pingback': 'https://acme.com/p?rid=READER_ID',
+      'pingback': 'https://acme.com/p?rid=READER_ID&type=AUTHDATA(type)',
       'login': 'https://acme.com/l?rid=READER_ID'
     });
     document.body.appendChild(configElement);
@@ -724,13 +726,30 @@ describe('AccessService pingback', () => {
   it('should send POST pingback', () => {
     expectGetReaderId('reader1');
     xhrMock.expects('sendSignal')
-        .withExactArgs('https://acme.com/p?rid=reader1', sinon.match(init => {
-          return (init.method == 'POST' &&
-              init.credentials == 'include' &&
-              init.body == '' &&
-              init.headers['Content-Type'] ==
-                  'application/x-www-form-urlencoded');
-        }))
+        .withExactArgs('https://acme.com/p?rid=reader1&type=',
+            sinon.match(init => {
+              return (init.method == 'POST' &&
+                  init.credentials == 'include' &&
+                  init.body == '' &&
+                  init.headers['Content-Type'] ==
+                      'application/x-www-form-urlencoded');
+            }))
+        .returns(Promise.resolve())
+        .once();
+    return service.reportViewToServer_().then(() => {
+      return 'SUCCESS';
+    }, error => {
+      return 'ERROR ' + error;
+    }).then(result => {
+      expect(result).to.equal('SUCCESS');
+    });
+  });
+
+  it('should resolve AUTH vars in POST pingback', () => {
+    expectGetReaderId('reader1');
+    service.setAuthResponse_({type: 'premium'});
+    xhrMock.expects('sendSignal')
+        .withArgs('https://acme.com/p?rid=reader1&type=premium')
         .returns(Promise.resolve())
         .once();
     return service.reportViewToServer_().then(() => {
