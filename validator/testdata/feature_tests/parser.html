@@ -15,8 +15,7 @@
 -->
 <!--
   Test Description:
-  Tests support for the amp-brightcove tag.
-  https://github.com/ampproject/amphtml/blob/master/extensions/amp-brightcove/amp-brightcove.md
+  This runs some tests which exercise our HTML parser.
 -->
 <!doctype html>
 <html ⚡>
@@ -28,23 +27,30 @@
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
-  <!-- Example of a valid amp-brightcove -->
-  <amp-brightcove
-      data-account="906043040001"
-      data-video-id="1401169490001"
-      data-player-id="180a5658-8be8-4f33-8eba-d562ab41b40c"
-      layout="responsive" width="480" height="270">
-  </amp-brightcove>
-  <!-- Valid: data-video-id, data-player-id are optional;
-       leaving them out results in the default config. -->
-  <amp-brightcove
-      data-account="906043040001"
-      layout="responsive" width="480" height="270">
-  </amp-brightcove>
-  <!-- Invalid: data-account is mandatory;
-       leaving them out results in an error. -->
-  <amp-brightcove
-      layout="responsive" width="480" height="270">
-  </amp-brightcove>
+
+Strangely quoted attributes:
+<a href="foo.html""></a>
+<a href='foo.html''></a>
+<a href=""foo.html"></a>
+<a href=''foo.html'></a>
+<a href=""foo.html""></a>
+<a href=''foo.html''></a>
+<a '></a>
+<a "></a>
+<a href"foo.html"></a>
+<a href'foo.html'></a>
+<a href"foo.html""></a>
+<a href'foo.html''></a>
+<a href""foo.html"></a>
+<a href''foo.html'></a>
+<a href""foo.html""></a>
+<a href''foo.html''></a>
+
+Attributes in closing tags:
+<a></a foo>
+<a></a href>
+<a></a foo="foo.html">
+<a></a href="foo.html">
+
 </body>
 </html>
