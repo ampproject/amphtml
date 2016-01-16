@@ -25,7 +25,7 @@ min_validator_revision_required: 75
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 113
+spec_file_revision: 115
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
 # These rules are just enough to validate the example from the spec.
@@ -49,9 +49,11 @@ tags: {
     value: ""
   }
 }
+
 # Below, we list the allowed elements in the order in which they are appear
 # in the spec in section 4 "The Elements of HTML"
 # (http://www.w3.org/TR/html5/single-page.html#html-elements).
+
 # 4.1 The root element
 # 4.1.1 The html element
 tags: {
@@ -68,6 +70,7 @@ tags: {
     alternative_names: "amp"
   }
 }
+
 # 4.2 Document metadata
 # 4.2.1 The head element
 tags: {
@@ -150,7 +153,6 @@ tags: {
     name: "content"
   }
 }
-
 # Various whitelisted rel attribute values which can co-occur with
 # "type", "href", and "sizes" attributes of arbitrary value.
 tags: {
@@ -542,7 +544,6 @@ tags: {
   mandatory: true
   spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#boilerplate"
 }
-
 tags: {
   name: "style"
   mandatory_parent: "head"
@@ -610,6 +611,7 @@ tags: { name: "header" }
 tags: { name: "footer" }
 # 4.3 7 The address element
 tags: { name: "address" }
+
 # 4.4 Grouping Content
 # 4.4.1 The p element
 tags: { name: "p" }
@@ -639,6 +641,7 @@ tags: { name: "figcaption" }
 tags: { name: "div" }
 # 4.4.14 The main element
 tags: { name: "main" }
+
 # 4.5 Text-level semantics
 # 4.5.1 The a element
 tags: {
@@ -910,11 +913,13 @@ tags: { name: "span" }
 tags: { name: "br" }
 # 4.5.30 The wbr element
 tags: { name: "wbr" }
+
 # 4.6 Edits
 # 4.6.1 The ins element
 tags: { name: "ins" }
 # 4.6.2 The del element
 tags: { name: "del" }
+
 # 4.7 Embedded Content
 # AMP HTML allows embedded content only via its own tags (e.g. amp-img).
 # 4.7.8
@@ -1424,10 +1429,12 @@ tags: {
   attr_lists: "svg-core-attributes"
   attrs: { name: "class" }
 }
+
 # 4.8 Links
 # For the link tag, only the canonical link is allowed (see 4.2.4).
 # TODO(johannes): look through the other link types to see which attributes
 # should be allowed for the a tag, e.g. nofollow etc.
+
 # 4.9 Tabular data
 # 4.9.1 The table element
 tags: { name: "table" }
@@ -1468,16 +1475,17 @@ tags: {
   attrs: { name: "scope" }
   attrs: { name: "sorted" }
 }
+
 # 4.10 Forms
 # Not allowed, except for button.
 tags: { name: "button" }
+
 # 4.11 Scripting
 # 4.11.1 The script element
 # Only the amphtml script, custom extensions and the LD/JSON description are
 # allowed. The AMP Engine is the first in this specfile so that the
 # 'development' attribute shows up as the disallowed attribute instead of
 # 'src' for a development flagged AMP engine script.
-
 tags: {
   name: "script"
   mandatory: true
@@ -1920,7 +1928,20 @@ tags: {
     value: "application/json"
   }
 }
-# 4.11.2 Non-conforming features
+# 4.11.3 The template element
+tags: {
+  name: "template"
+  # <template> tags may not be nested inside other <template> tags.
+  disallowed_ancestor: "template"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-templates.md"
+  attrs: {
+    name: "type"
+    value: "amp-mustache"
+    mandatory: true
+  }
+  also_requires: "amp-mustache extension"
+}
+# 11.2 Non-conforming features
 tags: { name: "acronym" }
 tags: { name: "big" }
 tags: { name: "center" }
@@ -1935,22 +1956,7 @@ tags: { name: "strike" }
 tags: { name: "tt" }
 tags: { name: "xmp" }
 
-# 4.11.3 The template element
-tags: {
-  name: "template"
-  # <template> tags may not be nested inside other <template> tags.
-  disallowed_ancestor: "template"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-templates.md"
-  attrs: {
-    name: "type"
-    value: "amp-mustache"
-    mandatory: true
-  }
-  also_requires: "amp-mustache extension"
-}
-
 # Some additional tags, microformats, allowances.
-#
 
 # Schema.org meta tag; schema.org is explicitly allowed by the AMP HTML draft.
 tags: {
@@ -1995,9 +2001,9 @@ tags: {
     value: "text/html; charset=utf-8"
   }
 }
-#
+
 # Tags and attributes specific to AMP HTML.
-#
+
 # AMP Custom elements require a "src" or a "srcset" attribute,
 # having both is also allowed.
 # TODO(greggrothaus): These probably need to validate http*s* only URLs
@@ -2016,14 +2022,12 @@ attr_lists: {
   attrs: { name: "media" }
   attrs: { name: "noloading" value: "" }
 }
-
 # <amp-brightcove>
 tags: {
   name: "amp-brightcove"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-brightcove/amp-brightcove.md"
   also_requires: "amp-brightcove extension .js script"
   attr_lists: "extended-amp-global"
-
   attrs: { name: "data-account" mandatory: true }
   # If data-player is missing, the default value is "default".
   attrs: { name: "data-player" }
@@ -2041,7 +2045,6 @@ tags: {
     supported_layouts: NODISPLAY
   }
 }
-
 # <amp-font>
 tags: {
   name: "amp-font"
@@ -2067,7 +2070,6 @@ tags: {
     supported_layouts: NODISPLAY
   }
 }
-
 # <amp-img>
 tags: {
   name: "amp-img"
@@ -2085,7 +2087,6 @@ tags: {
     supported_layouts: NODISPLAY
   }
 }
-
 # <amp-video>
 tags: {
   name: "amp-video"
@@ -2108,7 +2109,6 @@ tags: {
     supported_layouts: NODISPLAY
   }
 }
-
 # <amp-ad>
 tags: {
   name: "amp-ad"
@@ -2126,7 +2126,6 @@ tags: {
     supported_layouts: NODISPLAY
   }
 }
-
 # <amp-fit-text>
 # TODO(greggrothaus): amp-fit-text's attribute spec need flushing
 # out now that the spec is available.
@@ -2145,7 +2144,6 @@ tags: {
     supported_layouts: NODISPLAY
   }
 }
-
 # <amp-carousel>
 tags: {
   name: "amp-carousel"
@@ -2166,7 +2164,6 @@ tags: {
     supported_layouts: FILL
   }
 }
-
 # <amp-anim>
 tags: {
   name: "amp-anim"
@@ -2186,7 +2183,6 @@ tags: {
     supported_layouts: NODISPLAY
   }
 }
-
 # <amp-analytics>
 tags: {
   name: "amp-analytics"
@@ -2196,7 +2192,6 @@ tags: {
   # TODO(gregable): This should require a valid https URL as the attr value.
   attrs: { name: "config" }
 }
-
 # <amp-youtube>
 # amp-youtube either comes with a video-id attribute, or with
 # a data-videoid attribute.
@@ -2227,7 +2222,6 @@ tags: {
     supported_layouts: NODISPLAY
   }
 }
-
 # <amp-vine>
 tags: {
   name: "amp-vine"
@@ -2244,7 +2238,6 @@ tags: {
     supported_layouts: NODISPLAY
   }
 }
-
 # <amp-pinterest>
 # https://github.com/ampproject/amphtml/blob/master/extensions/amp-pinterest/amp-pinterest.md
 tags: {
@@ -2263,7 +2256,6 @@ tags: {
     supported_layouts: NODISPLAY
   }
 }
-
 # <amp-twitter>
 tags: {
   name: "amp-twitter"
@@ -2280,7 +2272,6 @@ tags: {
     supported_layouts: NODISPLAY
   }
 }
-
 # <amp-instagram>
 tags: {
   name: "amp-instagram"
@@ -2309,7 +2300,6 @@ tags: {
     supported_layouts: NODISPLAY
   }
 }
-
 # <amp-iframe>
 tags: {
   name: "amp-iframe"
@@ -2332,7 +2322,6 @@ tags: {
     supported_layouts: NODISPLAY
   }
 }
-
 # <amp-pixel>
 tags: {
   name: "amp-pixel"
@@ -2349,7 +2338,6 @@ tags: {
     defines_default_height: true
   }
 }
-
 # <amp-audio>
 tags: {
   name: "amp-audio"
@@ -2376,7 +2364,6 @@ tags: {
     defines_default_height: true
   }
 }
-
 # <amp-lightbox>
 tags: {
   name: "amp-lightbox"
@@ -2389,7 +2376,6 @@ tags: {
     supported_layouts: NODISPLAY
   }
 }
-
 # <amp-image-lightbox>
 tags: {
   name: "amp-image-lightbox"  # See http://b/24381009.
@@ -2402,14 +2388,12 @@ tags: {
     supported_layouts: NODISPLAY
   }
 }
-
 # <amp-list>
 tags: {
   name: "amp-list"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-list/amp-list.md"
   also_requires: "amp-list extension .js script"
   attr_lists: "extended-amp-global"
-
   attrs: { name: "src" mandatory: true }
   attrs: { name: "credentials" }
   amp_layout: {
@@ -2420,7 +2404,6 @@ tags: {
     supported_layouts: NODISPLAY
   }
 }
-
 # <amp-install-serviceworker>
 tags: {
   name: "amp-install-serviceworker"
@@ -2429,12 +2412,10 @@ tags: {
   attrs: { name: "src" }
 }
 
-#
 # AMP Layout attributes: implied for TagSpecs with amp_layout field
 # set. Note that while these attributes are defined as optional here,
 # depending on amp layout the validator will examine these fields and
 # their values.
-#
 attr_lists: {
   name: "$AMP_LAYOUT_ATTRS"
   attrs: { name: "layout" }
@@ -2443,16 +2424,13 @@ attr_lists: {
   attrs: { name: "sizes" }
 }
 
-#
 # Global attributes: These can be used in all tags.
-#
 attr_lists: {
   name: "$GLOBAL_ATTRS"
   # For schema.org annotations.
   attrs: { name: "itemprop" }
   attrs: { name: "itemscope" }
   attrs: { name: "itemtype" }
-
   # 3.2.5 HTML5 Global attributes.
   attrs: { name: "class" }
   attrs: { name: "id" }
@@ -2463,7 +2441,6 @@ attr_lists: {
   attrs: { name: "lang" }
   attrs: { name: "accesskey" }
   attrs: { name: "translate" }
-
   # Accessible Rich Internet Applications http://www.w3.org/TR/wai-aria/
   attrs: { name: "role" }
   attrs: { name: "aria-activedescendant" }
@@ -2501,25 +2478,22 @@ attr_lists: {
   attrs: { name: "aria-valuemin" }
   attrs: { name: "aria-valuenow" }
   attrs: { name: "aria-valuetext" }
-
   # For placeholders inside amp-ad and other tags, we allow the
   # placeholder empty attribute. See e.g.
   # https://github.com/ampproject/amphtml/pull/284/commits
   attrs: { name: "placeholder" value: "" }
-
   # We allow the empty fallback attribute on any element, per
   # http://b/24873828.
   attrs: { name: "fallback" value: "" }
-
   # Allowed on all elements per http://b/24380921.
   attrs: { name: "lightbox" }
   # Allowed on all elements per http://b/24789910.
   attrs: { name: "on" }
-
   # Allowed on all elements per http://b/25392418.
   attrs: { name: "overflow" }
 }
 
+# Error formats
 error_formats {
   code: MANDATORY_TAG_MISSING
   format: "The mandatory tag '%1' is missing or incorrect."
@@ -2642,4 +2616,3 @@ error_formats {
   code: TEMPLATE_IN_ATTR_NAME
   format: "Mustache template syntax in attribute name '%1' in tag '%2'."
 }
-
