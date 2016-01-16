@@ -274,6 +274,7 @@ function getCustomBootstrapBaseUrl(parentWindow) {
   // redirect to the proxy origin which is the important one.
   assert(parseUrl(url).origin != parseUrl(parentWindow.location.href).origin,
       '3p iframe url must not be on the same origin as the current document ' +
-      '%s in element %s.', url, meta);
+      '%s in element %s. See https://github.com/ampproject/amphtml/blob/' +
+      'master/spec/amp-iframe-origin-policy.md for details.', url, meta);
   return url + '?$internalRuntimeVersion$';
 }
