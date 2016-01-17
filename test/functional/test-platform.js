@@ -20,11 +20,13 @@ describe('Platform', () => {
 
   let isIos;
   let isChrome;
+  let isFirefox;
 
   beforeEach(() => {
     isIos = false;
     isChrome = false;
     isSafari = false;
+    isFirefox = false;
   });
 
   function testUserAgent(userAgentString) {
@@ -32,6 +34,7 @@ describe('Platform', () => {
     expect(platform.isIos()).to.equal(isIos);
     expect(platform.isChrome()).to.equal(isChrome);
     expect(platform.isSafari()).to.equal(isSafari);
+    expect(platform.isFirefox()).to.equal(isFirefox);
   }
 
   it('iPhone 6 Plus', () => {
@@ -62,5 +65,11 @@ describe('Platform', () => {
     testUserAgent('Mozilla/5.0 (Linux; Android 5.1.1; Nexus 6 Build/LYZ28E)' +
         ' AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.20' +
         ' Mobile Safari/537.36');
+  });
+
+  it('firefox', () => {
+    isFirefox = true;
+    testUserAgent('Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) ' +
+        'Gecko/20100101 Firefox/40.1');
   });
 });

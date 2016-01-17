@@ -105,13 +105,14 @@ export function onDocumentElementClick_(e, viewport) {
   let elem = null;
   const docElement = e.currentTarget;
   const doc = docElement.ownerDocument;
+  const win = doc.defaultView;
 
   const tgtLoc = parseUrl(target.href);
   if (!tgtLoc.hash) {
     return;
   }
 
-  const curLoc = parseUrl(doc.location.href);
+  const curLoc = parseUrl(win.location.href);
   const tgtHref = `${tgtLoc.origin}${tgtLoc.pathname}${tgtLoc.search}`;
   const curHref = `${curLoc.origin}${curLoc.pathname}${curLoc.search}`;
 
@@ -142,5 +143,11 @@ export function onDocumentElementClick_(e, viewport) {
   } else {
     log.warn('documentElement',
         `failed to find element with id=${hash} or a[name=${hash}]`);
+  }
+  const history = win.history;
+  // If possible do update the URL with the hash. As explained above
+  // we do replaceState to avoid messing with the container's history.
+  if (history.replaceState) {
+    history.replaceState(null, '', `#${hash}`);
   }
 };
