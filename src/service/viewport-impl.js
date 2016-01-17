@@ -645,7 +645,12 @@ export class ViewportBindingNatural_ {
     if (doc./*OK*/scrollingElement) {
       return doc./*OK*/scrollingElement;
     }
-    if (doc.body) {
+    if (doc.body
+        // Firefox does not support scrollTop on doc.body for default
+        // scrolling.
+        // See https://github.com/ampproject/amphtml/issues/1398
+        // Unfortunately there is no way to feature detect this.
+        && !platform.isFirefox()) {
       return doc.body;
     }
     return doc.documentElement;

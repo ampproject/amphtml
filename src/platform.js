@@ -55,6 +55,15 @@ export class Platform {
     // Also true for MS Edge :)
     return /Chrome|CriOS/i.test(this.navigator.userAgent);
   }
+
+  /**
+   * Whether the current browser is a Chrome browser.
+   * @return {boolean}
+   */
+  isFirefox() {
+    // Also true for MS Edge :)
+    return /Firefox/i.test(this.navigator.userAgent);
+  }
 };
 
 
