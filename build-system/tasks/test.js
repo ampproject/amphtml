@@ -92,9 +92,7 @@ gulp.task('test', 'Runs tests', prerequisites, function(done) {
   }
 
   if (argv.compiled) {
-    if (!argv.integration) {
-      throw new Error('Compiled tests are only supported for integration tests');
-    }
+    // Only applies to integration tests.
     c.client.amp.useCompiledJs = true;
   }
 
