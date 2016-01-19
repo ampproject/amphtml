@@ -101,7 +101,7 @@ Here’s an example of the AMP Access configuration:
 ```html
 <script id="amp-access" type="application/json">
 {
-  "authorization": 
+  "authorization":
       "https://pub.com/amp-access?rid={READER_ID}&url={AMPDOC_URL}",
   "pingback":
       "https://pub.com/amp-ping?rid={READER_ID}&url={AMPDOC_URL}",
@@ -117,6 +117,7 @@ When configuring the URLs for various endpoints, the Publisher can use substitut
 Var               | Description
 ----------------- | -----------
 READER_ID         | The AMP Reader ID.
+AUTHDATA(field)   | The value of the field in the authorization response.
 AMPDOC_URL        | The URL of this AMP Document.
 CANONICAL_URL     | The canonical URL of this AMP Document.
 DOCUMENT_REFERRER | The Referrer URL.
@@ -131,9 +132,13 @@ https://pub.com/access?
   &ref={DOCUMENT_REFERRER}
   &_={RANDOM}
 ```
+
+AUTHDATA variable is availbale to Pingback and Login URLs. It allows passing any field in the authorization
+response as an URL parameter. E.g. `AUTHDATA(isSubscriber)`.
+
 ##Access Content Markup
 
-Access Content Markup describes which sections are visible or hidden. It is comprised of two AMP attributes: ```amp-access``` and ```amp-access-hide``` that can be placed on any HTML element. 
+Access Content Markup describes which sections are visible or hidden. It is comprised of two AMP attributes: ```amp-access``` and ```amp-access-hide``` that can be placed on any HTML element.
 
 The ```amp-access``` attribute provides the expression that yields true or false based on the authorization response returned by the Authorization endpoint. The resulting value indicates whether or not the element and its contents are visible.
 
@@ -252,7 +257,7 @@ The publisher may choose to use the pingback as:
  - One of the main purposes for pingback is to count down meter when it is used.
  - As a credentialed CORS endpoint it may contain publisher cookies. Thus it can be used to map AMP Reader ID to the Publisher’s identity.
 
-The request format is:  
+The request format is:
 ```
 https://publisher.com/amp-pingback?
    rid={READER_ID}
@@ -323,7 +328,7 @@ PROPERTY ::= [a-zA-Z][a-zA-Z0-9\_\-]*
 VALUE ::= QUOTE [a-zA-Z0-9\_\-]* QUOTE
 ```
 
-Notice that ```amp-access``` expressions are evaluated by the AMP Runtime and AMP Cache. This is NOT part of the specification that the Publisher needs to implement. It is here simply for informational properties. 
+Notice that ```amp-access``` expressions are evaluated by the AMP Runtime and AMP Cache. This is NOT part of the specification that the Publisher needs to implement. It is here simply for informational properties.
 
 #Detailed Discussion
 This section will cover a detailed explanation of the design underlying the amp-access spec, and clarify design choices. Coming soon

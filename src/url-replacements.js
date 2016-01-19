@@ -172,9 +172,7 @@ class UrlReplacements {
     const expr = this.getExpr_(opt_bindings);
     let replacementPromise;
     const encodeValue = val => {
-      // Value 0 is specialcased because the numeric 0 is a valid substitution
-      // value.
-      if (!val && val !== 0) {
+      if (val == null) {
         val = '';
       }
       return encodeURIComponent(val);
