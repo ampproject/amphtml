@@ -315,17 +315,34 @@ CORS endpoints can be (and recommended) to be only allowed to the following orig
  - **AMP Prerendering** - AMP Viewers may take advantage of prerendering, which renders a hidden document before it can be shown. This adds a significant performance boost. But it is important to take into account the fact that the document prerendering does not constitute a view since the Reader may never actually see the document.
 
 #Appendix A: “amp-access” expression grammar
-Non-normative grammar is shown below:
+
+The most recent BNF grammar is available in [access-expr-impl.jison](./0.1/access-expr-impl.jison) file.
+
+The key excerpt of this grammar is as following:
 ```
-EXPR ::= TERM | EXPR "OR" TERM
-TERM ::= LITERAL | FACTOR | TERM "AND" FACTOR
-FACTOR ::= [NOT] TEST
-TEST ::= PREDICATE | PAREN_EXPR
-PREDICATE ::= PROPERTY OP VALUE
-PAREN_EXPR ::= "(" EXPR ")"
-OP ::= "=" | "!="
-PROPERTY ::= [a-zA-Z][a-zA-Z0-9\_\-]*
-VALUE ::= QUOTE [a-zA-Z0-9\_\-]* QUOTE
+search_condition:
+    search_condition OR search_condition
+  | search_condition AND search_condition
+  | NOT search_condition
+  | '(' search_condition ')'
+  | predicate
+
+predicate:
+    comparison_predicate | truthy_predicate
+
+comparison_predicate:
+    scalar_exp '=' scalar_exp
+  | scalar_exp '!=' scalar_exp
+  | scalar_exp '<' scalar_exp
+  | scalar_exp '<=' scalar_exp
+  | scalar_exp '>' scalar_exp
+  | scalar_exp '>=' scalar_exp
+
+truthy_predicate: scalar_exp
+
+scalar_exp: literal | field_ref
+
+literal: STRING | NUMERIC | TRUE | FALSE | NULL
 ```
 
 Notice that ```amp-access``` expressions are evaluated by the AMP Runtime and AMP Cache. This is NOT part of the specification that the Publisher needs to implement. It is here simply for informational properties.
