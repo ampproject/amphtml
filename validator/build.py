@@ -34,6 +34,25 @@ def Die(msg):
   print >> sys.stderr, msg
   sys.exit(1)
 
+def getNodeJsCmd():
+  """Ensure Node.js is installed and return the proper command to run."""
+  logging.info('entering ...')
+
+  try:
+    nodejs_cmd = 'node'
+    nodejs_check = subprocess.check_output([nodejs_cmd, '--eval', 'console.log("42")'])
+  except:
+    try:
+      nodejs_cmd = 'nodejs'
+      nodejs_check = subprocess.check_output([nodejs_cmd, '--eval', 'console.log("42")'])
+    except:
+      Die('Node.js not found. Try "apt-get install nodejs".')
+
+  if nodejs_check.strip() != '42':
+    Die('Node.js not found. Try "apt-get install nodejs".')
+
+  logging.info('... done')
+  return nodejs_cmd
 
 def CheckPrereqs():
   """Checks that various prerequisites for this script are satisfied."""
@@ -185,10 +204,10 @@ def CompileValidatorMinified(out_dir):
   logging.info('... done')
 
 
-def GenerateValidateBin(out_dir):
+def GenerateValidateBin(out_dir, nodejs_cmd):
   logging.info('entering ...')
   f = open('%s/validate' % out_dir, 'w')
-  f.write('#!/usr/bin/nodejs\n')
+  f.write('#!/usr/bin/%s\n' % nodejs_cmd)
   for l in open('%s/validator_minified.js' % out_dir):
     f.write(l)
   f.write("""
@@ -258,10 +277,10 @@ def GenerateValidateBin(out_dir):
   logging.info('... done')
 
 
-def RunSmokeTest(out_dir):
+def RunSmokeTest(out_dir, nodejs_cmd):
   logging.info('entering ...')
   # Run dist/validate on the minimum valid amp and observe that it passes.
-  p = subprocess.Popen(['node', '%s/validate' % out_dir,
+  p = subprocess.Popen([nodejs_cmd, '%s/validate' % out_dir,
                         'testdata/feature_tests/minimum_valid_amp.html'],
                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
   (stdout, stderr) = p.communicate()
@@ -271,7 +290,7 @@ def RunSmokeTest(out_dir):
 
   # Run dist/validate on an empty file and observe that it fails.
   open('%s/empty.html' % out_dir, 'w').close()
-  p = subprocess.Popen(['node', '%s/validate' % out_dir, '%s/empty.html' %
+  p = subprocess.Popen([nodejs_cmd, '%s/validate' % out_dir, '%s/empty.html' %
                         out_dir],
                        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
   (stdout, stderr) = p.communicate()
@@ -334,24 +353,25 @@ def GenerateTestRunner(out_dir):
   logging.info('... success')
 
 
-def RunTests(out_dir):
+def RunTests(out_dir, nodejs_cmd):
   logging.info('entering ...')
-  subprocess.check_call(['node', '%s/test_runner' % out_dir])
+  subprocess.check_call([nodejs_cmd, '%s/test_runner' % out_dir])
   logging.info('... success')
 
 
 logging.basicConfig(format='[[%(filename)s %(funcName)s]] - %(message)s',
                     level=logging.INFO)
+nodejs_cmd = getNodeJsCmd()
 CheckPrereqs()
 InstallNodeDependencies()
 SetupOutDir(out_dir='dist')
 GenValidatorPb2Py(out_dir='dist')
 GenValidatorGeneratedJs(out_dir='dist')
 CompileValidatorMinified(out_dir='dist')
-GenerateValidateBin(out_dir='dist')
-RunSmokeTest(out_dir='dist')
+GenerateValidateBin(out_dir='dist', nodejs_cmd=nodejs_cmd)
+RunSmokeTest(out_dir='dist', nodejs_cmd=nodejs_cmd)
 CompileValidatorTestMinified(out_dir='dist')
 CompileHtmlparserTestMinified(out_dir='dist')
 CompileParseCssTestMinified(out_dir='dist')
 GenerateTestRunner(out_dir='dist')
-RunTests(out_dir='dist')
+RunTests(out_dir='dist', nodejs_cmd=nodejs_cmd)
