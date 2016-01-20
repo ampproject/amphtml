@@ -28,6 +28,7 @@ import {adreactor} from '../ads/adreactor';
 import {adsense} from '../ads/adsense';
 import {adtech} from '../ads/adtech';
 import {doubleclick} from '../ads/doubleclick';
+import {facebook} from './facebook';
 import {twitter} from './twitter';
 import {register, run} from '../src/3p';
 import {parseUrl} from '../src/url';
@@ -42,6 +43,7 @@ register('_ping_', function(win, data) {
   win.document.getElementById('c').textContent = data.ping;
 });
 register('twitter', twitter);
+register('facebook', facebook);
 
 /**
  * Visible for testing.
@@ -112,12 +114,13 @@ window.draw3p = function(opt_configCallback) {
   window.context.isMaster = window.context.master == window;
   window.context.data = data;
   window.context.noContentAvailable = triggerNoContentAvailable;
-  if (data.type == 'twitter') {
-    // Only make this available to Twitter for now while
-    // https://github.com/ampproject/amphtml/issues/728
-    // is being implemented.
+
+  if (data.type === 'facebook' || data.type === 'twitter') {
+    // Only make this available to selected embeds until the generic solution is
+    // available.
     window.context.updateDimensions = triggerDimensions;
   }
+
   // This only actually works for ads.
   window.context.observeIntersection = observeIntersection;
   window.context.reportRenderedEntityIdentifier =

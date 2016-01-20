@@ -46,7 +46,7 @@ If you have any questions, feel free to ask on the issue or join us on [Slack](h
 | `gulp dist`                   | Builds production binaries.                                           |
 | `gulp lint`                   | Validates against Google Closure Linter.                              |
 | `gulp lint --watch`           | Watches for changes in files, Validates against Google Closure Linter.|
-| `gulp lint-fix`               | Fixes simple lint warnings/errors automatically.                      |
+| `gulp lint --fix`             | Fixes simple lint warnings/errors automatically.                      |
 | `gulp build`                  | Builds the AMP library.                                               |
 | `gulp clean`                  | Removes build output.                                                 |
 | `gulp css`                    | Recompile css to build directory.                                     |
