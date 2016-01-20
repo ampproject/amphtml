@@ -38,6 +38,8 @@ export function taboola(global, data) {
             publisher: data.publisher,
             placement: data.placement,
             mode:      data.mode,
+            manualVisibilityTrigger: true,
+            openAttributionInNewTab: true,
             container: 'c'
         },
         params]);
@@ -45,6 +47,9 @@ export function taboola(global, data) {
     global.context.observeIntersection(function(changes) {
         changes.forEach(function(c) {
             console.info('Effie Height of intersection', c.intersectionRect.height);
+            if (c.intersectionRect.height) {
+                global._taboola.push({visible: true,  placement: data.placement});
+            }
         });
     });
 
