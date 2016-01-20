@@ -18,6 +18,8 @@ import {parseUrl} from '../../../src/url';
 import {viewerFor} from '../../../src/viewer';
 import {log} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
+import {getService} from '../../../src/service';
+import {vsyncFor} from '../../../src/vsync';
 
 /** @const */
 const TAG = 'AmpDynamicCssClasses';
@@ -116,7 +118,10 @@ function addReferrerClasses(win) {
   const classes = referrers.map(referrer => {
     return `amp-referrer-${referrer.replace(/\./g, '-')}`;
   });
-  addDynamicCssClasses(win, classes);
+
+  vsyncFor(win).mutate(() => {
+    addDynamicCssClasses(win, classes);
+  });
 }
 
 
@@ -127,7 +132,9 @@ function addReferrerClasses(win) {
 function addViewerClass(win) {
   const viewer = viewerFor(win);
   if (viewer.isEmbedded()) {
-    addDynamicCssClasses(win, ['amp-viewer']);
+    vsyncFor(win).mutate(() => {
+      addDynamicCssClasses(win, ['amp-viewer']);
+    });
   }
 }
 
@@ -144,4 +151,15 @@ function addRuntimeClasses(win) {
   }
 }
 
-addRuntimeClasses(AMP.win);
+/**
+ * @param {!Window} win
+ * @return {!Object} All services need to return an object to "load".
+ */
+function installDynamicClassesService(win) {
+  return getService(win, 'amp-dynamic-css-classes', () => {
+    addRuntimeClasses(win);
+    return {};
+  });
+};
+
+installDynamicClassesService(AMP.win);
