@@ -1061,3 +1061,36 @@ export function registerElement(win, name, implementationClass) {
     prototype: createAmpElementProto(win, name, implementationClass)
   });
 }
+
+
+
+/**
+ * Registers a new alias for an existing custom element.
+ * @param {!Window} win The window in which to register the elements.
+ * @param {string} aliasName Additional name for an existing custom element.
+ * @param {string} sourceName Name of an existing custom element
+ * @param {Object} state Optional map to be merged into the prototype
+ *     to override the original state with new default values
+ */
+export function registerElementAlias(win, aliasName, sourceName, state) {
+  var implementationClass = knownElements[sourceName];
+
+  if (implementationClass) {
+    const proto = createAmpElementProto(win, aliasName, implementationClass);
+    const originalCreatedCallback = proto.createdCallback;
+
+    if (state) {
+      proto.createdCallback = function () {
+        originalCreatedCallback.call(this);
+        Object.keys(state).forEach(p => this.setAttribute(p, state[p]));
+      };
+    }
+
+    win.document.registerElement(aliasName, {
+      prototype: proto
+    });
+
+  } else {
+    throw new Error('Element name is unknown: ' + sourceName + '. Alias ' + aliasName + ' was not registered.');
+  }
+}
