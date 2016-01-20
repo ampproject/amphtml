@@ -323,6 +323,7 @@ export class AccessService {
       log.fine(TAG, 'Authorization response: ', response);
       this.setAuthResponse_(response);
       this.toggleTopClass_('amp-access-loading', false);
+      this.toggleTopClass_('amp-access-error', false);
       return new Promise((resolve, reject) => {
         onDocumentReady(this.win.document, () => {
           this.applyAuthorization_(response).then(resolve, reject);
@@ -331,6 +332,7 @@ export class AccessService {
     }).catch(error => {
       log.error(TAG, 'Authorization failed: ', error);
       this.toggleTopClass_('amp-access-loading', false);
+      this.toggleTopClass_('amp-access-error', true);
     });
   }
 
