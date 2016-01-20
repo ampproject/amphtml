@@ -1093,6 +1093,27 @@ function isElementScheduled(win, elementName) {
 }
 
 /**
+ * Registers a new alias for an existing custom element.
+ * @param {!Window} win The window in which to register the elements.
+ * @param {string} aliasName Additional name for an existing custom element.
+ * @param {string} sourceName Name of an existing custom element
+ * @param {Object} state Optional map to be merged into the prototype
+ *                 to override the original state with new default values
+ */
+export function registerElementAlias(win, aliasName, sourceName) {
+  const implementationClass = knownElements[sourceName];
+
+  if (implementationClass) {
+    win.document.registerElement(aliasName, {
+      prototype: createAmpElementProto(win, aliasName, implementationClass)
+    });
+  } else {
+    throw new Error(`Element name is unknown: ${sourceName}.` +
+                     `Alias ${aliasName} was not registered.`);
+  }
+}
+
+/**
  * In order to provide better error messages we only allow to retrieve
  * services from other elements if those elements are loaded in the page.
  * This makes it possible to mark an element as loaded in a test.
