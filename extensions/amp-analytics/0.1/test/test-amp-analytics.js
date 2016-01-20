@@ -73,23 +73,10 @@ describe('amp-analytics', function() {
     }
     const analytics = new AmpAnalytics(el);
     sandbox.stub(analytics, 'getWin').returns(windowApi);
-    analytics.isExperimentOn_ = () => true;
     analytics.createdCallback();
     sendRequestSpy = sandbox.spy(analytics, 'sendRequest_');
     return analytics;
   }
-
-  it('is blocked when experiment is off', function() {
-    const analytics = getAnalyticsTag({
-      'requests': {'foo': 'https://example.com/bar'},
-      'triggers': [{'on': 'visible', 'request': 'foo'}]
-    });
-
-    analytics.isExperimentOn_ = () => false;
-    return analytics.layoutCallback().then(() => {
-      expect(sendRequestSpy.callCount).to.equal(0);
-    });
-  });
 
   it('sends a basic hit', function() {
     const analytics = getAnalyticsTag({
@@ -112,7 +99,6 @@ describe('amp-analytics', function() {
     el.textContent = config;
     const analytics = new AmpAnalytics(el);
     sandbox.stub(analytics, 'getWin').returns(windowApi);
-    analytics.isExperimentOn_ = () => true;
     analytics.createdCallback();
     sendRequestSpy = sandbox.spy(analytics, 'sendRequest_');
 
@@ -145,7 +131,6 @@ describe('amp-analytics', function() {
         el.appendChild(script);
         const analytics = new AmpAnalytics(el);
         sandbox.stub(analytics, 'getWin').returns(windowApi);
-        analytics.isExperimentOn_ = () => true;
         analytics.createdCallback();
         sendRequestSpy = sandbox.spy(analytics, 'sendRequest_');
 
