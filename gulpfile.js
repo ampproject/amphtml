@@ -90,6 +90,7 @@ function buildExtensions(options) {
    * Please see {@link AmpCarousel} with `type=slides` attribute instead.
    */
   buildExtension('amp-slides', '0.1', false, options);
+  buildExtension('amp-taboola', '0.1', false, options);
   buildExtension('amp-twitter', '0.1', false, options);
   buildExtension('amp-user-notification', '0.1', true, options);
   buildExtension('amp-vine', '0.1', false, options);
