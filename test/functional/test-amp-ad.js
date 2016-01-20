@@ -302,34 +302,38 @@ describe('amp-ad', () => {
       const viewport = viewportFor(win);
       expect(posts).to.have.length(1);
       ampAd.viewportCallback(true);
-      expect(posts).to.have.length(2);
-      viewport.scroll_();
       expect(posts).to.have.length(3);
-      viewport.resize_();
+      expect(posts[2].data.type).to.equal('embed-state');
+      expect(posts[2].data.inViewport).to.be.true;
+      viewport.scroll_();
       expect(posts).to.have.length(4);
-      ampAd.viewportCallback(false);
+      viewport.resize_();
       expect(posts).to.have.length(5);
+      ampAd.viewportCallback(false);
+      expect(posts).to.have.length(7);
+      expect(posts[6].data.type).to.equal('embed-state');
+      expect(posts[6].data.inViewport).to.be.false;
       // No longer listening.
       viewport.scroll_();
-      expect(posts).to.have.length(5);
+      expect(posts).to.have.length(7);
       viewport.resize_();
-      expect(posts).to.have.length(5);
+      expect(posts).to.have.length(7);
     });
 
     it('report changes upon remeasure', () => {
       expect(posts).to.have.length(1);
       ampAd.viewportCallback(true);
-      expect(posts).to.have.length(2);
-      ampAd.onLayoutMeasure();
       expect(posts).to.have.length(3);
       ampAd.onLayoutMeasure();
       expect(posts).to.have.length(4);
-      ampAd.viewportCallback(false);
+      ampAd.onLayoutMeasure();
       expect(posts).to.have.length(5);
+      ampAd.viewportCallback(false);
+      expect(posts).to.have.length(7);
       // We also send a new record when we are currently not in the
       // viewport, because that might have just changed.
       ampAd.onLayoutMeasure();
-      expect(posts).to.have.length(6);
+      expect(posts).to.have.length(8);
     });
   });
 
