@@ -61,7 +61,8 @@ const EXPERIMENTS = [
   {
     id: 'amp-access',
     name: 'AMP Access',
-    spec: '',  // TODO(dvoytenko): link spec when ready.
+    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
+        'amp-access/amp-access-spec.md',
   },
 
   // Amp User Notification
@@ -195,20 +196,22 @@ function isExperimentOn_(id) {
  * @param {boolean=} opt_on
  */
 function toggleExperiment_(id, name, opt_on) {
+  const currentlyOn = isExperimentOn_(id);
+  const on = opt_on === undefined ? !currentlyOn : opt_on;
   // Protect against click jacking.
   const confirmAndmakeLinterHappy = 'confirm';
-  if (!window[confirmAndmakeLinterHappy](
-        'Do you really want to activate the AMP experiment: ' + name)) {
+  const confirmMessage = on ?
+      'Do you really want to activate the AMP experiment' :
+      'Do you really want to deactivate the AMP experiment';
+  if (!window[confirmAndmakeLinterHappy](`${confirmMessage}: "${name}"`)) {
     return;
   }
   if (id == CANARY_EXPERIMENT_ID) {
-    const currentlyOn = getCookie(window, 'AMP_CANARY') == '1';
     const validUntil = new Date().getTime() +
         COOKIE_MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
-    const on = opt_on !== undefined ? opt_on : !currentlyOn;
     setCookie(window, 'AMP_CANARY', (on ? '1' : '0'), (on ? validUntil : 0));
   } else {
-    toggleExperiment(window, id, opt_on);
+    toggleExperiment(window, id, on);
   }
   update();
 }
