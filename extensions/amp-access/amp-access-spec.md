@@ -243,6 +243,10 @@ Authorization endpoint is called by AMP Runtime as a credentialed CORS endpoint.
 
 AMP Runtime (or rather browser) observes cache response headers when calling Authorization endpoint. Thus the cached responses can be reused. It may or may not be desirable. If it is not desirable, the Publisher can user the appropriate cache control headers and/or RANDOM variable substitution for the endpoint URL.
 
+AMP Runtime uses the following CSS classes during the authorization flow:
+ 1. `amp-access-loading` CSS class is set on the document root when the authorization flow starts and removed when it completes or fails.
+ 2. `amp-access-error` CSS class is set on the document root when the authorization flow fails.
+
 In the *server* option, the call to Authorization endpoint is done by AMP Cache as a simple HTTPS endpoint. This means that the Publisher’s cookies cannot be delivered in this case.
 
 ##Pingback Endpoint

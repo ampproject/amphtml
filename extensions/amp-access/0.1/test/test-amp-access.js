@@ -36,6 +36,7 @@ describe('AccessService', () => {
     element.setAttribute('id', 'amp-access');
     element.setAttribute('type', 'application/json');
     document.body.appendChild(element);
+    document.documentElement.classList.remove('amp-access-error');
   });
 
   afterEach(() => {
@@ -229,6 +230,7 @@ describe('AccessService authorization', () => {
       'login': 'https://acme.com/l?rid=READER_ID'
     });
     document.body.appendChild(configElement);
+    document.documentElement.classList.remove('amp-access-error');
 
     elementOn = document.createElement('div');
     elementOn.setAttribute('amp-access', 'access');
@@ -244,6 +246,7 @@ describe('AccessService authorization', () => {
     sandbox.stub(service.resources_, 'mutateElement',
         (unusedElement, mutator) => {
           mutator();
+          return Promise.resolve();
         });
     service.vsync_ = {
       mutate: callback => {
@@ -294,8 +297,10 @@ describe('AccessService authorization', () => {
         .once();
     const promise = service.runAuthorization_();
     expect(document.documentElement).to.have.class('amp-access-loading');
+    expect(document.documentElement).not.to.have.class('amp-access-error');
     return promise.then(() => {
       expect(document.documentElement).not.to.have.class('amp-access-loading');
+      expect(document.documentElement).not.to.have.class('amp-access-error');
       expect(elementOn).not.to.have.attribute('amp-access-hide');
       expect(elementOff).to.have.attribute('amp-access-hide');
       expect(service.authResponse_).to.exist;
@@ -312,8 +317,10 @@ describe('AccessService authorization', () => {
         .once();
     const promise = service.runAuthorization_();
     expect(document.documentElement).to.have.class('amp-access-loading');
+    expect(document.documentElement).not.to.have.class('amp-access-error');
     return promise.then(() => {
       expect(document.documentElement).not.to.have.class('amp-access-loading');
+      expect(document.documentElement).to.have.class('amp-access-error');
       expect(elementOn).not.to.have.attribute('amp-access-hide');
       expect(elementOff).not.to.have.attribute('amp-access-hide');
     });
@@ -398,6 +405,7 @@ describe('AccessService applyAuthorizationToElement_', () => {
       'login': 'https://acme.com/l?rid=READER_ID'
     });
     document.body.appendChild(configElement);
+    document.documentElement.classList.remove('amp-access-error');
 
     elementOn = document.createElement('div');
     elementOn.setAttribute('amp-access', 'access');
@@ -413,6 +421,7 @@ describe('AccessService applyAuthorizationToElement_', () => {
     mutateElementStub = sandbox.stub(service.resources_, 'mutateElement',
         (unusedElement, mutator) => {
           mutator();
+          return Promise.resolve();
         });
     service.vsync_ = {
       mutatePromise: callback => {
@@ -542,6 +551,7 @@ describe('AccessService pingback', () => {
       'login': 'https://acme.com/l?rid=READER_ID'
     });
     document.body.appendChild(configElement);
+    document.documentElement.classList.remove('amp-access-error');
 
     service = new AccessService(window);
     service.isExperimentOn_ = true;
@@ -802,6 +812,7 @@ describe('AccessService login', () => {
       'login': 'https://acme.com/l?rid=READER_ID'
     });
     document.body.appendChild(configElement);
+    document.documentElement.classList.remove('amp-access-error');
 
     service = new AccessService(window);
     service.isExperimentOn_ = true;
@@ -942,6 +953,7 @@ describe('AccessService type=other', () => {
     configElement.setAttribute('type', 'application/json');
     configElement.textContent = JSON.stringify({'type': 'other'});
     document.body.appendChild(configElement);
+    document.documentElement.classList.remove('amp-access-error');
 
     service = new AccessService(window);
     service.isExperimentOn_ = true;
@@ -975,9 +987,11 @@ describe('AccessService type=other', () => {
     cidMock.expects('get').never();
     xhrMock.expects('fetchJson').never();
     const promise = service.runAuthorization_();
-    expect(document.documentElement).to.not.have.class('amp-access-loading');
+    expect(document.documentElement).not.to.have.class('amp-access-loading');
+    expect(document.documentElement).not.to.have.class('amp-access-error');
     return promise.then(() => {
       expect(document.documentElement).not.to.have.class('amp-access-loading');
+      expect(document.documentElement).not.to.have.class('amp-access-error');
       expect(service.firstAuthorizationPromise_).to.exist;
       return service.firstAuthorizationPromise_;
     });
