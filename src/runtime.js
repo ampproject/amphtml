@@ -22,7 +22,7 @@ import {installStyles} from './styles';
 import {installCoreServices} from './amp-core-service';
 import {isExperimentOn, toggleExperiment} from './experiments';
 import {performanceFor} from './performance';
-import {registerElement} from './custom-element';
+import {registerElement, registerElementAlias} from './custom-element';
 import {registerExtendedElement} from './extended-element';
 import {resourcesFor} from './resources';
 import {timer} from './timer';
@@ -74,6 +74,17 @@ export function adopt(global) {
     } else {
       register();
     }
+  };
+
+  /**
+   * Registers an extended element based on existing element.
+   * @param {string} aliasName Additional name for an existing custom element.
+   * @param {string} sourceName Name of an existing custom element
+   * @param {Object} state Optional map to be merged into the prototype to
+   *     override the original state with new default values.
+   */
+  global.AMP.registerElementAlias = function(aliasName, sourceName, state) {
+    registerElementAlias(global, aliasName, sourceName, state);
   };
 
   /** @const */
