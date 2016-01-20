@@ -139,7 +139,7 @@ module.exports = {
     // This does match dist.3p/current, so we run presubmit checks on the
     // built 3p binary. This is done, so we make sure our special 3p checks
     // run against the entire transitive closure of deps.
-    '!{node_modules,build,dist,dist.tools,' +
+    '!{node_modules,build,examples.build,dist,dist.tools,' +
         'dist.3p/[0-9]*,dist.3p/current-min}/**/*.*',
     '!validator/node_modules/**/*.*',
     '!build-system/tasks/presubmit-checks.js',

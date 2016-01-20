@@ -75,6 +75,13 @@ var forbiddenTerms = {
       'extensions/amp-analytics/0.1/amp-analytics.js',
     ],
   },
+  'installStorageService': {
+    message: privateServiceFactory,
+    whitelist: [
+      'extensions/amp-analytics/0.1/amp-analytics.js',
+      'src/service/storage-impl.js',
+    ],
+  },
   'installViewerService': {
     message: privateServiceFactory,
     whitelist: [
@@ -109,6 +116,14 @@ var forbiddenTerms = {
       'src/amp-core-service.js',
       'src/service/resources-impl.js',
       'src/service/standard-actions-impl.js',
+    ],
+  },
+  'sendMessage': {
+    message: privateServiceFactory,
+    whitelist: [
+      'src/service/viewer-impl.js',
+      'src/service/storage-impl.js',
+      'examples/viewer-integr-messaging.js',
     ],
   },
   // Privacy sensitive
@@ -169,10 +184,17 @@ var forbiddenTerms = {
     ]
   },
   'eval\\(': '',
+  'storageFor': {
+    message: requiresReviewPrivacy,
+    whitelist: [
+      'src/storage.js',
+    ],
+  },
   'localStorage': {
     message: requiresReviewPrivacy,
     whitelist: [
       'src/service/cid-impl.js',
+      'src/service/storage-impl.js',
     ],
   },
   'sessionStorage': requiresReviewPrivacy,
