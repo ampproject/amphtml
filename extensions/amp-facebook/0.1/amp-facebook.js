@@ -15,7 +15,8 @@
  */
 
 
-import {getIframe, listen, prefetchBootstrap} from '../../../src/3p-frame';
+import {getIframe, prefetchBootstrap} from '../../../src/3p-frame';
+import {listen} from '../../../src/iframe-helper';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
 
@@ -48,7 +49,7 @@ class AmpFacebook extends AMP.BaseElement {
       amp.setAttribute('height', data.height);
       amp.setAttribute('width', data.width);
       this./*OK*/changeHeight(data.height);
-    });
+    }, /* opt_is3P */true);
     return loadPromise(iframe);
   }
 };

@@ -480,6 +480,14 @@ export class BaseElement {
     return viewportFor(this.getWin());
   }
 
+ /**
+  * Returns a previously measured layout box of the element.
+  * @return {!LayoutRect}
+  */
+  getInsersectionElementLayoutBox() {
+    return this.resources_.getResourceForElement(this.element).getLayoutBox();
+  }
+
   /**
    * Schedule the layout request for the children element or elements
    * specified. Resource manager will perform the actual layout based on the

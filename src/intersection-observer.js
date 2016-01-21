@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
+import {Observable} from './observable';
 import {assert} from './asserts';
-import {layoutRectLtwh, rectIntersection, moveLayoutRect} from
-    './layout-rect';
+import {layoutRectLtwh, rectIntersection, moveLayoutRect} from './layout-rect';
+import {listen, postMessage} from './iframe-helper';
+import {parseUrl} from './url';
 
 /**
  * Produces a change entry for that should be compatible with
@@ -60,4 +62,137 @@ export function getIntersectionChangeEntry(
     boundingClientRect,
     intersectionRect,
   };
+}
+
+/**
+ * The IntersectionObserver class lets any element share its viewport
+ * intersection data with an iframe of its choice (most likely contained within
+ * the element itself.). When instantiated the class will start listening for
+ * a 'send-intersection' postMessage from the iframe, and only then  would start
+ * sending intersection data to the iframe. The intersection data would be sent
+ * when the element is moved inside or outside the viewport as well as on
+ * scroll and resize.
+ * The element should create an IntersectionObserver instance once the Iframe
+ * element is created.
+ * The IntersectionObserver class exposes a `fire` method that would send the
+ * intersection data to the iframe.
+ * The IntersectionObserver class exposes a `onViewportCallback` method that
+ * should be called inside if the viewportCallback of the element. This would
+ * let the element sent intersection data automatically when there element comes
+ * inside or goes outside the viewport and also manage sending intersection data
+ * onscroll and resize.
+ * Note: The IntersectionObserver would not send any data over to the iframe if
+ * it had not requested the intersection data already via a postMessage.
+ */
+export class IntersectionObserver extends Observable {
+  /**
+   * @param {!BaseElement} element.
+   * @param {!Element} iframe Iframe element to which would request intersection
+   *    data.
+   * @param {?boolean} opt_is3p Set to `true` when the iframe is 3'rd party.
+   * @constructor
+   * @extends {Observable}
+   */
+  constructor(baseElement, iframe, opt_is3p) {
+    super();
+    /** @private @const */
+    this.baseElement_ = baseElement;
+    /** @private {?Element} */
+    this.iframe_ = iframe;
+    /** @private {boolean} */
+    this.is3p_ = opt_is3p || false;
+    /** @private {boolean} */
+    this.shouldSendIntersectionChanges_ = false;
+    /** @private {Array<function>} */
+    this.unlisteners_ = [];
+
+    this.init_();
+  }
+
+  init_() {
+    // Triggered by context.observeIntersection(…) inside the ad/iframe.
+    // We use listen instead of listenOnce, because a single ad/iframe might
+    // have multiple parties wanting to receive viewability data.
+    // The second time this is called, it doesn't do much but it
+    // guarantees that the receiver gets an initial intersection change
+    // record.
+    this.unlisteners_.push(listen(this.iframe_, 'send-intersections', () => {
+      this.startSendingIntersectionChanges_();
+    }, this.is3p_));
+
+    this.unlisteners_.push(this.add(() => {
+      this.sendElementIntersection_();
+    }));
+  }
+
+  dispose() {
+    //used only in tests.
+    this.unlisteners_.forEach(unlisten => {
+      unlisten();
+    });
+    this.unlisteners_ = [];
+  }
+
+  /**
+   * Called via postMessage from the child iframe when the ad/iframe starts
+   * observing its position in the viewport.
+   * Sets a flag, measures the iframe position if necessary and sends
+   * one change record to the iframe.
+   * Note that this method may be called more than once if a single ad
+   * has multiple parties interested in viewability data.
+   * @private
+   */
+  startSendingIntersectionChanges_() {
+    this.shouldSendIntersectionChanges_ = true;
+    this.baseElement_.getVsync().measure(() => {
+      this.sendElementIntersection_();
+    });
+  }
+
+  /**
+   * Triggered by the AmpElement to when it either enters or exits the visible
+   * viewport.
+   * @param {boolean} inViewport true if the element is in viewport.
+   */
+  onViewportCallback(inViewport) {
+    // Lets the ad know that it became visible or no longer is.
+    this.fire();
+    // And update the ad about its position in the viewport while
+    // it is visible.
+    if (inViewport) {
+      const send = this.fire.bind(this);
+      // Scroll events.
+      const unlistenScroll = this.baseElement_.getViewport().onScroll(send);
+      // Throttled scroll events. Also fires for resize events.
+      const unlistenChanged = this.baseElement_.getViewport().onChanged(send);
+      this.unlistenViewportChanges_ = () => {
+        unlistenScroll();
+        unlistenChanged();
+      };
+    } else if (this.unlistenViewportChanges_) {
+      this.unlistenViewportChanges_();
+      this.unlistenViewportChanges_ = null;
+    }
+  }
+
+  /**
+   * Sends 'intersection' message to ad/iframe with intersection change records
+   * if this has been activated and we measured the layout box of the iframe
+   * at least once.
+   * @private
+   */
+  sendElementIntersection_() {
+    if (!this.shouldSendIntersectionChanges_) {
+      return;
+    }
+    const change = this.baseElement_.element.getIntersectionChangeEntry();
+    const targetOrigin =
+        this.iframe_.src ? parseUrl(this.iframe_.src).origin : '*';
+    postMessage(
+        this.iframe_,
+        'intersection',
+        {changes: [change]},
+        targetOrigin,
+        this.is3p_);
+  }
 }
