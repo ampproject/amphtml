@@ -127,57 +127,61 @@ function specificity(code) {
       return 2;
     case amp.validator.ValidationError.Code.DISALLOWED_TAG_ANCESTOR:
       return 3;
-    case amp.validator.ValidationError.Code.WRONG_PARENT_TAG:
+    case amp.validator.ValidationError.Code.MANDATORY_TAG_ANCESTOR:
       return 4;
-    case amp.validator.ValidationError.Code.MANDATORY_TAG_MISSING:
+    case amp.validator.ValidationError.Code.MANDATORY_TAG_ANCESTOR_WITH_HINT:
       return 5;
-    case amp.validator.ValidationError.Code.TAG_REQUIRED_BY_MISSING:
+    case amp.validator.ValidationError.Code.WRONG_PARENT_TAG:
       return 6;
-    case amp.validator.ValidationError.Code.DISALLOWED_TAG:
+    case amp.validator.ValidationError.Code.MANDATORY_TAG_MISSING:
       return 7;
-    case amp.validator.ValidationError.Code.DISALLOWED_ATTR:
+    case amp.validator.ValidationError.Code.TAG_REQUIRED_BY_MISSING:
       return 8;
-    case amp.validator.ValidationError.Code.INVALID_ATTR_VALUE:
+    case amp.validator.ValidationError.Code.DISALLOWED_TAG:
       return 9;
-    case amp.validator.ValidationError.Code.ATTR_VALUE_REQUIRED_BY_LAYOUT:
+    case amp.validator.ValidationError.Code.DISALLOWED_ATTR:
       return 10;
-    case amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING:
+    case amp.validator.ValidationError.Code.INVALID_ATTR_VALUE:
       return 11;
-    case amp.validator.ValidationError.Code.MANDATORY_ONEOF_ATTR_MISSING:
+    case amp.validator.ValidationError.Code.ATTR_VALUE_REQUIRED_BY_LAYOUT:
       return 12;
-    case amp.validator.ValidationError.Code.DUPLICATE_UNIQUE_TAG:
+    case amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING:
       return 13;
-    case amp.validator.ValidationError.Code.STYLESHEET_TOO_LONG:
+    case amp.validator.ValidationError.Code.MANDATORY_ONEOF_ATTR_MISSING:
       return 14;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX:
+    case amp.validator.ValidationError.Code.DUPLICATE_UNIQUE_TAG:
       return 15;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_AT_RULE:
+    case amp.validator.ValidationError.Code.STYLESHEET_TOO_LONG:
       return 16;
+    case amp.validator.ValidationError.Code.CSS_SYNTAX:
+      return 17;
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_AT_RULE:
+      return 18;
     case amp.validator.ValidationError.Code.
         MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE:
-      return 17;
+      return 19;
     case amp.validator.ValidationError.Code.
         INVALID_PROPERTY_VALUE_IN_ATTR_VALUE:
-      return 18;
-    case amp.validator.ValidationError.Code.DISALLOWED_PROPERTY_IN_ATTR_VALUE:
-      return 19;
-    case amp.validator.ValidationError.Code.MUTUALLY_EXCLUSIVE_ATTRS:
       return 20;
-    case amp.validator.ValidationError.Code.UNESCAPED_TEMPLATE_IN_ATTR_VALUE:
+    case amp.validator.ValidationError.Code.DISALLOWED_PROPERTY_IN_ATTR_VALUE:
       return 21;
-    case amp.validator.ValidationError.Code.TEMPLATE_PARTIAL_IN_ATTR_VALUE:
+    case amp.validator.ValidationError.Code.MUTUALLY_EXCLUSIVE_ATTRS:
       return 22;
-    case amp.validator.ValidationError.Code.TEMPLATE_IN_ATTR_NAME:
+    case amp.validator.ValidationError.Code.UNESCAPED_TEMPLATE_IN_ATTR_VALUE:
       return 23;
+    case amp.validator.ValidationError.Code.TEMPLATE_PARTIAL_IN_ATTR_VALUE:
+      return 24;
+    case amp.validator.ValidationError.Code.TEMPLATE_IN_ATTR_NAME:
+      return 25;
     case amp.validator.ValidationError.Code.
         INCONSISTENT_UNITS_FOR_WIDTH_AND_HEIGHT:
-      return 24;
-    case amp.validator.ValidationError.Code.IMPLIED_LAYOUT_INVALID:
-      return 25;
-    case amp.validator.ValidationError.Code.SPECIFIED_LAYOUT_INVALID:
       return 26;
-    case amp.validator.ValidationError.Code.DEV_MODE_ENABLED:
+    case amp.validator.ValidationError.Code.IMPLIED_LAYOUT_INVALID:
       return 27;
+    case amp.validator.ValidationError.Code.SPECIFIED_LAYOUT_INVALID:
+      return 28;
+    case amp.validator.ValidationError.Code.DEV_MODE_ENABLED:
+      return 29;
     case amp.validator.ValidationError.Code.DEPRECATED_ATTR:
       return 101;
     case amp.validator.ValidationError.Code.DEPRECATED_TAG:
@@ -1712,8 +1716,26 @@ ParsedTagSpec.prototype.validateParentTag = function(
  * @param {!Context} context
  * @param {!amp.validator.ValidationResult} validationResult
  */
-ParsedTagSpec.prototype.validateDisallowedAncestorTags = function(
+ParsedTagSpec.prototype.validateAncestorTags = function(
     context, validationResult) {
+  if (this.spec_.mandatoryAncestor !== null) {
+    const mandatoryAncestor = this.spec_.mandatoryAncestor;
+    if (!context.getTagNames().hasAncestor(mandatoryAncestor)) {
+      if (this.spec_.mandatoryAncestorSuggestedAlternative !== null) {
+        context.addError(
+            amp.validator.ValidationError.Code.MANDATORY_TAG_ANCESTOR_WITH_HINT,
+            /* params */ [this.spec_.name, mandatoryAncestor,
+                          this.spec_.mandatoryAncestorSuggestedAlternative],
+            this.spec_.specUrl, validationResult);
+      } else {
+        context.addError(
+            amp.validator.ValidationError.Code.MANDATORY_TAG_ANCESTOR,
+            /* params */ [this.spec_.name, mandatoryAncestor],
+            this.spec_.specUrl, validationResult);
+      }
+      return;
+    }
+  }
   for (const disallowedAncestor of this.spec_.disallowedAncestor) {
     if (context.getTagNames().hasAncestor(disallowedAncestor)) {
       context.addError(
@@ -1902,7 +1924,7 @@ ParsedValidatorRules.prototype.validateTagAgainstSpec = function(
   resultForAttempt.status = amp.validator.ValidationResult.Status.UNKNOWN;
   parsedSpec.validateAttributes(context, encounteredAttrs, resultForAttempt);
   parsedSpec.validateParentTag(context, resultForAttempt);
-  parsedSpec.validateDisallowedAncestorTags(context, resultForAttempt);
+  parsedSpec.validateAncestorTags(context, resultForAttempt);
 
   if (resultForAttempt.status === amp.validator.ValidationResult.Status.FAIL) {
     if (maxSpecificity(resultForAttempt) >
