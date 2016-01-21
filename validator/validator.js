@@ -123,7 +123,7 @@ function specificity(code) {
     case amp.validator.ValidationError.Code.
         MANDATORY_CDATA_MISSING_OR_INCORRECT:
       return 1;
-    case amp.validator.ValidationError.Code.MANDATORY_CDATA_VIOLATES_BLACKLIST:
+    case amp.validator.ValidationError.Code.CDATA_VIOLATES_BLACKLIST:
       return 2;
     case amp.validator.ValidationError.Code.DISALLOWED_TAG_ANCESTOR:
       return 3;
@@ -617,8 +617,7 @@ CdataMatcher.prototype.match = function(cdata, context, validationResult) {
     const blacklistRegex = new RegExp(blacklist.regex, 'i');
     if (blacklistRegex.test(cdata)) {
       context.addError(
-          amp.validator.ValidationError.Code.
-              MANDATORY_CDATA_VIOLATES_BLACKLIST,
+          amp.validator.ValidationError.Code.CDATA_VIOLATES_BLACKLIST,
           /* params */ [getDetailOrName(this.tagSpec_), blacklist.errorMessage],
           this.tagSpec_.specUrl, validationResult);
     }
