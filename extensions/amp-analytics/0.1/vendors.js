@@ -71,14 +71,23 @@ export const ANALYTICS_CONFIG = {
   },
 
   'parsely': {
-    'host': 'srv.pixel.parsely.com',
-    'method': 'GET',
     'requests': {
-      'baseHit': '/plogger/?rand={{timestamp}}&idsite={{apikey}}&url={{ampdocUrl}}&urlref={{documentReferrer}}&screen={{screenWidth}}x{{screenHeight}}%7C{{screenAvailWidth}}x{{screenAvailHeight}}%7C{{colorDepth}}&title={{title}}&date={{timestamp}}&ampid={{clientId}}'
-      'pageview': '{{baseHit}}&action=pageview',
+      'host': 'https://srv.pixel.parsely.com',
+      'basePrefix': '{{host}}/plogger/?rand={{timestamp}}&idsite={{apikey}}&' +
+          'url={{ampdocUrl}}&urlref={{documentReferrer}}&' +
+          'screen={{screenWidth}}x{{screenHeight}}%7C{{screenAvailWidth}}x' +
+          '{{screenAvailHeight}}%7C{{colorDepth}}&title={{title}}&' +
+          'date={{timestamp}}&ampid={{clientId}}',
+      'pageview': '{{basePrefix}}&action=pageview'
       // TODO: Engaged Time
-      // 'heartbeat': '{{baseHit}}&action=heartbeat&inc={{engagedTime}}'
+      // 'heartbeat': '{{basePrefix}}&action=heartbeat&inc={{engagedTime}}'
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true
     }
+
   }
 };
 
