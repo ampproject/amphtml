@@ -35,7 +35,22 @@ export function taboola(global, data) {
         }
     };
 
+    const valdateExactlyOne = function (data, alternativeFields) {
+        var countFileds = 0;
+
+        for (let i = 0; i < alternativeFields.length; i++) {
+            const field = alternativeFields[i];
+            if (data[field]) {
+                countFileds += 1;
+            }
+        }
+        assert(countFileds === 1,
+            'Attribute mismatch. amp-taboola must contain exactly one of those attributes: %s',
+            alternativeFields.join(', '));
+    };
+
     validateData(data, ['publisher', 'placement', 'mode']);
+    valdateExactlyOne(data, ['article', 'video', 'photo', 'search', 'category', 'homepage', 'others']);
 
     const params = {
         referrer: data.referrer || global.context.referrer,

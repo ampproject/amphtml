@@ -47,6 +47,7 @@ Supported parameters:
 - data-photo
 - data-home
 - data-category
+- data-others
 
 - data-url
 - data-referrer
