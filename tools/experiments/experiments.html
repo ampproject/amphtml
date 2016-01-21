@@ -90,6 +90,56 @@
     tr[data-on='1'] .on {
       display: block;
     }
+
+    .popup-graypane {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      flex-direction: column;
+      flex-wrap: nowrap;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .popup-graypane:not(.show) {
+      display: none;
+    }
+
+    .popup {
+      background: #fff;
+      border: 1px solid #aaa;
+      border-radius: 3px;
+      max-width: 90%;
+      max-height: 90%;
+      min-width: 280px;
+      min-height: 120px;
+    }
+
+    .popup-body {
+      padding: 16px;
+    }
+
+    .popup-button-bar {
+      padding: 16px;
+      text-align: right;
+    }
+
+    .popup-button-bar button {
+      margin: 0 4px;
+      border: 1px solid #eee;
+      border-radius: 2px;
+      background: #fff;
+      color: #222;
+    }
+
+    #popup-button-ok {
+      background: #03a9f4;
+      color: #fff;
+    }
   </style>
 </head>
 <body>
@@ -117,5 +167,17 @@
   <section class="content">
     <table id="experiments-table" border=1></table>
   </section>
+
+  <div class="popup-graypane" id="popup-container">
+    <div class="popup">
+      <div class="popup-body">
+        <div id="popup-message" class="popup-message"></div>
+      </div>
+      <div class="popup-button-bar">
+        <button id="popup-button-cancel">Cancel</button>
+        <button id="popup-button-ok">OK</button>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
