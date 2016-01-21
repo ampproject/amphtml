@@ -70,7 +70,7 @@ export const ANALYTICS_CONFIG = {
     'host': 'srv.pixel.parsely.com',
     'method': 'GET',
     'requests': {
-      'baseHit': '/plogger/?rand={{timestamp}}&idsite={{apikey}}&url={{ampdocUrl}}&urlref={{documentReferrer}}&screen={{screenWidth}}x{{screenHeight}}%7C{{screenAvailWidth}}x{{screenAvailHeight}}%7C{{pixelDepth}}&data=TODO&title={{title}}&date={{timestamp}}&amp=1'
+      'baseHit': '/plogger/?rand={{timestamp}}&idsite={{apikey}}&url={{ampdocUrl}}&urlref={{documentReferrer}}&screen={{screenWidth}}x{{screenHeight}}%7C{{screenAvailWidth}}x{{screenAvailHeight}}%7C{{colorDepth}}&title={{title}}&date={{timestamp}}&ampid={{clientId}}'
       'pageview': '{{baseHit}}&action=pageview',
       // TODO: Engaged Time
       'heartbeat': '{{baseHit}}&action=heartbeat&inc={{engagedTime}}'
