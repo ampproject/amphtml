@@ -156,6 +156,9 @@ export class AccessService {
     /** @private {?Promise} */
     this.reportViewPromise_ = null;
 
+    /** @private {?string} */
+    this.loginUrl_ = null;
+
     /** @private {?Promise} */
     this.loginPromise_ = null;
   }
@@ -233,6 +236,9 @@ export class AccessService {
 
     actionServiceFor(this.win).installActionHandler(
         this.accessElement_, this.handleAction_.bind(this));
+
+    // Calculate login URL right away.
+    this.buildLoginUrl_();
 
     // Start authorization XHR immediately.
     this.runAuthorization_();
@@ -324,6 +330,7 @@ export class AccessService {
       this.setAuthResponse_(response);
       this.toggleTopClass_('amp-access-loading', false);
       this.toggleTopClass_('amp-access-error', false);
+      this.buildLoginUrl_();
       return new Promise((resolve, reject) => {
         onDocumentReady(this.win.document, () => {
           this.applyAuthorization_(response).then(resolve, reject);
@@ -594,9 +601,10 @@ export class AccessService {
     }
 
     log.fine(TAG, 'Start login');
-    const urlPromise = this.buildUrl_(assert(this.config_.login,
-        'Login URL is not configured'), /* useAuthData */ true);
-    this.loginPromise_ = this.openLoginDialog_(urlPromise).then(result => {
+    assert(this.config_.login, 'Login URL is not configured');
+    // Login URL should always be available at this time.
+    const loginUrl = assert(this.loginUrl_, 'Login URL is not ready');
+    this.loginPromise_ = this.openLoginDialog_(loginUrl).then(result => {
       log.fine(TAG, 'Login dialog completed: ', result);
       this.loginPromise_ = null;
       const query = parseQueryString(result);
@@ -613,6 +621,21 @@ export class AccessService {
       throw reason;
     });
     return this.loginPromise_;
+  }
+
+  /**
+   * @return {!Promise<string>|undefined}
+   * @private
+   */
+  buildLoginUrl_() {
+    if (!this.config_.login) {
+      return;
+    }
+    return this.buildUrl_(this.config_.login, /* useAuthData */ true)
+        .then(url => {
+          this.loginUrl_ = url;
+          return url;
+        });
   }
 }
 

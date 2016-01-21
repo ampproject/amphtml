@@ -17,7 +17,7 @@
 import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
 import {log} from '../../../src/log';
-import {parseUrl} from '../../../src/url';
+import {parseUrl, removeFragment} from '../../../src/url';
 
 /** @const */
 const TAG = 'AmpAccessLogin';
@@ -231,11 +231,15 @@ class LoginDialog {
    * @private
    */
   getReturnUrl_() {
+    const currentUrl = removeFragment(this.win.location.href);
+    let returnUrl;
     if (getMode().localDev) {
       const loc = this.win.location;
-      return loc.protocol + '//' + loc.host +
+      returnUrl = loc.protocol + '//' + loc.host +
           '/extensions/amp-access/0.1/amp-login-done.html';
+    } else {
+      returnUrl = 'https://cdn.ampproject.org/v0/amp-login-done-0.1.html';
     }
-    return 'https://cdn.ampproject.org/v0/amp-login-done-0.1.html';
+    return returnUrl + '?url=' + encodeURIComponent(currentUrl);
   }
 }

@@ -38,9 +38,32 @@ export class LoginDoneDialog {
    */
   start() {
     this.setStyles_();
-    this.postback_().then(
-        this.postbackSuccess_.bind(this),
-        this.postbackError_.bind(this));
+    this.postbackOrRedirect_();
+  }
+
+  /**
+   * Tries to postback the response message or redirect URL.
+   * @return {!Promise}
+   * @private
+   */
+  postbackOrRedirect_() {
+    const query = parseQueryString(this.win.location.search);
+    if (this.win.opener && this.win.opener != this.win) {
+      // This is a dialog postback. Try to communicate with the opener window.
+      return this.postback_().then(
+          this.postbackSuccess_.bind(this),
+          this.postbackError_.bind(this));
+    }
+
+    if (query['url']) {
+      // Source URL is specified. Try to redirect back.
+      this.win.location.replace(query['url']);
+      return Promise.resolve();
+    }
+
+    const error = new Error('No opener or return location available');
+    this.postbackError_(error);
+    return Promise.reject(error);
   }
 
   /**
