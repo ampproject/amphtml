@@ -62,8 +62,7 @@ export const ANALYTICS_CONFIG = {
   },
 
   'parsely': {
-    // TODO: Can we support dynamic hosts like srv-2015-12-17-02.pixel.parsely.com
-    'host': 'pixel.parsely.com',
+    'host': 'srv.pixel.parsely.com',
     'method': 'GET',
     'requests': {
       // TODO: screenAvailWidth (screen.availWidth)
