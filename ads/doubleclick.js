@@ -23,7 +23,8 @@ import {loadScript, checkData} from '../src/3p';
 export function doubleclick(global, data) {
   checkData(data, [
     'slot', 'targeting', 'categoryExclusion',
-    'tagForChildDirectedTreatment', 'cookieOptions'
+    'tagForChildDirectedTreatment', 'cookieOptions',
+    'overrideWidth', 'overrideHeight',
   ]);
   loadScript(global, 'https://www.googletagservices.com/tag/js/gpt.js', () => {
     global.googletag.cmd.push(function() {
