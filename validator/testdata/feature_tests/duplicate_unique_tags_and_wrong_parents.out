@@ -1,4 +1,4 @@
 FAIL
 feature_tests/duplicate_unique_tags_and_wrong_parents.html:31:2 The tag 'author stylesheet' appears more than once in the document. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#stylesheets)
 feature_tests/duplicate_unique_tags_and_wrong_parents.html:35:0 The attribute 'amp-custom' may not appear in tag 'boilerplate (js enabled) - old variant'. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#boilerplate)
-feature_tests/duplicate_unique_tags_and_wrong_parents.html:35:0 The parent tag of tag 'style' is 'body', but it must be 'head'. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#boilerplate)
+feature_tests/duplicate_unique_tags_and_wrong_parents.html:35:0 The parent tag of tag 'style' is 'body', but it can only be 'head'. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#boilerplate)

@@ -34,25 +34,21 @@ def Die(msg):
   print >> sys.stderr, msg
   sys.exit(1)
 
-def getNodeJsCmd():
+
+def GetNodeJsCmd():
   """Ensure Node.js is installed and return the proper command to run."""
   logging.info('entering ...')
 
-  try:
-    nodejs_cmd = 'node'
-    nodejs_check = subprocess.check_output([nodejs_cmd, '--eval', 'console.log("42")'])
-  except:
+  for cmd in ['node', 'nodejs']:
     try:
-      nodejs_cmd = 'nodejs'
-      nodejs_check = subprocess.check_output([nodejs_cmd, '--eval', 'console.log("42")'])
-    except:
-      Die('Node.js not found. Try "apt-get install nodejs".')
+      output = subprocess.check_output([cmd, '--eval', 'console.log("42")'])
+      if output.strip() == '42':
+        logging.info('... done')
+        return cmd
+    except (subprocess.CalledProcessError, OSError):
+      continue
+  Die('Node.js not found. Try "apt-get install nodejs".')
 
-  if nodejs_check.strip() != '42':
-    Die('Node.js not found. Try "apt-get install nodejs".')
-
-  logging.info('... done')
-  return nodejs_cmd
 
 def CheckPrereqs():
   """Checks that various prerequisites for this script are satisfied."""
@@ -72,7 +68,7 @@ def CheckPrereqs():
   # Ensure protoc is available.
   try:
     libprotoc_version = subprocess.check_output(['protoc', '--version'])
-  except:
+  except (subprocess.CalledProcessError, OSError):
     Die('Protobuf compiler not found. Try "apt-get install protobuf-compiler".')
 
   # Ensure 'libprotoc 2.5.0' or newer.
@@ -86,13 +82,13 @@ def CheckPrereqs():
     module = 'google.protobuf.%s' % m
     try:
       __import__(module)
-    except:
+    except ImportError:
       Die('%s not found. Try "apt-get install python-protobuf"' % module)
 
   # Ensure that npm is installed.
   try:
     npm_version = subprocess.check_output(['npm', '--version'])
-  except:
+  except (subprocess.CalledProcessError, OSError):
     Die('npm package manager not found. Try "apt-get install npm".')
 
   # Ensure npm version '1.3.10' or newer.
@@ -103,7 +99,7 @@ def CheckPrereqs():
   # Ensure JVM installed. TODO: Check for version?
   try:
     subprocess.check_output(['java', '-version'], stderr=subprocess.STDOUT)
-  except:
+  except (subprocess.CalledProcessError, OSError):
     Die('Java missing. Try "apt-get install openjdk-7-jre"')
   logging.info('... done')
 
@@ -179,6 +175,14 @@ def GenValidatorGeneratedJs(out_dir):
 
 
 def CompileWithClosure(js_files, closure_entry_points, output_file):
+  """Compiles the arguments with the Closure compiler for transpilation to ES5.
+
+  Args:
+    js_files: list of files to compile
+    closure_entry_points: entry points (these won't be minimized)
+    output_file: name of the Javascript output file
+  """
+
   cmd = ['java', '-jar', 'node_modules/google-closure-compiler/compiler.jar',
          '--language_in=ECMASCRIPT6_STRICT', '--language_out=ES5_STRICT',
          '--js_output_file=%s' % output_file,
@@ -193,6 +197,11 @@ def CompileWithClosure(js_files, closure_entry_points, output_file):
 
 
 def CompileValidatorMinified(out_dir):
+  """Generates a minified validator script, which can be imported to validate.
+
+  Args:
+    out_dir: output directory
+  """
   logging.info('entering ...')
   CompileWithClosure(
       js_files=['htmlparser.js', 'parse-css.js', 'tokenize-css.js',
@@ -205,6 +214,12 @@ def CompileValidatorMinified(out_dir):
 
 
 def GenerateValidateBin(out_dir, nodejs_cmd):
+  """Generates the validator binary, a Node.js script.
+
+  Args:
+    out_dir: output directory
+    nodejs_cmd: the command for calling Node.js
+  """
   logging.info('entering ...')
   f = open('%s/validate' % out_dir, 'w')
   f.write('#!/usr/bin/%s\n' % nodejs_cmd)
@@ -278,6 +293,12 @@ def GenerateValidateBin(out_dir, nodejs_cmd):
 
 
 def RunSmokeTest(out_dir, nodejs_cmd):
+  """Runs a smoke test (minimum valid AMP and empty html file).
+
+  Args:
+    out_dir: output directory
+    nodejs_cmd: the command for calling Node.js
+  """
   logging.info('entering ...')
   # Run dist/validate on the minimum valid amp and observe that it passes.
   p = subprocess.Popen([nodejs_cmd, '%s/validate' % out_dir,
@@ -332,6 +353,7 @@ def CompileParseCssTestMinified(out_dir):
 
 
 def GenerateTestRunner(out_dir):
+  """Generates a test runner: a nodejs script that runs our minified tests."""
   logging.info('entering ...')
   f = open('%s/test_runner' % out_dir, 'w')
   f.write("""#!/usr/bin/nodejs
@@ -359,19 +381,24 @@ def RunTests(out_dir, nodejs_cmd):
   logging.info('... success')
 
 
-logging.basicConfig(format='[[%(filename)s %(funcName)s]] - %(message)s',
-                    level=logging.INFO)
-nodejs_cmd = getNodeJsCmd()
-CheckPrereqs()
-InstallNodeDependencies()
-SetupOutDir(out_dir='dist')
-GenValidatorPb2Py(out_dir='dist')
-GenValidatorGeneratedJs(out_dir='dist')
-CompileValidatorMinified(out_dir='dist')
-GenerateValidateBin(out_dir='dist', nodejs_cmd=nodejs_cmd)
-RunSmokeTest(out_dir='dist', nodejs_cmd=nodejs_cmd)
-CompileValidatorTestMinified(out_dir='dist')
-CompileHtmlparserTestMinified(out_dir='dist')
-CompileParseCssTestMinified(out_dir='dist')
-GenerateTestRunner(out_dir='dist')
-RunTests(out_dir='dist', nodejs_cmd=nodejs_cmd)
+def Main():
+  """The main method, which executes all build steps and runs the tests."""
+  logging.basicConfig(format='[[%(filename)s %(funcName)s]] - %(message)s',
+                      level=logging.INFO)
+  nodejs_cmd = GetNodeJsCmd()
+  CheckPrereqs()
+  InstallNodeDependencies()
+  SetupOutDir(out_dir='dist')
+  GenValidatorPb2Py(out_dir='dist')
+  GenValidatorGeneratedJs(out_dir='dist')
+  CompileValidatorMinified(out_dir='dist')
+  GenerateValidateBin(out_dir='dist', nodejs_cmd=nodejs_cmd)
+  RunSmokeTest(out_dir='dist', nodejs_cmd=nodejs_cmd)
+  CompileValidatorTestMinified(out_dir='dist')
+  CompileHtmlparserTestMinified(out_dir='dist')
+  CompileParseCssTestMinified(out_dir='dist')
+  GenerateTestRunner(out_dir='dist')
+  RunTests(out_dir='dist', nodejs_cmd=nodejs_cmd)
+
+if __name__ == '__main__':
+  Main()
