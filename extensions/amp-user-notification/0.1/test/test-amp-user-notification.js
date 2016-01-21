@@ -27,7 +27,6 @@ describe('amp-user-notification', () => {
   let stub;
   let stub1;
   let stub2;
-  let notifStub;
   let dftAttrs;
 
   function getUserNotification(attrs = {}) {
@@ -57,13 +56,9 @@ describe('amp-user-notification', () => {
       'data-dismiss-href': 'https://www.ampproject.org/post/here',
       'layout': 'nodisplay',
     };
-    notifStub = sinon.stub(AmpUserNotification.prototype, 'isExperimentOn_')
-        .returns(true);
   });
 
   afterEach(() => {
-    notifStub.restore();
-
     if (stub) {
       stub.restore();
       stub = null;
