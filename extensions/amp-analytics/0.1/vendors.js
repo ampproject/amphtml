@@ -41,6 +41,11 @@ export const ANALYTICS_CONFIG = {
       'scrollHeight': 'SCROLL_HEIGHT',
       'screenWidth': 'SCREEN_WIDTH',
       'screenHeight': 'SCREEN_HEIGHT'
+      // TODO: Requested by Parse.ly
+      //   screenAvailWidth (screen.availWidth)
+      //   screenAvailHeight (screen.availHeight)
+      //   colorDepth (screen.colorDepth)
+      //   client-side sessionization for session id, session initial URL, session referrer, session start time, last session start time
     }
     // TODO(btownsend, #871): Add a generic hit format to make custom analytics
     // easier.
@@ -63,6 +68,26 @@ export const ANALYTICS_CONFIG = {
           '${baseSuffix}'
     },
     'optout': '_gaUserPrefs.ioo'
+  },
+
+  'parsely': {
+    'requests': {
+      'host': 'https://srv.pixel.parsely.com',
+      'basePrefix': '{{host}}/plogger/?rand={{timestamp}}&idsite={{apikey}}&' +
+          'url={{ampdocUrl}}&urlref={{documentReferrer}}&' +
+          'screen={{screenWidth}}x{{screenHeight}}%7C{{screenAvailWidth}}x' +
+          '{{screenAvailHeight}}%7C{{colorDepth}}&title={{title}}&' +
+          'date={{timestamp}}&ampid={{clientId}}',
+      'pageview': '{{basePrefix}}&action=pageview'
+      // TODO: Engaged Time
+      // 'heartbeat': '{{basePrefix}}&action=heartbeat&inc={{engagedTime}}'
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true
+    }
+
   }
 };
 
