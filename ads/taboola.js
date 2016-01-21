@@ -15,18 +15,33 @@
  */
 
 import {writeScript} from '../src/3p';
+import {assert} from '../src/asserts';
+
+
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function taboola(global, data) {
-    let params = {
+
+    const blackList = ['height', 'initialWindowHeight', 'initialWindowWidth', 'type', 'width', 'placement', 'mode'];
+
+    const validateData = function(data, mandatoryFields) {
+        for (let i = 0; i < mandatoryFields.length; i++) {
+            const field = mandatoryFields[i];
+            assert(data[field],
+                'Missing attribute for amp-taboola: %s.', field);
+        }
+    };
+
+    validateData(data, ['publisher', 'placement', 'mode']);
+
+    const params = {
         referrer: data.referrer || global.context.referrer,
         url: data.url || global.context.canonicalUrl
     };
 
-    const blackList = ['height', 'initialWindowHeight', 'initialWindowWidth', 'type', 'width', 'placement', 'mode'];
 
     Object.keys(data).forEach(k => {
         if (blackList.indexOf(k) === -1) {
@@ -35,8 +50,8 @@ export function taboola(global, data) {
     });
 
     (global._taboola = global._taboola || []).push([{
-            pageId:    global.context.pageViewId,
-            //publisher: data.publisher,
+            viewId: global.context.pageViewId,
+            publisher: data.publisher,
             placement: data.placement,
             mode:      data.mode,
             framework:  'amp',
