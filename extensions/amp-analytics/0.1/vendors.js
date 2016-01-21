@@ -73,7 +73,7 @@ export const ANALYTICS_CONFIG = {
       'baseHit': '/plogger/?rand={{timestamp}}&idsite={{apikey}}&url={{ampdocUrl}}&urlref={{documentReferrer}}&screen={{screenWidth}}x{{screenHeight}}%7C{{screenAvailWidth}}x{{screenAvailHeight}}%7C{{colorDepth}}&title={{title}}&date={{timestamp}}&ampid={{clientId}}'
       'pageview': '{{baseHit}}&action=pageview',
       // TODO: Engaged Time
-      'heartbeat': '{{baseHit}}&action=heartbeat&inc={{engagedTime}}'
+      // 'heartbeat': '{{baseHit}}&action=heartbeat&inc={{engagedTime}}'
     }
   }
 };
