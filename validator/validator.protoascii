@@ -25,7 +25,7 @@ min_validator_revision_required: 75
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 115
+spec_file_revision: 116
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
 # These rules are just enough to validate the example from the spec.
@@ -2594,7 +2594,7 @@ error_formats {
 }
 error_formats {
   code: WRONG_PARENT_TAG
-  format: "The parent tag of tag '%1' is '%2', but it must be '%3'."
+  format: "The parent tag of tag '%1' is '%2', but it can only be '%3'."
 }
 error_formats {
   code: DISALLOWED_TAG_ANCESTOR
