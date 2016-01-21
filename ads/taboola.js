@@ -35,7 +35,7 @@ export function taboola(global, data) {
         }
     };
 
-    const valdateExactlyOne = function (data, alternativeFields) {
+    const validateExactlyOne = function (data, alternativeFields) {
         var countFileds = 0;
 
         for (let i = 0; i < alternativeFields.length; i++) {
@@ -50,7 +50,7 @@ export function taboola(global, data) {
     };
 
     validateData(data, ['publisher', 'placement', 'mode']);
-    valdateExactlyOne(data, ['article', 'video', 'photo', 'search', 'category', 'homepage', 'others']);
+    validateExactlyOne(data, ['article', 'video', 'photo', 'search', 'category', 'homepage', 'others']);
 
     const params = {
         referrer: data.referrer || global.context.referrer,
