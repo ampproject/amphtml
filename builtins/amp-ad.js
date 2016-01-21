@@ -20,8 +20,9 @@ import {assert} from '../src/asserts';
 import {getIframe, prefetchBootstrap} from '../src/3p-frame';
 import {IntersectionObserver} from '../src/intersection-observer';
 import {isLayoutSizeDefined} from '../src/layout';
-import {listenOnce} from '../src/iframe-helper';
+import {listen, listenOnce} from '../src/iframe-helper';
 import {loadPromise} from '../src/event-helper';
+import {log} from '../src/log';
 import {registerElement} from '../src/custom-element';
 import {timer} from '../src/timer';
 
@@ -31,6 +32,8 @@ const POSITION_FIXED_TAG_WHITELIST = {
   'AMP-LIGHTBOX': true
 };
 
+/** @const {string} */
+const TAG_ = 'AmpAd';
 
 /**
  * @param {!Window} win Destination window for the new element.
@@ -110,6 +113,9 @@ export function installAd(win) {
 
       /** @private {IntersectionObserver} */
       this.intersectionObserver_ = null;
+
+      /** @private @const {boolean} */
+      this.isResizable_ = this.element.hasAttribute('resizable');
     }
 
     /**
@@ -217,6 +223,12 @@ export function installAd(win) {
       assert(!this.isInFixedContainer_,
           '<amp-ad> is not allowed to be placed in elements with ' +
           'position:fixed: %s', this.element);
+      if (this.isResizable_) {
+        this.element.setAttribute('scrolling', 'no');
+        assert(this.getOverflowElement(),
+            'Overflow element must be defined for resizable ads: %s',
+            this.element);
+      }
       if (!this.iframe_) {
         this.iframe_ = getIframe(this.element.ownerDocument.defaultView,
             this.element);
@@ -227,12 +239,25 @@ export function installAd(win) {
         // Triggered by context.noContentAvailable() inside the ad iframe.
         listenOnce(this.iframe_, 'no-content', () => {
           this.noContentHandler_();
-        }, /* opt_is3P */true);
+        }, /* opt_is3P */ true);
         // Triggered by context.reportRenderedEntityIdentifier(…) inside the ad
         // iframe.
         listenOnce(this.iframe_, 'entity-id', info => {
           this.element.setAttribute('creative-id', info.id);
-        }, /* opt_is3P */true);
+        }, /* opt_is3P */ true);
+        listen(this.iframe_, 'embed-size', data => {
+          if (data.width !== undefined) {
+            this.iframe_.width = data.width;
+            this.element.setAttribute('width', data.width);
+          }
+          if (data.height !== undefined) {
+            const newHeight = Math.max(this.element./*OK*/offsetHeight +
+                data.height - this.iframe_./*OK*/offsetHeight, data.height);
+            this.iframe_.height = data.height;
+            this.element.setAttribute('height', newHeight);
+            this.updateHeight_(newHeight);
+          }
+        }, /* opt_is3P */ true);
       }
       return loadPromise(this.iframe_);
     }
@@ -242,6 +267,21 @@ export function installAd(win) {
       if (this.intersectionObserver_) {
         this.intersectionObserver_.onViewportCallback(inViewport);
       }
+    }
+
+    /**
+     * Updates the elements height to accommodate the iframe's requested height.
+     * @param {number} newHeight
+     * @private
+     */
+    updateHeight_(newHeight) {
+      if (!this.isResizable_) {
+        log.warn(TAG_,
+            'ignoring embed-size request because this ad is not resizable',
+            this.element);
+        return;
+      }
+      this.attemptChangeHeight(newHeight);
     }
 
     /**

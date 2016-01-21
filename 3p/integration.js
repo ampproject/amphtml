@@ -114,6 +114,7 @@ window.draw3p = function(opt_configCallback) {
   window.context.isMaster = window.context.master == window;
   window.context.data = data;
   window.context.noContentAvailable = triggerNoContentAvailable;
+  window.context.resize = triggerResizeRequest;
 
   if (data.type === 'facebook' || data.type === 'twitter') {
     // Only make this available to selected embeds until the generic solution is
@@ -137,6 +138,13 @@ function triggerDimensions(width, height) {
   nonSensitiveDataPostMessage('embed-size', {
     width: width,
     height: height,
+  });
+}
+
+function triggerResizeRequest(width, height) {
+  nonSensitiveDataPostMessage('embed-size', {
+    width: width,
+    height: height
   });
 }
 
