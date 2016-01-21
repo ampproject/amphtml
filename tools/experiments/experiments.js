@@ -16,9 +16,11 @@
 
 import '../../third_party/babel/custom-babel-helpers';
 import '../../src/polyfills';
-import {onDocumentReady} from '../../src/document-state';
-import {isExperimentOn, toggleExperiment} from '../../src/experiments';
+import {assert} from '../../src/asserts';
 import {getCookie, setCookie} from '../../src/cookies';
+import {isExperimentOn, toggleExperiment} from '../../src/experiments';
+import {listenOnce} from '../../src/event-helper';
+import {onDocumentReady} from '../../src/document-state';
 
 const COOKIE_MAX_AGE_DAYS = 180;  // 6 month
 
@@ -191,21 +193,48 @@ function toggleExperiment_(id, name, opt_on) {
   const currentlyOn = isExperimentOn_(id);
   const on = opt_on === undefined ? !currentlyOn : opt_on;
   // Protect against click jacking.
-  const confirmAndmakeLinterHappy = 'confirm';
   const confirmMessage = on ?
       'Do you really want to activate the AMP experiment' :
       'Do you really want to deactivate the AMP experiment';
-  if (!window[confirmAndmakeLinterHappy](`${confirmMessage}: "${name}"`)) {
-    return;
-  }
-  if (id == CANARY_EXPERIMENT_ID) {
-    const validUntil = new Date().getTime() +
-        COOKIE_MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
-    setCookie(window, 'AMP_CANARY', (on ? '1' : '0'), (on ? validUntil : 0));
-  } else {
-    toggleExperiment(window, id, on);
-  }
-  update();
+
+  showConfirmation_(`${confirmMessage}: "${name}"`, () => {
+    if (id == CANARY_EXPERIMENT_ID) {
+      const validUntil = new Date().getTime() +
+          COOKIE_MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
+      setCookie(window, 'AMP_CANARY', (on ? '1' : '0'), (on ? validUntil : 0));
+    } else {
+      toggleExperiment(window, id, on);
+    }
+    update();
+  });
+}
+
+
+/**
+ * Shows confirmation and calls callback if it's approved.
+ * @param {string} message
+ * @param {function()} callback
+ */
+function showConfirmation_(message, callback) {
+  const container = assert(document.getElementById('popup-container'));
+  const messageElement = assert(document.getElementById('popup-message'));
+  const confirmButton = assert(document.getElementById('popup-button-ok'));
+  const cancelButton = assert(document.getElementById('popup-button-cancel'));
+  const unlistenSet = [];
+  const closePopup = affirmative => {
+    container.classList.remove('show');
+    unlistenSet.forEach(unlisten => unlisten());
+    if (affirmative) {
+      callback();
+    }
+  };
+
+  messageElement.textContent = message;
+  unlistenSet.push(listenOnce(confirmButton, 'click',
+      () => closePopup(true)));
+  unlistenSet.push(listenOnce(cancelButton, 'click',
+      () => closePopup(false)));
+  container.classList.add('show');
 }
 
 
