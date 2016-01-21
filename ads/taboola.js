@@ -26,28 +26,31 @@ export function taboola(global, data) {
         url: data.url || global.context.canonicalUrl
     };
 
+    const blackList = ['height', 'initialWindowHeight', 'initialWindowWidth', 'type', 'width', 'placement', 'mode'];
 
-    ['article', 'video', 'photo', 'search', 'category', 'homepage'].forEach(function (p) {
-        if(data[p]) {
-            params[p] = data[p];
+    Object.keys(data).forEach(k => {
+        if (blackList.indexOf(k) === -1) {
+            params[k] = data[k]
         }
     });
 
     (global._taboola = global._taboola || []).push([{
             pageId:    global.context.pageViewId,
-            publisher: data.publisher,
+            //publisher: data.publisher,
             placement: data.placement,
             mode:      data.mode,
+            framework:  'amp',
             container: 'c'
         },
         params]);
 
     global.context.observeIntersection(function(changes) {
         changes.forEach(function(c) {
-            console.info('Effie Height of intersection', c.intersectionRect.height);
+            if (c.intersectionRect.height) {
+                global._taboola.push({visible: true, boundingClientRect: c.intersectionRect, placement: data.placement});
+            }
         });
     });
 
     writeScript(global, `https://cdn.taboola.com/libtrc/${data.publisher}/loader.js`);
 }
-
