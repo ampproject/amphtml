@@ -26,7 +26,6 @@ export function taboola(global, data) {
         url: data.url || global.context.canonicalUrl
     };
 
-    console.log("DATA->", data);
     const blackList = ['height', 'initialWindowHeight', 'initialWindowWidth', 'type', 'width', 'placement', 'mode'];
 
     Object.keys(data).forEach(k => {
