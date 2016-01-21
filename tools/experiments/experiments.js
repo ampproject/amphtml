@@ -59,14 +59,6 @@ const EXPERIMENTS = [
         'amp-access/amp-access-spec.md',
   },
 
-  // Amp User Notification
-  {
-    id: 'amp-user-notification',
-    name: 'Amp User Notification',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-        'amp-user-notification/amp-user-notification.md',
-  },
-
   // Dynamic CSS Classes
   {
     id: 'dynamic-css-classes',

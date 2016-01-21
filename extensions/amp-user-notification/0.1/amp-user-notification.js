@@ -19,16 +19,12 @@ import {assertHttpsUrl, addParamsToUrl} from '../../../src/url';
 import {assert} from '../../../src/asserts';
 import {cidFor} from '../../../src/cid';
 import {getService} from '../../../src/service';
-import {isExperimentOn} from '../../../src/experiments';
 import {log} from '../../../src/log';
 import {urlReplacementsFor} from '../../../src/url-replacements';
 import {viewerFor} from '../../../src/viewer';
 import {whenDocumentReady} from '../../../src/document-state';
 import {xhrFor} from '../../../src/xhr';
 
-
-/** @const */
-const EXPERIMENT = 'amp-user-notification';
 
 /**
  * @export
@@ -82,14 +78,6 @@ class NotificationInterface {
  */
 export class AmpUserNotification extends AMP.BaseElement {
 
-  /**
-   * @return {boolean}
-   * @private
-   */
-  isExperimentOn_() {
-    return isExperimentOn(this.getWin(), EXPERIMENT);
-  }
-
   /** @override */
   buildCallback() {
 
@@ -110,33 +98,31 @@ export class AmpUserNotification extends AMP.BaseElement {
       this.dialogResolve_ = resolve;
     });
 
-    if (this.isExperimentOn_()) {
-      /** @private @const {!UserNotificationManager} */
-      this.userNotificationManager_ = getUserNotificationManager_(this.win_);
+    /** @private @const {!UserNotificationManager} */
+    this.userNotificationManager_ = getUserNotificationManager_(this.win_);
 
-      this.elementId_ = assert(this.element.id,
-          'amp-user-notification should have an id.');
+    this.elementId_ = assert(this.element.id,
+        'amp-user-notification should have an id.');
 
-      assert(this.element.hasAttribute('data-show-if-href'),
-          `"amp-user-notification" (${this.elementId_}) ` +
-          'should have "data-show-if-href" attribute.');
-      /** @private @const {string} */
-      this.showIfHref_ = assertHttpsUrl(
-          this.element.getAttribute('data-show-if-href'), this.element);
+    assert(this.element.hasAttribute('data-show-if-href'),
+        `"amp-user-notification" (${this.elementId_}) ` +
+        'should have "data-show-if-href" attribute.');
+    /** @private @const {string} */
+    this.showIfHref_ = assertHttpsUrl(
+        this.element.getAttribute('data-show-if-href'), this.element);
 
-      assert(this.element.hasAttribute('data-dismiss-href'),
-          `"amp-user-notification" (${this.elementId_}) ` +
-          'should have "data-dismiss-href" attribute.');
+    assert(this.element.hasAttribute('data-dismiss-href'),
+        `"amp-user-notification" (${this.elementId_}) ` +
+        'should have "data-dismiss-href" attribute.');
 
-      /** @private @const {string} */
-      this.dismissHref_ = assertHttpsUrl(
-          this.element.getAttribute('data-dismiss-href'), this.element);
+    /** @private @const {string} */
+    this.dismissHref_ = assertHttpsUrl(
+        this.element.getAttribute('data-dismiss-href'), this.element);
 
-      this.userNotificationManager_
-          .registerUserNotification(this.elementId_, this);
+    this.userNotificationManager_
+        .registerUserNotification(this.elementId_, this);
 
-      this.registerAction('dismiss', this.dismiss.bind(this));
-    }
+    this.registerAction('dismiss', this.dismiss.bind(this));
   }
 
   /**
