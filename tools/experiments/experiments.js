@@ -49,14 +49,6 @@ const EXPERIMENTS = [
         'DEVELOPING.md#amp-dev-channel-experimental',
   },
 
-  // AMP Analytics
-  {
-    id: 'amp-analytics',
-    name: 'AMP Analytics',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-        'amp-analytics/amp-analytics.md',
-  },
-
   // AMP Access
   {
     id: 'amp-access',
