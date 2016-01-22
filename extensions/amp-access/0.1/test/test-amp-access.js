@@ -594,7 +594,7 @@ describe('AccessService pingback', () => {
     visibilityChanged = new Observable();
     service.viewer_ = {
       isVisible: () => true,
-      whenVisible: () => Promise.resolve(),
+      whenFirstVisible: () => Promise.resolve(),
       onVisibilityChanged: callback => visibilityChanged.add(callback),
       broadcast: () => {},
     };

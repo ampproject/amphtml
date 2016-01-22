@@ -17,27 +17,23 @@
 import * as sinon from 'sinon';
 import {Performance, performanceFor} from '../../src/performance';
 import {adopt} from '../../src/runtime';
+import {resourcesFor} from '../../src/resources';
+import {viewerFor} from '../../src/viewer';
 
 
 describe('performance', () => {
   let sandbox;
-  let windowMock;
   let perf;
-  let windowApi;
   let clock;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
-    const WindowApi = function() {};
-    windowApi = new WindowApi();
-    windowMock = sandbox.mock(windowApi);
-    perf = new Performance(windowMock);
+    perf = new Performance(window);
   });
 
   afterEach(() => {
     perf = null;
-    windowAPi = null;
     clock.restore();
     clock = null;
     sandbox.restore();
@@ -234,5 +230,119 @@ describe('performance', () => {
     window.AMP.setTickFunction(function() {}, flushSpy);
 
     expect(flushSpy.calledOnce).to.be.true;
+  });
+
+  describe('coreServicesAvailable', () => {
+    let tickSpy;
+    let viewer;
+    let whenFirstVisibleStub;
+    let whenReadyToRetrieveResourcesStub;
+    let hasBeenVisibleStub;
+    let whenFirstVisiblePromise;
+    let whenFirstVisibleResolve;
+    let whenReadyToRetrieveResourcesPromise;
+    let whenReadyToRetrieveResourcesResolve;
+    let whenViewportLayoutCompleteStub;
+    let whenViewportLayoutCompletePromise;
+    let whenViewportLayoutCompleteResolve;
+
+    function stubHasBeenVisible(visibility) {
+      hasBeenVisibleStub = sinon.stub(viewer, 'hasBeenVisible')
+          .returns(visibility);
+    }
+
+    beforeEach(() => {
+      viewer = viewerFor(window);
+      resources = resourcesFor(window);
+
+      tickSpy = sinon.spy(perf, 'tick');
+
+      whenFirstVisiblePromise = new Promise(resolve => {
+        whenFirstVisibleResolve = resolve;
+      });
+
+      whenReadyToRetrieveResourcesPromise = new Promise(resolve => {
+        whenReadyToRetrieveResourcesResolve = resolve;
+      });
+
+      whenViewportLayoutCompletePromise = new Promise(resolve => {
+        whenViewportLayoutCompleteResolve = resolve;
+      });
+
+      whenFirstVisibleStub = sinon.stub(viewer, 'whenFirstVisible')
+          .returns(whenFirstVisiblePromise);
+      whenReadyToRetrieveResourcesStub = sinon
+          .stub(perf, 'whenReadyToRetrieveResources_')
+          .returns(whenReadyToRetrieveResourcesPromise);
+      whenViewportLayoutCompleteStub = sinon
+          .stub(perf, 'whenViewportLayoutComplete_')
+          .returns(whenViewportLayoutCompletePromise);
+    });
+
+    afterEach(() => {
+      whenFirstVisibleStub.restore();
+      whenReadyToRetrieveResourcesStub.restore();
+      whenViewportLayoutCompleteStub.restore();
+      if (hasBeenVisibleStub) {
+        hasBeenVisibleStub.restore();
+      }
+    });
+
+    describe('document started in prerender', () => {
+
+      beforeEach(() => {
+        clock.tick(100);
+        stubHasBeenVisible(false);
+        perf.coreServicesAvailable();
+      });
+
+      it('should tick `pc` with opt_value=400 when user request document ' +
+         'to be visible before before first viewport completion', () => {
+        clock.tick(100);
+        whenFirstVisibleResolve();
+        return viewer.whenFirstVisible().then(() => {
+          clock.tick(400);
+          whenReadyToRetrieveResourcesResolve();
+          whenViewportLayoutCompleteResolve();
+          return perf.whenViewportLayoutComplete_().then(() => {
+            expect(tickSpy.callCount).to.equal(1);
+            expect(tickSpy.firstCall.args[0]).to.equal('pc');
+            expect(Number(tickSpy.firstCall.args[2])).to.equal(400);;
+          });
+        });
+      });
+
+      it('should tick `pc` with `opt_value=0` when viewport is complete ' +
+         'before user request document to be visible', () => {
+        clock.tick(300);
+        whenReadyToRetrieveResourcesResolve();
+        whenViewportLayoutCompleteResolve();
+        return perf.whenViewportLayoutComplete_().then(() => {
+          expect(tickSpy.callCount).to.equal(1);
+          expect(tickSpy.firstCall.args[0]).to.equal('pc');
+          expect(tickSpy.firstCall.args[2]).to.equal(0);
+        });
+      });
+    });
+
+    describe('document did not start in prerender', () => {
+
+      beforeEach(() => {
+        stubHasBeenVisible(true);
+        perf.coreServicesAvailable();
+      });
+
+      it('should tick `pc` with `opt_value=undefined` when user requests ' +
+         'document to be visible', () => {
+        clock.tick(300);
+        whenReadyToRetrieveResourcesResolve();
+        whenViewportLayoutCompleteResolve();
+        return perf.whenViewportLayoutComplete_().then(() => {
+          expect(tickSpy.callCount).to.equal(1);
+          expect(tickSpy.firstCall.args[0]).to.equal('pc');
+          expect(tickSpy.firstCall.args[2]).to.be.undefined;
+        });
+      });
+    });
   });
 });
