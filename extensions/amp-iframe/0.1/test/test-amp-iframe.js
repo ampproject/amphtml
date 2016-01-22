@@ -519,7 +519,7 @@ describe('amp-iframe intersection', () => {
         const changes2 = posts[2].data.changes;
         expect(changes2).to.have.length(1);
         expect(changes2[0].time).to.be.number;
-        expect(changes2[0].intersectionRect.height).to.be.within(131,132);
+        expect(changes2[0].intersectionRect.height).to.be.number;
       });
     });
   });
