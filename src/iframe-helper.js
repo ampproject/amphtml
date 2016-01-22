@@ -40,7 +40,7 @@ export function listen(iframe, typeOfMessage, callback, opt_is3P) {
     if (event.origin != origin && !mode.localDev && !mode.test) {
       return;
     }
-    if (event.source != iframe.contentWindow && !mode.localDev && !mode.test) {
+    if (event.source != iframe.contentWindow) {
       return;
     }
     if (!event.data || event.data.sentinel != sentinel) {
