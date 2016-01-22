@@ -7,8 +7,9 @@ parent.parent./*OK*/postMessage('loaded-iframe', '*');
 window.addEventListener('message', function(event) {
   if (event.data && event.data.sentinel == 'amp-test') {
     if (event.data.type == 'requestHeight') {
+      var sentinel = event.data.is3p ? 'amp-3p': 'amp';
       parent./*OK*/postMessage({
-        sentinel: 'amp',
+        sentinel: sentinel,
         type: 'embed-size',
         height: event.data.height
       }, '*');
