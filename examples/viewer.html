@@ -103,6 +103,14 @@
       text-decoration: underline;
     }
 
+    viewer[data-show-container="3"] #container3 {
+      visibility: visible;
+    }
+
+    viewer[data-show-container="3"] #show-container3-anchor {
+      text-decoration: underline;
+    }
+
     viewer.natural container {
       overflow-y: hidden;
     }
@@ -402,6 +410,10 @@
       new Viewer('container2', '2', false).start();
       addShowContainer('2');
 
+      new Viewer('container3', '3', false).start();
+      addShowContainer('3');
+
+
       showContainer('1');
     }
 
@@ -430,6 +442,7 @@
       <h1>Viewer</h1>
       <a class="show-container-anchor" id="show-container1-anchor">One</a>
       <a class="show-container-anchor" id="show-container2-anchor">Two</a>
+      <a class="show-container-anchor" id="show-container3-anchor">Three</a>
       <a>|</a>
       <a id="visibilityToggle">Visible</a>
     </header>
@@ -439,6 +452,11 @@
       </div>
     </container>
     <container id="container2">
+      <div class="wait">
+        Please wait, the AMP doc will appear here...
+      </div>
+    </container>
+    <container id="container3">
       <div class="wait">
         Please wait, the AMP doc will appear here...
       </div>
