@@ -20,11 +20,9 @@ limitations under the License.
 
 # AMP HTML ⚡
 
-AMP HTML is a way to build web pages for static content that render with reliable, fast performance. It is our attempt at fixing what many perceive as painfully slow page load times – especially when reading content on the mobile web.
+[AMP HTML](https://www.ampproject.org/docs/get_started/about-amp.html) is a way to build web pages for static content that render with reliable, fast performance. It is our attempt at fixing what many perceive as painfully slow page load times – especially when reading content on the mobile web.
 
-AMP HTML is entirely built on existing web technologies. It achieves reliable performance by restricting some parts of HTML, CSS and JavaScript. These restrictions are enforced with a validator that ships with AMP HTML. To make up for those limitations AMP HTML defines a set of [custom elements](http://www.html5rocks.com/en/tutorials/webcomponents/customelements/) for rich content beyond basic HTML.
-
-For more info on how AMP HTML works, and some insights into the design, please read our blog post ["A new approach to web performance"](https://www.ampproject.org/how-it-works/) (which may be the first AMP HTML file you ever see :). We also have a non-technical description of what we are doing on [www.ampproject.org](https://www.ampproject.org).
+AMP HTML is entirely built on existing web technologies. It achieves reliable performance by restricting some parts of HTML, CSS and JavaScript. These restrictions are enforced with a validator that ships with AMP HTML. To make up for those limitations AMP HTML defines a set of [custom elements](http://www.html5rocks.com/en/tutorials/webcomponents/customelements/) for rich content beyond basic HTML. Learn more about [how AMP speeds up performance](https://www.ampproject.org/docs/get_started/technical_overview.html).
 
 # How does AMP HTML work?
 
@@ -52,6 +50,8 @@ This allows the AMP library to include:
 * Some custom elements, called AMP HTML components, which make common patterns
   easy to implement in a performant way.
 
+Get started [creating your first AMP page](https://www.ampproject.org/docs/get_started/create_page.html).
+
 ## The AMP JS library
 
 The AMP JS library provides [builtin](builtins/README.md) AMP Components, manages the loading of external resources, and ensures a reliably fast time-to-paint.
@@ -59,7 +59,7 @@ The AMP JS library provides [builtin](builtins/README.md) AMP Components, manage
 ## The AMP Validator
 
 The AMP Validator allows a web developer to easily identify if the web page
-doesn't meet the AMP HTML specification.
+doesn't meet the [AMP HTML specification](spec/amp-html-format.md).
 
 Adding "#development=1" to the URL of the page instructs the AMP Runtime to run
 a series of assertions confirming the page's markup meets the AMP HTML
@@ -72,9 +72,11 @@ the specification.  This allows an app to make sure the page is fast and
 mobile-friendly, as pages adhering to the AMP HTML specification are reliably
 fast.
 
+Learn more about [validating your AMP pages](https://www.ampproject.org/docs/guides/validate.html).
+
 ## AMP HTML Components
 
-AMP HTML Components are a series of additional custom elements that supplement
+AMP HTML Components are a series of extended custom elements that supplement
 or replace functionality of core HTML5 elements to allow the runtime to ensure
 it is solely responsible for loading external assets and to provide for shared
 best practices in implementation.
@@ -97,13 +99,17 @@ as either image files (GIF) or video files (WebM or MP4) based on browser compat
 
 # Further Reading
 
+If you are creating AMP pages,
+check out the docs on [ampproject.org](https://www.ampproject.org/).
+
+These docs are public and open-source: [https://github.com/ampproject/docs/](https://github.com/ampproject/docs/).
+See something that's missing from the docs, or that could be worded better?
+[Create an issue](https://github.com/ampproject/docs/issues) and
+we will do our best to respond quickly.
+
 Resources:
 * [AMP HTML samples](examples/)
 * [AMP-HTML on StackOverflow](https://stackoverflow.com/questions/tagged/amp-html)
-
-Tutorials:
-* [How to Create a Basic AMP HTML Page](docs/create_page.md)
-* [How to Include Common Features](docs/include_features.md)
 
 <!--
 Not yet done.
@@ -119,9 +125,6 @@ Reference:
 Technical Specifications:
 * [AMP HTML format specification](spec/amp-html-format.md)
 * [AMP HTML custom element specification](spec/amp-html-components.md)
-
-Blog posts:
- * [Accelerated Mobile Pages – A new approach to web performance](https://www.ampproject.org/how-it-works/)
 
 # Who makes AMP HTML?
 

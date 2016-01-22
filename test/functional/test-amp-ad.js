@@ -40,6 +40,11 @@ describe('amp-ad', () => {
           for (const key in attributes) {
             a.setAttribute(key, attributes[key]);
           }
+          if (attributes.resizable !== undefined) {
+            const overflowEl = iframe.doc.createElement('div');
+            overflowEl.setAttribute('overflow', '');
+            a.appendChild(overflowEl);
+          }
           // Make document long.
           a.style.marginBottom = '1000px';
           if (opt_handleElement) {
@@ -153,6 +158,72 @@ describe('amp-ad', () => {
       lightbox.appendChild(p);
       return ad;
     })).to.be.not.be.rejected;
+  });
+
+  describe('ad resize', () => {
+    it('should listen for resize events',() => {
+      const iframeSrc = 'http://iframe.localhost:' + location.port +
+          '/base/test/fixtures/served/iframe.html';
+      return getAd({
+        width: 100,
+        height: 100,
+        type: 'a9',
+        src: 'testsrc',
+        resizable: ''
+      }, 'https://schema.org').then(element => {
+        return new Promise((resolve, unusedReject) => {
+          impl = element.implementation_;
+          impl.layoutCallback();
+          impl.updateHeight_ = newHeight => {
+            expect(newHeight).to.equal(217);
+            resolve(impl);
+          };
+          impl.iframe_.onload = function() {
+            impl.iframe_.contentWindow.postMessage({
+              sentinel: 'amp-test',
+              type: 'requestHeight',
+              is3p: true,
+              height: 217
+            }, '*');
+          };
+          impl.iframe_.src = iframeSrc;
+        });
+      }).then(impl => {
+        expect(impl.iframe_.height).to.equal('217');
+      });
+    });
+    it('should fallback for resize with overflow element',() => {
+      return getAd({
+        width: 100,
+        height: 100,
+        type: 'a9',
+        src: 'testsrc',
+        resizable: ''
+      }, 'https://schema.org').then(element => {
+        impl = element.implementation_;
+        impl.attemptChangeHeight = sinon.spy();
+        impl.changeHeight = sinon.spy();
+        impl.updateHeight_(217);
+        expect(impl.changeHeight.callCount).to.equal(0);
+        expect(impl.attemptChangeHeight.callCount).to.equal(1);
+        expect(impl.attemptChangeHeight.firstCall.args[0]).to.equal(217);
+      });
+    });
+    it('should not resize a non-resizable ad',() => {
+      return getAd({
+        width: 100,
+        height: 100,
+        type: 'a9',
+        src: 'testsrc'
+      }, 'https://schema.org').then(element => {
+        impl = element.implementation_;
+        impl.attemptChangeHeight = sinon.spy();
+        impl.changeHeight = sinon.spy();
+        impl.updateHeight_(217);
+        expect(impl.changeHeight.callCount).to.equal(0);
+        expect(impl.attemptChangeHeight.callCount).to.equal(0);
+      });
+    });
   });
 
   describe('ad intersection', () => {
@@ -286,7 +357,7 @@ describe('amp-ad', () => {
       });
     });
 
-    it('should collapse when equestChangeHeight succeeds', () => {
+    it('should collapse when attemptChangeHeight succeeds', () => {
       return getAd({
         width: 300,
         height: 750,
