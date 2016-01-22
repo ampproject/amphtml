@@ -112,71 +112,6 @@ export function getIframe(parentWindow, element, opt_type) {
 }
 
 /**
- * Allows listening for message from the iframe. Returns an unlisten
- * function to remove the listener.
- *
- * @param {!Element} iframe
- * @param {string} typeOfMessage
- * @param {function(!Object)} callback Called when a message of this type
- *     arrives for this iframe.
- * @return {!UnlistenDef}
- */
-export function listen(iframe, typeOfMessage, callback) {
-  const win = iframe.ownerDocument.defaultView;
-  const origin = iframe.ampLocation.origin;
-  const listener = function(event) {
-    if (event.origin != origin) {
-      return;
-    }
-    if (event.source != iframe.contentWindow) {
-      return;
-    }
-    if (!event.data || event.data.sentinel != 'amp-3p') {
-      return;
-    }
-    if (event.data.type != typeOfMessage) {
-      return;
-    }
-    callback(event.data);
-  };
-
-  win.addEventListener('message', listener);
-
-  return function() {
-    win.removeEventListener('message', listener);
-  };
-}
-
-/**
- * Allows listening for a message from the iframe and then removes the listener
- *
- * @param {!Element} iframe
- * @param {string} typeOfMessage
- * @param {function(!Object)} callback Called when a message of this type
- *     arrives for this iframe.
- * @return {!UnlistenDef}
- */
-export function listenOnce(iframe, typeOfMessage, callback) {
-  const unlisten = listen(iframe, typeOfMessage, data => {
-    unlisten();
-    return callback(data);
-  });
-  return unlisten;
-}
-
-/**
- * Posts a message to the iframe;
- * @param {!Element} element The 3p iframe.
- * @param {string} type Type of the message.
- * @param {!Object} object Message payload.
- */
-export function postMessage(iframe, type, object) {
-  object.type = type;
-  object.sentinel = 'amp-3p';
-  iframe.contentWindow./*OK*/postMessage(object, iframe.ampLocation.origin);
-}
-
-/**
  * Copies data- attributes from the element into the attributes object.
  * Removes the data- from the name and capitalizes after -. If there
  * is an attribute called json, parses the JSON and adds it to the
@@ -274,6 +209,7 @@ function getCustomBootstrapBaseUrl(parentWindow) {
   // redirect to the proxy origin which is the important one.
   assert(parseUrl(url).origin != parseUrl(parentWindow.location.href).origin,
       '3p iframe url must not be on the same origin as the current document ' +
-      '%s in element %s.', url, meta);
+      '%s in element %s. See https://github.com/ampproject/amphtml/blob/' +
+      'master/spec/amp-iframe-origin-policy.md for details.', url, meta);
   return url + '?$internalRuntimeVersion$';
 }

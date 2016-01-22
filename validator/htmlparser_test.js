@@ -158,6 +158,16 @@ describe('HtmlParser', () => {
       'startTag(custom,[foo,Hello])', 'pcdata("world.")', 'endTag(more-tags)',
       'endTag(a-tag)', 'endDoc()']);
   });
+
+  it('parses oddly formatted attributes', () => {
+    const handler = new LoggingHandler();
+    const parser = new amp.htmlparser.HtmlParser();
+    // Note the two double quotes at the end of the tag.
+    parser.parse(handler, '<a href="foo.html""></a>');
+    expect(handler.log).toEqual([
+        'startDoc()', 'startTag(a,[href,foo.html,","])',
+        'endTag(a)', 'endDoc()' ]);
+  });
 });
 
 /**

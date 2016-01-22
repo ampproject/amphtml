@@ -172,9 +172,7 @@ class UrlReplacements {
     const expr = this.getExpr_(opt_bindings);
     let replacementPromise;
     const encodeValue = val => {
-      // Value 0 is specialcased because the numeric 0 is a valid substitution
-      // value.
-      if (!val && val !== 0) {
+      if (val == null) {
         val = '';
       }
       return encodeURIComponent(val);
@@ -184,10 +182,10 @@ class UrlReplacements {
       if (typeof opt_strargs == 'string') {
         args = opt_strargs.split(',');
       }
-      const val =
-          (args.length == 0 && opt_bindings && (name in opt_bindings)) ?
-          opt_bindings[name] :
-          this.replacements_[name].apply(this.replacements_, args);
+      const binding = (opt_bindings && (name in opt_bindings)) ?
+          opt_bindings[name] : this.replacements_[name];
+      const val = (typeof binding == 'function') ?
+          binding.apply(null, args) : binding;
       // In case the produced value is a promise, we don't actually
       // replace anything here, but do it again when the promise resolves.
       if (val && val.then) {

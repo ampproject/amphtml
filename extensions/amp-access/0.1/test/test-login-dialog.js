@@ -17,8 +17,9 @@
 import {openLoginDialog} from '../login-dialog';
 import * as sinon from 'sinon';
 
-const RETURN_URL_ESC = 'http%3A%2F%2Flocalhost%3A8000%2Fextensions' +
-    '%2Famp-access%2F0.1%2Famp-login-done.html';
+const RETURN_URL_ESC = encodeURIComponent('http://localhost:8000/extensions' +
+    '/amp-access/0.1/amp-login-done.html?url=' +
+    encodeURIComponent('http://localhost:8000/test-login-dialog'));
 
 
 describe('LoginDialog', () => {

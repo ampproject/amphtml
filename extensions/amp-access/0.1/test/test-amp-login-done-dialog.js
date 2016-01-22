@@ -41,7 +41,9 @@ describe('LoginDoneDialog', () => {
         language: 'fr-FR'
       },
       location: {
-        hash: '#result1'
+        hash: '#result1',
+        search: '',
+        replace: sandbox.spy()
       },
       addEventListener: (type, callback) => {
         if (type == 'message') {
@@ -56,6 +58,7 @@ describe('LoginDoneDialog', () => {
       opener: {
         postMessage: () => {},
       },
+      open: () => {},
       postMessage: () => {},
       setTimeout: (callback, t) => window.setTimeout(callback, t),
       document: {
@@ -152,7 +155,7 @@ describe('LoginDoneDialog', () => {
   });
 
 
-  describe('postback_', () => {
+  describe('postbackOrRedirect_', () => {
 
     it('should post message to opener', () => {
       openerMock.expects('postMessage')
@@ -163,7 +166,7 @@ describe('LoginDoneDialog', () => {
               }),
               '*')
           .once();
-      const promise = dialog.postback_();
+      const promise = dialog.postbackOrRedirect_();
       return Promise.resolve()
           .then(() => {
             succeed();
@@ -176,12 +179,26 @@ describe('LoginDoneDialog', () => {
           });
     });
 
-    it('should fail without opener', () => {
+    it('should redirect to url without opener', () => {
+      windowApi.location.search = '?url=' +
+          encodeURIComponent('http://acme.com/doc1');
       windowApi.opener = null;
-      return dialog.postback_()
+      return dialog.postbackOrRedirect_()
           .then(() => 'SUCCESS', error => 'ERROR ' + error)
           .then(res => {
-            expect(res).to.match(/Opener not available/);
+            expect(res).to.equal('SUCCESS');
+            expect(windowApi.location.replace.callCount).to.equal(1);
+            expect(windowApi.location.replace.firstCall.args[0]).to.equal(
+                'http://acme.com/doc1');
+          });
+    });
+
+    it('should fail without opener and redirect URL', () => {
+      windowApi.opener = null;
+      return dialog.postbackOrRedirect_()
+          .then(() => 'SUCCESS', error => 'ERROR ' + error)
+          .then(res => {
+            expect(res).to.match(/No opener or return location available/);
             expect(messageListener).to.not.exist;
           });
     });

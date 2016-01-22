@@ -19,6 +19,7 @@ import {onDocumentElementClick_} from '../../src/document-click';
 describe('test-document-click onDocumentElementClick_', () => {
   let evt;
   let doc;
+  let win;
   let tgt;
   let elem;
   let docElem;
@@ -26,11 +27,13 @@ describe('test-document-click onDocumentElementClick_', () => {
   let preventDefaultSpy;
   let scrollIntoViewSpy;
   let querySelectorSpy;
+  let replaceStateSpy;
   let viewport;
 
   beforeEach(() => {
     preventDefaultSpy = sinon.spy();
     scrollIntoViewSpy = sinon.spy();
+    replaceStateSpy = sinon.spy();
     elem = {};
     getElementByIdSpy = sinon.stub();
     querySelectorSpy = sinon.stub();
@@ -39,10 +42,16 @@ describe('test-document-click onDocumentElementClick_', () => {
     doc = {
       getElementById: getElementByIdSpy,
       querySelector: querySelectorSpy,
-      location: {
-        href: 'https://www.google.com/some-path?hello=world#link'
-      }
+      defaultView: {
+        location: {
+          href: 'https://www.google.com/some-path?hello=world#link'
+        },
+        history: {
+          replaceState: replaceStateSpy
+        },
+      },
     };
+    win = doc.defaultView;
     docElem = {
       ownerDocument: doc
     };
@@ -71,7 +80,7 @@ describe('test-document-click onDocumentElementClick_', () => {
   describe('when linking to a different origin or path', () => {
 
     beforeEach(() => {
-      doc.location.href = 'https://www.google.com/some-path?hello=world#link';
+      win.location.href = 'https://www.google.com/some-path?hello=world#link';
     });
 
     it('should not do anything on path change', () => {
@@ -118,7 +127,7 @@ describe('test-document-click onDocumentElementClick_', () => {
   describe('when linking to identifier', () => {
 
     beforeEach(() => {
-      doc.location.href = 'https://www.google.com/some-path?hello=world';
+      win.location.href = 'https://www.google.com/some-path?hello=world';
       tgt.href = 'https://www.google.com/some-path?hello=world#test';
     });
 
@@ -155,7 +164,7 @@ describe('test-document-click onDocumentElementClick_', () => {
     });
 
     it('should not call scrollIntoView if element with id is not found or ' +
-       'anchor with name is not found', () => {
+       'anchor with name is not found, but should still update URL', () => {
       getElementByIdSpy.returns(null);
       querySelectorSpy.returns(null);
       expect(getElementByIdSpy.callCount).to.equal(0);
@@ -163,6 +172,8 @@ describe('test-document-click onDocumentElementClick_', () => {
       onDocumentElementClick_(evt, viewport);
       expect(getElementByIdSpy.callCount).to.equal(1);
       expect(scrollIntoViewSpy.callCount).to.equal(0);
+      expect(replaceStateSpy.callCount).to.equal(1);
+      expect(replaceStateSpy.args[0][2]).to.equal('#test');
     });
 
     it('should call scrollIntoView if element with id is found', () => {
@@ -171,15 +182,19 @@ describe('test-document-click onDocumentElementClick_', () => {
       expect(scrollIntoViewSpy.callCount).to.equal(0);
       onDocumentElementClick_(evt, viewport);
       expect(scrollIntoViewSpy.callCount).to.equal(1);
+      expect(replaceStateSpy.callCount).to.equal(1);
+      expect(replaceStateSpy.args[0][2]).to.equal('#test');
     });
 
-    it('should call scrollIntoView if element with id is found', () => {
+    it('should call scrollIntoView if element with name is found', () => {
       getElementByIdSpy.returns(null);
       querySelectorSpy.returns(elem);
 
       expect(scrollIntoViewSpy.callCount).to.equal(0);
       onDocumentElementClick_(evt, viewport);
       expect(scrollIntoViewSpy.callCount).to.equal(1);
+      expect(replaceStateSpy.callCount).to.equal(1);
+      expect(replaceStateSpy.args[0][2]).to.equal('#test');
     });
   });
 });

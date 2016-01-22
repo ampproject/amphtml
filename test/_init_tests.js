@@ -22,7 +22,7 @@ import {adopt} from '../src/runtime';
 adopt(global);
 
 // Make amp section in karma config readable by tests.
-global.ampTestRuntimeConfig = parent.karma.config.amp;
+global.ampTestRuntimeConfig = parent.karma ? parent.karma.config.amp : {};
 
 
 // Hack for skipping tests on Travis that don't work there.
@@ -68,6 +68,10 @@ afterEach(() => {
   window.localStorage.clear();
   window.ampExtendedElements = {};
   window.ENABLE_LOG = false;
+  if (!/native/.test(window.setTimeout)) {
+    throw new Error('You likely forgot to restore sinon timers ' +
+        '(installed via sandbox.useFakeTimers).');
+  }
 });
 
 chai.Assertion.addMethod('attribute', function(attr) {
@@ -96,32 +100,35 @@ chai.Assertion.addMethod('class', function(className) {
 
 chai.Assertion.addProperty('visible', function() {
   const obj = this._obj;
-  const value = window.getComputedStyle(obj)
-      .getPropertyValue('visibility');
+  const computedStyle = window.getComputedStyle(obj);
+  const visibility = computedStyle.getPropertyValue('visibility');
+  const opacity = computedStyle.getPropertyValue('opacity');
   const tagName = obj.tagName.toLowerCase();
   this.assert(
-    value === 'visible',
+    visibility === 'visible' || parseInt(opacity, 10) > 0,
     'expected element \'' +
         tagName + '\' to be #{exp}, got #{act}. with classes: ' + obj.className,
     'expected element \'' +
         tagName + '\' not to be #{act}. with classes: ' + obj.className,
     'visible',
-    value
+    visibility
   );
 });
 
 chai.Assertion.addProperty('hidden', function() {
   const obj = this._obj;
-  const value = window.getComputedStyle(obj).getPropertyValue('visibility');
+  const computedStyle = window.getComputedStyle(obj);
+  const visibility = computedStyle.getPropertyValue('visibility');
+  const opacity = computedStyle.getPropertyValue('opacity');
   const tagName = obj.tagName.toLowerCase();
   this.assert(
-     value === 'hidden',
+     visibility === 'hidden' || parseInt(opacity, 10) == 0,
     'expected element \'' +
         tagName + '\' to be #{exp}, got #{act}. with classes: ' + obj.className,
     'expected element \'' +
         tagName + '\' not to be #{act}. with classes: ' + obj.className,
     'hidden',
-    value
+    visibility
   );
 });
 

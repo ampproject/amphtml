@@ -47,8 +47,13 @@ export function getService(win, id, opt_factory) {
   const services = getServices(win);
   let s = services[id];
   if (!s) {
-    s = services[id] = {};
+    s = services[id] = {
+      obj: null,
+      promise: null,
+      resolve: null,
+    };
   }
+
   if (!s.obj) {
     assert(opt_factory, 'Factory not given and service missing %s', id);
     s.obj = opt_factory(win);
@@ -68,34 +73,12 @@ export function getService(win, id, opt_factory) {
  * Users should typically wrap this as a special purpose function (e.g.
  * viewportFor(win)) for type safety and because the factory should not be
  * passed around.
+ * TODO
  * @param {!Window} win
  * @param {string} id of the service.
- * @param {string} provideByElement Name of the custom element that provides
- *     the implementation of this service.
  * @return {!Promise<*>}
  */
-export function getElementService(win, id, providedByElement) {
-  // Call `getElementService_` in a micro-task to ensure that `stubElements`
-  // has been called.
-  return Promise.resolve().then(() => {
-    return getElementService_(win, id, providedByElement);
-  });
-}
-
-/**
- * @param {!Window} win
- * @param {string} id of the service.
- * @param {string} provideByElement Name of the custom element that provides
- *     the implementation of this service.
- * @return {!Promise<*>}
- * @private
- */
-function getElementService_(win, id, providedByElement) {
-  assert(isElementScheduled(win, providedByElement),
-      'Service %s was requested to be provided through %s, ' +
-      'but %s is not loaded in the current page. To fix this ' +
-      'problem load the JavaScript file for %s in this page.',
-      id, providedByElement, providedByElement, providedByElement);
+export function getServicePromise(win, id) {
   const services = getServices(win);
   const s = services[id];
   if (s) {
@@ -106,6 +89,7 @@ function getElementService_(win, id, providedByElement) {
     }
     return s.promise;
   }
+
   // TODO(@cramforce): Add a check that if the element is eventually registered
   // that the service is actually provided and this promise resolves.
   let resolve;
@@ -119,30 +103,6 @@ function getElementService_(win, id, providedByElement) {
   };
 
   return p;
-}
-
-/**
- * @param {!Window} win
- * @param {string} elementName Name of an extended custom element.
- * @return {boolean} Whether this element is scheduled to be loaded.
- */
-function isElementScheduled(win, elementName) {
-  assert(win.ampExtendedElements, 'win.ampExtendedElements not created yet');
-  return !!win.ampExtendedElements[elementName];
-}
-
-/**
- * In order to provide better error messages we only allow to retrieve
- * services from other elements if those elements are loaded in the page.
- * This makes it possible to mark an element as loaded in a test.
- * @param {!Window} win
- * @param {string} elementName Name of an extended custom element.
- */
-export function markElementScheduledForTesting(win, elementName) {
-  if (!win.ampExtendedElements) {
-    win.ampExtendedElements = {};
-  }
-  win.ampExtendedElements[elementName] = true;
 }
 
 /**

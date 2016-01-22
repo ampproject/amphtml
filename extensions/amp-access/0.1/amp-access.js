@@ -144,6 +144,9 @@ export class AccessService {
     /** @private {?Promise<string>} */
     this.readerIdPromise_ = null;
 
+    /** @private {?JSONObject} */
+    this.authResponse_ = null;
+
     /** @private {!Promise} */
     this.firstAuthorizationPromise_ = new Promise(resolve => {
       /** @private {!Promise} */
@@ -152,6 +155,9 @@ export class AccessService {
 
     /** @private {?Promise} */
     this.reportViewPromise_ = null;
+
+    /** @private {?string} */
+    this.loginUrl_ = null;
 
     /** @private {?Promise} */
     this.loginPromise_ = null;
@@ -231,6 +237,9 @@ export class AccessService {
     actionServiceFor(this.win).installActionHandler(
         this.accessElement_, this.handleAction_.bind(this));
 
+    // Calculate login URL right away.
+    this.buildLoginUrl_();
+
     // Start authorization XHR immediately.
     this.runAuthorization_();
 
@@ -277,14 +286,24 @@ export class AccessService {
 
   /**
    * @param {string} url
+   * @param {boolean} useAuthData Allows `AUTH(field)` URL var substitutions.
    * @return {!Promise<string>}
    * @private
    */
-  buildUrl_(url) {
+  buildUrl_(url, useAuthData) {
     return this.getReaderId_().then(readerId => {
-      return this.urlReplacements_.expand(url, {
+      const vars = {
         'READER_ID': readerId
-      });
+      };
+      if (useAuthData) {
+        vars['AUTHDATA'] = field => {
+          if (this.authResponse_) {
+            return this.authResponse_[field];
+          }
+          return undefined;
+        };
+      }
+      return this.urlReplacements_.expand(url, vars);
     });
   }
 
@@ -301,13 +320,17 @@ export class AccessService {
 
     log.fine(TAG, 'Start authorization via ', this.config_.authorization);
     this.toggleTopClass_('amp-access-loading', true);
-    return this.buildUrl_(this.config_.authorization).then(url => {
+    const promise = this.buildUrl_(
+        this.config_.authorization, /* useAuthData */ false);
+    return promise.then(url => {
       log.fine(TAG, 'Authorization URL: ', url);
       return this.xhr_.fetchJson(url, {credentials: 'include'});
     }).then(response => {
       log.fine(TAG, 'Authorization response: ', response);
-      this.firstAuthorizationResolver_();
+      this.setAuthResponse_(response);
       this.toggleTopClass_('amp-access-loading', false);
+      this.toggleTopClass_('amp-access-error', false);
+      this.buildLoginUrl_();
       return new Promise((resolve, reject) => {
         onDocumentReady(this.win.document, () => {
           this.applyAuthorization_(response).then(resolve, reject);
@@ -316,7 +339,17 @@ export class AccessService {
     }).catch(error => {
       log.error(TAG, 'Authorization failed: ', error);
       this.toggleTopClass_('amp-access-loading', false);
+      this.toggleTopClass_('amp-access-error', true);
     });
+  }
+
+  /**
+   * @param {!JSONObject} authResponse
+   * @private
+   */
+  setAuthResponse_(authResponse) {
+    this.authResponse_ = authResponse;
+    this.firstAuthorizationResolver_();
   }
 
   /**
@@ -515,7 +548,9 @@ export class AccessService {
       log.fine(TAG, 'Ignore pingback');
       return Promise.resolve();
     }
-    return this.buildUrl_(this.config_.pingback).then(url => {
+    const promise = this.buildUrl_(
+        this.config_.pingback, /* useAuthData */ true);
+    return promise.then(url => {
       log.fine(TAG, 'Pingback URL: ', url);
       return this.xhr_.sendSignal(url, {
         method: 'POST',
@@ -566,9 +601,10 @@ export class AccessService {
     }
 
     log.fine(TAG, 'Start login');
-    const urlPromise = this.buildUrl_(assert(this.config_.login,
-        'Login URL is not configured'));
-    this.loginPromise_ = this.openLoginDialog_(urlPromise).then(result => {
+    assert(this.config_.login, 'Login URL is not configured');
+    // Login URL should always be available at this time.
+    const loginUrl = assert(this.loginUrl_, 'Login URL is not ready');
+    this.loginPromise_ = this.openLoginDialog_(loginUrl).then(result => {
       log.fine(TAG, 'Login dialog completed: ', result);
       this.loginPromise_ = null;
       const query = parseQueryString(result);
@@ -585,6 +621,21 @@ export class AccessService {
       throw reason;
     });
     return this.loginPromise_;
+  }
+
+  /**
+   * @return {!Promise<string>|undefined}
+   * @private
+   */
+  buildLoginUrl_() {
+    if (!this.config_.login) {
+      return;
+    }
+    return this.buildUrl_(this.config_.login, /* useAuthData */ true)
+        .then(url => {
+          this.loginUrl_ = url;
+          return url;
+        });
   }
 }
 

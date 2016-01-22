@@ -15,7 +15,6 @@
  */
 
 import {assertHttpsUrl} from '../../../src/url';
-import {isExperimentOn} from '../../../src/experiments';
 import {installCidService} from '../../../src/service/cid-impl';
 import {log} from '../../../src/log';
 import {urlReplacementsFor} from '../../../src/url-replacements';
@@ -31,18 +30,7 @@ import {ANALYTICS_CONFIG} from './vendors';
 installCidService(AMP.win);
 
 
-/** @const */
-const EXPERIMENT = 'amp-analytics';
-
 export class AmpAnalytics extends AMP.BaseElement {
-
-  /**
-   * @return {boolean}
-   * @private
-   */
-  isExperimentOn_() {
-    return isExperimentOn(this.getWin(), EXPERIMENT);
-  }
 
   /** @override */
   isLayoutSupported(unusedLayout) {
@@ -53,10 +41,6 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @override
    */
   createdCallback() {
-    if (!this.isExperimentOn_()) {
-      return;
-    }
-
     /**
      * @const {!JSONObject} Copied here for tests.
      * @private
@@ -66,9 +50,6 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    if (!this.isExperimentOn_()) {
-      return Promise.resolve();
-    }
 
     this.element.setAttribute('aria-hidden', 'true');
 

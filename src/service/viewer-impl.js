@@ -486,7 +486,6 @@ export class Viewer {
    * @param {*} data
    * @param {boolean} unusedAwaitResponse
    * @return {(!Promise<*>|undefined)}
-   * @package
    * @export
    */
   receiveMessage(eventType, data, unusedAwaitResponse) {
@@ -536,7 +535,6 @@ export class Viewer {
    * Provides a message delivery mechanism by which AMP document can send
    * messages to the viewer.
    * @param {function(string, *, boolean):(!Promise<*>|undefined)} deliverer
-   * @package
    * @export
    */
   setMessageDeliverer(deliverer) {

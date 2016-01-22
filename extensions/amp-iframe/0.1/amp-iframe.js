@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+import {IntersectionObserver} from '../../../src/intersection-observer';
 import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
-import {getMode} from '../../../src/mode';
+import {listen} from '../../../src/iframe-helper';
 import {loadPromise} from '../../../src/event-helper';
 import {log} from '../../../src/log';
 import {parseUrl} from '../../../src/url';
@@ -41,7 +42,7 @@ export class AmpIframe extends AMP.BaseElement {
     assert(
         url.protocol == 'https:' ||
         url.protocol == 'data:' ||
-            url.origin.indexOf('http://iframe.localhost:') == 0,
+        url.origin.indexOf('http://iframe.localhost:') == 0,
         'Invalid <amp-iframe> src. Must start with https://. Found %s',
         this.element);
     const containerUrl = parseUrl(containerSrc);
@@ -49,7 +50,8 @@ export class AmpIframe extends AMP.BaseElement {
         !((' ' + sandbox + ' ').match(/\s+allow-same-origin\s+/i)) ||
         (url.origin != containerUrl.origin && url.protocol != 'data:'),
         'Origin of <amp-iframe> must not be equal to container %s' +
-        'if allow-same-origin is set.',
+        'if allow-same-origin is set. See https://github.com/ampproject/' +
+        'amphtml/blob/master/spec/amp-iframe-origin-policy.md for details.',
         this.element);
     return src;
   }
@@ -115,7 +117,56 @@ export class AmpIframe extends AMP.BaseElement {
     this.placeholder_ = this.getPlaceholder();
     /** @private @const {boolean} */
     this.isClickToPlay_ = !!this.placeholder_;
+    /**
+     * Call to stop listening to viewport changes.
+     * @private {?function()}
+     */
+    this.unlistenViewportChanges_ = null;
+    /**
+     * The layout box of the ad iframe (as opposed to the amp-ad tag).
+     * In practice it often has padding to create a grey or similar box
+     * around ads.
+     * @private {!LayoutRect}
+     */
+    this.iframeLayoutBox_ = null;
   }
+
+  /**
+   * @override
+   */
+  onLayoutMeasure() {
+    // We remeasured this tag, lets also remeasure the iframe. Should be
+    // free now and it might have changed.
+    this.measureIframeLayoutBox_();
+    // When the framework has the need to remeasure us, our position might
+    // have changed. Send an intersection record if needed. This does nothing
+    // if we aren't currently in view.
+    if (this.intersectionObserver_) {
+      this.intersectionObserver_.fire();
+    }
+  }
+
+  /**
+   * Measure the layout box of the iframe if we rendered it already.
+   * @private
+   */
+  measureIframeLayoutBox_() {
+    if (this.iframe_) {
+      this.iframeLayoutBox_ =
+          this.getViewport().getLayoutRect(this.iframe_);
+    }
+  }
+
+  /**
+   * @override
+   */
+  getInsersectionElementLayoutBox() {
+    if (!this.iframeLayoutBox_) {
+      this.measureIframeLayoutBox_();
+    }
+    return this.iframeLayoutBox_;
+  }
+
 
   /** @override */
   layoutCallback() {
@@ -159,6 +210,9 @@ export class AmpIframe extends AMP.BaseElement {
     setSandbox(this.element, iframe, this.sandbox_);
     iframe.src = this.iframeSrc;
     this.element.appendChild(makeIOsScrollable(this.element, iframe));
+    /** @private {!IntersectionObserver} */
+    this.intersectionObserver_ =
+        new IntersectionObserver(this, this.iframe_);
 
     iframe.onload = () => {
       // Chrome does not reflect the iframe readystate.
@@ -183,6 +237,13 @@ export class AmpIframe extends AMP.BaseElement {
       listen(iframe, 'embed-ready', this.activateIframe_.bind(this));
     }
     return loadPromise(iframe);
+  }
+
+  /** @override  */
+  viewportCallback(inViewport) {
+    if (this.intersectionObserver_) {
+      this.intersectionObserver_.onViewportCallback(inViewport);
+    }
   }
 
   /**
@@ -242,34 +303,6 @@ function makeIOsScrollable(element, iframe) {
     return wrapper;
   }
   return iframe;
-}
-
-/**
- * Listens for message from the iframe.
- * @param {!Element} iframe
- * @param {string} typeOfMessage
- * @param {function(!Object)} callback
- */
-function listen(iframe, typeOfMessage, callback) {
-  assert(iframe.src, 'only iframes with src supported');
-  const origin = parseUrl(iframe.src).origin;
-  const win = iframe.ownerDocument.defaultView;
-  const mode = getMode();
-  win.addEventListener('message', function(event) {
-    if (event.origin != origin && !mode.localDev && !mode.test) {
-      return;
-    }
-    if (event.source != iframe.contentWindow) {
-      return;
-    }
-    if (!event.data || event.data.sentinel != 'amp') {
-      return;
-    }
-    if (event.data.type != typeOfMessage) {
-      return;
-    }
-    callback(event.data);
-  });
 }
 
 AMP.registerElement('amp-iframe', AmpIframe);

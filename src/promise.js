@@ -29,7 +29,7 @@ export function all(promises) {
     return Promise.resolve([]);
   }
 
-  const results = [];
+  const results = Array(left);
   return new Promise((resolve, reject) => {
     promises.forEach((promise, index) => {
       promise.then(result => {
@@ -38,9 +38,7 @@ export function all(promises) {
         if (left == 0) {
           resolve(results);
         }
-      }, error => {
-        reject(error);
-      });
+      }, reject);
     });
   });
 }

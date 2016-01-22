@@ -196,7 +196,7 @@ message AmpLayout {
 // Some tags are mandatory. Note that the tag name is not unique, that is,
 // there can be multiple tag specs covering the same name, e.g., for
 // multiple meta tags (with different attributes).
-// NEXT AVAILABLE TAG: 15
+// NEXT AVAILABLE TAG: 17
 message TagSpec {
   // Use lower-case tag names only.
   optional string name = 1;
@@ -216,12 +216,18 @@ message TagSpec {
   // If true, a tag conforming to this tag spec may occur at most once within
   // the document.
   optional bool unique = 5;
-  // If not set, any tag can be the parent of this tag.
+
   // If set to "$ROOT", this tag must be the root tag.
-  // If set to any other string, the tag must be nested inside the
+  // If set to any other string, the tag must be the direct child of the
   //   specified mandatory parent tag.
   optional string mandatory_parent = 6;
-
+  // If set, the tag must descend from (not necessarily direct parent of) the
+  // specified mandatory parent string.
+  optional string mandatory_ancestor = 15;
+  // Use only for tags where mandatory_ancestor is set. If tag validation fails
+  // due to the mandatory_ancestor, and this field is set, then the error
+  // detail will suggest the tag specified here as an alternative to consider.
+  optional string mandatory_ancestor_suggested_alternative = 16;
   // This tag may not descend from any tag with any of these tag names.
   repeated string disallowed_ancestor = 13;
 
@@ -285,6 +291,7 @@ message ValidationError {
     DEV_WARNING = 3; // DEPRECATED DO NOT USE.
   }
   optional Severity severity = 6 [ default = ERROR ];
+  // NEXT AVAILABLE TAG: 33
   enum Code {
     UNKNOWN_CODE = 0;
     MANDATORY_TAG_MISSING = 1;
@@ -301,7 +308,7 @@ message ValidationError {
     WRONG_PARENT_TAG = 7;
     STYLESHEET_TOO_LONG = 8;
     MANDATORY_CDATA_MISSING_OR_INCORRECT = 9;
-    MANDATORY_CDATA_VIOLATES_BLACKLIST = 30;
+    CDATA_VIOLATES_BLACKLIST = 30;
     DEV_MODE_ENABLED = 10;
     DEPRECATED_ATTR = 11;
     DEPRECATED_TAG = 12;
@@ -316,6 +323,8 @@ message ValidationError {
     TEMPLATE_IN_ATTR_NAME = 20;
     INCONSISTENT_UNITS_FOR_WIDTH_AND_HEIGHT = 21;
     DISALLOWED_TAG_ANCESTOR = 23;
+    MANDATORY_TAG_ANCESTOR = 31;
+    MANDATORY_TAG_ANCESTOR_WITH_HINT = 32;
   }
   optional Code code = 1;
   optional int32 line = 2 [ default = 1 ];

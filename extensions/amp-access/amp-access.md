@@ -14,4 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-TODO: Add documentation
+### <a name="amp-access"></a>`amp-access`
+
+See the [AMP Access spec](./amp-access-spec.md).

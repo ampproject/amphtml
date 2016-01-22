@@ -30,6 +30,7 @@ import {stubElements} from './custom-element';
 import {adopt} from './runtime';
 import {cssText} from '../build/css';
 import {maybeValidate} from './validator-integration';
+import {waitForExtensions} from './render-delaying-extensions';
 
 // We must under all circumstances call makeBodyVisible.
 // It is much better to have AMP tags not rendered than having
@@ -57,8 +58,10 @@ try {
       installGlobalClickListener(window);
 
       maybeValidate(window);
-    } finally {
+      makeBodyVisible(document, waitForExtensions(window));
+    } catch (e) {
       makeBodyVisible(document);
+    } finally {
       perf.tick('e_is');
       // TODO(erwinm): move invocation of the `flush` method when we have the
       // new ticks in place to batch the ticks properly.

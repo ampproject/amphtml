@@ -1,2 +1,2 @@
 FAIL
-feature_tests/amp_brightcove.html:48:2 The mandatory attribute 'data-account' is missing in tag 'amp-brightcove'. (see https://github.com/ampproject/amphtml/blob/master/extensions/amp-brightcove/amp-brightcove.md)
+feature_tests/amp_brightcove.html:46:2 The mandatory attribute 'data-account' is missing in tag 'amp-brightcove'. (see https://github.com/ampproject/amphtml/blob/master/extensions/amp-brightcove/amp-brightcove.md)

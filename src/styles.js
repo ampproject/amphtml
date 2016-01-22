@@ -16,6 +16,7 @@
 
 import {setStyles} from './style';
 
+
 /**
  * Adds the given css text to the given document.
  *
@@ -77,8 +78,10 @@ export function installStyles(doc, cssText, cb, opt_isRuntimeCss) {
  * If the body is not yet available (because our script was loaded
  * synchronously), polls until it is.
  * @param {!Document} doc The document who's body we should make visible.
+ * @param {?Promise=} extensionsPromise A loading promise for special extensions
+ *     which must load before the body can be made visible
  */
-export function makeBodyVisible(doc) {
+export function makeBodyVisible(doc, extensionsPromise) {
   let interval;
   const set = () => {
     if (doc.body) {
@@ -90,8 +93,16 @@ export function makeBodyVisible(doc) {
       clearInterval(interval);
     }
   };
-  interval = setInterval(set, 4);
-  set();
+  const poll = () => {
+    interval = setInterval(set, 4);
+    set();
+  };
+
+  if (extensionsPromise) {
+    extensionsPromise.then(poll, poll);
+  } else {
+    poll();
+  }
 }
 
 

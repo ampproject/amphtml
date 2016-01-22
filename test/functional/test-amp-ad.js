@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {IntersectionObserver} from '../../src/intersection-observer';
 import {createIframePromise} from '../../testing/iframe';
 import {installAd} from '../../builtins/amp-ad';
 import {viewportFor} from
@@ -178,14 +179,17 @@ describe('amp-ad', () => {
             targetOrigin: origin,
           });
         };
-        expect(ampAd.shouldSendIntersectionChanges_).to.be.false;
-        ampAd.startSendingIntersectionChanges_();
-        expect(ampAd.shouldSendIntersectionChanges_).to.be.true;
-        expect(ampAd.iframeLayoutBox_).to.be.null;
+        ampAd.intersectionObserver_ =
+            new IntersectionObserver(ampAd, ampAd.iframe_, true);
+        ampAd.intersectionObserver_.startSendingIntersectionChanges_();
         expect(posts).to.have.length(0);
         ampAd.getVsync().runScheduledTasks_();
         expect(posts).to.have.length(1);
       });
+    });
+
+    afterEach(() => {
+      ampAd.intersectionObserver_.dispose();
     });
 
     it('should calculate intersection', () => {
@@ -205,7 +209,7 @@ describe('amp-ad', () => {
       const viewport = viewportFor(win);
       expect(posts).to.have.length(1);
       viewport.setScrollTop(0);
-      ampAd.sendAdIntersection_();
+      ampAd.intersectionObserver_.fire();
       expect(posts).to.have.length(2);
       const changes = posts[1].data.changes;
       expect(changes).to.have.length(1);
@@ -214,7 +218,7 @@ describe('amp-ad', () => {
       expect(changes[0].intersectionRect.width).to.equal(300);
 
       viewport.setScrollTop(350);
-      ampAd.sendAdIntersection_();
+      ampAd.intersectionObserver_.fire();
       expect(posts).to.have.length(3);
       const changes2 = posts[2].data.changes;
       expect(changes2).to.have.length(1);

@@ -645,7 +645,13 @@ export class ViewportBindingNatural_ {
     if (doc./*OK*/scrollingElement) {
       return doc./*OK*/scrollingElement;
     }
-    if (doc.body) {
+    if (doc.body
+        // Due to https://bugs.webkit.org/show_bug.cgi?id=106133, WebKit
+        // browsers have to use `body` and NOT `documentElement` for
+        // scrolling purposes. This has mostly being resolved via
+        // `scrollingElement` property, but this branch is still necessary
+        // for backward compatibility purposes.
+        && platform.isWebKit()) {
       return doc.body;
     }
     return doc.documentElement;

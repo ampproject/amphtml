@@ -1,0 +1,7 @@
+FAIL
+feature_tests/noscript.html:43:6 The mandatory attribute 'src' is missing in tag 'source'.
+feature_tests/noscript.html:43:6 The mandatory attribute 'type' is missing in tag 'source'.
+feature_tests/noscript.html:48:4 The mandatory attribute 'src' is missing in tag 'img'. (see https://github.com/ampproject/amphtml/blob/master/builtins/amp-img.md)
+feature_tests/noscript.html:51:2 The tag 'audio' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-audio'? (see https://github.com/ampproject/amphtml/blob/master/extensions/amp-audio/amp-audio.md)
+feature_tests/noscript.html:55:2 The tag 'img' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-img'? (see https://github.com/ampproject/amphtml/blob/master/builtins/amp-img.md)
+feature_tests/noscript.html:57:2 The tag 'video' may only appear as a descendant of tag 'noscript'. Did you mean 'amp-video'? (see https://github.com/ampproject/amphtml/blob/master/builtins/amp-video.md)

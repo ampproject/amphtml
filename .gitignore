@@ -9,3 +9,4 @@ examples.build
 examples.min
 node_modules
 npm-debug.log
+.idea
