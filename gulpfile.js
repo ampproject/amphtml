@@ -334,6 +334,7 @@ function buildExamples(watch) {
   buildExample('everything.amp.html');
   buildExample('font.amp.html');
   buildExample('facebook.amp.html');
+  buildExample('iframe.amp.html');
   buildExample('instagram.amp.html');
   buildExample('pinterest.amp.html');
   buildExample('released.amp.html');

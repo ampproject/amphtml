@@ -399,6 +399,20 @@ describe('amp-iframe', () => {
       });
     });
   });
+
+  it('should pass data-param-* attributes to the iframe src', () => {
+    return getAmpIframe({
+      src: iframeSrc,
+      'data-param-hello-world': 'passed value',
+      'data-param-autoplay': '',
+      width: 100,
+      height: 100
+    }).then(amp => {
+      expect(amp.iframe).to.be.instanceof(Element);
+      expect(amp.iframe.src).to.equal(
+          iframeSrc + '?helloWorld=passed%20value&autoplay=');
+    });
+  });
 });
 
 describe('amp-iframe intersection', () => {

@@ -19,8 +19,9 @@ import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
 import {listen} from '../../../src/iframe-helper';
 import {loadPromise} from '../../../src/event-helper';
 import {log} from '../../../src/log';
-import {parseUrl} from '../../../src/url';
+import {addParamsToUrl, parseUrl} from '../../../src/url';
 import {removeElement} from '../../../src/dom';
+import {dashToCamelCase} from '../../../src/string';
 
 /** @const {string} */
 const TAG_ = 'AmpIframe';
@@ -97,8 +98,10 @@ export class AmpIframe extends AMP.BaseElement {
   firstAttachedCallback() {
     /** @private @const {string} */
     this.sandbox_ = this.element.getAttribute('sandbox');
+    const params = this.getDataParams_();
+    const srcAttr = this.element.getAttribute('src');
     const iframeSrc =
-        this.element.getAttribute('src') ||
+        (srcAttr && addParamsToUrl(srcAttr, params)) ||
         this.transformSrcDoc(
             this.element.getAttribute('srcdoc'), this.sandbox_);
     this.iframeSrc = this.assertSource(
@@ -274,6 +277,26 @@ export class AmpIframe extends AMP.BaseElement {
       return;
     }
     this.attemptChangeHeight(newHeight);
+  }
+
+  /**
+   * Builds a key-value object representing data-params-* attributes on the
+   * element.
+   * @returns {!Object}
+   * @private
+   */
+  getDataParams_() {
+    const attributes = this.element.attributes;
+    const params = {};
+    for (let i = 0; i < attributes.length; i++) {
+      const attr = attributes[i];
+      const matches = attr.nodeName.match(/^data-param-(.+)/);
+      if (matches) {
+        const param = dashToCamelCase(matches[1]);
+        params[param] = attr.nodeValue;
+      }
+    }
+    return params;
   }
 };
 
