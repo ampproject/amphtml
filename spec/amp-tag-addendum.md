@@ -91,7 +91,7 @@ Below we list the allowed tags in the order in which they are appear in the HTML
 4.5.27 `<bdo>`  
 4.5.28 `<span>`  
 4.5.29 `<br>`  
-4.5.30 `<wb>`  
+4.5.30 `<wbr>`  
 ### 4.6 Edits
 4.6.1 `<insert>`  
 4.6.2 `<del>`  
