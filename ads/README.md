@@ -60,6 +60,21 @@ Example usage:
   });
 ```
 
+`window.context.observeIntersection` returns a function which when called will stop listening for intersection messages.
+
+Example usage:
+
+```js
+  var unlisten = window.context.observeIntersection(function(changes) {
+    changes.forEach(function(c) {
+      console.info('Height of intersection', c.intersectionRect.height);
+    });
+  });
+
+  // condition to stop listening to intersection messages.
+  unlisten();
+```
+
 ### Ad resizing
 
 Ads can call the special API
