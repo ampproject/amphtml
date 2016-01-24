@@ -17,7 +17,6 @@
 import {getService} from '../../../src/service';
 import {viewerFor} from '../../../src/viewer';
 import {Observable} from '../../../src/observable';
-import {log} from '../../../src/log';
 
 /**
  * This type signifies a callback that gets called when an analytics event that
@@ -105,7 +104,8 @@ class InstrumentationService {
       }
     } else if (eventType === AnalyticsEventType.CLICK) {
       if (!opt_selector) {
-        log.warn(this.TAG_, 'Missing required selector on click trigger');
+        console./*OK*/error(this.TAG_,
+            'Missing required selector on click trigger');
       } else {
         this.ensureClickListener_();
         this.clickObservable_.add(
@@ -116,6 +116,7 @@ class InstrumentationService {
 
   /**
    * Ensure we have a click listener registered on the document.
+   * @private
    */
   ensureClickListener_() {
     if (!this.clickHandlerRegistered_) {
@@ -127,6 +128,7 @@ class InstrumentationService {
 
   /**
    * @param {!Event} e
+   * @private
    */
   onClick_(e) {
     this.clickObservable_.fire(e);
@@ -135,6 +137,7 @@ class InstrumentationService {
   /**
    * @param {!Function} listener
    * @param {string} selector
+   * @private
    */
   createSelectiveListener_(listener, selector) {
     return e => {
@@ -148,6 +151,7 @@ class InstrumentationService {
    * @param {!Element} el
    * @param {string} selector
    * @return {boolean} True if the given element matches the given selector.
+   * @private
    */
   matchesSelector_(el, selector) {
     try {
@@ -164,7 +168,8 @@ class InstrumentationService {
       while (i-- > 0 && matches.item(i) != el) {};
       return i > -1;
     } catch (selectorError) {
-      log.error(this.TAG_, 'Bad query selector: ', selector, selectorError);
+      console./*OK*/error(this.TAG_, 'Bad query selector.', selector,
+          selectorError);
     }
     return false;
   }
