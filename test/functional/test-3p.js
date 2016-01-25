@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {validateSrcPrefix, validateSrcContains, checkData, validateData}
+import {validateSrcPrefix, validateSrcContains, checkData, validateData, dataHasAllFields}
     from '../../src/3p';
 import * as sinon from 'sinon';
 
@@ -97,5 +97,20 @@ describe('3p', () => {
       }, ['not-whitelisted', 'foo']);
     }).to.throw(/Unknown attribute for TEST: not-whitelisted2./);
   });
+  
+  it('should return false if there are no mandatory fields', () => {
+    expect(dataHasAllFields({
+      "field1": "1",
+      "field2": "2"
+    }, ["field1","field1","field3"])).to.equal(false);
+  })
+  
+  it ('should return true if there are all mandatory fields', () => {
+    expect(dataHasAllFields({
+      "field1": "1",
+      "field2": "2",
+      "field3": "3"
+    }, ["field1","field1","field3"])).to.equal(true);
+  })
 });
 
