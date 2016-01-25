@@ -25,7 +25,7 @@ min_validator_revision_required: 77
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 124
+spec_file_revision: 125
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
 # These rules are just enough to validate the example from the spec.
@@ -432,24 +432,6 @@ tags: {
     mandatory: true
   }
 }
-# AMP-specific extension:
-# Publishers may set this meta tag to indicate premium content. If present,
-# Google's AMP Cache will only serve this content when Referer is *.google.com.
-tags: {
-  name: "meta"
-  unique: true
-  mandatory_parent: "head"
-  attrs: {
-    name: "http-equiv"
-    mandatory: true
-    value: "amp-access"
-  }
-  attrs: {
-    name: "content"
-    mandatory: true
-    value: "premium"
-  }
-}
 # 4.2.6 The style
 # Text contents of the style tag will be validated seperately.
 tags: {  # Special custom 'author' spreadsheet.
@@ -510,7 +492,6 @@ tags: {  # Special custom 'author' spreadsheet.
       error_message: "CSS !important"
     }
     # All known @ rules except for media and font-face are disabled.
-    # See http://b/24415204.
     blacklisted_cdata_regex: {
       regex: "charset"
       error_message: "CSS @charset"
@@ -979,7 +960,7 @@ attr_lists: {
   name: "source-attrs"
   attrs: { name: "src" }
   attrs: { name: "type" }
-  # Not used thus far, just tolerated. See http://b//24376754.
+  # Not used thus far, just tolerated.
   attrs: { name: "sizes" }
 }
 tags: {
@@ -1625,6 +1606,23 @@ tags: {
     value: "application/ld+json"
   }
 }
+tags: {
+  name: "script"
+  mandatory_parent: "head"
+  attrs: {
+    name: "id"
+    mandatory: true
+    value: "amp-access"
+  }
+  attrs: {
+    name: "type"
+    mandatory: true
+    value: "application/json"
+  }
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-access/amp-access-spec.md"
+  # TODO(gregable): Validate the cdata contents of this script tag.
+}
+
 # Specific script tags for custom elements and runtime imports.
 tags: {  # amp-access
   name: "script"
@@ -2546,7 +2544,7 @@ tags: {
 }
 # <amp-image-lightbox>
 tags: {
-  name: "amp-image-lightbox"  # See http://b/24381009.
+  name: "amp-image-lightbox"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-image-lightbox/amp-image-lightbox.md"
   also_requires: "amp-image-lightbox extension .js script"
   # Support dimensions / sizes / etc. like an amp-lightbox.
@@ -2650,15 +2648,26 @@ attr_lists: {
   # placeholder empty attribute. See e.g.
   # https://github.com/ampproject/amphtml/pull/284/commits
   attrs: { name: "placeholder" value: "" }
-  # We allow the empty fallback attribute on any element, per
-  # http://b/24873828.
+  # We allow the empty fallback attribute on any element
   attrs: { name: "fallback" value: "" }
-  # Allowed on all elements per http://b/24380921.
   attrs: { name: "lightbox" }
-  # Allowed on all elements per http://b/24789910.
   attrs: { name: "on" }
-  # Allowed on all elements per http://b/25392418.
   attrs: { name: "overflow" }
+  # amp-access specific attributes, see
+  # https://github.com/ampproject/amphtml/blob/master/extensions/amp-access/amp-access-spec.md
+  # TODO(gregable): These should only be allowed on any tag inside BODY or HEAD.
+  attrs: { name: "amp-access" }
+  attrs: { name: "amp-access-loading" }
+  attrs: { name: "amp-access-loader" }
+  attrs: { name: "amp-access-template" }
+  attrs: { name: "amp-access-off" }
+  attrs: { name: "amp-access-on" }
+  attrs: { name: "amp-access-show" }
+  attrs: { name: "amp-access-hide" }
+  attrs: { name: "amp-access-style" }
+  attrs: { name: "amp-access-behavior" }
+  attrs: { name: "amp-access-id" }
+  attrs: { name: "i-amp-access-id" }
 }
 
 # Error formats
