@@ -143,9 +143,7 @@ describe('HistoryBindingNatural', () => {
     expect(onStackIndexUpdated.callCount).to.equal(0);
   });
 
-  // TODO(@dvoytenko): Unskip. Broke after change in service initialization
-  // sequence.
-  it.skip('should initialize correctly with preexisting state', () => {
+  it('should initialize correctly with preexisting state', () => {
     history.origPushState_({'AMP.History': window.history.length}, undefined);
     history.origReplaceState_({'AMP.History': window.history.length - 2},
         undefined);
@@ -181,17 +179,19 @@ describe('HistoryBindingNatural', () => {
   // This prevents IE11/Edge from coercing undefined to become the new url
   it('should not pass in `url` argument to original replace state if ' +
     'parameter is undefined', () => {
-    let argumentLength = 0;
-    const origReplace = window.history.replaceState;
-    window.history.replaceState = function() {
-      argumentLength = arguments.length;
+    const replaceStateSpy = sinon.spy();
+    const windowStub = {
+      history: {
+        replaceState: replaceStateSpy,
+        pushState: () => {},
+        state: {},
+        length: 11,
+      },
+      addEventListener: () => {},
     };
-
-    new HistoryBindingNatural_(window);
-
-    expect(argumentLength).to.equal(2);
-
-    window.history.replaceState = origReplace;
+    new HistoryBindingNatural_(windowStub);
+    expect(replaceStateSpy.callCount).to.be.greaterThan(0);
+    expect(replaceStateSpy.lastCall.args.length).to.equal(2);
   });
 
   it('should push new state in the window.history and notify', () => {
