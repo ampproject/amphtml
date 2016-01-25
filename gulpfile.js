@@ -529,7 +529,7 @@ function buildExperiments(options) {
   console.log('Processing ' + htmlPath);
   var html = fs.readFileSync(htmlPath, 'utf8');
   var minHtml = html.replace('../../dist.tools/experiments/experiments.max.js',
-      'https://cdn.ampproject.org/experiments.js');
+      'https://cdn.ampproject.org/v0/experiments.js');
   gulp.src(htmlPath)
       .pipe(file('experiments.cdn.html', minHtml))
       .pipe(gulp.dest('dist.tools/experiments/'));
