@@ -25,7 +25,7 @@ min_validator_revision_required: 77
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 123
+spec_file_revision: 124
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
 # These rules are just enough to validate the example from the spec.
@@ -1513,43 +1513,73 @@ tags: {
 
 # 4.9 Tabular data
 # 4.9.1 The table element
-tags: { name: "table" }
+tags: {
+  name: "table"
+  attrs: { name: "align" }
+}
 # 4.9.2 The caption element
-tags: { name: "caption" }
+tags: {
+  name: "caption"
+  attrs: { name: "align" }
+}
 # 4.9.3 The colgroup element
 tags: {
   name: "colgroup"
+  attrs: { name: "align" }
   attrs: { name: "span" }
+  attrs: { name: "valign" }
 }
 # 4.9.4 The col element
 tags: {
   name: "col"
+  attrs: { name: "align" }
   attrs: { name: "span" }
+  attrs: { name: "valign" }
 }
 # 4.9.5 The tbody element
-tags: { name: "tbody" }
+tags: {
+  name: "tbody"
+  attrs: { name: "align" }
+  attrs: { name: "valign" }
+}
 # 4.9.6 The thead element
-tags: { name: "thead" }
+tags: {
+  name: "thead"
+  attrs: { name: "align" }
+  attrs: { name: "valign" }
+}
 # 4.9.7 The tfoot element
-tags: { name: "tfoot" }
+tags: {
+  name: "tfoot"
+  attrs: { name: "align" }
+  attrs: { name: "valign" }
+}
 # 4.9.8 The tr element
-tags: { name: "tr" }
+tags: {
+  name: "tr"
+  attrs: { name: "align" }
+  attrs: { name: "valign" }
+}
 # 4.9.9 The td element
 tags: {
   name: "td"
+  attrs: { name: "align" }
   attrs: { name: "colspan" }
   attrs: { name: "headers" }
   attrs: { name: "rowspan" }
+  attrs: { name: "valign" }
 }
 # 4.9.10 The th element
 tags: {
   name: "th"
   attrs: { name: "abbr" }
+  attrs: { name: "align" }
   attrs: { name: "headers" }
   attrs: { name: "colspan" }
   attrs: { name: "rowspan" }
   attrs: { name: "scope" }
   attrs: { name: "sorted" }
+  attrs: { name: "valign" }
 }
 
 # 4.10 Forms
