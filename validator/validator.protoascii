@@ -25,7 +25,7 @@ min_validator_revision_required: 77
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 121
+spec_file_revision: 122
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
 # These rules are just enough to validate the example from the spec.
@@ -2342,6 +2342,9 @@ tags: {
 }
 # <amp-pinterest>
 # https://github.com/ampproject/amphtml/blob/master/extensions/amp-pinterest/amp-pinterest.md
+# TODO: Enforce mandatory attributes depending on the value of another
+# attribute. In this case, depending on the value of data-do, data-media and
+# data-description may or may not be mandatory.
 tags: {
   name: "amp-pinterest"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-pinterest/amp-pinterest.md"
@@ -2349,7 +2352,6 @@ tags: {
   attr_lists: "extended-amp-global"
   # data-* is generally allowed, but it's not generally mandatory.
   attrs: { name: "data-do" mandatory: true }
-  attrs: { name: "data-url" mandatory: true }
   amp_layout: {
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
