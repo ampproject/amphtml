@@ -166,11 +166,11 @@ function nonSensitiveDataPostMessage(type, opt_object) {
  * the IntersectionObserver spec callback.
  * http://rawgit.com/slightlyoff/IntersectionObserver/master/index.html#callbackdef-intersectionobservercallback
  * @param {function(!Array<IntersectionObserverEntry>)} observerCallback
+ * @returns {!function} A function which removes the event listener that
+ *    observes for intersection messages.
  */
 function observeIntersection(observerCallback) {
-  // Send request to received records.
-  nonSensitiveDataPostMessage('send-intersections');
-  window.addEventListener('message', function(event) {
+  function listener(event) {
     if (event.source != window.parent ||
         event.origin != window.context.location.origin ||
         !event.data ||
@@ -179,7 +179,13 @@ function observeIntersection(observerCallback) {
       return;
     }
     observerCallback(event.data.changes);
-  });
+  }
+  // Send request to received records.
+  nonSensitiveDataPostMessage('send-intersections');
+  window.addEventListener('message', listener);
+  return function() {
+    window.removeEventListener('message', listener);
+  };
 }
 
 /**

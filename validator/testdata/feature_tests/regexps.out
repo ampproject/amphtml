@@ -1,11 +1,11 @@
 FAIL
 feature_tests/regexps.html:27:2 The mandatory text (CDATA) inside tag 'boilerplate (js enabled) - old variant' is missing or incorrect. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#boilerplate)
-feature_tests/regexps.html:37:2 The attribute 'rel' in tag 'link' is set to the invalid value 'stylesheet'. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#canon)
-feature_tests/regexps.html:47:2 The attribute 'rel' in tag 'link' is set to the invalid value 'foo'. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#canon)
-feature_tests/regexps.html:48:2 The attribute 'rel' in tag 'link' is set to the invalid value 'accessibility foo'. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#canon)
-feature_tests/regexps.html:49:2 The attribute 'rel' in tag 'link' is set to the invalid value 'foo accessibility'. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#canon)
-feature_tests/regexps.html:57:2 The attribute 'name' in tag 'viewport declaration' is set to the invalid value 'content-disposition'. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#vprt)
-feature_tests/regexps.html:58:2 The attribute 'name' in tag 'viewport declaration' is set to the invalid value 'invalid content-disposition'. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#vprt)
+feature_tests/regexps.html:37:2 The attribute 'href' in tag 'link rel=stylesheet for fonts' is set to the invalid value 'http://xss.com/https://fonts.googleapis.com/css?foobar'. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#custom-fonts)
+feature_tests/regexps.html:47:2 The attribute 'rel' in tag 'link' is set to the invalid value 'foo'.
+feature_tests/regexps.html:48:2 The attribute 'rel' in tag 'link' is set to the invalid value 'accessibility foo'.
+feature_tests/regexps.html:49:2 The attribute 'rel' in tag 'link' is set to the invalid value 'foo accessibility'.
+feature_tests/regexps.html:57:2 The attribute 'name' in tag 'meta viewport declaration' is set to the invalid value 'content-disposition'. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#vprt)
+feature_tests/regexps.html:58:2 The attribute 'name' in tag 'meta viewport declaration' is set to the invalid value 'invalid content-disposition'. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#vprt)
 feature_tests/regexps.html:69:2 The attribute 'autoplay' in tag 'amp-audio' is set to the invalid value 'invalid'. (see https://github.com/ampproject/amphtml/blob/master/extensions/amp-audio/amp-audio.md)
 feature_tests/regexps.html:70:2 The attribute 'autoplay' in tag 'amp-audio' is set to the invalid value 'desktopfoo'. (see https://github.com/ampproject/amphtml/blob/master/extensions/amp-audio/amp-audio.md)
 feature_tests/regexps.html:71:2 The attribute 'autoplay' in tag 'amp-audio' is set to the invalid value 'foodesktop'. (see https://github.com/ampproject/amphtml/blob/master/extensions/amp-audio/amp-audio.md)
