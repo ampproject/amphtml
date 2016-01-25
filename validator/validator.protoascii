@@ -25,7 +25,7 @@ min_validator_revision_required: 77
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 120
+spec_file_revision: 121
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
 # These rules are just enough to validate the example from the spec.
@@ -475,6 +475,22 @@ tags: {  # Special custom 'author' spreadsheet.
           type: PARSE_AS_RULES
         }
         at_rule_spec: {
+          name: '-webkit-keyframes'
+          type: PARSE_AS_RULES
+        }
+        at_rule_spec: {
+          name: '-moz-keyframes'
+          type: PARSE_AS_RULES
+        }
+        at_rule_spec: {
+          name: '-o-keyframes'
+          type: PARSE_AS_RULES
+        }
+        at_rule_spec: {
+          name: 'supports'
+          type: PARSE_AS_RULES
+        }
+        at_rule_spec: {
           name: 'font-face'
           type: PARSE_AS_DECLARATIONS
         }
@@ -506,10 +522,6 @@ tags: {  # Special custom 'author' spreadsheet.
     blacklisted_cdata_regex: {
       regex: "@namespace"
       error_message: "CSS @namespace"
-    }
-    blacklisted_cdata_regex: {
-      regex: "@supports"
-      error_message: "CSS @supports"
     }
     blacklisted_cdata_regex: {
       regex: "@document"
@@ -2269,6 +2281,18 @@ tags: {
   attrs: { name: "type" value: "googleanalytics" }
   # TODO(gregable): This should require a valid https URL as the attr value.
   attrs: { name: "config" }
+}
+# <amp-user-notification>
+tags: {
+  name: "amp-user-notification"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-user-notification/amp-user-notification.md"
+  also_requires: "amp-user-notification extension .js script"
+  attr_lists: "extended-amp-global"
+  attrs: { name: "data-show-if-href" mandatory: true }
+  attrs: { name: "data-dismiss-href" mandatory: true }
+  amp_layout: {
+    supported_layouts: NODISPLAY
+  }
 }
 # <amp-youtube>
 # amp-youtube either comes with a video-id attribute, or with
