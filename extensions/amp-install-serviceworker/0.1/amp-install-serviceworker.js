@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {parseUrl, assertHttpsUrl} from '../../../src/url';
+import {parseUrl, assertHttpsUrl, isProxyOrigin} from '../../../src/url';
 import {getMode} from '../../../src/mode';
 
 /**
@@ -31,6 +31,10 @@ class AmpServiceWorkerInstallation extends AMP.BaseElement {
     }
     const src = this.element.getAttribute('src');
     assertHttpsUrl(src, this.element);
+
+    if (isProxyOrigin(src) || isProxyOrigin(win.location.href)) {
+      return;
+    }
 
     if (originMatches(win.location.href, src)) {
       install(this.getWin(), src);
