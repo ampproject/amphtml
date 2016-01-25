@@ -17,6 +17,7 @@
 import {all} from './promise';
 import {documentStateFor} from './document-state';
 import {getService} from './service';
+import {loadPromise} from './event-helper';
 import {resourcesFor} from './resources';
 import {timer} from './timer';
 import {viewerFor} from './viewer';
@@ -80,6 +81,11 @@ export class Performance {
         // Should definitely think of making `getResourcesInViewport` async.
         timer.delay(resolve);
       });
+    });
+
+    // Tick window.onload event.
+    loadPromise(win).then(() => {
+      this.tick('ol');
     });
   }
 
