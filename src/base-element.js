@@ -59,13 +59,14 @@ import {vsyncFor} from './vsync';
  *           ||
  *           || buildCallback
  *           || preconnectCallback may be called N times after this.
- *           || documentInactiveCallback may be called N times after this.
+ *           || pauseCallback may be called N times after this.
+ *           || resumeCallback may be called N times after this.
  *           ||
  *           \/
  *    State: <BUILT>
  *           ||
  *           || layoutCallback        <==
-             || (firstLayoutCompleted)  ||
+ *           || (firstLayoutCompleted)  ||
  *           ||                         ||
  *           \/                         || isRelayoutNeeded?
  *    State: <LAID OUT>                 ||
@@ -73,6 +74,7 @@ import {vsyncFor} from './vsync';
  *           ||                 =========
  *           ||
  *           || viewportCallback
+ *           || unlayoutCallback may be called N times after this.
  *           ||
  *           \/
  *    State: <IN VIEWPORT>
@@ -82,9 +84,20 @@ import {vsyncFor} from './vsync';
  * before buildCallback and it might be called multiple times including
  * after layoutCallback.
  *
- * The documentInactiveCallback is called when the document becomes
- * inactive. E.g. when the user swipes away from the document or
- * focuses a different tab.
+ * The pauseCallback is called when when the document becomes inactive, e.g.
+ * when the user swipes away from the document, or when the element is no
+ * longer being displayed, e.g. when the carousel slide slides out of view.
+ * In these situations, any actively playing media should pause.
+ *
+ * The resumeCallback is called when when the document becomes active again
+ * after becoming inactive, e.g. when the user swipes away from the document
+ * and swipes back. In these situations, any paused media may begin playing
+ * again, if user interaction is not required.
+ * // TODO(jridgewell) slide slides into view
+ *
+ * The unlayoutCallback is called when the document becomes inactive, e.g.
+ * when the user swipes away from the document, or another tab is focused.
+ * In these situations, expensive memory and CPU resources should be freed.
  *
  * Additionally whenever the dimensions of an element might have changed
  * AMP remeasures its dimensions and calls `onLayoutMeasure` on the
@@ -302,14 +315,28 @@ export class BaseElement {
   }
 
   /**
-   * Requests the resource to stop its activity when the document goes into
+   * Requests the element to stop its activity when the document goes into
    * inactive state. The scope is up to the actual component. Among other
    * things the active playback of video or audio content must be stopped.
-   * The component must return `true` if it'd like to later receive
-   * {@link layoutCallback} in case document becomes active again.
+   */
+  pauseCallback() {
+  }
+
+  /**
+   * Requests the element to resume its activity when the document returns from
+   * an inactive state. The scope is up to the actual component. Among other
+   * things the active playback of video or audio content may be resumed.
+   */
+  resumeCallback() {
+  }
+
+  /**
+   * Requests the element to unload any expensive resources when the element
+   * goes into non-visible state. The scope is up to the actual component.
+   *
    * @return {boolean}
    */
-  documentInactiveCallback() {
+  unlayoutCallback() {
     return false;
   }
 

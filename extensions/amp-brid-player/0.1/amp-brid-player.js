@@ -96,12 +96,13 @@ class AmpBridPlayer extends AMP.BaseElement {
   }
 
   /** @override */
-  documentInactiveCallback() {
+  pauseCallback() {
     if (this.iframe_ && this.iframe_.contentWindow) {
       this.iframe_.contentWindow./*OK*/postMessage(
-          'Brid|pause', 'https://services.brid.tv');
+        'Brid|pause',
+        'https://services.brid.tv'
+      );
     }
-    return false;
   }
 
   /** @private */

@@ -30,9 +30,10 @@ import {dev} from '../log';
 import {reportError} from '../error';
 import {timer} from '../timer';
 import {installFramerateService} from './framerate-impl';
-import {installViewerService} from './viewer-impl';
+import {installViewerService, VisibilityState} from './viewer-impl';
 import {installViewportService} from './viewport-impl';
 import {installVsyncService} from './vsync-impl';
+import {FiniteStateMachine} from '../finite-state-machine';
 
 
 const TAG_ = 'Resources';
@@ -48,6 +49,16 @@ const POST_TASK_PASS_DELAY_ = 1000;
 const MUTATE_DEFER_DELAY_ = 500;
 const FOCUS_HISTORY_TIMEOUT_ = 1000 * 60;  // 1min
 const FOUR_FRAME_DELAY_ = 70;
+
+/**
+ * The internal state of the visibility state machine.
+ * @typedef {{
+ *   viewer: boolean,
+ *   document: boolean
+ * }}
+ * @private
+ */
+let visibilityStateDef;
 
 
 /**
@@ -165,6 +176,12 @@ export class Resources {
 
     /** @private @const {!Framerate}  */
     this.framerate_ = installFramerateService(this.win);
+
+    /** @private @const {!FiniteStateMachine<visibilityStateDef>} */
+    this.visibilityStateMachine_ = new FiniteStateMachine({
+      state: this.viewer_.getVisibilityState(),
+    });
+    this.setupVisibilityStateMachine_(this.visibilityStateMachine_);
 
     // When viewport is resized, we have to re-measure all elements.
     this.viewport_.onChanged(event => {
@@ -560,7 +577,6 @@ export class Resources {
       return;
     }
 
-    const prevVisible = this.visible_;
     this.visible_ = this.viewer_.isVisible();
     this.prerenderSize_ = this.viewer_.getPrerenderSize();
 
@@ -583,32 +599,9 @@ export class Resources {
     this.pass_.cancel();
     this.vsyncScheduled_ = false;
 
-    // If document becomes invisible, bring everything into inactive state.
-    if (prevVisible && !this.visible_) {
-      dev.fine(TAG_, 'document become inactive');
-      this.documentBecameInactive_();
-      return;
-    }
-
-    // If viewport size is 0, the manager will wait for the resize event.
-    if (viewportSize.height > 0 && viewportSize.width > 0) {
-      if (this.hasMutateWork_()) {
-        this.mutateWork_();
-      }
-      this.discoverWork_();
-      let delay = this.work_();
-      if (this.hasMutateWork_()) {
-        // Overflow mutate work.
-        delay = Math.min(delay, MUTATE_DEFER_DELAY_);
-      }
-      if (this.visible_) {
-        dev.fine(TAG_, 'next pass:', delay);
-        this.schedulePass(delay);
-        this.updateScrollHeight_();
-      } else {
-        dev.fine(TAG_, 'document is not visible: no scheduling');
-      }
-    }
+    this.visibilityStateMachine_.setState({
+      state: this.viewer_.getVisibilityState(),
+    });
   }
 
   /**
@@ -934,18 +927,6 @@ export class Resources {
           }
         }
       }
-    }
-  }
-
-  /**
-   * Brings all resources into inactive state. First it sets "in viewport"
-   * state to false and then it calls documentInactive callback.
-   * @private
-   */
-  documentBecameInactive_() {
-    for (let i = 0; i < this.resources_.length; i++) {
-      const r = this.resources_[i];
-      r.documentBecameInactive();
     }
   }
 
@@ -1321,6 +1302,100 @@ export class Resources {
         }
       }
     }
+  }
+
+  /**
+   * Calls iterator on each sub-resource
+   * @param {function(!Resource, number)} iterator
+   */
+  setupVisibilityStateMachine_(vsm) {
+    const prerender = {
+      state: VisibilityState.PRERENDER,
+    };
+    const visible = {
+      state: VisibilityState.VISIBLE,
+    };
+    // Viewer has told us we are no longer active
+    const hidden = {
+      state: VisibilityState.HIDDEN,
+    };
+    // Viewer has told us to pause media but don't unload it.
+    const paused = {
+      state: VisibilityState.PAUSED,
+    };
+    // The browser tab is no longer active
+    const inactive = {
+      state: VisibilityState.INACTIVE,
+    };
+
+    const doPass = () => {
+      // If viewport size is 0, the manager will wait for the resize event.
+      const viewportSize = this.viewport_.getSize();
+      if (viewportSize.height > 0 && viewportSize.width > 0) {
+        if (this.hasMutateWork_()) {
+          this.mutateWork_();
+        }
+        this.discoverWork_();
+        let delay = this.work_();
+        if (this.hasMutateWork_()) {
+          // Overflow mutate work.
+          delay = Math.min(delay, MUTATE_DEFER_DELAY_);
+        }
+        if (this.visible_) {
+          dev.fine(TAG_, 'next pass:', delay);
+          this.schedulePass(delay);
+          this.updateScrollHeight_();
+        } else {
+          dev.fine(TAG_, 'document is not visible: no scheduling');
+        }
+      }
+    };
+    const pause = () => {
+      this.resources_.forEach(r => r.pause());
+    };
+    const unlayout = () => {
+      this.resources_.forEach(r => r.unlayout());
+    };
+    const pauseAndUnlayout = () => {
+      this.resources_.forEach(r => {
+        r.pause();
+        r.unlayout();
+      });
+    };
+    const resume = () => {
+      this.resources_.forEach(r => r.resume());
+      doPass();
+    };
+    const layout = () => {
+      this.resources_.forEach(r => r.layout());
+      doPass();
+    };
+
+    vsm.addTransition(prerender, prerender, doPass);
+    vsm.addTransition(prerender, visible, layout);
+    vsm.addTransition(prerender, hidden, doPass);
+    vsm.addTransition(prerender, inactive, doPass);
+    vsm.addTransition(prerender, paused, doPass);
+
+    vsm.addTransition(visible, visible, doPass);
+    vsm.addTransition(visible, hidden, unlayout);
+    vsm.addTransition(visible, inactive, pauseAndUnlayout);
+    vsm.addTransition(visible, paused, pause);
+
+    vsm.addTransition(hidden, visible, layout);
+    vsm.addTransition(hidden, hidden, doPass);
+    vsm.addTransition(hidden, inactive, pause);
+    vsm.addTransition(hidden, paused, pause);
+
+    vsm.addTransition(inactive, visible, layout);
+    vsm.addTransition(inactive, hidden, doPass);
+    vsm.addTransition(inactive, inactive, doPass);
+    vsm.addTransition(inactive, paused, doPass);
+
+    vsm.addTransition(paused, visible, resume);
+    vsm.addTransition(paused, hidden, unlayout);
+    vsm.addTransition(paused, inactive, unlayout);
+    vsm.addTransition(paused, paused, doPass);
   }
 }
 
@@ -1761,28 +1836,57 @@ export class Resource {
   }
 
   /**
-   * Calls element's documentInactiveCallback callback and resets state for
+   * Calls element's unlayoutCallback callback and resets state for
    * relayout in case document becomes active again.
    */
-  documentBecameInactive() {
-    if (this.state_ == ResourceState_.NOT_BUILT) {
+  unlayout() {
+    if (this.state_ != ResourceState_.LAYOUT_COMPLETE) {
       return;
     }
     if (this.isInViewport()) {
       this.setInViewport(false);
     }
-    if (this.element.documentInactiveCallback()) {
+    if (this.element.unlayoutCallback()) {
       this.state_ = ResourceState_.NOT_LAID_OUT;
       this.layoutCount_ = 0;
     }
   }
 
   /**
-   * Called when a previously visible element has become invisible.
+   * Calls element's pauseCallback callback.
+   */
+  pause() {
+    if (this.state_ == ResourceState_.NOT_BUILT) {
+      return;
+    }
+    if (this.isInViewport()) {
+      this.setInViewport(false);
+    }
+    this.element.pauseCallback();
+  }
+
+  /**
+   * TODO(jridgewell): This should eventually call layoutCallback
+   */
+  layout() {
+  }
+
+  /**
+   * Calls element's resumeCallback callback.
+   */
+  resume() {
+    if (this.state_ == ResourceState_.NOT_BUILT) {
+      return;
+    }
+    this.element.resumeCallback();
+  }
+
+  /**
+   * Called when a previously visible element is no longer displayed.
    */
   unload() {
-    // TODO(dvoytenko): Likely warrants its own callback and re-layout rules.
-    this.documentBecameInactive();
+    this.pause();
+    this.unlayout();
   }
 
   /**

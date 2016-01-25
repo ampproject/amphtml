@@ -794,20 +794,47 @@ export function createAmpElementProto(win, name, implementationClass) {
    * Requests the resource to stop its activity when the document goes into
    * inactive state. The scope is up to the actual component. Among other
    * things the active playback of video or audio content must be stopped.
-   * The component must return `true` if it'd like to later receive
-   * {@link layoutCallback} in case document becomes active again.
+   *
+   * @package @final
+   */
+  ElementProto.pauseCallback = function() {
+    this.assertNotTemplate_();
+    if (!this.isBuilt() || !this.isUpgraded()) {
+      return;
+    }
+    this.implementation_.pauseCallback();
+  };
+
+  /**
+   * Requests the resource to resume its activity when the document returns from
+   * an inactive state. The scope is up to the actual component. Among other
+   * things the active playback of video or audio content may be resumed.
+   *
+   * @package @final
+   */
+  ElementProto.resumeCallback = function() {
+    this.assertNotTemplate_();
+    if (!this.isBuilt() || !this.isUpgraded()) {
+      return;
+    }
+    this.implementation_.resumeCallback();
+  };
+
+  /**
+   * Requests the element to unload any expensive resources when the element
+   * goes into non-visible state. The scope is up to the actual component.
    *
    * Calling this method on unbuilt ot unupgraded element has no effect.
    *
-   * @return {!Promise}
+   * @return {boolean}
    * @package @final
    */
-  ElementProto.documentInactiveCallback = function() {
+  ElementProto.unlayoutCallback = function() {
     this.assertNotTemplate_();
     if (!this.isBuilt() || !this.isUpgraded()) {
       return false;
     }
-    return this.implementation_.documentInactiveCallback();
+    return this.implementation_.unlayoutCallback();
   };
 
   /**

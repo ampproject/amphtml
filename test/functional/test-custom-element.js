@@ -41,7 +41,9 @@ describe('CustomElement', () => {
   let testElementLayoutCallback;
   let testElementFirstLayoutCompleted;
   let testElementViewportCallback;
-  let testElementDocumentInactiveCallback;
+  let testElementUnlayoutCallback;
+  let testElementPauseCallback;
+  let testElementResumeCallback;
   let testElementIsReadyToBuild = true;
 
   class TestElement extends BaseElement {
@@ -77,9 +79,15 @@ describe('CustomElement', () => {
       testElementGetInsersectionElementLayoutBox();
       return {top: 10, left: 10, width: 11, height: 1};
     }
-    documentInactiveCallback() {
-      testElementDocumentInactiveCallback();
+    unlayoutCallback() {
+      testElementUnlayoutCallback();
       return true;
+    }
+    pauseCallback() {
+      testElementPauseCallback();
+    }
+    resumeCallback() {
+      testElementResumeCallback();
     }
   }
 
@@ -108,7 +116,9 @@ describe('CustomElement', () => {
     testElementFirstLayoutCompleted = sinon.spy();
     testElementViewportCallback = sinon.spy();
     testElementGetInsersectionElementLayoutBox = sinon.spy();
-    testElementDocumentInactiveCallback = sinon.spy();
+    testElementUnlayoutCallback = sinon.spy();
+    testElementPauseCallback = sinon.spy();
+    testElementResumeCallback = sinon.spy();
   });
 
   afterEach(() => {
@@ -638,25 +648,73 @@ describe('CustomElement', () => {
   });
 
 
-  it('Element - documentInactiveCallback', () => {
-    const element = new ElementClass();
+  describe('unlayoutCallback', () => {
+    it('Element', () => {
+      const element = new ElementClass();
 
-    // Non-built element doesn't receive documentInactiveCallback.
-    element.documentInactiveCallback();
-    expect(testElementDocumentInactiveCallback.callCount).to.equal(0);
+      // Non-built element doesn't receive unlayoutCallback.
+      element.unlayoutCallback();
+      expect(testElementUnlayoutCallback.callCount).to.equal(0);
 
-    // Built element receives documentInactiveCallback.
-    element.build(true);
-    element.documentInactiveCallback();
-    expect(testElementDocumentInactiveCallback.callCount).to.equal(1);
+      // Built element receives unlayoutCallback.
+      element.build(true);
+      element.unlayoutCallback();
+      expect(testElementUnlayoutCallback.callCount).to.equal(1);
+    });
+
+    it('StubElement', () => {
+      const element = new StubElementClass();
+
+      // Unupgraded document doesn't receive unlayoutCallback.
+      element.unlayoutCallback();
+      expect(testElementUnlayoutCallback.callCount).to.equal(0);
+    });
   });
 
-  it('StubElement - documentInactiveCallback', () => {
-    const element = new StubElementClass();
+  describe('pauseCallback', () => {
+    it('Element', () => {
+      const element = new ElementClass();
 
-    // Unupgraded document doesn't receive documentInactiveCallback.
-    element.documentInactiveCallback();
-    expect(testElementDocumentInactiveCallback.callCount).to.equal(0);
+      // Non-built element doesn't receive pauseCallback.
+      element.pauseCallback();
+      expect(testElementPauseCallback.callCount).to.equal(0);
+
+      // Built element receives pauseCallback.
+      element.build(true);
+      element.pauseCallback();
+      expect(testElementPauseCallback.callCount).to.equal(1);
+    });
+
+    it('StubElement', () => {
+      const element = new StubElementClass();
+
+      // Unupgraded document doesn't receive pauseCallback.
+      element.pauseCallback();
+      expect(testElementPauseCallback.callCount).to.equal(0);
+    });
+  });
+
+  describe('resumeCallback', () => {
+    it('Element', () => {
+      const element = new ElementClass();
+
+      // Non-built element doesn't receive resumeCallback.
+      element.resumeCallback();
+      expect(testElementResumeCallback.callCount).to.equal(0);
+
+      // Built element receives resumeCallback.
+      element.build(true);
+      element.resumeCallback();
+      expect(testElementResumeCallback.callCount).to.equal(1);
+    });
+
+    it('StubElement', () => {
+      const element = new StubElementClass();
+
+      // Unupgraded document doesn't receive resumeCallback.
+      element.resumeCallback();
+      expect(testElementResumeCallback.callCount).to.equal(0);
+    });
   });
 
   describe('viewportCallback', () => {

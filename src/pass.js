@@ -101,7 +101,8 @@ export class Pass {
   cancel() {
     if (this.scheduled_ != -1) {
       timer.cancel(this.scheduled_);
-      this.scheduled_ = -1;
     }
+    this.scheduled_ = -1;
+    this.nextTime_ = 0;
   }
 }

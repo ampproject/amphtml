@@ -90,7 +90,7 @@ class AmpBrightcove extends AMP.BaseElement {
   }
 
   /** @override */
-  documentInactiveCallback() {
+  pauseCallback() {
     /*
     This stops playback with the postMessage API.
     Add this script to the player in the player configuration in the Studio
@@ -105,7 +105,6 @@ class AmpBrightcove extends AMP.BaseElement {
       this.iframe_.contentWindow./*OK*/postMessage(
           'pause', 'https://players.brightcove.net');
     }
-    return false;
   }
 };
 

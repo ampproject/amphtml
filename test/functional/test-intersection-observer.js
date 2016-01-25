@@ -109,7 +109,6 @@ describe('IntersectionObserver', () => {
   let testElementLayoutCallback;
   let testElementFirstLayoutCompleted;
   let testElementViewportCallback;
-  let testElementDocumentInactiveCallback;
   const testElementIsReadyToBuild = true;
 
   class TestElement extends BaseElement {
@@ -144,10 +143,6 @@ describe('IntersectionObserver', () => {
     getIntersectionElementLayoutBox() {
       testElementGetInsersectionElementLayoutBox();
       return {top: 10, left: 10, width: 11, height: 1};
-    }
-    documentInactiveCallback() {
-      testElementDocumentInactiveCallback();
-      return true;
     }
   }
 
@@ -184,7 +179,6 @@ describe('IntersectionObserver', () => {
     testElementFirstLayoutCompleted = sandbox.spy();
     testElementViewportCallback = sandbox.spy();
     testElementGetInsersectionElementLayoutBox = sandbox.spy();
-    testElementDocumentInactiveCallback = sandbox.spy();
     getIntersectionChangeEntrySpy = sandbox.spy();
     onScrollSpy = sandbox.spy();
     onChangeSpy = sandbox.spy();

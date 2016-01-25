@@ -169,7 +169,7 @@ describe('amp-youtube', function() {
   it('should not pause when video not playing', () => {
     return getYt('mGENRKrdoGY').then(yt => {
       sandbox.spy(yt.implementation_, 'pauseVideo_');
-      yt.implementation_.documentInactiveCallback();
+      yt.implementation_.pauseCallback();
       expect(yt.implementation_.pauseVideo_.called).to.be.false;
     });
 
@@ -179,7 +179,7 @@ describe('amp-youtube', function() {
     return getYt('mGENRKrdoGY').then(yt => {
       yt.implementation_.playerState_ = 1;
       sandbox.spy(yt.implementation_, 'pauseVideo_');
-      yt.implementation_.documentInactiveCallback();
+      yt.implementation_.pauseCallback();
       expect(yt.implementation_.pauseVideo_.called).to.be.true;
     });
   });

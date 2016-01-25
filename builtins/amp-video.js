@@ -93,13 +93,10 @@ export function installVideo(win) {
     }
 
     /** @override */
-    documentInactiveCallback() {
+    pauseCallback() {
       if (this.video_) {
         this.video_.pause();
       }
-      // No need to do layout later - user action will be expect to resume
-      // the playback.
-      return false;
     }
 
     /** @private */

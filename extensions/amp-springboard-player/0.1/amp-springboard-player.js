@@ -98,11 +98,10 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
   }
 
   /** @override */
-  documentInactiveCallback() {
+  pauseCallback() {
     if (this.iframe_ && this.iframe_.contentWindow) {
       this.iframe_.contentWindow./*OK*/postMessage('ampPause', '*');
     }
-    return false;
   }
 
   /** @private */

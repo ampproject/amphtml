@@ -101,12 +101,12 @@ describe('amp-instagram', () => {
     });
   });
 
-  it('removes iframe after documentInactiveCallback', () => {
+  it('removes iframe after unlayoutCallback', () => {
     return getIns('fBwFP').then(ins => {
       const wrapper = ins.querySelector('wrapper');
       testIframe(ins.querySelector('iframe'));
       const obj = ins.implementation_;
-      obj.documentInactiveCallback();
+      obj.unlayoutCallback();
       expect(ins.querySelector('iframe')).to.be.null;
       expect(obj.iframe_).to.be.null;
       expect(obj.iframePromise_).to.be.null;

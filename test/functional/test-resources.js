@@ -242,7 +242,7 @@ describe('Resources schedulePause', () => {
           return true;
         },
       },
-      documentInactiveCallback() {
+      unlayoutCallback() {
         return false;
       },
     };
@@ -289,9 +289,18 @@ describe('Resources schedulePause', () => {
     }).to.not.throw();
   });
 
-  it('should call documentInactiveCallback on custom element', () => {
-    const stub1 = sandbox.stub(child1, 'documentInactiveCallback');
-    const stub2 = sandbox.stub(child2, 'documentInactiveCallback');
+  it('should call unlayoutCallback on custom element', () => {
+    const stub1 = sandbox.stub(child1, 'unlayoutCallback');
+    const stub2 = sandbox.stub(child2, 'unlayoutCallback');
+
+    resources.schedulePause(parent, children);
+    expect(stub1.calledOnce).to.be.true;
+    expect(stub2.calledOnce).to.be.true;
+  });
+
+  it('should call pauseCallback on custom element', () => {
+    const stub1 = sandbox.stub(child1, 'pauseCallback');
+    const stub2 = sandbox.stub(child2, 'pauseCallback');
 
     resources.schedulePause(parent, children);
     expect(stub1.calledOnce).to.be.true;
@@ -1050,7 +1059,9 @@ describe('Resources.Resource', () => {
       isRelayoutNeeded: () => false,
       layoutCallback: () => {},
       changeSize: () => {},
-      documentInactiveCallback: () => false,
+      unlayoutCallback: () => true,
+      pauseCallback: () => false,
+      resumeCallback: () => false,
       viewportCallback: () => {},
     };
     elementMock = sandbox.mock(element);
@@ -1469,41 +1480,41 @@ describe('Resources.Resource', () => {
   });
 
 
-  describe('documentInactiveCallback', () => {
-    it('should NOT call documentInactiveCallback on unbuilt element', () => {
+  describe('unlayoutCallback', () => {
+    it('should NOT call unlayoutCallback on unbuilt element', () => {
       resource.state_ = ResourceState_.NOT_BUILT;
       elementMock.expects('viewportCallback').never();
-      elementMock.expects('documentInactiveCallback').never();
-      resource.documentBecameInactive();
+      elementMock.expects('unlayoutCallback').never();
+      resource.unlayout();
       expect(resource.getState()).to.equal(ResourceState_.NOT_BUILT);
     });
 
-    it('should call documentInactiveCallback on built element and update state',
+    it('should call unlayoutCallback on built element and update state',
         () => {
           resource.state_ = ResourceState_.LAYOUT_COMPLETE;
-          elementMock.expects('documentInactiveCallback').returns(true).once();
-          resource.documentBecameInactive();
+          elementMock.expects('unlayoutCallback').returns(true).once();
+          resource.unlayout();
           expect(resource.getState()).to.equal(ResourceState_.NOT_LAID_OUT);
         });
 
     it('updated state should bypass isRelayoutNeeded', () => {
       resource.state_ = ResourceState_.LAYOUT_COMPLETE;
-      elementMock.expects('documentInactiveCallback').returns(true).once();
+      elementMock.expects('unlayoutCallback').returns(true).once();
       elementMock.expects('isUpgraded').returns(true).atLeast(1);
       elementMock.expects('getBoundingClientRect')
           .returns({left: 1, top: 1, width: 1, height: 1}).once();
 
-      resource.documentBecameInactive();
+      resource.unlayout();
 
       elementMock.expects('layoutCallback').returns(Promise.resolve()).once();
       resource.startLayout(true);
     });
 
-    it('should call documentInactiveCallback on built element' +
+    it('should call unlayoutCallback on built element' +
         ' but NOT update state', () => {
       resource.state_ = ResourceState_.LAYOUT_COMPLETE;
-      elementMock.expects('documentInactiveCallback').returns(false).once();
-      resource.documentBecameInactive();
+      elementMock.expects('unlayoutCallback').returns(false).once();
+      resource.unlayout();
       expect(resource.getState()).to.equal(ResourceState_.LAYOUT_COMPLETE);
     });
 
@@ -1511,21 +1522,49 @@ describe('Resources.Resource', () => {
       resource.state_ = ResourceState_.LAYOUT_COMPLETE;
       resource.isInViewport_ = false;
       elementMock.expects('viewportCallback').never();
-      resource.documentBecameInactive();
+      resource.unlayout();
     });
 
     it('should call viewportCallback when resource in viewport', () => {
       resource.state_ = ResourceState_.LAYOUT_COMPLETE;
       resource.isInViewport_ = true;
       elementMock.expects('viewportCallback').withExactArgs(false).once();
-      resource.documentBecameInactive();
+      resource.unlayout();
     });
 
-    it('should delegate unload to documentInactiveCallback', () => {
+    it('should delegate unload to unlayoutCallback', () => {
       resource.state_ = ResourceState_.LAYOUT_COMPLETE;
-      elementMock.expects('documentInactiveCallback').returns(false).once();
+      elementMock.expects('unlayoutCallback').returns(false).once();
       resource.unload();
       expect(resource.getState()).to.equal(ResourceState_.LAYOUT_COMPLETE);
+    });
+  });
+
+  describe('pauseCallback', () => {
+    it('should NOT call pauseCallback on unbuilt element', () => {
+      resource.state_ = ResourceState_.NOT_BUILT;
+      elementMock.expects('pauseCallback').never();
+      resource.pause();
+    });
+
+    it('should call pauseCallback on built element', () => {
+      resource.state_ = ResourceState_.LAYOUT_COMPLETE;
+      elementMock.expects('pauseCallback').once();
+      resource.pause();
+    });
+  });
+
+  describe('resumeCallback', () => {
+    it('should NOT call resumeCallback on unbuilt element', () => {
+      resource.state_ = ResourceState_.NOT_BUILT;
+      elementMock.expects('resumeCallback').never();
+      resource.resume();
+    });
+
+    it('should call resumeCallback on built element', () => {
+      resource.state_ = ResourceState_.LAYOUT_COMPLETE;
+      elementMock.expects('resumeCallback').once();
+      resource.resume();
     });
   });
 

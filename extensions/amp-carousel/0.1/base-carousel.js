@@ -142,7 +142,7 @@ export class BaseCarousel extends AMP.BaseElement {
   }
 
   /** @override */
-  documentInactiveCallback() {
+  unlayoutCallback() {
     return true;
   }
 

@@ -49,11 +49,13 @@ class AmpReachPlayer extends AMP.BaseElement {
   }
 
   /** @override */
-  documentInactiveCallback() {
+  pauseCallback() {
     if (this.iframe_ && this.iframe_.contentWindow) {
-      this.iframe_.contentWindow./*OK*/postMessage('pause', 'https://player-cdn.beachfrontmedia.com');
+      this.iframe_.contentWindow./*OK*/postMessage(
+        'pause',
+        'https://player-cdn.beachfrontmedia.com'
+      );
     }
-    return false;
   }
 
 };

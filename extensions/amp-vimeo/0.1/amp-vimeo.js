@@ -59,7 +59,7 @@ class AmpVimeo extends AMP.BaseElement {
   }
 
   /** @override */
-  documentInactiveCallback() {
+  pauseCallback() {
     if (this.iframe_ && this.iframe_.contentWindow) {
       // See
       // https://developer.vimeo.com/player/js-api
@@ -68,9 +68,6 @@ class AmpVimeo extends AMP.BaseElement {
         'value': '',
       }), '*');
     }
-    // No need to do layout later - user action will be expect to resume
-    // the playback.
-    return false;
   }
 };
 

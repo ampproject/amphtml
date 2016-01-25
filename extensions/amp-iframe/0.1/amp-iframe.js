@@ -329,7 +329,7 @@ export class AmpIframe extends AMP.BaseElement {
    * swiped away from the doc.
    * @override
    **/
-  documentInactiveCallback() {
+  unlayoutCallback() {
     if (this.iframe_) {
       removeElement(this.iframe_);
       if (this.placeholder_) {
