@@ -25,7 +25,7 @@ min_validator_revision_required: 77
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 122
+spec_file_revision: 123
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
 # These rules are just enough to validate the example from the spec.
@@ -1722,6 +1722,24 @@ tags: {  # amp-dynamic-css-classes
     mandatory: true
   }
 }
+tags: {  # amp-facebook
+  name: "script"
+  mandatory_parent: "head"
+  detail: "amp-facebook extension .js script"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-facebook/amp-facebook.md"
+  attrs: {
+    name: "custom-element"
+    value: "amp-facebook"
+    mandatory: true
+    dispatch_key: true
+  }
+  attrs: { name: "async" value: "" mandatory: true }
+  attrs: {
+    name: "src"
+    value: "https://cdn.ampproject.org/v0/amp-facebook-0.1.js"
+    mandatory: true
+  }
+}
 tags: {  # amp-fit-text
   name: "script"
   mandatory_parent: "head"
@@ -2208,6 +2226,22 @@ tags: {
   attrs: { name: "src" }
   attrs: { name: "type" mandatory: true }
   attrs: { name: "json" }
+  amp_layout: {
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: RESPONSIVE
+    supported_layouts: FILL
+    supported_layouts: NODISPLAY
+  }
+}
+# <amp-facebook>
+tags: {
+  name: "amp-facebook"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-facebook/amp-facebook.md"
+  also_requires: "amp-facebook extension .js script"
+  attr_lists: "extended-amp-global"
+  # data-* is generally allowed, but it's not generally mandatory.
+  attrs: { name: "data-href" mandatory: true }
   amp_layout: {
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
