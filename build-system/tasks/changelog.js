@@ -73,12 +73,14 @@ function getGitMetadata() {
         if (isDryrun) {
           return;
         }
-        return submitReleaseNotes(argv.version, gitMetadata.changelog);
+        return getCurrentSha().then(
+          submitReleaseNotes.bind(null, version, gitMetadata.changelog)
+        );
       })
       .catch(errHandler);
 }
 
-function submitReleaseNotes(version, changelog) {
+function submitReleaseNotes(version, changelog, sha) {
   var name = String(version);
   var options = {
     url: 'https://api.github.com/repos/ampproject/amphtml/releases',
@@ -90,7 +92,7 @@ function submitReleaseNotes(version, changelog) {
     json: true,
     body: {
       'tag_name': name,
-      'target_commitish': branch,
+      'target_commitish': sha,
       'name': name,
       'body': changelog,
       'draft': true,
@@ -107,6 +109,10 @@ function submitReleaseNotes(version, changelog) {
   return request(options).then(function() {
     util.log(util.colors.green('Release Notes submitted'));
   });
+}
+
+function getCurrentSha() {
+  return gitExec({ args: 'rev-parse HEAD' });
 }
 
 function buildChangelog(gitMetadata, githubMetadata) {
