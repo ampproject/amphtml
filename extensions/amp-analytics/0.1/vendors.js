@@ -59,9 +59,10 @@ export const ANALYTICS_CONFIG = {
     },
     'requests': {
       'host': 'https://www.google-analytics.com',
-      'basePrefix': 'v=1&_v=a0&aip=true&_s=${hitCount}&dr=${documentReferrer}' +
+      'basePrefix': 'v=1&_v=a0&aip=true&_s=${requestCount}' +
           'dt=${title}&sr=${screenWidth}x${screenHeight}&_utmht=${timestamp}&' +
-          'jid=&cid=${clientId(_ga)}&tid=${account}&dl=${documentLocation}',
+          'jid=&cid=${clientId(_ga)}&tid=${account}&dl=${documentLocation}&' +
+          'dr=${documentReferrer}',
       'baseSuffix': '&a=${pageViewId}&z=${random}',
       'pageview': '${host}/r/collect?${basePrefix}&t=pageview&' +
           '_r=1${baseSuffix}',
