@@ -314,6 +314,7 @@ function buildExamples(watch) {
   buildExample('analytics.amp.html');
   buildExample('article.amp.html');
   buildExample('article-access.amp.html');
+  buildExample('csp.amp.html');
   buildExample('metadata-examples/article-json-ld.amp.html');
   buildExample('metadata-examples/article-microdata.amp.html');
   buildExample('metadata-examples/recipe-json-ld.amp.html');
