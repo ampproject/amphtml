@@ -116,7 +116,7 @@ window.draw3p = function(opt_configCallback) {
   window.context.isMaster = window.context.master == window;
   window.context.data = data;
   window.context.noContentAvailable = triggerNoContentAvailable;
-  window.context.resize = triggerResizeRequest;
+  window.context.requestResize = triggerResizeRequest;
 
   if (data.type === 'facebook' || data.type === 'twitter') {
     // Only make this available to selected embeds until the generic solution is
@@ -126,6 +126,8 @@ window.draw3p = function(opt_configCallback) {
 
   // This only actually works for ads.
   window.context.observeIntersection = observeIntersection;
+  window.context.onResizeSuccess = onResizeSuccess;
+  window.context.onResizeDenied = onResizeDenied;
   window.context.reportRenderedEntityIdentifier =
       reportRenderedEntityIdentifier;
   delete data._context;
@@ -171,6 +173,30 @@ function observeIntersection(observerCallback) {
   nonSensitiveDataPostMessage('send-intersections');
   return listenParent('intersection', data => {
     observerCallback(data.changes);
+  });
+}
+
+/**
+ * Registers a callback for communicating when a resize request succeeds.
+ * @param {function(number)} observerCallback
+ * @returns {!function} A function which removes the event listener that
+ *    observes for resize status messages.
+ */
+function onResizeSuccess(observerCallback) {
+  return listenParent('embed-resize-changed', data => {
+    observerCallback(data.requestedHeight);
+  });
+}
+
+/**
+ * Registers a callback for communicating when a resize request is denied.
+ * @param {function(number)} observerCallback
+ * @returns {!function} A function which removes the event listener that
+ *    observes for resize status messages.
+ */
+function onResizeDenied(observerCallback) {
+  return listenParent('embed-resize-denied', data => {
+    observerCallback(data.requestedHeight);
   });
 }
 
