@@ -25,6 +25,7 @@ export const adPrefetch = {
   doubleclick: 'https://www.googletagservices.com/tag/js/gpt.js',
   a9: 'https://c.amazon-adsystem.com/aax2/assoc.js',
   adsense: 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js',
+  dotandads: 'https://amp.ad.dotandad.com/dotandadsAmp.js',
 };
 
 /**
@@ -42,4 +43,5 @@ export const adPreconnect = {
     'https://securepubads.g.doubleclick.net',
     'https://tpc.googlesyndication.com',
   ],
+  dotandads: 'https://bal.ad.dotandad.com',
 };

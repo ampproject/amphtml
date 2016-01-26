@@ -28,6 +28,7 @@ import {adreactor} from '../ads/adreactor';
 import {adsense} from '../ads/adsense';
 import {adtech} from '../ads/adtech';
 import {doubleclick} from '../ads/doubleclick';
+import {dotandads} from '../ads/dotandads';
 import {facebook} from './facebook';
 import {manageWin} from './environment';
 import {nonSensitiveDataPostMessage, listenParent} from './messaging';
@@ -41,6 +42,7 @@ register('adreactor', adreactor);
 register('adsense', adsense);
 register('adtech', adtech);
 register('doubleclick', doubleclick);
+register('dotandads', dotandads);
 register('_ping_', function(win, data) {
   win.document.getElementById('c').textContent = data.ping;
 });
