@@ -29,6 +29,8 @@ import {adsense} from '../ads/adsense';
 import {adtech} from '../ads/adtech';
 import {doubleclick} from '../ads/doubleclick';
 import {facebook} from './facebook';
+import {manageWin} from './environment';
+import {nonSensitiveDataPostMessage, listenParent} from './messaging';
 import {twitter} from './twitter';
 import {register, run} from '../src/3p';
 import {parseUrl} from '../src/url';
@@ -127,7 +129,13 @@ window.draw3p = function(opt_configCallback) {
   window.context.reportRenderedEntityIdentifier =
       reportRenderedEntityIdentifier;
   delete data._context;
+  // Run this only in canary and local dev for the time being.
+  if (location.pathname.indexOf('-canary') ||
+      location.pathname.indexOf('current')) {
+    manageWin(window);
+  }
   draw3p(window, data, opt_configCallback);
+  nonSensitiveDataPostMessage('render-start');
 };
 
 function triggerNoContentAvailable() {
@@ -148,17 +156,6 @@ function triggerResizeRequest(width, height) {
   });
 }
 
-function nonSensitiveDataPostMessage(type, opt_object) {
-  if (window.parent == window) {
-    return;  // Nothing to do.
-  }
-  const object = opt_object || {};
-  object.type = type;
-  object.sentinel = 'amp-3p';
-  window.parent./*OK*/postMessage(object,
-      window.context.location.origin);
-}
-
 /**
  * Registers a callback for intersections of this iframe with the current
  * viewport.
@@ -170,22 +167,11 @@ function nonSensitiveDataPostMessage(type, opt_object) {
  *    observes for intersection messages.
  */
 function observeIntersection(observerCallback) {
-  function listener(event) {
-    if (event.source != window.parent ||
-        event.origin != window.context.location.origin ||
-        !event.data ||
-        event.data.sentinel != 'amp-3p' ||
-        event.data.type != 'intersection') {
-      return;
-    }
-    observerCallback(event.data.changes);
-  }
   // Send request to received records.
   nonSensitiveDataPostMessage('send-intersections');
-  window.addEventListener('message', listener);
-  return function() {
-    window.removeEventListener('message', listener);
-  };
+  return listenParent('intersection', data => {
+    observerCallback(data.changes);
+  });
 }
 
 /**
