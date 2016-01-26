@@ -89,4 +89,30 @@ describe('amp-install-serviceworker', () => {
     implementation.buildCallback();
     expect(calledSrc).to.undefined;
   });
+
+  it('should do nothing on proxy', () => {
+    const install = document.createElement('amp-install-serviceworker');
+    const implementation = install.implementation_;
+    expect(implementation).to.be.defined;
+    install.setAttribute('src', 'https://cdn.ampproject.org/sw.js');
+    let calledSrc;
+    const p = new Promise(() => {});
+    implementation.getWin = () => {
+      return {
+        location: {
+          href: 'https://cdn.ampproject.org/some/path'
+        },
+        navigator: {
+          serviceWorker: {
+            register: src => {
+              calledSrc = src;
+              return p;
+            }
+          }
+        }
+      };
+    };
+    implementation.buildCallback();
+    expect(calledSrc).to.undefined;
+  });
 });

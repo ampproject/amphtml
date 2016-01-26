@@ -21,10 +21,15 @@ A validator for the
 
 This is a very first release, rough on the edges. Fasten your seatbelts.
 
-Prerequisite: Linux Ubuntu 14 or similar
+Prerequisite: Linux Ubuntu 14 or similar, or Mac OS X 10.11.x or later
+
+###Mac OS X
+
+See [Building a command-line AMP Validator: Mac OS X](https://github.com/ampproject/amphtml/blob/master/validator/docs/building_a_command_line_amp_validator_for_mac_os_x.md).
+
+###Linux
 
 Install these packages using apt-get:
-
 * npm
 * nodejs
 * openjdk-7-jre

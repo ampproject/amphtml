@@ -1,5 +1,5 @@
 FAIL
-feature_tests/bad_viewport.html:25:2 The property 'foo' in attribute 'content' in tag 'viewport declaration' is disallowed. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#vprt)
-feature_tests/bad_viewport.html:25:2 The property 'minimum-scale' in attribute 'content' in tag 'viewport declaration' is set to 'not-a-number', which is invalid. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#vprt)
-feature_tests/bad_viewport.html:25:2 The property 'width' is missing from attribute 'content' in tag 'viewport declaration'. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#vprt)
-feature_tests/bad_viewport.html:32:7 The mandatory tag 'viewport declaration' is missing or incorrect. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#vprt)
+feature_tests/bad_viewport.html:25:2 The property 'foo' in attribute 'content' in tag 'meta viewport declaration' is disallowed. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#vprt)
+feature_tests/bad_viewport.html:25:2 The property 'minimum-scale' in attribute 'content' in tag 'meta viewport declaration' is set to 'not-a-number', which is invalid. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#vprt)
+feature_tests/bad_viewport.html:25:2 The property 'width' is missing from attribute 'content' in tag 'meta viewport declaration'. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#vprt)
+feature_tests/bad_viewport.html:32:7 The mandatory tag 'meta viewport declaration' is missing or incorrect. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#vprt)
