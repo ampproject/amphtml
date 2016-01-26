@@ -273,9 +273,11 @@ export class HistoryBindingNatural_ {
     let pushState, replaceState;
     if (history.pushState && history.replaceState) {
       /** @private @const {function(*, string=, string=)|undefined} */
-      this.origPushState_ = history.pushState.bind(history);
+      this.origPushState_ = history.originalPushState ||
+          history.pushState.bind(history);
       /** @private @const {function(*, string=, string=)|undefined} */
-      this.origReplaceState_ = history.replaceState.bind(history);
+      this.origReplaceState_ = history.originalReplaceState ||
+          history.replaceState.bind(history);
       pushState = (state, opt_title, opt_url) => {
         this.unsupportedState_ = state;
         this.origPushState_(state, opt_title, opt_url);
@@ -290,6 +292,12 @@ export class HistoryBindingNatural_ {
           this.origReplaceState_(state, opt_title);
         }
       };
+      if (!history.originalPushState) {
+        history.originalPushState = this.origPushState_;
+      }
+      if (!history.originalReplaceState) {
+        history.originalReplaceState = this.origReplaceState_;
+      }
     } else {
       pushState = (state, opt_title, opt_url) => {
         this.unsupportedState_ = state;

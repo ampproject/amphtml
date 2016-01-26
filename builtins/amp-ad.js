@@ -20,9 +20,10 @@ import {assert} from '../src/asserts';
 import {getIframe, prefetchBootstrap} from '../src/3p-frame';
 import {IntersectionObserver} from '../src/intersection-observer';
 import {isLayoutSizeDefined} from '../src/layout';
-import {listen, listenOnce} from '../src/iframe-helper';
+import {listen, listenOnce, postMessage} from '../src/iframe-helper';
 import {loadPromise} from '../src/event-helper';
 import {log} from '../src/log';
+import {parseUrl} from '../src/url';
 import {registerElement} from '../src/custom-element';
 import {timer} from '../src/timer';
 
@@ -258,6 +259,9 @@ export function installAd(win) {
             this.updateHeight_(newHeight);
           }
         }, /* opt_is3P */ true);
+        listenOnce(this.iframe_, 'render-start', () => {
+          this.sendEmbedInfo_(this.isInViewport());
+        }, /* opt_is3P */ true);
       }
       return loadPromise(this.iframe_);
     }
@@ -266,6 +270,21 @@ export function installAd(win) {
     viewportCallback(inViewport) {
       if (this.intersectionObserver_) {
         this.intersectionObserver_.onViewportCallback(inViewport);
+      }
+      this.sendEmbedInfo_(inViewport);
+    }
+
+    /**
+     * @param {boolean} inViewport
+     * @private
+     */
+    sendEmbedInfo_(inViewport) {
+      if (this.iframe_) {
+        const targetOrigin =
+            this.iframe_.src ? parseUrl(this.iframe_.src).origin : '*';
+        postMessage(this.iframe_, 'embed-state', {
+          inViewport: inViewport
+        }, targetOrigin, /* opt_is3P */ true);
       }
     }
 
