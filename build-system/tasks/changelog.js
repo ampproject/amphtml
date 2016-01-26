@@ -109,7 +109,9 @@ function submitReleaseNotes(version, changelog, sha) {
 }
 
 function getCurrentSha() {
-  return gitExec({ args: 'rev-parse HEAD' });
+  return gitExec({ args: 'rev-parse HEAD' }).then(function(sha) {
+    return sha.trim();
+  });
 }
 
 function buildChangelog(gitMetadata, githubMetadata) {
