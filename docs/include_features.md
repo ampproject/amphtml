@@ -10,7 +10,7 @@ Make sure to review the documentation for each component individually as a refer
 # Display an iframe
 
 Display an iframe in your page using the
-[`amp-iframe`](../extensions/amp-iframe/amp-iframe.md) element.
+[`amp-iframe`](../extensions/amp-iframe/README.md) element.
 
 `amp-iframe` requirements:
 
@@ -100,7 +100,7 @@ amp-img {
 ## Include an animated image
 
 Include an animated image in your page
-using the [`amp-anim`](../extensions/amp-anim/amp-anim.md) element.
+using the [`amp-anim`](../extensions/amp-anim/README.md) element.
 
 The `amp-anim` element is very similar to the `amp-img` element,
 and provides additional functionality to manage loading and playing
@@ -125,7 +125,7 @@ The placeholder is specified via the `placeholder` attribute:
 ## Embed a Tweet
 
 Embed a Twitter Tweet in your page
-using the [`amp-twitter`](../extensions/amp-twitter/amp-twitter.md) element.
+using the [`amp-twitter`](../extensions/amp-twitter/README.md) element.
 
 To include a tweet in your page,
 first include the following script to the `<head>`:
@@ -194,7 +194,7 @@ if the browser doesn't support HTML5 video, for example:
 ## Include a youtube video
 
 Include a youtube video in your page
-using the [`amp-youtube`](../extensions/amp-youtube/amp-youtube.md) element.
+using the [`amp-youtube`](../extensions/amp-youtube/README.md) element.
 
 You must include the following script in the `<head>`:
 
@@ -217,7 +217,7 @@ Use `layout="responsive"` to yield correct layouts for 16:9 aspect ratio videos:
 ## Include an audio resource
 
 Include an audio resource in your page,
-using the [`amp-audio`](../extensions/amp-audio/amp-audio.md) element.
+using the [`amp-audio`](../extensions/amp-audio/README.md) element.
 
 You must include the following script in the `<head>`:
 

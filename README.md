@@ -86,14 +86,14 @@ These components can:
   such as [amp-img](builtins/amp-img.md) and [amp-video](builtins/amp-video.md).
 * Implement embedded third-party content, such as
 [amp-ad](builtins/amp-ad.md),
-[amp-pinterest](extensions/amp-pinterest/amp-pinterest.md),
-[amp-twitter](extensions/amp-twitter/amp-twitter.md),
-and [amp-youtube](extensions/amp-youtube/amp-youtube.md).
+[amp-pinterest](extensions/amp-pinterest/README.md),
+[amp-twitter](extensions/amp-twitter/README.md),
+and [amp-youtube](extensions/amp-youtube/README.md).
 * Provide for common patterns in web pages,
-such as [amp-lightbox](extensions/amp-lightbox/amp-lightbox.md)
-and [amp-carousel](extensions/amp-carousel/amp-carousel.md).
+such as [amp-lightbox](extensions/amp-lightbox/README.md)
+and [amp-carousel](extensions/amp-carousel/README.md).
 * Make advanced performance techniques easy,
-such as [amp-anim](extensions/amp-anim/amp-anim.md),
+such as [amp-anim](extensions/amp-anim/README.md),
 which allows web developers to dynamically serve animated images
 as either image files (GIF) or video files (WebM or MP4) based on browser compatibility.
 

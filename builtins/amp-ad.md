@@ -64,7 +64,7 @@ Optional attribute to pass configuration to the ad as an arbitrarily complex JSO
 
 ##### data-consent-notification-id
 
-Optional attribute. If provided will require confirming the [amp-user-notification](../extensions/amp-user-notification/amp-user-notification.md) with the given HTML-id until the "AMP client id" for the user (similar to a cookie) is passed to the ad. The means ad rendering is delayed until the user confirmed the notification.
+Optional attribute. If provided will require confirming the [amp-user-notification](../extensions/amp-user-notification/README.md) with the given HTML-id until the "AMP client id" for the user (similar to a cookie) is passed to the ad. The means ad rendering is delayed until the user confirmed the notification.
 
 #### Placeholder
 

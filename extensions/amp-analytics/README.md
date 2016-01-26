@@ -73,7 +73,7 @@ when the document is first loaded, and each time an `<a>` tag is clicked:
     ```
 
   - `data-consent-notification-id` Optional attribute. If provided will stop
-    processing the analytics request until a [amp-user-notification](../../extensions/amp-user-notification/amp-user-notification.md) with
+    processing the analytics request until a [amp-user-notification](../../extensions/amp-user-notification/README.md) with
     the given HTML-id was confirmed by the user.
 
 ## Configuration

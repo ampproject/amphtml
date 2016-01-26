@@ -19,7 +19,7 @@ limitations under the License.
 ## Overview
 
 Some components such as [`amp-pixel`](../builtins/amp-pixel.md) and
-[`amp-list`](../extensions/amp-list/amp-list.md) allow variables to be substituted
+[`amp-list`](../extensions/amp-list/README.md) allow variables to be substituted
 in the relevant URLs. AMP provides a number of standard variable substitutions and
 allows each component to add their own. The rest of this document talks about
 the variables supported by the platform.
