@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {writeScript, dataHasAllFields} from '../src/3p';
+import {writeScript} from '../src/3p';
 import {log} from '../src/log';
 
 /**
@@ -22,12 +22,7 @@ import {log} from '../src/log';
  * @param {!Object} data
  */
 export function dotandads(global, data) {
-  var mandatoryData = ["sp", "cid", "mpo", "mpt"];
-  if (dataHasAllFields(data, mandatoryData)){
-    global.data = data;
-    writeScript(global, 'https://amp.ad.dotandad.com/dotandadsAmp.js');
-  } else {
-    log.error("DotAndAds", "missing mandatory fields");
-    global.context.noContentAvailable();
-  }
+  const mandatoryData = ["sp", "cid", "mpo", "mpt"];
+  global.data = data;
+  writeScript(global, 'https://amp.ad.dotandad.com/dotandadsAmp.js');
 }
