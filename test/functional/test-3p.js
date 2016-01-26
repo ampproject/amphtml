@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {validateSrcPrefix, validateSrcContains, checkData, 
+import {validateSrcPrefix, validateSrcContains, checkData,
   validateData, dataHasAllFields}
     from '../../src/3p';
 import * as sinon from 'sinon';

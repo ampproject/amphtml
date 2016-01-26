@@ -178,7 +178,7 @@ export function validateData(data, allowedFields) {
  * @param {!Object} data
  * @param {!Array<string>} fields
  */
-export function dataHasAllFields(data, fields){
+export function dataHasAllFields(data, fields) {
   for (let c = 0; c < fields.length; c++) {
     if (!data.hasOwnProperty(fields[c]) && !data[fields[c]]) {
       return false;
