@@ -14,13 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-**This extension is still a work in progress. Details below can change.**
-
-### <a name="amp-analytics"></a>`amp-analytics`
+# <a name="amp-analytics"></a>`amp-analytics`
 
 Capture analytics data from an AMP document.
 
-#### <a name="behavior"></a>Behavior
+## <a name="behavior"></a>Behavior
 
 The `<amp-analytics>` element is used to measure activity on an AMP document. The details concerning what is measured and how
 that data is sent to an analytics server is specified in a JSON configuration object.
@@ -40,11 +38,11 @@ when the document is first loaded, and each time an `<a>` tag is clicked:
     "account": "ABC123"
   },
   "triggers": {
-    "track pageview": {
+    "trackPageview": {
       "on": "visible",
       "request": "pageview"
     },
-    "track anchor clicks": {
+    "trackAnchorClicks": {
       "on": "click",
       "selector": "a",
       "request": "event",
@@ -59,7 +57,7 @@ when the document is first loaded, and each time an `<a>` tag is clicked:
 </amp-analytics>
 ```
 
-#### <a name="attributes"></a>Attributes
+## <a name="attributes"></a>Attributes
 
   - `type` This optional attribute can be specified to use one of the built-in analytics providers. Currently supported values for type are:
     - `googleanalytics`: Adds support for Google Analytics. More details for adding Google Analytics support can be found at [developers.google.com](https://developers.google.com/analytics/devguides/collection/amp-analytics/).
@@ -74,13 +72,13 @@ when the document is first loaded, and each time an `<a>` tag is clicked:
     <amp-analytics config="https://example.com/analytics.config.json"></amp-analytics>
     ```
 
-#### Configuration
+## Configuration
 
 Configuration may be specified inline (as shown in the example above) or fetched remotely by specifying a URL in the
 `config` attribute. Additionally, built-in configuration for popular analytics vendors can be selected using
 the `type` attribute.
 
-If configuration data from more than one of these sources is used, the configuration objects will
+If configuration data from more than one of these sources is used, the configuration objects(vars, requests and triggers) will
 be merged together such that remote configuration takes precedence over inline configuration, and inline configuration
 takes precendence over vendor configuration.
 
@@ -107,7 +105,7 @@ The `<amp-analytics>` configuration object uses the following format:
   }
 }
 ```
-###### Requests
+### Requests
 The `requests` attribute specifies the URLs used to transmit data to an analytics platform. The `request-name` is used
 in the trigger configuration to specify what request should be sent in response to a pariticular event. The `request-value`
 is an https URL. These values may include placeholder tokens that can reference other requests or variables.
@@ -120,8 +118,8 @@ is an https URL. These values may include placeholder tokens that can reference 
 }
 ```
 
-###### Vars
-`amp-analytics` defines many basic variables that can be used in requests. A list of all such variables is available [here](./analytics-vars.md). In addition, all the variables supported by [AMP HTML URL Variable Substitutions](../../spec/amp-var-substitutions.md) are also supported. 
+### Vars
+`amp-analytics` defines many basic variables that can be used in requests. A list of all such variables is available [here](./analytics-vars.md). In addition, all the variables supported by [AMP HTML URL Variable Substitutions](../../spec/amp-var-substitutions.md) are also supported.
 
 The `vars` attribute in the configuration can be used to define new key-value pairs or override existing variables that can be referenced in `request` values. New variables are commonly used to specify publisher specific information.
 
@@ -132,22 +130,24 @@ The `vars` attribute in the configuration can be used to define new key-value pa
 }
 ```
 
-###### Triggers
-The `triggers` attribute describes when an analytics request should be sent.
+### Triggers
+The `triggers` attribute describes when an analytics request should be sent. It contains a key-value pair of trigger-name and
+ trigger-configuration. Trigger name can be any string comprised of alphanumeric characters (a-zA-Z0-9). Triggers from a
+ configuration with lower precedence are overridden by triggers with the same names from a configuration with higher precedence.
 
   - `on` (required) The event to listener for. Valid values are `visible` and `click`.
-  - `selector` A CSS selector used to refine which elements should be tracked. Use value `*` to track all elements.
   - `request` (required) Name of the request to send (as specified in the `requests` section).
+  - `selector` A CSS selector used to refine which elements should be tracked. Use value `*` to track all elements.
   - `vars` An object containing key-value pairs used to override `vars` defined in the top level config, or to specify
     vars unique to this trigger.
 
 ```javascript
 "triggers": {
-  "default pageview": {
+  "defaultPageview": {
     "on": "visible",
     "request": "pageview"
   },
-  "anchor clicks": {
+  "anchorClicks": {
     "on": "click",
     "selector": "a",
     "request": "event",
@@ -158,7 +158,7 @@ The `triggers` attribute describes when an analytics request should be sent.
 }
 ```
 
-###### Transport
+### Transport
 The `transport` attribute specifies how to send a request. The value is an object with fields that
 indicate which transport methods are acceptable.
 
