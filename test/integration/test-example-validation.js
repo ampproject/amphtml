@@ -52,6 +52,7 @@ describe('example', function() {
     'facebook.amp.html',
     'instagram.amp.html',
     'released.amp.html',
+    'soundcloud.amp.html',
     'twitter.amp.html',
     'vine.amp.html',
     'vimeo.amp.html',
@@ -68,6 +69,7 @@ describe('example', function() {
    */
   const errorWhitelist = [
     /invalid value \'.\/viewer-integr.js\'/,
+    /amp-soundcloud/,
     /vimeo/,
   ];
 
