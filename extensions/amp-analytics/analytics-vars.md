@@ -11,7 +11,7 @@ Vars can be defined by the platform, in the config at the top level, inside the 
 <script type="application/json">
 {
   "requests": {
-    "pageview": "https://example.com/analytics?url=${canonicalUrl}&title=${title}&acct=${account}&clientId=${clientId}",
+    "pageview": "https://example.com/analytics?url=${canonicalUrl}&title=${title}&acct=${account}&clientId=${clientId(cid-scope)}",
   },
   "vars": {
     "account": "ABC123",
@@ -189,6 +189,8 @@ Please see below the required and optional arguments you may pass into `clientId
 
   - `cid-scope` (Required) - Name of the fallback cookie when the document is loaded by the user directly.
   - `amp-user-notification-id` (Optional) - Optionally make the clientId substitution dependent on the dismissal of a user notification shown to the visitor of the page.
+    This is the same as using the [data-consent-notification-id](./amp-analytics.md) attribute
+    and you may choose one or the other.
 
 Example usage: `${clientId(foo)}`
 

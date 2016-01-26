@@ -24,6 +24,7 @@ import {isArray, isObject} from '../../../src/types';
 import {log} from '../../../src/log';
 import {sendRequest} from './transport';
 import {urlReplacementsFor} from '../../../src/url-replacements';
+import {userNotificationManagerFor} from '../../../src/user-notification';
 import {xhrFor} from '../../../src/xhr';
 
 
@@ -50,6 +51,25 @@ export class AmpAnalytics extends AMP.BaseElement {
   }
 
   /** @override */
+  buildCallback() {
+
+    /**
+     * The html id of the `amp-user-notification` element.
+     * @private @const {?string}
+     */
+    this.consentNotificationId_ = this.element
+        .getAttribute('data-consent-notification-id');
+
+    /** @private {!Promise} */
+    this.consentPromise_ = Promise.resolve();
+
+    if (this.consentNotificationId_ != null) {
+      this.consentPromise_ = userNotificationManagerFor(this.getWin())
+          .then(service => service.get(this.consentNotificationId_));
+    }
+  }
+
+  /** @override */
   layoutCallback() {
 
     this.element.setAttribute('aria-hidden', 'true');
@@ -71,40 +91,49 @@ export class AmpAnalytics extends AMP.BaseElement {
      */
     this.remoteConfig = {};
 
-    return this.fetchRemoteConfig_().then(() => {
-      /**
-       * @private {!JSONObject} The analytics config associated with the tag
-       */
-      this.config_ = this.mergeConfigs_();
+    return this.consentPromise_
+        .then(this.fetchRemoteConfig_.bind(this))
+        .then(this.onFetchRemoteConfigSuccess_.bind(this));
+  }
 
-      if (this.hasOptedOut_()) {
-        // Nothing to do when the user has opted out.
-        log.fine(this.getName_(), 'User has opted out. No hits will be sent.');
-        return Promise.resolve();
-      }
+  /**
+   * Handle successful fetching of (possibly) remote config.
+   * @return {!Promise|undefined}
+   * @private
+   */
+  onFetchRemoteConfigSuccess_() {
+    /**
+     * @private {!JSONObject} The analytics config associated with the tag
+     */
+    this.config_ = this.mergeConfigs_();
 
-      this.generateRequests_();
+    if (this.hasOptedOut_()) {
+      // Nothing to do when the user has opted out.
+      log.fine(this.getName_(), 'User has opted out. No hits will be sent.');
+      return Promise.resolve();
+    }
 
-      if (!this.config_['triggers']) {
-        console./*OK*/error(this.getName_(), 'No triggers were found in the ' +
-            'config. No analytics data will be sent.');
-        return Promise.resolve();
-      }
+    this.generateRequests_();
 
-      // Trigger callback can be synchronous. Do the registration at the end.
-      for (const k in this.config_['triggers']) {
-        if (this.config_['triggers'].hasOwnProperty(k)) {
-          const trigger = this.config_['triggers'][k];
-          if (!trigger['on'] || !trigger['request']) {
-            console./*OK*/error(this.getName_(), '"on" and "request" ' +
-                'attributes are required for data to be collected.');
-            continue;
-          }
-          addListener(this.getWin(), trigger['on'],
-              this.handleEvent_.bind(this, trigger), trigger['selector']);
+    if (!this.config_['triggers']) {
+      console./*OK*/error(this.getName_(), 'No triggers were found in the ' +
+          'config. No analytics data will be sent.');
+      return Promise.resolve();
+    }
+
+    // Trigger callback can be synchronous. Do the registration at the end.
+    for (const k in this.config_['triggers']) {
+      if (this.config_['triggers'].hasOwnProperty(k)) {
+        const trigger = this.config_['triggers'][k];
+        if (!trigger['on'] || !trigger['request']) {
+          console./*OK*/error(this.getName_(), '"on" and "request" ' +
+              'attributes are required for data to be collected.');
+          continue;
         }
+        addListener(this.getWin(), trigger['on'],
+            this.handleEvent_.bind(this, trigger), trigger['selector']);
       }
-    });
+    }
   }
 
   /**
