@@ -173,13 +173,13 @@ export function validateData(data, allowedFields) {
 }
 
 /**
- * Function to check if data has all mandatory 
+ * Function to check if data has all mandatory
  * fields specified
  * @param {!Object} data
  * @param {!Array<string>} fields
  */
 export function dataHasAllFields(data, fields){
-  for (var c = 0; c < fields.length; c++) {
+  for (let c = 0; c < fields.length; c++) {
     if (!data.hasOwnProperty(fields[c]) && !data[fields[c]]) {
       return false;
     }

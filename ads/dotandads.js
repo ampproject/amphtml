@@ -22,8 +22,8 @@ import {log} from '../src/log';
  * @param {!Object} data
  */
 export function dotandads(global, data) {
-  var mandatoryData = ["sp", "cid", "mpo", "mpt"];
-  if (dataHasAllFields(data, mandatoryData)){
+  const mandatoryData = ["sp", "cid", "mpo", "mpt"];
+  if (dataHasAllFields(data, mandatoryData)) {
     global.data = data;
     writeScript(global, 'https://amp.ad.dotandad.com/dotandadsAmp.js');
   } else {
