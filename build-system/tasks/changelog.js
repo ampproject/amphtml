@@ -71,7 +71,7 @@ function getGitMetadata() {
           return;
         }
         return getCurrentSha().then(
-          submitReleaseNotes.bind(null, version, gitMetadata.changelog)
+          submitReleaseNotes.bind(null, argv.version, gitMetadata.changelog)
         );
       })
       .catch(errHandler);
