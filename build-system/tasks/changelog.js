@@ -31,7 +31,6 @@ var git = require('gulp-git');
 var gulp = require('gulp-help')(require('gulp'));
 var request = BBPromise.promisify(require('request'));
 var util = require('gulp-util');
-var version = require('../internal-version').VERSION;
 
 var GITHUB_ACCESS_TOKEN = process.env.GITHUB_ACCESS_TOKEN;
 var exec = BBPromise.promisify(child_process.exec);
@@ -41,6 +40,7 @@ var isCanary = argv.type == 'canary';
 var suffix =  isCanary ? '-canary' : '';
 var branch = isCanary ? 'canary' : 'release';
 var isDryrun = argv.dryrun;
+
 
 function changelog() {
   if (!GITHUB_ACCESS_TOKEN) {
@@ -57,6 +57,9 @@ function changelog() {
 }
 
 function getGitMetadata() {
+  if (!argv.version) {
+    throw new Error('no version value passed in. See --version flag option.');
+  }
 
   var gitMetadata = {};
   return getLastGitTag()
@@ -70,7 +73,7 @@ function getGitMetadata() {
         if (isDryrun) {
           return;
         }
-        return submitReleaseNotes(version, gitMetadata.changelog);
+        return submitReleaseNotes(argv.version, gitMetadata.changelog);
       })
       .catch(errHandler);
 }
@@ -252,5 +255,6 @@ gulp.task('changelog', 'Create github release draft', changelog, {
   options: {
     dryrun: '  Generate changelog but dont push it out',
     type: '  Pass in "canary" to generate a canary changelog',
+    version: '  The git tag and github release label',
   }
 });
