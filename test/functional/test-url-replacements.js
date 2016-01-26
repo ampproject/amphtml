@@ -111,7 +111,7 @@ describe('UrlReplacements', () => {
 
   it('should replace TIMEZONE', () => {
     return expand('?tz=TIMEZONE').then(res => {
-      expect(res).to.match(/tz=\d+/);
+      expect(res).to.match(/tz=-?\d+/);
     });
   });
 
