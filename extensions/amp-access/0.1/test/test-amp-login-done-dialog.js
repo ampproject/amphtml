@@ -152,6 +152,15 @@ describe('LoginDoneDialog', () => {
       expect(buildLangSelector('FR-fr')).to
           .equal('[lang="fr"], [lang="fr-FR"]');
     });
+
+    it('should protect form malformed prefixes', () => {
+      expect(buildLangSelector('"fr"')).to
+          .equal('[lang="fr"]');
+      expect(buildLangSelector('\\fr\\')).to
+          .equal('[lang="fr"]');
+      expect(buildLangSelector('f r')).to
+          .equal('[lang="fr"]');
+    });
   });
 
 
@@ -179,7 +188,7 @@ describe('LoginDoneDialog', () => {
           });
     });
 
-    it('should redirect to url without opener', () => {
+    it('should redirect to url without opener with HTTP', () => {
       windowApi.location.search = '?url=' +
           encodeURIComponent('http://acme.com/doc1');
       windowApi.opener = null;
@@ -191,6 +200,30 @@ describe('LoginDoneDialog', () => {
             expect(windowApi.location.replace.firstCall.args[0]).to.equal(
                 'http://acme.com/doc1');
           });
+    });
+
+    it('should redirect to url without opener with HTTPS', () => {
+      windowApi.location.search = '?url=' +
+          encodeURIComponent('https://acme.com/doc1');
+      windowApi.opener = null;
+      return dialog.postbackOrRedirect_()
+          .then(() => 'SUCCESS', error => 'ERROR ' + error)
+          .then(res => {
+            expect(res).to.equal('SUCCESS');
+            expect(windowApi.location.replace.callCount).to.equal(1);
+            expect(windowApi.location.replace.firstCall.args[0]).to.equal(
+                'https://acme.com/doc1');
+          });
+    });
+
+    it('should fail redirect to url without opener and invalid URL', () => {
+      windowApi.location.search = '?url=' +
+          encodeURIComponent(/*eslint no-script-url: 0*/ 'javascript:alert(1)');
+      windowApi.opener = null;
+      expect(() => {
+        dialog.postbackOrRedirect_();
+      }).to.throw(/URL must start with/);
+      expect(windowApi.location.replace.callCount).to.equal(0);
     });
 
     it('should fail without opener and redirect URL', () => {
