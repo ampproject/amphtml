@@ -73,7 +73,7 @@ Example of `amp-iframe` with `overflow` element:
 </amp-iframe>
 ```
 
-Example of IFrame resize request:
+Example of Iframe resize request:
 ```javascript
 window.parent.postMessage({
   sentinel: 'amp',
@@ -91,8 +91,8 @@ resize the `amp-iframe` since it's triggered by a user action.
 Here are some factors that affect how fast the resize will be executed:
 
 - Whether the resize is triggered by the user action;
-- Whether the resize is requested for a currently active IFrame;
-- Whether the resize is requested for an IFrame below the viewport or above the viewport.
+- Whether the resize is requested for a currently active Iframe;
+- Whether the resize is requested for an Iframe below the viewport or above the viewport.
 
 #### Iframe with Placeholder
 It is possible to have an `amp-iframe` appear on the top of a document when the `amp-iframe` has a `placeholder` element as shown in the example below.
@@ -108,10 +108,43 @@ It is possible to have an `amp-iframe` appear on the top of a document when the 
 - The `amp-iframe` must contain an element with the `placeholder` attribute, (for instance an `amp-img` element) which would be rendered as a placeholder till the iframe is ready to be displayed.
 - Iframe readiness can be known by listening to `onload` of the iframe or an `embed-ready` postMessage which would be sent by the Iframe document, whichever comes first.
 
-Example of IFrame embed-ready request:
+Example of Iframe embed-ready request:
 ```javascript
 window.parent.postMessage({
   sentinel: 'amp',
   type: 'embed-ready'
 }, '*');
 ```
+
+#### Iframe viewability
+
+Iframes can send a  `send-intersection` message to its parent to start receiving IntersectionObserver style [change records](http://rawgit.com/slightlyoff/IntersectionObserver/master/index.html#intersectionobserverentry) of the iframe's intersection with the parent viewport.
+
+Example of Iframe `send-intersection` request:
+```javascript
+window.parent.postMessage({
+  sentinel: 'amp',
+  type: 'send-intersection'
+}, '*');
+```
+
+The Iframe can listen to an `intersection` message from the parent window to receive the intersection data.
+
+Example of Iframe `send-intersection` request:
+```javascript
+window.addEventListener('message', function(event) {
+  const listener = function(event) {
+    if (event.source != window.parent ||
+        event.origin != window.context.location.origin ||
+        !event.data ||
+        event.data.sentinel != 'amp' ||
+        event.data.type != 'intersection') {
+      return;
+    }
+    event.data.changes.forEach(function (change) {
+      console.log(change);
+    });
+});
+```
+
+The intersection message would be sent by the parent to the iframe when the iframe moves in or out of the viewport (or is partially visibile), when the iframe is scrolled or resized.
