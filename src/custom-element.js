@@ -458,7 +458,16 @@ export function createAmpElementProto(win, name, implementationClass) {
    * @param {boolean} onLayout Whether this was called after a layout.
    */
   ElementProto.preconnect = function(onLayout) {
-    this.implementation_.preconnectCallback(onLayout);
+    if (onLayout) {
+      this.implementation_.preconnectCallback(onLayout);
+    } else {
+      // If we do early preconnects we delay them a bit. This is kind of
+      // an unfortunate trade off, but it seems faster, because the DOM
+      // operations themselves are not free and might delay
+      timer.delay(() => {
+        this.implementation_.preconnectCallback(onLayout);
+      }, 1);
+    }
   };
 
   /**

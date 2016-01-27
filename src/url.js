@@ -16,6 +16,7 @@
 
 import {assert} from './asserts';
 
+const a = document.createElement('a');
 
 /**
  * Returns a Location-like object for the given URL. If it is relative,
@@ -24,7 +25,6 @@ import {assert} from './asserts';
  * @return {!Location}
  */
 export function parseUrl(url) {
-  const a = document.createElement('a');
   a.href = url;
   const info = {
     href: a.href,
