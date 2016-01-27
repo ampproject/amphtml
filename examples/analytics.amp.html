@@ -83,6 +83,30 @@
 
 <amp-analytics id="analytics3" config="./analytics.config.json"></amp-analytics>
 
+<amp-analytics id="analytics4">
+<script type="application/json">
+{
+  "requests": {
+    "test-ping": "https://my-analytics.com/ping?title=${title}&acct=${account}"
+  },
+  "vars": {
+    "title": "A page that sends a ping",
+    "account": "12345"
+  },
+  "triggers": {
+    "timer": {
+      "on": "timer",
+      "timer-spec": {
+        "interval": 5,
+        "max-timer-length": 300
+      },
+      "request": "test-ping"
+    }
+  }
+}
+</script>
+</amp-analytics>
+
 <!-- comScore UDM pageview tracking -->
 <amp-analytics type="comscore">
 <script type="application/json">
