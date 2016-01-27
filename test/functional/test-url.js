@@ -17,6 +17,7 @@
 import {
   addParamToUrl,
   addParamsToUrl,
+  assertAbsoluteHttpOrHttpsUrl,
   assertHttpsUrl,
   getOrigin,
   getSourceOrigin,
@@ -196,6 +197,37 @@ describe('assertHttpsUrl', () => {
     expect(() => {
       assertHttpsUrl('http://foolocalhost', referenceElement);
     }).to.throw(/source must start with/);
+  });
+});
+
+describe('assertAbsoluteHttpOrHttpsUrl', () => {
+  it('should allow http', () => {
+    expect(assertAbsoluteHttpOrHttpsUrl('http://twitter.com/'))
+        .to.equal('http://twitter.com/');
+    expect(assertAbsoluteHttpOrHttpsUrl('HTTP://twitter.com/'))
+        .to.equal('http://twitter.com/');
+  });
+  it('should allow https', () => {
+    expect(assertAbsoluteHttpOrHttpsUrl('https://twitter.com/'))
+        .to.equal('https://twitter.com/');
+    expect(assertAbsoluteHttpOrHttpsUrl('HTTPS://twitter.com/'))
+        .to.equal('https://twitter.com/');
+  });
+  it('should fail on relative protocol', () => {
+    expect(() => {
+      assertAbsoluteHttpOrHttpsUrl('//twitter.com/');
+    }).to.throw(/URL must start with/);
+  });
+  it('should fail on relative url', () => {
+    expect(() => {
+      assertAbsoluteHttpOrHttpsUrl('/path');
+    }).to.throw(/URL must start with/);
+  });
+  it('should fail on not allowed protocol', () => {
+    expect(() => {
+      assertAbsoluteHttpOrHttpsUrl(
+          /*eslint no-script-url: 0*/ 'javascript:alert');
+    }).to.throw(/URL must start with/);
   });
 });
 

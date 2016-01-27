@@ -95,6 +95,18 @@ export function assertHttpsUrl(urlString, elementContext) {
   return urlString;
 }
 
+/**
+ * Asserts that a given url is an absolute HTTP or HTTPS URL.
+ * @param {string} urlString
+ * @return {string}
+ */
+export function assertAbsoluteHttpOrHttpsUrl(urlString) {
+  assert(/^(http\:|https\:)/i.test(urlString),
+      'URL must start with "http://" or "https://". Invalid value: %s',
+      urlString);
+  return parseUrl(urlString).href;
+}
+
 
 /**
  * Parses the query string of an URL. This method returns a simple key/value
