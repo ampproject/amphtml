@@ -209,21 +209,6 @@ describe('amp-ad', () => {
         expect(impl.attemptChangeHeight.firstCall.args[0]).to.equal(217);
       });
     });
-    it('should not resize a non-resizable ad',() => {
-      return getAd({
-        width: 100,
-        height: 100,
-        type: 'a9',
-        src: 'testsrc'
-      }, 'https://schema.org').then(element => {
-        impl = element.implementation_;
-        impl.attemptChangeHeight = sinon.spy();
-        impl.changeHeight = sinon.spy();
-        impl.updateHeight_(217);
-        expect(impl.changeHeight.callCount).to.equal(0);
-        expect(impl.attemptChangeHeight.callCount).to.equal(0);
-      });
-    });
   });
 
   describe('ad intersection', () => {

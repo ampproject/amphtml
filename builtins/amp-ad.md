@@ -62,25 +62,6 @@ Most ad networks require further configuration. This can be passed to the networ
 
 Optional attribute to pass configuration to the ad as an arbitrarily complex JSON object. The object is passed to the ad as-is with no mangling done on the names.
 
-#### Ad Resizing
-
-An `amp-ad` must have static layout defined as is the case with any other AMP element. However,
-it's possible to resize an `amp-ad` in runtime. To do so:
-
-1. The `amp-ad` must be defined with `resizable` attribute;
-2. The `amp-ad` must have `overflow` child element;
-3. The Ad's Iframe document has to send a `embed-size` request as a window message.
-
-Notice that `resizable` overrides `scrolling` value to `no`.
-
-Example of `amp-ad` with `overflow` element:
-```html
-<amp-ad width=300 height=300
-    type="foo"
-    resizable>
-  <div overflow tabindex=0 role=button aria-label="Expand!">Expand!</div>
-</amp-ad>
-
 #### Placeholder
 
 Optionally `amp-ad` supports a child element with the `placeholder` attribute. If supported by the ad network, this element is shown until the ad is available for viewing.

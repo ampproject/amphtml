@@ -22,7 +22,6 @@ import {IntersectionObserver} from '../src/intersection-observer';
 import {isLayoutSizeDefined} from '../src/layout';
 import {listen, listenOnce, postMessage} from '../src/iframe-helper';
 import {loadPromise} from '../src/event-helper';
-import {log} from '../src/log';
 import {parseUrl} from '../src/url';
 import {registerElement} from '../src/custom-element';
 import {timer} from '../src/timer';
@@ -32,9 +31,6 @@ import {timer} from '../src/timer';
 const POSITION_FIXED_TAG_WHITELIST = {
   'AMP-LIGHTBOX': true
 };
-
-/** @const {string} */
-const TAG_ = 'AmpAd';
 
 /**
  * @param {!Window} win Destination window for the new element.
@@ -114,9 +110,6 @@ export function installAd(win) {
 
       /** @private {IntersectionObserver} */
       this.intersectionObserver_ = null;
-
-      /** @private @const {boolean} */
-      this.isResizable_ = this.element.hasAttribute('resizable');
     }
 
     /**
@@ -224,12 +217,7 @@ export function installAd(win) {
       assert(!this.isInFixedContainer_,
           '<amp-ad> is not allowed to be placed in elements with ' +
           'position:fixed: %s', this.element);
-      if (this.isResizable_) {
-        this.element.setAttribute('scrolling', 'no');
-        assert(this.getOverflowElement(),
-            'Overflow element must be defined for resizable ads: %s',
-            this.element);
-      }
+      this.element.setAttribute('scrolling', 'no');
       if (!this.iframe_) {
         this.iframe_ = getIframe(this.element.ownerDocument.defaultView,
             this.element);
@@ -288,19 +276,36 @@ export function installAd(win) {
       }
     }
 
+    /** @override  */
+    overflowCallback(overflown, requestedHeight) {
+      if (overflown) {
+        const targetOrigin =
+            this.iframe_.src ? parseUrl(this.iframe_.src).origin : '*';
+        postMessage(
+            this.iframe_,
+            'embed-size-denied',
+            {requestedHeight: requestedHeight},
+            targetOrigin,
+            /* opt_is3P */ true);
+      }
+    }
+
     /**
      * Updates the elements height to accommodate the iframe's requested height.
      * @param {number} newHeight
      * @private
      */
     updateHeight_(newHeight) {
-      if (!this.isResizable_) {
-        log.warn(TAG_,
-            'ignoring embed-size request because this ad is not resizable',
-            this.element);
-        return;
-      }
-      this.attemptChangeHeight(newHeight);
+      this.attemptChangeHeight(newHeight, () => {
+        const targetOrigin =
+            this.iframe_.src ? parseUrl(this.iframe_.src).origin : '*';
+        postMessage(
+            this.iframe_,
+            'embed-size-changed',
+            {requestedHeight: newHeight},
+            targetOrigin,
+            /* opt_is3P */ true);
+      });
     }
 
     /**

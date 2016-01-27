@@ -587,4 +587,11 @@ export class BaseElement {
    * @protected
    */
   onLayoutMeasure() {}
+
+  /**
+   * Called after a overflowCallback is triggered on an element.
+   * @param {boolean} unusedOverflown
+   * @param {number} unusedRequestedHeight
+   */
+  overflowCallback(unusedOverflown, unusedRequestedHeight) {}
 };
