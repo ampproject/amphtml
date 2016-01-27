@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {assert} from './asserts';
 import {cidFor} from './cid';
 import {documentInfoFor} from './document-info';
 import {getService} from './service';
@@ -29,6 +30,7 @@ const TAG_ = 'UrlReplacements';
 
 /**
  * This class replaces substitution variables with their values.
+ * Document new values in ../spec/amp-var-substitutions.md
  */
 class UrlReplacements {
   /** @param {!Window} win */
@@ -92,7 +94,9 @@ class UrlReplacements {
       return documentInfoFor(this.win_).pageViewId;
     });
 
-    this.set_('CLIENT_ID', (opt_name, opt_userNotificationId) => {
+    this.set_('CLIENT_ID', (scope, opt_userNotificationId) => {
+      assert(scope, 'The first argument to CLIENT_ID, the fallback c' +
+          /*OK*/'ookie name, is required');
       let consent = Promise.resolve();
 
       // If no `opt_userNotificationId` argument is provided then
@@ -102,9 +106,11 @@ class UrlReplacements {
           return service.get(opt_userNotificationId);
         });
       }
-
-      return cidFor(this.win_).then(cid => {
-        return cid.get(opt_name, consent);
+      return cidFor(win).then(cid => {
+        return cid.get({
+          scope: scope,
+          createCookieIfNotPresent: true
+        }, consent);
       });
     });
 

@@ -164,7 +164,9 @@ function getOrCreateCookie(cid, getCidStruct, persistenceConsent) {
     const relookup = getCookie(win, getCidStruct.scope);
     if (!relookup) {
       setCookie(win, getCidStruct.scope, newCookie,
-          timer.now() + BASE_CID_MAX_AGE_MILLIS);
+          timer.now() + BASE_CID_MAX_AGE_MILLIS, {
+            highestAvailableDomain: true,
+          });
     }
   });
   return Promise.resolve(newCookie);

@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+import {Observable} from '../../src/observable';
 import {createIframePromise} from '../../testing/iframe';
 import {urlReplacementsFor} from '../../src/url-replacements';
 import {markElementScheduledForTesting} from '../../src/custom-element';
 import {installCidService} from '../../src/service/cid-impl';
 import {setCookie} from '../../src/cookies';
-import {Observable} from '../../src/observable';
 
 
 describe('UrlReplacements', () => {
@@ -123,10 +123,11 @@ describe('UrlReplacements', () => {
 
   it('should replace CLIENT_ID', () => {
     setCookie(window, 'url-abc', 'cid-for-abc');
-    setCookie(window, 'url-xyz', 'cid-for-xyz');
+    // Make sure cookie does not exist
+    setCookie(window, 'url-xyz', '');
     return expand('?a=CLIENT_ID(url-abc)&b=CLIENT_ID(url-xyz)', true)
         .then(res => {
-          expect(res).to.equal('?a=cid-for-abc&b=cid-for-xyz');
+          expect(res).to.match(/^\?a=cid-for-abc\&b=amp-(\w){10,}/);
         });
   });
 
