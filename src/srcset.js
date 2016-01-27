@@ -231,4 +231,31 @@ export class Srcset {
   getLast() {
     return this.sources_[this.sources_.length - 1];
   }
+
+  /**
+   * Returns all sources in the srcset.
+   * @return {!Array<!SrcsetSourceDef>}
+   */
+  getSources() {
+    return this.sources_;
+  }
+
+  /**
+   * Reconstructs the string expression for this srcset.
+   * @return {string}
+   */
+  stringify() {
+    const res = [];
+    for (let i = 0; i < this.sources_.length; i++) {
+      const source = this.sources_[i];
+      if (source.width) {
+        res.push(`${source.url} ${source.width}w`);
+      } else if (source.dpr) {
+        res.push(`${source.url} ${source.dpr}x`);
+      } else {
+        res.push(`${source.url}`);
+      }
+    }
+    return res.join(', ');
+  }
 }
