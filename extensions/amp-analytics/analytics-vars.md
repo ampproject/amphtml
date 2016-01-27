@@ -11,7 +11,7 @@ Vars can be defined by the platform, in the config at the top level, inside the 
 <script type="application/json">
 {
   "requests": {
-    "pageview": "https://example.com/analytics?url=${canonicalUrl}&title=${title}&acct=${account}&clientId=${clientId}",
+    "pageview": "https://example.com/analytics?url=${canonicalUrl}&title=${title}&acct=${account}&clientId=${clientId(googleanalytics)}",
   },
   "vars": {
     "account": "ABC123",
