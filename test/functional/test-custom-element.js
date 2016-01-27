@@ -223,13 +223,15 @@ describe('CustomElement', () => {
     expect(res).to.equal(true);
     expect(element.isBuilt()).to.equal(true);
     expect(testElementBuildCallback.callCount).to.equal(1);
-    expect(testElementPreconnectCallback.callCount).to.equal(1);
+    expect(testElementPreconnectCallback.callCount).to.equal(0);
 
     // Call again.
     res = element.build(false);
     expect(res).to.equal(true);
     expect(element.isBuilt()).to.equal(true);
     expect(testElementBuildCallback.callCount).to.equal(1);
+    expect(testElementPreconnectCallback.callCount).to.equal(0);
+    clock.tick(1);
     expect(testElementPreconnectCallback.callCount).to.equal(1);
   });
 
@@ -412,6 +414,7 @@ describe('CustomElement', () => {
     element.build(true);
     expect(element.isBuilt()).to.equal(true);
     expect(testElementLayoutCallback.callCount).to.equal(0);
+    clock.tick(1);
     expect(testElementPreconnectCallback.callCount).to.equal(1);
     expect(testElementPreconnectCallback.getCall(0).args[0]).to.be.false;
 
