@@ -81,7 +81,7 @@
     "request": "2.67.0",
     "serve-index": "1.7.2",
     "serve-static": "1.9.1",
-    "sinon": "1.17.2",
+    "sinon": "1.17.3",
     "sinon-chai": "2.8.0",
     "text-table": "0.2.0",
     "through2": "2.0.0",
