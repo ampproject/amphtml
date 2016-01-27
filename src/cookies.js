@@ -54,10 +54,40 @@ export function getCookie(win, name) {
  * @param {string} name
  * @param {string} value
  * @param {time} expirationTime
+ * @param {{highestAvailableDomain:boolean}=} opt_options
+ *     - highestAvailableDomain: If true, set the cookie at the widest domain
+ *       scope allowed by the browser. E.g. on example.com if we are currently
+ *       on www.example.com.
  */
-export function setCookie(win, name, value, expirationTime) {
+export function setCookie(win, name, value, expirationTime, opt_options) {
+  if (opt_options && opt_options.highestAvailableDomain) {
+    const parts = win.location.hostname.split('.');
+    let domain = parts[parts.length - 1];
+    for (let i = parts.length - 2; i >= 0; i--) {
+      domain = parts[i] + '.' + domain;
+      trySetCookie(win, name, value, expirationTime, domain);
+      if (getCookie(win, name) == value) {
+        return;
+      }
+    }
+  } else {
+    trySetCookie(win, name, value, expirationTime, undefined);
+  }
+}
+
+/**
+ * Attempt to set a cookie with the given params.
+ *
+ * @param {!Window} win
+ * @param {string} name
+ * @param {string} value
+ * @param {time} expirationTime
+ * @param {string|undefined} domain
+ */
+function trySetCookie(win, name, value, expirationTime, domain) {
   win.document.cookie = encodeURIComponent(name) + '=' +
       encodeURIComponent(value) +
       '; path=/' +
+      (domain ? '; domain=' + domain : '') +
       '; expires=' + new Date(expirationTime).toUTCString();
 }
