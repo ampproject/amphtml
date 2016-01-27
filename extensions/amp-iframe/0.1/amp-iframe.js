@@ -62,9 +62,10 @@ export class AmpIframe extends AMP.BaseElement {
     assert(pos.top >= minTop,
         '<amp-iframe> elements must be positioned outside the first 75% ' +
         'of the viewport or 600px from the top (whichever is smaller): %s ' +
-        'Please contact the AMP team if that is a problem in your project.' +
-        ' We\'d love to learn about your use case. Current position %s. Min:' +
-        ' %s',
+        ' Current position %s. Min: %s' +
+        'Positioning rules don\'t apply for iframes that use `placeholder`.' +
+        'See https://github.com/ampproject/amphtml/blob/master/extensions/' +
+        'amp-iframe/amp-iframe.md#iframe-with-placeholder for details.',
         this.element,
         pos.top,
         minTop);
