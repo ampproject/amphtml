@@ -37,3 +37,6 @@ script:
   # and not start relying on new features).
   - gulp test --saucelabs --oldchrome
   - gulp validator
+branches:
+  only:
+    - master
