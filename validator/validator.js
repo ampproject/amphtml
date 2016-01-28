@@ -14,21 +14,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the license.
  */
+goog.provide('amp.validator.CssLengthAndUnit');  // Only for testing.
+goog.provide('amp.validator.Terminal');
+goog.provide('amp.validator.renderValidationResult');
+goog.provide('amp.validator.validateString');
+
 goog.require('amp.htmlparser.HtmlParser');
-goog.require('amp.htmlparser.HtmlParser.EFlags');
-goog.require('amp.htmlparser.HtmlParser.Elements');
-goog.require('amp.htmlparser.HtmlParser.Entities');
 goog.require('amp.htmlparser.HtmlSaxHandlerWithLocation');
 goog.require('amp.validator.AtRuleSpec');
 goog.require('amp.validator.AtRuleSpec.BlockType');
 goog.require('amp.validator.AttrList');
-goog.require('amp.validator.AttrSpec');
-goog.require('amp.validator.BlackListedCDataRegex');
-goog.require('amp.validator.CdataSpec');
-goog.require('amp.validator.CssRuleSpec');
 goog.require('amp.validator.CssSpec');
-goog.require('amp.validator.PropertySpec');
-goog.require('amp.validator.PropertySpecList');
 goog.require('amp.validator.RULES');
 goog.require('amp.validator.TagSpec');
 goog.require('amp.validator.ValidationError');
@@ -36,7 +32,6 @@ goog.require('amp.validator.ValidationError.Code');
 goog.require('amp.validator.ValidationError.Severity');
 goog.require('amp.validator.ValidationResult');
 goog.require('amp.validator.ValidationResult.Status');
-goog.require('amp.validator.ValidatorInfo');
 goog.require('amp.validator.ValidatorRules');
 goog.require('goog.array');
 goog.require('goog.asserts');
@@ -47,11 +42,6 @@ goog.require('goog.uri.utils');
 goog.require('parse_css.BlockType');
 goog.require('parse_css.parseAStylesheet');
 goog.require('parse_css.tokenize');
-
-goog.provide('amp.validator.CssLengthAndUnit');  // Only for testing.
-goog.provide('amp.validator.Terminal');
-goog.provide('amp.validator.renderValidationResult');
-goog.provide('amp.validator.validateString');
 
 /**
  * Determines if |n| is an integer.
@@ -564,7 +554,7 @@ CdataMatcher.prototype.match = function(cdata, context, validationResult) {
   if (cdataSpec.cssSpec !== null) {
     /** @type {!Array<!parse_css.ErrorToken>} */
     const cssErrors = [];
-    /** @type {!Array<!parse_css.CSSParserToken>} */
+    /** @type {!Array<!parse_css.Token>} */
     const tokenList = parse_css.tokenize(cdata,
                                        this.getLineCol().getLine(),
                                        this.getLineCol().getCol(),
