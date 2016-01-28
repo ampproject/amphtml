@@ -629,21 +629,18 @@ describe('ViewportBindingNaturalIosEmbed', () => {
     expect(binding.scrollWidth_).to.equal(777);
   });
 
-  it('should defer scrollWidth to max of window.innerHeight ' +
-        ' and body.scrollWidth', () => {
-    binding.scrollWidth_ = 0;
+  it('should always have scrollWidth equal window.innerWidth', () => {
     expect(binding.getScrollWidth()).to.equal(555);
-
-    binding.scrollWidth_ = 1000;
-    expect(binding.getScrollWidth()).to.equal(1000);
   });
 
   it('should setup document for embed scrolling', () => {
     const documentElement = windowApi.document.documentElement;
     const body = windowApi.document.body;
-    expect(documentElement.style.overflow).to.equal('auto');
+    expect(documentElement.style.overflowY).to.equal('auto');
+    expect(documentElement.style.overflowX).to.equal('hidden');
     expect(documentElement.style.webkitOverflowScrolling).to.equal('touch');
-    expect(body.style.overflow).to.equal('auto');
+    expect(body.style.overflowY).to.equal('auto');
+    expect(body.style.overflowX).to.equal('hidden');
     expect(body.style.webkitOverflowScrolling).to.equal('touch');
     expect(body.style.position).to.equal('absolute');
     expect(body.style.top).to.equal(0);
