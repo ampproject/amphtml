@@ -23,7 +23,7 @@ import {getElementService} from './custom-element';
 
 /**
  * @param {!Window} window
- * @return {!Promise<!UserNotification>}
+ * @return {!Promise<!UserNotificationManager>}
  */
 export function userNotificationManagerFor(window) {
   return getElementService(window, 'userNotificationManager',
