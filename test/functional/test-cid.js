@@ -341,7 +341,8 @@ describe('cid', () => {
 
   it('should create fallback cookie when asked', () => {
     fakeWin.location.href =
-        'https://abc.org/v/www.DIFFERENT.com/foo/?f=0';
+        'https://foo.abc.org/v/www.DIFFERENT.com/foo/?f=0';
+    fakeWin.location.hostname = 'foo.abc.org';
     return cid.get({scope: 'cookie_name', createCookieIfNotPresent: true},
         hasConsent).then(c => {
           expect(c).to.exist;
@@ -349,6 +350,7 @@ describe('cid', () => {
           expect(fakeWin.document.cookie).to.equal(
               'cookie_name=' + encodeURIComponent(c) +
               '; path=/' +
+              '; domain=abc.org' +
               '; expires=Fri, 01 Jan 1971 00:00:00 GMT');  // 1 year from 0.
         });
   });

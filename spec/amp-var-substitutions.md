@@ -174,7 +174,7 @@ For instance:
 
 ### CLIENT_ID
 
-Use the special string `CLIENT_ID` to add a per document-source-origin (the origin of the website where you publish your AMP doc) and user identifier. The `CLIENT_ID` will be the same for the same user if they visit again within one year. It should behave roughly similar to a cookie storing a session id for one year. If the AMP document is not served through the AMP CDN, the `CLIENT_ID` will be replaced with a cookie of the name of the cid scope below. If the cookie is not present, the empty string will be returned.
+Use the special string `CLIENT_ID` to add a per document-source-origin (The origin of the website where you publish your AMP doc) and user identifier. The `CLIENT_ID` will be the same for the same user if they visit again within one year. It should behave roughly similar to a cookie storing a session id for one year. If the AMP document is not served through the AMP CDN, the `CLIENT_ID` will be replaced with a cookie of the name of the cid scope below. If it is not present a cookie will be set with the same name. These cookies will always have the prefix "amp-" followed by a random base64 encoded string.
 
 Please see below the required and optional arguments you may
 pass into `CLIENT_ID` like a function. (spaces between arguments and values are not allowed)
@@ -188,7 +188,7 @@ arguments:
 
 For instance:
 ```html
-<amp-pixel src="https://foo.com/pixel?cid=CLIENT_ID(google-analytics)"></amp-pixel>
+<amp-pixel src="https://foo.com/pixel?cid=CLIENT_ID(cid-scope-cookie-fallback-name)"></amp-pixel>
 
 
 <amp-user-notification
@@ -202,7 +202,7 @@ For instance:
 </amp-user-notification>
 
 <!-- cid is not provided until `user-consent` is dismissed -->
-<amp-pixel src="https://foo.com/pixel?cid=CLIENT_ID(google-analytics,user-consent)"></amp-pixel>
+<amp-pixel src="https://foo.com/pixel?cid=CLIENT_ID(cid-scope-cookie-fallback-name,user-consent-id)"></amp-pixel>
 ```
 
 ### PAGE_VIEW_ID

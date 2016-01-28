@@ -70,9 +70,8 @@ export function setCookie(win, name, value, expirationTime, opt_options) {
         return;
       }
     }
-  } else {
-    trySetCookie(win, name, value, expirationTime, undefined);
   }
+  trySetCookie(win, name, value, expirationTime, undefined);
 }
 
 /**
