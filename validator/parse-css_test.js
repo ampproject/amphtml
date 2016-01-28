@@ -45,7 +45,8 @@ function assertStrictEqual(expected, saw) {
 function errorsToString(errors) {
   const out = [];
   for (const error of errors) {
-    out.push(error.toString());
+    out.push(':' + error.line + ':' + error.col + ' ' +
+        error.errorType + ' - ' + error.msg);
   }
   return out.join('\n');
 }

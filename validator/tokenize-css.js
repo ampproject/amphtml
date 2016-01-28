@@ -1081,13 +1081,6 @@ goog.inherits(parse_css.ErrorToken, parse_css.Token);
 /** @type {parse_css.TokenType} */
 parse_css.ErrorToken.prototype.tokenType = parse_css.TokenType.ERROR;
 
-/** @return {string} */
-parse_css.ErrorToken.prototype.toString = function() {
-  const json = this.toJSON();
-  return ':' + json['line'] + ':' +
-      json['col'] + ' ' + this.errorType + ' - ' + this.msg;
-};
-
 /** @return {!Object} */
 parse_css.ErrorToken.prototype.toJSON = function() {
   const json = goog.base(this, 'toJSON');
