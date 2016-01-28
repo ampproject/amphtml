@@ -25,7 +25,7 @@ allows each component to add their own.
 
 ## Standard Variable Substitutions
 
-**RANDOM**
+### RANDOM
 
 Use the special string `RANDOM` to add a random number to the URL if required.
 
@@ -35,7 +35,7 @@ For instance:
 ```
 may make a request to something like `https://foo.com/pixel?0.8390278471201` where the $RANDOM value is randomly generated upon each impression.
 
-**CANONICAL_URL**
+### CANONICAL_URL
 
 Use the special string `CANONICAL_URL` to add the canonical URL of the current document to the URL
 
@@ -45,7 +45,7 @@ For instance:
 ```
 may make a request to something like `https://foo.com/pixel?href=https%3A%2F%2Fpinterest.com%2F`.
 
-**CANONICAL_HOST**
+### CANONICAL_HOST
 
 Use the special string `CANONICAL_HOST` to add the canonical URL's host of the current document to the URL
 
@@ -55,7 +55,7 @@ For instance:
 ```
 may make a request to something like `https://foo.com/pixel?host=pinterest.com`.
 
-**CANONICAL_PATH**
+### CANONICAL_PATH
 
 Use the special string `CANONICAL_PATH` to add the canonical URL's path of the current document to the URL
 
@@ -98,7 +98,7 @@ For instance:
 <amp-pixel src="https://foo.com/pixel?cid=CLIENT_ID(google-analytics,user-consent)"></amp-pixel>
 ```
 
-**DOCUMENT_REFERRER**
+### DOCUMENT_REFERRER
 
 Use the special string `DOCUMENT_REFERRER` to add the current document's referrer to the URL.
 
@@ -107,7 +107,7 @@ For instance:
 <amp-pixel src="https://foo.com/pixel?referrer=DOCUMENT_REFERRER"></amp-pixel>
 ```
 
-**TITLE**
+### TITLE
 
 Use the special string `TITLE` to add the title of the current document to the URL
 
@@ -117,7 +117,7 @@ For instance:
 ```
 may make a request to something like `https://foo.com/pixel?title=Breaking%20News`.
 
-**AMPDOC_URL**
+### AMPDOC_URL
 
 Use the special string `AMPDOC_URL` to add the AMP document's URL.
 
@@ -127,7 +127,7 @@ For instance:
 ```
 may make a request to something like `https://foo.com/pixel?ref=https%3A%2F%2Fexample.com%2F`.
 
-**AMPDOC_HOST**
+### AMPDOC_HOST
 
 Use the special string `AMPDOC_HOST` to add the AMP document's URL host.
 
@@ -137,11 +137,11 @@ For instance:
 ```
 may make a request to something like `https://foo.com/pixel?host=example.com`.
 
-**PAGE_VIEW_ID**
+### PAGE_VIEW_ID
 
 Contains a string that is intended to be random and likely to be unique per URL, user and day.
 
-**TIMESTAMP**
+### TIMESTAMP
 
 Use the special string `TIMESTAMP` to add the current number of seconds that
 have elapsed since 1970. (Epoch time)
