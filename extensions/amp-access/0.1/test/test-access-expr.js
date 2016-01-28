@@ -193,4 +193,21 @@ describe('evaluateAccessExpr', () => {
     expect(evaluateAccessExpr('a AND b', {a: 1, b: 2})).to.be.true;
     expect(evaluateAccessExpr('a AND c', {a: 1, b: 2})).to.be.false;
   });
+
+  it('should accept name grammar', () => {
+    expect(evaluateAccessExpr('num = 10', {num: 10})).to.be.true;
+    expect(evaluateAccessExpr('num1 = 10', {num1: 10})).to.be.true;
+    expect(evaluateAccessExpr('num_ = 10', {num_: 10})).to.be.true;
+    expect(evaluateAccessExpr('_num = 10', {_num: 10})).to.be.true;
+
+    expect(() => {
+      evaluateAccessExpr('1num = 10', {"1num": 10});
+    }).to.throw();
+    expect(() => {
+      evaluateAccessExpr('num-a = 10', {"num-a": 10});
+    }).to.throw();
+    expect(() => {
+      evaluateAccessExpr('num.a = 10', {"num.a": 10});
+    }).to.throw();
+  });
 });
