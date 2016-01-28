@@ -144,12 +144,15 @@ The `triggers` attribute describes when an analytics request should be sent. It 
 
   - `on` (required) The event to listener for. Valid values are `visible`,`click`, and `timer`.
   - `request` (required) Name of the request to send (as specified in the `requests` section).
-  - `selector` A CSS selector used to refine which elements should be tracked. Use value `*` to track all elements.
-  - `timer-spec` Specification for the timer. The timer will trigger immediately and then at a specified interval thereafter.
-    - `interval` Length of the timer interval, in seconds.
-    - `max-timer-length` Maximum duration for which the timer will fire, in seconds.
   - `vars` An object containing key-value pairs used to override `vars` defined in the top level config, or to specify
     vars unique to this trigger.
+
+Following configuration only applies to specific values of `on`.
+  - `selector` A CSS selector used to refine which elements should be tracked. Use value `*` to track all elements. Used in triggers where `on` is set to `click`.
+  - `scrollSpec` An object used when `on` is set to `scroll`. This object can contain `verticalBoundaries` and `horizontalBoundaries`. At least one of the two property is required for scroll event to fire. The values for both the properties should be arrays of numbers containing the boundaries on which a scroll event is generated. For instance, in the following code snippet, the scroll event will be fired when page is scrolled vertically by 25%, 50% and 90%. Additionally, the event will also fire when the page is horizontally scrolled to 90% of scroll width.
+  - `timerSpec` Specification for triggers of type `timer`. The timer will trigger immediately and then at a specified interval thereafter.
+    - `interval` Length of the timer interval, in seconds.
+    - `maxTimerLength` Maximum duration for which the timer will fire, in seconds.
 
 ```javascript
 "triggers": {
@@ -167,11 +170,18 @@ The `triggers` attribute describes when an analytics request should be sent. It 
   },
   "pageTimer": {
     "on": "timer",
-    "timer-spec": {
+    "timerSpec": {
       "interval": 10,
-      "max-timer-length": 600
+      "maxTimerLength": 600
     },
     "request": "pagetime"
+  },
+  "scrollPings": {
+    "on": "scroll",
+    "scrollSpec": {
+      "verticalBoundaries": [25, 50, 90],
+      "horizontalBoundaries": [90]
+    }
   }
 }
 ```

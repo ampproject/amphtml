@@ -90,13 +90,13 @@ Example value: `The New York Times - Breaking News, World News...`
 
 ### availableScreenHeight
 
-Provides the screen height in pixels available for the page rendering.
+Provides the screen height in pixels available for the page rendering. Note that this can be slightly more or less than the actual viewport height due to various browser quirks.
 
 Example value: `1480`
 
 ### availableScreenWidth
 
-Provides the screen width in pixels available for the page rendering.
+Provides the screen width in pixels available for the page rendering. Note that this can be slightly more or less than the actual viewport height due to various browser quirks.
 
 Example value: `2500`
 
@@ -132,7 +132,7 @@ Example value: `2560`
 
 ### scrollHeight
 
-Provides the total size of the page in pixels.
+Provides the total height of the page in pixels.
 
 Example value: `400`
 
@@ -147,6 +147,12 @@ Example value: `100`
 Provides the number of pixels that the user has scrolled from top.
 
 Example value: `0`
+
+### scrollWidth
+
+Provides the total width of the page in pixels.
+
+Example value: `600`
 
 ### timezone
 

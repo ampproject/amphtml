@@ -33,6 +33,7 @@ const TAG_ = 'Viewport';
  * @typedef {{
  *   relayoutAll: boolean,
  *   top: number,
+ *   left: number,
  *   width: number,
  *   height: number,
  *   velocity: number
@@ -371,14 +372,17 @@ export class Viewport {
   changed_(relayoutAll, velocity) {
     const size = this.getSize();
     const scrollTop = this.getScrollTop();
+    const scrollLeft = this.getScrollLeft();
     log.fine(TAG_, 'changed event:',
         'relayoutAll=', relayoutAll,
         'top=', scrollTop,
+        'top=', scrollLeft,
         'bottom=', (scrollTop + size.height),
         'velocity=', velocity);
     this.changeObservable_.fire({
       relayoutAll: relayoutAll,
       top: scrollTop,
+      left: scrollLeft,
       width: size.width,
       height: size.height,
       velocity: velocity
