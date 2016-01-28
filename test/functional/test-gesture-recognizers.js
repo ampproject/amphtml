@@ -24,14 +24,12 @@ describe('TapRecognizer', () => {
 
   let sandbox;
   let element;
-  let clock;
   let recognizer;
   let gestures;
   let gesturesMock;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    clock = sandbox.useFakeTimers();
 
     element = {
       addEventListener: (unusedEventType, unusedHandler) => {}
@@ -45,10 +43,7 @@ describe('TapRecognizer', () => {
 
   afterEach(() => {
     gesturesMock.verify();
-    gesturesMock.restore();
     gesturesMock = null;
-    clock.restore();
-    clock = null;
     sandbox.restore();
     sandbox = null;
   });
@@ -120,14 +115,12 @@ describe('DoubletapRecognizer', () => {
 
   let sandbox;
   let element;
-  let clock;
   let recognizer;
   let gestures;
   let gesturesMock;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    clock = sandbox.useFakeTimers();
 
     element = {
       addEventListener: (unusedEventType, unusedHandler) => {}
@@ -141,10 +134,7 @@ describe('DoubletapRecognizer', () => {
 
   afterEach(() => {
     gesturesMock.verify();
-    gesturesMock.restore();
     gesturesMock = null;
-    clock.restore();
-    clock = null;
     sandbox.restore();
     sandbox = null;
   });
@@ -251,9 +241,7 @@ describe('SwipeXYRecognizer', () => {
 
   afterEach(() => {
     gesturesMock.verify();
-    gesturesMock.restore();
     gesturesMock = null;
-    clock.restore();
     clock = null;
     sandbox.restore();
     sandbox = null;
@@ -440,9 +428,7 @@ describe('TapzoomRecognizer', () => {
 
   afterEach(() => {
     gesturesMock.verify();
-    gesturesMock.restore();
     gesturesMock = null;
-    clock.restore();
     clock = null;
     sandbox.restore();
     sandbox = null;
@@ -623,9 +609,7 @@ describe('PinchRecognizer', () => {
 
   afterEach(() => {
     gesturesMock.verify();
-    gesturesMock.restore();
     gesturesMock = null;
-    clock.restore();
     clock = null;
     sandbox.restore();
     sandbox = null;

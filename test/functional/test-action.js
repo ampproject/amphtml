@@ -279,7 +279,6 @@ describe('Action interceptor', () => {
 
   afterEach(() => {
     action = null;
-    clock.restore();
     clock = null;
     sandbox.restore();
     sandbox = null;
@@ -357,13 +356,11 @@ describe('Action interceptor', () => {
 describe('Action common handler', () => {
 
   let sandbox;
-  let clock;
   let action;
   let target;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    clock = sandbox.useFakeTimers();
     action = new ActionService(window);
     target = document.createElement('target');
     target.setAttribute('id', 'amp-test-1');
@@ -373,8 +370,6 @@ describe('Action common handler', () => {
 
   afterEach(() => {
     action = null;
-    clock.restore();
-    clock = null;
     sandbox.restore();
     sandbox = null;
   });

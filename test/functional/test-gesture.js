@@ -63,9 +63,7 @@ describe('Gestures', () => {
 
   afterEach(() => {
     recognizerMock.verify();
-    recognizerMock.restore();
     recognizerMock = null;
-    clock.restore();
     clock = null;
     sandbox.restore();
     sandbox = null;

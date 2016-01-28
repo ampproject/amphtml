@@ -23,10 +23,8 @@ import {createIframePromise} from '../../../../testing/iframe';
 
 
 describe('amp-user-notification', () => {
+  let sandbox;
   let iframe;
-  let stub;
-  let stub1;
-  let stub2;
   let dftAttrs;
 
   function getUserNotification(attrs = {}) {
@@ -50,6 +48,7 @@ describe('amp-user-notification', () => {
   }
 
   beforeEach(() => {
+    sandbox = sinon.sandbox.create();
     dftAttrs = {
       id: 'n1',
       'data-show-if-href': 'https://www.ampproject.org/get/here',
@@ -59,20 +58,8 @@ describe('amp-user-notification', () => {
   });
 
   afterEach(() => {
-    if (stub) {
-      stub.restore();
-      stub = null;
-    }
-
-    if (stub1) {
-      stub1.restore();
-      stub1 = null;
-    }
-
-    if (stub2) {
-      stub2.restore();
-      stub2 = null;
-    }
+    sandbox.restore();
+    sandbox = null;
   });
 
   it('should require an id', () => {
@@ -105,9 +92,9 @@ describe('amp-user-notification', () => {
   });
 
   it('should show should return a boolean', () => {
-    stub = sinon.stub(AmpUserNotification.prototype, 'getAsyncCid_')
+    stub = sandbox.stub(AmpUserNotification.prototype, 'getAsyncCid_')
         .returns(Promise.resolve('12345'));
-    stub1 = sinon.stub(AmpUserNotification.prototype, 'getShowEndpoint_')
+    stub1 = sandbox.stub(AmpUserNotification.prototype, 'getShowEndpoint_')
         .returns(Promise.resolve({showNotification: true}));
     return getUserNotification(dftAttrs).then(el => {
       const impl = el.implementation_;
@@ -120,9 +107,9 @@ describe('amp-user-notification', () => {
   });
 
   it('should have class `amp-active`', () => {
-    stub = sinon.stub(AmpUserNotification.prototype, 'getAsyncCid_')
+    stub = sandbox.stub(AmpUserNotification.prototype, 'getAsyncCid_')
         .returns(Promise.resolve('12345'));
-    stub1 = sinon.stub(AmpUserNotification.prototype, 'getShowEndpoint_')
+    stub1 = sandbox.stub(AmpUserNotification.prototype, 'getShowEndpoint_')
         .returns(Promise.resolve({showNotification: true}));
 
     return getUserNotification(dftAttrs).then(el => {
@@ -142,9 +129,9 @@ describe('amp-user-notification', () => {
   });
 
   it('should not have `amp-active`', () => {
-    stub = sinon.stub(AmpUserNotification.prototype, 'getAsyncCid_')
+    stub = sandbox.stub(AmpUserNotification.prototype, 'getAsyncCid_')
         .returns(Promise.resolve('12345'));
-    stub1 = sinon.stub(AmpUserNotification.prototype, 'getShowEndpoint_')
+    stub1 = sandbox.stub(AmpUserNotification.prototype, 'getShowEndpoint_')
         .returns(Promise.resolve({showNotification: false}));
 
     return getUserNotification(dftAttrs).then(el => {
@@ -166,11 +153,11 @@ describe('amp-user-notification', () => {
   });
 
   it('should have `amp-hidden` and no `amp-active`', () => {
-    stub = sinon.stub(AmpUserNotification.prototype, 'getAsyncCid_')
+    stub = sandbox.stub(AmpUserNotification.prototype, 'getAsyncCid_')
         .returns(Promise.resolve('12345'));
-    stub1 = sinon.stub(AmpUserNotification.prototype, 'getShowEndpoint_')
+    stub1 = sandbox.stub(AmpUserNotification.prototype, 'getShowEndpoint_')
         .returns(Promise.resolve({showNotification: true}));
-    stub2 = sinon.stub(AmpUserNotification.prototype, 'postDismissEnpoint_')
+    stub2 = sandbox.stub(AmpUserNotification.prototype, 'postDismissEnpoint_')
         .returns(Promise.resolve());
 
     return getUserNotification(dftAttrs).then(el => {
@@ -245,9 +232,9 @@ describe('amp-user-notification', () => {
     it('should queue up multiple amp-user-notification elements', () => {
       const tag1 = Object.assign({}, tag);
       const tag2 = Object.assign({}, tag);
-      const show1 = sinon.spy(tag, 'show');
-      const show2 = sinon.spy(tag1, 'show');
-      const show3 = sinon.spy(tag2, 'show');
+      const show1 = sandbox.spy(tag, 'show');
+      const show2 = sandbox.spy(tag1, 'show');
+      const show3 = sandbox.spy(tag2, 'show');
       const p1 = service.registerUserNotification('n1', tag);
       const p2 = service.registerUserNotification('n2', tag1);
       const p3 = service.registerUserNotification('n3', tag2);

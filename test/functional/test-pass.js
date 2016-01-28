@@ -37,7 +37,6 @@ describe('Pass', () => {
     pass = null;
     expect(handlerCalled).to.equal(0);
     timerMock.verify();
-    timerMock.restore();
     timerMock = null;
     sandbox.restore();
     sandbox = null;
