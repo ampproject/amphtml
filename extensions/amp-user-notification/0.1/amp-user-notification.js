@@ -354,10 +354,11 @@ function getUserNotificationManager_(window) {
 
 /**
  * @param {!Window} window
+ * @return {!UserNotificationManager}
  * @private
  */
 export function installUserNotificationManager(window) {
-  getUserNotificationManager_(window);
+  return getUserNotificationManager_(window);
 }
 
 installUserNotificationManager(AMP.win);
