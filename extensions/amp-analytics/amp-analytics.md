@@ -61,7 +61,7 @@ when the document is first loaded, and each time an `<a>` tag is clicked:
 
   - `type` This optional attribute can be specified to use one of the built-in analytics providers. Currently supported values for type are:
     - `googleanalytics`: Adds support for Google Analytics. More details for adding Google Analytics support can be found at [developers.google.com](https://developers.google.com/analytics/devguides/collection/amp-analytics/).
-
+    - `piano`: Adds support for Piano AI. More details for adding Piano AI support can be found at [vx.piano.io](http://vx.piano.io/javascript-tracking-amp).
     ```
     <amp-analytics type="XYZ"> ... </amp-analytics>
     ```
