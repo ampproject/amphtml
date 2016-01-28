@@ -569,6 +569,17 @@ export class Viewer {
   }
 
   /**
+   * Sends the message to the viewer. This is a restricted API.
+   * @param {string} eventType
+   * @param {*} data
+   * @param {boolean} awaitResponse
+   * @return {!Promise<*>|undefined}
+   */
+  sendMessage(eventType, data, awaitResponse) {
+    return this.sendMessage_(eventType, data, awaitResponse);
+  }
+
+  /**
    * @param {string} eventType
    * @param {*} data
    * @param {boolean} awaitResponse

@@ -14,20 +14,21 @@
  * limitations under the License.
  */
 
-import {assertHttpsUrl} from '../../../src/url';
-import {installCidService} from '../../../src/service/cid-impl';
-import {log} from '../../../src/log';
-import {urlReplacementsFor} from '../../../src/url-replacements';
-import {expandTemplate} from '../../../src/string';
-import {xhrFor} from '../../../src/xhr';
-import {isArray, isObject} from '../../../src/types';
-
-import {addListener} from './instrumentation';
-import {sendRequest} from './transport';
 import {ANALYTICS_CONFIG} from './vendors';
+import {addListener} from './instrumentation';
+import {assertHttpsUrl} from '../../../src/url';
+import {expandTemplate} from '../../../src/string';
+import {installCidService} from '../../../src/service/cid-impl';
+import {installStorageService} from '../../../src/service/storage-impl';
+import {isArray, isObject} from '../../../src/types';
+import {log} from '../../../src/log';
+import {sendRequest} from './transport';
+import {urlReplacementsFor} from '../../../src/url-replacements';
+import {xhrFor} from '../../../src/xhr';
 
 
 installCidService(AMP.win);
+installStorageService(AMP.win);
 
 
 export class AmpAnalytics extends AMP.BaseElement {
