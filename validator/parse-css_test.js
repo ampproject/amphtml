@@ -38,10 +38,15 @@ function assertStrictEqual(expected, saw) {
   assert.ok(expected === saw, 'expected: ' + expected + ' saw: ' + saw);
 }
 
+/**
+ * @param {!Array<!parse_css.ErrorToken>} errors
+ * @return {string}
+ */
 function errorsToString(errors) {
   const out = [];
   for (const error of errors) {
-    out.push(error.toString());
+    out.push(':' + error.line + ':' + error.col + ' ' +
+        error.errorType + ' - ' + error.msg);
   }
   return out.join('\n');
 }
@@ -101,9 +106,22 @@ describe('tokenize', () => {
     const css = 'foo { bar: baz; }';
     const errors = [];
     const tokenlist = parse_css.tokenize(css, 1, 0, errors);
-    assertStrictEqual(
-        'IDENT(foo) WS { WS IDENT(bar) : WS IDENT(baz) ; WS } EOF_TOKEN',
-        tokenlist.join(' '));
+    assertJSONEquals(
+        [
+          {'line': 1, 'col': 0, 'tokenType': 'IDENT', 'value': 'foo'},
+          {'line': 1, 'col': 3, 'tokenType': 'WHITESPACE'},
+          {'line': 1, 'col': 4, 'tokenType': 'OPEN_CURLY'},
+          {'line': 1, 'col': 5, 'tokenType': 'WHITESPACE'},
+          {'line': 1, 'col': 6, 'tokenType': 'IDENT', 'value': 'bar'},
+          {'line': 1, 'col': 9, 'tokenType': 'COLON'},
+          {'line': 1, 'col': 10, 'tokenType': 'WHITESPACE'},
+          {'line': 1, 'col': 11, 'tokenType': 'IDENT', 'value': 'baz'},
+          {'line': 1, 'col': 14, 'tokenType': 'SEMICOLON'},
+          {'line': 1, 'col': 15, 'tokenType': 'WHITESPACE'},
+          {'line': 1, 'col': 16, 'tokenType': 'CLOSE_CURLY'},
+          {'line': 1, 'col': 17, 'tokenType': 'EOF_TOKEN'}
+        ],
+        tokenlist);
     assertStrictEqual(0, errors.length);
   });
 
@@ -171,30 +189,65 @@ describe('parseAStylesheet', () => {
         tokenlist, ampAtRuleParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
         errors);
     assertJSONEquals(
-        {'line': 1, 'col': 0, 'tokenType': 'STYLESHEET', 'rules':
-         [{'line': 1, 'col': 0, 'tokenType': 'QUALIFIED_RULE', 'prelude':
-           [{'line': 1, 'col': 0, 'tokenType': 'IDENT', 'value': 'foo'},
-            {'line': 1, 'col': 3, 'tokenType': 'WHITESPACE'},
-            {'line': 1, 'col': 4, 'tokenType': 'EOF_TOKEN'}], 'declarations':
-           [{'line': 1, 'col': 6, 'tokenType': 'DECLARATION', 'name':
-             'bar', 'value':
-             [{'line': 1, 'col': 10, 'tokenType': 'WHITESPACE'},
-              {'line': 1, 'col': 11, 'tokenType': 'FUNCTION_TOKEN',
-               'value': 'rgb'},
-              {'line': 1, 'col': 15, 'tokenType': 'NUMBER', 'type':
-               'integer', 'value': 255, 'repr': '255'},
-              {'line': 1, 'col': 18, 'tokenType': ','},
-              {'line': 1, 'col': 19, 'tokenType': 'WHITESPACE'},
-              {'line': 1, 'col': 20, 'tokenType': 'NUMBER', 'type':
-               'integer', 'value': 0, 'repr': '0'},
-              {'line': 1, 'col': 21, 'tokenType': ','},
-              {'line': 1, 'col': 22, 'tokenType': 'WHITESPACE'},
-              {'line': 1, 'col': 23, 'tokenType': 'NUMBER', 'type':
-               'integer', 'value': 127, 'repr': '127'},
-              {'line': 1, 'col': 26, 'tokenType': ')'},
-              {'line': 1, 'col': 27, 'tokenType': 'EOF_TOKEN'}], 'important':
-             false}]}], 'eof':
-         {'line': 1, 'col': 30, 'tokenType': 'EOF_TOKEN'}},
+        {
+          'line': 1,
+          'col': 0,
+          'tokenType': 'STYLESHEET',
+          'rules': [{
+            'line': 1,
+            'col': 0,
+            'tokenType': 'QUALIFIED_RULE',
+            'prelude': [
+              {'line': 1, 'col': 0, 'tokenType': 'IDENT', 'value': 'foo'},
+              {'line': 1, 'col': 3, 'tokenType': 'WHITESPACE'},
+              {'line': 1, 'col': 4, 'tokenType': 'EOF_TOKEN'}
+            ],
+            'declarations': [{
+              'line': 1,
+              'col': 6,
+              'tokenType': 'DECLARATION',
+              'name': 'bar',
+              'value': [
+                {'line': 1, 'col': 10, 'tokenType': 'WHITESPACE'}, {
+                  'line': 1,
+                  'col': 11,
+                  'tokenType': 'FUNCTION_TOKEN',
+                  'value': 'rgb'
+                },
+                {
+                  'line': 1,
+                  'col': 15,
+                  'tokenType': 'NUMBER',
+                  'type': 'integer',
+                  'value': 255,
+                  'repr': '255'
+                },
+                {'line': 1, 'col': 18, 'tokenType': 'COMMA'},
+                {'line': 1, 'col': 19, 'tokenType': 'WHITESPACE'}, {
+                  'line': 1,
+                  'col': 20,
+                  'tokenType': 'NUMBER',
+                  'type': 'integer',
+                  'value': 0,
+                  'repr': '0'
+                },
+                {'line': 1, 'col': 21, 'tokenType': 'COMMA'},
+                {'line': 1, 'col': 22, 'tokenType': 'WHITESPACE'}, {
+                  'line': 1,
+                  'col': 23,
+                  'tokenType': 'NUMBER',
+                  'type': 'integer',
+                  'value': 127,
+                  'repr': '127'
+                },
+                {'line': 1, 'col': 26, 'tokenType': 'CLOSE_PAREN'},
+                {'line': 1, 'col': 27, 'tokenType': 'EOF_TOKEN'}
+              ],
+              'important': false
+            }]
+          }],
+          'eof': {'line': 1, 'col': 30, 'tokenType': 'EOF_TOKEN'}
+        },
         sheet);
   });
 
@@ -250,148 +303,228 @@ describe('parseAStylesheet', () => {
     const errors = [];
     const tokenlist = parse_css.tokenize(css, 1, 0, errors);
     assertJSONEquals(
-        [{'line': 1, 'col': 0, 'tokenType': 'IDENT', 'value': 'h1'},
-         {'line': 1, 'col': 2, 'tokenType': 'WHITESPACE'},
-         {'line': 1, 'col': 3, 'tokenType': '{'},
-         {'line': 1, 'col': 4, 'tokenType': 'WHITESPACE'},
-         {'line': 1, 'col': 5, 'tokenType': 'IDENT', 'value': 'color'},
-         {'line': 1, 'col': 10, 'tokenType': ':'},
-         {'line': 1, 'col': 11, 'tokenType': 'WHITESPACE'},
-         {'line': 1, 'col': 12, 'tokenType': 'IDENT', 'value': 'red'},
-         {'line': 1, 'col': 15, 'tokenType': ';'},
-         {'line': 1, 'col': 16, 'tokenType': 'WHITESPACE'},
-         {'line': 1, 'col': 17, 'tokenType': '}'},
-         {'line': 1, 'col': 18, 'tokenType': 'WHITESPACE'},
-         {'line': 2, 'col': 0, 'tokenType': 'AT-KEYWORD', 'value':
-          'media'},
-         {'line': 2, 'col': 6, 'tokenType': 'WHITESPACE'},
-         {'line': 2, 'col': 7, 'tokenType': 'IDENT', 'value': 'print'},
-         {'line': 2, 'col': 12, 'tokenType': 'WHITESPACE'},
-         {'line': 2, 'col': 13, 'tokenType': '{'},
-         {'line': 2, 'col': 14, 'tokenType': 'WHITESPACE'},
-         {'line': 3, 'col': 2, 'tokenType': 'AT-KEYWORD', 'value':
-          'media'},
-         {'line': 3, 'col': 8, 'tokenType': 'WHITESPACE'},
-         {'line': 3, 'col': 9, 'tokenType': 'IDENT', 'value': 'print'},
-         {'line': 3, 'col': 14, 'tokenType': 'WHITESPACE'},
-         {'line': 3, 'col': 15, 'tokenType': '{'},
-         {'line': 3, 'col': 16, 'tokenType': 'WHITESPACE'},
-         {'line': 4, 'col': 4, 'tokenType': 'IDENT', 'value': 'h2'},
-         {'line': 4, 'col': 6, 'tokenType': 'DELIM', 'value': '.'},
-         {'line': 4, 'col': 7, 'tokenType': 'IDENT', 'value': 'bar'},
-         {'line': 4, 'col': 10, 'tokenType': 'WHITESPACE'},
-         {'line': 4, 'col': 11, 'tokenType': '{'},
-         {'line': 4, 'col': 12, 'tokenType': 'WHITESPACE'},
-         {'line': 4, 'col': 13, 'tokenType': 'IDENT', 'value': 'size'},
-         {'line': 4, 'col': 17, 'tokenType': ':'},
-         {'line': 4, 'col': 18, 'tokenType': 'WHITESPACE'},
-         {'line': 4, 'col': 19, 'tokenType': 'DIMENSION', 'type':
-          'integer', 'value': 4, 'repr': '4', 'unit': 'px'},
-         {'line': 4, 'col': 22, 'tokenType': ';'},
-         {'line': 4, 'col': 23, 'tokenType': 'WHITESPACE'},
-         {'line': 4, 'col': 24, 'tokenType': '}'},
-         {'line': 4, 'col': 25, 'tokenType': 'WHITESPACE'},
-         {'line': 5, 'col': 2, 'tokenType': '}'},
-         {'line': 5, 'col': 3, 'tokenType': 'WHITESPACE'},
-         {'line': 6, 'col': 0, 'tokenType': '}'},
-         {'line': 6, 'col': 1, 'tokenType': 'WHITESPACE'},
-         {'line': 7, 'col': 0, 'tokenType': 'AT-KEYWORD', 'value':
-          'font-face'},
-         {'line': 7, 'col': 10, 'tokenType': 'WHITESPACE'},
-         {'line': 7, 'col': 11, 'tokenType': '{'},
-         {'line': 7, 'col': 12, 'tokenType': 'WHITESPACE'},
-         {'line': 8, 'col': 2, 'tokenType': 'IDENT', 'value': 'font-family'},
-         {'line': 8, 'col': 13, 'tokenType': ':'},
-         {'line': 8, 'col': 14, 'tokenType': 'WHITESPACE'},
-         {'line': 8, 'col': 15, 'tokenType': 'STRING', 'value': 'MyFont'},
-         {'line': 8, 'col': 23, 'tokenType': ';'},
-         {'line': 8, 'col': 24, 'tokenType': 'WHITESPACE'},
-         {'line': 9, 'col': 2, 'tokenType': 'IDENT', 'value': 'src'},
-         {'line': 9, 'col': 5, 'tokenType': ':'},
-         {'line': 9, 'col': 6, 'tokenType': 'WHITESPACE'},
-         {'line': 9, 'col': 7, 'tokenType': 'FUNCTION_TOKEN', 'value':
-          'url'},
-         {'line': 9, 'col': 11, 'tokenType': 'STRING', 'value': 'foo.ttf'},
-         {'line': 9, 'col': 20, 'tokenType': ')'},
-         {'line': 9, 'col': 21, 'tokenType': ';'},
-         {'line': 9, 'col': 22, 'tokenType': 'WHITESPACE'},
-         {'line': 10, 'col': 0, 'tokenType': '}'},
-         {'line': 10, 'col': 1, 'tokenType': 'EOF_TOKEN'}],
+        [
+          {'line': 1, 'col': 0, 'tokenType': 'IDENT', 'value': 'h1'},
+          {'line': 1, 'col': 2, 'tokenType': 'WHITESPACE'},
+          {'line': 1, 'col': 3, 'tokenType': 'OPEN_CURLY'},
+          {'line': 1, 'col': 4, 'tokenType': 'WHITESPACE'},
+          {'line': 1, 'col': 5, 'tokenType': 'IDENT', 'value': 'color'},
+          {'line': 1, 'col': 10, 'tokenType': 'COLON'},
+          {'line': 1, 'col': 11, 'tokenType': 'WHITESPACE'},
+          {'line': 1, 'col': 12, 'tokenType': 'IDENT', 'value': 'red'},
+          {'line': 1, 'col': 15, 'tokenType': 'SEMICOLON'},
+          {'line': 1, 'col': 16, 'tokenType': 'WHITESPACE'},
+          {'line': 1, 'col': 17, 'tokenType': 'CLOSE_CURLY'},
+          {'line': 1, 'col': 18, 'tokenType': 'WHITESPACE'},
+          {'line': 2, 'col': 0, 'tokenType': 'AT_KEYWORD', 'value': 'media'},
+          {'line': 2, 'col': 6, 'tokenType': 'WHITESPACE'},
+          {'line': 2, 'col': 7, 'tokenType': 'IDENT', 'value': 'print'},
+          {'line': 2, 'col': 12, 'tokenType': 'WHITESPACE'},
+          {'line': 2, 'col': 13, 'tokenType': 'OPEN_CURLY'},
+          {'line': 2, 'col': 14, 'tokenType': 'WHITESPACE'},
+          {'line': 3, 'col': 2, 'tokenType': 'AT_KEYWORD', 'value': 'media'},
+          {'line': 3, 'col': 8, 'tokenType': 'WHITESPACE'},
+          {'line': 3, 'col': 9, 'tokenType': 'IDENT', 'value': 'print'},
+          {'line': 3, 'col': 14, 'tokenType': 'WHITESPACE'},
+          {'line': 3, 'col': 15, 'tokenType': 'OPEN_CURLY'},
+          {'line': 3, 'col': 16, 'tokenType': 'WHITESPACE'},
+          {'line': 4, 'col': 4, 'tokenType': 'IDENT', 'value': 'h2'},
+          {'line': 4, 'col': 6, 'tokenType': 'DELIM', 'value': '.'},
+          {'line': 4, 'col': 7, 'tokenType': 'IDENT', 'value': 'bar'},
+          {'line': 4, 'col': 10, 'tokenType': 'WHITESPACE'},
+          {'line': 4, 'col': 11, 'tokenType': 'OPEN_CURLY'},
+          {'line': 4, 'col': 12, 'tokenType': 'WHITESPACE'},
+          {'line': 4, 'col': 13, 'tokenType': 'IDENT', 'value': 'size'},
+          {'line': 4, 'col': 17, 'tokenType': 'COLON'},
+          {'line': 4, 'col': 18, 'tokenType': 'WHITESPACE'},
+          {
+            'line': 4,
+            'col': 19,
+            'tokenType': 'DIMENSION',
+            'type': 'integer',
+            'value': 4,
+            'repr': '4',
+            'unit': 'px'
+          },
+          {'line': 4, 'col': 22, 'tokenType': 'SEMICOLON'},
+          {'line': 4, 'col': 23, 'tokenType': 'WHITESPACE'},
+          {'line': 4, 'col': 24, 'tokenType': 'CLOSE_CURLY'},
+          {'line': 4, 'col': 25, 'tokenType': 'WHITESPACE'},
+          {'line': 5, 'col': 2, 'tokenType': 'CLOSE_CURLY'},
+          {'line': 5, 'col': 3, 'tokenType': 'WHITESPACE'},
+          {'line': 6, 'col': 0, 'tokenType': 'CLOSE_CURLY'},
+          {'line': 6, 'col': 1, 'tokenType': 'WHITESPACE'},
+          {
+            'line': 7,
+            'col': 0,
+            'tokenType': 'AT_KEYWORD',
+            'value': 'font-face'
+          },
+          {'line': 7, 'col': 10, 'tokenType': 'WHITESPACE'},
+          {'line': 7, 'col': 11, 'tokenType': 'OPEN_CURLY'},
+          {'line': 7, 'col': 12, 'tokenType': 'WHITESPACE'},
+          {'line': 8, 'col': 2, 'tokenType': 'IDENT', 'value': 'font-family'},
+          {'line': 8, 'col': 13, 'tokenType': 'COLON'},
+          {'line': 8, 'col': 14, 'tokenType': 'WHITESPACE'},
+          {'line': 8, 'col': 15, 'tokenType': 'STRING', 'value': 'MyFont'},
+          {'line': 8, 'col': 23, 'tokenType': 'SEMICOLON'},
+          {'line': 8, 'col': 24, 'tokenType': 'WHITESPACE'},
+          {'line': 9, 'col': 2, 'tokenType': 'IDENT', 'value': 'src'},
+          {'line': 9, 'col': 5, 'tokenType': 'COLON'},
+          {'line': 9, 'col': 6, 'tokenType': 'WHITESPACE'},
+          {'line': 9, 'col': 7, 'tokenType': 'FUNCTION_TOKEN', 'value': 'url'},
+          {'line': 9, 'col': 11, 'tokenType': 'STRING', 'value': 'foo.ttf'},
+          {'line': 9, 'col': 20, 'tokenType': 'CLOSE_PAREN'},
+          {'line': 9, 'col': 21, 'tokenType': 'SEMICOLON'},
+          {'line': 9, 'col': 22, 'tokenType': 'WHITESPACE'},
+          {'line': 10, 'col': 0, 'tokenType': 'CLOSE_CURLY'},
+          {'line': 10, 'col': 1, 'tokenType': 'EOF_TOKEN'}
+        ],
         tokenlist);
     const sheet = parse_css.parseAStylesheet(
         tokenlist, ampAtRuleParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
         errors);
     assertStrictEqual(0, errors.length);
     assertJSONEquals(
-        {'line': 1, 'col': 0, 'tokenType': 'STYLESHEET', 'rules':
-         [{'line': 1, 'col': 0, 'tokenType': 'QUALIFIED_RULE', 'prelude':
-           [{'line': 1, 'col': 0, 'tokenType': 'IDENT', 'value': 'h1'},
-            {'line': 1, 'col': 2, 'tokenType': 'WHITESPACE'},
-            {'line': 1, 'col': 3, 'tokenType': 'EOF_TOKEN'}], 'declarations':
-           [{'line': 1, 'col': 5, 'tokenType': 'DECLARATION', 'name':
-             'color', 'value':
-             [{'line': 1, 'col': 11, 'tokenType': 'WHITESPACE'},
-              {'line': 1, 'col': 12, 'tokenType': 'IDENT', 'value':
-               'red'},
-              {'line': 1, 'col': 15, 'tokenType': 'EOF_TOKEN'}], 'important':
-             false}]},
-          {'line': 2, 'col': 0, 'tokenType': 'AT_RULE', 'name': 'media',
-           'prelude':
-           [{'line': 2, 'col': 6, 'tokenType': 'WHITESPACE'},
-            {'line': 2, 'col': 7, 'tokenType': 'IDENT', 'value': 'print'},
-            {'line': 2, 'col': 12, 'tokenType': 'WHITESPACE'},
-            {'line': 2, 'col': 13, 'tokenType': 'EOF_TOKEN'}], 'declarations':
-           [], 'rules':
-           [{'line': 3, 'col': 2, 'tokenType': 'AT_RULE', 'name':
-             'media', 'prelude':
-             [{'line': 3, 'col': 8, 'tokenType': 'WHITESPACE'},
-              {'line': 3, 'col': 9, 'tokenType': 'IDENT', 'value':
-               'print'},
-              {'line': 3, 'col': 14, 'tokenType': 'WHITESPACE'},
-              {'line': 3, 'col': 15, 'tokenType': 'EOF_TOKEN'}], 'declarations':
-             [], 'rules':
-             [{'line': 4, 'col': 4, 'tokenType': 'QUALIFIED_RULE',
-               'prelude':
-               [{'line': 4, 'col': 4, 'tokenType': 'IDENT', 'value':
-                 'h2'},
-                {'line': 4, 'col': 6, 'tokenType': 'DELIM', 'value':
-                 '.'},
-                {'line': 4, 'col': 7, 'tokenType': 'IDENT', 'value':
-                 'bar'},
-                {'line': 4, 'col': 10, 'tokenType': 'WHITESPACE'},
-                {'line': 4, 'col': 11, 'tokenType': 'EOF_TOKEN'}],
-               'declarations':
-               [{'line': 4, 'col': 13, 'tokenType': 'DECLARATION',
-                 'name': 'size', 'value':
-                 [{'line': 4, 'col': 18, 'tokenType': 'WHITESPACE'},
-                  {'line': 4, 'col': 19, 'tokenType': 'DIMENSION',
-                   'type': 'integer', 'value': 4, 'repr': '4', 'unit':
-                   'px'},
-                  {'line': 4, 'col': 22, 'tokenType': 'EOF_TOKEN'}],
-                 'important': false}]}]}]},
-          {'line': 7, 'col': 0, 'tokenType': 'AT_RULE', 'name': 'font-face',
-           'prelude':
-           [{'line': 7, 'col': 10, 'tokenType': 'WHITESPACE'},
-            {'line': 7, 'col': 11, 'tokenType': 'EOF_TOKEN'}], 'declarations':
-           [{'line': 8, 'col': 2, 'tokenType': 'DECLARATION', 'name':
-             'font-family', 'value':
-             [{'line': 8, 'col': 14, 'tokenType': 'WHITESPACE'},
-              {'line': 8, 'col': 15, 'tokenType': 'STRING', 'value':
-               'MyFont'},
-              {'line': 8, 'col': 23, 'tokenType': 'EOF_TOKEN'}], 'important':
-             false},
-            {'line': 9, 'col': 2, 'tokenType': 'DECLARATION', 'name':
-             'src', 'value':
-             [{'line': 9, 'col': 6, 'tokenType': 'WHITESPACE'},
-              {'line': 9, 'col': 7, 'tokenType': 'FUNCTION_TOKEN',
-               'value': 'url'},
-              {'line': 9, 'col': 11, 'tokenType': 'STRING', 'value':
-               'foo.ttf'},
-              {'line': 9, 'col': 20, 'tokenType': ')'},
-              {'line': 9, 'col': 21, 'tokenType': 'EOF_TOKEN'}], 'important':
-             false}], 'rules':
-           []}], 'eof':
-         {'line': 10, 'col': 1, 'tokenType': 'EOF_TOKEN'}},
+        {
+          'line': 1,
+          'col': 0,
+          'tokenType': 'STYLESHEET',
+          'rules': [
+            {
+              'line': 1,
+              'col': 0,
+              'tokenType': 'QUALIFIED_RULE',
+              'prelude': [
+                {'line': 1, 'col': 0, 'tokenType': 'IDENT', 'value': 'h1'},
+                {'line': 1, 'col': 2, 'tokenType': 'WHITESPACE'},
+                {'line': 1, 'col': 3, 'tokenType': 'EOF_TOKEN'}
+              ],
+              'declarations': [{
+                'line': 1,
+                'col': 5,
+                'tokenType': 'DECLARATION',
+                'name': 'color',
+                'value': [
+                  {'line': 1, 'col': 11, 'tokenType': 'WHITESPACE'},
+                  {'line': 1, 'col': 12, 'tokenType': 'IDENT', 'value': 'red'},
+                  {'line': 1, 'col': 15, 'tokenType': 'EOF_TOKEN'}
+                ],
+                'important': false
+              }]
+            },
+            {
+              'line': 2,
+              'col': 0,
+              'tokenType': 'AT_RULE',
+              'name': 'media',
+              'prelude': [
+                {'line': 2, 'col': 6, 'tokenType': 'WHITESPACE'},
+                {'line': 2, 'col': 7, 'tokenType': 'IDENT', 'value': 'print'},
+                {'line': 2, 'col': 12, 'tokenType': 'WHITESPACE'},
+                {'line': 2, 'col': 13, 'tokenType': 'EOF_TOKEN'}
+              ],
+              'declarations': [],
+              'rules': [{
+                'line': 3,
+                'col': 2,
+                'tokenType': 'AT_RULE',
+                'name': 'media',
+                'prelude': [
+                  {'line': 3, 'col': 8, 'tokenType': 'WHITESPACE'},
+                  {'line': 3, 'col': 9, 'tokenType': 'IDENT', 'value': 'print'},
+                  {'line': 3, 'col': 14, 'tokenType': 'WHITESPACE'},
+                  {'line': 3, 'col': 15, 'tokenType': 'EOF_TOKEN'}
+                ],
+                'declarations': [],
+                'rules': [{
+                  'line': 4,
+                  'col': 4,
+                  'tokenType': 'QUALIFIED_RULE',
+                  'prelude': [
+                    {'line': 4, 'col': 4, 'tokenType': 'IDENT', 'value': 'h2'},
+                    {'line': 4, 'col': 6, 'tokenType': 'DELIM', 'value': '.'},
+                    {'line': 4, 'col': 7, 'tokenType': 'IDENT', 'value': 'bar'},
+                    {'line': 4, 'col': 10, 'tokenType': 'WHITESPACE'},
+                    {'line': 4, 'col': 11, 'tokenType': 'EOF_TOKEN'}
+                  ],
+                  'declarations': [{
+                    'line': 4,
+                    'col': 13,
+                    'tokenType': 'DECLARATION',
+                    'name': 'size',
+                    'value': [
+                      {'line': 4, 'col': 18, 'tokenType': 'WHITESPACE'}, {
+                        'line': 4,
+                        'col': 19,
+                        'tokenType': 'DIMENSION',
+                        'type': 'integer',
+                        'value': 4,
+                        'repr': '4',
+                        'unit': 'px'
+                      },
+                      {'line': 4, 'col': 22, 'tokenType': 'EOF_TOKEN'}
+                    ],
+                    'important': false
+                  }]
+                }]
+              }]
+            },
+            {
+              'line': 7,
+              'col': 0,
+              'tokenType': 'AT_RULE',
+              'name': 'font-face',
+              'prelude': [
+                {'line': 7, 'col': 10, 'tokenType': 'WHITESPACE'},
+                {'line': 7, 'col': 11, 'tokenType': 'EOF_TOKEN'}
+              ],
+              'declarations': [
+                {
+                  'line': 8,
+                  'col': 2,
+                  'tokenType': 'DECLARATION',
+                  'name': 'font-family',
+                  'value': [
+                    {'line': 8, 'col': 14, 'tokenType': 'WHITESPACE'}, {
+                      'line': 8,
+                      'col': 15,
+                      'tokenType': 'STRING',
+                      'value': 'MyFont'
+                    },
+                    {'line': 8, 'col': 23, 'tokenType': 'EOF_TOKEN'}
+                  ],
+                  'important': false
+                },
+                {
+                  'line': 9,
+                  'col': 2,
+                  'tokenType': 'DECLARATION',
+                  'name': 'src',
+                  'value': [
+                    {'line': 9, 'col': 6, 'tokenType': 'WHITESPACE'}, {
+                      'line': 9,
+                      'col': 7,
+                      'tokenType': 'FUNCTION_TOKEN',
+                      'value': 'url'
+                    },
+                    {
+                      'line': 9,
+                      'col': 11,
+                      'tokenType': 'STRING',
+                      'value': 'foo.ttf'
+                    },
+                    {'line': 9, 'col': 20, 'tokenType': 'CLOSE_PAREN'},
+                    {'line': 9, 'col': 21, 'tokenType': 'EOF_TOKEN'}
+                  ],
+                  'important': false
+                }
+              ],
+              'rules': []
+            }
+          ],
+          'eof': {'line': 10, 'col': 1, 'tokenType': 'EOF_TOKEN'}
+        },
         sheet);
   });
 
@@ -486,14 +619,14 @@ describe('parseAStylesheet', () => {
             {'line': 4, 'col': 0, 'tokenType': 'AT_RULE', 'name':
              'media', 'prelude':
              [{'line': 4, 'col': 6, 'tokenType': 'WHITESPACE'},
-              {'line': 4, 'col': 7, 'tokenType': '('},
+              {'line': 4, 'col': 7, 'tokenType': 'OPEN_PAREN'},
               {'line': 4, 'col': 8, 'tokenType': 'IDENT', 'value':
                'max-width'},
-              {'line': 4, 'col': 17, 'tokenType': ':'},
+              {'line': 4, 'col': 17, 'tokenType': 'COLON'},
               {'line': 4, 'col': 18, 'tokenType': 'WHITESPACE'},
               {'line': 4, 'col': 19, 'tokenType': 'DIMENSION', 'type':
                'integer', 'value': 12, 'repr': '12', 'unit': 'cm'},
-              {'line': 4, 'col': 23, 'tokenType': ')'},
+              {'line': 4, 'col': 23, 'tokenType': 'CLOSE_PAREN'},
               {'line': 4, 'col': 24, 'tokenType': 'WHITESPACE'},
               {'line': 4, 'col': 25, 'tokenType': 'EOF_TOKEN'}],
              'declarations': [], 'rules':
@@ -565,23 +698,27 @@ describe('parseAStylesheet', () => {
 
   it('handles selector example with square braces', () => {
     assertJSONEquals(
-        [{'line': 1, 'col': 0, 'tokenType': 'IDENT', 'value': 'E'},
-         {'line': 1, 'col': 1, 'tokenType': '['},
-         {'line': 1, 'col': 2, 'tokenType': 'IDENT', 'value': 'foo'},
-         {'line': 1, 'col': 5, 'tokenType': ']'},
-         {'line': 1, 'col': 6, 'tokenType': 'EOF_TOKEN'}],
+        [
+          {'line': 1, 'col': 0, 'tokenType': 'IDENT', 'value': 'E'},
+          {'line': 1, 'col': 1, 'tokenType': 'OPEN_SQUARE'},
+          {'line': 1, 'col': 2, 'tokenType': 'IDENT', 'value': 'foo'},
+          {'line': 1, 'col': 5, 'tokenType': 'CLOSE_SQUARE'},
+          {'line': 1, 'col': 6, 'tokenType': 'EOF_TOKEN'}
+        ],
         parseSelectorForTest('E[foo]'));
   });
 
   it('handles selector example with string matching', () => {
     assertJSONEquals(
-        [{'line': 1, 'col': 0, 'tokenType': 'IDENT', 'value': 'E'},
-         {'line': 1, 'col': 1, 'tokenType': '['},
-         {'line': 1, 'col': 2, 'tokenType': 'IDENT', 'value': 'foo'},
-         {'line': 1, 'col': 5, 'tokenType': 'DELIM', 'value': '='},
-         {'line': 1, 'col': 6, 'tokenType': 'STRING', 'value': 'bar'},
-         {'line': 1, 'col': 11, 'tokenType': ']'},
-         {'line': 1, 'col': 12, 'tokenType': 'EOF_TOKEN'}],
+        [
+          {'line': 1, 'col': 0, 'tokenType': 'IDENT', 'value': 'E'},
+          {'line': 1, 'col': 1, 'tokenType': 'OPEN_SQUARE'},
+          {'line': 1, 'col': 2, 'tokenType': 'IDENT', 'value': 'foo'},
+          {'line': 1, 'col': 5, 'tokenType': 'DELIM', 'value': '='},
+          {'line': 1, 'col': 6, 'tokenType': 'STRING', 'value': 'bar'},
+          {'line': 1, 'col': 11, 'tokenType': 'CLOSE_SQUARE'},
+          {'line': 1, 'col': 12, 'tokenType': 'EOF_TOKEN'}
+        ],
         parseSelectorForTest('E[foo="bar"]'));
   });
 });
@@ -739,15 +876,17 @@ describe('css_selectors', () => {
   it('parses a selectors group', () => {
     const tokens = parseSelectorForTest('foo, bar \n, baz');
     assertJSONEquals(
-        [{'line': 1, 'col': 0, 'tokenType': 'IDENT', 'value': 'foo'},
-         {'line': 1, 'col': 3, 'tokenType': ','},
-         {'line': 1, 'col': 4, 'tokenType': 'WHITESPACE'},
-         {'line': 1, 'col': 5, 'tokenType': 'IDENT', 'value': 'bar'},
-         {'line': 1, 'col': 8, 'tokenType': 'WHITESPACE'},
-         {'line': 2, 'col': 0, 'tokenType': ','},
-         {'line': 2, 'col': 1, 'tokenType': 'WHITESPACE'},
-         {'line': 2, 'col': 2, 'tokenType': 'IDENT', 'value': 'baz'},
-         {'line': 2, 'col': 5, 'tokenType': 'EOF_TOKEN'}],
+        [
+          {'line': 1, 'col': 0, 'tokenType': 'IDENT', 'value': 'foo'},
+          {'line': 1, 'col': 3, 'tokenType': 'COMMA'},
+          {'line': 1, 'col': 4, 'tokenType': 'WHITESPACE'},
+          {'line': 1, 'col': 5, 'tokenType': 'IDENT', 'value': 'bar'},
+          {'line': 1, 'col': 8, 'tokenType': 'WHITESPACE'},
+          {'line': 2, 'col': 0, 'tokenType': 'COMMA'},
+          {'line': 2, 'col': 1, 'tokenType': 'WHITESPACE'},
+          {'line': 2, 'col': 2, 'tokenType': 'IDENT', 'value': 'baz'},
+          {'line': 2, 'col': 5, 'tokenType': 'EOF_TOKEN'}
+        ],
         tokens);
     const tokenStream = new parse_css.TokenStream(tokens);
     tokenStream.consume();
@@ -775,14 +914,20 @@ describe('css_selectors', () => {
   it('parses a selectors group with an attrib match', () => {
     const tokens = parseSelectorForTest('a[href="http://www.w3.org/"]');
     assertJSONEquals(
-        [{'line': 1, 'col': 0, 'tokenType': 'IDENT', 'value': 'a'},
-         {'line': 1, 'col': 1, 'tokenType': '['},
-         {'line': 1, 'col': 2, 'tokenType': 'IDENT', 'value': 'href'},
-         {'line': 1, 'col': 6, 'tokenType': 'DELIM', 'value': '='},
-         {'line': 1, 'col': 7, 'tokenType': 'STRING',
-          'value': 'http://www.w3.org/'},
-         {'line': 1, 'col': 27, 'tokenType': ']'},
-         {'line': 1, 'col': 28, 'tokenType': 'EOF_TOKEN'}], tokens);
+        [
+          {'line': 1, 'col': 0, 'tokenType': 'IDENT', 'value': 'a'},
+          {'line': 1, 'col': 1, 'tokenType': 'OPEN_SQUARE'},
+          {'line': 1, 'col': 2, 'tokenType': 'IDENT', 'value': 'href'},
+          {'line': 1, 'col': 6, 'tokenType': 'DELIM', 'value': '='}, {
+            'line': 1,
+            'col': 7,
+            'tokenType': 'STRING',
+            'value': 'http://www.w3.org/'
+          },
+          {'line': 1, 'col': 27, 'tokenType': 'CLOSE_SQUARE'},
+          {'line': 1, 'col': 28, 'tokenType': 'EOF_TOKEN'}
+        ],
+        tokens);
     const tokenStream = new parse_css.TokenStream(tokens);
     tokenStream.consume();
     const selector = css_selectors.parseASelectorsGroup(tokenStream);
@@ -804,17 +949,19 @@ describe('css_selectors', () => {
   it('parses a selectors group with a pseudo class', () => {
     const tokens = parseSelectorForTest('a::b:lang(fr-be)]');
     assertJSONEquals(
-        [{'line': 1, 'col': 0, 'tokenType': 'IDENT', 'value': 'a'},
-         {'line': 1, 'col': 1, 'tokenType': ':'},
-         {'line': 1, 'col': 2, 'tokenType': ':'},
-         {'line': 1, 'col': 3, 'tokenType': 'IDENT', 'value': 'b'},
-         {'line': 1, 'col': 4, 'tokenType': ':'},
-         {'line': 1, 'col': 5, 'tokenType': 'FUNCTION_TOKEN', 'value':
-          'lang'},
-         {'line': 1, 'col': 10, 'tokenType': 'IDENT', 'value': 'fr-be'},
-         {'line': 1, 'col': 15, 'tokenType': ')'},
-         {'line': 1, 'col': 16, 'tokenType': ']'},
-         {'line': 1, 'col': 17, 'tokenType': 'EOF_TOKEN'}], tokens);
+        [
+          {'line': 1, 'col': 0, 'tokenType': 'IDENT', 'value': 'a'},
+          {'line': 1, 'col': 1, 'tokenType': 'COLON'},
+          {'line': 1, 'col': 2, 'tokenType': 'COLON'},
+          {'line': 1, 'col': 3, 'tokenType': 'IDENT', 'value': 'b'},
+          {'line': 1, 'col': 4, 'tokenType': 'COLON'},
+          {'line': 1, 'col': 5, 'tokenType': 'FUNCTION_TOKEN', 'value': 'lang'},
+          {'line': 1, 'col': 10, 'tokenType': 'IDENT', 'value': 'fr-be'},
+          {'line': 1, 'col': 15, 'tokenType': 'CLOSE_PAREN'},
+          {'line': 1, 'col': 16, 'tokenType': 'CLOSE_SQUARE'},
+          {'line': 1, 'col': 17, 'tokenType': 'EOF_TOKEN'}
+        ],
+        tokens);
     const tokenStream = new parse_css.TokenStream(tokens);
     tokenStream.consume();
     const selector = css_selectors.parseASelectorsGroup(tokenStream);
@@ -844,18 +991,36 @@ describe('css_selectors', () => {
     tokenStream.consume();
     const selector = css_selectors.parseASelectorsGroup(tokenStream);
     assertJSONEquals(
-        {'line': 1, 'col': 0, 'node': 'SIMPLE_SELECTOR_SEQUENCE',
-         'otherSelectors':
-         [{'line': 1, 'col': 6, 'name': 'not', 'func':
-           [{'line': 1, 'col': 7, 'tokenType': 'FUNCTION_TOKEN', 'value':
-             'not'},
-            {'line': 1, 'col': 11, 'tokenType': ':'},
-            {'line': 1, 'col': 12, 'tokenType': 'IDENT', 'value':
-             'link'},
-            {'line': 1, 'col': 16, 'tokenType': 'EOF_TOKEN'}], 'isClass':
-           true, 'node': 'PSEUDO_SELECTOR'}], 'typeSelector':
-         {'line': 1, 'col': 0, 'elementName': '*', 'namespacePrefix':
-          'html', 'node': 'TYPE_SELECTOR'}},
+        {
+          'line': 1,
+          'col': 0,
+          'node': 'SIMPLE_SELECTOR_SEQUENCE',
+          'otherSelectors': [{
+            'line': 1,
+            'col': 6,
+            'name': 'not',
+            'func': [
+              {
+                'line': 1,
+                'col': 7,
+                'tokenType': 'FUNCTION_TOKEN',
+                'value': 'not'
+              },
+              {'line': 1, 'col': 11, 'tokenType': 'COLON'},
+              {'line': 1, 'col': 12, 'tokenType': 'IDENT', 'value': 'link'},
+              {'line': 1, 'col': 16, 'tokenType': 'EOF_TOKEN'}
+            ],
+            'isClass': true,
+            'node': 'PSEUDO_SELECTOR'
+          }],
+          'typeSelector': {
+            'line': 1,
+            'col': 0,
+            'elementName': '*',
+            'namespacePrefix': 'html',
+            'node': 'TYPE_SELECTOR'
+          }
+        },
         selector);
   });
 

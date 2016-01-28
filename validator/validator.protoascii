@@ -20,12 +20,12 @@
 # in production from crashing. This id is not relevant to validator.js
 # because thus far, engine (validator.js) and spec file (validator.protoascii)
 # are always released together.
-min_validator_revision_required: 77
+min_validator_revision_required: 81
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 126
+spec_file_revision: 129
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
 # These rules are just enough to validate the example from the spec.
@@ -81,7 +81,10 @@ tags: {
   spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#crps"
 }
 # 4.2.2 The title element
-tags: { name: "title" }
+tags: {
+  name: "title"
+  detail: "title"
+}
 # 4.2.3 the base element
 # Disallowed.
 # 4.2.4 the link element
@@ -92,6 +95,7 @@ tags: { name: "title" }
 # in practice, we resort to a whitelist of allowed rel values.
 tags: {
   name: "link"
+  detail: "link rel="
   attrs: { name: "type" }
   attrs: { name: "href" }
   attrs: {
@@ -341,6 +345,7 @@ tags: {
 # itemprop=sameAs is allowed per schema.org, needs not be in head
 tags: {
   name: "link"
+  detail: "link itemprop=sameAs"
   attrs: {
     name: "itemprop"
     mandatory: true
@@ -355,6 +360,7 @@ tags: {
 # "type", "href", and "sizes" attributes of arbitrary value.
 tags: {
   name: "link"
+  detail: "link rel= for type= or href= or sizes="
   attrs: { name: "type" }
   attrs: { name: "href" }
   attrs: { name: "sizes" }
@@ -376,10 +382,10 @@ tags: {
 # Other meta elements not supported.
 tags: {
   name: "meta"
+  detail: "meta charset=utf-8"
   mandatory: true
   mandatory_parent: "head"
   unique: true
-  detail: "meta charset utf-8 declaration"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#chrs"
   attrs: {
     dispatch_key: true
@@ -390,7 +396,7 @@ tags: {
 }
 tags: {
   name: "meta"
-  detail: "meta viewport declaration"
+  detail: "meta name=viewport"
   mandatory: true
   mandatory_parent: "head"
   unique: true
@@ -416,6 +422,7 @@ tags: {
 }
 tags: {
   name: "meta"
+  detail: "meta property= and content="
   attrs: {
     name: "property"
     mandatory: true
@@ -430,6 +437,7 @@ tags: {
 # are altogether disallowed.
 tags: {
   name: "meta"
+  detail: "meta name= and content="
   attrs: {
     name: "name"
     mandatory: true
@@ -976,6 +984,7 @@ attr_lists: {
 }
 tags: {
   name: "source"
+  detail: "amp-audio > source"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-audio/amp-audio.md"
   mandatory_parent: "amp-audio"
   attrs: { name: "src" }
@@ -983,6 +992,7 @@ tags: {
 }
 tags: {
   name: "source"
+  detail: "amp-video > source"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/builtins/amp-video.md"
   mandatory_parent: "amp-video"
   attrs: { name: "src" }
@@ -990,6 +1000,7 @@ tags: {
 }
 tags: {
   name: "source"
+  detail: "audio > source"
   mandatory_parent: "audio"
   attrs: {
     name: "src"
@@ -1002,6 +1013,7 @@ tags: {
 }
 tags: {
   name: "source"
+  detail: "video > source"
   mandatory_parent: "video"
   attrs: {
     name: "src"
@@ -1494,6 +1506,7 @@ tags: {
 }
 tags: {
   name: "title"
+  detail: "svg title"
   attr_lists: "svg-core-attributes"
   attrs: { name: "class" }
 }
@@ -1581,9 +1594,7 @@ tags: { name: "button" }
 # 4.11 Scripting
 # 4.11.1 The script element
 # Only the amphtml script, custom extensions and the LD/JSON description are
-# allowed. The AMP Engine is the first in this specfile so that the
-# 'development' attribute shows up as the disallowed attribute instead of
-# 'src' for a development flagged AMP engine script.
+# allowed.
 tags: {
   name: "script"
   mandatory: true
@@ -1602,15 +1613,10 @@ tags: {
     value: ""
     mandatory: true
   }
-  attrs: {
-    name: "development"
-    value: ""
-    dev_mode_enabled: "please remove for prod"
-    dev_mode_enabled_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#amp-runtime"
-  }
 }
 tags: {
   name: "script"
+  detail: "script type=application/ld+json"
   mandatory_parent: "head"
   attrs: {
     name: "type"
@@ -1621,6 +1627,7 @@ tags: {
 }
 tags: {
   name: "script"
+  detail: "amp-access extension .json script"
   mandatory_parent: "head"
   attrs: {
     name: "id"
@@ -1640,8 +1647,8 @@ tags: {
 # Specific script tags for custom elements and runtime imports.
 tags: {  # amp-access
   name: "script"
-  mandatory_parent: "head"
   detail: "amp-access extension .js script"
+  mandatory_parent: "head"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-access/amp-access.md"
   attrs: {
     name: "custom-element"
@@ -1911,7 +1918,7 @@ tags: {  # amp-lightbox
 tags: {  # amp-mustache
   name: "script"
   mandatory_parent: "head"
-  detail: "amp-mustache extension"
+  detail: "amp-mustache extension .js script"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-mustache/amp-mustache.md"
   attrs: {
     name: "custom-template"
@@ -2089,7 +2096,7 @@ tags: {
     value: "amp-mustache"
     mandatory: true
   }
-  also_requires: "amp-mustache extension"
+  also_requires: "amp-mustache extension .js script"
 }
 # 11.2 Non-conforming features
 tags: { name: "acronym" }
@@ -2111,6 +2118,7 @@ tags: { name: "xmp" }
 # Schema.org meta tag; schema.org is explicitly allowed by the AMP HTML draft.
 tags: {
   name: "meta"
+  detail: "meta from schema.org"
   attrs: {
     name: "itemprop"
     mandatory: true
@@ -2124,6 +2132,7 @@ tags: {
 # to the IE8 engine. So it's explicitly allowed.
 tags: {
   name: "meta"
+  detail: "meta http-equiv=X-UA-Compatible"
   attrs: {
     name: "http-equiv"
     mandatory: true
@@ -2141,6 +2150,7 @@ tags: {
 # This is redundant with meta charset, but also harmless
 tags: {
   name: "meta"
+  detail: "meta http-equiv=content-type"
   attrs: {
     name: "http-equiv"
     mandatory: true
@@ -2262,9 +2272,30 @@ tags: {
   }
 }
 # <amp-ad>
+# In the AMP Runtime, amp-ad and amp-embed are implemented in the same way,
+# so if you're changing amp-ad consider changing amp-embed as well.
 tags: {
   name: "amp-ad"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/builtins/amp-ad.md"
+  attr_lists: "extended-amp-global"
+  attrs: { name: "alt" }
+  attrs: { name: "src" }
+  attrs: { name: "type" mandatory: true }
+  attrs: { name: "json" }
+  amp_layout: {
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: RESPONSIVE
+    supported_layouts: FILL
+    supported_layouts: NODISPLAY
+  }
+}
+# <amp-embed>
+# In the AMP Runtime, amp-ad and amp-embed are implemented in the same way,
+# so if you're changing amp-embed consider changing amp-ad as well.
+tags: {
+  name: "amp-embed"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/builtins/amp-embed.md"
   attr_lists: "extended-amp-global"
   attrs: { name: "alt" }
   attrs: { name: "src" }
