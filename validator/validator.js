@@ -16,6 +16,7 @@
  */
 goog.provide('amp.validator.CssLengthAndUnit');  // Only for testing.
 goog.provide('amp.validator.Terminal');
+goog.provide('amp.validator.renderErrorMessage');
 goog.provide('amp.validator.renderValidationResult');
 goog.provide('amp.validator.validateString');
 
@@ -1255,7 +1256,7 @@ const ParsedTagSpec = function ParsedTagSpec(
   for (let i = 0; i < attrs.length; ++i) {
     const parsedAttrSpec = new ParsedAttrSpec(attrs[i], i);
     this.attrsById_.push(parsedAttrSpec);
-    this.attrsByName_[parsedAttrSpec.getSpec().name] = parsedAttrSpec;
+    this.attrsByName_.set(parsedAttrSpec.getSpec().name, parsedAttrSpec);
     if (parsedAttrSpec.getSpec().mandatory) {
       this.mandatoryAttrIds_.push(i);
     }
@@ -1264,7 +1265,7 @@ const ParsedTagSpec = function ParsedTagSpec(
     }
     const altNames = parsedAttrSpec.getSpec().alternativeNames;
     for (const altName of altNames) {
-      this.attrsByName_[altName] = parsedAttrSpec;
+      this.attrsByName_.set(altName, parsedAttrSpec);
     }
     if (parsedAttrSpec.getSpec().dispatchKey) {
       this.dispatchKeyAttrSpec_ = i;
@@ -1519,7 +1520,7 @@ ParsedTagSpec.prototype.validateAttributes = function(
       encounteredAttrValue = '';
 
     const encounteredAttrName = encounteredAttrKey.toLowerCase();
-    const parsedSpec = this.attrsByName_[encounteredAttrName];
+    const parsedSpec = this.attrsByName_.get(encounteredAttrName);
     if (parsedSpec === undefined) {
       // For now, we just skip data- attributes in the validator, because
       // our schema doesn't capture which ones would be ok or not. E.g.
@@ -2225,6 +2226,28 @@ function applyFormat(format, error) {
 }
 
 /**
+ * Renders the error message for a single error, regardless of whether
+ * or not it has an associated format.
+ * @param {!amp.validator.ValidationError} error
+ * @return {!string}
+ * @export
+ */
+amp.validator.renderErrorMessage = function(error) {
+  let out = '';
+  const format =
+      parsedValidatorRulesSingleton.getFormatByCode().get(error.code);
+  // A11Y errors are special cased and don't have parameters.
+  if (format !== undefined && error.params.length > 0) {
+    out += applyFormat(format, error);
+  } else {
+    out += error.code;
+    if (error.detail !== undefined)
+      out += ' ' + error.detail;
+  }
+  return out;
+};
+
+/**
  * Renders one line of error output.
  * @param {!string} filenameOrUrl
  * @param {!amp.validator.ValidationError} error
@@ -2233,16 +2256,10 @@ function applyFormat(format, error) {
 function errorLine(filenameOrUrl, error) {
   const line = error.line || 1;
   const col = error.col || 0;
-  let message = error.code + ' ' + error.detail;
-  if (error.params.length > 0) {
-    const format =
-        parsedValidatorRulesSingleton.getFormatByCode().get(error.code);
-    if (format !== undefined) {
-      message = applyFormat(format, error);
-    }
-  }
+
   let errorLine = goog.uri.utils.removeFragment(filenameOrUrl) +
-      ':' + line + ':' + col + ' ' + message;
+      ':' + line + ':' + col + ' ';
+  errorLine += amp.validator.renderErrorMessage(error);
   if (error.specUrl) {
     errorLine += ' (see ' + error.specUrl + ')';
   }
