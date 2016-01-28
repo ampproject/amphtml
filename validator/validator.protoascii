@@ -25,7 +25,7 @@ min_validator_revision_required: 81
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 128
+spec_file_revision: 129
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
 # These rules are just enough to validate the example from the spec.
@@ -2272,9 +2272,30 @@ tags: {
   }
 }
 # <amp-ad>
+# In the AMP Runtime, amp-ad and amp-embed are implemented in the same way,
+# so if you're changing amp-ad consider changing amp-embed as well.
 tags: {
   name: "amp-ad"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/builtins/amp-ad.md"
+  attr_lists: "extended-amp-global"
+  attrs: { name: "alt" }
+  attrs: { name: "src" }
+  attrs: { name: "type" mandatory: true }
+  attrs: { name: "json" }
+  amp_layout: {
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: RESPONSIVE
+    supported_layouts: FILL
+    supported_layouts: NODISPLAY
+  }
+}
+# <amp-embed>
+# In the AMP Runtime, amp-ad and amp-embed are implemented in the same way,
+# so if you're changing amp-embed consider changing amp-ad as well.
+tags: {
+  name: "amp-embed"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/builtins/amp-embed.md"
   attr_lists: "extended-amp-global"
   attrs: { name: "alt" }
   attrs: { name: "src" }
