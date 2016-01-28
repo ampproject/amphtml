@@ -38,6 +38,10 @@ function assertStrictEqual(expected, saw) {
   assert.ok(expected === saw, 'expected: ' + expected + ' saw: ' + saw);
 }
 
+/**
+ * @param {!Array<!parse_css.ErrorToken>} errors
+ * @return {string}
+ */
 function errorsToString(errors) {
   const out = [];
   for (const error of errors) {
@@ -101,10 +105,22 @@ describe('tokenize', () => {
     const css = 'foo { bar: baz; }';
     const errors = [];
     const tokenlist = parse_css.tokenize(css, 1, 0, errors);
-    assertStrictEqual(
-        'IDENT(foo) WS OPEN_CURLY WS IDENT(bar) COLON WS IDENT(baz) ' +
-            'SEMICOLON WS CLOSE_CURLY EOF_TOKEN',
-        tokenlist.join(' '));
+    assertJSONEquals(
+        [
+          {'line': 1, 'col': 0, 'tokenType': 'IDENT', 'value': 'foo'},
+          {'line': 1, 'col': 3, 'tokenType': 'WHITESPACE'},
+          {'line': 1, 'col': 4, 'tokenType': 'OPEN_CURLY'},
+          {'line': 1, 'col': 5, 'tokenType': 'WHITESPACE'},
+          {'line': 1, 'col': 6, 'tokenType': 'IDENT', 'value': 'bar'},
+          {'line': 1, 'col': 9, 'tokenType': 'COLON'},
+          {'line': 1, 'col': 10, 'tokenType': 'WHITESPACE'},
+          {'line': 1, 'col': 11, 'tokenType': 'IDENT', 'value': 'baz'},
+          {'line': 1, 'col': 14, 'tokenType': 'SEMICOLON'},
+          {'line': 1, 'col': 15, 'tokenType': 'WHITESPACE'},
+          {'line': 1, 'col': 16, 'tokenType': 'CLOSE_CURLY'},
+          {'line': 1, 'col': 17, 'tokenType': 'EOF_TOKEN'}
+        ],
+        tokenlist);
     assertStrictEqual(0, errors.length);
   });
 
