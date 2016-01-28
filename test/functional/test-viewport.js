@@ -445,6 +445,7 @@ describe('ViewportBindingNatural', () => {
   let windowMock;
   let binding;
   let windowApi;
+  let documentElement;
   let windowEventHandlers;
 
   beforeEach(() => {
@@ -455,8 +456,14 @@ describe('ViewportBindingNatural', () => {
       windowEventHandlers[eventType] = handler;
     };
     windowApi = new WindowApi();
+    documentElement = {
+      style: {}
+    };
+    windowApi.document = {
+      documentElement: documentElement
+    };
     windowMock = sandbox.mock(windowApi);
-    binding = new ViewportBindingNatural_(windowApi);
+    binding = new ViewportBindingNatural_(windowApi, false);
   });
 
   afterEach(() => {
@@ -465,6 +472,17 @@ describe('ViewportBindingNatural', () => {
     windowMock = null;
     sandbox.restore();
     sandbox = null;
+  });
+
+  it('should NOT override overflow by default', () => {
+    expect(documentElement.style.overflowX).to.be.undefined;
+    expect(documentElement.style.overflowY).to.be.undefined;
+  });
+
+  it('should override overflow when embedded', () => {
+    new ViewportBindingNatural_(windowApi, true);
+    expect(documentElement.style.overflowX).to.equal('hidden');
+    expect(documentElement.style.overflowY).to.be.undefined;
   });
 
   it('should subscribe to scroll and resize events', () => {
@@ -623,10 +641,6 @@ describe('ViewportBindingNaturalIosEmbed', () => {
     expect(windowEventHandlers['resize']).to.not.equal(undefined);
     expect(windowEventHandlers['scroll']).to.equal(undefined);
     expect(bodyEventListeners['scroll']).to.not.equal(undefined);
-  });
-
-  it('should pre-calculate scrollWidth', () => {
-    expect(binding.scrollWidth_).to.equal(777);
   });
 
   it('should always have scrollWidth equal window.innerWidth', () => {

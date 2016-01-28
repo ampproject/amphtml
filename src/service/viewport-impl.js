@@ -540,8 +540,9 @@ export class ViewportBindingNatural_ {
 
   /**
    * @param {!Window} win
+   * @param {boolean} isEmbedded
    */
-  constructor(win) {
+  constructor(win, isEmbedded) {
     /** @const {!Window} */
     this.win = win;
 
@@ -553,6 +554,10 @@ export class ViewportBindingNatural_ {
 
     this.win.addEventListener('scroll', () => this.scrollObservable_.fire());
     this.win.addEventListener('resize', () => this.resizeObservable_.fire());
+
+    if (isEmbedded) {
+      setStyles(this.win.document.documentElement, {overflowX: 'hidden'});
+    }
 
     log.fine(TAG_, 'initialized natural viewport');
   }
@@ -1152,7 +1157,7 @@ function createViewport_(window) {
   } else if (viewer.getViewportType() == 'natural-ios-embed') {
     binding = new ViewportBindingNaturalIosEmbed_(window);
   } else {
-    binding = new ViewportBindingNatural_(window);
+    binding = new ViewportBindingNatural_(window, viewer.isEmbedded());
   }
   return new Viewport(window, binding, viewer);
 }
