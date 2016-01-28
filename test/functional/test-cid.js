@@ -116,7 +116,7 @@ describe('cid', () => {
         'https://cdn.ampproject.org/v/www.DIFFERENT.com/foo/?f=0';
     return compare(
         'e2',
-        'sha384(sha384([1,2,3,0,0,0,0,0,0,0,0,0,0,0,0,15])http://www.DIFFERENT.come2)');
+        'sha384(sha384([1,2,3,0,0,0,0,0,0,0,0,0,0,0,0,15])http://www.different.come2)');
   });
 
   it('should fallback to cookie value on custom domain.', () => {
