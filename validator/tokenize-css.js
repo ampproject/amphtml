@@ -52,6 +52,7 @@ goog.provide('parse_css.StringToken');
 goog.provide('parse_css.StringValuedToken');
 goog.provide('parse_css.SubstringMatchToken');
 goog.provide('parse_css.SuffixMatchToken');
+goog.provide('parse_css.TokenType');
 goog.provide('parse_css.URLToken');
 goog.provide('parse_css.WhitespaceToken');
 goog.provide('parse_css.tokenize');
@@ -982,6 +983,51 @@ Tokenizer.prototype.consumeTheRemnantsOfABadURL = function() {
 };
 
 /**
+ * @enum {string}
+ */
+parse_css.TokenType = {
+  UNKNOWN: 'UNKNOWN',
+  AT_KEYWORD: 'AT_KEYWORD',
+  CDC: 'CDC',  // -->
+  CDO: 'CDO',  // <!--
+  CLOSE_CURLY: 'CLOSE_CURLY',
+  CLOSE_PAREN: 'CLOSE_PAREN',
+  CLOSE_SQUARE: 'CLOSE_SQUARE',
+  COLON: 'COLON',
+  COLUMN: 'COLUMN',  // ||
+  COMMA: 'COMMA',
+  DASH_MATCH: 'DASH_MATCH',  // |=
+  DELIM: 'DELIM',
+  DIMENSION: 'DIMENSION',
+  EOF_TOKEN: 'EOF_TOKEN',  // Can't call this EOF due to symbol conflict in C.
+  ERROR: 'ERROR',
+  FUNCTION_TOKEN: 'FUNCTION_TOKEN',
+  HASH: 'HASH',  // #
+  IDENT: 'IDENT',
+  INCLUDE_MATCH: 'INCLUDE_MATCH',  // ~=
+  NUMBER: 'NUMBER',
+  OPEN_CURLY: 'OPEN_CURLY',
+  OPEN_PAREN: 'OPEN_PAREN',
+  OPEN_SQUARE: 'OPEN_SQUARE',
+  PERCENTAGE: 'PERCENTAGE',
+  PREFIX_MATCH: 'PREFIX_MATCH',  // ^=
+  SEMICOLON: 'SEMICOLON',
+  STRING: 'STRING',
+  SUBSTRING_MATCH: 'SUBSTRING_MATCH',  // *=
+  SUFFIX_MATCH: 'SUFFIX_MATCH',        // $=
+  WHITESPACE: 'WHITESPACE',
+  URL: 'URL',
+
+  // AST nodes produced by the parsing routines.
+  STYLESHEET: 'STYLESHEET',
+  AT_RULE: 'AT_RULE',
+  QUALIFIED_RULE: 'QUALIFIED_RULE',
+  DECLARATION: 'DECLARATION',
+  BLOCK: 'BLOCK',
+  FUNCTION: 'FUNCTION'
+};
+
+/**
  * The abstract superclass for all tokens.
  * @constructor
  */
@@ -992,8 +1038,8 @@ parse_css.CSSParserToken = function() {
   this.col = 0;
 };
 
-/** @type {string} */
-parse_css.CSSParserToken.prototype.tokenType = 'abstract';
+/** @type {parse_css.TokenType} */
+parse_css.CSSParserToken.prototype.tokenType = parse_css.TokenType.UNKNOWN;
 
 /** @return {!Object} */
 parse_css.CSSParserToken.prototype.toJSON = function() {
@@ -1037,8 +1083,8 @@ parse_css.ErrorToken = function(errorType, msg) {
 };
 goog.inherits(parse_css.ErrorToken, parse_css.CSSParserToken);
 
-/** @type {string} */
-parse_css.ErrorToken.prototype.tokenType = 'ERROR';
+/** @type {parse_css.TokenType} */
+parse_css.ErrorToken.prototype.tokenType = parse_css.TokenType.ERROR;
 
 /** @return {string} */
 parse_css.ErrorToken.prototype.toString = function() {
@@ -1064,8 +1110,8 @@ parse_css.WhitespaceToken = function() {
 };
 goog.inherits(parse_css.WhitespaceToken, parse_css.CSSParserToken);
 
-/** @type {string} */
-parse_css.WhitespaceToken.prototype.tokenType = 'WHITESPACE';
+/** @type {parse_css.TokenType} */
+parse_css.WhitespaceToken.prototype.tokenType = parse_css.TokenType.WHITESPACE;
 
 /** @return {string} */
 parse_css.WhitespaceToken.prototype.toString = function() { return 'WS'; };
@@ -1082,8 +1128,8 @@ parse_css.CDOToken = function() {
 };
 goog.inherits(parse_css.CDOToken, parse_css.CSSParserToken);
 
-/** @type {string} */
-parse_css.CDOToken.prototype.tokenType = 'CDO';
+/** @type {parse_css.TokenType} */
+parse_css.CDOToken.prototype.tokenType = parse_css.TokenType.CDO;
 
 /** @return {string} */
 parse_css.CDOToken.prototype.toSource = function() { return '<!--'; };
@@ -1097,8 +1143,8 @@ parse_css.CDCToken = function() {
 };
 goog.inherits(parse_css.CDCToken, parse_css.CSSParserToken);
 
-/** @type {string} */
-parse_css.CDCToken.prototype.tokenType = 'CDC';
+/** @type {parse_css.TokenType} */
+parse_css.CDCToken.prototype.tokenType = parse_css.TokenType.CDC;
 
 /** @return {string} */
 parse_css.CDCToken.prototype.toSource = function() { return '-->'; };
@@ -1112,8 +1158,8 @@ parse_css.ColonToken = function() {
 };
 goog.inherits(parse_css.ColonToken, parse_css.CSSParserToken);
 
-/** @type {string} */
-parse_css.ColonToken.prototype.tokenType = ':';
+/** @type {parse_css.TokenType} */
+parse_css.ColonToken.prototype.tokenType = parse_css.TokenType.COLON;
 
 /**
  * @constructor
@@ -1124,8 +1170,9 @@ parse_css.SemicolonToken = function() {
 };
 goog.inherits(parse_css.SemicolonToken, parse_css.CSSParserToken);
 
-/** @type {string} */
-parse_css.SemicolonToken.prototype.tokenType = ';';
+/** @type {parse_css.TokenType} */
+
+parse_css.SemicolonToken.prototype.tokenType = parse_css.TokenType.SEMICOLON;
 
 /**
  * @constructor
@@ -1136,8 +1183,8 @@ parse_css.CommaToken = function() {
 };
 goog.inherits(parse_css.CommaToken, parse_css.CSSParserToken);
 
-/** @type {string} */
-parse_css.CommaToken.prototype.tokenType = ',';
+/** @type {parse_css.TokenType} */
+parse_css.CommaToken.prototype.tokenType = parse_css.TokenType.COMMA;
 
 /**
  * @constructor
@@ -1163,8 +1210,8 @@ parse_css.OpenCurlyToken = function() {
 };
 goog.inherits(parse_css.OpenCurlyToken, parse_css.GroupingToken);
 
-/** @type {string} */
-parse_css.OpenCurlyToken.prototype.tokenType = '{';
+/** @type {parse_css.TokenType} */
+parse_css.OpenCurlyToken.prototype.tokenType = parse_css.TokenType.OPEN_CURLY;
 
 /**
  * @constructor
@@ -1179,8 +1226,8 @@ parse_css.CloseCurlyToken = function() {
 };
 goog.inherits(parse_css.CloseCurlyToken, parse_css.GroupingToken);
 
-/** @type {string} */
-parse_css.CloseCurlyToken.prototype.tokenType = '}';
+/** @type {parse_css.TokenType} */
+parse_css.CloseCurlyToken.prototype.tokenType = parse_css.TokenType.CLOSE_CURLY;
 
 /**
  * @constructor
@@ -1195,8 +1242,8 @@ parse_css.OpenSquareToken = function() {
 };
 goog.inherits(parse_css.OpenSquareToken, parse_css.GroupingToken);
 
-/** @type {string} */
-parse_css.OpenSquareToken.prototype.tokenType = '[';
+/** @type {parse_css.TokenType} */
+parse_css.OpenSquareToken.prototype.tokenType = parse_css.TokenType.OPEN_SQUARE;
 
 /**
  * @constructor
@@ -1211,8 +1258,9 @@ parse_css.CloseSquareToken = function() {
 };
 goog.inherits(parse_css.CloseSquareToken, parse_css.GroupingToken);
 
-/** @type {string} */
-parse_css.CloseSquareToken.prototype.tokenType = ']';
+/** @type {parse_css.TokenType} */
+parse_css.CloseSquareToken.prototype.tokenType =
+    parse_css.TokenType.CLOSE_SQUARE;
 
 /**
  * @constructor
@@ -1227,8 +1275,8 @@ parse_css.OpenParenToken = function() {
 };
 goog.inherits(parse_css.OpenParenToken, parse_css.GroupingToken);
 
-/** @type {string} */
-parse_css.OpenParenToken.prototype.tokenType = '(';
+/** @type {parse_css.TokenType} */
+parse_css.OpenParenToken.prototype.tokenType = parse_css.TokenType.OPEN_PAREN;
 
 /**
  * @constructor
@@ -1243,8 +1291,8 @@ parse_css.CloseParenToken = function() {
 };
 goog.inherits(parse_css.CloseParenToken, parse_css.GroupingToken);
 
-/** @type {string} */
-parse_css.CloseParenToken.prototype.tokenType = ')';
+/** @type {parse_css.TokenType} */
+parse_css.CloseParenToken.prototype.tokenType = parse_css.TokenType.CLOSE_PAREN;
 
 /**
  * @constructor
@@ -1255,8 +1303,9 @@ parse_css.IncludeMatchToken = function() {
 };
 goog.inherits(parse_css.IncludeMatchToken, parse_css.CSSParserToken);
 
-/** @type {string} */
-parse_css.IncludeMatchToken.prototype.tokenType = '~=';
+/** @type {parse_css.TokenType} */
+parse_css.IncludeMatchToken.prototype.tokenType =
+    parse_css.TokenType.INCLUDE_MATCH;
 
 /**
  * @constructor
@@ -1267,8 +1316,8 @@ parse_css.DashMatchToken = function() {
 };
 goog.inherits(parse_css.DashMatchToken, parse_css.CSSParserToken);
 
-/** @type {string} */
-parse_css.DashMatchToken.prototype.tokenType = '|=';
+/** @type {parse_css.TokenType} */
+parse_css.DashMatchToken.prototype.tokenType = parse_css.TokenType.DASH_MATCH;
 
 /**
  * @constructor
@@ -1279,8 +1328,9 @@ parse_css.PrefixMatchToken = function() {
 };
 goog.inherits(parse_css.PrefixMatchToken, parse_css.CSSParserToken);
 
-/** @type {string} */
-parse_css.PrefixMatchToken.prototype.tokenType = '^=';
+/** @type {parse_css.TokenType} */
+parse_css.PrefixMatchToken.prototype.tokenType =
+    parse_css.TokenType.PREFIX_MATCH;
 
 /**
  * @constructor
@@ -1291,8 +1341,9 @@ parse_css.SuffixMatchToken = function() {
 };
 goog.inherits(parse_css.SuffixMatchToken, parse_css.CSSParserToken);
 
-/** @type {string} */
-parse_css.SuffixMatchToken.prototype.tokenType = '$=';
+/** @type {parse_css.TokenType} */
+parse_css.SuffixMatchToken.prototype.tokenType =
+    parse_css.TokenType.SUFFIX_MATCH;
 
 /**
  * @constructor
@@ -1303,8 +1354,9 @@ parse_css.SubstringMatchToken = function() {
 };
 goog.inherits(parse_css.SubstringMatchToken, parse_css.CSSParserToken);
 
-/** @type {string} */
-parse_css.SubstringMatchToken.prototype.tokenType = '*=';
+/** @type {parse_css.TokenType} */
+parse_css.SubstringMatchToken.prototype.tokenType =
+    parse_css.TokenType.SUBSTRING_MATCH;
 
 /**
  * @constructor
@@ -1315,8 +1367,8 @@ parse_css.ColumnToken = function() {
 };
 goog.inherits(parse_css.ColumnToken, parse_css.CSSParserToken);
 
-/** @type {string} */
-parse_css.ColumnToken.prototype.tokenType = '||';
+/** @type {parse_css.TokenType} */
+parse_css.ColumnToken.prototype.tokenType = parse_css.TokenType.COLUMN;
 
 /**
  * @constructor
@@ -1327,8 +1379,8 @@ parse_css.EOFToken = function() {
 };
 goog.inherits(parse_css.EOFToken, parse_css.CSSParserToken);
 
-/** @type {string} */
-parse_css.EOFToken.prototype.tokenType = 'EOF_TOKEN';
+/** @type {parse_css.TokenType} */
+parse_css.EOFToken.prototype.tokenType = parse_css.TokenType.EOF_TOKEN;
 
 /** @return {string} */
 parse_css.EOFToken.prototype.toSource = function() { return ''; };
@@ -1345,8 +1397,8 @@ parse_css.DelimToken = function(code) {
 };
 goog.inherits(parse_css.DelimToken, parse_css.CSSParserToken);
 
-/** @type {string} */
-parse_css.DelimToken.prototype.tokenType = 'DELIM';
+/** @type {parse_css.TokenType} */
+parse_css.DelimToken.prototype.tokenType = parse_css.TokenType.DELIM;
 
 /** @return {string} */
 parse_css.DelimToken.prototype.toString = function() {
@@ -1407,8 +1459,8 @@ parse_css.IdentToken = function(val) {
 };
 goog.inherits(parse_css.IdentToken, parse_css.StringValuedToken);
 
-/** @type {string} */
-parse_css.IdentToken.prototype.tokenType = 'IDENT';
+/** @type {parse_css.TokenType} */
+parse_css.IdentToken.prototype.tokenType = parse_css.TokenType.IDENT;
 
 /** @return {string} */
 parse_css.IdentToken.prototype.toString = function() {
@@ -1434,8 +1486,9 @@ parse_css.FunctionToken = function(val) {
 };
 goog.inherits(parse_css.FunctionToken, parse_css.StringValuedToken);
 
-/** @type {string} */
-parse_css.FunctionToken.prototype.tokenType = 'FUNCTION_TOKEN';
+/** @type {parse_css.TokenType} */
+parse_css.FunctionToken.prototype.tokenType =
+    parse_css.TokenType.FUNCTION_TOKEN;
 
 /** @return {string} */
 parse_css.FunctionToken.prototype.toString = function() {
@@ -1459,8 +1512,8 @@ parse_css.AtKeywordToken = function(val) {
 };
 goog.inherits(parse_css.AtKeywordToken, parse_css.StringValuedToken);
 
-/** @type {string} */
-parse_css.AtKeywordToken.prototype.tokenType = 'AT-KEYWORD';
+/** @type {parse_css.TokenType} */
+parse_css.AtKeywordToken.prototype.tokenType = parse_css.TokenType.AT_KEYWORD;
 
 /** @return {string} */
 parse_css.AtKeywordToken.prototype.toString = function() {
@@ -1486,8 +1539,8 @@ parse_css.HashToken = function(val) {
 };
 goog.inherits(parse_css.HashToken, parse_css.StringValuedToken);
 
-/** @type {string} */
-parse_css.HashToken.prototype.tokenType = 'HASH';
+/** @type {parse_css.TokenType} */
+parse_css.HashToken.prototype.tokenType = parse_css.TokenType.HASH;
 
 /** @return {string} */
 parse_css.HashToken.prototype.toString = function() {
@@ -1523,8 +1576,8 @@ parse_css.StringToken = function(val) {
 };
 goog.inherits(parse_css.StringToken, parse_css.StringValuedToken);
 
-/** @type {string} */
-parse_css.StringToken.prototype.tokenType = 'STRING';
+/** @type {parse_css.TokenType} */
+parse_css.StringToken.prototype.tokenType = parse_css.TokenType.STRING;
 
 /** @return {string} */
 parse_css.StringToken.prototype.toString = function() {
@@ -1543,8 +1596,8 @@ parse_css.URLToken = function(val) {
 };
 goog.inherits(parse_css.URLToken, parse_css.StringValuedToken);
 
-/** @type {string} */
-parse_css.URLToken.prototype.tokenType = 'URL';
+/** @type {parse_css.TokenType} */
+parse_css.URLToken.prototype.tokenType = parse_css.TokenType.URL;
 
 /** @return {string} */
 parse_css.URLToken.prototype.toString = function() {
@@ -1570,8 +1623,8 @@ parse_css.NumberToken = function() {
 };
 goog.inherits(parse_css.NumberToken, parse_css.CSSParserToken);
 
-/** @type {string} */
-parse_css.NumberToken.prototype.tokenType = 'NUMBER';
+/** @type {parse_css.TokenType} */
+parse_css.NumberToken.prototype.tokenType = parse_css.TokenType.NUMBER;
 
 /** @return {string} */
 parse_css.NumberToken.prototype.toString = function() {
@@ -1607,8 +1660,8 @@ parse_css.PercentageToken = function() {
 };
 goog.inherits(parse_css.PercentageToken, parse_css.CSSParserToken);
 
-/** @type {string} */
-parse_css.PercentageToken.prototype.tokenType = 'PERCENTAGE';
+/** @type {parse_css.TokenType} */
+parse_css.PercentageToken.prototype.tokenType = parse_css.TokenType.PERCENTAGE;
 
 /** @return {string} */
 parse_css.PercentageToken.prototype.toString = function() {
@@ -1644,8 +1697,8 @@ parse_css.DimensionToken = function() {
 };
 goog.inherits(parse_css.DimensionToken, parse_css.CSSParserToken);
 
-/** @type {string} */
-parse_css.DimensionToken.prototype.tokenType = 'DIMENSION';
+/** @type {parse_css.TokenType} */
+parse_css.DimensionToken.prototype.tokenType = parse_css.TokenType.DIMENSION;
 
 /** @return {string} */
 parse_css.DimensionToken.prototype.toString = function() {

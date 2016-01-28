@@ -32,6 +32,7 @@ goog.provide('parse_css.extractASimpleBlock');
 goog.provide('parse_css.parseAStylesheet');
 
 goog.require('goog.asserts');
+goog.require('parse_css.TokenType');
 goog.require('parse_css.tokenize');
 
 /**
@@ -177,8 +178,8 @@ parse_css.CSSParserRule = function() {
 };
 goog.inherits(parse_css.CSSParserRule, parse_css.CSSParserToken);
 
-/** @type {string} */
-parse_css.CSSParserRule.tokenType = 'abstract';
+/** @type {parse_css.TokenType} */
+parse_css.CSSParserRule.tokenType = parse_css.TokenType.UNKNOWN;
 
 /**
  * @param {number=} opt_indent
@@ -201,8 +202,8 @@ parse_css.Stylesheet = function() {
 };
 goog.inherits(parse_css.Stylesheet, parse_css.CSSParserRule);
 
-/** @type {string} */
-parse_css.Stylesheet.prototype.tokenType = 'STYLESHEET';
+/** @type {parse_css.TokenType} */
+parse_css.Stylesheet.prototype.tokenType = parse_css.TokenType.STYLESHEET;
 
 /** @return {!Object} */
 parse_css.Stylesheet.prototype.toJSON = function() {
@@ -230,8 +231,8 @@ parse_css.AtRule = function(name) {
 };
 goog.inherits(parse_css.AtRule, parse_css.CSSParserRule);
 
-/** @type {string} */
-parse_css.AtRule.prototype.tokenType = 'AT_RULE';
+/** @type {parse_css.TokenType} */
+parse_css.AtRule.prototype.tokenType = parse_css.TokenType.AT_RULE;
 
 /** @return {!Object} */
 parse_css.AtRule.prototype.toJSON = function() {
@@ -256,8 +257,9 @@ parse_css.QualifiedRule = function() {
 };
 goog.inherits(parse_css.QualifiedRule, parse_css.CSSParserRule);
 
-/** @type {string} */
-parse_css.QualifiedRule.prototype.tokenType = 'QUALIFIED_RULE';
+/** @type {parse_css.TokenType} */
+parse_css.QualifiedRule.prototype.tokenType =
+    parse_css.TokenType.QUALIFIED_RULE;
 
 /** @return {!Object} */
 parse_css.QualifiedRule.prototype.toJSON = function() {
@@ -283,8 +285,8 @@ parse_css.Declaration = function(name) {
 };
 goog.inherits(parse_css.Declaration, parse_css.CSSParserRule);
 
-/** @type {string} */
-parse_css.Declaration.prototype.tokenType = 'DECLARATION';
+/** @type {parse_css.TokenType} */
+parse_css.Declaration.prototype.tokenType = parse_css.TokenType.DECLARATION;
 
 /** @return {!Object} */
 parse_css.Declaration.prototype.toJSON = function() {
