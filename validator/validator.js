@@ -1170,14 +1170,15 @@ function CalculateLayout(inputLayout, width, height, sizesAttr) {
  * tagspecs as necessary. That is, if it's needed for document scope validation:
  * - Mandatory tags
  * - Unique tags
- * - Tags (identified by their detail) that are required by other tags.
+ * - Tags (identified by their detail or name) that are required by other tags.
  * @param {!amp.validator.TagSpec} tag
- * @param {!goog.structs.Set<string>} detailsToTrack
+ * @param {!goog.structs.Set<string>} detailOrNamesToTrack
  * @return {!boolean}
  */
-function shouldRecordTagspecValidated(tag, detailsToTrack) {
+function shouldRecordTagspecValidated(tag, detailOrNamesToTrack) {
   return tag.mandatory || tag.unique ||
-      tag.detail != null && detailsToTrack.contains(tag.detail);
+      getDetailOrName(tag) != null &&
+      detailOrNamesToTrack.contains(getDetailOrName(tag));
 }
 
 
@@ -1186,14 +1187,14 @@ function shouldRecordTagspecValidated(tag, detailsToTrack) {
  * which is unique within its context, the ParsedValidatorRules.
  * @param {!string} templateSpecUrl
  * @param {!goog.structs.Map<string, !amp.validator.AttrList>} attrListsByName
- * @param {!goog.structs.Map<string, number>} tagspecIdsByDetail
+ * @param {!goog.structs.Map<string, number>} tagspecIdsByDetailOrName
  * @param {!boolean} shouldRecordTagspecValidated
  * @param {!amp.validator.TagSpec} tagSpec
  * @param {number} tagId
  * @constructor
  */
 const ParsedTagSpec = function ParsedTagSpec(
-    templateSpecUrl, attrListsByName, tagspecIdsByDetail,
+    templateSpecUrl, attrListsByName, tagspecIdsByDetailOrName,
     shouldRecordTagspecValidated, tagSpec, tagId) {
   /**
    * @type {!amp.validator.TagSpec}
@@ -1271,8 +1272,8 @@ const ParsedTagSpec = function ParsedTagSpec(
   }
   this.mandatoryOneofs_ = sortAndUniquify(this.mandatoryOneofs_);
 
-  for (const detail of tagSpec.alsoRequires) {
-    this.alsoRequires_.push(tagspecIdsByDetail.get(detail));
+  for (const detailOrName of tagSpec.alsoRequires) {
+    this.alsoRequires_.push(tagspecIdsByDetailOrName.get(detailOrName));
   }
 };
 
@@ -1779,17 +1780,19 @@ const ParsedValidatorRules = function ParsedValidatorRules() {
   }
 
   /** @type {!goog.structs.Map<string, number>} */
-  const tagspecIdsByDetail = new goog.structs.Map();
+  const tagspecIdsByDetailOrName = new goog.structs.Map();
   /** @type {!goog.structs.Set<string>} */
-  const detailsToTrack = new goog.structs.Set();
+  const detailOrNamesToTrack = new goog.structs.Set();
   for (let i = 0; i < rules.tags.length; ++i) {
     const tag = rules.tags[i];
-    if (tag.detail != null) {
-      goog.asserts.assert(!tagspecIdsByDetail.containsKey(tag.detail));
-      tagspecIdsByDetail.set(tag.detail, i);
-      for (const alsoRequires of tag.alsoRequires) {
-        detailsToTrack.add(alsoRequires);
-      }
+    goog.asserts.assert(
+        !tagspecIdsByDetailOrName.containsKey(getDetailOrName(tag)));
+    tagspecIdsByDetailOrName.set(getDetailOrName(tag), i);
+    if (tag.alsoRequires.length > 0) {
+      detailOrNamesToTrack.add(getDetailOrName(tag));
+    }
+    for (const alsoRequires of tag.alsoRequires) {
+      detailOrNamesToTrack.add(alsoRequires);
     }
   }
 
@@ -1797,8 +1800,8 @@ const ParsedValidatorRules = function ParsedValidatorRules() {
     const tag = rules.tags[i];
     goog.asserts.assert(rules.templateSpecUrl != null);
     const parsedTagSpec = new ParsedTagSpec(
-        rules.templateSpecUrl, attrListsByName, tagspecIdsByDetail,
-        shouldRecordTagspecValidated(tag, detailsToTrack), tag, i);
+        rules.templateSpecUrl, attrListsByName, tagspecIdsByDetailOrName,
+        shouldRecordTagspecValidated(tag, detailOrNamesToTrack), tag, i);
     this.tagSpecById_.push(parsedTagSpec);
     goog.asserts.assert(tag.name !== null);
     if (!this.tagSpecByTagName_.containsKey(tag.name)) {
