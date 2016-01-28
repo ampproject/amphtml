@@ -20,12 +20,12 @@
 # in production from crashing. This id is not relevant to validator.js
 # because thus far, engine (validator.js) and spec file (validator.protoascii)
 # are always released together.
-min_validator_revision_required: 77
+min_validator_revision_required: 80
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 126
+spec_file_revision: 127
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
 # These rules are just enough to validate the example from the spec.
@@ -1581,9 +1581,7 @@ tags: { name: "button" }
 # 4.11 Scripting
 # 4.11.1 The script element
 # Only the amphtml script, custom extensions and the LD/JSON description are
-# allowed. The AMP Engine is the first in this specfile so that the
-# 'development' attribute shows up as the disallowed attribute instead of
-# 'src' for a development flagged AMP engine script.
+# allowed.
 tags: {
   name: "script"
   mandatory: true
@@ -1601,12 +1599,6 @@ tags: {
     name: "async"
     value: ""
     mandatory: true
-  }
-  attrs: {
-    name: "development"
-    value: ""
-    dev_mode_enabled: "please remove for prod"
-    dev_mode_enabled_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#amp-runtime"
   }
 }
 tags: {

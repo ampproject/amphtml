@@ -1578,16 +1578,6 @@ ParsedTagSpec.prototype.validateAttributes = function(
           parsedSpec.getSpec().deprecationUrl, resultForAttempt);
       // Deprecation is only a warning, so we don't return.
     }
-    if (parsedSpec.getSpec().devModeEnabled !== null) {
-      context.addError(
-          amp.validator.ValidationError.Code.DEV_MODE_ENABLED,
-          /* params */ [encounteredAttrName, getDetailOrName(this.spec_)],
-          parsedSpec.getSpec().devModeEnabledUrl,
-          resultForAttempt);
-      // Enabling the developer attribute is now always an error, so we
-      // return.
-      return;
-    }
     if (!hasTemplateAncestor ||
         !this.valueHasTemplateSyntax(encounteredAttrValue)) {
       // The value, value_regex, and value_properties fields are
