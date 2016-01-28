@@ -241,6 +241,11 @@ if the browser doesn't support HTML5 audio, for example:
   <source type="audio/ogg" src="foo.ogg">
 </amp-audio>
 ```
+# Add Border Box Sizing
+
+Included in the base amp css is a class of `amp-border-box` that will set `box-sizing: border-box` on all elements 
+nested under that class. You can set this on your `html` tag to provide your page with default `border-box` sizing. 
+Individual elements can override this by beating or matching the CSS specificity of `.amp-border-box`. 
 # Count user page views
 
 Count user page views
