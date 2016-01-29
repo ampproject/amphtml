@@ -15,13 +15,20 @@
  */
 
 /**
+ * Horizontal scrolling interferes with embedded scenarios and predominantly
+ * the result of the non-responsive design.
+ */
+html, body {
+  overflow-x: hidden !important;
+}
+
+/**
  * Margin:0 is currently needed for iOS viewer embeds.
  * See:
  * https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md
  * and {@link ViewportBindingNaturalIosEmbed_} for more info.
  */
 body {
-  /* Undoes mandatory opacity: 0 in doc. */
   margin: 0 !important;
 }
 

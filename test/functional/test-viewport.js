@@ -463,7 +463,7 @@ describe('ViewportBindingNatural', () => {
       documentElement: documentElement
     };
     windowMock = sandbox.mock(windowApi);
-    binding = new ViewportBindingNatural_(windowApi, false);
+    binding = new ViewportBindingNatural_(windowApi);
   });
 
   afterEach(() => {
@@ -475,13 +475,6 @@ describe('ViewportBindingNatural', () => {
   });
 
   it('should NOT override overflow by default', () => {
-    expect(documentElement.style.overflowX).to.be.undefined;
-    expect(documentElement.style.overflowY).to.be.undefined;
-  });
-
-  it('should override overflow when embedded', () => {
-    new ViewportBindingNatural_(windowApi, true);
-    expect(documentElement.style.overflowX).to.equal('hidden');
     expect(documentElement.style.overflowY).to.be.undefined;
   });
 
@@ -651,10 +644,8 @@ describe('ViewportBindingNaturalIosEmbed', () => {
     const documentElement = windowApi.document.documentElement;
     const body = windowApi.document.body;
     expect(documentElement.style.overflowY).to.equal('auto');
-    expect(documentElement.style.overflowX).to.equal('hidden');
     expect(documentElement.style.webkitOverflowScrolling).to.equal('touch');
     expect(body.style.overflowY).to.equal('auto');
-    expect(body.style.overflowX).to.equal('hidden');
     expect(body.style.webkitOverflowScrolling).to.equal('touch');
     expect(body.style.position).to.equal('absolute');
     expect(body.style.top).to.equal(0);
