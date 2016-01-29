@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {sanitizeFormattingHtml, sanitizeHtml} from '../../src/sanitizer';
+import {resolveUrlAttr, sanitizeFormattingHtml, sanitizeHtml} from
+    '../../src/sanitizer';
 
 
 describe('sanitizeHtml', () => {
@@ -73,8 +74,8 @@ describe('sanitizeHtml', () => {
   });
 
   it('should output "href" attribute', () => {
-    expect(sanitizeHtml('a<a href="http://acme.com">b</a>')).to.be.equal(
-        'a<a href="http://acme.com">b</a>');
+    expect(sanitizeHtml('a<a href="http://acme.com/">b</a>')).to.be.equal(
+        'a<a href="http://acme.com/">b</a>');
   });
 
   it('sanitizes out the "target" attribute', () => {
@@ -123,6 +124,91 @@ describe('sanitizeHtml', () => {
     expect(sanitizeHtml('a<dialog>b<img>d</dialog>c')).to.be.equal('ac');
     expect(sanitizeHtml('<div class="c" src="d">b</div>')).to.be
         .equal('<div class="c" src="">b</div>');
+  });
+});
+
+
+describe('resolveUrlAttr', () => {
+
+  it('should be called by sanitizer', () => {
+    expect(sanitizeHtml('<a href="/path"></a>')).to.match(/http/);
+    expect(sanitizeHtml('<amp-img src="/path"></amp-img>')).to.match(/http/);
+    expect(sanitizeHtml('<amp-img srcset="/path"></amp-img>')).to.match(/http/);
+  });
+
+  it('should resolve non-hash href', () => {
+    expect(resolveUrlAttr('a', 'href',
+        '/doc2',
+        'http://acme.org/doc1'))
+        .to.equal('http://acme.org/doc2');
+    expect(resolveUrlAttr('a', 'href',
+        '/doc2',
+        'https://cdn.ampproject.org/c/acme.org/doc1'))
+        .to.equal('http://acme.org/doc2');
+    expect(resolveUrlAttr('a', 'href',
+        'http://non-acme.org/doc2',
+        'http://acme.org/doc1'))
+        .to.equal('http://non-acme.org/doc2');
+  });
+
+  it('should ignore hash URLs', () => {
+    expect(resolveUrlAttr('a', 'href',
+        '#hash1',
+        'http://acme.org/doc1'))
+        .to.equal('#hash1');
+  });
+
+  it('should resolve src', () => {
+    expect(resolveUrlAttr('amp-video', 'src',
+        '/video1',
+        'http://acme.org/doc1'))
+        .to.equal('http://acme.org/video1');
+    expect(resolveUrlAttr('amp-video', 'src',
+        '/video1',
+        'https://cdn.ampproject.org/c/acme.org/doc1'))
+        .to.equal('http://acme.org/video1');
+    expect(resolveUrlAttr('amp-video', 'src',
+        'http://non-acme.org/video1',
+        'http://acme.org/doc1'))
+        .to.equal('http://non-acme.org/video1');
+  });
+
+  it('should rewrite image http(s) src', () => {
+    expect(resolveUrlAttr('amp-img', 'src',
+        '/image1?a=b#h1',
+        'https://cdn.ampproject.org/c/acme.org/doc1'))
+        .to.equal('https://cdn.ampproject.org/i/acme.org/image1?a=b#h1');
+    expect(resolveUrlAttr('amp-img', 'src',
+        'https://acme.org/image1?a=b#h1',
+        'https://cdn.ampproject.org/c/acme.org/doc1'))
+        .to.equal('https://cdn.ampproject.org/i/s/acme.org/image1?a=b#h1');
+  });
+
+  it('should rewrite image http(s) srcset', () => {
+    expect(resolveUrlAttr('amp-img', 'srcset',
+        '/image2?a=b#h1 2x, /image1?a=b#h1 1x',
+        'https://cdn.ampproject.org/c/acme.org/doc1'))
+        .to.equal('https://cdn.ampproject.org/i/acme.org/image2?a=b#h1 2x, ' +
+            'https://cdn.ampproject.org/i/acme.org/image1?a=b#h1 1x');
+    expect(resolveUrlAttr('amp-img', 'srcset',
+        'https://acme.org/image2?a=b#h1 2x, /image1?a=b#h1 1x',
+        'https://cdn.ampproject.org/c/acme.org/doc1'))
+        .to.equal('https://cdn.ampproject.org/i/s/acme.org/image2?a=b#h1 2x, ' +
+            'https://cdn.ampproject.org/i/acme.org/image1?a=b#h1 1x');
+  });
+
+  it('should NOT rewrite image http(s) src when not on proxy', () => {
+    expect(resolveUrlAttr('amp-img', 'src',
+        '/image1',
+        'http://acme.org/doc1'))
+        .to.equal('http://acme.org/image1');
+  });
+
+  it('should NOT rewrite image data src', () => {
+    expect(resolveUrlAttr('amp-img', 'src',
+        'data:12345',
+        'https://cdn.ampproject.org/c/acme.org/doc1'))
+        .to.equal('data:12345');
   });
 });
 
