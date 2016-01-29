@@ -17,37 +17,54 @@
 import {createFixtureIframe, pollForLayout, expectBodyToBecomeVisible} from
     '../../testing/iframe.js';
 
-describe('Rendering of released components', () => {
-  let fixture;
-  beforeEach(() => {
-    return createFixtureIframe('test/fixtures/released.html', 3000)
-      .then(f => {
-        fixture = f;
-      });
-  });
-
-  // There is really weird behavior when running this test in FF in saucelabs.
-  // It never renders the ad, even though it appears to work when looking
-  // at the rendering. The test passes when running locally in FF.
-  it.skipOnFirefox('all components should get loaded', function() {
-    this.timeout(15000);
-    return pollForLayout(fixture.win, 13, 10000).then(() => {
-      expect(fixture.doc.querySelectorAll('.-amp-element')).to.have.length(15);
-      expect(fixture.doc.querySelectorAll('.-amp-layout')).to.have.length(13);
-      expect(fixture.doc.querySelectorAll('.-amp-error')).to.have.length(0);
-    }).then(() => {
-      return expectBodyToBecomeVisible(fixture.win);
-    });
-  });
-
-  it('sanity for Firefox while we skip above', function() {
-    this.timeout(15000);
-    // Test this only in firefox.
-    if (!navigator.userAgent.match(/Firefox/)) {
-      return;
-    }
-    return pollForLayout(fixture.win, 11, 10000).then(() => {
-      return expectBodyToBecomeVisible(fixture.win);
-    });
-  });
+describe('released components: ', function() {
+  runTest.call(this, false);
 });
+
+describe('released components with polyfills: ', function() {
+  runTest.call(this, true);
+});
+
+function runTest(shouldKillPolyfillableApis) {
+  describe('Rendering of released components', function() {
+    let fixture;
+    beforeEach(() => {
+      return createFixtureIframe('test/fixtures/released.html', 3000, win => {
+        if (shouldKillPolyfillableApis) {
+          win.Promise = undefined;
+        }
+      })
+        .then(f => {
+          fixture = f;
+        });
+    });
+
+    // There is really weird behavior when running this test in FF in
+    // saucelabs.
+    // It never renders the ad, even though it appears to work when looking
+    // at the rendering. The test passes when running locally in FF.
+    it.skipOnFirefox('all components should get loaded', function() {
+      this.timeout(15000);
+      return pollForLayout(fixture.win, 13, 10000).then(() => {
+        expect(fixture.doc.querySelectorAll('.-amp-element'))
+            .to.have.length(15);
+        expect(fixture.doc.querySelectorAll('.-amp-layout'))
+            .to.have.length(13);
+        expect(fixture.doc.querySelectorAll('.-amp-error')).to.have.length(0);
+      }).then(() => {
+        return expectBodyToBecomeVisible(fixture.win);
+      });
+    });
+
+    it('sanity for Firefox while we skip above', function() {
+      this.timeout(15000);
+      // Test this only in firefox.
+      if (!navigator.userAgent.match(/Firefox/)) {
+        return;
+      }
+      return pollForLayout(fixture.win, 11, 10000).then(() => {
+        return expectBodyToBecomeVisible(fixture.win);
+      });
+    });
+  });
+}
