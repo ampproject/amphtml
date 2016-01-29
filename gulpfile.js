@@ -28,8 +28,10 @@ var file = require('gulp-file');
 var fs = require('fs-extra');
 var gulp = require('gulp-help')(require('gulp'));
 var gulpWatch = require('gulp-watch');
+var includePaths = require('rollup-plugin-includepaths');
 var lazypipe = require('lazypipe');
 var minimist = require('minimist');
+var nodeResolve = require('rollup-plugin-node-resolve');
 var postcss = require('postcss');
 var rename = require('gulp-rename');
 var replace = require('gulp-replace');
@@ -451,33 +453,40 @@ function compileJs(srcDir, srcFilename, destDir, options) {
 
   function rebundle() {
     activeBundleOperationCount++;
+    console.log('src here', srcDir + srcFilename);
     gulp.src(srcDir + srcFilename)
       .pipe(rollup({
         sourceMap: true,
-        format: 'iife',
-        globals: {
-          'document-register-element/build/document-register-element.max': 'registerElement'
-        },
         plugins: [
-          babel({
-            runtimeHelpers: true,
-            exclude: 'node_modules/**'
+          nodeResolve({
+            jsnext: true,
+            main: true,
+          }),
+          includePaths({
+            include: {},
+            paths: ['third_party', 'node_modules/document-register-element'],
+            extensions: ['.js']
           }),
           commonjs({
+            namedExports: {
+              'node_modules/promise-pjs/promise.js': ['Promise'],
+            },
             include: [
-              'node_modules/**',
-              'document-register-element/**',
-              './third_party/mustache/**',
-              './extensions/amp-access/0.1/access-expr-impl.js'
+              'node_modules/**'
             ]
-          })
+          }),
+          babel({
+            //runtimeHelpers: true,
+            exclude: 'node_modules/**'
+          }),
+          uglify({ preserveComments: true })
         ]
       }))
       .on('error', function(err) { console.error(err); this.emit('end'); })
       .pipe(lazybuild())
       .pipe(rename(options.toName || srcFilename))
       .pipe(lazywrite())
-      .on('end', function() {
+      .on('end', function(err) {
         activeBundleOperationCount--;
         if (err instanceof SyntaxError) {
           console.error(util.colors.red('Syntax error:', err.message));
@@ -499,28 +508,18 @@ function compileJs(srcDir, srcFilename, destDir, options) {
   }
 
   function minify() {
-    gulp.src(srcDir + srcFilename)
-      .pipe(rollup({
-        sourceMap: true,
-        format: 'iife',
-        globals: {
-        },
-        plugins: [
-          babel({
-            runtimeHelpers: true,
-            exclude: 'node_modules/**'
-          }),
-          commonjs({
-            include: [
-              'node_modules/**',
-              'document-register-element/**',
-              './third_party/mustache/**',
-              './extensions/amp-access/0.1/access-expr-impl.js'
-            ]
-          }),
-          uglify({ preserveComments: true })
-        ]
-      }))
+    console.log('Minifying ' + srcFilename);
+    closureCompile(srcDir + srcFilename, destDir, options.minifiedName,
+        options)
+        .then(function() {
+          fs.writeFileSync(destDir + '/version.txt', internalRuntimeVersion);
+          if (options.latestName) {
+            fs.copySync(
+                destDir + '/' + options.minifiedName,
+                destDir + '/' + options.latestName);
+          }
+        });
+  }
 
   if (options.minify) {
     minify();

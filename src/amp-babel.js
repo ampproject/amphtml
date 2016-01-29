@@ -17,4 +17,5 @@
 // Entry point into AMP for compilation with babel. Just loads amp.js and
 // Babel's helpers.
 
+import '../third_party/babel/custom-babel-helpers';
 import './amp';
