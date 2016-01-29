@@ -481,6 +481,24 @@ describe('amp-analytics', function() {
     });
   });
 
+  it('updates requestCount on each request', () => {
+    const analytics = getAnalyticsTag({
+      'host': 'example.com',
+      'requests': {
+        'pageview1': '/test1=${requestCount}',
+        'pageview2': '/test2=${requestCount}'
+      },
+      'triggers': [
+        {'on': 'visible', 'request': 'pageview1'},
+        {'on': 'visible', 'request': 'pageview2'}
+      ]});
+    analytics.layoutCallback().then(() => {
+      expect(sendRequestSpy.calledTwice).to.be.true;
+      expect(sendRequestSpy.args[0][0]).to.equal('https://example.com/test1=1');
+      expect(sendRequestSpy.args[1][0]).to.equal('https://example.com/test2=2');
+    });
+  });
+
   describe('data-consent-notification-id', () => {
 
     it('should resume fetch when consent is given', () => {

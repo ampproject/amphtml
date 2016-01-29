@@ -193,12 +193,15 @@ export class AmpAnalytics extends AMP.BaseElement {
           'parsed. Is it in a valid JSON format?', er);
     }
 
-    const config = {};
+    // Initialize config with analytics related vars.
+    const config = {
+      'vars': {
+        'requestCount': 0
+      }
+    };
     const defaultConfig = this.predefinedConfig_['default'] || {};
     const typeConfig = this.predefinedConfig_[
       this.element.getAttribute('type')] || {};
-
-    config['vars'] = config['vars'] || {};
 
     this.mergeObjects_(defaultConfig, config);
     this.mergeObjects_(typeConfig, config);
@@ -284,6 +287,7 @@ export class AmpAnalytics extends AMP.BaseElement {
           (this.config_['vars'] && this.config_['vars'][name]) || '');
       return val + argList;
     });
+    this.config_['vars']['requestCount']++;
 
     // For consistentcy with amp-pixel we also expand any url replacements.
     urlReplacementsFor(this.getWin()).expand(request).then(
