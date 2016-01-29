@@ -108,7 +108,7 @@ function executeAfterWriteScript(win, fn) {
  * @param {string} src
  */
 export function validateSrcPrefix(prefix, src) {
-  if (src.indexOf(prefix) !== 0) {
+  if (src && src.indexOf(prefix) !== 0) {
     throw new Error('Invalid src ' + src);
   }
 }
@@ -119,7 +119,7 @@ export function validateSrcPrefix(prefix, src) {
  * @param {string} src
  */
 export function validateSrcContains(string, src) {
-  if (src.indexOf(string) === -1) {
+  if (src && src.indexOf(string) === -1) {
     throw new Error('Invalid src ' + src);
   }
 }

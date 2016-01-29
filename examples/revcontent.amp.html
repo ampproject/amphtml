@@ -1,0 +1,35 @@
+<!doctype html>
+<html amp lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Revcontent + AMP</title>
+    <link rel="canonical" href="http://amp.localhost/examples/revcontent.amp.html" />
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+    <style amp-custom>
+        amp-ad {
+            max-width: 500px;
+        }
+        .fixed {
+            position: fixed;
+            top: 0;
+            right: 0;
+        }
+        .red {
+            background-color: red;
+        }
+    </style>
+    <style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
+    <!-- <script async src="https://cdn.ampproject.org/v0.js"></script> -->
+    <script async src="/dist/amp.js"></script>
+</head>
+<body>
+<h1>RevContent + AMP</h1>
+
+<amp-ad width=300 height=250
+        type="revcontent"
+        data-id="30">
+
+</amp-ad>
+
+</body>
+</html>
