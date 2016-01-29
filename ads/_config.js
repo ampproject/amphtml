@@ -43,3 +43,13 @@ export const adPreconnect = {
     'https://tpc.googlesyndication.com',
   ],
 };
+
+/**
+ * The externalCidScope used to provide CIDs to ads of the given type.
+ *
+ * @const {!Object<string, string>}
+ */
+export const clientIdScope = {
+  // Add a mapping like
+  // adNetworkType: 'cidScope' here.
+};

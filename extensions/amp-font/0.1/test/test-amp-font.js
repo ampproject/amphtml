@@ -25,17 +25,14 @@ adopt(window);
 describe('amp-font', function() {
 
   let sandbox;
-  let setupLoadSuccessSpy;
-  let setupLoadFailureSpy;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
   });
 
   afterEach(() => {
-    restoreSpy(setupLoadSuccessSpy);
-    restoreSpy(setupLoadFailureSpy);
-    restoreSpy(sandbox);
+    sandbox.restore();
+    sandbox = null;
   });
 
   function getAmpFontIframe() {
@@ -56,14 +53,8 @@ describe('amp-font', function() {
     });
   }
 
-  function restoreSpy(spy) {
-    if (spy) {
-      spy.restore();
-    }
-  }
-
   it('should timeout while loading custom font', function(done) {
-    setupLoadFailureSpy = sinon.stub(FontLoader.prototype, 'load')
+    sandbox.stub(FontLoader.prototype, 'load')
         .returns(Promise.reject('mock rejection'));
     return getAmpFontIframe().then(iframe => {
       expect(iframe.doc.documentElement)
@@ -75,8 +66,7 @@ describe('amp-font', function() {
   });
 
   it('should load custom font', function(done) {
-    setupLoadSuccessSpy =
-        sinon.stub(FontLoader.prototype, 'load').returns(Promise.resolve());
+    sandbox.stub(FontLoader.prototype, 'load').returns(Promise.resolve());
     return getAmpFontIframe().then(iframe => {
       expect(iframe.doc.documentElement)
           .to.have.class('comic-amp-font-loaded');

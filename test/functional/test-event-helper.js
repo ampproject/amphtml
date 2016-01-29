@@ -28,13 +28,14 @@ describe('EventHelper', () => {
   }
 
   let sandbox;
+  let clock;
   let element;
   let loadObservable;
   let errorObservable;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    sandbox.useFakeTimers();
+    clock = sandbox.useFakeTimers();
     loadObservable = new Observable();
     errorObservable = new Observable();
     element = {
@@ -69,6 +70,7 @@ describe('EventHelper', () => {
     loadObservable = null;
     errorObservable = null;
     element = null;
+    clock = null;
     sandbox.restore();
     sandbox = null;
   });
@@ -152,7 +154,7 @@ describe('EventHelper', () => {
     const event = getEvent('load');
     const promise = expect(listenOncePromise(element, 'load', false, 100))
       .to.eventually.become(event);
-    sandbox.clock.tick(99);
+    clock.tick(99);
     loadObservable.fire(event);
     return promise;
   });
@@ -160,7 +162,7 @@ describe('EventHelper', () => {
   it('listenOncePromise - timeout', () => {
     const promise = expect(listenOncePromise(element, 'load', false, 100))
       .to.eventually.be.rejectedWith('timeout');
-    sandbox.clock.tick(101);
+    clock.tick(101);
     return promise;
   });
 

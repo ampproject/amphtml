@@ -40,11 +40,16 @@ export const ANALYTICS_CONFIG = {
       'scrollWidth': 'SCROLL_WIDTH',
       'scrollHeight': 'SCROLL_HEIGHT',
       'screenWidth': 'SCREEN_WIDTH',
-      'screenHeight': 'SCREEN_HEIGHT'
-      // Vars that GA can use: documentEncoding, userLanguage
+      'screenHeight': 'SCREEN_HEIGHT',
+      'pageLoadTime': 'PAGE_LOAD_TIME',
+      'domainLookupTime': 'DOMAIN_LOOKUP_TIME',
+      'tcpConnectTime': 'TCP_CONNECT_TIME',
+      'serverResponseTime': 'SERVER_RESPONSE_TIME',
+      'pageDownloadTime': 'PAGE_DOWNLOAD_TIME',
+      'redirectTime': 'REDIRECT_TIME',
+      'domInteractiveTime': 'DOM_INTERACTIVE_TIME',
+      'contentLoadTime': 'CONTENT_LOAD_TIME'
     }
-    // TODO(btownsend, #871): Add a generic hit format to make custom analytics
-    // easier.
   },
 
   'googleanalytics': {
@@ -54,9 +59,10 @@ export const ANALYTICS_CONFIG = {
     },
     'requests': {
       'host': 'https://www.google-analytics.com',
-      'basePrefix': 'v=1&_v=a0&aip=true&_s=${hitCount}&dr=${documentReferrer}' +
+      'basePrefix': 'v=1&_v=a0&aip=true&_s=${requestCount}' +
           'dt=${title}&sr=${screenWidth}x${screenHeight}&_utmht=${timestamp}&' +
-          'jid=&cid=${clientId(_ga)}&tid=${account}&dl=${documentLocation}',
+          'jid=&cid=${clientId(_ga)}&tid=${account}&dl=${documentLocation}&' +
+          'dr=${documentReferrer}',
       'baseSuffix': '&a=${pageViewId}&z=${random}',
       'pageview': '${host}/r/collect?${basePrefix}&t=pageview&' +
           '_r=1${baseSuffix}',
@@ -65,7 +71,11 @@ export const ANALYTICS_CONFIG = {
           'ev=${eventValue}${baseSuffix}',
       'social': '${host}/collect?${basePrefix}&t=social&' +
           'sa=${socialAction}&sn=${socialNetwork}&st=${socialTarget}' +
-          '${baseSuffix}'
+          '${baseSuffix}',
+      'timing': '${host}/collect?${basePrefix}&t=timing&plt=${pageLoadTime}&' +
+          'dns=${domainLookupTime}&tcp=${tcpConnectTime}&rrt=${redirectTime}&' +
+          'srt=${serverResponseTime}&pdt=${pageDownloadTime}&' +
+          'clt=${contentLoadTime}&dit=${domInteractiveTime}${baseSuffix}'
     },
     'optout': '_gaUserPrefs.ioo'
   }

@@ -66,6 +66,7 @@ function getFrameAttributes(parentWindow, element, opt_type) {
     referrer: parentWindow.document.referrer,
     canonicalUrl: docInfo.canonicalUrl,
     pageViewId: docInfo.pageViewId,
+    clientId: element.getAttribute('ampcid'),
     location: {
       href: locationHref
     },

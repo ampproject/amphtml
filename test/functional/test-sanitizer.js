@@ -77,6 +77,14 @@ describe('sanitizeHtml', () => {
         'a<a href="http://acme.com">b</a>');
   });
 
+  it('sanitizes out the "target" attribute', () => {
+    // TODO(dvoytenko, #1572): Confirm if the target actually needs to be
+    // sanitized.
+    // See https://github.com/google/caja/issues/1991.
+    expect(sanitizeHtml('a<a target="_blank">b</a>')).to.be.equal(
+        'a<a target="">b</a>');
+  });
+
   it('should NOT output security-sensitive attributes', () => {
     expect(sanitizeHtml('a<a onclick="alert">b</a>')).to.be.equal('a<a>b</a>');
     expect(sanitizeHtml('a<a style="color: red;">b</a>')).to.be.equal(

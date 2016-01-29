@@ -64,7 +64,6 @@ describe('toggleExperiment', () => {
   });
 
   afterEach(() => {
-    clock.restore();
     clock = null;
     sandbox.restore();
     sandbox = null;

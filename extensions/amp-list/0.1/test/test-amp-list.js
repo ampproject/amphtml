@@ -54,15 +54,12 @@ describe('amp-list component', () => {
   afterEach(() => {
     document.body.removeChild(element);
     templatesMock.verify();
-    templatesMock.restore();
-    templatesMock = null;
     xhrMock.verify();
-    xhrMock.restore();
-    xhrMock = null;
     listMock.verify();
-    listMock.restore();
-    listMock = null;
     sandbox.restore();
+    templatesMock = null;
+    xhrMock = null;
+    listMock = null;
     sandbox = null;
   });
 

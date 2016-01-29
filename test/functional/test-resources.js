@@ -34,7 +34,6 @@ describe('Resources', () => {
 
   afterEach(() => {
     resources = null;
-    clock.restore();
     clock = null;
     sandbox.restore();
     sandbox = null;
@@ -245,14 +244,12 @@ describe('Resources discoverWork', () => {
   }
 
   let sandbox;
-  let clock;
   let viewportMock;
   let resources;
   let resource1, resource2;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    clock = sandbox.useFakeTimers();
     resources = new Resources(window);
     viewportMock = sandbox.mock(resources.viewport_);
 
@@ -268,8 +265,6 @@ describe('Resources discoverWork', () => {
     viewportMock.verify();
     viewportMock = null;
     resources = null;
-    clock.restore();
-    clock = null;
     sandbox.restore();
     sandbox = null;
   });
@@ -442,10 +437,8 @@ describe('Resources changeHeight', () => {
 
   afterEach(() => {
     viewportMock.verify();
-    viewportMock.restore();
     viewportMock = null;
     resources = null;
-    clock.restore();
     clock = null;
     sandbox.restore();
     sandbox = null;
@@ -512,11 +505,6 @@ describe('Resources changeHeight', () => {
       resource1.layoutBox_ = {top: 10, left: 0, right: 100, bottom: 50,
           height: 50};
       vsyncSpy = sandbox.stub(resources.vsync_, 'run');
-    });
-
-    afterEach(() => {
-      vsyncSpy.reset();
-      vsyncSpy.restore();
     });
 
     it('should NOT change height and calls overflowCallback', () => {
@@ -767,7 +755,6 @@ describe('Resources mutateElement', () => {
   }
 
   let sandbox;
-  let clock;
   let viewportMock;
   let resources;
   let resource1, resource2;
@@ -777,7 +764,6 @@ describe('Resources mutateElement', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    clock = sandbox.useFakeTimers();
     resources = new Resources(window);
     viewportMock = sandbox.mock(resources.viewport_);
     resources.vsync_ = {
@@ -821,11 +807,8 @@ describe('Resources mutateElement', () => {
 
   afterEach(() => {
     viewportMock.verify();
-    viewportMock.restore();
     viewportMock = null;
     resources = null;
-    clock.restore();
-    clock = null;
     sandbox.restore();
     sandbox = null;
   });
@@ -893,7 +876,6 @@ describe('Resources.TaskQueue', () => {
   });
 
   afterEach(() => {
-    clock.restore();
     clock = null;
     sandbox.restore();
     sandbox = null;
@@ -936,7 +918,6 @@ describe('Resources.TaskQueue', () => {
 describe('Resources.Resource', () => {
 
   let sandbox;
-  let clock;
   let element;
   let elementMock;
   let resources;
@@ -945,7 +926,6 @@ describe('Resources.Resource', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    clock = sandbox.useFakeTimers();
 
     element = {
       tagName: 'AMP-AD',
@@ -971,14 +951,11 @@ describe('Resources.Resource', () => {
 
   afterEach(() => {
     viewportMock.verify();
-    viewportMock.restore();
     viewportMock = null;
     resource = null;
     elementMock.verify();
     elementMock = null;
     element = null;
-    clock.restore();
-    clock = null;
     sandbox.restore();
     sandbox = null;
   });
@@ -1057,11 +1034,10 @@ describe('Resources.Resource', () => {
   it('should mark as not laid out if not yet measured', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
     elementMock.expects('build').returns(true).once();
-    const stub = sinon.stub(resource, 'hasBeenMeasured').returns(false);
+    const stub = sandbox.stub(resource, 'hasBeenMeasured').returns(false);
     resource.build(false);
     expect(stub.calledOnce).to.be.true;
     expect(resource.getState()).to.equal(ResourceState_.NOT_LAID_OUT);
-    stub.restore();
   });
 
   it('should allow to measure when not upgraded', () => {

@@ -55,7 +55,6 @@ describe('Input', () => {
 
   afterEach(() => {
     input = null;
-    clock.restore();
     clock = null;
     sandbox.restore();
     sandbox = null;

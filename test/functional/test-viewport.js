@@ -64,7 +64,6 @@ describe('Viewport', () => {
     viewport = null;
     binding = null;
     viewer = null;
-    clock.restore();
     clock = null;
     sandbox.restore();
     sandbox = null;
@@ -113,7 +112,6 @@ describe('Viewport', () => {
     bindingMock.expects('updatePaddingTop').never();
     viewerViewportHandler();
     bindingMock.verify();
-    bindingMock.restore();
 
     // Should call updatePaddingTop.
     bindingMock = sandbox.mock(binding);
@@ -121,7 +119,6 @@ describe('Viewport', () => {
     bindingMock.expects('updatePaddingTop').withArgs(21).once();
     viewerViewportHandler();
     bindingMock.verify();
-    bindingMock.restore();
   });
 
   it('should call binding.updateViewerViewport', () => {
@@ -129,7 +126,6 @@ describe('Viewport', () => {
     bindingMock.expects('updateViewerViewport').once();
     viewerViewportHandler();
     bindingMock.verify();
-    bindingMock.restore();
   });
 
   it('should defer scroll events', () => {
@@ -363,7 +359,6 @@ describe('Viewport META', () => {
       viewport = null;
       binding = null;
       viewer = null;
-      clock.restore();
       clock = null;
       sandbox.restore();
       sandbox = null;

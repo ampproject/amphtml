@@ -141,7 +141,7 @@ export class Templates {
    */
   renderTemplate(templateElement, data) {
     return this.getImplementation_(templateElement).then(impl => {
-      return impl.render(data);
+      return this.render_(impl, data);
     });
   }
 
@@ -158,7 +158,7 @@ export class Templates {
     }
     return this.getImplementation_(templateElement).then(impl => {
       return array.map(item => {
-        return impl.render(item);
+        return this.render_(impl, item);
       });
     });
   }
@@ -304,6 +304,28 @@ export class Templates {
       delete this.templateClassResolvers_[type];
       resolver(templateClass);
     }
+  }
+
+  /**
+   * @param {!BaseTemplate} impl
+   * @param {!JSONObject} data
+   * @private
+   */
+  render_(impl, data) {
+    const root = impl.render(data);
+    const anchors = root.getElementsByTagName('a');
+    for (let i = 0; i < anchors.length; i++) {
+      const anchor = anchors[i];
+      if (!anchor.hasAttribute('href')) {
+        // Ignore anchors without href.
+        continue;
+      }
+
+      // TODO(dvoytenko, #1572): This code should be unnecessary after
+      // sanitization issue has been addressed.
+      anchor.setAttribute('target', '_blank');
+    }
+    return root;
   }
 }
 

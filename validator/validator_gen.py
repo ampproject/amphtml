@@ -157,16 +157,17 @@ def PrintClassFor(descriptor, msg_desc, out):
   # Those are given in field.default_value for each field.
   out.append('/**')
   out.append(' * @constructor')
-  if msg_desc.name == 'ValidationResult':
+  if (msg_desc.name == 'ValidationResult' or
+      msg_desc.name == 'ValidationError'):
     out.append(' * @export')
   out.append(' */')
   out.append('%s = function() {' % msg_desc.full_name)
   for field in msg_desc.fields:
     if field.label == descriptor.FieldDescriptor.LABEL_REPEATED:
-      out.append('  /** @type {%s} */' % FieldTypeFor(descriptor, field))
+      out.append('  /** @export {%s} */' % FieldTypeFor(descriptor, field))
       out.append('  this.%s = [];'  % UnderscoreToCamelCase(field.name))
     else:
-      out.append('  /** @type {?%s} */' % FieldTypeFor(descriptor, field))
+      out.append('  /** @export {?%s} */' % FieldTypeFor(descriptor, field))
       out.append('  this.%s = null;' % UnderscoreToCamelCase(field.name))
   out.append('};')
   out.append('')

@@ -287,6 +287,16 @@ template {
   display: none !important;
 }
 
+/**
+ * Authors can set this class on their html tags to provide `border-box` box-sizing
+ * to every element in their document. Individual elements can override as necessary.
+ */
+.amp-border-box,
+.amp-border-box *,
+.amp-border-box *:before,
+.amp-border-box *:after {
+  box-sizing: border-box;
+}
 
 amp-pixel {
   position: absolute !important;

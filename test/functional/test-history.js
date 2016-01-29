@@ -50,7 +50,6 @@ describe('History', () => {
     bindingMock = null;
     history.cleanup_();
     history = null;
-    clock.restore();
     clock = null;
     sandbox.restore();
     sandbox = null;
@@ -129,7 +128,6 @@ describe('HistoryBindingNatural', () => {
   afterEach(() => {
     history.cleanup_();
     history = null;
-    clock.restore();
     clock = null;
     sandbox.restore();
     sandbox = null;
@@ -284,7 +282,6 @@ describe('HistoryBindingVirtual', () => {
     viewerMock = null;
     history.cleanup_();
     history = null;
-    clock.restore();
     clock = null;
     sandbox.restore();
     sandbox = null;

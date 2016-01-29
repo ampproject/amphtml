@@ -75,11 +75,6 @@ message AttrSpec {
   // e.g. the name of an attribute or tag.
   optional string deprecation = 7;
   optional string deprecation_url = 8;
-  // This feature specifically addresses the development attribute on
-  // the top-level html tag. When set, a DEV_MODE_ENABLED error with
-  // severity ERROR is generated.
-  optional string dev_mode_enabled = 9;
-  optional string dev_mode_enabled_url = 10;
 
   // If set true, the TagSpec containing this AttrSpec will be evaluated first
   // for any encountered tag which matches the tag name and this attribute spec.
@@ -198,13 +193,14 @@ message AmpLayout {
 // multiple meta tags (with different attributes).
 // NEXT AVAILABLE TAG: 17
 message TagSpec {
-  // Use lower-case tag names only.
+  // Use lower-case tag names only. If adding the same tag twice, then they must
+  // also have a detail string which is unique throughout all detail.
   optional string name = 1;
 
   // The detail will be copied as is into ValidationError::detail for
   // MANDATORY_TAG_MISSING and other errors. It is especially useful
   // when the tag name by itself isn't sufficient to uniquely identify
-  // the tag spec.
+  // the tag spec, and itself must be unique.
   optional string detail = 2;
 
   // If true, a tag conforming to this tag spec must occur at least once
@@ -309,7 +305,7 @@ message ValidationError {
     STYLESHEET_TOO_LONG = 8;
     MANDATORY_CDATA_MISSING_OR_INCORRECT = 9;
     CDATA_VIOLATES_BLACKLIST = 30;
-    DEV_MODE_ENABLED = 10;
+    DEV_MODE_ENABLED = 10;  // Deprecated, remove after 2016-04-01.
     DEPRECATED_ATTR = 11;
     DEPRECATED_TAG = 12;
     CSS_SYNTAX = 13;

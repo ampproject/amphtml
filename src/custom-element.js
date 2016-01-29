@@ -28,7 +28,7 @@ import {reportError} from './error';
 import {resourcesFor} from './resources';
 import {timer} from './timer';
 import {vsyncFor} from './vsync';
-import {getServicePromise} from './service';
+import {getServicePromise, getServicePromiseOrNull} from './service';
 import * as dom from './dom';
 
 
@@ -458,7 +458,16 @@ export function createAmpElementProto(win, name, implementationClass) {
    * @param {boolean} onLayout Whether this was called after a layout.
    */
   ElementProto.preconnect = function(onLayout) {
-    this.implementation_.preconnectCallback(onLayout);
+    if (onLayout) {
+      this.implementation_.preconnectCallback(onLayout);
+    } else {
+      // If we do early preconnects we delay them a bit. This is kind of
+      // an unfortunate trade off, but it seems faster, because the DOM
+      // operations themselves are not free and might delay
+      timer.delay(() => {
+        this.implementation_.preconnectCallback(onLayout);
+      }, 1);
+    }
   };
 
   /**
@@ -1033,37 +1042,31 @@ export function createAmpElementProto(win, name, implementationClass) {
    * @package @final
    */
   ElementProto.overflowCallback = function(overflown, requestedHeight) {
-    if (!overflown && !this.overflowElement_) {
-      // Overflow has never been initialized and not wanted.
-      return;
-    }
-
-    const overflowElement = this.getOverflowElement();
-    if (!overflowElement) {
+    this.getOverflowElement();
+    if (!this.overflowElement_) {
       if (overflown) {
         log.warn(TAG_,
             'Cannot resize element and overlfow is not available', this);
       }
-      return;
-    }
-
-    overflowElement.classList.toggle('amp-visible', overflown);
-
-    if (overflown) {
-      this.overflowElement_.onclick = () => {
-        this.resources_./*OK*/changeHeight(this, requestedHeight);
-        this.getVsync_().mutate(() => {
-          this.overflowCallback(/* overflown */ false, requestedHeight);
-        });
-      };
     } else {
-      this.overflowElement_.onclick = null;
+      this.overflowElement_.classList.toggle('amp-visible', overflown);
+
+      if (overflown) {
+        this.overflowElement_.onclick = () => {
+          this.resources_./*OK*/changeHeight(this, requestedHeight);
+          this.getVsync_().mutate(() => {
+            this.overflowCallback(/* overflown */ false, requestedHeight);
+          });
+        };
+      } else {
+        this.overflowElement_.onclick = null;
+      }
     }
+    this.implementation_.overflowCallback(overflown, requestedHeight);
   };
 
   return ElementProto;
 }
-
 
 /**
  * Registers a new custom element with its implementation class.
@@ -1087,6 +1090,27 @@ export function registerElement(win, name, implementationClass) {
 function isElementScheduled(win, elementName) {
   assert(win.ampExtendedElements, 'win.ampExtendedElements not created yet');
   return !!win.ampExtendedElements[elementName];
+}
+
+/**
+ * Registers a new alias for an existing custom element.
+ * @param {!Window} win The window in which to register the elements.
+ * @param {string} aliasName Additional name for an existing custom element.
+ * @param {string} sourceName Name of an existing custom element
+ * @param {Object} state Optional map to be merged into the prototype
+ *                 to override the original state with new default values
+ */
+export function registerElementAlias(win, aliasName, sourceName) {
+  const implementationClass = knownElements[sourceName];
+
+  if (implementationClass) {
+    win.document.registerElement(aliasName, {
+      prototype: createAmpElementProto(win, aliasName, implementationClass)
+    });
+  } else {
+    throw new Error(`Element name is unknown: ${sourceName}.` +
+                     `Alias ${aliasName} was not registered.`);
+  }
 }
 
 /**
@@ -1137,4 +1161,24 @@ export function getElementService(win, id, providedByElement) {
         id, providedByElement, providedByElement, providedByElement);
     return getServicePromise(win, id);
   });
+}
+
+/**
+ * Same as getElementService but produces null if the given element is not
+ * actually available on the current page.
+ * @param {!Window} win
+ * @param {string} id of the service.
+ * @param {string} provideByElement Name of the custom element that provides
+ *     the implementation of this service.
+ * @return {!Promise<*>}
+ */
+export function getElementServiceIfAvailable(win, id, providedByElement) {
+  const s = getServicePromiseOrNull(win, id);
+  if (s) {
+    return s;
+  }
+  if (!isElementScheduled(win, providedByElement)) {
+    return Promise.resolve(null);
+  }
+  return getElementService(win, id, providedByElement);
 }

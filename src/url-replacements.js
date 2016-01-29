@@ -14,20 +14,23 @@
  * limitations under the License.
  */
 
+import {assert} from './asserts';
 import {cidFor} from './cid';
 import {documentInfoFor} from './document-info';
 import {getService} from './service';
-import {userNotificationManagerFor} from './user-notification';
+import {loadPromise} from './event-helper';
 import {log} from './log';
 import {parseUrl, removeFragment} from './url';
 import {viewportFor} from './viewport';
 import {vsyncFor} from './vsync';
+import {userNotificationManagerFor} from './user-notification';
 
 /** @private {string} */
 const TAG_ = 'UrlReplacements';
 
 /**
  * This class replaces substitution variables with their values.
+ * Document new values in ../spec/amp-var-substitutions.md
  */
 class UrlReplacements {
   /** @param {!Window} win */
@@ -91,7 +94,9 @@ class UrlReplacements {
       return documentInfoFor(this.win_).pageViewId;
     });
 
-    this.set_('CLIENT_ID', (opt_name, opt_userNotificationId) => {
+    this.set_('CLIENT_ID', (scope, opt_userNotificationId) => {
+      assert(scope, 'The first argument to CLIENT_ID, the fallback c' +
+          /*OK*/'ookie name, is required');
       let consent = Promise.resolve();
 
       // If no `opt_userNotificationId` argument is provided then
@@ -101,9 +106,11 @@ class UrlReplacements {
           return service.get(opt_userNotificationId);
         });
       }
-
-      return cidFor(this.win_).then(cid => {
-        return cid.get(opt_name, consent);
+      return cidFor(win).then(cid => {
+        return cid.get({
+          scope: scope,
+          createCookieIfNotPresent: true
+        }, consent);
       });
     });
 
@@ -144,6 +151,82 @@ class UrlReplacements {
     this.set_('SCREEN_HEIGHT', () => {
       return this.win_.screen.height;
     });
+
+    // Returns the time it took to load the whole page. (excludes amp-* elements
+    // that are not rendered by the system yet.)
+    this.set_('PAGE_LOAD_TIME', () => {
+      return this.getTimingData_('navigationStart', 'loadEventStart');
+    });
+
+    // Returns the time it took to perform DNS lookup for the domain.
+    this.set_('DOMAIN_LOOKUP_TIME', () => {
+      return this.getTimingData_('domainLookupStart', 'domainLookupEnd');
+    });
+
+    // Returns the time it took to connet to the server.
+    this.set_('TCP_CONNECT_TIME', () => {
+      return this.getTimingData_('connectStart', 'connectEnd');
+    });
+
+    // Returns the time it took for server to start sending a response to the
+    // request.
+    this.set_('SERVER_RESPONSE_TIME', () => {
+      return this.getTimingData_('requestStart', 'responseStart');
+    });
+
+    // Returns the time it took to download the page.
+    this.set_('PAGE_DOWNLOAD_TIME', () => {
+      return this.getTimingData_('responseStart', 'responseEnd');
+    });
+
+    // Returns the time it took for redirects to complete.
+    this.set_('REDIRECT_TIME', () => {
+      return this.getTimingData_('navigationStart', 'fetchStart');
+    });
+
+    // Returns the time it took for DOM to become interactive.
+    this.set_('DOM_INTERACTIVE_TIME', () => {
+      return this.getTimingData_('navigationStart', 'domInteractive');
+    });
+
+    // Returns the time it took for content to load.
+    this.set_('CONTENT_LOAD_TIME', () => {
+      return this.getTimingData_('navigationStart',
+          'domContentLoadedEventStart');
+    });
+  }
+
+  /**
+   * Returns navigation timing information based on the start and end events.
+   * The data for the timing events is retrieved from performance.timing API.
+   * @param {string} startEvent
+   * @param {string} endEvent
+   * @return {!Promise<string|undefined>}
+   * @private
+   */
+  getTimingData_(startEvent, endEvent) {
+    const timingInfo = this.win_['performance']
+        && this.win_['performance']['timing'];
+    if (!timingInfo || timingInfo['navigationStart'] == 0) {
+      // Navigation timing API is not supported.
+      return Promise.resolve();
+    }
+
+    let metric = timingInfo[endEvent] - timingInfo[startEvent];
+    if (isNaN(metric) || metric == Infinity) {
+      // The metric is not supported.
+      return Promise.resolve();
+    } else if (metric < 0) {
+      // Metric is not yet available. Retry after a delay.
+      return loadPromise(this.win_).then(() => {
+        metric = timingInfo[endEvent] - timingInfo[startEvent];
+        return (isNaN(metric) || metric == Infinity || metric < 0)
+            ? Promise.resolve()
+            : Promise.resolve(String(metric));
+      });
+    } else {
+      return Promise.resolve(String(metric));
+    }
   }
 
   /**

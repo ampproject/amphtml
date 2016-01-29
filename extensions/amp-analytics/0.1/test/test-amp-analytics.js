@@ -15,6 +15,9 @@
  */
 
 import {AmpAnalytics} from '../../../../build/all/v0/amp-analytics-0.1.max';
+import {
+  installUserNotificationManager
+} from '../../../../build/all/v0/amp-user-notification-0.1.max';
 import {adopt} from '../../../../src/runtime';
 import {getService} from '../../../../src/service';
 import {markElementScheduledForTesting} from '../../../../src/custom-element';
@@ -47,8 +50,10 @@ describe('amp-analytics', function() {
     };
     windowApi.Object = window.Object;
     markElementScheduledForTesting(windowApi, 'amp-analytics');
+    markElementScheduledForTesting(windowApi, 'amp-user-notification');
     installViewerService(windowApi);
     installCidService(windowApi);
+    installUserNotificationManager(windowApi);
     getService(windowApi, 'xhr', () => {return {
       fetchJson: url => Promise.resolve(JSON.parse(jsonMockResponses[url]))
     };});
@@ -74,6 +79,7 @@ describe('amp-analytics', function() {
     const analytics = new AmpAnalytics(el);
     sandbox.stub(analytics, 'getWin').returns(windowApi);
     analytics.createdCallback();
+    analytics.buildCallback();
     sendRequestSpy = sandbox.spy(analytics, 'sendRequest_');
     return analytics;
   }
@@ -100,6 +106,7 @@ describe('amp-analytics', function() {
     const analytics = new AmpAnalytics(el);
     sandbox.stub(analytics, 'getWin').returns(windowApi);
     analytics.createdCallback();
+    analytics.buildCallback();
     sendRequestSpy = sandbox.spy(analytics, 'sendRequest_');
 
     return analytics.layoutCallback().then(() => {
@@ -132,6 +139,7 @@ describe('amp-analytics', function() {
         const analytics = new AmpAnalytics(el);
         sandbox.stub(analytics, 'getWin').returns(windowApi);
         analytics.createdCallback();
+        analytics.buildCallback();
         sendRequestSpy = sandbox.spy(analytics, 'sendRequest_');
 
         return analytics.layoutCallback().then(() => {
@@ -470,6 +478,65 @@ describe('amp-analytics', function() {
     });
     return analytics.layoutCallback().then(() => {
       expect(sendRequestSpy.args[0][0]).to.equal('https://example.com/remote');
+    });
+  });
+
+  it('updates requestCount on each request', () => {
+    const analytics = getAnalyticsTag({
+      'host': 'example.com',
+      'requests': {
+        'pageview1': '/test1=${requestCount}',
+        'pageview2': '/test2=${requestCount}'
+      },
+      'triggers': [
+        {'on': 'visible', 'request': 'pageview1'},
+        {'on': 'visible', 'request': 'pageview2'}
+      ]});
+    analytics.layoutCallback().then(() => {
+      expect(sendRequestSpy.calledTwice).to.be.true;
+      expect(sendRequestSpy.args[0][0]).to.equal('https://example.com/test1=1');
+      expect(sendRequestSpy.args[1][0]).to.equal('https://example.com/test2=2');
+    });
+  });
+
+  describe('data-consent-notification-id', () => {
+
+    it('should resume fetch when consent is given', () => {
+      const analytics = getAnalyticsTag({
+        'requests': {'foo': 'https://example.com/local'},
+        'triggers': [{'on': 'visible', 'request': 'foo'}]
+      }, {
+        'data-consent-notification-id': 'amp-user-notification1'
+      });
+
+      const uidService = installUserNotificationManager(windowApi);
+      sandbox.stub(uidService, 'get', id => {
+        expect(id).to.equal('amp-user-notification1');
+        return Promise.resolve();
+      });
+
+      return analytics.layoutCallback().then(() => {
+        expect(sendRequestSpy.callCount).to.equal(1);
+        expect(sendRequestSpy.args[0][0]).to.equal('https://example.com/local');
+      });
+    });
+
+    it('should not fetch when consent is not given', () => {
+      const analytics = getAnalyticsTag({
+        'requests': {'foo': 'https://example.com/local'},
+        'triggers': [{'on': 'visible', 'request': 'foo'}]
+      }, {
+        'data-consent-notification-id': 'amp-user-notification1'
+      });
+
+      const uidService = installUserNotificationManager(windowApi);
+      sandbox.stub(uidService, 'get', id => {
+        expect(id).to.equal('amp-user-notification1');
+        return Promise.reject();
+      });
+      return analytics.layoutCallback().catch(() => {
+        expect(sendRequestSpy.callCount).to.equal(0);
+      });
     });
   });
 });

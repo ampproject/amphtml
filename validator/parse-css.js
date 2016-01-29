@@ -32,7 +32,10 @@ goog.provide('parse_css.extractASimpleBlock');
 goog.provide('parse_css.parseAStylesheet');
 
 goog.require('goog.asserts');
-goog.require('parse_css.tokenize');
+goog.require('parse_css.EOFToken');
+goog.require('parse_css.ErrorToken');
+goog.require('parse_css.Token');
+goog.require('parse_css.TokenType');
 
 /**
  * @param {!Array<?>} arr
@@ -47,17 +50,17 @@ function arrayToJSON(arr) {
 }
 
 /**
- * A TokenStream is essentially an array of CSSParserToken objects
+ * A TokenStream is essentially an array of Token objects
  * with a reference to a current position. Consume/Reconsume methods
  * move the current position. tokenAt, current, and next inspect tokens
  * at specific points.
  *
- * @param {!Array<!parse_css.CSSParserToken>} tokens
+ * @param {!Array<!parse_css.Token>} tokens
  * @export
  * @constructor
  */
 parse_css.TokenStream = function(tokens) {
-  /** @type {!Array<!parse_css.CSSParserToken>} */
+  /** @type {!Array<!parse_css.Token>} */
   this.tokens = tokens;
   goog.asserts.assert(this.tokens.length > 0,
       'Internal Error: empty TokenStream - must have EOF token');
@@ -71,7 +74,7 @@ parse_css.TokenStream = function(tokens) {
  * Returns the token at an absolute position in the token stream.
  *
  * @param {number} num
- * @return {!parse_css.CSSParserToken}
+ * @return {!parse_css.Token}
  */
 parse_css.TokenStream.prototype.tokenAt = function(num) {
   // The last token is guaranteed to be the EOF token (with correct
@@ -83,7 +86,7 @@ parse_css.TokenStream.prototype.tokenAt = function(num) {
 
 /**
  * Returns the token at the current position in the token stream.
- * @return {!parse_css.CSSParserToken}
+ * @return {!parse_css.Token}
  */
 parse_css.TokenStream.prototype.current = function() {
   return this.tokenAt(this.pos);
@@ -91,7 +94,7 @@ parse_css.TokenStream.prototype.current = function() {
 
 /**
  * Returns the token at the next position in the token stream.
- * @return {!parse_css.CSSParserToken}
+ * @return {!parse_css.Token}
  */
 parse_css.TokenStream.prototype.next = function() {
   return this.tokenAt(this.pos + 1);
@@ -113,7 +116,7 @@ parse_css.TokenStream.prototype.reconsume = function() {
 /**
  * Creates an EOF token at the same line/col as the given token,
  * used for breaking up a list of tokens.
- * @param {!parse_css.CSSParserToken} positionToken
+ * @param {!parse_css.Token} positionToken
  * @return {!parse_css.EOFToken}
  */
 function createEOFTokenAt(positionToken) {
@@ -125,7 +128,7 @@ function createEOFTokenAt(positionToken) {
 
 /**
  * Creates a ParseError token at the same line/col as the given token.
- * @param {!parse_css.CSSParserToken} positionToken
+ * @param {!parse_css.Token} positionToken
  * @param {string} detail
  * @return {!parse_css.ErrorToken}
  */
@@ -142,7 +145,7 @@ function createParseErrorTokenAt(positionToken, detail) {
  * The top level CSSParserRules in a Stylesheet are always a series of
  * QualifiedRule's or AtRule's.
  *
- * @param {!Array<!parse_css.CSSParserToken>} tokenList
+ * @param {!Array<!parse_css.Token>} tokenList
  * @param {!Object<string,parse_css.BlockType>} atRuleSpec block type rules for
  * all CSS AT rules this canonicalizer should handle.
  * @param {parse_css.BlockType} defaultSpec default block type for types not
@@ -170,15 +173,15 @@ parse_css.parseAStylesheet = function(
 /**
  * Abstract super class for the parser rules.
  * @constructor
- * @extends {parse_css.CSSParserToken}
+ * @extends {parse_css.Token}
  */
 parse_css.CSSParserRule = function() {
   goog.base(this);
 };
-goog.inherits(parse_css.CSSParserRule, parse_css.CSSParserToken);
+goog.inherits(parse_css.CSSParserRule, parse_css.Token);
 
-/** @type {string} */
-parse_css.CSSParserRule.tokenType = 'abstract';
+/** @type {parse_css.TokenType} */
+parse_css.CSSParserRule.tokenType = parse_css.TokenType.UNKNOWN;
 
 /**
  * @param {number=} opt_indent
@@ -201,8 +204,8 @@ parse_css.Stylesheet = function() {
 };
 goog.inherits(parse_css.Stylesheet, parse_css.CSSParserRule);
 
-/** @type {string} */
-parse_css.Stylesheet.prototype.tokenType = 'STYLESHEET';
+/** @type {parse_css.TokenType} */
+parse_css.Stylesheet.prototype.tokenType = parse_css.TokenType.STYLESHEET;
 
 /** @return {!Object} */
 parse_css.Stylesheet.prototype.toJSON = function() {
@@ -221,7 +224,7 @@ parse_css.AtRule = function(name) {
   goog.base(this);
   /** @type {string} */
   this.name = name;
-  /** @type {!Array<!parse_css.CSSParserToken>} */
+  /** @type {!Array<!parse_css.Token>} */
   this.prelude = [];
   /** @type {!Array<!parse_css.CSSParserRule>} */
   this.rules = [];
@@ -230,8 +233,8 @@ parse_css.AtRule = function(name) {
 };
 goog.inherits(parse_css.AtRule, parse_css.CSSParserRule);
 
-/** @type {string} */
-parse_css.AtRule.prototype.tokenType = 'AT_RULE';
+/** @type {parse_css.TokenType} */
+parse_css.AtRule.prototype.tokenType = parse_css.TokenType.AT_RULE;
 
 /** @return {!Object} */
 parse_css.AtRule.prototype.toJSON = function() {
@@ -249,15 +252,16 @@ parse_css.AtRule.prototype.toJSON = function() {
  */
 parse_css.QualifiedRule = function() {
   goog.base(this);
-  /** @type {!Array<!parse_css.CSSParserToken>} */
+  /** @type {!Array<!parse_css.Token>} */
   this.prelude = [];
   /** @type {!Array<!parse_css.Declaration>} */
   this.declarations = [];
 };
 goog.inherits(parse_css.QualifiedRule, parse_css.CSSParserRule);
 
-/** @type {string} */
-parse_css.QualifiedRule.prototype.tokenType = 'QUALIFIED_RULE';
+/** @type {parse_css.TokenType} */
+parse_css.QualifiedRule.prototype.tokenType =
+    parse_css.TokenType.QUALIFIED_RULE;
 
 /** @return {!Object} */
 parse_css.QualifiedRule.prototype.toJSON = function() {
@@ -276,15 +280,15 @@ parse_css.Declaration = function(name) {
   goog.base(this);
   /** @type {string} */
   this.name = name;
-  /** @type {!Array<!parse_css.CSSParserToken>} */
+  /** @type {!Array<!parse_css.Token>} */
   this.value = [];
   /** @type {boolean} */
   this.important = false;
 };
 goog.inherits(parse_css.Declaration, parse_css.CSSParserRule);
 
-/** @type {string} */
-parse_css.Declaration.prototype.tokenType = 'DECLARATION';
+/** @type {parse_css.TokenType} */
+parse_css.Declaration.prototype.tokenType = parse_css.TokenType.DECLARATION;
 
 /** @return {!Object} */
 parse_css.Declaration.prototype.toJSON = function() {
@@ -349,7 +353,7 @@ Canonicalizer.prototype.blockTypeFor = function(atRule) {
 /**
  * Parses and returns a list of rules, such as at the top level of a stylesheet.
  * Return list has only QualifiedRule's and AtRule's as top level elements.
- * @param {!Array<!parse_css.CSSParserToken>} tokenList
+ * @param {!Array<!parse_css.Token>} tokenList
  * @param {boolean} topLevel
  * @param {!Array<!parse_css.ErrorToken>} errors output array for the errors.
  * @return {!Array<!parse_css.CSSParserRule>}
@@ -473,7 +477,7 @@ Canonicalizer.prototype.parseAQualifiedRule = function(
 };
 
 /**
- * @param {!Array<!parse_css.CSSParserToken>} tokenList
+ * @param {!Array<!parse_css.Token>} tokenList
  * @param {!Array<!parse_css.ErrorToken>} errors output array for the errors.
  * @return {!Array<!parse_css.Declaration>}
  */
@@ -576,7 +580,7 @@ Canonicalizer.prototype.parseADeclaration = function(
  * Consumes one or more tokens from a tokenStream, appending them to a
  * tokenList.
  * @param {!parse_css.TokenStream} tokenStream
- * @param {!Array<!parse_css.CSSParserToken>} tokenList output array for tokens.
+ * @param {!Array<!parse_css.Token>} tokenList output array for tokens.
  */
 function consumeAComponentValue(tokenStream, tokenList) {
   if (tokenStream.current() instanceof parse_css.OpenCurlyToken ||
@@ -595,7 +599,7 @@ function consumeAComponentValue(tokenStream, tokenList) {
  * consuming from the stream all those tokens that it adds to the tokenList,
  * including the start/end grouping token.
  * @param {!parse_css.TokenStream} tokenStream
- * @param {!Array<!parse_css.CSSParserToken>} tokenList output array for tokens.
+ * @param {!Array<!parse_css.Token>} tokenList output array for tokens.
  */
 function consumeASimpleBlock(tokenStream, tokenList) {
   goog.asserts.assert(
@@ -628,10 +632,10 @@ function consumeASimpleBlock(tokenStream, tokenList) {
  * extractASimpleBlock returns a simple block's contents in tokenList,
  * excluding the start/end grouping token, and appended with an EOFToken.
  * @param {!parse_css.TokenStream} tokenStream
- * @return {!Array<!parse_css.CSSParserToken>}
+ * @return {!Array<!parse_css.Token>}
  */
 parse_css.extractASimpleBlock = function(tokenStream) {
-  /** @type {!Array<!parse_css.CSSParserToken>} */
+  /** @type {!Array<!parse_css.Token>} */
   const consumedTokens = [];
   consumeASimpleBlock(tokenStream, consumedTokens);
   // A simple block always has a start token (e.g. '{') and
@@ -639,7 +643,7 @@ parse_css.extractASimpleBlock = function(tokenStream) {
   goog.asserts.assert(consumedTokens.length >= 2);
 
   // Exclude the start token. Convert end token to EOF.
-  /** @type {!Array<!parse_css.CSSParserToken>} */
+  /** @type {!Array<!parse_css.Token>} */
   const tokenList = consumedTokens.slice(1, -1);
   tokenList.push(createEOFTokenAt(consumedTokens[consumedTokens.length - 1]));
   return tokenList;
@@ -650,7 +654,7 @@ parse_css.extractASimpleBlock = function(tokenStream) {
  * consuming from the stream all those tokens that it adds to the tokenList,
  * including the function token and end grouping token.
  * @param {!parse_css.TokenStream} tokenStream
- * @param {!Array<!parse_css.CSSParserToken>} tokenList output array for tokens.
+ * @param {!Array<!parse_css.Token>} tokenList output array for tokens.
  */
 function consumeAFunction(tokenStream, tokenList) {
   goog.asserts.assertInstanceof(tokenStream.current(), parse_css.FunctionToken,
@@ -675,10 +679,10 @@ function consumeAFunction(tokenStream, tokenList) {
  * including the leading FunctionToken, but excluding the trailing
  * CloseParen token and appended with an EOFToken instead.
  * @param {!parse_css.TokenStream} tokenStream
- * @return {!Array<!parse_css.CSSParserToken>}
+ * @return {!Array<!parse_css.Token>}
  */
 parse_css.extractAFunction = function(tokenStream) {
-  /** @type {!Array<!parse_css.CSSParserToken>} */
+  /** @type {!Array<!parse_css.Token>} */
   const consumedTokens = [];
   consumeAFunction(tokenStream, consumedTokens);
   // A function always has a start FunctionToken and
@@ -686,7 +690,7 @@ parse_css.extractAFunction = function(tokenStream) {
   goog.asserts.assert(consumedTokens.length >= 2);
 
   // Convert end token to EOF.
-  /** @type {!Array<!parse_css.CSSParserToken>} */
+  /** @type {!Array<!parse_css.Token>} */
   const tokenList = consumedTokens.slice(0, -1);
   tokenList.push(createEOFTokenAt(consumedTokens[consumedTokens.length - 1]));
   return tokenList;

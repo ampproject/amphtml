@@ -208,7 +208,8 @@ def CompileValidatorMinified(out_dir):
                 '%s/validator-generated.js' % out_dir,
                 'validator-in-browser.js', 'validator.js'],
       closure_entry_points=['amp.validator.validateString',
-                            'amp.validator.renderValidationResult'],
+                            'amp.validator.renderValidationResult',
+                            'amp.validator.renderErrorMessage'],
       output_file='%s/validator_minified.js' % out_dir)
   logging.info('... done')
 

@@ -34,6 +34,9 @@ We will provide the following information to the ad:
   In browsers that support `location.ancestorOrigins` you can trust that the `origin` of the
   location is actually correct (So rogue pages cannot claim they represent an origin they do not actually represent).
 - `window.context.canonicalUrl` contains the canonical URL of the primary document as defined by its `link rel=canonical` tag.
+- `window.context.clientId` contains a unique id that is persistently the same for a given user and AMP origin site in their current browser until local data is deleted or the value expires (expiration is currently set to 1 year).
+  - Ad networks must register their cid scope in the variable clientIdScope in [_config.js](./_config.js).
+  - Only available on pages that load `amp-analytics`. The clientId will be null if `amp-analytics` was not loaded on the given page.
 - `window.context.pageViewId` contains a relatively low entropy id that is the same for all ads shown on a page.
 - [ad viewability](#ad-viewability)
 
@@ -52,7 +55,7 @@ The API allows specifying a callback that fires with change records when AMP obs
 
 Example usage:
 
-```js
+```javascript
   window.context.observeIntersection(function(changes) {
     changes.forEach(function(c) {
       console.info('Height of intersection', c.intersectionRect.height);
@@ -64,7 +67,7 @@ Example usage:
 
 Example usage:
 
-```js
+```javascript
   var unlisten = window.context.observeIntersection(function(changes) {
     changes.forEach(function(c) {
       console.info('Height of intersection', c.intersectionRect.height);
@@ -78,7 +81,7 @@ Example usage:
 ### Ad resizing
 
 Ads can call the special API
-`window.context.resize(width, height)` to send a resize request.
+`window.context.requestResize(width, height)` to send a resize request.
 
 Example of resize request:
 ```javascript
@@ -91,9 +94,31 @@ window.parent.postMessage({
 
 Once this message is received the AMP runtime will try to accommodate this request as soon as
 possible, but it will take into account where the reader is currently reading, whether the scrolling
-is ongoing and any other UX or performance factors. If the runtime cannot satisfy the resize events
-the `amp-ad` will show an `overflow` element. Clicking on the `overflow` element will immediately
-resize the `amp-ad` since it's triggered by a user action.
+is ongoing and any other UX or performance factors.
+
+Based one whether the AMP runtime was able to satisfy the resize request,
+the runtime will also send out a `embed-size-changed` or `embed-size-denied` message accordingly. The ad can listen to these messages and have it's own overflow element within and repeat request on tap. In that case AMP runtime will definitely allow size change due to user action.
+
+Ads can call the special API `window.context.onResizeSuccess` to get a callback in case a resize request was successful.
+
+Example
+```javascript
+var unlisten = window.context.onResizeSuccess(function(requestedHeight) {
+  // Hide any overflow elements that were shown.
+  // The requestedHeight argument may be used to check which height change the request corresponds to.
+});
+```
+
+Ads can call the special API `window.context.onResizeDenied` to get a callback in case a resize request was denied.
+
+Example
+```javascript
+var unlisten = window.context.onResizeDenied(function(requestedHeight) {
+  // Show the overflow element and send a window.context.requestResize(width, height) when the overflow element is clicked.
+  // You may use the requestedHeight to check which height change the request corresponds to.
+});
+```
+
 
 Here are some factors that affect how fast the resize will be executed:
 
@@ -108,7 +133,7 @@ Here are some factors that affect how fast the resize will be executed:
 To allow ads to bundle HTTP requests across multiple ad units on the same page the object `window.context.master` will contain the window object of the iframe being elected master iframe for the current page.
 
 #### Preconnect and prefetch
-Add the JS URLs that an ad **always** fetches or always connects to (if you know the origin but not the path) to [_prefetch.js](_prefetch.js).
+Add the JS URLs that an ad **always** fetches or always connects to (if you know the origin but not the path) to [_config.js](_config.js).
 
 This triggers prefetch/preconnect when the ad is first seen, so that loads are faster when they come into view.
 
