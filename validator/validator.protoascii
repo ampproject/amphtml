@@ -25,7 +25,7 @@ min_validator_revision_required: 82
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 133
+spec_file_revision: 134
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
 # These rules are just enough to validate the example from the spec.
@@ -42,6 +42,7 @@ tags: {
   name: "!doctype"
   detail: "html doctype"
   mandatory_parent: "$ROOT"
+  mandatory: true
   unique: true
   attrs: {
     name: "html"
@@ -280,6 +281,7 @@ tags: {
   name: "link"
   detail: "link rel=canonical"
   mandatory_parent: "head"
+  mandatory: true
   unique: true
   attrs: {
     name: "rel"
