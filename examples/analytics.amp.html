@@ -64,6 +64,38 @@ Container for analytics tags. Positioned far away from top to make sure that doe
 </script>
 </amp-analytics>
 
+<!-- AT Internet tracking -->
+<amp-analytics type="atinternet">
+<script type="application/json">
+  {
+    "vars": {
+      "site": "123456", // Site number
+      "log": "logs", // Secured collect log
+      "domain": ".xiti.com", // Collect domain name
+      "title": "pageChapter::pageTitle", // Page label
+      "level2": "10" // Page level 2
+    },
+    "triggers": {
+      "defaultPageview": {
+        "on": "visible",
+        "request": "pageview"
+      },
+      "links": {
+        "on": "click",
+        "selector": "#test1",
+        "request": "click",
+        "vars": {
+          "label": "clickChapter::clickLabel", // Click label
+          "level2Click": "12", // Click level 2
+          "type": "a" // Click type (a = action, t = download, n = navigation, s = exit)
+        }
+      }
+    }
+  }
+</script>
+</amp-analytics>
+<!-- End AT Internet tracking -->
+
 <!-- Chartbeat tracking -->
 <amp-analytics type="chartbeat">
 <script type="application/json">
