@@ -15,7 +15,6 @@
  */
 
 import {assert} from './asserts';
-import {getMode} from './mode';
 import {parseUrl} from './url';
 
 
@@ -34,10 +33,9 @@ export function listen(iframe, typeOfMessage, callback, opt_is3P) {
   assert(iframe.src, 'only iframes with src supported');
   const origin = parseUrl(iframe.src).origin;
   const win = iframe.ownerDocument.defaultView;
-  const mode = getMode();
   const sentinel = getSentinel_(opt_is3P);
   const listener = function(event) {
-    if (event.origin != origin && !mode.localDev && !mode.test) {
+    if (event.origin != origin) {
       return;
     }
     if (event.source != iframe.contentWindow) {
