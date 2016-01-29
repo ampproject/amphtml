@@ -26,6 +26,13 @@ export function doubleclick(global, data) {
     'tagForChildDirectedTreatment', 'cookieOptions',
     'overrideWidth', 'overrideHeight',
   ]);
+  if (global.context.clientId) {
+    // Read by GPT for GA/GPT integration.
+    global.gaGlobal = {
+      vid: global.context.clientId,
+      hid: global.context.pageViewId,
+    };
+  }
   loadScript(global, 'https://www.googletagservices.com/tag/js/gpt.js', () => {
     global.googletag.cmd.push(function() {
       const googletag = global.googletag;
