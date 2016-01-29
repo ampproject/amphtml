@@ -25,7 +25,7 @@ min_validator_revision_required: 81
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 129
+spec_file_revision: 130
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
 # These rules are just enough to validate the example from the spec.
@@ -1659,7 +1659,7 @@ tags: {  # amp-access
   attrs: { name: "async" value: "" mandatory: true }
   attrs: {
     name: "src"
-    value: "https://cdn.ampproject.org/v0/amp-access-0.1.js"
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-access-(latest|0\\.1).js"
     mandatory: true
   }
 }
@@ -1677,7 +1677,7 @@ tags: {  # amp-analytics
   attrs: { name: "async" value: "" mandatory: true }
   attrs: {
     name: "src"
-    value: "https://cdn.ampproject.org/v0/amp-analytics-0.1.js"
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-analytics-(latest|0\\.1).js"
     mandatory: true
   }
 }
@@ -1695,7 +1695,7 @@ tags: {  # amp-anim
   attrs: { name: "async" value: "" mandatory: true }
   attrs: {
     name: "src"
-    value: "https://cdn.ampproject.org/v0/amp-anim-0.1.js"
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-anim-(latest|0\\.1).js"
     mandatory: true
   }
 }
@@ -1713,7 +1713,7 @@ tags: {  # amp-audio
   attrs: { name: "async" value: "" mandatory: true }
   attrs: {
     name: "src"
-    value: "https://cdn.ampproject.org/v0/amp-audio-0.1.js"
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-audio-(latest|0\\.1).js"
     mandatory: true
   }
 }
@@ -1731,7 +1731,7 @@ tags: {  # amp-brightcove
   attrs: { name: "async" value: "" mandatory: true }
   attrs: {
     name: "src"
-    value: "https://cdn.ampproject.org/v0/amp-brightcove-0.1.js"
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-brightcove-(latest|0\\.1).js"
     mandatory: true
   }
 }
@@ -1749,7 +1749,7 @@ tags: {  # amp-carousel
   attrs: { name: "async" value: "" mandatory: true }
   attrs: {
     name: "src"
-    value: "https://cdn.ampproject.org/v0/amp-carousel-0.1.js"
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-carousel-(latest|0\\.1).js"
     mandatory: true
   }
 }
@@ -1767,7 +1767,7 @@ tags: {  # amp-dynamic-css-classes
   attrs: { name: "async" value: "" mandatory: true }
   attrs: {
     name: "src"
-    value: "https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.js"
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-dynamic-css-classes-(latest|0\\.1).js"
     mandatory: true
   }
 }
@@ -1785,7 +1785,7 @@ tags: {  # amp-facebook
   attrs: { name: "async" value: "" mandatory: true }
   attrs: {
     name: "src"
-    value: "https://cdn.ampproject.org/v0/amp-facebook-0.1.js"
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-facebook-(latest|0\\.1).js"
     mandatory: true
   }
 }
@@ -1803,7 +1803,7 @@ tags: {  # amp-fit-text
   attrs: { name: "async" value: "" mandatory: true }
   attrs: {
     name: "src"
-    value: "https://cdn.ampproject.org/v0/amp-fit-text-0.1.js"
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-fit-text-(latest|0\\.1).js"
     mandatory: true
   }
 }
@@ -1821,7 +1821,7 @@ tags: {  # amp-font
   attrs: { name: "async" value: "" mandatory: true }
   attrs: {
     name: "src"
-    value: "https://cdn.ampproject.org/v0/amp-font-0.1.js"
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-font-(latest|0\\.1).js"
     mandatory: true
   }
 }
@@ -1839,7 +1839,7 @@ tags: {  # amp-iframe
   attrs: { name: "async" value: "" mandatory: true }
   attrs: {
     name: "src"
-    value: "https://cdn.ampproject.org/v0/amp-iframe-0.1.js"
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-iframe-(latest|0\\.1).js"
     mandatory: true
   }
 }
@@ -1857,7 +1857,7 @@ tags: {  # amp-image-lightbox
   attrs: { name: "async" value: "" mandatory: true }
   attrs: {
     name: "src"
-    value: "https://cdn.ampproject.org/v0/amp-image-lightbox-0.1.js"
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-image-lightbox-(latest|0\\.1).js"
     mandatory: true
   }
 }
@@ -1875,7 +1875,7 @@ tags: {  # amp-instagram
   attrs: { name: "async" value: "" mandatory: true }
   attrs: {
     name: "src"
-    value: "https://cdn.ampproject.org/v0/amp-instagram-0.1.js"
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-instagram-(latest|0\\.1).js"
     mandatory: true
   }
 }
@@ -1893,7 +1893,7 @@ tags: {  # amp-install-serviceworker
   attrs: { name: "async" value: "" mandatory: true }
   attrs: {
     name: "src"
-    value: "https://cdn.ampproject.org/v0/amp-install-serviceworker-0.1.js"
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-install-serviceworker-(latest|0\\.1).js"
     mandatory: true
   }
 }
@@ -1911,7 +1911,7 @@ tags: {  # amp-lightbox
   attrs: { name: "async" value: "" mandatory: true }
   attrs: {
     name: "src"
-    value: "https://cdn.ampproject.org/v0/amp-lightbox-0.1.js"
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-lightbox-(latest|0\\.1).js"
     mandatory: true
   }
 }
@@ -1929,7 +1929,7 @@ tags: {  # amp-mustache
   attrs: { name: "async" value: "" mandatory: true }
   attrs: {
     name: "src"
-    value: "https://cdn.ampproject.org/v0/amp-mustache-0.1.js"
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-mustache-(latest|0\\.1).js"
     mandatory: true
   }
 }
@@ -1947,7 +1947,7 @@ tags: {  # amp-list
   attrs: { name: "async" value: "" mandatory: true }
   attrs: {
     name: "src"
-    value: "https://cdn.ampproject.org/v0/amp-list-0.1.js"
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-list-(latest|0\\.1).js"
     mandatory: true
   }
 }
@@ -1965,7 +1965,7 @@ tags: {  # amp-pinterest
   attrs: { name: "async" value: "" mandatory: true }
   attrs: {
     name: "src"
-    value: "https://cdn.ampproject.org/v0/amp-pinterest-0.1.js"
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-pinterest-(latest|0\\.1).js"
     mandatory: true
   }
 }
@@ -1983,7 +1983,7 @@ tags: {  # amp-slides
   attrs: { name: "async" value: "" mandatory: true }
   attrs: {
     name: "src"
-    value: "https://cdn.ampproject.org/v0/amp-slides-0.1.js"
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-slides-(latest|0\\.1).js"
     mandatory: true
   }
 }
@@ -2001,7 +2001,7 @@ tags: {  # amp-twitter
   attrs: { name: "async" value: "" mandatory: true }
   attrs: {
     name: "src"
-    value: "https://cdn.ampproject.org/v0/amp-twitter-0.1.js"
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-twitter-(latest|0\\.1).js"
     mandatory: true
   }
 }
@@ -2019,7 +2019,7 @@ tags: {  # amp-user-notification
   attrs: { name: "async" value: "" mandatory: true }
   attrs: {
     name: "src"
-    value: "https://cdn.ampproject.org/v0/amp-user-notification-0.1.js"
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-user-notification-(latest|0\\.1).js"
     mandatory: true
   }
 }
@@ -2037,7 +2037,7 @@ tags: {  # amp-vine
   attrs: { name: "async" value: "" mandatory: true }
   attrs: {
     name: "src"
-    value: "https://cdn.ampproject.org/v0/amp-vine-0.1.js"
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-vine-(latest|0\\.1).js"
     mandatory: true
   }
 }
@@ -2055,7 +2055,7 @@ tags: {  # amp-youtube
   attrs: { name: "async" value: "" mandatory: true }
   attrs: {
     name: "src"
-    value: "https://cdn.ampproject.org/v0/amp-youtube-0.1.js"
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-youtube-(latest|0\\.1)\\.js"
     mandatory: true
   }
 }
