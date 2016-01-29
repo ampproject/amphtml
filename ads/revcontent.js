@@ -23,8 +23,8 @@ import {writeScript, checkData} from '../src/3p';
 export function revcontent(global, data) {
     checkData(data, ['id']);
     const serve_protocol = 'https://';
-    const serve_host = 'trends.revcontent.com/serve.js.php';
-    const serve_parms = '?id=' + data.id;
+    const serve_host = 'trends-stg.revcontent.com/serve.js.php';
+    const serve_parms = '?w=' + data.id;
     const serve_url = serve_protocol + serve_host + serve_parms;
     //validateSrcPrefix('https:', serve_url);
     //validateSrcContains('/serve.js.php/', serve_url);
