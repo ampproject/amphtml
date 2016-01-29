@@ -287,7 +287,7 @@ message ValidationError {
     DEV_WARNING = 3; // DEPRECATED DO NOT USE.
   }
   optional Severity severity = 6 [ default = ERROR ];
-  // NEXT AVAILABLE TAG: 33
+  // NEXT AVAILABLE TAG: 35
   enum Code {
     UNKNOWN_CODE = 0;
     MANDATORY_TAG_MISSING = 1;
@@ -321,6 +321,8 @@ message ValidationError {
     DISALLOWED_TAG_ANCESTOR = 23;
     MANDATORY_TAG_ANCESTOR = 31;
     MANDATORY_TAG_ANCESTOR_WITH_HINT = 32;
+    ATTR_DISALLOWED_BY_IMPLIED_LAYOUT = 33;
+    ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT = 34;
   }
   optional Code code = 1;
   optional int32 line = 2 [ default = 1 ];

@@ -173,6 +173,10 @@ function specificity(code) {
       return 28;
     case amp.validator.ValidationError.Code.DEV_MODE_ENABLED:
       return 29;
+    case amp.validator.ValidationError.Code.ATTR_DISALLOWED_BY_IMPLIED_LAYOUT:
+      return 30;
+    case amp.validator.ValidationError.Code.ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT:
+      return 31;
     case amp.validator.ValidationError.Code.DEPRECATED_ATTR:
       return 101;
     case amp.validator.ValidationError.Code.DEPRECATED_TAG:
@@ -1149,16 +1153,19 @@ function CalculateHeight(spec, inputLayout, inputHeight) {
  * @param {!amp.validator.CssLengthAndUnit} width
  * @param {!amp.validator.CssLengthAndUnit} height
  * @param {string?} sizesAttr
+ * @param {string?} heightsAttr
  * @return {!amp.validator.AmpLayout.Layout}
  */
-function CalculateLayout(inputLayout, width, height, sizesAttr) {
+function CalculateLayout(inputLayout, width, height, sizesAttr, heightsAttr) {
   if (inputLayout !== amp.validator.AmpLayout.Layout.UNKNOWN) {
     return inputLayout;
   } else if (!width.isSet && !height.isSet) {
     return amp.validator.AmpLayout.Layout.CONTAINER;
   } else if (height.isSet && (!width.isSet || width.isAuto)) {
     return amp.validator.AmpLayout.Layout.FIXED_HEIGHT;
-  } else if (height.isSet && width.isSet && sizesAttr !== undefined) {
+  } else if (
+      height.isSet && width.isSet &&
+      (sizesAttr !== undefined || heightsAttr !== undefined)) {
     return amp.validator.AmpLayout.Layout.RESPONSIVE;
   } else {
     return amp.validator.AmpLayout.Layout.FIXED;
@@ -1304,7 +1311,7 @@ ParsedTagSpec.prototype.getSpec = function() {
  */
 ParsedTagSpec.prototype.hasDispatchKey = function() {
   return this.dispatchKeyAttrSpec_ !== -1;
-}
+};
 /**
  * You must check hasDispatchKey before accessing
  * @return {string}
@@ -1391,6 +1398,7 @@ ParsedTagSpec.prototype.validateLayout = function(context, attrsByKey, result) {
   const widthAttr = attrsByKey.get('width');
   const heightAttr = attrsByKey.get('height');
   const sizesAttr = attrsByKey.get('sizes');
+  const heightsAttr = attrsByKey.get('heights');
 
   // Parse the input layout attributes which we found for this tag.
   const inputLayout = parseLayout(layoutAttr);
@@ -1398,7 +1406,7 @@ ParsedTagSpec.prototype.validateLayout = function(context, attrsByKey, result) {
       inputLayout === amp.validator.AmpLayout.Layout.UNKNOWN) {
     context.addError(
         amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
-        /* params */ ["layout", getDetailOrName(this.spec_), layoutAttr],
+        /* params */['layout', getDetailOrName(this.spec_), layoutAttr],
         this.spec_.specUrl, result);
     return;
   }
@@ -1407,7 +1415,7 @@ ParsedTagSpec.prototype.validateLayout = function(context, attrsByKey, result) {
   if (!inputWidth.isValid) {
     context.addError(
         amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
-        /* params */ ["width", getDetailOrName(this.spec_), widthAttr],
+        /* params */['width', getDetailOrName(this.spec_), widthAttr],
         this.spec_.specUrl, result);
     return;
   }
@@ -1416,7 +1424,7 @@ ParsedTagSpec.prototype.validateLayout = function(context, attrsByKey, result) {
   if (!inputHeight.isValid) {
     context.addError(
         amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
-        /* params */ ["height", getDetailOrName(this.spec_), heightAttr],
+        /* params */['height', getDetailOrName(this.spec_), heightAttr],
         this.spec_.specUrl, result);
     return;
   }
@@ -1425,7 +1433,8 @@ ParsedTagSpec.prototype.validateLayout = function(context, attrsByKey, result) {
   const width = CalculateWidth(this.spec_.ampLayout, inputLayout, inputWidth);
   const height = CalculateHeight(this.spec_.ampLayout, inputLayout,
                                  inputHeight);
-  const layout = CalculateLayout(inputLayout, width, height, sizesAttr);
+  const layout =
+      CalculateLayout(inputLayout, width, height, sizesAttr, heightsAttr);
 
   // Does the tag support the computed layout?
   if (this.spec_.ampLayout.supportedLayouts.indexOf(layout) === -1) {
@@ -1480,6 +1489,16 @@ ParsedTagSpec.prototype.validateLayout = function(context, attrsByKey, result) {
           this.spec_.specUrl, result);
       return;
   }
+  if (heightsAttr !== undefined &&
+      layout !== amp.validator.AmpLayout.Layout.RESPONSIVE) {
+    const code = layoutAttr === undefined ?
+        amp.validator.ValidationError.Code.ATTR_DISALLOWED_BY_IMPLIED_LAYOUT :
+        amp.validator.ValidationError.Code.ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT;
+    context.addError(
+        code, /* params */['heights', getDetailOrName(this.spec_), layout],
+        this.spec_.specUrl, result);
+    return;
+  }
 };
 
 /**
@@ -1504,7 +1523,7 @@ ParsedTagSpec.prototype.validateAttributes = function(
       return;
     }
   }
-  const hasTemplateAncestor = context.getTagNames().hasAncestor("template");
+  const hasTemplateAncestor = context.getTagNames().hasAncestor('template');
   let mandatoryAttrsSeen = [];
   /** @type {!goog.structs.Set<string>} */
   const mandatoryOneofsSeen = new goog.structs.Set();

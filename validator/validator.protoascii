@@ -20,12 +20,12 @@
 # in production from crashing. This id is not relevant to validator.js
 # because thus far, engine (validator.js) and spec file (validator.protoascii)
 # are always released together.
-min_validator_revision_required: 81
+min_validator_revision_required: 82
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 130
+spec_file_revision: 131
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
 # These rules are just enough to validate the example from the spec.
@@ -2635,6 +2635,7 @@ attr_lists: {
   attrs: { name: "width" }
   attrs: { name: "height" }
   attrs: { name: "sizes" }
+  attrs: { name: "heights" }
 }
 
 # Global attributes: These can be used in all tags.
@@ -2848,4 +2849,12 @@ error_formats {
 error_formats {
   code: TEMPLATE_IN_ATTR_NAME
   format: "Mustache template syntax in attribute name '%1' in tag '%2'."
+}
+error_formats {
+  code: ATTR_DISALLOWED_BY_IMPLIED_LAYOUT
+  format: "The attribute '%1' in tag '%2' is disallowed by implied layout '%3'."
+}
+error_formats {
+  code: ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT
+  format: "The attribute '%1' in tag '%2' is disallowed by implied layout '%3'."
 }
