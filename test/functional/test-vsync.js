@@ -379,7 +379,6 @@ describe('RAF polyfill', () => {
   });
 
   afterEach(() => {
-    clock.restore();
     sandbox.restore();
   });
 

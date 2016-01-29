@@ -53,6 +53,25 @@ it.skipOnFirefox = function(desc, fn) {
   it(desc, fn);
 };
 
+
+// Used to check if an unrestored sandbox exists
+const sandboxes = [];
+const create = sinon.sandbox.create;
+sinon.sandbox.create = function(config) {
+  const sandbox = create.call(sinon.sandbox, config);
+  sandboxes.push(sandbox);
+
+  const restore = sandbox.restore;
+  sandbox.restore = function() {
+    const i = sandboxes.indexOf(sandbox);
+    if (i > -1) {
+      sandboxes.splice(i, 1);
+    }
+    return restore.call(sandbox);
+  };
+  return sandbox;
+};
+
 // Global cleanup of tags added during tests. Cool to add more
 // to selector.
 afterEach(() => {
@@ -71,6 +90,9 @@ afterEach(() => {
   if (!/native/.test(window.setTimeout)) {
     throw new Error('You likely forgot to restore sinon timers ' +
         '(installed via sandbox.useFakeTimers).');
+  }
+  if (sandboxes.length > 0) {
+    throw new Error('You forgot to restore your sandbox!');
   }
 });
 

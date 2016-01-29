@@ -40,7 +40,6 @@ describe('runtime', () => {
   });
 
   afterEach(() => {
-    clock.restore();
     sandbox.restore();
   });
 

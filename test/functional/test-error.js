@@ -23,22 +23,18 @@ import * as sinon from 'sinon';
 describe('reportErrorToServer', () => {
 
   let sandbox;
-  let clock;
   let onError;
 
   beforeEach(() => {
     onError = window.onerror;
     sandbox = sinon.sandbox.create();
-    clock = sandbox.useFakeTimers();
-    sinon.spy(window, 'Image');
+    sandbox.spy(window, 'Image');
   });
 
   afterEach(() => {
     window.onerror = onError;
-    clock.restore();
     sandbox.restore();
     setModeForTesting(null);
-    Image.restore();
   });
 
   it('reportError with error object', () => {

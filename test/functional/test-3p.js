@@ -30,7 +30,6 @@ describe('3p', () => {
 
   afterEach(() => {
     clock.tick(1000);
-    clock.restore();
     sandbox.restore();
   });
 

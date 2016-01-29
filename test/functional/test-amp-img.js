@@ -20,21 +20,19 @@ import {installImg} from '../../builtins/amp-img';
 import * as sinon from 'sinon';
 
 describe('amp-img', () => {
-  let sandbox, methodStub;
+  let sandbox;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
   });
 
   afterEach(() => {
-    methodStub.restore();
-    methodStub = null;
     sandbox.restore();
     sandbox = null;
   });
 
   function getImg(attributes, children) {
-    methodStub = sinon.stub(BaseElement.prototype, 'isInViewport')
+    sandbox.stub(BaseElement.prototype, 'isInViewport')
         .returns(true);
     return createIframePromise().then(iframe => {
       installImg(iframe.win);

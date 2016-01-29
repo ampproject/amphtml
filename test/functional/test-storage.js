@@ -309,7 +309,6 @@ describe('Store', () => {
   });
 
   afterEach(() => {
-    clock.restore();
     clock = null;
     sandbox.restore();
     sandbox = null;

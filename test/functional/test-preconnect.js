@@ -35,7 +35,6 @@ describe('preconnect', () => {
 
   afterEach(() => {
     clock.tick(200000);
-    clock.restore();
     sandbox.restore();
   });
 

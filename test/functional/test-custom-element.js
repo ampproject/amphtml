@@ -113,9 +113,7 @@ describe('CustomElement', () => {
 
   afterEach(() => {
     resourcesMock.verify();
-    resourcesMock.restore();
     resourcesMock = null;
-    clock.restore();
     sandbox.restore();
     sandbox = null;
   });
@@ -830,8 +828,6 @@ describe('CustomElement Loading Indicator', () => {
   afterEach(() => {
     vsync.mutate = savedMutate;
     resourcesMock.verify();
-    resourcesMock.restore();
-    clock.restore();
     sandbox.restore();
     sandbox = null;
   });
@@ -1059,7 +1055,6 @@ describe('CustomElement Overflow Element', () => {
 
   const resources = resourcesFor(window);
   let sandbox;
-  let clock;
   let element;
   let overflowElement;
   let savedMutate;
@@ -1069,7 +1064,6 @@ describe('CustomElement Overflow Element', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    clock = sandbox.useFakeTimers();
     resourcesMock = sandbox.mock(resources);
     element = new ElementClass();
     element.layoutWidth_ = 300;
@@ -1088,8 +1082,6 @@ describe('CustomElement Overflow Element', () => {
   afterEach(() => {
     vsync.mutate = savedMutate;
     resourcesMock.verify();
-    resourcesMock.restore();
-    clock.restore();
     sandbox.restore();
     sandbox = null;
   });

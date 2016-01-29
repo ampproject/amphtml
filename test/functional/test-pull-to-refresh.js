@@ -50,7 +50,6 @@ describe('PullToRefreshBlocker', () => {
 
   afterEach(() => {
     viewportMock.verify();
-    viewportMock.restore();
     viewportMock = null;
     blocker.cleanup();
     blocker = null;

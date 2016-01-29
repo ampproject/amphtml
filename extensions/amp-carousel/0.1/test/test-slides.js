@@ -450,39 +450,35 @@ describe('Slides functional', () => {
     let tryAutoplaySpy;
     let setupAutoplaySpy;
     let goSpy;
-    let updateInViewportStub;
     let isInViewportStub;
 
     function autoplaySetup(delay = '', inViewport = true) {
-      sandbox = sinon.sandbox.create();
       clock = sandbox.useFakeTimers();
       setupElements();
       element.setAttribute('autoplay', delay);
       element.removeAttribute('loop');
-      setupAutoplaySpy = sinon.spy(AmpSlides.prototype, 'setupAutoplay_');
-      tryAutoplaySpy = sinon.spy(AmpSlides.prototype, 'tryAutoplay_');
-      goSpy = sinon.spy(AmpSlides.prototype, 'go');
+      setupAutoplaySpy = sandbox.spy(AmpSlides.prototype, 'setupAutoplay_');
+      tryAutoplaySpy = sandbox.spy(AmpSlides.prototype, 'tryAutoplay_');
+      goSpy = sandbox.spy(AmpSlides.prototype, 'go');
       setupSlides();
       setupSpies();
       setupInViewport(inViewport);
     }
 
     function setupInViewport(inViewport) {
-      updateInViewportStub = sinon.stub(slides, 'updateInViewport');
-      isInViewportStub = sinon.stub(slides, 'isInViewport').returns(inViewport);
+      sandbox.stub(slides, 'updateInViewport');
+      isInViewportStub = sandbox.stub(slides, 'isInViewport')
+          .returns(inViewport);
     }
+
+    beforeEach(() => {
+      sandbox = sinon.sandbox.create();
+    });
 
     afterEach(() => {
       teardownElements();
-      clock.restore();
-      clock = null;
       sandbox.restore();
       sandbox = null;
-      setupAutoplaySpy.restore();
-      tryAutoplaySpy.restore();
-      updateInViewportStub.restore();
-      isInViewportStub.restore();
-      goSpy.restore();
     });
 
     it('should call setupAutoplay_', () => {

@@ -31,6 +31,16 @@ runAdTestSuiteAgainstInstaller('amp-embed', installEmbed);
 
 function runAdTestSuiteAgainstInstaller(name, installer) {
   return describe(name, () => {
+    let sandbox;
+
+    beforeEach(() => {
+      sandbox = sinon.sandbox.create();
+    });
+    afterEach(() => {
+      sandbox.restore();
+      sandbox = null;
+    });
+
 
     function getAd(attributes, canonical, opt_handleElement,
                    opt_beforeLayoutCallback) {
@@ -423,14 +433,13 @@ function runAdTestSuiteAgainstInstaller(name, installer) {
             ad.appendChild(fallback);
             return ad;
           }).then(ad => {
-            const deferMutateStub = sinon.stub(
+            sandbox.stub(
                 ad.implementation_, 'deferMutate', function(callback) {
                   callback();
                 });
             expect(ad).to.not.have.class('amp-notsupported');
             ad.implementation_.noContentHandler_();
             expect(ad).to.have.class('amp-notsupported');
-            deferMutateStub.restore();
           });
         });
 
@@ -443,11 +452,11 @@ function runAdTestSuiteAgainstInstaller(name, installer) {
           }, 'https://schema.org', ad => {
             return ad;
           }).then(ad => {
-            const deferMutateStub = sinon.stub(
+            sandbox.stub(
                 ad.implementation_, 'deferMutate', function(callback) {
                   callback();
                 });
-            const attemptChangeHeightStub = sinon.stub(ad.implementation_,
+            sandbox.stub(ad.implementation_,
                 'attemptChangeHeight',
                 function(height, callback) {
                   ad.style.height = height;
@@ -459,8 +468,6 @@ function runAdTestSuiteAgainstInstaller(name, installer) {
             expect(ad.style.display).to.not.equal('none');
             ad.implementation_.noContentHandler_();
             expect(ad.style.display).to.equal('none');
-            deferMutateStub.restore();
-            attemptChangeHeightStub.restore();
           });
         });
       });
@@ -544,19 +551,6 @@ function runAdTestSuiteAgainstInstaller(name, installer) {
       });
 
       describe('renderOutsideViewport', () => {
-
-        let clock;
-        let sandbox;
-
-        afterEach(() => {
-          if (clock) {
-            clock.restore();
-          }
-          if (sandbox) {
-            sandbox.restore();
-          }
-        });
-
         function getGoodAd(cb, layoutCb) {
           return getAd({
             width: 300,
@@ -590,11 +584,11 @@ function runAdTestSuiteAgainstInstaller(name, installer) {
         });
 
         it('should return true after scrolling and then false for 1s', () => {
+          let clock;
           return getGoodAd(ad => {
             viewportFor(ad.element.ownerDocument.defaultView).scrollCount_++;
             expect(ad.renderOutsideViewport()).to.be.true;
           }, () => {
-            sandbox = sinon.sandbox.create();
             clock = sandbox.useFakeTimers();
           }).then(ad => {
             // False because we just rendered one.

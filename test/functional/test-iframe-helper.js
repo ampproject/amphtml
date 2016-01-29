@@ -30,12 +30,6 @@ describe('iframe-helper', function() {
     return i;
   }
 
-  function restoreSpy(spy) {
-    if (spy) {
-      spy.restore();
-    }
-  }
-
   beforeEach(() => {
     testIframe = getIframe(iframeSrc);
     sandbox = sinon.sandbox.create();
@@ -44,7 +38,7 @@ describe('iframe-helper', function() {
   afterEach(() => {
     testIframe.parentNode.removeChild(testIframe);
     testIframe = null;
-    restoreSpy(sandbox);
+    sandbox.restore();
   });
 
 
@@ -57,7 +51,7 @@ describe('iframe-helper', function() {
   });
 
   it('should un-listen after first hit', () => {
-    const removeEventListenerSpy = sinon.spy(window, 'removeEventListener');
+    const removeEventListenerSpy = sandbox.spy(window, 'removeEventListener');
     listen = function() {return unlisten;};
     return new Promise(resolve => {
       IframeHelper.listenOnce(testIframe, 'send-intersections', () => {
@@ -65,19 +59,20 @@ describe('iframe-helper', function() {
       });
     }).then(resolve => {
       expect(removeEventListenerSpy.callCount).to.equal(1);
-      removeEventListenerSpy.restore();
       resolve();
     });
   });
 
   it('should set sentinel on postMessage data', () => {
-    postMessageSpy = sinon.spy(testIframe.contentWindow, 'postMessage');
+    postMessageSpy = sinon/*OK*/.spy(testIframe.contentWindow, 'postMessage');
     return new Promise(resolve => {
       IframeHelper.postMessage(
         testIframe, 'testMessage', {}, 'http://google.com');
       expect(postMessageSpy.getCall(0).args[0].sentinel).to.equal('amp');
       expect(postMessageSpy.getCall(0).args[0].type).to.equal('testMessage');
-      postMessageSpy.restore();
+      // Very important to do this outside of the sandbox, or else hell
+      // breaks loose.
+      postMessageSpy/*OK*/.restore();
       resolve();
     });
   });

@@ -40,6 +40,17 @@ describe('amp-image-lightbox component', () => {
     });
   }
 
+  let sandbox;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+    sandbox = null;
+  });
+
   it('should render correctly', () => {
     return getImageLightbox().then(lightbox => {
       const container = lightbox
@@ -135,7 +146,7 @@ describe('amp-image-lightbox component', () => {
   it('should close on ESC', () => {
     return getImageLightbox().then(lightbox => {
       const impl = lightbox.implementation_;
-      const setupCloseSpy = sinon.spy(impl, 'close');
+      const setupCloseSpy = sandbox.spy(impl, 'close');
       const viewportOnChanged = sinon.spy();
       const disableTouchZoom = sinon.spy();
       const restoreOriginalTouchZoom = sinon.spy();
@@ -161,7 +172,6 @@ describe('amp-image-lightbox component', () => {
       impl.activate({source: ampImage});
       impl.closeOnEscape_({keyCode: 27});
       expect(setupCloseSpy.callCount).to.equal(1);
-      setupCloseSpy.restore();
     });
   });
 });
@@ -191,9 +201,7 @@ describe('amp-image-lightbox image viewer', () => {
   afterEach(() => {
     document.body.removeChild(imageViewer.getElement());
     lightboxMock.verify();
-    lightboxMock.restore();
     lightboxMock = null;
-    clock.restore();
     clock = null;
     sandbox.restore();
     sandbox = null;
@@ -349,14 +357,12 @@ describe('amp-image-lightbox image viewer', () => {
 describe('amp-image-lightbox image viewer gestures', () => {
 
   let sandbox;
-  let clock;
   let lightbox;
   let lightboxMock;
   let imageViewer;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    clock = sandbox.useFakeTimers();
 
     lightbox = {
       getDpr: () => 1,
@@ -379,10 +385,7 @@ describe('amp-image-lightbox image viewer gestures', () => {
   afterEach(() => {
     document.body.removeChild(imageViewer.getElement());
     lightboxMock.verify();
-    lightboxMock.restore();
     lightboxMock = null;
-    clock.restore();
-    clock = null;
     sandbox.restore();
     sandbox = null;
   });

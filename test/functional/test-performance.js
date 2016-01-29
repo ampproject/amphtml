@@ -34,7 +34,6 @@ describe('performance', () => {
 
   afterEach(() => {
     perf = null;
-    clock.restore();
     clock = null;
     sandbox.restore();
     sandbox = null;
@@ -196,7 +195,7 @@ describe('performance', () => {
 
   it('can set the performance function through the runtime', () => {
     const perf = performanceFor(window);
-    const spy = sinon.spy(perf, 'setTickFunction');
+    const spy = sandbox.spy(perf, 'setTickFunction');
     const fn = function() {};
 
     adopt(window);
@@ -204,13 +203,11 @@ describe('performance', () => {
     window.AMP.setTickFunction(fn);
 
     expect(spy.firstCall.args[0]).to.equal(fn);
-
-    spy.restore();
   });
 
   it('can set the flush function through the runtime', () => {
     const perf = performanceFor(window);
-    const spy = sinon.spy(perf, 'setTickFunction');
+    const spy = sandbox.spy(perf, 'setTickFunction');
     const fn = function() {};
 
     adopt(window);
@@ -218,8 +215,6 @@ describe('performance', () => {
     window.AMP.setTickFunction(function() {}, fn);
 
     expect(spy.firstCall.args[1]).to.equal(fn);
-
-    spy.restore();
   });
 
   it('should call the flush function after its set', () => {
@@ -235,19 +230,15 @@ describe('performance', () => {
   describe('coreServicesAvailable', () => {
     let tickSpy;
     let viewer;
-    let whenFirstVisibleStub;
-    let whenReadyToRetrieveResourcesStub;
-    let hasBeenVisibleStub;
     let whenFirstVisiblePromise;
     let whenFirstVisibleResolve;
     let whenReadyToRetrieveResourcesPromise;
     let whenReadyToRetrieveResourcesResolve;
-    let whenViewportLayoutCompleteStub;
     let whenViewportLayoutCompletePromise;
     let whenViewportLayoutCompleteResolve;
 
     function stubHasBeenVisible(visibility) {
-      hasBeenVisibleStub = sinon.stub(viewer, 'hasBeenVisible')
+      sandbox.stub(viewer, 'hasBeenVisible')
           .returns(visibility);
     }
 
@@ -255,7 +246,7 @@ describe('performance', () => {
       viewer = viewerFor(window);
       resources = resourcesFor(window);
 
-      tickSpy = sinon.spy(perf, 'tick');
+      tickSpy = sandbox.spy(perf, 'tick');
 
       whenFirstVisiblePromise = new Promise(resolve => {
         whenFirstVisibleResolve = resolve;
@@ -269,23 +260,12 @@ describe('performance', () => {
         whenViewportLayoutCompleteResolve = resolve;
       });
 
-      whenFirstVisibleStub = sinon.stub(viewer, 'whenFirstVisible')
+      sandbox.stub(viewer, 'whenFirstVisible')
           .returns(whenFirstVisiblePromise);
-      whenReadyToRetrieveResourcesStub = sinon
-          .stub(perf, 'whenReadyToRetrieveResources_')
+      sandbox.stub(perf, 'whenReadyToRetrieveResources_')
           .returns(whenReadyToRetrieveResourcesPromise);
-      whenViewportLayoutCompleteStub = sinon
-          .stub(perf, 'whenViewportLayoutComplete_')
+      sandbox.stub(perf, 'whenViewportLayoutComplete_')
           .returns(whenViewportLayoutCompletePromise);
-    });
-
-    afterEach(() => {
-      whenFirstVisibleStub.restore();
-      whenReadyToRetrieveResourcesStub.restore();
-      whenViewportLayoutCompleteStub.restore();
-      if (hasBeenVisibleStub) {
-        hasBeenVisibleStub.restore();
-      }
     });
 
     describe('document started in prerender', () => {
