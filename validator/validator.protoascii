@@ -25,19 +25,15 @@ min_validator_revision_required: 82
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 134
+spec_file_revision: 135
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
-# These rules are just enough to validate the example from the spec.
-# They are certainly not sufficent for release: many tags are missing.
-# Also we may want to allow some attribute definitions to be shared
-# between tags. As in, we may almost certainly need to revisit this format,
-# but it's a starting point.
 #
 # Specific URL to reference for violations having to do with mustache
 # templates. These are specific to any particular tag, so must live at
 # the top level of this rules file.
 template_spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-templates.md"
+
 tags: {
   name: "!doctype"
   detail: "html doctype"
@@ -99,6 +95,7 @@ tags: {
   detail: "link rel="
   attrs: { name: "type" }
   attrs: { name: "href" }
+  attrs: { name: "hreflang" }
   attrs: {
     name: "rel"
     mandatory: true
@@ -108,8 +105,7 @@ tags: {
     # "(foo|bar)( +(foo|bar))*" where the first match covers a string with
     # no space prefix and the later matches cover strings with whitespace
     # prefixes.
-    # TODO: Come up with a better scheme for this. Low priority since this
-    # 'rel' is the only case of a value which needs parsing like this.
+    # TODO(gregable): Come up with a better scheme for this.
     value_regex: "("
         "accessibility|"
         "alternate|"
@@ -293,6 +289,7 @@ tags: {
     name: "href"
     mandatory: true
   }
+  attrs: { name: "hreflang" }
   spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#canon"
 }
 # rel=amphtml is designed to point from a non-amphtml page to an amp-html
@@ -313,6 +310,7 @@ tags: {
     name: "href"
     mandatory: true
   }
+  attrs: { name: "hreflang" }
 }
 # Whitelisted font providers
 tags: {
@@ -352,6 +350,7 @@ tags: {
     name: "href"
     mandatory: true
   }
+  attrs: { name: "hreflang" }
 }
 # Various whitelisted rel attribute values which can co-occur with
 # "type", "href", and "sizes" attributes of arbitrary value.
@@ -659,6 +658,7 @@ tags: {
     name: "href"
     blacklisted_value_regex: "^\\s*(javascript|vbscript|data):"
   }
+  attrs: { name: "hreflang" }
   attrs: {
     name: "target"
     value: "_blank"
@@ -671,8 +671,7 @@ tags: {
     # "(foo|bar)( +(foo|bar))*" where the first match covers a string with
     # no space prefix and the later matches cover strings with whitespace
     # prefixes.
-    # TODO: Come up with a better scheme for this. Low priority since this
-    # 'rel' is the only case of a value which needs parsing like this.
+    # TODO(gregable): Come up with a better scheme for this.
     value_regex: "("
         "accessibility|"
         "author|"
@@ -1020,7 +1019,7 @@ tags: {
   }
 }
 # 4.7.15 SVG
-# We allow some limited embedded SVG tags. We do not allow  inline styles
+# We allow some limited embedded SVG tags. We do not allow inline styles
 # or embedding any external resources.
 # Attribute lists: https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute
 attr_lists: {
@@ -1507,9 +1506,7 @@ tags: {
 }
 
 # 4.8 Links
-# For the link tag, only the canonical link is allowed (see 4.2.4).
-# TODO(johannes): look through the other link types to see which attributes
-# should be allowed for the a tag, e.g. nofollow etc.
+# Links are a concept, rather than a tag. See tagspecs for "link", "a", etc.
 
 # 4.9 Tabular data
 # 4.9.1 The table element
@@ -2443,7 +2440,6 @@ tags: {
   }
 }
 # <amp-pinterest>
-# https://github.com/ampproject/amphtml/blob/master/extensions/amp-pinterest/amp-pinterest.md
 # TODO: Enforce mandatory attributes depending on the value of another
 # attribute. In this case, depending on the value of data-do, data-media and
 # data-description may or may not be mandatory.
