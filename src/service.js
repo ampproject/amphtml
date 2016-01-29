@@ -57,6 +57,9 @@ export function getService(win, id, opt_factory) {
   if (!s.obj) {
     assert(opt_factory, 'Factory not given and service missing %s', id);
     s.obj = opt_factory(win);
+    if (!s.promise) {
+      s.promise = Promise.resolve(s.obj);
+    }
     // The service may have been requested already, in which case we have a
     // pending promise we need to fulfill.
     if (s.resolve) {
@@ -73,7 +76,6 @@ export function getService(win, id, opt_factory) {
  * Users should typically wrap this as a special purpose function (e.g.
  * viewportFor(win)) for type safety and because the factory should not be
  * passed around.
- * TODO
  * @param {!Window} win
  * @param {string} id of the service.
  * @return {!Promise<*>}
@@ -82,11 +84,6 @@ export function getServicePromise(win, id) {
   const services = getServices(win);
   const s = services[id];
   if (s) {
-    // If a service was registered with getService, we make a promise from it
-    // which we will return in future invocations.
-    if (!s.promise) {
-      s.promise = Promise.resolve(s.obj);
-    }
     return s.promise;
   }
 
@@ -103,6 +100,20 @@ export function getServicePromise(win, id) {
   };
 
   return p;
+}
+
+/**
+ * Like getServicePromise but returns null if the service was never registered.
+ * @param {!Window} win
+ * @param {string} id of the service.
+ * @return {?Promise<*>}
+ */
+export function getServicePromiseOrNull(win, id) {
+  const services = getServices(win);
+  if (services[id]) {
+    return services[id].promise;
+  }
+  return null;
 }
 
 /**

@@ -28,7 +28,7 @@ import {reportError} from './error';
 import {resourcesFor} from './resources';
 import {timer} from './timer';
 import {vsyncFor} from './vsync';
-import {getServicePromise} from './service';
+import {getServicePromise, getServicePromiseOrNull} from './service';
 import * as dom from './dom';
 
 
@@ -1161,4 +1161,24 @@ export function getElementService(win, id, providedByElement) {
         id, providedByElement, providedByElement, providedByElement);
     return getServicePromise(win, id);
   });
+}
+
+/**
+ * Same as getElementService but produces null if the given element is not
+ * actually available on the current page.
+ * @param {!Window} win
+ * @param {string} id of the service.
+ * @param {string} provideByElement Name of the custom element that provides
+ *     the implementation of this service.
+ * @return {!Promise<*>}
+ */
+export function getElementServiceIfAvailable(win, id, providedByElement) {
+  const s = getServicePromiseOrNull(win, id);
+  if (s) {
+    return s;
+  }
+  if (!isElementScheduled(win, providedByElement)) {
+    return Promise.resolve(null);
+  }
+  return getElementService(win, id, providedByElement);
 }
