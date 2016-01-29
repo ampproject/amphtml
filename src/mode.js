@@ -51,7 +51,7 @@ export function setModeForTesting(m) {
  * @return {!ModeDef}
  */
 function getMode_() {
-  const isLocalDev = (location.hostname == 'localhost' ||
+  const isLocalDev = (location.hostname == 'localhost' || location.hostname == 'ads.localhost' ||
       (location.ancestorOrigins && location.ancestorOrigins[0] &&
           location.ancestorOrigins[0].indexOf('http://localhost:') == 0)) &&
       // Filter out localhost running against a prod script.

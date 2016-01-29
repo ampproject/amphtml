@@ -41,7 +41,7 @@ register('a9', a9);
 register('adreactor', adreactor);
 register('adsense', adsense);
 register('adtech', adtech);
-register('revcontent', adtech);
+register('revcontent', revcontent);
 register('doubleclick', doubleclick);
 register('_ping_', function(win, data) {
   win.document.getElementById('c').textContent = data.ping;
