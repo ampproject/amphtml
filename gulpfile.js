@@ -31,6 +31,7 @@ var rename = require('gulp-rename');
 var replace = require('gulp-replace');
 var source = require('vinyl-source-stream');
 var sourcemaps = require('gulp-sourcemaps');
+var touch = require('touch')
 var uglify = require('gulp-uglify');
 var util = require('gulp-util');
 var watchify = require('watchify');
@@ -443,6 +444,10 @@ function compileJs(srcDir, srcFilename, destDir, options) {
     bundler.on('update', function() {
       console.log('-> bundling ' + srcDir + '...');
       rebundle();
+      // Touch file in unit test set. This triggers rebundling of tests because
+      // karma only considers changes to tests files themselves re-bundle
+      // worthy.
+      touch('test/_init_tests.js');
     });
   }
 
