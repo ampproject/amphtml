@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import './polyfills';
+
 /**
  * Helper with all things Timer.
  */
