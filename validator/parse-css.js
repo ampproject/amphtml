@@ -22,9 +22,9 @@
  */
 goog.provide('parse_css.AtRule');
 goog.provide('parse_css.BlockType');
-goog.provide('parse_css.CSSParserRule');
 goog.provide('parse_css.Declaration');
 goog.provide('parse_css.QualifiedRule');
+goog.provide('parse_css.Rule');
 goog.provide('parse_css.Stylesheet');
 goog.provide('parse_css.TokenStream');
 goog.provide('parse_css.extractAFunction');
@@ -140,9 +140,9 @@ function createParseErrorTokenAt(positionToken, detail) {
 }
 
 /**
- * Returns a Stylesheet object with nested parse_css.CSSParserRules.
+ * Returns a Stylesheet object with nested parse_css.Rules.
  *
- * The top level CSSParserRules in a Stylesheet are always a series of
+ * The top level Rules in a Stylesheet are always a series of
  * QualifiedRule's or AtRule's.
  *
  * @param {!Array<!parse_css.Token>} tokenList
@@ -175,34 +175,34 @@ parse_css.parseAStylesheet = function(
  * @constructor
  * @extends {parse_css.Token}
  */
-parse_css.CSSParserRule = function() {
+parse_css.Rule = function() {
   goog.base(this);
 };
-goog.inherits(parse_css.CSSParserRule, parse_css.Token);
+goog.inherits(parse_css.Rule, parse_css.Token);
 
 /** @type {parse_css.TokenType} */
-parse_css.CSSParserRule.tokenType = parse_css.TokenType.UNKNOWN;
+parse_css.Rule.tokenType = parse_css.TokenType.UNKNOWN;
 
 /**
  * @param {number=} opt_indent
  * @return {string}
  */
-parse_css.CSSParserRule.prototype.toString = function(opt_indent) {
+parse_css.Rule.prototype.toString = function(opt_indent) {
   return JSON.stringify(this.toJSON(), null, opt_indent);
 };
 
 /**
  * @constructor
- * @extends {parse_css.CSSParserRule}
+ * @extends {parse_css.Rule}
  */
 parse_css.Stylesheet = function() {
   goog.base(this);
-  /** @type {!Array<!parse_css.CSSParserRule>} */
+  /** @type {!Array<!parse_css.Rule>} */
   this.rules = [];
   /** @type {?parse_css.EOFToken} */
   this.eof = null;
 };
-goog.inherits(parse_css.Stylesheet, parse_css.CSSParserRule);
+goog.inherits(parse_css.Stylesheet, parse_css.Rule);
 
 /** @type {parse_css.TokenType} */
 parse_css.Stylesheet.prototype.tokenType = parse_css.TokenType.STYLESHEET;
@@ -218,7 +218,7 @@ parse_css.Stylesheet.prototype.toJSON = function() {
 /**
  * @param {string} name
  * @constructor
- * @extends {parse_css.CSSParserRule}
+ * @extends {parse_css.Rule}
  */
 parse_css.AtRule = function(name) {
   goog.base(this);
@@ -226,12 +226,12 @@ parse_css.AtRule = function(name) {
   this.name = name;
   /** @type {!Array<!parse_css.Token>} */
   this.prelude = [];
-  /** @type {!Array<!parse_css.CSSParserRule>} */
+  /** @type {!Array<!parse_css.Rule>} */
   this.rules = [];
   /** @type {!Array<!parse_css.Declaration>} */
   this.declarations = [];
 };
-goog.inherits(parse_css.AtRule, parse_css.CSSParserRule);
+goog.inherits(parse_css.AtRule, parse_css.Rule);
 
 /** @type {parse_css.TokenType} */
 parse_css.AtRule.prototype.tokenType = parse_css.TokenType.AT_RULE;
@@ -248,7 +248,7 @@ parse_css.AtRule.prototype.toJSON = function() {
 
 /**
  * @constructor
- * @extends {parse_css.CSSParserRule}
+ * @extends {parse_css.Rule}
  */
 parse_css.QualifiedRule = function() {
   goog.base(this);
@@ -257,7 +257,7 @@ parse_css.QualifiedRule = function() {
   /** @type {!Array<!parse_css.Declaration>} */
   this.declarations = [];
 };
-goog.inherits(parse_css.QualifiedRule, parse_css.CSSParserRule);
+goog.inherits(parse_css.QualifiedRule, parse_css.Rule);
 
 /** @type {parse_css.TokenType} */
 parse_css.QualifiedRule.prototype.tokenType =
@@ -274,7 +274,7 @@ parse_css.QualifiedRule.prototype.toJSON = function() {
 /**
  * @param {string} name
  * @constructor
- * @extends {parse_css.CSSParserRule}
+ * @extends {parse_css.Rule}
  */
 parse_css.Declaration = function(name) {
   goog.base(this);
@@ -285,7 +285,7 @@ parse_css.Declaration = function(name) {
   /** @type {boolean} */
   this.important = false;
 };
-goog.inherits(parse_css.Declaration, parse_css.CSSParserRule);
+goog.inherits(parse_css.Declaration, parse_css.Rule);
 
 /** @type {parse_css.TokenType} */
 parse_css.Declaration.prototype.tokenType = parse_css.TokenType.DECLARATION;
@@ -356,7 +356,7 @@ Canonicalizer.prototype.blockTypeFor = function(atRule) {
  * @param {!Array<!parse_css.Token>} tokenList
  * @param {boolean} topLevel
  * @param {!Array<!parse_css.ErrorToken>} errors output array for the errors.
- * @return {!Array<!parse_css.CSSParserRule>}
+ * @return {!Array<!parse_css.Rule>}
  */
 Canonicalizer.prototype.parseAListOfRules = function(
     tokenList, topLevel, errors) {
@@ -439,7 +439,7 @@ Canonicalizer.prototype.parseAnAtRule = function(tokenStream, errors) {
  * and a list of declarations.
  *
  * @param {!parse_css.TokenStream} tokenStream
- * @param {!Array<!parse_css.CSSParserRule>} rules output array for new rule
+ * @param {!Array<!parse_css.Rule>} rules output array for new rule
  * @param {!Array<!parse_css.ErrorToken>} errors output array for new error.
  */
 Canonicalizer.prototype.parseAQualifiedRule = function(
