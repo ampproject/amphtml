@@ -120,6 +120,7 @@ function compile(watch, shouldMinify) {
   compileJs('./src/', 'amp-babel.js', './dist', {
     toName: 'amp.js',
     minifiedName: 'v0.js',
+    includePolyfills: true,
     watch: watch,
     minify: shouldMinify,
     // If there is a sync JS error during initial load,
