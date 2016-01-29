@@ -25,7 +25,7 @@ min_validator_revision_required: 82
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 132
+spec_file_revision: 133
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
 # These rules are just enough to validate the example from the spec.
@@ -2390,8 +2390,6 @@ tags: {
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-user-notification/amp-user-notification.md"
   also_requires: "amp-user-notification extension .js script"
   attr_lists: "extended-amp-global"
-  attrs: { name: "data-show-if-href" mandatory: true }
-  attrs: { name: "data-dismiss-href" mandatory: true }
   amp_layout: {
     supported_layouts: NODISPLAY
   }
