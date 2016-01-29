@@ -22,6 +22,13 @@ import {checkData} from '../src/3p';
  */
 export function adsense(global, data) {
   checkData(data, ['adClient', 'adSlot']);
+  if (global.context.clientId) {
+    // Read by GPT for GA/GPT integration.
+    global.gaGlobal = {
+      vid: global.context.clientId,
+      hid: global.context.pageViewId,
+    };
+  }
   /*eslint "google-camelcase/google-camelcase": 0*/
   global.google_page_url = global.context.canonicalUrl;
   const s = document.createElement('script');

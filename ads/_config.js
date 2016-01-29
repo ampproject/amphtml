@@ -54,4 +54,6 @@ export const adPreconnect = {
 export const clientIdScope = {
   // Add a mapping like
   // adNetworkType: 'cidScope' here.
+  adsense: 'AMP_ECID_GOOGLE',
+  doubleclick: 'AMP_ECID_GOOGLE',
 };
