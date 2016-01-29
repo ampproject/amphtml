@@ -127,7 +127,7 @@ describe('UrlReplacements', () => {
     setCookie(window, 'url-xyz', '');
     return expand('?a=CLIENT_ID(url-abc)&b=CLIENT_ID(url-xyz)', true)
         .then(res => {
-          expect(res).to.match(/^\?a=cid-for-abc\&b=amp-(\w){10,}/);
+          expect(res).to.match(/^\?a=cid-for-abc\&b=amp-([a-zA-Z0-9_-]+){10,}/);
         });
   });
 
