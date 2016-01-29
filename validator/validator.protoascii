@@ -25,7 +25,7 @@ min_validator_revision_required: 82
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 131
+spec_file_revision: 132
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
 # These rules are just enough to validate the example from the spec.
@@ -100,9 +100,7 @@ tags: {
   attrs: { name: "href" }
   attrs: {
     name: "rel"
-    # TODO(gregable): Make this attribute required. Test to verify that
-    # the change won't break too many pages.
-    # mandatory: true
+    mandatory: true
     # List sourced from http://microformats.org/wiki/existing-rel-values
     # In order to allow for multiple whitespace separated values, we must
     # repeat this list twice annoyingly. We end up with a structure like:
@@ -286,10 +284,8 @@ tags: {
   attrs: {
     name: "rel"
     value: "canonical"
-    # TODO(gregable): Make this attribute required. Test to verify that
-    # the change won't break too many pages.
-    # mandatory: true
-    # dispatch_key: true
+    mandatory: true
+    dispatch_key: true
   }
   attrs: {
     name: "href"
@@ -308,10 +304,8 @@ tags: {
   attrs: {
     name: "rel"
     value: "amphtml"
-    # TODO(gregable): Make this attribute required. Test to verify that
-    # the change won't break too many pages.
-    # mandatory: true
-    # dispatch_key: true
+    mandatory: true
+    dispatch_key: true
   }
   attrs: {
     name: "href"
@@ -353,7 +347,8 @@ tags: {
     dispatch_key: true
   }
   attrs: {
-    name: "content"
+    name: "href"
+    mandatory: true
   }
 }
 # Various whitelisted rel attribute values which can co-occur with
@@ -366,9 +361,7 @@ tags: {
   attrs: { name: "sizes" }
   attrs: {
     name: "rel"
-    # TODO(gregable): Make this attribute required. Test to verify that
-    # the change won't break too many pages.
-    # mandatory: true
+    mandatory: true
     value_regex: "icon|"
     "shortcut icon|"
     "image_src|"
