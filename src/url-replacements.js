@@ -152,6 +152,34 @@ class UrlReplacements {
       return this.win_.screen.height;
     });
 
+    // Returns screen.availHeight.
+    this.set_('AVAILABLE_SCREEN_HEIGHT', () => {
+      return this.win_.screen.availHeight;
+    });
+
+    // Returns screen.availWidth.
+    this.set_('AVAILABLE_SCREEN_WIDTH', () => {
+      return this.win_.screen.availWidth;
+    });
+
+    // Returns screen.ColorDepth.
+    this.set_('SCREEN_COLOR_DEPTH', () => {
+      return this.win_.screen.colorDepth;
+    });
+
+    // Returns document characterset.
+    this.set_('DOCUMENT_CHARSET', () => {
+      const doc = this.win_.document;
+      return doc.characterSet || doc.charset;
+    });
+
+    // Returns the browser language.
+    this.set_('BROWSER_LANGUAGE', () => {
+      const nav = this.win_.navigator;
+      return (nav.language || nav.userLanguage || nav.browserLanguage || '')
+          .toLowerCase();
+    });
+
     // Returns the time it took to load the whole page. (excludes amp-* elements
     // that are not rendered by the system yet.)
     this.set_('PAGE_LOAD_TIME', () => {
