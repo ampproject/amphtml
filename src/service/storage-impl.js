@@ -17,7 +17,7 @@
 import {assert} from '../asserts';
 import {getService} from '../service';
 import {getSourceOrigin} from '../url';
-import {isExperimentOn} from '../experiments';
+import {isDevChannel, isExperimentOn} from '../experiments';
 import {log} from '../log';
 import {timer} from '../timer';
 import {viewerFor} from '../viewer';
@@ -65,12 +65,8 @@ export class Storage {
     this.origin_ = getSourceOrigin(this.win.location);
 
     /** @const @private {boolean} */
-    this.isExperimentOn_ = isExperimentOn(this.win, EXPERIMENT);
-
-    /** @private @const {!Promise} */
-    this.whenStarted_ = this.isExperimentOn_ ?
-        Promise.resolve() :
-        Promise.reject(`Enable experiment ${EXPERIMENT}`);
+    this.isExperimentOn_ = (isExperimentOn(this.win, EXPERIMENT) ||
+        isDevChannel(this.win));
 
     /** @private {?Promise<!Store>} */
     this.storePromise_ = null;
@@ -129,9 +125,11 @@ export class Storage {
    * @private
    */
   getStore_() {
+    if (!this.isExperimentOn_) {
+      return Promise.reject(`Enable experiment ${EXPERIMENT}`);
+    }
     if (!this.storePromise_) {
-      this.storePromise_ = this.whenStarted_
-          .then(() => this.binding_.loadBlob(this.origin_))
+      this.storePromise_ = this.binding_.loadBlob(this.origin_)
           .then(blob => blob ? JSON.parse(atob(blob)) : {})
           .catch(reason => {
             log.error(TAG, 'Failed to load store: ', reason);
@@ -148,6 +146,9 @@ export class Storage {
    * @private
    */
   saveStore_(mutator) {
+    if (!this.isExperimentOn_) {
+      return Promise.reject(`Enable experiment ${EXPERIMENT}`);
+    }
     return this.getStore_()
         .then(store => {
           mutator(store);
