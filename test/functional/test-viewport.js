@@ -474,10 +474,6 @@ describe('ViewportBindingNatural', () => {
     sandbox = null;
   });
 
-  it('should NOT override overflow by default', () => {
-    expect(documentElement.style.overflowY).to.be.undefined;
-  });
-
   it('should subscribe to scroll and resize events', () => {
     expect(windowEventHandlers['scroll']).to.not.equal(undefined);
     expect(windowEventHandlers['resize']).to.not.equal(undefined);
