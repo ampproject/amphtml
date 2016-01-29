@@ -649,6 +649,7 @@ describe('parseAStylesheet', () => {
                  'important': false}]}]}]}], 'eof':
          {'line': 7, 'col': 1, 'tokenType': 'EOF_TOKEN'}},
         sheet);
+    assertStrictEqual(0, errors.length);
   });
 
   it('handles selectors but does not parse them in detail yet', () => {
@@ -674,6 +675,7 @@ describe('parseAStylesheet', () => {
              false}]}], 'eof':
          {'line': 1, 'col': 21, 'tokenType': 'EOF_TOKEN'}},
         sheet);
+    assertStrictEqual(0, errors.length);
   });
 
   // The tests below are exploratory - they tell us what the css parser

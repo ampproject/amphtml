@@ -409,6 +409,7 @@ Canonicalizer.prototype.parseAnAtRule = function(tokenStream, errors) {
     if (tokenStream.current() instanceof parse_css.OpenCurlyToken) {
       rule.prelude.push(createEOFTokenAt(tokenStream.current()));
 
+      /** @type {!Array<!parse_css.Token>} */
       const contents = parse_css.extractASimpleBlock(tokenStream);
 
       switch (this.blockTypeFor(rule)) {
@@ -426,7 +427,6 @@ Canonicalizer.prototype.parseAnAtRule = function(tokenStream, errors) {
               'Unrecognized blockType ' + this.blockTypeFor(rule));
           break;
       }
-
       return rule;
     }
     consumeAComponentValue(tokenStream, rule.prelude);
@@ -595,8 +595,8 @@ function consumeAComponentValue(tokenStream, tokenList) {
 }
 
 /**
- * consumeASimpleBlock appends a simple block's contents to a tokenList,
- * consuming from the stream all those tokens that it adds to the tokenList,
+ * Appends a simple block's contents to a tokenList, consuming from
+ * the stream all those tokens that it adds to the tokenList,
  * including the start/end grouping token.
  * @param {!parse_css.TokenStream} tokenStream
  * @param {!Array<!parse_css.Token>} tokenList output array for tokens.
@@ -629,8 +629,8 @@ function consumeASimpleBlock(tokenStream, tokenList) {
 }
 
 /**
- * extractASimpleBlock returns a simple block's contents in tokenList,
- * excluding the start/end grouping token, and appended with an EOFToken.
+ * Returns a simple block's contents in tokenStream, excluding the
+ * start/end grouping token, and appended with an EOFToken.
  * @param {!parse_css.TokenStream} tokenStream
  * @return {!Array<!parse_css.Token>}
  */
@@ -650,9 +650,9 @@ parse_css.extractASimpleBlock = function(tokenStream) {
 };
 
 /**
- * consumeAFunction appends a functions contents to a tokenList,
- * consuming from the stream all those tokens that it adds to the tokenList,
- * including the function token and end grouping token.
+ * Appends a function's contents to a tokenList, consuming from the
+ * stream all those tokens that it adds to the tokenList, including
+ * the function token and end grouping token.
  * @param {!parse_css.TokenStream} tokenStream
  * @param {!Array<!parse_css.Token>} tokenList output array for tokens.
  */
@@ -662,10 +662,8 @@ function consumeAFunction(tokenStream, tokenList) {
   tokenList.push(tokenStream.current());
   while (true) {
     tokenStream.consume();
-    if (tokenStream.current() instanceof parse_css.EOFToken) {
-      tokenList.push(tokenStream.current());
-      return;
-    } else if (tokenStream.current() instanceof parse_css.CloseParenToken) {
+    if (tokenStream.current() instanceof parse_css.EOFToken ||
+        tokenStream.current() instanceof parse_css.CloseParenToken) {
       tokenList.push(tokenStream.current());
       return;
     } else {
@@ -675,9 +673,9 @@ function consumeAFunction(tokenStream, tokenList) {
 }
 
 /**
- * extractAFunction returns a function's contents in tokenList,
- * including the leading FunctionToken, but excluding the trailing
- * CloseParen token and appended with an EOFToken instead.
+ * Returns a function's contents in tokenList, including the leading
+ * FunctionToken, but excluding the trailing CloseParen token and
+ * appended with an EOFToken instead.
  * @param {!parse_css.TokenStream} tokenStream
  * @return {!Array<!parse_css.Token>}
  */
