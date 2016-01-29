@@ -66,8 +66,12 @@ function compile(entryModuleFilename, outputDir,
     console./*OK*/log('Starting closure compiler for ', entryModuleFilename);
     fs.mkdirsSync('build/cc');
     fs.mkdirsSync('build/fake-module/third_party/babel');
+    fs.mkdirsSync('build/fake-module/src');
     fs.writeFileSync(
         'build/fake-module/third_party/babel/custom-babel-helpers.js',
+        '// Not needed in closure compiler\n');
+    fs.writeFileSync(
+        'build/fake-module/src/polyfills.js',
         '// Not needed in closure compiler\n');
     var wrapper = '(function(){var process={env:{}};%output%})();';
     if (options.wrapper) {
@@ -79,8 +83,7 @@ function compile(entryModuleFilename, outputDir,
     if (fs.existsSync(intermediateFilename)) {
       fs.unlinkSync(intermediateFilename);
     }
-    /*eslint "google-camelcase/google-camelcase": 0*/
-    return gulp.src([
+    const srcs = [
       '3p/**/*.js',
       'ads/**/*.js',
       'extensions/**/*.js',
@@ -104,7 +107,17 @@ function compile(entryModuleFilename, outputDir,
       // Don't include tests.
       '!**_test.js',
       '!**/test-*.js',
-    ])
+    ];
+    // Many files include the polyfills, but we only want to deliver them
+    // once. Since all files automatically wait for the main binary to load
+    // this works fine.
+    if (options.includePolyfills) {
+      srcs.push('!build/fake-module/src/polyfills.js');
+    } else {
+      srcs.push('!src/polyfills.js');
+    }
+    /*eslint "google-camelcase/google-camelcase": 0*/
+    return gulp.src(srcs)
     .pipe(closureCompiler({
       // Temporary shipping with our own compiler that has a single patch
       // applied

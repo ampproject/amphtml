@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+// Requires polyfills in immediate side effect.
+import './polyfills';
 import {assert} from './asserts';
 
 /**
