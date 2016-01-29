@@ -19,7 +19,7 @@ import {getElementService} from './custom-element';
 
 /**
  * @param {!Window} window
- * @return {!Storage}
+ * @return {!Promise<!Storage>}
  */
 export function storageFor(window) {
   return getElementService(window, 'storage', 'amp-analytics');

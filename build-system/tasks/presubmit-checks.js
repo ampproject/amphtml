@@ -198,6 +198,7 @@ var forbiddenTerms = {
     message: requiresReviewPrivacy,
     whitelist: [
       'src/storage.js',
+      'extensions/amp-user-notification/0.1/amp-user-notification.js',
     ],
   },
   'localStorage': {
