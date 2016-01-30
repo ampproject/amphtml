@@ -14,14 +14,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# AdTech
+# Revcontent
 
 ## Example
 
 ```html
-<amp-ad width=300 height=250
-    type="revcontent"
-    data-id="30">
+<amp-ad width=300 height=1000
+        type="revcontent"
+        data-endpoint="trends.revcontent.com"
+        data-ssl="true"
+        data-id="30">
+
 </amp-ad>
 ```
 
@@ -31,4 +34,6 @@ For semantics of configuration, please see ad network documentation.
 
 Supported parameters:
 
+- endpoint. Must be a valid Trends Server
 - id. Must be a valid Widget ID
+- ssl. Must be set to "true" for SSL mode

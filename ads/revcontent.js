@@ -22,11 +22,20 @@ import {writeScript, checkData} from '../src/3p';
  */
 export function revcontent(global, data) {
     checkData(data, ['id']);
-    const serve_protocol = 'https://';
-    const serve_host = 'trends-stg.revcontent.com/serve.js.php';
-    const serve_parms = '?w=' + data.id;
-    const serve_url = serve_protocol + serve_host + serve_parms;
-    //validateSrcPrefix('https:', serve_url);
-    //validateSrcContains('/serve.js.php/', serve_url);
-    writeScript(global, serve_url);
+    (function(window, document, undefined) {
+        const serve_protocol = data.ssl === 'true' ? 'https://' : 'http://';
+        const serve_host = data.endpoint;
+        const serve_script = '/serve.js.php';
+        var rcjsload = document.createElement("div");
+        rcjsload.id = "rcjsload_2ff711";
+        document.body.appendChild(rcjsload);
+        var rcel = document.createElement("script");
+        rcel.id = 'rc_' + Math.floor(Math.random() * 1000);
+        rcel.type = 'text/javascript';
+        var serve_parms = "?uitm=1&w=" + data.id + "&t=" + rcel.id + "&c=" + (new Date()).getTime() + "&width=" + (window.outerWidth || document.documentElement.clientWidth);
+        var serve_url = serve_protocol + serve_host + serve_script + serve_parms;
+        rcel.src = serve_url;
+        rcel.async = true;
+        var rcds = document.getElementById("rcjsload_2ff711"); rcds.appendChild(rcel);
+    })(global, global.document);
 }
