@@ -46,7 +46,7 @@ describe('New Visibility Boilerplate', () => {
       });
   });
 
-  it('should show the body', () => {
+  it('should show the body in boilerplate test', () => {
     return expectBodyToBecomeVisible(fixture.win).then(() => {
       expect(getStyle(
           fixture.win.document.body, 'visibility')).to.equal('visible');

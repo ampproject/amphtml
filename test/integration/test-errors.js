@@ -22,7 +22,12 @@ describe('error page', () => {
   beforeEach(() => {
     return createFixtureIframe('test/fixtures/errors.html', 500, win => {
       // Trigger dev mode.
-      win.history.pushState({}, '', 'test2.html#development=1');
+      try {
+        win.history.pushState({}, '', 'test2.html#development=1');
+      } catch (e) {
+        // Some browsers do not allow this.
+        win.AMP_DEV_MODE = true;
+      }
       console.error('updated', win.location.hash);
     }).then(f => {
       fixture = f;
@@ -35,7 +40,7 @@ describe('error page', () => {
     });
   });
 
-  it('should show the body', () => {
+  it('should show the body in error test', () => {
     return expectBodyToBecomeVisible(fixture.win);
   });
 
