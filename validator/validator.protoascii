@@ -972,7 +972,7 @@ tags: {
   mandatory_ancestor: "noscript"
   mandatory_ancestor_suggested_alternative: "amp-audio"
   attrs: { name: "controls" }
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-audio/amp-audio.md"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-audio/README.md"
 }
 # 4.7.8 The source element
 attr_lists: {
@@ -985,7 +985,7 @@ attr_lists: {
 tags: {
   name: "source"
   detail: "amp-audio > source"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-audio/amp-audio.md"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-audio/README.md"
   mandatory_parent: "amp-audio"
   attrs: { name: "src" }
   attrs: { name: "type" }
@@ -1649,7 +1649,7 @@ tags: {  # amp-access
   name: "script"
   detail: "amp-access extension .js script"
   mandatory_parent: "head"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-access/amp-access.md"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-access/README.md"
   attrs: {
     name: "custom-element"
     value: "amp-access"
@@ -1667,7 +1667,7 @@ tags: {  # amp-analytics
   name: "script"
   mandatory_parent: "head"
   detail: "amp-analytics extension .js script"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-analytics.md"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/README.md"
   attrs: {
     name: "custom-element"
     value: "amp-analytics"
@@ -1685,7 +1685,7 @@ tags: {  # amp-anim
   name: "script"
   mandatory_parent: "head"
   detail: "amp-anim extension .js script"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-anim/amp-anim.md"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-anim/README.md"
   attrs: {
     name: "custom-element"
     value: "amp-anim"
@@ -1703,7 +1703,7 @@ tags: {  # amp-audio
   name: "script"
   mandatory_parent: "head"
   detail: "amp-audio extension .js script"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-audio/amp-audio.md"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-audio/README.md"
   attrs: {
     name: "custom-element"
     value: "amp-audio"
@@ -1721,7 +1721,7 @@ tags: {  # amp-brightcove
   name: "script"
   mandatory_parent: "head"
   detail: "amp-brightcove extension .js script"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-brightcove/amp-brightcove.md"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-brightcove/README.md"
   attrs: {
     name: "custom-element"
     value: "amp-brightcove"
@@ -1739,7 +1739,7 @@ tags: {  # amp-carousel
   name: "script"
   mandatory_parent: "head"
   detail: "amp-carousel extension .js script"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-carousel/amp-carousel.md"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-carousel/README.md"
   attrs: {
     name: "custom-element"
     value: "amp-carousel"
@@ -1757,7 +1757,7 @@ tags: {  # amp-dynamic-css-classes
   name: "script"
   mandatory_parent: "head"
   detail: "amp-dynamic-css-classes extension .js script"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-dynamic-css-classes/amp-dynamic-css-classes.md"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-dynamic-css-classes/README.md"
   attrs: {
     name: "custom-element"
     value: "amp-dynamic-css-classes"
@@ -1775,7 +1775,7 @@ tags: {  # amp-facebook
   name: "script"
   mandatory_parent: "head"
   detail: "amp-facebook extension .js script"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-facebook/amp-facebook.md"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-facebook/README.md"
   attrs: {
     name: "custom-element"
     value: "amp-facebook"
@@ -1793,7 +1793,7 @@ tags: {  # amp-fit-text
   name: "script"
   mandatory_parent: "head"
   detail: "amp-fit-text extension .js script"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-fit-text/amp-fit-text.md"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-fit-text/README.md"
   attrs: {
     name: "custom-element"
     value: "amp-fit-text"
@@ -1811,7 +1811,7 @@ tags: {  # amp-font
   name: "script"
   mandatory_parent: "head"
   detail: "amp-font extension .js script"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-font/amp-font.md"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-font/README.md"
   attrs: {
     name: "custom-element"
     value: "amp-font"
@@ -1829,7 +1829,7 @@ tags: {  # amp-iframe
   name: "script"
   mandatory_parent: "head"
   detail: "amp-iframe extension .js script"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-iframe/amp-iframe.md"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-iframe/README.md"
   attrs: {
     name: "custom-element"
     value: "amp-iframe"
@@ -1847,7 +1847,7 @@ tags: {  # amp-image-lightbox
   name: "script"
   mandatory_parent: "head"
   detail: "amp-image-lightbox extension .js script"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-image-lightbox/amp-image-lightbox.md"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-image-lightbox/README.md"
   attrs: {
     name: "custom-element"
     value: "amp-image-lightbox"
@@ -1865,7 +1865,7 @@ tags: {  # amp-instagram
   name: "script"
   mandatory_parent: "head"
   detail: "amp-instagram extension .js script"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-instagram/amp-instagram.md"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-instagram/README.md"
   attrs: {
     name: "custom-element"
     value: "amp-instagram"
@@ -1883,7 +1883,7 @@ tags: {  # amp-install-serviceworker
   name: "script"
   mandatory_parent: "head"
   detail: "amp-install-serviceworker extension .js script"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-install-serviceworker/amp-install-serviceworker.md"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-install-serviceworker/README.md"
   attrs: {
     name: "custom-element"
     value: "amp-install-serviceworker"
@@ -1901,7 +1901,7 @@ tags: {  # amp-lightbox
   name: "script"
   mandatory_parent: "head"
   detail: "amp-lightbox extension .js script"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-lightbox/amp-lightbox.md"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-lightbox/README.md"
   attrs: {
     name: "custom-element"
     value: "amp-lightbox"
@@ -1919,7 +1919,7 @@ tags: {  # amp-mustache
   name: "script"
   mandatory_parent: "head"
   detail: "amp-mustache extension .js script"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-mustache/amp-mustache.md"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-mustache/README.md"
   attrs: {
     name: "custom-template"
     value: "amp-mustache"
@@ -1937,7 +1937,7 @@ tags: {  # amp-list
   name: "script"
   mandatory_parent: "head"
   detail: "amp-list extension .js script"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-list/amp-list.md"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-list/README.md"
   attrs: {
     name: "custom-element"
     value: "amp-list"
@@ -1955,7 +1955,7 @@ tags: {  # amp-pinterest
   name: "script"
   mandatory_parent: "head"
   detail: "amp-pinterest extension .js script"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-pinterest/amp-pinterest.md"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-pinterest/README.md"
   attrs: {
     name: "custom-element"
     value: "amp-pinterest"
@@ -1973,7 +1973,7 @@ tags: {  # amp-slides
   name: "script"
   mandatory_parent: "head"
   detail: "amp-slides extension .js script"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-slides/amp-slides.md"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-slides/README.md"
   attrs: {
     name: "custom-element"
     value: "amp-slides"
@@ -1991,7 +1991,7 @@ tags: {  # amp-twitter
   name: "script"
   mandatory_parent: "head"
   detail: "amp-twitter extension .js script"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-twitter/amp-twitter.md"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-twitter/README.md"
   attrs: {
     name: "custom-element"
     value: "amp-twitter"
@@ -2009,7 +2009,7 @@ tags: {  # amp-user-notification
   name: "script"
   mandatory_parent: "head"
   detail: "amp-user-notification extension .js script"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-user-notification/amp-user-notification.md"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-user-notification/README.md"
   attrs: {
     name: "custom-element"
     value: "amp-user-notification"
@@ -2027,7 +2027,7 @@ tags: {  # amp-vine
   name: "script"
   mandatory_parent: "head"
   detail: "amp-vine extension .js script"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-vine/amp-vine.md"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-vine/README.md"
   attrs: {
     name: "custom-element"
     value: "amp-vine"
@@ -2045,7 +2045,7 @@ tags: {  # amp-youtube
   name: "script"
   mandatory_parent: "head"
   detail: "amp-youtube extension .js script"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-youtube/amp-youtube.md"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-youtube/README.md"
   attrs: {
     name: "custom-element"
     value: "amp-youtube"
@@ -2064,7 +2064,7 @@ tags: {
   name: "script"
   mandatory_parent: "amp-analytics"
   detail: "amp-analytics json script"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-analytics.md"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/README.md"
   attrs: {
     name: "type"
     mandatory: true
@@ -2187,7 +2187,7 @@ attr_lists: {
 # <amp-brightcove>
 tags: {
   name: "amp-brightcove"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-brightcove/amp-brightcove.md"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-brightcove/README.md"
   also_requires: "amp-brightcove extension .js script"
   attr_lists: "extended-amp-global"
   attrs: { name: "data-account" mandatory: true }
@@ -2210,7 +2210,7 @@ tags: {
 # <amp-font>
 tags: {
   name: "amp-font"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-font/amp-font.md"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-font/README.md"
   also_requires: "amp-font extension .js script"
   attr_lists: "extended-amp-global"
   attrs: {
@@ -2312,7 +2312,7 @@ tags: {
 # <amp-facebook>
 tags: {
   name: "amp-facebook"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-facebook/amp-facebook.md"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-facebook/README.md"
   also_requires: "amp-facebook extension .js script"
   attr_lists: "extended-amp-global"
   # data-* is generally allowed, but it's not generally mandatory.
@@ -2330,7 +2330,7 @@ tags: {
 # out now that the spec is available.
 tags: {
   name: "amp-fit-text"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-fit-text/amp-fit-text.md"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-fit-text/README.md"
   also_requires: "amp-fit-text extension .js script"
   attr_lists: "extended-amp-global"
   attrs: { name: "min-font-size" }
@@ -2346,7 +2346,7 @@ tags: {
 # <amp-carousel>
 tags: {
   name: "amp-carousel"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-carousel/amp-carousel.md"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-carousel/README.md"
   also_requires: "amp-carousel extension .js script"
   attr_lists: "extended-amp-global"
   attrs: { name: "autoplay" value: "" }
@@ -2366,7 +2366,7 @@ tags: {
 # <amp-anim>
 tags: {
   name: "amp-anim"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-anim/amp-anim.md"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-anim/README.md"
   also_requires: "amp-anim extension .js script"
   attr_lists: "extended-amp-global"
   attr_lists: "mandatory-src-or-srcset"
@@ -2385,7 +2385,7 @@ tags: {
 # <amp-analytics>
 tags: {
   name: "amp-analytics"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-analytics.md"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/README.md"
   also_requires: "amp-analytics extension .js script"
   attrs: { name: "type" value: "googleanalytics" }
   # TODO(gregable): This should require a valid https URL as the attr value.
@@ -2394,7 +2394,7 @@ tags: {
 # <amp-user-notification>
 tags: {
   name: "amp-user-notification"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-user-notification/amp-user-notification.md"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-user-notification/README.md"
   also_requires: "amp-user-notification extension .js script"
   attr_lists: "extended-amp-global"
   attrs: { name: "data-show-if-href" mandatory: true }
@@ -2409,7 +2409,7 @@ tags: {
 tags: {
   name: "amp-youtube"
   attr_lists: "extended-amp-global"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-youtube/amp-youtube.md"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-youtube/README.md"
   also_requires: "amp-youtube extension .js script"
   attrs: {
     name: "src"
@@ -2422,7 +2422,7 @@ tags: {
   attrs: {
     name: "video-id"
     deprecation: "data-videoid"
-    deprecation_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-youtube/amp-youtube.md"
+    deprecation_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-youtube/README.md"
     mandatory_oneof: "['src', 'data-videoid']"
   }
   amp_layout: {
@@ -2436,7 +2436,7 @@ tags: {
 # <amp-vine>
 tags: {
   name: "amp-vine"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-vine/amp-vine.md"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-vine/README.md"
   also_requires: "amp-vine extension .js script"
   attr_lists: "extended-amp-global"
   # data-* is generally allowed, but it's not generally mandatory.
@@ -2450,13 +2450,13 @@ tags: {
   }
 }
 # <amp-pinterest>
-# https://github.com/ampproject/amphtml/blob/master/extensions/amp-pinterest/amp-pinterest.md
+# https://github.com/ampproject/amphtml/blob/master/extensions/amp-pinterest/README.md
 # TODO: Enforce mandatory attributes depending on the value of another
 # attribute. In this case, depending on the value of data-do, data-media and
 # data-description may or may not be mandatory.
 tags: {
   name: "amp-pinterest"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-pinterest/amp-pinterest.md"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-pinterest/README.md"
   also_requires: "amp-pinterest extension .js script"
   attr_lists: "extended-amp-global"
   # data-* is generally allowed, but it's not generally mandatory.
@@ -2472,7 +2472,7 @@ tags: {
 # <amp-twitter>
 tags: {
   name: "amp-twitter"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-twitter/amp-twitter.md"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-twitter/README.md"
   also_requires: "amp-twitter extension .js script"
   attr_lists: "extended-amp-global"
   attrs: { name: "data-tweetid" mandatory_oneof: "['data-tweetid', 'src']" }
@@ -2488,7 +2488,7 @@ tags: {
 # <amp-instagram>
 tags: {
   name: "amp-instagram"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-instagram/amp-instagram.md"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-instagram/README.md"
   also_requires: "amp-instagram extension .js script"
   attr_lists: "extended-amp-global"
   attrs: {
@@ -2502,7 +2502,7 @@ tags: {
   attrs: {
     name: "shortcode"
     deprecation: "data-shortcode"
-    deprecation_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-instagram/amp-instagram.md"
+    deprecation_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-instagram/README.md"
     mandatory_oneof: "['data-shortcode', 'src']"
   }
   amp_layout: {
@@ -2516,7 +2516,7 @@ tags: {
 # <amp-iframe>
 tags: {
   name: "amp-iframe"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-iframe/amp-iframe.md"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-iframe/README.md"
   also_requires: "amp-iframe extension .js script"
   attr_lists: "extended-amp-global"
   attrs: { name: "sandbox" }
@@ -2554,7 +2554,7 @@ tags: {
 # <amp-audio>
 tags: {
   name: "amp-audio"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-audio/amp-audio.md"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-audio/README.md"
   also_requires: "amp-audio extension .js script"
   attr_lists: "extended-amp-global"
   attrs: { name: "src" }
@@ -2581,7 +2581,7 @@ tags: {
 tags: {
   name: "amp-lightbox"
   attr_lists: "extended-amp-global"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-lightbox/amp-lightbox.md"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-lightbox/README.md"
   also_requires: "amp-lightbox extension .js script"
   attrs: { name: "from" }
   attrs: { name: "controls" }
@@ -2592,7 +2592,7 @@ tags: {
 # <amp-image-lightbox>
 tags: {
   name: "amp-image-lightbox"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-image-lightbox/amp-image-lightbox.md"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-image-lightbox/README.md"
   also_requires: "amp-image-lightbox extension .js script"
   # Support dimensions / sizes / etc. like an amp-lightbox.
   attr_lists: "extended-amp-global"
@@ -2604,7 +2604,7 @@ tags: {
 # <amp-list>
 tags: {
   name: "amp-list"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-list/amp-list.md"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-list/README.md"
   also_requires: "amp-list extension .js script"
   attr_lists: "extended-amp-global"
   attrs: { name: "src" mandatory: true }
@@ -2620,7 +2620,7 @@ tags: {
 # <amp-install-serviceworker>
 tags: {
   name: "amp-install-serviceworker"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-install-serviceworker/amp-install-serviceworker.md"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-install-serviceworker/README.md"
   also_requires: "amp-install-serviceworker extension .js script"
   attrs: { name: "src" }
 }
