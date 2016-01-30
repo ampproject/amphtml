@@ -406,6 +406,8 @@ function thirdPartyBootstrap(watch, shouldMinify) {
       });
 }
 
+var activeBundleOperationCount = 0;
+
 /**
  * Compile a javascript file
  *
@@ -436,11 +438,18 @@ function compileJs(srcDir, srcFilename, destDir, options) {
       .pipe(gulp.dest.bind(gulp), destDir);
 
   function rebundle() {
+    activeBundleOperationCount++;
     bundler.bundle()
       .on('error', function(err) { console.error(err); this.emit('end'); })
       .pipe(lazybuild())
       .pipe(rename(options.toName || srcFilename))
-      .pipe(lazywrite());
+      .pipe(lazywrite())
+      .on('end', function() {
+        activeBundleOperationCount--;
+        if (activeBundleOperationCount == 0) {
+          console.info('All current JS updates done.');
+        }
+      });
   }
 
   if (options.watch) {
