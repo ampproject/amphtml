@@ -19,10 +19,10 @@ import '../third_party/babel/custom-babel-helpers';
 import '../src/polyfills';
 import {adopt} from '../src/runtime';
 
-adopt(global);
+adopt(window);
 
 // Make amp section in karma config readable by tests.
-global.ampTestRuntimeConfig = parent.karma ? parent.karma.config.amp : {};
+window.ampTestRuntimeConfig = parent.karma ? parent.karma.config.amp : {};
 
 
 // Hack for skipping tests on Travis that don't work there.
@@ -75,10 +75,20 @@ sinon.sandbox.create = function(config) {
 // Global cleanup of tags added during tests. Cool to add more
 // to selector.
 afterEach(() => {
-  const cleanup = document.querySelectorAll('link,meta,iframe');
+  const cleanup = document.querySelectorAll('link,meta');
   for (let i = 0; i < cleanup.length; i++) {
     try {
-      cleanup[i].parentNode.removeChild(cleanup[i]);
+      const element = cleanup[i];
+      if (element.tagName == 'iframe') {
+        setTimeout(() => {
+          // Wait a bit until removing iframes. The reason is that Safari has
+          // a race where this sometimes runs too early and the test
+          // is actually still running
+          element.parentNode.removeChild(element);
+        }, 5000);
+      } else {
+        element.parentNode.removeChild(element);
+      }
     } catch (e) {
       // This sometimes fails for unknown reasons.
       console./*OK*/log(e);
@@ -87,6 +97,7 @@ afterEach(() => {
   window.localStorage.clear();
   window.ampExtendedElements = {};
   window.ENABLE_LOG = false;
+  window.AMP_DEV_MODE = false;
   if (!/native/.test(window.setTimeout)) {
     throw new Error('You likely forgot to restore sinon timers ' +
         '(installed via sandbox.useFakeTimers).');
