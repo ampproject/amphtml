@@ -126,7 +126,8 @@ function compile(watch, shouldMinify) {
     minify: shouldMinify,
     // If there is a sync JS error during initial load,
     // at least try to unhide the body.
-    wrapper: 'try{<%= contents %>}catch(e){setTimeout(function(){' +
+    wrapper: 'try{(function(){<%= contents %>})()}catch(e){' +
+        'setTimeout(function(){' +
         'var s=document.body.style;' +
         's.opacity=1;' +
         's.visibility="visible";' +
