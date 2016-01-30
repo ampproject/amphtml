@@ -63,7 +63,6 @@ describe('example', function() {
    */
   const errorWhitelist = [
     /invalid value \'.\/viewer-integr.js\'/,
-    /amp-embed/
   ];
 
   const usedWhitelist = [];
