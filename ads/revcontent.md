@@ -21,6 +21,7 @@ limitations under the License.
 ```html
 <amp-ad width=300 height=1000
         type="revcontent"
+        data-wrapper="rcjsload_2ff711"
         data-endpoint="trends.revcontent.com"
         data-ssl="true"
         data-id="30">
@@ -34,6 +35,7 @@ For semantics of configuration, please see ad network documentation.
 
 Supported parameters:
 
-- endpoint. Must be a valid Trends Server
-- id. Must be a valid Widget ID
-- ssl. Must be set to "true" for SSL mode
+- wrapper. Must be a valid dom.div id string
+- endpoint. Must be a valid Trends Server *required*
+- id. Must be a valid Widget ID *required* 
+- ssl. Must be set to "true" for SSL mode *required*

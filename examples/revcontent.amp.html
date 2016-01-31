@@ -7,16 +7,73 @@
     <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
     <style amp-custom>
         amp-ad {
-            max-width: 500px;
+            width: 100%;
+            max-width: 1280px;
+            margin: 18px 0;
+            padding: 0;
         }
-        .fixed {
-            position: fixed;
-            top: 0;
-            right: 0;
+
+        h1,h2,h3,h4,h5,h6 {
+            margin: 0;
+            padding: 0;
+            line-height: 130%;
         }
-        .red {
-            background-color: red;
+
+        p {
+            margin: 0;
+            padding: 0 0 10px 0;
         }
+
+        p.code-head {
+            margin: 0;
+            display: block;
+            width: 100%;
+            font-size: 10px;
+            text-transform: uppercase;
+            color: seagreen;
+            background-color: #222222;
+            line-height: 18px;
+            padding: 0 18px;
+
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+            font-family: Verdana,Tahoma,Arial,sans-serif;
+            font-size: 11px;
+        }
+
+        .wrapper {
+            padding: 18px;
+            display: block;
+
+        }
+
+        .wrapper.x2 {
+            padding: 36px;
+        }
+
+        pre {
+            margin: 0;
+            display: block;
+            width: 100%;
+            background-color: #dddddd;
+
+        }
+
+        pre code {
+
+            display: block;
+        }
+
+        div[placeholder] {
+            color: #888888;
+            padding: 5px;
+        }
+
+
     </style>
     <style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
     <!-- Production AMP Source -->
@@ -24,16 +81,36 @@
 
     <!-- Development AMP Source -->
     <script async src="/dist/amp.js"></script>
+
 </head>
 <body>
 <h1>RevContent + AMP</h1>
+<p>Serving native Ads within an <code>&lt;amp-ad /&gt;</code> Tag.</p>
+<p class="code-head">Embed Widget ID #30</p>
+<pre>
+<code class="html">
+    &lt;amp-ad width="auto"
+               layout="responsive"
+               type="revcontent"
+               data-wrapper="rcjsload_2ff711"
+               data-endpoint="trends.revcontent.com"
+               data-ssl="true"
+               data-id="30"&gt;
 
-<amp-ad width=300 height=1000
+    &lt;/amp-ad&gt;
+</code>
+</pre>
+
+<amp-ad width="auto"
+        layout="responsive"
         type="revcontent"
+        data-wrapper="rcjsload_2ff711"
         data-endpoint="trends.revcontent.com"
         data-ssl="true"
         data-id="30">
 
+        <div placeholder>200 Billion Content recommendations!</div>
+        <div fallback>200 Billion Content recommendations!</div>
 </amp-ad>
 
 </body>
