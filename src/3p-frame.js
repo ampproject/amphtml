@@ -173,6 +173,7 @@ export function getBootstrapBaseUrl(parentWindow, opt_strictForUnitTest) {
   });
 }
 
+
 /**
  * Returns the default base URL for 3p bootstrap iframes.
  * @param {!Window} parentWindow
