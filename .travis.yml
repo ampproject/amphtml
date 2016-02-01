@@ -41,3 +41,5 @@ script:
 branches:
   only:
     - master
+    - release
+    - canary
