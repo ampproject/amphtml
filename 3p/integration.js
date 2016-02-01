@@ -29,6 +29,7 @@ import {adreactor} from '../ads/adreactor';
 import {adsense} from '../ads/adsense';
 import {adtech} from '../ads/adtech';
 import {plista} from '../ads/plista';
+import {smartadserver} from '../ads/smartadserver';
 import {doubleclick} from '../ads/doubleclick';
 import {dotandads} from '../ads/dotandads';
 import {facebook} from './facebook';
@@ -53,7 +54,11 @@ register('adform', adform);
 register('adreactor', adreactor);
 register('adsense', adsense);
 register('adtech', adtech);
+<<<<<<< HEAD
 register('plista', plista);
+=======
+register('smartadserver', smartadserver);
+>>>>>>> 4a12645... Smart AdServer integration.
 register('doubleclick', doubleclick);
 register('taboola', taboola);
 register('dotandads', dotandads);

@@ -48,6 +48,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [AdTech](../ads/adtech.md)
 - [Dot and Media](../ads/dotandads.md)
 - [Doubleclick](../ads/doubleclick.md)
+- [Smart AdServer](../ads/smartadserver.md)
 - [plista](../ads/plista.md)
 
 #### Styling
