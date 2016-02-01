@@ -29,6 +29,7 @@ import {adsense} from '../ads/adsense';
 import {adtech} from '../ads/adtech';
 import {plista} from '../ads/plista';
 import {doubleclick} from '../ads/doubleclick';
+import {dotandads} from '../ads/dotandads';
 import {facebook} from './facebook';
 import {manageWin} from './environment';
 import {nonSensitiveDataPostMessage, listenParent} from './messaging';
@@ -53,6 +54,7 @@ register('adtech', adtech);
 register('plista', plista);
 register('doubleclick', doubleclick);
 register('taboola', taboola);
+register('dotandads', dotandads);
 register('_ping_', function(win, data) {
   win.document.getElementById('c').textContent = data.ping;
 });
