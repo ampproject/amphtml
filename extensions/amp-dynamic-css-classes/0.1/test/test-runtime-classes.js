@@ -16,6 +16,7 @@
 
 import {createServedIframe} from '../../../../testing/iframe';
 import {toggleExperiment} from '../../../../src/experiments';
+import {viewerFor} from '../../../../src/viewer';
 import {vsyncFor} from '../../../../src/vsync';
 
 function overwrite(object, property, value) {
@@ -56,7 +57,7 @@ describe('dynamic classes are inserted at runtime', () => {
         overwrite(win.navigator, 'userAgent', userAgent);
       }
       if (referrer !== undefined) {
-        overwrite(fixture.doc, 'referrer', referrer);
+        viewerFor(win).getReferrerUrl = () => referrer;
       }
 
       return win.insertDynamicCssScript();

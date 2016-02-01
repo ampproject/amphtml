@@ -195,6 +195,12 @@ var forbiddenTerms = {
       'src/experiments.js',
     ]
   },
+  'isTrusted': {
+    message: requiresReviewPrivacy,
+    whitelist: [
+      'src/service/viewer-impl.js',
+    ]
+  },
   'eval\\(': '',
   'storageFor': {
     message: requiresReviewPrivacy,
@@ -243,7 +249,15 @@ var forbiddenTerms = {
     whitelist: [
       'extensions/amp-access/0.1/access-expr-impl.js',
     ],
-  }
+  },
+
+  // Overridden APIs.
+  '(doc.*)\\.referrer': {
+    message: 'Use Viewer.getReferrerUrl() instead.',
+    whitelist: [
+      'src/service/viewer-impl.js',
+    ],
+  },
 };
 
 var ThreePTermsMessage = 'The 3p bootstrap iframe has no polyfills loaded and' +
