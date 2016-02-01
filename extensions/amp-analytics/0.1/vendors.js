@@ -84,6 +84,29 @@ export const ANALYTICS_CONFIG = {
           'clt=${contentLoadTime}&dit=${domInteractiveTime}${baseSuffix}'
     },
     'optout': '_gaUserPrefs.ioo'
+  },
+
+  'comscore': {
+    'vars': {
+      'c2': '1000001'
+    },
+    'requests': {
+      'host': 'https://sb.scorecardresearch.com',
+      'base': '${host}/b?',
+      'pageview': '${base}c1=2&c2=${c2}&rn=${random}&c8=${title}' +
+        '&c7=${canonicalUrl}&c9=${documentReferrer}&cs_c7amp=${ampdocUrl}'
+    },
+    'triggers': {
+      'defaultPageview': {
+        'on': 'visible',
+        'request': 'pageview'
+      }
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true
+    }
   }
 };
 
