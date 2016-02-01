@@ -25,7 +25,8 @@ reduces rendering and scrolling jank.
 
 With this in mind the AMP Layout System is designed to support few but flexible layouts
 that provide good performance guarantees. This system relies on a set of attributes such
-as `layout`, `width` and `height` to express the element's layout and sizing needs.
+as `layout`, `width`, `height`, `sizes` and `heights` to express the element's layout and
+sizing needs.
 
 
 ## Layout Types
@@ -88,7 +89,7 @@ Valid values for the layout attribute are:
 
 - Not present: The `layout` will be inferred as following:
   - if `height` is present and `width` is absent or equals to `auto` `fixed-height` layout is assumed;
-  - if `width` or `height` attributes are present along with `sizes` attribute `responsive` layout is assumed;
+  - if `width` or `height` attributes are present along with `sizes` and/or `heights` attribute, `responsive` layout is assumed;
   - if `width` or `height` attributes are present `fixed` layout is assumed;
   - if `width` and `height` are not present `container` layout is assumed
 - `fixed`: The `width` and `height` attributes must be present. The only exceptions are `amp-pixel`
@@ -109,13 +110,38 @@ specified value it would trigger a runtime error.
 
 ### `sizes`
 
-All AMP custom elements support `sizes` attribute. The value of this attribute is a sizes expression
+All AMP custom elements that allow `responsive` layout, also support `sizes` attribute.
+The value of this attribute is a sizes expression
 as described in the [img sizes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img), but
 extended to all elements, not just images. In short, `sizes` attribute describes how the width of
 the element is calculated depending on the media conditions.
 
 When `sizes` attribute is specified along with `width` and `height`, the `layout` is defaulted to
 the `responsive`.
+
+### `heights`
+
+All AMP custom elements that allow `responsive` layout, also support `heights` attribute.
+The value of this attribute is a sizes expression based on media expressions
+as described in the [img sizes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img),
+but with two key differences:
+ 1. It applies to the height and not width of the element.
+ 2. The percent values are allowed, e.g. `86%`. If percent value is used, it indicates the percent
+ of the element's width.
+
+When `heights` attribute is specified along with `width` and `height`, the `layout` is defaulted to
+the `responsive`.
+
+An example:
+```
+<amp-img src="https://acme.org/image1.png"
+    width="320" height="256"
+    heights="(min-width:500px) 200px, 80%">
+</amp-img>
+```
+
+In this example, the height of the element by default will be 80% of the width, but for the viewport
+wider than `500px` it will capped at `200px`.
 
 ### `media`
 
