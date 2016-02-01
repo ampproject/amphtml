@@ -443,7 +443,7 @@ const CdataMatcher = function CdataMatcher(tagSpec) {
  * @param {!amp.validator.CssSpec} cssSpec
  * @return {!Object<string,parse_css.BlockType>}
  */
-CdataMatcher.prototype.atRuleParsingSpec = function(cssSpec) {
+function computeAtRuleParsingSpec(cssSpec) {
   /** @type {!Object<string,parse_css.BlockType>} */
   const ampAtRuleParsingSpec = {};
   for (const atRuleSpec of cssSpec.atRuleSpec) {
@@ -466,18 +466,18 @@ CdataMatcher.prototype.atRuleParsingSpec = function(cssSpec) {
     }
   }
   return ampAtRuleParsingSpec;
-};
+}
 
 /**
  * Returns the default AT rule parsing spec.
- * @param {!Object} atRuleParsingSpec
+ * @param {!Object<string,parse_css.BlockType>} atRuleParsingSpec
  * @return {parse_css.BlockType}
  */
-CdataMatcher.prototype.atRuleDefaultParsingSpec = function(atRuleParsingSpec) {
+function computeAtRuleDefaultParsingSpec(atRuleParsingSpec) {
   const ret = atRuleParsingSpec['$DEFAULT'];
   goog.asserts.assert(ret !== undefined, 'No default atRuleSpec found');
   return ret;
-};
+}
 
 /**
  * Returns true if the given AT rule is considered valid.
@@ -529,9 +529,13 @@ CdataMatcher.prototype.match = function(cdata, context, validationResult) {
   if (context.getProgress(validationResult).complete)
     return;
 
+  // The mandatory_cdata, cdata_regex, and css_spec fields are treated
+  // like a oneof, but we're not using oneof because it's a feature
+  // that was added after protobuf 2.5.0 (which our open-source
+  // version uses).
+  // begin oneof {
+
   // Mandatory CDATA exact match
-  // TODO(johannes): This feature is no longer used in validator.protoascii,
-  // remove or make a test for it.
   if (cdataSpec.mandatoryCdata !== null) {
     if (cdataSpec.mandatoryCdata !== cdata) {
       context.addError(
@@ -543,8 +547,7 @@ CdataMatcher.prototype.match = function(cdata, context, validationResult) {
     // We return early if the cdata has an exact match rule. The
     // spec shouldn't have an exact match rule that doesn't validate.
     return;
-  }
-  if (cdataSpec.cdataRegex !== null) {
+  } else if (cdataSpec.cdataRegex !== null) {
     const cdataRegex = new RegExp('^(' + cdataSpec.cdataRegex + ')$');
     if (!cdataRegex.test(cdata)) {
       context.addError(
@@ -554,9 +557,7 @@ CdataMatcher.prototype.match = function(cdata, context, validationResult) {
           this.tagSpec_.specUrl, validationResult);
       return;
     }
-  }
-
-  if (cdataSpec.cssSpec !== null) {
+  } else if (cdataSpec.cssSpec !== null) {
     /** @type {!Array<!parse_css.ErrorToken>} */
     const cssErrors = [];
     /** @type {!Array<!parse_css.Token>} */
@@ -564,13 +565,12 @@ CdataMatcher.prototype.match = function(cdata, context, validationResult) {
                                        this.getLineCol().getLine(),
                                        this.getLineCol().getCol(),
                                        cssErrors);
-    /** @type {!Object} */
-    const atRuleParsingSpec = this.atRuleParsingSpec(cdataSpec.cssSpec);
+    /** @type {!Object<string,parse_css.BlockType>} */
+    const atRuleParsingSpec = computeAtRuleParsingSpec(cdataSpec.cssSpec);
     /** @type {!parse_css.Stylesheet} */
     const sheet = parse_css.parseAStylesheet(
         tokenList, atRuleParsingSpec,
-        this.atRuleDefaultParsingSpec(atRuleParsingSpec),
-        cssErrors);
+        computeAtRuleDefaultParsingSpec(atRuleParsingSpec), cssErrors);
     let reportCdataRegexpErrors = (cssErrors.length == 0);
     for (const errorToken of cssErrors) {
       const lineCol = new LineCol(errorToken.line, errorToken.col);
@@ -580,9 +580,9 @@ CdataMatcher.prototype.match = function(cdata, context, validationResult) {
           /* url */ '', validationResult);
     }
 
-    // TODO: This needs improvement to validate all fields recursively. For now,
-    // it's just doing one layer of fields to demonstrate the idea and keep
-    // tests passing
+    // TODO(johannes): This needs improvement to validate all fields
+    // recursively. For now, it's just doing one layer of fields to
+    // demonstrate the idea and keep tests passing.
     for (const cssRule of sheet.rules) {
       if (cssRule.tokenType === 'AT_RULE') {
         if (!this.isAtRuleValid(cdataSpec.cssSpec, cssRule.name)) {
@@ -603,6 +603,7 @@ CdataMatcher.prototype.match = function(cdata, context, validationResult) {
     if (!reportCdataRegexpErrors)
       return;
   }
+  // } end oneof
 
   // Blacklisted CDATA Regular Expressions
   for (const blacklist of cdataSpec.blacklistedCdataRegex) {
