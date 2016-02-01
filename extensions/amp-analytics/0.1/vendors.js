@@ -57,6 +57,80 @@ export const ANALYTICS_CONFIG = {
     }
   },
 
+  'chartbeat': {
+    'requests': {
+      'host': 'https://ping.chartbeat.net',
+      'basePrefix': '/ping?h=${domain}&' +
+        'p=${canonicalPath}&' +
+        'u=${clientId(_cb)}&' +
+        'd=${canonicalHost}&' +
+        'g=${uid}&' +
+        'g0=${sections}&' +
+        'g1=${authors}&' +
+        'g2=${zone}&' +
+        'g3=${sponsorName}&' +
+        'g4=${contentType}&' +
+        'x=${scrollTop}&' +
+        'w=${screenHeight}&' +
+        'j=${decayTime}&' +
+        'r=${documentReferrer}&' +
+        't=${clientId(_cb_amp)}${pageViewId}&' +
+        'i=${title}',
+      'baseSuffix': '&_',
+      'interval': '${host}${basePrefix}&${baseSuffix}',
+      'anchorClick': '${host}${basePrefix}&${baseSuffix}'
+    },
+    'triggers': {
+      'trackInterval': {
+        'on': 'timer',
+        'timer-spec': {
+          'interval': 15,
+          'max-timer-length': 7200
+        },
+        'request': 'interval',
+        'vars': {
+          'decayTime': 30
+        }
+      },
+      'trackAnchorClick': {
+        'on': 'click',
+        'selector': 'a',
+        'request': 'anchorClick',
+        'vars': {
+          'decayTime': 30
+        }
+      }
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true
+    }
+  },
+
+  'comscore': {
+    'vars': {
+      'c2': '1000001'
+    },
+    'requests': {
+      'host': 'https://sb.scorecardresearch.com',
+      'base': '${host}/b?',
+      'pageview': '${base}c1=2&c2=${c2}&rn=${random}&c8=${title}' +
+        '&c7=${canonicalUrl}&c9=${documentReferrer}&cs_c7amp=${ampdocUrl}'
+    },
+    'triggers': {
+      'defaultPageview': {
+        'on': 'visible',
+        'request': 'pageview'
+      }
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true
+    }
+  },
+
   'googleanalytics': {
     'vars': {
       'eventValue': "0",
@@ -85,29 +159,6 @@ export const ANALYTICS_CONFIG = {
           'clt=${contentLoadTime}&dit=${domInteractiveTime}${baseSuffix}'
     },
     'optout': '_gaUserPrefs.ioo'
-  },
-
-  'comscore': {
-    'vars': {
-      'c2': '1000001'
-    },
-    'requests': {
-      'host': 'https://sb.scorecardresearch.com',
-      'base': '${host}/b?',
-      'pageview': '${base}c1=2&c2=${c2}&rn=${random}&c8=${title}' +
-        '&c7=${canonicalUrl}&c9=${documentReferrer}&cs_c7amp=${ampdocUrl}'
-    },
-    'triggers': {
-      'defaultPageview': {
-        'on': 'visible',
-        'request': 'pageview'
-      }
-    },
-    'transport': {
-      'beacon': false,
-      'xhrpost': false,
-      'image': true
-    }
   }
 };
 

@@ -44,6 +44,32 @@
 </script>
 </amp-analytics>
 
+<!-- Chartbeat tracking -->
+<amp-analytics type="chartbeat">
+<script type="application/json">
+{
+  "vars": {
+    "uid": "12345",
+    "domain": "my-site.com",
+    "sections": "section 1, section 2"
+  }
+}
+</script>
+</amp-analytics>
+<!-- End Chartbeat example -->
+
+<!-- comScore UDM pageview tracking -->
+<amp-analytics type="comscore">
+<script type="application/json">
+{
+  "vars": {
+    "c2": "1000001"
+  }
+}
+</script>
+</amp-analytics>
+<!-- End comScore example -->
+
 <amp-analytics type="googleanalytics" id="analytics2">
 <script type="application/json">
 {
@@ -82,18 +108,6 @@
 </amp-analytics>
 
 <amp-analytics id="analytics3" config="./analytics.config.json"></amp-analytics>
-
-<!-- comScore UDM pageview tracking -->
-<amp-analytics type="comscore">
-<script type="application/json">
-{
-  "vars": {
-    "c2": "1000001"
-  }
-}
-</script>
-</amp-analytics>
-<!-- End comScore example -->
 
 <div class="logo"></div>
 <h1 id="top">AMP Analytics</h1>
