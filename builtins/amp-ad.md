@@ -94,6 +94,7 @@ Optionally `amp-ad` supports a child element with the `placeholder` attribute. I
 - [AdSense](../ads/adsense.md)
 - [AdTech](../ads/adtech.md)
 - [Doubleclick](../ads/doubleclick.md)
+- [Smart AdServer](../ads/smartadserver.md)
 
 
 #### Running ads from a custom domain

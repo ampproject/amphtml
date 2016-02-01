@@ -27,6 +27,7 @@ import {a9} from '../ads/a9';
 import {adreactor} from '../ads/adreactor';
 import {adsense} from '../ads/adsense';
 import {adtech} from '../ads/adtech';
+import {smartadserver} from '../ads/smartadserver';
 import {doubleclick} from '../ads/doubleclick';
 import {facebook} from './facebook';
 import {manageWin} from './environment';
@@ -40,6 +41,7 @@ register('a9', a9);
 register('adreactor', adreactor);
 register('adsense', adsense);
 register('adtech', adtech);
+register('smartadserver', smartadserver);
 register('doubleclick', doubleclick);
 register('_ping_', function(win, data) {
   win.document.getElementById('c').textContent = data.ping;
