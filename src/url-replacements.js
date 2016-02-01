@@ -266,6 +266,7 @@ class UrlReplacements {
    * @private
    */
   set_(varName, resolver) {
+    assert(varName.indexOf('RETURN') == -1);
     this.replacements_[varName] = resolver;
     this.replacementExpr_ = undefined;
     return this;
