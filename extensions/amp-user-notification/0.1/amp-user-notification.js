@@ -19,7 +19,7 @@ import {assertHttpsUrl, addParamsToUrl} from '../../../src/url';
 import {assert} from '../../../src/asserts';
 import {cidFor} from '../../../src/cid';
 import {getService} from '../../../src/service';
-import {isExperimentOn} from '../../../src/experiments';
+import {isDevChannel, isExperimentOn} from '../../../src/experiments';
 import {log} from '../../../src/log';
 import {storageFor} from '../../../src/storage';
 import {urlReplacementsFor} from '../../../src/url-replacements';
@@ -96,7 +96,8 @@ export class AmpUserNotification extends AMP.BaseElement {
     this.storagePromise_ = storageFor(this.win_);
 
     /** @const @private {boolean} */
-    this.isStorageEnabled_ = isExperimentOn(this.getWin(), 'amp-storage');
+    this.isStorageEnabled_ = (isExperimentOn(this.win_, 'amp-storage') ||
+        isDevChannel(this.win_));
   }
 
   /** @override */

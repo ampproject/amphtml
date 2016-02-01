@@ -120,5 +120,21 @@
   <!-- invalid: height=X. -->
   <amp-pixel src="https://www.example.com/make-my-visit-count"
              height="X" width="1px"></amp-pixel>
+
+  <!-- valid responsive layout with heights -->
+  <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w400-h300-no-n" width=400 height=300 layout=responsive
+           heights="(min-width:760px)  33%, (min-width:500px) 75%, 125%" ></amp-img>
+
+  <!-- valid implied responsive layout with heights -->
+  <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w400-h300-no-n" width=400 height=300
+           heights="(min-width:760px)  33%, (min-width:500px) 75%, 125%" ></amp-img>
+
+  <!-- invalid: can't have heights with specified layout fixed -->
+  <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w400-h300-no-n" width=400 height=300 layout="fixed"
+           heights="(min-width:760px)  33%, (min-width:500px) 75%, 125%" ></amp-img>
+
+  <!-- invalid: can't have heights with implied layout fixed_height -->
+  <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w400-h300-no-n" height=300
+           heights="(min-width:760px)  33%, (min-width:500px) 75%, 125%" ></amp-img>
 </body>
 </html>

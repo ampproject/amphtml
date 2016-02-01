@@ -241,6 +241,30 @@ describe('UrlReplacements', () => {
     });
   });
 
+  it('should replace AVAILABLE_SCREEN_HEIGHT', () => {
+    return expand('?sh=AVAILABLE_SCREEN_HEIGHT').then(res => {
+      expect(res).to.match(/sh=\d+/);
+    });
+  });
+
+  it('should replace AVAILABLE_SCREEN_WIDTH', () => {
+    return expand('?sh=AVAILABLE_SCREEN_WIDTH').then(res => {
+      expect(res).to.match(/sh=\d+/);
+    });
+  });
+
+  it('should replace SCREEN_COLOR_DEPTH', () => {
+    return expand('?sh=SCREEN_COLOR_DEPTH').then(res => {
+      expect(res).to.match(/sh=\d+/);
+    });
+  });
+
+  it('should replace BROWSER_LANGUAGE', () => {
+    return expand('?sh=BROWSER_LANGUAGE').then(res => {
+      expect(res).to.match(/sh=\w+/);
+    });
+  });
+
   it('should accept $expressions', () => {
     return expand('?href=$CANONICAL_URL').then(res => {
       expect(res).to.equal('?href=https%3A%2F%2Fpinterest.com%2Fpin1');

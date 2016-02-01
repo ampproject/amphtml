@@ -143,95 +143,12 @@
     amp-img {
       background-color: #f4f4f4;
     }
-
-    amp-user-notification {
-      min-height: 30px;
-      font-family: 'Roboto';
-      font-weight: 500;
-      line-height: 30px;
-      padding: 8px;
-      background: #46b6ac;
-    }
-
-    amp-user-notification button {
-      border: none;
-      border-radius: 2px;
-
-      color: #fafafa;
-      height: 26px;
-      min-width: 32px;
-      padding: 0 16px;
-      margin: 0 16px;
-      text-transform: uppercase;
-      letter-spacing: 0;
-      cursor: pointer;
-      vertical-align: middle;
-      line-height: 26px;
-      text-align: center;
-      background: #3f51b5;
-    }
-
-    @-webkit-keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
-    @-moz-keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
-    amp-user-notification.amp-active {
-      opacity: 0;
-      -webkit-animation: fadeIn ease-in 1s 1 forwards;
-      -moz-animation: fadeIn ease-in 1s 1 forwards;
-      animation: fadeIn ease-in 1s 1 forwards;
-    }
   </style>
-  <script async src="/examples/viewer-integr.js"></script>
-  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
-  <script async custom-element="amp-user-notification" src="https://cdn.ampproject.org/v0/amp-user-notification-0.1.js"></script>
   <script async custom-element="amp-lightbox" src="https://cdn.ampproject.org/v0/amp-lightbox-0.1.js"></script>
   <style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
-
-  <amp-user-notification
-      layout=nodisplay
-      id="amp-user-notification1"
-      data-show-if-href="http://localhost:8000/api/show?timestamp=TIMESTAMP"
-      data-dismiss-href="http://localhost:8000/api/echo/post">
-      This site uses cookies to personalize content.
-      <a href="#learn-more">Learn more.</a>
-     <button on="tap:amp-user-notification1.dismiss">I accept</button>
-  </amp-user-notification>
-
-  <amp-user-notification
-      layout=nodisplay
-      id="amp-user-notification2"
-      data-show-if-href="http://localhost:8000/api/dont-show"
-      data-dismiss-href="http://localhost:8000/api/echo/post">
-      notify 2
-      <a href="#learn-more">Learn more.</a>
-     <button on="tap:amp-user-notification2.dismiss">I accept</button>
-  </amp-user-notification>
-
-  <amp-user-notification
-      layout=nodisplay
-      id="amp-user-notification3"
-      data-show-if-href="http://localhost:8000/api/show"
-      data-dismiss-href="http://localhost:8000/api/echo/post">
-      notify 3
-      <a href="#learn-more">Learn more.</a>
-     <button on="tap:amp-user-notification3.dismiss">I accept</button>
-  </amp-user-notification>
-
   <header>
     <div class="brand-logo">
       PublisherLogo
@@ -241,9 +158,10 @@
     <article>
       <figure>
         <amp-img
-            src="./img/hero@1x.jpg"
-            srcset="./img/hero@1x.jpg 1x, ./img/hero@2x.jpg 2x"
+            src="img/hero@1x.jpg"
+            srcset="img/hero@1x.jpg 1x, img/hero@2x.jpg 2x"
             layout="responsive" width="360" placeholder
+            heights="(min-width:1420px) 20%, (min-width:1320px) 25%, (min-width:1000px) 40%, (min-width:760px)  85%, (min-width:500px) 100%, 120%"
             alt="Curabitur convallis, urna quis pulvinar feugiat, purus diam posuere turpis, sit amet tincidunt purus justo et mi."
             height="216" on="tap:headline-img-lightbox">
         </amp-img>
@@ -254,8 +172,8 @@
 
         <div class="lightbox-content">
           <amp-img id="floating-headline-img"
-              src="./img/hero@1x.jpg"
-              srcset="hero@1x.jpg 1x, ./img/hero@2x.jpg 2x"
+              src="img/hero@1x.jpg"
+              srcset="hero@1x.jpg 1x, img/hero@2x.jpg 2x"
               placeholder
               width="360" height="216" layout="responsive">
           </amp-img>
@@ -276,7 +194,7 @@
         </header>
 
         <div class="author">
-          <amp-img src="./img/sample.jpg" id="author-avatar" placeholder
+          <amp-img src="img/sample.jpg" id="author-avatar" placeholder
               height="50" width="50">
           </amp-img>
           <div class="byline">
@@ -352,8 +270,8 @@
 
           <figure>
             <amp-img class="full-bleed" placeholder
-                src="./img/sea@1x.jpg"
-                srcset="./img/sea@1x.jpg 1x, ./img/sea@2x.jpg 2x"
+                src="img/sea@1x.jpg"
+                srcset="img/sea@1x.jpg 1x, img/sea@2x.jpg 2x"
                 layout="responsive" width="360"
                 alt="Fusce pretium tempor justo, vitae consequat dolor maximus eget."
                 height="216">
@@ -402,23 +320,5 @@
   <footer>
     <div class="brand-logo">PublisherLogo</div>
   </footer>
-
-  <amp-analytics type="googleanalytics">
-  <script type="application/json">
-  {
-    "vars": { "account_id": "123456" },
-    "triggers": [{
-      "on": "LOAD",
-      "request": "pageview"
-    }]
-  }
-  </script>
-  </amp-analytics>
-
-  <amp-pixel src="https://pubads.g.doubleclick.net/activity;dc_iu=/12344/pixel;ord=CLIENT_ID(google_analytics,amp-user-notification1)?"></amp-pixel>
-
-  <amp-pixel src="https://pubads.g.doubleclick.net/activity;dc_iu=/12344/pixel;ord=CLIENT_ID(google_analytics,amp-user-notification2)?"></amp-pixel>
-
-  <amp-pixel src="https://pubads.g.doubleclick.net/activity;dc_iu=/12344/pixel;ord=CLIENT_ID(google_analytics,amp-user-notification3)?"></amp-pixel>
 </body>
 </html>

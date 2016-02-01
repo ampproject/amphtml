@@ -83,23 +83,11 @@ Example usage:
 Ads can call the special API
 `window.context.requestResize(width, height)` to send a resize request.
 
-Example of resize request:
-```javascript
-window.parent.postMessage({
-  sentinel: 'amp-3p',
-  type: 'embed-size',
-  height: document.body.scrollHeight
-}, '*');
-```
-
-Once this message is received the AMP runtime will try to accommodate this request as soon as
+Once the request is processed the AMP runtime will try to accommodate this request as soon as
 possible, but it will take into account where the reader is currently reading, whether the scrolling
 is ongoing and any other UX or performance factors.
 
-Based one whether the AMP runtime was able to satisfy the resize request,
-the runtime will also send out a `embed-size-changed` or `embed-size-denied` message accordingly. The ad can listen to these messages and have it's own overflow element within and repeat request on tap. In that case AMP runtime will definitely allow size change due to user action.
-
-Ads can call the special API `window.context.onResizeSuccess` to get a callback in case a resize request was successful.
+Ads can observe wehther resize request were successful using the `window.context.onResizeSuccess` and `window.context.onResizeDenied` methods.
 
 Example
 ```javascript
@@ -107,12 +95,7 @@ var unlisten = window.context.onResizeSuccess(function(requestedHeight) {
   // Hide any overflow elements that were shown.
   // The requestedHeight argument may be used to check which height change the request corresponds to.
 });
-```
 
-Ads can call the special API `window.context.onResizeDenied` to get a callback in case a resize request was denied.
-
-Example
-```javascript
 var unlisten = window.context.onResizeDenied(function(requestedHeight) {
   // Show the overflow element and send a window.context.requestResize(width, height) when the overflow element is clicked.
   // You may use the requestedHeight to check which height change the request corresponds to.

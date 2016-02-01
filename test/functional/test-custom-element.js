@@ -567,6 +567,28 @@ describe('CustomElement', () => {
     expect(element2.style.width).to.equal('50vw');
   });
 
+  it('should apply heights condition', () => {
+    const element1 = new ElementClass();
+    element1.sizerElement_ = document.createElement('div');
+    element1.setAttribute('layout', 'responsive');
+    element1.setAttribute('width', '200px');
+    element1.setAttribute('height', '200px');
+    element1.setAttribute('heights', '(min-width: 1px) 99%, 1%');
+    element1.attachedCallback();
+    element1.applySizesAndMediaQuery();
+    expect(element1.sizerElement_.style.paddingTop).to.equal('99%');
+
+    const element2 = new ElementClass();
+    element2.sizerElement_ = document.createElement('div');
+    element2.setAttribute('layout', 'responsive');
+    element2.setAttribute('width', '200px');
+    element2.setAttribute('height', '200px');
+    element2.setAttribute('heights', '(min-width: 1111111px) 99%, 1%');
+    element2.attachedCallback();
+    element2.applySizesAndMediaQuery();
+    expect(element2.sizerElement_.style.paddingTop).to.equal('1%');
+  });
+
   it('should change height without sizer', () => {
     const element = new ElementClass();
     element.changeHeight(111);

@@ -48,7 +48,12 @@ export const ANALYTICS_CONFIG = {
       'pageDownloadTime': 'PAGE_DOWNLOAD_TIME',
       'redirectTime': 'REDIRECT_TIME',
       'domInteractiveTime': 'DOM_INTERACTIVE_TIME',
-      'contentLoadTime': 'CONTENT_LOAD_TIME'
+      'contentLoadTime': 'CONTENT_LOAD_TIME',
+      'availableScreenHeight': 'AVAILABLE_SCREEN_HEIGHT',
+      'availableScreenWidth': 'AVAILABLE_SCREEN_WIDTH',
+      'screenColorDepth': 'SCREEN_COLOR_DEPTH',
+      'browserLanguage': 'BROWSER_LANGUAGE',
+      'documentCharset': 'DOCUMENT_CHARSET',
     }
   },
 
@@ -62,7 +67,8 @@ export const ANALYTICS_CONFIG = {
       'basePrefix': 'v=1&_v=a0&aip=true&_s=${requestCount}' +
           'dt=${title}&sr=${screenWidth}x${screenHeight}&_utmht=${timestamp}&' +
           'jid=&cid=${clientId(_ga)}&tid=${account}&dl=${documentLocation}&' +
-          'dr=${documentReferrer}',
+          'dr=${documentReferrer}&sd=${screenColorDepth}&' +
+          'ul=${browserLanguage}&de=${documentCharset}' ,
       'baseSuffix': '&a=${pageViewId}&z=${random}',
       'pageview': '${host}/r/collect?${basePrefix}&t=pageview&' +
           '_r=1${baseSuffix}',
@@ -78,6 +84,29 @@ export const ANALYTICS_CONFIG = {
           'clt=${contentLoadTime}&dit=${domInteractiveTime}${baseSuffix}'
     },
     'optout': '_gaUserPrefs.ioo'
+  },
+
+  'comscore': {
+    'vars': {
+      'c2': '1000001'
+    },
+    'requests': {
+      'host': 'https://sb.scorecardresearch.com',
+      'base': '${host}/b?',
+      'pageview': '${base}c1=2&c2=${c2}&rn=${random}&c8=${title}' +
+        '&c7=${canonicalUrl}&c9=${documentReferrer}&cs_c7amp=${ampdocUrl}'
+    },
+    'triggers': {
+      'defaultPageview': {
+        'on': 'visible',
+        'request': 'pageview'
+      }
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true
+    }
   }
 };
 

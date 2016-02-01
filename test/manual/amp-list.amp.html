@@ -37,13 +37,13 @@
     }
 
     .split {
-      height: 300px;
+      height: 360px;
     }
   </style>
   <style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
-  <script async src="../../dist/v0.js" development></script>
-  <script async custom-element="amp-list" src="../../dist/v0/amp-list-0.1.js"></script>
-  <script async custom-template="amp-mustache" src="../../dist/v0/amp-mustache-0.1.js"></script>
+  <script async src="../../dist/amp.js" development></script>
+  <script async custom-element="amp-list" src="../../dist/v0/amp-list-0.1.max.js"></script>
+  <script async custom-template="amp-mustache" src="../../dist/v0/amp-mustache-0.1.max.js"></script>
 </head>
 <body>
 <article>
@@ -69,7 +69,7 @@
     <template type="amp-mustache">
       <div class="story-entry">
         <amp-img src="{{imageUrl}}" width=80 height=60></amp-img>
-        {{title}}
+        <a href="/link.html">{{title}}</a>
       </div>
     </template>
     <div overflow>

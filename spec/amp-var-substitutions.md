@@ -170,6 +170,53 @@ For instance:
 <amp-pixel src="https://foo.com/pixel?tcpConnectTime=TCP_CONNECT_TIME"></amp-pixel>
 ```
 
+## Device and Browser
+
+### AVAILABLE_SCREEN_HEIGHT
+
+Provides the screen height in pixels available for the page rendering.
+
+For instance:
+```html
+<amp-pixel src="https://foo.com/pixel?availScreenHeight=AVAILABLE_SCREEN_HEIGHT"></amp-pixel>
+```
+
+### AVAILABLE_SCREEN_WIDTH
+
+Provides the screen width in pixels available for the page rendering.
+
+For instance:
+```html
+<amp-pixel src="https://foo.com/pixel?availScreenWidth=AVAILABLE_SCREEN_WIDTH"></amp-pixel>
+```
+
+### BROWSER_LANGUAGE
+
+Provides a string representing the preferred language of the user, usually the language of the browser UI.
+
+For instance:
+```html
+<amp-pixel src="https://foo.com/pixel?lang=BROWSER_LANGUAGE"></amp-pixel>
+```
+
+### DOCUMENT_CHARSET
+
+Provides the character encoding of the current document.
+
+For instance:
+```html
+<amp-pixel src="https://foo.com/pixel?charSet=DOCUMENT_CHARSET"></amp-pixel>
+```
+
+### SCREEN_COLOR_DEPTH
+
+Provides the screen color depth provided by the browser.
+
+For instance:
+```html
+<amp-pixel src="https://foo.com/pixel?colorDepth=SCREEN_COLOR_DEPTH"></amp-pixel>
+```
+
 ## Miscellaneous
 
 ### CLIENT_ID

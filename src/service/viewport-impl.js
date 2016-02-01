@@ -678,9 +678,6 @@ export class ViewportBindingNaturalIosEmbed_ {
     /** @const {!Window} */
     this.win = win;
 
-    /** @private {number} */
-    this.scrollWidth_ = 0;
-
     /** @private {?Element} */
     this.scrollPosEl_ = null;
 
@@ -713,9 +710,6 @@ export class ViewportBindingNaturalIosEmbed_ {
     const documentElement = this.win.document.documentElement;
     const documentBody = this.win.document.body;
 
-    // TODO(dvoytenko): need to also find a way to do this on resize.
-    this.scrollWidth_ = documentBody./*OK*/scrollWidth || 0;
-
     // Embedded scrolling on iOS is rather complicated. IFrames cannot be sized
     // and be scrollable. Sizing iframe by scrolling height has a big negative
     // that "fixed" position is essentially impossible. The only option we
@@ -731,11 +725,11 @@ export class ViewportBindingNaturalIosEmbed_ {
     //   -webkit-overflow-scrolling: touch;
     // }
     setStyles(documentElement, {
-      overflow: 'auto',
+      overflowY: 'auto',
       webkitOverflowScrolling: 'touch'
     });
     setStyles(documentBody, {
-      overflow: 'auto',
+      overflowY: 'auto',
       webkitOverflowScrolling: 'touch',
       position: 'absolute',
       top: 0,
@@ -837,7 +831,8 @@ export class ViewportBindingNaturalIosEmbed_ {
 
   /** @override */
   getScrollWidth() {
-    return Math.max(this.scrollWidth_, this.win./*OK*/innerWidth);
+    // There's no good way to calculate scroll width on iOS in this mode.
+    return this.win./*OK*/innerWidth;
   }
 
   /** @override */

@@ -92,7 +92,7 @@ describe('Storage', () => {
     store1.set('key2', 'value2');
     bindingMock.expects('loadBlob')
         .withExactArgs('https://acme.com')
-        .returns(btoa(JSON.stringify(store1.obj)))
+        .returns(Promise.resolve(btoa(JSON.stringify(store1.obj))))
         .once();
     return storage.get('key1').then(() => {
       return storage.storePromise_;
@@ -107,7 +107,7 @@ describe('Storage', () => {
     store1.set('key2', 'value2');
     bindingMock.expects('loadBlob')
         .withExactArgs('https://acme.com')
-        .returns(btoa(JSON.stringify(store1.obj)))
+        .returns(Promise.resolve(btoa(JSON.stringify(store1.obj))))
         .once();
     expect(storage.storePromise_).to.not.exist;
     const promise = storage.get('key1');
@@ -127,7 +127,7 @@ describe('Storage', () => {
   it('should get the value from first ever request and reuse store', () => {
     bindingMock.expects('loadBlob')
         .withExactArgs('https://acme.com')
-        .returns(null)
+        .returns(Promise.resolve(null))
         .once();
     expect(storage.storePromise_).to.not.exist;
     const promise = storage.get('key1');
@@ -176,7 +176,7 @@ describe('Storage', () => {
     store1.set('key2', 'value2');
     bindingMock.expects('loadBlob')
         .withExactArgs('https://acme.com')
-        .returns(btoa(JSON.stringify(store1.obj)))
+        .returns(Promise.resolve(btoa(JSON.stringify(store1.obj))))
         .once();
     bindingMock.expects('saveBlob')
         .withExactArgs('https://acme.com', sinon.match(arg => {
@@ -216,7 +216,7 @@ describe('Storage', () => {
     store1.set('key2', 'value2');
     bindingMock.expects('loadBlob')
         .withExactArgs('https://acme.com')
-        .returns(btoa(JSON.stringify(store1.obj)))
+        .returns(Promise.resolve(btoa(JSON.stringify(store1.obj))))
         .once();
     bindingMock.expects('saveBlob')
         .withExactArgs('https://acme.com', sinon.match(arg => {
@@ -254,7 +254,7 @@ describe('Storage', () => {
     store1.set('key1', 'value1');
     bindingMock.expects('loadBlob')
         .withExactArgs('https://acme.com')
-        .returns(btoa(JSON.stringify(store1.obj)))
+        .returns(Promise.resolve(btoa(JSON.stringify(store1.obj))))
         .twice();
     return storage.get('key1').then(value => {
       expect(value).to.equal('value1');
@@ -279,7 +279,7 @@ describe('Storage', () => {
     store1.set('key1', 'value1');
     bindingMock.expects('loadBlob')
         .withExactArgs('https://acme.com')
-        .returns(btoa(JSON.stringify(store1.obj)))
+        .returns(Promise.resolve(btoa(JSON.stringify(store1.obj))))
         .twice();
     return storage.get('key1').then(value => {
       expect(value).to.equal('value1');

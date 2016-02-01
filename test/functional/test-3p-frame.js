@@ -159,7 +159,7 @@ describe('3p-frame', () => {
   it('should pick the right bootstrap url (custom)', () => {
     addCustomBootstrap('http://localhost:9876/boot/remote.html');
     expect(() => {
-      getBootstrapBaseUrl(window);
+      getBootstrapBaseUrl(window, true);
     }).to.throw(/must not be on the same origin as the/);
   });
 
