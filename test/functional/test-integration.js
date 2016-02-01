@@ -187,4 +187,22 @@ describe('3p integration.js', () => {
       draw3p(win, data);
     }).to.throw(/Origin should have been validated/);
   });
+
+  it('should throw if origin was never validated', () => {
+    const data = {
+      type: 'testAction',
+    };
+    const win = {
+      context: {
+        location: {
+          originValidated: true
+        },
+        data: data,
+        tagName: 'AMP-EMBED',
+      }
+    };
+    expect(() => {
+      draw3p(win, data);
+    }).to.throw(/Embed type testAction not allowed with tag AMP-EMBED/);
+  });
 });
