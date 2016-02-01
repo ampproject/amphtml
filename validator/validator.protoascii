@@ -20,12 +20,12 @@
 # in production from crashing. This id is not relevant to validator.js
 # because thus far, engine (validator.js) and spec file (validator.protoascii)
 # are always released together.
-min_validator_revision_required: 77
+min_validator_revision_required: 81
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 120
+spec_file_revision: 129
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
 # These rules are just enough to validate the example from the spec.
@@ -81,7 +81,10 @@ tags: {
   spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#crps"
 }
 # 4.2.2 The title element
-tags: { name: "title" }
+tags: {
+  name: "title"
+  detail: "title"
+}
 # 4.2.3 the base element
 # Disallowed.
 # 4.2.4 the link element
@@ -92,97 +95,7 @@ tags: { name: "title" }
 # in practice, we resort to a whitelist of allowed rel values.
 tags: {
   name: "link"
-  mandatory_parent: "head"
-  unique: true
-  attrs: {
-    name: "rel"
-    value: "canonical"
-    # TODO(gregable): Make this attribute required. Test to verify that
-    # the change won't break too many pages.
-    # mandatory: true
-  }
-  attrs: {
-    name: "href"
-    mandatory: true
-  }
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#canon"
-}
-# rel=amphtml is designed to point from a non-amphtml page to an amp-html
-# page, but for ease of use and to match the syntax of rel=canonical, a
-# self-reference is also valid.
-tags: {
-  name: "link"
-  mandatory_parent: "head"
-  unique: true
-  attrs: {
-    name: "rel"
-    value: "amphtml"
-    # TODO(gregable): Make this attribute required. Test to verify that
-    # the change won't break too many pages.
-    # mandatory: true
-  }
-  attrs: {
-    name: "href"
-    mandatory: true
-  }
-}
-# Whitelisted font providers
-tags: {
-  name: "link"
-  mandatory_parent: "head"
-  attrs: {
-    name: "rel"
-    mandatory: true
-    value: "stylesheet"
-  }
-  attrs: {
-    name: "href"
-    mandatory: true
-    value_regex: "https://fonts\\.googleapis\\.com/css\\?.*|"
-                 "https://fonts\\.googleapis\\.com/earlyaccess/.*\\.css|"
-                 "https://fast\\.fonts\\.net/.*"
-  }
-  attrs: {
-    name: "type"
-    value: "text/css"
-  }
-}
-# itemprop=sameAs is allowed per schema.org, needs not be in head
-tags: {
-  name: "link"
-  attrs: {
-    name: "itemprop"
-    mandatory: true
-    value: "sameAs"
-  }
-  attrs: {
-    name: "content"
-  }
-}
-# Various whitelisted rel attribute values which can co-occur with
-# "type", "href", and "sizes" attributes of arbitrary value.
-tags: {
-  name: "link"
-  attrs: { name: "type" }
-  attrs: { name: "href" }
-  attrs: { name: "sizes" }
-  attrs: {
-    name: "rel"
-    # TODO(gregable): Make this attribute required. Test to verify that
-    # the change won't break too many pages.
-    # mandatory: true
-    value_regex: "icon|"
-    "shortcut icon|"
-    "image_src|"
-    "apple-touch-icon|"
-    "apple-touch-icon-precomposed|"
-    "apple-touch-startup-image"
-  }
-}
-# Various whitelisted rel attribute values which can co-occur with
-# "type" and "href" attributes of arbitrary value.
-tags: {
-  name: "link"
+  detail: "link rel="
   attrs: { name: "type" }
   attrs: { name: "href" }
   attrs: {
@@ -365,17 +278,117 @@ tags: {
       "))*"
   }
 }
+tags: {
+  name: "link"
+  detail: "link rel=canonical"
+  mandatory_parent: "head"
+  unique: true
+  attrs: {
+    name: "rel"
+    value: "canonical"
+    # TODO(gregable): Make this attribute required. Test to verify that
+    # the change won't break too many pages.
+    # mandatory: true
+    # dispatch_key: true
+  }
+  attrs: {
+    name: "href"
+    mandatory: true
+  }
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#canon"
+}
+# rel=amphtml is designed to point from a non-amphtml page to an amp-html
+# page, but for ease of use and to match the syntax of rel=canonical, a
+# self-reference is also valid.
+tags: {
+  name: "link"
+  detail: "link rel=amphtml"
+  mandatory_parent: "head"
+  unique: true
+  attrs: {
+    name: "rel"
+    value: "amphtml"
+    # TODO(gregable): Make this attribute required. Test to verify that
+    # the change won't break too many pages.
+    # mandatory: true
+    # dispatch_key: true
+  }
+  attrs: {
+    name: "href"
+    mandatory: true
+  }
+}
+# Whitelisted font providers
+tags: {
+  name: "link"
+  detail: "link rel=stylesheet for fonts"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#custom-fonts"
+  mandatory_parent: "head"
+  attrs: {
+    name: "rel"
+    mandatory: true
+    value: "stylesheet"
+    dispatch_key: true
+  }
+  attrs: {
+    name: "href"
+    mandatory: true
+    value_regex: "https://fonts\\.googleapis\\.com/css\\?.*|"
+                 "https://fonts\\.googleapis\\.com/earlyaccess/.*\\.css|"
+                 "https://fast\\.fonts\\.net/.*"
+  }
+  attrs: {
+    name: "type"
+    value: "text/css"
+  }
+}
+# itemprop=sameAs is allowed per schema.org, needs not be in head
+tags: {
+  name: "link"
+  detail: "link itemprop=sameAs"
+  attrs: {
+    name: "itemprop"
+    mandatory: true
+    value: "sameAs"
+    dispatch_key: true
+  }
+  attrs: {
+    name: "content"
+  }
+}
+# Various whitelisted rel attribute values which can co-occur with
+# "type", "href", and "sizes" attributes of arbitrary value.
+tags: {
+  name: "link"
+  detail: "link rel= for type= or href= or sizes="
+  attrs: { name: "type" }
+  attrs: { name: "href" }
+  attrs: { name: "sizes" }
+  attrs: {
+    name: "rel"
+    # TODO(gregable): Make this attribute required. Test to verify that
+    # the change won't break too many pages.
+    # mandatory: true
+    value_regex: "icon|"
+    "shortcut icon|"
+    "image_src|"
+    "apple-touch-icon|"
+    "apple-touch-icon-precomposed|"
+    "apple-touch-startup-image"
+  }
+}
 # 4.2.5 the meta element
 # Charset must be utf8, and a specific viewport is required.
 # Other meta elements not supported.
 tags: {
   name: "meta"
+  detail: "meta charset=utf-8"
   mandatory: true
   mandatory_parent: "head"
   unique: true
-  detail: "charset utf-8 declaration"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#chrs"
   attrs: {
+    dispatch_key: true
     name: "charset"
     mandatory: true
     value: "utf-8"
@@ -383,12 +396,13 @@ tags: {
 }
 tags: {
   name: "meta"
-  detail: "viewport declaration"
+  detail: "meta name=viewport"
   mandatory: true
   mandatory_parent: "head"
   unique: true
   spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#vprt"
   attrs: {
+    dispatch_key: true
     name: "name"
     mandatory: true
     value: "viewport"
@@ -408,6 +422,7 @@ tags: {
 }
 tags: {
   name: "meta"
+  detail: "meta property= and content="
   attrs: {
     name: "property"
     mandatory: true
@@ -422,6 +437,7 @@ tags: {
 # are altogether disallowed.
 tags: {
   name: "meta"
+  detail: "meta name= and content="
   attrs: {
     name: "name"
     mandatory: true
@@ -430,24 +446,6 @@ tags: {
   attrs: {
     name: "content"
     mandatory: true
-  }
-}
-# AMP-specific extension:
-# Publishers may set this meta tag to indicate premium content. If present,
-# Google's AMP Cache will only serve this content when Referer is *.google.com.
-tags: {
-  name: "meta"
-  unique: true
-  mandatory_parent: "head"
-  attrs: {
-    name: "http-equiv"
-    mandatory: true
-    value: "amp-access"
-  }
-  attrs: {
-    name: "content"
-    mandatory: true
-    value: "premium"
   }
 }
 # 4.2.6 The style
@@ -461,7 +459,8 @@ tags: {  # Special custom 'author' spreadsheet.
     name: "amp-custom"
     value: ""
     mandatory: true
-}
+    dispatch_key: true
+  }
   cdata: {
     max_bytes: 50000
     max_bytes_spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#maximum-size"
@@ -472,6 +471,22 @@ tags: {  # Special custom 'author' spreadsheet.
         }
         at_rule_spec: {
           name: 'keyframes'
+          type: PARSE_AS_RULES
+        }
+        at_rule_spec: {
+          name: '-webkit-keyframes'
+          type: PARSE_AS_RULES
+        }
+        at_rule_spec: {
+          name: '-moz-keyframes'
+          type: PARSE_AS_RULES
+        }
+        at_rule_spec: {
+          name: '-o-keyframes'
+          type: PARSE_AS_RULES
+        }
+        at_rule_spec: {
+          name: 'supports'
           type: PARSE_AS_RULES
         }
         at_rule_spec: {
@@ -494,7 +509,6 @@ tags: {  # Special custom 'author' spreadsheet.
       error_message: "CSS !important"
     }
     # All known @ rules except for media and font-face are disabled.
-    # See http://b/24415204.
     blacklisted_cdata_regex: {
       regex: "charset"
       error_message: "CSS @charset"
@@ -506,10 +520,6 @@ tags: {  # Special custom 'author' spreadsheet.
     blacklisted_cdata_regex: {
       regex: "@namespace"
       error_message: "CSS @namespace"
-    }
-    blacklisted_cdata_regex: {
-      regex: "@supports"
-      error_message: "CSS @supports"
     }
     blacklisted_cdata_regex: {
       regex: "@document"
@@ -695,6 +705,7 @@ tags: {
         "discussion|"
         "EditURI|"
         "endorsed|"
+        "external|"
         "fan|"
         "feed|"
         "footnote|"
@@ -785,6 +796,7 @@ tags: {
         "discussion|"
         "EditURI|"
         "endorsed|"
+        "external|"
         "fan|"
         "feed|"
         "footnote|"
@@ -967,11 +979,12 @@ attr_lists: {
   name: "source-attrs"
   attrs: { name: "src" }
   attrs: { name: "type" }
-  # Not used thus far, just tolerated. See http://b//24376754.
+  # Not used thus far, just tolerated.
   attrs: { name: "sizes" }
 }
 tags: {
   name: "source"
+  detail: "amp-audio > source"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-audio/amp-audio.md"
   mandatory_parent: "amp-audio"
   attrs: { name: "src" }
@@ -979,6 +992,7 @@ tags: {
 }
 tags: {
   name: "source"
+  detail: "amp-video > source"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/builtins/amp-video.md"
   mandatory_parent: "amp-video"
   attrs: { name: "src" }
@@ -986,6 +1000,7 @@ tags: {
 }
 tags: {
   name: "source"
+  detail: "audio > source"
   mandatory_parent: "audio"
   attrs: {
     name: "src"
@@ -998,6 +1013,7 @@ tags: {
 }
 tags: {
   name: "source"
+  detail: "video > source"
   mandatory_parent: "video"
   attrs: {
     name: "src"
@@ -1490,6 +1506,7 @@ tags: {
 }
 tags: {
   name: "title"
+  detail: "svg title"
   attr_lists: "svg-core-attributes"
   attrs: { name: "class" }
 }
@@ -1501,43 +1518,73 @@ tags: {
 
 # 4.9 Tabular data
 # 4.9.1 The table element
-tags: { name: "table" }
+tags: {
+  name: "table"
+  attrs: { name: "align" }
+}
 # 4.9.2 The caption element
-tags: { name: "caption" }
+tags: {
+  name: "caption"
+  attrs: { name: "align" }
+}
 # 4.9.3 The colgroup element
 tags: {
   name: "colgroup"
+  attrs: { name: "align" }
   attrs: { name: "span" }
+  attrs: { name: "valign" }
 }
 # 4.9.4 The col element
 tags: {
   name: "col"
+  attrs: { name: "align" }
   attrs: { name: "span" }
+  attrs: { name: "valign" }
 }
 # 4.9.5 The tbody element
-tags: { name: "tbody" }
+tags: {
+  name: "tbody"
+  attrs: { name: "align" }
+  attrs: { name: "valign" }
+}
 # 4.9.6 The thead element
-tags: { name: "thead" }
+tags: {
+  name: "thead"
+  attrs: { name: "align" }
+  attrs: { name: "valign" }
+}
 # 4.9.7 The tfoot element
-tags: { name: "tfoot" }
+tags: {
+  name: "tfoot"
+  attrs: { name: "align" }
+  attrs: { name: "valign" }
+}
 # 4.9.8 The tr element
-tags: { name: "tr" }
+tags: {
+  name: "tr"
+  attrs: { name: "align" }
+  attrs: { name: "valign" }
+}
 # 4.9.9 The td element
 tags: {
   name: "td"
+  attrs: { name: "align" }
   attrs: { name: "colspan" }
   attrs: { name: "headers" }
   attrs: { name: "rowspan" }
+  attrs: { name: "valign" }
 }
 # 4.9.10 The th element
 tags: {
   name: "th"
   attrs: { name: "abbr" }
+  attrs: { name: "align" }
   attrs: { name: "headers" }
   attrs: { name: "colspan" }
   attrs: { name: "rowspan" }
   attrs: { name: "scope" }
   attrs: { name: "sorted" }
+  attrs: { name: "valign" }
 }
 
 # 4.10 Forms
@@ -1547,9 +1594,7 @@ tags: { name: "button" }
 # 4.11 Scripting
 # 4.11.1 The script element
 # Only the amphtml script, custom extensions and the LD/JSON description are
-# allowed. The AMP Engine is the first in this specfile so that the
-# 'development' attribute shows up as the disallowed attribute instead of
-# 'src' for a development flagged AMP engine script.
+# allowed.
 tags: {
   name: "script"
   mandatory: true
@@ -1561,33 +1606,49 @@ tags: {
     name: "src"
     mandatory: true
     value: "https://cdn.ampproject.org/v0.js"
+    dispatch_key: true
   }
   attrs: {
     name: "async"
     value: ""
     mandatory: true
   }
-  attrs: {
-    name: "development"
-    value: ""
-    dev_mode_enabled: "please remove for prod"
-    dev_mode_enabled_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#amp-runtime"
-  }
 }
 tags: {
   name: "script"
+  detail: "script type=application/ld+json"
   mandatory_parent: "head"
   attrs: {
     name: "type"
     mandatory: true
     value: "application/ld+json"
+    dispatch_key: true
   }
 }
+tags: {
+  name: "script"
+  detail: "amp-access extension .json script"
+  mandatory_parent: "head"
+  attrs: {
+    name: "id"
+    mandatory: true
+    value: "amp-access"
+    dispatch_key: true
+  }
+  attrs: {
+    name: "type"
+    mandatory: true
+    value: "application/json"
+  }
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-access/amp-access-spec.md"
+  # TODO(gregable): Validate the cdata contents of this script tag.
+}
+
 # Specific script tags for custom elements and runtime imports.
 tags: {  # amp-access
   name: "script"
-  mandatory_parent: "head"
   detail: "amp-access extension .js script"
+  mandatory_parent: "head"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-access/amp-access.md"
   attrs: {
     name: "custom-element"
@@ -1707,6 +1768,24 @@ tags: {  # amp-dynamic-css-classes
   attrs: {
     name: "src"
     value: "https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.js"
+    mandatory: true
+  }
+}
+tags: {  # amp-facebook
+  name: "script"
+  mandatory_parent: "head"
+  detail: "amp-facebook extension .js script"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-facebook/amp-facebook.md"
+  attrs: {
+    name: "custom-element"
+    value: "amp-facebook"
+    mandatory: true
+    dispatch_key: true
+  }
+  attrs: { name: "async" value: "" mandatory: true }
+  attrs: {
+    name: "src"
+    value: "https://cdn.ampproject.org/v0/amp-facebook-0.1.js"
     mandatory: true
   }
 }
@@ -1839,7 +1918,7 @@ tags: {  # amp-lightbox
 tags: {  # amp-mustache
   name: "script"
   mandatory_parent: "head"
-  detail: "amp-mustache extension"
+  detail: "amp-mustache extension .js script"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-mustache/amp-mustache.md"
   attrs: {
     name: "custom-template"
@@ -2017,7 +2096,7 @@ tags: {
     value: "amp-mustache"
     mandatory: true
   }
-  also_requires: "amp-mustache extension"
+  also_requires: "amp-mustache extension .js script"
 }
 # 11.2 Non-conforming features
 tags: { name: "acronym" }
@@ -2039,6 +2118,7 @@ tags: { name: "xmp" }
 # Schema.org meta tag; schema.org is explicitly allowed by the AMP HTML draft.
 tags: {
   name: "meta"
+  detail: "meta from schema.org"
   attrs: {
     name: "itemprop"
     mandatory: true
@@ -2052,10 +2132,12 @@ tags: {
 # to the IE8 engine. So it's explicitly allowed.
 tags: {
   name: "meta"
+  detail: "meta http-equiv=X-UA-Compatible"
   attrs: {
     name: "http-equiv"
     mandatory: true
     value: "X-UA-Compatible"
+    dispatch_key: true
   }
   attrs: {
     name: "content"
@@ -2068,10 +2150,12 @@ tags: {
 # This is redundant with meta charset, but also harmless
 tags: {
   name: "meta"
+  detail: "meta http-equiv=content-type"
   attrs: {
     name: "http-equiv"
     mandatory: true
     value: "content-type"
+    dispatch_key: true
   }
   attrs: {
     name: "content"
@@ -2188,6 +2272,8 @@ tags: {
   }
 }
 # <amp-ad>
+# In the AMP Runtime, amp-ad and amp-embed are implemented in the same way,
+# so if you're changing amp-ad consider changing amp-embed as well.
 tags: {
   name: "amp-ad"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/builtins/amp-ad.md"
@@ -2196,6 +2282,41 @@ tags: {
   attrs: { name: "src" }
   attrs: { name: "type" mandatory: true }
   attrs: { name: "json" }
+  amp_layout: {
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: RESPONSIVE
+    supported_layouts: FILL
+    supported_layouts: NODISPLAY
+  }
+}
+# <amp-embed>
+# In the AMP Runtime, amp-ad and amp-embed are implemented in the same way,
+# so if you're changing amp-embed consider changing amp-ad as well.
+tags: {
+  name: "amp-embed"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/builtins/amp-embed.md"
+  attr_lists: "extended-amp-global"
+  attrs: { name: "alt" }
+  attrs: { name: "src" }
+  attrs: { name: "type" mandatory: true }
+  attrs: { name: "json" }
+  amp_layout: {
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: RESPONSIVE
+    supported_layouts: FILL
+    supported_layouts: NODISPLAY
+  }
+}
+# <amp-facebook>
+tags: {
+  name: "amp-facebook"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-facebook/amp-facebook.md"
+  also_requires: "amp-facebook extension .js script"
+  attr_lists: "extended-amp-global"
+  # data-* is generally allowed, but it's not generally mandatory.
+  attrs: { name: "data-href" mandatory: true }
   amp_layout: {
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
@@ -2270,6 +2391,18 @@ tags: {
   # TODO(gregable): This should require a valid https URL as the attr value.
   attrs: { name: "config" }
 }
+# <amp-user-notification>
+tags: {
+  name: "amp-user-notification"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-user-notification/amp-user-notification.md"
+  also_requires: "amp-user-notification extension .js script"
+  attr_lists: "extended-amp-global"
+  attrs: { name: "data-show-if-href" mandatory: true }
+  attrs: { name: "data-dismiss-href" mandatory: true }
+  amp_layout: {
+    supported_layouts: NODISPLAY
+  }
+}
 # <amp-youtube>
 # amp-youtube either comes with a video-id attribute, or with
 # a data-videoid attribute.
@@ -2318,6 +2451,9 @@ tags: {
 }
 # <amp-pinterest>
 # https://github.com/ampproject/amphtml/blob/master/extensions/amp-pinterest/amp-pinterest.md
+# TODO: Enforce mandatory attributes depending on the value of another
+# attribute. In this case, depending on the value of data-do, data-media and
+# data-description may or may not be mandatory.
 tags: {
   name: "amp-pinterest"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-pinterest/amp-pinterest.md"
@@ -2325,7 +2461,6 @@ tags: {
   attr_lists: "extended-amp-global"
   # data-* is generally allowed, but it's not generally mandatory.
   attrs: { name: "data-do" mandatory: true }
-  attrs: { name: "data-url" mandatory: true }
   amp_layout: {
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
@@ -2456,7 +2591,7 @@ tags: {
 }
 # <amp-image-lightbox>
 tags: {
-  name: "amp-image-lightbox"  # See http://b/24381009.
+  name: "amp-image-lightbox"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-image-lightbox/amp-image-lightbox.md"
   also_requires: "amp-image-lightbox extension .js script"
   # Support dimensions / sizes / etc. like an amp-lightbox.
@@ -2560,15 +2695,26 @@ attr_lists: {
   # placeholder empty attribute. See e.g.
   # https://github.com/ampproject/amphtml/pull/284/commits
   attrs: { name: "placeholder" value: "" }
-  # We allow the empty fallback attribute on any element, per
-  # http://b/24873828.
+  # We allow the empty fallback attribute on any element
   attrs: { name: "fallback" value: "" }
-  # Allowed on all elements per http://b/24380921.
   attrs: { name: "lightbox" }
-  # Allowed on all elements per http://b/24789910.
   attrs: { name: "on" }
-  # Allowed on all elements per http://b/25392418.
   attrs: { name: "overflow" }
+  # amp-access specific attributes, see
+  # https://github.com/ampproject/amphtml/blob/master/extensions/amp-access/amp-access-spec.md
+  # TODO(gregable): These should only be allowed on any tag inside BODY or HEAD.
+  attrs: { name: "amp-access" }
+  attrs: { name: "amp-access-loading" }
+  attrs: { name: "amp-access-loader" }
+  attrs: { name: "amp-access-template" }
+  attrs: { name: "amp-access-off" }
+  attrs: { name: "amp-access-on" }
+  attrs: { name: "amp-access-show" }
+  attrs: { name: "amp-access-hide" }
+  attrs: { name: "amp-access-style" }
+  attrs: { name: "amp-access-behavior" }
+  attrs: { name: "amp-access-id" }
+  attrs: { name: "i-amp-access-id" }
 }
 
 # Error formats

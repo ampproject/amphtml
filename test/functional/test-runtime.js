@@ -15,6 +15,7 @@
  */
 
 import {adopt} from '../../src/runtime';
+import {parseUrl} from '../../src/url';
 import * as sinon from 'sinon';
 
 describe('runtime', () => {
@@ -34,11 +35,11 @@ describe('runtime', () => {
       history: {},
       navigator: {},
       setTimeout: () => {},
+      location: parseUrl('https://acme.com/document1'),
     };
   });
 
   afterEach(() => {
-    clock.restore();
     sandbox.restore();
   });
 

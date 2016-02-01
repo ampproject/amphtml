@@ -41,6 +41,15 @@ var forbiddenTerms = {
   'DO NOT SUBMIT': '',
   'describe\\.only': '',
   'it\\.only': '',
+  'sinon\\.(spy|stub|mock)\\(\\w[^)]*\\)': {
+    message: 'Use a sandbox instead to avoid repeated `#restore` calls'
+  },
+  '(\\w*([sS]py|[sS]tub|[mM]ock|clock).restore)': {
+    message: 'Use a sandbox instead to avoid repeated `#restore` calls'
+  },
+  'sinon\\.useFakeTimers': {
+    message: 'Use a sandbox instead to avoid repeated `#restore` calls'
+  },
   'console\\.\\w+\\(': {
     message: 'If you run against this, use console/*OK*/.log to ' +
       'whitelist a legit case.',
@@ -73,6 +82,13 @@ var forbiddenTerms = {
       'src/service/cid-impl.js',
       'extensions/amp-access/0.1/amp-access.js',
       'extensions/amp-analytics/0.1/amp-analytics.js',
+    ],
+  },
+  'installStorageService': {
+    message: privateServiceFactory,
+    whitelist: [
+      'extensions/amp-analytics/0.1/amp-analytics.js',
+      'src/service/storage-impl.js',
     ],
   },
   'installViewerService': {
@@ -111,10 +127,19 @@ var forbiddenTerms = {
       'src/service/standard-actions-impl.js',
     ],
   },
+  'sendMessage': {
+    message: privateServiceFactory,
+    whitelist: [
+      'src/service/viewer-impl.js',
+      'src/service/storage-impl.js',
+      'examples/viewer-integr-messaging.js',
+    ],
+  },
   // Privacy sensitive
   'cidFor': {
     message: requiresReviewPrivacy,
     whitelist: [
+      'builtins/amp-ad.js',
       'src/cid.js',
       'src/service/cid-impl.js',
       'src/url-replacements.js',
@@ -169,10 +194,18 @@ var forbiddenTerms = {
     ]
   },
   'eval\\(': '',
+  'storageFor': {
+    message: requiresReviewPrivacy,
+    whitelist: [
+      'src/storage.js',
+      'extensions/amp-user-notification/0.1/amp-user-notification.js',
+    ],
+  },
   'localStorage': {
     message: requiresReviewPrivacy,
     whitelist: [
       'src/service/cid-impl.js',
+      'src/service/storage-impl.js',
     ],
   },
   'sessionStorage': requiresReviewPrivacy,

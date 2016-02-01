@@ -14,12 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the license.
  */
-goog.require('goog.asserts');
-goog.require('parse_css.EOFToken');
-goog.require('parse_css.ErrorToken');
-goog.require('parse_css.TokenStream');
-goog.require('parse_css.extractASimpleBlock');
-
 goog.provide('css_selectors.AttrSelector');
 goog.provide('css_selectors.ClassSelector');
 goog.provide('css_selectors.Combinator');
@@ -35,6 +29,12 @@ goog.provide('css_selectors.parseATypeSelector');
 goog.provide('css_selectors.parseAnAttrSelector');
 goog.provide('css_selectors.parseAnIdSelector');
 goog.provide('css_selectors.traverse');
+
+goog.require('goog.asserts');
+goog.require('parse_css.EOFToken');
+goog.require('parse_css.ErrorToken');
+goog.require('parse_css.TokenStream');
+goog.require('parse_css.extractASimpleBlock');
 
 /**
  * Abstract super class for CSS Selectors.
@@ -305,13 +305,13 @@ css_selectors.parseAnIdSelector = function(tokenStream) {
  * Typically written as '[foo=bar]'.
  * @param {number} line
  * @param {number} col
- * @param {!Array<!parse_css.CSSParserToken>} value
+ * @param {!Array<!parse_css.Token>} value
  * @constructor
  * @extends {css_selectors.SelectorNode}
  */
 css_selectors.AttrSelector = function(line, col, value) {
   goog.base(this, line, col);
-  /** @type {!Array<!parse_css.CSSParserToken>} */
+  /** @type {!Array<!parse_css.Token>} */
   this.value = value;
 };
 goog.inherits(css_selectors.AttrSelector, css_selectors.SelectorNode);
@@ -358,7 +358,7 @@ css_selectors.parseAnAttrSelector = function(tokenStream) {
  *   are pseudo class selectors. Selectors with two colons
  *   (e.g., '::first-line') are pseudo elements.
  * @param {string} name
- * @param {!Array<!parse_css.CSSParserToken>} func If it's a function style
+ * @param {!Array<!parse_css.Token>} func If it's a function style
  * pseudo selector, like lang(fr), then this parameter takes the function
  * tokens.
  * @constructor
@@ -370,7 +370,7 @@ css_selectors.PseudoSelector = function(line, col, isClass, name, func) {
   this.isClass = isClass;
   /** @type {string} */
   this.name = name;
-  /** @type {!Array<!parse_css.CSSParserToken>} */
+  /** @type {!Array<!parse_css.Token>} */
   this.func = func;
 };
 goog.inherits(css_selectors.PseudoSelector, css_selectors.SelectorNode);
@@ -411,7 +411,7 @@ css_selectors.parseAPseudoSelector = function(tokenStream) {
     tokenStream.consume();
   }
   let name = '';
-  /** @type {!Array<!parse_css.CSSParserToken>} */
+  /** @type {!Array<!parse_css.Token>} */
   let func = [];
   if (tokenStream.current() instanceof parse_css.IdentToken) {
     const ident = goog.asserts.assertInstanceof(
@@ -511,6 +511,10 @@ goog.inherits(css_selectors.SimpleSelectorSequence, css_selectors.SelectorNode);
 css_selectors.SimpleSelectorSequence.prototype.nodeType =
     'SIMPLE_SELECTOR_SEQUENCE';
 
+/**
+ * @param {!Array<!Object>} array
+ * @return {!Array<string>}
+ */
 function recursiveArrayToJSON(array) {
   const json = [];
   for (const entry of array) {
@@ -649,7 +653,7 @@ css_selectors.Combinator.prototype.accept = function(visitor) {
 /**
  * The CombinatorType for a given token; helper function used when
  * constructing a Combinator instance.
- * @param {!parse_css.CSSParserToken} token
+ * @param {!parse_css.Token} token
  * @return {string}
  */
 function combinatorTypeForToken(token) {
@@ -669,7 +673,7 @@ function combinatorTypeForToken(token) {
  * Whether or not the provided token could be the start of a simple
  * selector sequence. See the simple_selector_sequence production in
  * http://www.w3.org/TR/css3-selectors/#grammar.
- * @param {!parse_css.CSSParserToken} token
+ * @param {!parse_css.Token} token
  * @return {boolean}
  */
 function isSimpleSelectorSequenceStart(token) {

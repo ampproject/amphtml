@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+import {assertAbsoluteHttpOrHttpsUrl, parseQueryString} from '../../../src/url';
 import {listen} from '../../../src/event-helper';
-import {parseQueryString} from '../../../src/url';
 
 
 /**
@@ -57,7 +57,7 @@ export class LoginDoneDialog {
 
     if (query['url']) {
       // Source URL is specified. Try to redirect back.
-      this.win.location.replace(query['url']);
+      this.win.location.replace(assertAbsoluteHttpOrHttpsUrl(query['url']));
       return Promise.resolve();
     }
 
@@ -239,9 +239,7 @@ export function buildLangSelector(lang) {
       langPrefix += '-';
     }
     langPrefix += i == 0 ? parts[i].toLowerCase() : parts[i].toUpperCase();
-    if (langPrefix.indexOf('"') != -1) {
-      langPrefix = langPrefix.replace(/\"/g, '');
-    }
+    langPrefix = langPrefix.replace(/[^a-zA-Z\-]/g, '');
     langExpr += `[lang="${langPrefix}"]`;
   }
   return langExpr;

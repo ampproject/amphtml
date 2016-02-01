@@ -40,7 +40,7 @@ export function listen(iframe, typeOfMessage, callback, opt_is3P) {
     if (event.origin != origin && !mode.localDev && !mode.test) {
       return;
     }
-    if (event.source != iframe.contentWindow && !mode.localDev && !mode.test) {
+    if (event.source != iframe.contentWindow) {
       return;
     }
     if (!event.data || event.data.sentinel != sentinel) {
@@ -86,6 +86,9 @@ export function listenOnce(iframe, typeOfMessage, callback, opt_is3P) {
  * @param {boolean=} opt_is3P set to true if the iframe is 3p.
  */
 export function postMessage(iframe, type, object, targetOrigin, opt_is3P) {
+  if (!iframe.contentWindow) {
+    return;
+  }
   object.type = type;
   object.sentinel = getSentinel_(opt_is3P);
   iframe.contentWindow./*OK*/postMessage(object, targetOrigin);

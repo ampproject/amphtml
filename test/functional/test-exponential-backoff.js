@@ -29,7 +29,6 @@ describe('exponentialBackoff', () => {
   });
 
   afterEach(() => {
-    clock.restore();
     sandbox.restore();
   });
 

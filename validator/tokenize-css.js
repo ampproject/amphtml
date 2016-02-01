@@ -23,7 +23,6 @@
 goog.provide('parse_css.AtKeywordToken');
 goog.provide('parse_css.CDCToken');
 goog.provide('parse_css.CDOToken');
-goog.provide('parse_css.CSSParserToken');
 goog.provide('parse_css.CloseCurlyToken');
 goog.provide('parse_css.CloseParenToken');
 goog.provide('parse_css.CloseSquareToken');
@@ -52,15 +51,17 @@ goog.provide('parse_css.StringToken');
 goog.provide('parse_css.StringValuedToken');
 goog.provide('parse_css.SubstringMatchToken');
 goog.provide('parse_css.SuffixMatchToken');
+goog.provide('parse_css.Token');
+goog.provide('parse_css.TokenType');
 goog.provide('parse_css.URLToken');
 goog.provide('parse_css.WhitespaceToken');
 goog.provide('parse_css.tokenize');
 
 /**
- * Returns an array of CSSParserTokens.
+ * Returns an array of Tokens.
  *
  * Token Hierarchy:
- * CSSParserToken (abstract)
+ * Token (abstract)
  *   - StringValuedToken (abstract)
  *     - IdentToken
  *     - FunctionToken
@@ -98,7 +99,7 @@ goog.provide('parse_css.tokenize');
  * @param {number} line
  * @param {number} col
  * @param {!Array<!parse_css.ErrorToken>} errors output array for the errors.
- * @return {!Array<!parse_css.CSSParserToken>}
+ * @return {!Array<!parse_css.Token>}
  * @export
  */
 parse_css.tokenize = function(strIn, line, col, errors) {
@@ -346,7 +347,7 @@ Tokenizer.prototype.getCol = function() {
 };
 
 /**
- * @return {!Array<!parse_css.CSSParserToken>}
+ * @return {!Array<!parse_css.Token>}
  */
 Tokenizer.prototype.getTokens = function() {
   return this.tokens_;
@@ -378,7 +379,7 @@ Tokenizer.prototype.next = function(opt_num) {
 
 /**
  * A MarkedPosition object saves position information from the given
- * tokenizer and can later write that position back to a CSSParserToken
+ * tokenizer and can later write that position back to a Token
  * object.
  * @param {!Tokenizer} tokenizer
  * @constructor
@@ -392,8 +393,8 @@ const MarkedPosition = function MarkedPosition(tokenizer) {
 
 /**
  * Adds position data to the given token, returning it for chaining.
- * @param {!parse_css.CSSParserToken} token
- * @return {!parse_css.CSSParserToken}
+ * @param {!parse_css.Token} token
+ * @return {!parse_css.Token}
  */
 MarkedPosition.prototype.addPositionTo = function(token) {
   token.line = this.line;
@@ -431,7 +432,7 @@ Tokenizer.prototype.eof = function(opt_codepoint) {
   return codepoint === -1;
 };
 
-/** @return {!parse_css.CSSParserToken} */
+/** @return {!parse_css.Token} */
 Tokenizer.prototype.consumeAToken = function() {
   this.consumeComments();
   this.consume();
@@ -614,7 +615,7 @@ Tokenizer.prototype.consumeComments = function() {
  * Consumes a token that starts with a number.
  * The specific type is one of:
  *   NumberToken, DimensionToken, PercentageToken
- * @return {!parse_css.CSSParserToken} */
+ * @return {!parse_css.Token} */
 Tokenizer.prototype.consumeANumericToken = function() {
   goog.asserts.assert(
       this.wouldStartANumber(this.next(1), this.next(2), this.next(3)),
@@ -642,7 +643,7 @@ Tokenizer.prototype.consumeANumericToken = function() {
  * Consume an identifier-like token.
  * The specific type is one of:
  *   FunctionToken, URLToken, ErrorToken, IdentToken
- * @return {!parse_css.CSSParserToken}
+ * @return {!parse_css.Token}
  */
 Tokenizer.prototype.consumeAnIdentlikeToken = function() {
   const name = this.consumeAName();
@@ -672,7 +673,7 @@ Tokenizer.prototype.consumeAnIdentlikeToken = function() {
  * Consume a string token.
  * The specific type is one of:
  *   StringToken, ErrorToken
- * @return {!parse_css.CSSParserToken}
+ * @return {!parse_css.Token}
  */
 Tokenizer.prototype.consumeAStringToken = function() {
   goog.asserts.assert(
@@ -706,7 +707,7 @@ Tokenizer.prototype.consumeAStringToken = function() {
  * Consume an URL token.
  * The specific type is one of:
  *   URLToken, ErrorToken
- * @return {!parse_css.CSSParserToken}
+ * @return {!parse_css.Token}
  */
 Tokenizer.prototype.consumeAURLToken = function() {
   const token = new parse_css.URLToken('');
@@ -982,21 +983,66 @@ Tokenizer.prototype.consumeTheRemnantsOfABadURL = function() {
 };
 
 /**
+ * @enum {string}
+ */
+parse_css.TokenType = {
+  UNKNOWN: 'UNKNOWN',
+  AT_KEYWORD: 'AT_KEYWORD',
+  CDC: 'CDC',  // -->
+  CDO: 'CDO',  // <!--
+  CLOSE_CURLY: 'CLOSE_CURLY',
+  CLOSE_PAREN: 'CLOSE_PAREN',
+  CLOSE_SQUARE: 'CLOSE_SQUARE',
+  COLON: 'COLON',
+  COLUMN: 'COLUMN',  // ||
+  COMMA: 'COMMA',
+  DASH_MATCH: 'DASH_MATCH',  // |=
+  DELIM: 'DELIM',
+  DIMENSION: 'DIMENSION',
+  EOF_TOKEN: 'EOF_TOKEN',  // Can't call this EOF due to symbol conflict in C.
+  ERROR: 'ERROR',
+  FUNCTION_TOKEN: 'FUNCTION_TOKEN',
+  HASH: 'HASH',  // #
+  IDENT: 'IDENT',
+  INCLUDE_MATCH: 'INCLUDE_MATCH',  // ~=
+  NUMBER: 'NUMBER',
+  OPEN_CURLY: 'OPEN_CURLY',
+  OPEN_PAREN: 'OPEN_PAREN',
+  OPEN_SQUARE: 'OPEN_SQUARE',
+  PERCENTAGE: 'PERCENTAGE',
+  PREFIX_MATCH: 'PREFIX_MATCH',  // ^=
+  SEMICOLON: 'SEMICOLON',
+  STRING: 'STRING',
+  SUBSTRING_MATCH: 'SUBSTRING_MATCH',  // *=
+  SUFFIX_MATCH: 'SUFFIX_MATCH',        // $=
+  WHITESPACE: 'WHITESPACE',
+  URL: 'URL',
+
+  // AST nodes produced by the parsing routines.
+  STYLESHEET: 'STYLESHEET',
+  AT_RULE: 'AT_RULE',
+  QUALIFIED_RULE: 'QUALIFIED_RULE',
+  DECLARATION: 'DECLARATION',
+  BLOCK: 'BLOCK',
+  FUNCTION: 'FUNCTION'
+};
+
+/**
  * The abstract superclass for all tokens.
  * @constructor
  */
-parse_css.CSSParserToken = function() {
+parse_css.Token = function() {
   /** @type {number} */
   this.line = 1;
   /** @type {number} */
   this.col = 0;
 };
 
-/** @type {string} */
-parse_css.CSSParserToken.prototype.tokenType = 'abstract';
+/** @type {parse_css.TokenType} */
+parse_css.Token.prototype.tokenType = parse_css.TokenType.UNKNOWN;
 
 /** @return {!Object} */
-parse_css.CSSParserToken.prototype.toJSON = function() {
+parse_css.Token.prototype.toJSON = function() {
   return {
     'tokenType': this.tokenType,
     'line': this.line,
@@ -1005,12 +1051,7 @@ parse_css.CSSParserToken.prototype.toJSON = function() {
 };
 
 /** @return {string} */
-parse_css.CSSParserToken.prototype.toString = function() {
-  return this.tokenType;
-};
-
-/** @return {string} */
-parse_css.CSSParserToken.prototype.toSource = function() { return '' + this; };
+parse_css.Token.prototype.toSource = function() { return '' + this; };
 
 /**
  * Enum for the type of error that's being emitted.
@@ -1026,7 +1067,7 @@ parse_css.ErrorType = {
  * @param {parse_css.ErrorType} errorType
  * @param {string} msg
  * @constructor
- * @extends {parse_css.CSSParserToken}
+ * @extends {parse_css.Token}
  */
 parse_css.ErrorToken = function(errorType, msg) {
   goog.base(this);
@@ -1035,17 +1076,10 @@ parse_css.ErrorToken = function(errorType, msg) {
   /** @override @type {string} */
   this.msg = msg;
 };
-goog.inherits(parse_css.ErrorToken, parse_css.CSSParserToken);
+goog.inherits(parse_css.ErrorToken, parse_css.Token);
 
-/** @type {string} */
-parse_css.ErrorToken.prototype.tokenType = 'ERROR';
-
-/** @return {string} */
-parse_css.ErrorToken.prototype.toString = function() {
-  const json = this.toJSON();
-  return ':' + json['line'] + ':' +
-      json['col'] + ' ' + this.errorType + ' - ' + this.msg;
-};
+/** @type {parse_css.TokenType} */
+parse_css.ErrorToken.prototype.tokenType = parse_css.TokenType.ERROR;
 
 /** @return {!Object} */
 parse_css.ErrorToken.prototype.toJSON = function() {
@@ -1057,98 +1091,96 @@ parse_css.ErrorToken.prototype.toJSON = function() {
 
 /**
  * @constructor
- * @extends {parse_css.CSSParserToken}
+ * @extends {parse_css.Token}
  */
 parse_css.WhitespaceToken = function() {
   goog.base(this);
 };
-goog.inherits(parse_css.WhitespaceToken, parse_css.CSSParserToken);
+goog.inherits(parse_css.WhitespaceToken, parse_css.Token);
 
-/** @type {string} */
-parse_css.WhitespaceToken.prototype.tokenType = 'WHITESPACE';
-
-/** @return {string} */
-parse_css.WhitespaceToken.prototype.toString = function() { return 'WS'; };
+/** @type {parse_css.TokenType} */
+parse_css.WhitespaceToken.prototype.tokenType = parse_css.TokenType.WHITESPACE;
 
 /** @return {string} */
 parse_css.WhitespaceToken.prototype.toSource = function() { return ' '; };
 
 /**
  * @constructor
- * @extends {parse_css.CSSParserToken}
+ * @extends {parse_css.Token}
  */
 parse_css.CDOToken = function() {
   goog.base(this);
 };
-goog.inherits(parse_css.CDOToken, parse_css.CSSParserToken);
+goog.inherits(parse_css.CDOToken, parse_css.Token);
 
-/** @type {string} */
-parse_css.CDOToken.prototype.tokenType = 'CDO';
+/** @type {parse_css.TokenType} */
+parse_css.CDOToken.prototype.tokenType = parse_css.TokenType.CDO;
 
 /** @return {string} */
 parse_css.CDOToken.prototype.toSource = function() { return '<!--'; };
 
 /**
  * @constructor
- * @extends {parse_css.CSSParserToken}
+ * @extends {parse_css.Token}
  */
 parse_css.CDCToken = function() {
   goog.base(this);
 };
-goog.inherits(parse_css.CDCToken, parse_css.CSSParserToken);
+goog.inherits(parse_css.CDCToken, parse_css.Token);
 
-/** @type {string} */
-parse_css.CDCToken.prototype.tokenType = 'CDC';
+/** @type {parse_css.TokenType} */
+parse_css.CDCToken.prototype.tokenType = parse_css.TokenType.CDC;
 
 /** @return {string} */
 parse_css.CDCToken.prototype.toSource = function() { return '-->'; };
 
 /**
  * @constructor
- * @extends {parse_css.CSSParserToken}
+ * @extends {parse_css.Token}
  */
 parse_css.ColonToken = function() {
   goog.base(this);
 };
-goog.inherits(parse_css.ColonToken, parse_css.CSSParserToken);
+goog.inherits(parse_css.ColonToken, parse_css.Token);
 
-/** @type {string} */
-parse_css.ColonToken.prototype.tokenType = ':';
+/** @type {parse_css.TokenType} */
+parse_css.ColonToken.prototype.tokenType = parse_css.TokenType.COLON;
 
 /**
  * @constructor
- * @extends {parse_css.CSSParserToken}
+ * @extends {parse_css.Token}
  */
 parse_css.SemicolonToken = function() {
   goog.base(this);
 };
-goog.inherits(parse_css.SemicolonToken, parse_css.CSSParserToken);
+goog.inherits(parse_css.SemicolonToken, parse_css.Token);
 
-/** @type {string} */
-parse_css.SemicolonToken.prototype.tokenType = ';';
+/** @type {parse_css.TokenType} */
+
+parse_css.SemicolonToken.prototype.tokenType = parse_css.TokenType.SEMICOLON;
 
 /**
  * @constructor
- * @extends {parse_css.CSSParserToken}
+ * @extends {parse_css.Token}
  */
 parse_css.CommaToken = function() {
   goog.base(this);
 };
-goog.inherits(parse_css.CommaToken, parse_css.CSSParserToken);
+goog.inherits(parse_css.CommaToken, parse_css.Token);
 
-/** @type {string} */
-parse_css.CommaToken.prototype.tokenType = ',';
+/** @type {parse_css.TokenType} */
+parse_css.CommaToken.prototype.tokenType = parse_css.TokenType.COMMA;
 
 /**
  * @constructor
- * @extends {parse_css.CSSParserToken}
+ * @extends {parse_css.Token}
  */
 parse_css.GroupingToken = function() {
   goog.base(this);
   this.value = null;
   this.mirror = null;
 };
-goog.inherits(parse_css.GroupingToken, parse_css.CSSParserToken);
+goog.inherits(parse_css.GroupingToken, parse_css.Token);
 
 /**
  * @constructor
@@ -1163,8 +1195,8 @@ parse_css.OpenCurlyToken = function() {
 };
 goog.inherits(parse_css.OpenCurlyToken, parse_css.GroupingToken);
 
-/** @type {string} */
-parse_css.OpenCurlyToken.prototype.tokenType = '{';
+/** @type {parse_css.TokenType} */
+parse_css.OpenCurlyToken.prototype.tokenType = parse_css.TokenType.OPEN_CURLY;
 
 /**
  * @constructor
@@ -1179,8 +1211,8 @@ parse_css.CloseCurlyToken = function() {
 };
 goog.inherits(parse_css.CloseCurlyToken, parse_css.GroupingToken);
 
-/** @type {string} */
-parse_css.CloseCurlyToken.prototype.tokenType = '}';
+/** @type {parse_css.TokenType} */
+parse_css.CloseCurlyToken.prototype.tokenType = parse_css.TokenType.CLOSE_CURLY;
 
 /**
  * @constructor
@@ -1195,8 +1227,8 @@ parse_css.OpenSquareToken = function() {
 };
 goog.inherits(parse_css.OpenSquareToken, parse_css.GroupingToken);
 
-/** @type {string} */
-parse_css.OpenSquareToken.prototype.tokenType = '[';
+/** @type {parse_css.TokenType} */
+parse_css.OpenSquareToken.prototype.tokenType = parse_css.TokenType.OPEN_SQUARE;
 
 /**
  * @constructor
@@ -1211,8 +1243,9 @@ parse_css.CloseSquareToken = function() {
 };
 goog.inherits(parse_css.CloseSquareToken, parse_css.GroupingToken);
 
-/** @type {string} */
-parse_css.CloseSquareToken.prototype.tokenType = ']';
+/** @type {parse_css.TokenType} */
+parse_css.CloseSquareToken.prototype.tokenType =
+    parse_css.TokenType.CLOSE_SQUARE;
 
 /**
  * @constructor
@@ -1227,8 +1260,8 @@ parse_css.OpenParenToken = function() {
 };
 goog.inherits(parse_css.OpenParenToken, parse_css.GroupingToken);
 
-/** @type {string} */
-parse_css.OpenParenToken.prototype.tokenType = '(';
+/** @type {parse_css.TokenType} */
+parse_css.OpenParenToken.prototype.tokenType = parse_css.TokenType.OPEN_PAREN;
 
 /**
  * @constructor
@@ -1243,92 +1276,96 @@ parse_css.CloseParenToken = function() {
 };
 goog.inherits(parse_css.CloseParenToken, parse_css.GroupingToken);
 
-/** @type {string} */
-parse_css.CloseParenToken.prototype.tokenType = ')';
+/** @type {parse_css.TokenType} */
+parse_css.CloseParenToken.prototype.tokenType = parse_css.TokenType.CLOSE_PAREN;
 
 /**
  * @constructor
- * @extends {parse_css.CSSParserToken}
+ * @extends {parse_css.Token}
  */
 parse_css.IncludeMatchToken = function() {
   goog.base(this);
 };
-goog.inherits(parse_css.IncludeMatchToken, parse_css.CSSParserToken);
+goog.inherits(parse_css.IncludeMatchToken, parse_css.Token);
 
-/** @type {string} */
-parse_css.IncludeMatchToken.prototype.tokenType = '~=';
+/** @type {parse_css.TokenType} */
+parse_css.IncludeMatchToken.prototype.tokenType =
+    parse_css.TokenType.INCLUDE_MATCH;
 
 /**
  * @constructor
- * @extends {parse_css.CSSParserToken}
+ * @extends {parse_css.Token}
  */
 parse_css.DashMatchToken = function() {
   goog.base(this);
 };
-goog.inherits(parse_css.DashMatchToken, parse_css.CSSParserToken);
+goog.inherits(parse_css.DashMatchToken, parse_css.Token);
 
-/** @type {string} */
-parse_css.DashMatchToken.prototype.tokenType = '|=';
+/** @type {parse_css.TokenType} */
+parse_css.DashMatchToken.prototype.tokenType = parse_css.TokenType.DASH_MATCH;
 
 /**
  * @constructor
- * @extends {parse_css.CSSParserToken}
+ * @extends {parse_css.Token}
  */
 parse_css.PrefixMatchToken = function() {
   goog.base(this);
 };
-goog.inherits(parse_css.PrefixMatchToken, parse_css.CSSParserToken);
+goog.inherits(parse_css.PrefixMatchToken, parse_css.Token);
 
-/** @type {string} */
-parse_css.PrefixMatchToken.prototype.tokenType = '^=';
+/** @type {parse_css.TokenType} */
+parse_css.PrefixMatchToken.prototype.tokenType =
+    parse_css.TokenType.PREFIX_MATCH;
 
 /**
  * @constructor
- * @extends {parse_css.CSSParserToken}
+ * @extends {parse_css.Token}
  */
 parse_css.SuffixMatchToken = function() {
   goog.base(this);
 };
-goog.inherits(parse_css.SuffixMatchToken, parse_css.CSSParserToken);
+goog.inherits(parse_css.SuffixMatchToken, parse_css.Token);
 
-/** @type {string} */
-parse_css.SuffixMatchToken.prototype.tokenType = '$=';
+/** @type {parse_css.TokenType} */
+parse_css.SuffixMatchToken.prototype.tokenType =
+    parse_css.TokenType.SUFFIX_MATCH;
 
 /**
  * @constructor
- * @extends {parse_css.CSSParserToken}
+ * @extends {parse_css.Token}
  */
 parse_css.SubstringMatchToken = function() {
   goog.base(this);
 };
-goog.inherits(parse_css.SubstringMatchToken, parse_css.CSSParserToken);
+goog.inherits(parse_css.SubstringMatchToken, parse_css.Token);
 
-/** @type {string} */
-parse_css.SubstringMatchToken.prototype.tokenType = '*=';
+/** @type {parse_css.TokenType} */
+parse_css.SubstringMatchToken.prototype.tokenType =
+    parse_css.TokenType.SUBSTRING_MATCH;
 
 /**
  * @constructor
- * @extends {parse_css.CSSParserToken}
+ * @extends {parse_css.Token}
  */
 parse_css.ColumnToken = function() {
   goog.base(this);
 };
-goog.inherits(parse_css.ColumnToken, parse_css.CSSParserToken);
+goog.inherits(parse_css.ColumnToken, parse_css.Token);
 
-/** @type {string} */
-parse_css.ColumnToken.prototype.tokenType = '||';
+/** @type {parse_css.TokenType} */
+parse_css.ColumnToken.prototype.tokenType = parse_css.TokenType.COLUMN;
 
 /**
  * @constructor
- * @extends {parse_css.CSSParserToken}
+ * @extends {parse_css.Token}
  */
 parse_css.EOFToken = function() {
   goog.base(this);
 };
-goog.inherits(parse_css.EOFToken, parse_css.CSSParserToken);
+goog.inherits(parse_css.EOFToken, parse_css.Token);
 
-/** @type {string} */
-parse_css.EOFToken.prototype.tokenType = 'EOF_TOKEN';
+/** @type {parse_css.TokenType} */
+parse_css.EOFToken.prototype.tokenType = parse_css.TokenType.EOF_TOKEN;
 
 /** @return {string} */
 parse_css.EOFToken.prototype.toSource = function() { return ''; };
@@ -1336,22 +1373,17 @@ parse_css.EOFToken.prototype.toSource = function() { return ''; };
 /**
  * @param {number} code
  * @constructor
- * @extends {parse_css.CSSParserToken}
+ * @extends {parse_css.Token}
  */
 parse_css.DelimToken = function(code) {
   goog.base(this);
   /** @type {string} */
   this.value = stringFromCode(code);
 };
-goog.inherits(parse_css.DelimToken, parse_css.CSSParserToken);
+goog.inherits(parse_css.DelimToken, parse_css.Token);
 
-/** @type {string} */
-parse_css.DelimToken.prototype.tokenType = 'DELIM';
-
-/** @return {string} */
-parse_css.DelimToken.prototype.toString = function() {
-  return 'DELIM(' + this.value + ')';
-};
+/** @type {parse_css.TokenType} */
+parse_css.DelimToken.prototype.tokenType = parse_css.TokenType.DELIM;
 
 /** @return {!Object} */
 parse_css.DelimToken.prototype.toJSON = function() {
@@ -1371,14 +1403,14 @@ parse_css.DelimToken.prototype.toSource = function() {
 
 /**
  * @constructor
- * @extends {parse_css.CSSParserToken}
+ * @extends {parse_css.Token}
  */
 parse_css.StringValuedToken = function() {
   goog.base(this);
   /** @type {string} */
   this.value = 'abstract';
 };
-goog.inherits(parse_css.StringValuedToken, parse_css.CSSParserToken);
+goog.inherits(parse_css.StringValuedToken, parse_css.Token);
 
 /**
  * @param {string} str
@@ -1407,13 +1439,8 @@ parse_css.IdentToken = function(val) {
 };
 goog.inherits(parse_css.IdentToken, parse_css.StringValuedToken);
 
-/** @type {string} */
-parse_css.IdentToken.prototype.tokenType = 'IDENT';
-
-/** @return {string} */
-parse_css.IdentToken.prototype.toString = function() {
-  return 'IDENT(' + this.value + ')';
-};
+/** @type {parse_css.TokenType} */
+parse_css.IdentToken.prototype.tokenType = parse_css.TokenType.IDENT;
 
 /** @return {string} */
 parse_css.IdentToken.prototype.toSource = function() {
@@ -1434,13 +1461,9 @@ parse_css.FunctionToken = function(val) {
 };
 goog.inherits(parse_css.FunctionToken, parse_css.StringValuedToken);
 
-/** @type {string} */
-parse_css.FunctionToken.prototype.tokenType = 'FUNCTION_TOKEN';
-
-/** @return {string} */
-parse_css.FunctionToken.prototype.toString = function() {
-  return 'FUNCTION_TOKEN(' + this.value + ')';
-};
+/** @type {parse_css.TokenType} */
+parse_css.FunctionToken.prototype.tokenType =
+    parse_css.TokenType.FUNCTION_TOKEN;
 
 /** @return {string} */
 parse_css.FunctionToken.prototype.toSource = function() {
@@ -1459,13 +1482,8 @@ parse_css.AtKeywordToken = function(val) {
 };
 goog.inherits(parse_css.AtKeywordToken, parse_css.StringValuedToken);
 
-/** @type {string} */
-parse_css.AtKeywordToken.prototype.tokenType = 'AT-KEYWORD';
-
-/** @return {string} */
-parse_css.AtKeywordToken.prototype.toString = function() {
-  return 'AT(' + this.value + ')';
-};
+/** @type {parse_css.TokenType} */
+parse_css.AtKeywordToken.prototype.tokenType = parse_css.TokenType.AT_KEYWORD;
 
 /** @return {string} */
 parse_css.AtKeywordToken.prototype.toSource = function() {
@@ -1486,13 +1504,8 @@ parse_css.HashToken = function(val) {
 };
 goog.inherits(parse_css.HashToken, parse_css.StringValuedToken);
 
-/** @type {string} */
-parse_css.HashToken.prototype.tokenType = 'HASH';
-
-/** @return {string} */
-parse_css.HashToken.prototype.toString = function() {
-  return 'HASH(' + this.value + ')';
-};
+/** @type {parse_css.TokenType} */
+parse_css.HashToken.prototype.tokenType = parse_css.TokenType.HASH;
 
 /** @return {!Object} */
 parse_css.HashToken.prototype.toJSON = function() {
@@ -1523,13 +1536,8 @@ parse_css.StringToken = function(val) {
 };
 goog.inherits(parse_css.StringToken, parse_css.StringValuedToken);
 
-/** @type {string} */
-parse_css.StringToken.prototype.tokenType = 'STRING';
-
-/** @return {string} */
-parse_css.StringToken.prototype.toString = function() {
-  return '"' + escapeString(this.value) + '"';
-};
+/** @type {parse_css.TokenType} */
+parse_css.StringToken.prototype.tokenType = parse_css.TokenType.STRING;
 
 /**
  * @param {string} val
@@ -1543,13 +1551,8 @@ parse_css.URLToken = function(val) {
 };
 goog.inherits(parse_css.URLToken, parse_css.StringValuedToken);
 
-/** @type {string} */
-parse_css.URLToken.prototype.tokenType = 'URL';
-
-/** @return {string} */
-parse_css.URLToken.prototype.toString = function() {
-  return 'URL(' + this.value + ')';
-};
+/** @type {parse_css.TokenType} */
+parse_css.URLToken.prototype.tokenType = parse_css.TokenType.URL;
 
 /** @return {string} */
 parse_css.URLToken.prototype.toSource = function() {
@@ -1558,7 +1561,7 @@ parse_css.URLToken.prototype.toSource = function() {
 
 /**
  * @constructor
- * @extends {parse_css.CSSParserToken}
+ * @extends {parse_css.Token}
  */
 parse_css.NumberToken = function() {
   goog.base(this);
@@ -1568,18 +1571,10 @@ parse_css.NumberToken = function() {
   /** @type {string} */
   this.repr = '';
 };
-goog.inherits(parse_css.NumberToken, parse_css.CSSParserToken);
+goog.inherits(parse_css.NumberToken, parse_css.Token);
 
-/** @type {string} */
-parse_css.NumberToken.prototype.tokenType = 'NUMBER';
-
-/** @return {string} */
-parse_css.NumberToken.prototype.toString = function() {
-  if (this.type === 'integer') {
-    return 'INT(' + this.value + ')';
-  }
-  return 'NUMBER(' + this.value + ')';
-};
+/** @type {parse_css.TokenType} */
+parse_css.NumberToken.prototype.tokenType = parse_css.TokenType.NUMBER;
 
 /** @return {!Object} */
 parse_css.NumberToken.prototype.toJSON = function() {
@@ -1597,7 +1592,7 @@ parse_css.NumberToken.prototype.toSource = function() {
 
 /**
  * @constructor
- * @extends {parse_css.CSSParserToken}
+ * @extends {parse_css.Token}
  */
 parse_css.PercentageToken = function() {
   goog.base(this);
@@ -1605,15 +1600,10 @@ parse_css.PercentageToken = function() {
   /** @type {string} */
   this.repr = '';
 };
-goog.inherits(parse_css.PercentageToken, parse_css.CSSParserToken);
+goog.inherits(parse_css.PercentageToken, parse_css.Token);
 
-/** @type {string} */
-parse_css.PercentageToken.prototype.tokenType = 'PERCENTAGE';
-
-/** @return {string} */
-parse_css.PercentageToken.prototype.toString = function() {
-  return 'PERCENTAGE(' + this.value + ')';
-};
+/** @type {parse_css.TokenType} */
+parse_css.PercentageToken.prototype.tokenType = parse_css.TokenType.PERCENTAGE;
 
 /** @return {!Object} */
 parse_css.PercentageToken.prototype.toJSON = function() {
@@ -1630,7 +1620,7 @@ parse_css.PercentageToken.prototype.toSource = function() {
 
 /**
  * @constructor
- * @extends {parse_css.CSSParserToken}
+ * @extends {parse_css.Token}
  */
 parse_css.DimensionToken = function() {
   goog.base(this);
@@ -1642,15 +1632,10 @@ parse_css.DimensionToken = function() {
   /** @type {string} */
   this.unit = '';
 };
-goog.inherits(parse_css.DimensionToken, parse_css.CSSParserToken);
+goog.inherits(parse_css.DimensionToken, parse_css.Token);
 
-/** @type {string} */
-parse_css.DimensionToken.prototype.tokenType = 'DIMENSION';
-
-/** @return {string} */
-parse_css.DimensionToken.prototype.toString = function() {
-  return 'DIM(' + this.value + ',' + this.unit + ')';
-};
+/** @type {parse_css.TokenType} */
+parse_css.DimensionToken.prototype.tokenType = parse_css.TokenType.DIMENSION;
 
 /** @return {!Object} */
 parse_css.DimensionToken.prototype.toJSON = function() {

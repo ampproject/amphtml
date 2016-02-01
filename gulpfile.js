@@ -312,9 +312,11 @@ function buildExamples(watch) {
 
   // Also update test-example-validation.js
   buildExample('ads.amp.html');
+  buildExample('analytics-notification.amp.html');
   buildExample('analytics.amp.html');
   buildExample('article.amp.html');
   buildExample('article-access.amp.html');
+  buildExample('csp.amp.html');
   buildExample('metadata-examples/article-json-ld.amp.html');
   buildExample('metadata-examples/article-microdata.amp.html');
   buildExample('metadata-examples/recipe-json-ld.amp.html');
@@ -530,7 +532,7 @@ function buildExperiments(options) {
   console.log('Processing ' + htmlPath);
   var html = fs.readFileSync(htmlPath, 'utf8');
   var minHtml = html.replace('../../dist.tools/experiments/experiments.max.js',
-      'https://cdn.ampproject.org/experiments.js');
+      'https://cdn.ampproject.org/v0/experiments.js');
   gulp.src(htmlPath)
       .pipe(file('experiments.cdn.html', minHtml))
       .pipe(gulp.dest('dist.tools/experiments/'));

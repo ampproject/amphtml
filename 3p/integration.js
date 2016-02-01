@@ -29,6 +29,8 @@ import {adsense} from '../ads/adsense';
 import {adtech} from '../ads/adtech';
 import {doubleclick} from '../ads/doubleclick';
 import {facebook} from './facebook';
+import {manageWin} from './environment';
+import {nonSensitiveDataPostMessage, listenParent} from './messaging';
 import {twitter} from './twitter';
 import {register, run} from '../src/3p';
 import {parseUrl} from '../src/url';
@@ -114,7 +116,7 @@ window.draw3p = function(opt_configCallback) {
   window.context.isMaster = window.context.master == window;
   window.context.data = data;
   window.context.noContentAvailable = triggerNoContentAvailable;
-  window.context.resize = triggerResizeRequest;
+  window.context.requestResize = triggerResizeRequest;
 
   if (data.type === 'facebook' || data.type === 'twitter') {
     // Only make this available to selected embeds until the generic solution is
@@ -124,10 +126,18 @@ window.draw3p = function(opt_configCallback) {
 
   // This only actually works for ads.
   window.context.observeIntersection = observeIntersection;
+  window.context.onResizeSuccess = onResizeSuccess;
+  window.context.onResizeDenied = onResizeDenied;
   window.context.reportRenderedEntityIdentifier =
       reportRenderedEntityIdentifier;
   delete data._context;
+  // Run this only in canary and local dev for the time being.
+  if (location.pathname.indexOf('-canary') ||
+      location.pathname.indexOf('current')) {
+    manageWin(window);
+  }
   draw3p(window, data, opt_configCallback);
+  nonSensitiveDataPostMessage('render-start');
 };
 
 function triggerNoContentAvailable() {
@@ -148,17 +158,6 @@ function triggerResizeRequest(width, height) {
   });
 }
 
-function nonSensitiveDataPostMessage(type, opt_object) {
-  if (window.parent == window) {
-    return;  // Nothing to do.
-  }
-  const object = opt_object || {};
-  object.type = type;
-  object.sentinel = 'amp-3p';
-  window.parent./*OK*/postMessage(object,
-      window.context.location.origin);
-}
-
 /**
  * Registers a callback for intersections of this iframe with the current
  * viewport.
@@ -166,19 +165,38 @@ function nonSensitiveDataPostMessage(type, opt_object) {
  * the IntersectionObserver spec callback.
  * http://rawgit.com/slightlyoff/IntersectionObserver/master/index.html#callbackdef-intersectionobservercallback
  * @param {function(!Array<IntersectionObserverEntry>)} observerCallback
+ * @returns {!function} A function which removes the event listener that
+ *    observes for intersection messages.
  */
 function observeIntersection(observerCallback) {
   // Send request to received records.
   nonSensitiveDataPostMessage('send-intersections');
-  window.addEventListener('message', function(event) {
-    if (event.source != window.parent ||
-        event.origin != window.context.location.origin ||
-        !event.data ||
-        event.data.sentinel != 'amp-3p' ||
-        event.data.type != 'intersection') {
-      return;
-    }
-    observerCallback(event.data.changes);
+  return listenParent('intersection', data => {
+    observerCallback(data.changes);
+  });
+}
+
+/**
+ * Registers a callback for communicating when a resize request succeeds.
+ * @param {function(number)} observerCallback
+ * @returns {!function} A function which removes the event listener that
+ *    observes for resize status messages.
+ */
+function onResizeSuccess(observerCallback) {
+  return listenParent('embed-resize-changed', data => {
+    observerCallback(data.requestedHeight);
+  });
+}
+
+/**
+ * Registers a callback for communicating when a resize request is denied.
+ * @param {function(number)} observerCallback
+ * @returns {!function} A function which removes the event listener that
+ *    observes for resize status messages.
+ */
+function onResizeDenied(observerCallback) {
+  return listenParent('embed-resize-denied', data => {
+    observerCallback(data.requestedHeight);
   });
 }
 

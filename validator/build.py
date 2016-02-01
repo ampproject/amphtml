@@ -54,8 +54,8 @@ def CheckPrereqs():
   """Checks that various prerequisites for this script are satisfied."""
   logging.info('entering ...')
 
-  if platform.system() != 'Linux':
-    Die('Sorry, this script assumes Linux thus far, e.g. Ubuntu 14. '
+  if platform.system() != 'Linux' and platform.system() != 'Darwin':
+    Die('Sorry, this script assumes Linux or Mac OS X thus far. '
         'Please feel free to edit the source and fix it to your needs.')
 
   # Ensure source files are available.
@@ -208,7 +208,8 @@ def CompileValidatorMinified(out_dir):
                 '%s/validator-generated.js' % out_dir,
                 'validator-in-browser.js', 'validator.js'],
       closure_entry_points=['amp.validator.validateString',
-                            'amp.validator.renderValidationResult'],
+                            'amp.validator.renderValidationResult',
+                            'amp.validator.renderErrorMessage'],
       output_file='%s/validator_minified.js' % out_dir)
   logging.info('... done')
 

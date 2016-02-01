@@ -72,6 +72,7 @@
     "karma-sauce-launcher": "0.2.14",
     "karma-sinon-chai": "1.0.0",
     "lazypipe": "1.0.1",
+    "lolex": "^1.4.0",
     "minimist": "1.2.0",
     "mocha": "2.3.3",
     "path": "0.12.7",

@@ -55,7 +55,7 @@ An example:
       {{title}}
     </div>
   </template>
-  <div overflow role=button aria-lable="Show more" class="list-overflow">
+  <div overflow role=button aria-label="Show more" class="list-overflow">
     Show more
   </div>
 </amp-list>

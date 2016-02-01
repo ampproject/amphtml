@@ -229,41 +229,39 @@ describe('IntersectionObserver', () => {
   });
 
   it('should not send intersection', () => {
-    postMessageSpy = sinon.spy(testIframe.contentWindow, 'postMessage');
+    postMessageSpy = sinon/*OK*/.spy(testIframe.contentWindow, 'postMessage');
     const ioInstance = new IntersectionObserver(element, testIframe);
     ioInstance.sendElementIntersection_();
     expect(postMessageSpy.callCount).to.equal(0);
-    postMessageSpy.restore();
+    postMessageSpy/*OK*/.restore();
   });
 
   it('should send intersection', () => {
-    postMessageSpy = sinon.spy(testIframe.contentWindow, 'postMessage');
+    postMessageSpy = sinon/*OK*/.spy(testIframe.contentWindow, 'postMessage');
     const ioInstance = new IntersectionObserver(element, testIframe);
     ioInstance.startSendingIntersectionChanges_();
     ioInstance.sendElementIntersection_();
     expect(getIntersectionChangeEntrySpy.callCount);
     expect(postMessageSpy.callCount).to.equal(1);
-    postMessageSpy.restore();
+    postMessageSpy/*OK*/.restore();
   });
 
   it('should init listeners when element is in viewport', () => {
-    const fireSpy = sinon.spy(IntersectionObserver.prototype, 'fire');
+    const fireSpy = sandbox.spy(IntersectionObserver.prototype, 'fire');
     const ioInstance = new IntersectionObserver(element, testIframe);
     ioInstance.onViewportCallback(true);
     expect(fireSpy.callCount).to.equal(1);
     expect(onScrollSpy.callCount).to.equal(1);
     expect(onChangeSpy.callCount).to.equal(1);
     expect(ioInstance.unlistenViewportChanges_).to.not.be.null;
-    fireSpy.restore();
   });
 
   it('should unlisten listeners when element is out of viewport', () => {
-    const fireSpy = sinon.spy(IntersectionObserver.prototype, 'fire');
+    const fireSpy = sandbox.spy(IntersectionObserver.prototype, 'fire');
     const ioInstance = new IntersectionObserver(element, testIframe);
     ioInstance.onViewportCallback(true);
     ioInstance.onViewportCallback();
     expect(fireSpy.callCount).to.equal(2);
     expect(ioInstance.unlistenViewportChanges_).to.be.null;
-    fireSpy.restore();
   });
 });

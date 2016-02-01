@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"golang.org/x/net/context"
@@ -102,6 +103,9 @@ func handle(w http.ResponseWriter, r *http.Request) {
 	errorType := "default"
 	if r.URL.Query().Get("a") == "1" {
 		errorType = "assert"
+	}
+	if strings.HasPrefix(r.Referer(), "https://cdn.ampproject.org/") {
+		errorType += "-cdn"
 	}
 
 	event := &ErrorEvent{

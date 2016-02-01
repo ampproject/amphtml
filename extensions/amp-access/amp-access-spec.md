@@ -71,7 +71,7 @@ Login Page is implemented and served by the Publisher and called by the AMP Runt
 
 Login Page is triggered when the Reader taps on the Login Link which can be placed by the Publisher anywhere in the document.
 
-#Specification v0.1
+#Specification v0.2
 ##Configuration
 
 All of the endpoints are configured in the AMP document as a JSON object in the HEAD of the document:
@@ -302,6 +302,10 @@ Notice the use of a URL hash parameter “status”. The value is either “true
 
 If Return URL is not specified, the Login Page must redirect to the Document URL.
 
+#Integration with *amp-analytics*
+
+An integration with *amp-analytics* is under development and can be tracked on [Issue #1556][10]. This document will be updated when more details on the integration are available. 
+
 #CORS Origin Security
 CORS endpoints can be (and recommended) to be only allowed to the following origins:
  - *.ampproject.org
@@ -363,3 +367,4 @@ This section will cover a detailed explanation of the design underlying the amp-
 [7]: #access-url-variables
 [8]: #configuration
 [9]: #cors-origin-security
+[10]: https://github.com/ampproject/amphtml/issues/1556
