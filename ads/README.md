@@ -83,16 +83,7 @@ Example usage:
 Ads can call the special API
 `window.context.requestResize(width, height)` to send a resize request.
 
-Example of resize request:
-```javascript
-window.parent.postMessage({
-  sentinel: 'amp-3p',
-  type: 'embed-size',
-  height: document.body.scrollHeight
-}, '*');
-```
-
-Once this message is received the AMP runtime will try to accommodate this request as soon as
+Once the request is processed the AMP runtime will try to accommodate this request as soon as
 possible, but it will take into account where the reader is currently reading, whether the scrolling
 is ongoing and any other UX or performance factors.
 
