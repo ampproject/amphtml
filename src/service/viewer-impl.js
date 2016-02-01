@@ -19,7 +19,7 @@ import {assert} from '../asserts';
 import {documentStateFor} from '../document-state';
 import {getService} from '../service';
 import {log} from '../log';
-import {parseQueryString, removeFragment} from '../url';
+import {parseQueryString, parseUrl, removeFragment} from '../url';
 import {platform} from '../platform';
 
 
@@ -72,6 +72,20 @@ export const VisibilityState = {
    */
   HIDDEN: 'hidden'
 };
+
+
+/**
+ * These domains are trusted with more sensitive viewer operations such as
+ * propagating the referrer. If you believe your domain should be here,
+ * file the issue on GitHub to discuss. The process will be similar
+ * (but somewhat more stringent) to the one described in the [3p/README.md](
+ * https://github.com/ampproject/amphtml/blob/master/3p/README.md)
+ *
+ * @export {!Array<!RegExp>}
+ */
+export const TRUSTED_VIEWER_HOSTS = [
+  /^(.*\.)?(google)(\.com?)?(\.[a-z]{2})?$/
+];
 
 
 /**
@@ -214,6 +228,9 @@ export class Viewer {
 
     // Wait for document to become visible.
     this.docState_.onVisibilityChanged(this.onVisibilityChange_.bind(this));
+
+    /** @const @private {boolean} */
+    this.isTrustedViewer_ = this.calcTrustedViewer_();
 
     // Remove hash - no reason to keep it around, but only when embedded.
     if (this.isEmbedded_) {
@@ -389,6 +406,82 @@ export class Viewer {
    */
   getPaddingTop() {
     return this.paddingTop_;
+  }
+
+  /**
+   * Returns the "referrer" URL that can be optionally customized by
+   * the viewer.
+   * @return {string}
+   */
+  getReferrerUrl() {
+    // If not embedded in a IFrame always return the document's referrer.
+    if (!this.isEmbedded()) {
+      return this.win.document.referrer;
+    }
+
+    // Viewer override, but only for whitelisted viewers.
+    if (this.params_['referrer'] && this.isTrustedViewer()) {
+      return this.params_['referrer'];
+    }
+
+    // Document's referrer.
+    if (this.win.document.referrer) {
+      return this.win.document.referrer;
+    }
+
+    // Ancestor in the embedded case.
+    const ancestorOrigins = this.win.location.ancestorOrigins;
+    if (ancestorOrigins && ancestorOrigins.length > 0) {
+      return ancestorOrigins[0];
+    }
+
+    // No referrer found.
+    return '';
+  }
+
+  /**
+   * Whether the viewer has been whitelisted for more sensitive operations
+   * such as customizing referrer.
+   * @return {boolean}
+   */
+  isTrustedViewer() {
+    return this.isTrustedViewer_;
+  }
+
+  /**
+   * @return {boolean}
+   */
+  calcTrustedViewer_() {
+    // This only applies to the documents embedded as iframes.
+    if (!this.isEmbedded_) {
+      return false;
+    }
+
+    // Ancestors when available take precedence. This is the main API used
+    // for this determination. Fallback is only done when this API is not
+    // supported by the browser.
+    const ancestorOrigins = this.win.location.ancestorOrigins;
+    if (ancestorOrigins) {
+      return (ancestorOrigins.length > 0 &&
+          this.isTrustedViewerOrigin_(ancestorOrigins[0]));
+    }
+
+    // Fallback to the referrer if ancestorOrigins is not available.
+    return this.isTrustedViewerOrigin_(this.win.document.referrer);
+  }
+
+  /**
+   * @param {string} urlString
+   * @return {boolean}
+   * @private
+   */
+  isTrustedViewerOrigin_(urlString) {
+    const url = parseUrl(urlString);
+    if (url.protocol != 'https:') {
+      // Non-https origins are never trusted.
+      return false;
+    }
+    return TRUSTED_VIEWER_HOSTS.some(th => th.test(url.hostname));
   }
 
   /**
