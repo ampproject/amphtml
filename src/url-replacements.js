@@ -21,6 +21,7 @@ import {getService} from './service';
 import {loadPromise} from './event-helper';
 import {log} from './log';
 import {parseUrl, removeFragment} from './url';
+import {viewerFor} from './viewer';
 import {viewportFor} from './viewport';
 import {vsyncFor} from './vsync';
 import {userNotificationManagerFor} from './user-notification';
@@ -68,7 +69,7 @@ class UrlReplacements {
 
     // Returns the referrer URL.
     this.set_('DOCUMENT_REFERRER', () => {
-      return this.win_.document.referrer;
+      return viewerFor(this.win_).getReferrerUrl();
     });
 
     // Returns the title of this AMP document.
