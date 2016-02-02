@@ -305,13 +305,13 @@ export function createAmpElementProto(win, name, implementationClass) {
     this.isInViewport_ = false;
 
     /** @private {string|null|undefined} */
-    this.mediaQuery_;
+    this.mediaQuery_ = undefined;
 
     /** @private {!SizeList|null|undefined} */
-    this.sizeList_;
+    this.sizeList_ = undefined;
 
     /** @private {!SizeList|null|undefined} */
-    this.heightsList_;
+    this.heightsList_ = undefined;
 
     /**
      * This element can be assigned by the {@link applyLayout_} to a child
@@ -321,10 +321,10 @@ export function createAmpElementProto(win, name, implementationClass) {
     this.sizerElement_ = null;
 
     /** @private {boolean|undefined} */
-    this.loadingDisabled_;
+    this.loadingDisabled_ = undefined;
 
     /** @private {boolean|undefined} */
-    this.loadingState_;
+    this.loadingState_ = undefined;
 
     /** @private {?Element} */
     this.loadingContainer_ = null;
@@ -333,7 +333,7 @@ export function createAmpElementProto(win, name, implementationClass) {
     this.loadingElement_ = null;
 
     /** @private {?Element|undefined} */
-    this.overflowElement_;
+    this.overflowElement_ = undefined;
 
     /** @private {!BaseElement} */
     this.implementation_ = new implementationClass(this);
@@ -350,7 +350,7 @@ export function createAmpElementProto(win, name, implementationClass) {
      * Whether the element is in the template.
      * @private {boolean|undefined}
      */
-    this.isInTemplate_;
+    this.isInTemplate_ = undefined;
   };
 
   /** @private */
