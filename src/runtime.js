@@ -126,7 +126,6 @@ export function adopt(global) {
    * @param {GlobalAmp} fn
    */
   global.AMP.push = function(fn) {
-    preregisteredElements.push(fn);
     fn(global.AMP);
   };
 
@@ -152,6 +151,10 @@ export function adopt(global) {
       timer.delay(() => {throw e;}, 1);
     }
   }
+  // Make sure we empty the array of preregistered extensions.
+  // Technically this is only needed for testing, as everything should
+  // go out of scope here, but just making sure.
+  preregisteredElements.length = 0;
 }
 
 
