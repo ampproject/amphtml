@@ -873,6 +873,20 @@ describe('AccessService login', () => {
     });
   });
 
+  it('should build login url with RETURN_URL', () => {
+    service.config_.login = 'https://acme.com/l?rid=READER_ID&ret=RETURN_URL';
+    cidMock.expects('get')
+        .withExactArgs(
+            {scope: 'amp-access', createCookieIfNotPresent: true},
+            sinon.match(() => true))
+        .returns(Promise.resolve('reader1'))
+        .once();
+    return service.buildLoginUrl_().then(url => {
+      expect(url).to.equal('https://acme.com/l?rid=reader1&ret=RETURN_URL');
+      expect(service.loginUrl_).to.equal(url);
+    });
+  });
+
   it('should open dialog in the same microtask', () => {
     service.openLoginDialog_ = sandbox.stub();
     service.openLoginDialog_.returns(Promise.resolve());

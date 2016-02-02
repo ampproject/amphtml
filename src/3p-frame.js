@@ -70,6 +70,7 @@ function getFrameAttributes(parentWindow, element, opt_type) {
     location: {
       href: locationHref
     },
+    tagName: element.tagName,
     mode: getMode()
   };
   const adSrc = element.getAttribute('src');

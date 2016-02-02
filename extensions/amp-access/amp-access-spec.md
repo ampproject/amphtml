@@ -124,6 +124,7 @@ Var               | Description
 ----------------- | -----------
 READER_ID         | The AMP Reader ID.
 AUTHDATA(field)   | The value of the field in the authorization response.
+RETURN_URL        | The placeholder for the return URL specified by the AMP runtime for a Login Dialog to return to.
 AMPDOC_URL        | The URL of this AMP Document.
 CANONICAL_URL     | The canonical URL of this AMP Document.
 DOCUMENT_REFERRER | The Referrer URL.
@@ -293,7 +294,9 @@ AMP makes no distinction between login or subscribe. This distinction can be mad
 
 The link to the Login Page is configured via the ```login``` property in the [AMP Access Configuration][8] section.
 
-The link can take any parameters as defined in the [Access URL Variables][7] section. For instance, it could pass AMP Reader ID and document URL.
+The link can take any parameters as defined in the [Access URL Variables][7] section. For instance, it could pass AMP Reader ID and document URL. `RETURN_URL` query substitution can be used to specify query parameter for return URL, e.g. `?ret=RETURN_URL`. The return URL is
+required and if the `RETURN_URL` substitution is not specified, it will be injected automatically with the default query parameter name of
+"return".
 
 Login Page is simply a normal Web page with no special constraints, other than it should function well as a [browser dialog](https://developer.mozilla.org/en-US/docs/Web/API/Window/open). See the “Login Flow” section for more details.
 
@@ -302,19 +305,18 @@ The request format is:
 https://publisher.com/amp-login.html?
    rid={READER_ID}
   &url={AMPDOC_URL}
-  &return=<return-url>
+  &return={RETURN_URL}
 ```
-Notice that the “return” URL parameter is added by the AMP Runtime automatically. Once Login Page completes its work, it must redirect back to the specified “Return URL” with the following format:
+Notice that the “return” URL parameter is added by the AMP Runtime automatically if `RETURN_URL` substitution is not
+specified. Once Login Page completes its work, it must redirect back to the specified “Return URL” with the following format:
 ```
-<return-url>#status=true|false
+RETURN_URL#status=true|false
 ```
 Notice the use of a URL hash parameter “status”. The value is either “true” or “false” depending on whether the login succeeds or is abandoned. Ideally the Login Page, when possible, will send the signal in cases of both success or failure.
 
-If Return URL is not specified, the Login Page must redirect to the Document URL.
-
 #Integration with *amp-analytics*
 
-An integration with *amp-analytics* is under development and can be tracked on [Issue #1556][10]. This document will be updated when more details on the integration are available. 
+An integration with *amp-analytics* is under development and can be tracked on [Issue #1556][10]. This document will be updated when more details on the integration are available.
 
 #CORS Origin Security
 CORS endpoints can be (and recommended) to be only allowed to the following origins:
@@ -331,6 +333,9 @@ CORS endpoints can be (and recommended) to be only allowed to the following orig
  - **CORS endpoint** - cross-origin HTTPS endpoint. See https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS for more info. See [CORS Origin Security][9] for a list of origins that should be allowed.
  - **Reader** - the actual person viewing AMP documents.
  - **AMP Prerendering** - AMP Viewers may take advantage of prerendering, which renders a hidden document before it can be shown. This adds a significant performance boost. But it is important to take into account the fact that the document prerendering does not constitute a view since the Reader may never actually see the document.
+
+#Revisions
+- Feb 1: "return" query parameter for Login Page can be customized using RETURN_URL URL substitution.
 
 #Appendix A: “amp-access” expression grammar
 

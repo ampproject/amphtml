@@ -71,7 +71,7 @@ describe('3p-frame', () => {
     link.setAttribute('href', 'https://foo.bar/baz');
     document.head.appendChild(link);
 
-    const div = document.createElement('div');
+    const div = document.createElement('my-element');
     div.setAttribute('data-test-attr', 'value');
     div.setAttribute('data-ping', 'pong');
     div.setAttribute('width', '50');
@@ -99,8 +99,8 @@ describe('3p-frame', () => {
         ',"_context":{"referrer":"' + referrer + '",' +
         '"canonicalUrl":"https://foo.bar/baz",' +
         '"pageViewId":"' + docInfo.pageViewId + '","clientId":"cidValue",' +
-        '"location":{"href":"' + locationHref + '"},"mode":{"localDev":true,' +
-        '"development":false,"minified":false}}}';
+        '"location":{"href":"' + locationHref + '"},"tagName":"MY-ELEMENT",' +
+        '"mode":{"localDev":true,"development":false,"minified":false}}}';
     expect(src).to.equal(
         'http://ads.localhost:9876/dist.3p/current/frame.max.html' +
         fragment);
