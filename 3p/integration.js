@@ -28,6 +28,7 @@ import {adreactor} from '../ads/adreactor';
 import {adsense} from '../ads/adsense';
 import {adtech} from '../ads/adtech';
 import {smartadserver} from '../ads/smartadserver';
+import {plista} from '../ads/plista';
 import {doubleclick} from '../ads/doubleclick';
 import {facebook} from './facebook';
 import {manageWin} from './environment';
@@ -50,6 +51,7 @@ register('adreactor', adreactor);
 register('adsense', adsense);
 register('adtech', adtech);
 register('smartadserver', smartadserver);
+register('plista', plista);
 register('doubleclick', doubleclick);
 register('_ping_', function(win, data) {
   win.document.getElementById('c').textContent = data.ping;
