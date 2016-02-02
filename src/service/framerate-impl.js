@@ -117,9 +117,9 @@ export class Framerate {
       const duration = now - this.collectStartTime_;
       const framerate = 1000 / (duration / this.frameCount_);
       const performance = performanceFor(this.win);
-      performance.tick('fps', undefined, framerate);
+      performance.tickDelta('fps', framerate);
       if (this.loadedAd_) {
-        performance.tick('fal', undefined, framerate);
+        performance.tickDelta('fal', framerate);
       }
       performance.flush();
       this.reset_();
