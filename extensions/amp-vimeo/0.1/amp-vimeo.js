@@ -39,8 +39,7 @@ class AmpVimeo extends AMP.BaseElement {
     const height = this.element.getAttribute('height');
     // The video-id is supported only for backward compatibility.
     const videoid = AMP.assert(
-        (this.element.getAttribute('data-videoid') ||
-        this.element.getAttribute('video-id')),
+        this.element.getAttribute('data-videoid'),
         'The data-videoid attribute is required for <amp-vimeo> %s',
         this.element);
     // See
