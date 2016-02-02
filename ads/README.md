@@ -110,10 +110,10 @@ Here are some factors that affect how fast the resize will be executed:
 - Whether the resize is requested for an ad below the viewport or above the viewport.
 
 
-### Minimizing HTTP requests
+### Optimizing ad performance
 
 #### JS reuse across iframes
-To allow ads to bundle HTTP requests across multiple ad units on the same page the object `window.context.master` will contain the window object of the iframe being elected master iframe for the current page.
+To allow ads to bundle HTTP requests across multiple ad units on the same page the object `window.context.master` will contain the window object of the iframe being elected master iframe for the current page. The `window.context.isMaster` property is `true` when the current frame is the master frame. 
 
 #### Preconnect and prefetch
 Add the JS URLs that an ad **always** fetches or always connects to (if you know the origin but not the path) to [_config.js](_config.js).
