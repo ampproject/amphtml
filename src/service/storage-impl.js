@@ -18,6 +18,7 @@ import {assert} from '../asserts';
 import {getService} from '../service';
 import {getSourceOrigin} from '../url';
 import {isDevChannel, isExperimentOn} from '../experiments';
+import {isObject} from '../types';
 import {log} from '../log';
 import {timer} from '../timer';
 import {viewerFor} from '../viewer';
@@ -202,15 +203,15 @@ export class Store {
    */
   constructor(obj, opt_maxValues) {
     /** @const {!JSONObject} */
-    this.obj = obj;
+    this.obj = recreateObject(obj);
 
     /** @private @const {number} */
     this.maxValues_ = opt_maxValues || MAX_VALUES_PER_ORIGIN;
 
     /** @private @const {!Object<string, !JSONObject>} */
-    this.values_ = obj['vv'] || {};
-    if (!obj['vv']) {
-      obj['vv'] = this.values_;
+    this.values_ = this.obj['vv'] || Object.create(null);
+    if (!this.obj['vv']) {
+      this.obj['vv'] = this.values_;
     }
   }
 
@@ -231,6 +232,8 @@ export class Store {
    * @private
    */
   set(name, value) {
+    assert(name != '__proto__' && name != 'prototype',
+        'Name is not allowed: %s', name);
     // The structure is {key: {v: *, t: time}}
     if (this.values_[name] !== undefined) {
       const item = this.values_[name];
@@ -363,6 +366,24 @@ export class ViewerStorageBinding {
       'blob': blob
     }, true);
   }
+}
+
+
+/**
+ * Recreates objects with prototype-less copies.
+ * @param {!JSONObject} obj
+ * @return {!JSONObject}
+ */
+function recreateObject(obj) {
+  const copy = Object.create(null);
+  for (const k in obj) {
+    if (!obj.hasOwnProperty(k)) {
+      continue;
+    }
+    const v = obj[k];
+    copy[k] = isObject(v) ? recreateObject(v) : v;
+  }
+  return copy;
 }
 
 
