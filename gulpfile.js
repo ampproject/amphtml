@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+checkMinVersion();
+
 var autoprefixer = require('autoprefixer');
 var babel = require('babelify');
 var browserify = require('browserify');
@@ -654,6 +656,20 @@ function buildLoginDoneVersion(version, options) {
           latestName: latestName,
         });
       });
+}
+
+/**
+ * Exits the process if gulp is running with a node version lower than
+ * the required version. This has to run very early to avoid parse
+ * errors from modules that e.g. use let.
+ */
+function checkMinVersion() {
+  var majorVersion = Number(process.version.replace(/v/, '').split('.')[0]);
+  if (majorVersion < 4) {
+    console.log('Please run AMP with node.js version 4 or newer.');
+    console.log('Your version is', process.version);
+    process.exit(1);
+  }
 }
 
 
