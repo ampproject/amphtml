@@ -59,6 +59,13 @@ const EXPERIMENTS = [
         'amp-access/amp-access-spec.md',
   },
 
+  // AMP Access Analytics
+  {
+    id: 'amp-access-analytics',
+    name: 'AMP Access Analytics',
+    spec: 'https://github.com/ampproject/amphtml/issues/1556',
+  },
+
   // Dynamic CSS Classes
   {
     id: 'dynamic-css-classes',
