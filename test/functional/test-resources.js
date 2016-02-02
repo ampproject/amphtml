@@ -1290,6 +1290,7 @@ describe('Resources.Resource', () => {
 
     resource.state_ = ResourceState_.READY_FOR_LAYOUT;
     resource.layoutBox_ = {left: 11, top: 12, width: 10, height: 10};
+    const loaded = resource.loaded();
     const promise = resource.startLayout(true);
     expect(resource.layoutPromise_).to.not.equal(null);
     expect(resource.getState()).to.equal(ResourceState_.LAYOUT_SCHEDULED);
@@ -1297,6 +1298,7 @@ describe('Resources.Resource', () => {
     return promise.then(() => {
       expect(resource.getState()).to.equal(ResourceState_.LAYOUT_COMPLETE);
       expect(resource.layoutPromise_).to.equal(null);
+      return loaded;  // Just making sure this doesn't time out.
     });
   });
 
