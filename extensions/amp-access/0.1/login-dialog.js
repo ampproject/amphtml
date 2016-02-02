@@ -25,6 +25,9 @@ const TAG = 'AmpAccessLogin';
 /** @const {!Function} */
 const assert = AMP.assert;
 
+/** @const {!RegExp} */
+const RETURN_URL_REGEX = new RegExp('RETURN_URL');
+
 
 /**
  * Opens the login dialog for the specified URL. If the login dialog succeeds,
@@ -221,6 +224,12 @@ class LoginDialog {
    * @private
    */
   buildLoginUrl_(url, returnUrl) {
+    // RETURN_URL has to arrive here unreplaced by UrlReplacements for two
+    // reasons: (1) sync replacement and (2) if we need to propagate this
+    // replacement to the viewer.
+    if (RETURN_URL_REGEX.test(url)) {
+      return url.replace(RETURN_URL_REGEX, encodeURIComponent(returnUrl));
+    }
     return url +
         (url.indexOf('?') == -1 ? '?' : '&') +
         'return=' + encodeURIComponent(returnUrl);
