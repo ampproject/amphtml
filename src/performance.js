@@ -56,10 +56,10 @@ export class Performance {
     this.win = win;
 
     /** @const @private {funtion(string,?string=,number=)|undefined} */
-    this.tick_;
+    this.tick_ = undefined;
 
     /** @const @private {funtion()|undefined} */
-    this.flush_;
+    this.flush_ = undefined;
 
     /** @const @private {!Array<TickEventDef>} */
     this.events_ = [];

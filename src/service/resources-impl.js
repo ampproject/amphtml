@@ -1356,7 +1356,7 @@ export class Resource {
      * known when the element is upgraded.
      * @private {!Function|undefined}
      */
-    this.onUpgraded_;
+    this.onUpgraded_ = undefined;
 
     /**
      * Pending change height that was requested but could not be satisfied.

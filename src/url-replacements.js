@@ -39,7 +39,7 @@ class UrlReplacements {
     this.win_ = win;
 
     /** @private {!RegExp|undefined} */
-    this.replacementExpr_;
+    this.replacementExpr_ = undefined;
 
     /** @private @const {!Object<string, function(*):*>} */
     this.replacements_ = this.win_.Object.create(null);
