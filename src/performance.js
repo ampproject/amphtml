@@ -120,9 +120,11 @@ export class Performance {
 
     this.whenViewportLayoutComplete_().then(() => {
       if (didStartInPrerender) {
-        const userPerceivedVisualCompletenesssTime = docVisibleTime > -1 ?
-            (timer.now() - docVisibleTime) : 0;
-        this.tick('pc', undefined, userPerceivedVisualCompletenesssTime);
+        const userPerceivedVisualCompletenesssTime = docVisibleTime > -1
+            ? (timer.now() - docVisibleTime)
+            : 1 /* MS (magic number for prerender was complete
+                   by the time the user opened the page) */;
+        this.tickDelta('pc', userPerceivedVisualCompletenesssTime);
       } else {
         // If it didnt start in prerender, no need to calculate anything
         // and we just need to tick `pc`. (it will give us the relative
@@ -141,7 +143,7 @@ export class Performance {
     return this.whenReadyToRetrieveResources_().then(() => {
       return all(this.resources_.getResourcesInViewport().map(r => {
         // We're ok with the layout failing and still reporting.
-        return r.whenFirstLayoutComplete().catch(function() {});
+        return r.loaded().catch(function() {});
       }));
     });
   }
@@ -156,14 +158,14 @@ export class Performance {
   }
 
   /**
-   * Forwards tick events to the tick function set or queues it up to be
-   * flushed at a later time.
+   * Ticks a timing event.
    *
    * @param {string} label The variable name as it will be reported.
    * @param {?string=} opt_from The label of a previous tick to use as a
    *    relative start for this tick.
    * @param {number=} opt_value The time to record the tick at. Optional, if
-   *    not provided, use the current time.
+   *    not provided, use the current time. You probably want to use
+   *    `tickDelta` instead.
    */
   tick(label, opt_from, opt_value) {
     if (this.tick_) {
@@ -171,6 +173,17 @@ export class Performance {
     } else {
       this.queueTick_(label, opt_from, opt_value);
     }
+  }
+
+  /**
+   * Tick a very specific value for the label. Use this method if you
+   * measure the time it took to do something yourself.
+   * @param {string} label The variable name as it will be reported.
+   * @param {number} value The value in milliseconds that should be ticked.
+   */
+  tickDelta(label, value) {
+    this.tick('_' + label, undefined, 0);
+    this.tick(label, '_' + label, value);
   }
 
 
