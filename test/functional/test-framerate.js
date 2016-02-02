@@ -35,7 +35,7 @@ describe('the framerate service', () => {
     lastRafCallback = null;
     visible = true;
     performance = {
-      tick: sinon.spy(),
+      tickDelta: sinon.spy(),
       flush: sinon.spy()
     };
     viewer = {
@@ -88,10 +88,10 @@ describe('the framerate service', () => {
     }
     clock.tick(5000);
     lastRafCallback();
-    expect(performance.tick.callCount).to.equal(1);
+    expect(performance.tickDelta.callCount).to.equal(1);
     expect(performance.flush.callCount).to.equal(1);
-    expect(performance.tick.args[0][0]).to.equal('fps');
-    expect(performance.tick.args[0][2]).to.within(15, 16);
+    expect(performance.tickDelta.args[0][0]).to.equal('fps');
+    expect(performance.tickDelta.args[0][1]).to.within(15, 16);
     expect(fr.frameCount_).to.equal(0);
 
     // Second round
@@ -110,10 +110,10 @@ describe('the framerate service', () => {
     }
     clock.tick(5000);
     lastRafCallback();
-    expect(performance.tick.callCount).to.equal(2);
+    expect(performance.tickDelta.callCount).to.equal(2);
     expect(performance.flush.callCount).to.equal(2);
-    expect(performance.tick.args[1][0]).to.equal('fps');
-    expect(performance.tick.args[1][2]).to.within(9, 10);
+    expect(performance.tickDelta.args[1][0]).to.equal('fps');
+    expect(performance.tickDelta.args[1][1]).to.within(9, 10);
   });
 
   it('does nothing with an invisible window', () => {
@@ -145,12 +145,12 @@ describe('the framerate service', () => {
     }
     clock.tick(5000);
     lastRafCallback();
-    expect(performance.tick.callCount).to.equal(2);
+    expect(performance.tickDelta.callCount).to.equal(2);
     expect(performance.flush.callCount).to.equal(1);
-    expect(performance.tick.args[0][0]).to.equal('fps');
-    expect(performance.tick.args[0][2]).to.within(15, 16);
-    expect(performance.tick.args[1][0]).to.equal('fal');
-    expect(performance.tick.args[1][2]).to.within(15, 16);
+    expect(performance.tickDelta.args[0][0]).to.equal('fps');
+    expect(performance.tickDelta.args[0][1]).to.within(15, 16);
+    expect(performance.tickDelta.args[1][0]).to.equal('fal');
+    expect(performance.tickDelta.args[1][1]).to.within(15, 16);
     // Second round
     fr.collect();
     for (let i = 0; i < 50; i++) {
@@ -159,9 +159,9 @@ describe('the framerate service', () => {
     }
     clock.tick(5000);
     lastRafCallback();
-    expect(performance.tick.callCount).to.equal(4);
+    expect(performance.tickDelta.callCount).to.equal(4);
     expect(performance.flush.callCount).to.equal(2);
-    expect(performance.tick.args[2][0]).to.equal('fps');
-    expect(performance.tick.args[3][0]).to.equal('fal');
+    expect(performance.tickDelta.args[2][0]).to.equal('fps');
+    expect(performance.tickDelta.args[3][0]).to.equal('fal');
   });
 });
