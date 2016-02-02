@@ -41,7 +41,7 @@ export function reportError(error, opt_associatedElement) {
   }
   error.reported = true;
   const element = opt_associatedElement || error.associatedElement;
-  if (element) {
+  if (element && element.classList) {
     element.classList.add('-amp-error');
     if (getMode().development) {
       element.classList.add('-amp-element-error');
