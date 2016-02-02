@@ -312,7 +312,8 @@ export class AccessService {
   buildUrl_(url, useAuthData) {
     return this.getReaderId_().then(readerId => {
       const vars = {
-        'READER_ID': readerId
+        'READER_ID': readerId,
+        'ACCESS_READER_ID': readerId  // A synonym.
       };
       if (useAuthData) {
         vars['AUTHDATA'] = field => {
@@ -375,6 +376,42 @@ export class AccessService {
   setAuthResponse_(authResponse) {
     this.authResponse_ = authResponse;
     this.firstAuthorizationResolver_();
+  }
+
+  /**
+   * Returns the promise that will yield the access READER_ID.
+   *
+   * This is a restricted API.
+   *
+   * @return {?Promise<string>}
+   */
+  getAccessReaderId() {
+    if (!this.isAnalyticsExperimentOn_) {
+      return null;
+    }
+    if (!this.enabled_) {
+      return null;
+    }
+    return this.getReaderId_();
+  }
+
+  /**
+   * Returns the field from the authorization response. If the authorization
+   * response have not been received yet, the result will be `null`.
+   *
+   * This is a restricted API.
+   *
+   * @param {string} field
+   * @return {*|null}
+   */
+  getAuthdataField(field) {
+    if (!this.isAnalyticsExperimentOn_) {
+      return null;
+    }
+    if (!this.enabled_ || !this.authResponse_) {
+      return null;
+    }
+    return getValueForExpr(this.authResponse_, field) || null;
   }
 
   /**
