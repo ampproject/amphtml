@@ -323,7 +323,7 @@ Notice the use of a URL hash parameter “status”. The value is either “true
 
 #Integration with *amp-analytics*
 
-An integration with *amp-analytics* is under development and can be tracked on [Issue #1556][10]. This document will be updated when more details on the integration are available.
+An integration with *amp-analytics* is documented in the [amp-access-analytics.md](./amp-access-analytics.md).
 
 #CORS Origin Security
 
