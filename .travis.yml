@@ -43,3 +43,6 @@ branches:
     - master
     - release
     - canary
+env:
+  global:
+    - NPM_CONFIG_PROGRESS="false"
