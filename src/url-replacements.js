@@ -20,7 +20,7 @@ import {documentInfoFor} from './document-info';
 import {getService} from './service';
 import {loadPromise} from './event-helper';
 import {log} from './log';
-import {getSourceUrl, parseUrl, removeFragment} from './url';
+import {getSourceUrl, parseUrl, removeFragment, parseQueryString} from './url';
 import {viewerFor} from './viewer';
 import {viewportFor} from './viewport';
 import {vsyncFor} from './vsync';
@@ -103,6 +103,17 @@ class UrlReplacements {
     // all the page views a single user is making at a time.
     this.set_('PAGE_VIEW_ID', () => {
       return documentInfoFor(this.win_).pageViewId;
+    });
+
+    this.set_('QUERY_PARAM', (param, defaultValue = "") => {
+      assert(param, 'The first argument to QUERY_PARAM, the query string ' +
+          /*OK*/'param is required');
+      const url = parseUrl(this.win_.location.href);
+      const params = parseQueryString(url.search);
+
+      return (typeof params[param] !== "undefined") ?
+        params[param] :
+        defaultValue;
     });
 
     this.set_('CLIENT_ID', (scope, opt_userNotificationId) => {

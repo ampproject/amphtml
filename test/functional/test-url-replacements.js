@@ -20,6 +20,7 @@ import {urlReplacementsFor} from '../../src/url-replacements';
 import {markElementScheduledForTesting} from '../../src/custom-element';
 import {installCidService} from '../../src/service/cid-impl';
 import {setCookie} from '../../src/cookies';
+import {parseUrl} from '../../src/url';
 
 
 describe('UrlReplacements', () => {
@@ -422,5 +423,35 @@ describe('UrlReplacements', () => {
     }).then(res => {
       expect(res).to.match(/a=aaa&b=bbb\?$/);
     });
+  });
+
+  it('should replace QUERY_PARAM with foo', () => {
+    const win = getFakeWindow();
+    win.location = parseUrl("https://example.com?query_string_param1=foo");
+    return urlReplacementsFor(win)
+      .expand('?sh=QUERY_PARAM(query_string_param1)&s')
+      .then(res => {
+        expect(res).to.match(/sh=foo&s/);
+      });
+  });
+
+  it('should replace QUERY_PARAM with ""', () => {
+    const win = getFakeWindow();
+    win.location = parseUrl("https://example.com");
+    return urlReplacementsFor(win)
+      .expand('?sh=QUERY_PARAM(query_string_param1)&s')
+      .then(res => {
+        expect(res).to.match(/sh=&s/);
+      });
+  });
+
+  it('should replace QUERY_PARAM with default_value', () => {
+    const win = getFakeWindow();
+    win.location = parseUrl("https://example.com");
+    return urlReplacementsFor(win)
+      .expand('?sh=QUERY_PARAM(query_string_param1,default_value)&s')
+      .then(res => {
+        expect(res).to.match(/sh=default_value&s/);
+      });
   });
 });
