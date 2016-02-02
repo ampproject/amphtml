@@ -144,6 +144,41 @@ export function checkData(data, allowedFields) {
 }
 
 /**
+ * Throws an exception if data does not contains a mandatory field.
+ * @param {!Object} data
+ * @param {!Array<string>} mandatoryFields
+ */
+export function validateDataExists(data, mandatoryFields) {
+  for (let i = 0; i < mandatoryFields.length; i++) {
+    const field = mandatoryFields[i];
+    assert(data[field],
+        'Missing attribute for %s: %s.', data.type, field);
+  }
+}
+
+/**
+ * Throws an exception if data does not contains exactly one field
+ * mentioned in the alternativeField array.
+ * @param {!Object} data
+ * @param {!Array<string>} alternativeFields
+ */
+export function validateExactlyOne(data, alternativeFields) {
+  let countFileds = 0;
+
+  for (let i = 0; i < alternativeFields.length; i++) {
+    const field = alternativeFields[i];
+    if (data[field]) {
+      countFileds += 1;
+    }
+  }
+
+  assert(countFileds === 1,
+      '%s must contain exactly one of attributes: %s.',
+      data.type,
+      alternativeFields.join(', '));
+}
+
+/**
  * Throws an exception if data contains a field not supported
  * by this embed type.
  * @param {!Object} data
