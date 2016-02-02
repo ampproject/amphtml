@@ -24,7 +24,7 @@
   "devDependencies": {
     "autoprefixer": "6.1.1",
     "babel-core": "5.8.35",
-    "babel-eslint": "4.1.6",
+    "babel-eslint": "4.1.8",
     "babelify": "6.4.0",
     "bluebird": "3.0.5",
     "body-parser": "1.14.2",
@@ -36,7 +36,6 @@
     "core-js": "1.2.1",
     "cssnano": "3.3.2",
     "del": "2.2.0",
-    "escope": "3.3.0",
     "eslint": "1.10.3",
     "eslint-plugin-google-camelcase": "0.0.2",
     "finalhandler": "0.4.0",

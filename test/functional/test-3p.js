@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {validateSrcPrefix, validateSrcContains, checkData, validateData}
-    from '../../src/3p';
+import {validateSrcPrefix, validateSrcContains, checkData, validateData,
+    validateDataExists, validateExactlyOne} from '../../src/3p';
 import * as sinon from 'sinon';
 
 describe('3p', () => {
@@ -76,6 +76,40 @@ describe('3p', () => {
     clock.tick(1);
   });
 
+  it('should accept supplied data', () => {
+    validateDataExists({
+      width: '',
+      height: false,
+      initialWindowWidth: 1,
+      initialWindowHeight: 2,
+      type: "taboola",
+      referrer: true,
+      canonicalUrl: true,
+      pageViewId: true,
+      location: true,
+      mode: true,
+    }, []);
+    clock.tick(1);
+
+    validateDataExists({
+      width: "",
+      type: "taboola",
+      foo: true,
+      bar: true,
+    }, ['foo', 'bar']);
+    clock.tick(1);
+  });
+
+  it('should accept supplied data', () => {
+    validateExactlyOne({
+      width: "",
+      type: "taboola",
+      foo: true,
+      bar: true,
+    }, ['foo', 'day', 'night']);
+    clock.tick(1);
+  });
+
   it('should complain about unexpected args', () => {
     checkData({
       type: 'TEST',
@@ -96,5 +130,29 @@ describe('3p', () => {
       }, ['not-whitelisted', 'foo']);
     }).to.throw(/Unknown attribute for TEST: not-whitelisted2./);
   });
+
+  it('should complain about missing args', () => {
+
+    expect(() => {
+      validateDataExists({
+        width: "",
+        type: "xxxxxx",
+        foo: true,
+        bar: true,
+      }, ['foo', 'bar', 'persika']);
+    }).to.throw(/Missing attribute for xxxxxx: persika./);
+
+    expect(() => {
+      validateExactlyOne({
+        width: "",
+        type: "xxxxxx",
+        foo: true,
+        bar: true,
+      }, ['red', 'green', 'blue']);
+    }).to.throw(
+        /xxxxxx must contain exactly one of attributes: red, green, blue./);
+  });
+
+
 });
 

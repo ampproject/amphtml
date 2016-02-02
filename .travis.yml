@@ -41,3 +41,8 @@ script:
 branches:
   only:
     - master
+    - release
+    - canary
+env:
+  global:
+    - NPM_CONFIG_PROGRESS="false"

@@ -27,6 +27,7 @@ import {a9} from '../ads/a9';
 import {adreactor} from '../ads/adreactor';
 import {adsense} from '../ads/adsense';
 import {adtech} from '../ads/adtech';
+import {plista} from '../ads/plista';
 import {doubleclick} from '../ads/doubleclick';
 import {facebook} from './facebook';
 import {manageWin} from './environment';
@@ -35,12 +36,23 @@ import {twitter} from './twitter';
 import {register, run} from '../src/3p';
 import {parseUrl} from '../src/url';
 import {assert} from '../src/asserts';
+import {taboola} from '../ads/taboola';
+
+/**
+ * Whether the embed type may be used with amp-embed tag.
+ * @const {!Object<string: boolean>}
+ */
+const AMP_EMBED_ALLOWED = {
+  taboola: true
+};
 
 register('a9', a9);
 register('adreactor', adreactor);
 register('adsense', adsense);
 register('adtech', adtech);
+register('plista', plista);
 register('doubleclick', doubleclick);
+register('taboola', taboola);
 register('_ping_', function(win, data) {
   win.document.getElementById('c').textContent = data.ping;
 });
@@ -62,6 +74,9 @@ export function draw3p(win, data, configCallback) {
   const type = data.type;
   assert(win.context.location.originValidated != null,
       'Origin should have been validated');
+
+  assert(isTagNameAllowed(data.type, win.context.tagName),
+      'Embed type %s not allowed with tag %s', data.type, win.context.tagName);
   if (configCallback) {
     configCallback(data, data => {
       assert(data, 'Expected configuration to be passed as first argument');
@@ -256,4 +271,19 @@ export function parseFragment(fragment) {
     json = decodeURIComponent(json);
   }
   return json ? JSON.parse(json) : {};
+}
+
+/**
+ * Not all types of embeds are allowed to be used with all tag names on the
+ * AMP side. This function checks whether the current usage is permissible.
+ * @param {string} type
+ * @param {string|undefined} tagName The tagName that was used to embed this
+ *     3p-frame.
+ * @return {boolean}
+ */
+export function isTagNameAllowed(type, tagName) {
+  if (tagName == 'AMP-EMBED') {
+    return !!AMP_EMBED_ALLOWED[type];
+  }
+  return true;
 }

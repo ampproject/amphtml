@@ -58,7 +58,7 @@ describe('PullToRefreshBlocker', () => {
   });
 
   function sendEvent(event, opt_prevetDefault) {
-    event.preventDefault = opt_prevetDefault || () => {};
+    event.preventDefault = opt_prevetDefault || (() => {});
     event.stopPropagation = () => {};
     eventListeners[event.type](event);
   }
