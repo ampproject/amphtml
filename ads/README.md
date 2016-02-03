@@ -1,6 +1,6 @@
 # Integrating ad networks into AMP
 
-See also our [ad integration guidelines](../3p/README.md#ads).
+See also our [ad integration guidelines](../3p/README.md#ads) and [3rd party ads integration guidelines](/integration-guide.md)
 
 ## Overview
 Ads are just another external resource and must play within the same constraints placed on all resources in AMP. We aim to support a large subset of existing ads with little or no changes to how the integrations work. Our long term goal is to further improve the impact of ads on the user experience through changes across the entire vertical client side stack.
@@ -159,3 +159,5 @@ Technically the `<amp-ad>` tag loads an iframe to a generic bootstrap URL that k
 
 Access to a publishers 1st party cookies may be achieved through a custom ad bootstrap
 file. See ["Running ads from a custom domain"](../builtins/amp-ad.md) in the ad documentation for details.
+
+If the publisher would like to add custom JavaScript in the `remote.html` file that wants to read or write to the publisher owned cookies, then the publisher needs to ensure that the `remote.html` file is hosted on a sub-domain of the publisher URL. e.g. if the publisher hosts a webpage on https://nytimes.com, then the remote file should be hosted on something similar to https://sub-domain.nytimes.com for the custom JavaScript to have the abiity to read or write cookies for nytimes.com.
