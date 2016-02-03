@@ -51,6 +51,23 @@ export const ANALYTICS_CONFIG = {
       'contentLoadTime': 'CONTENT_LOAD_TIME'
     }
   },
+  
+  'atinternet': {
+    'transport': {'beacon': false, 'xhrpost': false, 'image': true},
+    'requests': {
+      'base': 'https://${log}${domain}/?s=${site}&ts=${timestamp}&r=${screenWidth}x${screenHeight}x0',
+      'suffix': '&ref=${documentReferrer}',
+      'pageview': '${base}&' +
+        'p=${title}&' +
+        's2=${level2}${suffix}',
+      'click': '${base}&' +
+        'pclick=${title}&' +
+        's2click=${level2}&' +
+        'p=${label}&' +
+        's2=${level2Click}&' +
+        'type=click&click=${type}${suffix}'
+    }
+  },
 
   'googleanalytics': {
     'vars': {
@@ -78,23 +95,6 @@ export const ANALYTICS_CONFIG = {
           'clt=${contentLoadTime}&dit=${domInteractiveTime}${baseSuffix}'
     },
     'optout': '_gaUserPrefs.ioo'
-  }
-  
-  'atinternet': {
-    'transport': {'beacon': false, 'xhrpost': false},
-    'requests': {
-      'base': 'https://${log}${domain}/?s=${site}&ts=${timestamp}&r=${screenWidth}x${screenHeight}x0',
-      'suffix': '&ref=${documentReferrer}',
-      'pageview': '${base}&' +
-        'p=${title}&' +
-        's2=${level2}${suffix}',
-      'click': '${base}&' +
-        'pclick=${title}&' +
-        's2click=${level2}&' +
-        'p=${label}&' +
-        's2=${level2Click}&' +
-        'type=click&click=${type}${suffix}'
-    }
   }
 };
 
