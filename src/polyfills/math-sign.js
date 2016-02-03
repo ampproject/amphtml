@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,5 +14,25 @@
  * limitations under the License.
  */
 
-import 'document-register-element/build/document-register-element.max';
-import './polyfills/math-sign';
+/**
+ * Parses the number x and returns its sign. For positive x returns 1, for
+ * negative, -1. For 0 and -0, returns 0 and -0 respectively. For any number
+ * that parses to NaN, returns NaN.
+ *
+ * @param {number} x
+ * @returns {number}
+ */
+export function sign(x) {
+  x = Number(x);
+
+  // If x is 0, -0, or NaN, return it.
+  if (!x) {
+    return x;
+  }
+
+  return x > 0 ? 1 : -1;
+};
+
+if (!Math.sign) {
+  Math.sign = sign;
+}
