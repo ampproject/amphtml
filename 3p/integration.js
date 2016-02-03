@@ -33,7 +33,7 @@ import {twitter} from './twitter';
 import {register, run} from '../src/3p';
 import {parseUrl} from '../src/url';
 import {assert} from '../src/asserts';
-import {appnexus} from '../ads/appnexus.ast';
+import {appnexus} from '../ads/appnexus';
 
 register('a9', a9);
 register('adreactor', adreactor);

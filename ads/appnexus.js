@@ -34,7 +34,7 @@ export function appnexus(global, data) {
 	  apntag.anq = apntag.anq || [];
 	  apntag.debug = data.debug || false;
 
-	  writeScript(global, "http://juliend:8080/amp/ast.debug.js" /*"https://acdn.adnxs.com/ast/ast.js"*/);
+	  writeScript(global, "https://acdn.adnxs.com/ast/ast.js");
 
       apntag.anq.push(function() {
           //set global page options
@@ -64,7 +64,10 @@ export function appnexus(global, data) {
 	  context.master.apntag.anq.push(function() {
 		  if (!this.isMaster) // in case we are not in the master iframe, we create a reference to the apntag in the master iframe
 			  global.apntag = context.master.apntag;
-		  // would need fix in AST to allow passing the document variable to use
+		  // collapse on no ad is handle here.
+		  context.master.apntag.onEvent('adNoBid', data.target, function(){
+			context.noContentAvailable();
+		  });
 		  context.master.apntag.showTag(data.target, global.window);
 	  });
   }

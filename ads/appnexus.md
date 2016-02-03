@@ -1,0 +1,70 @@
+<!---
+Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS-IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+# AppNexus 
+
+## Example
+
+### Basic
+
+```html
+<amp-ad width=320 height=50
+    type="appnexus"
+    src="https://secure.adnxs.com/ttj?id=4119129">
+</amp-ad>
+```
+
+### using AST for multiple sync ads on the page 
+
+```html
+<amp-ad width=320 height=50
+    type="appnexus"
+    data-target="apn_ad_40954389058"
+    json='{"pageOpts":{"member": 958}, "adUnits": [{"member": 958,"disablePsa": true, "invCode": "ast_guaranteed_prios_1","sizes": [300,250],"targetId": "apn_ad_40954389058"}, {"member": 958, "invCode": "ast_guaranteed_prios_1","sizes": [160,600],"targetId":"apn_ad_5675675648"}]}'>
+</amp-ad>
+
+<amp-ad width=160 height=600
+    type="appnexus"
+    data-target="apn_ad_5675675648"
+    json='{"pageOpts":{"member": 958}, "adUnits": [{"member": 958,"disablePsa": true, "invCode": "ast_guaranteed_prios_1","sizes": [300,250],"targetId": "apn_ad_40954389058"}, {"member": 958, "invCode": "ast_guaranteed_prios_1","sizes": [160,600],"targetId":"apn_ad_5675675648"}]}'>
+</amp-ad>
+
+```
+
+## Configuration
+
+For ads configuration, please check ast api on appnexus wiki
+
+### debug 
+
+to enable debug with the AST type of tags, just set the data-debug=true to all your amp-ad tags
+
+```html
+<amp-ad width=320 height=50
+    type="appnexus"
+    data-target="apn_ad_40954389058"
+    data-debug=true
+    json='{"pageOpts":{"member": 958}, "adUnits": [{"member": 958,"disablePsa": true, "invCode": "ast_guaranteed_prios_1","sizes": [300,250],"targetId": "apn_ad_40954389058"}, {"member": 958, "invCode": "ast_guaranteed_prios_1","sizes": [160,600],"targetId":"apn_ad_5675675648"}]}'>
+</amp-ad>
+
+<amp-ad width=160 height=600
+    type="appnexus"
+    data-target="apn_ad_5675675648"
+    data-debug=true
+    json='{"pageOpts":{"member": 958}, "adUnits": [{"member": 958,"disablePsa": true, "invCode": "ast_guaranteed_prios_1","sizes": [300,250],"targetId": "apn_ad_40954389058"}, {"member": 958, "invCode": "ast_guaranteed_prios_1","sizes": [160,600],"targetId":"apn_ad_5675675648"}]}'>
+</amp-ad>
+
+```
