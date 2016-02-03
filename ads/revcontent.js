@@ -24,31 +24,8 @@ export function revcontent(global, data) {
     checkData(data, ['id', 'width', 'height', 'endpoint', 'ssl', 'wrapper']);
     (function(window, document, data, undefined) {
 
-        const serve_protocol = data.ssl === 'true' ? 'https://' : 'http://';
-        const serve_host = data.endpoint;
-        const serve_script = '/serve.js.php';
-        var rcjsload = document.createElement("div");
-        rcjsload.id = data.wrapper !== undefined ? data.wrapper : "rcjsload_2ff711";
-        document.body.appendChild(rcjsload);
-        var rcel = document.createElement("script");
-        rcel.id = 'rc_' + Math.floor(Math.random() * 1000);
-        rcel.type = 'text/javascript';
-        var serve_parms = "?uitm=1&w=" + data.id + "&t=" + rcel.id + "&c=" + (new Date()).getTime() + "&width=" + (window.outerWidth || document.documentElement.clientWidth);
-        var serve_url = serve_protocol + serve_host + serve_script + serve_parms;
-        rcel.src = serve_url;
-        rcel.async = true;
-        var rcds = document.getElementById(rcjsload.id); rcds.appendChild(rcel);
-
-        /**
-         *
-         * @type {*|!Function}
-         * @todo Implement Resize Handlers...
-         */
-        var unlisten = window.context.onResizeSuccess(function(requestedHeight) {
-
-
-        });
-
+        window.data = data;
+        writeScript(window, 'https://labs-cdn.revcontent.com/build/amphtml/revcontent.amp.min.js');
 
     })(global, global.document, data);
 }
