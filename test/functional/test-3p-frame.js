@@ -141,6 +141,7 @@ describe('3p-frame', () => {
       expect(c).to.not.be.null;
       expect(c.textContent).to.contain('pong');
       validateData(win.context.data, ['ping', 'testAttr']);
+      document.head.removeChild(link);
     });
   });
 
