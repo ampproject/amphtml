@@ -19,6 +19,7 @@
     "dist": "gulp dist"
   },
   "dependencies": {
+    "promise-pjs": "^0.2.1",
     "document-register-element": "0.5.4"
   },
   "devDependencies": {
@@ -79,6 +80,7 @@
     "postcss": "5.0.14",
     "pretty-bytes": "2.0.1",
     "request": "2.67.0",
+    "rimraf": "^2.5.1",
     "serve-index": "1.7.2",
     "serve-static": "1.9.1",
     "sinon": "1.17.2",

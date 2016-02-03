@@ -33,6 +33,13 @@ export function sign(x) {
   return x > 0 ? 1 : -1;
 };
 
-if (!Math.sign) {
-  Math.sign = sign;
+
+/**
+ * Sets the Math.sign polyfill if it does not exist.
+ * @param {!Window} win
+ */
+export function install(win) {
+  if (!win.Math.sign) {
+    win.Math.sign = sign;
+  }
 }
