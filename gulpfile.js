@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+checkMinVersion();
+
 var autoprefixer = require('autoprefixer');
 var babel = require('babelify');
 var browserify = require('browserify');
@@ -95,6 +97,7 @@ function buildExtensions(options) {
   buildExtension('amp-slides', '0.1', false, options);
   buildExtension('amp-twitter', '0.1', false, options);
   buildExtension('amp-user-notification', '0.1', true, options);
+  buildExtension('amp-vimeo', '0.1', false, options);
   buildExtension('amp-vine', '0.1', false, options);
   buildExtension('amp-youtube', '0.1', false, options);
 }
@@ -126,7 +129,8 @@ function compile(watch, shouldMinify) {
     minify: shouldMinify,
     // If there is a sync JS error during initial load,
     // at least try to unhide the body.
-    wrapper: 'try{<%= contents %>}catch(e){setTimeout(function(){' +
+    wrapper: 'try{(function(){<%= contents %>})()}catch(e){' +
+        'setTimeout(function(){' +
         'var s=document.body.style;' +
         's.opacity=1;' +
         's.visibility="visible";' +
@@ -316,6 +320,7 @@ function buildExamples(watch) {
   buildExample('analytics-notification.amp.html');
   buildExample('analytics.amp.html');
   buildExample('article.amp.html');
+  buildExample('responsive.amp.html');
   buildExample('article-access.amp.html');
   buildExample('csp.amp.html');
   buildExample('metadata-examples/article-json-ld.amp.html');
@@ -334,6 +339,7 @@ function buildExamples(watch) {
   buildExample('released.amp.html');
   buildExample('twitter.amp.html');
   buildExample('user-notification.amp.html');
+  buildExample('vimeo.amp.html');
   buildExample('vine.amp.html');
 
   // TODO(dvoytenko, #1393): Enable for proxy-testing.
@@ -404,6 +410,8 @@ function thirdPartyBootstrap(watch, shouldMinify) {
       });
 }
 
+var activeBundleOperationCount = 0;
+
 /**
  * Compile a javascript file
  *
@@ -434,11 +442,18 @@ function compileJs(srcDir, srcFilename, destDir, options) {
       .pipe(gulp.dest.bind(gulp), destDir);
 
   function rebundle() {
+    activeBundleOperationCount++;
     bundler.bundle()
       .on('error', function(err) { console.error(err); this.emit('end'); })
       .pipe(lazybuild())
       .pipe(rename(options.toName || srcFilename))
-      .pipe(lazywrite());
+      .pipe(lazywrite())
+      .on('end', function() {
+        activeBundleOperationCount--;
+        if (activeBundleOperationCount == 0) {
+          console.info('All current JS updates done.');
+        }
+      });
   }
 
   if (options.watch) {
@@ -643,6 +658,20 @@ function buildLoginDoneVersion(version, options) {
           latestName: latestName,
         });
       });
+}
+
+/**
+ * Exits the process if gulp is running with a node version lower than
+ * the required version. This has to run very early to avoid parse
+ * errors from modules that e.g. use let.
+ */
+function checkMinVersion() {
+  var majorVersion = Number(process.version.replace(/v/, '').split('.')[0]);
+  if (majorVersion < 4) {
+    console.log('Please run AMP with node.js version 4 or newer.');
+    console.log('Your version is', process.version);
+    process.exit(1);
+  }
 }
 
 

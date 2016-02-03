@@ -88,6 +88,36 @@ Example value: `The New York Times - Breaking News, World News...`
 
 ## Device and Browser
 
+### availableScreenHeight
+
+Provides the screen height in pixels available for the page rendering.
+
+Example value: `1480`
+
+### availableScreenWidth
+
+Provides the screen width in pixels available for the page rendering.
+
+Example value: `2500`
+
+### browserLanguage
+
+Provides a string representing the preferred language of the user, usually the language of the browser UI.
+
+Example value: `en-us`
+
+### documentCharset
+
+Provides the character encoding of the current document.
+
+Example value: `UTF-8`
+
+### screenColorDepth
+
+Provides the screen color depth provided by the browser.
+
+Example value: `24`
+
 ### screenHeight
 
 Provides the screen height in pixels. The value is retrieved from `window.screen.height`.

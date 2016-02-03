@@ -173,6 +173,10 @@ function specificity(code) {
       return 28;
     case amp.validator.ValidationError.Code.DEV_MODE_ENABLED:
       return 29;
+    case amp.validator.ValidationError.Code.ATTR_DISALLOWED_BY_IMPLIED_LAYOUT:
+      return 30;
+    case amp.validator.ValidationError.Code.ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT:
+      return 31;
     case amp.validator.ValidationError.Code.DEPRECATED_ATTR:
       return 101;
     case amp.validator.ValidationError.Code.DEPRECATED_TAG:
@@ -439,7 +443,7 @@ const CdataMatcher = function CdataMatcher(tagSpec) {
  * @param {!amp.validator.CssSpec} cssSpec
  * @return {!Object<string,parse_css.BlockType>}
  */
-CdataMatcher.prototype.atRuleParsingSpec = function(cssSpec) {
+function computeAtRuleParsingSpec(cssSpec) {
   /** @type {!Object<string,parse_css.BlockType>} */
   const ampAtRuleParsingSpec = {};
   for (const atRuleSpec of cssSpec.atRuleSpec) {
@@ -462,18 +466,18 @@ CdataMatcher.prototype.atRuleParsingSpec = function(cssSpec) {
     }
   }
   return ampAtRuleParsingSpec;
-};
+}
 
 /**
  * Returns the default AT rule parsing spec.
- * @param {!Object} atRuleParsingSpec
+ * @param {!Object<string,parse_css.BlockType>} atRuleParsingSpec
  * @return {parse_css.BlockType}
  */
-CdataMatcher.prototype.atRuleDefaultParsingSpec = function(atRuleParsingSpec) {
+function computeAtRuleDefaultParsingSpec(atRuleParsingSpec) {
   const ret = atRuleParsingSpec['$DEFAULT'];
   goog.asserts.assert(ret !== undefined, 'No default atRuleSpec found');
   return ret;
-};
+}
 
 /**
  * Returns true if the given AT rule is considered valid.
@@ -525,9 +529,13 @@ CdataMatcher.prototype.match = function(cdata, context, validationResult) {
   if (context.getProgress(validationResult).complete)
     return;
 
+  // The mandatory_cdata, cdata_regex, and css_spec fields are treated
+  // like a oneof, but we're not using oneof because it's a feature
+  // that was added after protobuf 2.5.0 (which our open-source
+  // version uses).
+  // begin oneof {
+
   // Mandatory CDATA exact match
-  // TODO(johannes): This feature is no longer used in validator.protoascii,
-  // remove or make a test for it.
   if (cdataSpec.mandatoryCdata !== null) {
     if (cdataSpec.mandatoryCdata !== cdata) {
       context.addError(
@@ -539,8 +547,7 @@ CdataMatcher.prototype.match = function(cdata, context, validationResult) {
     // We return early if the cdata has an exact match rule. The
     // spec shouldn't have an exact match rule that doesn't validate.
     return;
-  }
-  if (cdataSpec.cdataRegex !== null) {
+  } else if (cdataSpec.cdataRegex !== null) {
     const cdataRegex = new RegExp('^(' + cdataSpec.cdataRegex + ')$');
     if (!cdataRegex.test(cdata)) {
       context.addError(
@@ -550,9 +557,7 @@ CdataMatcher.prototype.match = function(cdata, context, validationResult) {
           this.tagSpec_.specUrl, validationResult);
       return;
     }
-  }
-
-  if (cdataSpec.cssSpec !== null) {
+  } else if (cdataSpec.cssSpec !== null) {
     /** @type {!Array<!parse_css.ErrorToken>} */
     const cssErrors = [];
     /** @type {!Array<!parse_css.Token>} */
@@ -560,13 +565,12 @@ CdataMatcher.prototype.match = function(cdata, context, validationResult) {
                                        this.getLineCol().getLine(),
                                        this.getLineCol().getCol(),
                                        cssErrors);
-    /** @type {!Object} */
-    const atRuleParsingSpec = this.atRuleParsingSpec(cdataSpec.cssSpec);
+    /** @type {!Object<string,parse_css.BlockType>} */
+    const atRuleParsingSpec = computeAtRuleParsingSpec(cdataSpec.cssSpec);
     /** @type {!parse_css.Stylesheet} */
     const sheet = parse_css.parseAStylesheet(
         tokenList, atRuleParsingSpec,
-        this.atRuleDefaultParsingSpec(atRuleParsingSpec),
-        cssErrors);
+        computeAtRuleDefaultParsingSpec(atRuleParsingSpec), cssErrors);
     let reportCdataRegexpErrors = (cssErrors.length == 0);
     for (const errorToken of cssErrors) {
       const lineCol = new LineCol(errorToken.line, errorToken.col);
@@ -576,9 +580,9 @@ CdataMatcher.prototype.match = function(cdata, context, validationResult) {
           /* url */ '', validationResult);
     }
 
-    // TODO: This needs improvement to validate all fields recursively. For now,
-    // it's just doing one layer of fields to demonstrate the idea and keep
-    // tests passing
+    // TODO(johannes): This needs improvement to validate all fields
+    // recursively. For now, it's just doing one layer of fields to
+    // demonstrate the idea and keep tests passing.
     for (const cssRule of sheet.rules) {
       if (cssRule.tokenType === 'AT_RULE') {
         if (!this.isAtRuleValid(cdataSpec.cssSpec, cssRule.name)) {
@@ -599,6 +603,7 @@ CdataMatcher.prototype.match = function(cdata, context, validationResult) {
     if (!reportCdataRegexpErrors)
       return;
   }
+  // } end oneof
 
   // Blacklisted CDATA Regular Expressions
   for (const blacklist of cdataSpec.blacklistedCdataRegex) {
@@ -1149,16 +1154,19 @@ function CalculateHeight(spec, inputLayout, inputHeight) {
  * @param {!amp.validator.CssLengthAndUnit} width
  * @param {!amp.validator.CssLengthAndUnit} height
  * @param {string?} sizesAttr
+ * @param {string?} heightsAttr
  * @return {!amp.validator.AmpLayout.Layout}
  */
-function CalculateLayout(inputLayout, width, height, sizesAttr) {
+function CalculateLayout(inputLayout, width, height, sizesAttr, heightsAttr) {
   if (inputLayout !== amp.validator.AmpLayout.Layout.UNKNOWN) {
     return inputLayout;
   } else if (!width.isSet && !height.isSet) {
     return amp.validator.AmpLayout.Layout.CONTAINER;
   } else if (height.isSet && (!width.isSet || width.isAuto)) {
     return amp.validator.AmpLayout.Layout.FIXED_HEIGHT;
-  } else if (height.isSet && width.isSet && sizesAttr !== undefined) {
+  } else if (
+      height.isSet && width.isSet &&
+      (sizesAttr !== undefined || heightsAttr !== undefined)) {
     return amp.validator.AmpLayout.Layout.RESPONSIVE;
   } else {
     return amp.validator.AmpLayout.Layout.FIXED;
@@ -1304,7 +1312,7 @@ ParsedTagSpec.prototype.getSpec = function() {
  */
 ParsedTagSpec.prototype.hasDispatchKey = function() {
   return this.dispatchKeyAttrSpec_ !== -1;
-}
+};
 /**
  * You must check hasDispatchKey before accessing
  * @return {string}
@@ -1391,6 +1399,7 @@ ParsedTagSpec.prototype.validateLayout = function(context, attrsByKey, result) {
   const widthAttr = attrsByKey.get('width');
   const heightAttr = attrsByKey.get('height');
   const sizesAttr = attrsByKey.get('sizes');
+  const heightsAttr = attrsByKey.get('heights');
 
   // Parse the input layout attributes which we found for this tag.
   const inputLayout = parseLayout(layoutAttr);
@@ -1398,7 +1407,7 @@ ParsedTagSpec.prototype.validateLayout = function(context, attrsByKey, result) {
       inputLayout === amp.validator.AmpLayout.Layout.UNKNOWN) {
     context.addError(
         amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
-        /* params */ ["layout", getDetailOrName(this.spec_), layoutAttr],
+        /* params */['layout', getDetailOrName(this.spec_), layoutAttr],
         this.spec_.specUrl, result);
     return;
   }
@@ -1407,7 +1416,7 @@ ParsedTagSpec.prototype.validateLayout = function(context, attrsByKey, result) {
   if (!inputWidth.isValid) {
     context.addError(
         amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
-        /* params */ ["width", getDetailOrName(this.spec_), widthAttr],
+        /* params */['width', getDetailOrName(this.spec_), widthAttr],
         this.spec_.specUrl, result);
     return;
   }
@@ -1416,7 +1425,7 @@ ParsedTagSpec.prototype.validateLayout = function(context, attrsByKey, result) {
   if (!inputHeight.isValid) {
     context.addError(
         amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
-        /* params */ ["height", getDetailOrName(this.spec_), heightAttr],
+        /* params */['height', getDetailOrName(this.spec_), heightAttr],
         this.spec_.specUrl, result);
     return;
   }
@@ -1425,7 +1434,8 @@ ParsedTagSpec.prototype.validateLayout = function(context, attrsByKey, result) {
   const width = CalculateWidth(this.spec_.ampLayout, inputLayout, inputWidth);
   const height = CalculateHeight(this.spec_.ampLayout, inputLayout,
                                  inputHeight);
-  const layout = CalculateLayout(inputLayout, width, height, sizesAttr);
+  const layout =
+      CalculateLayout(inputLayout, width, height, sizesAttr, heightsAttr);
 
   // Does the tag support the computed layout?
   if (this.spec_.ampLayout.supportedLayouts.indexOf(layout) === -1) {
@@ -1480,6 +1490,16 @@ ParsedTagSpec.prototype.validateLayout = function(context, attrsByKey, result) {
           this.spec_.specUrl, result);
       return;
   }
+  if (heightsAttr !== undefined &&
+      layout !== amp.validator.AmpLayout.Layout.RESPONSIVE) {
+    const code = layoutAttr === undefined ?
+        amp.validator.ValidationError.Code.ATTR_DISALLOWED_BY_IMPLIED_LAYOUT :
+        amp.validator.ValidationError.Code.ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT;
+    context.addError(
+        code, /* params */['heights', getDetailOrName(this.spec_), layout],
+        this.spec_.specUrl, result);
+    return;
+  }
 };
 
 /**
@@ -1504,7 +1524,7 @@ ParsedTagSpec.prototype.validateAttributes = function(
       return;
     }
   }
-  const hasTemplateAncestor = context.getTagNames().hasAncestor("template");
+  const hasTemplateAncestor = context.getTagNames().hasAncestor('template');
   let mandatoryAttrsSeen = [];
   /** @type {!goog.structs.Set<string>} */
   const mandatoryOneofsSeen = new goog.structs.Set();

@@ -55,6 +55,19 @@ describe('performance', () => {
       expect(perf.events_.length).to.equal(2);
     });
 
+    it('should map tickDelta to tick', () => {
+      expect(perf.events_.length).to.equal(0);
+
+      perf.tickDelta('test', 99);
+      expect(perf.events_.length).to.equal(2);
+      expect(perf.events_[0]).to.jsonEqual({label: '_test', opt_value: 0});
+      expect(perf.events_[1]).to.jsonEqual({
+        label: 'test',
+        opt_from: '_test',
+        opt_value: 99
+      });
+    });
+
     it('should have max 50 queued events', () => {
       expect(perf.events_.length).to.equal(0);
 
@@ -285,9 +298,12 @@ describe('performance', () => {
           whenReadyToRetrieveResourcesResolve();
           whenViewportLayoutCompleteResolve();
           return perf.whenViewportLayoutComplete_().then(() => {
-            expect(tickSpy.callCount).to.equal(1);
-            expect(tickSpy.firstCall.args[0]).to.equal('pc');
-            expect(Number(tickSpy.firstCall.args[2])).to.equal(400);;
+            expect(tickSpy.callCount).to.equal(2);
+            expect(tickSpy.firstCall.args[0]).to.equal('_pc');
+            expect(tickSpy.secondCall.args[0]).to.equal('pc');
+            expect(tickSpy.secondCall.args[1]).to.equal('_pc');
+            expect(Number(tickSpy.firstCall.args[2])).to.equal(0);
+            expect(Number(tickSpy.secondCall.args[2])).to.equal(400);
           });
         });
       });
@@ -298,9 +314,12 @@ describe('performance', () => {
         whenReadyToRetrieveResourcesResolve();
         whenViewportLayoutCompleteResolve();
         return perf.whenViewportLayoutComplete_().then(() => {
-          expect(tickSpy.callCount).to.equal(1);
-          expect(tickSpy.firstCall.args[0]).to.equal('pc');
-          expect(tickSpy.firstCall.args[2]).to.equal(0);
+          expect(tickSpy.callCount).to.equal(2);
+          expect(tickSpy.firstCall.args[0]).to.equal('_pc');
+          expect(tickSpy.secondCall.args[0]).to.equal('pc');
+          expect(tickSpy.secondCall.args[1]).to.equal('_pc');
+          expect(Number(tickSpy.firstCall.args[2])).to.equal(0);
+          expect(Number(tickSpy.secondCall.args[2])).to.equal(1);
         });
       });
     });

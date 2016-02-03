@@ -27,7 +27,7 @@ describe('integration amp-carousel', () => {
       });
   });
 
-  it('should show the body', () => {
+  it('should show the body in carousel test', () => {
     return expectBodyToBecomeVisible(fixture.win);
   });
 

@@ -33,10 +33,9 @@ function runTest(shouldKillPolyfillableApis) {
         if (shouldKillPolyfillableApis) {
           win.Promise = undefined;
         }
-      })
-        .then(f => {
-          fixture = f;
-        });
+      }).then(f => {
+        fixture = f;
+      });
     });
 
     // There is really weird behavior when running this test in FF in
@@ -51,6 +50,7 @@ function runTest(shouldKillPolyfillableApis) {
         expect(fixture.doc.querySelectorAll('.-amp-layout'))
             .to.have.length(13);
         expect(fixture.doc.querySelectorAll('.-amp-error')).to.have.length(0);
+        checkGlobalScope(fixture.win);
       }).then(() => {
         return expectBodyToBecomeVisible(fixture.win);
       });
@@ -67,4 +67,15 @@ function runTest(shouldKillPolyfillableApis) {
       });
     });
   });
+}
+
+function checkGlobalScope(win) {
+  // Checks that we don't leak certain symbols to the global scope.
+  // This could happen if we do not wrap all our code in a closure.
+  const commonSymbols = [
+    '$', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'x', 'z', '_', 'log'];
+  expect(win).to.not.include.keys(commonSymbols);
+  expect(win).to.not.include.keys(commonSymbols.map(symbol => {
+    return symbol.toUpperCase();
+  }));
 }

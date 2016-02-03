@@ -135,10 +135,19 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
     iframe.onerror = function(event) {
       throw event.error;
     };
-    iframe.srcdoc = html;
     iframe.height = initialIframeHeight;
     iframe.width = 500;
-    document.body.appendChild(iframe);
+    if ('scrdoc' in iframe) {
+      iframe.srcdoc = html;
+      document.body.appendChild(iframe);
+    } else {
+      iframe.src = 'about:blank';
+      document.body.appendChild(iframe);
+      const idoc = iframe.contentWindow.document;
+      idoc.open();
+      idoc.write(html);
+      idoc.close();
+    }
   });
 }
 
@@ -293,7 +302,7 @@ export function pollForLayout(win, count, opt_timeout) {
  */
 export function expectBodyToBecomeVisible(win) {
   return poll('expect body to become visible', () => {
-    return win.document.body && (
+    return win && win.document && win.document.body && (
         (win.document.body.style.visibility == 'visible'
             && win.document.body.style.opacity != '0')
         || win.document.body.style.opacity == '1');

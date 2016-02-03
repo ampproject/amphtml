@@ -386,7 +386,7 @@ describe('amp-iframe', () => {
         sandbox.spy(AmpIframe.prototype, 'activateIframe_');
     return getAmpIframe({
       src: clickableIframeSrc,
-      sandbox: 'allow-scripts',
+      sandbox: 'allow-scripts allow-same-origin',
       width: 480,
       height: 360,
       poster: 'https://i.ytimg.com/vi/cMcCTVAFBWM/hqdefault.jpg'

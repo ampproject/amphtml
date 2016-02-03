@@ -51,6 +51,7 @@ describe('example', function() {
     'released.amp.html',
     'twitter.amp.html',
     'vine.amp.html',
+    'old-boilerplate.amp.html',
   ];
 
   /**
@@ -62,7 +63,7 @@ describe('example', function() {
    * @constructor {!Array<!RegExp>}
    */
   const errorWhitelist = [
-    /invalid value \'.\/viewer-integr.js\'/
+    /invalid value \'.\/viewer-integr.js\'/,
   ];
 
   const usedWhitelist = [];
