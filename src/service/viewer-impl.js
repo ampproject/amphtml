@@ -154,6 +154,9 @@ export class Viewer {
     /** @private {?function(string, *, boolean):(Promise<*>|undefined)} */
     this.messageDeliverer_ = null;
 
+    /** @private {?string} */
+    this.messagingOrigin_ = null;
+
     /** @private {!Array<!{eventType: string, data: *}>} */
     this.messageQueue_ = [];
 
@@ -647,11 +650,15 @@ export class Viewer {
    * Provides a message delivery mechanism by which AMP document can send
    * messages to the viewer.
    * @param {function(string, *, boolean):(!Promise<*>|undefined)} deliverer
+   * @param {string} origin
    * @export
    */
-  setMessageDeliverer(deliverer) {
+  setMessageDeliverer(deliverer, origin) {
     assert(!this.messageDeliverer_, 'message deliverer can only be set once');
+    log.fine(TAG_, 'message channel established with origin: ', origin);
     this.messageDeliverer_ = deliverer;
+    // TODO(dvoytenko, #1764): Make `origin` required when viewers catch up.
+    this.messagingOrigin_ = origin;
     if (this.messageQueue_.length > 0) {
       const queue = this.messageQueue_.slice(0);
       this.messageQueue_ = [];
