@@ -66,7 +66,8 @@ export const ANALYTICS_CONFIG = {
       'host': 'https://www.google-analytics.com',
       'basePrefix': 'v=1&_v=a0&aip=true&_s=${requestCount}' +
           'dt=${title}&sr=${screenWidth}x${screenHeight}&_utmht=${timestamp}&' +
-          'jid=&cid=${clientId(_ga)}&tid=${account}&dl=${documentLocation}&' +
+          'jid=&cid=${clientId(AMP_ECID_GOOGLE)}&tid=${account}&' +
+          'dl=${documentLocation}&' +
           'dr=${documentReferrer}&sd=${screenColorDepth}&' +
           'ul=${browserLanguage}&de=${documentCharset}' ,
       'baseSuffix': '&a=${pageViewId}&z=${random}',
