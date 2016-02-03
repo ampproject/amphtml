@@ -399,4 +399,21 @@ describe('UrlReplacements', () => {
       expect(res).to.equal('v=false');
     });
   });
+
+  it('should resolve sub-included bindings', () => {
+    // RANDOM is a standard property and we add RANDOM_OTHER.
+    return expand('r=RANDOM&ro=RANDOM_OTHER?', false, {'RANDOM_OTHER': 'ABC'})
+        .then(res => {
+          expect(res).to.match(/r=(\d\.\d+)&ro=ABC\?$/);
+        });
+  });
+
+  it('should expand multiple vars', () => {
+    return expand('a=VALUEA&b=VALUEB?', false, {
+      'VALUEA': 'aaa',
+      'VALUEB': 'bbb',
+    }).then(res => {
+      expect(res).to.match(/a=aaa&b=bbb\?$/);
+    });
+  });
 });
