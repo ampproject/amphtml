@@ -25,7 +25,7 @@ min_validator_revision_required: 83
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 136
+spec_file_revision: 137
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
 #
@@ -2015,6 +2015,24 @@ tags: {  # amp-user-notification
     mandatory: true
   }
 }
+tags: {  # amp-viafoura
+  name: "script"
+  mandatory_parent: "head"
+  detail: "amp-viafoura extension .js script"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-viafoura/amp-viafoura.md"
+  attrs: {
+    name: "custom-element"
+    value: "amp-viafoura"
+    mandatory: true
+    dispatch_key: true
+  }
+  attrs: { name: "async" value: "" mandatory: true }
+  attrs: {
+    name: "src"
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-viafoura-(latest|0\\.1).js"
+    mandatory: true
+  }
+}
 tags: {  # amp-vine
   name: "script"
   mandatory_parent: "head"
@@ -2421,6 +2439,20 @@ tags: {
     supported_layouts: RESPONSIVE
     supported_layouts: FILL
     supported_layouts: NODISPLAY
+  }
+}
+# <amp-viafoura>
+tags: {
+  name: "amp-viafoura"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-viafoura/amp-viafoura.md"
+  also_requires: "amp-viafoura extension .js script"
+  attr_lists: "extended-amp-global"
+  attrs: { name: "data-widget" mandatory: true }
+  amp_layout: {
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: RESPONSIVE
+    supported_layouts: FILL
   }
 }
 # <amp-vine>

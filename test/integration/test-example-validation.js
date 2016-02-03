@@ -50,6 +50,7 @@ describe('example', function() {
     'instagram.amp.html',
     'released.amp.html',
     'twitter.amp.html',
+    'viafoura.amp.html',
     'vine.amp.html',
     'old-boilerplate.amp.html',
   ];

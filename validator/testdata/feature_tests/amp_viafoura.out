@@ -1,0 +1,2 @@
+FAIL
+feature_tests/amp_viafoura.html:27:4 The mandatory attribute 'data-widget' is missing in tag 'amp-viafoura'. (see https://github.com/ampproject/amphtml/blob/master/extensions/amp-viafoura/amp-viafoura.md)
