@@ -351,6 +351,9 @@ class UrlReplacements {
    * @private
    */
   buildExpr_(keys) {
+    // The keys must be sorted to ensure that the longest keys are considered
+    // first. This avoids a problem where a RANDOM conflicts with RANDOM_ONE.
+    keys.sort((s1, s2) => s2.length - s1.length);
     const all = keys.join('|');
     // Match the given replacement patterns, as well as optionally
     // arguments to the replacement behind it in parantheses.
