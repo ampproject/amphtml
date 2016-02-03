@@ -23,6 +23,7 @@ import {getMode} from './mode';
 import {preconnectFor} from './preconnect';
 import {dashToCamelCase} from './string';
 import {parseUrl, assertHttpsUrl} from './url';
+import {viewerFor} from './viewer';
 
 
 /** @type {!Object<string,number>} Number of 3p frames on the for that type. */
@@ -55,6 +56,7 @@ function getFrameAttributes(parentWindow, element, opt_type) {
   attributes.initialWindowHeight = box.height;
   attributes.type = type;
   const docInfo = documentInfoFor(parentWindow);
+  const viewer = viewerFor(parentWindow);
   let locationHref = parentWindow.location.href;
   // This is really only needed for tests, but whatever. Children
   // see us as the logical origin, so telling them we are about:srcdoc
@@ -63,7 +65,7 @@ function getFrameAttributes(parentWindow, element, opt_type) {
     locationHref = parentWindow.parent.location.href;
   }
   attributes._context = {
-    referrer: parentWindow.document.referrer,
+    referrer: viewer.getReferrerUrl(),
     canonicalUrl: docInfo.canonicalUrl,
     pageViewId: docInfo.pageViewId,
     clientId: element.getAttribute('ampcid'),
