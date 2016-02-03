@@ -204,7 +204,7 @@ describe('Viewer', () => {
     const delivered = [];
     viewer.setMessageDeliverer((eventType, data) => {
       delivered.push({eventType: eventType, data: data});
-    });
+    }, 'https://acme.com');
 
     expect(viewer.messageQueue_.length).to.equal(0);
     expect(delivered.length).to.equal(2);
