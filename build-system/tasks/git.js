@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 
-require('./babel-helpers');
-require('./changelog');
-require('./clean');
-require('./compile');
-require('./compile-access-expr');
-require('./git');
-require('./lint');
-require('./make-golden');
-require('./presubmit-checks');
-require('./serve');
-require('./size');
-require('./test');
-require('./validator');
+const BBPromise = require('bluebird');
+const argv = require('minimist')(process.argv.slice(2));
+const gulp = require('gulp-help')(require('gulp'));
+const git = require('gulp-git');
+const gitPull = BBPromise.promisify(git.pull);
+
+const noop = function() {};
+
+gulp.task('pull', () => {
+  const remote = argv._[1] || 'origin';
+  const branch = argv._[2] || 'master';
+  return gitPull(remote, branch);
+});
+
+gulp.task('origin', noop);
+gulp.task('master', noop);
