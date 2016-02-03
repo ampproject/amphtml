@@ -87,4 +87,22 @@ describe('instrumentation', function() {
     expect(fnIdY.callCount).to.equal(1);
   });
 
+  it('should listen on custom events', () => {
+    const handler1 = sinon.spy();
+    const handler2 = sinon.spy();
+    ins.addListener('custom-event-1', handler1);
+    ins.addListener('custom-event-2', handler2);
+
+    ins.triggerEvent('custom-event-1');
+    expect(handler1.callCount).to.equal(1);
+    expect(handler2.callCount).to.equal(0);
+
+    ins.triggerEvent('custom-event-2');
+    expect(handler1.callCount).to.equal(1);
+    expect(handler2.callCount).to.equal(1);
+
+    ins.triggerEvent('custom-event-1');
+    expect(handler1.callCount).to.equal(2);
+    expect(handler2.callCount).to.equal(1);
+  });
 });
