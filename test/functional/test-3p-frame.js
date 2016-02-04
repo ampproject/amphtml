@@ -94,7 +94,7 @@ describe('3p-frame', () => {
 
     const viewer = viewerFor(window);
     const viewerMock = sandbox.mock(viewer);
-    viewerMock.expects('getReferrerUrl')
+    viewerMock.expects('getUnconfirmedReferrerUrl')
         .returns('http://acme.org/')
         .once();
 
