@@ -60,8 +60,9 @@ when the document is first loaded, and each time an `<a>` tag is clicked:
 ## <a name="attributes"></a>Attributes
 
   - `type` This optional attribute can be specified to use one of the built-in analytics providers. Currently supported values for type are:
-    - `googleanalytics`: Adds support for Google Analytics. More details for adding Google Analytics support can be found at [developers.google.com](https://developers.google.com/analytics/devguides/collection/amp-analytics/).
+    - `chartbeat`: Adds support for Chartbeat. More details for adding Chartbeat support can be found at [support.chartbeat.com](http://support.chartbeat.com/docs/).
     - `comscore`: Supports comScore Unified Digital Measurement™ pageview analytics. Requires defining *var* `c2` with comScore-provided *c2 id*.
+    - `googleanalytics`: Adds support for Google Analytics. More details for adding Google Analytics support can be found at [developers.google.com](https://developers.google.com/analytics/devguides/collection/amp-analytics/).
 
     ```
     <amp-analytics type="XYZ"> ... </amp-analytics>
