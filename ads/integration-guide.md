@@ -1,4 +1,4 @@
-### Instructions to integrate, if you are:
+If you are an ad technology provider looking to integrate with AMP HTML, please see the following guidelines:
 
 #### Ad Server
 
@@ -8,7 +8,8 @@ As an adserver, publishers you support include a javascript library provided by 
 Since AMP doesn’t allow publishers to execute arbitrary javascript (like the library above), you will need to contribute to the AMP open source code to allow the amp-ad built-in tag to request ads from your ad server.
 
 For example : Amazon A9 server (documentation) can be invoked using following syntax. 
-```
+
+```html
 <amp-ad width=300 height=250
     type="a9"
     data-aax_size="300x250"
@@ -46,7 +47,8 @@ A video player that works in regular HTML pages will not work in AMP and therefo
 Brightcove has already created a custom amp-brightcove tag that allows media and ads to be played in AMP pages.
 
 A brightcove player can be invoked by the following:
-```
+
+```html
 <amp-brightcove
       data-account="906043040001"
       data-video-id="1401169490001"
