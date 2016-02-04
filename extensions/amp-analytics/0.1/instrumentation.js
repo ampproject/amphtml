@@ -80,8 +80,11 @@ class InstrumentationService {
     /** @private {boolean} */
     this.clickHandlerRegistered_ = false;
 
-    /** @private {!Observable<Event>} */
+    /** @private {!Observable<!Event>} */
     this.clickObservable_ = new Observable();
+
+    /** @private {!Object<string, !Observable<!AnalyticsEvent>>} */
+    this.observers_ = {};
   }
 
   /**
@@ -111,6 +114,24 @@ class InstrumentationService {
         this.clickObservable_.add(
             this.createSelectiveListener_(listener, opt_selector));
       }
+    } else {
+      let observers = this.observers_[eventType];
+      if (!observers) {
+        observers = new Observable();
+        this.observers_[eventType] = observers;
+      }
+      observers.add(listener);
+    }
+  }
+
+  /**
+   * Triggers the analytics event with the specified type.
+   * @param {string} eventType
+   */
+  triggerEvent(eventType) {
+    const observers = this.observers_[eventType];
+    if (observers) {
+      observers.fire(new AnalyticsEvent(eventType));
     }
   }
 

@@ -30,7 +30,16 @@ describe('Viewer', () => {
     const WindowApi = function() {};
     WindowApi.prototype.setTimeout = function() {};
     windowApi = new WindowApi();
-    windowApi.location = {hash: '', href: '/test/viewer'};
+    windowApi.location = {
+      hash: '',
+      href: '/test/viewer',
+      ancestorOrigins: null,
+    };
+    windowApi.document = {
+      referrer: '',
+      body: {style: {}},
+      documentElement: {style: {}},
+    };
     windowMock = sandbox.mock(windowApi);
     viewer = new Viewer(windowApi);
   });
@@ -55,7 +64,6 @@ describe('Viewer', () => {
     windowApi.name = '__AMP__viewportType=virtual&width=222&height=333' +
         '&scrollTop=15';
     windowApi.location.hash = '#width=111&paddingTop=17&other=something';
-    windowApi.document = {body: {style: {}}};
     const viewer = new Viewer(windowApi);
     expect(viewer.getViewportType()).to.equal('virtual');
     expect(viewer.getViewportWidth()).to.equal(111);
@@ -86,9 +94,6 @@ describe('Viewer', () => {
   it('should configure correctly for iOS embedding', () => {
     windowApi.name = '__AMP__viewportType=natural';
     windowApi.parent = {};
-    const body = {style: {}};
-    const documentElement = {style: {}};
-    windowApi.document = {body: body, documentElement: documentElement};
     sandbox.mock(platform).expects('isIos').returns(true).once();
     const viewer = new Viewer(windowApi);
 
@@ -98,9 +103,6 @@ describe('Viewer', () => {
   it('should NOT configure for iOS embedding if not embedded', () => {
     windowApi.name = '__AMP__viewportType=natural';
     windowApi.parent = windowApi;
-    const body = {style: {}};
-    const documentElement = {style: {}};
-    windowApi.document = {body: body, documentElement: documentElement};
     sandbox.mock(platform).expects('isIos').returns(true).once();
     expect(new Viewer(windowApi).getViewportType()).to.equal('natural');
 
@@ -202,7 +204,7 @@ describe('Viewer', () => {
     const delivered = [];
     viewer.setMessageDeliverer((eventType, data) => {
       delivered.push({eventType: eventType, data: data});
-    });
+    }, 'https://acme.com');
 
     expect(viewer.messageQueue_.length).to.equal(0);
     expect(delivered.length).to.equal(2);
@@ -210,5 +212,145 @@ describe('Viewer', () => {
     expect(delivered[0].data.width).to.equal(11);
     expect(delivered[1].eventType).to.equal('documentResized');
     expect(delivered[1].data.width).to.equal(13);
+  });
+
+  describe('isTrustedViewer', () => {
+    function test(referrer, toBeTrusted) {
+      windowApi.parent = {};
+
+      windowApi.location.ancestorOrigins = referrer ? [referrer] : [];
+      expect(new Viewer(windowApi).isTrustedViewer())
+          .to.equal(toBeTrusted, 'by ancestor');
+      windowApi.location.ancestorOrigins = null;
+
+      windowApi.document.referrer = referrer;
+      expect(new Viewer(windowApi).isTrustedViewer())
+          .to.equal(toBeTrusted, 'by referrer');
+      windowApi.document.referrer = '';
+    }
+
+    it('should verify ancestorOrigins ahead of referrer', () => {
+      windowApi.parent = {};
+      windowApi.document.referrer = 'https://google.com';
+      expect(new Viewer(windowApi).isTrustedViewer()).to.equal(true);
+
+      windowApi.location.ancestorOrigins = ['https://google.com'];
+      expect(new Viewer(windowApi).isTrustedViewer()).to.equal(true);
+
+      windowApi.location.ancestorOrigins = ['https://google.other.com'];
+      expect(new Viewer(windowApi).isTrustedViewer()).to.equal(false);
+
+      // Even empty ancestorOrigins takes precendence.
+      windowApi.location.ancestorOrigins = [];
+      expect(new Viewer(windowApi).isTrustedViewer()).to.equal(false);
+    });
+
+    it('should only consider viewer trusted when iframed', () => {
+      windowApi.parent = {};
+      windowApi.location.ancestorOrigins = ['https://google.com'];
+      expect(new Viewer(windowApi).isTrustedViewer()).to.equal(true);
+
+      windowApi.parent = windowApi;
+      expect(new Viewer(windowApi).isTrustedViewer()).to.equal(false);
+    });
+
+    it('should flag viewer as not trusted without referrer or ancestor', () => {
+      test('', false);
+    });
+
+    it('should trust host as referrer with https', () => {
+      test('https://google.com', true);
+    });
+
+    it('should not trust host as referrer with http', () => {
+      test('http://google.com', false);
+    });
+
+    it('should trust domain variations', () => {
+      test('https://google.com', true);
+      test('https://www.google.com', true);
+      test('https://news.google.com', true);
+      test('https://www.google.co.uk', true);
+      test('https://www.google.co.au', true);
+      test('https://news.google.co.uk', true);
+      test('https://news.google.co.au', true);
+      test('https://google.de', true);
+      test('https://www.google.de', true);
+      test('https://news.google.de', true);
+    });
+
+    it('should NOT trust wrong or non-whitelisted domain variations', () => {
+      test('https://google.net', false);
+      test('https://google.other.com', false);
+      test('https://www.google.other.com', false);
+      test('https://withgoogle.com', false);
+      test('https://acme.com', false);
+    });
+  });
+
+  describe('referrer', () => {
+    it('should return overridden trusted viewer referrer by ancestor', () => {
+      windowApi.parent = {};
+      windowApi.location.hash = '#referrer=' +
+          encodeURIComponent('https://acme.org/viewer');
+      windowApi.location.ancestorOrigins = [
+        'https://google.com'
+      ];
+      expect(new Viewer(windowApi).getReferrerUrl())
+          .to.equal('https://acme.org/viewer');
+    });
+
+    it('should return overridden trusted viewer referrer by referrer', () => {
+      windowApi.parent = {};
+      windowApi.location.hash = '#referrer=' +
+          encodeURIComponent('https://acme.org/viewer');
+      windowApi.document.referrer = 'https://google.com/';
+      expect(new Viewer(windowApi).getReferrerUrl())
+          .to.equal('https://acme.org/viewer');
+    });
+
+    it('should return document referrer if no viewer referrer', () => {
+      windowApi.parent = {};
+      windowApi.location.hash = '#';
+      windowApi.document.referrer = 'https://acme.org/docref';
+      expect(new Viewer(windowApi).getReferrerUrl())
+          .to.equal('https://acme.org/docref');
+    });
+
+    it('should return document referrer if not embedded', () => {
+      windowApi.parent = windowApi;  // Top window.
+      windowApi.document.referrer = 'https://acme.org/docref';
+      windowApi.location.hash = '#referrer=' +
+          encodeURIComponent('https://acme.org/viewer');
+      expect(new Viewer(windowApi).getReferrerUrl())
+          .to.equal('https://acme.org/docref');
+    });
+
+    it('should return doc referrer if not embedded by trusted viewer', () => {
+      windowApi.parent = {};
+      windowApi.document.referrer = 'https://acme.org/docref';
+      windowApi.location.hash = '#referrer=' +
+          encodeURIComponent('https://acme.org/viewer');
+      windowApi.location.ancestorOrigins = ['https://acme.org/viewer'];
+      expect(new Viewer(windowApi).getReferrerUrl())
+          .to.equal('https://acme.org/docref');
+    });
+
+    it('should return ancestor origin no viewer/doc referrer', () => {
+      windowApi.parent = {};
+      windowApi.location.hash = '#';
+      windowApi.location.ancestorOrigins = [
+        'https://acme.org/ancestor1',
+        'https://acme.org/ancestor2'
+      ];
+      expect(new Viewer(windowApi).getReferrerUrl())
+          .to.equal('https://acme.org/ancestor1');
+    });
+
+    it('should return empty string if nothing matches', () => {
+      windowApi.parent = {};
+      windowApi.location.hash = '#';
+      expect(new Viewer(windowApi).getReferrerUrl()).to.be.equal('');
+    });
   });
 });

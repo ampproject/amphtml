@@ -25,6 +25,7 @@ goog.provide('parse_css.BlockType');
 goog.provide('parse_css.Declaration');
 goog.provide('parse_css.QualifiedRule');
 goog.provide('parse_css.Rule');
+goog.provide('parse_css.RuleVisitor');
 goog.provide('parse_css.Stylesheet');
 goog.provide('parse_css.TokenStream');
 goog.provide('parse_css.extractAFunction');
@@ -183,6 +184,9 @@ goog.inherits(parse_css.Rule, parse_css.Token);
 /** @type {parse_css.TokenType} */
 parse_css.Rule.tokenType = parse_css.TokenType.UNKNOWN;
 
+/** @param {!parse_css.RuleVisitor} visitor */
+parse_css.Rule.prototype.accept = goog.abstractMethod;
+
 /**
  * @param {number=} opt_indent
  * @return {string}
@@ -213,6 +217,14 @@ parse_css.Stylesheet.prototype.toJSON = function() {
   json['rules'] = arrayToJSON(this.rules);
   json['eof'] = this.eof.toJSON();
   return json;
+};
+
+/** @param {!parse_css.RuleVisitor} visitor */
+parse_css.Stylesheet.prototype.accept = function(visitor) {
+  visitor.visitStylesheet(this);
+  for (const rule of this.rules) {
+    rule.accept(visitor);
+  }
 };
 
 /**
@@ -246,6 +258,17 @@ parse_css.AtRule.prototype.toJSON = function() {
   return json;
 };
 
+/** @param {!parse_css.RuleVisitor} visitor */
+parse_css.AtRule.prototype.accept = function(visitor) {
+  visitor.visitAtRule(this);
+  for (const rule of this.rules) {
+    rule.accept(visitor);
+  }
+  for (const declaration of this.declarations) {
+    declaration.accept(visitor);
+  }
+};
+
 /**
  * @constructor
  * @extends {parse_css.Rule}
@@ -269,6 +292,14 @@ parse_css.QualifiedRule.prototype.toJSON = function() {
   json['prelude'] = arrayToJSON(this.prelude);
   json['declarations'] = arrayToJSON(this.declarations);
   return json;
+};
+
+/** @param {!parse_css.RuleVisitor} visitor */
+parse_css.QualifiedRule.prototype.accept = function(visitor) {
+  visitor.visitQualifiedRule(this);
+  for (const declaration of this.declarations) {
+    declaration.accept(visitor);
+  }
 };
 
 /**
@@ -298,6 +329,22 @@ parse_css.Declaration.prototype.toJSON = function() {
   json['value'] = arrayToJSON(this.value);
   return json;
 };
+
+/** @param {!parse_css.RuleVisitor} visitor */
+parse_css.Declaration.prototype.accept = function(visitor) {
+  visitor.visitDeclaration(this);
+};
+
+/** @constructor */
+parse_css.RuleVisitor = function() {};
+/** @param {!parse_css.Stylesheet} stylesheet */
+parse_css.RuleVisitor.prototype.visitStylesheet = function(stylesheet) {};
+/** @param {!parse_css.AtRule} atRule */
+parse_css.RuleVisitor.prototype.visitAtRule = function(atRule) {};
+/** @param {!parse_css.QualifiedRule} qualifiedRule */
+parse_css.RuleVisitor.prototype.visitQualifiedRule = function(qualifiedRule) {};
+/** @param {!parse_css.Declaration} declaration */
+parse_css.RuleVisitor.prototype.visitDeclaration = function(declaration) {};
 
 /**
  * Enum describing how to parse the rules inside a CSS AT Rule.
