@@ -51,12 +51,6 @@ export function installAd(win) {
 
     /** @override  */
     renderOutsideViewport() {
-      // Before the user has scrolled we only render ads in view. This prevents
-      // excessive jank in situations like swiping through a lot of articles.
-      if (!this.getViewport().hasScrolled()) {
-        return false;
-      };
-
       // If another ad is currently loading we only load ads that are currently
       // in viewport.
       if (loadingAdsCount > 0) {

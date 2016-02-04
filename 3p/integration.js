@@ -150,11 +150,7 @@ window.draw3p = function(opt_configCallback) {
   window.context.reportRenderedEntityIdentifier =
       reportRenderedEntityIdentifier;
   delete data._context;
-  // Run this only in canary and local dev for the time being.
-  if (location.pathname.indexOf('-canary') ||
-      location.pathname.indexOf('current')) {
-    manageWin(window);
-  }
+  manageWin(window);
   draw3p(window, data, opt_configCallback);
   nonSensitiveDataPostMessage('render-start');
 };
