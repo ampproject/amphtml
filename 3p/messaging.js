@@ -25,7 +25,7 @@ export function nonSensitiveDataPostMessage(type, opt_object) {
   }
   const object = opt_object || {};
   object.type = type;
-  object.sentinel = 'amp-3p';
+  object.sentinel = 'amp-$internalRuntimeToken$';
   window.parent./*OK*/postMessage(object,
       window.context.location.origin);
 }
@@ -41,7 +41,7 @@ export function listenParent(type, callback) {
     if (event.source != window.parent ||
         event.origin != window.context.location.origin ||
         !event.data ||
-        event.data.sentinel != 'amp-3p' ||
+        event.data.sentinel != 'amp-$internalRuntimeToken$' ||
         event.data.type != type) {
       return;
     }
