@@ -1,4 +1,5 @@
-If you are an ad technology provider looking to integrate with AMP HTML, please see the following guidelines:
+If you are an ad technology provider looking to integrate with AMP HTML, please see guidelines below.
+In order to ensure minimum latency and quality, please follow the instructions listed [here](../3p/README.md#ads) before submitting a pull request to the AMP open source project. For general guidance on how get started with contributing to the AMP project, please see [here](../CONTRIBUTING.md).
 
 #### Ad Server
 
@@ -7,7 +8,7 @@ If you are an ad technology provider looking to integrate with AMP HTML, please 
 As an adserver, publishers you support include a javascript library provided by you and place various ‘ad snippets’ that rely on the javascript library to fetch ads and render them on the publisher’s website.
 Since AMP doesn’t allow publishers to execute arbitrary javascript (like the library above), you will need to contribute to the AMP open source code to allow the amp-ad built-in tag to request ads from your ad server.
 
-For example : Amazon A9 server (documentation) can be invoked using following syntax. 
+For example : Amazon A9 server can be invoked using following syntax :
 
 ```html
 <amp-ad width=300 height=250
@@ -18,18 +19,16 @@ For example : Amazon A9 server (documentation) can be invoked using following sy
 </amp-ad>
 ```
 
-Also note that each of the attributes that follow ‘type’ are dependent on the parameters that Amazon’s A9 server expects in order to deliver an ad. The file a9.js shows you how the parameters are mapped to making a javascript call which will invoke the server by invoking the URL : https://c.amazon-adsystem.com/aax2/assoc.js  and appending the corresponding parameters being passed in by the AMP ad tag  and return the ad.
+Also note that each of the attributes that follow ‘type’ are dependent on the parameters that Amazon’s A9 server expects in order to deliver an ad. The file [a9.js](/a9.js) shows you how the parameters are mapped to making a javascript call which will invoke the server by invoking the URL : https://c.amazon-adsystem.com/aax2/assoc.js  and appending the corresponding parameters being passed in by the AMP ad tag  and return the ad.
 
-
-In order to ensure minimum latency and quality, please follow the instructions listed here before submitting a pull request to the AMP open source project. For general guidance on how get started with contributing to the AMP project, please see here.
 
 ##### Side Platform (SSP) or an Ad Exchange
 
 *Examples : Rubicon, Criteo OR Appnexus, Ad-Exchange*
 
-If you are a sell side platform that wants to directly get called from a publisher’s webpage, you will need to follow the same directions as listed above for integrating with an Ad Server. Adding your own ‘type’ value to the amp-ad tag will allow you to distribute your tag directly to the publisher, so they can insert your tags directly into their AMP pages.
+If you are a sell side platform that wants to get called directly from a publisher’s webpage, you will need to follow the same directions as listed integrating with an Ad Server. Adding your own ‘type’ value to the amp-ad tag will allow you to distribute your tag directly to the publisher, so they can insert your tags directly into their AMP pages.
 
-More commonly, SSPs work with the publisher to traffick the SSP’s ad tags in their ad server. In this case, ensure that all assets being loaded by your script in the ad server’s creative are being made over HTTPS. There are some restrictions around some intrusive ad formats like expandables, so we recommend that you test out the most commonly delivered creative formats with your publishers.
+More commonly, SSPs work with the publisher to traffick the SSP’s ad tags in their ad server. In this case, ensure that all assets being loaded by your script in the ad server’s creative are being made over HTTPS. There are some restrictions around some ad formats like expandables, so we recommend that you test out the most commonly delivered creative formats with your publishers.
 
 #### Ad Agency
 *Examples : Essence, Omnicom*
@@ -37,14 +36,14 @@ More commonly, SSPs work with the publisher to traffick the SSP’s ad tags in t
 Work with your publisher to ensure that the creatives you develop are AMP compliant. Since all creatives are served into iframes whose size is determined, when the ad is called, ensure that your creative doesn't try to modify the size of the iframe.
 
 Ensure that all assets that are part of the creative are requested using HTTPS.
-Some ad formats are fully not supported at the moment and we recommend testing the creatives in an AMP environment. Some examples are : Rich Media Expandables, Interstitials, Page Level Ads
+Some ad formats are not fully supported at the moment and we recommend testing the creatives in an AMP environment. Some examples are : Rich Media Expandables, Interstitials, Page Level Ads
 
 #### Video Player
 
 *Examples : Brightcove, Ooyala*
 
 A video player that works in regular HTML pages will not work in AMP and therefore a specific tag needs to be created that will allow the AMP runtime to load your player. 
-Brightcove has already created a custom amp-brightcove tag that allows media and ads to be played in AMP pages.
+Brightcove has created a custom [amp-brightcove](https://github.com/ampproject/amphtml/blob/master/extensions/amp-brightcove/amp-brightcove.md) tag that allows media and ads to be played in AMP pages. 
 
 A brightcove player can be invoked by the following:
 
@@ -56,9 +55,8 @@ A brightcove player can be invoked by the following:
       layout="responsive" width="480" height="270">
   </amp-brightcove>
 ```
-For instructions on how to develop an amp tag like brightcove, please see [amp-brightcove.js](https://github.com/ampproject/amphtml/blob/master/extensions/amp-brightcove/0.1/amp-brightcove.js)
+For instructions on how to develop an amp tag like brightcove, please See pull request [here](https://github.com/ampproject/amphtml/pull/1052).
 
-The other popular option is for video players to take advantage of the amp-iframe (https://github.com/ampproject/amphtml/blob/master/extensions/amp-iframe/amp-iframe.md) extension (with post frame or fallback markup) and serve the player within the iframe. 
 
 #### Video Ad Network
 
@@ -85,17 +83,11 @@ Viewability providers typically integrate with publishers via the ad server’s 
 
 For e.g. for MOAT, make sure http://js.moatads.com is switched to  https://z.moatads.com
 
-If you instead would like to directly embed viewability JS on the publisher page, use the approach to inject javascript on a remote server. [See how to enhance custom ad configuration](https://github.com/ampproject/amphtml/blob/master/builtins/amp-ad.md#enhance-incoming-ad-configuration)
-
-Alternatively, see appraoch to using the [intersection obeserver pattern](#ad-viewability)
+Also see approach to using the [intersection obeserver pattern](#ad-viewability)
 
 #### Content-Recommendation Platform
 
 *Examples : Taboola, Outbrain*
 
-As content recommendation platforms, if you have some piece of Javascript embeded on the publisher website today but the approach will not work in AMP pages. If you would like to recommend content via the publisher’s ad server, we suggest that you use the amp-embed extension to request the content details. (served like the creative).
+As content recommendation platforms, if you have some piece of Javascript embeded on the publisher website today but the approach will not work in AMP pages. If you would like to recommend content on an AMP page, we suggest that you use the amp-embed extension to request the content details. Please see the [Taboola](https://github.com/ampproject/amphtml/blob/master/ads/taboola.md) example.
 
-Instead, you can also create your own AMP extension tag which will allow you to embed a tag like <amp-taboola> in the publisher’s page instead of custom javascript.
-
-
-If instead you’d like to simply pass in the elements of the content you’d like to recommend to the publisher’s page (so the publisher can maintain the look and feel), use the approach to inject javascript on a remote server. [See how to enhance custom ad configuration](https://github.com/ampproject/amphtml/blob/master/builtins/amp-ad.md#enhance-incoming-ad-configuration)
