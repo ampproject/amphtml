@@ -340,4 +340,51 @@ describe('HtmlParser with location', () => {
       ':17:0: endTag(html)',
       ':17:6: endDoc()']);
   });
+
+  it('Supports Turkish UTF8 İ character in body', () => {
+    // A Javascript string with this character in it has .length 1, but
+    // when .toLowerCase()'d it becomes length 2, which would throw off
+    // the bookkeeping in htmlparser.js. Hence, amp.htmlparser.toLowerCase
+    // works around the problem.
+    const handler = new LoggingHandlerWithLocation();
+    const parser = new amp.htmlparser.HtmlParser();
+    parser.parse(
+        handler,
+        '<!doctype html>\n' +
+        '<html amp lang="tr">\n' +
+        '<head>\n' +
+        '<meta charset="utf-8">\n' +
+        '<title></title>\n' +
+        '<script async src="https://cdn.ampproject.org/v0.js"></script>\n' +
+        '</head>\n' +
+        '<body>İ</body>\n' +
+        '</html>');
+    expect(handler.log).toEqual([
+      ':1:0: startDoc()',
+      ':1:0: startTag(!doctype,[html,html])',
+      ':1:14: pcdata("\n")',
+      ':2:0: startTag(html,[amp,amp,lang,tr])',
+      ':2:19: pcdata("\n")',
+      ':3:0: startTag(head,[])',
+      ':3:5: pcdata("\n")',
+      ':4:0: startTag(meta,[charset,utf-8])',
+      ':4:21: pcdata("\n")',
+      ':5:0: startTag(title,[])',
+      ':5:0: rcdata("")',
+      ':5:7: endTag(title)',
+      ':5:14: pcdata("\n")',
+      ':6:0: startTag(script,[async,async,src,'+
+          'https://cdn.ampproject.org/v0.js])',
+      ':6:0: cdata("")',
+      ':6:53: endTag(script)',
+      ':6:61: pcdata("\n")',
+      ':7:0: endTag(head)',
+      ':7:6: pcdata("\n")',
+      ':8:0: startTag(body,[])',
+      ':8:5: pcdata("İ")',
+      ':8:7: endTag(body)',
+      ':8:13: pcdata("\n")',
+      ':9:0: endTag(html)',
+      ':9:6: endDoc()' ]);
+  });
 });
