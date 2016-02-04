@@ -57,7 +57,7 @@ export function getElementPriority(tagName) {
   if (tagName == 'amp-ad') {
     return 2;
   }
-  if (tagName == 'amp-pixel') {
+  if (tagName == 'amp-pixel' || tagName == 'amp-analytics') {
     return 1;
   }
   return 0;
