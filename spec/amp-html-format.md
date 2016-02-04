@@ -147,6 +147,8 @@ Attribute names starting with `on` (such as `onclick` or `onmouseover`) are disa
 
 The `style` attribute must not be used.
 
+XML-related attributes, such as xmlns, xml:lang, xml:base, and xml:space are disallowed in AMP HTML.
+
 ### Links
 
 The `javascript:` schema is disallowed.
