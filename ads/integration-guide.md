@@ -6,7 +6,7 @@ In order to ensure minimum latency and quality, please follow the instructions l
 *Examples : DFP, A9*
 
 As an adserver, publishers you support include a javascript library provided by you and place various ‘ad snippets’ that rely on the javascript library to fetch ads and render them on the publisher’s website.
-Since AMP doesn’t allow publishers to execute arbitrary javascript (like the library above), you will need to contribute to the AMP open source code to allow the amp-ad built-in tag to request ads from your ad server.
+Since AMP doesn’t allow publishers to execute arbitrary JavaScript (like the library above), you will need to contribute to the AMP open source code to allow the amp-ad built-in tag to request ads from your ad server.
 
 For example : Amazon A9 server can be invoked using following syntax :
 
@@ -19,7 +19,7 @@ For example : Amazon A9 server can be invoked using following syntax :
 </amp-ad>
 ```
 
-Also note that each of the attributes that follow ‘type’ are dependent on the parameters that Amazon’s A9 server expects in order to deliver an ad. The file [a9.js](/a9.js) shows you how the parameters are mapped to making a javascript call which will invoke the server by invoking the URL : https://c.amazon-adsystem.com/aax2/assoc.js  and appending the corresponding parameters being passed in by the AMP ad tag  and return the ad.
+Also note that each of the attributes that follow ‘type’ are dependent on the parameters that Amazon’s A9 server expects in order to deliver an ad. The file [a9.js](/a9.js) shows you how the parameters are mapped to making a JavaScript call which will invoke the server by invoking the URL : https://c.amazon-adsystem.com/aax2/assoc.js  and appending the corresponding parameters being passed in by the AMP ad tag  and return the ad.
 
 
 ##### Side Platform (SSP) or an Ad Exchange
@@ -83,11 +83,11 @@ Viewability providers typically integrate with publishers via the ad server’s 
 
 For e.g. for MOAT, make sure http://js.moatads.com is switched to  https://z.moatads.com
 
-Also see approach to using the [intersection obeserver pattern](#ad-viewability)
+Also see approach to using the [intersection observer pattern](https://github.com/ampproject/amphtml/blob/master/ads/README.md#ad-viewability)
 
 #### Content-Recommendation Platform
 
 *Examples : Taboola, Outbrain*
 
-As content recommendation platforms, if you have some piece of Javascript embeded on the publisher website today but the approach will not work in AMP pages. If you would like to recommend content on an AMP page, we suggest that you use the amp-embed extension to request the content details. Please see the [Taboola](https://github.com/ampproject/amphtml/blob/master/ads/taboola.md) example.
+If you have some piece of JavaScript embeded on the publisher website today but the approach will not work in AMP pages. If you would like to recommend content on an AMP page, we suggest that you use the amp-embed extension to request the content details. Please see the [Taboola](https://github.com/ampproject/amphtml/blob/master/ads/taboola.md) example.
 
