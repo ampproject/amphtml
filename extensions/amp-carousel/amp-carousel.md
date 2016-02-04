@@ -20,11 +20,9 @@ A generic carousel for displaying multiple similar pieces of content along a hor
 
 #### Behavior
 
-Each of the `amp-carousel` component’s immediate children is considered an item in the carousel. Each of these nodes may also have arbitrary HTML children.
+The `amp-carousel` component comprises an arbitrary number of children, as well as optional navigational arrows to go forward or backward one item at a time. Each child is considered an *item* in the carousel and may also have arbitrary HTML children.
 
-The carousel consists of an arbitrary number of items, as well as optional navigational arrows to go forward or backwards a single item.
-
-The carousel advances between items if the user swipes, uses arrow keys, clicks an optional navigation arrow.
+The carousel advances between items if the user swipes, uses arrow keys, or clicks an optional navigation arrow.
 ```html
 <amp-carousel width=300 height=400>
   <amp-img src="my-img1.png" width=300 height=400></amp-img>
@@ -33,42 +31,32 @@ The carousel advances between items if the user swipes, uses arrow keys, clicks 
 </amp-carousel>
 ```
 
-Note, that while the example shows a carousel of images `amp-carousel` support arbitrary children.
+Note that while this example shows a carousel of images, `amp-carousel` supports arbitrary HTML elements as children.
 
 #### Attributes
 
 **controls**
 
-If present, displays left and right arrows for the user to use in navigation on mobile.
-Visibility of arrows can also be controlled via styling, and a media query can be used to
-only display arrows at certain screen widths. On desktop, arrows will always be displayed
-unless only a single child is present.
+If present, displays left and right arrows for navigation on mobile devices. The visibility of these arrows can be controlled via styling, and a media query can be used to only display arrows at certain screen widths. On desktop, arrows are always displayed unless the carousel has only one child.
 
 **type**
-- `carousel` (default) - All slides are shown and are scrollable horizontally.
-  Be aware that `type=carousel` does not currently support `layout=responsive`.
-- `slides` - Shows a single slide at a time.
 
-**loop** (type=slides only)
+ - `carousel` (default): All slides are shown and are scrollable horizontally. Be aware that `type=carousel` does not currently support `layout=responsive`.
+ - `slides`: Shows a single slide at a time.
 
-If present, the user may advance past the first item or the final item.
+**loop** (`type=slides` only)
 
-**autoplay** (type=slides only)
+If present, the user may navigate forward from the last item to the first, or backward from the first item to the last.
 
-If present, advances the slide to the next slide without user interaction.
-By default it will advance a slide in 5000 millisecond intervals (5 seconds)
-but will use the value of the `autoplay` attribute if present (minimum of 1000 ms).
-Value of `autoplay` must be numeric representation in milliseconds, ex. `autoplay=5000`.
-If `autoplay` is present it will also attach the `loop` attribute to
-`amp-carousel` if `loop` is not already present.
+**autoplay** (`type=slides` only)
+
+If present, advances to the next slide without user interaction. By default, slides advance in 5000ms (5 second) intervals, but can use the value of the `autoplay` attribute if present (minimum of 1000ms). The value of `autoplay` must be in milliseconds, e.g., `autoplay=5000`. If `autoplay` is present it also attaches the `loop` attribute to the carousel if `loop` is not already present.
 
 #### Styling
-- You may use the `amp-carousel` element selector to style it freely.
-- `.amp-carousel-button` by default uses an inlined svg as the background-image of the buttons.
-You may override this with your own svg or image like so:
+ - You may use the `amp-carousel` element selector to style the carousel via CSS.
+ - The `.amp-carousel-button` uses an inlined SVG as the default background-image. You may override this with your own SVG or image.
 
-  **default**
-
+**default SVG**
 ```css
 .amp-carousel-button-prev {
   left: 16px;
@@ -76,15 +64,14 @@ You may override this with your own svg or image like so:
 }
 ```
 
-  **override**
+**override SVG**
 ```css
 .amp-carousel-button-prev {
   left: 5%;
   background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18"><path d="M11.56 5.56L10.5 4.5 6 9l4.5 4.5 1.06-1.06L8.12 9z" fill="#fff" /></svg>');
 }
 ```
-- By default the visual state of an `amp-carousel` button when it is disabled is that it is hidden.
-  You may override this visual state of an `amp-carousel` button in the disabled state by:
+ - The default visual state of a disabled `amp-carousel-button` is `hidden`. You can explicitly set the `visibility` attribute to override this.
 
 ```css
 .amp-carousel-button.amp-disabled {
