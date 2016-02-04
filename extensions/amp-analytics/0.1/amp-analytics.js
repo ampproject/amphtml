@@ -15,7 +15,7 @@
  */
 
 import {ANALYTICS_CONFIG} from './vendors';
-import {addListener} from './instrumentation';
+import {addListener, instrumentationServiceFor} from './instrumentation';
 import {assertHttpsUrl} from '../../../src/url';
 import {expandTemplate} from '../../../src/string';
 import {installCidService} from '../../../src/service/cid-impl';
@@ -30,6 +30,7 @@ import {xhrFor} from '../../../src/xhr';
 
 installCidService(AMP.win);
 installStorageService(AMP.win);
+instrumentationServiceFor(AMP.win);
 
 
 export class AmpAnalytics extends AMP.BaseElement {
