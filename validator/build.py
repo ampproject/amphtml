@@ -174,6 +174,36 @@ def GenValidatorGeneratedJs(out_dir):
   logging.info('... done')
 
 
+# Similar to GenValidatorGeneratedJS(), except calls out for PHP generation
+def GenValidatorGeneratedPHP(out_dir):
+  """Calls validator_gen to generate validator-generated.php.
+
+  Args:
+    out_dir: directory name of the output directory. Must not have slashes,
+      dots, etc.
+  """
+  logging.info('entering ...')
+  assert re.match(r'^[a-zA-Z_\-0-9]+$', out_dir), 'bad out_dir: %s' % out_dir
+
+  # These imports happen late, within this method because they don't necessarily
+  # exist when the module starts running, and the ones that probably do
+  # are checked by CheckPrereqs.
+  from google.protobuf import text_format
+  from google.protobuf import descriptor
+  from dist import validator_pb2
+  import validator_gen_php
+  out = []
+  validator_gen_php.GenerateValidatorGeneratedPHP(specfile='validator.protoascii',
+                                             validator_pb2=validator_pb2,
+                                             text_format=text_format,
+                                             descriptor=descriptor,
+                                             out=out)
+  out.append('')
+  f = open('%s/validator-generated.php' % out_dir, 'w')
+  f.write('\n'.join(out))
+  f.close()
+  logging.info('... done')
+
 def CompileWithClosure(js_files, closure_entry_points, output_file):
   """Compiles the arguments with the Closure compiler for transpilation to ES5.
 
@@ -392,6 +422,7 @@ def Main():
   SetupOutDir(out_dir='dist')
   GenValidatorPb2Py(out_dir='dist')
   GenValidatorGeneratedJs(out_dir='dist')
+  GenValidatorGeneratedPHP(out_dir='dist')
   CompileValidatorMinified(out_dir='dist')
   GenerateValidateBin(out_dir='dist', nodejs_cmd=nodejs_cmd)
   RunSmokeTest(out_dir='dist', nodejs_cmd=nodejs_cmd)
