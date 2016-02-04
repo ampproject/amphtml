@@ -22,7 +22,7 @@ Example:
 ```html
 <amp-brightcove
     data-account="12345"
-    data-player="default"
+    data-player-id="default"
     data-embed="default"
     data-video-id="1234"
     layout="responsive"
@@ -38,7 +38,7 @@ The width and height will determine the aspect ratio of the player embed in resp
 
 The Brightcove Video Cloud or Perform account id
 
-**data-player**
+**data-player-id**
 
 The Brightcove player id. This is a GUID or "default". The default value is "default".
 
