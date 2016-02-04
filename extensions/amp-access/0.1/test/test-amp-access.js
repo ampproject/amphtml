@@ -311,8 +311,10 @@ describe('AccessService authorization', () => {
   it('should run authorization flow', () => {
     expectGetReaderId('reader1');
     xhrMock.expects('fetchJson')
-        .withExactArgs('https://acme.com/a?rid=reader1',
-            {credentials: 'include'})
+        .withExactArgs('https://acme.com/a?rid=reader1', {
+          credentials: 'include',
+          requireAmpResponseSourceOrigin: true
+        })
         .returns(Promise.resolve({access: true}))
         .once();
     service.buildLoginUrl_ = sandbox.spy();
@@ -334,8 +336,10 @@ describe('AccessService authorization', () => {
   it('should recover from authorization failure', () => {
     expectGetReaderId('reader1');
     xhrMock.expects('fetchJson')
-        .withExactArgs('https://acme.com/a?rid=reader1',
-            {credentials: 'include'})
+        .withExactArgs('https://acme.com/a?rid=reader1', {
+          credentials: 'include',
+          requireAmpResponseSourceOrigin: true
+        })
         .returns(Promise.reject('intentional'))
         .once();
     const promise = service.runAuthorization_();
@@ -352,8 +356,10 @@ describe('AccessService authorization', () => {
   it('should resolve first-authorization promise after success', () => {
     expectGetReaderId('reader1');
     xhrMock.expects('fetchJson')
-        .withExactArgs('https://acme.com/a?rid=reader1',
-            {credentials: 'include'})
+        .withExactArgs('https://acme.com/a?rid=reader1', {
+          credentials: 'include',
+          requireAmpResponseSourceOrigin: true
+        })
         .returns(Promise.resolve({access: true}))
         .once();
     return service.runAuthorization_().then(() => {
@@ -365,8 +371,10 @@ describe('AccessService authorization', () => {
   it('should NOT resolve first-authorization promise after failure', () => {
     expectGetReaderId('reader1');
     xhrMock.expects('fetchJson')
-        .withExactArgs('https://acme.com/a?rid=reader1',
-            {credentials: 'include'})
+        .withExactArgs('https://acme.com/a?rid=reader1', {
+          credentials: 'include',
+          requireAmpResponseSourceOrigin: true
+        })
         .returns(Promise.reject('intentional'))
         .once();
     return service.runAuthorization_().then(() => {
@@ -763,6 +771,7 @@ describe('AccessService pingback', () => {
             sinon.match(init => {
               return (init.method == 'POST' &&
                   init.credentials == 'include' &&
+                  init.requireAmpResponseSourceOrigin == true &&
                   init.body == '' &&
                   init.headers['Content-Type'] ==
                       'application/x-www-form-urlencoded');
