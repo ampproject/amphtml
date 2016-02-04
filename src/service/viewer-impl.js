@@ -232,8 +232,62 @@ export class Viewer {
     // Wait for document to become visible.
     this.docState_.onVisibilityChanged(this.onVisibilityChange_.bind(this));
 
-    /** @const @private {boolean} */
-    this.isTrustedViewer_ = this.calcTrustedViewer_();
+    let trustedViewerResolved;
+    let trustedViewerPromise;
+    if (!this.isEmbedded_) {
+      // Not embedded in IFrame - can't trust the viewer.
+      trustedViewerResolved = false;
+      trustedViewerPromise = Promise.resolve(false);
+    } else if (this.win.location.ancestorOrigins) {
+      // Ancestors when available take precedence. This is the main API used
+      // for this determination. Fallback is only done when this API is not
+      // supported by the browser.
+      trustedViewerResolved = (this.win.location.ancestorOrigins.length > 0 &&
+          this.isTrustedViewerOrigin_(this.win.location.ancestorOrigins[0]));
+      trustedViewerPromise = Promise.resolve(trustedViewerResolved);
+    } else {
+      // Wait for comms channel to confirm the origin.
+      trustedViewerResolved = undefined;
+      trustedViewerPromise = new Promise(resolve => {
+        /** @const @private {!function(boolean)|undefined} */
+        this.trustedViewerResolver_ = resolve;
+      });
+    }
+
+    /** @const @private {!Promise<boolean>} */
+    this.isTrustedViewer_ = trustedViewerPromise;
+
+    /** @private {string} */
+    this.unconfirmedReferrerUrl_ =
+        this.isEmbedded() && this.params_['referrer'] &&
+            trustedViewerResolved !== false ?
+        this.params_['referrer'] :
+        this.win.document.referrer;
+
+    /** @const @private {!Promise<string>} */
+    this.referrerUrl_ = new Promise(resolve => {
+      if (this.isEmbedded() && this.params_['referrer']) {
+        // Viewer override, but only for whitelisted viewers. Only allowed for
+        // iframed documents.
+        this.isTrustedViewer_.then(isTrusted => {
+          if (isTrusted) {
+            resolve(this.params_['referrer']);
+          } else {
+            resolve(this.win.document.referrer);
+            if (this.unconfirmedReferrerUrl_ != this.win.document.referrer) {
+              this.win.setTimeout(() => {
+                throw new Error('Untrusted viewer referrer override: ' +
+                    this.unconfirmedReferrerUrl_ + ' at ' +
+                    this.messagingOrigin_);
+              });
+              this.unconfirmedReferrerUrl_ = this.win.document.referrer;
+            }
+          }
+        });
+      } else {
+        resolve(this.win.document.referrer);
+      }
+    });
 
     // Remove hash - no reason to keep it around, but only when embedded.
     if (this.isEmbedded_) {
@@ -412,34 +466,23 @@ export class Viewer {
   }
 
   /**
-   * Returns the "referrer" URL that can be optionally customized by
-   * the viewer.
+   * Returns an unconfirmed "referrer" URL that can be optionally customized by
+   * the viewer. Consider using `getReferrerUrl()` instead, which returns the
+   * promise that will yield the confirmed "referrer" URL.
    * @return {string}
    */
+  getUnconfirmedReferrerUrl() {
+    return this.unconfirmedReferrerUrl_;
+  }
+
+  /**
+   * Returns the promise that will yield the confirmed "referrer" URL. This
+   * URL can be optionally customized by the viewer, but viewer is required
+   * to be a trusted viewer.
+   * @return {!Promise<string>}
+   */
   getReferrerUrl() {
-    // If not embedded in a IFrame always return the document's referrer.
-    if (!this.isEmbedded()) {
-      return this.win.document.referrer;
-    }
-
-    // Viewer override, but only for whitelisted viewers.
-    if (this.params_['referrer'] && this.isTrustedViewer()) {
-      return this.params_['referrer'];
-    }
-
-    // Document's referrer.
-    if (this.win.document.referrer) {
-      return this.win.document.referrer;
-    }
-
-    // Ancestor in the embedded case.
-    const ancestorOrigins = this.win.location.ancestorOrigins;
-    if (ancestorOrigins && ancestorOrigins.length > 0) {
-      return ancestorOrigins[0];
-    }
-
-    // No referrer found.
-    return '';
+    return this.referrerUrl_;
   }
 
   /**
@@ -449,28 +492,6 @@ export class Viewer {
    */
   isTrustedViewer() {
     return this.isTrustedViewer_;
-  }
-
-  /**
-   * @return {boolean}
-   */
-  calcTrustedViewer_() {
-    // This only applies to the documents embedded as iframes.
-    if (!this.isEmbedded_) {
-      return false;
-    }
-
-    // Ancestors when available take precedence. This is the main API used
-    // for this determination. Fallback is only done when this API is not
-    // supported by the browser.
-    const ancestorOrigins = this.win.location.ancestorOrigins;
-    if (ancestorOrigins) {
-      return (ancestorOrigins.length > 0 &&
-          this.isTrustedViewerOrigin_(ancestorOrigins[0]));
-    }
-
-    // Fallback to the referrer if ancestorOrigins is not available.
-    return this.isTrustedViewerOrigin_(this.win.document.referrer);
   }
 
   /**
@@ -659,6 +680,10 @@ export class Viewer {
     this.messageDeliverer_ = deliverer;
     // TODO(dvoytenko, #1764): Make `origin` required when viewers catch up.
     this.messagingOrigin_ = origin;
+    if (this.trustedViewerResolver_) {
+      this.trustedViewerResolver_(
+          origin ? this.isTrustedViewerOrigin_(origin) : false);
+    }
     if (this.messageQueue_.length > 0) {
       const queue = this.messageQueue_.slice(0);
       this.messageQueue_ = [];
