@@ -69,7 +69,6 @@ describe('example', function() {
   const errorWhitelist = [
     /invalid value \'.\/viewer-integr.js\'/,
     /vimeo/,
-    /comscore/,
   ];
 
   const usedWhitelist = [];
