@@ -115,6 +115,13 @@ describe('UrlReplacements', () => {
     });
   });
 
+  it('should replace SOURCE_URL and _HOST', () => {
+    return expand('?url=SOURCE_URL&host=SOURCE_HOST').then(res => {
+      expect(res).to.not.match(/SOURCE_URL/);
+      expect(res).to.not.match(/SOURCE_HOST/);
+    });
+  });
+
   it('should replace PAGE_VIEW_ID', () => {
     return expand('?pid=PAGE_VIEW_ID').then(res => {
       expect(res).to.match(/pid=\d+/);
