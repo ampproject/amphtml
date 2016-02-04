@@ -30,7 +30,8 @@
     foo.i-amp-class {}
     foo.amp-class {}
     foo { b: red !important; }
-    @viewport (mumble mumble) {}
+    @viewport (mumble mumble) { }
+    @media (whatever) { @notallowednested }
   </style>
   <style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
   <script src="https://cdn.ampproject.org/v0.js" async></script>
