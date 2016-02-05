@@ -60,8 +60,9 @@ when the document is first loaded, and each time an `<a>` tag is clicked:
 ## <a name="attributes"></a>Attributes
 
   - `type` This optional attribute can be specified to use one of the built-in analytics providers. Currently supported values for type are:
-    - `googleanalytics`: Adds support for Google Analytics. More details for adding Google Analytics support can be found at [developers.google.com](https://developers.google.com/analytics/devguides/collection/amp-analytics/).
+    - `chartbeat`: Adds support for Chartbeat. More details for adding Chartbeat support can be found at [support.chartbeat.com](http://support.chartbeat.com/docs/).
     - `comscore`: Supports comScore Unified Digital Measurement™ pageview analytics. Requires defining *var* `c2` with comScore-provided *c2 id*.
+    - `googleanalytics`: Adds support for Google Analytics. More details for adding Google Analytics support can be found at [developers.google.com](https://developers.google.com/analytics/devguides/collection/amp-analytics/).
 
     ```
     <amp-analytics type="XYZ"> ... </amp-analytics>
@@ -140,9 +141,12 @@ The `triggers` attribute describes when an analytics request should be sent. It 
  trigger-configuration. Trigger name can be any string comprised of alphanumeric characters (a-zA-Z0-9). Triggers from a
  configuration with lower precedence are overridden by triggers with the same names from a configuration with higher precedence.
 
-  - `on` (required) The event to listener for. Valid values are `visible` and `click`.
+  - `on` (required) The event to listener for. Valid values are `visible`,`click`, and `timer`.
   - `request` (required) Name of the request to send (as specified in the `requests` section).
   - `selector` A CSS selector used to refine which elements should be tracked. Use value `*` to track all elements.
+  - `timer-spec` Specification for the timer. The timer will trigger immediately and then at a specified interval thereafter.
+    - `interval` Length of the timer interval, in seconds.
+    - `max-timer-length` Maximum duration for which the timer will fire, in seconds.
   - `vars` An object containing key-value pairs used to override `vars` defined in the top level config, or to specify
     vars unique to this trigger.
 
@@ -159,6 +163,14 @@ The `triggers` attribute describes when an analytics request should be sent. It 
     "vars": {
       "eventId": 128
     }
+  },
+  "pageTimer": {
+    "on": "timer",
+    "timer-spec": {
+      "interval": 10,
+      "max-timer-length": 600
+    },
+    "request": "pagetime"
   }
 }
 ```

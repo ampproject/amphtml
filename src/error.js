@@ -58,7 +58,7 @@ export function reportError(error, opt_associatedElement) {
     } else {
       (console.error || console.log).call(console, error.message);
     }
-    if (!(process.env.NODE_ENV == 'production')) {
+    if (!getMode().minified) {
       (console.error || console.log).call(console, error.stack);
     }
   }
