@@ -247,7 +247,9 @@ export function installAd(win) {
               this.updateHeight_(newHeight);
             }
           }, /* opt_is3P */ true);
+          this.iframe_.style.visibility = 'hidden';
           listenOnce(this.iframe_, 'render-start', () => {
+            this.iframe_.style.visibility = '';
             this.sendEmbedInfo_(this.isInViewport());
           }, /* opt_is3P */ true);
 
