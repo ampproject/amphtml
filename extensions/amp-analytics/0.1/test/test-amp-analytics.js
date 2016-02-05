@@ -84,13 +84,36 @@ describe('amp-analytics', function() {
     return analytics;
   }
 
+  function waitForSendRequest(analytics, opt_max) {
+    return analytics.layoutCallback().then(() => {
+      if (sendRequestSpy.callCount > 0) {
+        return;
+      }
+      return new Promise(resolve => {
+        const start = new Date().getTime();
+        const interval = setInterval(() => {
+          const time = new Date().getTime();
+          if (sendRequestSpy.callCount > 0 ||
+                  opt_max && (time - start) > opt_max) {
+            clearInterval(interval);
+            resolve();
+          }
+        }, 4);
+      });
+    });
+  }
+
+  function waitForNoSendRequest(analytics) {
+    return waitForSendRequest(analytics, 100);
+  }
+
   it('sends a basic hit', function() {
     const analytics = getAnalyticsTag({
       'requests': {'foo': 'https://example.com/bar'},
       'triggers': [{'on': 'visible', 'request': 'foo'}]
     });
 
-    return analytics.layoutCallback().then(() => {
+    return waitForSendRequest(analytics).then(() => {
       expect(sendRequestSpy.withArgs('https://example.com/bar').calledOnce)
           .to.be.true;
     });
@@ -109,7 +132,7 @@ describe('amp-analytics', function() {
     analytics.buildCallback();
     sendRequestSpy = sandbox.spy(analytics, 'sendRequest_');
 
-    return analytics.layoutCallback().then(() => {
+    return waitForNoSendRequest(analytics).then(() => {
       expect(sendRequestSpy.callCount).to.equal(0);
     });
   });
@@ -122,7 +145,7 @@ describe('amp-analytics', function() {
     const script2 = document.createElement('script');
     script2.setAttribute('type', 'application/json');
     analytics.element.appendChild(script2);
-    return analytics.layoutCallback().then(() => {
+    return waitForNoSendRequest(analytics).then(() => {
       expect(sendRequestSpy.callCount).to.equal(0);
     });
   });
@@ -142,7 +165,7 @@ describe('amp-analytics', function() {
         analytics.buildCallback();
         sendRequestSpy = sandbox.spy(analytics, 'sendRequest_');
 
-        return analytics.layoutCallback().then(() => {
+        return waitForNoSendRequest(analytics).then(() => {
           expect(sendRequestSpy.callCount).to.equal(0);
         });
       });
@@ -153,7 +176,7 @@ describe('amp-analytics', function() {
       'triggers': [{'on': 'visible'}]
     });
 
-    return analytics.layoutCallback().then(() => {
+    return waitForNoSendRequest(analytics).then(() => {
       expect(sendRequestSpy.callCount).to.equal(0);
     });
   });
@@ -163,7 +186,7 @@ describe('amp-analytics', function() {
       'triggers': [{'on': 'visible', 'request': 'foo'}]
     });
 
-    return analytics.layoutCallback().then(() => {
+    return waitForNoSendRequest(analytics).then(() => {
       expect(sendRequestSpy.callCount).to.equal(0);
     });
   });
@@ -174,8 +197,7 @@ describe('amp-analytics', function() {
         'https://example.com/bar&${foobar}&baz', 'foobar': 'f1'},
       'triggers': [{'on': 'visible', 'request': 'foo'}]
     });
-
-    return analytics.layoutCallback().then(() => {
+    return waitForSendRequest(analytics).then(() => {
       expect(sendRequestSpy.calledOnce).to.be.true;
       expect(sendRequestSpy.args[0][0])
         .to.equal('https://example.com/bar&f1&baz');
@@ -189,7 +211,7 @@ describe('amp-analytics', function() {
       'triggers': [{'on': 'visible', 'request': 'foo'}]
     });
 
-    return analytics.layoutCallback().then(() => {
+    return waitForSendRequest(analytics).then(() => {
       expect(sendRequestSpy.calledOnce).to.be.true;
       expect(sendRequestSpy.args[0][0]).to.equal('https://example.com/bar&b1');
     });
@@ -201,7 +223,7 @@ describe('amp-analytics', function() {
       'triggers': [{'on': 'visible', 'request': 'foo'}]
     });
 
-    return analytics.layoutCallback().then(() => {
+    return waitForSendRequest(analytics).then(() => {
       expect(sendRequestSpy.calledOnce).to.be.true;
       expect(sendRequestSpy.args[0][0])
           .to.equal('/bar&/bar&/bar&&baz&baz&baz');
@@ -223,10 +245,10 @@ describe('amp-analytics', function() {
       'triggers': [{'on': 'visible', 'request': 'foo'}]
     });
 
-    analytics.layoutCallback().then(() => {
+    return waitForSendRequest(analytics).then(() => {
       expect(sendRequestSpy.calledOnce).to.be.true;
       expect(sendRequestSpy.args[0][0]).to.equal(
-         'https://example.comcid=uQVAtQyO978OPCNBZXWOKRDcxSORw9GQfB' +
+         'https://example.com/cid=uQVAtQyO978OPCNBZXWOKRDcxSORw9GQfB' +
           'x2CyJSF0MnkIPeeX9ruacSFPgQ0HSD');
     });
   });
@@ -242,7 +264,7 @@ describe('amp-analytics', function() {
         'requests': {'foo': '/bar', 'bar': 'foobar'}
       }
     };
-    return analytics.layoutCallback().then(() => {
+    return waitForSendRequest(analytics).then(() => {
       expect(sendRequestSpy.calledOnce).to.be.true;
       expect(sendRequestSpy.args[0][0]).to.equal('https://example.com/foobar');
     });
@@ -296,7 +318,7 @@ describe('amp-analytics', function() {
           'var2': 'test2'
         }
       }]});
-    return analytics.layoutCallback().then(() => {
+    return waitForSendRequest(analytics).then(() => {
       expect(sendRequestSpy.calledOnce).to.be.true;
       expect(sendRequestSpy.args[0][0]).to.equal(
           'https://example.com/test1=x&test2=test2');
@@ -312,7 +334,7 @@ describe('amp-analytics', function() {
       'requests': {'pageview':
         'https://example.com/test1=${var1}&test2=${var2}'},
       'triggers': [{'on': 'visible', 'request': 'pageview'}]});
-    return analytics.layoutCallback().then(() => {
+    return waitForSendRequest(analytics).then(() => {
       expect(sendRequestSpy.calledOnce).to.be.true;
       expect(sendRequestSpy.args[0][0]).to.equal(
           'https://example.com/test1=x&test2=test2');
@@ -324,7 +346,7 @@ describe('amp-analytics', function() {
       'requests': {'pageview':
         'https://example.com/title=${title}&ref=${documentReferrer}'},
       'triggers': [{'on': 'visible', 'request': 'pageview'}]});
-    return analytics.layoutCallback().then(() => {
+    return waitForSendRequest(analytics).then(() => {
       expect(sendRequestSpy.calledOnce).to.be.true;
       expect(sendRequestSpy.args[0][0]).to.equal(
           'https://example.com/title=Test%20Title&' +
@@ -337,13 +359,11 @@ describe('amp-analytics', function() {
       'requests': {'foo': 'https://example.com/AMPDOC_URL&TITLE'},
       'triggers': [{'on': 'visible', 'request': 'foo'}]
     });
-
-    return analytics.layoutCallback().then(() => {
+    return waitForSendRequest(analytics).then(() => {
       expect(sendRequestSpy.calledOnce).to.be.true;
       expect(sendRequestSpy.args[0][0]).to.not.match(/AMPDOC_URL/);
     });
   });
-
 
   it('expands trigger vars with higher precedence than config vars', () => {
     const analytics = getAnalyticsTag({
@@ -359,7 +379,7 @@ describe('amp-analytics', function() {
         'vars': {
           'var1': 'trigger1'
         }}]});
-    return analytics.layoutCallback().then(() => {
+    return waitForSendRequest(analytics).then(() => {
       expect(sendRequestSpy.calledOnce).to.be.true;
       expect(sendRequestSpy.args[0][0]).to.equal(
           'https://example.com/test1=trigger1&test2=config2');
@@ -373,7 +393,7 @@ describe('amp-analytics', function() {
         'https://example.com/test1=${title}&test2=${random}'},
       'triggers': [{'on': 'visible', 'request': 'pageview',}]
     });
-    return analytics.layoutCallback().then(() => {
+    return waitForSendRequest(analytics).then(() => {
       expect(sendRequestSpy.calledOnce).to.be.true;
       expect(sendRequestSpy.args[0][0]).to.equal(
           'https://example.com/test1=Test%20Title&test2=428');
@@ -390,7 +410,7 @@ describe('amp-analytics', function() {
           'var1': '${var2}',
           'var2': 't2'
         }}]});
-    return analytics.layoutCallback().then(() => {
+    return waitForSendRequest(analytics).then(() => {
       expect(sendRequestSpy.calledOnce).to.be.true;
       expect(sendRequestSpy.args[0][0]).to.equal(
           'https://example.com/test=%24%7Bvar2%7D');
@@ -414,7 +434,7 @@ describe('amp-analytics', function() {
           't1': 'trigger=1',
           't2': 'trigger?2'
         }}]});
-    return analytics.layoutCallback().then(() => {
+    return waitForSendRequest(analytics).then(() => {
       expect(sendRequestSpy.calledOnce).to.be.true;
       expect(sendRequestSpy.args[0][0]).to.equal(
           'https://example.com/test?c1=config%201&t1=trigger%3D1&' +
@@ -434,7 +454,7 @@ describe('amp-analytics', function() {
           'var2': 'DOCUMENT_REFERRER'
         }
       }]});
-    return analytics.layoutCallback().then(() => {
+    return waitForSendRequest(analytics).then(() => {
       expect(sendRequestSpy.calledOnce).to.be.true;
       expect(sendRequestSpy.args[0][0]).to.equal(
           'https://example.com/test1=x&test2=https%3A%2F%2Fwww.google.com%2F' +
@@ -449,18 +469,18 @@ describe('amp-analytics', function() {
       'optout': 'foo.bar'
     };
     let analytics = getAnalyticsTag(config);
-    return analytics.layoutCallback().then(() => {
+    return waitForSendRequest(analytics).then(() => {
       expect(sendRequestSpy.withArgs('https://example.com/bar').calledOnce)
           .to.be.true;
       sendRequestSpy.reset();
       windowApi['foo'] = {'bar': function() { return true; }};
       analytics = getAnalyticsTag(config);
-      analytics.layoutCallback().then(() => {
+      return waitForNoSendRequest(analytics).then(() => {
         expect(sendRequestSpy.callCount).to.be.equal(0);
         sendRequestSpy.reset();
         windowApi['foo'] = {'bar': function() { return false; }};
         analytics = getAnalyticsTag(config);
-        analytics.layoutCallback().then(() => {
+        waitForSendRequest(analytics).then(() => {
           expect(sendRequestSpy.withArgs('https://example.com/bar').calledOnce)
               .to.be.true;
         });
@@ -476,7 +496,7 @@ describe('amp-analytics', function() {
     }, {
       'config': 'config1'
     });
-    return analytics.layoutCallback().then(() => {
+    return waitForSendRequest(analytics).then(() => {
       expect(sendRequestSpy.args[0][0]).to.equal('https://example.com/remote');
     });
   });
@@ -492,10 +512,10 @@ describe('amp-analytics', function() {
         {'on': 'visible', 'request': 'pageview1'},
         {'on': 'visible', 'request': 'pageview2'}
       ]});
-    analytics.layoutCallback().then(() => {
+    return waitForSendRequest(analytics).then(() => {
       expect(sendRequestSpy.calledTwice).to.be.true;
-      expect(sendRequestSpy.args[0][0]).to.equal('https://example.com/test1=1');
-      expect(sendRequestSpy.args[1][0]).to.equal('https://example.com/test2=2');
+      expect(sendRequestSpy.args[0][0]).to.equal('/test1=1');
+      expect(sendRequestSpy.args[1][0]).to.equal('/test2=2');
     });
   });
 
@@ -515,7 +535,7 @@ describe('amp-analytics', function() {
         return Promise.resolve();
       });
 
-      return analytics.layoutCallback().then(() => {
+      return waitForSendRequest(analytics).then(() => {
         expect(sendRequestSpy.callCount).to.equal(1);
         expect(sendRequestSpy.args[0][0]).to.equal('https://example.com/local');
       });
@@ -534,7 +554,9 @@ describe('amp-analytics', function() {
         expect(id).to.equal('amp-user-notification1');
         return Promise.reject();
       });
-      return analytics.layoutCallback().catch(() => {
+      return analytics.layoutCallback().then(() => {
+        throw new Error('Must never be here');
+      }, () => {
         expect(sendRequestSpy.callCount).to.equal(0);
       });
     });
