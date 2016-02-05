@@ -151,13 +151,20 @@ export class AmpAnalytics extends AMP.BaseElement {
     }
     assertHttpsUrl(remoteConfigUrl);
     log.fine(this.getName_(), 'Fetching remote config', remoteConfigUrl);
-    return xhrFor(this.getWin()).fetchJson(remoteConfigUrl).then(jsonValue => {
-      this.remoteConfig_ = jsonValue;
-      log.fine(this.getName_(), 'Remote config loaded', remoteConfigUrl);
-    }, err => {
-      console./*OK*/error(this.getName_(), 'Error loading remote config: ',
-          remoteConfigUrl, err);
-    });
+    const fetchConfig = {
+      requireAmpResponseSourceOrigin: true,
+    };
+    if (this.element.hasAttribute('data-credentials')) {
+      fetchConfig.credentials = this.element.getAttribute('data-credentials');
+    }
+    return xhrFor(this.getWin()).fetchJson(remoteConfigUrl, fetchConfig)
+        .then(jsonValue => {
+          this.remoteConfig_ = jsonValue;
+          log.fine(this.getName_(), 'Remote config loaded', remoteConfigUrl);
+        }, err => {
+          console./*OK*/error(this.getName_(), 'Error loading remote config: ',
+              remoteConfigUrl, err);
+        });
   }
 
   /**
