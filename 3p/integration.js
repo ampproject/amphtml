@@ -54,11 +54,8 @@ register('adform', adform);
 register('adreactor', adreactor);
 register('adsense', adsense);
 register('adtech', adtech);
-<<<<<<< HEAD
 register('plista', plista);
-=======
 register('smartadserver', smartadserver);
->>>>>>> 4a12645... Smart AdServer integration.
 register('doubleclick', doubleclick);
 register('taboola', taboola);
 register('dotandads', dotandads);
