@@ -210,14 +210,9 @@ export function installAd(win) {
       return false;
     }
 
-
     /** @override */
     layoutCallback() {
-      if (this.paused_) {
-        this.paused_ = false;
-        toggle(this.iframe_, true);
-        return Promise.resolve(this.iframe_);
-      }
+      this.maybeUnpause_();
       if (!this.iframe_) {
         loadingAdsCount++;
         assert(!this.isInFixedContainer_,
@@ -315,10 +310,24 @@ export function installAd(win) {
 
     /** @override  */
     viewportCallback(inViewport) {
+      if (inViewport) {
+        this.maybeUnpause_();
+      }
       if (this.intersectionObserver_) {
         this.intersectionObserver_.onViewportCallback(inViewport);
       }
       this.sendEmbedInfo_(inViewport);
+    }
+
+    /**
+     * Unpauses the ad if it is paused.
+     * @private
+     */
+    maybeUnpause_() {
+      if (this.paused_) {
+        this.paused_ = false;
+        toggle(this.iframe_, true);
+      }
     }
 
     /**

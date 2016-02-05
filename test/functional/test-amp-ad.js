@@ -200,6 +200,13 @@ function runAdTestSuiteAgainstInstaller(name, installer) {
           obj.layoutCallback();
           expect(iframe.style.display).to.equal('');
           expect(obj.paused_).to.be.false;
+
+          // Pause again
+          const ret2 = obj.documentInactiveCallback();
+          expect(ret2).to.be.true;
+          obj.viewportCallback(false);
+          expect(iframe.style.display).to.equal('none');
+          obj.viewportCallback(true);
         });
       });
 
