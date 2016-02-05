@@ -25,6 +25,7 @@ export const adPrefetch = {
   doubleclick: 'https://www.googletagservices.com/tag/js/gpt.js',
   a9: 'https://c.amazon-adsystem.com/aax2/assoc.js',
   adsense: 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js',
+  mediaimpact: 'https://ec-ns.sascdn.com/diff/251/divscripte/t.js'
   dotandads: 'https://amp.ad.dotandad.com/dotandadsAmp.js',
   smartadserver: 'https://ec-ns.sascdn.com/diff/js/smart.js',
   yieldmo: 'https://static.yieldmo.com/ym.amp1.js',
