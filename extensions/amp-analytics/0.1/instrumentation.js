@@ -18,6 +18,9 @@ import {getService} from '../../../src/service';
 import {viewerFor} from '../../../src/viewer';
 import {Observable} from '../../../src/observable';
 
+const MIN_TIMER_INTERVAL_SECONDS_ = 0.5;
+const DEFAULT_MAX_TIMER_LENGTH_SECONDS_ = 7200;
+
 /**
  * This type signifies a callback that gets called when an analytics event that
  * the listener subscribed to fires.
@@ -32,10 +35,13 @@ let AnalyticsEventListenerDef;
  *          fires.
  * @param {string=} opt_selector If specified, the given listener
  *   should only be called if the event target matches this selector.
+ * @param {JSONObject=} opt_timerSpec If specified, the specification on how
+ *   the timer should fire.
  */
-export function addListener(window, type, listener, opt_selector) {
+export function addListener(window, type, listener, opt_selector,
+    opt_timerSpec) {
   return instrumentationServiceFor(window).addListener(
-      type, listener, opt_selector);
+      type, listener, opt_selector, opt_timerSpec);
 }
 
 /**
@@ -45,7 +51,8 @@ export function addListener(window, type, listener, opt_selector) {
  */
 export const AnalyticsEventType = {
   VISIBLE: 'visible',
-  CLICK: 'click'
+  CLICK: 'click',
+  TIMER: 'timer'
 };
 
 /**
@@ -80,8 +87,11 @@ class InstrumentationService {
     /** @private {boolean} */
     this.clickHandlerRegistered_ = false;
 
-    /** @private {!Observable<Event>} */
+    /** @private {!Observable<!Event>} */
     this.clickObservable_ = new Observable();
+
+    /** @private {!Object<string, !Observable<!AnalyticsEvent>>} */
+    this.observers_ = {};
   }
 
   /**
@@ -90,8 +100,10 @@ class InstrumentationService {
    *   occurs.
    * @param {string=} opt_selector If specified, the given listener
    *   should only be called if the event target matches this selector.
+   * @param {JSONObject=} opt_timerSpec If specified, the specification on how
+   *   the timer should fire.
    */
-  addListener(eventType, listener, opt_selector) {
+  addListener(eventType, listener, opt_selector, opt_timerSpec) {
     if (eventType === AnalyticsEventType.VISIBLE) {
       if (this.viewer_.isVisible()) {
         listener(new AnalyticsEvent(AnalyticsEventType.VISIBLE));
@@ -111,6 +123,28 @@ class InstrumentationService {
         this.clickObservable_.add(
             this.createSelectiveListener_(listener, opt_selector));
       }
+    } else if (eventType === AnalyticsEventType.TIMER) {
+      if (this.isTimerSpecValid_(opt_timerSpec)) {
+        this.createTimerListener_(listener, opt_timerSpec);
+      }
+    } else {
+      let observers = this.observers_[eventType];
+      if (!observers) {
+        observers = new Observable();
+        this.observers_[eventType] = observers;
+      }
+      observers.add(listener);
+    }
+  }
+
+  /**
+   * Triggers the analytics event with the specified type.
+   * @param {string} eventType
+   */
+  triggerEvent(eventType) {
+    const observers = this.observers_[eventType];
+    if (observers) {
+      observers.fire(new AnalyticsEvent(eventType));
     }
   }
 
@@ -172,6 +206,48 @@ class InstrumentationService {
           selectorError);
     }
     return false;
+  }
+
+  /**
+   * @param {JSONObject} timerSpec
+   * @private
+   */
+  isTimerSpecValid_(timerSpec) {
+    if (!timerSpec) {
+      console./*OK*/error(this.TAG_, 'Bad timer specification');
+      return false;
+    } else if (!timerSpec.hasOwnProperty('interval')) {
+      console./*OK*/error(this.TAG_, 'Timer interval specification required');
+      return false;
+    } else if (typeof timerSpec['interval'] !== 'number' ||
+               timerSpec['interval'] < MIN_TIMER_INTERVAL_SECONDS_) {
+      console./*OK*/error(this.TAG_, 'Bad timer interval specification');
+      return false;
+    } else if (timerSpec.hasOwnProperty('max-timer-length') &&
+              (typeof timerSpec['max-timer-length'] !== 'number' ||
+                  timerSpec['max-timer-length'] <= 0)) {
+      console./*OK*/error(this.TAG_, 'Bad max-timer-length specification');
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  /**
+   * @param {!Function} listener
+   * @param {JSONObject} timerSpec
+   * @private
+   */
+  createTimerListener_(listener, timerSpec) {
+    const intervalId = this.win_.setInterval(
+        listener.bind(null, new AnalyticsEvent(AnalyticsEventType.TIMER)),
+        timerSpec['interval'] * 1000);
+    listener(new AnalyticsEvent(AnalyticsEventType.TIMER));
+
+    const maxTimerLength = timerSpec['max-timer-length'] ||
+        DEFAULT_MAX_TIMER_LENGTH_SECONDS_;
+    this.win_.setTimeout(this.win_.clearInterval.bind(this.win_, intervalId),
+        maxTimerLength * 1000);
   }
 }
 

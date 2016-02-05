@@ -39,6 +39,7 @@ var util = require('gulp-util');
 var watchify = require('watchify');
 var wrap = require('gulp-wrap');
 var internalRuntimeVersion = require('./build-system/internal-version').VERSION;
+var internalRuntimeToken = require('./build-system/internal-version').TOKEN;
 
 var argv = minimist(process.argv.slice(2), { boolean: ['strictBabelTransform'] });
 
@@ -434,6 +435,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
       .pipe(source, srcFilename)
       .pipe(buffer)
       .pipe(replace, /\$internalRuntimeVersion\$/g, internalRuntimeVersion)
+      .pipe(replace, /\$internalRuntimeToken\$/g, internalRuntimeToken)
       .pipe(wrap, wrapper)
       .pipe(sourcemaps.init.bind(sourcemaps), {loadMaps: true});
 

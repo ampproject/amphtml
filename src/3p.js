@@ -23,6 +23,7 @@
 
 
 import {assert} from './asserts';
+import {isArray} from './types';
 
 
 /** @typedef {function(!Window, !Object)}  */
@@ -103,14 +104,23 @@ function executeAfterWriteScript(win, fn) {
 }
 
 /**
- * Throws if the given src doesn't start with prefix.
- * @param {string} prefix
+ * Throws if the given src doesn't start with prefix(es).
+ * @param {!Array<string>|string} prefix
  * @param {string} src
  */
 export function validateSrcPrefix(prefix, src) {
-  if (src.indexOf(prefix) !== 0) {
-    throw new Error('Invalid src ' + src);
+
+  if (!isArray(prefix)) {
+    prefix = [prefix];
   }
+
+  for (const p of prefix) {
+    if (src.indexOf(p) === 0) {
+      return;
+    }
+  }
+
+  throw new Error('Invalid src ' + src);
 }
 
 /**

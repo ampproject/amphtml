@@ -18,11 +18,12 @@
 /**
  * This is a very simple messaging protocol between viewer and viewer client.
  * @param {!Window} target
+ * @param {string} targetOrigin
  * @param {function(string, *, boolean):(!Promise<*>|undefined)}
  *    requestProcessor
  * @constructor
  */
-function ViewerMessaging(target, requestProcessor) {
+function ViewerMessaging(target, targetOrigin, requestProcessor) {
   this.sentinel_ = '__AMP__';
   this.requestSentinel_ = this.sentinel_ + 'REQUEST';
   this.responseSentinel_ = this.sentinel_ + 'RESPONSE';
@@ -30,8 +31,16 @@ function ViewerMessaging(target, requestProcessor) {
   this.requestIdCounter_ = 0;
   this.waitingForResponse_ = {};
 
+  /** @const @private {!Widnow} */
   this.target_ = target;
+  /** @const @private {string} */
+  this.targetOrigin_ = targetOrigin;
+  /** @const @private {function(string, *, boolean):(!Promise<*>|undefined)} */
   this.requestProcessor_ = requestProcessor;
+
+  if (!this.targetOrigin_) {
+    throw new Error('Target origin must be specified');
+  }
 
   window.addEventListener('message', this.onMessage_.bind(this), false);
 }
@@ -65,10 +74,9 @@ ViewerMessaging.prototype.sendRequest = function(eventType, payload,
  * @private
  */
 ViewerMessaging.prototype.onMessage_ = function(event) {
-  if (event.source != this.target_) {
+  if (event.source != this.target_ && event.origin != this.targetOrigin_) {
     return;
   }
-  // TODO: must check for origin/target.
   var message = event.data;
   if (message.sentinel == this.requestSentinel_) {
     this.onRequest_(message);
@@ -128,7 +136,6 @@ ViewerMessaging.prototype.onResponse_ = function(message) {
  */
 ViewerMessaging.prototype.sendMessage_ = function(sentinel, requestId,
       eventType, payload, awaitResponse) {
-  // TODO: must check for origin/target.
   var message = {
     sentinel: sentinel,
     requestId: requestId,
@@ -136,7 +143,7 @@ ViewerMessaging.prototype.sendMessage_ = function(sentinel, requestId,
     payload: payload,
     rsvp: awaitResponse
   };
-  this.target_./*TODO-REVIEW*/postMessage(message, '*');
+  this.target_./*OK*/postMessage(message, this.targetOrigin_);
 };
 
 

@@ -16,6 +16,8 @@
 
 import {assert} from './asserts';
 import {getService} from './service';
+import {addParamToUrl, getSourceOrigin, parseQueryString, parseUrl}
+    from './url';
 import {isArray, isObject} from './types';
 
 
@@ -40,6 +42,12 @@ const allowedMethods_ = ['GET', 'POST'];
 /** @private @const {!Array<function:boolean>} */
 const allowedBodyTypes_ = [isArray, isObject];
 
+/** @private @const {string} */
+const SOURCE_ORIGIN_PARAM = '__amp_source_origin';
+
+/** @private @const {string} */
+const ALLOW_SOURCE_ORIGIN_HEADER = 'AMP-Access-Control-Allow-Source-Origin';
+
 
 /**
  * A service that polyfills Fetch API for use within AMP.
@@ -50,6 +58,9 @@ class Xhr {
    * @param {!Window} win
    */
   constructor(win) {
+    /** @const {!Window} */
+    this.win = win;
+
     /**
      * We want to call `fetch_` unbound from any context since it could
      * be either the native fetch or our polyfill.
@@ -59,9 +70,57 @@ class Xhr {
   }
 
   /**
+   * Performs the final initialization and requests the fetch. It does three
+   * main things: (1) It adds "__amp_source_origin" URL parameter with source
+   * origin; (2) It verifies "AMP-Access-Control-Allow-Source-Origin" if it's
+   * returned in the response; and (3) If requires
+   * "AMP-Access-Control-Allow-Source-Origin" to be present in the response
+   * if the `init.requireAmpResponseSourceOrigin = true`.
+   *
+   * @param {string} input
+   * @param {?FetchInitDef=} opt_init
+   * @return {!Promise<!FetchResponse>}
+   * @private
+   */
+  fetchAmpCors_(input, opt_init) {
+    // Add "__amp_source_origin" query parameter to the URL. Ideally, we'd be
+    // able to set a header (e.g. AMP-Source-Origin), but this will force
+    // preflight request on all CORS request.
+    const sourceOrigin = getSourceOrigin(this.win.location.href);
+    const url = parseUrl(input);
+    const query = parseQueryString(url.search);
+    if (SOURCE_ORIGIN_PARAM in query) {
+      throw new Error(`Source origin is not allowed in ${input}`);
+    } else {
+      input = addParamToUrl(input, SOURCE_ORIGIN_PARAM, sourceOrigin);
+    }
+    return this.fetch_(input, opt_init).then(response => {
+      const allowSourceOriginHeader = response.headers.get(
+          ALLOW_SOURCE_ORIGIN_HEADER);
+      if (allowSourceOriginHeader) {
+        // If the `AMP-Access-Control-Allow-Source-Origin` header is returned,
+        // ensure that it's equal to the current source origin.
+        if (allowSourceOriginHeader != sourceOrigin) {
+          throw new Error(`Returned ${ALLOW_SOURCE_ORIGIN_HEADER} is not` +
+              ` equal to the current: ${allowSourceOriginHeader}` +
+              ` vs ${sourceOrigin}`);
+        }
+      } else if (opt_init && opt_init.requireAmpResponseSourceOrigin) {
+        // If the `AMP-Access-Control-Allow-Source-Origin` header is not
+        // returned but required, return error.
+        throw new Error(`Response must contain the` +
+            ` ${ALLOW_SOURCE_ORIGIN_HEADER} header`);
+      }
+      return response;
+    });
+  }
+
+  /**
    * Fetches and constructs JSON object based on the fetch polyfill.
    *
    * See https://developer.mozilla.org/en-US/docs/Web/API/GlobalFetch/fetch
+   *
+   * See `fetchAmpCors_` for more detail.
    *
    * @param {string} input
    * @param {?FetchInitDef=} opt_init
@@ -72,7 +131,7 @@ class Xhr {
     init.method = normalizeMethod_(init.method);
     setupJson_(init);
 
-    return this.fetch_(input, init).then(response => {
+    return this.fetchAmpCors_(input, init).then(response => {
       return assertSuccess(response).json();
     });
   }
@@ -82,12 +141,14 @@ class Xhr {
    *
    * See https://developer.mozilla.org/en-US/docs/Web/API/GlobalFetch/fetch
    *
+   * See `fetchAmpCors_` for more detail.
+   *
    * @param {string} input
    * @param {?FetchInitDef=} opt_init
    * @return {!Promise}
    */
   sendSignal(input, opt_init) {
-    return this.fetch_(input, opt_init).then(response => {
+    return this.fetchAmpCors_(input, opt_init).then(response => {
       assertSuccess(response);
     });
   }
@@ -122,9 +183,8 @@ export function normalizeMethod_(method) {
  * @private
  */
 function setupJson_(init) {
-  init.headers = {
-    'Accept': 'application/json'
-  };
+  init.headers = init.headers || {};
+  init.headers['Accept'] = 'application/json';
 
   if (init.method == 'POST') {
     // Assume JSON strict mode where only objects or arrays are allowed
@@ -257,6 +317,9 @@ class FetchResponse {
     /** @type {number} */
     this.status = this.xhr_.status;
 
+    /** @private @const {!FetchResponseHeaders} */
+    this.headers = new FetchResponseHeaders(xhr);
+
     /** @type {boolean} */
     this.bodyUsed = false;
   }
@@ -278,6 +341,28 @@ class FetchResponse {
    */
   json() {
     return this.drainText_().then(JSON.parse);
+  }
+}
+
+
+/**
+ * Provides access to the response headers as defined in the Fetch API.
+ */
+class FetchResponseHeaders {
+  /**
+   * @param {!XMLHttpRequest} xhr
+   */
+  constructor(xhr) {
+    /** @private @const {!XMLHttpRequest} */
+    this.xhr_ = xhr;
+  }
+
+  /**
+   * @param {string} name
+   * @return {*}
+   */
+  get(name) {
+    return this.xhr_.getResponseHeader(name);
   }
 }
 

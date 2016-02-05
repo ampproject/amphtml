@@ -33,14 +33,28 @@ describe('3p', () => {
     sandbox.restore();
   });
 
-  it('should throw an error if prefix is not https:', () => {
-    expect(() => {
-      validateSrcPrefix('https:', 'http://adserver.adtechus.com');
-    }).to.throw(/Invalid src/);
-  });
+  describe('validateSrcPrefix()', () => {
 
-  it('should not throw if source starts with https', () => {
-    validateSrcPrefix('https:', 'https://adserver.adtechus.com');
+    it('should throw when a string prefix does not match', () => {
+      expect(() => {
+        validateSrcPrefix('https:', 'http://example.org');
+      }).to.throw(/Invalid src/);
+    });
+
+    it('should throw when array prefixes do not match', () => {
+      expect(() => {
+        validateSrcPrefix(['https:', 'ftp:'], 'http://example.org');
+      }).to.throw(/Invalid src/);
+    });
+
+    it('should not throw when a string prefix matches', () => {
+      validateSrcPrefix('http:', 'http://example.org');
+    });
+
+    it('should not throw when any of the array prefixes match', () => {
+      validateSrcPrefix(['https:', 'http:'], 'http://example.org');
+      validateSrcPrefix(['http:', 'https:'], 'http://example.org');
+    });
   });
 
   it('should throw an error if src does not contain addyn', () => {

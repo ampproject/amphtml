@@ -46,11 +46,15 @@ describe('example', function() {
     'metadata-examples/video-json-ld.amp.html',
     'metadata-examples/video-microdata.amp.html',
     'article.amp.html',
+    'analytics.amp.html',
+    'analytics-notification.amp.html',
     'everything.amp.html',
+    'facebook.amp.html',
     'instagram.amp.html',
     'released.amp.html',
     'twitter.amp.html',
     'vine.amp.html',
+    'vimeo.amp.html',
     'old-boilerplate.amp.html',
   ];
 
@@ -64,6 +68,7 @@ describe('example', function() {
    */
   const errorWhitelist = [
     /invalid value \'.\/viewer-integr.js\'/,
+    /vimeo/,
   ];
 
   const usedWhitelist = [];

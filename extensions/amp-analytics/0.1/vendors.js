@@ -91,33 +91,55 @@ export const ANALYTICS_CONFIG = {
     }
   },
 
-  'googleanalytics': {
-    'vars': {
-      'eventValue': "0",
-      'documentLocation': 'AMPDOC_URL'
-    },
+  'chartbeat': {
     'requests': {
-      'host': 'https://www.google-analytics.com',
-      'basePrefix': 'v=1&_v=a0&aip=true&_s=${requestCount}' +
-          'dt=${title}&sr=${screenWidth}x${screenHeight}&_utmht=${timestamp}&' +
-          'jid=&cid=${clientId(_ga)}&tid=${account}&dl=${documentLocation}&' +
-          'dr=${documentReferrer}&sd=${screenColorDepth}&' +
-          'ul=${browserLanguage}&de=${documentCharset}' ,
-      'baseSuffix': '&a=${pageViewId}&z=${random}',
-      'pageview': '${host}/r/collect?${basePrefix}&t=pageview&' +
-          '_r=1${baseSuffix}',
-      'event': '${host}/collect?${basePrefix}&t=event&' +
-          'ec=${eventCategory}&ea=${eventAction}&el=${eventLabel}&' +
-          'ev=${eventValue}${baseSuffix}',
-      'social': '${host}/collect?${basePrefix}&t=social&' +
-          'sa=${socialAction}&sn=${socialNetwork}&st=${socialTarget}' +
-          '${baseSuffix}',
-      'timing': '${host}/collect?${basePrefix}&t=timing&plt=${pageLoadTime}&' +
-          'dns=${domainLookupTime}&tcp=${tcpConnectTime}&rrt=${redirectTime}&' +
-          'srt=${serverResponseTime}&pdt=${pageDownloadTime}&' +
-          'clt=${contentLoadTime}&dit=${domInteractiveTime}${baseSuffix}'
+      'host': 'https://ping.chartbeat.net',
+      'basePrefix': '/ping?h=${domain}&' +
+        'p=${canonicalPath}&' +
+        'u=${clientId(_cb)}&' +
+        'd=${canonicalHost}&' +
+        'g=${uid}&' +
+        'g0=${sections}&' +
+        'g1=${authors}&' +
+        'g2=${zone}&' +
+        'g3=${sponsorName}&' +
+        'g4=${contentType}&' +
+        'x=${scrollTop}&' +
+        'w=${screenHeight}&' +
+        'j=${decayTime}&' +
+        'r=${documentReferrer}&' +
+        't=${clientId(_cb_amp)}${pageViewId}&' +
+        'i=${title}',
+      'baseSuffix': '&_',
+      'interval': '${host}${basePrefix}&${baseSuffix}',
+      'anchorClick': '${host}${basePrefix}&${baseSuffix}'
     },
-    'optout': '_gaUserPrefs.ioo'
+    'triggers': {
+      'trackInterval': {
+        'on': 'timer',
+        'timer-spec': {
+          'interval': 15,
+          'max-timer-length': 7200
+        },
+        'request': 'interval',
+        'vars': {
+          'decayTime': 30
+        }
+      },
+      'trackAnchorClick': {
+        'on': 'click',
+        'selector': 'a',
+        'request': 'anchorClick',
+        'vars': {
+          'decayTime': 30
+        }
+      }
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true
+    }
   },
 
   'comscore': {
@@ -141,6 +163,36 @@ export const ANALYTICS_CONFIG = {
       'xhrpost': false,
       'image': true
     }
+  },
+
+  'googleanalytics': {
+    'vars': {
+      'eventValue': "0",
+      'documentLocation': 'AMPDOC_URL'
+    },
+    'requests': {
+      'host': 'https://www.google-analytics.com',
+      'basePrefix': 'v=1&_v=a0&aip=true&_s=${requestCount}&' +
+          'dt=${title}&sr=${screenWidth}x${screenHeight}&_utmht=${timestamp}&' +
+          'jid=&cid=${clientId(AMP_ECID_GOOGLE)}&tid=${account}&' +
+          'dl=${documentLocation}&' +
+          'dr=${documentReferrer}&sd=${screenColorDepth}&' +
+          'ul=${browserLanguage}&de=${documentCharset}' ,
+      'baseSuffix': '&a=${pageViewId}&z=${random}',
+      'pageview': '${host}/r/collect?${basePrefix}&t=pageview&' +
+          '_r=1${baseSuffix}',
+      'event': '${host}/collect?${basePrefix}&t=event&' +
+          'ec=${eventCategory}&ea=${eventAction}&el=${eventLabel}&' +
+          'ev=${eventValue}${baseSuffix}',
+      'social': '${host}/collect?${basePrefix}&t=social&' +
+          'sa=${socialAction}&sn=${socialNetwork}&st=${socialTarget}' +
+          '${baseSuffix}',
+      'timing': '${host}/collect?${basePrefix}&t=timing&plt=${pageLoadTime}&' +
+          'dns=${domainLookupTime}&tcp=${tcpConnectTime}&rrt=${redirectTime}&' +
+          'srt=${serverResponseTime}&pdt=${pageDownloadTime}&' +
+          'clt=${contentLoadTime}&dit=${domInteractiveTime}${baseSuffix}'
+    },
+    'optout': '_gaUserPrefs.ioo'
   }
 };
 

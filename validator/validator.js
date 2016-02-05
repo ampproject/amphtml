@@ -41,6 +41,7 @@ goog.require('goog.structs.Map');
 goog.require('goog.structs.Set');
 goog.require('goog.uri.utils');
 goog.require('parse_css.BlockType');
+goog.require('parse_css.RuleVisitor');
 goog.require('parse_css.parseAStylesheet');
 goog.require('parse_css.tokenize');
 
@@ -414,6 +415,64 @@ TagNameStack.prototype.hasAncestor = function(ancestor) {
   return false;
 };
 
+
+/**
+ * Returns true if the given AT rule is considered valid.
+ * @param {!amp.validator.CssSpec} cssSpec
+ * @param {string} atRuleName
+ * @return {boolean}
+ */
+function isAtRuleValid(cssSpec, atRuleName) {
+  let defaultType = '';
+
+  for (const atRuleSpec of cssSpec.atRuleSpec) {
+    if (atRuleSpec.name === '$DEFAULT') {
+      defaultType = atRuleSpec.type;
+    } else if (atRuleSpec.name === atRuleName) {
+      return atRuleSpec.type !==
+          amp.validator.AtRuleSpec.BlockType.PARSE_AS_ERROR;
+    }
+  }
+
+  goog.asserts.assert(defaultType !== '');
+  return defaultType !== amp.validator.AtRuleSpec.BlockType.PARSE_AS_ERROR;
+};
+
+/**
+ * @param {!amp.validator.TagSpec} tagSpec
+ * @param {!amp.validator.CssSpec} cssSpec
+ * @param {!Context} context
+ * @param {!amp.validator.ValidationResult} result
+ * @constructor
+ * @extends {parse_css.RuleVisitor}
+ */
+const InvalidAtRuleVisitor = function(tagSpec, cssSpec, context, result) {
+  goog.base(this);
+  /** @type {!amp.validator.TagSpec} */
+  this.tagSpec = tagSpec;
+  /** @type {!amp.validator.CssSpec} */
+  this.cssSpec = cssSpec;
+  /** @type {!Context} */
+  this.context = context;
+  /** @type {!amp.validator.ValidationResult} */
+  this.result = result;
+  /** @type {boolean} */
+  this.errorsSeen = false;
+};
+goog.inherits(InvalidAtRuleVisitor, parse_css.RuleVisitor);
+
+/** @param {!parse_css.AtRule} atRule */
+InvalidAtRuleVisitor.prototype.visitAtRule = function(atRule) {
+  if (!isAtRuleValid(this.cssSpec, atRule.name)) {
+    this.context.addErrorWithLineCol(
+        new LineCol(atRule.line, atRule.col),
+        amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_AT_RULE,
+        /* params */ [getDetailOrName(this.tagSpec), atRule.name],
+        /* url */ '', this.result);
+    this.errorsSeen = true;
+  }
+};
+
 /**
  * This matcher maintains a constraint to check which an opening tag
  * introduces: a tag's cdata matches constraints set by it's cdata
@@ -478,28 +537,6 @@ function computeAtRuleDefaultParsingSpec(atRuleParsingSpec) {
   goog.asserts.assert(ret !== undefined, 'No default atRuleSpec found');
   return ret;
 }
-
-/**
- * Returns true if the given AT rule is considered valid.
- * @param {!amp.validator.CssSpec} cssSpec
- * @param {string} atRuleName
- * @return {boolean}
- */
-CdataMatcher.prototype.isAtRuleValid = function(cssSpec, atRuleName) {
-  let defaultType = '';
-
-  for (const atRuleSpec of cssSpec.atRuleSpec) {
-    if (atRuleSpec.name === '$DEFAULT') {
-      defaultType = atRuleSpec.type;
-    } else if (atRuleSpec.name === atRuleName) {
-      return atRuleSpec.type !==
-          amp.validator.AtRuleSpec.BlockType.PARSE_AS_ERROR;
-    }
-  }
-
-  goog.asserts.assert(defaultType !== '');
-  return defaultType !== amp.validator.AtRuleSpec.BlockType.PARSE_AS_ERROR;
-};
 
 /**
  * Matches the provided cdata against what this matcher expects.
@@ -571,7 +608,6 @@ CdataMatcher.prototype.match = function(cdata, context, validationResult) {
     const sheet = parse_css.parseAStylesheet(
         tokenList, atRuleParsingSpec,
         computeAtRuleDefaultParsingSpec(atRuleParsingSpec), cssErrors);
-    let reportCdataRegexpErrors = (cssErrors.length == 0);
     for (const errorToken of cssErrors) {
       const lineCol = new LineCol(errorToken.line, errorToken.col);
       context.addErrorWithLineCol(
@@ -579,28 +615,14 @@ CdataMatcher.prototype.match = function(cdata, context, validationResult) {
           /* params */ [getDetailOrName(this.tagSpec_), errorToken.msg],
           /* url */ '', validationResult);
     }
-
-    // TODO(johannes): This needs improvement to validate all fields
-    // recursively. For now, it's just doing one layer of fields to
-    // demonstrate the idea and keep tests passing.
-    for (const cssRule of sheet.rules) {
-      if (cssRule.tokenType === 'AT_RULE') {
-        if (!this.isAtRuleValid(cdataSpec.cssSpec, cssRule.name)) {
-          reportCdataRegexpErrors = false;
-          const lineCol = new LineCol(cssRule.line, cssRule.col);
-          context.addErrorWithLineCol(
-              lineCol,
-              amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_AT_RULE,
-              /* params */ [getDetailOrName(this.tagSpec_), cssRule.name],
-              /* url */ '', validationResult);
-        }
-      }
-    }
+    const visitor = new InvalidAtRuleVisitor(
+        this.tagSpec_, cdataSpec.cssSpec, context, validationResult);
+    sheet.accept(visitor);
 
     // As a hack to not report some errors twice, both via the css parser
     // and via the regular expressions below, we return early if there
     // are parser errors and skip the regular expression errors.
-    if (!reportCdataRegexpErrors)
+    if (visitor.errorsSeen || cssErrors.length > 0)
       return;
   }
   // } end oneof

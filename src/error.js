@@ -41,7 +41,7 @@ export function reportError(error, opt_associatedElement) {
   }
   error.reported = true;
   const element = opt_associatedElement || error.associatedElement;
-  if (element) {
+  if (element && element.classList) {
     element.classList.add('-amp-error');
     if (getMode().development) {
       element.classList.add('-amp-element-error');
@@ -58,7 +58,7 @@ export function reportError(error, opt_associatedElement) {
     } else {
       (console.error || console.log).call(console, error.message);
     }
-    if (!(process.env.NODE_ENV == 'production')) {
+    if (!getMode().minified) {
       (console.error || console.log).call(console, error.stack);
     }
   }

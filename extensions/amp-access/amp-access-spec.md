@@ -51,11 +51,17 @@ Supporting AMP Access requires Publisher to implement the components described a
 
 To assist access services and use cases, AMP Access introduces the concept of the *Reader ID*.
 
-The Reader ID is an anonymous and unique ID created by the AMP ecosystem. It is unique for each reader/publisher pair. i.e., a Reader is identified differently to two different publishers. It is a non-reversible ID. The Reader ID is included in all AMP/Publisher communications. Publishers can use the Reader ID to identify the Reader and map it to their own identity systems.
+The Reader ID is an anonymous and unique ID created by the AMP ecosystem. It is unique for each reader/publisher pair. i.e., a Reader is identified differently to two different publishers. It is a non-reversible ID. The Reader ID is included in all AMP/Publisher communications. Publishers must use the Reader ID to identify the Reader and map it to their own identity systems.
 
 The Reader ID is constructed on the user device and intended to be long-lived. However, it follows the normal browser storage rules, including those for incognito windows. The intended lifecycle of a Reader ID is 1 year between uses or until the user clears their cookies. The Reader IDs are not currently shared between devices.
 
 The Reader ID is constructed similar to the mechanism used to build ExternalCID described [here](https://docs.google.com/document/d/1f7z3X2GM_ASb3ZCI_7tngglxwS6WoWi1EB3aKzdf6vo/edit#heading=h.hyyaxi8m42a).
+
+##AMP Access and Cookies
+
+Even though some of the Publisher's own authentication cookies may be available at the time of the Authorization and Pingback requests, the cookies should only be used for internal mapping. There are no guarantees that the Publisher will be able to read or write cookies given all surfaces and platforms where an AMP document can be embedded. The Reader ID is the only identifier that is guaranteed to work.
+
+This means, in particular, that features such as metering and first-click-free implementation have to rely on the AMP Reader ID and server-side storage.
 
 ##Access Content Markup
 
@@ -75,7 +81,7 @@ Login Page is implemented and served by the Publisher and called by the AMP Runt
 
 Login Page is triggered when the Reader taps on the Login Link which can be placed by the Publisher anywhere in the document.
 
-#Specification v0.2
+#Specification v0.3
 
 ##Configuration
 
@@ -107,11 +113,11 @@ Here’s an example of the AMP Access configuration:
 <script id="amp-access" type="application/json">
 {
   "authorization":
-      "https://pub.com/amp-access?rid={READER_ID}&url={AMPDOC_URL}",
+      "https://pub.com/amp-access?rid={READER_ID}&url={SOURCE_URL}",
   "pingback":
-      "https://pub.com/amp-ping?rid={READER_ID}&url={AMPDOC_URL}",
+      "https://pub.com/amp-ping?rid={READER_ID}&url={SOURCE_URL}",
   "login":
-      "https://pub.com/amp-login?rid={READER_ID}&url={AMPDOC_URL}"
+      "https://pub.com/amp-login?rid={READER_ID}&url={SOURCE_URL}"
 }
 </script>
 ```
@@ -125,6 +131,7 @@ Var               | Description
 READER_ID         | The AMP Reader ID.
 AUTHDATA(field)   | The value of the field in the authorization response.
 RETURN_URL        | The placeholder for the return URL specified by the AMP runtime for a Login Dialog to return to.
+SOURCE_URL        | The Source URL of this AMP Document. If document is served from CDN, AMPDOC_URL will be a CDN URL, while SOURCE_URL will be the original source URL.
 AMPDOC_URL        | The URL of this AMP Document.
 CANONICAL_URL     | The canonical URL of this AMP Document.
 DOCUMENT_REFERRER | The Referrer URL.
@@ -200,9 +207,9 @@ And here’s an example that shows additional content to the premium subscribers
 
 ##Authorization Endpoint
 
-Authorization is configured via ```authorization``` property in the [AMP Access Configuration][8] section. It is a credentialed CORS endpoint. See [CORS Origin Security][9] for a list of origins that should be allowed.
+Authorization is configured via ```authorization``` property in the [AMP Access Configuration][8] section. It is a credentialed CORS endpoint. See [CORS Origin Security][9] for how this request should be secured.
 
-Authorization can take any parameters as defined in the [Access URL Variables][7] section. For instance, it could pass AMP Reader ID and document URL. Besides URL parameters, the Publisher may use any information naturally delivered via HTTP protocol, such as Reader’s IP address.
+Authorization can take any parameters as defined in the [Access URL Variables][7] section. For instance, it could pass AMP Reader ID and document URL. Besides URL parameters, the Publisher may use any information naturally delivered via HTTP protocol, such as Reader’s IP address. The inclusion of the `READER_ID` is required.
 
 This endpoint produces the authorization response that can be used in the content markup expressions to show/hide different parts of content.
 
@@ -210,7 +217,7 @@ The request format is:
 ```
 https://publisher.com/amp-access.json?
    rid={READER_ID}
-  &url={AMPDOC_URL}
+  &url={SOURCE_URL}
 ```
 The response is a free-form JSON object: it can contain any properties and values with few limitations. The limitations are:
  - The property names have to conform to the restrictions defined by the ```amp-access``` expressions grammar (see [Appendix A][1]. This mostly means that the property names cannot contain characters such as spaces, dashes and other characters that do not conform to the “amp-access” specification.
@@ -247,7 +254,7 @@ The authorization response may be used by AMP Runtime and extensions for two dif
  1. When evaluating ```amp-access``` expressions.
  2. When evaluating ```<template>``` templates such as ```amp-mustache```.
 
-Authorization endpoint is called by AMP Runtime as a credentialed CORS endpoint. As such, it must implement CORS protocol. It should use CORS Origin to restrict the access to this service. This endpoint may use publisher cookies for its needs. For instance, it can associate the binding between the Reader ID and the Publisher’s own user identity. AMP itself does not need to know about this (and prefers not to).
+Authorization endpoint is called by AMP Runtime as a credentialed CORS endpoint. As such, it must implement CORS protocol. It should use CORS Origin and source origin to restrict the access to this service as described in the [CORS Origin Security][9]. This endpoint may use publisher cookies for its needs. For instance, it can associate the binding between the Reader ID and the Publisher’s own user identity. AMP itself does not need to know about this (and prefers not to). Reader more on [AMP Reader ID][2] and [AMP Access and Cookies][11] for more detail.
 
 AMP Runtime (or rather browser) observes cache response headers when calling Authorization endpoint. Thus the cached responses can be reused. It may or may not be desirable. If it is not desirable, the Publisher can user the appropriate cache control headers and/or RANDOM variable substitution for the endpoint URL.
 
@@ -259,9 +266,9 @@ In the *server* option, the call to Authorization endpoint is done by AMP Cache 
 
 ##Pingback Endpoint
 
-Pingback is configured via ```pingback``` property in the [AMP Access Configuration][8] section. It is a credentialed CORS endpoint. See [CORS Origin Security][9]” for a list of origins that should be allowed.
+Pingback is configured via ```pingback``` property in the [AMP Access Configuration][8] section. It is a credentialed CORS endpoint. See [CORS Origin Security][9]” for how this request should be secured.
 
-Pingback URL can take any parameters as defined in the [Access URL Variables][7] section. For instance, it could pass AMP Reader ID and document URL.
+Pingback URL can take any parameters as defined in the [Access URL Variables][7] section. For instance, it could pass AMP Reader ID and document URL. The inclusion of the `READER_ID` is required.
 
 Pingback does not produce a response - any response is ignored by AMP runtime.
 
@@ -273,7 +280,7 @@ The request format is:
 ```
 https://publisher.com/amp-pingback?
    rid={READER_ID}
-  &url={AMPDOC_URL}
+  &url={SOURCE_URL}
 ```
 
 ##Login Link
@@ -304,7 +311,7 @@ The request format is:
 ```
 https://publisher.com/amp-login.html?
    rid={READER_ID}
-  &url={AMPDOC_URL}
+  &url={SOURCE_URL}
   &return={RETURN_URL}
 ```
 Notice that the “return” URL parameter is added by the AMP Runtime automatically if `RETURN_URL` substitution is not
@@ -319,9 +326,10 @@ Notice the use of a URL hash parameter “status”. The value is either “true
 An integration with *amp-analytics* is under development and can be tracked on [Issue #1556][10]. This document will be updated when more details on the integration are available.
 
 #CORS Origin Security
-CORS endpoints can be (and recommended) to be only allowed to the following origins:
- - *.ampproject.org
- - The Publisher’s own origins
+
+Authorization and Pingback endpoints are CORS endpoints and they must implement the security protocol described in the
+[AMP CORS Security Spec](https://github.com/ampproject/amphtml/blob/master/spec/amp-cors-requests.md#cors-security-in-amp).
+
 
 #AMP Glossary
  - **AMP Document** - the HTML document that follows AMP format and validated by AMP Validator. AMP Documents are cacheable by AMP Cache.
@@ -330,12 +338,13 @@ CORS endpoints can be (and recommended) to be only allowed to the following orig
  - **AMP Cache** - the proxying cache for AMP documents.
  - **AMP Viewer** - the Web or native application that displays/embeds AMP Documents.
  - **Publisher.com** - the site of an AMP publisher.
- - **CORS endpoint** - cross-origin HTTPS endpoint. See https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS for more info. See [CORS Origin Security][9] for a list of origins that should be allowed.
+ - **CORS endpoint** - cross-origin HTTPS endpoint. See https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS for more info. See [CORS Origin Security][9] for how such requests can be secured.
  - **Reader** - the actual person viewing AMP documents.
  - **AMP Prerendering** - AMP Viewers may take advantage of prerendering, which renders a hidden document before it can be shown. This adds a significant performance boost. But it is important to take into account the fact that the document prerendering does not constitute a view since the Reader may never actually see the document.
 
 #Revisions
 - Feb 1: "return" query parameter for Login Page can be customized using RETURN_URL URL substitution.
+- Feb 3: Spec for "source origin" security added to the [CORS Origin security][9].
 
 #Appendix A: “amp-access” expression grammar
 
@@ -384,3 +393,4 @@ This section will cover a detailed explanation of the design underlying the amp-
 [8]: #configuration
 [9]: #cors-origin-security
 [10]: https://github.com/ampproject/amphtml/issues/1556
+[11]: #amp-access-and-cookies
