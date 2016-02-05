@@ -60,6 +60,7 @@ when the document is first loaded, and each time an `<a>` tag is clicked:
 ## <a name="attributes"></a>Attributes
 
   - `type` This optional attribute can be specified to use one of the built-in analytics providers. Currently supported values for type are:
+    - `atinternet`: Adds support for AT Internet.
     - `googleanalytics`: Adds support for Google Analytics. More details for adding Google Analytics support can be found at [developers.google.com](https://developers.google.com/analytics/devguides/collection/amp-analytics/).
     - `comscore`: Supports comScore Unified Digital Measurement™ pageview analytics. Requires defining *var* `c2` with comScore-provided *c2 id*.
 
