@@ -43,9 +43,7 @@ export const adPreconnect = {
     'https://securepubads.g.doubleclick.net',
     'https://tpc.googlesyndication.com',
   ],
-  mediaimpact: [
-    'https://ec-ns.sascdn.com'
-  ]
+  mediaimpact: 'https://ec-ns.sascdn.com'
 };
 
 /**
@@ -57,3 +55,4 @@ export const clientIdScope = {
   // Add a mapping like
   // adNetworkType: 'cidScope' here.
 };
+

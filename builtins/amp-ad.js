@@ -110,6 +110,7 @@ export function installAd(win) {
        */
       this.unlistenViewportChanges_ = null;
 
+
       /** @private {IntersectionObserver} */
       this.intersectionObserver_ = null;
     }

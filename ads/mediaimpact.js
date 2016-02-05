@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {writeScript, validateSrcPrefix, validateSrcContains} from '../src/3p';
+import {writeScript} from '../src/3p';
 
 /**
  * @param {!Window} global
@@ -22,10 +22,10 @@ import {writeScript, validateSrcPrefix, validateSrcContains} from '../src/3p';
  */
 
 export function mediaimpact(global, data) {
-  const src = data.src;
+  const src = "https://ec-ns.sascdn.com/diff/251/bild.js";
   writeScript(global, src);
-  global.SmartAdServerAjax = function() {
+  /*global.SmartAdServerAjax = function() {
     global.asmi.pageSet.pageName = data.page;
     global.asmi.sas.call(false, data.format, data.target, '', data.slot, 1);
-  }
+  }*/
 }
