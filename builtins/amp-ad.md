@@ -99,6 +99,16 @@ Optionally `amp-ad` supports a child element with the `placeholder` attribute. I
 
 - If there is no fallback element available, the amp-ad tag will be collapsed (set to display: none) if the ad sends a message that the ad slot cannot be filled and AMP determines that this operation can be performed without affecting the user's scroll position.
 
+#### Supported ad networks
+
+- [A9](../ads/a9.md)
+- [AdReactor](../ads/adreactor.md)
+- [AdSense](../ads/adsense.md)
+- [AdTech](../ads/adtech.md)
+- [Doubleclick](../ads/doubleclick.md)
+- [Smart AdServer](../ads/smartadserver.md)
+
+
 #### Running ads from a custom domain
 
 AMP supports loading the bootstrap iframe that is used to load ads from a custom domain such as your own domain.
