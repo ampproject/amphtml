@@ -25,6 +25,7 @@ import {loadPromise} from '../src/event-helper';
 import {parseUrl} from '../src/url';
 import {registerElement} from '../src/custom-element';
 import {adPrefetch, adPreconnect, clientIdScope} from '../ads/_config';
+import {toggle} from '../src/style';
 import {timer} from '../src/timer';
 import {userNotificationManagerFor} from '../src/user-notification';
 
@@ -66,14 +67,16 @@ export function installAd(win) {
       return isLayoutSizeDefined(layout);
     }
 
-    /**
-     * @return {boolean}
-     * @override
-     */
+    /** @override */
     isReadyToBuild() {
       // TODO(dvoytenko, #1014): Review and try a more immediate approach.
       // Wait until DOMReady.
       return false;
+    }
+
+    /** @override */
+    isRelayoutNeeded() {
+      return true;
     }
 
     /** @override */
@@ -106,6 +109,13 @@ export function installAd(win) {
 
       /** @private {IntersectionObserver} */
       this.intersectionObserver_ = null;
+
+      /**
+       * In this state the iframe is set to display: none to reduce
+       * CPU/GPU/Battery consumption by the ad.
+       * @private {boolean}
+       */
+      this.paused_ = false;
     }
 
     /**
@@ -203,24 +213,29 @@ export function installAd(win) {
 
     /** @override */
     layoutCallback() {
-      loadingAdsCount++;
-      timer.delay(() => {
-        // Unfortunately we don't really have a good way to measure how long it
-        // takes to load an ad, so we'll just pretend it takes 1 second for
-        // now.
-        loadingAdsCount--;
-      }, 1000);
-      assert(!this.isInFixedContainer_,
-          '<amp-ad> is not allowed to be placed in elements with ' +
-          'position:fixed: %s', this.element);
-      this.element.setAttribute('scrolling', 'no');
+      if (this.paused_) {
+        this.paused_ = false;
+        toggle(this.iframe_, true);
+        return Promise.resolve(this.iframe_);
+      }
       if (!this.iframe_) {
+        loadingAdsCount++;
+        assert(!this.isInFixedContainer_,
+            '<amp-ad> is not allowed to be placed in elements with ' +
+            'position:fixed: %s', this.element);
+        timer.delay(() => {
+          // Unfortunately we don't really have a good way to measure how long it
+          // takes to load an ad, so we'll just pretend it takes 1 second for
+          // now.
+          loadingAdsCount--;
+        }, 1000);
         return this.getAdCid_().then(cid => {
           if (cid) {
             this.element.setAttribute('ampcid', cid);
           }
           this.iframe_ = getIframe(this.element.ownerDocument.defaultView,
             this.element);
+          this.iframe_.setAttribute('scrolling', 'no');
           this.applyFillContent(this.iframe_);
           this.element.appendChild(this.iframe_);
           this.intersectionObserver_ =
@@ -257,6 +272,18 @@ export function installAd(win) {
         });
       }
       return loadPromise(this.iframe_);
+    }
+
+    /** @override */
+    documentInactiveCallback() {
+      if (this.iframe_) {
+        this.paused_ = true;
+        // When the doc is inactive, hide the ads, so any work they do takes
+        // less CPU and power.
+        toggle(this.iframe_, false);
+      }
+      // Call layoutCallback again when this document becomes active.
+      return true;
     }
 
     /**
