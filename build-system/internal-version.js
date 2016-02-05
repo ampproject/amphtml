@@ -30,9 +30,12 @@ exports.TOKEN = getToken();
 
 function getToken() {
   var task = process.argv[2];
-  if (!task || task == 'build') {
+  // For tests build parent and child frame can get out of sync because
+  // we do not version lock them. To fix this we use a fixed token.
+  if (!task || task == 'build' || task == 'test') {
     return 'development--token';
   }
+  // For every other build, most importantly `dist` we assume production.
   return crypto.createHmac(
       'sha256', crypto.randomBytes(16)).update(exports.VERSION)
       .digest('hex');
