@@ -47,7 +47,7 @@ export function isDevChannel(win) {
   if (isExperimentOn(win, CANARY_EXPERIMENT_ID)) {
     return true;
   }
-  if (isDevChannelVersionDoNotUse_('$internalRuntimeVersion$')) {
+  if (isDevChannelVersionDoNotUse_(win)) {
     return true;
   }
   return false;
@@ -56,12 +56,13 @@ export function isDevChannel(win) {
 
 /**
  * Whether the version corresponds to the dev-channel binary.
+ * @param {!Window} win
  * @param {string} version
  * @return {boolean}
  * @private Visible for testing only!
  */
-export function isDevChannelVersionDoNotUse_(version) {
-  return !!version.match(/\-canary$/);
+export function isDevChannelVersionDoNotUse_(win, version) {
+  return !!win.AMP_CONFIG && win.AMP_CONFIG.canary;
 }
 
 
