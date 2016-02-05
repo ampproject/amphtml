@@ -16,7 +16,7 @@
 
 // TODO(malteubl) Move somewhere else since this is not an ad.
 
-import {loadScript} from '../src/3p';
+import {computeInMasterFrame, loadScript} from '../src/3p';
 
 /**
  * Produces the Twitter API object for the passed in callback. If the current
@@ -27,21 +27,11 @@ import {loadScript} from '../src/3p';
  * @param {function(!Object)} cb
  */
 function getTwttr(global, cb) {
-  if (context.isMaster) {
-    global.twttrCbs = [cb];
+  computeInMasterFrame(global, 'twttrCbs', done => {
     loadScript(global, 'https://platform.twitter.com/widgets.js', () => {
-      for (let i = 0; i < global.twttrCbs.length; i++) {
-        global.twttrCbs[i](global.twttr);
-      }
-      global.twttrCbs.push = function(cb) {
-        cb(global.twttr);
-      };
+      done(global.twttr);
     });
-  } else {
-    // Because we rely on this global existing it is important that
-    // this array is created synchronously after master selection.
-    context.master.twttrCbs.push(cb);
-  }
+  }, cb);
 }
 
 /**
