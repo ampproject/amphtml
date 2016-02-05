@@ -61,7 +61,7 @@ export function isDevChannel(win) {
  * @return {boolean}
  * @private Visible for testing only!
  */
-export function isDevChannelVersionDoNotUse_(win, version) {
+export function isDevChannelVersionDoNotUse_(win) {
   return !!win.AMP_CONFIG && win.AMP_CONFIG.canary;
 }
 
