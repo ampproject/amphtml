@@ -31,6 +31,7 @@ import {adtech} from '../ads/adtech';
 import {plista} from '../ads/plista';
 import {doubleclick} from '../ads/doubleclick';
 import {dotandads} from '../ads/dotandads';
+import {smartadserver} from '../ads/smartadserver';
 import {facebook} from './facebook';
 import {manageWin} from './environment';
 import {nonSensitiveDataPostMessage, listenParent} from './messaging';
@@ -39,6 +40,7 @@ import {register, run} from '../src/3p';
 import {parseUrl} from '../src/url';
 import {assert} from '../src/asserts';
 import {taboola} from '../ads/taboola';
+
 
 /**
  * Whether the embed type may be used with amp-embed tag.
@@ -54,6 +56,7 @@ register('adreactor', adreactor);
 register('adsense', adsense);
 register('adtech', adtech);
 register('plista', plista);
+register('smartadserver', smartadserver);
 register('doubleclick', doubleclick);
 register('taboola', taboola);
 register('dotandads', dotandads);
