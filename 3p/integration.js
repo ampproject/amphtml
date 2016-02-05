@@ -35,7 +35,6 @@ import {doubleclick} from '../ads/doubleclick';
 import {dotandads} from '../ads/dotandads';
 import {facebook} from './facebook';
 import {manageWin} from './environment';
-import {mediaimpact} from '../ads/mediaimpact';
 import {nonSensitiveDataPostMessage, listenParent} from './messaging';
 import {twitter} from './twitter';
 import {yieldmo} from '../ads/yieldmo';
