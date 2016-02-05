@@ -59,6 +59,7 @@ export const ANALYTICS_CONFIG = {
       'timestamp': 'TIMESTAMP',
       'timezone': 'TIMEZONE',
       'title': 'TITLE',
+      'totalEngagedTime': 'TOTAL_ENGAGED_TIME',
       'viewer': 'VIEWER',
     }
   },

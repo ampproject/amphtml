@@ -83,6 +83,13 @@ var forbiddenTerms = {
       'extensions/amp-access/0.1/amp-access.js',
     ],
   },
+  'installActivityService': {
+    message: privateServiceFactory,
+    whitelist: [
+      'src/service/activity-impl.js',
+      'extensions/amp-analytics/0.1/amp-analytics.js'
+    ]
+  },
   'installCidService': {
     message: privateServiceFactory,
     whitelist: [
