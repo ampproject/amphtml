@@ -29,9 +29,9 @@ import {adreactor} from '../ads/adreactor';
 import {adsense} from '../ads/adsense';
 import {adtech} from '../ads/adtech';
 import {plista} from '../ads/plista';
-import {smartadserver} from '../ads/smartadserver';
 import {doubleclick} from '../ads/doubleclick';
 import {dotandads} from '../ads/dotandads';
+import {smartadserver} from '../ads/smartadserver';
 import {facebook} from './facebook';
 import {manageWin} from './environment';
 import {nonSensitiveDataPostMessage, listenParent} from './messaging';
@@ -40,6 +40,7 @@ import {register, run} from '../src/3p';
 import {parseUrl} from '../src/url';
 import {assert} from '../src/asserts';
 import {taboola} from '../ads/taboola';
+
 
 /**
  * Whether the embed type may be used with amp-embed tag.
