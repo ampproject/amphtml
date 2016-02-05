@@ -20,11 +20,9 @@ Capture analytics data from an AMP document.
 
 ## <a name="behavior"></a>Behavior
 
-The `<amp-analytics>` element is used to measure activity on an AMP document. The details concerning what is measured and how
-that data is sent to an analytics server is specified in a JSON configuration object.
+The `<amp-analytics>` element is used to measure activity on an AMP document. The details of what is measured and how that data is sent to an analytics server are specified in a JSON configuration object.
 
-For example, the following `<amp-analytics>` element is configured to send a request to `https://example.com/analytics`
-when the document is first loaded, and each time an `<a>` tag is clicked:
+For example, the following `<amp-analytics>` element is configured to send a request to `https://example.com/analytics` when the document is first loaded, and each time an `<a>` tag is clicked:
 
 ```html
 <amp-analytics>
@@ -59,7 +57,7 @@ when the document is first loaded, and each time an `<a>` tag is clicked:
 
 ## <a name="attributes"></a>Attributes
 
-  - `type` This optional attribute can be specified to use one of the built-in analytics providers. Currently supported values for type are:
+  - `type` This optional attribute can be specified to use one of the built-in analytics providers. Currently supported values for `type` are:
     - `googleanalytics`: Adds support for Google Analytics. More details for adding Google Analytics support can be found at [developers.google.com](https://developers.google.com/analytics/devguides/collection/amp-analytics/).
     - `comscore`: Supports comScore Unified Digital Measurement™ pageview analytics. Requires defining *var* `c2` with comScore-provided *c2 id*.
 
@@ -67,25 +65,19 @@ when the document is first loaded, and each time an `<a>` tag is clicked:
     <amp-analytics type="XYZ"> ... </amp-analytics>
     ```
 
-  - `config` This attribute can be used to load a configuration from a specified remote URL. The URL specified here should use https scheme.
+  - `config` This attribute can be used to load a configuration from a specified remote URL. The URL specified here should use the `https` protocol.
 
     ```
     <amp-analytics config="https://example.com/analytics.config.json"></amp-analytics>
     ```
 
-  - `data-consent-notification-id` Optional attribute. If provided will stop
-    processing the analytics request until a [amp-user-notification](../../extensions/amp-user-notification/amp-user-notification.md) with
-    the given HTML-id was confirmed by the user.
+  - `data-consent-notification-id` Optional; if provided, stops processing the analytics request until an [amp-user-notification](../../extensions/amp-user-notification/amp-user-notification.md) with the given HTML-id is confirmed by the user.
 
 ## Configuration
 
-Configuration may be specified inline (as shown in the example above) or fetched remotely by specifying a URL in the
-`config` attribute. Additionally, built-in configuration for popular analytics vendors can be selected using
-the `type` attribute.
+Configuration may be specified inline as shown above or fetched remotely by specifying a URL in the `config` attribute. Additionally, built-in configuration for popular analytics vendors can be selected using the `type` attribute.
 
-If configuration data from more than one of these sources is used, the configuration objects(vars, requests and triggers) will
-be merged together such that remote configuration takes precedence over inline configuration, and inline configuration
-takes precendence over vendor configuration.
+If configuration data from more than one of these sources is used, the configuration objects (vars, requests, and triggers) are merged together such that remote configuration takes precedence over inline configuration, and inline configuration takes precendence over vendor configuration.
 
 The `<amp-analytics>` configuration object uses the following format:
 
@@ -111,9 +103,7 @@ The `<amp-analytics>` configuration object uses the following format:
 }
 ```
 ### Requests
-The `requests` attribute specifies the URLs used to transmit data to an analytics platform. The `request-name` is used
-in the trigger configuration to specify what request should be sent in response to a pariticular event. The `request-value`
-is an https URL. These values may include placeholder tokens that can reference other requests or variables.
+The `requests` attribute specifies the URLs used to transmit data to an analytics platform. The `request-name` is used in the trigger configuration to specify which request should be sent in response to a particular event. The `request-value` is an `https` URL. These values may include placeholder tokens that can reference other requests or variables.
 
 ```javascript
 "requests": {
@@ -124,9 +114,9 @@ is an https URL. These values may include placeholder tokens that can reference 
 ```
 
 ### Vars
-`amp-analytics` defines many basic variables that can be used in requests. A list of all such variables is available [here](./analytics-vars.md). In addition, all the variables supported by [AMP HTML URL Variable Substitutions](../../spec/amp-var-substitutions.md) are also supported.
+`amp-analytics` defines many basic variables that can be used in requests. A list of these variables is available [here](./analytics-vars.md). In addition, all the variables supported by [AMP HTML URL Variable Substitutions](../../spec/amp-var-substitutions.md) are also supported.
 
-The `vars` attribute in the configuration can be used to define new key-value pairs or override existing variables that can be referenced in `request` values. New variables are commonly used to specify publisher specific information.
+The `vars` attribute in the configuration can be used to define new key-value pairs or to override existing variables that can be referenced in `request` values. New variables are commonly used to specify publisher-specific information.
 
 ```javascript
 "vars": {
@@ -136,15 +126,12 @@ The `vars` attribute in the configuration can be used to define new key-value pa
 ```
 
 ### Triggers
-The `triggers` attribute describes when an analytics request should be sent. It contains a key-value pair of trigger-name and
- trigger-configuration. Trigger name can be any string comprised of alphanumeric characters (a-zA-Z0-9). Triggers from a
- configuration with lower precedence are overridden by triggers with the same names from a configuration with higher precedence.
+The `triggers` attribute describes when an analytics request should be sent. It contains a key-value pair of trigger name and trigger configuration. Trigger name can be any alphanumeric string (a-z, A-Z, 0-9). When identical trigger names are encountered, higher-precedence configuration triggers override lower-precedence configuration triggers.
 
-  - `on` (required) The event to listener for. Valid values are `visible` and `click`.
-  - `request` (required) Name of the request to send (as specified in the `requests` section).
-  - `selector` A CSS selector used to refine which elements should be tracked. Use value `*` to track all elements.
-  - `vars` An object containing key-value pairs used to override `vars` defined in the top level config, or to specify
-    vars unique to this trigger.
+  - `on` (required): The event to listen for. Valid values are `visible` and `click`.
+  - `request` (required): Name of the request to send, as specified in the `requests` section.
+  - `selector`: A CSS selector used to define which elements should be tracked. Use `*` to track all elements.
+  - `vars`: An object containing key-value pairs used to override `vars` defined in the top level config, or to specify     vars unique to this trigger.
 
 ```javascript
 "triggers": {
@@ -164,16 +151,11 @@ The `triggers` attribute describes when an analytics request should be sent. It 
 ```
 
 ### Transport
-The `transport` attribute specifies how to send a request. The value is an object with fields that
-indicate which transport methods are acceptable.
+The `transport` attribute specifies how to send a request. The value is an object with fields that indicate which transport methods are acceptable.
 
-  - `beacon` Indicates [`navigator.sendBeacon`](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/sendBeacon)
-     can be used to transmit the request. This will send a POST request, with credentials, and an empty body.
-  - `xhrpost` Indicates `XMLHttpRequest` can be used to transmit the request. This will send a POST
-     request, with credentials, and an empty body.
-  - `image` Indicates the request can be sent by generating an `Image` tag. This will send a GET request.
+  - `beacon`: Indicates [`navigator.sendBeacon`](https://developer.mozilla.org/en-US/docs/Web/API/Navigator/sendBeacon)      can be used to transmit the request. This sends a POST request, with credentials, and an empty body.
+  - `xhrpost`: Indicates `XMLHttpRequest` can be used to transmit the request. This sends a POST request, with credentials, and an empty body.
+  - `image`: Indicates the request can be sent by generating an `image` tag. This sends a GET request.
 
-If more than one of the above transport methods are enabled, the precedence is `beacon` > `xhrpost` > `image`.
-If the client's user agent does not support a method, the next highest precedence method enabled will be used.
-By default, all three methods above are enabled.
+If more than one of the above transport methods is enabled, the precedence is `beacon` > `xhrpost` > `image`. If the client's user agent does not support a given method, the next highest precedence method enabled will be used. By default, all three methods are enabled.
 
