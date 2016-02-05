@@ -32,6 +32,7 @@ describe('amp-analytics', function() {
   let sandbox;
   let windowApi;
   let sendRequestSpy;
+  let configWithCredentials;
 
   const jsonMockResponses = {
     'config1': '{"vars": {"title": "remote"}}'
@@ -48,6 +49,7 @@ describe('amp-analytics', function() {
       title: 'Test Title',
       referrer: 'https://www.google.com/'
     };
+    configWithCredentials = false;
     windowApi.Object = window.Object;
     markElementScheduledForTesting(windowApi, 'amp-analytics');
     markElementScheduledForTesting(windowApi, 'amp-user-notification');
@@ -55,7 +57,15 @@ describe('amp-analytics', function() {
     installCidService(windowApi);
     installUserNotificationManager(windowApi);
     getService(windowApi, 'xhr', () => {return {
-      fetchJson: url => Promise.resolve(JSON.parse(jsonMockResponses[url]))
+      fetchJson: (url, init) => {
+        expect(init.requireAmpResponseSourceOrigin).to.be.true;
+        if (configWithCredentials) {
+          expect(init.credentials).to.equal('include');
+        } else {
+          expect(init.credentials).to.undefined;
+        }
+        return Promise.resolve(JSON.parse(jsonMockResponses[url]));
+      }
     };});
   });
 
@@ -495,6 +505,21 @@ describe('amp-analytics', function() {
       'triggers': [{'on': 'visible', 'request': 'foo'}]
     }, {
       'config': 'config1'
+    });
+    return waitForSendRequest(analytics).then(() => {
+      expect(sendRequestSpy.args[0][0]).to.equal('https://example.com/remote');
+    });
+  });
+
+  it('fetches and merges remote config with credentials', () => {
+    configWithCredentials = true;
+    const analytics = getAnalyticsTag({
+      'vars': {'title': 'local'},
+      'requests': {'foo': 'https://example.com/${title}'},
+      'triggers': [{'on': 'visible', 'request': 'foo'}]
+    }, {
+      'config': 'config1',
+      'data-credentials': 'include',
     });
     return waitForSendRequest(analytics).then(() => {
       expect(sendRequestSpy.args[0][0]).to.equal('https://example.com/remote');

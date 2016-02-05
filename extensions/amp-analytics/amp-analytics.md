@@ -68,12 +68,13 @@ when the document is first loaded, and each time an `<a>` tag is clicked:
     <amp-analytics type="XYZ"> ... </amp-analytics>
     ```
 
-  - `config` This attribute can be used to load a configuration from a specified remote URL. The URL specified here should use https scheme.
+  - `config` This attribute can be used to load a configuration from a specified remote URL. The URL specified here should use https scheme. See also `data-include-credentials` attribute below.
 
     ```
     <amp-analytics config="https://example.com/analytics.config.json"></amp-analytics>
     ```
-
+    The response must follow the [AMP CORS security guidelines](../../spec/amp-cors-requests.md).
+  - `data-credentials` Optional. If set to `include` turns on the ability to read and write cookies on the request specified via `config` above.
   - `data-consent-notification-id` Optional attribute. If provided will stop
     processing the analytics request until a [amp-user-notification](../../extensions/amp-user-notification/amp-user-notification.md) with
     the given HTML-id was confirmed by the user.
