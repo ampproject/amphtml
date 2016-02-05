@@ -81,7 +81,7 @@ Login Page is implemented and served by the Publisher and called by the AMP Runt
 
 Login Page is triggered when the Reader taps on the Login Link which can be placed by the Publisher anywhere in the document.
 
-#Specification v0.2
+#Specification v0.3
 
 ##Configuration
 
