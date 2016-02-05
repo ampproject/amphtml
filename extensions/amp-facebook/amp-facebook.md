@@ -14,13 +14,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-### <a name="amp-facebook"></a> `amp-facebook`
+## <a name="amp-facebook"></a> `amp-facebook`
 
 **Status: Component landed, but does not validate.**
 
 Displays a Facebook Post or Video. 
 
-Example - Embedding a post:
+###Examples
+
+####Embedding a post:
 ```html
 <amp-facebook width=486 height=657
     layout="responsive"
@@ -28,7 +30,7 @@ Example - Embedding a post:
 </amp-facebook>
 ```
 
-Example - Embedding a video:
+####Embedding a video:
 ```html
 <amp-facebook width=552 height=574
     layout="responsive"
@@ -38,16 +40,16 @@ Example - Embedding a video:
 ```
 
 
-#### Attributes
+### Attributes
 
 **data-href**
 
-The URL of the facebook post/video. For example: https://www.facebook.com/zuck/posts/10102593740125791.
+The URL of the facebook post/video. For example, `https://www.facebook.com/zuck/posts/10102593740125791`.
 
-**data-embed-as**
-_Optional_
-Either `post` or `video` (default: `post`).
+**data-embed-as** (Optional)
 
-Both posts and videos can be embedded as a post. Setting `data-embed-as="video"` for Facebook videos only embed the player of the video ignoring the accompanying post card with it. This is recommended if you'd like a better aspect ratio management for the video to be responsive.  
+Either `post` or `video`; default is `post`.
 
-Checkout the documentation for differences between [post embeds](https://developers.facebook.com/docs/plugins/embedded-posts) and [video embeds](https://developers.facebook.com/docs/plugins/embedded-video-player).
+Both posts and videos can be embedded as a post. Setting `data-embed-as="video"` for Facebook videos only embeds the video player, ignoring the accompanying post card with it. This is recommended if you need better aspect ratio management for the video to be responsive.  
+
+See the documentation for differences between [post embeds](https://developers.facebook.com/docs/plugins/embedded-posts) and [video embeds](https://developers.facebook.com/docs/plugins/embedded-video-player).
