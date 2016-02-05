@@ -37,6 +37,7 @@ var touch = require('touch')
 var uglify = require('gulp-uglify');
 var util = require('gulp-util');
 var watchify = require('watchify');
+var windowConfig = require('./build-system/window-config');
 var wrap = require('gulp-wrap');
 var internalRuntimeVersion = require('./build-system/internal-version').VERSION;
 var internalRuntimeToken = require('./build-system/internal-version').TOKEN;
@@ -130,7 +131,8 @@ function compile(watch, shouldMinify) {
     minify: shouldMinify,
     // If there is a sync JS error during initial load,
     // at least try to unhide the body.
-    wrapper: 'try{(function(){<%= contents %>})()}catch(e){' +
+    wrapper: windowConfig.getTemplate() +
+        'try{(function(){<%= contents %>})()}catch(e){' +
         'setTimeout(function(){' +
         'var s=document.body.style;' +
         's.opacity=1;' +
@@ -268,7 +270,8 @@ function buildExtensionJs(js, path, name, version, options) {
           minify: options.minify,
           minifiedName: minifiedName,
           latestName: latestName,
-          wrapper: '(window.AMP = window.AMP || [])' +
+          wrapper: windowConfig.getTemplate() +
+              '(window.AMP = window.AMP || [])' +
               '.push(function(AMP) {<%= contents %>\n});',
         });
       });
