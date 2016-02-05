@@ -132,7 +132,8 @@ export class AmpAnalytics extends AMP.BaseElement {
           continue;
         }
         addListener(this.getWin(), trigger['on'],
-            this.handleEvent_.bind(this, trigger), trigger['selector']);
+            this.handleEvent_.bind(this, trigger), trigger['selector'],
+            trigger['timer-spec']);
       }
     }
   }
