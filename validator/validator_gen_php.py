@@ -257,10 +257,10 @@ def GenerateValidatorGeneratedPHP(specfile, validator_pb2, text_format,
   # message of type ValidatorRules.
   rules = validator_pb2.ValidatorRules()
   text_format.Merge(open(specfile).read(), rules)
-  out.append('class Rules {')
-  out.append('  public function __construct() {')
+  out.append('class ValidationRulesFactory {')
+  out.append('  public static function createValidationRules() {')
   PrintObject(descriptor, rules, 0, out)
-  out.append('  $this->rules = $o_0;')
+  out.append('  return $o_0;')
   out.append('  }')
   out.append('}')
   out.append('')
