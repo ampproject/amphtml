@@ -324,7 +324,10 @@ export class AccessService {
         this.config_.authorization, /* useAuthData */ false);
     return promise.then(url => {
       log.fine(TAG, 'Authorization URL: ', url);
-      return this.xhr_.fetchJson(url, {credentials: 'include'});
+      return this.xhr_.fetchJson(url, {
+        credentials: 'include',
+        requireAmpResponseSourceOrigin: true
+      });
     }).then(response => {
       log.fine(TAG, 'Authorization response: ', response);
       this.setAuthResponse_(response);
@@ -555,6 +558,7 @@ export class AccessService {
       return this.xhr_.sendSignal(url, {
         method: 'POST',
         credentials: 'include',
+        requireAmpResponseSourceOrigin: true,
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded'
         },
