@@ -28,6 +28,7 @@ import {a9} from '../ads/a9';
 import {adform} from '../ads/adform';
 import {adreactor} from '../ads/adreactor';
 import {adsense} from '../ads/adsense';
+import {mediaimpact} from '../ads/mediaimpact';
 import {adtech} from '../ads/adtech';
 import {plista} from '../ads/plista';
 import {doubleclick} from '../ads/doubleclick';
