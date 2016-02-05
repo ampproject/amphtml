@@ -30,6 +30,7 @@ import {adtech} from '../ads/adtech';
 import {doubleclick} from '../ads/doubleclick';
 import {facebook} from './facebook';
 import {manageWin} from './environment';
+import {mediaimpact} from '../ads/mediaimpact';
 import {nonSensitiveDataPostMessage, listenParent} from './messaging';
 import {twitter} from './twitter';
 import {register, run} from '../src/3p';
@@ -49,6 +50,7 @@ register('adreactor', adreactor);
 register('adsense', adsense);
 register('adtech', adtech);
 register('doubleclick', doubleclick);
+register('mediaimpact', mediaimpact);
 register('_ping_', function(win, data) {
   win.document.getElementById('c').textContent = data.ping;
 });
