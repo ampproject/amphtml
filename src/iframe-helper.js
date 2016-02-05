@@ -99,5 +99,5 @@ export function postMessage(iframe, type, object, targetOrigin, opt_is3P) {
  * @private
  */
 function getSentinel_(opt_is3P) {
-  return opt_is3P ? 'amp-3p' : 'amp';
+  return opt_is3P ? 'amp-$internalRuntimeToken$' : 'amp';
 }

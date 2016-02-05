@@ -24,6 +24,7 @@
 
 import './polyfills';
 import {a9} from '../ads/a9';
+import {adform} from '../ads/adform';
 import {adreactor} from '../ads/adreactor';
 import {adsense} from '../ads/adsense';
 import {adtech} from '../ads/adtech';
@@ -48,6 +49,7 @@ const AMP_EMBED_ALLOWED = {
 };
 
 register('a9', a9);
+register('adform', adform);
 register('adreactor', adreactor);
 register('adsense', adsense);
 register('adtech', adtech);
@@ -148,11 +150,7 @@ window.draw3p = function(opt_configCallback) {
   window.context.reportRenderedEntityIdentifier =
       reportRenderedEntityIdentifier;
   delete data._context;
-  // Run this only in canary and local dev for the time being.
-  if (location.pathname.indexOf('-canary') ||
-      location.pathname.indexOf('current')) {
-    manageWin(window);
-  }
+  manageWin(window);
   draw3p(window, data, opt_configCallback);
   nonSensitiveDataPostMessage('render-start');
 };

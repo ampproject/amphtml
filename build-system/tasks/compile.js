@@ -20,6 +20,7 @@ var gulp = require('gulp');
 var rename = require('gulp-rename');
 var replace = require('gulp-replace');
 var internalRuntimeVersion = require('../internal-version').VERSION;
+var internalRuntimeToken = require('../internal-version').TOKEN;
 
 var queue = [];
 var inProgress = 0;
@@ -73,15 +74,20 @@ function compile(entryModuleFilename, outputDir,
     fs.writeFileSync(
         'build/fake-module/src/polyfills.js',
         '// Not needed in closure compiler\n');
-    var wrapper = '(function(){var process={env:{}};%output%})();';
+    var wrapper = '(function(){var process={env:{NODE_ENV:"production"}};' +
+        '%output%})();';
     if (options.wrapper) {
       wrapper = options.wrapper.replace('<%= contents %>',
-          'var process={env:{}};%output%');
+          // TODO(@cramforce): Switch to define.
+          'var process={env:{NODE_ENV:"production"}};%output%');
     }
     wrapper += '\n//# sourceMappingURL=' +
         outputFilename + '.map\n';
     if (fs.existsSync(intermediateFilename)) {
       fs.unlinkSync(intermediateFilename);
+    }
+    if (/development/.test(internalRuntimeToken)) {
+      throw new Error('Should compile with a prod token');
     }
     const srcs = [
       '3p/**/*.js',
@@ -150,6 +156,7 @@ function compile(entryModuleFilename, outputDir,
     })
     .pipe(rename(outputFilename))
     .pipe(replace(/\$internalRuntimeVersion\$/g, internalRuntimeVersion))
+    .pipe(replace(/\$internalRuntimeToken\$/g, internalRuntimeToken))
     .pipe(gulp.dest(outputDir))
     .on('end', function() {
       console./*OK*/log('Compiled ', entryModuleFilename, 'to',

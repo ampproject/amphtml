@@ -271,6 +271,7 @@ An example `amp-pixel` from the
 The following ad networks are supported in AMP HTML pages:
 
 - [A9](../ads/a9.md)
+- [Adform](../ads/adform.md)
 - [AdReactor](../ads/adreactor.md)
 - [AdSense](../ads/adsense.md)
 - [AdTech](../ads/adtech.md)
