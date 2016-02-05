@@ -54,10 +54,7 @@ register('adform', adform);
 register('adreactor', adreactor);
 register('adsense', adsense);
 register('adtech', adtech);
-<<<<<<< HEAD
 register('plista', plista);
-=======
->>>>>>> 4a12645ceb9c3267e5486c6f0440bebe8ec022b2
 register('smartadserver', smartadserver);
 register('doubleclick', doubleclick);
 register('taboola', taboola);
