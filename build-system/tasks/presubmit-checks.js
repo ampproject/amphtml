@@ -258,6 +258,14 @@ var forbiddenTerms = {
       'src/service/viewer-impl.js',
     ],
   },
+  'getUnconfirmedReferrerUrl': {
+    message: 'Use Viewer.getReferrerUrl() instead.',
+    whitelist: [
+      'extensions/amp-dynamic-css-classes/0.1/amp-dynamic-css-classes.js',
+      'src/3p-frame.js',
+      'src/service/viewer-impl.js',
+    ],
+  },
 };
 
 var ThreePTermsMessage = 'The 3p bootstrap iframe has no polyfills loaded and' +
