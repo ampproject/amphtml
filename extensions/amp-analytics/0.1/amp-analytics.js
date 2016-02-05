@@ -277,6 +277,8 @@ export class AmpAnalytics extends AMP.BaseElement {
       return;
     }
 
+    this.config_['vars']['requestCount']++;
+
     // Replace placeholders with URI encoded values.
     // Precedence is trigger.vars > config.vars.
     // Nested expansion not supported.
@@ -284,12 +286,11 @@ export class AmpAnalytics extends AMP.BaseElement {
       const match = key.match(/([^(]*)(\([^)]*\))?/);
       const name = match[1];
       const argList = match[2] || '';
-      const val = encodeURIComponent(
-          (trigger['vars'] && trigger['vars'][name]) ||
-          (this.config_['vars'] && this.config_['vars'][name]) || '');
+      const raw = (trigger['vars'] && trigger['vars'][name] ||
+          this.config_['vars'] && this.config_['vars'][name]);
+      const val = encodeURIComponent(raw != null ? raw : '');
       return val + argList;
     });
-    this.config_['vars']['requestCount']++;
 
     // For consistentcy with amp-pixel we also expand any url replacements.
     urlReplacementsFor(this.getWin()).expand(request).then(
