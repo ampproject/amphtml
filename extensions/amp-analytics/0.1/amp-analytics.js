@@ -131,9 +131,8 @@ export class AmpAnalytics extends AMP.BaseElement {
               'attributes are required for data to be collected.');
           continue;
         }
-        addListener(this.getWin(), trigger['on'],
-            this.handleEvent_.bind(this, trigger), trigger['selector'],
-            trigger['timer-spec']);
+        addListener(this.getWin(), trigger,
+            this.handleEvent_.bind(this, trigger));
       }
     }
   }
