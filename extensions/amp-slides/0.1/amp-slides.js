@@ -52,15 +52,17 @@ class AmpSlides extends AMP.BaseElement {
 
     this.prevButton_ = document.createElement('button');
     this.prevButton_.textContent = '\u276E';
-    this.prevButton_.style.opacity = 0.6;
-    this.prevButton_.style.position = 'absolute';
-    this.prevButton_.style.zIndex = 10;
-    this.prevButton_.style.left = '16px';
-    this.prevButton_.style.top = '50%';
-    this.prevButton_.style.padding = '8px';
-    this.prevButton_.style.fontSize = '24px';
-    this.prevButton_.style.marginTop = '-20px';
-    this.prevButton_.style.pointerEvents = 'all';
+    st.setStyles(this.prevButton_, {
+      opacity: 0.6,
+      position: 'absolute',
+      zIndex: 10,
+      left: '16px',
+      top: '50%',
+      padding: '8px',
+      fontSize: '24px',
+      marginTop: '-20px',
+      pointerEvents: 'all'
+    });
     this.prevButton_.onclick = () => {
       this.go(-1, true);
     };
@@ -68,15 +70,17 @@ class AmpSlides extends AMP.BaseElement {
 
     this.nextButton_ = document.createElement('button');
     this.nextButton_.textContent = '\u276F';
-    this.nextButton_.style.opacity = 0.6;
-    this.nextButton_.style.position = 'absolute';
-    this.nextButton_.style.zIndex = 10;
-    this.nextButton_.style.right = '16px';
-    this.nextButton_.style.top = '50%';
-    this.nextButton_.style.padding = '8px';
-    this.nextButton_.style.fontSize = '24px';
-    this.nextButton_.style.marginTop = '-20px';
-    this.nextButton_.style.pointerEvents = 'all';
+    st.setStyles(this.nextButton_, {
+      opacity: 0.6,
+      position: 'absolute',
+      zIndex: 10,
+      right: '16px',
+      top: '50%',
+      padding: '8px',
+      fontSize: '24px',
+      marginTop: '-20px',
+      pointerEvents: 'all'
+    });
     this.nextButton_.onclick = () => {
       this.go(1, true);
     };
