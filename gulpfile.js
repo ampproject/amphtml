@@ -270,8 +270,7 @@ function buildExtensionJs(js, path, name, version, options) {
           minify: options.minify,
           minifiedName: minifiedName,
           latestName: latestName,
-          wrapper: windowConfig.getTemplate() +
-              '(window.AMP = window.AMP || [])' +
+          wrapper: '(window.AMP = window.AMP || [])' +
               '.push(function(AMP) {<%= contents %>\n});',
         });
       });
