@@ -15,6 +15,7 @@
  */
 
 var fs = require('fs-extra');
+var windowConfig = require('../window-config');
 var closureCompiler = require('gulp-closure-compiler');
 var gulp = require('gulp');
 var rename = require('gulp-rename');
@@ -74,7 +75,8 @@ function compile(entryModuleFilename, outputDir,
     fs.writeFileSync(
         'build/fake-module/src/polyfills.js',
         '// Not needed in closure compiler\n');
-    var wrapper = '(function(){var process={env:{NODE_ENV:"production"}};' +
+    var wrapper = windowConfig.getTemplate() +
+        '(function(){var process={env:{NODE_ENV:"production"}};' +
         '%output%})();';
     if (options.wrapper) {
       wrapper = options.wrapper.replace('<%= contents %>',

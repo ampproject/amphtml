@@ -37,7 +37,6 @@ var exec = BBPromise.promisify(child_process.exec);
 var gitExec = BBPromise.promisify(git.exec);
 
 var isCanary = argv.type == 'canary';
-var suffix =  isCanary ? '-canary' : '';
 var branch = isCanary ? 'canary' : 'release';
 var isDryrun = argv.dryrun;
 
@@ -45,12 +44,12 @@ var isDryrun = argv.dryrun;
 function changelog() {
   if (!GITHUB_ACCESS_TOKEN) {
     util.log(util.colors.red('Warning! You have not set the ' +
-        'GITHUB_ACCESS_TOKEN env var. This task might hit the default ' +
-        'rate limit set by github (60).'));
+        'GITHUB_ACCESS_TOKEN env var. Aborting "changelog" task.'));
     util.log(util.colors.green('See https://help.github.com/articles/' +
         'creating-an-access-token-for-command-line-use/ ' +
         'for instructions on how to create a github access token. We only ' +
         'need `public_repo` scope.'));
+    return;
   }
 
   return getGitMetadata();
@@ -140,9 +139,8 @@ function getLastGitTag() {
     args: 'describe --abbrev=0 --tags'
   };
   var canaryGrep = isCanary ? 'grep canary$' : 'grep -v canary$';
-  return exec('git tag | ' + canaryGrep + ' | ' +
-      'xargs -I@ git log --format=format:"%ai @%n" -1 @ | ' +
-      'sort -r | awk \'{print $4}\' | head -1').then(function(tag) {
+  return exec(`git describe --abbrev=0 --tags ${branch}`)
+      .then(function(tag) {
         return tag.replace('\n', '');
       });
 }

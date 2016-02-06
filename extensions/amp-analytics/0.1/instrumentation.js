@@ -16,10 +16,16 @@
 
 import {getService} from '../../../src/service';
 import {viewerFor} from '../../../src/viewer';
+import {viewportFor} from '../../../src/viewport';
 import {Observable} from '../../../src/observable';
 
 const MIN_TIMER_INTERVAL_SECONDS_ = 0.5;
 const DEFAULT_MAX_TIMER_LENGTH_SECONDS_ = 7200;
+
+/**
+ * @private {number}
+ */
+const SCROLL_PRECISION_PERCENT = 5;
 
 /**
  * This type signifies a callback that gets called when an analytics event that
@@ -30,18 +36,12 @@ let AnalyticsEventListenerDef;
 
 /**
  * @param {!Window} window Window object to listen on.
- * @param {!AnalyticsEventType} type Event type to listen to.
+ * @param {!JSONObject} config Configuration for instrumentation.
  * @param {!AnalyticsEventListenerDef} listener Callback to call when the event
  *          fires.
- * @param {string=} opt_selector If specified, the given listener
- *   should only be called if the event target matches this selector.
- * @param {JSONObject=} opt_timerSpec If specified, the specification on how
- *   the timer should fire.
  */
-export function addListener(window, type, listener, opt_selector,
-    opt_timerSpec) {
-  return instrumentationServiceFor(window).addListener(
-      type, listener, opt_selector, opt_timerSpec);
+export function addListener(window, config, listener) {
+  return instrumentationServiceFor(window).addListener(config, listener);
 }
 
 /**
@@ -52,7 +52,8 @@ export function addListener(window, type, listener, opt_selector,
 export const AnalyticsEventType = {
   VISIBLE: 'visible',
   CLICK: 'click',
-  TIMER: 'timer'
+  TIMER: 'timer',
+  SCROLL: 'scroll',
 };
 
 /**
@@ -84,6 +85,9 @@ class InstrumentationService {
     /** @const {!Viewer} */
     this.viewer_ = viewerFor(window);
 
+    /** @const {!Viewport} */
+    this.viewport_ = viewportFor(window);
+
     /** @private {boolean} */
     this.clickHandlerRegistered_ = false;
 
@@ -92,18 +96,21 @@ class InstrumentationService {
 
     /** @private {!Object<string, !Observable<!AnalyticsEvent>>} */
     this.observers_ = {};
+
+    /** @private {boolean} */
+    this.scrollHandlerRegistered_ = false;
+
+    /** @private {!Observable<Event>} */
+    this.scrollObservable_ = new Observable();
   }
 
   /**
-   * @param {!AnalyticsEventType} eventType The type of event
+   * @param {!JSONObject} config Configuration for instrumentation.
    * @param {!AnalyticsEventListenerDef} The callback to call when the event
    *   occurs.
-   * @param {string=} opt_selector If specified, the given listener
-   *   should only be called if the event target matches this selector.
-   * @param {JSONObject=} opt_timerSpec If specified, the specification on how
-   *   the timer should fire.
    */
-  addListener(eventType, listener, opt_selector, opt_timerSpec) {
+  addListener(config, listener) {
+    const eventType = config['on'];
     if (eventType === AnalyticsEventType.VISIBLE) {
       if (this.viewer_.isVisible()) {
         listener(new AnalyticsEvent(AnalyticsEventType.VISIBLE));
@@ -115,17 +122,34 @@ class InstrumentationService {
         });
       }
     } else if (eventType === AnalyticsEventType.CLICK) {
-      if (!opt_selector) {
+      if (!config['selector']) {
         console./*OK*/error(this.TAG_,
             'Missing required selector on click trigger');
-      } else {
-        this.ensureClickListener_();
-        this.clickObservable_.add(
-            this.createSelectiveListener_(listener, opt_selector));
+        return;
       }
+
+      this.ensureClickListener_();
+      this.clickObservable_.add(
+          this.createSelectiveListener_(listener, config['selector']));
+    } else if (eventType === AnalyticsEventType.SCROLL) {
+      if (!config['scrollSpec']) {
+        console./*OK*/error(this.TAG_,
+            'Missing scrollSpec on scroll trigger.');
+        return;
+      }
+      this.registerScrollTrigger_(config['scrollSpec'], listener);
+
+      // Trigger an event to fire events that might have already happened.
+      const size = this.viewport_.getSize();
+      this.onScroll_({
+        top: this.viewport_.getScrollTop(),
+        left: this.viewport_.getScrollLeft(),
+        width: size.width,
+        height: size.height
+      });
     } else if (eventType === AnalyticsEventType.TIMER) {
-      if (this.isTimerSpecValid_(opt_timerSpec)) {
-        this.createTimerListener_(listener, opt_timerSpec);
+      if (this.isTimerSpecValid_(config['timerSpec'])) {
+        this.createTimerListener_(listener, config['timerSpec']);
       }
     } else {
       let observers = this.observers_[eventType];
@@ -169,6 +193,14 @@ class InstrumentationService {
   }
 
   /**
+   * @param {!ViewportChangedEventDef} e
+   * @private
+   */
+  onScroll_(e) {
+    this.scrollObservable_.fire(e);
+  }
+
+  /**
    * @param {!Function} listener
    * @param {string} selector
    * @private
@@ -179,6 +211,90 @@ class InstrumentationService {
         listener(new AnalyticsEvent(AnalyticsEventType.CLICK));
       }
     };
+  }
+
+  /**
+   * Register for a listener to be called when the boundaries specified in
+   * config are reached.
+   * @param {!JSONObject} config the config that specifies the boundaries.
+   * @param {Function} listener
+   * @private
+   */
+  registerScrollTrigger_(config, listener) {
+    if (!Array.isArray(config['verticalBoundaries']) &&
+        !Array.isArray(config['horizontalBoundaries'])) {
+      console./*OK*/error(this.TAG_, "Boundaries are required for the scroll " +
+          "trigger to work.");
+      return;
+    }
+
+    // Ensure that the scroll events are being listened to.
+    if (!this.scrollHandlerRegistered_) {
+      this.scrollHandlerRegistered_ = true;
+      this.viewport_.onChanged(this.onScroll_.bind(this));
+    }
+
+    /**
+     * @param {!Object.<number, boolean>} bounds.
+     * @param {number} scrollPos Number representing the current scroll
+     * position.
+     */
+    const triggerScrollEvents = function(bounds, scrollPos) {
+      if (!scrollPos) {
+        return;
+      }
+      // Goes through each of the boundaries and fires an event if it has not
+      // been fired so far and it should be.
+      for (const b in bounds) {
+        if (!bounds.hasOwnProperty(b) || b > scrollPos || bounds[b]) {
+          continue;
+        }
+        bounds[b] = true;
+        listener(new AnalyticsEvent(AnalyticsEventType.SCROLL));
+      }
+    };
+
+    const boundsV = this.normalizeBoundaries_(config['verticalBoundaries']);
+    const boundsH = this.normalizeBoundaries_(config['horizontalBoundaries']);
+    this.scrollObservable_.add(e => {
+      // Calculates percentage scrolled by adding screen height/width to
+      // top/left and dividing by the total scroll height/width.
+      triggerScrollEvents(boundsV,
+          (e.top + e.height) * 100 / this.viewport_.getScrollHeight());
+      triggerScrollEvents(boundsH,
+          (e.left + e.width) * 100 / this.viewport_.getScrollWidth());
+    });
+  }
+
+  /**
+   * Rounds the boundaries for scroll trigger to nearest
+   * SCROLL_PRECISION_PERCENT and returns an object with normalized boundaries
+   * as keys and false as values.
+   *
+   * @param {!Array.<number>} bounds array of bounds.
+   * @return {!Object.<number,boolean>} Object with normalized bounds as keys
+   * and false as value.
+   * @private
+   */
+  normalizeBoundaries_(bounds) {
+    const result = {};
+    if (!bounds || !Array.isArray(bounds)) {
+      return result;
+    }
+
+    for (let b = 0; b < bounds.length; b++) {
+      let bound = bounds[b];
+      if (typeof bound !== 'number' || !isFinite(bound)) {
+        console./*OK*/error(this.TAG_,
+            'Scroll trigger boundaries must be finite.');
+        return result;
+      }
+
+      bound = Math.min(Math.round(bound / SCROLL_PRECISION_PERCENT) *
+          SCROLL_PRECISION_PERCENT, 100);
+      result[bound] = false;
+    }
+    return result;
   }
 
   /**
@@ -223,10 +339,10 @@ class InstrumentationService {
                timerSpec['interval'] < MIN_TIMER_INTERVAL_SECONDS_) {
       console./*OK*/error(this.TAG_, 'Bad timer interval specification');
       return false;
-    } else if (timerSpec.hasOwnProperty('max-timer-length') &&
-              (typeof timerSpec['max-timer-length'] !== 'number' ||
-                  timerSpec['max-timer-length'] <= 0)) {
-      console./*OK*/error(this.TAG_, 'Bad max-timer-length specification');
+    } else if (timerSpec.hasOwnProperty('maxTimerLength') &&
+              (typeof timerSpec['maxTimerLength'] !== 'number' ||
+                  timerSpec['maxTimerLength'] <= 0)) {
+      console./*OK*/error(this.TAG_, 'Bad maxTimerLength specification');
       return false;
     } else {
       return true;
@@ -244,7 +360,7 @@ class InstrumentationService {
         timerSpec['interval'] * 1000);
     listener(new AnalyticsEvent(AnalyticsEventType.TIMER));
 
-    const maxTimerLength = timerSpec['max-timer-length'] ||
+    const maxTimerLength = timerSpec['maxTimerLength'] ||
         DEFAULT_MAX_TIMER_LENGTH_SECONDS_;
     this.win_.setTimeout(this.win_.clearInterval.bind(this.win_, intervalId),
         maxTimerLength * 1000);

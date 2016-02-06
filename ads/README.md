@@ -18,6 +18,7 @@ Reasons include:
   - Allows browsers to run the ad in a different process from the primary page (even better security and prevents JS inside the ad to block the main page UI thread).
   - Prevents ads doing less than optimal things to measure user behavior and other interference with the primary page.
 - The AMP runtime may at any moment decide that there are too many iframes on a page and that memory is low. In that case it would unload ads that were previously loaded and are no longer visible. It may later load new ads in the same slot if the user scrolls them back into view.
+- The AMP runtime may decide to set an ad that is currently not visible to `display: none` to reduce browser layout and compositing cost.
 
 
 ## The iframe sandbox

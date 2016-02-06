@@ -153,6 +153,12 @@ class UrlReplacements {
         () => viewportFor(this.win_).getScrollHeight());
     });
 
+    // Returns a promise resolving to viewport.getScrollWidth.
+    this.set_('SCROLL_WIDTH', () => {
+      return vsyncFor(this.win_).measurePromise(
+        () => viewportFor(this.win_).getScrollWidth());
+    });
+
     // Returns screen.width.
     this.set_('SCREEN_WIDTH', () => {
       return this.win_.screen.width;

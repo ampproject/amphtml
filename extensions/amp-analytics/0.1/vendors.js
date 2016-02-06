@@ -83,9 +83,9 @@ export const ANALYTICS_CONFIG = {
     'triggers': {
       'trackInterval': {
         'on': 'timer',
-        'timer-spec': {
+        'timerSpec': {
           'interval': 15,
-          'max-timer-length': 7200
+          'maxTimerLength': 7200
         },
         'request': 'interval',
         'vars': {

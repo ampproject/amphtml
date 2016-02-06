@@ -93,6 +93,7 @@ function runAdTestSuiteAgainstInstaller(name, installer) {
         const url = iframe.getAttribute('src');
         expect(url).to.match(/^http:\/\/ads.localhost:/);
         expect(url).to.match(/frame(.max)?.html#{/);
+        expect(iframe.style.display).to.equal('');
 
         const fragment = url.substr(url.indexOf('#') + 1);
         const data = JSON.parse(fragment);
@@ -104,7 +105,7 @@ function runAdTestSuiteAgainstInstaller(name, installer) {
         expect(data._context.canonicalUrl).to.equal('https://schema.org/');
         expect(data.aax_size).to.equal('300x250');
 
-        describe('ad intersection', () => {
+        describe('ad preconnect', () => {
           const doc = iframe.ownerDocument;
           const fetches = doc.querySelectorAll(
               'link[rel=prefetch]');
@@ -174,6 +175,41 @@ function runAdTestSuiteAgainstInstaller(name, installer) {
           });
         });
       });
+
+      it('should toggle iframe when doc becomes inactive', () => {
+        return getAd({
+          width: 300,
+          height: 250,
+          type: 'a9',
+          src: 'https://testsrc',
+          'data-aax_size': '300x250',
+          'data-aax_pubname': 'test123',
+          'data-aax_src': '302',
+          // Test precedence
+          'data-width': '6666'
+        }, 'https://schema.org').then(ad => {
+          const iframe = ad.firstChild;
+          expect(iframe.style.display).to.equal('');
+          const obj = ad.implementation_;
+          expect(obj.isRelayoutNeeded()).to.be.true;
+          expect(obj.paused_).to.be.false;
+          const ret = obj.documentInactiveCallback();
+          expect(ret).to.be.true;
+          expect(iframe.style.display).to.equal('none');
+          expect(obj.paused_).to.be.true;
+          obj.layoutCallback();
+          expect(iframe.style.display).to.equal('');
+          expect(obj.paused_).to.be.false;
+
+          // Pause again
+          const ret2 = obj.documentInactiveCallback();
+          expect(ret2).to.be.true;
+          obj.viewportCallback(false);
+          expect(iframe.style.display).to.equal('none');
+          obj.viewportCallback(true);
+        });
+      });
+
 
       it('should require a canonical', () => {
         return expect(getAd({

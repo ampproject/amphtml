@@ -105,6 +105,8 @@ export class IntersectionObserver extends Observable {
     this.shouldSendIntersectionChanges_ = false;
     /** @private {Array<function>} */
     this.unlisteners_ = [];
+    /** @private {boolean} */
+    this.inViewport_ = false;
 
     this.init_();
   }
@@ -145,7 +147,10 @@ export class IntersectionObserver extends Observable {
   startSendingIntersectionChanges_() {
     this.shouldSendIntersectionChanges_ = true;
     this.baseElement_.getVsync().measure(() => {
-      this.sendElementIntersection_();
+      if (this.baseElement_.isInViewport()) {
+        this.onViewportCallback(true);
+      }
+      this.fire();
     });
   }
 
@@ -155,6 +160,10 @@ export class IntersectionObserver extends Observable {
    * @param {boolean} inViewport true if the element is in viewport.
    */
   onViewportCallback(inViewport) {
+    if (this.inViewport_ == inViewport) {
+      return;
+    }
+    this.inViewport_ = inViewport;
     // Lets the ad know that it became visible or no longer is.
     this.fire();
     // And update the ad about its position in the viewport while
