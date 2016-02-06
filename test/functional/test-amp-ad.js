@@ -105,7 +105,7 @@ function runAdTestSuiteAgainstInstaller(name, installer) {
         expect(data._context.canonicalUrl).to.equal('https://schema.org/');
         expect(data.aax_size).to.equal('300x250');
 
-        describe('ad intersection', () => {
+        describe('ad preconnect', () => {
           const doc = iframe.ownerDocument;
           const fetches = doc.querySelectorAll(
               'link[rel=prefetch]');
