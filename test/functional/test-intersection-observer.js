@@ -157,9 +157,9 @@ describe('IntersectionObserver', () => {
   let sandbox;
   let testIframe;
   let element;
-  const getIntersectionChangeEntrySpy = sinon.spy();
-  const onScrollSpy = sinon.spy();
-  const onChangeSpy = sinon.spy();
+  let getIntersectionChangeEntrySpy;
+  let onScrollSpy;
+  let onChangeSpy;
 
   function getIframe(src) {
     const i = document.createElement('iframe');
@@ -180,11 +180,16 @@ describe('IntersectionObserver', () => {
     testElementViewportCallback = sinon.spy();
     testElementGetInsersectionElementLayoutBox = sinon.spy();
     testElementDocumentInactiveCallback = sinon.spy();
+    getIntersectionChangeEntrySpy = sinon.spy();
+    onScrollSpy = sinon.spy();
+    onChangeSpy = sinon.spy();
     testIframe = getIframe(iframeSrc);
     element = new ElementClass();
     element.getVsync = function() {
       return {
-        measure: function() {}
+        measure: function(fn) {
+          fn();
+        }
       };
     };
     element.getViewport = function() {
@@ -207,6 +212,7 @@ describe('IntersectionObserver', () => {
         return getIntersectionChangeEntry(111, rootBounds, layoutBox);
       }
     };
+    element.isInViewport = () => false;
   });
 
   afterEach(() => {
@@ -240,8 +246,7 @@ describe('IntersectionObserver', () => {
     postMessageSpy = sinon/*OK*/.spy(testIframe.contentWindow, 'postMessage');
     const ioInstance = new IntersectionObserver(element, testIframe);
     ioInstance.startSendingIntersectionChanges_();
-    ioInstance.sendElementIntersection_();
-    expect(getIntersectionChangeEntrySpy.callCount);
+    expect(getIntersectionChangeEntrySpy.callCount).to.equal(1);
     expect(postMessageSpy.callCount).to.equal(1);
     postMessageSpy/*OK*/.restore();
   });
@@ -263,5 +268,15 @@ describe('IntersectionObserver', () => {
     ioInstance.onViewportCallback();
     expect(fireSpy.callCount).to.equal(2);
     expect(ioInstance.unlistenViewportChanges_).to.be.null;
+  });
+
+  it('should go into in-viewport state for initially visible element', () => {
+    element.isInViewport = () => true;
+    const ioInstance = new IntersectionObserver(element, testIframe);
+    ioInstance.startSendingIntersectionChanges_();
+    expect(getIntersectionChangeEntrySpy.callCount).to.equal(2);
+    expect(onScrollSpy.callCount).to.equal(1);
+    expect(onChangeSpy.callCount).to.equal(1);
+    expect(ioInstance.unlistenViewportChanges_).to.not.be.null;
   });
 });
