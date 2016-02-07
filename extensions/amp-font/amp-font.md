@@ -14,18 +14,15 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-### <a name="`amp-font`"></a> `amp-font`
+## <a name="`amp-font`"></a> `amp-font`
 
 The `amp-font` extension can trigger and monitor the loading of custom fonts on AMP pages.
 
 
-####Behavior
+###Behavior
 
-The `amp-font` extension should be used for controlling timeouts on font loading.
+The `amp-font` extension should be used for controlling timeouts on font loading. It allows adding and removing CSS classes from `document.documentElement` based on whether a font was loaded or is in an error-state. For example:
 
-The `amp-font` extension allows adding and removing CSS classes from document.documentElement based on whether a font was loaded or is in error-state.
-
-Example:
 ```html
   <amp-font
       layout="nodisplay"
@@ -41,43 +38,42 @@ Example:
       on-load-remove-class="my-other-font-loading"></amp-font>
 ```
 
-The extension observes loading of a font and when it loads executes the optional attributes `on-load-add-class` and `on-load-remove-class` and when there is any error or timeout runs `on-error-remove-class` and `on-error-add-class`.
+When the extension detects the loading of a font, it appends the optional attributes `on-load-add-class` and `on-load-remove-class`; when there is any error or timeout, it appends `on-error-remove-class` and `on-error-add-class`.
 
-Using these classes authors can guard whether a font is displayed and get the following results:
+Using these classes, authors can monitor whether a font is displayed to achieve the following results:
 
-- get a short (e.g. 3000ms) timeout in Safari similar to other browsers
-- implement FOIT where the page renders with no text before the font comes in
-- make the timeout very short and only use a font if it was already cached.
+- get a short (~ 3000ms) timeout in Safari, similar to other browsers
+- implement FOIT, where the page renders with no text before the font comes in
+- make the timeout very short, and only use a font if it was already cached
 
+The `amp-font` extension accepts the `layout` value `nodisplay`.
 
-The `amp-font` extension accepts the `layout` value:  `nodisplay`
-
-####Attributes
+###Attributes
 
 **font-family**
 
 The font-family of the custom font being loaded.
 
-**timeout**
+**timeout** (Optional)
 
-Time in milliseconds after which the we don't wait for the custom font to be available. This attribute is optional and it's default value is 3000. If the timeout is set to 0 then the amp-font loads the font if it is already in the cache, otherwise the font would not be loaded. If the timeout is has an invalid value then the timeout defaults to 3000.
+Time in milliseconds (default: 3000ms) after which the page does not wait for the custom font to be available. If the timeout is set to 0 then `amp-font` loads the font only if it is already in the cache; otherwise the font is not loaded. If the timeout has an invalid value then the timeout defaults to 3000ms.
 
-**on-load-add-class**
+**on-load-add-class** (Optional)
 
-CSS class that would be added to the `document.documentElement`  after making sure that the custom font is available for display. This attribute is optional.
+CSS class that is added to the `document.documentElement`  after making sure that the custom font is available for display.
 
-**on-load-remove-class**
+**on-load-remove-class** (Optional)
 
-CSS class that would be removed from the `document.documentElement` and `document.body` after making sure that the custom font is available for display. This attribute is optional.
+CSS class that is removed from the `document.documentElement` and `document.body` after making sure that the custom font is available for display.
 
-**on-error-add-class**
+**on-error-add-class** (Optional)
 
-CSS class that would be added to the `document.documentElement`, if the timeout interval runs out before the font becomes available for use. This attribute is optional.
+CSS class that is added to the `document.documentElement` if the timeout interval runs out before the font becomes available for use.
 
-**on-error-remove-class**
+**on-error-remove-class** (Optional)
 
-CSS class that would be removed from the `document.documentElement` and `document.body` , if the timeout interval runs out before the font becomes available for use. This attribute is optional.
+CSS class that is removed from the `document.documentElement` and `document.body` if the timeout interval runs out before the font becomes available for use.
 
 **font-weight, font-style, font-variant**
 
-The attributes above should all behave like they do on standard elements.
+These attributes should all behave like they do on standard elements.
