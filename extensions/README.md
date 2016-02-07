@@ -2,7 +2,6 @@
 
 AMP Extensions are either extended components or extended templates.
 
-
 ## AMP HTML Extended Components
 
 Extended components must be explicitly included into the document as custom elements.
@@ -41,7 +40,6 @@ Current list of extended components:
 | [`amp-vimeo`](amp-vimeo/amp-vimeo.md) | Displays a Vimeo video. |
 | [`amp-vine`](amp-vine/amp-vine.md) | Displays a Vine simple embed. |
 | [`amp-youtube`](amp-youtube/amp-youtube.md) | Displays a YouTube video. |
-
 
 ## AMP HTML Extended Templates
 
