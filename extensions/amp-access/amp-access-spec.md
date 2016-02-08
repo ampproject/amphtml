@@ -18,9 +18,51 @@ limitations under the License.
 
 ### <a name="amp-access-spec"></a>AMP Access Spec
 
-#Background
+<table>
+  <tr>
+    <td width="40%"><strong>Description</strong></td>
+    <td>AMP Access or “AMP paywall and subscription support” gives publishers control over which content can be accessed by a reader and with what restrictions, based on the reader’s subscription status, number of views, and other factors.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Availability</strong></td>
+    <td><a href="/docs/reference/experimental.html">Experimental</a></td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Required Script</strong></td>
+    <td><code>&lt;script async custom-element="amp-access" src="https://cdn.ampproject.org/v0/amp-access-0.1.js">&lt;/script></code></td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Examples</strong></td>
+    <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/article-access.amp.html">article-access.amp.html</a></td>
+  </tr>
+</table>
 
-AMP Access or “AMP paywall and subscription support” provides control to publishers over what content can be accessed by a reader and with what restrictions,  based on the reader’s subscription status, number of views and so on.
+The following lists validation errors specific to the `amp-access-spec` tag
+(see also `amp-access-spec` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii):
+
+<!---
+More validations need to be added once implemented;
+this table will change soon.
+-->
+
+<table>
+  <tr>
+    <th width="40%"><strong>Validation Error</strong></th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td width="40%"><a href="/docs/reference/validation_errors.html#tag-required-by-another-tag-is-missing">TAG_REQUIRED_BY_MISSING</a></td>
+    <td>Error thrown when required <code>amp-access-spec</code> extension <code>.js</code> script tag is missing or incorrect.</td>
+  </tr>
+  <tr>
+    <td width="40%"><a href="/docs/reference/validation_errors.html#mandatory-attribute-missing">MANDATORY_ATTR_MISSING</a></td>
+    <td>Error thrown when the <code>amp-access-spec</code> extension <code>.json</code> script is missing the mandatory attribute, <code>type</code>.</td>
+  </tr>
+  <tr>
+    <td width="40%"><a href="/docs/reference/validation_errors.html#invalid-attribute-value">INVALID_ATTR_VALUE</a></td>
+    <td>Error thrown when the attribute, <code>type</code>, is any value other than the required value: <code>application/json</code>. Error also thrown when the <code>src</code> attribute for the script tag is invalid. The value must be <code>"https://cdn.ampproject.org/v0/amp-access-0.1.js"</code>.</td>
+  </tr>
+</table>
 
 #Solution
 

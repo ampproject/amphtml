@@ -14,11 +14,51 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-analytics"></a>`amp-analytics`
+### <a name="amp-analytics"></a>`amp-analytics`
 
-Capture analytics data from an AMP document.
+<table>
+  <tr>
+    <td width="40%"><strong>Description</strong></td>
+    <td>Capture analytics data from an AMP document.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Availability</strong></td>
+    <td>Stable</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Required Script</strong></td>
+    <td><code>&lt;script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js">&lt;/script></code></td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Examples</strong></td>
+    <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/analytics.amp.html">analytics.amp.html</a></td>
+  </tr>
+</table>
 
-## <a name="behavior"></a>Behavior
+The following lists validation errors specific to the `amp-analytics` tag
+(see also `amp-analytics` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii):
+
+<!---
+Check for valid HTTPS URL coming soon;
+this table will need to change too.
+-->
+
+<table>
+  <tr>
+    <th width="40%"><strong>Validation Error</strong></th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td width="40%"><a href="/docs/reference/validation_errors.html#tag-required-by-another-tag-is-missing">TAG_REQUIRED_BY_MISSING</a></td>
+    <td>Error thrown when required <code>amp-analytics</code> extension <code>.js</code> script tag is missing or incorrect.</td>
+  </tr>
+  <tr>
+    <td width="40%"><a href="/docs/reference/validation_errors.html#invalid-attribute-value">INVALID_ATTR_VALUE</a></td>
+    <td>Error thrown when the <code>src</code> attribute for the script tag is invalid. The value must be <code>"https://cdn.ampproject.org/v0/amp-analytics-0.1.js"</code>.</td>
+  </tr>
+</table>
+
+#### <a name="behavior"></a>Behavior
 
 The `<amp-analytics>` element is used to measure activity on an AMP document. The details concerning what is measured and how
 that data is sent to an analytics server is specified in a JSON configuration object.
@@ -57,7 +97,7 @@ when the document is first loaded, and each time an `<a>` tag is clicked:
 </amp-analytics>
 ```
 
-## <a name="attributes"></a>Attributes
+#### <a name="attributes"></a>Attributes
 
   - `type` This optional attribute can be specified to use one of the built-in analytics providers. Currently supported values for type are:
     - `chartbeat`: Adds support for Chartbeat. More details for adding Chartbeat support can be found at [support.chartbeat.com](http://support.chartbeat.com/docs/).
@@ -79,7 +119,7 @@ when the document is first loaded, and each time an `<a>` tag is clicked:
     processing the analytics request until a [amp-user-notification](../../extensions/amp-user-notification/amp-user-notification.md) with
     the given HTML-id was confirmed by the user.
 
-## Configuration
+#### Configuration
 
 Configuration may be specified inline (as shown in the example above) or fetched remotely by specifying a URL in the
 `config` attribute. Additionally, built-in configuration for popular analytics vendors can be selected using
@@ -112,7 +152,7 @@ The `<amp-analytics>` configuration object uses the following format:
   }
 }
 ```
-### Requests
+##### Requests
 The `requests` attribute specifies the URLs used to transmit data to an analytics platform. The `request-name` is used
 in the trigger configuration to specify what request should be sent in response to a pariticular event. The `request-value`
 is an https URL. These values may include placeholder tokens that can reference other requests or variables.
@@ -125,7 +165,7 @@ is an https URL. These values may include placeholder tokens that can reference 
 }
 ```
 
-### Vars
+##### Vars
 `amp-analytics` defines many basic variables that can be used in requests. A list of all such variables is available [here](./analytics-vars.md). In addition, all the variables supported by [AMP HTML URL Variable Substitutions](../../spec/amp-var-substitutions.md) are also supported.
 
 The `vars` attribute in the configuration can be used to define new key-value pairs or override existing variables that can be referenced in `request` values. New variables are commonly used to specify publisher specific information.
@@ -137,7 +177,7 @@ The `vars` attribute in the configuration can be used to define new key-value pa
 }
 ```
 
-### Triggers
+##### Triggers
 The `triggers` attribute describes when an analytics request should be sent. It contains a key-value pair of trigger-name and
  trigger-configuration. Trigger name can be any string comprised of alphanumeric characters (a-zA-Z0-9). Triggers from a
  configuration with lower precedence are overridden by triggers with the same names from a configuration with higher precedence.
@@ -186,7 +226,7 @@ Following configuration only applies to specific values of `on`.
 }
 ```
 
-### Transport
+##### Transport
 The `transport` attribute specifies how to send a request. The value is an object with fields that
 indicate which transport methods are acceptable.
 
