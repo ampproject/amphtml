@@ -5,7 +5,11 @@ In order to ensure minimum latency and quality, please follow the instructions l
 
 *Examples : DFP, A9*
 
+<<<<<<< HEAD
 As an adserver, publishers you support include a JavaScript library provided by you and place various ‘ad snippets’ that rely on the JavaScript library to fetch ads and render them on the publisher’s website.
+=======
+As an adserver, publishers you support include a javascript library provided by you and place various ‘ad snippets’ that rely on the javascript library to fetch ads and render them on the publisher’s website.
+>>>>>>> 58a6f6381a59928998298d42a35153673715efe6
 Since AMP doesn’t allow publishers to execute arbitrary JavaScript (like the library above), you will need to contribute to the AMP open source code to allow the amp-ad built-in tag to request ads from your ad server.
 
 For example : Amazon A9 server can be invoked using following syntax :
