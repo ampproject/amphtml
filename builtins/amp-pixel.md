@@ -16,7 +16,42 @@ limitations under the License.
 
 ### <a name="amp-pixel"></a> `amp-pixel`
 
-The `amp-pixel` element is meant to be used as a typical tracking pixel - to count page views.
+<table>
+   <tr>
+    <td width="40%"><strong>Description</strong></td>
+    <td>The <code>amp-pixel</code> element is meant to be used as a typical tracking pixel - to count page views.</td>
+  </tr>
+   <tr>
+    <td width="40%"><strong>Availability</strong></td>
+    <td>Stable</td>
+  </tr>
+   <tr>
+    <td width="40%"><strong>Examples</strong></td>
+    <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/everything.amp.html">everything.amp.html</a></td>
+  </tr>
+</table>
+
+The following lists validation errors specific to the `amp-pixel` tag
+(see also `amp-pixel` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii):
+
+<table>
+  <tr>
+    <th width="40%"><strong>Validation Error</strong></th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td width="40%"><a href="/docs/reference/validation_errors.html#mandatory-attribute-missing">MANDATORY_ATTR_MISSING</a></td>
+    <td>Error thrown when <code>src</code> attribute is missing.</td>
+  </tr>
+  <tr>
+    <td width="40%"><a href="/docs/reference/validation_errors.html#implied-layout-isnt-supported-by-amp-tag">IMPLIED_LAYOUT_INVALID</a></td>
+    <td>Error thrown when implied layout set to <code>FIXED_HEIGHT</code>, <code>RESPONSIVE</code>, <code>FILL</code>, or <code>CONTAINER</code> as these aren't supported.</td>
+  </tr>
+  <tr>
+    <td width="40%"><a href="/docs/reference/validation_errors.html#specified-layout-isnt-supported-by-amp-tag">SPECIFIED_LAYOUT_INVALID</a></td>
+    <td>Error thrown when specified layout set to <code>FIXED_HEIGHT</code>, <code>RESPONSIVE</code>, <code>FILL</code>, or <code>CONTAINER</code> as these aren't supported.</td>
+  </tr>
+</table>
 
 #### Behavior
 
