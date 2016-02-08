@@ -35,6 +35,7 @@ import {facebook} from './facebook';
 import {manageWin} from './environment';
 import {nonSensitiveDataPostMessage, listenParent} from './messaging';
 import {twitter} from './twitter';
+import {yieldmo} from '../ads/yieldmo';
 import {register, run} from '../src/3p';
 import {parseUrl} from '../src/url';
 import {assert} from '../src/asserts';
@@ -58,6 +59,7 @@ register('plista', plista);
 register('doubleclick', doubleclick);
 register('taboola', taboola);
 register('dotandads', dotandads);
+register('yieldmo', yieldmo);
 register('_ping_', function(win, data) {
   win.document.getElementById('c').textContent = data.ping;
 });
