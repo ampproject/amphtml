@@ -122,6 +122,11 @@ export function installAd(win) {
        * Whether this ad was ever in the viewport.
        */
       this.wasEverVisible_ = false;
+
+      /**
+       * @private @const
+       */
+      this.viewer_ = viewerFor(this.getWin());
     }
 
     /**
@@ -268,6 +273,9 @@ export function installAd(win) {
             this.iframe_.style.visibility = '';
             this.sendEmbedInfo_(this.isInViewport());
           }, /* opt_is3P */ true);
+          this.viewer_.onVisibilityChanged(() => {
+            this.sendEmbedInfo_(this.isInViewport());
+          });
 
           return loadPromise(this.iframe_);
         });
@@ -344,7 +352,7 @@ export function installAd(win) {
      * @private
      */
     maybePause_() {
-      if (!this.wasEverVisible_ && viewerFor(this.getWin()).isVisible()) {
+      if (!this.wasEverVisible_ && this.viewer_.isVisible()) {
         return;
       }
       // We only pause ads that have been visible before
@@ -365,7 +373,8 @@ export function installAd(win) {
         const targetOrigin =
             this.iframe_.src ? parseUrl(this.iframe_.src).origin : '*';
         postMessage(this.iframe_, 'embed-state', {
-          inViewport: inViewport
+          inViewport: inViewport,
+          pageHidden: !this.viewer_.isVisible(),
         }, targetOrigin, /* opt_is3P */ true);
       }
     }

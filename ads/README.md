@@ -50,6 +50,9 @@ More information can be provided in a similar fashion if needed (Please file an 
 
 ### Ad viewability
 
+
+#### Position in viewport
+
 Ads can call the special API `window.context.observeIntersection(changesCallback)` to receive IntersectionObserver style [change records](http://rawgit.com/slightlyoff/IntersectionObserver/master/index.html#intersectionobserverentry) of the ad's intersection with the parent viewport.
 
 The API allows specifying a callback that fires with change records when AMP observes that an ad becomes visible and then while it is visible, changes are reported as they happen.
@@ -78,6 +81,16 @@ Example usage:
   // condition to stop listening to intersection messages.
   unlisten();
 ```
+
+#### Page visibility
+
+AMP documents may be practically invisible without the visibility being reflected by the [page visibility API](https://developer.mozilla.org/en-US/docs/Web/API/Page_Visibility_API). This is primarily the case when a document is swiped away or being prerendered.
+
+Whether a document is actually being visible can be queried using:
+
+`window.context.hidden` which is true if the page is not visible as per page visibility API or because the AMP viewer currently does not show it.
+
+Additionally one can observe the `amp:visibilitychange` on the `window` object to be notified about changes in visibility.
 
 ### Ad resizing
 
