@@ -16,7 +16,42 @@ limitations under the License.
 
 ### <a name="amp-mustache"></a> `amp-mustache`
 
-The `amp-mustache` allows rendering of [Mustache.js](https://github.com/janl/mustache.js/) templates.
+<table>
+  <tr>
+    <td width="40%"><strong>Description</strong></td>
+    <td>Allows rendering of <a href="https://github.com/janl/mustache.js/">Mustache.js</a>.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Availability</strong></td>
+    <td>Stable</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Examples</strong></td>
+    <td>None</td>
+  </tr>
+</table>
+
+The following lists validation errors specific to `amp-mustache`
+(see also `template` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii):
+
+<table>
+  <tr>
+    <th width="40%"><strong>Validation Error</strong></th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td width="40%"><a href="/docs/reference/validation_errors.html#attribute-contains-template-syntax">TEMPLATE_IN_ATTR_NAME</a></td>
+    <td>Mustache templates must be within the <code>amp-mustache</code> tag. Error thrown when templating syntax found in an attribute in another tag.</td>
+  </tr>
+  <tr>
+    <td width="40%"><a href="/docs/reference/validation_errors.html#attribute-contains-unescaped-template-syntax">UNESCAPED_TEMPLATE_IN_ATTR_VALUE</a></td>
+    <td>Mustache templates must be within the <code>amp-mustache</code> tag. Error thrown when <a href="https://github.com/janl/mustache.js/#variables">unescaped templating syntax</a> found in an attribute in another tag.</td>
+  </tr>
+  <tr>
+    <td width="40%"><a href="/docs/reference/validation_errors.html#attribute-contains-template-partial">TEMPLATE_PARTIAL_IN_ATTR_VALUE</a></td>
+    <td>Mustache templates must be within the <code>amp-mustache</code> tag. Error thrown when <a href="https://github.com/janl/mustache.js/#partials">template partial</a> found in an attribute in another tag.</td>
+  </tr>
+</table>
 
 #### Syntax
 
