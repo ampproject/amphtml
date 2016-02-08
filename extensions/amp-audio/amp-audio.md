@@ -16,13 +16,72 @@ limitations under the License.
 
 ### <a name="amp-audio"></a> `amp-audio`
 
-A replacement for the HTML5 `audio` tag. Like all embedded external resources in a AMP file, the audio is lazily loaded only when the `amp-audio` element is in or near the viewport.
+<table>
+  <tr>
+    <td width="40%"><strong>Description</strong></td>
+    <td>A replacement for the HTML5 <code>audio</code> tag. The <code>amp-audio</code> component is only to be used for direct HTML5 audio file embeds.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Availability</strong></td>
+    <td>Stable</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Required Script</strong></td>
+    <td><code>&lt;script async custom-element="amp-audio" src="https://cdn.ampproject.org/v0/amp-audio-0.1.js">&lt;/script></code></td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Examples</strong></td>
+    <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/everything.amp.html">everything.amp.html</a></td>
+  </tr>
+</table>
 
-The `amp-audio` component is only to be used for direct HTML5 audio file embeds.
+The following lists validation errors specific to the `amp-audio` tag
+(see also `amp-audio` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii):
+
+<!---
+What does fixed height and fixed width mean for audio layout?
+May need to add something to this table based on technical review.
+-->
+
+<table>
+  <tr>
+    <th width="40%"><strong>Validation Error</strong></th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td width="40%"><a href="/docs/reference/validation_errors.html#tag-required-by-another-tag-is-missing">TAG_REQUIRED_BY_MISSING</a></td>
+    <td>Error thrown when required <code>amp-audio</code> extension <code>.js</code> script tag is missing or incorrect.</td>
+  </tr>
+  <tr>
+    <td width="40%"><a href="/docs/reference/validation_errors.html#mandatory-tag-ancestor-with-hint">MANDATORY_TAG_ANCESTOR_WITH_HINT</a></td>
+    <td>Error thrown if your AMP document uses <code>audio</code> instead of <code>amp-audio</code>. Error message: The tag <code>audio</code> may only appear as a descendant of tag <code>noscript</code>. Did you mean <code>amp-audio</code>?</td>
+  </tr>
+  <tr>
+    <td width="40%"><a href="/docs/reference/validation_errors.html#missing-url">MISSING_URL</a></td>
+    <td>Error thrown when <code>src</code> attribute is missing it's URL.</td>
+  </tr>
+  <tr>
+    <td width="40%"><a href="/docs/reference/validation_errors.html#invalid-url">INVALID_URL</a></td>
+    <td>Error thrown when <code>src</code> attribute's URL is invalid.</td>
+  </tr>
+  <tr>
+    <td width="40%"><a href="/docs/reference/validation_errors.html#invalid-url-protocol">INVALID_URL_PROTOCOL</a></td>
+    <td>Error thrown <code>src</code> attribute's URL is <code>http</code>; <code>https</code> protocol required.</td>
+  </tr>
+  <tr>
+    <td width="40%"><a href="/docs/reference/validation_errors.html#implied-layout-isnt-supported-by-amp-tag">IMPLIED_LAYOUT_INVALID</a></td>
+    <td>Error thrown when implied layout is set to <code>RESPONSIVE</code>, <code>FILL</code>, or <code>CONTAINER</code>; these layout types aren't supported.</td>
+  </tr>
+  <tr>
+    <td width="40%"><a href="/docs/reference/validation_errors.html#specified-layout-isnt-supported-by-amp-tag">SPECIFIED_LAYOUT_INVALID</a></td>
+    <td>Error thrown when specified layout is set to <code>RESPONSIVE</code>, <code>FILL</code>, or <code>CONTAINER</code>; these layout types aren't supported.</td>
+  </tr>
+</table>
 
 #### Behavior
 
-The `amp-audio` component loads the audio resource specified by its `src` attribute lazily, at a time determined by the runtime. It can be controlled much the same way as a standard HTML5 `audio` tag.
+The `amp-audio` component loads the audio resource specified by its `src` attribute at a time determined by the runtime. It can be controlled in much the same way as a standard HTML5 `audio` tag.
+Like all embedded external resources in an AMP file, the audio is "lazily" loaded, only when the `amp-audio` element is in or near the viewport.
 
 The `amp-audio` component HTML accepts up to three unique types of HTML nodes as children - `source` tags, a placeholder for before the audio starts, and a fallback if the browser doesn’t support HTML5 audio.
 
