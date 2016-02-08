@@ -154,6 +154,7 @@ window.draw3p = function(opt_configCallback) {
   delete data._context;
   manageWin(window);
   draw3p(window, data, opt_configCallback);
+  updateVisibilityState(window);
   nonSensitiveDataPostMessage('render-start');
 };
 
@@ -190,6 +191,23 @@ function observeIntersection(observerCallback) {
   nonSensitiveDataPostMessage('send-intersections');
   return listenParent('intersection', data => {
     observerCallback(data.changes);
+  });
+}
+
+/**
+ * Listens for events via postMessage and updates `context.hidden` based on
+ * it and forwards the event to a custom event called `amp:visibilitychange`.
+ * @param {!Window} global
+ */
+function updateVisibilityState(global) {
+  listenParent('embed-state', function(data) {
+    global.context.hidden = data.pageHidden;
+    const event = global.document.createEvent('Event');
+    event.data = {
+      hidden: data.pageHidden,
+    };
+    event.initEvent('amp:visibilitychange', true, true);
+    global.dispatchEvent(event);
   });
 }
 

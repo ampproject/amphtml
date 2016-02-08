@@ -50,6 +50,10 @@ describe('Rendering of one ad', () => {
     }).then(unusedCanvas => {
       return poll('3p JS to load.', () => iframe.contentWindow.context);
     }).then(context => {
+      expect(context.hidden).to.be.false;
+      expect(context.referrer).to.equal('http://localhost:' + location.port +
+          '/context.html');
+      expect(context.pageViewId).to.be.greaterThan(0);
       expect(context.data.tagForChildDirectedTreatment).to.be.false;
       expect(context.data.categoryExclusion).to.be.equal('health');
       expect(context.data.targeting).to.be.jsonEqual(
@@ -58,7 +62,14 @@ describe('Rendering of one ad', () => {
         return iframe.contentWindow.document.querySelector(
             'script[src="https://www.googletagservices.com/tag/js/gpt.js"]');
       });
-    }).then(unusedCanvas => {
+    }).then(() => {
+      return poll('render-start message received', () => {
+        return fixture.messages.filter(message => {
+          return message.type == 'render-start';
+        }).length;
+      });
+    }).then(() => {
+      expect(iframe.style.visibility).to.equal('');
       const win = iframe.contentWindow;
       return poll('GPT loaded', () => {
         return win.googletag && win.googletag.pubads && win.googletag.pubads();
@@ -77,7 +88,14 @@ describe('Rendering of one ad', () => {
             return canvas.querySelector(
                 '[id="google_ads_iframe_/4119129/mobile_ad_banner_0"]');
           }, null, 5000);
-    }).then(unusedAdIframe => {
+    }).then(() => {
+      expect(iframe.contentWindow.context.hidden).to.be.false;
+      return new Promise(resolve => {
+        iframe.contentWindow.addEventListener('amp:visibilitychange', resolve);
+        fixture.win.AMP.viewer.visibilityState_ = 'hidden';
+        fixture.win.AMP.viewer.onVisibilityChange_();
+      });
+    }).then(() => {
       expect(iframe.getAttribute('width')).to.equal('320');
       expect(iframe.getAttribute('height')).to.equal('50');
       if (isEdge) { // TODO(cramforce): Get this to pass in Edge

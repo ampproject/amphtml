@@ -111,7 +111,8 @@ describe('3p-frame', () => {
         '"canonicalUrl":"https://foo.bar/baz",' +
         '"pageViewId":"' + docInfo.pageViewId + '","clientId":"cidValue",' +
         '"location":{"href":"' + locationHref + '"},"tagName":"MY-ELEMENT",' +
-        '"mode":{"localDev":true,"development":false,"minified":false}}}';
+        '"mode":{"localDev":true,"development":false,"minified":false}' +
+        ',"hidden":false}}';
     expect(src).to.equal(
         'http://ads.localhost:9876/dist.3p/current/frame.max.html' +
         fragment);

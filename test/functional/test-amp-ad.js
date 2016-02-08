@@ -414,7 +414,7 @@ function runAdTestSuiteAgainstInstaller(name, installer) {
           expect(posts).to.have.length(7);
         });
 
-        it('report changes upon remeasure', () => {
+        it('should report changes upon remeasure', () => {
           expect(posts).to.have.length(1);
           ampAd.viewportCallback(true);
           expect(posts).to.have.length(3);
@@ -428,6 +428,21 @@ function runAdTestSuiteAgainstInstaller(name, installer) {
           // viewport, because that might have just changed.
           ampAd.onLayoutMeasure();
           expect(posts).to.have.length(8);
+        });
+
+        it('should report page visibility changes', () => {
+          expect(posts).to.have.length(1);
+          const viewer = viewerFor(ampAd.getWin());
+          viewer.visibilityState_ = 'hidden';
+          viewer.onVisibilityChange_();
+          expect(posts).to.have.length(2);
+          expect(posts[1].data.type).to.equal('embed-state');
+          expect(posts[1].data.hidden).to.equal(true);
+          viewer.visibilityState_ = 'visible';
+          viewer.onVisibilityChange_();
+          expect(posts).to.have.length(3);
+          expect(posts[2].data.type).to.equal('embed-state');
+          expect(posts[2].data.hidden).to.equal(false);
         });
       });
 
