@@ -27,9 +27,14 @@ import {viewerFor} from './viewer';
  * Maximum number of tick events we allow to accumulate in the performance
  * instance's queue before we start dropping those events and can no longer
  * be forwarded to the actual `tick` function when it is set.
- * @const {number}
  */
-const QUEUE_LIMIT_ = 50;
+const QUEUE_LIMIT = 50;
+
+/**
+ * Added to relative relative timings so that they are never 0 which the
+ * underlying library considers a non-value.
+ */
+const ENSURE_NON_ZERO = 1000;
 
 /**
  * @typedef {{
@@ -182,8 +187,10 @@ export class Performance {
    * @param {number} value The value in milliseconds that should be ticked.
    */
   tickDelta(label, value) {
-    this.tick('_' + label, undefined, 0);
-    this.tick(label, '_' + label, value);
+    // ENSURE_NON_ZERO Is added instead of non-zero, because the underlying
+    // library doesn't like 0 values.
+    this.tick('_' + label, undefined, ENSURE_NON_ZERO);
+    this.tick(label, '_' + label, value + ENSURE_NON_ZERO);
   }
 
 
@@ -214,7 +221,7 @@ export class Performance {
 
     // Start dropping the head of the queue if we've reached the limit
     // so that we don't take up too much memory in the runtime.
-    if (this.events_.length >= QUEUE_LIMIT_) {
+    if (this.events_.length >= QUEUE_LIMIT) {
       this.events_.shift();
     }
 
