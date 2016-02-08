@@ -47,6 +47,7 @@ export const adPreconnect = {
     'https://tpc.googlesyndication.com',
   ],
   dotandads: 'https://bal.ad.dotandad.com',
+  widespace: 'https://engine.widespace.com',
 };
 
 /**

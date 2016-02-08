@@ -40,6 +40,7 @@ import {parseUrl} from '../src/url';
 import {assert} from '../src/asserts';
 import {taboola} from '../ads/taboola';
 import {smartadserver} from '../ads/smartadserver';
+import {widespace} from '../ads/widespace';
 
 /**
  * Whether the embed type may be used with amp-embed tag.
@@ -64,6 +65,7 @@ register('_ping_', function(win, data) {
 register('twitter', twitter);
 register('facebook', facebook);
 register('smartadserver', smartadserver);
+register('widespace', widespace);
 
 /**
  * Visible for testing.
