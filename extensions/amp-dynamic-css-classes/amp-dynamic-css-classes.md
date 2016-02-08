@@ -16,8 +16,38 @@ limitations under the License.
 
 ### <a name="amp-dynamic-css-classes"></a> AMP Dynamic CSS Classes
 
-The AMP Dynamic CSS Classes extension adds several dynamic CSS class
-names onto the HTML element.
+<table>
+  <tr>
+    <td width="40%"><strong>Description</strong></td>
+    <td>Adds several dynamic CSS class names onto the HTML element.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Availability</strong></td>
+    <td><a href="/docs/reference/experimental.html">Experimental</a></td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Required Script</strong></td>
+    <td><code>&lt;script async custom-element="amp-dynamic-css-classes" src="https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.js">&lt;/script></code></td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Examples</strong></td>
+    <td>None</td>
+  </tr>
+</table>
+
+The following lists validation errors specific to the `amp-dynamic-css-classes` tag
+(see also `amp-dynamic-css-classes` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii):
+
+<table>
+  <tr>
+    <th width="40%"><strong>Validation Error</strong></th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td width="40%"><a href="/docs/reference/validation_errors.html#tag-required-by-another-tag-is-missing">TAG_REQUIRED_BY_MISSING</a></td>
+    <td>Error thrown when required <code>amp-dynamic-css-classes</code> extension <code>.js</code> script tag is missing or incorrect.</td>
+  </tr>
+</table>
 
 #### Behavior
 

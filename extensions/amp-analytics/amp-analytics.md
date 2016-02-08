@@ -16,7 +16,43 @@ limitations under the License.
 
 # <a name="amp-analytics"></a>`amp-analytics`
 
-Capture analytics data from an AMP document.
+<table>
+  <tr>
+    <td width="40%"><strong>Description</strong></td>
+    <td>Capture analytics data from an AMP document.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Availability</strong></td>
+    <td>Stable</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Required Script</strong></td>
+    <td><code>&lt;script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js">&lt;/script></code></td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Examples</strong></td>
+    <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/analytics.amp.html">analytics.amp.html</a></td>
+  </tr>
+</table>
+
+The following lists validation errors specific to the `amp-analytics` tag
+(see also `amp-analytics` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii):
+
+<!---
+Check for valid HTTPS URL coming soon;
+this table will need to change too.
+-->
+
+<table>
+  <tr>
+    <th width="40%"><strong>Validation Error</strong></th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td width="40%"><a href="/docs/reference/validation_errors.html#tag-required-by-another-tag-is-missing">TAG_REQUIRED_BY_MISSING</a></td>
+    <td>Error thrown when required <code>amp-analytics</code> extension <code>.js</code> script tag is missing or incorrect.</td>
+  </tr>
+</table>
 
 ## <a name="behavior"></a>Behavior
 
