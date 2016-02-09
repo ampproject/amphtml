@@ -34,6 +34,7 @@ goog.require('amp.validator.ValidationError.Severity');
 goog.require('amp.validator.ValidationResult');
 goog.require('amp.validator.ValidationResult.Status');
 goog.require('amp.validator.ValidatorRules');
+goog.require('goog.Uri');
 goog.require('goog.array');
 goog.require('goog.asserts');
 goog.require('goog.string');
@@ -178,6 +179,12 @@ function specificity(code) {
       return 30;
     case amp.validator.ValidationError.Code.ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT:
       return 31;
+    case amp.validator.ValidationError.Code.MISSING_URL:
+      return 32;
+    case amp.validator.ValidationError.Code.INVALID_URL_PROTOCOL:
+      return 33;
+    case amp.validator.ValidationError.Code.INVALID_URL:
+      return 34;
     case amp.validator.ValidationError.Code.DEPRECATED_ATTR:
       return 101;
     case amp.validator.ValidationError.Code.DEPRECATED_TAG:
@@ -339,7 +346,7 @@ const TagNameStack = function TagNameStack() {
 /**
  * Some tags have no end tags as per HTML5 spec. These were extracted
  * from the single page spec by looking for "no end tag" with CTRL+F.
- * @type {Object<string,number>}
+ * @type {Object<string, number>}
  */
 TagNameStack.TagsWithNoEndTags = function() {
   // TODO(johannes): Figure out how to prevent the Closure compiler from
@@ -500,10 +507,10 @@ const CdataMatcher = function CdataMatcher(tagSpec) {
 /**
  * Generates an AT Rule Parsing Spec from a CssSpec.
  * @param {!amp.validator.CssSpec} cssSpec
- * @return {!Object<string,parse_css.BlockType>}
+ * @return {!Object<string, parse_css.BlockType>}
  */
 function computeAtRuleParsingSpec(cssSpec) {
-  /** @type {!Object<string,parse_css.BlockType>} */
+  /** @type {!Object<string, parse_css.BlockType>} */
   const ampAtRuleParsingSpec = {};
   for (const atRuleSpec of cssSpec.atRuleSpec) {
     goog.asserts.assert(atRuleSpec.name !== null);
@@ -889,6 +896,16 @@ const ParsedAttrSpec = function ParsedAttrSpec(attrSpec, attrId) {
    */
   this.id_ = attrId;
   /**
+   * @type {!goog.structs.Set<string>}
+   * @private
+   */
+  this.valueUrlAllowedProtocols_ = new goog.structs.Set();
+  if (this.spec_.valueUrl !== null) {
+    for (const protocol of this.spec_.valueUrl.allowedProtocol) {
+      this.valueUrlAllowedProtocols_.add(protocol);
+    }
+  }
+  /**
    * @type {!goog.structs.Map<string, !Object>}
    * @private
    */
@@ -922,6 +939,63 @@ ParsedAttrSpec.prototype.getId = function() {
  */
 ParsedAttrSpec.prototype.getSpec = function() {
   return this.spec_;
+};
+
+/**
+ * @param {!Context} context
+ * @param {!string} attrName
+ * @param {!string} attrValue
+ * @param {!amp.validator.TagSpec} tagSpec
+ * @param {!string} specUrl
+ * @param {!amp.validator.ValidationResult} result
+ */
+ParsedAttrSpec.prototype.validateAttrValueUrl = function(
+    context, attrName, attrValue, tagSpec, specUrl, result) {
+  const maybe_uri = goog.string.trim(attrValue);
+  if (maybe_uri === '') {
+    context.addError(
+        amp.validator.ValidationError.Code.MISSING_URL,
+        /* params */ [attrName, getDetailOrName(tagSpec)], specUrl, result);
+    return;
+  }
+  let uri;
+  try {
+    uri = goog.Uri.parse(maybe_uri);
+  } catch (ex) {
+    context.addError(
+        amp.validator.ValidationError.Code.INVALID_URL,
+        /* params */ [attrName, getDetailOrName(tagSpec), attrValue],
+        specUrl, result);
+    return;
+  }
+  if (uri.hasScheme() &&
+      !this.valueUrlAllowedProtocols_.contains(uri.getScheme().toLowerCase())) {
+    context.addError(
+        amp.validator.ValidationError.Code.INVALID_URL_PROTOCOL,
+        /* params */ [attrName, getDetailOrName(tagSpec),
+        uri.getScheme().toLowerCase()], specUrl, result);
+    return;
+  }
+  const unescaped_maybe_uri = goog.string.unescapeEntities(maybe_uri);
+  let unescaped_uri;
+  try {
+    unescaped_uri = goog.Uri.parse(unescaped_maybe_uri);
+  } catch (ex) {
+    context.addError(
+        amp.validator.ValidationError.Code.INVALID_URL,
+        /* params */ [attrName, getDetailOrName(tagSpec), attrValue],
+        specUrl, result);
+    return;
+  }
+  if (unescaped_uri.hasScheme() &&
+      !this.valueUrlAllowedProtocols_.contains(
+          unescaped_uri.getScheme().toLowerCase())) {
+    context.addError(
+        amp.validator.ValidationError.Code.INVALID_URL_PROTOCOL,
+        /* params */ [attrName, getDetailOrName(tagSpec),
+        unescaped_uri.getScheme().toLowerCase()], specUrl, result);
+    return;
+  }
 };
 
 /**
@@ -1525,6 +1599,48 @@ ParsedTagSpec.prototype.validateLayout = function(context, attrsByKey, result) {
 };
 
 /**
+ * Helper method for ValidateAttributes, for when an attribute is
+ * encountered which is not specified by the validator.protoascii
+ * specification.
+ * @param {!string} attrName
+ * @param {!Context} context
+ * @param {!amp.validator.ValidationResult} result
+ * @return {boolean} indicating success or validation failure
+ */
+ParsedTagSpec.prototype.validateAttrNotFoundInSpec = function(
+    attrName, context, result) {
+  // For now, we just skip data- attributes in the validator, because
+  // our schema doesn't capture which ones would be ok or not. E.g.
+  // in practice, some type of ad or perhaps other custom elements require
+  // particular data attributes.
+  // http://www.w3.org/TR/html5/single-page.html#attr-data-*
+  // http://w3c.github.io/aria-in-html/
+  // However, mostly to avoid confusion, we want to make sure that
+  // nobody tries to make a Mustache template data attribute,
+  // e.g. <div data-{{foo}}>, so we also exclude those characters.
+  if (goog.string.startsWith(attrName, 'data-') &&
+      !goog.string.contains(attrName, '}') &&
+      !goog.string.contains(attrName, '{')) {
+    return true;
+  }
+
+  // At this point, it's an error either way, but we try to give a
+  // more specific error in the case of Mustache template characters.
+  if (attrName.indexOf('{{') != -1) {
+    context.addError(
+        amp.validator.ValidationError.Code.TEMPLATE_IN_ATTR_NAME,
+        /* params */ [attrName, getDetailOrName(this.spec_)],
+        this.templateSpecUrl_, result);
+  } else {
+    context.addError(
+        amp.validator.ValidationError.Code.DISALLOWED_ATTR,
+        /* params */ [attrName, getDetailOrName(this.spec_)],
+        this.spec_.specUrl, result);
+  }
+  return false;
+};
+
+/**
  * Validates whether the attributes set on |encountered_tag| conform to this
  * tag specification. All mandatory attributes must appear. Only attributes
  * explicitly mentioned by this tag spec may appear.
@@ -1564,35 +1680,12 @@ ParsedTagSpec.prototype.validateAttributes = function(
     const encounteredAttrName = encounteredAttrKey.toLowerCase();
     const parsedSpec = this.attrsByName_.get(encounteredAttrName);
     if (parsedSpec === undefined) {
-      // For now, we just skip data- attributes in the validator, because
-      // our schema doesn't capture which ones would be ok or not. E.g.
-      // in practice, some type of ad or perhaps other custom elements require
-      // particular data attributes.
-      // http://www.w3.org/TR/html5/single-page.html#attr-data-*
-      // http://w3c.github.io/aria-in-html/
-      // However, mostly to avoid confusion, we want to make sure that
-      // nobody tries to make a Mustache template data attribute,
-      // e.g. <div data-{{foo}}>, so we also exclude those characters.
-      if (goog.string.startsWith(encounteredAttrKey, 'data-') &&
-          !goog.string.contains(encounteredAttrKey, '}') &&
-          !goog.string.contains(encounteredAttrKey, '{')) {
+      if (this.validateAttrNotFoundInSpec(encounteredAttrName, context,
+                                          resultForAttempt)) {
         continue;
-      }
-
-      // At this point, it's an error either way, but we try to give a
-      // more specific error in the case of Mustache template characters.
-      if (encounteredAttrName.indexOf('{{') != -1) {
-        context.addError(
-            amp.validator.ValidationError.Code.TEMPLATE_IN_ATTR_NAME,
-            /* params */ [encounteredAttrName, getDetailOrName(this.spec_)],
-            this.templateSpecUrl_, resultForAttempt);
       } else {
-        context.addError(
-            amp.validator.ValidationError.Code.DISALLOWED_ATTR,
-            /* params */ [encounteredAttrName, getDetailOrName(this.spec_)],
-            this.spec_.specUrl, resultForAttempt);
+        return;
       }
-      return;
     }
     // Specific checks for attribute values descending from a template tag.
     if (hasTemplateAncestor) {
@@ -1624,7 +1717,7 @@ ParsedTagSpec.prototype.validateAttributes = function(
     }
     if (!hasTemplateAncestor ||
         !this.valueHasTemplateSyntax(encounteredAttrValue)) {
-      // The value, value_regex, and value_properties fields are
+      // The value, value_regex, value_url, and value_properties fields are
       // treated like a oneof, but we're not using oneof because it's
       // a feature that was added after protobuf 2.5.0 (which our
       // open-source version uses).
@@ -1648,6 +1741,17 @@ ParsedTagSpec.prototype.validateAttributes = function(
               /* params */ [encounteredAttrName, getDetailOrName(this.spec_),
                             encounteredAttrValue],
               this.spec_.specUrl, resultForAttempt);
+          return;
+        }
+      }
+      // TODO: remove srcset exclusion when srcset code is ready.
+      if (parsedSpec.getSpec().valueUrl !== null &&
+          encounteredAttrName != 'srcset') {
+        parsedSpec.validateAttrValueUrl(
+            context, encounteredAttrName, encounteredAttrValue,
+            this.spec_, this.spec_.specUrl, resultForAttempt);
+        if (resultForAttempt.status ===
+            amp.validator.ValidationResult.Status.FAIL) {
           return;
         }
       }

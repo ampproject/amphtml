@@ -11,6 +11,4 @@ feature_tests/regexps.html:66:2 The attribute 'name' in tag 'meta name=viewport'
 feature_tests/regexps.html:77:2 The attribute 'autoplay' in tag 'amp-audio' is set to the invalid value 'invalid'. (see https://github.com/ampproject/amphtml/blob/master/extensions/amp-audio/amp-audio.md)
 feature_tests/regexps.html:78:2 The attribute 'autoplay' in tag 'amp-audio' is set to the invalid value 'desktopfoo'. (see https://github.com/ampproject/amphtml/blob/master/extensions/amp-audio/amp-audio.md)
 feature_tests/regexps.html:79:2 The attribute 'autoplay' in tag 'amp-audio' is set to the invalid value 'foodesktop'. (see https://github.com/ampproject/amphtml/blob/master/extensions/amp-audio/amp-audio.md)
-feature_tests/regexps.html:86:2 The attribute 'href' in tag 'a' is set to the invalid value 'javascript:alert'.
-feature_tests/regexps.html:87:2 The attribute 'href' in tag 'a' is set to the invalid value ' javascript:alert'.
-feature_tests/regexps.html:89:7 The 'amp-audio extension .js script' tag is missing or incorrect, but required by 'amp-audio'. (see https://github.com/ampproject/amphtml/blob/master/extensions/amp-audio/amp-audio.md)
+feature_tests/regexps.html:82:7 The 'amp-audio extension .js script' tag is missing or incorrect, but required by 'amp-audio'. (see https://github.com/ampproject/amphtml/blob/master/extensions/amp-audio/amp-audio.md)
