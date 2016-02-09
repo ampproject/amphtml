@@ -78,6 +78,7 @@ export const naturalDimensions_ = {
 export const LOADING_ELEMENTS_ = {
   'AMP-ANIM': true,
   'AMP-BRIGHTCOVE': true,
+  'AMP-EMBED': true,
   'AMP-IFRAME': true,
   'AMP-IMG': true,
   'AMP-INSTAGRAM': true,
