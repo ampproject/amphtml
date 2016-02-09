@@ -25,7 +25,7 @@ min_validator_revision_required: 87
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 142
+spec_file_revision: 143
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
 #
@@ -658,6 +658,7 @@ tags: {
     # TODO(gregable): Come up with a better scheme for this.
     value_regex: "("
         "accessibility|"
+        "attachment|"  # Commonly used by wordpress
         "author|"
         "alternate|"
         "appendix|"
@@ -746,9 +747,11 @@ tags: {
         "vcalendar-parent|"
         "vcalendar-sibling|"
         "webmention|"
+        "wp-att-[0-9]+|"  # Commonly used by wordpress
         "yandex-tableau-widget"
       ")( +("
         "accessibility|"
+        "attachment|"  # Commonly used by wordpress
         "author|"
         "alternate|"
         "appendix|"
@@ -837,6 +840,7 @@ tags: {
         "vcalendar-parent|"
         "vcalendar-sibling|"
         "webmention|"
+        "wp-att-[0-9]+|"  # Commonly used by wordpress
         "yandex-tableau-widget"
       "))*"
   }
