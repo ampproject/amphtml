@@ -16,8 +16,6 @@
 
 import {createFixtureIframe, pollForLayout, poll} from
     '../../testing/iframe';
-import {timer} from
-    '../../src/timer';
 
 describe('Rendering of one ad', () => {
   let fixture;
