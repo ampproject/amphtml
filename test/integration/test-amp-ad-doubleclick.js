@@ -51,8 +51,13 @@ describe('Rendering of one ad', () => {
       return poll('3p JS to load.', () => iframe.contentWindow.context);
     }).then(context => {
       expect(context.hidden).to.be.false;
-      expect(context.referrer).to.equal('http://localhost:' + location.port +
-          '/context.html');
+      // In some browsers the referrer is empty. But in Chrome it works, so
+      // we always check there.
+      if (context.referrer !== '' ||
+          (navigator.userAgent.match(/Chrome/) && !isEdge)) {
+        expect(context.referrer).to.equal('http://localhost:' + location.port +
+            '/context.html');
+      }
       expect(context.pageViewId).to.be.greaterThan(0);
       expect(context.data.tagForChildDirectedTreatment).to.be.false;
       expect(context.data.categoryExclusion).to.be.equal('health');
