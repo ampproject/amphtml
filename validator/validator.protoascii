@@ -25,7 +25,7 @@ min_validator_revision_required: 85
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 139
+spec_file_revision: 140
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
 #
@@ -2587,7 +2587,10 @@ tags: {
   name: "amp-install-serviceworker"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-install-serviceworker/amp-install-serviceworker.md"
   also_requires: "amp-install-serviceworker extension .js script"
-  attrs: { name: "src" }
+  attrs: { name: "src" mandatory: true }
+  amp_layout: {
+    supported_layouts: NODISPLAY
+  }
 }
 
 # AMP Layout attributes: implied for TagSpecs with amp_layout field
