@@ -30,11 +30,6 @@ var commonTestPaths = [
     included: false,
   },
   {
-    pattern: 'build/**/*.js',
-    included: false,
-    served: true
-  },
-  {
     pattern: 'examples/**/*',
     included: false,
     served: true
