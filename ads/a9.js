@@ -20,7 +20,6 @@ import {writeScript, checkData} from '../src/3p';
  * @param {!Window} global
  * @param {!Object} data
  */
-
 export function a9(global, data) {
   checkData(data, ['aax_size', 'aax_pubname', 'aax_src']);
   /*eslint "google-camelcase/google-camelcase": 0*/
