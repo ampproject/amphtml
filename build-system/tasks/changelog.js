@@ -136,13 +136,11 @@ function buildChangelog(gitMetadata, githubMetadata) {
  */
 function getLastGitTag() {
   var options = {
-    args: 'describe --abbrev=0 --tags'
+    args: `describe --abbrev=0 --first-parent --tags ${branch}`
   };
-  var canaryGrep = isCanary ? 'grep canary$' : 'grep -v canary$';
-  return exec(`git describe --abbrev=0 --tags ${branch}`)
-      .then(function(tag) {
-        return tag.replace('\n', '');
-      });
+  return gitExec(options).then(function(tag) {
+    return tag.trim();
+  });
 }
 
 /**
