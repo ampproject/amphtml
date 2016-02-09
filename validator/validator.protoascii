@@ -25,7 +25,7 @@ min_validator_revision_required: 85
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 137
+spec_file_revision: 138
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
 #
@@ -2354,7 +2354,7 @@ tags: {
   name: "amp-analytics"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-analytics.md"
   also_requires: "amp-analytics extension .js script"
-  attrs: { name: "type" value: "googleanalytics" }
+  attrs: { name: "type" }
   # TODO(gregable): This should require a valid https URL as the attr value.
   attrs: { name: "config" }
 }
