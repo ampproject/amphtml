@@ -93,7 +93,9 @@ describe('amp-analytics', function() {
   }
 
   function waitForSendRequest(analytics, opt_max) {
+    expect(analytics.element.style.display).to.equal('');
     return analytics.layoutCallback().then(() => {
+      expect(analytics.element.style.display).to.equal('none');
       if (sendRequestSpy.callCount > 0) {
         return;
       }
