@@ -5,11 +5,8 @@ In order to ensure minimum latency and quality, please follow the instructions l
 
 *Examples : DFP, A9*
 
-<<<<<<< HEAD
-As an adserver, publishers you support include a JavaScript library provided by you and place various ‘ad snippets’ that rely on the JavaScript library to fetch ads and render them on the publisher’s website.
-=======
 As an adserver, publishers you support include a javascript library provided by you and place various ‘ad snippets’ that rely on the javascript library to fetch ads and render them on the publisher’s website.
->>>>>>> 58a6f6381a59928998298d42a35153673715efe6
+
 Since AMP doesn’t allow publishers to execute arbitrary JavaScript (like the library above), you will need to contribute to the AMP open source code to allow the amp-ad built-in tag to request ads from your ad server.
 
 For example : Amazon A9 server can be invoked using following syntax :
@@ -24,7 +21,6 @@ For example : Amazon A9 server can be invoked using following syntax :
 ```
 
 Also note that each of the attributes that follow ‘type’ are dependent on the parameters that Amazon’s A9 server expects in order to deliver an ad. The file [a9.js](/a9.js) shows you how the parameters are mapped to making a JavaScript call which will invoke the server by invoking the URL : https://c.amazon-adsystem.com/aax2/assoc.js  and appending the corresponding parameters being passed in by the AMP ad tag  and return the ad.
-
 
 ##### Side Platform (SSP) or an Ad Exchange
 
@@ -46,8 +42,8 @@ Some ad formats are not fully supported at the moment and we recommend testing t
 
 *Examples : Brightcove, Ooyala*
 
-A video player that works in regular HTML pages will not work in AMP and therefore a specific tag needs to be created that will allow the AMP runtime to load your player. 
-Brightcove has created a custom [amp-brightcove](https://github.com/ampproject/amphtml/blob/master/extensions/amp-brightcove/amp-brightcove.md) tag that allows media and ads to be played in AMP pages. 
+A video player that works in regular HTML pages will not work in AMP and therefore a specific tag needs to be created that will allow the AMP runtime to load your player.
+Brightcove has created a custom [amp-brightcove](https://github.com/ampproject/amphtml/blob/master/extensions/amp-brightcove/amp-brightcove.md) tag that allows media and ads to be played in AMP pages.
 
 A brightcove player can be invoked by the following:
 
@@ -61,7 +57,6 @@ A brightcove player can be invoked by the following:
 ```
 For instructions on how to develop an amp tag like brightcove, please See pull request [here](https://github.com/ampproject/amphtml/pull/1052).
 
-
 #### Video Ad Network
 
 *Examples : Tremor, Brightroll*
@@ -70,7 +65,6 @@ If you are a video ad network, please work with your publisher to ensure that :
 
 -All video assets are being served over HTTPS
 -The publisher’s video player has AMP support
-
 
 #### Data Management Platform (DMP)
 *Examples : KRUX, Bluekai*
@@ -94,4 +88,3 @@ Also see approach to using the [intersection observer pattern](https://github.co
 *Examples : Taboola, Outbrain*
 
 If you have some piece of JavaScript embeded on the publisher website today but the approach will not work in AMP pages. If you would like to recommend content on an AMP page, we suggest that you use the amp-embed extension to request the content details. Please see the [Taboola](https://github.com/ampproject/amphtml/blob/master/ads/taboola.md) example.
-

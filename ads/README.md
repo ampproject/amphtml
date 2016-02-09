@@ -5,7 +5,6 @@ See also our [ad integration guidelines](../3p/README.md#ads) and [3rd party ads
 ## Overview
 Ads are just another external resource and must play within the same constraints placed on all resources in AMP. We aim to support a large subset of existing ads with little or no changes to how the integrations work. Our long term goal is to further improve the impact of ads on the user experience through changes across the entire vertical client side stack.
 
-
 ## Constraints
 A summary of constraints placed on external resources such as ads in AMP HTML:
 
@@ -18,7 +17,6 @@ Reasons include:
   - Allows browsers to run the ad in a different process from the primary page (even better security and prevents JS inside the ad to block the main page UI thread).
   - Prevents ads doing less than optimal things to measure user behavior and other interference with the primary page.
 - The AMP runtime may at any moment decide that there are too many iframes on a page and that memory is low. In that case it would unload ads that were previously loaded and are no longer visible. It may later load new ads in the same slot if the user scrolls them back into view.
-
 
 ## The iframe sandbox
 
@@ -102,24 +100,21 @@ var unlisten = window.context.onResizeDenied(function(requestedHeight) {
 });
 ```
 
-
 Here are some factors that affect how fast the resize will be executed:
 
 - Whether the resize is triggered by the user action;
 - Whether the resize is requested for a currently active ad;
 - Whether the resize is requested for an ad below the viewport or above the viewport.
 
-
 ### Optimizing ad performance
 
 #### JS reuse across iframes
-To allow ads to bundle HTTP requests across multiple ad units on the same page the object `window.context.master` will contain the window object of the iframe being elected master iframe for the current page. The `window.context.isMaster` property is `true` when the current frame is the master frame. 
+To allow ads to bundle HTTP requests across multiple ad units on the same page the object `window.context.master` will contain the window object of the iframe being elected master iframe for the current page. The `window.context.isMaster` property is `true` when the current frame is the master frame.
 
 #### Preconnect and prefetch
 Add the JS URLs that an ad **always** fetches or always connects to (if you know the origin but not the path) to [_config.js](_config.js).
 
 This triggers prefetch/preconnect when the ad is first seen, so that loads are faster when they come into view.
-
 
 ### Ad markup
 Ads are loaded using a the <amp-ad> tag given the type of the ad network and name value pairs of configuration. This is an example for the A9 network:
