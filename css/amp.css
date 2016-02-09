@@ -306,7 +306,8 @@ template {
 }
 
 amp-pixel {
-  position: absolute !important;
+  /* Fixed to make position independent of page other elements. */
+  position: fixed !important;
   top: 0 !important;
   width: 1px !important;
   height: 1px !important; /* Only things with height are ever loaded. */
@@ -344,7 +345,8 @@ amp-instagram {
  * Analytics tags should never be visible. keep them hidden.
  */
 amp-analytics {
-  position: absolute !important;
+  /* Fixed to make position independent of page other elements. */
+  position: fixed !important;
   top: 0 !important;
   width: 1px !important;
   height: 1px !important;
