@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {writeScript} from '../src/3p';
+import {loadScript,writeScript} from '../src/3p';
 
 /**
  * @param {!Window} global
@@ -22,10 +22,9 @@ import {writeScript} from '../src/3p';
  */
 
 export function mediaimpact(global, data) {
-  const src = "https://ec-ns.sascdn.com/diff/251/bild.js";
-  writeScript(global, src);
-  /*global.SmartAdServerAjax = function() {
-    global.asmi.pageSet.pageName = data.page;
-    global.asmi.sas.call(false, data.format, data.target, '', data.slot, 1);
-  }*/
+    global.fif = false;
+    writeScript(global, "https://ec-ns.sascdn.com/diff/251/divscripte/amp.js?dom=" + window.context.location.host, () => {
+        asmi.sas.call(data.site + '/(' + data.page + ')', data.format, data.target, '', 'sas_' + data.slot.replace('sas_',''), 1);
+        document.getElementsByTagName('body')[0].style.margin = "0px";
+    });
 }
