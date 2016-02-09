@@ -57,6 +57,7 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
       'amp:stubbed': 0,
       'amp:load:start': 0
     };
+    const messages = [];
     let html = __html__[fixture];
     if (!html) {
       throw new Error('Cannot find fixture: ' + fixture);
@@ -74,6 +75,11 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
       if (opt_beforeLoad) {
         opt_beforeLoad(win);
       }
+      win.addEventListener('message', (event) => {
+        if (event.data && /^amp/.test(event.data.sentinel)) {
+          messages.push(event.data);
+        }
+      })
       // Function that returns a promise for when the given event fired at
       // least count times.
       let awaitEvent = (eventName, count) => {
@@ -123,7 +129,8 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
           doc: win.document,
           iframe: iframe,
           awaitEvent: awaitEvent,
-          errors: errors
+          errors: errors,
+          messages: messages,
         });
       };
     };

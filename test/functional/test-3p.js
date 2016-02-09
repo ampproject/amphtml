@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {validateSrcPrefix, validateSrcContains, checkData, validateData,
-    validateDataExists, validateExactlyOne} from '../../src/3p';
+import {computeInMasterFrame, validateSrcPrefix, validateSrcContains,
+    checkData, validateData, validateDataExists, validateExactlyOne}
+    from '../../src/3p';
 import * as sinon from 'sinon';
 
 describe('3p', () => {
@@ -167,6 +168,54 @@ describe('3p', () => {
         /xxxxxx must contain exactly one of attributes: red, green, blue./);
   });
 
-
+  it('should do work only in master', () => {
+    const taskId = 'exampleId';
+    const master = {
+      context: {
+        isMaster: true,
+      }
+    };
+    master.context.master = master;
+    const slave0 = {
+      context: {
+        isMaster: false,
+        master: master
+      }
+    };
+    const slave1 = {
+      context: {
+        isMaster: false,
+        master: master
+      }
+    };
+    const slave2 = {
+      context: {
+        isMaster: false,
+        master: master
+      }
+    };
+    let done;
+    let workCalls = 0;
+    const work = d => {
+      workCalls++;
+      done = d;
+    };
+    let progress = '';
+    const frame = id => {
+      return result => {
+        progress += result + id;
+      };
+    };
+    computeInMasterFrame(slave0, taskId, work, frame('slave0'));
+    expect(workCalls).to.equal(0);
+    computeInMasterFrame(master, taskId, work, frame('master'));
+    expect(workCalls).to.equal(1);
+    computeInMasterFrame(slave1, taskId, work, frame('slave1'));
+    expect(progress).to.equal('');
+    done(';');
+    expect(progress).to.equal(';slave0;master;slave1');
+    computeInMasterFrame(slave2, taskId, work, frame('slave2'));
+    expect(progress).to.equal(';slave0;master;slave1;slave2');
+    expect(workCalls).to.equal(1);
+  });
 });
-

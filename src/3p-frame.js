@@ -73,7 +73,8 @@ function getFrameAttributes(parentWindow, element, opt_type) {
       href: locationHref
     },
     tagName: element.tagName,
-    mode: getMode()
+    mode: getMode(),
+    hidden: !viewer.isVisible(),
   };
   const adSrc = element.getAttribute('src');
   if (adSrc) {

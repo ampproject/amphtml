@@ -193,6 +193,8 @@ function runAdTestSuiteAgainstInstaller(name, installer) {
           const obj = ad.implementation_;
           expect(obj.isRelayoutNeeded()).to.be.true;
           expect(obj.paused_).to.be.false;
+          expect(obj.wasEverVisible_).to.be.true;
+          obj.wasEverVisible_ = false;
           const ret = obj.documentInactiveCallback();
           expect(ret).to.be.true;
           expect(iframe.style.display).to.equal('none');
@@ -200,16 +202,53 @@ function runAdTestSuiteAgainstInstaller(name, installer) {
           obj.layoutCallback();
           expect(iframe.style.display).to.equal('');
           expect(obj.paused_).to.be.false;
+          expect(obj.wasEverVisible_).to.be.false;
+          obj.viewportCallback(true);
+          expect(obj.wasEverVisible_).to.be.true;
 
           // Pause again
           const ret2 = obj.documentInactiveCallback();
           expect(ret2).to.be.true;
-          obj.viewportCallback(false);
           expect(iframe.style.display).to.equal('none');
-          obj.viewportCallback(true);
         });
       });
 
+      it('should toggle an ad when it gets out of viewport', () => {
+        return getAd({
+          width: 300,
+          height: 250,
+          type: 'a9',
+          src: 'https://testsrc',
+          'data-aax_size': '300x250',
+          'data-aax_pubname': 'test123',
+          'data-aax_src': '302',
+          // Test precedence
+          'data-width': '6666'
+        }, 'https://schema.org').then(ad => {
+          const iframe = ad.firstChild;
+          expect(iframe.style.display).to.equal('');
+          const obj = ad.implementation_;
+          expect(obj.isRelayoutNeeded()).to.be.true;
+          expect(obj.paused_).to.be.false;
+          obj.viewportCallback(false);
+          expect(iframe.style.display).to.equal('none');
+          expect(obj.paused_).to.be.true;
+          obj.viewportCallback(true);
+          expect(iframe.style.display).to.equal('');
+          expect(obj.paused_).to.be.false;
+
+          // Pause again
+          obj.viewportCallback(false);
+          expect(iframe.style.display).to.equal('none');
+          obj.viewportCallback(true);
+          expect(iframe.style.display).to.equal('');
+
+          // Without having been in viewport
+          obj.wasEverVisible_ = false;
+          obj.viewportCallback(false);
+          expect(iframe.style.display).to.equal('');
+        });
+      });
 
       it('should require a canonical', () => {
         return expect(getAd({
@@ -375,7 +414,7 @@ function runAdTestSuiteAgainstInstaller(name, installer) {
           expect(posts).to.have.length(7);
         });
 
-        it('report changes upon remeasure', () => {
+        it('should report changes upon remeasure', () => {
           expect(posts).to.have.length(1);
           ampAd.viewportCallback(true);
           expect(posts).to.have.length(3);
@@ -389,6 +428,21 @@ function runAdTestSuiteAgainstInstaller(name, installer) {
           // viewport, because that might have just changed.
           ampAd.onLayoutMeasure();
           expect(posts).to.have.length(8);
+        });
+
+        it('should report page visibility changes', () => {
+          expect(posts).to.have.length(1);
+          const viewer = viewerFor(ampAd.getWin());
+          viewer.visibilityState_ = 'hidden';
+          viewer.onVisibilityChange_();
+          expect(posts).to.have.length(2);
+          expect(posts[1].data.type).to.equal('embed-state');
+          expect(posts[1].data.hidden).to.equal(true);
+          viewer.visibilityState_ = 'visible';
+          viewer.onVisibilityChange_();
+          expect(posts).to.have.length(3);
+          expect(posts[2].data.type).to.equal('embed-state');
+          expect(posts[2].data.hidden).to.equal(false);
         });
       });
 

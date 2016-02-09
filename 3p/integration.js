@@ -35,6 +35,7 @@ import {facebook} from './facebook';
 import {manageWin} from './environment';
 import {nonSensitiveDataPostMessage, listenParent} from './messaging';
 import {twitter} from './twitter';
+import {yieldmo} from '../ads/yieldmo';
 import {register, run} from '../src/3p';
 import {parseUrl} from '../src/url';
 import {assert} from '../src/asserts';
@@ -58,6 +59,7 @@ register('plista', plista);
 register('doubleclick', doubleclick);
 register('taboola', taboola);
 register('dotandads', dotandads);
+register('yieldmo', yieldmo);
 register('_ping_', function(win, data) {
   win.document.getElementById('c').textContent = data.ping;
 });
@@ -154,6 +156,7 @@ window.draw3p = function(opt_configCallback) {
   delete data._context;
   manageWin(window);
   draw3p(window, data, opt_configCallback);
+  updateVisibilityState(window);
   nonSensitiveDataPostMessage('render-start');
 };
 
@@ -190,6 +193,23 @@ function observeIntersection(observerCallback) {
   nonSensitiveDataPostMessage('send-intersections');
   return listenParent('intersection', data => {
     observerCallback(data.changes);
+  });
+}
+
+/**
+ * Listens for events via postMessage and updates `context.hidden` based on
+ * it and forwards the event to a custom event called `amp:visibilitychange`.
+ * @param {!Window} global
+ */
+function updateVisibilityState(global) {
+  listenParent('embed-state', function(data) {
+    global.context.hidden = data.pageHidden;
+    const event = global.document.createEvent('Event');
+    event.data = {
+      hidden: data.pageHidden,
+    };
+    event.initEvent('amp:visibilitychange', true, true);
+    global.dispatchEvent(event);
   });
 }
 

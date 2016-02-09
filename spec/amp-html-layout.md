@@ -121,16 +121,15 @@ the `responsive`.
 
 ### `heights`
 
-All AMP custom elements that allow `responsive` layout, also support `heights` attribute.
+All AMP custom elements that allow `responsive` layout, also support the `heights` attribute.
 The value of this attribute is a sizes expression based on media expressions
-as described in the [img sizes](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img),
+as similar to the [img sizes attribute](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img),
 but with two key differences:
  1. It applies to the height and not width of the element.
- 2. The percent values are allowed, e.g. `86%`. If percent value is used, it indicates the percent
+ 2. Percent values are allowed, e.g. `86%`. If a percent value is used, it indicates the percent
  of the element's width.
 
-When `heights` attribute is specified along with `width` and `height`, the `layout` is defaulted to
-the `responsive`.
+When the `heights` attribute is specified along with `width` and `height`, the `layout` is defaulted to `responsive`.
 
 An example:
 ```
@@ -141,7 +140,7 @@ An example:
 ```
 
 In this example, the height of the element by default will be 80% of the width, but for the viewport
-wider than `500px` it will capped at `200px`.
+wider than `500px` it will be capped at `200px`.
 
 ### `media`
 

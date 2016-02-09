@@ -27,6 +27,7 @@ import {registerElement} from '../src/custom-element';
 import {adPrefetch, adPreconnect, clientIdScope} from '../ads/_config';
 import {toggle} from '../src/style';
 import {timer} from '../src/timer';
+import {viewerFor} from '../src/viewer';
 import {userNotificationManagerFor} from '../src/user-notification';
 
 
@@ -116,6 +117,16 @@ export function installAd(win) {
        * @private {boolean}
        */
       this.paused_ = false;
+
+      /**
+       * Whether this ad was ever in the viewport.
+       */
+      this.wasEverVisible_ = false;
+
+      /**
+       * @private @const
+       */
+      this.viewer_ = viewerFor(this.getWin());
     }
 
     /**
@@ -262,6 +273,9 @@ export function installAd(win) {
             this.iframe_.style.visibility = '';
             this.sendEmbedInfo_(this.isInViewport());
           }, /* opt_is3P */ true);
+          this.viewer_.onVisibilityChanged(() => {
+            this.sendEmbedInfo_(this.isInViewport());
+          });
 
           return loadPromise(this.iframe_);
         });
@@ -271,12 +285,7 @@ export function installAd(win) {
 
     /** @override */
     documentInactiveCallback() {
-      if (this.iframe_) {
-        this.paused_ = true;
-        // When the doc is inactive, hide the ads, so any work they do takes
-        // less CPU and power.
-        toggle(this.iframe_, false);
-      }
+      this.maybePause_();
       // Call layoutCallback again when this document becomes active.
       return true;
     }
@@ -311,7 +320,10 @@ export function installAd(win) {
     /** @override  */
     viewportCallback(inViewport) {
       if (inViewport) {
+        this.wasEverVisible_ = true;
         this.maybeUnpause_();
+      } else {
+        this.maybePause_();
       }
       if (this.intersectionObserver_) {
         this.intersectionObserver_.onViewportCallback(inViewport);
@@ -331,6 +343,28 @@ export function installAd(win) {
     }
 
     /**
+     * Pauses the ad unless
+     * - it was never visible and the viewport is visible.
+     * We have that exception because setting `diplay:none` can break some
+     * measurements inside the ad and these are more likely to occur early
+     * in the ad lifecycle. We could probably enhance this by still hiding
+     * ads that have been loaded for a while (Say 10 seconds).
+     * @private
+     */
+    maybePause_() {
+      if (!this.wasEverVisible_ && this.viewer_.isVisible()) {
+        return;
+      }
+      // We only pause ads that have been visible before
+      if (this.iframe_ && !this.paused_) {
+        this.paused_ = true;
+        // When the doc is inactive, hide the ads, so any work they do takes
+        // less CPU and power.
+        toggle(this.iframe_, false);
+      }
+    }
+
+    /**
      * @param {boolean} inViewport
      * @private
      */
@@ -339,7 +373,8 @@ export function installAd(win) {
         const targetOrigin =
             this.iframe_.src ? parseUrl(this.iframe_.src).origin : '*';
         postMessage(this.iframe_, 'embed-state', {
-          inViewport: inViewport
+          inViewport: inViewport,
+          pageHidden: !this.viewer_.isVisible(),
         }, targetOrigin, /* opt_is3P */ true);
       }
     }
