@@ -51,7 +51,7 @@ export const adPreconnect = {
   doubleclick: [
     'https://partner.googleadservices.com',
     'https://securepubads.g.doubleclick.net',
-    'https://tpc.googlesyndication.com',
+    'https://tpc.googlesyndication.com'
   ],
   mediaimpact: 'https://ec-ns.sascdn.com'
   dotandads: 'https://bal.ad.dotandad.com',

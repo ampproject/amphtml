@@ -19,12 +19,13 @@ limitations under the License.
 ## Example
 
 ```html
-  <amp-ad width="320" height="50"
+  <amp-ad width="300" height="250"
       type="mediaimpact"
-      data-page="home_index"
-      data-format="3648"
+      data-site="67767"
+      data-page="display"
+      data-format="4459"
       data-target=""
-      data-slot="3648">
+      data-slot="4459">
   </amp-ad>
 ```
 
