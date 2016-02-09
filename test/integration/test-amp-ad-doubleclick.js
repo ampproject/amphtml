@@ -33,15 +33,18 @@ describe('Rendering of one ad', () => {
     let iframe;
     let ampAd;
     const isEdge = navigator.userAgent.match(/Edge/);
-    return pollForLayout(fixture.win, 1, 5500).then(function() {
+    return pollForLayout(fixture.win, 1, 5500).then(() => {
+      return poll('frame to be in DOM', () => {
+        return fixture.doc.querySelector('iframe');
+      });
+    }).then(iframeElement => {
+      iframe = iframeElement;
       expect(fixture.doc.querySelectorAll('iframe')).to.have.length(1);
-      iframe = fixture.doc.querySelector('iframe');
       ampAd = iframe.parentElement;
       expect(iframe.src).to.contain('categoryExclusion');
       expect(iframe.src).to.contain('health');
       expect(iframe.src).to.contain('tagForChildDirectedTreatment');
       expect(iframe.src).to.match(/http\:\/\/localhost:9876\/base\/dist\.3p\//);
-      return timer.promise(10);
     }).then(() => {
       return poll('frame to load', () => {
         return iframe.contentWindow && iframe.contentWindow.document &&
