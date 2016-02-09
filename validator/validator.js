@@ -34,6 +34,7 @@ goog.require('amp.validator.ValidationError.Severity');
 goog.require('amp.validator.ValidationResult');
 goog.require('amp.validator.ValidationResult.Status');
 goog.require('amp.validator.ValidatorRules');
+goog.require('goog.Uri');
 goog.require('goog.array');
 goog.require('goog.asserts');
 goog.require('goog.string');
@@ -178,6 +179,12 @@ function specificity(code) {
       return 30;
     case amp.validator.ValidationError.Code.ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT:
       return 31;
+    case amp.validator.ValidationError.Code.MISSING_URL:
+      return 32;
+    case amp.validator.ValidationError.Code.INVALID_URL_PROTOCOL:
+      return 33;
+    case amp.validator.ValidationError.Code.INVALID_URL:
+      return 34;
     case amp.validator.ValidationError.Code.DEPRECATED_ATTR:
       return 101;
     case amp.validator.ValidationError.Code.DEPRECATED_TAG:
@@ -339,7 +346,7 @@ const TagNameStack = function TagNameStack() {
 /**
  * Some tags have no end tags as per HTML5 spec. These were extracted
  * from the single page spec by looking for "no end tag" with CTRL+F.
- * @type {Object<string,number>}
+ * @type {Object<string, number>}
  */
 TagNameStack.TagsWithNoEndTags = function() {
   // TODO(johannes): Figure out how to prevent the Closure compiler from
@@ -500,10 +507,10 @@ const CdataMatcher = function CdataMatcher(tagSpec) {
 /**
  * Generates an AT Rule Parsing Spec from a CssSpec.
  * @param {!amp.validator.CssSpec} cssSpec
- * @return {!Object<string,parse_css.BlockType>}
+ * @return {!Object<string, parse_css.BlockType>}
  */
 function computeAtRuleParsingSpec(cssSpec) {
-  /** @type {!Object<string,parse_css.BlockType>} */
+  /** @type {!Object<string, parse_css.BlockType>} */
   const ampAtRuleParsingSpec = {};
   for (const atRuleSpec of cssSpec.atRuleSpec) {
     goog.asserts.assert(atRuleSpec.name !== null);
@@ -889,6 +896,16 @@ const ParsedAttrSpec = function ParsedAttrSpec(attrSpec, attrId) {
    */
   this.id_ = attrId;
   /**
+   * @type {!goog.structs.Set<string>}
+   * @private
+   */
+  this.valueUrlAllowedProtocols_ = new goog.structs.Set();
+  if (this.spec_.valueUrl !== null) {
+    for (const protocol of this.spec_.valueUrl.allowedProtocol) {
+      this.valueUrlAllowedProtocols_.add(protocol);
+    }
+  }
+  /**
    * @type {!goog.structs.Map<string, !Object>}
    * @private
    */
@@ -922,6 +939,63 @@ ParsedAttrSpec.prototype.getId = function() {
  */
 ParsedAttrSpec.prototype.getSpec = function() {
   return this.spec_;
+};
+
+/**
+ * @param {!Context} context
+ * @param {!string} attrName
+ * @param {!string} attrValue
+ * @param {!amp.validator.TagSpec} tagSpec
+ * @param {!string} specUrl
+ * @param {!amp.validator.ValidationResult} result
+ */
+ParsedAttrSpec.prototype.validateAttrValueUrl = function(
+    context, attrName, attrValue, tagSpec, specUrl, result) {
+  const maybe_uri = goog.string.trim(attrValue);
+  if (maybe_uri === '') {
+    context.addError(
+        amp.validator.ValidationError.Code.MISSING_URL,
+        /* params */ [attrName, getDetailOrName(tagSpec)], specUrl, result);
+    return;
+  }
+  let uri;
+  try {
+    uri = goog.Uri.parse(maybe_uri);
+  } catch (ex) {
+    context.addError(
+        amp.validator.ValidationError.Code.INVALID_URL,
+        /* params */ [attrName, getDetailOrName(tagSpec), attrValue],
+        specUrl, result);
+    return;
+  }
+  if (uri.hasScheme() &&
+      !this.valueUrlAllowedProtocols_.contains(uri.getScheme().toLowerCase())) {
+    context.addError(
+        amp.validator.ValidationError.Code.INVALID_URL_PROTOCOL,
+        /* params */ [attrName, getDetailOrName(tagSpec),
+        uri.getScheme().toLowerCase()], specUrl, result);
+    return;
+  }
+  const unescaped_maybe_uri = goog.string.unescapeEntities(maybe_uri);
+  let unescaped_uri;
+  try {
+    unescaped_uri = goog.Uri.parse(unescaped_maybe_uri);
+  } catch (ex) {
+    context.addError(
+        amp.validator.ValidationError.Code.INVALID_URL,
+        /* params */ [attrName, getDetailOrName(tagSpec), attrValue],
+        specUrl, result);
+    return;
+  }
+  if (unescaped_uri.hasScheme() &&
+      !this.valueUrlAllowedProtocols_.contains(
+          unescaped_uri.getScheme().toLowerCase())) {
+    context.addError(
+        amp.validator.ValidationError.Code.INVALID_URL_PROTOCOL,
+        /* params */ [attrName, getDetailOrName(tagSpec),
+        unescaped_uri.getScheme().toLowerCase()], specUrl, result);
+    return;
+  }
 };
 
 /**
@@ -1643,7 +1717,7 @@ ParsedTagSpec.prototype.validateAttributes = function(
     }
     if (!hasTemplateAncestor ||
         !this.valueHasTemplateSyntax(encounteredAttrValue)) {
-      // The value, value_regex, and value_properties fields are
+      // The value, value_regex, value_url, and value_properties fields are
       // treated like a oneof, but we're not using oneof because it's
       // a feature that was added after protobuf 2.5.0 (which our
       // open-source version uses).
@@ -1667,6 +1741,17 @@ ParsedTagSpec.prototype.validateAttributes = function(
               /* params */ [encounteredAttrName, getDetailOrName(this.spec_),
                             encounteredAttrValue],
               this.spec_.specUrl, resultForAttempt);
+          return;
+        }
+      }
+      // TODO: remove srcset exclusion when srcset code is ready.
+      if (parsedSpec.getSpec().valueUrl !== null &&
+          encounteredAttrName != 'srcset') {
+        parsedSpec.validateAttrValueUrl(
+            context, encounteredAttrName, encounteredAttrValue,
+            this.spec_, this.spec_.specUrl, resultForAttempt);
+        if (resultForAttempt.status ===
+            amp.validator.ValidationResult.Status.FAIL) {
           return;
         }
       }

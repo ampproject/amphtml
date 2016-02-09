@@ -1,0 +1,60 @@
+<!--
+  Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS-IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the license.
+-->
+<!--
+  Test Description:
+    This tests looks at specific errors related to URLs in href and src
+    attributes.
+-->
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <link rel="canonical" href="./regular-html-version.html" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
+  <style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
+  <script src="https://cdn.ampproject.org/v0.js" async></script>
+</head>
+<body>
+  <a href="https://google.com/">Valid URL</a>
+  <a href=" http://google.com/ ">Valid URL</a>
+  <a href="foo">Valid URL</a>
+  <a href="/bar">Valid URL</a>
+  <a href="#foobar">Valid URL</a>
+  <a href="https://⚡">Valid URL</a>
+  <a href="https://">Valid URL</a>
+  <a href="HtTpS://Google.com/">Valid URL</a>
+  <a href="javascript:alert('boo')">Invalid protocol</a>
+  <a href="JavaScript:alert('boo')">Invalid protocol</a>
+  <a href="javascript&colon;alert(1)">Invalid protocol</a>
+  <a href="vbscript:bar">Invalid protocol</a>
+  <a href="data:baz">Invalid protocol</a>
+  <a href="ftp://google.com/">Invalid protocol</a>
+  <a href="http://site:80808/%AFpage">Malformed URL</a>
+  <!-- Missing src -->
+  <amp-ad src="" width="42" height="42" type=""></amp-ad>
+  <amp-anim src="" width="42" height="42"></amp-anim>
+  <amp-audio src="" layout="fixed" width="42"></amp-audio>
+  <amp-iframe src="" width="42" height="42"></amp-iframe>
+  <amp-img src="" layout="responsive" width="42" height="42"></amp-img>
+  <amp-pixel src="" layout="fixed" width="42"></amp-pixel>
+  <amp-video src="" width="42" height="42"></amp-video>
+  <!-- Invalid protocol -->
+  <amp-ad src="http://amp-ad" width="42" height="42" type=""></amp-ad>
+  <amp-iframe src="http://amp-iframe" width="42" height="42"></amp-iframe>
+  <amp-pixel src="http://amp-pixel" layout="fixed" width="42"></amp-pixel>
+  <amp-video src="http://amp-video" width="42" height="42"></amp-video>
+</body>
+</html>
