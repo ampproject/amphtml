@@ -1525,6 +1525,48 @@ ParsedTagSpec.prototype.validateLayout = function(context, attrsByKey, result) {
 };
 
 /**
+ * Helper method for ValidateAttributes, for when an attribute is
+ * encountered which is not specified by the validator.protoascii
+ * specification.
+ * @param {!string} attrName
+ * @param {!Context} context
+ * @param {!amp.validator.ValidationResult} result
+ * @return {boolean} indicating success or validation failure
+ */
+ParsedTagSpec.prototype.validateAttrNotFoundInSpec = function(
+    attrName, context, result) {
+  // For now, we just skip data- attributes in the validator, because
+  // our schema doesn't capture which ones would be ok or not. E.g.
+  // in practice, some type of ad or perhaps other custom elements require
+  // particular data attributes.
+  // http://www.w3.org/TR/html5/single-page.html#attr-data-*
+  // http://w3c.github.io/aria-in-html/
+  // However, mostly to avoid confusion, we want to make sure that
+  // nobody tries to make a Mustache template data attribute,
+  // e.g. <div data-{{foo}}>, so we also exclude those characters.
+  if (goog.string.startsWith(attrName, 'data-') &&
+      !goog.string.contains(attrName, '}') &&
+      !goog.string.contains(attrName, '{')) {
+    return true;
+  }
+
+  // At this point, it's an error either way, but we try to give a
+  // more specific error in the case of Mustache template characters.
+  if (attrName.indexOf('{{') != -1) {
+    context.addError(
+        amp.validator.ValidationError.Code.TEMPLATE_IN_ATTR_NAME,
+        /* params */ [attrName, getDetailOrName(this.spec_)],
+        this.templateSpecUrl_, result);
+  } else {
+    context.addError(
+        amp.validator.ValidationError.Code.DISALLOWED_ATTR,
+        /* params */ [attrName, getDetailOrName(this.spec_)],
+        this.spec_.specUrl, result);
+  }
+  return false;
+};
+
+/**
  * Validates whether the attributes set on |encountered_tag| conform to this
  * tag specification. All mandatory attributes must appear. Only attributes
  * explicitly mentioned by this tag spec may appear.
@@ -1564,35 +1606,12 @@ ParsedTagSpec.prototype.validateAttributes = function(
     const encounteredAttrName = encounteredAttrKey.toLowerCase();
     const parsedSpec = this.attrsByName_.get(encounteredAttrName);
     if (parsedSpec === undefined) {
-      // For now, we just skip data- attributes in the validator, because
-      // our schema doesn't capture which ones would be ok or not. E.g.
-      // in practice, some type of ad or perhaps other custom elements require
-      // particular data attributes.
-      // http://www.w3.org/TR/html5/single-page.html#attr-data-*
-      // http://w3c.github.io/aria-in-html/
-      // However, mostly to avoid confusion, we want to make sure that
-      // nobody tries to make a Mustache template data attribute,
-      // e.g. <div data-{{foo}}>, so we also exclude those characters.
-      if (goog.string.startsWith(encounteredAttrKey, 'data-') &&
-          !goog.string.contains(encounteredAttrKey, '}') &&
-          !goog.string.contains(encounteredAttrKey, '{')) {
+      if (this.validateAttrNotFoundInSpec(encounteredAttrName, context,
+                                          resultForAttempt)) {
         continue;
-      }
-
-      // At this point, it's an error either way, but we try to give a
-      // more specific error in the case of Mustache template characters.
-      if (encounteredAttrName.indexOf('{{') != -1) {
-        context.addError(
-            amp.validator.ValidationError.Code.TEMPLATE_IN_ATTR_NAME,
-            /* params */ [encounteredAttrName, getDetailOrName(this.spec_)],
-            this.templateSpecUrl_, resultForAttempt);
       } else {
-        context.addError(
-            amp.validator.ValidationError.Code.DISALLOWED_ATTR,
-            /* params */ [encounteredAttrName, getDetailOrName(this.spec_)],
-            this.spec_.specUrl, resultForAttempt);
+        return;
       }
-      return;
     }
     // Specific checks for attribute values descending from a template tag.
     if (hasTemplateAncestor) {
