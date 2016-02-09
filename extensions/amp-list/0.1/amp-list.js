@@ -57,6 +57,9 @@ export class AmpList extends AMP.BaseElement {
           const opts = {
             credentials: this.element.getAttribute('credentials')
           };
+          if (opts.credentials) {
+            opts.requireAmpResponseSourceOrigin = true;
+          }
           return xhrFor(this.getWin()).fetchJson(src, opts);
         }).then(data => {
           assert(typeof data == 'object' && Array.isArray(data['items']),

@@ -126,11 +126,11 @@ HTML tags can be used unchanged in AMP HTML. Certain tags have equivalent custom
 | param     | Prohibited. |
 | applet    | Prohibited. |
 | embed     | Prohibited. |
-| form      | Prohibited. |
+| form      | Prohibited. [Support coming in the future.](https://github.com/ampproject/amphtml/issues/1286) |
 | input elements | Prohibited. Includes input, textarea, select, option. Notably, button element is allowed. |
 | button    | Allowed. |
 | <a name="cust"></a>style     | [Required style tags for adjusting opacity](#opacity) One additional style tag is allowed in head tag for the purpose of custom styling. This style tag must have the attribute `amp-custom`. [🔗](#cust) |
-| link      | Allowed for certain values of rel: `canonical`. `stylesheet` is generally disallowed, but some values may be whitelisted for font providers. |
+| link      | `rel` values registered on [microformats.org](http://microformats.org/wiki/existing-rel-values) are allowed. If a rel value is missing from our whitelist, [please submit an issue](https://github.com/ampproject/amphtml/issues/new). `stylesheet` and other values like `preconnect`, `prerender` and `prefectch` that has side effects in the browser are disallowed. There is a special case for fetching stylesheets from whitelisted font providers. |
 | meta      | The `http-equiv` attribute is banned. Otherwise allowed. |
 | <a name="ancr"></a>a         | The `href` attribute value must not begin with `javascript:`. If set, the `target` attribute value must be `_blank`. Otherwise allowed. [🔗](#ancr) |
 | svg       | Most SVG elements are allowed |
@@ -146,6 +146,8 @@ Conditional HTML comments are not allowed.
 Attribute names starting with `on` (such as `onclick` or `onmouseover`) are disallowed in AMP HTML. The attribute with the literal name `on` (no suffix) is allowed.
 
 The `style` attribute must not be used.
+
+XML-related attributes, such as xmlns, xml:lang, xml:base, and xml:space are disallowed in AMP HTML.
 
 ### Links
 

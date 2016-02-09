@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import {getService} from '../../../src/service';
+import {isExperimentOn} from '../../../src/experiments';
+import {log} from '../../../src/log';
 import {parseUrl} from '../../../src/url';
 import {viewerFor} from '../../../src/viewer';
-import {log} from '../../../src/log';
-import {isExperimentOn} from '../../../src/experiments';
-import {getService} from '../../../src/service';
 import {vsyncFor} from '../../../src/vsync';
 
 /** @const */
@@ -33,7 +33,7 @@ const EXPERIMENT = 'dynamic-css-classes';
  * @returns {string}
  */
 function referrerDomain(win) {
-  const referrer = win.document.referrer;
+  const referrer = viewerFor(win).getUnconfirmedReferrerUrl();
   if (referrer) {
     return parseUrl(referrer).hostname;
   }

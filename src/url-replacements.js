@@ -20,7 +20,8 @@ import {documentInfoFor} from './document-info';
 import {getService} from './service';
 import {loadPromise} from './event-helper';
 import {log} from './log';
-import {parseUrl, removeFragment} from './url';
+import {getSourceUrl, parseUrl, removeFragment} from './url';
+import {viewerFor} from './viewer';
 import {viewportFor} from './viewport';
 import {vsyncFor} from './vsync';
 import {userNotificationManagerFor} from './user-notification';
@@ -68,7 +69,7 @@ class UrlReplacements {
 
     // Returns the referrer URL.
     this.set_('DOCUMENT_REFERRER', () => {
-      return this.win_.document.referrer;
+      return viewerFor(this.win_).getReferrerUrl();
     });
 
     // Returns the title of this AMP document.
@@ -85,6 +86,16 @@ class UrlReplacements {
     this.set_('AMPDOC_HOST', () => {
       const url = parseUrl(this.win_.location.href);
       return url && url.hostname;
+    });
+
+    // Returns the Source URL for this AMP document.
+    this.set_('SOURCE_URL', () => {
+      return removeFragment(getSourceUrl(this.win_.location.href));
+    });
+
+    // Returns the host of the Source URL for this AMP document.
+    this.set_('SOURCE_HOST', () => {
+      return parseUrl(getSourceUrl(this.win_.location.href)).hostname;
     });
 
     // Returns a random string that will be the constant for the duration of
@@ -140,6 +151,12 @@ class UrlReplacements {
     this.set_('SCROLL_HEIGHT', () => {
       return vsyncFor(this.win_).measurePromise(
         () => viewportFor(this.win_).getScrollHeight());
+    });
+
+    // Returns a promise resolving to viewport.getScrollWidth.
+    this.set_('SCROLL_WIDTH', () => {
+      return vsyncFor(this.win_).measurePromise(
+        () => viewportFor(this.win_).getScrollWidth());
     });
 
     // Returns screen.width.
@@ -351,6 +368,9 @@ class UrlReplacements {
    * @private
    */
   buildExpr_(keys) {
+    // The keys must be sorted to ensure that the longest keys are considered
+    // first. This avoids a problem where a RANDOM conflicts with RANDOM_ONE.
+    keys.sort((s1, s2) => s2.length - s1.length);
     const all = keys.join('|');
     // Match the given replacement patterns, as well as optionally
     // arguments to the replacement behind it in parantheses.

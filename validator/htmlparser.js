@@ -651,23 +651,24 @@ amp.htmlparser.HtmlParser.prototype.normalizeRCData_ = function(rcdata) {
 
 
 /**
- * TODO(goto): why isn't this in the string package ? does this solves any
- * real problem ? move it to the goog.string package if it does.
- *
  * @param {string} str The string to lower case.
  * @return {string} The str in lower case format.
  */
 amp.htmlparser.toLowerCase = function(str) {
-  // The below may not be true on browsers in the Turkish locale.
-  if ('script' === 'SCRIPT'.toLowerCase()) {
-    return str.toLowerCase();
-  } else {
-    return str.replace(/[A-Z]/g, function(ch) {
-      return String.fromCharCode(ch.charCodeAt(0) | 32);
-    });
+  // htmlparser.js heavily relies on the length of the strings, and
+  // unfortunately some characters change their length when
+  // lowercased; for instance, the Turkish İ has a length of 1, but
+  // when lower-cased, it has a length of 2. So, as a workaround we
+  // check that the length be the same as before lower-casing, and if
+  // not, we only lower-case the letters A-Z.
+  const lowerCased = str.toLowerCase();
+  if (lowerCased.length == str.length) {
+    return lowerCased;
   }
+  return str.replace(/[A-Z]/g, function(ch) {
+    return String.fromCharCode(ch.charCodeAt(0) | 32);
+  });
 };
-
 
 
 /**

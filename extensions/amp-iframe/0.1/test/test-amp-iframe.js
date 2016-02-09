@@ -455,15 +455,6 @@ describe('amp-iframe intersection', () => {
   }
 
   beforeEach(() => {
-    window.onmessage = function(message) {
-      if (message.data.type == 'received-intersection') {
-        posts.push({
-          data: message.data,
-          targetOrigin: message.origin,
-        });
-      }
-    };
-    posts = [];
     return getAmpIframe({
       src: iframeSrc,
       sandbox: 'allow-scripts  allow-same-origin',
@@ -473,8 +464,16 @@ describe('amp-iframe intersection', () => {
       poster: 'https://i.ytimg.com/vi/cMcCTVAFBWM/hqdefault.jpg',
     }, '100').then(amp => {
       posts = [];
+      window.onmessage = function(message) {
+        if (message.data.type == 'received-intersection' &&
+            message.source == amp.iframe.contentWindow) {
+          posts.push({
+            data: message.data,
+            targetOrigin: message.origin,
+          });
+        }
+      };
       element = amp.container;
-      viewportFor(element.ownerDocument.defaultView).setScrollTop(50);
       ampIframe = element.implementation_;
       ampIframe.getVsync = function() {
         return {
@@ -489,15 +488,15 @@ describe('amp-iframe intersection', () => {
       expect(posts).to.have.length(0);
       //ampIframe.getVsync().runScheduledTasks_();
       return timer.promise(50).then(() => {
-        expect(posts).to.have.length(1);
+        expect(posts).to.have.length(2);
       });
     });
   });
 
   it('should calculate intersection', () => {
     expect(ampIframe.iframeLayoutBox_).to.not.be.null;
-    expect(posts).to.have.length(1);
-    const changes = posts[0].data.changes;
+    expect(posts).to.have.length(2);
+    const changes = posts[1].data.changes;
     expect(changes).to.be.array;
     expect(changes).to.have.length(1);
     expect(changes[0].time).to.be.number;
@@ -508,12 +507,12 @@ describe('amp-iframe intersection', () => {
   it('reflect viewport changes', () => {
     const win = ampIframe.element.ownerDocument.defaultView;
     const viewport = viewportFor(win);
-    expect(posts).to.have.length(1);
+    expect(posts).to.have.length(2);
     viewport.setScrollTop(0);
     ampIframe.intersectionObserver_.fire();
     return timer.promise(50).then(() => {
-      expect(posts).to.have.length(2);
-      const changes = posts[1].data.changes;
+      expect(posts).to.have.length(3);
+      const changes = posts[2].data.changes;
       expect(changes).to.have.length(1);
       expect(changes[0].time).to.be.number;
       expect(changes[0].intersectionRect.height).to.equal(150);
@@ -522,8 +521,8 @@ describe('amp-iframe intersection', () => {
       viewport.setScrollTop(350);
       ampIframe.intersectionObserver_.fire();
       return timer.promise(50).then(() => {
-        expect(posts).to.have.length(3);
-        const changes2 = posts[2].data.changes;
+        expect(posts).to.have.length(5);
+        const changes2 = posts[4].data.changes;
         expect(changes2).to.have.length(1);
         expect(changes2[0].time).to.be.number;
         expect(changes2[0].intersectionRect.height).to.be.number;

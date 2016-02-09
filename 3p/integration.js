@@ -24,11 +24,13 @@
 
 import './polyfills';
 import {a9} from '../ads/a9';
+import {adform} from '../ads/adform';
 import {adreactor} from '../ads/adreactor';
 import {adsense} from '../ads/adsense';
 import {adtech} from '../ads/adtech';
 import {plista} from '../ads/plista';
 import {doubleclick} from '../ads/doubleclick';
+import {dotandads} from '../ads/dotandads';
 import {facebook} from './facebook';
 import {manageWin} from './environment';
 import {nonSensitiveDataPostMessage, listenParent} from './messaging';
@@ -37,6 +39,7 @@ import {register, run} from '../src/3p';
 import {parseUrl} from '../src/url';
 import {assert} from '../src/asserts';
 import {taboola} from '../ads/taboola';
+import {smartadserver} from '../ads/smartadserver';
 
 /**
  * Whether the embed type may be used with amp-embed tag.
@@ -47,17 +50,20 @@ const AMP_EMBED_ALLOWED = {
 };
 
 register('a9', a9);
+register('adform', adform);
 register('adreactor', adreactor);
 register('adsense', adsense);
 register('adtech', adtech);
 register('plista', plista);
 register('doubleclick', doubleclick);
 register('taboola', taboola);
+register('dotandads', dotandads);
 register('_ping_', function(win, data) {
   win.document.getElementById('c').textContent = data.ping;
 });
 register('twitter', twitter);
 register('facebook', facebook);
+register('smartadserver', smartadserver);
 
 /**
  * Visible for testing.
@@ -146,11 +152,7 @@ window.draw3p = function(opt_configCallback) {
   window.context.reportRenderedEntityIdentifier =
       reportRenderedEntityIdentifier;
   delete data._context;
-  // Run this only in canary and local dev for the time being.
-  if (location.pathname.indexOf('-canary') ||
-      location.pathname.indexOf('current')) {
-    manageWin(window);
-  }
+  manageWin(window);
   draw3p(window, data, opt_configCallback);
   nonSensitiveDataPostMessage('render-start');
 };

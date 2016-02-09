@@ -143,7 +143,10 @@ describe('amp-list component', () => {
     const xhrPromise = Promise.resolve({items: items});
     element.setAttribute('credentials', 'include');
     xhrMock.expects('fetchJson').withExactArgs('https://data.com/list.json',
-        sinon.match(opts => opts.credentials == 'include'))
+        sinon.match(opts => {
+          return opts.credentials == 'include' &&
+              opts.requireAmpResponseSourceOrigin;
+        }))
         .returns(xhrPromise).once();
     templatesMock.expects('findAndRenderTemplateArray').withExactArgs(
         element, items)

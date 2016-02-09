@@ -19,7 +19,7 @@ The `amp-embed` element is used to allow embedding elements in to the AMP page.
 
 #### Implementation
 
-The `<amp-embed>` is actually an alias to the [`<amp-ad>`](amp-ad.md)  tag, deriving all of it's functionality with a different tag name.
+The `<amp-embed>` is actually an alias to the [`<amp-ad>`](amp-ad.md) tag, deriving all of it's functionality with a different tag name.
 Can be used instead of `<amp-ad>` when that would be semantically more accurate.
 
 ```html
@@ -31,3 +31,7 @@ Can be used instead of `<amp-ad>` when that would be semantically more accurate.
         data-placement="Below Article Thumbnails">
 </amp-embed>
 ```
+
+#### Supported embed types
+
+- [Taboola](../ads/taboola.md)

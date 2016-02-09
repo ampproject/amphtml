@@ -37,8 +37,10 @@ var touch = require('touch')
 var uglify = require('gulp-uglify');
 var util = require('gulp-util');
 var watchify = require('watchify');
+var windowConfig = require('./build-system/window-config');
 var wrap = require('gulp-wrap');
 var internalRuntimeVersion = require('./build-system/internal-version').VERSION;
+var internalRuntimeToken = require('./build-system/internal-version').TOKEN;
 
 var argv = minimist(process.argv.slice(2), { boolean: ['strictBabelTransform'] });
 
@@ -129,7 +131,8 @@ function compile(watch, shouldMinify) {
     minify: shouldMinify,
     // If there is a sync JS error during initial load,
     // at least try to unhide the body.
-    wrapper: 'try{(function(){<%= contents %>})()}catch(e){' +
+    wrapper: windowConfig.getTemplate() +
+        'try{(function(){<%= contents %>})()}catch(e){' +
         'setTimeout(function(){' +
         'var s=document.body.style;' +
         's.opacity=1;' +
@@ -434,6 +437,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
       .pipe(source, srcFilename)
       .pipe(buffer)
       .pipe(replace, /\$internalRuntimeVersion\$/g, internalRuntimeVersion)
+      .pipe(replace, /\$internalRuntimeToken\$/g, internalRuntimeToken)
       .pipe(wrap, wrapper)
       .pipe(sourcemaps.init.bind(sourcemaps), {loadMaps: true});
 
