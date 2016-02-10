@@ -35,7 +35,7 @@ const PinterestUA = 'Mozilla/5.0 (Linux; Android 5.1.1; SM-G920F' +
   ' Build/LMY47X; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0' +
   ' Chrome/47.0.2526.100 Mobile Safari/537.36 [Pinterest/Android]';
 
-describe('dynamic classes are inserted at runtime', () => {
+describe.skip('dynamic classes are inserted at runtime', () => {
   let documentElement;
 
   function mockVsync(win) {
