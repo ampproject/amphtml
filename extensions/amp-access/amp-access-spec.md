@@ -330,6 +330,20 @@ An integration with *amp-analytics* is under development and can be tracked on [
 Authorization and Pingback endpoints are CORS endpoints and they must implement the security protocol described in the
 [AMP CORS Security Spec](https://github.com/ampproject/amphtml/blob/master/spec/amp-cors-requests.md#cors-security-in-amp).
 
+#Metering
+Metering is the system where the Reader is shown premium content for free for several document views in some period. Once some quota is reached, the Reader is shown the paywall kicks in and the Reader instead is shown partial content with upsell message and signup/login link. For instance, the metering can be defined as “Reader can read 10 articles per month for free”.
+
+AMP Access provides the following facilities for implementing metered access:
+ 1. READER_ID should be used to store metering information. Since the Publisher cannot rely on always being able to set cookies in a 3rd-party context, this data should be stored on the server-side.
+ 2. The “read count” can only be updated in the Pingback endpoint.
+ 3. Only unique documents can be counted against the quota. I.e. refreshing the same document ten times constitutes a single view. For this purpose Authorization and Pingback endpoints can inject `SOURCE_URL` or similar URL variables. See [Access URL Variables][7].
+
+#First-Click-Free
+Google's First-click-free (or FCF) policy is described [here](https://support.google.com/news/publisher/answer/40543), with the most recent update described in more detail [here](https://googlewebmastercentral.blogspot.com/2015/09/first-click-free-update.html).
+
+To implement FCF, the Publisher must (1) be able to determine the referring service for each view, and (2) be able to count number of views per day for each reader.
+
+Both steps are covered by the AMP Access spec. The referrer can be injected into the Authorization and Pingback URLs using `DOCUMENT_REFERRER` URL substitution as described in [Access URL Variables][7]. The view counting can be done using Pingback endpoint on the server-side. This is very similar to the metering implementation described in [Metering][12].
 
 #AMP Glossary
  - **AMP Document** - the HTML document that follows AMP format and validated by AMP Validator. AMP Documents are cacheable by AMP Cache.
@@ -345,6 +359,7 @@ Authorization and Pingback endpoints are CORS endpoints and they must implement 
 #Revisions
 - Feb 1: "return" query parameter for Login Page can be customized using RETURN_URL URL substitution.
 - Feb 3: Spec for "source origin" security added to the [CORS Origin security][9].
+- Feb 9: [First-click-free][13] and [Metering][12] sections.
 
 #Appendix A: “amp-access” expression grammar
 
@@ -394,3 +409,5 @@ This section will cover a detailed explanation of the design underlying the amp-
 [9]: #cors-origin-security
 [10]: https://github.com/ampproject/amphtml/issues/1556
 [11]: #amp-access-and-cookies
+[12]: #metering
+[13]: #first-click-free
