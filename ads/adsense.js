@@ -29,8 +29,6 @@ export function adsense(global, data) {
       hid: global.context.pageViewId,
     };
   }
-  /*eslint "google-camelcase/google-camelcase": 0*/
-  global.google_page_url = global.context.canonicalUrl;
   const s = document.createElement('script');
   s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js';
   global.document.body.appendChild(s);
@@ -40,6 +38,7 @@ export function adsense(global, data) {
   if (data['adSlot']) {
     i.setAttribute('data-ad-slot', data['adSlot']);
   }
+  i.setAttribute('data-page-url', global.context.canonicalUrl);
   i.setAttribute('class', 'adsbygoogle');
   i.style.cssText = 'display:inline-block;width:100%;height:100%;';
   global.document.getElementById('c').appendChild(i);
