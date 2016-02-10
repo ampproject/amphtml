@@ -435,5 +435,19 @@ describe('Viewer', () => {
         expect(timeouts).to.have.length(0);
       });
     });
+
+    it('should allow override to empty if iframed and trusted', () => {
+      windowApi.parent = {};
+      windowApi.location.hash = '#referrer=';
+      windowApi.document.referrer = 'https://acme.org/docref';
+      windowApi.location.ancestorOrigins = ['https://google.com'];
+      const viewer = new Viewer(windowApi);
+      expect(viewer.getUnconfirmedReferrerUrl())
+          .to.equal('');
+      return viewer.getReferrerUrl().then(referrerUrl => {
+        expect(referrerUrl).to.equal('');
+        expect(timeouts).to.have.length(0);
+      });
+    });
   });
 });
