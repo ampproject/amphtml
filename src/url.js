@@ -16,15 +16,27 @@
 
 import {assert} from './asserts';
 
+// Cached a-tag to avoid memory allocation during URL parsing.
 const a = document.createElement('a');
+
+// We cached all parsed URLs. As of now there are no use cases
+// of AMP docs that would ever parse an actual large number of URLs,
+// but we often parse the same one over and over again.
+const cache = Object.create(null);
 
 /**
  * Returns a Location-like object for the given URL. If it is relative,
  * the URL gets resolved.
+ * Consider the returned object immutable. This is enforced during
+ * testing by freezing the object.
  * @param {string} url
  * @return {!Location}
  */
 export function parseUrl(url) {
+  const fromCache = cache[url];
+  if (fromCache) {
+    return fromCache;
+  }
   a.href = url;
   const info = {
     href: a.href,
@@ -40,6 +52,8 @@ export function parseUrl(url) {
   // We instead return the actual origin which is the full URL.
   info.origin = (a.origin && a.origin != 'null') ? a.origin : getOrigin(info);
   assert(info.origin, 'Origin must exist');
+  // Freeze during testing to avoid accidental mutation.
+  cache[url] = (window.AMP_TEST && Object.freeze) ? Object.freeze(info) : info;
   return info;
 }
 
