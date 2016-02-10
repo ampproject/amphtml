@@ -296,13 +296,29 @@ export class AmpAnalytics extends AMP.BaseElement {
       const argList = match[2] || '';
       const raw = (trigger['vars'] && trigger['vars'][name] ||
           this.config_['vars'] && this.config_['vars'][name]);
-      const val = encodeURIComponent(raw != null ? raw : '');
+      const val = this.encodeVars_(raw != null ? raw : '');
       return val + argList;
     });
 
     // For consistentcy with amp-pixel we also expand any url replacements.
     urlReplacementsFor(this.getWin()).expand(request).then(
         request => this.sendRequest_(request));
+  }
+
+  /**
+   * @param {string} raw The values to URI encode.
+   * @private
+   */
+  encodeVars_(raw) {
+    if (isArray(raw)) {
+      for (let i = 0; i < raw.length; ++i) {
+        raw[i] = encodeURIComponent(raw[i]);
+      }
+      raw = raw.join();
+    } else {
+      raw = encodeURIComponent(raw);
+    }
+    return raw;
   }
 
   /**

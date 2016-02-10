@@ -450,6 +450,27 @@ describe('amp-analytics', function() {
     });
   });
 
+  it('encodes array vars', () => {
+    const analytics = getAnalyticsTag({
+      'vars': {
+        'c1': ['Config, The Barbarian', 'config 1'],
+        'c2': 'config&2'
+      },
+      'requests': {
+        'base': 'https://example.com/test?',
+        'pageview': '${base}c1=${c1}&c2=${c2}'
+      },
+      'triggers': [{
+        'on': 'visible',
+        'request': 'pageview',
+      }]});
+    return waitForSendRequest(analytics).then(() => {
+      expect(sendRequestSpy.calledOnce).to.be.true;
+      expect(sendRequestSpy.args[0][0]).to.equal(
+          'https://example.com/test?c1=Config%2C%20The%20Barbarian,config%201&c2=config%262');
+    });
+  });
+
   it('expands url-replacements vars', () => {
     const analytics = getAnalyticsTag({
       'requests': {'pageview':

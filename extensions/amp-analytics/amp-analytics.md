@@ -128,12 +128,13 @@ is an https URL. These values may include placeholder tokens that can reference 
 ### Vars
 `amp-analytics` defines many basic variables that can be used in requests. A list of all such variables is available [here](./analytics-vars.md). In addition, all the variables supported by [AMP HTML URL Variable Substitutions](../../spec/amp-var-substitutions.md) are also supported.
 
-The `vars` attribute in the configuration can be used to define new key-value pairs or override existing variables that can be referenced in `request` values. New variables are commonly used to specify publisher specific information.
+The `vars` attribute in the configuration can be used to define new key-value pairs or override existing variables that can be referenced in `request` values. New variables are commonly used to specify publisher specific information.  Arrays can be used to specify a list of values that should be URL encoded separately while preserving the comma delimiter.
 
 ```javascript
 "vars": {
   "account": "ABC123",
-  "countryCode": "tr"
+  "countryCode": "tr",
+  "tags": ["Swift,Jonathan", "Gulliver's Travels"]
 }
 ```
 
