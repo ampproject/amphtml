@@ -259,14 +259,14 @@ export class Viewer {
 
     /** @private {string} */
     this.unconfirmedReferrerUrl_ =
-        this.isEmbedded() && this.params_['referrer'] &&
+        this.isEmbedded() && 'referrer' in this.params_ &&
             trustedViewerResolved !== false ?
         this.params_['referrer'] :
         this.win.document.referrer;
 
     /** @const @private {!Promise<string>} */
     this.referrerUrl_ = new Promise(resolve => {
-      if (this.isEmbedded() && this.params_['referrer']) {
+      if (this.isEmbedded() && 'referrer' in this.params_) {
         // Viewer override, but only for whitelisted viewers. Only allowed for
         // iframed documents.
         this.isTrustedViewer_.then(isTrusted => {
