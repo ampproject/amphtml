@@ -15,6 +15,7 @@
  */
 
 var fs = require('fs-extra');
+var argv = require('minimist')(process.argv.slice(2));
 var windowConfig = require('../window-config');
 var closureCompiler = require('gulp-closure-compiler');
 var gulp = require('gulp');
@@ -23,6 +24,7 @@ var replace = require('gulp-replace');
 var internalRuntimeVersion = require('../internal-version').VERSION;
 var internalRuntimeToken = require('../internal-version').TOKEN;
 
+var isProdBuild = !!argv.type;
 var queue = [];
 var inProgress = 0;
 var MAX_PARALLEL_CLOSURE_INVOCATIONS = 4;
@@ -91,6 +93,12 @@ function compile(entryModuleFilename, outputDir,
     if (/development/.test(internalRuntimeToken)) {
       throw new Error('Should compile with a prod token');
     }
+    var sourceMapBase = 'http://localhost:8000/';
+    if (isProdBuild) {
+      // Point sourcemap to fetch files from correct GitHub tag.
+      sourceMapBase = 'https://raw.githubusercontent.com/ampproject/amphtml/' +
+            internalRuntimeVersion + '/';
+    }
     const srcs = [
       '3p/**/*.js',
       'ads/**/*.js',
@@ -148,7 +156,8 @@ function compile(entryModuleFilename, outputDir,
         only_closure_dependencies: true,
         output_wrapper: wrapper,
         create_source_map: intermediateFilename + '.map',
-        source_map_location_mapping: '|http://localhost:8000/',
+        source_map_location_mapping:
+            '|' + sourceMapBase,
         warning_level: process.env.TRAVIS ? 'QUIET' : 'DEFAULT',
       }
     }))
