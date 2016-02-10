@@ -16,9 +16,44 @@ limitations under the License.
 
 ### <a name="amp-facebook"></a> `amp-facebook`
 
-**Status: Component landed, but does not validate.**
+<table>
+  <tr>
+    <td width="40%"><strong>Description</strong></td>
+    <td>Displays a Facebook Post or Video. </td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Availability</strong></td>
+    <td>Stable, but doesn't validate.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Required Script</strong></td>
+    <td><code>&lt;script async custom-element="amp-facebook" src="https://cdn.ampproject.org/v0/amp-facebook-0.1.js">&lt;/script></code></td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Examples</strong></td>
+    <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/facebook.amp.html">facebook.amp.html</a></td>
+  </tr>
+</table>
 
-Displays a Facebook Post or Video. 
+**Note:** This tag is currently stable; however, it doesn't validate.
+
+<!---
+
+Placeholder for validation errors once they've been implemented.
+This doesn't actually have the errors, only a starting point.
+
+<table>
+  <tr>
+    <th width="40%"><strong>Validation Error</strong></th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td width="40%"><a href="/docs/reference/validation_errors.html#tag-required-by-another-tag-is-missing">TAG_REQUIRED_BY_MISSING</a></td>
+    <td>Error thrown when required <code>amp-facebook</code> extension <code>.js</code> script tag is missing or incorrect.</td>
+  </tr>
+</table>
+
+-->
 
 Example - Embedding a post:
 ```html
