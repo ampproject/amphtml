@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# AdTech
+# MediaImpact
 
 ## Example
 
@@ -35,5 +35,8 @@ For semantics of configuration, please see ad network documentation.
 
 Supported parameters:
 
-- src. Value must ...
-- id. Must contain "sas_" followed by formatId called
+- data-site: siteid given by mediaimpact
+- data-page: pageName given by mediaimpact
+- data-format: formatid e.g. 4459 (MREC)
+- data-target: for special targeting like "goodCustomer=true;"
+- data-slot: slotid without trailing sas_
