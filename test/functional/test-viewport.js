@@ -130,12 +130,19 @@ describe('Viewport', () => {
 
   it('should defer scroll events', () => {
     let changeEvent = null;
+    let eventCount = 0;
     viewport.onChanged(event => {
       changeEvent = event;
+      eventCount++;
     });
     viewer.getScrollTop = () => 34;
+    expect(viewport.scrollTracking_).to.be.false;
+    viewerViewportHandler();
+    expect(viewport.scrollTracking_).to.be.true;
+    viewerViewportHandler();
     viewerViewportHandler();
     expect(changeEvent).to.equal(null);
+    expect(viewport.scrollTracking_).to.be.true;
 
     // Not enough time past.
     clock.tick(8);
@@ -145,15 +152,26 @@ describe('Viewport', () => {
     viewer.getScrollTop = () => 35;
     viewerViewportHandler();
     clock.tick(16);
+    viewerViewportHandler();
     expect(changeEvent).to.equal(null);
 
     // A bit more time.
     clock.tick(16);
+    viewerViewportHandler();
     expect(changeEvent).to.equal(null);
+    expect(viewport.scrollTracking_).to.be.true;
     clock.tick(4);
     expect(changeEvent).to.not.equal(null);
     expect(changeEvent.relayoutAll).to.equal(false);
     expect(changeEvent.velocity).to.be.closeTo(0.019230, 1e-4);
+    expect(eventCount).to.equal(1);
+    expect(viewport.scrollTracking_).to.be.false;
+    changeEvent = null;
+    viewer.getScrollTop = () => 36;
+    viewerViewportHandler();
+    expect(changeEvent).to.equal(null);
+    clock.tick(53);
+    expect(changeEvent).to.not.equal(null);
   });
 
   it('should update scroll pos and reset cache', () => {
