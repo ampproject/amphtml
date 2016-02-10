@@ -28,7 +28,7 @@ export function mediaimpact(global, data) {
     view: "m",
     async: true
   }
-  loadScript(global, "http://adtechs.de/demopages/amp.js?dom=" + window.context.location.host, () => {
+  loadScript(global, "https://ec-ns.sascdn.com/diff/251/divscripte/amp.js?dom=" + window.context.location.host, () => {
     if (!document.getElementById('sas_' + data.slot.replace('sas_',''))) {
       var adContainer = document.createElement('div');
       adContainer.id = 'sas_' + data.slot.replace('sas_','');
