@@ -56,6 +56,23 @@ export const ANALYTICS_CONFIG = {
       'title': 'TITLE',
     }
   },
+  
+  'atinternet': {
+    'transport': {'beacon': false, 'xhrpost': false, 'image': true},
+    'requests': {
+      'base': 'https://${log}${domain}/?s=${site}&ts=${timestamp}&r=${screenWidth}x${screenHeight}x${screenColorDepth}&re=${availableScreenWidth}x${availableScreenHeight}',
+      'suffix': '&ref=${documentReferrer}',
+      'pageview': '${base}&' +
+        'p=${title}&' +
+        's2=${level2}${suffix}',
+      'click': '${base}&' +
+        'pclick=${title}&' +
+        's2click=${level2}&' +
+        'p=${label}&' +
+        's2=${level2Click}&' +
+        'type=click&click=${type}${suffix}'
+    }
+  },
 
   'chartbeat': {
     'requests': {
