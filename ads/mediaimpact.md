@@ -22,7 +22,7 @@ limitations under the License.
   <amp-ad width="300" height="250"
       type="mediaimpact"
       data-site="67767"
-      data-page="display"
+      data-page="amp"
       data-format="4459"
       data-target=""
       data-slot="4459">
