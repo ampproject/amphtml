@@ -1,10 +1,9 @@
 # Integrating ad networks into AMP
 
-See also our [ad integration guidelines](../3p/README.md#ads).
+See also our [ad integration guidelines](../3p/README.md#ads) and [3rd party ads integration guidelines](./integration-guide.md)
 
 ## Overview
 Ads are just another external resource and must play within the same constraints placed on all resources in AMP. We aim to support a large subset of existing ads with little or no changes to how the integrations work. Our long term goal is to further improve the impact of ads on the user experience through changes across the entire vertical client side stack.
-
 
 ## Constraints
 A summary of constraints placed on external resources such as ads in AMP HTML:
@@ -18,7 +17,7 @@ Reasons include:
   - Allows browsers to run the ad in a different process from the primary page (even better security and prevents JS inside the ad to block the main page UI thread).
   - Prevents ads doing less than optimal things to measure user behavior and other interference with the primary page.
 - The AMP runtime may at any moment decide that there are too many iframes on a page and that memory is low. In that case it would unload ads that were previously loaded and are no longer visible. It may later load new ads in the same slot if the user scrolls them back into view.
-
+- The AMP runtime may decide to set an ad that is currently not visible to `display: none` to reduce browser layout and compositing cost.
 
 ## The iframe sandbox
 
@@ -34,6 +33,9 @@ We will provide the following information to the ad:
   In browsers that support `location.ancestorOrigins` you can trust that the `origin` of the
   location is actually correct (So rogue pages cannot claim they represent an origin they do not actually represent).
 - `window.context.canonicalUrl` contains the canonical URL of the primary document as defined by its `link rel=canonical` tag.
+- `window.context.clientId` contains a unique id that is persistently the same for a given user and AMP origin site in their current browser until local data is deleted or the value expires (expiration is currently set to 1 year).
+  - Ad networks must register their cid scope in the variable clientIdScope in [_config.js](./_config.js).
+  - Only available on pages that load `amp-analytics`. The clientId will be null if `amp-analytics` was not loaded on the given page.
 - `window.context.pageViewId` contains a relatively low entropy id that is the same for all ads shown on a page.
 - [ad viewability](#ad-viewability)
 
@@ -46,13 +48,15 @@ More information can be provided in a similar fashion if needed (Please file an 
 
 ### Ad viewability
 
+#### Position in viewport
+
 Ads can call the special API `window.context.observeIntersection(changesCallback)` to receive IntersectionObserver style [change records](http://rawgit.com/slightlyoff/IntersectionObserver/master/index.html#intersectionobserverentry) of the ad's intersection with the parent viewport.
 
 The API allows specifying a callback that fires with change records when AMP observes that an ad becomes visible and then while it is visible, changes are reported as they happen.
 
 Example usage:
 
-```js
+```javascript
   window.context.observeIntersection(function(changes) {
     changes.forEach(function(c) {
       console.info('Height of intersection', c.intersectionRect.height);
@@ -64,7 +68,7 @@ Example usage:
 
 Example usage:
 
-```js
+```javascript
   var unlisten = window.context.observeIntersection(function(changes) {
     changes.forEach(function(c) {
       console.info('Height of intersection', c.intersectionRect.height);
@@ -75,25 +79,39 @@ Example usage:
   unlisten();
 ```
 
+#### Page visibility
+
+AMP documents may be practically invisible without the visibility being reflected by the [page visibility API](https://developer.mozilla.org/en-US/docs/Web/API/Page_Visibility_API). This is primarily the case when a document is swiped away or being prerendered.
+
+Whether a document is actually being visible can be queried using:
+
+`window.context.hidden` which is true if the page is not visible as per page visibility API or because the AMP viewer currently does not show it.
+
+Additionally one can observe the `amp:visibilitychange` on the `window` object to be notified about changes in visibility.
+
 ### Ad resizing
 
 Ads can call the special API
-`window.context.resize(width, height)` to send a resize request.
+`window.context.requestResize(width, height)` to send a resize request.
 
-Example of resize request:
-```javascript
-window.parent.postMessage({
-  sentinel: 'amp-3p',
-  type: 'embed-size',
-  height: document.body.scrollHeight
-}, '*');
-```
-
-Once this message is received the AMP runtime will try to accommodate this request as soon as
+Once the request is processed the AMP runtime will try to accommodate this request as soon as
 possible, but it will take into account where the reader is currently reading, whether the scrolling
-is ongoing and any other UX or performance factors. If the runtime cannot satisfy the resize events
-the `amp-ad` will show an `overflow` element. Clicking on the `overflow` element will immediately
-resize the `amp-ad` since it's triggered by a user action.
+is ongoing and any other UX or performance factors.
+
+Ads can observe wehther resize request were successful using the `window.context.onResizeSuccess` and `window.context.onResizeDenied` methods.
+
+Example
+```javascript
+var unlisten = window.context.onResizeSuccess(function(requestedHeight) {
+  // Hide any overflow elements that were shown.
+  // The requestedHeight argument may be used to check which height change the request corresponds to.
+});
+
+var unlisten = window.context.onResizeDenied(function(requestedHeight) {
+  // Show the overflow element and send a window.context.requestResize(width, height) when the overflow element is clicked.
+  // You may use the requestedHeight to check which height change the request corresponds to.
+});
+```
 
 Here are some factors that affect how fast the resize will be executed:
 
@@ -101,17 +119,17 @@ Here are some factors that affect how fast the resize will be executed:
 - Whether the resize is requested for a currently active ad;
 - Whether the resize is requested for an ad below the viewport or above the viewport.
 
-
-### Minimizing HTTP requests
+### Optimizing ad performance
 
 #### JS reuse across iframes
-To allow ads to bundle HTTP requests across multiple ad units on the same page the object `window.context.master` will contain the window object of the iframe being elected master iframe for the current page.
+To allow ads to bundle HTTP requests across multiple ad units on the same page the object `window.context.master` will contain the window object of the iframe being elected master iframe for the current page. The `window.context.isMaster` property is `true` when the current frame is the master frame.
+
+The `computeInMasterFrame` function is designed to make it easy to perform a task only in the master frame and provide the result to all frames.
 
 #### Preconnect and prefetch
-Add the JS URLs that an ad **always** fetches or always connects to (if you know the origin but not the path) to [_prefetch.js](_prefetch.js).
+Add the JS URLs that an ad **always** fetches or always connects to (if you know the origin but not the path) to [_config.js](_config.js).
 
 This triggers prefetch/preconnect when the ad is first seen, so that loads are faster when they come into view.
-
 
 ### Ad markup
 Ads are loaded using a the <amp-ad> tag given the type of the ad network and name value pairs of configuration. This is an example for the A9 network:
@@ -150,4 +168,7 @@ Technically the `<amp-ad>` tag loads an iframe to a generic bootstrap URL that k
 ### 1st party cookies
 
 Access to a publishers 1st party cookies may be achieved through a custom ad bootstrap
+
 file. See ["Running ads from a custom domain"](../builtins/amp-ad.md) in the ad documentation for details.
+
+If the publisher would like to add custom JavaScript in the `remote.html` file that wants to read or write to the publisher owned cookies, then the publisher needs to ensure that the `remote.html` file is hosted on a sub-domain of the publisher URL. e.g. if the publisher hosts a webpage on https://nytimes.com, then the remote file should be hosted on something similar to https://sub-domain.nytimes.com for the custom JavaScript to have the abiity to read or write cookies for nytimes.com.

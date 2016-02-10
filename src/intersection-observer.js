@@ -19,6 +19,7 @@ import {assert} from './asserts';
 import {layoutRectLtwh, rectIntersection, moveLayoutRect} from './layout-rect';
 import {listen, postMessage} from './iframe-helper';
 import {parseUrl} from './url';
+import {timer} from './timer';
 
 /**
  * Produces a change entry for that should be compatible with
@@ -103,8 +104,17 @@ export class IntersectionObserver extends Observable {
     this.is3p_ = opt_is3p || false;
     /** @private {boolean} */
     this.shouldSendIntersectionChanges_ = false;
-    /** @private {Array<function>} */
-    this.unlisteners_ = [];
+    /** @private {boolean} */
+    this.inViewport_ = false;
+
+    /** @private {!Array<!IntersectionObserverEntry>} */
+    this.pendingChanges_ = [];
+
+    /** @private {number} */
+    this.flushTimeout_ = 0;
+
+    /** @private @const {function()} */
+    this.boundFlush_ = this.flush_.bind(this);
 
     this.init_();
   }
@@ -116,23 +126,14 @@ export class IntersectionObserver extends Observable {
     // The second time this is called, it doesn't do much but it
     // guarantees that the receiver gets an initial intersection change
     // record.
-    this.unlisteners_.push(listen(this.iframe_, 'send-intersections', () => {
+    listen(this.iframe_, 'send-intersections', () => {
       this.startSendingIntersectionChanges_();
-    }, this.is3p_));
+    }, this.is3p_);
 
-    this.unlisteners_.push(this.add(() => {
+    this.add(() => {
       this.sendElementIntersection_();
-    }));
-  }
-
-  dispose() {
-    //used only in tests.
-    this.unlisteners_.forEach(unlisten => {
-      unlisten();
     });
-    this.unlisteners_ = [];
   }
-
   /**
    * Called via postMessage from the child iframe when the ad/iframe starts
    * observing its position in the viewport.
@@ -145,7 +146,10 @@ export class IntersectionObserver extends Observable {
   startSendingIntersectionChanges_() {
     this.shouldSendIntersectionChanges_ = true;
     this.baseElement_.getVsync().measure(() => {
-      this.sendElementIntersection_();
+      if (this.baseElement_.isInViewport()) {
+        this.onViewportCallback(true);
+      }
+      this.fire();
     });
   }
 
@@ -155,6 +159,10 @@ export class IntersectionObserver extends Observable {
    * @param {boolean} inViewport true if the element is in viewport.
    */
   onViewportCallback(inViewport) {
+    if (this.inViewport_ == inViewport) {
+      return;
+    }
+    this.inViewport_ = inViewport;
     // Lets the ad know that it became visible or no longer is.
     this.fire();
     // And update the ad about its position in the viewport while
@@ -186,13 +194,31 @@ export class IntersectionObserver extends Observable {
       return;
     }
     const change = this.baseElement_.element.getIntersectionChangeEntry();
+    if (this.pendingChanges_.length > 0 &&
+        this.pendingChanges_[this.pendingChanges_.length - 1].time
+        == change.time) {
+      return;
+    }
+    this.pendingChanges_.push(change);
+    if (!this.flushTimeout_) {
+      // Send a maximum of 10 postMessages per second.
+      this.flushTimeout_ = timer.delay(this.boundFlush_, 100);
+    }
+  }
+
+  flush_() {
+    this.flushTimeout_ = 0;
+    if (!this.pendingChanges_.length) {
+      return;
+    }
     const targetOrigin =
         this.iframe_.src ? parseUrl(this.iframe_.src).origin : '*';
     postMessage(
         this.iframe_,
         'intersection',
-        {changes: [change]},
+        {changes: this.pendingChanges_},
         targetOrigin,
         this.is3p_);
+    this.pendingChanges_.length = 0;
   }
 }

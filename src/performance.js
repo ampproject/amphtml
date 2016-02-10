@@ -27,9 +27,14 @@ import {viewerFor} from './viewer';
  * Maximum number of tick events we allow to accumulate in the performance
  * instance's queue before we start dropping those events and can no longer
  * be forwarded to the actual `tick` function when it is set.
- * @const {number}
  */
-const QUEUE_LIMIT_ = 50;
+const QUEUE_LIMIT = 50;
+
+/**
+ * Added to relative relative timings so that they are never 0 which the
+ * underlying library considers a non-value.
+ */
+const ENSURE_NON_ZERO = 1000;
 
 /**
  * @typedef {{
@@ -56,10 +61,10 @@ export class Performance {
     this.win = win;
 
     /** @const @private {funtion(string,?string=,number=)|undefined} */
-    this.tick_;
+    this.tick_ = undefined;
 
     /** @const @private {funtion()|undefined} */
-    this.flush_;
+    this.flush_ = undefined;
 
     /** @const @private {!Array<TickEventDef>} */
     this.events_ = [];
@@ -120,9 +125,11 @@ export class Performance {
 
     this.whenViewportLayoutComplete_().then(() => {
       if (didStartInPrerender) {
-        const userPerceivedVisualCompletenesssTime = docVisibleTime > -1 ?
-            (timer.now() - docVisibleTime) : 0;
-        this.tick('pc', undefined, userPerceivedVisualCompletenesssTime);
+        const userPerceivedVisualCompletenesssTime = docVisibleTime > -1
+            ? (timer.now() - docVisibleTime)
+            : 1 /* MS (magic number for prerender was complete
+                   by the time the user opened the page) */;
+        this.tickDelta('pc', userPerceivedVisualCompletenesssTime);
       } else {
         // If it didnt start in prerender, no need to calculate anything
         // and we just need to tick `pc`. (it will give us the relative
@@ -141,7 +148,7 @@ export class Performance {
     return this.whenReadyToRetrieveResources_().then(() => {
       return all(this.resources_.getResourcesInViewport().map(r => {
         // We're ok with the layout failing and still reporting.
-        return r.whenFirstLayoutComplete().catch(function() {});
+        return r.loaded().catch(function() {});
       }));
     });
   }
@@ -156,14 +163,14 @@ export class Performance {
   }
 
   /**
-   * Forwards tick events to the tick function set or queues it up to be
-   * flushed at a later time.
+   * Ticks a timing event.
    *
    * @param {string} label The variable name as it will be reported.
    * @param {?string=} opt_from The label of a previous tick to use as a
    *    relative start for this tick.
    * @param {number=} opt_value The time to record the tick at. Optional, if
-   *    not provided, use the current time.
+   *    not provided, use the current time. You probably want to use
+   *    `tickDelta` instead.
    */
   tick(label, opt_from, opt_value) {
     if (this.tick_) {
@@ -171,6 +178,19 @@ export class Performance {
     } else {
       this.queueTick_(label, opt_from, opt_value);
     }
+  }
+
+  /**
+   * Tick a very specific value for the label. Use this method if you
+   * measure the time it took to do something yourself.
+   * @param {string} label The variable name as it will be reported.
+   * @param {number} value The value in milliseconds that should be ticked.
+   */
+  tickDelta(label, value) {
+    // ENSURE_NON_ZERO Is added instead of non-zero, because the underlying
+    // library doesn't like 0 values.
+    this.tick('_' + label, undefined, ENSURE_NON_ZERO);
+    this.tick(label, '_' + label, value + ENSURE_NON_ZERO);
   }
 
 
@@ -201,7 +221,7 @@ export class Performance {
 
     // Start dropping the head of the queue if we've reached the limit
     // so that we don't take up too much memory in the runtime.
-    if (this.events_.length >= QUEUE_LIMIT_) {
+    if (this.events_.length >= QUEUE_LIMIT) {
       this.events_.shift();
     }
 

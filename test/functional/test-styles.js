@@ -30,7 +30,6 @@ describe('Styles', () => {
   afterEach(() => {
     sandbox.restore();
     sandbox = null;
-    clock.restore();
     clock = null;
   });
 

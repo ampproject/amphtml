@@ -45,7 +45,6 @@ describe('Animation', () => {
     anim = null;
     vsync = null;
     vsyncTasks = null;
-    clock.restore();
     clock = null;
     sandbox.restore();
     sandbox = null;

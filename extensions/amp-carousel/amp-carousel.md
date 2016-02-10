@@ -57,10 +57,15 @@ If present, the user may advance past the first item or the final item.
 
 If present, advances the slide to the next slide without user interaction.
 By default it will advance a slide in 5000 millisecond intervals (5 seconds)
-but will use the value of the `autoplay` attribute if present (minimum of 1000 ms).
-Value of `autoplay` must be numeric representation in milliseconds, ex. `autoplay=5000`.
+and can be overridden by the `delay` attribute.
 If `autoplay` is present it will also attach the `loop` attribute to
 `amp-carousel` if `loop` is not already present.
+
+**delay** (type=slides only)
+By default a slide will advance in 5000 millisecond intervals (5 seconds)
+when `autoplay` is specified and will use the value of the `delay`
+attribute if present (minimum of 1000 ms, an error will be thrown if its any lower).
+The value of `delay` must be numeric representation in milliseconds, ex. `delay=5000`.
 
 #### Styling
 - You may use the `amp-carousel` element selector to style it freely.

@@ -16,15 +16,27 @@
 
 import {assert} from './asserts';
 
+// Cached a-tag to avoid memory allocation during URL parsing.
+const a = document.createElement('a');
+
+// We cached all parsed URLs. As of now there are no use cases
+// of AMP docs that would ever parse an actual large number of URLs,
+// but we often parse the same one over and over again.
+const cache = Object.create(null);
 
 /**
  * Returns a Location-like object for the given URL. If it is relative,
  * the URL gets resolved.
+ * Consider the returned object immutable. This is enforced during
+ * testing by freezing the object.
  * @param {string} url
  * @return {!Location}
  */
 export function parseUrl(url) {
-  const a = document.createElement('a');
+  const fromCache = cache[url];
+  if (fromCache) {
+    return fromCache;
+  }
   a.href = url;
   const info = {
     href: a.href,
@@ -40,6 +52,8 @@ export function parseUrl(url) {
   // We instead return the actual origin which is the full URL.
   info.origin = (a.origin && a.origin != 'null') ? a.origin : getOrigin(info);
   assert(info.origin, 'Origin must exist');
+  // Freeze during testing to avoid accidental mutation.
+  cache[url] = (window.AMP_TEST && Object.freeze) ? Object.freeze(info) : info;
   return info;
 }
 
@@ -95,6 +109,18 @@ export function assertHttpsUrl(urlString, elementContext) {
   return urlString;
 }
 
+/**
+ * Asserts that a given url is an absolute HTTP or HTTPS URL.
+ * @param {string} urlString
+ * @return {string}
+ */
+export function assertAbsoluteHttpOrHttpsUrl(urlString) {
+  assert(/^(http\:|https\:)/i.test(urlString),
+      'URL must start with "http://" or "https://". Invalid value: %s',
+      urlString);
+  return parseUrl(urlString).href;
+}
+
 
 /**
  * Parses the query string of an URL. This method returns a simple key/value
@@ -135,15 +161,18 @@ export function parseQueryString(queryString) {
  * Don't use this directly, only exported for testing. The value
  * is available via the origin property of the object returned by
  * parseUrl.
- * @param {!Location} info
+ * @param {string|!Location} url
  * @return {string}
  * @visibleForTesting
  */
-export function getOrigin(info) {
-  if (info.protocol == 'data:' || !info.host) {
-    return info.href;
+export function getOrigin(url) {
+  if (typeof url == 'string') {
+    url = parseUrl(url);
   }
-  return info.protocol + '//' + info.host;
+  if (url.protocol == 'data:' || !url.host) {
+    return url.href;
+  }
+  return url.protocol + '//' + url.host;
 }
 
 
@@ -180,19 +209,19 @@ export function isProxyOrigin(url) {
 }
 
 /**
- * Returns the source origin of an AMP document for documents served
+ * Returns the source URL of an AMP document for documents served
  * on a proxy origin or directly.
  * @param {string|!Location} url URL of an AMP document.
- * @return {string} The source origin of the URL.
+ * @return {string}
  */
-export function getSourceOrigin(url) {
+export function getSourceUrl(url) {
   if (typeof url == 'string') {
     url = parseUrl(url);
   }
 
-  // Not a proxy URL - return the URL's origin.
+  // Not a proxy URL - return the URL itself.
   if (!isProxyOrigin(url)) {
-    return getOrigin(url);
+    return url.href;
   }
 
   // A proxy URL.
@@ -205,9 +234,74 @@ export function getSourceOrigin(url) {
       'Unknown path prefix in url %s', url.href);
   const domainOrHttpsSignal = path[2];
   const origin = domainOrHttpsSignal == 's'
-      ? 'https://' + path[3]
-      : 'http://' + domainOrHttpsSignal;
+      ? 'https://' + decodeURIComponent(path[3])
+      : 'http://' + decodeURIComponent(domainOrHttpsSignal);
   // Sanity test that what we found looks like a domain.
   assert(origin.indexOf('.') > 0, 'Expected a . in origin %s', origin);
-  return origin;
+  path.splice(1, domainOrHttpsSignal == 's' ? 3 : 2);
+  return origin + path.join('/') + (url.search || '') + (url.hash || '');
+}
+
+/**
+ * Returns the source origin of an AMP document for documents served
+ * on a proxy origin or directly.
+ * @param {string|!Location} url URL of an AMP document.
+ * @return {string} The source origin of the URL.
+ */
+export function getSourceOrigin(url) {
+  return getOrigin(getSourceUrl(url));
+}
+
+/**
+ * Returns absolute URL resolved based on the relative URL and the base.
+ * @param {string} relativeUrlString
+ * @param {string|!Location} baseUrl
+ * @return {string}
+ */
+export function resolveRelativeUrl(relativeUrlString, baseUrl) {
+  if (typeof baseUrl == 'string') {
+    baseUrl = parseUrl(baseUrl);
+  }
+  if (typeof URL == 'function') {
+    return new URL(relativeUrlString, baseUrl.href).toString();
+  }
+  return resolveRelativeUrlFallback_(relativeUrlString, baseUrl);
+}
+
+/**
+ * Fallback for URL resolver when URL class is not available.
+ * @param {string} relativeUrlString
+ * @param {string|!Location} baseUrl
+ * @return {string}
+ * @private Visible for testing.
+ */
+export function resolveRelativeUrlFallback_(relativeUrlString, baseUrl) {
+  if (typeof baseUrl == 'string') {
+    baseUrl = parseUrl(baseUrl);
+  }
+  relativeUrlString = relativeUrlString.replace(/\\/g, '/');
+  const relativeUrl = parseUrl(relativeUrlString);
+
+  // Absolute URL.
+  if (relativeUrlString.toLowerCase().indexOf(relativeUrl.protocol) == 0) {
+    return relativeUrl.href;
+  }
+
+  // Protocol-relative URL.
+  if (relativeUrlString.indexOf('//') == 0) {
+    return baseUrl.protocol + relativeUrlString;
+  }
+
+  // Absolute path.
+  if (relativeUrlString.indexOf('/') == 0) {
+    return baseUrl.origin + relativeUrlString;
+  }
+
+  // Relative path.
+  const basePath = baseUrl.pathname.split('/');
+  return baseUrl.origin +
+      (basePath.length > 1 ?
+          basePath.slice(0, basePath.length - 1).join('/') :
+          '') +
+      '/' + relativeUrlString;
 }

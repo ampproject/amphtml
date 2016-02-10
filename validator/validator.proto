@@ -38,10 +38,16 @@ message PropertySpecList {
   repeated PropertySpec properties = 1;
 }
 
+// Used for validating urls in attribute values.
+message UrlSpec {
+  // allowed_protocol must be in lowercase (e.g. "javascript" not "JavaScript").
+  repeated string allowed_protocol = 1;
+}
+
 // Attributes that are not covered by at least one of these specs are
 // disallowed. Within a given context (e.g., for a given TagSpec),
 // names are unique.
-// NEXT AVAILABLE TAG: 14
+// NEXT AVAILABLE TAG: 15
 message AttrSpec {
   // Use lower-case attribute names only.
   optional string name = 1;
@@ -56,13 +62,15 @@ message AttrSpec {
   // This would be a oneof, but this file only uses features in protobuf 2.5.0.
   // begin oneof {
 
-  // If none of value, value_regex, value_properties are set, any
-  // value is accepted. Note that prior to comparing, the attributes
-  // in a given HTML document will be unescaped.
+  // If none of value, value_regex, value_url, value_properties are set,
+  // any value is accepted unless blacklisted_value_regex is set.
+  // Note that prior to comparing, the attributes in a given HTML document
+  // will be unescaped.
 
   // The attribute value must be equal to the value in this field.
   optional string value = 4;
   optional string value_regex = 5;
+  optional UrlSpec value_url = 14;
   // validates against a list of properties (see PropertySpec).
   optional PropertySpecList value_properties = 11;
   // } end oneof
@@ -75,11 +83,6 @@ message AttrSpec {
   // e.g. the name of an attribute or tag.
   optional string deprecation = 7;
   optional string deprecation_url = 8;
-  // This feature specifically addresses the development attribute on
-  // the top-level html tag. When set, a DEV_MODE_ENABLED error with
-  // severity ERROR is generated.
-  optional string dev_mode_enabled = 9;
-  optional string dev_mode_enabled_url = 10;
 
   // If set true, the TagSpec containing this AttrSpec will be evaluated first
   // for any encountered tag which matches the tag name and this attribute spec.
@@ -198,13 +201,14 @@ message AmpLayout {
 // multiple meta tags (with different attributes).
 // NEXT AVAILABLE TAG: 17
 message TagSpec {
-  // Use lower-case tag names only.
+  // Use lower-case tag names only. If adding the same tag twice, then they must
+  // also have a detail string which is unique throughout all detail.
   optional string name = 1;
 
   // The detail will be copied as is into ValidationError::detail for
   // MANDATORY_TAG_MISSING and other errors. It is especially useful
   // when the tag name by itself isn't sufficient to uniquely identify
-  // the tag spec.
+  // the tag spec, and itself must be unique.
   optional string detail = 2;
 
   // If true, a tag conforming to this tag spec must occur at least once
@@ -291,7 +295,7 @@ message ValidationError {
     DEV_WARNING = 3; // DEPRECATED DO NOT USE.
   }
   optional Severity severity = 6 [ default = ERROR ];
-  // NEXT AVAILABLE TAG: 33
+  // NEXT AVAILABLE TAG: 38
   enum Code {
     UNKNOWN_CODE = 0;
     MANDATORY_TAG_MISSING = 1;
@@ -309,13 +313,16 @@ message ValidationError {
     STYLESHEET_TOO_LONG = 8;
     MANDATORY_CDATA_MISSING_OR_INCORRECT = 9;
     CDATA_VIOLATES_BLACKLIST = 30;
-    DEV_MODE_ENABLED = 10;
+    DEV_MODE_ENABLED = 10;  // Deprecated, remove after 2016-04-01.
     DEPRECATED_ATTR = 11;
     DEPRECATED_TAG = 12;
     CSS_SYNTAX = 13;
     CSS_SYNTAX_INVALID_AT_RULE = 29;
     MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE = 14;
     INVALID_PROPERTY_VALUE_IN_ATTR_VALUE = 15;
+    MISSING_URL = 35;
+    INVALID_URL = 36;
+    INVALID_URL_PROTOCOL = 37;
     DISALLOWED_PROPERTY_IN_ATTR_VALUE = 16;
     MUTUALLY_EXCLUSIVE_ATTRS = 17;
     UNESCAPED_TEMPLATE_IN_ATTR_VALUE = 18;
@@ -325,6 +332,8 @@ message ValidationError {
     DISALLOWED_TAG_ANCESTOR = 23;
     MANDATORY_TAG_ANCESTOR = 31;
     MANDATORY_TAG_ANCESTOR_WITH_HINT = 32;
+    ATTR_DISALLOWED_BY_IMPLIED_LAYOUT = 33;
+    ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT = 34;
   }
   optional Code code = 1;
   optional int32 line = 2 [ default = 1 ];

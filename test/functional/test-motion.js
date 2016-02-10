@@ -76,7 +76,6 @@ describe('Motion continueMotion', () => {
     expect(vsyncTasks.length).to.equal(0);
     vsync = null;
     vsyncTasks = null;
-    clock.restore();
     clock = null;
     sandbox.restore();
     sandbox = null;

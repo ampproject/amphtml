@@ -24,6 +24,7 @@ Example:
     layout="responsive"
     data-tweetid="585110598171631616"
     data-cards="hidden">
+</amp-twitter>
 ```
 
 **CAVEATS**

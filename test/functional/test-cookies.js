@@ -56,4 +56,38 @@ describe('getCookie', () => {
     expect(doc.cookie).to.equal(
         'c%261=v%261; path=/; expires=Fri, 13 Nov 2015 02:52:39 GMT');
   });
+
+  it('should write the cookie to the right domain', () => {
+    function test(hostname, targetDomain, opt_noset) {
+      let cookie;
+      const doc = {
+        set cookie(val) {
+          if (val.indexOf('; domain=' + targetDomain) != -1) {
+            cookie = val;
+          }
+        },
+        get cookie() {
+          return cookie;
+        }
+      };
+      setCookie({document: doc, location: {hostname: hostname}},
+          'c&1', 'v&1', 1447383159853, {
+            highestAvailableDomain: true
+          });
+      if (opt_noset) {
+        expect(cookie).to.be.undefined;
+      } else {
+        expect(cookie).to.equal(
+           'c%261=v%261; path=/; domain=' + targetDomain +
+            '; expires=Fri, 13 Nov 2015 02:52:39 GMT');
+      }
+    }
+    test('www.example.com', 'example.com');
+    test('123.www.example.com', 'example.com');
+    test('example.com', 'example.com');
+    test('www.example.com', 'www.example.com');
+    test('123.www.example.com', '123.www.example.com');
+    test('www.example.net', 'example.com', true);
+    test('example.net', 'example.com', true);
+  });
 });

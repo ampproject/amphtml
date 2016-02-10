@@ -39,6 +39,19 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 </amp-ad>
 ```
 
+#### Supported ad networks
+
+- [A9](../ads/a9.md)
+- [Adform](../ads/adform.md)
+- [AdReactor](../ads/adreactor.md)
+- [AdSense](../ads/adsense.md)
+- [AdTech](../ads/adtech.md)
+- [Dot and Media](../ads/dotandads.md)
+- [Doubleclick](../ads/doubleclick.md)
+- [plista](../ads/plista.md)
+- [Smart AdServer](../ads/smartadserver.md)
+- [Yieldmo](../ads/yieldmo.md)
+
 #### Styling
 
 `<amp-ad>` elements may not themselves have or be placed in containers that have CSS `position: fixed` set (with the exception of `amp-lightbox`).
@@ -46,40 +59,25 @@ This is due to the UX implications of full page overlay ads. It may be considere
 
 #### Attributes
 
-**type**
+##### type
 
 Identifier for the ad network. This selects the template that is used for the ad tag.
 
-**src**
+##### src
 
 Optional src value for a script tag loaded for this ad network. This can be used with ad networks that require exactly a single script tag to be inserted in the page. The src value must have a prefix that is whitelisted for this ad network.
 
-**data-foo-bar**
+##### data-foo-bar
 
 Most ad networks require further configuration. This can be passed to the network using HTML `data-` attributes. The parameter names are subject to standard data attribute dash to camel case conversion. E.g. "data-foo-bar" is send to the ad for configuration as "fooBar".
 
-**json**
+##### json
 
 Optional attribute to pass configuration to the ad as an arbitrarily complex JSON object. The object is passed to the ad as-is with no mangling done on the names.
 
-#### Ad Resizing
+##### data-consent-notification-id
 
-An `amp-ad` must have static layout defined as is the case with any other AMP element. However,
-it's possible to resize an `amp-ad` in runtime. To do so:
-
-1. The `amp-ad` must be defined with `resizable` attribute;
-2. The `amp-ad` must have `overflow` child element;
-3. The Ad's Iframe document has to send a `embed-size` request as a window message.
-
-Notice that `resizable` overrides `scrolling` value to `no`.
-
-Example of `amp-ad` with `overflow` element:
-```html
-<amp-ad width=300 height=300
-    type="foo"
-    resizable>
-  <div overflow tabindex=0 role=button aria-label="Expand!">Expand!</div>
-</amp-ad>
+Optional attribute. If provided will require confirming the [amp-user-notification](../extensions/amp-user-notification/amp-user-notification.md) with the given HTML-id until the "AMP client id" for the user (similar to a cookie) is passed to the ad. The means ad rendering is delayed until the user confirmed the notification.
 
 #### Placeholder
 
@@ -101,15 +99,6 @@ Optionally `amp-ad` supports a child element with the `placeholder` attribute. I
 ```
 
 - If there is no fallback element available, the amp-ad tag will be collapsed (set to display: none) if the ad sends a message that the ad slot cannot be filled and AMP determines that this operation can be performed without affecting the user's scroll position.
-
-#### Supported ad networks
-
-- [A9](../ads/a9.md)
-- [AdReactor](../ads/adreactor.md)
-- [AdSense](../ads/adsense.md)
-- [AdTech](../ads/adtech.md)
-- [Doubleclick](../ads/doubleclick.md)
-
 
 #### Running ads from a custom domain
 

@@ -23,6 +23,7 @@ import {getMode} from './mode';
 import {preconnectFor} from './preconnect';
 import {dashToCamelCase} from './string';
 import {parseUrl, assertHttpsUrl} from './url';
+import {viewerFor} from './viewer';
 
 
 /** @type {!Object<string,number>} Number of 3p frames on the for that type. */
@@ -55,6 +56,7 @@ function getFrameAttributes(parentWindow, element, opt_type) {
   attributes.initialWindowHeight = box.height;
   attributes.type = type;
   const docInfo = documentInfoFor(parentWindow);
+  const viewer = viewerFor(parentWindow);
   let locationHref = parentWindow.location.href;
   // This is really only needed for tests, but whatever. Children
   // see us as the logical origin, so telling them we are about:srcdoc
@@ -63,13 +65,16 @@ function getFrameAttributes(parentWindow, element, opt_type) {
     locationHref = parentWindow.parent.location.href;
   }
   attributes._context = {
-    referrer: parentWindow.document.referrer,
+    referrer: viewer.getUnconfirmedReferrerUrl(),
     canonicalUrl: docInfo.canonicalUrl,
     pageViewId: docInfo.pageViewId,
+    clientId: element.getAttribute('ampcid'),
     location: {
       href: locationHref
     },
-    mode: getMode()
+    tagName: element.tagName,
+    mode: getMode(),
+    hidden: !viewer.isVisible(),
   };
   const adSrc = element.getAttribute('src');
   if (adSrc) {
@@ -161,12 +166,13 @@ export function prefetchBootstrap(window) {
 /**
  * Returns the base URL for 3p bootstrap iframes.
  * @param {!Window} parentWindow
+ * @param {boolean=} opt_strictForUnitTest
  * @return {string}
  * @visibleForTesting
  */
-export function getBootstrapBaseUrl(parentWindow) {
+export function getBootstrapBaseUrl(parentWindow, opt_strictForUnitTest) {
   return getService(window, 'bootstrapBaseUrl', () => {
-    return getCustomBootstrapBaseUrl(parentWindow) ||
+    return getCustomBootstrapBaseUrl(parentWindow, opt_strictForUnitTest) ||
       getDefaultBootstrapBaseUrl(parentWindow);
   });
 }
@@ -192,9 +198,10 @@ function getDefaultBootstrapBaseUrl(parentWindow) {
  * Returns the custom base URL for 3p bootstrap iframes if it exists.
  * Otherwise null.
  * @param {!Window} parentWindow
+ * @param {boolean=} opt_strictForUnitTest
  * @return {?string}
  */
-function getCustomBootstrapBaseUrl(parentWindow) {
+function getCustomBootstrapBaseUrl(parentWindow, opt_strictForUnitTest) {
   const meta = parentWindow.document
       .querySelector('meta[name="amp-3p-iframe-src"]');
   if (!meta) {
@@ -207,9 +214,12 @@ function getCustomBootstrapBaseUrl(parentWindow) {
   // This is not a security primitive, we just don't want this to happen in
   // practice. People could still redirect to the same origin, but they cannot
   // redirect to the proxy origin which is the important one.
-  assert(parseUrl(url).origin != parseUrl(parentWindow.location.href).origin,
+  const parsed = parseUrl(url);
+  assert((parsed.hostname == 'localhost' && !opt_strictForUnitTest) ||
+      parsed.origin != parseUrl(parentWindow.location.href).origin,
       '3p iframe url must not be on the same origin as the current document ' +
-      '%s in element %s. See https://github.com/ampproject/amphtml/blob/' +
-      'master/spec/amp-iframe-origin-policy.md for details.', url, meta);
+      '%s (%s) in element %s. See https://github.com/ampproject/amphtml/blob/' +
+      'master/spec/amp-iframe-origin-policy.md for details.', url,
+      parseUrl(url).origin, meta);
   return url + '?$internalRuntimeVersion$';
 }

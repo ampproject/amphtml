@@ -23,28 +23,112 @@ export const ANALYTICS_CONFIG = {
   'default': {
     'transport': {'beacon': true, 'xhrpost': true, 'image': true},
     'vars': {
-      'random': 'RANDOM',
-      'canonicalUrl': 'CANONICAL_URL',
+      'ampdocHost': 'AMPDOC_HOST',
+      'ampdocUrl': 'AMPDOC_URL',
+      'availableScreenHeight': 'AVAILABLE_SCREEN_HEIGHT',
+      'availableScreenWidth': 'AVAILABLE_SCREEN_WIDTH',
+      'browserLanguage': 'BROWSER_LANGUAGE',
       'canonicalHost': 'CANONICAL_HOST',
       'canonicalPath': 'CANONICAL_PATH',
-      'documentReferrer': 'DOCUMENT_REFERRER',
-      'title': 'TITLE',
-      'ampdocUrl': 'AMPDOC_URL',
-      'ampdocHost': 'AMPDOC_HOST',
-      'pageViewId': 'PAGE_VIEW_ID',
+      'canonicalUrl': 'CANONICAL_URL',
       'clientId': 'CLIENT_ID',
+      'contentLoadTime': 'CONTENT_LOAD_TIME',
+      'documentCharset': 'DOCUMENT_CHARSET',
+      'documentReferrer': 'DOCUMENT_REFERRER',
+      'domainLookupTime': 'DOMAIN_LOOKUP_TIME',
+      'domInteractiveTime': 'DOM_INTERACTIVE_TIME',
+      'pageDownloadTime': 'PAGE_DOWNLOAD_TIME',
+      'pageLoadTime': 'PAGE_LOAD_TIME',
+      'pageViewId': 'PAGE_VIEW_ID',
+      'random': 'RANDOM',
+      'redirectTime': 'REDIRECT_TIME',
+      'screenColorDepth': 'SCREEN_COLOR_DEPTH',
+      'screenHeight': 'SCREEN_HEIGHT',
+      'screenWidth': 'SCREEN_WIDTH',
+      'scrollHeight': 'SCROLL_HEIGHT',
+      'scrollLeft': 'SCROLL_LEFT',
+      'scrollTop': 'SCROLL_TOP',
+      'scrollWidth': 'SCROLL_WIDTH',
+      'serverResponseTime': 'SERVER_RESPONSE_TIME',
+      'tcpConnectTime': 'TCP_CONNECT_TIME',
       'timestamp': 'TIMESTAMP',
       'timezone': 'TIMEZONE',
-      'scrollTop': 'SCROLL_TOP',
-      'scrollLeft': 'SCROLL_LEFT',
-      'scrollWidth': 'SCROLL_WIDTH',
-      'scrollHeight': 'SCROLL_HEIGHT',
-      'screenWidth': 'SCREEN_WIDTH',
-      'screenHeight': 'SCREEN_HEIGHT'
-      // Vars that GA can use: documentEncoding, userLanguage
+      'title': 'TITLE',
     }
-    // TODO(btownsend, #871): Add a generic hit format to make custom analytics
-    // easier.
+  },
+
+  'chartbeat': {
+    'requests': {
+      'host': 'https://ping.chartbeat.net',
+      'basePrefix': '/ping?h=${domain}&' +
+        'p=${canonicalPath}&' +
+        'u=${clientId(_cb)}&' +
+        'd=${canonicalHost}&' +
+        'g=${uid}&' +
+        'g0=${sections}&' +
+        'g1=${authors}&' +
+        'g2=${zone}&' +
+        'g3=${sponsorName}&' +
+        'g4=${contentType}&' +
+        'x=${scrollTop}&' +
+        'w=${screenHeight}&' +
+        'j=${decayTime}&' +
+        'r=${documentReferrer}&' +
+        't=${clientId(_cb_amp)}${pageViewId}&' +
+        'i=${title}',
+      'baseSuffix': '&_',
+      'interval': '${host}${basePrefix}&${baseSuffix}',
+      'anchorClick': '${host}${basePrefix}&${baseSuffix}'
+    },
+    'triggers': {
+      'trackInterval': {
+        'on': 'timer',
+        'timerSpec': {
+          'interval': 15,
+          'maxTimerLength': 7200
+        },
+        'request': 'interval',
+        'vars': {
+          'decayTime': 30
+        }
+      },
+      'trackAnchorClick': {
+        'on': 'click',
+        'selector': 'a',
+        'request': 'anchorClick',
+        'vars': {
+          'decayTime': 30
+        }
+      }
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true
+    }
+  },
+
+  'comscore': {
+    'vars': {
+      'c2': '1000001'
+    },
+    'requests': {
+      'host': 'https://sb.scorecardresearch.com',
+      'base': '${host}/b?',
+      'pageview': '${base}c1=2&c2=${c2}&rn=${random}&c8=${title}' +
+        '&c7=${canonicalUrl}&c9=${documentReferrer}&cs_c7amp=${ampdocUrl}'
+    },
+    'triggers': {
+      'defaultPageview': {
+        'on': 'visible',
+        'request': 'pageview'
+      }
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true
+    }
   },
 
   'googleanalytics': {
@@ -54,9 +138,12 @@ export const ANALYTICS_CONFIG = {
     },
     'requests': {
       'host': 'https://www.google-analytics.com',
-      'basePrefix': 'v=1&_v=a0&aip=true&_s=${hitCount}&dr=${documentReferrer}' +
+      'basePrefix': 'v=1&_v=a0&aip=true&_s=${requestCount}&' +
           'dt=${title}&sr=${screenWidth}x${screenHeight}&_utmht=${timestamp}&' +
-          'jid=&cid=${clientId(_ga)}&tid=${account}&dl=${documentLocation}',
+          'jid=&cid=${clientId(AMP_ECID_GOOGLE)}&tid=${account}&' +
+          'dl=${documentLocation}&' +
+          'dr=${documentReferrer}&sd=${screenColorDepth}&' +
+          'ul=${browserLanguage}&de=${documentCharset}' ,
       'baseSuffix': '&a=${pageViewId}&z=${random}',
       'pageview': '${host}/r/collect?${basePrefix}&t=pageview&' +
           '_r=1${baseSuffix}',
@@ -65,7 +152,11 @@ export const ANALYTICS_CONFIG = {
           'ev=${eventValue}${baseSuffix}',
       'social': '${host}/collect?${basePrefix}&t=social&' +
           'sa=${socialAction}&sn=${socialNetwork}&st=${socialTarget}' +
-          '${baseSuffix}'
+          '${baseSuffix}',
+      'timing': '${host}/collect?${basePrefix}&t=timing&plt=${pageLoadTime}&' +
+          'dns=${domainLookupTime}&tcp=${tcpConnectTime}&rrt=${redirectTime}&' +
+          'srt=${serverResponseTime}&pdt=${pageDownloadTime}&' +
+          'clt=${contentLoadTime}&dit=${domInteractiveTime}${baseSuffix}'
     },
     'optout': '_gaUserPrefs.ioo'
   }

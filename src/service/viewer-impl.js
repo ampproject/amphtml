@@ -19,7 +19,7 @@ import {assert} from '../asserts';
 import {documentStateFor} from '../document-state';
 import {getService} from '../service';
 import {log} from '../log';
-import {parseQueryString, removeFragment} from '../url';
+import {parseQueryString, parseUrl, removeFragment} from '../url';
 import {platform} from '../platform';
 
 
@@ -72,6 +72,20 @@ export const VisibilityState = {
    */
   HIDDEN: 'hidden'
 };
+
+
+/**
+ * These domains are trusted with more sensitive viewer operations such as
+ * propagating the referrer. If you believe your domain should be here,
+ * file the issue on GitHub to discuss. The process will be similar
+ * (but somewhat more stringent) to the one described in the [3p/README.md](
+ * https://github.com/ampproject/amphtml/blob/master/3p/README.md)
+ *
+ * @export {!Array<!RegExp>}
+ */
+export const TRUSTED_VIEWER_HOSTS = [
+  /^(.*\.)?(google)(\.com?)?(\.[a-z]{2})?$/
+];
 
 
 /**
@@ -139,6 +153,9 @@ export class Viewer {
 
     /** @private {?function(string, *, boolean):(Promise<*>|undefined)} */
     this.messageDeliverer_ = null;
+
+    /** @private {?string} */
+    this.messagingOrigin_ = null;
 
     /** @private {!Array<!{eventType: string, data: *}>} */
     this.messageQueue_ = [];
@@ -214,6 +231,63 @@ export class Viewer {
 
     // Wait for document to become visible.
     this.docState_.onVisibilityChanged(this.onVisibilityChange_.bind(this));
+
+    let trustedViewerResolved;
+    let trustedViewerPromise;
+    if (!this.isEmbedded_) {
+      // Not embedded in IFrame - can't trust the viewer.
+      trustedViewerResolved = false;
+      trustedViewerPromise = Promise.resolve(false);
+    } else if (this.win.location.ancestorOrigins) {
+      // Ancestors when available take precedence. This is the main API used
+      // for this determination. Fallback is only done when this API is not
+      // supported by the browser.
+      trustedViewerResolved = (this.win.location.ancestorOrigins.length > 0 &&
+          this.isTrustedViewerOrigin_(this.win.location.ancestorOrigins[0]));
+      trustedViewerPromise = Promise.resolve(trustedViewerResolved);
+    } else {
+      // Wait for comms channel to confirm the origin.
+      trustedViewerResolved = undefined;
+      trustedViewerPromise = new Promise(resolve => {
+        /** @const @private {!function(boolean)|undefined} */
+        this.trustedViewerResolver_ = resolve;
+      });
+    }
+
+    /** @const @private {!Promise<boolean>} */
+    this.isTrustedViewer_ = trustedViewerPromise;
+
+    /** @private {string} */
+    this.unconfirmedReferrerUrl_ =
+        this.isEmbedded() && 'referrer' in this.params_ &&
+            trustedViewerResolved !== false ?
+        this.params_['referrer'] :
+        this.win.document.referrer;
+
+    /** @const @private {!Promise<string>} */
+    this.referrerUrl_ = new Promise(resolve => {
+      if (this.isEmbedded() && 'referrer' in this.params_) {
+        // Viewer override, but only for whitelisted viewers. Only allowed for
+        // iframed documents.
+        this.isTrustedViewer_.then(isTrusted => {
+          if (isTrusted) {
+            resolve(this.params_['referrer']);
+          } else {
+            resolve(this.win.document.referrer);
+            if (this.unconfirmedReferrerUrl_ != this.win.document.referrer) {
+              this.win.setTimeout(() => {
+                throw new Error('Untrusted viewer referrer override: ' +
+                    this.unconfirmedReferrerUrl_ + ' at ' +
+                    this.messagingOrigin_);
+              });
+              this.unconfirmedReferrerUrl_ = this.win.document.referrer;
+            }
+          }
+        });
+      } else {
+        resolve(this.win.document.referrer);
+      }
+    });
 
     // Remove hash - no reason to keep it around, but only when embedded.
     if (this.isEmbedded_) {
@@ -392,6 +466,49 @@ export class Viewer {
   }
 
   /**
+   * Returns an unconfirmed "referrer" URL that can be optionally customized by
+   * the viewer. Consider using `getReferrerUrl()` instead, which returns the
+   * promise that will yield the confirmed "referrer" URL.
+   * @return {string}
+   */
+  getUnconfirmedReferrerUrl() {
+    return this.unconfirmedReferrerUrl_;
+  }
+
+  /**
+   * Returns the promise that will yield the confirmed "referrer" URL. This
+   * URL can be optionally customized by the viewer, but viewer is required
+   * to be a trusted viewer.
+   * @return {!Promise<string>}
+   */
+  getReferrerUrl() {
+    return this.referrerUrl_;
+  }
+
+  /**
+   * Whether the viewer has been whitelisted for more sensitive operations
+   * such as customizing referrer.
+   * @return {boolean}
+   */
+  isTrustedViewer() {
+    return this.isTrustedViewer_;
+  }
+
+  /**
+   * @param {string} urlString
+   * @return {boolean}
+   * @private
+   */
+  isTrustedViewerOrigin_(urlString) {
+    const url = parseUrl(urlString);
+    if (url.protocol != 'https:') {
+      // Non-https origins are never trusted.
+      return false;
+    }
+    return TRUSTED_VIEWER_HOSTS.some(th => th.test(url.hostname));
+  }
+
+  /**
    * Adds a "visibilitychange" event listener for viewer events. The
    * callback can check {@link isVisible} and {@link getPrefetchCount}
    * methods for more info.
@@ -554,11 +671,19 @@ export class Viewer {
    * Provides a message delivery mechanism by which AMP document can send
    * messages to the viewer.
    * @param {function(string, *, boolean):(!Promise<*>|undefined)} deliverer
+   * @param {string} origin
    * @export
    */
-  setMessageDeliverer(deliverer) {
+  setMessageDeliverer(deliverer, origin) {
     assert(!this.messageDeliverer_, 'message deliverer can only be set once');
+    log.fine(TAG_, 'message channel established with origin: ', origin);
     this.messageDeliverer_ = deliverer;
+    // TODO(dvoytenko, #1764): Make `origin` required when viewers catch up.
+    this.messagingOrigin_ = origin;
+    if (this.trustedViewerResolver_) {
+      this.trustedViewerResolver_(
+          origin ? this.isTrustedViewerOrigin_(origin) : false);
+    }
     if (this.messageQueue_.length > 0) {
       const queue = this.messageQueue_.slice(0);
       this.messageQueue_ = [];
@@ -566,6 +691,17 @@ export class Viewer {
         this.messageDeliverer_(message.eventType, message.data, false);
       });
     }
+  }
+
+  /**
+   * Sends the message to the viewer. This is a restricted API.
+   * @param {string} eventType
+   * @param {*} data
+   * @param {boolean} awaitResponse
+   * @return {!Promise<*>|undefined}
+   */
+  sendMessage(eventType, data, awaitResponse) {
+    return this.sendMessage_(eventType, data, awaitResponse);
   }
 
   /**

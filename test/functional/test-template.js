@@ -24,7 +24,9 @@ describe('Template', () => {
 
   class TemplateImpl extends BaseTemplate {
     render(data) {
-      return 'abc' + data.value;
+      const elem = document.createElement('div');
+      elem.textContent = 'abc' + data.value;
+      return elem;
     }
   }
 
@@ -46,7 +48,7 @@ describe('Template', () => {
     registerExtendedTemplate(window, templateElement.getAttribute('type'),
         TemplateImpl);
     return templates.renderTemplate(templateElement, {value: 1}).then(res => {
-      expect(res).to.equal('abc1');
+      expect(res.textContent).to.equal('abc1');
     });
   });
 
@@ -57,8 +59,8 @@ describe('Template', () => {
     return templates.renderTemplateArray(templateElement,
         [{value: 1}, {value: 2}]).then(res => {
           expect(res).to.have.length.of(2);
-          expect(res[0]).to.equal('abc1');
-          expect(res[1]).to.equal('abc2');
+          expect(res[0].textContent).to.equal('abc1');
+          expect(res[1].textContent).to.equal('abc2');
         });
   });
 
@@ -108,7 +110,7 @@ describe('Template', () => {
     registerExtendedTemplate(window, templateElement.getAttribute('type'),
         TemplateImpl);
     return p.then(res => {
-      expect(res).to.equal('abc1');
+      expect(res.textContent).to.equal('abc1');
     });
   });
 
@@ -129,8 +131,8 @@ describe('Template', () => {
         return [res1, res2];
       });
     }).then(res => {
-      expect(res[0]).to.equal('abc1');
-      expect(res[1]).to.equal('abc2');
+      expect(res[0].textContent).to.equal('abc1');
+      expect(res[1].textContent).to.equal('abc2');
     });
   });
 
@@ -146,7 +148,7 @@ describe('Template', () => {
     parentElement.setAttribute('template', id);
     return templates.findAndRenderTemplate(parentElement, {value: 1}).then(
         res => {
-          expect(res).to.equal('abc1');
+          expect(res.textContent).to.equal('abc1');
         });
   });
 
@@ -172,7 +174,7 @@ describe('Template', () => {
     parentElement.appendChild(templateElement);
     return templates.findAndRenderTemplate(parentElement, {value: 1}).then(
         res => {
-          expect(res).to.equal('abc1');
+          expect(res.textContent).to.equal('abc1');
         });
   });
 
@@ -201,9 +203,74 @@ describe('Template', () => {
     return templates.findAndRenderTemplateArray(parentElement,
         [{value: 1}, {value: 2}]).then(res => {
           expect(res).to.have.length.of(2);
-          expect(res[0]).to.equal('abc1');
-          expect(res[1]).to.equal('abc2');
+          expect(res[0].textContent).to.equal('abc1');
+          expect(res[1].textContent).to.equal('abc2');
         });
+  });
+
+  it('should discover and render template for an array', () => {
+    const templateElement = createTemplateElement();
+    const type = templateElement.getAttribute('type');
+    const id = type + Math.random();
+    templateElement.setAttribute('id', id);
+    document.body.appendChild(templateElement);
+    registerExtendedTemplate(window, type, TemplateImpl);
+
+    const parentElement = document.createElement('div');
+    parentElement.setAttribute('template', id);
+    return templates.findAndRenderTemplateArray(parentElement,
+        [{value: 1}, {value: 2}]).then(res => {
+          expect(res).to.have.length.of(2);
+          expect(res[0].textContent).to.equal('abc1');
+          expect(res[1].textContent).to.equal('abc2');
+        });
+  });
+
+  it('should replace target attribute in anchors', () => {
+    const prerendered = document.createElement('div');
+
+    const anchorWithoutTarget = document.createElement('a');
+    anchorWithoutTarget.setAttribute('href', 'https://acme.com/');
+    prerendered.appendChild(anchorWithoutTarget);
+
+    const anchorWithoutHref = document.createElement('a');
+    anchorWithoutHref.setAttribute('on', 'tap:my-element');
+    prerendered.appendChild(anchorWithoutHref);
+
+    const anchorWithTargetSelf = document.createElement('a');
+    anchorWithTargetSelf.setAttribute('href', 'https://acme.com/');
+    anchorWithTargetSelf.setAttribute('target', '_self');
+    prerendered.appendChild(anchorWithTargetSelf);
+
+    const anchorWithTargetTop = document.createElement('a');
+    anchorWithTargetTop.setAttribute('href', 'https://acme.com/');
+    anchorWithTargetTop.setAttribute('target', '_top');
+    prerendered.appendChild(anchorWithTargetTop);
+
+    const anchorWithTargetBlank = document.createElement('a');
+    anchorWithTargetBlank.setAttribute('href', 'https://acme.com/');
+    anchorWithTargetBlank.setAttribute('target', '_blank');
+    prerendered.appendChild(anchorWithTargetBlank);
+
+    const anchorWithTargetParent = document.createElement('a');
+    anchorWithTargetParent.setAttribute('href', 'https://acme.com/');
+    anchorWithTargetParent.setAttribute('target', '_parent');
+    prerendered.appendChild(anchorWithTargetParent);
+
+    templates.render_({render: () => prerendered});
+
+    // The unknown target is replaced with "_blank", at least until #1572
+    // is resolved.
+    expect(anchorWithoutTarget.getAttribute('target')).to.equal('_blank');
+
+    // No target substitution is done for anchors without href.
+    expect(anchorWithoutHref.getAttribute('target')).to.be.null;
+
+    // All others require _blank.
+    expect(anchorWithTargetSelf.getAttribute('target')).to.equal('_blank');
+    expect(anchorWithTargetTop.getAttribute('target')).to.equal('_blank');
+    expect(anchorWithTargetBlank.getAttribute('target')).to.equal('_blank');
+    expect(anchorWithTargetParent.getAttribute('target')).to.equal('_blank');
   });
 });
 

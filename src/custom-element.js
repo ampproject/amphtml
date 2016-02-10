@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {Layout, assertLength, getLayoutClass, getLengthNumeral, getLengthUnits,
-          isInternalElement, isLayoutSizeDefined, isLoadingAllowed,
-          parseLayout, parseLength, getNaturalDimensions,
-          hasNaturalDimensions} from './layout';
+import {Layout, getLayoutClass, getLengthNumeral, getLengthUnits,
+    isInternalElement, isLayoutSizeDefined, isLoadingAllowed,
+    parseLayout, parseLength, getNaturalDimensions,
+    hasNaturalDimensions} from './layout';
 import {ElementStub, stubbedElements} from './element-stub';
 import {assert} from './asserts';
 import {createLoaderElement} from '../src/loader';
@@ -28,7 +28,7 @@ import {reportError} from './error';
 import {resourcesFor} from './resources';
 import {timer} from './timer';
 import {vsyncFor} from './vsync';
-import {getServicePromise} from './service';
+import {getServicePromise, getServicePromiseOrNull} from './service';
 import * as dom from './dom';
 
 
@@ -129,6 +129,7 @@ export function applyLayout_(element) {
   const widthAttr = element.getAttribute('width');
   const heightAttr = element.getAttribute('height');
   const sizesAttr = element.getAttribute('sizes');
+  const heightsAttr = element.getAttribute('heights');
 
   // Input layout attributes.
   const inputLayout = layoutAttr ? parseLayout(layoutAttr) : null;
@@ -146,7 +147,7 @@ export function applyLayout_(element) {
 
   // Calculate effective width and height.
   if ((!inputLayout || inputLayout == Layout.FIXED ||
-          inputLayout == Layout.FIXED_HEIGHT) &&
+      inputLayout == Layout.FIXED_HEIGHT) &&
       (!inputWidth || !inputHeight) && hasNaturalDimensions(element.tagName)) {
     // Default width and height: handle elements that do not specify a
     // width/height and are defined to have natural browser dimensions.
@@ -166,7 +167,7 @@ export function applyLayout_(element) {
     layout = Layout.CONTAINER;
   } else if (height && (!width || width == 'auto')) {
     layout = Layout.FIXED_HEIGHT;
-  } else if (height && width && sizesAttr) {
+  } else if (height && width && (sizesAttr || heightsAttr)) {
     layout = Layout.RESPONSIVE;
   } else {
     layout = Layout.FIXED;
@@ -174,7 +175,7 @@ export function applyLayout_(element) {
 
   // Verify layout attributes.
   if (layout == Layout.FIXED || layout == Layout.FIXED_HEIGHT ||
-          layout == Layout.RESPONSIVE) {
+      layout == Layout.RESPONSIVE) {
     assert(height, 'Expected height to be available: %s', heightAttr);
   }
   if (layout == Layout.FIXED_HEIGHT) {
@@ -184,13 +185,16 @@ export function applyLayout_(element) {
   }
   if (layout == Layout.FIXED || layout == Layout.RESPONSIVE) {
     assert(width && width != 'auto',
-          'Expected width to be available and not equal to "auto": %s',
-          widthAttr);
+        'Expected width to be available and not equal to "auto": %s',
+        widthAttr);
   }
   if (layout == Layout.RESPONSIVE) {
     assert(getLengthUnits(width) == getLengthUnits(height),
         'Length units should be the same for width and height: %s, %s',
         widthAttr, heightAttr);
+  } else {
+    assert(heightsAttr === null,
+        'Unexpected "heights" attribute for none-responsive layout');
   }
 
   // Apply UI.
@@ -233,8 +237,8 @@ function isInternalOrServiceNode(node) {
     return true;
   }
   if (node.tagName && (node.hasAttribute('placeholder') ||
-          node.hasAttribute('fallback') ||
-          node.hasAttribute('overflow'))) {
+      node.hasAttribute('fallback') ||
+      node.hasAttribute('overflow'))) {
     return true;
   }
   return false;
@@ -301,10 +305,13 @@ export function createAmpElementProto(win, name, implementationClass) {
     this.isInViewport_ = false;
 
     /** @private {string|null|undefined} */
-    this.mediaQuery_;
+    this.mediaQuery_ = undefined;
 
     /** @private {!SizeList|null|undefined} */
-    this.sizeList_;
+    this.sizeList_ = undefined;
+
+    /** @private {!SizeList|null|undefined} */
+    this.heightsList_ = undefined;
 
     /**
      * This element can be assigned by the {@link applyLayout_} to a child
@@ -314,10 +321,10 @@ export function createAmpElementProto(win, name, implementationClass) {
     this.sizerElement_ = null;
 
     /** @private {boolean|undefined} */
-    this.loadingDisabled_;
+    this.loadingDisabled_ = undefined;
 
     /** @private {boolean|undefined} */
-    this.loadingState_;
+    this.loadingState_ = undefined;
 
     /** @private {?Element} */
     this.loadingContainer_ = null;
@@ -326,7 +333,7 @@ export function createAmpElementProto(win, name, implementationClass) {
     this.loadingElement_ = null;
 
     /** @private {?Element|undefined} */
-    this.overflowElement_;
+    this.overflowElement_ = undefined;
 
     /** @private {!BaseElement} */
     this.implementation_ = new implementationClass(this);
@@ -343,7 +350,7 @@ export function createAmpElementProto(win, name, implementationClass) {
      * Whether the element is in the template.
      * @private {boolean|undefined}
      */
-    this.isInTemplate_;
+    this.isInTemplate_ = undefined;
   };
 
   /** @private */
@@ -376,7 +383,7 @@ export function createAmpElementProto(win, name, implementationClass) {
     this.classList.remove('-amp-unresolved');
     this.implementation_.createdCallback();
     if (this.layout_ != Layout.NODISPLAY &&
-          !this.implementation_.isLayoutSupported(this.layout_)) {
+        !this.implementation_.isLayoutSupported(this.layout_)) {
       throw new Error('Layout not supported: ' + this.layout_);
     }
     this.implementation_.layout_ = this.layout_;
@@ -458,7 +465,16 @@ export function createAmpElementProto(win, name, implementationClass) {
    * @param {boolean} onLayout Whether this was called after a layout.
    */
   ElementProto.preconnect = function(onLayout) {
-    this.implementation_.preconnectCallback(onLayout);
+    if (onLayout) {
+      this.implementation_.preconnectCallback(onLayout);
+    } else {
+      // If we do early preconnects we delay them a bit. This is kind of
+      // an unfortunate trade off, but it seems faster, because the DOM
+      // operations themselves are not free and might delay
+      timer.delay(() => {
+        this.implementation_.preconnectCallback(onLayout);
+      }, 1);
+    }
   };
 
   /**
@@ -487,7 +503,7 @@ export function createAmpElementProto(win, name, implementationClass) {
         // Already in viewport - start showing loading.
         this.toggleLoading_(true);
       } else if (layoutBox.top < PREPARE_LOADING_THRESHOLD_ &&
-            layoutBox.top >= 0) {
+          layoutBox.top >= 0) {
         // Few top elements will also be pre-initialized with a loading
         // element.
         this.getVsync_().mutate(() => {
@@ -527,8 +543,19 @@ export function createAmpElementProto(win, name, implementationClass) {
       this.sizeList_ = sizesAttr ? parseSizeList(sizesAttr) : null;
     }
     if (this.sizeList_) {
-      this.style.width = assertLength(this.sizeList_.select(
-          this.ownerDocument.defaultView));
+      this.style.width = this.sizeList_.select(this.ownerDocument.defaultView);
+    }
+    // Heights.
+    if (this.heightsList_ === undefined) {
+      const heightsAttr = this.getAttribute('heights');
+      this.heightsList_ = heightsAttr ?
+          parseSizeList(heightsAttr, /* allowPercent */ true) : null;
+    }
+
+    if (this.heightsList_ && this.layout_ ===
+        Layout.RESPONSIVE && this.sizerElement_) {
+      this.sizerElement_.style.paddingTop = this.heightsList_.select(
+          this.ownerDocument.defaultView);
     }
   };
 
@@ -598,7 +625,7 @@ export function createAmpElementProto(win, name, implementationClass) {
     try {
       this.layout_ = applyLayout_(this);
       if (this.layout_ != Layout.NODISPLAY &&
-            !this.implementation_.isLayoutSupported(this.layout_)) {
+          !this.implementation_.isLayoutSupported(this.layout_)) {
         throw new Error('Layout not supported for: ' + this.layout_);
       }
       this.implementation_.layout_ = this.layout_;
@@ -925,12 +952,10 @@ export function createAmpElementProto(win, name, implementationClass) {
     if (this.loadingDisabled_ === undefined) {
       this.loadingDisabled_ = this.hasAttribute('noloading');
     }
-    if (this.loadingDisabled_ ||
-            !isLoadingAllowed(this.tagName) ||
-            this.layoutWidth_ < MIN_WIDTH_FOR_LOADING_ ||
-            this.layoutCount_ > 0 ||
-            isInternalOrServiceNode(this) ||
-            !isLayoutSizeDefined(this.layout_)) {
+    if (this.loadingDisabled_ || !isLoadingAllowed(this.tagName) ||
+        this.layoutWidth_ < MIN_WIDTH_FOR_LOADING_ ||
+        this.layoutCount_ > 0 ||
+        isInternalOrServiceNode(this) || !isLayoutSizeDefined(this.layout_)) {
       return false;
     }
     return true;
@@ -1033,37 +1058,31 @@ export function createAmpElementProto(win, name, implementationClass) {
    * @package @final
    */
   ElementProto.overflowCallback = function(overflown, requestedHeight) {
-    if (!overflown && !this.overflowElement_) {
-      // Overflow has never been initialized and not wanted.
-      return;
-    }
-
-    const overflowElement = this.getOverflowElement();
-    if (!overflowElement) {
+    this.getOverflowElement();
+    if (!this.overflowElement_) {
       if (overflown) {
         log.warn(TAG_,
             'Cannot resize element and overlfow is not available', this);
       }
-      return;
-    }
-
-    overflowElement.classList.toggle('amp-visible', overflown);
-
-    if (overflown) {
-      this.overflowElement_.onclick = () => {
-        this.resources_./*OK*/changeHeight(this, requestedHeight);
-        this.getVsync_().mutate(() => {
-          this.overflowCallback(/* overflown */ false, requestedHeight);
-        });
-      };
     } else {
-      this.overflowElement_.onclick = null;
+      this.overflowElement_.classList.toggle('amp-visible', overflown);
+
+      if (overflown) {
+        this.overflowElement_.onclick = () => {
+          this.resources_./*OK*/changeHeight(this, requestedHeight);
+          this.getVsync_().mutate(() => {
+            this.overflowCallback(/* overflown */ false, requestedHeight);
+          });
+        };
+      } else {
+        this.overflowElement_.onclick = null;
+      }
     }
+    this.implementation_.overflowCallback(overflown, requestedHeight);
   };
 
   return ElementProto;
 }
-
 
 /**
  * Registers a new custom element with its implementation class.
@@ -1087,6 +1106,27 @@ export function registerElement(win, name, implementationClass) {
 function isElementScheduled(win, elementName) {
   assert(win.ampExtendedElements, 'win.ampExtendedElements not created yet');
   return !!win.ampExtendedElements[elementName];
+}
+
+/**
+ * Registers a new alias for an existing custom element.
+ * @param {!Window} win The window in which to register the elements.
+ * @param {string} aliasName Additional name for an existing custom element.
+ * @param {string} sourceName Name of an existing custom element
+ * @param {Object} state Optional map to be merged into the prototype
+ *                 to override the original state with new default values
+ */
+export function registerElementAlias(win, aliasName, sourceName) {
+  const implementationClass = knownElements[sourceName];
+
+  if (implementationClass) {
+    win.document.registerElement(aliasName, {
+      prototype: createAmpElementProto(win, aliasName, implementationClass)
+    });
+  } else {
+    throw new Error(`Element name is unknown: ${sourceName}.` +
+                     `Alias ${aliasName} was not registered.`);
+  }
 }
 
 /**
@@ -1137,4 +1177,24 @@ export function getElementService(win, id, providedByElement) {
         id, providedByElement, providedByElement, providedByElement);
     return getServicePromise(win, id);
   });
+}
+
+/**
+ * Same as getElementService but produces null if the given element is not
+ * actually available on the current page.
+ * @param {!Window} win
+ * @param {string} id of the service.
+ * @param {string} provideByElement Name of the custom element that provides
+ *     the implementation of this service.
+ * @return {!Promise<*>}
+ */
+export function getElementServiceIfAvailable(win, id, providedByElement) {
+  const s = getServicePromiseOrNull(win, id);
+  if (s) {
+    return s;
+  }
+  if (!isElementScheduled(win, providedByElement)) {
+    return Promise.resolve(null);
+  }
+  return getElementService(win, id, providedByElement);
 }

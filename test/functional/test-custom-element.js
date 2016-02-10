@@ -25,6 +25,7 @@ import * as sinon from 'sinon';
 import {getService, resetServiceForTesting} from '../../src/service';
 import {
   getElementService,
+  getElementServiceIfAvailable,
   markElementScheduledForTesting,
   resetScheduledElementForTesting
 } from '../../src/custom-element';
@@ -112,9 +113,7 @@ describe('CustomElement', () => {
 
   afterEach(() => {
     resourcesMock.verify();
-    resourcesMock.restore();
     resourcesMock = null;
-    clock.restore();
     sandbox.restore();
     sandbox = null;
   });
@@ -223,13 +222,15 @@ describe('CustomElement', () => {
     expect(res).to.equal(true);
     expect(element.isBuilt()).to.equal(true);
     expect(testElementBuildCallback.callCount).to.equal(1);
-    expect(testElementPreconnectCallback.callCount).to.equal(1);
+    expect(testElementPreconnectCallback.callCount).to.equal(0);
 
     // Call again.
     res = element.build(false);
     expect(res).to.equal(true);
     expect(element.isBuilt()).to.equal(true);
     expect(testElementBuildCallback.callCount).to.equal(1);
+    expect(testElementPreconnectCallback.callCount).to.equal(0);
+    clock.tick(1);
     expect(testElementPreconnectCallback.callCount).to.equal(1);
   });
 
@@ -412,6 +413,7 @@ describe('CustomElement', () => {
     element.build(true);
     expect(element.isBuilt()).to.equal(true);
     expect(testElementLayoutCallback.callCount).to.equal(0);
+    clock.tick(1);
     expect(testElementPreconnectCallback.callCount).to.equal(1);
     expect(testElementPreconnectCallback.getCall(0).args[0]).to.be.false;
 
@@ -563,6 +565,28 @@ describe('CustomElement', () => {
     element2.setAttribute('sizes', '(min-width: 1111111px) 200px, 50vw');
     element2.applySizesAndMediaQuery();
     expect(element2.style.width).to.equal('50vw');
+  });
+
+  it('should apply heights condition', () => {
+    const element1 = new ElementClass();
+    element1.sizerElement_ = document.createElement('div');
+    element1.setAttribute('layout', 'responsive');
+    element1.setAttribute('width', '200px');
+    element1.setAttribute('height', '200px');
+    element1.setAttribute('heights', '(min-width: 1px) 99%, 1%');
+    element1.attachedCallback();
+    element1.applySizesAndMediaQuery();
+    expect(element1.sizerElement_.style.paddingTop).to.equal('99%');
+
+    const element2 = new ElementClass();
+    element2.sizerElement_ = document.createElement('div');
+    element2.setAttribute('layout', 'responsive');
+    element2.setAttribute('width', '200px');
+    element2.setAttribute('height', '200px');
+    element2.setAttribute('heights', '(min-width: 1111111px) 99%, 1%');
+    element2.attachedCallback();
+    element2.applySizesAndMediaQuery();
+    expect(element2.sizerElement_.style.paddingTop).to.equal('1%');
   });
 
   it('should change height without sizer', () => {
@@ -826,8 +850,6 @@ describe('CustomElement Loading Indicator', () => {
   afterEach(() => {
     vsync.mutate = savedMutate;
     resourcesMock.verify();
-    resourcesMock.restore();
-    clock.restore();
     sandbox.restore();
     sandbox = null;
   });
@@ -1055,7 +1077,6 @@ describe('CustomElement Overflow Element', () => {
 
   const resources = resourcesFor(window);
   let sandbox;
-  let clock;
   let element;
   let overflowElement;
   let savedMutate;
@@ -1065,7 +1086,6 @@ describe('CustomElement Overflow Element', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    clock = sandbox.useFakeTimers();
     resourcesMock = sandbox.mock(resources);
     element = new ElementClass();
     element.layoutWidth_ = 300;
@@ -1084,8 +1104,6 @@ describe('CustomElement Overflow Element', () => {
   afterEach(() => {
     vsync.mutate = savedMutate;
     resourcesMock.verify();
-    resourcesMock.restore();
-    clock.restore();
     sandbox.restore();
     sandbox = null;
   });
@@ -1125,19 +1143,25 @@ describe('CustomElement Overflow Element', () => {
   });
 
   it('should set overflow', () => {
+    const overflowCallbackSpy =
+        sandbox.spy(element.implementation_, 'overflowCallback');
     element.overflowCallback(true, 117);
     expect(element.overflowElement_).to.equal(overflowElement);
     expect(overflowElement).to.have.class('amp-visible');
     expect(overflowElement.onclick).to.exist;
+    expect(overflowCallbackSpy).to.be.calledWith(true, 117);
   });
 
   it('should unset overflow', () => {
+    const overflowCallbackSpy =
+        sandbox.spy(element.implementation_, 'overflowCallback');
     element.getOverflowElement();
     overflowElement.classList.toggle('amp-visible', true);
     element.overflowCallback(false, 117);
     expect(element.overflowElement_).to.equal(overflowElement);
     expect(overflowElement).to.not.have.class('amp-visible');
     expect(overflowElement.onclick).to.not.exist;
+    expect(overflowCallbackSpy).to.be.calledWith(false, 117);
   });
 
   it('should force change height when clicked', () => {
@@ -1189,6 +1213,21 @@ describe('CustomElement Overflow Element', () => {
       }).then(result => {
         expect(result).to.match(
           /Service e1 was requested to be provided through element-bar/);
+      });
+    });
+
+    it('should be provided by element if available', () => {
+      markElementScheduledForTesting(window, 'element-1');
+      const p1 = getElementServiceIfAvailable(window, 'e1', 'element-1');
+      const p2 = getElementServiceIfAvailable(window, 'e2', 'not-available');
+      getService(window, 'e1', function() {
+        return 'from e1';
+      });
+      return p1.then(s1 => {
+        expect(s1).to.equal('from e1');
+        return p2.then(s2 => {
+          expect(s2).to.be.null;
+        });
       });
     });
   });

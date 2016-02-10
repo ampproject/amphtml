@@ -15,7 +15,7 @@
  */
 
 import {assert} from './asserts';
-import {assertLength} from './layout';
+import {assertLength, assertLengthOrPercent} from './layout';
 
 
 /**
@@ -39,9 +39,10 @@ let SizeListOptionDef;
  * See https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#Attributes
  * See http://www.w3.org/html/wg/drafts/html/master/semantics.html#attr-img-sizes
  * @param {string} s
+ * @param {boolean=} opt_allowPercentAsLength when parsing heights
  * @return {!SizeList}
  */
-export function parseSizeList(s) {
+export function parseSizeList(s, opt_allowPercentAsLength) {
   const sSizes = s.split(',');
   assert(sSizes.length > 0, 'sizes has to have at least one size');
   const sizes = [];
@@ -61,7 +62,10 @@ export function parseSizeList(s) {
       sizeStr = sSize;
       mediaStr = undefined;
     }
-    sizes.push({mediaQuery: mediaStr, size: assertLength(sizeStr)});
+    sizes.push({mediaQuery: mediaStr,
+      size: opt_allowPercentAsLength ?
+          assertLengthOrPercent(sizeStr) :
+          assertLength(sizeStr)});
   });
   return new SizeList(sizes);
 };

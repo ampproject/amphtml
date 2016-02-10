@@ -74,7 +74,7 @@ amp.validator.validateTapActionsA11y = function(doc, validationResult) {
 
   const elements = doc.querySelectorAll('[on*="tap:"]');
   for (let i = 0; i < elements.length; i++) {
-    const element = elements[i];
+    const element = goog.asserts.assertInstanceof(elements[i], HTMLElement);
     if (element.tagName === 'A' || element.tagName === 'BUTTON') {
       continue;
     }

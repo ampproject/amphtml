@@ -195,6 +195,26 @@ describe('LoginDialog', () => {
         });
   });
 
+  it('should substitute return URL', () => {
+    windowMock.expects('open')
+        .withExactArgs(
+            'http://acme.com/login?a=1&ret1=' + RETURN_URL_ESC,
+            '_blank',
+            'height=450,width=700,left=150,top=275')
+        .returns(dialog)
+        .once();
+    const promise = openLoginDialog(windowApi,
+        'http://acme.com/login?a=1&ret1=RETURN_URL');
+    return Promise.resolve()
+        .then(() => {
+          succeed();
+          return promise;
+        })
+        .then(result => {
+          expect(result).to.equal('#success=true');
+        });
+  });
+
   it('should respond with empty string when dialog is closed', () => {
     windowMock.expects('open')
         .returns(dialog)

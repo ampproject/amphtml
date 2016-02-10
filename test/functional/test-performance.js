@@ -34,7 +34,6 @@ describe('performance', () => {
 
   afterEach(() => {
     perf = null;
-    clock.restore();
     clock = null;
     sandbox.restore();
     sandbox = null;
@@ -54,6 +53,19 @@ describe('performance', () => {
 
       perf.tick('startEnd');
       expect(perf.events_.length).to.equal(2);
+    });
+
+    it('should map tickDelta to tick', () => {
+      expect(perf.events_.length).to.equal(0);
+
+      perf.tickDelta('test', 99);
+      expect(perf.events_.length).to.equal(2);
+      expect(perf.events_[0]).to.jsonEqual({label: '_test', opt_value: 1000});
+      expect(perf.events_[1]).to.jsonEqual({
+        label: 'test',
+        opt_from: '_test',
+        opt_value: 1099
+      });
     });
 
     it('should have max 50 queued events', () => {
@@ -196,7 +208,7 @@ describe('performance', () => {
 
   it('can set the performance function through the runtime', () => {
     const perf = performanceFor(window);
-    const spy = sinon.spy(perf, 'setTickFunction');
+    const spy = sandbox.spy(perf, 'setTickFunction');
     const fn = function() {};
 
     adopt(window);
@@ -204,13 +216,11 @@ describe('performance', () => {
     window.AMP.setTickFunction(fn);
 
     expect(spy.firstCall.args[0]).to.equal(fn);
-
-    spy.restore();
   });
 
   it('can set the flush function through the runtime', () => {
     const perf = performanceFor(window);
-    const spy = sinon.spy(perf, 'setTickFunction');
+    const spy = sandbox.spy(perf, 'setTickFunction');
     const fn = function() {};
 
     adopt(window);
@@ -218,8 +228,6 @@ describe('performance', () => {
     window.AMP.setTickFunction(function() {}, fn);
 
     expect(spy.firstCall.args[1]).to.equal(fn);
-
-    spy.restore();
   });
 
   it('should call the flush function after its set', () => {
@@ -235,19 +243,15 @@ describe('performance', () => {
   describe('coreServicesAvailable', () => {
     let tickSpy;
     let viewer;
-    let whenFirstVisibleStub;
-    let whenReadyToRetrieveResourcesStub;
-    let hasBeenVisibleStub;
     let whenFirstVisiblePromise;
     let whenFirstVisibleResolve;
     let whenReadyToRetrieveResourcesPromise;
     let whenReadyToRetrieveResourcesResolve;
-    let whenViewportLayoutCompleteStub;
     let whenViewportLayoutCompletePromise;
     let whenViewportLayoutCompleteResolve;
 
     function stubHasBeenVisible(visibility) {
-      hasBeenVisibleStub = sinon.stub(viewer, 'hasBeenVisible')
+      sandbox.stub(viewer, 'hasBeenVisible')
           .returns(visibility);
     }
 
@@ -255,7 +259,7 @@ describe('performance', () => {
       viewer = viewerFor(window);
       resources = resourcesFor(window);
 
-      tickSpy = sinon.spy(perf, 'tick');
+      tickSpy = sandbox.spy(perf, 'tick');
 
       whenFirstVisiblePromise = new Promise(resolve => {
         whenFirstVisibleResolve = resolve;
@@ -269,23 +273,12 @@ describe('performance', () => {
         whenViewportLayoutCompleteResolve = resolve;
       });
 
-      whenFirstVisibleStub = sinon.stub(viewer, 'whenFirstVisible')
+      sandbox.stub(viewer, 'whenFirstVisible')
           .returns(whenFirstVisiblePromise);
-      whenReadyToRetrieveResourcesStub = sinon
-          .stub(perf, 'whenReadyToRetrieveResources_')
+      sandbox.stub(perf, 'whenReadyToRetrieveResources_')
           .returns(whenReadyToRetrieveResourcesPromise);
-      whenViewportLayoutCompleteStub = sinon
-          .stub(perf, 'whenViewportLayoutComplete_')
+      sandbox.stub(perf, 'whenViewportLayoutComplete_')
           .returns(whenViewportLayoutCompletePromise);
-    });
-
-    afterEach(() => {
-      whenFirstVisibleStub.restore();
-      whenReadyToRetrieveResourcesStub.restore();
-      whenViewportLayoutCompleteStub.restore();
-      if (hasBeenVisibleStub) {
-        hasBeenVisibleStub.restore();
-      }
     });
 
     describe('document started in prerender', () => {
@@ -305,9 +298,12 @@ describe('performance', () => {
           whenReadyToRetrieveResourcesResolve();
           whenViewportLayoutCompleteResolve();
           return perf.whenViewportLayoutComplete_().then(() => {
-            expect(tickSpy.callCount).to.equal(1);
-            expect(tickSpy.firstCall.args[0]).to.equal('pc');
-            expect(Number(tickSpy.firstCall.args[2])).to.equal(400);;
+            expect(tickSpy.callCount).to.equal(2);
+            expect(tickSpy.firstCall.args[0]).to.equal('_pc');
+            expect(tickSpy.secondCall.args[0]).to.equal('pc');
+            expect(tickSpy.secondCall.args[1]).to.equal('_pc');
+            expect(Number(tickSpy.firstCall.args[2])).to.equal(1000);
+            expect(Number(tickSpy.secondCall.args[2])).to.equal(1400);
           });
         });
       });
@@ -318,9 +314,12 @@ describe('performance', () => {
         whenReadyToRetrieveResourcesResolve();
         whenViewportLayoutCompleteResolve();
         return perf.whenViewportLayoutComplete_().then(() => {
-          expect(tickSpy.callCount).to.equal(1);
-          expect(tickSpy.firstCall.args[0]).to.equal('pc');
-          expect(tickSpy.firstCall.args[2]).to.equal(0);
+          expect(tickSpy.callCount).to.equal(2);
+          expect(tickSpy.firstCall.args[0]).to.equal('_pc');
+          expect(tickSpy.secondCall.args[0]).to.equal('pc');
+          expect(tickSpy.secondCall.args[1]).to.equal('_pc');
+          expect(Number(tickSpy.firstCall.args[2])).to.equal(1000);
+          expect(Number(tickSpy.secondCall.args[2])).to.equal(1001);
         });
       });
     });

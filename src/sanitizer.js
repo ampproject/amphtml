@@ -15,6 +15,13 @@
  */
 
 import {htmlSanitizer} from '../third_party/caja/html-sanitizer';
+import {
+  getSourceUrl,
+  isProxyOrigin,
+  parseUrl,
+  resolveRelativeUrl
+} from './url';
+import {parseSrcset} from './srcset';
 
 
 /**
@@ -165,7 +172,8 @@ export function sanitizeHtml(html) {
         emit(attrName);
         emit('="');
         if (attrValue) {
-          emit(htmlSanitizer.escapeAttrib(attrValue));
+          emit(htmlSanitizer.escapeAttrib(resolveAttrValue(
+              tagName, attrName, attrValue)));
         }
         emit('"');
       }
@@ -240,4 +248,92 @@ export function isValidAttr(attrName, attrValue) {
   }
 
   return true;
+}
+
+/**
+ * Resolves the attribute value. The main purpose is to rewrite URLs as
+ * described in `resolveUrlAttr`.
+ * @param {string} tagName
+ * @param {string} attrName
+ * @param {string} attrValue
+ * @return {string}
+ */
+function resolveAttrValue(tagName, attrName, attrValue) {
+  if (attrName == 'src' || attrName == 'href' || attrName == 'srcset') {
+    return resolveUrlAttr(tagName, attrName, attrValue, window.location);
+  }
+  return attrValue;
+}
+
+/**
+ * Rewrites the URL attribute values. URLs are rewritten as following:
+ * - If URL is absolute, it is not rewritten
+ * - If URL is relative, it's rewritten as absolute against the source origin
+ * - If resulting URL is a `http:` URL and it's for image, the URL is rewritten
+ *   again to be served with AMP Cache (cdn.ampproject.org).
+ *
+ * @param {string} tagName
+ * @param {string} attrName
+ * @param {string} attrValue
+ * @param {!Location} windowLocation
+ * @return {string}
+ * @private Visible for testing.
+ */
+export function resolveUrlAttr(tagName, attrName, attrValue, windowLocation) {
+  const isProxyHost = isProxyOrigin(windowLocation);
+  const baseUrl = parseUrl(getSourceUrl(windowLocation));
+
+  if (attrName == 'href' && attrValue.indexOf('#') != 0) {
+    return resolveRelativeUrl(attrValue, baseUrl);
+  }
+
+  if (attrName == 'src') {
+    if (tagName == 'amp-img') {
+      return resolveImageUrlAttr(attrValue, baseUrl, isProxyHost);
+    }
+    return resolveRelativeUrl(attrValue, baseUrl);
+  }
+
+  if (attrName == 'srcset') {
+    let srcset;
+    try {
+      srcset = parseSrcset(attrValue);
+    } catch (e) {
+      // Do not failed the whole template just because one srcset is broken.
+      // An AMP element will pick it up and report properly.
+      setTimeout(() => {throw e;});
+      return attrValue;
+    }
+    const sources = srcset.getSources();
+    for (let i = 0; i < sources.length; i++) {
+      sources[i].url = resolveImageUrlAttr(
+          sources[i].url, baseUrl, isProxyHost);
+    }
+    return srcset.stringify();
+  }
+
+  return attrValue;
+}
+
+/**
+ * Non-HTTPs image URLs are rewritten via proxy.
+ * @param {string} attrValue
+ * @param {!Location} baseUrl
+ * @param {boolean} isProxyHost
+ * @return {string}
+ */
+function resolveImageUrlAttr(attrValue, baseUrl, isProxyHost) {
+  const src = parseUrl(resolveRelativeUrl(attrValue, baseUrl));
+
+  // URLs such as `data:` or proxy URLs are returned as is. Unsafe protocols
+  // do not arrive here - already stripped by the sanitizer.
+  if (src.protocol == 'data:' || isProxyOrigin(src) || !isProxyHost) {
+    return src.href;
+  }
+
+  // Rewrite as a proxy URL.
+  return 'https://cdn.ampproject.org/i/' +
+      (src.protocol == 'https:' ? 's/' : '') +
+      encodeURIComponent(src.host) +
+      src.pathname + (src.search || '') + (src.hash || '');
 }

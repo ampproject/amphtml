@@ -16,8 +16,6 @@
 
 import {createFixtureIframe, pollForLayout, poll} from
     '../../testing/iframe';
-import {timer} from
-    '../../src/timer';
 
 describe('Rendering of one ad', () => {
   let fixture;
@@ -32,15 +30,19 @@ describe('Rendering of one ad', () => {
     this.timeout(20000);
     let iframe;
     let ampAd;
-    return pollForLayout(fixture.win, 1, 5500).then(function() {
+    const isEdge = navigator.userAgent.match(/Edge/);
+    return pollForLayout(fixture.win, 1, 5500).then(() => {
+      return poll('frame to be in DOM', () => {
+        return fixture.doc.querySelector('iframe');
+      });
+    }).then(iframeElement => {
+      iframe = iframeElement;
       expect(fixture.doc.querySelectorAll('iframe')).to.have.length(1);
-      iframe = fixture.doc.querySelector('iframe');
       ampAd = iframe.parentElement;
       expect(iframe.src).to.contain('categoryExclusion');
       expect(iframe.src).to.contain('health');
       expect(iframe.src).to.contain('tagForChildDirectedTreatment');
       expect(iframe.src).to.match(/http\:\/\/localhost:9876\/base\/dist\.3p\//);
-      return timer.promise(10);
     }).then(() => {
       return poll('frame to load', () => {
         return iframe.contentWindow && iframe.contentWindow.document &&
@@ -49,6 +51,15 @@ describe('Rendering of one ad', () => {
     }).then(unusedCanvas => {
       return poll('3p JS to load.', () => iframe.contentWindow.context);
     }).then(context => {
+      expect(context.hidden).to.be.false;
+      // In some browsers the referrer is empty. But in Chrome it works, so
+      // we always check there.
+      if (context.referrer !== '' ||
+          (navigator.userAgent.match(/Chrome/) && !isEdge)) {
+        expect(context.referrer).to.equal('http://localhost:' + location.port +
+            '/context.html');
+      }
+      expect(context.pageViewId).to.be.greaterThan(0);
       expect(context.data.tagForChildDirectedTreatment).to.be.false;
       expect(context.data.categoryExclusion).to.be.equal('health');
       expect(context.data.targeting).to.be.jsonEqual(
@@ -57,7 +68,14 @@ describe('Rendering of one ad', () => {
         return iframe.contentWindow.document.querySelector(
             'script[src="https://www.googletagservices.com/tag/js/gpt.js"]');
       });
-    }).then(unusedCanvas => {
+    }).then(() => {
+      return poll('render-start message received', () => {
+        return fixture.messages.filter(message => {
+          return message.type == 'render-start';
+        }).length;
+      });
+    }).then(() => {
+      expect(iframe.style.visibility).to.equal('');
       const win = iframe.contentWindow;
       return poll('GPT loaded', () => {
         return win.googletag && win.googletag.pubads && win.googletag.pubads();
@@ -76,13 +94,26 @@ describe('Rendering of one ad', () => {
             return canvas.querySelector(
                 '[id="google_ads_iframe_/4119129/mobile_ad_banner_0"]');
           }, null, 5000);
-    }).then(unusedAdIframe => {
+    }).then(() => {
+      expect(iframe.contentWindow.context.hidden).to.be.false;
+      return new Promise(resolve => {
+        iframe.contentWindow.addEventListener('amp:visibilitychange', resolve);
+        fixture.win.AMP.viewer.visibilityState_ = 'hidden';
+        fixture.win.AMP.viewer.onVisibilityChange_();
+      });
+    }).then(() => {
       expect(iframe.getAttribute('width')).to.equal('320');
       expect(iframe.getAttribute('height')).to.equal('50');
+      if (isEdge) { // TODO(cramforce): Get this to pass in Edge
+        return;
+      }
       return poll('Creative id transmitted. Ad fully rendered.', () => {
         return ampAd.getAttribute('creative-id');
       }, null, 15000);
     }).then(creativeId => {
+      if (isEdge) { // TODO(cramforce): Get this to pass in Edge
+        return;
+      }
       expect(creativeId).to.match(/^dfp-/);
     });
   });

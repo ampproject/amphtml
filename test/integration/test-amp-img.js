@@ -25,7 +25,7 @@ describe('Rendering of amp-img', () => {
     });
   });
 
-  it('should show the body', () => {
+  it('should show the body in image test', () => {
     return expectBodyToBecomeVisible(fixture.win);
   });
 

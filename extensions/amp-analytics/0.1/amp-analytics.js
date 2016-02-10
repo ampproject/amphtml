@@ -14,20 +14,24 @@
  * limitations under the License.
  */
 
-import {assertHttpsUrl} from '../../../src/url';
-import {installCidService} from '../../../src/service/cid-impl';
-import {log} from '../../../src/log';
-import {urlReplacementsFor} from '../../../src/url-replacements';
-import {expandTemplate} from '../../../src/string';
-import {xhrFor} from '../../../src/xhr';
-import {isArray, isObject} from '../../../src/types';
-
-import {addListener} from './instrumentation';
-import {sendRequest} from './transport';
 import {ANALYTICS_CONFIG} from './vendors';
+import {addListener, instrumentationServiceFor} from './instrumentation';
+import {assertHttpsUrl} from '../../../src/url';
+import {expandTemplate} from '../../../src/string';
+import {installCidService} from '../../../src/service/cid-impl';
+import {installStorageService} from '../../../src/service/storage-impl';
+import {isArray, isObject} from '../../../src/types';
+import {log} from '../../../src/log';
+import {sendRequest} from './transport';
+import {urlReplacementsFor} from '../../../src/url-replacements';
+import {userNotificationManagerFor} from '../../../src/user-notification';
+import {xhrFor} from '../../../src/xhr';
+import {toggle} from '../../../src/style';
 
 
 installCidService(AMP.win);
+installStorageService(AMP.win);
+instrumentationServiceFor(AMP.win);
 
 
 export class AmpAnalytics extends AMP.BaseElement {
@@ -49,9 +53,29 @@ export class AmpAnalytics extends AMP.BaseElement {
   }
 
   /** @override */
-  layoutCallback() {
-
+  buildCallback() {
     this.element.setAttribute('aria-hidden', 'true');
+    /**
+     * The html id of the `amp-user-notification` element.
+     * @private @const {?string}
+     */
+    this.consentNotificationId_ = this.element
+        .getAttribute('data-consent-notification-id');
+
+    /** @private {!Promise} */
+    this.consentPromise_ = Promise.resolve();
+
+    if (this.consentNotificationId_ != null) {
+      this.consentPromise_ = userNotificationManagerFor(this.getWin())
+          .then(service => service.get(this.consentNotificationId_));
+    }
+  }
+
+  /** @override */
+  layoutCallback() {
+    // Now that we are rendered, stop rendering the element to reduce
+    // resource consumption.
+    toggle(this.element, false);
 
     /**
      * @private {?string} Predefinedtype associated with the tag. If specified,
@@ -70,40 +94,49 @@ export class AmpAnalytics extends AMP.BaseElement {
      */
     this.remoteConfig = {};
 
-    return this.fetchRemoteConfig_().then(() => {
-      /**
-       * @private {!JSONObject} The analytics config associated with the tag
-       */
-      this.config_ = this.mergeConfigs_();
+    return this.consentPromise_
+        .then(this.fetchRemoteConfig_.bind(this))
+        .then(this.onFetchRemoteConfigSuccess_.bind(this));
+  }
 
-      if (this.hasOptedOut_()) {
-        // Nothing to do when the user has opted out.
-        log.fine(this.getName_(), 'User has opted out. No hits will be sent.');
-        return Promise.resolve();
-      }
+  /**
+   * Handle successful fetching of (possibly) remote config.
+   * @return {!Promise|undefined}
+   * @private
+   */
+  onFetchRemoteConfigSuccess_() {
+    /**
+     * @private {!JSONObject} The analytics config associated with the tag
+     */
+    this.config_ = this.mergeConfigs_();
 
-      this.generateRequests_();
+    if (this.hasOptedOut_()) {
+      // Nothing to do when the user has opted out.
+      log.fine(this.getName_(), 'User has opted out. No hits will be sent.');
+      return Promise.resolve();
+    }
 
-      if (!this.config_['triggers']) {
-        console./*OK*/error(this.getName_(), 'No triggers were found in the ' +
-            'config. No analytics data will be sent.');
-        return Promise.resolve();
-      }
+    this.generateRequests_();
 
-      // Trigger callback can be synchronous. Do the registration at the end.
-      for (const k in this.config_['triggers']) {
-        if (this.config_['triggers'].hasOwnProperty(k)) {
-          const trigger = this.config_['triggers'][k];
-          if (!trigger['on'] || !trigger['request']) {
-            console./*OK*/error(this.getName_(), '"on" and "request" ' +
-                'attributes are required for data to be collected.');
-            continue;
-          }
-          addListener(this.getWin(), trigger['on'],
-              this.handleEvent_.bind(this, trigger), trigger['selector']);
+    if (!this.config_['triggers']) {
+      console./*OK*/error(this.getName_(), 'No triggers were found in the ' +
+          'config. No analytics data will be sent.');
+      return Promise.resolve();
+    }
+
+    // Trigger callback can be synchronous. Do the registration at the end.
+    for (const k in this.config_['triggers']) {
+      if (this.config_['triggers'].hasOwnProperty(k)) {
+        const trigger = this.config_['triggers'][k];
+        if (!trigger['on'] || !trigger['request']) {
+          console./*OK*/error(this.getName_(), '"on" and "request" ' +
+              'attributes are required for data to be collected.');
+          continue;
         }
+        addListener(this.getWin(), trigger,
+            this.handleEvent_.bind(this, trigger));
       }
-    });
+    }
   }
 
   /**
@@ -119,13 +152,20 @@ export class AmpAnalytics extends AMP.BaseElement {
     }
     assertHttpsUrl(remoteConfigUrl);
     log.fine(this.getName_(), 'Fetching remote config', remoteConfigUrl);
-    return xhrFor(this.getWin()).fetchJson(remoteConfigUrl).then(jsonValue => {
-      this.remoteConfig_ = jsonValue;
-      log.fine(this.getName_(), 'Remote config loaded', remoteConfigUrl);
-    }, err => {
-      console./*OK*/error(this.getName_(), 'Error loading remote config: ',
-          remoteConfigUrl, err);
-    });
+    const fetchConfig = {
+      requireAmpResponseSourceOrigin: true,
+    };
+    if (this.element.hasAttribute('data-credentials')) {
+      fetchConfig.credentials = this.element.getAttribute('data-credentials');
+    }
+    return xhrFor(this.getWin()).fetchJson(remoteConfigUrl, fetchConfig)
+        .then(jsonValue => {
+          this.remoteConfig_ = jsonValue;
+          log.fine(this.getName_(), 'Remote config loaded', remoteConfigUrl);
+        }, err => {
+          console./*OK*/error(this.getName_(), 'Error loading remote config: ',
+              remoteConfigUrl, err);
+        });
   }
 
   /**
@@ -163,12 +203,15 @@ export class AmpAnalytics extends AMP.BaseElement {
           'parsed. Is it in a valid JSON format?', er);
     }
 
-    const config = {};
+    // Initialize config with analytics related vars.
+    const config = {
+      'vars': {
+        'requestCount': 0
+      }
+    };
     const defaultConfig = this.predefinedConfig_['default'] || {};
     const typeConfig = this.predefinedConfig_[
       this.element.getAttribute('type')] || {};
-
-    config['vars'] = config['vars'] || {};
 
     this.mergeObjects_(defaultConfig, config);
     this.mergeObjects_(typeConfig, config);
@@ -242,6 +285,8 @@ export class AmpAnalytics extends AMP.BaseElement {
       return;
     }
 
+    this.config_['vars']['requestCount']++;
+
     // Replace placeholders with URI encoded values.
     // Precedence is trigger.vars > config.vars.
     // Nested expansion not supported.
@@ -249,9 +294,9 @@ export class AmpAnalytics extends AMP.BaseElement {
       const match = key.match(/([^(]*)(\([^)]*\))?/);
       const name = match[1];
       const argList = match[2] || '';
-      const val = encodeURIComponent(
-          (trigger['vars'] && trigger['vars'][name]) ||
-          (this.config_['vars'] && this.config_['vars'][name]) || '');
+      const raw = (trigger['vars'] && trigger['vars'][name] ||
+          this.config_['vars'] && this.config_['vars'][name]);
+      const val = encodeURIComponent(raw != null ? raw : '');
       return val + argList;
     });
 

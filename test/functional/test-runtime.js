@@ -15,6 +15,7 @@
  */
 
 import {adopt} from '../../src/runtime';
+import {parseUrl} from '../../src/url';
 import * as sinon from 'sinon';
 
 describe('runtime', () => {
@@ -34,11 +35,11 @@ describe('runtime', () => {
       history: {},
       navigator: {},
       setTimeout: () => {},
+      location: parseUrl('https://acme.com/document1'),
     };
   });
 
   afterEach(() => {
-    clock.restore();
     sandbox.restore();
   });
 
@@ -61,6 +62,7 @@ describe('runtime', () => {
 
   it('should execute scheduled extensions & execute new extensions', () => {
     let progress = '';
+    const queueExtensions = win.AMP;
     win.AMP.push(amp => {
       expect(amp).to.equal(win.AMP);
       progress += '1';
@@ -73,7 +75,9 @@ describe('runtime', () => {
       expect(amp).to.equal(win.AMP);
       progress += '3';
     });
+    expect(queueExtensions).to.have.length(3);
     adopt(win);
+    expect(queueExtensions).to.have.length(0);
     expect(progress).to.equal('123');
     win.AMP.push(amp => {
       expect(amp).to.equal(win.AMP);
@@ -85,6 +89,7 @@ describe('runtime', () => {
       progress += '5';
     });
     expect(progress).to.equal('12345');
+    expect(queueExtensions).to.have.length(0);
   });
 
   it('should be robust against errors in early extensions', () => {

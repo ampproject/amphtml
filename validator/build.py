@@ -208,7 +208,8 @@ def CompileValidatorMinified(out_dir):
                 '%s/validator-generated.js' % out_dir,
                 'validator-in-browser.js', 'validator.js'],
       closure_entry_points=['amp.validator.validateString',
-                            'amp.validator.renderValidationResult'],
+                            'amp.validator.renderValidationResult',
+                            'amp.validator.renderErrorMessage'],
       output_file='%s/validator_minified.js' % out_dir)
   logging.info('... done')
 
@@ -222,7 +223,7 @@ def GenerateValidateBin(out_dir, nodejs_cmd):
   """
   logging.info('entering ...')
   f = open('%s/validate' % out_dir, 'w')
-  f.write('#!/usr/bin/%s\n' % nodejs_cmd)
+  f.write('#!/usr/bin/env %s\n' % nodejs_cmd)
   for l in open('%s/validator_minified.js' % out_dir):
     f.write(l)
   f.write("""

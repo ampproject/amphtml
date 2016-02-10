@@ -7,3 +7,5 @@ feature_tests/amp_layouts.html:83:2 The attribute 'layout' in tag 'amp-img' is s
 feature_tests/amp_layouts.html:113:2 The implied layout 'FIXED_HEIGHT' is not supported by tag 'amp-pixel'. (see https://github.com/ampproject/amphtml/blob/master/builtins/amp-pixel.md)
 feature_tests/amp_layouts.html:117:2 The attribute 'width' in tag 'amp-pixel' is set to the invalid value 'X'. (see https://github.com/ampproject/amphtml/blob/master/builtins/amp-pixel.md)
 feature_tests/amp_layouts.html:121:2 The attribute 'height' in tag 'amp-pixel' is set to the invalid value 'X'. (see https://github.com/ampproject/amphtml/blob/master/builtins/amp-pixel.md)
+feature_tests/amp_layouts.html:133:2 The attribute 'heights' in tag 'amp-img' is disallowed by implied layout 'FIXED'. (see https://github.com/ampproject/amphtml/blob/master/builtins/amp-img.md)
+feature_tests/amp_layouts.html:137:2 The attribute 'heights' in tag 'amp-img' is disallowed by implied layout 'FIXED_HEIGHT'. (see https://github.com/ampproject/amphtml/blob/master/builtins/amp-img.md)
