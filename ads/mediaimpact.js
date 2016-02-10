@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {loadScript,writeScript} from '../src/3p';
+import {loadScript} from '../src/3p';
 
 /**
  * @param {!Window} global
@@ -22,9 +22,17 @@ import {loadScript,writeScript} from '../src/3p';
  */
 
 export function mediaimpact(global, data) {
-    global.fif = false;
-    writeScript(global, "https://ec-ns.sascdn.com/diff/251/divscripte/amp.js?dom=" + window.context.location.host, () => {
-        asmi.sas.call(data.site + '/(' + data.page + ')', data.format, data.target, '', 'sas_' + data.slot.replace('sas_',''), 1);
-        document.getElementsByTagName('body')[0].style.margin = "0px";
-    });
+  global.fif = false;
+  window.addEventListener('load', function() {asmi.sas.call(data.site + '/(' + data.page + ')', data.format, data.target + ";googleAMP=1;", '', 'sas_' + data.slot.replace('sas_',''), 1)}, false);
+  asmiSetup = {
+    view: "m",
+    async: true
+  }
+  loadScript(global, "http://adtechs.de/demopages/amp.js?dom=" + window.context.location.host, () => {
+    if (!document.getElementById('sas_' + data.slot.replace('sas_',''))) {
+      var adContainer = document.createElement('div');
+      adContainer.id = 'sas_' + data.slot.replace('sas_','');
+      document.body.appendChild(adContainer);
+    }
+  });
 }
