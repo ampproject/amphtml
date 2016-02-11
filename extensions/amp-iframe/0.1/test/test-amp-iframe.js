@@ -415,33 +415,44 @@ describe('amp-iframe', () => {
       height: 10,
       poster: 'https://i.ytimg.com/vi/cMcCTVAFBWM/hqdefault.jpg'
     };
+    let nonTracking;
     return getAmpIframe(attributes, null, null, null, doc => {
-      const i = doc.createElement('amp-iframe');
-      for (const key in attributes) {
-        i.setAttribute(key, attributes[key]);
+      function addFrame() {
+        const i = doc.createElement('amp-iframe');
+        for (const key in attributes) {
+          i.setAttribute(key, attributes[key]);
+        }
+        i.style.height = '10px';
+        i.style.width = '10px';
+        i.style.display = 'block';
+        i.style.position = 'absolute';
+        i.style.top = '600px';
+        doc.body.appendChild(i);
+        return i;
       }
-      i.style.height = '10px';
-      i.style.width = '10px';
-      i.style.display = 'block';
-      i.style.position = 'absolute';
-      i.style.top = '600px';
-      doc.body.appendChild(i);
+
+      addFrame();
+      nonTracking = addFrame();
+      nonTracking.style.width = '100px';
+      nonTracking.style.height = '100px';
     }).then(iframe => {
       const impl = iframe.container.implementation_;
       const doc = impl.element.ownerDocument;
       expect(impl.looksLikeTrackingIframe_()).to.be.true;
-      return pollForLayout(doc.defaultView, 2).then(() => {
-        const iframes = doc.querySelectorAll('amp-iframe');
-        expect(iframes[0].implementation_
-            .looksLikeTrackingIframe_()).to.be.true;
-        expect(iframes[1].implementation_
-            .looksLikeTrackingIframe_()).to.be.true;
-        expect(doc.querySelectorAll('iframe,[amp-removed]')).to.have.length(1);
-        return poll('iframe removal', () => {
-          return doc.querySelectorAll('[amp-removed]').length == 1;
-        }).then(() => {
-          expect(doc.querySelectorAll('iframe')).to.have.length(0);
-        });
+      const iframes = doc.querySelectorAll('amp-iframe');
+      expect(iframes[0].implementation_
+          .looksLikeTrackingIframe_()).to.be.true;
+      expect(iframes[1].implementation_
+          .looksLikeTrackingIframe_()).to.be.true;
+      expect(iframes[2].implementation_
+          .looksLikeTrackingIframe_()).to.be.false;
+      expect(doc.querySelectorAll('iframe,[amp-removed]')).to.have.length(2);
+      return poll('iframe removal', () => {
+        return doc.querySelectorAll('[amp-removed]').length == 1;
+      }).then(() => {
+        expect(doc.querySelectorAll('iframe')).to.have.length(1);
+        expect(nonTracking.implementation_.iframe_)
+            .to.equal(doc.querySelector('iframe'));
       });
     });
   });
