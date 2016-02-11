@@ -247,9 +247,23 @@ export class InstrumentationService {
    */
   createSelectiveListener_(listener, selector) {
     return e => {
+      // First do the cheap lookups.
       if (selector === '*' || this.matchesSelector_(e.target, selector)) {
         listener(new AnalyticsEvent(AnalyticsEventType.CLICK));
+      } else {
+        // More expensive search.
+        let el = e.target;
+        while (el.parentElement != null && el.parentElement.tagName != 'BODY') {
+          el = el.parentElement;
+          if (this.matchesSelector_(el, selector)) {
+            listener(new AnalyticsEvent(AnalyticsEventType.CLICK));
+            // Don't fire the event multiple times even if the more than one
+            // ancestor matches the selector.
+            return;
+          }
+        }
       }
+
     };
   }
 
