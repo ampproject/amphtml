@@ -73,13 +73,6 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
         'amp-dynamic-css-classes/amp-dynamic-css-classes.md',
   },
-
-  // AMP Storage
-  {
-    id: 'amp-storage',
-    name: 'Local Storage',
-    spec: '',
-  },
 ];
 
 
