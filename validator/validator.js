@@ -944,15 +944,14 @@ ParsedAttrSpec.prototype.getSpec = function() {
 /**
  * @param {!Context} context
  * @param {!string} attrName
- * @param {!string} attrValue
+ * @param {!string} url
  * @param {!amp.validator.TagSpec} tagSpec
  * @param {!string} specUrl
  * @param {!amp.validator.ValidationResult} result
  */
-ParsedAttrSpec.prototype.validateAttrValueUrl = function(
-    context, attrName, attrValue, tagSpec, specUrl, result) {
-  const maybe_uri = goog.string.trim(attrValue);
-  if (maybe_uri === '') {
+ParsedAttrSpec.prototype.validateUrlAndProtocol = function(
+    context, attrName, url, tagSpec, specUrl, result) {
+  if (url === '') {
     context.addError(
         amp.validator.ValidationError.Code.MISSING_URL,
         /* params */ [attrName, getDetailOrName(tagSpec)], specUrl, result);
@@ -960,11 +959,11 @@ ParsedAttrSpec.prototype.validateAttrValueUrl = function(
   }
   let uri;
   try {
-    uri = goog.Uri.parse(maybe_uri);
+    uri = goog.Uri.parse(url);
   } catch (ex) {
     context.addError(
         amp.validator.ValidationError.Code.INVALID_URL,
-        /* params */ [attrName, getDetailOrName(tagSpec), attrValue],
+        /* params */ [attrName, getDetailOrName(tagSpec), url],
         specUrl, result);
     return;
   }
@@ -976,27 +975,49 @@ ParsedAttrSpec.prototype.validateAttrValueUrl = function(
         uri.getScheme().toLowerCase()], specUrl, result);
     return;
   }
-  const unescaped_maybe_uri = goog.string.unescapeEntities(maybe_uri);
-  let unescaped_uri;
-  try {
-    unescaped_uri = goog.Uri.parse(unescaped_maybe_uri);
-  } catch (ex) {
+};
+
+/**
+ * @param {!Context} context
+ * @param {!string} attrName
+ * @param {!string} attrValue
+ * @param {!amp.validator.TagSpec} tagSpec
+ * @param {!string} specUrl
+ * @param {!amp.validator.ValidationResult} result
+ */
+ParsedAttrSpec.prototype.validateAttrValueUrl = function(
+    context, attrName, attrValue, tagSpec, specUrl, result) {
+  const maybe_uris = new goog.structs.Set();
+  if (attrName != 'srcset') {
+    maybe_uris.add(goog.string.trim(attrValue));
+  } else {
+    // TODO: Replace this hack with a parser.
+    const segments = goog.string.trim(attrValue).split(',');
+    for (const segment of segments) {
+      const key_value = goog.string.trim(segment).split(' ');
+      // Allow srcsets with missing data, e.g. "img.jpg 2x,"
+      if (key_value[0] !== '') {
+        maybe_uris.add(goog.string.trim(key_value[0]));
+      }
+    }
+    // TODO: End hack.
+  }
+  if (maybe_uris.isEmpty()) {
     context.addError(
-        amp.validator.ValidationError.Code.INVALID_URL,
-        /* params */ [attrName, getDetailOrName(tagSpec), attrValue],
+        amp.validator.ValidationError.Code.MISSING_URL,
+        /* params */ [attrName, getDetailOrName(tagSpec)],
         specUrl, result);
     return;
   }
-  if (unescaped_uri.hasScheme() &&
-      !this.valueUrlAllowedProtocols_.contains(
-          unescaped_uri.getScheme().toLowerCase())) {
-    context.addError(
-        amp.validator.ValidationError.Code.INVALID_URL_PROTOCOL,
-        /* params */ [attrName, getDetailOrName(tagSpec),
-        unescaped_uri.getScheme().toLowerCase()], specUrl, result);
-    return;
+  for (const maybe_uri of maybe_uris.getValues()) {
+    const unescaped_maybe_uri = goog.string.unescapeEntities(maybe_uri);
+    this.validateUrlAndProtocol(
+        context, attrName, unescaped_maybe_uri, tagSpec, specUrl, result);
+    if (result.status === amp.validator.ValidationResult.Status.FAIL) {
+      return;
+    }
   }
-};
+}
 
 /**
  * @param {!Context} context
@@ -1744,9 +1765,7 @@ ParsedTagSpec.prototype.validateAttributes = function(
           return;
         }
       }
-      // TODO: remove srcset exclusion when srcset code is ready.
-      if (parsedSpec.getSpec().valueUrl !== null &&
-          encounteredAttrName != 'srcset') {
+      if (parsedSpec.getSpec().valueUrl !== null) {
         parsedSpec.validateAttrValueUrl(
             context, encounteredAttrName, encounteredAttrValue,
             this.spec_, this.spec_.specUrl, resultForAttempt);
