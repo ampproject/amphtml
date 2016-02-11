@@ -60,6 +60,13 @@ var forbiddenTerms = {
       'validator/validator-in-browser.js',
     ]
   },
+  'iframePing': {
+    message: 'This is only available in vendor config for ' +
+        'temporary workarounds.',
+    whitelist: [
+      'extensions/amp-analytics/0.1/amp-analytics.js',
+    ],
+  },
   // Service factories that should only be installed once.
   'installActionService': {
     message: privateServiceFactory,
@@ -221,14 +228,26 @@ var forbiddenTerms = {
   'openDatabase': requiresReviewPrivacy,
   'requestFileSystem': requiresReviewPrivacy,
   'webkitRequestFileSystem': requiresReviewPrivacy,
+  'getAccessReaderId': {
+    message: requiresReviewPrivacy,
+    whitelist: [
+      'extensions/amp-access/0.1/amp-access.js',
+      'src/url-replacements.js',
+    ]
+  },
+  'getAuthdataField': {
+    message: requiresReviewPrivacy,
+    whitelist: [
+      'extensions/amp-access/0.1/amp-access.js',
+      'src/url-replacements.js',
+    ]
+  },
   'debugger': '',
 
   // ES6. These are only the most commonly used.
   'Array\\.of': es6polyfill,
   // These currently depend on core-js/modules/web.dom.iterable which
   // we don't want. That decision could be reconsidered.
-  'Promise\\.all': es6polyfill,
-  'Promise\\.race': es6polyfill,
   '\\.startsWith': {
     message: es6polyfill,
     whitelist: [

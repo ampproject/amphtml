@@ -40,6 +40,7 @@ export const ANALYTICS_CONFIG = {
       'pageDownloadTime': 'PAGE_DOWNLOAD_TIME',
       'pageLoadTime': 'PAGE_LOAD_TIME',
       'pageViewId': 'PAGE_VIEW_ID',
+      'queryParam': 'QUERY_PARAM',
       'random': 'RANDOM',
       'redirectTime': 'REDIRECT_TIME',
       'screenColorDepth': 'SCREEN_COLOR_DEPTH',
@@ -50,10 +51,31 @@ export const ANALYTICS_CONFIG = {
       'scrollTop': 'SCROLL_TOP',
       'scrollWidth': 'SCROLL_WIDTH',
       'serverResponseTime': 'SERVER_RESPONSE_TIME',
+      'sourceUrl': 'SOURCE_URL',
+      'sourceHost': 'SOURCE_HOST',
       'tcpConnectTime': 'TCP_CONNECT_TIME',
       'timestamp': 'TIMESTAMP',
       'timezone': 'TIMEZONE',
       'title': 'TITLE',
+      'accessReaderId': 'ACCESS_READER_ID',
+      'authdata': 'AUTHDATA',
+    }
+  },
+
+  'atinternet': {
+    'transport': {'beacon': false, 'xhrpost': false, 'image': true},
+    'requests': {
+      'base': 'https://${log}${domain}/?s=${site}&ts=${timestamp}&r=${screenWidth}x${screenHeight}x${screenColorDepth}&re=${availableScreenWidth}x${availableScreenHeight}',
+      'suffix': '&ref=${documentReferrer}',
+      'pageview': '${base}&' +
+        'p=${title}&' +
+        's2=${level2}${suffix}',
+      'click': '${base}&' +
+        'pclick=${title}&' +
+        's2click=${level2}&' +
+        'p=${label}&' +
+        's2=${level2Click}&' +
+        'type=click&click=${type}${suffix}'
     }
   },
 
@@ -161,6 +183,43 @@ export const ANALYTICS_CONFIG = {
     'optout': '_gaUserPrefs.ioo'
   },
 
+  'krux': {
+    'requests': {
+      'beaconHost': 'https://beacon.krxd.net',
+      'timing': 't_navigation_type=0&' +
+        't_dns=${domainLookupTime}&' +
+        't_tcp=${tcpConnectTime}&' +
+        't_http_request=${serverResponseTime}&' +
+        't_http_response=${pageDownloadTime}&' +
+        't_content_ready=${contentLoadTime}&' +
+        't_window_load=${pageLoadTime}&' +
+        't_redirect=${redirectTime}',
+      'common': 'source=amp&' +
+        'confid=${confid}&' +
+        '_kpid=${pubid}&' +
+        '_kcp_s=${site}&' +
+        '_kcp_sc=${section}&' +
+        '_kcp_ssc=${subsection}&' +
+        '_kcp_d=${canonicalHost}&' +
+        '_kpref_=${documentReferrer}&' +
+        '_kua_kx_amp_client_id=${clientId(_kuid_)}&' +
+        '_kua_kx_lang=${browserLanguage}&' +
+        '_kua_kx_tech_browser_language=${browserLanguage}&' +
+        '_kua_kx_tz=${timezone}',
+      'pageview': '${beaconHost}/pixel.gif?${common}&${timing}',
+      'event': '${beaconHost}/event.gif?${common}&${timing}&pageview=false'
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true
+    },
+    'extraUrlParamsReplaceMap': {
+      'user.': '_kua_',
+      'page.': '_kpa_'
+    }
+  },
+
   'parsely': {
     'requests': {
       'host': 'https://srv.pixel.parsely.com',
@@ -191,5 +250,83 @@ export const ANALYTICS_CONFIG = {
       'xhrpost': false,
       'image': true
     }
+  },
+
+  'quantcast': {
+    'vars': {
+      'labels': ''
+    },
+    'requests': {
+      'host': 'https://pixel.quantserve.com/pixel',
+      'pageview': '${host};r=${random};a=${pcode};labels=${labels};' +
+        'fpan=;fpa=${clientId(__qca)};ns=0;ce=1;cm=;je=0;' +
+        'sr=${screenWidth}x${screenHeight}x${screenColorDepth};' +
+        'enc=n;et=${timestamp};ref=${documentReferrer};url=${canonicalUrl}'
+    },
+    'triggers': {
+      'defaultPageview': {
+        'on': 'visible',
+        'request': 'pageview'
+      }
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true
+    }
+  },
+
+  'adobeanalytics': {
+    'vars': {
+      'pageName': 'TITLE',
+      'host': '',
+      'reportSuites': '',
+      'linkType': 'o',
+      'linkUrl': '',
+      'linkName': '',
+    },
+    'requests': {
+      'requestPath': '/b/ss/${reportSuites}/0/amp-1.0/s${random}',
+      'basePrefix': 'vid=${clientId(amp_id)}' +
+          '&ndh=0' +
+          '&ce=${documentCharset}' +
+          '&pageName=${pageName}' +
+          '&g=${ampdocUrl}' +
+          '&r=${documentReferrer}' +
+          '&bh=${availableScreenHeight}' +
+          '&bw=${availableScreenWidth}' +
+          '&c=${screenColorDepth}' +
+          '&j=amp' +
+          '&s=${screenWidth}x${screenHeight}',
+      'pageview': 'https://${host}${requestPath}?${basePrefix}',
+      'click': 'https://${host}${requestPath}?${basePrefix}&pe=lnk_${linkType}&pev1=${linkUrl}&pev2=${linkName}',
+    }
+  },
+
+  'infonline': {
+    'vars': {
+      'sv': 'ke',
+      'ap': '1'
+    },
+    'transport': {'beacon': false, 'xhrpost': false, 'image': true},
+    'requests': {
+      'pageview': '${url}?st=${st}' +
+        '&sv=${sv}' +
+        '&ap=${ap}' +
+        '&co=${co}' +
+        '&cp=${cp}' +
+        '&host=${canonicalHost}' +
+        '&path=${canonicalPath}'
+    },
+    'triggers': {
+      'pageview': {
+        'on': 'visible',
+        'request': 'pageview'
+      }
+    }
   }
+
 };
+ANALYTICS_CONFIG['infonline']['triggers']['pageview']['iframe' +
+/* TEMPORARY EXCEPTION */ 'Ping'] = true;
+

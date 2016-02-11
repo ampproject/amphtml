@@ -115,11 +115,14 @@ func handle(w http.ResponseWriter, r *http.Request) {
 		level = logging.Error
 		errorType += "-cdn"
 	}
+	if r.URL.Query().Get("3p") == "1" {
+		errorType = "-3p"
+	}
 
 	event := &ErrorEvent{
 		Message:     r.URL.Query().Get("m"),
 		Exception:   r.URL.Query().Get("s"),
-		Version:     r.URL.Query().Get("v"),
+		Version:     errorType + "-" + r.URL.Query().Get("v"),
 		Environment: "prod",
 		Application: errorType,
 		AppID:       appengine.AppID(c),

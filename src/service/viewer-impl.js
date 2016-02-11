@@ -21,6 +21,7 @@ import {getService} from '../service';
 import {log} from '../log';
 import {parseQueryString, parseUrl, removeFragment} from '../url';
 import {platform} from '../platform';
+import {timer} from '../timer';
 
 
 const TAG_ = 'Viewer';
@@ -232,6 +233,23 @@ export class Viewer {
     // Wait for document to become visible.
     this.docState_.onVisibilityChanged(this.onVisibilityChange_.bind(this));
 
+    /**
+     * This promise will resolve when communications channel has been
+     * established or timeout in 5 seconds. The timeout is needed to avoid
+     * this promise becoming a memory leak with accumulating undelivered
+     * messages.
+     * @private @const {!Promise<!Viewer>}
+     */
+    this.messagingReadyPromise_ = timer.timeoutPromise(
+        5000,
+        new Promise(resolve => {
+          /** @private @const {function(!Viewer)} */
+          this.messagingReadyResolver_ = resolve;
+        }));
+    // The error is expected when no viewer is ever set.
+    this.messagingReadyPromise_.catch(() => {});
+
+    // Trusted viewer and referrer.
     let trustedViewerResolved;
     let trustedViewerPromise;
     if (!this.isEmbedded_) {
@@ -600,14 +618,6 @@ export class Viewer {
   }
 
   /**
-   * Broadcasts a message to all other AMP documents under the same viewer.
-   * @param {!JSONObject} message
-   */
-  broadcast(message) {
-    this.sendMessage_('broadcast', message, false);
-  }
-
-  /**
    * Triggers "tick" event for the viewer.
    * @param {!JSONObject} message
    */
@@ -628,15 +638,6 @@ export class Viewer {
    */
   setFlushParams(message) {
     this.sendMessage_('setFlushParams', message, false);
-  }
-
-  /**
-   * Registers receiver for the broadcast events.
-   * @param {function(!JSONObject)} handler
-   * @return {!Unlisten}
-   */
-  onBroadcast(handler) {
-    return this.broadcastObservable_.add(handler);
   }
 
   /**
@@ -701,6 +702,7 @@ export class Viewer {
     assert(!this.messageDeliverer_, 'message deliverer can only be set once');
     log.fine(TAG_, 'message channel established with origin: ', origin);
     this.messageDeliverer_ = deliverer;
+    this.messagingReadyResolver_(this);
     // TODO(dvoytenko, #1764): Make `origin` required when viewers catch up.
     this.messagingOrigin_ = origin;
     if (this.trustedViewerResolver_) {
@@ -724,7 +726,28 @@ export class Viewer {
    * @return {!Promise<*>|undefined}
    */
   sendMessage(eventType, data, awaitResponse) {
-    return this.sendMessage_(eventType, data, awaitResponse);
+    return this.messagingReadyPromise_.then(() => {
+      return this.sendMessage_(eventType, data, awaitResponse);
+    });
+  }
+
+  /**
+   * Broadcasts a message to all other AMP documents under the same viewer.
+   * @param {!JSONObject} message
+   */
+  broadcast(message) {
+    this.messagingReadyPromise_.then(() => {
+      return this.sendMessage_('broadcast', message, false);
+    });
+  }
+
+  /**
+   * Registers receiver for the broadcast events.
+   * @param {function(!JSONObject)} handler
+   * @return {!Unlisten}
+   */
+  onBroadcast(handler) {
+    return this.broadcastObservable_.add(handler);
   }
 
   /**
