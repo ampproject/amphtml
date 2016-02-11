@@ -31,6 +31,10 @@ export function setInViewportForTesting(inV) {
 
 let rafId = 0;
 let rafQueue = {};
+// Active intervals. Must be global, because people clear intervals
+// with clearInterval from a different window.
+const intervals = {};
+let intervalId = 0;
 
 /**
  * Add instrumentation to a window and all child iframes.
@@ -180,20 +184,25 @@ function instrumentEntryPoints(win) {
   };
   // Implement setInterval in terms of setTimeout to make
   // it respect the same rules
-  const intervals = {};
-  let intervalId = 0;
   win.setInterval = function(fn, time) {
     const id = intervalId++;
     function next() {
       intervals[id] = win.setTimeout(function() {
         next();
-        return fn.apply(this, arguments);
+        if (typeof fn == 'string') {
+          // Handle rare and dangerous string arg case.
+          return (0, win.eval/*NOT OK but whatcha gonna do.*/)(fn);
+        } else {
+          return fn.apply(this, arguments);
+        }
       }, time);
     }
     next();
     return id;
   };
+  const clearInterval = win.clearInterval;
   win.clearInterval = function(id) {
+    clearInterval(id);
     win.clearTimeout(intervals[id]);
     delete intervals[id];
   };
