@@ -185,6 +185,7 @@ describe('3p environment', () => {
     });
 
     it('should cancel uninstrumented timeouts', () => {
+      installTimer(testWin);
       const timeout = testWin.setTimeout(() => {
         throw new Error('should not happen: timeout');
       }, 0);
@@ -194,6 +195,7 @@ describe('3p environment', () => {
       manageWin(testWin);
       testWin.clearTimeout(timeout);
       testWin.clearInterval(interval);
+      clock.tick(100);
     });
 
     it('throttle requestAnimationFrame', () => {
