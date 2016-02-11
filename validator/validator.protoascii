@@ -25,7 +25,7 @@ min_validator_revision_required: 87
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 145
+spec_file_revision: 146
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
 #
@@ -351,6 +351,19 @@ tags: {
     mandatory: true
   }
   attrs: { name: "hreflang" }
+}
+# rel= isn't mandatory when itemprop= is present.
+tags: {
+  name: "link"
+  detail: "link itemprop="
+  attrs: {
+    name: "itemprop"
+    mandatory: true
+  }
+  attrs: {
+    name: "href"
+    mandatory: true
+  }
 }
 # Various whitelisted rel attribute values which can co-occur with
 # "type", "href", and "sizes" attributes of arbitrary value.
@@ -2710,7 +2723,9 @@ attr_lists: {
 attr_lists: {
   name: "$GLOBAL_ATTRS"
   # For schema.org annotations.
+  attrs: { name: "itemid" }
   attrs: { name: "itemprop" }
+  attrs: { name: "itemref" }
   attrs: { name: "itemscope" }
   attrs: { name: "itemtype" }
   # 3.2.5 HTML5 Global attributes.
