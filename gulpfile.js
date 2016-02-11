@@ -81,6 +81,7 @@ function buildExtensions(options) {
   buildExtension('amp-audio', '0.1', false, options);
   buildExtension('amp-brightcove', '0.1', false, options);
   buildExtension('amp-carousel', '0.1', true, options);
+  buildExtension('amp-dailymotion', '0.1', false, options);
   buildExtension('amp-dynamic-css-classes', '0.1', false, options);
   buildExtension('amp-facebook', '0.1', false, options);
   buildExtension('amp-fit-text', '0.1', true, options);
@@ -327,6 +328,7 @@ function buildExamples(watch) {
   buildExample('article.amp.html');
   buildExample('responsive.amp.html');
   buildExample('article-access.amp.html');
+  buildExample('dailymotion.amp.html');
   buildExample('csp.amp.html');
   buildExample('metadata-examples/article-json-ld.amp.html');
   buildExample('metadata-examples/article-microdata.amp.html');
