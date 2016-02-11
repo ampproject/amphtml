@@ -6,7 +6,9 @@ Description:
 Online SVGs of popular logos
 
 Local Modifications:
-None yet, but expected changes for reworking to be usable as in-line css svgs.
+Created a derived css file from the index.html, contained in
+amp-social-share-svgs.css. To be imported into the ampproject to provide in-line
+svg icons through css.
 
 Gist created verbatim from source for referencing files:
 https://gist.github.com/anonymous/920164b2cafcdade77a2
