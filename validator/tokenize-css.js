@@ -603,8 +603,10 @@ Tokenizer.prototype.consumeComments = function() {
       } else if (this.eof()) {
         // For example "h1 { color: red; } \* " would emit this parse error
         // at the end of the string.
-        this.errors_.push(mark.addPositionTo(new parse_css.ErrorToken(
-            parse_css.ErrorType.TOKENIZATION, 'unterminated comment')));
+        const error = new parse_css.ErrorToken(
+            parse_css.ErrorType.TOKENIZATION, 'unterminated comment');
+        mark.addPositionTo(error);
+        this.errors_.push(error);
         return;
       }
     }

@@ -40,12 +40,21 @@ export function doubleclick(global, data) {
         parseInt(data.overrideWidth || data.width, 10),
         parseInt(data.overrideHeight || data.height, 10)
       ]];
+      const clientId = window.context.clientId;
+      const pageViewId = window.context.pageViewId;
+      let correlator = null;
+      if (clientId != null) {
+        correlator = pageViewId + (clientId.replace(/\D/g, '') % 1e6) * 1e6;
+      } else {
+        correlator = pageViewId;
+      }
       const pubads = googletag.pubads();
       const slot = googletag.defineSlot(data.slot, dimensions, 'c')
           .addService(pubads);
       pubads.enableSingleRequest();
       pubads.markAsAmp();
       pubads.set('page_url', context.canonicalUrl);
+      pubads.setCorrelator(Number(correlator));
       googletag.enableServices();
 
       if (data.targeting) {

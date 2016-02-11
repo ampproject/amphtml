@@ -23,37 +23,37 @@ export const ANALYTICS_CONFIG = {
   'default': {
     'transport': {'beacon': true, 'xhrpost': true, 'image': true},
     'vars': {
-      'random': 'RANDOM',
-      'canonicalUrl': 'CANONICAL_URL',
-      'canonicalHost': 'CANONICAL_HOST',
-      'canonicalPath': 'CANONICAL_PATH',
-      'documentReferrer': 'DOCUMENT_REFERRER',
-      'title': 'TITLE',
-      'ampdocUrl': 'AMPDOC_URL',
       'ampdocHost': 'AMPDOC_HOST',
-      'pageViewId': 'PAGE_VIEW_ID',
-      'clientId': 'CLIENT_ID',
-      'timestamp': 'TIMESTAMP',
-      'timezone': 'TIMEZONE',
-      'scrollTop': 'SCROLL_TOP',
-      'scrollLeft': 'SCROLL_LEFT',
-      'scrollWidth': 'SCROLL_WIDTH',
-      'scrollHeight': 'SCROLL_HEIGHT',
-      'screenWidth': 'SCREEN_WIDTH',
-      'screenHeight': 'SCREEN_HEIGHT',
-      'pageLoadTime': 'PAGE_LOAD_TIME',
-      'domainLookupTime': 'DOMAIN_LOOKUP_TIME',
-      'tcpConnectTime': 'TCP_CONNECT_TIME',
-      'serverResponseTime': 'SERVER_RESPONSE_TIME',
-      'pageDownloadTime': 'PAGE_DOWNLOAD_TIME',
-      'redirectTime': 'REDIRECT_TIME',
-      'domInteractiveTime': 'DOM_INTERACTIVE_TIME',
-      'contentLoadTime': 'CONTENT_LOAD_TIME',
+      'ampdocUrl': 'AMPDOC_URL',
       'availableScreenHeight': 'AVAILABLE_SCREEN_HEIGHT',
       'availableScreenWidth': 'AVAILABLE_SCREEN_WIDTH',
-      'screenColorDepth': 'SCREEN_COLOR_DEPTH',
       'browserLanguage': 'BROWSER_LANGUAGE',
+      'canonicalHost': 'CANONICAL_HOST',
+      'canonicalPath': 'CANONICAL_PATH',
+      'canonicalUrl': 'CANONICAL_URL',
+      'clientId': 'CLIENT_ID',
+      'contentLoadTime': 'CONTENT_LOAD_TIME',
       'documentCharset': 'DOCUMENT_CHARSET',
+      'documentReferrer': 'DOCUMENT_REFERRER',
+      'domainLookupTime': 'DOMAIN_LOOKUP_TIME',
+      'domInteractiveTime': 'DOM_INTERACTIVE_TIME',
+      'pageDownloadTime': 'PAGE_DOWNLOAD_TIME',
+      'pageLoadTime': 'PAGE_LOAD_TIME',
+      'pageViewId': 'PAGE_VIEW_ID',
+      'random': 'RANDOM',
+      'redirectTime': 'REDIRECT_TIME',
+      'screenColorDepth': 'SCREEN_COLOR_DEPTH',
+      'screenHeight': 'SCREEN_HEIGHT',
+      'screenWidth': 'SCREEN_WIDTH',
+      'scrollHeight': 'SCROLL_HEIGHT',
+      'scrollLeft': 'SCROLL_LEFT',
+      'scrollTop': 'SCROLL_TOP',
+      'scrollWidth': 'SCROLL_WIDTH',
+      'serverResponseTime': 'SERVER_RESPONSE_TIME',
+      'tcpConnectTime': 'TCP_CONNECT_TIME',
+      'timestamp': 'TIMESTAMP',
+      'timezone': 'TIMEZONE',
+      'title': 'TITLE',
     }
   },
 
@@ -159,6 +159,37 @@ export const ANALYTICS_CONFIG = {
           'clt=${contentLoadTime}&dit=${domInteractiveTime}${baseSuffix}'
     },
     'optout': '_gaUserPrefs.ioo'
+  },
+
+  'parsely': {
+    'requests': {
+      'host': 'https://srv.pixel.parsely.com',
+      'basePrefix': '${host}/plogger/?' +
+        'rand=${timestamp}&' +
+        'idsite=${apikey}&' +
+        'url=${ampdocUrl}&' +
+        'urlref=${documentReferrer}&' +
+        'screen=${screenWidth}x${screenHeight}%7C' +
+          '${availableScreenWidth}x${availableScreenHeight}%7C' +
+          '${screenColorDepth}&' +
+        'title=${title}&' +
+        'date=${timestamp}&' +
+        'ampid=${clientId(_parsely_visitor)}',
+      'pageview': '${basePrefix}&action=pageview'
+      // TODO(#1612): client-side session support
+      // TODO(#1296): active engaged time support
+      // 'heartbeat': '${basePrefix}&action=heartbeat&inc=${engagedTime}'
+    },
+    'triggers': {
+      'defaultPageview': {
+        'on': 'visible',
+        'request': 'pageview'
+      }
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true
+    }
   }
 };
-

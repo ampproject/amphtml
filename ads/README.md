@@ -1,10 +1,9 @@
 # Integrating ad networks into AMP
 
-See also our [ad integration guidelines](../3p/README.md#ads).
+See also our [ad integration guidelines](../3p/README.md#ads) and [3rd party ads integration guidelines](./integration-guide.md)
 
 ## Overview
 Ads are just another external resource and must play within the same constraints placed on all resources in AMP. We aim to support a large subset of existing ads with little or no changes to how the integrations work. Our long term goal is to further improve the impact of ads on the user experience through changes across the entire vertical client side stack.
-
 
 ## Constraints
 A summary of constraints placed on external resources such as ads in AMP HTML:
@@ -19,7 +18,6 @@ Reasons include:
   - Prevents ads doing less than optimal things to measure user behavior and other interference with the primary page.
 - The AMP runtime may at any moment decide that there are too many iframes on a page and that memory is low. In that case it would unload ads that were previously loaded and are no longer visible. It may later load new ads in the same slot if the user scrolls them back into view.
 - The AMP runtime may decide to set an ad that is currently not visible to `display: none` to reduce browser layout and compositing cost.
-
 
 ## The iframe sandbox
 
@@ -50,6 +48,8 @@ More information can be provided in a similar fashion if needed (Please file an 
 
 ### Ad viewability
 
+#### Position in viewport
+
 Ads can call the special API `window.context.observeIntersection(changesCallback)` to receive IntersectionObserver style [change records](http://rawgit.com/slightlyoff/IntersectionObserver/master/index.html#intersectionobserverentry) of the ad's intersection with the parent viewport.
 
 The API allows specifying a callback that fires with change records when AMP observes that an ad becomes visible and then while it is visible, changes are reported as they happen.
@@ -79,6 +79,16 @@ Example usage:
   unlisten();
 ```
 
+#### Page visibility
+
+AMP documents may be practically invisible without the visibility being reflected by the [page visibility API](https://developer.mozilla.org/en-US/docs/Web/API/Page_Visibility_API). This is primarily the case when a document is swiped away or being prerendered.
+
+Whether a document is actually being visible can be queried using:
+
+`window.context.hidden` which is true if the page is not visible as per page visibility API or because the AMP viewer currently does not show it.
+
+Additionally one can observe the `amp:visibilitychange` on the `window` object to be notified about changes in visibility.
+
 ### Ad resizing
 
 Ads can call the special API
@@ -103,24 +113,23 @@ var unlisten = window.context.onResizeDenied(function(requestedHeight) {
 });
 ```
 
-
 Here are some factors that affect how fast the resize will be executed:
 
 - Whether the resize is triggered by the user action;
 - Whether the resize is requested for a currently active ad;
 - Whether the resize is requested for an ad below the viewport or above the viewport.
 
-
 ### Optimizing ad performance
 
 #### JS reuse across iframes
-To allow ads to bundle HTTP requests across multiple ad units on the same page the object `window.context.master` will contain the window object of the iframe being elected master iframe for the current page. The `window.context.isMaster` property is `true` when the current frame is the master frame. 
+To allow ads to bundle HTTP requests across multiple ad units on the same page the object `window.context.master` will contain the window object of the iframe being elected master iframe for the current page. The `window.context.isMaster` property is `true` when the current frame is the master frame.
+
+The `computeInMasterFrame` function is designed to make it easy to perform a task only in the master frame and provide the result to all frames.
 
 #### Preconnect and prefetch
 Add the JS URLs that an ad **always** fetches or always connects to (if you know the origin but not the path) to [_config.js](_config.js).
 
 This triggers prefetch/preconnect when the ad is first seen, so that loads are faster when they come into view.
-
 
 ### Ad markup
 Ads are loaded using a the <amp-ad> tag given the type of the ad network and name value pairs of configuration. This is an example for the A9 network:
@@ -159,4 +168,7 @@ Technically the `<amp-ad>` tag loads an iframe to a generic bootstrap URL that k
 ### 1st party cookies
 
 Access to a publishers 1st party cookies may be achieved through a custom ad bootstrap
+
 file. See ["Running ads from a custom domain"](../builtins/amp-ad.md) in the ad documentation for details.
+
+If the publisher would like to add custom JavaScript in the `remote.html` file that wants to read or write to the publisher owned cookies, then the publisher needs to ensure that the `remote.html` file is hosted on a sub-domain of the publisher URL. e.g. if the publisher hosts a webpage on https://nytimes.com, then the remote file should be hosted on something similar to https://sub-domain.nytimes.com for the custom JavaScript to have the abiity to read or write cookies for nytimes.com.

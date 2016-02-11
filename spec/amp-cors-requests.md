@@ -20,6 +20,21 @@ Many components and extensions in AMP take advantage of remote endpoints using C
 on CORS see [CORS Spec](https://www.w3.org/TR/cors/). This spec explains some of the key aspects of using CORS
 in AMP.
 
+## CORS and Cookies
+
+Most of components that use CORS requests in AMP also either automatically set credentials mode or allow the
+author to optionally enable it. The credentials mode sends origin cookies in the CORS request and it will also
+allow the origin to set cookies in response (subject to 3rd-party cookie restrictions). The origin, however,
+must enable credentials mode on the server side using `Access-Control-Allow-Credentials: true` response header.
+
+### 3rd-Party Cookie Restrictions
+
+The normal browser 3rd-party cookie restrictions apply to the credentialed CORS requests. These restrictions depend
+on the browser and the platform, but for some browsers, the origin can only set cookies if the user has previously
+visited the origin in a 1st-party (top) window. Or, in other words, only after the user has directly visited the
+origin website itself. Given this, a service accessed via CORS cannot assume that it will be able to set cookies
+by default.
+
 ## CORS Security in AMP
 
 This security protocol consists of two components: CORS origin and source origin restrictions.

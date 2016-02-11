@@ -22,6 +22,7 @@ Current list of extended components:
 | [`amp-audio`](amp-audio/amp-audio.md)                      | Replacement for the HTML5 `audio` tag.                                                      |
 | [`amp-brightcove`](amp-brightcove/amp-brightcove.md)             | Displays a Brightcove Video Cloud or Perform player. |
 | [`amp-carousel`](amp-carousel/amp-carousel.md)                | Generic carousel for displaying multiple similar pieces of content along a horizontal axis. |
+| [`amp-facebook`](amp-facebook/amp-facebook.md)               | Displays a Facebook Post or Video.                                                                   |
 | [`amp-fit-text`](amp-fit-text/amp-fit-text.md)                | Expand or shrink font size to fit the content within the space given.                       |
 | [`amp-font`](amp-font/amp-font.md)                | Trigger and monitor the loading of custom fonts.                       |
 | [`amp-iframe`](amp-iframe/amp-iframe.md)                 | Displays an iframe.                                                                         |
@@ -30,7 +31,9 @@ Current list of extended components:
 | [`amp-install-serviceworker`](amp-install-serviceworker/amp-install-serviceworker.md)               | Installs a ServiceWorker.
 | [`amp-lightbox`](amp-lightbox/amp-lightbox.md)             | Allows for a “lightbox” or similar experience.                                              |
 | [`amp-list`](amp-list/amp-list.md)             | A dynamic list that can download data and create list items using a template |
+| [`amp-pinterest`](amp-pinterest/amp-pinterest.md)               | Displays a Pintrest widget or Pin It button.                                                                   |
 | [`amp-twitter`](amp-twitter/amp-twitter.md)               | Displays a Twitter Tweet.                                                                   |
+| [`amp-vimeo`](amp-vimeo/amp-vimeo.md)               | Displays a Vimeo player embed.                                                                   |
 | [`amp-vine`](amp-vine/amp-vine.md)               | Displays a Vine simple embed.                                                                   |
 | [`amp-youtube`](amp-youtube/amp-youtube.md)               | Displays a Youtube video.                                                                   |
 

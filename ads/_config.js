@@ -27,6 +27,7 @@ export const adPrefetch = {
   adsense: 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js',
   dotandads: 'https://amp.ad.dotandad.com/dotandadsAmp.js',
   smartadserver: 'https://ec-ns.sascdn.com/diff/js/smart.js',
+  yieldmo: 'https://static.yieldmo.com/ym.amp1.js',
 };
 
 /**
@@ -47,6 +48,11 @@ export const adPreconnect = {
     'https://tpc.googlesyndication.com',
   ],
   dotandads: 'https://bal.ad.dotandad.com',
+  yieldmo: [
+    'https://static.yieldmo.com',
+    'https://s.yieldmo.com',
+    'https://ads.yieldmo.com',
+  ],
 };
 
 /**

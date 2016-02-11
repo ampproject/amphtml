@@ -60,11 +60,11 @@ describe('performance', () => {
 
       perf.tickDelta('test', 99);
       expect(perf.events_.length).to.equal(2);
-      expect(perf.events_[0]).to.jsonEqual({label: '_test', opt_value: 0});
+      expect(perf.events_[0]).to.jsonEqual({label: '_test', opt_value: 1000});
       expect(perf.events_[1]).to.jsonEqual({
         label: 'test',
         opt_from: '_test',
-        opt_value: 99
+        opt_value: 1099
       });
     });
 
@@ -302,8 +302,8 @@ describe('performance', () => {
             expect(tickSpy.firstCall.args[0]).to.equal('_pc');
             expect(tickSpy.secondCall.args[0]).to.equal('pc');
             expect(tickSpy.secondCall.args[1]).to.equal('_pc');
-            expect(Number(tickSpy.firstCall.args[2])).to.equal(0);
-            expect(Number(tickSpy.secondCall.args[2])).to.equal(400);
+            expect(Number(tickSpy.firstCall.args[2])).to.equal(1000);
+            expect(Number(tickSpy.secondCall.args[2])).to.equal(1400);
           });
         });
       });
@@ -318,8 +318,8 @@ describe('performance', () => {
           expect(tickSpy.firstCall.args[0]).to.equal('_pc');
           expect(tickSpy.secondCall.args[0]).to.equal('pc');
           expect(tickSpy.secondCall.args[1]).to.equal('_pc');
-          expect(Number(tickSpy.firstCall.args[2])).to.equal(0);
-          expect(Number(tickSpy.secondCall.args[2])).to.equal(1);
+          expect(Number(tickSpy.firstCall.args[2])).to.equal(1000);
+          expect(Number(tickSpy.secondCall.args[2])).to.equal(1001);
         });
       });
     });

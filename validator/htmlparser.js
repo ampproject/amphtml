@@ -59,6 +59,7 @@ amp.htmlparser.HtmlParser = function() {
  * @type {!Object<string, string>}
  */
 amp.htmlparser.HtmlParser.Entities = {
+  'colon': ':',
   'lt': '<',
   'gt': '>',
   'amp': '&',
@@ -587,14 +588,15 @@ amp.htmlparser.HtmlParser.prototype.parse = function(handler, htmlText) {
 /**
  * Decodes an HTML entity.
  *
- * @param {string} name The content between the '&' and the ';'.
+ * @param {string} entity The full entity (including the & and the ;).
  * @return {string} A single unicode code-point as a string.
  * @private
  */
-amp.htmlparser.HtmlParser.prototype.lookupEntity_ = function(name) {
+amp.htmlparser.HtmlParser.prototype.lookupEntity_ = function(entity) {
   // TODO(goto): use {amp.htmlparserDecode} instead ?
   // TODO(goto): &pi; is different from &Pi;
-  name = amp.htmlparser.toLowerCase(name);
+  const name = amp.htmlparser.toLowerCase(
+      entity.substring(1, entity.length - 1));
   if (amp.htmlparser.HtmlParser.Entities.hasOwnProperty(name)) {
     return amp.htmlparser.HtmlParser.Entities[name];
   }
@@ -605,7 +607,8 @@ amp.htmlparser.HtmlParser.prototype.lookupEntity_ = function(name) {
       !!(m = name.match(amp.htmlparser.HtmlParser.HEX_ESCAPE_RE_))) {
     return String.fromCharCode(parseInt(m[1], 16));
   }
-  return '';
+  // If unable to decode, return the name.
+  return name;
 };
 
 

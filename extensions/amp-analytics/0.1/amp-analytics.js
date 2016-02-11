@@ -26,6 +26,7 @@ import {sendRequest} from './transport';
 import {urlReplacementsFor} from '../../../src/url-replacements';
 import {userNotificationManagerFor} from '../../../src/user-notification';
 import {xhrFor} from '../../../src/xhr';
+import {toggle} from '../../../src/style';
 
 
 installCidService(AMP.win);
@@ -53,7 +54,7 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-
+    this.element.setAttribute('aria-hidden', 'true');
     /**
      * The html id of the `amp-user-notification` element.
      * @private @const {?string}
@@ -72,8 +73,9 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-
-    this.element.setAttribute('aria-hidden', 'true');
+    // Now that we are rendered, stop rendering the element to reduce
+    // resource consumption.
+    toggle(this.element, false);
 
     /**
      * @private {?string} Predefinedtype associated with the tag. If specified,
