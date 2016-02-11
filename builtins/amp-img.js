@@ -16,9 +16,11 @@
 
 import {BaseElement} from '../src/base-element';
 import {getLengthNumeral, isLayoutSizeDefined} from '../src/layout';
+import {isProxyOrigin} from '../src/url';
 import {loadPromise} from '../src/event-helper';
 import {parseSrcset} from '../src/srcset';
 import {registerElement} from '../src/custom-element';
+import {reportError} from '../src/error';
 
 
 /**
@@ -85,7 +87,11 @@ export function installImg(win) {
       }
       this.img_.setAttribute('src', src);
 
-      return loadPromise(this.img_);
+      return loadPromise(this.img_).catch(error => {
+        if (isProxyOrigin(src)) {
+          reportError(error, this.element);
+        }
+      });
     }
   };
 
