@@ -62,11 +62,11 @@ describe('amp-user-notification', () => {
     sandbox = null;
   });
 
-  it('should NOT have storage key by default', () => {
+  it('should have storage key by default', () => {
     return getUserNotification(dftAttrs).then(el => {
       const impl = el.implementation_;
       impl.buildCallback();
-      expect(impl.storageKey_).to.be.null;
+      expect(impl.storageKey_).to.not.be.null;
     });
   });
 
@@ -75,27 +75,6 @@ describe('amp-user-notification', () => {
       const impl = el.implementation_;
       expect(impl.buildCallback.bind(impl))
           .to.throw(/should have an id/);
-    });
-  });
-
-  it('should require `data-show-if-href`', () => {
-    return getUserNotification({
-      id: 'n1'
-    }).then(el => {
-      const impl = el.implementation_;
-      expect(impl.buildCallback.bind(impl)).to
-          .throw(/should have "data-show-if-href" attribute/);
-    });
-  });
-
-  it('should require `data-dismiss-href`', () => {
-    return getUserNotification({
-      id: 'n1',
-      'data-show-if-href': 'https://www.ampproject.org/get'
-    }).then(el => {
-      const impl = el.implementation_;
-      expect(impl.buildCallback.bind(impl)).to
-          .throw(/should have "data-dismiss-href" attribute/);
     });
   });
 
@@ -271,6 +250,7 @@ describe('amp-user-notification', () => {
 });
 
 
+// TODO(dvoytenko, #1942): Merge with the main `describe`.
 describe('amp-user-notification with storage', () => {
   let iframe;
   let dftAttrs;

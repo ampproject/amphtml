@@ -31,24 +31,74 @@ export function nonSensitiveDataPostMessage(type, opt_object) {
 }
 
 /**
+ * Message event listeners.
+ * @const {!Array<{type: string, cb: function(!Object)}>}
+ */
+const listeners = [];
+
+/**
  * Listen to message events from document frame.
+ * @param {!Window} win
  * @param {string} type Type of messages
  * @param {function(*)} callback Called with data payload of message.
  * @return {function()} function to unlisten for messages.
  */
-export function listenParent(type, callback) {
-  const listener = function(event) {
-    if (event.source != window.parent ||
-        event.origin != window.context.location.origin ||
-        !event.data ||
-        event.data.sentinel != 'amp-$internalRuntimeToken$' ||
-        event.data.type != type) {
+export function listenParent(win, type, callback) {
+  const listener = {
+    type: type,
+    cb: callback,
+  };
+  listeners.push(listener);
+  startListening(win);
+  return function() {
+    const index = listeners.indexOf(listener);
+    if (index > -1) {
+      listeners.splice(index, 1);
+    }
+  };
+}
+
+/**
+ * Listens for message events and dispatches to listeners registered
+ * via listenParent.
+ * @param {!Window} win
+ */
+function startListening(win) {
+  if (win.AMP_LISTENING) {
+    return;
+  }
+  win.AMP_LISTENING = true;
+  win.addEventListener('message', function(event) {
+    // Cheap operations first, so we don't parse JSON unless we have to.
+    if (event.source != win.parent ||
+        event.origin != win.context.location.origin ||
+        typeof event.data != 'string' ||
+        event.data.indexOf('amp-') != 0) {
       return;
     }
-    callback(event.data);
-  };
-  window.addEventListener('message', listener);
-  return function() {
-    window.removeEventListener('message', listener);
-  };
+    // Parse JSON only once per message.
+    const data = JSON.parse(event.data.substr(4));
+    if (data.sentinel != 'amp-$internalRuntimeToken$') {
+      return;
+    }
+    // Don't let other message handlers interpret our events.
+    if (event.stopImmediatePropagation) {
+      event.stopImmediatePropagation();
+    }
+    // Find all the listeners for this type.
+    for (let i = 0; i < listeners.length; i++) {
+      if (listeners[i].type != data.type) {
+        continue;
+      }
+      const cb = listeners[i].cb;
+      try {
+        cb(data);
+      } catch (e) {
+        // Do not interrupt execution.
+        setTimeout(() => {
+          throw e;
+        });
+      }
+    }
+  });
 }

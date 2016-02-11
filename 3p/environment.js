@@ -264,7 +264,7 @@ function minTime(time) {
   return time;
 }
 
-listenParent('embed-state', function(data) {
+listenParent(window, 'embed-state', function(data) {
   inViewport = data.inViewport;
   if (inViewport) {
     becomeVisible();
