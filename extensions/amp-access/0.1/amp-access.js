@@ -51,7 +51,8 @@ import {xhrFor} from '../../../src/xhr';
  *   type: !AccessType,
  *   authorization: (string|undefined),
  *   pingback: (string|undefined),
- *   login: (string|undefined)
+ *   login: (string|undefined),
+ *   authorizationFallbackResponse: !JSONObject
  * }}
  */
 let AccessConfigDef;
@@ -195,6 +196,8 @@ export class AccessService {
       authorization: configJson['authorization'],
       pingback: configJson['pingback'],
       login: configJson['login'],
+      authorizationFallbackResponse:
+          configJson['authorizationFallbackResponse'],
     };
 
     // Check that all URLs are valid.
@@ -350,6 +353,16 @@ export class AccessService {
             credentials: 'include',
             requireAmpResponseSourceOrigin: true
           }));
+    }).catch(error => {
+      this.analyticsEvent_('access-authorization-failed');
+      if (this.config_.authorizationFallbackResponse) {
+        // Use fallback.
+        setTimeout(() => {throw error;});
+        return this.config_.authorizationFallbackResponse;
+      } else {
+        // Rethrow the error.
+        throw error;
+      }
     }).then(response => {
       log.fine(TAG, 'Authorization response: ', response);
       this.setAuthResponse_(response);
@@ -363,7 +376,6 @@ export class AccessService {
       });
     }).catch(error => {
       log.error(TAG, 'Authorization failed: ', error);
-      this.analyticsEvent_('access-authorization-failed');
       this.toggleTopClass_('amp-access-loading', false);
       this.toggleTopClass_('amp-access-error', true);
     });
