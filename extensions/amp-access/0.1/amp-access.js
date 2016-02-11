@@ -22,6 +22,7 @@ import {cidFor} from '../../../src/cid';
 import {documentStateFor} from '../../../src/document-state';
 import {evaluateAccessExpr} from './access-expr';
 import {getService} from '../../../src/service';
+import {getValueForExpr, recreateNonProtoObject} from '../../../src/json';
 import {installStyles} from '../../../src/styles';
 import {listenOnce} from '../../../src/event-helper';
 import {log} from '../../../src/log';
@@ -293,7 +294,7 @@ export class AccessService {
       if (useAuthData) {
         vars['AUTHDATA'] = field => {
           if (this.authResponse_) {
-            return this.authResponse_[field];
+            return getValueForExpr(this.authResponse_, field);
           }
           return undefined;
         };
@@ -323,6 +324,8 @@ export class AccessService {
         credentials: 'include',
         requireAmpResponseSourceOrigin: true
       });
+    }).then(response => {
+      return recreateNonProtoObject(response);
     }).then(response => {
       log.fine(TAG, 'Authorization response: ', response);
       this.setAuthResponse_(response);
