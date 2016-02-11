@@ -23,6 +23,8 @@ import * as lolex from 'lolex';
 
 describe('3p environment', () => {
 
+  let testWin;
+
   beforeEach(() => {
     iframeCount = 0;
     return createIframePromise(true).then(iframe => {
