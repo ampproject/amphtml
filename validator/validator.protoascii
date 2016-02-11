@@ -20,12 +20,12 @@
 # in production from crashing. This id is not relevant to validator.js
 # because thus far, engine (validator.js) and spec file (validator.protoascii)
 # are always released together.
-min_validator_revision_required: 87
+min_validator_revision_required: 91
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 146
+spec_file_revision: 147
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
 #
@@ -944,13 +944,13 @@ tags: {
   attrs: { name: "height" }
   attrs: {
     name: "src"
+    alternative_names: "srcset"
     mandatory: true
     value_url: {
       allowed_protocol: "data"
       allowed_protocol: "https"
     }
   }
-  attrs: { name: "srcset" }
   attrs: { name: "width" }
   spec_url: "https://github.com/ampproject/amphtml/blob/master/builtins/amp-img.md"
 }
@@ -2182,8 +2182,6 @@ tags: {
 
 # AMP Custom elements require a "src" or a "srcset" attribute,
 # having both is also allowed.
-# TODO(greggrothaus): These probably need to validate http*s* only URLs
-# and data: urls as per the spec.
 attr_lists: {
   name: "mandatory-src-or-srcset"
   attrs: {

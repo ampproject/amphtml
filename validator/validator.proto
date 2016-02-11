@@ -38,7 +38,7 @@ message PropertySpecList {
   repeated PropertySpec properties = 1;
 }
 
-// Used for validating urls in attribute values.
+// Used for validating urls in attribute values (such as href/src/srcset).
 message UrlSpec {
   // allowed_protocol must be in lowercase (e.g. "javascript" not "JavaScript").
   repeated string allowed_protocol = 1;
