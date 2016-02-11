@@ -43,6 +43,14 @@
   <a href="data:baz">Invalid protocol</a>
   <a href="ftp://google.com/">Invalid protocol</a>
   <a href="http://site:80808/%AFpage">Malformed URL</a>
+  <amp-img srcset="javascript:alert(1)" layout="fill"></amp-img>
+  <amp-img srcset="image-1.png 1x, javascript:alert(1)" layout="fill"></amp-img>
+  <amp-img srcset="image-1x.png 1x, image-2x.png 2x" layout="fill"></amp-img>
+  <amp-img srcset="image-1x.png 1x, image-2x.png 2x," layout="fill"></amp-img>
+  <amp-img srcset="javascript:alert('boo') 1x, foo 2x" layout="fill"></amp-img>
+  <amp-img srcset="image-1x.png 1x, JavaScript:baz 2x" layout="fill"></amp-img>
+  <amp-img srcset="http://site:80808/%AFimg 1x, img 2x" layout="fill"></amp-img>
+  <amp-img srcset="" layout="fill"></amp-img>
   <!-- Missing src -->
   <amp-ad src="" width="42" height="42" type=""></amp-ad>
   <amp-anim src="" width="42" height="42"></amp-anim>
