@@ -232,8 +232,17 @@ var forbiddenTerms = {
   '\\.startsWith': {
     message: es6polyfill,
     whitelist: [
+      // validator uses goog.string.startsWith.
+      'validator/css-selectors.js',
+      'validator/htmlparser_test.js',
+      'validator/parse-css.js',
       'validator/tokenize-css.js',
-      'validator/validator.js'
+      'validator/validator.js',
+      'validator/htmlparser.js',
+      'validator/json-testutil.js',
+      'validator/parse-css_test.js',
+      'validator/validator-in-browser.js',
+      'validator/validator_test.js',
     ]
   },
   '\\.endsWith': es6polyfill,
@@ -248,6 +257,17 @@ var forbiddenTerms = {
     message: es6polyfill,
     whitelist: [
       'extensions/amp-access/0.1/access-expr-impl.js',
+      // validator uses goog.string.endsWith.
+      'validator/css-selectors.js',
+      'validator/htmlparser_test.js',
+      'validator/parse-css.js',
+      'validator/tokenize-css.js',
+      'validator/validator.js',
+      'validator/htmlparser.js',
+      'validator/json-testutil.js',
+      'validator/parse-css_test.js',
+      'validator/validator-in-browser.js',
+      'validator/validator_test.js',
     ],
   },
 
