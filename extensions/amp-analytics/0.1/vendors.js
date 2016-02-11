@@ -159,6 +159,37 @@ export const ANALYTICS_CONFIG = {
           'clt=${contentLoadTime}&dit=${domInteractiveTime}${baseSuffix}'
     },
     'optout': '_gaUserPrefs.ioo'
+  },
+
+  'parsely': {
+    'requests': {
+      'host': 'https://srv.pixel.parsely.com',
+      'basePrefix': '${host}/plogger/?' +
+        'rand=${timestamp}&' +
+        'idsite=${apikey}&' +
+        'url=${ampdocUrl}&' +
+        'urlref=${documentReferrer}&' +
+        'screen=${screenWidth}x${screenHeight}%7C' +
+          '${availableScreenWidth}x${availableScreenHeight}%7C' +
+          '${screenColorDepth}&' +
+        'title=${title}&' +
+        'date=${timestamp}&' +
+        'ampid=${clientId(_parsely_visitor)}',
+      'pageview': '${basePrefix}&action=pageview'
+      // TODO(#1612): client-side session support
+      // TODO(#1296): active engaged time support
+      // 'heartbeat': '${basePrefix}&action=heartbeat&inc=${engagedTime}'
+    },
+    'triggers': {
+      'defaultPageview': {
+        'on': 'visible',
+        'request': 'pageview'
+      }
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true
+    }
   }
 };
-

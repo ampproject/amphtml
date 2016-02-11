@@ -295,7 +295,7 @@ describe('amp-image-lightbox image viewer', () => {
   });
 
 
-  it.skip('should measure horiz aspect ratio and assign image.src', () => {
+  it('should measure horiz aspect ratio and assign image.src', () => {
     imageViewer.getElement().style.width = '100px';
     imageViewer.getElement().style.height = '200px';
     imageViewer.srcset_ = parseSrcset('image1');
