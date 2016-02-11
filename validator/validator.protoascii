@@ -25,7 +25,7 @@ min_validator_revision_required: 87
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 144
+spec_file_revision: 145
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
 #
@@ -638,6 +638,7 @@ tags: {
       # Whitelisting additional commonly observed third party
       # protocols which should be safe
       allowed_protocol: "sms"
+      allowed_protocol: "tel"
       allowed_protocol: "viber"
       allowed_protocol: "whatsapp"
      }
@@ -932,7 +933,7 @@ tags: {
     name: "src"
     mandatory: true
     value_url: {
-      allowed_protocol: "http"
+      allowed_protocol: "data"
       allowed_protocol: "https"
     }
   }
@@ -976,7 +977,6 @@ tags: {
   attrs: {
     name: "src"
     value_url: {
-      allowed_protocol: "http"
       allowed_protocol: "https"
     }
   }
@@ -1003,7 +1003,6 @@ tags: {
     name: "src"
     mandatory: true
     value_url: {
-      allowed_protocol: "http"
       allowed_protocol: "https"
     }
   }
@@ -2411,8 +2410,12 @@ tags: {
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-analytics.md"
   also_requires: "amp-analytics extension .js script"
   attrs: { name: "type" }
-  # TODO(gregable): This should require a valid https URL as the attr value.
-  attrs: { name: "config" }
+  attrs: {
+    name: "config"
+    value_url: {
+      allowed_protocol: "https"
+    }
+  }
 }
 # <amp-user-notification>
 tags: {
@@ -2440,6 +2443,7 @@ tags: {
     name: "src"
     mandatory_oneof: "['src', 'data-videoid']"
     value_url: {
+      allowed_protocol: "http"  # runtime will rewrite URL to https in this case
       allowed_protocol: "https"
     }
   }
@@ -2503,6 +2507,7 @@ tags: {
     name: "src"
     mandatory_oneof: "['data-tweetid', 'src']"
     value_url: {
+      allowed_protocol: "http"  # runtime will rewrite URL to https in this case
       allowed_protocol: "https"
     }
   }
@@ -2528,6 +2533,7 @@ tags: {
     name: "src"
     mandatory_oneof: "['data-shortcode', 'src']"
     value_url: {
+      allowed_protocol: "http"  # runtime will rewrite URL to https in this case
       allowed_protocol: "https"
     }
   }
@@ -2561,6 +2567,7 @@ tags: {
     name: "src"
     mandatory_oneof: "['src', 'srcdoc']"
     value_url: {
+      allowed_protocol: "data"
       allowed_protocol: "https"
     }
   }
@@ -2601,7 +2608,6 @@ tags: {
   attrs: {
     name: "src"
     value_url: {
-      allowed_protocol: "http"
       allowed_protocol: "https"
     }
   }
