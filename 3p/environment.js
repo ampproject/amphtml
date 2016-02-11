@@ -191,7 +191,7 @@ function instrumentEntryPoints(win) {
         next();
         if (typeof fn == 'string') {
           // Handle rare and dangerous string arg case.
-          return (0, win.eval/*NOT OK but whatcha gonna do.*/)(fn);
+          return (0, win.eval/*NOT OK but whatcha gonna do.*/).call(win, fn);
         } else {
           return fn.apply(this, arguments);
         }
