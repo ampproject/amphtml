@@ -129,12 +129,13 @@ flag for the specified ID locally.
 #### JSON Fields
 
 - `elementId` (string) - The HTML id used on `amp-user-notification` element.
-- `ampUserId` (string) - This id is passed to both this request and the dismiss request.
+- `ampUserId` (string) - This id is passed to both the `data-show-if-href` GET request
+    (as a query string field) and the `data-dismiss-href` POST request (as a json field).
     The id will be the same for this user going forward, but no other requests
     in AMP send the same id.
     You can use the id on your side to lookup/store whether the user has
     dismissed the notification before.
-- `showNotification` (boolean) - Boolean value wether the notification should be shown.
+- `showNotification` (boolean) - Boolean value indicating whether or not the notification should be shown.
     If `false` the promise associated to the element is resolved right away.
 
 ---

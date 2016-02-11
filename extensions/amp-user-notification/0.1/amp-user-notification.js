@@ -233,8 +233,9 @@ export class AmpUserNotification extends AMP.BaseElement {
       // the user only really has 1 option to accept/dismiss (to resolve)
       // the notification or have the nagging notification sitting there
       // (to never resolve).
-      return cid.get('amp-user-notification',
-          Promise.resolve(), this.dialogPromise_);
+      return cid.get(
+        {scope: 'amp-user-notification', createCookieIfNotPresent: true},
+        Promise.resolve(), this.dialogPromise_);
     });
   }
 
