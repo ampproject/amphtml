@@ -1,13 +1,3 @@
-### <a name="amp-ad"></a> `amp-ad`
-
-NOTE: The specification of `amp-ad` is likely to significantly evolve over time. The current approach is designed to bootstrap the format to be able to show ads.
-
-A container to display an ad.
-
-Ads are loaded like all other resources in AMP documents, with a special
-custom element called `<amp-ad>`. No ad network provided JavaScript is allowed to run inside the AMP document. Instead the AMP runtime loads an iframe from a
-different origin (via iframe sandbox) as the AMP document and executes the ad
-network’s JS inside that iframe sandbox.
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
@@ -24,12 +14,61 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-AMP documents only support ads served via HTTPS.
+### <a name="amp-ad"></a> `amp-ad`
 
-#### Behavior
+NOTE: The specification of `amp-ad` is likely to significantly evolve over time. The current approach is designed to bootstrap the format to be able to show ads.
 
-The `<amp-ad>` requires width and height values to be specified like all
-resources in AMP. It requires a `type` argument that select what ad network is displayed. All `data-*` attributes on the tag are automatically passed as arguments to the code that eventually renders the ad. What `data-` attributes are required for a given type of network depends and must be documented with the ad network.
+<table>
+  <tr>
+    <td width="40%"><strong>Description</strong></td>
+    <td>A container to display an ad.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Availability</strong></td>
+    <td>Stable</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Examples</strong></td>
+    <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/ads.amp.html">ads.amp.html</a></td>
+  </tr>
+</table>
+
+The following lists validation errors specific to the `amp-ad` tag
+(see also `amp-ad` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii):
+
+<table>
+  <tr>
+    <th width="40%"><strong>Validation Error</strong></th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td width="40%"><a href="/docs/reference/validation_errors.html#mandatory-attribute-missing">MANDATORY_ATTR_MISSING</a></td>
+    <td>Error thrown when <code>type</code> attribute missing.</td>
+  </tr>
+  <tr>
+    <td width="40%"><a href="/docs/reference/validation_errors.html#disallowed-attribute">DISALLOWED_ATTR</a></td>
+    <td>Error thrown when tag includes disallowed <code>srcset</code> attribute.</td>
+  </tr>
+  <tr>
+    <td width="40%"><a href="/docs/reference/validation_errors.html#implied-layout-isnt-supported-by-amp-tag">IMPLIED_LAYOUT_INVALID</a></td>
+    <td>Error thrown when implied set to <code>CONTAINER</code>; this layout type isn't supported.</td>
+  </tr>
+  <tr>
+    <td width="40%"><a href="/docs/reference/validation_errors.html#specified-layout-isnt-supported-by-amp-tag">SPECIFIED_LAYOUT_INVALID</a></td>
+    <td>Error thrown when specified layout set to <code>CONTAINER</code>; this layout type isn't supported.</td>
+  </tr>
+  <tr>
+    <td width="40%"><a href="/docs/reference/validation_errors.html#invalid-property-value">INVALID_PROPERTY_VALUE_IN_ATTR_VALUE</a></td>
+    <td>Error thrown when invalid value is given for attributes <code>height</code> or <code>width</code>. For example, <code>height=auto</code> triggers this error for all supported layout types, with the exception of <code>NODISPLAY</code>.</td>
+  </tr>
+</table>
+
+### Behavior
+
+Ads are loaded like all other resources in AMP documents, with a special
+custom element called `<amp-ad>`. No ad network provided JavaScript is allowed to run inside the AMP document. Instead the AMP runtime loads an iframe from a
+different origin (via iframe sandbox) as the AMP document and executes the ad
+network’s JS inside that iframe sandbox. AMP documents only support ads served via HTTPS.
 ```html
 <amp-ad width=300 height=250
     type="a9"
