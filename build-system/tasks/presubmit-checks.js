@@ -235,8 +235,12 @@ var forbiddenTerms = {
       'validator/tokenize-css.js',
       'validator/validator.js'
     ]
+    contentsWhitelist: 'goog\\.string\\.startsWith',
   },
-  '\\.endsWith': es6polyfill,
+  '\\.endsWith': {
+    message: es6polyfill,
+    contentsWhitelist: 'goog\\.string\\.endsWith',
+  }
   // TODO: (erwinm) rewrite the destructure and spread warnings as
   // eslint rules (takes more time than this quick regex fix).
   // No destructuring allowed since we dont ship with Array polyfills.
@@ -377,12 +381,21 @@ function matchTerms(file, terms) {
   return Object.keys(terms).map(function(term) {
     var fix;
     var whitelist = terms[term].whitelist;
+    var contentsWhitelist = terms[term].contentsWhitelist;
     // NOTE: we could do a glob test instead of exact check in the future
     // if needed but that might be too permissive.
     if (Array.isArray(whitelist) && (whitelist.indexOf(relative) != -1 ||
         isInTestFolder(relative))) {
       return false;
     }
+    // If the contentsWhitelist exists, then any match within the candidate
+    // file switches off this particular term to check.
+    if (contentsWhitelist !== undefined) {
+      if (contents.match(new RegExp(contentsWhitelist, 'gm'))) {
+        return false;
+      }
+    }
+
     // we can't optimize building the `RegExp` objects early unless we build
     // another mapping of term -> regexp object to be able to get back to the
     // original term to get the possible fix value. This is ok as the
