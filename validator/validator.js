@@ -1639,7 +1639,7 @@ ParsedTagSpec.prototype.validateAttrNotFoundInSpec = function(
   // However, mostly to avoid confusion, we want to make sure that
   // nobody tries to make a Mustache template data attribute,
   // e.g. <div data-{{foo}}>, so we also exclude those characters.
-  if (goog.string.startsWith(attrName, 'data-') &&
+  if (goog.string./*OK*/startsWith(attrName, 'data-') &&
       !goog.string.contains(attrName, '}') &&
       !goog.string.contains(attrName, '{')) {
     return true;
@@ -2495,8 +2495,8 @@ amp.validator.categorizeError = function(error) {
   // (since there is such a TagSpec as well, for the head).
   if (error.code ===
       amp.validator.ValidationError.Code.MANDATORY_TAG_ANCESTOR) {
-    if (goog.string.startsWith(error.params[0], "amp-")
-        || goog.string.startsWith(error.params[1], "amp-")) {
+    if (goog.string./*OK*/startsWith(error.params[0], "amp-")
+        || goog.string./*OK*/startsWith(error.params[1], "amp-")) {
       return amp.validator.ErrorCategory.Code.AMP_TAG_PROBLEM;
     }
     return amp.validator.ErrorCategory.Code.DISALLOWED_HTML;
@@ -2524,7 +2524,7 @@ amp.validator.categorizeError = function(error) {
           && error.params[0] === "⚡") ||
       (error.code === amp.validator.ValidationError.
           Code.MANDATORY_CDATA_MISSING_OR_INCORRECT
-          && goog.string.startsWith(error.params[0], "boilerplate"))) {
+          && goog.string./*OK*/startsWith(error.params[0], "boilerplate"))) {
     return amp.validator.ErrorCategory.Code.
         MANDATORY_AMP_TAG_MISSING_OR_INCORRECT;
   }
@@ -2568,13 +2568,13 @@ amp.validator.categorizeError = function(error) {
   // '//static.breakingnews.com/ads/gptLoader.js'."
   if (error.code === amp.validator.ValidationError.Code.INVALID_ATTR_VALUE
       && error.params[0] === "src"
-      && goog.string.endsWith(error.params[1], "script")) {
+      && goog.string./*OK*/endsWith(error.params[1], "script")) {
     return amp.validator.ErrorCategory.Code.CUSTOM_JAVASCRIPT_DISALLOWED;
   }
   // E.g.: "The attribute 'type' in tag 'script type=application/ld+json'
   // is set to the invalid value 'text/javascript'."
   if (error.code === amp.validator.ValidationError.Code.INVALID_ATTR_VALUE
-      && goog.string.startsWith(error.params[1], "script")
+      && goog.string./*OK*/startsWith(error.params[1], "script")
       && error.params[0] === "type") {
     return amp.validator.ErrorCategory.Code.CUSTOM_JAVASCRIPT_DISALLOWED;
   }
@@ -2584,7 +2584,7 @@ amp.validator.categorizeError = function(error) {
       error.code === amp.validator.ValidationError.Code.DISALLOWED_ATTR ||
       error.code === amp.validator.ValidationError.Code.
       MANDATORY_ATTR_MISSING)) {
-    if (goog.string.startsWith(error.params[1], "amp-")) {
+    if (goog.string./*OK*/startsWith(error.params[1], "amp-")) {
       return amp.validator.ErrorCategory.Code.AMP_TAG_PROBLEM;
     }
     // E.g. "The attribute 'async' may not appear in tag 'link
@@ -2607,9 +2607,9 @@ amp.validator.categorizeError = function(error) {
   // E.g. "The parent tag of tag 'source' is 'picture', but it can
   // only be 'amp-audio'."
   if (error.code === amp.validator.ValidationError.Code.WRONG_PARENT_TAG) {
-    if (goog.string.startsWith(error.params[0], "amp-")
-        || goog.string.startsWith(error.params[1], "amp-")
-        || goog.string.startsWith(error.params[2], "amp-")) {
+    if (goog.string./*OK*/startsWith(error.params[0], "amp-")
+        || goog.string./*OK*/startsWith(error.params[1], "amp-")
+        || goog.string./*OK*/startsWith(error.params[2], "amp-")) {
       return amp.validator.ErrorCategory.Code.AMP_TAG_PROBLEM;
     }
     // E.g. "The parent tag of tag 'script' is 'body', but it can only
@@ -2620,7 +2620,7 @@ amp.validator.categorizeError = function(error) {
   // missing or incorrect, but required by 'amp-image-lightbox'."
   if (error.code === amp.validator.ValidationError.Code.
       TAG_REQUIRED_BY_MISSING &&
-      (goog.string.startsWith(error.params[1], "amp-") ||
+      (goog.string./*OK*/startsWith(error.params[1], "amp-") ||
        error.params[1] === "template")) {
     return amp.validator.ErrorCategory.Code.AMP_TAG_PROBLEM;
   }
@@ -2628,7 +2628,7 @@ amp.validator.categorizeError = function(error) {
   // 'amp-youtube' - pick one of ['src', 'data-videoid']."
   if (error.code === amp.validator.ValidationError.Code.
       MUTUALLY_EXCLUSIVE_ATTRS &&
-      goog.string.startsWith(error.params[0], "amp-")) {
+      goog.string./*OK*/startsWith(error.params[0], "amp-")) {
     return amp.validator.ErrorCategory.Code.AMP_TAG_PROBLEM;
   }
   // E.g. "The tag 'boilerplate (noscript) - old variant' appears
@@ -2660,7 +2660,7 @@ amp.validator.categorizeError = function(error) {
   if (error.code == amp.validator.ValidationError.Code.MISSING_URL ||
       error.code == amp.validator.ValidationError.Code.INVALID_URL ||
       error.code == amp.validator.ValidationError.Code.INVALID_URL_PROTOCOL) {
-    if (goog.string.startsWith(error.params[1], "amp-")) {
+    if (goog.string./*OK*/startsWith(error.params[1], "amp-")) {
       return amp.validator.ErrorCategory.Code.AMP_TAG_PROBLEM;
     }
     return amp.validator.ErrorCategory.Code.DISALLOWED_HTML;
