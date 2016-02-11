@@ -208,7 +208,7 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
             element.build(true);
             if (element.layoutCount_ == 0) {
               if (opt_beforeLayoutCallback) {
-                opt_beforeLayoutCallback();
+                opt_beforeLayoutCallback(element);
               }
               return element.layoutCallback().then(() => {
                 return element;
