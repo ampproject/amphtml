@@ -166,21 +166,6 @@ describe('AccessService', () => {
     }).to.throw(/Unknown access type/);
   });
 
-  it('should NOT start when experiment is off or disabled', () => {
-    document.body.removeChild(element);
-    const service = new AccessService(window);
-    service.startInternal_ = sandbox.spy();
-    expect(service.isEnabled()).to.be.false;
-    expect(service.isExperimentOn_).to.be.false;
-
-    service.start_();
-    expect(service.startInternal_.callCount).to.equal(0);
-
-    service.isExperimentOn_ = true;
-    service.start_();
-    expect(service.startInternal_.callCount).to.equal(0);
-  });
-
   it('should start when experiment is on and enabled', () => {
     element.textContent = JSON.stringify({
       'authorization': 'https://acme.com/a',
