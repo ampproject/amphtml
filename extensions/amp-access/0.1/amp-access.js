@@ -71,6 +71,9 @@ const AccessType = {
 const TAG = 'AmpAccess';
 
 /** @const {number} */
+const AUTHORIZATION_TIMEOUT = 3000;
+
+/** @const {number} */
 const VIEW_TIMEOUT = 2000;
 
 /** @const {string} */
@@ -109,6 +112,9 @@ export class AccessService {
 
     /** @const @private {string} */
     this.pubOrigin_ = getSourceOrigin(this.win.location);
+
+    /** @const @private {!Timer} */
+    this.timer_ = timer;
 
     /** @const @private {!Vsync} */
     this.vsync_ = vsyncFor(this.win);
@@ -338,10 +344,12 @@ export class AccessService {
         this.config_.authorization, /* useAuthData */ false);
     return promise.then(url => {
       log.fine(TAG, 'Authorization URL: ', url);
-      return this.xhr_.fetchJson(url, {
-        credentials: 'include',
-        requireAmpResponseSourceOrigin: true
-      });
+      return this.timer_.timeoutPromise(
+          AUTHORIZATION_TIMEOUT,
+          this.xhr_.fetchJson(url, {
+            credentials: 'include',
+            requireAmpResponseSourceOrigin: true
+          }));
     }).then(response => {
       log.fine(TAG, 'Authorization response: ', response);
       this.setAuthResponse_(response);
@@ -541,8 +549,8 @@ export class AccessService {
       }));
 
       // 2. After a few seconds: register a view.
-      const timeoutId = timer.delay(resolve, VIEW_TIMEOUT);
-      unlistenSet.push(() => timer.cancel(timeoutId));
+      const timeoutId = this.timer_.delay(resolve, VIEW_TIMEOUT);
+      unlistenSet.push(() => this.timer_.cancel(timeoutId));
 
       // 3. If scrolled: register a view.
       unlistenSet.push(this.viewport_.onScroll(resolve));
