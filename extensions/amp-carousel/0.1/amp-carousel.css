@@ -53,3 +53,31 @@ amp-carousel .amp-carousel-button.amp-disabled {
   background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="#fff" viewBox="0 0 18 18"><path d="M9 3L7.94 4.06l4.19 4.19H3v1.5h9.13l-4.19 4.19L9 15l6-6z" /></svg>');
   background-size: 18px 18px;
 }
+
+.amp-carousel-indicator {
+  position: absolute;
+  bottom: 10px;
+  list-style: none;
+  z-index: 99;
+  padding: 0;
+  margin: 0;
+  text-align: center;
+}
+
+.amp-carousel-indicator > li {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin: 1px;
+  text-indent: -999px;
+  background-color: rgba(0,0,0,0);
+  border: 2px solid #fff;
+  border-radius: 10px;
+}
+
+.amp-carousel-indicator > .amp-carousel-indicator-active {
+  width: 12px;
+  height: 12px;
+  margin: 0;
+  background-color: #fff;
+}
