@@ -334,6 +334,7 @@ describe('AccessService authorization', () => {
       expect(elementOn).not.to.have.attribute('amp-access-hide');
       expect(elementOff).to.have.attribute('amp-access-hide');
       expect(service.authResponse_).to.exist;
+      expect(service.authResponse_.__proto__).to.be.undefined;
       expect(service.authResponse_.access).to.be.true;
       expect(service.buildLoginUrl_.callCount).to.equal(1);
     });
@@ -594,7 +595,7 @@ describe('AccessService pingback', () => {
     configElement.setAttribute('type', 'application/json');
     configElement.textContent = JSON.stringify({
       'authorization': 'https://acme.com/a?rid=READER_ID',
-      'pingback': 'https://acme.com/p?rid=READER_ID&type=AUTHDATA(type)',
+      'pingback': 'https://acme.com/p?rid=READER_ID&type=AUTHDATA(child.type)',
       'login': 'https://acme.com/l?rid=READER_ID'
     });
     document.body.appendChild(configElement);
@@ -828,7 +829,7 @@ describe('AccessService pingback', () => {
 
   it('should resolve AUTH vars in POST pingback', () => {
     expectGetReaderId('reader1');
-    service.setAuthResponse_({type: 'premium'});
+    service.setAuthResponse_({child: {type: 'premium'}});
     xhrMock.expects('sendSignal')
         .withArgs('https://acme.com/p?rid=reader1&type=premium')
         .returns(Promise.resolve())

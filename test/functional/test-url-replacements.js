@@ -318,6 +318,15 @@ describe('UrlReplacements', () => {
         .eventually.equal('?a=xyz-abc');
   });
 
+  it('should support multiple positional arguments with dots', () => {
+    const replacements = urlReplacementsFor(window);
+    replacements.set_('FN', (one, two) => {
+      return one + '-' + two;
+    });
+    return expect(replacements.expand('?a=FN(xy.z,ab.c)')).to
+        .eventually.equal('?a=xy.z-ab.c');
+  });
+
   it('should support promises as replacements', () => {
     const replacements = urlReplacementsFor(window);
     replacements.set_('P1', () => Promise.resolve('abc '));

@@ -378,7 +378,7 @@ class UrlReplacements {
     // FOO_BAR
     // FOO_BAR(arg1)
     // FOO_BAR(arg1,arg2)
-    return new RegExp('\\$?(' + all + ')(?:\\(([0-9a-zA-Z-_,]+)\\))?', 'g');
+    return new RegExp('\\$?(' + all + ')(?:\\(([0-9a-zA-Z-_.,]+)\\))?', 'g');
   }
 }
 

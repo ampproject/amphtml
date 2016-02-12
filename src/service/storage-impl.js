@@ -17,8 +17,8 @@
 import {assert} from '../asserts';
 import {getService} from '../service';
 import {getSourceOrigin} from '../url';
-import {isObject} from '../types';
 import {log} from '../log';
+import {recreateNonProtoObject} from '../json';
 import {timer} from '../timer';
 import {viewerFor} from '../viewer';
 
@@ -197,7 +197,7 @@ export class Store {
    */
   constructor(obj, opt_maxValues) {
     /** @const {!JSONObject} */
-    this.obj = recreateObject(obj);
+    this.obj = recreateNonProtoObject(obj);
 
     /** @private @const {number} */
     this.maxValues_ = opt_maxValues || MAX_VALUES_PER_ORIGIN;
@@ -360,24 +360,6 @@ export class ViewerStorageBinding {
       'blob': blob
     }, true);
   }
-}
-
-
-/**
- * Recreates objects with prototype-less copies.
- * @param {!JSONObject} obj
- * @return {!JSONObject}
- */
-function recreateObject(obj) {
-  const copy = Object.create(null);
-  for (const k in obj) {
-    if (!obj.hasOwnProperty(k)) {
-      continue;
-    }
-    const v = obj[k];
-    copy[k] = isObject(v) ? recreateObject(v) : v;
-  }
-  return copy;
 }
 
 
