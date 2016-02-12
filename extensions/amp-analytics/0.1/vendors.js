@@ -40,6 +40,7 @@ export const ANALYTICS_CONFIG = {
       'pageDownloadTime': 'PAGE_DOWNLOAD_TIME',
       'pageLoadTime': 'PAGE_LOAD_TIME',
       'pageViewId': 'PAGE_VIEW_ID',
+      'queryParam': 'QUERY_PARAM',
       'random': 'RANDOM',
       'redirectTime': 'REDIRECT_TIME',
       'screenColorDepth': 'SCREEN_COLOR_DEPTH',
@@ -54,6 +55,23 @@ export const ANALYTICS_CONFIG = {
       'timestamp': 'TIMESTAMP',
       'timezone': 'TIMEZONE',
       'title': 'TITLE',
+    }
+  },
+
+  'atinternet': {
+    'transport': {'beacon': false, 'xhrpost': false, 'image': true},
+    'requests': {
+      'base': 'https://${log}${domain}/?s=${site}&ts=${timestamp}&r=${screenWidth}x${screenHeight}x${screenColorDepth}&re=${availableScreenWidth}x${availableScreenHeight}',
+      'suffix': '&ref=${documentReferrer}',
+      'pageview': '${base}&' +
+        'p=${title}&' +
+        's2=${level2}${suffix}',
+      'click': '${base}&' +
+        'pclick=${title}&' +
+        's2click=${level2}&' +
+        'p=${label}&' +
+        's2=${level2Click}&' +
+        'type=click&click=${type}${suffix}'
     }
   },
 
@@ -179,6 +197,30 @@ export const ANALYTICS_CONFIG = {
       // TODO(#1612): client-side session support
       // TODO(#1296): active engaged time support
       // 'heartbeat': '${basePrefix}&action=heartbeat&inc=${engagedTime}'
+    },
+    'triggers': {
+      'defaultPageview': {
+        'on': 'visible',
+        'request': 'pageview'
+      }
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true
+    }
+  },
+
+  'quantcast': {
+    'vars': {
+      'labels': ''
+    },
+    'requests': {
+      'host': 'https://pixel.quantserve.com/pixel',
+      'pageview': '${host};r=${random};a=${pcode};labels=${labels};' +
+        'fpan=;fpa=${clientId(__qca)};ns=0;ce=1;cm=;je=0;' +
+        'sr=${screenWidth}x${screenHeight}x${screenColorDepth};' +
+        'enc=n;et=${timestamp};ref=${documentReferrer};url=${canonicalUrl}'
     },
     'triggers': {
       'defaultPageview': {

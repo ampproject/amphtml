@@ -250,6 +250,20 @@ Provides the number of seconds that have elapsed since 1970. (Epoch time)
 
 Example value: `1452710304312`
 
+### queryParam
+
+Pulls a value from the query string
+
+Please see below the required and optional arguments you may pass into `queryParam` like a function. Spaces between arguments and values are not allowed.
+
+**arguments**
+
+ - `query string param` (Required) - The query string param for which you want the value
+ - `default value` (Optional) - If the query string param is not available use this default instead
+
+Example usage: `${queryParam(foo)}` - if foo is available its associated value will be returned, if not an empty string will be returned
+               `${queryParam(foo,bar)}` - if foo is available its associated value will be returned, if not bar will be returned
+
 ## requestCount
 
 Provides the number of requests sent out from a particular `amp-analytics` tag. This value can be used to reconstruct the sequence in which requests were sent from a tag. The value starts from 0 and increases monotonically. Note that there may be a gap in requestCount numbers if the request sending fails due to network issues.

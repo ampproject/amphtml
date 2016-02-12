@@ -1,19 +1,25 @@
 FAIL
-feature_tests/urls.html:39:2 Invalid URL protocol 'javascript:' for attribute 'href' in tag 'a'.
-feature_tests/urls.html:40:2 Invalid URL protocol 'javascript:' for attribute 'href' in tag 'a'.
-feature_tests/urls.html:41:2 Invalid URL protocol 'javascript:' for attribute 'href' in tag 'a'.
-feature_tests/urls.html:42:2 Invalid URL protocol 'vbscript:' for attribute 'href' in tag 'a'.
-feature_tests/urls.html:43:2 Invalid URL protocol 'data:' for attribute 'href' in tag 'a'.
-feature_tests/urls.html:44:2 Invalid URL protocol 'ftp:' for attribute 'href' in tag 'a'.
-feature_tests/urls.html:45:2 Malformed URL 'http://site:80808/%AFpage' for attribute 'href' in tag 'a'.
-feature_tests/urls.html:47:2 Missing URL for attribute 'src' in tag 'amp-ad'. (see https://github.com/ampproject/amphtml/blob/master/builtins/amp-ad.md)
-feature_tests/urls.html:48:2 Missing URL for attribute 'src' in tag 'amp-anim'. (see https://github.com/ampproject/amphtml/blob/master/extensions/amp-anim/amp-anim.md)
-feature_tests/urls.html:49:2 Missing URL for attribute 'src' in tag 'amp-audio'. (see https://github.com/ampproject/amphtml/blob/master/extensions/amp-audio/amp-audio.md)
-feature_tests/urls.html:50:2 Missing URL for attribute 'src' in tag 'amp-iframe'. (see https://github.com/ampproject/amphtml/blob/master/extensions/amp-iframe/amp-iframe.md)
-feature_tests/urls.html:51:2 Missing URL for attribute 'src' in tag 'amp-img'. (see https://github.com/ampproject/amphtml/blob/master/builtins/amp-img.md)
-feature_tests/urls.html:52:2 Missing URL for attribute 'src' in tag 'amp-pixel'. (see https://github.com/ampproject/amphtml/blob/master/builtins/amp-pixel.md)
-feature_tests/urls.html:53:2 Missing URL for attribute 'src' in tag 'amp-video'. (see https://github.com/ampproject/amphtml/blob/master/builtins/amp-video.md)
-feature_tests/urls.html:55:2 Invalid URL protocol 'http:' for attribute 'src' in tag 'amp-ad'. (see https://github.com/ampproject/amphtml/blob/master/builtins/amp-ad.md)
-feature_tests/urls.html:56:2 Invalid URL protocol 'http:' for attribute 'src' in tag 'amp-iframe'. (see https://github.com/ampproject/amphtml/blob/master/extensions/amp-iframe/amp-iframe.md)
-feature_tests/urls.html:57:2 Invalid URL protocol 'http:' for attribute 'src' in tag 'amp-pixel'. (see https://github.com/ampproject/amphtml/blob/master/builtins/amp-pixel.md)
-feature_tests/urls.html:58:2 Invalid URL protocol 'http:' for attribute 'src' in tag 'amp-video'. (see https://github.com/ampproject/amphtml/blob/master/builtins/amp-video.md)
+feature_tests/urls.html:39:2 Invalid URL protocol 'javascript:' for attribute 'href' in tag 'a'. [DISALLOWED_HTML]
+feature_tests/urls.html:40:2 Invalid URL protocol 'javascript:' for attribute 'href' in tag 'a'. [DISALLOWED_HTML]
+feature_tests/urls.html:41:2 Invalid URL protocol 'javascript:' for attribute 'href' in tag 'a'. [DISALLOWED_HTML]
+feature_tests/urls.html:42:2 Invalid URL protocol 'vbscript:' for attribute 'href' in tag 'a'. [DISALLOWED_HTML]
+feature_tests/urls.html:43:2 Invalid URL protocol 'data:' for attribute 'href' in tag 'a'. [DISALLOWED_HTML]
+feature_tests/urls.html:44:2 Invalid URL protocol 'ftp:' for attribute 'href' in tag 'a'. [DISALLOWED_HTML]
+feature_tests/urls.html:45:2 Malformed URL 'http://site:80808/%AFpage' for attribute 'href' in tag 'a'. [DISALLOWED_HTML]
+feature_tests/urls.html:46:2 Invalid URL protocol 'javascript:' for attribute 'srcset' in tag 'amp-img'. (see https://github.com/ampproject/amphtml/blob/master/builtins/amp-img.md) [AMP_TAG_PROBLEM]
+feature_tests/urls.html:47:2 Invalid URL protocol 'javascript:' for attribute 'srcset' in tag 'amp-img'. (see https://github.com/ampproject/amphtml/blob/master/builtins/amp-img.md) [AMP_TAG_PROBLEM]
+feature_tests/urls.html:50:2 Invalid URL protocol 'javascript:' for attribute 'srcset' in tag 'amp-img'. (see https://github.com/ampproject/amphtml/blob/master/builtins/amp-img.md) [AMP_TAG_PROBLEM]
+feature_tests/urls.html:51:2 Invalid URL protocol 'javascript:' for attribute 'srcset' in tag 'amp-img'. (see https://github.com/ampproject/amphtml/blob/master/builtins/amp-img.md) [AMP_TAG_PROBLEM]
+feature_tests/urls.html:52:2 Malformed URL 'http://site:80808/%AFimg' for attribute 'srcset' in tag 'amp-img'. (see https://github.com/ampproject/amphtml/blob/master/builtins/amp-img.md) [AMP_TAG_PROBLEM]
+feature_tests/urls.html:53:2 Missing URL for attribute 'srcset' in tag 'amp-img'. (see https://github.com/ampproject/amphtml/blob/master/builtins/amp-img.md) [AMP_TAG_PROBLEM]
+feature_tests/urls.html:55:2 Missing URL for attribute 'src' in tag 'amp-ad'. (see https://github.com/ampproject/amphtml/blob/master/builtins/amp-ad.md) [AMP_TAG_PROBLEM]
+feature_tests/urls.html:56:2 Missing URL for attribute 'src' in tag 'amp-anim'. (see https://github.com/ampproject/amphtml/blob/master/extensions/amp-anim/amp-anim.md) [AMP_TAG_PROBLEM]
+feature_tests/urls.html:57:2 Missing URL for attribute 'src' in tag 'amp-audio'. (see https://github.com/ampproject/amphtml/blob/master/extensions/amp-audio/amp-audio.md) [AMP_TAG_PROBLEM]
+feature_tests/urls.html:58:2 Missing URL for attribute 'src' in tag 'amp-iframe'. (see https://github.com/ampproject/amphtml/blob/master/extensions/amp-iframe/amp-iframe.md) [AMP_TAG_PROBLEM]
+feature_tests/urls.html:59:2 Missing URL for attribute 'src' in tag 'amp-img'. (see https://github.com/ampproject/amphtml/blob/master/builtins/amp-img.md) [AMP_TAG_PROBLEM]
+feature_tests/urls.html:60:2 Missing URL for attribute 'src' in tag 'amp-pixel'. (see https://github.com/ampproject/amphtml/blob/master/builtins/amp-pixel.md) [AMP_TAG_PROBLEM]
+feature_tests/urls.html:61:2 Missing URL for attribute 'src' in tag 'amp-video'. (see https://github.com/ampproject/amphtml/blob/master/builtins/amp-video.md) [AMP_TAG_PROBLEM]
+feature_tests/urls.html:63:2 Invalid URL protocol 'http:' for attribute 'src' in tag 'amp-ad'. (see https://github.com/ampproject/amphtml/blob/master/builtins/amp-ad.md) [AMP_TAG_PROBLEM]
+feature_tests/urls.html:64:2 Invalid URL protocol 'http:' for attribute 'src' in tag 'amp-iframe'. (see https://github.com/ampproject/amphtml/blob/master/extensions/amp-iframe/amp-iframe.md) [AMP_TAG_PROBLEM]
+feature_tests/urls.html:65:2 Invalid URL protocol 'http:' for attribute 'src' in tag 'amp-pixel'. (see https://github.com/ampproject/amphtml/blob/master/builtins/amp-pixel.md) [AMP_TAG_PROBLEM]
+feature_tests/urls.html:66:2 Invalid URL protocol 'http:' for attribute 'src' in tag 'amp-video'. (see https://github.com/ampproject/amphtml/blob/master/builtins/amp-video.md) [AMP_TAG_PROBLEM]

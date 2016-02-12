@@ -25,6 +25,7 @@ import {timer} from './timer';
  * @const {!Array<string>}
  */
 const EXTENSIONS = [
+  'amp-accordion',
   'amp-dynamic-css-classes'
 ];
 
