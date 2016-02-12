@@ -184,7 +184,7 @@ Use this configuration to fire a request when a specified element is clicked. Us
 ###### Scroll trigger (`"on": "scroll"`)
 Use this configuration to fire a request under certain conditions when the page is scrolled. Use `scrollSpec` to control when this will fire:
   - `scrollSpec` This object can contain `verticalBoundaries` and `horizontalBoundaries`. At least one of the two properties is required for a scroll event to fire. The values for both of the properties should be arrays of numbers containing the boundaries on which a scroll event is generated. For instance, in the following code snippet, the scroll event will be fired when page is scrolled vertically by 25%, 50% and 90%. Additionally, the event will also fire when the page is horizontally scrolled to 90% of scroll width.
- 
+
 
     ```javascript
     "triggers": {
@@ -203,7 +203,7 @@ Use this configuration to fire a request on a regular time interval. Use `timerS
   - `timerSpec` Specification for triggers of type `timer`. The timer will trigger immediately and then at a specified interval thereafter.
     - `interval` Length of the timer interval, in seconds.
     - `maxTimerLength` Maximum duration for which the timer will fire, in seconds.
-    
+
     ```javascript
     "triggers": {
       "pageTimer": {
@@ -216,6 +216,11 @@ Use this configuration to fire a request on a regular time interval. Use `timerS
       }
     }
     ```
+
+###### Access triggers (`"on": "amp-access-*"`)
+
+AMP Access system issues numerous events for different states in the access flow. See [amp-access-analytics.md](../amp-access/amp-access-analytics.md) for details.
+
 
 ##### Transport
 The `transport` attribute specifies how to send a request. The value is an object with fields that

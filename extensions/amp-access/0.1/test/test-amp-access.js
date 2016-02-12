@@ -210,6 +210,18 @@ describe('AccessService', () => {
     expect(service.pubOrigin_).to.exist;
     expect(service.pubOrigin_).to.match(/^http.*/);
   });
+
+  it('should NOT send events by default', () => {
+    element.textContent = JSON.stringify({
+      'authorization': 'https://acme.com/a',
+      'pingback': 'https://acme.com/p',
+      'login': 'https://acme.com/l'
+    });
+    const service = new AccessService(window);
+    service.analyticsPromise_ = {then: sandbox.spy()};
+    service.analyticsEvent_('an-event');
+    expect(service.analyticsPromise_.then.callCount).to.equal(0);
+  });
 });
 
 
@@ -219,6 +231,7 @@ describe('AccessService authorization', () => {
   let configElement, elementOn, elementOff;
   let xhrMock;
   let cidMock;
+  let analyticsMock;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -268,6 +281,13 @@ describe('AccessService authorization', () => {
     };
     cidMock = sandbox.mock(cid);
     service.cid_ = Promise.resolve(cid);
+
+    const analytics = {
+      triggerEvent: () => {}
+    };
+    analyticsMock = sandbox.mock(analytics);
+    service.analyticsPromise_ = {then: callback => callback(analytics)};
+    service.isAnalyticsExperimentOn_ = true;
   });
 
   afterEach(() => {
@@ -280,6 +300,7 @@ describe('AccessService authorization', () => {
     if (elementOff.parentElement) {
       elementOff.parentElement.removeChild(elementOff);
     }
+    analyticsMock.verify();
     sandbox.restore();
     sandbox = null;
   });
@@ -347,6 +368,9 @@ describe('AccessService authorization', () => {
         })
         .returns(Promise.resolve({access: true}))
         .once();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-authorization-received')
+        .once();
     return service.runAuthorization_().then(() => {
       expect(service.firstAuthorizationPromise_).to.exist;
       return service.firstAuthorizationPromise_;
@@ -361,6 +385,12 @@ describe('AccessService authorization', () => {
           requireAmpResponseSourceOrigin: true
         })
         .returns(Promise.reject('intentional'))
+        .once();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-authorization-received')
+        .never();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-authorization-failed')
         .once();
     return service.runAuthorization_().then(() => {
       expect(service.firstAuthorizationPromise_).to.exist;
@@ -548,6 +578,7 @@ describe('AccessService pingback', () => {
   let configElement;
   let xhrMock;
   let cidMock;
+  let analyticsMock;
   let visibilityChanged;
   let scrolled;
 
@@ -580,6 +611,13 @@ describe('AccessService pingback', () => {
     cidMock = sandbox.mock(cid);
     service.cid_ = Promise.resolve(cid);
 
+    const analytics = {
+      triggerEvent: () => {}
+    };
+    analyticsMock = sandbox.mock(analytics);
+    service.analyticsPromise_ = {then: callback => callback(analytics)};
+    service.isAnalyticsExperimentOn_ = true;
+
     this.docState_ = {
       onReady: callback => callback()
     };
@@ -605,6 +643,7 @@ describe('AccessService pingback', () => {
     if (configElement.parentElement) {
       configElement.parentElement.removeChild(configElement);
     }
+    analyticsMock.verify();
     sandbox.restore();
     sandbox = null;
   });
@@ -620,6 +659,9 @@ describe('AccessService pingback', () => {
 
   it('should register "viewed" signal after timeout', () => {
     service.reportViewToServer_ = sandbox.spy();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-viewed')
+        .once();
     const p = service.reportWhenViewed_();
     return Promise.resolve().then(() => {
       clock.tick(2001);
@@ -633,6 +675,9 @@ describe('AccessService pingback', () => {
 
   it('should register "viewed" signal after scroll', () => {
     service.reportViewToServer_ = sandbox.spy();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-viewed')
+        .once();
     const p = service.reportWhenViewed_();
     return Promise.resolve().then(() => {
       scrolled.fire();
@@ -646,6 +691,9 @@ describe('AccessService pingback', () => {
 
   it('should register "viewed" signal after click', () => {
     service.reportViewToServer_ = sandbox.spy();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-viewed')
+        .once();
     const p = service.reportWhenViewed_();
     return Promise.resolve().then(() => {
       let clickEvent;
@@ -671,6 +719,9 @@ describe('AccessService pingback', () => {
     service.firstAuthorizationPromise_ = new Promise(resolve => {
       firstAuthorizationResolver = resolve;
     });
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-viewed')
+        .once();
     service.reportViewToServer_ = sandbox.spy();
     service.reportWhenViewed_();
     return Promise.resolve().then(() => {
@@ -763,6 +814,9 @@ describe('AccessService pingback', () => {
             }))
         .returns(Promise.resolve())
         .once();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-pingback-sent')
+        .once();
     return service.reportViewToServer_().then(() => {
       return 'SUCCESS';
     }, error => {
@@ -785,6 +839,35 @@ describe('AccessService pingback', () => {
       return 'ERROR ' + error;
     }).then(result => {
       expect(result).to.equal('SUCCESS');
+    });
+  });
+
+  it('should NOT send analytics event if postback failed', () => {
+    expectGetReaderId('reader1');
+    xhrMock.expects('sendSignal')
+        .withExactArgs('https://acme.com/p?rid=reader1&type=',
+            sinon.match(init => {
+              return (init.method == 'POST' &&
+                  init.credentials == 'include' &&
+                  init.requireAmpResponseSourceOrigin == true &&
+                  init.body == '' &&
+                  init.headers['Content-Type'] ==
+                      'application/x-www-form-urlencoded');
+            }))
+        .returns(Promise.reject('intentional'))
+        .once();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-pingback-sent')
+        .never();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-pingback-failed')
+        .once();
+    return service.reportViewToServer_().then(() => {
+      return 'SUCCESS';
+    }, error => {
+      return 'ERROR ' + error;
+    }).then(result => {
+      expect(result).to.match(/ERROR/);
     });
   });
 
@@ -812,6 +895,7 @@ describe('AccessService login', () => {
   let sandbox;
   let configElement;
   let cidMock;
+  let analyticsMock;
   let serviceMock;
 
   beforeEach(() => {
@@ -839,6 +923,13 @@ describe('AccessService login', () => {
     };
     cidMock = sandbox.mock(cid);
     service.cid_ = Promise.resolve(cid);
+
+    const analytics = {
+      triggerEvent: () => {}
+    };
+    analyticsMock = sandbox.mock(analytics);
+    service.analyticsPromise_ = {then: callback => callback(analytics)};
+    service.isAnalyticsExperimentOn_ = true;
 
     service.openLoginDialog_ = () => {};
     serviceMock = sandbox.mock(service);
@@ -884,6 +975,9 @@ describe('AccessService login', () => {
   it('should open dialog in the same microtask', () => {
     service.openLoginDialog_ = sandbox.stub();
     service.openLoginDialog_.returns(Promise.resolve());
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-login-started')
+        .once();
     service.login();
     expect(service.openLoginDialog_.callCount).to.equal(1);
     expect(service.openLoginDialog_.firstCall.args[0])
@@ -902,6 +996,12 @@ describe('AccessService login', () => {
         .withExactArgs('https://acme.com/l?rid=R')
         .returns(Promise.resolve('#success=true'))
         .once();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-login-started')
+        .once();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-login-success')
+        .once();
     return service.login().then(() => {
       expect(service.loginPromise_).to.not.exist;
       expect(service.runAuthorization_.callCount).to.equal(1);
@@ -918,6 +1018,12 @@ describe('AccessService login', () => {
     serviceMock.expects('openLoginDialog_')
         .withExactArgs('https://acme.com/l?rid=R')
         .returns(Promise.resolve('#success=no'))
+        .once();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-login-started')
+        .once();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-login-rejected')
         .once();
     return service.login().then(() => {
       expect(service.loginPromise_).to.not.exist;
@@ -942,6 +1048,12 @@ describe('AccessService login', () => {
     serviceMock.expects('openLoginDialog_')
         .withExactArgs('https://acme.com/l?rid=R')
         .returns(Promise.reject('abort'))
+        .once();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-login-started')
+        .once();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-login-failed')
         .once();
     return service.login().then(() => 'SUCCESS', () => 'ERROR').then(result => {
       expect(result).to.equal('ERROR');
