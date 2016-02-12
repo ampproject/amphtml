@@ -233,5 +233,32 @@ export const ANALYTICS_CONFIG = {
       'xhrpost': false,
       'image': true
     }
+  },
+
+  'adobeanalytics': {
+    'vars': {
+      'pageName': 'TITLE',
+      'host': '',
+      'reportSuites': '',
+      'linkType': 'o',
+      'linkUrl': '',
+      'linkName': '',
+    },
+    'requests': {
+      'requestPath': '/b/ss/${reportSuites}/0/amp-1.0/s${random}',
+      'basePrefix': 'vid=${clientId(amp_id)}' +
+          '&ndh=0' +
+          '&ce=${documentCharset}' +
+          '&pageName=${pageName}' +
+          '&g=${ampdocUrl}' +
+          '&r=${documentReferrer}' +
+          '&bh=${availableScreenHeight}' +
+          '&bw=${availableScreenWidth}' +
+          '&c=${screenColorDepth}' +
+          '&j=amp' +
+          '&s=${screenWidth}x${screenHeight}',
+      'pageview': 'https://${host}${requestPath}?${basePrefix}',
+      'click': 'https://${host}${requestPath}?${basePrefix}&pe=lnk_${linkType}&pev1=${linkUrl}&pev2=${linkName}',
+    }
   }
 };
