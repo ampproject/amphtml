@@ -17,15 +17,35 @@
 import {createIframePromise} from '../../../../testing/iframe';
 require('../amp-youtube');
 import {adopt} from '../../../../src/runtime';
+import {timer} from '../../../../src/timer';
+import * as sinon from 'sinon';
 
 adopt(window);
 
 describe('amp-youtube', () => {
+  let sandbox;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+    sandbox = null;
+  });
 
   function getYt(videoId, opt_responsive, opt_beforeLayoutCallback) {
     return createIframePromise(
         true, opt_beforeLayoutCallback).then(iframe => {
           const yt = iframe.doc.createElement('amp-youtube');
+
+          // TODO(mkhatib): During tests, messages are not being correctly
+          // caught and hence the ready promise will never resolve.
+          // For now, this resolves the ready promise after a while.
+          timer.promise(50).then(() => {
+            yt.implementation_.playerReadyResolver_();
+          });
+
           yt.setAttribute('data-videoid', videoId);
           yt.setAttribute('width', '111');
           yt.setAttribute('height', '222');

@@ -17,7 +17,10 @@
 import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
 import {setStyles} from '../../../src/style';
+import {timer} from '../../../src/timer';
 
+/** @type {number} Value of YouTube player state when playing. */
+const YT_PLAYER_STATE_PLAYING = 1;
 
 class AmpYoutube extends AMP.BaseElement {
 
@@ -46,6 +49,9 @@ class AmpYoutube extends AMP.BaseElement {
     /** @private @const {number} */
     this.height_ = getLengthNumeral(height);
 
+    /** @private {number} */
+    this.playerState_ = 0;
+
     // The video-id is supported only for backward compatibility.
     /** @private @const {string} */
     this.videoid_ = AMP.assert(
@@ -72,16 +78,38 @@ class AmpYoutube extends AMP.BaseElement {
     iframe.width = this.width_;
     iframe.height = this.height_;
     this.element.appendChild(iframe);
-    /** @private {?Element} */
+
+    /** @private {!Element} */
     this.iframe_ = iframe;
 
-    // TODO(mkhatib, #2050): Use PlayerReady message for layout promise.
-    return loadPromise(iframe);
+    /** @private @const {!Promise} */
+    this.playerReadyPromise_ = new Promise(resolve => {
+      /** @private @const {function()} */
+      this.playerReadyResolver_ = resolve;
+    });
+
+    this.getWin().addEventListener(
+        'message', event => this.handleYoutubeMessages_(event));
+
+    return loadPromise(iframe)
+        .then(() => {
+          // Make sure the YT player is ready for this. For some reason YT player
+          // would send couple of messages but then stop. Waiting for a bit before
+          // sending the 'listening' event seems to fix that and allow YT
+          // Player to send messages continuously.
+          return timer.promise(300);
+        })
+        .then(() => this.listenToFrame_())
+        .then(() => this.playerReadyPromise_);
   }
 
   /** @override */
   documentInactiveCallback() {
-    if (this.iframe_ && this.iframe_.contentWindow) {
+    // Only send pauseVideo command if the player is playing. Otherwise
+    // The player breaks if the user haven't played the video yet specially
+    // on mobile.
+    if (this.iframe_ && this.iframe_.contentWindow &&
+        this.playerState_ == YT_PLAYER_STATE_PLAYING) {
       this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify({
         'event': 'command',
         'func': 'pauseVideo',
@@ -91,6 +119,31 @@ class AmpYoutube extends AMP.BaseElement {
     // No need to do layout later - user action will be expect to resume
     // the playback.
     return false;
+  }
+
+  /** @private */
+  handleYoutubeMessages_(event) {
+    if (event.origin != 'https://www.youtube.com' ||
+        event.source != this.iframe_.contentWindow) {
+      return;
+    }
+    const data = JSON.parse(event.data);
+    if (data.event == 'onReady') {
+      this.playerReadyResolver_(this.iframe_);
+    } else if (data.event == 'infoDelivery' &&
+        data.info && data.info.playerState !== undefined) {
+      this.playerState_ = data.info.playerState;
+    }
+  }
+
+  /**
+   * Sends 'listening' message to the YouTube iframe to listen for events.
+   * @private
+   */
+  listenToFrame_() {
+    this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify({
+      'event': 'listening'
+    }), '*');
   }
 
   /** @private */
