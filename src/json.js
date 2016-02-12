@@ -87,7 +87,9 @@ export function getValueForExpr(obj, expr) {
       value = undefined;
       break;
     }
-    if (!isObject(value) || !value.hasOwnProperty(part)) {
+    if (!isObject(value) ||
+            value[part] === undefined ||
+            value.hasOwnProperty && !value.hasOwnProperty(part)) {
       value = undefined;
       break;
     }
