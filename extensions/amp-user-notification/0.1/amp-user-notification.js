@@ -93,10 +93,6 @@ export class AmpUserNotification extends AMP.BaseElement {
 
     /** @const @private {!Promise<!Storage>} */
     this.storagePromise_ = storageFor(this.win_);
-
-    // TODO(dvoytenko, #1942): Cleanup `amp-storage` experiment.
-    /** @const @private {boolean} */
-    this.isStorageEnabled_ = true;
   }
 
   /** @override */
@@ -116,10 +112,8 @@ export class AmpUserNotification extends AMP.BaseElement {
     this.elementId_ = assert(this.element.id,
         'amp-user-notification should have an id.');
 
-    // TODO(dvoytenko, #1942): Cleanup `amp-storage` experiment.
-    /** @private @const {?string} */
-    this.storageKey_ = this.isStorageEnabled_ ?
-        'amp-user-notification:' + this.elementId_ : null;
+    /** @private @const {string} */
+    this.storageKey_ = 'amp-user-notification:' + this.elementId_;
 
     /** @private @const {?string} */
     this.showIfHref_ = this.element.getAttribute('data-show-if-href');
@@ -131,17 +125,6 @@ export class AmpUserNotification extends AMP.BaseElement {
     this.dismissHref_ = this.element.getAttribute('data-dismiss-href');
     if (this.dismissHref_) {
       assertHttpsUrl(this.dismissHref_, this.element);
-    }
-
-    // TODO(dvoytenko): document storage behavior in these methods once
-    // experiment is removed.
-    if (!this.storageKey_) {
-      assert(this.showIfHref_,
-          `"amp-user-notification" (${this.elementId_}) ` +
-          'should have "data-show-if-href" attribute.');
-      assert(this.dismissHref_,
-          `"amp-user-notification" (${this.elementId_}) ` +
-          'should have "data-dismiss-href" attribute.');
     }
 
     this.userNotificationManager_
@@ -241,29 +224,26 @@ export class AmpUserNotification extends AMP.BaseElement {
 
   /** @override */
   shouldShow() {
-    if (this.storageKey_) {
-      return this.storagePromise_.then(storage => {
-        return storage.get(this.storageKey_);
-      }).then(value => {
-        if (value) {
-          // Consent has been accepted. Nothing more to do.
-          return false;
-        }
-        if (this.showIfHref_) {
-          // Ask remote endpoint if available.
-          return this.shouldShowViaXhr_();
-        }
-        // Otherwise, show the notification.
-        return true;
-      }).catch(reason => {
-        log.error('Failed to read storage', reason);
-        if (this.showIfHref_) {
-          return this.shouldShowViaXhr_();
-        }
-        return true;
-      });
-    }
-    return this.shouldShowViaXhr_();
+    return this.storagePromise_.then(storage => {
+      return storage.get(this.storageKey_);
+    }).then(value => {
+      if (value) {
+        // Consent has been accepted. Nothing more to do.
+        return false;
+      }
+      if (this.showIfHref_) {
+        // Ask remote endpoint if available.
+        return this.shouldShowViaXhr_();
+      }
+      // Otherwise, show the notification.
+      return true;
+    }).catch(reason => {
+      log.error('Failed to read storage', reason);
+      if (this.showIfHref_) {
+        return this.shouldShowViaXhr_();
+      }
+      return true;
+    });
   }
 
   /**
@@ -293,11 +273,9 @@ export class AmpUserNotification extends AMP.BaseElement {
     this.dialogResolve_();
 
     // Store and post.
-    if (this.storageKey_) {
-      this.storagePromise_.then(storage => {
-        storage.set(this.storageKey_, true);
-      });
-    }
+    this.storagePromise_.then(storage => {
+      storage.set(this.storageKey_, true);
+    });
     if (this.dismissHref_) {
       this.postDismissEnpoint_();
     }
