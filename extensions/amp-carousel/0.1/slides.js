@@ -55,7 +55,8 @@ export class AmpSlides extends BaseCarousel {
     if (this.isIndicators_) {
       this.slidesIndicatorWrap_ = document.createElement('ol');
       this.slidesIndicatorWrap_.classList.add('amp-carousel-indicator');
-      this.slidesIndicatorWrap_.style.width = this.element./*OK*/offsetWidth + 'px';
+      this.slidesIndicatorWrap_
+      .style.width = this.element./*OK*/offsetWidth + 'px';
       this.element.appendChild(this.slidesIndicatorWrap_);
     }
 
