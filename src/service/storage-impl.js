@@ -59,10 +59,6 @@ export class Storage {
     /** @const @private {string} */
     this.origin_ = getSourceOrigin(this.win.location);
 
-    // TODO(dvoytenko, #1942): Cleanup `amp-storage` experiment.
-    /** @const @private {boolean} */
-    this.isExperimentOn_ = true;
-
     /** @private {?Promise<!Store>} */
     this.storePromise_ = null;
   }
@@ -72,10 +68,6 @@ export class Storage {
    * @private
    */
   start_() {
-    if (!this.isExperimentOn_) {
-      log.info(TAG, 'Storage experiment is off: ', EXPERIMENT);
-      return this;
-    }
     this.listenToBroadcasts_();
     return this;
   }
@@ -120,9 +112,6 @@ export class Storage {
    * @private
    */
   getStore_() {
-    if (!this.isExperimentOn_) {
-      return Promise.reject(`Enable experiment ${EXPERIMENT}`);
-    }
     if (!this.storePromise_) {
       this.storePromise_ = this.binding_.loadBlob(this.origin_)
           .then(blob => blob ? JSON.parse(atob(blob)) : {})
@@ -141,9 +130,6 @@ export class Storage {
    * @private
    */
   saveStore_(mutator) {
-    if (!this.isExperimentOn_) {
-      return Promise.reject(`Enable experiment ${EXPERIMENT}`);
-    }
     return this.getStore_()
         .then(store => {
           mutator(store);
