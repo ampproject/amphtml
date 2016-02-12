@@ -33,7 +33,7 @@ const EXPERIMENT = 'dynamic-css-classes';
  * @returns {string}
  */
 function referrerDomain(win) {
-  const referrer = viewerFor(win).getReferrerUrl();
+  const referrer = viewerFor(win).getUnconfirmedReferrerUrl();
   if (referrer) {
     return parseUrl(referrer).hostname;
   }

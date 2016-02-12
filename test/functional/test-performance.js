@@ -16,7 +16,7 @@
 
 import * as sinon from 'sinon';
 import {Performance, performanceFor} from '../../src/performance';
-import {adopt} from '../../src/runtime';
+import {getService, resetServiceForTesting} from '../../src/service';
 import {resourcesFor} from '../../src/resources';
 import {viewerFor} from '../../src/viewer';
 
@@ -39,11 +39,7 @@ describe('performance', () => {
     sandbox = null;
   });
 
-  describe('when no tick function is set,', () => {
-
-    it('should not have a tick function', () => {
-      expect(perf.tick_).to.be.undefined;
-    });
+  describe('when viewer is not ready', () => {
 
     it('should queue up tick events', () => {
       expect(perf.events_.length).to.equal(0);
@@ -60,11 +56,12 @@ describe('performance', () => {
 
       perf.tickDelta('test', 99);
       expect(perf.events_.length).to.equal(2);
-      expect(perf.events_[0]).to.jsonEqual({label: '_test', opt_value: 0});
-      expect(perf.events_[1]).to.jsonEqual({
+      expect(perf.events_[0])
+          .to.be.jsonEqual({label: '_test', from: null, value: 1000});
+      expect(perf.events_[1]).to.be.jsonEqual({
         label: 'test',
-        opt_from: '_test',
-        opt_value: 99
+        from: '_test',
+        value: 1099,
       });
     });
 
@@ -83,10 +80,10 @@ describe('performance', () => {
       clock.tick(150);
       perf.tick('start0');
 
-      expect(perf.events_[0]).to.deep.equal({
+      expect(perf.events_[0]).to.be.jsonEqual({
         label: 'start0',
-        opt_from: undefined,
-        opt_value: 150
+        from: null,
+        value: 150,
       });
     });
 
@@ -94,10 +91,10 @@ describe('performance', () => {
       clock.tick(150);
       perf.tick('start0', 'start1', 300);
 
-      expect(perf.events_[0]).to.deep.equal({
+      expect(perf.events_[0]).to.be.jsonEqual({
         label: 'start0',
-        opt_from: 'start1',
-        opt_value: 300
+        from: 'start1',
+        value: 300,
       });
     });
 
@@ -112,41 +109,37 @@ describe('performance', () => {
       }
 
       expect(perf.events_.length).to.equal(50);
-      expect(perf.events_[0]).to.deep.equal({
+      expect(perf.events_[0]).to.be.jsonEqual({
         label: 'start0',
-        opt_from: undefined,
-        opt_value: tickTime
+        from: null,
+        value: tickTime,
       });
 
       clock.tick(1);
       perf.tick('start50');
 
-      expect(perf.events_[0]).to.deep.equal({
+      expect(perf.events_[0]).to.be.jsonEqual({
         label: 'start1',
-        opt_from: undefined,
-        opt_value: tickTime
+        from: null,
+        value: tickTime,
       });
-      expect(perf.events_[49]).to.deep.equal({
+      expect(perf.events_[49]).to.be.jsonEqual({
         label: 'start50',
-        opt_from: undefined,
-        opt_value: tickTime + 1
+        from: null,
+        value: tickTime + 1,
       });
     });
   });
 
-  describe('when tick function is set,', () => {
-    let spy;
+  describe('when viewer is ready,', () => {
+    let tickSpy;
+    let flushTicksSpy;
+    let viewer;
 
     beforeEach(() => {
-      spy = sinon.spy();
-    });
-
-    it('should be able to install a performance function', () => {
-      expect(perf.tick_).to.be.undefined;
-
-      perf.setTickFunction(spy);
-
-      expect(perf.tick_).to.be.an.instanceof(Function);
+      viewer = viewerFor(window);
+      tickSpy = sandbox.stub(viewer, 'tick');
+      flushTicksSpy = sandbox.stub(viewer, 'flushTicks');
     });
 
     it('should forward all queued tick events', () => {
@@ -156,14 +149,18 @@ describe('performance', () => {
 
       expect(perf.events_.length).to.equal(2);
 
-      perf.setTickFunction(spy);
+      perf.coreServicesAvailable();
 
-      expect(spy.firstCall.args[0]).to.equal('start0');
-      expect(spy.firstCall.args[1]).to.equal(undefined);
-      expect(spy.firstCall.args[2]).to.equal(0);
-      expect(spy.secondCall.args[0]).to.equal('start1');
-      expect(spy.secondCall.args[1]).to.equal('start0');
-      expect(spy.secondCall.args[2]).to.equal(1);
+      expect(tickSpy.firstCall.args[0]).to.be.jsonEqual({
+        label: 'start0',
+        from: null,
+        value: 0,
+      });
+      expect(tickSpy.secondCall.args[0]).to.be.jsonEqual({
+        label: 'start1',
+        from: 'start0',
+        value: 1,
+      });
     });
 
     it('should have no more queued tick events after flush', () => {
@@ -172,72 +169,40 @@ describe('performance', () => {
 
       expect(perf.events_.length).to.equal(2);
 
-      perf.setTickFunction(spy);
+      perf.coreServicesAvailable();
 
       expect(perf.events_.length).to.equal(0);
     });
 
     it('should forward tick events', () => {
-      perf.setTickFunction(spy);
+      perf.coreServicesAvailable();
 
-      perf.tick('start0');
       clock.tick(100);
+      perf.tick('start0');
       perf.tick('start1', 'start0', 300);
 
-      expect(spy.firstCall.args[0]).to.equal('start0');
-      expect(spy.firstCall.args[1]).to.equal(undefined);
-      expect(spy.firstCall.args[2]).to.equal(undefined);
-
-      expect(spy.secondCall.args[0]).to.equal('start1');
-      expect(spy.secondCall.args[1]).to.equal('start0');
-      expect(spy.secondCall.args[2]).to.equal(300);
+      expect(tickSpy.firstCall.args[0]).to.be.jsonEqual({
+        label: 'start0',
+        from: null,
+        value: 100,
+      });
+      expect(tickSpy.secondCall.args[0]).to.be.jsonEqual({
+        label: 'start1',
+        from: 'start0',
+        value: 300,
+      });
     });
 
     it('should call the flush callback', () => {
-      perf.setTickFunction(function() {}, spy);
-
-      // We start at 1 since setting the tick function and flush
-      // causes 1 flush call for any queued events.
-      expect(spy.callCount).to.equal(1);
+      expect(flushTicksSpy.callCount).to.equal(0);
+      // coreServicesAvailable calls flush once.
+      perf.coreServicesAvailable();
+      expect(flushTicksSpy.callCount).to.equal(1);
       perf.flush();
-      expect(spy.callCount).to.equal(2);
+      expect(flushTicksSpy.callCount).to.equal(2);
       perf.flush();
-      expect(spy.callCount).to.equal(3);
+      expect(flushTicksSpy.callCount).to.equal(3);
     });
-  });
-
-  it('can set the performance function through the runtime', () => {
-    const perf = performanceFor(window);
-    const spy = sandbox.spy(perf, 'setTickFunction');
-    const fn = function() {};
-
-    adopt(window);
-
-    window.AMP.setTickFunction(fn);
-
-    expect(spy.firstCall.args[0]).to.equal(fn);
-  });
-
-  it('can set the flush function through the runtime', () => {
-    const perf = performanceFor(window);
-    const spy = sandbox.spy(perf, 'setTickFunction');
-    const fn = function() {};
-
-    adopt(window);
-
-    window.AMP.setTickFunction(function() {}, fn);
-
-    expect(spy.firstCall.args[1]).to.equal(fn);
-  });
-
-  it('should call the flush function after its set', () => {
-    const flushSpy = sinon.spy();
-
-    adopt(window);
-
-    window.AMP.setTickFunction(function() {}, flushSpy);
-
-    expect(flushSpy.calledOnce).to.be.true;
   });
 
   describe('coreServicesAvailable', () => {
@@ -302,8 +267,8 @@ describe('performance', () => {
             expect(tickSpy.firstCall.args[0]).to.equal('_pc');
             expect(tickSpy.secondCall.args[0]).to.equal('pc');
             expect(tickSpy.secondCall.args[1]).to.equal('_pc');
-            expect(Number(tickSpy.firstCall.args[2])).to.equal(0);
-            expect(Number(tickSpy.secondCall.args[2])).to.equal(400);
+            expect(Number(tickSpy.firstCall.args[2])).to.equal(1000);
+            expect(Number(tickSpy.secondCall.args[2])).to.equal(1400);
           });
         });
       });
@@ -318,8 +283,8 @@ describe('performance', () => {
           expect(tickSpy.firstCall.args[0]).to.equal('_pc');
           expect(tickSpy.secondCall.args[0]).to.equal('pc');
           expect(tickSpy.secondCall.args[1]).to.equal('_pc');
-          expect(Number(tickSpy.firstCall.args[2])).to.equal(0);
-          expect(Number(tickSpy.secondCall.args[2])).to.equal(1);
+          expect(Number(tickSpy.firstCall.args[2])).to.equal(1000);
+          expect(Number(tickSpy.secondCall.args[2])).to.equal(1001);
         });
       });
     });
@@ -341,6 +306,48 @@ describe('performance', () => {
           expect(tickSpy.firstCall.args[0]).to.equal('pc');
           expect(tickSpy.firstCall.args[2]).to.be.undefined;
         });
+      });
+    });
+  });
+
+  it('should setFlushParams', () => {
+    const perf = performanceFor(window);
+    const viewer = viewerFor(window);
+    sandbox.stub(perf, 'whenViewportLayoutComplete_')
+        .returns(Promise.resolve());
+    const setFlushParamsSpy = sandbox.stub(viewer, 'setFlushParams');
+    perf.coreServicesAvailable();
+    resetServiceForTesting(window, 'documentInfo');
+    const info = {
+      canonicalUrl: 'https://foo.bar/baz',
+      pageViewId: 12345,
+      sourceUrl: 'https://hello.world/baz/#development'
+    };
+    getService(window, 'documentInfo', () => info);
+
+    const ad1 = document.createElement('amp-ad');
+    ad1.setAttribute('type', 'abc');
+    const ad2 = document.createElement('amp-ad');
+    ad2.setAttribute('type', 'xyz');
+    const ad3 = document.createElement('amp-ad');
+    sandbox.stub(perf.resources_, 'get').returns([
+      {element: document.createElement('amp-img')},
+      {element: document.createElement('amp-img')},
+      {element: document.createElement('amp-anim')},
+      {element: ad1},
+      {element: ad2},
+      {element: ad3},
+    ]);
+
+    return perf.setDocumentInfoParams_().then(() => {
+      expect(setFlushParamsSpy.lastCall.args[0]).to.be.jsonEqual({
+        sourceUrl: 'https://hello.world/baz/',
+        'amp-img': 2,
+        'amp-anim': 1,
+        'amp-ad': 3,
+        'ad-abc': 1,
+        'ad-xyz': 1,
+        'ad-null': 1,
       });
     });
   });

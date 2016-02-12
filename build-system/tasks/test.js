@@ -65,8 +65,9 @@ gulp.task('test', 'Runs tests', prerequisites, function(done) {
   if (argv.saucelabs && process.env.MAIN_REPO &&
       // Sauce Labs does not work on Pull Requests directly.
       // The @ampsauce bot builds these.
-      process.env.TRAVIS_PULL_REQUEST) {
-    console./*OK*/info('Deactivated for main repo');
+      process.env.TRAVIS_PULL_REQUEST != 'false') {
+    console./*OK*/info('Deactivated for pull requests. ' +
+        'The @ampsauce bots build eligible PRs.');
     return;
   }
 

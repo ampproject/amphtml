@@ -18,6 +18,8 @@ limitations under the License.
 
 ### Slack and mailing list
 
+Please join our [announcements mailing list](https://groups.google.com/forum/#!forum/amphtml-announce). This is a curated, low volume list for announcements about breaking changes and similar issues in AMP.
+
 We discuss implementation issues on [amphtml-discuss@googlegroups.com](https://groups.google.com/forum/#!forum/amphtml-discuss).
 
 For more immediate feedback, [sign up for our Slack](https://docs.google.com/forms/d/1wAE8w3K5preZnBkRk-MD1QkX8FmlRDxd_vs4bFSeJlQ/viewform?fbzx=4406980310789882877).

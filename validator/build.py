@@ -253,7 +253,7 @@ def GenerateValidateBin(out_dir, nodejs_cmd):
   """
   logging.info('entering ...')
   f = open('%s/validate' % out_dir, 'w')
-  f.write('#!/usr/bin/%s\n' % nodejs_cmd)
+  f.write('#!/usr/bin/env %s\n' % nodejs_cmd)
   for l in open('%s/validator_minified.js' % out_dir):
     f.write(l)
   f.write("""

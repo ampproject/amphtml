@@ -19,7 +19,6 @@ import {assertHttpsUrl, addParamsToUrl} from '../../../src/url';
 import {assert} from '../../../src/asserts';
 import {cidFor} from '../../../src/cid';
 import {getService} from '../../../src/service';
-import {isDevChannel, isExperimentOn} from '../../../src/experiments';
 import {log} from '../../../src/log';
 import {storageFor} from '../../../src/storage';
 import {urlReplacementsFor} from '../../../src/url-replacements';
@@ -95,9 +94,9 @@ export class AmpUserNotification extends AMP.BaseElement {
     /** @const @private {!Promise<!Storage>} */
     this.storagePromise_ = storageFor(this.win_);
 
+    // TODO(dvoytenko, #1942): Cleanup `amp-storage` experiment.
     /** @const @private {boolean} */
-    this.isStorageEnabled_ = (isExperimentOn(this.win_, 'amp-storage') ||
-        isDevChannel(this.win_));
+    this.isStorageEnabled_ = true;
   }
 
   /** @override */
@@ -117,6 +116,7 @@ export class AmpUserNotification extends AMP.BaseElement {
     this.elementId_ = assert(this.element.id,
         'amp-user-notification should have an id.');
 
+    // TODO(dvoytenko, #1942): Cleanup `amp-storage` experiment.
     /** @private @const {?string} */
     this.storageKey_ = this.isStorageEnabled_ ?
         'amp-user-notification:' + this.elementId_ : null;
@@ -233,8 +233,9 @@ export class AmpUserNotification extends AMP.BaseElement {
       // the user only really has 1 option to accept/dismiss (to resolve)
       // the notification or have the nagging notification sitting there
       // (to never resolve).
-      return cid.get('amp-user-notification',
-          Promise.resolve(), this.dialogPromise_);
+      return cid.get(
+        {scope: 'amp-user-notification', createCookieIfNotPresent: true},
+        Promise.resolve(), this.dialogPromise_);
     });
   }
 

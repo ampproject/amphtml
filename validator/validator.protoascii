@@ -20,12 +20,12 @@
 # in production from crashing. This id is not relevant to validator.js
 # because thus far, engine (validator.js) and spec file (validator.protoascii)
 # are always released together.
-min_validator_revision_required: 85
+min_validator_revision_required: 91
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 137
+spec_file_revision: 147
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
 #
@@ -352,6 +352,19 @@ tags: {
   }
   attrs: { name: "hreflang" }
 }
+# rel= isn't mandatory when itemprop= is present.
+tags: {
+  name: "link"
+  detail: "link itemprop="
+  attrs: {
+    name: "itemprop"
+    mandatory: true
+  }
+  attrs: {
+    name: "href"
+    mandatory: true
+  }
+}
 # Various whitelisted rel attribute values which can co-occur with
 # "type", "href", and "sizes" attributes of arbitrary value.
 tags: {
@@ -631,7 +644,17 @@ tags: {
   name: "a"
   attrs: {
     name: "href"
-    blacklisted_value_regex: "^\\s*(javascript|vbscript|data):"
+    value_url: {
+      allowed_protocol: "http"
+      allowed_protocol: "https"
+      allowed_protocol: "mailto"
+      # Whitelisting additional commonly observed third party
+      # protocols which should be safe
+      allowed_protocol: "sms"
+      allowed_protocol: "tel"
+      allowed_protocol: "viber"
+      allowed_protocol: "whatsapp"
+     }
   }
   attrs: { name: "hreflang" }
   attrs: {
@@ -649,6 +672,7 @@ tags: {
     # TODO(gregable): Come up with a better scheme for this.
     value_regex: "("
         "accessibility|"
+        "attachment|"  # Commonly used by wordpress
         "author|"
         "alternate|"
         "appendix|"
@@ -737,9 +761,11 @@ tags: {
         "vcalendar-parent|"
         "vcalendar-sibling|"
         "webmention|"
+        "wp-att-[0-9]+|"  # Commonly used by wordpress
         "yandex-tableau-widget"
       ")( +("
         "accessibility|"
+        "attachment|"  # Commonly used by wordpress
         "author|"
         "alternate|"
         "appendix|"
@@ -828,6 +854,7 @@ tags: {
         "vcalendar-parent|"
         "vcalendar-sibling|"
         "webmention|"
+        "wp-att-[0-9]+|"  # Commonly used by wordpress
         "yandex-tableau-widget"
       "))*"
   }
@@ -917,9 +944,13 @@ tags: {
   attrs: { name: "height" }
   attrs: {
     name: "src"
+    alternative_names: "srcset"
     mandatory: true
+    value_url: {
+      allowed_protocol: "data"
+      allowed_protocol: "https"
+    }
   }
-  attrs: { name: "srcset" }
   attrs: { name: "width" }
   spec_url: "https://github.com/ampproject/amphtml/blob/master/builtins/amp-img.md"
 }
@@ -956,7 +987,12 @@ tags: {
   detail: "amp-audio > source"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-audio/amp-audio.md"
   mandatory_parent: "amp-audio"
-  attrs: { name: "src" }
+  attrs: {
+    name: "src"
+    value_url: {
+      allowed_protocol: "https"
+    }
+  }
   attrs: { name: "type" }
 }
 tags: {
@@ -964,7 +1000,12 @@ tags: {
   detail: "amp-video > source"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/builtins/amp-video.md"
   mandatory_parent: "amp-video"
-  attrs: { name: "src" }
+  attrs: {
+    name: "src"
+    value_url: {
+      allowed_protocol: "https"
+    }
+  }
   attrs: { name: "type" }
 }
 tags: {
@@ -974,6 +1015,9 @@ tags: {
   attrs: {
     name: "src"
     mandatory: true
+    value_url: {
+      allowed_protocol: "https"
+    }
   }
   attrs: {
     name: "type"
@@ -987,6 +1031,9 @@ tags: {
   attrs: {
     name: "src"
     mandatory: true
+    value_url: {
+      allowed_protocol: "https"
+    }
   }
   attrs: {
     name: "type"
@@ -2135,14 +2182,17 @@ tags: {
 
 # AMP Custom elements require a "src" or a "srcset" attribute,
 # having both is also allowed.
-# TODO(greggrothaus): These probably need to validate http*s* only URLs
-# and data: urls as per the spec.
 attr_lists: {
   name: "mandatory-src-or-srcset"
   attrs: {
     name: "src"
     alternative_names: "srcset"
     mandatory: true
+    value_url: {
+      allowed_protocol: "data"
+      allowed_protocol: "http"
+      allowed_protocol: "https"
+    }
   }
 }
 # Extended AMP globally optional tags.
@@ -2224,7 +2274,12 @@ tags: {
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
   attrs: { name: "placeholder" }
-  attrs: { name: "src" }
+  attrs: {
+    name: "src"
+    value_url: {
+      allowed_protocol: "https"
+    }
+  }
   attrs: { name: "controls" value: "" }
   attrs: { name: "autoplay" value: "" }
   attrs: { name: "loop"     value: "" }
@@ -2246,7 +2301,12 @@ tags: {
   spec_url: "https://github.com/ampproject/amphtml/blob/master/builtins/amp-ad.md"
   attr_lists: "extended-amp-global"
   attrs: { name: "alt" }
-  attrs: { name: "src" }
+  attrs: {
+    name: "src"
+    value_url: {
+      allowed_protocol: "https"
+    }
+  }
   attrs: { name: "type" mandatory: true }
   attrs: { name: "json" }
   amp_layout: {
@@ -2265,7 +2325,12 @@ tags: {
   spec_url: "https://github.com/ampproject/amphtml/blob/master/builtins/amp-embed.md"
   attr_lists: "extended-amp-global"
   attrs: { name: "alt" }
-  attrs: { name: "src" }
+  attrs: {
+    name: "src"
+    value_url: {
+      allowed_protocol: "https"
+    }
+  }
   attrs: { name: "type" mandatory: true }
   attrs: { name: "json" }
   amp_layout: {
@@ -2317,6 +2382,7 @@ tags: {
   also_requires: "amp-carousel extension .js script"
   attr_lists: "extended-amp-global"
   attrs: { name: "autoplay" value: "" }
+  attrs: { name: "delay" value_regex: "[0-9]+" }
   attrs: { name: "loop" value: "" }
   attrs: { name: "dots" value: "" }
   attrs: { name: "arrows" value: "" }
@@ -2354,9 +2420,13 @@ tags: {
   name: "amp-analytics"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-analytics.md"
   also_requires: "amp-analytics extension .js script"
-  attrs: { name: "type" value: "googleanalytics" }
-  # TODO(gregable): This should require a valid https URL as the attr value.
-  attrs: { name: "config" }
+  attrs: { name: "type" }
+  attrs: {
+    name: "config"
+    value_url: {
+      allowed_protocol: "https"
+    }
+  }
 }
 # <amp-user-notification>
 tags: {
@@ -2377,12 +2447,16 @@ tags: {
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-youtube/amp-youtube.md"
   also_requires: "amp-youtube extension .js script"
   attrs: {
-    name: "src"
+    name: "data-videoid"
     mandatory_oneof: "['src', 'data-videoid']"
   }
   attrs: {
-    name: "data-videoid"
+    name: "src"
     mandatory_oneof: "['src', 'data-videoid']"
+    value_url: {
+      allowed_protocol: "http"  # runtime will rewrite URL to https in this case
+      allowed_protocol: "https"
+    }
   }
   attrs: {
     name: "video-id"
@@ -2440,7 +2514,14 @@ tags: {
   also_requires: "amp-twitter extension .js script"
   attr_lists: "extended-amp-global"
   attrs: { name: "data-tweetid" mandatory_oneof: "['data-tweetid', 'src']" }
-  attrs: { name: "src" mandatory_oneof: "['data-tweetid', 'src']" }
+  attrs: {
+    name: "src"
+    mandatory_oneof: "['data-tweetid', 'src']"
+    value_url: {
+      allowed_protocol: "http"  # runtime will rewrite URL to https in this case
+      allowed_protocol: "https"
+    }
+  }
   amp_layout: {
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
@@ -2462,6 +2543,10 @@ tags: {
   attrs: {
     name: "src"
     mandatory_oneof: "['data-shortcode', 'src']"
+    value_url: {
+      allowed_protocol: "http"  # runtime will rewrite URL to https in this case
+      allowed_protocol: "https"
+    }
   }
   attrs: {
     name: "shortcode"
@@ -2489,7 +2574,14 @@ tags: {
   attrs: { name: "allowtransparency" value: "" }
   attrs: { name: "resizable" value: "" }
   attrs: { name: "frameborder" value_regex: "0|1" }
-  attrs: { name: "src" mandatory_oneof: "['src', 'srcdoc']" }
+  attrs: {
+    name: "src"
+    mandatory_oneof: "['src', 'srcdoc']"
+    value_url: {
+      allowed_protocol: "data"
+      allowed_protocol: "https"
+    }
+  }
   attrs: { name: "srcdoc" mandatory_oneof: "['src', 'srcdoc']" }
   amp_layout: {
     supported_layouts: FIXED
@@ -2507,6 +2599,9 @@ tags: {
   attrs: {
     name: "src"
     mandatory: true
+    value_url: {
+      allowed_protocol: "https"
+    }
   }
   amp_layout {
     supported_layouts: FIXED
@@ -2521,7 +2616,12 @@ tags: {
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-audio/amp-audio.md"
   also_requires: "amp-audio extension .js script"
   attr_lists: "extended-amp-global"
-  attrs: { name: "src" }
+  attrs: {
+    name: "src"
+    value_url: {
+      allowed_protocol: "https"
+    }
+  }
   attrs: {
     name: "autoplay"
     # ^$| prefix intended. empty string is valid.
@@ -2571,7 +2671,13 @@ tags: {
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-list/amp-list.md"
   also_requires: "amp-list extension .js script"
   attr_lists: "extended-amp-global"
-  attrs: { name: "src" mandatory: true }
+  attrs: {
+    name: "src"
+    mandatory: true
+    value_url: {
+      allowed_protocol: "https"
+    }
+  }
   attrs: { name: "credentials" }
   amp_layout: {
     supported_layouts: FIXED
@@ -2586,7 +2692,16 @@ tags: {
   name: "amp-install-serviceworker"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-install-serviceworker/amp-install-serviceworker.md"
   also_requires: "amp-install-serviceworker extension .js script"
-  attrs: { name: "src" }
+  attrs: {
+    name: "src"
+    mandatory: true
+    value_url: {
+      allowed_protocol: "https"
+    }
+  }
+  amp_layout: {
+    supported_layouts: NODISPLAY
+  }
 }
 
 # AMP Layout attributes: implied for TagSpecs with amp_layout field
@@ -2606,7 +2721,9 @@ attr_lists: {
 attr_lists: {
   name: "$GLOBAL_ATTRS"
   # For schema.org annotations.
+  attrs: { name: "itemid" }
   attrs: { name: "itemprop" }
+  attrs: { name: "itemref" }
   attrs: { name: "itemscope" }
   attrs: { name: "itemtype" }
   # 3.2.5 HTML5 Global attributes.
@@ -2748,6 +2865,18 @@ error_formats {
   code: INVALID_PROPERTY_VALUE_IN_ATTR_VALUE
   format: "The property '%1' in attribute '%2' in tag '%3' is set to "
           "'%4', which is invalid."
+}
+error_formats {
+  code: MISSING_URL
+  format: "Missing URL for attribute '%1' in tag '%2'."
+}
+error_formats {
+  code: INVALID_URL
+  format: "Malformed URL '%3' for attribute '%1' in tag '%2'."
+}
+error_formats {
+  code: INVALID_URL_PROTOCOL
+  format: "Invalid URL protocol '%3:' for attribute '%1' in tag '%2'."
 }
 error_formats {
   code: MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE

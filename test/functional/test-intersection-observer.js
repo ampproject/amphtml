@@ -19,6 +19,8 @@ import {IntersectionObserver, getIntersectionChangeEntry} from
     '../../src/intersection-observer';
 import {createAmpElementProto} from '../../src/custom-element';
 import {layoutRectLtwh} from '../../src/layout-rect';
+import * as sinon from 'sinon';
+
 
 describe('getIntersectionChangeEntry', () => {
 
@@ -157,9 +159,10 @@ describe('IntersectionObserver', () => {
   let sandbox;
   let testIframe;
   let element;
-  const getIntersectionChangeEntrySpy = sinon.spy();
-  const onScrollSpy = sinon.spy();
-  const onChangeSpy = sinon.spy();
+  let getIntersectionChangeEntrySpy;
+  let onScrollSpy;
+  let onChangeSpy;
+  let clock;
 
   function getIframe(src) {
     const i = document.createElement('iframe');
@@ -170,21 +173,26 @@ describe('IntersectionObserver', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-
-    testElementCreatedCallback = sinon.spy();
-    testElementPreconnectCallback = sinon.spy();
-    testElementFirstAttachedCallback = sinon.spy();
-    testElementBuildCallback = sinon.spy();
-    testElementLayoutCallback = sinon.spy();
-    testElementFirstLayoutCompleted = sinon.spy();
-    testElementViewportCallback = sinon.spy();
-    testElementGetInsersectionElementLayoutBox = sinon.spy();
-    testElementDocumentInactiveCallback = sinon.spy();
+    clock = sandbox.useFakeTimers();
+    testElementCreatedCallback = sandbox.spy();
+    testElementPreconnectCallback = sandbox.spy();
+    testElementFirstAttachedCallback = sandbox.spy();
+    testElementBuildCallback = sandbox.spy();
+    testElementLayoutCallback = sandbox.spy();
+    testElementFirstLayoutCompleted = sandbox.spy();
+    testElementViewportCallback = sandbox.spy();
+    testElementGetInsersectionElementLayoutBox = sandbox.spy();
+    testElementDocumentInactiveCallback = sandbox.spy();
+    getIntersectionChangeEntrySpy = sandbox.spy();
+    onScrollSpy = sandbox.spy();
+    onChangeSpy = sandbox.spy();
     testIframe = getIframe(iframeSrc);
     element = new ElementClass();
     element.getVsync = function() {
       return {
-        measure: function() {}
+        measure: function(fn) {
+          fn();
+        }
       };
     };
     element.getViewport = function() {
@@ -204,28 +212,16 @@ describe('IntersectionObserver', () => {
         getIntersectionChangeEntrySpy();
         const rootBounds = layoutRectLtwh(198, 299, 100, 100);
         const layoutBox = layoutRectLtwh(50, 100, 150, 200);
-        return getIntersectionChangeEntry(111, rootBounds, layoutBox);
+        return getIntersectionChangeEntry(new Date().getTime(),
+            rootBounds, layoutBox);
       }
     };
+    element.isInViewport = () => false;
   });
 
   afterEach(() => {
-    testIframe.parentNode.removeChild(testIframe);
-    testIframe = null;
-    element = null;
     sandbox.restore();
-    sandbox = null;
-  });
-
-  it('should instantiate', () => {
-    const ioInstance = new IntersectionObserver(element, testIframe);
-    expect(ioInstance.unlisteners_.length).to.equal(2);
-  });
-
-  it('should dispose', () => {
-    const ioInstance = new IntersectionObserver(element, testIframe);
-    ioInstance.dispose();
-    expect(ioInstance.unlisteners_.length).to.equal(0);
+    testIframe.parentNode.removeChild(testIframe);
   });
 
   it('should not send intersection', () => {
@@ -233,17 +229,63 @@ describe('IntersectionObserver', () => {
     const ioInstance = new IntersectionObserver(element, testIframe);
     ioInstance.sendElementIntersection_();
     expect(postMessageSpy.callCount).to.equal(0);
-    postMessageSpy/*OK*/.restore();
+    expect(ioInstance.pendingChanges_).to.have.length(0);
   });
 
   it('should send intersection', () => {
-    postMessageSpy = sinon/*OK*/.spy(testIframe.contentWindow, 'postMessage');
+    const messages = [];
+    sandbox.stub(testIframe.contentWindow, 'postMessage', message => {
+      // Copy because arg is modified in place.
+      messages.push(JSON.parse(JSON.stringify(message)));
+    });
+    const ioInstance = new IntersectionObserver(element, testIframe);
+    clock.tick(33);
+    ioInstance.startSendingIntersectionChanges_();
+    expect(getIntersectionChangeEntrySpy.callCount).to.equal(1);
+    expect(messages).to.have.length(0);
+    clock.tick(99);
+    expect(ioInstance.pendingChanges_).to.have.length(1);
+    expect(messages).to.have.length(0);
+    clock.tick(1);
+    expect(messages).to.have.length(1);
+    expect(ioInstance.pendingChanges_).to.have.length(0);
+    expect(messages[0].changes).to.have.length(1);
+    expect(messages[0].changes[0].time).to.equal(33);
+  });
+
+  it('should send more intersections', () => {
+    const messages = [];
+    sandbox.stub(testIframe.contentWindow, 'postMessage', message => {
+      // Copy because arg is modified in place.
+      messages.push(JSON.parse(JSON.stringify(message)));
+    });
     const ioInstance = new IntersectionObserver(element, testIframe);
     ioInstance.startSendingIntersectionChanges_();
-    ioInstance.sendElementIntersection_();
-    expect(getIntersectionChangeEntrySpy.callCount);
-    expect(postMessageSpy.callCount).to.equal(1);
-    postMessageSpy/*OK*/.restore();
+    expect(getIntersectionChangeEntrySpy.callCount).to.equal(1);
+    expect(messages).to.have.length(0);
+    clock.tick(99);
+    ioInstance.fire();
+    ioInstance.fire();  // Same time
+    ioInstance.fire();  // Same time
+    expect(ioInstance.pendingChanges_).to.have.length(2);
+    expect(messages).to.have.length(0);
+    clock.tick(1);
+    expect(messages).to.have.length(1);
+    expect(messages[0].changes).to.have.length(2);
+    expect(messages[0].changes[0].time).to.equal(0);
+    expect(messages[0].changes[1].time).to.equal(99);
+    expect(ioInstance.pendingChanges_).to.have.length(0);
+    ioInstance.fire();
+    expect(ioInstance.pendingChanges_).to.have.length(1);
+    expect(messages).to.have.length(1);
+    clock.tick(99);
+    expect(ioInstance.pendingChanges_).to.have.length(1);
+    expect(messages).to.have.length(1);
+    clock.tick(1);
+    expect(ioInstance.pendingChanges_).to.have.length(0);
+    expect(messages).to.have.length(2);
+    expect(messages[1].changes).to.have.length(1);
+    expect(messages[1].changes[0].time).to.equal(100);
   });
 
   it('should init listeners when element is in viewport', () => {
@@ -263,5 +305,15 @@ describe('IntersectionObserver', () => {
     ioInstance.onViewportCallback();
     expect(fireSpy.callCount).to.equal(2);
     expect(ioInstance.unlistenViewportChanges_).to.be.null;
+  });
+
+  it('should go into in-viewport state for initially visible element', () => {
+    element.isInViewport = () => true;
+    const ioInstance = new IntersectionObserver(element, testIframe);
+    ioInstance.startSendingIntersectionChanges_();
+    expect(getIntersectionChangeEntrySpy.callCount).to.equal(2);
+    expect(onScrollSpy.callCount).to.equal(1);
+    expect(onChangeSpy.callCount).to.equal(1);
+    expect(ioInstance.unlistenViewportChanges_).to.not.be.null;
   });
 });

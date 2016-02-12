@@ -24,26 +24,23 @@ var commonTestPaths = [
   {
     pattern: 'dist/**/*.js',
     included: false,
+    nocache: true,
   },
   {
     pattern: 'dist.tools/**/*.js',
     included: false,
-  },
-  {
-    pattern: 'build/**/*.js',
-    included: false,
-    served: true
+    nocache: true,
   },
   {
     pattern: 'examples/**/*',
     included: false,
-    served: true
+    nocache: true,
   },
   {
     pattern: 'dist.3p/**/*',
     included: false,
-    served: true
-  }
+    nocache: true,
+  },
 ]
 
 var testPaths = commonTestPaths.concat([

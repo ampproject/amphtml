@@ -24,6 +24,7 @@
 
 import './polyfills';
 import {a9} from '../ads/a9';
+import {adform} from '../ads/adform';
 import {adreactor} from '../ads/adreactor';
 import {adsense} from '../ads/adsense';
 import {adtech} from '../ads/adtech';
@@ -34,10 +35,12 @@ import {facebook} from './facebook';
 import {manageWin} from './environment';
 import {nonSensitiveDataPostMessage, listenParent} from './messaging';
 import {twitter} from './twitter';
+import {yieldmo} from '../ads/yieldmo';
 import {register, run} from '../src/3p';
 import {parseUrl} from '../src/url';
 import {assert} from '../src/asserts';
 import {taboola} from '../ads/taboola';
+import {smartadserver} from '../ads/smartadserver';
 
 /**
  * Whether the embed type may be used with amp-embed tag.
@@ -48,6 +51,7 @@ const AMP_EMBED_ALLOWED = {
 };
 
 register('a9', a9);
+register('adform', adform);
 register('adreactor', adreactor);
 register('adsense', adsense);
 register('adtech', adtech);
@@ -55,11 +59,13 @@ register('plista', plista);
 register('doubleclick', doubleclick);
 register('taboola', taboola);
 register('dotandads', dotandads);
+register('yieldmo', yieldmo);
 register('_ping_', function(win, data) {
   win.document.getElementById('c').textContent = data.ping;
 });
 register('twitter', twitter);
 register('facebook', facebook);
+register('smartadserver', smartadserver);
 
 /**
  * Visible for testing.
@@ -148,12 +154,9 @@ window.draw3p = function(opt_configCallback) {
   window.context.reportRenderedEntityIdentifier =
       reportRenderedEntityIdentifier;
   delete data._context;
-  // Run this only in canary and local dev for the time being.
-  if (location.pathname.indexOf('-canary') ||
-      location.pathname.indexOf('current')) {
-    manageWin(window);
-  }
+  manageWin(window);
   draw3p(window, data, opt_configCallback);
+  updateVisibilityState(window);
   nonSensitiveDataPostMessage('render-start');
 };
 
@@ -188,8 +191,25 @@ function triggerResizeRequest(width, height) {
 function observeIntersection(observerCallback) {
   // Send request to received records.
   nonSensitiveDataPostMessage('send-intersections');
-  return listenParent('intersection', data => {
+  return listenParent(window, 'intersection', data => {
     observerCallback(data.changes);
+  });
+}
+
+/**
+ * Listens for events via postMessage and updates `context.hidden` based on
+ * it and forwards the event to a custom event called `amp:visibilitychange`.
+ * @param {!Window} global
+ */
+function updateVisibilityState(global) {
+  listenParent(window, 'embed-state', function(data) {
+    global.context.hidden = data.pageHidden;
+    const event = global.document.createEvent('Event');
+    event.data = {
+      hidden: data.pageHidden,
+    };
+    event.initEvent('amp:visibilitychange', true, true);
+    global.dispatchEvent(event);
   });
 }
 
@@ -200,7 +220,7 @@ function observeIntersection(observerCallback) {
  *    observes for resize status messages.
  */
 function onResizeSuccess(observerCallback) {
-  return listenParent('embed-resize-changed', data => {
+  return listenParent(window, 'embed-resize-changed', data => {
     observerCallback(data.requestedHeight);
   });
 }
@@ -212,7 +232,7 @@ function onResizeSuccess(observerCallback) {
  *    observes for resize status messages.
  */
 function onResizeDenied(observerCallback) {
-  return listenParent('embed-resize-denied', data => {
+  return listenParent(window, 'embed-resize-denied', data => {
     observerCallback(data.requestedHeight);
   });
 }

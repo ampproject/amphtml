@@ -33,12 +33,14 @@ var rename = require('gulp-rename');
 var replace = require('gulp-replace');
 var source = require('vinyl-source-stream');
 var sourcemaps = require('gulp-sourcemaps');
-var touch = require('touch')
+var touch = require('touch');
 var uglify = require('gulp-uglify');
 var util = require('gulp-util');
 var watchify = require('watchify');
+var windowConfig = require('./build-system/window-config');
 var wrap = require('gulp-wrap');
 var internalRuntimeVersion = require('./build-system/internal-version').VERSION;
+var internalRuntimeToken = require('./build-system/internal-version').TOKEN;
 
 var argv = minimist(process.argv.slice(2), { boolean: ['strictBabelTransform'] });
 
@@ -73,6 +75,7 @@ function buildExtensions(options) {
   // and update it if any of its required deps changed.
   // Each extension and version must be listed individually here.
   buildExtension('amp-access', '0.1', true, options);
+  buildExtension('amp-accordion', '0.1', true, options);
   buildExtension('amp-analytics', '0.1', false, options);
   buildExtension('amp-anim', '0.1', false, options);
   buildExtension('amp-audio', '0.1', false, options);
@@ -129,7 +132,8 @@ function compile(watch, shouldMinify) {
     minify: shouldMinify,
     // If there is a sync JS error during initial load,
     // at least try to unhide the body.
-    wrapper: 'try{(function(){<%= contents %>})()}catch(e){' +
+    wrapper: windowConfig.getTemplate() +
+        'try{(function(){<%= contents %>})()}catch(e){' +
         'setTimeout(function(){' +
         'var s=document.body.style;' +
         's.opacity=1;' +
@@ -341,6 +345,7 @@ function buildExamples(watch) {
   buildExample('user-notification.amp.html');
   buildExample('vimeo.amp.html');
   buildExample('vine.amp.html');
+  buildExample('multiple-docs.html');
 
   // TODO(dvoytenko, #1393): Enable for proxy-testing.
   // // Examples are also copied into `c/` directory for AMP-proxy testing.
@@ -434,6 +439,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
       .pipe(source, srcFilename)
       .pipe(buffer)
       .pipe(replace, /\$internalRuntimeVersion\$/g, internalRuntimeVersion)
+      .pipe(replace, /\$internalRuntimeToken\$/g, internalRuntimeToken)
       .pipe(wrap, wrapper)
       .pipe(sourcemaps.init.bind(sourcemaps), {loadMaps: true});
 

@@ -90,6 +90,7 @@ const ValidatorTestCase = function(ampHtmlFile, opt_ampUrl) {
  */
 ValidatorTestCase.prototype.run = function() {
   const results = amp.validator.validateString(this.ampHtmlFileContents);
+  amp.validator.annotateWithErrorCategories(results);
   const observed = amp.validator.renderValidationResult(
       results, this.ampUrl).join('\n');
   if (observed === this.expectedOutput) {
@@ -134,12 +135,13 @@ describe('ValidatorOutput', () => {
         '\'amphtml engine v0.js script\' is set to the invalid value ' +
         '\'https://example.com/v0-not-allowed.js\'. ' +
         '(see https://github.com/ampproject/amphtml/blob/master/spec/' +
-        'amp-html-format.md#scrpt)\n' +
-        'http://google.com/foo.html:29:3 The attribute \'custom-element\' ' +
+        'amp-html-format.md#scrpt) [CUSTOM_JAVASCRIPT_DISALLOWED]\n' +
+        'http://google.com/foo.html:29:3 '+
+        'The attribute \'custom-element\' ' +
         'in tag \'amp-access extension .js script\' is set to the invalid ' +
         'value \'amp-foo\'. ' +
         '(see https://github.com/ampproject/amphtml/blob/master/extensions/' +
-        'amp-access/amp-access.md)';
+        'amp-access/amp-access.md) [AMP_TAG_PROBLEM]';
     test.run();
   });
 });
@@ -177,7 +179,8 @@ describe('ValidatorCssLengthValidation', () => {
         'feature_tests/css_length.html:28:2 The author stylesheet specified ' +
         'in tag \'style\' is too long - we saw 50001 bytes whereas the ' +
         'limit is 50000 bytes. (see https://github.com/ampproject/amphtml/' +
-        'blob/master/spec/amp-html-format.md#maximum-size)';
+        'blob/master/spec/amp-html-format.md#maximum-size) ' +
+        '[AUTHOR_STYLESHEET_PROBLEM]';
     test.run();
   });
 
@@ -193,7 +196,8 @@ describe('ValidatorCssLengthValidation', () => {
         'feature_tests/css_length.html:28:2 The author stylesheet specified ' +
         'in tag \'style\' is too long - we saw 50002 bytes whereas the limit ' +
         'is 50000 bytes. (see https://github.com/ampproject/amphtml/blob/' +
-        'master/spec/amp-html-format.md#maximum-size)';
+        'master/spec/amp-html-format.md#maximum-size) ' +
+        '[AUTHOR_STYLESHEET_PROBLEM]';
     test.run();
   });
 });

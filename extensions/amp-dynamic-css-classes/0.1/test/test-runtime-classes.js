@@ -57,7 +57,7 @@ describe('dynamic classes are inserted at runtime', () => {
         overwrite(win.navigator, 'userAgent', userAgent);
       }
       if (referrer !== undefined) {
-        viewerFor(win).getReferrerUrl = () => referrer;
+        viewerFor(win).getUnconfirmedReferrerUrl = () => referrer;
       }
 
       return win.insertDynamicCssScript();

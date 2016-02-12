@@ -23,6 +23,7 @@
 
 
 import {assert} from './asserts';
+import {isArray} from './types';
 
 
 /** @typedef {function(!Window, !Object)}  */
@@ -103,14 +104,23 @@ function executeAfterWriteScript(win, fn) {
 }
 
 /**
- * Throws if the given src doesn't start with prefix.
- * @param {string} prefix
+ * Throws if the given src doesn't start with prefix(es).
+ * @param {!Array<string>|string} prefix
  * @param {string} src
  */
 export function validateSrcPrefix(prefix, src) {
-  if (src.indexOf(prefix) !== 0) {
-    throw new Error('Invalid src ' + src);
+
+  if (!isArray(prefix)) {
+    prefix = [prefix];
   }
+
+  for (const p of prefix) {
+    if (src.indexOf(p) === 0) {
+      return;
+    }
+  }
+
+  throw new Error('Invalid src ' + src);
 }
 
 /**
@@ -141,6 +151,46 @@ export function checkData(data, allowedFields) {
       throw e;
     });
   }
+}
+
+/**
+ * Utility function to perform a potentially asynchronous task
+ * exactly once for all frames of a given type and the provide the respective
+ * value to all frames.
+ * @param {!Window} global Your window
+ * @param {string} taskId Must be not conflict with any other global variable
+ *     you use. Must be the same for all callers from all frames that want
+ *     the same result.
+ * @param {function(function(*))} work Function implementing the work that
+ *     is to be done. Receives a second function that should be called with
+ *     the result when the work is done.
+ * @param {function(*)} cb Callback function that is called when the work is
+ *     done. The first argument is the result.
+ */
+export function computeInMasterFrame(global, taskId, work, cb) {
+  const master = global.context.master;
+  let tasks = master.__ampMasterTasks;
+  if (!tasks) {
+    tasks = master.__ampMasterTasks = {};
+  }
+  let cbs = tasks[taskId];
+  if (!tasks[taskId]) {
+    cbs = tasks[taskId] = [];
+  }
+  cbs.push(cb);
+  if (!global.context.isMaster) {
+    return;  // Only do work in master.
+  }
+  work(result => {
+    for (let i = 0; i < cbs.length; i++) {
+      cbs[i].call(null, result);
+    }
+    tasks[taskId] = {
+      push: function(cb) {
+        cb(result);
+      }
+    };
+  });
 }
 
 /**

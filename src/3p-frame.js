@@ -65,7 +65,7 @@ function getFrameAttributes(parentWindow, element, opt_type) {
     locationHref = parentWindow.parent.location.href;
   }
   attributes._context = {
-    referrer: viewer.getReferrerUrl(),
+    referrer: viewer.getUnconfirmedReferrerUrl(),
     canonicalUrl: docInfo.canonicalUrl,
     pageViewId: docInfo.pageViewId,
     clientId: element.getAttribute('ampcid'),
@@ -73,7 +73,8 @@ function getFrameAttributes(parentWindow, element, opt_type) {
       href: locationHref
     },
     tagName: element.tagName,
-    mode: getMode()
+    mode: getMode(),
+    hidden: !viewer.isVisible(),
   };
   const adSrc = element.getAttribute('src');
   if (adSrc) {

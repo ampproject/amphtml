@@ -20,7 +20,7 @@ import {documentInfoFor} from './document-info';
 import {getService} from './service';
 import {loadPromise} from './event-helper';
 import {log} from './log';
-import {parseUrl, removeFragment} from './url';
+import {getSourceUrl, parseUrl, removeFragment} from './url';
 import {viewerFor} from './viewer';
 import {viewportFor} from './viewport';
 import {vsyncFor} from './vsync';
@@ -88,6 +88,16 @@ class UrlReplacements {
       return url && url.hostname;
     });
 
+    // Returns the Source URL for this AMP document.
+    this.set_('SOURCE_URL', () => {
+      return removeFragment(getSourceUrl(this.win_.location.href));
+    });
+
+    // Returns the host of the Source URL for this AMP document.
+    this.set_('SOURCE_HOST', () => {
+      return parseUrl(getSourceUrl(this.win_.location.href)).hostname;
+    });
+
     // Returns a random string that will be the constant for the duration of
     // single page view. It should have sufficient entropy to be unique for
     // all the page views a single user is making at a time.
@@ -141,6 +151,12 @@ class UrlReplacements {
     this.set_('SCROLL_HEIGHT', () => {
       return vsyncFor(this.win_).measurePromise(
         () => viewportFor(this.win_).getScrollHeight());
+    });
+
+    // Returns a promise resolving to viewport.getScrollWidth.
+    this.set_('SCROLL_WIDTH', () => {
+      return vsyncFor(this.win_).measurePromise(
+        () => viewportFor(this.win_).getScrollWidth());
     });
 
     // Returns screen.width.
@@ -362,7 +378,7 @@ class UrlReplacements {
     // FOO_BAR
     // FOO_BAR(arg1)
     // FOO_BAR(arg1,arg2)
-    return new RegExp('\\$?(' + all + ')(?:\\(([0-9a-zA-Z-_,]+)\\))?', 'g');
+    return new RegExp('\\$?(' + all + ')(?:\\(([0-9a-zA-Z-_.,]+)\\))?', 'g');
   }
 }
 

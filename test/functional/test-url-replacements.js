@@ -115,6 +115,13 @@ describe('UrlReplacements', () => {
     });
   });
 
+  it('should replace SOURCE_URL and _HOST', () => {
+    return expand('?url=SOURCE_URL&host=SOURCE_HOST').then(res => {
+      expect(res).to.not.match(/SOURCE_URL/);
+      expect(res).to.not.match(/SOURCE_HOST/);
+    });
+  });
+
   it('should replace PAGE_VIEW_ID', () => {
     return expand('?pid=PAGE_VIEW_ID').then(res => {
       expect(res).to.match(/pid=\d+/);
@@ -309,6 +316,15 @@ describe('UrlReplacements', () => {
     });
     return expect(replacements.expand('?a=FN(xyz,abc)')).to
         .eventually.equal('?a=xyz-abc');
+  });
+
+  it('should support multiple positional arguments with dots', () => {
+    const replacements = urlReplacementsFor(window);
+    replacements.set_('FN', (one, two) => {
+      return one + '-' + two;
+    });
+    return expect(replacements.expand('?a=FN(xy.z,ab.c)')).to
+        .eventually.equal('?a=xy.z-ab.c');
   });
 
   it('should support promises as replacements', () => {

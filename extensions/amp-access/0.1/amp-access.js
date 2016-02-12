@@ -16,14 +16,16 @@
 
 import {all} from '../../../src/promise';
 import {actionServiceFor} from '../../../src/action';
+import {analyticsFor} from '../../../src/analytics';
 import {assert, assertEnumValue} from '../../../src/asserts';
 import {assertHttpsUrl, getSourceOrigin} from '../../../src/url';
 import {cidFor} from '../../../src/cid';
 import {documentStateFor} from '../../../src/document-state';
 import {evaluateAccessExpr} from './access-expr';
 import {getService} from '../../../src/service';
+import {getValueForExpr, recreateNonProtoObject} from '../../../src/json';
 import {installStyles} from '../../../src/styles';
-import {isDevChannel, isExperimentOn} from '../../../src/experiments';
+import {isExperimentOn} from '../../../src/experiments';
 import {listenOnce} from '../../../src/event-helper';
 import {log} from '../../../src/log';
 import {onDocumentReady} from '../../../src/document-state';
@@ -66,10 +68,10 @@ const AccessType = {
 };
 
 /** @const */
-const EXPERIMENT = 'amp-access';
+const TAG = 'AmpAccess';
 
 /** @const */
-const TAG = 'AmpAccess';
+const ANALYTICS_EXPERIMENT = 'amp-access-analytics';
 
 /** @const {number} */
 const VIEW_TIMEOUT = 2000;
@@ -91,8 +93,11 @@ export class AccessService {
     installStyles(this.win.document, $CSS$, () => {});
 
     /** @const @private {boolean} */
-    this.isExperimentOn_ = (isExperimentOn(this.win, EXPERIMENT) ||
-        isDevChannel(this.win));
+    this.isExperimentOn_ = true;
+
+    /** @const @private {boolean} */
+    this.isAnalyticsExperimentOn_ = (this.isExperimentOn_ &&
+        isExperimentOn(this.win, ANALYTICS_EXPERIMENT));
 
     const accessElement = document.getElementById('amp-access');
 
@@ -161,6 +166,13 @@ export class AccessService {
 
     /** @private {?Promise} */
     this.loginPromise_ = null;
+
+    /** @private {!Promise<!InstrumentationService>} */
+    this.analyticsPromise_ = analyticsFor(this.win);
+
+    this.firstAuthorizationPromise_.then(() => {
+      this.analyticsEvent_('access-authorization-received');
+    });
   }
 
   /**
@@ -211,6 +223,18 @@ export class AccessService {
    */
   isEnabled() {
     return this.enabled_;
+  }
+
+  /**
+   * @param {string} eventType
+   * @private
+   */
+  analyticsEvent_(eventType) {
+    if (this.isAnalyticsExperimentOn_) {
+      this.analyticsPromise_.then(analytics => {
+        analytics.triggerEvent(eventType);
+      });
+    }
   }
 
   /**
@@ -298,7 +322,7 @@ export class AccessService {
       if (useAuthData) {
         vars['AUTHDATA'] = field => {
           if (this.authResponse_) {
-            return this.authResponse_[field];
+            return getValueForExpr(this.authResponse_, field);
           }
           return undefined;
         };
@@ -324,7 +348,12 @@ export class AccessService {
         this.config_.authorization, /* useAuthData */ false);
     return promise.then(url => {
       log.fine(TAG, 'Authorization URL: ', url);
-      return this.xhr_.fetchJson(url, {credentials: 'include'});
+      return this.xhr_.fetchJson(url, {
+        credentials: 'include',
+        requireAmpResponseSourceOrigin: true
+      });
+    }).then(response => {
+      return recreateNonProtoObject(response);
     }).then(response => {
       log.fine(TAG, 'Authorization response: ', response);
       this.setAuthResponse_(response);
@@ -338,6 +367,7 @@ export class AccessService {
       });
     }).catch(error => {
       log.error(TAG, 'Authorization failed: ', error);
+      this.analyticsEvent_('access-authorization-failed');
       this.toggleTopClass_('amp-access-loading', false);
       this.toggleTopClass_('amp-access-error', true);
     });
@@ -489,6 +519,7 @@ export class AccessService {
     log.fine(TAG, 'start view monitoring');
     this.reportViewPromise_ = this.whenViewed_()
         .then(() => {
+          this.analyticsEvent_('access-viewed');
           // Wait for the first authorization flow to complete.
           return this.firstAuthorizationPromise_;
         })
@@ -555,6 +586,7 @@ export class AccessService {
       return this.xhr_.sendSignal(url, {
         method: 'POST',
         credentials: 'include',
+        requireAmpResponseSourceOrigin: true,
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded'
         },
@@ -562,8 +594,10 @@ export class AccessService {
       });
     }).then(() => {
       log.fine(TAG, 'Pingback complete');
+      this.analyticsEvent_('access-pingback-sent');
     }).catch(error => {
       log.error(TAG, 'Pingback failed: ', error);
+      this.analyticsEvent_('access-pingback-failed');
       throw error;
     });
   }
@@ -604,6 +638,7 @@ export class AccessService {
     assert(this.config_.login, 'Login URL is not configured');
     // Login URL should always be available at this time.
     const loginUrl = assert(this.loginUrl_, 'Login URL is not ready');
+    this.analyticsEvent_('access-login-started');
     this.loginPromise_ = this.openLoginDialog_(loginUrl).then(result => {
       log.fine(TAG, 'Login dialog completed: ', result);
       this.loginPromise_ = null;
@@ -611,12 +646,16 @@ export class AccessService {
       const s = query['success'];
       const success = (s == 'true' || s == 'yes' || s == '1');
       if (success) {
+        this.analyticsEvent_('access-login-success');
         this.broadcastReauthorize_();
         // Repeat the authorization flow.
         return this.runAuthorization_();
+      } else {
+        this.analyticsEvent_('access-login-rejected');
       }
     }).catch(reason => {
       log.fine(TAG, 'Login dialog failed: ', reason);
+      this.analyticsEvent_('access-login-failed');
       this.loginPromise_ = null;
       throw reason;
     });

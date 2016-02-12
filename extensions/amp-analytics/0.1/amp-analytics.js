@@ -15,8 +15,8 @@
  */
 
 import {ANALYTICS_CONFIG} from './vendors';
-import {addListener} from './instrumentation';
-import {assertHttpsUrl} from '../../../src/url';
+import {addListener, instrumentationServiceFor} from './instrumentation';
+import {assertHttpsUrl, addParamsToUrl} from '../../../src/url';
 import {expandTemplate} from '../../../src/string';
 import {installCidService} from '../../../src/service/cid-impl';
 import {installStorageService} from '../../../src/service/storage-impl';
@@ -26,11 +26,14 @@ import {sendRequest} from './transport';
 import {urlReplacementsFor} from '../../../src/url-replacements';
 import {userNotificationManagerFor} from '../../../src/user-notification';
 import {xhrFor} from '../../../src/xhr';
+import {toggle} from '../../../src/style';
 
 
 installCidService(AMP.win);
 installStorageService(AMP.win);
+instrumentationServiceFor(AMP.win);
 
+const MAX_REPLACES = 16; // The maximum number of entries in a extraUrlParamsReplaceMap
 
 export class AmpAnalytics extends AMP.BaseElement {
 
@@ -52,7 +55,7 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-
+    this.element.setAttribute('aria-hidden', 'true');
     /**
      * The html id of the `amp-user-notification` element.
      * @private @const {?string}
@@ -71,8 +74,9 @@ export class AmpAnalytics extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-
-    this.element.setAttribute('aria-hidden', 'true');
+    // Now that we are rendered, stop rendering the element to reduce
+    // resource consumption.
+    toggle(this.element, false);
 
     /**
      * @private {?string} Predefinedtype associated with the tag. If specified,
@@ -120,6 +124,34 @@ export class AmpAnalytics extends AMP.BaseElement {
           'config. No analytics data will be sent.');
       return Promise.resolve();
     }
+    if (this.config_['extraUrlParams'] &&
+        this.config_['extraUrlParamsReplaceMap']) {
+      // If the config includes a extraUrlParamsReplaceMap, apply it as a set
+      // of params to String.replace to allow aliasing of the keys in
+      // extraUrlParams.
+      let count = 0;
+      for (const replaceMapKey in this.config_['extraUrlParamsReplaceMap']) {
+        if (++count > MAX_REPLACES) {
+          console./*OK*/error(this.getName_(),
+           "More than " + MAX_REPLACES.toString() +
+           " extraUrlParamsReplaceMap rules aren't allowed; Skipping the rest"
+          );
+          break;
+        }
+
+        for (const extraUrlParamsKey in this.config_['extraUrlParams']) {
+          const newkey = extraUrlParamsKey.replace(
+            replaceMapKey,
+            this.config_['extraUrlParamsReplaceMap'][replaceMapKey]
+          );
+          if (extraUrlParamsKey != newkey) {
+            const value = this.config_['extraUrlParams'][extraUrlParamsKey];
+            delete this.config_['extraUrlParams'][extraUrlParamsKey];
+            this.config_['extraUrlParams'][newkey] = value;
+          }
+        }
+      }
+    }
 
     // Trigger callback can be synchronous. Do the registration at the end.
     for (const k in this.config_['triggers']) {
@@ -130,8 +162,8 @@ export class AmpAnalytics extends AMP.BaseElement {
               'attributes are required for data to be collected.');
           continue;
         }
-        addListener(this.getWin(), trigger['on'],
-            this.handleEvent_.bind(this, trigger), trigger['selector']);
+        addListener(this.getWin(), trigger,
+            this.handleEvent_.bind(this, trigger));
       }
     }
   }
@@ -149,13 +181,20 @@ export class AmpAnalytics extends AMP.BaseElement {
     }
     assertHttpsUrl(remoteConfigUrl);
     log.fine(this.getName_(), 'Fetching remote config', remoteConfigUrl);
-    return xhrFor(this.getWin()).fetchJson(remoteConfigUrl).then(jsonValue => {
-      this.remoteConfig_ = jsonValue;
-      log.fine(this.getName_(), 'Remote config loaded', remoteConfigUrl);
-    }, err => {
-      console./*OK*/error(this.getName_(), 'Error loading remote config: ',
-          remoteConfigUrl, err);
-    });
+    const fetchConfig = {
+      requireAmpResponseSourceOrigin: true,
+    };
+    if (this.element.hasAttribute('data-credentials')) {
+      fetchConfig.credentials = this.element.getAttribute('data-credentials');
+    }
+    return xhrFor(this.getWin()).fetchJson(remoteConfigUrl, fetchConfig)
+        .then(jsonValue => {
+          this.remoteConfig_ = jsonValue;
+          log.fine(this.getName_(), 'Remote config loaded', remoteConfigUrl);
+        }, err => {
+          console./*OK*/error(this.getName_(), 'Error loading remote config: ',
+              remoteConfigUrl, err);
+        });
   }
 
   /**
@@ -275,6 +314,13 @@ export class AmpAnalytics extends AMP.BaseElement {
       return;
     }
 
+    // Add any given extraUrlParams as query string param
+    if (this.config_['extraUrlParams']) {
+      request = addParamsToUrl(request, this.config_['extraUrlParams']);
+    }
+
+    this.config_['vars']['requestCount']++;
+
     // Replace placeholders with URI encoded values.
     // Precedence is trigger.vars > config.vars.
     // Nested expansion not supported.
@@ -282,12 +328,11 @@ export class AmpAnalytics extends AMP.BaseElement {
       const match = key.match(/([^(]*)(\([^)]*\))?/);
       const name = match[1];
       const argList = match[2] || '';
-      const val = encodeURIComponent(
-          (trigger['vars'] && trigger['vars'][name]) ||
-          (this.config_['vars'] && this.config_['vars'][name]) || '');
+      const raw = (trigger['vars'] && trigger['vars'][name] ||
+          this.config_['vars'] && this.config_['vars'][name]);
+      const val = encodeURIComponent(raw != null ? raw : '');
       return val + argList;
     });
-    this.config_['vars']['requestCount']++;
 
     // For consistentcy with amp-pixel we also expand any url replacements.
     urlReplacementsFor(this.getWin()).expand(request).then(

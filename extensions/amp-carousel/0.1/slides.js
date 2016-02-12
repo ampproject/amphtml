@@ -105,13 +105,13 @@ export class AmpSlides extends BaseCarousel {
       return;
     }
 
-    const autoplayValue = Number(this.element.getAttribute('autoplay'));
+    const delayValue = Number(this.element.getAttribute('delay'));
     // If it isn't a number and is not greater than 0 then don't assign
     // and use the default.
-    if (autoplayValue > 0) {
+    if (delayValue > 0) {
       // Guard against autoplayValue that is lower than 1s to prevent
       // people from crashing the runtime with providing very low delays.
-      this.autoplayDelay_ = Math.max(1000, autoplayValue);
+      this.autoplayDelay_ = Math.max(1000, delayValue);
     }
 
     // By default `autoplay` should also mean that the current carousel slide

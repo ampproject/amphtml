@@ -16,8 +16,6 @@ limitations under the License.
 
 ### <a name="amp-facebook"></a> `amp-facebook`
 
-**Status: Component landed, but does not validate.**
-
 Displays a Facebook Post or Video. 
 
 Example - Embedding a post:

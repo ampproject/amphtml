@@ -33,6 +33,7 @@ const TAG_ = 'Viewport';
  * @typedef {{
  *   relayoutAll: boolean,
  *   top: number,
+ *   left: number,
  *   width: number,
  *   height: number,
  *   velocity: number
@@ -371,14 +372,17 @@ export class Viewport {
   changed_(relayoutAll, velocity) {
     const size = this.getSize();
     const scrollTop = this.getScrollTop();
+    const scrollLeft = this.getScrollLeft();
     log.fine(TAG_, 'changed event:',
         'relayoutAll=', relayoutAll,
         'top=', scrollTop,
+        'top=', scrollLeft,
         'bottom=', (scrollTop + size.height),
         'velocity=', velocity);
     this.changeObservable_.fire({
       relayoutAll: relayoutAll,
       top: scrollTop,
+      left: scrollLeft,
       width: size.width,
       height: size.height,
       velocity: velocity
@@ -416,7 +420,6 @@ export class Viewport {
    * @private
    */
   throttledScroll_(referenceTime, referenceTop) {
-    this.scrollTracking_ = false;
     const newScrollTop = this.scrollTop_ = this.binding_.getScrollTop();
     const now = timer.now();
     let velocity = 0;
@@ -427,10 +430,9 @@ export class Viewport {
     log.fine(TAG_, 'scroll: ' +
         'scrollTop=' + newScrollTop + '; ' +
         'velocity=' + velocity);
-    // TODO(dvoytenko): confirm the desired value and document it well.
-    // Currently, this is 30px/second -> 0.03px/millis
     if (Math.abs(velocity) < 0.03) {
       this.changed_(/* relayoutAll */ false, velocity);
+      this.scrollTracking_ = false;
     } else {
       timer.delay(() => this.vsync_.measure(
           this.throttledScroll_.bind(this, now, newScrollTop)), 20);

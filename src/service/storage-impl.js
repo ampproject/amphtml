@@ -17,14 +17,10 @@
 import {assert} from '../asserts';
 import {getService} from '../service';
 import {getSourceOrigin} from '../url';
-import {isDevChannel, isExperimentOn} from '../experiments';
-import {isObject} from '../types';
 import {log} from '../log';
+import {recreateNonProtoObject} from '../json';
 import {timer} from '../timer';
 import {viewerFor} from '../viewer';
-
-/** @const */
-const EXPERIMENT = 'amp-storage';
 
 /** @const */
 const TAG = 'Storage';
@@ -39,8 +35,6 @@ const MAX_VALUES_PER_ORIGIN = 8;
  *
  * The storage is done per source origin. See `get`, `set` and `remove` methods
  * for more info.
- *
- * Requires "amp-storage" experiment.
  *
  * @see https://html.spec.whatwg.org/multipage/webstorage.html
  * @private Visible for testing only.
@@ -65,9 +59,9 @@ export class Storage {
     /** @const @private {string} */
     this.origin_ = getSourceOrigin(this.win.location);
 
+    // TODO(dvoytenko, #1942): Cleanup `amp-storage` experiment.
     /** @const @private {boolean} */
-    this.isExperimentOn_ = (isExperimentOn(this.win, EXPERIMENT) ||
-        isDevChannel(this.win));
+    this.isExperimentOn_ = true;
 
     /** @private {?Promise<!Store>} */
     this.storePromise_ = null;
@@ -203,7 +197,7 @@ export class Store {
    */
   constructor(obj, opt_maxValues) {
     /** @const {!JSONObject} */
-    this.obj = recreateObject(obj);
+    this.obj = recreateNonProtoObject(obj);
 
     /** @private @const {number} */
     this.maxValues_ = opt_maxValues || MAX_VALUES_PER_ORIGIN;
@@ -366,24 +360,6 @@ export class ViewerStorageBinding {
       'blob': blob
     }, true);
   }
-}
-
-
-/**
- * Recreates objects with prototype-less copies.
- * @param {!JSONObject} obj
- * @return {!JSONObject}
- */
-function recreateObject(obj) {
-  const copy = Object.create(null);
-  for (const k in obj) {
-    if (!obj.hasOwnProperty(k)) {
-      continue;
-    }
-    const v = obj[k];
-    copy[k] = isObject(v) ? recreateObject(v) : v;
-  }
-  return copy;
 }
 
 

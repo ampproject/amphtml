@@ -89,6 +89,10 @@ export function postMessage(iframe, type, object, targetOrigin, opt_is3P) {
   }
   object.type = type;
   object.sentinel = getSentinel_(opt_is3P);
+  if (opt_is3P) {
+    // Serialize ourselves because that is much faster in Chrome.
+    object = 'amp-' + JSON.stringify(object);
+  }
   iframe.contentWindow./*OK*/postMessage(object, targetOrigin);
 }
 
@@ -99,5 +103,5 @@ export function postMessage(iframe, type, object, targetOrigin, opt_is3P) {
  * @private
  */
 function getSentinel_(opt_is3P) {
-  return opt_is3P ? 'amp-3p' : 'amp';
+  return opt_is3P ? 'amp-$internalRuntimeToken$' : 'amp';
 }

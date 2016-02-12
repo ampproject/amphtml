@@ -174,7 +174,7 @@ For instance:
 
 ### AVAILABLE_SCREEN_HEIGHT
 
-Provides the screen height in pixels available for the page rendering.
+Provides the screen height in pixels available for the page rendering. Note that this value can be slightly more or less than the actual viewport size because of various browser quirks.
 
 For instance:
 ```html
@@ -183,7 +183,7 @@ For instance:
 
 ### AVAILABLE_SCREEN_WIDTH
 
-Provides the screen width in pixels available for the page rendering.
+Provides the screen width in pixels available for the page rendering. Note that this can be slightly more or less than the actual viewport height due to various browser quirks.
 
 For instance:
 ```html

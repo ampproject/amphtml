@@ -16,10 +16,10 @@
  */
 goog.provide('amp.validator.CssLengthAndUnit');  // Only for testing.
 goog.provide('amp.validator.Terminal');
+goog.provide('amp.validator.annotateWithErrorCategories');
 goog.provide('amp.validator.renderErrorMessage');
 goog.provide('amp.validator.renderValidationResult');
 goog.provide('amp.validator.validateString');
-
 goog.require('amp.htmlparser.HtmlParser');
 goog.require('amp.htmlparser.HtmlSaxHandlerWithLocation');
 goog.require('amp.validator.AtRuleSpec');
@@ -34,6 +34,7 @@ goog.require('amp.validator.ValidationError.Severity');
 goog.require('amp.validator.ValidationResult');
 goog.require('amp.validator.ValidationResult.Status');
 goog.require('amp.validator.ValidatorRules');
+goog.require('goog.Uri');
 goog.require('goog.array');
 goog.require('goog.asserts');
 goog.require('goog.string');
@@ -178,6 +179,12 @@ function specificity(code) {
       return 30;
     case amp.validator.ValidationError.Code.ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT:
       return 31;
+    case amp.validator.ValidationError.Code.MISSING_URL:
+      return 32;
+    case amp.validator.ValidationError.Code.INVALID_URL_PROTOCOL:
+      return 33;
+    case amp.validator.ValidationError.Code.INVALID_URL:
+      return 34;
     case amp.validator.ValidationError.Code.DEPRECATED_ATTR:
       return 101;
     case amp.validator.ValidationError.Code.DEPRECATED_TAG:
@@ -339,7 +346,7 @@ const TagNameStack = function TagNameStack() {
 /**
  * Some tags have no end tags as per HTML5 spec. These were extracted
  * from the single page spec by looking for "no end tag" with CTRL+F.
- * @type {Object<string,number>}
+ * @type {Object<string, number>}
  */
 TagNameStack.TagsWithNoEndTags = function() {
   // TODO(johannes): Figure out how to prevent the Closure compiler from
@@ -500,10 +507,10 @@ const CdataMatcher = function CdataMatcher(tagSpec) {
 /**
  * Generates an AT Rule Parsing Spec from a CssSpec.
  * @param {!amp.validator.CssSpec} cssSpec
- * @return {!Object<string,parse_css.BlockType>}
+ * @return {!Object<string, parse_css.BlockType>}
  */
 function computeAtRuleParsingSpec(cssSpec) {
-  /** @type {!Object<string,parse_css.BlockType>} */
+  /** @type {!Object<string, parse_css.BlockType>} */
   const ampAtRuleParsingSpec = {};
   for (const atRuleSpec of cssSpec.atRuleSpec) {
     goog.asserts.assert(atRuleSpec.name !== null);
@@ -889,6 +896,16 @@ const ParsedAttrSpec = function ParsedAttrSpec(attrSpec, attrId) {
    */
   this.id_ = attrId;
   /**
+   * @type {!goog.structs.Set<string>}
+   * @private
+   */
+  this.valueUrlAllowedProtocols_ = new goog.structs.Set();
+  if (this.spec_.valueUrl !== null) {
+    for (const protocol of this.spec_.valueUrl.allowedProtocol) {
+      this.valueUrlAllowedProtocols_.add(protocol);
+    }
+  }
+  /**
    * @type {!goog.structs.Map<string, !Object>}
    * @private
    */
@@ -923,6 +940,84 @@ ParsedAttrSpec.prototype.getId = function() {
 ParsedAttrSpec.prototype.getSpec = function() {
   return this.spec_;
 };
+
+/**
+ * @param {!Context} context
+ * @param {!string} attrName
+ * @param {!string} url
+ * @param {!amp.validator.TagSpec} tagSpec
+ * @param {!string} specUrl
+ * @param {!amp.validator.ValidationResult} result
+ */
+ParsedAttrSpec.prototype.validateUrlAndProtocol = function(
+    context, attrName, url, tagSpec, specUrl, result) {
+  if (url === '') {
+    context.addError(
+        amp.validator.ValidationError.Code.MISSING_URL,
+        /* params */ [attrName, getDetailOrName(tagSpec)], specUrl, result);
+    return;
+  }
+  let uri;
+  try {
+    uri = goog.Uri.parse(url);
+  } catch (ex) {
+    context.addError(
+        amp.validator.ValidationError.Code.INVALID_URL,
+        /* params */ [attrName, getDetailOrName(tagSpec), url],
+        specUrl, result);
+    return;
+  }
+  if (uri.hasScheme() &&
+      !this.valueUrlAllowedProtocols_.contains(uri.getScheme().toLowerCase())) {
+    context.addError(
+        amp.validator.ValidationError.Code.INVALID_URL_PROTOCOL,
+        /* params */ [attrName, getDetailOrName(tagSpec),
+        uri.getScheme().toLowerCase()], specUrl, result);
+    return;
+  }
+};
+
+/**
+ * @param {!Context} context
+ * @param {!string} attrName
+ * @param {!string} attrValue
+ * @param {!amp.validator.TagSpec} tagSpec
+ * @param {!string} specUrl
+ * @param {!amp.validator.ValidationResult} result
+ */
+ParsedAttrSpec.prototype.validateAttrValueUrl = function(
+    context, attrName, attrValue, tagSpec, specUrl, result) {
+  const maybe_uris = new goog.structs.Set();
+  if (attrName != 'srcset') {
+    maybe_uris.add(goog.string.trim(attrValue));
+  } else {
+    // TODO: Replace this hack with a parser.
+    const segments = goog.string.trim(attrValue).split(',');
+    for (const segment of segments) {
+      const key_value = goog.string.trim(segment).split(' ');
+      // Allow srcsets with missing data, e.g. "img.jpg 2x,"
+      if (key_value[0] !== '') {
+        maybe_uris.add(goog.string.trim(key_value[0]));
+      }
+    }
+    // TODO: End hack.
+  }
+  if (maybe_uris.isEmpty()) {
+    context.addError(
+        amp.validator.ValidationError.Code.MISSING_URL,
+        /* params */ [attrName, getDetailOrName(tagSpec)],
+        specUrl, result);
+    return;
+  }
+  for (const maybe_uri of maybe_uris.getValues()) {
+    const unescaped_maybe_uri = goog.string.unescapeEntities(maybe_uri);
+    this.validateUrlAndProtocol(
+        context, attrName, unescaped_maybe_uri, tagSpec, specUrl, result);
+    if (result.status === amp.validator.ValidationResult.Status.FAIL) {
+      return;
+    }
+  }
+}
 
 /**
  * @param {!Context} context
@@ -1525,6 +1620,48 @@ ParsedTagSpec.prototype.validateLayout = function(context, attrsByKey, result) {
 };
 
 /**
+ * Helper method for ValidateAttributes, for when an attribute is
+ * encountered which is not specified by the validator.protoascii
+ * specification.
+ * @param {!string} attrName
+ * @param {!Context} context
+ * @param {!amp.validator.ValidationResult} result
+ * @return {boolean} indicating success or validation failure
+ */
+ParsedTagSpec.prototype.validateAttrNotFoundInSpec = function(
+    attrName, context, result) {
+  // For now, we just skip data- attributes in the validator, because
+  // our schema doesn't capture which ones would be ok or not. E.g.
+  // in practice, some type of ad or perhaps other custom elements require
+  // particular data attributes.
+  // http://www.w3.org/TR/html5/single-page.html#attr-data-*
+  // http://w3c.github.io/aria-in-html/
+  // However, mostly to avoid confusion, we want to make sure that
+  // nobody tries to make a Mustache template data attribute,
+  // e.g. <div data-{{foo}}>, so we also exclude those characters.
+  if (goog.string./*OK*/startsWith(attrName, 'data-') &&
+      !goog.string.contains(attrName, '}') &&
+      !goog.string.contains(attrName, '{')) {
+    return true;
+  }
+
+  // At this point, it's an error either way, but we try to give a
+  // more specific error in the case of Mustache template characters.
+  if (attrName.indexOf('{{') != -1) {
+    context.addError(
+        amp.validator.ValidationError.Code.TEMPLATE_IN_ATTR_NAME,
+        /* params */ [attrName, getDetailOrName(this.spec_)],
+        this.templateSpecUrl_, result);
+  } else {
+    context.addError(
+        amp.validator.ValidationError.Code.DISALLOWED_ATTR,
+        /* params */ [attrName, getDetailOrName(this.spec_)],
+        this.spec_.specUrl, result);
+  }
+  return false;
+};
+
+/**
  * Validates whether the attributes set on |encountered_tag| conform to this
  * tag specification. All mandatory attributes must appear. Only attributes
  * explicitly mentioned by this tag spec may appear.
@@ -1564,35 +1701,12 @@ ParsedTagSpec.prototype.validateAttributes = function(
     const encounteredAttrName = encounteredAttrKey.toLowerCase();
     const parsedSpec = this.attrsByName_.get(encounteredAttrName);
     if (parsedSpec === undefined) {
-      // For now, we just skip data- attributes in the validator, because
-      // our schema doesn't capture which ones would be ok or not. E.g.
-      // in practice, some type of ad or perhaps other custom elements require
-      // particular data attributes.
-      // http://www.w3.org/TR/html5/single-page.html#attr-data-*
-      // http://w3c.github.io/aria-in-html/
-      // However, mostly to avoid confusion, we want to make sure that
-      // nobody tries to make a Mustache template data attribute,
-      // e.g. <div data-{{foo}}>, so we also exclude those characters.
-      if (goog.string.startsWith(encounteredAttrKey, 'data-') &&
-          !goog.string.contains(encounteredAttrKey, '}') &&
-          !goog.string.contains(encounteredAttrKey, '{')) {
+      if (this.validateAttrNotFoundInSpec(encounteredAttrName, context,
+                                          resultForAttempt)) {
         continue;
-      }
-
-      // At this point, it's an error either way, but we try to give a
-      // more specific error in the case of Mustache template characters.
-      if (encounteredAttrName.indexOf('{{') != -1) {
-        context.addError(
-            amp.validator.ValidationError.Code.TEMPLATE_IN_ATTR_NAME,
-            /* params */ [encounteredAttrName, getDetailOrName(this.spec_)],
-            this.templateSpecUrl_, resultForAttempt);
       } else {
-        context.addError(
-            amp.validator.ValidationError.Code.DISALLOWED_ATTR,
-            /* params */ [encounteredAttrName, getDetailOrName(this.spec_)],
-            this.spec_.specUrl, resultForAttempt);
+        return;
       }
-      return;
     }
     // Specific checks for attribute values descending from a template tag.
     if (hasTemplateAncestor) {
@@ -1624,7 +1738,7 @@ ParsedTagSpec.prototype.validateAttributes = function(
     }
     if (!hasTemplateAncestor ||
         !this.valueHasTemplateSyntax(encounteredAttrValue)) {
-      // The value, value_regex, and value_properties fields are
+      // The value, value_regex, value_url, and value_properties fields are
       // treated like a oneof, but we're not using oneof because it's
       // a feature that was added after protobuf 2.5.0 (which our
       // open-source version uses).
@@ -1648,6 +1762,15 @@ ParsedTagSpec.prototype.validateAttributes = function(
               /* params */ [encounteredAttrName, getDetailOrName(this.spec_),
                             encounteredAttrValue],
               this.spec_.specUrl, resultForAttempt);
+          return;
+        }
+      }
+      if (parsedSpec.getSpec().valueUrl !== null) {
+        parsedSpec.validateAttrValueUrl(
+            context, encounteredAttrName, encounteredAttrValue,
+            this.spec_, this.spec_.specUrl, resultForAttempt);
+        if (resultForAttempt.status ===
+            amp.validator.ValidationResult.Status.FAIL) {
           return;
         }
       }
@@ -2305,6 +2428,9 @@ function errorLine(filenameOrUrl, error) {
   if (error.specUrl) {
     errorLine += ' (see ' + error.specUrl + ')';
   }
+  if (error.category !== null) {
+    errorLine += ' [' + error.category + ']';
+  }
   return errorLine;
 }
 
@@ -2324,4 +2450,232 @@ amp.validator.renderValidationResult = function(validationResult, filename) {
     rendered.push(errorLine(filename, error));
   }
   return rendered;
+};
+
+/**
+ * Computes the validation category for this |error|. This is a higher
+ * level classification that distinguishes layout problems, problems
+ * with specific tags, etc. The category is determined with heuristics,
+ * just based on the information in |error|. We consider
+ * ValidationError::Code, ValidationError::params (including suffix /
+ * prefix matches.
+ * @param {!amp.validator.ValidationError} error
+ * @return {!amp.validator.ErrorCategory.Code}
+ * @export
+ */
+amp.validator.categorizeError = function(error) {
+  // This shouldn't happen in practice. We always set some params, and
+  // UNKNOWN_CODE would indicate that the field wasn't populated.
+  if (error.params.length === 0 ||
+      error.code === amp.validator.ValidationError.Code.UNKNOWN_CODE ||
+      error.code === null) {
+    return amp.validator.ErrorCategory.Code.UNKNOWN;
+  }
+  // E.g. "The tag 'img' may only appear as a descendant of tag
+  // 'noscript'. Did you mean 'amp-img'?"
+  if (error.code === amp.validator.ValidationError.Code.DISALLOWED_TAG) {
+    if (error.params[0] === "img" || error.params[0] === "video" ||
+        error.params[0] === "audio" || error.params[0] === "iframe" ||
+        error.params[0] === "font") {
+      return amp.validator.ErrorCategory.Code.
+          DISALLOWED_HTML_WITH_AMP_EQUIVALENT;
+    }
+    // E.g. "The tag 'picture' is disallowed."
+    return amp.validator.ErrorCategory.Code.DISALLOWED_HTML;
+  }
+  // E.g. "tag 'img' may only appear as a descendant of tag
+  // 'noscript'. Did you mean 'amp-img'?"
+  if (error.code ===
+      amp.validator.ValidationError.Code.MANDATORY_TAG_ANCESTOR_WITH_HINT) {
+    return amp.validator.ErrorCategory.Code.DISALLOWED_HTML_WITH_AMP_EQUIVALENT;
+  }
+  // At the moment it's not possible to get this particular error since
+  // all mandatory tag ancestors have hints except for noscript, but
+  // usually when noscript fails then it reports an error for mandatory_parent
+  // (since there is such a TagSpec as well, for the head).
+  if (error.code ===
+      amp.validator.ValidationError.Code.MANDATORY_TAG_ANCESTOR) {
+    if (goog.string./*OK*/startsWith(error.params[0], "amp-")
+        || goog.string./*OK*/startsWith(error.params[1], "amp-")) {
+      return amp.validator.ErrorCategory.Code.AMP_TAG_PROBLEM;
+    }
+    return amp.validator.ErrorCategory.Code.DISALLOWED_HTML;
+  }
+  // E.g. "The text (CDATA) inside tag 'author stylesheet' matches
+  // 'CSS !important', which is disallowed."
+  if (error.code === amp.validator.ValidationError.Code.STYLESHEET_TOO_LONG ||
+      (error.code ===
+      amp.validator.ValidationError.Code.CDATA_VIOLATES_BLACKLIST
+      && error.params[0] === "author stylesheet")) {
+    return amp.validator.ErrorCategory.Code.AUTHOR_STYLESHEET_PROBLEM;
+  }
+  // E.g. "CSS syntax error in tag 'author stylesheet' - Invalid Declaration."
+  if ((error.code === amp.validator.ValidationError.Code.CSS_SYNTAX ||
+       error.code ===
+      amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_AT_RULE) &&
+      error.params[0] === "author stylesheet") {
+    return amp.validator.ErrorCategory.Code.AUTHOR_STYLESHEET_PROBLEM;
+  }
+  // E.g. "The mandatory tag 'boilerplate (noscript)' is missing or
+  // incorrect."
+  if (error.code === amp.validator.ValidationError.Code.MANDATORY_TAG_MISSING ||
+      (error.code ===
+          amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING
+          && error.params[0] === "⚡") ||
+      (error.code === amp.validator.ValidationError.
+          Code.MANDATORY_CDATA_MISSING_OR_INCORRECT
+          && goog.string./*OK*/startsWith(error.params[0], "boilerplate"))) {
+    return amp.validator.ErrorCategory.Code.
+        MANDATORY_AMP_TAG_MISSING_OR_INCORRECT;
+  }
+  // E.g. "The mandatory tag 'meta name=viewport' is missing or
+  // incorrect."
+  if ((error.code ===
+       amp.validator.ValidationError.Code.DISALLOWED_PROPERTY_IN_ATTR_VALUE ||
+      error.code ===
+      amp.validator.ValidationError.Code.INVALID_PROPERTY_VALUE_IN_ATTR_VALUE ||
+      error.code ===
+      amp.validator.ValidationError.Code.
+      MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE) &&
+      error.params[2] === "meta name=viewport") {
+    return amp.validator.ErrorCategory.Code.
+        MANDATORY_AMP_TAG_MISSING_OR_INCORRECT;
+  }
+  // E.g. "The mandatory attribute 'height' is missing in tag 'amp-img'."
+  if (error.code === amp.validator.ValidationError.Code.
+      ATTR_VALUE_REQUIRED_BY_LAYOUT ||
+      error.code === amp.validator.ValidationError.Code.
+      IMPLIED_LAYOUT_INVALID ||
+      error.code === amp.validator.ValidationError.Code.
+      SPECIFIED_LAYOUT_INVALID ||
+      (error.code === amp.validator.ValidationError.Code.
+      INCONSISTENT_UNITS_FOR_WIDTH_AND_HEIGHT) ||
+      ((error.code === amp.validator.ValidationError.Code.INVALID_ATTR_VALUE ||
+        error.code === amp.validator.ValidationError.Code.
+      MANDATORY_ATTR_MISSING) &&
+      (error.params[0] === "width" || error.params[0] === "height" ||
+      error.params[0] === "layout"))) {
+    return amp.validator.ErrorCategory.Code.AMP_LAYOUT_PROBLEM;
+  }
+  if (error.code === amp.validator.ValidationError.Code.
+      ATTR_DISALLOWED_BY_IMPLIED_LAYOUT ||
+      error.code === amp.validator.ValidationError.Code.
+      ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT) {
+    return amp.validator.ErrorCategory.Code.AMP_LAYOUT_PROBLEM;
+  }
+  // E..g. "The attribute 'src' in tag 'amphtml engine v0.js script'
+  // is set to the invalid value
+  // '//static.breakingnews.com/ads/gptLoader.js'."
+  if (error.code === amp.validator.ValidationError.Code.INVALID_ATTR_VALUE
+      && error.params[0] === "src"
+      && goog.string./*OK*/endsWith(error.params[1], "script")) {
+    return amp.validator.ErrorCategory.Code.CUSTOM_JAVASCRIPT_DISALLOWED;
+  }
+  // E.g.: "The attribute 'type' in tag 'script type=application/ld+json'
+  // is set to the invalid value 'text/javascript'."
+  if (error.code === amp.validator.ValidationError.Code.INVALID_ATTR_VALUE
+      && goog.string./*OK*/startsWith(error.params[1], "script")
+      && error.params[0] === "type") {
+    return amp.validator.ErrorCategory.Code.CUSTOM_JAVASCRIPT_DISALLOWED;
+  }
+  // E.g. "The attribute 'srcset' may not appear in tag 'amp-audio >
+  // source'."
+  if ((error.code === amp.validator.ValidationError.Code.INVALID_ATTR_VALUE ||
+      error.code === amp.validator.ValidationError.Code.DISALLOWED_ATTR ||
+      error.code === amp.validator.ValidationError.Code.
+      MANDATORY_ATTR_MISSING)) {
+    if (goog.string./*OK*/startsWith(error.params[1], "amp-")) {
+      return amp.validator.ErrorCategory.Code.AMP_TAG_PROBLEM;
+    }
+    // E.g. "The attribute 'async' may not appear in tag 'link
+    // rel=stylesheet for fonts'."
+    return amp.validator.ErrorCategory.Code.DISALLOWED_HTML;
+  }
+  // Like the previous example but the tag is params[0] here. This
+  // error should always be for AMP elements thus far, so we don't
+  // check for params[0].
+  if (error.code === amp.validator.ValidationError.Code.
+      MANDATORY_ONEOF_ATTR_MISSING) {
+    return amp.validator.ErrorCategory.Code.AMP_TAG_PROBLEM;
+  }
+  // E.g. "The attribute 'shortcode' in tag 'amp-instagram' is deprecated -
+  // use 'data-shortcode' instead."
+  if (error.code === amp.validator.ValidationError.Code.DEPRECATED_ATTR
+      || error.code === amp.validator.ValidationError.Code.DEPRECATED_TAG) {
+    return amp.validator.ErrorCategory.Code.DEPRECATION;
+  }
+  // E.g. "The parent tag of tag 'source' is 'picture', but it can
+  // only be 'amp-audio'."
+  if (error.code === amp.validator.ValidationError.Code.WRONG_PARENT_TAG) {
+    if (goog.string./*OK*/startsWith(error.params[0], "amp-")
+        || goog.string./*OK*/startsWith(error.params[1], "amp-")
+        || goog.string./*OK*/startsWith(error.params[2], "amp-")) {
+      return amp.validator.ErrorCategory.Code.AMP_TAG_PROBLEM;
+    }
+    // E.g. "The parent tag of tag 'script' is 'body', but it can only
+    // be 'head'".
+    return amp.validator.ErrorCategory.Code.DISALLOWED_HTML;
+  }
+  // E.g. "The 'amp-image-lightbox extension .js script' tag is
+  // missing or incorrect, but required by 'amp-image-lightbox'."
+  if (error.code === amp.validator.ValidationError.Code.
+      TAG_REQUIRED_BY_MISSING &&
+      (goog.string./*OK*/startsWith(error.params[1], "amp-") ||
+       error.params[1] === "template")) {
+    return amp.validator.ErrorCategory.Code.AMP_TAG_PROBLEM;
+  }
+  // E.g. "Mutually exclusive attributes encountered in tag
+  // 'amp-youtube' - pick one of ['src', 'data-videoid']."
+  if (error.code === amp.validator.ValidationError.Code.
+      MUTUALLY_EXCLUSIVE_ATTRS &&
+      goog.string./*OK*/startsWith(error.params[0], "amp-")) {
+    return amp.validator.ErrorCategory.Code.AMP_TAG_PROBLEM;
+  }
+  // E.g. "The tag 'boilerplate (noscript) - old variant' appears
+  // more than once in the document."
+  if (error.code === amp.validator.ValidationError.Code.
+      DUPLICATE_UNIQUE_TAG) {
+    return amp.validator.ErrorCategory.Code.
+        MANDATORY_AMP_TAG_MISSING_OR_INCORRECT;
+  }
+  // E.g. "Mustache template syntax in attribute name
+  // 'data-{{&notallowed}}' in tag 'p'."
+  if (error.code === amp.validator.ValidationError.Code.
+      UNESCAPED_TEMPLATE_IN_ATTR_VALUE ||
+      error.code === amp.validator.ValidationError.Code.
+      TEMPLATE_PARTIAL_IN_ATTR_VALUE ||
+      error.code === amp.validator.ValidationError.Code.
+      TEMPLATE_IN_ATTR_NAME) {
+    return amp.validator.ErrorCategory.Code.AMP_MUSTACHE_TEMPLATE_PROBLEM;
+  }
+  if (error.code === amp.validator.ValidationError.Code
+      .DISALLOWED_TAG_ANCESTOR &&
+      (error.params[1] === "template")) {
+    return amp.validator.ErrorCategory.Code.AMP_MUSTACHE_TEMPLATE_PROBLEM;
+  }
+  // E.g. "Missing URL for attribute 'href' in tag 'a'."
+  // E.g. "Invalid URL protocol 'http:' for attribute 'src' in tag
+  // 'amp-iframe'." Note: Parameters in the format strings appear out
+  // of order so that error.params(1) is the tag for all three of these.
+  if (error.code == amp.validator.ValidationError.Code.MISSING_URL ||
+      error.code == amp.validator.ValidationError.Code.INVALID_URL ||
+      error.code == amp.validator.ValidationError.Code.INVALID_URL_PROTOCOL) {
+    if (goog.string./*OK*/startsWith(error.params[1], "amp-")) {
+      return amp.validator.ErrorCategory.Code.AMP_TAG_PROBLEM;
+    }
+    return amp.validator.ErrorCategory.Code.DISALLOWED_HTML;
+  }
+  return amp.validator.ErrorCategory.Code.GENERIC;
+};
+
+/**
+ * Convenience function which calls |CategorizeError| for each error
+ * in |result| and sets its category field accordingly.
+ * @param {!amp.validator.ValidationResult} result
+ * @export
+ */
+amp.validator.annotateWithErrorCategories = function(result) {
+  for (const error of result.errors) {
+    error.category = amp.validator.categorizeError(error);
+  }
 };

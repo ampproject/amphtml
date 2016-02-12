@@ -163,7 +163,9 @@ class Preconnect {
     // we effectively create an active connection.
     // TODO(@cramforce): Confirm actual http2 timeout in Safari.
     this.origins_[origin] = timer.now() + ACTIVE_CONNECTION_TIMEOUT_MS;
-    const url = origin + '/amp_preconnect_polyfill?' + Math.random();
+    const url = origin +
+        '/amp_preconnect_polyfill_404_or_other_error_expected.' +
+        '_Do_not_worry_about_it?' + Math.random();
     // We use an XHR without withCredentials(true), so we do not send cookies
     // to the host and the host cannot set cookies.
     const xhr = new XMLHttpRequest();
