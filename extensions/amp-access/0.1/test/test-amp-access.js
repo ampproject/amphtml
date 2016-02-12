@@ -330,7 +330,6 @@ describe('AccessService authorization', () => {
       expect(elementOn).not.to.have.attribute('amp-access-hide');
       expect(elementOff).to.have.attribute('amp-access-hide');
       expect(service.authResponse_).to.exist;
-      expect(service.authResponse_.__proto__).to.be.undefined;
       expect(service.authResponse_.access).to.be.true;
       expect(service.buildLoginUrl_.callCount).to.equal(1);
     });

@@ -23,7 +23,7 @@ import {cidFor} from '../../../src/cid';
 import {documentStateFor} from '../../../src/document-state';
 import {evaluateAccessExpr} from './access-expr';
 import {getService} from '../../../src/service';
-import {getValueForExpr, recreateNonProtoObject} from '../../../src/json';
+import {getValueForExpr} from '../../../src/json';
 import {installStyles} from '../../../src/styles';
 import {isExperimentOn} from '../../../src/experiments';
 import {listenOnce} from '../../../src/event-helper';
@@ -342,8 +342,6 @@ export class AccessService {
         credentials: 'include',
         requireAmpResponseSourceOrigin: true
       });
-    }).then(response => {
-      return recreateNonProtoObject(response);
     }).then(response => {
       log.fine(TAG, 'Authorization response: ', response);
       this.setAuthResponse_(response);
