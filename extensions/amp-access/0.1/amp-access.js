@@ -70,9 +70,6 @@ const AccessType = {
 /** @const */
 const TAG = 'AmpAccess';
 
-/** @const */
-const ANALYTICS_EXPERIMENT = 'amp-access-analytics';
-
 /** @const {number} */
 const VIEW_TIMEOUT = 2000;
 
@@ -93,11 +90,8 @@ export class AccessService {
     installStyles(this.win.document, $CSS$, () => {});
 
     /** @const @private {boolean} */
-    this.isExperimentOn_ = true;
-
-    /** @const @private {boolean} */
-    this.isAnalyticsExperimentOn_ = (this.isExperimentOn_ &&
-        isExperimentOn(this.win, ANALYTICS_EXPERIMENT));
+    this.isAnalyticsExperimentOn_ = isExperimentOn(
+        this.win, 'amp-access-analytics');
 
     const accessElement = document.getElementById('amp-access');
 
@@ -242,10 +236,6 @@ export class AccessService {
    * @private
    */
   start_() {
-    if (!this.isExperimentOn_) {
-      log.info(TAG, 'Access experiment is off: ', EXPERIMENT);
-      return this;
-    }
     if (!this.enabled_) {
       log.info(TAG, 'Access is disabled - no "id=amp-access" element');
       return this;
