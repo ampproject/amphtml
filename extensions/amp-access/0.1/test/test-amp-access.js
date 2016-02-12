@@ -166,14 +166,13 @@ describe('AccessService', () => {
     }).to.throw(/Unknown access type/);
   });
 
-  it('should start when experiment is on and enabled', () => {
+  it('should start when enabled', () => {
     element.textContent = JSON.stringify({
       'authorization': 'https://acme.com/a',
       'pingback': 'https://acme.com/p',
       'login': 'https://acme.com/l'
     });
     const service = new AccessService(window);
-    service.isExperimentOn_ = true;
     service.startInternal_ = sandbox.spy();
     service.start_();
     expect(service.startInternal_.callCount).to.equal(1);
@@ -186,7 +185,6 @@ describe('AccessService', () => {
       'login': 'https://acme.com/l'
     });
     const service = new AccessService(window);
-    service.isExperimentOn_ = true;
     service.buildLoginUrl_ = sandbox.spy();
     service.runAuthorization_ = sandbox.spy();
     service.scheduleView_ = sandbox.spy();
@@ -206,7 +204,6 @@ describe('AccessService', () => {
       'login': 'https://acme.com/l'
     });
     const service = new AccessService(window);
-    service.isExperimentOn_ = true;
     expect(service.pubOrigin_).to.exist;
     expect(service.pubOrigin_).to.match(/^http.*/);
   });
@@ -259,7 +256,6 @@ describe('AccessService authorization', () => {
     document.body.appendChild(elementOff);
 
     service = new AccessService(window);
-    service.isExperimentOn_ = true;
 
     sandbox.stub(service.resources_, 'mutateElement',
         (unusedElement, mutator) => {
@@ -463,7 +459,6 @@ describe('AccessService applyAuthorizationToElement_', () => {
     document.body.appendChild(elementOff);
 
     service = new AccessService(window);
-    service.isExperimentOn_ = true;
 
     mutateElementStub = sandbox.stub(service.resources_, 'mutateElement',
         (unusedElement, mutator) => {
@@ -602,7 +597,6 @@ describe('AccessService pingback', () => {
     document.documentElement.classList.remove('amp-access-error');
 
     service = new AccessService(window);
-    service.isExperimentOn_ = true;
 
     xhrMock = sandbox.mock(service.xhr_);
 
@@ -917,7 +911,6 @@ describe('AccessService login', () => {
     document.documentElement.classList.remove('amp-access-error');
 
     service = new AccessService(window);
-    service.isExperimentOn_ = true;
 
     const cid = {
       get: () => {}
@@ -1098,7 +1091,6 @@ describe('AccessService type=other', () => {
     document.documentElement.classList.remove('amp-access-error');
 
     service = new AccessService(window);
-    service.isExperimentOn_ = true;
 
     service.vsync_ = {
       mutate: callback => {
