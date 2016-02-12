@@ -75,6 +75,7 @@ function buildExtensions(options) {
   // and update it if any of its required deps changed.
   // Each extension and version must be listed individually here.
   buildExtension('amp-access', '0.1', true, options);
+  buildExtension('amp-accordion', '0.1', true, options);
   buildExtension('amp-analytics', '0.1', false, options);
   buildExtension('amp-anim', '0.1', false, options);
   buildExtension('amp-audio', '0.1', false, options);
@@ -344,6 +345,7 @@ function buildExamples(watch) {
   buildExample('user-notification.amp.html');
   buildExample('vimeo.amp.html');
   buildExample('vine.amp.html');
+  buildExample('multiple-docs.html');
 
   // TODO(dvoytenko, #1393): Enable for proxy-testing.
   // // Examples are also copied into `c/` directory for AMP-proxy testing.

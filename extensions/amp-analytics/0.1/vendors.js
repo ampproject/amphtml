@@ -40,6 +40,7 @@ export const ANALYTICS_CONFIG = {
       'pageDownloadTime': 'PAGE_DOWNLOAD_TIME',
       'pageLoadTime': 'PAGE_LOAD_TIME',
       'pageViewId': 'PAGE_VIEW_ID',
+      'queryParam': 'QUERY_PARAM',
       'random': 'RANDOM',
       'redirectTime': 'REDIRECT_TIME',
       'screenColorDepth': 'SCREEN_COLOR_DEPTH',

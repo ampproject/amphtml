@@ -148,7 +148,8 @@ https://pub.com/access?
 ```
 
 AUTHDATA variable is availbale to Pingback and Login URLs. It allows passing any field in the authorization
-response as an URL parameter. E.g. `AUTHDATA(isSubscriber)`.
+response as an URL parameter. E.g. `AUTHDATA(isSubscriber)`. The nested expressions are allowed as well, such as
+`AUTHDATA(other.isSubscriber)`.
 
 ##Access Content Markup
 
@@ -323,7 +324,7 @@ Notice the use of a URL hash parameter “status”. The value is either “true
 
 #Integration with *amp-analytics*
 
-An integration with *amp-analytics* is under development and can be tracked on [Issue #1556][10]. This document will be updated when more details on the integration are available.
+An integration with *amp-analytics* is documented in the [amp-access-analytics.md](./amp-access-analytics.md).
 
 #CORS Origin Security
 
@@ -360,6 +361,7 @@ Both steps are covered by the AMP Access spec. The referrer can be injected into
 - Feb 1: "return" query parameter for Login Page can be customized using RETURN_URL URL substitution.
 - Feb 3: Spec for "source origin" security added to the [CORS Origin security][9].
 - Feb 9: [First-click-free][13] and [Metering][12] sections.
+- Feb 11: Nested field references such as `object.field` are now allowed.
 
 #Appendix A: “amp-access” expression grammar
 
@@ -388,6 +390,8 @@ comparison_predicate:
 truthy_predicate: scalar_exp
 
 scalar_exp: literal | field_ref
+
+field_ref: field_ref '.' field_name | field_name
 
 literal: STRING | NUMERIC | TRUE | FALSE | NULL
 ```

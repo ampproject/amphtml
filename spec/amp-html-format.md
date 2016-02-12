@@ -163,7 +163,7 @@ The following @-rules are allowed in stylesheets:
 
 `@font-face`, `@keyframes`, `@media`, `@supports`.
 
-`@import` will not be allowed. Other may be added in the future.
+`@import` will not be allowed. Others may be added in the future.
 
 #### Author stylesheets
 

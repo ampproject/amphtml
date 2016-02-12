@@ -25,6 +25,7 @@
 [a-zA-Z_][a-zA-Z0-9_]*    return 'NAME'
 \'[^\']*\'                return 'STRING'
 \"[^\"]*\"                return 'STRING'
+\.                        return 'DOT'
 .                         return 'INVALID'
 <<EOF>>                   return 'EOF'
 /lex
@@ -37,6 +38,7 @@
 %token NUMERIC
 %token TRUE FALSE
 %token NULL
+%token DOT
 %token EOF
 
 
@@ -141,8 +143,19 @@ atom:
  * Ex: `field1`.
  */
 field_ref:
+    field_ref DOT field_name
+      {$$ = Object.prototype.toString.call($1) == '[object Object]' && $1.hasOwnProperty($3) ? $1[$3] : null;}
+  | field_name
+      {$$ = yy[$1] !== undefined ? yy[$1] : null;}
+  ;
+
+/**
+ * A field name.
+ * Ex: `"field1"`.
+ */
+field_name:
     NAME
-      {$$ = yy[yytext] !== undefined ? yy[yytext] : null;}
+      {$$ = yytext;}
   ;
 
 /**

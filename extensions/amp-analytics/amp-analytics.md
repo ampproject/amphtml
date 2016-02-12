@@ -218,6 +218,11 @@ Use this configuration to fire a request on a regular time interval. Use `timerS
     }
     ```
 
+###### Access triggers (`"on": "amp-access-*"`)
+
+AMP Access system issues numerous events for different states in the access flow. See [amp-access-analytics.md](../amp-access/amp-access-analytics.md) for details.
+
+
 ##### Transport
 The `transport` attribute specifies how to send a request. The value is an object with fields that
 indicate which transport methods are acceptable.
@@ -239,3 +244,10 @@ In the example below, `beacon` and `xhrpost` are set to `false`, so they will no
   'image': true
 }
 ```
+
+
+### Extra URL Params
+
+The `extraUrlParams` attribute specifies additional parameters to append to the query string of the url via the usual "&foo=baz" convention.
+
+The `extraUrlParamsReplaceMap` attribute specifies a map of keys and values that act as parameters to String.replace() to preprocess keys in the extraUrlParams map.

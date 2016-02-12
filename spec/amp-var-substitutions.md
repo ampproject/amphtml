@@ -252,6 +252,21 @@ For instance:
 <amp-pixel src="https://foo.com/pixel?cid=CLIENT_ID(cid-scope-cookie-fallback-name,user-consent-id)"></amp-pixel>
 ```
 
+### QUERY_PARAM
+
+Provides access to query string params.
+
+arguments:
+  - `param` (Required) - The key for the query string parameter to be inserted
+  - `defaultValue` - The value to use if the provide key is not present on the query string. Defaults to ""
+
+For instance:
+```html
+<amp-pixel src="https://foo.com/pixel?bar=QUERY_PARAM(baz,biz)"</amp-pixel>
+```
+
+If a query string parameter baz is provided then the corresponding value will be insterted into the pixel src, if no, the default "biz" will be used.
+
 ### PAGE_VIEW_ID
 
 Contains a string that is intended to be random and likely to be unique per URL, user and day.

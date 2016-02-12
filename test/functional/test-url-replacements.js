@@ -20,6 +20,7 @@ import {urlReplacementsFor} from '../../src/url-replacements';
 import {markElementScheduledForTesting} from '../../src/custom-element';
 import {installCidService} from '../../src/service/cid-impl';
 import {setCookie} from '../../src/cookies';
+import {parseUrl} from '../../src/url';
 
 
 describe('UrlReplacements', () => {
@@ -318,6 +319,15 @@ describe('UrlReplacements', () => {
         .eventually.equal('?a=xyz-abc');
   });
 
+  it('should support multiple positional arguments with dots', () => {
+    const replacements = urlReplacementsFor(window);
+    replacements.set_('FN', (one, two) => {
+      return one + '-' + two;
+    });
+    return expect(replacements.expand('?a=FN(xy.z,ab.c)')).to
+        .eventually.equal('?a=xy.z-ab.c');
+  });
+
   it('should support promises as replacements', () => {
     const replacements = urlReplacementsFor(window);
     replacements.set_('P1', () => Promise.resolve('abc '));
@@ -422,5 +432,35 @@ describe('UrlReplacements', () => {
     }).then(res => {
       expect(res).to.match(/a=aaa&b=bbb\?$/);
     });
+  });
+
+  it('should replace QUERY_PARAM with foo', () => {
+    const win = getFakeWindow();
+    win.location = parseUrl("https://example.com?query_string_param1=foo");
+    return urlReplacementsFor(win)
+      .expand('?sh=QUERY_PARAM(query_string_param1)&s')
+      .then(res => {
+        expect(res).to.match(/sh=foo&s/);
+      });
+  });
+
+  it('should replace QUERY_PARAM with ""', () => {
+    const win = getFakeWindow();
+    win.location = parseUrl("https://example.com");
+    return urlReplacementsFor(win)
+      .expand('?sh=QUERY_PARAM(query_string_param1)&s')
+      .then(res => {
+        expect(res).to.match(/sh=&s/);
+      });
+  });
+
+  it('should replace QUERY_PARAM with default_value', () => {
+    const win = getFakeWindow();
+    win.location = parseUrl("https://example.com");
+    return urlReplacementsFor(win)
+      .expand('?sh=QUERY_PARAM(query_string_param1,default_value)&s')
+      .then(res => {
+        expect(res).to.match(/sh=default_value&s/);
+      });
   });
 });

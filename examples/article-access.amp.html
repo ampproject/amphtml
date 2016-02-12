@@ -147,6 +147,41 @@
   <script async src="./viewer-integr.js"></script>
 </head>
 <body>
+<amp-analytics type="googleanalytics" id="analytics2">
+<script type="application/json">
+{
+  "vars": {
+    "account": "UA-YYYY-Y"
+  },
+  "triggers": {
+    "defaultPageview": {
+      "on": "visible",
+      "request": "pageview",
+      "vars": {
+        "title": "Example Pageview"
+      }
+    },
+    "authorizationReceived": {
+      "on": "access-authorization-received",
+      "request": "event",
+      "vars": {
+        "eventCategory": "amp-access",
+        "eventAction": "access-authorization-received"
+      }
+    },
+    "pingbackSent": {
+      "on": "access-pingback-sent",
+      "request": "event",
+      "vars": {
+        "eventCategory": "amp-access",
+        "eventAction": "access-pingback-sent"
+      }
+    }
+  }
+}
+</script>
+</amp-analytics>
+
   <header>
     <div class="brand-logo">
       PublisherLogo

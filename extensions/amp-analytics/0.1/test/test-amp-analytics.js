@@ -497,6 +497,39 @@ describe('amp-analytics', function() {
     });
   });
 
+  it('sends extraUrlParams', () => {
+    const analytics = getAnalyticsTag({
+      'extraUrlParams': {'s.evar0': '0', 's.evar1': '1', 'foofoo': 'baz'},
+      'requests': {'foo': 'https://example.com/${title}'},
+      'triggers': [{'on': 'visible', 'request': 'foo'}]
+    }, {
+      'config': 'config1'
+    });
+    return analytics.layoutCallback().then(() => {
+      expect(sendRequestSpy.args[0][0]).to.have.string('s.evar0=0');
+      expect(sendRequestSpy.args[0][0]).to.have.string('s.evar1=1');
+      expect(sendRequestSpy.args[0][0]).to.have.string('foofoo=baz');
+    });
+  });
+
+  it('handles extraUrlParamsReplaceMap', () => {
+    const analytics = getAnalyticsTag({
+      'extraUrlParams': {'s.evar0': '0', 's.evar1': '1', 'foofoo': 'baz'},
+      'extraUrlParamsReplaceMap': {'s.evar': 'v'},
+      'requests': {'foo': 'https://example.com/${title}'},
+      'triggers': [{'on': 'visible', 'request': 'foo'}]
+    }, {
+      'config': 'config1'
+    });
+    return analytics.layoutCallback().then(() => {
+      expect(sendRequestSpy.args[0][0]).to.have.string('v0=0');
+      expect(sendRequestSpy.args[0][0]).to.have.string('v1=1');
+      expect(sendRequestSpy.args[0][0]).to.not.have.string('s.evar1');
+      expect(sendRequestSpy.args[0][0]).to.not.have.string('s.evar0');
+      expect(sendRequestSpy.args[0][0]).to.have.string('foofoo=baz');
+    });
+  });
+
   it('fetches and merges remote config', () => {
     const analytics = getAnalyticsTag({
       'vars': {'title': 'local'},

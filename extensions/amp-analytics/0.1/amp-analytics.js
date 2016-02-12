@@ -16,7 +16,7 @@
 
 import {ANALYTICS_CONFIG} from './vendors';
 import {addListener, instrumentationServiceFor} from './instrumentation';
-import {assertHttpsUrl} from '../../../src/url';
+import {assertHttpsUrl, addParamsToUrl} from '../../../src/url';
 import {expandTemplate} from '../../../src/string';
 import {installCidService} from '../../../src/service/cid-impl';
 import {installStorageService} from '../../../src/service/storage-impl';
@@ -33,6 +33,7 @@ installCidService(AMP.win);
 installStorageService(AMP.win);
 instrumentationServiceFor(AMP.win);
 
+const MAX_REPLACES = 16; // The maximum number of entries in a extraUrlParamsReplaceMap
 
 export class AmpAnalytics extends AMP.BaseElement {
 
@@ -122,6 +123,34 @@ export class AmpAnalytics extends AMP.BaseElement {
       console./*OK*/error(this.getName_(), 'No triggers were found in the ' +
           'config. No analytics data will be sent.');
       return Promise.resolve();
+    }
+    if (this.config_['extraUrlParams'] &&
+        this.config_['extraUrlParamsReplaceMap']) {
+      // If the config includes a extraUrlParamsReplaceMap, apply it as a set
+      // of params to String.replace to allow aliasing of the keys in
+      // extraUrlParams.
+      let count = 0;
+      for (const replaceMapKey in this.config_['extraUrlParamsReplaceMap']) {
+        if (++count > MAX_REPLACES) {
+          console./*OK*/error(this.getName_(),
+           "More than " + MAX_REPLACES.toString() +
+           " extraUrlParamsReplaceMap rules aren't allowed; Skipping the rest"
+          );
+          break;
+        }
+
+        for (const extraUrlParamsKey in this.config_['extraUrlParams']) {
+          const newkey = extraUrlParamsKey.replace(
+            replaceMapKey,
+            this.config_['extraUrlParamsReplaceMap'][replaceMapKey]
+          );
+          if (extraUrlParamsKey != newkey) {
+            const value = this.config_['extraUrlParams'][extraUrlParamsKey];
+            delete this.config_['extraUrlParams'][extraUrlParamsKey];
+            this.config_['extraUrlParams'][newkey] = value;
+          }
+        }
+      }
     }
 
     // Trigger callback can be synchronous. Do the registration at the end.
@@ -283,6 +312,11 @@ export class AmpAnalytics extends AMP.BaseElement {
       console./*OK*/error(this.getName_(), 'Ignoring event. Request string ' +
           'not found: ', trigger['request']);
       return;
+    }
+
+    // Add any given extraUrlParams as query string param
+    if (this.config_['extraUrlParams']) {
+      request = addParamsToUrl(request, this.config_['extraUrlParams']);
     }
 
     this.config_['vars']['requestCount']++;
