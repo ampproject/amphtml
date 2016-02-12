@@ -17,6 +17,7 @@
 import {createIframePromise} from '../../testing/iframe';
 import {BaseElement} from '../../src/base-element';
 import {installImg} from '../../builtins/amp-img';
+import * as error from '../../src/error';
 import * as sinon from 'sinon';
 
 describe('amp-img', () => {
@@ -60,6 +61,18 @@ describe('amp-img', () => {
       expect(img).to.be.an.instanceof(Element);
       expect(img.tagName).to.equal('IMG');
       expect(img.getAttribute('src')).to.equal('test.jpg');
+    });
+  });
+
+  it('should send error report on error', () => {
+    const errorMock_ = sandbox.mock(error);
+    errorMock_.expects('reportError').once();
+    return getImg({
+      src: 'c/test404.jpg',
+      width: 300,
+      height: 200
+    }).then(() => {
+      errorMock_.verify();
     });
   });
 });

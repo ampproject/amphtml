@@ -123,8 +123,7 @@ export class AmpFont extends AMP.BaseElement {
       this.onFontLoadSuccess_();
     }).catch(unusedError => {
       this.onFontLoadError_();
-      console./* OK */warn(
-          'Font download timed out for ' + this.fontFamily_);
+      console./* OK */warn('Font download timed out for ' + this.fontFamily_);
     });
   }
 
