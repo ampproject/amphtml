@@ -167,6 +167,9 @@ The ```amp-access-hide``` attribute can be used to optimistically hide the eleme
 ```html
 <div amp-access="expression" amp-access-hide>...</div>
 ```
+
+If Authorization request fails, `amp-access` expressions are not evaluated and whether a section is visible or hidden is determined by the presence of the `amp-access-hide` attribute initially provided by the document.
+
 We can extend the set of ```amp-access-*``` attributes as needed to support different obfuscation and rendering needs.
 
 Here’s an example that shows either login link or the complete content based on the subscription status:
@@ -251,13 +254,18 @@ This RPC may be called in the prerendering phase and thus it should not be used 
 
 Another important consideration is that in some cases AMP runtime may need to call Authorization endpoint multiple times per document impression. This can happen when AMP Runtime believes that the access parameters for the Reader have changed significantly, e.g. after a successful Login Flow.
 
-The authorization response may be used by AMP Runtime and extensions for two different purposes:
+The authorization response may be used by AMP Runtime and extensions for three different purposes:
  1. When evaluating ```amp-access``` expressions.
  2. When evaluating ```<template>``` templates such as ```amp-mustache```.
+ 3. When providing additional variables to pingback and login URLs using `AUTHDATA(field)`.
 
 Authorization endpoint is called by AMP Runtime as a credentialed CORS endpoint. As such, it must implement CORS protocol. It should use CORS Origin and source origin to restrict the access to this service as described in the [CORS Origin Security][9]. This endpoint may use publisher cookies for its needs. For instance, it can associate the binding between the Reader ID and the Publisher’s own user identity. AMP itself does not need to know about this (and prefers not to). Reader more on [AMP Reader ID][2] and [AMP Access and Cookies][11] for more detail.
 
 AMP Runtime (or rather browser) observes cache response headers when calling Authorization endpoint. Thus the cached responses can be reused. It may or may not be desirable. If it is not desirable, the Publisher can user the appropriate cache control headers and/or RANDOM variable substitution for the endpoint URL.
+
+If Authorization request fails the `amp-access` expressions will not be evaluated and whether a section is visible or hidden will be determined by the presence of the `amp-access-hide` attribute initially provided by the document.
+
+Authorization request is automatically timed out and assumed to have failed after 3 seconds.
 
 AMP Runtime uses the following CSS classes during the authorization flow:
  1. `amp-access-loading` CSS class is set on the document root when the authorization flow starts and removed when it completes or fails.
@@ -362,6 +370,7 @@ Both steps are covered by the AMP Access spec. The referrer can be injected into
 - Feb 3: Spec for "source origin" security added to the [CORS Origin security][9].
 - Feb 9: [First-click-free][13] and [Metering][12] sections.
 - Feb 11: Nested field references such as `object.field` are now allowed.
+- Feb 11: Authorization request timeout in [Authorization Endpoint][4].
 
 #Appendix A: “amp-access” expression grammar
 

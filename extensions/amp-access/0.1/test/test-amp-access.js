@@ -225,6 +225,7 @@ describe('AccessService', () => {
 describe('AccessService authorization', () => {
 
   let sandbox;
+  let clock;
   let configElement, elementOn, elementOff;
   let xhrMock;
   let cidMock;
@@ -232,6 +233,8 @@ describe('AccessService authorization', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
+    clock = sandbox.useFakeTimers();
+    clock.tick(0);
 
     markElementScheduledForTesting(window, 'amp-analytics');
     installCidService(window);
@@ -352,6 +355,32 @@ describe('AccessService authorization', () => {
       expect(document.documentElement).to.have.class('amp-access-error');
       expect(elementOn).not.to.have.attribute('amp-access-hide');
       expect(elementOff).not.to.have.attribute('amp-access-hide');
+    });
+  });
+
+  it('should time out authorization flow', () => {
+    expectGetReaderId('reader1');
+    xhrMock.expects('fetchJson')
+        .withExactArgs('https://acme.com/a?rid=reader1', {
+          credentials: 'include',
+          requireAmpResponseSourceOrigin: true
+        })
+        .returns(new Promise(() => {}))
+        .once();
+    service.buildLoginUrl_ = sandbox.spy();
+    let actualTimeoutDelay;
+    sandbox.stub(service.timer_, 'delay', (callback, delay) => {
+      actualTimeoutDelay = delay;
+      callback();
+    });
+    const promise = service.runAuthorization_();
+    expect(document.documentElement).to.have.class('amp-access-loading');
+    expect(document.documentElement).not.to.have.class('amp-access-error');
+    return promise.then(() => {
+      expect(document.documentElement).not.to.have.class('amp-access-loading');
+      expect(document.documentElement).to.have.class('amp-access-error');
+      expect(service.authResponse_).to.not.exist;
+      expect(actualTimeoutDelay).to.equal(3000);
     });
   });
 
