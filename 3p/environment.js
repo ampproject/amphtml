@@ -264,9 +264,11 @@ function minTime(time) {
   return time;
 }
 
-listenParent(window, 'embed-state', function(data) {
-  inViewport = data.inViewport;
-  if (inViewport) {
-    becomeVisible();
-  }
-});
+export function installEmbedStateListener() {
+  listenParent(window, 'embed-state', function(data) {
+    inViewport = data.inViewport;
+    if (inViewport) {
+      becomeVisible();
+    }
+  });
+};
