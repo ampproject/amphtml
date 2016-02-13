@@ -115,7 +115,7 @@ export function validateSrcPrefix(prefix, src) {
   }
 
   for (const p in prefix) {
-    if (src && src.indexOf(p) === 0) {
+    if (src.indexOf(p) === 0) {
       return;
     }
   }
