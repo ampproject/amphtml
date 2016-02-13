@@ -42,6 +42,7 @@ import {parseUrl} from '../src/url';
 import {assert} from '../src/asserts';
 import {taboola} from '../ads/taboola';
 import {smartadserver} from '../ads/smartadserver';
+import {revcontent} from '../ads/revcontent';
 
 /**
  * Whether the embed type may be used with amp-embed tag.
