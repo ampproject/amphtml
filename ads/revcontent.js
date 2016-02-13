@@ -22,10 +22,10 @@ import {writeScript, checkData} from '../src/3p';
  */
 export function revcontent(global, data) {
   checkData(data, ['id', 'width', 'height', 'endpoint', 'ssl', 'wrapper']);
-  (function (window, document, data, undefined) {
-    const revamp_service_url = 'https://labs-cdn.revcontent.com/build/amphtml/revcontent.amp.min.js';
+  (function (window, document, data) {
+    const revampServiceUrl = 'https://labs-cdn.revcontent.com/build/amphtml/revcontent.amp.min.js';
     window.data = data;
-    writeScript(window, revamp_service_url);
+    writeScript(window, revampServiceUrl);
 
   })(global, global.document, data);
 }
