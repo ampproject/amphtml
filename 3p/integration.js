@@ -68,6 +68,7 @@ register('_ping_', function(win, data) {
 register('twitter', twitter);
 register('facebook', facebook);
 register('smartadserver', smartadserver);
+register('revcontent', revcontent);
 
 /**
  * Visible for testing.

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {writeScript, checkData} from '../src/3p';
+import {writeScript, checkData, validateSrcPrefix, validateSrcContains} from '../src/3p';
 
 /**
  * @param {!Window} global
@@ -23,9 +23,11 @@ import {writeScript, checkData} from '../src/3p';
 export function revcontent(global, data) {
     checkData(data, ['id', 'width', 'height', 'endpoint', 'ssl', 'wrapper']);
     (function(window, document, data, undefined) {
-
+        const revamp_service_url = 'https://labs-cdn.revcontent.com/build/amphtml/revcontent.amp.min.js';
         window.data = data;
-        writeScript(window, 'https://labs-cdn.revcontent.com/build/amphtml/revcontent.amp.min.js');
+        validateSrcPrefix('https:', revamp_service_url);
+        validateSrcContains('/build/amphtml/', revamp_service_url);
+        writeScript(window, revamp_service_url);
 
     })(global, global.document, data);
 }
