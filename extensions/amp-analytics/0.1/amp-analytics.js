@@ -16,13 +16,14 @@
 
 import {ANALYTICS_CONFIG} from './vendors';
 import {addListener, instrumentationServiceFor} from './instrumentation';
+import {assert} from '../../../src/asserts';
 import {assertHttpsUrl, addParamsToUrl} from '../../../src/url';
 import {expandTemplate} from '../../../src/string';
 import {installCidService} from '../../../src/service/cid-impl';
 import {installStorageService} from '../../../src/service/storage-impl';
 import {isArray, isObject} from '../../../src/types';
 import {log} from '../../../src/log';
-import {sendRequest} from './transport';
+import {sendRequest, sendRequestUsingIframe} from './transport';
 import {urlReplacementsFor} from '../../../src/url-replacements';
 import {userNotificationManagerFor} from '../../../src/user-notification';
 import {xhrFor} from '../../../src/xhr';
@@ -243,7 +244,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       this.element.getAttribute('type')] || {};
 
     this.mergeObjects_(defaultConfig, config);
-    this.mergeObjects_(typeConfig, config);
+    this.mergeObjects_(typeConfig, config, /* predefined */ true);
     this.mergeObjects_(inlineConfig, config);
     this.mergeObjects_(this.remoteConfig_, config);
     return config;
@@ -335,20 +336,28 @@ export class AmpAnalytics extends AMP.BaseElement {
     });
 
     // For consistentcy with amp-pixel we also expand any url replacements.
-    urlReplacementsFor(this.getWin()).expand(request).then(
-        request => this.sendRequest_(request));
+    urlReplacementsFor(this.getWin()).expand(request).then(request => {
+      this.sendRequest_(request, trigger);
+    });
   }
 
   /**
    * @param {string} request The full request string to send.
+   * @param {!JSONObject} trigger
    * @private
    */
-  sendRequest_(request) {
+  sendRequest_(request, trigger) {
     if (!request) {
       console./*OK*/error(this.getName_(), 'Request not sent. Contents empty.');
       return;
     }
-    sendRequest(this.getWin(), request, this.config_['transport'] || {});
+    if (trigger['iframePing']) {
+      assert(trigger['on'] == 'visible',
+          'iframePing is only available on page view requests.');
+      sendRequestUsingIframe(this.getWin(), request);
+    } else {
+      sendRequest(this.getWin(), request, this.config_['transport'] || {});
+    }
   }
 
   /**
@@ -367,26 +376,31 @@ export class AmpAnalytics extends AMP.BaseElement {
    *
    * @param {Object|Array} from Object or array to merge from
    * @param {Object|Array} to Object or Array to merge into
+   * @param {boolean=} opt_predefinedConfig
    * @private
    */
-  mergeObjects_(from, to) {
+  mergeObjects_(from, to, opt_predefinedConfig) {
     if (to === null || to === undefined) {
       to = {};
     }
 
     for (const property in from) {
+      assert(opt_predefinedConfig || property != 'iframePing',
+          'iframePing config is only available to vendor config.');
       // Only deal with own properties.
       if (from.hasOwnProperty(property)) {
         if (isArray(from[property])) {
           if (!isArray(to[property])) {
             to[property] = [];
           }
-          to[property] = this.mergeObjects_(from[property], to[property]);
+          to[property] = this.mergeObjects_(from[property], to[property],
+              opt_predefinedConfig);
         } else if (isObject(from[property])) {
           if (!isObject(to[property])) {
             to[property] = {};
           }
-          to[property] = this.mergeObjects_(from[property], to[property]);
+          to[property] = this.mergeObjects_(from[property], to[property],
+              opt_predefinedConfig);
         } else {
           to[property] = from[property];
         }

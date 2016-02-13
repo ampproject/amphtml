@@ -576,6 +576,43 @@ describe('amp-analytics', function() {
     });
   });
 
+  describe('iframePing', () => {
+    it('fails for iframePing config outside of vendor config', function() {
+      const analytics = getAnalyticsTag({
+        'requests': {'foo': 'https://example.com/bar'},
+        'triggers': [{'on': 'visible', 'iframePing': true}]
+      });
+      return expect(waitForNoSendRequest(analytics)).to.be
+          .rejectedWith(
+              /iframePing config is only available to vendor config/);
+    });
+
+    it('succeeds for iframePing config in vendor config', function() {
+      const analytics = getAnalyticsTag({}, {'type': 'testVendor'});
+      const url = 'http://iframe.localhost:9876/base/test/' +
+              'fixtures/served/iframe.html?title=${title}';
+      analytics.predefinedConfig_.testVendor = {
+        'requests': {
+          'pageview': url
+        },
+        'triggers': {
+          'pageview': {
+            'on': 'visible',
+            'request': 'pageview',
+            'iframePing': true
+          }
+        }
+      };
+      return waitForSendRequest(analytics).then(() => {
+        const iframe = analytics.element
+            .ownerDocument.querySelector('iframe[amp-analytics]');
+        expect(iframe).to.not.be.null;
+        expect(iframe.src).to.contain('served/iframe.html');
+        expect(iframe.src).to.contain('Test%20Title');
+      });
+    });
+  });
+
   describe('data-consent-notification-id', () => {
 
     it('should resume fetch when consent is given', () => {
