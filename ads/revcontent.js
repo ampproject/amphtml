@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {writeScript, checkData, validateSrcPrefix, validateSrcContains} from '../src/3p';
+import {writeScript, checkData} from '../src/3p';
 
 /**
  * @param {!Window} global
@@ -25,8 +25,6 @@ export function revcontent(global, data) {
     (function(window, document, data, undefined) {
         const revamp_service_url = 'https://labs-cdn.revcontent.com/build/amphtml/revcontent.amp.min.js';
         window.data = data;
-        validateSrcPrefix('https:', revamp_service_url);
-        validateSrcContains('/build/amphtml/', revamp_service_url);
         writeScript(window, revamp_service_url);
 
     })(global, global.document, data);
