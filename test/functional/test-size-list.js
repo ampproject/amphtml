@@ -66,6 +66,20 @@ describe('SizeList parseSizeList', () => {
     expect(res.sizes_[0].size).to.equal('111vw');
   });
 
+  it('should accept different length units including percent', () => {
+    const res = parseSizeList(' \n 111% \n ',
+        /* opt_allowPercentAsLength */ true);
+    expect(res.sizes_.length).to.equal(1);
+    expect(res.sizes_[0].mediaQuery).to.equal(undefined);
+    expect(res.sizes_[0].size).to.equal('111%');
+  });
+
+  it('should fail bad length', () => {
+    expect(() => {
+      parseSizeList(' \n 111% \n ', /* opt_allowPercentAsLength */ false);
+    }).to.throw(/Invalid length value/);
+  });
+
   it('should fail bad length', () => {
     expect(() => {
       parseSizeList(' \n 111 \n ');
@@ -88,7 +102,7 @@ describe('SizeList construct', () => {
     }).to.throw(/The last option must not have a media condition/);
     expect(() => {
       new SizeList([{mediaQuery: 'print', size: '222px'},
-          {mediaQuery: 'screen', size: '111px'}]);
+        {mediaQuery: 'screen', size: '111px'}]);
     }).to.throw(/The last option must not have a media condition/);
   });
 
@@ -103,43 +117,49 @@ describe('SizeList construct', () => {
 describe('SizeList select', () => {
   it('should select default last option', () => {
     const sizeList = new SizeList([
-        {mediaQuery: 'media1', size: '444px'},
-        {mediaQuery: 'media2', size: '333px'},
-        {mediaQuery: 'media3', size: '222px'},
-        {size: '111px'}
+      {mediaQuery: 'media1', size: '444px'},
+      {mediaQuery: 'media2', size: '333px'},
+      {mediaQuery: 'media3', size: '222px'},
+      {size: '111px'}
     ]);
-    expect(sizeList.select({matchMedia: () => {
-      return {};
-    }})).to.equal('111px');
+    expect(sizeList.select({
+      matchMedia: () => {
+        return {};
+      }
+    })).to.equal('111px');
   });
 
   it('should select a matching option', () => {
     const sizeList = new SizeList([
-        {mediaQuery: 'media1', size: '444px'},
-        {mediaQuery: 'media2', size: '333px'},
-        {mediaQuery: 'media3', size: '222px'},
-        {size: '111px'}
+      {mediaQuery: 'media1', size: '444px'},
+      {mediaQuery: 'media2', size: '333px'},
+      {mediaQuery: 'media3', size: '222px'},
+      {size: '111px'}
     ]);
-    expect(sizeList.select({matchMedia: mq => {
-      if (mq == 'media2') {
-        return {matches: true};
+    expect(sizeList.select({
+      matchMedia: mq => {
+        if (mq == 'media2') {
+          return {matches: true};
+        }
+        return {};
       }
-      return {};
-    }})).to.equal('333px');
+    })).to.equal('333px');
   });
 
   it('should select first matching option', () => {
     const sizeList = new SizeList([
-        {mediaQuery: 'media1', size: '444px'},
-        {mediaQuery: 'media2', size: '333px'},
-        {mediaQuery: 'media3', size: '222px'},
-        {size: '111px'}
+      {mediaQuery: 'media1', size: '444px'},
+      {mediaQuery: 'media2', size: '333px'},
+      {mediaQuery: 'media3', size: '222px'},
+      {size: '111px'}
     ]);
-    expect(sizeList.select({matchMedia: mq => {
-      if (mq == 'media1' || mq == 'media2') {
-        return {matches: true};
+    expect(sizeList.select({
+      matchMedia: mq => {
+        if (mq == 'media1' || mq == 'media2') {
+          return {matches: true};
+        }
+        return {};
       }
-      return {};
-    }})).to.equal('444px');
+    })).to.equal('444px');
   });
 });

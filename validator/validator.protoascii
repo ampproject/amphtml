@@ -20,28 +20,25 @@
 # in production from crashing. This id is not relevant to validator.js
 # because thus far, engine (validator.js) and spec file (validator.protoascii)
 # are always released together.
-min_validator_revision_required: 81
+min_validator_revision_required: 91
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 129
+spec_file_revision: 147
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
-# These rules are just enough to validate the example from the spec.
-# They are certainly not sufficent for release: many tags are missing.
-# Also we may want to allow some attribute definitions to be shared
-# between tags. As in, we may almost certainly need to revisit this format,
-# but it's a starting point.
 #
 # Specific URL to reference for violations having to do with mustache
 # templates. These are specific to any particular tag, so must live at
 # the top level of this rules file.
 template_spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-templates.md"
+
 tags: {
   name: "!doctype"
   detail: "html doctype"
   mandatory_parent: "$ROOT"
+  mandatory: true
   unique: true
   attrs: {
     name: "html"
@@ -98,19 +95,17 @@ tags: {
   detail: "link rel="
   attrs: { name: "type" }
   attrs: { name: "href" }
+  attrs: { name: "hreflang" }
   attrs: {
     name: "rel"
-    # TODO(gregable): Make this attribute required. Test to verify that
-    # the change won't break too many pages.
-    # mandatory: true
+    mandatory: true
     # List sourced from http://microformats.org/wiki/existing-rel-values
     # In order to allow for multiple whitespace separated values, we must
     # repeat this list twice annoyingly. We end up with a structure like:
     # "(foo|bar)( +(foo|bar))*" where the first match covers a string with
     # no space prefix and the later matches cover strings with whitespace
     # prefixes.
-    # TODO: Come up with a better scheme for this. Low priority since this
-    # 'rel' is the only case of a value which needs parsing like this.
+    # TODO(gregable): Come up with a better scheme for this.
     value_regex: "("
         "accessibility|"
         "alternate|"
@@ -282,19 +277,19 @@ tags: {
   name: "link"
   detail: "link rel=canonical"
   mandatory_parent: "head"
+  mandatory: true
   unique: true
   attrs: {
     name: "rel"
     value: "canonical"
-    # TODO(gregable): Make this attribute required. Test to verify that
-    # the change won't break too many pages.
-    # mandatory: true
-    # dispatch_key: true
+    mandatory: true
+    dispatch_key: true
   }
   attrs: {
     name: "href"
     mandatory: true
   }
+  attrs: { name: "hreflang" }
   spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#canon"
 }
 # rel=amphtml is designed to point from a non-amphtml page to an amp-html
@@ -308,15 +303,14 @@ tags: {
   attrs: {
     name: "rel"
     value: "amphtml"
-    # TODO(gregable): Make this attribute required. Test to verify that
-    # the change won't break too many pages.
-    # mandatory: true
-    # dispatch_key: true
+    mandatory: true
+    dispatch_key: true
   }
   attrs: {
     name: "href"
     mandatory: true
   }
+  attrs: { name: "hreflang" }
 }
 # Whitelisted font providers
 tags: {
@@ -353,7 +347,22 @@ tags: {
     dispatch_key: true
   }
   attrs: {
-    name: "content"
+    name: "href"
+    mandatory: true
+  }
+  attrs: { name: "hreflang" }
+}
+# rel= isn't mandatory when itemprop= is present.
+tags: {
+  name: "link"
+  detail: "link itemprop="
+  attrs: {
+    name: "itemprop"
+    mandatory: true
+  }
+  attrs: {
+    name: "href"
+    mandatory: true
   }
 }
 # Various whitelisted rel attribute values which can co-occur with
@@ -366,9 +375,7 @@ tags: {
   attrs: { name: "sizes" }
   attrs: {
     name: "rel"
-    # TODO(gregable): Make this attribute required. Test to verify that
-    # the change won't break too many pages.
-    # mandatory: true
+    mandatory: true
     value_regex: "icon|"
     "shortcut icon|"
     "image_src|"
@@ -464,42 +471,42 @@ tags: {  # Special custom 'author' spreadsheet.
   cdata: {
     max_bytes: 50000
     max_bytes_spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#maximum-size"
-      css_spec: {
-        at_rule_spec: {
-          name: 'media'
-          type: PARSE_AS_RULES
-        }
-        at_rule_spec: {
-          name: 'keyframes'
-          type: PARSE_AS_RULES
-        }
-        at_rule_spec: {
-          name: '-webkit-keyframes'
-          type: PARSE_AS_RULES
-        }
-        at_rule_spec: {
-          name: '-moz-keyframes'
-          type: PARSE_AS_RULES
-        }
-        at_rule_spec: {
-          name: '-o-keyframes'
-          type: PARSE_AS_RULES
-        }
-        at_rule_spec: {
-          name: 'supports'
-          type: PARSE_AS_RULES
-        }
-        at_rule_spec: {
-          name: 'font-face'
-          type: PARSE_AS_DECLARATIONS
-        }
-        at_rule_spec: {
-          name: '$DEFAULT'  # matches if none of the above match
-          type: PARSE_AS_ERROR
-        }
+    css_spec: {
+      at_rule_spec: {
+        name: 'media'
+        type: PARSE_AS_RULES
       }
+      at_rule_spec: {
+        name: 'keyframes'
+        type: PARSE_AS_RULES
+      }
+      at_rule_spec: {
+        name: '-webkit-keyframes'
+        type: PARSE_AS_RULES
+      }
+      at_rule_spec: {
+        name: '-moz-keyframes'
+        type: PARSE_AS_RULES
+      }
+      at_rule_spec: {
+        name: '-o-keyframes'
+        type: PARSE_AS_RULES
+      }
+      at_rule_spec: {
+        name: 'supports'
+        type: PARSE_AS_RULES
+      }
+      at_rule_spec: {
+        name: 'font-face'
+        type: PARSE_AS_DECLARATIONS
+      }
+      at_rule_spec: {
+        name: '$DEFAULT'  # matches if none of the above match
+        type: PARSE_AS_ERROR
+      }
+    }
     # These regex blacklists are temporary hacks to validate essential CSS
-    # rules. They will be replaced later with more principalled solutions.
+    # rules. They will be replaced later with more principled solutions.
     blacklisted_cdata_regex: {
       regex: "\\.i?-amp-"
       error_message: "CSS -amp- class name prefix"
@@ -507,31 +514,6 @@ tags: {  # Special custom 'author' spreadsheet.
     blacklisted_cdata_regex: {
       regex: "!important"
       error_message: "CSS !important"
-    }
-    # All known @ rules except for media and font-face are disabled.
-    blacklisted_cdata_regex: {
-      regex: "charset"
-      error_message: "CSS @charset"
-    }
-    blacklisted_cdata_regex: {
-      regex: "@import"
-      error_message: "CSS @import"
-    }
-    blacklisted_cdata_regex: {
-      regex: "@namespace"
-      error_message: "CSS @namespace"
-    }
-    blacklisted_cdata_regex: {
-      regex: "@document"
-      error_message: "CSS @document"
-    }
-    blacklisted_cdata_regex: {
-      regex: "@page"
-      error_message: "CSS @page"
-    }
-    blacklisted_cdata_regex: {
-      regex: "@viewport"
-      error_message: "CSS @viewport"
     }
   }
   spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#stylesheets"
@@ -569,7 +551,7 @@ tags: {
   cdata: {
     # This regex allows arbitrary whitespace whenever some whitespace
     # is required in the boilerplate. It was made by replacing ' ' with \\s+.
-    cdata_regex: "body{-webkit-animation:-amp-start\\s+1s\\s+steps\\(1,end\\)\\s+0s\\s+1\\s+normal\\s+both;-moz-animation:-amp-start\\s+1s\\s+steps\\(1,end\\)\\s+0s\\s+1\\s+normal\\s+both;-ms-animation:-amp-start\\s+1s\\s+steps\\(1,end\\)\\s+0s\\s+1\\s+normal\\s+both;animation:-amp-start\\s+1s\\s+steps\\(1,end\\)\\s+0s\\s+1\\s+normal\\s+both}@-webkit-keyframes\\s+-amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes\\s+-amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes\\s+-amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes\\s+-amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes\\s+-amp-start{from{visibility:hidden}to{visibility:visible}}"
+    cdata_regex: "body{-webkit-animation:-amp-start\\s+8s\\s+steps\\(1,end\\)\\s+0s\\s+1\\s+normal\\s+both;-moz-animation:-amp-start\\s+8s\\s+steps\\(1,end\\)\\s+0s\\s+1\\s+normal\\s+both;-ms-animation:-amp-start\\s+8s\\s+steps\\(1,end\\)\\s+0s\\s+1\\s+normal\\s+both;animation:-amp-start\\s+8s\\s+steps\\(1,end\\)\\s+0s\\s+1\\s+normal\\s+both}@-webkit-keyframes\\s+-amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes\\s+-amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes\\s+-amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes\\s+-amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes\\s+-amp-start{from{visibility:hidden}to{visibility:visible}}"
   }
   attrs: {
     name: "amp-boilerplate"
@@ -662,8 +644,19 @@ tags: {
   name: "a"
   attrs: {
     name: "href"
-    blacklisted_value_regex: "^\\s*(javascript|vbscript|data):"
+    value_url: {
+      allowed_protocol: "http"
+      allowed_protocol: "https"
+      allowed_protocol: "mailto"
+      # Whitelisting additional commonly observed third party
+      # protocols which should be safe
+      allowed_protocol: "sms"
+      allowed_protocol: "tel"
+      allowed_protocol: "viber"
+      allowed_protocol: "whatsapp"
+     }
   }
+  attrs: { name: "hreflang" }
   attrs: {
     name: "target"
     value: "_blank"
@@ -676,10 +669,10 @@ tags: {
     # "(foo|bar)( +(foo|bar))*" where the first match covers a string with
     # no space prefix and the later matches cover strings with whitespace
     # prefixes.
-    # TODO: Come up with a better scheme for this. Low priority since this
-    # 'rel' is the only case of a value which needs parsing like this.
+    # TODO(gregable): Come up with a better scheme for this.
     value_regex: "("
         "accessibility|"
+        "attachment|"  # Commonly used by wordpress
         "author|"
         "alternate|"
         "appendix|"
@@ -768,9 +761,11 @@ tags: {
         "vcalendar-parent|"
         "vcalendar-sibling|"
         "webmention|"
+        "wp-att-[0-9]+|"  # Commonly used by wordpress
         "yandex-tableau-widget"
       ")( +("
         "accessibility|"
+        "attachment|"  # Commonly used by wordpress
         "author|"
         "alternate|"
         "appendix|"
@@ -859,6 +854,7 @@ tags: {
         "vcalendar-parent|"
         "vcalendar-sibling|"
         "webmention|"
+        "wp-att-[0-9]+|"  # Commonly used by wordpress
         "yandex-tableau-widget"
       "))*"
   }
@@ -948,9 +944,13 @@ tags: {
   attrs: { name: "height" }
   attrs: {
     name: "src"
+    alternative_names: "srcset"
     mandatory: true
+    value_url: {
+      allowed_protocol: "data"
+      allowed_protocol: "https"
+    }
   }
-  attrs: { name: "srcset" }
   attrs: { name: "width" }
   spec_url: "https://github.com/ampproject/amphtml/blob/master/builtins/amp-img.md"
 }
@@ -987,7 +987,12 @@ tags: {
   detail: "amp-audio > source"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-audio/amp-audio.md"
   mandatory_parent: "amp-audio"
-  attrs: { name: "src" }
+  attrs: {
+    name: "src"
+    value_url: {
+      allowed_protocol: "https"
+    }
+  }
   attrs: { name: "type" }
 }
 tags: {
@@ -995,7 +1000,12 @@ tags: {
   detail: "amp-video > source"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/builtins/amp-video.md"
   mandatory_parent: "amp-video"
-  attrs: { name: "src" }
+  attrs: {
+    name: "src"
+    value_url: {
+      allowed_protocol: "https"
+    }
+  }
   attrs: { name: "type" }
 }
 tags: {
@@ -1005,6 +1015,9 @@ tags: {
   attrs: {
     name: "src"
     mandatory: true
+    value_url: {
+      allowed_protocol: "https"
+    }
   }
   attrs: {
     name: "type"
@@ -1018,6 +1031,9 @@ tags: {
   attrs: {
     name: "src"
     mandatory: true
+    value_url: {
+      allowed_protocol: "https"
+    }
   }
   attrs: {
     name: "type"
@@ -1025,7 +1041,7 @@ tags: {
   }
 }
 # 4.7.15 SVG
-# We allow some limited embedded SVG tags. We do not allow  inline styles
+# We allow some limited embedded SVG tags. We do not allow inline styles
 # or embedding any external resources.
 # Attribute lists: https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute
 attr_lists: {
@@ -1512,9 +1528,7 @@ tags: {
 }
 
 # 4.8 Links
-# For the link tag, only the canonical link is allowed (see 4.2.4).
-# TODO(johannes): look through the other link types to see which attributes
-# should be allowed for the a tag, e.g. nofollow etc.
+# Links are a concept, rather than a tag. See tagspecs for "link", "a", etc.
 
 # 4.9 Tabular data
 # 4.9.1 The table element
@@ -1659,7 +1673,7 @@ tags: {  # amp-access
   attrs: { name: "async" value: "" mandatory: true }
   attrs: {
     name: "src"
-    value: "https://cdn.ampproject.org/v0/amp-access-0.1.js"
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-access-(latest|0\\.1).js"
     mandatory: true
   }
 }
@@ -1677,7 +1691,7 @@ tags: {  # amp-analytics
   attrs: { name: "async" value: "" mandatory: true }
   attrs: {
     name: "src"
-    value: "https://cdn.ampproject.org/v0/amp-analytics-0.1.js"
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-analytics-(latest|0\\.1).js"
     mandatory: true
   }
 }
@@ -1695,7 +1709,7 @@ tags: {  # amp-anim
   attrs: { name: "async" value: "" mandatory: true }
   attrs: {
     name: "src"
-    value: "https://cdn.ampproject.org/v0/amp-anim-0.1.js"
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-anim-(latest|0\\.1).js"
     mandatory: true
   }
 }
@@ -1713,7 +1727,7 @@ tags: {  # amp-audio
   attrs: { name: "async" value: "" mandatory: true }
   attrs: {
     name: "src"
-    value: "https://cdn.ampproject.org/v0/amp-audio-0.1.js"
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-audio-(latest|0\\.1).js"
     mandatory: true
   }
 }
@@ -1731,7 +1745,7 @@ tags: {  # amp-brightcove
   attrs: { name: "async" value: "" mandatory: true }
   attrs: {
     name: "src"
-    value: "https://cdn.ampproject.org/v0/amp-brightcove-0.1.js"
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-brightcove-(latest|0\\.1).js"
     mandatory: true
   }
 }
@@ -1749,7 +1763,7 @@ tags: {  # amp-carousel
   attrs: { name: "async" value: "" mandatory: true }
   attrs: {
     name: "src"
-    value: "https://cdn.ampproject.org/v0/amp-carousel-0.1.js"
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-carousel-(latest|0\\.1).js"
     mandatory: true
   }
 }
@@ -1767,7 +1781,7 @@ tags: {  # amp-dynamic-css-classes
   attrs: { name: "async" value: "" mandatory: true }
   attrs: {
     name: "src"
-    value: "https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.js"
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-dynamic-css-classes-(latest|0\\.1).js"
     mandatory: true
   }
 }
@@ -1785,7 +1799,7 @@ tags: {  # amp-facebook
   attrs: { name: "async" value: "" mandatory: true }
   attrs: {
     name: "src"
-    value: "https://cdn.ampproject.org/v0/amp-facebook-0.1.js"
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-facebook-(latest|0\\.1).js"
     mandatory: true
   }
 }
@@ -1803,7 +1817,7 @@ tags: {  # amp-fit-text
   attrs: { name: "async" value: "" mandatory: true }
   attrs: {
     name: "src"
-    value: "https://cdn.ampproject.org/v0/amp-fit-text-0.1.js"
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-fit-text-(latest|0\\.1).js"
     mandatory: true
   }
 }
@@ -1821,7 +1835,7 @@ tags: {  # amp-font
   attrs: { name: "async" value: "" mandatory: true }
   attrs: {
     name: "src"
-    value: "https://cdn.ampproject.org/v0/amp-font-0.1.js"
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-font-(latest|0\\.1).js"
     mandatory: true
   }
 }
@@ -1839,7 +1853,7 @@ tags: {  # amp-iframe
   attrs: { name: "async" value: "" mandatory: true }
   attrs: {
     name: "src"
-    value: "https://cdn.ampproject.org/v0/amp-iframe-0.1.js"
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-iframe-(latest|0\\.1).js"
     mandatory: true
   }
 }
@@ -1857,7 +1871,7 @@ tags: {  # amp-image-lightbox
   attrs: { name: "async" value: "" mandatory: true }
   attrs: {
     name: "src"
-    value: "https://cdn.ampproject.org/v0/amp-image-lightbox-0.1.js"
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-image-lightbox-(latest|0\\.1).js"
     mandatory: true
   }
 }
@@ -1875,7 +1889,7 @@ tags: {  # amp-instagram
   attrs: { name: "async" value: "" mandatory: true }
   attrs: {
     name: "src"
-    value: "https://cdn.ampproject.org/v0/amp-instagram-0.1.js"
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-instagram-(latest|0\\.1).js"
     mandatory: true
   }
 }
@@ -1893,7 +1907,7 @@ tags: {  # amp-install-serviceworker
   attrs: { name: "async" value: "" mandatory: true }
   attrs: {
     name: "src"
-    value: "https://cdn.ampproject.org/v0/amp-install-serviceworker-0.1.js"
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-install-serviceworker-(latest|0\\.1).js"
     mandatory: true
   }
 }
@@ -1911,7 +1925,7 @@ tags: {  # amp-lightbox
   attrs: { name: "async" value: "" mandatory: true }
   attrs: {
     name: "src"
-    value: "https://cdn.ampproject.org/v0/amp-lightbox-0.1.js"
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-lightbox-(latest|0\\.1).js"
     mandatory: true
   }
 }
@@ -1929,7 +1943,7 @@ tags: {  # amp-mustache
   attrs: { name: "async" value: "" mandatory: true }
   attrs: {
     name: "src"
-    value: "https://cdn.ampproject.org/v0/amp-mustache-0.1.js"
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-mustache-(latest|0\\.1).js"
     mandatory: true
   }
 }
@@ -1947,7 +1961,7 @@ tags: {  # amp-list
   attrs: { name: "async" value: "" mandatory: true }
   attrs: {
     name: "src"
-    value: "https://cdn.ampproject.org/v0/amp-list-0.1.js"
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-list-(latest|0\\.1).js"
     mandatory: true
   }
 }
@@ -1965,7 +1979,7 @@ tags: {  # amp-pinterest
   attrs: { name: "async" value: "" mandatory: true }
   attrs: {
     name: "src"
-    value: "https://cdn.ampproject.org/v0/amp-pinterest-0.1.js"
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-pinterest-(latest|0\\.1).js"
     mandatory: true
   }
 }
@@ -1983,7 +1997,7 @@ tags: {  # amp-slides
   attrs: { name: "async" value: "" mandatory: true }
   attrs: {
     name: "src"
-    value: "https://cdn.ampproject.org/v0/amp-slides-0.1.js"
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-slides-(latest|0\\.1).js"
     mandatory: true
   }
 }
@@ -2001,7 +2015,7 @@ tags: {  # amp-twitter
   attrs: { name: "async" value: "" mandatory: true }
   attrs: {
     name: "src"
-    value: "https://cdn.ampproject.org/v0/amp-twitter-0.1.js"
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-twitter-(latest|0\\.1).js"
     mandatory: true
   }
 }
@@ -2019,7 +2033,7 @@ tags: {  # amp-user-notification
   attrs: { name: "async" value: "" mandatory: true }
   attrs: {
     name: "src"
-    value: "https://cdn.ampproject.org/v0/amp-user-notification-0.1.js"
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-user-notification-(latest|0\\.1).js"
     mandatory: true
   }
 }
@@ -2037,7 +2051,7 @@ tags: {  # amp-vine
   attrs: { name: "async" value: "" mandatory: true }
   attrs: {
     name: "src"
-    value: "https://cdn.ampproject.org/v0/amp-vine-0.1.js"
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-vine-(latest|0\\.1).js"
     mandatory: true
   }
 }
@@ -2055,7 +2069,7 @@ tags: {  # amp-youtube
   attrs: { name: "async" value: "" mandatory: true }
   attrs: {
     name: "src"
-    value: "https://cdn.ampproject.org/v0/amp-youtube-0.1.js"
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-youtube-(latest|0\\.1)\\.js"
     mandatory: true
   }
 }
@@ -2168,14 +2182,17 @@ tags: {
 
 # AMP Custom elements require a "src" or a "srcset" attribute,
 # having both is also allowed.
-# TODO(greggrothaus): These probably need to validate http*s* only URLs
-# and data: urls as per the spec.
 attr_lists: {
   name: "mandatory-src-or-srcset"
   attrs: {
     name: "src"
     alternative_names: "srcset"
     mandatory: true
+    value_url: {
+      allowed_protocol: "data"
+      allowed_protocol: "http"
+      allowed_protocol: "https"
+    }
   }
 }
 # Extended AMP globally optional tags.
@@ -2257,7 +2274,12 @@ tags: {
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
   attrs: { name: "placeholder" }
-  attrs: { name: "src" }
+  attrs: {
+    name: "src"
+    value_url: {
+      allowed_protocol: "https"
+    }
+  }
   attrs: { name: "controls" value: "" }
   attrs: { name: "autoplay" value: "" }
   attrs: { name: "loop"     value: "" }
@@ -2279,7 +2301,12 @@ tags: {
   spec_url: "https://github.com/ampproject/amphtml/blob/master/builtins/amp-ad.md"
   attr_lists: "extended-amp-global"
   attrs: { name: "alt" }
-  attrs: { name: "src" }
+  attrs: {
+    name: "src"
+    value_url: {
+      allowed_protocol: "https"
+    }
+  }
   attrs: { name: "type" mandatory: true }
   attrs: { name: "json" }
   amp_layout: {
@@ -2298,7 +2325,12 @@ tags: {
   spec_url: "https://github.com/ampproject/amphtml/blob/master/builtins/amp-embed.md"
   attr_lists: "extended-amp-global"
   attrs: { name: "alt" }
-  attrs: { name: "src" }
+  attrs: {
+    name: "src"
+    value_url: {
+      allowed_protocol: "https"
+    }
+  }
   attrs: { name: "type" mandatory: true }
   attrs: { name: "json" }
   amp_layout: {
@@ -2350,6 +2382,7 @@ tags: {
   also_requires: "amp-carousel extension .js script"
   attr_lists: "extended-amp-global"
   attrs: { name: "autoplay" value: "" }
+  attrs: { name: "delay" value_regex: "[0-9]+" }
   attrs: { name: "loop" value: "" }
   attrs: { name: "dots" value: "" }
   attrs: { name: "arrows" value: "" }
@@ -2387,9 +2420,13 @@ tags: {
   name: "amp-analytics"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-analytics.md"
   also_requires: "amp-analytics extension .js script"
-  attrs: { name: "type" value: "googleanalytics" }
-  # TODO(gregable): This should require a valid https URL as the attr value.
-  attrs: { name: "config" }
+  attrs: { name: "type" }
+  attrs: {
+    name: "config"
+    value_url: {
+      allowed_protocol: "https"
+    }
+  }
 }
 # <amp-user-notification>
 tags: {
@@ -2397,8 +2434,6 @@ tags: {
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-user-notification/amp-user-notification.md"
   also_requires: "amp-user-notification extension .js script"
   attr_lists: "extended-amp-global"
-  attrs: { name: "data-show-if-href" mandatory: true }
-  attrs: { name: "data-dismiss-href" mandatory: true }
   amp_layout: {
     supported_layouts: NODISPLAY
   }
@@ -2412,12 +2447,16 @@ tags: {
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-youtube/amp-youtube.md"
   also_requires: "amp-youtube extension .js script"
   attrs: {
-    name: "src"
+    name: "data-videoid"
     mandatory_oneof: "['src', 'data-videoid']"
   }
   attrs: {
-    name: "data-videoid"
+    name: "src"
     mandatory_oneof: "['src', 'data-videoid']"
+    value_url: {
+      allowed_protocol: "http"  # runtime will rewrite URL to https in this case
+      allowed_protocol: "https"
+    }
   }
   attrs: {
     name: "video-id"
@@ -2450,7 +2489,6 @@ tags: {
   }
 }
 # <amp-pinterest>
-# https://github.com/ampproject/amphtml/blob/master/extensions/amp-pinterest/amp-pinterest.md
 # TODO: Enforce mandatory attributes depending on the value of another
 # attribute. In this case, depending on the value of data-do, data-media and
 # data-description may or may not be mandatory.
@@ -2476,7 +2514,14 @@ tags: {
   also_requires: "amp-twitter extension .js script"
   attr_lists: "extended-amp-global"
   attrs: { name: "data-tweetid" mandatory_oneof: "['data-tweetid', 'src']" }
-  attrs: { name: "src" mandatory_oneof: "['data-tweetid', 'src']" }
+  attrs: {
+    name: "src"
+    mandatory_oneof: "['data-tweetid', 'src']"
+    value_url: {
+      allowed_protocol: "http"  # runtime will rewrite URL to https in this case
+      allowed_protocol: "https"
+    }
+  }
   amp_layout: {
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
@@ -2498,6 +2543,10 @@ tags: {
   attrs: {
     name: "src"
     mandatory_oneof: "['data-shortcode', 'src']"
+    value_url: {
+      allowed_protocol: "http"  # runtime will rewrite URL to https in this case
+      allowed_protocol: "https"
+    }
   }
   attrs: {
     name: "shortcode"
@@ -2525,7 +2574,14 @@ tags: {
   attrs: { name: "allowtransparency" value: "" }
   attrs: { name: "resizable" value: "" }
   attrs: { name: "frameborder" value_regex: "0|1" }
-  attrs: { name: "src" mandatory_oneof: "['src', 'srcdoc']" }
+  attrs: {
+    name: "src"
+    mandatory_oneof: "['src', 'srcdoc']"
+    value_url: {
+      allowed_protocol: "data"
+      allowed_protocol: "https"
+    }
+  }
   attrs: { name: "srcdoc" mandatory_oneof: "['src', 'srcdoc']" }
   amp_layout: {
     supported_layouts: FIXED
@@ -2543,6 +2599,9 @@ tags: {
   attrs: {
     name: "src"
     mandatory: true
+    value_url: {
+      allowed_protocol: "https"
+    }
   }
   amp_layout {
     supported_layouts: FIXED
@@ -2557,7 +2616,12 @@ tags: {
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-audio/amp-audio.md"
   also_requires: "amp-audio extension .js script"
   attr_lists: "extended-amp-global"
-  attrs: { name: "src" }
+  attrs: {
+    name: "src"
+    value_url: {
+      allowed_protocol: "https"
+    }
+  }
   attrs: {
     name: "autoplay"
     # ^$| prefix intended. empty string is valid.
@@ -2607,7 +2671,13 @@ tags: {
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-list/amp-list.md"
   also_requires: "amp-list extension .js script"
   attr_lists: "extended-amp-global"
-  attrs: { name: "src" mandatory: true }
+  attrs: {
+    name: "src"
+    mandatory: true
+    value_url: {
+      allowed_protocol: "https"
+    }
+  }
   attrs: { name: "credentials" }
   amp_layout: {
     supported_layouts: FIXED
@@ -2622,7 +2692,16 @@ tags: {
   name: "amp-install-serviceworker"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-install-serviceworker/amp-install-serviceworker.md"
   also_requires: "amp-install-serviceworker extension .js script"
-  attrs: { name: "src" }
+  attrs: {
+    name: "src"
+    mandatory: true
+    value_url: {
+      allowed_protocol: "https"
+    }
+  }
+  amp_layout: {
+    supported_layouts: NODISPLAY
+  }
 }
 
 # AMP Layout attributes: implied for TagSpecs with amp_layout field
@@ -2635,13 +2714,16 @@ attr_lists: {
   attrs: { name: "width" }
   attrs: { name: "height" }
   attrs: { name: "sizes" }
+  attrs: { name: "heights" }
 }
 
 # Global attributes: These can be used in all tags.
 attr_lists: {
   name: "$GLOBAL_ATTRS"
   # For schema.org annotations.
+  attrs: { name: "itemid" }
   attrs: { name: "itemprop" }
+  attrs: { name: "itemref" }
   attrs: { name: "itemscope" }
   attrs: { name: "itemtype" }
   # 3.2.5 HTML5 Global attributes.
@@ -2785,6 +2867,18 @@ error_formats {
           "'%4', which is invalid."
 }
 error_formats {
+  code: MISSING_URL
+  format: "Missing URL for attribute '%1' in tag '%2'."
+}
+error_formats {
+  code: INVALID_URL
+  format: "Malformed URL '%3' for attribute '%1' in tag '%2'."
+}
+error_formats {
+  code: INVALID_URL_PROTOCOL
+  format: "Invalid URL protocol '%3:' for attribute '%1' in tag '%2'."
+}
+error_formats {
   code: MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE
   format: "The property '%1' is missing from attribute '%2' in tag '%3'."
 }
@@ -2848,4 +2942,12 @@ error_formats {
 error_formats {
   code: TEMPLATE_IN_ATTR_NAME
   format: "Mustache template syntax in attribute name '%1' in tag '%2'."
+}
+error_formats {
+  code: ATTR_DISALLOWED_BY_IMPLIED_LAYOUT
+  format: "The attribute '%1' in tag '%2' is disallowed by implied layout '%3'."
+}
+error_formats {
+  code: ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT
+  format: "The attribute '%1' in tag '%2' is disallowed by implied layout '%3'."
 }

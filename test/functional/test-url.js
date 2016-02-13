@@ -55,6 +55,13 @@ describe('url', () => {
       origin: 'https://foo.com'
     });
   });
+  it('caches results', () => {
+    const url = 'https://foo.com:123/abc?123#foo';
+    parseUrl(url);
+    const a1 = parseUrl(url);
+    const a2 = parseUrl(url);
+    expect(a1).to.equal(a2);
+  });
   it('should handle ports', () => {
     compareParse('https://foo.com:123/abc?123#foo', {
       href: 'https://foo.com:123/abc?123#foo',

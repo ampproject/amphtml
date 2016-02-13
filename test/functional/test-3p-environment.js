@@ -23,6 +23,8 @@ import * as lolex from 'lolex';
 
 describe('3p environment', () => {
 
+  let testWin;
+
   beforeEach(() => {
     iframeCount = 0;
     return createIframePromise(true).then(iframe => {
@@ -110,6 +112,7 @@ describe('3p environment', () => {
       win.cancelAnimationFrame = function(id) {
         win.clearTimeout(id);
       };
+      return clock;
     }
 
     function add(p) {
@@ -176,6 +179,25 @@ describe('3p environment', () => {
       clock.tick(20);
       expect(progress).to.equal(
           'aaaaaaaaabaaaaaaaaaacbaabcaaaaaaaaaaaaaaaaaababb');
+      testWin.ran = false;
+      testWin.setInterval('ran=true', 1);
+      clock.tick(1);
+      expect(window.ran).to.be.equal(undefined);
+      expect(testWin.ran).to.be.true;
+    });
+
+    it('should cancel uninstrumented timeouts', () => {
+      installTimer(testWin);
+      const timeout = testWin.setTimeout(() => {
+        throw new Error('should not happen: timeout');
+      }, 0);
+      const interval = testWin.setInterval(() => {
+        throw new Error('should not happen: interval');
+      }, 0);
+      manageWin(testWin);
+      testWin.clearTimeout(timeout);
+      testWin.clearInterval(interval);
+      clock.tick(100);
     });
 
     it('throttle requestAnimationFrame', () => {

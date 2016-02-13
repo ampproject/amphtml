@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {all} from './promise';
+import {documentInfoFor} from './document-info';
 import {documentStateFor} from './document-state';
 import {getService} from './service';
 import {loadPromise} from './event-helper';
@@ -27,9 +27,14 @@ import {viewerFor} from './viewer';
  * Maximum number of tick events we allow to accumulate in the performance
  * instance's queue before we start dropping those events and can no longer
  * be forwarded to the actual `tick` function when it is set.
- * @const {number}
  */
-const QUEUE_LIMIT_ = 50;
+const QUEUE_LIMIT = 50;
+
+/**
+ * Added to relative relative timings so that they are never 0 which the
+ * underlying library considers a non-value.
+ */
+const ENSURE_NON_ZERO = 1000;
 
 /**
  * @typedef {{
@@ -39,6 +44,24 @@ const QUEUE_LIMIT_ = 50;
  * }}
  */
 class TickEventDef {}
+
+
+/**
+ * Increments the value, else defaults to 0 for the given object key.
+ * @param {!Object<string, (string|number|boolean|Array|Object|null)>} obj
+ * @param {?string} name
+ */
+function incOrDef(obj, name) {
+  if (!name) {
+    return;
+  }
+
+  if (!obj[name]) {
+    obj[name] = 1;
+  } else {
+    obj[name]++;
+  }
+}
 
 
 /**
@@ -56,10 +79,10 @@ export class Performance {
     this.win = win;
 
     /** @const @private {funtion(string,?string=,number=)|undefined} */
-    this.tick_;
+    this.tick_ = undefined;
 
     /** @const @private {funtion()|undefined} */
-    this.flush_;
+    this.flush_ = undefined;
 
     /** @const @private {!Array<TickEventDef>} */
     this.events_ = [];
@@ -99,6 +122,14 @@ export class Performance {
     this.viewer_.onVisibilityChanged(this.flush.bind(this));
 
     this.measureUserPerceivedVisualCompletenessTime_();
+    this.setDocumentInfoParams_();
+
+    // forward all queued ticks to the viewer.
+    this.flushQueuedTicks_();
+    // We need to call flush right away in case the viewer is available
+    // later than the amp codebase had invoked the performance services'
+    // `flush` method to forward ticks.
+    this.flush();
   }
 
   /**
@@ -120,9 +151,11 @@ export class Performance {
 
     this.whenViewportLayoutComplete_().then(() => {
       if (didStartInPrerender) {
-        const userPerceivedVisualCompletenesssTime = docVisibleTime > -1 ?
-            (timer.now() - docVisibleTime) : 0;
-        this.tick('pc', undefined, userPerceivedVisualCompletenesssTime);
+        const userPerceivedVisualCompletenesssTime = docVisibleTime > -1
+            ? (timer.now() - docVisibleTime)
+            : 1 /* MS (magic number for prerender was complete
+                   by the time the user opened the page) */;
+        this.tickDelta('pc', userPerceivedVisualCompletenesssTime);
       } else {
         // If it didnt start in prerender, no need to calculate anything
         // and we just need to tick `pc`. (it will give us the relative
@@ -136,12 +169,13 @@ export class Performance {
    * Returns a promise that is resolved when resources in viewport
    * have been finished being laid out.
    * @return {!Promise}
+   * @private
    */
   whenViewportLayoutComplete_() {
     return this.whenReadyToRetrieveResources_().then(() => {
-      return all(this.resources_.getResourcesInViewport().map(r => {
+      return Promise.all(this.resources_.getResourcesInViewport().map(r => {
         // We're ok with the layout failing and still reporting.
-        return r.whenFirstLayoutComplete().catch(function() {});
+        return r.loaded().catch(function() {});
       }));
     });
   }
@@ -156,30 +190,60 @@ export class Performance {
   }
 
   /**
-   * Forwards tick events to the tick function set or queues it up to be
-   * flushed at a later time.
+   * Forward an object to be appended as search params to the external
+   * intstrumentation library.
+   * @param {!JSONObject} params
+   * @private
+   */
+  setFlushParams_(params) {
+    this.viewer_.setFlushParams(params);
+  }
+
+  /**
+   * Ticks a timing event.
    *
    * @param {string} label The variable name as it will be reported.
    * @param {?string=} opt_from The label of a previous tick to use as a
    *    relative start for this tick.
    * @param {number=} opt_value The time to record the tick at. Optional, if
-   *    not provided, use the current time.
+   *    not provided, use the current time. You probably want to use
+   *    `tickDelta` instead.
    */
   tick(label, opt_from, opt_value) {
-    if (this.tick_) {
-      this.tick_(label, opt_from, opt_value);
+    opt_from = opt_from == undefined ? null : opt_from;
+    opt_value = opt_value == undefined ? timer.now() : opt_value;
+
+    if (this.viewer_) {
+      this.viewer_.tick({
+        'label': label,
+        'from': opt_from,
+        'value': opt_value,
+      });
     } else {
       this.queueTick_(label, opt_from, opt_value);
     }
   }
 
+  /**
+   * Tick a very specific value for the label. Use this method if you
+   * measure the time it took to do something yourself.
+   * @param {string} label The variable name as it will be reported.
+   * @param {number} value The value in milliseconds that should be ticked.
+   */
+  tickDelta(label, value) {
+    // ENSURE_NON_ZERO Is added instead of non-zero, because the underlying
+    // library doesn't like 0 values.
+    this.tick('_' + label, undefined, ENSURE_NON_ZERO);
+    this.tick(label, '_' + label, value + ENSURE_NON_ZERO);
+  }
+
 
   /**
-   * Calls the flush callback function set through setTickFunction.
+   * Calls the "flushTicks" function on the viewer.
    */
   flush() {
-    if (this.flush_) {
-      this.flush_();
+    if (this.viewer_) {
+      this.viewer_.flushTicks();
     }
   }
 
@@ -195,56 +259,61 @@ export class Performance {
    * @private
    */
   queueTick_(label, opt_from, opt_value) {
-    if (opt_value == undefined) {
-      opt_value = timer.now();
-    }
-
     // Start dropping the head of the queue if we've reached the limit
     // so that we don't take up too much memory in the runtime.
-    if (this.events_.length >= QUEUE_LIMIT_) {
+    if (this.events_.length >= QUEUE_LIMIT) {
       this.events_.shift();
     }
 
     this.events_.push({
-      label: label,
-      opt_from: opt_from,
-      opt_value: opt_value
+      'label': label,
+      'from': opt_from,
+      'value': opt_value,
     });
   }
 
 
-  /** @private */
+  /**
+   * Forwards all queued ticks to the viewer tick method.
+   * @private
+   */
   flushQueuedTicks_() {
-    if (!this.tick_) {
+    if (!this.viewer_) {
       return;
     }
 
     this.events_.forEach(tickEvent => {
-      this.tick_(tickEvent.label, tickEvent.opt_from, tickEvent.opt_value);
+      this.viewer_.tick(tickEvent);
     });
     this.events_.length = 0;
   }
 
 
   /**
-   * Sets the `tick` function.
-   *
-   * @param {funtion(string,?string=,number=)} tick function that the tick
-   *   events get forwarded to. Function can take in a `label` as the first
-   *   argument and an optional `opt_from` label to use
-   *   as a relative start for this tick. A third argument `opt_value` can
-   *   also be provided to indicate when to record the tick at.
-   * @param {function()=} opt_flush callback function that is called
-   *   when we are ready for the ticks to be forwarded to an endpoint.
+   * Calls "setFlushParams_" with relevant document information.
+   * @return {!Promise}
+   * @private
    */
-  setTickFunction(tick, opt_flush) {
-    this.tick_ = tick;
-    this.flush_ = opt_flush;
-    this.flushQueuedTicks_();
-    // We need to call flush right away in case `setTickFunction` is called
-    // later than the amp codebase had invoked the performance services'
-    // `flush` method to forward ticks.
-    this.flush();
+  setDocumentInfoParams_() {
+    return this.whenViewportLayoutComplete_().then(() => {
+      const params = Object.create(null);
+      const sourceUrl = documentInfoFor(this.win).sourceUrl
+          .replace(/#.*/, '');
+      params['sourceUrl'] = sourceUrl;
+
+      this.resources_.get().forEach(r => {
+        const el = r.element;
+        const name = el.tagName.toLowerCase();
+        incOrDef(params, name);
+        if (name == 'amp-ad') {
+          incOrDef(params, `ad-${el.getAttribute('type')}`);
+        }
+      });
+
+      // this should be guaranteed to be at the very least on the last
+      // visibility flush.
+      this.setFlushParams_(params);
+    });
   }
 }
 

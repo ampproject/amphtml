@@ -20,6 +20,7 @@ import {urlReplacementsFor} from '../../src/url-replacements';
 import {markElementScheduledForTesting} from '../../src/custom-element';
 import {installCidService} from '../../src/service/cid-impl';
 import {setCookie} from '../../src/cookies';
+import {parseUrl} from '../../src/url';
 
 
 describe('UrlReplacements', () => {
@@ -112,6 +113,13 @@ describe('UrlReplacements', () => {
   it('should replace AMPDOC_HOST', () => {
     return expand('?ref=AMPDOC_HOST').then(res => {
       expect(res).to.not.match(/AMPDOC_HOST/);
+    });
+  });
+
+  it('should replace SOURCE_URL and _HOST', () => {
+    return expand('?url=SOURCE_URL&host=SOURCE_HOST').then(res => {
+      expect(res).to.not.match(/SOURCE_URL/);
+      expect(res).to.not.match(/SOURCE_HOST/);
     });
   });
 
@@ -241,6 +249,30 @@ describe('UrlReplacements', () => {
     });
   });
 
+  it('should replace AVAILABLE_SCREEN_HEIGHT', () => {
+    return expand('?sh=AVAILABLE_SCREEN_HEIGHT').then(res => {
+      expect(res).to.match(/sh=\d+/);
+    });
+  });
+
+  it('should replace AVAILABLE_SCREEN_WIDTH', () => {
+    return expand('?sh=AVAILABLE_SCREEN_WIDTH').then(res => {
+      expect(res).to.match(/sh=\d+/);
+    });
+  });
+
+  it('should replace SCREEN_COLOR_DEPTH', () => {
+    return expand('?sh=SCREEN_COLOR_DEPTH').then(res => {
+      expect(res).to.match(/sh=\d+/);
+    });
+  });
+
+  it('should replace BROWSER_LANGUAGE', () => {
+    return expand('?sh=BROWSER_LANGUAGE').then(res => {
+      expect(res).to.match(/sh=\w+/);
+    });
+  });
+
   it('should accept $expressions', () => {
     return expand('?href=$CANONICAL_URL').then(res => {
       expect(res).to.equal('?href=https%3A%2F%2Fpinterest.com%2Fpin1');
@@ -285,6 +317,15 @@ describe('UrlReplacements', () => {
     });
     return expect(replacements.expand('?a=FN(xyz,abc)')).to
         .eventually.equal('?a=xyz-abc');
+  });
+
+  it('should support multiple positional arguments with dots', () => {
+    const replacements = urlReplacementsFor(window);
+    replacements.set_('FN', (one, two) => {
+      return one + '-' + two;
+    });
+    return expect(replacements.expand('?a=FN(xy.z,ab.c)')).to
+        .eventually.equal('?a=xy.z-ab.c');
   });
 
   it('should support promises as replacements', () => {
@@ -374,5 +415,52 @@ describe('UrlReplacements', () => {
     }).then(res => {
       expect(res).to.equal('v=false');
     });
+  });
+
+  it('should resolve sub-included bindings', () => {
+    // RANDOM is a standard property and we add RANDOM_OTHER.
+    return expand('r=RANDOM&ro=RANDOM_OTHER?', false, {'RANDOM_OTHER': 'ABC'})
+        .then(res => {
+          expect(res).to.match(/r=(\d\.\d+)&ro=ABC\?$/);
+        });
+  });
+
+  it('should expand multiple vars', () => {
+    return expand('a=VALUEA&b=VALUEB?', false, {
+      'VALUEA': 'aaa',
+      'VALUEB': 'bbb',
+    }).then(res => {
+      expect(res).to.match(/a=aaa&b=bbb\?$/);
+    });
+  });
+
+  it('should replace QUERY_PARAM with foo', () => {
+    const win = getFakeWindow();
+    win.location = parseUrl("https://example.com?query_string_param1=foo");
+    return urlReplacementsFor(win)
+      .expand('?sh=QUERY_PARAM(query_string_param1)&s')
+      .then(res => {
+        expect(res).to.match(/sh=foo&s/);
+      });
+  });
+
+  it('should replace QUERY_PARAM with ""', () => {
+    const win = getFakeWindow();
+    win.location = parseUrl("https://example.com");
+    return urlReplacementsFor(win)
+      .expand('?sh=QUERY_PARAM(query_string_param1)&s')
+      .then(res => {
+        expect(res).to.match(/sh=&s/);
+      });
+  });
+
+  it('should replace QUERY_PARAM with default_value', () => {
+    const win = getFakeWindow();
+    win.location = parseUrl("https://example.com");
+    return urlReplacementsFor(win)
+      .expand('?sh=QUERY_PARAM(query_string_param1,default_value)&s')
+      .then(res => {
+        expect(res).to.match(/sh=default_value&s/);
+      });
   });
 });

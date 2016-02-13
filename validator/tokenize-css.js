@@ -482,7 +482,7 @@ Tokenizer.prototype.consumeAToken = function() {
       return mark.addPositionTo(new parse_css.DelimToken(this.code_));
     }
   } else if (this.code_ === /* '+' */ 0x2b) {
-    if (this.startsWithANumber()) {
+    if (this./*OK*/startsWithANumber()) {
       this.reconsume();
       return mark.addPositionTo(this.consumeANumericToken());
     } else {
@@ -491,21 +491,21 @@ Tokenizer.prototype.consumeAToken = function() {
   } else if (this.code_ === /* ',' */ 0x2c) {
     return mark.addPositionTo(new parse_css.CommaToken());
   } else if (this.code_ === /* '-' */ 0x2d) {
-    if (this.startsWithANumber()) {
+    if (this./*OK*/startsWithANumber()) {
       this.reconsume();
       return mark.addPositionTo(this.consumeANumericToken());
     } else if (this.next(1) === /* '-' */ 0x2d &&
                this.next(2) === /* '>' */ 0x3e) {
       this.consume(2);
       return mark.addPositionTo(new parse_css.CDCToken());
-    } else if (this.startsWithAnIdentifier()) {
+    } else if (this./*OK*/startsWithAnIdentifier()) {
       this.reconsume();
       return mark.addPositionTo(this.consumeAnIdentlikeToken());
     } else {
       return mark.addPositionTo(new parse_css.DelimToken(this.code_));
     }
   } else if (this.code_ === /* '.' */ 0x2e) {
-    if (this.startsWithANumber()) {
+    if (this./*OK*/startsWithANumber()) {
       this.reconsume();
       return mark.addPositionTo(this.consumeANumericToken());
     } else {
@@ -533,7 +533,7 @@ Tokenizer.prototype.consumeAToken = function() {
   } else if (this.code_ === /* '[' */ 0x5b) {
     return mark.addPositionTo(new parse_css.OpenSquareToken());
   } else if (this.code_ === /* '\' */ 0x5c) {
-    if (this.startsWithAValidEscape()) {
+    if (this./*OK*/startsWithAValidEscape()) {
       this.reconsume();
       return mark.addPositionTo(this.consumeAnIdentlikeToken());
     } else {
@@ -603,8 +603,10 @@ Tokenizer.prototype.consumeComments = function() {
       } else if (this.eof()) {
         // For example "h1 { color: red; } \* " would emit this parse error
         // at the end of the string.
-        this.errors_.push(mark.addPositionTo(new parse_css.ErrorToken(
-            parse_css.ErrorType.TOKENIZATION, 'unterminated comment')));
+        const error = new parse_css.ErrorToken(
+            parse_css.ErrorType.TOKENIZATION, 'unterminated comment');
+        mark.addPositionTo(error);
+        this.errors_.push(error);
         return;
       }
     }
@@ -739,7 +741,7 @@ Tokenizer.prototype.consumeAURLToken = function() {
       return new parse_css.ErrorToken(
           parse_css.ErrorType.TOKENIZATION, 'bad url');
     } else if (this.code_ === /* '\' */ 0x5c) {
-      if (this.startsWithAValidEscape()) {
+      if (this./*OK*/startsWithAValidEscape()) {
         token.value += stringFromCode(this.consumeEscape());
       } else {
         this.consumeTheRemnantsOfABadURL();
@@ -810,7 +812,7 @@ Tokenizer.prototype.areAValidEscape = function(c1, c2) {
 /**
  * Returns true if the next two codepoints are the start of an escape token.
  * @return {boolean} */
-Tokenizer.prototype.startsWithAValidEscape = function() {
+Tokenizer.prototype./*OK*/startsWithAValidEscape = function() {
   return this.areAValidEscape(this.code_, this.next());
 };
 
@@ -840,7 +842,7 @@ Tokenizer.prototype.wouldStartAnIdentifier = function(c1, c2, c3) {
  * Returns true if the next three codepoints are the start of an identifier.
  * @return {boolean}
  */
-Tokenizer.prototype.startsWithAnIdentifier = function() {
+Tokenizer.prototype./*OK*/startsWithAnIdentifier = function() {
   return this.wouldStartAnIdentifier(this.code_, this.next(1), this.next(2));
 };
 
@@ -877,7 +879,7 @@ Tokenizer.prototype.wouldStartANumber = function(c1, c2, c3) {
  * Returns true if the next three codepoints are the start of a number.
  * @return {boolean}
  */
-Tokenizer.prototype.startsWithANumber = function() {
+Tokenizer.prototype./*OK*/startsWithANumber = function() {
   return this.wouldStartANumber(this.code_, this.next(1), this.next(2));
 };
 
@@ -888,7 +890,7 @@ Tokenizer.prototype.consumeAName = function() {
     this.consume();
     if (nameChar(this.code_)) {
       result += stringFromCode(this.code_);
-    } else if (this.startsWithAValidEscape()) {
+    } else if (this./*OK*/startsWithAValidEscape()) {
       result += stringFromCode(this.consumeEscape());
     } else {
       this.reconsume();
@@ -976,7 +978,7 @@ Tokenizer.prototype.consumeTheRemnantsOfABadURL = function() {
     this.consume();
     if (this.code_ === /* '-' */ 0x2d || this.eof()) {
       return;
-    } else if (this.startsWithAValidEscape()) {
+    } else if (this./*OK*/startsWithAValidEscape()) {
       this.consumeEscape();
     }
   }

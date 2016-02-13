@@ -25,6 +25,9 @@ export const adPrefetch = {
   doubleclick: 'https://www.googletagservices.com/tag/js/gpt.js',
   a9: 'https://c.amazon-adsystem.com/aax2/assoc.js',
   adsense: 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js',
+  dotandads: 'https://amp.ad.dotandad.com/dotandadsAmp.js',
+  smartadserver: 'https://ec-ns.sascdn.com/diff/js/smart.js',
+  yieldmo: 'https://static.yieldmo.com/ym.amp1.js',
 };
 
 /**
@@ -35,12 +38,24 @@ export const adPrefetch = {
  * @const {!Object<string, (string|!Array<string>)>}
  */
 export const adPreconnect = {
+  adform: 'https://track.adform.net',
   adreactor: 'https://adserver.adreactor.com',
   adsense: 'https://googleads.g.doubleclick.net',
+  taboola: [
+    'https://cdn.taboola.com',
+    'https://trc.taboola.com',
+    'https://images.taboola.com',
+  ],
   doubleclick: [
     'https://partner.googleadservices.com',
     'https://securepubads.g.doubleclick.net',
     'https://tpc.googlesyndication.com',
+  ],
+  dotandads: 'https://bal.ad.dotandad.com',
+  yieldmo: [
+    'https://static.yieldmo.com',
+    'https://s.yieldmo.com',
+    'https://ads.yieldmo.com',
   ],
 };
 
@@ -52,4 +67,6 @@ export const adPreconnect = {
 export const clientIdScope = {
   // Add a mapping like
   // adNetworkType: 'cidScope' here.
+  adsense: 'AMP_ECID_GOOGLE',
+  doubleclick: 'AMP_ECID_GOOGLE',
 };

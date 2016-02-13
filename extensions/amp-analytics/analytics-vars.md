@@ -88,6 +88,36 @@ Example value: `The New York Times - Breaking News, World News...`
 
 ## Device and Browser
 
+### availableScreenHeight
+
+Provides the screen height in pixels available for the page rendering. Note that this can be slightly more or less than the actual viewport height due to various browser quirks.
+
+Example value: `1480`
+
+### availableScreenWidth
+
+Provides the screen width in pixels available for the page rendering. Note that this can be slightly more or less than the actual viewport height due to various browser quirks.
+
+Example value: `2500`
+
+### browserLanguage
+
+Provides a string representing the preferred language of the user, usually the language of the browser UI.
+
+Example value: `en-us`
+
+### documentCharset
+
+Provides the character encoding of the current document.
+
+Example value: `UTF-8`
+
+### screenColorDepth
+
+Provides the screen color depth provided by the browser.
+
+Example value: `24`
+
 ### screenHeight
 
 Provides the screen height in pixels. The value is retrieved from `window.screen.height`.
@@ -102,7 +132,7 @@ Example value: `2560`
 
 ### scrollHeight
 
-Provides the total size of the page in pixels.
+Provides the total height of the page in pixels.
 
 Example value: `400`
 
@@ -117,6 +147,12 @@ Example value: `100`
 Provides the number of pixels that the user has scrolled from top.
 
 Example value: `0`
+
+### scrollWidth
+
+Provides the total width of the page in pixels.
+
+Example value: `600`
 
 ### timezone
 
@@ -213,6 +249,20 @@ Example value: `0.12345632345`
 Provides the number of seconds that have elapsed since 1970. (Epoch time)
 
 Example value: `1452710304312`
+
+### queryParam
+
+Pulls a value from the query string
+
+Please see below the required and optional arguments you may pass into `queryParam` like a function. Spaces between arguments and values are not allowed.
+
+**arguments**
+
+ - `query string param` (Required) - The query string param for which you want the value
+ - `default value` (Optional) - If the query string param is not available use this default instead
+
+Example usage: `${queryParam(foo)}` - if foo is available its associated value will be returned, if not an empty string will be returned
+               `${queryParam(foo,bar)}` - if foo is available its associated value will be returned, if not bar will be returned
 
 ## requestCount
 

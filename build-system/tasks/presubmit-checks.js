@@ -60,6 +60,13 @@ var forbiddenTerms = {
       'validator/validator-in-browser.js',
     ]
   },
+  'iframePing': {
+    message: 'This is only available in vendor config for ' +
+        'temporary workarounds.',
+    whitelist: [
+      'extensions/amp-analytics/0.1/amp-analytics.js',
+    ],
+  },
   // Service factories that should only be installed once.
   'installActionService': {
     message: privateServiceFactory,
@@ -183,7 +190,9 @@ var forbiddenTerms = {
     message: requiresReviewPrivacy,
     whitelist: [
       'extensions/amp-access/0.1/amp-access.js',
+      'extensions/amp-user-notification/0.1/amp-user-notification.js',
       'src/experiments.js',
+      'src/service/storage-impl.js',
       'tools/experiments/experiments.js',
     ]
   },
@@ -191,6 +200,12 @@ var forbiddenTerms = {
     message: shouldNeverBeUsed,
     whitelist: [
       'src/experiments.js',
+    ]
+  },
+  'isTrusted': {
+    message: requiresReviewPrivacy,
+    whitelist: [
+      'src/service/viewer-impl.js',
     ]
   },
   'eval\\(': '',
@@ -219,8 +234,6 @@ var forbiddenTerms = {
   'Array\\.of': es6polyfill,
   // These currently depend on core-js/modules/web.dom.iterable which
   // we don't want. That decision could be reconsidered.
-  'Promise\\.all': es6polyfill,
-  'Promise\\.race': es6polyfill,
   '\\.startsWith': {
     message: es6polyfill,
     whitelist: [
@@ -241,7 +254,23 @@ var forbiddenTerms = {
     whitelist: [
       'extensions/amp-access/0.1/access-expr-impl.js',
     ],
-  }
+  },
+
+  // Overridden APIs.
+  '(doc.*)\\.referrer': {
+    message: 'Use Viewer.getReferrerUrl() instead.',
+    whitelist: [
+      'src/service/viewer-impl.js',
+    ],
+  },
+  'getUnconfirmedReferrerUrl': {
+    message: 'Use Viewer.getReferrerUrl() instead.',
+    whitelist: [
+      'extensions/amp-dynamic-css-classes/0.1/amp-dynamic-css-classes.js',
+      'src/3p-frame.js',
+      'src/service/viewer-impl.js',
+    ],
+  },
 };
 
 var ThreePTermsMessage = 'The 3p bootstrap iframe has no polyfills loaded and' +

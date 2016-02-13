@@ -39,6 +39,8 @@ describe('preconnect', () => {
   });
 
   it('should preconnect', () => {
+    sandbox.stub(preconnect.platform_, 'isSafari', () => false);
+    const open = sandbox.spy(XMLHttpRequest.prototype, 'open');
     preconnect.url('https://a.preconnect.com/foo/bar');
     preconnect.url('https://a.preconnect.com/other');
     preconnect.url(javascriptUrlPrefix + ':alert()');
@@ -52,6 +54,31 @@ describe('preconnect', () => {
         .to.equal('https://a.preconnect.com/');
     expect(document.querySelectorAll('link[rel=prefetch]'))
         .to.have.length(0);
+    expect(open.callCount).to.equal(0);
+  });
+
+  it('should preconnect with polyfill', () => {
+    sandbox.stub(preconnect.platform_, 'isSafari', () => true);
+    const open = sandbox.spy(XMLHttpRequest.prototype, 'open');
+    const send = sandbox.spy(XMLHttpRequest.prototype, 'send');
+    preconnect.url('https://s.preconnect.com/foo/bar');
+    preconnect.url('https://s.preconnect.com/other');
+    preconnect.url(javascriptUrlPrefix + ':alert()');
+    expect(document.querySelectorAll('link[rel=dns-prefetch]'))
+        .to.have.length(1);
+    expect(document.querySelector('link[rel=dns-prefetch]').href)
+        .to.equal('https://s.preconnect.com/');
+    expect(document.querySelectorAll('link[rel=preconnect]'))
+        .to.have.length(1);
+    expect(document.querySelector('link[rel=preconnect]').href)
+        .to.equal('https://s.preconnect.com/');
+    expect(document.querySelectorAll('link[rel=prefetch]'))
+        .to.have.length(0);
+    expect(open.callCount).to.equal(1);
+    expect(send.callCount).to.equal(1);
+    expect(open.args[0][1]).to.include(
+        'https://s.preconnect.com/amp_preconnect_polyfill_404_or' +
+        '_other_error_expected._Do_not_worry_about_it');
   });
 
   it('should cleanup', () => {

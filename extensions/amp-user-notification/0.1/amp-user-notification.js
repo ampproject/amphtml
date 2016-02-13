@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-import {all} from '../../../src/promise';
 import {assertHttpsUrl, addParamsToUrl} from '../../../src/url';
 import {assert} from '../../../src/asserts';
 import {cidFor} from '../../../src/cid';
 import {getService} from '../../../src/service';
-import {isExperimentOn} from '../../../src/experiments';
 import {log} from '../../../src/log';
 import {storageFor} from '../../../src/storage';
 import {urlReplacementsFor} from '../../../src/url-replacements';
@@ -94,9 +92,6 @@ export class AmpUserNotification extends AMP.BaseElement {
 
     /** @const @private {!Promise<!Storage>} */
     this.storagePromise_ = storageFor(this.win_);
-
-    /** @const @private {boolean} */
-    this.isStorageEnabled_ = isExperimentOn(this.getWin(), 'amp-storage');
   }
 
   /** @override */
@@ -116,9 +111,8 @@ export class AmpUserNotification extends AMP.BaseElement {
     this.elementId_ = assert(this.element.id,
         'amp-user-notification should have an id.');
 
-    /** @private @const {?string} */
-    this.storageKey_ = this.isStorageEnabled_ ?
-        'amp-user-notification:' + this.elementId_ : null;
+    /** @private @const {string} */
+    this.storageKey_ = 'amp-user-notification:' + this.elementId_;
 
     /** @private @const {?string} */
     this.showIfHref_ = this.element.getAttribute('data-show-if-href');
@@ -130,17 +124,6 @@ export class AmpUserNotification extends AMP.BaseElement {
     this.dismissHref_ = this.element.getAttribute('data-dismiss-href');
     if (this.dismissHref_) {
       assertHttpsUrl(this.dismissHref_, this.element);
-    }
-
-    // TODO(dvoytenko): document storage behavior in these methods once
-    // experiment is removed.
-    if (!this.storageKey_) {
-      assert(this.showIfHref_,
-          `"amp-user-notification" (${this.elementId_}) ` +
-          'should have "data-show-if-href" attribute.');
-      assert(this.dismissHref_,
-          `"amp-user-notification" (${this.elementId_}) ` +
-          'should have "data-dismiss-href" attribute.');
     }
 
     this.userNotificationManager_
@@ -232,36 +215,34 @@ export class AmpUserNotification extends AMP.BaseElement {
       // the user only really has 1 option to accept/dismiss (to resolve)
       // the notification or have the nagging notification sitting there
       // (to never resolve).
-      return cid.get('amp-user-notification',
-          Promise.resolve(), this.dialogPromise_);
+      return cid.get(
+        {scope: 'amp-user-notification', createCookieIfNotPresent: true},
+        Promise.resolve(), this.dialogPromise_);
     });
   }
 
   /** @override */
   shouldShow() {
-    if (this.storageKey_) {
-      return this.storagePromise_.then(storage => {
-        return storage.get(this.storageKey_);
-      }).then(value => {
-        if (value) {
-          // Consent has been accepted. Nothing more to do.
-          return false;
-        }
-        if (this.showIfHref_) {
-          // Ask remote endpoint if available.
-          return this.shouldShowViaXhr_();
-        }
-        // Otherwise, show the notification.
-        return true;
-      }).catch(reason => {
-        log.error('Failed to read storage', reason);
-        if (this.showIfHref_) {
-          return this.shouldShowViaXhr_();
-        }
-        return true;
-      });
-    }
-    return this.shouldShowViaXhr_();
+    return this.storagePromise_.then(storage => {
+      return storage.get(this.storageKey_);
+    }).then(value => {
+      if (value) {
+        // Consent has been accepted. Nothing more to do.
+        return false;
+      }
+      if (this.showIfHref_) {
+        // Ask remote endpoint if available.
+        return this.shouldShowViaXhr_();
+      }
+      // Otherwise, show the notification.
+      return true;
+    }).catch(reason => {
+      log.error('Failed to read storage', reason);
+      if (this.showIfHref_) {
+        return this.shouldShowViaXhr_();
+      }
+      return true;
+    });
   }
 
   /**
@@ -291,11 +272,9 @@ export class AmpUserNotification extends AMP.BaseElement {
     this.dialogResolve_();
 
     // Store and post.
-    if (this.storageKey_) {
-      this.storagePromise_.then(storage => {
-        storage.set(this.storageKey_, true);
-      });
-    }
+    this.storagePromise_.then(storage => {
+      storage.set(this.storageKey_, true);
+    });
     if (this.dismissHref_) {
       this.postDismissEnpoint_();
     }
@@ -320,7 +299,7 @@ export class UserNotificationManager {
     this.viewer_ = viewerFor(this.win_);
 
     /** @private {!Promise} */
-    this.managerReadyPromise_ = all([
+    this.managerReadyPromise_ = Promise.all([
       this.viewer_.whenFirstVisible(),
       whenDocumentReady(this.win_.document)
     ]);

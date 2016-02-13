@@ -24,26 +24,23 @@ var commonTestPaths = [
   {
     pattern: 'dist/**/*.js',
     included: false,
+    nocache: true,
   },
   {
     pattern: 'dist.tools/**/*.js',
     included: false,
-  },
-  {
-    pattern: 'build/**/*.js',
-    included: false,
-    served: true
+    nocache: true,
   },
   {
     pattern: 'examples/**/*',
     included: false,
-    served: true
+    nocache: true,
   },
   {
     pattern: 'dist.3p/**/*',
     included: false,
-    served: true
-  }
+    nocache: true,
+  },
 ]
 
 var testPaths = commonTestPaths.concat([
@@ -62,9 +59,6 @@ var karma = {
     singleRun: true,
     client: {
       captureConsole: false,
-      amp: {
-        useCompiledJs: false
-      }
     }
   },
   firefox: {
@@ -99,10 +93,10 @@ var karma = {
       'SL_Firefox_latest',
       'SL_Safari_8',
       'SL_Safari_9',
+      'SL_Edge_latest',
       // TODO(#895) Enable these.
       //'SL_iOS_9_1',
       //'SL_IE_11',
-      //'SL_Edge_latest',
     ],
     singleRun: true,
     client: {
@@ -144,6 +138,7 @@ module.exports = {
     '!validator/node_modules/**/*.*',
     '!build-system/tasks/presubmit-checks.js',
     '!build/polyfills.js',
+    '!build/polyfills/*.js',
     '!gulpfile.js',
     '!third_party/**/*.*',
   ],

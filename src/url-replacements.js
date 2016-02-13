@@ -20,7 +20,8 @@ import {documentInfoFor} from './document-info';
 import {getService} from './service';
 import {loadPromise} from './event-helper';
 import {log} from './log';
-import {parseUrl, removeFragment} from './url';
+import {getSourceUrl, parseUrl, removeFragment, parseQueryString} from './url';
+import {viewerFor} from './viewer';
 import {viewportFor} from './viewport';
 import {vsyncFor} from './vsync';
 import {userNotificationManagerFor} from './user-notification';
@@ -39,7 +40,7 @@ class UrlReplacements {
     this.win_ = win;
 
     /** @private {!RegExp|undefined} */
-    this.replacementExpr_;
+    this.replacementExpr_ = undefined;
 
     /** @private @const {!Object<string, function(*):*>} */
     this.replacements_ = this.win_.Object.create(null);
@@ -68,7 +69,7 @@ class UrlReplacements {
 
     // Returns the referrer URL.
     this.set_('DOCUMENT_REFERRER', () => {
-      return this.win_.document.referrer;
+      return viewerFor(this.win_).getReferrerUrl();
     });
 
     // Returns the title of this AMP document.
@@ -87,11 +88,32 @@ class UrlReplacements {
       return url && url.hostname;
     });
 
+    // Returns the Source URL for this AMP document.
+    this.set_('SOURCE_URL', () => {
+      return removeFragment(getSourceUrl(this.win_.location.href));
+    });
+
+    // Returns the host of the Source URL for this AMP document.
+    this.set_('SOURCE_HOST', () => {
+      return parseUrl(getSourceUrl(this.win_.location.href)).hostname;
+    });
+
     // Returns a random string that will be the constant for the duration of
     // single page view. It should have sufficient entropy to be unique for
     // all the page views a single user is making at a time.
     this.set_('PAGE_VIEW_ID', () => {
       return documentInfoFor(this.win_).pageViewId;
+    });
+
+    this.set_('QUERY_PARAM', (param, defaultValue = "") => {
+      assert(param, 'The first argument to QUERY_PARAM, the query string ' +
+          /*OK*/'param is required');
+      const url = parseUrl(this.win_.location.href);
+      const params = parseQueryString(url.search);
+
+      return (typeof params[param] !== "undefined") ?
+        params[param] :
+        defaultValue;
     });
 
     this.set_('CLIENT_ID', (scope, opt_userNotificationId) => {
@@ -142,6 +164,12 @@ class UrlReplacements {
         () => viewportFor(this.win_).getScrollHeight());
     });
 
+    // Returns a promise resolving to viewport.getScrollWidth.
+    this.set_('SCROLL_WIDTH', () => {
+      return vsyncFor(this.win_).measurePromise(
+        () => viewportFor(this.win_).getScrollWidth());
+    });
+
     // Returns screen.width.
     this.set_('SCREEN_WIDTH', () => {
       return this.win_.screen.width;
@@ -150,6 +178,34 @@ class UrlReplacements {
     // Returns screen.height.
     this.set_('SCREEN_HEIGHT', () => {
       return this.win_.screen.height;
+    });
+
+    // Returns screen.availHeight.
+    this.set_('AVAILABLE_SCREEN_HEIGHT', () => {
+      return this.win_.screen.availHeight;
+    });
+
+    // Returns screen.availWidth.
+    this.set_('AVAILABLE_SCREEN_WIDTH', () => {
+      return this.win_.screen.availWidth;
+    });
+
+    // Returns screen.ColorDepth.
+    this.set_('SCREEN_COLOR_DEPTH', () => {
+      return this.win_.screen.colorDepth;
+    });
+
+    // Returns document characterset.
+    this.set_('DOCUMENT_CHARSET', () => {
+      const doc = this.win_.document;
+      return doc.characterSet || doc.charset;
+    });
+
+    // Returns the browser language.
+    this.set_('BROWSER_LANGUAGE', () => {
+      const nav = this.win_.navigator;
+      return (nav.language || nav.userLanguage || nav.browserLanguage || '')
+          .toLowerCase();
     });
 
     // Returns the time it took to load the whole page. (excludes amp-* elements
@@ -238,6 +294,7 @@ class UrlReplacements {
    * @private
    */
   set_(varName, resolver) {
+    assert(varName.indexOf('RETURN') == -1);
     this.replacements_[varName] = resolver;
     this.replacementExpr_ = undefined;
     return this;
@@ -322,6 +379,9 @@ class UrlReplacements {
    * @private
    */
   buildExpr_(keys) {
+    // The keys must be sorted to ensure that the longest keys are considered
+    // first. This avoids a problem where a RANDOM conflicts with RANDOM_ONE.
+    keys.sort((s1, s2) => s2.length - s1.length);
     const all = keys.join('|');
     // Match the given replacement patterns, as well as optionally
     // arguments to the replacement behind it in parantheses.
@@ -329,7 +389,7 @@ class UrlReplacements {
     // FOO_BAR
     // FOO_BAR(arg1)
     // FOO_BAR(arg1,arg2)
-    return new RegExp('\\$?(' + all + ')(?:\\(([0-9a-zA-Z-_,]+)\\))?', 'g');
+    return new RegExp('\\$?(' + all + ')(?:\\(([0-9a-zA-Z-_.,]+)\\))?', 'g');
   }
 }
 

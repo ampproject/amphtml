@@ -17,13 +17,10 @@
 import {assert} from '../asserts';
 import {getService} from '../service';
 import {getSourceOrigin} from '../url';
-import {isExperimentOn} from '../experiments';
 import {log} from '../log';
+import {recreateNonProtoObject} from '../json';
 import {timer} from '../timer';
 import {viewerFor} from '../viewer';
-
-/** @const */
-const EXPERIMENT = 'amp-storage';
 
 /** @const */
 const TAG = 'Storage';
@@ -38,8 +35,6 @@ const MAX_VALUES_PER_ORIGIN = 8;
  *
  * The storage is done per source origin. See `get`, `set` and `remove` methods
  * for more info.
- *
- * Requires "amp-storage" experiment.
  *
  * @see https://html.spec.whatwg.org/multipage/webstorage.html
  * @private Visible for testing only.
@@ -64,14 +59,6 @@ export class Storage {
     /** @const @private {string} */
     this.origin_ = getSourceOrigin(this.win.location);
 
-    /** @const @private {boolean} */
-    this.isExperimentOn_ = isExperimentOn(this.win, EXPERIMENT);
-
-    /** @private @const {!Promise} */
-    this.whenStarted_ = this.isExperimentOn_ ?
-        Promise.resolve() :
-        Promise.reject(`Enable experiment ${EXPERIMENT}`);
-
     /** @private {?Promise<!Store>} */
     this.storePromise_ = null;
   }
@@ -81,10 +68,6 @@ export class Storage {
    * @private
    */
   start_() {
-    if (!this.isExperimentOn_) {
-      log.info(TAG, 'Storage experiment is off: ', EXPERIMENT);
-      return this;
-    }
     this.listenToBroadcasts_();
     return this;
   }
@@ -130,8 +113,7 @@ export class Storage {
    */
   getStore_() {
     if (!this.storePromise_) {
-      this.storePromise_ = this.whenStarted_
-          .then(() => this.binding_.loadBlob(this.origin_))
+      this.storePromise_ = this.binding_.loadBlob(this.origin_)
           .then(blob => blob ? JSON.parse(atob(blob)) : {})
           .catch(reason => {
             log.error(TAG, 'Failed to load store: ', reason);
@@ -201,15 +183,15 @@ export class Store {
    */
   constructor(obj, opt_maxValues) {
     /** @const {!JSONObject} */
-    this.obj = obj;
+    this.obj = recreateNonProtoObject(obj);
 
     /** @private @const {number} */
     this.maxValues_ = opt_maxValues || MAX_VALUES_PER_ORIGIN;
 
     /** @private @const {!Object<string, !JSONObject>} */
-    this.values_ = obj['vv'] || {};
-    if (!obj['vv']) {
-      obj['vv'] = this.values_;
+    this.values_ = this.obj['vv'] || Object.create(null);
+    if (!this.obj['vv']) {
+      this.obj['vv'] = this.values_;
     }
   }
 
@@ -230,6 +212,8 @@ export class Store {
    * @private
    */
   set(name, value) {
+    assert(name != '__proto__' && name != 'prototype',
+        'Name is not allowed: %s', name);
     // The structure is {key: {v: *, t: time}}
     if (this.values_[name] !== undefined) {
       const item = this.values_[name];

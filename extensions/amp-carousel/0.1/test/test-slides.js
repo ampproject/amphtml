@@ -455,7 +455,10 @@ describe('Slides functional', () => {
     function autoplaySetup(delay = '', inViewport = true) {
       clock = sandbox.useFakeTimers();
       setupElements();
-      element.setAttribute('autoplay', delay);
+      element.setAttribute('autoplay', '');
+      if (delay) {
+        element.setAttribute('delay', delay);
+      }
       element.removeAttribute('loop');
       setupAutoplaySpy = sandbox.spy(AmpSlides.prototype, 'setupAutoplay_');
       tryAutoplaySpy = sandbox.spy(AmpSlides.prototype, 'tryAutoplay_');

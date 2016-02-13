@@ -57,7 +57,7 @@ export function getElementPriority(tagName) {
   if (tagName == 'amp-ad') {
     return 2;
   }
-  if (tagName == 'amp-pixel') {
+  if (tagName == 'amp-pixel' || tagName == 'amp-analytics') {
     return 1;
   }
   return 0;
@@ -1348,24 +1348,27 @@ export class Resource {
     /** @private {boolean} */
     this.isInViewport_ = false;
 
+    /** @private {?Promise<undefined>} */
+    this.layoutPromise_ = null;
+
     /**
      * Only used in the "runtime off" case when the monitoring code needs to
      * known when the element is upgraded.
      * @private {!Function|undefined}
      */
-    this.onUpgraded_;
+    this.onUpgraded_ = undefined;
 
     /**
      * Pending change height that was requested but could not be satisfied.
      * @private {number|undefined}
      */
-    this.pendingChangeHeight_;
+    this.pendingChangeHeight_ = undefined;
 
-    /** @private {?function(*)} */
-    this.whenFirstLayoutCompleteResolve_ = null;
-
-    /** @private @const {?Promise} */
-    this.whenFirstLayoutCompletePromise_ = null;
+    /** @private @const {!Promise} */
+    this.loadPromise_ = new Promise(resolve => {
+      /** @const  */
+      this.loadPromiseResolve_ = resolve;
+    });
   }
 
   /**
@@ -1681,6 +1684,7 @@ export class Resource {
    * @return {!Promise|undefined}
    */
   layoutComplete_(success, opt_reason) {
+    this.loadPromiseResolve_();
     this.layoutPromise_ = null;
     this.state_ = success ? ResourceState_.LAYOUT_COMPLETE :
         ResourceState_.LAYOUT_FAILED;
@@ -1694,16 +1698,11 @@ export class Resource {
 
   /**
    * Returns a promise that is resolved when this resource is laid out
-   * for the first time.
+   * for the first time and the resource was loaded.
    * @return {!Promise}
    */
-  whenFirstLayoutComplete() {
-    if (!this.whenFirstLayoutCompletePromise_) {
-      this.whenFirstLayoutCompletePromise_ = new Promise(resolve => {
-        this.whenFirstLayoutCompleteResolve_ = resolve;
-      });
-    }
-    return this.whenFirstLayoutCompletePromise_;
+  loaded() {
+    return this.loadPromise_;
   }
 
   /**

@@ -16,7 +16,6 @@
 
 import {Storage, Store, LocalStorageBinding, ViewerStorageBinding} from
     '../../src/service/storage-impl';
-import {all} from '../../src/promise';
 import * as sinon from 'sinon';
 
 
@@ -43,9 +42,7 @@ describe('Storage', () => {
     viewerMock = sandbox.mock(viewer);
 
     windowApi = {
-      document: {
-        cookie: 'AMP_EXP=amp-storage'
-      },
+      document: {},
       location: 'https://acme.com/document1',
     };
 
@@ -72,19 +69,8 @@ describe('Storage', () => {
         expect(value).to.equal(expectedValue, `For "${k}"`);
       }));
     }
-    return all(list);
+    return Promise.all(list);
   }
-
-  it('should initialize with experiment', () => {
-    expect(viewerBroadcastHandler).to.exist;
-  });
-
-  it('should not initialize without experiment', () => {
-    viewerBroadcastHandler = undefined;
-    windowApi.document.cookie = '';
-    new Storage(windowApi, viewer, binding).start_();
-    expect(viewerBroadcastHandler).to.not.exist;
-  });
 
   it('should configure store correctly', () => {
     const store1 = new Store({});
@@ -92,12 +78,41 @@ describe('Storage', () => {
     store1.set('key2', 'value2');
     bindingMock.expects('loadBlob')
         .withExactArgs('https://acme.com')
-        .returns(btoa(JSON.stringify(store1.obj)))
+        .returns(Promise.resolve(btoa(JSON.stringify(store1.obj))))
         .once();
     return storage.get('key1').then(() => {
       return storage.storePromise_;
     }).then(store => {
       expect(store.maxValues_).to.equal(8);
+    });
+  });
+
+  it('should initialize empty store with prototype-less objects', () => {
+    bindingMock.expects('loadBlob')
+        .withExactArgs('https://acme.com')
+        .returns(Promise.resolve(null))
+        .once();
+    return storage.get('key1').then(() => {
+      return storage.storePromise_;
+    }).then(store => {
+      expect(store.obj.__proto__).to.be.undefined;
+      expect(store.values_.__proto__).to.be.undefined;
+    });
+  });
+
+  it('should restore store with prototype-less objects', () => {
+    const store1 = new Store({});
+    store1.set('key1', 'value1');
+    store1.set('key2', 'value2');
+    bindingMock.expects('loadBlob')
+        .withExactArgs('https://acme.com')
+        .returns(Promise.resolve(btoa(JSON.stringify(store1.obj))))
+        .once();
+    return storage.get('key1').then(() => {
+      return storage.storePromise_;
+    }).then(store => {
+      expect(store.obj.__proto__).to.be.undefined;
+      expect(store.values_.__proto__).to.be.undefined;
     });
   });
 
@@ -107,7 +122,7 @@ describe('Storage', () => {
     store1.set('key2', 'value2');
     bindingMock.expects('loadBlob')
         .withExactArgs('https://acme.com')
-        .returns(btoa(JSON.stringify(store1.obj)))
+        .returns(Promise.resolve(btoa(JSON.stringify(store1.obj))))
         .once();
     expect(storage.storePromise_).to.not.exist;
     const promise = storage.get('key1');
@@ -127,7 +142,7 @@ describe('Storage', () => {
   it('should get the value from first ever request and reuse store', () => {
     bindingMock.expects('loadBlob')
         .withExactArgs('https://acme.com')
-        .returns(null)
+        .returns(Promise.resolve(null))
         .once();
     expect(storage.storePromise_).to.not.exist;
     const promise = storage.get('key1');
@@ -176,7 +191,7 @@ describe('Storage', () => {
     store1.set('key2', 'value2');
     bindingMock.expects('loadBlob')
         .withExactArgs('https://acme.com')
-        .returns(btoa(JSON.stringify(store1.obj)))
+        .returns(Promise.resolve(btoa(JSON.stringify(store1.obj))))
         .once();
     bindingMock.expects('saveBlob')
         .withExactArgs('https://acme.com', sinon.match(arg => {
@@ -216,7 +231,7 @@ describe('Storage', () => {
     store1.set('key2', 'value2');
     bindingMock.expects('loadBlob')
         .withExactArgs('https://acme.com')
-        .returns(btoa(JSON.stringify(store1.obj)))
+        .returns(Promise.resolve(btoa(JSON.stringify(store1.obj))))
         .once();
     bindingMock.expects('saveBlob')
         .withExactArgs('https://acme.com', sinon.match(arg => {
@@ -254,7 +269,7 @@ describe('Storage', () => {
     store1.set('key1', 'value1');
     bindingMock.expects('loadBlob')
         .withExactArgs('https://acme.com')
-        .returns(btoa(JSON.stringify(store1.obj)))
+        .returns(Promise.resolve(btoa(JSON.stringify(store1.obj))))
         .twice();
     return storage.get('key1').then(value => {
       expect(value).to.equal('value1');
@@ -279,7 +294,7 @@ describe('Storage', () => {
     store1.set('key1', 'value1');
     bindingMock.expects('loadBlob')
         .withExactArgs('https://acme.com')
-        .returns(btoa(JSON.stringify(store1.obj)))
+        .returns(Promise.resolve(btoa(JSON.stringify(store1.obj))))
         .twice();
     return storage.get('key1').then(value => {
       expect(value).to.equal('value1');
@@ -390,6 +405,15 @@ describe('Store', () => {
     expect(store.get('k3')).to.equal(3);
     expect(store.get('k1')).to.be.undefined;
     expect(store.get('k2')).to.be.undefined;
+  });
+
+  it('should prohibit unsafe values', () => {
+    expect(() => {
+      store.set('__proto__', 'value1');
+    }).to.throw(/Name is not allowed/);
+    expect(() => {
+      store.set('prototype', 'value1');
+    }).to.throw(/Name is not allowed/);
   });
 });
 

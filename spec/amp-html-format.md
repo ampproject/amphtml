@@ -68,7 +68,7 @@ In concrete terms this means that:
     }
     </script>
     <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
-    <style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
     <script async src="https://cdn.ampproject.org/v0.js"></script>
   </head>
   <body>
@@ -98,7 +98,7 @@ AMP HTML documents MUST
 - <a name="chrs"></a>contain a `<meta charset="utf-8">` tag as the first child of their head tag. [🔗](#chrs)
 - <a name="vprt"></a>contain a `<meta name="viewport" content="width=device-width,minimum-scale=1">` tag inside their head tag. It's also recommend to include `initial-scale=1` (1). [🔗](#vprt)
 - <a name="scrpt"></a>contain a `<script async src="https://cdn.ampproject.org/v0.js"></script>` tag inside their head tag. [🔗](#scrpt)
-- <a name="opacity"></a><a name="boilerplate"></a>contain `<style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>` in their head tag. [🔗](#boilerplate)
+- <a name="boilerplate"></a>contain the [AMP boilerplate code](amp-boilerplate.md) in their head tag. [🔗](#boilerplate)
 
 (1) `width=device-width,minimum-scale=1` is required to ensure [GPU rasterization](https://www.chromium.org/developers/design-documents/chromium-graphics/how-to-get-gpu-rasterization) is enabled.
 
@@ -126,11 +126,11 @@ HTML tags can be used unchanged in AMP HTML. Certain tags have equivalent custom
 | param     | Prohibited. |
 | applet    | Prohibited. |
 | embed     | Prohibited. |
-| form      | Prohibited. |
+| form      | Prohibited. [Support coming in the future.](https://github.com/ampproject/amphtml/issues/1286) |
 | input elements | Prohibited. Includes input, textarea, select, option. Notably, button element is allowed. |
 | button    | Allowed. |
 | <a name="cust"></a>style     | [Required style tags for adjusting opacity](#opacity) One additional style tag is allowed in head tag for the purpose of custom styling. This style tag must have the attribute `amp-custom`. [🔗](#cust) |
-| link      | Allowed for certain values of rel: `canonical`. `stylesheet` is generally disallowed, but some values may be whitelisted for font providers. |
+| link      | `rel` values registered on [microformats.org](http://microformats.org/wiki/existing-rel-values) are allowed. If a rel value is missing from our whitelist, [please submit an issue](https://github.com/ampproject/amphtml/issues/new). `stylesheet` and other values like `preconnect`, `prerender` and `prefectch` that has side effects in the browser are disallowed. There is a special case for fetching stylesheets from whitelisted font providers. |
 | meta      | The `http-equiv` attribute is banned. Otherwise allowed. |
 | <a name="ancr"></a>a         | The `href` attribute value must not begin with `javascript:`. If set, the `target` attribute value must be `_blank`. Otherwise allowed. [🔗](#ancr) |
 | svg       | Most SVG elements are allowed |
@@ -147,6 +147,8 @@ Attribute names starting with `on` (such as `onclick` or `onmouseover`) are disa
 
 The `style` attribute must not be used.
 
+XML-related attributes, such as xmlns, xml:lang, xml:base, and xml:space are disallowed in AMP HTML.
+
 ### Links
 
 The `javascript:` schema is disallowed.
@@ -161,7 +163,7 @@ The following @-rules are allowed in stylesheets:
 
 `@font-face`, `@keyframes`, `@media`, `@supports`.
 
-`@import` will not be allowed. Other may be added in the future.
+`@import` will not be allowed. Others may be added in the future.
 
 #### Author stylesheets
 

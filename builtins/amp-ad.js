@@ -26,6 +26,7 @@ import {parseUrl} from '../src/url';
 import {registerElement} from '../src/custom-element';
 import {adPrefetch, adPreconnect, clientIdScope} from '../ads/_config';
 import {timer} from '../src/timer';
+import {viewerFor} from '../src/viewer';
 import {userNotificationManagerFor} from '../src/user-notification';
 
 
@@ -51,12 +52,6 @@ export function installAd(win) {
 
     /** @override  */
     renderOutsideViewport() {
-      // Before the user has scrolled we only render ads in view. This prevents
-      // excessive jank in situations like swiping through a lot of articles.
-      if (!this.getViewport().hasScrolled()) {
-        return false;
-      };
-
       // If another ad is currently loading we only load ads that are currently
       // in viewport.
       if (loadingAdsCount > 0) {
@@ -72,14 +67,16 @@ export function installAd(win) {
       return isLayoutSizeDefined(layout);
     }
 
-    /**
-     * @return {boolean}
-     * @override
-     */
+    /** @override */
     isReadyToBuild() {
       // TODO(dvoytenko, #1014): Review and try a more immediate approach.
       // Wait until DOMReady.
       return false;
+    }
+
+    /** @override */
+    isRelayoutNeeded() {
+      return true;
     }
 
     /** @override */
@@ -112,6 +109,11 @@ export function installAd(win) {
 
       /** @private {IntersectionObserver} */
       this.intersectionObserver_ = null;
+
+      /**
+       * @private @const
+       */
+      this.viewer_ = viewerFor(this.getWin());
     }
 
     /**
@@ -206,27 +208,26 @@ export function installAd(win) {
       return false;
     }
 
-
     /** @override */
     layoutCallback() {
-      loadingAdsCount++;
-      timer.delay(() => {
-        // Unfortunately we don't really have a good way to measure how long it
-        // takes to load an ad, so we'll just pretend it takes 1 second for
-        // now.
-        loadingAdsCount--;
-      }, 1000);
-      assert(!this.isInFixedContainer_,
-          '<amp-ad> is not allowed to be placed in elements with ' +
-          'position:fixed: %s', this.element);
-      this.element.setAttribute('scrolling', 'no');
       if (!this.iframe_) {
+        loadingAdsCount++;
+        assert(!this.isInFixedContainer_,
+            '<amp-ad> is not allowed to be placed in elements with ' +
+            'position:fixed: %s', this.element);
+        timer.delay(() => {
+          // Unfortunately we don't really have a good way to measure how long it
+          // takes to load an ad, so we'll just pretend it takes 1 second for
+          // now.
+          loadingAdsCount--;
+        }, 1000);
         return this.getAdCid_().then(cid => {
           if (cid) {
             this.element.setAttribute('ampcid', cid);
           }
           this.iframe_ = getIframe(this.element.ownerDocument.defaultView,
             this.element);
+          this.iframe_.setAttribute('scrolling', 'no');
           this.applyFillContent(this.iframe_);
           this.element.appendChild(this.iframe_);
           this.intersectionObserver_ =
@@ -253,9 +254,14 @@ export function installAd(win) {
               this.updateHeight_(newHeight);
             }
           }, /* opt_is3P */ true);
+          this.iframe_.style.visibility = 'hidden';
           listenOnce(this.iframe_, 'render-start', () => {
+            this.iframe_.style.visibility = '';
             this.sendEmbedInfo_(this.isInViewport());
           }, /* opt_is3P */ true);
+          this.viewer_.onVisibilityChanged(() => {
+            this.sendEmbedInfo_(this.isInViewport());
+          });
 
           return loadPromise(this.iframe_);
         });
@@ -282,7 +288,7 @@ export function installAd(win) {
         const consentId = this.element.getAttribute(
             'data-consent-notification-id');
         if (consentId) {
-          consent = userNotificationManagerFor(this.win).then(service => {
+          consent = userNotificationManagerFor(this.getWin()).then(service => {
             return service.get(consentId);
           });
         }
@@ -307,7 +313,8 @@ export function installAd(win) {
         const targetOrigin =
             this.iframe_.src ? parseUrl(this.iframe_.src).origin : '*';
         postMessage(this.iframe_, 'embed-state', {
-          inViewport: inViewport
+          inViewport: inViewport,
+          pageHidden: !this.viewer_.isVisible(),
         }, targetOrigin, /* opt_is3P */ true);
       }
     }

@@ -130,7 +130,7 @@ export class Templates {
     this.templateClassResolvers_ = {};
 
     /** @type {!Object<string, boolean>|undefined} */
-    this.declaredTemplates_;
+    this.declaredTemplates_ = undefined;
   }
 
   /**

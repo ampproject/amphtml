@@ -170,6 +170,53 @@ For instance:
 <amp-pixel src="https://foo.com/pixel?tcpConnectTime=TCP_CONNECT_TIME"></amp-pixel>
 ```
 
+## Device and Browser
+
+### AVAILABLE_SCREEN_HEIGHT
+
+Provides the screen height in pixels available for the page rendering. Note that this value can be slightly more or less than the actual viewport size because of various browser quirks.
+
+For instance:
+```html
+<amp-pixel src="https://foo.com/pixel?availScreenHeight=AVAILABLE_SCREEN_HEIGHT"></amp-pixel>
+```
+
+### AVAILABLE_SCREEN_WIDTH
+
+Provides the screen width in pixels available for the page rendering. Note that this can be slightly more or less than the actual viewport height due to various browser quirks.
+
+For instance:
+```html
+<amp-pixel src="https://foo.com/pixel?availScreenWidth=AVAILABLE_SCREEN_WIDTH"></amp-pixel>
+```
+
+### BROWSER_LANGUAGE
+
+Provides a string representing the preferred language of the user, usually the language of the browser UI.
+
+For instance:
+```html
+<amp-pixel src="https://foo.com/pixel?lang=BROWSER_LANGUAGE"></amp-pixel>
+```
+
+### DOCUMENT_CHARSET
+
+Provides the character encoding of the current document.
+
+For instance:
+```html
+<amp-pixel src="https://foo.com/pixel?charSet=DOCUMENT_CHARSET"></amp-pixel>
+```
+
+### SCREEN_COLOR_DEPTH
+
+Provides the screen color depth provided by the browser.
+
+For instance:
+```html
+<amp-pixel src="https://foo.com/pixel?colorDepth=SCREEN_COLOR_DEPTH"></amp-pixel>
+```
+
 ## Miscellaneous
 
 ### CLIENT_ID
@@ -204,6 +251,21 @@ For instance:
 <!-- cid is not provided until `user-consent` is dismissed -->
 <amp-pixel src="https://foo.com/pixel?cid=CLIENT_ID(cid-scope-cookie-fallback-name,user-consent-id)"></amp-pixel>
 ```
+
+### QUERY_PARAM
+
+Provides access to query string params.
+
+arguments:
+  - `param` (Required) - The key for the query string parameter to be inserted
+  - `defaultValue` - The value to use if the provide key is not present on the query string. Defaults to ""
+
+For instance:
+```html
+<amp-pixel src="https://foo.com/pixel?bar=QUERY_PARAM(baz,biz)"</amp-pixel>
+```
+
+If a query string parameter baz is provided then the corresponding value will be insterted into the pixel src, if no, the default "biz" will be used.
 
 ### PAGE_VIEW_ID
 
