@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {all} from './promise';
 import {documentInfoFor} from './document-info';
 import {documentStateFor} from './document-state';
 import {getService} from './service';
@@ -174,7 +173,7 @@ export class Performance {
    */
   whenViewportLayoutComplete_() {
     return this.whenReadyToRetrieveResources_().then(() => {
-      return all(this.resources_.getResourcesInViewport().map(r => {
+      return Promise.all(this.resources_.getResourcesInViewport().map(r => {
         // We're ok with the layout failing and still reporting.
         return r.loaded().catch(function() {});
       }));

@@ -23,6 +23,7 @@
  */
 
 import './polyfills';
+import {installEmbedStateListener} from './environment';
 import {a9} from '../ads/a9';
 import {adform} from '../ads/adform';
 import {adreactor} from '../ads/adreactor';
@@ -154,7 +155,9 @@ window.draw3p = function(opt_configCallback) {
   window.context.reportRenderedEntityIdentifier =
       reportRenderedEntityIdentifier;
   delete data._context;
+
   manageWin(window);
+  installEmbedStateListener();
   draw3p(window, data, opt_configCallback);
   updateVisibilityState(window);
   nonSensitiveDataPostMessage('render-start');

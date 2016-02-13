@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,15 @@
  * limitations under the License.
  */
 
-import 'document-register-element/build/document-register-element.max';
-import {install as installMathSign} from './polyfills/math-sign';
-import {install as installPromise} from './polyfills/promise';
 
-installMathSign(window);
-installPromise(window);
+import {Promise} from 'promise-pjs/promise';
+
+/**
+ * Sets the Promise polyfill if it does not exist.
+ * @param {!Window} win
+ */
+export function install(win) {
+  if (!win.Promise) {
+    win.Promise = Promise;
+  }
+}
