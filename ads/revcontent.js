@@ -21,11 +21,11 @@ import {writeScript, checkData} from '../src/3p';
  * @param {!Object} data
  */
 export function revcontent(global, data) {
-    checkData(data, ['id', 'width', 'height', 'endpoint', 'ssl', 'wrapper']);
-    (function(window, document, data, undefined) {
-        const revamp_service_url = 'https://labs-cdn.revcontent.com/build/amphtml/revcontent.amp.min.js';
-        window.data = data;
-        writeScript(window, revamp_service_url);
+  checkData(data, ['id', 'width', 'height', 'endpoint', 'ssl', 'wrapper']);
+  (function (window, document, data, undefined) {
+    const revamp_service_url = 'https://labs-cdn.revcontent.com/build/amphtml/revcontent.amp.min.js';
+    window.data = data;
+    writeScript(window, revamp_service_url);
 
-    })(global, global.document, data);
+  })(global, global.document, data);
 }

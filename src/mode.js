@@ -51,18 +51,19 @@ export function setModeForTesting(m) {
  * @return {!ModeDef}
  */
 function getMode_() {
-  const isLocalDev = (location.hostname == 'localhost' || location.hostname == 'ads.localhost' ||
-      (location.ancestorOrigins && location.ancestorOrigins[0] &&
-          location.ancestorOrigins[0].indexOf('http://localhost:') == 0)) &&
+  const hostname = location.hostname;
+  const isLocalDev = (hostname == 'localhost' || hostname == 'ads.localhost' ||
+    (location.ancestorOrigins && location.ancestorOrigins[0] &&
+    location.ancestorOrigins[0].indexOf('http://localhost:') == 0)) &&
       // Filter out localhost running against a prod script.
       // Because all allowed scripts are ours, we know that these can only
       // occur during local dev.
-      !!document.querySelector('script[src*="/dist/"],script[src*="/base/"]');
+    !!document.querySelector('script[src*="/dist/"],script[src*="/base/"]');
 
   const developmentQueryString = parseQueryString(
-      // location.originalHash is set by the viewer when it removes the fragment
-      // from the URL.
-      location.originalHash || location.hash)['development'];
+    // location.originalHash is set by the viewer when it removes the fragment
+    // from the URL.
+    location.originalHash || location.hash)['development'];
 
   return {
     localDev: isLocalDev,
