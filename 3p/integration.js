@@ -191,7 +191,7 @@ function triggerResizeRequest(width, height) {
 function observeIntersection(observerCallback) {
   // Send request to received records.
   nonSensitiveDataPostMessage('send-intersections');
-  return listenParent('intersection', data => {
+  return listenParent(window, 'intersection', data => {
     observerCallback(data.changes);
   });
 }
@@ -202,7 +202,7 @@ function observeIntersection(observerCallback) {
  * @param {!Window} global
  */
 function updateVisibilityState(global) {
-  listenParent('embed-state', function(data) {
+  listenParent(window, 'embed-state', function(data) {
     global.context.hidden = data.pageHidden;
     const event = global.document.createEvent('Event');
     event.data = {
@@ -220,7 +220,7 @@ function updateVisibilityState(global) {
  *    observes for resize status messages.
  */
 function onResizeSuccess(observerCallback) {
-  return listenParent('embed-resize-changed', data => {
+  return listenParent(window, 'embed-resize-changed', data => {
     observerCallback(data.requestedHeight);
   });
 }
@@ -232,7 +232,7 @@ function onResizeSuccess(observerCallback) {
  *    observes for resize status messages.
  */
 function onResizeDenied(observerCallback) {
-  return listenParent('embed-resize-denied', data => {
+  return listenParent(window, 'embed-resize-denied', data => {
     observerCallback(data.requestedHeight);
   });
 }

@@ -608,6 +608,29 @@ export class Viewer {
   }
 
   /**
+   * Triggers "tick" event for the viewer.
+   * @param {!JSONObject} message
+   */
+  tick(message) {
+    this.sendMessage_('tick', message, false);
+  }
+
+  /**
+   * Triggers "sendCsi" event for the viewer.
+   */
+  flushTicks() {
+    this.sendMessage_('sendCsi', undefined, false);
+  }
+
+  /**
+   * Triggers "setFlushParams" event for the viewer.
+   * @param {!JSONObject} message
+   */
+  setFlushParams(message) {
+    this.sendMessage_('setFlushParams', message, false);
+  }
+
+  /**
    * Registers receiver for the broadcast events.
    * @param {function(!JSONObject)} handler
    * @return {!Unlisten}

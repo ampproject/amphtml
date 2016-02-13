@@ -16,8 +16,6 @@ limitations under the License.
 
 ### <a name="amp-user-notification"></a> `amp-user-notification`
 
-Experiment: "amp-storage" should be enabled via https://cdn.ampproject.org/experiments.html or `AMP.toggleExperiment('amp-storage')`. See [Experiments Guide](../../tools/experiments/README.md). If this experiment is not enabled, the `data-show-if-href` and `data-dismiss-href` are required.
-
 Displays a dismissable notification to the user. By supplying two URLs that
 get called before the notification is shown and after it is dismissed,
 it is possible to control per user as to whether the notification should
