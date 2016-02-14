@@ -117,7 +117,7 @@ export function validateSrcPrefix(prefix, src) {
   if (src !== undefined) {
     let p = 0;
     for (p = 0; p <= totalPrefixes; p++) {
-      const protocolIndex = src.toLowerCase().indexOf(prefix[p]);
+      const protocolIndex = src.indexOf(prefix[p]);
       if (protocolIndex == 0) {
         validPrefixes.push(p.toString());
       }
