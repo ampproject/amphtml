@@ -630,7 +630,7 @@ describe('Resources changeHeight', () => {
       expect(state.scrollHeight).to.equal(2999);
 
       viewportMock.expects('getScrollHeight').returns(3999).once();
-      viewportMock.expects('getScrollTop').withExactArgs(2777).once();
+      viewportMock.expects('setScrollTop').withExactArgs(2777).once();
       task.mutate(state);
       expect(resource1.changeHeight.callCount).to.equal(1);
       expect(resource1.changeHeight.firstCall.args[0]).to.equal(111);
