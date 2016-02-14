@@ -109,14 +109,14 @@ function executeAfterWriteScript(win, fn) {
  * @param {string} src
  */
 export function validateSrcPrefix(prefix, src) {
-  var validPrefixes = [];
+  let validPrefixes = [];
   if (!isArray(prefix)) {
     prefix = [prefix];
   }
-  var totalPrefixes = prefix.length;
+  let totalPrefixes = prefix.length;
   if (src !== undefined) {
-    for (var p = 0; p <= totalPrefixes; p++) {
-      var protocolIndex = src.toLowerCase().indexOf(prefix[p]);
+    for (const p = 0; p <= totalPrefixes; p++) {
+      let protocolIndex = src.toLowerCase().indexOf(prefix[p]);
       if (protocolIndex == 0) {
         validPrefixes.push(p.toString());
       }
