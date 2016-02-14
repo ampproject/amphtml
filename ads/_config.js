@@ -58,7 +58,12 @@ export const adPreconnect = {
     'https://s.yieldmo.com',
     'https://ads.yieldmo.com'
   ],
-  revcontent: 'https://trends.revcontent.com'
+  revcontent: [
+    'https://trends.revcontent.com',
+    'https://cdn.revcontent.com',
+    'https://img.revcontent.com',
+    'https://labs-cdn.revcontent.com'
+  ]
 };
 
 /**
