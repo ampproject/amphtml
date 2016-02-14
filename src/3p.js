@@ -128,6 +128,7 @@ export function validateSrcPrefix(prefix, src) {
       throw new Error('Invalid src ' + src);
     }
   }
+  throw new Error('Invalid src ' + src);
 }
 
 /**
