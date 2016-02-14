@@ -19,7 +19,7 @@ limitations under the License.
 ## Example
 
 ```html
-<amp-ad width=300 height=1000
+<amp-ad width=320 height=420
         type="revcontent"
         data-wrapper="rcjsload_2ff711"
         data-endpoint="trends.revcontent.com"
