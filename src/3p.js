@@ -109,18 +109,24 @@ function executeAfterWriteScript(win, fn) {
  * @param {string} src
  */
 export function validateSrcPrefix(prefix, src) {
-
+  var validPrefixes = [];
   if (!isArray(prefix)) {
     prefix = [prefix];
   }
-
-  for (const p in prefix) {
-    if (src.indexOf(p) === 0) {
+  var totalPrefixes = prefix.length;
+  if (src !== undefined) {
+    for (var p = 0; p <= totalPrefixes; p++) {
+      var protocolIndex = src.toLowerCase().indexOf(prefix[p]);
+      if (protocolIndex == 0) {
+        validPrefixes.push(p.toString());
+      }
+    }
+    if (validPrefixes.length > 0) {
       return;
+    } else {
+      throw new Error('Invalid src ' + src);
     }
   }
-
-  throw new Error('Invalid src ' + src);
 }
 
 /**
