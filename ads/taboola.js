@@ -47,13 +47,13 @@ export function taboola(global, data) {
 
   // push the two object into the '_taboola' global
   (global._taboola = global._taboola || []).push([{
-      viewId: global.context.pageViewId,
-      publisher: data.publisher,
-      placement: data.placement,
-      mode: data.mode,
-      framework: 'amp',
-      container: 'c'
-    },
+    viewId: global.context.pageViewId,
+    publisher: data.publisher,
+    placement: data.placement,
+    mode: data.mode,
+    framework: 'amp',
+    container: 'c'
+  },
     params,
     {flush: true}]
   );
