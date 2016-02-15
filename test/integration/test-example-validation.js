@@ -37,6 +37,7 @@ describe('example', function() {
   const examples = [
     'ads.amp.html',
     'brightcove.amp.html',
+    'dailymotion.amp.html',
     'metadata-examples/article-json-ld.amp.html',
     'metadata-examples/article-microdata.amp.html',
     'metadata-examples/recipe-json-ld.amp.html',
@@ -69,6 +70,7 @@ describe('example', function() {
    */
   const errorWhitelist = [
     /invalid value \'.\/viewer-integr.js\'/,
+    /amp-dailymotion/,
     /amp-soundcloud/,
     /vimeo/,
   ];
