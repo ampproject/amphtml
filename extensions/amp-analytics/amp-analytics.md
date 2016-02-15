@@ -20,8 +20,7 @@ Capture analytics data from an AMP document.
 
 #### <a name="behavior"></a>Behavior
 
-The `<amp-analytics>` element is used to measure activity on an AMP document. The details concerning what is measured and how
-that data is sent to an analytics server is specified in a JSON configuration object.
+The `<amp-analytics>` element is used to measure activity on an AMP document. The details concerning what is measured and how that data is sent to an analytics server is specified in a JSON configuration object. It comes pre-configured to support many [analytics vendors](#analytics-vendors) out of the box.
 
 For example, the following `<amp-analytics>` element is configured to send a request to `https://example.com/analytics`
 when the document is first loaded, and each time an `<a>` tag is clicked:
@@ -66,6 +65,12 @@ Here's an example of usage of `type` for a provider called XYZ:
 ```html
 <amp-analytics type="XYZ"> ... </amp-analytics>
 ```
+
+##### Adobe Analytics
+
+Type attribute value: `adobeanalytics`
+
+Adds support for Adobe Analytics. More details for adding Adobe Analytics support can be found at [helpx.adobe.com](https://helpx.adobe.com/marketing-cloud/analytics.html).
 
 ##### AT Internet
 
