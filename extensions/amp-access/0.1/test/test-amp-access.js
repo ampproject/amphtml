@@ -208,6 +208,18 @@ describe('AccessService', () => {
     expect(service.pubOrigin_).to.match(/^http.*/);
   });
 
+  it('should initialize authorization fallback response', () => {
+    element.textContent = JSON.stringify({
+      'authorization': 'https://acme.com/a',
+      'pingback': 'https://acme.com/p',
+      'login': 'https://acme.com/l',
+      'authorizationFallbackResponse': {'error': true}
+    });
+    const service = new AccessService(window);
+    expect(service.config_.authorizationFallbackResponse).to.deep.equal(
+        {'error': true});
+  });
+
   it('should NOT send events by default', () => {
     element.textContent = JSON.stringify({
       'authorization': 'https://acme.com/a',
@@ -226,7 +238,7 @@ describe('AccessService authorization', () => {
 
   let sandbox;
   let clock;
-  let configElement, elementOn, elementOff;
+  let configElement, elementOn, elementOff, elementError;
   let xhrMock;
   let cidMock;
   let analyticsMock;
@@ -257,6 +269,11 @@ describe('AccessService authorization', () => {
     elementOff = document.createElement('div');
     elementOff.setAttribute('amp-access', 'NOT access');
     document.body.appendChild(elementOff);
+
+    elementError = document.createElement('div');
+    elementError.setAttribute('amp-access', 'error');
+    elementError.setAttribute('amp-access-hide', '');
+    document.body.appendChild(elementError);
 
     service = new AccessService(window);
 
@@ -298,6 +315,9 @@ describe('AccessService authorization', () => {
     }
     if (elementOff.parentElement) {
       elementOff.parentElement.removeChild(elementOff);
+    }
+    if (elementError.parentElement) {
+      elementError.parentElement.removeChild(elementError);
     }
     analyticsMock.verify();
     sandbox.restore();
@@ -381,6 +401,28 @@ describe('AccessService authorization', () => {
       expect(document.documentElement).to.have.class('amp-access-error');
       expect(service.authResponse_).to.not.exist;
       expect(actualTimeoutDelay).to.equal(3000);
+    });
+  });
+
+  it('should use fallback on authorization failure when available', () => {
+    expectGetReaderId('reader1');
+    xhrMock.expects('fetchJson')
+        .withExactArgs('https://acme.com/a?rid=reader1', {
+          credentials: 'include',
+          requireAmpResponseSourceOrigin: true
+        })
+        .returns(Promise.reject('intentional'))
+        .once();
+    service.config_.authorizationFallbackResponse = {'error': true};
+    const promise = service.runAuthorization_();
+    expect(document.documentElement).to.have.class('amp-access-loading');
+    expect(document.documentElement).not.to.have.class('amp-access-error');
+    return promise.then(() => {
+      expect(document.documentElement).not.to.have.class('amp-access-loading');
+      expect(document.documentElement).not.to.have.class('amp-access-error');
+      expect(elementOn).to.have.attribute('amp-access-hide');
+      expect(elementOff).not.to.have.attribute('amp-access-hide');
+      expect(elementError).not.to.have.attribute('amp-access-hide');
     });
   });
 
