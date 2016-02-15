@@ -74,6 +74,9 @@ export function reportError(error, opt_associatedElement) {
  */
 export function installErrorReporting(win) {
   win.onerror = reportErrorToServer;
+  win.addEventListener('unhandledrejection', event => {
+    reportError(event.reason);
+  });
 }
 
 /**
