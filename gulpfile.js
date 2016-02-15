@@ -452,14 +452,21 @@ function compileJs(srcDir, srcFilename, destDir, options) {
   function rebundle() {
     activeBundleOperationCount++;
     bundler.bundle()
-      .on('error', function(err) { console.error(err); this.emit('end'); })
+      .on('error', function(err) {
+        activeBundleOperationCount--;
+        if (err instanceof SyntaxError) {
+          console.error(util.colors.red('Syntax error:', err.message));
+        } else {
+          console.error(err);
+        }
+      })
       .pipe(lazybuild())
       .pipe(rename(options.toName || srcFilename))
       .pipe(lazywrite())
       .on('end', function() {
         activeBundleOperationCount--;
         if (activeBundleOperationCount == 0) {
-          console.info('All current JS updates done.');
+          console.info(util.colors.green('All current JS updates done.'));
         }
       });
   }
