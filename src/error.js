@@ -90,7 +90,7 @@ function reportErrorToServer(message, filename, line, col, error) {
     makeBodyVisible(this.document);
   }
   const mode = getMode();
-  if (mode.isLocalDev || mode.development || mode.test) {
+  if (mode.localDev || mode.development || mode.test) {
     return;
   }
   const url = getErrorReportUrl(message, filename, line, col, error);
@@ -124,6 +124,9 @@ export function getErrorReportUrl(message, filename, line, col, error) {
   let url = 'https://amp-error-reporting.appspot.com/r' +
       '?v=' + encodeURIComponent('$internalRuntimeVersion$') +
       '&m=' + encodeURIComponent(message);
+  if (window.context && window.context.location) {
+    url += '&3p=1';
+  }
 
   if (error) {
     const tagName = error && error.associatedElement
