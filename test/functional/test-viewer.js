@@ -22,7 +22,6 @@ import * as sinon from 'sinon';
 describe('Viewer', () => {
 
   let sandbox;
-  let clock;
   let windowMock;
   let viewer;
   let windowApi;
@@ -30,7 +29,6 @@ describe('Viewer', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    clock = sandbox.useFakeTimers();
     timeouts = [];
     const WindowApi = function() {};
     WindowApi.prototype.setTimeout = function(handler) {
@@ -277,16 +275,15 @@ describe('Viewer', () => {
       expect(m2Resolved).to.be.false;
 
       // Timeout.
-      clock.tick(5001);
-      viewer.setMessageDeliverer(() => {
-        return Promise.resolve();
-      }, 'https://acme.com');
+      expect(timeouts).to.have.length(1);
+      timeouts[0]();
       return Promise.all([m1, m2]);
-    }, error => {
-      expect(error).to.match(/timeout/);
+    }).then(() => {
+      throw new Error('must never be here');
+    }, () => {
       // Not resolved ever.
-      expect(m1Resolved).to.be.true;
-      expect(m2Resolved).to.be.true;
+      expect(m1Resolved).to.be.false;
+      expect(m2Resolved).to.be.false;
     });
   });
 
