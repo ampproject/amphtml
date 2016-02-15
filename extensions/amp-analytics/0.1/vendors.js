@@ -51,10 +51,14 @@ export const ANALYTICS_CONFIG = {
       'scrollTop': 'SCROLL_TOP',
       'scrollWidth': 'SCROLL_WIDTH',
       'serverResponseTime': 'SERVER_RESPONSE_TIME',
+      'sourceUrl': 'SOURCE_URL',
+      'sourceHost': 'SOURCE_HOST',
       'tcpConnectTime': 'TCP_CONNECT_TIME',
       'timestamp': 'TIMESTAMP',
       'timezone': 'TIMEZONE',
       'title': 'TITLE',
+      'accessReaderId': 'ACCESS_READER_ID',
+      'authdata': 'AUTHDATA',
     }
   },
 

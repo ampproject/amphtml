@@ -143,3 +143,19 @@ The `access-login-failed` event is issued when Login dialog has failed due to an
   }
 }
 ```
+
+#### Access analytics variables
+
+Access contributes the following URL substitutions to the [amp-var-substitutions.md](spec/amp-var-substitutions.md).
+
+###### ACCESS_READER_ID
+
+The `ACCESS_READER_ID` variable is substituted with the Reader ID used for access operations. This is a sensitive ID and care should be taken in sharing it. Please ensure that any data you pass to a third party complies with its terms of service.
+
+###### AUTHDATA(field)
+
+The `AUTHDATA(field)` variable is substituted with the value of the field in the authorization response. The nested fields are allowed, such as `AUTHDATA(nested.field)`.
+
+This variable is replaced with empty string if queried before the authorization response is received.
+
+Data contained in `AUTHDATA` may be sensitive and care should be taken in sharing it. Please ensure that any data you pass to a third party complies with its terms of service.

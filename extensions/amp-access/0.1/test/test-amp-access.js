@@ -1098,6 +1098,77 @@ describe('AccessService login', () => {
 });
 
 
+describe('AccessService analytics', () => {
+
+  let sandbox;
+  let configElement;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+
+    markElementScheduledForTesting(window, 'amp-analytics');
+    installCidService(window);
+
+    configElement = document.createElement('script');
+    configElement.setAttribute('id', 'amp-access');
+    configElement.setAttribute('type', 'application/json');
+    configElement.textContent = JSON.stringify({
+      'authorization': 'https://acme.com/a?rid=READER_ID',
+      'pingback': 'https://acme.com/p?rid=READER_ID',
+      'login': 'https://acme.com/l?rid=READER_ID'
+    });
+    document.body.appendChild(configElement);
+    document.documentElement.classList.remove('amp-access-error');
+
+    service = new AccessService(window);
+    service.enabled_ = true;
+    service.isAnalyticsExperimentOn_ = true;
+    service.getReaderId_ = () => {
+      return Promise.resolve('reader1');
+    };
+    service.setAuthResponse_({views: 3, child: {type: 'premium'}});
+  });
+
+  afterEach(() => {
+    if (configElement.parentElement) {
+      configElement.parentElement.removeChild(configElement);
+    }
+    sandbox.restore();
+    sandbox = null;
+  });
+
+  it('should return null without experiment', () => {
+    service.isAnalyticsExperimentOn_ = false;
+    expect(service.getAccessReaderId()).to.be.null;
+    expect(service.getAuthdataField('views')).to.be.null;
+  });
+
+  it('should return null when not enabled', () => {
+    service.enabled_ = false;
+    expect(service.getAccessReaderId()).to.be.null;
+    expect(service.getAuthdataField('views')).to.be.null;
+  });
+
+  it('should return reader id', () => {
+    return service.getAccessReaderId().then(readerId => {
+      expect(readerId).to.equal('reader1');
+    });
+  });
+
+  it('should return authdata', () => {
+    expect(service.getAuthdataField('views')).to.equal(3);
+    expect(service.getAuthdataField('child.type')).to.equal('premium');
+    expect(service.getAuthdataField('other')).to.be.null;
+    expect(service.getAuthdataField('child.other')).to.be.null;
+  });
+
+  it('should return null before authdata initialized', () => {
+    service.setAuthResponse_(null);
+    expect(service.getAuthdataField('views')).to.be.null;
+  });
+});
+
+
 describe('AccessService type=other', () => {
 
   let sandbox;

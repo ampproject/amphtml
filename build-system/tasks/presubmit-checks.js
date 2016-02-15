@@ -228,6 +228,20 @@ var forbiddenTerms = {
   'openDatabase': requiresReviewPrivacy,
   'requestFileSystem': requiresReviewPrivacy,
   'webkitRequestFileSystem': requiresReviewPrivacy,
+  'getAccessReaderId': {
+    message: requiresReviewPrivacy,
+    whitelist: [
+      'extensions/amp-access/0.1/amp-access.js',
+      'src/url-replacements.js',
+    ]
+  },
+  'getAuthdataField': {
+    message: requiresReviewPrivacy,
+    whitelist: [
+      'extensions/amp-access/0.1/amp-access.js',
+      'src/url-replacements.js',
+    ]
+  },
   'debugger': '',
 
   // ES6. These are only the most commonly used.

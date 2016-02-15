@@ -25,9 +25,17 @@ import {parseUrl} from '../../src/url';
 
 describe('UrlReplacements', () => {
 
+  let sandbox;
   let loadObservable;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+  });
+
   afterEach(() => {
     loadObservable = null;
+    sandbox.restore();
+    sandbox = null;
   });
 
   function expand(url, withCid, opt_bindings) {
@@ -462,5 +470,75 @@ describe('UrlReplacements', () => {
       .then(res => {
         expect(res).to.match(/sh=default_value&s/);
       });
+  });
+
+  describe('access values', () => {
+
+    let accessService;
+    let accessServiceMock;
+    let reportDevSpy;
+
+    beforeEach(() => {
+      accessService = {
+        getAccessReaderId: () => {},
+        getAuthdataField: () => {},
+      };
+      accessServiceMock = sandbox.mock(accessService);
+      reportDevSpy = sandbox.spy();
+    });
+
+    afterEach(() => {
+      accessServiceMock.verify();
+    });
+
+    function expand(url, opt_disabled) {
+      return createIframePromise().then(iframe => {
+        iframe.doc.title = 'Pixel Test';
+        const link = iframe.doc.createElement('link');
+        link.setAttribute('href', 'https://pinterest.com/pin1');
+        link.setAttribute('rel', 'canonical');
+        iframe.doc.head.appendChild(link);
+
+        const replacements = urlReplacementsFor(iframe.win);
+        replacements.getAccessService_ = () => {
+          if (opt_disabled) {
+            return Promise.resolve(null);
+          }
+          return Promise.resolve(accessService);
+        };
+        replacements.reportDev_ = reportDevSpy;
+        return replacements.expand(url);
+      });
+    }
+
+    it('should replace ACCESS_READER_ID', () => {
+      accessServiceMock.expects('getAccessReaderId')
+          .returns(Promise.resolve('reader1'))
+          .once();
+      return expand('?a=ACCESS_READER_ID') .then(res => {
+        expect(res).to.match(/a=reader1/);
+        expect(reportDevSpy.callCount).to.equal(0);
+      });
+    });
+
+    it('should replace AUTHDATA', () => {
+      accessServiceMock.expects('getAuthdataField')
+          .withExactArgs('field1')
+          .returns('value1')
+          .once();
+      return expand('?a=AUTHDATA(field1)').then(res => {
+        expect(res).to.match(/a=value1/);
+        expect(reportDevSpy.callCount).to.equal(0);
+      });
+    });
+
+    it('should report error if not available', () => {
+      accessServiceMock.expects('getAccessReaderId')
+          .never();
+      return expand('?a=ACCESS_READER_ID;', /* disabled */ true) .then(res => {
+        expect(res).to.match(/a=;/);
+        expect(reportDevSpy.callCount).to.equal(1);
+      });
+    });
   });
 });
