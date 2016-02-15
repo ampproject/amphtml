@@ -96,6 +96,16 @@ Type attribute value: `googleanalytics`
 
 Adds support for Google Analytics. More details for adding Google Analytics support can be found at [developers.google.com](https://developers.google.com/analytics/devguides/collection/amp-analytics/).
 
+##### INFOnline / IVW
+
+Type attribute value: `infonline`
+
+Adds support for [INFOnline](https://www.infonline.de) / [IVW](http://www.ivw.de). Requires the following variables
+
+* `st` (Angebotskennung)
+* `co` (Comment)
+* `cp` (Code)
+
 ##### Krux
 
 Type attribute value: `krux`
