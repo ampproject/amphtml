@@ -51,6 +51,21 @@ Note also, that the sandbox applies to all windows opened from a sandboxed ifram
 
 See the [the docs on MDN](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe#attr-sandbox) for further details on the sandbox attribute.
 
+##### data-param-*
+
+All `data-param-*` attributes will be added as query parameter to the iframe src. For example, you can add `data-param-autoplay=1` to a YouTube amp-iframe and it'll pass `?autoplay=1` as part of the iframe src.
+
+Example:
+```html
+<amp-iframe width=500 height=320
+    src="https://www.youtube.com/embed/JGhoLcsr8GA"
+    data-param-autoplay="1"
+    data-param-cc_load_policy="1">
+</amp-iframe>
+```
+
+The src of the inner iframe will be `https://www.youtube.com/embed/JGhoLcsr8GA?autoplay=1&cc_load_policy=1`.
+
 #### Iframe Resizing
 
 An `amp-iframe` must have static layout defined as is the case with any other AMP element. However,
