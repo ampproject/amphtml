@@ -16,11 +16,13 @@
 
 import {Viewer} from '../../src/service/viewer-impl';
 import {platform} from '../../src/platform';
+import * as sinon from 'sinon';
 
 
 describe('Viewer', () => {
 
   let sandbox;
+  let clock;
   let windowMock;
   let viewer;
   let windowApi;
@@ -28,6 +30,7 @@ describe('Viewer', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
+    clock = sandbox.useFakeTimers();
     timeouts = [];
     const WindowApi = function() {};
     WindowApi.prototype.setTimeout = function(handler) {
@@ -182,10 +185,18 @@ describe('Viewer', () => {
   });
 
   it('should post broadcast event', () => {
+    const delivered = [];
+    viewer.setMessageDeliverer((eventType, data) => {
+      delivered.push({eventType: eventType, data: data});
+    }, 'https://acme.com');
     viewer.broadcast({type: 'type1'});
-    const m = viewer.messageQueue_[0];
-    expect(m.eventType).to.equal('broadcast');
-    expect(m.data.type).to.equal('type1');
+    expect(viewer.messageQueue_.length).to.equal(0);
+    return viewer.messagingReadyPromise_.then(() => {
+      expect(delivered.length).to.equal(1);
+      const m = delivered[0];
+      expect(m.eventType).to.equal('broadcast');
+      expect(m.data.type).to.equal('type1');
+    });
   });
 
   it('should queue non-dupe events', () => {
@@ -216,6 +227,67 @@ describe('Viewer', () => {
     expect(delivered[0].data.width).to.equal(11);
     expect(delivered[1].eventType).to.equal('documentResized');
     expect(delivered[1].data.width).to.equal(13);
+  });
+
+  it('should wait for messaging channel', () => {
+    let m1Resolved = false;
+    let m2Resolved = false;
+    const m1 = viewer.sendMessage('message1', {}, /* awaitResponse */ false)
+        .then(() => {
+          m1Resolved = true;
+        });
+    const m2 = viewer.sendMessage('message2', {}, /* awaitResponse */ true)
+        .then(() => {
+          m2Resolved = true;
+        });
+    return Promise.resolve().then(() => {
+      // Not resolved yet.
+      expect(m1Resolved).to.be.false;
+      expect(m2Resolved).to.be.false;
+
+      // Set message deliverer.
+      viewer.setMessageDeliverer(() => {
+        return Promise.resolve();
+      }, 'https://acme.com');
+      expect(m1Resolved).to.be.false;
+      expect(m2Resolved).to.be.false;
+
+      return Promise.all([m1, m2]);
+    }).then(() => {
+      // All resolved now.
+      expect(m1Resolved).to.be.true;
+      expect(m2Resolved).to.be.true;
+    });
+  });
+
+  it('should timeout messaging channel', () => {
+    let m1Resolved = false;
+    let m2Resolved = false;
+    const m1 = viewer.sendMessage('message1', {}, /* awaitResponse */ false)
+        .then(() => {
+          m1Resolved = true;
+        });
+    const m2 = viewer.sendMessage('message2', {}, /* awaitResponse */ true)
+        .then(() => {
+          m2Resolved = true;
+        });
+    return Promise.resolve().then(() => {
+      // Not resolved yet.
+      expect(m1Resolved).to.be.false;
+      expect(m2Resolved).to.be.false;
+
+      // Timeout.
+      clock.tick(5001);
+      viewer.setMessageDeliverer(() => {
+        return Promise.resolve();
+      }, 'https://acme.com');
+      return Promise.all([m1, m2]);
+    }, error => {
+      expect(error).to.match(/timeout/);
+      // Not resolved ever.
+      expect(m1Resolved).to.be.true;
+      expect(m2Resolved).to.be.true;
+    });
   });
 
   describe('isTrustedViewer', () => {
