@@ -246,6 +246,8 @@ export class Viewer {
           /** @private @const {function(!Viewer)} */
           this.messagingReadyResolver_ = resolve;
         }));
+    // The error is expected when no viewer is ever set.
+    this.messagingReadyPromise_.catch(() => {});
 
     // Trusted viewer and referrer.
     let trustedViewerResolved;
