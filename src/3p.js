@@ -114,14 +114,12 @@ export function validateSrcPrefix(prefix, src) {
   }
   const totalPrefixes = prefix.length;
   if (src !== undefined) {
-    let p = 0;
-    for (p = 0; p <= totalPrefixes; p++) {
+    for (let p = 0; p <= totalPrefixes; p++) {
       const protocolIndex = src.indexOf(prefix[p]);
       if (protocolIndex == 0) {
         return;
       }
     }
-    throw new Error('Invalid src ' + src);
   }
   throw new Error('Invalid src ' + src);
 }
