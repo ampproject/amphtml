@@ -109,17 +109,17 @@ function executeAfterWriteScript(win, fn) {
  * @param {string} src
  */
 export function validateSrcPrefix(prefix, src) {
-
   if (!isArray(prefix)) {
     prefix = [prefix];
   }
-
-  for (const p of prefix) {
-    if (src.indexOf(p) === 0) {
-      return;
+  if (src !== undefined) {
+    for (let p = 0; p <= prefix.length; p++) {
+      const protocolIndex = src.indexOf(prefix[p]);
+      if (protocolIndex == 0) {
+        return;
+      }
     }
   }
-
   throw new Error('Invalid src ' + src);
 }
 
