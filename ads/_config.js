@@ -28,6 +28,7 @@ export const adPrefetch = {
   dotandads: 'https://amp.ad.dotandad.com/dotandadsAmp.js',
   smartadserver: 'https://ec-ns.sascdn.com/diff/js/smart.js',
   yieldmo: 'https://static.yieldmo.com/ym.amp1.js',
+  revcontent: 'https://labs-cdn.revcontent.com/build/amphtml/revcontent.amp.min.js',
 };
 
 /**
@@ -57,6 +58,11 @@ export const adPreconnect = {
     'https://s.yieldmo.com',
     'https://ads.yieldmo.com',
   ],
+  revcontent: [
+    'https://trends.revcontent.com',
+    'https://cdn.revcontent.com',
+    'https://img.revcontent.com',
+  ]
 };
 
 /**
