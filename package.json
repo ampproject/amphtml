@@ -76,7 +76,7 @@
     "minimist": "1.2.0",
     "mocha": "2.3.3",
     "path": "0.12.7",
-    "postcss": "5.0.14",
+    "postcss": "5.0.16",
     "pretty-bytes": "2.0.1",
     "request": "2.67.0",
     "rimraf": "^2.5.1",
