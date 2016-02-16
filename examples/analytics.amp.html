@@ -237,7 +237,13 @@ Container for analytics tags. Positioned far away from top to make sure that doe
 </amp-analytics>
 <!-- End comScore example -->
 
-<!-- INFOnline example -->
+<!--
+  INFOnline example
+
+  Important: url needs to point to a copy of
+  amp-analytics-infonline.html on a different subdomain
+  than your AMP files.
+-->
 <amp-analytics type="infonline" id="infonline">
 <script type="application/json">
 {
@@ -245,6 +251,9 @@ Container for analytics tags. Positioned far away from top to make sure that doe
     "st":  "angebotskennung",
     "co":  "comment",
     "cp":  "code"
+  },
+  "requests": {
+    "url":  "https://3p.ampproject.net/custom/amp-analytics-infonline.html"
   }
 }
 </script>
