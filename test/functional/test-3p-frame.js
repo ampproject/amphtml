@@ -21,8 +21,13 @@ import {documentInfoFor} from '../../src/document-info';
 import {loadPromise} from '../../src/event-helper';
 import {setModeForTesting} from '../../src/mode';
 import {resetServiceForTesting} from '../../src/service';
+import {viewerFor} from '../../src/viewer';
 
 describe('3p-frame', () => {
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+  });
 
   afterEach(() => {
     resetServiceForTesting(window, 'bootstrapBaseUrl');
@@ -32,6 +37,8 @@ describe('3p-frame', () => {
     if (m) {
       m.parentElement.removeChild(m);
     }
+    sandbox.restore();
+    sandbox = null;
   });
 
   function addCustomBootstrap(url) {
@@ -71,11 +78,12 @@ describe('3p-frame', () => {
     link.setAttribute('href', 'https://foo.bar/baz');
     document.head.appendChild(link);
 
-    const div = document.createElement('div');
+    const div = document.createElement('my-element');
     div.setAttribute('data-test-attr', 'value');
     div.setAttribute('data-ping', 'pong');
     div.setAttribute('width', '50');
     div.setAttribute('height', '100');
+    div.setAttribute('ampcid', 'cidValue');
 
     div.getLayoutBox = function() {
       return {
@@ -84,10 +92,14 @@ describe('3p-frame', () => {
       };
     };
 
+    const viewer = viewerFor(window);
+    const viewerMock = sandbox.mock(viewer);
+    viewerMock.expects('getUnconfirmedReferrerUrl')
+        .returns('http://acme.org/')
+        .once();
+
     const iframe = getIframe(window, div, '_ping_');
     const src = iframe.src;
-    const referrer = window.document.referrer;
-    expect(referrer).to.not.be.empty;
     const locationHref = location.href;
     expect(locationHref).to.not.be.empty;
     const docInfo = documentInfoFor(window);
@@ -95,11 +107,12 @@ describe('3p-frame', () => {
     const fragment =
         '#{"testAttr":"value","ping":"pong","width":50,"height":100,' +
         '"initialWindowWidth":100,"initialWindowHeight":200,"type":"_ping_"' +
-        ',"_context":{"referrer":"' + referrer + '",' +
+        ',"_context":{"referrer":"http://acme.org/",' +
         '"canonicalUrl":"https://foo.bar/baz",' +
-        '"pageViewId":"' + docInfo.pageViewId + '","location":{"href":' +
-        '"' + locationHref + '"},"mode":{"localDev":true,' +
-        '"development":false,"minified":false}}}';
+        '"pageViewId":"' + docInfo.pageViewId + '","clientId":"cidValue",' +
+        '"location":{"href":"' + locationHref + '"},"tagName":"MY-ELEMENT",' +
+        '"mode":{"localDev":true,"development":false,"minified":false}' +
+        ',"hidden":false}}';
     expect(src).to.equal(
         'http://ads.localhost:9876/dist.3p/current/frame.max.html' +
         fragment);
@@ -119,7 +132,7 @@ describe('3p-frame', () => {
         expect(win.context.location.originValidated).to.be.false;
       }
       expect(win.context.pageViewId).to.equal(docInfo.pageViewId);
-      expect(win.context.referrer).to.equal(referrer);
+      expect(win.context.referrer).to.equal('http://acme.org/');
       expect(win.context.data.testAttr).to.equal('value');
       expect(win.context.noContentAvailable).to.be.a('function');
       expect(win.context.observeIntersection).to.be.a('function');
@@ -128,6 +141,7 @@ describe('3p-frame', () => {
       expect(c).to.not.be.null;
       expect(c.textContent).to.contain('pong');
       validateData(win.context.data, ['ping', 'testAttr']);
+      document.head.removeChild(link);
     });
   });
 
@@ -158,7 +172,7 @@ describe('3p-frame', () => {
   it('should pick the right bootstrap url (custom)', () => {
     addCustomBootstrap('http://localhost:9876/boot/remote.html');
     expect(() => {
-      getBootstrapBaseUrl(window);
+      getBootstrapBaseUrl(window, true);
     }).to.throw(/must not be on the same origin as the/);
   });
 

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+checkMinVersion();
+
 var autoprefixer = require('autoprefixer');
 var babel = require('babelify');
 var browserify = require('browserify');
@@ -31,11 +33,14 @@ var rename = require('gulp-rename');
 var replace = require('gulp-replace');
 var source = require('vinyl-source-stream');
 var sourcemaps = require('gulp-sourcemaps');
+var touch = require('touch');
 var uglify = require('gulp-uglify');
 var util = require('gulp-util');
 var watchify = require('watchify');
+var windowConfig = require('./build-system/window-config');
 var wrap = require('gulp-wrap');
 var internalRuntimeVersion = require('./build-system/internal-version').VERSION;
+var internalRuntimeToken = require('./build-system/internal-version').TOKEN;
 
 var argv = minimist(process.argv.slice(2), { boolean: ['strictBabelTransform'] });
 
@@ -70,11 +75,13 @@ function buildExtensions(options) {
   // and update it if any of its required deps changed.
   // Each extension and version must be listed individually here.
   buildExtension('amp-access', '0.1', true, options);
+  buildExtension('amp-accordion', '0.1', true, options);
   buildExtension('amp-analytics', '0.1', false, options);
   buildExtension('amp-anim', '0.1', false, options);
   buildExtension('amp-audio', '0.1', false, options);
   buildExtension('amp-brightcove', '0.1', false, options);
   buildExtension('amp-carousel', '0.1', true, options);
+  buildExtension('amp-dailymotion', '0.1', false, options);
   buildExtension('amp-dynamic-css-classes', '0.1', false, options);
   buildExtension('amp-facebook', '0.1', false, options);
   buildExtension('amp-fit-text', '0.1', true, options);
@@ -86,6 +93,7 @@ function buildExtensions(options) {
   buildExtension('amp-list', '0.1', false, options);
   buildExtension('amp-mustache', '0.1', false, options);
   buildExtension('amp-pinterest', '0.1', true, options);
+  buildExtension('amp-soundcloud', '0.1', false, options);
   buildExtension('amp-install-serviceworker', '0.1', false, options);
   /**
    * @deprecated `amp-slides` is deprecated and will be deleted before 1.0.
@@ -94,6 +102,7 @@ function buildExtensions(options) {
   buildExtension('amp-slides', '0.1', false, options);
   buildExtension('amp-twitter', '0.1', false, options);
   buildExtension('amp-user-notification', '0.1', true, options);
+  buildExtension('amp-vimeo', '0.1', false, options);
   buildExtension('amp-vine', '0.1', false, options);
   buildExtension('amp-youtube', '0.1', false, options);
 }
@@ -120,11 +129,14 @@ function compile(watch, shouldMinify) {
   compileJs('./src/', 'amp-babel.js', './dist', {
     toName: 'amp.js',
     minifiedName: 'v0.js',
+    includePolyfills: true,
     watch: watch,
     minify: shouldMinify,
     // If there is a sync JS error during initial load,
     // at least try to unhide the body.
-    wrapper: 'try{<%= contents %>}catch(e){setTimeout(function(){' +
+    wrapper: windowConfig.getTemplate() +
+        'try{(function(){<%= contents %>})()}catch(e){' +
+        'setTimeout(function(){' +
         'var s=document.body.style;' +
         's.opacity=1;' +
         's.visibility="visible";' +
@@ -311,9 +323,13 @@ function buildExamples(watch) {
 
   // Also update test-example-validation.js
   buildExample('ads.amp.html');
+  buildExample('analytics-notification.amp.html');
   buildExample('analytics.amp.html');
   buildExample('article.amp.html');
+  buildExample('responsive.amp.html');
   buildExample('article-access.amp.html');
+  buildExample('dailymotion.amp.html');
+  buildExample('csp.amp.html');
   buildExample('metadata-examples/article-json-ld.amp.html');
   buildExample('metadata-examples/article-microdata.amp.html');
   buildExample('metadata-examples/recipe-json-ld.amp.html');
@@ -329,8 +345,11 @@ function buildExamples(watch) {
   buildExample('pinterest.amp.html');
   buildExample('released.amp.html');
   buildExample('twitter.amp.html');
+  buildExample('soundcloud.amp.html');
   buildExample('user-notification.amp.html');
+  buildExample('vimeo.amp.html');
   buildExample('vine.amp.html');
+  buildExample('multiple-docs.html');
 
   // TODO(dvoytenko, #1393): Enable for proxy-testing.
   // // Examples are also copied into `c/` directory for AMP-proxy testing.
@@ -400,6 +419,8 @@ function thirdPartyBootstrap(watch, shouldMinify) {
       });
 }
 
+var activeBundleOperationCount = 0;
+
 /**
  * Compile a javascript file
  *
@@ -422,6 +443,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
       .pipe(source, srcFilename)
       .pipe(buffer)
       .pipe(replace, /\$internalRuntimeVersion\$/g, internalRuntimeVersion)
+      .pipe(replace, /\$internalRuntimeToken\$/g, internalRuntimeToken)
       .pipe(wrap, wrapper)
       .pipe(sourcemaps.init.bind(sourcemaps), {loadMaps: true});
 
@@ -430,17 +452,35 @@ function compileJs(srcDir, srcFilename, destDir, options) {
       .pipe(gulp.dest.bind(gulp), destDir);
 
   function rebundle() {
+    activeBundleOperationCount++;
     bundler.bundle()
-      .on('error', function(err) { console.error(err); this.emit('end'); })
+      .on('error', function(err) {
+        activeBundleOperationCount--;
+        if (err instanceof SyntaxError) {
+          console.error(util.colors.red('Syntax error:', err.message));
+        } else {
+          console.error(err);
+        }
+      })
       .pipe(lazybuild())
       .pipe(rename(options.toName || srcFilename))
-      .pipe(lazywrite());
+      .pipe(lazywrite())
+      .on('end', function() {
+        activeBundleOperationCount--;
+        if (activeBundleOperationCount == 0) {
+          console.info(util.colors.green('All current JS updates done.'));
+        }
+      });
   }
 
   if (options.watch) {
     bundler.on('update', function() {
       console.log('-> bundling ' + srcDir + '...');
       rebundle();
+      // Touch file in unit test set. This triggers rebundling of tests because
+      // karma only considers changes to tests files themselves re-bundle
+      // worthy.
+      touch('test/_init_tests.js');
     });
   }
 
@@ -529,7 +569,7 @@ function buildExperiments(options) {
   console.log('Processing ' + htmlPath);
   var html = fs.readFileSync(htmlPath, 'utf8');
   var minHtml = html.replace('../../dist.tools/experiments/experiments.max.js',
-      'https://cdn.ampproject.org/experiments.js');
+      'https://cdn.ampproject.org/v0/experiments.js');
   gulp.src(htmlPath)
       .pipe(file('experiments.cdn.html', minHtml))
       .pipe(gulp.dest('dist.tools/experiments/'));
@@ -635,6 +675,20 @@ function buildLoginDoneVersion(version, options) {
           latestName: latestName,
         });
       });
+}
+
+/**
+ * Exits the process if gulp is running with a node version lower than
+ * the required version. This has to run very early to avoid parse
+ * errors from modules that e.g. use let.
+ */
+function checkMinVersion() {
+  var majorVersion = Number(process.version.replace(/v/, '').split('.')[0]);
+  if (majorVersion < 4) {
+    console.log('Please run AMP with node.js version 4 or newer.');
+    console.log('Your version is', process.version);
+    process.exit(1);
+  }
 }
 
 

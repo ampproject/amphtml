@@ -41,6 +41,15 @@ var forbiddenTerms = {
   'DO NOT SUBMIT': '',
   'describe\\.only': '',
   'it\\.only': '',
+  'sinon\\.(spy|stub|mock)\\(\\w[^)]*\\)': {
+    message: 'Use a sandbox instead to avoid repeated `#restore` calls'
+  },
+  '(\\w*([sS]py|[sS]tub|[mM]ock|clock).restore)': {
+    message: 'Use a sandbox instead to avoid repeated `#restore` calls'
+  },
+  'sinon\\.useFakeTimers': {
+    message: 'Use a sandbox instead to avoid repeated `#restore` calls'
+  },
   'console\\.\\w+\\(': {
     message: 'If you run against this, use console/*OK*/.log to ' +
       'whitelist a legit case.',
@@ -50,6 +59,13 @@ var forbiddenTerms = {
       'validator/parse-css.js',
       'validator/validator-in-browser.js',
     ]
+  },
+  'iframePing': {
+    message: 'This is only available in vendor config for ' +
+        'temporary workarounds.',
+    whitelist: [
+      'extensions/amp-analytics/0.1/amp-analytics.js',
+    ],
   },
   // Service factories that should only be installed once.
   'installActionService': {
@@ -73,6 +89,13 @@ var forbiddenTerms = {
       'src/service/cid-impl.js',
       'extensions/amp-access/0.1/amp-access.js',
       'extensions/amp-analytics/0.1/amp-analytics.js',
+    ],
+  },
+  'installStorageService': {
+    message: privateServiceFactory,
+    whitelist: [
+      'extensions/amp-analytics/0.1/amp-analytics.js',
+      'src/service/storage-impl.js',
     ],
   },
   'installViewerService': {
@@ -111,10 +134,19 @@ var forbiddenTerms = {
       'src/service/standard-actions-impl.js',
     ],
   },
+  'sendMessage': {
+    message: privateServiceFactory,
+    whitelist: [
+      'src/service/viewer-impl.js',
+      'src/service/storage-impl.js',
+      'examples/viewer-integr-messaging.js',
+    ],
+  },
   // Privacy sensitive
   'cidFor': {
     message: requiresReviewPrivacy,
     whitelist: [
+      'builtins/amp-ad.js',
       'src/cid.js',
       'src/service/cid-impl.js',
       'src/url-replacements.js',
@@ -158,7 +190,9 @@ var forbiddenTerms = {
     message: requiresReviewPrivacy,
     whitelist: [
       'extensions/amp-access/0.1/amp-access.js',
+      'extensions/amp-user-notification/0.1/amp-user-notification.js',
       'src/experiments.js',
+      'src/service/storage-impl.js',
       'tools/experiments/experiments.js',
     ]
   },
@@ -168,11 +202,25 @@ var forbiddenTerms = {
       'src/experiments.js',
     ]
   },
+  'isTrusted': {
+    message: requiresReviewPrivacy,
+    whitelist: [
+      'src/service/viewer-impl.js',
+    ]
+  },
   'eval\\(': '',
+  'storageFor': {
+    message: requiresReviewPrivacy,
+    whitelist: [
+      'src/storage.js',
+      'extensions/amp-user-notification/0.1/amp-user-notification.js',
+    ],
+  },
   'localStorage': {
     message: requiresReviewPrivacy,
     whitelist: [
       'src/service/cid-impl.js',
+      'src/service/storage-impl.js',
     ],
   },
   'sessionStorage': requiresReviewPrivacy,
@@ -180,14 +228,26 @@ var forbiddenTerms = {
   'openDatabase': requiresReviewPrivacy,
   'requestFileSystem': requiresReviewPrivacy,
   'webkitRequestFileSystem': requiresReviewPrivacy,
+  'getAccessReaderId': {
+    message: requiresReviewPrivacy,
+    whitelist: [
+      'extensions/amp-access/0.1/amp-access.js',
+      'src/url-replacements.js',
+    ]
+  },
+  'getAuthdataField': {
+    message: requiresReviewPrivacy,
+    whitelist: [
+      'extensions/amp-access/0.1/amp-access.js',
+      'src/url-replacements.js',
+    ]
+  },
   'debugger': '',
 
   // ES6. These are only the most commonly used.
   'Array\\.of': es6polyfill,
   // These currently depend on core-js/modules/web.dom.iterable which
   // we don't want. That decision could be reconsidered.
-  'Promise\\.all': es6polyfill,
-  'Promise\\.race': es6polyfill,
   '\\.startsWith': {
     message: es6polyfill,
     whitelist: [
@@ -208,7 +268,23 @@ var forbiddenTerms = {
     whitelist: [
       'extensions/amp-access/0.1/access-expr-impl.js',
     ],
-  }
+  },
+
+  // Overridden APIs.
+  '(doc.*)\\.referrer': {
+    message: 'Use Viewer.getReferrerUrl() instead.',
+    whitelist: [
+      'src/service/viewer-impl.js',
+    ],
+  },
+  'getUnconfirmedReferrerUrl': {
+    message: 'Use Viewer.getReferrerUrl() instead.',
+    whitelist: [
+      'extensions/amp-dynamic-css-classes/0.1/amp-dynamic-css-classes.js',
+      'src/3p-frame.js',
+      'src/service/viewer-impl.js',
+    ],
+  },
 };
 
 var ThreePTermsMessage = 'The 3p bootstrap iframe has no polyfills loaded and' +

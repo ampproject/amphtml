@@ -34,7 +34,6 @@ describe('Resources', () => {
 
   afterEach(() => {
     resources = null;
-    clock.restore();
     clock = null;
     sandbox.restore();
     sandbox = null;
@@ -245,14 +244,12 @@ describe('Resources discoverWork', () => {
   }
 
   let sandbox;
-  let clock;
   let viewportMock;
   let resources;
   let resource1, resource2;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    clock = sandbox.useFakeTimers();
     resources = new Resources(window);
     viewportMock = sandbox.mock(resources.viewport_);
 
@@ -266,11 +263,8 @@ describe('Resources discoverWork', () => {
 
   afterEach(() => {
     viewportMock.verify();
-    viewportMock.restore();
     viewportMock = null;
     resources = null;
-    clock.restore();
-    clock = null;
     sandbox.restore();
     sandbox = null;
   });
@@ -443,10 +437,8 @@ describe('Resources changeHeight', () => {
 
   afterEach(() => {
     viewportMock.verify();
-    viewportMock.restore();
     viewportMock = null;
     resources = null;
-    clock.restore();
     clock = null;
     sandbox.restore();
     sandbox = null;
@@ -513,11 +505,6 @@ describe('Resources changeHeight', () => {
       resource1.layoutBox_ = {top: 10, left: 0, right: 100, bottom: 50,
           height: 50};
       vsyncSpy = sandbox.stub(resources.vsync_, 'run');
-    });
-
-    afterEach(() => {
-      vsyncSpy.reset();
-      vsyncSpy.restore();
     });
 
     it('should NOT change height and calls overflowCallback', () => {
@@ -768,7 +755,6 @@ describe('Resources mutateElement', () => {
   }
 
   let sandbox;
-  let clock;
   let viewportMock;
   let resources;
   let resource1, resource2;
@@ -778,7 +764,6 @@ describe('Resources mutateElement', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    clock = sandbox.useFakeTimers();
     resources = new Resources(window);
     viewportMock = sandbox.mock(resources.viewport_);
     resources.vsync_ = {
@@ -822,11 +807,8 @@ describe('Resources mutateElement', () => {
 
   afterEach(() => {
     viewportMock.verify();
-    viewportMock.restore();
     viewportMock = null;
     resources = null;
-    clock.restore();
-    clock = null;
     sandbox.restore();
     sandbox = null;
   });
@@ -894,7 +876,6 @@ describe('Resources.TaskQueue', () => {
   });
 
   afterEach(() => {
-    clock.restore();
     clock = null;
     sandbox.restore();
     sandbox = null;
@@ -937,15 +918,14 @@ describe('Resources.TaskQueue', () => {
 describe('Resources.Resource', () => {
 
   let sandbox;
-  let clock;
   let element;
   let elementMock;
   let resources;
   let resource;
+  let viewportMock;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    clock = sandbox.useFakeTimers();
 
     element = {
       tagName: 'AMP-AD',
@@ -966,15 +946,16 @@ describe('Resources.Resource', () => {
 
     resources = new Resources(window);
     resource = new Resource(1, element, resources);
+    viewportMock = sandbox.mock(resources.viewport_);
   });
 
   afterEach(() => {
+    viewportMock.verify();
+    viewportMock = null;
     resource = null;
     elementMock.verify();
     elementMock = null;
     element = null;
-    clock.restore();
-    clock = null;
     sandbox.restore();
     sandbox = null;
   });
@@ -1041,16 +1022,43 @@ describe('Resources.Resource', () => {
     expect(resource.build(true)).to.equal(false);
   });
 
-  it('should fail measure when not upgraded', () => {
-    elementMock.expects('isUpgraded').returns(false).atLeast(1);
-    expect(() => {
-      resource.measure();
-    }).to.throw(/Must be upgraded to measure: amp-ad#1/);
+  it('should mark as ready for layout if already measured', () => {
+    elementMock.expects('isUpgraded').returns(true).atLeast(1);
+    elementMock.expects('build').returns(true).once();
+    const stub = sandbox.stub(resource, 'hasBeenMeasured').returns(true);
+    resource.build(false);
+    expect(stub.calledOnce).to.be.true;
+    expect(resource.getState()).to.equal(ResourceState_.READY_FOR_LAYOUT);
   });
 
-  it('should noop measure when not built', () => {
+  it('should mark as not laid out if not yet measured', () => {
     elementMock.expects('isUpgraded').returns(true).atLeast(1);
-    elementMock.expects('getBoundingClientRect').never();
+    elementMock.expects('build').returns(true).once();
+    const stub = sandbox.stub(resource, 'hasBeenMeasured').returns(false);
+    resource.build(false);
+    expect(stub.calledOnce).to.be.true;
+    expect(resource.getState()).to.equal(ResourceState_.NOT_LAID_OUT);
+  });
+
+  it('should allow to measure when not upgraded', () => {
+    elementMock.expects('isUpgraded').returns(false).atLeast(1);
+    resource.resources_ = {
+      viewport_: {
+        getLayoutRect() {
+          return layoutRectLtwh(0, 100, 300, 100);
+        }
+      }
+    };
+    expect(() => {
+      resource.measure();
+    }).to.not.throw();
+    expect(resource.getLayoutBox()).to.eql(layoutRectLtwh(0, 100, 300, 100));
+  });
+
+  it('should allow measure even when not built', () => {
+    elementMock.expects('isUpgraded').returns(true).atLeast(1);
+    elementMock.expects('getBoundingClientRect').returns(
+        layoutRectLtwh(0, 0, 0, 0)).once();
     resource.measure();
     expect(resource.getState()).to.equal(ResourceState_.NOT_BUILT);
   });
@@ -1121,7 +1129,6 @@ describe('Resources.Resource', () => {
   });
 
   it('should not relayout if has box has not changed', () => {
-    elementMock.expects('isUpgraded').returns(true).atLeast(1);
     resource.state_ = ResourceState_.LAYOUT_COMPLETE;
     resource.layoutBox_ = {left: 11, top: 12, width: 111, height: 222};
 
@@ -1283,6 +1290,7 @@ describe('Resources.Resource', () => {
 
     resource.state_ = ResourceState_.READY_FOR_LAYOUT;
     resource.layoutBox_ = {left: 11, top: 12, width: 10, height: 10};
+    const loaded = resource.loaded();
     const promise = resource.startLayout(true);
     expect(resource.layoutPromise_).to.not.equal(null);
     expect(resource.getState()).to.equal(ResourceState_.LAYOUT_SCHEDULED);
@@ -1290,6 +1298,7 @@ describe('Resources.Resource', () => {
     return promise.then(() => {
       expect(resource.getState()).to.equal(ResourceState_.LAYOUT_COMPLETE);
       expect(resource.layoutPromise_).to.equal(null);
+      return loaded;  // Just making sure this doesn't time out.
     });
   });
 
@@ -1402,4 +1411,38 @@ describe('Resources.Resource', () => {
     });
   });
 
+  describe('getResourcesInViewport', () => {
+    let resource1;
+    let resource2;
+
+    beforeEach(() => {
+      resource1 = {
+        hasOwner: () => false,
+        isDisplayed: () => true,
+        prerenderAllowed: () => true,
+        overlaps: () => true
+      };
+      resource2 = {
+        hasOwner: () => false,
+        isDisplayed: () => true,
+        prerenderAllowed: () => true,
+        overlaps: () => false
+      };
+      resources.resources_ = [resource1, resource2];
+    });
+
+    it('should return a subset of resources that are currently ' +
+       'in the viewport', () => {
+      expect(resources.get().length).to.equal(2);
+      expect(resources.getResourcesInViewport().length).to.equal(1);
+    });
+
+    it('should not return resources that are not allowed to prerender if ' +
+       'in prerender mode', () => {
+      resource1.prerenderAllowed = () => false;
+      expect(resources.get().length).to.equal(2);
+      expect(resources.getResourcesInViewport(false).length).to.equal(1);
+      expect(resources.getResourcesInViewport(true).length).to.equal(0);
+    });
+  });
 });

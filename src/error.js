@@ -41,7 +41,7 @@ export function reportError(error, opt_associatedElement) {
   }
   error.reported = true;
   const element = opt_associatedElement || error.associatedElement;
-  if (element) {
+  if (element && element.classList) {
     element.classList.add('-amp-error');
     if (getMode().development) {
       element.classList.add('-amp-element-error');
@@ -58,7 +58,7 @@ export function reportError(error, opt_associatedElement) {
     } else {
       (console.error || console.log).call(console, error.message);
     }
-    if (!(process.env.NODE_ENV == 'production')) {
+    if (!getMode().minified) {
       (console.error || console.log).call(console, error.stack);
     }
   }
@@ -74,6 +74,9 @@ export function reportError(error, opt_associatedElement) {
  */
 export function installErrorReporting(win) {
   win.onerror = reportErrorToServer;
+  win.addEventListener('unhandledrejection', event => {
+    reportError(event.reason);
+  });
 }
 
 /**
@@ -90,7 +93,7 @@ function reportErrorToServer(message, filename, line, col, error) {
     makeBodyVisible(this.document);
   }
   const mode = getMode();
-  if (mode.isLocalDev || mode.development || mode.test) {
+  if (mode.localDev || mode.development || mode.test) {
     return;
   }
   const url = getErrorReportUrl(message, filename, line, col, error);
@@ -124,6 +127,9 @@ export function getErrorReportUrl(message, filename, line, col, error) {
   let url = 'https://amp-error-reporting.appspot.com/r' +
       '?v=' + encodeURIComponent('$internalRuntimeVersion$') +
       '&m=' + encodeURIComponent(message);
+  if (window.context && window.context.location) {
+    url += '&3p=1';
+  }
 
   if (error) {
     const tagName = error && error.associatedElement

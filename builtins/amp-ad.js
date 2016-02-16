@@ -15,22 +15,25 @@
  */
 
 import {BaseElement} from '../src/base-element';
-import {adPrefetch, adPreconnect} from '../ads/_prefetch';
-import {assert} from '../src/asserts';
-import {getIframe, prefetchBootstrap} from '../src/3p-frame';
 import {IntersectionObserver} from '../src/intersection-observer';
+import {assert} from '../src/asserts';
+import {cidForOrNull} from '../src/cid';
+import {getIframe, prefetchBootstrap} from '../src/3p-frame';
 import {isLayoutSizeDefined} from '../src/layout';
-import {listenOnce} from '../src/iframe-helper';
+import {listen, listenOnce, postMessage} from '../src/iframe-helper';
 import {loadPromise} from '../src/event-helper';
+import {parseUrl} from '../src/url';
 import {registerElement} from '../src/custom-element';
+import {adPrefetch, adPreconnect, clientIdScope} from '../ads/_config';
 import {timer} from '../src/timer';
+import {viewerFor} from '../src/viewer';
+import {userNotificationManagerFor} from '../src/user-notification';
 
 
 /** @private @const These tags are allowed to have fixed positioning */
 const POSITION_FIXED_TAG_WHITELIST = {
   'AMP-LIGHTBOX': true
 };
-
 
 /**
  * @param {!Window} win Destination window for the new element.
@@ -49,12 +52,6 @@ export function installAd(win) {
 
     /** @override  */
     renderOutsideViewport() {
-      // Before the user has scrolled we only render ads in view. This prevents
-      // excessive jank in situations like swiping through a lot of articles.
-      if (!this.getViewport().hasScrolled()) {
-        return false;
-      };
-
       // If another ad is currently loading we only load ads that are currently
       // in viewport.
       if (loadingAdsCount > 0) {
@@ -70,14 +67,16 @@ export function installAd(win) {
       return isLayoutSizeDefined(layout);
     }
 
-    /**
-     * @return {boolean}
-     * @override
-     */
+    /** @override */
     isReadyToBuild() {
       // TODO(dvoytenko, #1014): Review and try a more immediate approach.
       // Wait until DOMReady.
       return false;
+    }
+
+    /** @override */
+    isRelayoutNeeded() {
+      return true;
     }
 
     /** @override */
@@ -110,6 +109,11 @@ export function installAd(win) {
 
       /** @private {IntersectionObserver} */
       this.intersectionObserver_ = null;
+
+      /**
+       * @private @const
+       */
+      this.viewer_ = viewerFor(this.getWin());
     }
 
     /**
@@ -204,37 +208,92 @@ export function installAd(win) {
       return false;
     }
 
-
     /** @override */
     layoutCallback() {
-      loadingAdsCount++;
-      timer.delay(() => {
-        // Unfortunately we don't really have a good way to measure how long it
-        // takes to load an ad, so we'll just pretend it takes 1 second for
-        // now.
-        loadingAdsCount--;
-      }, 1000);
-      assert(!this.isInFixedContainer_,
-          '<amp-ad> is not allowed to be placed in elements with ' +
-          'position:fixed: %s', this.element);
       if (!this.iframe_) {
-        this.iframe_ = getIframe(this.element.ownerDocument.defaultView,
+        loadingAdsCount++;
+        assert(!this.isInFixedContainer_,
+            '<amp-ad> is not allowed to be placed in elements with ' +
+            'position:fixed: %s', this.element);
+        timer.delay(() => {
+          // Unfortunately we don't really have a good way to measure how long it
+          // takes to load an ad, so we'll just pretend it takes 1 second for
+          // now.
+          loadingAdsCount--;
+        }, 1000);
+        return this.getAdCid_().then(cid => {
+          if (cid) {
+            this.element.setAttribute('ampcid', cid);
+          }
+          this.iframe_ = getIframe(this.element.ownerDocument.defaultView,
             this.element);
-        this.applyFillContent(this.iframe_);
-        this.element.appendChild(this.iframe_);
-        this.intersectionObserver_ =
-            new IntersectionObserver(this, this.iframe_, /* opt_is3P */true);
-        // Triggered by context.noContentAvailable() inside the ad iframe.
-        listenOnce(this.iframe_, 'no-content', () => {
-          this.noContentHandler_();
-        }, /* opt_is3P */true);
-        // Triggered by context.reportRenderedEntityIdentifier(…) inside the ad
-        // iframe.
-        listenOnce(this.iframe_, 'entity-id', info => {
-          this.element.setAttribute('creative-id', info.id);
-        }, /* opt_is3P */true);
+          this.iframe_.setAttribute('scrolling', 'no');
+          this.applyFillContent(this.iframe_);
+          this.element.appendChild(this.iframe_);
+          this.intersectionObserver_ =
+              new IntersectionObserver(this, this.iframe_, /* opt_is3P */true);
+          // Triggered by context.noContentAvailable() inside the ad iframe.
+          listenOnce(this.iframe_, 'no-content', () => {
+            this.noContentHandler_();
+          }, /* opt_is3P */ true);
+          // Triggered by context.reportRenderedEntityIdentifier(…) inside the ad
+          // iframe.
+          listenOnce(this.iframe_, 'entity-id', info => {
+            this.element.setAttribute('creative-id', info.id);
+          }, /* opt_is3P */ true);
+          listen(this.iframe_, 'embed-size', data => {
+            if (data.width !== undefined) {
+              this.iframe_.width = data.width;
+              this.element.setAttribute('width', data.width);
+            }
+            if (data.height !== undefined) {
+              const newHeight = Math.max(this.element./*OK*/offsetHeight +
+                  data.height - this.iframe_./*OK*/offsetHeight, data.height);
+              this.iframe_.height = data.height;
+              this.element.setAttribute('height', newHeight);
+              this.updateHeight_(newHeight);
+            }
+          }, /* opt_is3P */ true);
+          this.iframe_.style.visibility = 'hidden';
+          listenOnce(this.iframe_, 'render-start', () => {
+            this.iframe_.style.visibility = '';
+            this.sendEmbedInfo_(this.isInViewport());
+          }, /* opt_is3P */ true);
+          this.viewer_.onVisibilityChanged(() => {
+            this.sendEmbedInfo_(this.isInViewport());
+          });
+
+          return loadPromise(this.iframe_);
+        });
       }
       return loadPromise(this.iframe_);
+    }
+
+    /**
+     * @return {!Promise<string|undefined>} A promise for a CID or undefined if
+     *     - the ad network does not request one or
+     *     - `amp-analytics` which provides the CID service was not installed.
+     * @private
+     */
+    getAdCid_() {
+      const scope = clientIdScope[this.element.getAttribute('type')];
+      if (!scope) {
+        return Promise.resolve();
+      }
+      return cidForOrNull(this.getWin()).then(cidService => {
+        if (!cidService) {
+          return Promise.resolve();
+        }
+        let consent = Promise.resolve();
+        const consentId = this.element.getAttribute(
+            'data-consent-notification-id');
+        if (consentId) {
+          consent = userNotificationManagerFor(this.getWin()).then(service => {
+            return service.get(consentId);
+          });
+        }
+        return cidService.get(scope, consent);
+      });
     }
 
     /** @override  */
@@ -242,6 +301,54 @@ export function installAd(win) {
       if (this.intersectionObserver_) {
         this.intersectionObserver_.onViewportCallback(inViewport);
       }
+      this.sendEmbedInfo_(inViewport);
+    }
+
+    /**
+     * @param {boolean} inViewport
+     * @private
+     */
+    sendEmbedInfo_(inViewport) {
+      if (this.iframe_) {
+        const targetOrigin =
+            this.iframe_.src ? parseUrl(this.iframe_.src).origin : '*';
+        postMessage(this.iframe_, 'embed-state', {
+          inViewport: inViewport,
+          pageHidden: !this.viewer_.isVisible(),
+        }, targetOrigin, /* opt_is3P */ true);
+      }
+    }
+
+    /** @override  */
+    overflowCallback(overflown, requestedHeight) {
+      if (overflown) {
+        const targetOrigin =
+            this.iframe_.src ? parseUrl(this.iframe_.src).origin : '*';
+        postMessage(
+            this.iframe_,
+            'embed-size-denied',
+            {requestedHeight: requestedHeight},
+            targetOrigin,
+            /* opt_is3P */ true);
+      }
+    }
+
+    /**
+     * Updates the elements height to accommodate the iframe's requested height.
+     * @param {number} newHeight
+     * @private
+     */
+    updateHeight_(newHeight) {
+      this.attemptChangeHeight(newHeight, () => {
+        const targetOrigin =
+            this.iframe_.src ? parseUrl(this.iframe_.src).origin : '*';
+        postMessage(
+            this.iframe_,
+            'embed-size-changed',
+            {requestedHeight: newHeight},
+            targetOrigin,
+            /* opt_is3P */ true);
+      });
     }
 
     /**

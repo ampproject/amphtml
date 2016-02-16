@@ -17,7 +17,6 @@
 import {AmpList} from '../amp-list';
 import {templatesFor} from '../../../../src/template';
 import {xhrFor} from '../../../../src/xhr';
-import * as promise from '../../../../src/promise';
 import * as sinon from 'sinon';
 
 
@@ -54,15 +53,12 @@ describe('amp-list component', () => {
   afterEach(() => {
     document.body.removeChild(element);
     templatesMock.verify();
-    templatesMock.restore();
-    templatesMock = null;
     xhrMock.verify();
-    xhrMock.restore();
-    xhrMock = null;
     listMock.verify();
-    listMock.restore();
-    listMock = null;
     sandbox.restore();
+    templatesMock = null;
+    xhrMock = null;
+    listMock = null;
     sandbox = null;
   });
 
@@ -89,7 +85,7 @@ describe('amp-list component', () => {
     }).once();
     listMock.expects('attemptChangeHeight').withExactArgs(newHeight);
     return list.layoutCallback().then(() => {
-      return promise.all([xhrPromise, renderPromise]).then(() => {
+      return Promise.all([xhrPromise, renderPromise]).then(() => {
         expect(list.container_.contains(itemElement)).to.be.true;
         expect(measureFunc).to.exist;
         measureFunc();
@@ -111,7 +107,7 @@ describe('amp-list component', () => {
         element, items)
         .returns(renderPromise).once();
     return list.layoutCallback().then(() => {
-      return promise.all([xhrPromise, renderPromise]).then(() => {
+      return Promise.all([xhrPromise, renderPromise]).then(() => {
         expect(list.element.getAttribute('role')).to.equal('list');
         expect(itemElement.getAttribute('role')).to.equal('listitem');
       });
@@ -134,7 +130,7 @@ describe('amp-list component', () => {
         element, items)
         .returns(renderPromise).once();
     return list.layoutCallback().then(() => {
-      return promise.all([xhrPromise, renderPromise]).then(() => {
+      return Promise.all([xhrPromise, renderPromise]).then(() => {
         expect(list.element.getAttribute('role')).to.equal('list1');
         expect(itemElement.getAttribute('role')).to.equal('listitem1');
       });
@@ -146,7 +142,10 @@ describe('amp-list component', () => {
     const xhrPromise = Promise.resolve({items: items});
     element.setAttribute('credentials', 'include');
     xhrMock.expects('fetchJson').withExactArgs('https://data.com/list.json',
-        sinon.match(opts => opts.credentials == 'include'))
+        sinon.match(opts => {
+          return opts.credentials == 'include' &&
+              opts.requireAmpResponseSourceOrigin;
+        }))
         .returns(xhrPromise).once();
     templatesMock.expects('findAndRenderTemplateArray').withExactArgs(
         element, items)

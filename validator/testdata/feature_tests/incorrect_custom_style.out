@@ -1,0 +1,4 @@
+FAIL
+feature_tests/incorrect_custom_style.html:29:4 CSS syntax error in tag 'author stylesheet' - saw invalid at rule 'import'. [AUTHOR_STYLESHEET_PROBLEM]
+feature_tests/incorrect_custom_style.html:33:4 CSS syntax error in tag 'author stylesheet' - saw invalid at rule 'viewport'. [AUTHOR_STYLESHEET_PROBLEM]
+feature_tests/incorrect_custom_style.html:34:24 CSS syntax error in tag 'author stylesheet' - saw invalid at rule 'notallowednested'. [AUTHOR_STYLESHEET_PROBLEM]

@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import {all} from '../../../src/promise';
 import {assertHttpsUrl, addParamsToUrl} from '../../../src/url';
 import {assert} from '../../../src/asserts';
 import {cidFor} from '../../../src/cid';
 import {getService} from '../../../src/service';
 import {log} from '../../../src/log';
+import {storageFor} from '../../../src/storage';
 import {urlReplacementsFor} from '../../../src/url-replacements';
 import {viewerFor} from '../../../src/viewer';
 import {whenDocumentReady} from '../../../src/document-state';
@@ -79,13 +79,23 @@ class NotificationInterface {
 export class AmpUserNotification extends AMP.BaseElement {
 
   /** @override */
-  buildCallback() {
+  createdCallback() {
 
     /** @private @const {!Window} */
     this.win_ = this.getWin();
 
     /** @private @const {!UrlReplacements} */
     this.urlReplacements_ = urlReplacementsFor(this.win_);
+
+    /** @private @const {!UserNotificationManager} */
+    this.userNotificationManager_ = getUserNotificationManager_(this.win_);
+
+    /** @const @private {!Promise<!Storage>} */
+    this.storagePromise_ = storageFor(this.win_);
+  }
+
+  /** @override */
+  buildCallback() {
 
     /** @private {?string} */
     this.ampUserId_ = null;
@@ -98,26 +108,23 @@ export class AmpUserNotification extends AMP.BaseElement {
       this.dialogResolve_ = resolve;
     });
 
-    /** @private @const {!UserNotificationManager} */
-    this.userNotificationManager_ = getUserNotificationManager_(this.win_);
-
     this.elementId_ = assert(this.element.id,
         'amp-user-notification should have an id.');
 
-    assert(this.element.hasAttribute('data-show-if-href'),
-        `"amp-user-notification" (${this.elementId_}) ` +
-        'should have "data-show-if-href" attribute.');
     /** @private @const {string} */
-    this.showIfHref_ = assertHttpsUrl(
-        this.element.getAttribute('data-show-if-href'), this.element);
+    this.storageKey_ = 'amp-user-notification:' + this.elementId_;
 
-    assert(this.element.hasAttribute('data-dismiss-href'),
-        `"amp-user-notification" (${this.elementId_}) ` +
-        'should have "data-dismiss-href" attribute.');
+    /** @private @const {?string} */
+    this.showIfHref_ = this.element.getAttribute('data-show-if-href');
+    if (this.showIfHref_) {
+      assertHttpsUrl(this.showIfHref_, this.element);
+    }
 
-    /** @private @const {string} */
-    this.dismissHref_ = assertHttpsUrl(
-        this.element.getAttribute('data-dismiss-href'), this.element);
+    /** @private @const {?string} */
+    this.dismissHref_ = this.element.getAttribute('data-dismiss-href');
+    if (this.dismissHref_) {
+      assertHttpsUrl(this.dismissHref_, this.element);
+    }
 
     this.userNotificationManager_
         .registerUserNotification(this.elementId_, this);
@@ -133,7 +140,7 @@ export class AmpUserNotification extends AMP.BaseElement {
    * @private
    */
   buildGetHref_(ampUserId) {
-    return this.urlReplacements_.expand(this.showIfHref_).then(href => {
+    return this.urlReplacements_.expand(assert(this.showIfHref_)).then(href => {
       return addParamsToUrl(href, {
         elementId: this.elementId_,
         ampUserId: ampUserId
@@ -164,7 +171,7 @@ export class AmpUserNotification extends AMP.BaseElement {
    * @return {!Promise}
    */
   postDismissEnpoint_() {
-    return xhrFor(this.win_).fetchJson(this.dismissHref_, {
+    return xhrFor(this.win_).fetchJson(assert(this.dismissHref_), {
       method: 'POST',
       credentials: 'include',
       body: {
@@ -208,13 +215,41 @@ export class AmpUserNotification extends AMP.BaseElement {
       // the user only really has 1 option to accept/dismiss (to resolve)
       // the notification or have the nagging notification sitting there
       // (to never resolve).
-      return cid.get('amp-user-notification',
-          Promise.resolve(), this.dialogPromise_);
+      return cid.get(
+        {scope: 'amp-user-notification', createCookieIfNotPresent: true},
+        Promise.resolve(), this.dialogPromise_);
     });
   }
 
   /** @override */
   shouldShow() {
+    return this.storagePromise_.then(storage => {
+      return storage.get(this.storageKey_);
+    }).then(value => {
+      if (value) {
+        // Consent has been accepted. Nothing more to do.
+        return false;
+      }
+      if (this.showIfHref_) {
+        // Ask remote endpoint if available.
+        return this.shouldShowViaXhr_();
+      }
+      // Otherwise, show the notification.
+      return true;
+    }).catch(reason => {
+      log.error('Failed to read storage', reason);
+      if (this.showIfHref_) {
+        return this.shouldShowViaXhr_();
+      }
+      return true;
+    });
+  }
+
+  /**
+   * @return {!Promise<boolean>}
+   * @private
+   */
+  shouldShowViaXhr_() {
     return this.getAsyncCid_()
         .then(this.getShowEndpoint_.bind(this))
         .then(this.onGetShowEndpointSuccess_.bind(this));
@@ -235,7 +270,14 @@ export class AmpUserNotification extends AMP.BaseElement {
     this.element.classList.remove('amp-active');
     this.element.classList.add('amp-hidden');
     this.dialogResolve_();
-    this.postDismissEnpoint_();
+
+    // Store and post.
+    this.storagePromise_.then(storage => {
+      storage.set(this.storageKey_, true);
+    });
+    if (this.dismissHref_) {
+      this.postDismissEnpoint_();
+    }
   }
 }
 
@@ -257,8 +299,8 @@ export class UserNotificationManager {
     this.viewer_ = viewerFor(this.win_);
 
     /** @private {!Promise} */
-    this.managerReadyPromise_ = all([
-      this.viewer_.whenVisible(),
+    this.managerReadyPromise_ = Promise.all([
+      this.viewer_.whenFirstVisible(),
       whenDocumentReady(this.win_.document)
     ]);
 
@@ -354,10 +396,11 @@ function getUserNotificationManager_(window) {
 
 /**
  * @param {!Window} window
+ * @return {!UserNotificationManager}
  * @private
  */
 export function installUserNotificationManager(window) {
-  getUserNotificationManager_(window);
+  return getUserNotificationManager_(window);
 }
 
 installUserNotificationManager(AMP.win);

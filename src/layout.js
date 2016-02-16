@@ -78,6 +78,7 @@ export const naturalDimensions_ = {
 export const LOADING_ELEMENTS_ = {
   'AMP-ANIM': true,
   'AMP-BRIGHTCOVE': true,
+  'AMP-EMBED': true,
   'AMP-IFRAME': true,
   'AMP-IMG': true,
   'AMP-INSTAGRAM': true,
@@ -158,14 +159,30 @@ export function parseLength(s) {
 }
 
 
+
 /**
- * Asserts that the supplied value is a CSS Length value.
+ * Asserts that the supplied value is a non-percent CSS Length value.
  * @param {!LengthDef|string} length
  * @return {!LengthDef}
  */
 export function assertLength(length) {
   assert(/^\d+(\.\d+)?(px|em|rem|vh|vw|vmin|vmax)$/.test(length),
       'Invalid length value: %s', length);
+  return length;
+}
+
+
+
+
+/**
+ * Asserts that the supplied value is a CSS Length value
+ * (including percent unit).
+ * @param {!LengthDef|string} length
+ * @return {!LengthDef}
+ */
+export function assertLengthOrPercent(length) {
+  assert(/^\d+(\.\d+)?(px|em|rem|vh|vw|vmin|vmax|%)$/.test(length),
+      'Invalid length or percent value: %s', length);
   return length;
 }
 

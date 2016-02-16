@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {IntersectionObserver} from '../../../../src/intersection-observer';
 import {Timer} from '../../../../src/timer';
 import {AmpIframe} from '../amp-iframe';
 import {adopt} from '../../../../src/runtime';
@@ -35,13 +34,21 @@ describe('amp-iframe', () => {
 
   const timer = new Timer(window);
   let ranJs = 0;
+  let sandbox;
+
   beforeEach(() => {
     ranJs = 0;
+    sandbox = sinon.sandbox.create();
     window.onmessage = function(message) {
       if (message.data == 'loaded-iframe') {
         ranJs++;
       }
     };
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+    sandbox = null;
   });
 
   function waitForJsInIframe() {
@@ -375,10 +382,10 @@ describe('amp-iframe', () => {
   it('should listen for embed-ready event', () => {
     sinon.sandbox.create();
     const activateIframeSpy_ =
-        sinon.spy(AmpIframe.prototype, 'activateIframe_');
+        sandbox.spy(AmpIframe.prototype, 'activateIframe_');
     return getAmpIframe({
       src: clickableIframeSrc,
-      sandbox: 'allow-scripts',
+      sandbox: 'allow-scripts allow-same-origin',
       width: 480,
       height: 360,
       poster: 'https://i.ytimg.com/vi/cMcCTVAFBWM/hqdefault.jpg'
@@ -388,138 +395,6 @@ describe('amp-iframe', () => {
         expect(impl.iframe_.style.zIndex).to.equal('');
         expect(impl.placeholder_).to.be.null;
         expect(activateIframeSpy_.callCount).to.equal(2);
-        activateIframeSpy_.restore();
-      });
-    });
-  });
-});
-
-describe('amp-iframe intersection', () => {
-
-  let ampIframe;
-  let element;
-  let posts;
-  const timer = new Timer(window);
-  const iframeSrc = 'http://iframe.localhost:' + location.port +
-      '/base/test/fixtures/served/iframe-intersection.html';
-
-  function getAmpIframe(attributes, opt_top) {
-    return createIframePromise().then(function(iframe) {
-      const i = iframe.doc.createElement('amp-iframe');
-      for (const key in attributes) {
-        i.setAttribute(key, attributes[key]);
-      }
-      viewportFor(iframe.win).resize_();
-      const top = opt_top || '600px';
-      i.style.position = 'absolute';
-      i.style.top = top;
-      if (attributes.poster) {
-        const img = iframe.doc.createElement('amp-img');
-        img.setAttribute('layout', 'fill');
-        img.setAttribute('src', attributes.poster);
-        img.setAttribute('placeholder', '');
-        i.appendChild(img);
-      }
-      iframe.doc.body.appendChild(i);
-      // Wait an event loop for the iframe to be created.
-      return pollForLayout(iframe.win, 1).then(() => {
-        const created = i.querySelector('iframe');
-        if (created) {
-          // Wait for the iframe to load
-          return loadPromise(created).then(() => {
-            // Wait a bit more for postMessage to get through.
-            return timer.promise(100).then(() => {
-              return {
-                container: i,
-                iframe: created,
-                scrollWrapper: i.querySelector('i-amp-scroll-container')
-              };
-            });
-          });
-        }
-        // No iframe was created.
-        return {
-          container: i,
-          iframe: null,
-          error: i.textContent
-        };
-      });
-    });
-  }
-
-  beforeEach(() => {
-    window.onmessage = function(message) {
-      if (message.data.type == 'received-intersection') {
-        posts.push({
-          data: message.data,
-          targetOrigin: message.origin,
-        });
-      }
-    };
-    posts = [];
-    return getAmpIframe({
-      src: iframeSrc,
-      sandbox: 'allow-scripts  allow-same-origin',
-      width: 300,
-      height: 250,
-      style: 'left:50px;',
-      poster: 'https://i.ytimg.com/vi/cMcCTVAFBWM/hqdefault.jpg',
-    }, '100').then(amp => {
-      posts = [];
-      element = amp.container;
-      viewportFor(element.ownerDocument.defaultView).setScrollTop(50);
-      ampIframe = element.implementation_;
-      ampIframe.getVsync = function() {
-        return {
-          measure: function(callback) {
-            callback();
-          }
-        };
-      };
-      ampIframe.intersectionObserver_ =
-          new IntersectionObserver(ampIframe, amp.iframe, true);
-      ampIframe.intersectionObserver_.startSendingIntersectionChanges_();
-      expect(posts).to.have.length(0);
-      //ampIframe.getVsync().runScheduledTasks_();
-      return timer.promise(50).then(() => {
-        expect(posts).to.have.length(1);
-      });
-    });
-  });
-
-  it('should calculate intersection', () => {
-    expect(ampIframe.iframeLayoutBox_).to.not.be.null;
-    expect(posts).to.have.length(1);
-    const changes = posts[0].data.changes;
-    expect(changes).to.be.array;
-    expect(changes).to.have.length(1);
-    expect(changes[0].time).to.be.number;
-    expect(changes[0].intersectionRect.height).to.equal(150);
-    expect(changes[0].intersectionRect.width).to.equal(250);
-  });
-
-  it('reflect viewport changes', () => {
-    const win = ampIframe.element.ownerDocument.defaultView;
-    const viewport = viewportFor(win);
-    expect(posts).to.have.length(1);
-    viewport.setScrollTop(0);
-    ampIframe.intersectionObserver_.fire();
-    return timer.promise(50).then(() => {
-      expect(posts).to.have.length(2);
-      const changes = posts[1].data.changes;
-      expect(changes).to.have.length(1);
-      expect(changes[0].time).to.be.number;
-      expect(changes[0].intersectionRect.height).to.equal(150);
-      expect(changes[0].intersectionRect.width).to.equal(250);
-
-      viewport.setScrollTop(350);
-      ampIframe.intersectionObserver_.fire();
-      return timer.promise(50).then(() => {
-        expect(posts).to.have.length(3);
-        const changes2 = posts[2].data.changes;
-        expect(changes2).to.have.length(1);
-        expect(changes2[0].time).to.be.number;
-        expect(changes2[0].intersectionRect.height).to.be.number;
       });
     });
   });

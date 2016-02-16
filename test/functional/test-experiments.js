@@ -64,7 +64,6 @@ describe('toggleExperiment', () => {
   });
 
   afterEach(() => {
-    clock.restore();
     clock = null;
     sandbox.restore();
     sandbox = null;
@@ -129,7 +128,13 @@ describe('isDevChannel', () => {
   });
 
   it('should return value based on binary version', () => {
-    expect(isDevChannelVersionDoNotUse_('123456789')).to.be.false;
-    expect(isDevChannelVersionDoNotUse_('123456789-canary')).to.be.true;
+    const win = {
+      AMP_CONFIG: {
+        canary: false
+      }
+    };
+    expect(isDevChannelVersionDoNotUse_(win)).to.be.false;
+    win.AMP_CONFIG.canary = true;
+    expect(isDevChannelVersionDoNotUse_(win)).to.be.true;
   });
 });

@@ -58,41 +58,26 @@ const FAILURE_FONT_CONFIG = {
 describe('FontLoader', () => {
 
   let sandbox;
-  let clock;
   let fontloader;
   let setupFontCheckSpy;
   let setupFontLoadSpy;
-  let setupCanUseNativeApisSpy;
   let setupLoadWithPolyfillSpy;
   let setupDisposeSpy;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    clock = sinon.useFakeTimers();
     setupLoadWithPolyfillSpy =
-        sinon.spy(FontLoader.prototype, 'loadWithPolyfill_');
+        sandbox.spy(FontLoader.prototype, 'loadWithPolyfill_');
     setupCreateElementsSpy =
-        sinon.spy(FontLoader.prototype, 'createElements_');
-    setupDisposeSpy = sinon.spy(FontLoader.prototype, 'dispose_');
+        sandbox.spy(FontLoader.prototype, 'createElements_');
+    setupDisposeSpy = sandbox.spy(FontLoader.prototype, 'dispose_');
   });
 
   afterEach(() => {
-    restoreSpy(setupDisposeSpy);
-    restoreSpy(setupCreateElementsSpy);
-    restoreSpy(setupLoadWithPolyfillSpy);
-    restoreSpy(setupCanUseNativeApisSpy);
-    restoreSpy(setupFontCheckSpy);
-    restoreSpy(setupFontLoadSpy);
-    restoreSpy(clock);
-    restoreSpy(sandbox);
+    sandbox.restore();
+    sandbox = null;
     fontloader = null;
   });
-
-  function restoreSpy(spy) {
-    if (spy) {
-      spy.restore();
-    }
-  }
 
   function getIframe() {
     return createIframePromise().then(iframe => {
@@ -103,8 +88,8 @@ describe('FontLoader', () => {
       textEl.textContent =
           "Neque porro quisquam est qui dolorem ipsum quia dolor";
       iframe.doc.body.appendChild(textEl);
-      setupFontCheckSpy = sinon.spy(iframe.doc.fonts, 'check');
-      setupFontLoadSpy = sinon.spy(iframe.doc.fonts, 'load');
+      setupFontCheckSpy = sandbox.spy(iframe.doc.fonts, 'check');
+      setupFontLoadSpy = sandbox.spy(iframe.doc.fonts, 'load');
       fontloader = new FontLoader(iframe.win);
       return Promise.resolve(iframe);
     });
@@ -125,8 +110,7 @@ describe('FontLoader', () => {
 
   it('should check and load font via polyfill', () => {
     return getIframe().then(iframe => {
-      setupCanUseNativeApisSpy =
-          sinon.stub(FontLoader.prototype, 'canUseNativeApis_').returns(false);
+      sandbox.stub(FontLoader.prototype, 'canUseNativeApis_').returns(false);
       fontloader.load(FONT_CONFIG, 3000).then(() => {
         iframe.doc.documentElement.classList.add('comic-amp-font-loaded');
         expect(setupFontCheckSpy.callCount).to.equal(0);
@@ -154,8 +138,7 @@ describe('FontLoader', () => {
 
   it('should error when font is not available via polyfill', () => {
     return getIframe().then(iframe => {
-      setupCanUseNativeApisSpy =
-          sinon.stub(FontLoader.prototype, 'canUseNativeApis_').returns(false);
+      sandbox.stub(FontLoader.prototype, 'canUseNativeApis_').returns(false);
       fontloader.load(FONT_CONFIG, 3000).then(() => {
         iframe.doc.documentElement.classList.add('comic-amp-font-loaded');
         assert.fail('Font loaded when it should have failed.');
@@ -171,11 +154,10 @@ describe('FontLoader', () => {
 
   it('should check if elements are being created when using polyfill', () => {
     return getIframe().then(iframe => {
-      setupCanUseNativeApisSpy =
-          sinon.stub(FontLoader.prototype, 'canUseNativeApis_').returns(false);
-      setupDisposeSpy.restore();
+      sandbox.stub(FontLoader.prototype, 'canUseNativeApis_').returns(false);
+      setupDisposeSpy/*OK*/.restore();
       setupDisposeSpy =
-          sinon.stub(FontLoader.prototype, 'dispose_').returns(undefined);
+          sandbox.stub(FontLoader.prototype, 'dispose_').returns(undefined);
       const initialElementsCount = iframe.doc.getElementsByTagName('*').length;
       fontloader.load(FONT_CONFIG, 3000).then(() => {
         iframe.doc.documentElement.classList.add('comic-amp-font-loaded');
@@ -189,8 +171,7 @@ describe('FontLoader', () => {
 
   it('should check if elements created using the polyfill are disposed', () => {
     return getIframe().then(iframe => {
-      setupCanUseNativeApisSpy =
-          sinon.stub(FontLoader.prototype, 'canUseNativeApis_').returns(false);
+      sandbox.stub(FontLoader.prototype, 'canUseNativeApis_').returns(false);
       const initialElementsCount = iframe.doc.getElementsByTagName('*').length;
       fontloader.load(FONT_CONFIG, 3000).then(() => {
         iframe.doc.documentElement.classList.add('comic-amp-font-loaded');

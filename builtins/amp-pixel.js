@@ -19,6 +19,7 @@ import {Layout} from '../src/layout';
 import {urlReplacementsFor} from '../src/url-replacements';
 import {assert} from '../src/asserts';
 import {registerElement} from '../src/custom-element';
+import {toggle} from '../src/style';
 
 
 /**
@@ -44,6 +45,9 @@ export function installPixel(win) {
 
     /** @override */
     layoutCallback() {
+      // Now that we are rendered, stop rendering the element to reduce
+      // resource consumption.
+      toggle(this.element, false);
       const src = this.element.getAttribute('src');
       return urlReplacementsFor(this.getWin()).expand(this.assertSource(src))
           .then(src => {

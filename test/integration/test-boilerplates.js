@@ -41,12 +41,12 @@ describe('New Visibility Boilerplate', () => {
   let fixture;
   beforeEach(() => {
     return createFixtureIframe(
-      'test/fixtures/boilerplate-new-visibility.html', 1000).then(f => {
+      'test/fixtures/boilerplate-new-visibility.html', 10000).then(f => {
         fixture = f;
       });
   });
 
-  it('should show the body', () => {
+  it('should show the body in boilerplate test', () => {
     return expectBodyToBecomeVisible(fixture.win).then(() => {
       expect(getStyle(
           fixture.win.document.body, 'visibility')).to.equal('visible');

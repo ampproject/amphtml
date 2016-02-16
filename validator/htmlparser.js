@@ -59,6 +59,7 @@ amp.htmlparser.HtmlParser = function() {
  * @type {!Object<string, string>}
  */
 amp.htmlparser.HtmlParser.Entities = {
+  'colon': ':',
   'lt': '<',
   'gt': '>',
   'amp': '&',
@@ -587,14 +588,15 @@ amp.htmlparser.HtmlParser.prototype.parse = function(handler, htmlText) {
 /**
  * Decodes an HTML entity.
  *
- * @param {string} name The content between the '&' and the ';'.
+ * @param {string} entity The full entity (including the & and the ;).
  * @return {string} A single unicode code-point as a string.
  * @private
  */
-amp.htmlparser.HtmlParser.prototype.lookupEntity_ = function(name) {
+amp.htmlparser.HtmlParser.prototype.lookupEntity_ = function(entity) {
   // TODO(goto): use {amp.htmlparserDecode} instead ?
   // TODO(goto): &pi; is different from &Pi;
-  name = amp.htmlparser.toLowerCase(name);
+  const name = amp.htmlparser.toLowerCase(
+      entity.substring(1, entity.length - 1));
   if (amp.htmlparser.HtmlParser.Entities.hasOwnProperty(name)) {
     return amp.htmlparser.HtmlParser.Entities[name];
   }
@@ -605,7 +607,8 @@ amp.htmlparser.HtmlParser.prototype.lookupEntity_ = function(name) {
       !!(m = name.match(amp.htmlparser.HtmlParser.HEX_ESCAPE_RE_))) {
     return String.fromCharCode(parseInt(m[1], 16));
   }
-  return '';
+  // If unable to decode, return the name.
+  return name;
 };
 
 
@@ -651,23 +654,24 @@ amp.htmlparser.HtmlParser.prototype.normalizeRCData_ = function(rcdata) {
 
 
 /**
- * TODO(goto): why isn't this in the string package ? does this solves any
- * real problem ? move it to the goog.string package if it does.
- *
  * @param {string} str The string to lower case.
  * @return {string} The str in lower case format.
  */
 amp.htmlparser.toLowerCase = function(str) {
-  // The below may not be true on browsers in the Turkish locale.
-  if ('script' === 'SCRIPT'.toLowerCase()) {
-    return str.toLowerCase();
-  } else {
-    return str.replace(/[A-Z]/g, function(ch) {
-      return String.fromCharCode(ch.charCodeAt(0) | 32);
-    });
+  // htmlparser.js heavily relies on the length of the strings, and
+  // unfortunately some characters change their length when
+  // lowercased; for instance, the Turkish İ has a length of 1, but
+  // when lower-cased, it has a length of 2. So, as a workaround we
+  // check that the length be the same as before lower-casing, and if
+  // not, we only lower-case the letters A-Z.
+  const lowerCased = str.toLowerCase();
+  if (lowerCased.length == str.length) {
+    return lowerCased;
   }
+  return str.replace(/[A-Z]/g, function(ch) {
+    return String.fromCharCode(ch.charCodeAt(0) | 32);
+  });
 };
-
 
 
 /**

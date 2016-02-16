@@ -26,7 +26,7 @@ The `amp-list` defines data source using the following attributes:
 - `src` defines a CORS URL. The URL's protocol must be HTTPS.
 - `credentials` defines a `credentials` option as specified by the
 [Fetch API](https://fetch.spec.whatwg.org/). To send credentials, pass the
-value of "include".
+value of "include". If this is set, the response must follow the [AMP CORS security guidelines](../../spec/amp-cors-requests.md).
 
 The response must be a JSON object that contains an array property "items":
 ```json
@@ -55,7 +55,7 @@ An example:
       {{title}}
     </div>
   </template>
-  <div overflow role=button aria-lable="Show more" class="list-overflow">
+  <div overflow role=button aria-label="Show more" class="list-overflow">
     Show more
   </div>
 </amp-list>

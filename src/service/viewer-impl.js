@@ -19,8 +19,9 @@ import {assert} from '../asserts';
 import {documentStateFor} from '../document-state';
 import {getService} from '../service';
 import {log} from '../log';
-import {parseQueryString, removeFragment} from '../url';
+import {parseQueryString, parseUrl, removeFragment} from '../url';
 import {platform} from '../platform';
+import {timer} from '../timer';
 
 
 const TAG_ = 'Viewer';
@@ -72,6 +73,20 @@ export const VisibilityState = {
    */
   HIDDEN: 'hidden'
 };
+
+
+/**
+ * These domains are trusted with more sensitive viewer operations such as
+ * propagating the referrer. If you believe your domain should be here,
+ * file the issue on GitHub to discuss. The process will be similar
+ * (but somewhat more stringent) to the one described in the [3p/README.md](
+ * https://github.com/ampproject/amphtml/blob/master/3p/README.md)
+ *
+ * @export {!Array<!RegExp>}
+ */
+export const TRUSTED_VIEWER_HOSTS = [
+  /^(.*\.)?(google)(\.com?)?(\.[a-z]{2})?$/
+];
 
 
 /**
@@ -140,6 +155,9 @@ export class Viewer {
     /** @private {?function(string, *, boolean):(Promise<*>|undefined)} */
     this.messageDeliverer_ = null;
 
+    /** @private {?string} */
+    this.messagingOrigin_ = null;
+
     /** @private {!Array<!{eventType: string, data: *}>} */
     this.messageQueue_ = [];
 
@@ -147,11 +165,16 @@ export class Viewer {
     this.params_ = {};
 
     /** @private {?function()} */
-    this.whenVisibleResolve_ = null;
+    this.whenFirstVisibleResolve_ = null;
 
-    /** @private @const {!Promise} */
-    this.whenVisiblePromise_ = new Promise(resolve => {
-      this.whenVisibleResolve_ = resolve;
+    /**
+     * This promise might be resolved right away if the current
+     * document is already visible. See end of this constructor where we call
+     * `this.onVisibilityChange_()`.
+     * @private @const {!Promise}
+     */
+    this.whenFirstVisiblePromise_ = new Promise(resolve => {
+      this.whenFirstVisibleResolve_ = resolve;
     });
 
     // Params can be passed either via iframe name or via hash. Hash currently
@@ -204,8 +227,85 @@ export class Viewer {
         this.paddingTop_;
     log.fine(TAG_, '- padding-top:', this.paddingTop_);
 
+    /** @private {boolean} */
+    this.hasBeenVisible_ = this.isVisible();
+
     // Wait for document to become visible.
     this.docState_.onVisibilityChanged(this.onVisibilityChange_.bind(this));
+
+    /**
+     * This promise will resolve when communications channel has been
+     * established or timeout in 5 seconds. The timeout is needed to avoid
+     * this promise becoming a memory leak with accumulating undelivered
+     * messages.
+     * @private @const {!Promise<!Viewer>}
+     */
+    this.messagingReadyPromise_ = timer.timeoutPromise(
+        5000,
+        new Promise(resolve => {
+          /** @private @const {function(!Viewer)} */
+          this.messagingReadyResolver_ = resolve;
+        }));
+    // The error is expected when no viewer is ever set.
+    this.messagingReadyPromise_.catch(() => {});
+
+    // Trusted viewer and referrer.
+    let trustedViewerResolved;
+    let trustedViewerPromise;
+    if (!this.isEmbedded_) {
+      // Not embedded in IFrame - can't trust the viewer.
+      trustedViewerResolved = false;
+      trustedViewerPromise = Promise.resolve(false);
+    } else if (this.win.location.ancestorOrigins) {
+      // Ancestors when available take precedence. This is the main API used
+      // for this determination. Fallback is only done when this API is not
+      // supported by the browser.
+      trustedViewerResolved = (this.win.location.ancestorOrigins.length > 0 &&
+          this.isTrustedViewerOrigin_(this.win.location.ancestorOrigins[0]));
+      trustedViewerPromise = Promise.resolve(trustedViewerResolved);
+    } else {
+      // Wait for comms channel to confirm the origin.
+      trustedViewerResolved = undefined;
+      trustedViewerPromise = new Promise(resolve => {
+        /** @const @private {!function(boolean)|undefined} */
+        this.trustedViewerResolver_ = resolve;
+      });
+    }
+
+    /** @const @private {!Promise<boolean>} */
+    this.isTrustedViewer_ = trustedViewerPromise;
+
+    /** @private {string} */
+    this.unconfirmedReferrerUrl_ =
+        this.isEmbedded() && 'referrer' in this.params_ &&
+            trustedViewerResolved !== false ?
+        this.params_['referrer'] :
+        this.win.document.referrer;
+
+    /** @const @private {!Promise<string>} */
+    this.referrerUrl_ = new Promise(resolve => {
+      if (this.isEmbedded() && 'referrer' in this.params_) {
+        // Viewer override, but only for whitelisted viewers. Only allowed for
+        // iframed documents.
+        this.isTrustedViewer_.then(isTrusted => {
+          if (isTrusted) {
+            resolve(this.params_['referrer']);
+          } else {
+            resolve(this.win.document.referrer);
+            if (this.unconfirmedReferrerUrl_ != this.win.document.referrer) {
+              this.win.setTimeout(() => {
+                throw new Error('Untrusted viewer referrer override: ' +
+                    this.unconfirmedReferrerUrl_ + ' at ' +
+                    this.messagingOrigin_);
+              });
+              this.unconfirmedReferrerUrl_ = this.win.document.referrer;
+            }
+          }
+        });
+      } else {
+        resolve(this.win.document.referrer);
+      }
+    });
 
     // Remove hash - no reason to keep it around, but only when embedded.
     if (this.isEmbedded_) {
@@ -230,7 +330,8 @@ export class Viewer {
    */
   onVisibilityChange_() {
     if (this.isVisible()) {
-      this.whenVisibleResolve_();
+      this.hasBeenVisible_ = true;
+      this.whenFirstVisibleResolve_();
     }
     this.visibilityObservable_.fire();
   }
@@ -308,13 +409,23 @@ export class Viewer {
         !this.docState_.isHidden();
   }
 
+  /**
+   * Whether the AMP document has been ever visible before. Since the visiblity
+   * state of a document can be flipped back and forth we sometimes want to know
+   * if a document has ever been visible.
+   * @return {boolean}
+   */
+  hasBeenVisible() {
+    return this.hasBeenVisible_;
+  }
+
  /**
   * Returns a Promise that only ever resolved when the current
   * AMP document becomes visible.
   * @return {!Promise}
   */
-  whenVisible() {
-    return this.whenVisiblePromise_;
+  whenFirstVisible() {
+    return this.whenFirstVisiblePromise_;
   }
 
   /**
@@ -370,6 +481,49 @@ export class Viewer {
    */
   getPaddingTop() {
     return this.paddingTop_;
+  }
+
+  /**
+   * Returns an unconfirmed "referrer" URL that can be optionally customized by
+   * the viewer. Consider using `getReferrerUrl()` instead, which returns the
+   * promise that will yield the confirmed "referrer" URL.
+   * @return {string}
+   */
+  getUnconfirmedReferrerUrl() {
+    return this.unconfirmedReferrerUrl_;
+  }
+
+  /**
+   * Returns the promise that will yield the confirmed "referrer" URL. This
+   * URL can be optionally customized by the viewer, but viewer is required
+   * to be a trusted viewer.
+   * @return {!Promise<string>}
+   */
+  getReferrerUrl() {
+    return this.referrerUrl_;
+  }
+
+  /**
+   * Whether the viewer has been whitelisted for more sensitive operations
+   * such as customizing referrer.
+   * @return {boolean}
+   */
+  isTrustedViewer() {
+    return this.isTrustedViewer_;
+  }
+
+  /**
+   * @param {string} urlString
+   * @return {boolean}
+   * @private
+   */
+  isTrustedViewerOrigin_(urlString) {
+    const url = parseUrl(urlString);
+    if (url.protocol != 'https:') {
+      // Non-https origins are never trusted.
+      return false;
+    }
+    return TRUSTED_VIEWER_HOSTS.some(th => th.test(url.hostname));
   }
 
   /**
@@ -464,20 +618,26 @@ export class Viewer {
   }
 
   /**
-   * Broadcasts a message to all other AMP documents under the same viewer.
+   * Triggers "tick" event for the viewer.
    * @param {!JSONObject} message
    */
-  broadcast(message) {
-    this.sendMessage_('broadcast', message, false);
+  tick(message) {
+    this.sendMessage_('tick', message, false);
   }
 
   /**
-   * Registers receiver for the broadcast events.
-   * @param {function(!JSONObject)} handler
-   * @return {!Unlisten}
+   * Triggers "sendCsi" event for the viewer.
    */
-  onBroadcast(handler) {
-    return this.broadcastObservable_.add(handler);
+  flushTicks() {
+    this.sendMessage_('sendCsi', undefined, false);
+  }
+
+  /**
+   * Triggers "setFlushParams" event for the viewer.
+   * @param {!JSONObject} message
+   */
+  setFlushParams(message) {
+    this.sendMessage_('setFlushParams', message, false);
   }
 
   /**
@@ -535,11 +695,20 @@ export class Viewer {
    * Provides a message delivery mechanism by which AMP document can send
    * messages to the viewer.
    * @param {function(string, *, boolean):(!Promise<*>|undefined)} deliverer
+   * @param {string} origin
    * @export
    */
-  setMessageDeliverer(deliverer) {
+  setMessageDeliverer(deliverer, origin) {
     assert(!this.messageDeliverer_, 'message deliverer can only be set once');
+    log.fine(TAG_, 'message channel established with origin: ', origin);
     this.messageDeliverer_ = deliverer;
+    this.messagingReadyResolver_(this);
+    // TODO(dvoytenko, #1764): Make `origin` required when viewers catch up.
+    this.messagingOrigin_ = origin;
+    if (this.trustedViewerResolver_) {
+      this.trustedViewerResolver_(
+          origin ? this.isTrustedViewerOrigin_(origin) : false);
+    }
     if (this.messageQueue_.length > 0) {
       const queue = this.messageQueue_.slice(0);
       this.messageQueue_ = [];
@@ -547,6 +716,38 @@ export class Viewer {
         this.messageDeliverer_(message.eventType, message.data, false);
       });
     }
+  }
+
+  /**
+   * Sends the message to the viewer. This is a restricted API.
+   * @param {string} eventType
+   * @param {*} data
+   * @param {boolean} awaitResponse
+   * @return {!Promise<*>|undefined}
+   */
+  sendMessage(eventType, data, awaitResponse) {
+    return this.messagingReadyPromise_.then(() => {
+      return this.sendMessage_(eventType, data, awaitResponse);
+    });
+  }
+
+  /**
+   * Broadcasts a message to all other AMP documents under the same viewer.
+   * @param {!JSONObject} message
+   */
+  broadcast(message) {
+    this.messagingReadyPromise_.then(() => {
+      return this.sendMessage_('broadcast', message, false);
+    });
+  }
+
+  /**
+   * Registers receiver for the broadcast events.
+   * @param {function(!JSONObject)} handler
+   * @return {!Unlisten}
+   */
+  onBroadcast(handler) {
+    return this.broadcastObservable_.add(handler);
   }
 
   /**

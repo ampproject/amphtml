@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"golang.org/x/net/context"
@@ -62,6 +63,7 @@ type ErrorEvent struct {
 	Line      int32  `json:"line,omitempty"`
 	Classname string `json:"classname,omitempty"`
 	Function  string `json:"function,omitempty"`
+	Severity  string `json:"severity,omitempty"`
 }
 
 func init() {
@@ -103,17 +105,31 @@ func handle(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Query().Get("a") == "1" {
 		errorType = "assert"
 	}
+	// By default we log as "INFO" severity, because reports are very spammy
+	severity := "INFO"
+	level := logging.Info
+	// But if the request comes from the cache (and thus only from valid AMP
+	// docs) we log as "ERROR".
+	if strings.HasPrefix(r.Referer(), "https://cdn.ampproject.org/") {
+		severity = "ERROR"
+		level = logging.Error
+		errorType += "-cdn"
+	}
+	if r.URL.Query().Get("3p") == "1" {
+		errorType = "-3p"
+	}
 
 	event := &ErrorEvent{
 		Message:     r.URL.Query().Get("m"),
 		Exception:   r.URL.Query().Get("s"),
-		Version:     r.URL.Query().Get("v"),
+		Version:     errorType + "-" + r.URL.Query().Get("v"),
 		Environment: "prod",
 		Application: errorType,
 		AppID:       appengine.AppID(c),
 		Filename:    r.URL.Query().Get("f"),
 		Line:        int32(line),
 		Classname:   r.URL.Query().Get("el"),
+		Severity:    severity,
 	}
 
 	if event.Message == "" && event.Exception == "" {
@@ -142,6 +158,7 @@ func handle(w http.ResponseWriter, r *http.Request) {
 	err = logc.LogSync(logging.Entry{
 		Time:    time.Now().UTC(),
 		Payload: event,
+		Level:   level,
 	})
 
 	if err != nil {
@@ -156,7 +173,8 @@ func handle(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Query().Get("debug") == "1" {
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
-		fmt.Fprintln(w, "OK")
+		fmt.Fprintln(w, "OK\n");
+		fmt.Fprintln(w, event);
 	} else {
 		w.WriteHeader(http.StatusNoContent)
 	}

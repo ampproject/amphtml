@@ -50,7 +50,6 @@ describe('PullToRefreshBlocker', () => {
 
   afterEach(() => {
     viewportMock.verify();
-    viewportMock.restore();
     viewportMock = null;
     blocker.cleanup();
     blocker = null;
@@ -59,7 +58,7 @@ describe('PullToRefreshBlocker', () => {
   });
 
   function sendEvent(event, opt_prevetDefault) {
-    event.preventDefault = opt_prevetDefault || () => {};
+    event.preventDefault = opt_prevetDefault || (() => {});
     event.stopPropagation = () => {};
     eventListeners[event.type](event);
   }

@@ -14,14 +14,29 @@
  * limitations under the License.
  */
 
+import {Observable} from '../../src/observable';
 import {createIframePromise} from '../../testing/iframe';
 import {urlReplacementsFor} from '../../src/url-replacements';
 import {markElementScheduledForTesting} from '../../src/custom-element';
 import {installCidService} from '../../src/service/cid-impl';
 import {setCookie} from '../../src/cookies';
+import {parseUrl} from '../../src/url';
 
 
 describe('UrlReplacements', () => {
+
+  let sandbox;
+  let loadObservable;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+  });
+
+  afterEach(() => {
+    loadObservable = null;
+    sandbox.restore();
+    sandbox = null;
+  });
 
   function expand(url, withCid, opt_bindings) {
     return createIframePromise().then(iframe => {
@@ -38,6 +53,27 @@ describe('UrlReplacements', () => {
       const replacements = urlReplacementsFor(iframe.win);
       return replacements.expand(url, opt_bindings);
     });
+  }
+
+  function getFakeWindow() {
+    loadObservable = new Observable();
+    const win = {
+      addEventListener: function(type, callback) {
+        loadObservable.add(callback);
+      },
+      complete: false,
+      Object: Object,
+      performance: {
+        timing: {
+          navigationStart: 100,
+          loadEventStart: 0
+        }
+      },
+      removeEventListener: function(type, callback) {
+        loadObservable.remove(callback);
+      }
+    };
+    return win;
   }
 
   it('should replace RANDOM', () => {
@@ -88,6 +124,13 @@ describe('UrlReplacements', () => {
     });
   });
 
+  it('should replace SOURCE_URL and _HOST', () => {
+    return expand('?url=SOURCE_URL&host=SOURCE_HOST').then(res => {
+      expect(res).to.not.match(/SOURCE_URL/);
+      expect(res).to.not.match(/SOURCE_HOST/);
+    });
+  });
+
   it('should replace PAGE_VIEW_ID', () => {
     return expand('?pid=PAGE_VIEW_ID').then(res => {
       expect(res).to.match(/pid=\d+/);
@@ -96,10 +139,11 @@ describe('UrlReplacements', () => {
 
   it('should replace CLIENT_ID', () => {
     setCookie(window, 'url-abc', 'cid-for-abc');
-    setCookie(window, 'url-xyz', 'cid-for-xyz');
+    // Make sure cookie does not exist
+    setCookie(window, 'url-xyz', '');
     return expand('?a=CLIENT_ID(url-abc)&b=CLIENT_ID(url-xyz)', true)
         .then(res => {
-          expect(res).to.equal('?a=cid-for-abc&b=cid-for-xyz');
+          expect(res).to.match(/^\?a=cid-for-abc\&b=amp-([a-zA-Z0-9_-]+){10,}/);
         });
   });
 
@@ -111,7 +155,7 @@ describe('UrlReplacements', () => {
 
   it('should replace TIMEZONE', () => {
     return expand('?tz=TIMEZONE').then(res => {
-      expect(res).to.match(/tz=\d+/);
+      expect(res).to.match(/tz=-?\d+/);
     });
   });
 
@@ -142,6 +186,98 @@ describe('UrlReplacements', () => {
   it('should replace SCREEN_HEIGHT', () => {
     return expand('?sh=SCREEN_HEIGHT').then(res => {
       expect(res).to.match(/sh=\d+/);
+    });
+  });
+
+  it('should replace PAGE_LOAD_TIME', () => {
+    return expand('?sh=PAGE_LOAD_TIME').then(res => {
+      expect(res).to.match(/sh=\d+/);
+    });
+  });
+
+  it('should replace PAGE_LOAD_TIME if timing info is not available', () => {
+    const win = getFakeWindow();
+    win.complete = true;
+    return urlReplacementsFor(win).expand('?sh=PAGE_LOAD_TIME&s')
+        .then(res => {
+          expect(res).to.match(/sh=&s/);
+        });
+  });
+
+  it('should replace PAGE_LOAD_TIME if available within a delay', () => {
+    const win = getFakeWindow();
+    const urlReplacements = urlReplacementsFor(win);
+    const validMetric = urlReplacements.expand('?sh=PAGE_LOAD_TIME&s');
+    urlReplacements.win_.performance.timing.loadEventStart = 109;
+    loadObservable.fire(document.createEvent('Event')); // Mimics load event.
+    return validMetric.then(res => {
+      expect(res).to.match(/sh=9&s/);
+    });
+  });
+
+  it('should replace DOMAIN_LOOKUP_TIME', () => {
+    return expand('?sh=DOMAIN_LOOKUP_TIME').then(res => {
+      expect(res).to.match(/sh=\d+/);
+    });
+  });
+
+  it('should replace TCP_CONNECT_TIME', () => {
+    return expand('?sh=TCP_CONNECT_TIME').then(res => {
+      expect(res).to.match(/sh=\d+/);
+    });
+  });
+
+  it('should replace SERVER_RESPONSE_TIME', () => {
+    return expand('?sh=SERVER_RESPONSE_TIME').then(res => {
+      expect(res).to.match(/sh=\d+/);
+    });
+  });
+
+  it('should replace PAGE_DOWNLOAD_TIME', () => {
+    return expand('?sh=PAGE_DOWNLOAD_TIME').then(res => {
+      expect(res).to.match(/sh=\d+/);
+    });
+  });
+
+  it('should replace REDIRECT_TIME', () => {
+    return expand('?sh=REDIRECT_TIME').then(res => {
+      expect(res).to.match(/sh=\d+/);
+    });
+  });
+
+  it('should replace DOM_INTERACTIVE_TIME', () => {
+    return expand('?sh=DOM_INTERACTIVE_TIME').then(res => {
+      expect(res).to.match(/sh=\d+/);
+    });
+  });
+
+  it('should replace CONTENT_LOAD_TIME', () => {
+    return expand('?sh=CONTENT_LOAD_TIME').then(res => {
+      expect(res).to.match(/sh=\d+/);
+    });
+  });
+
+  it('should replace AVAILABLE_SCREEN_HEIGHT', () => {
+    return expand('?sh=AVAILABLE_SCREEN_HEIGHT').then(res => {
+      expect(res).to.match(/sh=\d+/);
+    });
+  });
+
+  it('should replace AVAILABLE_SCREEN_WIDTH', () => {
+    return expand('?sh=AVAILABLE_SCREEN_WIDTH').then(res => {
+      expect(res).to.match(/sh=\d+/);
+    });
+  });
+
+  it('should replace SCREEN_COLOR_DEPTH', () => {
+    return expand('?sh=SCREEN_COLOR_DEPTH').then(res => {
+      expect(res).to.match(/sh=\d+/);
+    });
+  });
+
+  it('should replace BROWSER_LANGUAGE', () => {
+    return expand('?sh=BROWSER_LANGUAGE').then(res => {
+      expect(res).to.match(/sh=\w+/);
     });
   });
 
@@ -189,6 +325,15 @@ describe('UrlReplacements', () => {
     });
     return expect(replacements.expand('?a=FN(xyz,abc)')).to
         .eventually.equal('?a=xyz-abc');
+  });
+
+  it('should support multiple positional arguments with dots', () => {
+    const replacements = urlReplacementsFor(window);
+    replacements.set_('FN', (one, two) => {
+      return one + '-' + two;
+    });
+    return expect(replacements.expand('?a=FN(xy.z,ab.c)')).to
+        .eventually.equal('?a=xy.z-ab.c');
   });
 
   it('should support promises as replacements', () => {
@@ -277,6 +422,123 @@ describe('UrlReplacements', () => {
       'VALUE': false
     }).then(res => {
       expect(res).to.equal('v=false');
+    });
+  });
+
+  it('should resolve sub-included bindings', () => {
+    // RANDOM is a standard property and we add RANDOM_OTHER.
+    return expand('r=RANDOM&ro=RANDOM_OTHER?', false, {'RANDOM_OTHER': 'ABC'})
+        .then(res => {
+          expect(res).to.match(/r=(\d\.\d+)&ro=ABC\?$/);
+        });
+  });
+
+  it('should expand multiple vars', () => {
+    return expand('a=VALUEA&b=VALUEB?', false, {
+      'VALUEA': 'aaa',
+      'VALUEB': 'bbb',
+    }).then(res => {
+      expect(res).to.match(/a=aaa&b=bbb\?$/);
+    });
+  });
+
+  it('should replace QUERY_PARAM with foo', () => {
+    const win = getFakeWindow();
+    win.location = parseUrl("https://example.com?query_string_param1=foo");
+    return urlReplacementsFor(win)
+      .expand('?sh=QUERY_PARAM(query_string_param1)&s')
+      .then(res => {
+        expect(res).to.match(/sh=foo&s/);
+      });
+  });
+
+  it('should replace QUERY_PARAM with ""', () => {
+    const win = getFakeWindow();
+    win.location = parseUrl("https://example.com");
+    return urlReplacementsFor(win)
+      .expand('?sh=QUERY_PARAM(query_string_param1)&s')
+      .then(res => {
+        expect(res).to.match(/sh=&s/);
+      });
+  });
+
+  it('should replace QUERY_PARAM with default_value', () => {
+    const win = getFakeWindow();
+    win.location = parseUrl("https://example.com");
+    return urlReplacementsFor(win)
+      .expand('?sh=QUERY_PARAM(query_string_param1,default_value)&s')
+      .then(res => {
+        expect(res).to.match(/sh=default_value&s/);
+      });
+  });
+
+  describe('access values', () => {
+
+    let accessService;
+    let accessServiceMock;
+    let reportDevSpy;
+
+    beforeEach(() => {
+      accessService = {
+        getAccessReaderId: () => {},
+        getAuthdataField: () => {},
+      };
+      accessServiceMock = sandbox.mock(accessService);
+      reportDevSpy = sandbox.spy();
+    });
+
+    afterEach(() => {
+      accessServiceMock.verify();
+    });
+
+    function expand(url, opt_disabled) {
+      return createIframePromise().then(iframe => {
+        iframe.doc.title = 'Pixel Test';
+        const link = iframe.doc.createElement('link');
+        link.setAttribute('href', 'https://pinterest.com/pin1');
+        link.setAttribute('rel', 'canonical');
+        iframe.doc.head.appendChild(link);
+
+        const replacements = urlReplacementsFor(iframe.win);
+        replacements.getAccessService_ = () => {
+          if (opt_disabled) {
+            return Promise.resolve(null);
+          }
+          return Promise.resolve(accessService);
+        };
+        replacements.reportDev_ = reportDevSpy;
+        return replacements.expand(url);
+      });
+    }
+
+    it('should replace ACCESS_READER_ID', () => {
+      accessServiceMock.expects('getAccessReaderId')
+          .returns(Promise.resolve('reader1'))
+          .once();
+      return expand('?a=ACCESS_READER_ID') .then(res => {
+        expect(res).to.match(/a=reader1/);
+        expect(reportDevSpy.callCount).to.equal(0);
+      });
+    });
+
+    it('should replace AUTHDATA', () => {
+      accessServiceMock.expects('getAuthdataField')
+          .withExactArgs('field1')
+          .returns('value1')
+          .once();
+      return expand('?a=AUTHDATA(field1)').then(res => {
+        expect(res).to.match(/a=value1/);
+        expect(reportDevSpy.callCount).to.equal(0);
+      });
+    });
+
+    it('should report error if not available', () => {
+      accessServiceMock.expects('getAccessReaderId')
+          .never();
+      return expand('?a=ACCESS_READER_ID;', /* disabled */ true) .then(res => {
+        expect(res).to.match(/a=;/);
+        expect(reportDevSpy.callCount).to.equal(1);
+      });
     });
   });
 });

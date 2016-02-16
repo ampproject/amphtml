@@ -24,6 +24,7 @@ import {installGlobalClickListener} from './document-click';
 import {installImg} from '../builtins/amp-img';
 import {installVideo} from '../builtins/amp-video';
 import {installPixel} from '../builtins/amp-pixel';
+import {installEmbed} from '../builtins/amp-embed';
 import {installStyles, makeBodyVisible} from './styles';
 import {installErrorReporting} from './error';
 import {stubElements} from './custom-element';
@@ -44,12 +45,15 @@ try {
   installStyles(document, cssText, () => {
     try {
       installCoreServices(window);
+      // We need the core services (viewer/resources) to start instrumenting
+      perf.coreServicesAvailable();
       templatesFor(window);
 
       installImg(window);
       installAd(window);
       installPixel(window);
       installVideo(window);
+      installEmbed(window);
 
       adopt(window);
       stubElements(window);

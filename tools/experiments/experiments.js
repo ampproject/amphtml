@@ -51,12 +51,11 @@ const EXPERIMENTS = [
         'DEVELOPING.md#amp-dev-channel-experimental',
   },
 
-  // AMP Access
+  // AMP Access Analytics
   {
-    id: 'amp-access',
-    name: 'AMP Access',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-        'amp-access/amp-access-spec.md',
+    id: 'amp-access-analytics',
+    name: 'AMP Access Analytics',
+    spec: 'https://github.com/ampproject/amphtml/issues/1556',
   },
 
   // Dynamic CSS Classes
@@ -65,6 +64,14 @@ const EXPERIMENTS = [
     name: 'Dynamic CSS Classes',
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
         'amp-dynamic-css-classes/amp-dynamic-css-classes.md',
+  },
+
+  // Amp Accordion
+  {
+    id: 'amp-accordion',
+    name: 'Amp Accordion',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
+        'amp-accordion/amp-accordion.md',
   },
 ];
 

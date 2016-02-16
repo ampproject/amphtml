@@ -15,6 +15,7 @@
  */
 
 import {timer} from './timer';
+import {assert} from './asserts';
 
 
 /**
@@ -110,7 +111,15 @@ export function loadPromise(element, opt_timeout) {
       } else {
         unlistenLoad = listenOnce(element, 'load', () => resolve(element));
       }
-      unlistenError = listenOnce(element, 'error', reject);
+      unlistenError = listenOnce(element, 'error', () => {
+        try {
+          // Report failed loads as asserts so that they automatically go into
+          // the "document error" bucket.
+          assert(false, 'Failed HTTP request for %s.', element);
+        } catch (e) {
+          reject(e);
+        }
+      });
     }
   });
   return racePromise_(loadingPromise, () => {

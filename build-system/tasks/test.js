@@ -65,8 +65,9 @@ gulp.task('test', 'Runs tests', prerequisites, function(done) {
   if (argv.saucelabs && process.env.MAIN_REPO &&
       // Sauce Labs does not work on Pull Requests directly.
       // The @ampsauce bot builds these.
-      process.env.TRAVIS_PULL_REQUEST) {
-    console./*OK*/info('Deactivated for main repo');
+      process.env.TRAVIS_PULL_REQUEST != 'false') {
+    console./*OK*/info('Deactivated for pull requests. ' +
+        'The @ampsauce bots build eligible PRs.');
     return;
   }
 
@@ -91,10 +92,9 @@ gulp.task('test', 'Runs tests', prerequisites, function(done) {
     c.files = config.testPaths;
   }
 
-  if (argv.compiled) {
-    // Only applies to integration tests.
-    c.client.amp.useCompiledJs = true;
-  }
+  c.client.amp = {
+    useCompiledJs: !!argv.compiled
+  };
 
   karma.start(c, done);
 }, {

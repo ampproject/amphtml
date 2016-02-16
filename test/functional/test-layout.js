@@ -15,7 +15,7 @@
  */
 
 import {Layout, assertLength, getLengthNumeral, getLengthUnits, parseLength,
-    parseLayout} from '../../src/layout';
+    parseLayout, assertLengthOrPercent} from '../../src/layout';
 import {applyLayout_} from '../../src/custom-element';
 
 
@@ -90,6 +90,9 @@ describe('Layout', () => {
     expect(assertLength('10.1vmin')).to.equal('10.1vmin');
 
     expect(function() {
+      assertLength('10%');
+    }).to.throw(/Invalid length value/);
+    expect(function() {
       assertLength(10);
     }).to.throw(/Invalid length value/);
     expect(function() {
@@ -104,6 +107,34 @@ describe('Layout', () => {
     expect(function() {
       assertLength('');
     }).to.throw(/Invalid length value/);
+  });
+
+
+  it('assertLengthOrPercent', () => {
+    expect(assertLengthOrPercent('10px')).to.equal('10px');
+    expect(assertLengthOrPercent('10em')).to.equal('10em');
+    expect(assertLengthOrPercent('10vmin')).to.equal('10vmin');
+
+    expect(assertLengthOrPercent('10.1px')).to.equal('10.1px');
+    expect(assertLengthOrPercent('10.1em')).to.equal('10.1em');
+    expect(assertLengthOrPercent('10.1vmin')).to.equal('10.1vmin');
+    expect(assertLengthOrPercent('10.1%')).to.equal('10.1%');
+
+    expect(function() {
+      assertLengthOrPercent(10);
+    }).to.throw(/Invalid length or percent value/);
+    expect(function() {
+      assertLengthOrPercent('10');
+    }).to.throw(/Invalid length or percent value/);
+    expect(function() {
+      assertLengthOrPercent(undefined);
+    }).to.throw(/Invalid length or percent value/);
+    expect(function() {
+      assertLengthOrPercent(null);
+    }).to.throw(/Invalid length or percent value/);
+    expect(function() {
+      assertLengthOrPercent('');
+    }).to.throw(/Invalid length or percent value/);
   });
 
 

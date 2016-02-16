@@ -6,7 +6,7 @@
     "title": "Example Request"
   },
   "triggers": {
-    "remote pageview": {
+    "remotePageview": {
       "on": "visible",
       "request": "event"
     }

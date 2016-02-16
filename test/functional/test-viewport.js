@@ -64,7 +64,6 @@ describe('Viewport', () => {
     viewport = null;
     binding = null;
     viewer = null;
-    clock.restore();
     clock = null;
     sandbox.restore();
     sandbox = null;
@@ -113,7 +112,6 @@ describe('Viewport', () => {
     bindingMock.expects('updatePaddingTop').never();
     viewerViewportHandler();
     bindingMock.verify();
-    bindingMock.restore();
 
     // Should call updatePaddingTop.
     bindingMock = sandbox.mock(binding);
@@ -121,7 +119,6 @@ describe('Viewport', () => {
     bindingMock.expects('updatePaddingTop').withArgs(21).once();
     viewerViewportHandler();
     bindingMock.verify();
-    bindingMock.restore();
   });
 
   it('should call binding.updateViewerViewport', () => {
@@ -129,17 +126,23 @@ describe('Viewport', () => {
     bindingMock.expects('updateViewerViewport').once();
     viewerViewportHandler();
     bindingMock.verify();
-    bindingMock.restore();
   });
 
   it('should defer scroll events', () => {
     let changeEvent = null;
+    let eventCount = 0;
     viewport.onChanged(event => {
       changeEvent = event;
+      eventCount++;
     });
     viewer.getScrollTop = () => 34;
+    expect(viewport.scrollTracking_).to.be.false;
+    viewerViewportHandler();
+    expect(viewport.scrollTracking_).to.be.true;
+    viewerViewportHandler();
     viewerViewportHandler();
     expect(changeEvent).to.equal(null);
+    expect(viewport.scrollTracking_).to.be.true;
 
     // Not enough time past.
     clock.tick(8);
@@ -149,15 +152,26 @@ describe('Viewport', () => {
     viewer.getScrollTop = () => 35;
     viewerViewportHandler();
     clock.tick(16);
+    viewerViewportHandler();
     expect(changeEvent).to.equal(null);
 
     // A bit more time.
     clock.tick(16);
+    viewerViewportHandler();
     expect(changeEvent).to.equal(null);
+    expect(viewport.scrollTracking_).to.be.true;
     clock.tick(4);
     expect(changeEvent).to.not.equal(null);
     expect(changeEvent.relayoutAll).to.equal(false);
     expect(changeEvent.velocity).to.be.closeTo(0.019230, 1e-4);
+    expect(eventCount).to.equal(1);
+    expect(viewport.scrollTracking_).to.be.false;
+    changeEvent = null;
+    viewer.getScrollTop = () => 36;
+    viewerViewportHandler();
+    expect(changeEvent).to.equal(null);
+    clock.tick(53);
+    expect(changeEvent).to.not.equal(null);
   });
 
   it('should update scroll pos and reset cache', () => {
@@ -363,7 +377,6 @@ describe('Viewport META', () => {
       viewport = null;
       binding = null;
       viewer = null;
-      clock.restore();
       clock = null;
       sandbox.restore();
       sandbox = null;
@@ -445,6 +458,7 @@ describe('ViewportBindingNatural', () => {
   let windowMock;
   let binding;
   let windowApi;
+  let documentElement;
   let windowEventHandlers;
 
   beforeEach(() => {
@@ -455,6 +469,12 @@ describe('ViewportBindingNatural', () => {
       windowEventHandlers[eventType] = handler;
     };
     windowApi = new WindowApi();
+    documentElement = {
+      style: {}
+    };
+    windowApi.document = {
+      documentElement: documentElement
+    };
     windowMock = sandbox.mock(windowApi);
     binding = new ViewportBindingNatural_(windowApi);
   });
@@ -625,25 +645,16 @@ describe('ViewportBindingNaturalIosEmbed', () => {
     expect(bodyEventListeners['scroll']).to.not.equal(undefined);
   });
 
-  it('should pre-calculate scrollWidth', () => {
-    expect(binding.scrollWidth_).to.equal(777);
-  });
-
-  it('should defer scrollWidth to max of window.innerHeight ' +
-        ' and body.scrollWidth', () => {
-    binding.scrollWidth_ = 0;
+  it('should always have scrollWidth equal window.innerWidth', () => {
     expect(binding.getScrollWidth()).to.equal(555);
-
-    binding.scrollWidth_ = 1000;
-    expect(binding.getScrollWidth()).to.equal(1000);
   });
 
   it('should setup document for embed scrolling', () => {
     const documentElement = windowApi.document.documentElement;
     const body = windowApi.document.body;
-    expect(documentElement.style.overflow).to.equal('auto');
+    expect(documentElement.style.overflowY).to.equal('auto');
     expect(documentElement.style.webkitOverflowScrolling).to.equal('touch');
-    expect(body.style.overflow).to.equal('auto');
+    expect(body.style.overflowY).to.equal('auto');
     expect(body.style.webkitOverflowScrolling).to.equal('touch');
     expect(body.style.position).to.equal('absolute');
     expect(body.style.top).to.equal(0);

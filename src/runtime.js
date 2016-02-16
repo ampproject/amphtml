@@ -21,7 +21,6 @@ import {getMode} from './mode';
 import {installStyles} from './styles';
 import {installCoreServices} from './amp-core-service';
 import {isExperimentOn, toggleExperiment} from './experiments';
-import {performanceFor} from './performance';
 import {registerElement} from './custom-element';
 import {registerExtendedElement} from './extended-element';
 import {resourcesFor} from './resources';
@@ -126,7 +125,6 @@ export function adopt(global) {
    * @param {GlobalAmp} fn
    */
   global.AMP.push = function(fn) {
-    preregisteredElements.push(fn);
     fn(global.AMP);
   };
 
@@ -134,12 +132,10 @@ export function adopt(global) {
    * Sets the function to forward tick events to.
    * @param {funtion(string,?string=,number=)} fn
    * @param {function()=} opt_flush
+   * @deprecated
    * @export
    */
-  global.AMP.setTickFunction = (fn, opt_flush) => {
-    const perf = performanceFor(global);
-    perf.setTickFunction(fn, opt_flush);
-  };
+  global.AMP.setTickFunction = () => {};
 
   // Execute asynchronously scheduled elements.
   for (let i = 0; i < preregisteredElements.length; i++) {
@@ -152,6 +148,10 @@ export function adopt(global) {
       timer.delay(() => {throw e;}, 1);
     }
   }
+  // Make sure we empty the array of preregistered extensions.
+  // Technically this is only needed for testing, as everything should
+  // go out of scope here, but just making sure.
+  preregisteredElements.length = 0;
 }
 
 

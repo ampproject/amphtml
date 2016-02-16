@@ -16,39 +16,30 @@
 
 import * as sinon from 'sinon';
 import {Performance, performanceFor} from '../../src/performance';
-import {adopt} from '../../src/runtime';
+import {getService, resetServiceForTesting} from '../../src/service';
+import {resourcesFor} from '../../src/resources';
+import {viewerFor} from '../../src/viewer';
 
 
 describe('performance', () => {
   let sandbox;
-  let windowMock;
   let perf;
-  let windowApi;
   let clock;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
-    const WindowApi = function() {};
-    windowApi = new WindowApi();
-    windowMock = sandbox.mock(windowApi);
-    perf = new Performance(windowMock);
+    perf = new Performance(window);
   });
 
   afterEach(() => {
     perf = null;
-    windowAPi = null;
-    clock.restore();
     clock = null;
     sandbox.restore();
     sandbox = null;
   });
 
-  describe('when no tick function is set,', () => {
-
-    it('should not have a tick function', () => {
-      expect(perf.tick_).to.be.undefined;
-    });
+  describe('when viewer is not ready', () => {
 
     it('should queue up tick events', () => {
       expect(perf.events_.length).to.equal(0);
@@ -58,6 +49,20 @@ describe('performance', () => {
 
       perf.tick('startEnd');
       expect(perf.events_.length).to.equal(2);
+    });
+
+    it('should map tickDelta to tick', () => {
+      expect(perf.events_.length).to.equal(0);
+
+      perf.tickDelta('test', 99);
+      expect(perf.events_.length).to.equal(2);
+      expect(perf.events_[0])
+          .to.be.jsonEqual({label: '_test', from: null, value: 1000});
+      expect(perf.events_[1]).to.be.jsonEqual({
+        label: 'test',
+        from: '_test',
+        value: 1099,
+      });
     });
 
     it('should have max 50 queued events', () => {
@@ -75,10 +80,10 @@ describe('performance', () => {
       clock.tick(150);
       perf.tick('start0');
 
-      expect(perf.events_[0]).to.deep.equal({
+      expect(perf.events_[0]).to.be.jsonEqual({
         label: 'start0',
-        opt_from: undefined,
-        opt_value: 150
+        from: null,
+        value: 150,
       });
     });
 
@@ -86,10 +91,10 @@ describe('performance', () => {
       clock.tick(150);
       perf.tick('start0', 'start1', 300);
 
-      expect(perf.events_[0]).to.deep.equal({
+      expect(perf.events_[0]).to.be.jsonEqual({
         label: 'start0',
-        opt_from: 'start1',
-        opt_value: 300
+        from: 'start1',
+        value: 300,
       });
     });
 
@@ -104,41 +109,37 @@ describe('performance', () => {
       }
 
       expect(perf.events_.length).to.equal(50);
-      expect(perf.events_[0]).to.deep.equal({
+      expect(perf.events_[0]).to.be.jsonEqual({
         label: 'start0',
-        opt_from: undefined,
-        opt_value: tickTime
+        from: null,
+        value: tickTime,
       });
 
       clock.tick(1);
       perf.tick('start50');
 
-      expect(perf.events_[0]).to.deep.equal({
+      expect(perf.events_[0]).to.be.jsonEqual({
         label: 'start1',
-        opt_from: undefined,
-        opt_value: tickTime
+        from: null,
+        value: tickTime,
       });
-      expect(perf.events_[49]).to.deep.equal({
+      expect(perf.events_[49]).to.be.jsonEqual({
         label: 'start50',
-        opt_from: undefined,
-        opt_value: tickTime + 1
+        from: null,
+        value: tickTime + 1,
       });
     });
   });
 
-  describe('when tick function is set,', () => {
-    let spy;
+  describe('when viewer is ready,', () => {
+    let tickSpy;
+    let flushTicksSpy;
+    let viewer;
 
     beforeEach(() => {
-      spy = sinon.spy();
-    });
-
-    it('should be able to install a performance function', () => {
-      expect(perf.tick_).to.be.undefined;
-
-      perf.setTickFunction(spy);
-
-      expect(perf.tick_).to.be.an.instanceof(Function);
+      viewer = viewerFor(window);
+      tickSpy = sandbox.stub(viewer, 'tick');
+      flushTicksSpy = sandbox.stub(viewer, 'flushTicks');
     });
 
     it('should forward all queued tick events', () => {
@@ -148,14 +149,18 @@ describe('performance', () => {
 
       expect(perf.events_.length).to.equal(2);
 
-      perf.setTickFunction(spy);
+      perf.coreServicesAvailable();
 
-      expect(spy.firstCall.args[0]).to.equal('start0');
-      expect(spy.firstCall.args[1]).to.equal(undefined);
-      expect(spy.firstCall.args[2]).to.equal(0);
-      expect(spy.secondCall.args[0]).to.equal('start1');
-      expect(spy.secondCall.args[1]).to.equal('start0');
-      expect(spy.secondCall.args[2]).to.equal(1);
+      expect(tickSpy.firstCall.args[0]).to.be.jsonEqual({
+        label: 'start0',
+        from: null,
+        value: 0,
+      });
+      expect(tickSpy.secondCall.args[0]).to.be.jsonEqual({
+        label: 'start1',
+        from: 'start0',
+        value: 1,
+      });
     });
 
     it('should have no more queued tick events after flush', () => {
@@ -164,75 +169,186 @@ describe('performance', () => {
 
       expect(perf.events_.length).to.equal(2);
 
-      perf.setTickFunction(spy);
+      perf.coreServicesAvailable();
 
       expect(perf.events_.length).to.equal(0);
     });
 
     it('should forward tick events', () => {
-      perf.setTickFunction(spy);
+      perf.coreServicesAvailable();
 
-      perf.tick('start0');
       clock.tick(100);
+      perf.tick('start0');
       perf.tick('start1', 'start0', 300);
 
-      expect(spy.firstCall.args[0]).to.equal('start0');
-      expect(spy.firstCall.args[1]).to.equal(undefined);
-      expect(spy.firstCall.args[2]).to.equal(undefined);
-
-      expect(spy.secondCall.args[0]).to.equal('start1');
-      expect(spy.secondCall.args[1]).to.equal('start0');
-      expect(spy.secondCall.args[2]).to.equal(300);
+      expect(tickSpy.firstCall.args[0]).to.be.jsonEqual({
+        label: 'start0',
+        from: null,
+        value: 100,
+      });
+      expect(tickSpy.secondCall.args[0]).to.be.jsonEqual({
+        label: 'start1',
+        from: 'start0',
+        value: 300,
+      });
     });
 
     it('should call the flush callback', () => {
-      perf.setTickFunction(function() {}, spy);
-
-      // We start at 1 since setting the tick function and flush
-      // causes 1 flush call for any queued events.
-      expect(spy.callCount).to.equal(1);
+      expect(flushTicksSpy.callCount).to.equal(0);
+      // coreServicesAvailable calls flush once.
+      perf.coreServicesAvailable();
+      expect(flushTicksSpy.callCount).to.equal(1);
       perf.flush();
-      expect(spy.callCount).to.equal(2);
+      expect(flushTicksSpy.callCount).to.equal(2);
       perf.flush();
-      expect(spy.callCount).to.equal(3);
+      expect(flushTicksSpy.callCount).to.equal(3);
     });
   });
 
-  it('can set the performance function through the runtime', () => {
-    const perf = performanceFor(window);
-    const spy = sinon.spy(perf, 'setTickFunction');
-    const fn = function() {};
+  describe('coreServicesAvailable', () => {
+    let tickSpy;
+    let viewer;
+    let whenFirstVisiblePromise;
+    let whenFirstVisibleResolve;
+    let whenReadyToRetrieveResourcesPromise;
+    let whenReadyToRetrieveResourcesResolve;
+    let whenViewportLayoutCompletePromise;
+    let whenViewportLayoutCompleteResolve;
 
-    adopt(window);
+    function stubHasBeenVisible(visibility) {
+      sandbox.stub(viewer, 'hasBeenVisible')
+          .returns(visibility);
+    }
 
-    window.AMP.setTickFunction(fn);
+    beforeEach(() => {
+      viewer = viewerFor(window);
+      resources = resourcesFor(window);
 
-    expect(spy.firstCall.args[0]).to.equal(fn);
+      tickSpy = sandbox.spy(perf, 'tick');
 
-    spy.restore();
+      whenFirstVisiblePromise = new Promise(resolve => {
+        whenFirstVisibleResolve = resolve;
+      });
+
+      whenReadyToRetrieveResourcesPromise = new Promise(resolve => {
+        whenReadyToRetrieveResourcesResolve = resolve;
+      });
+
+      whenViewportLayoutCompletePromise = new Promise(resolve => {
+        whenViewportLayoutCompleteResolve = resolve;
+      });
+
+      sandbox.stub(viewer, 'whenFirstVisible')
+          .returns(whenFirstVisiblePromise);
+      sandbox.stub(perf, 'whenReadyToRetrieveResources_')
+          .returns(whenReadyToRetrieveResourcesPromise);
+      sandbox.stub(perf, 'whenViewportLayoutComplete_')
+          .returns(whenViewportLayoutCompletePromise);
+    });
+
+    describe('document started in prerender', () => {
+
+      beforeEach(() => {
+        clock.tick(100);
+        stubHasBeenVisible(false);
+        perf.coreServicesAvailable();
+      });
+
+      it('should tick `pc` with opt_value=400 when user request document ' +
+         'to be visible before before first viewport completion', () => {
+        clock.tick(100);
+        whenFirstVisibleResolve();
+        return viewer.whenFirstVisible().then(() => {
+          clock.tick(400);
+          whenReadyToRetrieveResourcesResolve();
+          whenViewportLayoutCompleteResolve();
+          return perf.whenViewportLayoutComplete_().then(() => {
+            expect(tickSpy.callCount).to.equal(2);
+            expect(tickSpy.firstCall.args[0]).to.equal('_pc');
+            expect(tickSpy.secondCall.args[0]).to.equal('pc');
+            expect(tickSpy.secondCall.args[1]).to.equal('_pc');
+            expect(Number(tickSpy.firstCall.args[2])).to.equal(1000);
+            expect(Number(tickSpy.secondCall.args[2])).to.equal(1400);
+          });
+        });
+      });
+
+      it('should tick `pc` with `opt_value=0` when viewport is complete ' +
+         'before user request document to be visible', () => {
+        clock.tick(300);
+        whenReadyToRetrieveResourcesResolve();
+        whenViewportLayoutCompleteResolve();
+        return perf.whenViewportLayoutComplete_().then(() => {
+          expect(tickSpy.callCount).to.equal(2);
+          expect(tickSpy.firstCall.args[0]).to.equal('_pc');
+          expect(tickSpy.secondCall.args[0]).to.equal('pc');
+          expect(tickSpy.secondCall.args[1]).to.equal('_pc');
+          expect(Number(tickSpy.firstCall.args[2])).to.equal(1000);
+          expect(Number(tickSpy.secondCall.args[2])).to.equal(1001);
+        });
+      });
+    });
+
+    describe('document did not start in prerender', () => {
+
+      beforeEach(() => {
+        stubHasBeenVisible(true);
+        perf.coreServicesAvailable();
+      });
+
+      it('should tick `pc` with `opt_value=undefined` when user requests ' +
+         'document to be visible', () => {
+        clock.tick(300);
+        whenReadyToRetrieveResourcesResolve();
+        whenViewportLayoutCompleteResolve();
+        return perf.whenViewportLayoutComplete_().then(() => {
+          expect(tickSpy.callCount).to.equal(1);
+          expect(tickSpy.firstCall.args[0]).to.equal('pc');
+          expect(tickSpy.firstCall.args[2]).to.be.undefined;
+        });
+      });
+    });
   });
 
-  it('can set the flush function through the runtime', () => {
+  it('should setFlushParams', () => {
     const perf = performanceFor(window);
-    const spy = sinon.spy(perf, 'setTickFunction');
-    const fn = function() {};
+    const viewer = viewerFor(window);
+    sandbox.stub(perf, 'whenViewportLayoutComplete_')
+        .returns(Promise.resolve());
+    const setFlushParamsSpy = sandbox.stub(viewer, 'setFlushParams');
+    perf.coreServicesAvailable();
+    resetServiceForTesting(window, 'documentInfo');
+    const info = {
+      canonicalUrl: 'https://foo.bar/baz',
+      pageViewId: 12345,
+      sourceUrl: 'https://hello.world/baz/#development'
+    };
+    getService(window, 'documentInfo', () => info);
 
-    adopt(window);
+    const ad1 = document.createElement('amp-ad');
+    ad1.setAttribute('type', 'abc');
+    const ad2 = document.createElement('amp-ad');
+    ad2.setAttribute('type', 'xyz');
+    const ad3 = document.createElement('amp-ad');
+    sandbox.stub(perf.resources_, 'get').returns([
+      {element: document.createElement('amp-img')},
+      {element: document.createElement('amp-img')},
+      {element: document.createElement('amp-anim')},
+      {element: ad1},
+      {element: ad2},
+      {element: ad3},
+    ]);
 
-    window.AMP.setTickFunction(function() {}, fn);
-
-    expect(spy.firstCall.args[1]).to.equal(fn);
-
-    spy.restore();
-  });
-
-  it('should call the flush function after its set', () => {
-    const flushSpy = sinon.spy();
-
-    adopt(window);
-
-    window.AMP.setTickFunction(function() {}, flushSpy);
-
-    expect(flushSpy.calledOnce).to.be.true;
+    return perf.setDocumentInfoParams_().then(() => {
+      expect(setFlushParamsSpy.lastCall.args[0]).to.be.jsonEqual({
+        sourceUrl: 'https://hello.world/baz/',
+        'amp-img': 2,
+        'amp-anim': 1,
+        'amp-ad': 3,
+        'ad-abc': 1,
+        'ad-xyz': 1,
+        'ad-null': 1,
+      });
+    });
   });
 });

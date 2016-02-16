@@ -493,7 +493,6 @@ export class BaseElement {
    * specified. Resource manager will perform the actual layout based on the
    * priority of this element and its children.
    * @param {!Element|!Array<!Element>} elements
-   * @param {boolean} inLocalViewport
    * @protected
    */
   scheduleLayout(elements) {
@@ -554,6 +553,24 @@ export class BaseElement {
     this.resources_.attemptChangeHeight(this.element, newHeight, opt_callback);
   }
 
+ /**
+  * Runs the specified mutation on the element and ensures that measures
+  * and layouts performed for the affected elements.
+  *
+  * This method should be called whenever a significant mutations are done
+  * on the DOM that could affect layout of elements inside this subtree or
+  * its siblings. The top-most affected element should be specified as the
+  * first argument to this method and all the mutation work should be done
+  * in the mutator callback which is called in the "mutation" vsync phase.
+  *
+  * @param {function()} mutator
+  * @param {Element=} opt_element
+  * @return {!Promise}
+  */
+  mutateElement(mutator, opt_element) {
+    this.resources_.mutateElement(opt_element || this.element, mutator);
+  }
+
   /**
    * Schedules callback to be complete within the next batch. This call is
    * intended for heavy DOM mutations that typically cause re-layouts.
@@ -587,4 +604,11 @@ export class BaseElement {
    * @protected
    */
   onLayoutMeasure() {}
+
+  /**
+   * Called after a overflowCallback is triggered on an element.
+   * @param {boolean} unusedOverflown
+   * @param {number} unusedRequestedHeight
+   */
+  overflowCallback(unusedOverflown, unusedRequestedHeight) {}
 };

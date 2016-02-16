@@ -15,7 +15,6 @@
  */
 
 import {assert} from './asserts';
-import {getMode} from './mode';
 import {parseUrl} from './url';
 
 
@@ -34,13 +33,12 @@ export function listen(iframe, typeOfMessage, callback, opt_is3P) {
   assert(iframe.src, 'only iframes with src supported');
   const origin = parseUrl(iframe.src).origin;
   const win = iframe.ownerDocument.defaultView;
-  const mode = getMode();
   const sentinel = getSentinel_(opt_is3P);
   const listener = function(event) {
-    if (event.origin != origin && !mode.localDev && !mode.test) {
+    if (event.origin != origin) {
       return;
     }
-    if (event.source != iframe.contentWindow && !mode.localDev && !mode.test) {
+    if (event.source != iframe.contentWindow) {
       return;
     }
     if (!event.data || event.data.sentinel != sentinel) {
@@ -86,8 +84,15 @@ export function listenOnce(iframe, typeOfMessage, callback, opt_is3P) {
  * @param {boolean=} opt_is3P set to true if the iframe is 3p.
  */
 export function postMessage(iframe, type, object, targetOrigin, opt_is3P) {
+  if (!iframe.contentWindow) {
+    return;
+  }
   object.type = type;
   object.sentinel = getSentinel_(opt_is3P);
+  if (opt_is3P) {
+    // Serialize ourselves because that is much faster in Chrome.
+    object = 'amp-' + JSON.stringify(object);
+  }
   iframe.contentWindow./*OK*/postMessage(object, targetOrigin);
 }
 
@@ -98,5 +103,5 @@ export function postMessage(iframe, type, object, targetOrigin, opt_is3P) {
  * @private
  */
 function getSentinel_(opt_is3P) {
-  return opt_is3P ? 'amp-3p' : 'amp';
+  return opt_is3P ? 'amp-$internalRuntimeToken$' : 'amp';
 }

@@ -15,4 +15,8 @@
  */
 
 import 'document-register-element/build/document-register-element.max';
-import './custom-core-js-shim';
+import {install as installMathSign} from './polyfills/math-sign';
+import {install as installPromise} from './polyfills/promise';
+
+installMathSign(window);
+installPromise(window);

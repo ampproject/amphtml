@@ -23,22 +23,18 @@ import * as sinon from 'sinon';
 describe('reportErrorToServer', () => {
 
   let sandbox;
-  let clock;
   let onError;
 
   beforeEach(() => {
     onError = window.onerror;
     sandbox = sinon.sandbox.create();
-    clock = sandbox.useFakeTimers();
-    sinon.spy(window, 'Image');
+    sandbox.spy(window, 'Image');
   });
 
   afterEach(() => {
     window.onerror = onError;
-    clock.restore();
     sandbox.restore();
     setModeForTesting(null);
-    Image.restore();
   });
 
   it('reportError with error object', () => {
@@ -53,6 +49,7 @@ describe('reportErrorToServer', () => {
     expect(query.el).to.equal('u');
     expect(query.a).to.equal('0');
     expect(query.s).to.equal(e.stack);
+    expect(query['3p']).to.equal(undefined);
     expect(e.message).to.contain('_reported_');
   });
 
@@ -80,6 +77,20 @@ describe('reportErrorToServer', () => {
     expect(query.m).to.equal('XYZ');
     expect(query.a).to.equal('1');
     expect(query.v).to.equal('$internalRuntimeVersion$');
+  });
+
+  it('reportError marks 3p', () => {
+    window.context = {
+      location: {},
+    };
+    const e = new Error('XYZ');
+    e.fromAssert = true;
+    const url = parseUrl(
+        getErrorReportUrl(undefined, undefined, undefined, undefined, e));
+    const query = parseQueryString(url.search);
+
+    expect(query.m).to.equal('XYZ');
+    expect(query['3p']).to.equal('1');
   });
 
   it('reportError without error object', () => {

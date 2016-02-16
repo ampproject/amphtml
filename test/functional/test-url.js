@@ -17,13 +17,17 @@
 import {
   addParamToUrl,
   addParamsToUrl,
+  assertAbsoluteHttpOrHttpsUrl,
   assertHttpsUrl,
   getOrigin,
   getSourceOrigin,
+  getSourceUrl,
   isProxyOrigin,
   parseQueryString,
   parseUrl,
-  removeFragment
+  removeFragment,
+  resolveRelativeUrl,
+  resolveRelativeUrlFallback_
 } from '../../src/url';
 
 describe('url', () => {
@@ -50,6 +54,13 @@ describe('url', () => {
       hash: '#foo',
       origin: 'https://foo.com'
     });
+  });
+  it('caches results', () => {
+    const url = 'https://foo.com:123/abc?123#foo';
+    parseUrl(url);
+    const a1 = parseUrl(url);
+    const a2 = parseUrl(url);
+    expect(a1).to.equal(a2);
   });
   it('should handle ports', () => {
     compareParse('https://foo.com:123/abc?123#foo', {
@@ -199,6 +210,37 @@ describe('assertHttpsUrl', () => {
   });
 });
 
+describe('assertAbsoluteHttpOrHttpsUrl', () => {
+  it('should allow http', () => {
+    expect(assertAbsoluteHttpOrHttpsUrl('http://twitter.com/'))
+        .to.equal('http://twitter.com/');
+    expect(assertAbsoluteHttpOrHttpsUrl('HTTP://twitter.com/'))
+        .to.equal('http://twitter.com/');
+  });
+  it('should allow https', () => {
+    expect(assertAbsoluteHttpOrHttpsUrl('https://twitter.com/'))
+        .to.equal('https://twitter.com/');
+    expect(assertAbsoluteHttpOrHttpsUrl('HTTPS://twitter.com/'))
+        .to.equal('https://twitter.com/');
+  });
+  it('should fail on relative protocol', () => {
+    expect(() => {
+      assertAbsoluteHttpOrHttpsUrl('//twitter.com/');
+    }).to.throw(/URL must start with/);
+  });
+  it('should fail on relative url', () => {
+    expect(() => {
+      assertAbsoluteHttpOrHttpsUrl('/path');
+    }).to.throw(/URL must start with/);
+  });
+  it('should fail on not allowed protocol', () => {
+    expect(() => {
+      assertAbsoluteHttpOrHttpsUrl(
+          /*eslint no-script-url: 0*/ 'javascript:alert');
+    }).to.throw(/URL must start with/);
+  });
+});
+
 describe('removeFragment', () => {
   it('should remove fragment', () => {
     expect(removeFragment('https://twitter.com/path#abc')).to.equal(
@@ -302,33 +344,119 @@ describe('isProxyOrigin', () => {
       false);
 });
 
-describe('getSourceOrigin', () => {
+describe('getSourceOrigin/Url', () => {
 
-  function testOrigin(href, origin) {
-    it('should return the origin from ' + href, () => {
-      expect(getSourceOrigin(parseUrl(href))).to.equal(origin);
+  function testOrigin(href, sourceHref) {
+    it('should return the source origin/url from ' + href, () => {
+      expect(getSourceUrl(href)).to.equal(sourceHref);
+      expect(getSourceOrigin(href)).to.equal(getOrigin(sourceHref));
     });
   }
 
+  // CDN.
   testOrigin(
-      'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0',
-      'http://www.origin.com');
+      'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0#h',
+      'http://www.origin.com/foo/?f=0#h');
   testOrigin(
-      'https://cdn.ampproject.org/v/s/www.origin.com/foo/?f=0',
-      'https://www.origin.com');
+      'https://cdn.ampproject.org/v/s/www.origin.com/foo/?f=0#h',
+      'https://www.origin.com/foo/?f=0#h');
   testOrigin(
       'https://cdn.ampproject.org/c/www.origin.com/foo/?f=0',
-      'http://www.origin.com');
+      'http://www.origin.com/foo/?f=0');
   testOrigin(
       'https://cdn.ampproject.org/c/s/www.origin.com/foo/?f=0',
-      'https://www.origin.com');
+      'https://www.origin.com/foo/?f=0');
   testOrigin(
       'https://cdn.ampproject.org/c/s/origin.com/foo/?f=0',
-      'https://origin.com');
+      'https://origin.com/foo/?f=0');
+  testOrigin(
+      'https://cdn.ampproject.org/c/s/origin.com%3A81/foo/?f=0',
+      'https://origin.com:81/foo/?f=0');
+
+  // Non-CDN.
+  testOrigin(
+      'https://origin.com/foo/?f=0',
+      'https://origin.com/foo/?f=0');
 
   it('should fail on invalid source origin', () => {
     expect(() => {
       getSourceOrigin(parseUrl('https://cdn.ampproject.org/v/yyy/'));
     }).to.throw(/Expected a \. in origin http:\/\/yyy/);
   });
+});
+
+describe('resolveRelativeUrl', () => {
+
+  function testRelUrl(href, baseHref, resolvedHref) {
+    it('should return the resolved rel url from ' + href +
+          ' with base ' + baseHref, () => {
+      expect(resolveRelativeUrl(href, baseHref))
+          .to.equal(resolvedHref, 'native or fallback');
+      expect(resolveRelativeUrlFallback_(href, baseHref))
+          .to.equal(resolvedHref, 'fallback');
+    });
+  }
+
+  // Absolute URL.
+  testRelUrl(
+      'https://acme.org/path/file?f=0#h',
+      'https://base.org/bpath/bfile?bf=0#bh',
+      'https://acme.org/path/file?f=0#h');
+  testRelUrl(
+      'data:12345',
+      'https://base.org/bpath/bfile?bf=0#bh',
+      'data:12345');
+
+  // Protocol-relative URL.
+  testRelUrl(
+      '//acme.org/path/file?f=0#h',
+      'https://base.org/bpath/bfile?bf=0#bh',
+      'https://acme.org/path/file?f=0#h');
+  testRelUrl(
+      '//acme.org/path/file?f=0#h',
+      'http://base.org/bpath/bfile?bf=0#bh',
+      'http://acme.org/path/file?f=0#h');
+  testRelUrl(
+      '\\\\acme.org/path/file?f=0#h',
+      'http://base.org/bpath/bfile?bf=0#bh',
+      'http://acme.org/path/file?f=0#h');
+
+  // Absolute path.
+  testRelUrl(
+      '/path/file?f=0#h',
+      'https://base.org/bpath/bfile?bf=0#bh',
+      'https://base.org/path/file?f=0#h');
+  testRelUrl(
+      '/path/file?f=0#h',
+      'http://base.org/bpath/bfile?bf=0#bh',
+      'http://base.org/path/file?f=0#h');
+  testRelUrl(
+      '\\path/file?f=0#h',
+      'http://base.org/bpath/bfile?bf=0#bh',
+      'http://base.org/path/file?f=0#h');
+
+  // Relative path.
+  testRelUrl(
+      'file?f=0#h',
+      'https://base.org/bpath/bfile?bf=0#bh',
+      'https://base.org/bpath/file?f=0#h');
+  testRelUrl(
+      'file?f=0#h',
+      'http://base.org/bpath/bfile?bf=0#bh',
+      'http://base.org/bpath/file?f=0#h');
+
+  testRelUrl(
+      'file?f=0#h',
+      'https://base.org/bfile?bf=0#bh',
+      'https://base.org/file?f=0#h');
+  testRelUrl(
+      'file?f=0#h',
+      'http://base.org/bfile?bf=0#bh',
+      'http://base.org/file?f=0#h');
+
+  // Accepts parsed URLs.
+  testRelUrl(
+      'file?f=0#h',
+      parseUrl('http://base.org/bfile?bf=0#bh'),
+      'http://base.org/file?f=0#h');
 });

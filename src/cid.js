@@ -18,7 +18,8 @@
  * @fileoverview Factory for ./service/cid-impl.js
  */
 
-import {getElementService} from './custom-element';
+import {getElementService, getElementServiceIfAvailable}
+    from './custom-element';
 
 /**
  * @param {!Window} window
@@ -26,4 +27,14 @@ import {getElementService} from './custom-element';
  */
 export function cidFor(window) {
   return getElementService(window, 'cid', 'amp-analytics');
+};
+
+/**
+ * Returns a promise for the CID service or a promise for null if the service
+ * is not available on the current page.
+ * @param {!Window} window
+ * @return {!Promise<?Cid>}
+ */
+export function cidForOrNull(window) {
+  return getElementServiceIfAvailable(window, 'cid', 'amp-analytics');
 };

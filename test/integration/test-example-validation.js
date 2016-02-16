@@ -37,6 +37,7 @@ describe('example', function() {
   const examples = [
     'ads.amp.html',
     'brightcove.amp.html',
+    'dailymotion.amp.html',
     'metadata-examples/article-json-ld.amp.html',
     'metadata-examples/article-microdata.amp.html',
     'metadata-examples/recipe-json-ld.amp.html',
@@ -46,11 +47,17 @@ describe('example', function() {
     'metadata-examples/video-json-ld.amp.html',
     'metadata-examples/video-microdata.amp.html',
     'article.amp.html',
+    'analytics.amp.html',
+    'analytics-notification.amp.html',
     'everything.amp.html',
+    'facebook.amp.html',
     'instagram.amp.html',
     'released.amp.html',
+    'soundcloud.amp.html',
     'twitter.amp.html',
     'vine.amp.html',
+    'vimeo.amp.html',
+    'old-boilerplate.amp.html',
   ];
 
   /**
@@ -62,7 +69,10 @@ describe('example', function() {
    * @constructor {!Array<!RegExp>}
    */
   const errorWhitelist = [
-    /INVALID_ATTR_VALUE src=\.\/viewer-integr\.js/
+    /invalid value \'.\/viewer-integr.js\'/,
+    /amp-dailymotion/,
+    /amp-soundcloud/,
+    /vimeo/,
   ];
 
   const usedWhitelist = [];

@@ -19,10 +19,10 @@ import '../third_party/babel/custom-babel-helpers';
 import '../src/polyfills';
 import {adopt} from '../src/runtime';
 
-adopt(global);
+adopt(window);
 
 // Make amp section in karma config readable by tests.
-global.ampTestRuntimeConfig = parent.karma ? parent.karma.config.amp : {};
+window.ampTestRuntimeConfig = parent.karma ? parent.karma.config.amp : {};
 
 
 // Hack for skipping tests on Travis that don't work there.
@@ -53,13 +53,42 @@ it.skipOnFirefox = function(desc, fn) {
   it(desc, fn);
 };
 
+
+// Used to check if an unrestored sandbox exists
+const sandboxes = [];
+const create = sinon.sandbox.create;
+sinon.sandbox.create = function(config) {
+  const sandbox = create.call(sinon.sandbox, config);
+  sandboxes.push(sandbox);
+
+  const restore = sandbox.restore;
+  sandbox.restore = function() {
+    const i = sandboxes.indexOf(sandbox);
+    if (i > -1) {
+      sandboxes.splice(i, 1);
+    }
+    return restore.call(sandbox);
+  };
+  return sandbox;
+};
+
 // Global cleanup of tags added during tests. Cool to add more
 // to selector.
 afterEach(() => {
-  const cleanup = document.querySelectorAll('link,meta');
+  const cleanup = document.querySelectorAll('link,meta,iframe');
   for (let i = 0; i < cleanup.length; i++) {
     try {
-      cleanup[i].parentNode.removeChild(cleanup[i]);
+      const element = cleanup[i];
+      if (element.tagName == 'IFRAME') {
+        setTimeout(() => {
+          // Wait a bit until removing iframes. The reason is that Safari has
+          // a race where this sometimes runs too early and the test
+          // is actually still running
+          element.parentNode.removeChild(element);
+        }, 1000);
+      } else {
+        element.parentNode.removeChild(element);
+      }
     } catch (e) {
       // This sometimes fails for unknown reasons.
       console./*OK*/log(e);
@@ -68,9 +97,14 @@ afterEach(() => {
   window.localStorage.clear();
   window.ampExtendedElements = {};
   window.ENABLE_LOG = false;
+  window.AMP_DEV_MODE = false;
+  window.context = undefined;
   if (!/native/.test(window.setTimeout)) {
     throw new Error('You likely forgot to restore sinon timers ' +
         '(installed via sandbox.useFakeTimers).');
+  }
+  if (sandboxes.length > 0) {
+    throw new Error('You forgot to restore your sandbox!');
   }
 });
 
