@@ -27,6 +27,13 @@ import {timer} from '../timer';
 const TAG_ = 'Viewer';
 const SENTINEL_ = '__AMP__';
 
+/**
+ * Duration in milliseconds to wait for viewerOrigin to be set before an empty
+ * string is returned.
+ * @const
+ * @private {number}
+ */
+const VIEWER_ORIGIN_TIMEOUT_ = 1000;
 
 /**
  * The type of the viewport.
@@ -275,6 +282,22 @@ export class Viewer {
     /** @const @private {!Promise<boolean>} */
     this.isTrustedViewer_ = trustedViewerPromise;
 
+    /** @const @private {!Promise<string>} */
+    this.viewerOrigin_ = new Promise(resolve => {
+      if (!this.isEmbedded()) {
+        // Viewer is only determined for iframed documents at this time.
+        resolve('');
+      } else if (this.win.location.ancestorOrigins &&
+          this.win.location.ancestorOrigins.length > 0) {
+        resolve(this.win.location.ancestorOrigins[0]);
+      } else {
+        // Race to resolve with a timer.
+        timer.delay(() => resolve(''), VIEWER_ORIGIN_TIMEOUT_);
+        /** @private @const {!function(string)|undefined} */
+        this.viewerOriginResolver_ = resolve;
+      }
+    });
+
     /** @private {string} */
     this.unconfirmedReferrerUrl_ =
         this.isEmbedded() && 'referrer' in this.params_ &&
@@ -513,6 +536,16 @@ export class Viewer {
   }
 
   /**
+   * Returns the promise that resolves to URL representing the origin of the
+   * viewer. If the document is not embedded or if a viewer origin can't be
+   * found, empty string is returned.
+   * @return {!Promise<string>}
+   */
+  getViewerOrigin() {
+    return this.viewerOrigin_;
+  }
+
+  /**
    * @param {string} urlString
    * @return {boolean}
    * @private
@@ -709,6 +742,10 @@ export class Viewer {
       this.trustedViewerResolver_(
           origin ? this.isTrustedViewerOrigin_(origin) : false);
     }
+    if (this.viewerOriginResolver_) {
+      this.viewerOriginResolver_(origin || '');
+    }
+
     if (this.messageQueue_.length > 0) {
       const queue = this.messageQueue_.slice(0);
       this.messageQueue_ = [];

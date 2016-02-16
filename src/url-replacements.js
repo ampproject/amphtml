@@ -270,6 +270,11 @@ class UrlReplacements {
         return accessService.getAuthdataField(field);
       }, 'AUTHDATA');
     });
+
+    // Returns an identifier for the viewer.
+    this.set_('VIEWER', () => {
+      return viewerFor(this.win_).getViewerOrigin();
+    });
   }
 
   /**

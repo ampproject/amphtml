@@ -19,14 +19,18 @@ import {createIframePromise} from '../../testing/iframe';
 import {urlReplacementsFor} from '../../src/url-replacements';
 import {markElementScheduledForTesting} from '../../src/custom-element';
 import {installCidService} from '../../src/service/cid-impl';
+import {installViewerService} from '../../src/service/viewer-impl';
 import {setCookie} from '../../src/cookies';
 import {parseUrl} from '../../src/url';
 
+import * as sinon from 'sinon';
 
 describe('UrlReplacements', () => {
 
   let sandbox;
   let loadObservable;
+  let replacements;
+  let viewerService;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -36,9 +40,11 @@ describe('UrlReplacements', () => {
     loadObservable = null;
     sandbox.restore();
     sandbox = null;
+    replacements = null;
+    viewerService = null;
   });
 
-  function expand(url, withCid, opt_bindings) {
+  function getReplacements(withCid) {
     return createIframePromise().then(iframe => {
       iframe.doc.title = 'Pixel Test';
       const link = iframe.doc.createElement('link');
@@ -49,8 +55,14 @@ describe('UrlReplacements', () => {
         markElementScheduledForTesting(iframe.win, 'amp-analytics');
         installCidService(iframe.win);
       }
+      viewerService = installViewerService(iframe.win);
+      replacements = urlReplacementsFor(iframe.win);
+      return replacements;
+    });
+  }
 
-      const replacements = urlReplacementsFor(iframe.win);
+  function expand(url, withCid, opt_bindings) {
+    return getReplacements(withCid).then(replacements => {
       return replacements.expand(url, opt_bindings);
     });
   }
@@ -278,6 +290,26 @@ describe('UrlReplacements', () => {
   it('should replace BROWSER_LANGUAGE', () => {
     return expand('?sh=BROWSER_LANGUAGE').then(res => {
       expect(res).to.match(/sh=\w+/);
+    });
+  });
+
+  it('should replace VIEWER with origin', () => {
+    return getReplacements().then(replacements => {
+      sandbox.stub(viewerService, 'getViewerOrigin').returns(
+          Promise.resolve('https://www.google.com'));
+      return replacements.expand('?sh=VIEWER').then(res => {
+        expect(res).to.equal('?sh=https%3A%2F%2Fwww.google.com');
+      });
+    });
+  });
+
+  it('should replace VIEWER with empty string', () => {
+    return getReplacements().then(replacements => {
+      sandbox.stub(viewerService, 'getViewerOrigin').returns(
+          Promise.resolve(''));
+      return replacements.expand('?sh=VIEWER').then(res => {
+        expect(res).to.equal('?sh=');
+      });
     });
   });
 
