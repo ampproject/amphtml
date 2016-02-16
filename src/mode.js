@@ -51,6 +51,9 @@ export function setModeForTesting(m) {
  * @return {!ModeDef}
  */
 function getMode_() {
+  if (window.context && window.context.mode) {
+    return window.context.mode;
+  }
   const isLocalDev = (location.hostname == 'localhost' ||
       (location.ancestorOrigins && location.ancestorOrigins[0] &&
           location.ancestorOrigins[0].indexOf('http://localhost:') == 0)) &&

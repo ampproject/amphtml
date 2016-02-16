@@ -188,8 +188,16 @@ describe('assertHttpsUrl', () => {
   it('should allow https', () => {
     assertHttpsUrl('https://twitter.com', referenceElement);
   });
-  it('should allow protocol relative', () => {
-    assertHttpsUrl('//twitter.com', referenceElement);
+  it('should allow protocol relative on https', () => {
+    const base = document.createElement('base');
+    base.href = 'https://google.com/';
+    document.head.appendChild(base);
+    assertHttpsUrl('//test-in-https-base.com', referenceElement);
+  });
+  it('should deny protocol relative on http', () => {
+    expect(() => {
+      assertHttpsUrl('//test-in-http-base.com', referenceElement);
+    }).to.throw(/source must start with/);
   });
   it('should allow localhost with http', () => {
     assertHttpsUrl('http://localhost:8000/sfasd', referenceElement);

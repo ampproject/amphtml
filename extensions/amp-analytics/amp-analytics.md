@@ -16,7 +16,42 @@ limitations under the License.
 
 ### <a name="amp-analytics"></a>`amp-analytics`
 
-Capture analytics data from an AMP document.
+<table>
+  <tr>
+    <td width="40%"><strong>Description</strong></td>
+    <td>Capture analytics data from an AMP document.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Availability</strong></td>
+    <td>Stable</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Required Script</strong></td>
+    <td><code>&lt;script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js">&lt;/script></code></td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Examples</strong></td>
+    <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/analytics.amp.html">analytics.amp.html</a></td>
+  </tr>
+</table>
+
+The following lists validation errors specific to the `amp-analytics` tag
+(see also `amp-analytics` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii):
+
+<table>
+  <tr>
+    <th width="40%"><strong>Validation Error</strong></th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td width="40%"><a href="/docs/reference/validation_errors.html#tag-required-by-another-tag-is-missing">TAG_REQUIRED_BY_MISSING</a></td>
+    <td>Error thrown when required <code>amp-analytics</code> extension <code>.js</code> script tag is missing or incorrect.</td>
+  </tr>
+  <tr>
+    <td width="40%"><a href="/docs/reference/validation_errors.html#invalid-attribute-value">INVALID_ATTR_VALUE</a></td>
+    <td>Error thrown when the <code>src</code> attribute for the script tag is invalid. The value must be <code>"https://cdn.ampproject.org/v0/amp-analytics-0.1.js"</code>.</td>
+  </tr>
+</table>
 
 #### <a name="behavior"></a>Behavior
 
@@ -100,11 +135,16 @@ Adds support for Google Analytics. More details for adding Google Analytics supp
 
 Type attribute value: `infonline`
 
-Adds support for [INFOnline](https://www.infonline.de) / [IVW](http://www.ivw.de). Requires the following variables
+Adds support for [INFOnline](https://www.infonline.de) / [IVW](http://www.ivw.de). Requires a copy of [amp-analytics-infonline.html](https://3p.ampproject.net/custom/amp-analytics-infonline.html) on a different subdomain than the including AMP file ([why?](https://github.com/ampproject/amphtml/blob/master/spec/amp-iframe-origin-policy.md)). Example: if your AMP files are hosted on `www.example.com`, then `amp-analytics-infonline.html` needs to be on another subdomain such as `iframe.example.com` or `assets.example.com`.
 
-* `st` (Angebotskennung)
-* `co` (Comment)
-* `cp` (Code)
+Additionally, the following variables must be defined:
+
+* `st`: Angebotskennung
+* `co`: comment
+* `cp`: code
+* `url`: location of `amp-analytics-infonline.html`
+
+More details for adding INFOnline / IVW support can be found at [www.infonline.de](https://www.infonline.de/downloads/web-mew-und-ctv/).
 
 ##### Krux
 
@@ -184,6 +224,7 @@ is an https URL. These values may include placeholder tokens that can reference 
 ```
 
 ##### Vars
+
 `amp-analytics` defines many basic variables that can be used in requests. A list of all such variables is available in the  [`amp-analytics` Variables Guide](./analytics-vars.md). In addition, all of the variables supported by [AMP HTML Substitutions Guide](../../spec/amp-var-substitutions.md) are also supported.
 
 The `vars` attribute in the configuration can be used to define new key-value pairs or override existing variables that can be referenced in `request` values. New variables are commonly used to specify publisher specific information.  Arrays can be used to specify a list of values that should be URL encoded separately while preserving the comma delimiter.
@@ -277,7 +318,6 @@ Use this configuration to fire a request on a regular time interval. Use `timerS
 ###### Access triggers (`"on": "amp-access-*"`)
 
 AMP Access system issues numerous events for different states in the access flow. See [amp-access-analytics.md](../amp-access/amp-access-analytics.md) for details.
-
 
 ##### Transport
 The `transport` attribute specifies how to send a request. The value is an object with fields that

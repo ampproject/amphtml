@@ -108,6 +108,45 @@ describe('instrumentation', function() {
     expect(fnIdY.callCount).to.equal(1);
   });
 
+  it('fires for events on child elements', () => {
+    const el1 = document.createElement('div');
+    const el2 = document.createElement('div');
+
+    const el3 = document.createElement('div');
+    el3.className = 'x z';
+    el3.appendChild(el1);
+
+    const el4 = document.createElement('div');
+    el4.className = 'x';
+    el4.id = 'y';
+    el4.appendChild(el3);
+    el4.appendChild(el2);
+
+    const fnClassX = sandbox.stub();
+    ins.addListener({'on': 'click', 'selector': '.x'}, fnClassX);
+
+    const fnIdY = sandbox.stub();
+    ins.addListener({'on': 'click', 'selector': '#y'}, fnIdY);
+
+    const fnClassZ = sandbox.stub();
+    ins.addListener({'on': 'click', 'selector': '.z'}, fnClassZ);
+
+    ins.onClick_({target: el1});
+    expect(fnClassX.callCount).to.equal(1);
+    expect(fnIdY.callCount).to.equal(1);
+    expect(fnClassZ.callCount).to.equal(1);
+
+    ins.onClick_({target: el2});
+    expect(fnClassX.callCount).to.equal(2);
+    expect(fnIdY.callCount).to.equal(2);
+    expect(fnClassZ.callCount).to.equal(1);
+
+    ins.onClick_({target: el3});
+    expect(fnClassX.callCount).to.equal(3);
+    expect(fnIdY.callCount).to.equal(3);
+    expect(fnClassZ.callCount).to.equal(2);
+  });
+
   it('should listen on custom events', () => {
     const handler1 = sinon.spy();
     const handler2 = sinon.spy();

@@ -97,7 +97,7 @@ export function addParamsToUrl(url, params) {
 export function assertHttpsUrl(urlString, elementContext) {
   const url = parseUrl(urlString);
   assert(
-      url.protocol == 'https:' || /^(\/\/)/.test(urlString) ||
+      url.protocol == 'https:' ||
       url.hostname == 'localhost' ||
           url.hostname.lastIndexOf('.localhost') ==
           // Poor person's endsWith

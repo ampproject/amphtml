@@ -75,7 +75,7 @@ sinon.sandbox.create = function(config) {
 // Global cleanup of tags added during tests. Cool to add more
 // to selector.
 afterEach(() => {
-  const cleanup = document.querySelectorAll('link,meta,iframe');
+  const cleanup = document.querySelectorAll('link,meta,base,iframe');
   for (let i = 0; i < cleanup.length; i++) {
     try {
       const element = cleanup[i];
@@ -98,6 +98,7 @@ afterEach(() => {
   window.ampExtendedElements = {};
   window.ENABLE_LOG = false;
   window.AMP_DEV_MODE = false;
+  window.context = undefined;
   if (!/native/.test(window.setTimeout)) {
     throw new Error('You likely forgot to restore sinon timers ' +
         '(installed via sandbox.useFakeTimers).');

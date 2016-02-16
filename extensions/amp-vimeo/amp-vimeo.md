@@ -16,17 +16,37 @@ limitations under the License.
 
 ### <a name="amp-vimeo"></a> `amp-vimeo`
 
-Displays a Vimeo video.
+<table>
+  <tr>
+    <td width="40%"><strong>Description</strong></td>
+    <td>Displays a Vimeo video.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Availability</strong></td>
+    <td>Stable, but no validation.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Required Script</strong></td>
+    <td><code>&lt;script async custom-element="amp-vimeo" src="https://cdn.ampproject.org/v0/amp-vimeo-0.1.js">&lt;/script></code></td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Examples</strong></td>
+    <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/vimeo.amp.html">vimeo.amp.html</a></td>
+  </tr>
+</table>
 
-Example:
+**Note:** Currently, no validations apply to this tag.
+
+#### Example
+
+With responsive layout, the width and height from the example should yield correct layouts for 16:9 aspect ratio videos:
+
 ```html
 <amp-vimeo
     data-videoid="27246366"
     layout="responsive"
     width="500" height="281"></amp-vimeo>
 ```
-
-With responsive layout the width and height from the example should yield correct layouts for 16:9 aspect ratio videos
 
 #### Attributes
 
