@@ -15,13 +15,14 @@ limitations under the License.
 -->
 
 # AppNexus 
+See our tag  [Tiny Tag documentation](https://wiki.appnexus.com/display/adnexusdocumentation/Dynamic+TinyTag+Parameters) or [AST  documentation](https://wiki.appnexus.com/pages/viewpage.action?pageId=75793258) for details on input parameters. 
 
 ## Example
 
 ### Basic
 
 ```html
-<amp-ad width=320 height=50
+<amp-ad width=300 height=250
     type="appnexus"
     src="https://secure.adnxs.com/ttj?id=4119129">
 </amp-ad>
@@ -30,16 +31,16 @@ limitations under the License.
 ### using AST for multiple sync ads on the page 
 
 ```html
-<amp-ad width=320 height=50
+<amp-ad width=300 height=250
     type="appnexus"
     data-target="apn_ad_40954389058"
-    json='{"pageOpts":{"member": 958}, "adUnits": [{"member": 958,"disablePsa": true, "invCode": "ast_guaranteed_prios_1","sizes": [300,250],"targetId": "apn_ad_40954389058"}, {"member": 958, "invCode": "ast_guaranteed_prios_1","sizes": [160,600],"targetId":"apn_ad_5675675648"}]}'>
+    json='{"pageOpts": {"member": 958},"adUnits": [{"disablePsa": true,"invCode": "ast_guaranteed_prios_1","tagId": 12345,"sizes": [300, 250],"targetId": "apn_ad_40954389058"}, {"invCode": "ast_guaranteed_prios_1","tagId": 456,"sizes": [160, 600],"targetId": "apn_ad_5675675648"}]}'>>
 </amp-ad>
 
 <amp-ad width=160 height=600
     type="appnexus"
     data-target="apn_ad_5675675648"
-    json='{"pageOpts":{"member": 958}, "adUnits": [{"member": 958,"disablePsa": true, "invCode": "ast_guaranteed_prios_1","sizes": [300,250],"targetId": "apn_ad_40954389058"}, {"member": 958, "invCode": "ast_guaranteed_prios_1","sizes": [160,600],"targetId":"apn_ad_5675675648"}]}'>
+    json='{"pageOpts": {"member": 958},"adUnits": [{"disablePsa": true,"invCode": "ast_guaranteed_prios_1","tagId": 12345,"sizes": [300, 250],"targetId": "apn_ad_40954389058"}, {"invCode": "ast_guaranteed_prios_1","tagId": 456,"sizes": [160, 600],"targetId": "apn_ad_5675675648"}]}'>
 </amp-ad>
 
 ```
@@ -53,18 +54,17 @@ For ads configuration, please check ast api on appnexus wiki
 to enable debug with the AST type of tags, just set the data-debug=true to all your amp-ad tags
 
 ```html
-<amp-ad width=320 height=50
+<amp-ad width=300 height=250
     type="appnexus"
     data-target="apn_ad_40954389058"
     data-debug=true
-    json='{"pageOpts":{"member": 958}, "adUnits": [{"member": 958,"disablePsa": true, "invCode": "ast_guaranteed_prios_1","sizes": [300,250],"targetId": "apn_ad_40954389058"}, {"member": 958, "invCode": "ast_guaranteed_prios_1","sizes": [160,600],"targetId":"apn_ad_5675675648"}]}'>
+    json='{"pageOpts":{"member": 958}, "adUnits": [{"disablePsa": true, "invCode": "ast_guaranteed_prios_1","sizes": [300,250],"targetId": "apn_ad_40954389058"}, {"invCode": "ast_guaranteed_prios_1","sizes": [160,600],"targetId":"apn_ad_5675675648"}]}'>
 </amp-ad>
 
 <amp-ad width=160 height=600
     type="appnexus"
     data-target="apn_ad_5675675648"
     data-debug=true
-    json='{"pageOpts":{"member": 958}, "adUnits": [{"member": 958,"disablePsa": true, "invCode": "ast_guaranteed_prios_1","sizes": [300,250],"targetId": "apn_ad_40954389058"}, {"member": 958, "invCode": "ast_guaranteed_prios_1","sizes": [160,600],"targetId":"apn_ad_5675675648"}]}'>
+    json='{"pageOpts":{"member": 958}, "adUnits": [{"disablePsa": true, "invCode": "ast_guaranteed_prios_1","sizes": [300,250],"targetId": "apn_ad_40954389058"}, {"invCode": "ast_guaranteed_prios_1","sizes": [160,600],"targetId":"apn_ad_5675675648"}]}'>
 </amp-ad>
-
 ```

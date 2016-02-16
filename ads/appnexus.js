@@ -14,7 +14,12 @@
  * limitations under the License.
  */
 
-import {writeScript, validateSrcPrefix, validateSrcContains} from '../src/3p';
+import {
+  writeScript, validateSrcPrefix, validateSrcContains
+}
+from '../src/3p';
+
+const APPNEXUS_AST_URL = 'https://acdn.adnxs.com/ast/ast.js';
 
 /**
  * @param {!Window} global
@@ -22,53 +27,67 @@ import {writeScript, validateSrcPrefix, validateSrcContains} from '../src/3p';
  */
 export function appnexus(global, data) {
   // in case we pass the ttj url to use, simply call it and return
-  if (data.src){
-	  validateSrcPrefix('https:', data.src);
-	  validateSrcContains('/ttj?', data.src);
-	  writeScript(global, data.src);
-	  return;
+  if (data.src) {
+    validateSrcPrefix('https:', data.src);
+    validateSrcContains('/ttj?', data.src);
+    try {
+      validateSrcContains('size=', data.src);
+    } catch (e) {
+      //append sizes from data
+      const sizes = 'size=' + data.width + 'x' + data.height;
+      data.src = data.src + '&' + sizes;
+    }
+    writeScript(global, data.src);
+    return;
   }
   // otherwise, use json configuration to load ast
-  if (context.isMaster){ // in case we are in the master iframe, we load AST
-	  apntag = (typeof apntag != "undefined")? apntag : {};
-	  apntag.anq = apntag.anq || [];
-	  apntag.debug = data.debug || false;
+  if (context.isMaster) { // in case we are in the master iframe, we load AST
+    apntag = (typeof apntag !== 'undefined') ? apntag : {};
+    apntag.anq = apntag.anq || [];
 
-	  writeScript(global, "https://acdn.adnxs.com/ast/ast.js");
+    writeScript(global, APPNEXUS_AST_URL);
 
+    if (data.pageOpts) {
       apntag.anq.push(function() {
-          //set global page options
-          apntag.setPageOpts(data.pageOpts);
+        //output console information
+        apntag.debug = data.debug || false;
+        //set global page options
+        apntag.setPageOpts(data.pageOpts);
       });
+    }
 
-	  for (var i = 0; i < data.adUnits.length; ++i){
-		  (function(j){
-	        apntag.anq.push(function() {
-	            //define ad tag
-	            apntag.defineTag(data.adUnits[j]);
-	        });
-		  })(i)
-	  }
+    for (let i = 0; i < data.adUnits.length; ++i) {
+      (function(i) {
+        apntag.anq.push(function() {
+          //define ad tag
+          apntag.defineTag(data.adUnits[i]);
+        });
+      })(i);
+    }
 
-	  apntag.anq.push(function() {
-          apntag.loadTags();
-      });
+    apntag.anq.push(function() {
+      apntag.loadTags();
+    });
   }
   // then for all ad units, define the ad placement and show the ad
-  global.docEndCallback = function(){
-	  var div = global.document.createElement("div");
-	  div.setAttribute("id", data.target);
-	  global.document.body.appendChild(div); // create and insert the div for the ad to render in
-	  context.master.apntag = (typeof context.master.apntag != "undefined")? context.master.apntag : {};
-	  context.master.apntag.anq = context.master.apntag.anq || [];
-	  context.master.apntag.anq.push(function() {
-		  if (!this.isMaster) // in case we are not in the master iframe, we create a reference to the apntag in the master iframe
-			  global.apntag = context.master.apntag;
-		  // collapse on no ad is handle here.
-		  context.master.apntag.onEvent('adNoBid', data.target, function(){
-			context.noContentAvailable();
-		  });
-		  context.master.apntag.showTag(data.target, global.window);
-	  });
-  }
+  global.docEndCallback = function() {
+    const div = global.document.createElement('div'),
+      c = context;
+    div.setAttribute('id', data.target);
+    // create and insert the div for the ad to render in
+    global.document.body.appendChild(div);
+    c.master.apntag = c.master.apntag || {};
+    c.master.apntag.anq = c.master.apntag.anq || [];
+    c.master.apntag.anq.push(function() {
+      // in case we are not in the master iframe, we create a reference to the apntag in the master iframe
+      if (!this.isMaster) {
+        global.apntag = c.master.apntag;
+      }
+      // collapse on no ad is handle here.
+      c.master.apntag.onEvent('adNoBid', data.target, function() {
+        c.noContentAvailable();
+      });
+      c.master.apntag.showTag(data.target, global.window);
+    });
+  };
 }
