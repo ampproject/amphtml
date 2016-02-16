@@ -310,7 +310,7 @@ export const ANALYTICS_CONFIG = {
     },
     'transport': {'beacon': false, 'xhrpost': false, 'image': true},
     'requests': {
-      'pageview': 'https://3p.ampproject.net/custom/amp-analytics-infonline.html?st=${st}' +
+      'pageview': '${url}?st=${st}' +
         '&sv=${sv}' +
         '&ap=${ap}' +
         '&co=${co}' +
