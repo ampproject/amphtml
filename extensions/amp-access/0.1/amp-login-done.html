@@ -11,7 +11,50 @@
       margin: 0;
     }
 
+    header {
+      padding: 16px;
+      display: -webkit-box;
+      display: -webkit-flex;
+      display: -ms-flexbox;
+      display: flex;
+      -webkit-box-orient: horizontal;
+      -webkit-box-direction: normal;
+      -webkit-flex-direction: row;
+      -ms-flex-direction: row;
+      flex-direction: row;
+      -webkit-flex-wrap: nowrap;
+      -ms-flex-wrap: nowrap;
+      flex-wrap: nowrap;
+      -webkit-box-align: center;
+      -webkit-align-items: center;
+      -ms-flex-align: center;
+      align-items: center;
+    }
+
+    .logo,
+    .logo svg {
+      height: 40px;
+      width: 40px;
+    }
+
+    .logo path {
+      fill: #bdbdbd;
+    }
+
+    .logo-text {
+      color: #bdbdbd;
+      font-family: Roboto, verdana, arial, sans-serif;
+      font-size: 14px;
+      letter-spacing: 2px;
+      margin-left: 16px;
+      text-decoration: none;
+      text-transform: uppercase;
+    }
+
     section {
+      font-family: Roboto, verdana, arial, sans-serif;
+      font-size: 14px;
+      font-weight: 500;
       margin: 16px;
     }
 
@@ -29,43 +72,50 @@
       display: none;
     }
 
-    .button-section {
-      text-align: center;
-    }
-
     #closeButton {
-      background: #4285f4;
-      color: #fff;
-      font-size: 14px;
-      font-weight: 500;
-      padding: 10px 20px;
-      border-radius: 2px;
-      box-shadow: 0 2px 5px 0 rgba(0,0,0,0.4);
-      outline: none;
-      border: none;
+      color: #4285f4;
+      display: block;
+      font-weight: 300;
+      padding: 8px 0;
+      text-decoration: none;
     }
   </style>
 </head>
 <body>
 
+  <header>
+    <div class="logo">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40">
+        <g>
+          <path d="M20,0C9,0,0,9,0,20c0,8.7,5.6,16.2,13.4,18.9l3.9-15.4h-3.6c-1,0-1.4-0.8-0.8-1.8L25.7,0.8C23.9,0.3,22,0,20,0"/>
+          <path d="M26.6,1.1l-3.9,15.4h3.6c1,0,1.4,0.8,0.8,1.8L14.3,39.2C16.1,39.7,18,40,20,40c11,0,20-9,20-20C40,11.3,34.4,3.8,26.6,1.1" />
+        </g>
+      </svg>
+    </div>
+    <div class="logo-text">
+      <div>Accelerated</div>
+      <div>Mobile Pages</div>
+    </div>
+  </header>
+
   <section class="progress-section">
     <div lang="en">
-      Returning back...
+      Please wait...
     </div>
     <div lang="fr">
-      Retour...
+      Attendez, s'il vous plaît...
     </div>
   </section>
 
   <section class="button-section">
-    <button id="closeButton">
+    <a id="closeButton">
       <div lang="en">
-        Close
+        Click here to continue.
       </div>
       <div lang="fr">
-        Fermer
+        Clique ici pour continuer
       </div>
-    </button>
+    </a>
   </section>
 
 </body>

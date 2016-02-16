@@ -23,6 +23,7 @@
  */
 
 import './polyfills';
+import {installEmbedStateListener} from './environment';
 import {a9} from '../ads/a9';
 import {adform} from '../ads/adform';
 import {adreactor} from '../ads/adreactor';
@@ -41,6 +42,7 @@ import {parseUrl} from '../src/url';
 import {assert} from '../src/asserts';
 import {taboola} from '../ads/taboola';
 import {smartadserver} from '../ads/smartadserver';
+import {revcontent} from '../ads/revcontent';
 
 /**
  * Whether the embed type may be used with amp-embed tag.
@@ -66,6 +68,7 @@ register('_ping_', function(win, data) {
 register('twitter', twitter);
 register('facebook', facebook);
 register('smartadserver', smartadserver);
+register('revcontent', revcontent);
 
 /**
  * Visible for testing.
@@ -154,7 +157,9 @@ window.draw3p = function(opt_configCallback) {
   window.context.reportRenderedEntityIdentifier =
       reportRenderedEntityIdentifier;
   delete data._context;
+
   manageWin(window);
+  installEmbedStateListener();
   draw3p(window, data, opt_configCallback);
   updateVisibilityState(window);
   nonSensitiveDataPostMessage('render-start');

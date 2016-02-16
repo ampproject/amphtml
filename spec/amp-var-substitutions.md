@@ -76,6 +76,28 @@ For instance:
 ```
 may make a request to something like `https://foo.com/pixel?href=https%3A%2F%2Fpinterest.com%2F`.
 
+### SOURCE_URL
+
+Use the special string `SOURCE_URL` to add the source URL of the current document to the URL.
+
+The source URL is extracted from the proxy URL if the document is being served from a proxy. Otherwise the original document URL is returned. For instance, if the URL is served via the proxy `https://cdn.ampproject.org` from the URL `https://cdn.ampproject.org/c/s/example.com/page.html`, then `SOURCE_URL` would return `https://example.com/page.html`.
+
+For instance:
+```html
+<amp-pixel src="https://foo.com/pixel?href=SOURCE_URL"></amp-pixel>
+```
+may make a request to something like `https://foo.com/pixel?href=https%3A%2F%2Fpinterest.com%2F`.
+
+### SOURCE_HOST
+
+Use the special string `SOURCE_HOST` to add the source URL's host of the current document to the URL. See the description of `SOURCE_URL` for more details.
+
+For instance:
+```html
+<amp-pixel src="https://foo.com/pixel?host=SOURCE_HOST"></amp-pixel>
+```
+may make a request to something like `https://foo.com/pixel?host=pinterest.com`.
+
 ### DOCUMENT_REFERRER
 
 Use the special string `DOCUMENT_REFERRER` to add the current document's referrer to the URL.
@@ -252,6 +274,21 @@ For instance:
 <amp-pixel src="https://foo.com/pixel?cid=CLIENT_ID(cid-scope-cookie-fallback-name,user-consent-id)"></amp-pixel>
 ```
 
+### QUERY_PARAM
+
+Provides access to query string params.
+
+arguments:
+  - `param` (Required) - The key for the query string parameter to be inserted
+  - `defaultValue` - The value to use if the provide key is not present on the query string. Defaults to ""
+
+For instance:
+```html
+<amp-pixel src="https://foo.com/pixel?bar=QUERY_PARAM(baz,biz)"</amp-pixel>
+```
+
+If a query string parameter baz is provided then the corresponding value will be insterted into the pixel src, if no, the default "biz" will be used.
+
 ### PAGE_VIEW_ID
 
 Contains a string that is intended to be random and likely to be unique per URL, user and day.
@@ -276,3 +313,6 @@ For instance:
 <amp-pixel src="https://foo.com/pixel?timestamp=TIMESTAMP"></amp-pixel>
 ```
 
+## Access
+
+Access variables are described in [amp-access-analytics.md](../extensions/amp-access/amp-access-analytics.md).

@@ -51,6 +51,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [plista](../ads/plista.md)
 - [Smart AdServer](../ads/smartadserver.md)
 - [Yieldmo](../ads/yieldmo.md)
+- [Revcontent](../ads/revcontent.md)
 
 #### Styling
 

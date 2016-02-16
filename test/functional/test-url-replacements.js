@@ -20,13 +20,22 @@ import {urlReplacementsFor} from '../../src/url-replacements';
 import {markElementScheduledForTesting} from '../../src/custom-element';
 import {installCidService} from '../../src/service/cid-impl';
 import {setCookie} from '../../src/cookies';
+import {parseUrl} from '../../src/url';
 
 
 describe('UrlReplacements', () => {
 
+  let sandbox;
   let loadObservable;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+  });
+
   afterEach(() => {
     loadObservable = null;
+    sandbox.restore();
+    sandbox = null;
   });
 
   function expand(url, withCid, opt_bindings) {
@@ -318,6 +327,15 @@ describe('UrlReplacements', () => {
         .eventually.equal('?a=xyz-abc');
   });
 
+  it('should support multiple positional arguments with dots', () => {
+    const replacements = urlReplacementsFor(window);
+    replacements.set_('FN', (one, two) => {
+      return one + '-' + two;
+    });
+    return expect(replacements.expand('?a=FN(xy.z,ab.c)')).to
+        .eventually.equal('?a=xy.z-ab.c');
+  });
+
   it('should support promises as replacements', () => {
     const replacements = urlReplacementsFor(window);
     replacements.set_('P1', () => Promise.resolve('abc '));
@@ -421,6 +439,106 @@ describe('UrlReplacements', () => {
       'VALUEB': 'bbb',
     }).then(res => {
       expect(res).to.match(/a=aaa&b=bbb\?$/);
+    });
+  });
+
+  it('should replace QUERY_PARAM with foo', () => {
+    const win = getFakeWindow();
+    win.location = parseUrl("https://example.com?query_string_param1=foo");
+    return urlReplacementsFor(win)
+      .expand('?sh=QUERY_PARAM(query_string_param1)&s')
+      .then(res => {
+        expect(res).to.match(/sh=foo&s/);
+      });
+  });
+
+  it('should replace QUERY_PARAM with ""', () => {
+    const win = getFakeWindow();
+    win.location = parseUrl("https://example.com");
+    return urlReplacementsFor(win)
+      .expand('?sh=QUERY_PARAM(query_string_param1)&s')
+      .then(res => {
+        expect(res).to.match(/sh=&s/);
+      });
+  });
+
+  it('should replace QUERY_PARAM with default_value', () => {
+    const win = getFakeWindow();
+    win.location = parseUrl("https://example.com");
+    return urlReplacementsFor(win)
+      .expand('?sh=QUERY_PARAM(query_string_param1,default_value)&s')
+      .then(res => {
+        expect(res).to.match(/sh=default_value&s/);
+      });
+  });
+
+  describe('access values', () => {
+
+    let accessService;
+    let accessServiceMock;
+    let reportDevSpy;
+
+    beforeEach(() => {
+      accessService = {
+        getAccessReaderId: () => {},
+        getAuthdataField: () => {},
+      };
+      accessServiceMock = sandbox.mock(accessService);
+      reportDevSpy = sandbox.spy();
+    });
+
+    afterEach(() => {
+      accessServiceMock.verify();
+    });
+
+    function expand(url, opt_disabled) {
+      return createIframePromise().then(iframe => {
+        iframe.doc.title = 'Pixel Test';
+        const link = iframe.doc.createElement('link');
+        link.setAttribute('href', 'https://pinterest.com/pin1');
+        link.setAttribute('rel', 'canonical');
+        iframe.doc.head.appendChild(link);
+
+        const replacements = urlReplacementsFor(iframe.win);
+        replacements.getAccessService_ = () => {
+          if (opt_disabled) {
+            return Promise.resolve(null);
+          }
+          return Promise.resolve(accessService);
+        };
+        replacements.reportDev_ = reportDevSpy;
+        return replacements.expand(url);
+      });
+    }
+
+    it('should replace ACCESS_READER_ID', () => {
+      accessServiceMock.expects('getAccessReaderId')
+          .returns(Promise.resolve('reader1'))
+          .once();
+      return expand('?a=ACCESS_READER_ID') .then(res => {
+        expect(res).to.match(/a=reader1/);
+        expect(reportDevSpy.callCount).to.equal(0);
+      });
+    });
+
+    it('should replace AUTHDATA', () => {
+      accessServiceMock.expects('getAuthdataField')
+          .withExactArgs('field1')
+          .returns('value1')
+          .once();
+      return expand('?a=AUTHDATA(field1)').then(res => {
+        expect(res).to.match(/a=value1/);
+        expect(reportDevSpy.callCount).to.equal(0);
+      });
+    });
+
+    it('should report error if not available', () => {
+      accessServiceMock.expects('getAccessReaderId')
+          .never();
+      return expand('?a=ACCESS_READER_ID;', /* disabled */ true) .then(res => {
+        expect(res).to.match(/a=;/);
+        expect(reportDevSpy.callCount).to.equal(1);
+      });
     });
   });
 });

@@ -20,8 +20,7 @@ Capture analytics data from an AMP document.
 
 #### <a name="behavior"></a>Behavior
 
-The `<amp-analytics>` element is used to measure activity on an AMP document. The details concerning what is measured and how
-that data is sent to an analytics server is specified in a JSON configuration object.
+The `<amp-analytics>` element is used to measure activity on an AMP document. The details concerning what is measured and how that data is sent to an analytics server is specified in a JSON configuration object. It comes pre-configured to support many [analytics vendors](#analytics-vendors) out of the box.
 
 For example, the following `<amp-analytics>` element is configured to send a request to `https://example.com/analytics`
 when the document is first loaded, and each time an `<a>` tag is clicked:
@@ -57,20 +56,77 @@ when the document is first loaded, and each time an `<a>` tag is clicked:
 </amp-analytics>
 ```
 
+#### Analytics vendors
+
+By specifying the name of an analytics vendor with the `type` attribute you can quickly configure `amp-analytics` to use the respective product. Additional configuration (such as your user id) may still be necessary.
+
+Here's an example of usage of `type` for a provider called XYZ:
+
+```html
+<amp-analytics type="XYZ"> ... </amp-analytics>
+```
+
+##### Adobe Analytics
+
+Type attribute value: `adobeanalytics`
+
+Adds support for Adobe Analytics. More details for adding Adobe Analytics support can be found at [helpx.adobe.com](https://helpx.adobe.com/marketing-cloud/analytics.html).
+
+##### AT Internet
+
+Type attribute value: `atinternet`
+
+Adds support for AT Internet. More details for adding AT Internet support can be found at [developers.atinternet-solutions.com](http://developers.atinternet-solutions.com/javascript-en/advanced-features-javascript-en/accelerated-mobile-pages-amp-javascript-en/).
+
+##### Chartbeat
+
+Type attribute value: `chartbeat`
+
+Adds support for Chartbeat. More details for adding Chartbeat support can be found at [support.chartbeat.com](http://support.chartbeat.com/docs/).
+
+##### comScore
+
+Type attribute value: `comscore`
+
+Adds support for comScore Unified Digital Measurement™ pageview analytics. Requires defining *var* `c2` with comScore-provided *c2 id*.
+
+##### Google Analytics
+
+Type attribute value: `googleanalytics`
+
+Adds support for Google Analytics. More details for adding Google Analytics support can be found at [developers.google.com](https://developers.google.com/analytics/devguides/collection/amp-analytics/).
+
+##### INFOnline / IVW
+
+Type attribute value: `infonline`
+
+Adds support for [INFOnline](https://www.infonline.de) / [IVW](http://www.ivw.de). Requires the following variables
+
+* `st` (Angebotskennung)
+* `co` (Comment)
+* `cp` (Code)
+
+##### Krux
+
+Type attribute value: `krux`
+
+Adds support for Krux.  Configuration details can be found at [help.krux.com](https://konsole.zendesk.com/hc/en-us/articles/216596608).
+
+##### Parsely
+
+Type attribute value: `parsely`
+
+Adds support for Parsely. Configuration details can be found at [parsely.com/docs](http://parsely.com/docs/integration/tracking/google-amp.html).
+
+##### Quantcast Measurement
+
+Type attribute value: `quantcast`
+
+Adds support for Quantcast Measurement. More details for adding Quantcast Measurement can be found at [quantcast.com](https://www.quantcast.com/help/guides/)
+
 #### <a name="attributes"></a>Attributes
 
-  - `type` Optional attribute. This attribute can be used to inherit configuration from one of the built-in analytics providers. Currently supported values for type are:
-    - `chartbeat`: Adds support for Chartbeat. More details for adding Chartbeat support can be found at [support.chartbeat.com](http://support.chartbeat.com/docs/).
-    - `comscore`: Adds support for comScore Unified Digital Measurement™ pageview analytics. Requires defining *var* `c2` with comScore-provided *c2 id*.
-    - `googleanalytics`: Adds support for Google Analytics. More details for adding Google Analytics support can be found at [developers.google.com](https://developers.google.com/analytics/devguides/collection/amp-analytics/).
-    - `parsely`: Adds support for Parsely. Configuration details can be found at [parsely.com/docs](http://parsely.com/docs/integration/tracking/google-amp.html).
-
-
-    Here's an example of usage of `type` for a provider called XYZ:
-    ```
-    <amp-analytics type="XYZ"> ... </amp-analytics>
-    ```
-
+  - `type` See [Analytics vendors](#analytics-vendors)
   - `config` Optional attribute. This attribute can be used to load a configuration from a specified remote URL. The URL specified here should use https scheme. See also `data-include-credentials` attribute below.
 
     ```
@@ -130,12 +186,13 @@ is an https URL. These values may include placeholder tokens that can reference 
 ##### Vars
 `amp-analytics` defines many basic variables that can be used in requests. A list of all such variables is available in the  [`amp-analytics` Variables Guide](./analytics-vars.md). In addition, all of the variables supported by [AMP HTML Substitutions Guide](../../spec/amp-var-substitutions.md) are also supported.
 
-The `vars` attribute in the configuration can be used to define new key-value pairs or override existing variables that can be referenced in `request` values. New variables are commonly used to specify publisher specific information.
+The `vars` attribute in the configuration can be used to define new key-value pairs or override existing variables that can be referenced in `request` values. New variables are commonly used to specify publisher specific information.  Arrays can be used to specify a list of values that should be URL encoded separately while preserving the comma delimiter.
 
 ```javascript
 "vars": {
   "account": "ABC123",
-  "countryCode": "tr"
+  "countryCode": "tr",
+  "tags": ["Swift,Jonathan", "Gulliver's Travels"]
 }
 ```
 
@@ -184,7 +241,7 @@ Use this configuration to fire a request when a specified element is clicked. Us
 ###### Scroll trigger (`"on": "scroll"`)
 Use this configuration to fire a request under certain conditions when the page is scrolled. Use `scrollSpec` to control when this will fire:
   - `scrollSpec` This object can contain `verticalBoundaries` and `horizontalBoundaries`. At least one of the two properties is required for a scroll event to fire. The values for both of the properties should be arrays of numbers containing the boundaries on which a scroll event is generated. For instance, in the following code snippet, the scroll event will be fired when page is scrolled vertically by 25%, 50% and 90%. Additionally, the event will also fire when the page is horizontally scrolled to 90% of scroll width.
- 
+
 
     ```javascript
     "triggers": {
@@ -203,7 +260,7 @@ Use this configuration to fire a request on a regular time interval. Use `timerS
   - `timerSpec` Specification for triggers of type `timer`. The timer will trigger immediately and then at a specified interval thereafter.
     - `interval` Length of the timer interval, in seconds.
     - `maxTimerLength` Maximum duration for which the timer will fire, in seconds.
-    
+
     ```javascript
     "triggers": {
       "pageTimer": {
@@ -216,6 +273,11 @@ Use this configuration to fire a request on a regular time interval. Use `timerS
       }
     }
     ```
+
+###### Access triggers (`"on": "amp-access-*"`)
+
+AMP Access system issues numerous events for different states in the access flow. See [amp-access-analytics.md](../amp-access/amp-access-analytics.md) for details.
+
 
 ##### Transport
 The `transport` attribute specifies how to send a request. The value is an object with fields that
@@ -238,3 +300,10 @@ In the example below, `beacon` and `xhrpost` are set to `false`, so they will no
   'image': true
 }
 ```
+
+
+### Extra URL Params
+
+The `extraUrlParams` attribute specifies additional parameters to append to the query string of the url via the usual "&foo=baz" convention.
+
+The `extraUrlParamsReplaceMap` attribute specifies a map of keys and values that act as parameters to String.replace() to preprocess keys in the extraUrlParams map.

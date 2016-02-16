@@ -54,7 +54,9 @@ export function taboola(global, data) {
     framework: 'amp',
     container: 'c'
   },
-    params]);
+    params,
+    {flush: true}]
+  );
 
   // install observation on entering/leaving the view
   global.context.observeIntersection(function(changes) {

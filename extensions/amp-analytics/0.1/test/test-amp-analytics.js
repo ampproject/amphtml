@@ -450,6 +450,27 @@ describe('amp-analytics', function() {
     });
   });
 
+  it('encodes array vars', () => {
+    const analytics = getAnalyticsTag({
+      'vars': {
+        'c1': ['Config, The Barbarian', 'config 1'],
+        'c2': 'config&2'
+      },
+      'requests': {
+        'base': 'https://example.com/test?',
+        'pageview': '${base}c1=${c1}&c2=${c2}'
+      },
+      'triggers': [{
+        'on': 'visible',
+        'request': 'pageview',
+      }]});
+    return waitForSendRequest(analytics).then(() => {
+      expect(sendRequestSpy.calledOnce).to.be.true;
+      expect(sendRequestSpy.args[0][0]).to.equal(
+          'https://example.com/test?c1=Config%2C%20The%20Barbarian,config%201&c2=config%262');
+    });
+  });
+
   it('expands url-replacements vars', () => {
     const analytics = getAnalyticsTag({
       'requests': {'pageview':
@@ -497,6 +518,39 @@ describe('amp-analytics', function() {
     });
   });
 
+  it('sends extraUrlParams', () => {
+    const analytics = getAnalyticsTag({
+      'extraUrlParams': {'s.evar0': '0', 's.evar1': '1', 'foofoo': 'baz'},
+      'requests': {'foo': 'https://example.com/${title}'},
+      'triggers': [{'on': 'visible', 'request': 'foo'}]
+    }, {
+      'config': 'config1'
+    });
+    return analytics.layoutCallback().then(() => {
+      expect(sendRequestSpy.args[0][0]).to.have.string('s.evar0=0');
+      expect(sendRequestSpy.args[0][0]).to.have.string('s.evar1=1');
+      expect(sendRequestSpy.args[0][0]).to.have.string('foofoo=baz');
+    });
+  });
+
+  it('handles extraUrlParamsReplaceMap', () => {
+    const analytics = getAnalyticsTag({
+      'extraUrlParams': {'s.evar0': '0', 's.evar1': '1', 'foofoo': 'baz'},
+      'extraUrlParamsReplaceMap': {'s.evar': 'v'},
+      'requests': {'foo': 'https://example.com/${title}'},
+      'triggers': [{'on': 'visible', 'request': 'foo'}]
+    }, {
+      'config': 'config1'
+    });
+    return analytics.layoutCallback().then(() => {
+      expect(sendRequestSpy.args[0][0]).to.have.string('v0=0');
+      expect(sendRequestSpy.args[0][0]).to.have.string('v1=1');
+      expect(sendRequestSpy.args[0][0]).to.not.have.string('s.evar1');
+      expect(sendRequestSpy.args[0][0]).to.not.have.string('s.evar0');
+      expect(sendRequestSpy.args[0][0]).to.have.string('foofoo=baz');
+    });
+  });
+
   it('fetches and merges remote config', () => {
     const analytics = getAnalyticsTag({
       'vars': {'title': 'local'},
@@ -540,6 +594,43 @@ describe('amp-analytics', function() {
       expect(sendRequestSpy.calledTwice).to.be.true;
       expect(sendRequestSpy.args[0][0]).to.equal('/test1=1');
       expect(sendRequestSpy.args[1][0]).to.equal('/test2=2');
+    });
+  });
+
+  describe('iframePing', () => {
+    it('fails for iframePing config outside of vendor config', function() {
+      const analytics = getAnalyticsTag({
+        'requests': {'foo': 'https://example.com/bar'},
+        'triggers': [{'on': 'visible', 'iframePing': true}]
+      });
+      return expect(waitForNoSendRequest(analytics)).to.be
+          .rejectedWith(
+              /iframePing config is only available to vendor config/);
+    });
+
+    it('succeeds for iframePing config in vendor config', function() {
+      const analytics = getAnalyticsTag({}, {'type': 'testVendor'});
+      const url = 'http://iframe.localhost:9876/base/test/' +
+              'fixtures/served/iframe.html?title=${title}';
+      analytics.predefinedConfig_.testVendor = {
+        'requests': {
+          'pageview': url
+        },
+        'triggers': {
+          'pageview': {
+            'on': 'visible',
+            'request': 'pageview',
+            'iframePing': true
+          }
+        }
+      };
+      return waitForSendRequest(analytics).then(() => {
+        const iframe = analytics.element
+            .ownerDocument.querySelector('iframe[amp-analytics]');
+        expect(iframe).to.not.be.null;
+        expect(iframe.src).to.contain('served/iframe.html');
+        expect(iframe.src).to.contain('Test%20Title');
+      });
     });
   });
 

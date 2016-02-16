@@ -103,6 +103,7 @@ Property      | Values               | Description
 authorization | &lt;URL&gt;          | The HTTPS URL for the Authorization endpoint.
 pingback      | &lt;URL&gt;          | The HTTPS URL for the Pingback endpoint.
 login         | &lt;URL&gt;          | The HTTPS URL for the Login Page.
+authorizationFallbackResponse | &lt;object&gt;          | The JSON object to be used in place of the authorization response if it fails.
 type          | "client" or "server" | Default is “client”. The "server" option is under design discussion and these docs will be updated when it is ready.
 
 *&lt;URL&gt;* values specify HTTPS URLs with substitution variables. The substitution variables are covered in more detail in the [Access URL Variables][7] section below.
@@ -117,7 +118,8 @@ Here’s an example of the AMP Access configuration:
   "pingback":
       "https://pub.com/amp-ping?rid={READER_ID}&url={SOURCE_URL}",
   "login":
-      "https://pub.com/amp-login?rid={READER_ID}&url={SOURCE_URL}"
+      "https://pub.com/amp-login?rid={READER_ID}&url={SOURCE_URL}",
+  "authorizationFallbackResponse": {"error": true}
 }
 </script>
 ```
@@ -148,7 +150,8 @@ https://pub.com/access?
 ```
 
 AUTHDATA variable is availbale to Pingback and Login URLs. It allows passing any field in the authorization
-response as an URL parameter. E.g. `AUTHDATA(isSubscriber)`.
+response as an URL parameter. E.g. `AUTHDATA(isSubscriber)`. The nested expressions are allowed as well, such as
+`AUTHDATA(other.isSubscriber)`.
 
 ##Access Content Markup
 
@@ -166,7 +169,12 @@ The ```amp-access-hide``` attribute can be used to optimistically hide the eleme
 ```html
 <div amp-access="expression" amp-access-hide>...</div>
 ```
+
+If Authorization request fails, `amp-access` expressions are not evaluated and whether a section is visible or hidden is determined by the presence of the `amp-access-hide` attribute initially provided by the document.
+
 We can extend the set of ```amp-access-*``` attributes as needed to support different obfuscation and rendering needs.
+
+If Authorization request fails and the "authorizationFallbackResponse" response is not specified in the documentation, `amp-access` expressions are not evaluated and whether a section is visible or hidden is determined by the presence of the `amp-access-hide` attribute initially provided by the document.
 
 Here’s an example that shows either login link or the complete content based on the subscription status:
 ```html
@@ -250,13 +258,18 @@ This RPC may be called in the prerendering phase and thus it should not be used 
 
 Another important consideration is that in some cases AMP runtime may need to call Authorization endpoint multiple times per document impression. This can happen when AMP Runtime believes that the access parameters for the Reader have changed significantly, e.g. after a successful Login Flow.
 
-The authorization response may be used by AMP Runtime and extensions for two different purposes:
+The authorization response may be used by AMP Runtime and extensions for three different purposes:
  1. When evaluating ```amp-access``` expressions.
  2. When evaluating ```<template>``` templates such as ```amp-mustache```.
+ 3. When providing additional variables to pingback and login URLs using `AUTHDATA(field)`.
 
 Authorization endpoint is called by AMP Runtime as a credentialed CORS endpoint. As such, it must implement CORS protocol. It should use CORS Origin and source origin to restrict the access to this service as described in the [CORS Origin Security][9]. This endpoint may use publisher cookies for its needs. For instance, it can associate the binding between the Reader ID and the Publisher’s own user identity. AMP itself does not need to know about this (and prefers not to). Reader more on [AMP Reader ID][2] and [AMP Access and Cookies][11] for more detail.
 
 AMP Runtime (or rather browser) observes cache response headers when calling Authorization endpoint. Thus the cached responses can be reused. It may or may not be desirable. If it is not desirable, the Publisher can user the appropriate cache control headers and/or RANDOM variable substitution for the endpoint URL.
+
+If Authorization request fails, AMP Runtime will fallback to the "authorizationFallbackResponse", if it's specified in the configuration. In this case the authorization flow will proceed without as normal with the value of the "authorizationFallbackResponse" property in place of the authorization response. If the "authorizationFallbackResponse" is not specified, the authorization flow will fail, in which case the `amp-access` expressions will not be evaluated and whether a section is visible or hidden will be determined by the presence of the `amp-access-hide` attribute initially provided by the document.
+
+Authorization request is automatically timed out and assumed to have failed after 3 seconds.
 
 AMP Runtime uses the following CSS classes during the authorization flow:
  1. `amp-access-loading` CSS class is set on the document root when the authorization flow starts and removed when it completes or fails.
@@ -323,7 +336,7 @@ Notice the use of a URL hash parameter “status”. The value is either “true
 
 #Integration with *amp-analytics*
 
-An integration with *amp-analytics* is under development and can be tracked on [Issue #1556][10]. This document will be updated when more details on the integration are available.
+An integration with *amp-analytics* is documented in the [amp-access-analytics.md](./amp-access-analytics.md).
 
 #CORS Origin Security
 
@@ -360,6 +373,9 @@ Both steps are covered by the AMP Access spec. The referrer can be injected into
 - Feb 1: "return" query parameter for Login Page can be customized using RETURN_URL URL substitution.
 - Feb 3: Spec for "source origin" security added to the [CORS Origin security][9].
 - Feb 9: [First-click-free][13] and [Metering][12] sections.
+- Feb 11: Nested field references such as `object.field` are now allowed.
+- Feb 11: Authorization request timeout in [Authorization Endpoint][4].
+- Feb 15: [Configuration][8] and [Authorization Endpoint][4] now allow "authorizationFallbackResponse" property that can be used when authorization fails.
 
 #Appendix A: “amp-access” expression grammar
 
@@ -388,6 +404,8 @@ comparison_predicate:
 truthy_predicate: scalar_exp
 
 scalar_exp: literal | field_ref
+
+field_ref: field_ref '.' field_name | field_name
 
 literal: STRING | NUMERIC | TRUE | FALSE | NULL
 ```

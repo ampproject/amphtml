@@ -186,7 +186,8 @@ function getDefaultBootstrapBaseUrl(parentWindow) {
   let url =
       'https://3p.ampproject.net/$internalRuntimeVersion$/frame.html';
   if (getMode().localDev) {
-    url = 'http://ads.localhost:' + parentWindow.location.port +
+    url = 'http://ads.localhost:' +
+        (parentWindow.location.port || parentWindow.parent.location.port) +
         '/dist.3p/current' +
         (getMode().minified ? '-min/frame' : '/frame.max') +
         '.html';
