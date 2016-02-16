@@ -98,6 +98,7 @@ afterEach(() => {
   window.ampExtendedElements = {};
   window.ENABLE_LOG = false;
   window.AMP_DEV_MODE = false;
+  window.context = undefined;
   if (!/native/.test(window.setTimeout)) {
     throw new Error('You likely forgot to restore sinon timers ' +
         '(installed via sandbox.useFakeTimers).');
