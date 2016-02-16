@@ -20,8 +20,7 @@ Capture analytics data from an AMP document.
 
 #### <a name="behavior"></a>Behavior
 
-The `<amp-analytics>` element is used to measure activity on an AMP document. The details concerning what is measured and how
-that data is sent to an analytics server is specified in a JSON configuration object.
+The `<amp-analytics>` element is used to measure activity on an AMP document. The details concerning what is measured and how that data is sent to an analytics server is specified in a JSON configuration object. It comes pre-configured to support many [analytics vendors](#analytics-vendors) out of the box.
 
 For example, the following `<amp-analytics>` element is configured to send a request to `https://example.com/analytics`
 when the document is first loaded, and each time an `<a>` tag is clicked:
@@ -57,23 +56,77 @@ when the document is first loaded, and each time an `<a>` tag is clicked:
 </amp-analytics>
 ```
 
+#### Analytics vendors
+
+By specifying the name of an analytics vendor with the `type` attribute you can quickly configure `amp-analytics` to use the respective product. Additional configuration (such as your user id) may still be necessary.
+
+Here's an example of usage of `type` for a provider called XYZ:
+
+```html
+<amp-analytics type="XYZ"> ... </amp-analytics>
+```
+
+##### Adobe Analytics
+
+Type attribute value: `adobeanalytics`
+
+Adds support for Adobe Analytics. More details for adding Adobe Analytics support can be found at [helpx.adobe.com](https://helpx.adobe.com/marketing-cloud/analytics.html).
+
+##### AT Internet
+
+Type attribute value: `atinternet`
+
+Adds support for AT Internet. More details for adding AT Internet support can be found at [developers.atinternet-solutions.com](http://developers.atinternet-solutions.com/javascript-en/advanced-features-javascript-en/accelerated-mobile-pages-amp-javascript-en/).
+
+##### Chartbeat
+
+Type attribute value: `chartbeat`
+
+Adds support for Chartbeat. More details for adding Chartbeat support can be found at [support.chartbeat.com](http://support.chartbeat.com/docs/).
+
+##### comScore
+
+Type attribute value: `comscore`
+
+Adds support for comScore Unified Digital Measurement™ pageview analytics. Requires defining *var* `c2` with comScore-provided *c2 id*.
+
+##### Google Analytics
+
+Type attribute value: `googleanalytics`
+
+Adds support for Google Analytics. More details for adding Google Analytics support can be found at [developers.google.com](https://developers.google.com/analytics/devguides/collection/amp-analytics/).
+
+##### INFOnline / IVW
+
+Type attribute value: `infonline`
+
+Adds support for [INFOnline](https://www.infonline.de) / [IVW](http://www.ivw.de). Requires the following variables
+
+* `st` (Angebotskennung)
+* `co` (Comment)
+* `cp` (Code)
+
+##### Krux
+
+Type attribute value: `krux`
+
+Adds support for Krux.  Configuration details can be found at [help.krux.com](https://konsole.zendesk.com/hc/en-us/articles/216596608).
+
+##### Parsely
+
+Type attribute value: `parsely`
+
+Adds support for Parsely. Configuration details can be found at [parsely.com/docs](http://parsely.com/docs/integration/tracking/google-amp.html).
+
+##### Quantcast Measurement
+
+Type attribute value: `quantcast`
+
+Adds support for Quantcast Measurement. More details for adding Quantcast Measurement can be found at [quantcast.com](https://www.quantcast.com/help/guides/)
+
 #### <a name="attributes"></a>Attributes
 
-  - `type` Optional attribute. This attribute can be used to inherit configuration from one of the built-in analytics providers. Currently supported values for type are:
-    - `atinternet`: Adds support for AT Internet. More details for adding AT Internet support can be found at [developers.atinternet-solutions.com](http://developers.atinternet-solutions.com/javascript-en/advanced-features-javascript-en/accelerated-mobile-pages-amp-javascript-en/).
-    - `chartbeat`: Adds support for Chartbeat. More details for adding Chartbeat support can be found at [support.chartbeat.com](http://support.chartbeat.com/docs/).
-    - `comscore`: Adds support for comScore Unified Digital Measurement™ pageview analytics. Requires defining *var* `c2` with comScore-provided *c2 id*.
-    - `googleanalytics`: Adds support for Google Analytics. More details for adding Google Analytics support can be found at [developers.google.com](https://developers.google.com/analytics/devguides/collection/amp-analytics/).
-    - `krux`: Adds support for Krux.  Configuration details can be found at [help.krux.com](https://konsole.zendesk.com/hc/en-us/articles/216596608).
-    - `parsely`: Adds support for Parsely. Configuration details can be found at [parsely.com/docs](http://parsely.com/docs/integration/tracking/google-amp.html).
-    - `quantcast`: Adds support for Quantcast Measurement. More details for adding Quantcast Measurement can be found at [quantcast.com](https://www.quantcast.com/help/guides/)
-
-
-    Here's an example of usage of `type` for a provider called XYZ:
-    ```
-    <amp-analytics type="XYZ"> ... </amp-analytics>
-    ```
-
+  - `type` See [Analytics vendors](#analytics-vendors)
   - `config` Optional attribute. This attribute can be used to load a configuration from a specified remote URL. The URL specified here should use https scheme. See also `data-include-credentials` attribute below.
 
     ```

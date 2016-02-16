@@ -81,6 +81,7 @@ function buildExtensions(options) {
   buildExtension('amp-audio', '0.1', false, options);
   buildExtension('amp-brightcove', '0.1', false, options);
   buildExtension('amp-carousel', '0.1', true, options);
+  buildExtension('amp-dailymotion', '0.1', false, options);
   buildExtension('amp-dynamic-css-classes', '0.1', false, options);
   buildExtension('amp-facebook', '0.1', false, options);
   buildExtension('amp-fit-text', '0.1', true, options);
@@ -92,6 +93,7 @@ function buildExtensions(options) {
   buildExtension('amp-list', '0.1', false, options);
   buildExtension('amp-mustache', '0.1', false, options);
   buildExtension('amp-pinterest', '0.1', true, options);
+  buildExtension('amp-soundcloud', '0.1', false, options);
   buildExtension('amp-install-serviceworker', '0.1', false, options);
   /**
    * @deprecated `amp-slides` is deprecated and will be deleted before 1.0.
@@ -326,6 +328,7 @@ function buildExamples(watch) {
   buildExample('article.amp.html');
   buildExample('responsive.amp.html');
   buildExample('article-access.amp.html');
+  buildExample('dailymotion.amp.html');
   buildExample('csp.amp.html');
   buildExample('metadata-examples/article-json-ld.amp.html');
   buildExample('metadata-examples/article-microdata.amp.html');
@@ -342,6 +345,7 @@ function buildExamples(watch) {
   buildExample('pinterest.amp.html');
   buildExample('released.amp.html');
   buildExample('twitter.amp.html');
+  buildExample('soundcloud.amp.html');
   buildExample('user-notification.amp.html');
   buildExample('vimeo.amp.html');
   buildExample('vine.amp.html');

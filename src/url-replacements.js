@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
+import {accessServiceForOrNull} from './access-service';
 import {assert} from './asserts';
 import {cidFor} from './cid';
 import {documentInfoFor} from './document-info';
+import {getMode} from './mode';
 import {getService} from './service';
 import {loadPromise} from './event-helper';
 import {log} from './log';
@@ -44,6 +46,9 @@ class UrlReplacements {
 
     /** @private @const {!Object<string, function(*):*>} */
     this.replacements_ = this.win_.Object.create(null);
+
+    /** @private @const {function():!Promise<?AccessService>} */
+    this.getAccessService_ = accessServiceForOrNull.bind(null);
 
     // Returns a random value for cache busters.
     this.set_('RANDOM', () => {
@@ -250,6 +255,40 @@ class UrlReplacements {
       return this.getTimingData_('navigationStart',
           'domContentLoadedEventStart');
     });
+
+    // Access: Reader ID.
+    this.set_('ACCESS_READER_ID', () => {
+      return this.getAccessValue_(accessService => {
+        return accessService.getAccessReaderId();
+      }, 'ACCESS_READER_ID');
+    });
+
+    // Access: data from the authorization response.
+    this.set_('AUTHDATA', field => {
+      assert(field, 'The first argument to AUTHDATA, the field, is required');
+      return this.getAccessValue_(accessService => {
+        return accessService.getAuthdataField(field);
+      }, 'AUTHDATA');
+    });
+  }
+
+  /**
+   * Resolves the value via access service. If access service is not configured,
+   * the resulting value is `null`.
+   * @param {function(!AccessService):*} getter
+   * @param {string} expr
+   * @return {*|null}
+   */
+  getAccessValue_(getter, expr) {
+    return this.getAccessService_(this.win_).then(accessService => {
+      if (!accessService) {
+        // Access service is not installed.
+        this.reportDev_(
+            'Access service is not installed to access ' + expr);
+        return null;
+      }
+      return getter(accessService);
+    });
   }
 
   /**
@@ -390,6 +429,16 @@ class UrlReplacements {
     // FOO_BAR(arg1)
     // FOO_BAR(arg1,arg2)
     return new RegExp('\\$?(' + all + ')(?:\\(([0-9a-zA-Z-_.,]+)\\))?', 'g');
+  }
+
+  /**
+   * @param {string} message
+   * @private
+   */
+  reportDev_(message) {
+    if (getMode().development || getMode().localDev) {
+      console./* OK */error(message);
+    }
   }
 }
 

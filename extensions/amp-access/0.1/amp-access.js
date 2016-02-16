@@ -51,7 +51,8 @@ import {xhrFor} from '../../../src/xhr';
  *   type: !AccessType,
  *   authorization: (string|undefined),
  *   pingback: (string|undefined),
- *   login: (string|undefined)
+ *   login: (string|undefined),
+ *   authorizationFallbackResponse: !JSONObject
  * }}
  */
 let AccessConfigDef;
@@ -195,6 +196,8 @@ export class AccessService {
       authorization: configJson['authorization'],
       pingback: configJson['pingback'],
       login: configJson['login'],
+      authorizationFallbackResponse:
+          configJson['authorizationFallbackResponse'],
     };
 
     // Check that all URLs are valid.
@@ -312,7 +315,8 @@ export class AccessService {
   buildUrl_(url, useAuthData) {
     return this.getReaderId_().then(readerId => {
       const vars = {
-        'READER_ID': readerId
+        'READER_ID': readerId,
+        'ACCESS_READER_ID': readerId  // A synonym.
       };
       if (useAuthData) {
         vars['AUTHDATA'] = field => {
@@ -349,6 +353,16 @@ export class AccessService {
             credentials: 'include',
             requireAmpResponseSourceOrigin: true
           }));
+    }).catch(error => {
+      this.analyticsEvent_('access-authorization-failed');
+      if (this.config_.authorizationFallbackResponse) {
+        // Use fallback.
+        setTimeout(() => {throw error;});
+        return this.config_.authorizationFallbackResponse;
+      } else {
+        // Rethrow the error.
+        throw error;
+      }
     }).then(response => {
       log.fine(TAG, 'Authorization response: ', response);
       this.setAuthResponse_(response);
@@ -362,7 +376,6 @@ export class AccessService {
       });
     }).catch(error => {
       log.error(TAG, 'Authorization failed: ', error);
-      this.analyticsEvent_('access-authorization-failed');
       this.toggleTopClass_('amp-access-loading', false);
       this.toggleTopClass_('amp-access-error', true);
     });
@@ -375,6 +388,42 @@ export class AccessService {
   setAuthResponse_(authResponse) {
     this.authResponse_ = authResponse;
     this.firstAuthorizationResolver_();
+  }
+
+  /**
+   * Returns the promise that will yield the access READER_ID.
+   *
+   * This is a restricted API.
+   *
+   * @return {?Promise<string>}
+   */
+  getAccessReaderId() {
+    if (!this.isAnalyticsExperimentOn_) {
+      return null;
+    }
+    if (!this.enabled_) {
+      return null;
+    }
+    return this.getReaderId_();
+  }
+
+  /**
+   * Returns the field from the authorization response. If the authorization
+   * response have not been received yet, the result will be `null`.
+   *
+   * This is a restricted API.
+   *
+   * @param {string} field
+   * @return {*|null}
+   */
+  getAuthdataField(field) {
+    if (!this.isAnalyticsExperimentOn_) {
+      return null;
+    }
+    if (!this.enabled_ || !this.authResponse_) {
+      return null;
+    }
+    return getValueForExpr(this.authResponse_, field) || null;
   }
 
   /**

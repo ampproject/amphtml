@@ -51,10 +51,14 @@ export const ANALYTICS_CONFIG = {
       'scrollTop': 'SCROLL_TOP',
       'scrollWidth': 'SCROLL_WIDTH',
       'serverResponseTime': 'SERVER_RESPONSE_TIME',
+      'sourceUrl': 'SOURCE_URL',
+      'sourceHost': 'SOURCE_HOST',
       'tcpConnectTime': 'TCP_CONNECT_TIME',
       'timestamp': 'TIMESTAMP',
       'timezone': 'TIMEZONE',
       'title': 'TITLE',
+      'accessReaderId': 'ACCESS_READER_ID',
+      'authdata': 'AUTHDATA',
     }
   },
 
@@ -297,5 +301,32 @@ export const ANALYTICS_CONFIG = {
       'pageview': 'https://${host}${requestPath}?${basePrefix}',
       'click': 'https://${host}${requestPath}?${basePrefix}&pe=lnk_${linkType}&pev1=${linkUrl}&pev2=${linkName}',
     }
+  },
+
+  'infonline': {
+    'vars': {
+      'sv': 'ke',
+      'ap': '1'
+    },
+    'transport': {'beacon': false, 'xhrpost': false, 'image': true},
+    'requests': {
+      'pageview': 'https://3p.ampproject.net/custom/amp-analytics-infonline.html?st=${st}' +
+        '&sv=${sv}' +
+        '&ap=${ap}' +
+        '&co=${co}' +
+        '&cp=${cp}' +
+        '&host=${canonicalHost}' +
+        '&path=${canonicalPath}'
+    },
+    'triggers': {
+      'pageview': {
+        'on': 'visible',
+        'request': 'pageview'
+      }
+    }
   }
+
 };
+ANALYTICS_CONFIG['infonline']['triggers']['pageview']['iframe' +
+/* TEMPORARY EXCEPTION */ 'Ping'] = true;
+
