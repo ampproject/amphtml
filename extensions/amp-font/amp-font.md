@@ -16,8 +16,54 @@ limitations under the License.
 
 ### <a name="`amp-font`"></a> `amp-font`
 
-The `amp-font` extension can trigger and monitor the loading of custom fonts on AMP pages.
+<table>
+  <tr>
+    <td width="40%"><strong>Description</strong></td>
+    <td>Trigger and monitor the loading of custom fonts on AMP pages.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Availability</strong></td>
+    <td>Stable</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Required Script</strong></td>
+    <td><code>&lt;script async custom-element="amp-font" src="https://cdn.ampproject.org/v0/amp-font-0.1.js">&lt;/script></code></td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Examples</strong></td>
+    <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/font.amp.html">font.amp.html</a></td>
+  </tr>
+</table>
 
+The following lists validation errors specific to the `amp-font` tag
+(see also `amp-font` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii):
+
+<table>
+  <tr>
+    <th width="40%"><strong>Validation Error</strong></th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td width="40%"><a href="/docs/reference/validation_errors.html#tag-required-by-another-tag-is-missing">TAG_REQUIRED_BY_MISSING</a></td>
+    <td>Error thrown when required <code>amp-font</code> extension <code>.js</code> script tag is missing or incorrect.</td>
+  </tr>
+  <tr>
+    <td width="40%"><a href="/docs/reference/validation_errors.html#mandatory-attribute-missing">MANDATORY_ATTR_MISSING</a></td>
+    <td>Error thrown when <code>font-family</code> attribute is missing.</td>
+  </tr>
+  <tr>
+    <td width="40%"><a href="/docs/reference/validation_errors.html#invalid-attribute-value">INVALID_ATTR_VALUE</a></td>
+    <td>Error thrown when the <code>timeout</code> attribute is not a positive integer.</td>
+  </tr>
+  <tr>
+    <td width="40%"><a href="/docs/reference/validation_errors.html#implied-layout-isnt-supported-by-amp-tag">IMPLIED_LAYOUT_INVALID</a></td>
+    <td>The only supported layout type is <code>NODISPLAY</code>. Error thrown if implied layout is any other value.</td>
+  </tr>
+  <tr>
+    <td width="40%"><a href="/docs/reference/validation_errors.html#specified-layout-isnt-supported-by-amp-tag">SPECIFIED_LAYOUT_INVALID</a></td>
+    <td>The only supported layout type is <code>NODISPLAY</code>. Error thrown if specified layout is any other value.</td>
+  </tr>
+</table>
 
 ####Behavior
 
