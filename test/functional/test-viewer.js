@@ -26,9 +26,11 @@ describe('Viewer', () => {
   let viewer;
   let windowApi;
   let timeouts;
+  let clock;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
+    clock = sandbox.useFakeTimers();
     timeouts = [];
     const WindowApi = function() {};
     WindowApi.prototype.setTimeout = function(handler) {
@@ -517,6 +519,45 @@ describe('Viewer', () => {
         expect(referrerUrl).to.equal('');
         expect(timeouts).to.have.length(0);
       });
+    });
+  });
+
+  describe('viewerOrigin', () => {
+
+    it('should return empty string if origin is not known', () => {
+      const viewer = new Viewer(windowApi);
+      return viewer.getViewerOrigin().then(viewerOrigin => {
+        expect(viewerOrigin).to.equal('');
+      });
+    });
+
+    it('should return ancestor origin if known', () => {
+      windowApi.parent = {};
+      windowApi.location.ancestorOrigins = ['https://google.com'];
+      const viewer = new Viewer(windowApi);
+      return viewer.getViewerOrigin().then(viewerOrigin => {
+        expect(viewerOrigin).to.equal('https://google.com');
+      });
+    });
+
+    it('should return viewer origin if set via handshake', () => {
+      windowApi.parent = {};
+      const viewer = new Viewer(windowApi);
+      const result = viewer.getViewerOrigin().then(viewerOrigin => {
+        expect(viewerOrigin).to.equal('https://foobar.com');
+      });
+      viewer.setMessageDeliverer(() => {}, 'https://foobar.com');
+      return result;
+    });
+
+    it('should return empty string if handshake does not happen', () => {
+      windowApi.parent = {};
+      const viewer = new Viewer(windowApi);
+      const result = viewer.getViewerOrigin().then(viewerOrigin => {
+        expect(viewerOrigin).to.equal('');
+      });
+      clock.tick(1010);
+      return result;
     });
   });
 });

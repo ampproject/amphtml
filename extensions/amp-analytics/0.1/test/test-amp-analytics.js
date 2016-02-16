@@ -471,6 +471,15 @@ describe('amp-analytics', function() {
     });
   });
 
+  it('correctly encodes scalars and arrays', () => {
+    const a = getAnalyticsTag();
+    expect(a.encodeVars_('abc %&')).to.equal('abc%20%25%26');
+    const array = ['abc %&', 'a b'];
+    expect(a.encodeVars_(array)).to.equal('abc%20%25%26,a%20b');
+    // Test non-inplace semantics but testing again.
+    expect(a.encodeVars_(array)).to.equal('abc%20%25%26,a%20b');
+  });
+
   it('expands url-replacements vars', () => {
     const analytics = getAnalyticsTag({
       'requests': {'pageview':
