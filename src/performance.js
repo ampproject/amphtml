@@ -213,7 +213,7 @@ export class Performance {
     opt_from = opt_from == undefined ? null : opt_from;
     opt_value = opt_value == undefined ? timer.now() : opt_value;
 
-    if (this.viewer_) {
+    if (this.viewer_ && this.viewer_.isPerformanceTrackingOn()) {
       this.viewer_.tick({
         'label': label,
         'from': opt_from,
@@ -242,7 +242,7 @@ export class Performance {
    * Calls the "flushTicks" function on the viewer.
    */
   flush() {
-    if (this.viewer_) {
+    if (this.viewer_ && this.viewer_.isPerformanceTrackingOn()) {
       this.viewer_.flushTicks();
     }
   }
@@ -279,6 +279,12 @@ export class Performance {
    */
   flushQueuedTicks_() {
     if (!this.viewer_) {
+      return;
+    }
+
+    if (!this.viewer_.isPerformanceTrackingOn()) {
+      // drop all queued ticks to not leak
+      this.events_.length = 0;
       return;
     }
 

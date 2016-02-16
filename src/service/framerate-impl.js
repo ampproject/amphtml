@@ -58,17 +58,18 @@ export class Framerate {
      */
     this.loadedAd_ = false;
 
-    const viewer = viewerFor(this.win);
+    /** @private @const {!Viewer} */
+    this.viewer_ = viewerFor(this.win);
 
     /**
      * We do not make measurements when the window is hidden, because
      * animation frames not not fire in that case.
      * @private {boolean}
      */
-    this.isActive_ = viewer.isVisible();
+    this.isActive_ = this.isActive();
 
-    viewer.onVisibilityChanged(() => {
-      this.isActive_ = viewer.isVisible();
+    this.viewer_.onVisibilityChanged(() => {
+      this.isActive_ = this.isActive();
       this.reset_();
       if (this.isActive_) {
         this.collect();
@@ -76,6 +77,15 @@ export class Framerate {
     });
 
     this.collect();
+  }
+
+  /**
+   * Framerate instrumentation should only be on if viewer is visible
+   * and csi is actually on.
+   * @return {boolean}
+   */
+  isActive() {
+    return this.viewer_.isPerformanceTrackingOn() && this.viewer_.isVisible();
   }
 
   /**
