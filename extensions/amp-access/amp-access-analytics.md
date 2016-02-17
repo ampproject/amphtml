@@ -92,9 +92,11 @@ The `access-pingback-failed` event is issued when the Pingback endpoint has fail
 }
 ```
 
-###### Login started trigger (`"on": "access-login-started"`)
+###### Login started trigger (`"on": "access-login[-type]-started"`)
 
-The `access-login-started` event is issued right before the Login dialog has been opened. Use these configurations to fire a request for this event.
+The `access-login[-type]-started` event is issued right before the Login dialog has been opened. Use these configurations to fire a request for this event.
+
+When only one Login URL is configured, the event is `access-login-started`. When multiple Login URLs are configured, the event is `access-login-type-started`, e.g. "access-login-signup-started". See [Login Page Spec](./amp-access-spec.md#login-page) for more info.
 
 ```javascript
 "triggers": {
@@ -105,9 +107,11 @@ The `access-login-started` event is issued right before the Login dialog has bee
 }
 ```
 
-###### Login success trigger (`"on": "access-login-success"`)
+###### Login success trigger (`"on": "access-login[-type]-success"`)
 
-The `access-login-success` event is issued when Login dialog has succeeded. Use these configurations to fire a request for this event.
+The `access-login[-type]-success` event is issued when Login dialog has succeeded. Use these configurations to fire a request for this event.
+
+When only one Login URL is configured, the event is `access-login-success`. When multiple Login URLs are configured, the event is `access-login-type-success`, e.g. "access-login-signup-success". See [Login Page Spec](./amp-access-spec.md#login-page) for more info.
 
 ```javascript
 "triggers": {
@@ -118,9 +122,11 @@ The `access-login-success` event is issued when Login dialog has succeeded. Use 
 }
 ```
 
-###### Login rejected trigger (`"on": "access-login-rejected"`)
+###### Login rejected trigger (`"on": "access-login[-type]-rejected"`)
 
-The `access-login-rejected` event is issued when Login dialog has been rejected by the user. Use these configurations to fire a request for this event.
+The `access-login[-type]-rejected` event is issued when Login dialog has been rejected by the user. Use these configurations to fire a request for this event.
+
+When only one Login URL is configured, the event is `access-login-rejected`. When multiple Login URLs are configured, the event is `access-login-type-rejected`, e.g. "access-login-signup-rejected". See [Login Page Spec](./amp-access-spec.md#login-page) for more info.
 
 ```javascript
 "triggers": {
@@ -131,9 +137,11 @@ The `access-login-rejected` event is issued when Login dialog has been rejected 
 }
 ```
 
-###### Login failed trigger (`"on": "access-login-failed"`)
+###### Login failed trigger (`"on": "access-login[-type]-failed"`)
 
-The `access-login-failed` event is issued when Login dialog has failed due to an unknown reason. Use these configurations to fire a request for this event.
+The `access-login[-type]-failed` event is issued when Login dialog has failed due to an unknown reason. Use these configurations to fire a request for this event.
+
+When only one Login URL is configured, the event is `access-login[-type]-rejected`. When multiple Login URLs are configured, the event is `access-login-type-rejected`, e.g. "access-login-signup-rejected". See [Login Page Spec](./amp-access-spec.md#login-page) for more info.
 
 ```javascript
 "triggers": {
