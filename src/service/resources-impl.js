@@ -1781,17 +1781,13 @@ export class Resource {
       if (this.state_ == ResourceState_.LAYOUT_COMPLETE ||
               this.state_ == ResourceState_.LAYOUT_FAILED ||
               this.layoutCount_ > 0) {
-        return Promise.resolve();
+        return;
       }
       if (!this.isDisplayed()) {
-        return Promise.resolve();
+        return;
       }
       this.layoutCount_++;
-      try {
-        return this.element.layoutCallback();
-      } catch (e) {
-        return Promise.reject(e);
-      }
+      return this.element.layoutCallback();
     });
   }
 }

@@ -119,7 +119,7 @@ export class Timer {
       if (timerKey != -1) {
         this.cancel(timerKey);
       }
-      return Promise.reject(error);
+      throw error;
     });
   }
 
@@ -148,7 +148,7 @@ export class Timer {
       if (timerKey != -1) {
         this.cancel(timerKey);
       }
-      return Promise.reject(error);
+      throw error;
     });
     if (!opt_racePromise) {
       return delayPromise;

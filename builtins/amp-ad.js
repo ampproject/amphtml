@@ -282,7 +282,7 @@ export function installAd(win) {
       }
       return cidForOrNull(this.getWin()).then(cidService => {
         if (!cidService) {
-          return Promise.resolve();
+          return;
         }
         let consent = Promise.resolve();
         const consentId = this.element.getAttribute(
