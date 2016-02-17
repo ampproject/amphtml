@@ -58,3 +58,18 @@ empty.html:1:0 MANDATORY_TAG_MISSING noscript enclosure for mandatory style (see
 empty.html:1:0 MANDATORY_TAG_MISSING body (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#crps)
 empty.html:1:0 MANDATORY_TAG_MISSING amphtml engine v0.js script (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#scrpt)
 ```
+
+###Docker
+
+Build a docker image that contains the amp validator:
+
+```
+docker build -t=amp-validator .
+```
+
+Validate an amp html file by piping a file through a container:
+
+```
+cat examples\facebook.amp.html | docker run -i amp-validator
+PASS
+```
