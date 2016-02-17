@@ -16,6 +16,7 @@
 
 import {Storage, Store, LocalStorageBinding, ViewerStorageBinding} from
     '../../src/service/storage-impl';
+import {all} from '../../src/promise';
 import * as sinon from 'sinon';
 
 
@@ -69,7 +70,7 @@ describe('Storage', () => {
         expect(value).to.equal(expectedValue, `For "${k}"`);
       }));
     }
-    return Promise.all(list);
+    return all(list);
   }
 
   it('should configure store correctly', () => {
