@@ -168,6 +168,9 @@ export class AccessService {
     /** @private {?Promise} */
     this.loginPromise_ = null;
 
+    /** @private {time} */
+    this.loginStartTime_ = 0;
+
     /** @private {!Promise<!InstrumentationService>} */
     this.analyticsPromise_ = analyticsFor(this.win);
 
@@ -675,7 +678,13 @@ export class AccessService {
    * @return {!Promise}
    */
   login() {
-    if (this.loginPromise_) {
+    const now = this.timer_.now();
+
+    // If login is pending, block a new one from starting for 1 second. After
+    // 1 second, however, the new login request will be allowed to proceed,
+    // given that we cannot always determine fully if the previous attempt is
+    // "stuck".
+    if (this.loginPromise_ && (now - this.loginStartTime_ < 1000)) {
       return this.loginPromise_;
     }
 
@@ -684,7 +693,7 @@ export class AccessService {
     // Login URL should always be available at this time.
     const loginUrl = assert(this.loginUrl_, 'Login URL is not ready');
     this.analyticsEvent_('access-login-started');
-    this.loginPromise_ = this.openLoginDialog_(loginUrl).then(result => {
+    const loginPromise = this.openLoginDialog_(loginUrl).then(result => {
       log.fine(TAG, 'Login dialog completed: ', result);
       this.loginPromise_ = null;
       const query = parseQueryString(result);
@@ -701,9 +710,13 @@ export class AccessService {
     }).catch(reason => {
       log.fine(TAG, 'Login dialog failed: ', reason);
       this.analyticsEvent_('access-login-failed');
-      this.loginPromise_ = null;
+      if (this.loginPromise_ == loginPromise) {
+        this.loginPromise_ = null;
+      }
       throw reason;
     });
+    this.loginPromise_ = loginPromise;
+    this.loginStartTime_ = now;
     return this.loginPromise_;
   }
 
