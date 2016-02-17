@@ -253,6 +253,33 @@ export const ANALYTICS_CONFIG = {
     }
   },
 
+  'piano': {
+    'requests': {
+      'host': 'https://api-v3.tinypass.com',
+      'basePrefix': '/api/v3',
+      'baseSuffix': '&pageview_id=${pageViewId}&rand=${random}',
+      'pageview': '${host}${basePrefix}/page/track?url=${canonicalUrl}&' +
+      'referer=${documentReferrer}&content_created=${contentCreated}&' +
+      'content_author=${contentAuthor}&content_section=${contentSection}&' +
+      'timezone_offset=${timezone}&tags=${tags}&amp_url=${ampdocUrl}&' +
+      'screen=${screenWidth}x${screenHeight}',
+      // TODO: piano request for unload beacon
+      //'unload': '${host}${basePrefix}/page/unload?aid=${aid}&amp_url=${ampdocUrl}&' +
+      //    'time_on_page=${timeOnPage}&scroll_depth=${scrollTop}'
+    },
+    'triggers': {
+      'defaultPageview': {
+        'on': 'visible',
+        'request': 'pageview'
+      }
+    },
+    'transport': {
+      'beacon': true,
+      'xhrpost': true,
+      'image': true
+    }
+  },
+
   'quantcast': {
     'vars': {
       'labels': ''
