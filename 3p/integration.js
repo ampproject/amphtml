@@ -37,7 +37,7 @@ import {manageWin} from './environment';
 import {nonSensitiveDataPostMessage, listenParent} from './messaging';
 import {twitter} from './twitter';
 import {yieldmo} from '../ads/yieldmo';
-import {register, run} from '../src/3p';
+import {computeInMasterFrame, register, run} from '../src/3p';
 import {parseUrl} from '../src/url';
 import {assert} from '../src/asserts';
 import {taboola} from '../ads/taboola';
@@ -156,6 +156,7 @@ window.draw3p = function(opt_configCallback) {
   window.context.onResizeDenied = onResizeDenied;
   window.context.reportRenderedEntityIdentifier =
       reportRenderedEntityIdentifier;
+  window.context.computeInMasterFrame = computeInMasterFrame;
   delete data._context;
 
   manageWin(window);

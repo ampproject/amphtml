@@ -347,14 +347,9 @@ export class AmpAnalytics extends AMP.BaseElement {
    */
   encodeVars_(raw) {
     if (isArray(raw)) {
-      for (let i = 0; i < raw.length; ++i) {
-        raw[i] = encodeURIComponent(raw[i]);
-      }
-      raw = raw.join();
-    } else {
-      raw = encodeURIComponent(raw);
+      return raw.map(encodeURIComponent).join(',');
     }
-    return raw;
+    return encodeURIComponent(raw);
   }
 
   /**

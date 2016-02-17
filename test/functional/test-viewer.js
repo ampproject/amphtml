@@ -16,6 +16,7 @@
 
 import {Viewer} from '../../src/service/viewer-impl';
 import {platform} from '../../src/platform';
+import {all} from '../../src/promise';
 import * as sinon from 'sinon';
 
 
@@ -26,9 +27,11 @@ describe('Viewer', () => {
   let viewer;
   let windowApi;
   let timeouts;
+  let clock;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
+    clock = sandbox.useFakeTimers();
     timeouts = [];
     const WindowApi = function() {};
     WindowApi.prototype.setTimeout = function(handler) {
@@ -250,7 +253,7 @@ describe('Viewer', () => {
       expect(m1Resolved).to.be.false;
       expect(m2Resolved).to.be.false;
 
-      return Promise.all([m1, m2]);
+      return all([m1, m2]);
     }).then(() => {
       // All resolved now.
       expect(m1Resolved).to.be.true;
@@ -277,7 +280,7 @@ describe('Viewer', () => {
       // Timeout.
       expect(timeouts).to.have.length(1);
       timeouts[0]();
-      return Promise.all([m1, m2]);
+      return all([m1, m2]);
     }).then(() => {
       throw new Error('must never be here');
     }, () => {
@@ -517,6 +520,45 @@ describe('Viewer', () => {
         expect(referrerUrl).to.equal('');
         expect(timeouts).to.have.length(0);
       });
+    });
+  });
+
+  describe('viewerOrigin', () => {
+
+    it('should return empty string if origin is not known', () => {
+      const viewer = new Viewer(windowApi);
+      return viewer.getViewerOrigin().then(viewerOrigin => {
+        expect(viewerOrigin).to.equal('');
+      });
+    });
+
+    it('should return ancestor origin if known', () => {
+      windowApi.parent = {};
+      windowApi.location.ancestorOrigins = ['https://google.com'];
+      const viewer = new Viewer(windowApi);
+      return viewer.getViewerOrigin().then(viewerOrigin => {
+        expect(viewerOrigin).to.equal('https://google.com');
+      });
+    });
+
+    it('should return viewer origin if set via handshake', () => {
+      windowApi.parent = {};
+      const viewer = new Viewer(windowApi);
+      const result = viewer.getViewerOrigin().then(viewerOrigin => {
+        expect(viewerOrigin).to.equal('https://foobar.com');
+      });
+      viewer.setMessageDeliverer(() => {}, 'https://foobar.com');
+      return result;
+    });
+
+    it('should return empty string if handshake does not happen', () => {
+      windowApi.parent = {};
+      const viewer = new Viewer(windowApi);
+      const result = viewer.getViewerOrigin().then(viewerOrigin => {
+        expect(viewerOrigin).to.equal('');
+      });
+      clock.tick(1010);
+      return result;
     });
   });
 });

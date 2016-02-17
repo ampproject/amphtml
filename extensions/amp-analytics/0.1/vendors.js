@@ -23,8 +23,10 @@ export const ANALYTICS_CONFIG = {
   'default': {
     'transport': {'beacon': true, 'xhrpost': true, 'image': true},
     'vars': {
+      'accessReaderId': 'ACCESS_READER_ID',
       'ampdocHost': 'AMPDOC_HOST',
       'ampdocUrl': 'AMPDOC_URL',
+      'authdata': 'AUTHDATA',
       'availableScreenHeight': 'AVAILABLE_SCREEN_HEIGHT',
       'availableScreenWidth': 'AVAILABLE_SCREEN_WIDTH',
       'browserLanguage': 'BROWSER_LANGUAGE',
@@ -57,8 +59,7 @@ export const ANALYTICS_CONFIG = {
       'timestamp': 'TIMESTAMP',
       'timezone': 'TIMEZONE',
       'title': 'TITLE',
-      'accessReaderId': 'ACCESS_READER_ID',
-      'authdata': 'AUTHDATA',
+      'viewer': 'VIEWER',
     }
   },
 
@@ -310,7 +311,7 @@ export const ANALYTICS_CONFIG = {
     },
     'transport': {'beacon': false, 'xhrpost': false, 'image': true},
     'requests': {
-      'pageview': 'https://3p.ampproject.net/custom/amp-analytics-infonline.html?st=${st}' +
+      'pageview': '${url}?st=${st}' +
         '&sv=${sv}' +
         '&ap=${ap}' +
         '&co=${co}' +

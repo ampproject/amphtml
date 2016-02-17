@@ -17,6 +17,7 @@
 // This must load before all other tests.
 import '../third_party/babel/custom-babel-helpers';
 import '../src/polyfills';
+import {removeElement} from '../src/dom';
 import {adopt} from '../src/runtime';
 
 adopt(window);
@@ -75,19 +76,24 @@ sinon.sandbox.create = function(config) {
 // Global cleanup of tags added during tests. Cool to add more
 // to selector.
 afterEach(() => {
-  const cleanup = document.querySelectorAll('link,meta,iframe');
+  const cleanup = document.querySelectorAll('link,meta,base,iframe');
   for (let i = 0; i < cleanup.length; i++) {
     try {
       const element = cleanup[i];
       if (element.tagName == 'IFRAME') {
-        setTimeout(() => {
+        /*setTimeout(() => {
           // Wait a bit until removing iframes. The reason is that Safari has
           // a race where this sometimes runs too early and the test
           // is actually still running
-          element.parentNode.removeChild(element);
-        }, 1000);
+          try {
+            removeElement(element);
+          } catch (e) {
+            // This sometimes fails for unknown reasons.
+            console./*OK/log(e);
+          }
+        }, 1000);*/
       } else {
-        element.parentNode.removeChild(element);
+        removeElement(element);
       }
     } catch (e) {
       // This sometimes fails for unknown reasons.
@@ -98,6 +104,7 @@ afterEach(() => {
   window.ampExtendedElements = {};
   window.ENABLE_LOG = false;
   window.AMP_DEV_MODE = false;
+  window.context = undefined;
   if (!/native/.test(window.setTimeout)) {
     throw new Error('You likely forgot to restore sinon timers ' +
         '(installed via sandbox.useFakeTimers).');

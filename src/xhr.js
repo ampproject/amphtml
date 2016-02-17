@@ -89,26 +89,25 @@ class Xhr {
     const sourceOrigin = getSourceOrigin(this.win.location.href);
     const url = parseUrl(input);
     const query = parseQueryString(url.search);
-    if (SOURCE_ORIGIN_PARAM in query) {
-      throw new Error(`Source origin is not allowed in ${input}`);
-    } else {
-      input = addParamToUrl(input, SOURCE_ORIGIN_PARAM, sourceOrigin);
-    }
-    return this.fetch_(input, opt_init).then(response => {
+    assert(!(SOURCE_ORIGIN_PARAM in query),
+        'Source origin is not allowed in %s', input);
+    input = addParamToUrl(input, SOURCE_ORIGIN_PARAM, sourceOrigin);
+    return this.fetch_(input, opt_init).catch(reason => {
+      assert(false, 'Fetch failed %s: %s', input, reason && reason.message);
+    }).then(response => {
       const allowSourceOriginHeader = response.headers.get(
           ALLOW_SOURCE_ORIGIN_HEADER);
       if (allowSourceOriginHeader) {
         // If the `AMP-Access-Control-Allow-Source-Origin` header is returned,
         // ensure that it's equal to the current source origin.
-        if (allowSourceOriginHeader != sourceOrigin) {
-          throw new Error(`Returned ${ALLOW_SOURCE_ORIGIN_HEADER} is not` +
+        assert(allowSourceOriginHeader == sourceOrigin,
+              `Returned ${ALLOW_SOURCE_ORIGIN_HEADER} is not` +
               ` equal to the current: ${allowSourceOriginHeader}` +
               ` vs ${sourceOrigin}`);
-        }
       } else if (opt_init && opt_init.requireAmpResponseSourceOrigin) {
         // If the `AMP-Access-Control-Allow-Source-Origin` header is not
         // returned but required, return error.
-        throw new Error(`Response must contain the` +
+        assert(false, `Response must contain the` +
             ` ${ALLOW_SOURCE_ORIGIN_HEADER} header`);
       }
       return response;
@@ -294,9 +293,8 @@ function createXhrRequest(method, url, init) {
  * @return {!FetchResponse}
  */
 function assertSuccess(response) {
-  if (response.status < 200 || response.status > 299) {
-    throw new Error(`HTTP error ${response.status}`);
-  }
+  assert(response.status >= 200 && response.status < 300,
+      'HTTP error %s', response.status);
   return response;
 }
 

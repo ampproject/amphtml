@@ -15,6 +15,7 @@
  */
 
 import {getServicePromise} from './service';
+import {all} from './promise';
 import {timer} from './timer';
 
 /**
@@ -46,7 +47,7 @@ export function waitForExtensions(win) {
   const extensions = includedExtensions(win);
 
   if (extensions.length) {
-    return timer.timeoutPromise(LOAD_TIMEOUT, Promise.all(extensions));
+    return timer.timeoutPromise(LOAD_TIMEOUT, all(extensions));
   }
 }
 

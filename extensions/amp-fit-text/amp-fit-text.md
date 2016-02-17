@@ -16,8 +16,50 @@ limitations under the License.
 
 ### <a name="amp-fit-text"></a> `amp-fit-text`
 
-The `amp-fit-text` component can expand or shrink its font size to fit the
-content within the space given to it.
+<table>
+  <tr>
+    <td width="40%"><strong>Description</strong></td>
+    <td>Expands or shrinks its font size to fit the content within the space given to it.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Availability</strong></td>
+    <td>Stable</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Required Script</strong></td>
+    <td><code>&lt;script async custom-element="amp-fit-text" src="https://cdn.ampproject.org/v0/amp-fit-text-0.1.js">&lt;/script></code></td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Examples</strong></td>
+    <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/everything.amp.html">everything.amp.html</a></td>
+  </tr>
+</table>
+
+The following lists validation errors specific to the `amp-fit-text` tag
+(see also `amp-fit-text` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii):
+
+<table>
+  <tr>
+    <th width="40%"><strong>Validation Error</strong></th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td width="40%"><a href="/docs/reference/validation_errors.html#tag-required-by-another-tag-is-missing">TAG_REQUIRED_BY_MISSING</a></td>
+    <td>Error thrown when required <code>amp-fit-text</code> extension <code>.js</code> script tag is missing or incorrect.</td>
+  </tr>
+  <tr>
+    <td width="40%"><a href="/docs/reference/validation_errors.html#implied-layout-isnt-supported-by-amp-tag">IMPLIED_LAYOUT_INVALID</a></td>
+    <td>Error thrown when implied layout is set to <code>CONTAINER</code>; this layout type isn't supported.</td>
+  </tr>
+  <tr>
+    <td width="40%"><a href="/docs/reference/validation_errors.html#specified-layout-isnt-supported-by-amp-tag">SPECIFIED_LAYOUT_INVALID</a></td>
+    <td>Error thrown when specified layout is set to <code>CONTAINER</code>; this layout type isn't supported.</td>
+  </tr>
+  <tr>
+    <td width="40%"><a href="/docs/reference/validation_errors.html#invalid-property-value">INVALID_PROPERTY_VALUE_IN_ATTR_VALUE</a></td>
+    <td>Error thrown when invalid value is given for attributes <code>height</code> or <code>width</code>. For example, <code>height=auto</code> triggers this error for all supported layout types, with the exception of <code>NODISPLAY</code>.</td>
+  </tr>
+</table>
 
 #### Behavior
 

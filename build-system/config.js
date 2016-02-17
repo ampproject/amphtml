@@ -138,7 +138,6 @@ module.exports = {
     '!validator/node_modules/**/*.*',
     '!build-system/tasks/presubmit-checks.js',
     '!build/polyfills.js',
-    '!build/polyfills/*.js',
     '!gulpfile.js',
     '!third_party/**/*.*',
   ],

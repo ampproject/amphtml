@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {all} from '../../../src/promise';
 import {assertHttpsUrl, addParamsToUrl} from '../../../src/url';
 import {assert} from '../../../src/asserts';
 import {cidFor} from '../../../src/cid';
@@ -299,7 +300,7 @@ export class UserNotificationManager {
     this.viewer_ = viewerFor(this.win_);
 
     /** @private {!Promise} */
-    this.managerReadyPromise_ = Promise.all([
+    this.managerReadyPromise_ = all([
       this.viewer_.whenFirstVisible(),
       whenDocumentReady(this.win_.document)
     ]);

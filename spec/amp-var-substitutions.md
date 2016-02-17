@@ -98,6 +98,15 @@ For instance:
 ```
 may make a request to something like `https://foo.com/pixel?host=pinterest.com`.
 
+### DOCUMENT_CHARSET
+
+Provides the character encoding of the current document.
+
+For instance:
+```html
+<amp-pixel src="https://foo.com/pixel?charSet=DOCUMENT_CHARSET"></amp-pixel>
+```
+
 ### DOCUMENT_REFERRER
 
 Use the special string `DOCUMENT_REFERRER` to add the current document's referrer to the URL.
@@ -116,6 +125,14 @@ For instance:
 <amp-pixel src="https://foo.com/pixel?title=TITLE"></amp-pixel>
 ```
 may make a request to something like `https://foo.com/pixel?title=Breaking%20News`.
+
+### VIEWER
+
+Provides an identifier for the viewer that contains the AMP document. Empty string is provided when the document is loaded directly in the browser or if the id is not found.
+For instance:
+```html
+<amp-pixel src="https://foo.com/pixel?viewer=VIEWER"></amp-pixel>
+```
 
 ## Performance
 
@@ -219,15 +236,6 @@ Provides a string representing the preferred language of the user, usually the l
 For instance:
 ```html
 <amp-pixel src="https://foo.com/pixel?lang=BROWSER_LANGUAGE"></amp-pixel>
-```
-
-### DOCUMENT_CHARSET
-
-Provides the character encoding of the current document.
-
-For instance:
-```html
-<amp-pixel src="https://foo.com/pixel?charSet=DOCUMENT_CHARSET"></amp-pixel>
 ```
 
 ### SCREEN_COLOR_DEPTH

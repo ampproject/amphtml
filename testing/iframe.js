@@ -105,9 +105,9 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
         });
       }
       win.onerror = function(message, file, line, col, error) {
-        reject(new Error('Error in frame: ' + message + '\n' +
+        throw new Error('Error in frame: ' + message + '\n' +
             file + ':' + line + '\n' +
-            (error ? error.stack : 'no stack')));
+            (error ? error.stack : 'no stack'));
       };
       let errors = [];
       win.console.error = function() {
@@ -140,11 +140,11 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
     let iframe = document.createElement('iframe');
     iframe.name = 'test_' + fixture + iframeCount++;
     iframe.onerror = function(event) {
-      reject(event.error);
+      throw event.error;
     };
     iframe.height = initialIframeHeight;
     iframe.width = 500;
-    if ('srcdoc' in iframe) {
+    if ('scrdoc' in iframe) {
       iframe.srcdoc = html;
       document.body.appendChild(iframe);
     } else {
