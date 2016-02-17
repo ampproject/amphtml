@@ -33,6 +33,7 @@
     "chai-as-promised": "5.2.0",
     "connect": "3.3.4",
     "connect-livereload": "0.5.4",
+    "core-js": "1.2.1",
     "cssnano": "3.3.2",
     "del": "2.2.0",
     "eslint": "1.10.3",
