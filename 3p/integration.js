@@ -28,6 +28,7 @@ import {a9} from '../ads/a9';
 import {adform} from '../ads/adform';
 import {adreactor} from '../ads/adreactor';
 import {adsense} from '../ads/adsense';
+import {mediaimpact} from '../ads/mediaimpact';
 import {adtech} from '../ads/adtech';
 import {plista} from '../ads/plista';
 import {doubleclick} from '../ads/doubleclick';
@@ -61,6 +62,7 @@ register('plista', plista);
 register('doubleclick', doubleclick);
 register('taboola', taboola);
 register('dotandads', dotandads);
+register('mediaimpact', mediaimpact);
 register('yieldmo', yieldmo);
 register('_ping_', function(win, data) {
   win.document.getElementById('c').textContent = data.ping;
