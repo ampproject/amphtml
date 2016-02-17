@@ -81,7 +81,7 @@ afterEach(() => {
     try {
       const element = cleanup[i];
       if (element.tagName == 'IFRAME') {
-        /*setTimeout(() => {
+        setTimeout(() => {
           // Wait a bit until removing iframes. The reason is that Safari has
           // a race where this sometimes runs too early and the test
           // is actually still running
@@ -89,9 +89,9 @@ afterEach(() => {
             removeElement(element);
           } catch (e) {
             // This sometimes fails for unknown reasons.
-            console./*OK/log(e);
+            console./*OK*/log(e);
           }
-        }, 1000);*/
+        }, 1000);
       } else {
         removeElement(element);
       }
