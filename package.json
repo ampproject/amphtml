@@ -19,7 +19,7 @@
     "dist": "gulp dist"
   },
   "dependencies": {
-    "promise-pjs": "^0.2.1",
+    "promise-pjs": "^0.2.3",
     "document-register-element": "0.5.4"
   },
   "devDependencies": {
