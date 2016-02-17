@@ -15,4 +15,4 @@
  */
 
 import 'document-register-element/build/document-register-element.max';
-import './polyfills/math-sign';
+import './custom-core-js-shim';
