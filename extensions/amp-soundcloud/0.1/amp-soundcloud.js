@@ -24,11 +24,8 @@
  *   height=166
  *   data-trackid="243169232"
  *   data-color="ff5500"
- *   data-autoplay="true"
  *   layout="fixed-height">
  * </amp-soundcloud>
- *
- *
  */
 
 import {Layout} from '../../../src/layout';
@@ -65,7 +62,7 @@ class AmpSoundcloud extends AMP.BaseElement {
     iframe.src = "https://w.soundcloud.com/player/?" +
       "url=" + encodeURIComponent(url + trackid);
 
-    if (visual) {
+    if (visual === 'true') {
       iframe.src += "&visual=true";
     } else if (color) {
       iframe.src += "&color=" + encodeURIComponent(color);
@@ -81,7 +78,7 @@ class AmpSoundcloud extends AMP.BaseElement {
     return loadPromise(iframe);
   }
 
-    /** @override */
+  /** @override */
   documentInactiveCallback() {
     if (this.iframe_ && this.iframe_.contentWindow) {
       this.iframe_.contentWindow./*OK*/postMessage(
