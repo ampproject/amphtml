@@ -17,6 +17,7 @@
 // This must load before all other tests.
 import '../third_party/babel/custom-babel-helpers';
 import '../src/polyfills';
+import {removeElement} from '../src/dom';
 import {adopt} from '../src/runtime';
 
 adopt(window);
@@ -84,10 +85,15 @@ afterEach(() => {
           // Wait a bit until removing iframes. The reason is that Safari has
           // a race where this sometimes runs too early and the test
           // is actually still running
-          element.parentNode.removeChild(element);
+          try {
+            removeElement(element);
+          } catch (e) {
+            // This sometimes fails for unknown reasons.
+            console./*OK*/log(e);
+          }
         }, 1000);
       } else {
-        element.parentNode.removeChild(element);
+        removeElement(element);
       }
     } catch (e) {
       // This sometimes fails for unknown reasons.
