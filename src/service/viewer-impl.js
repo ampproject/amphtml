@@ -115,7 +115,7 @@ export class Viewer {
     this.isEmbedded_ = (this.win.parent && this.win.parent != this.win);
 
     /** @const {!DocumentState} */
-    this.docState_ = documentStateFor(window);
+    this.docState_ = documentStateFor(this.win);
 
     /** @private {boolean} */
     this.isRuntimeOn_ = true;
