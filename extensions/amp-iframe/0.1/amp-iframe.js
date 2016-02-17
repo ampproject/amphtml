@@ -21,12 +21,19 @@ import {loadPromise} from '../../../src/event-helper';
 import {log} from '../../../src/log';
 import {parseUrl} from '../../../src/url';
 import {removeElement} from '../../../src/dom';
+import {timer} from '../../../src/timer';
 
 /** @const {string} */
 const TAG_ = 'AmpIframe';
 
 /** @type {number}  */
 let count = 0;
+
+/** @type {number}  */
+let trackingIframeCount = 0;
+
+/** @type {number}  */
+let trackingIframeTimeout = 5000;
 
 /** @const */
 const assert = AMP.assert;
@@ -179,6 +186,22 @@ export class AmpIframe extends AMP.BaseElement {
       return Promise.resolve();
     }
 
+    const isTracking = this.looksLikeTrackingIframe_();
+    if (isTracking) {
+      trackingIframeCount++;
+      if (trackingIframeCount > 1) {
+        console/*OK*/.error('Only 1 analytics/tracking iframe allowed per ' +
+            'page. Please use amp-analytics instead or file a GitHub issue ' +
+            'for your use case: ' +
+            'https://github.com/ampproject/amphtml/issues/new');
+        return Promise.resolve();
+      }
+      console/*OK*/.error('It looks like this page contains an iframe that' +
+          ' is used for tracking or analytics purposes. Please use ' +
+          'amp-analytics instead. This usage of amp-iframe will break ' +
+          'in the future');
+    }
+
     const width = this.element.getAttribute('width');
     const height = this.element.getAttribute('height');
     const iframe = document.createElement('iframe');
@@ -211,14 +234,26 @@ export class AmpIframe extends AMP.BaseElement {
     setSandbox(this.element, iframe, this.sandbox_);
     iframe.src = this.iframeSrc;
     this.element.appendChild(makeIOsScrollable(this.element, iframe));
-    /** @private {!IntersectionObserver} */
-    this.intersectionObserver_ =
-        new IntersectionObserver(this, this.iframe_);
+    if (!isTracking) {
+      /** @private {!IntersectionObserver} */
+      this.intersectionObserver_ =
+          new IntersectionObserver(this, this.iframe_);
+    }
 
     iframe.onload = () => {
       // Chrome does not reflect the iframe readystate.
       iframe.readyState = 'complete';
       this.activateIframe_();
+      if (isTracking) {
+        timer.promise(trackingIframeTimeout).then(() => {
+          if (iframe.parentNode) {
+            iframe.parentNode.removeChild(iframe);
+          }
+          this.element.setAttribute('amp-removed', '');
+          this.iframe_ = null;
+          this.iframeSrc = null;
+        });
+      }
     };
 
     listen(iframe, 'embed-size', data => {
@@ -275,6 +310,15 @@ export class AmpIframe extends AMP.BaseElement {
     }
     this.attemptChangeHeight(newHeight);
   }
+
+  looksLikeTrackingIframe_() {
+    const box = this.element.getLayoutBox();
+    // This heuristic is subject to change.
+    if (box.width > 10 && box.height > 10) {
+      return false;
+    }
+    return true;
+  }
 };
 
 /**
@@ -304,6 +348,13 @@ function makeIOsScrollable(element, iframe) {
     return wrapper;
   }
   return iframe;
+}
+
+/**
+ * @param {number} ms
+ */
+export function setTrackingIframeTimeoutForTesting(ms) {
+  trackingIframeTimeout = ms;
 }
 
 AMP.registerElement('amp-iframe', AmpIframe);

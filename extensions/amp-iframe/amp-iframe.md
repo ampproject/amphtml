@@ -213,3 +213,11 @@ window.addEventListener('message', function(event) {
 ```
 
 The intersection message would be sent by the parent to the iframe when the iframe moves in or out of the viewport (or is partially visibile), when the iframe is scrolled or resized.
+
+#### Tracking/Analytics iframes
+
+We strongly recommend using [`amp-analytics`](../amp-analytics/amp-analytics.md) for analytics purposes, because it is significantly more robust, complete and efficient solution and can be configured for a wide range of analytics vendors.
+
+AMP only allows a single iframe, that is used for analytics and tracking purposes, per page. To conserve resources these iframes will be removed from the DOM 5 seconds after they loaded, which should be sufficient time to complete whatever work is needed to be done.
+
+Iframes are identified as tracking/analytics iframes if they appear to serve no direct user purpose such as being invisible or small.

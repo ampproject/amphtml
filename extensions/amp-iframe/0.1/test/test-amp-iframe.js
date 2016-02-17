@@ -15,7 +15,7 @@
  */
 
 import {Timer} from '../../../../src/timer';
-import {AmpIframe} from '../amp-iframe';
+import {AmpIframe, setTrackingIframeTimeoutForTesting} from '../amp-iframe';
 import {adopt} from '../../../../src/runtime';
 import {createIframePromise, pollForLayout, poll}
     from '../../../../testing/iframe';
@@ -44,6 +44,7 @@ describe('amp-iframe', () => {
         ranJs++;
       }
     };
+    setTrackingIframeTimeoutForTesting(20);
   });
 
   afterEach(() => {
@@ -56,7 +57,8 @@ describe('amp-iframe', () => {
       return ranJs > 0;
     }, undefined, 300);
   }
-  function getAmpIframe(attributes, opt_top, opt_height, opt_translateY) {
+  function getAmpIframe(attributes, opt_top, opt_height, opt_translateY,
+      opt_onAppend) {
     return createIframePromise().then(function(iframe) {
       const i = iframe.doc.createElement('amp-iframe');
       for (const key in attributes) {
@@ -85,6 +87,9 @@ describe('amp-iframe', () => {
         i.appendChild(img);
       }
       iframe.doc.body.appendChild(i);
+      if (opt_onAppend) {
+        opt_onAppend(iframe.doc);
+      }
       // Wait an event loop for the iframe to be created.
       return pollForLayout(iframe.win, 1).then(() => {
         const created = i.querySelector('iframe');
@@ -111,12 +116,13 @@ describe('amp-iframe', () => {
     });
   }
 
-  function getAmpIframeObject() {
-    return getAmpIframe({
+  function getAmpIframeObject(opt_args) {
+    const args = opt_args || {
       src: iframeSrc,
       width: 100,
       height: 100
-    }).then(amp => {
+    };
+    return getAmpIframe(args).then(amp => {
       return amp.container.implementation_;
     });
   }
@@ -127,10 +133,12 @@ describe('amp-iframe', () => {
       width: 100,
       height: 100
     }).then(amp => {
+      const impl = amp.container.implementation_;
       expect(amp.iframe).to.be.instanceof(Element);
       expect(amp.iframe.src).to.equal(iframeSrc);
       expect(amp.iframe.getAttribute('sandbox')).to.equal('');
       expect(amp.iframe.parentNode).to.equal(amp.scrollWrapper);
+      expect(impl.looksLikeTrackingIframe_()).to.be.false;
       return timer.promise(50).then(() => {
         expect(ranJs).to.equal(0);
       });
@@ -396,6 +404,57 @@ describe('amp-iframe', () => {
         expect(impl.placeholder_).to.be.null;
         expect(activateIframeSpy_.callCount).to.equal(2);
       });
+    });
+  });
+
+  it('should detect tracking iframes', () => {
+    const attributes = {
+      src: clickableIframeSrc,
+      sandbox: 'allow-scripts allow-same-origin',
+      width: 10,
+      height: 10,
+      poster: 'https://i.ytimg.com/vi/cMcCTVAFBWM/hqdefault.jpg'
+    };
+    return getAmpIframe(attributes, null, null, null, doc => {
+      const i = doc.createElement('amp-iframe');
+      for (const key in attributes) {
+        i.setAttribute(key, attributes[key]);
+      }
+      i.style.height = '10px';
+      i.style.width = '10px';
+      i.style.display = 'block';
+      i.style.position = 'absolute';
+      i.style.top = '600px';
+      doc.body.appendChild(i);
+    }).then(iframe => {
+      const impl = iframe.container.implementation_;
+      const doc = impl.element.ownerDocument;
+      expect(impl.looksLikeTrackingIframe_()).to.be.true;
+      return pollForLayout(doc.defaultView, 2).then(() => {
+        const iframes = doc.querySelectorAll('amp-iframe');
+        expect(iframes[0].implementation_
+            .looksLikeTrackingIframe_()).to.be.true;
+        expect(iframes[1].implementation_
+            .looksLikeTrackingIframe_()).to.be.true;
+        expect(doc.querySelectorAll('iframe,[amp-removed]')).to.have.length(1);
+        return poll('iframe removal', () => {
+          return doc.querySelectorAll('[amp-removed]').length == 1;
+        }).then(() => {
+          expect(doc.querySelectorAll('iframe')).to.have.length(0);
+        });
+      });
+    });
+  });
+
+  it('should detect non tracking frames', () => {
+    return getAmpIframeObject({
+      src: clickableIframeSrc,
+      sandbox: 'allow-scripts allow-same-origin',
+      width: 11,
+      height: 11,
+      poster: 'https://i.ytimg.com/vi/cMcCTVAFBWM/hqdefault.jpg'
+    }).then(impl => {
+      expect(impl.looksLikeTrackingIframe_()).to.be.false;
     });
   });
 });
