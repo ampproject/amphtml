@@ -248,6 +248,8 @@ var forbiddenTerms = {
   'Array\\.of': es6polyfill,
   // These currently depend on core-js/modules/web.dom.iterable which
   // we don't want. That decision could be reconsidered.
+  'Promise\\.all': es6polyfill,
+  'Promise\\.race': es6polyfill,
   '\\.startsWith': {
     message: es6polyfill,
     whitelist: [
