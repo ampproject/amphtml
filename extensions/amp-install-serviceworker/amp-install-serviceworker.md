@@ -83,7 +83,7 @@ Example
 
   <amp-install-serviceworker
       src="https://www.your-domain.com/serviceworker.js"
-      layout="nodisplay"
+      layout="nodisplay">
   </amp-install-serviceworker>
 
 ```
