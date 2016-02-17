@@ -43,6 +43,7 @@ import {assert} from '../src/asserts';
 import {taboola} from '../ads/taboola';
 import {smartadserver} from '../ads/smartadserver';
 import {revcontent} from '../ads/revcontent';
+import {openadstream} from '../ads/openadstream';
 
 /**
  * Whether the embed type may be used with amp-embed tag.
@@ -69,6 +70,7 @@ register('twitter', twitter);
 register('facebook', facebook);
 register('smartadserver', smartadserver);
 register('revcontent', revcontent);
+register('openadstream', openadstream);
 
 /**
  * Visible for testing.
