@@ -164,6 +164,12 @@ Type attribute value: `quantcast`
 
 Adds support for Quantcast Measurement. More details for adding Quantcast Measurement can be found at [quantcast.com](https://www.quantcast.com/help/guides/)
 
+##### SimpleReach
+
+Type attribute value: `simplereach`
+
+Adds support for SimpleReach.  Configuration details can be found at [simplereach.com/docs](http://docs.simplereach.com/dev-guide/implementation/google-amp-implementation)
+
 #### <a name="attributes"></a>Attributes
 
   - `type` See [Analytics vendors](#analytics-vendors)

@@ -325,8 +325,50 @@ export const ANALYTICS_CONFIG = {
         'request': 'pageview'
       }
     }
-  }
+  },
 
+  'simplereach': {
+    'vars': {
+      'pid': '',
+      'published_at': '',
+      'authors': [],
+      'channels': [],
+      'tags': []
+    },
+    'requests': {
+      'host': 'https://edge.simplereach.com',
+      'baseParams': 'amp=true' +
+        '&pid=${pid}' +
+        '&title=${title}' +
+        '&url=${canonicalUrl}' +
+        '&date=${published_at}' +
+        '&authors=${authors}' +
+        '&channels=${categories}' +
+        '&tags=${tags}' +
+        '&referrer=${documentReferrer}' +
+        '&page_url=${sourceUrl}' +
+        '&user_id=${clientId(amp_id)}' +
+        '&domain=${canonicalHost}',
+      'visible': '${host}/n?${baseParams}',
+      'timer': '${host}/t?${baseParams}' +
+        '&t=5000' +
+        '&e=5000'
+    },
+    'triggers': {
+      'visible': {
+        'on': 'visible',
+        'request': 'visible'
+      },
+      'timer': {
+        'on': 'timer',
+        'timerSpec': {
+          'interval': 5,
+          'max-timer-length': 1200
+        },
+        'request': 'timer'
+      }
+    }
+  }
 };
 ANALYTICS_CONFIG['infonline']['triggers']['pageview']['iframe' +
 /* TEMPORARY EXCEPTION */ 'Ping'] = true;
