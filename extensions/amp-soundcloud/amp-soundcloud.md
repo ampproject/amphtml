@@ -34,19 +34,29 @@ Example Classic Mode:
     data-color="ff5500"></amp-soundcloud>
 ```
 
-#### Attributes
+#### Required attributes
 
 **data-trackid**
 
-The ID of the track.
+The ID of the track, an integer.
+
+#### Optional attributes
 
 **data-visual**
 
-Displays full width "Visual" mode.
+Value: `"true"` or `"false"`
+
+Default value: `"false"`
+
+If set to true, displays full width "Visual" mode. Otherwise, displays "Classic"
+mode.
 
 **data-color**
 
-Custom color override. Only works with "Classic" Mode. Will be ignored in "Visual" Mode.
+Value: Hexadecimal color value (without the leading #).
+E.g. `data-color="e540ff"`
+
+Custom color override for the "Classic" mode. Ignored in "Visual" mode.
 
 **width and height**
-Layout is `fixed-height` and will fill all the available horizontal space. This is ideal for `classic mode`, but for `visual-mode`, height is recommended to be 300px, 450px or 600px, as per Soundcloud embed code. This will allow the clip's internal elements to resize properly on mobile.
+Layout is `fixed-height` and will fill all the available horizontal space. This is ideal for "Classic" mode, but for "Visual", height is recommended to be 300px, 450px or 600px, as per Soundcloud embed code. This will allow the clip's internal elements to resize properly on mobile.

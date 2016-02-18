@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {setStyles} from './style';
+import {setStyles, setStyle} from './style';
+import {platformFor} from './platform';
 
 
 /**
@@ -34,6 +35,9 @@ import {setStyles} from './style';
  *     after.
  */
 export function installStyles(doc, cssText, cb, opt_isRuntimeCss) {
+  if (platformFor(doc.defaultView).isIos()) {
+    setStyle(doc.documentElement, 'cursor', 'pointer');
+  }
   const style = doc.createElement('style');
   style.textContent = cssText;
   let afterElement = null;

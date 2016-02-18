@@ -958,6 +958,7 @@ describe('AccessService pingback', () => {
 describe('AccessService login', () => {
 
   let sandbox;
+  let clock;
   let configElement;
   let cidMock;
   let analyticsMock;
@@ -965,6 +966,7 @@ describe('AccessService login', () => {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
+    clock = sandbox.useFakeTimers();
 
     markElementScheduledForTesting(window, 'amp-analytics');
     installCidService(window);
@@ -1126,16 +1128,35 @@ describe('AccessService login', () => {
     });
   });
 
-  it('should run login only once at a time', () => {
+  it('should block login for 1 second', () => {
+    let p1Reject;
+    const p1Promise = new Promise((unusedResolve, reject) => {
+      p1Reject = reject;
+    });
     service.runAuthorization_ = sandbox.spy();
-    serviceMock.expects('openLoginDialog_')
-        .withExactArgs('https://acme.com/l?rid=R')
-        .returns(new Promise(() => {}))
-        .once();
+    const openLoginDialogStub = sandbox.stub(service, 'openLoginDialog_');
+    openLoginDialogStub.onCall(0).returns(p1Promise);
+    openLoginDialogStub.onCall(1).returns(new Promise(() => {}));
+    openLoginDialogStub.onCall(2).throws();
     const p1 = service.login();
+
+    // The immediate second attempt is blocked.
     const p2 = service.login();
-    expect(p1).to.equal(service.loginPromise_);
+    expect(service.loginPromise_).to.equal(p1);
     expect(p2).to.equal(p1);
+
+    // The delayed third attempt succeeds after 1 second.
+    clock.tick(1001);
+    const p3 = service.login();
+    expect(service.loginPromise_).to.equal(p3);
+    expect(p3).to.not.equal(p1);
+
+    // Rejecting the first login attempt does not reject the current promise.
+    p1Reject();
+    return p1Promise.then(() => 'SUCCESS', () => 'ERROR').then(res => {
+      expect(res).to.equal('ERROR');
+      expect(service.loginPromise_).to.equal(p3);
+    });
   });
 });
 

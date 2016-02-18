@@ -30,10 +30,8 @@ describe('amp-video', () => {
     sandbox = null;
   });
 
-  function getFooVideoSrc(mediatype, opt_http) {
-    // assumes no optional params
-    return (opt_http ? 'http' : 'https') + '://someHost/foo.' +
-        mediatype.slice(mediatype.indexOf('/') + 1);
+  function getFooVideoSrc(mediatype) {
+    return '//someHost/foo.' + mediatype.slice(mediatype.indexOf('/') + 1); // assumes no optional params
   }
 
   function getVideo(attributes, children, opt_beforeLayoutCallback) {
@@ -115,8 +113,7 @@ describe('amp-video', () => {
         expect(video.children.item(i).hasAttribute('src')).to.be.true;
         expect(video.children.item(i).getAttribute('src'))
             .to.equal(getFooVideoSrc(mediatype));
-        expect(video.children.item(i).getAttribute('type')).to
-            .equal(mediatype);
+        expect(video.children.item(i).getAttribute('type')).to.equal(mediatype);
       }
     });
   });
@@ -127,7 +124,7 @@ describe('amp-video', () => {
     for (let i = 0; i < mediatypes.length; i++) {
       const mediatype = mediatypes[i];
       const source = document.createElement('source');
-      source.setAttribute('src', getFooVideoSrc(mediatype, /*http*/ true));
+      source.setAttribute('src', 'http:' + getFooVideoSrc(mediatype));
       source.setAttribute('type', mediatype);
       sources.push(source);
     }
@@ -217,8 +214,7 @@ describe('amp-video', () => {
         expect(video.children.item(i).hasAttribute('src')).to.be.true;
         expect(video.children.item(i).getAttribute('src'))
             .to.equal(getFooVideoSrc(mediatype));
-        expect(video.children.item(i).getAttribute('type'))
-            .to.equal(mediatype);
+        expect(video.children.item(i).getAttribute('type')).to.equal(mediatype);
       }
     });
   });
