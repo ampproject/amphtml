@@ -38,7 +38,8 @@ describe('amp-analytics', function() {
   let uidService;
 
   const jsonMockResponses = {
-    'config1': '{"vars": {"title": "remote"}}'
+    'config1': '{"vars": {"title": "remote"}}',
+    'https://foo/Test%20Title': '{"vars": {"title": "magic"}}'
   };
 
   beforeEach(() => {
@@ -585,6 +586,18 @@ describe('amp-analytics', function() {
     });
     return waitForSendRequest(analytics).then(() => {
       expect(sendRequestSpy.args[0][0]).to.equal('https://example.com/remote');
+    });
+  });
+
+  it('expands urls in config request', () => {
+    const analytics = getAnalyticsTag({
+      'requests': {'foo': 'https://example.com/${title}'},
+      'triggers': [{'on': 'visible', 'request': 'foo'}]
+    }, {
+      'config': 'https://foo/TITLE'
+    });
+    return waitForSendRequest(analytics).then(() => {
+      expect(sendRequestSpy.args[0][0]).to.equal('https://example.com/magic');
     });
   });
 

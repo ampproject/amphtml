@@ -321,8 +321,8 @@ class UrlReplacements {
       return loadPromise(this.win_).then(() => {
         metric = timingInfo[endEvent] - timingInfo[startEvent];
         return (isNaN(metric) || metric == Infinity || metric < 0)
-            ? Promise.resolve()
-            : Promise.resolve(String(metric));
+            ? undefined
+            : String(metric);
       });
     } else {
       return Promise.resolve(String(metric));

@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {all} from '../../../src/promise';
 import {actionServiceFor} from '../../../src/action';
 import {analyticsFor} from '../../../src/analytics';
 import {assert, assertEnumValue} from '../../../src/asserts';
@@ -441,7 +440,7 @@ export class AccessService {
     for (let i = 0; i < elements.length; i++) {
       promises.push(this.applyAuthorizationToElement_(elements[i], response));
     }
-    return all(promises);
+    return Promise.all(promises);
   }
 
   /**
@@ -505,7 +504,7 @@ export class AccessService {
         promises.push(p);
       }
     }
-    return promises.length > 0 ? all(promises) : null;
+    return promises.length > 0 ? Promise.all(promises) : null;
   }
 
   /**

@@ -167,7 +167,7 @@ Adds support for Quantcast Measurement. More details for adding Quantcast Measur
 #### <a name="attributes"></a>Attributes
 
   - `type` See [Analytics vendors](#analytics-vendors)
-  - `config` Optional attribute. This attribute can be used to load a configuration from a specified remote URL. The URL specified here should use https scheme. See also `data-include-credentials` attribute below.
+  - `config` Optional attribute. This attribute can be used to load a configuration from a specified remote URL. The URL specified here should use https scheme. See also `data-include-credentials` attribute below. The URL may include [AMP URL vars](../../spec/amp-var-substitutions.md).
 
     ```
     <amp-analytics config="https://example.com/analytics.config.json"></amp-analytics>
