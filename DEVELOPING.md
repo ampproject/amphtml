@@ -128,13 +128,4 @@ In particular, we try to maintain "it might not be perfect but isn't broken"-sup
 
 We also recommend scanning the [spec](spec/). The non-element part should help understand some of the design aspects.
 
-## AMP Dev Channel (Experimental)
-
-AMP Dev Channel is a way to opt a browser into using a newer version of the AMP JS libraries.
-
-This release may be less stable and it may contain features not available to all users. Opt into this option if you'd like to help test new versions of AMP, report bugs or build documents that require a new feature that is not yet available to everyone.
-
-To opt your browser into the AMP Dev Channel, go to [the AMP experiments page](https://cdn.ampproject.org/experiments.html) and activate the "AMP Dev Channel" experiment.
-
-
 ## [Code of conduct](CODE_OF_CONDUCT.md)
