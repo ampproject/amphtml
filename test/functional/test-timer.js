@@ -99,7 +99,7 @@ describe('Timer', () => {
     }).catch(reason => {
       c++;
       expect(c).to.equal(1);
-      expect(reason).to.equal('timeout');
+      expect(reason.message).to.equal('timeout');
     });
   });
 
@@ -131,7 +131,7 @@ describe('Timer', () => {
     }).catch(reason => {
       c++;
       expect(c).to.equal(1);
-      expect(reason).to.equal('timeout');
+      expect(reason.message).to.equal('timeout');
     });
   });
 });
