@@ -76,7 +76,7 @@ sinon.sandbox.create = function(config) {
 // Global cleanup of tags added during tests. Cool to add more
 // to selector.
 afterEach(() => {
-  const cleanup = document.querySelectorAll('link,meta,iframe');
+  const cleanup = document.querySelectorAll('link,meta');
   for (let i = 0; i < cleanup.length; i++) {
     try {
       const element = cleanup[i];
