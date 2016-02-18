@@ -541,11 +541,6 @@ export class Resources {
       log.fine(TAG_, 'runtime is off');
       return;
     }
-    // Sometimes in Safari these passes run after the document has already been
-    // destroyed. To avoid errors we bail out here.
-    if (!this.win.document) {
-      return;
-    }
 
     const prevVisible = this.visible_;
     this.visible_ = this.viewer_.isVisible();
