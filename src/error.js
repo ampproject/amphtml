@@ -36,6 +36,9 @@ export function reportError(error, opt_associatedElement) {
   if (!window.console) {
     return;
   }
+  if (!error) {
+    error = new Error('no error supplied');
+  }
   if (error.reported) {
     return;
   }
@@ -75,7 +78,7 @@ export function reportError(error, opt_associatedElement) {
 export function installErrorReporting(win) {
   win.onerror = reportErrorToServer;
   win.addEventListener('unhandledrejection', event => {
-    reportError(event.reason);
+    reportError(event.reason || new Error('rejected promise ' + event));
   });
 }
 
