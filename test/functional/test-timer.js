@@ -27,6 +27,7 @@ describe('Timer', () => {
     const WindowApi = function() {};
     WindowApi.prototype.setTimeout = function(unusedCallback, unusedDelay) {};
     WindowApi.prototype.clearTimeout = function(unusedTimerId) {};
+    WindowApi.prototype.document = {};
     const windowApi = new WindowApi();
     windowMock = sandbox.mock(windowApi);
     timer = new Timer(windowApi);
