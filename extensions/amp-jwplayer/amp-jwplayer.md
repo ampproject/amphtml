@@ -88,6 +88,18 @@ Example:
 </amp-jwplayer>
 ```
 
+Non-responsive layout is also supported.
+
+Example:
+
+```html
+<amp-jwplayer
+    data-player-id="aBcD1234"
+    data-playlist-id="5678WxYz"
+    width="160" height="90">
+</amp-jwplayer>
+```
+
 #### Attributes
 
 **data-player-id**
