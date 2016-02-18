@@ -41,11 +41,15 @@ and merge would have exited with \"Already-up-to-date.\"
 
 cd ${MERGE_FOLDER}
 
-https push:
+https push (needs auth login entry):
 git push https://github.com/ampproject/amphtml.git canary
 git push https://github.com/ampproject/amphtml.git release
 
 ssh push:
 git push git@github.com:ampproject/amphtml.git canary
 git push git@github.com:ampproject/amphtml.git release
+
+
+single line ssh push (if both branches can be pushed):
+cd ${MERGE_FOLDER} && git push git@github.com:ampproject/amphtml.git canary && git push git@github.com:ampproject/amphtml.git release
 "

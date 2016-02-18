@@ -285,11 +285,22 @@ See the [AMP Layout System](./amp-html-layout.md) for details about the layout s
 
 The `on` attribute is used to install event handlers on elements. The events that are supported depend on the element.
 
-The value for the syntax is a simple domain specific language of the form `eventName:targetId[.methodName]`.
+The value for the syntax is a simple domain specific language of the form:
+
+```
+eventName:targetId[.methodName[(arg1=value, arg2=value)]]
+```
+
 Example: `on="tap:fooId.showLightbox"`
 
 If `methodName` is omitted the default method is executed if defined for the element.
 Example: `on="tap:fooId"`
+
+Some actions, if documented, may accept arguments. The arguments defined in the parenthesis in the `key=value` notation. The accepted values are:
+ - simple unquoted strings: `simple-value`;
+ - quoted strings: `"string value"` or `'string value'`;
+ - boolean values: `true` or `false`;
+ - numbers: `11` or `1.1`.
 
 
 ### Extended components
