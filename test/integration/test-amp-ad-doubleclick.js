@@ -56,8 +56,7 @@ describe('Rendering of one ad', () => {
       // we always check there.
       if (context.referrer !== '' ||
           (navigator.userAgent.match(/Chrome/) && !isEdge)) {
-        expect(context.referrer).to.equal('http://localhost:' + location.port +
-            '/context.html');
+        expect(context.referrer).to.contain('http://localhost:' + location.port);
       }
       expect(context.pageViewId).to.be.greaterThan(0);
       expect(context.data.tagForChildDirectedTreatment).to.be.false;

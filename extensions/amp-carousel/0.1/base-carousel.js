@@ -93,7 +93,6 @@ export class BaseCarousel extends AMP.BaseElement {
    */
   go(dir, animate) {
     this.goCallback(dir, animate);
-    this.setControlsState();
   }
 
   /**
