@@ -73,6 +73,9 @@ export class Timer {
       // they are predictably fast.
       const id = 'p' + this.taskCount_++;
       this.resolved_.then(() => {
+        if (!this.win.document) {
+          return;  // Do not fire callback if document has been destroyed.
+        }
         if (this.canceled_[id]) {
           delete this.canceled_[id];
           return;
