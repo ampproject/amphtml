@@ -130,6 +130,9 @@ export function getErrorReportUrl(message, filename, line, col, error) {
   if (window.context && window.context.location) {
     url += '&3p=1';
   }
+  if (window.AMP_CONFIG && window.AMP_CONFIG.canary) {
+    url += '&ca=1';
+  }
 
   if (error) {
     const tagName = error && error.associatedElement
