@@ -196,10 +196,6 @@ export class AmpIframe extends AMP.BaseElement {
             'https://github.com/ampproject/amphtml/issues/new');
         return Promise.resolve();
       }
-      console/*OK*/.error('It looks like this page contains an iframe that' +
-          ' is used for tracking or analytics purposes. Please use ' +
-          'amp-analytics instead. This usage of amp-iframe will break ' +
-          'in the future');
     }
 
     const width = this.element.getAttribute('width');
@@ -246,9 +242,7 @@ export class AmpIframe extends AMP.BaseElement {
       this.activateIframe_();
       if (isTracking) {
         timer.promise(trackingIframeTimeout).then(() => {
-          if (iframe.parentNode) {
-            iframe.parentNode.removeChild(iframe);
-          }
+          removeElement(iframe);
           this.element.setAttribute('amp-removed', '');
           this.iframe_ = null;
           this.iframeSrc = null;
@@ -311,6 +305,10 @@ export class AmpIframe extends AMP.BaseElement {
     this.attemptChangeHeight(newHeight);
   }
 
+  /**
+   * Whether this is iframe may have tracking as its primary use case.
+   * @return {boolean}
+   */
   looksLikeTrackingIframe_() {
     const box = this.element.getLayoutBox();
     // This heuristic is subject to change.
