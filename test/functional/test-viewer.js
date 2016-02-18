@@ -16,7 +16,6 @@
 
 import {Viewer} from '../../src/service/viewer-impl';
 import {platform} from '../../src/platform';
-import {all} from '../../src/promise';
 import * as sinon from 'sinon';
 
 
@@ -192,12 +191,25 @@ describe('Viewer', () => {
     }, 'https://acme.com');
     viewer.broadcast({type: 'type1'});
     expect(viewer.messageQueue_.length).to.equal(0);
-    return viewer.messagingReadyPromise_.then(() => {
+    return viewer.messagingMaybePromise_.then(() => {
       expect(delivered.length).to.equal(1);
       const m = delivered[0];
       expect(m.eventType).to.equal('broadcast');
       expect(m.data.type).to.equal('type1');
     });
+  });
+
+  it('should post broadcast event but not fail w/o messaging', () => {
+    viewer.broadcast({type: 'type1'});
+    expect(viewer.messageQueue_.length).to.equal(0);
+    clock.tick(5001);
+    return viewer.messagingReadyPromise_.then(() => 'OK', () => 'ERROR')
+        .then(res => {
+          expect(res).to.equal('ERROR');
+          return viewer.messagingMaybePromise_;
+        }).then(() => {
+          expect(viewer.messageQueue_.length).to.equal(0);
+        });
   });
 
   it('should queue non-dupe events', () => {
@@ -253,7 +265,7 @@ describe('Viewer', () => {
       expect(m1Resolved).to.be.false;
       expect(m2Resolved).to.be.false;
 
-      return all([m1, m2]);
+      return Promise.all([m1, m2]);
     }).then(() => {
       // All resolved now.
       expect(m1Resolved).to.be.true;
@@ -278,9 +290,8 @@ describe('Viewer', () => {
       expect(m2Resolved).to.be.false;
 
       // Timeout.
-      expect(timeouts).to.have.length(1);
-      timeouts[0]();
-      return all([m1, m2]);
+      clock.tick(5001);
+      return Promise.all([m1, m2]);
     }).then(() => {
       throw new Error('must never be here');
     }, () => {
