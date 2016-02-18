@@ -372,9 +372,9 @@ https://publisher.com/amp-login.html?
 Notice that the “return” URL parameter is added by the AMP Runtime automatically if `RETURN_URL` substitution is not
 specified. Once Login Page completes its work, it must redirect back to the specified “Return URL” with the following format:
 ```
-RETURN_URL#status=true|false
+RETURN_URL#success=true|false
 ```
-Notice the use of a URL hash parameter “status”. The value is either “true” or “false” depending on whether the login succeeds or is abandoned. Ideally the Login Page, when possible, will send the signal in cases of both success or failure.
+Notice the use of a URL hash parameter “success”. The value is either “true” or “false” depending on whether the login succeeds or is abandoned. Ideally the Login Page, when possible, will send the signal in cases of both success or failure.
 
 #Integration with *amp-analytics*
 
