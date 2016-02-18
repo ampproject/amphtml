@@ -59,17 +59,19 @@ The following lists validation errors specific to the `amp-user-notification` ta
 
 #### Usage
 
-`amp-user-notification` requires 2 URLs which can be provided by
-the `data-show-if-href` and `data-dismiss-href` attributes. An `id` is required
+An `id` is required
 as multiple `amp-user-notification` elements are allowed and the
-id is used to differentiate them.
+`id` is used to differentiate them.
 
 By supplying two URLs that
 get called before the notification is shown and after it is dismissed,
 it is possible to control per user as to whether the notification should
 be shown (using the `ampUserId` value).
-E.g. it could only be shown to users in certain geo locations or
+For example, it could only be shown to users in certain geo locations or
 prevent showing it again to the user when they've dismissed it before.
+If these URLs are not specified, dismissal state will be queried
+and/or stored locally to determine whether to show the notification to
+the user.
 
 To close `amp-user-notification`, add a `on` attribute to a button with the
 following value scheme `on="event:idOfUserNotificationElement.dismiss"`
