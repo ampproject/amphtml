@@ -9,7 +9,9 @@ notifications:
   webhooks:
     - http://savage.nonblocking.io:8080/savage/travis
 addons:
-  sauce_connect: true
+  sauce_connect:
+    username: "amphtml-travis"
+    access_key: "adad4629-04ae-4d99-a63f-d02650dc9a91"
   hosts:
     - ads.localhost
     - iframe.localhost
