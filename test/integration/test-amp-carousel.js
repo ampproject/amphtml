@@ -111,6 +111,9 @@ describe('integration amp-carousel', () => {
         impl.go(1, false);
         impl.go(1, false);
         impl.go(1, false);
+        impl.go(1, false);
+        impl.go(1, false);
+        impl.go(1, false);
         expect(prevBtn).to.be.visible;
         expect(nextBtn).to.be.hidden;
       });
