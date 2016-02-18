@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
+import {FixedLayer} from './fixed-layer';
 import {Observable} from '../observable';
+import {getMode} from '../mode';
 import {getService} from '../service';
+import {isDevChannel} from '../experiments';
 import {layoutRectLtwh} from '../layout-rect';
 import {log} from '../log';
 import {onDocumentReady} from '../document-state';
@@ -108,6 +111,17 @@ export class Viewport {
     /** @private {string|undefined} */
     this.originalViewportMetaString_ = undefined;
 
+    if (isDevChannel(this.win_) || getMode().localDev ||
+            getMode().development) {
+      /** @private @const {!FixedLayer|undefined} */
+      this.fixedLayer_ = new FixedLayer(
+          this.win_.document,
+          this.vsync_,
+          this.paddingTop_,
+          this.binding_.requiresFixedLayerTransfer());
+      onDocumentReady(this.win_.document, () => this.fixedLayer_.setup());
+    }
+
     /** @private @const (function()) */
     this.boundThrottledScroll_ = this.throttledScroll_.bind(this);
 
@@ -117,6 +131,9 @@ export class Viewport {
       if (paddingTop != this.paddingTop_) {
         this.paddingTop_ = paddingTop;
         this.binding_.updatePaddingTop(this.paddingTop_);
+        if (this.fixedLayer_) {
+          this.fixedLayer_.updatePaddingTop(this.paddingTop_);
+        }
       }
     });
     this.binding_.updateViewerViewport(this.viewer_);
@@ -331,6 +348,33 @@ export class Viewport {
   }
 
   /**
+   * Hides the fixed layer.
+   */
+  hideFixedLayer() {
+    if (this.fixedLayer_) {
+      this.fixedLayer_.setVisible(false);
+    }
+  }
+
+  /**
+   * Shows the fixed layer.
+   */
+  showFixedLayer() {
+    if (this.fixedLayer_) {
+      this.fixedLayer_.setVisible(true);
+    }
+  }
+
+  /**
+   * Updates the fixed layer.
+   */
+  updatedFixedLayer() {
+    if (this.fixedLayer_) {
+      this.fixedLayer_.update();
+    }
+  }
+
+  /**
    * Updates touch zoom meta data. Returns `true` if any actual
    * changes have been done.
    * @return {boolean}
@@ -444,17 +488,32 @@ export class Viewport {
     const oldSize = this.size_;
     this.size_ = null;  // Need to recalc.
     const newSize = this.getSize();
-    this.changed_(!oldSize || oldSize.width != newSize.width, 0);
+    if (this.fixedLayer_) {
+      this.fixedLayer_.update().then(() => {
+        this.changed_(!oldSize || oldSize.width != newSize.width, 0);
+      });
+    } else {
+      this.changed_(!oldSize || oldSize.width != newSize.width, 0);
+    }
   }
 }
 
 
 /**
- * ViewportBindingDef is an interface that defines an underlying technology behind
- * the {@link Viewport}.
+ * ViewportBindingDef is an interface that defines an underlying technology
+ * behind the {@link Viewport}.
  * @interface
  */
 class ViewportBindingDef {
+
+  /**
+   * Whether the binding requires fixed elements to be transfered to a
+   * independent fixed layer.
+   * @return {boolean}
+   */
+  requiresFixedLayerTransfer() {
+    return false;
+  }
 
   /**
    * Register a callback for scroll events.
@@ -562,6 +621,11 @@ export class ViewportBindingNatural_ {
   /** @override */
   cleanup_() {
     // TODO(dvoytenko): remove listeners
+  }
+
+  /** @override */
+  requiresFixedLayerTransfer() {
+    return false;
   }
 
   /** @override */
@@ -705,6 +769,11 @@ export class ViewportBindingNaturalIosEmbed_ {
     this.win.addEventListener('resize', () => this.resizeObservable_.fire());
 
     log.fine(TAG_, 'initialized natural viewport for iOS embeds');
+  }
+
+  /** @override */
+  requiresFixedLayerTransfer() {
+    return true;
   }
 
   /** @private */
@@ -976,6 +1045,11 @@ export class ViewportBindingVirtual_ {
   /** @override */
   cleanup_() {
     // TODO(dvoytenko): remove listeners
+  }
+
+  /** @override */
+  requiresFixedLayerTransfer() {
+    return false;
   }
 
   /** @override */

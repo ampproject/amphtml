@@ -17,6 +17,7 @@
 import {Observable} from '../observable';
 import {assert} from '../asserts';
 import {documentStateFor} from '../document-state';
+import {getMode} from '../mode';
 import {getService} from '../service';
 import {log} from '../log';
 import {parseQueryString, parseUrl, removeFragment} from '../url';
@@ -214,6 +215,13 @@ export class Viewer {
     // Configure scrolling parameters when AMP is embeded in a viewer on iOS.
     if (this.viewportType_ == ViewportType.NATURAL && this.isEmbedded_ &&
             platform.isIos()) {
+      this.viewportType_ = ViewportType.NATURAL_IOS_EMBED;
+    }
+    // Enable iOS Embedded mode so that it's easy to test against a more
+    // realistic iOS environment.
+    if (platform.isIos() &&
+            this.viewportType_ != ViewportType.NATURAL_IOS_EMBED &&
+            (getMode().localDev || getMode().development)) {
       this.viewportType_ = ViewportType.NATURAL_IOS_EMBED;
     }
     log.fine(TAG_, '- viewportType:', this.viewportType_);
