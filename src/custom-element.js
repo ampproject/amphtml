@@ -740,7 +740,7 @@ export function createAmpElementProto(win, name, implementationClass) {
       }
     }, reason => {
       this.toggleLoading_(false, /* cleanup */ true);
-      return Promise.reject(reason);
+      throw reason;
     });
   };
 

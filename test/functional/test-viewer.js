@@ -16,7 +16,6 @@
 
 import {Viewer} from '../../src/service/viewer-impl';
 import {platform} from '../../src/platform';
-import {all} from '../../src/promise';
 import * as sinon from 'sinon';
 
 
@@ -266,7 +265,7 @@ describe('Viewer', () => {
       expect(m1Resolved).to.be.false;
       expect(m2Resolved).to.be.false;
 
-      return all([m1, m2]);
+      return Promise.all([m1, m2]);
     }).then(() => {
       // All resolved now.
       expect(m1Resolved).to.be.true;
@@ -292,7 +291,7 @@ describe('Viewer', () => {
 
       // Timeout.
       clock.tick(5001);
-      return all([m1, m2]);
+      return Promise.all([m1, m2]);
     }).then(() => {
       throw new Error('must never be here');
     }, () => {
