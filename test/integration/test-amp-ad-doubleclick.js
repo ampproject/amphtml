@@ -39,7 +39,7 @@ describe('Rendering of one ad', () => {
       iframe = iframeElement;
       expect(fixture.doc.querySelectorAll('iframe')).to.have.length(1);
       ampAd = iframe.parentElement;
-      expect(iframe.src).to.contain('categoryExclusion');
+      expect(iframe.src).to.contain('categoryExclusions');
       expect(iframe.src).to.contain('health');
       expect(iframe.src).to.contain('tagForChildDirectedTreatment');
       expect(iframe.src).to.match(/http\:\/\/localhost:9876\/base\/dist\.3p\//);
@@ -59,8 +59,8 @@ describe('Rendering of one ad', () => {
         expect(context.referrer).to.contain('http://localhost:' + location.port);
       }
       expect(context.pageViewId).to.be.greaterThan(0);
-      expect(context.data.tagForChildDirectedTreatment).to.be.false;
-      expect(context.data.categoryExclusion).to.be.equal('health');
+      expect(context.data.tagForChildDirectedTreatment).to.equal(0);
+      expect(context.data.categoryExclusions).to.be.jsonEqual(['health']);
       expect(context.data.targeting).to.be.jsonEqual(
           {sport: ['rugby', 'cricket']});
       return poll('main ad JS is injected', () => {
