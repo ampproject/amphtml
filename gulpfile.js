@@ -326,6 +326,7 @@ function buildExamples(watch) {
   buildExample('analytics-notification.amp.html');
   buildExample('analytics.amp.html');
   buildExample('article.amp.html');
+  buildExample('brightcove.amp.html');
   buildExample('responsive.amp.html');
   buildExample('article-access.amp.html');
   buildExample('dailymotion.amp.html');
