@@ -188,14 +188,17 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (this.element.hasAttribute('data-credentials')) {
       fetchConfig.credentials = this.element.getAttribute('data-credentials');
     }
-    return xhrFor(this.getWin()).fetchJson(remoteConfigUrl, fetchConfig)
-        .then(jsonValue => {
+    return urlReplacementsFor(this.getWin()).expand(remoteConfigUrl)
+      .then(expandedUrl => {
+        return xhrFor(this.getWin()).fetchJson(expandedUrl, fetchConfig);
+      })
+      .then(jsonValue => {
           this.remoteConfig_ = jsonValue;
           log.fine(this.getName_(), 'Remote config loaded', remoteConfigUrl);
         }, err => {
           console./*OK*/error(this.getName_(), 'Error loading remote config: ',
-              remoteConfigUrl, err);
-        });
+          expandedUrl, err);
+      });
   }
 
   /**
