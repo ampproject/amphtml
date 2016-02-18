@@ -23,17 +23,15 @@ adopt(window);
 
 describe('amp-jwplayer', () => {
 
-  function getjwplayer(attributes, opt_responsive) {
+  function getjwplayer(attributes) {
     return createIframePromise().then(iframe => {
       const jw = iframe.doc.createElement('amp-jwplayer');
       for (const key in attributes) {
         jw.setAttribute(key, attributes[key]);
       }
-      jw.setAttribute('width', '111');
-      jw.setAttribute('height', '222');
-      if (opt_responsive) {
-        jw.setAttribute('layout', 'responsive');
-      }
+      jw.setAttribute('width', '320');
+      jw.setAttribute('height', '180');
+      jw.setAttribute('layout', 'responsive');
       iframe.doc.body.appendChild(jw);
       jw.implementation_.layoutCallback();
       return jw;
@@ -50,8 +48,50 @@ describe('amp-jwplayer', () => {
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.src).to.equal(
           'https://content.jwplatform.com/players/Wferorsv-sDZEo0ea.html');
-      expect(iframe.getAttribute('width')).to.equal('111');
-      expect(iframe.getAttribute('height')).to.equal('222');
+      expect(iframe.getAttribute('width')).to.equal('320');
+      expect(iframe.getAttribute('height')).to.equal('180');
+    });
+  });
+
+  it('renders with a playlist', () => {
+    return getjwplayer({
+      'data-playlist-id': '482jsTAr',
+      'data-player-id': 'sDZEo0ea'
+    }).then(jw => {
+      const iframe = jw.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.tagName).to.equal('IFRAME');
+      expect(iframe.src).to.equal(
+          'https://content.jwplatform.com/players/482jsTAr-sDZEo0ea.html');
+    });
+  });
+
+  it('fails if no media is specified', () => {
+    return getjwplayer({
+      'data-player-id': 'sDZEo0ea'
+    }).should.eventually.be.rejectedWith(
+      /Either the data-media-id or the data-playlist-id attributes must be specified for/
+    );
+  });
+
+  it('fails if no player is specified', () => {
+    return getjwplayer({
+      'data-media-id': 'Wferorsv',
+    }).should.eventually.be.rejectedWith(
+      /The data-player-id attribute is required for/
+    );
+  });
+
+  it('renders with a bad playlist', () => {
+    return getjwplayer({
+      'data-playlist-id': 'zzz',
+      'data-player-id': 'sDZEo0ea'
+    }).then(jw => {
+      const iframe = jw.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      expect(iframe.tagName).to.equal('IFRAME');
+      expect(iframe.src).to.equal(
+          'https://content.jwplatform.com/players/zzz-sDZEo0ea.html');
     });
   });
 
