@@ -32,7 +32,7 @@
     "browserify": "12.0.0",
     "chai": "3.4.1",
     "chai-as-promised": "5.2.0",
-    "connect": "3.3.4",
+    "connect": "3.4.1",
     "connect-livereload": "0.5.4",
     "cssnano": "3.3.2",
     "del": "2.2.0",
