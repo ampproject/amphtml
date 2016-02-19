@@ -1463,6 +1463,19 @@ describe('Resources.Resource', () => {
           expect(resource.getState()).to.equal(ResourceState_.NOT_LAID_OUT);
         });
 
+    it('updated state should bypass isRelayoutNeeded', () => {
+      resource.state_ = ResourceState_.LAYOUT_COMPLETE;
+      elementMock.expects('documentInactiveCallback').returns(true).once();
+      elementMock.expects('isUpgraded').returns(true).atLeast(1);
+      elementMock.expects('getBoundingClientRect')
+          .returns({left: 1, top: 1, width: 1, height: 1}).once();
+
+      resource.documentBecameInactive();
+
+      elementMock.expects('layoutCallback').returns(Promise.resolve()).once();
+      resource.startLayout(true);
+    });
+
     it('should call documentInactiveCallback on built element' +
         ' but NOT update state', () => {
       resource.state_ = ResourceState_.LAYOUT_COMPLETE;
