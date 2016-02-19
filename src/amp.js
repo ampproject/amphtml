@@ -63,19 +63,17 @@ try {
 
       maybeValidate(window);
       makeBodyVisible(document, waitForExtensions(window));
-    } catch (e) {
-      makeBodyVisible(document);
     } finally {
+      makeBodyVisible(document);
       perf.tick('e_is');
       // TODO(erwinm): move invocation of the `flush` method when we have the
       // new ticks in place to batch the ticks properly.
       perf.flush();
     }
   }, /* opt_isRuntimeCss */ true);
-} catch (e) {
+} finally {
   // In case of an error call this.
   makeBodyVisible(document);
-  throw e;
 }
 
 // Output a message to the console and add an attribute to the <html>
