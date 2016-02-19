@@ -22,19 +22,19 @@ import * as sinon from 'sinon';
 adopt(window);
 
 /** @private @const {string} */
-const FONT_FACE_ = '\
-  @font-face {\
-    font-family: \'Comic AMP\';\
-    src: url(/base/examples/fonts/ComicAMP.ttf) format(\'truetype\');\
-  }\
-';
+const FONT_FACE_ = `
+  @font-face {
+    font-family: 'Comic AMP';
+    src: url(/base/examples/fonts/ComicAMP.ttf) format('truetype');
+  }
+`;
 
-const CSS_RULES_ = '\
-  .comic-amp-font-loaded {\
-    font-family: \'Comic AMP\', serif, sans-serif;\
-    color: #0f0;\
-  }\
-';
+const CSS_RULES_ = `
+  .comic-amp-font-loaded {
+    font-family: 'Comic AMP', serif, sans-serif;
+    color: #0f0;
+  }
+`;
 
 /** @private @const {!FontConfig} */
 const FONT_CONFIG = {
