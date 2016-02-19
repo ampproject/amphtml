@@ -63,7 +63,10 @@ class AmpJWPlayer extends AMP.BaseElement {
 
   /** @override */
   documentInactiveCallback() {
-    // TODO: implement inactiveCallback
+    if (this.iframe_ && this.iframe_.contentWindow) {
+      // The /players page can respond to "play" and "pause" commands from the iframe's parent
+      this.iframe_.contentWindow./*OK*/postMessage('pause', 'https://content.jwplatform.com');
+    }
     return false;
   }
 };
