@@ -75,11 +75,6 @@ export function installAd(win) {
     }
 
     /** @override */
-    isRelayoutNeeded() {
-      return true;
-    }
-
-    /** @override */
     buildCallback() {
       /** @private {?Element} */
       this.iframe_ = null;
