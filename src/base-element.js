@@ -500,6 +500,14 @@ export class BaseElement {
   }
 
   /**
+   * @param {!Element|!Array<!Element>} elements
+   * @protected
+   */
+  schedulePause(elements) {
+    this.resources_.schedulePause(this.element, elements);
+  }
+
+  /**
    * Schedule the preload request for the children element or elements
    * specified. Resource manager will perform the actual preload based on the
    * priority of this element and its children.

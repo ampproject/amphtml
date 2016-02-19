@@ -330,6 +330,7 @@ function buildExamples(watch) {
   buildExample('responsive.amp.html');
   buildExample('article-access.amp.html');
   buildExample('dailymotion.amp.html');
+  buildExample('carousel.amp.html');
   buildExample('csp.amp.html');
   buildExample('metadata-examples/article-json-ld.amp.html');
   buildExample('metadata-examples/article-microdata.amp.html');
