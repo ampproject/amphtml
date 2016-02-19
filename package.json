@@ -23,7 +23,7 @@
     "document-register-element": "0.5.4"
   },
   "devDependencies": {
-    "autoprefixer": "6.1.1",
+    "autoprefixer": "6.3.3",
     "babel-core": "5.8.35",
     "babel-eslint": "4.1.8",
     "babelify": "6.4.0",
