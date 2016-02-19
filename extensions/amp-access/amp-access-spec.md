@@ -156,11 +156,11 @@ Here’s an example of the AMP Access configuration:
 <script id="amp-access" type="application/json">
 {
   "authorization":
-      "https://pub.com/amp-access?rid={READER_ID}&url={SOURCE_URL}",
+      "https://pub.com/amp-access?rid=READER_ID&url=SOURCE_URL",
   "pingback":
-      "https://pub.com/amp-ping?rid={READER_ID}&url={SOURCE_URL}",
+      "https://pub.com/amp-ping?rid=READER_ID&url=SOURCE_URL",
   "login":
-      "https://pub.com/amp-login?rid={READER_ID}&url={SOURCE_URL}",
+      "https://pub.com/amp-login?rid=READER_ID&url=SOURCE_URL",
   "authorizationFallbackResponse": {"error": true}
 }
 </script>
@@ -185,10 +185,10 @@ RANDOM            | A random number. Helpful to avoid browser cache.
 Here’s an example of the URL extended with Reader ID, Canonical URL, Referrer information and random cachebuster:
 ```
 https://pub.com/access?
-   rid={READER_ID}
-  &url={CANONICAL_URL}
-  &ref={DOCUMENT_REFERRER}
-  &_={RANDOM}
+   rid=READER_ID
+  &url=CANONICAL_URL
+  &ref=DOCUMENT_REFERRER
+  &_=RANDOM
 ```
 
 AUTHDATA variable is availbale to Pingback and Login URLs. It allows passing any field in the authorization
@@ -266,8 +266,8 @@ This endpoint produces the authorization response that can be used in the conten
 The request format is:
 ```
 https://publisher.com/amp-access.json?
-   rid={READER_ID}
-  &url={SOURCE_URL}
+   rid=READER_ID
+  &url=SOURCE_URL
 ```
 The response is a free-form JSON object: it can contain any properties and values with few limitations. The limitations are:
  - The property names have to conform to the restrictions defined by the ```amp-access``` expressions grammar (see [Appendix A][1]. This mostly means that the property names cannot contain characters such as spaces, dashes and other characters that do not conform to the “amp-access” specification.
@@ -334,8 +334,8 @@ The publisher may choose to use the pingback as:
 The request format is:
 ```
 https://publisher.com/amp-pingback?
-   rid={READER_ID}
-  &url={SOURCE_URL}
+   rid=READER_ID
+  &url=SOURCE_URL
 ```
 
 ##Login Link
@@ -365,9 +365,9 @@ Login Page is simply a normal Web page with no special constraints, other than i
 The request format is:
 ```
 https://publisher.com/amp-login.html?
-   rid={READER_ID}
-  &url={SOURCE_URL}
-  &return={RETURN_URL}
+   rid=READER_ID
+  &url=SOURCE_URL
+  &return=RETURN_URL
 ```
 Notice that the “return” URL parameter is added by the AMP Runtime automatically if `RETURN_URL` substitution is not
 specified. Once Login Page completes its work, it must redirect back to the specified “Return URL” with the following format:
@@ -418,6 +418,7 @@ Both steps are covered by the AMP Access spec. The referrer can be injected into
 - Feb 11: Nested field references such as `object.field` are now allowed.
 - Feb 11: Authorization request timeout in [Authorization Endpoint][4].
 - Feb 15: [Configuration][8] and [Authorization Endpoint][4] now allow "authorizationFallbackResponse" property that can be used when authorization fails.
+- Feb 19: Corrected samples to remove `{}` from URL var substitutions.
 
 #Appendix A: “amp-access” expression grammar
 
