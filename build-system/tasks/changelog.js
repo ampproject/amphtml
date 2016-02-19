@@ -37,7 +37,7 @@ var exec = BBPromise.promisify(child_process.exec);
 var gitExec = BBPromise.promisify(git.exec);
 
 var isCanary = argv.type == 'canary';
-var branch = isCanary ? 'canary' : 'release';
+var branch = isCanary ? 'master' : 'release';
 var isDryrun = argv.dryrun;
 
 
