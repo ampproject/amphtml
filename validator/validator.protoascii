@@ -4050,6 +4050,25 @@ tags: {  # <amp-install-serviceworker>
     supported_layouts: NODISPLAY
   }
 }
+tags: {  # <amp-jwplayer>
+  tag_name: "amp-jwplayer"
+  disallowed_ancestor: "head"
+  also_requires: "amp-jwplayer extension .js script"
+  attrs: { name: "data-player-id" mandatory: true }
+  # If data-media-id is omitted, then data-playlist-id is required.
+  attrs: { name: "data-media-id" }
+  # If data-playlist-id is omitted, then data-media-id is required.
+  attrs: { name: "data-playlist-id" }
+  attr_lists: "extended-amp-global"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-jwplayer.html"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}
 tags: {  # <amp-lightbox>
   tag_name: "amp-lightbox"
   disallowed_ancestor: "head"
