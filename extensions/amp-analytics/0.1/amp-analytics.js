@@ -158,6 +158,11 @@ export class AmpAnalytics extends AMP.BaseElement {
     for (const k in this.config_['triggers']) {
       if (this.config_['triggers'].hasOwnProperty(k)) {
         const trigger = this.config_['triggers'][k];
+        if (!trigger) {
+          console./*OK*/error(this.getName_(),
+              'trigger should be an object: ', k);
+          continue;
+        }
         if (!trigger['on'] || !trigger['request']) {
           console./*OK*/error(this.getName_(), '"on" and "request" ' +
               'attributes are required for data to be collected.');

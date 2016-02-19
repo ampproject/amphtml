@@ -219,7 +219,7 @@ export class ActionService {
    */
   actionInfoError_(s, actionInfo, target) {
     // Method not found "activate" on ' + target
-    throw new Error('Action Error: ' + s +
+    assert(false, 'Action Error: ' + s +
         (actionInfo ? ' in [' + actionInfo.str + ']' : '') +
         (target ? ' on [' + target + ']' : ''));
   }
