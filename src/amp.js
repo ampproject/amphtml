@@ -65,6 +65,7 @@ try {
       makeBodyVisible(document, waitForExtensions(window));
     } catch (e) {
       makeBodyVisible(document);
+      throw e;
     } finally {
       perf.tick('e_is');
       // TODO(erwinm): move invocation of the `flush` method when we have the
