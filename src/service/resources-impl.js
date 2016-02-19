@@ -1754,6 +1754,7 @@ export class Resource {
     }
     if (this.element.documentInactiveCallback()) {
       this.state_ = ResourceState_.NOT_LAID_OUT;
+      this.layoutCount_ = 0;
     }
   }
 
