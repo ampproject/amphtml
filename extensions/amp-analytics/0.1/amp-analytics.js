@@ -135,7 +135,7 @@ export class AmpAnalytics extends AMP.BaseElement {
         if (++count > MAX_REPLACES) {
           console./*OK*/error(this.getName_(),
            'More than ' + MAX_REPLACES.toString() +
-           ' extraUrlParamsReplaceMap rules aren\'t allowed; Skipping the rest'
+           " extraUrlParamsReplaceMap rules aren't allowed; Skipping the rest"
           );
           break;
         }
