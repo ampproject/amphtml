@@ -230,7 +230,7 @@ function updateVisibilityState(global) {
  *    observes for resize status messages.
  */
 function onResizeSuccess(observerCallback) {
-  return listenParent(window, 'embed-resize-changed', data => {
+  return listenParent(window, 'embed-size-changed', data => {
     observerCallback(data.requestedHeight);
   });
 }
@@ -242,7 +242,7 @@ function onResizeSuccess(observerCallback) {
  *    observes for resize status messages.
  */
 function onResizeDenied(observerCallback) {
-  return listenParent(window, 'embed-resize-denied', data => {
+  return listenParent(window, 'embed-size-denied', data => {
     observerCallback(data.requestedHeight);
   });
 }
