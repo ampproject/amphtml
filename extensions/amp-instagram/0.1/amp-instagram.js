@@ -41,7 +41,7 @@ import {loadPromise} from '../../../src/event-helper';
 class AmpInstagram extends AMP.BaseElement {
   /** @override */
   preconnectCallback(onLayout) {
-    this.preconnect.url('https://instagram.com', onLayout);
+    this.preconnect.url('https://www.instagram.com', onLayout);
   }
 
   /** @override */
@@ -63,7 +63,7 @@ class AmpInstagram extends AMP.BaseElement {
     const iframe = document.createElement('iframe');
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowtransparency', 'true');
-    iframe.src = 'https://instagram.com/p/' +
+    iframe.src = 'https://www.instagram.com/p/' +
         encodeURIComponent(shortcode) + '/embed/?v=4';
     this.applyFillContent(iframe);
     iframe.width = width;
