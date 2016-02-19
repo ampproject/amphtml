@@ -61,6 +61,7 @@
       "arraysInObjects": false
     }],
     "prefer-const": 2,
+    "quotes": [2, "single"],
     "radix": 2,
     "semi": 2,
     "space-after-keywords": 2,

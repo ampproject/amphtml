@@ -82,7 +82,7 @@ export class InstrumentationService {
     this.win_ = window;
 
     /** @const {string} */
-    this.TAG_ = "Analytics.Instrumentation";
+    this.TAG_ = 'Analytics.Instrumentation';
 
     /** @const {!Viewer} */
     this.viewer_ = viewerFor(window);
@@ -277,8 +277,8 @@ export class InstrumentationService {
   registerScrollTrigger_(config, listener) {
     if (!Array.isArray(config['verticalBoundaries']) &&
         !Array.isArray(config['horizontalBoundaries'])) {
-      console./*OK*/error(this.TAG_, "Boundaries are required for the scroll " +
-          "trigger to work.");
+      console./*OK*/error(this.TAG_, 'Boundaries are required for the scroll ' +
+          'trigger to work.');
       return;
     }
 

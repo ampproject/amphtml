@@ -84,7 +84,7 @@ describe('3p', () => {
     clock.tick(1);
 
     checkData({
-      width: "",
+      width: '',
       foo: true,
       bar: true,
     }, ['foo', 'bar']);
@@ -97,7 +97,7 @@ describe('3p', () => {
       height: false,
       initialWindowWidth: 1,
       initialWindowHeight: 2,
-      type: "taboola",
+      type: 'taboola',
       referrer: true,
       canonicalUrl: true,
       pageViewId: true,
@@ -107,8 +107,8 @@ describe('3p', () => {
     clock.tick(1);
 
     validateDataExists({
-      width: "",
-      type: "taboola",
+      width: '',
+      type: 'taboola',
       foo: true,
       bar: true,
     }, ['foo', 'bar']);
@@ -117,8 +117,8 @@ describe('3p', () => {
 
   it('should accept supplied data', () => {
     validateExactlyOne({
-      width: "",
-      type: "taboola",
+      width: '',
+      type: 'taboola',
       foo: true,
       bar: true,
     }, ['foo', 'day', 'night']);
@@ -150,8 +150,8 @@ describe('3p', () => {
 
     expect(() => {
       validateDataExists({
-        width: "",
-        type: "xxxxxx",
+        width: '',
+        type: 'xxxxxx',
         foo: true,
         bar: true,
       }, ['foo', 'bar', 'persika']);
@@ -159,8 +159,8 @@ describe('3p', () => {
 
     expect(() => {
       validateExactlyOne({
-        width: "",
-        type: "xxxxxx",
+        width: '',
+        type: 'xxxxxx',
         foo: true,
         bar: true,
       }, ['red', 'green', 'blue']);
