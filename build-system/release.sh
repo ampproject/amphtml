@@ -13,11 +13,9 @@ echo "===================="
 echo "in folder $(pwd)"
 echo "===================="
 
-git checkout canary
+git checkout -B canary master
 
-git merge master
-
-echo "done with merging master into canary"
+echo "done with resetting canary"
 echo "===================="
 
 git checkout release
