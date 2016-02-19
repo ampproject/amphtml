@@ -145,7 +145,7 @@ describe('example', function() {
           }
         }
       };
-      xhr.open("GET", filename, true);
+      xhr.open('GET', filename, true);
       xhr.send();
     });
   }

@@ -476,7 +476,7 @@ describe('UrlReplacements', () => {
 
   it('should replace QUERY_PARAM with foo', () => {
     const win = getFakeWindow();
-    win.location = parseUrl("https://example.com?query_string_param1=foo");
+    win.location = parseUrl('https://example.com?query_string_param1=foo');
     return urlReplacementsFor(win)
       .expand('?sh=QUERY_PARAM(query_string_param1)&s')
       .then(res => {
@@ -486,7 +486,7 @@ describe('UrlReplacements', () => {
 
   it('should replace QUERY_PARAM with ""', () => {
     const win = getFakeWindow();
-    win.location = parseUrl("https://example.com");
+    win.location = parseUrl('https://example.com');
     return urlReplacementsFor(win)
       .expand('?sh=QUERY_PARAM(query_string_param1)&s')
       .then(res => {
@@ -496,7 +496,7 @@ describe('UrlReplacements', () => {
 
   it('should replace QUERY_PARAM with default_value', () => {
     const win = getFakeWindow();
-    win.location = parseUrl("https://example.com");
+    win.location = parseUrl('https://example.com');
     return urlReplacementsFor(win)
       .expand('?sh=QUERY_PARAM(query_string_param1,default_value)&s')
       .then(res => {

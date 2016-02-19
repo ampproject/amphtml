@@ -47,7 +47,7 @@ describe('EventHelper', () => {
         } else if (type == 'error') {
           errorObservable.add(callback);
         } else {
-          expect(type).to.equal("load or error");
+          expect(type).to.equal('load or error');
         }
       },
       removeEventListener: function(type, callback) {
@@ -56,7 +56,7 @@ describe('EventHelper', () => {
         } else if (type == 'error') {
           errorObservable.remove(callback);
         } else {
-          expect(type).to.equal("load or error");
+          expect(type).to.equal('load or error');
         }
       }
     };

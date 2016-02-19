@@ -134,8 +134,8 @@ export class AmpAnalytics extends AMP.BaseElement {
       for (const replaceMapKey in this.config_['extraUrlParamsReplaceMap']) {
         if (++count > MAX_REPLACES) {
           console./*OK*/error(this.getName_(),
-           "More than " + MAX_REPLACES.toString() +
-           " extraUrlParamsReplaceMap rules aren't allowed; Skipping the rest"
+           'More than ' + MAX_REPLACES.toString() +
+           ' extraUrlParamsReplaceMap rules aren\'t allowed; Skipping the rest'
           );
           break;
         }

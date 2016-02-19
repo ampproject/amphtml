@@ -164,7 +164,7 @@ export const ANALYTICS_CONFIG = {
 
   'googleanalytics': {
     'vars': {
-      'eventValue': "0",
+      'eventValue': '0',
       'documentLocation': 'AMPDOC_URL'
     },
     'requests': {

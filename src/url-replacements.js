@@ -110,13 +110,13 @@ class UrlReplacements {
       return documentInfoFor(this.win_).pageViewId;
     });
 
-    this.set_('QUERY_PARAM', (param, defaultValue = "") => {
+    this.set_('QUERY_PARAM', (param, defaultValue = '') => {
       assert(param, 'The first argument to QUERY_PARAM, the query string ' +
           /*OK*/'param is required');
       const url = parseUrl(this.win_.location.href);
       const params = parseQueryString(url.search);
 
-      return (typeof params[param] !== "undefined") ?
+      return (typeof params[param] !== 'undefined') ?
         params[param] :
         defaultValue;
     });

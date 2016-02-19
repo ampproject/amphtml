@@ -273,10 +273,10 @@ describe('evaluateAccessExpr', () => {
     expect(evaluateAccessExpr('_num = 10', {_num: 10})).to.be.true;
 
     expect(() => {
-      evaluateAccessExpr('1num = 10', {"1num": 10});
+      evaluateAccessExpr('1num = 10', {'1num': 10});
     }).to.throw();
     expect(() => {
-      evaluateAccessExpr('num-a = 10', {"num-a": 10});
+      evaluateAccessExpr('num-a = 10', {'num-a': 10});
     }).to.throw();
   });
 });

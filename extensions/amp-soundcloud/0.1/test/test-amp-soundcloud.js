@@ -22,7 +22,7 @@ adopt(window);
 
 describe('amp-soundcloud', () => {
 
-  const embedUrl = "https://w.soundcloud.com/player/?url=https%3A%2F%2Fapi.soundcloud.com%2Ftracks%2F243169232";
+  const embedUrl = 'https://w.soundcloud.com/player/?url=https%3A%2F%2Fapi.soundcloud.com%2Ftracks%2F243169232';
 
   function getIns(trackid, optVisualMode, optColor, optFixedHeight) {
     return createIframePromise().then(iframe => {
@@ -55,13 +55,13 @@ describe('amp-soundcloud', () => {
   });
 
   it('renders fixed-height', () => {
-    return getIns('243169232', true, "FF0000", true).then(ins => {
+    return getIns('243169232', true, 'FF0000', true).then(ins => {
       expect(ins.className).to.match(/amp-layout-fixed-height/);
     });
   });
 
   it('ignores color in visual mode', () => {
-    return getIns('243169232', "true", '00FF00').then(ins => {
+    return getIns('243169232', 'true', '00FF00').then(ins => {
       const iframe = ins.firstChild;
       expect(iframe.src).to.include('visual=true');
       expect(iframe.src).not.to.include('color=00FF00');
