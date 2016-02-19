@@ -62,6 +62,12 @@ describe('getCookie', () => {
       let cookie;
       const doc = {
         set cookie(val) {
+          // Delete cookies on ampproject.org
+          if (val.indexOf('domain=ampproject.org; ' +
+              'expires=Thu, 01 Jan 1970 00:00:00 GMT') != -1) {
+            cookie = undefined;
+            return;
+          }
           if (val.indexOf('; domain=' + targetDomain) != -1) {
             cookie = val;
           }
@@ -89,5 +95,9 @@ describe('getCookie', () => {
     test('123.www.example.com', '123.www.example.com');
     test('www.example.net', 'example.com', true);
     test('example.net', 'example.com', true);
+    test('www.ampproject.org', 'ampproject.org', true);
+    test('cdn.ampproject.org', 'ampproject.org', true);
+    test('www.ampproject.org', 'www.ampproject.org');
+    test('cdn.ampproject.org', 'cdn.ampproject.org');
   });
 });

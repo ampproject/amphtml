@@ -84,9 +84,22 @@ export function setCookie(win, name, value, expirationTime, opt_options) {
  * @param {string|undefined} domain
  */
 function trySetCookie(win, name, value, expirationTime, domain) {
+  // We do not allow setting cookies on the domain that contains both
+  // the cdn. and www. hosts.
+  if (domain == 'ampproject.org') {
+    // Actively delete them.
+    value = 'delete';
+    expirationTime = 0;
+  }
   win.document.cookie = encodeURIComponent(name) + '=' +
       encodeURIComponent(value) +
       '; path=/' +
       (domain ? '; domain=' + domain : '') +
       '; expires=' + new Date(expirationTime).toUTCString();
+}
+
+// Clean up cookies set by www.ampproject.org to 2nd level.
+if (location.hostname.indexOf('.ampproject.org') != 0) {
+  trySetCookie(window, '_ga', '', 0, 'ampproject.org');
+  trySetCookie(window, 'AMP_ECID_GOOGLE', '', 0, 'ampproject.org');
 }
