@@ -98,6 +98,20 @@ describe('Viewer', () => {
     expect(viewer.getPrerenderSize()).to.equal(3);
   });
 
+  it('should configure performance tracking', () => {
+    windowApi.location.hash = '';
+    let viewer = new Viewer(windowApi);
+    expect(viewer.isPerformanceTrackingOn()).to.be.false;
+
+    windowApi.location.hash = '#csi=1';
+    viewer = new Viewer(windowApi);
+    expect(viewer.isPerformanceTrackingOn()).to.be.true;
+
+    windowApi.location.hash = '#csi=0';
+    viewer = new Viewer(windowApi);
+    expect(viewer.isPerformanceTrackingOn()).to.be.false;
+  });
+
   it('should configure correctly for iOS embedding', () => {
     windowApi.name = '__AMP__viewportType=natural';
     windowApi.parent = {};
