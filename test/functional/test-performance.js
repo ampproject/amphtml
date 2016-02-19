@@ -142,67 +142,116 @@ describe('performance', () => {
       flushTicksSpy = sandbox.stub(viewer, 'flushTicks');
     });
 
-    it('should forward all queued tick events', () => {
-      perf.tick('start0');
-      clock.tick(1);
-      perf.tick('start1', 'start0');
+    describe('and performanceTracking is off', () => {
 
-      expect(perf.events_.length).to.equal(2);
-
-      perf.coreServicesAvailable();
-
-      expect(tickSpy.firstCall.args[0]).to.be.jsonEqual({
-        label: 'start0',
-        from: null,
-        value: 0,
+      beforeEach(() => {
+        sandbox.stub(viewer, 'isPerformanceTrackingOn')
+            .returns(false);
       });
-      expect(tickSpy.secondCall.args[0]).to.be.jsonEqual({
-        label: 'start1',
-        from: 'start0',
-        value: 1,
+
+      it('should not forward queued ticks', () => {
+        perf.tick('start0');
+        clock.tick(1);
+        perf.tick('start1', 'start0');
+
+        expect(perf.events_.length).to.equal(2);
+
+        perf.coreServicesAvailable();
+        perf.flushQueuedTicks_();
+        perf.flush();
+
+        expect(perf.events_.length).to.equal(0);
+
+        expect(tickSpy.callCount).to.equal(0);
+        expect(flushTicksSpy.callCount).to.equal(0);
       });
-    });
 
-    it('should have no more queued tick events after flush', () => {
-      perf.tick('start0');
-      perf.tick('start1');
+      it('should ignore all calls to tick', () => {
+        perf.coreServicesAvailable();
 
-      expect(perf.events_.length).to.equal(2);
-
-      perf.coreServicesAvailable();
-
-      expect(perf.events_.length).to.equal(0);
-    });
-
-    it('should forward tick events', () => {
-      perf.coreServicesAvailable();
-
-      clock.tick(100);
-      perf.tick('start0');
-      perf.tick('start1', 'start0', 300);
-
-      expect(tickSpy.firstCall.args[0]).to.be.jsonEqual({
-        label: 'start0',
-        from: null,
-        value: 100,
+        perf.tick('start0');
+        expect(tickSpy.callCount).to.equal(0);
       });
-      expect(tickSpy.secondCall.args[0]).to.be.jsonEqual({
-        label: 'start1',
-        from: 'start0',
-        value: 300,
+
+      it('should ignore all calls to flush', () => {
+        perf.coreServicesAvailable();
+
+        perf.tick('start0');
+        perf.flush();
+        expect(flushTicksSpy.callCount).to.equal(0);
       });
     });
 
-    it('should call the flush callback', () => {
-      expect(flushTicksSpy.callCount).to.equal(0);
-      // coreServicesAvailable calls flush once.
-      perf.coreServicesAvailable();
-      expect(flushTicksSpy.callCount).to.equal(1);
-      perf.flush();
-      expect(flushTicksSpy.callCount).to.equal(2);
-      perf.flush();
-      expect(flushTicksSpy.callCount).to.equal(3);
+    describe('and performanceTracking is on', () => {
+
+      beforeEach(() => {
+        sandbox.stub(viewer, 'isPerformanceTrackingOn')
+            .returns(true);
+      });
+
+      it('should forward all queued tick events', () => {
+        perf.tick('start0');
+        clock.tick(1);
+        perf.tick('start1', 'start0');
+
+        expect(perf.events_.length).to.equal(2);
+
+        perf.coreServicesAvailable();
+
+        expect(tickSpy.firstCall.args[0]).to.be.jsonEqual({
+          label: 'start0',
+          from: null,
+          value: 0,
+        });
+        expect(tickSpy.secondCall.args[0]).to.be.jsonEqual({
+          label: 'start1',
+          from: 'start0',
+          value: 1,
+        });
+      });
+
+      it('should have no more queued tick events after flush', () => {
+        perf.tick('start0');
+        perf.tick('start1');
+
+        expect(perf.events_.length).to.equal(2);
+
+        perf.coreServicesAvailable();
+
+        expect(perf.events_.length).to.equal(0);
+      });
+
+      it('should forward tick events', () => {
+        perf.coreServicesAvailable();
+
+        clock.tick(100);
+        perf.tick('start0');
+        perf.tick('start1', 'start0', 300);
+
+        expect(tickSpy.firstCall.args[0]).to.be.jsonEqual({
+          label: 'start0',
+          from: null,
+          value: 100,
+        });
+        expect(tickSpy.secondCall.args[0]).to.be.jsonEqual({
+          label: 'start1',
+          from: 'start0',
+          value: 300,
+        });
+      });
+
+      it('should call the flush callback', () => {
+        expect(flushTicksSpy.callCount).to.equal(0);
+        // coreServicesAvailable calls flush once.
+        perf.coreServicesAvailable();
+        expect(flushTicksSpy.callCount).to.equal(1);
+        perf.flush();
+        expect(flushTicksSpy.callCount).to.equal(2);
+        perf.flush();
+        expect(flushTicksSpy.callCount).to.equal(3);
+      });
     });
+
   });
 
   describe('coreServicesAvailable', () => {

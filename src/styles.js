@@ -35,7 +35,7 @@ import {platformFor} from './platform';
  *     after.
  */
 export function installStyles(doc, cssText, cb, opt_isRuntimeCss) {
-  if (platformFor(doc.defaultView).isIos()) {
+  if (platformFor(doc.defaultView).isIos() && opt_isRuntimeCss) {
     setStyle(doc.documentElement, 'cursor', 'pointer');
   }
   const style = doc.createElement('style');

@@ -116,9 +116,16 @@ func handle(w http.ResponseWriter, r *http.Request) {
 		severity = "ERROR"
 		level = logging.Error
 		errorType += "-cdn"
+	} else {
+		errorType += "-origin"
 	}
 	if r.URL.Query().Get("3p") == "1" {
-		errorType = "-3p"
+		errorType += "-3p"
+	} else {
+		errorType += "-1p"
+	}
+	if r.URL.Query().Get("ca") == "1" {
+		errorType += "-canary"
 	}
 
 	if level != logging.Error && rand.Float32() > 0.01 {

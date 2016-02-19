@@ -50,6 +50,8 @@ describe('Styles', () => {
     expect(elem.style.cursor).to.not.be.ok;
     sandbox.stub(platform, 'isIos').returns(true);
     styles.installStyles(document, '', () => {});
+    expect(elem.style.cursor).to.not.be.ok;
+    styles.installStyles(document, '', () => {}, true);
     expect(elem.style.cursor).to.equal('pointer');
   });
 });

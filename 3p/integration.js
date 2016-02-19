@@ -34,6 +34,7 @@ import {doubleclick} from '../ads/doubleclick';
 import {dotandads} from '../ads/dotandads';
 import {facebook} from './facebook';
 import {manageWin} from './environment';
+import {mediaimpact} from '../ads/mediaimpact';
 import {nonSensitiveDataPostMessage, listenParent} from './messaging';
 import {twitter} from './twitter';
 import {yieldmo} from '../ads/yieldmo';
@@ -43,6 +44,7 @@ import {assert} from '../src/asserts';
 import {taboola} from '../ads/taboola';
 import {smartadserver} from '../ads/smartadserver';
 import {revcontent} from '../ads/revcontent';
+import {openadstream} from '../ads/openadstream';
 
 /**
  * Whether the embed type may be used with amp-embed tag.
@@ -68,7 +70,9 @@ register('_ping_', function(win, data) {
 register('twitter', twitter);
 register('facebook', facebook);
 register('smartadserver', smartadserver);
+register('mediaimpact', mediaimpact);
 register('revcontent', revcontent);
+register('openadstream', openadstream);
 
 /**
  * Visible for testing.
@@ -226,7 +230,7 @@ function updateVisibilityState(global) {
  *    observes for resize status messages.
  */
 function onResizeSuccess(observerCallback) {
-  return listenParent(window, 'embed-resize-changed', data => {
+  return listenParent(window, 'embed-size-changed', data => {
     observerCallback(data.requestedHeight);
   });
 }
@@ -238,7 +242,7 @@ function onResizeSuccess(observerCallback) {
  *    observes for resize status messages.
  */
 function onResizeDenied(observerCallback) {
-  return listenParent(window, 'embed-resize-denied', data => {
+  return listenParent(window, 'embed-size-denied', data => {
     observerCallback(data.requestedHeight);
   });
 }

@@ -234,6 +234,10 @@ export class Viewer {
         this.paddingTop_;
     log.fine(TAG_, '- padding-top:', this.paddingTop_);
 
+    /** @private @const {boolean} */
+    this.performanceTracking_ = this.params_['csi'] === '1';
+    log.fine(TAG_, '- performanceTracking:', this.performanceTracking_);
+
     /** @private {boolean} */
     this.hasBeenVisible_ = this.isVisible();
 
@@ -391,6 +395,14 @@ export class Viewer {
    */
   isRuntimeOn() {
     return this.isRuntimeOn_;
+  }
+
+  /**
+   * Identifies if the viewer is recording instrumentation.
+   * @return {boolean}
+   */
+  isPerformanceTrackingOn() {
+    return this.performanceTracking_;
   }
 
   /**

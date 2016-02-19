@@ -21,11 +21,32 @@ import {loadScript, checkData} from '../src/3p';
  * @param {!Object} data
  */
 export function doubleclick(global, data) {
+  const experimentFraction = 0.01;
+
   checkData(data, [
-    'slot', 'targeting', 'categoryExclusion',
+    'slot', 'targeting', 'categoryExclusions',
     'tagForChildDirectedTreatment', 'cookieOptions',
     'overrideWidth', 'overrideHeight',
   ]);
+
+  if (global.context.location.href.indexOf('google_glade=1') > 0 ||
+      Math.random() < experimentFraction) {
+    doubleClickWithGlade(global, data);
+  } else {
+    doubleClickWithGpt(global, data);
+  }
+}
+
+/**
+ * @param {!Window} global
+ * @param {!Object} data
+ */
+function doubleClickWithGpt(global, data) {
+  const dimensions = [[
+    parseInt(data.overridewidth || data.width, 10),
+    parseInt(data.overrideheight || data.height, 10)
+  ]];
+
   if (global.context.clientId) {
     // Read by GPT for GA/GPT integration.
     global.gaGlobal = {
@@ -33,38 +54,32 @@ export function doubleclick(global, data) {
       hid: global.context.pageViewId,
     };
   }
+
   loadScript(global, 'https://www.googletagservices.com/tag/js/gpt.js', () => {
-    global.googletag.cmd.push(function() {
+    global.googletag.cmd.push(() => {
       const googletag = global.googletag;
-      const dimensions = [[
-        parseInt(data.overrideWidth || data.width, 10),
-        parseInt(data.overrideHeight || data.height, 10)
-      ]];
-      const clientId = window.context.clientId;
-      const pageViewId = window.context.pageViewId;
-      let correlator = null;
-      if (clientId != null) {
-        correlator = pageViewId + (clientId.replace(/\D/g, '') % 1e6) * 1e6;
-      } else {
-        correlator = pageViewId;
-      }
       const pubads = googletag.pubads();
       const slot = googletag.defineSlot(data.slot, dimensions, 'c')
           .addService(pubads);
+
       pubads.enableSingleRequest();
       pubads.markAsAmp();
-      pubads.set('page_url', context.canonicalUrl);
-      pubads.setCorrelator(Number(correlator));
+      pubads.set('page_url', global.context.canonicalUrl);
+      pubads.setCorrelator(Number(getCorrelator(global)));
       googletag.enableServices();
 
-      if (data.targeting) {
-        for (const key in data.targeting) {
-          slot.setTargeting(key, data.targeting[key]);
+      if (data.categoryExclusions) {
+        if (Array.isArray(data.categoryExclusions)) {
+          for (const categoryExclusion of data.categoryExclusions) {
+            slot.setCategoryExclusion(categoryExclusion);
+          }
+        } else {
+          slot.setCategoryExclusion(data.categoryExclusions);
         }
       }
 
-      if (data.categoryExclusion) {
-        slot.setCategoryExclusion(data.categoryExclusion);
+      if (data.cookieOptions) {
+        pubads.setCookieOptions(data.cookieOptions);
       }
 
       if (data.tagForChildDirectedTreatment != undefined) {
@@ -72,19 +87,19 @@ export function doubleclick(global, data) {
             data.tagForChildDirectedTreatment);
       }
 
-      if (data.cookieOptions) {
-        pubads.setCookieOptions(data.cookieOptions);
+      if (data.targeting) {
+        for (const key in data.targeting) {
+          slot.setTargeting(key, data.targeting[key]);
+        }
       }
 
-      pubads.addEventListener('slotRenderEnded', function(event) {
-        let creativeId = event.creativeId ||
-            // Full for backfill or empty case. Empty is handled below.
-            '_backfill_';
+      pubads.addEventListener('slotRenderEnded', event => {
+        let creativeId = event.creativeId || '_backfill_';
         if (event.isEmpty) {
-          context.noContentAvailable();
+          global.context.noContentAvailable();
           creativeId = '_empty_';
         }
-        context.reportRenderedEntityIdentifier('dfp-' + creativeId);
+        global.context.reportRenderedEntityIdentifier('dfp-' + creativeId);
       });
 
       // Exported for testing.
@@ -92,4 +107,56 @@ export function doubleclick(global, data) {
       googletag.display('c');
     });
   });
+}
+
+/**
+ * @param {!Window} global
+ * @param {!Object} data
+ */
+function doubleClickWithGlade(global, data) {
+  const height = parseInt(data.overrideHeight || data.height, 10);
+  const width = parseInt(data.overrideWidth || data.width, 10);
+
+  const jsonParameters = {};
+  if (data.categoryExclusions) {
+    jsonParameters.categoryExclusions = data.categoryExclusions;
+  }
+  if (data.cookieOptions) {
+    jsonParameters.cookieOptOut = data.cookieOptions;
+  }
+  if (data.tagForChildDirectedTreatment != undefined) {
+    jsonParameters.tagForChildDirectedTreatment =
+        data.tagForChildDirectedTreatment;
+  }
+  if (data.targeting) {
+    jsonParameters.targeting = data.targeting;
+  }
+
+  const slot = global.document.querySelector('#c');
+  slot.setAttribute('data-glade', '');
+  slot.setAttribute('data-amp-ad', '');
+  slot.setAttribute('data-ad-unit-path', data.slot);
+  if (Object.keys(jsonParameters).length > 0) {
+    slot.setAttribute('data-json', JSON.stringify(jsonParameters));
+  }
+  slot.setAttribute('data-page-url', global.context.canonicalUrl);
+  slot.setAttribute('height', height);
+  slot.setAttribute('width', width);
+
+  window.glade = {correlator: getCorrelator(global)};
+  loadScript(global, 'https://securepubads.g.doubleclick.net/static/glade.js');
+}
+
+/**
+ * @param {!Object} data
+ * @return {number}
+ */
+function getCorrelator(global) {
+  const clientId = global.context.clientId;
+  const pageViewId = global.context.pageViewId;
+  if (global.context.clientId) {
+    return pageViewId + (clientId.replace(/\D/g, '') % 1e6) * 1e6;
+  } else {
+    return pageViewId;
+  }
 }

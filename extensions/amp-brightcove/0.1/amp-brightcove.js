@@ -101,7 +101,10 @@ class AmpBrightcove extends AMP.BaseElement {
     It's not a 'real' video.js plugin, just a plain script running in
     the iframe so needs no configuration options.
     */
-    this.iframe_.contentWindow./*OK*/postMessage('pause', 'https://players.brightcove.net');
+    if (this.iframe_ && this.iframe_.contentWindow) {
+      this.iframe_.contentWindow./*OK*/postMessage(
+          'pause', 'https://players.brightcove.net');
+    }
     return false;
   }
 };

@@ -36,6 +36,9 @@ export function reportError(error, opt_associatedElement) {
   if (!window.console) {
     return;
   }
+  if (!error) {
+    error = new Error('no error supplied');
+  }
   if (error.reported) {
     return;
   }
@@ -75,7 +78,7 @@ export function reportError(error, opt_associatedElement) {
 export function installErrorReporting(win) {
   win.onerror = reportErrorToServer;
   win.addEventListener('unhandledrejection', event => {
-    reportError(event.reason);
+    reportError(event.reason || new Error('rejected promise ' + event));
   });
 }
 
@@ -129,6 +132,9 @@ export function getErrorReportUrl(message, filename, line, col, error) {
       '&m=' + encodeURIComponent(message);
   if (window.context && window.context.location) {
     url += '&3p=1';
+  }
+  if (window.AMP_CONFIG && window.AMP_CONFIG.canary) {
+    url += '&ca=1';
   }
 
   if (error) {

@@ -93,6 +93,20 @@ describe('reportErrorToServer', () => {
     expect(query['3p']).to.equal('1');
   });
 
+  it('reportError marks canary', () => {
+    window.AMP_CONFIG = {
+      canary: true,
+    };
+    const e = new Error('XYZ');
+    e.fromAssert = true;
+    const url = parseUrl(
+        getErrorReportUrl(undefined, undefined, undefined, undefined, e));
+    const query = parseQueryString(url.search);
+
+    expect(query.m).to.equal('XYZ');
+    expect(query['ca']).to.equal('1');
+  });
+
   it('reportError without error object', () => {
     const url = parseUrl(
         getErrorReportUrl('foo bar', 'foo.js', '11', '22', undefined));
