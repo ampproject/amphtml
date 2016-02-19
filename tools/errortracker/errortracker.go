@@ -112,29 +112,32 @@ func handle(w http.ResponseWriter, r *http.Request) {
 	level := logging.Info
 	// But if the request comes from the cache (and thus only from valid AMP
 	// docs) we log as "ERROR".
-	if strings.HasPrefix(r.Referer(), "https://cdn.ampproject.org/") {
+	if strings.HasPrefix(r.Referer(), "https://cdn.ampproject.org/") ||
+			strings.Contains(r.Referer(), ".ampproject.net/") {
 		severity = "ERROR"
 		level = logging.Error
 		errorType += "-cdn"
 	} else {
 		errorType += "-origin"
 	}
+	is3p := false
 	if r.URL.Query().Get("3p") == "1" {
+		is3p = true
 		errorType += "-3p"
 	} else {
 		errorType += "-1p"
 	}
+	isCanary := false;
 	if r.URL.Query().Get("ca") == "1" {
 		errorType += "-canary"
+		isCanary = true;
 	}
-
-	if level != logging.Error && rand.Float32() > 0.01 {
+	if !isCanary && !is3p && level != logging.Error && rand.Float32() > 0.01 {
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprintln(w, "THROTTLED\n")
 		return
 	}
-
 
 	event := &ErrorEvent{
 		Message:     r.URL.Query().Get("m"),

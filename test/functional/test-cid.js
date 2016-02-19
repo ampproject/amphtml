@@ -355,6 +355,31 @@ describe('cid', () => {
         });
   });
 
+  it('should update fallback cookie expiration when present', () => {
+    fakeWin.location.href = 'https://foo.abc.org/v/www.DIFFERENT.com/foo/?f=0';
+    fakeWin.location.hostname = 'foo.abc.org';
+    fakeWin.document.cookie = 'cookie_name=amp-12345';
+
+    return cid.get('cookie_name', hasConsent).then(c => {
+      expect(fakeWin.document.cookie).to.equal(
+        'cookie_name=' + encodeURIComponent(c) +
+        '; path=/' +
+        '; domain=abc.org' +
+        '; expires=Fri, 01 Jan 1971 00:00:00 GMT'  // 1 year from 0.
+      );
+    });
+  });
+
+  it('should not update expiration when created externally', () => {
+    fakeWin.location.href = 'https://foo.abc.org/v/www.DIFFERENT.com/foo/?f=0';
+    fakeWin.location.hostname = 'foo.abc.org';
+    fakeWin.document.cookie = 'cookie_name=12345';
+
+    return cid.get('cookie_name', hasConsent).then(() => {
+      expect(fakeWin.document.cookie).to.equal('cookie_name=12345');
+    });
+  });
+
   function compare(externalCidScope, compareValue) {
     return cid.get(externalCidScope, hasConsent).then(c => {
       expect(c).to.equal(compareValue);

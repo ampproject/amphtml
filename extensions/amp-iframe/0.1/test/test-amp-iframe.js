@@ -323,6 +323,15 @@ describe('amp-iframe', () => {
           'parent.parent./*OK*/postMessage(\'loaded-iframe\', \'*\');}' +
           '</script>', 'Allow-Same-Origin');
       }).to.throw(/allow-same-origin is not allowed with the srcdoc attribute/);
+
+      expect(() => {
+        amp.assertSource('https://3p.ampproject.net:999/t',
+            'https://google.com/abc');
+      }).to.throw(/not allow embedding of frames from ampproject\.\*/);
+      expect(() => {
+        amp.assertSource('https://3p.ampproject.net:999/t',
+            'https://google.com/abc');
+      }).to.throw(/not allow embedding of frames from ampproject\.\*/);
     });
   });
 
@@ -400,8 +409,7 @@ describe('amp-iframe', () => {
     }).then(amp => {
       const impl = amp.container.implementation_;
       return timer.promise(100).then(() => {
-        expect(impl.iframe_.style.zIndex).to.equal('');
-        expect(impl.placeholder_).to.be.null;
+        expect(impl.iframe_.style.zIndex).to.equal('0');
         expect(activateIframeSpy_.callCount).to.equal(2);
       });
     });

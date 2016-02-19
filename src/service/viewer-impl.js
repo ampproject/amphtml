@@ -15,13 +15,15 @@
  */
 
 import {Observable} from '../observable';
-import {assert} from '../asserts';
+import {assertEnumValue} from '../asserts';
 import {documentStateFor} from '../document-state';
+import {getMode} from '../mode';
 import {getService} from '../service';
 import {log} from '../log';
 import {parseQueryString, parseUrl, removeFragment} from '../url';
 import {platform} from '../platform';
 import {timer} from '../timer';
+import {reportError} from '../error';
 
 
 const TAG_ = 'Viewer';
@@ -66,19 +68,34 @@ export const ViewportType = {
 /**
  * Visibility state of the AMP document.
  * @enum {string}
- * @private
  */
 export const VisibilityState = {
+  /**
+   * The AMP document is being pre-rendered before being shown.
+   */
+  PRERENDER: 'prerender',
 
   /**
-   * Viewer has shown the AMP document.
+   * The AMP document is currently active and visible.
    */
   VISIBLE: 'visible',
 
   /**
-   * Viewer has indicated that AMP document is hidden.
+   * The AMP document is active but the browser tab or AMP app is not.
    */
-  HIDDEN: 'hidden'
+  HIDDEN: 'hidden',
+
+  /**
+   * The AMP document is visible, but the user has started swiping away from
+   * it. The runtime may stop active playback.
+   */
+  PAUSED: 'paused',
+
+  /**
+   * The AMP document is no longer active because the user swiped away or
+   * closed the viewer. The document may become visible again later.
+   */
+  INACTIVE: 'inactive',
 };
 
 
@@ -125,6 +142,9 @@ export class Viewer {
 
     /** @private {string} */
     this.visibilityState_ = VisibilityState.VISIBLE;
+
+    /** @private {string} */
+    this.viewerVisibilityState_ = this.visibilityState_;
 
     /** @private {number} */
     this.prerenderSize_ = 1;
@@ -202,9 +222,8 @@ export class Viewer {
         this.overtakeHistory_;
     log.fine(TAG_, '- history:', this.overtakeHistory_);
 
-    this.visibilityState_ = this.params_['visibilityState'] ||
-        this.visibilityState_;
-    log.fine(TAG_, '- visibilityState:', this.visibilityState_);
+    this.setVisibilityState_(this.params_['visibilityState']);
+    log.fine(TAG_, '- visibilityState:', this.getVisibilityState());
 
     this.prerenderSize_ = parseInt(this.params_['prerenderSize'], 10) ||
         this.prerenderSize_;
@@ -214,6 +233,13 @@ export class Viewer {
     // Configure scrolling parameters when AMP is embeded in a viewer on iOS.
     if (this.viewportType_ == ViewportType.NATURAL && this.isEmbedded_ &&
             platform.isIos()) {
+      this.viewportType_ = ViewportType.NATURAL_IOS_EMBED;
+    }
+    // Enable iOS Embedded mode so that it's easy to test against a more
+    // realistic iOS environment.
+    if (platform.isIos() &&
+            this.viewportType_ != ViewportType.NATURAL_IOS_EMBED &&
+            (getMode().localDev || getMode().development)) {
       this.viewportType_ = ViewportType.NATURAL_IOS_EMBED;
     }
     log.fine(TAG_, '- viewportType:', this.viewportType_);
@@ -242,31 +268,38 @@ export class Viewer {
     this.hasBeenVisible_ = this.isVisible();
 
     // Wait for document to become visible.
-    this.docState_.onVisibilityChanged(this.onVisibilityChange_.bind(this));
+    this.docState_.onVisibilityChanged(this.recheckVisibilityState_.bind(this));
 
     /**
      * This promise will resolve when communications channel has been
-     * established or timeout in 5 seconds. The timeout is needed to avoid
+     * established or timeout in 20 seconds. The timeout is needed to avoid
      * this promise becoming a memory leak with accumulating undelivered
-     * messages.
-     * @private @const {!Promise<!Viewer>}
+     * messages. The promise is only available when the document is embedded.
+     * @private @const {?Promise}
      */
-    this.messagingReadyPromise_ = timer.timeoutPromise(
-        5000,
-        new Promise(resolve => {
-          /** @private @const {function(!Viewer)} */
-          this.messagingReadyResolver_ = resolve;
-        })).catch(() => {
-          throw new Error('no messaging channel');
-        });
+    this.messagingReadyPromise_ = this.isEmbedded_ ?
+        timer.timeoutPromise(
+            20000,
+            new Promise(resolve => {
+              /** @private @const {function()|undefined} */
+              this.messagingReadyResolver_ = resolve;
+            })).catch(reason => {
+              throw getChannelError(reason);
+            }) : null;
 
     /**
      * A promise for non-essential messages. These messages should not fail
      * if there's no messaging channel set up. But ideally viewer would try to
-     * deliver if at all possible.
-     * @private @const {!Promise<!Viewer>}
+     * deliver if at all possible. This promise is only available when the
+     * document is embedded.
+     * @private @const {?Promise}
      */
-    this.messagingMaybePromise_ = this.messagingReadyPromise_.catch(() => {});
+    this.messagingMaybePromise_ = this.isEmbedded_ ?
+        this.messagingReadyPromise_
+            .catch(reason => {
+              // Don't fail promise, but still report.
+              reportError(getChannelError(reason));
+            }) : null;
 
     // Trusted viewer and referrer.
     let trustedViewerResolved;
@@ -356,6 +389,7 @@ export class Viewer {
 
     // Check if by the time the `Viewer`
     // instance is constructed, the document is already `visible`.
+    this.recheckVisibilityState_();
     this.onVisibilityChange_();
   }
 
@@ -440,6 +474,48 @@ export class Viewer {
     return this.visibilityState_;
   }
 
+  recheckVisibilityState_() {
+    this.setVisibilityState_(this.viewerVisibilityState_);
+  }
+
+  /**
+   * Sets the viewer defined visibility state.
+   * @param {string|undefined} state
+   */
+  setVisibilityState_(state) {
+    if (!state) {
+      return;
+    }
+    const oldState = this.visibilityState_;
+    state = assertEnumValue(VisibilityState, state, 'VisibilityState');
+
+    // The viewer is informing us we are not currently active because we are
+    // being pre-rendered, or the user swiped to another doc (or closed the
+    // viewer). Unfortunately, the viewer sends HIDDEN instead of PRERENDER or
+    // INACTIVE, though we know better.
+    if (state === VisibilityState.HIDDEN) {
+      state = this.hasBeenVisible_ ?
+        VisibilityState.INACTIVE :
+        VisibilityState.PRERENDER;
+    }
+
+    this.viewerVisibilityState_ = state;
+
+    if (this.docState_.isHidden() &&
+        (state === VisibilityState.VISIBLE ||
+         state === VisibilityState.PAUSED)) {
+      state = VisibilityState.HIDDEN;
+    }
+
+    this.visibilityState_ = state;
+
+    log.fine(TAG_, 'visibilitychange event:', this.getVisibilityState());
+
+    if (oldState !== state) {
+      this.onVisibilityChange_();
+    }
+  }
+
   /**
    * Whether the AMP document currently visible. The reasons why it might not
    * be visible include user switching to another tab, browser running the
@@ -448,8 +524,7 @@ export class Viewer {
    * @return {boolean}
    */
   isVisible() {
-    return this.visibilityState_ == VisibilityState.VISIBLE &&
-        !this.docState_.isHidden();
+    return this.getVisibilityState() == VisibilityState.VISIBLE;
   }
 
   /**
@@ -614,7 +689,11 @@ export class Viewer {
    * @param {number} height
    */
   postDocumentReady(width, height) {
-    this.sendMessage_('documentLoaded', {width: width, height: height}, false);
+    this.sendMessageUnreliable_('documentLoaded', {
+      width: width,
+      height: height,
+      title: this.win.document.title,
+    }, false);
   }
 
   /**
@@ -623,7 +702,8 @@ export class Viewer {
    * @param {number} height
    */
   postDocumentResized(width, height) {
-    this.sendMessage_('documentResized', {width: width, height: height}, false);
+    this.sendMessageUnreliable_(
+        'documentResized', {width: width, height: height}, false);
   }
 
   /**
@@ -632,7 +712,7 @@ export class Viewer {
    * @return {!Promise}
    */
   requestFullOverlay() {
-    return this.sendMessage_('requestFullOverlay', {}, true);
+    return this.sendMessageUnreliable_('requestFullOverlay', {}, true);
   }
 
   /**
@@ -641,7 +721,7 @@ export class Viewer {
    * @return {!Promise}
    */
   cancelFullOverlay() {
-    return this.sendMessage_('cancelFullOverlay', {}, true);
+    return this.sendMessageUnreliable_('cancelFullOverlay', {}, true);
   }
 
   /**
@@ -650,7 +730,8 @@ export class Viewer {
    * @return {!Promise}
    */
   postPushHistory(stackIndex) {
-    return this.sendMessage_('pushHistory', {stackIndex: stackIndex}, true);
+    return this.sendMessageUnreliable_(
+        'pushHistory', {stackIndex: stackIndex}, true);
   }
 
   /**
@@ -659,7 +740,8 @@ export class Viewer {
    * @return {!Promise}
    */
   postPopHistory(stackIndex) {
-    return this.sendMessage_('popHistory', {stackIndex: stackIndex}, true);
+    return this.sendMessageUnreliable_(
+        'popHistory', {stackIndex: stackIndex}, true);
   }
 
   /**
@@ -667,7 +749,7 @@ export class Viewer {
    * @return {!Promise<string>}
    */
   getBaseCid() {
-    return this.sendMessage_('cid', undefined, true);
+    return this.sendMessage('cid', undefined, true);
   }
 
   /**
@@ -675,14 +757,14 @@ export class Viewer {
    * @param {!JSONObject} message
    */
   tick(message) {
-    this.sendMessage_('tick', message, false);
+    this.sendMessageUnreliable_('tick', message, false);
   }
 
   /**
    * Triggers "sendCsi" event for the viewer.
    */
   flushTicks() {
-    this.sendMessage_('sendCsi', undefined, false);
+    this.sendMessageUnreliable_('sendCsi', undefined, false);
   }
 
   /**
@@ -690,7 +772,7 @@ export class Viewer {
    * @param {!JSONObject} message
    */
   setFlushParams(message) {
-    this.sendMessage_('setFlushParams', message, false);
+    this.sendMessageUnreliable_('setFlushParams', message, false);
   }
 
   /**
@@ -725,15 +807,11 @@ export class Viewer {
       return Promise.resolve();
     }
     if (eventType == 'visibilitychange') {
-      if (data['state'] !== undefined) {
-        this.visibilityState_ = data['state'];
-      }
       if (data['prerenderSize'] !== undefined) {
         this.prerenderSize_ = data['prerenderSize'];
+        log.fine(TAG_, '- prerenderSize change:', this.prerenderSize_);
       }
-      log.fine(TAG_, 'visibilitychange event:', this.visibilityState_,
-          this.prerenderSize_);
-      this.onVisibilityChange_();
+      this.setVisibilityState_(data['state']);
       return Promise.resolve();
     }
     if (eventType == 'broadcast') {
@@ -752,12 +830,18 @@ export class Viewer {
    * @export
    */
   setMessageDeliverer(deliverer, origin) {
-    assert(!this.messageDeliverer_, 'message deliverer can only be set once');
+    if (this.messageDeliverer_) {
+      throw new Error('message channel can only be initialized once');
+    }
+    if (!origin) {
+      throw new Error('message channel must have an origin');
+    }
     log.fine(TAG_, 'message channel established with origin: ', origin);
     this.messageDeliverer_ = deliverer;
-    this.messagingReadyResolver_(this);
-    // TODO(dvoytenko, #1764): Make `origin` required when viewers catch up.
     this.messagingOrigin_ = origin;
+    if (this.messagingReadyResolver_) {
+      this.messagingReadyResolver_();
+    }
     if (this.trustedViewerResolver_) {
       this.trustedViewerResolver_(
           origin ? this.isTrustedViewerOrigin_(origin) : false);
@@ -788,8 +872,11 @@ export class Viewer {
    * @return {!Promise<*>|undefined}
    */
   sendMessage(eventType, data, awaitResponse) {
+    if (!this.messagingReadyPromise_) {
+      return Promise.reject(getChannelError());
+    }
     return this.messagingReadyPromise_.then(() => {
-      return this.sendMessage_(eventType, data, awaitResponse);
+      return this.sendMessageUnreliable_(eventType, data, awaitResponse);
     });
   }
 
@@ -814,13 +901,17 @@ export class Viewer {
   }
 
   /**
+   * This message queues up the message to be sent when communication channel
+   * is established. If the communication channel is not established at
+   * this time, this method responds immediately with a Promise that yields
+   * `undefined` value.
    * @param {string} eventType
    * @param {*} data
    * @param {boolean} awaitResponse
    * @return {!Promise<*>|undefined}
    * @private
    */
-  sendMessage_(eventType, data, awaitResponse) {
+  sendMessageUnreliable_(eventType, data, awaitResponse) {
     if (this.messageDeliverer_) {
       return this.messageDeliverer_(eventType, data, awaitResponse);
     }
@@ -852,9 +943,13 @@ export class Viewer {
    * @private
    */
   maybeSendMessage_(eventType, data) {
+    if (!this.messagingMaybePromise_) {
+      // Messaging is not expected.
+      return;
+    }
     this.messagingMaybePromise_.then(() => {
       if (this.messageDeliverer_) {
-        this.sendMessage_(eventType, data, false);
+        this.sendMessageUnreliable_(eventType, data, false);
       }
     });
   }
@@ -870,11 +965,25 @@ export class Viewer {
  * @param {!Object<string, string>} allParams
  * @private
  */
-export function parseParams_(str, allParams) {
+function parseParams_(str, allParams) {
   const params = parseQueryString(str);
   for (const k in params) {
     allParams[k] = params[k];
   }
+}
+
+
+/**
+ * Creates an error for the case where a channel cannot be established.
+ * @param {!Error=} opt_reason
+ * @return {!Error}
+ */
+function getChannelError(opt_reason) {
+  if (opt_reason instanceof Error) {
+    opt_reason.message = 'No messaging channel: ' + opt_reason.message;
+    return opt_reason;
+  }
+  return new Error('No messaging channel: ' + opt_reason);
 }
 
 

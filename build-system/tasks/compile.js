@@ -145,7 +145,9 @@ function compile(entryModuleFilename, outputDir,
       );
     }
     unneededFiles.forEach(function(fake) {
-      fs.writeFileSync(fake, '// Not needed in closure compiler\n');
+      if (!fs.existsSync(fake)) {
+        fs.writeFileSync(fake, '// Not needed in closure compiler\n');
+      }
     });
     /*eslint "google-camelcase/google-camelcase": 0*/
     return gulp.src(srcs)

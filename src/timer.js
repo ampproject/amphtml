@@ -17,6 +17,8 @@
 // Requires polyfills in immediate side effect.
 import './polyfills';
 
+import {userError} from './asserts';
+
 /**
  * Helper with all things Timer.
  */
@@ -130,15 +132,16 @@ export class Timer {
    * will resolve based on the opt_racePromise, whichever happens first.
    * @param {number} delay
    * @param {!Promise<RESULT>|undefined} opt_racePromise
+   * @param {string=} opt_message
    * @return {!Promise<RESULT>}
    * @template RESULT
    */
-  timeoutPromise(delay, opt_racePromise) {
+  timeoutPromise(delay, opt_racePromise, opt_message) {
     let timerKey = null;
     const delayPromise = new Promise((_resolve, reject) => {
       timerKey = this.delay(() => {
         timerKey = -1;
-        reject(new Error('timeout'));
+        reject(userError(opt_message || 'timeout'));
       }, delay);
       if (timerKey == -1) {
         reject(new Error('Failed to schedule timer.'));
@@ -153,11 +156,7 @@ export class Timer {
     if (!opt_racePromise) {
       return delayPromise;
     }
-    // Avoids Promise->race due to presubmit check against it.
-    return new Promise((resolve, reject) => {
-      delayPromise.then(resolve, reject);
-      opt_racePromise.then(resolve, reject);
-    });
+    return Promise.race([delayPromise, opt_racePromise]);
   }
 }
 

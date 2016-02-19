@@ -83,6 +83,13 @@ var forbiddenTerms = {
       'extensions/amp-access/0.1/amp-access.js',
     ],
   },
+  'installActivityService': {
+    message: privateServiceFactory,
+    whitelist: [
+      'src/service/activity-impl.js',
+      'extensions/amp-analytics/0.1/amp-analytics.js'
+    ]
+  },
   'installCidService': {
     message: privateServiceFactory,
     whitelist: [
@@ -140,6 +147,7 @@ var forbiddenTerms = {
       'src/service/viewer-impl.js',
       'src/service/storage-impl.js',
       'examples/viewer-integr-messaging.js',
+      'extensions/amp-access/0.1/login-dialog.js',
     ],
   },
   // Privacy sensitive
@@ -193,6 +201,7 @@ var forbiddenTerms = {
       'extensions/amp-user-notification/0.1/amp-user-notification.js',
       'src/experiments.js',
       'src/service/storage-impl.js',
+      'src/service/viewport-impl.js',
       'tools/experiments/experiments.js',
     ]
   },
@@ -255,7 +264,13 @@ var forbiddenTerms = {
       'validator/validator.js'
     ]
   },
-  '\\.endsWith': es6polyfill,
+  '\\.endsWith': {
+    message: es6polyfill,
+    whitelist: [
+      // .endsWith occurs in babel generated code.
+      'dist.3p/current/integration.js',
+    ],
+  },
   // TODO: (erwinm) rewrite the destructure and spread warnings as
   // eslint rules (takes more time than this quick regex fix).
   // No destructuring allowed since we dont ship with Array polyfills.
@@ -275,6 +290,13 @@ var forbiddenTerms = {
     message: 'Use Viewer.getReferrerUrl() instead.',
     whitelist: [
       'src/service/viewer-impl.js',
+      'src/error.js',
+    ],
+  },
+  '(doc.*)\\.contains': {
+    message: 'Use dom.documentContains API.',
+    whitelist: [
+      'src/dom.js',
     ],
   },
   'getUnconfirmedReferrerUrl': {
@@ -354,6 +376,13 @@ var forbiddenTermsSrcInclusive = {
   '\\.webkitConvertPointFromNodeToPage(?!_)': bannedTermsHelpString,
   '\\.webkitConvertPointFromPageToNode(?!_)': bannedTermsHelpString,
   '\\.changeHeight(?!_)': bannedTermsHelpString,
+  'reject\\(\\)': {
+    message: 'Always supply a reason in rejections. ' +
+        'error.cancellation() may be applicable.',
+    whitelist: [
+      'extensions/amp-access/0.1/access-expr-impl.js',
+    ],
+  }
 };
 
 // Terms that must appear in a source file.

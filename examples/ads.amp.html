@@ -9,6 +9,7 @@
     amp-ad {
       max-width: 500px;
     }
+    /* Included here to make sure it does not render. */
     .fixed {
       position: fixed;
       top: 0;
@@ -39,7 +40,7 @@
   </amp-ad>
 
   <div class="fixed">
-    <h2>A9</h2>
+    <h4>Fixed positioned ad (will not render)</h4>
     <amp-ad width=300 height=250
         type="a9"
         data-aax_size="300x250"
@@ -67,6 +68,15 @@
   <amp-ad width=300 height=250
       type="adtech"
       src="https://adserver.adtechus.com/addyn/3.0/5280.1/2274008/0/-1/ADTECH;size=300x250;key=plumber;alias=careerbear-ros-middle1;loc=300;;target=_blank;grp=27980912;misc=3767074">
+  </amp-ad>
+
+  <h2>Teads</h2>
+  <amp-ad width=300 height=220
+      type="teads"
+      data-pid="42266"
+      layout="responsive">
+
+      <div fallback>Teads fallback - Discover <a href="http://teads.tv/en/platform/">inRead by Teads</a> !</div>
   </amp-ad>
 
   <h2>Doubleclick</h2>
@@ -128,6 +138,19 @@
       data-slot="/35096353/amptesting/badvideoad">
     </amp-ad>
 
+  <h2>Criteo</h2>
+  <amp-ad width="300" height="250"
+      type="criteo"
+      data-zone="314159">
+  </amp-ad>
+
+  <h2>Flite</h2>
+  <amp-ad width=320 height=568
+      type = "flite"
+      data-guid = "aa7bf589-6d51-4194-91f4-d22eef8e3688"
+      data-mixins="">
+  </amp-ad>
+
   <h2>Media Impact</h2>
   <amp-ad width="320" height="250"
           type="mediaimpact"
@@ -179,14 +202,14 @@
   </amp-ad>
 
   <h2>Open AdStream single ad</h2>
-  <amp-ad width=300 height=250 
-    type="openadstream" 
-    data-adhost="oasc-training7.247realmedia.com" 
-    data-sitepage="dx_tag_pvt_site" 
-    data-pos="x04" 
+  <amp-ad width=300 height=250
+    type="openadstream"
+    data-adhost="oasc-training7.247realmedia.com"
+    data-sitepage="dx_tag_pvt_site"
+    data-pos="x04"
     data-query="keyword=keyvalue&key2=value2" >
   </amp-ad>
-  
+
   <h2>SmartAdServer ad</h2>
   <amp-ad width=320 height=50
       type="smartadserver"
@@ -213,6 +236,13 @@
 
     <div placeholder>200 Billion Content recommendations!</div>
     <div fallback>200 Billion Content recommendations!</div>
+  </amp-ad>
+
+  <h2>TripleLift</h2>
+  <amp-ad width=297 height=410
+      type="triplelift"
+      layout="responsive"
+      src="https://ib.3lift.com/dtj/amptest_main_feed/335430">
   </amp-ad>
 
 </body>

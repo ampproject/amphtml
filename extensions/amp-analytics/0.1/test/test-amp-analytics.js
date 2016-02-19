@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {ANALYTICS_CONFIG} from '../vendors';
 import {AmpAnalytics} from '../../../../build/all/v0/amp-analytics-0.1.max';
 import {
   installUserNotificationManager
@@ -25,7 +26,10 @@ import {markElementScheduledForTesting} from '../../../../src/custom-element';
 import {installCidService} from '../../../../src/service/cid-impl';
 import {installViewerService} from '../../../../src/service/viewer-impl';
 import {installViewportService} from '../../../../src/service/viewport-impl';
+import {urlReplacementsFor} from '../../../../src/url-replacements';
 import * as sinon from 'sinon';
+
+const VENDOR_REQUESTS = require('./vendor-requests.json');
 
 adopt(window);
 
@@ -64,6 +68,10 @@ describe('amp-analytics', function() {
           return Promise.resolve(JSON.parse(jsonMockResponses[url]));
         }};
       });
+      const link = document.createElement('link');
+      link.setAttribute('rel', 'canonical');
+      link.setAttribute('href', './test-canonical.html');
+      iframe.win.document.head.appendChild(link);
       windowApi = iframe.win;
     });
   });
@@ -128,6 +136,58 @@ describe('amp-analytics', function() {
       expect(sendRequestSpy.withArgs('https://example.com/bar').calledOnce)
           .to.be.true;
     });
+  });
+
+  describe('vendor request tests', () => {
+    const actualResults = {};
+    for (const vendor in ANALYTICS_CONFIG) {
+      const config = ANALYTICS_CONFIG[vendor];
+      if (!config.requests) {
+        continue;
+      }
+      actualResults[vendor] = {};
+      describe('analytics vendor: ' + vendor, function() {
+        for (const name in config.requests) {
+          it('should produce request: ' + name +
+              '. If this test fails update vendor-requests.json', () => {
+            const analytics = getAnalyticsTag({
+              requests: config.requests
+            });
+            analytics.createdCallback();
+            analytics.buildCallback();
+            const urlReplacements = urlReplacementsFor(analytics.getWin());
+            sandbox.stub(urlReplacements, 'getReplacement_', function(name) {
+              expect(this.replacements_).to.have.property(name);
+              return '_' + name.toLowerCase() + '_';
+            });
+            const encodeVars = analytics.encodeVars_;
+            sandbox.stub(analytics, 'encodeVars_', function(val, name) {
+              val = encodeVars.call(this, val, name);
+              if (val == '') {
+                return '$' + name;
+              }
+              return val;
+            });
+            return analytics.layoutCallback().then(() => {
+              return analytics.handleEvent_({
+                request: name
+              }).then(url => {
+                const val = VENDOR_REQUESTS[vendor][name];
+                if (val == null) {
+                  throw new Error('Define ' + vendor + '.' + name +
+                      'in vendor-requests.json. Expected value: ' + url);
+                }
+                actualResults[vendor][name] = url;
+                // Write this out for easy copy pasting.
+                // top.document.documentElement.setAttribute('json',
+                //     JSON.stringify(actualResults, null, '  '));
+                expect(url).to.equal(val);
+              });
+            });
+          });
+        }
+      });
+    }
   });
 
   it('does not send a hit when config is not in a script tag', function() {

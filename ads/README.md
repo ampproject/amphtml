@@ -43,7 +43,7 @@ More information can be provided in a similar fashion if needed (Please file an 
 
 ### Methods available to the ad.
 
-- `window.context.noContentAvailable` is a function that the ad system can call if the ad slot was not filled. The container page will then react by showing placeholder content or collapsing the ad if allowed by AMP resizing rules.
+- `window.context.noContentAvailable` is a function that the ad system can call if the ad slot was not filled. The container page will then react by showing fallback content or collapsing the ad if allowed by AMP resizing rules.
 - `window.context.reportRenderedEntityIdentifier` MUST be called by ads, when they know information about which creative was rendered into a particular ad frame and should contain information to allow identifying the creative. Consider including a small string identifying the ad network. This is used by AMP for reporting purposes. The value MUST NOT contain user data or personal identifiable information.
 
 ### Ad viewability
@@ -113,7 +113,7 @@ var unlisten = window.context.onResizeDenied(function(requestedHeight) {
 });
 ```
 
-Here are some factors that affect how fast the resize will be executed:
+Here are some factors that affect whether the resize will be executed:
 
 - Whether the resize is triggered by the user action;
 - Whether the resize is requested for a currently active ad;

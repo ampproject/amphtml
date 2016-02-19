@@ -43,7 +43,8 @@ class AmpAccordion extends AMP.BaseElement {
       log.warn(TAG, `Experiment ${EXPERIMENT} disabled`);
       return;
     }
-    this.sections_.forEach(section => {
+    this.element.setAttribute('role', 'tablist');
+    this.sections_.forEach((section, index) => {
       assert(
           section.tagName.toLowerCase() == 'section',
           'Sections should be enclosed in a <section> tag, ' +
@@ -58,14 +59,26 @@ class AmpAccordion extends AMP.BaseElement {
       const header = sectionComponents_[0];
       const content = sectionComponents_[1];
       header.classList.add('-amp-accordion-header');
+      header.setAttribute('role', 'tab');
       content.classList.add('-amp-accordion-content');
+      content.setAttribute('role', 'tabpanel');
+      content.setAttribute(
+          'aria-expanded', section.hasAttribute('expanded').toString());
+      let contentId = content.getAttribute('id');
+      if (!contentId) {
+        contentId = this.element.id + '_AMP_content_' + index;
+        content.setAttribute('id', contentId);
+      }
+      header.setAttribute('aria-controls', contentId);
       header.addEventListener('click', event => {
         event.preventDefault();
         this.mutateElement(() => {
           if (section.hasAttribute('expanded')) {
             section.removeAttribute('expanded');
+            content.setAttribute('aria-expanded', 'false');
           } else {
             section.setAttribute('expanded', '');
+            content.setAttribute('aria-expanded', 'true');
           }
         }, content);
       });

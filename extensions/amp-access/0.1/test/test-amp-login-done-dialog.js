@@ -268,15 +268,34 @@ describe('LoginDoneDialog', () => {
       expect(dialog.postbackError_.callCount).to.equal(1);
     });
 
-    it('should configure error mode', () => {
+    it('should configure error mode for "postback"', () => {
       dialog.postbackError_(new Error());
 
-      expect(windowApi.document.documentElement).to.have.class(
-          'amp-postback-error');
+      expect(windowApi.document.documentElement)
+          .to.have.class('amp-error');
+      expect(windowApi.document.documentElement.getAttribute('data-error'))
+          .to.equal('postback');
       expect(closeButton.onclick).to.exist;
 
       windowMock.expects('close').once();
       closeButton.onclick();
+    });
+
+    it('should configure error mode for "close"', () => {
+      dialog.postbackError_(new Error());
+
+      expect(windowApi.document.documentElement)
+          .to.have.class('amp-error');
+      expect(windowApi.document.documentElement.getAttribute('data-error'))
+          .to.equal('postback');
+      windowMock.expects('close').once();
+      closeButton.onclick();
+
+      clock.tick(3000);
+      expect(windowApi.document.documentElement)
+          .to.have.class('amp-error');
+      expect(windowApi.document.documentElement.getAttribute('data-error'))
+          .to.equal('close');
     });
   });
 });

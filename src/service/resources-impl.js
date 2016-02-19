@@ -18,7 +18,7 @@ import {FocusHistory} from '../focus-history';
 import {Pass} from '../pass';
 import {assert} from '../asserts';
 import {closest} from '../dom';
-import {documentStateFor} from '../document-state';
+import {onDocumentReady} from '../document-ready';
 import {expandLayoutRect, layoutRectLtwh, layoutRectsOverlap} from
     '../layout-rect';
 import {getService} from '../service';
@@ -153,9 +153,6 @@ export class Resources {
     /** @private @const {!Vsync} */
     this.vsync_ = installVsyncService(this.win);
 
-    /** @private @const {!DocumentState} */
-    this.docState_ = documentStateFor(this.win);
-
     /** @private @const {!FocusHistory} */
     this.activeHistory_ = new FocusHistory(this.win, FOCUS_HISTORY_TIMEOUT_);
 
@@ -194,7 +191,7 @@ export class Resources {
     });
 
     // Ensure that we attempt to rebuild things when DOM is ready.
-    this.docState_.onReady(() => {
+    onDocumentReady(this.win.document, () => {
       this.documentReady_ = true;
       this.forceBuild_ = true;
       this.relayoutAll_ = true;
@@ -382,6 +379,21 @@ export class Resources {
         this.getResourceForElement(parentElement),
         /* layout */ true,
         elements_(subElements));
+  }
+
+  /**
+   * Invokes `unload` on the elements' resource which in turn will invoke
+   * the `documentBecameInactive` callback on the custom element.
+   * @param {!Element} parentElement
+   * @param {!Element|!Array<!Element>} subElements
+   */
+  schedulePause(parentElement, subElements) {
+    const parentResource = this.getResourceForElement(parentElement);
+    subElements = elements_(subElements);
+
+    this.discoverResourcesForArray_(parentResource, subElements, resource => {
+      resource.unload();
+    });
   }
 
   /**
@@ -1674,7 +1686,6 @@ export class Resource {
 
     this.layoutPromise_ = promise.then(() => this.layoutComplete_(true),
         reason => this.layoutComplete_(false, reason));
-    this.layoutPromise_.then(this.whenFirstLayoutCompleteResolve_);
     return this.layoutPromise_;
   }
 
@@ -1739,6 +1750,7 @@ export class Resource {
     }
     if (this.element.documentInactiveCallback()) {
       this.state_ = ResourceState_.NOT_LAID_OUT;
+      this.layoutCount_ = 0;
     }
   }
 

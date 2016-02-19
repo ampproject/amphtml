@@ -16,6 +16,7 @@
 
 import {Viewer} from '../../src/service/viewer-impl';
 import {platform} from '../../src/platform';
+import {setModeForTesting} from '../../src/mode';
 import * as sinon from 'sinon';
 
 
@@ -27,6 +28,20 @@ describe('Viewer', () => {
   let windowApi;
   let timeouts;
   let clock;
+  let events;
+
+  function changeVisibility(vis) {
+    windowApi.document.hidden = vis !== 'visible';
+    windowApi.document.visibilityState = vis;
+    if (events.visibilitychange) {
+      events.visibilitychange({
+        target: windowApi.document,
+        type: 'visibilitychange',
+        bubbles: false,
+        cancelable: false
+      });
+    }
+  }
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
@@ -43,10 +58,17 @@ describe('Viewer', () => {
       ancestorOrigins: null,
     };
     windowApi.document = {
+      hidden: false,
+      visibilityState: 'visible',
+      addEventListener: function(type, listener) {
+        events[type] = listener;
+      },
       referrer: '',
       body: {style: {}},
       documentElement: {style: {}},
+      title: 'Awesome doc',
     };
+    events = {};
     windowMock = sandbox.mock(windowApi);
     viewer = new Viewer(windowApi);
   });
@@ -91,9 +113,9 @@ describe('Viewer', () => {
   });
 
   it('should configure visibilityState and prerender', () => {
-    windowApi.location.hash = '#visibilityState=hidden&prerenderSize=3';
+    windowApi.location.hash = '#visibilityState=prerender&prerenderSize=3';
     const viewer = new Viewer(windowApi);
-    expect(viewer.getVisibilityState()).to.equal('hidden');
+    expect(viewer.getVisibilityState()).to.equal('prerender');
     expect(viewer.isVisible()).to.equal(false);
     expect(viewer.getPrerenderSize()).to.equal(3);
   });
@@ -115,7 +137,7 @@ describe('Viewer', () => {
   it('should configure correctly for iOS embedding', () => {
     windowApi.name = '__AMP__viewportType=natural';
     windowApi.parent = {};
-    sandbox.mock(platform).expects('isIos').returns(true).once();
+    sandbox.mock(platform).expects('isIos').returns(true).atLeast(1);
     const viewer = new Viewer(windowApi);
 
     expect(viewer.getViewportType()).to.equal('natural-ios-embed');
@@ -124,11 +146,14 @@ describe('Viewer', () => {
   it('should NOT configure for iOS embedding if not embedded', () => {
     windowApi.name = '__AMP__viewportType=natural';
     windowApi.parent = windowApi;
-    sandbox.mock(platform).expects('isIos').returns(true).once();
-    expect(new Viewer(windowApi).getViewportType()).to.equal('natural');
-
-    windowApi.parent = null;
-    expect(new Viewer(windowApi).getViewportType()).to.equal('natural');
+    sandbox.mock(platform).expects('isIos').returns(true).atLeast(1);
+    setModeForTesting({
+      localDev: false,
+      development: false
+    });
+    const viewportType = new Viewer(windowApi).getViewportType();
+    setModeForTesting(null);
+    expect(viewportType).to.equal('natural');
   });
 
   it('should receive viewport event', () => {
@@ -150,19 +175,188 @@ describe('Viewer', () => {
     expect(viewer.getPaddingTop()).to.equal(19);
   });
 
-  it('should receive visibilitychange event', () => {
-    let visEvent = null;
-    viewer.onVisibilityChanged(event => {
-      visEvent = event;
+  describe('should receive the visibilitychange event', () => {
+    it('should change prerenderSize', () => {
+      viewer.receiveMessage('visibilitychange', {
+        prerenderSize: 4
+      });
+      expect(viewer.getPrerenderSize()).to.equal(4);
     });
-    viewer.receiveMessage('visibilitychange', {
-      state: 'other',
-      prerenderSize: 4
+
+    it('should change visibilityState', () => {
+      viewer.receiveMessage('visibilitychange', {
+        state: 'paused'
+      });
+      expect(viewer.getVisibilityState()).to.equal('paused');
+      expect(viewer.isVisible()).to.equal(false);
     });
-    expect(visEvent).to.not.equal(null);
-    expect(viewer.getVisibilityState()).to.equal('other');
-    expect(viewer.isVisible()).to.equal(false);
-    expect(viewer.getPrerenderSize()).to.equal(4);
+
+    it('should receive "paused" visibilityState', () => {
+      viewer.receiveMessage('visibilitychange', {
+        state: 'paused'
+      });
+      expect(viewer.getVisibilityState()).to.equal('paused');
+      expect(viewer.isVisible()).to.equal(false);
+    });
+
+    it('should receive "inactive" visibilityState', () => {
+      viewer.receiveMessage('visibilitychange', {
+        state: 'inactive'
+      });
+      expect(viewer.getVisibilityState()).to.equal('inactive');
+      expect(viewer.isVisible()).to.equal(false);
+    });
+
+    it('should parse "hidden" as "prerender" before first visible', () => {
+      viewer.hasBeenVisible_ = false;
+      viewer.receiveMessage('visibilitychange', {
+        state: 'hidden'
+      });
+      expect(viewer.getVisibilityState()).to.equal('prerender');
+      expect(viewer.isVisible()).to.equal(false);
+    });
+
+    it('should parse "hidden" as "inactive" after first visible', () => {
+      viewer.hasBeenVisible_ = true;
+      viewer.receiveMessage('visibilitychange', {
+        state: 'hidden'
+      });
+      expect(viewer.getVisibilityState()).to.equal('inactive');
+      expect(viewer.isVisible()).to.equal(false);
+    });
+
+    it('should reject unknown values', () => {
+      viewer.receiveMessage('visibilitychange', {
+        state: 'paused'
+      });
+      expect(() => {
+        viewer.receiveMessage('visibilitychange', {
+          state: 'what is this'
+        });
+      }).to.throw('Unknown VisibilityState value');
+      expect(viewer.getVisibilityState()).to.equal('paused');
+      expect(viewer.isVisible()).to.equal(false);
+    });
+
+    it('should be inactive when the viewer tells us we are inactive', () => {
+      viewer.receiveMessage('visibilitychange', {
+        state: 'inactive'
+      });
+      expect(viewer.getVisibilityState()).to.equal('inactive');
+      expect(viewer.isVisible()).to.equal(false);
+      changeVisibility('hidden');
+      expect(viewer.getVisibilityState()).to.equal('inactive');
+      expect(viewer.isVisible()).to.equal(false);
+    });
+
+    it('should be prerender when the viewer tells us we are prerender', () => {
+      viewer.receiveMessage('visibilitychange', {
+        state: 'prerender'
+      });
+      expect(viewer.getVisibilityState()).to.equal('prerender');
+      expect(viewer.isVisible()).to.equal(false);
+      changeVisibility('visible');
+      expect(viewer.getVisibilityState()).to.equal('prerender');
+      expect(viewer.isVisible()).to.equal(false);
+    });
+
+    it('should be hidden when the browser document is hidden', () => {
+      changeVisibility('hidden');
+      viewer.receiveMessage('visibilitychange', {
+        state: 'visible'
+      });
+      expect(viewer.getVisibilityState()).to.equal('hidden');
+      expect(viewer.isVisible()).to.equal(false);
+      viewer.receiveMessage('visibilitychange', {
+        state: 'paused'
+      });
+      expect(viewer.getVisibilityState()).to.equal('hidden');
+      expect(viewer.isVisible()).to.equal(false);
+      viewer.receiveMessage('visibilitychange', {
+        state: 'visible'
+      });
+      expect(viewer.getVisibilityState()).to.equal('hidden');
+      expect(viewer.isVisible()).to.equal(false);
+    });
+
+    it('should be paused when the browser document is visible but viewer is' +
+       'paused', () => {
+      changeVisibility('visible');
+      viewer.receiveMessage('visibilitychange', {
+        state: 'paused'
+      });
+      expect(viewer.getVisibilityState()).to.equal('paused');
+      expect(viewer.isVisible()).to.equal(false);
+    });
+
+    it('should be visible when the browser document is visible', () => {
+      changeVisibility('visible');
+      viewer.receiveMessage('visibilitychange', {
+        state: 'visible'
+      });
+      expect(viewer.getVisibilityState()).to.equal('visible');
+      expect(viewer.isVisible()).to.equal(true);
+    });
+
+    it('should be hidden when the browser document is unknown state', () => {
+      changeVisibility('what is this');
+      expect(viewer.getVisibilityState()).to.equal('hidden');
+      expect(viewer.isVisible()).to.equal(false);
+      viewer.receiveMessage('visibilitychange', {
+        state: 'paused'
+      });
+      expect(viewer.getVisibilityState()).to.equal('hidden');
+      expect(viewer.isVisible()).to.equal(false);
+    });
+
+    it('should change visibility on visibilitychange event', () => {
+      changeVisibility('hidden');
+      expect(viewer.getVisibilityState()).to.equal('hidden');
+      expect(viewer.isVisible()).to.equal(false);
+      changeVisibility('visible');
+      expect(viewer.getVisibilityState()).to.equal('visible');
+      expect(viewer.isVisible()).to.equal(true);
+
+      viewer.receiveMessage('visibilitychange', {
+        state: 'hidden'
+      });
+      changeVisibility('hidden');
+      expect(viewer.getVisibilityState()).to.equal('inactive');
+      expect(viewer.isVisible()).to.equal(false);
+      changeVisibility('visible');
+      expect(viewer.getVisibilityState()).to.equal('inactive');
+      expect(viewer.isVisible()).to.equal(false);
+
+      viewer.receiveMessage('visibilitychange', {
+        state: 'inactive'
+      });
+      changeVisibility('hidden');
+      expect(viewer.getVisibilityState()).to.equal('inactive');
+      expect(viewer.isVisible()).to.equal(false);
+      changeVisibility('visible');
+      expect(viewer.getVisibilityState()).to.equal('inactive');
+      expect(viewer.isVisible()).to.equal(false);
+
+      viewer.receiveMessage('visibilitychange', {
+        state: 'paused'
+      });
+      changeVisibility('hidden');
+      expect(viewer.getVisibilityState()).to.equal('hidden');
+      expect(viewer.isVisible()).to.equal(false);
+      changeVisibility('visible');
+      expect(viewer.getVisibilityState()).to.equal('paused');
+      expect(viewer.isVisible()).to.equal(false);
+
+      viewer.receiveMessage('visibilitychange', {
+        state: 'visible'
+      });
+      changeVisibility('hidden');
+      expect(viewer.getVisibilityState()).to.equal('hidden');
+      expect(viewer.isVisible()).to.equal(false);
+      changeVisibility('visible');
+      expect(viewer.getVisibilityState()).to.equal('visible');
+      expect(viewer.isVisible()).to.equal(true);
+    });
   });
 
   it('should post documentLoaded event', () => {
@@ -171,6 +365,7 @@ describe('Viewer', () => {
     expect(m.eventType).to.equal('documentLoaded');
     expect(m.data.width).to.equal(11);
     expect(m.data.height).to.equal(12);
+    expect(m.data.title).to.equal('Awesome doc');
   });
 
   it('should post documentResized event', () => {
@@ -186,44 +381,6 @@ describe('Viewer', () => {
     viewer.cancelFullOverlay();
     expect(viewer.messageQueue_[0].eventType).to.equal('requestFullOverlay');
     expect(viewer.messageQueue_[1].eventType).to.equal('cancelFullOverlay');
-  });
-
-  it('should receive broadcast event', () => {
-    let broadcastMessage = null;
-    viewer.onBroadcast(message => {
-      broadcastMessage = message;
-    });
-    viewer.receiveMessage('broadcast', {type: 'type1'});
-    expect(broadcastMessage).to.exist;
-    expect(broadcastMessage.type).to.equal('type1');
-  });
-
-  it('should post broadcast event', () => {
-    const delivered = [];
-    viewer.setMessageDeliverer((eventType, data) => {
-      delivered.push({eventType: eventType, data: data});
-    }, 'https://acme.com');
-    viewer.broadcast({type: 'type1'});
-    expect(viewer.messageQueue_.length).to.equal(0);
-    return viewer.messagingMaybePromise_.then(() => {
-      expect(delivered.length).to.equal(1);
-      const m = delivered[0];
-      expect(m.eventType).to.equal('broadcast');
-      expect(m.data.type).to.equal('type1');
-    });
-  });
-
-  it('should post broadcast event but not fail w/o messaging', () => {
-    viewer.broadcast({type: 'type1'});
-    expect(viewer.messageQueue_.length).to.equal(0);
-    clock.tick(5001);
-    return viewer.messagingReadyPromise_.then(() => 'OK', () => 'ERROR')
-        .then(res => {
-          expect(res).to.equal('ERROR');
-          return viewer.messagingMaybePromise_;
-        }).then(() => {
-          expect(viewer.messageQueue_.length).to.equal(0);
-        });
   });
 
   it('should queue non-dupe events', () => {
@@ -256,62 +413,129 @@ describe('Viewer', () => {
     expect(delivered[1].data.width).to.equal(13);
   });
 
-  it('should wait for messaging channel', () => {
-    let m1Resolved = false;
-    let m2Resolved = false;
-    const m1 = viewer.sendMessage('message1', {}, /* awaitResponse */ false)
-        .then(() => {
-          m1Resolved = true;
-        });
-    const m2 = viewer.sendMessage('message2', {}, /* awaitResponse */ true)
-        .then(() => {
-          m2Resolved = true;
-        });
-    return Promise.resolve().then(() => {
-      // Not resolved yet.
-      expect(m1Resolved).to.be.false;
-      expect(m2Resolved).to.be.false;
+  describe('Messaging not embedded', () => {
 
-      // Set message deliverer.
-      viewer.setMessageDeliverer(() => {
-        return Promise.resolve();
-      }, 'https://acme.com');
-      expect(m1Resolved).to.be.false;
-      expect(m2Resolved).to.be.false;
+    it('should not expect messaging', () => {
+      expect(viewer.messagingReadyPromise_).to.be.null;
+      expect(viewer.messagingMaybePromise_).to.be.null;
+    });
 
-      return Promise.all([m1, m2]);
-    }).then(() => {
-      // All resolved now.
-      expect(m1Resolved).to.be.true;
-      expect(m2Resolved).to.be.true;
+    it('should fail sendMessage', () => {
+      return viewer.sendMessage('message1', {}, /* awaitResponse */ false)
+          .then(() => {
+            throw new Error('should not succeed');
+          }, error => {
+            expect(error.message).to.match(/No messaging channel/);
+          });
+    });
+
+    it('should post broadcast event but not fail', () => {
+      viewer.broadcast({type: 'type1'});
+      expect(viewer.messageQueue_.length).to.equal(0);
     });
   });
 
-  it('should timeout messaging channel', () => {
-    let m1Resolved = false;
-    let m2Resolved = false;
-    const m1 = viewer.sendMessage('message1', {}, /* awaitResponse */ false)
-        .then(() => {
-          m1Resolved = true;
-        });
-    const m2 = viewer.sendMessage('message2', {}, /* awaitResponse */ true)
-        .then(() => {
-          m2Resolved = true;
-        });
-    return Promise.resolve().then(() => {
-      // Not resolved yet.
-      expect(m1Resolved).to.be.false;
-      expect(m2Resolved).to.be.false;
+  describe('Messaging', () => {
+    beforeEach(() => {
+      windowApi.parent = {};
+      viewer = new Viewer(windowApi);
+    });
 
-      // Timeout.
-      clock.tick(5001);
-      return Promise.all([m1, m2]);
-    }).then(() => {
-      throw new Error('must never be here');
-    }, () => {
-      // Not resolved ever.
-      expect(m1Resolved).to.be.false;
-      expect(m2Resolved).to.be.false;
+    it('should receive broadcast event', () => {
+      let broadcastMessage = null;
+      viewer.onBroadcast(message => {
+        broadcastMessage = message;
+      });
+      viewer.receiveMessage('broadcast', {type: 'type1'});
+      expect(broadcastMessage).to.exist;
+      expect(broadcastMessage.type).to.equal('type1');
+    });
+
+    it('should post broadcast event', () => {
+      const delivered = [];
+      viewer.setMessageDeliverer((eventType, data) => {
+        delivered.push({eventType: eventType, data: data});
+      }, 'https://acme.com');
+      viewer.broadcast({type: 'type1'});
+      expect(viewer.messageQueue_.length).to.equal(0);
+      return viewer.messagingMaybePromise_.then(() => {
+        expect(delivered.length).to.equal(1);
+        const m = delivered[0];
+        expect(m.eventType).to.equal('broadcast');
+        expect(m.data.type).to.equal('type1');
+      });
+    });
+
+    it('should post broadcast event but not fail w/o messaging', () => {
+      viewer.broadcast({type: 'type1'});
+      expect(viewer.messageQueue_.length).to.equal(0);
+      clock.tick(20001);
+      return viewer.messagingReadyPromise_.then(() => 'OK', () => 'ERROR')
+          .then(res => {
+            expect(res).to.equal('ERROR');
+            return viewer.messagingMaybePromise_;
+          }).then(() => {
+            expect(viewer.messageQueue_.length).to.equal(0);
+          });
+    });
+
+    it('should wait for messaging channel', () => {
+      let m1Resolved = false;
+      let m2Resolved = false;
+      const m1 = viewer.sendMessage('message1', {}, /* awaitResponse */ false)
+          .then(() => {
+            m1Resolved = true;
+          });
+      const m2 = viewer.sendMessage('message2', {}, /* awaitResponse */ true)
+          .then(() => {
+            m2Resolved = true;
+          });
+      return Promise.resolve().then(() => {
+        // Not resolved yet.
+        expect(m1Resolved).to.be.false;
+        expect(m2Resolved).to.be.false;
+
+        // Set message deliverer.
+        viewer.setMessageDeliverer(() => {
+          return Promise.resolve();
+        }, 'https://acme.com');
+        expect(m1Resolved).to.be.false;
+        expect(m2Resolved).to.be.false;
+
+        return Promise.all([m1, m2]);
+      }).then(() => {
+        // All resolved now.
+        expect(m1Resolved).to.be.true;
+        expect(m2Resolved).to.be.true;
+      });
+    });
+
+    it('should timeout messaging channel', () => {
+      let m1Resolved = false;
+      let m2Resolved = false;
+      const m1 = viewer.sendMessage('message1', {}, /* awaitResponse */ false)
+          .then(() => {
+            m1Resolved = true;
+          });
+      const m2 = viewer.sendMessage('message2', {}, /* awaitResponse */ true)
+          .then(() => {
+            m2Resolved = true;
+          });
+      return Promise.resolve().then(() => {
+        // Not resolved yet.
+        expect(m1Resolved).to.be.false;
+        expect(m2Resolved).to.be.false;
+
+        // Timeout.
+        clock.tick(20001);
+        return Promise.all([m1, m2]);
+      }).then(() => {
+        throw new Error('must never be here');
+      }, () => {
+        // Not resolved ever.
+        expect(m1Resolved).to.be.false;
+        expect(m2Resolved).to.be.false;
+      });
     });
   });
 
@@ -364,14 +588,13 @@ describe('Viewer', () => {
       });
     });
 
-    it('should decide non-trusted on connection without origin', () => {
+    it('should NOT allow channel without origin', () => {
       windowApi.parent = {};
       windowApi.location.ancestorOrigins = null;
       const viewer = new Viewer(windowApi);
-      viewer.setMessageDeliverer(() => {});
-      return viewer.isTrustedViewer().then(res => {
-        expect(res).to.be.false;
-      });
+      expect(() => {
+        viewer.setMessageDeliverer(() => {});
+      }).to.throw(/message channel must have an origin/);
     });
 
     it('should decide non-trusted on connection with wrong origin', () => {

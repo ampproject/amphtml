@@ -19,7 +19,7 @@
     "dist": "gulp dist"
   },
   "dependencies": {
-    "promise-pjs": "^0.2.3",
+    "promise-pjs": "0.2.5",
     "document-register-element": "0.5.4"
   },
   "devDependencies": {
@@ -50,6 +50,7 @@
     "gulp-if": "2.0.0",
     "gulp-image-diff": "0.3.0",
     "gulp-live-server": "0.0.29",
+    "gulp-load-plugins": "1.2.0",
     "gulp-rename": "1.2.2",
     "gulp-replace": "0.5.4",
     "gulp-sourcemaps": "1.5.2",
@@ -78,8 +79,8 @@
     "path": "0.12.7",
     "postcss": "5.0.14",
     "pretty-bytes": "2.0.1",
-    "request": "2.67.0",
-    "rimraf": "^2.5.1",
+    "request": "2.69.0",
+    "rimraf": "2.5.1",
     "serve-index": "1.7.2",
     "serve-static": "1.9.1",
     "sinon": "1.17.2",

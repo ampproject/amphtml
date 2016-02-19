@@ -32,7 +32,7 @@ limitations under the License.
 </table>
 
 The following lists validation errors specific to `amp-mustache`
-(see also `template` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii):
+(see also `template` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii)):
 
 <table>
   <tr>
@@ -40,15 +40,15 @@ The following lists validation errors specific to `amp-mustache`
     <th>Description</th>
   </tr>
   <tr>
-    <td width="40%"><a href="/docs/reference/validation_errors.html#attribute-contains-template-syntax">TEMPLATE_IN_ATTR_NAME</a></td>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#attribute-contains-template-syntax">Mustache template syntax in attribute name 'example1' in tag 'example2'.</a></td>
     <td>Mustache templates must be within the <code>amp-mustache</code> tag. Error thrown when templating syntax found in an attribute in another tag.</td>
   </tr>
   <tr>
-    <td width="40%"><a href="/docs/reference/validation_errors.html#attribute-contains-unescaped-template-syntax">UNESCAPED_TEMPLATE_IN_ATTR_VALUE</a></td>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#attribute-contains-unescaped-template-syntax">The attribute 'example1' in tag 'example2' is set to 'example3', which contains unescaped Mustache template syntax.</a></td>
     <td>Mustache templates must be within the <code>amp-mustache</code> tag. Error thrown when <a href="https://github.com/janl/mustache.js/#variables">unescaped templating syntax</a> found in an attribute in another tag.</td>
   </tr>
   <tr>
-    <td width="40%"><a href="/docs/reference/validation_errors.html#attribute-contains-template-partial">TEMPLATE_PARTIAL_IN_ATTR_VALUE</a></td>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#attribute-contains-template-partial">The attribute 'example1' in tag 'example2' is set to 'example3', which contains a Mustache template partial.</a></td>
     <td>Mustache templates must be within the <code>amp-mustache</code> tag. Error thrown when <a href="https://github.com/janl/mustache.js/#partials">template partial</a> found in an attribute in another tag.</td>
   </tr>
 </table>
@@ -58,10 +58,10 @@ The following lists validation errors specific to `amp-mustache`
 Mustache is a logic-less template syntax. See [Mustache.js docs](https://github.com/janl/mustache.js/)
 for more details. Some of the core Mustache tags are:
 
-- `{{variable}}` - variable tag. It outputs the the HTML-escaped value of a variable;
-- `{{#section}}{{/section}}` - section tag. It can test existance of a variable and iterate over it if
+- \{\{variable\}\} - variable tag. It outputs the the HTML-escaped value of a variable;
+- \{\{#section\}\}\{\{/section\}\} - section tag. It can test existance of a variable and iterate over it if
 it's an array;
-- `{{^section}}{{/section}}` - inverted tag. It can test non-existance of a variable.
+- \{\{^section\}\}\{\{/section\}\} - inverted tag. It can test non-existance of a variable.
 
 #### Usage
 

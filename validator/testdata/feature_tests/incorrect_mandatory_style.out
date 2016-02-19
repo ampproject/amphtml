@@ -1,3 +1,3 @@
 FAIL
-feature_tests/incorrect_mandatory_style.html:28:2 The mandatory text (CDATA) inside tag 'boilerplate (js enabled) - old variant' is missing or incorrect. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#boilerplate) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
-feature_tests/incorrect_mandatory_style.html:28:74 The mandatory text (CDATA) inside tag 'boilerplate (noscript) - old variant' is missing or incorrect. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#boilerplate) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+feature_tests/incorrect_mandatory_style.html:28:2 The mandatory text (CDATA) inside tag 'head > style : boilerplate' is missing or incorrect. (see https://www.ampproject.org/docs/reference/spec.html#required-markup) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+feature_tests/incorrect_mandatory_style.html:28:58 The mandatory text (CDATA) inside tag 'noscript > style : boilerplate' is missing or incorrect. (see https://www.ampproject.org/docs/reference/spec.html#required-markup) [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]

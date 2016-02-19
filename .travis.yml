@@ -43,6 +43,7 @@ branches:
     - master
     - release
     - canary
+    - /^amp-release-.*$/
 env:
   global:
     - NPM_CONFIG_PROGRESS="false"

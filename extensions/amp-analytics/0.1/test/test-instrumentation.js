@@ -216,11 +216,11 @@ describe('instrumentation', function() {
 
   it('only fires when the timer interval exceeds the minimum', () => {
     const fn1 = sandbox.stub();
-    ins.addListener({'on': 'timer', 'timerSpec': {"interval": 0}}, fn1);
+    ins.addListener({'on': 'timer', 'timerSpec': {'interval': 0}}, fn1);
     expect(fn1.callCount).to.equal(0);
 
     const fn2 = sandbox.stub();
-    ins.addListener({'on': 'timer', 'timerSpec': {"interval": 1}}, fn2);
+    ins.addListener({'on': 'timer', 'timerSpec': {'interval': 1}}, fn2);
     expect(fn2.callCount).to.equal(1);
   });
 
@@ -264,11 +264,11 @@ describe('instrumentation', function() {
 
   it('fires on the appropriate interval', () => {
     const fn1 = sandbox.stub();
-    ins.addListener({'on': 'timer', 'timerSpec': {"interval": 10}}, fn1);
+    ins.addListener({'on': 'timer', 'timerSpec': {'interval': 10}}, fn1);
     expect(fn1.callCount).to.equal(1);
 
     const fn2 = sandbox.stub();
-    ins.addListener({'on': 'timer', 'timerSpec': {"interval": 15}}, fn2);
+    ins.addListener({'on': 'timer', 'timerSpec': {'interval': 15}}, fn2);
     expect(fn2.callCount).to.equal(1);
 
     clock.tick(10 * 1000); // 10 seconds
@@ -287,18 +287,18 @@ describe('instrumentation', function() {
   it('stops firing after the maxTimerLength is exceeded', () => {
     const fn1 = sandbox.stub();
     ins.addListener({
-      'on': 'timer', 'timerSpec': {"interval": 10, "maxTimerLength": 15}
+      'on': 'timer', 'timerSpec': {'interval': 10, 'maxTimerLength': 15}
     }, fn1);
     expect(fn1.callCount).to.equal(1);
 
     const fn2 = sandbox.stub();
     ins.addListener({
-      'on': 'timer', 'timerSpec': {"interval": 10, "maxTimerLength": 20}
+      'on': 'timer', 'timerSpec': {'interval': 10, 'maxTimerLength': 20}
     }, fn2);
     expect(fn2.callCount).to.equal(1);
 
     const fn3 = sandbox.stub();
-    ins.addListener({'on': 'timer', 'timerSpec': {"interval": 3600}}, fn3);
+    ins.addListener({'on': 'timer', 'timerSpec': {'interval': 3600}}, fn3);
     expect(fn3.callCount).to.equal(1);
 
     clock.tick(10 * 1000); // 10 seconds

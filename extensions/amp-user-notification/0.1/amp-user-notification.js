@@ -22,7 +22,7 @@ import {log} from '../../../src/log';
 import {storageFor} from '../../../src/storage';
 import {urlReplacementsFor} from '../../../src/url-replacements';
 import {viewerFor} from '../../../src/viewer';
-import {whenDocumentReady} from '../../../src/document-state';
+import {whenDocumentReady} from '../../../src/document-ready';
 import {xhrFor} from '../../../src/xhr';
 
 
@@ -259,6 +259,7 @@ export class AmpUserNotification extends AMP.BaseElement {
   show() {
     this.element.style.display = '';
     this.element.classList.add('amp-active');
+    this.getViewport().addToFixedLayer(this.element);
     return this.dialogPromise_;
   }
 
@@ -270,6 +271,7 @@ export class AmpUserNotification extends AMP.BaseElement {
     this.element.classList.remove('amp-active');
     this.element.classList.add('amp-hidden');
     this.dialogResolve_();
+    this.getViewport().removeFromFixedLayer(this.element);
 
     // Store and post.
     this.storagePromise_.then(storage => {

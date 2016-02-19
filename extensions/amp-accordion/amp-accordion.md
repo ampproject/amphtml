@@ -16,7 +16,24 @@ limitations under the License.
 
 ### <a name="amp-accordion"></a> `amp-accordion`
 
-An accordion provides a way for viewers to have a glance at the outline of the content and jump to a section or their choice at their will. This would be extremely helpful for handheld mobile devices where even a couple of sentences in a section would lead to the viewer needing to scroll.
+<table>
+  <tr>
+    <td width="40%"><strong>Description</strong></td>
+    <td>An accordion provides a way for viewers to glance at the content outline and jump to any section. This is helpful for handheld mobile devices where even a couple of sentences into a section requires scrolling.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Availability</strong></td>
+    <td><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a>; no validations yet.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Required Script</strong></td>
+    <td><code>&lt;script async custom-element="amp-accordion" src="https://cdn.ampproject.org/v0/amp-accordion-0.1.js">&lt;/script></code></td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Examples</strong></td>
+    <td><a href="https://ampbyexample.com/components/amp-accordion">amp-accordion.html</a></td>
+  </tr>
+</table>
 
 #### Behavior
 
@@ -29,6 +46,8 @@ Each of the `amp-accordion` component’s immediate children is considered a sec
 - There is no restriction on the type of tags that could be used for the `<section>`’s children.
 - Any additional children of the `<section>` would be ignored not be displayed. (This should just be a safety backup and should be enforced in the validator)
 - Clicking/tapping on the heading of a section expands/ or collapses the section.
+
+Example:
 
 ```html
 <amp-accordion>

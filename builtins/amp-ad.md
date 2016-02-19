@@ -2,12 +2,6 @@
 
 NOTE: The specification of `amp-ad` is likely to significantly evolve over time. The current approach is designed to bootstrap the format to be able to show ads.
 
-A container to display an ad.
-
-Ads are loaded like all other resources in AMP documents, with a special
-custom element called `<amp-ad>`. No ad network provided JavaScript is allowed to run inside the AMP document. Instead the AMP runtime loads an iframe from a
-different origin (via iframe sandbox) as the AMP document and executes the ad
-network’s JS inside that iframe sandbox.
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
@@ -24,12 +18,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-AMP documents only support ads served via HTTPS.
-
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>A container to display an ad.</td>
+    <td>A container to display an ad. AMP documents only support ads served via HTTPS.</td>
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
@@ -37,12 +29,12 @@ AMP documents only support ads served via HTTPS.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/ads.amp.html">ads.amp.html</a></td>
+    <td><a href="https://ampbyexample.com/components/amp-ad">amp-ad.html</a><br /><a href="https://github.com/ampproject/amphtml/blob/master/examples/ads.amp.html">ads.amp.html</a></td>
   </tr>
 </table>
 
 The following lists validation errors specific to the `amp-ad` tag
-(see also `amp-ad` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii):
+(see also `amp-ad` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii)):
 
 <table>
   <tr>
@@ -50,39 +42,45 @@ The following lists validation errors specific to the `amp-ad` tag
     <th>Description</th>
   </tr>
   <tr>
-    <td width="40%"><a href="/docs/reference/validation_errors.html#mandatory-attribute-missing">MANDATORY_ATTR_MISSING</a></td>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#mandatory-attribute-missing">The mandatory attribute 'example1' is missing in tag 'example2'.</a></td>
     <td>Error thrown when <code>type</code> attribute missing.</td>
   </tr>
   <tr>
-    <td width="40%"><a href="/docs/reference/validation_errors.html#missing-url">MISSING_URL</a></td>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#missing-url">Missing URL for attribute 'example1' in tag 'example2'.</a></td>
     <td>Error thrown when <code>src</code> attribute is missing it's URL.</td>
   </tr>
   <tr>
-  <td width="40%"><a href="/docs/reference/validation_errors.html#invalid-url">INVALID_URL</a></td>
+  <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-url">Malformed URL 'example3' for attribute 'example1' in tag 'example2'.</a></td>
     <td>Error thrown when <code>src</code> attribute's URL is invalid.</td>
   </tr>
   <tr>
-    <td width="40%"><a href="/docs/reference/validation_errors.html#invalid-url-protocol">INVALID_URL_PROTOCOL</a></td>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-url-protocol">Invalid URL protocol 'example3:' for attribute 'example1' in tag 'example2'.</a></td>
     <td>Error thrown <code>src</code> attribute's URL is <code>http</code>; <code>https</code> protocol required.</td>
   </tr>
   <tr>
-    <td width="40%"><a href="/docs/reference/validation_errors.html#implied-layout-isnt-supported-by-amp-tag">IMPLIED_LAYOUT_INVALID</a></td>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#implied-layout-isnt-supported-by-amp-tag">The implied layout 'example1' is not supported by tag 'example2'.</a></td>
     <td>Error thrown when implied set to <code>CONTAINER</code>; this layout type isn't supported.</td>
   </tr>
   <tr>
-    <td width="40%"><a href="/docs/reference/validation_errors.html#specified-layout-isnt-supported-by-amp-tag">SPECIFIED_LAYOUT_INVALID</a></td>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#specified-layout-isnt-supported-by-amp-tag">The specified layout 'example1' is not supported by tag 'example2'.</a></td>
     <td>Error thrown when specified layout set to <code>CONTAINER</code>; this layout type isn't supported.</td>
   </tr>
   <tr>
-    <td width="40%"><a href="/docs/reference/validation_errors.html#invalid-property-value">INVALID_PROPERTY_VALUE_IN_ATTR_VALUE</a></td>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-property-value">The property 'example1' in attribute 'example2' in tag 'example3' is set to 'example4', which is invalid.</a></td>
     <td>Error thrown when invalid value is given for attributes <code>height</code> or <code>width</code>. For example, <code>height=auto</code> triggers this error for all supported layout types, with the exception of <code>NODISPLAY</code>.</td>
   </tr>
 </table>
 
 ### Behavior
 
+Ads are loaded like all other resources in AMP documents, with a special
+custom element called `<amp-ad>`. No ad network provided JavaScript is allowed to run inside the AMP document. Instead the AMP runtime loads an iframe from a
+different origin (via iframe sandbox) as the AMP document and executes the ad
+network’s JS inside that iframe sandbox.
+
 The `<amp-ad>` requires width and height values to be specified like all
 resources in AMP. It requires a `type` argument that select what ad network is displayed. All `data-*` attributes on the tag are automatically passed as arguments to the code that eventually renders the ad. What `data-` attributes are required for a given type of network depends and must be documented with the ad network.
+
 ```html
 <amp-ad width=300 height=250
     type="a9"
@@ -99,12 +97,16 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [AdReactor](../ads/adreactor.md)
 - [AdSense](../ads/adsense.md)
 - [AdTech](../ads/adtech.md)
+- [Criteo](../ads/criteo.md)
 - [Dot and Media](../ads/dotandads.md)
 - [Doubleclick](../ads/doubleclick.md)
+- [Flite](../ads/flite.md)
 - [plista](../ads/plista.md)
 - [Smart AdServer](../ads/smartadserver.md)
 - [Yieldmo](../ads/yieldmo.md)
 - [Revcontent](../ads/revcontent.md)
+- [TripleLift](../ads/triplelift.md)
+- [Teads](../ads/teads.md)
 
 #### Styling
 
@@ -183,3 +185,4 @@ draw3p(function(config, done) {
     done(config);
   }, 100)
 });
+```

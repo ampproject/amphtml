@@ -28,11 +28,13 @@ export const adPrefetch = {
   ],
   a9: 'https://c.amazon-adsystem.com/aax2/assoc.js',
   adsense: 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js',
+  criteo: 'https://static.criteo.net/js/ld/publishertag.js',
   dotandads: 'https://amp.ad.dotandad.com/dotandadsAmp.js',
   mediaimpact: 'https://ec-ns.sascdn.com/diff/251/divscripte/amp.js',
   smartadserver: 'https://ec-ns.sascdn.com/diff/js/smart.js',
   yieldmo: 'https://static.yieldmo.com/ym.amp1.js',
   revcontent: 'https://labs-cdn.revcontent.com/build/amphtml/revcontent.amp.min.js',
+  teads: 'https://cdn.teads.tv/media/format/v3/teads-format.min.js',
 };
 
 /**
@@ -51,6 +53,15 @@ export const adPreconnect = {
     'https://trc.taboola.com',
     'https://images.taboola.com',
   ],
+  teads: [
+    'https://cdn.teads.tv',
+    'https://cdn2.teads.tv',
+    'https://a.teads.tv',
+    'https://t.teads.tv',
+  ],
+  criteo: [
+    'https://cas.criteo.com',
+  ],
   doubleclick: [
     'https://partner.googleadservices.com',
     'https://securepubads.g.doubleclick.net',
@@ -61,6 +72,12 @@ export const adPreconnect = {
     'https://static.yieldmo.com',
     'https://s.yieldmo.com',
     'https://ads.yieldmo.com',
+  ],
+  triplelift: [
+    'https://ib.3lift.com',
+    'https://dynamic.3lift.com',
+    'https://img.3lift.com',
+    'https://eb2.3lift.com',
   ],
   revcontent: [
     'https://trends.revcontent.com',

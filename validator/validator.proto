@@ -42,6 +42,7 @@ message PropertySpecList {
 message UrlSpec {
   // allowed_protocol must be in lowercase (e.g. "javascript" not "JavaScript").
   repeated string allowed_protocol = 1;
+  optional bool allow_relative = 2 [default = true];
 }
 
 // Attributes that are not covered by at least one of these specs are
@@ -82,6 +83,7 @@ message AttrSpec {
   // The value of the deprecation field indicates what to use instead,
   // e.g. the name of an attribute or tag.
   optional string deprecation = 7;
+  // If provided, a URL which links to the AMP HTML spec for this deprecation.
   optional string deprecation_url = 8;
 
   // If set true, the TagSpec containing this AttrSpec will be evaluated first
@@ -199,7 +201,7 @@ message AmpLayout {
 // Some tags are mandatory. Note that the tag name is not unique, that is,
 // there can be multiple tag specs covering the same name, e.g., for
 // multiple meta tags (with different attributes).
-// NEXT AVAILABLE TAG: 17
+// NEXT AVAILABLE TAG: 19
 message TagSpec {
   // Use lower-case tag names only. If adding the same tag twice, then they must
   // also have a detail string which is unique throughout all detail.
@@ -238,6 +240,13 @@ message TagSpec {
   // If set, other tags - identified by their detail string - must be
   // present as well.
   repeated string also_requires = 14;
+
+  // If set, generates a DEPRECATED_TAG error with severity WARNING.
+  // The value of the deprecation field indicates what to use instead,
+  // e.g. the name of a tag.
+  optional string deprecation = 17;
+  // If provided, a URL which links to the AMP HTML spec for this deprecation.
+  optional string deprecation_url = 18;
 
   // Attribute specifications related to this tag.
   repeated AttrSpec attrs = 7;
@@ -337,7 +346,7 @@ message ValidationError {
     DEV_WARNING = 3; // DEPRECATED DO NOT USE.
   }
   optional Severity severity = 6 [ default = ERROR ];
-  // NEXT AVAILABLE TAG: 38
+  // NEXT AVAILABLE TAG: 51
   enum Code {
     UNKNOWN_CODE = 0;
     MANDATORY_TAG_MISSING = 1;
@@ -352,19 +361,19 @@ message ValidationError {
     MANDATORY_ONEOF_ATTR_MISSING = 28;
     DUPLICATE_UNIQUE_TAG = 6;
     WRONG_PARENT_TAG = 7;
-    STYLESHEET_TOO_LONG = 8;
+    STYLESHEET_TOO_LONG_OLD_VARIANT = 8;
+    STYLESHEET_TOO_LONG = 50;
     MANDATORY_CDATA_MISSING_OR_INCORRECT = 9;
     CDATA_VIOLATES_BLACKLIST = 30;
     DEV_MODE_ENABLED = 10;  // Deprecated, remove after 2016-04-01.
     DEPRECATED_ATTR = 11;
     DEPRECATED_TAG = 12;
-    CSS_SYNTAX = 13;
-    CSS_SYNTAX_INVALID_AT_RULE = 29;
     MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE = 14;
     INVALID_PROPERTY_VALUE_IN_ATTR_VALUE = 15;
     MISSING_URL = 35;
     INVALID_URL = 36;
     INVALID_URL_PROTOCOL = 37;
+    DISALLOWED_RELATIVE_URL = 49;
     DISALLOWED_PROPERTY_IN_ATTR_VALUE = 16;
     MUTUALLY_EXCLUSIVE_ATTRS = 17;
     UNESCAPED_TEMPLATE_IN_ATTR_VALUE = 18;
@@ -376,6 +385,20 @@ message ValidationError {
     MANDATORY_TAG_ANCESTOR_WITH_HINT = 32;
     ATTR_DISALLOWED_BY_IMPLIED_LAYOUT = 33;
     ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT = 34;
+
+    CSS_SYNTAX = 13;  // Deprecated, remove after 2016-06-01.
+    CSS_SYNTAX_INVALID_AT_RULE = 29;
+    CSS_SYNTAX_STRAY_TRAILING_BACKSLASH = 38;
+    CSS_SYNTAX_UNTERMINATED_COMMENT = 39;
+    CSS_SYNTAX_UNTERMINATED_STRING = 40;
+    CSS_SYNTAX_BAD_URL = 41;
+    CSS_SYNTAX_EOF_IN_PRELUDE_OF_QUALIFIED_RULE = 42;
+    CSS_SYNTAX_INVALID_DECLARATION = 43;
+    CSS_SYNTAX_INCOMPLETE_DECLARATION = 44;
+    CSS_SYNTAX_ERROR_IN_PSEUDO_SELECTOR = 45;
+    CSS_SYNTAX_MISSING_SELECTOR = 46;
+    CSS_SYNTAX_NOT_A_SELECTOR_START = 47;
+    CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR = 48;
   }
   optional Code code = 1;
   optional int32 line = 2 [ default = 1 ];

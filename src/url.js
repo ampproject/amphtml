@@ -15,6 +15,7 @@
  */
 
 import {assert} from './asserts';
+import {endsWith} from './string';
 
 // Cached a-tag to avoid memory allocation during URL parsing.
 const a = document.createElement('a');
@@ -98,10 +99,7 @@ export function assertHttpsUrl(urlString, elementContext) {
   const url = parseUrl(urlString);
   assert(
       url.protocol == 'https:' || /^(\/\/)/.test(urlString) ||
-      url.hostname == 'localhost' ||
-          url.hostname.lastIndexOf('.localhost') ==
-          // Poor person's endsWith
-          url.hostname.length - '.localhost'.length,
+      url.hostname == 'localhost' || endsWith(url.hostname, '.localhost'),
       '%s source must start with ' +
       '"https://" or "//" or be relative and served from ' +
       'either https or from localhost. Invalid value: %s',

@@ -79,6 +79,7 @@ class AmpLightbox extends AMP.BaseElement {
         'keydown', this.boundCloseOnEscape_);
     this.requestFullOverlay();
     this.getViewport().resetTouchZoom();
+    this.getViewport().hideFixedLayer();
     this.element.style.display = '';
     this.element.style.opacity = 0;
 
@@ -109,6 +110,7 @@ class AmpLightbox extends AMP.BaseElement {
 
   close() {
     this.cancelFullOverlay();
+    this.getViewport().showFixedLayer();
     this.element.style.display = 'none';
     if (this.historyId_ != -1) {
       this.getHistory_().pop(this.historyId_);
@@ -116,6 +118,7 @@ class AmpLightbox extends AMP.BaseElement {
     this.getWin().document.documentElement.removeEventListener(
         'keydown', this.boundCloseOnEscape_);
     this.boundCloseOnEscape_ = null;
+    this.schedulePause(this.container_);
   }
 
   getHistory_() {

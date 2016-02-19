@@ -26,16 +26,16 @@ export function mediaimpact(global, data) {
   window.addEventListener('load', function() {
     asmi.sas.call(data.site + '/(' + data.page + ')',
       data.format,
-      data.target + ";googleAMP=1;",
+      data.target + ';googleAMP=1;',
       '',
       'sas_' + data.slot.replace('sas_',''),
       1);
   }, false);
   asmiSetup = {
-    view: "m",
+    view: 'm',
     async: true
   };
-  loadScript(global, "https://ec-ns.sascdn.com/diff/251/divscripte/amp.js?dom=" + window.context.location.host, () => {
+  loadScript(global, 'https://ec-ns.sascdn.com/diff/251/divscripte/amp.js?dom=' + window.context.location.host, () => {
     if (!document.getElementById('sas_' + data.slot.replace('sas_',''))) {
       const adContainer = document.createElement('div');
       adContainer.id = 'sas_' + data.slot.replace('sas_','');

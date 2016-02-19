@@ -36,7 +36,7 @@ limitations under the License.
 </table>
 
 The following lists validation errors specific to the `amp-analytics` tag
-(see also `amp-analytics` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii):
+(see also `amp-analytics` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii)):
 
 <table>
   <tr>
@@ -44,11 +44,11 @@ The following lists validation errors specific to the `amp-analytics` tag
     <th>Description</th>
   </tr>
   <tr>
-    <td width="40%"><a href="/docs/reference/validation_errors.html#tag-required-by-another-tag-is-missing">TAG_REQUIRED_BY_MISSING</a></td>
+    <td width="40%"><a href="/docs/reference/validation_errors.html#tag-required-by-another-tag-is-missing">The 'example1' tag is missing or incorrect, but required by 'example2'.</a></td>
     <td>Error thrown when required <code>amp-analytics</code> extension <code>.js</code> script tag is missing or incorrect.</td>
   </tr>
   <tr>
-    <td width="40%"><a href="/docs/reference/validation_errors.html#invalid-attribute-value">INVALID_ATTR_VALUE</a></td>
+    <td width="40%"><a href="/docs/reference/validation_errors.html#invalid-attribute-value">The attribute 'example1' in tag 'example2' is set to the invalid value 'example3'.</a></td>
     <td>Error thrown when the <code>src</code> attribute for the script tag is invalid. The value must be <code>"https://cdn.ampproject.org/v0/amp-analytics-0.1.js"</code>.</td>
   </tr>
 </table>
@@ -117,7 +117,7 @@ Adds support for AT Internet. More details for adding AT Internet support can be
 
 Type attribute value: `chartbeat`
 
-Adds support for Chartbeat. More details for adding Chartbeat support can be found at [support.chartbeat.com](http://support.chartbeat.com/docs/).
+Adds support for Chartbeat. More details for adding Chartbeat support can be found at [support.chartbeat.com](http://support.chartbeat.com/docs/integrations.html#amp).
 
 ##### comScore
 
@@ -340,16 +340,28 @@ If more than one of the above transport methods are enabled, the precedence is `
 In the example below, `beacon` and `xhrpost` are set to `false`, so they will not be used even though they have higher precedence than `image`. `image` would be set `true` by default, but it is explicitly declared here. If the client's user agent supports the `image` method, then it will be used; otherwise, no request would be sent.
 
 ```javascript
-'transport': {
-  'beacon': false,
-  'xhrpost': false,
-  'image': true
+"transport": {
+  "beacon": false,
+  "xhrpost": false,
+  "image": true
 }
 ```
 
 
 ### Extra URL Params
 
-The `extraUrlParams` attribute specifies additional parameters to append to the query string of the url via the usual "&foo=baz" convention.
+The `extraUrlParams` attribute specifies additional parameters to append to the query string of a request URL via the usual "&foo=baz" convention.
 
-The `extraUrlParamsReplaceMap` attribute specifies a map of keys and values that act as parameters to String.replace() to preprocess keys in the extraUrlParams map.
+Here's an example that would append `&a=1&b=2&c=3` to a request:
+
+```javascript
+"extraUrlParams": {
+  "a": "1",
+  "b": "2",
+  "c": "3"
+}
+```
+
+The `extraUrlParamsReplaceMap` attribute specifies a map of keys and values that act as parameters to String.replace() to preprocess keys in the extraUrlParams configuration. For example, if an `extraUrlParams` configuration defines `"page.title": "The title of my page"` and the `extraUrlParamsReplaceMap` defines `"page.": "_p_"`, then `&_p_title=The%20title%20of%20my%20page%20` will be appended to the request.
+
+`extraUrlParamsReplaceMap` is not required to use `extraUrlParams`. If `extraUrlParamsReplaceMap` is not defined, then no string substitution will happens and the strings defined in `extraUrlParams` are used as-is.

@@ -21,6 +21,7 @@ import {assertHttpsUrl, addParamsToUrl} from '../../../src/url';
 import {expandTemplate} from '../../../src/string';
 import {installCidService} from '../../../src/service/cid-impl';
 import {installStorageService} from '../../../src/service/storage-impl';
+import {installActivityService} from '../../../src/service/activity-impl';
 import {isArray, isObject} from '../../../src/types';
 import {log} from '../../../src/log';
 import {sendRequest, sendRequestUsingIframe} from './transport';
@@ -32,6 +33,7 @@ import {toggle} from '../../../src/style';
 
 installCidService(AMP.win);
 installStorageService(AMP.win);
+installActivityService(AMP.win);
 instrumentationServiceFor(AMP.win);
 
 const MAX_REPLACES = 16; // The maximum number of entries in a extraUrlParamsReplaceMap
@@ -134,7 +136,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       for (const replaceMapKey in this.config_['extraUrlParamsReplaceMap']) {
         if (++count > MAX_REPLACES) {
           console./*OK*/error(this.getName_(),
-           "More than " + MAX_REPLACES.toString() +
+           'More than ' + MAX_REPLACES.toString() +
            " extraUrlParamsReplaceMap rules aren't allowed; Skipping the rest"
           );
           break;
@@ -158,6 +160,11 @@ export class AmpAnalytics extends AMP.BaseElement {
     for (const k in this.config_['triggers']) {
       if (this.config_['triggers'].hasOwnProperty(k)) {
         const trigger = this.config_['triggers'][k];
+        if (!trigger) {
+          console./*OK*/error(this.getName_(),
+              'trigger should be an object: ', k);
+          continue;
+        }
         if (!trigger['on'] || !trigger['request']) {
           console./*OK*/error(this.getName_(), '"on" and "request" ' +
               'attributes are required for data to be collected.');
@@ -316,7 +323,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (!request) {
       console./*OK*/error(this.getName_(), 'Ignoring event. Request string ' +
           'not found: ', trigger['request']);
-      return;
+      return Promise.resolve();
     }
 
     // Add any given extraUrlParams as query string param
@@ -335,21 +342,23 @@ export class AmpAnalytics extends AMP.BaseElement {
       const argList = match[2] || '';
       const raw = (trigger['vars'] && trigger['vars'][name] ||
           this.config_['vars'] && this.config_['vars'][name]);
-      const val = this.encodeVars_(raw != null ? raw : '');
+      const val = this.encodeVars_(raw != null ? raw : '', name);
       return val + argList;
     });
 
-    // For consistentcy with amp-pixel we also expand any url replacements.
-    urlReplacementsFor(this.getWin()).expand(request).then(request => {
+    // For consistency with amp-pixel we also expand any url replacements.
+    return urlReplacementsFor(this.getWin()).expand(request).then(request => {
       this.sendRequest_(request, trigger);
+      return request;
     });
   }
 
   /**
    * @param {string} raw The values to URI encode.
+   * @param {string} unusedName Name of the variable.
    * @private
    */
-  encodeVars_(raw) {
+  encodeVars_(raw, unusedName) {
     if (isArray(raw)) {
       return raw.map(encodeURIComponent).join(',');
     }

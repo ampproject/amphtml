@@ -75,11 +75,6 @@ export function installAd(win) {
     }
 
     /** @override */
-    isRelayoutNeeded() {
-      return true;
-    }
-
-    /** @override */
     buildCallback() {
       /** @private {?Element} */
       this.iframe_ = null;
@@ -127,10 +122,10 @@ export function installAd(win) {
       const prefetch = adPrefetch[type];
       const preconnect = adPreconnect[type];
       if (typeof prefetch == 'string') {
-        this.preconnect.prefetch(prefetch);
+        this.preconnect.prefetch(prefetch, 'script');
       } else if (prefetch) {
         prefetch.forEach(p => {
-          this.preconnect.prefetch(p);
+          this.preconnect.prefetch(p, 'script');
         });
       }
       if (typeof preconnect == 'string') {
@@ -239,7 +234,7 @@ export function installAd(win) {
           // Triggered by context.reportRenderedEntityIdentifier(…) inside the ad
           // iframe.
           listenOnce(this.iframe_, 'entity-id', info => {
-            this.element.setAttribute('creative-id', info.id);
+            this.element.creativeId = info.id;
           }, /* opt_is3P */ true);
           listen(this.iframe_, 'embed-size', data => {
             if (data.width !== undefined) {
@@ -365,6 +360,10 @@ export function installAd(win) {
       }
       this.deferMutate(() => {
         if (this.fallback_) {
+          // Hide placeholder when falling back.
+          if (this.placeholder_) {
+            this.togglePlaceholder(false);
+          }
           this.toggleFallback(true);
         }
         this.element.removeChild(this.iframe_);

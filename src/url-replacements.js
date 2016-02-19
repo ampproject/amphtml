@@ -27,6 +27,7 @@ import {viewerFor} from './viewer';
 import {viewportFor} from './viewport';
 import {vsyncFor} from './vsync';
 import {userNotificationManagerFor} from './user-notification';
+import {activityFor} from './activity';
 
 /** @private {string} */
 const TAG_ = 'UrlReplacements';
@@ -110,13 +111,13 @@ class UrlReplacements {
       return documentInfoFor(this.win_).pageViewId;
     });
 
-    this.set_('QUERY_PARAM', (param, defaultValue = "") => {
+    this.set_('QUERY_PARAM', (param, defaultValue = '') => {
       assert(param, 'The first argument to QUERY_PARAM, the query string ' +
           /*OK*/'param is required');
       const url = parseUrl(this.win_.location.href);
       const params = parseQueryString(url.search);
 
-      return (typeof params[param] !== "undefined") ?
+      return (typeof params[param] !== 'undefined') ?
         params[param] :
         defaultValue;
     });
@@ -267,13 +268,22 @@ class UrlReplacements {
     this.set_('AUTHDATA', field => {
       assert(field, 'The first argument to AUTHDATA, the field, is required');
       return this.getAccessValue_(accessService => {
-        return accessService.getAuthdataField(field);
+        return accessService.whenFirstAuthorized().then(() => {
+          return accessService.getAuthdataField(field);
+        });
       }, 'AUTHDATA');
     });
 
     // Returns an identifier for the viewer.
     this.set_('VIEWER', () => {
       return viewerFor(this.win_).getViewerOrigin();
+    });
+
+    // Returns the total engaged time since the content became viewable.
+    this.set_('TOTAL_ENGAGED_TIME', () => {
+      return activityFor(this.win_).then(activity => {
+        return activity.getTotalEngagedTime();
+      });
     });
   }
 
@@ -367,7 +377,7 @@ class UrlReplacements {
         args = opt_strargs.split(',');
       }
       const binding = (opt_bindings && (name in opt_bindings)) ?
-          opt_bindings[name] : this.replacements_[name];
+          opt_bindings[name] : this.getReplacement_(name);
       const val = (typeof binding == 'function') ?
           binding.apply(null, args) : binding;
       // In case the produced value is a promise, we don't actually
@@ -393,6 +403,14 @@ class UrlReplacements {
     }
 
     return replacementPromise || Promise.resolve(url);
+  }
+
+  /**
+   * @param {string} name
+   * @return {function(*):*}
+   */
+  getReplacement_(name) {
+    return this.replacements_[name];
   }
 
   /**

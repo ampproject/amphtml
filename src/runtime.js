@@ -27,6 +27,7 @@ import {resourcesFor} from './resources';
 import {timer} from './timer';
 import {viewerFor} from './viewer';
 import {viewportFor} from './viewport';
+import {getService} from './service';
 
 
 /** @type {!Array} */
@@ -67,9 +68,14 @@ export function adopt(global) {
         name: name,
         implementationClass: implementationClass
       });
+      // Resolve this extension's Service Promise.
+      getService(global, name, () => {
+        // All services need to resolve to an object.
+        return {};
+      });
     };
     if (opt_css) {
-      installStyles(global.document, opt_css, register);
+      installStyles(global.document, opt_css, register, false, name);
     } else {
       register();
     }

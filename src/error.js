@@ -17,9 +17,12 @@
 
 import {getMode} from './mode';
 import {exponentialBackoff} from './exponential-backoff';
+import {ASSERT_SENTINEL, isAssertErrorMessage} from './asserts';
 import {makeBodyVisible} from './styles';
 
 const globalExponentialBackoff = exponentialBackoff(1.5);
+
+const CANCELLED = 'CANCELLED';
 
 
 /**
@@ -72,6 +75,15 @@ export function reportError(error, opt_associatedElement) {
 }
 
 /**
+ * Returns an error for a cancellation of a promise.
+ * @param {string} message
+ * @return {!Error}
+ */
+export function cancellation() {
+  return new Error(CANCELLED);
+}
+
+/**
  * Install handling of global unhandled exceptions.
  * @param {!Window} win
  */
@@ -101,7 +113,9 @@ function reportErrorToServer(message, filename, line, col, error) {
   }
   const url = getErrorReportUrl(message, filename, line, col, error);
   globalExponentialBackoff(() => {
-    new Image().src = url;
+    if (url) {
+      new Image().src = url;
+    }
   });
 }
 
@@ -112,11 +126,15 @@ function reportErrorToServer(message, filename, line, col, error) {
  * @param {string|undefined} line
  * @param {string|undefined} col
  * @param {!Error|undefined} error
+ * @return {string|undefined} The URL
  * visibleForTesting
  */
 export function getErrorReportUrl(message, filename, line, col, error) {
   message = error && error.message ? error.message : message;
   if (/_reported_/.test(message)) {
+    return;
+  }
+  if (message == CANCELLED) {
     return;
   }
   if (!message) {
@@ -129,22 +147,26 @@ export function getErrorReportUrl(message, filename, line, col, error) {
   // for analyzing production issues.
   let url = 'https://amp-error-reporting.appspot.com/r' +
       '?v=' + encodeURIComponent('$internalRuntimeVersion$') +
-      '&m=' + encodeURIComponent(message);
+      '&m=' + encodeURIComponent(message.replace(ASSERT_SENTINEL, '')) +
+      '&a=' + (isAssertErrorMessage(message) ? 1 : 0);
   if (window.context && window.context.location) {
     url += '&3p=1';
   }
   if (window.AMP_CONFIG && window.AMP_CONFIG.canary) {
     url += '&ca=1';
   }
+  if (window.location.ancestorOrigins && window.location.ancestorOrigins[0]) {
+    url += '&or=' + encodeURIComponent(window.location.ancestorOrigins[0]);
+  }
+  if (window.viewerState) {
+    url += '&vs=' + encodeURIComponent(window.viewerState);
+  }
 
   if (error) {
     const tagName = error && error.associatedElement
       ? error.associatedElement.tagName
       : 'u';  // Unknown
-    // We may want to consider not reporting asserts but for now
-    // this should be helpful.
-    url += '&a=' + (error.fromAssert ? 1 : 0) +
-        '&el=' + encodeURIComponent(tagName) +
+    url += '&el=' + encodeURIComponent(tagName) +
         '&s=' + encodeURIComponent(error.stack || '');
     error.message += ' _reported_';
   } else {
@@ -152,6 +174,7 @@ export function getErrorReportUrl(message, filename, line, col, error) {
         '&l=' + encodeURIComponent(line) +
         '&c=' + encodeURIComponent(col || '');
   }
+  url += '&r=' + encodeURIComponent(document.referrer);
 
   // Shorten URLs to a value all browsers will send.
   return url.substr(0, 2000);

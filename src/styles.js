@@ -33,8 +33,9 @@ import {platformFor} from './platform';
  * @param {boolean=} opt_isRuntimeCss If true, this style tag will be inserted
  *     as the first element in head and all style elements will be positioned
  *     after.
+ * @param {string=} opt_ext
  */
-export function installStyles(doc, cssText, cb, opt_isRuntimeCss) {
+export function installStyles(doc, cssText, cb, opt_isRuntimeCss, opt_ext) {
   if (platformFor(doc.defaultView).isIos() && opt_isRuntimeCss) {
     setStyle(doc.documentElement, 'cursor', 'pointer');
   }
@@ -46,6 +47,7 @@ export function installStyles(doc, cssText, cb, opt_isRuntimeCss) {
   if (opt_isRuntimeCss) {
     style.setAttribute('amp-runtime', '');
   } else {
+    style.setAttribute('amp-extension', opt_ext || '');
     afterElement = doc.querySelector('style[amp-runtime]');
   }
   insertAfterOrAtStart(doc.head, style, afterElement);

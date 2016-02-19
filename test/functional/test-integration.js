@@ -33,9 +33,12 @@ describe('3p integration.js', () => {
     expect(registrations).to.include.key('adsense');
     expect(registrations).to.include.key('adtech');
     expect(registrations).to.include.key('adreactor');
+    expect(registrations).to.include.key('criteo');
     expect(registrations).to.include.key('doubleclick');
+    expect(registrations).to.include.key('flite');
     expect(registrations).to.include.key('twitter');
     expect(registrations).to.include.key('yieldmo');
+    expect(registrations).to.include.key('triplelift');
     expect(registrations).to.include.key('_ping_');
   });
 

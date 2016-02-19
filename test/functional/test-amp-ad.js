@@ -290,6 +290,33 @@ function tests(name, installer) {
           expect(ad.style.display).to.equal('none');
         });
       });
+
+      it('should hide placeholder when ad falls back', () => {
+        return getAd({
+          width: 300,
+          height: 750,
+          type: 'a9',
+          src: 'testsrc',
+        }, 'https://schema.org', ad => {
+          const placeholder = document.createElement('div');
+          placeholder.setAttribute('placeholder', '');
+          ad.appendChild(placeholder);
+          expect(placeholder.classList.contains('amp-hidden')).to.be.false;
+
+          const fallback = document.createElement('div');
+          fallback.setAttribute('fallback', '');
+          ad.appendChild(fallback);
+          return ad;
+        }).then(ad => {
+          const placeholderEl = ad.querySelector('[placeholder]');
+          sandbox.stub(
+              ad.implementation_, 'deferMutate', function(callback) {
+                callback();
+              });
+          ad.implementation_.noContentHandler_();
+          expect(placeholderEl.classList.contains('amp-hidden')).to.be.true;
+        });
+      });
     });
 
     describe('cid-ad support', () => {

@@ -30,9 +30,11 @@ import {adreactor} from '../ads/adreactor';
 import {adsense} from '../ads/adsense';
 import {adtech} from '../ads/adtech';
 import {plista} from '../ads/plista';
+import {criteo} from '../ads/criteo';
 import {doubleclick} from '../ads/doubleclick';
 import {dotandads} from '../ads/dotandads';
 import {facebook} from './facebook';
+import {flite} from '../ads/flite';
 import {manageWin} from './environment';
 import {mediaimpact} from '../ads/mediaimpact';
 import {nonSensitiveDataPostMessage, listenParent} from './messaging';
@@ -45,6 +47,8 @@ import {taboola} from '../ads/taboola';
 import {smartadserver} from '../ads/smartadserver';
 import {revcontent} from '../ads/revcontent';
 import {openadstream} from '../ads/openadstream';
+import {triplelift} from '../ads/triplelift';
+import {teads} from '../ads/teads';
 
 /**
  * Whether the embed type may be used with amp-embed tag.
@@ -60,7 +64,9 @@ register('adreactor', adreactor);
 register('adsense', adsense);
 register('adtech', adtech);
 register('plista', plista);
+register('criteo', criteo);
 register('doubleclick', doubleclick);
+register('flite', flite);
 register('taboola', taboola);
 register('dotandads', dotandads);
 register('yieldmo', yieldmo);
@@ -73,6 +79,8 @@ register('smartadserver', smartadserver);
 register('mediaimpact', mediaimpact);
 register('revcontent', revcontent);
 register('openadstream', openadstream);
+register('triplelift', triplelift);
+register('teads', teads);
 
 /**
  * Visible for testing.

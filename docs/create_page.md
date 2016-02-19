@@ -1,3 +1,7 @@
+**Important:** We've published new and improved tutorial:
+[Create Your First AMP Page](https://www.ampproject.org/docs/get_started/create_page.html).
+Eventually, this version will get deprecated.
+
 # How to Create a Basic AMP HTML Page
 
 Learn how to create a basic AMP HTML page,
