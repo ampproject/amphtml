@@ -25,7 +25,7 @@ min_validator_revision_required: 95
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 158
+spec_file_revision: 159
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
 #
@@ -1142,7 +1142,7 @@ tags: {
     }
   }
   attrs: { name: "width" }
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/builtins/amp-img.md"
+  spec_url: "https://www.ampproject.org/docs/reference/amp-img.html"
 }
 # 4.7.6 The video element
 # Only allowed in noscript tags. Otherwise use amp-video.
@@ -1153,7 +1153,7 @@ tags: {
   attrs: { name: "controls" }
   attrs: { name: "height" }
   attrs: { name: "width" }
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/builtins/amp-video.md"
+  spec_url: "https://www.ampproject.org/docs/reference/amp-video.html"
 }
 # 4.7.7 The audio element
 # Only allowed in noscript tags. Otherwise use amp-audio.
@@ -1162,7 +1162,7 @@ tags: {
   mandatory_ancestor: "noscript"
   mandatory_ancestor_suggested_alternative: "amp-audio"
   attrs: { name: "controls" }
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-audio/amp-audio.md"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-audio.html"
 }
 # 4.7.8 The source element
 attr_lists: {
@@ -1175,7 +1175,7 @@ attr_lists: {
 tags: {
   name: "source"
   detail: "amp-audio > source"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-audio/amp-audio.md"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-audio.html"
   mandatory_parent: "amp-audio"
   attrs: {
     name: "src"
@@ -1188,7 +1188,7 @@ tags: {
 tags: {
   name: "source"
   detail: "amp-video > source"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/builtins/amp-video.md"
+  spec_url: "https://www.ampproject.org/docs/reference/amp-video.html"
   mandatory_parent: "amp-video"
   attrs: {
     name: "src"
@@ -1910,7 +1910,7 @@ tags: {
     mandatory: true
     value: "application/json"
   }
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-access/amp-access-spec.md"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-access-spec.html"
   # TODO(gregable): Validate the cdata contents of this script tag.
 }
 
@@ -1937,7 +1937,7 @@ tags: {  # amp-analytics
   name: "script"
   mandatory_parent: "head"
   detail: "amp-analytics extension .js script"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-analytics.md"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-analytics.html"
   attrs: {
     name: "custom-element"
     value: "amp-analytics"
@@ -1955,7 +1955,7 @@ tags: {  # amp-anim
   name: "script"
   mandatory_parent: "head"
   detail: "amp-anim extension .js script"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-anim/amp-anim.md"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-anim.html"
   attrs: {
     name: "custom-element"
     value: "amp-anim"
@@ -1973,7 +1973,7 @@ tags: {  # amp-audio
   name: "script"
   mandatory_parent: "head"
   detail: "amp-audio extension .js script"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-audio/amp-audio.md"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-audio.html"
   attrs: {
     name: "custom-element"
     value: "amp-audio"
@@ -2027,7 +2027,7 @@ tags: {  # amp-dynamic-css-classes
   name: "script"
   mandatory_parent: "head"
   detail: "amp-dynamic-css-classes extension .js script"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-dynamic-css-classes/amp-dynamic-css-classes.md"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-dynamic-css-classes.html"
   attrs: {
     name: "custom-element"
     value: "amp-dynamic-css-classes"
@@ -2045,7 +2045,7 @@ tags: {  # amp-facebook
   name: "script"
   mandatory_parent: "head"
   detail: "amp-facebook extension .js script"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-facebook/amp-facebook.md"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-facebook.html"
   attrs: {
     name: "custom-element"
     value: "amp-facebook"
@@ -2225,7 +2225,7 @@ tags: {  # amp-pinterest
   name: "script"
   mandatory_parent: "head"
   detail: "amp-pinterest extension .js script"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-pinterest/amp-pinterest.md"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-pinterest.html"
   attrs: {
     name: "custom-element"
     value: "amp-pinterest"
@@ -2243,7 +2243,7 @@ tags: {  # amp-slides
   name: "script"
   mandatory_parent: "head"
   detail: "amp-slides extension .js script"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-slides/amp-slides.md"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-slides.html"
   attrs: {
     name: "custom-element"
     value: "amp-slides"
@@ -2279,7 +2279,7 @@ tags: {  # amp-user-notification
   name: "script"
   mandatory_parent: "head"
   detail: "amp-user-notification extension .js script"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-user-notification/amp-user-notification.md"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-user-notification.html"
   attrs: {
     name: "custom-element"
     value: "amp-user-notification"
@@ -2388,7 +2388,7 @@ tags: {
   name: "script"
   mandatory_parent: "amp-analytics"
   detail: "amp-analytics json script"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-analytics.md"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-analytics.html"
   attrs: {
     name: "type"
     mandatory: true
@@ -2703,7 +2703,7 @@ tags: {
 tags: {
   name: "amp-facebook"
   disallowed_ancestor: "head"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-facebook/amp-facebook.md"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-facebook.html"
   also_requires: "amp-facebook extension .js script"
   attr_lists: "extended-amp-global"
   # data-* is generally allowed, but it's not generally mandatory.
@@ -2781,7 +2781,7 @@ tags: {
 tags: {
   name: "amp-analytics"
   disallowed_ancestor: "head"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-analytics.md"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-analytics.html"
   also_requires: "amp-analytics extension .js script"
   attrs: { name: "type" }
   attrs: {
@@ -2795,7 +2795,7 @@ tags: {
 tags: {
   name: "amp-user-notification"
   disallowed_ancestor: "head"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-user-notification/amp-user-notification.md"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-user-notification.html"
   also_requires: "amp-user-notification extension .js script"
   attr_lists: "extended-amp-global"
   amp_layout: {
@@ -2924,7 +2924,7 @@ tags: {
 tags: {
   name: "amp-pinterest"
   disallowed_ancestor: "head"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-pinterest/amp-pinterest.md"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-pinterest.html"
   also_requires: "amp-pinterest extension .js script"
   attr_lists: "extended-amp-global"
   # data-* is generally allowed, but it's not generally mandatory.
@@ -3222,7 +3222,7 @@ attr_lists: {
   attrs: { name: "on" }
   attrs: { name: "overflow" }
   # amp-access specific attributes, see
-  # https://github.com/ampproject/amphtml/blob/master/extensions/amp-access/amp-access-spec.md
+  # https://www.ampproject.org/docs/reference/extended/amp-access-spec.html
   # TODO(gregable): These should only be allowed on any tag inside BODY or HEAD.
   attrs: { name: "amp-access" }
   attrs: { name: "amp-access-loading" }
