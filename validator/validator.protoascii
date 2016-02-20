@@ -25,7 +25,7 @@ min_validator_revision_required: 91
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 148
+spec_file_revision: 149
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
 #
@@ -587,61 +587,143 @@ tags: {
   spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#crps"
 }
 # 4.3.2 The article element
-tags: { name: "article" }
+tags: {
+  name: "article"
+  disallowed_ancestor: "head"
+}
 # 4.3.3 The section element
-tags: { name: "section" }
+tags: {
+  name: "section"
+  disallowed_ancestor: "head"
+}
 # 4.3.4 The nav element
-tags: { name: "nav" }
+tags: {
+  name: "nav"
+  disallowed_ancestor: "head"
+}
 # 4.3.5 The aside element
-tags: { name: "aside" }
+tags: {
+  name: "aside"
+  disallowed_ancestor: "head"
+}
 # 4.3.6 The h1, h2, h3, h4, h5, and h6 elements
-tags: { name: "h1" }
-tags: { name: "h2" }
-tags: { name: "h3" }
-tags: { name: "h4" }
-tags: { name: "h5" }
-tags: { name: "h6" }
+tags: {
+  name: "h1"
+  disallowed_ancestor: "head"
+}
+tags: {
+  name: "h2"
+  disallowed_ancestor: "head"
+}
+tags: {
+  name: "h3"
+  disallowed_ancestor: "head"
+}
+tags: {
+  name: "h4"
+  disallowed_ancestor: "head"
+}
+tags: {
+  name: "h5"
+  disallowed_ancestor: "head"
+}
+tags: {
+  name: "h6"
+  disallowed_ancestor: "head"
+}
 # 4.3 7 The header element
-tags: { name: "header" }
+tags: {
+  name: "header"
+  disallowed_ancestor: "head"
+}
 # 4.3 7 The footer element
-tags: { name: "footer" }
+tags: {
+  name: "footer"
+  disallowed_ancestor: "head"
+}
 # 4.3 7 The address element
-tags: { name: "address" }
+tags: {
+  name: "address"
+  disallowed_ancestor: "head"
+}
 
 # 4.4 Grouping Content
 # 4.4.1 The p element
-tags: { name: "p" }
+tags: {
+  name: "p"
+  disallowed_ancestor: "head"
+}
 # 4.4.2 The hr element
-tags: { name: "hr" }
+tags: {
+  name: "hr"
+  disallowed_ancestor: "head"
+}
 # 4.4.3 The pre element
-tags: { name: "pre" }
+tags: {
+  name: "pre"
+  disallowed_ancestor: "head"
+}
 # 4.4.4 The blockquote element
-tags: { name: "blockquote" }
+tags: {
+  name: "blockquote"
+  disallowed_ancestor: "head"
+}
 # 4.4.5 The ol element
-tags: { name: "ol" }
+tags: {
+  name: "ol"
+  disallowed_ancestor: "head"
+}
 # 4.4.6 The ul element
-tags: { name: "ul" }
+tags: {
+  name: "ul"
+  disallowed_ancestor: "head"
+}
 # 4.4.7 The li element
-tags: { name: "li" }
+tags: {
+  name: "li"
+  disallowed_ancestor: "head"
+}
 # 4.4.8 The dl element
-tags: { name: "dl" }
+tags: {
+  name: "dl"
+  disallowed_ancestor: "head"
+}
 # 4.4.9 The dt element
-tags: { name: "dt" }
+tags: {
+  name: "dt"
+  disallowed_ancestor: "head"
+}
 # 4.4.10 The dd element
-tags: { name: "dd" }
+tags: {
+  name: "dd"
+  disallowed_ancestor: "head"
+}
 # 4.4.11 The figure element
-tags: { name: "figure" }
+tags: {
+  name: "figure"
+  disallowed_ancestor: "head"
+}
 # 4.4.12 The figcaption element
-tags: { name: "figcaption" }
+tags: {
+  name: "figcaption"
+  disallowed_ancestor: "head"
+}
 # 4.4.13 The div element
-tags: { name: "div" }
+tags: {
+  name: "div"
+  disallowed_ancestor: "head"
+}
 # 4.4.14 The main element
-tags: { name: "main" }
+tags: {
+  name: "main"
+  disallowed_ancestor: "head"
+}
 
 # 4.5 Text-level semantics
 # 4.5.1 The a element
 tags: {
   name: "a"
+  disallowed_ancestor: "head"
   attrs: {
     name: "href"
     value_url: {
@@ -862,75 +944,169 @@ tags: {
   attrs: { name: "name" }
 }
 # 4.5.2 The em element
-tags: { name: "em" }
+tags: {
+  name: "em"
+  disallowed_ancestor: "head"
+}
 # 4.5.3 The strong element
-tags: { name: "strong" }
+tags: {
+  name: "strong"
+  disallowed_ancestor: "head"
+}
 # 4.5.4 The small element
-tags: { name: "small" }
+tags: {
+  name: "small"
+  disallowed_ancestor: "head"
+}
 # 4.5.5 The s element
-tags: { name: "s" }
+tags: {
+  name: "s"
+  disallowed_ancestor: "head"
+}
 # 4.5.6 The cite element
-tags: { name: "cite" }
+tags: {
+  name: "cite"
+  disallowed_ancestor: "head"
+}
 # 4.5.7 The q element
-tags: { name: "q" }
+tags: {
+  name: "q"
+  disallowed_ancestor: "head"
+}
 # 4.5.8 The dfn element
-tags: { name: "dfn" }
+tags: {
+  name: "dfn"
+  disallowed_ancestor: "head"
+}
 # 4.5.9 The abbr element
-tags: { name: "abbr" }
+tags: {
+  name: "abbr"
+  disallowed_ancestor: "head"
+}
 # 4.5.10 The data element
-tags: { name: "data" }
+tags: {
+  name: "data"
+  disallowed_ancestor: "head"
+}
 # 4.5.11 The time element
 tags: {
   name: "time"
+  disallowed_ancestor: "head"
   attrs: {
     name: "datetime"
   }
 }
 # 4.5.12 The code element
-tags: { name: "code" }
+tags: {
+  name: "code"
+  disallowed_ancestor: "head"
+}
 # 4.5.13 The var element
-tags: { name: "var" }
+tags: {
+  name: "var"
+  disallowed_ancestor: "head"
+}
 # 4.5.14 The samp element
-tags: { name: "samp" }
+tags: {
+  name: "samp"
+  disallowed_ancestor: "head"
+}
 # 4.5.15 The kbd element
-tags: { name: "kbd" }
+tags: {
+  name: "kbd"
+  disallowed_ancestor: "head"
+}
 # 4.5.16 The sub and sup elements
-tags: { name: "sub" }
-tags: { name: "sup" }
+tags: {
+  name: "sub"
+  disallowed_ancestor: "head"
+}
+tags: {
+  name: "sup"
+  disallowed_ancestor: "head"
+}
 # 4.5.17 The i element
-tags: { name: "i" }
+tags: {
+  name: "i"
+  disallowed_ancestor: "head"
+}
 # 4.5.18 The b element
-tags: { name: "b" }
+tags: {
+  name: "b"
+  disallowed_ancestor: "head"
+}
 # 4.5.19 The u element
-tags: { name: "u" }
+tags: {
+  name: "u"
+  disallowed_ancestor: "head"
+}
 # 4.5.20 The mark element
-tags: { name: "mark" }
+tags: {
+  name: "mark"
+  disallowed_ancestor: "head"
+}
 # 4.5.21 The ruby element
-tags: { name: "ruby" }
+tags: {
+  name: "ruby"
+  disallowed_ancestor: "head"
+}
 # 4.5.22 The rb element
-tags: { name: "rb" }
+tags: {
+  name: "rb"
+  disallowed_ancestor: "head"
+}
 # 4.5.23 The rt element
-tags: { name: "rt" }
+tags: {
+  name: "rt"
+  disallowed_ancestor: "head"
+}
 # 4.5.24 The rtc element
-tags: { name: "rtc" }
+tags: {
+  name: "rtc"
+  disallowed_ancestor: "head"
+}
 # 4.5.25 The rp element
-tags: { name: "rp" }
+tags: {
+  name: "rp"
+  disallowed_ancestor: "head"
+}
 # 4.5.26 The bdi element
-tags: { name: "bdi" }
+tags: {
+  name: "bdi"
+  disallowed_ancestor: "head"
+}
 # 4.5.27 The bdo element
-tags: { name: "bdo" }
+tags: {
+  name: "bdo"
+  disallowed_ancestor: "head"
+}
 # 4.5.28 The span element
-tags: { name: "span" }
+tags: {
+  name: "span"
+  disallowed_ancestor: "head"
+}
 # 4.5.29 The br element
-tags: { name: "br" }
+tags: {
+  name: "br"
+  disallowed_ancestor: "head"
+}
 # 4.5.30 The wbr element
-tags: { name: "wbr" }
+tags: {
+  name: "wbr"
+  disallowed_ancestor: "head"
+}
 
 # 4.6 Edits
 # 4.6.1 The ins element
-tags: { name: "ins" }
+tags: {
+  name: "ins"
+  disallowed_ancestor: "head"
+}
 # 4.6.2 The del element
-tags: { name: "del" }
+tags: {
+  name: "del"
+  disallowed_ancestor: "head"
+}
 
 # 4.7 Embedded Content
 # AMP HTML allows embedded content only via its own tags (e.g. amp-img), with
@@ -1156,6 +1332,7 @@ attr_lists: {
 tags: {
   name: "svg"
   disallowed_ancestor: "svg"
+  disallowed_ancestor: "head"
   attr_lists: "svg-conditional-processing-attributes"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
@@ -1174,6 +1351,7 @@ tags: {
 }
 tags: {
   name: "g"
+  mandatory_ancestor: "svg"
   attr_lists: "svg-conditional-processing-attributes"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
@@ -1183,6 +1361,7 @@ tags: {
 }
 tags: {
   name: "path"
+  mandatory_ancestor: "svg"
   attr_lists: "svg-conditional-processing-attributes"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
@@ -1194,6 +1373,7 @@ tags: {
 }
 tags: {
   name: "glyph"
+  mandatory_ancestor: "svg"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
   attrs: { name: "class" }
@@ -1209,6 +1389,7 @@ tags: {
 }
 tags: {
   name: "glyphref"
+  mandatory_ancestor: "svg"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
   attr_lists: "svg-xlink-attributes"
@@ -1222,6 +1403,7 @@ tags: {
 }
 tags: {
   name: "marker"
+  mandatory_ancestor: "svg"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
   attrs: { name: "class" }
@@ -1238,6 +1420,7 @@ tags: {
 }
 tags: {
   name: "view"
+  mandatory_ancestor: "svg"
   attr_lists: "svg-core-attributes"
   attrs: { name: "externalresourcesrequired" }
   attrs: { name: "viewbox" }
@@ -1248,6 +1431,7 @@ tags: {
 # Shapes
 tags: {
   name: "circle"
+  mandatory_ancestor: "svg"
   attr_lists: "svg-conditional-processing-attributes"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
@@ -1260,6 +1444,7 @@ tags: {
 }
 tags: {
   name: "line"
+  mandatory_ancestor: "svg"
   attr_lists: "svg-conditional-processing-attributes"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
@@ -1273,6 +1458,7 @@ tags: {
 }
 tags: {
   name: "polygon"
+  mandatory_ancestor: "svg"
   attr_lists: "svg-conditional-processing-attributes"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
@@ -1283,6 +1469,7 @@ tags: {
 }
 tags: {
   name: "polyline"
+  mandatory_ancestor: "svg"
   attr_lists: "svg-conditional-processing-attributes"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
@@ -1293,6 +1480,7 @@ tags: {
 }
 tags: {
   name: "rect"
+  mandatory_ancestor: "svg"
   attr_lists: "svg-conditional-processing-attributes"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
@@ -1309,6 +1497,7 @@ tags: {
 # Text
 tags: {
   name: "text"
+  mandatory_ancestor: "svg"
   attr_lists: "svg-conditional-processing-attributes"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
@@ -1326,6 +1515,7 @@ tags: {
 }
 tags: {
   name: "textpath"
+  mandatory_ancestor: "svg"
   attr_lists: "svg-conditional-processing-attributes"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
@@ -1338,6 +1528,7 @@ tags: {
 }
 tags: {
   name: "tref"
+  mandatory_ancestor: "svg"
   attr_lists: "svg-conditional-processing-attributes"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
@@ -1347,6 +1538,7 @@ tags: {
 }
 tags: {
   name: "tspan"
+  mandatory_ancestor: "svg"
   attr_lists: "svg-conditional-processing-attributes"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
@@ -1363,6 +1555,7 @@ tags: {
 # Rendering
 tags: {
   name: "clippath"
+  mandatory_ancestor: "svg"
   attr_lists: "svg-conditional-processing-attributes"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
@@ -1373,6 +1566,7 @@ tags: {
 }
 tags: {
   name: "filter"
+  mandatory_ancestor: "svg"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
   attr_lists: "svg-xlink-attributes"
@@ -1388,6 +1582,7 @@ tags: {
 }
 tags: {
   name: "lineargradient"
+  mandatory_ancestor: "svg"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
   attr_lists: "svg-xlink-attributes"
@@ -1403,6 +1598,7 @@ tags: {
 }
 tags: {
   name: "radialgradient"
+  mandatory_ancestor: "svg"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
   attr_lists: "svg-xlink-attributes"
@@ -1419,6 +1615,7 @@ tags: {
 }
 tags: {
   name: "mask"
+  mandatory_ancestor: "svg"
   attr_lists: "svg-conditional-processing-attributes"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
@@ -1433,6 +1630,7 @@ tags: {
 }
 tags: {
   name: "pattern"
+  mandatory_ancestor: "svg"
   attr_lists: "svg-conditional-processing-attributes"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
@@ -1451,6 +1649,7 @@ tags: {
 }
 tags: {
   name: "vkern"
+  mandatory_ancestor: "svg"
   attr_lists: "svg-core-attributes"
   attrs: { name: "u1" }
   attrs: { name: "g1" }
@@ -1460,6 +1659,7 @@ tags: {
 }
 tags: {
   name: "hkern"
+  mandatory_ancestor: "svg"
   attr_lists: "svg-core-attributes"
   attrs: { name: "u1" }
   attrs: { name: "g1" }
@@ -1470,6 +1670,7 @@ tags: {
 # Special
 tags: {
   name: "defs"
+  mandatory_ancestor: "svg"
   attr_lists: "svg-conditional-processing-attributes"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
@@ -1479,6 +1680,7 @@ tags: {
 }
 tags: {
   name: "use"
+  mandatory_ancestor: "svg"
   attr_lists: "svg-conditional-processing-attributes"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
@@ -1493,6 +1695,7 @@ tags: {
 }
 tags: {
   name: "symbol"
+  mandatory_ancestor: "svg"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
   attrs: { name: "class" }
@@ -1504,6 +1707,7 @@ tags: {
 # See https://github.com/ampproject/amphtml/issues/717
 tags: {
   name: "foreignObject"
+  mandatory_ancestor: "svg"
   attr_lists: "svg-conditional-processing-attributes"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
@@ -1518,11 +1722,13 @@ tags: {
 # ARIA
 tags: {
   name: "desc"
+  mandatory_ancestor: "svg"
   attr_lists: "svg-core-attributes"
   attrs: { name: "class" }
 }
 tags: {
   name: "title"
+  mandatory_ancestor: "svg"
   detail: "svg title"
   attr_lists: "svg-core-attributes"
   attrs: { name: "class" }
@@ -1535,16 +1741,19 @@ tags: {
 # 4.9.1 The table element
 tags: {
   name: "table"
+  disallowed_ancestor: "head"
   attrs: { name: "align" }
 }
 # 4.9.2 The caption element
 tags: {
   name: "caption"
+  disallowed_ancestor: "head"
   attrs: { name: "align" }
 }
 # 4.9.3 The colgroup element
 tags: {
   name: "colgroup"
+  disallowed_ancestor: "head"
   attrs: { name: "align" }
   attrs: { name: "span" }
   attrs: { name: "valign" }
@@ -1552,6 +1761,7 @@ tags: {
 # 4.9.4 The col element
 tags: {
   name: "col"
+  disallowed_ancestor: "head"
   attrs: { name: "align" }
   attrs: { name: "span" }
   attrs: { name: "valign" }
@@ -1559,30 +1769,35 @@ tags: {
 # 4.9.5 The tbody element
 tags: {
   name: "tbody"
+  disallowed_ancestor: "head"
   attrs: { name: "align" }
   attrs: { name: "valign" }
 }
 # 4.9.6 The thead element
 tags: {
   name: "thead"
+  disallowed_ancestor: "head"
   attrs: { name: "align" }
   attrs: { name: "valign" }
 }
 # 4.9.7 The tfoot element
 tags: {
   name: "tfoot"
+  disallowed_ancestor: "head"
   attrs: { name: "align" }
   attrs: { name: "valign" }
 }
 # 4.9.8 The tr element
 tags: {
   name: "tr"
+  disallowed_ancestor: "head"
   attrs: { name: "align" }
   attrs: { name: "valign" }
 }
 # 4.9.9 The td element
 tags: {
   name: "td"
+  disallowed_ancestor: "head"
   attrs: { name: "align" }
   attrs: { name: "colspan" }
   attrs: { name: "headers" }
@@ -1592,6 +1807,7 @@ tags: {
 # 4.9.10 The th element
 tags: {
   name: "th"
+  disallowed_ancestor: "head"
   attrs: { name: "abbr" }
   attrs: { name: "align" }
   attrs: { name: "headers" }
@@ -1604,7 +1820,10 @@ tags: {
 
 # 4.10 Forms
 # Not allowed, except for button.
-tags: { name: "button" }
+tags: {
+  name: "button"
+  disallowed_ancestor: "head"
+}
 
 # 4.11 Scripting
 # 4.11.1 The script element
@@ -2114,19 +2333,58 @@ tags: {
   also_requires: "amp-mustache extension .js script"
 }
 # 11.2 Non-conforming features
-tags: { name: "acronym" }
-tags: { name: "big" }
-tags: { name: "center" }
-tags: { name: "dir" }
-tags: { name: "hgroup" }
-tags: { name: "listing" }
-tags: { name: "multicol" }
-tags: { name: "nextid" }
-tags: { name: "nobr" }
-tags: { name: "spacer" }
-tags: { name: "strike" }
-tags: { name: "tt" }
-tags: { name: "xmp" }
+tags: {
+  name: "acronym"
+  disallowed_ancestor: "head"
+}
+tags: {
+  name: "big"
+  disallowed_ancestor: "head"
+}
+tags: {
+  name: "center"
+  disallowed_ancestor: "head"
+}
+tags: {
+  name: "dir"
+  disallowed_ancestor: "head"
+}
+tags: {
+  name: "hgroup"
+  disallowed_ancestor: "head"
+}
+tags: {
+  name: "listing"
+  disallowed_ancestor: "head"
+}
+tags: {
+  name: "multicol"
+  disallowed_ancestor: "head"
+}
+tags: {
+  name: "nextid"
+  disallowed_ancestor: "head"
+}
+tags: {
+  name: "nobr"
+  disallowed_ancestor: "head"
+}
+tags: {
+  name: "spacer"
+  disallowed_ancestor: "head"
+}
+tags: {
+  name: "strike"
+  disallowed_ancestor: "head"
+}
+tags: {
+  name: "tt"
+  disallowed_ancestor: "head"
+}
+tags: {
+  name: "xmp"
+  disallowed_ancestor: "head"
+}
 
 # Some additional tags, microformats, allowances.
 
@@ -2205,6 +2463,7 @@ attr_lists: {
 # <amp-brightcove>
 tags: {
   name: "amp-brightcove"
+  disallowed_ancestor: "head"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-brightcove/amp-brightcove.md"
   also_requires: "amp-brightcove extension .js script"
   attr_lists: "extended-amp-global"
@@ -2228,6 +2487,7 @@ tags: {
 # <amp-font>
 tags: {
   name: "amp-font"
+  disallowed_ancestor: "head"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-font/amp-font.md"
   also_requires: "amp-font extension .js script"
   attr_lists: "extended-amp-global"
@@ -2253,6 +2513,7 @@ tags: {
 # <amp-img>
 tags: {
   name: "amp-img"
+  disallowed_ancestor: "head"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/builtins/amp-img.md"
   attr_lists: "extended-amp-global"
   attr_lists: "mandatory-src-or-srcset"
@@ -2270,6 +2531,7 @@ tags: {
 # <amp-video>
 tags: {
   name: "amp-video"
+  disallowed_ancestor: "head"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/builtins/amp-video.md"
   attr_lists: "extended-amp-global"
   attrs: { name: "alt" }
@@ -2299,6 +2561,7 @@ tags: {
 # so if you're changing amp-ad consider changing amp-embed as well.
 tags: {
   name: "amp-ad"
+  disallowed_ancestor: "head"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/builtins/amp-ad.md"
   attr_lists: "extended-amp-global"
   attrs: { name: "alt" }
@@ -2323,6 +2586,7 @@ tags: {
 # so if you're changing amp-embed consider changing amp-ad as well.
 tags: {
   name: "amp-embed"
+  disallowed_ancestor: "head"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/builtins/amp-embed.md"
   attr_lists: "extended-amp-global"
   attrs: { name: "alt" }
@@ -2345,6 +2609,7 @@ tags: {
 # <amp-facebook>
 tags: {
   name: "amp-facebook"
+  disallowed_ancestor: "head"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-facebook/amp-facebook.md"
   also_requires: "amp-facebook extension .js script"
   attr_lists: "extended-amp-global"
@@ -2363,6 +2628,7 @@ tags: {
 # out now that the spec is available.
 tags: {
   name: "amp-fit-text"
+  disallowed_ancestor: "head"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-fit-text/amp-fit-text.md"
   also_requires: "amp-fit-text extension .js script"
   attr_lists: "extended-amp-global"
@@ -2379,6 +2645,7 @@ tags: {
 # <amp-carousel>
 tags: {
   name: "amp-carousel"
+  disallowed_ancestor: "head"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-carousel/amp-carousel.md"
   also_requires: "amp-carousel extension .js script"
   attr_lists: "extended-amp-global"
@@ -2400,6 +2667,7 @@ tags: {
 # <amp-anim>
 tags: {
   name: "amp-anim"
+  disallowed_ancestor: "head"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-anim/amp-anim.md"
   also_requires: "amp-anim extension .js script"
   attr_lists: "extended-amp-global"
@@ -2419,6 +2687,7 @@ tags: {
 # <amp-analytics>
 tags: {
   name: "amp-analytics"
+  disallowed_ancestor: "head"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/amp-analytics.md"
   also_requires: "amp-analytics extension .js script"
   attrs: { name: "type" }
@@ -2432,6 +2701,7 @@ tags: {
 # <amp-user-notification>
 tags: {
   name: "amp-user-notification"
+  disallowed_ancestor: "head"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-user-notification/amp-user-notification.md"
   also_requires: "amp-user-notification extension .js script"
   attr_lists: "extended-amp-global"
@@ -2444,6 +2714,7 @@ tags: {
 # a data-videoid attribute.
 tags: {
   name: "amp-youtube"
+  disallowed_ancestor: "head"
   attr_lists: "extended-amp-global"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-youtube/amp-youtube.md"
   also_requires: "amp-youtube extension .js script"
@@ -2476,6 +2747,7 @@ tags: {
 # <amp-vine>
 tags: {
   name: "amp-vine"
+  disallowed_ancestor: "head"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-vine/amp-vine.md"
   also_requires: "amp-vine extension .js script"
   attr_lists: "extended-amp-global"
@@ -2495,6 +2767,7 @@ tags: {
 # data-description may or may not be mandatory.
 tags: {
   name: "amp-pinterest"
+  disallowed_ancestor: "head"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-pinterest/amp-pinterest.md"
   also_requires: "amp-pinterest extension .js script"
   attr_lists: "extended-amp-global"
@@ -2511,6 +2784,7 @@ tags: {
 # <amp-twitter>
 tags: {
   name: "amp-twitter"
+  disallowed_ancestor: "head"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-twitter/amp-twitter.md"
   also_requires: "amp-twitter extension .js script"
   attr_lists: "extended-amp-global"
@@ -2534,6 +2808,7 @@ tags: {
 # <amp-instagram>
 tags: {
   name: "amp-instagram"
+  disallowed_ancestor: "head"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-instagram/amp-instagram.md"
   also_requires: "amp-instagram extension .js script"
   attr_lists: "extended-amp-global"
@@ -2566,6 +2841,7 @@ tags: {
 # <amp-iframe>
 tags: {
   name: "amp-iframe"
+  disallowed_ancestor: "head"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-iframe/amp-iframe.md"
   also_requires: "amp-iframe extension .js script"
   attr_lists: "extended-amp-global"
@@ -2595,6 +2871,7 @@ tags: {
 # <amp-pixel>
 tags: {
   name: "amp-pixel"
+  disallowed_ancestor: "head"
   attr_lists: "extended-amp-global"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/builtins/amp-pixel.md"
   attrs: {
@@ -2614,6 +2891,7 @@ tags: {
 # <amp-audio>
 tags: {
   name: "amp-audio"
+  disallowed_ancestor: "head"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-audio/amp-audio.md"
   also_requires: "amp-audio extension .js script"
   attr_lists: "extended-amp-global"
@@ -2645,6 +2923,7 @@ tags: {
 # <amp-lightbox>
 tags: {
   name: "amp-lightbox"
+  disallowed_ancestor: "head"
   attr_lists: "extended-amp-global"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-lightbox/amp-lightbox.md"
   also_requires: "amp-lightbox extension .js script"
@@ -2657,6 +2936,7 @@ tags: {
 # <amp-image-lightbox>
 tags: {
   name: "amp-image-lightbox"
+  disallowed_ancestor: "head"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-image-lightbox/amp-image-lightbox.md"
   also_requires: "amp-image-lightbox extension .js script"
   # Support dimensions / sizes / etc. like an amp-lightbox.
@@ -2669,6 +2949,7 @@ tags: {
 # <amp-list>
 tags: {
   name: "amp-list"
+  disallowed_ancestor: "head"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-list/amp-list.md"
   also_requires: "amp-list extension .js script"
   attr_lists: "extended-amp-global"
@@ -2691,6 +2972,7 @@ tags: {
 # <amp-install-serviceworker>
 tags: {
   name: "amp-install-serviceworker"
+  disallowed_ancestor: "head"
   spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-install-serviceworker/amp-install-serviceworker.md"
   also_requires: "amp-install-serviceworker extension .js script"
   attrs: {
