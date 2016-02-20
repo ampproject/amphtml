@@ -357,7 +357,8 @@ def CompileParseCssTestMinified(out_dir):
   logging.info('entering ...')
   CompileWithClosure(
       js_files=['parse-css.js', 'tokenize-css.js', 'css-selectors.js',
-                'json-testutil.js', 'parse-css_test.js'],
+                'json-testutil.js', 'parse-css_test.js',
+                '%s/validator-generated.js' % out_dir],
       closure_entry_points=['parse_css.ParseCssTest'],
       output_file='%s/parse-css_test_minified.js' % out_dir)
   logging.info('... success')
