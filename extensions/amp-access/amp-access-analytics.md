@@ -156,6 +156,6 @@ The `ACCESS_READER_ID` variable is substituted with the Reader ID used for acces
 
 The `AUTHDATA(field)` variable is substituted with the value of the field in the authorization response. The nested fields are allowed, such as `AUTHDATA(nested.field)`.
 
-This variable is replaced with empty string if queried before the authorization response is received.
+This variable will wait until authorization is complete before being available.
 
 Data contained in `AUTHDATA` may be sensitive and care should be taken in sharing it. Please ensure that any data you pass to a third party complies with its terms of service.

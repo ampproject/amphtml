@@ -429,6 +429,14 @@ export class AccessService {
     return getValueForExpr(this.authResponse_, field) || null;
   }
 
+
+  /**
+   * @return {!Promise} Returns a promise for the initial authorization.
+   */
+  whenFirstAuthorized() {
+    return this.firstAuthorizationPromise_;
+  }
+
   /**
    * @param {!JSONObjectDef} response
    * @return {!Promise}
