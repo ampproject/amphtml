@@ -25,7 +25,7 @@ min_validator_revision_required: 95
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 156
+spec_file_revision: 157
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
 #
@@ -1361,7 +1361,7 @@ tags: {
   attrs: { name: "contentstyletype" }
   attrs: { name: "class" }
   attrs: { name: "externalresourcesrequired" }
-  attrs: { name: "version" value: "1.0" }
+  attrs: { name: "version" value_regex: "(1.0|1.1)" }
 }
 tags: {
   name: "g"
@@ -1381,9 +1381,10 @@ tags: {
   attr_lists: "svg-presentation-attributes"
   attrs: { name: "class" }
   attrs: { name: "d" }
-  attrs: { name: "pathlength" }
-  attrs: { name: "transform" }
   attrs: { name: "externalresourcesrequired" }
+  attrs: { name: "pathlength" }
+  attrs: { name: "sketch:type" }
+  attrs: { name: "transform" }
 }
 tags: {
   name: "glyph"
@@ -1450,11 +1451,12 @@ tags: {
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
   attrs: { name: "class" }
-  attrs: { name: "externalresourcesrequired" }
-  attrs: { name: "transform" }
   attrs: { name: "cx" }
   attrs: { name: "cy" }
+  attrs: { name: "externalresourcesrequired" }
   attrs: { name: "r" }
+  attrs: { name: "sketch:type" }
+  attrs: { name: "transform" }
 }
 tags: {
   name: "line"
@@ -1464,10 +1466,11 @@ tags: {
   attr_lists: "svg-presentation-attributes"
   attrs: { name: "class" }
   attrs: { name: "externalresourcesrequired" }
+  attrs: { name: "sketch:type" }
   attrs: { name: "transform" }
   attrs: { name: "x1" }
-  attrs: { name: "y1" }
   attrs: { name: "x2" }
+  attrs: { name: "y1" }
   attrs: { name: "y2" }
 }
 tags: {
@@ -1478,8 +1481,9 @@ tags: {
   attr_lists: "svg-presentation-attributes"
   attrs: { name: "class" }
   attrs: { name: "externalresourcesrequired" }
-  attrs: { name: "transform" }
   attrs: { name: "points" }
+  attrs: { name: "sketch:type" }
+  attrs: { name: "transform" }
 }
 tags: {
   name: "polyline"
@@ -1489,8 +1493,9 @@ tags: {
   attr_lists: "svg-presentation-attributes"
   attrs: { name: "class" }
   attrs: { name: "externalresourcesrequired" }
-  attrs: { name: "transform" }
   attrs: { name: "points" }
+  attrs: { name: "sketch:type" }
+  attrs: { name: "transform" }
 }
 tags: {
   name: "rect"
@@ -1500,13 +1505,14 @@ tags: {
   attr_lists: "svg-presentation-attributes"
   attrs: { name: "class" }
   attrs: { name: "externalresourcesrequired" }
-  attrs: { name: "transform" }
-  attrs: { name: "x" }
-  attrs: { name: "y" }
-  attrs: { name: "width" }
   attrs: { name: "height" }
   attrs: { name: "rx" }
   attrs: { name: "ry" }
+  attrs: { name: "sketch:type" }
+  attrs: { name: "transform" }
+  attrs: { name: "width" }
+  attrs: { name: "x" }
+  attrs: { name: "y" }
 }
 # Text
 tags: {
@@ -1611,6 +1617,14 @@ tags: {
   attrs: { name: "spreadmethod" }
 }
 tags: {
+  name: "stop"
+  detail: "lineargradient > stop"
+  mandatory_ancestor: "lineargradient"
+  attrs: { name: "offset" }
+  attrs: { name: "stop-color" }
+  attrs: { name: "stop-opacity" }
+}
+tags: {
   name: "radialgradient"
   mandatory_ancestor: "svg"
   attr_lists: "svg-core-attributes"
@@ -1626,6 +1640,14 @@ tags: {
   attrs: { name: "fx" }
   attrs: { name: "fy" }
   attrs: { name: "spreadmethod" }
+}
+tags: {
+  name: "stop"
+  detail: "radialgradient > stop"
+  mandatory_ancestor: "radialgradient"
+  attrs: { name: "offset" }
+  attrs: { name: "stop-color" }
+  attrs: { name: "stop-opacity" }
 }
 tags: {
   name: "mask"
