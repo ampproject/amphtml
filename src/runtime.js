@@ -69,7 +69,7 @@ export function adopt(global) {
       });
     };
     if (opt_css) {
-      installStyles(global.document, opt_css, register);
+      installStyles(global.document, opt_css, register, false, name);
     } else {
       register();
     }

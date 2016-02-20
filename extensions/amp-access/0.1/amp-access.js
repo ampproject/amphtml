@@ -90,7 +90,7 @@ export class AccessService {
   constructor(win) {
     /** @const {!Window} */
     this.win = win;
-    installStyles(this.win.document, $CSS$, () => {});
+    installStyles(this.win.document, $CSS$, () => {}, false, 'amp-access');
 
     /** @const @private {boolean} */
     this.isAnalyticsExperimentOn_ = isExperimentOn(
