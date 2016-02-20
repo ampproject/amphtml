@@ -25,7 +25,7 @@ min_validator_revision_required: 91
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 149
+spec_file_revision: 150
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
 #
@@ -2293,6 +2293,24 @@ tags: {  # amp-youtube
     mandatory: true
   }
 }
+tags: {  # amp-vimeo
+  name: "script"
+  mandatory_parent: "head"
+  detail: "amp-vimeo extension .js script"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-vimeo/amp-vimeo.md"
+  attrs: {
+    name: "custom-element"
+    value: "amp-vimeo"
+    mandatory: true
+    dispatch_key: true
+  }
+  attrs: { name: "async" value: "" mandatory: true }
+  attrs: {
+    name: "src"
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-vimeo-(latest|0\\.1)\\.js"
+    mandatory: true
+  }
+}
 # Specific json data, descendant from an <amp-analytics> tag.
 tags: {
   name: "script"
@@ -2742,6 +2760,25 @@ tags: {
     supported_layouts: RESPONSIVE
     supported_layouts: FILL
     supported_layouts: NODISPLAY
+  }
+}
+# <amp-vimeo>
+tags: {
+  name: "amp-vimeo"
+  disallowed_ancestor: "head"
+  attr_lists: "extended-amp-global"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-vimeo/amp-vimeo.md"
+  also_requires: "amp-vimeo extension .js script"
+  attrs: {
+    name: "data-videoid"
+    mandatory: true
+    value_regex: "[0-9]+"
+  }
+  amp_layout: {
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: RESPONSIVE
+    supported_layouts: FILL
   }
 }
 # <amp-vine>
