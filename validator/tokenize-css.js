@@ -57,6 +57,8 @@ goog.provide('parse_css.URLToken');
 goog.provide('parse_css.WhitespaceToken');
 goog.provide('parse_css.tokenize');
 
+goog.require('amp.validator.ValidationError');
+
 /**
  * Returns an array of Tokens.
  *
@@ -201,22 +203,6 @@ function whitespace(code) {
 
 /** @const @type {number} */
 const maxAllowedCodepoint = 0x10ffff;
-
-/**
- * This error can be thrown if an internal method encounters a 0x0 codepoint.
- * This cannot happen if tokenize() is called as the preprocessor replaces
- * these codepoints.
- * @param {string} message
- * @constructor
- */
-const InvalidCharacterError = function(message) {
-  /** @type {string} */
-  this.message = message;
-};
-
-InvalidCharacterError.prototype = new Error;
-/** @type {string} */
-InvalidCharacterError.prototype.name = 'InvalidCharacterError';
 
 /**
  * @param {string} str
@@ -540,9 +526,10 @@ Tokenizer.prototype.consumeAToken = function() {
       // This condition happens if we are in consumeAToken (this method),
       // the current codepoint is 0x5c (\) and the next codepoint is a
       // newline (\n).
-      return mark.addPositionTo(
-          new parse_css.ErrorToken(
-              parse_css.ErrorType.TOKENIZATION, 'stray trailing backslash'));
+      return mark.addPositionTo(new parse_css.ErrorToken(
+          amp.validator.ValidationError.Code.
+              CSS_SYNTAX_STRAY_TRAILING_BACKSLASH,
+          ['style']));
     }
   } else if (this.code_ === /* ']' */ 0x5d) {
     return mark.addPositionTo(new parse_css.CloseSquareToken());
@@ -604,7 +591,8 @@ Tokenizer.prototype.consumeComments = function() {
         // For example "h1 { color: red; } \* " would emit this parse error
         // at the end of the string.
         const error = new parse_css.ErrorToken(
-            parse_css.ErrorType.TOKENIZATION, 'unterminated comment');
+            amp.validator.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_COMMENT,
+            ['style']);
         mark.addPositionTo(error);
         this.errors_.push(error);
         return;
@@ -689,8 +677,9 @@ Tokenizer.prototype.consumeAStringToken = function() {
       return new parse_css.StringToken(string);
     } else if (newline(this.code_)) {
       this.reconsume();
-      return new parse_css.ErrorToken(parse_css.ErrorType.TOKENIZATION,
-                                      'unterminated string');
+      return new parse_css.ErrorToken(
+          amp.validator.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_STRING,
+          ['style']);
     } else if (this.code_ === /* '\' */ 0x5c) {
       if (this.eof(this.next())) {
         continue;
@@ -733,20 +722,20 @@ Tokenizer.prototype.consumeAURLToken = function() {
       } else {
         this.consumeTheRemnantsOfABadURL();
         return new parse_css.ErrorToken(
-            parse_css.ErrorType.TOKENIZATION, 'bad url');
+            amp.validator.ValidationError.Code.CSS_SYNTAX_BAD_URL, ['style']);
       }
     } else if (this.code_ === /* '"' */ 0x22 || this.code_ === /* ''' */ 0x27 ||
                this.code_ === /* '(' */ 0x28 || nonPrintable(this.code_)) {
       this.consumeTheRemnantsOfABadURL();
       return new parse_css.ErrorToken(
-          parse_css.ErrorType.TOKENIZATION, 'bad url');
+          amp.validator.ValidationError.Code.CSS_SYNTAX_BAD_URL, ['style']);
     } else if (this.code_ === /* '\' */ 0x5c) {
       if (this./*OK*/startsWithAValidEscape()) {
         token.value += stringFromCode(this.consumeEscape());
       } else {
         this.consumeTheRemnantsOfABadURL();
         return new parse_css.ErrorToken(
-            parse_css.ErrorType.TOKENIZATION, 'bad url');
+            amp.validator.ValidationError.Code.CSS_SYNTAX_BAD_URL, ['style']);
       }
     } else {
       token.value += stringFromCode(this.code_);
@@ -1056,27 +1045,17 @@ parse_css.Token.prototype.toJSON = function() {
 parse_css.Token.prototype.toSource = function() { return '' + this; };
 
 /**
- * Enum for the type of error that's being emitted.
- * @enum {string}
- */
-parse_css.ErrorType = {
-  'TOKENIZATION': 'TOKENIZATION',
-  'PARSING': 'PARSING',
-  'SELECTORS': 'SELECTORS'
-};
-
-/**
- * @param {parse_css.ErrorType} errorType
- * @param {string} msg
+ * @param {!amp.validator.ValidationError.Code} code
+ * @param {!Array<!string>} params
  * @constructor
  * @extends {parse_css.Token}
  */
-parse_css.ErrorToken = function(errorType, msg) {
+parse_css.ErrorToken = function(code, params) {
   goog.base(this);
-  /** @override @type {parse_css.ErrorType} */
-  this.errorType = errorType;
-  /** @override @type {string} */
-  this.msg = msg;
+  /** @type {!amp.validator.ValidationError.Code} */
+  this.code = code;
+  /** @export {!Array<!string>} */
+  this.params = params;
 };
 goog.inherits(parse_css.ErrorToken, parse_css.Token);
 
@@ -1086,8 +1065,8 @@ parse_css.ErrorToken.prototype.tokenType = parse_css.TokenType.ERROR;
 /** @return {!Object} */
 parse_css.ErrorToken.prototype.toJSON = function() {
   const json = goog.base(this, 'toJSON');
-  json['errorType'] = this.errorType;
-  json['msg'] = this.msg;
+  json['code'] = this.code;
+  json['params'] = this.params;
   return json;
 };
 

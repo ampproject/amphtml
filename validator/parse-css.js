@@ -32,6 +32,7 @@ goog.provide('parse_css.extractAFunction');
 goog.provide('parse_css.extractASimpleBlock');
 goog.provide('parse_css.parseAStylesheet');
 
+goog.require('amp.validator.ValidationError.Code');
 goog.require('goog.asserts');
 goog.require('parse_css.EOFToken');
 goog.require('parse_css.ErrorToken');
@@ -130,11 +131,12 @@ function createEOFTokenAt(positionToken) {
 /**
  * Creates a ParseError token at the same line/col as the given token.
  * @param {!parse_css.Token} positionToken
- * @param {string} detail
+ * @param {!amp.validator.ValidationError.Code} code
+ * @param {!Array<!string>} params
  * @return {!parse_css.ErrorToken}
  */
-function createParseErrorTokenAt(positionToken, detail) {
-  const error = new parse_css.ErrorToken(parse_css.ErrorType.PARSING, detail);
+function createParseErrorTokenAt(positionToken, code, params) {
+  const error = new parse_css.ErrorToken(code, params);
   error.line = positionToken.line;
   error.col = positionToken.col;
   return error;
@@ -503,8 +505,10 @@ Canonicalizer.prototype.parseAQualifiedRule = function(
   while (true) {
     tokenStream.consume();
     if (tokenStream.current() instanceof parse_css.EOFToken) {
-      errors.push(createParseErrorTokenAt(rule,
-          'Hit EOF when trying to parse the prelude of a qualified rule.'));
+      errors.push(createParseErrorTokenAt(
+          rule,
+          amp.validator.ValidationError.Code
+              .CSS_SYNTAX_EOF_IN_PRELUDE_OF_QUALIFIED_RULE, ['style']));
       return;
     }
     if (tokenStream.current() instanceof parse_css.OpenCurlyToken) {
@@ -544,13 +548,17 @@ Canonicalizer.prototype.parseAListOfDeclarations = function(tokenList, errors) {
       // declarations, but our grammar does not so we deviate a tiny bit here.
       // We consume an AT rule, but drop it and instead push an error token.
       const atRule = this.parseAnAtRule(tokenStream, errors);
-      errors.push(createParseErrorTokenAt(atRule,
-            '@' + atRule.name + ' found inside declaration'));
+      errors.push(createParseErrorTokenAt(
+          atRule,
+          amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_AT_RULE,
+          ['style', atRule.name]));
     } else if (tokenStream.current() instanceof parse_css.IdentToken) {
       this.parseADeclaration(tokenStream, decls, errors);
     } else {
       errors.push(createParseErrorTokenAt(
-          tokenStream.current(), 'Invalid Declaration'));
+          tokenStream.current(),
+          amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_DECLARATION,
+          ['style']));
       tokenStream.reconsume();
       while (!(tokenStream.next() instanceof parse_css.SemicolonToken ||
                tokenStream.next() instanceof parse_css.EOFToken)) {
@@ -586,7 +594,10 @@ Canonicalizer.prototype.parseADeclaration = function(
 
   tokenStream.consume();
   if (!(tokenStream.current() instanceof parse_css.ColonToken)) {
-    errors.push(createParseErrorTokenAt(startToken, 'Incomplete declaration'));
+    errors.push(createParseErrorTokenAt(
+        startToken,
+        amp.validator.ValidationError.Code.CSS_SYNTAX_INCOMPLETE_DECLARATION,
+        ['style']));
     tokenStream.reconsume();
     while (!(tokenStream.next() instanceof parse_css.SemicolonToken ||
              tokenStream.next() instanceof parse_css.EOFToken)) {

@@ -20,12 +20,12 @@
 # in production from crashing. This id is not relevant to validator.js
 # because thus far, engine (validator.js) and spec file (validator.protoascii)
 # are always released together.
-min_validator_revision_required: 91
+min_validator_revision_required: 95
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 154
+spec_file_revision: 155
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
 #
@@ -3346,14 +3346,6 @@ error_formats {
   format: "The tag '%1' appears more than once in the document."
 }
 error_formats {
-  code: CSS_SYNTAX
-  format: "CSS syntax error in tag '%1' - %2."
-}
-error_formats {
-  code: CSS_SYNTAX_INVALID_AT_RULE
-  format: "CSS syntax error in tag '%1' - saw invalid at rule '%2'."
-}
-error_formats {
   code: TEMPLATE_IN_ATTR_NAME
   format: "Mustache template syntax in attribute name '%1' in tag '%2'."
 }
@@ -3364,4 +3356,59 @@ error_formats {
 error_formats {
   code: ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT
   format: "The attribute '%1' in tag '%2' is disallowed by implied layout '%3'."
+}
+
+# CSS Errors. All of these use %1 for the tag name (in practice 'style'
+# by default).
+error_formats {
+  code: CSS_SYNTAX
+  format: "CSS syntax error in tag '%1' - %2."
+}
+error_formats {
+  code: CSS_SYNTAX_INVALID_AT_RULE
+  format: "CSS syntax error in tag '%1' - saw invalid at rule '%2'."
+}
+error_formats {
+  code: CSS_SYNTAX_STRAY_TRAILING_BACKSLASH
+  format: "CSS syntax error in tag '%1' - stray trailing backslash."
+}
+error_formats {
+  code: CSS_SYNTAX_UNTERMINATED_COMMENT
+  format: "CSS syntax error in tag '%1' - unterminated comment."
+}
+error_formats {
+  code: CSS_SYNTAX_UNTERMINATED_STRING
+  format: "CSS syntax error in tag '%1' - unterminated string."
+}
+error_formats {
+  code: CSS_SYNTAX_BAD_URL
+  format: "CSS syntax error in tag '%1' - bad url."
+}
+error_formats {
+  code: CSS_SYNTAX_EOF_IN_PRELUDE_OF_QUALIFIED_RULE
+  format: "CSS syntax error in tag '%1' - EOF in prelude of a qualified rule."
+}
+error_formats {
+  code: CSS_SYNTAX_INVALID_DECLARATION
+  format: "CSS syntax error in tag '%1' - invalid declaration."
+}
+error_formats {
+  code: CSS_SYNTAX_INCOMPLETE_DECLARATION
+  format: "CSS syntax error in tag '%1' - incomplete declaration."
+}
+error_formats {
+  code: CSS_SYNTAX_ERROR_IN_PSEUDO_SELECTOR
+  format: "CSS syntax error in tag '%1' - invalid pseudo selector."
+}
+error_formats {
+  code: CSS_SYNTAX_MISSING_SELECTOR
+  format: "CSS syntax error in tag '%1' - missing selector."
+}
+error_formats {
+  code: CSS_SYNTAX_NOT_A_SELECTOR_START
+  format: "CSS syntax error in tag '%1' - not a selector start."
+}
+error_formats {
+  code: CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR
+  format: "CSS syntax error in tag '%1' - unparsed input remains in selector."
 }

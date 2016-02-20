@@ -425,8 +425,8 @@ css_selectors.parseAPseudoSelector = function(tokenStream) {
     func = parse_css.extractAFunction(tokenStream);
   } else {
     const error = new parse_css.ErrorToken(
-        parse_css.ErrorType.SELECTORS,
-        'syntax error in pseudo specification');
+        amp.validator.ValidationError.Code.CSS_SYNTAX_ERROR_IN_PSEUDO_SELECTOR,
+        ['style']);
     error.line = firstColon.line;
     error.col = firstColon.col;
     return error;
@@ -580,8 +580,9 @@ css_selectors.parseASimpleSelectorSequence = function(tokenStream) {
     } else {
       if (typeSelector === null) {
         if (otherSelectors.length == 0) {
-          const error = new parse_css.ErrorToken(parse_css.ErrorType.SELECTORS,
-                                               'no selector found');
+          const error = new parse_css.ErrorToken(
+              amp.validator.ValidationError.Code.CSS_SYNTAX_MISSING_SELECTOR,
+              ['style']);
           error.line = tokenStream.current().line;
           error.col = tokenStream.current().col;
           return error;
@@ -712,8 +713,9 @@ function isSimpleSelectorSequenceStart(token) {
  */
 css_selectors.parseASelector = function(tokenStream) {
   if (!isSimpleSelectorSequenceStart(tokenStream.current())) {
-    const error = new parse_css.ErrorToken(parse_css.ErrorType.SELECTORS,
-                                         'not a selector start');
+    const error = new parse_css.ErrorToken(
+        amp.validator.ValidationError.Code.CSS_SYNTAX_NOT_A_SELECTOR_START,
+        ['style']);
     error.line = tokenStream.current().line;
     error.col = tokenStream.current().col;
     return error;
@@ -801,8 +803,9 @@ css_selectors.SelectorsGroup.prototype.accept = function(visitor) {
  */
 css_selectors.parseASelectorsGroup = function(tokenStream) {
   if (!isSimpleSelectorSequenceStart(tokenStream.current())) {
-    const error = new parse_css.ErrorToken(parse_css.ErrorType.SELECTORS,
-                                           'not a selector start');
+    const error = new parse_css.ErrorToken(
+        amp.validator.ValidationError.Code.CSS_SYNTAX_NOT_A_SELECTOR_START,
+        ['style']);
     error.line = tokenStream.current().line;
     error.col = tokenStream.current().col;
     return error;
@@ -846,8 +849,10 @@ css_selectors.parse = function(tokenStream, errors) {
     errors.push(group);
   }
   if (!(tokenStream.current() instanceof parse_css.EOFToken)) {
-    const error = new parse_css.ErrorToken(parse_css.ErrorType.SELECTORS,
-                                           'unparsed input remains');
+    const error = new parse_css.ErrorToken(
+        amp.validator.ValidationError.Code.
+            CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR,
+        ['style']);
     error.line = tokenStream.current().line;
     error.col = tokenStream.current().col;
     errors.push(error);

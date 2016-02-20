@@ -185,6 +185,31 @@ function specificity(code) {
       return 33;
     case amp.validator.ValidationError.Code.INVALID_URL:
       return 34;
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_STRAY_TRAILING_BACKSLASH:
+      return 35;
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_COMMENT:
+      return 36;
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_STRING:
+      return 37;
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_BAD_URL:
+      return 38;
+    case amp.validator.ValidationError.Code
+        .CSS_SYNTAX_EOF_IN_PRELUDE_OF_QUALIFIED_RULE:
+      return 39;
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_DECLARATION:
+      return 40;
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_INCOMPLETE_DECLARATION:
+      return 41;
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_ERROR_IN_PSEUDO_SELECTOR:
+      return 42;
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_MISSING_SELECTOR:
+      return 43;
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_NOT_A_SELECTOR_START:
+      return 44;
+    case amp.validator.ValidationError.Code.
+        CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR:
+      return 45;
+
     case amp.validator.ValidationError.Code.DEPRECATED_ATTR:
       return 101;
     case amp.validator.ValidationError.Code.DEPRECATED_TAG:
@@ -621,11 +646,13 @@ class CdataMatcher {
           tokenList, atRuleParsingSpec,
           computeAtRuleDefaultParsingSpec(atRuleParsingSpec), cssErrors);
       for (const errorToken of cssErrors) {
-        const lineCol = new LineCol(errorToken.line, errorToken.col);
+        // Override the first parameter with the name of this style tag.
+        let params = errorToken.params;
+        // Override the first parameter with the name of this style tag.
+        params[0] = getDetailOrName(this.tagSpec_);
         context.addErrorWithLineCol(
-            lineCol, amp.validator.ValidationError.Code.CSS_SYNTAX,
-            /* params */ [getDetailOrName(this.tagSpec_), errorToken.msg],
-            /* url */ '', validationResult);
+            new LineCol(errorToken.line, errorToken.col),
+            errorToken.code, params, /* url */ '', validationResult);
       }
       const visitor = new InvalidAtRuleVisitor(
           this.tagSpec_, cdataSpec.cssSpec, context, validationResult);
@@ -2496,9 +2523,38 @@ amp.validator.categorizeError = function(error) {
     return amp.validator.ErrorCategory.Code.AUTHOR_STYLESHEET_PROBLEM;
   }
   // E.g. "CSS syntax error in tag 'author stylesheet' - Invalid Declaration."
-  if ((error.code === amp.validator.ValidationError.Code.CSS_SYNTAX ||
-       error.code ===
-      amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_AT_RULE) &&
+  // TODO(powdercloud): Legacy generic css error code. Remove after 2016-06-01.
+  if (error.code === amp.validator.ValidationError.Code.CSS_SYNTAX &&
+      error.params[0] === "author stylesheet") {
+    return amp.validator.ErrorCategory.Code.AUTHOR_STYLESHEET_PROBLEM;
+  }
+  // E.g. "CSS syntax error in tag 'author stylesheet' - unterminated string."
+  if ((error.code ===
+      amp.validator.ValidationError.Code.CSS_SYNTAX_STRAY_TRAILING_BACKSLASH ||
+      error.code ===
+      amp.validator.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_COMMENT ||
+      error.code ===
+      amp.validator.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_STRING ||
+      error.code ===
+      amp.validator.ValidationError.Code.CSS_SYNTAX_BAD_URL ||
+      error.code ===
+      amp.validator.ValidationError.Code
+      .CSS_SYNTAX_EOF_IN_PRELUDE_OF_QUALIFIED_RULE ||
+      error.code ===
+      amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_DECLARATION ||
+      error.code ===
+      amp.validator.ValidationError.Code.CSS_SYNTAX_INCOMPLETE_DECLARATION ||
+      error.code ===
+      amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_AT_RULE ||
+      error.code ===
+      amp.validator.ValidationError.Code.CSS_SYNTAX_ERROR_IN_PSEUDO_SELECTOR ||
+      error.code ===
+      amp.validator.ValidationError.Code.CSS_SYNTAX_MISSING_SELECTOR ||
+      error.code ===
+      amp.validator.ValidationError.Code.CSS_SYNTAX_NOT_A_SELECTOR_START ||
+      error.code ===
+      amp.validator.ValidationError.Code.
+      CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR) &&
       error.params[0] === "author stylesheet") {
     return amp.validator.ErrorCategory.Code.AUTHOR_STYLESHEET_PROBLEM;
   }
