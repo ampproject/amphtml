@@ -1155,6 +1155,7 @@ attr_lists: {
 # Basics
 tags: {
   name: "svg"
+  disallowed_ancestor: "svg"
   attr_lists: "svg-conditional-processing-attributes"
   attr_lists: "svg-core-attributes"
   attr_lists: "svg-presentation-attributes"
