@@ -438,9 +438,9 @@ describe('AccessService authorization', () => {
     analyticsMock.expects('triggerEvent')
         .withExactArgs('access-authorization-received')
         .once();
+    expect(service.firstAuthorizationPromise_).to.exist;
     return service.runAuthorization_().then(() => {
-      expect(service.firstAuthorizationPromise_).to.exist;
-      return service.firstAuthorizationPromise_;
+      return service.whenFirstAuthorized();
     });
   });
 
