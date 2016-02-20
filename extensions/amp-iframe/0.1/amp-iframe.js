@@ -20,6 +20,7 @@ import {listen} from '../../../src/iframe-helper';
 import {loadPromise} from '../../../src/event-helper';
 import {log} from '../../../src/log';
 import {parseUrl} from '../../../src/url';
+import {platform} from '../../../src/platform';
 import {removeElement} from '../../../src/dom';
 import {timer} from '../../../src/timer';
 
@@ -335,9 +336,29 @@ export class AmpIframe extends AMP.BaseElement {
         if (this.iframe_) {
           this.iframe_.style.zIndex = 0;
           this.togglePlaceholder(false);
+          this.maybeFixSafariGlitch_();
         }
       });
     }
+  }
+
+  /**
+   * Fixes a problem where in Safari on iOS the iframe is not rendered
+   * after it is shown by forcing a repaint.
+   */
+  maybeFixSafariGlitch_() {
+    // Only known to be a problem on Safari, but lets assume webviews
+    // are also affected.
+    if (!platform.isIos()) {
+      return;
+    }
+    this.getVsync().mutate(() => {
+      if (this.iframe_) {
+        // This forces a repaint in Safari although it should have absolutely
+        // no effect.
+        this.iframe_.style.transform = 'scale(1)';
+      }
+    });
   }
 
   /**
