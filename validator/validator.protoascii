@@ -25,7 +25,7 @@ min_validator_revision_required: 91
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 150
+spec_file_revision: 151
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
 #
@@ -2311,6 +2311,24 @@ tags: {  # amp-vimeo
     mandatory: true
   }
 }
+tags: {  # amp-dailymotion
+  name: "script"
+  mandatory_parent: "head"
+  detail: "amp-dailymotion extension .js script"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-dailymotion/amp-dailymotion.md"
+  attrs: {
+    name: "custom-element"
+    value: "amp-dailymotion"
+    mandatory: true
+    dispatch_key: true
+  }
+  attrs: { name: "async" value: "" mandatory: true }
+  attrs: {
+    name: "src"
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-dailymotion-(latest|0\\.1)\\.js"
+    mandatory: true
+  }
+}
 # Specific json data, descendant from an <amp-analytics> tag.
 tags: {
   name: "script"
@@ -2774,6 +2792,32 @@ tags: {
     mandatory: true
     value_regex: "[0-9]+"
   }
+  amp_layout: {
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: RESPONSIVE
+    supported_layouts: FILL
+  }
+}
+# <amp-dailymotion>
+tags: {
+  name: "amp-dailymotion"
+  disallowed_ancestor: "head"
+  attr_lists: "extended-amp-global"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-dailymotion/amp-dailymotion.md"
+  also_requires: "amp-dailymotion extension .js script"
+  attrs: {
+    name: "data-videoid"
+    mandatory: true
+    value_regex: "[a-z0-9]+"
+  }
+  attrs: { name: "data-mute" value_regex: "true|false" }
+  attrs: { name: "data-endscreen-enable" value_regex: "true|false" }
+  attrs: { name: "data-sharing-enable" value_regex: "true|false" }
+  attrs: { name: "data-start" value_regex: "[0-9]+" }
+  attrs: { name: "data-ui-highlight" value_regex: "[0-9a-f]{6}" }
+  attrs: { name: "data-ui-logo" value_regex: "true|false" }
+  attrs: { name: "data-info" value_regex: "true|false" }
   amp_layout: {
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
