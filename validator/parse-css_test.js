@@ -21,6 +21,7 @@
  *   (http://creativecommons.org/publicdomain/zero/1.0/).
  */
 goog.require('css_selectors.parseATypeSelector');
+goog.require('goog.asserts');
 goog.require('json_testutil.renderJSON');
 goog.require('parse_css.parseAStylesheet');
 goog.require('parse_css.tokenize');
@@ -726,7 +727,8 @@ function parseSelectorForTest(selector) {
   const sheet = parse_css.parseAStylesheet(
       tokenlist, ampAtRuleParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
       errors);
-  return sheet['rules'][0].prelude;
+  return goog.asserts.assertInstanceof(sheet.rules[0],
+                                       parse_css.QualifiedRule).prelude;
 }
 
 //

@@ -175,166 +175,151 @@ parse_css.parseAStylesheet = function(
 
 /**
  * Abstract super class for the parser rules.
- * @constructor
- * @extends {parse_css.Token}
  */
-parse_css.Rule = function() {
-  goog.base(this);
-};
-goog.inherits(parse_css.Rule, parse_css.Token);
+parse_css.Rule = class extends parse_css.Token {
+  constructor() {
+    super();
+    /** @type {parse_css.TokenType} */
+    this.tokenType = parse_css.TokenType.UNKNOWN;
+  }
 
-/** @type {parse_css.TokenType} */
-parse_css.Rule.tokenType = parse_css.TokenType.UNKNOWN;
+  /** @param {!parse_css.RuleVisitor} visitor */
+  accept(visitor) {}
 
-/** @param {!parse_css.RuleVisitor} visitor */
-parse_css.Rule.prototype.accept = goog.abstractMethod;
-
-/**
- * @param {number=} opt_indent
- * @return {string}
- */
-parse_css.Rule.prototype.toString = function(opt_indent) {
-  return JSON.stringify(this.toJSON(), null, opt_indent);
-};
-
-/**
- * @constructor
- * @extends {parse_css.Rule}
- */
-parse_css.Stylesheet = function() {
-  goog.base(this);
-  /** @type {!Array<!parse_css.Rule>} */
-  this.rules = [];
-  /** @type {?parse_css.EOFToken} */
-  this.eof = null;
-};
-goog.inherits(parse_css.Stylesheet, parse_css.Rule);
-
-/** @type {parse_css.TokenType} */
-parse_css.Stylesheet.prototype.tokenType = parse_css.TokenType.STYLESHEET;
-
-/** @return {!Object} */
-parse_css.Stylesheet.prototype.toJSON = function() {
-  const json = goog.base(this, 'toJSON');
-  json['rules'] = arrayToJSON(this.rules);
-  json['eof'] = this.eof.toJSON();
-  return json;
-};
-
-/** @param {!parse_css.RuleVisitor} visitor */
-parse_css.Stylesheet.prototype.accept = function(visitor) {
-  visitor.visitStylesheet(this);
-  for (const rule of this.rules) {
-    rule.accept(visitor);
+  /**
+   * @param {number=} opt_indent
+   * @return {string}
+   */
+  toString(opt_indent) {
+    return JSON.stringify(this.toJSON(), null, opt_indent);
   }
 };
 
-/**
- * @param {string} name
- * @constructor
- * @extends {parse_css.Rule}
- */
-parse_css.AtRule = function(name) {
-  goog.base(this);
-  /** @type {string} */
-  this.name = name;
-  /** @type {!Array<!parse_css.Token>} */
-  this.prelude = [];
-  /** @type {!Array<!parse_css.Rule>} */
-  this.rules = [];
-  /** @type {!Array<!parse_css.Declaration>} */
-  this.declarations = [];
-};
-goog.inherits(parse_css.AtRule, parse_css.Rule);
-
-/** @type {parse_css.TokenType} */
-parse_css.AtRule.prototype.tokenType = parse_css.TokenType.AT_RULE;
-
-/** @return {!Object} */
-parse_css.AtRule.prototype.toJSON = function() {
-  const json = goog.base(this, 'toJSON');
-  json['name'] = this.name;
-  json['prelude'] = arrayToJSON(this.prelude);
-  json['rules'] = arrayToJSON(this.rules);
-  json['declarations'] = arrayToJSON(this.declarations);
-  return json;
-};
-
-/** @param {!parse_css.RuleVisitor} visitor */
-parse_css.AtRule.prototype.accept = function(visitor) {
-  visitor.visitAtRule(this);
-  for (const rule of this.rules) {
-    rule.accept(visitor);
+parse_css.Stylesheet = class extends parse_css.Rule {
+  constructor() {
+    super();
+    /** @type {!Array<!parse_css.Rule>} */
+    this.rules = [];
+    /** @type {?parse_css.EOFToken} */
+    this.eof = null;
+    /** @type {parse_css.TokenType} */
+    this.tokenType = parse_css.TokenType.STYLESHEET;
   }
-  for (const declaration of this.declarations) {
-    declaration.accept(visitor);
+
+  /** @inheritDoc */
+  toJSON() {
+    const json = super.toJSON();
+    json['rules'] = arrayToJSON(this.rules);
+    json['eof'] = this.eof.toJSON();
+    return json;
+  }
+
+  /** @inheritDoc */
+  accept(visitor) {
+    visitor.visitStylesheet(this);
+    for (const rule of this.rules) {
+      rule.accept(visitor);
+    }
   }
 };
 
-/**
- * @constructor
- * @extends {parse_css.Rule}
- */
-parse_css.QualifiedRule = function() {
-  goog.base(this);
-  /** @type {!Array<!parse_css.Token>} */
-  this.prelude = [];
-  /** @type {!Array<!parse_css.Declaration>} */
-  this.declarations = [];
-};
-goog.inherits(parse_css.QualifiedRule, parse_css.Rule);
+parse_css.AtRule = class extends parse_css.Rule {
+  /**
+   * @param {string} name
+   */
+  constructor(name) {
+    super();
+    /** @type {string} */
+    this.name = name;
+    /** @type {!Array<!parse_css.Token>} */
+    this.prelude = [];
+    /** @type {!Array<!parse_css.Rule>} */
+    this.rules = [];
+    /** @type {!Array<!parse_css.Declaration>} */
+    this.declarations = [];
+    /** @type {parse_css.TokenType} */
+    this.tokenType = parse_css.TokenType.AT_RULE;
+  }
 
-/** @type {parse_css.TokenType} */
-parse_css.QualifiedRule.prototype.tokenType =
-    parse_css.TokenType.QUALIFIED_RULE;
+  /** @inheritDoc */
+  toJSON() {
+    const json = super.toJSON();
+    json['name'] = this.name;
+    json['prelude'] = arrayToJSON(this.prelude);
+    json['rules'] = arrayToJSON(this.rules);
+    json['declarations'] = arrayToJSON(this.declarations);
+    return json;
+  }
 
-/** @return {!Object} */
-parse_css.QualifiedRule.prototype.toJSON = function() {
-  const json = goog.base(this, 'toJSON');
-  json['prelude'] = arrayToJSON(this.prelude);
-  json['declarations'] = arrayToJSON(this.declarations);
-  return json;
-};
-
-/** @param {!parse_css.RuleVisitor} visitor */
-parse_css.QualifiedRule.prototype.accept = function(visitor) {
-  visitor.visitQualifiedRule(this);
-  for (const declaration of this.declarations) {
-    declaration.accept(visitor);
+  /** @inheritDoc */
+  accept(visitor) {
+    visitor.visitAtRule(this);
+    for (const rule of this.rules) {
+      rule.accept(visitor);
+    }
+    for (const declaration of this.declarations) {
+      declaration.accept(visitor);
+    }
   }
 };
 
-/**
- * @param {string} name
- * @constructor
- * @extends {parse_css.Rule}
- */
-parse_css.Declaration = function(name) {
-  goog.base(this);
-  /** @type {string} */
-  this.name = name;
-  /** @type {!Array<!parse_css.Token>} */
-  this.value = [];
-  /** @type {boolean} */
-  this.important = false;
+parse_css.QualifiedRule = class extends parse_css.Rule {
+  constructor() {
+    super();
+    /** @type {!Array<!parse_css.Token>} */
+    this.prelude = [];
+    /** @type {!Array<!parse_css.Declaration>} */
+    this.declarations = [];
+    /** @type {parse_css.TokenType} */
+    this.tokenType = parse_css.TokenType.QUALIFIED_RULE;
+  }
+
+  /** @inheritDoc */
+  toJSON() {
+    const json = super.toJSON();
+    json['prelude'] = arrayToJSON(this.prelude);
+    json['declarations'] = arrayToJSON(this.declarations);
+    return json;
+  }
+
+  /** @inheritDoc */
+  accept(visitor) {
+    visitor.visitQualifiedRule(this);
+    for (const declaration of this.declarations) {
+      declaration.accept(visitor);
+    }
+  }
 };
-goog.inherits(parse_css.Declaration, parse_css.Rule);
 
-/** @type {parse_css.TokenType} */
-parse_css.Declaration.prototype.tokenType = parse_css.TokenType.DECLARATION;
+parse_css.Declaration = class extends parse_css.Rule {
+  /**
+   * @param {string} name
+   */
+  constructor(name) {
+    super();
+    /** @type {string} */
+    this.name = name;
+    /** @type {!Array<!parse_css.Token>} */
+    this.value = [];
+    /** @type {boolean} */
+    this.important = false;
+    /** @type {parse_css.TokenType} */
+    this.tokenType = parse_css.TokenType.DECLARATION;
+  }
 
-/** @return {!Object} */
-parse_css.Declaration.prototype.toJSON = function() {
-  const json = goog.base(this, 'toJSON');
-  json['name'] = this.name;
-  json['important'] = this.important;
-  json['value'] = arrayToJSON(this.value);
-  return json;
-};
+  /** @inheritDoc */
+  toJSON() {
+    const json = super.toJSON();
+    json['name'] = this.name;
+    json['important'] = this.important;
+    json['value'] = arrayToJSON(this.value);
+    return json;
+  }
 
-/** @param {!parse_css.RuleVisitor} visitor */
-parse_css.Declaration.prototype.accept = function(visitor) {
-  visitor.visitDeclaration(this);
+  /** @inheritDoc */
+  accept(visitor) {
+    visitor.visitDeclaration(this);
+  }
 };
 
 /** @constructor */
@@ -618,11 +603,12 @@ Canonicalizer.prototype.parseADeclaration = function(
     if (decl.value[i] instanceof parse_css.WhitespaceToken) {
       continue;
     } else if (decl.value[i] instanceof parse_css.IdentToken &&
-               decl.value[i].ASCIIMatch('important')) {
+        /** @type {parse_css.IdentToken} */ (decl.value[i])
+        .ASCIIMatch('important')) {
       foundImportant = true;
     } else if (foundImportant &&
-               decl.value[i] instanceof parse_css.DelimToken &&
-               decl.value[i].value === '!') {
+        decl.value[i] instanceof parse_css.DelimToken &&
+        /** @type {parse_css.DelimToken} */(decl.value[i]).value === '!') {
       decl.value.splice(i, decl.value.length);
       decl.important = true;
       break;
@@ -677,7 +663,8 @@ function consumeASimpleBlock(tokenStream, tokenList) {
       tokenList.push(tokenStream.current());
       return;
     } else if (tokenStream.current() instanceof parse_css.GroupingToken &&
-               tokenStream.current().value === mirror) {
+        /** @type {parse_css.GroupingToken} */(tokenStream.current())
+        .value === mirror) {
       tokenList.push(tokenStream.current());
       return;
     } else {
