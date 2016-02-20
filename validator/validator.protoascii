@@ -25,7 +25,7 @@ min_validator_revision_required: 91
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 153
+spec_file_revision: 154
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
 #
@@ -2343,6 +2343,24 @@ tags: {  # amp-dailymotion
     mandatory: true
   }
 }
+tags: {  # amp-soundcloud
+  name: "script"
+  mandatory_parent: "head"
+  detail: "amp-soundcloud extension .js script"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-soundcloud/amp-soundcloud.md"
+  attrs: {
+    name: "custom-element"
+    value: "amp-soundcloud"
+    mandatory: true
+    dispatch_key: true
+  }
+  attrs: { name: "async" value: "" mandatory: true }
+  attrs: {
+    name: "src"
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-soundcloud-(latest|0\\.1)\\.js"
+    mandatory: true
+  }
+}
 # Specific json data, descendant from an <amp-analytics> tag.
 tags: {
   name: "script"
@@ -2829,7 +2847,7 @@ tags: {
   attrs: { name: "data-endscreen-enable" value_regex: "true|false" }
   attrs: { name: "data-sharing-enable" value_regex: "true|false" }
   attrs: { name: "data-start" value_regex: "[0-9]+" }
-  attrs: { name: "data-ui-highlight" value_regex: "[0-9a-f]{6}" }
+  attrs: { name: "data-ui-highlight" value_regex: "([0-9a-f]{3}){1,2}" }
   attrs: { name: "data-ui-logo" value_regex: "true|false" }
   attrs: { name: "data-info" value_regex: "true|false" }
   amp_layout: {
@@ -2837,6 +2855,24 @@ tags: {
     supported_layouts: FIXED_HEIGHT
     supported_layouts: RESPONSIVE
     supported_layouts: FILL
+  }
+}
+# <amp-soundcloud>
+tags: {
+  name: "amp-soundcloud"
+  disallowed_ancestor: "head"
+  attr_lists: "extended-amp-global"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-soundcloud/amp-soundcloud.md"
+  also_requires: "amp-soundcloud extension .js script"
+  attrs: {
+    name: "data-trackid"
+    mandatory: true
+    value_regex: "[0-9]+"
+  }
+  attrs: { name: "data-visual" value_regex: "true|false" }
+  attrs: { name: "data-color" value_regex: "([0-9a-f]{3}){1,2}" }
+  amp_layout: {
+    supported_layouts: FIXED_HEIGHT
   }
 }
 # <amp-vine>
