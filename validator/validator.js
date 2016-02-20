@@ -472,40 +472,40 @@ function isAtRuleValid(cssSpec, atRuleName) {
   return defaultType !== amp.validator.AtRuleSpec.BlockType.PARSE_AS_ERROR;
 }
 
-/**
- * @param {!amp.validator.TagSpec} tagSpec
- * @param {!amp.validator.CssSpec} cssSpec
- * @param {!Context} context
- * @param {!amp.validator.ValidationResult} result
- * @constructor
- * @extends {parse_css.RuleVisitor}
- */
-const InvalidAtRuleVisitor = function(tagSpec, cssSpec, context, result) {
-  goog.base(this);
-  /** @type {!amp.validator.TagSpec} */
-  this.tagSpec = tagSpec;
-  /** @type {!amp.validator.CssSpec} */
-  this.cssSpec = cssSpec;
-  /** @type {!Context} */
-  this.context = context;
-  /** @type {!amp.validator.ValidationResult} */
-  this.result = result;
-  /** @type {boolean} */
-  this.errorsSeen = false;
-};
-goog.inherits(InvalidAtRuleVisitor, parse_css.RuleVisitor);
-
-/** @param {!parse_css.AtRule} atRule */
-InvalidAtRuleVisitor.prototype.visitAtRule = function(atRule) {
-  if (!isAtRuleValid(this.cssSpec, atRule.name)) {
-    this.context.addErrorWithLineCol(
-        new LineCol(atRule.line, atRule.col),
-        amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_AT_RULE,
-        /* params */ [getDetailOrName(this.tagSpec), atRule.name],
-        /* url */ '', this.result);
-    this.errorsSeen = true;
+/** @private */
+class InvalidAtRuleVisitor extends parse_css.RuleVisitor {
+  /**
+   * @param {!amp.validator.TagSpec} tagSpec
+   * @param {!amp.validator.CssSpec} cssSpec
+   * @param {!Context} context
+   * @param {!amp.validator.ValidationResult} result
+   */
+  constructor(tagSpec, cssSpec, context, result) {
+    super();
+    /** @type {!amp.validator.TagSpec} */
+    this.tagSpec = tagSpec;
+    /** @type {!amp.validator.CssSpec} */
+    this.cssSpec = cssSpec;
+    /** @type {!Context} */
+    this.context = context;
+    /** @type {!amp.validator.ValidationResult} */
+    this.result = result;
+    /** @type {boolean} */
+    this.errorsSeen = false;
   }
-};
+
+  /** @inheritDoc */
+  visitAtRule(atRule) {
+    if (!isAtRuleValid(this.cssSpec, atRule.name)) {
+      this.context.addErrorWithLineCol(
+          new LineCol(atRule.line, atRule.col),
+          amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_AT_RULE,
+          /* params */ [getDetailOrName(this.tagSpec), atRule.name],
+          /* url */ '', this.result);
+      this.errorsSeen = true;
+    }
+  }
+}
 
 /**
  * Generates an AT Rule Parsing Spec from a CssSpec.
