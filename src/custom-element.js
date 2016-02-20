@@ -79,7 +79,8 @@ export function upgradeOrRegisterElement(win, name, toClass) {
     return;
   }
   assert(knownElements[name] == ElementStub,
-      'Expected ' + name + ' to be an ElementStub.');
+      '%s is already registered. The script tag for ' +
+      '%s is likely included twice in the page.', name, name);
   for (let i = 0; i < stubbedElements.length; i++) {
     const stub = stubbedElements[i];
     // There are 3 possible states here:
