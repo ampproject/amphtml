@@ -944,17 +944,57 @@ ParsedAttrSpec.prototype.getSpec = function() {
 /**
  * @param {!Context} context
  * @param {!string} attrName
- * @param {!string} url
+ * @param {!string} attrValue
  * @param {!amp.validator.TagSpec} tagSpec
- * @param {!string} specUrl
  * @param {!amp.validator.ValidationResult} result
  */
+ParsedAttrSpec.prototype.validateNonTemplateAttrValueAgainstSpec = function(
+    context, attrName, attrValue, tagSpec, result) {
+  // The value, value_regex, value_url, and value_properties fields are
+  // treated like a oneof, but we're not using oneof because it's
+  // a feature that was added after protobuf 2.5.0 (which our
+  // open-source version uses).
+  // begin oneof {
+  if (this.spec_.value !== null) {
+    if (attrValue != this.spec_.value) {
+      context.addError(
+          amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
+          /* params */ [attrName, getDetailOrName(tagSpec), attrValue],
+          tagSpec.specUrl, result);
+    }
+  } else if (this.spec_.valueRegex !== null) {
+    const valueRegex =
+        new RegExp('^(' + this.spec_.valueRegex + ')$');
+    if (!valueRegex.test(attrValue)) {
+      context.addError(
+          amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
+          /* params */ [attrName, getDetailOrName(tagSpec), attrValue],
+          tagSpec.specUrl, result);
+    }
+  } else if (this.spec_.valueUrl !== null) {
+    this.validateAttrValueUrl(context, attrName, attrValue, tagSpec, result);
+  } else if (this.spec_.valueProperties !== null) {
+        this.validateAttrValueProperties(
+            context, attrName, attrValue, tagSpec, result);
+  }
+  // } end oneof
+};
+
+/**
+ * @param {!Context} context
+ * @param {!string} attrName
+ * @param {!string} url
+ * @param {!amp.validator.TagSpec} tagSpec
+ * @param {!amp.validator.ValidationResult} result
+ * @private
+ */
 ParsedAttrSpec.prototype.validateUrlAndProtocol = function(
-    context, attrName, url, tagSpec, specUrl, result) {
+    context, attrName, url, tagSpec, result) {
   if (url === '') {
     context.addError(
         amp.validator.ValidationError.Code.MISSING_URL,
-        /* params */ [attrName, getDetailOrName(tagSpec)], specUrl, result);
+        /* params */ [attrName, getDetailOrName(tagSpec)],
+        tagSpec.specUrl, result);
     return;
   }
   let uri;
@@ -964,7 +1004,7 @@ ParsedAttrSpec.prototype.validateUrlAndProtocol = function(
     context.addError(
         amp.validator.ValidationError.Code.INVALID_URL,
         /* params */ [attrName, getDetailOrName(tagSpec), url],
-        specUrl, result);
+        tagSpec.specUrl, result);
     return;
   }
   if (uri.hasScheme() &&
@@ -972,7 +1012,7 @@ ParsedAttrSpec.prototype.validateUrlAndProtocol = function(
     context.addError(
         amp.validator.ValidationError.Code.INVALID_URL_PROTOCOL,
         /* params */ [attrName, getDetailOrName(tagSpec),
-        uri.getScheme().toLowerCase()], specUrl, result);
+        uri.getScheme().toLowerCase()], tagSpec.specUrl, result);
     return;
   }
 };
@@ -982,11 +1022,11 @@ ParsedAttrSpec.prototype.validateUrlAndProtocol = function(
  * @param {!string} attrName
  * @param {!string} attrValue
  * @param {!amp.validator.TagSpec} tagSpec
- * @param {!string} specUrl
  * @param {!amp.validator.ValidationResult} result
+ * @private
  */
 ParsedAttrSpec.prototype.validateAttrValueUrl = function(
-    context, attrName, attrValue, tagSpec, specUrl, result) {
+    context, attrName, attrValue, tagSpec, result) {
   const maybe_uris = new goog.structs.Set();
   if (attrName != 'srcset') {
     maybe_uris.add(goog.string.trim(attrValue));
@@ -1006,13 +1046,13 @@ ParsedAttrSpec.prototype.validateAttrValueUrl = function(
     context.addError(
         amp.validator.ValidationError.Code.MISSING_URL,
         /* params */ [attrName, getDetailOrName(tagSpec)],
-        specUrl, result);
+        tagSpec.specUrl, result);
     return;
   }
   for (const maybe_uri of maybe_uris.getValues()) {
     const unescaped_maybe_uri = goog.string.unescapeEntities(maybe_uri);
     this.validateUrlAndProtocol(
-        context, attrName, unescaped_maybe_uri, tagSpec, specUrl, result);
+        context, attrName, unescaped_maybe_uri, tagSpec, result);
     if (result.status === amp.validator.ValidationResult.Status.FAIL) {
       return;
     }
@@ -1024,11 +1064,11 @@ ParsedAttrSpec.prototype.validateAttrValueUrl = function(
  * @param {!string} attrName
  * @param {!string} attrValue
  * @param {!amp.validator.TagSpec} tagSpec
- * @param {!string} specUrl
  * @param {!amp.validator.ValidationResult} result
+ * @private
  */
 ParsedAttrSpec.prototype.validateAttrValueProperties = function(
-    context, attrName, attrValue, tagSpec, specUrl, result) {
+    context, attrName, attrValue, tagSpec, result) {
   // TODO(johannes): Replace this hack with a parser.
   const segments = attrValue.split(',');
   const properties = new goog.structs.Map();
@@ -1048,7 +1088,7 @@ ParsedAttrSpec.prototype.validateAttrValueProperties = function(
       context.addError(
           amp.validator.ValidationError.Code.DISALLOWED_PROPERTY_IN_ATTR_VALUE,
           /* params */ [name, attrName, getDetailOrName(tagSpec)],
-          specUrl, result);
+          tagSpec.specUrl, result);
       continue;
     }
     const propertySpec = this.valuePropertyByName_.get(name);
@@ -1058,7 +1098,7 @@ ParsedAttrSpec.prototype.validateAttrValueProperties = function(
             amp.validator.ValidationError.Code.
                 INVALID_PROPERTY_VALUE_IN_ATTR_VALUE,
             /* params */ [name, attrName, getDetailOrName(tagSpec), value],
-            specUrl, result);
+            tagSpec.specUrl, result);
       }
     } else if (propertySpec.valueDouble !== null) {
       if (parseFloat(value) != propertySpec.valueDouble) {
@@ -1066,7 +1106,7 @@ ParsedAttrSpec.prototype.validateAttrValueProperties = function(
             amp.validator.ValidationError.Code.
                 INVALID_PROPERTY_VALUE_IN_ATTR_VALUE,
             /* params */ [name, attrName, getDetailOrName(tagSpec), value],
-            specUrl, result);
+            tagSpec.specUrl, result);
       }
     }
   }
@@ -1076,10 +1116,9 @@ ParsedAttrSpec.prototype.validateAttrValueProperties = function(
         amp.validator.ValidationError.Code.
             MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE,
         /* params */ [name, attrName, getDetailOrName(tagSpec)],
-        specUrl, result);
+        tagSpec.specUrl, result);
   }
 };
-
 
 /**
  * Collect the AttrSpec pointers for a given |tagspec|.
@@ -1623,13 +1662,12 @@ ParsedTagSpec.prototype.validateLayout = function(context, attrsByKey, result) {
  * Helper method for ValidateAttributes, for when an attribute is
  * encountered which is not specified by the validator.protoascii
  * specification.
- * @param {!string} attrName
  * @param {!Context} context
+ * @param {!string} attrName
  * @param {!amp.validator.ValidationResult} result
- * @return {boolean} indicating success or validation failure
  */
 ParsedTagSpec.prototype.validateAttrNotFoundInSpec = function(
-    attrName, context, result) {
+    context, attrName, result) {
   // For now, we just skip data- attributes in the validator, because
   // our schema doesn't capture which ones would be ok or not. E.g.
   // in practice, some type of ad or perhaps other custom elements require
@@ -1642,7 +1680,7 @@ ParsedTagSpec.prototype.validateAttrNotFoundInSpec = function(
   if (goog.string./*OK*/startsWith(attrName, 'data-') &&
       !goog.string.contains(attrName, '}') &&
       !goog.string.contains(attrName, '{')) {
-    return true;
+    return;
   }
 
   // At this point, it's an error either way, but we try to give a
@@ -1658,8 +1696,29 @@ ParsedTagSpec.prototype.validateAttrNotFoundInSpec = function(
         /* params */ [attrName, getDetailOrName(this.spec_)],
         this.spec_.specUrl, result);
   }
-  return false;
 };
+
+/**
+ * Specific checks for attribute values descending from a template tag.
+ * @param {!Context} context
+ * @param {!string} attrName
+ * @param {!string} attrValue
+ * @param {!amp.validator.ValidationResult} result
+ */
+ParsedTagSpec.prototype.validateAttrValueBelowTemplateTag = function(
+    context, attrName, attrValue, result) {
+  if (this.valueHasUnescapedTemplateSyntax(attrValue)) {
+    context.addError(
+        amp.validator.ValidationError.Code.UNESCAPED_TEMPLATE_IN_ATTR_VALUE,
+        /* params */ [attrName, getDetailOrName(this.spec_), attrValue],
+        this.templateSpecUrl_, result);
+  } else if (this.valueHasPartialsTemplateSyntax(attrValue)) {
+    context.addError(
+        amp.validator.ValidationError.Code.TEMPLATE_PARTIAL_IN_ATTR_VALUE,
+        /* params */ [attrName, getDetailOrName(this.spec_), attrValue],
+        this.templateSpecUrl_, result);
+  }
+}
 
 /**
  * Validates whether the attributes set on |encountered_tag| conform to this
@@ -1668,18 +1727,17 @@ ParsedTagSpec.prototype.validateAttrNotFoundInSpec = function(
  *  Returns true iff the validation is successful.
  * @param {!Context} context
  * @param {!Array<string>} encounteredAttrs Alternating key/value pain the array
- * @param {!amp.validator.ValidationResult} resultForAttempt
+ * @param {!amp.validator.ValidationResult} result
  */
 ParsedTagSpec.prototype.validateAttributes = function(
-    context, encounteredAttrs, resultForAttempt) {
+    context, encounteredAttrs, result) {
   if (this.spec_.ampLayout !== null) {
     const attrsByKey = new goog.structs.Map();
     for (let i = 0; i < encounteredAttrs.length; i += 2) {
       attrsByKey.set(encounteredAttrs[i], encounteredAttrs[i + 1]);
     }
-    this.validateLayout(context, attrsByKey, resultForAttempt);
-    if (resultForAttempt.status ===
-        amp.validator.ValidationResult.Status.FAIL) {
+    this.validateLayout(context, attrsByKey, result);
+    if (result.status === amp.validator.ValidationResult.Status.FAIL) {
       return;
     }
   }
@@ -1690,110 +1748,54 @@ ParsedTagSpec.prototype.validateAttributes = function(
   // Our html parser delivers attributes as an array of alternating keys and
   // values. We skip over this array 2 at a time to iterate over the keys.
   for (let i = 0; i < encounteredAttrs.length; i += 2) {
-    const encounteredAttrKey = encounteredAttrs[i];
-    let encounteredAttrValue = encounteredAttrs[i + 1];
+    const attrKey = encounteredAttrs[i];
+    const attrName = attrKey.toLowerCase();
+    let attrValue = encounteredAttrs[i + 1];
 
     // Our html parser repeats the key as the value if there is no value. We
     // replace the value with an empty string instead in this case.
-    if (encounteredAttrKey === encounteredAttrValue)
-      encounteredAttrValue = '';
+    if (attrKey === attrValue)
+      attrValue = '';
 
-    const encounteredAttrName = encounteredAttrKey.toLowerCase();
-    const parsedSpec = this.attrsByName_.get(encounteredAttrName);
+    const parsedSpec = this.attrsByName_.get(attrName);
     if (parsedSpec === undefined) {
-      if (this.validateAttrNotFoundInSpec(encounteredAttrName, context,
-                                          resultForAttempt)) {
-        continue;
-      } else {
+      this.validateAttrNotFoundInSpec(context, attrName, result);
+      if (result.status === amp.validator.ValidationResult.Status.FAIL) {
         return;
       }
+      continue;
     }
-    // Specific checks for attribute values descending from a template tag.
     if (hasTemplateAncestor) {
-      if (this.valueHasUnescapedTemplateSyntax(encounteredAttrValue)) {
-        context.addError(
-            amp.validator.ValidationError.Code.UNESCAPED_TEMPLATE_IN_ATTR_VALUE,
-            /* params */ [encounteredAttrName, getDetailOrName(this.spec_),
-                         encounteredAttrValue],
-            this.templateSpecUrl_, resultForAttempt);
-        return;
-      }
-      if (this.valueHasPartialsTemplateSyntax(encounteredAttrValue)) {
-        context.addError(
-            amp.validator.ValidationError.Code.TEMPLATE_PARTIAL_IN_ATTR_VALUE,
-            /* params */ [encounteredAttrName, getDetailOrName(this.spec_),
-                         encounteredAttrValue],
-            this.templateSpecUrl_, resultForAttempt);
+      this.validateAttrValueBelowTemplateTag(
+          context, attrName, attrValue, result);
+      if (result.status === amp.validator.ValidationResult.Status.FAIL) {
         return;
       }
     }
-
     if (parsedSpec.getSpec().deprecation !== null) {
       context.addError(
           amp.validator.ValidationError.Code.DEPRECATED_ATTR,
-          /* params */ [encounteredAttrName, getDetailOrName(this.spec_),
+          /* params */ [attrName, getDetailOrName(this.spec_),
                         parsedSpec.getSpec().deprecation],
-          parsedSpec.getSpec().deprecationUrl, resultForAttempt);
+          parsedSpec.getSpec().deprecationUrl, result);
       // Deprecation is only a warning, so we don't return.
     }
-    if (!hasTemplateAncestor ||
-        !this.valueHasTemplateSyntax(encounteredAttrValue)) {
-      // The value, value_regex, value_url, and value_properties fields are
-      // treated like a oneof, but we're not using oneof because it's
-      // a feature that was added after protobuf 2.5.0 (which our
-      // open-source version uses).
-      // begin oneof {
-      if (parsedSpec.getSpec().value !== null) {
-        if (encounteredAttrValue != parsedSpec.getSpec().value) {
-          context.addError(
-              amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
-              /* params */ [encounteredAttrName, getDetailOrName(this.spec_),
-                            encounteredAttrValue],
-              this.spec_.specUrl, resultForAttempt);
-          return;
-        }
+    if (!hasTemplateAncestor || !this.valueHasTemplateSyntax(attrValue)) {
+      parsedSpec.validateNonTemplateAttrValueAgainstSpec(
+          context, attrName, attrValue, this.spec_, result);
+      if (result.status === amp.validator.ValidationResult.Status.FAIL) {
+        return;
       }
-      if (parsedSpec.getSpec().valueRegex !== null) {
-        const valueRegex =
-            new RegExp('^(' + parsedSpec.getSpec().valueRegex + ')$');
-        if (!valueRegex.test(encounteredAttrValue)) {
-          context.addError(
-              amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
-              /* params */ [encounteredAttrName, getDetailOrName(this.spec_),
-                            encounteredAttrValue],
-              this.spec_.specUrl, resultForAttempt);
-          return;
-        }
-      }
-      if (parsedSpec.getSpec().valueUrl !== null) {
-        parsedSpec.validateAttrValueUrl(
-            context, encounteredAttrName, encounteredAttrValue,
-            this.spec_, this.spec_.specUrl, resultForAttempt);
-        if (resultForAttempt.status ===
-            amp.validator.ValidationResult.Status.FAIL) {
-          return;
-        }
-      }
-      if (parsedSpec.getSpec().valueProperties !== null) {
-        parsedSpec.validateAttrValueProperties(
-            context, encounteredAttrName, encounteredAttrValue,
-            this.spec_, this.spec_.specUrl, resultForAttempt);
-        if (resultForAttempt.status ===
-            amp.validator.ValidationResult.Status.FAIL) {
-          return;
-        }
-      }
-      // } end oneof
     }
     if (parsedSpec.getSpec().blacklistedValueRegex !== null) {
       const blacklistedValueRegex = new RegExp(
           parsedSpec.getSpec().blacklistedValueRegex, 'i');
-      if (blacklistedValueRegex.test(encounteredAttrValue)) {
+      if (blacklistedValueRegex.test(attrValue)) {
         context.addError(
             amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
-            /* params */ [encounteredAttrName, getDetailOrName(this.spec_),
-                          encounteredAttrValue],
-            this.spec_.specUrl, resultForAttempt);
+            /* params */ [attrName, getDetailOrName(this.spec_),
+                          attrValue],
+            this.spec_.specUrl, result);
         return;
       }
     }
@@ -1809,7 +1811,7 @@ ParsedTagSpec.prototype.validateAttributes = function(
           amp.validator.ValidationError.Code.MUTUALLY_EXCLUSIVE_ATTRS,
           /* params */ [getDetailOrName(this.spec_),
                         parsedSpec.getSpec().mandatoryOneof],
-          this.spec_.specUrl, resultForAttempt);
+          this.spec_.specUrl, result);
       return;
     }
     mandatoryOneofsSeen.add(parsedSpec.getSpec().mandatoryOneof);
@@ -1821,10 +1823,9 @@ ParsedTagSpec.prototype.validateAttributes = function(
       context.addError(
           amp.validator.ValidationError.Code.MANDATORY_ONEOF_ATTR_MISSING,
           /* params */ [getDetailOrName(this.spec_), mandatoryOneof],
-          this.spec_.specUrl, resultForAttempt);
+          this.spec_.specUrl, result);
     }
   }
-
   mandatoryAttrsSeen = sortAndUniquify(mandatoryAttrsSeen);
   const diffs = subtractDiff(this.mandatoryAttrIds_, mandatoryAttrsSeen);
   for (const diff of diffs) {
@@ -1832,7 +1833,7 @@ ParsedTagSpec.prototype.validateAttributes = function(
         amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING,
         /* params */ [this.attrsById_[diff].getSpec().name,
                       getDetailOrName(this.spec_)],
-        this.spec_.specUrl, resultForAttempt);
+        this.spec_.specUrl, result);
   }
 };
 
