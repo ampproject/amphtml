@@ -25,7 +25,7 @@ min_validator_revision_required: 91
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 152
+spec_file_revision: 153
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
 #
@@ -1103,11 +1103,23 @@ tags: {
 tags: {
   name: "ins"
   disallowed_ancestor: "head"
+  # https://developer.mozilla.org/en-US/docs/Web/HTML/Element/ins
+  # These attributes have specific formatting, but as they are metadata
+  # that can't hurt performance, rendering or security, we don't validate
+  # the values.
+  attrs { name: "datetime" }
+  attrs { name: "cite" }
 }
 # 4.6.2 The del element
 tags: {
   name: "del"
   disallowed_ancestor: "head"
+  # https://developer.mozilla.org/en-US/docs/Web/HTML/Element/del
+  # These attributes have specific formatting, but as they are metadata
+  # that can't hurt performance, rendering or security, we don't validate
+  # the values.
+  attrs { name: "datetime" }
+  attrs { name: "cite" }
 }
 
 # 4.7 Embedded Content
