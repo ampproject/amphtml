@@ -25,7 +25,7 @@ min_validator_revision_required: 95
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 159
+spec_file_revision: 160
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
 #
@@ -506,6 +506,10 @@ tags: {  # Special custom 'author' spreadsheet.
         name: '$DEFAULT'  # matches if none of the above match
         type: PARSE_AS_ERROR
       }
+    }
+    blacklisted_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
     }
     # These regex blacklists are temporary hacks to validate essential CSS
     # rules. They will be replaced later with more principled solutions.
@@ -1883,6 +1887,12 @@ tags: {
     value: ""
     mandatory: true
   }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "."
+      error_message: "contents"
+    }
+  }
 }
 tags: {
   name: "script"
@@ -1893,6 +1903,12 @@ tags: {
     mandatory: true
     value: "application/ld+json"
     dispatch_key: true
+  }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
+    }
   }
 }
 tags: {
@@ -1912,6 +1928,12 @@ tags: {
   }
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-access-spec.html"
   # TODO(gregable): Validate the cdata contents of this script tag.
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
+    }
+  }
 }
 
 # Specific script tags for custom elements and runtime imports.
@@ -1932,6 +1954,12 @@ tags: {  # amp-access
     value_regex: "https://cdn\\.ampproject\\.org/v0/amp-access-(latest|0\\.1).js"
     mandatory: true
   }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "."
+      error_message: "contents"
+    }
+  }
 }
 tags: {  # amp-analytics
   name: "script"
@@ -1949,6 +1977,12 @@ tags: {  # amp-analytics
     name: "src"
     value_regex: "https://cdn\\.ampproject\\.org/v0/amp-analytics-(latest|0\\.1).js"
     mandatory: true
+  }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "."
+      error_message: "contents"
+    }
   }
 }
 tags: {  # amp-anim
@@ -1968,6 +2002,12 @@ tags: {  # amp-anim
     value_regex: "https://cdn\\.ampproject\\.org/v0/amp-anim-(latest|0\\.1).js"
     mandatory: true
   }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "."
+      error_message: "contents"
+    }
+  }
 }
 tags: {  # amp-audio
   name: "script"
@@ -1985,6 +2025,12 @@ tags: {  # amp-audio
     name: "src"
     value_regex: "https://cdn\\.ampproject\\.org/v0/amp-audio-(latest|0\\.1).js"
     mandatory: true
+  }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "."
+      error_message: "contents"
+    }
   }
 }
 tags: {  # amp-brightcove
@@ -2004,6 +2050,12 @@ tags: {  # amp-brightcove
     value_regex: "https://cdn\\.ampproject\\.org/v0/amp-brightcove-(latest|0\\.1).js"
     mandatory: true
   }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "."
+      error_message: "contents"
+    }
+  }
 }
 tags: {  # amp-carousel
   name: "script"
@@ -2021,6 +2073,12 @@ tags: {  # amp-carousel
     name: "src"
     value_regex: "https://cdn\\.ampproject\\.org/v0/amp-carousel-(latest|0\\.1).js"
     mandatory: true
+  }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "."
+      error_message: "contents"
+    }
   }
 }
 tags: {  # amp-dynamic-css-classes
@@ -2040,6 +2098,12 @@ tags: {  # amp-dynamic-css-classes
     value_regex: "https://cdn\\.ampproject\\.org/v0/amp-dynamic-css-classes-(latest|0\\.1).js"
     mandatory: true
   }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "."
+      error_message: "contents"
+    }
+  }
 }
 tags: {  # amp-facebook
   name: "script"
@@ -2057,6 +2121,12 @@ tags: {  # amp-facebook
     name: "src"
     value_regex: "https://cdn\\.ampproject\\.org/v0/amp-facebook-(latest|0\\.1).js"
     mandatory: true
+  }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "."
+      error_message: "contents"
+    }
   }
 }
 tags: {  # amp-fit-text
@@ -2076,6 +2146,12 @@ tags: {  # amp-fit-text
     value_regex: "https://cdn\\.ampproject\\.org/v0/amp-fit-text-(latest|0\\.1).js"
     mandatory: true
   }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "."
+      error_message: "contents"
+    }
+  }
 }
 tags: {  # amp-font
   name: "script"
@@ -2093,6 +2169,12 @@ tags: {  # amp-font
     name: "src"
     value_regex: "https://cdn\\.ampproject\\.org/v0/amp-font-(latest|0\\.1).js"
     mandatory: true
+  }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "."
+      error_message: "contents"
+    }
   }
 }
 tags: {  # amp-iframe
@@ -2112,6 +2194,12 @@ tags: {  # amp-iframe
     value_regex: "https://cdn\\.ampproject\\.org/v0/amp-iframe-(latest|0\\.1).js"
     mandatory: true
   }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "."
+      error_message: "contents"
+    }
+  }
 }
 tags: {  # amp-image-lightbox
   name: "script"
@@ -2129,6 +2217,12 @@ tags: {  # amp-image-lightbox
     name: "src"
     value_regex: "https://cdn\\.ampproject\\.org/v0/amp-image-lightbox-(latest|0\\.1).js"
     mandatory: true
+  }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "."
+      error_message: "contents"
+    }
   }
 }
 tags: {  # amp-instagram
@@ -2148,6 +2242,12 @@ tags: {  # amp-instagram
     value_regex: "https://cdn\\.ampproject\\.org/v0/amp-instagram-(latest|0\\.1).js"
     mandatory: true
   }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "."
+      error_message: "contents"
+    }
+  }
 }
 tags: {  # amp-install-serviceworker
   name: "script"
@@ -2165,6 +2265,12 @@ tags: {  # amp-install-serviceworker
     name: "src"
     value_regex: "https://cdn\\.ampproject\\.org/v0/amp-install-serviceworker-(latest|0\\.1).js"
     mandatory: true
+  }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "."
+      error_message: "contents"
+    }
   }
 }
 tags: {  # amp-lightbox
@@ -2184,6 +2290,12 @@ tags: {  # amp-lightbox
     value_regex: "https://cdn\\.ampproject\\.org/v0/amp-lightbox-(latest|0\\.1).js"
     mandatory: true
   }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "."
+      error_message: "contents"
+    }
+  }
 }
 tags: {  # amp-mustache
   name: "script"
@@ -2201,6 +2313,12 @@ tags: {  # amp-mustache
     name: "src"
     value_regex: "https://cdn\\.ampproject\\.org/v0/amp-mustache-(latest|0\\.1).js"
     mandatory: true
+  }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "."
+      error_message: "contents"
+    }
   }
 }
 tags: {  # amp-list
@@ -2220,6 +2338,12 @@ tags: {  # amp-list
     value_regex: "https://cdn\\.ampproject\\.org/v0/amp-list-(latest|0\\.1).js"
     mandatory: true
   }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "."
+      error_message: "contents"
+    }
+  }
 }
 tags: {  # amp-pinterest
   name: "script"
@@ -2237,6 +2361,12 @@ tags: {  # amp-pinterest
     name: "src"
     value_regex: "https://cdn\\.ampproject\\.org/v0/amp-pinterest-(latest|0\\.1).js"
     mandatory: true
+  }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "."
+      error_message: "contents"
+    }
   }
 }
 tags: {  # amp-slides
@@ -2256,6 +2386,12 @@ tags: {  # amp-slides
     value_regex: "https://cdn\\.ampproject\\.org/v0/amp-slides-(latest|0\\.1).js"
     mandatory: true
   }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "."
+      error_message: "contents"
+    }
+  }
 }
 tags: {  # amp-twitter
   name: "script"
@@ -2273,6 +2409,12 @@ tags: {  # amp-twitter
     name: "src"
     value_regex: "https://cdn\\.ampproject\\.org/v0/amp-twitter-(latest|0\\.1).js"
     mandatory: true
+  }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "."
+      error_message: "contents"
+    }
   }
 }
 tags: {  # amp-user-notification
@@ -2292,6 +2434,12 @@ tags: {  # amp-user-notification
     value_regex: "https://cdn\\.ampproject\\.org/v0/amp-user-notification-(latest|0\\.1).js"
     mandatory: true
   }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "."
+      error_message: "contents"
+    }
+  }
 }
 tags: {  # amp-vine
   name: "script"
@@ -2309,6 +2457,12 @@ tags: {  # amp-vine
     name: "src"
     value_regex: "https://cdn\\.ampproject\\.org/v0/amp-vine-(latest|0\\.1).js"
     mandatory: true
+  }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "."
+      error_message: "contents"
+    }
   }
 }
 tags: {  # amp-youtube
@@ -2328,6 +2482,12 @@ tags: {  # amp-youtube
     value_regex: "https://cdn\\.ampproject\\.org/v0/amp-youtube-(latest|0\\.1)\\.js"
     mandatory: true
   }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "."
+      error_message: "contents"
+    }
+  }
 }
 tags: {  # amp-vimeo
   name: "script"
@@ -2345,6 +2505,12 @@ tags: {  # amp-vimeo
     name: "src"
     value_regex: "https://cdn\\.ampproject\\.org/v0/amp-vimeo-(latest|0\\.1)\\.js"
     mandatory: true
+  }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "."
+      error_message: "contents"
+    }
   }
 }
 tags: {  # amp-dailymotion
@@ -2364,6 +2530,12 @@ tags: {  # amp-dailymotion
     value_regex: "https://cdn\\.ampproject\\.org/v0/amp-dailymotion-(latest|0\\.1)\\.js"
     mandatory: true
   }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "."
+      error_message: "contents"
+    }
+  }
 }
 tags: {  # amp-soundcloud
   name: "script"
@@ -2382,6 +2554,12 @@ tags: {  # amp-soundcloud
     value_regex: "https://cdn\\.ampproject\\.org/v0/amp-soundcloud-(latest|0\\.1)\\.js"
     mandatory: true
   }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "."
+      error_message: "contents"
+    }
+  }
 }
 # Specific json data, descendant from an <amp-analytics> tag.
 tags: {
@@ -2393,6 +2571,12 @@ tags: {
     name: "type"
     mandatory: true
     value: "application/json"
+  }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
+    }
   }
 }
 # 4.11.2 The noscript element
@@ -3293,7 +3477,7 @@ error_formats {
 }
 error_formats {
   code: CDATA_VIOLATES_BLACKLIST
-  format: "The text (CDATA) inside tag '%1' matches '%2', "
+  format: "The text (CDATA) inside tag '%1' contains '%2', "
           "which is disallowed."
 }
 error_formats {
