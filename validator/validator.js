@@ -2244,10 +2244,9 @@ function byteLength(utf8Str) {
 
 /**
  * Validation Handler which accepts callbacks from HTML Parser
- * @implements {amp.htmlparser.HtmlSaxHandlerWithLocation}
  * @private
  */
-class ValidationHandler {
+class ValidationHandler extends amp.htmlparser.HtmlSaxHandlerWithLocation {
   /** Creates a new handler. */
   constructor() {
     this.validationResult_ = new amp.validator.ValidationResult();
@@ -2286,6 +2285,7 @@ class ValidationHandler {
   /**
    * Callback before startDoc which gives us a document locator.
    * @param {amp.htmlparser.DocLocator} locator
+   * @override
    */
   setDocLocator(locator) {
     if (locator == null) {
@@ -2297,6 +2297,7 @@ class ValidationHandler {
 
   /**
    * Callback for the start of a new HTML document.
+   * @override
    */
   startDoc() {
     this.validationResult_ = new amp.validator.ValidationResult();
@@ -2323,6 +2324,7 @@ class ValidationHandler {
    * Callback for a start HTML tag.
    * @param {string} tagName ie: 'table' (already lower-cased by htmlparser.js).
    * @param {Array<string>} attrs Alternating key/value pain the array
+   * @override
    */
   startTag(tagName, attrs) {
     goog.asserts.assert(attrs !== null, 'Null attributes for tag: ' + tagName);
@@ -2339,6 +2341,7 @@ class ValidationHandler {
   /**
    * Callback for an end HTML tag.
    * @param {string} tagName ie: 'table'
+   * @override
    */
   endTag(tagName) {
     this.context_.setCdataMatcher(new CdataMatcher(new amp.validator.TagSpec()));
@@ -2349,6 +2352,7 @@ class ValidationHandler {
    * Callback for pcdata. I'm not sure what this is supposed to include, but it
    * seems to be called for contents of <p> tags, looking at a few examples.
    * @param {string} text
+   * @override
    */
   pcdata(text) {}
 
@@ -2356,12 +2360,14 @@ class ValidationHandler {
    * Callback for rcdata text. rcdata text includes contents of title or textarea
    * tags. The validator has no specific rules regarding these text blobs.
    * @param {string} text
+   * @override
    */
   rcdata(text) {}
 
   /**
    * Callback for cdata.
    * @param {string} text
+   * @override
    */
   cdata(text) {
     this.context_.getCdataMatcher().match(
