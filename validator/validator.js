@@ -673,206 +673,198 @@ function SeverityFor(code) {
   return amp.validator.ValidationError.Severity.ERROR;
 }
 
-
 /**
  * The Context keeps track of the line / column that the validator is
  * in, as well as the mandatory tag specs that have already been validated.
  * So, this constitutes the mutable state for the validator except for
  * the validation result itself.
- * @param {number} maxErrors Maximum number of errors to output. -1 means all.
- * @constructor
+ * @private
  */
-const Context = function Context(maxErrors) {
-  goog.asserts.assert(isInteger(maxErrors),
-      'Unrecognized value for maxErrors.');
-  goog.asserts.assert(maxErrors >= -1, 'Unrecognized value for maxErrors.');
+class Context {
   /**
-   * Maximum number of errors to return.
-   * @type {number}
-   * @private
+   * @param {number} maxErrors Maximum number of errors to output. -1 means all.
    */
-  this.maxErrors_ = maxErrors;
+  constructor(maxErrors) {
+    goog.asserts.assert(isInteger(maxErrors),
+                        'Unrecognized value for maxErrors.');
+    goog.asserts.assert(maxErrors >= -1, 'Unrecognized value for maxErrors.');
+    /**
+     * Maximum number of errors to return.
+     * @type {number}
+     * @private
+     */
+    this.maxErrors_ = maxErrors;
+    /**
+     * The mandatory alternatives that we've validated.
+     * @type {!goog.structs.Set<string>}
+     * @private
+     */
+    this.mandatoryAlternativesSatisfied_ = new goog.structs.Set();
+    /**
+     * DocLocator object from the parser which gives us line/col numbers.
+     * @type {amp.htmlparser.DocLocator}
+     * @private
+     */
+    this.docLocator_ = null;
+
+    this.tagNames_ = new TagNameStack();
+
+    this.cdataMatcher_ = new CdataMatcher(new amp.validator.TagSpec());
+
+    /**
+     * @private
+     */
+    this.tagspecsValidated_ = new goog.structs.Set();
+  }
+
   /**
-   * The mandatory alternatives that we've validated.
-   * @type {!goog.structs.Set<string>}
-   * @private
+   * Callback before startDoc which gives us a document locator.
+   * @param {!amp.htmlparser.DocLocator} locator
    */
-  this.mandatoryAlternativesSatisfied_ = new goog.structs.Set();
-  /**
-   * DocLocator object from the parser which gives us line/col numbers.
-   * @type {amp.htmlparser.DocLocator}
-   * @private
-   */
-  this.docLocator_ = null;
+  setDocLocator(locator) { this.docLocator_ = locator; }
 
-  this.tagNames_ = new TagNameStack();
-
-  this.cdataMatcher_ = new CdataMatcher(new amp.validator.TagSpec());
+  /** @return {amp.htmlparser.DocLocator} */
+  getDocLocator() { return this.docLocator_; }
 
   /**
-   * @private
+   * Returns the TagNameStack instance associated with this context.
+   * @return {!TagNameStack}
    */
-  this.tagspecsValidated_ = new goog.structs.Set();
-};
+  getTagNames() { return this.tagNames_; }
 
-/**
- * Callback before startDoc which gives us a document locator.
- * @param {!amp.htmlparser.DocLocator} locator
- */
-Context.prototype.setDocLocator = function(locator) {
-  this.docLocator_ = locator;
-};
+  /**
+   * Returns an object with two fields, complete and wantsMoreErrors. When
+   * complete is true, we can exit the validator. This happens only at the end of
+   * the document or if the validation has FAILED. wantsMoreErrors returns true
+   * if we we haven't hit the required number of errors.
+   * @param {!amp.validator.ValidationResult} validationResult
+   * @return {!Object<string, boolean>} progress tuple
+   */
+  getProgress(validationResult) {
+    // If maxErrors is set to -1, it means that we want to keep going no
+    // matter what, because there may be more errors.
+    if (this.maxErrors_ === -1) {
+      return { complete: false, wantsMoreErrors: true };
+    }
 
-/** @return {amp.htmlparser.DocLocator} */
-Context.prototype.getDocLocator = function() {
-  return this.docLocator_;
-};
+    // For maxErrors set to 0, if the status is FAIL then we know that
+    // we are done. Otherwise, we are forced to keep going. This is
+    // because in practice, the validator uses PASS as a default value.
+    if (this.maxErrors_ === 0) {
+      return { complete: validationResult.status ===
+          amp.validator.ValidationResult.Status.FAIL,
+               wantsMoreErrors: false };
+    }
 
-/**
- * Returns the TagNameStack instance associated with this context.
- * @return {!TagNameStack}
- */
-Context.prototype.getTagNames = function() {
-  return this.tagNames_;
-};
-
-/**
- * Returns an object with two fields, complete and wantsMoreErrors. When
- * complete is true, we can exit the validator. This happens only at the end of
- * the document or if the validation has FAILED. wantsMoreErrors returns true
- * if we we haven't hit the required number of errors.
- * @param {!amp.validator.ValidationResult} validationResult
- * @return {!Object<string, boolean>} progress tuple
- */
-Context.prototype.getProgress = function(validationResult) {
-  // If maxErrors is set to -1, it means that we want to keep going no
-  // matter what, because there may be more errors.
-  if (this.maxErrors_ === -1)
-    return { complete: false,
-             wantsMoreErrors: true };
-
-  // For maxErrors set to 0, if the status is FAIL then we know that
-  // we are done. Otherwise, we are forced to keep going. This is
-  // because in practice, the validator uses PASS as a default value.
-  if (this.maxErrors_ === 0)
-    return { complete: validationResult.status ===
-                       amp.validator.ValidationResult.Status.FAIL,
-             wantsMoreErrors: false };
-
-  // For maxErrors > 0, we want to keep going if we haven't seen maxErrors
-  // errors yet.
-  const wantsMoreErrors = validationResult.errors.length < this.maxErrors_;
-  return { complete: !wantsMoreErrors,
-           wantsMoreErrors: wantsMoreErrors };
-};
-
-/**
- * Returns true if the result was changed; false otherwise.
- * @param {LineCol|amp.htmlparser.DocLocator} lineCol a line / column pair.
- * @param {!amp.validator.ValidationError.Code} validationErrorCode Error code
- * @param {!Array<!string>} params
- * @param {string} specUrl a link (URL) to the amphtml spec
- * @param {!amp.validator.ValidationResult} validationResult
- * @return {boolean}
- */
-Context.prototype.addErrorWithLineCol = function(
-    lineCol, validationErrorCode, params, specUrl,
-    validationResult) {
-  const progress = this.getProgress(validationResult);
-  if (progress.complete) {
-    goog.asserts.assert(
-        validationResult.status === amp.validator.ValidationResult.Status.FAIL,
-        'Early PASS exit without full verification.');
-    return false;
+    // For maxErrors > 0, we want to keep going if we haven't seen maxErrors
+    // errors yet.
+    const wantsMoreErrors = validationResult.errors.length < this.maxErrors_;
+    return { complete: !wantsMoreErrors,
+             wantsMoreErrors: wantsMoreErrors };
   }
-  const severity = SeverityFor(validationErrorCode);
 
-  // If any of the errors amount to more than a WARNING, validation fails.
-  if (severity !== amp.validator.ValidationError.Severity.WARNING) {
-    validationResult.status = amp.validator.ValidationResult.Status.FAIL;
+  /**
+   * Returns true if the result was changed; false otherwise.
+   * @param {LineCol|amp.htmlparser.DocLocator} lineCol a line / column pair.
+   * @param {!amp.validator.ValidationError.Code} validationErrorCode Error code
+   * @param {!Array<!string>} params
+   * @param {string} specUrl a link (URL) to the amphtml spec
+   * @param {!amp.validator.ValidationResult} validationResult
+   * @return {boolean}
+   */
+  addErrorWithLineCol(
+      lineCol, validationErrorCode, params, specUrl, validationResult) {
+    const progress = this.getProgress(validationResult);
+    if (progress.complete) {
+      goog.asserts.assert(
+          validationResult.status === amp.validator.ValidationResult.Status.FAIL,
+          'Early PASS exit without full verification.');
+      return false;
+    }
+    const severity = SeverityFor(validationErrorCode);
+
+    // If any of the errors amount to more than a WARNING, validation fails.
+    if (severity !== amp.validator.ValidationError.Severity.WARNING) {
+      validationResult.status = amp.validator.ValidationResult.Status.FAIL;
+    }
+    if (progress.wantsMoreErrors) {
+      const error = new amp.validator.ValidationError();
+      error.severity = severity;
+      error.code = validationErrorCode;
+      error.params = params;
+      error.line = lineCol.getLine();
+      error.col = lineCol.getCol();
+      error.specUrl = specUrl;
+      goog.asserts.assert(validationResult.errors !== undefined);
+      validationResult.errors.push(error);
+    }
+    return true;
   }
-  if (progress.wantsMoreErrors) {
-    const error = new amp.validator.ValidationError();
-    error.severity = severity;
-    error.code = validationErrorCode;
-    error.params = params;
-    error.line = lineCol.getLine();
-    error.col = lineCol.getCol();
-    error.specUrl = specUrl;
-    goog.asserts.assert(validationResult.errors !== undefined);
-    validationResult.errors.push(error);
+
+  /**
+   * Returns true if the result was changed; false otherwise.
+   * @param {!amp.validator.ValidationError.Code} validationErrorCode Error code
+   * @param {!Array<!string>} params
+   * @param {?string} specUrl a link (URL) to the amphtml spec
+   * @param {!amp.validator.ValidationResult} validationResult
+   * @return {boolean}
+   */
+  addError(validationErrorCode, params, specUrl, validationResult) {
+    if (specUrl === null) {
+      specUrl = '';
+    }
+    return this.addErrorWithLineCol(
+        this.docLocator_, validationErrorCode, params, specUrl,
+        validationResult);
   }
-  return true;
-};
 
-/**
- * Returns true if the result was changed; false otherwise.
- * @param {!amp.validator.ValidationError.Code} validationErrorCode Error code
- * @param {!Array<!string>} params
- * @param {?string} specUrl a link (URL) to the amphtml spec
- * @param {!amp.validator.ValidationResult} validationResult
- * @return {boolean}
- */
-Context.prototype.addError = function(validationErrorCode, params, specUrl,
-                                      validationResult) {
-  if (specUrl === null) {
-    specUrl = '';
+  /**
+   * Records a tag spec that's been validated. This method is only used by
+   * ParsedValidatorRules, which by itself does not have any mutable state.
+   * @param {number} tagSpecId id of tagSpec to record.
+   * @return {boolean} whether or not the tag spec had been encountered before.
+   */
+  recordTagspecValidated(tagSpecId) {
+    const duplicate = this.tagspecsValidated_.contains(tagSpecId);
+    if (!duplicate) {
+      this.tagspecsValidated_.add(tagSpecId);
+    }
+    return !duplicate;
   }
-  return this.addErrorWithLineCol(
-      this.docLocator_, validationErrorCode, params, specUrl, validationResult);
-};
 
-/**
- * Records a tag spec that's been validated. This method is only used by
- * ParsedValidatorRules, which by itself does not have any mutable state.
- * @param {number} tagSpecId id of tagSpec to record.
- * @return {boolean} whether or not the tag spec had been encountered before.
- */
-Context.prototype.recordTagspecValidated = function(tagSpecId) {
-  const duplicate = this.tagspecsValidated_.contains(tagSpecId);
-  if (!duplicate) {
-    this.tagspecsValidated_.add(tagSpecId);
+  /**
+   * @return {!goog.structs.Set<number>}
+   */
+  getTagspecsValidated() { return this.tagspecsValidated_; }
+
+  /**
+   * For use by |ParsedValidatorRules|, which doesn't have any mutable state.
+   * @param {string} alternative id of the validated alternative.
+   */
+  recordMandatoryAlternativeSatisfied(alternative) {
+    this.mandatoryAlternativesSatisfied_.add(alternative);
   }
-  return !duplicate;
-};
 
-/**
- * @return {!goog.structs.Set<number>}
- */
-Context.prototype.getTagspecsValidated = function() {
-  return this.tagspecsValidated_;
-};
+  /**
+   * The mandatory alternatives that we've satisfied.
+   * @return {!goog.structs.Set<string>}
+   */
+  getMandatoryAlternativesSatisfied() {
+    return this.mandatoryAlternativesSatisfied_;
+  }
 
-/**
- * For use by |ParsedValidatorRules|, which doesn't have any mutable state.
- * @param {string} alternative id of the validated alternative.
- */
-Context.prototype.recordMandatoryAlternativeSatisfied = function(alternative) {
-  this.mandatoryAlternativesSatisfied_.add(alternative);
-};
+  /** @return {CdataMatcher} */
+  getCdataMatcher() { return this.cdataMatcher_; }
 
-/**
- * The mandatory alternatives that we've satisfied.
- * @return {!goog.structs.Set<string>}
- */
-Context.prototype.getMandatoryAlternativesSatisfied = function() {
-  return this.mandatoryAlternativesSatisfied_;
-};
-
-/** @return {CdataMatcher} */
-Context.prototype.getCdataMatcher = function() {
-  return this.cdataMatcher_;
-};
-
-/** @param {CdataMatcher} matcher */
-Context.prototype.setCdataMatcher = function(matcher) {
-  // We store away the position from when the matcher was created
-  // so we can use it to generate error messages relating to the opening tag.
-  matcher.setLineCol(
-      new LineCol(this.docLocator_.getLine(), this.docLocator_.getCol()));
-  this.cdataMatcher_ = matcher;
-};
-
+  /** @param {CdataMatcher} matcher */
+  setCdataMatcher(matcher) {
+    // We store away the position from when the matcher was created
+    // so we can use it to generate error messages relating to the opening tag.
+    matcher.setLineCol(
+        new LineCol(this.docLocator_.getLine(), this.docLocator_.getCol()));
+    this.cdataMatcher_ = matcher;
+  }
+}
 
 /**
  * This wrapper class provides access to an AttrSpec and
