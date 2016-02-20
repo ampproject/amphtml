@@ -57,5 +57,7 @@
   <video controls height="480" width="640">
     <source src="island-of-lemurs.mp4" type="video/mp4">
   </video>
+  <!-- Invalid: nested noscript tags don't correctly parse. -->
+  <noscript> <noscript> </noscript> </noscript>
 </body>
 </html>
