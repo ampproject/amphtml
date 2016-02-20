@@ -116,6 +116,7 @@ class AmpLightbox extends AMP.BaseElement {
     this.getWin().document.documentElement.removeEventListener(
         'keydown', this.boundCloseOnEscape_);
     this.boundCloseOnEscape_ = null;
+    this.schedulePause(this.container_);
   }
 
   getHistory_() {
