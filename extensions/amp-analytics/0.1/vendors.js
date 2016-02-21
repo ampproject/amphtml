@@ -296,7 +296,7 @@ export const ANALYTICS_CONFIG = {
     },
     'requests': {
       'requestPath': '/b/ss/${reportSuites}/0/amp-1.0/s${random}',
-      'basePrefix': 'vid=${clientId(amp_id)}' +
+      'basePrefix': 'vid=${clientId(adobe_amp_id)}' +
           '&ndh=0' +
           '&ce=${documentCharset}' +
           '&pageName=${pageName}' +
@@ -355,7 +355,7 @@ export const ANALYTICS_CONFIG = {
         '&tags=${tags}' +
         '&referrer=${documentReferrer}' +
         '&page_url=${sourceUrl}' +
-        '&user_id=${clientId(amp_id)}' +
+        '&user_id=${clientId(sr_amp_id)}' +
         '&domain=${canonicalHost}',
       'visible': '${host}/n?${baseParams}',
       'timer': '${host}/t?${baseParams}' +
