@@ -337,7 +337,7 @@ export class AmpIframe extends AMP.BaseElement {
         if (this.iframe_) {
           this.iframe_.style.zIndex = 0;
           this.togglePlaceholder(false);
-          maybeFixSafariGlitch_();
+          this.maybeFixSafariGlitch_();
         }
       });
     }
