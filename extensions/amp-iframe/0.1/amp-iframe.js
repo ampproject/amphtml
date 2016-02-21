@@ -324,6 +324,7 @@ export class AmpIframe extends AMP.BaseElement {
     if (this.intersectionObserver_) {
       this.intersectionObserver_.onViewportCallback(inViewport);
     }
+    this.maybeFixSafariGlitch_();
   }
 
   /**
@@ -336,7 +337,7 @@ export class AmpIframe extends AMP.BaseElement {
         if (this.iframe_) {
           this.iframe_.style.zIndex = 0;
           this.togglePlaceholder(false);
-          this.maybeFixSafariGlitch_();
+          maybeFixSafariGlitch_();
         }
       });
     }
@@ -351,6 +352,9 @@ export class AmpIframe extends AMP.BaseElement {
     // are also affected.
     if (!platform.isIos()) {
       return;
+    }
+    if (this.iframe_ && this.iframe_.style.transform == 'scale(1)') {
+      this.iframe_.style.transform = 'scale(1.00000000002)';
     }
     this.getVsync().mutate(() => {
       if (this.iframe_) {
