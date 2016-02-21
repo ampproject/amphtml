@@ -144,7 +144,7 @@ Property      | Values               | Description
 ------------- | -------------------- |---------------------------------
 authorization | &lt;URL&gt;          | The HTTPS URL for the Authorization endpoint.
 pingback      | &lt;URL&gt;          | The HTTPS URL for the Pingback endpoint.
-login         | &lt;URL&gt;          | The HTTPS URL for the Login Page.
+login         | &lt;URL&gt; or &lt;Map[string, URL]&gt; | The HTTPS URL for the Login Page or a set of URLs for different types of login pages.
 authorizationFallbackResponse | &lt;object&gt;          | The JSON object to be used in place of the authorization response if it fails.
 type          | "client" or "server" | Default is “client”. The "server" option is under design discussion and these docs will be updated when it is ready.
 
@@ -338,25 +338,28 @@ https://publisher.com/amp-pingback?
   &url=SOURCE_URL
 ```
 
-##Login Link
-
-The Publisher may choose to place the Login Link anywhere in the content of the document.
-
-Login Link is configured via “login” property in the [AMP Access Configuration][8] section.
-
-Login Link can be declared on any HTML element that allows “on” attribute, most typically it’d be an anchor or a button element.
-
-The format is:
-```html
-<a on="tap:amp-access.login">Login or subscribe</a>
-```
-AMP makes no distinction between login or subscribe. This distinction can be made on the Publisher’s side.
-
 ##Login Page
 
-The link to the Login Page is configured via the ```login``` property in the [AMP Access Configuration][8] section.
+The URL of the Login Page(s) is configured via the `login` property in the [AMP Access Configuration][8] section.
 
-The link can take any parameters as defined in the [Access URL Variables][7] section. For instance, it could pass AMP Reader ID and document URL. `RETURN_URL` query substitution can be used to specify query parameter for return URL, e.g. `?ret=RETURN_URL`. The return URL is
+The configuration can specify either a single Login URL or a map of Login URL indexed by the type of login. An example of a single Login URL:
+```
+{
+  "login": "https://publisher.com/amp-login.html?rid={READER_ID}"
+}
+```
+
+An example of multiple Login URLs:
+```
+{
+  "login": {
+    "signin": "https://publisher.com/signin.html?rid={READER_ID}",
+    "signup": "https://publisher.com/signup.html?rid={READER_ID}"
+  }
+}
+```
+
+The URL can take any parameters as defined in the [Access URL Variables][7] section. For instance, it could pass AMP Reader ID and document URL. `RETURN_URL` query substitution can be used to specify query parameter for return URL, e.g. `?ret=RETURN_URL`. The return URL is
 required and if the `RETURN_URL` substitution is not specified, it will be injected automatically with the default query parameter name of
 "return".
 
@@ -375,6 +378,26 @@ specified. Once Login Page completes its work, it must redirect back to the spec
 RETURN_URL#success=true|false
 ```
 Notice the use of a URL hash parameter “success”. The value is either “true” or “false” depending on whether the login succeeds or is abandoned. Ideally the Login Page, when possible, will send the signal in cases of both success or failure.
+
+###Login Link
+
+The Publisher may choose to place the Login Link anywhere in the content of the document.
+
+A single or multiple Login URLs are configured via “login” property in the [AMP Access Configuration][8] section.
+
+Login Link can be declared on any HTML element that allows “on” attribute, most typically it’d be an anchor or a button element.
+
+The format follows "Login URL" configuration. When a single Login URL is configured, the format is:
+```html
+<a on="tap:amp-access.login">Login or subscribe</a>
+```
+
+When multiple Login URLs are configured, the format is `tap:amp-access.login-{type}`. Ex.:
+```html
+<a on="tap:amp-access.login-signup">Subscribe</a>
+```
+
+AMP makes no distinction between login or subscribe. This distinction can be configured by the Publisher using multiple Login URLs/links or on the Publisher’s side.
 
 #Integration with *amp-analytics*
 

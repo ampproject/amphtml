@@ -25,6 +25,7 @@ import {getService} from '../../../src/service';
 import {getValueForExpr} from '../../../src/json';
 import {installStyles} from '../../../src/styles';
 import {isExperimentOn} from '../../../src/experiments';
+import {isObject} from '../../../src/types';
 import {listenOnce} from '../../../src/event-helper';
 import {log} from '../../../src/log';
 import {onDocumentReady} from '../../../src/document-state';
@@ -45,13 +46,13 @@ import {xhrFor} from '../../../src/xhr';
  * - type: The type of access workflow: client, server or other.
  * - authorization: The URL of the Authorization endpoint.
  * - pingback: The URL of the Pingback endpoint.
- * - login: The URL of the Login Page.
+ * - loginMap: The URL of the Login Page or a map of URLs.
  *
  * @typedef {{
  *   type: !AccessType,
  *   authorization: (string|undefined),
  *   pingback: (string|undefined),
- *   login: (string|undefined),
+ *   loginMap: !Object<string, string>,
  *   authorizationFallbackResponse: !JSONObject
  * }}
  */
@@ -161,8 +162,8 @@ export class AccessService {
     /** @private {?Promise} */
     this.reportViewPromise_ = null;
 
-    /** @private {?string} */
-    this.loginUrl_ = null;
+    /** @private {!Object<string, string>} */
+    this.loginUrlMap_ = {};
 
     /** @private {?Promise} */
     this.loginPromise_ = null;
@@ -198,7 +199,7 @@ export class AccessService {
       type: type,
       authorization: configJson['authorization'],
       pingback: configJson['pingback'],
-      login: configJson['login'],
+      loginMap: this.buildConfigLoginMap_(configJson['login']),
       authorizationFallbackResponse:
           configJson['authorizationFallbackResponse'],
     };
@@ -210,17 +211,38 @@ export class AccessService {
     if (config.pingback) {
       assertHttpsUrl(config.pingback);
     }
-    if (config.login) {
-      assertHttpsUrl(config.login);
+    for (const k in config.loginMap) {
+      assertHttpsUrl(config.loginMap[k]);
     }
 
     // Validate type = client/server.
     if (type == AccessType.CLIENT || type == AccessType.SERVER) {
       assert(config.authorization, '"authorization" URL must be specified');
       assert(config.pingback, '"pingback" URL must be specified');
-      assert(config.login, '"login" URL must be specified');
+      assert(Object.keys(config.loginMap).length > 0,
+          'At least one "login" URL must be specified');
     }
     return config;
+  }
+
+  /**
+   * @return {?Object<string, string>}
+   * @private
+   */
+  buildConfigLoginMap_(loginConfig) {
+    const loginMap = {};
+    if (!loginConfig) {
+      // Ignore: in some cases login config is not necessary.
+    } else if (typeof loginConfig == 'string') {
+      loginMap[''] = loginConfig;
+    } else if (isObject(loginConfig)) {
+      for (const k in loginConfig) {
+        loginMap[k] = loginConfig[k];
+      }
+    } else {
+      assert(false, '"login" must be either a single URL or a map of URLs');
+    }
+    return loginMap;
   }
 
   /**
@@ -262,8 +284,8 @@ export class AccessService {
     actionServiceFor(this.win).installActionHandler(
         this.accessElement_, this.handleAction_.bind(this));
 
-    // Calculate login URL right away.
-    this.buildLoginUrl_();
+    // Calculate login URLs right away.
+    this.buildLoginUrls_();
 
     // Start authorization XHR immediately.
     this.runAuthorization_();
@@ -371,7 +393,7 @@ export class AccessService {
       this.setAuthResponse_(response);
       this.toggleTopClass_('amp-access-loading', false);
       this.toggleTopClass_('amp-access-error', false);
-      this.buildLoginUrl_();
+      this.buildLoginUrls_();
       return new Promise((resolve, reject) => {
         onDocumentReady(this.win.document, () => {
           this.applyAuthorization_(response).then(resolve, reject);
@@ -674,7 +696,9 @@ export class AccessService {
    */
   handleAction_(invocation) {
     if (invocation.method == 'login') {
-      this.login();
+      this.login('');
+    } else if (invocation.method.indexOf('login-') == 0) {
+      this.login(invocation.method.substring('login-'.length));
     }
   }
 
@@ -682,9 +706,14 @@ export class AccessService {
    * Runs the Login flow. Returns a promise that is resolved if login succeeds
    * or is rejected if login fails. Login flow is performed as an external
    * 1st party Web dialog. It's goal is to authenticate the reader.
+   *
+   * Type can be either an empty string for a default login or a name of the
+   * login URL.
+   *
+   * @param {string} type
    * @return {!Promise}
    */
-  login() {
+  login(type) {
     const now = this.timer_.now();
 
     // If login is pending, block a new one from starting for 1 second. After
@@ -695,28 +724,31 @@ export class AccessService {
       return this.loginPromise_;
     }
 
-    log.fine(TAG, 'Start login');
-    assert(this.config_.login, 'Login URL is not configured');
+    log.fine(TAG, 'Start login: ', type);
+    assert(this.config_.loginMap[type],
+        'Login URL is not configured: %s', type);
     // Login URL should always be available at this time.
-    const loginUrl = assert(this.loginUrl_, 'Login URL is not ready');
-    this.analyticsEvent_('access-login-started');
+    const loginUrl = assert(this.loginUrlMap_[type],
+        'Login URL is not ready: %s', type);
+
+    this.loginAnalyticsEvent_(type, 'started');
     const loginPromise = this.openLoginDialog_(loginUrl).then(result => {
-      log.fine(TAG, 'Login dialog completed: ', result);
+      log.fine(TAG, 'Login dialog completed: ', type, result);
       this.loginPromise_ = null;
       const query = parseQueryString(result);
       const s = query['success'];
       const success = (s == 'true' || s == 'yes' || s == '1');
       if (success) {
-        this.analyticsEvent_('access-login-success');
+        this.loginAnalyticsEvent_(type, 'success');
         this.broadcastReauthorize_();
         // Repeat the authorization flow.
         return this.runAuthorization_();
       } else {
-        this.analyticsEvent_('access-login-rejected');
+        this.loginAnalyticsEvent_(type, 'rejected');
       }
     }).catch(reason => {
-      log.fine(TAG, 'Login dialog failed: ', reason);
-      this.analyticsEvent_('access-login-failed');
+      log.fine(TAG, 'Login dialog failed: ', type, reason);
+      this.loginAnalyticsEvent_(type, 'failed');
       if (this.loginPromise_ == loginPromise) {
         this.loginPromise_ = null;
       }
@@ -728,18 +760,35 @@ export class AccessService {
   }
 
   /**
-   * @return {!Promise<string>|undefined}
+   * @param {string} type
+   * @param {string} event
    * @private
    */
-  buildLoginUrl_() {
-    if (!this.config_.login) {
-      return;
+  loginAnalyticsEvent_(type, event) {
+    this.analyticsEvent_(`access-login-${event}`);
+    if (type) {
+      this.analyticsEvent_(`access-login-${type}-${event}`);
     }
-    return this.buildUrl_(this.config_.login, /* useAuthData */ true)
-        .then(url => {
-          this.loginUrl_ = url;
-          return url;
-        });
+  }
+
+  /**
+   * @return {?Promise<!{type: string, url: string}>}
+   * @private
+   */
+  buildLoginUrls_() {
+    const loginMap = this.config_.loginMap;
+    if (Object.keys(loginMap).length == 0) {
+      return null;
+    }
+    const promises = [];
+    for (const k in loginMap) {
+      promises.push(
+          this.buildUrl_(loginMap[k], /* useAuthData */ true).then(url => {
+            this.loginUrlMap_[k] = url;
+            return {type: k, url: url};
+          }));
+    }
+    return Promise.all(promises);
   }
 }
 
