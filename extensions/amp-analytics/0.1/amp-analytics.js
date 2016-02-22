@@ -21,6 +21,7 @@ import {assertHttpsUrl, addParamsToUrl} from '../../../src/url';
 import {expandTemplate} from '../../../src/string';
 import {installCidService} from '../../../src/service/cid-impl';
 import {installStorageService} from '../../../src/service/storage-impl';
+import {installActivityService} from '../../../src/service/activity-impl';
 import {isArray, isObject} from '../../../src/types';
 import {log} from '../../../src/log';
 import {sendRequest, sendRequestUsingIframe} from './transport';
@@ -32,6 +33,7 @@ import {toggle} from '../../../src/style';
 
 installCidService(AMP.win);
 installStorageService(AMP.win);
+installActivityService(AMP.win);
 instrumentationServiceFor(AMP.win);
 
 const MAX_REPLACES = 16; // The maximum number of entries in a extraUrlParamsReplaceMap

@@ -20,6 +20,7 @@ import {urlReplacementsFor} from '../../src/url-replacements';
 import {markElementScheduledForTesting} from '../../src/custom-element';
 import {installCidService} from '../../src/service/cid-impl';
 import {installViewerService} from '../../src/service/viewer-impl';
+import {installActivityService} from '../../src/service/activity-impl';
 import {setCookie} from '../../src/cookies';
 import {parseUrl} from '../../src/url';
 
@@ -44,7 +45,7 @@ describe('UrlReplacements', () => {
     viewerService = null;
   });
 
-  function getReplacements(withCid) {
+  function getReplacements(withCid, withActivity) {
     return createIframePromise().then(iframe => {
       iframe.doc.title = 'Pixel Test';
       const link = iframe.doc.createElement('link');
@@ -55,14 +56,18 @@ describe('UrlReplacements', () => {
         markElementScheduledForTesting(iframe.win, 'amp-analytics');
         installCidService(iframe.win);
       }
+      if (withActivity) {
+        markElementScheduledForTesting(iframe.win, 'amp-analytics');
+        installActivityService(iframe.win);
+      }
       viewerService = installViewerService(iframe.win);
       replacements = urlReplacementsFor(iframe.win);
       return replacements;
     });
   }
 
-  function expand(url, withCid, opt_bindings) {
-    return getReplacements(withCid).then(replacements => {
+  function expand(url, withCid, withActivity, opt_bindings) {
+    return getReplacements(withCid, withActivity).then(replacements => {
       return replacements.expand(url, opt_bindings);
     });
   }
@@ -313,6 +318,12 @@ describe('UrlReplacements', () => {
     });
   });
 
+  it('should replace TOTAL_ENGAGED_TIME', () => {
+    return expand('?sh=TOTAL_ENGAGED_TIME', false, true).then(res => {
+      expect(res).to.match(/sh=\d+/);
+    });
+  });
+
   it('should accept $expressions', () => {
     return expand('?href=$CANONICAL_URL').then(res => {
       expect(res).to.equal('?href=https%3A%2F%2Fpinterest.com%2Fpin1');
@@ -379,20 +390,24 @@ describe('UrlReplacements', () => {
   });
 
   it('should override an existing binding', () => {
-    return expand('ord=RANDOM?', false, {'RANDOM': 'abc'}).then(res => {
+    return expand('ord=RANDOM?', false, false, {'RANDOM': 'abc'}).then(res => {
       expect(res).to.match(/ord=abc\?$/);
     });
   });
 
   it('should add an additional binding', () => {
-    return expand('rid=NONSTANDARD?', false, {'NONSTANDARD': 'abc'}).then(
+    return expand('rid=NONSTANDARD?', false, false, {
+      'NONSTANDARD': 'abc'
+    }).then(
         res => {
           expect(res).to.match(/rid=abc\?$/);
         });
   });
 
   it('should NOT overwrite the cached expression with new bindings', () => {
-    return expand('rid=NONSTANDARD?', false, {'NONSTANDARD': 'abc'}).then(
+    return expand('rid=NONSTANDARD?', false, false, {
+      'NONSTANDARD': 'abc'
+    }).then(
       res => {
         expect(res).to.match(/rid=abc\?$/);
         return expand('rid=NONSTANDARD?').then(res => {
@@ -402,7 +417,7 @@ describe('UrlReplacements', () => {
   });
 
   it('should expand bindings as functions', () => {
-    return expand('rid=FUNC(abc)?', false, {
+    return expand('rid=FUNC(abc)?', false, false, {
       'FUNC': value => 'func_' + value
     }).then(res => {
       expect(res).to.match(/rid=func_abc\?$/);
@@ -410,7 +425,7 @@ describe('UrlReplacements', () => {
   });
 
   it('should expand bindings as functions with promise', () => {
-    return expand('rid=FUNC(abc)?', false, {
+    return expand('rid=FUNC(abc)?', false, false, {
       'FUNC': value => Promise.resolve('func_' + value)
     }).then(res => {
       expect(res).to.match(/rid=func_abc\?$/);
@@ -418,7 +433,7 @@ describe('UrlReplacements', () => {
   });
 
   it('should expand null as empty string', () => {
-    return expand('v=VALUE', false, {
+    return expand('v=VALUE', false, false, {
       'VALUE': null
     }).then(res => {
       expect(res).to.equal('v=');
@@ -426,7 +441,7 @@ describe('UrlReplacements', () => {
   });
 
   it('should expand undefined as empty string', () => {
-    return expand('v=VALUE', false, {
+    return expand('v=VALUE', false, false, {
       'VALUE': undefined
     }).then(res => {
       expect(res).to.equal('v=');
@@ -434,7 +449,7 @@ describe('UrlReplacements', () => {
   });
 
   it('should expand empty string as empty string', () => {
-    return expand('v=VALUE', false, {
+    return expand('v=VALUE', false, false, {
       'VALUE': ''
     }).then(res => {
       expect(res).to.equal('v=');
@@ -442,7 +457,7 @@ describe('UrlReplacements', () => {
   });
 
   it('should expand zero as zero', () => {
-    return expand('v=VALUE', false, {
+    return expand('v=VALUE', false, false, {
       'VALUE': 0
     }).then(res => {
       expect(res).to.equal('v=0');
@@ -450,7 +465,7 @@ describe('UrlReplacements', () => {
   });
 
   it('should expand false as false', () => {
-    return expand('v=VALUE', false, {
+    return expand('v=VALUE', false, false, {
       'VALUE': false
     }).then(res => {
       expect(res).to.equal('v=false');
@@ -459,14 +474,15 @@ describe('UrlReplacements', () => {
 
   it('should resolve sub-included bindings', () => {
     // RANDOM is a standard property and we add RANDOM_OTHER.
-    return expand('r=RANDOM&ro=RANDOM_OTHER?', false, {'RANDOM_OTHER': 'ABC'})
-        .then(res => {
-          expect(res).to.match(/r=(\d\.\d+)&ro=ABC\?$/);
-        });
+    return expand('r=RANDOM&ro=RANDOM_OTHER?', false, false, {
+      'RANDOM_OTHER': 'ABC'
+    }).then(res => {
+      expect(res).to.match(/r=(\d\.\d+)&ro=ABC\?$/);
+    });
   });
 
   it('should expand multiple vars', () => {
-    return expand('a=VALUEA&b=VALUEB?', false, {
+    return expand('a=VALUEA&b=VALUEB?', false, false, {
       'VALUEA': 'aaa',
       'VALUEB': 'bbb',
     }).then(res => {
