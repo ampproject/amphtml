@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-### <a name="amp-accordion"></a> AMP Accordion
+### <a name="amp-accordion"></a> `amp-accordion`
 
 <table>
   <tr>
