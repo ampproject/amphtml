@@ -29,9 +29,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://amp-by-example.appspot.com/amp-ad.html">amp-ad.html</a>
-    <br />
-    <a href="https://github.com/ampproject/amphtml/blob/master/examples/ads.amp.html">ads.amp.html</a></td>
+    <td><a href="https://amp-by-example.appspot.com/amp-ad.html">amp-ad.html</a><br /><a href="https://github.com/ampproject/amphtml/blob/master/examples/ads.amp.html">ads.amp.html</a></td>
   </tr>
 </table>
 
