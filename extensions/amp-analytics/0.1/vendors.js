@@ -355,7 +355,7 @@ export const ANALYTICS_CONFIG = {
         '&tags=${tags}' +
         '&referrer=${documentReferrer}' +
         '&page_url=${sourceUrl}' +
-        '&user_id=${clientId(amp_id)}' +
+        '&user_id=${clientId(sr_amp_id)}' +
         '&domain=${canonicalHost}',
       'visible': '${host}/n?${baseParams}',
       'timer': '${host}/t?${baseParams}' +
