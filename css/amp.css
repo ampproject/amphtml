@@ -196,6 +196,14 @@ i-amp-scroll-container {
   left: 0;
   right: 0;
   bottom: 0;
+  display: block;
+}
+
+/**
+ * Overflow:auto will be set with delay due to iOS bug where iframe is not
+ * rendered.
+ */
+i-amp-scroll-container.amp-active {
   overflow: auto;
 }
 
