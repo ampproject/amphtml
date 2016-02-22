@@ -16,9 +16,7 @@
 
 import {FixedLayer} from './fixed-layer';
 import {Observable} from '../observable';
-import {getMode} from '../mode';
 import {getService} from '../service';
-import {isDevChannel} from '../experiments';
 import {layoutRectLtwh} from '../layout-rect';
 import {log} from '../log';
 import {onDocumentReady} from '../document-state';
@@ -111,16 +109,13 @@ export class Viewport {
     /** @private {string|undefined} */
     this.originalViewportMetaString_ = undefined;
 
-    if (isDevChannel(this.win_) || getMode().localDev ||
-            getMode().development) {
-      /** @private @const {!FixedLayer|undefined} */
-      this.fixedLayer_ = new FixedLayer(
-          this.win_.document,
-          this.vsync_,
-          this.paddingTop_,
-          this.binding_.requiresFixedLayerTransfer());
-      onDocumentReady(this.win_.document, () => this.fixedLayer_.setup());
-    }
+    /** @private @const {!FixedLayer} */
+    this.fixedLayer_ = new FixedLayer(
+        this.win_.document,
+        this.vsync_,
+        this.paddingTop_,
+        this.binding_.requiresFixedLayerTransfer());
+    onDocumentReady(this.win_.document, () => this.fixedLayer_.setup());
 
     /** @private @const (function()) */
     this.boundThrottledScroll_ = this.throttledScroll_.bind(this);
