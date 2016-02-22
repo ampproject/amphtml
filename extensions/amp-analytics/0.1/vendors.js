@@ -257,18 +257,13 @@ export const ANALYTICS_CONFIG = {
     'requests': {
       'host': 'https://api-v3.tinypass.com',
       'basePrefix': '/api/v3',
-      'baseSuffix': '&pageview_id=${pageViewId}&rand=${random}',
+      'baseSuffix': '&pageview_id=${pageViewId}&rand=${random}&aid=${aid}',
       'pageview': '${host}${basePrefix}/page/track?url=${canonicalUrl}&' +
-      'referer=${documentReferrer}&content_created=${contentCreated}&' +
-      'content_author=${contentAuthor}&content_section=${contentSection}&' +
-      'timezone_offset=${timezone}&tags=${tags}&amp_url=${ampdocUrl}&' +
-      'screen=${screenWidth}x${screenHeight}',
+        'referer=${documentReferrer}&content_created=${contentCreated}&' +
+        'content_author=${contentAuthor}&content_section=${contentSection}&' +
+        'timezone_offset=${timezone}&tags=${tags}&amp_url=${ampdocUrl}&' +
+        'screen=${screenWidth}x${screenHeight}${baseSuffix}',
     },
-    'transport': {
-      'beacon': true,
-      'xhrpost': true,
-      'image': true
-    }
   },
 
   'quantcast': {
