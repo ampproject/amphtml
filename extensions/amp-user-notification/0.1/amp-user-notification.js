@@ -19,6 +19,7 @@ import {assert} from '../../../src/asserts';
 import {cidFor} from '../../../src/cid';
 import {getService} from '../../../src/service';
 import {log} from '../../../src/log';
+import {setStyle, toggle} from '../../../src/style';
 import {storageFor} from '../../../src/storage';
 import {urlReplacementsFor} from '../../../src/url-replacements';
 import {viewerFor} from '../../../src/viewer';
@@ -102,6 +103,9 @@ export class AmpUserNotification extends AMP.BaseElement {
 
     /** @private {function} */
     this.dialogResolve_ = null;
+
+    /** @private @const {!Viewer} */
+    this.viewer_ = viewerFor(this.win_);
 
     /** @private {!Promise} */
     this.dialogPromise_ = new Promise(resolve => {
@@ -257,7 +261,26 @@ export class AmpUserNotification extends AMP.BaseElement {
 
   /** @override */
   show() {
-    this.element.style.display = '';
+    // This is to remove `layout=nodisplay`.
+    // We also need to do this early because `getComputedStyle` will return
+    // the `used value` and not the `computed value` otherwise.
+    toggle(this.element, true);
+
+    let top = this.viewer_.getPaddingTop();
+
+    // if there is no viewer padding, then no need to do any offset
+    if (top > 0) {
+      // we need to use getComputedStyle in cases where `top` is not in pixels
+      const elementTop = parseFloat(this.win_
+          ./*REVIEW*/getComputedStyle(this.element, null)
+          .getPropertyValue('top'));
+
+      // Guard against NaN
+      if (!(typeof elementTop == 'number' && isNaN(elementTop))) {
+        top += elementTop;
+      }
+      setStyle(this.element, 'top', `${top}px`);
+    }
     this.element.classList.add('amp-active');
     return this.dialogPromise_;
   }

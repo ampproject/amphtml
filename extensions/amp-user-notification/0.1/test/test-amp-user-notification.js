@@ -20,6 +20,7 @@ import {
   UserNotificationManager
 } from '../../../../build/all/v0/amp-user-notification-0.1.max';
 import {createIframePromise} from '../../../../testing/iframe';
+import {viewerFor} from '../../../../src/viewer';
 
 
 describe('amp-user-notification', () => {
@@ -332,6 +333,67 @@ describe('amp-user-notification', () => {
         expect(el).to.not.have.class('amp-active');
         expect(el).to.have.class('amp-hidden');
         expect(stub2.calledOnce).to.be.true;
+      });
+    });
+  });
+
+  describe('when elements top style property is set', () => {
+
+    it('should set it exactly to the viewer\'s padding when top ' +
+       'is elements top lower', () => {
+      return getUserNotification({id: 'n1'}).then(el => {
+        const impl = el.implementation_;
+        const viewer = viewerFor(iframe.win);
+        sandbox.stub(viewer, 'getPaddingTop').returns(30);
+
+        return iframe.addElement(el).then(() => {
+          el.style.top = '0px';
+          impl.buildCallback();
+          impl.show();
+
+          const top = iframe.win.getComputedStyle(el, null)
+              .getPropertyValue('top');
+          expect(top).to.equal('30px');
+        });
+      });
+    });
+
+    it('should use the elements top position when it is higher', () => {
+      return getUserNotification({id: 'n1'}).then(el => {
+        const impl = el.implementation_;
+        const viewer = viewerFor(iframe.win);
+        sandbox.stub(viewer, 'getPaddingTop').returns(30);
+
+        return iframe.addElement(el).then(() => {
+          el.style.top = '40px';
+          impl.buildCallback();
+          impl.show();
+
+          const top = iframe.win.getComputedStyle(el, null)
+              .getPropertyValue('top');
+          expect(top).to.equal('40px');
+        });
+      });
+    });
+
+    it('should handle unset top', () => {
+      return getUserNotification({id: 'n1'}).then(el => {
+        const impl = el.implementation_;
+        const viewer = viewerFor(iframe.win);
+        sandbox.stub(viewer, 'getPaddingTop').returns(25);
+
+        return iframe.addElement(el).then(() => {
+          el.style.bottom = '0px';
+          impl.buildCallback();
+          impl.show();
+
+          const top = iframe.win.getComputedStyle(el, null)
+              .getPropertyValue('top');
+          const bottom = iframe.win.getComputedStyle(el, null)
+              .getPropertyValue('bottom');
+          expect(top).to.equal('auto');
+          expect(bottom).to.equal('0px');
+        });
       });
     });
   });
