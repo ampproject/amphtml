@@ -132,7 +132,15 @@ class AmpYoutube extends AMP.BaseElement {
         event.source != this.iframe_.contentWindow) {
       return;
     }
-    const data = JSON.parse(event.data);
+    let data;
+    if (event.data.indexOf('{') != 0) {
+      return;  // Doesn't look like JSON.
+    }
+    try {
+      data = JSON.parse(event.data);
+    } catch (unused) {
+      return; // We only process valid JSON.
+    }
     if (data.event == 'onReady') {
       this.playerReadyResolver_(this.iframe_);
     } else if (data.event == 'infoDelivery' &&
