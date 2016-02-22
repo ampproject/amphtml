@@ -76,7 +76,7 @@ The following lists validation errors specific to the `amp-youtube` tag
     <td>Error thrown when invalid value is given for attributes <code>height</code> or <code>width</code>. For example, <code>height=auto</code> triggers this error for all supported layout types, with the exception of <code>NODISPLAY</code>.</td>
   </tr>
   <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#/docs/reference/validation_errors.html#deprecated-attribute">DEPRECATED_ATTR</a></td>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#deprecated-attribute">DEPRECATED_ATTR</a></td>
     <td>The attribute <code>video-id</code> is deprecated - use <code>data-videoid</code> instead</td>
   </tr>
 </table>
