@@ -18,6 +18,7 @@ import {actionServiceFor} from '../../../src/action';
 import {analyticsFor} from '../../../src/analytics';
 import {assert, assertEnumValue} from '../../../src/asserts';
 import {assertHttpsUrl, getSourceOrigin} from '../../../src/url';
+import {cancellation} from '../../../src/error';
 import {cidFor} from '../../../src/cid';
 import {documentStateFor} from '../../../src/document-state';
 import {evaluateAccessExpr} from './access-expr';
@@ -625,7 +626,7 @@ export class AccessService {
       // 1. Document becomes invisible again: cancel.
       unlistenSet.push(this.viewer_.onVisibilityChanged(() => {
         if (!this.viewer_.isVisible()) {
-          reject();
+          reject(cancellation());
         }
       }));
 

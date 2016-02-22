@@ -15,7 +15,7 @@
  */
 
 import {assert} from '../../src/asserts';
-import {getErrorReportUrl} from '../../src/error';
+import {getErrorReportUrl, cancellation} from '../../src/error';
 import {setModeForTesting} from '../../src/mode';
 import {parseUrl, parseQueryString} from '../../src/url';
 import * as sinon from 'sinon';
@@ -139,5 +139,19 @@ describe('reportErrorToServer', () => {
     expect(query.f).to.equal('foo.js');
     expect(query.l).to.equal('11');
     expect(query.c).to.equal('22');
+  });
+
+  it('should not double report', () => {
+    const e = new Error('something _reported_');
+    const url =
+        getErrorReportUrl(undefined, undefined, undefined, undefined, e);
+    expect(url).to.be.undefined;
+  });
+
+  it('reportError with error object', () => {
+    const e = cancellation();
+    const url =
+        getErrorReportUrl(undefined, undefined, undefined, undefined, e);
+    expect(url).to.be.undefined;
   });
 });

@@ -22,6 +22,8 @@ import {makeBodyVisible} from './styles';
 
 const globalExponentialBackoff = exponentialBackoff(1.5);
 
+const CANCELLED = 'CANCELLED';
+
 
 /**
  * Reports an error. If the error has an "associatedElement" property
@@ -73,6 +75,15 @@ export function reportError(error, opt_associatedElement) {
 }
 
 /**
+ * Returns an error for a cancellation of a promise.
+ * @param {string} message
+ * @return {!Error}
+ */
+export function cancellation() {
+  return new Error(CANCELLED);
+}
+
+/**
  * Install handling of global unhandled exceptions.
  * @param {!Window} win
  */
@@ -102,7 +113,9 @@ function reportErrorToServer(message, filename, line, col, error) {
   }
   const url = getErrorReportUrl(message, filename, line, col, error);
   globalExponentialBackoff(() => {
-    new Image().src = url;
+    if (url) {
+      new Image().src = url;
+    }
   });
 }
 
@@ -113,11 +126,15 @@ function reportErrorToServer(message, filename, line, col, error) {
  * @param {string|undefined} line
  * @param {string|undefined} col
  * @param {!Error|undefined} error
+ * @return {string|undefined} The URL
  * visibleForTesting
  */
 export function getErrorReportUrl(message, filename, line, col, error) {
   message = error && error.message ? error.message : message;
   if (/_reported_/.test(message)) {
+    return;
+  }
+  if (message == CANCELLED) {
     return;
   }
   if (!message) {
