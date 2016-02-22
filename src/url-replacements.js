@@ -377,7 +377,7 @@ class UrlReplacements {
         args = opt_strargs.split(',');
       }
       const binding = (opt_bindings && (name in opt_bindings)) ?
-          opt_bindings[name] : this.replacements_[name];
+          opt_bindings[name] : this.getReplacement_(name);
       const val = (typeof binding == 'function') ?
           binding.apply(null, args) : binding;
       // In case the produced value is a promise, we don't actually
@@ -403,6 +403,14 @@ class UrlReplacements {
     }
 
     return replacementPromise || Promise.resolve(url);
+  }
+
+  /**
+   * @param {string} name
+   * @return {function(*):*}
+   */
+  getReplacement_(name) {
+    return this.replacements_[name];
   }
 
   /**
