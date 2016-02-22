@@ -20,6 +20,7 @@
  */
 html, body {
   overflow-x: hidden !important;
+  height: auto !important;
 }
 
 /**
