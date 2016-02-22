@@ -18,7 +18,7 @@ import {FocusHistory} from '../focus-history';
 import {Pass} from '../pass';
 import {assert} from '../asserts';
 import {closest} from '../dom';
-import {documentStateFor} from '../document-state';
+import {onDocumentReady} from '../document-ready';
 import {expandLayoutRect, layoutRectLtwh, layoutRectsOverlap} from
     '../layout-rect';
 import {getService} from '../service';
@@ -153,9 +153,6 @@ export class Resources {
     /** @private @const {!Vsync} */
     this.vsync_ = installVsyncService(this.win);
 
-    /** @private @const {!DocumentState} */
-    this.docState_ = documentStateFor(this.win);
-
     /** @private @const {!FocusHistory} */
     this.activeHistory_ = new FocusHistory(this.win, FOCUS_HISTORY_TIMEOUT_);
 
@@ -194,7 +191,7 @@ export class Resources {
     });
 
     // Ensure that we attempt to rebuild things when DOM is ready.
-    this.docState_.onReady(() => {
+    onDocumentReady(this.win.document, () => {
       this.documentReady_ = true;
       this.forceBuild_ = true;
       this.relayoutAll_ = true;
