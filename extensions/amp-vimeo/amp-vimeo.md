@@ -35,8 +35,6 @@ limitations under the License.
   </tr>
 </table>
 
-**Note:** Currently, no validations apply to this tag.
-
 #### Example
 
 With responsive layout, the width and height from the example should yield correct layouts for 16:9 aspect ratio videos:
