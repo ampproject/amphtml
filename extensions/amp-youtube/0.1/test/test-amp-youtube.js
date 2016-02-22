@@ -43,7 +43,12 @@ describe('amp-youtube', () => {
           // caught and hence the ready promise will never resolve.
           // For now, this resolves the ready promise after a while.
           timer.promise(50).then(() => {
-            yt.implementation_.playerReadyResolver_();
+            const ytIframe = yt.querySelector('iframe');
+            yt.implementation_.handleYoutubeMessages_({
+              origin: 'https://www.youtube.com',
+              source: ytIframe.contentWindow,
+              data: JSON.stringify({event: 'onReady'})
+            });
           });
 
           yt.setAttribute('data-videoid', videoId);
@@ -138,5 +143,45 @@ describe('amp-youtube', () => {
       expect(imgPlaceholder.src).to.equal(
           'https://i.ytimg.com/vi/FAKE/hqdefault.jpg');
     });
+  });
+
+  it('monitors the YouTube player state', () => {
+    return getYt('mGENRKrdoGY').then(yt => {
+      const iframe = yt.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+
+      expect(yt.implementation_.playerState_).to.equal(0);
+
+      yt.implementation_.handleYoutubeMessages_({
+        origin: 'https://www.youtube.com',
+        source: iframe.contentWindow,
+        data: JSON.stringify({
+          event: 'infoDelivery',
+          info: {playerState: 1}
+        })
+      });
+
+      expect(yt.implementation_.playerState_).to.equal(1);
+    });
+
+  });
+
+  it('should not pause when video not playing', () => {
+    return getYt('mGENRKrdoGY').then(yt => {
+      sandbox.spy(yt.implementation_, 'pauseVideo_');
+      yt.implementation_.documentInactiveCallback();
+      expect(yt.implementation_.pauseVideo_.called).to.be.false;
+    });
+
+  });
+
+  it('should pause if the video is playing', () => {
+    return getYt('mGENRKrdoGY').then(yt => {
+      yt.implementation_.playerState_ = 1;
+      sandbox.spy(yt.implementation_, 'pauseVideo_');
+      yt.implementation_.documentInactiveCallback();
+      expect(yt.implementation_.pauseVideo_.called).to.be.true;
+    });
+
   });
 });
