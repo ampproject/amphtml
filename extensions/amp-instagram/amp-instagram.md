@@ -31,7 +31,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://amp-by-example.appspot.com/amp-instagram.html">amp-instagram.html</a></br><a href="https://github.com/ampproject/amphtml/blob/master/examples/instagram.amp.html">instagram.amp.html</a></td>
+    <td><a href="https://amp-by-example.appspot.com/amp-instagram.html">amp-instagram.html</a><br /><a href="https://github.com/ampproject/amphtml/blob/master/examples/instagram.amp.html">instagram.amp.html</a></td>
   </tr>
 </table>
 
