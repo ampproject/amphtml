@@ -297,7 +297,8 @@ export const ANALYTICS_CONFIG = {
     },
     'requests': {
       'requestPath': '/b/ss/${reportSuites}/0/amp-1.0/s${random}',
-      'basePrefix': 'vid=${clientId(adobe_amp_id)}' +
+      // vid starts with z to work around #2198
+      'basePrefix': 'vid=z${clientId(adobe_amp_id)}' +
           '&ndh=0' +
           '&ce=${documentCharset}' +
           '&pageName=${pageName}' +
