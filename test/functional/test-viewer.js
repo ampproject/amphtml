@@ -16,6 +16,7 @@
 
 import {Viewer} from '../../src/service/viewer-impl';
 import {platform} from '../../src/platform';
+import {setModeForTesting} from '../../src/mode';
 import * as sinon from 'sinon';
 
 
@@ -115,7 +116,7 @@ describe('Viewer', () => {
   it('should configure correctly for iOS embedding', () => {
     windowApi.name = '__AMP__viewportType=natural';
     windowApi.parent = {};
-    sandbox.mock(platform).expects('isIos').returns(true).once();
+    sandbox.mock(platform).expects('isIos').returns(true).atLeast(1);
     const viewer = new Viewer(windowApi);
 
     expect(viewer.getViewportType()).to.equal('natural-ios-embed');
@@ -124,11 +125,14 @@ describe('Viewer', () => {
   it('should NOT configure for iOS embedding if not embedded', () => {
     windowApi.name = '__AMP__viewportType=natural';
     windowApi.parent = windowApi;
-    sandbox.mock(platform).expects('isIos').returns(true).once();
-    expect(new Viewer(windowApi).getViewportType()).to.equal('natural');
-
-    windowApi.parent = null;
-    expect(new Viewer(windowApi).getViewportType()).to.equal('natural');
+    sandbox.mock(platform).expects('isIos').returns(true).atLeast(1);
+    setModeForTesting({
+      localDev: false,
+      development: false
+    });
+    const viewportType = new Viewer(windowApi).getViewportType();
+    setModeForTesting(null);
+    expect(viewportType).to.equal('natural');
   });
 
   it('should receive viewport event', () => {

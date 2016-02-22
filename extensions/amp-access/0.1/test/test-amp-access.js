@@ -20,7 +20,6 @@ import {installCidService} from '../../../../src/service/cid-impl';
 import {markElementScheduledForTesting} from '../../../../src/custom-element';
 import * as sinon from 'sinon';
 
-
 describe('AccessService', () => {
 
   let sandbox;
@@ -62,7 +61,9 @@ describe('AccessService', () => {
   });
 
   it('should fail if config authorization is missing or malformed', () => {
-    const config = {};
+    const config = {
+      'login': 'https://acme.org/l'
+    };
     element.textContent = JSON.stringify(config);
     expect(() => {
       new AccessService(window);
@@ -77,7 +78,8 @@ describe('AccessService', () => {
 
   it('should fail if config pingback is missing or malformed', () => {
     const config = {
-      'authorization': 'https://acme.com/a'
+      'authorization': 'https://acme.com/a',
+      'login': 'https://acme.org/l'
     };
     element.textContent = JSON.stringify(config);
     expect(() => {
@@ -99,7 +101,7 @@ describe('AccessService', () => {
     element.textContent = JSON.stringify(config);
     expect(() => {
       new AccessService(window);
-    }).to.throw(/"login" URL must be specified/);
+    }).to.throw(/At least one "login" URL must be specified/);
 
     config['login'] = 'http://acme.com/l';
     element.textContent = JSON.stringify(config);
@@ -120,7 +122,25 @@ describe('AccessService', () => {
     expect(service.accessElement_).to.equal(element);
     expect(service.config_.authorization).to.equal('https://acme.com/a');
     expect(service.config_.pingback).to.equal('https://acme.com/p');
-    expect(service.config_.login).to.equal('https://acme.com/l');
+    expect(service.config_.loginMap).to.deep.equal({'': 'https://acme.com/l'});
+  });
+
+  it('should parse multiple login URLs', () => {
+    const config = {
+      'authorization': 'https://acme.com/a',
+      'pingback': 'https://acme.com/p',
+      'login': {
+        'login1': 'https://acme.com/l1',
+        'login2': 'https://acme.com/l2',
+      }
+    };
+    element.textContent = JSON.stringify(config);
+    const service = new AccessService(window);
+    expect(service.isEnabled()).to.be.true;
+    expect(service.config_.loginMap).to.deep.equal({
+      'login1': 'https://acme.com/l1',
+      'login2': 'https://acme.com/l2',
+    });
   });
 
   it('should default type to "client"', () => {
@@ -185,13 +205,13 @@ describe('AccessService', () => {
       'login': 'https://acme.com/l'
     });
     const service = new AccessService(window);
-    service.buildLoginUrl_ = sandbox.spy();
+    service.buildLoginUrls_ = sandbox.spy();
     service.runAuthorization_ = sandbox.spy();
     service.scheduleView_ = sandbox.spy();
     service.listenToBroadcasts_ = sandbox.spy();
 
     service.startInternal_();
-    expect(service.buildLoginUrl_.callCount).to.equal(1);
+    expect(service.buildLoginUrls_.callCount).to.equal(1);
     expect(service.runAuthorization_.callCount).to.equal(1);
     expect(service.scheduleView_.callCount).to.equal(1);
     expect(service.listenToBroadcasts_.callCount).to.equal(1);
@@ -342,11 +362,11 @@ describe('AccessService authorization', () => {
         })
         .returns(Promise.resolve({access: true}))
         .once();
-    service.buildLoginUrl_ = sandbox.spy();
+    service.buildLoginUrls_ = sandbox.spy();
     const promise = service.runAuthorization_();
     expect(document.documentElement).to.have.class('amp-access-loading');
     expect(document.documentElement).not.to.have.class('amp-access-error');
-    expect(service.buildLoginUrl_.callCount).to.equal(0);
+    expect(service.buildLoginUrls_.callCount).to.equal(0);
     return promise.then(() => {
       expect(document.documentElement).not.to.have.class('amp-access-loading');
       expect(document.documentElement).not.to.have.class('amp-access-error');
@@ -354,7 +374,7 @@ describe('AccessService authorization', () => {
       expect(elementOff).to.have.attribute('amp-access-hide');
       expect(service.authResponse_).to.exist;
       expect(service.authResponse_.access).to.be.true;
-      expect(service.buildLoginUrl_.callCount).to.equal(1);
+      expect(service.buildLoginUrls_.callCount).to.equal(1);
     });
   });
 
@@ -387,7 +407,7 @@ describe('AccessService authorization', () => {
         })
         .returns(new Promise(() => {}))
         .once();
-    service.buildLoginUrl_ = sandbox.spy();
+    service.buildLoginUrls_ = sandbox.spy();
     let actualTimeoutDelay;
     sandbox.stub(service.timer_, 'delay', (callback, delay) => {
       actualTimeoutDelay = delay;
@@ -438,9 +458,9 @@ describe('AccessService authorization', () => {
     analyticsMock.expects('triggerEvent')
         .withExactArgs('access-authorization-received')
         .once();
+    expect(service.firstAuthorizationPromise_).to.exist;
     return service.runAuthorization_().then(() => {
-      expect(service.firstAuthorizationPromise_).to.exist;
-      return service.firstAuthorizationPromise_;
+      return service.whenFirstAuthorized();
     });
   });
 
@@ -1000,7 +1020,7 @@ describe('AccessService login', () => {
     service.openLoginDialog_ = () => {};
     serviceMock = sandbox.mock(service);
 
-    service.loginUrl_ = 'https://acme.com/l?rid=R';
+    service.loginUrlMap_[''] = 'https://acme.com/l?rid=R';
   });
 
   afterEach(() => {
@@ -1018,23 +1038,62 @@ describe('AccessService login', () => {
             sinon.match(() => true))
         .returns(Promise.resolve('reader1'))
         .once();
-    return service.buildLoginUrl_().then(url => {
+    return service.buildLoginUrls_().then(urls => {
+      const url = urls[0].url;
       expect(url).to.equal('https://acme.com/l?rid=reader1');
-      expect(service.loginUrl_).to.equal(url);
+      expect(service.loginUrlMap_['']).to.equal(url);
+    });
+  });
+
+  it('should build multiple login url', () => {
+    service.config_.loginMap = {
+      'login1': 'https://acme.com/l1?rid=READER_ID',
+      'login2': 'https://acme.com/l2?rid=READER_ID',
+    };
+    cidMock.expects('get')
+        .withExactArgs(
+            {scope: 'amp-access', createCookieIfNotPresent: true},
+            sinon.match(() => true))
+        .returns(Promise.resolve('reader1'))
+        .atLeast(1);
+    return service.buildLoginUrls_().then(urls => {
+      expect(urls).to.have.length(2);
+      let l1, l2;
+      if (urls[0].type == 'login1') {
+        l1 = 0;
+        l2 = 1;
+      } else {
+        l1 = 1;
+        l2 = 0;
+      }
+      expect(urls[l1]).to.deep.equal({
+        'type': 'login1',
+        'url': 'https://acme.com/l1?rid=reader1',
+      });
+      expect(urls[l2]).to.deep.equal({
+        'type': 'login2',
+        'url': 'https://acme.com/l2?rid=reader1',
+      });
+      expect(service.loginUrlMap_['login1']).to
+          .equal('https://acme.com/l1?rid=reader1');
+      expect(service.loginUrlMap_['login2']).to
+          .equal('https://acme.com/l2?rid=reader1');
     });
   });
 
   it('should build login url with RETURN_URL', () => {
-    service.config_.login = 'https://acme.com/l?rid=READER_ID&ret=RETURN_URL';
+    service.config_.loginMap[''] =
+        'https://acme.com/l?rid=READER_ID&ret=RETURN_URL';
     cidMock.expects('get')
         .withExactArgs(
             {scope: 'amp-access', createCookieIfNotPresent: true},
             sinon.match(() => true))
         .returns(Promise.resolve('reader1'))
         .once();
-    return service.buildLoginUrl_().then(url => {
+    return service.buildLoginUrls_().then(urls => {
+      const url = urls[0].url;
       expect(url).to.equal('https://acme.com/l?rid=reader1&ret=RETURN_URL');
-      expect(service.loginUrl_).to.equal(url);
+      expect(service.loginUrlMap_['']).to.equal(url);
     });
   });
 
@@ -1044,15 +1103,15 @@ describe('AccessService login', () => {
     analyticsMock.expects('triggerEvent')
         .withExactArgs('access-login-started')
         .once();
-    service.login();
+    service.login('');
     expect(service.openLoginDialog_.callCount).to.equal(1);
     expect(service.openLoginDialog_.firstCall.args[0])
         .to.equal('https://acme.com/l?rid=R');
   });
 
   it('should fail to open dialog if loginUrl is not built yet', () => {
-    service.loginUrl_ = null;
-    expect(() => service.login()).to.throw(/Login URL is not ready/);
+    service.loginUrlMap_[''] = null;
+    expect(() => service.login('')).to.throw(/Login URL is not ready/);
   });
 
   it('should succeed login with success=true', () => {
@@ -1068,7 +1127,7 @@ describe('AccessService login', () => {
     analyticsMock.expects('triggerEvent')
         .withExactArgs('access-login-success')
         .once();
-    return service.login().then(() => {
+    return service.login('').then(() => {
       expect(service.loginPromise_).to.not.exist;
       expect(service.runAuthorization_.callCount).to.equal(1);
       expect(broadcastStub.callCount).to.equal(1);
@@ -1091,7 +1150,7 @@ describe('AccessService login', () => {
     analyticsMock.expects('triggerEvent')
         .withExactArgs('access-login-rejected')
         .once();
-    return service.login().then(() => {
+    return service.login('').then(() => {
       expect(service.loginPromise_).to.not.exist;
       expect(service.runAuthorization_.callCount).to.equal(0);
     });
@@ -1103,7 +1162,7 @@ describe('AccessService login', () => {
         .withExactArgs('https://acme.com/l?rid=R')
         .returns(Promise.resolve(''))
         .once();
-    return service.login().then(() => {
+    return service.login('').then(() => {
       expect(service.loginPromise_).to.not.exist;
       expect(service.runAuthorization_.callCount).to.equal(0);
     });
@@ -1121,10 +1180,48 @@ describe('AccessService login', () => {
     analyticsMock.expects('triggerEvent')
         .withExactArgs('access-login-failed')
         .once();
-    return service.login().then(() => 'SUCCESS', () => 'ERROR').then(result => {
+    return service.login('').then(() => 'S', () => 'ERROR').then(result => {
       expect(result).to.equal('ERROR');
       expect(service.loginPromise_).to.not.exist;
       expect(service.runAuthorization_.callCount).to.equal(0);
+    });
+  });
+
+  it('should succeed login with success=true with multiple logins', () => {
+    service.config_.loginMap = {
+      'login1': 'https://acme.com/l1?rid=READER_ID',
+      'login2': 'https://acme.com/l2?rid=READER_ID',
+    };
+    service.loginUrlMap_ = {
+      'login1': 'https://acme.com/l1?rid=R',
+      'login2': 'https://acme.com/l2?rid=R',
+    };
+    service.runAuthorization_ = sandbox.spy();
+    const broadcastStub = sandbox.stub(service.viewer_, 'broadcast');
+    serviceMock.expects('openLoginDialog_')
+        .withExactArgs('https://acme.com/l2?rid=R')
+        .returns(Promise.resolve('#success=true'))
+        .once();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-login-started')
+        .once();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-login-login2-started')
+        .once();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-login-success')
+        .once();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-login-login2-success')
+        .once();
+    return service.login('login2').then(() => {
+      expect(service.loginPromise_).to.not.exist;
+      expect(service.runAuthorization_.callCount).to.equal(1);
+      expect(broadcastStub.callCount).to.equal(1);
+      expect(broadcastStub.firstCall.args[0]).to.deep.equal({
+        'type': 'amp-access-reauthorize',
+        'origin': service.pubOrigin_
+      });
     });
   });
 
@@ -1138,16 +1235,16 @@ describe('AccessService login', () => {
     openLoginDialogStub.onCall(0).returns(p1Promise);
     openLoginDialogStub.onCall(1).returns(new Promise(() => {}));
     openLoginDialogStub.onCall(2).throws();
-    const p1 = service.login();
+    const p1 = service.login('');
 
     // The immediate second attempt is blocked.
-    const p2 = service.login();
+    const p2 = service.login('');
     expect(service.loginPromise_).to.equal(p1);
     expect(p2).to.equal(p1);
 
     // The delayed third attempt succeeds after 1 second.
     clock.tick(1001);
-    const p3 = service.login();
+    const p3 = service.login('');
     expect(service.loginPromise_).to.equal(p3);
     expect(p3).to.not.equal(p1);
 
@@ -1300,6 +1397,6 @@ describe('AccessService type=other', () => {
   });
 
   it('should short-circuit login flow', () => {
-    expect(() => service.login()).to.throw(/Login URL is not configured/);
+    expect(() => service.login('')).to.throw(/Login URL is not configured/);
   });
 });

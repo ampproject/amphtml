@@ -59,6 +59,7 @@ export const ANALYTICS_CONFIG = {
       'timestamp': 'TIMESTAMP',
       'timezone': 'TIMEZONE',
       'title': 'TITLE',
+      'totalEngagedTime': 'TOTAL_ENGAGED_TIME',
       'viewer': 'VIEWER',
     }
   },
@@ -94,14 +95,22 @@ export const ANALYTICS_CONFIG = {
         'g3=${sponsorName}&' +
         'g4=${contentType}&' +
         'x=${scrollTop}&' +
-        'w=${screenHeight}&' +
+        'y=${scrollHeight}&' +
         'j=${decayTime}&' +
         'r=${documentReferrer}&' +
-        't=${clientId(_cb_amp)}${pageViewId}&' +
-        'i=${title}',
+        'b=${pageLoadTime}&' +
+        't=${clientId(_cb)}${pageViewId}&' +
+        'i=${title}&' +
+        'T=${timestamp}&' +
+        'E=${totalEngagedTime}&' +
+        'C=2&' +
+        'R=1&' +
+        'W=0&' +
+        'I=0&' +
+        'c=120',
       'baseSuffix': '&_',
-      'interval': '${host}${basePrefix}&${baseSuffix}',
-      'anchorClick': '${host}${basePrefix}&${baseSuffix}'
+      'interval': '${host}${basePrefix}${baseSuffix}',
+      'anchorClick': '${host}${basePrefix}${baseSuffix}',
     },
     'triggers': {
       'trackInterval': {
@@ -156,7 +165,7 @@ export const ANALYTICS_CONFIG = {
 
   'googleanalytics': {
     'vars': {
-      'eventValue': "0",
+      'eventValue': '0',
       'documentLocation': 'AMPDOC_URL'
     },
     'requests': {
@@ -288,7 +297,8 @@ export const ANALYTICS_CONFIG = {
     },
     'requests': {
       'requestPath': '/b/ss/${reportSuites}/0/amp-1.0/s${random}',
-      'basePrefix': 'vid=${clientId(amp_id)}' +
+      // vid starts with z to work around #2198
+      'basePrefix': 'vid=z${clientId(adobe_amp_id)}' +
           '&ndh=0' +
           '&ce=${documentCharset}' +
           '&pageName=${pageName}' +
@@ -347,7 +357,7 @@ export const ANALYTICS_CONFIG = {
         '&tags=${tags}' +
         '&referrer=${documentReferrer}' +
         '&page_url=${sourceUrl}' +
-        '&user_id=${clientId(amp_id)}' +
+        '&user_id=${clientId(sr_amp_id)}' +
         '&domain=${canonicalHost}',
       'visible': '${host}/n?${baseParams}',
       'timer': '${host}/t?${baseParams}' +

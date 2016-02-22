@@ -385,6 +385,21 @@ export class Resources {
   }
 
   /**
+   * Invokes `unload` on the elements' resource which in turn will invoke
+   * the `documentBecameInactive` callback on the custom element.
+   * @param {!Element} parentElement
+   * @param {!Element|!Array<!Element>} subElements
+   */
+  schedulePause(parentElement, subElements) {
+    const parentResource = this.getResourceForElement(parentElement);
+    subElements = elements_(subElements);
+
+    this.discoverResourcesForArray_(parentResource, subElements, resource => {
+      resource.unload();
+    });
+  }
+
+  /**
    * Schedules preload for the specified sub-elements that are children of the
    * parent element. The parent element may choose to send this signal either
    * because it's an owner (see {@link setOwner}) or because it wants the
@@ -1739,6 +1754,7 @@ export class Resource {
     }
     if (this.element.documentInactiveCallback()) {
       this.state_ = ResourceState_.NOT_LAID_OUT;
+      this.layoutCount_ = 0;
     }
   }
 

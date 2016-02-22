@@ -75,11 +75,6 @@ export function installAd(win) {
     }
 
     /** @override */
-    isRelayoutNeeded() {
-      return true;
-    }
-
-    /** @override */
     buildCallback() {
       /** @private {?Element} */
       this.iframe_ = null;
@@ -239,7 +234,7 @@ export function installAd(win) {
           // Triggered by context.reportRenderedEntityIdentifier(…) inside the ad
           // iframe.
           listenOnce(this.iframe_, 'entity-id', info => {
-            this.element.setAttribute('creative-id', info.id);
+            this.element.creativeId = info.id;
           }, /* opt_is3P */ true);
           listen(this.iframe_, 'embed-size', data => {
             if (data.width !== undefined) {

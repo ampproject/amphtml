@@ -86,6 +86,21 @@ If a test flaked on a pull request you can ask for a retry by sending the commen
 
 ### Manual testing
 
+#### Document proxy
+
+AMP ships with a local proxy for testing production AMP documents with the local JS version.
+
+For any public AMP document like: http://output.jsbin.com/pegizoq/quiet
+
+You can access is with the local JS at
+
+- normal sources: http://localhost:8000/max/output.jsbin.com/pegizoq/quiet
+- minified: http://localhost:8000/min/output.jsbin.com/pegizoq/quiet
+
+If the origin resource is on HTTPS, the URLs are http://localhost:8000/max/s/output.jsbin.com/pegizoq/quiet and http://localhost:8000/min/s/output.jsbin.com/pegizoq/quiet
+
+#### Chrome extension
+
 For testing documents on arbitrary URLs with your current local version of the AMP runtime we created a [Chrome extension](testing/local-amp-chrome-extension/README.md).
 
 ## Repository Layout

@@ -124,17 +124,17 @@ func handle(w http.ResponseWriter, r *http.Request) {
 	} else {
 		errorType += "-1p"
 	}
+	isCanary := false;
 	if r.URL.Query().Get("ca") == "1" {
 		errorType += "-canary"
+		isCanary = true;
 	}
-
-	if level != logging.Error && rand.Float32() > 0.01 {
+	if !isCanary && level != logging.Error && rand.Float32() > 0.01 {
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprintln(w, "THROTTLED\n")
 		return
 	}
-
 
 	event := &ErrorEvent{
 		Message:     r.URL.Query().Get("m"),

@@ -16,5 +16,5 @@
 import {registerElementAlias} from '../src/custom-element';
 
 export function installEmbed(win) {
-  registerElementAlias(win, "amp-embed", "amp-ad");
+  registerElementAlias(win, 'amp-embed', 'amp-ad');
 }

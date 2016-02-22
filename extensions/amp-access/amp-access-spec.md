@@ -144,7 +144,7 @@ Property      | Values               | Description
 ------------- | -------------------- |---------------------------------
 authorization | &lt;URL&gt;          | The HTTPS URL for the Authorization endpoint.
 pingback      | &lt;URL&gt;          | The HTTPS URL for the Pingback endpoint.
-login         | &lt;URL&gt;          | The HTTPS URL for the Login Page.
+login         | &lt;URL&gt; or &lt;Map[string, URL]&gt; | The HTTPS URL for the Login Page or a set of URLs for different types of login pages.
 authorizationFallbackResponse | &lt;object&gt;          | The JSON object to be used in place of the authorization response if it fails.
 type          | "client" or "server" | Default is “client”. The "server" option is under design discussion and these docs will be updated when it is ready.
 
@@ -156,11 +156,11 @@ Here’s an example of the AMP Access configuration:
 <script id="amp-access" type="application/json">
 {
   "authorization":
-      "https://pub.com/amp-access?rid={READER_ID}&url={SOURCE_URL}",
+      "https://pub.com/amp-access?rid=READER_ID&url=SOURCE_URL",
   "pingback":
-      "https://pub.com/amp-ping?rid={READER_ID}&url={SOURCE_URL}",
+      "https://pub.com/amp-ping?rid=READER_ID&url=SOURCE_URL",
   "login":
-      "https://pub.com/amp-login?rid={READER_ID}&url={SOURCE_URL}",
+      "https://pub.com/amp-login?rid=READER_ID&url=SOURCE_URL",
   "authorizationFallbackResponse": {"error": true}
 }
 </script>
@@ -185,10 +185,10 @@ RANDOM            | A random number. Helpful to avoid browser cache.
 Here’s an example of the URL extended with Reader ID, Canonical URL, Referrer information and random cachebuster:
 ```
 https://pub.com/access?
-   rid={READER_ID}
-  &url={CANONICAL_URL}
-  &ref={DOCUMENT_REFERRER}
-  &_={RANDOM}
+   rid=READER_ID
+  &url=CANONICAL_URL
+  &ref=DOCUMENT_REFERRER
+  &_=RANDOM
 ```
 
 AUTHDATA variable is availbale to Pingback and Login URLs. It allows passing any field in the authorization
@@ -266,8 +266,8 @@ This endpoint produces the authorization response that can be used in the conten
 The request format is:
 ```
 https://publisher.com/amp-access.json?
-   rid={READER_ID}
-  &url={SOURCE_URL}
+   rid=READER_ID
+  &url=SOURCE_URL
 ```
 The response is a free-form JSON object: it can contain any properties and values with few limitations. The limitations are:
  - The property names have to conform to the restrictions defined by the ```amp-access``` expressions grammar (see [Appendix A][1]. This mostly means that the property names cannot contain characters such as spaces, dashes and other characters that do not conform to the “amp-access” specification.
@@ -334,29 +334,32 @@ The publisher may choose to use the pingback as:
 The request format is:
 ```
 https://publisher.com/amp-pingback?
-   rid={READER_ID}
-  &url={SOURCE_URL}
+   rid=READER_ID
+  &url=SOURCE_URL
 ```
-
-##Login Link
-
-The Publisher may choose to place the Login Link anywhere in the content of the document.
-
-Login Link is configured via “login” property in the [AMP Access Configuration][8] section.
-
-Login Link can be declared on any HTML element that allows “on” attribute, most typically it’d be an anchor or a button element.
-
-The format is:
-```html
-<a on="tap:amp-access.login">Login or subscribe</a>
-```
-AMP makes no distinction between login or subscribe. This distinction can be made on the Publisher’s side.
 
 ##Login Page
 
-The link to the Login Page is configured via the ```login``` property in the [AMP Access Configuration][8] section.
+The URL of the Login Page(s) is configured via the `login` property in the [AMP Access Configuration][8] section.
 
-The link can take any parameters as defined in the [Access URL Variables][7] section. For instance, it could pass AMP Reader ID and document URL. `RETURN_URL` query substitution can be used to specify query parameter for return URL, e.g. `?ret=RETURN_URL`. The return URL is
+The configuration can specify either a single Login URL or a map of Login URL indexed by the type of login. An example of a single Login URL:
+```
+{
+  "login": "https://publisher.com/amp-login.html?rid={READER_ID}"
+}
+```
+
+An example of multiple Login URLs:
+```
+{
+  "login": {
+    "signin": "https://publisher.com/signin.html?rid={READER_ID}",
+    "signup": "https://publisher.com/signup.html?rid={READER_ID}"
+  }
+}
+```
+
+The URL can take any parameters as defined in the [Access URL Variables][7] section. For instance, it could pass AMP Reader ID and document URL. `RETURN_URL` query substitution can be used to specify query parameter for return URL, e.g. `?ret=RETURN_URL`. The return URL is
 required and if the `RETURN_URL` substitution is not specified, it will be injected automatically with the default query parameter name of
 "return".
 
@@ -365,9 +368,9 @@ Login Page is simply a normal Web page with no special constraints, other than i
 The request format is:
 ```
 https://publisher.com/amp-login.html?
-   rid={READER_ID}
-  &url={SOURCE_URL}
-  &return={RETURN_URL}
+   rid=READER_ID
+  &url=SOURCE_URL
+  &return=RETURN_URL
 ```
 Notice that the “return” URL parameter is added by the AMP Runtime automatically if `RETURN_URL` substitution is not
 specified. Once Login Page completes its work, it must redirect back to the specified “Return URL” with the following format:
@@ -375,6 +378,26 @@ specified. Once Login Page completes its work, it must redirect back to the spec
 RETURN_URL#success=true|false
 ```
 Notice the use of a URL hash parameter “success”. The value is either “true” or “false” depending on whether the login succeeds or is abandoned. Ideally the Login Page, when possible, will send the signal in cases of both success or failure.
+
+###Login Link
+
+The Publisher may choose to place the Login Link anywhere in the content of the document.
+
+A single or multiple Login URLs are configured via “login” property in the [AMP Access Configuration][8] section.
+
+Login Link can be declared on any HTML element that allows “on” attribute, most typically it’d be an anchor or a button element.
+
+The format follows "Login URL" configuration. When a single Login URL is configured, the format is:
+```html
+<a on="tap:amp-access.login">Login or subscribe</a>
+```
+
+When multiple Login URLs are configured, the format is `tap:amp-access.login-{type}`. Ex.:
+```html
+<a on="tap:amp-access.login-signup">Subscribe</a>
+```
+
+AMP makes no distinction between login or subscribe. This distinction can be configured by the Publisher using multiple Login URLs/links or on the Publisher’s side.
 
 #Integration with *amp-analytics*
 
@@ -418,6 +441,7 @@ Both steps are covered by the AMP Access spec. The referrer can be injected into
 - Feb 11: Nested field references such as `object.field` are now allowed.
 - Feb 11: Authorization request timeout in [Authorization Endpoint][4].
 - Feb 15: [Configuration][8] and [Authorization Endpoint][4] now allow "authorizationFallbackResponse" property that can be used when authorization fails.
+- Feb 19: Corrected samples to remove `{}` from URL var substitutions.
 
 #Appendix A: “amp-access” expression grammar
 

@@ -107,7 +107,7 @@ describe('Rendering of one ad', () => {
         return;
       }
       return poll('Creative id transmitted. Ad fully rendered.', () => {
-        return ampAd.getAttribute('creative-id');
+        return ampAd.creativeId;
       }, null, 15000);
     }).then(creativeId => {
       if (isEdge) { // TODO(cramforce): Get this to pass in Edge

@@ -1,0 +1,4 @@
+FAIL
+feature_tests/dailymotion.html:48:0 The attribute 'data-videoid' in tag 'amp-dailymotion' is set to the invalid value 'i don't think so'. (see https://github.com/ampproject/amphtml/blob/master/extensions/amp-dailymotion/amp-dailymotion.md) [AMP_TAG_PROBLEM]
+feature_tests/dailymotion.html:52:0 The mandatory attribute 'data-videoid' is missing in tag 'amp-dailymotion'. (see https://github.com/ampproject/amphtml/blob/master/extensions/amp-dailymotion/amp-dailymotion.md) [AMP_TAG_PROBLEM]
+feature_tests/dailymotion.html:55:0 The attribute 'data-ui-highlight' in tag 'amp-dailymotion' is set to the invalid value 'blue'. (see https://github.com/ampproject/amphtml/blob/master/extensions/amp-dailymotion/amp-dailymotion.md) [AMP_TAG_PROBLEM]

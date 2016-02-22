@@ -400,8 +400,7 @@ describe('amp-iframe', () => {
     }).then(amp => {
       const impl = amp.container.implementation_;
       return timer.promise(100).then(() => {
-        expect(impl.iframe_.style.zIndex).to.equal('');
-        expect(impl.placeholder_).to.be.null;
+        expect(impl.iframe_.style.zIndex).to.equal('0');
         expect(activateIframeSpy_.callCount).to.equal(2);
       });
     });

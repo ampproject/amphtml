@@ -321,6 +321,12 @@ For instance:
 <amp-pixel src="https://foo.com/pixel?timestamp=TIMESTAMP"></amp-pixel>
 ```
 
+### TOTAL_ENGAGED_TIME
+
+Provides the total time the user has been enagaged with the page since the page
+first became visible in the viewport. Total engaged time will be 0 until the
+page first becomes visible.
+
 ## Access
 
 Access variables are described in [amp-access-analytics.md](../extensions/amp-access/amp-access-analytics.md).

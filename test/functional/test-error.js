@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {assert} from '../../src/asserts';
 import {getErrorReportUrl} from '../../src/error';
 import {setModeForTesting} from '../../src/mode';
 import {parseUrl, parseQueryString} from '../../src/url';
@@ -68,10 +69,30 @@ describe('reportErrorToServer', () => {
   });
 
   it('reportError mark asserts', () => {
-    const e = new Error('XYZ');
-    e.fromAssert = true;
+    let e = '';
+    try {
+      assert(false, 'XYZ');
+    } catch (error) {
+      e = error;
+    }
     const url = parseUrl(
         getErrorReportUrl(undefined, undefined, undefined, undefined, e));
+    const query = parseQueryString(url.search);
+
+    expect(query.m).to.equal('XYZ');
+    expect(query.a).to.equal('1');
+    expect(query.v).to.equal('$internalRuntimeVersion$');
+  });
+
+  it('reportError mark asserts without error object', () => {
+    let e = '';
+    try {
+      assert(false, 'XYZ');
+    } catch (error) {
+      e = error;
+    }
+    const url = parseUrl(
+        getErrorReportUrl(e.message, undefined, undefined, undefined));
     const query = parseQueryString(url.search);
 
     expect(query.m).to.equal('XYZ');
