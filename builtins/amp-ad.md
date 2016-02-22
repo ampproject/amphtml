@@ -26,7 +26,60 @@ limitations under the License.
 
 AMP documents only support ads served via HTTPS.
 
-#### Behavior
+<table>
+  <tr>
+    <td width="40%"><strong>Description</strong></td>
+    <td>A container to display an ad.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Availability</strong></td>
+    <td>Stable</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Examples</strong></td>
+    <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/ads.amp.html">ads.amp.html</a></td>
+  </tr>
+</table>
+
+The following lists validation errors specific to the `amp-ad` tag
+(see also `amp-ad` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii):
+
+<table>
+  <tr>
+    <th width="40%"><strong>Validation Error</strong></th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td width="40%"><a href="/docs/reference/validation_errors.html#mandatory-attribute-missing">MANDATORY_ATTR_MISSING</a></td>
+    <td>Error thrown when <code>type</code> attribute missing.</td>
+  </tr>
+  <tr>
+    <td width="40%"><a href="/docs/reference/validation_errors.html#missing-url">MISSING_URL</a></td>
+    <td>Error thrown when <code>src</code> attribute is missing it's URL.</td>
+  </tr>
+  <tr>
+  <td width="40%"><a href="/docs/reference/validation_errors.html#invalid-url">INVALID_URL</a></td>
+    <td>Error thrown when <code>src</code> attribute's URL is invalid.</td>
+  </tr>
+  <tr>
+    <td width="40%"><a href="/docs/reference/validation_errors.html#invalid-url-protocol">INVALID_URL_PROTOCOL</a></td>
+    <td>Error thrown <code>src</code> attribute's URL is <code>http</code>; <code>https</code> protocol required.</td>
+  </tr>
+  <tr>
+    <td width="40%"><a href="/docs/reference/validation_errors.html#implied-layout-isnt-supported-by-amp-tag">IMPLIED_LAYOUT_INVALID</a></td>
+    <td>Error thrown when implied set to <code>CONTAINER</code>; this layout type isn't supported.</td>
+  </tr>
+  <tr>
+    <td width="40%"><a href="/docs/reference/validation_errors.html#specified-layout-isnt-supported-by-amp-tag">SPECIFIED_LAYOUT_INVALID</a></td>
+    <td>Error thrown when specified layout set to <code>CONTAINER</code>; this layout type isn't supported.</td>
+  </tr>
+  <tr>
+    <td width="40%"><a href="/docs/reference/validation_errors.html#invalid-property-value">INVALID_PROPERTY_VALUE_IN_ATTR_VALUE</a></td>
+    <td>Error thrown when invalid value is given for attributes <code>height</code> or <code>width</code>. For example, <code>height=auto</code> triggers this error for all supported layout types, with the exception of <code>NODISPLAY</code>.</td>
+  </tr>
+</table>
+
+### Behavior
 
 The `<amp-ad>` requires width and height values to be specified like all
 resources in AMP. It requires a `type` argument that select what ad network is displayed. All `data-*` attributes on the tag are automatically passed as arguments to the code that eventually renders the ad. What `data-` attributes are required for a given type of network depends and must be documented with the ad network.
@@ -48,6 +101,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [AdTech](../ads/adtech.md)
 - [Dot and Media](../ads/dotandads.md)
 - [Doubleclick](../ads/doubleclick.md)
+- [Flite](../ads/flite.md)
 - [plista](../ads/plista.md)
 - [Smart AdServer](../ads/smartadserver.md)
 - [Yieldmo](../ads/yieldmo.md)

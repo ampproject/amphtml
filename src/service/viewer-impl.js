@@ -17,6 +17,7 @@
 import {Observable} from '../observable';
 import {assert} from '../asserts';
 import {documentStateFor} from '../document-state';
+import {getMode} from '../mode';
 import {getService} from '../service';
 import {log} from '../log';
 import {parseQueryString, parseUrl, removeFragment} from '../url';
@@ -115,7 +116,7 @@ export class Viewer {
     this.isEmbedded_ = (this.win.parent && this.win.parent != this.win);
 
     /** @const {!DocumentState} */
-    this.docState_ = documentStateFor(window);
+    this.docState_ = documentStateFor(this.win);
 
     /** @private {boolean} */
     this.isRuntimeOn_ = true;
@@ -216,6 +217,13 @@ export class Viewer {
             platform.isIos()) {
       this.viewportType_ = ViewportType.NATURAL_IOS_EMBED;
     }
+    // Enable iOS Embedded mode so that it's easy to test against a more
+    // realistic iOS environment.
+    if (platform.isIos() &&
+            this.viewportType_ != ViewportType.NATURAL_IOS_EMBED &&
+            (getMode().localDev || getMode().development)) {
+      this.viewportType_ = ViewportType.NATURAL_IOS_EMBED;
+    }
     log.fine(TAG_, '- viewportType:', this.viewportType_);
 
     this.viewportWidth_ = parseInt(this.params_['width'], 10) ||
@@ -233,6 +241,10 @@ export class Viewer {
     this.paddingTop_ = parseInt(this.params_['paddingTop'], 10) ||
         this.paddingTop_;
     log.fine(TAG_, '- padding-top:', this.paddingTop_);
+
+    /** @private @const {boolean} */
+    this.performanceTracking_ = this.params_['csi'] === '1';
+    log.fine(TAG_, '- performanceTracking:', this.performanceTracking_);
 
     /** @private {boolean} */
     this.hasBeenVisible_ = this.isVisible();
@@ -252,9 +264,17 @@ export class Viewer {
         new Promise(resolve => {
           /** @private @const {function(!Viewer)} */
           this.messagingReadyResolver_ = resolve;
-        }));
-    // The error is expected when no viewer is ever set.
-    this.messagingReadyPromise_.catch(() => {});
+        })).catch(() => {
+          throw new Error('no messaging channel');
+        });
+
+    /**
+     * A promise for non-essential messages. These messages should not fail
+     * if there's no messaging channel set up. But ideally viewer would try to
+     * deliver if at all possible.
+     * @private @const {!Promise<!Viewer>}
+     */
+    this.messagingMaybePromise_ = this.messagingReadyPromise_.catch(() => {});
 
     // Trusted viewer and referrer.
     let trustedViewerResolved;
@@ -383,6 +403,14 @@ export class Viewer {
    */
   isRuntimeOn() {
     return this.isRuntimeOn_;
+  }
+
+  /**
+   * Identifies if the viewer is recording instrumentation.
+   * @return {boolean}
+   */
+  isPerformanceTrackingOn() {
+    return this.performanceTracking_;
   }
 
   /**
@@ -756,7 +784,12 @@ export class Viewer {
   }
 
   /**
-   * Sends the message to the viewer. This is a restricted API.
+   * Sends the message to the viewer. This method will wait for the messaging
+   * channel to be established. If the messaging channel times out, the
+   * promise will fail.
+   *
+   * This is a restricted API.
+   *
    * @param {string} eventType
    * @param {*} data
    * @param {boolean} awaitResponse
@@ -769,13 +802,14 @@ export class Viewer {
   }
 
   /**
-   * Broadcasts a message to all other AMP documents under the same viewer.
+   * Broadcasts a message to all other AMP documents under the same viewer. It
+   * will attempt to deliver messages when the messaging channel has been
+   * established, but it will not fail if the channel is timed out.
+   *
    * @param {!JSONObject} message
    */
   broadcast(message) {
-    this.messagingReadyPromise_.then(() => {
-      return this.sendMessage_('broadcast', message, false);
-    });
+    this.maybeSendMessage_('broadcast', message);
   }
 
   /**
@@ -818,6 +852,19 @@ export class Viewer {
       return Promise.resolve();
     }
     return undefined;
+  }
+
+  /**
+   * @param {string} eventType
+   * @param {*} data
+   * @private
+   */
+  maybeSendMessage_(eventType, data) {
+    this.messagingMaybePromise_.then(() => {
+      if (this.messageDeliverer_) {
+        this.sendMessage_(eventType, data, false);
+      }
+    });
   }
 }
 

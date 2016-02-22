@@ -17,6 +17,7 @@
 
 import {getMode} from './mode';
 import {exponentialBackoff} from './exponential-backoff';
+import {ASSERT_SENTINEL, isAssertErrorMessage} from './asserts';
 import {makeBodyVisible} from './styles';
 
 const globalExponentialBackoff = exponentialBackoff(1.5);
@@ -35,6 +36,9 @@ const globalExponentialBackoff = exponentialBackoff(1.5);
 export function reportError(error, opt_associatedElement) {
   if (!window.console) {
     return;
+  }
+  if (!error) {
+    error = new Error('no error supplied');
   }
   if (error.reported) {
     return;
@@ -75,7 +79,7 @@ export function reportError(error, opt_associatedElement) {
 export function installErrorReporting(win) {
   win.onerror = reportErrorToServer;
   win.addEventListener('unhandledrejection', event => {
-    reportError(event.reason);
+    reportError(event.reason || new Error('rejected promise ' + event));
   });
 }
 
@@ -126,19 +130,20 @@ export function getErrorReportUrl(message, filename, line, col, error) {
   // for analyzing production issues.
   let url = 'https://amp-error-reporting.appspot.com/r' +
       '?v=' + encodeURIComponent('$internalRuntimeVersion$') +
-      '&m=' + encodeURIComponent(message);
+      '&m=' + encodeURIComponent(message.replace(ASSERT_SENTINEL, '')) +
+      '&a=' + (isAssertErrorMessage(message) ? 1 : 0);
   if (window.context && window.context.location) {
     url += '&3p=1';
+  }
+  if (window.AMP_CONFIG && window.AMP_CONFIG.canary) {
+    url += '&ca=1';
   }
 
   if (error) {
     const tagName = error && error.associatedElement
       ? error.associatedElement.tagName
       : 'u';  // Unknown
-    // We may want to consider not reporting asserts but for now
-    // this should be helpful.
-    url += '&a=' + (error.fromAssert ? 1 : 0) +
-        '&el=' + encodeURIComponent(tagName) +
+    url += '&el=' + encodeURIComponent(tagName) +
         '&s=' + encodeURIComponent(error.stack || '');
     error.message += ' _reported_';
   } else {

@@ -17,24 +17,43 @@
 import {createIframePromise} from '../../../../testing/iframe';
 require('../amp-youtube');
 import {adopt} from '../../../../src/runtime';
+import {timer} from '../../../../src/timer';
+import * as sinon from 'sinon';
 
 adopt(window);
 
 describe('amp-youtube', () => {
+  let sandbox;
 
-  function getYt(videoId, opt_responsive) {
-    return createIframePromise().then(iframe => {
-      const yt = iframe.doc.createElement('amp-youtube');
-      yt.setAttribute('data-videoid', videoId);
-      yt.setAttribute('width', '111');
-      yt.setAttribute('height', '222');
-      if (opt_responsive) {
-        yt.setAttribute('layout', 'responsive');
-      }
-      iframe.doc.body.appendChild(yt);
-      yt.implementation_.layoutCallback();
-      return yt;
-    });
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+    sandbox = null;
+  });
+
+  function getYt(videoId, opt_responsive, opt_beforeLayoutCallback) {
+    return createIframePromise(
+        true, opt_beforeLayoutCallback).then(iframe => {
+          const yt = iframe.doc.createElement('amp-youtube');
+
+          // TODO(mkhatib): During tests, messages are not being correctly
+          // caught and hence the ready promise will never resolve.
+          // For now, this resolves the ready promise after a while.
+          timer.promise(50).then(() => {
+            yt.implementation_.playerReadyResolver_();
+          });
+
+          yt.setAttribute('data-videoid', videoId);
+          yt.setAttribute('width', '111');
+          yt.setAttribute('height', '222');
+          if (opt_responsive) {
+            yt.setAttribute('layout', 'responsive');
+          }
+          return iframe.addElement(yt);
+        });
   }
 
   it('renders', () => {
@@ -60,5 +79,64 @@ describe('amp-youtube', () => {
   it('requires data-videoid', () => {
     return getYt('').should.eventually.be.rejectedWith(
         /The data-videoid attribute is required for/);
+  });
+
+  it('adds an img placeholder in prerender mode', () => {
+    return getYt('mGENRKrdoGY', true, function(yt) {
+      const iframe = yt.querySelector('iframe');
+      expect(iframe).to.be.null;
+
+      const imgPlaceholder = yt.querySelector('img[placeholder]');
+      expect(imgPlaceholder).to.not.be.null;
+      expect(imgPlaceholder.className).to.not.match(/amp-hidden/);
+      expect(imgPlaceholder.getAttribute('src')).to.be.equal(
+          'https://i.ytimg.com/vi/mGENRKrdoGY/sddefault.jpg');
+    }).then(yt => {
+      const iframe = yt.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+
+      const imgPlaceholder = yt.querySelector('img[placeholder]');
+      expect(imgPlaceholder.className).to.match(/amp-hidden/);
+    });
+  });
+
+  it('loads only sddefault when it exists', () => {
+    return getYt('mGENRKrdoGY', true, function(yt) {
+      const iframe = yt.querySelector('iframe');
+      expect(iframe).to.be.null;
+
+      const imgPlaceholder = yt.querySelector('img[placeholder]');
+      expect(imgPlaceholder).to.not.be.null;
+      expect(imgPlaceholder.className).to.not.match(/amp-hidden/);
+    }).then(yt => {
+      const iframe = yt.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+
+      const imgPlaceholder = yt.querySelector('img[placeholder]');
+      expect(imgPlaceholder.className).to.match(/amp-hidden/);
+
+      expect(imgPlaceholder.src).to.equal(
+          'https://i.ytimg.com/vi/mGENRKrdoGY/sddefault.jpg');
+    });
+  });
+
+  it('loads hqdefault thumbnail source when sddefault fails', () => {
+    return getYt('FAKE', true, function(yt) {
+      const iframe = yt.querySelector('iframe');
+      expect(iframe).to.be.null;
+
+      const imgPlaceholder = yt.querySelector('img[placeholder]');
+      expect(imgPlaceholder).to.not.be.null;
+      expect(imgPlaceholder.className).to.not.match(/amp-hidden/);
+    }).then(yt => {
+      const iframe = yt.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+
+      const imgPlaceholder = yt.querySelector('img[placeholder]');
+      expect(imgPlaceholder.className).to.match(/amp-hidden/);
+
+      expect(imgPlaceholder.src).to.equal(
+          'https://i.ytimg.com/vi/FAKE/hqdefault.jpg');
+    });
   });
 });

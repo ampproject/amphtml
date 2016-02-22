@@ -40,7 +40,7 @@ describe('amp-instagram', () => {
       const iframe = ins.firstChild;
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
-      expect(iframe.src).to.equal('https://instagram.com/p/fBwFP/embed/?v=4');
+      expect(iframe.src).to.equal('https://www.instagram.com/p/fBwFP/embed/?v=4');
       expect(iframe.getAttribute('width')).to.equal('111');
       expect(iframe.getAttribute('height')).to.equal('222');
     });

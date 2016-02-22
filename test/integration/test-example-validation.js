@@ -70,9 +70,6 @@ describe('example', function() {
    */
   const errorWhitelist = [
     /invalid value \'.\/viewer-integr.js\'/,
-    /amp-dailymotion/,
-    /amp-soundcloud/,
-    /vimeo/,
   ];
 
   const usedWhitelist = [];
@@ -145,7 +142,7 @@ describe('example', function() {
           }
         }
       };
-      xhr.open("GET", filename, true);
+      xhr.open('GET', filename, true);
       xhr.send();
     });
   }

@@ -17,7 +17,9 @@
 import {createFixtureIframe, expectBodyToBecomeVisible} from
     '../../testing/iframe.js';
 
-describe('Rendering of amp-img', () => {
+describe('Rendering of amp-img', function() {
+  this.timeout(5000);
+
   let fixture;
   beforeEach(() => {
     return createFixtureIframe('test/fixtures/images.html', 500).then(f => {

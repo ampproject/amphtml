@@ -107,6 +107,7 @@ export class AmpCarousel extends BaseCarousel {
     this.doLayout_(newPos);
     this.preloadNext_(newPos, Math.sign(newPos - oldPos));
     this.updateInViewport_(newPos, oldPos);
+    this.setControlsState();
   }
 
   /**
@@ -183,6 +184,7 @@ export class AmpCarousel extends BaseCarousel {
       this.withinWindow_(oldPos, cell => {
         if (seen.indexOf(cell) == -1) {
           this.updateInViewport(cell, false);
+          this.schedulePause(cell);
         }
       });
     }

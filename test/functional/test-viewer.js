@@ -16,6 +16,7 @@
 
 import {Viewer} from '../../src/service/viewer-impl';
 import {platform} from '../../src/platform';
+import {setModeForTesting} from '../../src/mode';
 import * as sinon from 'sinon';
 
 
@@ -98,10 +99,24 @@ describe('Viewer', () => {
     expect(viewer.getPrerenderSize()).to.equal(3);
   });
 
+  it('should configure performance tracking', () => {
+    windowApi.location.hash = '';
+    let viewer = new Viewer(windowApi);
+    expect(viewer.isPerformanceTrackingOn()).to.be.false;
+
+    windowApi.location.hash = '#csi=1';
+    viewer = new Viewer(windowApi);
+    expect(viewer.isPerformanceTrackingOn()).to.be.true;
+
+    windowApi.location.hash = '#csi=0';
+    viewer = new Viewer(windowApi);
+    expect(viewer.isPerformanceTrackingOn()).to.be.false;
+  });
+
   it('should configure correctly for iOS embedding', () => {
     windowApi.name = '__AMP__viewportType=natural';
     windowApi.parent = {};
-    sandbox.mock(platform).expects('isIos').returns(true).once();
+    sandbox.mock(platform).expects('isIos').returns(true).atLeast(1);
     const viewer = new Viewer(windowApi);
 
     expect(viewer.getViewportType()).to.equal('natural-ios-embed');
@@ -110,11 +125,14 @@ describe('Viewer', () => {
   it('should NOT configure for iOS embedding if not embedded', () => {
     windowApi.name = '__AMP__viewportType=natural';
     windowApi.parent = windowApi;
-    sandbox.mock(platform).expects('isIos').returns(true).once();
-    expect(new Viewer(windowApi).getViewportType()).to.equal('natural');
-
-    windowApi.parent = null;
-    expect(new Viewer(windowApi).getViewportType()).to.equal('natural');
+    sandbox.mock(platform).expects('isIos').returns(true).atLeast(1);
+    setModeForTesting({
+      localDev: false,
+      development: false
+    });
+    const viewportType = new Viewer(windowApi).getViewportType();
+    setModeForTesting(null);
+    expect(viewportType).to.equal('natural');
   });
 
   it('should receive viewport event', () => {
@@ -191,12 +209,25 @@ describe('Viewer', () => {
     }, 'https://acme.com');
     viewer.broadcast({type: 'type1'});
     expect(viewer.messageQueue_.length).to.equal(0);
-    return viewer.messagingReadyPromise_.then(() => {
+    return viewer.messagingMaybePromise_.then(() => {
       expect(delivered.length).to.equal(1);
       const m = delivered[0];
       expect(m.eventType).to.equal('broadcast');
       expect(m.data.type).to.equal('type1');
     });
+  });
+
+  it('should post broadcast event but not fail w/o messaging', () => {
+    viewer.broadcast({type: 'type1'});
+    expect(viewer.messageQueue_.length).to.equal(0);
+    clock.tick(5001);
+    return viewer.messagingReadyPromise_.then(() => 'OK', () => 'ERROR')
+        .then(res => {
+          expect(res).to.equal('ERROR');
+          return viewer.messagingMaybePromise_;
+        }).then(() => {
+          expect(viewer.messageQueue_.length).to.equal(0);
+        });
   });
 
   it('should queue non-dupe events', () => {
@@ -277,8 +308,7 @@ describe('Viewer', () => {
       expect(m2Resolved).to.be.false;
 
       // Timeout.
-      expect(timeouts).to.have.length(1);
-      timeouts[0]();
+      clock.tick(5001);
       return Promise.all([m1, m2]);
     }).then(() => {
       throw new Error('must never be here');

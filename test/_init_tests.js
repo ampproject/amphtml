@@ -17,6 +17,7 @@
 // This must load before all other tests.
 import '../third_party/babel/custom-babel-helpers';
 import '../src/polyfills';
+import {removeElement} from '../src/dom';
 import {adopt} from '../src/runtime';
 
 adopt(window);
@@ -75,20 +76,11 @@ sinon.sandbox.create = function(config) {
 // Global cleanup of tags added during tests. Cool to add more
 // to selector.
 afterEach(() => {
-  const cleanup = document.querySelectorAll('link,meta,base,iframe');
+  const cleanup = document.querySelectorAll('link,meta');
   for (let i = 0; i < cleanup.length; i++) {
     try {
       const element = cleanup[i];
-      if (element.tagName == 'IFRAME') {
-        setTimeout(() => {
-          // Wait a bit until removing iframes. The reason is that Safari has
-          // a race where this sometimes runs too early and the test
-          // is actually still running
-          element.parentNode.removeChild(element);
-        }, 1000);
-      } else {
-        element.parentNode.removeChild(element);
-      }
+      removeElement(element);
     } catch (e) {
       // This sometimes fails for unknown reasons.
       console./*OK*/log(e);

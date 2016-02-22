@@ -21,6 +21,7 @@
  *   (http://creativecommons.org/publicdomain/zero/1.0/).
  */
 goog.require('css_selectors.parseATypeSelector');
+goog.require('goog.asserts');
 goog.require('json_testutil.renderJSON');
 goog.require('parse_css.parseAStylesheet');
 goog.require('parse_css.tokenize');
@@ -36,19 +37,6 @@ goog.provide('parse_css.ParseCssTest');
  */
 function assertStrictEqual(expected, saw) {
   assert.ok(expected === saw, 'expected: ' + expected + ' saw: ' + saw);
-}
-
-/**
- * @param {!Array<!parse_css.ErrorToken>} errors
- * @return {string}
- */
-function errorsToString(errors) {
-  const out = [];
-  for (const error of errors) {
-    out.push(':' + error.line + ':' + error.col + ' ' +
-        error.errorType + ' - ' + error.msg);
-  }
-  return out.join('\n');
 }
 
 // Simple function which lets us sort the keys in json output from the parser
@@ -136,10 +124,9 @@ describe('tokenize', () => {
          {'line': 2, 'col': 2, 'tokenType': 'EOF_TOKEN'}],
         tokenlist);
     assertJSONEquals(
-        [{'line': 1, 'col': 1, 'tokenType': 'ERROR', 'errorType':
-          'TOKENIZATION', 'msg': 'unterminated string'}], errors);
-    assertStrictEqual(':1:1 TOKENIZATION - unterminated string',
-                      errorsToString(errors));
+        [{'line': 1, 'col': 1, 'tokenType': 'ERROR',
+          'code': 'CSS_SYNTAX_UNTERMINATED_STRING', 'params': ['style']}],
+        errors);
   });
 
   it('provides errors with line col offsets', () => {
@@ -148,17 +135,20 @@ describe('tokenize', () => {
         'line 2 "unterminated\n';
     let errors = [];
     parse_css.tokenize(css, 1, 0, errors);
-    assertStrictEqual(':1:7 TOKENIZATION - unterminated string\n' +
-        ':2:7 TOKENIZATION - unterminated string', errorsToString(errors));
+    assertJSONEquals([
+      {'line': 1, 'col': 7, 'tokenType': 'ERROR',
+       'code': 'CSS_SYNTAX_UNTERMINATED_STRING', 'params': ['style']},
+      {'line': 2, 'col': 7, 'tokenType': 'ERROR',
+       'code': 'CSS_SYNTAX_UNTERMINATED_STRING', 'params': ['style']}], errors);
     errors = [];
     parse_css.tokenize(css, 5, 5, errors);
-    assertStrictEqual(':5:12 TOKENIZATION - unterminated string\n' +
-        ':6:7 TOKENIZATION - unterminated string', errorsToString(errors));
     assertJSONEquals(
-        [{'line': 5, 'col': 12, 'tokenType': 'ERROR', 'errorType':
-          'TOKENIZATION', 'msg': 'unterminated string'},
-         {'line': 6, 'col': 7, 'tokenType': 'ERROR', 'errorType':
-          'TOKENIZATION', 'msg': 'unterminated string'}],
+        [{'line': 5, 'col': 12, 'tokenType': 'ERROR',
+          'code': 'CSS_SYNTAX_UNTERMINATED_STRING',
+          'params': ['style']},
+         {'line': 6, 'col': 7, 'tokenType': 'ERROR',
+          'code': 'CSS_SYNTAX_UNTERMINATED_STRING',
+          'params': ['style']}],
         errors);
   });
 
@@ -166,17 +156,23 @@ describe('tokenize', () => {
     // Note that Javascript has its own escaping, so there's really just one '\'.
     let errors = [];
     parse_css.tokenize('a trailing \\\nbackslash', 1, 0, errors);
-    assertStrictEqual(':1:11 TOKENIZATION - stray trailing backslash',
-                      errorsToString(errors));
+    assertJSONEquals(
+        [{'line': 1, 'col': 11, 'tokenType': 'ERROR',
+          'code': 'CSS_SYNTAX_STRAY_TRAILING_BACKSLASH', 'params': ['style']}],
+        errors);
 
     errors = [];
     parse_css.tokenize('h1 {color: red; } /*', 1, 0, errors);
-    assertStrictEqual(':1:17 TOKENIZATION - unterminated comment',
-                      errorsToString(errors));
+    assertJSONEquals(
+        [{'line': 1, 'col': 17, 'tokenType': 'ERROR',
+          'code': 'CSS_SYNTAX_UNTERMINATED_COMMENT', 'params': ['style']}],
+        errors);
 
     errors = [];
     parse_css.tokenize('oh hi url(foo"bar)', 1, 0, errors);
-    assertStrictEqual(':1:6 TOKENIZATION - bad url', errorsToString(errors));
+    assertJSONEquals(
+        [{'line': 1, 'col': 6, 'tokenType': 'ERROR',
+          'code': 'CSS_SYNTAX_BAD_URL', 'params': ['style']}], errors);
   });
 });
 
@@ -539,15 +535,13 @@ describe('parseAStylesheet', () => {
         tokenlist, ampAtRuleParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
         errors);
     assertJSONEquals(
-        [{'line': 1, 'col': 7, 'tokenType': 'ERROR', 'errorType':
-          'PARSING', 'msg': 'Incomplete declaration'},
-         {'line': 2, 'col': 13, 'tokenType': 'ERROR', 'errorType':
-          'PARSING', 'msg': '@media found inside declaration'},
-         {'line': 4, 'col': 0, 'tokenType': 'ERROR', 'errorType':
-          'PARSING', 'msg':
-          'Hit EOF when trying to parse the prelude of a ' +
-              'qualified rule.'}],
-        errors);
+        [{'line': 1, 'col': 7, 'tokenType': 'ERROR',
+          'code': 'CSS_SYNTAX_INCOMPLETE_DECLARATION', 'params': ['style']},
+         {'line': 2, 'col': 13, 'tokenType': 'ERROR',
+          'code': 'CSS_SYNTAX_INVALID_AT_RULE', 'params': ['style', 'media']},
+         {'line': 4, 'col': 0, 'tokenType': 'ERROR',
+          'code': 'CSS_SYNTAX_EOF_IN_PRELUDE_OF_QUALIFIED_RULE',
+          'params': ['style']}], errors);
   });
 
   it('generates errors based on the grammar', () => {
@@ -559,8 +553,9 @@ describe('parseAStylesheet', () => {
         tokenlist, ampAtRuleParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
         errors);
     assertJSONEquals(
-        [{'line': 2, 'col': 5, 'tokenType': 'ERROR', 'errorType':
-          'PARSING', 'msg': 'Incomplete declaration'}], errors);
+        [{'line': 2, 'col': 5, 'tokenType': 'ERROR',
+          'code': 'CSS_SYNTAX_INCOMPLETE_DECLARATION', 'params': ['style']}],
+        errors);
     assertJSONEquals(
         {'line': 1, 'col': 0, 'tokenType': 'STYLESHEET', 'rules':
          [{'line': 1, 'col': 0, 'tokenType': 'AT_RULE', 'name': 'gregable',
@@ -732,7 +727,8 @@ function parseSelectorForTest(selector) {
   const sheet = parse_css.parseAStylesheet(
       tokenlist, ampAtRuleParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
       errors);
-  return sheet['rules'][0].prelude;
+  return goog.asserts.assertInstanceof(sheet.rules[0],
+                                       parse_css.QualifiedRule).prelude;
 }
 
 //
@@ -1040,10 +1036,13 @@ describe('css_selectors', () => {
     const errors = [];
     const selector = css_selectors.parse(tokenStream, errors);
     assertStrictEqual(null, selector);
-    assertStrictEqual(
-        ':1:8 SELECTORS - no selector found\n' +
-            ':1:8 SELECTORS - unparsed input remains',
-        errorsToString(errors));
+    assertJSONEquals(
+        [{'line': 1, 'col': 8, 'tokenType': 'ERROR',
+          'code': 'CSS_SYNTAX_MISSING_SELECTOR',
+          'params': ['style']},
+         {'line': 1, 'col': 8, 'tokenType': 'ERROR',
+          'code': 'CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR',
+          'params': ['style']}], errors);
   });
 
   it('implements visitor pattern', () => {

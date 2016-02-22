@@ -22,32 +22,39 @@
  */
 goog.require('amp.htmlparser.HtmlParser');
 goog.require('amp.htmlparser.HtmlSaxHandler');
+goog.require('amp.htmlparser.HtmlSaxHandlerWithLocation');
 
 goog.provide('amp.htmlparser.HtmlParserTest');
 
 /**
- * @implements {amp.htmlparser.HtmlSaxHandler}
  * @private
  */
-class LoggingHandler {
+class LoggingHandler extends amp.htmlparser.HtmlSaxHandler {
   constructor() {
     this.log = [];
   }
 
+  /** @override */
   startDoc() { this.log.push('startDoc()'); }
 
+  /** @override */
   cdata(text) { this.log.push('cdata("' + text + '")'); }
 
+  /** @override */
   pcdata(text) { this.log.push('pcdata("' + text + '")'); }
 
+  /** @override */
   rcdata(text) { this.log.push('rcdata("' + text + '")'); }
 
+  /** @override */
   endDoc() { this.log.push('endDoc()'); }
 
+  /** @override */
   startTag(tagName, attrs) {
     this.log.push('startTag(' + tagName + ',[' + attrs + '])');
   }
 
+  /** @override */
   endTag(tagName) { this.log.push('endTag(' + tagName + ')'); }
 }
 
@@ -171,44 +178,60 @@ describe('HtmlParser', () => {
 });
 
 /**
- * @implements {amp.htmlparser.HtmlSaxHandlerWithLocation}
  * @private
  */
-class LoggingHandlerWithLocation {
+class LoggingHandlerWithLocation
+extends amp.htmlparser.HtmlSaxHandlerWithLocation {
   constructor() {
     /** @type {amp.htmlparser.DocLocator} */
     this.locator = null;
     /** @type {!Array<!string>} */
     this.log = [];
   }
+
+  /** @override */
   setDocLocator (locator) {
     this.locator = locator;
     this.log = [];
   }
+
+  /** @override */
   startDoc() {
     this.log.push(':' + this.locator.getLine() + ':' + this.locator.getCol() +
         ': startDoc()');
   }
+
+  /** @override */
   cdata(text) {
     this.log.push(':' + this.locator.getLine() + ':' + this.locator.getCol() +
         ': cdata("' + text + '")');
   }
+
+  /** @override */
   pcdata(text) {
     this.log.push(':' + this.locator.getLine() + ':' + this.locator.getCol() +
         ': pcdata("' + text + '")');
   }
+
+  /** @override */
   rcdata(text) {
     this.log.push(':' + this.locator.getLine() + ':' + this.locator.getCol() +
         ': rcdata("' + text + '")');
   }
+
+  /** @override */
   endDoc() {
     this.log.push(':' + this.locator.getLine() + ':' + this.locator.getCol() +
         ': endDoc()');
   }
+
+  /** @override */
   startTag(tagName, attrs) {
     this.log.push(':' + this.locator.getLine() + ':' + this.locator.getCol() +
         ': startTag(' + tagName + ',[' + attrs + '])');
   }
+
+  /** @override */
   endTag(tagName) {
     this.log.push(':' + this.locator.getLine() + ':' + this.locator.getCol() +
         ': endTag(' + tagName + ')');

@@ -255,7 +255,7 @@ export class Vsync {
           if (!res) {
             resolve();
           } else if (opt_timeout && timeSinceStart > opt_timeout) {
-            reject('timeout');
+            reject(new Error('timeout'));
           } else {
             prevTime = timeSinceStart;
             task(state);

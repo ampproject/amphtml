@@ -30,7 +30,7 @@ describe('amp-accordion', () => {
       const ampAccordion = iframe.doc.createElement('amp-accordion');
       for (let i = 0; i < 3; i++) {
         const section = iframe.doc.createElement('section');
-        section.innerHTML = "<h2>Section " + i + "</h2><div>Loreum ipsum</div>";
+        section.innerHTML = '<h2>Section ' + i + '</h2><div>Loreum ipsum</div>';
         ampAccordion.appendChild(section);
         if (i == 1) {
           section.setAttribute('expanded', '');

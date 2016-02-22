@@ -110,13 +110,13 @@ class UrlReplacements {
       return documentInfoFor(this.win_).pageViewId;
     });
 
-    this.set_('QUERY_PARAM', (param, defaultValue = "") => {
+    this.set_('QUERY_PARAM', (param, defaultValue = '') => {
       assert(param, 'The first argument to QUERY_PARAM, the query string ' +
           /*OK*/'param is required');
       const url = parseUrl(this.win_.location.href);
       const params = parseQueryString(url.search);
 
-      return (typeof params[param] !== "undefined") ?
+      return (typeof params[param] !== 'undefined') ?
         params[param] :
         defaultValue;
     });
@@ -267,7 +267,9 @@ class UrlReplacements {
     this.set_('AUTHDATA', field => {
       assert(field, 'The first argument to AUTHDATA, the field, is required');
       return this.getAccessValue_(accessService => {
-        return accessService.getAuthdataField(field);
+        return accessService.whenFirstAuthorized().then(() => {
+          return accessService.getAuthdataField(field);
+        });
       }, 'AUTHDATA');
     });
 
@@ -321,8 +323,8 @@ class UrlReplacements {
       return loadPromise(this.win_).then(() => {
         metric = timingInfo[endEvent] - timingInfo[startEvent];
         return (isNaN(metric) || metric == Infinity || metric < 0)
-            ? Promise.resolve()
-            : Promise.resolve(String(metric));
+            ? undefined
+            : String(metric);
       });
     } else {
       return Promise.resolve(String(metric));

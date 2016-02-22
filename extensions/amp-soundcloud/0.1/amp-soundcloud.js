@@ -24,11 +24,8 @@
  *   height=166
  *   data-trackid="243169232"
  *   data-color="ff5500"
- *   data-autoplay="true"
  *   layout="fixed-height">
  * </amp-soundcloud>
- *
- *
  */
 
 import {Layout} from '../../../src/layout';
@@ -52,7 +49,7 @@ class AmpSoundcloud extends AMP.BaseElement {
     const height = this.element.getAttribute('height');
     const color = this.element.getAttribute('data-color');
     const visual = this.element.getAttribute('data-visual');
-    const url = "https://api.soundcloud.com/tracks/";
+    const url = 'https://api.soundcloud.com/tracks/';
     const trackid = AMP.assert(
         (this.element.getAttribute('data-trackid')),
         'The data-trackid attribute is required for <amp-soundcloud> %s',
@@ -62,13 +59,13 @@ class AmpSoundcloud extends AMP.BaseElement {
 
     iframe.setAttribute('frameborder', 'no');
     iframe.setAttribute('scrolling', 'no');
-    iframe.src = "https://w.soundcloud.com/player/?" +
-      "url=" + encodeURIComponent(url + trackid);
+    iframe.src = 'https://w.soundcloud.com/player/?' +
+      'url=' + encodeURIComponent(url + trackid);
 
-    if (visual) {
-      iframe.src += "&visual=true";
+    if (visual === 'true') {
+      iframe.src += '&visual=true';
     } else if (color) {
-      iframe.src += "&color=" + encodeURIComponent(color);
+      iframe.src += '&color=' + encodeURIComponent(color);
     }
 
     this.applyFillContent(iframe);
@@ -81,7 +78,7 @@ class AmpSoundcloud extends AMP.BaseElement {
     return loadPromise(iframe);
   }
 
-    /** @override */
+  /** @override */
   documentInactiveCallback() {
     if (this.iframe_ && this.iframe_.contentWindow) {
       this.iframe_.contentWindow./*OK*/postMessage(

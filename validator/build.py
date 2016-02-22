@@ -252,37 +252,47 @@ def GenerateValidateBin(out_dir, nodejs_cmd):
 
       function main() {
         if (process.argv.length < 3) {
-          console.error('usage: validate <file.html or url>');
+          console.error('usage: validate <file.html>|<url>|-');
           process.exit(1)
         }
         var args = process.argv.slice(2);
         var full_path = args[0];
 
-        if (full_path.indexOf('http://') === 0 ||
-            full_path.indexOf('https://') === 0) {
-          var callback = function(response) {
-            var chunks = [];
+        var callback = function(response) {
+          var chunks = [];
 
-            response.on('data', function (chunk) {
-              chunks.push(chunk);
-            });
+          response.on('data', function (chunk) {
+            chunks.push(chunk);
+          });
 
-            response.on('end', function () {
-              validateFile(chunks.join(''), full_path);
-            });
-          };
+          response.on('end', function () {
+            validateFile(chunks.join(''), full_path);
+          });
 
-          var clientModule = http;
-          if (full_path.indexOf('https://') === 0) {
-            clientModule = https;
+        };
+
+        if (full_path === '-') {
+          callback(process.stdin);
+          process.stdin.resume();
+        } else {
+
+          if (full_path.indexOf('http://') === 0 ||
+              full_path.indexOf('https://') === 0) {
+
+            var clientModule = http;
+            if (full_path.indexOf('https://') === 0) {
+              clientModule = https;
+            }
+            clientModule.request(url.parse(full_path), callback).end();
+
+          } else {
+            var filename = path.basename(full_path);
+            var contents = fs.readFileSync(full_path, 'utf8');
+            validateFile(contents, filename);
           }
 
-          clientModule.request(url.parse(full_path), callback).end();
-        } else {
-          var filename = path.basename(full_path);
-          var contents = fs.readFileSync(full_path, 'utf8');
-          validateFile(contents, filename);
         }
+
       }
 
       if (require.main === module) {
@@ -347,7 +357,8 @@ def CompileParseCssTestMinified(out_dir):
   logging.info('entering ...')
   CompileWithClosure(
       js_files=['parse-css.js', 'tokenize-css.js', 'css-selectors.js',
-                'json-testutil.js', 'parse-css_test.js'],
+                'json-testutil.js', 'parse-css_test.js',
+                '%s/validator-generated.js' % out_dir],
       closure_entry_points=['parse_css.ParseCssTest'],
       output_file='%s/parse-css_test_minified.js' % out_dir)
   logging.info('... success')

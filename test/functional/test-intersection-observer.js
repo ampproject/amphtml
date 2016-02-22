@@ -37,25 +37,25 @@ describe('getIntersectionChangeEntry', () => {
     expect(change.rootBounds.x).to.equal(0);
     expect(change.rootBounds.y).to.equal(100);
     expect(change.boundingClientRect).to.jsonEqual({
-      "left": 50,
-      "top": -50,
-      "width": 150,
-      "height": 200,
-      "bottom": 150,
-      "right": 200,
-      "x": 50,
-      "y": -50
+      'left': 50,
+      'top': -50,
+      'width': 150,
+      'height': 200,
+      'bottom': 150,
+      'right': 200,
+      'x': 50,
+      'y': -50
     });
     expect(change.intersectionRect.height).to.equal(100);
     expect(change.intersectionRect).to.jsonEqual({
-      "left": 50,
-      "top": 100,
-      "width": 50,
-      "height": 100,
-      "bottom": 200,
-      "right": 100,
-      "x": 50,
-      "y": 100
+      'left': 50,
+      'top': 100,
+      'width': 50,
+      'height': 100,
+      'bottom': 200,
+      'right': 100,
+      'x': 50,
+      'y': 100
     });
   });
 
@@ -68,14 +68,14 @@ describe('getIntersectionChangeEntry', () => {
 
     expect(change.intersectionRect.height).to.equal(1);
     expect(change.intersectionRect).to.jsonEqual({
-      "left": 50,
-      "top": 199,
-      "width": 50,
-      "height": 1,
-      "bottom": 200,
-      "right": 100,
-      "x": 50,
-      "y": 199
+      'left': 50,
+      'top': 199,
+      'width': 50,
+      'height': 1,
+      'bottom': 200,
+      'right': 100,
+      'x': 50,
+      'y': 199
     });
   });
 

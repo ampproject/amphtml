@@ -326,9 +326,11 @@ function buildExamples(watch) {
   buildExample('analytics-notification.amp.html');
   buildExample('analytics.amp.html');
   buildExample('article.amp.html');
+  buildExample('brightcove.amp.html');
   buildExample('responsive.amp.html');
   buildExample('article-access.amp.html');
   buildExample('dailymotion.amp.html');
+  buildExample('carousel.amp.html');
   buildExample('csp.amp.html');
   buildExample('metadata-examples/article-json-ld.amp.html');
   buildExample('metadata-examples/article-microdata.amp.html');
@@ -350,6 +352,7 @@ function buildExamples(watch) {
   buildExample('vimeo.amp.html');
   buildExample('vine.amp.html');
   buildExample('multiple-docs.html');
+  buildExample('youtube.amp.html');
 
   // TODO(dvoytenko, #1393): Enable for proxy-testing.
   // // Examples are also copied into `c/` directory for AMP-proxy testing.

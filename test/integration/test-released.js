@@ -27,8 +27,10 @@ describe('released components with polyfills: ', function() {
 
 function runTest(shouldKillPolyfillableApis) {
   describe('Rendering of released components', function() {
+    this.timeout(5000);
     let fixture;
     beforeEach(() => {
+      this.timeout(3100);
       return createFixtureIframe('test/fixtures/released.html', 3000, win => {
         if (shouldKillPolyfillableApis) {
           win.Promise = undefined;

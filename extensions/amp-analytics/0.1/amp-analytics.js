@@ -134,7 +134,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       for (const replaceMapKey in this.config_['extraUrlParamsReplaceMap']) {
         if (++count > MAX_REPLACES) {
           console./*OK*/error(this.getName_(),
-           "More than " + MAX_REPLACES.toString() +
+           'More than ' + MAX_REPLACES.toString() +
            " extraUrlParamsReplaceMap rules aren't allowed; Skipping the rest"
           );
           break;
@@ -158,6 +158,11 @@ export class AmpAnalytics extends AMP.BaseElement {
     for (const k in this.config_['triggers']) {
       if (this.config_['triggers'].hasOwnProperty(k)) {
         const trigger = this.config_['triggers'][k];
+        if (!trigger) {
+          console./*OK*/error(this.getName_(),
+              'trigger should be an object: ', k);
+          continue;
+        }
         if (!trigger['on'] || !trigger['request']) {
           console./*OK*/error(this.getName_(), '"on" and "request" ' +
               'attributes are required for data to be collected.');
@@ -176,7 +181,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @return {!Promise<>}
    */
   fetchRemoteConfig_() {
-    const remoteConfigUrl = this.element.getAttribute('config');
+    let remoteConfigUrl = this.element.getAttribute('config');
     if (!remoteConfigUrl) {
       return Promise.resolve();
     }
@@ -188,13 +193,17 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (this.element.hasAttribute('data-credentials')) {
       fetchConfig.credentials = this.element.getAttribute('data-credentials');
     }
-    return xhrFor(this.getWin()).fetchJson(remoteConfigUrl, fetchConfig)
+    return urlReplacementsFor(this.getWin()).expand(remoteConfigUrl)
+        .then(expandedUrl => {
+          remoteConfigUrl = expandedUrl;
+          return xhrFor(this.getWin()).fetchJson(remoteConfigUrl, fetchConfig);
+        })
         .then(jsonValue => {
           this.remoteConfig_ = jsonValue;
           log.fine(this.getName_(), 'Remote config loaded', remoteConfigUrl);
         }, err => {
           console./*OK*/error(this.getName_(), 'Error loading remote config: ',
-              remoteConfigUrl, err);
+          remoteConfigUrl, err);
         });
   }
 

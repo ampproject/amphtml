@@ -20,6 +20,7 @@ package errortracker
 
 import (
 	"fmt"
+	"math/rand"
 	"net/http"
 	"strconv"
 	"strings"
@@ -67,6 +68,7 @@ type ErrorEvent struct {
 }
 
 func init() {
+	rand.Seed(time.Now().UTC().UnixNano())
 	http.HandleFunc("/r", handle)
 }
 
@@ -114,9 +116,24 @@ func handle(w http.ResponseWriter, r *http.Request) {
 		severity = "ERROR"
 		level = logging.Error
 		errorType += "-cdn"
+	} else {
+		errorType += "-origin"
 	}
 	if r.URL.Query().Get("3p") == "1" {
-		errorType = "-3p"
+		errorType += "-3p"
+	} else {
+		errorType += "-1p"
+	}
+	isCanary := false;
+	if r.URL.Query().Get("ca") == "1" {
+		errorType += "-canary"
+		isCanary = true;
+	}
+	if !isCanary && level != logging.Error && rand.Float32() > 0.01 {
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintln(w, "THROTTLED\n")
+		return
 	}
 
 	event := &ErrorEvent{

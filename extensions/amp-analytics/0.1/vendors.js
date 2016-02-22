@@ -66,7 +66,7 @@ export const ANALYTICS_CONFIG = {
   'atinternet': {
     'transport': {'beacon': false, 'xhrpost': false, 'image': true},
     'requests': {
-      'base': 'https://${log}${domain}/?s=${site}&ts=${timestamp}&r=${screenWidth}x${screenHeight}x${screenColorDepth}&re=${availableScreenWidth}x${availableScreenHeight}',
+      'base': 'https://${log}${domain}/hit.xiti?s=${site}&ts=${timestamp}&r=${screenWidth}x${screenHeight}x${screenColorDepth}&re=${availableScreenWidth}x${availableScreenHeight}',
       'suffix': '&ref=${documentReferrer}',
       'pageview': '${base}&' +
         'p=${title}&' +
@@ -94,14 +94,22 @@ export const ANALYTICS_CONFIG = {
         'g3=${sponsorName}&' +
         'g4=${contentType}&' +
         'x=${scrollTop}&' +
-        'w=${screenHeight}&' +
+        'y=${scrollHeight}&' +
         'j=${decayTime}&' +
         'r=${documentReferrer}&' +
-        't=${clientId(_cb_amp)}${pageViewId}&' +
-        'i=${title}',
+        'b=${pageLoadTime}&' +
+        't=${clientId(_cb)}${pageViewId}&' +
+        'i=${title}&' +
+        'T=${timestamp}&' +
+        'E=${totalEngagedTime}&' +
+        'C=2&' +
+        'R=1&' +
+        'W=0&' +
+        'I=0&' +
+        'c=120',
       'baseSuffix': '&_',
-      'interval': '${host}${basePrefix}&${baseSuffix}',
-      'anchorClick': '${host}${basePrefix}&${baseSuffix}'
+      'interval': '${host}${basePrefix}${baseSuffix}',
+      'anchorClick': '${host}${basePrefix}${baseSuffix}',
     },
     'triggers': {
       'trackInterval': {
@@ -156,7 +164,7 @@ export const ANALYTICS_CONFIG = {
 
   'googleanalytics': {
     'vars': {
-      'eventValue': "0",
+      'eventValue': '0',
       'documentLocation': 'AMPDOC_URL'
     },
     'requests': {
@@ -325,8 +333,50 @@ export const ANALYTICS_CONFIG = {
         'request': 'pageview'
       }
     }
-  }
+  },
 
+  'simplereach': {
+    'vars': {
+      'pid': '',
+      'published_at': '',
+      'authors': [],
+      'channels': [],
+      'tags': []
+    },
+    'requests': {
+      'host': 'https://edge.simplereach.com',
+      'baseParams': 'amp=true' +
+        '&pid=${pid}' +
+        '&title=${title}' +
+        '&url=${canonicalUrl}' +
+        '&date=${published_at}' +
+        '&authors=${authors}' +
+        '&channels=${categories}' +
+        '&tags=${tags}' +
+        '&referrer=${documentReferrer}' +
+        '&page_url=${sourceUrl}' +
+        '&user_id=${clientId(sr_amp_id)}' +
+        '&domain=${canonicalHost}',
+      'visible': '${host}/n?${baseParams}',
+      'timer': '${host}/t?${baseParams}' +
+        '&t=5000' +
+        '&e=5000'
+    },
+    'triggers': {
+      'visible': {
+        'on': 'visible',
+        'request': 'visible'
+      },
+      'timer': {
+        'on': 'timer',
+        'timerSpec': {
+          'interval': 5,
+          'max-timer-length': 1200
+        },
+        'request': 'timer'
+      }
+    }
+  }
 };
 ANALYTICS_CONFIG['infonline']['triggers']['pageview']['iframe' +
 /* TEMPORARY EXCEPTION */ 'Ping'] = true;

@@ -24,6 +24,7 @@ describe('the framerate service', () => {
   let lastRafCallback;
   let call = 0;
   let visible;
+  let csiOn;
   let performance;
   let viewer;
   let sandbox;
@@ -34,6 +35,7 @@ describe('the framerate service', () => {
     clock = sandbox.useFakeTimers();
     lastRafCallback = null;
     visible = true;
+    csiOn = true;
     performance = {
       tickDelta: sinon.spy(),
       flush: sinon.spy()
@@ -41,6 +43,9 @@ describe('the framerate service', () => {
     viewer = {
       isVisible: () => {
         return visible;
+      },
+      isPerformanceTrackingOn() {
+        return csiOn;
       },
       onVisibilityChanged: sinon.spy()
     };
@@ -163,5 +168,30 @@ describe('the framerate service', () => {
     expect(performance.flush.callCount).to.equal(2);
     expect(performance.tickDelta.args[2][0]).to.equal('fps');
     expect(performance.tickDelta.args[3][0]).to.equal('fal');
+  });
+
+  it('respects viewer csi flag', () => {
+    csiOn = false;
+
+    fr = installFramerateService(win);
+    expect(viewer.onVisibilityChanged.callCount).to.equal(1);
+    expect(fr.isActive_).to.be.false;
+    fr.collect();
+    expect(fr.requestedFrame_).to.be.null;
+    visible = true;
+    viewer.onVisibilityChanged.args[0][0]();
+    expect(fr.isActive_).to.be.false;
+    fr.collect();
+    expect(fr.requestedFrame_).to.be.null;
+    viewer.onVisibilityChanged.args[0][0](false);
+    expect(fr.isActive_).to.be.false;
+    expect(fr.requestedFrame_).to.be.null;
+    fr.collect();
+    expect(fr.requestedFrame_).to.be.null;
+
+    csiOn = true;
+    fr.collect();
+    viewer.onVisibilityChanged.args[0][0](false);
+    expect(fr.requestedFrame_).to.not.be.null;
   });
 });

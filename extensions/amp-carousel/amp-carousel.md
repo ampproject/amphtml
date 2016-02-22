@@ -16,7 +16,55 @@ limitations under the License.
 
 ### <a name="amp-carousel"></a> `amp-carousel`
 
-A generic carousel for displaying multiple similar pieces of content along a horizontal axis. It is meant to be highly flexible and performant.
+<table>
+  <tr>
+    <td width="40%"><strong>Description</strong></td>
+    <td>A generic carousel for displaying multiple similar pieces of content along a horizontal axis; meant to be highly flexible and performant.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Availability</strong></td>
+    <td>Stable</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Required Script</strong></td>
+    <td><code>&lt;script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js">&lt;/script></code></td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Examples</strong></td>
+    <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/everything.amp.html">everything.amp.html</a></td>
+  </tr>
+</table>
+
+The following lists validation errors specific to the `amp-carousel` tag
+(see also `amp-carousel` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii):
+
+<!---
+Check for valid HTTPS URL coming soon;
+this table will need to change too.
+-->
+
+<table>
+  <tr>
+    <th width="40%"><strong>Validation Error</strong></th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td width="40%"><a href="/docs/reference/validation_errors.html#tag-required-by-another-tag-is-missing">TAG_REQUIRED_BY_MISSING</a></td>
+    <td>Error thrown when required <code>amp-carousel</code> extension <code>.js</code> script tag is missing or incorrect.</td>
+  </tr>
+  <tr>
+    <td width="40%"><a href="/docs/reference/validation_errors.html#implied-layout-isnt-supported-by-amp-tag">IMPLIED_LAYOUT_INVALID</a></td>
+    <td>Error thrown when implied layout is set to <code>CONTAINER</code>; this layout type isn't supported.</td>
+  </tr>
+  <tr>
+    <td width="40%"><a href="/docs/reference/validation_errors.html#specified-layout-isnt-supported-by-amp-tag">SPECIFIED_LAYOUT_INVALID</a></td>
+    <td>Error thrown when specified layout is set to <code>CONTAINER</code>; this layout type isn't supported.</td>
+  </tr>
+  <tr>
+    <td width="40%"><code>Layout not supported for: responsive</code></td>
+    <td>Error thrown when layout set to <code>RESPONSIVE</code> and the <code>type</code> attribute is set to (or defaults to) <code>carousel</code>.</td>
+  </tr>
+</table>
 
 #### Behavior
 
