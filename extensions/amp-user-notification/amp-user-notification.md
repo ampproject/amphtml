@@ -31,7 +31,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://amp-by-example.appspot.com/amp-user-notification_with_local_storage.html">amp-user-notification_with_local_storage.html</a></br><a href="https://amp-by-example.appspot.com/amp-user-notification_with_server_endpoint.html">amp-user-notification_with_server_endpoint.html</a></br><a href="https://github.com/ampproject/amphtml/blob/master/examples/user-notification.amp.html">user-notification.amp.html</a></td>
+    <td><a href="https://amp-by-example.appspot.com/amp-user-notification_with_local_storage.html">amp-user-notification_with_local_storage.html</a><br /><a href="https://amp-by-example.appspot.com/amp-user-notification_with_server_endpoint.html">amp-user-notification_with_server_endpoint.html</a><br /><a href="https://github.com/ampproject/amphtml/blob/master/examples/user-notification.amp.html">user-notification.amp.html</a></td>
   </tr>
 </table>
 
