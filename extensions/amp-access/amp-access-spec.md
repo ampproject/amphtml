@@ -168,7 +168,7 @@ Here’s an example of the AMP Access configuration:
 
 ##Access URL Variables
 
-When configuring the URLs for various endpoints, the Publisher can use substitution variables. These variables are a subset of the variables defined in the [AMP Var Spec](https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md). The set of allowed variables is defined in the table below:
+When configuring the URLs for various endpoints, the Publisher can use substitution variables. The full list of these variables are defined in the [AMP Var Spec](https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md). In addition, this spec adds a few access-specific variables such as `READER_ID` and `AUTHDATA`. Some of the most relevant variables are described in the table below:
 
 Var               | Description
 ----------------- | -----------
