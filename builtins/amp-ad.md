@@ -2,12 +2,6 @@
 
 NOTE: The specification of `amp-ad` is likely to significantly evolve over time. The current approach is designed to bootstrap the format to be able to show ads.
 
-A container to display an ad.
-
-Ads are loaded like all other resources in AMP documents, with a special
-custom element called `<amp-ad>`. No ad network provided JavaScript is allowed to run inside the AMP document. Instead the AMP runtime loads an iframe from a
-different origin (via iframe sandbox) as the AMP document and executes the ad
-network’s JS inside that iframe sandbox.
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
@@ -24,12 +18,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-AMP documents only support ads served via HTTPS.
-
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td>A container to display an ad.</td>
+    <td>A container to display an ad. AMP documents only support ads served via HTTPS.</td>
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
@@ -37,12 +29,12 @@ AMP documents only support ads served via HTTPS.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/ads.amp.html">ads.amp.html</a></td>
+    <td><a href="https://amp-by-example.appspot.com/amp-ad.html">amp-ad.html</a></br><a href="https://github.com/ampproject/amphtml/blob/master/examples/ads.amp.html">ads.amp.html</a></td>
   </tr>
 </table>
 
 The following lists validation errors specific to the `amp-ad` tag
-(see also `amp-ad` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii):
+(see also `amp-ad` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii)):
 
 <table>
   <tr>
@@ -81,8 +73,14 @@ The following lists validation errors specific to the `amp-ad` tag
 
 ### Behavior
 
+Ads are loaded like all other resources in AMP documents, with a special
+custom element called `<amp-ad>`. No ad network provided JavaScript is allowed to run inside the AMP document. Instead the AMP runtime loads an iframe from a
+different origin (via iframe sandbox) as the AMP document and executes the ad
+network’s JS inside that iframe sandbox.
+
 The `<amp-ad>` requires width and height values to be specified like all
 resources in AMP. It requires a `type` argument that select what ad network is displayed. All `data-*` attributes on the tag are automatically passed as arguments to the code that eventually renders the ad. What `data-` attributes are required for a given type of network depends and must be documented with the ad network.
+
 ```html
 <amp-ad width=300 height=250
     type="a9"
