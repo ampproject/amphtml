@@ -355,6 +355,13 @@ var forbiddenTermsSrcInclusive = {
   '\\.webkitConvertPointFromNodeToPage(?!_)': bannedTermsHelpString,
   '\\.webkitConvertPointFromPageToNode(?!_)': bannedTermsHelpString,
   '\\.changeHeight(?!_)': bannedTermsHelpString,
+  'reject\\(\\)': {
+    message: 'Always supply a reason in rejections. ' +
+        'error.cancellation() may be applicable.',
+    whitelist: [
+      'extensions/amp-access/0.1/access-expr-impl.js',
+    ],
+  }
 };
 
 // Terms that must appear in a source file.
