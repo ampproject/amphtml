@@ -66,13 +66,13 @@ Example value: `example.com`
 
 Provides the canonical URL's path part.
 
-Example value: `example2Fanalytics.html`
+Example value: `%2Fanalytics.html`
 
 ### canonicalUrl
 
 Provides the canonical URL of the current document.
 
-Example value: `httpexample3Aexample2F%2Fexample.com%3A8000%2Fanalytics.html`
+Example value: `http%3A%2F%2Fexample.com%3A8000%2Fanalytics.html`
 
 ### documentCharset
 
