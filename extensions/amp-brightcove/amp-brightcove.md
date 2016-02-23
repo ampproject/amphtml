@@ -44,23 +44,23 @@ The following lists validation errors specific to the `amp-brightcove` tag
     <th>Description</th>
   </tr>
   <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#tag-required-by-another-tag-is-missing">The '%1' tag is missing or incorrect, but required by '%2'.</a></td>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#tag-required-by-another-tag-is-missing">The 'example1' tag is missing or incorrect, but required by 'example2'.</a></td>
     <td>Error thrown when required <code>amp-brightcove</code> extension <code>.js</code> script tag is missing or incorrect.</td>
   </tr>
   <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#mandatory-attribute-missing">The mandatory attribute '%1' is missing in tag '%2'.</a></td>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#mandatory-attribute-missing">The mandatory attribute 'example1' is missing in tag 'example2'.</a></td>
     <td>Error thrown when <code>data-account</code> attribute is missing.</td>
   </tr>
   <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#implied-layout-isnt-supported-by-amp-tag">The implied layout '%1' is not supported by tag '%2'.</a></td>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#implied-layout-isnt-supported-by-amp-tag">The implied layout 'example1' is not supported by tag 'example2'.</a></td>
     <td>Error thrown when implied layout is set to <code>CONTAINER</code>; this layout type isn't supported.</td>
   </tr>
   <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#specified-layout-isnt-supported-by-amp-tag">The specified layout '%1' is not supported by tag '%2'.</a></td>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#specified-layout-isnt-supported-by-amp-tag">The specified layout 'example1' is not supported by tag 'example2'.</a></td>
     <td>Error thrown when specified layout is set to <code>CONTAINER</code>; this layout type isn't supported.</td>
   </tr>
   <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-property-value">The property '%1' in attribute '%2' in tag '%3' is set to 'example4', which is invalid.</a></td>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-property-value">The property 'example1' in attribute 'example2' in tag 'example3' is set to 'example4', which is invalid.</a></td>
     <td>Error thrown when invalid value is given for attributes <code>height</code> or <code>width</code>. For example, <code>height=auto</code> triggers this error for all supported layout types, with the exception of <code>NODISPLAY</code>.</td>
   </tr>
 </table>
