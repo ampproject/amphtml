@@ -200,7 +200,12 @@ function getBaseCid(cid, persistenceConsent) {
     return Promise.resolve(cid.baseCid_);
   }
   const win = cid.win;
-  const stored = read(win);
+  let stored = read(win);
+  // Protect against a case where we could have stored the "undefined"
+  // value as a string.
+  if (stored === 'undefined') {
+    stored = null;
+  }
   // See if we have a stored base cid and whether it is still valid
   // in terms of expiration.
   if (stored && !isExpired(stored)) {
@@ -215,7 +220,12 @@ function getBaseCid(cid, persistenceConsent) {
   // Note, that we never try to persist to localStorage in this case.
   const viewer = viewerFor(win);
   if (viewer.isEmbedded()) {
-    return viewer.getBaseCid();
+    return viewer.getBaseCid().then(cid => {
+      if (!cid) {
+        throw new Error('No CID');
+      }
+      return cid;
+    });
   }
 
   // We need to make a new one.
