@@ -47,6 +47,7 @@ describe('Viewer', () => {
       referrer: '',
       body: {style: {}},
       documentElement: {style: {}},
+      title: 'Awesome doc',
     };
     windowMock = sandbox.mock(windowApi);
     viewer = new Viewer(windowApi);
@@ -175,6 +176,7 @@ describe('Viewer', () => {
     expect(m.eventType).to.equal('documentLoaded');
     expect(m.data.width).to.equal(11);
     expect(m.data.height).to.equal(12);
+    expect(m.data.title).to.equal('Awesome doc');
   });
 
   it('should post documentResized event', () => {
