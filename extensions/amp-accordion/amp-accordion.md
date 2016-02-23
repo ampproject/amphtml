@@ -16,7 +16,21 @@ limitations under the License.
 
 ### <a name="amp-accordion"></a> `amp-accordion`
 
-An accordion provides a way for viewers to have a glance at the outline of the content and jump to a section or their choice at their will. This would be extremely helpful for handheld mobile devices where even a couple of sentences in a section would lead to the viewer needing to scroll.
+<table>
+  <tr>
+    <td width="40%"><strong>Description</strong></td>
+    <td>An accordion provides a way for viewers to have a glance at the outline of the content and jump to a section or their choice at their will. This would be extremely helpful for handheld mobile devices where even a couple of sentences in a section would lead to the viewer needing to scroll.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Availability</strong></td>
+    <td><a href="/docs/reference/experimental.html">Experimental</a></td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Examples</strong></td>
+    <td>None</td>
+  </tr>
+</table>
+
 
 #### Behavior
 
