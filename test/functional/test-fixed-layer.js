@@ -162,8 +162,13 @@ describe('FixedLayer', () => {
         top: '',
         bottom: '',
         position: '',
+        opacity: '0.9',
+        visibility: 'visible',
       },
-      computedStyle: {},
+      computedStyle: {
+        opacity: '0.9',
+        visibility: 'visible',
+      },
       matches: () => true,
       compareDocumentPosition: other => {
         if (id < other.id) {
@@ -559,6 +564,34 @@ describe('FixedLayer', () => {
       });
       expect(fe.fixedNow).to.be.false;
       expect(fe.placeholder.parentElement).to.not.exist;
+    });
+
+    it('should disregard opaque element', () => {
+      element1.computedStyle['position'] = 'fixed';
+      element1.offsetWidth = 10;
+      element1.offsetHeight = 10;
+      element1.computedStyle['opacity'] = '0';
+
+      expect(vsyncTasks).to.have.length(1);
+      const state = {};
+      vsyncTasks[0].measure(state);
+
+      expect(state['F0'].fixed).to.equal(true);
+      expect(state['F0'].transferrable).to.equal(false);
+    });
+
+    it('should disregard visibility=hidden element', () => {
+      element1.computedStyle['position'] = 'fixed';
+      element1.offsetWidth = 10;
+      element1.offsetHeight = 10;
+      element1.computedStyle['visibility'] = 'hidden';
+
+      expect(vsyncTasks).to.have.length(1);
+      const state = {};
+      vsyncTasks[0].measure(state);
+
+      expect(state['F0'].fixed).to.equal(true);
+      expect(state['F0'].transferrable).to.equal(false);
     });
   });
 });
