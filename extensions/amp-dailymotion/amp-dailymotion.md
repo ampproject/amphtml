@@ -51,6 +51,10 @@ The following lists validation errors specific to the `amp-dailymotion` tag
     <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#mandatory-attribute-missing">The mandatory attribute 'example1' is missing in tag 'example2'.</a></td>
     <td>Error thrown when <code>data-videoid</code> attribute missing.</td>
   </tr>
+    <tr>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-attribute-value">The attribute 'example1' in tag 'example2' is set to the invalid value 'example3'.</a></td>
+    <td>Error thrown when the <code>data-videoid</code> attribute is invalid. Check your ID and make sure the first letter is lowercase; the ID is case sensitive.</td>
+  </tr>
   <tr>
     <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#implied-layout-isnt-supported-by-amp-tag">The implied layout 'example1' is not supported by tag 'example2'.</a></td>
     <td>Error thrown when implied layout is set to <code>CONTAINER</code>; this layout type isn't supported.</td>
