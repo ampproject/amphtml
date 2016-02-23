@@ -663,3 +663,79 @@ describe('Slides functional', () => {
     });
   });
 });
+
+describe('empty Slides functional', () => {
+
+  let element;
+  let slides;
+
+  function setupElements() {
+    element = document.createElement('div');
+    element.setAttribute('type', 'slides');
+    element.style.width = '320px';
+    element.style.height = '200px';
+    document.body.appendChild(element);
+
+    element.getRealChildren = () => [];
+    return element;
+  }
+
+  function setupSlides() {
+    slides = new AmpSlides(element);
+    return slides;
+  }
+
+  function teardownElements() {
+    document.body.removeChild(element);
+  }
+
+  beforeEach(() => {
+    setupElements();
+    setupSlides();
+  });
+
+  afterEach(() => {
+    teardownElements();
+  });
+
+  it('should throw an assert error on buildCallback', () => {
+    expect(() => {
+      slides.buildCallback();
+    }).to.throw(/should have at least 1 slide/);
+  });
+
+  it('should not throw an error on layoutCallback', () => {
+    expect(() => {
+      slides.buildCallback();
+    }).to.throw(/should have at least 1 slide/);
+    expect(() => {
+      slides.layoutCallback();
+    }).to.not.throw();
+  });
+
+  it('should not throw an error on viewportCallback', () => {
+    expect(() => {
+      slides.buildCallback();
+    }).to.throw(/should have at least 1 slide/);
+    expect(() => {
+      slides.viewportCallback();
+    }).to.not.throw();
+  });
+
+  it('should not throw an error on goCallback', () => {
+    expect(() => {
+      slides.buildCallback();
+    }).to.throw(/should have at least 1 slide/);
+    expect(() => {
+      slides.goCallback();
+    }).to.not.throw();
+  });
+
+  it('should not have any controls', () => {
+    expect(() => {
+      slides.buildCallback();
+    }).to.throw(/should have at least 1 slide/);
+    expect(slides.hasNext()).to.be.false;
+    expect(slides.hasPrev()).to.be.false;
+  });
+});
