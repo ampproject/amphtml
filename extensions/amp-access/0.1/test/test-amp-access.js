@@ -1031,6 +1031,24 @@ describe('AccessService login', () => {
     sandbox = null;
   });
 
+  it('should intercept global action to login', () => {
+    serviceMock.expects('login')
+        .withExactArgs('')
+        .once();
+    const event = {preventDefault: sandbox.spy()};
+    service.handleAction_({method: 'login', event: event});
+    expect(event.preventDefault.callCount).to.equal(1);
+  });
+
+  it('should intercept global action to login-other', () => {
+    serviceMock.expects('login')
+        .withExactArgs('other')
+        .once();
+    const event = {preventDefault: sandbox.spy()};
+    service.handleAction_({method: 'login-other', event: event});
+    expect(event.preventDefault.callCount).to.equal(1);
+  });
+
   it('should build login url', () => {
     cidMock.expects('get')
         .withExactArgs(
