@@ -40,27 +40,27 @@ The following lists validation errors specific to the `amp-pixel` tag
     <th>Description</th>
   </tr>
   <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#mandatory-attribute-missing">MANDATORY_ATTR_MISSING</a></td>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#mandatory-attribute-missing">The mandatory attribute '%1' is missing in tag '%2'.</a></td>
     <td>Error thrown when <code>src</code> attribute is missing.</td>
   </tr>
   <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#missing-url">MISSING_URL</a></td>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#missing-url">Missing URL for attribute '%1' in tag '%2'.</a></td>
     <td>Error thrown when <code>src</code> attribute is missing it's URL.</td>
   </tr>
   <tr>
-  <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-url">INVALID_URL</a></td>
+  <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-url">Malformed URL '%3' for attribute '%1' in tag '%2'.</a></td>
     <td>Error thrown when <code>src</code> attribute's URL is invalid.</td>
   </tr>
   <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-url-protocol">INVALID_URL_PROTOCOL</a></td>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-url-protocol">Invalid URL protocol '%3:' for attribute '%1' in tag '%2'.</a></td>
     <td>Error thrown <code>src</code> attribute's URL is <code>http</code>; <code>https</code> protocol required.</td>
   </tr>
   <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#implied-layout-isnt-supported-by-amp-tag">IMPLIED_LAYOUT_INVALID</a></td>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#implied-layout-isnt-supported-by-amp-tag">The implied layout '%1' is not supported by tag '%2'.</a></td>
     <td>Error thrown when implied layout set to <code>FIXED_HEIGHT</code>, <code>RESPONSIVE</code>, <code>FILL</code>, or <code>CONTAINER</code> as these aren't supported.</td>
   </tr>
   <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#specified-layout-isnt-supported-by-amp-tag">SPECIFIED_LAYOUT_INVALID</a></td>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#specified-layout-isnt-supported-by-amp-tag">The specified layout '%1' is not supported by tag '%2'.</a></td>
     <td>Error thrown when specified layout set to <code>FIXED_HEIGHT</code>, <code>RESPONSIVE</code>, <code>FILL</code>, or <code>CONTAINER</code> as these aren't supported.</td>
   </tr>
 </table>
