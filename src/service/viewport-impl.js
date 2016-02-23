@@ -878,7 +878,10 @@ export class ViewportBindingNaturalIosEmbed_ {
   /** @override */
   updatePaddingTop(paddingTop) {
     onDocumentReady(this.win.document, () => {
-      this.win.document.body.style.paddingTop = px(paddingTop);
+      // Also tried `paddingTop` but it didn't work for `position:absolute`
+      // on iOS.
+      this.win.document.body.style.borderTop =
+          `${paddingTop}px solid transparent`;
     });
   }
 

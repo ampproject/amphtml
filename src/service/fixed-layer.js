@@ -191,6 +191,8 @@ export class FixedLayer {
           const position = styles.getPropertyValue('position');
           const top = styles.getPropertyValue('top');
           const bottom = styles.getPropertyValue('bottom');
+          const opacity = parseFloat(styles.getPropertyValue('opacity'));
+          const visibility = styles.getPropertyValue('visibility');
           // Element is indeed fixed. Visibility is added to the test to
           // avoid moving around invisible elements.
           const isFixed = (
@@ -198,9 +200,18 @@ export class FixedLayer {
               element./*OK*/offsetWidth > 0 &&
               element./*OK*/offsetHeight > 0);
           // Transferability requires element to be fixed and top or bottom
-          // to be styled with `0`.
+          // to be styled with `0`. Also, do not transfer opaque or invisible
+          // elements - that's a lot of work for no benefit. Additionally,
+          // invisible/opaque elements used for "service" needs and thus best
+          // kept in the original tree.
+          // Also, the `height` is constrained to at most 300px. This is to
+          // avoid transfering of more substantial sections for now. Likely
+          // to be relaxed in the future.
           const isTransferrable = (
               isFixed &&
+              visibility != 'hidden' &&
+              opacity > 0 &&
+              element./*OK*/offsetHeight < 300 &&
               (this.isAllowedCoord_(top) || this.isAllowedCoord_(bottom)));
           if (isTransferrable) {
             hasTransferables = true;

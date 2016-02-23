@@ -726,13 +726,13 @@ describe('ViewportBindingNaturalIosEmbed', () => {
     expect(bodyChildren[2].style.visibility).to.equal('hidden');
   });
 
-  it('should update padding on BODY', () => {
+  it('should update border on BODY', () => {
     windowApi.document = {
       body: {style: {}}
     };
     binding.updatePaddingTop(31);
-    expect(windowApi.document.body.style.paddingTop).to
-        .equal('31px');
+    expect(windowApi.document.body.style.borderTop).to
+        .equal('31px solid transparent');
   });
 
   it('should calculate size', () => {
