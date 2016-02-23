@@ -1,4 +1,4 @@
-### <a name="amp-access-spec"></a> `amp-access-spec`
+### <a name="amp-access-spec"></a> AMP Access Specification
 
 **This extension is under active development, and the version number of the specification section should provide guidance to its evolution.**
 
@@ -47,11 +47,11 @@ The following lists validation errors specific to the `amp-access-spec` tag
   </tr>
   <tr>
     <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#tag-required-by-another-tag-is-missing">The 'example1' tag is missing or incorrect, but required by 'example2'.</a></td>
-    <td>Error thrown when required <code>amp-access-spec</code> extension <code>.js</code> script tag is missing or incorrect.</td>
+    <td>Error thrown when required <code>amp-access</code> extension <code>.js</code> script tag is missing or incorrect.</td>
   </tr>
   <tr>
     <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#mandatory-attribute-missing">The mandatory attribute 'example1' is missing in tag 'example2'.</a></td>
-    <td>Error thrown when the <code>amp-access-spec</code> extension <code>.json</code> script is missing the mandatory attribute, <code>type</code>.</td>
+    <td>Error thrown when the <code>amp-access</code> extension <code>.json</code> script is missing the mandatory attribute, <code>type</code>.</td>
   </tr>
   <tr>
     <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-attribute-value">The attribute 'example1' in tag 'example2' is set to the invalid value 'example3'.</a></td>
