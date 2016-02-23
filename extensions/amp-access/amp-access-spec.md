@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-### <a name="amp-access-spec"></a>AMP Access Spec
+### <a name="amp-access-spec"></a> `amp-access-spec`
 
 **This extension is under active development, and the version number of the specification section should provide guidance to its evolution.**
 
