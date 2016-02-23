@@ -66,7 +66,7 @@ describe('Rendering of one ad', () => {
       return poll('main ad JS is injected', () => {
         return iframe.contentWindow.document.querySelector(
             'script[src="https://www.googletagservices.com/tag/js/gpt.js"]');
-      });
+      }, undefined,  /* timeout */ 4000);
     }).then(() => {
       return poll('render-start message received', () => {
         return fixture.messages.filter(message => {
