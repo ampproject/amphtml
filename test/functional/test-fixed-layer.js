@@ -21,7 +21,6 @@ import * as sinon from 'sinon';
 describe('FixedLayer', () => {
   let sandbox;
   let documentApi;
-  let domElements;
   let vsyncApi;
   let vsyncTasks;
   let docBody, docElem;
@@ -44,7 +43,6 @@ describe('FixedLayer', () => {
     docBody.appendChild(element1);
     docBody.appendChild(element2);
     docBody.appendChild(element3);
-    domElements = [element1, element2, element3];
 
     const invalidRule = createValidRule('#invalid', [element1, element3]);
     documentApi = {
@@ -117,7 +115,7 @@ describe('FixedLayer', () => {
         return allRules[selector].elements;
       },
       contains: elem => {
-        return domElements.indexOf(elem) != -1;
+        return (!!elem.parentElement);
       },
       defaultView: {
         getComputedStyle: elem => {
@@ -140,6 +138,9 @@ describe('FixedLayer', () => {
       runPromise: task => {
         vsyncTasks.push(task);
         return Promise.resolve();
+      },
+      mutate: mutator => {
+        vsyncTasks.push({mutate: mutator});
       }
     };
   });
@@ -179,6 +180,13 @@ describe('FixedLayer', () => {
       appendChild: child => {
         child.parentElement = elem;
         children.push(child);
+      },
+      removeChild: child => {
+        const index = children.indexOf(child);
+        if (index != -1) {
+          children.splice(index, 1);
+        }
+        child.parentElement = null;
       },
       replaceChild: (newChild, oldChild) => {
         oldChild.parentElement = null;
@@ -274,8 +282,26 @@ describe('FixedLayer', () => {
       });
     });
 
+    it('should add and remove element directly', () => {
+      const updateStub = sandbox.stub(fixedLayer, 'update');
+      expect(fixedLayer.fixedElements_).to.have.length(2);
+
+      // Add.
+      fixedLayer.addElement(element3, '*');
+      expect(updateStub.callCount).to.equal(1);
+      expect(fixedLayer.fixedElements_).to.have.length(3);
+      const fe = fixedLayer.fixedElements_[2];
+      expect(fe.id).to.equal('F2');
+      expect(fe.element).to.equal(element3);
+      expect(fe.selectors).to.deep.equal(['*']);
+
+      // Remove.
+      fixedLayer.removeElement(element3);
+      expect(fixedLayer.fixedElements_).to.have.length(2);
+    });
+
     it('should remove node when disappeared from DOM', () => {
-      domElements.splice(0, 1);
+      docBody.removeChild(element1);
       expect(fixedLayer.fixedElements_).to.have.length(2);
       fixedLayer.update();
       expect(fixedLayer.fixedElements_).to.have.length(1);
@@ -494,7 +520,7 @@ describe('FixedLayer', () => {
       expect(fe.element.parentElement).to.not.equal(fixedLayer.fixedLayer_);
     });
 
-    it('should returned transfered element if it no longer matches', () => {
+    it('should return transfered element if it no longer matches', () => {
       const fe = fixedLayer.fixedElements_[0];
       fe.element.matches = () => false;
       fixedLayer.mutateFixedElement_(fe, 1, {
@@ -511,5 +537,28 @@ describe('FixedLayer', () => {
       expect(fe.element.style.zIndex).to.equal('');
     });
 
+    it('should remove transfered element if it no longer exists', () => {
+      const fe = fixedLayer.fixedElements_[0];
+
+      // Add.
+      fixedLayer.mutateFixedElement_(fe, 1, {
+        fixed: true,
+        transferrable: true,
+        zIndex: '11',
+      });
+      expect(fe.fixedNow).to.be.true;
+      expect(fe.placeholder).to.exist;
+      expect(fe.element.parentElement).to.equal(fixedLayer.fixedLayer_);
+      expect(fixedLayer.fixedLayer_).to.exist;
+
+      // Remove from DOM.
+      fe.element.parentElement.removeChild(fe.element);
+      fixedLayer.mutateFixedElement_(fe, 1, {
+        fixed: false,
+        transferrable: false,
+      });
+      expect(fe.fixedNow).to.be.false;
+      expect(fe.placeholder.parentElement).to.not.exist;
+    });
   });
 });

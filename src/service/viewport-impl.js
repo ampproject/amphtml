@@ -370,6 +370,26 @@ export class Viewport {
   }
 
   /**
+   * Adds the element to the fixed layer.
+   * @param {!Element} element
+   */
+  addToFixedLayer(element) {
+    if (this.fixedLayer_) {
+      this.fixedLayer_.addElement(element);
+    }
+  }
+
+  /**
+   * Removes the element from the fixed layer.
+   * @param {!Element} element
+   */
+  removeFromFixedLayer(element) {
+    if (this.fixedLayer_) {
+      this.fixedLayer_.removeElement(element);
+    }
+  }
+
+  /**
    * Updates touch zoom meta data. Returns `true` if any actual
    * changes have been done.
    * @return {boolean}

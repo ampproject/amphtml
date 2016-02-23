@@ -99,7 +99,6 @@ export class FixedLayer {
     }
 
     try {
-      const idMap = {};
       fixedSelectors.forEach(selector => {
         const elements = this.doc.querySelectorAll(selector);
         for (let i = 0; i < elements.length; i++) {
@@ -107,7 +106,7 @@ export class FixedLayer {
             // We shouldn't have too many of `fixed` elements.
             break;
           }
-          this.setupFixedElement_(elements[i], selector, idMap);
+          this.setupFixedElement_(elements[i], selector);
         }
       });
     } catch (e) {
@@ -116,15 +115,7 @@ export class FixedLayer {
     }
 
     // Sort in document order.
-    this.fixedElements_.sort(function(fe1, fe2) {
-      // 8 | 2 = 0x0A
-      // 2 - preceeding
-      // 8 - contains
-      if (fe1.element.compareDocumentPosition(fe2.element) & 0x0A != 0) {
-        return 1;
-      }
-      return -1;
-    });
+    this.sortInDomOrder_();
 
     if (this.fixedElements_.length > 0 && !this.transfer_ &&
             platform.isIos()) {
@@ -137,11 +128,36 @@ export class FixedLayer {
   }
 
   /**
+   * Updates the viewer's padding-top position and recalculates offsets of
+   * all elements.
    * @param {number} paddingTop
    */
   updatePaddingTop(paddingTop) {
     this.paddingTop_ = paddingTop;
     this.update();
+  }
+
+  /**
+   * Adds the element directly into the fixed layer, bypassing discovery.
+   * @param {!Element} element
+   */
+  addElement(element) {
+    this.setupFixedElement_(element, /* selector */ '*');
+    this.sortInDomOrder_();
+    this.update();
+  }
+
+  /**
+   * Removes the element from the fixed layer.
+   * @param {!Element} element
+   */
+  removeElement(element) {
+    this.removeFixedElement_(element);
+    if (this.fixedLayer_) {
+      this.vsync_.mutate(() => {
+        this.returnFromFixedLayer_(element);
+      });
+    }
   }
 
   /**
@@ -157,16 +173,10 @@ export class FixedLayer {
     }
 
     // Some of the elements may no longer be in DOM.
-    /** @type {!Array<number>} */
-    const toRemove = [];
-    this.fixedElements_.forEach((fe, i) => {
-      if (!this.doc.contains(fe.element)) {
-        toRemove.push(i);
-      }
-    });
-    toRemove.forEach(i => {
-      this.fixedElements_.splice(i, 1);
-    });
+    /** @type {!Array<!FixedElementDef>} */
+    const toRemove = this.fixedElements_.filter(
+        fe => !this.doc.contains(fe.element));
+    toRemove.forEach(fe => this.removeFixedElement_(fe.element));
 
     // Next, the positioning-related properties will be measured. If a
     // potentially fixed element turns out to be actually fixed, it will
@@ -239,18 +249,22 @@ export class FixedLayer {
    *
    * @param {!Element} element
    * @param {string} selector
-   * @param {!Object<string, !FixedElementDef>} idMap
    * @private
    */
-  setupFixedElement_(element, selector, idMap) {
-    let fixedId = element.getAttribute('i-amp-fixedid');
-    let fe;
-    if (fixedId) {
+  setupFixedElement_(element, selector) {
+    let fe = null;
+    for (let i = 0; i < this.fixedElements_.length; i++) {
+      if (this.fixedElements_[i].element == element) {
+        fe = this.fixedElements_[i];
+        break;
+      }
+    }
+    if (fe) {
       // Already seen.
-      fe = idMap[fixedId];
       fe.selectors.push(selector);
     } else {
-      fixedId = 'F' + (this.counter_++);
+      // A new entry.
+      const fixedId = 'F' + (this.counter_++);
       element.setAttribute('i-amp-fixedid', fixedId);
       fe = {
         id: fixedId,
@@ -258,8 +272,35 @@ export class FixedLayer {
         selectors: [selector],
       };
       this.fixedElements_.push(fe);
-      idMap[fixedId] = fe;
     }
+  }
+
+  /**
+   * Removes element from the fixed layer.
+   *
+   * @param {!Element} element
+   * @private
+   */
+  removeFixedElement_(element) {
+    for (let i = 0; i < this.fixedElements_.length; i++) {
+      if (this.fixedElements_[i].element == element) {
+        this.fixedElements_.splice(i, 1);
+        break;
+      }
+    }
+  }
+
+  /** @private */
+  sortInDomOrder_() {
+    this.fixedElements_.sort(function(fe1, fe2) {
+      // 8 | 2 = 0x0A
+      // 2 - preceeding
+      // 8 - contains
+      if (fe1.element.compareDocumentPosition(fe2.element) & 0x0A != 0) {
+        return 1;
+      }
+      return -1;
+    });
   }
 
   /**
@@ -339,10 +380,33 @@ export class FixedLayer {
 
     // Test if the element still matches one of the `fixed ` selectors. If not
     // return it back to BODY.
-    const matches = fe.selectors.some(selector => element.matches(selector));
+    const matches = fe.selectors.some(
+        selector => this.matches_(element, selector));
     if (!matches) {
       this.returnFromFixedLayer_(fe);
     }
+  }
+
+  /**
+   * @param {!Element} element
+   * @param {string} selector
+   * @return {boolean}
+   */
+  matches_(element, selector) {
+    try {
+      const matcher = element.matches ||
+          element.webkitMatchesSelector ||
+          element.mozMatchesSelector ||
+          element.msMatchesSelector ||
+          element.oMatchesSelector;
+      if (matcher) {
+        return matcher.call(element, selector);
+      }
+    } catch (e) {
+      // Fail silently.
+      setTimeout(() => {throw e;});
+    }
+    return false;
   }
 
   /**
@@ -350,14 +414,18 @@ export class FixedLayer {
    * @private
    */
   returnFromFixedLayer_(fe) {
-    if (!fe.placeholder || !fe.placeholder.parentElement) {
+    if (!fe.placeholder || !this.doc.contains(fe.placeholder)) {
       return;
     }
     log.fine(TAG, 'return from fixed:', fe.id, fe.element);
-    if (fe.element.style.zIndex) {
-      fe.element.style.zIndex = '';
+    if (this.doc.contains(fe.element)) {
+      if (fe.element.style.zIndex) {
+        fe.element.style.zIndex = '';
+      }
+      fe.placeholder.parentElement.replaceChild(fe.element, fe.placeholder);
+    } else {
+      fe.placeholder.parentElement.removeChild(fe.placeholder);
     }
-    fe.placeholder.parentElement.replaceChild(fe.element, fe.placeholder);
   }
 
   /**

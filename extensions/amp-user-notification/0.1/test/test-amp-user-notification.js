@@ -270,6 +270,8 @@ describe('amp-user-notification', () => {
       const impl = el.implementation_;
       impl.buildCallback();
       impl.dialogPromise_ = Promise.resolve();
+      const addToFixedLayerStub = sandbox.stub(
+          impl.getViewport(), 'addToFixedLayer');
 
       expect(el).to.not.have.class('amp-active');
 
@@ -277,6 +279,8 @@ describe('amp-user-notification', () => {
         expect(el).to.not.have.class('amp-active');
         return impl.show().then(() => {
           expect(el).to.have.class('amp-active');
+          expect(addToFixedLayerStub.callCount).to.equal(1);
+          expect(addToFixedLayerStub.getCall(0).args[0]).to.equal(el);
         });
       });
     });
@@ -319,6 +323,8 @@ describe('amp-user-notification', () => {
       impl.buildCallback();
       impl.dialogPromise_ = Promise.resolve();
       impl.dialogResolve_ = function() {};
+      const removeFromFixedLayerStub = sandbox.stub(
+          impl.getViewport(), 'removeFromFixedLayer');
 
       expect(el).to.not.have.class('amp-active');
 
@@ -332,6 +338,8 @@ describe('amp-user-notification', () => {
         expect(el).to.not.have.class('amp-active');
         expect(el).to.have.class('amp-hidden');
         expect(stub2.calledOnce).to.be.true;
+        expect(removeFromFixedLayerStub.callCount).to.equal(1);
+        expect(removeFromFixedLayerStub.getCall(0).args[0]).to.equal(el);
       });
     });
   });
