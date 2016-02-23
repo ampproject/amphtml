@@ -60,7 +60,7 @@ export function assert(shouldBeTrueish, message, var_args) {
       pushIfNonEmpty(messageArray, nextConstant.trim());
       formatted += toString(val) + nextConstant;
     }
-    const e = new Error(formatted + ASSERT_SENTINEL);
+    const e = userError(formatted);
     e.fromAssert = true;
     e.associatedElement = firstElement;
     e.messageArray = messageArray;
@@ -87,6 +87,18 @@ export function assertEnumValue(enumObj, s, opt_enumName) {
     }
   }
   throw new Error(`Unknown ${opt_enumName || 'enum'} value: "${s}"`);
+}
+
+/**
+ * Returns an error object that will be treated as user originated error
+ * by the system.
+ * User in this case means: 'Error caused by doc as opposed internal AMP
+ * error'.
+ * @param {string} message
+ * @return {!Error}
+ */
+export function userError(message) {
+  return new Error(message + ASSERT_SENTINEL);
 }
 
 /**

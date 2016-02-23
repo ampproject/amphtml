@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {ASSERT_SENTINEL, assert, assertEnumValue, isAssertErrorMessage} from
-    '../../src/asserts';
+import {ASSERT_SENTINEL, assert, assertEnumValue, isAssertErrorMessage,
+    userError} from '../../src/asserts';
 
 describe('asserts', () => {
 
@@ -97,6 +97,12 @@ describe('asserts', () => {
     }
     // Unreachable
     expect(false).to.be.true;
+  });
+
+  it('should create user errors', () => {
+    expect(userError('test')).to.be.instanceof(Error);
+    expect(isAssertErrorMessage(userError('test').message)).to.be.true;
+    expect(userError('test').message).to.contain('test');
   });
 });
 

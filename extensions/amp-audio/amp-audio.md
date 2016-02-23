@@ -36,7 +36,7 @@ limitations under the License.
 </table>
 
 The following lists validation errors specific to the `amp-audio` tag
-(see also `amp-audio` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii):
+(see also `amp-audio` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii)):
 
 <!---
 What does fixed height and fixed width mean for audio layout?
@@ -49,31 +49,31 @@ May need to add something to this table based on technical review.
     <th>Description</th>
   </tr>
   <tr>
-    <td width="40%"><a href="/docs/reference/validation_errors.html#tag-required-by-another-tag-is-missing">TAG_REQUIRED_BY_MISSING</a></td>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#tag-required-by-another-tag-is-missing">TAG_REQUIRED_BY_MISSING</a></td>
     <td>Error thrown when required <code>amp-audio</code> extension <code>.js</code> script tag is missing or incorrect.</td>
   </tr>
   <tr>
-    <td width="40%"><a href="/docs/reference/validation_errors.html#mandatory-tag-ancestor-with-hint">MANDATORY_TAG_ANCESTOR_WITH_HINT</a></td>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#mandatory-tag-ancestor-with-hint">MANDATORY_TAG_ANCESTOR_WITH_HINT</a></td>
     <td>Error thrown if your AMP document uses <code>audio</code> instead of <code>amp-audio</code>. Error message: The tag <code>audio</code> may only appear as a descendant of tag <code>noscript</code>. Did you mean <code>amp-audio</code>?</td>
   </tr>
   <tr>
-    <td width="40%"><a href="/docs/reference/validation_errors.html#missing-url">MISSING_URL</a></td>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#missing-url">MISSING_URL</a></td>
     <td>Error thrown when <code>src</code> attribute is missing it's URL.</td>
   </tr>
   <tr>
-    <td width="40%"><a href="/docs/reference/validation_errors.html#invalid-url">INVALID_URL</a></td>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-url">INVALID_URL</a></td>
     <td>Error thrown when <code>src</code> attribute's URL is invalid.</td>
   </tr>
   <tr>
-    <td width="40%"><a href="/docs/reference/validation_errors.html#invalid-url-protocol">INVALID_URL_PROTOCOL</a></td>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-url-protocol">INVALID_URL_PROTOCOL</a></td>
     <td>Error thrown <code>src</code> attribute's URL is <code>http</code>; <code>https</code> protocol required.</td>
   </tr>
   <tr>
-    <td width="40%"><a href="/docs/reference/validation_errors.html#implied-layout-isnt-supported-by-amp-tag">IMPLIED_LAYOUT_INVALID</a></td>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#implied-layout-isnt-supported-by-amp-tag">IMPLIED_LAYOUT_INVALID</a></td>
     <td>Error thrown when implied layout is set to <code>RESPONSIVE</code>, <code>FILL</code>, or <code>CONTAINER</code>; these layout types aren't supported.</td>
   </tr>
   <tr>
-    <td width="40%"><a href="/docs/reference/validation_errors.html#specified-layout-isnt-supported-by-amp-tag">SPECIFIED_LAYOUT_INVALID</a></td>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#specified-layout-isnt-supported-by-amp-tag">SPECIFIED_LAYOUT_INVALID</a></td>
     <td>Error thrown when specified layout is set to <code>RESPONSIVE</code>, <code>FILL</code>, or <code>CONTAINER</code>; these layout types aren't supported.</td>
   </tr>
 </table>

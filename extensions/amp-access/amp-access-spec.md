@@ -25,7 +25,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-    <td><a href="/docs/reference/experimental.html">Experimental</a></td>
+    <td><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a></td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -38,12 +38,7 @@ limitations under the License.
 </table>
 
 The following lists validation errors specific to the `amp-access-spec` tag
-(see also `amp-access-spec` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii):
-
-<!---
-More validations need to be added once implemented;
-this table will change soon.
--->
+(see also `amp-access-spec` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii)):
 
 <table>
   <tr>
@@ -51,15 +46,15 @@ this table will change soon.
     <th>Description</th>
   </tr>
   <tr>
-    <td width="40%"><a href="/docs/reference/validation_errors.html#tag-required-by-another-tag-is-missing">TAG_REQUIRED_BY_MISSING</a></td>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#tag-required-by-another-tag-is-missing">TAG_REQUIRED_BY_MISSING</a></td>
     <td>Error thrown when required <code>amp-access-spec</code> extension <code>.js</code> script tag is missing or incorrect.</td>
   </tr>
   <tr>
-    <td width="40%"><a href="/docs/reference/validation_errors.html#mandatory-attribute-missing">MANDATORY_ATTR_MISSING</a></td>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#mandatory-attribute-missing">MANDATORY_ATTR_MISSING</a></td>
     <td>Error thrown when the <code>amp-access-spec</code> extension <code>.json</code> script is missing the mandatory attribute, <code>type</code>.</td>
   </tr>
   <tr>
-    <td width="40%"><a href="/docs/reference/validation_errors.html#invalid-attribute-value">INVALID_ATTR_VALUE</a></td>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-attribute-value">INVALID_ATTR_VALUE</a></td>
     <td>Error thrown when the attribute, <code>type</code>, is any value other than the required value: <code>application/json</code>. Error also thrown when the <code>src</code> attribute for the script tag is invalid. The value must be <code>"https://cdn.ampproject.org/v0/amp-access-0.1.js"</code>.</td>
   </tr>
 </table>
@@ -123,7 +118,7 @@ Login Page is implemented and served by the Publisher and called by the AMP Runt
 
 Login Page is triggered when the Reader taps on the Login Link which can be placed by the Publisher anywhere in the document.
 
-#Specification v0.3
+#Specification v0.4
 
 ##Configuration
 
@@ -168,7 +163,7 @@ Here’s an example of the AMP Access configuration:
 
 ##Access URL Variables
 
-When configuring the URLs for various endpoints, the Publisher can use substitution variables. These variables are a subset of the variables defined in the [AMP Var Spec](https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md). The set of allowed variables is defined in the table below:
+When configuring the URLs for various endpoints, the Publisher can use substitution variables. The full list of these variables are defined in the [AMP Var Spec](https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md). In addition, this spec adds a few access-specific variables such as `READER_ID` and `AUTHDATA`. Some of the most relevant variables are described in the table below:
 
 Var               | Description
 ----------------- | -----------

@@ -15,6 +15,7 @@
  */
 
 import {Pass} from '../pass';
+import {cancellation} from '../error';
 import {getService} from '../service';
 import {log} from '../log';
 import {timer} from '../timer';
@@ -243,7 +244,7 @@ export class Vsync {
    */
   runAnimMutateSeries(mutator, opt_timeout) {
     if (!this.canAnimate()) {
-      return Promise.reject();
+      return Promise.reject(cancellation());
     }
     return new Promise((resolve, reject) => {
       const startTime = timer.now();

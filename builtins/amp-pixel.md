@@ -32,7 +32,7 @@ limitations under the License.
 </table>
 
 The following lists validation errors specific to the `amp-pixel` tag
-(see also `amp-pixel` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii):
+(see also `amp-pixel` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii)):
 
 <table>
   <tr>
@@ -40,27 +40,27 @@ The following lists validation errors specific to the `amp-pixel` tag
     <th>Description</th>
   </tr>
   <tr>
-    <td width="40%"><a href="/docs/reference/validation_errors.html#mandatory-attribute-missing">MANDATORY_ATTR_MISSING</a></td>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#mandatory-attribute-missing">MANDATORY_ATTR_MISSING</a></td>
     <td>Error thrown when <code>src</code> attribute is missing.</td>
   </tr>
   <tr>
-    <td width="40%"><a href="/docs/reference/validation_errors.html#missing-url">MISSING_URL</a></td>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#missing-url">MISSING_URL</a></td>
     <td>Error thrown when <code>src</code> attribute is missing it's URL.</td>
   </tr>
   <tr>
-  <td width="40%"><a href="/docs/reference/validation_errors.html#invalid-url">INVALID_URL</a></td>
+  <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-url">INVALID_URL</a></td>
     <td>Error thrown when <code>src</code> attribute's URL is invalid.</td>
   </tr>
   <tr>
-    <td width="40%"><a href="/docs/reference/validation_errors.html#invalid-url-protocol">INVALID_URL_PROTOCOL</a></td>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-url-protocol">INVALID_URL_PROTOCOL</a></td>
     <td>Error thrown <code>src</code> attribute's URL is <code>http</code>; <code>https</code> protocol required.</td>
   </tr>
   <tr>
-    <td width="40%"><a href="/docs/reference/validation_errors.html#implied-layout-isnt-supported-by-amp-tag">IMPLIED_LAYOUT_INVALID</a></td>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#implied-layout-isnt-supported-by-amp-tag">IMPLIED_LAYOUT_INVALID</a></td>
     <td>Error thrown when implied layout set to <code>FIXED_HEIGHT</code>, <code>RESPONSIVE</code>, <code>FILL</code>, or <code>CONTAINER</code> as these aren't supported.</td>
   </tr>
   <tr>
-    <td width="40%"><a href="/docs/reference/validation_errors.html#specified-layout-isnt-supported-by-amp-tag">SPECIFIED_LAYOUT_INVALID</a></td>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#specified-layout-isnt-supported-by-amp-tag">SPECIFIED_LAYOUT_INVALID</a></td>
     <td>Error thrown when specified layout set to <code>FIXED_HEIGHT</code>, <code>RESPONSIVE</code>, <code>FILL</code>, or <code>CONTAINER</code> as these aren't supported.</td>
   </tr>
 </table>

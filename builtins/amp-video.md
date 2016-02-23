@@ -27,12 +27,12 @@ limitations under the License.
   </tr>
    <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/everything.amp.html">everything.amp.html</a></td>
+    <td><a href="https://amp-by-example.appspot.com/amp-video.html">amp-video.html</a><br /><a href="https://github.com/ampproject/amphtml/blob/master/examples/everything.amp.html">everything.amp.html</a></td>
   </tr>
 </table>
 
 The following lists validation errors specific to the `amp-video` tag
-(see also `amp-video` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii):
+(see also `amp-video` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii)):
 
 <table>
   <tr>
@@ -40,31 +40,31 @@ The following lists validation errors specific to the `amp-video` tag
     <th>Description</th>
   </tr>
   <tr>
-    <td width="40%"><a href="/docs/reference/validation_errors.html#mandatory-tag-ancestor-with-hint">MANDATORY_TAG_ANCESTOR_WITH_HINT</a></td>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#mandatory-tag-ancestor-with-hint">MANDATORY_TAG_ANCESTOR_WITH_HINT</a></td>
     <td>Error thrown if your AMP document uses <code>video</code> instead of <code>amp-video</code>. Error message: <code>The tag <code>video</code> may only appear as a descendant of tag <code>noscript</code>. Did you mean <code>amp-video</code>?</code>.</td>
   </tr>
   <tr>
-    <td width="40%"><a href="/docs/reference/validation_errors.html#missing-url">MISSING_URL</a></td>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#missing-url">MISSING_URL</a></td>
     <td>Error thrown when <code>src</code> attribute is missing it's URL.</td>
   </tr>
   <tr>
-    <td width="40%"><a href="/docs/reference/validation_errors.html#invalid-url">INVALID_URL</a></td>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-url">INVALID_URL</a></td>
     <td>Error thrown when <code>src</code> attribute's URL is invalid.</td>
   </tr>
   <tr>
-    <td width="40%"><a href="/docs/reference/validation_errors.html#invalid-url-protocol">INVALID_URL_PROTOCOL</a></td>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-url-protocol">INVALID_URL_PROTOCOL</a></td>
     <td>Error thrown <code>src</code> attribute's URL is <code>http</code>; <code>https</code> protocol required.</td>
   </tr>
   <tr>
-    <td width="40%"><a href="/docs/reference/validation_errors.html#implied-layout-isnt-supported-by-amp-tag">IMPLIED_LAYOUT_INVALID</a></td>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#implied-layout-isnt-supported-by-amp-tag">IMPLIED_LAYOUT_INVALID</a></td>
     <td>Error thrown when implied layout is set to <code>CONTAINER</code>; this layout type isn't supported.</td>
   </tr>
   <tr>
-    <td width="40%"><a href="/docs/reference/validation_errors.html#specified-layout-isnt-supported-by-amp-tag">SPECIFIED_LAYOUT_INVALID</a></td>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#specified-layout-isnt-supported-by-amp-tag">SPECIFIED_LAYOUT_INVALID</a></td>
     <td>Error thrown when specified layout is set to <code>CONTAINER</code>; this layout type isn't supported.</td>
   </tr>
   <tr>
-    <td width="40%"><a href="/docs/reference/validation_errors.html#invalid-property-value">INVALID_PROPERTY_VALUE_IN_ATTR_VALUE</a></td>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-property-value">INVALID_PROPERTY_VALUE_IN_ATTR_VALUE</a></td>
     <td>Error thrown when invalid value is given for attributes <code>height</code> or <code>width</code>. For example, <code>height=auto</code> triggers this error for all supported layout types, with the exception of <code>NODISPLAY</code>.</td>
   </tr>
 </table>
