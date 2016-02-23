@@ -124,6 +124,11 @@ export class BaseCarousel extends AMP.BaseElement {
     return false;
   }
 
+  /** @override */
+  documentInactiveCallback() {
+    return true;
+  }
+
   /**
    * @return {boolean}
    */
