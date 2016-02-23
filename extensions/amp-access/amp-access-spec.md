@@ -397,7 +397,7 @@ AMP makes no distinction between login or subscribe. This distinction can be con
 
 An integration with *amp-analytics* is documented in the [amp-access-analytics.md](./amp-access-analytics.md).
 
-#CORS Origin Security
+#### CORS Origin Security
 
 Authorization and Pingback endpoints are CORS endpoints and they must implement the security protocol described in the
 [AMP CORS Security Spec](https://github.com/ampproject/amphtml/blob/master/spec/amp-cors-requests.md#cors-security-in-amp).
