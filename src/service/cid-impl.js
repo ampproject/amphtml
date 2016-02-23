@@ -215,7 +215,12 @@ function getBaseCid(cid, persistenceConsent) {
   // Note, that we never try to persist to localStorage in this case.
   const viewer = viewerFor(win);
   if (viewer.isEmbedded()) {
-    return viewer.getBaseCid();
+    return viewer.getBaseCid().then(cid => {
+      if (!cid) {
+        throw new Error('No CID');
+      }
+      return cid;
+    });
   }
 
   // We need to make a new one.
