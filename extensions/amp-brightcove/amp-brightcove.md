@@ -60,7 +60,7 @@ The following lists validation errors specific to the `amp-brightcove` tag
     <td>Error thrown when specified layout is set to <code>CONTAINER</code>; this layout type isn't supported.</td>
   </tr>
   <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-property-value">The property '%1' in attribute '%2' in tag '%3' is set to '%4', which is invalid.</a></td>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-property-value">The property '%1' in attribute '%2' in tag '%3' is set to 'example4', which is invalid.</a></td>
     <td>Error thrown when invalid value is given for attributes <code>height</code> or <code>width</code>. For example, <code>height=auto</code> triggers this error for all supported layout types, with the exception of <code>NODISPLAY</code>.</td>
   </tr>
 </table>

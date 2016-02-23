@@ -40,15 +40,15 @@ The following lists validation errors specific to `amp-mustache`
     <th>Description</th>
   </tr>
   <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#attribute-contains-template-syntax">Mustache template syntax in attribute name '%1' in tag '%2'.</a></td>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#attribute-contains-template-syntax">Mustache template syntax in attribute name 'example1' in tag 'example2'.</a></td>
     <td>Mustache templates must be within the <code>amp-mustache</code> tag. Error thrown when templating syntax found in an attribute in another tag.</td>
   </tr>
   <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#attribute-contains-unescaped-template-syntax">The attribute '%1' in tag '%2' is set to '%3', which contains unescaped Mustache template syntax.</a></td>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#attribute-contains-unescaped-template-syntax">The attribute 'example1' in tag 'example2' is set to 'example3', which contains unescaped Mustache template syntax.</a></td>
     <td>Mustache templates must be within the <code>amp-mustache</code> tag. Error thrown when <a href="https://github.com/janl/mustache.js/#variables">unescaped templating syntax</a> found in an attribute in another tag.</td>
   </tr>
   <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#attribute-contains-template-partial">The attribute '%1' in tag '%2' is set to '%3', which contains a Mustache template partial.</a></td>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#attribute-contains-template-partial">The attribute 'example1' in tag 'example2' is set to 'example3', which contains a Mustache template partial.</a></td>
     <td>Mustache templates must be within the <code>amp-mustache</code> tag. Error thrown when <a href="https://github.com/janl/mustache.js/#partials">template partial</a> found in an attribute in another tag.</td>
   </tr>
 </table>
