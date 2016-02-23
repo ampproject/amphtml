@@ -323,7 +323,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (!request) {
       console./*OK*/error(this.getName_(), 'Ignoring event. Request string ' +
           'not found: ', trigger['request']);
-      return;
+      return Promise.resolve();
     }
 
     // Add any given extraUrlParams as query string param
@@ -342,21 +342,23 @@ export class AmpAnalytics extends AMP.BaseElement {
       const argList = match[2] || '';
       const raw = (trigger['vars'] && trigger['vars'][name] ||
           this.config_['vars'] && this.config_['vars'][name]);
-      const val = this.encodeVars_(raw != null ? raw : '');
+      const val = this.encodeVars_(raw != null ? raw : '', name);
       return val + argList;
     });
 
-    // For consistentcy with amp-pixel we also expand any url replacements.
-    urlReplacementsFor(this.getWin()).expand(request).then(request => {
+    // For consistency with amp-pixel we also expand any url replacements.
+    return urlReplacementsFor(this.getWin()).expand(request).then(request => {
       this.sendRequest_(request, trigger);
+      return request;
     });
   }
 
   /**
    * @param {string} raw The values to URI encode.
+   * @param {string} unusedName Name of the variable.
    * @private
    */
-  encodeVars_(raw) {
+  encodeVars_(raw, unusedName) {
     if (isArray(raw)) {
       return raw.map(encodeURIComponent).join(',');
     }
