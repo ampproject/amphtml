@@ -299,16 +299,7 @@ describe('amp-analytics', function() {
     });
   });
 
-  it.skip('fills cid for proxy host', function() {
-    windowApi.localStorage = {
-      getItem: function(unusedName) {
-        return JSON.stringify({
-          time: new Date().getTime(),
-          cid: 'base',
-        });
-      },
-    };
-    windowApi.location.href = '/c/www.test.com/abc';
+  it('fills cid', function() {
     const analytics = getAnalyticsTag({
       'requests': {'foo': 'https://example.com/cid=${clientId(analytics-abc)}'},
       'triggers': [{'on': 'visible', 'request': 'foo'}],
@@ -316,9 +307,7 @@ describe('amp-analytics', function() {
 
     return waitForSendRequest(analytics).then(() => {
       expect(sendRequestSpy.calledOnce).to.be.true;
-      expect(sendRequestSpy.args[0][0]).to.equal(
-         'https://example.com/cid=uQVAtQyO978OPCNBZXWOKRDcxSORw9GQfB' +
-          'x2CyJSF0MnkIPeeX9ruacSFPgQ0HSD');
+      expect(sendRequestSpy.args[0][0]).to.match(/cid=[a-zA-Z\-]+/);
     });
   });
 
