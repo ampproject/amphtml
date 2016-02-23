@@ -566,7 +566,7 @@ describe('FixedLayer', () => {
       expect(fe.placeholder.parentElement).to.not.exist;
     });
 
-    it('should disregard opaque element', () => {
+    it('should disregard transparent element', () => {
       element1.computedStyle['position'] = 'fixed';
       element1.offsetWidth = 10;
       element1.offsetHeight = 10;
