@@ -158,6 +158,12 @@ Type attribute value: `parsely`
 
 Adds support for Parsely. Configuration details can be found at [parsely.com/docs](http://parsely.com/docs/integration/tracking/google-amp.html).
 
+##### Piano
+
+Type attribute value: `piano`
+
+Adds support for Piano.  Configuration details can be found at [vx.piano.io](http://vx.piano.io/javascript-tracking-amp).
+
 ##### Quantcast Measurement
 
 Type attribute value: `quantcast`
