@@ -285,6 +285,12 @@ var forbiddenTerms = {
       'src/service/viewer-impl.js',
     ],
   },
+  '(doc.*)\\.contains': {
+    message: 'Use dom.documentContains API.',
+    whitelist: [
+      'src/dom.js',
+    ],
+  },
   'getUnconfirmedReferrerUrl': {
     message: 'Use Viewer.getReferrerUrl() instead.',
     whitelist: [

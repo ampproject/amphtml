@@ -148,4 +148,58 @@ describe('DOM', () => {
     expect(dom.childElementByAttr(parent, 'attr12', '3')).to.be.null;
     expect(dom.childElementByAttr(parent, 'attr3')).to.be.null;
   });
+
+  describe('contains', () => {
+    let connectedElement;
+    let connectedChild;
+    let disconnectedElement;
+    let disconnectedChild;
+
+    beforeEach(() => {
+      connectedElement = document.createElement('div');
+      connectedChild = document.createElement('div');
+      disconnectedElement = document.createElement('div');
+      disconnectedChild = document.createElement('div');
+
+      connectedElement.appendChild(connectedChild);
+      disconnectedElement.appendChild(disconnectedChild);
+      document.body.appendChild(connectedElement);
+    });
+
+    afterEach(() => {
+      dom.removeElement(connectedElement);
+    });
+
+    it('should use document.contains or fallback as available', () => {
+      expect(dom.documentContains(document, connectedElement)).to.be.true;
+      expect(dom.documentContains(document, connectedChild)).to.be.true;
+      expect(dom.documentContains(document, disconnectedElement)).to.be.false;
+      expect(dom.documentContains(document, disconnectedChild)).to.be.false;
+    });
+
+    it('should polyfill document.contains', () => {
+      expect(dom.documentContainsPolyfillInternal_(
+          document, connectedElement)).to.be.true;
+      expect(dom.documentContainsPolyfillInternal_(
+          document, connectedChild)).to.be.true;
+      expect(dom.documentContainsPolyfillInternal_(
+          document, disconnectedElement)).to.be.false;
+      expect(dom.documentContainsPolyfillInternal_(
+          document, disconnectedChild)).to.be.false;
+    });
+
+    it('should be inclusionary for documentElement', () => {
+      expect(dom.documentContains(
+          document, document.documentElement)).to.be.true;
+      expect(dom.documentContainsPolyfillInternal_(
+          document, document.documentElement)).to.be.true;
+    });
+
+    it('should be inclusionary for document itself', () => {
+      expect(dom.documentContains(
+          document, document)).to.be.true;
+      expect(dom.documentContainsPolyfillInternal_(
+          document, document)).to.be.true;
+    });
+  });
 });
