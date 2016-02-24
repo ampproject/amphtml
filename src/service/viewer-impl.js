@@ -260,7 +260,7 @@ export class Viewer {
      * @private @const {!Promise<!Viewer>}
      */
     this.messagingReadyPromise_ = timer.timeoutPromise(
-        5000,
+        20000,
         new Promise(resolve => {
           /** @private @const {function(!Viewer)} */
           this.messagingReadyResolver_ = resolve;
