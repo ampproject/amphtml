@@ -200,12 +200,7 @@ function getBaseCid(cid, persistenceConsent) {
     return Promise.resolve(cid.baseCid_);
   }
   const win = cid.win;
-  let stored = read(win);
-  // Protect against a case where we could have stored the "undefined"
-  // value as a string.
-  if (stored === 'undefined') {
-    stored = null;
-  }
+  const stored = read(win);
   // See if we have a stored base cid and whether it is still valid
   // in terms of expiration.
   if (stored && !isExpired(stored)) {
