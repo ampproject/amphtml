@@ -679,7 +679,7 @@ export class Viewer {
    * @return {!Promise<string>}
    */
   getBaseCid() {
-    return this.sendMessage_('cid', undefined, true);
+    return this.sendMessage('cid', undefined, true);
   }
 
   /**
