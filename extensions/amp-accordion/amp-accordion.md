@@ -23,7 +23,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
-    <td>Stable</td>
+    <td>Stable; no validations yet.</td>
   </tr>
   <tr>
     <td width="40%"><strong>Required Script</strong></td>
@@ -46,6 +46,8 @@ Each of the `amp-accordion` component’s immediate children is considered a sec
 - There is no restriction on the type of tags that could be used for the `<section>`’s children.
 - Any additional children of the `<section>` would be ignored not be displayed. (This should just be a safety backup and should be enforced in the validator)
 - Clicking/tapping on the heading of a section expands/ or collapses the section.
+
+Example:
 
 ```html
 <amp-accordion>
