@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-### <a name="amp-img"></a> `amp-img`
+# <a name="amp-img"></a> `amp-img`
 
 <table>
    <tr>
@@ -69,7 +69,7 @@ The following lists validation errors specific to the `amp-img` tag
   </tr>
 </table>
 
-#### Behavior
+## Behavior
 
 The runtime may choose to delay or prioritize resource loading based on the viewport position, system resources, connection bandwidth, or other factors. The `amp-img` components allows the runtime to effectively manage image resources this way.
 
@@ -80,7 +80,7 @@ The `amp-img` includes attributes for denoting attribution via the attribution a
 
 Additional image features like captions can be implemented with standard HTML - using the `figure` and `figcaption` elements, for example.
 
-#### Attributes
+## Attributes
 
 **src**
 
@@ -101,7 +101,7 @@ A string of alternate text, similar to the `alt` attribute on `img`.
 A string that indicates the attribution of the image. E.g. `attribution="CC courtesy of Cats on Flicker"`
 
 
-#### Styling
+## Styling
 
 `amp-img` can be styled directly via CSS properties. Setting a grey background
 placeholder for example could be achieved via:

@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-### <a name="amp-instagram"></a> `amp-instagram`
+# <a name="amp-instagram"></a> `amp-instagram`
 
 <table>
   <tr>
@@ -82,7 +82,7 @@ The following lists validation errors specific to the `amp-instagram` tag
   </tr>
 </table>
 
-#### Behavior
+## Behavior
 
 The `width` and `height` attributes are special for the instagram embed.
 These should be the actual width and height of the instagram image.
@@ -104,7 +104,7 @@ If the instagram is not square you will need to enter the actual dimensions of t
 
 When using non-responsive layout you will need to account for the extra space added for the "instagram chrome" around the image. This is currently 48px above and below the image and 8px on the sides.
 
-#### Attributes
+## Attributes
 
 <!---
 `src` attribute hasn't been documented. Should it be?

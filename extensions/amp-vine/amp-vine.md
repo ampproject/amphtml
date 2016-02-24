@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
  
-### <a name="amp-vine"></a> `amp-vine`
+# <a name="amp-vine"></a> `amp-vine`
 
 <table>
   <tr>
@@ -65,7 +65,7 @@ The following lists validation errors specific to the `amp-vine` tag
   </tr>
 </table>
 
-#### Example
+## Example
 
 A Vine simple embed has equal width and height:
 
@@ -75,7 +75,7 @@ A Vine simple embed has equal width and height:
 </amp-vine>
 ```
 
-#### Attributes
+## Attributes
 
 **data-vineid**
 

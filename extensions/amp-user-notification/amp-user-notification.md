@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-### <a name="amp-user-notification"></a> `amp-user-notification`
+# <a name="amp-user-notification"></a> `amp-user-notification`
 
 <table>
   <tr>
@@ -57,7 +57,7 @@ The following lists validation errors specific to the `amp-user-notification` ta
   </tr>
 </table>
 
-#### Usage
+## Usage
 
 An `id` is required
 as multiple `amp-user-notification` elements are allowed and the
@@ -101,7 +101,7 @@ Example:
 
 ---
 
-#### Attributes
+## Attributes
 
 **data-show-if-href** (Optional)
 
@@ -165,7 +165,7 @@ flag for the specified ID locally.
 
 ---
 
-#### JSON Fields
+## JSON Fields
 
 - `elementId` (string) - The HTML id used on `amp-user-notification` element.
 - `ampUserId` (string) - This id is passed to both the `data-show-if-href` GET request
@@ -179,7 +179,7 @@ flag for the specified ID locally.
 
 ---
 
-#### Behavior
+## Behavior
 
 A notification is shown when:
 
@@ -196,7 +196,7 @@ record remotely.
 
 ---
 
-#### Styling
+## Styling
 
 The `amp-user-notification` component should always have `layout=nodisplay`
 and will be `position: fixed` after layout (default is bottom: 0, which can be overridden).
@@ -223,7 +223,7 @@ ex. (w/o vendor prefixes)
   }
 ```
 
-#### Delaying Client ID generation until the notification is acknowledged
+## Delaying Client ID generation until the notification is acknowledged
 
 Optionally one can delay generation of Client IDs used for analytics and similar purposes until an `amp-user-notification` is confirmed by the user. See these docs for how to implement this:
 

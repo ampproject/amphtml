@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-### <a name="amp-analytics"></a>`amp-analytics`
+# <a name="amp-analytics"></a>`amp-analytics`
 
 <table>
   <tr>
@@ -53,7 +53,7 @@ The following lists validation errors specific to the `amp-analytics` tag
   </tr>
 </table>
 
-#### <a name="behavior"></a>Behavior
+## <a name="behavior"></a>Behavior
 
 The `<amp-analytics>` element is used to measure activity on an AMP document. The details concerning what is measured and how that data is sent to an analytics server is specified in a JSON configuration object. It comes pre-configured to support many [analytics vendors](#analytics-vendors) out of the box.
 
@@ -91,7 +91,7 @@ when the document is first loaded, and each time an `<a>` tag is clicked:
 </amp-analytics>
 ```
 
-#### Analytics vendors
+## Analytics vendors
 
 By specifying the name of an analytics vendor with the `type` attribute you can quickly configure `amp-analytics` to use the respective product. Additional configuration (such as your user id) may still be necessary.
 
@@ -101,37 +101,37 @@ Here's an example of usage of `type` for a provider called XYZ:
 <amp-analytics type="XYZ"> ... </amp-analytics>
 ```
 
-##### Adobe Analytics
+### Adobe Analytics
 
 Type attribute value: `adobeanalytics`
 
 Adds support for Adobe Analytics. More details for adding Adobe Analytics support can be found at [helpx.adobe.com](https://helpx.adobe.com/marketing-cloud/analytics.html).
 
-##### AT Internet
+### AT Internet
 
 Type attribute value: `atinternet`
 
 Adds support for AT Internet. More details for adding AT Internet support can be found at [developers.atinternet-solutions.com](http://developers.atinternet-solutions.com/javascript-en/advanced-features-javascript-en/accelerated-mobile-pages-amp-javascript-en/).
 
-##### Chartbeat
+### Chartbeat
 
 Type attribute value: `chartbeat`
 
 Adds support for Chartbeat. More details for adding Chartbeat support can be found at [support.chartbeat.com](http://support.chartbeat.com/docs/).
 
-##### comScore
+### comScore
 
 Type attribute value: `comscore`
 
 Adds support for comScore Unified Digital Measurement™ pageview analytics. Requires defining *var* `c2` with comScore-provided *c2 id*.
 
-##### Google Analytics
+### Google Analytics
 
 Type attribute value: `googleanalytics`
 
 Adds support for Google Analytics. More details for adding Google Analytics support can be found at [developers.google.com](https://developers.google.com/analytics/devguides/collection/amp-analytics/).
 
-##### INFOnline / IVW
+### INFOnline / IVW
 
 Type attribute value: `infonline`
 
@@ -146,31 +146,31 @@ Additionally, the following variables must be defined:
 
 More details for adding INFOnline / IVW support can be found at [www.infonline.de](https://www.infonline.de/downloads/web-mew-und-ctv/).
 
-##### Krux
+### Krux
 
 Type attribute value: `krux`
 
 Adds support for Krux.  Configuration details can be found at [help.krux.com](https://konsole.zendesk.com/hc/en-us/articles/216596608).
 
-##### Parsely
+### Parsely
 
 Type attribute value: `parsely`
 
 Adds support for Parsely. Configuration details can be found at [parsely.com/docs](http://parsely.com/docs/integration/tracking/google-amp.html).
 
-##### Quantcast Measurement
+### Quantcast Measurement
 
 Type attribute value: `quantcast`
 
 Adds support for Quantcast Measurement. More details for adding Quantcast Measurement can be found at [quantcast.com](https://www.quantcast.com/help/guides/)
 
-##### SimpleReach
+### SimpleReach
 
 Type attribute value: `simplereach`
 
 Adds support for SimpleReach.  Configuration details can be found at [simplereach.com/docs](http://docs.simplereach.com/dev-guide/implementation/google-amp-implementation)
 
-#### <a name="attributes"></a>Attributes
+## <a name="attributes"></a>Attributes
 
   - `type` See [Analytics vendors](#analytics-vendors)
   - `config` Optional attribute. This attribute can be used to load a configuration from a specified remote URL. The URL specified here should use https scheme. See also `data-include-credentials` attribute below. The URL may include [AMP URL vars](../../spec/amp-var-substitutions.md).
@@ -183,7 +183,7 @@ Adds support for SimpleReach.  Configuration details can be found at [simplereac
   - `data-consent-notification-id` Optional attribute. If provided, the page will not process analytics requests until an [amp-user-notification](../../extensions/amp-user-notification/amp-user-notification.md) with
     the given HTML element id is confirmed (accepted) by the user.
 
-#### Configuration
+## Configuration
 
 Configuration may be specified inline (as shown in the example above) or fetched remotely by specifying a URL in the
 `config` attribute. Additionally, built-in configuration for popular analytics vendors can be selected using
@@ -216,7 +216,7 @@ The `<amp-analytics>` configuration object uses the following format:
   }
 }
 ```
-##### Requests
+### Requests
 The `requests` attribute specifies the URLs used to transmit data to an analytics platform. The `request-name` is used
 in the trigger configuration to specify what request should be sent in response to a pariticular event. The `request-value`
 is an https URL. These values may include placeholder tokens that can reference other requests or variables.
@@ -229,7 +229,7 @@ is an https URL. These values may include placeholder tokens that can reference 
 }
 ```
 
-##### Vars
+### Vars
 
 `amp-analytics` defines many basic variables that can be used in requests. A list of all such variables is available in the  [`amp-analytics` Variables Guide](./analytics-vars.md). In addition, all of the variables supported by [AMP HTML Substitutions Guide](../../spec/amp-var-substitutions.md) are also supported.
 
@@ -243,7 +243,7 @@ The `vars` attribute in the configuration can be used to define new key-value pa
 }
 ```
 
-##### Triggers
+### Triggers
 The `triggers` attribute describes when an analytics request should be sent. It contains a key-value pair of trigger-name and
  trigger-configuration. Trigger name can be any string comprised of alphanumeric characters (a-zA-Z0-9). Triggers from a
  configuration with lower precedence are overridden by triggers with the same names from a configuration with higher precedence.
@@ -256,7 +256,7 @@ The `triggers` attribute describes when an analytics request should be sent. It 
   - `scrollSpec` (required when `on` is set to `scroll`) This configuration is used on conjunction with the `scroll` trigger. Please see below for details.
   - `timerSpec` (required when `on` is set to `timer`) This configuration is used on conjunction with the `timer` trigger. Please see below for details.
 
-###### Page visible trigger (`"on": "visible"`)
+#### Page visible trigger (`"on": "visible"`)
 Use this configuration to fire a request when the page becomes visible. No further configuration is required.
 
 ```javascript
@@ -268,7 +268,7 @@ Use this configuration to fire a request when the page becomes visible. No furth
 }
 ```
 
-###### Click trigger (`"on": "click"`)
+#### Click trigger (`"on": "click"`)
 Use this configuration to fire a request when a specified element is clicked. Use `selector` to control which elements will cause this request to fire:
   - `selector` A CSS selector used to refine which elements should be tracked. Use value `*` to track all elements.
 
@@ -285,7 +285,7 @@ Use this configuration to fire a request when a specified element is clicked. Us
     }
     ```
 
-###### Scroll trigger (`"on": "scroll"`)
+#### Scroll trigger (`"on": "scroll"`)
 Use this configuration to fire a request under certain conditions when the page is scrolled. Use `scrollSpec` to control when this will fire:
   - `scrollSpec` This object can contain `verticalBoundaries` and `horizontalBoundaries`. At least one of the two properties is required for a scroll event to fire. The values for both of the properties should be arrays of numbers containing the boundaries on which a scroll event is generated. For instance, in the following code snippet, the scroll event will be fired when page is scrolled vertically by 25%, 50% and 90%. Additionally, the event will also fire when the page is horizontally scrolled to 90% of scroll width.
 
@@ -302,7 +302,7 @@ Use this configuration to fire a request under certain conditions when the page 
     }
     ```
 
-###### Timer trigger (`"on": "timer"`)
+#### Timer trigger (`"on": "timer"`)
 Use this configuration to fire a request on a regular time interval. Use `timerSpec` to control when this will fire:
   - `timerSpec` Specification for triggers of type `timer`. The timer will trigger immediately and then at a specified interval thereafter.
     - `interval` Length of the timer interval, in seconds.
@@ -321,11 +321,11 @@ Use this configuration to fire a request on a regular time interval. Use `timerS
     }
     ```
 
-###### Access triggers (`"on": "amp-access-*"`)
+#### Access triggers (`"on": "amp-access-*"`)
 
 AMP Access system issues numerous events for different states in the access flow. See [amp-access-analytics.md](../amp-access/amp-access-analytics.md) for details.
 
-##### Transport
+### Transport
 The `transport` attribute specifies how to send a request. The value is an object with fields that
 indicate which transport methods are acceptable.
 
@@ -348,7 +348,7 @@ In the example below, `beacon` and `xhrpost` are set to `false`, so they will no
 ```
 
 
-### Extra URL Params
+# Extra URL Params
 
 The `extraUrlParams` attribute specifies additional parameters to append to the query string of the url via the usual "&foo=baz" convention.
 

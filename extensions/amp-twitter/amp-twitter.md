@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-### <a name="amp-twitter"></a> `amp-twitter`
+# <a name="amp-twitter"></a> `amp-twitter`
 
 <table>
   <tr>
@@ -82,7 +82,7 @@ May need to add something to this table based on technical review.
   </tr>
 </table>
 
-#### Behavior
+## Behavior
 
 **CAVEAT**
 
@@ -98,7 +98,7 @@ Example:
 </amp-twitter>
 ```
 
-#### Attributes
+## Attributes
 
 **data-tweetid**
 
