@@ -155,6 +155,12 @@ export function getErrorReportUrl(message, filename, line, col, error) {
   if (window.AMP_CONFIG && window.AMP_CONFIG.canary) {
     url += '&ca=1';
   }
+  if (window.location.ancestorOrigins && window.location.ancestorOrigins[0]) {
+    url += '&or=' + encodeURIComponent(window.location.ancestorOrigins[0]);
+  }
+  if (window.viewerState) {
+    url += '&vs=' + encodeURIComponent(window.viewerState);
+  }
 
   if (error) {
     const tagName = error && error.associatedElement
@@ -168,6 +174,7 @@ export function getErrorReportUrl(message, filename, line, col, error) {
         '&l=' + encodeURIComponent(line) +
         '&c=' + encodeURIComponent(col || '');
   }
+  url += '&r=' + encodeURIComponent(document.referrer);
 
   // Shorten URLs to a value all browsers will send.
   return url.substr(0, 2000);
