@@ -697,8 +697,14 @@ export class AccessService {
    */
   handleAction_(invocation) {
     if (invocation.method == 'login') {
+      if (invocation.event) {
+        invocation.event.preventDefault();
+      }
       this.login('');
     } else if (invocation.method.indexOf('login-') == 0) {
+      if (invocation.event) {
+        invocation.event.preventDefault();
+      }
       this.login(invocation.method.substring('login-'.length));
     }
   }

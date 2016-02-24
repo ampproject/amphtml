@@ -622,7 +622,11 @@ export class Viewer {
    * @param {number} height
    */
   postDocumentReady(width, height) {
-    this.sendMessage_('documentLoaded', {width: width, height: height}, false);
+    this.sendMessage_('documentLoaded', {
+      width: width,
+      height: height,
+      title: this.win.document.title,
+    }, false);
   }
 
   /**
@@ -675,7 +679,7 @@ export class Viewer {
    * @return {!Promise<string>}
    */
   getBaseCid() {
-    return this.sendMessage_('cid', undefined, true);
+    return this.sendMessage('cid', undefined, true);
   }
 
   /**

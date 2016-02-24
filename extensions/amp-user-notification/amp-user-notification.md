@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-### <a name="amp-user-notification"></a> `amp-user-notification`
+# <a name="amp-user-notification"></a> `amp-user-notification`
 
 <table>
   <tr>
@@ -44,20 +44,20 @@ The following lists validation errors specific to the `amp-user-notification` ta
     <th>Description</th>
   </tr>
   <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#tag-required-by-another-tag-is-missing">TAG_REQUIRED_BY_MISSING</a></td>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#tag-required-by-another-tag-is-missing">The 'example1' tag is missing or incorrect, but required by 'example2'.</a></td>
     <td>Error thrown when required <code>amp-user-notification</code> extension <code>.js</code> script tag is missing or incorrect.</td>
   </tr>
   <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#implied-layout-isnt-supported-by-amp-tag">IMPLIED_LAYOUT_INVALID</a></td>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#implied-layout-isnt-supported-by-amp-tag">The implied layout 'example1' is not supported by tag 'example2'.</a></td>
     <td>The only supported layout type is <code>NODISPLAY</code>. Error thrown if implied layout is any other value.</td>
   </tr>
   <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#specified-layout-isnt-supported-by-amp-tag">SPECIFIED_LAYOUT_INVALID</a></td>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#specified-layout-isnt-supported-by-amp-tag">The specified layout 'example1' is not supported by tag 'example2'.</a></td>
     <td>The only supported layout type is <code>NODISPLAY</code>. Error thrown if specified layout is any other value.</td>
   </tr>
 </table>
 
-#### Usage
+## Usage
 
 An `id` is required
 as multiple `amp-user-notification` elements are allowed and the
@@ -101,7 +101,7 @@ Example:
 
 ---
 
-#### Attributes
+## Attributes
 
 **data-show-if-href** (Optional)
 
@@ -165,7 +165,7 @@ flag for the specified ID locally.
 
 ---
 
-#### JSON Fields
+## JSON Fields
 
 - `elementId` (string) - The HTML id used on `amp-user-notification` element.
 - `ampUserId` (string) - This id is passed to both the `data-show-if-href` GET request
@@ -179,7 +179,7 @@ flag for the specified ID locally.
 
 ---
 
-#### Behavior
+## Behavior
 
 A notification is shown when:
 
@@ -196,7 +196,7 @@ record remotely.
 
 ---
 
-#### Styling
+## Styling
 
 The `amp-user-notification` component should always have `layout=nodisplay`
 and will be `position: fixed` after layout (default is bottom: 0, which can be overridden).
@@ -223,7 +223,7 @@ ex. (w/o vendor prefixes)
   }
 ```
 
-#### Delaying Client ID generation until the notification is acknowledged
+## Delaying Client ID generation until the notification is acknowledged
 
 Optionally one can delay generation of Client IDs used for analytics and similar purposes until an `amp-user-notification` is confirmed by the user. See these docs for how to implement this:
 
