@@ -237,17 +237,20 @@ export function installAd(win) {
             this.element.creativeId = info.id;
           }, /* opt_is3P */ true);
           listen(this.iframe_, 'embed-size', data => {
+            let newHeight, newWidth;
             if (data.width !== undefined) {
+              newWidth = Math.max(this.element./*REVIEW*/offsetWidth +
+                  data.width - this.iframe_./*REVIEW*/offsetWidth, data.width);
               this.iframe_.width = data.width;
               this.element.setAttribute('width', data.width);
             }
             if (data.height !== undefined) {
-              const newHeight = Math.max(this.element./*OK*/offsetHeight +
+              newHeight = Math.max(this.element./*OK*/offsetHeight +
                   data.height - this.iframe_./*OK*/offsetHeight, data.height);
               this.iframe_.height = data.height;
               this.element.setAttribute('height', newHeight);
-              this.updateHeight_(newHeight);
             }
+            this.updateDimensions_(newWidth, newHeight);
           }, /* opt_is3P */ true);
           this.iframe_.style.visibility = 'hidden';
           listenOnce(this.iframe_, 'render-start', () => {
@@ -317,33 +320,66 @@ export function installAd(win) {
     /** @override  */
     overflowCallback(overflown, requestedHeight) {
       if (overflown) {
-        const targetOrigin =
-            this.iframe_.src ? parseUrl(this.iframe_.src).origin : '*';
-        postMessage(
-            this.iframe_,
-            'embed-size-denied',
-            {requestedHeight: requestedHeight},
-            targetOrigin,
-            /* opt_is3P */ true);
+        this.onResizeFailed_(requestedHeight);
       }
     }
 
     /**
-     * Updates the elements height to accommodate the iframe's requested height.
-     * @param {number} newHeight
+     * Updates the element's dimensions to accommodate the iframe's
+     *    requested dimensions.
+     * @param {number|undefined} newWidth
+     * @param {number|undefined} newHeight
      * @private
      */
-    updateHeight_(newHeight) {
+    updateDimensions_(newWidth, newHeight) {
+      if (typeof newWidth != 'number' && typeof newHeight != 'number') {
+        return;
+      }
+      if (newWidth && typeof newHeight != 'number') {
+        this.getVsync().mutate(() => {
+          this.element.style.width = newWidth + 'px';
+          this.onResizeSuccess_();
+        });
+        return;
+      }
       this.attemptChangeHeight(newHeight, () => {
-        const targetOrigin =
-            this.iframe_.src ? parseUrl(this.iframe_.src).origin : '*';
-        postMessage(
-            this.iframe_,
-            'embed-size-changed',
-            {requestedHeight: newHeight},
-            targetOrigin,
-            /* opt_is3P */ true);
+        if (newWidth) {
+          this.element.style.width = newWidth + 'px';
+        }
+        this.onResizeSuccess_(newHeight);
       });
+    }
+
+    /**
+     * Communicates failure to the resize requestor(ad iframe).
+     * @param {number} requestedHeight
+     * @private
+     */
+    onResizeFailed_(requestedHeight) {
+      const targetOrigin =
+          this.iframe_.src ? parseUrl(this.iframe_.src).origin : '*';
+      postMessage(
+          this.iframe_,
+          'embed-size-denied',
+          {requestedHeight: requestedHeight},
+          targetOrigin,
+          /* opt_is3P */ true);
+    }
+
+    /**
+     * Communicates success to the resize requestor(ad iframe).
+     * @param {number|undefined} requestedHeight
+     * @private
+     */
+    onResizeSuccess_(requestedHeight) {
+      const targetOrigin =
+          this.iframe_.src ? parseUrl(this.iframe_.src).origin : '*';
+      postMessage(
+          this.iframe_,
+          'embed-size-changed',
+          {requestedHeight: requestedHeight},
+          targetOrigin,
+          /* opt_is3P */ true);
     }
 
     /**
