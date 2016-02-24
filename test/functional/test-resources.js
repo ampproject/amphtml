@@ -265,6 +265,10 @@ describe('Resources schedulePause', () => {
     children = [child0, child1, child2];
   });
 
+  afterEach(() => {
+    sandbox.restore();
+  });
+
   it('should not throw with a single element', () => {
     expect(() => {
       resources.schedulePause(parent, child1);
@@ -311,7 +315,7 @@ describe('Resources discoverWork', () => {
       updateLayoutBox: () => {},
       applySizesAndMediaQuery: () => {},
       layoutCallback: () => Promise.resolve(),
-      viewportCallback: sinon.spy(),
+      viewportCallback: sandbox.spy(),
       prerenderAllowed: () => true,
       renderOutsideViewport: () => true,
       isRelayoutNeeded: () => true,
@@ -481,7 +485,7 @@ describe('Resources changeHeight', () => {
       getBoundingClientRect: () => rect,
       applySizesAndMediaQuery: () => {},
       layoutCallback: () => Promise.resolve(),
-      viewportCallback: sinon.spy(),
+      viewportCallback: sandbox.spy(),
       prerenderAllowed: () => true,
       renderOutsideViewport: () => false,
       isRelayoutNeeded: () => true,
@@ -496,7 +500,7 @@ describe('Resources changeHeight', () => {
     resource.element['__AMP__RESOURCE'] = resource;
     resource.state_ = ResourceState_.READY_FOR_LAYOUT;
     resource.layoutBox_ = rect;
-    resource.changeHeight = sinon.spy();
+    resource.changeHeight = sandbox.spy();
     return resource;
   }
 
@@ -510,6 +514,7 @@ describe('Resources changeHeight', () => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
     resources = new Resources(window);
+    resources.isRuntimeOn_ = false;
     viewportMock = sandbox.mock(resources.viewport_);
 
     resource1 = createResource(1, layoutRectLtwh(10, 10, 100, 100));
@@ -579,7 +584,7 @@ describe('Resources changeHeight', () => {
     let vsyncSpy;
 
     beforeEach(() => {
-      overflowCallbackSpy = sinon.spy();
+      overflowCallbackSpy = sandbox.spy();
       resource1.element.overflowCallback = overflowCallbackSpy;
       viewportMock.expects('getRect').returns(
           {top: 0, left: 0, right: 100, bottom: 200, height: 200}).atLeast(1);
@@ -817,7 +822,7 @@ describe('Resources mutateElement', () => {
       getBoundingClientRect: () => rect,
       applySizesAndMediaQuery: () => {},
       layoutCallback: () => Promise.resolve(),
-      viewportCallback: sinon.spy(),
+      viewportCallback: sandbox.spy(),
       prerenderAllowed: () => true,
       renderOutsideViewport: () => false,
       isRelayoutNeeded: () => true,
@@ -832,7 +837,7 @@ describe('Resources mutateElement', () => {
     resource.element['__AMP__RESOURCE'] = resource;
     resource.state_ = ResourceState_.READY_FOR_LAYOUT;
     resource.layoutBox_ = rect;
-    resource.changeHeight = sinon.spy();
+    resource.changeHeight = sandbox.spy();
     return resource;
   }
 
