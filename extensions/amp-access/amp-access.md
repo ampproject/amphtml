@@ -37,8 +37,8 @@ limitations under the License.
   </tr>
 </table>
 
-The following lists validation errors specific to the `amp-access-spec` tag
-(see also `amp-access-spec` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii)):
+The following lists validation errors specific to the `amp-access` tag
+(see also `amp-access` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii)):
 
 <table>
   <tr>
@@ -70,13 +70,14 @@ The proposed solution gives control to the Publisher over the following decision
  - Flexibility over access parameters at a per-document level
 
 The solution comprises the following components:
- 1. [**AMP Reader ID**][2]: provided by AMP ecosystem, this is a unique identifier of the reader as seen by AMP.
- 2. [**Access Content Markup**][3]: authored by the Publisher, defines which parts of a document are visible in which circumstances.
- 3. [**Authorization endpoint**][4]: provided by the Publisher, returns the response that explains which part of a document the Reader can consume.
- 4. [**Pingback endpoint**][5]: provided by the Publisher, is used to send the “view” impression for a document.
- 5. [**Login Link and Login Page**][6]: allows the publisher to authenticate the Reader and connect their identity with AMP Reader ID.
 
-AMP Cache returns the document to the Reader with some sections obscured using Access Content Markup. The AMP Runtime calls the Authorization endpoint and uses the response to either hide or show different sections as defined by the Access Content Markup. After the document has been shown to the Reader, AMP Runtime calls the Pingback endpoint that can be used by the Publisher to update the countdown meter.
+1. [**AMP Reader ID**][2]: provided by AMP ecosystem, this is a unique identifier of the reader as seen by AMP.
+2. [**Access Content Markup**][3]: authored by the Publisher, defines which parts of a document are visible in which circumstances.
+3. [**Authorization endpoint**][4]: provided by the Publisher, returns the response that explains which part of a document the Reader can consume.
+4. [**Pingback endpoint**][5]: provided by the Publisher, is used to send the “view” impression for a document.
+5. [**Login Link and Login Page**][6]: allows the publisher to authenticate the Reader and connect their identity with AMP Reader ID.
+
+Google AMP Cache returns the document to the Reader with some sections obscured using Access Content Markup. The AMP Runtime calls the Authorization endpoint and uses the response to either hide or show different sections as defined by the Access Content Markup. After the document has been shown to the Reader, AMP Runtime calls the Pingback endpoint that can be used by the Publisher to update the countdown meter.
 
 The solution also allows the Publisher to place in the AMP document  a Login Link that launches the Login/Subscribe Page where the Publisher can authenticate the Reader and associate the Reader’s identity in their system with the AMP Reader ID.
 
@@ -106,11 +107,11 @@ Access Content Markup determines which sections are visible or hidden based on t
 
 ### Authorization Endpoint
 
-Authorization is an endpoint provided by the publisher and called by AMP Runtime or AMP Cache. It is a credentialed CORS endpoint. This endpoint returns the access parameters that can be used by the Content Markup to hide or show different parts of the document.
+Authorization is an endpoint provided by the publisher and called by AMP Runtime or Google AMP Cache. It is a credentialed CORS endpoint. This endpoint returns the access parameters that can be used by the Content Markup to hide or show different parts of the document.
 
 ### Pingback Endpoint
 
-Pingback is an endpoint provided by the publisher and called by AMP Runtime or AMP Cache. It is a credentialed CORS endpoint. AMP Runtime calls this endpoint automatically when the Reader has started viewing the document. On of the main goals of the Pingback is for the Publisher to update metering information.
+Pingback is an endpoint provided by the publisher and called by AMP Runtime or Google AMP Cache. It is a credentialed CORS endpoint. AMP Runtime calls this endpoint automatically when the Reader has started viewing the document. On of the main goals of the Pingback is for the Publisher to update metering information.
 
 ### Login Page and Login Link
 
@@ -135,13 +136,13 @@ All of the endpoints are configured in the AMP document as a JSON object in the 
 
 The following properties are defined in this configuration:
 
-Property      | Values               | Description
-------------- | -------------------- |---------------------------------
-authorization | &lt;URL&gt;          | The HTTPS URL for the Authorization endpoint.
-pingback      | &lt;URL&gt;          | The HTTPS URL for the Pingback endpoint.
-login         | &lt;URL&gt; or &lt;Map[string, URL]&gt; | The HTTPS URL for the Login Page or a set of URLs for different types of login pages.
-authorizationFallbackResponse | &lt;object&gt;          | The JSON object to be used in place of the authorization response if it fails.
-type          | "client" or "server" | Default is “client”. The "server" option is under design discussion and these docs will be updated when it is ready.
+|Property       | Values               | Description |
+--------------  | -------------------- | --------------------------------- |
+| authorization | &lt;URL&gt;          | The HTTPS URL for the Authorization endpoint. |
+| pingback      | &lt;URL&gt;          | The HTTPS URL for the Pingback endpoint. |
+| login         | &lt;URL&gt; or &lt;Map[string, URL]&gt; | The HTTPS URL for the Login Page or a set of URLs for different types of login pages. |
+| authorizationFallbackResponse | &lt;object&gt;          | The JSON object to be used in place of the authorization response if it fails. |
+| type          | "client" or "server" | Default is “client”. The "server" option is under design discussion and these docs will be updated when it is ready. |
 
 *&lt;URL&gt;* values specify HTTPS URLs with substitution variables. The substitution variables are covered in more detail in the [Access URL Variables][7] section below.
 
@@ -164,17 +165,17 @@ Here’s an example of the AMP Access configuration:
 
 When configuring the URLs for various endpoints, the Publisher can use substitution variables. The full list of these variables are defined in the [AMP Var Spec](https://github.com/ampproject/amphtml/blob/master/spec/amp-var-substitutions.md). In addition, this spec adds a few access-specific variables such as `READER_ID` and `AUTHDATA`. Some of the most relevant variables are described in the table below:
 
-Var               | Description
------------------ | -----------
-READER_ID         | The AMP Reader ID.
-AUTHDATA(field)   | The value of the field in the authorization response.
-RETURN_URL        | The placeholder for the return URL specified by the AMP runtime for a Login Dialog to return to.
-SOURCE_URL        | The Source URL of this AMP Document. If document is served from CDN, AMPDOC_URL will be a CDN URL, while SOURCE_URL will be the original source URL.
-AMPDOC_URL        | The URL of this AMP Document.
-CANONICAL_URL     | The canonical URL of this AMP Document.
-DOCUMENT_REFERRER | The Referrer URL.
-VIEWER            | The URL of the AMP Viewer.
-RANDOM            | A random number. Helpful to avoid browser cache.
+| Var               | Description |
+| ----------------- | ----------- |
+| READER_ID         | The AMP Reader ID. |
+| AUTHDATA(field)   | The value of the field in the authorization response. |
+| RETURN_URL        | The placeholder for the return URL specified by the AMP runtime for a Login Dialog to return to. |
+| SOURCE_URL        | The Source URL of this AMP Document. If document is served from CDN, AMPDOC_URL will be a CDN URL, while SOURCE_URL will be the original source URL. |
+| AMPDOC_URL        | The URL of this AMP Document. |
+| CANONICAL_URL     | The canonical URL of this AMP Document. |
+| DOCUMENT_REFERRER | The Referrer URL. |
+| VIEWER            | The URL of the AMP Viewer. |
+| RANDOM            | A random number. Helpful to avoid browser cache. |
 
 Here’s an example of the URL extended with Reader ID, Canonical URL, Referrer information and random cachebuster:
 ```
@@ -311,7 +312,7 @@ AMP Runtime uses the following CSS classes during the authorization flow:
  1. `amp-access-loading` CSS class is set on the document root when the authorization flow starts and removed when it completes or fails.
  2. `amp-access-error` CSS class is set on the document root when the authorization flow fails.
 
-In the *server* option, the call to Authorization endpoint is done by AMP Cache as a simple HTTPS endpoint. This means that the Publisher’s cookies cannot be delivered in this case.
+In the *server* option, the call to Authorization endpoint is done by Google AMP Cache as a simple HTTPS endpoint. This means that the Publisher’s cookies cannot be delivered in this case.
 
 ### Pingback Endpoint
 
@@ -418,10 +419,10 @@ To implement FCF, the Publisher must (1) be able to determine the referring serv
 Both steps are covered by the AMP Access spec. The referrer can be injected into the Authorization and Pingback URLs using `DOCUMENT_REFERRER` URL substitution as described in [Access URL Variables][7]. The view counting can be done using Pingback endpoint on the server-side. This is very similar to the metering implementation described in [Metering][12].
 
 ## AMP Glossary
- - **AMP Document** - the HTML document that follows AMP format and validated by AMP Validator. AMP Documents are cacheable by AMP Cache.
+ - **AMP Document** - the HTML document that follows AMP format and validated by AMP Validator. AMP Documents are cacheable by Google AMP Cache.
  - **AMP Validator** - the computer program that performs a static analysis of an HTML document and returns success or failure depending on whether the document conforms to the AMP format.
  - **AMP Runtime** - the JavaScript runtime that executes AMP Document.
- - **AMP Cache** - the proxying cache for AMP documents.
+ - **Google AMP Cache** - the proxying cache for AMP documents.
  - **AMP Viewer** - the Web or native application that displays/embeds AMP Documents.
  - **Publisher.com** - the site of an AMP publisher.
  - **CORS endpoint** - cross-origin HTTPS endpoint. See https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS for more info. See [CORS Origin Security][9] for how such requests can be secured.
@@ -470,7 +471,7 @@ field_ref: field_ref '.' field_name | field_name
 literal: STRING | NUMERIC | TRUE | FALSE | NULL
 ```
 
-Notice that ```amp-access``` expressions are evaluated by the AMP Runtime and AMP Cache. This is NOT part of the specification that the Publisher needs to implement. It is here simply for informational properties.
+Notice that ```amp-access``` expressions are evaluated by the AMP Runtime and Google AMP Cache. This is NOT part of the specification that the Publisher needs to implement. It is here simply for informational properties.
 
 ## Detailed Discussion
 
