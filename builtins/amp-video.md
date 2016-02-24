@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-### <a name="amp-video"></a> `amp-video`
+# <a name="amp-video"></a> `amp-video`
 
 <table>
    <tr>
@@ -69,7 +69,7 @@ The following lists validation errors specific to the `amp-video` tag
   </tr>
 </table>
 
-#### Behavior
+## Behavior
 
 The `amp-video` component loads the video resource specified by its `src` attribute lazily, at a time determined by the runtime. It can be controlled much the same way as a standard HTML5 `video` tag.
 
@@ -93,7 +93,7 @@ For example:
 </amp-video>
 ```
 
-#### Attributes
+## Attributes
 
 **src**
 

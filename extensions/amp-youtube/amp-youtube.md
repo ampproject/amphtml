@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-### <a name="amp-youtube"></a> `amp-youtube`
+# <a name="amp-youtube"></a> `amp-youtube`
 
 <table>
   <tr>
@@ -81,7 +81,7 @@ The following lists validation errors specific to the `amp-youtube` tag
   </tr>
 </table>
 
-#### Example
+## Example
 
 With responsive layout the width and height from the example should yield correct layouts for 16:9 aspect ratio videos:
 
@@ -92,7 +92,7 @@ With responsive layout the width and height from the example should yield correc
     width="480" height="270"></amp-youtube>
 ```
 
-#### Attributes
+## Attributes
 
 **data-videoid**
 

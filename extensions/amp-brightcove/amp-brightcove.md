@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-### <a name="amp-brightcove"></a> `amp-brightcove`
+# <a name="amp-brightcove"></a> `amp-brightcove`
 
 <table>
   <tr>
@@ -65,7 +65,7 @@ The following lists validation errors specific to the `amp-brightcove` tag
   </tr>
 </table>
 
-#### Example
+## Example
 
 The `width` and `height` attributes determine the aspect ratio of the player embedded in responsive layouts.
 
@@ -82,7 +82,7 @@ Example:
 </amp-brightcove>
 ```
 
-#### Attributes
+## Attributes
 
 **data-account**
 
@@ -119,7 +119,7 @@ Keys and values will be URI encoded. Keys will be camel cased.
 - `data-param-language="de"` becomes `&language=de`
 - `data-param-custom-ad-data="key:value;key2:value2"` becomes `&customAdData=key%3Avalue%3Bkey2%3Avalue2`
 
-#### Player configuration
+## Player configuration
 
 This script should be added to the configuration of Brightcove Players used with this component. This allows the AMP document to pause the player. Only the script need be added, no plugin name or JSON are needed.
 

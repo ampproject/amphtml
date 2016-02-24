@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-### <a name="amp-dailymotion"></a> `amp-dailymotion`
+# <a name="amp-dailymotion"></a> `amp-dailymotion`
 
 <table>
   <tr>
@@ -69,7 +69,7 @@ The following lists validation errors specific to the `amp-dailymotion` tag
   </tr>
 </table>
 
-#### Example
+## Example
 
 With responsive layout, the width and height from the example should yield correct layouts for 16:9 aspect ratio videos.
 
@@ -80,7 +80,7 @@ With responsive layout, the width and height from the example should yield corre
     width="480" height="270"></amp-dailymotion>
 ```
 
-#### Required attributes
+## Required attributes
 
 **data-videoid**
 
@@ -88,7 +88,7 @@ The Dailymotion video id found in every video page URL.
 
 E.g. in https://www.dailymotion.com/video/x2m8jpp_dailymotion-spirit-movie_creation `"x2m8jpp"` is the video id.
 
-#### Optional attributes
+## Optional attributes
 
 **data-mute**
 

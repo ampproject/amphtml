@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-### <a name="amp-carousel"></a> `amp-carousel`
+# <a name="amp-carousel"></a> `amp-carousel`
 
 <table>
   <tr>
@@ -61,7 +61,7 @@ The following lists validation errors specific to the `amp-carousel` tag
   </tr>
 </table>
 
-#### Behavior
+## Behavior
 
 Each of the `amp-carousel` component’s immediate children is considered an item in the carousel. Each of these nodes may also have arbitrary HTML children.
 
@@ -78,7 +78,7 @@ The carousel advances between items if the user swipes, uses arrow keys, clicks 
 
 Note, that while the example shows a carousel of images `amp-carousel` support arbitrary children.
 
-#### Attributes
+## Attributes
 
 **controls**
 
@@ -110,7 +110,7 @@ when `autoplay` is specified and will use the value of the `delay`
 attribute if present (minimum of 1000 ms, an error will be thrown if its any lower).
 The value of `delay` must be numeric representation in milliseconds, ex. `delay=5000`.
 
-#### Styling
+## Styling
 - You may use the `amp-carousel` element selector to style it freely.
 - `.amp-carousel-button` by default uses an inlined svg as the background-image of the buttons.
 You may override this with your own svg or image like so:

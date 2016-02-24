@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-### <a name="amp-accordion"></a> `amp-accordion`
+# <a name="amp-accordion"></a> `amp-accordion`
 
 <table>
   <tr>
@@ -35,7 +35,7 @@ limitations under the License.
   </tr>
 </table>
 
-#### Behavior
+## Behavior
 
 Each of the `amp-accordion` component’s immediate children is considered a section in the accordion. Each of these nodes must be a `<section>` tag.
 
@@ -64,13 +64,13 @@ Each of the `amp-accordion` component’s immediate children is considered a sec
 </amp-accordion>
 ```
 
-#### Attributes
+## Attributes
 
 **expanded**
 
 The `expanded` attribute can be set on any `<section>` that needs to be expanded on page load.
 
-#### Styling
+## Styling
 
 - You may use the `amp-accordion` element selector to style it freely.
 - `amp-accordion` elements are always `display: block`.

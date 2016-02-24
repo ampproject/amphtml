@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-### <a name="amp-mustache"></a> `amp-mustache`
+# <a name="amp-mustache"></a> `amp-mustache`
 
 <table>
   <tr>
@@ -53,7 +53,7 @@ The following lists validation errors specific to `amp-mustache`
   </tr>
 </table>
 
-#### Syntax
+## Syntax
 
 Mustache is a logic-less template syntax. See [Mustache.js docs](https://github.com/janl/mustache.js/)
 for more details. Some of the core Mustache tags are:
@@ -63,7 +63,7 @@ for more details. Some of the core Mustache tags are:
 it's an array;
 - \{\{^section\}\}\{\{/section\}\}` - inverted tag. It can test non-existance of a variable.
 
-#### Usage
+## Usage
 
 The `amp-mustache` template has to be defined and used according to the
 [AMP Template Spec](../../spec/amp-html-templates.md).
@@ -85,7 +85,7 @@ Then, the Mustache templates can be defined in the `template` tags like this:
 How templates are discovered, when they are rendered, how data is provided - all decided by the
 target AMP element that uses this template to render its content.
 
-#### Restrictions
+## Restrictions
 
 Like all AMP templates, `amp-mustache` templates are required to be well-formed DOM fragments. This means
 that among other things, you can't use `amp-mustache` to:

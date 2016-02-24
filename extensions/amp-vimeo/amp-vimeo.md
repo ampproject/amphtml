@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-### <a name="amp-vimeo"></a> `amp-vimeo`
+# <a name="amp-vimeo"></a> `amp-vimeo`
 
 <table>
   <tr>
@@ -69,7 +69,7 @@ The following lists validation errors specific to the `amp-vimeo` tag
   </tr>
 </table>
 
-#### Example
+## Example
 
 With responsive layout, the width and height from the example should yield correct layouts for 16:9 aspect ratio videos:
 
@@ -80,7 +80,7 @@ With responsive layout, the width and height from the example should yield corre
     width="500" height="281"></amp-vimeo>
 ```
 
-#### Attributes
+## Attributes
 
 **data-videoid**
 

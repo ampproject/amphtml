@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-### <a name="amp-image-lightbox"></a> `amp-image-lightbox`
+# <a name="amp-image-lightbox"></a> `amp-image-lightbox`
 
 <table>
   <tr>
@@ -57,7 +57,7 @@ The following lists validation errors specific to the `amp-image-lightbox` tag
   </tr>
 </table>
 
-#### Behavior
+## Behavior
 
 The typical scenario looks like this:
 ```html
@@ -85,7 +85,7 @@ Among other things the `amp-image-lightbox` allows the following user manipulati
 zooming, panning, showing/hiding of the description.
 Pressing the escape key on the keyboard will close the lightbox.
 
-#### Styling
+## Styling
 
 The `amp-image-lightbox` component can be styled with standard CSS. Some of the
 properties that can be styled are `background` and `color`.

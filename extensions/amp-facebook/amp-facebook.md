@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-### <a name="amp-facebook"></a> `amp-facebook`
+# <a name="amp-facebook"></a> `amp-facebook`
 
 <table>
   <tr>
@@ -65,7 +65,7 @@ The following lists validation errors specific to the `amp-facebook` tag
   </tr>
 </table>
 
-#### Examples
+## Examples
 
 Example - Embedding a post:
 ```html
@@ -84,7 +84,7 @@ Example - Embedding a video:
 </amp-facebook>
 ```
 
-#### Attributes
+## Attributes
 
 **data-href**
 

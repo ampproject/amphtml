@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-### <a name=”amp-pinterest”></a> `amp-pinterest`
+# <a name=”amp-pinterest”></a> `amp-pinterest`
 
 <table>
   <tr>
@@ -64,7 +64,7 @@ The following lists validation errors specific to the `amp-pinterest` tag
   </tr>
 </table>
 
-### Examples:
+## Examples:
 
 Pin It button: `data-do="buttonPin"`
 
