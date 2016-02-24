@@ -23,6 +23,7 @@ import {log} from '../log';
 import {parseQueryString, parseUrl, removeFragment} from '../url';
 import {platform} from '../platform';
 import {timer} from '../timer';
+import {reportError} from '../error';
 
 
 const TAG_ = 'Viewer';
@@ -252,6 +253,20 @@ export class Viewer {
     // Wait for document to become visible.
     this.docState_.onVisibilityChanged(this.onVisibilityChange_.bind(this));
 
+
+    /**
+     * Creates an error for the case where a channel cannot be established.
+     * @param {!Error|undefined} reason
+     * @return {!Error}
+     */
+    function getChannelError(reason) {
+      if (reason instanceof Error) {
+        reason.message = 'No messaging channel: ' + reason.message;
+        return reason;
+      }
+      return new Error('No messaging channel: ' + reason);
+    }
+
     /**
      * This promise will resolve when communications channel has been
      * established or timeout in 5 seconds. The timeout is needed to avoid
@@ -264,8 +279,8 @@ export class Viewer {
         new Promise(resolve => {
           /** @private @const {function(!Viewer)} */
           this.messagingReadyResolver_ = resolve;
-        })).catch(() => {
-          throw new Error('no messaging channel');
+        })).catch(reason => {
+          throw getChannelError(reason);
         });
 
     /**
@@ -274,7 +289,10 @@ export class Viewer {
      * deliver if at all possible.
      * @private @const {!Promise<!Viewer>}
      */
-    this.messagingMaybePromise_ = this.messagingReadyPromise_.catch(() => {});
+    this.messagingMaybePromise_ = this.messagingReadyPromise_.catch(reason => {
+      // Don't fail promise, but still report.
+      reportError(getChannelError(reason));
+    });
 
     // Trusted viewer and referrer.
     let trustedViewerResolved;
