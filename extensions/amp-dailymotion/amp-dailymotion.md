@@ -19,7 +19,7 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td> Displays a Dailymotion video.</td>
+    <td> Displays a <a href="http://www.dailymotion.com/">Dailymotion</a> video.</td>
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
