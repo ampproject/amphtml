@@ -222,7 +222,7 @@ describe('Viewer', () => {
   it('should post broadcast event but not fail w/o messaging', () => {
     viewer.broadcast({type: 'type1'});
     expect(viewer.messageQueue_.length).to.equal(0);
-    clock.tick(5001);
+    clock.tick(20001);
     return viewer.messagingReadyPromise_.then(() => 'OK', () => 'ERROR')
         .then(res => {
           expect(res).to.equal('ERROR');
@@ -310,7 +310,7 @@ describe('Viewer', () => {
       expect(m2Resolved).to.be.false;
 
       // Timeout.
-      clock.tick(5001);
+      clock.tick(20001);
       return Promise.all([m1, m2]);
     }).then(() => {
       throw new Error('must never be here');
