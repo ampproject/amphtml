@@ -36,6 +36,7 @@ describe('reportErrorToServer', () => {
     window.onerror = onError;
     sandbox.restore();
     setModeForTesting(null);
+    window.viewerState = undefined;
   });
 
   it('reportError with error object', () => {
@@ -52,6 +53,9 @@ describe('reportErrorToServer', () => {
     expect(query.s).to.equal(e.stack);
     expect(query['3p']).to.equal(undefined);
     expect(e.message).to.contain('_reported_');
+    expect(query.or).to.contain('http://localhost');
+    expect(query.vs).to.be.undefined;
+    expect(query.r).to.contain('http://localhost');
   });
 
   it('reportError with associatedElement', () => {
@@ -114,7 +118,8 @@ describe('reportErrorToServer', () => {
     expect(query['3p']).to.equal('1');
   });
 
-  it('reportError marks canary', () => {
+  it('reportError marks canary and viewerState', () => {
+    window.viewerState = 'some-state';
     window.AMP_CONFIG = {
       canary: true,
     };
@@ -126,6 +131,7 @@ describe('reportErrorToServer', () => {
 
     expect(query.m).to.equal('XYZ');
     expect(query['ca']).to.equal('1');
+    expect(query['vs']).to.equal('some-state');
   });
 
   it('reportError without error object', () => {

@@ -283,6 +283,7 @@ var forbiddenTerms = {
     message: 'Use Viewer.getReferrerUrl() instead.',
     whitelist: [
       'src/service/viewer-impl.js',
+      'src/error.js',
     ],
   },
   'getUnconfirmedReferrerUrl': {
