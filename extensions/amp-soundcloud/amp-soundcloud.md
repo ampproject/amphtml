@@ -19,7 +19,7 @@ limitations under the License.
 <table>
   <tr>
     <td width="40%"><strong>Description</strong></td>
-    <td> Displays a Soundcloud clip.</td>
+    <td> Displays a <a href="https://soundcloud.com/">Soundcloud</a> clip.</td>
   </tr>
   <tr>
     <td width="40%"><strong>Availability</strong></td>
