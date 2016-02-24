@@ -640,7 +640,7 @@ export class Viewer {
    * @param {number} height
    */
   postDocumentReady(width, height) {
-    this.sendMessage_('documentLoaded', {
+    this.sendMessageUnreliable_('documentLoaded', {
       width: width,
       height: height,
       title: this.win.document.title,
@@ -653,7 +653,8 @@ export class Viewer {
    * @param {number} height
    */
   postDocumentResized(width, height) {
-    this.sendMessage_('documentResized', {width: width, height: height}, false);
+    this.sendMessageUnreliable_(
+        'documentResized', {width: width, height: height}, false);
   }
 
   /**
@@ -662,7 +663,7 @@ export class Viewer {
    * @return {!Promise}
    */
   requestFullOverlay() {
-    return this.sendMessage_('requestFullOverlay', {}, true);
+    return this.sendMessageUnreliable_('requestFullOverlay', {}, true);
   }
 
   /**
@@ -671,7 +672,7 @@ export class Viewer {
    * @return {!Promise}
    */
   cancelFullOverlay() {
-    return this.sendMessage_('cancelFullOverlay', {}, true);
+    return this.sendMessageUnreliable_('cancelFullOverlay', {}, true);
   }
 
   /**
@@ -680,7 +681,8 @@ export class Viewer {
    * @return {!Promise}
    */
   postPushHistory(stackIndex) {
-    return this.sendMessage_('pushHistory', {stackIndex: stackIndex}, true);
+    return this.sendMessageUnreliable_(
+        'pushHistory', {stackIndex: stackIndex}, true);
   }
 
   /**
@@ -689,7 +691,8 @@ export class Viewer {
    * @return {!Promise}
    */
   postPopHistory(stackIndex) {
-    return this.sendMessage_('popHistory', {stackIndex: stackIndex}, true);
+    return this.sendMessageUnreliable_(
+        'popHistory', {stackIndex: stackIndex}, true);
   }
 
   /**
@@ -705,14 +708,14 @@ export class Viewer {
    * @param {!JSONObject} message
    */
   tick(message) {
-    this.sendMessage_('tick', message, false);
+    this.sendMessageUnreliable_('tick', message, false);
   }
 
   /**
    * Triggers "sendCsi" event for the viewer.
    */
   flushTicks() {
-    this.sendMessage_('sendCsi', undefined, false);
+    this.sendMessageUnreliable_('sendCsi', undefined, false);
   }
 
   /**
@@ -720,7 +723,7 @@ export class Viewer {
    * @param {!JSONObject} message
    */
   setFlushParams(message) {
-    this.sendMessage_('setFlushParams', message, false);
+    this.sendMessageUnreliable_('setFlushParams', message, false);
   }
 
   /**
@@ -819,7 +822,7 @@ export class Viewer {
    */
   sendMessage(eventType, data, awaitResponse) {
     return this.messagingReadyPromise_.then(() => {
-      return this.sendMessage_(eventType, data, awaitResponse);
+      return this.sendMessageUnreliable_(eventType, data, awaitResponse);
     });
   }
 
@@ -844,13 +847,17 @@ export class Viewer {
   }
 
   /**
+   * This message queues up the message to be sent when communication channel
+   * is established. If the communication channel is not established at
+   * this time, this method responds immediately with a Promise that yields
+   * `undefined` value.
    * @param {string} eventType
    * @param {*} data
    * @param {boolean} awaitResponse
    * @return {!Promise<*>|undefined}
    * @private
    */
-  sendMessage_(eventType, data, awaitResponse) {
+  sendMessageUnreliable_(eventType, data, awaitResponse) {
     if (this.messageDeliverer_) {
       return this.messageDeliverer_(eventType, data, awaitResponse);
     }
@@ -884,7 +891,7 @@ export class Viewer {
   maybeSendMessage_(eventType, data) {
     this.messagingMaybePromise_.then(() => {
       if (this.messageDeliverer_) {
-        this.sendMessage_(eventType, data, false);
+        this.sendMessageUnreliable_(eventType, data, false);
       }
     });
   }
