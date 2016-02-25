@@ -270,48 +270,36 @@ export class Viewer {
     // Wait for document to become visible.
     this.docState_.onVisibilityChanged(this.recheckVisibilityState_.bind(this));
 
-
-    /**
-     * Creates an error for the case where a channel cannot be established.
-     * @param {!Error|undefined} reason
-     * @return {!Error}
-     */
-    function getChannelError(reason) {
-      if (reason instanceof Error) {
-        reason.message = 'No messaging channel: ' + reason.message;
-        return reason;
-      }
-      return new Error('No messaging channel: ' + reason);
-    }
-
     /**
      * This promise will resolve when communications channel has been
-     * established or timeout in 5 seconds. The timeout is needed to avoid
+     * established or timeout in 20 seconds. The timeout is needed to avoid
      * this promise becoming a memory leak with accumulating undelivered
-     * messages.
-     * @private @const {!Promise<!Viewer>}
+     * messages. The promise is only available when the document is embedded.
+     * @private @const {?Promise}
      */
-    this.messagingReadyPromise_ = timer.timeoutPromise(
-        20000,
-        new Promise(resolve => {
-          /** @private @const {function(!Viewer)} */
-          this.messagingReadyResolver_ = resolve;
-        })).catch(reason => {
-          throw getChannelError(reason);
-        });
+    this.messagingReadyPromise_ = this.isEmbedded_ ?
+        timer.timeoutPromise(
+            20000,
+            new Promise(resolve => {
+              /** @private @const {function()|undefined} */
+              this.messagingReadyResolver_ = resolve;
+            })).catch(reason => {
+              throw getChannelError(reason);
+            }) : null;
 
     /**
      * A promise for non-essential messages. These messages should not fail
      * if there's no messaging channel set up. But ideally viewer would try to
-     * deliver if at all possible.
-     * @private @const {!Promise<!Viewer>}
+     * deliver if at all possible. This promise is only available when the
+     * document is embedded.
+     * @private @const {?Promise}
      */
-    this.messagingMaybePromise_ = this.messagingReadyPromise_.catch(reason => {
-      if (this.isEmbedded_) {
-        // Don't fail promise, but still report.
-        reportError(getChannelError(reason));
-      }
-    });
+    this.messagingMaybePromise_ = this.isEmbedded_ ?
+        this.messagingReadyPromise_
+            .catch(reason => {
+              // Don't fail promise, but still report.
+              reportError(getChannelError(reason));
+            }) : null;
 
     // Trusted viewer and referrer.
     let trustedViewerResolved;
@@ -845,7 +833,9 @@ export class Viewer {
     assert(!this.messageDeliverer_, 'message deliverer can only be set once');
     log.fine(TAG_, 'message channel established with origin: ', origin);
     this.messageDeliverer_ = deliverer;
-    this.messagingReadyResolver_(this);
+    if (this.messagingReadyResolver_) {
+      this.messagingReadyResolver_();
+    }
     // TODO(dvoytenko, #1764): Make `origin` required when viewers catch up.
     this.messagingOrigin_ = origin;
     if (this.trustedViewerResolver_) {
@@ -878,6 +868,9 @@ export class Viewer {
    * @return {!Promise<*>|undefined}
    */
   sendMessage(eventType, data, awaitResponse) {
+    if (!this.messagingReadyPromise_) {
+      return Promise.reject(getChannelError());
+    }
     return this.messagingReadyPromise_.then(() => {
       return this.sendMessageUnreliable_(eventType, data, awaitResponse);
     });
@@ -946,6 +939,10 @@ export class Viewer {
    * @private
    */
   maybeSendMessage_(eventType, data) {
+    if (!this.messagingMaybePromise_) {
+      // Messaging is not expected.
+      return;
+    }
     this.messagingMaybePromise_.then(() => {
       if (this.messageDeliverer_) {
         this.sendMessageUnreliable_(eventType, data, false);
@@ -964,11 +961,25 @@ export class Viewer {
  * @param {!Object<string, string>} allParams
  * @private
  */
-export function parseParams_(str, allParams) {
+function parseParams_(str, allParams) {
   const params = parseQueryString(str);
   for (const k in params) {
     allParams[k] = params[k];
   }
+}
+
+
+/**
+ * Creates an error for the case where a channel cannot be established.
+ * @param {!Error=} opt_reason
+ * @return {!Error}
+ */
+function getChannelError(opt_reason) {
+  if (opt_reason instanceof Error) {
+    opt_reason.message = 'No messaging channel: ' + opt_reason.message;
+    return opt_reason;
+  }
+  return new Error('No messaging channel: ' + opt_reason);
 }
 
 
