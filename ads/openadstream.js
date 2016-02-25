@@ -26,7 +26,7 @@ export function openadstream(global, data) {
   checkData(data, ['adhost', 'sitepage', 'pos', 'query']);
   //required fields
   validateDataExists(data, ['adhost', 'sitepage', 'pos']);
-  let url = 'https://' + encodeURIComponent(data.adhost) + '/3/' + encodeURIComponent(data.sitepage) + '/1' + new String(Math.random()).substring(2, 11) + '@' + data.pos;
+  let url = 'https://' + encodeURIComponent(data.adhost) + '/3/' + data.sitepage + '/1' + String(Math.random()).substring(2, 11) + '@' + data.pos;
   if (data.query) {
     url = url + '?' + data.query;
   }
