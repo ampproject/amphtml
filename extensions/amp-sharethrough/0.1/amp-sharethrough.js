@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-import {Layout, isLayoutSizeDefined} from '../../../src/layout';
+import {isLayoutSizeDefined} from '../../../src/layout';
 import {AmpMustache}
     from '../../../build/all/v0/amp-mustache-0.1.max';
-import {parse as mustacheParse, render as mustacheRender,
-    setUnescapedSanitizier} from '../../../third_party/mustache/mustache';
 import {xhrFor} from '../../../src/xhr';
 
 /** @private @const */
@@ -81,40 +79,46 @@ export class AmpSharethrough extends AMP.BaseElement {
           this.element.appendChild(this.pixelHTML(creative.creative_key, pkey));
         }
       }, err => {
-        console./*OK*/error(this.getName_(), 'Error loading data from exchange using url: ', url, err);
+        console./*OK*/error(this.getName_(),
+          'Error loading data from exchange using url: ', url, err);
       });
   }
 
   unencodeHTML(html) {
-    return html.replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+    return html.replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&amp;/g, '&');
   }
 
   analyticsHTML(idSelector) {
     const analyticsElement = document.createElement('amp-analytics');
     analyticsElement.innerHTML = '<script type="application/json">'
-    +'{'
-    +'  "requests": {'
-    +'    "event": "' + analyticsUrl + '?ckey=${ckey}&type=${eventLabel}"'
-    +'  },'
-    +'  "triggers": {'
-    +'    "trackAdVisible": {'
-    +'      "on": "visible",'
-    +'      "selector": "#'+ idSelector +'",'
-    +'      "request": "event",'
-    +'      "vars": {'
-    +'        "ckey": "creative_key",'
-    +'        "eventLabel": "visible"'
-    +'      }'
-    +'    }'
-    +'  }'
-    +'}'
-    +'</script>';
+    + '{'
+    + '  "requests": {'
+    + '    "event": "' + analyticsUrl + '?ckey=${ckey}&type=${eventLabel}"'
+    + '  },'
+    + '  "triggers": {'
+    + '    "trackAdVisible": {'
+    + '      "on": "visible",'
+    + '      "selector": "#' + idSelector + '",'
+    + '      "request": "event",'
+    + '      "vars": {'
+    + '        "ckey": "creative_key",'
+    + '        "eventLabel": "visible"'
+    + '      }'
+    + '    }'
+    + '  }'
+    + '}'
+    + '</script>';
     return analyticsElement;
   }
 
   pixelHTML(ckey, pkey) {
     const pixelElement = document.createElement('amp-pixel');
-    pixelElement.setAttribute('src', `${analyticsUrl}?ckey=${ckey}&pkey=${pkey}&type=rendered`);
+    pixelElement.setAttribute('src',
+      `${analyticsUrl}?ckey=${ckey}&pkey=${pkey}&type=rendered`);
     return pixelElement;
   }
 }
