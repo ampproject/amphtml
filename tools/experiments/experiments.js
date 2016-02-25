@@ -50,11 +50,19 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/blob/master/' +
         'README.md#amp-dev-channel',
   },
+
   {
     id: 'amp-social-share',
     name: 'AMP Social Share',
     spec: 'https://github.com/ampproject/amphtml/blob/master/' +
         'extensions/amp-social-share/amp-social-share.md',
+
+  // Amp Sidebar
+  {
+    id: 'amp-sidebar',
+    name: 'Amp Sidebar',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
+        'amp-sidebar/amp-sidebar.md',
   },
 ];
 
