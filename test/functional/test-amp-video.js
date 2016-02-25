@@ -240,4 +240,33 @@ describe('amp-video', () => {
     });
   });
 
+  it('should pause the video when document inactive', () => {
+    return getVideo({
+      src: 'video.mp4',
+      width: 160,
+      height: 90,
+    }).then(v => {
+      const impl = v.implementation_;
+      const video = v.querySelector('video');
+      sandbox.spy(video, 'pause');
+      impl.documentInactiveCallback();
+      expect(video.pause.called).to.be.true;
+    });
+  });
+
+  it('should fallback if video element is not supported', () => {
+    return getVideo({
+      src: 'video.mp4',
+      width: 160,
+      height: 90,
+    }, null, function(element) {
+      const impl = element.implementation_;
+      sandbox.stub(impl, 'isVideoSupported_').returns(false);
+      sandbox.spy(impl, 'toggleFallback');
+    }).then(v => {
+      const impl = v.implementation_;
+      expect(impl.toggleFallback.called).to.be.true;
+      expect(impl.toggleFallback.calledWith(true)).to.be.true;
+    });
+  });
 });
