@@ -17,7 +17,7 @@
 // Tests integration.js
 // Most coverage through test-3p-frame
 
-import {draw3p, validateParentOrigin, parseFragment}
+import {draw3p, validateParentOrigin, validateAllowedTypes, parseFragment}
     from '../../3p/integration';
 import {registrations, register} from '../../src/3p';
 
@@ -207,5 +207,46 @@ describe('3p integration.js', () => {
     expect(() => {
       draw3p(win, data);
     }).to.throw(/Embed type testAction not allowed with tag AMP-EMBED/);
+  });
+
+  it('should allow all types on localhost', () => {
+    const localhost = {
+      location: {
+        hostname: 'ads.localhost'
+      }
+    };
+    validateAllowedTypes(localhost, 'twitter');
+    validateAllowedTypes(localhost, 'facebook');
+    validateAllowedTypes(localhost, 'a9');
+    validateAllowedTypes(localhost, 'not present');
+  });
+
+  it('should allow all types on default host', () => {
+    const defaultHost = {
+      location: {
+        hostname: '3p.ampproject.net'
+      }
+    };
+    validateAllowedTypes(defaultHost, 'twitter');
+    validateAllowedTypes(defaultHost, 'facebook');
+    validateAllowedTypes(defaultHost, 'a9');
+    validateAllowedTypes(defaultHost, 'not present');
+  });
+
+  it('should validate types on custom host', () => {
+    const defaultHost = {
+      location: {
+        hostname: 'other.com'
+      }
+    };
+    validateAllowedTypes(defaultHost, 'twitter');
+    validateAllowedTypes(defaultHost, 'facebook');
+    validateAllowedTypes(defaultHost, 'doubleclick');
+    expect(() => {
+      validateAllowedTypes(defaultHost, 'not present');
+    }).to.throw(/Non-whitelisted 3p type for custom iframe/);
+    expect(() => {
+      validateAllowedTypes(defaultHost, 'adtech');
+    }).to.throw(/Non-whitelisted 3p type for custom iframe/);
   });
 });

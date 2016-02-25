@@ -76,6 +76,19 @@ register('mediaimpact', mediaimpact);
 register('revcontent', revcontent);
 register('openadstream', openadstream);
 
+// For backward compat, we always allow these types without the iframe
+// opting in.
+const defaultAllowedTypesInCustomFrame = [
+  // Entries must be reasonably safe and not allow overriding the injected
+  // JS URL.
+  // Each custom iframe can override this through the second argument to
+  // draw3p. See amp-ad docs.
+  'facebook',
+  'twitter',
+  'doubleclick',
+  '_ping_',
+];
+
 /**
  * Visible for testing.
  * Draws a 3p embed to the window. Expects the data to include the 3p type.
@@ -138,12 +151,15 @@ function masterSelection(type) {
  *     1. The configuration parameters supplied to this embed.
  *     2. A callback that MUST be called for rendering to proceed. It takes
  *        no arguments. Configuration is expected to be modified in-place.
+ * @param {!Array<string>=} opt_allowed3pTypes List of advertising network
+ *     types you expect.
  */
-window.draw3p = function(opt_configCallback) {
+window.draw3p = function(opt_configCallback, opt_allowed3pTypes) {
   const data = parseFragment(location.hash);
   window.context = data._context;
   window.context.location = parseUrl(data._context.location.href);
   validateParentOrigin(window, window.context.location);
+  validateAllowedTypes(window, data.type, opt_allowed3pTypes);
   window.context.master = masterSelection(data.type);
   window.context.isMaster = window.context.master == window;
   window.context.data = data;
@@ -288,6 +304,27 @@ export function validateParentOrigin(window, parentLocation) {
       'Parent origin mismatch: %s, %s',
       ancestors[0], parentLocation.origin);
   parentLocation.originValidated = true;
+}
+
+/**
+ * Check that this iframe intended this particular ad type to run.
+ * @param {!Window} window
+ * @param {string} type 3p type
+ * @param {!Array<string>|undefined} allowedTypes May be undefined.
+ */
+export function validateAllowedTypes(window, type, allowedTypes) {
+  // Everything allowed in default iframe.
+  if (window.location.hostname == '3p.ampproject.net') {
+    return;
+  }
+  if (window.location.hostname == 'ads.localhost') {
+    return;
+  }
+  if (defaultAllowedTypesInCustomFrame.indexOf(type) != -1) {
+    return;
+  }
+  assert(allowedTypes && allowedTypes.indexOf(type) != -1,
+      'Non-whitelisted 3p type for custom iframe: ' + type);
 }
 
 /**

@@ -165,6 +165,8 @@ To enable this, copy the file [remote.html](../3p/remote.html) to your web serve
 
 The `content` attribute of the meta tag is the absolute URL to your copy of the remote.html file on your web server. This URL must use a "https" schema. It is not allowed to reside on the same origin as your AMP files. E.g. if you host AMP files on "www.example.com", this URL must not be on "www.example.com" but e.g. "something-else.example.com" is OK. See the doc ["Iframe origin policy"](../spec/amp-iframe-origin-policy.md) for further details on allowed origins for iframes.
 
+Make sure to validate incoming data before passing it on to the `draw3p` function, to make sure your iframe only does things it expects to do.
+
 ### Enhance incoming ad configuration
 
 This is completely optional: It is sometimes desired to further process the incoming iframe configuration before drawing the ad using AMP's built-in system.
