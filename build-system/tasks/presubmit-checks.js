@@ -282,6 +282,8 @@ var forbiddenTerms = {
   '(doc.*)\\.referrer': {
     message: 'Use Viewer.getReferrerUrl() instead.',
     whitelist: [
+      '3p/integration.js',
+      'dist.3p/current/integration.js',
       'src/service/viewer-impl.js',
       'src/error.js',
     ],

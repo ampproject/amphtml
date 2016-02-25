@@ -155,37 +155,42 @@ function masterSelection(type) {
  *     types you expect.
  */
 window.draw3p = function(opt_configCallback, opt_allowed3pTypes) {
-  const data = parseFragment(location.hash);
-  window.context = data._context;
-  window.context.location = parseUrl(data._context.location.href);
-  validateParentOrigin(window, window.context.location);
-  validateAllowedTypes(window, data.type, opt_allowed3pTypes);
-  window.context.master = masterSelection(data.type);
-  window.context.isMaster = window.context.master == window;
-  window.context.data = data;
-  window.context.noContentAvailable = triggerNoContentAvailable;
-  window.context.requestResize = triggerResizeRequest;
+  try {
+    const data = parseFragment(location.hash);
+    window.context = data._context;
+    window.context.location = parseUrl(data._context.location.href);
+    validateParentOrigin(window, window.context.location);
+    validateAllowedTypes(window, data.type, opt_allowed3pTypes);
+    window.context.master = masterSelection(data.type);
+    window.context.isMaster = window.context.master == window;
+    window.context.data = data;
+    window.context.noContentAvailable = triggerNoContentAvailable;
+    window.context.requestResize = triggerResizeRequest;
 
-  if (data.type === 'facebook' || data.type === 'twitter') {
-    // Only make this available to selected embeds until the generic solution is
-    // available.
-    window.context.updateDimensions = triggerDimensions;
+    if (data.type === 'facebook' || data.type === 'twitter') {
+      // Only make this available to selected embeds until the
+      // generic solution is available.
+      window.context.updateDimensions = triggerDimensions;
+    }
+
+    // This only actually works for ads.
+    window.context.observeIntersection = observeIntersection;
+    window.context.onResizeSuccess = onResizeSuccess;
+    window.context.onResizeDenied = onResizeDenied;
+    window.context.reportRenderedEntityIdentifier =
+        reportRenderedEntityIdentifier;
+    window.context.computeInMasterFrame = computeInMasterFrame;
+    delete data._context;
+
+    manageWin(window);
+    installEmbedStateListener();
+    draw3p(window, data, opt_configCallback);
+    updateVisibilityState(window);
+    nonSensitiveDataPostMessage('render-start');
+  } catch (e) {
+    lightweightErrorReport(e);
+    throw e;
   }
-
-  // This only actually works for ads.
-  window.context.observeIntersection = observeIntersection;
-  window.context.onResizeSuccess = onResizeSuccess;
-  window.context.onResizeDenied = onResizeDenied;
-  window.context.reportRenderedEntityIdentifier =
-      reportRenderedEntityIdentifier;
-  window.context.computeInMasterFrame = computeInMasterFrame;
-  delete data._context;
-
-  manageWin(window);
-  installEmbedStateListener();
-  draw3p(window, data, opt_configCallback);
-  updateVisibilityState(window);
-  nonSensitiveDataPostMessage('render-start');
 };
 
 function triggerNoContentAvailable() {
@@ -357,4 +362,20 @@ export function isTagNameAllowed(type, tagName) {
     return !!AMP_EMBED_ALLOWED[type];
   }
   return true;
+}
+
+/**
+ * Reports an error to the server. Must only be called once per page.
+ * Not for use in event handlers.
+ *
+ * We don't use the default error in error.js handler because it has
+ * too many deps for this small JS binary.
+ *
+ * @param {!Error} e
+ */
+function lightweightErrorReport(e) {
+  new Image().src = 'https://amp-error-reporting.appspot.com/r' +
+      '?v=' + encodeURIComponent('$internalRuntimeVersion$') +
+      '&m=' + encodeURIComponent(e.message) +
+      '&r=' + encodeURIComponent(document.referrer);
 }
