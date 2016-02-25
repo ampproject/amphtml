@@ -290,8 +290,10 @@ export class Viewer {
      * @private @const {!Promise<!Viewer>}
      */
     this.messagingMaybePromise_ = this.messagingReadyPromise_.catch(reason => {
-      // Don't fail promise, but still report.
-      reportError(getChannelError(reason));
+      if (this.isEmbedded_) {
+        // Don't fail promise, but still report.
+        reportError(getChannelError(reason));
+      }
     });
 
     // Trusted viewer and referrer.
