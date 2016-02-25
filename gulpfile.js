@@ -93,6 +93,7 @@ function buildExtensions(options) {
   buildExtension('amp-list', '0.1', false, options);
   buildExtension('amp-mustache', '0.1', false, options);
   buildExtension('amp-pinterest', '0.1', true, options);
+  buildExtension('amp-sharethrough', '0.1', false, options);
   buildExtension('amp-soundcloud', '0.1', false, options);
   buildExtension('amp-install-serviceworker', '0.1', false, options);
   /**
@@ -348,6 +349,7 @@ function buildExamples(watch) {
   buildExample('released.amp.html');
   buildExample('twitter.amp.html');
   buildExample('soundcloud.amp.html');
+  buildExample('sharethrough.amp.html');
   buildExample('user-notification.amp.html');
   buildExample('vimeo.amp.html');
   buildExample('vine.amp.html');
