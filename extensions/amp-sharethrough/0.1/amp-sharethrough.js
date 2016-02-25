@@ -66,7 +66,7 @@ export class AmpSharethrough extends AMP.BaseElement {
           const rawTemplate = data.placement.placementAttributes.template;
 
           const templateElement = document.createElement('div');
-          templateElement.innerHTML = this.unencodeHTML(rawTemplate);
+          templateElement./*REVIEW*/innerHTML = this.unencodeHTML(rawTemplate);
 
           const template = new AmpMustache(templateElement);
           template.compileCallback();
@@ -94,7 +94,7 @@ export class AmpSharethrough extends AMP.BaseElement {
 
   analyticsHTML(idSelector) {
     const analyticsElement = document.createElement('amp-analytics');
-    analyticsElement.innerHTML = '<script type="application/json">'
+    analyticsElement./*REVIEW*/innerHTML = '<script type="application/json">'
     + '{'
     + '  "requests": {'
     + '    "event": "' + analyticsUrl + '?ckey=${ckey}&type=${eventLabel}"'

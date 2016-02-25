@@ -175,10 +175,10 @@ describe('amp-sharethrough', () => {
         + '{{{thumbnail_url}}}&quot; layout=&quot;fixed&quot; height=&quot;'
         + '80&quot; width=&quot;80&quot; class=&quot;str-thumbnail&quot;'
         + '&gt;&lt;/amp-img&gt; &lt;/div&gt;&lt;h3 class=&quot;str-title&quot;'
-        + 'style=&quot;margin: 0;padding: 2px 3px 0 0;font-weight:bold;'
+        + ' style=&quot;margin: 0;padding: 2px 3px 0 0;font-weight:bold;'
         + 'line-height:normal;&quot;&gt;{{title}}&lt;/h3&gt; &lt;div '
         + 'class=&quot;str-advertiser&quot; style=&quot;margin:0; padding '
-        + '4px 3px 4px 0;font-size: .8em;padding: 4px 4px 4px 0;&quot;&gt;Ad'
+        + '4px 3px 4px 0;font-size: .8em;padding: 4px 4px 4px 0;&quot;&gt;Ad '
         + 'by{{advertiser}}&lt;amp-img src=&quot;{{{brand_logo_url}}}&quot; '
         + 'layout=&quot;fixed&quot; height=&quot;16&quot; width=&quot;16&quot;'
         + '&gt;&lt;/amp-img&gt; &lt;/div&gt;&lt;/a&gt;&lt;/div&gt;';
