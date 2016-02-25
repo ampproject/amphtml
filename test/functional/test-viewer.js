@@ -194,44 +194,6 @@ describe('Viewer', () => {
     expect(viewer.messageQueue_[1].eventType).to.equal('cancelFullOverlay');
   });
 
-  it('should receive broadcast event', () => {
-    let broadcastMessage = null;
-    viewer.onBroadcast(message => {
-      broadcastMessage = message;
-    });
-    viewer.receiveMessage('broadcast', {type: 'type1'});
-    expect(broadcastMessage).to.exist;
-    expect(broadcastMessage.type).to.equal('type1');
-  });
-
-  it('should post broadcast event', () => {
-    const delivered = [];
-    viewer.setMessageDeliverer((eventType, data) => {
-      delivered.push({eventType: eventType, data: data});
-    }, 'https://acme.com');
-    viewer.broadcast({type: 'type1'});
-    expect(viewer.messageQueue_.length).to.equal(0);
-    return viewer.messagingMaybePromise_.then(() => {
-      expect(delivered.length).to.equal(1);
-      const m = delivered[0];
-      expect(m.eventType).to.equal('broadcast');
-      expect(m.data.type).to.equal('type1');
-    });
-  });
-
-  it('should post broadcast event but not fail w/o messaging', () => {
-    viewer.broadcast({type: 'type1'});
-    expect(viewer.messageQueue_.length).to.equal(0);
-    clock.tick(20001);
-    return viewer.messagingReadyPromise_.then(() => 'OK', () => 'ERROR')
-        .then(res => {
-          expect(res).to.equal('ERROR');
-          return viewer.messagingMaybePromise_;
-        }).then(() => {
-          expect(viewer.messageQueue_.length).to.equal(0);
-        });
-  });
-
   it('should queue non-dupe events', () => {
     viewer.postDocumentReady(11, 12);
     viewer.postDocumentResized(13, 14);
@@ -262,62 +224,129 @@ describe('Viewer', () => {
     expect(delivered[1].data.width).to.equal(13);
   });
 
-  it('should wait for messaging channel', () => {
-    let m1Resolved = false;
-    let m2Resolved = false;
-    const m1 = viewer.sendMessage('message1', {}, /* awaitResponse */ false)
-        .then(() => {
-          m1Resolved = true;
-        });
-    const m2 = viewer.sendMessage('message2', {}, /* awaitResponse */ true)
-        .then(() => {
-          m2Resolved = true;
-        });
-    return Promise.resolve().then(() => {
-      // Not resolved yet.
-      expect(m1Resolved).to.be.false;
-      expect(m2Resolved).to.be.false;
+  describe('Messaging not embedded', () => {
 
-      // Set message deliverer.
-      viewer.setMessageDeliverer(() => {
-        return Promise.resolve();
-      }, 'https://acme.com');
-      expect(m1Resolved).to.be.false;
-      expect(m2Resolved).to.be.false;
+    it('should not expect messaging', () => {
+      expect(viewer.messagingReadyPromise_).to.be.null;
+      expect(viewer.messagingMaybePromise_).to.be.null;
+    });
 
-      return Promise.all([m1, m2]);
-    }).then(() => {
-      // All resolved now.
-      expect(m1Resolved).to.be.true;
-      expect(m2Resolved).to.be.true;
+    it('should fail sendMessage', () => {
+      return viewer.sendMessage('message1', {}, /* awaitResponse */ false)
+          .then(() => {
+            throw new Error('should not succeed');
+          }, error => {
+            expect(error.message).to.match(/No messaging channel/);
+          });
+    });
+
+    it('should post broadcast event but not fail', () => {
+      viewer.broadcast({type: 'type1'});
+      expect(viewer.messageQueue_.length).to.equal(0);
     });
   });
 
-  it('should timeout messaging channel', () => {
-    let m1Resolved = false;
-    let m2Resolved = false;
-    const m1 = viewer.sendMessage('message1', {}, /* awaitResponse */ false)
-        .then(() => {
-          m1Resolved = true;
-        });
-    const m2 = viewer.sendMessage('message2', {}, /* awaitResponse */ true)
-        .then(() => {
-          m2Resolved = true;
-        });
-    return Promise.resolve().then(() => {
-      // Not resolved yet.
-      expect(m1Resolved).to.be.false;
-      expect(m2Resolved).to.be.false;
+  describe('Messaging', () => {
+    beforeEach(() => {
+      windowApi.parent = {};
+      viewer = new Viewer(windowApi);
+    });
 
-      // Timeout.
+    it('should receive broadcast event', () => {
+      let broadcastMessage = null;
+      viewer.onBroadcast(message => {
+        broadcastMessage = message;
+      });
+      viewer.receiveMessage('broadcast', {type: 'type1'});
+      expect(broadcastMessage).to.exist;
+      expect(broadcastMessage.type).to.equal('type1');
+    });
+
+    it('should post broadcast event', () => {
+      const delivered = [];
+      viewer.setMessageDeliverer((eventType, data) => {
+        delivered.push({eventType: eventType, data: data});
+      }, 'https://acme.com');
+      viewer.broadcast({type: 'type1'});
+      expect(viewer.messageQueue_.length).to.equal(0);
+      return viewer.messagingMaybePromise_.then(() => {
+        expect(delivered.length).to.equal(1);
+        const m = delivered[0];
+        expect(m.eventType).to.equal('broadcast');
+        expect(m.data.type).to.equal('type1');
+      });
+    });
+
+    it('should post broadcast event but not fail w/o messaging', () => {
+      viewer.broadcast({type: 'type1'});
+      expect(viewer.messageQueue_.length).to.equal(0);
       clock.tick(20001);
-      return Promise.all([m1, m2]);
-    }).then(() => {
-      throw new Error('must never be here');
-    }, () => {
-      // Not resolved ever.
-      expect(m1Resolved).to.be.false;
-      expect(m2Resolved).to.be.false;
+      return viewer.messagingReadyPromise_.then(() => 'OK', () => 'ERROR')
+          .then(res => {
+            expect(res).to.equal('ERROR');
+            return viewer.messagingMaybePromise_;
+          }).then(() => {
+            expect(viewer.messageQueue_.length).to.equal(0);
+          });
+    });
+
+    it('should wait for messaging channel', () => {
+      let m1Resolved = false;
+      let m2Resolved = false;
+      const m1 = viewer.sendMessage('message1', {}, /* awaitResponse */ false)
+          .then(() => {
+            m1Resolved = true;
+          });
+      const m2 = viewer.sendMessage('message2', {}, /* awaitResponse */ true)
+          .then(() => {
+            m2Resolved = true;
+          });
+      return Promise.resolve().then(() => {
+        // Not resolved yet.
+        expect(m1Resolved).to.be.false;
+        expect(m2Resolved).to.be.false;
+
+        // Set message deliverer.
+        viewer.setMessageDeliverer(() => {
+          return Promise.resolve();
+        }, 'https://acme.com');
+        expect(m1Resolved).to.be.false;
+        expect(m2Resolved).to.be.false;
+
+        return Promise.all([m1, m2]);
+      }).then(() => {
+        // All resolved now.
+        expect(m1Resolved).to.be.true;
+        expect(m2Resolved).to.be.true;
+      });
+    });
+
+    it('should timeout messaging channel', () => {
+      let m1Resolved = false;
+      let m2Resolved = false;
+      const m1 = viewer.sendMessage('message1', {}, /* awaitResponse */ false)
+          .then(() => {
+            m1Resolved = true;
+          });
+      const m2 = viewer.sendMessage('message2', {}, /* awaitResponse */ true)
+          .then(() => {
+            m2Resolved = true;
+          });
+      return Promise.resolve().then(() => {
+        // Not resolved yet.
+        expect(m1Resolved).to.be.false;
+        expect(m2Resolved).to.be.false;
+
+        // Timeout.
+        clock.tick(20001);
+        return Promise.all([m1, m2]);
+      }).then(() => {
+        throw new Error('must never be here');
+      }, () => {
+        // Not resolved ever.
+        expect(m1Resolved).to.be.false;
+        expect(m2Resolved).to.be.false;
+      });
     });
   });
 
