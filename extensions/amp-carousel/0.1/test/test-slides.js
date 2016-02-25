@@ -492,6 +492,7 @@ describe('Slides functional', () => {
     let setupAutoplaySpy;
     let goSpy;
     let isInViewportStub;
+    let tryCancelAutoplayTimeoutSpy;
 
     function autoplaySetup(delay = '', inViewport = true) {
       clock = sandbox.useFakeTimers();
@@ -504,6 +505,8 @@ describe('Slides functional', () => {
       setupAutoplaySpy = sandbox.spy(AmpSlides.prototype, 'setupAutoplay_');
       tryAutoplaySpy = sandbox.spy(AmpSlides.prototype, 'tryAutoplay_');
       goSpy = sandbox.spy(AmpSlides.prototype, 'go');
+      tryCancelAutoplayTimeoutSpy = sandbox
+          .spy(AmpSlides.prototype, 'tryCancelAutoplayTimeout_');
       setupSlides();
       setupSpies();
       setupInViewport(inViewport);
@@ -562,11 +565,17 @@ describe('Slides functional', () => {
 
         expect(tryAutoplaySpy.callCount).to.equal(2);
         expect(goSpy.callCount).to.equal(1);
+
+        clock.tick(5000);
+
+        expect(tryAutoplaySpy.callCount).to.equal(3);
+        expect(goSpy.callCount).to.equal(2);
       });
 
       it('should call `go` after 2000ms (set by user)', () => {
         autoplaySetup(2000);
 
+        expect(slides.isAutoplayRequested_).to.be.true;
         expect(tryAutoplaySpy.callCount).to.equal(0);
         expect(goSpy.callCount).to.equal(0);
 
@@ -579,6 +588,71 @@ describe('Slides functional', () => {
 
         expect(tryAutoplaySpy.callCount).to.equal(2);
         expect(goSpy.callCount).to.equal(1);
+        expect(slides.isAutoplayRequested_).to.be.true;
+      });
+
+      it('should cancel autoplay on swipe start', () => {
+        autoplaySetup(2000);
+
+        expect(slides.isAutoplayRequested_).to.be.true;
+        expect(tryAutoplaySpy.callCount).to.equal(0);
+        expect(goSpy.callCount).to.equal(0);
+        expect(tryCancelAutoplayTimeoutSpy.callCount).to.equal(0);
+
+        slides.viewportCallback(true);
+
+        expect(tryCancelAutoplayTimeoutSpy.callCount).to.equal(1);
+        expect(tryAutoplaySpy.callCount).to.equal(1);
+        expect(goSpy.callCount).to.equal(0);
+
+        // user interaction
+        slides.onSwipeStart_({});
+
+        expect(slides.isAutoplayRequested_).to.be.false;
+        expect(tryCancelAutoplayTimeoutSpy.callCount).to.equal(2);
+
+        clock.tick(2000);
+
+        expect(tryAutoplaySpy.callCount).to.equal(1);
+        expect(goSpy.callCount).to.equal(0);
+      });
+
+      it('should cancel autoplay on user interaction', () => {
+        autoplaySetup(2000);
+
+        expect(slides.isAutoplayRequested_).to.be.true;
+        expect(tryAutoplaySpy.callCount).to.equal(0);
+        expect(goSpy.callCount).to.equal(0);
+
+        slides.viewportCallback(true);
+
+        expect(tryAutoplaySpy.callCount).to.equal(1);
+        expect(goSpy.callCount).to.equal(0);
+
+        clock.tick(2000);
+
+        // autoplay call
+        expect(tryAutoplaySpy.callCount).to.equal(2);
+        expect(goSpy.callCount).to.equal(1);
+
+        clock.tick(2000);
+
+        expect(tryAutoplaySpy.callCount).to.equal(3);
+        expect(goSpy.callCount).to.equal(2);
+
+        // user interaction
+        slides.interactionNext(1, false);
+        expect(slides.isAutoplayRequested_).to.be.false;
+
+        clock.tick(2000);
+
+        expect(tryAutoplaySpy.callCount).to.equal(4);
+        expect(goSpy.callCount).to.equal(3);
+
+        clock.tick(2000);
+
+        expect(tryAutoplaySpy.callCount).to.equal(4);
+        expect(goSpy.callCount).to.equal(3);
       });
     });
 

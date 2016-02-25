@@ -37,7 +37,7 @@ export class AmpSlides extends BaseCarousel {
     /** @private @const {boolean} */
     this.isLooping_ = this.element.hasAttribute('loop');
 
-    /** @private @const {boolean} */
+    /** @private {boolean} */
     this.isAutoplayRequested_ = this.element.hasAttribute('autoplay');
 
     /** @private @const {number} */
@@ -293,6 +293,10 @@ export class AmpSlides extends BaseCarousel {
    * @private
    */
   onSwipeStart_(unusedSwipe) {
+    // cancel any current and future autoplay request
+    this.tryCancelAutoplayTimeout_();
+    this.isAutoplayRequested_ = false;
+
     const currentSlide = this.curSlide_();
     const containerWidth = this.element./*OK*/offsetWidth;
     let minDelta = 0;
@@ -385,15 +389,15 @@ export class AmpSlides extends BaseCarousel {
       if (s.currentIndex != this.currentIndex_) {
         return;
       }
-      const oldSlide = this.slides_[this.currentIndex_];
+      const oldSlide = this.curSlide_();
       if (newPos > 0.5) {
         s.nextTr(1);
         this.currentIndex_ = s.nextIndex;
-        this.commitSwitch_(oldSlide, this.slides_[this.currentIndex_]);
+        this.commitSwitch_(oldSlide, this.curSlide_());
       } else if (newPos < -0.5) {
         s.prevTr(1);
         this.currentIndex_ = s.prevIndex;
-        this.commitSwitch_(oldSlide, this.slides_[this.currentIndex_]);
+        this.commitSwitch_(oldSlide, this.curSlide_());
       } else {
         s.nextTr(0);
         s.prevTr(0);
@@ -415,6 +419,22 @@ export class AmpSlides extends BaseCarousel {
       return true;
     }
     return this.currentIndex_ < this.slides_.length - 1;
+  }
+
+  /** @override */
+  interactionNext() {
+    if (!this.nextButton_.classList.contains('amp-disabled')) {
+      this.isAutoplayRequested_ = false;
+      this.go(1, true);
+    }
+  }
+
+  /** @override */
+  interactionPrev() {
+    if (!this.prevButton_.classList.contains('amp-disabled')) {
+      this.isAutoplayRequested_ = false;
+      this.go(-1, true);
+    }
   }
 
   /**
