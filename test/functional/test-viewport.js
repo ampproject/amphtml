@@ -56,7 +56,9 @@ describe('Viewport', () => {
     installViewerService(windowApi);
     binding = new ViewportBindingVirtual_(windowApi, viewer);
     viewport = new Viewport(windowApi, binding, viewer);
-    viewport.fixedLayer_ = null;
+    viewport.fixedLayer_ = {update: () => {
+      return {then: callback => callback()};
+    }};
     viewport.getSize();
   });
 
@@ -132,6 +134,7 @@ describe('Viewport', () => {
 
     // Should call updatePaddingTop.
     bindingMock = sandbox.mock(binding);
+    viewport.fixedLayer_.updatePaddingTop = () => {};
     viewerMock.expects('getPaddingTop').returns(21).atLeast(1);
     bindingMock.expects('updatePaddingTop').withArgs(21).once();
     viewerViewportHandler();
