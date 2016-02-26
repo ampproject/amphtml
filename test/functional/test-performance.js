@@ -15,7 +15,8 @@
  */
 
 import * as sinon from 'sinon';
-import {Performance, performanceFor} from '../../src/performance';
+import {ENSURE_NON_ZERO, Performance, performanceFor}
+    from '../../src/performance';
 import {getService, resetServiceForTesting} from '../../src/service';
 import {resourcesFor} from '../../src/resources';
 import {viewerFor} from '../../src/viewer';
@@ -57,11 +58,15 @@ describe('performance', () => {
       perf.tickDelta('test', 99);
       expect(perf.events_.length).to.equal(2);
       expect(perf.events_[0])
-          .to.be.jsonEqual({label: '_test', from: null, value: 1000});
+          .to.be.jsonEqual({
+            label: '_test',
+            from: null,
+            value: ENSURE_NON_ZERO
+          });
       expect(perf.events_[1]).to.be.jsonEqual({
         label: 'test',
         from: '_test',
-        value: 1099,
+        value: ENSURE_NON_ZERO + 99,
       });
     });
 
@@ -316,8 +321,9 @@ describe('performance', () => {
             expect(tickSpy.firstCall.args[0]).to.equal('_pc');
             expect(tickSpy.secondCall.args[0]).to.equal('pc');
             expect(tickSpy.secondCall.args[1]).to.equal('_pc');
-            expect(Number(tickSpy.firstCall.args[2])).to.equal(1000);
-            expect(Number(tickSpy.secondCall.args[2])).to.equal(1400);
+            expect(Number(tickSpy.firstCall.args[2])).to.equal(ENSURE_NON_ZERO);
+            expect(Number(tickSpy.secondCall.args[2]))
+                .to.equal(ENSURE_NON_ZERO + 400);
           });
         });
       });
@@ -332,8 +338,9 @@ describe('performance', () => {
           expect(tickSpy.firstCall.args[0]).to.equal('_pc');
           expect(tickSpy.secondCall.args[0]).to.equal('pc');
           expect(tickSpy.secondCall.args[1]).to.equal('_pc');
-          expect(Number(tickSpy.firstCall.args[2])).to.equal(1000);
-          expect(Number(tickSpy.secondCall.args[2])).to.equal(1001);
+          expect(Number(tickSpy.firstCall.args[2])).to.equal(ENSURE_NON_ZERO);
+          expect(Number(tickSpy.secondCall.args[2])).to.equal(
+              ENSURE_NON_ZERO + 1);
         });
       });
     });
