@@ -119,4 +119,47 @@ describe('Carousel gestures', () => {
       expect(spy.callCount).to.equal(1);
     });
   });
+
+  it('should hint when not in mouse mode', () => {
+    carousel.inViewport_ = true;
+    carousel.getVsync = function() {
+      return {
+        mutate: function(fn) {
+          fn();
+        }
+      };
+    };
+    carousel.deferMutate = function(fn) {
+      fn();
+    };
+    expect(
+        carousel.element.classList.contains('-amp-carousel-button-start-hint'))
+            .to.be.false;
+    carousel.hintControls();
+    expect(
+        carousel.element.classList.contains('-amp-carousel-button-start-hint'))
+            .to.be.true;
+  });
+
+  it('should not hint when in mouse mode', () => {
+    carousel.inViewport_ = true;
+    carousel.showControls_ = true;
+    carousel.getVsync = function() {
+      return {
+        mutate: function(fn) {
+          fn();
+        }
+      };
+    };
+    carousel.deferMutate = function(fn) {
+      fn();
+    };
+    expect(
+        carousel.element.classList.contains('-amp-carousel-button-start-hint'))
+            .to.be.false;
+    carousel.hintControls();
+    expect(
+        carousel.element.classList.contains('-amp-carousel-button-start-hint'))
+            .to.be.false;
+  });
 });

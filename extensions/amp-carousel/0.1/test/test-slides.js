@@ -60,6 +60,47 @@ describe('Slides functional', () => {
     document.body.removeChild(element);
   }
 
+  describe('Slides hint', () => {
+    beforeEach(() => {
+      setupElements();
+      setupSlides();
+      slides.inViewport_ = true;
+      slides.getVsync = function() {
+        return {
+          mutate: function(fn) {
+            fn();
+          }
+        };
+      };
+      slides.deferMutate = function(fn) {
+        fn();
+      };
+    });
+    afterEach(() => {
+      teardownElements();
+    });
+    it('should hint when not in mouse mode', () => {
+      expect(
+          slides.element.classList.contains('-amp-carousel-button-start-hint'))
+              .to.be.false;
+      slides.hintControls();
+      expect(
+          slides.element.classList.contains('-amp-carousel-button-start-hint'))
+              .to.be.true;
+    });
+
+    it('should not hint when in mouse mode', () => {
+      slides.showControls_ = true;
+      expect(
+          slides.element.classList.contains('-amp-carousel-button-start-hint'))
+              .to.be.false;
+      slides.hintControls();
+      expect(
+          slides.element.classList.contains('-amp-carousel-button-start-hint'))
+              .to.be.false;
+    });
+  });
+
   describe('Slides gestures', () => {
 
     beforeEach(() => {
@@ -503,7 +544,7 @@ describe('Slides functional', () => {
 
         slides.viewportCallback(true);
         expect(tryAutoplaySpy.callCount).to.equal(1);
-        expect(isInViewportStub.callCount).to.equal(1);
+        expect(isInViewportStub.callCount).to.equal(2);
       });
 
       it('should call `go` after 5000ms(default)', () => {

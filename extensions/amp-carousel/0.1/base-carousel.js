@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {timer} from '../../../src/timer';
 
 export class BaseCarousel extends AMP.BaseElement {
 
@@ -29,7 +30,10 @@ export class BaseCarousel extends AMP.BaseElement {
     this.setupGestures();
     this.setControlsState();
 
-    if (this.element.hasAttribute('controls')) {
+    /** @const @private {boolean} */
+    this.showControls_ = this.element.hasAttribute('controls');
+
+    if (this.showControls_) {
       this.element.classList.add('-amp-carousel-has-controls');
     }
   }
@@ -112,6 +116,22 @@ export class BaseCarousel extends AMP.BaseElement {
     this.prevButton_.setAttribute('aria-disabled', !this.hasPrev());
     this.nextButton_.classList.toggle('amp-disabled', !this.hasNext());
     this.nextButton_.setAttribute('aria-disabled', !this.hasNext());
+  }
+
+  /**
+   * Shows the controls and then fades them away.
+   */
+  hintControls() {
+    if (this.showControls_ || !this.isInViewport()) {
+      return;
+    }
+    this.getVsync().mutate(() => {
+      const className = '-amp-carousel-button-start-hint';
+      this.element.classList.add(className);
+      timer.delay(() => {
+        this.deferMutate(() => this.element.classList.remove(className));
+      }, 1000);
+    });
   }
 
   /**

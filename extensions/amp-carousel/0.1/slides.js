@@ -72,6 +72,9 @@ export class AmpSlides extends BaseCarousel {
   viewportCallback(inViewport) {
     this.updateInViewport(this.slides_[this.currentIndex_], inViewport);
     this.tryAutoplay_(1, true);
+    if (inViewport) {
+      this.hintControls();
+    }
   }
 
   /** @override */
