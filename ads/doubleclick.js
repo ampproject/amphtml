@@ -29,19 +29,21 @@ export function doubleclick(global, data) {
     'overrideWidth', 'overrideHeight',
   ]);
 
+  const dice = Math.random();
   if (global.context.location.href.indexOf('google_glade=1') > 0 ||
-      Math.random() < experimentFraction) {
+      dice < experimentFraction) {
     doubleClickWithGlade(global, data);
   } else {
-    doubleClickWithGpt(global, data);
+    doubleClickWithGpt(global, data, dice < 2 * experimentFraction);
   }
 }
 
 /**
  * @param {!Window} global
  * @param {!Object} data
+ * @param {boolean} isGladeControl
  */
-function doubleClickWithGpt(global, data) {
+function doubleClickWithGpt(global, data, isGladeControl) {
   const dimensions = [[
     parseInt(data.overrideWidth || data.width, 10),
     parseInt(data.overrideHeight || data.height, 10),
@@ -62,7 +64,10 @@ function doubleClickWithGpt(global, data) {
       const slot = googletag.defineSlot(data.slot, dimensions, 'c')
           .addService(pubads);
 
-      pubads.enableSingleRequest();
+      if (isGladeControl) {
+        pubads.markAsGladeControl();
+      }
+
       pubads.markAsAmp();
       pubads.set('page_url', global.context.canonicalUrl);
       pubads.setCorrelator(Number(getCorrelator(global)));
