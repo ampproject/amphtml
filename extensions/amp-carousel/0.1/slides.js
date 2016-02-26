@@ -43,13 +43,37 @@ export class AmpSlides extends BaseCarousel {
     /** @private @const {number} */
     this.autoplayDelay_ = 5000;
 
+    /** @private @const {boolean} */
+    this.isIndicators_ = this.element.hasAttribute('indicators');
+
     /** @private {!Array<!Element>} */
     this.slides_ = this.getRealChildren();
+
+    /** @private {!Object<!Element>} */
+    this.slidesIndicator_ = {};
+
+    if (this.isIndicators_) {
+      this.slidesIndicatorWrap_ = document.createElement('ol');
+      this.slidesIndicatorWrap_.classList.add('amp-carousel-indicator');
+      this.slidesIndicatorWrap_
+      .style.width = this.element./*OK*/offsetWidth + 'px';
+      this.element.appendChild(this.slidesIndicatorWrap_);
+    }
+
     this.slides_.forEach((slide, i) => {
       this.setAsOwner(slide);
       // Only the first element is initially visible.
       slide.style.display = i > 0 ? 'none' : 'block';
       this.applyFillContent(slide);
+      if (this.isIndicators_) {
+        // Create element of slide's indicator .
+        const indicator = document.createElement('li');
+        if (i === 0) {
+          indicator.classList.add('amp-carousel-indicator-active');
+        }
+        this.slidesIndicator_[slide.id] = indicator;
+        this.slidesIndicatorWrap_.appendChild(indicator);
+      }
     });
 
     /** @private {number} */
@@ -205,6 +229,14 @@ export class AmpSlides extends BaseCarousel {
       transform: '',
       opacity: 1
     });
+
+    if (this.isIndicators_) {
+      this.slidesIndicator_[oldSlide.id]
+      .classList.remove('amp-carousel-indicator-active');
+      this.slidesIndicator_[newSlide.id]
+      .classList.add('amp-carousel-indicator-active');
+    }
+
     this.scheduleLayout(newSlide);
     this.updateInViewport(oldSlide, false);
     this.updateInViewport(newSlide, true);
