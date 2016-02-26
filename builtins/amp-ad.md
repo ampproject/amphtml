@@ -165,7 +165,18 @@ To enable this, copy the file [remote.html](../3p/remote.html) to your web serve
 
 The `content` attribute of the meta tag is the absolute URL to your copy of the remote.html file on your web server. This URL must use a "https" schema. It is not allowed to reside on the same origin as your AMP files. E.g. if you host AMP files on "www.example.com", this URL must not be on "www.example.com" but e.g. "something-else.example.com" is OK. See the doc ["Iframe origin policy"](../spec/amp-iframe-origin-policy.md) for further details on allowed origins for iframes.
 
-Make sure to validate incoming data before passing it on to the `draw3p` function, to make sure your iframe only does things it expects to do.
+### Security
+
+Validate incoming data before passing it on to the `draw3p` function, to make sure your iframe only does things it expects to do. This is true, in particular, for ad networks that allow custom JavaScript injection.
+
+Iframes should also enforce that they are only iframed into origins that they expect to be iframed into. The origins would be:
+
+- your own origins
+- https://cdn.ampproject.org for the AMP cache
+
+In the case of the AMP cache you also need to check that the "source origin" (origin of the document served by cdn.ampproject.org) is one of your origins.
+
+Enforcing origins can be done using the (allow-from)[https://developer.mozilla.org/en-US/docs/Web/HTTP/X-Frame-Options] directive, but this is not supported in all browsers. In Chrome and Safari you can, however, check `location.ancestorOrigins` for the expected origin.
 
 ### Enhance incoming ad configuration
 
