@@ -170,6 +170,12 @@ Type attribute value: `simplereach`
 
 Adds support for SimpleReach.  Configuration details can be found at [simplereach.com/docs](http://docs.simplereach.com/dev-guide/implementation/google-amp-implementation)
 
+##### Webtrekk
+
+Type attribute value: `webtrekk`
+
+Adds support for Webtrekk. Configuration details can be found at [supportcenter.webtrekk.com](https://supportcenter.webtrekk.com/en/public/amp-analytics.html).
+
 ## <a name="attributes"></a>Attributes
 
   - `type` See [Analytics vendors](#analytics-vendors)

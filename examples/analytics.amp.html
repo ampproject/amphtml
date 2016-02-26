@@ -276,6 +276,26 @@ Container for analytics tags. Positioned far away from top to make sure that doe
 </script>
 </amp-analytics>
 <!-- End SimpleReach Example -->
+
+<!-- Webtrekk tracking -->
+<amp-analytics type="webtrekk">
+<script type="application/json">
+  {
+    "vars": {
+      "trackDomain": "q3.webtrekk.net",
+      "trackId": "111111111111111",
+      "contentId": "en.example"
+    },
+    "triggers": {
+      "trackPageview": {
+        "on": "visible",
+        "request": "pageview"
+      }
+    }
+  }
+</script>
+</amp-analytics>
+<!-- End Webtrekk example -->
 </div>
 
 <div class="logo"></div>
