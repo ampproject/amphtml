@@ -32,6 +32,7 @@ import {adtech} from '../ads/adtech';
 import {plista} from '../ads/plista';
 import {doubleclick} from '../ads/doubleclick';
 import {dotandads} from '../ads/dotandads';
+import {endsWith} from '../src/string';
 import {facebook} from './facebook';
 import {flite} from '../ads/flite';
 import {manageWin} from './environment';
@@ -40,7 +41,7 @@ import {nonSensitiveDataPostMessage, listenParent} from './messaging';
 import {twitter} from './twitter';
 import {yieldmo} from '../ads/yieldmo';
 import {computeInMasterFrame, register, run} from '../src/3p';
-import {parseUrl} from '../src/url';
+import {parseUrl, getSourceUrl} from '../src/url';
 import {assert} from '../src/asserts';
 import {taboola} from '../ads/taboola';
 import {smartadserver} from '../ads/smartadserver';
@@ -153,8 +154,11 @@ function masterSelection(type) {
  *        no arguments. Configuration is expected to be modified in-place.
  * @param {!Array<string>=} opt_allowed3pTypes List of advertising network
  *     types you expect.
+ * @param {!Array<string>=} opt_allowedEmbeddingOrigins List of domain suffixes
+ *     that are allowed to embed this frame.
  */
-window.draw3p = function(opt_configCallback, opt_allowed3pTypes) {
+window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
+    opt_allowedEmbeddingOrigins) {
   try {
     ensureFramed(window);
     const data = parseFragment(location.hash);
@@ -162,6 +166,9 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes) {
     window.context.location = parseUrl(data._context.location.href);
     validateParentOrigin(window, window.context.location);
     validateAllowedTypes(window, data.type, opt_allowed3pTypes);
+    if (opt_allowedEmbeddingOrigins) {
+      validateAllowedEmbeddingOrigins(window, opt_allowedEmbeddingOrigins);
+    }
     window.context.master = masterSelection(data.type);
     window.context.isMaster = window.context.master == window;
     window.context.data = data;
@@ -335,6 +342,42 @@ export function validateAllowedTypes(window, type, allowedTypes) {
   }
   assert(allowedTypes && allowedTypes.indexOf(type) != -1,
       'Non-whitelisted 3p type for custom iframe: ' + type);
+}
+
+/**
+ * Check that parent host name was whitelisted.
+ * @param {!Window} window
+ * @param {!Array<string>} allowedHostnames Suffixes of allowed host names.
+ * @visiblefortesting
+ */
+export function validateAllowedEmbeddingOrigins(window, allowedHostnames) {
+  if (!window.document.referrer) {
+    throw new Error('Referrer expected: ' + window.location.href);
+  }
+  const ancestors = window.location.ancestorOrigins;
+  // We prefer the unforgable ancestorOrigins, but referrer is better than
+  // nothing.
+  const ancestor = ancestors ? ancestors[0] : window.document.referrer;
+  let hostname = parseUrl(ancestor).hostname;
+  const onDefault = hostname == 'cdn.ampproject.org';
+  if (onDefault) {
+    // If we are on the cache domain, parse the source hostname from
+    // the referrer. The referrer is used because it should be
+    // trustable.
+    hostname = parseUrl(getSourceUrl(window.document.referrer)).hostname;
+  }
+  for (let i = 0; i < allowedHostnames.length; i++) {
+    // Either the hostname is exactly as whitelisted…
+    if (allowedHostnames[i] == hostname) {
+      return;
+    }
+    // Or it ends in .$hostname (aka is a sub domain of the whitelisted domain.
+    if (endsWith(hostname, '.' + allowedHostnames[i])) {
+      return;
+    }
+  }
+  throw new Error('Invalid embedding hostname: ' + hostname + ' not in '
+      + allowedHostnames);
 }
 
 /**
