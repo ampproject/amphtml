@@ -16,13 +16,15 @@
 
 import {ANALYTICS_CONFIG} from './vendors';
 import {addListener, instrumentationServiceFor} from './instrumentation';
-import {assertHttpsUrl} from '../../../src/url';
+import {assert} from '../../../src/asserts';
+import {assertHttpsUrl, addParamsToUrl} from '../../../src/url';
 import {expandTemplate} from '../../../src/string';
 import {installCidService} from '../../../src/service/cid-impl';
 import {installStorageService} from '../../../src/service/storage-impl';
+import {installActivityService} from '../../../src/service/activity-impl';
 import {isArray, isObject} from '../../../src/types';
 import {log} from '../../../src/log';
-import {sendRequest} from './transport';
+import {sendRequest, sendRequestUsingIframe} from './transport';
 import {urlReplacementsFor} from '../../../src/url-replacements';
 import {userNotificationManagerFor} from '../../../src/user-notification';
 import {xhrFor} from '../../../src/xhr';
@@ -31,8 +33,10 @@ import {toggle} from '../../../src/style';
 
 installCidService(AMP.win);
 installStorageService(AMP.win);
+installActivityService(AMP.win);
 instrumentationServiceFor(AMP.win);
 
+const MAX_REPLACES = 16; // The maximum number of entries in a extraUrlParamsReplaceMap
 
 export class AmpAnalytics extends AMP.BaseElement {
 
@@ -123,11 +127,44 @@ export class AmpAnalytics extends AMP.BaseElement {
           'config. No analytics data will be sent.');
       return Promise.resolve();
     }
+    if (this.config_['extraUrlParams'] &&
+        this.config_['extraUrlParamsReplaceMap']) {
+      // If the config includes a extraUrlParamsReplaceMap, apply it as a set
+      // of params to String.replace to allow aliasing of the keys in
+      // extraUrlParams.
+      let count = 0;
+      for (const replaceMapKey in this.config_['extraUrlParamsReplaceMap']) {
+        if (++count > MAX_REPLACES) {
+          console./*OK*/error(this.getName_(),
+           'More than ' + MAX_REPLACES.toString() +
+           " extraUrlParamsReplaceMap rules aren't allowed; Skipping the rest"
+          );
+          break;
+        }
+
+        for (const extraUrlParamsKey in this.config_['extraUrlParams']) {
+          const newkey = extraUrlParamsKey.replace(
+            replaceMapKey,
+            this.config_['extraUrlParamsReplaceMap'][replaceMapKey]
+          );
+          if (extraUrlParamsKey != newkey) {
+            const value = this.config_['extraUrlParams'][extraUrlParamsKey];
+            delete this.config_['extraUrlParams'][extraUrlParamsKey];
+            this.config_['extraUrlParams'][newkey] = value;
+          }
+        }
+      }
+    }
 
     // Trigger callback can be synchronous. Do the registration at the end.
     for (const k in this.config_['triggers']) {
       if (this.config_['triggers'].hasOwnProperty(k)) {
         const trigger = this.config_['triggers'][k];
+        if (!trigger) {
+          console./*OK*/error(this.getName_(),
+              'trigger should be an object: ', k);
+          continue;
+        }
         if (!trigger['on'] || !trigger['request']) {
           console./*OK*/error(this.getName_(), '"on" and "request" ' +
               'attributes are required for data to be collected.');
@@ -146,7 +183,7 @@ export class AmpAnalytics extends AMP.BaseElement {
    * @return {!Promise<>}
    */
   fetchRemoteConfig_() {
-    const remoteConfigUrl = this.element.getAttribute('config');
+    let remoteConfigUrl = this.element.getAttribute('config');
     if (!remoteConfigUrl) {
       return Promise.resolve();
     }
@@ -158,13 +195,17 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (this.element.hasAttribute('data-credentials')) {
       fetchConfig.credentials = this.element.getAttribute('data-credentials');
     }
-    return xhrFor(this.getWin()).fetchJson(remoteConfigUrl, fetchConfig)
+    return urlReplacementsFor(this.getWin()).expand(remoteConfigUrl)
+        .then(expandedUrl => {
+          remoteConfigUrl = expandedUrl;
+          return xhrFor(this.getWin()).fetchJson(remoteConfigUrl, fetchConfig);
+        })
         .then(jsonValue => {
           this.remoteConfig_ = jsonValue;
           log.fine(this.getName_(), 'Remote config loaded', remoteConfigUrl);
         }, err => {
           console./*OK*/error(this.getName_(), 'Error loading remote config: ',
-              remoteConfigUrl, err);
+          remoteConfigUrl, err);
         });
   }
 
@@ -214,7 +255,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       this.element.getAttribute('type')] || {};
 
     this.mergeObjects_(defaultConfig, config);
-    this.mergeObjects_(typeConfig, config);
+    this.mergeObjects_(typeConfig, config, /* predefined */ true);
     this.mergeObjects_(inlineConfig, config);
     this.mergeObjects_(this.remoteConfig_, config);
     return config;
@@ -282,7 +323,12 @@ export class AmpAnalytics extends AMP.BaseElement {
     if (!request) {
       console./*OK*/error(this.getName_(), 'Ignoring event. Request string ' +
           'not found: ', trigger['request']);
-      return;
+      return Promise.resolve();
+    }
+
+    // Add any given extraUrlParams as query string param
+    if (this.config_['extraUrlParams']) {
+      request = addParamsToUrl(request, this.config_['extraUrlParams']);
     }
 
     this.config_['vars']['requestCount']++;
@@ -296,25 +342,46 @@ export class AmpAnalytics extends AMP.BaseElement {
       const argList = match[2] || '';
       const raw = (trigger['vars'] && trigger['vars'][name] ||
           this.config_['vars'] && this.config_['vars'][name]);
-      const val = encodeURIComponent(raw != null ? raw : '');
+      const val = this.encodeVars_(raw != null ? raw : '', name);
       return val + argList;
     });
 
-    // For consistentcy with amp-pixel we also expand any url replacements.
-    urlReplacementsFor(this.getWin()).expand(request).then(
-        request => this.sendRequest_(request));
+    // For consistency with amp-pixel we also expand any url replacements.
+    return urlReplacementsFor(this.getWin()).expand(request).then(request => {
+      this.sendRequest_(request, trigger);
+      return request;
+    });
+  }
+
+  /**
+   * @param {string} raw The values to URI encode.
+   * @param {string} unusedName Name of the variable.
+   * @private
+   */
+  encodeVars_(raw, unusedName) {
+    if (isArray(raw)) {
+      return raw.map(encodeURIComponent).join(',');
+    }
+    return encodeURIComponent(raw);
   }
 
   /**
    * @param {string} request The full request string to send.
+   * @param {!JSONObject} trigger
    * @private
    */
-  sendRequest_(request) {
+  sendRequest_(request, trigger) {
     if (!request) {
       console./*OK*/error(this.getName_(), 'Request not sent. Contents empty.');
       return;
     }
-    sendRequest(this.getWin(), request, this.config_['transport'] || {});
+    if (trigger['iframePing']) {
+      assert(trigger['on'] == 'visible',
+          'iframePing is only available on page view requests.');
+      sendRequestUsingIframe(this.getWin(), request);
+    } else {
+      sendRequest(this.getWin(), request, this.config_['transport'] || {});
+    }
   }
 
   /**
@@ -333,26 +400,31 @@ export class AmpAnalytics extends AMP.BaseElement {
    *
    * @param {Object|Array} from Object or array to merge from
    * @param {Object|Array} to Object or Array to merge into
+   * @param {boolean=} opt_predefinedConfig
    * @private
    */
-  mergeObjects_(from, to) {
+  mergeObjects_(from, to, opt_predefinedConfig) {
     if (to === null || to === undefined) {
       to = {};
     }
 
     for (const property in from) {
+      assert(opt_predefinedConfig || property != 'iframePing',
+          'iframePing config is only available to vendor config.');
       // Only deal with own properties.
       if (from.hasOwnProperty(property)) {
         if (isArray(from[property])) {
           if (!isArray(to[property])) {
             to[property] = [];
           }
-          to[property] = this.mergeObjects_(from[property], to[property]);
+          to[property] = this.mergeObjects_(from[property], to[property],
+              opt_predefinedConfig);
         } else if (isObject(from[property])) {
           if (!isObject(to[property])) {
             to[property] = {};
           }
-          to[property] = this.mergeObjects_(from[property], to[property]);
+          to[property] = this.mergeObjects_(from[property], to[property],
+              opt_predefinedConfig);
         } else {
           to[property] = from[property];
         }

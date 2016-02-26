@@ -11,7 +11,50 @@
       margin: 0;
     }
 
+    header {
+      padding: 16px;
+      display: -webkit-box;
+      display: -webkit-flex;
+      display: -ms-flexbox;
+      display: flex;
+      -webkit-box-orient: horizontal;
+      -webkit-box-direction: normal;
+      -webkit-flex-direction: row;
+      -ms-flex-direction: row;
+      flex-direction: row;
+      -webkit-flex-wrap: nowrap;
+      -ms-flex-wrap: nowrap;
+      flex-wrap: nowrap;
+      -webkit-box-align: center;
+      -webkit-align-items: center;
+      -ms-flex-align: center;
+      align-items: center;
+    }
+
+    .logo,
+    .logo svg {
+      height: 40px;
+      width: 40px;
+    }
+
+    .logo path {
+      fill: #bdbdbd;
+    }
+
+    .logo-text {
+      color: #bdbdbd;
+      font-family: Roboto, verdana, arial, sans-serif;
+      font-size: 14px;
+      letter-spacing: 2px;
+      margin-left: 16px;
+      text-decoration: none;
+      text-transform: uppercase;
+    }
+
     section {
+      font-family: Roboto, verdana, arial, sans-serif;
+      font-size: 14px;
+      font-weight: 500;
       margin: 16px;
     }
 
@@ -29,43 +72,50 @@
       display: none;
     }
 
-    .button-section {
-      text-align: center;
-    }
-
     #closeButton {
-      background: #4285f4;
-      color: #fff;
-      font-size: 14px;
-      font-weight: 500;
-      padding: 10px 20px;
-      border-radius: 2px;
-      box-shadow: 0 2px 5px 0 rgba(0,0,0,0.4);
-      outline: none;
-      border: none;
+      color: #4285f4;
+      display: block;
+      font-weight: 300;
+      padding: 8px 0;
+      text-decoration: none;
     }
   </style>
 </head>
 <body>
 
+  <header>
+    <div class="logo">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 105 105">
+        <g>
+          <path d="M48.24645,63.9289875 L29.9397,63.9289875 C29.1627,63.9289875 28.65345,63.1152375 28.9947,62.4169875 L59.211075,0.4249875 C57.00345,0.1441125 54.753825,-0.0002625 52.470075,-0.0002625 C23.789325,0.0181125 0.211575,23.4304875 0.001575,52.1112375 C-0.17955,77.2456125 17.300325,98.3269875 40.77045,103.684612 L48.24645,63.9289875 Z"/>
+          <path d="M65.00865,1.504125 L57.419775,41.853 L75.726525,41.853 C76.503525,41.853 77.012775,42.66675 76.671525,43.365 L46.78065,104.69025 C48.66015,104.892375 50.568525,105 52.500525,105 C81.496275,105 105.000525,81.49575 105.000525,52.5 C105.000525,27.817125 87.964275,7.11375 65.00865,1.504125" />
+        </g>
+      </svg>
+    </div>
+    <div class="logo-text">
+      <div>Accelerated</div>
+      <div>Mobile Pages</div>
+    </div>
+  </header>
+
   <section class="progress-section">
     <div lang="en">
-      Returning back...
+      Please wait...
     </div>
     <div lang="fr">
-      Retour...
+      Attendez, s'il vous plaît...
     </div>
   </section>
 
   <section class="button-section">
-    <button id="closeButton">
+    <a id="closeButton">
       <div lang="en">
-        Close
+        Click here to continue.
       </div>
       <div lang="fr">
-        Fermer
+        Clique ici pour continuer
       </div>
-    </button>
+    </a>
   </section>
 
 </body>

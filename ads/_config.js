@@ -22,12 +22,17 @@
  * @const {!Object<string, (string|!Array<string>)>}
  */
 export const adPrefetch = {
-  doubleclick: 'https://www.googletagservices.com/tag/js/gpt.js',
+  doubleclick: [
+    'https://www.googletagservices.com/tag/js/gpt.js',
+    'https://securepubads.g.doubleclick.net/static/glade.js',
+  ],
   a9: 'https://c.amazon-adsystem.com/aax2/assoc.js',
   adsense: 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js',
   dotandads: 'https://amp.ad.dotandad.com/dotandadsAmp.js',
+  mediaimpact: 'https://ec-ns.sascdn.com/diff/251/divscripte/amp.js',
   smartadserver: 'https://ec-ns.sascdn.com/diff/js/smart.js',
   yieldmo: 'https://static.yieldmo.com/ym.amp1.js',
+  revcontent: 'https://labs-cdn.revcontent.com/build/amphtml/revcontent.amp.min.js',
 };
 
 /**
@@ -41,7 +46,11 @@ export const adPreconnect = {
   adform: 'https://track.adform.net',
   adreactor: 'https://adserver.adreactor.com',
   adsense: 'https://googleads.g.doubleclick.net',
-  taboola: 'https://cdn.taboola.com',
+  taboola: [
+    'https://cdn.taboola.com',
+    'https://trc.taboola.com',
+    'https://images.taboola.com',
+  ],
   doubleclick: [
     'https://partner.googleadservices.com',
     'https://securepubads.g.doubleclick.net',
@@ -53,6 +62,11 @@ export const adPreconnect = {
     'https://s.yieldmo.com',
     'https://ads.yieldmo.com',
   ],
+  revcontent: [
+    'https://trends.revcontent.com',
+    'https://cdn.revcontent.com',
+    'https://img.revcontent.com',
+  ]
 };
 
 /**

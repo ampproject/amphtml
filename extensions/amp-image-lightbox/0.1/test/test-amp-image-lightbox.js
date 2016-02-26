@@ -81,9 +81,13 @@ describe('amp-image-lightbox component', () => {
       impl.requestFullOverlay = requestFullOverlay;
       const viewportOnChanged = sinon.spy();
       const disableTouchZoom = sinon.spy();
+      const hideFixedLayer = sinon.spy();
+      const showFixedLayer = sinon.spy();
       impl.getViewport = () => {return {
         onChanged: viewportOnChanged,
-        disableTouchZoom: disableTouchZoom
+        disableTouchZoom: disableTouchZoom,
+        hideFixedLayer: hideFixedLayer,
+        showFixedLayer: showFixedLayer,
       };};
       const historyPush = sinon.spy();
       impl.getHistory_ = () => {
@@ -106,6 +110,8 @@ describe('amp-image-lightbox component', () => {
       expect(enter.callCount).to.equal(1);
       expect(impl.sourceElement_).to.equal(ampImage);
       expect(disableTouchZoom.callCount).to.equal(1);
+      expect(hideFixedLayer.callCount).to.equal(1);
+      expect(showFixedLayer.callCount).to.equal(0);
     });
   });
 
@@ -119,8 +125,12 @@ describe('amp-image-lightbox component', () => {
       const viewportOnChangedUnsubscribed = sinon.spy();
       impl.unlistenViewport_ = viewportOnChangedUnsubscribed;
       const restoreOriginalTouchZoom = sinon.spy();
+      const hideFixedLayer = sinon.spy();
+      const showFixedLayer = sinon.spy();
       impl.getViewport = () => {return {
-        restoreOriginalTouchZoom: restoreOriginalTouchZoom
+        restoreOriginalTouchZoom: restoreOriginalTouchZoom,
+        hideFixedLayer: hideFixedLayer,
+        showFixedLayer: showFixedLayer,
       };};
       const historyPop = sinon.spy();
       impl.getHistory_ = () => {
@@ -140,6 +150,8 @@ describe('amp-image-lightbox component', () => {
       expect(cancelFullOverlay.callCount).to.equal(1);
       expect(restoreOriginalTouchZoom.callCount).to.equal(1);
       expect(historyPop.callCount).to.equal(1);
+      expect(showFixedLayer.callCount).to.equal(1);
+      expect(hideFixedLayer.callCount).to.equal(0);
     });
   });
 
@@ -153,7 +165,9 @@ describe('amp-image-lightbox component', () => {
       impl.getViewport = () => {return {
         onChanged: viewportOnChanged,
         disableTouchZoom: disableTouchZoom,
-        restoreOriginalTouchZoom: restoreOriginalTouchZoom
+        restoreOriginalTouchZoom: restoreOriginalTouchZoom,
+        hideFixedLayer: () => {},
+        showFixedLayer: () => {},
       };};
       const historyPush = sinon.spy();
       impl.getHistory_ = () => {

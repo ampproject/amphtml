@@ -74,6 +74,12 @@ Provides the canonical URL of the current document.
 
 Example value: `http%3A%2F%2Fexample.com%3A8000%2Fanalytics.html`
 
+### documentCharset
+
+Provides the character encoding of the current document.
+
+Example value: `UTF-8`
+
 ### documentReferrer
 
 Provides the referrer where the user came from. It is read from `document.referrer`. The value is empty for direct visitors.
@@ -85,6 +91,11 @@ Example value: `https://www.google.com`
 Provides the title of the current document.
 
 Example value: `The New York Times - Breaking News, World News...`
+
+### viewer
+Provides an identifier for the viewer that contains the AMP document. Empty string if the document is loaded directly in a browser or if the id is not found.
+
+Example value: `www.google.com`
 
 ## Device and Browser
 
@@ -105,12 +116,6 @@ Example value: `2500`
 Provides a string representing the preferred language of the user, usually the language of the browser UI.
 
 Example value: `en-us`
-
-### documentCharset
-
-Provides the character encoding of the current document.
-
-Example value: `UTF-8`
 
 ### screenColorDepth
 
@@ -249,6 +254,20 @@ Example value: `0.12345632345`
 Provides the number of seconds that have elapsed since 1970. (Epoch time)
 
 Example value: `1452710304312`
+
+### queryParam
+
+Pulls a value from the query string
+
+Please see below the required and optional arguments you may pass into `queryParam` like a function. Spaces between arguments and values are not allowed.
+
+**arguments**
+
+ - `query string param` (Required) - The query string param for which you want the value
+ - `default value` (Optional) - If the query string param is not available use this default instead
+
+Example usage: `${queryParam(foo)}` - if foo is available its associated value will be returned, if not an empty string will be returned
+               `${queryParam(foo,bar)}` - if foo is available its associated value will be returned, if not bar will be returned
 
 ## requestCount
 

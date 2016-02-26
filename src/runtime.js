@@ -21,7 +21,6 @@ import {getMode} from './mode';
 import {installStyles} from './styles';
 import {installCoreServices} from './amp-core-service';
 import {isExperimentOn, toggleExperiment} from './experiments';
-import {performanceFor} from './performance';
 import {registerElement} from './custom-element';
 import {registerExtendedElement} from './extended-element';
 import {resourcesFor} from './resources';
@@ -70,7 +69,7 @@ export function adopt(global) {
       });
     };
     if (opt_css) {
-      installStyles(global.document, opt_css, register);
+      installStyles(global.document, opt_css, register, false, name);
     } else {
       register();
     }
@@ -133,12 +132,10 @@ export function adopt(global) {
    * Sets the function to forward tick events to.
    * @param {funtion(string,?string=,number=)} fn
    * @param {function()=} opt_flush
+   * @deprecated
    * @export
    */
-  global.AMP.setTickFunction = (fn, opt_flush) => {
-    const perf = performanceFor(global);
-    perf.setTickFunction(fn, opt_flush);
-  };
+  global.AMP.setTickFunction = () => {};
 
   // Execute asynchronously scheduled elements.
   for (let i = 0; i < preregisteredElements.length; i++) {

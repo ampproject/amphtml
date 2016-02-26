@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
+import {Observable} from '../../../src/observable';
 import {getService} from '../../../src/service';
+import {timer} from '../../../src/timer';
 import {viewerFor} from '../../../src/viewer';
 import {viewportFor} from '../../../src/viewport';
-import {Observable} from '../../../src/observable';
 
+/** @private @const {number} */
 const MIN_TIMER_INTERVAL_SECONDS_ = 0.5;
+
+/** @private @const {number} */
 const DEFAULT_MAX_TIMER_LENGTH_SECONDS_ = 7200;
 
-/**
- * @private {number}
- */
+/** @private {number} */
 const SCROLL_PRECISION_PERCENT = 5;
 
 /**
@@ -70,8 +72,8 @@ class AnalyticsEvent {
   }
 }
 
-/** @private */
-class InstrumentationService {
+/** @private Visible for testing. */
+export class InstrumentationService {
   /**
    * @param {!Window} window
    */
@@ -80,7 +82,7 @@ class InstrumentationService {
     this.win_ = window;
 
     /** @const {string} */
-    this.TAG_ = "Analytics.Instrumentation";
+    this.TAG_ = 'Analytics.Instrumentation';
 
     /** @const {!Viewer} */
     this.viewer_ = viewerFor(window);
@@ -94,14 +96,27 @@ class InstrumentationService {
     /** @private {!Observable<!Event>} */
     this.clickObservable_ = new Observable();
 
-    /** @private {!Object<string, !Observable<!AnalyticsEvent>>} */
-    this.observers_ = {};
-
     /** @private {boolean} */
     this.scrollHandlerRegistered_ = false;
 
     /** @private {!Observable<Event>} */
     this.scrollObservable_ = new Observable();
+
+    /** @private {!Object<string, !Observable<!AnalyticsEvent>>} */
+    this.customEventObservers_ = {};
+
+    /**
+     * Early events have to be buffered because there's no way to predict
+     * how fast all `amp-analytics` elements will be instrumented.
+     * @private {!Object<string, !Array<!AnalyticsEvent>>|undefined}
+     */
+    this.customEventBuffer_ = {};
+
+    // Stop buffering of custom events after 10 seconds. Assumption is that all
+    // `amp-analytics` elements will have been instrumented by this time.
+    timer.delay(() => {
+      this.customEventBuffer_ = undefined;
+    }, 10000);
   }
 
   /**
@@ -152,12 +167,24 @@ class InstrumentationService {
         this.createTimerListener_(listener, config['timerSpec']);
       }
     } else {
-      let observers = this.observers_[eventType];
+      let observers = this.customEventObservers_[eventType];
       if (!observers) {
         observers = new Observable();
-        this.observers_[eventType] = observers;
+        this.customEventObservers_[eventType] = observers;
       }
       observers.add(listener);
+
+      // Push recent events if any.
+      if (this.customEventBuffer_) {
+        const buffer = this.customEventBuffer_[eventType];
+        if (buffer) {
+          timer.delay(() => {
+            buffer.forEach(event => {
+              listener(event);
+            });
+          }, 1);
+        }
+      }
     }
   }
 
@@ -166,9 +193,22 @@ class InstrumentationService {
    * @param {string} eventType
    */
   triggerEvent(eventType) {
-    const observers = this.observers_[eventType];
+    const event = new AnalyticsEvent(eventType);
+
+    // Enqueue.
+    if (this.customEventBuffer_) {
+      let buffer = this.customEventBuffer_[event.type];
+      if (!buffer) {
+        buffer = [];
+        this.customEventBuffer_[event.type] = buffer;
+      }
+      buffer.push(event);
+    }
+
+    // If listeners already present - trigger right away.
+    const observers = this.customEventObservers_[eventType];
     if (observers) {
-      observers.fire(new AnalyticsEvent(eventType));
+      observers.fire(event);
     }
   }
 
@@ -207,9 +247,23 @@ class InstrumentationService {
    */
   createSelectiveListener_(listener, selector) {
     return e => {
+      // First do the cheap lookups.
       if (selector === '*' || this.matchesSelector_(e.target, selector)) {
         listener(new AnalyticsEvent(AnalyticsEventType.CLICK));
+      } else {
+        // More expensive search.
+        let el = e.target;
+        while (el.parentElement != null && el.parentElement.tagName != 'BODY') {
+          el = el.parentElement;
+          if (this.matchesSelector_(el, selector)) {
+            listener(new AnalyticsEvent(AnalyticsEventType.CLICK));
+            // Don't fire the event multiple times even if the more than one
+            // ancestor matches the selector.
+            return;
+          }
+        }
       }
+
     };
   }
 
@@ -223,8 +277,8 @@ class InstrumentationService {
   registerScrollTrigger_(config, listener) {
     if (!Array.isArray(config['verticalBoundaries']) &&
         !Array.isArray(config['horizontalBoundaries'])) {
-      console./*OK*/error(this.TAG_, "Boundaries are required for the scroll " +
-          "trigger to work.");
+      console./*OK*/error(this.TAG_, 'Boundaries are required for the scroll ' +
+          'trigger to work.');
       return;
     }
 

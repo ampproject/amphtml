@@ -23,6 +23,8 @@ import * as lolex from 'lolex';
 
 describe('3p environment', () => {
 
+  let testWin;
+
   beforeEach(() => {
     iframeCount = 0;
     return createIframePromise(true).then(iframe => {
@@ -114,8 +116,14 @@ describe('3p environment', () => {
     }
 
     function add(p) {
-      return function() {
+      return function(a, b) {
         progress += p;
+        if (a) {
+          progress += a;
+        }
+        if (b) {
+          progress += b;
+        }
       };
     }
 
@@ -182,6 +190,16 @@ describe('3p environment', () => {
       clock.tick(1);
       expect(window.ran).to.be.equal(undefined);
       expect(testWin.ran).to.be.true;
+    });
+
+    it('should support multi arg forms', () => {
+      installTimer(testWin);
+      manageWin(testWin);
+      testWin.setTimeout(add('a'), 50, '!', '?');
+      testWin.setTimeout(add('b'), 60, 'B');
+      testWin.setInterval(add('i'), 70, 'X', 'Z');
+      clock.tick(140);
+      expect(progress).to.equal('a!?bBiXZiXZ');
     });
 
     it('should cancel uninstrumented timeouts', () => {

@@ -180,22 +180,26 @@ function instrumentEntryPoints(win) {
   const setTimeout = win.setTimeout;
   win.setTimeout = function(fn, time) {
     time = minTime(time);
-    return setTimeout(fn, time);
+    arguments[1] = time;
+    return setTimeout.apply(this, arguments);
   };
   // Implement setInterval in terms of setTimeout to make
   // it respect the same rules
-  win.setInterval = function(fn, time) {
+  win.setInterval = function(fn) {
     const id = intervalId++;
+    const args = Array.prototype.slice.call(arguments);
+    function wrapper() {
+      next();
+      if (typeof fn == 'string') {
+        // Handle rare and dangerous string arg case.
+        return (0, win.eval/*NOT OK but whatcha gonna do.*/).call(win, fn);
+      } else {
+        return fn.apply(this, arguments);
+      }
+    }
+    args[0] = wrapper;
     function next() {
-      intervals[id] = win.setTimeout(function() {
-        next();
-        if (typeof fn == 'string') {
-          // Handle rare and dangerous string arg case.
-          return (0, win.eval/*NOT OK but whatcha gonna do.*/).call(win, fn);
-        } else {
-          return fn.apply(this, arguments);
-        }
-      }, time);
+      intervals[id] = win.setTimeout.apply(win, args);
     }
     next();
     return id;
@@ -264,9 +268,11 @@ function minTime(time) {
   return time;
 }
 
-listenParent('embed-state', function(data) {
-  inViewport = data.inViewport;
-  if (inViewport) {
-    becomeVisible();
-  }
-});
+export function installEmbedStateListener() {
+  listenParent(window, 'embed-state', function(data) {
+    inViewport = data.inViewport;
+    if (inViewport) {
+      becomeVisible();
+    }
+  });
+};

@@ -32,9 +32,17 @@ import {parseUrl} from './url';
 export function listen(iframe, typeOfMessage, callback, opt_is3P) {
   assert(iframe.src, 'only iframes with src supported');
   const origin = parseUrl(iframe.src).origin;
-  const win = iframe.ownerDocument.defaultView;
+  let win = iframe.ownerDocument.defaultView;
   const sentinel = getSentinel_(opt_is3P);
-  const listener = function(event) {
+  let unlisten;
+  let listener = function(event) {
+    // If this iframe no longer has a contentWindow is was removed
+    // from the DOM. Unlisten immediately as we can never again receive
+    // messages for it (
+    if (!iframe.contentWindow) {
+      unlisten();
+      return;
+    }
     if (event.origin != origin) {
       return;
     }
@@ -52,8 +60,16 @@ export function listen(iframe, typeOfMessage, callback, opt_is3P) {
 
   win.addEventListener('message', listener);
 
-  return function() {
-    win.removeEventListener('message', listener);
+  return unlisten = function() {
+    if (listener) {
+      win.removeEventListener('message', listener);
+      // Make sure references to the unlisten function do not keep
+      // alive too much.
+      listener = null;
+      iframe = null;
+      win = null;
+      callback = null;
+    }
   };
 }
 
@@ -89,6 +105,10 @@ export function postMessage(iframe, type, object, targetOrigin, opt_is3P) {
   }
   object.type = type;
   object.sentinel = getSentinel_(opt_is3P);
+  if (opt_is3P) {
+    // Serialize ourselves because that is much faster in Chrome.
+    object = 'amp-' + JSON.stringify(object);
+  }
   iframe.contentWindow./*OK*/postMessage(object, targetOrigin);
 }
 

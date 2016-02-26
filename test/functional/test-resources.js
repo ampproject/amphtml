@@ -210,6 +210,92 @@ describe('Resources', () => {
   });
 });
 
+describe('Resources schedulePause', () => {
+
+  let sandbox;
+  let resources;
+  let parent;
+  let children;
+  let child0;
+  let child1;
+  let child2;
+
+  function createElement() {
+    return {
+      tagName: 'amp-test',
+      isBuilt() {
+        return true;
+      },
+      isUpgraded() {
+        return true;
+      },
+      getAttribute() {
+        return null;
+      },
+      contains() {
+        return true;
+      },
+      classList: {
+        contains() {
+          return true;
+        }
+      },
+      documentInactiveCallback() {
+        return false;
+      }
+    };
+  }
+
+  function createElementWithResource(id) {
+    const element = createElement();
+    const resource = new Resource(id, element, resources);
+    resource.state_ = ResourceState_.LAYOUT_COMPLETE;
+    resource.element['__AMP__RESOURCE'] = resource;
+    return [element, resource];
+  }
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+    resources = new Resources(window);
+    const parentTuple = createElementWithResource(1);
+    parent = parentTuple[0];
+    child0 = document.createElement('div');
+    child1 = createElementWithResource(2)[0];
+    child2 = createElementWithResource(3)[0];
+    children = [child0, child1, child2];
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
+
+  it('should not throw with a single element', () => {
+    expect(() => {
+      resources.schedulePause(parent, child1);
+    }).to.not.throw();
+  });
+
+  it('should not throw with an array of elements', () => {
+    expect(() => {
+      resources.schedulePause(parent, [child1, child2]);
+    }).to.not.throw();
+  });
+
+  it('should be ok with non amp children', () => {
+    expect(() => {
+      resources.schedulePause(parent, children);
+    }).to.not.throw();
+  });
+
+  it('should call documentInactiveCallback on custom element', () => {
+    const stub1 = sandbox.stub(child1, 'documentInactiveCallback');
+    const stub2 = sandbox.stub(child2, 'documentInactiveCallback');
+
+    resources.schedulePause(parent, children);
+    expect(stub1.calledOnce).to.be.true;
+    expect(stub2.calledOnce).to.be.true;
+  });
+});
 
 describe('Resources discoverWork', () => {
 
@@ -229,7 +315,7 @@ describe('Resources discoverWork', () => {
       updateLayoutBox: () => {},
       applySizesAndMediaQuery: () => {},
       layoutCallback: () => Promise.resolve(),
-      viewportCallback: sinon.spy(),
+      viewportCallback: sandbox.spy(),
       prerenderAllowed: () => true,
       renderOutsideViewport: () => true,
       isRelayoutNeeded: () => true,
@@ -399,7 +485,7 @@ describe('Resources changeHeight', () => {
       getBoundingClientRect: () => rect,
       applySizesAndMediaQuery: () => {},
       layoutCallback: () => Promise.resolve(),
-      viewportCallback: sinon.spy(),
+      viewportCallback: sandbox.spy(),
       prerenderAllowed: () => true,
       renderOutsideViewport: () => false,
       isRelayoutNeeded: () => true,
@@ -414,7 +500,7 @@ describe('Resources changeHeight', () => {
     resource.element['__AMP__RESOURCE'] = resource;
     resource.state_ = ResourceState_.READY_FOR_LAYOUT;
     resource.layoutBox_ = rect;
-    resource.changeHeight = sinon.spy();
+    resource.changeHeight = sandbox.spy();
     return resource;
   }
 
@@ -428,6 +514,7 @@ describe('Resources changeHeight', () => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
     resources = new Resources(window);
+    resources.isRuntimeOn_ = false;
     viewportMock = sandbox.mock(resources.viewport_);
 
     resource1 = createResource(1, layoutRectLtwh(10, 10, 100, 100));
@@ -497,7 +584,7 @@ describe('Resources changeHeight', () => {
     let vsyncSpy;
 
     beforeEach(() => {
-      overflowCallbackSpy = sinon.spy();
+      overflowCallbackSpy = sandbox.spy();
       resource1.element.overflowCallback = overflowCallbackSpy;
       viewportMock.expects('getRect').returns(
           {top: 0, left: 0, right: 100, bottom: 200, height: 200}).atLeast(1);
@@ -735,7 +822,7 @@ describe('Resources mutateElement', () => {
       getBoundingClientRect: () => rect,
       applySizesAndMediaQuery: () => {},
       layoutCallback: () => Promise.resolve(),
-      viewportCallback: sinon.spy(),
+      viewportCallback: sandbox.spy(),
       prerenderAllowed: () => true,
       renderOutsideViewport: () => false,
       isRelayoutNeeded: () => true,
@@ -750,7 +837,7 @@ describe('Resources mutateElement', () => {
     resource.element['__AMP__RESOURCE'] = resource;
     resource.state_ = ResourceState_.READY_FOR_LAYOUT;
     resource.layoutBox_ = rect;
-    resource.changeHeight = sinon.spy();
+    resource.changeHeight = sandbox.spy();
     return resource;
   }
 
@@ -1380,6 +1467,19 @@ describe('Resources.Resource', () => {
           resource.documentBecameInactive();
           expect(resource.getState()).to.equal(ResourceState_.NOT_LAID_OUT);
         });
+
+    it('updated state should bypass isRelayoutNeeded', () => {
+      resource.state_ = ResourceState_.LAYOUT_COMPLETE;
+      elementMock.expects('documentInactiveCallback').returns(true).once();
+      elementMock.expects('isUpgraded').returns(true).atLeast(1);
+      elementMock.expects('getBoundingClientRect')
+          .returns({left: 1, top: 1, width: 1, height: 1}).once();
+
+      resource.documentBecameInactive();
+
+      elementMock.expects('layoutCallback').returns(Promise.resolve()).once();
+      resource.startLayout(true);
+    });
 
     it('should call documentInactiveCallback on built element' +
         ' but NOT update state', () => {

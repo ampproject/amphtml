@@ -43,7 +43,7 @@ More information can be provided in a similar fashion if needed (Please file an 
 
 ### Methods available to the ad.
 
-- `window.context.noContentAvailable` is a function that the ad system can call if the ad slot was not filled. The container page will then react by showing placeholder content or collapsing the ad if allowed by AMP resizing rules.
+- `window.context.noContentAvailable` is a function that the ad system can call if the ad slot was not filled. The container page will then react by showing fallback content or collapsing the ad if allowed by AMP resizing rules.
 - `window.context.reportRenderedEntityIdentifier` MUST be called by ads, when they know information about which creative was rendered into a particular ad frame and should contain information to allow identifying the creative. Consider including a small string identifying the ad network. This is used by AMP for reporting purposes. The value MUST NOT contain user data or personal identifiable information.
 
 ### Ad viewability
@@ -124,7 +124,7 @@ Here are some factors that affect how fast the resize will be executed:
 #### JS reuse across iframes
 To allow ads to bundle HTTP requests across multiple ad units on the same page the object `window.context.master` will contain the window object of the iframe being elected master iframe for the current page. The `window.context.isMaster` property is `true` when the current frame is the master frame.
 
-The `computeInMasterFrame` function is designed to make it easy to perform a task only in the master frame and provide the result to all frames.
+The `computeInMasterFrame` function is designed to make it easy to perform a task only in the master frame and provide the result to all frames. It is also available to custom ad iframes as `window.context.computeInMasterFrame`. See [3p.js](https://github.com/ampproject/amphtml/blob/master/src/3p.js) for function signature.
 
 #### Preconnect and prefetch
 Add the JS URLs that an ad **always** fetches or always connects to (if you know the origin but not the path) to [_config.js](_config.js).

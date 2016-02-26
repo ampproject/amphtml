@@ -17,6 +17,8 @@
 // Requires polyfills in immediate side effect.
 import './polyfills';
 
+import {userError} from './asserts';
+
 /**
  * Helper with all things Timer.
  */
@@ -119,7 +121,7 @@ export class Timer {
       if (timerKey != -1) {
         this.cancel(timerKey);
       }
-      return Promise.reject(error);
+      throw error;
     });
   }
 
@@ -138,7 +140,7 @@ export class Timer {
     const delayPromise = new Promise((_resolve, reject) => {
       timerKey = this.delay(() => {
         timerKey = -1;
-        reject('timeout');
+        reject(userError('timeout'));
       }, delay);
       if (timerKey == -1) {
         reject(new Error('Failed to schedule timer.'));
@@ -148,7 +150,7 @@ export class Timer {
       if (timerKey != -1) {
         this.cancel(timerKey);
       }
-      return Promise.reject(error);
+      throw error;
     });
     if (!opt_racePromise) {
       return delayPromise;

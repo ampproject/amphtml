@@ -16,6 +16,8 @@
 
 import {Viewer} from '../../src/service/viewer-impl';
 import {platform} from '../../src/platform';
+import {setModeForTesting} from '../../src/mode';
+import * as sinon from 'sinon';
 
 
 describe('Viewer', () => {
@@ -25,9 +27,11 @@ describe('Viewer', () => {
   let viewer;
   let windowApi;
   let timeouts;
+  let clock;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
+    clock = sandbox.useFakeTimers();
     timeouts = [];
     const WindowApi = function() {};
     WindowApi.prototype.setTimeout = function(handler) {
@@ -43,6 +47,7 @@ describe('Viewer', () => {
       referrer: '',
       body: {style: {}},
       documentElement: {style: {}},
+      title: 'Awesome doc',
     };
     windowMock = sandbox.mock(windowApi);
     viewer = new Viewer(windowApi);
@@ -95,10 +100,24 @@ describe('Viewer', () => {
     expect(viewer.getPrerenderSize()).to.equal(3);
   });
 
+  it('should configure performance tracking', () => {
+    windowApi.location.hash = '';
+    let viewer = new Viewer(windowApi);
+    expect(viewer.isPerformanceTrackingOn()).to.be.false;
+
+    windowApi.location.hash = '#csi=1';
+    viewer = new Viewer(windowApi);
+    expect(viewer.isPerformanceTrackingOn()).to.be.true;
+
+    windowApi.location.hash = '#csi=0';
+    viewer = new Viewer(windowApi);
+    expect(viewer.isPerformanceTrackingOn()).to.be.false;
+  });
+
   it('should configure correctly for iOS embedding', () => {
     windowApi.name = '__AMP__viewportType=natural';
     windowApi.parent = {};
-    sandbox.mock(platform).expects('isIos').returns(true).once();
+    sandbox.mock(platform).expects('isIos').returns(true).atLeast(1);
     const viewer = new Viewer(windowApi);
 
     expect(viewer.getViewportType()).to.equal('natural-ios-embed');
@@ -107,11 +126,14 @@ describe('Viewer', () => {
   it('should NOT configure for iOS embedding if not embedded', () => {
     windowApi.name = '__AMP__viewportType=natural';
     windowApi.parent = windowApi;
-    sandbox.mock(platform).expects('isIos').returns(true).once();
-    expect(new Viewer(windowApi).getViewportType()).to.equal('natural');
-
-    windowApi.parent = null;
-    expect(new Viewer(windowApi).getViewportType()).to.equal('natural');
+    sandbox.mock(platform).expects('isIos').returns(true).atLeast(1);
+    setModeForTesting({
+      localDev: false,
+      development: false
+    });
+    const viewportType = new Viewer(windowApi).getViewportType();
+    setModeForTesting(null);
+    expect(viewportType).to.equal('natural');
   });
 
   it('should receive viewport event', () => {
@@ -154,6 +176,7 @@ describe('Viewer', () => {
     expect(m.eventType).to.equal('documentLoaded');
     expect(m.data.width).to.equal(11);
     expect(m.data.height).to.equal(12);
+    expect(m.data.title).to.equal('Awesome doc');
   });
 
   it('should post documentResized event', () => {
@@ -182,10 +205,31 @@ describe('Viewer', () => {
   });
 
   it('should post broadcast event', () => {
+    const delivered = [];
+    viewer.setMessageDeliverer((eventType, data) => {
+      delivered.push({eventType: eventType, data: data});
+    }, 'https://acme.com');
     viewer.broadcast({type: 'type1'});
-    const m = viewer.messageQueue_[0];
-    expect(m.eventType).to.equal('broadcast');
-    expect(m.data.type).to.equal('type1');
+    expect(viewer.messageQueue_.length).to.equal(0);
+    return viewer.messagingMaybePromise_.then(() => {
+      expect(delivered.length).to.equal(1);
+      const m = delivered[0];
+      expect(m.eventType).to.equal('broadcast');
+      expect(m.data.type).to.equal('type1');
+    });
+  });
+
+  it('should post broadcast event but not fail w/o messaging', () => {
+    viewer.broadcast({type: 'type1'});
+    expect(viewer.messageQueue_.length).to.equal(0);
+    clock.tick(20001);
+    return viewer.messagingReadyPromise_.then(() => 'OK', () => 'ERROR')
+        .then(res => {
+          expect(res).to.equal('ERROR');
+          return viewer.messagingMaybePromise_;
+        }).then(() => {
+          expect(viewer.messageQueue_.length).to.equal(0);
+        });
   });
 
   it('should queue non-dupe events', () => {
@@ -216,6 +260,65 @@ describe('Viewer', () => {
     expect(delivered[0].data.width).to.equal(11);
     expect(delivered[1].eventType).to.equal('documentResized');
     expect(delivered[1].data.width).to.equal(13);
+  });
+
+  it('should wait for messaging channel', () => {
+    let m1Resolved = false;
+    let m2Resolved = false;
+    const m1 = viewer.sendMessage('message1', {}, /* awaitResponse */ false)
+        .then(() => {
+          m1Resolved = true;
+        });
+    const m2 = viewer.sendMessage('message2', {}, /* awaitResponse */ true)
+        .then(() => {
+          m2Resolved = true;
+        });
+    return Promise.resolve().then(() => {
+      // Not resolved yet.
+      expect(m1Resolved).to.be.false;
+      expect(m2Resolved).to.be.false;
+
+      // Set message deliverer.
+      viewer.setMessageDeliverer(() => {
+        return Promise.resolve();
+      }, 'https://acme.com');
+      expect(m1Resolved).to.be.false;
+      expect(m2Resolved).to.be.false;
+
+      return Promise.all([m1, m2]);
+    }).then(() => {
+      // All resolved now.
+      expect(m1Resolved).to.be.true;
+      expect(m2Resolved).to.be.true;
+    });
+  });
+
+  it('should timeout messaging channel', () => {
+    let m1Resolved = false;
+    let m2Resolved = false;
+    const m1 = viewer.sendMessage('message1', {}, /* awaitResponse */ false)
+        .then(() => {
+          m1Resolved = true;
+        });
+    const m2 = viewer.sendMessage('message2', {}, /* awaitResponse */ true)
+        .then(() => {
+          m2Resolved = true;
+        });
+    return Promise.resolve().then(() => {
+      // Not resolved yet.
+      expect(m1Resolved).to.be.false;
+      expect(m2Resolved).to.be.false;
+
+      // Timeout.
+      clock.tick(20001);
+      return Promise.all([m1, m2]);
+    }).then(() => {
+      throw new Error('must never be here');
+    }, () => {
+      // Not resolved ever.
+      expect(m1Resolved).to.be.false;
+      expect(m2Resolved).to.be.false;
+    });
   });
 
   describe('isTrustedViewer', () => {
@@ -448,6 +551,45 @@ describe('Viewer', () => {
         expect(referrerUrl).to.equal('');
         expect(timeouts).to.have.length(0);
       });
+    });
+  });
+
+  describe('viewerOrigin', () => {
+
+    it('should return empty string if origin is not known', () => {
+      const viewer = new Viewer(windowApi);
+      return viewer.getViewerOrigin().then(viewerOrigin => {
+        expect(viewerOrigin).to.equal('');
+      });
+    });
+
+    it('should return ancestor origin if known', () => {
+      windowApi.parent = {};
+      windowApi.location.ancestorOrigins = ['https://google.com'];
+      const viewer = new Viewer(windowApi);
+      return viewer.getViewerOrigin().then(viewerOrigin => {
+        expect(viewerOrigin).to.equal('https://google.com');
+      });
+    });
+
+    it('should return viewer origin if set via handshake', () => {
+      windowApi.parent = {};
+      const viewer = new Viewer(windowApi);
+      const result = viewer.getViewerOrigin().then(viewerOrigin => {
+        expect(viewerOrigin).to.equal('https://foobar.com');
+      });
+      viewer.setMessageDeliverer(() => {}, 'https://foobar.com');
+      return result;
+    });
+
+    it('should return empty string if handshake does not happen', () => {
+      windowApi.parent = {};
+      const viewer = new Viewer(windowApi);
+      const result = viewer.getViewerOrigin().then(viewerOrigin => {
+        expect(viewerOrigin).to.equal('');
+      });
+      clock.tick(1010);
+      return result;
     });
   });
 });

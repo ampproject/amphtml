@@ -86,6 +86,21 @@ If a test flaked on a pull request you can ask for a retry by sending the commen
 
 ### Manual testing
 
+#### Document proxy
+
+AMP ships with a local proxy for testing production AMP documents with the local JS version.
+
+For any public AMP document like: http://output.jsbin.com/pegizoq/quiet
+
+You can access is with the local JS at
+
+- normal sources: http://localhost:8000/max/output.jsbin.com/pegizoq/quiet
+- minified: http://localhost:8000/min/output.jsbin.com/pegizoq/quiet
+
+If the origin resource is on HTTPS, the URLs are http://localhost:8000/max/s/output.jsbin.com/pegizoq/quiet and http://localhost:8000/min/s/output.jsbin.com/pegizoq/quiet
+
+#### Chrome extension
+
 For testing documents on arbitrary URLs with your current local version of the AMP runtime we created a [Chrome extension](testing/local-amp-chrome-extension/README.md).
 
 ## Repository Layout
@@ -127,14 +142,5 @@ In particular, we try to maintain "it might not be perfect but isn't broken"-sup
 - [AMP Layout system](spec/amp-html-layout.md)
 
 We also recommend scanning the [spec](spec/). The non-element part should help understand some of the design aspects.
-
-## AMP Dev Channel (Experimental)
-
-AMP Dev Channel is a way to opt a browser into using a newer version of the AMP JS libraries.
-
-This release may be less stable and it may contain features not available to all users. Opt into this option if you'd like to help test new versions of AMP, report bugs or build documents that require a new feature that is not yet available to everyone.
-
-To opt your browser into the AMP Dev Channel, go to [the AMP experiments page](https://cdn.ampproject.org/experiments.html) and activate the "AMP Dev Channel" experiment.
-
 
 ## [Code of conduct](CODE_OF_CONDUCT.md)

@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-import {assertHttpsUrl} from '../../../src/url';
+import {assert} from '../../../src/asserts';
+import {assertHttpsUrl, parseUrl} from '../../../src/url';
 import {log} from '../../../src/log';
 import {loadPromise} from '../../../src/event-helper';
+import {timer} from '../../../src/timer';
+import {removeElement} from '../../../src/dom';
 
 /** @const {string} */
 const TAG_ = 'AmpAnalytics.Transport';
@@ -108,3 +111,31 @@ export class Transport {
   }
 }
 
+/**
+ * Sends a ping request using an iframe, that is removed 5 seconds after
+ * it is loaded.
+ * This is not available as a standard transport, but rather used for
+ * specific, whitelisted requests.
+ * @param {!Window} win
+ * @param {string} request The request URL.
+ */
+export function sendRequestUsingIframe(win, request) {
+  assertHttpsUrl(request);
+  const iframe = document.createElement('iframe');
+  iframe.style.display = 'none';
+  iframe.onload = iframe.onerror = () => {
+    timer.delay(() => {
+      removeElement(iframe);
+    }, 5000);
+  };
+  assert(
+      parseUrl(request).origin != parseUrl(win.location.href).origin,
+      'Origin of iframe request must not be equal to the document origin. ' +
+      'See https://github.com/ampproject/' +
+      'amphtml/blob/master/spec/amp-iframe-origin-policy.md for details.');
+  iframe.setAttribute('amp-analytics', '');
+  iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+  iframe.src = request;
+  win.document.body.appendChild(iframe);
+  return iframe;
+}

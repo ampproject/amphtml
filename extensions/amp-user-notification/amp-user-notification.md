@@ -14,27 +14,66 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-### <a name="amp-user-notification"></a> `amp-user-notification`
+# <a name="amp-user-notification"></a> `amp-user-notification`
 
-Experiment: "amp-storage" should be enabled via https://cdn.ampproject.org/experiments.html or `AMP.toggleExperiment('amp-storage')`. See [Experiments Guide](../../tools/experiments/README.md). If this experiment is not enabled, the `data-show-if-href` and `data-dismiss-href` are required.
+<table>
+  <tr>
+    <td width="40%"><strong>Description</strong></td>
+    <td>Displays a dismissable notification to the user. </td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Availability</strong></td>
+    <td>Stable</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Required Script</strong></td>
+    <td><code>&lt;script async custom-element="amp-user-notification" src="https://cdn.ampproject.org/v0/amp-user-notification-0.1.js">&lt;/script></code></td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Examples</strong></td>
+    <td><a href="https://amp-by-example.appspot.com/amp-user-notification_with_local_storage.html">amp-user-notification_with_local_storage.html</a><br /><a href="https://amp-by-example.appspot.com/amp-user-notification_with_server_endpoint.html">amp-user-notification_with_server_endpoint.html</a><br /><a href="https://github.com/ampproject/amphtml/blob/master/examples/user-notification.amp.html">user-notification.amp.html</a></td>
+  </tr>
+</table>
 
-Displays a dismissable notification to the user. By supplying two URLs that
+The following lists validation errors specific to the `amp-user-notification` tag
+(see also `amp-user-notification` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii)):
+
+<table>
+  <tr>
+    <th width="40%"><strong>Validation Error</strong></th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#tag-required-by-another-tag-is-missing">The 'example1' tag is missing or incorrect, but required by 'example2'.</a></td>
+    <td>Error thrown when required <code>amp-user-notification</code> extension <code>.js</code> script tag is missing or incorrect.</td>
+  </tr>
+  <tr>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#implied-layout-isnt-supported-by-amp-tag">The implied layout 'example1' is not supported by tag 'example2'.</a></td>
+    <td>The only supported layout type is <code>NODISPLAY</code>. Error thrown if implied layout is any other value.</td>
+  </tr>
+  <tr>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#specified-layout-isnt-supported-by-amp-tag">The specified layout 'example1' is not supported by tag 'example2'.</a></td>
+    <td>The only supported layout type is <code>NODISPLAY</code>. Error thrown if specified layout is any other value.</td>
+  </tr>
+</table>
+
+## Usage
+
+An `id` is required
+as multiple `amp-user-notification` elements are allowed and the
+`id` is used to differentiate them.
+
+By supplying two URLs that
 get called before the notification is shown and after it is dismissed,
 it is possible to control per user as to whether the notification should
 be shown (using the `ampUserId` value).
-E.g. it could only be shown to users in certain geo locations or
+For example, it could only be shown to users in certain geo locations or
 prevent showing it again to the user when they've dismissed it before.
+If these URLs are not specified, dismissal state will be queried
+and/or stored locally to determine whether to show the notification to
+the user.
 
----
-
-#### Usage
-
-`amp-user-notification` requires 2 URLs which can be provided by
-the `data-show-if-href` and `data-dismiss-href` attributes. An `id` is required
-as multiple `amp-user-notification` elements are allowed and the
-id is used to differentiate them.
-
-To close `amp-user-notification` add a `on` attribute to a button with the
+To close `amp-user-notification`, add a `on` attribute to a button with the
 following value scheme `on="event:idOfUserNotificationElement.dismiss"`
 (see example below). This user action also triggers the `GET` to the
 `data-dismiss-href` URL. Be very mindful of the browser caching the `GET` response
@@ -62,7 +101,7 @@ Example:
 
 ---
 
-#### Attributes
+## Attributes
 
 **data-show-if-href** (Optional)
 
@@ -126,7 +165,7 @@ flag for the specified ID locally.
 
 ---
 
-#### JSON Fields
+## JSON Fields
 
 - `elementId` (string) - The HTML id used on `amp-user-notification` element.
 - `ampUserId` (string) - This id is passed to both the `data-show-if-href` GET request
@@ -140,7 +179,7 @@ flag for the specified ID locally.
 
 ---
 
-#### Behavior
+## Behavior
 
 A notification is shown when:
 
@@ -157,7 +196,7 @@ record remotely.
 
 ---
 
-#### Styling
+## Styling
 
 The `amp-user-notification` component should always have `layout=nodisplay`
 and will be `position: fixed` after layout (default is bottom: 0, which can be overridden).
@@ -184,7 +223,7 @@ ex. (w/o vendor prefixes)
   }
 ```
 
-#### Delaying Client ID generation until the notification is acknowledged
+## Delaying Client ID generation until the notification is acknowledged
 
 Optionally one can delay generation of Client IDs used for analytics and similar purposes until an `amp-user-notification` is confirmed by the user. See these docs for how to implement this:
 

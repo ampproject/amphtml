@@ -48,13 +48,46 @@ PASS
 $ touch empty.html
 $ dist/validate empty.html
 FAIL
-empty.html:1:0 MANDATORY_TAG_MISSING html ⚡ for top-level html (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#ampd)
-empty.html:1:0 MANDATORY_TAG_MISSING head (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#crps)
-empty.html:1:0 MANDATORY_TAG_MISSING charset utf-8 declaration (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#chrs)
-empty.html:1:0 MANDATORY_TAG_MISSING viewport declaration (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#vprt)
-empty.html:1:0 MANDATORY_TAG_MISSING mandatory style (js enabled) opacity 0 (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#opacity)
-empty.html:1:0 MANDATORY_TAG_MISSING mandatory style (noscript) opacity 1 (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#opacity)
-empty.html:1:0 MANDATORY_TAG_MISSING noscript enclosure for mandatory style (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#opacity)
-empty.html:1:0 MANDATORY_TAG_MISSING body (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#crps)
-empty.html:1:0 MANDATORY_TAG_MISSING amphtml engine v0.js script (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#scrpt)
+empty.html:1:0 The mandatory tag 'html doctype' is missing or
+incorrect. [MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+empty.html:1:0 The mandatory tag 'html ⚡ for top-level html' is
+missing or incorrect. (see
+https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#ampd)
+[MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+empty.html:1:0 The mandatory tag 'head' is missing or incorrect.
+(see
+https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#crps)
+[MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+empty.html:1:0 The mandatory tag 'link rel=canonical' is missing
+or incorrect. (see
+https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#canon)
+[MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+empty.html:1:0 The mandatory tag 'meta charset=utf-8' is missing
+or incorrect. (see
+https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#chrs)
+[MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+empty.html:1:0 The mandatory tag 'meta name=viewport' is missing
+or incorrect. (see
+https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#vprt)
+[MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+empty.html:1:0 The mandatory tag 'body' is missing or incorrect.
+(see
+https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#crps)
+[MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+empty.html:1:0 The mandatory tag 'amphtml engine v0.js script' is
+missing or incorrect. (see
+https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#scrpt)
+[MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+empty.html:1:0 The mandatory tag 'noscript enclosure for
+boilerplate' is missing or incorrect. (see
+https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#boilerplate)
+[MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+empty.html:1:0 The mandatory tag 'boilerplate (js enabled)' is
+missing or incorrect. (see
+https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#boilerplate)
+[MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
+empty.html:1:0 The mandatory tag 'boilerplate (noscript)' is
+missing or incorrect. (see
+https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#boilerplate)
+[MANDATORY_AMP_TAG_MISSING_OR_INCORRECT]
 ```

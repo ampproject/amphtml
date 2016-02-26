@@ -48,15 +48,7 @@ const EXPERIMENTS = [
     id: CANARY_EXPERIMENT_ID,
     name: 'AMP Dev Channel (more info)',
     spec: 'https://github.com/ampproject/amphtml/blob/master/' +
-        'DEVELOPING.md#amp-dev-channel-experimental',
-  },
-
-  // AMP Access
-  {
-    id: 'amp-access',
-    name: 'AMP Access',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-        'amp-access/amp-access-spec.md',
+        'README.md#amp-dev-channel',
   },
 
   // AMP Access Analytics
@@ -74,11 +66,12 @@ const EXPERIMENTS = [
         'amp-dynamic-css-classes/amp-dynamic-css-classes.md',
   },
 
-  // AMP Storage
+  // Amp Accordion
   {
-    id: 'amp-storage',
-    name: 'Local Storage',
-    spec: '',
+    id: 'amp-accordion',
+    name: 'Amp Accordion',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
+        'amp-accordion/amp-accordion.md',
   },
 ];
 

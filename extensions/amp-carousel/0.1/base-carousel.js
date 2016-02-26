@@ -93,7 +93,6 @@ export class BaseCarousel extends AMP.BaseElement {
    */
   go(dir, animate) {
     this.goCallback(dir, animate);
-    this.setControlsState();
   }
 
   /**
@@ -123,6 +122,11 @@ export class BaseCarousel extends AMP.BaseElement {
     // TODO(dvoytenko, #1014): Review and try a more immediate approach.
     // Wait until DOMReady.
     return false;
+  }
+
+  /** @override */
+  documentInactiveCallback() {
+    return true;
   }
 
   /**

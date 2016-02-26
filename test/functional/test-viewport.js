@@ -21,7 +21,6 @@ import {installViewerService} from '../../src/service/viewer-impl';
 import {getStyle} from '../../src/style';
 import * as sinon from 'sinon';
 
-
 describe('Viewport', () => {
   let sandbox;
   let clock;
@@ -57,6 +56,7 @@ describe('Viewport', () => {
     installViewerService(windowApi);
     binding = new ViewportBindingVirtual_(windowApi, viewer);
     viewport = new Viewport(windowApi, binding, viewer);
+    viewport.fixedLayer_ = null;
     viewport.getSize();
   });
 
@@ -106,6 +106,23 @@ describe('Viewport', () => {
     expect(changeEvent.velocity).to.equal(0);
   });
 
+  it('should defer change event until fixed layer is complete', () => {
+    let changeEvent = null;
+    viewport.onChanged(event => {
+      changeEvent = event;
+    });
+    let fixedResolver;
+    const fixedPromise = new Promise(resolve => fixedResolver = resolve);
+    viewport.fixedLayer_ = {update: () => fixedPromise};
+    viewerMock.expects('getViewportWidth').returns(112).atLeast(1);
+    viewerViewportHandler();
+    expect(changeEvent).to.be.null;
+    fixedResolver();
+    return fixedPromise.then(() => {
+      expect(changeEvent).to.not.be.null;
+    });
+  });
+
   it('should update padding when changed only', () => {
     // Shouldn't call updatePaddingTop since it hasn't changed.
     let bindingMock = sandbox.mock(binding);
@@ -119,6 +136,19 @@ describe('Viewport', () => {
     bindingMock.expects('updatePaddingTop').withArgs(21).once();
     viewerViewportHandler();
     bindingMock.verify();
+  });
+
+  it('should update padding for fixed layer', () => {
+    // Should call updatePaddingTop.
+    const bindingMock = sandbox.mock(binding);
+    viewerMock.expects('getPaddingTop').returns(21).atLeast(1);
+    bindingMock.expects('updatePaddingTop').withArgs(21).once();
+    viewport.fixedLayer_ = {updatePaddingTop: () => {}};
+    const fixedLayerMock = sandbox.mock(viewport.fixedLayer_);
+    fixedLayerMock.expects('updatePaddingTop').withArgs(21).once();
+    viewerViewportHandler();
+    bindingMock.verify();
+    fixedLayerMock.verify();
   });
 
   it('should call binding.updateViewerViewport', () => {
@@ -487,6 +517,10 @@ describe('ViewportBindingNatural', () => {
     sandbox = null;
   });
 
+  it('should NOT require fixed layer transferring', () => {
+    expect(binding.requiresFixedLayerTransfer()).to.be.false;
+  });
+
   it('should subscribe to scroll and resize events', () => {
     expect(windowEventHandlers['scroll']).to.not.equal(undefined);
     expect(windowEventHandlers['resize']).to.not.equal(undefined);
@@ -639,6 +673,10 @@ describe('ViewportBindingNaturalIosEmbed', () => {
     sandbox = null;
   });
 
+  it('should require fixed layer transferring', () => {
+    expect(binding.requiresFixedLayerTransfer()).to.be.true;
+  });
+
   it('should subscribe to resize events on window, scroll on body', () => {
     expect(windowEventHandlers['resize']).to.not.equal(undefined);
     expect(windowEventHandlers['scroll']).to.equal(undefined);
@@ -688,13 +726,13 @@ describe('ViewportBindingNaturalIosEmbed', () => {
     expect(bodyChildren[2].style.visibility).to.equal('hidden');
   });
 
-  it('should update padding on BODY', () => {
+  it('should update border on BODY', () => {
     windowApi.document = {
       body: {style: {}}
     };
     binding.updatePaddingTop(31);
-    expect(windowApi.document.body.style.paddingTop).to
-        .equal('31px');
+    expect(windowApi.document.body.style.borderTop).to
+        .equal('31px solid transparent');
   });
 
   it('should calculate size', () => {
@@ -826,6 +864,10 @@ describe('ViewportBindingVirtual', () => {
     viewer = null;
     sandbox.restore();
     sandbox = null;
+  });
+
+  it('should NOT require fixed layer transferring', () => {
+    expect(binding.requiresFixedLayerTransfer()).to.be.false;
   });
 
   it('should configure viewport parameters', () => {

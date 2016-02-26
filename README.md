@@ -97,6 +97,21 @@ such as [amp-anim](extensions/amp-anim/amp-anim.md),
 which allows web developers to dynamically serve animated images
 as either image files (GIF) or video files (WebM or MP4) based on browser compatibility.
 
+# AMP Dev Channel
+
+AMP Dev Channel is a way to opt a browser into using a newer version of the AMP JS libraries.
+
+This release **may be less stable** and it may contain features not available to all users. Opt into this option if you'd like to help test new versions of AMP, report bugs or build documents that require a new feature that is not yet available to everyone.
+
+Opting into Dev Channel is great to:
+
+- test and play with new features not yet available to all users.
+- use in Q&A to ensure that your site is compatible with the next version of AMP.
+
+If you find an issue that appears to only occur in the Dev Channel version of AMP, please [file an issue](https://github.com/ampproject/amphtml/issues/new) with a description of the problem. Please always include a URL to a page that reproduces the issue.
+
+To opt your browser into the AMP Dev Channel, go to [the AMP experiments page](https://cdn.ampproject.org/experiments.html) and activate the "AMP Dev Channel" experiment.
+
 # Further Reading
 
 If you are creating AMP pages,

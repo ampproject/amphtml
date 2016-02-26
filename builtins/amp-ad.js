@@ -25,7 +25,6 @@ import {loadPromise} from '../src/event-helper';
 import {parseUrl} from '../src/url';
 import {registerElement} from '../src/custom-element';
 import {adPrefetch, adPreconnect, clientIdScope} from '../ads/_config';
-import {toggle} from '../src/style';
 import {timer} from '../src/timer';
 import {viewerFor} from '../src/viewer';
 import {userNotificationManagerFor} from '../src/user-notification';
@@ -76,11 +75,6 @@ export function installAd(win) {
     }
 
     /** @override */
-    isRelayoutNeeded() {
-      return true;
-    }
-
-    /** @override */
     buildCallback() {
       /** @private {?Element} */
       this.iframe_ = null;
@@ -110,18 +104,6 @@ export function installAd(win) {
 
       /** @private {IntersectionObserver} */
       this.intersectionObserver_ = null;
-
-      /**
-       * In this state the iframe is set to display: none to reduce
-       * CPU/GPU/Battery consumption by the ad.
-       * @private {boolean}
-       */
-      this.paused_ = false;
-
-      /**
-       * Whether this ad was ever in the viewport.
-       */
-      this.wasEverVisible_ = false;
 
       /**
        * @private @const
@@ -223,7 +205,6 @@ export function installAd(win) {
 
     /** @override */
     layoutCallback() {
-      this.maybeUnpause_();
       if (!this.iframe_) {
         loadingAdsCount++;
         assert(!this.isInFixedContainer_,
@@ -253,7 +234,7 @@ export function installAd(win) {
           // Triggered by context.reportRenderedEntityIdentifier(…) inside the ad
           // iframe.
           listenOnce(this.iframe_, 'entity-id', info => {
-            this.element.setAttribute('creative-id', info.id);
+            this.element.creativeId = info.id;
           }, /* opt_is3P */ true);
           listen(this.iframe_, 'embed-size', data => {
             if (data.width !== undefined) {
@@ -283,13 +264,6 @@ export function installAd(win) {
       return loadPromise(this.iframe_);
     }
 
-    /** @override */
-    documentInactiveCallback() {
-      this.maybePause_();
-      // Call layoutCallback again when this document becomes active.
-      return true;
-    }
-
     /**
      * @return {!Promise<string|undefined>} A promise for a CID or undefined if
      *     - the ad network does not request one or
@@ -303,13 +277,13 @@ export function installAd(win) {
       }
       return cidForOrNull(this.getWin()).then(cidService => {
         if (!cidService) {
-          return Promise.resolve();
+          return;
         }
         let consent = Promise.resolve();
         const consentId = this.element.getAttribute(
             'data-consent-notification-id');
         if (consentId) {
-          consent = userNotificationManagerFor(this.win).then(service => {
+          consent = userNotificationManagerFor(this.getWin()).then(service => {
             return service.get(consentId);
           });
         }
@@ -319,49 +293,10 @@ export function installAd(win) {
 
     /** @override  */
     viewportCallback(inViewport) {
-      if (inViewport) {
-        this.wasEverVisible_ = true;
-        this.maybeUnpause_();
-      } else {
-        this.maybePause_();
-      }
       if (this.intersectionObserver_) {
         this.intersectionObserver_.onViewportCallback(inViewport);
       }
       this.sendEmbedInfo_(inViewport);
-    }
-
-    /**
-     * Unpauses the ad if it is paused.
-     * @private
-     */
-    maybeUnpause_() {
-      if (this.paused_) {
-        this.paused_ = false;
-        toggle(this.iframe_, true);
-      }
-    }
-
-    /**
-     * Pauses the ad unless
-     * - it was never visible and the viewport is visible.
-     * We have that exception because setting `diplay:none` can break some
-     * measurements inside the ad and these are more likely to occur early
-     * in the ad lifecycle. We could probably enhance this by still hiding
-     * ads that have been loaded for a while (Say 10 seconds).
-     * @private
-     */
-    maybePause_() {
-      if (!this.wasEverVisible_ && this.viewer_.isVisible()) {
-        return;
-      }
-      // We only pause ads that have been visible before
-      if (this.iframe_ && !this.paused_) {
-        this.paused_ = true;
-        // When the doc is inactive, hide the ads, so any work they do takes
-        // less CPU and power.
-        toggle(this.iframe_, false);
-      }
     }
 
     /**

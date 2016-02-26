@@ -19,17 +19,33 @@ import {createIframePromise} from '../../testing/iframe';
 import {urlReplacementsFor} from '../../src/url-replacements';
 import {markElementScheduledForTesting} from '../../src/custom-element';
 import {installCidService} from '../../src/service/cid-impl';
+import {installViewerService} from '../../src/service/viewer-impl';
+import {installActivityService} from '../../src/service/activity-impl';
 import {setCookie} from '../../src/cookies';
+import {parseUrl} from '../../src/url';
 
+import * as sinon from 'sinon';
 
 describe('UrlReplacements', () => {
 
+  let sandbox;
   let loadObservable;
-  afterEach(() => {
-    loadObservable = null;
+  let replacements;
+  let viewerService;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
   });
 
-  function expand(url, withCid, opt_bindings) {
+  afterEach(() => {
+    loadObservable = null;
+    sandbox.restore();
+    sandbox = null;
+    replacements = null;
+    viewerService = null;
+  });
+
+  function getReplacements(withCid, withActivity) {
     return createIframePromise().then(iframe => {
       iframe.doc.title = 'Pixel Test';
       const link = iframe.doc.createElement('link');
@@ -40,8 +56,18 @@ describe('UrlReplacements', () => {
         markElementScheduledForTesting(iframe.win, 'amp-analytics');
         installCidService(iframe.win);
       }
+      if (withActivity) {
+        markElementScheduledForTesting(iframe.win, 'amp-analytics');
+        installActivityService(iframe.win);
+      }
+      viewerService = installViewerService(iframe.win);
+      replacements = urlReplacementsFor(iframe.win);
+      return replacements;
+    });
+  }
 
-      const replacements = urlReplacementsFor(iframe.win);
+  function expand(url, withCid, withActivity, opt_bindings) {
+    return getReplacements(withCid, withActivity).then(replacements => {
       return replacements.expand(url, opt_bindings);
     });
   }
@@ -272,6 +298,32 @@ describe('UrlReplacements', () => {
     });
   });
 
+  it('should replace VIEWER with origin', () => {
+    return getReplacements().then(replacements => {
+      sandbox.stub(viewerService, 'getViewerOrigin').returns(
+          Promise.resolve('https://www.google.com'));
+      return replacements.expand('?sh=VIEWER').then(res => {
+        expect(res).to.equal('?sh=https%3A%2F%2Fwww.google.com');
+      });
+    });
+  });
+
+  it('should replace VIEWER with empty string', () => {
+    return getReplacements().then(replacements => {
+      sandbox.stub(viewerService, 'getViewerOrigin').returns(
+          Promise.resolve(''));
+      return replacements.expand('?sh=VIEWER').then(res => {
+        expect(res).to.equal('?sh=');
+      });
+    });
+  });
+
+  it('should replace TOTAL_ENGAGED_TIME', () => {
+    return expand('?sh=TOTAL_ENGAGED_TIME', false, true).then(res => {
+      expect(res).to.match(/sh=\d+/);
+    });
+  });
+
   it('should accept $expressions', () => {
     return expand('?href=$CANONICAL_URL').then(res => {
       expect(res).to.equal('?href=https%3A%2F%2Fpinterest.com%2Fpin1');
@@ -318,6 +370,15 @@ describe('UrlReplacements', () => {
         .eventually.equal('?a=xyz-abc');
   });
 
+  it('should support multiple positional arguments with dots', () => {
+    const replacements = urlReplacementsFor(window);
+    replacements.set_('FN', (one, two) => {
+      return one + '-' + two;
+    });
+    return expect(replacements.expand('?a=FN(xy.z,ab.c)')).to
+        .eventually.equal('?a=xy.z-ab.c');
+  });
+
   it('should support promises as replacements', () => {
     const replacements = urlReplacementsFor(window);
     replacements.set_('P1', () => Promise.resolve('abc '));
@@ -329,20 +390,24 @@ describe('UrlReplacements', () => {
   });
 
   it('should override an existing binding', () => {
-    return expand('ord=RANDOM?', false, {'RANDOM': 'abc'}).then(res => {
+    return expand('ord=RANDOM?', false, false, {'RANDOM': 'abc'}).then(res => {
       expect(res).to.match(/ord=abc\?$/);
     });
   });
 
   it('should add an additional binding', () => {
-    return expand('rid=NONSTANDARD?', false, {'NONSTANDARD': 'abc'}).then(
+    return expand('rid=NONSTANDARD?', false, false, {
+      'NONSTANDARD': 'abc'
+    }).then(
         res => {
           expect(res).to.match(/rid=abc\?$/);
         });
   });
 
   it('should NOT overwrite the cached expression with new bindings', () => {
-    return expand('rid=NONSTANDARD?', false, {'NONSTANDARD': 'abc'}).then(
+    return expand('rid=NONSTANDARD?', false, false, {
+      'NONSTANDARD': 'abc'
+    }).then(
       res => {
         expect(res).to.match(/rid=abc\?$/);
         return expand('rid=NONSTANDARD?').then(res => {
@@ -352,7 +417,7 @@ describe('UrlReplacements', () => {
   });
 
   it('should expand bindings as functions', () => {
-    return expand('rid=FUNC(abc)?', false, {
+    return expand('rid=FUNC(abc)?', false, false, {
       'FUNC': value => 'func_' + value
     }).then(res => {
       expect(res).to.match(/rid=func_abc\?$/);
@@ -360,7 +425,7 @@ describe('UrlReplacements', () => {
   });
 
   it('should expand bindings as functions with promise', () => {
-    return expand('rid=FUNC(abc)?', false, {
+    return expand('rid=FUNC(abc)?', false, false, {
       'FUNC': value => Promise.resolve('func_' + value)
     }).then(res => {
       expect(res).to.match(/rid=func_abc\?$/);
@@ -368,7 +433,7 @@ describe('UrlReplacements', () => {
   });
 
   it('should expand null as empty string', () => {
-    return expand('v=VALUE', false, {
+    return expand('v=VALUE', false, false, {
       'VALUE': null
     }).then(res => {
       expect(res).to.equal('v=');
@@ -376,7 +441,7 @@ describe('UrlReplacements', () => {
   });
 
   it('should expand undefined as empty string', () => {
-    return expand('v=VALUE', false, {
+    return expand('v=VALUE', false, false, {
       'VALUE': undefined
     }).then(res => {
       expect(res).to.equal('v=');
@@ -384,7 +449,7 @@ describe('UrlReplacements', () => {
   });
 
   it('should expand empty string as empty string', () => {
-    return expand('v=VALUE', false, {
+    return expand('v=VALUE', false, false, {
       'VALUE': ''
     }).then(res => {
       expect(res).to.equal('v=');
@@ -392,7 +457,7 @@ describe('UrlReplacements', () => {
   });
 
   it('should expand zero as zero', () => {
-    return expand('v=VALUE', false, {
+    return expand('v=VALUE', false, false, {
       'VALUE': 0
     }).then(res => {
       expect(res).to.equal('v=0');
@@ -400,7 +465,7 @@ describe('UrlReplacements', () => {
   });
 
   it('should expand false as false', () => {
-    return expand('v=VALUE', false, {
+    return expand('v=VALUE', false, false, {
       'VALUE': false
     }).then(res => {
       expect(res).to.equal('v=false');
@@ -409,18 +474,123 @@ describe('UrlReplacements', () => {
 
   it('should resolve sub-included bindings', () => {
     // RANDOM is a standard property and we add RANDOM_OTHER.
-    return expand('r=RANDOM&ro=RANDOM_OTHER?', false, {'RANDOM_OTHER': 'ABC'})
-        .then(res => {
-          expect(res).to.match(/r=(\d\.\d+)&ro=ABC\?$/);
-        });
+    return expand('r=RANDOM&ro=RANDOM_OTHER?', false, false, {
+      'RANDOM_OTHER': 'ABC'
+    }).then(res => {
+      expect(res).to.match(/r=(\d\.\d+)&ro=ABC\?$/);
+    });
   });
 
   it('should expand multiple vars', () => {
-    return expand('a=VALUEA&b=VALUEB?', false, {
+    return expand('a=VALUEA&b=VALUEB?', false, false, {
       'VALUEA': 'aaa',
       'VALUEB': 'bbb',
     }).then(res => {
       expect(res).to.match(/a=aaa&b=bbb\?$/);
+    });
+  });
+
+  it('should replace QUERY_PARAM with foo', () => {
+    const win = getFakeWindow();
+    win.location = parseUrl('https://example.com?query_string_param1=foo');
+    return urlReplacementsFor(win)
+      .expand('?sh=QUERY_PARAM(query_string_param1)&s')
+      .then(res => {
+        expect(res).to.match(/sh=foo&s/);
+      });
+  });
+
+  it('should replace QUERY_PARAM with ""', () => {
+    const win = getFakeWindow();
+    win.location = parseUrl('https://example.com');
+    return urlReplacementsFor(win)
+      .expand('?sh=QUERY_PARAM(query_string_param1)&s')
+      .then(res => {
+        expect(res).to.match(/sh=&s/);
+      });
+  });
+
+  it('should replace QUERY_PARAM with default_value', () => {
+    const win = getFakeWindow();
+    win.location = parseUrl('https://example.com');
+    return urlReplacementsFor(win)
+      .expand('?sh=QUERY_PARAM(query_string_param1,default_value)&s')
+      .then(res => {
+        expect(res).to.match(/sh=default_value&s/);
+      });
+  });
+
+  describe('access values', () => {
+
+    let accessService;
+    let accessServiceMock;
+    let reportDevSpy;
+
+    beforeEach(() => {
+      accessService = {
+        getAccessReaderId: () => {},
+        getAuthdataField: () => {},
+        whenFirstAuthorized: () => {},
+      };
+      accessServiceMock = sandbox.mock(accessService);
+      reportDevSpy = sandbox.spy();
+    });
+
+    afterEach(() => {
+      accessServiceMock.verify();
+    });
+
+    function expand(url, opt_disabled) {
+      return createIframePromise().then(iframe => {
+        iframe.doc.title = 'Pixel Test';
+        const link = iframe.doc.createElement('link');
+        link.setAttribute('href', 'https://pinterest.com/pin1');
+        link.setAttribute('rel', 'canonical');
+        iframe.doc.head.appendChild(link);
+
+        const replacements = urlReplacementsFor(iframe.win);
+        replacements.getAccessService_ = () => {
+          if (opt_disabled) {
+            return Promise.resolve(null);
+          }
+          return Promise.resolve(accessService);
+        };
+        replacements.reportDev_ = reportDevSpy;
+        return replacements.expand(url);
+      });
+    }
+
+    it('should replace ACCESS_READER_ID', () => {
+      accessServiceMock.expects('getAccessReaderId')
+          .returns(Promise.resolve('reader1'))
+          .once();
+      return expand('?a=ACCESS_READER_ID') .then(res => {
+        expect(res).to.match(/a=reader1/);
+        expect(reportDevSpy.callCount).to.equal(0);
+      });
+    });
+
+    it('should replace AUTHDATA', () => {
+      accessServiceMock.expects('whenFirstAuthorized')
+          .returns(Promise.resolve())
+          .once();
+      accessServiceMock.expects('getAuthdataField')
+          .withExactArgs('field1')
+          .returns('value1')
+          .once();
+      return expand('?a=AUTHDATA(field1)').then(res => {
+        expect(res).to.match(/a=value1/);
+        expect(reportDevSpy.callCount).to.equal(0);
+      });
+    });
+
+    it('should report error if not available', () => {
+      accessServiceMock.expects('getAccessReaderId')
+          .never();
+      return expand('?a=ACCESS_READER_ID;', /* disabled */ true) .then(res => {
+        expect(res).to.match(/a=;/);
+        expect(reportDevSpy.callCount).to.equal(1);
+      });
     });
   });
 });

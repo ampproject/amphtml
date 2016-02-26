@@ -23,6 +23,7 @@
  */
 
 import './polyfills';
+import {installEmbedStateListener} from './environment';
 import {a9} from '../ads/a9';
 import {adform} from '../ads/adform';
 import {adreactor} from '../ads/adreactor';
@@ -32,15 +33,19 @@ import {plista} from '../ads/plista';
 import {doubleclick} from '../ads/doubleclick';
 import {dotandads} from '../ads/dotandads';
 import {facebook} from './facebook';
+import {flite} from '../ads/flite';
 import {manageWin} from './environment';
+import {mediaimpact} from '../ads/mediaimpact';
 import {nonSensitiveDataPostMessage, listenParent} from './messaging';
 import {twitter} from './twitter';
 import {yieldmo} from '../ads/yieldmo';
-import {register, run} from '../src/3p';
+import {computeInMasterFrame, register, run} from '../src/3p';
 import {parseUrl} from '../src/url';
 import {assert} from '../src/asserts';
 import {taboola} from '../ads/taboola';
 import {smartadserver} from '../ads/smartadserver';
+import {revcontent} from '../ads/revcontent';
+import {openadstream} from '../ads/openadstream';
 
 /**
  * Whether the embed type may be used with amp-embed tag.
@@ -57,6 +62,7 @@ register('adsense', adsense);
 register('adtech', adtech);
 register('plista', plista);
 register('doubleclick', doubleclick);
+register('flite', flite);
 register('taboola', taboola);
 register('dotandads', dotandads);
 register('yieldmo', yieldmo);
@@ -66,6 +72,22 @@ register('_ping_', function(win, data) {
 register('twitter', twitter);
 register('facebook', facebook);
 register('smartadserver', smartadserver);
+register('mediaimpact', mediaimpact);
+register('revcontent', revcontent);
+register('openadstream', openadstream);
+
+// For backward compat, we always allow these types without the iframe
+// opting in.
+const defaultAllowedTypesInCustomFrame = [
+  // Entries must be reasonably safe and not allow overriding the injected
+  // JS URL.
+  // Each custom iframe can override this through the second argument to
+  // draw3p. See amp-ad docs.
+  'facebook',
+  'twitter',
+  'doubleclick',
+  '_ping_',
+];
 
 /**
  * Visible for testing.
@@ -129,35 +151,46 @@ function masterSelection(type) {
  *     1. The configuration parameters supplied to this embed.
  *     2. A callback that MUST be called for rendering to proceed. It takes
  *        no arguments. Configuration is expected to be modified in-place.
+ * @param {!Array<string>=} opt_allowed3pTypes List of advertising network
+ *     types you expect.
  */
-window.draw3p = function(opt_configCallback) {
-  const data = parseFragment(location.hash);
-  window.context = data._context;
-  window.context.location = parseUrl(data._context.location.href);
-  validateParentOrigin(window, window.context.location);
-  window.context.master = masterSelection(data.type);
-  window.context.isMaster = window.context.master == window;
-  window.context.data = data;
-  window.context.noContentAvailable = triggerNoContentAvailable;
-  window.context.requestResize = triggerResizeRequest;
+window.draw3p = function(opt_configCallback, opt_allowed3pTypes) {
+  try {
+    const data = parseFragment(location.hash);
+    window.context = data._context;
+    window.context.location = parseUrl(data._context.location.href);
+    validateParentOrigin(window, window.context.location);
+    validateAllowedTypes(window, data.type, opt_allowed3pTypes);
+    window.context.master = masterSelection(data.type);
+    window.context.isMaster = window.context.master == window;
+    window.context.data = data;
+    window.context.noContentAvailable = triggerNoContentAvailable;
+    window.context.requestResize = triggerResizeRequest;
 
-  if (data.type === 'facebook' || data.type === 'twitter') {
-    // Only make this available to selected embeds until the generic solution is
-    // available.
-    window.context.updateDimensions = triggerDimensions;
+    if (data.type === 'facebook' || data.type === 'twitter') {
+      // Only make this available to selected embeds until the
+      // generic solution is available.
+      window.context.updateDimensions = triggerDimensions;
+    }
+
+    // This only actually works for ads.
+    window.context.observeIntersection = observeIntersection;
+    window.context.onResizeSuccess = onResizeSuccess;
+    window.context.onResizeDenied = onResizeDenied;
+    window.context.reportRenderedEntityIdentifier =
+        reportRenderedEntityIdentifier;
+    window.context.computeInMasterFrame = computeInMasterFrame;
+    delete data._context;
+
+    manageWin(window);
+    installEmbedStateListener();
+    draw3p(window, data, opt_configCallback);
+    updateVisibilityState(window);
+    nonSensitiveDataPostMessage('render-start');
+  } catch (e) {
+    lightweightErrorReport(e);
+    throw e;
   }
-
-  // This only actually works for ads.
-  window.context.observeIntersection = observeIntersection;
-  window.context.onResizeSuccess = onResizeSuccess;
-  window.context.onResizeDenied = onResizeDenied;
-  window.context.reportRenderedEntityIdentifier =
-      reportRenderedEntityIdentifier;
-  delete data._context;
-  manageWin(window);
-  draw3p(window, data, opt_configCallback);
-  updateVisibilityState(window);
-  nonSensitiveDataPostMessage('render-start');
 };
 
 function triggerNoContentAvailable() {
@@ -191,7 +224,7 @@ function triggerResizeRequest(width, height) {
 function observeIntersection(observerCallback) {
   // Send request to received records.
   nonSensitiveDataPostMessage('send-intersections');
-  return listenParent('intersection', data => {
+  return listenParent(window, 'intersection', data => {
     observerCallback(data.changes);
   });
 }
@@ -202,7 +235,7 @@ function observeIntersection(observerCallback) {
  * @param {!Window} global
  */
 function updateVisibilityState(global) {
-  listenParent('embed-state', function(data) {
+  listenParent(window, 'embed-state', function(data) {
     global.context.hidden = data.pageHidden;
     const event = global.document.createEvent('Event');
     event.data = {
@@ -220,7 +253,7 @@ function updateVisibilityState(global) {
  *    observes for resize status messages.
  */
 function onResizeSuccess(observerCallback) {
-  return listenParent('embed-resize-changed', data => {
+  return listenParent(window, 'embed-size-changed', data => {
     observerCallback(data.requestedHeight);
   });
 }
@@ -232,7 +265,7 @@ function onResizeSuccess(observerCallback) {
  *    observes for resize status messages.
  */
 function onResizeDenied(observerCallback) {
-  return listenParent('embed-resize-denied', data => {
+  return listenParent(window, 'embed-size-denied', data => {
     observerCallback(data.requestedHeight);
   });
 }
@@ -279,6 +312,27 @@ export function validateParentOrigin(window, parentLocation) {
 }
 
 /**
+ * Check that this iframe intended this particular ad type to run.
+ * @param {!Window} window
+ * @param {string} type 3p type
+ * @param {!Array<string>|undefined} allowedTypes May be undefined.
+ */
+export function validateAllowedTypes(window, type, allowedTypes) {
+  // Everything allowed in default iframe.
+  if (window.location.hostname == '3p.ampproject.net') {
+    return;
+  }
+  if (window.location.hostname == 'ads.localhost') {
+    return;
+  }
+  if (defaultAllowedTypesInCustomFrame.indexOf(type) != -1) {
+    return;
+  }
+  assert(allowedTypes && allowedTypes.indexOf(type) != -1,
+      'Non-whitelisted 3p type for custom iframe: ' + type);
+}
+
+/**
  * Expects the fragment to contain JSON.
  * @param {string} fragment Value of location.fragment
  * @return {!JSONObject}
@@ -308,4 +362,20 @@ export function isTagNameAllowed(type, tagName) {
     return !!AMP_EMBED_ALLOWED[type];
   }
   return true;
+}
+
+/**
+ * Reports an error to the server. Must only be called once per page.
+ * Not for use in event handlers.
+ *
+ * We don't use the default error in error.js handler because it has
+ * too many deps for this small JS binary.
+ *
+ * @param {!Error} e
+ */
+function lightweightErrorReport(e) {
+  new Image().src = 'https://amp-error-reporting.appspot.com/r' +
+      '?v=' + encodeURIComponent('$internalRuntimeVersion$') +
+      '&m=' + encodeURIComponent(e.message) +
+      '&r=' + encodeURIComponent(document.referrer);
 }

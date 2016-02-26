@@ -47,7 +47,7 @@ describe('EventHelper', () => {
         } else if (type == 'error') {
           errorObservable.add(callback);
         } else {
-          expect(type).to.equal("load or error");
+          expect(type).to.equal('load or error');
         }
       },
       removeEventListener: function(type, callback) {
@@ -56,7 +56,7 @@ describe('EventHelper', () => {
         } else if (type == 'error') {
           errorObservable.remove(callback);
         } else {
-          expect(type).to.equal("load or error");
+          expect(type).to.equal('load or error');
         }
       }
     };
@@ -203,7 +203,10 @@ describe('EventHelper', () => {
   it('loadPromise - error event', () => {
     const promise = loadPromise(element).then(result => {
       assert.fail('must never be here: ' + result);
-    }).catch(unusedReason => {
+    }).then(() => {
+      throw new Error('Should not be reached.');
+    }, reason => {
+      expect(reason.message).to.include('Failed HTTP request for');
     });
     errorObservable.fire(getEvent('error'));
     return promise;

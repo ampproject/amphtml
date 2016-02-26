@@ -1,0 +1,5 @@
+FAIL
+feature_tests/css_errors.html:29:8 CSS syntax error in tag 'author stylesheet' - unterminated string. [AUTHOR_STYLESHEET_PROBLEM]
+feature_tests/css_errors.html:30:25 CSS syntax error in tag 'author stylesheet' - stray trailing backslash. [AUTHOR_STYLESHEET_PROBLEM]
+feature_tests/css_errors.html:31:4 CSS syntax error in tag 'author stylesheet' - bad url. [AUTHOR_STYLESHEET_PROBLEM]
+feature_tests/css_errors.html:29:4 CSS syntax error in tag 'author stylesheet' - EOF in prelude of a qualified rule. [AUTHOR_STYLESHEET_PROBLEM]

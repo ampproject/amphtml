@@ -105,7 +105,13 @@ class AmpAnim extends AMP.BaseElement {
       return Promise.resolve();
     }
     this.img_.setAttribute('src', src);
-    this.loadPromise_ = loadPromise(this.img_);
+    this.loadPromise_ = loadPromise(this.img_)
+        .catch(error => {
+          if (!this.img_.getAttribute('src')) {
+            return;
+          }
+          throw error;
+        });
     return this.loadPromise_;
   }
 };

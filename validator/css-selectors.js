@@ -38,78 +38,69 @@ goog.require('parse_css.extractASimpleBlock');
 
 /**
  * Abstract super class for CSS Selectors.
- * @param {!number} line
- * @param {!number} col
- * @constructor
  */
-css_selectors.SelectorNode = function(line, col) {
-  /** @type {number} */
-  this.line = line;
-  /** @type {number} */
-  this.col = col;
-};
+css_selectors.SelectorNode = class {
+  /**
+   * @param {!number} line
+   * @param {!number} col
+   */
+  constructor(line, col) {
+    /** @type {number} */
+    this.line = line;
+    /** @type {number} */
+    this.col = col;
+    /** @type {string} */
+    this.nodeType = 'abstract';
+  }
 
-/** @type {string} */
-css_selectors.SelectorNode.prototype.nodeType = 'abstract';
+  /** @return {!Object} */
+  toJSON() {
+    return {
+      'line': this.line,
+      'col': this.col,
+      'node': this.nodeType
+    }
+  }
 
-/** @return {!Object} */
-css_selectors.SelectorNode.prototype.toJSON = function() {
-  return {
-    'line': this.line,
-    'col': this.col,
-    'node': this.nodeType
-  };
-};
+  /** @return {!Array<!css_selectors.SelectorNode>} */
+  getChildNodes() { return []; }
 
-/** @return {!Array<!css_selectors.SelectorNode>} */
-css_selectors.SelectorNode.prototype.getChildNodes = function() {
-  return [];
-};
-
-/** @param {!css_selectors.NodeVisitor} visitor */
-css_selectors.SelectorNode.prototype.accept = function(visitor) {
-  goog.asserts.fail('Abstract Base Class');
+  /** @param {!css_selectors.NodeVisitor} visitor */
+  accept(visitor) {}
 };
 
 /**
  * A super class for making visitors (by overriding the types of interest).
  * The css_selectors.traverse function can be used to visit nodes in a
  * parsed CSS selector.
- * @constructor
  */
-css_selectors.NodeVisitor = function() {};
+css_selectors.NodeVisitor = class {
+  constructor() {}
 
-/** @param {!css_selectors.TypeSelector} typeSelector */
-css_selectors.NodeVisitor.prototype.visitTypeSelector =
-    function(typeSelector) {};
+  /** @param {!css_selectors.TypeSelector} typeSelector */
+  visitTypeSelector(typeSelector) {}
 
-/** @param {!css_selectors.IdSelector} idSelector */
-css_selectors.NodeVisitor.prototype.visitIdSelector =
-    function(idSelector) {};
+  /** @param {!css_selectors.IdSelector} idSelector */
+  visitIdSelector(idSelector) {}
 
-/** @param {!css_selectors.AttrSelector} attrSelector */
-css_selectors.NodeVisitor.prototype.visitAttrSelector =
-    function(attrSelector) {};
+  /** @param {!css_selectors.AttrSelector} attrSelector */
+  visitAttrSelector(attrSelector) {}
 
-/** @param {!css_selectors.PseudoSelector} pseudoSelector */
-css_selectors.NodeVisitor.prototype.visitPseudoSelector =
-    function(pseudoSelector) {};
+  /** @param {!css_selectors.PseudoSelector} pseudoSelector */
+  visitPseudoSelector(pseudoSelector) {}
 
-/** @param {!css_selectors.ClassSelector} classSelector */
-css_selectors.NodeVisitor.prototype.visitClassSelector =
-    function(classSelector) {};
+  /** @param {!css_selectors.ClassSelector} classSelector */
+  visitClassSelector(classSelector) {}
 
-/** @param {!css_selectors.SimpleSelectorSequence} sequence */
-css_selectors.NodeVisitor.prototype.visitSimpleSelectorSequence =
-    function(sequence) {};
+  /** @param {!css_selectors.SimpleSelectorSequence} sequence */
+  visitSimpleSelectorSequence(sequence) {}
 
-/** @param {!css_selectors.Combinator} combinator */
-css_selectors.NodeVisitor.prototype.visitCombinator =
-    function(combinator) {};
+  /** @param {!css_selectors.Combinator} combinator */
+  visitCombinator(combinator) {}
 
-/** @param {!css_selectors.SelectorsGroup} group */
-css_selectors.NodeVisitor.prototype.visitSelectorsGroup =
-    function(group) {};
+  /** @param {!css_selectors.SelectorsGroup} group */
+  visitSelectorsGroup(group) {}
+};
 
 /**
  * Visits the node by calling the appropriate methods on the provided visitor.
@@ -141,49 +132,48 @@ css_selectors.traverse = function(selectorNode, visitor) {
  * null means the default namespace if one is declared, and '*' otherwise.
  *
  * The universal selector is covered by setting the elementName to '*'.
- *
- * @param {number} line
- * @param {number} col
- * @param {?string} namespacePrefix
- * @param {string} elementName
- * @constructor
- * @extends {css_selectors.SelectorNode}
  */
-css_selectors.TypeSelector = function(line, col, namespacePrefix, elementName) {
-  goog.base(this, line, col);
-  /** @type {?string} */
-  this.namespacePrefix = namespacePrefix;
-  /** @type {string} */
-  this.elementName = elementName;
-};
-goog.inherits(css_selectors.TypeSelector, css_selectors.SelectorNode);
-
-/** @type {string} */
-css_selectors.TypeSelector.prototype.nodeType = 'TYPE_SELECTOR';
-
-/**
- * Serializes the selector to a string (in this case CSS syntax that
- * could be used to recreate it).
- * @return {string}
- */
-css_selectors.TypeSelector.prototype.toString = function() {
-  if (this.namespacePrefix === null) {
-    return this.elementName;
+css_selectors.TypeSelector = class extends css_selectors.SelectorNode {
+  /**
+   * @param {number} line
+   * @param {number} col
+   * @param {?string} namespacePrefix
+   * @param {string} elementName
+   */
+  constructor(line, col, namespacePrefix, elementName) {
+    super(line, col);
+    /** @type {?string} */
+    this.namespacePrefix = namespacePrefix;
+    /** @type {string} */
+    this.elementName = elementName;
+    /** @type {string} */
+    this.nodeType = 'TYPE_SELECTOR';
   }
-  return this.namespacePrefix + '|' + this.elementName;
-};
 
-/** @return {!Object} */
-css_selectors.TypeSelector.prototype.toJSON = function() {
-  const json = goog.base(this, 'toJSON');
-  json['namespacePrefix'] = this.namespacePrefix;
-  json['elementName'] = this.elementName;
-  return json;
-};
+  /**
+   * Serializes the selector to a string (in this case CSS syntax that
+   * could be used to recreate it).
+   * @return {string}
+   */
+  toString() {
+    if (this.namespacePrefix === null) {
+      return this.elementName;
+    }
+    return this.namespacePrefix + '|' + this.elementName;
+  }
 
-/** @param {!css_selectors.NodeVisitor} visitor */
-css_selectors.TypeSelector.prototype.accept = function(visitor) {
-  visitor.visitTypeSelector(this);
+  /** @inheritDoc */
+  toJSON() {
+    const json = super.toJSON();
+    json['namespacePrefix'] = this.namespacePrefix;
+    json['elementName'] = this.elementName;
+    return json;
+  }
+
+  /** @inheritDoc */
+  accept(visitor) {
+    visitor.visitTypeSelector(this);
+  }
 };
 
 /**
@@ -248,37 +238,35 @@ css_selectors.parseATypeSelector = function(tokenStream) {
  * An ID selector references some document id.
  * http://www.w3.org/TR/css3-selectors/#id-selectors
  * Typically written as '#foo'.
- * @param {number} line
- * @param {number} col
- * @param {string} value
- * @constructor
- * @extends {css_selectors.SelectorNode}
  */
-css_selectors.IdSelector = function(line, col, value) {
-  goog.base(this, line, col);
-  /** @type {string} */
-  this.value = value;
-};
-goog.inherits(css_selectors.IdSelector, css_selectors.SelectorNode);
+css_selectors.IdSelector = class extends css_selectors.SelectorNode {
+  /**
+   * @param {number} line
+   * @param {number} col
+   * @param {string} value
+   */
+  constructor(line, col, value) {
+    super(line, col);
+    /** @type {string} */
+    this.value = value;
+    /** @type {string} */
+    this.nodeType = 'ID_SELECTOR';
+  }
 
-/** @type {string} */
-css_selectors.IdSelector.prototype.nodeType = 'ID_SELECTOR';
+  /** @return {string} */
+  toString() { return '#' + this.value; }
 
-/** @return {string} */
-css_selectors.IdSelector.prototype.toString = function() {
-  return '#' + this.value;
-};
+  /** @inheritDoc */
+  toJSON() {
+    const json = super.toJSON();
+    json['value'] = this.value;
+    return json;
+  }
 
-/** @return {!Object} */
-css_selectors.IdSelector.prototype.toJSON = function() {
-  const json = goog.base(this, 'toJSON');
-  json['value'] = this.value;
-  return json;
-};
-
-/** @param {!css_selectors.NodeVisitor} visitor */
-css_selectors.IdSelector.prototype.accept = function(visitor) {
-  visitor.visitIdSelector(this);
+  /** @inheritDoc */
+  accept(visitor) {
+    visitor.visitIdSelector(this);
+  }
 };
 
 /**
@@ -303,32 +291,32 @@ css_selectors.parseAnIdSelector = function(tokenStream) {
  * as its value. We'll refine this in the future.
  *
  * Typically written as '[foo=bar]'.
- * @param {number} line
- * @param {number} col
- * @param {!Array<!parse_css.Token>} value
- * @constructor
- * @extends {css_selectors.SelectorNode}
  */
-css_selectors.AttrSelector = function(line, col, value) {
-  goog.base(this, line, col);
-  /** @type {!Array<!parse_css.Token>} */
-  this.value = value;
-};
-goog.inherits(css_selectors.AttrSelector, css_selectors.SelectorNode);
+css_selectors.AttrSelector = class extends css_selectors.SelectorNode {
+  /**
+   * @param {number} line
+   * @param {number} col
+   * @param {!Array<!parse_css.Token>} value
+   */
+  constructor(line, col, value) {
+    super(line, col);
+    /** @type {!Array<!parse_css.Token>} */
+    this.value = value;
+    /** @type {string} */
+    this.nodeType = 'ATTR_SELECTOR';
+  }
 
-/** @type {string} */
-css_selectors.AttrSelector.prototype.nodeType = 'ATTR_SELECTOR';
+  /** @inheritDoc */
+  toJSON() {
+    const json = super.toJSON();
+    json['value'] = recursiveArrayToJSON(this.value);
+    return json;
+  }
 
-/** @return {!Object} */
-css_selectors.AttrSelector.prototype.toJSON = function() {
-  const json = goog.base(this, 'toJSON');
-  json['value'] = recursiveArrayToJSON(this.value);
-  return json;
-};
-
-/** @param {!css_selectors.NodeVisitor} visitor */
-css_selectors.AttrSelector.prototype.accept = function(visitor) {
-  visitor.visitAttrSelector(this);
+  /** @inheritDoc */
+  accept(visitor) {
+    visitor.visitAttrSelector(this);
+  }
 };
 
 /**
@@ -352,46 +340,46 @@ css_selectors.parseAnAttrSelector = function(tokenStream) {
  * http://www.w3.org/TR/css3-selectors/#pseudo-elements.
  *
  * Typically written as ':visited', ':lang(fr)', and '::first-line'.
- * @param {number} line
- * @param {number} col
- * @param {boolean} isClass selectors with a single colon (e.g., ':visited')
- *   are pseudo class selectors. Selectors with two colons
- *   (e.g., '::first-line') are pseudo elements.
- * @param {string} name
- * @param {!Array<!parse_css.Token>} func If it's a function style
- * pseudo selector, like lang(fr), then this parameter takes the function
- * tokens.
- * @constructor
- * @extends {css_selectors.SelectorNode}
  */
-css_selectors.PseudoSelector = function(line, col, isClass, name, func) {
-  goog.base(this, line, col);
-  /** @type {boolean} */
-  this.isClass = isClass;
-  /** @type {string} */
-  this.name = name;
-  /** @type {!Array<!parse_css.Token>} */
-  this.func = func;
-};
-goog.inherits(css_selectors.PseudoSelector, css_selectors.SelectorNode);
-
-/** @type {string} */
-css_selectors.PseudoSelector.prototype.nodeType = 'PSEUDO_SELECTOR';
-
-/** @return {!Object} */
-css_selectors.PseudoSelector.prototype.toJSON = function() {
-  const json = goog.base(this, 'toJSON');
-  json['isClass'] = this.isClass;
-  json['name'] = this.name;
-  if (this.func.length !== 0) {
-    json['func'] = recursiveArrayToJSON(this.func);
+css_selectors.PseudoSelector = class extends css_selectors.SelectorNode {
+  /**
+   * @param {number} line
+   * @param {number} col
+   * @param {boolean} isClass selectors with a single colon (e.g., ':visited')
+   *   are pseudo class selectors. Selectors with two colons
+   *   (e.g., '::first-line') are pseudo elements.
+   * @param {string} name
+   * @param {!Array<!parse_css.Token>} func If it's a function style
+   * pseudo selector, like lang(fr), then this parameter takes the function
+   * tokens.
+   */
+  constructor(line, col, isClass, name, func) {
+    super(line, col);
+    /** @type {boolean} */
+    this.isClass = isClass;
+    /** @type {string} */
+    this.name = name;
+    /** @type {!Array<!parse_css.Token>} */
+    this.func = func;
+    /** @type {string} */
+    this.nodeType = 'PSEUDO_SELECTOR';
   }
-  return json;
-};
 
-/** @param {!css_selectors.NodeVisitor} visitor */
-css_selectors.PseudoSelector.prototype.accept = function(visitor) {
-  visitor.visitPseudoSelector(this);
+  /** @inheritDoc */
+  toJSON() {
+    const json = super.toJSON();
+    json['isClass'] = this.isClass;
+    json['name'] = this.name;
+    if (this.func.length !== 0) {
+      json['func'] = recursiveArrayToJSON(this.func);
+    }
+    return json;
+  }
+
+  /** @inheritDoc */
+  accept(visitor) {
+    visitor.visitPseudoSelector(this);
+  }
 };
 
 /**
@@ -425,8 +413,8 @@ css_selectors.parseAPseudoSelector = function(tokenStream) {
     func = parse_css.extractAFunction(tokenStream);
   } else {
     const error = new parse_css.ErrorToken(
-        parse_css.ErrorType.SELECTORS,
-        'syntax error in pseudo specification');
+        amp.validator.ValidationError.Code.CSS_SYNTAX_ERROR_IN_PSEUDO_SELECTOR,
+        ['style']);
     error.line = firstColon.line;
     error.col = firstColon.col;
     return error;
@@ -439,38 +427,35 @@ css_selectors.parseAPseudoSelector = function(tokenStream) {
  * A class selector of the form '.value' is a shorthand notation for
  * an attribute match of the form '[class~=value]'.
  * http://www.w3.org/TR/css3-selectors/#class-html
- * @param {number} line
- * @param {number} col
- * @param {string} value the class to match.
- * @constructor
- * @extends {css_selectors.SelectorNode}
  */
-css_selectors.ClassSelector = function(line, col, value) {
-  goog.base(this, line, col);
-  /** @type {string} */
-  this.value = value;
-};
-goog.inherits(css_selectors.ClassSelector, css_selectors.SelectorNode);
+css_selectors.ClassSelector = class extends css_selectors.SelectorNode {
+  /**
+   * @param {number} line
+   * @param {number} col
+   * @param {string} value the class to match.
+   */
+  constructor(line, col, value) {
+    super(line, col);
+    /** @type {string} */
+    this.value = value;
+    /** @type {string} */
+    this.nodeType = 'CLASS_SELECTOR';
+  }
+  /** @return {string} */
+  toString() { return '.' + this.value; }
 
-/** @type {string} */
-css_selectors.ClassSelector.prototype.nodeType = 'CLASS_SELECTOR';
+  /** @inheritDoc */
+  toJSON() {
+    const json = super.toJSON();
+    json['value'] = this.value;
+    return json;
+  }
 
-/** @return {string} */
-css_selectors.ClassSelector.prototype.toString = function() {
-  return '.' + this.value;
-};
-
-/** @return {!Object} */
-css_selectors.ClassSelector.prototype.toJSON = function() {
-  const json = goog.base(this, 'toJSON');
-  json['value'] = this.value;
-  return json;
-};
-
-/** @param {!css_selectors.NodeVisitor} visitor */
-css_selectors.ClassSelector.prototype.accept = function(visitor) {
-  visitor.visitClassSelector(this);
-};
+  /** @inheritDoc */
+  accept(visitor) {
+    visitor.visitClassSelector(this);
+  }
+}
 
 /**
  * tokenStream.current() must be the '.' delimiter token.
@@ -490,26 +475,6 @@ css_selectors.parseAClassSelector = function(tokenStream) {
   return new css_selectors.ClassSelector(dot.line, dot.col, ident.value);
 };
 
-/**
- * Models a simple selector sequence, e.g. '*|foo#id'.
- * @param {number} line
- * @param {number} col
- * @param {css_selectors.TypeSelector} typeSelector
- * @param {!Array<!css_selectors.IdSelector>} otherSelectors
- * @constructor
- * @extends {css_selectors.SelectorNode}
- */
-css_selectors.SimpleSelectorSequence = function(line, col,
-                                                typeSelector, otherSelectors) {
-  goog.base(this, line, col);
-  this.typeSelector = typeSelector;
-  this.otherSelectors = otherSelectors;
-};
-goog.inherits(css_selectors.SimpleSelectorSequence, css_selectors.SelectorNode);
-
-/** @type {string} */
-css_selectors.SimpleSelectorSequence.prototype.nodeType =
-    'SIMPLE_SELECTOR_SEQUENCE';
 
 /**
  * @param {!Array<!Object>} array
@@ -523,27 +488,49 @@ function recursiveArrayToJSON(array) {
   return json;
 }
 
-/** @return {!Object} */
-css_selectors.SimpleSelectorSequence.prototype.toJSON = function() {
-  const json = goog.base(this, 'toJSON');
-  json['typeSelector'] = this.typeSelector.toJSON();
-  json['otherSelectors'] = recursiveArrayToJSON(this.otherSelectors);
-  return json;
-};
-
-/** @return {!Array<!css_selectors.SelectorNode>} */
-css_selectors.SimpleSelectorSequence.prototype.getChildNodes = function() {
-  const children = [this.typeSelector];
-  for (const other of this.otherSelectors) {
-    children.push(other);
+/**
+ * Models a simple selector sequence, e.g. '*|foo#id'.
+ */
+css_selectors.SimpleSelectorSequence = class extends
+css_selectors.SelectorNode {
+  /**
+   * @param {number} line
+   * @param {number} col
+   * @param {!css_selectors.TypeSelector} typeSelector
+   * @param {!Array<!css_selectors.IdSelector>} otherSelectors
+   */
+  constructor(line, col, typeSelector, otherSelectors) {
+    super(line, col);
+    /** @type {!css_selectors.TypeSelector} */
+    this.typeSelector = typeSelector;
+    /** @type {!Array<!css_selectors.IdSelector>} */
+    this.otherSelectors = otherSelectors;
+    /** @type {string} */
+    this.nodeType = 'SIMPLE_SELECTOR_SEQUENCE';
   }
-  return children;
-};
 
-/** @param {!css_selectors.NodeVisitor} visitor */
-css_selectors.SimpleSelectorSequence.prototype.accept = function(visitor) {
-  visitor.visitSimpleSelectorSequence(this);
-};
+  /** @inheritDoc */
+  toJSON() {
+    const json = super.toJSON();
+    json['typeSelector'] = this.typeSelector.toJSON();
+    json['otherSelectors'] = recursiveArrayToJSON(this.otherSelectors);
+    return json;
+  }
+
+  /** @inheritDoc */
+  getChildNodes() {
+    const children = [this.typeSelector];
+    for (const other of this.otherSelectors) {
+      children.push(other);
+    }
+    return children;
+  }
+
+  /** @inheritDoc */
+  accept(visitor) {
+    visitor.visitSimpleSelectorSequence(this);
+  }
+}
 
 /**
  * tokenStream.current must be the first token of the sequence.
@@ -580,8 +567,9 @@ css_selectors.parseASimpleSelectorSequence = function(tokenStream) {
     } else {
       if (typeSelector === null) {
         if (otherSelectors.length == 0) {
-          const error = new parse_css.ErrorToken(parse_css.ErrorType.SELECTORS,
-                                               'no selector found');
+          const error = new parse_css.ErrorToken(
+              amp.validator.ValidationError.Code.CSS_SYNTAX_MISSING_SELECTOR,
+              ['style']);
           error.line = tokenStream.current().line;
           error.col = tokenStream.current().col;
           return error;
@@ -609,45 +597,45 @@ css_selectors.CombinatorType = {
 /**
  * Models a combinator, as described in
  * http://www.w3.org/TR/css3-selectors/#combinators.
- * @param {number} line line of the original combinator token
- * @param {number} col col of the original combinator token
- * @param {!string} combinatorType
- * @param {!css_selectors.SimpleSelectorSequence|!css_selectors.Combinator} left
- * @param {!css_selectors.SimpleSelectorSequence} right
- * @constructor
- * @extends {css_selectors.SelectorNode}
  */
-css_selectors.Combinator = function(line, col, combinatorType, left, right) {
-  goog.base(this, line, col);
-  /** @type {!string} */
-  this.combinatorType = combinatorType;
-  /** @type {!css_selectors.SimpleSelectorSequence|!css_selectors.Combinator} */
-  this.left = left;
-  /** @type {!css_selectors.SimpleSelectorSequence} */
-  this.right = right;
-};
-goog.inherits(css_selectors.Combinator, css_selectors.SelectorNode);
+css_selectors.Combinator = class extends css_selectors.SelectorNode {
+  /**
+   * @param {number} line line of the original combinator token
+   * @param {number} col col of the original combinator token
+   * @param {!string} combinatorType
+   * @param {!css_selectors.SimpleSelectorSequence|!css_selectors.Combinator} left
+   * @param {!css_selectors.SimpleSelectorSequence} right
+   */
+  constructor(line, col, combinatorType, left, right) {
+    super(line, col);
+    /** @type {!string} */
+    this.combinatorType = combinatorType;
+    /** @type {!css_selectors.SimpleSelectorSequence|!css_selectors.Combinator} */
+    this.left = left;
+    /** @type {!css_selectors.SimpleSelectorSequence} */
+    this.right = right;
+    /** @type {string} */
+    this.nodeType = 'COMBINATOR';
+  }
 
-/** @type {string} */
-css_selectors.Combinator.prototype.nodeType = 'COMBINATOR';
+  /** @inheritDoc */
+  toJSON() {
+    const json = super.toJSON();
+    json['combinatorType'] = this.combinatorType;
+    json['left'] = this.left.toJSON();
+    json['right'] = this.right.toJSON();
+    return json;
+  }
 
-/** @return {!Object} */
-css_selectors.Combinator.prototype.toJSON = function() {
-  const json = goog.base(this, 'toJSON');
-  json['combinatorType'] = this.combinatorType;
-  json['left'] = this.left.toJSON();
-  json['right'] = this.right.toJSON();
-  return json;
-};
+  /** @inheritDoc */
+  getChildNodes() {
+    return [this.left, this.right];
+  }
 
-/** @return {!Array<!css_selectors.SelectorNode>} */
-css_selectors.Combinator.prototype.getChildNodes = function() {
-  return [this.left, this.right];
-};
-
-/** @param {!css_selectors.NodeVisitor} visitor */
-css_selectors.Combinator.prototype.accept = function(visitor) {
-  visitor.visitCombinator(this);
+  /** @inheritDoc */
+  accept(visitor) {
+    visitor.visitCombinator(this);
+  }
 };
 
 /**
@@ -712,8 +700,9 @@ function isSimpleSelectorSequenceStart(token) {
  */
 css_selectors.parseASelector = function(tokenStream) {
   if (!isSimpleSelectorSequenceStart(tokenStream.current())) {
-    const error = new parse_css.ErrorToken(parse_css.ErrorType.SELECTORS,
-                                         'not a selector start');
+    const error = new parse_css.ErrorToken(
+        amp.validator.ValidationError.Code.CSS_SYNTAX_NOT_A_SELECTOR_START,
+        ['style']);
     error.line = tokenStream.current().line;
     error.col = tokenStream.current().col;
     return error;
@@ -756,39 +745,39 @@ css_selectors.parseASelector = function(tokenStream) {
 /**
  * Models a selectors group, as described in
  * http://www.w3.org/TR/css3-selectors/#grouping.
- * @param {number} line
- * @param {number} col
- * @param {!Array<!css_selectors.SimpleSelectorSequence|
- *         !css_selectors.Combinator>} elements
- * @constructor
- * @extends {css_selectors.SelectorNode}
  */
-css_selectors.SelectorsGroup = function(line, col, elements) {
-  goog.base(this, line, col);
-  /** @type {!Array<!css_selectors.SimpleSelectorSequence|
-  !css_selectors.Combinator>} */
-  this.elements = elements;
-};
-goog.inherits(css_selectors.SelectorsGroup, css_selectors.SelectorNode);
+css_selectors.SelectorsGroup = class extends css_selectors.SelectorNode {
+  /**
+   * @param {number} line
+   * @param {number} col
+   * @param {!Array<!css_selectors.SimpleSelectorSequence|
+   *         !css_selectors.Combinator>} elements
+   */
+  constructor(line, col, elements) {
+    super(line, col);
+    /** @type {!Array<!css_selectors.SimpleSelectorSequence|
+        !css_selectors.Combinator>} */
+    this.elements = elements;
+    /** @type {string} */
+    this.nodeType = 'SELECTORS_GROUP';
+  }
 
-/** @type {string} */
-css_selectors.SelectorsGroup.prototype.nodeType = 'SELECTORS_GROUP';
+  /** @inheritDoc */
+  toJSON() {
+    const json = super.toJSON();
+    json['elements'] = recursiveArrayToJSON(this.elements);
+    return json;
+  }
 
-/** @return {!Object} */
-css_selectors.SelectorsGroup.prototype.toJSON = function() {
-  const json = goog.base(this, 'toJSON');
-  json['elements'] = recursiveArrayToJSON(this.elements);
-  return json;
-};
+  /** @inheritDoc */
+  getChildNodes() {
+    return this.elements;
+  }
 
-/** @return {!Array<!css_selectors.SelectorNode>} */
-css_selectors.SelectorsGroup.prototype.getChildNodes = function() {
-  return this.elements;
-};
-
-/** @param {!css_selectors.NodeVisitor} visitor */
-css_selectors.SelectorsGroup.prototype.accept = function(visitor) {
-  visitor.visitSelectorsGroup(this);
+  /** @param {!css_selectors.NodeVisitor} visitor */
+  accept(visitor) {
+    visitor.visitSelectorsGroup(this);
+  }
 };
 
 /**
@@ -801,8 +790,9 @@ css_selectors.SelectorsGroup.prototype.accept = function(visitor) {
  */
 css_selectors.parseASelectorsGroup = function(tokenStream) {
   if (!isSimpleSelectorSequenceStart(tokenStream.current())) {
-    const error = new parse_css.ErrorToken(parse_css.ErrorType.SELECTORS,
-                                           'not a selector start');
+    const error = new parse_css.ErrorToken(
+        amp.validator.ValidationError.Code.CSS_SYNTAX_NOT_A_SELECTOR_START,
+        ['style']);
     error.line = tokenStream.current().line;
     error.col = tokenStream.current().col;
     return error;
@@ -846,8 +836,10 @@ css_selectors.parse = function(tokenStream, errors) {
     errors.push(group);
   }
   if (!(tokenStream.current() instanceof parse_css.EOFToken)) {
-    const error = new parse_css.ErrorToken(parse_css.ErrorType.SELECTORS,
-                                           'unparsed input remains');
+    const error = new parse_css.ErrorToken(
+        amp.validator.ValidationError.Code.
+            CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR,
+        ['style']);
     error.line = tokenStream.current().line;
     error.col = tokenStream.current().col;
     errors.push(error);

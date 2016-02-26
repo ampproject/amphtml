@@ -9,6 +9,7 @@
     amp-ad {
       max-width: 500px;
     }
+    /* Included here to make sure it does not render. */
     .fixed {
       position: fixed;
       top: 0;
@@ -16,6 +17,13 @@
     }
     .red {
       background-color: red;
+    }
+
+    amp-ad[type="revcontent"] {
+      width: 100%;
+      max-width: 1280px;
+      margin: 18px 0;
+      padding: 0;
     }
   </style>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
@@ -32,7 +40,7 @@
   </amp-ad>
 
   <div class="fixed">
-    <h2>A9</h2>
+    <h4>Fixed positioned ad (will not render)</h4>
     <amp-ad width=300 height=250
         type="a9"
         data-aax_size="300x250"
@@ -73,7 +81,7 @@
   <amp-ad width=320 height=50
       type="doubleclick"
       data-slot="/4119129/mobile_ad_banner"
-      json='{"targeting":{"sport":["rugby","cricket"]},"categoryExclusion":"health","tagForChildDirectedTreatment":false}'
+      json='{"targeting":{"sport":["rugby","cricket"]},"categoryExclusions":["health"],"tagForChildDirectedTreatment":0}'
       >
   </amp-ad>
 
@@ -121,6 +129,23 @@
       data-slot="/35096353/amptesting/badvideoad">
     </amp-ad>
 
+  <h2>Flite</h2>
+  <amp-ad width=320 height=568
+      type = "flite"
+      data-guid = "aa7bf589-6d51-4194-91f4-d22eef8e3688"
+      data-mixins="">
+  </amp-ad>
+
+  <h2>Media Impact</h2>
+  <amp-ad width="320" height="250"
+          type="mediaimpact"
+          data-site="67767"
+          data-page="amp"
+          data-format="4459"
+          data-target=""
+          data-slot="4459">
+  </amp-ad>
+
   <h2>plista</h2>
   <amp-ad width=300 height=300
       type="plista"
@@ -161,6 +186,15 @@
       data-mpt="amp-amp-all-all">
   </amp-ad>
 
+  <h2>Open AdStream single ad</h2>
+  <amp-ad width=300 height=250
+    type="openadstream"
+    data-adhost="oasc-training7.247realmedia.com"
+    data-sitepage="dx_tag_pvt_site"
+    data-pos="x04"
+    data-query="keyword=keyvalue&key2=value2" >
+  </amp-ad>
+
   <h2>SmartAdServer ad</h2>
   <amp-ad width=320 height=50
       type="smartadserver"
@@ -176,5 +210,18 @@
       type="yieldmo"
       data-ymid="1349317029731662884">
   </amp-ad>
+
+  <h2>Revcontent Widget with placeholder and fallback</h2>
+  <amp-ad width="320" height="420"
+      layout="responsive"
+      type="revcontent"
+      data-wrapper="rcjsload_2ff711"
+      data-endpoint="trends.revcontent.com"
+      data-id="203">
+
+    <div placeholder>200 Billion Content recommendations!</div>
+    <div fallback>200 Billion Content recommendations!</div>
+  </amp-ad>
+
 </body>
 </html>

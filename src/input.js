@@ -195,8 +195,17 @@ export class Input {
     log.fine(TAG_, 'keyboard deactivated');
   }
 
-  /** @private */
-  onMouseMove_() {
+  /**
+   * @param {!Event} e
+   * @return {!Promise|undefined}
+   * @private
+   */
+  onMouseMove_(e) {
+    // The event explicitly states that it's a result of a touch event.
+    if (e.sourceCapabilities && e.sourceCapabilities.firesTouchEvents) {
+      this.mouseCanceled_();
+      return undefined;
+    }
     // If "click" arrives within a timeout time, this is most likely a
     // touch/mouse emulation. Otherwise, if timeout exceeded, this looks
     // like a legitimate mouse event.

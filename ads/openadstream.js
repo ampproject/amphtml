@@ -14,31 +14,22 @@
  * limitations under the License.
  */
 
+import {checkData, validateDataExists, writeScript} from '../src/3p';
+
 
 /**
- * Waits for all promises to yield and resolves with the position array of
- * results. If one promise fails, the overall promise fails as well.
- *
- * @param {!Array<!Promise<T>>} promises
- * @return {!Promise<!Array<T>>}
- * @template T
+ * @param {!Window} global
+ * @param {!Object} data
  */
-export function all(promises) {
-  let left = promises.length;
-  if (left == 0) {
-    return Promise.resolve([]);
+export function openadstream(global, data) {
+  //all available fields
+  checkData(data, ['adhost', 'sitepage', 'pos', 'query']);
+  //required fields
+  validateDataExists(data, ['adhost', 'sitepage', 'pos']);
+  let url = 'https://' + encodeURIComponent(data.adhost) + '/3/' + encodeURIComponent(data.sitepage) + '/1' + new String(Math.random()).substring(2, 11) + '@' + data.pos;
+  if (data.query) {
+    url = url + '?' + data.query;
   }
+  writeScript(global, url);
 
-  const results = Array(left);
-  return new Promise((resolve, reject) => {
-    promises.forEach((promise, index) => {
-      promise.then(result => {
-        results[index] = result;
-        left--;
-        if (left == 0) {
-          resolve(results);
-        }
-      }, reject);
-    });
-  });
 }

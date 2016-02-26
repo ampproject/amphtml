@@ -1,3 +1,6 @@
+**Important:** We're deprecating this guide soon. See the newer version: [Include Third-Party Content](https://www.ampproject.org/docs/guides/third_party_components.html).
+For all the latest docs, go to [ampproject.org](https://www.ampproject.org).
+
 # How to Include Common Features
 
 AMP HTML components make it simple for you to control your content.

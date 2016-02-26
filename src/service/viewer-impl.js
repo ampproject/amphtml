@@ -17,15 +17,25 @@
 import {Observable} from '../observable';
 import {assert} from '../asserts';
 import {documentStateFor} from '../document-state';
+import {getMode} from '../mode';
 import {getService} from '../service';
 import {log} from '../log';
 import {parseQueryString, parseUrl, removeFragment} from '../url';
 import {platform} from '../platform';
+import {timer} from '../timer';
+import {reportError} from '../error';
 
 
 const TAG_ = 'Viewer';
 const SENTINEL_ = '__AMP__';
 
+/**
+ * Duration in milliseconds to wait for viewerOrigin to be set before an empty
+ * string is returned.
+ * @const
+ * @private {number}
+ */
+const VIEWER_ORIGIN_TIMEOUT_ = 1000;
 
 /**
  * The type of the viewport.
@@ -107,7 +117,7 @@ export class Viewer {
     this.isEmbedded_ = (this.win.parent && this.win.parent != this.win);
 
     /** @const {!DocumentState} */
-    this.docState_ = documentStateFor(window);
+    this.docState_ = documentStateFor(this.win);
 
     /** @private {boolean} */
     this.isRuntimeOn_ = true;
@@ -208,6 +218,13 @@ export class Viewer {
             platform.isIos()) {
       this.viewportType_ = ViewportType.NATURAL_IOS_EMBED;
     }
+    // Enable iOS Embedded mode so that it's easy to test against a more
+    // realistic iOS environment.
+    if (platform.isIos() &&
+            this.viewportType_ != ViewportType.NATURAL_IOS_EMBED &&
+            (getMode().localDev || getMode().development)) {
+      this.viewportType_ = ViewportType.NATURAL_IOS_EMBED;
+    }
     log.fine(TAG_, '- viewportType:', this.viewportType_);
 
     this.viewportWidth_ = parseInt(this.params_['width'], 10) ||
@@ -226,12 +243,60 @@ export class Viewer {
         this.paddingTop_;
     log.fine(TAG_, '- padding-top:', this.paddingTop_);
 
+    /** @private @const {boolean} */
+    this.performanceTracking_ = this.params_['csi'] === '1';
+    log.fine(TAG_, '- performanceTracking:', this.performanceTracking_);
+
     /** @private {boolean} */
     this.hasBeenVisible_ = this.isVisible();
 
     // Wait for document to become visible.
     this.docState_.onVisibilityChanged(this.onVisibilityChange_.bind(this));
 
+
+    /**
+     * Creates an error for the case where a channel cannot be established.
+     * @param {!Error|undefined} reason
+     * @return {!Error}
+     */
+    function getChannelError(reason) {
+      if (reason instanceof Error) {
+        reason.message = 'No messaging channel: ' + reason.message;
+        return reason;
+      }
+      return new Error('No messaging channel: ' + reason);
+    }
+
+    /**
+     * This promise will resolve when communications channel has been
+     * established or timeout in 5 seconds. The timeout is needed to avoid
+     * this promise becoming a memory leak with accumulating undelivered
+     * messages.
+     * @private @const {!Promise<!Viewer>}
+     */
+    this.messagingReadyPromise_ = timer.timeoutPromise(
+        20000,
+        new Promise(resolve => {
+          /** @private @const {function(!Viewer)} */
+          this.messagingReadyResolver_ = resolve;
+        })).catch(reason => {
+          throw getChannelError(reason);
+        });
+
+    /**
+     * A promise for non-essential messages. These messages should not fail
+     * if there's no messaging channel set up. But ideally viewer would try to
+     * deliver if at all possible.
+     * @private @const {!Promise<!Viewer>}
+     */
+    this.messagingMaybePromise_ = this.messagingReadyPromise_.catch(reason => {
+      if (this.isEmbedded_) {
+        // Don't fail promise, but still report.
+        reportError(getChannelError(reason));
+      }
+    });
+
+    // Trusted viewer and referrer.
     let trustedViewerResolved;
     let trustedViewerPromise;
     if (!this.isEmbedded_) {
@@ -256,6 +321,22 @@ export class Viewer {
 
     /** @const @private {!Promise<boolean>} */
     this.isTrustedViewer_ = trustedViewerPromise;
+
+    /** @const @private {!Promise<string>} */
+    this.viewerOrigin_ = new Promise(resolve => {
+      if (!this.isEmbedded()) {
+        // Viewer is only determined for iframed documents at this time.
+        resolve('');
+      } else if (this.win.location.ancestorOrigins &&
+          this.win.location.ancestorOrigins.length > 0) {
+        resolve(this.win.location.ancestorOrigins[0]);
+      } else {
+        // Race to resolve with a timer.
+        timer.delay(() => resolve(''), VIEWER_ORIGIN_TIMEOUT_);
+        /** @private @const {!function(string)|undefined} */
+        this.viewerOriginResolver_ = resolve;
+      }
+    });
 
     /** @private {string} */
     this.unconfirmedReferrerUrl_ =
@@ -342,6 +423,14 @@ export class Viewer {
    */
   isRuntimeOn() {
     return this.isRuntimeOn_;
+  }
+
+  /**
+   * Identifies if the viewer is recording instrumentation.
+   * @return {boolean}
+   */
+  isPerformanceTrackingOn() {
+    return this.performanceTracking_;
   }
 
   /**
@@ -495,6 +584,16 @@ export class Viewer {
   }
 
   /**
+   * Returns the promise that resolves to URL representing the origin of the
+   * viewer. If the document is not embedded or if a viewer origin can't be
+   * found, empty string is returned.
+   * @return {!Promise<string>}
+   */
+  getViewerOrigin() {
+    return this.viewerOrigin_;
+  }
+
+  /**
    * @param {string} urlString
    * @return {boolean}
    * @private
@@ -543,7 +642,11 @@ export class Viewer {
    * @param {number} height
    */
   postDocumentReady(width, height) {
-    this.sendMessage_('documentLoaded', {width: width, height: height}, false);
+    this.sendMessageUnreliable_('documentLoaded', {
+      width: width,
+      height: height,
+      title: this.win.document.title,
+    }, false);
   }
 
   /**
@@ -552,7 +655,8 @@ export class Viewer {
    * @param {number} height
    */
   postDocumentResized(width, height) {
-    this.sendMessage_('documentResized', {width: width, height: height}, false);
+    this.sendMessageUnreliable_(
+        'documentResized', {width: width, height: height}, false);
   }
 
   /**
@@ -561,7 +665,7 @@ export class Viewer {
    * @return {!Promise}
    */
   requestFullOverlay() {
-    return this.sendMessage_('requestFullOverlay', {}, true);
+    return this.sendMessageUnreliable_('requestFullOverlay', {}, true);
   }
 
   /**
@@ -570,7 +674,7 @@ export class Viewer {
    * @return {!Promise}
    */
   cancelFullOverlay() {
-    return this.sendMessage_('cancelFullOverlay', {}, true);
+    return this.sendMessageUnreliable_('cancelFullOverlay', {}, true);
   }
 
   /**
@@ -579,7 +683,8 @@ export class Viewer {
    * @return {!Promise}
    */
   postPushHistory(stackIndex) {
-    return this.sendMessage_('pushHistory', {stackIndex: stackIndex}, true);
+    return this.sendMessageUnreliable_(
+        'pushHistory', {stackIndex: stackIndex}, true);
   }
 
   /**
@@ -588,7 +693,8 @@ export class Viewer {
    * @return {!Promise}
    */
   postPopHistory(stackIndex) {
-    return this.sendMessage_('popHistory', {stackIndex: stackIndex}, true);
+    return this.sendMessageUnreliable_(
+        'popHistory', {stackIndex: stackIndex}, true);
   }
 
   /**
@@ -596,24 +702,30 @@ export class Viewer {
    * @return {!Promise<string>}
    */
   getBaseCid() {
-    return this.sendMessage_('cid', undefined, true);
+    return this.sendMessage('cid', undefined, true);
   }
 
   /**
-   * Broadcasts a message to all other AMP documents under the same viewer.
+   * Triggers "tick" event for the viewer.
    * @param {!JSONObject} message
    */
-  broadcast(message) {
-    this.sendMessage_('broadcast', message, false);
+  tick(message) {
+    this.sendMessageUnreliable_('tick', message, false);
   }
 
   /**
-   * Registers receiver for the broadcast events.
-   * @param {function(!JSONObject)} handler
-   * @return {!Unlisten}
+   * Triggers "sendCsi" event for the viewer.
    */
-  onBroadcast(handler) {
-    return this.broadcastObservable_.add(handler);
+  flushTicks() {
+    this.sendMessageUnreliable_('sendCsi', undefined, false);
+  }
+
+  /**
+   * Triggers "setFlushParams" event for the viewer.
+   * @param {!JSONObject} message
+   */
+  setFlushParams(message) {
+    this.sendMessageUnreliable_('setFlushParams', message, false);
   }
 
   /**
@@ -678,12 +790,17 @@ export class Viewer {
     assert(!this.messageDeliverer_, 'message deliverer can only be set once');
     log.fine(TAG_, 'message channel established with origin: ', origin);
     this.messageDeliverer_ = deliverer;
+    this.messagingReadyResolver_(this);
     // TODO(dvoytenko, #1764): Make `origin` required when viewers catch up.
     this.messagingOrigin_ = origin;
     if (this.trustedViewerResolver_) {
       this.trustedViewerResolver_(
           origin ? this.isTrustedViewerOrigin_(origin) : false);
     }
+    if (this.viewerOriginResolver_) {
+      this.viewerOriginResolver_(origin || '');
+    }
+
     if (this.messageQueue_.length > 0) {
       const queue = this.messageQueue_.slice(0);
       this.messageQueue_ = [];
@@ -694,24 +811,55 @@ export class Viewer {
   }
 
   /**
-   * Sends the message to the viewer. This is a restricted API.
+   * Sends the message to the viewer. This method will wait for the messaging
+   * channel to be established. If the messaging channel times out, the
+   * promise will fail.
+   *
+   * This is a restricted API.
+   *
    * @param {string} eventType
    * @param {*} data
    * @param {boolean} awaitResponse
    * @return {!Promise<*>|undefined}
    */
   sendMessage(eventType, data, awaitResponse) {
-    return this.sendMessage_(eventType, data, awaitResponse);
+    return this.messagingReadyPromise_.then(() => {
+      return this.sendMessageUnreliable_(eventType, data, awaitResponse);
+    });
   }
 
   /**
+   * Broadcasts a message to all other AMP documents under the same viewer. It
+   * will attempt to deliver messages when the messaging channel has been
+   * established, but it will not fail if the channel is timed out.
+   *
+   * @param {!JSONObject} message
+   */
+  broadcast(message) {
+    this.maybeSendMessage_('broadcast', message);
+  }
+
+  /**
+   * Registers receiver for the broadcast events.
+   * @param {function(!JSONObject)} handler
+   * @return {!Unlisten}
+   */
+  onBroadcast(handler) {
+    return this.broadcastObservable_.add(handler);
+  }
+
+  /**
+   * This message queues up the message to be sent when communication channel
+   * is established. If the communication channel is not established at
+   * this time, this method responds immediately with a Promise that yields
+   * `undefined` value.
    * @param {string} eventType
    * @param {*} data
    * @param {boolean} awaitResponse
    * @return {!Promise<*>|undefined}
    * @private
    */
-  sendMessage_(eventType, data, awaitResponse) {
+  sendMessageUnreliable_(eventType, data, awaitResponse) {
     if (this.messageDeliverer_) {
       return this.messageDeliverer_(eventType, data, awaitResponse);
     }
@@ -735,6 +883,19 @@ export class Viewer {
       return Promise.resolve();
     }
     return undefined;
+  }
+
+  /**
+   * @param {string} eventType
+   * @param {*} data
+   * @private
+   */
+  maybeSendMessage_(eventType, data) {
+    this.messagingMaybePromise_.then(() => {
+      if (this.messageDeliverer_) {
+        this.sendMessageUnreliable_(eventType, data, false);
+      }
+    });
   }
 }
 

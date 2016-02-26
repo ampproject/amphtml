@@ -16,7 +16,6 @@
 
 import {Storage, Store, LocalStorageBinding, ViewerStorageBinding} from
     '../../src/service/storage-impl';
-import {all} from '../../src/promise';
 import * as sinon from 'sinon';
 
 
@@ -43,9 +42,7 @@ describe('Storage', () => {
     viewerMock = sandbox.mock(viewer);
 
     windowApi = {
-      document: {
-        cookie: 'AMP_EXP=amp-storage'
-      },
+      document: {},
       location: 'https://acme.com/document1',
     };
 
@@ -72,19 +69,8 @@ describe('Storage', () => {
         expect(value).to.equal(expectedValue, `For "${k}"`);
       }));
     }
-    return all(list);
+    return Promise.all(list);
   }
-
-  it('should initialize with experiment', () => {
-    expect(viewerBroadcastHandler).to.exist;
-  });
-
-  it('should not initialize without experiment', () => {
-    viewerBroadcastHandler = undefined;
-    windowApi.document.cookie = '';
-    new Storage(windowApi, viewer, binding).start_();
-    expect(viewerBroadcastHandler).to.not.exist;
-  });
 
   it('should configure store correctly', () => {
     const store1 = new Store({});

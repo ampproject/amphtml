@@ -65,13 +65,14 @@ try {
       makeBodyVisible(document, waitForExtensions(window));
     } catch (e) {
       makeBodyVisible(document);
+      throw e;
     } finally {
       perf.tick('e_is');
       // TODO(erwinm): move invocation of the `flush` method when we have the
       // new ticks in place to batch the ticks properly.
       perf.flush();
     }
-  }, /* opt_isRuntimeCss */ true);
+  }, /* opt_isRuntimeCss */ true, /* opt_ext */ 'amp-runtime');
 } catch (e) {
   // In case of an error call this.
   makeBodyVisible(document);
