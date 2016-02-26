@@ -142,7 +142,8 @@ function tests(name, installer) {
           return new Promise((resolve, unusedReject) => {
             impl = element.implementation_;
             impl.layoutCallback();
-            impl.updateHeight_ = newHeight => {
+            impl.updateDimensions_ = (newWidth, newHeight) => {
+              expect(newWidth).to.equal(113);
               expect(newHeight).to.equal(217);
               resolve(impl);
             };
@@ -151,13 +152,15 @@ function tests(name, installer) {
                 sentinel: 'amp-test',
                 type: 'requestHeight',
                 is3p: true,
-                height: 217
+                height: 217,
+                width: 113
               }, '*');
             };
             impl.iframe_.src = iframeSrc;
           });
         }).then(impl => {
           expect(impl.iframe_.height).to.equal('217');
+          expect(impl.iframe_.width).to.equal('113');
         });
       });
 
@@ -172,10 +175,87 @@ function tests(name, installer) {
           impl = element.implementation_;
           impl.attemptChangeHeight = sinon.spy();
           impl.changeHeight = sinon.spy();
-          impl.updateHeight_(217);
+          impl.updateDimensions_(113, 217);
           expect(impl.changeHeight.callCount).to.equal(0);
           expect(impl.attemptChangeHeight.callCount).to.equal(1);
           expect(impl.attemptChangeHeight.firstCall.args[0]).to.equal(217);
+        });
+      });
+
+      it('should resize width only', () => {
+        return getAd({
+          width: 100,
+          height: 100,
+          type: 'a9',
+          src: 'testsrc',
+          resizable: ''
+        }, 'https://schema.org').then(element => {
+          const newWidth = 113;
+          impl = element.implementation_;
+          impl.attemptChangeHeight = sinon.spy();
+          impl.onResizeSuccess_ = sinon.spy();
+          impl.getVsync = function() {
+            return {
+              mutate: function(fn) {
+                fn();
+              }
+            };
+          };
+          impl.updateDimensions_(newWidth);
+          expect(element.style.width).to.equal(newWidth + 'px');
+          expect(impl.attemptChangeHeight.callCount).to.equal(0);
+          expect(impl.onResizeSuccess_.callCount).to.equal(1);
+        });
+      });
+
+      it('should resize height only', () => {
+        return getAd({
+          width: 100,
+          height: 100,
+          type: 'a9',
+          src: 'testsrc',
+          resizable: ''
+        }, 'https://schema.org').then(element => {
+          const newHeight = 217;
+          const attemptChangeHeightSpy = sinon.spy();
+          impl = element.implementation_;
+          impl.getVsync = sinon.spy();
+          impl.attemptChangeHeight = function(height) {
+            attemptChangeHeightSpy();
+            impl.onResizeSuccess_(height);
+          };
+          impl.onResizeSuccess_ = sinon.spy();
+          impl.updateDimensions_(undefined, newHeight);
+          expect(impl.getVsync.callCount).to.equal(0);
+          expect(attemptChangeHeightSpy.callCount).to.equal(1);
+          expect(impl.onResizeSuccess_.callCount).to.equal(1);
+          expect(impl.onResizeSuccess_).to.be.calledWith(217);
+        });
+      });
+
+      it('should resize both height and width', () => {
+        return getAd({
+          width: 100,
+          height: 100,
+          type: 'a9',
+          src: 'testsrc',
+          resizable: ''
+        }, 'https://schema.org').then(element => {
+          const newHeight = 217;
+          const newWidth = 113;
+          const attemptChangeHeightSpy = sinon.spy();
+          impl = element.implementation_;
+          impl.getVsync = sinon.spy();
+          impl.attemptChangeHeight = function(height) {
+            attemptChangeHeightSpy();
+            impl.onResizeSuccess_(height);
+          };
+          impl.onResizeSuccess_ = sinon.spy();
+          impl.updateDimensions_(newWidth, newHeight);
+          expect(impl.getVsync.callCount).to.equal(0);
+          expect(attemptChangeHeightSpy.callCount).to.equal(1);
+          expect(impl.onResizeSuccess_.callCount).to.equal(1);
+          expect(impl.onResizeSuccess_).to.be.calledWith(217);
         });
       });
     });
