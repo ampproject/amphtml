@@ -405,7 +405,7 @@ function thirdPartyBootstrap(watch, shouldMinify) {
   var min = html;
   // By default we use an absolute URL, that is independent of the
   // actual frame host for the JS inside the frame.
-  var jsPrefix = 'https://3p.ampproject.org/' + internalRuntimeVersion;
+  var jsPrefix = 'https://3p.ampproject.net/' + internalRuntimeVersion;
   // But during testing we need a relative reference because the
   // version is not available on the absolute path.
   if (argv.fortesting) {
