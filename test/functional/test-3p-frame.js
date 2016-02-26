@@ -15,13 +15,14 @@
  */
 
 import {addDataAndJsonAttributes_, getIframe, getBootstrapBaseUrl,
-    prefetchBootstrap} from '../../src/3p-frame';
+    getSubDomain, prefetchBootstrap} from '../../src/3p-frame';
 import {validateData} from '../../src/3p';
 import {documentInfoFor} from '../../src/document-info';
 import {loadPromise} from '../../src/event-helper';
 import {setModeForTesting} from '../../src/mode';
 import {resetServiceForTesting} from '../../src/service';
 import {viewerFor} from '../../src/viewer';
+import {toggleExperiment} from '../../src/experiments';
 
 describe('3p-frame', () => {
 
@@ -30,6 +31,7 @@ describe('3p-frame', () => {
   });
 
   afterEach(() => {
+    toggleExperiment(window, 'unique-origins', false);
     resetServiceForTesting(window, 'bootstrapBaseUrl');
     setModeForTesting(null);
     const m = document.querySelector(
@@ -156,6 +158,13 @@ describe('3p-frame', () => {
         'https://3p.ampproject.net/$internalRuntimeVersion$/frame.html');
   });
 
+  it('should pick the right bootstrap unique url (prod)', () => {
+    setModeForTesting({});
+    toggleExperiment(window, 'unique-origins', true);
+    expect(getBootstrapBaseUrl(window)).to.match(
+        /^https:\/\/d-\d+\.ampproject\.net\/\$\internal\w+\$\/frame\.html$/);
+  });
+
   it('should pick the right bootstrap url (custom)', () => {
     addCustomBootstrap('https://example.com/boot/remote.html');
     expect(getBootstrapBaseUrl(window)).to.equal(
@@ -185,5 +194,51 @@ describe('3p-frame', () => {
         'http://ads.localhost:9876/dist.3p/current/frame.max.html');
     expect(fetches[1].href).to.equal(
         'https://3p.ampproject.net/$internalRuntimeVersion$/f.js');
+  });
+
+  it('should make sub domain: 3p', () => {
+    expect(getSubDomain(window)).to.equal('3p');
+  });
+
+  it('should make sub domains (unique)', () => {
+    toggleExperiment(window, 'unique-origins', true);
+    expect(getSubDomain(window)).to.match(/^d-\d+$/);
+    expect(getSubDomain(window)).to.not.equal('d-00');
+  });
+
+  it('should make sub domains (Math)', () => {
+    toggleExperiment(window, 'unique-origins', true);
+    const fakeWin = {
+      document: document,
+      Math: Math,
+    };
+    expect(getSubDomain(fakeWin)).to.match(/^d-\d+$/);
+  });
+
+  it('should make sub domains (crypto)', () => {
+    toggleExperiment(window, 'unique-origins', true);
+    const fakeWin = {
+      document: document,
+      crypto: {
+        getRandomValues: function(arg) {
+          arg[0] = 123;
+          arg[1] = 987;
+        }
+      }
+    };
+    expect(getSubDomain(fakeWin)).to.equal('d-123987');
+  });
+
+  it('should make sub domains (fallback)', () => {
+    toggleExperiment(window, 'unique-origins', true);
+    const fakeWin = {
+      document: document,
+      Math: {
+        random: function() {
+          return 0.567;
+        }
+      }
+    };
+    expect(getSubDomain(fakeWin)).to.equal('d-5670');
   });
 });

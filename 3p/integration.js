@@ -322,6 +322,9 @@ export function validateAllowedTypes(window, type, allowedTypes) {
   if (window.location.hostname == '3p.ampproject.net') {
     return;
   }
+  if (/^d-\d+\.ampproject\.net$/.test(window.location.hostname)) {
+    return;
+  }
   if (window.location.hostname == 'ads.localhost') {
     return;
   }

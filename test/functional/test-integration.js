@@ -233,6 +233,22 @@ describe('3p integration.js', () => {
     validateAllowedTypes(defaultHost, 'not present');
   });
 
+  it('should allow all types on unique default host', () => {
+    function get(domain) {
+      return {
+        location: {
+          hostname: domain
+        }
+      };
+    }
+    validateAllowedTypes(get('d-123.ampproject.net'), 'twitter');
+    validateAllowedTypes(get('d-46851196780996873.ampproject.net'), 'adtech');
+    validateAllowedTypes(get('d-46851196780996873.ampproject.net'), 'a9');
+    expect(() => {
+      validateAllowedTypes(get('d-124.ampproject.net.com'), 'not present');
+    }).to.throw(/Non-whitelisted 3p type for custom iframe/);
+  });
+
   it('should validate types on custom host', () => {
     const defaultHost = {
       location: {
@@ -248,5 +264,6 @@ describe('3p integration.js', () => {
     expect(() => {
       validateAllowedTypes(defaultHost, 'adtech');
     }).to.throw(/Non-whitelisted 3p type for custom iframe/);
+    validateAllowedTypes(defaultHost, 'adtech', ['adtech']);
   });
 });

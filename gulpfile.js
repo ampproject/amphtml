@@ -403,7 +403,16 @@ function thirdPartyBootstrap(watch, shouldMinify) {
   console.log('Processing ' + input);
   var html = fs.readFileSync(input, 'utf8');
   var min = html;
-  min = min.replace(/\.\/integration\.js/g, './f.js');
+  // By default we use an absolute URL, that is independent of the
+  // actual frame host for the JS inside the frame.
+  var jsPrefix = 'https://3p.ampproject.org/' + internalRuntimeVersion;
+  // But during testing we need a relative reference because the
+  // version is not available on the absolute path.
+  if (argv.fortesting) {
+    jsPrefix = '.';
+  }
+  // Convert default relative URL to absolute min URL.
+  min = min.replace(/\.\/integration\.js/g, jsPrefix + '/f.js');
   gulp.src(input)
       .pipe(file('frame.html', min))
       .pipe(gulp.dest('dist.3p/' + internalRuntimeVersion))
