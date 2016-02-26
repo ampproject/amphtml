@@ -28,6 +28,7 @@ export const adPrefetch = {
   ],
   a9: 'https://c.amazon-adsystem.com/aax2/assoc.js',
   adsense: 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js',
+  criteo: 'https://static.criteo.net/js/ld/publishertag.js',
   dotandads: 'https://amp.ad.dotandad.com/dotandadsAmp.js',
   mediaimpact: 'https://ec-ns.sascdn.com/diff/251/divscripte/amp.js',
   smartadserver: 'https://ec-ns.sascdn.com/diff/js/smart.js',
@@ -57,6 +58,9 @@ export const adPreconnect = {
     'https://cdn2.teads.tv',
     'https://a.teads.tv',
     'https://t.teads.tv',
+  ],
+  criteo: [
+    'https://cas.criteo.com',
   ],
   doubleclick: [
     'https://partner.googleadservices.com',
