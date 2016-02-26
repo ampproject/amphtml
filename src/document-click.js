@@ -19,6 +19,7 @@ import {getService} from './service';
 import {log} from './log';
 import {parseUrl} from './url';
 import {viewportFor} from './viewport';
+import {platform} from './platform';
 
 
 /**
@@ -89,6 +90,10 @@ export class ClickHandler {
 /**
  * Intercept any click on the current document and prevent any
  * linking to an identifier from pushing into the history stack.
+ *
+ * This also handles custom protocols (e.g. whatsapp://) when iframed
+ * on iOS Safari.
+ *
  * @param {!Event} e
  * @param {!Viewport} viewport
  */
@@ -108,6 +113,20 @@ export function onDocumentElementClick_(e, viewport) {
   const win = doc.defaultView;
 
   const tgtLoc = parseUrl(target.href);
+
+  // On Safari iOS, custom protocol links will fail to open apps when the
+  // document is iframed - in order to go around this, we set the top.location
+  // to the custom protocol href.
+  const isSafariIOS = platform.isIos() && platform.isSafari();
+  const isEmbedded = win.parent && win.parent != win;
+  const isNormalProtocol = /^https?:$/.test(tgtLoc.protocol);
+  if (isSafariIOS && isEmbedded && !isNormalProtocol) {
+    win.open(target.href, '_blank');
+    // Without preventing default the page would should an alert error twice
+    // in the case where there's no app to handle the custom protocol.
+    e.preventDefault();
+  }
+
   if (!tgtLoc.hash) {
     return;
   }
