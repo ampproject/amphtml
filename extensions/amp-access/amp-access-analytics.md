@@ -141,7 +141,7 @@ When only one Login URL is configured, the event is `access-login-rejected`. Whe
 
 The `access-login[-type]-failed` event is issued when Login dialog has failed due to an unknown reason. Use these configurations to fire a request for this event.
 
-When only one Login URL is configured, the event is `access-login[-type]-rejected`. When multiple Login URLs are configured, the event is `access-login-type-rejected`, e.g. "access-login-signup-rejected". See [Login Page Spec](./amp-access-spec.md#login-page) for more info.
+When only one Login URL is configured, the event is `access-login[-type]-failed`. When multiple Login URLs are configured, the event is `access-login-type-failed`, e.g. "access-login-signup-failed". See [Login Page Spec](./amp-access-spec.md#login-page) for more info.
 
 ```javascript
 "triggers": {
