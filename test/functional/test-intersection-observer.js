@@ -15,8 +15,10 @@
  */
 
 import {BaseElement} from '../../src/base-element';
-import {IntersectionObserver, getIntersectionChangeEntry} from
-    '../../src/intersection-observer';
+import {
+  IntersectionObserver,
+  getIntersectionChangeEntry,
+} from '../../src/intersection-observer';
 import {createAmpElementProto} from '../../src/custom-element';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import * as sinon from 'sinon';
@@ -44,7 +46,7 @@ describe('getIntersectionChangeEntry', () => {
       'bottom': 150,
       'right': 200,
       'x': 50,
-      'y': -50
+      'y': -50,
     });
     expect(change.intersectionRect.height).to.equal(100);
     expect(change.intersectionRect).to.jsonEqual({
@@ -55,7 +57,7 @@ describe('getIntersectionChangeEntry', () => {
       'bottom': 200,
       'right': 100,
       'x': 50,
-      'y': 100
+      'y': 100,
     });
   });
 
@@ -75,7 +77,7 @@ describe('getIntersectionChangeEntry', () => {
       'bottom': 200,
       'right': 100,
       'x': 50,
-      'y': 199
+      'y': 199,
     });
   });
 
@@ -150,7 +152,7 @@ describe('IntersectionObserver', () => {
   }
 
   const ElementClass = document.registerElement('amp-int', {
-    prototype: createAmpElementProto(window, 'amp-int', TestElement)
+    prototype: createAmpElementProto(window, 'amp-int', TestElement),
   });
 
   const iframeSrc = 'http://iframe.localhost:' + location.port +
@@ -192,7 +194,7 @@ describe('IntersectionObserver', () => {
       return {
         measure: function(fn) {
           fn();
-        }
+        },
       };
     };
     element.getViewport = function() {
@@ -204,7 +206,7 @@ describe('IntersectionObserver', () => {
         onChanged: function() {
           onChangeSpy();
           return function() {};
-        }
+        },
       };
     };
     element.element = {
@@ -214,7 +216,7 @@ describe('IntersectionObserver', () => {
         const layoutBox = layoutRectLtwh(50, 100, 150, 200);
         return getIntersectionChangeEntry(new Date().getTime(),
             rootBounds, layoutBox);
-      }
+      },
     };
     element.isInViewport = () => false;
   });

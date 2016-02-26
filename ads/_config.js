@@ -66,7 +66,7 @@ export const adPreconnect = {
     'https://trends.revcontent.com',
     'https://cdn.revcontent.com',
     'https://img.revcontent.com',
-  ]
+  ],
 };
 
 /**

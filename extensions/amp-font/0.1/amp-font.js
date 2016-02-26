@@ -117,7 +117,7 @@ export class AmpFont extends AMP.BaseElement {
       variant: this.fontVariant_,
       weight: this.fontWeight_,
       size: DEFAULT_SIZE_,
-      family: this.fontFamily_
+      family: this.fontFamily_,
     };
     this.fontLoader_.load(fontConfig, this.getTimeout_()).then(() => {
       this.onFontLoadSuccess_();

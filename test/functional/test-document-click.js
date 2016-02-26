@@ -44,24 +44,24 @@ describe('test-document-click onDocumentElementClick_', () => {
       querySelector: querySelectorSpy,
       defaultView: {
         location: {
-          href: 'https://www.google.com/some-path?hello=world#link'
+          href: 'https://www.google.com/some-path?hello=world#link',
         },
         history: {
-          replaceState: replaceStateSpy
+          replaceState: replaceStateSpy,
         },
       },
     };
     win = doc.defaultView;
     docElem = {
-      ownerDocument: doc
+      ownerDocument: doc,
     };
     evt = {
       currentTarget: docElem,
       target: tgt,
-      preventDefault: preventDefaultSpy
+      preventDefault: preventDefaultSpy,
     };
     viewport = {
-      scrollIntoView: scrollIntoViewSpy
+      scrollIntoView: scrollIntoViewSpy,
     };
   });
 

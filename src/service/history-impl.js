@@ -477,7 +477,7 @@ export class HistoryBindingNatural_ {
     this.waitingState_ = {
       promise: promise,
       resolve: resolve,
-      reject: reject
+      reject: reject,
     };
     return promise;
   }

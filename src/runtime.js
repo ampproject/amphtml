@@ -50,7 +50,7 @@ export function adopt(global) {
   const preregisteredElements = global.AMP || [];
 
   global.AMP = {
-    win: global
+    win: global,
   };
 
   /**
@@ -66,7 +66,7 @@ export function adopt(global) {
       registerExtendedElement(global, name, implementationClass);
       elementsForTesting.push({
         name: name,
-        implementationClass: implementationClass
+        implementationClass: implementationClass,
       });
       // Resolve this extension's Service Promise.
       getService(global, name, () => {

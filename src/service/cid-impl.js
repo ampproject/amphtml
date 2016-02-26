@@ -28,8 +28,9 @@ import {getService} from '../service';
 import {getSourceOrigin, isProxyOrigin, parseUrl} from '../url';
 import {timer} from '../timer';
 import {viewerFor} from '../viewer';
-import {sha384Base64} from
-    '../../third_party/closure-library/sha384-generated';
+import {
+  sha384Base64,
+} from '../../third_party/closure-library/sha384-generated';
 
 
 const ONE_DAY_MILLIS = 24 * 3600 * 1000;

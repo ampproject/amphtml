@@ -27,7 +27,7 @@ import {
   parseUrl,
   removeFragment,
   resolveRelativeUrl,
-  resolveRelativeUrlFallback_
+  resolveRelativeUrlFallback_,
 } from '../../src/url';
 
 describe('url', () => {
@@ -52,7 +52,7 @@ describe('url', () => {
       pathname: '/abc',
       search: '?123',
       hash: '#foo',
-      origin: 'https://foo.com'
+      origin: 'https://foo.com',
     });
   });
   it('caches results', () => {
@@ -72,7 +72,7 @@ describe('url', () => {
       pathname: '/abc',
       search: '?123',
       hash: '#foo',
-      origin: 'https://foo.com:123'
+      origin: 'https://foo.com:123',
     });
   });
   it('should support http', () => {
@@ -85,7 +85,7 @@ describe('url', () => {
       pathname: '/abc',
       search: '?123',
       hash: '#foo',
-      origin: 'http://foo.com:123'
+      origin: 'http://foo.com:123',
     });
   });
   it('should resolve relative urls', () => {
@@ -98,7 +98,7 @@ describe('url', () => {
       pathname: '/abc',
       search: '?123',
       hash: '#foo',
-      origin: 'http://localhost:' + currentPort
+      origin: 'http://localhost:' + currentPort,
     });
   });
   it('should resolve path relative urls', () => {
@@ -111,7 +111,7 @@ describe('url', () => {
       pathname: '/abc',
       search: '?123',
       hash: '#foo',
-      origin: 'http://localhost:' + currentPort
+      origin: 'http://localhost:' + currentPort,
     });
   });
   it('should handle URLs with just the domain', () => {
@@ -124,7 +124,7 @@ describe('url', () => {
       pathname: '/',
       search: '',
       hash: '',
-      origin: 'http://foo.com:123'
+      origin: 'http://foo.com:123',
     });
   });
 
@@ -138,47 +138,47 @@ describe('parseQueryString', () => {
   });
   it('should parse single key-value', () => {
     expect(parseQueryString('a=1')).to.deep.equal({
-      'a': '1'
+      'a': '1',
     });
   });
   it('should parse two key-values', () => {
     expect(parseQueryString('a=1&b=2')).to.deep.equal({
       'a': '1',
-      'b': '2'
+      'b': '2',
     });
   });
   it('should ignore leading ?', () => {
     expect(parseQueryString('?a=1&b=2')).to.deep.equal({
       'a': '1',
-      'b': '2'
+      'b': '2',
     });
   });
   it('should ignore leading #', () => {
     expect(parseQueryString('#a=1&b=2')).to.deep.equal({
       'a': '1',
-      'b': '2'
+      'b': '2',
     });
   });
   it('should parse empty value', () => {
     expect(parseQueryString('a=&b=2')).to.deep.equal({
       'a': '',
-      'b': '2'
+      'b': '2',
     });
     expect(parseQueryString('a&b=2')).to.deep.equal({
       'a': '',
-      'b': '2'
+      'b': '2',
     });
   });
   it('should decode names and values', () => {
     expect(parseQueryString('a%26=1%26&b=2')).to.deep.equal({
       'a&': '1&',
-      'b': '2'
+      'b': '2',
     });
   });
   it('should return last dupe', () => {
     expect(parseQueryString('a=1&b=2&a=3')).to.deep.equal({
       'a': '3',
-      'b': '2'
+      'b': '2',
     });
   });
 });
@@ -312,7 +312,7 @@ describe('addParamsToUrl', () => {
   it('should loop over the keys and values correctly', () => {
     url = addParamsToUrl(url, {
       hello: 'world',
-      foo: 'bar'
+      foo: 'bar',
     });
 
     expect(url).to.equal('https://www.ampproject.org/get/here?hello=world&foo=bar#hash-value');

@@ -57,21 +57,21 @@ describe('Activity getTotalEngagedTime', () => {
       documentElement: {
         style: {
           // required to instantiate Viewport service
-          paddingTop: 0
-        }
-      }
+          paddingTop: 0,
+        },
+      },
     };
 
     fakeWin = {
       document: fakeDoc,
       ampExtendedElements: {
-        'amp-analytics': true
+        'amp-analytics': true,
       },
       location: {
         href: 'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0',
       },
       // required to instantiate Viewport service
-      addEventListener: () => {}
+      addEventListener: () => {},
     };
 
     installViewerService(fakeWin);

@@ -1095,7 +1095,7 @@ export function registerElement(win, name, implementationClass) {
   knownElements[name] = implementationClass;
 
   win.document.registerElement(name, {
-    prototype: createAmpElementProto(win, name, implementationClass)
+    prototype: createAmpElementProto(win, name, implementationClass),
   });
 }
 
@@ -1122,7 +1122,7 @@ export function registerElementAlias(win, aliasName, sourceName) {
 
   if (implementationClass) {
     win.document.registerElement(aliasName, {
-      prototype: createAmpElementProto(win, aliasName, implementationClass)
+      prototype: createAmpElementProto(win, aliasName, implementationClass),
     });
   } else {
     throw new Error(`Element name is unknown: ${sourceName}.` +

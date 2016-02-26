@@ -43,7 +43,7 @@ describe('LoginDialog', () => {
       location: {
         protocol: 'http:',
         host: 'localhost:8000',
-        href: 'http://localhost:8000/test-login-dialog'
+        href: 'http://localhost:8000/test-login-dialog',
       },
       screen: {width: 1000, height: 1000},
       addEventListener: (type, callback) => {
@@ -58,7 +58,7 @@ describe('LoginDialog', () => {
       },
       setTimeout: (callback, t) => window.setTimeout(callback, t),
       setInterval: (callback, t) => window.setInterval(callback, t),
-      clearInterval: intervalId => window.clearInterval(intervalId)
+      clearInterval: intervalId => window.clearInterval(intervalId),
     };
     windowMock = sandbox.mock(windowApi);
 
@@ -68,9 +68,9 @@ describe('LoginDialog', () => {
       location: {
         replace: url => {
           dialogUrl = url;
-        }
+        },
       },
-      postMessage: () => {}
+      postMessage: () => {},
     };
     dialogMock = sandbox.mock(dialog);
   });
@@ -86,8 +86,8 @@ describe('LoginDialog', () => {
       data: {
         sentinel: 'amp',
         type: 'result',
-        result: '#success=true'
-      }
+        result: '#success=true',
+      },
     });
   }
 

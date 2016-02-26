@@ -19,7 +19,7 @@ import {writeScript, validateSrcPrefix, validateExactlyOne} from '../src/3p';
 // Valid adform ad source hosts
 const hosts = {
   track: 'https://track.adform.net/',
-  adx: 'https://adx.adform.net/'
+  adx: 'https://adx.adform.net/',
 };
 
 /**

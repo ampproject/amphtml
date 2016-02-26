@@ -19,8 +19,11 @@ import {Pass} from '../pass';
 import {assert} from '../asserts';
 import {closest} from '../dom';
 import {onDocumentReady} from '../document-ready';
-import {expandLayoutRect, layoutRectLtwh, layoutRectsOverlap} from
-    '../layout-rect';
+import {
+  expandLayoutRect,
+  layoutRectLtwh,
+  layoutRectsOverlap,
+} from '../layout-rect';
 import {getService} from '../service';
 import {inputFor} from '../input';
 import {log} from '../log';
@@ -522,7 +525,7 @@ export class Resources {
             this.schedulePass(FOUR_FRAME_DELAY_);
           }
         });
-      }
+      },
     });
   }
 
@@ -752,7 +755,7 @@ export class Resources {
               this.viewport_.setScrollTop(state./*OK*/scrollTop +
                   (newScrollHeight - state./*OK*/scrollHeight));
             }
-          }
+          },
         });
       }
     }
@@ -1138,7 +1141,7 @@ export class Resources {
         resource: resource,
         newHeight: newHeight,
         force: force,
-        callback: opt_callback
+        callback: opt_callback,
       });
     }
     this.schedulePassVsync();
@@ -1232,7 +1235,7 @@ export class Resources {
       priority: Math.max(resource.getPriority(), parentPriority) +
           priorityOffset,
       callback: callback,
-      scheduleTime: timer.now()
+      scheduleTime: timer.now(),
     };
     log.fine(TAG_, 'schedule:', task.id, 'at', task.scheduleTime);
 
@@ -1972,7 +1975,7 @@ export const ResourceState_ = {
   /**
    * The latest resource's layout failed.
    */
-  LAYOUT_FAILED: 5
+  LAYOUT_FAILED: 5,
 };
 
 

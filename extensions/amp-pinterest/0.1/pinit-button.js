@@ -105,7 +105,7 @@ export class PinItButton {
     Util.log('&type=pidget&button_count=1');
     return Util.make({'span': {
       class: `-amp-pinterest-bubble-${this.count}${heightClass}`,
-      textContent: this.formatPinCount(count)
+      textContent: this.formatPinCount(count),
     }});
   }
 
@@ -119,12 +119,12 @@ export class PinItButton {
       shape: this.round ? '-round' : '-rect',
       height: this.tall ? '-tall' : '',
       lang: this.lang === 'ja' ? '-ja' : '-en',
-      color: ['red', 'white'].indexOf(this.color) !== -1 ? this.color : 'gray'
+      color: ['red', 'white'].indexOf(this.color) !== -1 ? this.color : 'gray',
     };
 
     const clazz = [
       `-amp-pinterest${CLASS.shape}${CLASS.height}`,
-      '-amp-fill-content'
+      '-amp-fill-content',
     ];
 
     let countBubble = '';
@@ -138,7 +138,7 @@ export class PinItButton {
 
     const pinitButton = Util.make({'a': {
       class: clazz.join(' '),
-      href: this.href
+      href: this.href,
     }});
 
     if (countBubble) {
@@ -162,7 +162,7 @@ export class PinItButton {
       `guid=${Util.guid}`,
       `url=${this.url}`,
       `media=${this.media}`,
-      `description=${this.description}`
+      `description=${this.description}`,
     ].join('&');
     this.href = `https://www.pinterest.com/pin/create/button/?${query}`;
 

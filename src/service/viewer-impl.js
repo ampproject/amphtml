@@ -61,7 +61,7 @@ export const ViewportType = {
    * https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md
    * and {@link ViewportBindingNaturalIosEmbed_} for more details.
    */
-  NATURAL_IOS_EMBED: 'natural-ios-embed'
+  NATURAL_IOS_EMBED: 'natural-ios-embed',
 };
 
 
@@ -109,7 +109,7 @@ export const VisibilityState = {
  * @export {!Array<!RegExp>}
  */
 export const TRUSTED_VIEWER_HOSTS = [
-  /^(.*\.)?(google)(\.com?)?(\.[a-z]{2})?$/
+  /^(.*\.)?(google)(\.com?)?(\.[a-z]{2})?$/,
 ];
 
 
@@ -814,7 +814,7 @@ export class Viewer {
     }
     if (eventType == 'historyPopped') {
       this.historyPoppedObservable_.fire({
-        newStackIndex: data['newStackIndex']
+        newStackIndex: data['newStackIndex'],
       });
       return Promise.resolve();
     }

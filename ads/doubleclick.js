@@ -44,7 +44,7 @@ export function doubleclick(global, data) {
 function doubleClickWithGpt(global, data) {
   const dimensions = [[
     parseInt(data.overrideWidth || data.width, 10),
-    parseInt(data.overrideHeight || data.height, 10)
+    parseInt(data.overrideHeight || data.height, 10),
   ]];
 
   if (global.context.clientId) {

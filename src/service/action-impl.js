@@ -400,7 +400,7 @@ export function parseActionMap(s, context) {
         method: method,
         args: (args && window.AMP_TEST && Object.freeze) ?
             Object.freeze(args) : args,
-        str: s
+        str: s,
       };
       if (!actionMap) {
         actionMap = {};

@@ -38,7 +38,7 @@ describe('DocumentState', () => {
         if (eventListeners[eventType] == handler) {
           delete eventListeners[eventType];
         }
-      }
+      },
     };
     windowApi = {document: testDoc};
     docState = new DocumentState(windowApi);
@@ -56,7 +56,7 @@ describe('DocumentState', () => {
       webkitHidden: false,
       webkitVisibilityState: 'visible',
       addEventListener: (unusedEventType, unusedHandler) => {},
-      removeEventListener: (unusedEventType, unusedHandler) => {}
+      removeEventListener: (unusedEventType, unusedHandler) => {},
     };
     const other = new DocumentState({document: otherDoc});
     expect(other.hiddenProp_).to.equal('webkitHidden');
@@ -67,7 +67,7 @@ describe('DocumentState', () => {
   it('resolve no properties', () => {
     const otherDoc = {
       addEventListener: (unusedEventType, unusedHandler) => {},
-      removeEventListener: (unusedEventType, unusedHandler) => {}
+      removeEventListener: (unusedEventType, unusedHandler) => {},
     };
     const other = new DocumentState({document: otherDoc});
     expect(other.hiddenProp_).to.equal(null);
@@ -78,7 +78,7 @@ describe('DocumentState', () => {
   it('should default hidden and visibilityState if unknown', () => {
     const otherDoc = {
       addEventListener: (unusedEventType, unusedHandler) => {},
-      removeEventListener: (unusedEventType, unusedHandler) => {}
+      removeEventListener: (unusedEventType, unusedHandler) => {},
     };
     const other = new DocumentState({document: otherDoc});
     expect(other.isHidden()).to.equal(false);

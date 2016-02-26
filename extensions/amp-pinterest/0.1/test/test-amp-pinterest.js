@@ -33,7 +33,7 @@
                 element.implementation_.layoutCallback();
                 return element;
               });
-            }
+            },
           });
           document.body.appendChild(div);
         });

@@ -52,7 +52,7 @@ import {openadstream} from '../ads/openadstream';
  * @const {!Object<string: boolean>}
  */
 const AMP_EMBED_ALLOWED = {
-  taboola: true
+  taboola: true,
 };
 
 register('a9', a9);
@@ -207,7 +207,7 @@ function triggerDimensions(width, height) {
 function triggerResizeRequest(width, height) {
   nonSensitiveDataPostMessage('embed-size', {
     width: width,
-    height: height
+    height: height,
   });
 }
 
@@ -283,7 +283,7 @@ function reportRenderedEntityIdentifier(entityId) {
   assert(typeof entityId == 'string',
       'entityId should be a string %s', entityId);
   nonSensitiveDataPostMessage('entity-id', {
-    id: entityId
+    id: entityId,
   });
 }
 

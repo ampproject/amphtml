@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {isDocumentReady, onDocumentReady, whenDocumentReady} from
+import {isDocumentReady, onDocumentReady, whenDocumentReady,} from
     '../../src/document-ready';
 import {timer} from '../../src/timer';
 import * as sinon from 'sinon';
@@ -36,7 +36,7 @@ describe('documentReady', () => {
         if (eventListeners[eventType] == handler) {
           delete eventListeners[eventType];
         }
-      }
+      },
     };
   });
 

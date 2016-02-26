@@ -71,7 +71,7 @@ function getFrameAttributes(parentWindow, element, opt_type) {
     pageViewId: docInfo.pageViewId,
     clientId: element.getAttribute('ampcid'),
     location: {
-      href: locationHref
+      href: locationHref,
     },
     tagName: element.tagName,
     mode: getMode(),

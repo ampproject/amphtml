@@ -46,7 +46,7 @@ export function parseUrl(url) {
     port: a.port == '0' ? '' : a.port,
     pathname: a.pathname,
     search: a.search,
-    hash: a.hash
+    hash: a.hash,
   };
   // For data URI a.origin is equal to the string 'null' which is not useful.
   // We instead return the actual origin which is the full URL.

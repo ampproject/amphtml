@@ -50,28 +50,28 @@ describe('FixedLayer', () => {
         // Will be ignored due to being a link.
         {
           ownerNode: document.createElement('link'),
-          cssRules: [invalidRule]
+          cssRules: [invalidRule],
         },
         // Will be ignored because it's disabled
         {
           ownerNode: createStyleNode(),
           disabled: true,
-          cssRules: [invalidRule]
+          cssRules: [invalidRule],
         },
         // Will be ignored because it's a boilerplate
         {
           ownerNode: createStyleNode('amp-boilerplate'),
-          cssRules: [invalidRule]
+          cssRules: [invalidRule],
         },
         // Will be ignored because it's a runtime
         {
           ownerNode: createStyleNode('amp-runtime'),
-          cssRules: [invalidRule]
+          cssRules: [invalidRule],
         },
         // Will be ignored because it's an extension
         {
           ownerNode: createStyleNode('amp-extension', 'amp-fit-text'),
-          cssRules: [invalidRule]
+          cssRules: [invalidRule],
         },
         // Valid stylesheet with amp-custom
         {
@@ -84,19 +84,19 @@ describe('FixedLayer', () => {
               type: 4,
               cssRules: [
                 createValidRule('#amp-custom-media-rule1', [element1]),
-              ]
+              ],
             },
             {
               type: 12,
               cssRules: [
                 createValidRule('#amp-custom-supports-rule1', [element2]),
-              ]
+              ],
             },
             // Uknown rule.
             {
               type: 3,
-            }
-          ]
+            },
+          ],
         },
         // Valid stylesheet without amp-custom
         {
@@ -105,7 +105,7 @@ describe('FixedLayer', () => {
             createValidRule('#other-rule1', [element1]),
             createValidRule('#other-rule2', [element2]),
             createUnrelatedRule('#other-rule3', [element1, element3]),
-          ]
+          ],
         },
       ],
       querySelectorAll: selector => {
@@ -122,9 +122,9 @@ describe('FixedLayer', () => {
           return {
             getPropertyValue: prop => {
               return elem.computedStyle[prop] || '';
-            }
+            },
           };
-        }
+        },
       },
       createElement: name => {
         return createElement(name);
@@ -141,7 +141,7 @@ describe('FixedLayer', () => {
       },
       mutate: mutator => {
         vsyncTasks.push({mutate: mutator});
-      }
+      },
     };
   });
 
@@ -218,7 +218,7 @@ describe('FixedLayer', () => {
       type: 1,
       selectorText: selector,
       style: {position: 'fixed'},
-      elements: elements
+      elements: elements,
     };
     if (allRules[selector]) {
       throw new Error('dup selector');
@@ -232,7 +232,7 @@ describe('FixedLayer', () => {
       type: 1,
       selectorText: selector,
       style: {},
-      elements: elements
+      elements: elements,
     };
     if (allRules[selector]) {
       throw new Error('dup selector');
@@ -273,8 +273,8 @@ describe('FixedLayer', () => {
           '#amp-custom-rule1',
           '#amp-custom-rule2',
           '#amp-custom-media-rule1',
-          '#other-rule1'
-        ]
+          '#other-rule1',
+        ],
       });
       expectFe(fixedLayer.fixedElements_[1], {
         id: 'F1',
@@ -282,8 +282,8 @@ describe('FixedLayer', () => {
         selectors: [
           '#amp-custom-rule2',
           '#amp-custom-supports-rule1',
-          '#other-rule2'
-        ]
+          '#other-rule2',
+        ],
       });
     });
 

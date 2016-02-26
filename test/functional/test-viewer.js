@@ -38,7 +38,7 @@ describe('Viewer', () => {
         target: windowApi.document,
         type: 'visibilitychange',
         bubbles: false,
-        cancelable: false
+        cancelable: false,
       });
     }
   }
@@ -149,7 +149,7 @@ describe('Viewer', () => {
     sandbox.mock(platform).expects('isIos').returns(true).atLeast(1);
     setModeForTesting({
       localDev: false,
-      development: false
+      development: false,
     });
     const viewportType = new Viewer(windowApi).getViewportType();
     setModeForTesting(null);
@@ -166,7 +166,7 @@ describe('Viewer', () => {
       scrollLeft: 12,
       width: 13,
       height: 14,
-      paddingTop: 19
+      paddingTop: 19,
     });
     expect(viewportEvent).to.not.equal(null);
     expect(viewer.getScrollTop()).to.equal(11);
@@ -178,14 +178,14 @@ describe('Viewer', () => {
   describe('should receive the visibilitychange event', () => {
     it('should change prerenderSize', () => {
       viewer.receiveMessage('visibilitychange', {
-        prerenderSize: 4
+        prerenderSize: 4,
       });
       expect(viewer.getPrerenderSize()).to.equal(4);
     });
 
     it('should change visibilityState', () => {
       viewer.receiveMessage('visibilitychange', {
-        state: 'paused'
+        state: 'paused',
       });
       expect(viewer.getVisibilityState()).to.equal('paused');
       expect(viewer.isVisible()).to.equal(false);
@@ -193,7 +193,7 @@ describe('Viewer', () => {
 
     it('should receive "paused" visibilityState', () => {
       viewer.receiveMessage('visibilitychange', {
-        state: 'paused'
+        state: 'paused',
       });
       expect(viewer.getVisibilityState()).to.equal('paused');
       expect(viewer.isVisible()).to.equal(false);
@@ -201,7 +201,7 @@ describe('Viewer', () => {
 
     it('should receive "inactive" visibilityState', () => {
       viewer.receiveMessage('visibilitychange', {
-        state: 'inactive'
+        state: 'inactive',
       });
       expect(viewer.getVisibilityState()).to.equal('inactive');
       expect(viewer.isVisible()).to.equal(false);
@@ -210,7 +210,7 @@ describe('Viewer', () => {
     it('should parse "hidden" as "prerender" before first visible', () => {
       viewer.hasBeenVisible_ = false;
       viewer.receiveMessage('visibilitychange', {
-        state: 'hidden'
+        state: 'hidden',
       });
       expect(viewer.getVisibilityState()).to.equal('prerender');
       expect(viewer.isVisible()).to.equal(false);
@@ -219,7 +219,7 @@ describe('Viewer', () => {
     it('should parse "hidden" as "inactive" after first visible', () => {
       viewer.hasBeenVisible_ = true;
       viewer.receiveMessage('visibilitychange', {
-        state: 'hidden'
+        state: 'hidden',
       });
       expect(viewer.getVisibilityState()).to.equal('inactive');
       expect(viewer.isVisible()).to.equal(false);
@@ -227,11 +227,11 @@ describe('Viewer', () => {
 
     it('should reject unknown values', () => {
       viewer.receiveMessage('visibilitychange', {
-        state: 'paused'
+        state: 'paused',
       });
       expect(() => {
         viewer.receiveMessage('visibilitychange', {
-          state: 'what is this'
+          state: 'what is this',
         });
       }).to.throw('Unknown VisibilityState value');
       expect(viewer.getVisibilityState()).to.equal('paused');
@@ -240,7 +240,7 @@ describe('Viewer', () => {
 
     it('should be inactive when the viewer tells us we are inactive', () => {
       viewer.receiveMessage('visibilitychange', {
-        state: 'inactive'
+        state: 'inactive',
       });
       expect(viewer.getVisibilityState()).to.equal('inactive');
       expect(viewer.isVisible()).to.equal(false);
@@ -251,7 +251,7 @@ describe('Viewer', () => {
 
     it('should be prerender when the viewer tells us we are prerender', () => {
       viewer.receiveMessage('visibilitychange', {
-        state: 'prerender'
+        state: 'prerender',
       });
       expect(viewer.getVisibilityState()).to.equal('prerender');
       expect(viewer.isVisible()).to.equal(false);
@@ -263,17 +263,17 @@ describe('Viewer', () => {
     it('should be hidden when the browser document is hidden', () => {
       changeVisibility('hidden');
       viewer.receiveMessage('visibilitychange', {
-        state: 'visible'
+        state: 'visible',
       });
       expect(viewer.getVisibilityState()).to.equal('hidden');
       expect(viewer.isVisible()).to.equal(false);
       viewer.receiveMessage('visibilitychange', {
-        state: 'paused'
+        state: 'paused',
       });
       expect(viewer.getVisibilityState()).to.equal('hidden');
       expect(viewer.isVisible()).to.equal(false);
       viewer.receiveMessage('visibilitychange', {
-        state: 'visible'
+        state: 'visible',
       });
       expect(viewer.getVisibilityState()).to.equal('hidden');
       expect(viewer.isVisible()).to.equal(false);
@@ -283,7 +283,7 @@ describe('Viewer', () => {
        'paused', () => {
       changeVisibility('visible');
       viewer.receiveMessage('visibilitychange', {
-        state: 'paused'
+        state: 'paused',
       });
       expect(viewer.getVisibilityState()).to.equal('paused');
       expect(viewer.isVisible()).to.equal(false);
@@ -292,7 +292,7 @@ describe('Viewer', () => {
     it('should be visible when the browser document is visible', () => {
       changeVisibility('visible');
       viewer.receiveMessage('visibilitychange', {
-        state: 'visible'
+        state: 'visible',
       });
       expect(viewer.getVisibilityState()).to.equal('visible');
       expect(viewer.isVisible()).to.equal(true);
@@ -303,7 +303,7 @@ describe('Viewer', () => {
       expect(viewer.getVisibilityState()).to.equal('hidden');
       expect(viewer.isVisible()).to.equal(false);
       viewer.receiveMessage('visibilitychange', {
-        state: 'paused'
+        state: 'paused',
       });
       expect(viewer.getVisibilityState()).to.equal('hidden');
       expect(viewer.isVisible()).to.equal(false);
@@ -318,7 +318,7 @@ describe('Viewer', () => {
       expect(viewer.isVisible()).to.equal(true);
 
       viewer.receiveMessage('visibilitychange', {
-        state: 'hidden'
+        state: 'hidden',
       });
       changeVisibility('hidden');
       expect(viewer.getVisibilityState()).to.equal('inactive');
@@ -328,7 +328,7 @@ describe('Viewer', () => {
       expect(viewer.isVisible()).to.equal(false);
 
       viewer.receiveMessage('visibilitychange', {
-        state: 'inactive'
+        state: 'inactive',
       });
       changeVisibility('hidden');
       expect(viewer.getVisibilityState()).to.equal('inactive');
@@ -338,7 +338,7 @@ describe('Viewer', () => {
       expect(viewer.isVisible()).to.equal(false);
 
       viewer.receiveMessage('visibilitychange', {
-        state: 'paused'
+        state: 'paused',
       });
       changeVisibility('hidden');
       expect(viewer.getVisibilityState()).to.equal('hidden');
@@ -348,7 +348,7 @@ describe('Viewer', () => {
       expect(viewer.isVisible()).to.equal(false);
 
       viewer.receiveMessage('visibilitychange', {
-        state: 'visible'
+        state: 'visible',
       });
       changeVisibility('hidden');
       expect(viewer.getVisibilityState()).to.equal('hidden');

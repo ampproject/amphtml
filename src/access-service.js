@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-import {getElementService, getElementServiceIfAvailable} from
-    './custom-element';
+import {
+  getElementService,
+  getElementServiceIfAvailable,
+} from './custom-element';
 
 
 /**

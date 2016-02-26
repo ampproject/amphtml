@@ -163,7 +163,7 @@ export class LoginDoneDialog {
       opener./*OK*/postMessage({
         sentinel: 'amp',
         type: 'result',
-        result: response
+        result: response,
       }, target);
 
       this.win.setTimeout(() => {

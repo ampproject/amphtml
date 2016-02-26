@@ -54,7 +54,7 @@ describe('amp-img', () => {
     return getImg({
       src: 'test.jpg',
       width: 300,
-      height: 200
+      height: 200,
     }).then(ampImg => {
       const img = ampImg.querySelector('img');
       expect(img).to.be.an.instanceof(Element);

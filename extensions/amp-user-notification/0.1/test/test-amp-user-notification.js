@@ -17,7 +17,7 @@
 import * as sinon from 'sinon';
 import {
   AmpUserNotification,
-  UserNotificationManager
+  UserNotificationManager,
 } from '../../../../build/all/v0/amp-user-notification-0.1.max';
 import {createIframePromise} from '../../../../testing/iframe';
 
@@ -70,7 +70,7 @@ describe('amp-user-notification', () => {
     const impl = elem.implementation_;
     impl.storagePromise_ = Promise.resolve(storage);
     impl.userNotificationManager_ = {
-      registerUserNotification: () => {}
+      registerUserNotification: () => {},
     };
 
     return elem;
@@ -94,7 +94,7 @@ describe('amp-user-notification', () => {
 
   it('should NOT require `data-show-if-href`', () => {
     return getUserNotification({
-      id: 'n1'
+      id: 'n1',
     }).then(el => {
       const impl = el.implementation_;
       expect(impl.buildCallback.bind(impl)).to.not.throw;
@@ -104,7 +104,7 @@ describe('amp-user-notification', () => {
   it('should NOT require `data-dismiss-href`', () => {
     return getUserNotification({
       id: 'n1',
-      'data-show-if-href': 'https://www.ampproject.org/get'
+      'data-show-if-href': 'https://www.ampproject.org/get',
     }).then(el => {
       const impl = el.implementation_;
       expect(impl.buildCallback.bind(impl)).to.not.throw;
@@ -381,7 +381,7 @@ describe('amp-user-notification', () => {
       service.nextInQueue_ = service.managerReadyPromise_;
       tag = {
         shouldShow: () => Promise.resolve(true),
-        show: () => Promise.resolve()
+        show: () => Promise.resolve(),
       };
     });
 

@@ -38,12 +38,12 @@ describe('LoginDoneDialog', () => {
     windowApi = {
       close: () => {},
       navigator: {
-        language: 'fr-FR'
+        language: 'fr-FR',
       },
       location: {
         hash: '#result1',
         search: '',
-        replace: sandbox.spy()
+        replace: sandbox.spy(),
       },
       addEventListener: (type, callback) => {
         if (type == 'message') {
@@ -74,8 +74,8 @@ describe('LoginDoneDialog', () => {
             return null;
           }
           return {};
-        }
-      }
+        },
+      },
     };
     windowMock = sandbox.mock(windowApi);
     openerMock = sandbox.mock(windowApi.opener);
@@ -93,8 +93,8 @@ describe('LoginDoneDialog', () => {
       origin: 'http://localhost:8000',
       data: {
         sentinel: 'amp',
-        type: 'result-ack'
-      }
+        type: 'result-ack',
+      },
     });
   }
 

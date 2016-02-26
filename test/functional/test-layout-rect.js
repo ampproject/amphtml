@@ -80,7 +80,7 @@ describe('LayoutRect', () => {
       'width': 10,
       'height': 10,
       'bottom': 70,
-      'right': 50
+      'right': 50,
     });
     expect(lr.rectIntersection(rect1, rect3)).to.be.null;
     expect(lr.rectIntersection(rect2, rect3)).to.be.null;

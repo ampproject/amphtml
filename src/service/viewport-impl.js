@@ -317,7 +317,7 @@ export class Viewport {
     // and prohibit further default zooming.
     const newValue = updateViewportMetaString(viewportMeta.content, {
       'maximum-scale': '1',
-      'user-scalable': 'no'
+      'user-scalable': 'no',
     });
     return this.setViewportMetaString_(newValue);
   }
@@ -444,7 +444,7 @@ export class Viewport {
       left: scrollLeft,
       width: size.width,
       height: size.height,
-      velocity: velocity
+      velocity: velocity,
     });
   }
 
@@ -812,7 +812,7 @@ export class ViewportBindingNaturalIosEmbed_ {
     // }
     setStyles(documentElement, {
       overflowY: 'auto',
-      webkitOverflowScrolling: 'touch'
+      webkitOverflowScrolling: 'touch',
     });
     setStyles(documentBody, {
       overflowY: 'auto',
@@ -821,7 +821,7 @@ export class ViewportBindingNaturalIosEmbed_ {
       top: 0,
       left: 0,
       right: 0,
-      bottom: 0
+      bottom: 0,
     });
 
     // Insert scrollPos element into DOM. See {@link onScrolled_} for why
@@ -834,7 +834,7 @@ export class ViewportBindingNaturalIosEmbed_ {
       left: 0,
       width: 0,
       height: 0,
-      visibility: 'hidden'
+      visibility: 'hidden',
     });
     documentBody.appendChild(this.scrollPosEl_);
 
@@ -848,7 +848,7 @@ export class ViewportBindingNaturalIosEmbed_ {
       left: 0,
       width: 0,
       height: 0,
-      visibility: 'hidden'
+      visibility: 'hidden',
     });
     documentBody.appendChild(this.scrollMoveEl_);
 
@@ -859,7 +859,7 @@ export class ViewportBindingNaturalIosEmbed_ {
     setStyles(this.endPosEl_, {
       width: 0,
       height: 0,
-      visibility: 'hidden'
+      visibility: 'hidden',
     });
     // TODO(dvoytenko): not only it should be at the bottom at setup time,
     // but it must always be at the bottom. Consider using BODY "childList"
@@ -904,7 +904,7 @@ export class ViewportBindingNaturalIosEmbed_ {
   getSize() {
     return {
       width: this.win./*OK*/innerWidth,
-      height: this.win./*OK*/innerHeight
+      height: this.win./*OK*/innerHeight,
     };
   }
 

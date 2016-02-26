@@ -43,7 +43,7 @@ describe('amp-brightcove', () => {
   it('renders', () => {
     return getBrightcove({
       'data-account': '906043040001',
-      'data-video-id': 'ref:ampdemo'
+      'data-video-id': 'ref:ampdemo',
     }).then(bc => {
       const iframe = bc.querySelector('iframe');
       expect(iframe).to.not.be.null;
@@ -58,7 +58,7 @@ describe('amp-brightcove', () => {
   it('renders responsively', () => {
     return getBrightcove({
       'data-account': '906043040001',
-      'data-video-id': 'ref:ampdemo'
+      'data-video-id': 'ref:ampdemo',
     }, true).then(bc => {
       const iframe = bc.querySelector('iframe');
       expect(iframe).to.not.be.null;
@@ -76,7 +76,7 @@ describe('amp-brightcove', () => {
     return getBrightcove({
       'data-account': '906043040001',
       'data-video-id': 'ref:ampdemo',
-      'data-param-my-param': 'hello world'
+      'data-param-my-param': 'hello world',
     }).then(bc => {
       const iframe = bc.querySelector('iframe');
       const params = parseUrl(iframe.src).search.split('&');

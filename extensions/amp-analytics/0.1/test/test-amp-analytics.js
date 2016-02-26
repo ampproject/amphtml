@@ -17,7 +17,7 @@
 import {ANALYTICS_CONFIG} from '../vendors';
 import {AmpAnalytics} from '../../../../build/all/v0/amp-analytics-0.1.max';
 import {
-  installUserNotificationManager
+  installUserNotificationManager,
 } from '../../../../build/all/v0/amp-user-notification-0.1.max';
 import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
@@ -43,7 +43,7 @@ describe('amp-analytics', function() {
 
   const jsonMockResponses = {
     'config1': '{"vars": {"title": "remote"}}',
-    'https://foo/Test%20Title': '{"vars": {"title": "magic"}}'
+    'https://foo/Test%20Title': '{"vars": {"title": "magic"}}',
   };
 
   beforeEach(() => {
@@ -129,7 +129,7 @@ describe('amp-analytics', function() {
   it('sends a basic hit', function() {
     const analytics = getAnalyticsTag({
       'requests': {'foo': 'https://example.com/bar'},
-      'triggers': [{'on': 'visible', 'request': 'foo'}]
+      'triggers': [{'on': 'visible', 'request': 'foo'}],
     });
 
     return waitForSendRequest(analytics).then(() => {
@@ -151,7 +151,7 @@ describe('amp-analytics', function() {
           it('should produce request: ' + name +
               '. If this test fails update vendor-requests.json', () => {
             const analytics = getAnalyticsTag({
-              requests: config.requests
+              requests: config.requests,
             });
             analytics.createdCallback();
             analytics.buildCallback();
@@ -170,7 +170,7 @@ describe('amp-analytics', function() {
             });
             return analytics.layoutCallback().then(() => {
               return analytics.handleEvent_({
-                request: name
+                request: name,
               }).then(url => {
                 const val = VENDOR_REQUESTS[vendor][name];
                 if (val == null) {
@@ -193,7 +193,7 @@ describe('amp-analytics', function() {
   it('does not send a hit when config is not in a script tag', function() {
     const config = JSON.stringify({
       'requests': {'foo': 'https://example.com/bar'},
-      'triggers': [{'on': 'visible', 'request': 'foo'}]
+      'triggers': [{'on': 'visible', 'request': 'foo'}],
     });
     const el = windowApi.document.createElement('amp-analytics');
     el.textContent = config;
@@ -210,7 +210,7 @@ describe('amp-analytics', function() {
   it('does not send a hit when multiple child tags exist', function() {
     const analytics = getAnalyticsTag({
       'requests': {'foo': 'https://example.com/bar'},
-      'triggers': [{'on': 'visible', 'request': 'foo'}]
+      'triggers': [{'on': 'visible', 'request': 'foo'}],
     });
     const script2 = document.createElement('script');
     script2.setAttribute('type', 'application/json');
@@ -226,7 +226,7 @@ describe('amp-analytics', function() {
         const script = windowApi.document.createElement('script');
         script.textContent = JSON.stringify({
           'requests': {'foo': 'https://example.com/bar'},
-          'triggers': [{'on': 'visible', 'request': 'foo'}]
+          'triggers': [{'on': 'visible', 'request': 'foo'}],
         });
         el.appendChild(script);
         const analytics = new AmpAnalytics(el);
@@ -242,7 +242,7 @@ describe('amp-analytics', function() {
   it('does not send a hit when request is not provided', function() {
     const analytics = getAnalyticsTag({
       'requests': {'foo': 'https://example.com/bar'},
-      'triggers': [{'on': 'visible'}]
+      'triggers': [{'on': 'visible'}],
     });
 
     return waitForNoSendRequest(analytics).then(() => {
@@ -252,7 +252,7 @@ describe('amp-analytics', function() {
 
   it('does not send a hit when request type is not defined', function() {
     const analytics = getAnalyticsTag({
-      'triggers': [{'on': 'visible', 'request': 'foo'}]
+      'triggers': [{'on': 'visible', 'request': 'foo'}],
     });
 
     return waitForNoSendRequest(analytics).then(() => {
@@ -264,7 +264,7 @@ describe('amp-analytics', function() {
     const analytics = getAnalyticsTag({
       'requests': {'foo':
         'https://example.com/bar&${foobar}&baz', 'foobar': 'f1'},
-      'triggers': [{'on': 'visible', 'request': 'foo'}]
+      'triggers': [{'on': 'visible', 'request': 'foo'}],
     });
     return waitForSendRequest(analytics).then(() => {
       expect(sendRequestSpy.calledOnce).to.be.true;
@@ -277,7 +277,7 @@ describe('amp-analytics', function() {
     const analytics = getAnalyticsTag({
       'requests': {'foo':
         'https://example.com/bar&${foobar}', 'foobar': '${baz}', 'baz': 'b1'},
-      'triggers': [{'on': 'visible', 'request': 'foo'}]
+      'triggers': [{'on': 'visible', 'request': 'foo'}],
     });
 
     return waitForSendRequest(analytics).then(() => {
@@ -289,7 +289,7 @@ describe('amp-analytics', function() {
   it('expands recursive requests', function() {
     const analytics = getAnalyticsTag({
       'requests': {'foo': '/bar&${foobar}&baz', 'foobar': '${foo}'},
-      'triggers': [{'on': 'visible', 'request': 'foo'}]
+      'triggers': [{'on': 'visible', 'request': 'foo'}],
     });
 
     return waitForSendRequest(analytics).then(() => {
@@ -304,14 +304,14 @@ describe('amp-analytics', function() {
       getItem: function(unusedName) {
         return JSON.stringify({
           time: new Date().getTime(),
-          cid: 'base'
+          cid: 'base',
         });
       },
     };
     windowApi.location.href = '/c/www.test.com/abc';
     const analytics = getAnalyticsTag({
       'requests': {'foo': 'https://example.com/cid=${clientId(analytics-abc)}'},
-      'triggers': [{'on': 'visible', 'request': 'foo'}]
+      'triggers': [{'on': 'visible', 'request': 'foo'}],
     });
 
     return waitForSendRequest(analytics).then(() => {
@@ -325,13 +325,13 @@ describe('amp-analytics', function() {
   it('merges requests correctly', function() {
     const analytics = getAnalyticsTag({
       'requests': {'foo': 'https://example.com/${bar}'},
-      'triggers': [{'on': 'visible', 'request': 'foo'}]
+      'triggers': [{'on': 'visible', 'request': 'foo'}],
     }, {'type': 'xyz'});
 
     analytics.predefinedConfig_ = {
       'xyz': {
-        'requests': {'foo': '/bar', 'bar': 'foobar'}
-      }
+        'requests': {'foo': '/bar', 'bar': 'foobar'},
+      },
     };
     return waitForSendRequest(analytics).then(() => {
       expect(sendRequestSpy.calledOnce).to.be.true;
@@ -342,7 +342,7 @@ describe('amp-analytics', function() {
   it('merges objects correctly', function() {
     const analytics = getAnalyticsTag({
       'requests': {'foo': 'https://example.com/bar'},
-      'triggers': [{'on': 'visible', 'request': 'foo'}]
+      'triggers': [{'on': 'visible', 'request': 'foo'}],
     });
 
     return analytics.layoutCallback().then(() => {
@@ -370,7 +370,7 @@ describe('amp-analytics', function() {
           .to.deep.equal({
             'foo': 'bar',
             'baz': 'bar',
-            'foobar': {'foobar': ['abc', 'def']}
+            'foobar': {'foobar': ['abc', 'def']},
           });
     });
   });
@@ -384,8 +384,8 @@ describe('amp-analytics', function() {
         'request': 'pageview',
         'vars': {
           'var1': 'x',
-          'var2': 'test2'
-        }
+          'var2': 'test2',
+        },
       }]});
     return waitForSendRequest(analytics).then(() => {
       expect(sendRequestSpy.calledOnce).to.be.true;
@@ -398,7 +398,7 @@ describe('amp-analytics', function() {
     const analytics = getAnalyticsTag({
       'vars': {
         'var1': 'x',
-        'var2': 'test2'
+        'var2': 'test2',
       },
       'requests': {'pageview':
         'https://example.com/test1=${var1}&test2=${var2}'},
@@ -426,7 +426,7 @@ describe('amp-analytics', function() {
   it('expands url-replacements vars', function() {
     const analytics = getAnalyticsTag({
       'requests': {'foo': 'https://example.com/AMPDOC_URL&TITLE'},
-      'triggers': [{'on': 'visible', 'request': 'foo'}]
+      'triggers': [{'on': 'visible', 'request': 'foo'}],
     });
     return waitForSendRequest(analytics).then(() => {
       expect(sendRequestSpy.calledOnce).to.be.true;
@@ -438,7 +438,7 @@ describe('amp-analytics', function() {
     const analytics = getAnalyticsTag({
       'vars': {
         'var1': 'config1',
-        'var2': 'config2'
+        'var2': 'config2',
       },
       'requests': {'pageview':
         'https://example.com/test1=${var1}&test2=${var2}'},
@@ -446,7 +446,7 @@ describe('amp-analytics', function() {
         'on': 'visible',
         'request': 'pageview',
         'vars': {
-          'var1': 'trigger1'
+          'var1': 'trigger1',
         }}]});
     return waitForSendRequest(analytics).then(() => {
       expect(sendRequestSpy.calledOnce).to.be.true;
@@ -460,7 +460,7 @@ describe('amp-analytics', function() {
       'vars': {'random': 428},
       'requests': {'pageview':
         'https://example.com/test1=${title}&test2=${random}'},
-      'triggers': [{'on': 'visible', 'request': 'pageview',}]
+      'triggers': [{'on': 'visible', 'request': 'pageview'}],
     });
     return waitForSendRequest(analytics).then(() => {
       expect(sendRequestSpy.calledOnce).to.be.true;
@@ -477,7 +477,7 @@ describe('amp-analytics', function() {
         'request': 'pageview',
         'vars': {
           'var1': '${var2}',
-          'var2': 't2'
+          'var2': 't2',
         }}]});
     return waitForSendRequest(analytics).then(() => {
       expect(sendRequestSpy.calledOnce).to.be.true;
@@ -490,18 +490,18 @@ describe('amp-analytics', function() {
     const analytics = getAnalyticsTag({
       'vars': {
         'c1': 'config 1',
-        'c2': 'config&2'
+        'c2': 'config&2',
       },
       'requests': {
         'base': 'https://example.com/test?c1=${c1}&t1=${t1}',
-        'pageview': '${base}&c2=${c2}&t2=${t2}'
+        'pageview': '${base}&c2=${c2}&t2=${t2}',
       },
       'triggers': [{
         'on': 'visible',
         'request': 'pageview',
         'vars': {
           't1': 'trigger=1',
-          't2': 'trigger?2'
+          't2': 'trigger?2',
         }}]});
     return waitForSendRequest(analytics).then(() => {
       expect(sendRequestSpy.calledOnce).to.be.true;
@@ -515,11 +515,11 @@ describe('amp-analytics', function() {
     const analytics = getAnalyticsTag({
       'vars': {
         'c1': ['Config, The Barbarian', 'config 1'],
-        'c2': 'config&2'
+        'c2': 'config&2',
       },
       'requests': {
         'base': 'https://example.com/test?',
-        'pageview': '${base}c1=${c1}&c2=${c2}'
+        'pageview': '${base}c1=${c1}&c2=${c2}',
       },
       'triggers': [{
         'on': 'visible',
@@ -550,8 +550,8 @@ describe('amp-analytics', function() {
         'request': 'pageview',
         'vars': {
           'var1': 'x',
-          'var2': 'DOCUMENT_REFERRER'
-        }
+          'var2': 'DOCUMENT_REFERRER',
+        },
       }]});
     return waitForSendRequest(analytics).then(() => {
       expect(sendRequestSpy.calledOnce).to.be.true;
@@ -566,7 +566,7 @@ describe('amp-analytics', function() {
     const config = {
       'requests': {'foo': 'https://example.com/bar'},
       'triggers': [{'on': 'visible', 'request': 'foo'}],
-      'optout': 'foo.bar'
+      'optout': 'foo.bar',
     };
     let analytics = getAnalyticsTag(config);
     return waitForSendRequest(analytics).then(() => {
@@ -592,9 +592,9 @@ describe('amp-analytics', function() {
     const analytics = getAnalyticsTag({
       'extraUrlParams': {'s.evar0': '0', 's.evar1': '1', 'foofoo': 'baz'},
       'requests': {'foo': 'https://example.com/${title}'},
-      'triggers': [{'on': 'visible', 'request': 'foo'}]
+      'triggers': [{'on': 'visible', 'request': 'foo'}],
     }, {
-      'config': 'config1'
+      'config': 'config1',
     });
     return analytics.layoutCallback().then(() => {
       expect(sendRequestSpy.args[0][0]).to.have.string('s.evar0=0');
@@ -608,9 +608,9 @@ describe('amp-analytics', function() {
       'extraUrlParams': {'s.evar0': '0', 's.evar1': '1', 'foofoo': 'baz'},
       'extraUrlParamsReplaceMap': {'s.evar': 'v'},
       'requests': {'foo': 'https://example.com/${title}'},
-      'triggers': [{'on': 'visible', 'request': 'foo'}]
+      'triggers': [{'on': 'visible', 'request': 'foo'}],
     }, {
-      'config': 'config1'
+      'config': 'config1',
     });
     return analytics.layoutCallback().then(() => {
       expect(sendRequestSpy.args[0][0]).to.have.string('v0=0');
@@ -625,9 +625,9 @@ describe('amp-analytics', function() {
     const analytics = getAnalyticsTag({
       'vars': {'title': 'local'},
       'requests': {'foo': 'https://example.com/${title}'},
-      'triggers': [{'on': 'visible', 'request': 'foo'}]
+      'triggers': [{'on': 'visible', 'request': 'foo'}],
     }, {
-      'config': 'config1'
+      'config': 'config1',
     });
     return waitForSendRequest(analytics).then(() => {
       expect(sendRequestSpy.args[0][0]).to.equal('https://example.com/remote');
@@ -639,7 +639,7 @@ describe('amp-analytics', function() {
     const analytics = getAnalyticsTag({
       'vars': {'title': 'local'},
       'requests': {'foo': 'https://example.com/${title}'},
-      'triggers': [{'on': 'visible', 'request': 'foo'}]
+      'triggers': [{'on': 'visible', 'request': 'foo'}],
     }, {
       'config': 'config1',
       'data-credentials': 'include',
@@ -652,9 +652,9 @@ describe('amp-analytics', function() {
   it('expands urls in config request', () => {
     const analytics = getAnalyticsTag({
       'requests': {'foo': 'https://example.com/${title}'},
-      'triggers': [{'on': 'visible', 'request': 'foo'}]
+      'triggers': [{'on': 'visible', 'request': 'foo'}],
     }, {
-      'config': 'https://foo/TITLE'
+      'config': 'https://foo/TITLE',
     });
     return waitForSendRequest(analytics).then(() => {
       expect(sendRequestSpy.args[0][0]).to.equal('https://example.com/magic');
@@ -666,11 +666,11 @@ describe('amp-analytics', function() {
       'host': 'example.com',
       'requests': {
         'pageview1': '/test1=${requestCount}',
-        'pageview2': '/test2=${requestCount}'
+        'pageview2': '/test2=${requestCount}',
       },
       'triggers': [
         {'on': 'visible', 'request': 'pageview1'},
-        {'on': 'visible', 'request': 'pageview2'}
+        {'on': 'visible', 'request': 'pageview2'},
       ]});
     return waitForSendRequest(analytics).then(() => {
       expect(sendRequestSpy.calledTwice).to.be.true;
@@ -683,7 +683,7 @@ describe('amp-analytics', function() {
     it('fails for iframePing config outside of vendor config', function() {
       const analytics = getAnalyticsTag({
         'requests': {'foo': 'https://example.com/bar'},
-        'triggers': [{'on': 'visible', 'iframePing': true}]
+        'triggers': [{'on': 'visible', 'iframePing': true}],
       });
       return expect(waitForNoSendRequest(analytics)).to.be
           .rejectedWith(
@@ -696,15 +696,15 @@ describe('amp-analytics', function() {
               'fixtures/served/iframe.html?title=${title}';
       analytics.predefinedConfig_.testVendor = {
         'requests': {
-          'pageview': url
+          'pageview': url,
         },
         'triggers': {
           'pageview': {
             'on': 'visible',
             'request': 'pageview',
-            'iframePing': true
-          }
-        }
+            'iframePing': true,
+          },
+        },
       };
       return waitForSendRequest(analytics).then(() => {
         const iframe = analytics.element
@@ -721,9 +721,9 @@ describe('amp-analytics', function() {
     it('should resume fetch when consent is given', () => {
       const analytics = getAnalyticsTag({
         'requests': {'foo': 'https://example.com/local'},
-        'triggers': [{'on': 'visible', 'request': 'foo'}]
+        'triggers': [{'on': 'visible', 'request': 'foo'}],
       }, {
-        'data-consent-notification-id': 'amp-user-notification1'
+        'data-consent-notification-id': 'amp-user-notification1',
       });
 
       sandbox.stub(uidService, 'get', id => {
@@ -740,9 +740,9 @@ describe('amp-analytics', function() {
     it('should not fetch when consent is not given', () => {
       const analytics = getAnalyticsTag({
         'requests': {'foo': 'https://example.com/local'},
-        'triggers': [{'on': 'visible', 'request': 'foo'}]
+        'triggers': [{'on': 'visible', 'request': 'foo'}],
       }, {
-        'data-consent-notification-id': 'amp-user-notification1'
+        'data-consent-notification-id': 'amp-user-notification1',
       });
 
       sandbox.stub(uidService, 'get', id => {

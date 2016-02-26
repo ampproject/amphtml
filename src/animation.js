@@ -145,7 +145,7 @@ class AnimationPlayer {
         duration: segment.duration,
         curve: segment.curve || defaultCurve,
         started: false,
-        completed: false
+        completed: false,
       });
     }
 
@@ -181,7 +181,7 @@ class AnimationPlayer {
 
     /** @const */
     this.task_ = this.vsync_.createAnimTask({
-      mutate: this.stepMutate_.bind(this)
+      mutate: this.stepMutate_.bind(this),
     });
   }
 

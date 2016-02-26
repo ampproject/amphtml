@@ -17,8 +17,11 @@
 import {Timer} from '../../../../src/timer';
 import {AmpIframe, setTrackingIframeTimeoutForTesting} from '../amp-iframe';
 import {adopt} from '../../../../src/runtime';
-import {createIframePromise, pollForLayout, poll}
-    from '../../../../testing/iframe';
+import {
+  createIframePromise,
+  pollForLayout,
+  poll,
+} from '../../../../testing/iframe';
 import {loadPromise} from '../../../../src/event-helper';
 import {viewportFor} from '../../../../src/viewport';
 import * as sinon from 'sinon';
@@ -101,7 +104,7 @@ describe('amp-iframe', () => {
               return {
                 container: i,
                 iframe: created,
-                scrollWrapper: i.querySelector('i-amp-scroll-container')
+                scrollWrapper: i.querySelector('i-amp-scroll-container'),
               };
             });
           });
@@ -110,7 +113,7 @@ describe('amp-iframe', () => {
         return {
           container: i,
           iframe: null,
-          error: i.textContent
+          error: i.textContent,
         };
       });
     });
@@ -120,7 +123,7 @@ describe('amp-iframe', () => {
     const args = opt_args || {
       src: iframeSrc,
       width: 100,
-      height: 100
+      height: 100,
     };
     return getAmpIframe(args).then(amp => {
       return amp.container.implementation_;
@@ -131,7 +134,7 @@ describe('amp-iframe', () => {
     return getAmpIframe({
       src: iframeSrc,
       width: 100,
-      height: 100
+      height: 100,
     }).then(amp => {
       const impl = amp.container.implementation_;
       expect(amp.iframe).to.be.instanceof(Element);
@@ -151,7 +154,7 @@ describe('amp-iframe', () => {
       sandbox: 'allow-scripts',
       width: 100,
       height: 100,
-      scrolling: 'no'
+      scrolling: 'no',
     }).then(amp => {
       expect(amp.iframe.getAttribute('sandbox')).to.equal('allow-scripts');
       return waitForJsInIframe().then(() => {
@@ -166,7 +169,7 @@ describe('amp-iframe', () => {
       src: iframeSrc,
       sandbox: 'allow-scripts',
       width: 100,
-      height: 100
+      height: 100,
     }, '599px', '1000px').then(amp => {
       expect(amp.iframe).to.be.null;
     }).catch(() => {});
@@ -177,7 +180,7 @@ describe('amp-iframe', () => {
       src: iframeSrc,
       sandbox: 'allow-scripts',
       width: 100,
-      height: 100
+      height: 100,
     }, '650px', '1000px', '-100px').then(amp => {
       expect(amp.iframe).to.be.null;
     }).catch(() => {});
@@ -188,7 +191,7 @@ describe('amp-iframe', () => {
       src: iframeSrc,
       sandbox: 'allow-scripts',
       width: 100,
-      height: 100
+      height: 100,
     }, '75px', '100px').then(amp => {
       expect(amp.iframe).to.be.not.null;
     });
@@ -201,7 +204,7 @@ describe('amp-iframe', () => {
           '/base/test/fixtures/served/iframe.html',
       sandbox: 'allow-scripts',
       width: 100,
-      height: 100
+      height: 100,
     }).then(amp => {
       expect(amp.iframe).to.be.null;
     });
@@ -214,7 +217,7 @@ describe('amp-iframe', () => {
     return getAmpIframe({
       src: dataUri,
       width: 100,
-      height: 100
+      height: 100,
     }).then(amp => {
       expect(amp.iframe).to.be.instanceof(Element);
       expect(amp.iframe.src).to.equal(dataUri);
@@ -266,7 +269,7 @@ describe('amp-iframe', () => {
       sandbox: 'allow-same-origin',
       src: 'data:text/html;charset=utf-8;base64,' +
         'PHNjcmlwdD5kb2N1bWVudC53cml0ZSgnUiAnICsgZG9jdW1lbnQucmVmZXJyZXIgK' +
-        'yAnLCAnICsgbG9jYXRpb24uaHJlZik8L3NjcmlwdD4='
+        'yAnLCAnICsgbG9jYXRpb24uaHJlZik8L3NjcmlwdD4=',
     }).then(amp => {
       expect(amp.iframe).to.be.null;
     });
@@ -279,7 +282,7 @@ describe('amp-iframe', () => {
       sandbox: 'allow-same-origin',
       src: 'DATA:text/html;charset=utf-8;base64,' +
         'PHNjcmlwdD5kb2N1bWVudC53cml0ZSgnUiAnICsgZG9jdW1lbnQucmVmZXJyZXIgK' +
-        'yAnLCAnICsgbG9jYXRpb24uaHJlZik8L3NjcmlwdD4='
+        'yAnLCAnICsgbG9jYXRpb24uaHJlZik8L3NjcmlwdD4=',
     }).then(amp => {
       expect(amp.iframe).to.be.null;
     });
@@ -332,7 +335,7 @@ describe('amp-iframe', () => {
       sandbox: 'allow-scripts allow-same-origin',
       width: 100,
       height: 100,
-      resizable: ''
+      resizable: '',
     }).then(amp => {
       const impl = amp.container.implementation_;
       impl.layoutCallback();
@@ -344,7 +347,7 @@ describe('amp-iframe', () => {
       amp.iframe.contentWindow.postMessage({
         sentinel: 'amp-test',
         type: 'requestHeight',
-        height: 217
+        height: 217,
       }, '*');
       return p;
     }).then(res => {
@@ -359,7 +362,7 @@ describe('amp-iframe', () => {
       sandbox: 'allow-scripts',
       width: 100,
       height: 100,
-      resizable: ''
+      resizable: '',
     }).then(amp => {
       const impl = amp.container.implementation_;
       impl.attemptChangeHeight = sinon.spy();
@@ -376,7 +379,7 @@ describe('amp-iframe', () => {
       src: iframeSrc,
       sandbox: 'allow-scripts',
       width: 100,
-      height: 100
+      height: 100,
     }).then(amp => {
       const impl = amp.container.implementation_;
       impl.attemptChangeHeight = sinon.spy();
@@ -396,7 +399,7 @@ describe('amp-iframe', () => {
       sandbox: 'allow-scripts allow-same-origin',
       width: 480,
       height: 360,
-      poster: 'https://i.ytimg.com/vi/cMcCTVAFBWM/hqdefault.jpg'
+      poster: 'https://i.ytimg.com/vi/cMcCTVAFBWM/hqdefault.jpg',
     }).then(amp => {
       const impl = amp.container.implementation_;
       return timer.promise(100).then(() => {
@@ -412,7 +415,7 @@ describe('amp-iframe', () => {
       sandbox: 'allow-scripts allow-same-origin',
       width: 10,
       height: 10,
-      poster: 'https://i.ytimg.com/vi/cMcCTVAFBWM/hqdefault.jpg'
+      poster: 'https://i.ytimg.com/vi/cMcCTVAFBWM/hqdefault.jpg',
     };
     let nonTracking;
     return getAmpIframe(attributes, null, null, null, doc => {
@@ -462,7 +465,7 @@ describe('amp-iframe', () => {
       sandbox: 'allow-scripts allow-same-origin',
       width: 11,
       height: 11,
-      poster: 'https://i.ytimg.com/vi/cMcCTVAFBWM/hqdefault.jpg'
+      poster: 'https://i.ytimg.com/vi/cMcCTVAFBWM/hqdefault.jpg',
     }).then(impl => {
       expect(impl.looksLikeTrackingIframe_()).to.be.false;
     });
