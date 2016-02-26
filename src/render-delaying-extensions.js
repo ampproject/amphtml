@@ -44,7 +44,7 @@ const LOAD_TIMEOUT = 3000;
  */
 export function waitForExtensions(win) {
   const extensions = includedExtensions(win);
-  const promises = extensions.map((extension) => {
+  const promises = extensions.map(extension => {
     return timer.timeoutPromise(
       LOAD_TIMEOUT,
       getServicePromise(win, extension),
