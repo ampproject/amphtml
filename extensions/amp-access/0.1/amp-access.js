@@ -20,7 +20,6 @@ import {assert, assertEnumValue} from '../../../src/asserts';
 import {assertHttpsUrl, getSourceOrigin} from '../../../src/url';
 import {cancellation} from '../../../src/error';
 import {cidFor} from '../../../src/cid';
-import {documentStateFor} from '../../../src/document-state';
 import {evaluateAccessExpr} from './access-expr';
 import {getService} from '../../../src/service';
 import {getValueForExpr} from '../../../src/json';
@@ -29,7 +28,7 @@ import {isExperimentOn} from '../../../src/experiments';
 import {isObject} from '../../../src/types';
 import {listenOnce} from '../../../src/event-helper';
 import {log} from '../../../src/log';
-import {onDocumentReady} from '../../../src/document-state';
+import {onDocumentReady} from '../../../src/document-ready';
 import {openLoginDialog} from './login-dialog';
 import {parseQueryString} from '../../../src/url';
 import {resourcesFor} from '../../../src/resources';
@@ -132,9 +131,6 @@ export class AccessService {
 
     /** @private @const {!Viewer} */
     this.viewer_ = viewerFor(this.win);
-
-    /** @private @const {!DocumentState} */
-    this.docState_ = documentStateFor(this.win);
 
     /** @private @const {!Viewport} */
     this.viewport_ = viewportFor(this.win);
@@ -574,7 +570,7 @@ export class AccessService {
    * @private
    */
   scheduleView_() {
-    this.docState_.onReady(() => {
+    onDocumentReady(this.win.document, () => {
       if (this.viewer_.isVisible()) {
         this.reportWhenViewed_();
       }

@@ -20,7 +20,7 @@ import {assert} from '../../src/asserts';
 import {getCookie, setCookie} from '../../src/cookies';
 import {isExperimentOn, toggleExperiment} from '../../src/experiments';
 import {listenOnce} from '../../src/event-helper';
-import {onDocumentReady} from '../../src/document-state';
+import {onDocumentReady} from '../../src/document-ready';
 
 const COOKIE_MAX_AGE_DAYS = 180;  // 6 month
 

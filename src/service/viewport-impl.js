@@ -19,7 +19,7 @@ import {Observable} from '../observable';
 import {getService} from '../service';
 import {layoutRectLtwh} from '../layout-rect';
 import {log} from '../log';
-import {onDocumentReady} from '../document-state';
+import {onDocumentReady} from '../document-ready';
 import {platform} from '../platform';
 import {px, setStyle, setStyles} from '../style';
 import {timer} from '../timer';

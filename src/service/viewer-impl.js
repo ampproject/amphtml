@@ -15,7 +15,7 @@
  */
 
 import {Observable} from '../observable';
-import {assert} from '../asserts';
+import {assert, assertEnumValue} from '../asserts';
 import {documentStateFor} from '../document-state';
 import {getMode} from '../mode';
 import {getService} from '../service';
@@ -68,19 +68,34 @@ export const ViewportType = {
 /**
  * Visibility state of the AMP document.
  * @enum {string}
- * @private
  */
 export const VisibilityState = {
+  /**
+   * The AMP document is being pre-rendered before being shown.
+   */
+  PRERENDER: 'prerender',
 
   /**
-   * Viewer has shown the AMP document.
+   * The AMP document is currently active and visible.
    */
   VISIBLE: 'visible',
 
   /**
-   * Viewer has indicated that AMP document is hidden.
+   * The AMP document is active but the browser tab or AMP app is not.
    */
-  HIDDEN: 'hidden'
+  HIDDEN: 'hidden',
+
+  /**
+   * The AMP document is visible, but the user has started swiping away from
+   * it. The runtime may stop active playback.
+   */
+  PAUSED: 'paused',
+
+  /**
+   * The AMP document is no longer active because the user swiped away or
+   * closed the viewer. The document may become visible again later.
+   */
+  INACTIVE: 'inactive',
 };
 
 
@@ -127,6 +142,9 @@ export class Viewer {
 
     /** @private {string} */
     this.visibilityState_ = VisibilityState.VISIBLE;
+
+    /** @private {string} */
+    this.viewerVisibilityState_ = this.visibilityState_;
 
     /** @private {number} */
     this.prerenderSize_ = 1;
@@ -204,9 +222,8 @@ export class Viewer {
         this.overtakeHistory_;
     log.fine(TAG_, '- history:', this.overtakeHistory_);
 
-    this.visibilityState_ = this.params_['visibilityState'] ||
-        this.visibilityState_;
-    log.fine(TAG_, '- visibilityState:', this.visibilityState_);
+    this.setVisibilityState_(this.params_['visibilityState']);
+    log.fine(TAG_, '- visibilityState:', this.getVisibilityState());
 
     this.prerenderSize_ = parseInt(this.params_['prerenderSize'], 10) ||
         this.prerenderSize_;
@@ -251,7 +268,7 @@ export class Viewer {
     this.hasBeenVisible_ = this.isVisible();
 
     // Wait for document to become visible.
-    this.docState_.onVisibilityChanged(this.onVisibilityChange_.bind(this));
+    this.docState_.onVisibilityChanged(this.recheckVisibilityState_.bind(this));
 
 
     /**
@@ -384,6 +401,7 @@ export class Viewer {
 
     // Check if by the time the `Viewer`
     // instance is constructed, the document is already `visible`.
+    this.recheckVisibilityState_();
     this.onVisibilityChange_();
   }
 
@@ -468,6 +486,48 @@ export class Viewer {
     return this.visibilityState_;
   }
 
+  recheckVisibilityState_() {
+    this.setVisibilityState_(this.viewerVisibilityState_);
+  }
+
+  /**
+   * Sets the viewer defined visibility state.
+   * @param {string|undefined} state
+   */
+  setVisibilityState_(state) {
+    if (!state) {
+      return;
+    }
+    const oldState = this.visibilityState_;
+    state = assertEnumValue(VisibilityState, state, 'VisibilityState');
+
+    // The viewer is informing us we are not currently active because we are
+    // being pre-rendered, or the user swiped to another doc (or closed the
+    // viewer). Unfortunately, the viewer sends HIDDEN instead of PRERENDER or
+    // INACTIVE, though we know better.
+    if (state === VisibilityState.HIDDEN) {
+      state = this.hasBeenVisible_ ?
+        VisibilityState.INACTIVE :
+        VisibilityState.PRERENDER;
+    }
+
+    this.viewerVisibilityState_ = state;
+
+    if (this.docState_.isHidden() &&
+        (state === VisibilityState.VISIBLE ||
+         state === VisibilityState.PAUSED)) {
+      state = VisibilityState.HIDDEN;
+    }
+
+    this.visibilityState_ = state;
+
+    log.fine(TAG_, 'visibilitychange event:', this.getVisibilityState());
+
+    if (oldState !== state) {
+      this.onVisibilityChange_();
+    }
+  }
+
   /**
    * Whether the AMP document currently visible. The reasons why it might not
    * be visible include user switching to another tab, browser running the
@@ -476,8 +536,7 @@ export class Viewer {
    * @return {boolean}
    */
   isVisible() {
-    return this.visibilityState_ == VisibilityState.VISIBLE &&
-        !this.docState_.isHidden();
+    return this.getVisibilityState() == VisibilityState.VISIBLE;
   }
 
   /**
@@ -760,15 +819,11 @@ export class Viewer {
       return Promise.resolve();
     }
     if (eventType == 'visibilitychange') {
-      if (data['state'] !== undefined) {
-        this.visibilityState_ = data['state'];
-      }
       if (data['prerenderSize'] !== undefined) {
         this.prerenderSize_ = data['prerenderSize'];
+        log.fine(TAG_, '- prerenderSize change:', this.prerenderSize_);
       }
-      log.fine(TAG_, 'visibilitychange event:', this.visibilityState_,
-          this.prerenderSize_);
-      this.onVisibilityChange_();
+      this.setVisibilityState_(data['state']);
       return Promise.resolve();
     }
     if (eventType == 'broadcast') {

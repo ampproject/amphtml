@@ -15,7 +15,7 @@
  */
 
 import {documentInfoFor} from './document-info';
-import {documentStateFor} from './document-state';
+import {onDocumentReady} from './document-ready';
 import {getService} from './service';
 import {loadPromise} from './event-helper';
 import {resourcesFor} from './resources';
@@ -93,12 +93,9 @@ export class Performance {
     /** @private {?Resources} */
     this.resources = null;
 
-    /** @private {!DocumentState} */
-    this.docState_ = documentStateFor(this.win);
-
     /** @private @const {!Promise} */
     this.whenReadyToRetrieveResourcesPromise_ = new Promise(resolve => {
-      this.docState_.onReady(() => {
+      onDocumentReady(this.win.document, () => {
         // We need to add a delay, since this can execute earlier
         // than the onReady callback registered inside of `Resources`.
         // Should definitely think of making `getResourcesInViewport` async.
