@@ -15,7 +15,7 @@
  */
 
 import {Observable} from '../observable';
-import {assert, assertEnumValue} from '../asserts';
+import {assertEnumValue} from '../asserts';
 import {documentStateFor} from '../document-state';
 import {getMode} from '../mode';
 import {getService} from '../service';
@@ -830,14 +830,18 @@ export class Viewer {
    * @export
    */
   setMessageDeliverer(deliverer, origin) {
-    assert(!this.messageDeliverer_, 'message deliverer can only be set once');
+    if (this.messageDeliverer_) {
+      throw new Error('message channel can only be initialized once');
+    }
+    if (!origin) {
+      throw new Error('message channel must have an origin');
+    }
     log.fine(TAG_, 'message channel established with origin: ', origin);
     this.messageDeliverer_ = deliverer;
+    this.messagingOrigin_ = origin;
     if (this.messagingReadyResolver_) {
       this.messagingReadyResolver_();
     }
-    // TODO(dvoytenko, #1764): Make `origin` required when viewers catch up.
-    this.messagingOrigin_ = origin;
     if (this.trustedViewerResolver_) {
       this.trustedViewerResolver_(
           origin ? this.isTrustedViewerOrigin_(origin) : false);

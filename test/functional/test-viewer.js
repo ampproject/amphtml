@@ -588,14 +588,13 @@ describe('Viewer', () => {
       });
     });
 
-    it('should decide non-trusted on connection without origin', () => {
+    it('should NOT allow channel without origin', () => {
       windowApi.parent = {};
       windowApi.location.ancestorOrigins = null;
       const viewer = new Viewer(windowApi);
-      viewer.setMessageDeliverer(() => {});
-      return viewer.isTrustedViewer().then(res => {
-        expect(res).to.be.false;
-      });
+      expect(() => {
+        viewer.setMessageDeliverer(() => {});
+      }).to.throw(/message channel must have an origin/);
     });
 
     it('should decide non-trusted on connection with wrong origin', () => {
