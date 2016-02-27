@@ -152,6 +152,12 @@ Type attribute value: `krux`
 
 Adds support for Krux.  Configuration details can be found at [help.krux.com](https://konsole.zendesk.com/hc/en-us/articles/216596608).
 
+##### Médiamétrie
+
+Type attribute value: `mediametrie`
+
+Adds support for Médiamétrie tracking pages. Requires defining *var* `serial`. Vars `level1` to `level4` are optional.
+
 ### Parsely
 
 Type attribute value: `parsely`

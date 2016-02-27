@@ -230,6 +230,33 @@ export const ANALYTICS_CONFIG = {
     },
   },
 
+  'mediametrie': {
+    'requests': {
+      'host': 'https://prof.estat.com/m/web',
+      'pageview': '${host}/${serial}?' +
+        'c=${level1}' +
+        '&dom=${ampdocUrl}' +
+        '&enc=${documentCharset}' +
+        '&l3=${level3}' +
+        '&l4=${level4}' +
+        '&n=${random}' +
+        '&p=${level2}' +
+        '&r=${documentReferrer}' +
+        '&sch=${screenHeight}' +
+        '&scw=${screenWidth}' +
+        '&tn=amp' +
+        '&v=1' +
+        '&vh=${availableScreenHeight}' +
+        '&vw=${availableScreenWidth}',
+    },
+    'triggers': {
+      'trackPageview': {
+        'on': 'visible',
+        'request': 'pageview',
+      },
+    },
+  },
+
   'parsely': {
     'requests': {
       'host': 'https://srv.pixel.parsely.com',
