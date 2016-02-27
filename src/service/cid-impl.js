@@ -270,7 +270,7 @@ function store(win, cidString) {
   try {
     const item = {
       time: timer.now(),
-      cid: cidString
+      cid: cidString,
     };
     const data = JSON.stringify(item);
     win.localStorage.setItem('amp-cid', data);
