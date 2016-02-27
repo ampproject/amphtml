@@ -104,6 +104,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [Smart AdServer](../ads/smartadserver.md)
 - [Yieldmo](../ads/yieldmo.md)
 - [Revcontent](../ads/revcontent.md)
+- [TripleLift](../ads/triplelift.md)
 - [Teads](../ads/teads.md)
 
 ## Styling
