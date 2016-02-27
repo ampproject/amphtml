@@ -47,6 +47,7 @@ import {taboola} from '../ads/taboola';
 import {smartadserver} from '../ads/smartadserver';
 import {revcontent} from '../ads/revcontent';
 import {openadstream} from '../ads/openadstream';
+import {triplelift} from '../ads/triplelift';
 import {teads} from '../ads/teads';
 
 /**
@@ -77,6 +78,7 @@ register('smartadserver', smartadserver);
 register('mediaimpact', mediaimpact);
 register('revcontent', revcontent);
 register('openadstream', openadstream);
+register('triplelift', triplelift);
 register('teads', teads);
 
 // For backward compat, we always allow these types without the iframe

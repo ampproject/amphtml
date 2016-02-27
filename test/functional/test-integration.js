@@ -43,6 +43,7 @@ describe('3p integration.js', () => {
     expect(registrations).to.include.key('flite');
     expect(registrations).to.include.key('twitter');
     expect(registrations).to.include.key('yieldmo');
+    expect(registrations).to.include.key('triplelift');
     expect(registrations).to.include.key('_ping_');
   });
 
