@@ -12,6 +12,7 @@
     }
 
     header {
+      margin-bottom: 32px;
       padding: 16px;
       display: -webkit-box;
       display: -webkit-flex;
@@ -58,18 +59,28 @@
       margin: 16px;
     }
 
+    .subsection {
+      margin: 8px 0;
+    }
+
     [lang] {
       display: none;
     }
 
-    .button-section {
+    .error-section {
       display: none;
     }
-    .amp-postback-error .button-section {
+
+    .amp-error .progress-section {
+      display: none;
+    }
+
+    .amp-error[data-error="postback"] .postback-failed-section {
       display: block;
     }
-    .amp-postback-error .progress-section {
-      display: none;
+
+    .amp-error[data-error="close"] .close-failed-section {
+      display: block;
     }
 
     #closeButton {
@@ -78,6 +89,7 @@
       font-weight: 300;
       padding: 8px 0;
       text-decoration: none;
+      text-transform: uppercase;
     }
   </style>
 </head>
@@ -100,22 +112,44 @@
 
   <section class="progress-section">
     <div lang="en">
-      Please wait...
+      Opening page...
     </div>
     <div lang="fr">
       Attendez, s'il vous plaît...
     </div>
   </section>
 
-  <section class="button-section">
-    <a id="closeButton">
+  <section class="error-section postback-failed-section">
+    <div class="subsection postback-failed-message">
       <div lang="en">
-        Click here to continue.
+        Couldn’t open page.
       </div>
-      <div lang="fr">
-        Clique ici pour continuer
+    </div>
+
+    <div class="subsection button-section">
+      <a id="closeButton">
+        <div lang="en">
+          Continue
+        </div>
+        <div lang="fr">
+          Clique ici pour continuer
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <section class="error-section close-failed-section">
+    <div class="subsection close-failed-message">
+      <div lang="en">
+        An error occurred.
       </div>
-    </a>
+    </div>
+
+    <div class="subsection">
+      <div lang="en">
+        Please close this page.
+      </div>
+    </div>
   </section>
 
 </body>
