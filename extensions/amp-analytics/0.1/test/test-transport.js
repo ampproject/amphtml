@@ -51,7 +51,7 @@ describe('transport', () => {
   it('prefers beacon over xhrpost and image', () => {
     setupStubs(true, true);
     sendRequest(window, 'https://example.com/test', {
-      beacon: true, xhrpost: true, image: true
+      beacon: true, xhrpost: true, image: true,
     });
     assertCallCounts(1, 0, 0);
   });
@@ -59,7 +59,7 @@ describe('transport', () => {
   it('prefers xhrpost over image', () => {
     setupStubs(true, true);
     sendRequest(window, 'https://example.com/test', {
-      beacon: false, xhrpost: true, image: true
+      beacon: false, xhrpost: true, image: true,
     });
     assertCallCounts(0, 1, 0);
   });
@@ -67,7 +67,7 @@ describe('transport', () => {
   it('reluctantly uses image if nothing else is enabled', () => {
     setupStubs(true, true);
     sendRequest(window, 'https://example.com/test', {
-      image: true
+      image: true,
     });
     assertCallCounts(0, 0, 1);
   });
@@ -75,7 +75,7 @@ describe('transport', () => {
   it('falls back to xhrpost when enabled and beacon is not available', () => {
     setupStubs(false, true);
     sendRequest(window, 'https://example.com/test', {
-      beacon: true, xhrpost: true, image: true
+      beacon: true, xhrpost: true, image: true,
     });
     assertCallCounts(1, 1, 0);
   });
@@ -83,7 +83,7 @@ describe('transport', () => {
   it('falls back to image when beacon not found and xhr disabled', () => {
     setupStubs(false, true);
     sendRequest(window, 'https://example.com/test', {
-      beacon: true, xhrpost: false, image: true
+      beacon: true, xhrpost: false, image: true,
     });
     assertCallCounts(1, 0, 1);
   });
@@ -91,7 +91,7 @@ describe('transport', () => {
   it('falls back to image when beacon and xhr are not available', () => {
     setupStubs(false, false);
     sendRequest(window, 'https://example.com/test', {
-      beacon: true, xhrpost: true, image: true
+      beacon: true, xhrpost: true, image: true,
     });
     assertCallCounts(1, 1, 1);
   });

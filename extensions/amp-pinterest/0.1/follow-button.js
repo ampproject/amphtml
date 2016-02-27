@@ -59,7 +59,7 @@ export class FollowButton {
     const followButton = Util.make({'a': {
       class: '-amp-pinterest-follow-button',
       href: this.href,
-      textContent: this.label
+      textContent: this.label,
     }});
     followButton.appendChild(Util.make({'i': {}}));
     followButton.onclick = this.handleClick.bind(this);

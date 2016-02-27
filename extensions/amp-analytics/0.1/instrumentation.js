@@ -160,7 +160,7 @@ export class InstrumentationService {
         top: this.viewport_.getScrollTop(),
         left: this.viewport_.getScrollLeft(),
         width: size.width,
-        height: size.height
+        height: size.height,
       });
     } else if (eventType === AnalyticsEventType.TIMER) {
       if (this.isTimerSpecValid_(config['timerSpec'])) {

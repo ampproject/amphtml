@@ -38,7 +38,7 @@ describe('FocusHistory', () => {
           throw new Error('the focus listener must be capture');
         }
         eventListeners[eventType] = handler;
-      }
+      },
     };
 
     windowEventListeners = {};
@@ -46,7 +46,7 @@ describe('FocusHistory', () => {
       document: testDoc,
       addEventListener: (eventType, handler) => {
         windowEventListeners[eventType] = handler;
-      }
+      },
     };
     focusHistory = new FocusHistory(testWindow, 10000);
   });

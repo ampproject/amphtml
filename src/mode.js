@@ -72,6 +72,6 @@ function getMode_() {
     // Triggers validation
     development: developmentQueryString == '1' || window.AMP_DEV_MODE,
     minified: process.env.NODE_ENV == 'production',
-    test: window.AMP_TEST
+    test: window.AMP_TEST,
   };
 }

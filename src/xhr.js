@@ -16,8 +16,12 @@
 
 import {assert} from './asserts';
 import {getService} from './service';
-import {addParamToUrl, getSourceOrigin, parseQueryString, parseUrl}
-    from './url';
+import {
+  addParamToUrl,
+  getSourceOrigin,
+  parseQueryString,
+  parseUrl,
+} from './url';
 import {isArray, isObject} from './types';
 
 

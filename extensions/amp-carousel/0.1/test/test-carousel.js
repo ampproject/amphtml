@@ -126,7 +126,7 @@ describe('Carousel gestures', () => {
       return {
         mutate: function(fn) {
           fn();
-        }
+        },
       };
     };
     carousel.deferMutate = function(fn) {
@@ -148,7 +148,7 @@ describe('Carousel gestures', () => {
       return {
         mutate: function(fn) {
           fn();
-        }
+        },
       };
     };
     carousel.deferMutate = function(fn) {

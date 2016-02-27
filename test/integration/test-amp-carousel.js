@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-import {createFixtureIframe, expectBodyToBecomeVisible} from
-    '../../testing/iframe';
+import {
+  createFixtureIframe,
+  expectBodyToBecomeVisible,
+} from '../../testing/iframe';
 
 describe.skip('integration amp-carousel', () => {
 

@@ -19,8 +19,9 @@ import {createIframePromise} from '../../testing/iframe';
 import {installAd} from '../../builtins/amp-ad';
 import {installEmbed} from '../../builtins/amp-embed';
 import {installCidService} from '../../src/service/cid-impl';
-import {installUserNotificationManager} from
-    '../../build/all/v0/amp-user-notification-0.1.max';
+import {
+  installUserNotificationManager,
+} from '../../build/all/v0/amp-user-notification-0.1.max';
 import {markElementScheduledForTesting} from '../../src/custom-element';
 import {setCookie} from '../../src/cookies';
 import * as sinon from 'sinon';
@@ -86,7 +87,7 @@ function tests(name, installer) {
         'data-aax_pubname': 'test123',
         'data-aax_src': '302',
         // Test precedence
-        'data-width': '6666'
+        'data-width': '6666',
       }, 'https://schema.org').then(ad => {
         const iframe = ad.firstChild;
         expect(iframe).to.not.be.null;
@@ -137,7 +138,7 @@ function tests(name, installer) {
           height: 100,
           type: 'a9',
           src: 'testsrc',
-          resizable: ''
+          resizable: '',
         }, 'https://schema.org').then(element => {
           return new Promise((resolve, unusedReject) => {
             impl = element.implementation_;
@@ -151,7 +152,7 @@ function tests(name, installer) {
                 sentinel: 'amp-test',
                 type: 'requestHeight',
                 is3p: true,
-                height: 217
+                height: 217,
               }, '*');
             };
             impl.iframe_.src = iframeSrc;
@@ -167,7 +168,7 @@ function tests(name, installer) {
           height: 100,
           type: 'a9',
           src: 'testsrc',
-          resizable: ''
+          resizable: '',
         }, 'https://schema.org').then(element => {
           impl = element.implementation_;
           impl.attemptChangeHeight = sinon.spy();
@@ -330,7 +331,7 @@ function tests(name, installer) {
           height: 250,
           type: 'with_cid',
           src: 'testsrc',
-          'data-consent-notification-id': 'uid'
+          'data-consent-notification-id': 'uid',
         }, 'https://schema.org', function(ad) {
           const win = ad.ownerDocument.defaultView;
           const cidService = installCidService(win);
@@ -379,7 +380,7 @@ function tests(name, installer) {
           'data-aax_pubname': 'test123',
           'data-aax_src': '302',
           // Test precedence
-          'data-width': '6666'
+          'data-width': '6666',
         }, 'https://schema.org', element => {
           cb(element.implementation_);
           return element;

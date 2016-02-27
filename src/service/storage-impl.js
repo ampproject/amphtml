@@ -155,7 +155,7 @@ export class Storage {
     log.fine(TAG, 'Broadcasted reset message');
     this.viewer_.broadcast({
       'type': 'amp-storage-reset',
-      'origin': this.origin_
+      'origin': this.origin_,
     });
   }
 }
@@ -335,7 +335,7 @@ export class ViewerStorageBinding {
   /** @override */
   loadBlob(origin) {
     return this.viewer_.sendMessage('loadStore', {
-      'origin': origin
+      'origin': origin,
     }, true).then(response => response['blob']);
   }
 
@@ -343,7 +343,7 @@ export class ViewerStorageBinding {
   saveBlob(origin, blob) {
     return this.viewer_.sendMessage('saveStore', {
       'origin': origin,
-      'blob': blob
+      'blob': blob,
     }, true);
   }
 }

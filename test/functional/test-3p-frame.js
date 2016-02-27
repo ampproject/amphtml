@@ -59,7 +59,7 @@ describe('3p-frame', () => {
     addDataAndJsonAttributes_(div, obj);
     expect(obj).to.deep.equal({
       'foo': 'foo',
-      'bar': 'bar'
+      'bar': 'bar',
     });
 
     div.setAttribute('json', '{"abc": [1,2,3]}');
@@ -69,7 +69,7 @@ describe('3p-frame', () => {
     expect(obj).to.deep.equal({
       'foo': 'foo',
       'bar': 'bar',
-      'abc': [1, 2, 3]
+      'abc': [1, 2, 3],
     });
   });
 
@@ -90,7 +90,7 @@ describe('3p-frame', () => {
     div.getLayoutBox = function() {
       return {
         width: 100,
-        height: 200
+        height: 200,
       };
     };
 
@@ -223,8 +223,8 @@ describe('3p-frame', () => {
         getRandomValues: function(arg) {
           arg[0] = 123;
           arg[1] = 987;
-        }
-      }
+        },
+      },
     };
     expect(getSubDomain(fakeWin)).to.equal('d-123987');
   });
@@ -236,8 +236,8 @@ describe('3p-frame', () => {
       Math: {
         random: function() {
           return 0.567;
-        }
-      }
+        },
+      },
     };
     expect(getSubDomain(fakeWin)).to.equal('d-5670');
   });

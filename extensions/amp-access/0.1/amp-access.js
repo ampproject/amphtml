@@ -308,7 +308,7 @@ export class AccessService {
   broadcastReauthorize_() {
     this.viewer_.broadcast({
       'type': 'amp-access-reauthorize',
-      'origin': this.pubOrigin_
+      'origin': this.pubOrigin_,
     });
   }
 
@@ -338,7 +338,7 @@ export class AccessService {
     return this.getReaderId_().then(readerId => {
       const vars = {
         'READER_ID': readerId,
-        'ACCESS_READER_ID': readerId  // A synonym.
+        'ACCESS_READER_ID': readerId,  // A synonym.
       };
       if (useAuthData) {
         vars['AUTHDATA'] = field => {
@@ -373,7 +373,7 @@ export class AccessService {
           AUTHORIZATION_TIMEOUT,
           this.xhr_.fetchJson(url, {
             credentials: 'include',
-            requireAmpResponseSourceOrigin: true
+            requireAmpResponseSourceOrigin: true,
           }));
     }).catch(error => {
       this.analyticsEvent_('access-authorization-failed');
@@ -662,9 +662,9 @@ export class AccessService {
         credentials: 'include',
         requireAmpResponseSourceOrigin: true,
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
+          'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: ''
+        body: '',
       });
     }).then(() => {
       log.fine(TAG, 'Pingback complete');

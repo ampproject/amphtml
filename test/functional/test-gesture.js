@@ -49,7 +49,7 @@ describe('Gestures', () => {
     element = {
       addEventListener: (eventType, handler) => {
         eventListeners[eventType] = handler;
-      }
+      },
     };
 
     onGesture = sinon.spy();

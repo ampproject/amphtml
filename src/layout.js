@@ -31,7 +31,7 @@ export const Layout = {
   FIXED_HEIGHT: 'fixed-height',
   RESPONSIVE: 'responsive',
   CONTAINER: 'container',
-  FILL: 'fill'
+  FILL: 'fill',
 };
 
 
@@ -65,7 +65,7 @@ export const naturalDimensions_ = {
   'AMP-PIXEL': {width: '1px', height: '1px'},
   'AMP-ANALYTICS': {width: '1px', height: '1px'},
   // TODO(dvoytenko): audio should have width:auto.
-  'AMP-AUDIO': null
+  'AMP-AUDIO': null,
 };
 
 
@@ -84,7 +84,7 @@ export const LOADING_ELEMENTS_ = {
   'AMP-INSTAGRAM': true,
   'AMP-LIST': true,
   'AMP-PINTEREST': true,
-  'AMP-VIDEO': true
+  'AMP-VIDEO': true,
 };
 
 
@@ -243,7 +243,7 @@ export function getNaturalDimensions(tagName) {
     document.body.appendChild(temp);
     naturalDimensions_[tagName] = {
       width: (temp./*OK*/offsetWidth || 1) + 'px',
-      height: (temp./*OK*/offsetHeight || 1) + 'px'
+      height: (temp./*OK*/offsetHeight || 1) + 'px',
     };
     document.body.removeChild(temp);
   }

@@ -58,7 +58,7 @@ class AmpFitText extends AMP.BaseElement {
       right: 0,
       zIndex: 1,
       visibility: 'hidden',
-      lineHeight: `${LINE_HEIGHT_EM_}em`
+      lineHeight: `${LINE_HEIGHT_EM_}em`,
     });
 
     this.getRealChildNodes().forEach(node => {
@@ -146,7 +146,7 @@ export function updateOverflow_(content, measurer, maxHeight, fontSize) {
   content.classList.toggle('-amp-fit-text-content-overflown', overflown);
   st.setStyles(content, {
     lineClamp: overflown ? numberOfLines : '',
-    maxHeight: overflown ? st.px(lineHeight * numberOfLines) : ''
+    maxHeight: overflown ? st.px(lineHeight * numberOfLines) : '',
   });
 };
 

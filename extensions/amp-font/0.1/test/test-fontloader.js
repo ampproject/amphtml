@@ -42,7 +42,7 @@ const FONT_CONFIG = {
   variant: 'normal',
   weight: '400',
   size: 'medium',
-  family: 'Comic AMP'
+  family: 'Comic AMP',
 };
 
 
@@ -52,7 +52,7 @@ const FAILURE_FONT_CONFIG = {
   variant: 'normal',
   weight: '400',
   size: 'medium',
-  family: 'Comic BLAH'
+  family: 'Comic BLAH',
 };
 
 describe('FontLoader', () => {

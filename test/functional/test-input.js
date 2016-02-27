@@ -41,13 +41,13 @@ describe('Input', () => {
         if (eventListeners[eventType] == handler) {
           delete eventListeners[eventType];
         }
-      }
+      },
     };
 
     windowApi = {
       document: documentApi,
       navigator: {},
-      ontouchstart: ''
+      ontouchstart: '',
     };
 
     input = new Input(windowApi);

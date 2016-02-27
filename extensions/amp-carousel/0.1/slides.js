@@ -175,7 +175,7 @@ export class AmpSlides extends BaseCarousel {
     st.setStyles(slide, {
       transform: st.translateX(dir * containerWidth),
       zIndex: 1,
-      display: 'block'
+      display: 'block',
     });
 
     this.scheduleLayout(slide);
@@ -192,12 +192,12 @@ export class AmpSlides extends BaseCarousel {
     return tr.all([
       tr.setStyles(newSlide, {
         transform: tr.translateX(tr.numeric(dir * containerWidth, 0)),
-        opacity: tr.numeric(0.8, 1)
+        opacity: tr.numeric(0.8, 1),
       }),
       tr.setStyles(oldSlide, {
         transform: tr.scale(tr.numeric(1, 0.98)),
-        opacity: tr.numeric(1, 0.4)
-      })
+        opacity: tr.numeric(1, 0.4),
+      }),
     ]);
   }
 
@@ -211,13 +211,13 @@ export class AmpSlides extends BaseCarousel {
       display: 'none',
       zIndex: 0,
       transform: '',
-      opacity: 1
+      opacity: 1,
     });
     st.setStyles(newSlide, {
       display: 'block',
       zIndex: 0,
       transform: '',
-      opacity: 1
+      opacity: 1,
     });
     this.scheduleLayout(newSlide);
     this.updateInViewport(oldSlide, false);
@@ -325,7 +325,7 @@ export class AmpSlides extends BaseCarousel {
       min: minDelta,
       max: maxDelta,
       pos: 0,
-      currentIndex: this.currentIndex_
+      currentIndex: this.currentIndex_,
     };
   }
 

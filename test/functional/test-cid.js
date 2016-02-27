@@ -15,8 +15,10 @@
  */
 
 import {cidFor} from '../../src/cid';
-import {installCidService, getProxySourceOrigin} from
-    '../../src/service/cid-impl';
+import {
+  installCidService,
+  getProxySourceOrigin,
+} from '../../src/service/cid-impl';
 import {parseUrl} from '../../src/url';
 import {timer} from '../../src/timer';
 import {installViewerService} from '../../src/service/viewer-impl';
@@ -59,12 +61,12 @@ describe('cid', () => {
           array[1] = 2;
           array[2] = 3;
           array[15] = 15;
-        }
+        },
       },
       document: {},
       ampExtendedElements: {
-        'amp-analytics': true
-      }
+        'amp-analytics': true,
+      },
     };
     const viewer = installViewerService(fakeWin);
     sandbox.stub(viewer, 'isEmbedded', function() {
@@ -198,8 +200,8 @@ describe('cid', () => {
       },
       services: {},
       ampExtendedElements: {
-        'amp-analytics': true
-      }
+        'amp-analytics': true,
+      },
     };
     win.__proto__ = window;
     expect(win.location.href).to.equal('https://cdn.ampproject.org/v/www.origin.com/');
@@ -307,12 +309,12 @@ describe('cid', () => {
     fakeWin.crypto = undefined;
     fakeWin.screen = {
       width: '111',
-      height: '222'
+      height: '222',
     };
     fakeWin.Math = {
       random: () => {
         return 999;
-      }
+      },
     };
     clock.tick(7777);
     return compare(

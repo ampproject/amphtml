@@ -191,7 +191,7 @@ class LoginDialog {
         if (this.dialog_) {
           this.dialog_./*OK*/postMessage({
             sentinel: 'amp',
-            type: 'result-ack'
+            type: 'result-ack',
           }, returnOrigin);
         }
         this.loginDone_(e.data.result);

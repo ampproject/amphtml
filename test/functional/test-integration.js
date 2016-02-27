@@ -17,8 +17,12 @@
 // Tests integration.js
 // Most coverage through test-3p-frame
 
-import {draw3p, validateParentOrigin, validateAllowedTypes, parseFragment}
-    from '../../3p/integration';
+import {
+  draw3p,
+  validateParentOrigin,
+  validateAllowedTypes,
+  parseFragment,
+} from '../../3p/integration';
 import {registrations, register} from '../../src/3p';
 
 describe('3p integration.js', () => {
@@ -43,27 +47,27 @@ describe('3p integration.js', () => {
   it('should validateParentOrigin without ancestorOrigins', () => {
     let parent = {};
     validateParentOrigin({
-      location: {}
+      location: {},
     }, parent);
     expect(parent.originValidated).to.be.false;
 
     parent = {};
     validateParentOrigin({
       location: {
-        ancestorOrigins: []
-      }
+        ancestorOrigins: [],
+      },
     }, parent);
     expect(parent.originValidated).to.be.false;
   });
 
   it('should validateParentOrigin with correct ancestorOrigins', () => {
     const parent = {
-      origin: 'abc'
+      origin: 'abc',
     };
     validateParentOrigin({
       location: {
-        ancestorOrigins: ['abc', 'xyz']
-      }
+        ancestorOrigins: ['abc', 'xyz'],
+      },
     }, parent);
 
     expect(parent.originValidated).to.be.true;
@@ -72,13 +76,13 @@ describe('3p integration.js', () => {
   it('should throw in validateParentOrigin with incorrect ancestorOrigins',
     () => {
       const parent = {
-        origin: 'abc'
+        origin: 'abc',
       };
       expect(() => {
         validateParentOrigin({
           location: {
-            ancestorOrigins: ['xyz']
-          }
+            ancestorOrigins: ['xyz'],
+          },
         }, parent);
       }).to.throw(/Parent origin mismatch/);
     });
@@ -126,10 +130,10 @@ describe('3p integration.js', () => {
     const win = {
       context: {
         location: {
-          originValidated: true
+          originValidated: true,
         },
         data: data,
-      }
+      },
     };
     let called = false;
     register('testAction', function(myWin, myData) {
@@ -149,10 +153,10 @@ describe('3p integration.js', () => {
     const win = {
       context: {
         location: {
-          originValidated: true
+          originValidated: true,
         },
         data: data,
-      }
+      },
     };
     let called = false;
     register('testAction2', function(myWin, myData) {
@@ -167,7 +171,7 @@ describe('3p integration.js', () => {
     draw3p(win, data, (_config, done) => {
       finish = () => {
         done({
-          custom: true
+          custom: true,
         });
       };
     });
@@ -184,7 +188,7 @@ describe('3p integration.js', () => {
       context: {
         location: {},
         data: data,
-      }
+      },
     };
     expect(() => {
       draw3p(win, data);
@@ -198,11 +202,11 @@ describe('3p integration.js', () => {
     const win = {
       context: {
         location: {
-          originValidated: true
+          originValidated: true,
         },
         data: data,
         tagName: 'AMP-EMBED',
-      }
+      },
     };
     expect(() => {
       draw3p(win, data);
@@ -212,8 +216,8 @@ describe('3p integration.js', () => {
   it('should allow all types on localhost', () => {
     const localhost = {
       location: {
-        hostname: 'ads.localhost'
-      }
+        hostname: 'ads.localhost',
+      },
     };
     validateAllowedTypes(localhost, 'twitter');
     validateAllowedTypes(localhost, 'facebook');
@@ -224,8 +228,8 @@ describe('3p integration.js', () => {
   it('should allow all types on default host', () => {
     const defaultHost = {
       location: {
-        hostname: '3p.ampproject.net'
-      }
+        hostname: '3p.ampproject.net',
+      },
     };
     validateAllowedTypes(defaultHost, 'twitter');
     validateAllowedTypes(defaultHost, 'facebook');
@@ -237,8 +241,8 @@ describe('3p integration.js', () => {
     function get(domain) {
       return {
         location: {
-          hostname: domain
-        }
+          hostname: domain,
+        },
       };
     }
     validateAllowedTypes(get('d-123.ampproject.net'), 'twitter');
@@ -252,8 +256,8 @@ describe('3p integration.js', () => {
   it('should validate types on custom host', () => {
     const defaultHost = {
       location: {
-        hostname: 'other.com'
-      }
+        hostname: 'other.com',
+      },
     };
     validateAllowedTypes(defaultHost, 'twitter');
     validateAllowedTypes(defaultHost, 'facebook');

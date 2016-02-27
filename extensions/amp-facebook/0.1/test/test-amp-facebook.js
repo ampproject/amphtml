@@ -85,7 +85,7 @@ describe('amp-facebook', () => {
             sentinel: 'amp-test',
             type: 'requestHeight',
             is3p: true,
-            height: 666
+            height: 666,
           }, '*');
         };
 

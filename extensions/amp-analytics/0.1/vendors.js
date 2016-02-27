@@ -61,7 +61,7 @@ export const ANALYTICS_CONFIG = {
       'title': 'TITLE',
       'totalEngagedTime': 'TOTAL_ENGAGED_TIME',
       'viewer': 'VIEWER',
-    }
+    },
   },
 
   'atinternet': {
@@ -77,8 +77,8 @@ export const ANALYTICS_CONFIG = {
         's2click=${level2}&' +
         'p=${label}&' +
         's2=${level2Click}&' +
-        'type=click&click=${type}${suffix}'
-    }
+        'type=click&click=${type}${suffix}',
+    },
   },
 
   'chartbeat': {
@@ -117,56 +117,56 @@ export const ANALYTICS_CONFIG = {
         'on': 'timer',
         'timerSpec': {
           'interval': 15,
-          'maxTimerLength': 7200
+          'maxTimerLength': 7200,
         },
         'request': 'interval',
         'vars': {
-          'decayTime': 30
-        }
+          'decayTime': 30,
+        },
       },
       'trackAnchorClick': {
         'on': 'click',
         'selector': 'a',
         'request': 'anchorClick',
         'vars': {
-          'decayTime': 30
-        }
-      }
+          'decayTime': 30,
+        },
+      },
     },
     'transport': {
       'beacon': false,
       'xhrpost': false,
-      'image': true
-    }
+      'image': true,
+    },
   },
 
   'comscore': {
     'vars': {
-      'c2': '1000001'
+      'c2': '1000001',
     },
     'requests': {
       'host': 'https://sb.scorecardresearch.com',
       'base': '${host}/b?',
       'pageview': '${base}c1=2&c2=${c2}&rn=${random}&c8=${title}' +
-        '&c7=${canonicalUrl}&c9=${documentReferrer}&cs_c7amp=${ampdocUrl}'
+        '&c7=${canonicalUrl}&c9=${documentReferrer}&cs_c7amp=${ampdocUrl}',
     },
     'triggers': {
       'defaultPageview': {
         'on': 'visible',
-        'request': 'pageview'
-      }
+        'request': 'pageview',
+      },
     },
     'transport': {
       'beacon': false,
       'xhrpost': false,
-      'image': true
-    }
+      'image': true,
+    },
   },
 
   'googleanalytics': {
     'vars': {
       'eventValue': '0',
-      'documentLocation': 'AMPDOC_URL'
+      'documentLocation': 'AMPDOC_URL',
     },
     'requests': {
       'host': 'https://www.google-analytics.com',
@@ -188,9 +188,9 @@ export const ANALYTICS_CONFIG = {
       'timing': '${host}/collect?${basePrefix}&t=timing&plt=${pageLoadTime}&' +
           'dns=${domainLookupTime}&tcp=${tcpConnectTime}&rrt=${redirectTime}&' +
           'srt=${serverResponseTime}&pdt=${pageDownloadTime}&' +
-          'clt=${contentLoadTime}&dit=${domInteractiveTime}${baseSuffix}'
+          'clt=${contentLoadTime}&dit=${domInteractiveTime}${baseSuffix}',
     },
-    'optout': '_gaUserPrefs.ioo'
+    'optout': '_gaUserPrefs.ioo',
   },
 
   'krux': {
@@ -217,17 +217,17 @@ export const ANALYTICS_CONFIG = {
         '_kua_kx_tech_browser_language=${browserLanguage}&' +
         '_kua_kx_tz=${timezone}',
       'pageview': '${beaconHost}/pixel.gif?${common}&${timing}',
-      'event': '${beaconHost}/event.gif?${common}&${timing}&pageview=false'
+      'event': '${beaconHost}/event.gif?${common}&${timing}&pageview=false',
     },
     'transport': {
       'beacon': false,
       'xhrpost': false,
-      'image': true
+      'image': true,
     },
     'extraUrlParamsReplaceMap': {
       'user.': '_kua_',
-      'page.': '_kpa_'
-    }
+      'page.': '_kpa_',
+    },
   },
 
   'parsely': {
@@ -244,7 +244,7 @@ export const ANALYTICS_CONFIG = {
         'title=${title}&' +
         'date=${timestamp}&' +
         'ampid=${clientId(_parsely_visitor)}',
-      'pageview': '${basePrefix}&action=pageview'
+      'pageview': '${basePrefix}&action=pageview',
       // TODO(#1612): client-side session support
       // TODO(#1296): active engaged time support
       // 'heartbeat': '${basePrefix}&action=heartbeat&inc=${engagedTime}'
@@ -252,38 +252,38 @@ export const ANALYTICS_CONFIG = {
     'triggers': {
       'defaultPageview': {
         'on': 'visible',
-        'request': 'pageview'
-      }
+        'request': 'pageview',
+      },
     },
     'transport': {
       'beacon': false,
       'xhrpost': false,
-      'image': true
-    }
+      'image': true,
+    },
   },
 
   'quantcast': {
     'vars': {
-      'labels': ''
+      'labels': '',
     },
     'requests': {
       'host': 'https://pixel.quantserve.com/pixel',
       'pageview': '${host};r=${random};a=${pcode};labels=${labels};' +
         'fpan=;fpa=${clientId(__qca)};ns=0;ce=1;cm=;je=0;' +
         'sr=${screenWidth}x${screenHeight}x${screenColorDepth};' +
-        'enc=n;et=${timestamp};ref=${documentReferrer};url=${canonicalUrl}'
+        'enc=n;et=${timestamp};ref=${documentReferrer};url=${canonicalUrl}',
     },
     'triggers': {
       'defaultPageview': {
         'on': 'visible',
-        'request': 'pageview'
-      }
+        'request': 'pageview',
+      },
     },
     'transport': {
       'beacon': false,
       'xhrpost': false,
-      'image': true
-    }
+      'image': true,
+    },
   },
 
   'adobeanalytics': {
@@ -311,13 +311,13 @@ export const ANALYTICS_CONFIG = {
           '&s=${screenWidth}x${screenHeight}',
       'pageview': 'https://${host}${requestPath}?${basePrefix}',
       'click': 'https://${host}${requestPath}?${basePrefix}&pe=lnk_${linkType}&pev1=${linkUrl}&pev2=${linkName}',
-    }
+    },
   },
 
   'infonline': {
     'vars': {
       'sv': 'ke',
-      'ap': '1'
+      'ap': '1',
     },
     'transport': {'beacon': false, 'xhrpost': false, 'image': true},
     'requests': {
@@ -327,14 +327,14 @@ export const ANALYTICS_CONFIG = {
         '&co=${co}' +
         '&cp=${cp}' +
         '&host=${canonicalHost}' +
-        '&path=${canonicalPath}'
+        '&path=${canonicalPath}',
     },
     'triggers': {
       'pageview': {
         'on': 'visible',
-        'request': 'pageview'
-      }
-    }
+        'request': 'pageview',
+      },
+    },
   },
 
   'simplereach': {
@@ -343,7 +343,7 @@ export const ANALYTICS_CONFIG = {
       'published_at': '',
       'authors': [],
       'channels': [],
-      'tags': []
+      'tags': [],
     },
     'requests': {
       'host': 'https://edge.simplereach.com',
@@ -362,22 +362,22 @@ export const ANALYTICS_CONFIG = {
       'visible': '${host}/n?${baseParams}',
       'timer': '${host}/t?${baseParams}' +
         '&t=5000' +
-        '&e=5000'
+        '&e=5000',
     },
     'triggers': {
       'visible': {
         'on': 'visible',
-        'request': 'visible'
+        'request': 'visible',
       },
       'timer': {
         'on': 'timer',
         'timerSpec': {
           'interval': 5,
-          'max-timer-length': 1200
+          'max-timer-length': 1200,
         },
-        'request': 'timer'
-      }
-    }
+        'request': 'timer',
+      },
+    },
   },
 
   'webtrekk': {
@@ -406,9 +406,9 @@ export const ANALYTICS_CONFIG = {
         '&ck2=${actionParameter2}&ck3=${actionParameter3}' +
         '&ck4=${actionParameter4}&ck5=${actionParameter5}',
       'event': '${trackURL}${parameterPrefix}&ct=${actionName}' +
-        '${actionParameter}${parameterSuffix}'
-    }
-  }
+        '${actionParameter}${parameterSuffix}',
+    },
+  },
 };
 ANALYTICS_CONFIG['infonline']['triggers']['pageview']['iframe' +
 /* TEMPORARY EXCEPTION */ 'Ping'] = true;

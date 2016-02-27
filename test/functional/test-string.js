@@ -38,7 +38,7 @@ describe('expandTemplate', () => {
     'totoxy': '${toxy}',
     'loop1': '${loop2}',
     'loop2': '${loop1}',
-    'loop': '${loop}'
+    'loop': '${loop}',
   };
 
   function testGetter(key) {

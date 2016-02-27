@@ -15,8 +15,11 @@
  */
 
 import * as sinon from 'sinon';
-import {ENSURE_NON_ZERO, Performance, performanceFor}
-    from '../../src/performance';
+import {
+  ENSURE_NON_ZERO,
+  Performance,
+  performanceFor,
+} from '../../src/performance';
 import {getService, resetServiceForTesting} from '../../src/service';
 import {resourcesFor} from '../../src/resources';
 import {viewerFor} from '../../src/viewer';
@@ -61,7 +64,7 @@ describe('performance', () => {
           .to.be.jsonEqual({
             label: '_test',
             from: null,
-            value: ENSURE_NON_ZERO
+            value: ENSURE_NON_ZERO,
           });
       expect(perf.events_[1]).to.be.jsonEqual({
         label: 'test',
@@ -377,7 +380,7 @@ describe('performance', () => {
     const info = {
       canonicalUrl: 'https://foo.bar/baz',
       pageViewId: 12345,
-      sourceUrl: 'https://hello.world/baz/#development'
+      sourceUrl: 'https://hello.world/baz/#development',
     };
     getService(window, 'documentInfo', () => info);
 

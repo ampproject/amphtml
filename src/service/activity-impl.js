@@ -36,7 +36,7 @@ const DEFAULT_ENGAGED_SECONDS = 5;
  */
 const ActivityEventType = {
   ACTIVE: 'active',
-  INACTIVE: 'inactive'
+  INACTIVE: 'inactive',
 };
 
 /**
@@ -117,7 +117,7 @@ class ActivityHistory {
  * @private @const {Array<string>}
  */
 const ACTIVE_EVENT_TYPES = [
-  'mousedown', 'mouseup', 'mousemove', 'keydown', 'keyup'
+  'mousedown', 'mouseup', 'mousemove', 'keydown', 'keyup',
 ];
 
 export class Activity {
@@ -258,7 +258,7 @@ export class Activity {
 
     this.activityHistory_.push(/** @type {ActivityEventDef} */{
       type: type,
-      time: secondKey
+      time: secondKey,
     });
   }
 
