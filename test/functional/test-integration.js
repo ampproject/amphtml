@@ -19,6 +19,7 @@
 
 import {
   draw3p,
+  ensureFramed,
   validateParentOrigin,
   validateAllowedTypes,
   parseFragment,
@@ -269,5 +270,21 @@ describe('3p integration.js', () => {
       validateAllowedTypes(defaultHost, 'adtech');
     }).to.throw(/Non-whitelisted 3p type for custom iframe/);
     validateAllowedTypes(defaultHost, 'adtech', ['adtech']);
+  });
+
+  it('should ensure the 3p frame is actually framed', () => {
+    ensureFramed(window); // Test window is always framed.
+    ensureFramed({
+      parent: 'other',
+    });
+    const win = {
+      location: {
+        href: 'sentinel',
+      },
+    };
+    win.parent = win;
+    expect(() => {
+      ensureFramed(win);
+    }).to.throw(/Must be framed: sentinel/);
   });
 });

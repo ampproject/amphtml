@@ -156,6 +156,7 @@ function masterSelection(type) {
  */
 window.draw3p = function(opt_configCallback, opt_allowed3pTypes) {
   try {
+    ensureFramed(window);
     const data = parseFragment(location.hash);
     window.context = data._context;
     window.context.location = parseUrl(data._context.location.href);
@@ -316,6 +317,7 @@ export function validateParentOrigin(window, parentLocation) {
  * @param {!Window} window
  * @param {string} type 3p type
  * @param {!Array<string>|undefined} allowedTypes May be undefined.
+ * @visiblefortesting
  */
 export function validateAllowedTypes(window, type, allowedTypes) {
   // Everything allowed in default iframe.
@@ -333,6 +335,17 @@ export function validateAllowedTypes(window, type, allowedTypes) {
   }
   assert(allowedTypes && allowedTypes.indexOf(type) != -1,
       'Non-whitelisted 3p type for custom iframe: ' + type);
+}
+
+/**
+ * Throws if this window is a top level window.
+ * @param {!Window} window
+ * @visiblefortesting
+ */
+export function ensureFramed(window) {
+  if (window == window.parent) {
+    throw new Error('Must be framed: ' + window.location.href);
+  }
 }
 
 /**
@@ -378,7 +391,7 @@ export function isTagNameAllowed(type, tagName) {
  */
 function lightweightErrorReport(e) {
   new Image().src = 'https://amp-error-reporting.appspot.com/r' +
-      '?v=' + encodeURIComponent('$internalRuntimeVersion$') +
+      '?3p=1&v=' + encodeURIComponent('$internalRuntimeVersion$') +
       '&m=' + encodeURIComponent(e.message) +
       '&r=' + encodeURIComponent(document.referrer);
 }
