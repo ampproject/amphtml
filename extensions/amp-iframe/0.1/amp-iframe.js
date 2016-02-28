@@ -16,6 +16,7 @@
 
 import {IntersectionObserver} from '../../../src/intersection-observer';
 import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
+import {endsWith} from '../../../src/string';
 import {listen} from '../../../src/iframe-helper';
 import {loadPromise} from '../../../src/event-helper';
 import {log} from '../../../src/log';
@@ -46,6 +47,9 @@ export class AmpIframe extends AMP.BaseElement {
 
   assertSource(src, containerSrc, sandbox) {
     const url = parseUrl(src);
+    // Some of these can be easily circumvented with redirects.
+    // Checks are mostly there to prevent people easily do something
+    // they did not mean to.
     assert(
         url.protocol == 'https:' ||
         url.protocol == 'data:' ||
@@ -60,6 +64,10 @@ export class AmpIframe extends AMP.BaseElement {
         'if allow-same-origin is set. See https://github.com/ampproject/' +
         'amphtml/blob/master/spec/amp-iframe-origin-policy.md for details.',
         this.element);
+    assert(!(endsWith(url.hostname, '.ampproject.net') ||
+        endsWith(url.hostname, '.ampproject.org')),
+        'amp-iframe does not allow embedding of frames from ' +
+        'ampproject.*: %s', src);
     return src;
   }
 

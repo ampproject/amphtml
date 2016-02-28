@@ -263,7 +263,13 @@ var forbiddenTerms = {
       'validator/validator.js'
     ]
   },
-  '\\.endsWith': es6polyfill,
+  '\\.endsWith': {
+    message: es6polyfill,
+    whitelist: [
+      // .endsWith occurs in babel generated code.
+      'dist.3p/current/integration.js',
+    ],
+  },
   // TODO: (erwinm) rewrite the destructure and spread warnings as
   // eslint rules (takes more time than this quick regex fix).
   // No destructuring allowed since we dont ship with Array polyfills.
