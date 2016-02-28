@@ -150,4 +150,8 @@ under the [Apache License, Version 2.0](LICENSE).
 
 Please see [the CONTRIBUTING file](CONTRIBUTING.md) for information on contributing to the AMP Project, and [the DEVELOPING file](DEVELOPING.md) for documentation on the AMP library internals and [hints how to get started](DEVELOPING.md#starter-issues).
 
+### Security disclosures
+
+The AMP Project accepts responsible security disclosures through the [Google Application Security program](https://www.google.com/about/appsecurity/).
+
 ### [Code of conduct](CODE_OF_CONDUCT.md)
