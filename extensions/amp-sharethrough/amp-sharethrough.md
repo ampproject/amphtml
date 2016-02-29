@@ -41,7 +41,7 @@ limitations under the License.
 <amp-sharethrough height=657
     layout="fixed-height"
     data-native-key="abcd1234">
-    </amp-soundcloud>
+    </amp-sharethrough>
 ```
 
 ## Required attributes
