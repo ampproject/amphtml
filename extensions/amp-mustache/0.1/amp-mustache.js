@@ -14,9 +14,14 @@
  * limitations under the License.
  */
 
-import {parse as mustacheParse, render as mustacheRender,
-    setUnescapedSanitizier} from '../../../third_party/mustache/mustache';
+//import {parse as mustacheParse, render as mustacheRender,
+    //setUnescapedSanitizier} from '../../../third_party/mustache/mustache';
+//import * as m from '../../../third_party/mustache/mustache';
 import {sanitizeHtml, sanitizeFormattingHtml} from '../../../src/sanitizer';
+
+var mustacheParse = m.parse;
+var mustacheRender = m.render;
+var setUnescapedSanitizier = m.setUnescapedSanitizier;
 
 // Configure inline sanitizer for unescaped values.
 setUnescapedSanitizier(sanitizeFormattingHtml);

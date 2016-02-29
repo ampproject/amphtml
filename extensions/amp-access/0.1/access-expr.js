@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-import {parser} from './access-expr-impl';
+//import * as p from './access-expr-impl';
+
+var parser = p.parser;
 
 
 /**
