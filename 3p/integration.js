@@ -47,6 +47,7 @@ import {taboola} from '../ads/taboola';
 import {smartadserver} from '../ads/smartadserver';
 import {revcontent} from '../ads/revcontent';
 import {openadstream} from '../ads/openadstream';
+import {teads} from '../ads/teads';
 
 /**
  * Whether the embed type may be used with amp-embed tag.
@@ -76,6 +77,7 @@ register('smartadserver', smartadserver);
 register('mediaimpact', mediaimpact);
 register('revcontent', revcontent);
 register('openadstream', openadstream);
+register('teads', teads);
 
 // For backward compat, we always allow these types without the iframe
 // opting in.
