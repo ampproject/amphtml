@@ -31,7 +31,7 @@ describe('3p-frame', () => {
   });
 
   afterEach(() => {
-    toggleExperiment(window, 'unique-origins', false);
+    toggleExperiment(window, 'dev-channel', false);
     resetServiceForTesting(window, 'bootstrapBaseUrl');
     setModeForTesting(null);
     const m = document.querySelector(
@@ -160,7 +160,7 @@ describe('3p-frame', () => {
 
   it('should pick the right bootstrap unique url (prod)', () => {
     setModeForTesting({});
-    toggleExperiment(window, 'unique-origins', true);
+    toggleExperiment(window, 'dev-channel', true);
     expect(getBootstrapBaseUrl(window)).to.match(
         /^https:\/\/d-\d+\.ampproject\.net\/\$\internal\w+\$\/frame\.html$/);
   });
@@ -201,13 +201,13 @@ describe('3p-frame', () => {
   });
 
   it('should make sub domains (unique)', () => {
-    toggleExperiment(window, 'unique-origins', true);
+    toggleExperiment(window, 'dev-channel', true);
     expect(getSubDomain(window)).to.match(/^d-\d+$/);
     expect(getSubDomain(window)).to.not.equal('d-00');
   });
 
   it('should make sub domains (Math)', () => {
-    toggleExperiment(window, 'unique-origins', true);
+    toggleExperiment(window, 'dev-channel', true);
     const fakeWin = {
       document: document,
       Math: Math,
@@ -216,7 +216,7 @@ describe('3p-frame', () => {
   });
 
   it('should make sub domains (crypto)', () => {
-    toggleExperiment(window, 'unique-origins', true);
+    toggleExperiment(window, 'dev-channel', true);
     const fakeWin = {
       document: document,
       crypto: {
@@ -230,7 +230,7 @@ describe('3p-frame', () => {
   });
 
   it('should make sub domains (fallback)', () => {
-    toggleExperiment(window, 'unique-origins', true);
+    toggleExperiment(window, 'dev-channel', true);
     const fakeWin = {
       document: document,
       Math: {
