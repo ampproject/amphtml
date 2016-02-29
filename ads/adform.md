@@ -57,7 +57,4 @@ information on how to get required ad tag or placement IDs.
 Only one of the mentioned parameters should be used at the same time.
 
 The `src` parameter must use **https** protocol and must be from one of the
-allowed hosts:
-
-- `https://track.adform.net/...`
-- `https://adx.adform.net/...`
+allowed Adform hosts.
