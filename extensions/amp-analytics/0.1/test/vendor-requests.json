@@ -33,6 +33,10 @@
     "pageview": "https://beacon.krxd.net/pixel.gif?source=amp&confid=$confid&_kpid=$pubid&_kcp_s=$site&_kcp_sc=$section&_kcp_ssc=$subsection&_kcp_d=_canonical_host_&_kpref_=_document_referrer_&_kua_kx_amp_client_id=_client_id_&_kua_kx_lang=_browser_language_&_kua_kx_tech_browser_language=_browser_language_&_kua_kx_tz=_timezone_&t_navigation_type=0&t_dns=_domain_lookup_time_&t_tcp=_tcp_connect_time_&t_http_request=_server_response_time_&t_http_response=_page_download_time_&t_content_ready=_content_load_time_&t_window_load=_page_load_time_&t_redirect=_redirect_time_",
     "event": "https://beacon.krxd.net/event.gif?source=amp&confid=$confid&_kpid=$pubid&_kcp_s=$site&_kcp_sc=$section&_kcp_ssc=$subsection&_kcp_d=_canonical_host_&_kpref_=_document_referrer_&_kua_kx_amp_client_id=_client_id_&_kua_kx_lang=_browser_language_&_kua_kx_tech_browser_language=_browser_language_&_kua_kx_tz=_timezone_&t_navigation_type=0&t_dns=_domain_lookup_time_&t_tcp=_tcp_connect_time_&t_http_request=_server_response_time_&t_http_response=_page_download_time_&t_content_ready=_content_load_time_&t_window_load=_page_load_time_&t_redirect=_redirect_time_&pageview=false"
   },
+  "mediametrie": {
+    "host": "https://prof.estat.com/m/web",
+    "pageview": "https://prof.estat.com/m/web/$serial?c=$level1&dom=_ampdoc_url_&enc=_document_charset_&l3=$level3&l4=$level4&n=_random_&p=$level2&r=_document_referrer_&sch=_screen_height_&scw=_screen_width_&tn=amp&v=1&vh=_available_screen_height_&vw=_available_screen_width_"
+  },
   "parsely": {
     "host": "https://srv.pixel.parsely.com",
     "basePrefix": "https://srv.pixel.parsely.com/plogger/?rand=_timestamp_&idsite=$apikey&url=_ampdoc_url_&urlref=_document_referrer_&screen=_screen_width_x_screen_height_%7C_available_screen_width_x_available_screen_height_%7C_screen_color_depth_&title=_title_&date=_timestamp_&ampid=_client_id_",
