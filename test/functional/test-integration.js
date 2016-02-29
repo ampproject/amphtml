@@ -21,6 +21,7 @@ import {
   draw3p,
   ensureFramed,
   validateParentOrigin,
+  validateAllowedEmbeddingOrigins,
   validateAllowedTypes,
   parseFragment,
 } from '../../3p/integration';
@@ -286,5 +287,84 @@ describe('3p integration.js', () => {
     expect(() => {
       ensureFramed(win);
     }).to.throw(/Must be framed: sentinel/);
+  });
+
+  it('should validateAllowedEmbeddingOrigins: non-cache', () => {
+    const win = {
+      document: {
+        referrer: 'https://should-be-ignored',
+      },
+      location: {
+        ancestorOrigins: ['https://www.foo.com'],
+      },
+    };
+    function invalid(fn) {
+      expect(fn).to.throw(/Invalid embedding hostname/);
+    }
+    validateAllowedEmbeddingOrigins(win, ['foo.com']);
+    validateAllowedEmbeddingOrigins(win, ['foo.net', 'foo.com']);
+    validateAllowedEmbeddingOrigins(win, ['www.foo.com']);
+    invalid(() => validateAllowedEmbeddingOrigins(win, ['bar.com']));
+    invalid(() => validateAllowedEmbeddingOrigins(win, ['amp.www.foo.com']));
+    invalid(() => validateAllowedEmbeddingOrigins(win, ['ampwww.foo.com']));
+  });
+
+  it('should validateAllowedEmbeddingOrigins: cache', () => {
+    const win = {
+      location: {
+        ancestorOrigins: ['https://cdn.ampproject.org'],
+      },
+      document: {
+        referrer: 'https://cdn.ampproject.org/c/www.foo.com/test',
+      },
+    };
+    function invalid(fn) {
+      expect(fn).to.throw(/Invalid embedding hostname/);
+    }
+    validateAllowedEmbeddingOrigins(win, ['foo.com']);
+    validateAllowedEmbeddingOrigins(win, ['www.foo.com']);
+    invalid(() => validateAllowedEmbeddingOrigins(win, ['bar.com']));
+    invalid(() => validateAllowedEmbeddingOrigins(win, ['amp.www.foo.com']));
+    invalid(() => validateAllowedEmbeddingOrigins(win, ['ampwww.foo.com']));
+    win.document.referrer = 'https://cdn.ampproject.net/c/www.foo.com/test';
+    invalid(() => validateAllowedEmbeddingOrigins(win, ['foo.com']));
+  });
+
+  it('should validateAllowedEmbeddingOrigins: referrer non-cache', () => {
+    const win = {
+      location: {
+      },
+      document: {
+        referrer: 'https://www.foo.com/test',
+      },
+    };
+    function invalid(fn) {
+      expect(fn).to.throw(/Invalid embedding hostname/);
+    }
+    validateAllowedEmbeddingOrigins(win, ['foo.com']);
+    validateAllowedEmbeddingOrigins(win, ['www.foo.com']);
+    invalid(() => validateAllowedEmbeddingOrigins(win, ['bar.com']));
+    invalid(() => validateAllowedEmbeddingOrigins(win, ['amp.www.foo.com']));
+    invalid(() => validateAllowedEmbeddingOrigins(win, ['ampwww.foo.com']));
+  });
+
+  it('should validateAllowedEmbeddingOrigins: referrer cache', () => {
+    const win = {
+      location: {
+      },
+      document: {
+        referrer: 'https://cdn.ampproject.org/c/www.foo.com/test',
+      },
+    };
+    function invalid(fn) {
+      expect(fn).to.throw(/Invalid embedding hostname/);
+    }
+    validateAllowedEmbeddingOrigins(win, ['foo.com']);
+    validateAllowedEmbeddingOrigins(win, ['www.foo.com']);
+    invalid(() => validateAllowedEmbeddingOrigins(win, ['bar.com']));
+    invalid(() => validateAllowedEmbeddingOrigins(win, ['amp.www.foo.com']));
+    invalid(() => validateAllowedEmbeddingOrigins(win, ['ampwww.foo.com']));
+    win.document.referrer = 'https://cdn.ampproject.net/c/www.foo.com/test';
+    invalid(() => validateAllowedEmbeddingOrigins(win, ['foo.com']));
   });
 });
