@@ -20,7 +20,7 @@ import {getLengthNumeral} from '../src/layout';
 import {getService} from './service';
 import {documentInfoFor} from './document-info';
 import {getMode} from './mode';
-import {isExperimentOn} from './experiments';
+import {isDevChannel} from './experiments';
 import {preconnectFor} from './preconnect';
 import {dashToCamelCase} from './string';
 import {parseUrl, assertHttpsUrl} from './url';
@@ -205,7 +205,7 @@ function getDefaultBootstrapBaseUrl(parentWindow) {
  * @visibleForTesting
  */
 export function getSubDomain(win) {
-  if (!isExperimentOn(win, 'unique-origins')) {
+  if (!isDevChannel(win)) {
     return '3p';
   }
 

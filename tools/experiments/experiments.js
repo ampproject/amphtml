@@ -73,12 +73,6 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
         'amp-accordion/amp-accordion.md',
   },
-
-  // Unique 3p origins
-  {
-    id: 'unique-origins',
-    name: 'Unique 3p origins',
-  },
 ];
 
 
