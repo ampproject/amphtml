@@ -133,6 +133,7 @@ function addViewerClass(win) {
 
 /**
  * @param {!Window} win
+ * @private visible for testing
  */
 function addRuntimeClasses(win) {
   addReferrerClasses(win);
@@ -142,8 +143,9 @@ function addRuntimeClasses(win) {
 /**
  * @param {!Window} win
  * @return {!Object} All services need to return an object to "load".
+ * @visiblefortesting
  */
-function installDynamicClassesService(win) {
+export function installDynamicClassesService(win) {
   return getService(win, 'amp-dynamic-css-classes', () => {
     addRuntimeClasses(win);
     return {};
