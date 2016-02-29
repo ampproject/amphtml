@@ -84,6 +84,60 @@ export const ANALYTICS_CONFIG = {
     },
   },
 
+  'burt': {
+    'vars': {
+      'trackingKey': 'ignore',
+      'category': '',
+      'subCategory': '',
+    },
+    'requests': {
+      'host': '//${trackingKey}.c.richmetrics.com/',
+      'base': '${host}imglog?' +
+        'e=${trackingKey}&' +
+        'pi=${trackingKey}' +
+          '|${pageViewId}' +
+          '|${canonicalPath}' +
+          '|${clientId(burt-amp-user-id)}&' +
+        'ui=${clientId(burt-amp-user-id)}&' +
+        'v=amp&' +
+        'ts=${timestamp}&' +
+        'sn=${requestCount}&',
+      'pageview': '${base}' +
+        'type=page&' +
+        'ca=${category}&' +
+        'sc=${subCategory}&' +
+        'ln=${browserLanguage}&' +
+        'lr=${documentReferrer}&' +
+        'eu=${sourceUrl}&' +
+        'tz=${timezone}&' +
+        'pd=${scrollWidth}x${scrollHeight}&' +
+        'sd=${screenWidth}x${screenHeight}&' +
+        'wd=${availableScreenWidth}x${availableScreenHeight}&' +
+        'ws=${scrollLeft}x${scrollTop}',
+      'pageping': '${base}' +
+        'type=pageping',
+    },
+    'triggers': {
+      'pageview': {
+        'on': 'visible',
+        'request': 'pageview',
+      },
+      'pageping': {
+        'on': 'timer',
+        'timerSpec': {
+          'interval': 15,
+          'max-timer-length': 1200,
+        },
+        'request': 'pageping',
+      },
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
+    },
+  },
+
   'chartbeat': {
     'requests': {
       'host': 'https://ping.chartbeat.net',
