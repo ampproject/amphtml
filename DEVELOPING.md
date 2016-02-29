@@ -46,6 +46,7 @@ If you have any questions, feel free to ask on the issue or join us on [Slack](h
 | ----------------------------- | --------------------------------------------------------------------- |
 | `gulp`                        | Runs "watch" and "serve".                                             |
 | `gulp dist`                   | Builds production binaries.                                           |
+| `gulp dist --fortesting`      | Indicates the production binaries are used for local testing. Without this ads, tweets and similar use cases are expected to break locally when using minified sources.|
 | `gulp lint`                   | Validates against Google Closure Linter.                              |
 | `gulp lint --watch`           | Watches for changes in files, Validates against Google Closure Linter.|
 | `gulp lint --fix`             | Fixes simple lint warnings/errors automatically.                      |
