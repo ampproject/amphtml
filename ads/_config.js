@@ -69,6 +69,12 @@ export const adPreconnect = {
     'https://s.yieldmo.com',
     'https://ads.yieldmo.com',
   ],
+  triplelift: [
+    'https://ib.3lift.com',
+    'https://dynamic.3lift.com',
+    'https://img.3lift.com',
+    'https://eb2.3lift.com',
+  ],
   revcontent: [
     'https://trends.revcontent.com',
     'https://cdn.revcontent.com',
