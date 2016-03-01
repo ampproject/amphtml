@@ -152,7 +152,7 @@ Type attribute value: `krux`
 
 Adds support for Krux.  Configuration details can be found at [help.krux.com](https://konsole.zendesk.com/hc/en-us/articles/216596608).
 
-##### Médiamétrie
+### Médiamétrie
 
 Type attribute value: `mediametrie`
 
@@ -176,7 +176,7 @@ Type attribute value: `simplereach`
 
 Adds support for SimpleReach.  Configuration details can be found at [simplereach.com/docs](http://docs.simplereach.com/dev-guide/implementation/google-amp-implementation)
 
-##### Webtrekk
+### Webtrekk
 
 Type attribute value: `webtrekk`
 
