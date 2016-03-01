@@ -360,6 +360,10 @@ export function installAd(win) {
       }
       this.deferMutate(() => {
         if (this.fallback_) {
+          // Hide placeholder when falling back.
+          if (this.placeholder_) {
+            this.togglePlaceholder(false);
+          }
           this.toggleFallback(true);
         }
         this.element.removeChild(this.iframe_);
