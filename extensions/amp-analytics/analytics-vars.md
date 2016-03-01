@@ -271,7 +271,7 @@ Example usage: `${queryParam(foo)}` - if foo is available its associated value w
 
 ## requestCount
 
-Provides the number of requests sent out from a particular `amp-analytics` tag. This value can be used to reconstruct the sequence in which requests were sent from a tag. The value starts from 0 and increases monotonically. Note that there may be a gap in requestCount numbers if the request sending fails due to network issues.
+Provides the number of requests sent out from a particular `amp-analytics` tag. This value can be used to reconstruct the sequence in which requests were sent from a tag. The value starts from 1 and increases monotonically. Note that there may be a gap in requestCount numbers if the request sending fails due to network issues.
 
 Example value: `6`
 
