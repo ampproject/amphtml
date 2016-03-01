@@ -22,10 +22,130 @@ const RETURN_URL_ESC = encodeURIComponent('http://localhost:8000/extensions' +
     encodeURIComponent('http://localhost:8000/test-login-dialog'));
 
 
-describe('LoginDialog', () => {
+describe('ViewerLoginDialog', () => {
+
+  let sandbox;
+  let viewer;
+  let windowApi;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+    clock = sandbox.useFakeTimers();
+
+    viewer = {
+      getParam: param => {
+        if (param == 'dialog') {
+          return '1';
+        }
+        return null;
+      },
+      sendMessage: () => {},
+    };
+
+    windowApi = {
+      services: {
+        'viewer': {obj: viewer},
+      },
+      screen: {width: 1000, height: 1000},
+      open: () => {
+        throw new Error('Not allowed');
+      },
+      addEventListener: () => {
+        throw new Error('Not allowed');
+      },
+      setTimeout: () => {
+        throw new Error('Not allowed');
+      },
+      setInterval: () => {
+        throw new Error('Not allowed');
+      },
+    };
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+    sandbox = null;
+  });
+
+  it('should delegate to viewer with url', () => {
+    const stub = sandbox.stub(viewer, 'sendMessage',
+        () => Promise.resolve('#success=yes'));
+    return openLoginDialog(windowApi, 'http://acme.com/login').then(res => {
+      expect(res).to.equal('#success=yes');
+      expect(stub.callCount).to.equal(1);
+      expect(stub.firstCall.args[0]).to.equal('openDialog');
+      expect(stub.firstCall.args[1]).to.deep.equal({
+        'url': 'http://acme.com/login?return=RETURN_URL',
+      });
+      expect(stub.firstCall.args[2]).to.be.true;
+    });
+  });
+
+  it('should delegate to viewer with url promise', () => {
+    const stub = sandbox.stub(viewer, 'sendMessage',
+        () => Promise.resolve('#success=yes'));
+    const urlPromise = Promise.resolve('http://acme.com/login');
+    return openLoginDialog(windowApi, urlPromise).then(res => {
+      expect(res).to.equal('#success=yes');
+      expect(stub.callCount).to.equal(1);
+      expect(stub.firstCall.args[0]).to.equal('openDialog');
+      expect(stub.firstCall.args[1]).to.deep.equal({
+        'url': 'http://acme.com/login?return=RETURN_URL',
+      });
+      expect(stub.firstCall.args[2]).to.be.true;
+    });
+  });
+
+  it('should fail when url promise fails', () => {
+    sandbox.stub(viewer, 'sendMessage',
+        () => Promise.resolve('#success=yes'));
+    const urlPromise = Promise.reject('expected');
+    return openLoginDialog(windowApi, urlPromise).then(() => {
+      throw new Error('must not be here');
+    }, reason => {
+      expect(reason).to.equal('expected');
+    });
+  });
+
+  it('should fail when viewer fails', () => {
+    sandbox.stub(viewer, 'sendMessage',
+        () => Promise.reject('expected'));
+    return openLoginDialog(windowApi, 'http://acme.com/login').then(() => {
+      throw new Error('must not be here');
+    }, reason => {
+      expect(reason).to.equal('expected');
+    });
+  });
+
+  it('should have correct URL with other parameters', () => {
+    const stub = sandbox.stub(viewer, 'sendMessage',
+        () => Promise.resolve('#success=yes'));
+    const url = 'http://acme.com/login?a=b';
+    return openLoginDialog(windowApi, url).then(() => {
+      expect(stub.firstCall.args[1]).to.deep.equal({
+        'url': 'http://acme.com/login?a=b&return=RETURN_URL',
+      });
+    });
+  });
+
+  it('should allow alternative form of return URL', () => {
+    const stub = sandbox.stub(viewer, 'sendMessage',
+        () => Promise.resolve('#success=yes'));
+    const url = 'http://acme.com/login?a=b&ret1=RETURN_URL';
+    return openLoginDialog(windowApi, url).then(() => {
+      expect(stub.firstCall.args[1]).to.deep.equal({
+        'url': 'http://acme.com/login?a=b&ret1=RETURN_URL',
+      });
+    });
+  });
+});
+
+
+describe('WebLoginDialog', () => {
 
   let sandbox;
   let clock;
+  let viewer;
   let windowApi;
   let windowMock;
   let dialog;
@@ -38,7 +158,13 @@ describe('LoginDialog', () => {
     clock = sandbox.useFakeTimers();
 
     messageListener = undefined;
+    viewer = {
+      getParam: () => null,
+    };
     windowApi = {
+      services: {
+        'viewer': {obj: viewer},
+      },
       open: () => {},
       location: {
         protocol: 'http:',
