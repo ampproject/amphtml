@@ -42,7 +42,9 @@ goog.require('goog.structs.Map');
 goog.require('goog.structs.Set');
 goog.require('goog.uri.utils');
 goog.require('parse_css.BlockType');
+goog.require('parse_css.ParsedCssUrl');
 goog.require('parse_css.RuleVisitor');
+goog.require('parse_css.extractUrls');
 goog.require('parse_css.parseAStylesheet');
 goog.require('parse_css.tokenize');
 
@@ -650,6 +652,13 @@ class CdataMatcher {
       const sheet = parse_css.parseAStylesheet(
           tokenList, atRuleParsingSpec,
           computeAtRuleDefaultParsingSpec(atRuleParsingSpec), cssErrors);
+
+      // We extract the urls from the stylesheet. As a side-effect, this can
+      // generate errors for url(...) functions with invalid parameters.
+      /** @type {!Array<!parse_css.ParsedCssUrl>} */
+      const parsedUrls = [];
+      parse_css.extractUrls(sheet, parsedUrls, cssErrors);
+
       for (const errorToken of cssErrors) {
         // Override the first parameter with the name of this style tag.
         let params = errorToken.params;
