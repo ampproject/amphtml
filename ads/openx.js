@@ -27,13 +27,14 @@ export function openx(global, data) {
 
     checkData(data, openxData);
 
-    // consolidate doubleclick inputs
+    // consolidate doubleclick inputs for forwarding
+    // conversion rules are explained in openx.md
     if (data.dfpSlot) {
 
         // anything starting with 'dfp' gets promoted
         // otherwise it's removed
         for (let openxKey of openxData) {
-            if (openxKey in dfpData) {
+            if (openxKey in dfpData && openxKey !== 'dfp') {
                 if (openxKey.startsWith('dfp')) {
 
                     // remove 'dfp' prefix, lowercase first letter
@@ -52,9 +53,6 @@ export function openx(global, data) {
             delete dfpData['dfp'];
         }
 
-        console.log(data);
-        console.log(dfpData);
-
         checkData(dfpData, [
             'slot', 'targeting', 'categoryExclusions',
             'tagForChildDirectedTreatment', 'cookieOptions',
@@ -64,6 +62,7 @@ export function openx(global, data) {
 
     let jssdk = 'https://' + data.host + '/mw/1.0/jstag';
 
+    // decide how to render
     if (data.nc && data.dfpSlot) { // doubleclick bidder
         jssdk += '?nc=' + data.nc;
         writeScript(global, jssdk, () => {
@@ -82,6 +81,8 @@ export function openx(global, data) {
             }
         ];
         loadScript(global, jssdk);
+    } else if (data.dfpSlot) { // plain dfp fallback
+        doubleClickWithGpt(global, dfpData);
     }
 }
 
