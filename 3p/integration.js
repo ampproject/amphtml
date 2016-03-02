@@ -32,6 +32,7 @@ import {adtech} from '../ads/adtech';
 import {plista} from '../ads/plista';
 import {doubleclick} from '../ads/doubleclick';
 import {dotandads} from '../ads/dotandads';
+import {endsWith} from '../src/string';
 import {facebook} from './facebook';
 import {flite} from '../ads/flite';
 import {manageWin} from './environment';
@@ -40,20 +41,25 @@ import {nonSensitiveDataPostMessage, listenParent} from './messaging';
 import {twitter} from './twitter';
 import {yieldmo} from '../ads/yieldmo';
 import {computeInMasterFrame, register, run} from '../src/3p';
-import {parseUrl} from '../src/url';
+import {parseUrl, getSourceUrl} from '../src/url';
 import {assert} from '../src/asserts';
 import {taboola} from '../ads/taboola';
 import {smartadserver} from '../ads/smartadserver';
 import {revcontent} from '../ads/revcontent';
 import {openadstream} from '../ads/openadstream';
+<<<<<<< HEAD
 import {rubicon} from '../ads/rubicon';
+=======
+import {triplelift} from '../ads/triplelift';
+import {teads} from '../ads/teads';
+>>>>>>> upstream/master
 
 /**
  * Whether the embed type may be used with amp-embed tag.
  * @const {!Object<string: boolean>}
  */
 const AMP_EMBED_ALLOWED = {
-  taboola: true
+  taboola: true,
 };
 
 register('a9', a9);
@@ -76,7 +82,12 @@ register('smartadserver', smartadserver);
 register('mediaimpact', mediaimpact);
 register('revcontent', revcontent);
 register('openadstream', openadstream);
+<<<<<<< HEAD
 register('rubicon', rubicon);
+=======
+register('triplelift', triplelift);
+register('teads', teads);
+>>>>>>> upstream/master
 
 // For backward compat, we always allow these types without the iframe
 // opting in.
@@ -155,14 +166,21 @@ function masterSelection(type) {
  *        no arguments. Configuration is expected to be modified in-place.
  * @param {!Array<string>=} opt_allowed3pTypes List of advertising network
  *     types you expect.
+ * @param {!Array<string>=} opt_allowedEmbeddingOrigins List of domain suffixes
+ *     that are allowed to embed this frame.
  */
-window.draw3p = function(opt_configCallback, opt_allowed3pTypes) {
+window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
+    opt_allowedEmbeddingOrigins) {
   try {
+    ensureFramed(window);
     const data = parseFragment(location.hash);
     window.context = data._context;
     window.context.location = parseUrl(data._context.location.href);
     validateParentOrigin(window, window.context.location);
     validateAllowedTypes(window, data.type, opt_allowed3pTypes);
+    if (opt_allowedEmbeddingOrigins) {
+      validateAllowedEmbeddingOrigins(window, opt_allowedEmbeddingOrigins);
+    }
     window.context.master = masterSelection(data.type);
     window.context.isMaster = window.context.master == window;
     window.context.data = data;
@@ -209,7 +227,7 @@ function triggerDimensions(width, height) {
 function triggerResizeRequest(width, height) {
   nonSensitiveDataPostMessage('embed-size', {
     width: width,
-    height: height
+    height: height,
   });
 }
 
@@ -285,7 +303,7 @@ function reportRenderedEntityIdentifier(entityId) {
   assert(typeof entityId == 'string',
       'entityId should be a string %s', entityId);
   nonSensitiveDataPostMessage('entity-id', {
-    id: entityId
+    id: entityId,
   });
 }
 
@@ -318,10 +336,14 @@ export function validateParentOrigin(window, parentLocation) {
  * @param {!Window} window
  * @param {string} type 3p type
  * @param {!Array<string>|undefined} allowedTypes May be undefined.
+ * @visiblefortesting
  */
 export function validateAllowedTypes(window, type, allowedTypes) {
   // Everything allowed in default iframe.
   if (window.location.hostname == '3p.ampproject.net') {
+    return;
+  }
+  if (/^d-\d+\.ampproject\.net$/.test(window.location.hostname)) {
     return;
   }
   if (window.location.hostname == 'ads.localhost') {
@@ -332,6 +354,53 @@ export function validateAllowedTypes(window, type, allowedTypes) {
   }
   assert(allowedTypes && allowedTypes.indexOf(type) != -1,
       'Non-whitelisted 3p type for custom iframe: ' + type);
+}
+
+/**
+ * Check that parent host name was whitelisted.
+ * @param {!Window} window
+ * @param {!Array<string>} allowedHostnames Suffixes of allowed host names.
+ * @visiblefortesting
+ */
+export function validateAllowedEmbeddingOrigins(window, allowedHostnames) {
+  if (!window.document.referrer) {
+    throw new Error('Referrer expected: ' + window.location.href);
+  }
+  const ancestors = window.location.ancestorOrigins;
+  // We prefer the unforgable ancestorOrigins, but referrer is better than
+  // nothing.
+  const ancestor = ancestors ? ancestors[0] : window.document.referrer;
+  let hostname = parseUrl(ancestor).hostname;
+  const onDefault = hostname == 'cdn.ampproject.org';
+  if (onDefault) {
+    // If we are on the cache domain, parse the source hostname from
+    // the referrer. The referrer is used because it should be
+    // trustable.
+    hostname = parseUrl(getSourceUrl(window.document.referrer)).hostname;
+  }
+  for (let i = 0; i < allowedHostnames.length; i++) {
+    // Either the hostname is exactly as whitelisted…
+    if (allowedHostnames[i] == hostname) {
+      return;
+    }
+    // Or it ends in .$hostname (aka is a sub domain of the whitelisted domain.
+    if (endsWith(hostname, '.' + allowedHostnames[i])) {
+      return;
+    }
+  }
+  throw new Error('Invalid embedding hostname: ' + hostname + ' not in '
+      + allowedHostnames);
+}
+
+/**
+ * Throws if this window is a top level window.
+ * @param {!Window} window
+ * @visiblefortesting
+ */
+export function ensureFramed(window) {
+  if (window == window.parent) {
+    throw new Error('Must be framed: ' + window.location.href);
+  }
 }
 
 /**
@@ -377,7 +446,7 @@ export function isTagNameAllowed(type, tagName) {
  */
 function lightweightErrorReport(e) {
   new Image().src = 'https://amp-error-reporting.appspot.com/r' +
-      '?v=' + encodeURIComponent('$internalRuntimeVersion$') +
+      '?3p=1&v=' + encodeURIComponent('$internalRuntimeVersion$') +
       '&m=' + encodeURIComponent(e.message) +
       '&r=' + encodeURIComponent(document.referrer);
 }

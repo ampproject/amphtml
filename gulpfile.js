@@ -16,29 +16,22 @@
 
 checkMinVersion();
 
+var $$ = require('gulp-load-plugins')();
 var autoprefixer = require('autoprefixer');
 var babel = require('babelify');
 var browserify = require('browserify');
 var buffer = require('vinyl-buffer');
 var closureCompile = require('./build-system/tasks/compile').closureCompile;
 var cssnano = require('cssnano');
-var file = require('gulp-file');
 var fs = require('fs-extra');
-var gulp = require('gulp-help')(require('gulp'));
-var gulpWatch = require('gulp-watch');
+var gulp = $$.help(require('gulp'));
 var lazypipe = require('lazypipe');
 var minimist = require('minimist');
 var postcss = require('postcss');
-var rename = require('gulp-rename');
-var replace = require('gulp-replace');
 var source = require('vinyl-source-stream');
-var sourcemaps = require('gulp-sourcemaps');
 var touch = require('touch');
-var uglify = require('gulp-uglify');
-var util = require('gulp-util');
 var watchify = require('watchify');
 var windowConfig = require('./build-system/window-config');
-var wrap = require('gulp-wrap');
 var internalRuntimeVersion = require('./build-system/internal-version').VERSION;
 var internalRuntimeToken = require('./build-system/internal-version').TOKEN;
 
@@ -160,7 +153,7 @@ function compileCss() {
   console.info('Recompiling CSS.');
   return jsifyCssPromise('css/amp.css').then(function(css) {
     return gulp.src('css/**.css')
-        .pipe(file('css.js', 'export const cssText = ' + css))
+        .pipe($$.file('css.js', 'export const cssText = ' + css))
         .pipe(gulp.dest('build'));
   });
 }
@@ -192,7 +185,7 @@ function jsifyCssPromise(filename) {
  * Enables watching for file changes in css, extensions, and examples.
  */
 function watch() {
-  gulpWatch('css/**/*.css', function() {
+  $$.watch('css/**/*.css', function() {
     compileCss();
   });
   buildExtensions({
@@ -231,7 +224,7 @@ function buildExtension(name, version, hasCss, options) {
     // Do not set watchers again when we get called by the watcher.
     var copy = Object.create(options);
     copy.watch = false;
-    gulpWatch(path + '/*', function() {
+    $$.watch(path + '/*', function() {
       buildExtension(name, version, hasCss, copy);
     });
   }
@@ -265,7 +258,7 @@ function buildExtensionJs(js, path, name, version, options) {
   var minifiedName = name + '-' + version + '.js';
   var latestName = name + '-latest.js';
   return gulp.src(path + '/*.js')
-      .pipe(file(builtName, js))
+      .pipe($$.file(builtName, js))
       .pipe(gulp.dest('build/all/v0/'))
       .on('end', function() {
         compileJs('./build/all/v0/', builtName, './dist/v0', {
@@ -308,7 +301,7 @@ function dist() {
  */
 function buildExamples(watch) {
   if (watch) {
-    gulpWatch('examples/*.html', function() {
+    $$.watch('examples/*.html', function() {
       buildExamples(false);
     });
   }
@@ -316,9 +309,9 @@ function buildExamples(watch) {
   fs.copy('examples/', 'examples.build/', {clobber: true},
       function(err) {
         if (err) {
-          return util.log(util.colors.red('copy error: ', err));
+          return $$.util.log($$.util.colors.red('copy error: ', err));
         }
-        util.log(util.colors.green('copied examples to examples.build'));
+        $$.util.log($$.util.colors.green('copied examples to examples.build'));
       });
 
   // Also update test-example-validation.js
@@ -375,14 +368,14 @@ function buildExample(name) {
   max = max.replace('https://cdn.ampproject.org/v0.max.js', '../dist/amp.js');
   max = max.replace(/https:\/\/cdn.ampproject.org\/v0\//g, '../dist/v0/');
   gulp.src(input)
-      .pipe(file(name.replace('.html', '.max.html'),max))
+      .pipe($$.file(name.replace('.html', '.max.html'),max))
       .pipe(gulp.dest('examples.build/'));
 
   var min = max;
   min = min.replace(/\.max\.js/g, '.js');
   min = min.replace('../dist/amp.js', '../dist/v0.js');
   gulp.src(input)
-      .pipe(file(name.replace('.html', '.min.html'), min))
+      .pipe($$.file(name.replace('.html', '.min.html'), min))
       .pipe(gulp.dest('examples.build/'));
 }
 
@@ -396,16 +389,25 @@ function buildExample(name) {
 function thirdPartyBootstrap(watch, shouldMinify) {
   var input = '3p/frame.max.html';
   if (watch) {
-    gulpWatch(input, function() {
+    $$.watch(input, function() {
       thirdPartyBootstrap(false);
     });
   }
   console.log('Processing ' + input);
   var html = fs.readFileSync(input, 'utf8');
   var min = html;
-  min = min.replace(/\.\/integration\.js/g, './f.js');
+  // By default we use an absolute URL, that is independent of the
+  // actual frame host for the JS inside the frame.
+  var jsPrefix = 'https://3p.ampproject.net/' + internalRuntimeVersion;
+  // But during testing we need a relative reference because the
+  // version is not available on the absolute path.
+  if (argv.fortesting) {
+    jsPrefix = '.';
+  }
+  // Convert default relative URL to absolute min URL.
+  min = min.replace(/\.\/integration\.js/g, jsPrefix + '/f.js');
   gulp.src(input)
-      .pipe(file('frame.html', min))
+      .pipe($$.file('frame.html', min))
       .pipe(gulp.dest('dist.3p/' + internalRuntimeVersion))
       .on('end', function() {
         var aliasToLatestBuild = 'dist.3p/current';
@@ -445,13 +447,13 @@ function compileJs(srcDir, srcFilename, destDir, options) {
   var lazybuild = lazypipe()
       .pipe(source, srcFilename)
       .pipe(buffer)
-      .pipe(replace, /\$internalRuntimeVersion\$/g, internalRuntimeVersion)
-      .pipe(replace, /\$internalRuntimeToken\$/g, internalRuntimeToken)
-      .pipe(wrap, wrapper)
-      .pipe(sourcemaps.init.bind(sourcemaps), {loadMaps: true});
+      .pipe($$.replace, /\$internalRuntimeVersion\$/g, internalRuntimeVersion)
+      .pipe($$.replace, /\$internalRuntimeToken\$/g, internalRuntimeToken)
+      .pipe($$.wrap, wrapper)
+      .pipe($$.sourcemaps.init.bind($$.sourcemaps), {loadMaps: true});
 
   var lazywrite = lazypipe()
-      .pipe(sourcemaps.write.bind(sourcemaps), './')
+      .pipe($$.sourcemaps.write.bind($$.sourcemaps), './')
       .pipe(gulp.dest.bind(gulp), destDir);
 
   function rebundle() {
@@ -460,18 +462,18 @@ function compileJs(srcDir, srcFilename, destDir, options) {
       .on('error', function(err) {
         activeBundleOperationCount--;
         if (err instanceof SyntaxError) {
-          console.error(util.colors.red('Syntax error:', err.message));
+          console.error($$.util.colors.red('Syntax error:', err.message));
         } else {
           console.error(err);
         }
       })
       .pipe(lazybuild())
-      .pipe(rename(options.toName || srcFilename))
+      .pipe($$.rename(options.toName || srcFilename))
       .pipe(lazywrite())
       .on('end', function() {
         activeBundleOperationCount--;
         if (activeBundleOperationCount == 0) {
-          console.info(util.colors.green('All current JS updates done.'));
+          console.info($$.util.colors.green('All current JS updates done.'));
         }
       });
   }
@@ -509,10 +511,10 @@ function compileJs(srcDir, srcFilename, destDir, options) {
     bundler.bundle()
       .on('error', function(err) { console.error(err); this.emit('end'); })
       .pipe(lazybuild())
-      .pipe(uglify({
+      .pipe($$.uglify({
         preserveComments: 'some'
       }))
-      .pipe(rename(options.minifiedName))
+      .pipe($$.rename(options.minifiedName))
       .pipe(lazywrite())
       .on('end', function() {
         fs.writeFileSync(destDir + '/version.txt', internalRuntimeVersion);
@@ -543,9 +545,9 @@ function buildExperiments(options) {
 
   function copyHandler(name, err) {
     if (err) {
-      return util.log(util.colors.red('copy error: ', err));
+      return $$.util.log($$.util.colors.red('copy error: ', err));
     }
-    util.log(util.colors.green('copied ' + name));
+    $$.util.log($$.util.colors.green('copied ' + name));
   }
 
   var path = 'tools/experiments';
@@ -563,7 +565,7 @@ function buildExperiments(options) {
     // Do not set watchers again when we get called by the watcher.
     var copy = Object.create(options);
     copy.watch = false;
-    gulpWatch(path + '/*', function() {
+    $$.watch(path + '/*', function() {
       buildExperiments(copy);
     });
   }
@@ -574,7 +576,7 @@ function buildExperiments(options) {
   var minHtml = html.replace('../../dist.tools/experiments/experiments.max.js',
       'https://cdn.ampproject.org/v0/experiments.js');
   gulp.src(htmlPath)
-      .pipe(file('experiments.cdn.html', minHtml))
+      .pipe($$.file('experiments.cdn.html', minHtml))
       .pipe(gulp.dest('dist.tools/experiments/'));
 
   // Build JS.
@@ -582,7 +584,7 @@ function buildExperiments(options) {
   var builtName = 'experiments.max.js';
   var minifiedName = 'experiments.js';
   return gulp.src(path + '/*.js')
-      .pipe(file(builtName, js))
+      .pipe($$.file(builtName, js))
       .pipe(gulp.dest('build/experiments/'))
       .on('end', function() {
         compileJs('./build/experiments/', builtName, './dist.tools/experiments/', {
@@ -614,9 +616,9 @@ function buildLoginDoneVersion(version, options) {
 
   function copyHandler(name, err) {
     if (err) {
-      return util.log(util.colors.red('copy error: ', err));
+      return $$.util.log($$.util.colors.red('copy error: ', err));
     }
-    util.log(util.colors.green('copied ' + name));
+    $$.util.log($$.util.colors.green('copied ' + name));
   }
 
   var path = 'extensions/amp-access/' + version + '/';
@@ -634,7 +636,7 @@ function buildLoginDoneVersion(version, options) {
     // Do not set watchers again when we get called by the watcher.
     var copy = Object.create(options);
     copy.watch = false;
-    gulpWatch(path + '/*', function() {
+    $$.watch(path + '/*', function() {
       buildLoginDoneVersion(version, copy);
     });
   }
@@ -668,7 +670,7 @@ function buildLoginDoneVersion(version, options) {
   var minifiedName = 'amp-login-done-' + version + '.js';
   var latestName = 'amp-login-done-latest.js';
   return gulp.src(path + '/*.js')
-      .pipe(file(builtName, js))
+      .pipe($$.file(builtName, js))
       .pipe(gulp.dest('build/all/v0/'))
       .on('end', function() {
         compileJs('./build/all/v0/', builtName, './dist/v0/', {

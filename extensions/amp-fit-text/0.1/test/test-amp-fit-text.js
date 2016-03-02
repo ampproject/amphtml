@@ -17,8 +17,10 @@
 import {Timer} from '../../../../src/timer';
 import {createIframePromise} from '../../../../testing/iframe';
 require('../../../../build/all/v0/amp-fit-text-0.1.max');
-import {calculateFontSize_, updateOverflow_}
-    from '../../../../build/all/v0/amp-fit-text-0.1.max';
+import {
+  calculateFontSize_,
+  updateOverflow_,
+} from '../../../../build/all/v0/amp-fit-text-0.1.max';
 import {adopt} from '../../../../src/runtime';
 
 adopt(window);
@@ -118,8 +120,8 @@ describe('amp-fit-text updateOverflow', () => {
       classList: {
         toggle: (className, on) => {
           classToggles[className] = on;
-        }
-      }
+        },
+      },
     };
 
     measurer = document.createElement('div');

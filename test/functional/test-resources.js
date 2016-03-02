@@ -14,8 +14,12 @@
  * limitations under the License.
  */
 
-import {Resource, ResourceState_, Resources, TaskQueue_} from
-    '../../src/service/resources-impl';
+import {
+  Resource,
+  ResourceState_,
+  Resources,
+  TaskQueue_,
+} from '../../src/service/resources-impl';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import * as sinon from 'sinon';
 
@@ -46,54 +50,54 @@ describe('Resources', () => {
       resource: {
         getLayoutBox() {
           return layoutRectLtwh(0, 100, 300, 100);
-        }
+        },
       },
-      priority: 0
+      priority: 0,
     };
     // Task 2 is in the viewport and priority 1
     const task_vp0_p1 = {
       resource: {
         getLayoutBox() {
           return layoutRectLtwh(0, 100, 300, 100);
-        }
+        },
       },
-      priority: 1
+      priority: 1,
     };
     // Task 3 is above viewport and priority 0
     const task_vpu_p0 = {
       resource: {
         getLayoutBox() {
           return layoutRectLtwh(0, 0, 300, 50);
-        }
+        },
       },
-      priority: 0
+      priority: 0,
     };
     // Task 4 is above viewport and priority 0
     const task_vpu_p1 = {
       resource: {
         getLayoutBox() {
           return layoutRectLtwh(0, 0, 300, 50);
-        }
+        },
       },
-      priority: 1
+      priority: 1,
     };
     // Task 5 is below viewport and priority 0
     const task_vpd_p0 = {
       resource: {
         getLayoutBox() {
           return layoutRectLtwh(0, 600, 300, 50);
-        }
+        },
       },
-      priority: 0
+      priority: 0,
     };
     // Task 6 is below viewport and priority 0
     const task_vpd_p1 = {
       resource: {
         getLayoutBox() {
           return layoutRectLtwh(0, 600, 300, 50);
-        }
+        },
       },
-      priority: 1
+      priority: 1,
     };
 
     expect(resources.calcTaskScore_(viewportRect, 0, task_vp0_p0)).to.equal(0);
@@ -112,12 +116,12 @@ describe('Resources', () => {
     // Task 1 is priority 0
     const task_p0 = {
       priority: 0,
-      startTime: 0
+      startTime: 0,
     };
     // Task 2 is priority 1
     const task_p1 = {
       priority: 1,
-      startTime: 0
+      startTime: 0,
     };
 
     // Empty pool
@@ -155,7 +159,7 @@ describe('Resources', () => {
       isInViewport: () => true,
       prerenderAllowed: () => false,
       renderOutsideViewport: () => false,
-      startLayout: () => {}
+      startLayout: () => {},
     };
     resources.visible_ = false;
     resources.scheduleLayoutOrPreload_(resource, true);
@@ -172,7 +176,7 @@ describe('Resources', () => {
       renderOutsideViewport: () => true,
       getPriority: () => 1,
       startLayout: () => {},
-      layoutScheduled: () => {}
+      layoutScheduled: () => {},
     };
     resources.visible_ = false;
     resources.scheduleLayoutOrPreload_(resource, true);
@@ -203,7 +207,7 @@ describe('Resources', () => {
       renderOutsideViewport: () => true,
       getPriority: () => 1,
       startLayout: () => {},
-      layoutScheduled: () => {}
+      layoutScheduled: () => {},
     };
     resources.scheduleLayoutOrPreload_(resource, true);
     expect(resources.queue_.getSize()).to.equal(1);
@@ -238,11 +242,11 @@ describe('Resources schedulePause', () => {
       classList: {
         contains() {
           return true;
-        }
+        },
       },
       documentInactiveCallback() {
         return false;
-      }
+      },
     };
   }
 
@@ -343,7 +347,7 @@ describe('Resources discoverWork', () => {
     resource2 = createResource(2, layoutRectLtwh(10, 1010, 100, 100));
     resources.resources_ = [resource1, resource2];
     resources.vsync_ = {
-      mutate: callback => callback()
+      mutate: callback => callback(),
     };
   });
 
@@ -1027,7 +1031,7 @@ describe('Resources.Resource', () => {
       layoutCallback: () => {},
       changeHeight: () => {},
       documentInactiveCallback: () => false,
-      viewportCallback: () => {}
+      viewportCallback: () => {},
     };
     elementMock = sandbox.mock(element);
 
@@ -1133,8 +1137,8 @@ describe('Resources.Resource', () => {
       viewport_: {
         getLayoutRect() {
           return layoutRectLtwh(0, 100, 300, 100);
-        }
-      }
+        },
+      },
     };
     expect(() => {
       resource.measure();
@@ -1520,13 +1524,13 @@ describe('Resources.Resource', () => {
         hasOwner: () => false,
         isDisplayed: () => true,
         prerenderAllowed: () => true,
-        overlaps: () => true
+        overlaps: () => true,
       };
       resource2 = {
         hasOwner: () => false,
         isDisplayed: () => true,
         prerenderAllowed: () => true,
-        overlaps: () => false
+        overlaps: () => false,
       };
       resources.resources_ = [resource1, resource2];
     });

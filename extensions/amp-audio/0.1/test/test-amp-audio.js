@@ -72,7 +72,7 @@ describe('amp-audio', () => {
 
   it('should load audio through attribute', () => {
     return attachAndRun({
-      src: 'https://origin.com/audio.mp3'
+      src: 'https://origin.com/audio.mp3',
     }).then(a => {
       const audio = a.querySelector('audio');
       expect(audio).to.be.an.instanceof(Element);
@@ -91,7 +91,7 @@ describe('amp-audio', () => {
       height: 53,
       autoplay: '',
       muted: '',
-      loop: ''
+      loop: '',
     }, [
         {tag: 'source', src: 'https://origin.com/audio.mp3',
             type: 'audio/mpeg'},
@@ -123,7 +123,7 @@ describe('amp-audio', () => {
 
   it('should set its dimensions to the browser natural', () => {
     return attachAndRun({
-      src: 'https://origin.com/audio.mp3'
+      src: 'https://origin.com/audio.mp3',
     }).then(a => {
       const audio = a.querySelector('audio');
       expect(a.style.width).to.be.equal('300px');
@@ -141,7 +141,7 @@ describe('amp-audio', () => {
   it('should set its natural dimension only if not specified', () => {
     return attachAndRun({
       'width': '500',
-      src: 'https://origin.com/audio.mp3'
+      src: 'https://origin.com/audio.mp3',
     }).then(a => {
       expect(a.style.width).to.be.equal('500px');
       expect(a.style.height).to.be.equal('30px');

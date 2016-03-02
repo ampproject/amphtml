@@ -15,7 +15,7 @@
  */
 
 import {computeInMasterFrame, validateSrcPrefix, validateSrcContains,
-    checkData, validateData, validateDataExists, validateExactlyOne}
+    checkData, validateData, validateDataExists, validateExactlyOne,}
     from '../../src/3p';
 import * as sinon from 'sinon';
 
@@ -173,26 +173,26 @@ describe('3p', () => {
     const master = {
       context: {
         isMaster: true,
-      }
+      },
     };
     master.context.master = master;
     const slave0 = {
       context: {
         isMaster: false,
-        master: master
-      }
+        master: master,
+      },
     };
     const slave1 = {
       context: {
         isMaster: false,
-        master: master
-      }
+        master: master,
+      },
     };
     const slave2 = {
       context: {
         isMaster: false,
-        master: master
-      }
+        master: master,
+      },
     };
     let done;
     let workCalls = 0;

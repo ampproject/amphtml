@@ -32,7 +32,7 @@ import {userNotificationManagerFor} from '../src/user-notification';
 
 /** @private @const These tags are allowed to have fixed positioning */
 const POSITION_FIXED_TAG_WHITELIST = {
-  'AMP-LIGHTBOX': true
+  'AMP-LIGHTBOX': true,
 };
 
 /**
@@ -360,6 +360,10 @@ export function installAd(win) {
       }
       this.deferMutate(() => {
         if (this.fallback_) {
+          // Hide placeholder when falling back.
+          if (this.placeholder_) {
+            this.togglePlaceholder(false);
+          }
           this.toggleFallback(true);
         }
         this.element.removeChild(this.iframe_);

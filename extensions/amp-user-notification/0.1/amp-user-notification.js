@@ -22,7 +22,7 @@ import {log} from '../../../src/log';
 import {storageFor} from '../../../src/storage';
 import {urlReplacementsFor} from '../../../src/url-replacements';
 import {viewerFor} from '../../../src/viewer';
-import {whenDocumentReady} from '../../../src/document-state';
+import {whenDocumentReady} from '../../../src/document-ready';
 import {xhrFor} from '../../../src/xhr';
 
 
@@ -143,7 +143,7 @@ export class AmpUserNotification extends AMP.BaseElement {
     return this.urlReplacements_.expand(assert(this.showIfHref_)).then(href => {
       return addParamsToUrl(href, {
         elementId: this.elementId_,
-        ampUserId: ampUserId
+        ampUserId: ampUserId,
       });
     });
   }
@@ -159,7 +159,7 @@ export class AmpUserNotification extends AMP.BaseElement {
     this.ampUserId_ = ampUserId;
     return this.buildGetHref_(ampUserId).then(href => {
       const getReq = {
-        credentials: 'include'
+        credentials: 'include',
       };
       return xhrFor(this.win_).fetchJson(href, getReq);
     });
@@ -176,8 +176,8 @@ export class AmpUserNotification extends AMP.BaseElement {
       credentials: 'include',
       body: {
         'elementId': this.elementId_,
-        'ampUserId': this.ampUserId_
-      }
+        'ampUserId': this.ampUserId_,
+      },
     });
   }
 
@@ -303,7 +303,7 @@ export class UserNotificationManager {
     /** @private {!Promise} */
     this.managerReadyPromise_ = Promise.all([
       this.viewer_.whenFirstVisible(),
-      whenDocumentReady(this.win_.document)
+      whenDocumentReady(this.win_.document),
     ]);
 
     /** @private {!Promise} */
@@ -380,7 +380,7 @@ export class UserNotificationManager {
 
     return this.deferRegistry_[id] = {
       promise: promise,
-      resolve: resolve
+      resolve: resolve,
     };
   }
 }

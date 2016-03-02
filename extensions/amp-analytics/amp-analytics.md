@@ -152,6 +152,12 @@ Type attribute value: `krux`
 
 Adds support for Krux.  Configuration details can be found at [help.krux.com](https://konsole.zendesk.com/hc/en-us/articles/216596608).
 
+### Médiamétrie
+
+Type attribute value: `mediametrie`
+
+Adds support for Médiamétrie tracking pages. Requires defining *var* `serial`. Vars `level1` to `level4` are optional.
+
 ### Parsely
 
 Type attribute value: `parsely`
@@ -169,6 +175,12 @@ Adds support for Quantcast Measurement. More details for adding Quantcast Measur
 Type attribute value: `simplereach`
 
 Adds support for SimpleReach.  Configuration details can be found at [simplereach.com/docs](http://docs.simplereach.com/dev-guide/implementation/google-amp-implementation)
+
+### Webtrekk
+
+Type attribute value: `webtrekk`
+
+Adds support for Webtrekk. Configuration details can be found at [supportcenter.webtrekk.com](https://supportcenter.webtrekk.com/en/public/amp-analytics.html).
 
 ## <a name="attributes"></a>Attributes
 

@@ -64,7 +64,7 @@ describe('amp-list component', () => {
 
   it('should load and render', () => {
     const items = [
-      {title: 'Title1'}
+      {title: 'Title1'},
     ];
     const newHeight = 127;
     const itemElement = document.createElement('div');
@@ -81,7 +81,7 @@ describe('amp-list component', () => {
     listMock.expects('getVsync').returns({
       measure: func => {
         measureFunc = func;
-      }
+      },
     }).once();
     listMock.expects('attemptChangeHeight').withExactArgs(newHeight);
     return list.layoutCallback().then(() => {
@@ -95,7 +95,7 @@ describe('amp-list component', () => {
 
   it('should set accessibility roles', () => {
     const items = [
-      {title: 'Title1'}
+      {title: 'Title1'},
     ];
     const itemElement = document.createElement('div');
     const xhrPromise = Promise.resolve({items: items});
@@ -116,7 +116,7 @@ describe('amp-list component', () => {
 
   it('should preserve accessibility roles', () => {
     const items = [
-      {title: 'Title1'}
+      {title: 'Title1'},
     ];
     element.setAttribute('role', 'list1');
     const itemElement = document.createElement('div');

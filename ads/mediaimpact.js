@@ -33,7 +33,7 @@ export function mediaimpact(global, data) {
   }, false);
   asmiSetup = {
     view: 'm',
-    async: true
+    async: true,
   };
   loadScript(global, 'https://ec-ns.sascdn.com/diff/251/divscripte/amp.js?dom=' + window.context.location.host, () => {
     if (!document.getElementById('sas_' + data.slot.replace('sas_',''))) {

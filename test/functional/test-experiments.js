@@ -24,8 +24,8 @@ describe('isExperimentOn', () => {
   function expectExperiment(cookiesString, experimentId) {
     return expect(isExperimentOn({
       document: {
-        cookie: cookiesString
-      }
+        cookie: cookiesString,
+      },
     }, experimentId));
   }
 
@@ -71,7 +71,7 @@ describe('toggleExperiment', () => {
 
   function expectToggle(cookiesString, experimentId, opt_on) {
     const doc = {
-      cookie: cookiesString
+      cookie: cookiesString,
     };
     const on = toggleExperiment({document: doc}, experimentId, opt_on);
     const parts = doc.cookie.split(/\s*;\s*/g);
@@ -117,8 +117,8 @@ describe('isDevChannel', () => {
   function expectDevChannel(cookiesString) {
     return expect(isDevChannel({
       document: {
-        cookie: cookiesString
-      }
+        cookie: cookiesString,
+      },
     }));
   }
 
@@ -130,8 +130,8 @@ describe('isDevChannel', () => {
   it('should return value based on binary version', () => {
     const win = {
       AMP_CONFIG: {
-        canary: false
-      }
+        canary: false,
+      },
     };
     expect(isDevChannelVersionDoNotUse_(win)).to.be.false;
     win.AMP_CONFIG.canary = true;

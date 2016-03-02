@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-import {createFixtureIframe, pollForLayout, poll} from
-    '../../testing/iframe';
+import {
+  createFixtureIframe,
+  pollForLayout,
+  poll,
+} from '../../testing/iframe';
 
 describe('Rendering of one ad', () => {
   let fixture;

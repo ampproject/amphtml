@@ -163,7 +163,7 @@ export class LoginDoneDialog {
       opener./*OK*/postMessage({
         sentinel: 'amp',
         type: 'result',
-        result: response
+        result: response,
       }, target);
 
       this.win.setTimeout(() => {
@@ -208,9 +208,21 @@ export class LoginDoneDialog {
     }
 
     const doc = this.win.document;
-    doc.documentElement.classList.toggle('amp-postback-error', true);
+    doc.documentElement.classList.toggle('amp-error', true);
+    doc.documentElement.setAttribute('data-error', 'postback');
     doc.getElementById('closeButton').onclick = () => {
-      this.win.close();
+      try {
+        this.win.close();
+      } catch (e) {
+        // Ignore.
+      }
+      // Give a little time to actually close. If it didn't work, set the flag
+      // for closing failure.
+      this.win.setTimeout(() => {
+        if (!this.win.closed) {
+          doc.documentElement.setAttribute('data-error', 'close');
+        }
+      }, 1000);
     };
   }
 }

@@ -20,51 +20,6 @@ import {getVendorJsPropertyName} from './style';
 
 
 /**
- * Whether the document is ready.
- * @param {!Document} doc
- * @return {boolean}
- */
-export function isDocumentReady(doc) {
-  return doc.readyState != 'loading';
-}
-
-
-/**
- * Calls the callback when document is ready.
- * @param {!Document} doc
- * @param {!Function} callback
- */
-export function onDocumentReady(doc, callback) {
-  let ready = isDocumentReady(doc);
-  if (ready) {
-    callback();
-  } else {
-    const readyListener = () => {
-      if (doc.readyState != 'loading') {
-        if (!ready) {
-          ready = true;
-          callback();
-        }
-        doc.removeEventListener('readystatechange', readyListener);
-      }
-    };
-    doc.addEventListener('readystatechange', readyListener);
-  }
-}
-
-/**
- * Returns a promise that is resolved when document is ready.
- * @param {!Document} doc
- * @return {!Promise}
- */
-export function whenDocumentReady(doc) {
-  return new Promise(resolve => {
-    onDocumentReady(doc, resolve);
-  });
-}
-
-
-/**
  */
 export class DocumentState {
   /**
@@ -121,22 +76,6 @@ export class DocumentState {
   }
 
   /**
-   * Whether the document is ready.
-   * @return {boolean}
-   */
-  isReady() {
-    return isDocumentReady(this.document_);
-  }
-
-  /**
-   * Calls the callback when document is ready.
-   * @param {!Function} callback
-   */
-  onReady(callback) {
-    return onDocumentReady(this.document_, callback);
-  }
-
-  /**
    * Returns the value of "document.hidden" property. The reasons why it may
    * not be visible include document in a non-active tab or when the document
    * is being pre-rendered via link with rel="prerender".
@@ -156,7 +95,7 @@ export class DocumentState {
    */
   getVisibilityState() {
     if (!this.visibilityStateProp_) {
-      return !this.isHidden() ? 'visible' : 'hidden';
+      return this.isHidden() ? 'hidden' : 'visible';
     }
     return this.document_[this.visibilityStateProp_];
   }
@@ -179,19 +118,9 @@ export class DocumentState {
 /**
  * @param {!Window} window
  * @return {!DocumentState}
- * @private
- */
-function createDocumentState_(window) {
-  return new DocumentState(window);
-}
-
-
-/**
- * @param {!Window} window
- * @return {!DocumentState}
  */
 export function documentStateFor(window) {
   return getService(window, 'documentState', () => {
-    return createDocumentState_(window);
+    return new DocumentState(window);
   });
 };

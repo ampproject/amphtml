@@ -237,7 +237,7 @@ export class FixedLayer {
             this.mutateFixedElement_(fe, i, feState);
           }
         });
-      }
+      },
     }).catch(error => {
       // Fail silently.
       setTimeout(() => {throw error;});

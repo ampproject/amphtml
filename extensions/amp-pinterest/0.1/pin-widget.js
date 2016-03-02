@@ -90,7 +90,7 @@ export class PinWidget {
 
     const container = Util.make({'span': {
       'className': '-amp-pinterest-embed-pin-inner',
-      'data-pin-log': 'embed_pin'
+      'data-pin-log': 'embed_pin',
     }});
 
     const img = Util.make({'img': {
@@ -98,7 +98,7 @@ export class PinWidget {
       'className': '-amp-pinterest-embed-pin-image',
       'data-pin-no-hover': true,
       'data-pin-href': 'https://www.pinterest.com/pin/' + pin.id + '/',
-      'data-pin-log': 'embed_pin_img'
+      'data-pin-log': 'embed_pin_img',
     }});
     container.appendChild(img);
 
@@ -109,13 +109,13 @@ export class PinWidget {
       'data-pin-log': 'embed_pin_repin',
       'data-pin-pop': '1',
       'data-pin-href': 'https://www.pinterest.com/pin/' + pin.id +
-        '/repin/x/?amp=1&guid=' + Util.guid
+        '/repin/x/?amp=1&guid=' + Util.guid,
     }});
     container.appendChild(repin);
 
     // text container
     const text = Util.make({'span': {
-      'className': '-amp-pinterest-embed-pin-text'
+      'className': '-amp-pinterest-embed-pin-text',
     }});
 
     // description
@@ -123,7 +123,7 @@ export class PinWidget {
       const description = Util.make({'span': {
         'className': '-amp-pinterest-embed-pin-text-block ' +
           '-amp-pinterest-embed-pin-description',
-        'textContent': Util.filter(pin.description)
+        'textContent': Util.filter(pin.description),
       }});
       text.appendChild(description);
     }
@@ -132,18 +132,18 @@ export class PinWidget {
     if (pin.attribution) {
       const attribution = Util.make({'span': {
         'className': '-amp-pinterest-embed-pin-text-block' +
-          ' -amp-pinterest-embed-pin-attribution'
+          ' -amp-pinterest-embed-pin-attribution',
       }});
       attribution.appendChild(Util.make({'img': {
         'className': '-amp-pinterest-embed-pin-text-icon-attrib',
-        'src': pin.attribution.provider_icon_url
+        'src': pin.attribution.provider_icon_url,
       }}));
       attribution.appendChild(Util.make({'span': {
-        'textContent': ' by '
+        'textContent': ' by ',
       }}));
       attribution.appendChild(Util.make({'span': {
         'data-pin-href': pin.attribution.url,
-        'textContent': Util.filter(pin.attribution.author_name)
+        'textContent': Util.filter(pin.attribution.author_name),
       }}));
       text.appendChild(attribution);
     }
@@ -152,12 +152,12 @@ export class PinWidget {
     if (pin.repin_count || pin.like_count) {
       const stats = Util.make({'span': {
         'className': '-amp-pinterest-embed-pin-text-block' +
-          ' -amp-pinterest-embed-pin-stats'
+          ' -amp-pinterest-embed-pin-stats',
       }});
       if (pin.repin_count) {
         const repinCount = Util.make({'span': {
           'className': '-amp-pinterest-embed-pin-stats-repins',
-          'textContent': String(pin.repin_count)
+          'textContent': String(pin.repin_count),
         }});
         stats.appendChild(repinCount);
       }
@@ -165,7 +165,7 @@ export class PinWidget {
       if (pin.like_count) {
         const likeCount = Util.make({'span': {
           'className': '-amp-pinterest-embed-pin-stats-likes',
-          'textContent': String(pin.like_count)
+          'textContent': String(pin.like_count),
         }});
         stats.appendChild(likeCount);
       }
@@ -177,7 +177,7 @@ export class PinWidget {
 
       const pinner = Util.make({'span': {
         'className': '-amp-pinterest-embed-pin-text-block' +
-          ' -amp-pinterest-embed-pin-pinner'
+          ' -amp-pinterest-embed-pin-pinner',
       }});
 
       // avatar
@@ -186,21 +186,21 @@ export class PinWidget {
         'alt': Util.filter(pin.pinner.full_name),
         'title': Util.filter(pin.pinner.full_name),
         'src': pin.pinner.image_small_url,
-        'data-pin-href': pin.pinner.profile_url
+        'data-pin-href': pin.pinner.profile_url,
       }}));
 
       // name
       pinner.appendChild(Util.make({'span': {
         'className': '-amp-pinterest-embed-pin-pinner-name',
         'textContent': Util.filter(pin.pinner.full_name),
-        'data-pin-href': pin.pinner.profile_url
+        'data-pin-href': pin.pinner.profile_url,
       }}));
 
       // board
       pinner.appendChild(Util.make({'span': {
         'className': '-amp-pinterest-embed-pin-board-name',
         'textContent': Util.filter(pin.board.name),
-        'data-pin-href': 'https://www.pinterest.com/' + pin.board.url
+        'data-pin-href': 'https://www.pinterest.com/' + pin.board.url,
       }}));
 
       text.appendChild(pinner);

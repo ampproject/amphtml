@@ -15,13 +15,14 @@
  */
 
 import {addDataAndJsonAttributes_, getIframe, getBootstrapBaseUrl,
-    prefetchBootstrap} from '../../src/3p-frame';
+    getSubDomain, prefetchBootstrap} from '../../src/3p-frame';
 import {validateData} from '../../src/3p';
 import {documentInfoFor} from '../../src/document-info';
 import {loadPromise} from '../../src/event-helper';
 import {setModeForTesting} from '../../src/mode';
 import {resetServiceForTesting} from '../../src/service';
 import {viewerFor} from '../../src/viewer';
+import {toggleExperiment} from '../../src/experiments';
 
 describe('3p-frame', () => {
 
@@ -30,6 +31,7 @@ describe('3p-frame', () => {
   });
 
   afterEach(() => {
+    toggleExperiment(window, 'dev-channel', false);
     resetServiceForTesting(window, 'bootstrapBaseUrl');
     setModeForTesting(null);
     const m = document.querySelector(
@@ -57,7 +59,7 @@ describe('3p-frame', () => {
     addDataAndJsonAttributes_(div, obj);
     expect(obj).to.deep.equal({
       'foo': 'foo',
-      'bar': 'bar'
+      'bar': 'bar',
     });
 
     div.setAttribute('json', '{"abc": [1,2,3]}');
@@ -67,7 +69,7 @@ describe('3p-frame', () => {
     expect(obj).to.deep.equal({
       'foo': 'foo',
       'bar': 'bar',
-      'abc': [1, 2, 3]
+      'abc': [1, 2, 3],
     });
   });
 
@@ -88,7 +90,7 @@ describe('3p-frame', () => {
     div.getLayoutBox = function() {
       return {
         width: 100,
-        height: 200
+        height: 200,
       };
     };
 
@@ -156,6 +158,13 @@ describe('3p-frame', () => {
         'https://3p.ampproject.net/$internalRuntimeVersion$/frame.html');
   });
 
+  it('should pick the right bootstrap unique url (prod)', () => {
+    setModeForTesting({});
+    toggleExperiment(window, 'dev-channel', true);
+    expect(getBootstrapBaseUrl(window)).to.match(
+        /^https:\/\/d-\d+\.ampproject\.net\/\$\internal\w+\$\/frame\.html$/);
+  });
+
   it('should pick the right bootstrap url (custom)', () => {
     addCustomBootstrap('https://example.com/boot/remote.html');
     expect(getBootstrapBaseUrl(window)).to.equal(
@@ -185,5 +194,51 @@ describe('3p-frame', () => {
         'http://ads.localhost:9876/dist.3p/current/frame.max.html');
     expect(fetches[1].href).to.equal(
         'https://3p.ampproject.net/$internalRuntimeVersion$/f.js');
+  });
+
+  it('should make sub domain: 3p', () => {
+    expect(getSubDomain(window)).to.equal('3p');
+  });
+
+  it('should make sub domains (unique)', () => {
+    toggleExperiment(window, 'dev-channel', true);
+    expect(getSubDomain(window)).to.match(/^d-\d+$/);
+    expect(getSubDomain(window)).to.not.equal('d-00');
+  });
+
+  it('should make sub domains (Math)', () => {
+    toggleExperiment(window, 'dev-channel', true);
+    const fakeWin = {
+      document: document,
+      Math: Math,
+    };
+    expect(getSubDomain(fakeWin)).to.match(/^d-\d+$/);
+  });
+
+  it('should make sub domains (crypto)', () => {
+    toggleExperiment(window, 'dev-channel', true);
+    const fakeWin = {
+      document: document,
+      crypto: {
+        getRandomValues: function(arg) {
+          arg[0] = 123;
+          arg[1] = 987;
+        },
+      },
+    };
+    expect(getSubDomain(fakeWin)).to.equal('d-123987');
+  });
+
+  it('should make sub domains (fallback)', () => {
+    toggleExperiment(window, 'dev-channel', true);
+    const fakeWin = {
+      document: document,
+      Math: {
+        random: function() {
+          return 0.567;
+        },
+      },
+    };
+    expect(getSubDomain(fakeWin)).to.equal('d-5670');
   });
 });

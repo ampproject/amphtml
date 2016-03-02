@@ -20,6 +20,7 @@ import {getLengthNumeral} from '../src/layout';
 import {getService} from './service';
 import {documentInfoFor} from './document-info';
 import {getMode} from './mode';
+import {isDevChannel} from './experiments';
 import {preconnectFor} from './preconnect';
 import {dashToCamelCase} from './string';
 import {parseUrl, assertHttpsUrl} from './url';
@@ -70,7 +71,7 @@ function getFrameAttributes(parentWindow, element, opt_type) {
     pageViewId: docInfo.pageViewId,
     clientId: element.getAttribute('ampcid'),
     location: {
-      href: locationHref
+      href: locationHref,
     },
     tagName: element.tagName,
     mode: getMode(),
@@ -184,7 +185,8 @@ export function getBootstrapBaseUrl(parentWindow, opt_strictForUnitTest) {
  */
 function getDefaultBootstrapBaseUrl(parentWindow) {
   let url =
-      'https://3p.ampproject.net/$internalRuntimeVersion$/frame.html';
+      'https://' + getSubDomain(parentWindow) +
+      '.ampproject.net/$internalRuntimeVersion$/frame.html';
   if (getMode().localDev) {
     url = 'http://ads.localhost:' +
         (parentWindow.location.port || parentWindow.parent.location.port) +
@@ -193,6 +195,31 @@ function getDefaultBootstrapBaseUrl(parentWindow) {
         '.html';
   }
   return url;
+}
+
+/**
+ * Sub domain on which the 3p iframe will be hosted.
+ * Because we only calculate the URL once per page, this function is only
+ * called once and hence all frames on a page use the same URL.
+ * @return {string}
+ * @visibleForTesting
+ */
+export function getSubDomain(win) {
+  if (!isDevChannel(win)) {
+    return '3p';
+  }
+
+  let rand;
+  if (win.crypto && win.crypto.getRandomValues) {
+    // By default use 2 32 bit integers.
+    const uint32array = new Uint32Array(2);
+    win.crypto.getRandomValues(uint32array);
+    rand = String(uint32array[0]) + uint32array[1];
+  } else {
+    // Fall back to Math.random.
+    rand = String(win.Math.random()).substr(2) + '0';
+  }
+  return 'd-' + rand;
 }
 
 /**

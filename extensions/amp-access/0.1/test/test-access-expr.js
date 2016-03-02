@@ -200,7 +200,7 @@ describe('evaluateAccessExpr', () => {
         str: 'A',
         num: 11,
         bool: true,
-      }
+      },
     };
 
     expect(evaluateAccessExpr('obj.bool = true', resp)).to.be.true;
@@ -226,8 +226,8 @@ describe('evaluateAccessExpr', () => {
       obj: {
         str: 'A',
         child: {
-          str: 'B'
-        }
+          str: 'B',
+        },
       },
     };
 

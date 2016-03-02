@@ -14,8 +14,12 @@
  * limitations under the License.
  */
 
-import {Storage, Store, LocalStorageBinding, ViewerStorageBinding} from
-    '../../src/service/storage-impl';
+import {
+  Storage,
+  Store,
+  LocalStorageBinding,
+  ViewerStorageBinding,
+} from '../../src/service/storage-impl';
 import * as sinon from 'sinon';
 
 
@@ -37,7 +41,7 @@ describe('Storage', () => {
       onBroadcast: handler => {
         viewerBroadcastHandler = handler;
       },
-      broadcast: () => {}
+      broadcast: () => {},
     };
     viewerMock = sandbox.mock(viewer);
 
@@ -279,7 +283,7 @@ describe('Storage', () => {
       // Issue broadcast event.
       viewerBroadcastHandler({
         'type': 'amp-storage-reset',
-        'origin': 'https://acme.com'
+        'origin': 'https://acme.com',
       });
       expect(storage.storePromise_).to.not.exist;
       return storage.get('key1').then(value => {
@@ -304,7 +308,7 @@ describe('Storage', () => {
       // Issue broadcast event.
       viewerBroadcastHandler({
         'type': 'amp-storage-reset',
-        'origin': 'OTHER'
+        'origin': 'OTHER',
       });
       expect(storage.storePromise_).to.exist;
     });
@@ -345,7 +349,7 @@ describe('Store', () => {
     expect(store.values_['key1']['t']).to.equal(101);
     expect(store.values_).to.deep.equal({
       'key2': {v: 'value2', t: 0},
-      'key1': {v: 'value1', t: 101}
+      'key1': {v: 'value1', t: 101},
     });
   });
 
@@ -360,7 +364,7 @@ describe('Store', () => {
     expect(store.values_['key2']['t']).to.equal(0);
     expect(store.values_).to.deep.equal({
       'key1': {v: 'value1b', t: 101},
-      'key2': {v: 'value2', t: 0}
+      'key2': {v: 'value2', t: 0},
     });
   });
 
@@ -375,7 +379,7 @@ describe('Store', () => {
     expect(Object.keys(store.values_).length).to.equal(1);
     expect(store.values_['key2']['t']).to.equal(0);
     expect(store.values_).to.deep.equal({
-      'key2': {v: 'value2', t: 0}
+      'key2': {v: 'value2', t: 0},
     });
   });
 
@@ -430,7 +434,7 @@ describe('LocalStorageBinding', () => {
       localStorage: {
         getItem: () => {},
         setItem: () => {},
-      }
+      },
     };
     localStorageMock = sandbox.mock(windowApi.localStorage);
     binding = new LocalStorageBinding(windowApi);
@@ -501,7 +505,7 @@ describe('ViewerStorageBinding', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     viewer = {
-      sendMessage: () => {}
+      sendMessage: () => {},
     };
     viewerMock = sandbox.mock(viewer);
     binding = new ViewerStorageBinding(viewer);
