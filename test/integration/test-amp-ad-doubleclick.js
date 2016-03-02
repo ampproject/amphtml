@@ -23,10 +23,13 @@ import {
 describe('Rendering of one ad', () => {
   let fixture;
   beforeEach(() => {
-    return createFixtureIframe('test/fixtures/doubleclick.html', 3000)
-      .then(f => {
-        fixture = f;
-      });
+    return createFixtureIframe('test/fixtures/doubleclick.html', 3000, win => {
+      win.history.replaceState(null, null,
+          // TODO(#2402) Support glade as well.
+          'test/fixtures/doubleclick.html?google_glade=0');
+    }).then(f => {
+      fixture = f;
+    });
   });
 
   it('should create an iframe loaded', function() {
@@ -69,7 +72,7 @@ describe('Rendering of one ad', () => {
       return poll('main ad JS is injected', () => {
         return iframe.contentWindow.document.querySelector(
             'script[src="https://www.googletagservices.com/tag/js/gpt.js"]');
-      }, undefined,  /* timeout */ 4000);
+      }, undefined,  /* timeout */ 5000);
     }).then(() => {
       return poll('render-start message received', () => {
         return fixture.messages.filter(message => {
