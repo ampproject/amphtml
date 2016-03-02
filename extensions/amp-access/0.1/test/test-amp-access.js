@@ -311,7 +311,6 @@ describe('AccessService authorization', () => {
     };
     analyticsMock = sandbox.mock(analytics);
     service.analyticsPromise_ = {then: callback => callback(analytics)};
-    service.isAnalyticsExperimentOn_ = true;
   });
 
   afterEach(() => {
@@ -689,7 +688,6 @@ describe('AccessService pingback', () => {
     };
     analyticsMock = sandbox.mock(analytics);
     service.analyticsPromise_ = {then: callback => callback(analytics)};
-    service.isAnalyticsExperimentOn_ = true;
 
     this.docState_ = {
       onReady: callback => callback(),
@@ -1003,7 +1001,6 @@ describe('AccessService login', () => {
     };
     analyticsMock = sandbox.mock(analytics);
     service.analyticsPromise_ = {then: callback => callback(analytics)};
-    service.isAnalyticsExperimentOn_ = true;
 
     service.openLoginDialog_ = () => {};
     serviceMock = sandbox.mock(service);
@@ -1288,7 +1285,6 @@ describe('AccessService analytics', () => {
 
     service = new AccessService(window);
     service.enabled_ = true;
-    service.isAnalyticsExperimentOn_ = true;
     service.getReaderId_ = () => {
       return Promise.resolve('reader1');
     };
@@ -1301,12 +1297,6 @@ describe('AccessService analytics', () => {
     }
     sandbox.restore();
     sandbox = null;
-  });
-
-  it('should return null without experiment', () => {
-    service.isAnalyticsExperimentOn_ = false;
-    expect(service.getAccessReaderId()).to.be.null;
-    expect(service.getAuthdataField('views')).to.be.null;
   });
 
   it('should return null when not enabled', () => {
