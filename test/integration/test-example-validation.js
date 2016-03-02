@@ -36,6 +36,7 @@ describe('example', function() {
 
   const examples = [
     'ads.amp.html',
+    'brid-player.amp.html',
     'brightcove.amp.html',
     'dailymotion.amp.html',
     'metadata-examples/article-json-ld.amp.html',
@@ -70,6 +71,8 @@ describe('example', function() {
    */
   const errorWhitelist = [
     /invalid value \'.\/viewer-integr.js\'/,
+    /invalid value \'amp-brid-player\'/,
+    /\'amp-brid-player\' is disallowed/,
   ];
 
   const usedWhitelist = [];
