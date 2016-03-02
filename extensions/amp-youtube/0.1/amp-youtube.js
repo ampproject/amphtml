@@ -39,6 +39,11 @@ class AmpYoutube extends AMP.BaseElement {
   }
 
   /** @override */
+  renderOutsideViewport() {
+    return false;
+  }
+
+  /** @override */
   buildCallback() {
     const width = this.element.getAttribute('width');
     const height = this.element.getAttribute('height');
