@@ -30,8 +30,9 @@ export function doubleclick(global, data) {
   ]);
 
   const dice = Math.random();
-  if (global.context.location.href.indexOf('google_glade=1') > 0 ||
-      dice < experimentFraction) {
+  const href = global.context.location.href;
+  if ((href.indexOf('google_glade=1') > 0 || dice < experimentFraction)
+      && href.indexOf('google_glade=0') < 0) {
     doubleClickWithGlade(global, data);
   } else {
     doubleClickWithGpt(global, data, dice < 2 * experimentFraction);
