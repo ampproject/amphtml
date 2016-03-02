@@ -182,6 +182,5 @@ describe('amp-youtube', () => {
       yt.implementation_.documentInactiveCallback();
       expect(yt.implementation_.pauseVideo_.called).to.be.true;
     });
-
   });
 });
