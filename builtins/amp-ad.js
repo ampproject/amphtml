@@ -122,10 +122,10 @@ export function installAd(win) {
       const prefetch = adPrefetch[type];
       const preconnect = adPreconnect[type];
       if (typeof prefetch == 'string') {
-        this.preconnect.prefetch(prefetch);
+        this.preconnect.prefetch(prefetch, 'script');
       } else if (prefetch) {
         prefetch.forEach(p => {
-          this.preconnect.prefetch(p);
+          this.preconnect.prefetch(p, 'script');
         });
       }
       if (typeof preconnect == 'string') {

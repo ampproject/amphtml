@@ -28,7 +28,7 @@ import {platformFor} from './platform';
 const ACTIVE_CONNECTION_TIMEOUT_MS = 180 * 1000;
 const PRECONNECT_TIMEOUT_MS = 10 * 1000;
 
-class Preconnect {
+export class Preconnect {
 
   /**
    * @param {!Window} win
@@ -51,6 +51,9 @@ class Preconnect {
     this.platform_ = platformFor(win);
     // Mark current origin as preconnected.
     this.origins_[parseUrl(win.location.href).origin] = true;
+
+    /** @private {boolean} */
+    this.preloadSupported_ = this.isPreloadSupported_();
   }
 
   /**
@@ -109,20 +112,26 @@ class Preconnect {
   /**
    * Asks the browser to prefetch a URL. Always also does a preconnect
    * because browser support for that is better.
+   *
    * @param {string} url
+   * @param {string=} opt_preloadAs
    */
-  prefetch(url) {
+  prefetch(url, opt_preloadAs) {
     if (!this.isInterestingUrl_(url)) {
       return;
     }
     if (this.urls_[url]) {
       return;
     }
+    const command = this.preloadSupported_ ? 'preload' : 'prefetch';
     this.urls_[url] = true;
     this.url(url, /* opt_alsoConnecting */ true);
     const prefetch = document.createElement('link');
-    prefetch.setAttribute('rel', 'prefetch');
+    prefetch.setAttribute('rel', command);
     prefetch.setAttribute('href', url);
+    if (opt_preloadAs) {
+      prefetch.setAttribute('as', opt_preloadAs);
+    }
     this.head_.appendChild(prefetch);
     // As opposed to preconnect we do not clean this tag up, because there is
     // no expectation as to it having an immediate effect.
@@ -133,6 +142,17 @@ class Preconnect {
       return true;
     }
     return false;
+  }
+
+  /** @private */
+  isPreloadSupported_() {
+    const tokenList = document.createElement('link').relList;
+    if (!tokenList || !tokenList.supports) {
+      this.preloadSupported_ = false;
+      return this.preloadSupported_;
+    }
+    this.preloadSupported_ = tokenList.supports('preload');
+    return this.preloadSupported_;
   }
 
   /**
