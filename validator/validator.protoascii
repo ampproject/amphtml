@@ -25,14 +25,14 @@ min_validator_revision_required: 100
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 170
+spec_file_revision: 171
 # Rules for AMP HTML
-# (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
+# (https://www.ampproject.org/docs/reference/spec.html)
 #
 # Specific URL to reference for violations having to do with mustache
 # templates. These are specific to any particular tag, so must live at
 # the top level of this rules file.
-template_spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-templates.md"
+template_spec_url: "https://www.ampproject.org/docs/reference/extended/amp-mustache.html"
 
 tags: {
   name: "!doctype"
@@ -57,7 +57,7 @@ tags: {
   name: "html"
   detail: "html ⚡ for top-level html"
   mandatory: true
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#ampd"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
   mandatory_parent: "!doctype"
   unique: true
   attrs: {
@@ -75,7 +75,7 @@ tags: {
   mandatory: true
   mandatory_parent: "html"
   unique: true
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#crps"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
 }
 # 4.2.2 The title element
 tags: {
@@ -295,7 +295,7 @@ tags: {
     }
   }
   attrs: { name: "hreflang" }
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#canon"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
 }
 # rel=amphtml is designed to point from a non-amphtml page to an amp-html
 # page, but for ease of use and to match the syntax of rel=canonical, a
@@ -343,7 +343,7 @@ tags: {
 tags: {
   name: "link"
   detail: "link rel=stylesheet for fonts"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#custom-fonts"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#custom-fonts"
   mandatory_parent: "head"
   attrs: {
     name: "rel"
@@ -420,7 +420,7 @@ tags: {
   mandatory: true
   mandatory_parent: "head"
   unique: true
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#chrs"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
   attrs: {
     dispatch_key: true
     name: "charset"
@@ -434,7 +434,7 @@ tags: {
   mandatory: true
   mandatory_parent: "head"
   unique: true
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#vprt"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
   attrs: {
     dispatch_key: true
     name: "name"
@@ -497,7 +497,7 @@ tags: {  # Special custom 'author' spreadsheet.
   }
   cdata: {
     max_bytes: 50000
-    max_bytes_spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#maximum-size"
+    max_bytes_spec_url: "https://www.ampproject.org/docs/reference/spec.html#maximum-size"
     css_spec: {
       at_rule_spec: {
         name: 'media'
@@ -547,7 +547,7 @@ tags: {  # Special custom 'author' spreadsheet.
       error_message: "CSS !important"
     }
   }
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#stylesheets"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#stylesheets"
 }
 tags: {
   name: "style"
@@ -555,7 +555,7 @@ tags: {
   detail: "boilerplate (js enabled) - old variant"
   unique: true
   mandatory_alternatives: "boilerplate (js enabled)"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#boilerplate"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
   cdata: {
     cdata_regex: "body ?{opacity: ?0}"
   }
@@ -564,7 +564,7 @@ tags: {
   name: "style"
   mandatory_parent: "noscript"
   detail: "boilerplate (noscript) - old variant"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#boilerplate"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
   unique: true
   mandatory_alternatives: "boilerplate (noscript)"
   cdata {
@@ -578,7 +578,7 @@ tags: {
   also_requires: "boilerplate (noscript)"
   unique: true
   mandatory_alternatives: "boilerplate (js enabled)"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#boilerplate"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
   cdata: {
     # This regex allows arbitrary whitespace whenever some whitespace
     # is required in the boilerplate. It was made by replacing ' ' with \\s+.
@@ -595,7 +595,7 @@ tags: {
   mandatory_parent: "noscript"
   detail: "boilerplate (noscript)"
   also_requires: "boilerplate (js enabled)"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#boilerplate"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
   unique: true
   mandatory_alternatives: "boilerplate (noscript)"
   cdata {
@@ -615,7 +615,7 @@ tags: {
   mandatory: true
   mandatory_parent: "html"
   unique: true
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#crps"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
 }
 # 4.3.2 The article element
 tags: {
@@ -1389,6 +1389,7 @@ tags: {
   attrs: { name: "class" }
   attrs: { name: "externalresourcesrequired" }
   attrs: { name: "version" value_regex: "(1.0|1.1)" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
   name: "g"
@@ -1399,6 +1400,7 @@ tags: {
   attrs: { name: "class" }
   attrs: { name: "externalresourcesrequired" }
   attrs: { name: "transform" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
   name: "path"
@@ -1412,6 +1414,7 @@ tags: {
   attrs: { name: "pathlength" }
   attrs: { name: "sketch:type" }
   attrs: { name: "transform" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
   name: "glyph"
@@ -1428,6 +1431,7 @@ tags: {
   attrs: { name: "glyph-name" }
   attrs: { name: "orientation" }
   attrs: { name: "arabic-form" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
   name: "glyphref"
@@ -1442,6 +1446,7 @@ tags: {
   attrs: { name: "dy" }
   attrs: { name: "glyphref" }
   attrs: { name: "format" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
   name: "marker"
@@ -1459,6 +1464,7 @@ tags: {
   attrs: { name: "markerwidth" }
   attrs: { name: "markerheight" }
   attrs: { name: "orient" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
   name: "view"
@@ -1469,6 +1475,7 @@ tags: {
   attrs: { name: "preserveaspectratio" }
   attrs: { name: "zoomandpan" }
   attrs: { name: "viewtarget" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 # Shapes
 tags: {
@@ -1484,6 +1491,7 @@ tags: {
   attrs: { name: "r" }
   attrs: { name: "sketch:type" }
   attrs: { name: "transform" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
   name: "line"
@@ -1499,6 +1507,7 @@ tags: {
   attrs: { name: "x2" }
   attrs: { name: "y1" }
   attrs: { name: "y2" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
   name: "polygon"
@@ -1511,6 +1520,7 @@ tags: {
   attrs: { name: "points" }
   attrs: { name: "sketch:type" }
   attrs: { name: "transform" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
   name: "polyline"
@@ -1523,6 +1533,7 @@ tags: {
   attrs: { name: "points" }
   attrs: { name: "sketch:type" }
   attrs: { name: "transform" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
   name: "rect"
@@ -1540,6 +1551,7 @@ tags: {
   attrs: { name: "width" }
   attrs: { name: "x" }
   attrs: { name: "y" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 # Text
 tags: {
@@ -1559,6 +1571,7 @@ tags: {
   attrs: { name: "rotate" }
   attrs: { name: "textlength" }
   attrs: { name: "lengthadjust" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
   name: "textpath"
@@ -1572,6 +1585,7 @@ tags: {
   attrs: { name: "startoffset" }
   attrs: { name: "method" }
   attrs: { name: "spacing" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
   name: "tref"
@@ -1582,6 +1596,7 @@ tags: {
   attr_lists: "svg-xlink-attributes"
   attrs: { name: "class" }
   attrs: { name: "externalresourcesrequired" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
   name: "tspan"
@@ -1598,6 +1613,7 @@ tags: {
   attrs: { name: "rotate" }
   attrs: { name: "textlength" }
   attrs: { name: "lengthadjust" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 # Rendering
 tags: {
@@ -1610,6 +1626,7 @@ tags: {
   attrs: { name: "externalresourcesrequired" }
   attrs: { name: "transform" }
   attrs: { name: "clippathunits" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
   name: "filter"
@@ -1626,6 +1643,7 @@ tags: {
   attrs: { name: "filterres" }
   attrs: { name: "filterunits" }
   attrs: { name: "primitiveunits" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
   name: "lineargradient"
@@ -1642,6 +1660,7 @@ tags: {
   attrs: { name: "x2" }
   attrs: { name: "y2" }
   attrs: { name: "spreadmethod" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
   name: "stop"
@@ -1650,6 +1669,7 @@ tags: {
   attrs: { name: "offset" }
   attrs: { name: "stop-color" }
   attrs: { name: "stop-opacity" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
   name: "radialgradient"
@@ -1667,6 +1687,7 @@ tags: {
   attrs: { name: "fx" }
   attrs: { name: "fy" }
   attrs: { name: "spreadmethod" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
   name: "stop"
@@ -1675,6 +1696,7 @@ tags: {
   attrs: { name: "offset" }
   attrs: { name: "stop-color" }
   attrs: { name: "stop-opacity" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
   name: "mask"
@@ -1690,6 +1712,7 @@ tags: {
   attrs: { name: "y" }
   attrs: { name: "width" }
   attrs: { name: "height" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
   name: "pattern"
@@ -1709,6 +1732,7 @@ tags: {
   attrs: { name: "width" }
   attrs: { name: "height" }
   attrs: { name: "preserveaspectratio" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
   name: "vkern"
@@ -1719,6 +1743,7 @@ tags: {
   attrs: { name: "u2" }
   attrs: { name: "g2" }
   attrs: { name: "k" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
   name: "hkern"
@@ -1729,6 +1754,7 @@ tags: {
   attrs: { name: "u2" }
   attrs: { name: "g2" }
   attrs: { name: "k" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 # Special
 tags: {
@@ -1740,6 +1766,7 @@ tags: {
   attrs: { name: "class" }
   attrs: { name: "externalresourcesrequired" }
   attrs: { name: "transform" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
   name: "use"
@@ -1755,6 +1782,7 @@ tags: {
   attrs: { name: "y" }
   attrs: { name: "width" }
   attrs: { name: "height" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
   name: "symbol"
@@ -1765,6 +1793,7 @@ tags: {
   attrs: { name: "externalresourcesrequired" }
   attrs: { name: "preserveaspectratio" }
   attrs: { name: "viewbox" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 # HTML inside SVG, esp. to allow amp-img.
 # See https://github.com/ampproject/amphtml/issues/717
@@ -1781,6 +1810,7 @@ tags: {
   attrs: { name: "y" }
   attrs: { name: "width" }
   attrs: { name: "height" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 # ARIA
 tags: {
@@ -1788,6 +1818,7 @@ tags: {
   mandatory_ancestor: "svg"
   attr_lists: "svg-core-attributes"
   attrs: { name: "class" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
   name: "title"
@@ -1795,6 +1826,7 @@ tags: {
   detail: "svg title"
   attr_lists: "svg-core-attributes"
   attrs: { name: "class" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 
 # 4.8 Links
@@ -1898,7 +1930,7 @@ tags: {
   mandatory_parent: "head"
   unique: true
   detail: "amphtml engine v0.js script"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#scrpt"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
   attrs: {
     name: "src"
     mandatory: true
@@ -1964,7 +1996,7 @@ tags: {  # amp-access
   name: "script"
   detail: "amp-access extension .js script"
   mandatory_parent: "head"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-access/amp-access.md"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-access.html"
   attrs: {
     name: "custom-element"
     value: "amp-access"
@@ -2609,7 +2641,7 @@ tags: {
   detail: "noscript enclosure for boilerplate"
   unique: true
   mandatory: true
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#boilerplate"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
 }
 # We allow noscript in the body to contain tags otherwise disallowed by AMP.
 tags: {
@@ -2624,7 +2656,7 @@ tags: {
   name: "template"
   # <template> tags may not be nested inside other <template> tags.
   disallowed_ancestor: "template"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-templates.md"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-mustache.html"
   attrs: {
     name: "type"
     value: "amp-mustache"
@@ -2890,7 +2922,7 @@ tags: {
 tags: {
   name: "amp-embed"
   disallowed_ancestor: "head"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/builtins/amp-embed.md"
+  spec_url: "https://www.ampproject.org/docs/reference/amp-embed.html"
   attr_lists: "extended-amp-global"
   attrs: { name: "alt" }
   attrs: {
