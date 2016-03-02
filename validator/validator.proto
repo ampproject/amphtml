@@ -42,6 +42,7 @@ message PropertySpecList {
 message UrlSpec {
   // allowed_protocol must be in lowercase (e.g. "javascript" not "JavaScript").
   repeated string allowed_protocol = 1;
+  optional bool allow_relative = 2 [default = true];
 }
 
 // Attributes that are not covered by at least one of these specs are
@@ -82,6 +83,7 @@ message AttrSpec {
   // The value of the deprecation field indicates what to use instead,
   // e.g. the name of an attribute or tag.
   optional string deprecation = 7;
+  // If provided, a URL which links to the AMP HTML spec for this deprecation.
   optional string deprecation_url = 8;
 
   // If set true, the TagSpec containing this AttrSpec will be evaluated first
@@ -199,7 +201,7 @@ message AmpLayout {
 // Some tags are mandatory. Note that the tag name is not unique, that is,
 // there can be multiple tag specs covering the same name, e.g., for
 // multiple meta tags (with different attributes).
-// NEXT AVAILABLE TAG: 17
+// NEXT AVAILABLE TAG: 19
 message TagSpec {
   // Use lower-case tag names only. If adding the same tag twice, then they must
   // also have a detail string which is unique throughout all detail.
@@ -238,6 +240,13 @@ message TagSpec {
   // If set, other tags - identified by their detail string - must be
   // present as well.
   repeated string also_requires = 14;
+
+  // If set, generates a DEPRECATED_TAG error with severity WARNING.
+  // The value of the deprecation field indicates what to use instead,
+  // e.g. the name of a tag.
+  optional string deprecation = 17;
+  // If provided, a URL which links to the AMP HTML spec for this deprecation.
+  optional string deprecation_url = 18;
 
   // Attribute specifications related to this tag.
   repeated AttrSpec attrs = 7;
@@ -337,7 +346,7 @@ message ValidationError {
     DEV_WARNING = 3; // DEPRECATED DO NOT USE.
   }
   optional Severity severity = 6 [ default = ERROR ];
-  // NEXT AVAILABLE TAG: 49
+  // NEXT AVAILABLE TAG: 51
   enum Code {
     UNKNOWN_CODE = 0;
     MANDATORY_TAG_MISSING = 1;
@@ -352,7 +361,8 @@ message ValidationError {
     MANDATORY_ONEOF_ATTR_MISSING = 28;
     DUPLICATE_UNIQUE_TAG = 6;
     WRONG_PARENT_TAG = 7;
-    STYLESHEET_TOO_LONG = 8;
+    STYLESHEET_TOO_LONG_OLD_VARIANT = 8;
+    STYLESHEET_TOO_LONG = 50;
     MANDATORY_CDATA_MISSING_OR_INCORRECT = 9;
     CDATA_VIOLATES_BLACKLIST = 30;
     DEV_MODE_ENABLED = 10;  // Deprecated, remove after 2016-04-01.
@@ -363,6 +373,7 @@ message ValidationError {
     MISSING_URL = 35;
     INVALID_URL = 36;
     INVALID_URL_PROTOCOL = 37;
+    DISALLOWED_RELATIVE_URL = 49;
     DISALLOWED_PROPERTY_IN_ATTR_VALUE = 16;
     MUTUALLY_EXCLUSIVE_ATTRS = 17;
     UNESCAPED_TEMPLATE_IN_ATTR_VALUE = 18;
