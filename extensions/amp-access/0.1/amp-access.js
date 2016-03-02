@@ -24,7 +24,6 @@ import {evaluateAccessExpr} from './access-expr';
 import {getService} from '../../../src/service';
 import {getValueForExpr} from '../../../src/json';
 import {installStyles} from '../../../src/styles';
-import {isExperimentOn} from '../../../src/experiments';
 import {isObject} from '../../../src/types';
 import {listenOnce} from '../../../src/event-helper';
 import {log} from '../../../src/log';
@@ -94,8 +93,7 @@ export class AccessService {
     installStyles(this.win.document, $CSS$, () => {}, false, 'amp-access');
 
     /** @const @private {boolean} */
-    this.isAnalyticsExperimentOn_ = isExperimentOn(
-        this.win, 'amp-access-analytics');
+    this.isAnalyticsExperimentOn_ = true;
 
     const accessElement = document.getElementById('amp-access');
 
