@@ -26,6 +26,7 @@ import './polyfills';
 import {installEmbedStateListener} from './environment';
 import {a9} from '../ads/a9';
 import {adform} from '../ads/adform';
+import {adman} from '../ads/adman';
 import {adreactor} from '../ads/adreactor';
 import {adsense} from '../ads/adsense';
 import {adtech} from '../ads/adtech';
@@ -60,6 +61,7 @@ const AMP_EMBED_ALLOWED = {
 
 register('a9', a9);
 register('adform', adform);
+register('adman', adman);
 register('adreactor', adreactor);
 register('adsense', adsense);
 register('adtech', adtech);
