@@ -179,36 +179,38 @@ function specificity(code) {
       return 30;
     case amp.validator.ValidationError.Code.ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT:
       return 31;
-    case amp.validator.ValidationError.Code.MISSING_URL:
+    case amp.validator.ValidationError.Code.DISALLOWED_RELATIVE_URL:
       return 32;
-    case amp.validator.ValidationError.Code.INVALID_URL_PROTOCOL:
+    case amp.validator.ValidationError.Code.MISSING_URL:
       return 33;
-    case amp.validator.ValidationError.Code.INVALID_URL:
+    case amp.validator.ValidationError.Code.INVALID_URL_PROTOCOL:
       return 34;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_STRAY_TRAILING_BACKSLASH:
+    case amp.validator.ValidationError.Code.INVALID_URL:
       return 35;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_COMMENT:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_STRAY_TRAILING_BACKSLASH:
       return 36;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_STRING:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_COMMENT:
       return 37;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_BAD_URL:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_STRING:
       return 38;
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_BAD_URL:
+      return 39;
     case amp.validator.ValidationError.Code
         .CSS_SYNTAX_EOF_IN_PRELUDE_OF_QUALIFIED_RULE:
-      return 39;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_DECLARATION:
       return 40;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_INCOMPLETE_DECLARATION:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_DECLARATION:
       return 41;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_ERROR_IN_PSEUDO_SELECTOR:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_INCOMPLETE_DECLARATION:
       return 42;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_MISSING_SELECTOR:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_ERROR_IN_PSEUDO_SELECTOR:
       return 43;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_NOT_A_SELECTOR_START:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_MISSING_SELECTOR:
       return 44;
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_NOT_A_SELECTOR_START:
+      return 45;
     case amp.validator.ValidationError.Code.
         CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR:
-      return 45;
+      return 46;
 
     case amp.validator.ValidationError.Code.DEPRECATED_ATTR:
       return 101;
@@ -1026,11 +1028,20 @@ class ParsedAttrSpec {
       return;
     }
     if (uri.hasScheme() &&
-        !this.valueUrlAllowedProtocols_.contains(uri.getScheme().toLowerCase())) {
+        !this.valueUrlAllowedProtocols_.contains(
+            uri.getScheme().toLowerCase())) {
       context.addError(
           amp.validator.ValidationError.Code.INVALID_URL_PROTOCOL,
-          /* params */ [attrName, getDetailOrName(tagSpec),
-                        uri.getScheme().toLowerCase()], tagSpec.specUrl, result);
+          /* params */
+          [attrName, getDetailOrName(tagSpec), uri.getScheme().toLowerCase()],
+          tagSpec.specUrl, result);
+      return;
+    }
+    if (!this.spec_.valueUrl.allowRelative && !uri.hasScheme()) {
+      context.addError(
+          amp.validator.ValidationError.Code.DISALLOWED_RELATIVE_URL,
+          /* params */[attrName, getDetailOrName(tagSpec), url],
+          tagSpec.specUrl, result);
       return;
     }
   }
@@ -2708,10 +2719,12 @@ amp.validator.categorizeError = function(error) {
   // E.g. "Missing URL for attribute 'href' in tag 'a'."
   // E.g. "Invalid URL protocol 'http:' for attribute 'src' in tag
   // 'amp-iframe'." Note: Parameters in the format strings appear out
-  // of order so that error.params(1) is the tag for all three of these.
+  // of order so that error.params(1) is the tag for all four of these.
   if (error.code == amp.validator.ValidationError.Code.MISSING_URL ||
       error.code == amp.validator.ValidationError.Code.INVALID_URL ||
-      error.code == amp.validator.ValidationError.Code.INVALID_URL_PROTOCOL) {
+      error.code == amp.validator.ValidationError.Code.INVALID_URL_PROTOCOL ||
+      error.code ==
+          amp.validator.ValidationError.Code.DISALLOWED_RELATIVE_URL) {
     if (goog.string./*OK*/startsWith(error.params[1], "amp-")) {
       return amp.validator.ErrorCategory.Code.AMP_TAG_PROBLEM;
     }

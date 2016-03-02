@@ -20,12 +20,12 @@
 # in production from crashing. This id is not relevant to validator.js
 # because thus far, engine (validator.js) and spec file (validator.protoascii)
 # are always released together.
-min_validator_revision_required: 95
+min_validator_revision_required: 98
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 166
+spec_file_revision: 167
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
 #
@@ -291,6 +291,7 @@ tags: {
     name: "href"
     mandatory: true
     value_url: {
+      allow_relative: true
       allowed_protocol: "http"
       allowed_protocol: "https"
     }
@@ -737,6 +738,7 @@ tags: {
   attrs: {
     name: "href"
     value_url: {
+      allow_relative: true
       allowed_protocol: "http"
       allowed_protocol: "https"
       allowed_protocol: "mailto"
@@ -1145,6 +1147,7 @@ tags: {
     alternative_names: "srcset"
     mandatory: true
     value_url: {
+      allow_relative: true  # Will be set to false at a future date.
       allowed_protocol: "data"
       allowed_protocol: "https"
     }
@@ -1188,6 +1191,7 @@ tags: {
   attrs: {
     name: "src"
     value_url: {
+      allow_relative: true  # Will be set to false at a future date.
       allowed_protocol: "https"
     }
   }
@@ -1201,6 +1205,7 @@ tags: {
   attrs: {
     name: "src"
     value_url: {
+      allow_relative: true  # Will be set to false at a future date.
       allowed_protocol: "https"
     }
   }
@@ -1214,6 +1219,7 @@ tags: {
     name: "src"
     mandatory: true
     value_url: {
+      allow_relative: true  # Will be set to false at a future date.
       allowed_protocol: "https"
     }
   }
@@ -1230,6 +1236,7 @@ tags: {
     name: "src"
     mandatory: true
     value_url: {
+      allow_relative: true  # Will be set to false at a future date.
       allowed_protocol: "https"
     }
   }
@@ -2729,6 +2736,7 @@ attr_lists: {
     alternative_names: "srcset"
     mandatory: true
     value_url: {
+      allow_relative: true
       allowed_protocol: "data"
       allowed_protocol: "http"
       allowed_protocol: "https"
@@ -2821,6 +2829,7 @@ tags: {
   attrs: {
     name: "src"
     value_url: {
+      allow_relative: true  # Will be set to false at a future date.
       allowed_protocol: "https"
     }
   }
@@ -2849,6 +2858,7 @@ tags: {
   attrs: {
     name: "src"
     value_url: {
+      allow_relative: true  # Will be set to false at a future date.
       allowed_protocol: "https"
     }
   }
@@ -2874,6 +2884,7 @@ tags: {
   attrs: {
     name: "src"
     value_url: {
+      allow_relative: true  # Will be set to false at a future date.
       allowed_protocol: "https"
     }
   }
@@ -2975,6 +2986,7 @@ tags: {
   attrs: {
     name: "config"
     value_url: {
+      allow_relative: true  # Will be set to false at a future date.
       allowed_protocol: "https"
     }
   }
@@ -3007,6 +3019,7 @@ tags: {
     name: "src"
     mandatory_oneof: "['src', 'data-videoid']"
     value_url: {
+      allow_relative: true
       allowed_protocol: "http"  # runtime will rewrite URL to https in this case
       allowed_protocol: "https"
     }
@@ -3137,6 +3150,7 @@ tags: {
     name: "src"
     mandatory_oneof: "['data-tweetid', 'src']"
     value_url: {
+      allow_relative: true
       allowed_protocol: "http"  # runtime will rewrite URL to https in this case
       allowed_protocol: "https"
     }
@@ -3164,6 +3178,7 @@ tags: {
     name: "src"
     mandatory_oneof: "['data-shortcode', 'src']"
     value_url: {
+      allow_relative: true
       allowed_protocol: "http"  # runtime will rewrite URL to https in this case
       allowed_protocol: "https"
     }
@@ -3199,6 +3214,7 @@ tags: {
     name: "src"
     mandatory_oneof: "['src', 'srcdoc']"
     value_url: {
+      allow_relative: true  # Will be set to false at a future date.
       allowed_protocol: "data"
       allowed_protocol: "https"
     }
@@ -3222,6 +3238,7 @@ tags: {
     name: "src"
     mandatory: true
     value_url: {
+      allow_relative: true  # Will be set to false at a future date.
       allowed_protocol: "https"
     }
   }
@@ -3242,6 +3259,7 @@ tags: {
   attrs: {
     name: "src"
     value_url: {
+      allow_relative: true  # Will be set to false at a future date.
       allowed_protocol: "https"
     }
   }
@@ -3301,6 +3319,7 @@ tags: {
     name: "src"
     mandatory: true
     value_url: {
+      allow_relative: true  # Will be set to false at a future date.
       allowed_protocol: "https"
     }
   }
@@ -3323,6 +3342,7 @@ tags: {
     name: "src"
     mandatory: true
     value_url: {
+      allow_relative: true  # Will be set to false at a future date.
       allowed_protocol: "https"
     }
   }
@@ -3508,6 +3528,10 @@ error_formats {
 error_formats {
   code: INVALID_URL_PROTOCOL
   format: "Invalid URL protocol '%3:' for attribute '%1' in tag '%2'."
+}
+error_formats {
+  code: DISALLOWED_RELATIVE_URL
+  format: "The relative URL '%3' for attribute '%1' in tag '%2' is disallowed."
 }
 error_formats {
   code: MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE
