@@ -22,7 +22,6 @@ import {loadPromise} from '../../src/event-helper';
 import {setModeForTesting} from '../../src/mode';
 import {resetServiceForTesting} from '../../src/service';
 import {viewerFor} from '../../src/viewer';
-import {toggleExperiment} from '../../src/experiments';
 
 describe('3p-frame', () => {
 
@@ -31,7 +30,6 @@ describe('3p-frame', () => {
   });
 
   afterEach(() => {
-    toggleExperiment(window, 'dev-channel', false);
     resetServiceForTesting(window, 'bootstrapBaseUrl');
     setModeForTesting(null);
     const m = document.querySelector(
@@ -152,15 +150,8 @@ describe('3p-frame', () => {
         'http://ads.localhost:9876/dist.3p/current/frame.max.html');
   });
 
-  it('should pick the right bootstrap url (prod)', () => {
-    setModeForTesting({});
-    expect(getBootstrapBaseUrl(window)).to.equal(
-        'https://3p.ampproject.net/$internalRuntimeVersion$/frame.html');
-  });
-
   it('should pick the right bootstrap unique url (prod)', () => {
     setModeForTesting({});
-    toggleExperiment(window, 'dev-channel', true);
     expect(getBootstrapBaseUrl(window)).to.match(
         /^https:\/\/d-\d+\.ampproject\.net\/\$\internal\w+\$\/frame\.html$/);
   });
@@ -196,18 +187,12 @@ describe('3p-frame', () => {
         'https://3p.ampproject.net/$internalRuntimeVersion$/f.js');
   });
 
-  it('should make sub domain: 3p', () => {
-    expect(getSubDomain(window)).to.equal('3p');
-  });
-
   it('should make sub domains (unique)', () => {
-    toggleExperiment(window, 'dev-channel', true);
     expect(getSubDomain(window)).to.match(/^d-\d+$/);
     expect(getSubDomain(window)).to.not.equal('d-00');
   });
 
   it('should make sub domains (Math)', () => {
-    toggleExperiment(window, 'dev-channel', true);
     const fakeWin = {
       document: document,
       Math: Math,
@@ -216,7 +201,6 @@ describe('3p-frame', () => {
   });
 
   it('should make sub domains (crypto)', () => {
-    toggleExperiment(window, 'dev-channel', true);
     const fakeWin = {
       document: document,
       crypto: {
@@ -230,7 +214,6 @@ describe('3p-frame', () => {
   });
 
   it('should make sub domains (fallback)', () => {
-    toggleExperiment(window, 'dev-channel', true);
     const fakeWin = {
       document: document,
       Math: {
