@@ -2128,12 +2128,21 @@ class ParsedValidatorRules {
     resultForBestAttempt.status = resultForAttempt.status;
     resultForBestAttempt.errors = resultForAttempt.errors;
 
+    const spec = parsedSpec.getSpec();
+
+    if (spec.deprecation !== null) {
+      context.addError(
+          amp.validator.ValidationError.Code.DEPRECATED_TAG,
+          /* params */ [getDetailOrName(spec), spec.deprecation],
+          spec.deprecationUrl, resultForBestAttempt);
+      // Deprecation is only a warning, so we don't return.
+    }
+
     if (parsedSpec.shouldRecordTagspecValidated()) {
       const isUnique = context.recordTagspecValidated(parsedSpec.getId());
       // If a duplicate tag is encountered for a spec that's supposed
       // to be unique, we've found an error that we must report.
-      if (parsedSpec.getSpec().unique && !isUnique) {
-        const spec = parsedSpec.getSpec();
+      if (spec.unique && !isUnique) {
         context.addError(
             amp.validator.ValidationError.Code.DUPLICATE_UNIQUE_TAG,
             /* params */ [getDetailOrName(spec)], spec.specUrl,
@@ -2142,14 +2151,14 @@ class ParsedValidatorRules {
       }
     }
 
-    if (parsedSpec.getSpec().mandatoryAlternatives !== null) {
-      const satisfied = parsedSpec.getSpec().mandatoryAlternatives;
+    if (spec.mandatoryAlternatives !== null) {
+      const satisfied = spec.mandatoryAlternatives;
       goog.asserts.assert(satisfied !== null);
       context.recordMandatoryAlternativeSatisfied(satisfied);
     }
     // (Re)set the cdata matcher to the expectations that this tag
     // brings with it.
-    context.setCdataMatcher(new CdataMatcher(parsedSpec.getSpec()));
+    context.setCdataMatcher(new CdataMatcher(spec));
   }
 
   /**
@@ -2597,7 +2606,10 @@ amp.validator.categorizeError = function(error) {
           && error.params[0] === "⚡") ||
       (error.code === amp.validator.ValidationError.
           Code.MANDATORY_CDATA_MISSING_OR_INCORRECT
-          && goog.string./*OK*/startsWith(error.params[0], "boilerplate"))) {
+          && (goog.string./*OK*/startsWith(
+                  error.params[0], "head > style : boilerplate") ||
+              goog.string./*OK*/startsWith(
+                  error.params[0], "noscript > style : boilerplate")))) {
     return amp.validator.ErrorCategory.Code.
         MANDATORY_AMP_TAG_MISSING_OR_INCORRECT;
   }

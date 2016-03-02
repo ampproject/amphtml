@@ -25,7 +25,7 @@ min_validator_revision_required: 100
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 172
+spec_file_revision: 173
 # Rules for AMP HTML
 # (https://www.ampproject.org/docs/reference/spec.html)
 #
@@ -552,32 +552,36 @@ tags: {  # Special custom 'author' spreadsheet.
 tags: {
   name: "style"
   mandatory_parent: "head"
-  detail: "boilerplate (js enabled) - old variant"
+  detail: "head > style : boilerplate - old variant"
+  deprecation: "head > style : boilerplate"
+  deprecation_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
   unique: true
-  mandatory_alternatives: "boilerplate (js enabled)"
-  spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
+  mandatory_alternatives: "head > style : boilerplate"
   cdata: {
     cdata_regex: "body ?{opacity: ?0}"
   }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
 }
 tags: {
   name: "style"
   mandatory_parent: "noscript"
-  detail: "boilerplate (noscript) - old variant"
-  spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
+  detail: "noscript > style : boilerplate - old variant"
+  deprecation: "noscript > style : boilerplate"
+  deprecation_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
   unique: true
-  mandatory_alternatives: "boilerplate (noscript)"
+  mandatory_alternatives: "noscript > style : boilerplate"
   cdata {
     cdata_regex: "body ?{opacity: ?1}"
   }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
 }
 tags: {
   name: "style"
   mandatory_parent: "head"
-  detail: "boilerplate (js enabled)"
-  also_requires: "boilerplate (noscript)"
+  detail: "head > style : boilerplate"
+  also_requires: "noscript > style : boilerplate"
   unique: true
-  mandatory_alternatives: "boilerplate (js enabled)"
+  mandatory_alternatives: "head > style : boilerplate"
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
   cdata: {
     # This regex allows arbitrary whitespace whenever some whitespace
@@ -593,11 +597,11 @@ tags: {
 tags: {
   name: "style"
   mandatory_parent: "noscript"
-  detail: "boilerplate (noscript)"
-  also_requires: "boilerplate (js enabled)"
-  spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
+  detail: "noscript > style : boilerplate"
+  also_requires: "head > style : boilerplate"
   unique: true
-  mandatory_alternatives: "boilerplate (noscript)"
+  mandatory_alternatives: "noscript > style : boilerplate"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
   cdata {
     mandatory_cdata: "body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}"
   }
@@ -3595,6 +3599,10 @@ error_formats {
   code: TEMPLATE_PARTIAL_IN_ATTR_VALUE
   format: "The attribute '%1' in tag '%2' is set to '%3', which contains "
           "a Mustache template partial."
+}
+error_formats {
+  code: DEPRECATED_TAG
+  format: "The tag '%1' is deprecated - use '%2' instead."
 }
 error_formats {
   code: DEPRECATED_ATTR

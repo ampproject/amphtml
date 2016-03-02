@@ -83,6 +83,7 @@ message AttrSpec {
   // The value of the deprecation field indicates what to use instead,
   // e.g. the name of an attribute or tag.
   optional string deprecation = 7;
+  // If provided, a URL which links to the AMP HTML spec for this deprecation.
   optional string deprecation_url = 8;
 
   // If set true, the TagSpec containing this AttrSpec will be evaluated first
@@ -200,7 +201,7 @@ message AmpLayout {
 // Some tags are mandatory. Note that the tag name is not unique, that is,
 // there can be multiple tag specs covering the same name, e.g., for
 // multiple meta tags (with different attributes).
-// NEXT AVAILABLE TAG: 17
+// NEXT AVAILABLE TAG: 19
 message TagSpec {
   // Use lower-case tag names only. If adding the same tag twice, then they must
   // also have a detail string which is unique throughout all detail.
@@ -239,6 +240,13 @@ message TagSpec {
   // If set, other tags - identified by their detail string - must be
   // present as well.
   repeated string also_requires = 14;
+
+  // If set, generates a DEPRECATED_TAG error with severity WARNING.
+  // The value of the deprecation field indicates what to use instead,
+  // e.g. the name of a tag.
+  optional string deprecation = 17;
+  // If provided, a URL which links to the AMP HTML spec for this deprecation.
+  optional string deprecation_url = 18;
 
   // Attribute specifications related to this tag.
   repeated AttrSpec attrs = 7;
