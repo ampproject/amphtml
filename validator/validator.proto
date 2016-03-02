@@ -42,6 +42,7 @@ message PropertySpecList {
 message UrlSpec {
   // allowed_protocol must be in lowercase (e.g. "javascript" not "JavaScript").
   repeated string allowed_protocol = 1;
+  optional bool allow_relative = 2 [default = true];
 }
 
 // Attributes that are not covered by at least one of these specs are
@@ -337,7 +338,7 @@ message ValidationError {
     DEV_WARNING = 3; // DEPRECATED DO NOT USE.
   }
   optional Severity severity = 6 [ default = ERROR ];
-  // NEXT AVAILABLE TAG: 49
+  // NEXT AVAILABLE TAG: 50
   enum Code {
     UNKNOWN_CODE = 0;
     MANDATORY_TAG_MISSING = 1;
@@ -363,6 +364,7 @@ message ValidationError {
     MISSING_URL = 35;
     INVALID_URL = 36;
     INVALID_URL_PROTOCOL = 37;
+    DISALLOWED_RELATIVE_URL = 49;
     DISALLOWED_PROPERTY_IN_ATTR_VALUE = 16;
     MUTUALLY_EXCLUSIVE_ATTRS = 17;
     UNESCAPED_TEMPLATE_IN_ATTR_VALUE = 18;
