@@ -25,7 +25,7 @@ min_validator_revision_required: 95
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 162
+spec_file_revision: 163
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
 #
@@ -3433,7 +3433,7 @@ error_formats {
 }
 error_formats {
   code: TAG_REQUIRED_BY_MISSING
-  format: "The '%1' tag is missing or incorrect, but required by '%2'."
+  format: "The tag '%1' is missing or incorrect, but required by '%2'."
 }
 error_formats {
   code: DISALLOWED_TAG
