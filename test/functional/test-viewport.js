@@ -42,21 +42,23 @@ describe('Viewport', () => {
       getPaddingTop: () => 19,
       onViewportEvent: handler => {
         viewerViewportHandler = handler;
-      }
+      },
     };
     viewerMock = sandbox.mock(viewer);
     windowApi = {
       document: {
-        documentElement: {style: {}}
+        documentElement: {style: {}},
       },
       location: {},
       setTimeout: window.setTimeout,
-      requestAnimationFrame: fn => window.setTimeout(fn, 16)
+      requestAnimationFrame: fn => window.setTimeout(fn, 16),
     };
     installViewerService(windowApi);
     binding = new ViewportBindingVirtual_(windowApi, viewer);
     viewport = new Viewport(windowApi, binding, viewer);
-    viewport.fixedLayer_ = null;
+    viewport.fixedLayer_ = {update: () => {
+      return {then: callback => callback()};
+    }};
     viewport.getSize();
   });
 
@@ -132,6 +134,7 @@ describe('Viewport', () => {
 
     // Should call updatePaddingTop.
     bindingMock = sandbox.mock(binding);
+    viewport.fixedLayer_.updatePaddingTop = () => {};
     viewerMock.expects('getPaddingTop').returns(21).atLeast(1);
     bindingMock.expects('updatePaddingTop').withArgs(21).once();
     viewerViewportHandler();
@@ -242,36 +245,36 @@ describe('Viewport META', () => {
     });
     it('should parse single key-value', () => {
       expect(parseViewportMeta('width=device-width')).to.deep.equal({
-        'width': 'device-width'
+        'width': 'device-width',
       });
     });
     it('should parse two key-values', () => {
       expect(parseViewportMeta('width=device-width,minimum-scale=1')).to.deep
           .equal({
             'width': 'device-width',
-            'minimum-scale': '1'
+            'minimum-scale': '1',
           });
     });
     it('should parse empty value', () => {
       expect(parseViewportMeta('width=device-width,minimal-ui')).to.deep.equal({
         'width': 'device-width',
-        'minimal-ui': ''
+        'minimal-ui': '',
       });
       expect(parseViewportMeta('minimal-ui,width=device-width')).to.deep.equal({
         'width': 'device-width',
-        'minimal-ui': ''
+        'minimal-ui': '',
       });
     });
     it('should return last dupe', () => {
       expect(parseViewportMeta('width=100,width=200')).to.deep.equal({
-        'width': '200'
+        'width': '200',
       });
     });
     it('should ignore extra delims', () => {
       expect(parseViewportMeta(',,,width=device-width,,,,minimum-scale=1,,,'))
           .to.deep.equal({
             'width': 'device-width',
-            'minimum-scale': '1'
+            'minimum-scale': '1',
           });
     });
   });
@@ -287,7 +290,7 @@ describe('Viewport META', () => {
     it('should stringify two key-values', () => {
       const res = stringifyViewportMeta({
         'width': 'device-width',
-        'minimum-scale': '1'
+        'minimum-scale': '1',
       });
       expect(res == 'width=device-width,minimum-scale=1' ||
           res == 'minimum-scale=1,width=device-width')
@@ -296,7 +299,7 @@ describe('Viewport META', () => {
     it('should stringify empty values', () => {
       const res = stringifyViewportMeta({
         'width': 'device-width',
-        'minimal-ui': ''
+        'minimal-ui': '',
       });
       expect(res == 'width=device-width,minimal-ui' ||
           res == 'minimal-ui,width=device-width')
@@ -318,7 +321,7 @@ describe('Viewport META', () => {
           'width=device-width', {'minimum-scale': '1'})))
           .to.deep.equal({
             'width': 'device-width',
-            'minimum-scale': '1'
+            'minimum-scale': '1',
           });
     });
     it('should replace the existing value', () => {
@@ -326,21 +329,21 @@ describe('Viewport META', () => {
           'width=device-width,minimum-scale=2', {'minimum-scale': '1'})))
           .to.deep.equal({
             'width': 'device-width',
-            'minimum-scale': '1'
+            'minimum-scale': '1',
           });
     });
     it('should delete the existing value', () => {
       expect(parseViewportMeta(updateViewportMetaString(
           'width=device-width,minimum-scale=1', {'minimum-scale': undefined})))
           .to.deep.equal({
-            'width': 'device-width'
+            'width': 'device-width',
           });
     });
     it('should ignore delete for a non-existing value', () => {
       expect(parseViewportMeta(updateViewportMetaString(
           'width=device-width', {'minimum-scale': undefined})))
           .to.deep.equal({
-            'width': 'device-width'
+            'width': 'device-width',
           });
     });
     it('should do nothing if values did not change', () => {
@@ -371,7 +374,7 @@ describe('Viewport META', () => {
         getScrollTop: () => 0,
         getPaddingTop: () => 0,
         onViewportEvent: () => {},
-        isEmbedded: () => false
+        isEmbedded: () => false,
       };
       viewerMock = sandbox.mock(viewer);
 
@@ -384,7 +387,7 @@ describe('Viewport META', () => {
         set: value => {
           viewportMetaSetter(value);
           viewportMetaString = value;
-        }
+        },
       });
       windowApi = {
         document: {
@@ -394,9 +397,9 @@ describe('Viewport META', () => {
               return viewportMeta;
             }
             return undefined;
-          }
+          },
         },
-        location: {}
+        location: {},
       };
       installViewerService(windowApi);
       binding = new ViewportBindingVirtual_(windowApi, viewer);
@@ -500,10 +503,10 @@ describe('ViewportBindingNatural', () => {
     };
     windowApi = new WindowApi();
     documentElement = {
-      style: {}
+      style: {},
     };
     windowApi.document = {
-      documentElement: documentElement
+      documentElement: documentElement,
     };
     windowMock = sandbox.mock(windowApi);
     binding = new ViewportBindingNatural_(windowApi);
@@ -528,7 +531,7 @@ describe('ViewportBindingNatural', () => {
 
   it('should update padding', () => {
     windowApi.document = {
-      documentElement: {style: {}}
+      documentElement: {style: {}},
     };
     binding.updatePaddingTop(31);
     expect(windowApi.document.documentElement.style.paddingTop).to
@@ -541,8 +544,8 @@ describe('ViewportBindingNatural', () => {
     windowApi.document = {
       documentElement: {
         clientWidth: 111,
-        clientHeight: 222
-      }
+        clientHeight: 222,
+      },
     };
     const size = binding.getSize();
     expect(size.width).to.equal(111);
@@ -553,8 +556,8 @@ describe('ViewportBindingNatural', () => {
     windowApi.pageYOffset = 11;
     windowApi.document = {
       scrollingElement: {
-        scrollTop: 17
-      }
+        scrollTop: 17,
+      },
     };
     expect(binding.getScrollTop()).to.equal(17);
   });
@@ -563,8 +566,8 @@ describe('ViewportBindingNatural', () => {
     windowApi.pageYOffset = 11;
     windowApi.document = {
       scrollingElement: {
-        scrollWidth: 117
-      }
+        scrollWidth: 117,
+      },
     };
     expect(binding.getScrollWidth()).to.equal(117);
   });
@@ -573,8 +576,8 @@ describe('ViewportBindingNatural', () => {
     windowApi.pageYOffset = 11;
     windowApi.document = {
       scrollingElement: {
-        scrollHeight: 119
-      }
+        scrollHeight: 119,
+      },
     };
     expect(binding.getScrollHeight()).to.equal(119);
   });
@@ -583,8 +586,8 @@ describe('ViewportBindingNatural', () => {
     windowApi.pageYOffset = 11;
     windowApi.document = {
       scrollingElement: {
-        scrollTop: 17
-      }
+        scrollTop: 17,
+      },
     };
     binding.setScrollTop(21);
     expect(windowApi.document.scrollingElement./*OK*/scrollTop).to.equal(21);
@@ -603,7 +606,7 @@ describe('ViewportBindingNatural', () => {
     const el = {
       getBoundingClientRect: () => {
         return {left: 11.5, top: 12.5, width: 13.5, height: 14.5};
-      }
+      },
     };
     const rect = binding.getLayoutRect(el);
     expect(rect.left).to.equal(112);  // round(100 + 11.5)
@@ -648,16 +651,16 @@ describe('ViewportBindingNaturalIosEmbed', () => {
         },
         addEventListener: (eventType, handler) => {
           bodyEventListeners[eventType] = handler;
-        }
+        },
       },
       createElement: tagName => {
         return {
           tagName: tagName,
           id: '',
           style: {},
-          scrollIntoView: sinon.spy()
+          scrollIntoView: sinon.spy(),
         };
-      }
+      },
     };
     windowMock = sandbox.mock(windowApi);
     binding = new ViewportBindingNaturalIosEmbed_(windowApi);
@@ -728,7 +731,7 @@ describe('ViewportBindingNaturalIosEmbed', () => {
 
   it('should update border on BODY', () => {
     windowApi.document = {
-      body: {style: {}}
+      body: {style: {}},
     };
     binding.updatePaddingTop(31);
     expect(windowApi.document.body.style.borderTop).to
@@ -777,7 +780,7 @@ describe('ViewportBindingNaturalIosEmbed', () => {
     const el = {
       getBoundingClientRect: () => {
         return {left: 11.5, top: 12.5, width: 13.5, height: 14.5};
-      }
+      },
     };
     const rect = binding.getLayoutRect(el);
     expect(rect.left).to.equal(112);  // round(100 + 11.5)
@@ -848,13 +851,13 @@ describe('ViewportBindingVirtual', () => {
       getViewportWidth: () => 111,
       getViewportHeight: () => 222,
       getScrollTop: () => 17,
-      getPaddingTop: () => 19
+      getPaddingTop: () => 19,
     };
     sandbox.mock(viewer);
     windowApi = {
       document: {
-        documentElement: {style: {}}
-      }
+        documentElement: {style: {}},
+      },
     };
     binding = new ViewportBindingVirtual_(windowApi, viewer);
   });
@@ -878,7 +881,7 @@ describe('ViewportBindingVirtual', () => {
 
   it('should update padding', () => {
     windowApi.document = {
-      documentElement: {style: {}}
+      documentElement: {style: {}},
     };
     binding.updatePaddingTop(33);
     expect(windowApi.document.documentElement.style.paddingTop).to
@@ -945,7 +948,7 @@ describe('ViewportBindingVirtual', () => {
     const el = {
       getBoundingClientRect: () => {
         return {left: 11.5, top: 12.5, width: 13.5, height: 14.5};
-      }
+      },
     };
     const rect = binding.getLayoutRect(el);
     expect(rect.left).to.equal(12);  // round(11.5)

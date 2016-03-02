@@ -68,7 +68,7 @@ describe('Motion continueMotion', () => {
       runAnimMutateSeries: mutator => {
         vsyncTasks.push(mutator);
         return new Promise((unusedResolve, unusedReject) => {});
-      }
+      },
     };
   });
 

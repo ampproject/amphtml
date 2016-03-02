@@ -175,6 +175,25 @@ Container for analytics tags. Positioned far away from top to make sure that doe
 </script>
 </amp-analytics>
 
+<!-- Mediametrie tracking
+  serial is the account id (required)
+  level1 to 4 are page levels (optional)
+-->
+<amp-analytics type="mediametrie">
+<script type="application/json">
+  {
+    "vars": {
+      "serial": "241041208720",
+      "level1": "level1-test-amp",
+      "level2": "level2-test-amp",
+      "level3": "level3",
+      "level4": "level4"
+    }
+  }
+</script>
+</amp-analytics>
+<!-- End Mediametrie example -->
+
 <!-- Parsely tracking -->
 <amp-analytics type="parsely">
 <script type="application/json">
@@ -276,6 +295,26 @@ Container for analytics tags. Positioned far away from top to make sure that doe
 </script>
 </amp-analytics>
 <!-- End SimpleReach Example -->
+
+<!-- Webtrekk tracking -->
+<amp-analytics type="webtrekk">
+<script type="application/json">
+  {
+    "vars": {
+      "trackDomain": "q3.webtrekk.net",
+      "trackId": "111111111111111",
+      "contentId": "en.example"
+    },
+    "triggers": {
+      "trackPageview": {
+        "on": "visible",
+        "request": "pageview"
+      }
+    }
+  }
+</script>
+</amp-analytics>
+<!-- End Webtrekk example -->
 </div>
 
 <div class="logo"></div>

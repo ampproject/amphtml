@@ -27,7 +27,7 @@ import {
   getElementService,
   getElementServiceIfAvailable,
   markElementScheduledForTesting,
-  resetScheduledElementForTesting
+  resetScheduledElementForTesting,
 } from '../../src/custom-element';
 
 
@@ -84,11 +84,11 @@ describe('CustomElement', () => {
   }
 
   const ElementClass = document.registerElement('amp-test', {
-    prototype: createAmpElementProto(window, 'amp-test', TestElement)
+    prototype: createAmpElementProto(window, 'amp-test', TestElement),
   });
 
   const StubElementClass = document.registerElement('amp-stub', {
-    prototype: createAmpElementProto(window, 'amp-stub', ElementStub)
+    prototype: createAmpElementProto(window, 'amp-stub', ElementStub),
   });
 
   let sandbox;
@@ -725,7 +725,7 @@ describe('CustomElement', () => {
 describe('CustomElement Service Elements', () => {
 
   const StubElementClass = document.registerElement('amp-stub2', {
-    prototype: createAmpElementProto(window, 'amp-stub2', ElementStub)
+    prototype: createAmpElementProto(window, 'amp-stub2', ElementStub),
   });
 
   let sandbox;
@@ -819,7 +819,7 @@ describe('CustomElement Loading Indicator', () => {
   class TestElement extends BaseElement {
   }
   const ElementClass = document.registerElement('amp-test-loader', {
-    prototype: createAmpElementProto(window, 'amp-test-loader', TestElement)
+    prototype: createAmpElementProto(window, 'amp-test-loader', TestElement),
   });
 
   const resources = resourcesFor(window);
@@ -1072,7 +1072,7 @@ describe('CustomElement Overflow Element', () => {
   class TestElement extends BaseElement {
   }
   const ElementClass = document.registerElement('amp-test-overflow', {
-    prototype: createAmpElementProto(window, 'amp-test-overflow', TestElement)
+    prototype: createAmpElementProto(window, 'amp-test-overflow', TestElement),
   });
 
   const resources = resourcesFor(window);

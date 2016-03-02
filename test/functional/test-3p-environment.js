@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-import {becomeVisible, manageWin, setInViewportForTesting} from
-    '../../3p/environment';
+import {
+  becomeVisible,
+  manageWin,
+  setInViewportForTesting,
+} from '../../3p/environment';
 import {createIframePromise} from '../../testing/iframe';
 import {timer} from '../../src/timer';
 import {loadPromise} from '../../src/event-helper';

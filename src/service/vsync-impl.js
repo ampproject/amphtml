@@ -131,7 +131,7 @@ export class Vsync {
         mutate: state => {
           task.mutate(state);
           resolve();
-        }
+        },
       }, opt_state);
     });
   }
@@ -261,7 +261,7 @@ export class Vsync {
             prevTime = timeSinceStart;
             task(state);
           }
-        }
+        },
       });
       task({});
     });

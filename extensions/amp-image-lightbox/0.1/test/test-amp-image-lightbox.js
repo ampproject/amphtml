@@ -17,8 +17,9 @@
 import {Timer} from '../../../../src/timer';
 import {createIframePromise} from '../../../../testing/iframe';
 require('../../../../build/all/v0/amp-image-lightbox-0.1.max');
-import {ImageViewer}
-    from '../../../../build/all/v0/amp-image-lightbox-0.1.max';
+import {
+  ImageViewer,
+} from '../../../../build/all/v0/amp-image-lightbox-0.1.max';
 import {adopt} from '../../../../src/runtime';
 import {parseSrcset} from '../../../../src/srcset';
 import * as sinon from 'sinon';
@@ -204,7 +205,7 @@ describe('amp-image-lightbox image viewer', () => {
     clock = sandbox.useFakeTimers();
 
     lightbox = {
-      getDpr: () => 1
+      getDpr: () => 1,
     };
     lightboxMock = sandbox.mock(lightbox);
 
@@ -240,7 +241,7 @@ describe('amp-image-lightbox image viewer', () => {
           return 'image1';
         }
         return undefined;
-      }
+      },
     };
 
     imageViewer.init(sourceElement, null);
@@ -260,11 +261,11 @@ describe('amp-image-lightbox image viewer', () => {
           return 'image1';
         }
         return undefined;
-      }
+      },
     };
     const sourceImage = {
       complete: false,
-      src: 'image1-smaller'
+      src: 'image1-smaller',
     };
 
     imageViewer.init(sourceElement, sourceImage);
@@ -281,11 +282,11 @@ describe('amp-image-lightbox image viewer', () => {
           return 'image1';
         }
         return undefined;
-      }
+      },
     };
     const sourceImage = {
       complete: true,
-      src: 'image1-smaller'
+      src: 'image1-smaller',
     };
 
     imageViewer.init(sourceElement, sourceImage);
@@ -381,7 +382,7 @@ describe('amp-image-lightbox image viewer gestures', () => {
     lightbox = {
       getDpr: () => 1,
       close: () => {},
-      toggleViewMode: () => {}
+      toggleViewMode: () => {},
     };
     lightboxMock = sandbox.mock(lightbox);
 

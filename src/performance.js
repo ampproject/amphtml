@@ -15,7 +15,7 @@
  */
 
 import {documentInfoFor} from './document-info';
-import {documentStateFor} from './document-state';
+import {onDocumentReady} from './document-ready';
 import {getService} from './service';
 import {loadPromise} from './event-helper';
 import {resourcesFor} from './resources';
@@ -34,7 +34,7 @@ const QUEUE_LIMIT = 50;
  * Added to relative relative timings so that they are never 0 which the
  * underlying library considers a non-value.
  */
-const ENSURE_NON_ZERO = 1000;
+export const ENSURE_NON_ZERO = new Date().getTime();
 
 /**
  * @typedef {{
@@ -93,12 +93,9 @@ export class Performance {
     /** @private {?Resources} */
     this.resources = null;
 
-    /** @private {!DocumentState} */
-    this.docState_ = documentStateFor(this.win);
-
     /** @private @const {!Promise} */
     this.whenReadyToRetrieveResourcesPromise_ = new Promise(resolve => {
-      this.docState_.onReady(() => {
+      onDocumentReady(this.win.document, () => {
         // We need to add a delay, since this can execute earlier
         // than the onReady callback registered inside of `Resources`.
         // Should definitely think of making `getResourcesInViewport` async.
@@ -234,7 +231,7 @@ export class Performance {
     // ENSURE_NON_ZERO Is added instead of non-zero, because the underlying
     // library doesn't like 0 values.
     this.tick('_' + label, undefined, ENSURE_NON_ZERO);
-    this.tick(label, '_' + label, value + ENSURE_NON_ZERO);
+    this.tick(label, '_' + label, Math.round(value + ENSURE_NON_ZERO));
   }
 
 

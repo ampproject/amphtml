@@ -16,6 +16,7 @@
 
 import {adopt} from '../../src/runtime';
 import {parseUrl} from '../../src/url';
+import {getServicePromise} from '../../src/service';
 import * as sinon from 'sinon';
 
 describe('runtime', () => {
@@ -36,6 +37,8 @@ describe('runtime', () => {
       navigator: {},
       setTimeout: () => {},
       location: parseUrl('https://acme.com/document1'),
+      Object: Object,
+      HTMLElement: HTMLElement,
     };
   });
 
@@ -108,6 +111,18 @@ describe('runtime', () => {
     expect(() => {
       clock.tick(1);
     }).to.throw(/extension error/);
+  });
+
+  describe('registerElement', () => {
+    beforeEach(() => {
+      adopt(win);
+    });
+
+    it('resolves any pending service promises for the element', () => {
+      const promise = getServicePromise(win, 'amp-test-register');
+      win.AMP.registerElement('amp-test-register', win.AMP.BaseElement);
+      return promise;
+    });
   });
 });
 

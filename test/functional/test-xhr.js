@@ -28,8 +28,8 @@ describe('XHR', function() {
     {xhr: xhrFor(window), desc: 'Native'},
     {xhr: xhrFor({
       fetch: fetchPolyfill,
-      location: {href: 'https://acme.com/path'}
-    }), desc: 'Polyfill'}
+      location: {href: 'https://acme.com/path'},
+    }), desc: 'Polyfill'},
   ];
 
   function setupMockXhr() {
@@ -70,26 +70,26 @@ describe('XHR', function() {
         const post = xhr.fetchJson.bind(xhr, '/post', {
           method: 'POST',
           body: {
-            hello: 'world'
-          }
+            hello: 'world',
+          },
         });
         const put = xhr.fetchJson.bind(xhr, '/put', {
           method: 'PUT',
           body: {
-            hello: 'world'
-          }
+            hello: 'world',
+          },
         });
         const patch = xhr.fetchJson.bind(xhr, '/patch', {
           method: 'PATCH',
           body: {
-            hello: 'world'
-          }
+            hello: 'world',
+          },
         });
         const deleteMethod = xhr.fetchJson.bind(xhr, '/delete', {
           method: 'DELETE',
           body: {
-            id: 3
-          }
+            id: 3,
+          },
         });
 
         expect(get).to.not.throw();
@@ -111,8 +111,8 @@ describe('XHR', function() {
         xhr.fetchJson('/abc', {
           method: 'post',
           body: {
-            hello: 'world'
-          }
+            hello: 'world',
+          },
         });
         expect(requests[0].method).to.equal('GET');
         expect(requests[1].method).to.equal('POST');
@@ -160,7 +160,7 @@ describe('XHR', function() {
           'Content-Type': 'application/json',
           'Access-Control-Expose-Headers':
               'AMP-Access-Control-Allow-Source-Origin',
-          'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com'
+          'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
         }, '{}');
         return promise.then(() => 'SUCCESS', reason => 'ERROR: ' + reason)
             .then(res => {
@@ -175,7 +175,7 @@ describe('XHR', function() {
           'Content-Type': 'application/json',
           'Access-Control-Expose-Headers':
               'AMP-Access-Control-Allow-Source-Origin',
-          'AMP-Access-Control-Allow-Source-Origin': 'https://other.com'
+          'AMP-Access-Control-Allow-Source-Origin': 'https://other.com',
         }, '{}');
         return promise.then(() => 'SUCCESS', reason => 'ERROR: ' + reason)
             .then(res => {
@@ -187,10 +187,10 @@ describe('XHR', function() {
       it('should require AMP origin in response for when request', () => {
         setupMockXhr();
         const promise = xhr.fetchJson('/get', {
-          requireAmpResponseSourceOrigin: true
+          requireAmpResponseSourceOrigin: true,
         });
         requests[0].respond(200, {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         }, '{}');
         return promise.then(() => 'SUCCESS', reason => 'ERROR: ' + reason)
             .then(res => {
@@ -281,16 +281,16 @@ describe('XHR', function() {
           xhr.fetchJson(url, {
             method: 'POST',
             body: {
-              hello: 'world'
+              hello: 'world',
             },
             headers: {
-              'Other': 'another'
-            }
+              'Other': 'another',
+            },
           });
           expect(requests[0].requestHeaders).to.deep.equal({
             'Accept': 'application/json',
             'Content-Type': 'application/json;charset=utf-8',
-            'Other': 'another'  // Not removed when other headers set.
+            'Other': 'another',  // Not removed when other headers set.
           });
         });
       }
@@ -299,11 +299,11 @@ describe('XHR', function() {
         return xhr.fetchJson(url, {
           method: 'POST',
           body: {
-            hello: 'world'
-          }
+            hello: 'world',
+          },
         }).then(res => {
           expect(res.json).to.jsonEqual({
-            hello: 'world'
+            hello: 'world',
           });
         });
       });
@@ -312,28 +312,28 @@ describe('XHR', function() {
         const objectFn = xhr.fetchJson.bind(xhr, url, {
           method: 'POST',
           body: {
-            hello: 'world'
-          }
+            hello: 'world',
+          },
         });
         const arrayFn = xhr.fetchJson.bind(xhr, url, {
           method: 'POST',
-          body: ['hello', 'world']
+          body: ['hello', 'world'],
         });
         const stringFn = xhr.fetchJson.bind(xhr, url, {
           method: 'POST',
-          body: 'hello world'
+          body: 'hello world',
         });
         const numberFn = xhr.fetchJson.bind(xhr, url, {
           method: 'POST',
-          body: 3
+          body: 3,
         });
         const booleanFn = xhr.fetchJson.bind(xhr, url, {
           method: 'POST',
-          body: true
+          body: true,
         });
         const nullFn = xhr.fetchJson.bind(xhr, url, {
           method: 'POST',
-          body: null
+          body: null,
         });
 
         expect(objectFn).to.not.throw();

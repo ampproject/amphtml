@@ -27,6 +27,7 @@ import {resourcesFor} from './resources';
 import {timer} from './timer';
 import {viewerFor} from './viewer';
 import {viewportFor} from './viewport';
+import {getService} from './service';
 
 
 /** @type {!Array} */
@@ -49,7 +50,7 @@ export function adopt(global) {
   const preregisteredElements = global.AMP || [];
 
   global.AMP = {
-    win: global
+    win: global,
   };
 
   /**
@@ -65,7 +66,12 @@ export function adopt(global) {
       registerExtendedElement(global, name, implementationClass);
       elementsForTesting.push({
         name: name,
-        implementationClass: implementationClass
+        implementationClass: implementationClass,
+      });
+      // Resolve this extension's Service Promise.
+      getService(global, name, () => {
+        // All services need to resolve to an object.
+        return {};
       });
     };
     if (opt_css) {

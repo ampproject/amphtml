@@ -94,7 +94,7 @@ export function makeBodyVisible(doc, extensionsPromise) {
       setStyles(doc.body, {
         opacity: 1,
         visibility: 'visible',
-        animation: 'none'
+        animation: 'none',
       });
       clearInterval(interval);
     }

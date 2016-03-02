@@ -137,7 +137,7 @@ class UrlReplacements {
       return cidFor(win).then(cid => {
         return cid.get({
           scope: scope,
-          createCookieIfNotPresent: true
+          createCookieIfNotPresent: true,
         }, consent);
       });
     });

@@ -61,7 +61,7 @@ class AmpSlides extends AMP.BaseElement {
       padding: '8px',
       fontSize: '24px',
       marginTop: '-20px',
-      pointerEvents: 'all'
+      pointerEvents: 'all',
     });
     this.prevButton_.onclick = () => {
       this.go(-1, true);
@@ -79,7 +79,7 @@ class AmpSlides extends AMP.BaseElement {
       padding: '8px',
       fontSize: '24px',
       marginTop: '-20px',
-      pointerEvents: 'all'
+      pointerEvents: 'all',
     });
     this.nextButton_.onclick = () => {
       this.go(1, true);
@@ -143,7 +143,7 @@ class AmpSlides extends AMP.BaseElement {
     st.setStyles(slide, {
       transform: st.translateX(dir * containerWidth),
       zIndex: 1,
-      display: 'block'
+      display: 'block',
     });
 
     this.scheduleLayout(slide);
@@ -160,12 +160,12 @@ class AmpSlides extends AMP.BaseElement {
     return tr.all([
       tr.setStyles(newSlide, {
         transform: tr.translateX(tr.numeric(dir * containerWidth, 0)),
-        opacity: tr.numeric(0.8, 1)
+        opacity: tr.numeric(0.8, 1),
       }),
       tr.setStyles(oldSlide, {
         transform: tr.scale(tr.numeric(1, 0.98)),
-        opacity: tr.numeric(1, 0.4)
-      })
+        opacity: tr.numeric(1, 0.4),
+      }),
     ]);
   }
 

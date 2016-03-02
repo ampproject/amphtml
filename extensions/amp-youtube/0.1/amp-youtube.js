@@ -39,6 +39,11 @@ class AmpYoutube extends AMP.BaseElement {
   }
 
   /** @override */
+  renderOutsideViewport() {
+    return false;
+  }
+
+  /** @override */
   buildCallback() {
     const width = this.element.getAttribute('width');
     const height = this.element.getAttribute('height');
@@ -122,7 +127,7 @@ class AmpYoutube extends AMP.BaseElement {
     this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify({
       'event': 'command',
       'func': 'pauseVideo',
-      'args': ''
+      'args': '',
     }), '*');
   }
 
@@ -155,7 +160,7 @@ class AmpYoutube extends AMP.BaseElement {
    */
   listenToFrame_() {
     this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify({
-      'event': 'listening'
+      'event': 'listening',
     }), '*');
   }
 
@@ -169,7 +174,7 @@ class AmpYoutube extends AMP.BaseElement {
       'object-fit': 'cover',
       // Hiding the placeholder initially to give the browser time to fix
       // the object-fit: cover.
-      'visibility': 'hidden'
+      'visibility': 'hidden',
     });
 
     // TODO(mkhatib): Maybe add srcset to allow the browser to
@@ -201,7 +206,7 @@ class AmpYoutube extends AMP.BaseElement {
       return loadPromise(imgPlaceholder);
     }).then(() => {
       setStyles(imgPlaceholder, {
-        'visibility': ''
+        'visibility': '',
       });
     });
   }

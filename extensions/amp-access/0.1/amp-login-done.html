@@ -12,6 +12,7 @@
     }
 
     header {
+      margin-bottom: 32px;
       padding: 16px;
       display: -webkit-box;
       display: -webkit-flex;
@@ -58,18 +59,28 @@
       margin: 16px;
     }
 
+    .subsection {
+      margin: 8px 0;
+    }
+
     [lang] {
       display: none;
     }
 
-    .button-section {
+    .error-section {
       display: none;
     }
-    .amp-postback-error .button-section {
+
+    .amp-error .progress-section {
+      display: none;
+    }
+
+    .amp-error[data-error="postback"] .postback-failed-section {
       display: block;
     }
-    .amp-postback-error .progress-section {
-      display: none;
+
+    .amp-error[data-error="close"] .close-failed-section {
+      display: block;
     }
 
     #closeButton {
@@ -78,6 +89,7 @@
       font-weight: 300;
       padding: 8px 0;
       text-decoration: none;
+      text-transform: uppercase;
     }
   </style>
 </head>
@@ -85,10 +97,10 @@
 
   <header>
     <div class="logo">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 105 105">
         <g>
-          <path d="M20,0C9,0,0,9,0,20c0,8.7,5.6,16.2,13.4,18.9l3.9-15.4h-3.6c-1,0-1.4-0.8-0.8-1.8L25.7,0.8C23.9,0.3,22,0,20,0"/>
-          <path d="M26.6,1.1l-3.9,15.4h3.6c1,0,1.4,0.8,0.8,1.8L14.3,39.2C16.1,39.7,18,40,20,40c11,0,20-9,20-20C40,11.3,34.4,3.8,26.6,1.1" />
+          <path d="M48.24645,63.9289875 L29.9397,63.9289875 C29.1627,63.9289875 28.65345,63.1152375 28.9947,62.4169875 L59.211075,0.4249875 C57.00345,0.1441125 54.753825,-0.0002625 52.470075,-0.0002625 C23.789325,0.0181125 0.211575,23.4304875 0.001575,52.1112375 C-0.17955,77.2456125 17.300325,98.3269875 40.77045,103.684612 L48.24645,63.9289875 Z"/>
+          <path d="M65.00865,1.504125 L57.419775,41.853 L75.726525,41.853 C76.503525,41.853 77.012775,42.66675 76.671525,43.365 L46.78065,104.69025 C48.66015,104.892375 50.568525,105 52.500525,105 C81.496275,105 105.000525,81.49575 105.000525,52.5 C105.000525,27.817125 87.964275,7.11375 65.00865,1.504125" />
         </g>
       </svg>
     </div>
@@ -100,22 +112,44 @@
 
   <section class="progress-section">
     <div lang="en">
-      Please wait...
+      Opening page...
     </div>
     <div lang="fr">
       Attendez, s'il vous plaît...
     </div>
   </section>
 
-  <section class="button-section">
-    <a id="closeButton">
+  <section class="error-section postback-failed-section">
+    <div class="subsection postback-failed-message">
       <div lang="en">
-        Click here to continue.
+        Couldn’t open page.
       </div>
-      <div lang="fr">
-        Clique ici pour continuer
+    </div>
+
+    <div class="subsection button-section">
+      <a id="closeButton">
+        <div lang="en">
+          Continue
+        </div>
+        <div lang="fr">
+          Clique ici pour continuer
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <section class="error-section close-failed-section">
+    <div class="subsection close-failed-message">
+      <div lang="en">
+        An error occurred.
       </div>
-    </a>
+    </div>
+
+    <div class="subsection">
+      <div lang="en">
+        Please close this page.
+      </div>
+    </div>
   </section>
 
 </body>

@@ -30,8 +30,10 @@ import {adreactor} from '../ads/adreactor';
 import {adsense} from '../ads/adsense';
 import {adtech} from '../ads/adtech';
 import {plista} from '../ads/plista';
+import {criteo} from '../ads/criteo';
 import {doubleclick} from '../ads/doubleclick';
 import {dotandads} from '../ads/dotandads';
+import {endsWith} from '../src/string';
 import {facebook} from './facebook';
 import {flite} from '../ads/flite';
 import {manageWin} from './environment';
@@ -40,19 +42,21 @@ import {nonSensitiveDataPostMessage, listenParent} from './messaging';
 import {twitter} from './twitter';
 import {yieldmo} from '../ads/yieldmo';
 import {computeInMasterFrame, register, run} from '../src/3p';
-import {parseUrl} from '../src/url';
+import {parseUrl, getSourceUrl} from '../src/url';
 import {assert} from '../src/asserts';
 import {taboola} from '../ads/taboola';
 import {smartadserver} from '../ads/smartadserver';
 import {revcontent} from '../ads/revcontent';
 import {openadstream} from '../ads/openadstream';
+import {triplelift} from '../ads/triplelift';
+import {teads} from '../ads/teads';
 
 /**
  * Whether the embed type may be used with amp-embed tag.
  * @const {!Object<string: boolean>}
  */
 const AMP_EMBED_ALLOWED = {
-  taboola: true
+  taboola: true,
 };
 
 register('a9', a9);
@@ -61,6 +65,7 @@ register('adreactor', adreactor);
 register('adsense', adsense);
 register('adtech', adtech);
 register('plista', plista);
+register('criteo', criteo);
 register('doubleclick', doubleclick);
 register('flite', flite);
 register('taboola', taboola);
@@ -75,6 +80,21 @@ register('smartadserver', smartadserver);
 register('mediaimpact', mediaimpact);
 register('revcontent', revcontent);
 register('openadstream', openadstream);
+register('triplelift', triplelift);
+register('teads', teads);
+
+// For backward compat, we always allow these types without the iframe
+// opting in.
+const defaultAllowedTypesInCustomFrame = [
+  // Entries must be reasonably safe and not allow overriding the injected
+  // JS URL.
+  // Each custom iframe can override this through the second argument to
+  // draw3p. See amp-ad docs.
+  'facebook',
+  'twitter',
+  'doubleclick',
+  '_ping_',
+];
 
 /**
  * Visible for testing.
@@ -138,38 +158,53 @@ function masterSelection(type) {
  *     1. The configuration parameters supplied to this embed.
  *     2. A callback that MUST be called for rendering to proceed. It takes
  *        no arguments. Configuration is expected to be modified in-place.
+ * @param {!Array<string>=} opt_allowed3pTypes List of advertising network
+ *     types you expect.
+ * @param {!Array<string>=} opt_allowedEmbeddingOrigins List of domain suffixes
+ *     that are allowed to embed this frame.
  */
-window.draw3p = function(opt_configCallback) {
-  const data = parseFragment(location.hash);
-  window.context = data._context;
-  window.context.location = parseUrl(data._context.location.href);
-  validateParentOrigin(window, window.context.location);
-  window.context.master = masterSelection(data.type);
-  window.context.isMaster = window.context.master == window;
-  window.context.data = data;
-  window.context.noContentAvailable = triggerNoContentAvailable;
-  window.context.requestResize = triggerResizeRequest;
+window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
+    opt_allowedEmbeddingOrigins) {
+  try {
+    ensureFramed(window);
+    const data = parseFragment(location.hash);
+    window.context = data._context;
+    window.context.location = parseUrl(data._context.location.href);
+    validateParentOrigin(window, window.context.location);
+    validateAllowedTypes(window, data.type, opt_allowed3pTypes);
+    if (opt_allowedEmbeddingOrigins) {
+      validateAllowedEmbeddingOrigins(window, opt_allowedEmbeddingOrigins);
+    }
+    window.context.master = masterSelection(data.type);
+    window.context.isMaster = window.context.master == window;
+    window.context.data = data;
+    window.context.noContentAvailable = triggerNoContentAvailable;
+    window.context.requestResize = triggerResizeRequest;
 
-  if (data.type === 'facebook' || data.type === 'twitter') {
-    // Only make this available to selected embeds until the generic solution is
-    // available.
-    window.context.updateDimensions = triggerDimensions;
+    if (data.type === 'facebook' || data.type === 'twitter') {
+      // Only make this available to selected embeds until the
+      // generic solution is available.
+      window.context.updateDimensions = triggerDimensions;
+    }
+
+    // This only actually works for ads.
+    window.context.observeIntersection = observeIntersection;
+    window.context.onResizeSuccess = onResizeSuccess;
+    window.context.onResizeDenied = onResizeDenied;
+    window.context.reportRenderedEntityIdentifier =
+        reportRenderedEntityIdentifier;
+    window.context.computeInMasterFrame = computeInMasterFrame;
+    delete data._context;
+
+    manageWin(window);
+    installEmbedStateListener();
+    draw3p(window, data, opt_configCallback);
+    updateVisibilityState(window);
+    nonSensitiveDataPostMessage('render-start');
+  } catch (e) {
+    lightweightErrorReport(e);
+    throw e;
   }
-
-  // This only actually works for ads.
-  window.context.observeIntersection = observeIntersection;
-  window.context.onResizeSuccess = onResizeSuccess;
-  window.context.onResizeDenied = onResizeDenied;
-  window.context.reportRenderedEntityIdentifier =
-      reportRenderedEntityIdentifier;
-  window.context.computeInMasterFrame = computeInMasterFrame;
-  delete data._context;
-
-  manageWin(window);
-  installEmbedStateListener();
-  draw3p(window, data, opt_configCallback);
-  updateVisibilityState(window);
-  nonSensitiveDataPostMessage('render-start');
 };
 
 function triggerNoContentAvailable() {
@@ -186,7 +221,7 @@ function triggerDimensions(width, height) {
 function triggerResizeRequest(width, height) {
   nonSensitiveDataPostMessage('embed-size', {
     width: width,
-    height: height
+    height: height,
   });
 }
 
@@ -262,7 +297,7 @@ function reportRenderedEntityIdentifier(entityId) {
   assert(typeof entityId == 'string',
       'entityId should be a string %s', entityId);
   nonSensitiveDataPostMessage('entity-id', {
-    id: entityId
+    id: entityId,
   });
 }
 
@@ -288,6 +323,78 @@ export function validateParentOrigin(window, parentLocation) {
       'Parent origin mismatch: %s, %s',
       ancestors[0], parentLocation.origin);
   parentLocation.originValidated = true;
+}
+
+/**
+ * Check that this iframe intended this particular ad type to run.
+ * @param {!Window} window
+ * @param {string} type 3p type
+ * @param {!Array<string>|undefined} allowedTypes May be undefined.
+ * @visiblefortesting
+ */
+export function validateAllowedTypes(window, type, allowedTypes) {
+  // Everything allowed in default iframe.
+  if (window.location.hostname == '3p.ampproject.net') {
+    return;
+  }
+  if (/^d-\d+\.ampproject\.net$/.test(window.location.hostname)) {
+    return;
+  }
+  if (window.location.hostname == 'ads.localhost') {
+    return;
+  }
+  if (defaultAllowedTypesInCustomFrame.indexOf(type) != -1) {
+    return;
+  }
+  assert(allowedTypes && allowedTypes.indexOf(type) != -1,
+      'Non-whitelisted 3p type for custom iframe: ' + type);
+}
+
+/**
+ * Check that parent host name was whitelisted.
+ * @param {!Window} window
+ * @param {!Array<string>} allowedHostnames Suffixes of allowed host names.
+ * @visiblefortesting
+ */
+export function validateAllowedEmbeddingOrigins(window, allowedHostnames) {
+  if (!window.document.referrer) {
+    throw new Error('Referrer expected: ' + window.location.href);
+  }
+  const ancestors = window.location.ancestorOrigins;
+  // We prefer the unforgable ancestorOrigins, but referrer is better than
+  // nothing.
+  const ancestor = ancestors ? ancestors[0] : window.document.referrer;
+  let hostname = parseUrl(ancestor).hostname;
+  const onDefault = hostname == 'cdn.ampproject.org';
+  if (onDefault) {
+    // If we are on the cache domain, parse the source hostname from
+    // the referrer. The referrer is used because it should be
+    // trustable.
+    hostname = parseUrl(getSourceUrl(window.document.referrer)).hostname;
+  }
+  for (let i = 0; i < allowedHostnames.length; i++) {
+    // Either the hostname is exactly as whitelisted…
+    if (allowedHostnames[i] == hostname) {
+      return;
+    }
+    // Or it ends in .$hostname (aka is a sub domain of the whitelisted domain.
+    if (endsWith(hostname, '.' + allowedHostnames[i])) {
+      return;
+    }
+  }
+  throw new Error('Invalid embedding hostname: ' + hostname + ' not in '
+      + allowedHostnames);
+}
+
+/**
+ * Throws if this window is a top level window.
+ * @param {!Window} window
+ * @visiblefortesting
+ */
+export function ensureFramed(window) {
+  if (window == window.parent) {
+    throw new Error('Must be framed: ' + window.location.href);
+  }
 }
 
 /**
@@ -320,4 +427,20 @@ export function isTagNameAllowed(type, tagName) {
     return !!AMP_EMBED_ALLOWED[type];
   }
   return true;
+}
+
+/**
+ * Reports an error to the server. Must only be called once per page.
+ * Not for use in event handlers.
+ *
+ * We don't use the default error in error.js handler because it has
+ * too many deps for this small JS binary.
+ *
+ * @param {!Error} e
+ */
+function lightweightErrorReport(e) {
+  new Image().src = 'https://amp-error-reporting.appspot.com/r' +
+      '?3p=1&v=' + encodeURIComponent('$internalRuntimeVersion$') +
+      '&m=' + encodeURIComponent(e.message) +
+      '&r=' + encodeURIComponent(document.referrer);
 }

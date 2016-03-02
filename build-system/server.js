@@ -59,6 +59,9 @@ function proxyToAmpProxy(req, res, minify) {
   var url = 'https://cdn.ampproject.org/c' + req.url;
   request(url, function (error, response, body) {
     body = body
+        // Unversion URLs.
+        .replace(/https\:\/\/cdn\.ampproject\.org\/rtv\/\d+\//g,
+            'https://cdn.ampproject.org/')
         // <base> href pointing to the proxy, so that images, etc. still work.
         .replace('<head>', '<head><base href="https://cdn.ampproject.org/">')
         .replace(/(https:\/\/cdn.ampproject.org\/.+?).js/g, '$1.max.js')

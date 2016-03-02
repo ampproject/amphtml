@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-import {createFixtureIframe, pollForLayout, expectBodyToBecomeVisible} from
-    '../../testing/iframe.js';
+import {
+  createFixtureIframe,
+  pollForLayout,
+  expectBodyToBecomeVisible,
+} from '../../testing/iframe.js';
 
 describe('released components: ', function() {
   runTest.call(this, false);

@@ -22,8 +22,8 @@ describe('getCookie', () => {
   function expectCookie(cookiesString, cookieName) {
     return expect(getCookie({
       document: {
-        cookie: cookiesString
-      }
+        cookie: cookiesString,
+      },
     }, cookieName));
   }
 
@@ -74,11 +74,11 @@ describe('getCookie', () => {
         },
         get cookie() {
           return cookie;
-        }
+        },
       };
       setCookie({document: doc, location: {hostname: hostname}},
           'c&1', 'v&1', 1447383159853, {
-            highestAvailableDomain: true
+            highestAvailableDomain: true,
           });
       if (opt_noset) {
         expect(cookie).to.be.undefined;

@@ -120,12 +120,12 @@ describe('SizeList select', () => {
       {mediaQuery: 'media1', size: '444px'},
       {mediaQuery: 'media2', size: '333px'},
       {mediaQuery: 'media3', size: '222px'},
-      {size: '111px'}
+      {size: '111px'},
     ]);
     expect(sizeList.select({
       matchMedia: () => {
         return {};
-      }
+      },
     })).to.equal('111px');
   });
 
@@ -134,7 +134,7 @@ describe('SizeList select', () => {
       {mediaQuery: 'media1', size: '444px'},
       {mediaQuery: 'media2', size: '333px'},
       {mediaQuery: 'media3', size: '222px'},
-      {size: '111px'}
+      {size: '111px'},
     ]);
     expect(sizeList.select({
       matchMedia: mq => {
@@ -142,7 +142,7 @@ describe('SizeList select', () => {
           return {matches: true};
         }
         return {};
-      }
+      },
     })).to.equal('333px');
   });
 
@@ -151,7 +151,7 @@ describe('SizeList select', () => {
       {mediaQuery: 'media1', size: '444px'},
       {mediaQuery: 'media2', size: '333px'},
       {mediaQuery: 'media3', size: '222px'},
-      {size: '111px'}
+      {size: '111px'},
     ]);
     expect(sizeList.select({
       matchMedia: mq => {
@@ -159,7 +159,7 @@ describe('SizeList select', () => {
           return {matches: true};
         }
         return {};
-      }
+      },
     })).to.equal('444px');
   });
 });

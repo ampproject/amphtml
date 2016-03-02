@@ -38,7 +38,7 @@ describe('the framerate service', () => {
     csiOn = true;
     performance = {
       tickDelta: sinon.spy(),
-      flush: sinon.spy()
+      flush: sinon.spy(),
     };
     viewer = {
       isVisible: () => {
@@ -47,12 +47,12 @@ describe('the framerate service', () => {
       isPerformanceTrackingOn() {
         return csiOn;
       },
-      onVisibilityChanged: sinon.spy()
+      onVisibilityChanged: sinon.spy(),
     };
     win = {
       services: {
         performance: {obj: performance},
-        viewer: {obj: viewer}
+        viewer: {obj: viewer},
       },
       requestAnimationFrame: cb => {
         lastRafCallback = cb;
@@ -63,7 +63,7 @@ describe('the framerate service', () => {
           return;
         }
         expect(index).to.equal(call - 1);
-      }
+      },
     };
   });
 

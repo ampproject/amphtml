@@ -20,16 +20,14 @@ import {assert, assertEnumValue} from '../../../src/asserts';
 import {assertHttpsUrl, getSourceOrigin} from '../../../src/url';
 import {cancellation} from '../../../src/error';
 import {cidFor} from '../../../src/cid';
-import {documentStateFor} from '../../../src/document-state';
 import {evaluateAccessExpr} from './access-expr';
 import {getService} from '../../../src/service';
 import {getValueForExpr} from '../../../src/json';
 import {installStyles} from '../../../src/styles';
-import {isExperimentOn} from '../../../src/experiments';
 import {isObject} from '../../../src/types';
 import {listenOnce} from '../../../src/event-helper';
 import {log} from '../../../src/log';
-import {onDocumentReady} from '../../../src/document-state';
+import {onDocumentReady} from '../../../src/document-ready';
 import {openLoginDialog} from './login-dialog';
 import {parseQueryString} from '../../../src/url';
 import {resourcesFor} from '../../../src/resources';
@@ -95,8 +93,7 @@ export class AccessService {
     installStyles(this.win.document, $CSS$, () => {}, false, 'amp-access');
 
     /** @const @private {boolean} */
-    this.isAnalyticsExperimentOn_ = isExperimentOn(
-        this.win, 'amp-access-analytics');
+    this.isAnalyticsExperimentOn_ = true;
 
     const accessElement = document.getElementById('amp-access');
 
@@ -132,9 +129,6 @@ export class AccessService {
 
     /** @private @const {!Viewer} */
     this.viewer_ = viewerFor(this.win);
-
-    /** @private @const {!DocumentState} */
-    this.docState_ = documentStateFor(this.win);
 
     /** @private @const {!Viewport} */
     this.viewport_ = viewportFor(this.win);
@@ -312,7 +306,7 @@ export class AccessService {
   broadcastReauthorize_() {
     this.viewer_.broadcast({
       'type': 'amp-access-reauthorize',
-      'origin': this.pubOrigin_
+      'origin': this.pubOrigin_,
     });
   }
 
@@ -342,7 +336,7 @@ export class AccessService {
     return this.getReaderId_().then(readerId => {
       const vars = {
         'READER_ID': readerId,
-        'ACCESS_READER_ID': readerId  // A synonym.
+        'ACCESS_READER_ID': readerId,  // A synonym.
       };
       if (useAuthData) {
         vars['AUTHDATA'] = field => {
@@ -377,7 +371,7 @@ export class AccessService {
           AUTHORIZATION_TIMEOUT,
           this.xhr_.fetchJson(url, {
             credentials: 'include',
-            requireAmpResponseSourceOrigin: true
+            requireAmpResponseSourceOrigin: true,
           }));
     }).catch(error => {
       this.analyticsEvent_('access-authorization-failed');
@@ -574,7 +568,7 @@ export class AccessService {
    * @private
    */
   scheduleView_() {
-    this.docState_.onReady(() => {
+    onDocumentReady(this.win.document, () => {
       if (this.viewer_.isVisible()) {
         this.reportWhenViewed_();
       }
@@ -666,9 +660,9 @@ export class AccessService {
         credentials: 'include',
         requireAmpResponseSourceOrigin: true,
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
+          'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: ''
+        body: '',
       });
     }).then(() => {
       log.fine(TAG, 'Pingback complete');

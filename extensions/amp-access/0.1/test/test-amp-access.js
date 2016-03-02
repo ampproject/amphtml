@@ -62,7 +62,7 @@ describe('AccessService', () => {
 
   it('should fail if config authorization is missing or malformed', () => {
     const config = {
-      'login': 'https://acme.org/l'
+      'login': 'https://acme.org/l',
     };
     element.textContent = JSON.stringify(config);
     expect(() => {
@@ -79,7 +79,7 @@ describe('AccessService', () => {
   it('should fail if config pingback is missing or malformed', () => {
     const config = {
       'authorization': 'https://acme.com/a',
-      'login': 'https://acme.org/l'
+      'login': 'https://acme.org/l',
     };
     element.textContent = JSON.stringify(config);
     expect(() => {
@@ -96,7 +96,7 @@ describe('AccessService', () => {
   it('should fail if config login is missing or malformed', () => {
     const config = {
       'authorization': 'https://acme.com/a',
-      'pingback': 'https://acme.com/p'
+      'pingback': 'https://acme.com/p',
     };
     element.textContent = JSON.stringify(config);
     expect(() => {
@@ -114,7 +114,7 @@ describe('AccessService', () => {
     const config = {
       'authorization': 'https://acme.com/a',
       'pingback': 'https://acme.com/p',
-      'login': 'https://acme.com/l'
+      'login': 'https://acme.com/l',
     };
     element.textContent = JSON.stringify(config);
     const service = new AccessService(window);
@@ -132,7 +132,7 @@ describe('AccessService', () => {
       'login': {
         'login1': 'https://acme.com/l1',
         'login2': 'https://acme.com/l2',
-      }
+      },
     };
     element.textContent = JSON.stringify(config);
     const service = new AccessService(window);
@@ -147,7 +147,7 @@ describe('AccessService', () => {
     const config = {
       'authorization': 'https://acme.com/a',
       'pingback': 'https://acme.com/p',
-      'login': 'https://acme.com/l'
+      'login': 'https://acme.com/l',
     };
     element.textContent = JSON.stringify(config);
     const service = new AccessService(window);
@@ -159,7 +159,7 @@ describe('AccessService', () => {
       'type': 'client',
       'authorization': 'https://acme.com/a',
       'pingback': 'https://acme.com/p',
-      'login': 'https://acme.com/l'
+      'login': 'https://acme.com/l',
     };
     element.textContent = JSON.stringify(config);
     expect(new AccessService(window).config_.type).to.equal('client');
@@ -178,7 +178,7 @@ describe('AccessService', () => {
       'type': 'unknown',
       'authorization': 'https://acme.com/a',
       'pingback': 'https://acme.com/p',
-      'login': 'https://acme.com/l'
+      'login': 'https://acme.com/l',
     };
     element.textContent = JSON.stringify(config);
     expect(() => {
@@ -190,7 +190,7 @@ describe('AccessService', () => {
     element.textContent = JSON.stringify({
       'authorization': 'https://acme.com/a',
       'pingback': 'https://acme.com/p',
-      'login': 'https://acme.com/l'
+      'login': 'https://acme.com/l',
     });
     const service = new AccessService(window);
     service.startInternal_ = sandbox.spy();
@@ -202,7 +202,7 @@ describe('AccessService', () => {
     element.textContent = JSON.stringify({
       'authorization': 'https://acme.com/a',
       'pingback': 'https://acme.com/p',
-      'login': 'https://acme.com/l'
+      'login': 'https://acme.com/l',
     });
     const service = new AccessService(window);
     service.buildLoginUrls_ = sandbox.spy();
@@ -221,7 +221,7 @@ describe('AccessService', () => {
     element.textContent = JSON.stringify({
       'authorization': 'https://acme.com/a',
       'pingback': 'https://acme.com/p',
-      'login': 'https://acme.com/l'
+      'login': 'https://acme.com/l',
     });
     const service = new AccessService(window);
     expect(service.pubOrigin_).to.exist;
@@ -233,23 +233,11 @@ describe('AccessService', () => {
       'authorization': 'https://acme.com/a',
       'pingback': 'https://acme.com/p',
       'login': 'https://acme.com/l',
-      'authorizationFallbackResponse': {'error': true}
+      'authorizationFallbackResponse': {'error': true},
     });
     const service = new AccessService(window);
     expect(service.config_.authorizationFallbackResponse).to.deep.equal(
         {'error': true});
-  });
-
-  it('should NOT send events by default', () => {
-    element.textContent = JSON.stringify({
-      'authorization': 'https://acme.com/a',
-      'pingback': 'https://acme.com/p',
-      'login': 'https://acme.com/l'
-    });
-    const service = new AccessService(window);
-    service.analyticsPromise_ = {then: sandbox.spy()};
-    service.analyticsEvent_('an-event');
-    expect(service.analyticsPromise_.then.callCount).to.equal(0);
   });
 });
 
@@ -277,7 +265,7 @@ describe('AccessService authorization', () => {
     configElement.textContent = JSON.stringify({
       'authorization': 'https://acme.com/a?rid=READER_ID',
       'pingback': 'https://acme.com/p?rid=READER_ID',
-      'login': 'https://acme.com/l?rid=READER_ID'
+      'login': 'https://acme.com/l?rid=READER_ID',
     });
     document.body.appendChild(configElement);
     document.documentElement.classList.remove('amp-access-error');
@@ -309,17 +297,17 @@ describe('AccessService authorization', () => {
       mutatePromise: callback => {
         callback();
         return Promise.resolve();
-      }
+      },
     };
     xhrMock = sandbox.mock(service.xhr_);
     const cid = {
-      get: () => {}
+      get: () => {},
     };
     cidMock = sandbox.mock(cid);
     service.cid_ = Promise.resolve(cid);
 
     const analytics = {
-      triggerEvent: () => {}
+      triggerEvent: () => {},
     };
     analyticsMock = sandbox.mock(analytics);
     service.analyticsPromise_ = {then: callback => callback(analytics)};
@@ -358,7 +346,7 @@ describe('AccessService authorization', () => {
     xhrMock.expects('fetchJson')
         .withExactArgs('https://acme.com/a?rid=reader1', {
           credentials: 'include',
-          requireAmpResponseSourceOrigin: true
+          requireAmpResponseSourceOrigin: true,
         })
         .returns(Promise.resolve({access: true}))
         .once();
@@ -383,7 +371,7 @@ describe('AccessService authorization', () => {
     xhrMock.expects('fetchJson')
         .withExactArgs('https://acme.com/a?rid=reader1', {
           credentials: 'include',
-          requireAmpResponseSourceOrigin: true
+          requireAmpResponseSourceOrigin: true,
         })
         .returns(Promise.reject('intentional'))
         .once();
@@ -403,7 +391,7 @@ describe('AccessService authorization', () => {
     xhrMock.expects('fetchJson')
         .withExactArgs('https://acme.com/a?rid=reader1', {
           credentials: 'include',
-          requireAmpResponseSourceOrigin: true
+          requireAmpResponseSourceOrigin: true,
         })
         .returns(new Promise(() => {}))
         .once();
@@ -429,7 +417,7 @@ describe('AccessService authorization', () => {
     xhrMock.expects('fetchJson')
         .withExactArgs('https://acme.com/a?rid=reader1', {
           credentials: 'include',
-          requireAmpResponseSourceOrigin: true
+          requireAmpResponseSourceOrigin: true,
         })
         .returns(Promise.reject('intentional'))
         .once();
@@ -451,7 +439,7 @@ describe('AccessService authorization', () => {
     xhrMock.expects('fetchJson')
         .withExactArgs('https://acme.com/a?rid=reader1', {
           credentials: 'include',
-          requireAmpResponseSourceOrigin: true
+          requireAmpResponseSourceOrigin: true,
         })
         .returns(Promise.resolve({access: true}))
         .once();
@@ -469,7 +457,7 @@ describe('AccessService authorization', () => {
     xhrMock.expects('fetchJson')
         .withExactArgs('https://acme.com/a?rid=reader1', {
           credentials: 'include',
-          requireAmpResponseSourceOrigin: true
+          requireAmpResponseSourceOrigin: true,
         })
         .returns(Promise.reject('intentional'))
         .once();
@@ -535,7 +523,7 @@ describe('AccessService applyAuthorizationToElement_', () => {
     configElement.textContent = JSON.stringify({
       'authorization': 'https://acme.com/a?rid=READER_ID',
       'pingback': 'https://acme.com/p?rid=READER_ID',
-      'login': 'https://acme.com/l?rid=READER_ID'
+      'login': 'https://acme.com/l?rid=READER_ID',
     });
     document.body.appendChild(configElement);
     document.documentElement.classList.remove('amp-access-error');
@@ -559,7 +547,7 @@ describe('AccessService applyAuthorizationToElement_', () => {
       mutatePromise: callback => {
         callback();
         return Promise.resolve();
-      }
+      },
     };
     templatesMock = sandbox.mock(service.templates_);
   });
@@ -681,7 +669,7 @@ describe('AccessService pingback', () => {
     configElement.textContent = JSON.stringify({
       'authorization': 'https://acme.com/a?rid=READER_ID',
       'pingback': 'https://acme.com/p?rid=READER_ID&type=AUTHDATA(child.type)',
-      'login': 'https://acme.com/l?rid=READER_ID'
+      'login': 'https://acme.com/l?rid=READER_ID',
     });
     document.body.appendChild(configElement);
     document.documentElement.classList.remove('amp-access-error');
@@ -691,20 +679,20 @@ describe('AccessService pingback', () => {
     xhrMock = sandbox.mock(service.xhr_);
 
     const cid = {
-      get: () => {}
+      get: () => {},
     };
     cidMock = sandbox.mock(cid);
     service.cid_ = Promise.resolve(cid);
 
     const analytics = {
-      triggerEvent: () => {}
+      triggerEvent: () => {},
     };
     analyticsMock = sandbox.mock(analytics);
     service.analyticsPromise_ = {then: callback => callback(analytics)};
     service.isAnalyticsExperimentOn_ = true;
 
     this.docState_ = {
-      onReady: callback => callback()
+      onReady: callback => callback(),
     };
 
     visibilityChanged = new Observable();
@@ -717,7 +705,7 @@ describe('AccessService pingback', () => {
 
     scrolled = new Observable();
     service.viewport_ = {
-      onScroll: callback => scrolled.add(callback)
+      onScroll: callback => scrolled.add(callback),
     };
 
     // Emulate first authorization complete.
@@ -968,7 +956,7 @@ describe('AccessService pingback', () => {
       expect(broadcastStub.callCount).to.equal(1);
       expect(broadcastStub.firstCall.args[0]).to.deep.equal({
         'type': 'amp-access-reauthorize',
-        'origin': service.pubOrigin_
+        'origin': service.pubOrigin_,
       });
     });
   });
@@ -997,7 +985,7 @@ describe('AccessService login', () => {
     configElement.textContent = JSON.stringify({
       'authorization': 'https://acme.com/a?rid=READER_ID',
       'pingback': 'https://acme.com/p?rid=READER_ID',
-      'login': 'https://acme.com/l?rid=READER_ID'
+      'login': 'https://acme.com/l?rid=READER_ID',
     });
     document.body.appendChild(configElement);
     document.documentElement.classList.remove('amp-access-error');
@@ -1005,13 +993,13 @@ describe('AccessService login', () => {
     service = new AccessService(window);
 
     const cid = {
-      get: () => {}
+      get: () => {},
     };
     cidMock = sandbox.mock(cid);
     service.cid_ = Promise.resolve(cid);
 
     const analytics = {
-      triggerEvent: () => {}
+      triggerEvent: () => {},
     };
     analyticsMock = sandbox.mock(analytics);
     service.analyticsPromise_ = {then: callback => callback(analytics)};
@@ -1151,7 +1139,7 @@ describe('AccessService login', () => {
       expect(broadcastStub.callCount).to.equal(1);
       expect(broadcastStub.firstCall.args[0]).to.deep.equal({
         'type': 'amp-access-reauthorize',
-        'origin': service.pubOrigin_
+        'origin': service.pubOrigin_,
       });
     });
   });
@@ -1238,7 +1226,7 @@ describe('AccessService login', () => {
       expect(broadcastStub.callCount).to.equal(1);
       expect(broadcastStub.firstCall.args[0]).to.deep.equal({
         'type': 'amp-access-reauthorize',
-        'origin': service.pubOrigin_
+        'origin': service.pubOrigin_,
       });
     });
   });
@@ -1293,7 +1281,7 @@ describe('AccessService analytics', () => {
     configElement.textContent = JSON.stringify({
       'authorization': 'https://acme.com/a?rid=READER_ID',
       'pingback': 'https://acme.com/p?rid=READER_ID',
-      'login': 'https://acme.com/l?rid=READER_ID'
+      'login': 'https://acme.com/l?rid=READER_ID',
     });
     document.body.appendChild(configElement);
     document.documentElement.classList.remove('amp-access-error');
@@ -1376,11 +1364,11 @@ describe('AccessService type=other', () => {
       mutatePromise: callback => {
         callback();
         return Promise.resolve();
-      }
+      },
     };
     xhrMock = sandbox.mock(service.xhr_);
     const cid = {
-      get: () => {}
+      get: () => {},
     };
     cidMock = sandbox.mock(cid);
     service.cid_ = Promise.resolve(cid);

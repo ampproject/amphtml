@@ -19,7 +19,7 @@ import {Observable} from '../observable';
 import {getService} from '../service';
 import {layoutRectLtwh} from '../layout-rect';
 import {log} from '../log';
-import {onDocumentReady} from '../document-state';
+import {onDocumentReady} from '../document-ready';
 import {platform} from '../platform';
 import {px, setStyle, setStyles} from '../style';
 import {timer} from '../timer';
@@ -126,9 +126,7 @@ export class Viewport {
       if (paddingTop != this.paddingTop_) {
         this.paddingTop_ = paddingTop;
         this.binding_.updatePaddingTop(this.paddingTop_);
-        if (this.fixedLayer_) {
-          this.fixedLayer_.updatePaddingTop(this.paddingTop_);
-        }
+        this.fixedLayer_.updatePaddingTop(this.paddingTop_);
       }
     });
     this.binding_.updateViewerViewport(this.viewer_);
@@ -317,7 +315,7 @@ export class Viewport {
     // and prohibit further default zooming.
     const newValue = updateViewportMetaString(viewportMeta.content, {
       'maximum-scale': '1',
-      'user-scalable': 'no'
+      'user-scalable': 'no',
     });
     return this.setViewportMetaString_(newValue);
   }
@@ -346,27 +344,21 @@ export class Viewport {
    * Hides the fixed layer.
    */
   hideFixedLayer() {
-    if (this.fixedLayer_) {
-      this.fixedLayer_.setVisible(false);
-    }
+    this.fixedLayer_.setVisible(false);
   }
 
   /**
    * Shows the fixed layer.
    */
   showFixedLayer() {
-    if (this.fixedLayer_) {
-      this.fixedLayer_.setVisible(true);
-    }
+    this.fixedLayer_.setVisible(true);
   }
 
   /**
    * Updates the fixed layer.
    */
   updatedFixedLayer() {
-    if (this.fixedLayer_) {
-      this.fixedLayer_.update();
-    }
+    this.fixedLayer_.update();
   }
 
   /**
@@ -374,9 +366,7 @@ export class Viewport {
    * @param {!Element} element
    */
   addToFixedLayer(element) {
-    if (this.fixedLayer_) {
-      this.fixedLayer_.addElement(element);
-    }
+    this.fixedLayer_.addElement(element);
   }
 
   /**
@@ -384,9 +374,7 @@ export class Viewport {
    * @param {!Element} element
    */
   removeFromFixedLayer(element) {
-    if (this.fixedLayer_) {
-      this.fixedLayer_.removeElement(element);
-    }
+    this.fixedLayer_.removeElement(element);
   }
 
   /**
@@ -444,7 +432,7 @@ export class Viewport {
       left: scrollLeft,
       width: size.width,
       height: size.height,
-      velocity: velocity
+      velocity: velocity,
     });
   }
 
@@ -503,13 +491,9 @@ export class Viewport {
     const oldSize = this.size_;
     this.size_ = null;  // Need to recalc.
     const newSize = this.getSize();
-    if (this.fixedLayer_) {
-      this.fixedLayer_.update().then(() => {
-        this.changed_(!oldSize || oldSize.width != newSize.width, 0);
-      });
-    } else {
+    this.fixedLayer_.update().then(() => {
       this.changed_(!oldSize || oldSize.width != newSize.width, 0);
-    }
+    });
   }
 }
 
@@ -812,7 +796,7 @@ export class ViewportBindingNaturalIosEmbed_ {
     // }
     setStyles(documentElement, {
       overflowY: 'auto',
-      webkitOverflowScrolling: 'touch'
+      webkitOverflowScrolling: 'touch',
     });
     setStyles(documentBody, {
       overflowY: 'auto',
@@ -821,7 +805,7 @@ export class ViewportBindingNaturalIosEmbed_ {
       top: 0,
       left: 0,
       right: 0,
-      bottom: 0
+      bottom: 0,
     });
 
     // Insert scrollPos element into DOM. See {@link onScrolled_} for why
@@ -834,7 +818,7 @@ export class ViewportBindingNaturalIosEmbed_ {
       left: 0,
       width: 0,
       height: 0,
-      visibility: 'hidden'
+      visibility: 'hidden',
     });
     documentBody.appendChild(this.scrollPosEl_);
 
@@ -848,7 +832,7 @@ export class ViewportBindingNaturalIosEmbed_ {
       left: 0,
       width: 0,
       height: 0,
-      visibility: 'hidden'
+      visibility: 'hidden',
     });
     documentBody.appendChild(this.scrollMoveEl_);
 
@@ -859,7 +843,7 @@ export class ViewportBindingNaturalIosEmbed_ {
     setStyles(this.endPosEl_, {
       width: 0,
       height: 0,
-      visibility: 'hidden'
+      visibility: 'hidden',
     });
     // TODO(dvoytenko): not only it should be at the bottom at setup time,
     // but it must always be at the bottom. Consider using BODY "childList"
@@ -904,7 +888,7 @@ export class ViewportBindingNaturalIosEmbed_ {
   getSize() {
     return {
       width: this.win./*OK*/innerWidth,
-      height: this.win./*OK*/innerHeight
+      height: this.win./*OK*/innerHeight,
     };
   }
 

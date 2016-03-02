@@ -32,7 +32,7 @@ describe('TapRecognizer', () => {
     sandbox = sinon.sandbox.create();
 
     element = {
-      addEventListener: (unusedEventType, unusedHandler) => {}
+      addEventListener: (unusedEventType, unusedHandler) => {},
     };
 
     gestures = new Gestures(element);
@@ -123,7 +123,7 @@ describe('DoubletapRecognizer', () => {
     sandbox = sinon.sandbox.create();
 
     element = {
-      addEventListener: (unusedEventType, unusedHandler) => {}
+      addEventListener: (unusedEventType, unusedHandler) => {},
     };
 
     gestures = new Gestures(element);
@@ -230,7 +230,7 @@ describe('SwipeXYRecognizer', () => {
     clock = sandbox.useFakeTimers();
 
     element = {
-      addEventListener: (unusedEventType, unusedHandler) => {}
+      addEventListener: (unusedEventType, unusedHandler) => {},
     };
 
     gestures = new Gestures(element);
@@ -417,7 +417,7 @@ describe('TapzoomRecognizer', () => {
     clock = sandbox.useFakeTimers();
 
     element = {
-      addEventListener: (unusedEventType, unusedHandler) => {}
+      addEventListener: (unusedEventType, unusedHandler) => {},
     };
 
     gestures = new Gestures(element);
@@ -598,7 +598,7 @@ describe('PinchRecognizer', () => {
     clock = sandbox.useFakeTimers();
 
     element = {
-      addEventListener: (unusedEventType, unusedHandler) => {}
+      addEventListener: (unusedEventType, unusedHandler) => {},
     };
 
     gestures = new Gestures(element);

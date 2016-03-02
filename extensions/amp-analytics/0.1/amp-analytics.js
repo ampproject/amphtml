@@ -247,8 +247,8 @@ export class AmpAnalytics extends AMP.BaseElement {
     // Initialize config with analytics related vars.
     const config = {
       'vars': {
-        'requestCount': 0
-      }
+        'requestCount': 0,
+      },
     };
     const defaultConfig = this.predefinedConfig_['default'] || {};
     const typeConfig = this.predefinedConfig_[

@@ -28,7 +28,7 @@ describe('3p messaging', () => {
     return createIframePromise(true).then(i => {
       testWin = i.win;
       testWin.context = {
-        location: window.location
+        location: window.location,
       };
       iframe = {
         contentWindow: testWin,
