@@ -15,7 +15,7 @@
  */
 
 import {writeScript, loadScript, checkData} from '../src/3p';
-import {doubleclick} from 'doubleclick';
+//import {doubleclick} from 'doubleclick';
 
 /**
  * @param {!Window} global

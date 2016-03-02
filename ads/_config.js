@@ -80,13 +80,10 @@ export const adPreconnect = {
     'https://cdn.revcontent.com',
     'https://img.revcontent.com',
   ],
-<<<<<<< HEAD
   rubicon: [
     'https://ads.rubiconprojet.com',
     'https://optimized-by.rubiconproject.com',
   ]
-=======
->>>>>>> upstream/master
 };
 
 /**
