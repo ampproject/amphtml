@@ -66,6 +66,10 @@ export const adPreconnect = {
     'https://trends.revcontent.com',
     'https://cdn.revcontent.com',
     'https://img.revcontent.com',
+  ],
+  rubicon: [
+    'https://ads.rubiconprojet.com',
+    'https://optimized-by.rubiconproject.com',
   ]
 };
 
