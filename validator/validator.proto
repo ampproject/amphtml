@@ -338,7 +338,7 @@ message ValidationError {
     DEV_WARNING = 3; // DEPRECATED DO NOT USE.
   }
   optional Severity severity = 6 [ default = ERROR ];
-  // NEXT AVAILABLE TAG: 50
+  // NEXT AVAILABLE TAG: 51
   enum Code {
     UNKNOWN_CODE = 0;
     MANDATORY_TAG_MISSING = 1;
@@ -353,7 +353,8 @@ message ValidationError {
     MANDATORY_ONEOF_ATTR_MISSING = 28;
     DUPLICATE_UNIQUE_TAG = 6;
     WRONG_PARENT_TAG = 7;
-    STYLESHEET_TOO_LONG = 8;
+    STYLESHEET_TOO_LONG_OLD_VARIANT = 8;
+    STYLESHEET_TOO_LONG = 50;
     MANDATORY_CDATA_MISSING_OR_INCORRECT = 9;
     CDATA_VIOLATES_BLACKLIST = 30;
     DEV_MODE_ENABLED = 10;  // Deprecated, remove after 2016-04-01.

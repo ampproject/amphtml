@@ -20,12 +20,12 @@
 # in production from crashing. This id is not relevant to validator.js
 # because thus far, engine (validator.js) and spec file (validator.protoascii)
 # are always released together.
-min_validator_revision_required: 98
+min_validator_revision_required: 99
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 168
+spec_file_revision: 169
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
 #
@@ -3507,9 +3507,14 @@ error_formats {
           "width is specified in '%2' whereas height is specified in '%3'."
 }
 error_formats {
-  code: STYLESHEET_TOO_LONG
+  code: STYLESHEET_TOO_LONG_OLD_VARIANT
   format: "The author stylesheet specified in tag 'style amp-custom' is too "
           "long - we saw %1 bytes whereas the limit is %2 bytes."
+}
+error_formats {
+  code: STYLESHEET_TOO_LONG
+  format: "The author stylesheet specified in tag '%1' is too "
+          "long - we saw %2 bytes whereas the limit is %3 bytes."
 }
 error_formats {
   code: MANDATORY_CDATA_MISSING_OR_INCORRECT
