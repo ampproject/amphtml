@@ -177,8 +177,9 @@ describe('ValidatorCssLengthValidation', () => {
     test.expectedOutput =
         'FAIL\n' +
         'feature_tests/css_length.html:28:2 The author stylesheet specified ' +
-        'in tag \'style\' is too long - we saw 50001 bytes whereas the ' +
-        'limit is 50000 bytes. (see https://github.com/ampproject/amphtml/' +
+        'in tag \'style amp-custom\' is too long - we saw 50001 bytes ' +
+        'whereas the limit is 50000 bytes. ' +
+        '(see https://github.com/ampproject/amphtml/' +
         'blob/master/spec/amp-html-format.md#maximum-size) ' +
         '[AUTHOR_STYLESHEET_PROBLEM]';
     test.run();
@@ -194,8 +195,9 @@ describe('ValidatorCssLengthValidation', () => {
     test.expectedOutput =
         'FAIL\n' +
         'feature_tests/css_length.html:28:2 The author stylesheet specified ' +
-        'in tag \'style\' is too long - we saw 50002 bytes whereas the limit ' +
-        'is 50000 bytes. (see https://github.com/ampproject/amphtml/blob/' +
+        'in tag \'style amp-custom\' is too long - we saw 50002 bytes ' +
+        'whereas the limit is 50000 bytes. ' +
+        '(see https://github.com/ampproject/amphtml/blob/' +
         'master/spec/amp-html-format.md#maximum-size) ' +
         '[AUTHOR_STYLESHEET_PROBLEM]';
     test.run();

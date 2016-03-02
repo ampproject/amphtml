@@ -25,7 +25,7 @@ min_validator_revision_required: 95
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 161
+spec_file_revision: 162
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
 #
@@ -467,7 +467,7 @@ tags: {  # Special custom 'author' spreadsheet.
   name: "style"
   mandatory_parent: "head"
   unique: true
-  detail: "author stylesheet"
+  detail: "style amp-custom"
   attrs: {
     name: "amp-custom"
     value: ""
@@ -3472,8 +3472,8 @@ error_formats {
 }
 error_formats {
   code: STYLESHEET_TOO_LONG
-  format: "The author stylesheet specified in tag 'style' is too long - "
-          "we saw %1 bytes whereas the limit is %2 bytes."
+  format: "The author stylesheet specified in tag 'style amp-custom' is too "
+          "long - we saw %1 bytes whereas the limit is %2 bytes."
 }
 error_formats {
   code: MANDATORY_CDATA_MISSING_OR_INCORRECT
