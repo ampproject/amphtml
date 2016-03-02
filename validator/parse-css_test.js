@@ -676,8 +676,8 @@ describe('parseAStylesheet', () => {
   // The tests below are exploratory - they tell us what the css parser
   // currently produces for these selectors. For a list of selectors, see
   // http://www.w3.org/TR/css3-selectors/#selectors.
-  //
-  // TODO(johannes): Get complete coverage.
+  // Note also that css-selectors.js contains a parser for selectors
+  // which is covered in this unittest below.
 
   it('handles simple selector example', () => {
     assertJSONEquals(
@@ -717,6 +717,119 @@ describe('parseAStylesheet', () => {
           {'line': 1, 'col': 12, 'tokenType': 'EOF_TOKEN'}
         ],
         parseSelectorForTest('E[foo="bar"]'));
+  });
+});
+
+describe('extractUrls', () => {
+
+  // Tests that font urls are parsed with font-face atRuleScope.
+  it('finds font in font-face', () => {
+    const css =
+        "@font-face {font-family: 'Foo'; src: url('http://foo.com/bar.ttf');}";
+    const errors = [];
+    const tokenList = parse_css.tokenize(css, 1, 0, errors);
+    const sheet = parse_css.parseAStylesheet(
+        tokenList, ampAtRuleParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
+        errors);
+    const parsedUrls = [];
+    parse_css.extractUrls(sheet, parsedUrls, errors);
+    assertJSONEquals([], errors);
+    assertJSONEquals(
+        [{'line': 1, 'col': 37, 'tokenType': 'PARSED_CSS_URL', 'atRuleScope':
+          'font-face', 'utf8Url': 'http://foo.com/bar.ttf'}], parsedUrls);
+  });
+
+  // Tests that image URLs are parsed with empty atRuleScope; also tests
+  // that unicode escapes (in this case \000026) within the URL are decoded.
+  it('supports image url with unicode', () => {
+    const css =
+        "body{background-image: url('http://a.com/b/c=d\\000026e=f_g*h');}";
+    const errors = [];
+    const tokenList = parse_css.tokenize(css, 1, 0, errors);
+    const sheet = parse_css.parseAStylesheet(
+        tokenList, ampAtRuleParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
+        errors);
+    const parsedUrls = [];
+    parse_css.extractUrls(sheet, parsedUrls, errors);
+    assertJSONEquals([], errors);
+    assertJSONEquals(
+        [{'line': 1, 'col': 23, 'tokenType': 'PARSED_CSS_URL', 'atRuleScope':
+          '', 'utf8Url': 'http://a.com/b/c=d&e=f_g*h'}], parsedUrls);
+  });
+
+  // This example contains both image urls, other urls (fonts) and
+  // segments in between.
+  it('handles longer example', () => {
+    const css =
+      ".a { color:red; background-image:url(4.png) }" +
+      ".b { color:black; background-image:url('http://a.com/b.png') } " +
+      "@font-face {font-family: 'Medium';src: url('http://a.com/1.woff') " +
+      "format('woff'),url('http://b.com/1.ttf') format('truetype')," +
+      "src:url('') format('embedded-opentype');}";
+    const errors = [];
+    const tokenList = parse_css.tokenize(css, 1, 0, errors);
+    const sheet = parse_css.parseAStylesheet(
+        tokenList, ampAtRuleParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
+        errors);
+    const parsedUrls = [];
+    parse_css.extractUrls(sheet, parsedUrls, errors);
+    assertJSONEquals([], errors);
+    assertJSONEquals(
+        [{'line': 1, 'col': 33, 'tokenType': 'PARSED_CSS_URL', 'atRuleScope':
+          '', 'utf8Url': '4.png'},
+         {'line': 1, 'col': 80, 'tokenType': 'PARSED_CSS_URL', 'atRuleScope':
+          '', 'utf8Url': 'http://a.com/b.png'},
+         {'line': 1, 'col': 147, 'tokenType': 'PARSED_CSS_URL', 'atRuleScope':
+          'font-face', 'utf8Url': 'http://a.com/1.woff'},
+         {'line': 1, 'col': 189, 'tokenType': 'PARSED_CSS_URL', 'atRuleScope':
+          'font-face', 'utf8Url': 'http://b.com/1.ttf'},
+         {'line': 1, 'col': 238, 'tokenType': 'PARSED_CSS_URL', 'atRuleScope':
+          'font-face', 'utf8Url': ''}], parsedUrls);
+  });
+
+  // Windows newlines present extra challenges for position information.
+  it('handles windows newlines', () => {
+    const css =
+        ".a \r\n{ color:red; background-image:url(4.png) }\r\n" +
+        ".b { color:black; \r\nbackground-image:url('http://a.com/b.png') }";
+    const errors = [];
+    const tokenList = parse_css.tokenize(css, 1, 0, errors);
+    const sheet = parse_css.parseAStylesheet(
+        tokenList, ampAtRuleParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
+        errors);
+    const parsedUrls = [];
+    parse_css.extractUrls(sheet, parsedUrls, errors);
+    assertJSONEquals([], errors);
+    assertJSONEquals(
+        [{'line': 2, 'col': 30, 'tokenType': 'PARSED_CSS_URL', 'atRuleScope':
+          '', 'utf8Url': '4.png'},
+         {'line': 4, 'col': 17, 'tokenType': 'PARSED_CSS_URL', 'atRuleScope':
+          '', 'utf8Url': 'http://a.com/b.png'}], parsedUrls);
+  });
+
+  // This example parses as CSS without errors, however once the URL
+  // with parameters is extracted, we recognize that the arguments to
+  // the url function are invalid.
+  it('invalid arguments inside url function yields error', () => {
+    const css =
+        "\n" +
+        "    @font-face {\n" +
+        "      font-family: 'Roboto', sans-serif;\n" +
+        "      src: url('<link href='https://fonts.googleapis.com/css" +
+        "?family=Roboto:300,400,500,700' " +
+        "rel='stylesheet' type='text/css'>');\n" +
+        "    }\n";
+    const errors = [];
+    const tokenList = parse_css.tokenize(css, 1, 0, errors);
+    const sheet = parse_css.parseAStylesheet(
+        tokenList, ampAtRuleParsingSpec, parse_css.BlockType.PARSE_AS_IGNORE,
+        errors);
+    const parsedUrls = [];
+    parse_css.extractUrls(sheet, parsedUrls, errors);
+    assertJSONEquals(
+        [{'line': 4, 'col': 11, 'tokenType': 'ERROR',
+          'code': 'CSS_SYNTAX_BAD_URL', 'params': ['style']}], errors);
+    assertJSONEquals([], parsedUrls);
   });
 });
 
