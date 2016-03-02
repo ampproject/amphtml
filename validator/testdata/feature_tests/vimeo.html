@@ -36,7 +36,10 @@
 <amp-vimeo data-videoid="27246366" width="500" height="281"></amp-vimeo>
 
 <!-- valid -->
-<amp-vimeo data-videoid="27246366" width="500" height="281"layout="responsive"></amp-vimeo>
+<amp-vimeo data-videoid="27246366" width="500" height="281" layout="responsive" noloading></amp-vimeo>
+
+<!-- valid -->
+<amp-vimeo data-videoid="27246366" width="500" height="281" layout="responsive" noloading="noloading"></amp-vimeo>
 
 <!-- invalid videoid -->
 <amp-vimeo data-videoid="i don't think so" width="500" height="281" layout="responsive"></amp-vimeo>
@@ -44,7 +47,7 @@
 <!-- videoid missing -->
 <amp-vimeo width="500" height="281" layout="responsive"></amp-vimeo>
 
-<!-- noloading must not have a value -->
-<amp-vimeo width="500" height="281" layout="responsive" noloading="noloading"></amp-vimeo>
+<!-- noloading must not have a value other than "" or noloading-->
+<amp-vimeo width="500" height="281" layout="responsive" noloading="foo"></amp-vimeo>
 </body>
 </html>

@@ -20,12 +20,12 @@
 # in production from crashing. This id is not relevant to validator.js
 # because thus far, engine (validator.js) and spec file (validator.protoascii)
 # are always released together.
-min_validator_revision_required: 99
+min_validator_revision_required: 100
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 169
+spec_file_revision: 170
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
 #
@@ -3278,7 +3278,7 @@ tags: {
   attrs: {
     name: "autoplay"
     # ^$| prefix intended. empty string is valid.
-    value_regex: "^$|desktop|tablet|mobile"
+    value_regex: "^$|desktop|tablet|mobile|autoplay"
   }
   attrs: { name: "loop"  value: "" }
   attrs: { name: "muted" value: "" }

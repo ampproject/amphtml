@@ -980,12 +980,15 @@ class ParsedAttrSpec {
     // open-source version uses).
     // begin oneof {
     if (this.spec_.value !== null) {
-      if (attrValue != this.spec_.value) {
-        context.addError(
-            amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
-            /* params */ [attrName, getDetailOrName(tagSpec), attrValue],
-            tagSpec.specUrl, result);
-      }
+      if (attrValue == this.spec_.value) { return; }
+      // Allow spec's with value: "" to also be equal to their attribute
+      // name (e.g. script's spec: async has value: "" so both
+      // async and async="async" is okay in a script tag).
+      if ((this.spec_.value == "") && (attrValue == attrName)) { return; }
+      context.addError(
+          amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
+          /* params */ [attrName, getDetailOrName(tagSpec), attrValue],
+          tagSpec.specUrl, result);
     } else if (this.spec_.valueRegex !== null) {
       const valueRegex =
           new RegExp('^(' + this.spec_.valueRegex + ')$');
