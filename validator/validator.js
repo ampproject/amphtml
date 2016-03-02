@@ -2524,21 +2524,21 @@ amp.validator.categorizeError = function(error) {
     }
     return amp.validator.ErrorCategory.Code.DISALLOWED_HTML;
   }
-  // E.g. "The text (CDATA) inside tag 'author stylesheet' matches
+  // E.g. "The text (CDATA) inside tag 'style amp-custom' matches
   // 'CSS !important', which is disallowed."
   if (error.code === amp.validator.ValidationError.Code.STYLESHEET_TOO_LONG ||
       (error.code ===
       amp.validator.ValidationError.Code.CDATA_VIOLATES_BLACKLIST
-      && error.params[0] === "author stylesheet")) {
+      && error.params[0] === "style amp-custom")) {
     return amp.validator.ErrorCategory.Code.AUTHOR_STYLESHEET_PROBLEM;
   }
-  // E.g. "CSS syntax error in tag 'author stylesheet' - Invalid Declaration."
+  // E.g. "CSS syntax error in tag 'style amp-custom' - Invalid Declaration."
   // TODO(powdercloud): Legacy generic css error code. Remove after 2016-06-01.
   if (error.code === amp.validator.ValidationError.Code.CSS_SYNTAX &&
-      error.params[0] === "author stylesheet") {
+      error.params[0] === "style amp-custom") {
     return amp.validator.ErrorCategory.Code.AUTHOR_STYLESHEET_PROBLEM;
   }
-  // E.g. "CSS syntax error in tag 'author stylesheet' - unterminated string."
+  // E.g. "CSS syntax error in tag 'style amp-custom' - unterminated string."
   if ((error.code ===
       amp.validator.ValidationError.Code.CSS_SYNTAX_STRAY_TRAILING_BACKSLASH ||
       error.code ===
@@ -2565,7 +2565,7 @@ amp.validator.categorizeError = function(error) {
       error.code ===
       amp.validator.ValidationError.Code.
       CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR) &&
-      error.params[0] === "author stylesheet") {
+      error.params[0] === "style amp-custom") {
     return amp.validator.ErrorCategory.Code.AUTHOR_STYLESHEET_PROBLEM;
   }
   // E.g. "The mandatory tag 'boilerplate (noscript)' is missing or
