@@ -1,2 +1,2 @@
 FAIL
-feature_tests/new_and_old_boilerplate_mixed.html:34:7 The tag 'boilerplate (noscript)' is missing or incorrect, but required by 'boilerplate (js enabled)'. (see https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#boilerplate) [GENERIC]
+feature_tests/new_and_old_boilerplate_mixed.html:34:7 The tag 'boilerplate (noscript)' is missing or incorrect, but required by 'boilerplate (js enabled)'. (see https://www.ampproject.org/docs/reference/spec.html#required-markup) [GENERIC]
