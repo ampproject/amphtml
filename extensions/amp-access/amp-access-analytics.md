@@ -16,11 +16,6 @@ limitations under the License.
 
 # <a name="amp-access-analytics"></a>AMP Access and Analytics
 
-Experiment: "amp-access-analytics" should be enabled via https://cdn.ampproject.org/experiments.html or
-`AMP.toggleExperiment('amp-access-analytics')`. See [Experiments Guide](../../tools/experiments/README.md).
-
-An integration with *amp-analytics* is under development and can be tracked on [Issue #1556](https://github.com/ampproject/amphtml/issues/1556). This document will be updated when more details on the integration are available.
-
 ## Access analytics triggers
 
 Access service issues events for major states in the access flow. These events can be reported via an analytics package using triggers.
