@@ -25,7 +25,7 @@ min_validator_revision_required: 98
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 167
+spec_file_revision: 168
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
 #
@@ -109,9 +109,9 @@ tags: {
     value_regex: "("
         "accessibility|"
         "alternate|"
+        "appendix|"
         "archives?|"
         "attachment|"
-        "appendix|"
         "author|"
         "bibliography|"
         "category|"
@@ -143,7 +143,6 @@ tags: {
         "license|"
         "made|"
         "map|"
-        "mask-icon|"
         "me|"
         "meta|"
         "micropub|"
@@ -192,9 +191,9 @@ tags: {
       ")( +("
         "accessibility|"
         "alternate|"
+        "appendix|"
         "archives?|"
         "attachment|"
-        "appendix|"
         "author|"
         "bibliography|"
         "category|"
@@ -226,7 +225,6 @@ tags: {
         "license|"
         "made|"
         "map|"
-        "mask-icon|"
         "me|"
         "meta|"
         "micropub|"
@@ -318,6 +316,28 @@ tags: {
     mandatory: true
   }
   attrs: { name: "hreflang" }
+}
+# Safari pinned tab icon
+# https://developer.apple.com/library/ios/documentation/AppleApplications/Reference/SafariWebContent/pinnedTabs/pinnedTabs.html
+tags: {
+  name: "link"
+  detail: "link rel=mask-icon"
+  mandatory_parent: "head"
+  attrs: {
+    name: "rel"
+    value: "mask-icon"
+    mandatory: true
+    dispatch_key: true
+  }
+  attrs: {
+    name: "href"
+    mandatory: true
+    value_url: {
+      allow_relative: false
+      allowed_protocol: "https"
+    }
+  }
+  attrs: { name: "color" }
 }
 # Whitelisted font providers
 tags: {
@@ -766,15 +786,11 @@ tags: {
     # TODO(gregable): Come up with a better scheme for this.
     value_regex: "("
         "accessibility|"
-        "attachment|"  # Commonly used by wordpress
-        "author|"
         "alternate|"
         "appendix|"
-        "alternate|"
         "archived|"
         "archives?|"
         "attachment|"
-        "appendix|"
         "author|"
         "bookmark|"
         "bibliography|"
@@ -859,15 +875,11 @@ tags: {
         "yandex-tableau-widget"
       ")( +("
         "accessibility|"
-        "attachment|"  # Commonly used by wordpress
-        "author|"
         "alternate|"
         "appendix|"
-        "alternate|"
         "archived|"
         "archives?|"
         "attachment|"
-        "appendix|"
         "author|"
         "bookmark|"
         "bibliography|"
