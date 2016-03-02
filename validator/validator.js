@@ -1692,9 +1692,13 @@ class ParsedTagSpec {
     // However, mostly to avoid confusion, we want to make sure that
     // nobody tries to make a Mustache template data attribute,
     // e.g. <div data-{{foo}}>, so we also exclude those characters.
+    // We also don't allow slashes as they can be parsed differently by
+    // different clients.
     if (goog.string./*OK*/startsWith(attrName, 'data-') &&
         !goog.string.contains(attrName, '}') &&
-        !goog.string.contains(attrName, '{')) {
+        !goog.string.contains(attrName, '{') &&
+        !goog.string.contains(attrName, '/') &&
+        !goog.string.contains(attrName, '\\')) {
       return;
     }
 
