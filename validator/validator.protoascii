@@ -25,7 +25,7 @@ min_validator_revision_required: 95
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 165
+spec_file_revision: 166
 # Rules for AMP HTML
 # (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
 #
@@ -2497,7 +2497,7 @@ tags: {  # amp-vimeo
   name: "script"
   mandatory_parent: "head"
   detail: "amp-vimeo extension .js script"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-vimeo/amp-vimeo.md"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-vimeo.html"
   attrs: {
     name: "custom-element"
     value: "amp-vimeo"
@@ -2521,7 +2521,7 @@ tags: {  # amp-dailymotion
   name: "script"
   mandatory_parent: "head"
   detail: "amp-dailymotion extension .js script"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-dailymotion/amp-dailymotion.md"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-dailymotion.html"
   attrs: {
     name: "custom-element"
     value: "amp-dailymotion"
@@ -2545,7 +2545,7 @@ tags: {  # amp-soundcloud
   name: "script"
   mandatory_parent: "head"
   detail: "amp-soundcloud extension .js script"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-soundcloud/amp-soundcloud.md"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-soundcloud.html"
   attrs: {
     name: "custom-element"
     value: "amp-soundcloud"
@@ -3030,7 +3030,7 @@ tags: {
   name: "amp-vimeo"
   disallowed_ancestor: "head"
   attr_lists: "extended-amp-global"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-vimeo/amp-vimeo.md"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-vimeo.html"
   also_requires: "amp-vimeo extension .js script"
   attrs: {
     name: "data-videoid"
@@ -3049,7 +3049,7 @@ tags: {
   name: "amp-dailymotion"
   disallowed_ancestor: "head"
   attr_lists: "extended-amp-global"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-dailymotion/amp-dailymotion.md"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-dailymotion.html"
   also_requires: "amp-dailymotion extension .js script"
   attrs: {
     name: "data-videoid"
@@ -3075,7 +3075,7 @@ tags: {
   name: "amp-soundcloud"
   disallowed_ancestor: "head"
   attr_lists: "extended-amp-global"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-soundcloud/amp-soundcloud.md"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-soundcloud.html"
   also_requires: "amp-soundcloud extension .js script"
   attrs: {
     name: "data-trackid"
