@@ -144,73 +144,75 @@ function specificity(code) {
       return 14;
     case amp.validator.ValidationError.Code.DUPLICATE_UNIQUE_TAG:
       return 15;
-    case amp.validator.ValidationError.Code.STYLESHEET_TOO_LONG:
+    case amp.validator.ValidationError.Code.STYLESHEET_TOO_LONG_OLD_VARIANT:
       return 16;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX:
+    case amp.validator.ValidationError.Code.STYLESHEET_TOO_LONG:
       return 17;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_AT_RULE:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX:
       return 18;
-    case amp.validator.ValidationError.Code.
-        MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_AT_RULE:
       return 19;
     case amp.validator.ValidationError.Code.
-        INVALID_PROPERTY_VALUE_IN_ATTR_VALUE:
+        MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE:
       return 20;
-    case amp.validator.ValidationError.Code.DISALLOWED_PROPERTY_IN_ATTR_VALUE:
+    case amp.validator.ValidationError.Code.
+        INVALID_PROPERTY_VALUE_IN_ATTR_VALUE:
       return 21;
-    case amp.validator.ValidationError.Code.MUTUALLY_EXCLUSIVE_ATTRS:
+    case amp.validator.ValidationError.Code.DISALLOWED_PROPERTY_IN_ATTR_VALUE:
       return 22;
-    case amp.validator.ValidationError.Code.UNESCAPED_TEMPLATE_IN_ATTR_VALUE:
+    case amp.validator.ValidationError.Code.MUTUALLY_EXCLUSIVE_ATTRS:
       return 23;
-    case amp.validator.ValidationError.Code.TEMPLATE_PARTIAL_IN_ATTR_VALUE:
+    case amp.validator.ValidationError.Code.UNESCAPED_TEMPLATE_IN_ATTR_VALUE:
       return 24;
-    case amp.validator.ValidationError.Code.TEMPLATE_IN_ATTR_NAME:
+    case amp.validator.ValidationError.Code.TEMPLATE_PARTIAL_IN_ATTR_VALUE:
       return 25;
+    case amp.validator.ValidationError.Code.TEMPLATE_IN_ATTR_NAME:
+      return 26;
     case amp.validator.ValidationError.Code.
         INCONSISTENT_UNITS_FOR_WIDTH_AND_HEIGHT:
-      return 26;
-    case amp.validator.ValidationError.Code.IMPLIED_LAYOUT_INVALID:
       return 27;
-    case amp.validator.ValidationError.Code.SPECIFIED_LAYOUT_INVALID:
+    case amp.validator.ValidationError.Code.IMPLIED_LAYOUT_INVALID:
       return 28;
-    case amp.validator.ValidationError.Code.DEV_MODE_ENABLED:
+    case amp.validator.ValidationError.Code.SPECIFIED_LAYOUT_INVALID:
       return 29;
-    case amp.validator.ValidationError.Code.ATTR_DISALLOWED_BY_IMPLIED_LAYOUT:
+    case amp.validator.ValidationError.Code.DEV_MODE_ENABLED:
       return 30;
-    case amp.validator.ValidationError.Code.ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT:
+    case amp.validator.ValidationError.Code.ATTR_DISALLOWED_BY_IMPLIED_LAYOUT:
       return 31;
-    case amp.validator.ValidationError.Code.DISALLOWED_RELATIVE_URL:
+    case amp.validator.ValidationError.Code.ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT:
       return 32;
-    case amp.validator.ValidationError.Code.MISSING_URL:
+    case amp.validator.ValidationError.Code.DISALLOWED_RELATIVE_URL:
       return 33;
-    case amp.validator.ValidationError.Code.INVALID_URL_PROTOCOL:
+    case amp.validator.ValidationError.Code.MISSING_URL:
       return 34;
-    case amp.validator.ValidationError.Code.INVALID_URL:
+    case amp.validator.ValidationError.Code.INVALID_URL_PROTOCOL:
       return 35;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_STRAY_TRAILING_BACKSLASH:
+    case amp.validator.ValidationError.Code.INVALID_URL:
       return 36;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_COMMENT:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_STRAY_TRAILING_BACKSLASH:
       return 37;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_STRING:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_COMMENT:
       return 38;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_BAD_URL:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_STRING:
       return 39;
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_BAD_URL:
+      return 40;
     case amp.validator.ValidationError.Code
         .CSS_SYNTAX_EOF_IN_PRELUDE_OF_QUALIFIED_RULE:
-      return 40;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_DECLARATION:
       return 41;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_INCOMPLETE_DECLARATION:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_DECLARATION:
       return 42;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_ERROR_IN_PSEUDO_SELECTOR:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_INCOMPLETE_DECLARATION:
       return 43;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_MISSING_SELECTOR:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_ERROR_IN_PSEUDO_SELECTOR:
       return 44;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_NOT_A_SELECTOR_START:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_MISSING_SELECTOR:
       return 45;
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_NOT_A_SELECTOR_START:
+      return 46;
     case amp.validator.ValidationError.Code.
         CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR:
-      return 46;
+      return 47;
 
     case amp.validator.ValidationError.Code.DEPRECATED_ATTR:
       return 101;
@@ -595,7 +597,8 @@ class CdataMatcher {
       const bytes = byteLength(cdata);
       if (bytes > cdataSpec.maxBytes) {
         context.addError(amp.validator.ValidationError.Code.STYLESHEET_TOO_LONG,
-                         /* params */ [bytes, cdataSpec.maxBytes],
+                         /* params */ [getDetailOrName(this.tagSpec_),
+                                       bytes, cdataSpec.maxBytes],
                          cdataSpec.maxBytesSpecUrl, validationResult);
         // We return early if the byte length is violated as parsing
         // really long stylesheets is slow and not worth our time.
