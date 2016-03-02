@@ -19,6 +19,10 @@ import * as dom from '../../src/dom';
 
 describe('DOM', () => {
 
+  afterEach(() => {
+    dom.setScopeSelectorSupportedForTesting(undefined);
+  });
+
   it('should remove all children', () => {
     const element = document.createElement('div');
     element.appendChild(document.createElement('div'));
@@ -113,7 +117,7 @@ describe('DOM', () => {
         .to.be.null;
   });
 
-  it('childElementByTag should find first match', () => {
+  function testChildElementByTag() {
     const parent = document.createElement('parent');
 
     const element1 = document.createElement('element1');
@@ -122,12 +126,23 @@ describe('DOM', () => {
     const element2 = document.createElement('element2');
     parent.appendChild(element2);
 
+    const element3 = document.createElement('element3');
+    element1.appendChild(element3);
+
     expect(dom.childElementByTag(parent, 'element1')).to.equal(element1);
     expect(dom.childElementByTag(parent, 'element2')).to.equal(element2);
     expect(dom.childElementByTag(parent, 'element3')).to.be.null;
+    expect(dom.childElementByTag(parent, 'element4')).to.be.null;
+  }
+
+  it('childElementByTag should find first match', testChildElementByTag);
+
+  it('childElementByTag should find first match (polyfill)', () => {
+    dom.setScopeSelectorSupportedForTesting(false);
+    testChildElementByTag();
   });
 
-  it('childElementByAttr should find first match', () => {
+  function testChildElementByAttr() {
     const parent = document.createElement('parent');
 
     const element1 = document.createElement('element1');
@@ -140,13 +155,22 @@ describe('DOM', () => {
     element2.setAttribute('attr12', '2');
     parent.appendChild(element2);
 
+    const element3 = document.createElement('element2');
+    element3.setAttribute('on-child', '');
+    element2.appendChild(element3);
+
     expect(dom.childElementByAttr(parent, 'attr1')).to.equal(element1);
     expect(dom.childElementByAttr(parent, 'attr2')).to.equal(element2);
     expect(dom.childElementByAttr(parent, 'attr12')).to.equal(element1);
-    expect(dom.childElementByAttr(parent, 'attr12', '1')).to.equal(element1);
-    expect(dom.childElementByAttr(parent, 'attr12', '2')).to.equal(element2);
-    expect(dom.childElementByAttr(parent, 'attr12', '3')).to.be.null;
     expect(dom.childElementByAttr(parent, 'attr3')).to.be.null;
+    expect(dom.childElementByAttr(parent, 'on-child')).to.be.null;
+  }
+
+  it('childElementByAttr should find first match', testChildElementByAttr);
+
+  it('childElementByAttr should find first match', () => {
+    dom.setScopeSelectorSupportedForTesting(false);
+    testChildElementByAttr();
   });
 
   describe('contains', () => {
