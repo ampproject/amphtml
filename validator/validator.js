@@ -1780,11 +1780,6 @@ class ParsedTagSpec {
       const attrName = attrKey.toLowerCase();
       let attrValue = encounteredAttrs[i + 1];
 
-      // Our html parser repeats the key as the value if there is no value. We
-      // replace the value with an empty string instead in this case.
-      if (attrKey === attrValue)
-      attrValue = '';
-
       const parsedSpec = this.attrsByName_.get(attrName);
       if (parsedSpec === undefined) {
         this.validateAttrNotFoundInSpec(context, attrName, result);

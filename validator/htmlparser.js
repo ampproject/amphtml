@@ -196,10 +196,10 @@ amp.htmlparser.HtmlParser = class {
         if (m[1]) { // Attribute.
           // SetAttribute with uppercase names doesn't work on IE6.
           const attribName = amp.htmlparser.toLowerCase(m[1]);
-          // Use name as value for valueless attribs, so
+          // Use empty string as value for valueless attribs, so
           //   <input type=checkbox checked>
-          // gets attributes ['type', 'checkbox', 'checked', 'checked']
-          let decodedValue = attribName;
+          // gets attributes ['type', 'checkbox', 'checked', '']
+          let decodedValue = "";
           if (m[2]) {
             let encodedValue = m[3];
             switch (encodedValue.charCodeAt(0)) {  // Strip quotes.
