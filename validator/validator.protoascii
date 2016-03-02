@@ -25,7 +25,7 @@ min_validator_revision_required: 100
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 171
+spec_file_revision: 172
 # Rules for AMP HTML
 # (https://www.ampproject.org/docs/reference/spec.html)
 #
@@ -3645,7 +3645,7 @@ error_formats {
 }
 error_formats {
   code: ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT
-  format: "The attribute '%1' in tag '%2' is disallowed by implied layout '%3'."
+  format: "The attribute '%1' in tag '%2' is disallowed by specified layout '%3'."
 }
 
 # CSS Errors. All of these use %1 for the tag name (in practice 'style'
@@ -3656,7 +3656,7 @@ error_formats {
 }
 error_formats {
   code: CSS_SYNTAX_INVALID_AT_RULE
-  format: "CSS syntax error in tag '%1' - saw invalid at rule '%2'."
+  format: "CSS syntax error in tag '%1' - saw invalid at rule '@%2'."
 }
 error_formats {
   code: CSS_SYNTAX_STRAY_TRAILING_BACKSLASH
