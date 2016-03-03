@@ -92,9 +92,6 @@ export class AccessService {
     this.win = win;
     installStyles(this.win.document, $CSS$, () => {}, false, 'amp-access');
 
-    /** @const @private {boolean} */
-    this.isAnalyticsExperimentOn_ = true;
-
     const accessElement = document.getElementById('amp-access');
 
     /** @const @private {boolean} */
@@ -252,11 +249,9 @@ export class AccessService {
    * @private
    */
   analyticsEvent_(eventType) {
-    if (this.isAnalyticsExperimentOn_) {
-      this.analyticsPromise_.then(analytics => {
-        analytics.triggerEvent(eventType);
-      });
-    }
+    this.analyticsPromise_.then(analytics => {
+      analytics.triggerEvent(eventType);
+    });
   }
 
   /**
@@ -418,9 +413,6 @@ export class AccessService {
    * @return {?Promise<string>}
    */
   getAccessReaderId() {
-    if (!this.isAnalyticsExperimentOn_) {
-      return null;
-    }
     if (!this.enabled_) {
       return null;
     }
@@ -437,9 +429,6 @@ export class AccessService {
    * @return {*|null}
    */
   getAuthdataField(field) {
-    if (!this.isAnalyticsExperimentOn_) {
-      return null;
-    }
     if (!this.enabled_ || !this.authResponse_) {
       return null;
     }
