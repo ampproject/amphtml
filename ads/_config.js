@@ -34,6 +34,7 @@ export const adPrefetch = {
   yieldmo: 'https://static.yieldmo.com/ym.amp1.js',
   revcontent: 'https://labs-cdn.revcontent.com/build/amphtml/revcontent.amp.min.js',
   teads: 'https://cdn.teads.tv/media/format/v3/teads-format.min.js',
+  adman: 'http://192.168.10.46/adman-js/amp/adman.js',
 };
 
 /**
