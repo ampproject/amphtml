@@ -26,7 +26,8 @@ export function doubleclick(global, data) {
   checkData(data, [
     'slot', 'targeting', 'categoryExclusions',
     'tagForChildDirectedTreatment', 'cookieOptions',
-    'overrideWidth', 'overrideHeight',
+    'overrideWidth', 'overrideHeight', 'loadingStrategy',
+    'consentNotificationId',
   ]);
 
   const dice = Math.random();
