@@ -58,6 +58,19 @@ export function installAd(win) {
         return false;
       }
 
+      // Ad opts into lazier loading strategy where we only load ads that are
+      // at closer than 1.25 viewports away.
+      if (this.element.getAttribute('data-loading-strategy') ==
+          'prefer-viewability-over-views') {
+        const box = this.getIntersectionElementLayoutBox();
+        const viewportBox = this.getViewport().getRect();
+        const distanceFromViewport = box.top - viewportBox.bottom;
+        if (distanceFromViewport <= 1.25 * (viewportBox.height)) {
+          return true;
+        }
+        return false;
+      }
+
       // Otherwise the ad is good to go.
       return true;
     }
@@ -174,7 +187,10 @@ export function installAd(win) {
     /**
      * @override
      */
-    getInsersectionElementLayoutBox() {
+    getIntersectionElementLayoutBox() {
+      if (!this.iframe_) {
+        return super.getIntersectionElementLayoutBox();
+      }
       if (!this.iframeLayoutBox_) {
         this.measureIframeLayoutBox_();
       }

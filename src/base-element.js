@@ -484,7 +484,7 @@ export class BaseElement {
   * Returns a previously measured layout box of the element.
   * @return {!LayoutRect}
   */
-  getInsersectionElementLayoutBox() {
+  getIntersectionElementLayoutBox() {
     return this.resources_.getResourceForElement(this.element).getLayoutBox();
   }
 
