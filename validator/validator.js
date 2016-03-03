@@ -654,7 +654,7 @@ class CdataMatcher {
           computeAtRuleDefaultParsingSpec(atRuleParsingSpec), cssErrors);
 
       // We extract the urls from the stylesheet. As a side-effect, this can
-      // generate errors for url(...) functions with invalid parameters.
+      // generate errors for url(…) functions with invalid parameters.
       /** @type {!Array<!parse_css.ParsedCssUrl>} */
       const parsedUrls = [];
       parse_css.extractUrls(sheet, parsedUrls, cssErrors);
