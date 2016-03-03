@@ -239,18 +239,6 @@ describe('AccessService', () => {
     expect(service.config_.authorizationFallbackResponse).to.deep.equal(
         {'error': true});
   });
-
-  it('should NOT send events by default', () => {
-    element.textContent = JSON.stringify({
-      'authorization': 'https://acme.com/a',
-      'pingback': 'https://acme.com/p',
-      'login': 'https://acme.com/l',
-    });
-    const service = new AccessService(window);
-    service.analyticsPromise_ = {then: sandbox.spy()};
-    service.analyticsEvent_('an-event');
-    expect(service.analyticsPromise_.then.callCount).to.equal(0);
-  });
 });
 
 

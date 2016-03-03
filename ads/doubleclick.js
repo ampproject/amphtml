@@ -29,19 +29,21 @@ export function doubleclick(global, data) {
     'overrideWidth', 'overrideHeight',
   ]);
 
+  const dice = Math.random();
   if (global.context.location.href.indexOf('google_glade=1') > 0 ||
-      Math.random() < experimentFraction) {
+      dice < experimentFraction) {
     doubleClickWithGlade(global, data);
   } else {
-    doubleClickWithGpt(global, data);
+    doubleClickWithGpt(global, data, dice < 2 * experimentFraction);
   }
 }
 
 /**
  * @param {!Window} global
  * @param {!Object} data
+ * @param {boolean} isGladeControl
  */
-function doubleClickWithGpt(global, data) {
+function doubleClickWithGpt(global, data, isGladeControl) {
   const dimensions = [[
     parseInt(data.overrideWidth || data.width, 10),
     parseInt(data.overrideHeight || data.height, 10),
@@ -62,7 +64,10 @@ function doubleClickWithGpt(global, data) {
       const slot = googletag.defineSlot(data.slot, dimensions, 'c')
           .addService(pubads);
 
-      pubads.enableSingleRequest();
+      if (isGladeControl) {
+        pubads.markAsGladeControl();
+      }
+
       pubads.markAsAmp();
       pubads.set('page_url', global.context.canonicalUrl);
       pubads.setCorrelator(Number(getCorrelator(global)));
@@ -114,8 +119,8 @@ function doubleClickWithGpt(global, data) {
  * @param {!Object} data
  */
 function doubleClickWithGlade(global, data) {
-  const height = parseInt(data.overrideHeight || data.height, 10);
-  const width = parseInt(data.overrideWidth || data.width, 10);
+  const requestHeight = parseInt(data.overrideHeight || data.height, 10);
+  const requestWidth = parseInt(data.overrideWidth || data.width, 10);
 
   const jsonParameters = {};
   if (data.categoryExclusions) {
@@ -140,8 +145,16 @@ function doubleClickWithGlade(global, data) {
     slot.setAttribute('data-json', JSON.stringify(jsonParameters));
   }
   slot.setAttribute('data-page-url', global.context.canonicalUrl);
-  slot.setAttribute('height', height);
-  slot.setAttribute('width', width);
+
+  // Size setup.
+  // The ad container should simply fill the amp-ad iframe, but we still
+  // need to request a specific size from the ad server.
+  // The ad container size will be relative to the amp-iframe, so if the
+  // latter changes the ad container will match it.
+  slot.setAttribute('width', 'fill');
+  slot.setAttribute('height', 'fill');
+  slot.setAttribute('data-request-height', requestHeight);
+  slot.setAttribute('data-request-width', requestWidth);
 
   window.glade = {correlator: getCorrelator(global)};
   loadScript(global, 'https://securepubads.g.doubleclick.net/static/glade.js');
