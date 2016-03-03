@@ -145,11 +145,14 @@ export class AccessService {
     /** @private {?JSONObject} */
     this.authResponse_ = null;
 
-    /** @private {!Promise} */
+    /** @const @private {!Promise} */
     this.firstAuthorizationPromise_ = new Promise(resolve => {
       /** @private {!Promise} */
       this.firstAuthorizationResolver_ = resolve;
     });
+
+    /** @private {!Promise} */
+    this.lastAuthorizationPromise_ = this.firstAuthorizationPromise_;
 
     /** @private {?Promise} */
     this.reportViewPromise_ = null;
@@ -281,7 +284,7 @@ export class AccessService {
     this.runAuthorization_();
 
     // Wait for the "view" signal.
-    this.scheduleView_();
+    this.scheduleView_(VIEW_TIMEOUT);
 
     // Listen to amp-access broadcasts from other pages.
     this.listenToBroadcasts_();
@@ -346,10 +349,14 @@ export class AccessService {
   }
 
   /**
+   * Returns the promise that resolves when all authorization work has
+   * completed, including authorization endpoint call and UI update.
+   * Note that this promise never fails.
+   * @param {boolean=} opt_disableFallback
    * @return {!Promise}
    * @private
    */
-  runAuthorization_() {
+  runAuthorization_(opt_disableFallback) {
     if (this.config_.type == AccessType.OTHER) {
       log.fine(TAG, 'Ignore authorization due to type=other');
       this.firstAuthorizationResolver_();
@@ -358,9 +365,9 @@ export class AccessService {
 
     log.fine(TAG, 'Start authorization via ', this.config_.authorization);
     this.toggleTopClass_('amp-access-loading', true);
-    const promise = this.buildUrl_(
+    const urlPromise = this.buildUrl_(
         this.config_.authorization, /* useAuthData */ false);
-    return promise.then(url => {
+    const promise = urlPromise.then(url => {
       log.fine(TAG, 'Authorization URL: ', url);
       return this.timer_.timeoutPromise(
           AUTHORIZATION_TIMEOUT,
@@ -370,7 +377,7 @@ export class AccessService {
           }));
     }).catch(error => {
       this.analyticsEvent_('access-authorization-failed');
-      if (this.config_.authorizationFallbackResponse) {
+      if (this.config_.authorizationFallbackResponse && !opt_disableFallback) {
         // Use fallback.
         setTimeout(() => {throw error;});
         return this.config_.authorizationFallbackResponse;
@@ -394,6 +401,10 @@ export class AccessService {
       this.toggleTopClass_('amp-access-loading', false);
       this.toggleTopClass_('amp-access-error', true);
     });
+    // The "first" promise must always succeed first.
+    this.lastAuthorizationPromise_ = Promise.all(
+        [this.firstAuthorizationPromise_, promise]);
+    return promise;
   }
 
   /**
@@ -420,21 +431,26 @@ export class AccessService {
   }
 
   /**
-   * Returns the field from the authorization response. If the authorization
-   * response have not been received yet, the result will be `null`.
+   * Returns the promise that will yield the value of the specified field from
+   * the authorization response. This method will wait for the most recent
+   * authorization request to complete.
    *
    * This is a restricted API.
    *
    * @param {string} field
-   * @return {*|null}
+   * @return {?Promise<*|null>}
    */
   getAuthdataField(field) {
-    if (!this.enabled_ || !this.authResponse_) {
+    if (!this.enabled_) {
       return null;
     }
-    return getValueForExpr(this.authResponse_, field) || null;
+    return this.lastAuthorizationPromise_.then(() => {
+      if (!this.authResponse_) {
+        return null;
+      }
+      return getValueForExpr(this.authResponse_, field) || null;
+    });
   }
-
 
   /**
    * @return {!Promise} Returns a promise for the initial authorization.
@@ -554,44 +570,48 @@ export class AccessService {
   }
 
   /**
+   * @param {time} timeToView
    * @private
    */
-  scheduleView_() {
+  scheduleView_(timeToView) {
     onDocumentReady(this.win.document, () => {
       if (this.viewer_.isVisible()) {
-        this.reportWhenViewed_();
+        this.reportWhenViewed_(timeToView);
       }
       this.viewer_.onVisibilityChanged(() => {
         if (this.viewer_.isVisible()) {
-          this.reportWhenViewed_();
+          this.reportWhenViewed_(timeToView);
         }
       });
     });
   }
 
   /**
+   * @param {time} timeToView
    * @return {!Promise}
    * @private
    */
-  reportWhenViewed_() {
+  reportWhenViewed_(timeToView) {
     if (this.reportViewPromise_) {
       return this.reportViewPromise_;
     }
     log.fine(TAG, 'start view monitoring');
-    this.reportViewPromise_ = this.whenViewed_()
+    this.reportViewPromise_ = this.whenViewed_(timeToView)
         .then(() => {
-          this.analyticsEvent_('access-viewed');
-          // Wait for the first authorization flow to complete.
-          return this.firstAuthorizationPromise_;
+          // Wait for the most recent authorization flow to complete.
+          return this.lastAuthorizationPromise_;
         })
-        .then(
-            this.reportViewToServer_.bind(this),
-            reason => {
-              // Ignore - view has been canceled.
-              log.fine(TAG, 'view cancelled:', reason);
-              this.reportViewPromise_ = null;
-              throw reason;
-            });
+        .then(() => {
+          // Report the analytics event.
+          this.analyticsEvent_('access-viewed');
+          return this.reportViewToServer_();
+        })
+        .catch(reason => {
+          // Ignore - view has been canceled.
+          log.fine(TAG, 'view cancelled:', reason);
+          this.reportViewPromise_ = null;
+          throw reason;
+        });
     this.reportViewPromise_.then(this.broadcastReauthorize_.bind(this));
     return this.reportViewPromise_;
   }
@@ -599,10 +619,18 @@ export class AccessService {
   /**
    * The promise will be resolved when a view of this document has occurred. It
    * will be rejected if the current impression should not be counted as a view.
+   * @param {time} timeToView Pass the value of 0 when this method is called
+   *   as the result of the user action.
    * @return {!Promise}
    * @private
    */
-  whenViewed_() {
+  whenViewed_(timeToView) {
+    if (timeToView == 0) {
+      // Immediate view has been registered. This will happen when this method
+      // is called as the result of the user action.
+      return Promise.resolve();
+    }
+
     // Viewing kick off: document is visible.
     const unlistenSet = [];
     return new Promise((resolve, reject) => {
@@ -614,7 +642,7 @@ export class AccessService {
       }));
 
       // 2. After a few seconds: register a view.
-      const timeoutId = this.timer_.delay(resolve, VIEW_TIMEOUT);
+      const timeoutId = this.timer_.delay(resolve, timeToView);
       unlistenSet.push(() => this.timer_.cancel(timeoutId));
 
       // 3. If scrolled: register a view.
@@ -731,8 +759,12 @@ export class AccessService {
       if (success) {
         this.loginAnalyticsEvent_(type, 'success');
         this.broadcastReauthorize_();
-        // Repeat the authorization flow.
-        return this.runAuthorization_();
+        // Repeat the authorization and pingback flows. Pingback is repeated
+        // in this case since this is now a new "view" with a different access
+        // profile.
+        return this.runAuthorization_(/* disableFallback */ true).then(() => {
+          this.scheduleView_(/* timeToView */ 0);
+        });
       } else {
         this.loginAnalyticsEvent_(type, 'rejected');
       }
