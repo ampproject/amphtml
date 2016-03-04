@@ -247,6 +247,24 @@ For instance:
 <amp-pixel src="https://foo.com/pixel?colorDepth=SCREEN_COLOR_DEPTH"></amp-pixel>
 ```
 
+### VIEWPORT_HEIGHT
+
+Provides the viewport height in pixels available for the page rendering. In contrast to `AVAILABLE_SCREEN_HEIGHT`, this value takes window size and zooming into account.
+
+For instance:
+```html
+<amp-pixel src="https://foo.com/pixel?viewportHeight=VIEWPORT_HEIGHT"></amp-pixel>
+```
+
+### VIEWPORT_WIDTH
+
+Provides the viewport width in pixels available for the page rendering. In contrast to `AVAILABLE_SCREEN_WIDTH`, this value takes window size and zooming into account.
+
+For instance:
+```html
+<amp-pixel src="https://foo.com/pixel?viewportWidth=VIEWPORT_WIDTH"></amp-pixel>
+```
+
 ## Miscellaneous
 
 ### CLIENT_ID
