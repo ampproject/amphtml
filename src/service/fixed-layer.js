@@ -238,7 +238,7 @@ export class FixedLayer {
           }
         });
       },
-    }).catch(error => {
+    }, {}).catch(error => {
       // Fail silently.
       setTimeout(() => {throw error;});
     });
