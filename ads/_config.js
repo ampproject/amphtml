@@ -87,7 +87,7 @@ export const adPreconnect = {
   rubicon: [
     'https://ads.rubiconprojet.com',
     'https://optimized-by.rubiconproject.com',
-  ]
+  ],
 };
 
 /**

@@ -15,7 +15,8 @@
  */
 
 import {writeScript, loadScript, checkData} from '../src/3p';
-//import {doubleclick} from 'doubleclick';
+//import {nonSensitiveDataPostMessage, listenParent} from '../3p/messaging.js';
+//import {doubleclick} from './doubleclick.js';
 
 /**
  * @param {!Window} global
@@ -45,26 +46,28 @@ export function rubicon(global, data) {
 function fastLane(global, data) {
   const dimensions = [[
     parseInt(data.overrideWidth || data.width, 10),
-    parseInt(data.overrideHeight || data.height, 10)
+    parseInt(data.overrideHeight || data.height, 10),
   ]];
 
-  var gptran = false;
-  var gptrun = function() {
-      if (gptran) {
-          return;
-      }
-      gptran = true;
+  let gptran = false;
+  function gptrun() {
+    if (gptran) {
+      return;
+    }
+    gptran = true;
 
-      data.targeting['rpfl_'+data.account] = rubicontag.getSlot('c').getAdServerTargeting();
-      data.targeting.rplf_elemid = 'c';
-      doubleclick(global, data);
+    data.targeting['rpfl_' + data.account] =
+      rubicontag.getSlot('c').getAdServerTargeting();
+
+    data.targeting['rpfl_elemid'] = 'c';
+    doubleclick(global, data);
   };
 
-  loadScript(global, 'https://ads.rubiconproject.com/header/'+ data.account +'.js', () => {
+  loadScript(global, 'https://ads.rubiconproject.com/header/' + data.account + '.js', () => {
     global.rubicontag.cmd.push(() => {
       const rubicontag = global.rubicontag;
       const slot = rubicontag.defineSlot(data.slot, dimensions, 'c');
-      
+
       slot.setPosition(data.pos);
 
 /**
@@ -81,7 +84,7 @@ function fastLane(global, data) {
       rubicontag.setFPI(data.inventory);
 
       rubicontag.run(gptrun, 1000);
-      
+
     });
   });
 }
@@ -91,14 +94,14 @@ function fastLane(global, data) {
  * @param {!Object} data
  */
 function smartTag(global, data) {
-  global.rp_account   = data.account;
-  global.rp_site      = data.site;
-  global.rp_zonesize  = data.zone +'-'+ data.size;
-  global.rp_adtype    = data.type;
-  global.rp_kw        = data.kw;
-  global.rp_visitor   = data.visitor;
+  global.rp_account = data.account;
+  global.rp_site = data.site;
+  global.rp_zonesize = data.zone + '-' + data.size;
+  global.rp_adtype = data.type;
+  global.rp_kw = data.kw;
+  global.rp_visitor = data.visitor;
   global.rp_inventory = data.inventory;
-  global.rp_callback  = data.callback;
-  writeScript(global, 'https://ads.rubiconproject.com/ad/'+ data.account +'.js');
+  global.rp_callback = data.callback;
+  writeScript(global, 'https://ads.rubiconproject.com/ad/' + data.account + '.js');
 }
 
