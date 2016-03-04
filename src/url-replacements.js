@@ -280,9 +280,7 @@ class UrlReplacements {
     this.set_('AUTHDATA', field => {
       assert(field, 'The first argument to AUTHDATA, the field, is required');
       return this.getAccessValue_(accessService => {
-        return accessService.whenFirstAuthorized().then(() => {
-          return accessService.getAuthdataField(field);
-        });
+        return accessService.getAuthdataField(field);
       }, 'AUTHDATA');
     });
 

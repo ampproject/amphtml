@@ -542,7 +542,6 @@ describe('UrlReplacements', () => {
       accessService = {
         getAccessReaderId: () => {},
         getAuthdataField: () => {},
-        whenFirstAuthorized: () => {},
       };
       accessServiceMock = sandbox.mock(accessService);
       reportDevSpy = sandbox.spy();
@@ -583,12 +582,9 @@ describe('UrlReplacements', () => {
     });
 
     it('should replace AUTHDATA', () => {
-      accessServiceMock.expects('whenFirstAuthorized')
-          .returns(Promise.resolve())
-          .once();
       accessServiceMock.expects('getAuthdataField')
           .withExactArgs('field1')
-          .returns('value1')
+          .returns(Promise.resolve('value1'))
           .once();
       return expand('?a=AUTHDATA(field1)').then(res => {
         expect(res).to.match(/a=value1/);
