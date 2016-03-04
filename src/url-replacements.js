@@ -201,6 +201,18 @@ class UrlReplacements {
       return this.win_.screen.colorDepth;
     });
 
+    // Returns the viewport height.
+    this.set_('VIEWPORT_HEIGHT', () => {
+      return vsyncFor(this.win_).measurePromise(
+        () => viewportFor(this.win_).getSize().height);
+    });
+
+    // Returns the viewport width.
+    this.set_('VIEWPORT_WIDTH', () => {
+      return vsyncFor(this.win_).measurePromise(
+        () => viewportFor(this.win_).getSize().width);
+    });
+
     // Returns document characterset.
     this.set_('DOCUMENT_CHARSET', () => {
       const doc = this.win_.document;

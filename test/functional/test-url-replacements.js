@@ -206,6 +206,18 @@ describe('UrlReplacements', () => {
     });
   });
 
+  it('should replace VIEWPORT_WIDTH', () => {
+    return expand('?vw=VIEWPORT_WIDTH').then(res => {
+      expect(res).to.match(/vw=\d+/);
+    });
+  });
+
+  it('should replace VIEWPORT_HEIGHT', () => {
+    return expand('?vh=VIEWPORT_HEIGHT').then(res => {
+      expect(res).to.match(/vh=\d+/);
+    });
+  });
+
   it('should replace PAGE_LOAD_TIME', () => {
     return expand('?sh=PAGE_LOAD_TIME').then(res => {
       expect(res).to.match(/sh=\d+/);
