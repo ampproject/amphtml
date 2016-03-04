@@ -17,7 +17,9 @@
 
 import {getMode} from './mode';
 import {exponentialBackoff} from './exponential-backoff';
+// TODO(dvoytenko, #2527): Remove ASSERT_SENTINEL and isAssertErrorMessage.
 import {ASSERT_SENTINEL, isAssertErrorMessage} from './asserts';
+import {USER_ERROR_SENTINEL, isUserErrorMessage} from './log';
 import {makeBodyVisible} from './styles';
 
 const globalExponentialBackoff = exponentialBackoff(1.5);
@@ -147,8 +149,11 @@ export function getErrorReportUrl(message, filename, line, col, error) {
   // for analyzing production issues.
   let url = 'https://amp-error-reporting.appspot.com/r' +
       '?v=' + encodeURIComponent('$internalRuntimeVersion$') +
-      '&m=' + encodeURIComponent(message.replace(ASSERT_SENTINEL, '')) +
-      '&a=' + (isAssertErrorMessage(message) ? 1 : 0);
+      '&m=' + encodeURIComponent(
+          message.replace(ASSERT_SENTINEL, '')
+              .replace(USER_ERROR_SENTINEL, '')) +
+      '&a=' + (isAssertErrorMessage(message) ||
+          isUserErrorMessage(message) ? 1 : 0);
   if (window.context && window.context.location) {
     url += '&3p=1';
   }

@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
+// TODO(dvoytenko, #2527): Remove this module.
+
 
 // Triple zero width space.
 // This is added to assert error messages, so that we can later identify
 // them, when the only thing that we have is the message. This is the
 // case in many browsers when the global exception handler is invoked.
+// @deprecated DO NOT USE. Replaced with USER_ERROR_SENTINEL.
 export const ASSERT_SENTINEL = '\u200B\u200B\u200B';
 
 /**
@@ -39,6 +42,7 @@ export const ASSERT_SENTINEL = '\u200B\u200B\u200B';
  * @param {...*} var_args Arguments substituted into %s in the message.
  * @return {T} The value of shouldBeTrueish.
  * @template T
+ * @deprecated DO NOT USE. Replaced with user.assert.
  */
 /*eslint "google-camelcase/google-camelcase": 0*/
 export function assert(shouldBeTrueish, message, var_args) {
@@ -79,6 +83,7 @@ export function assert(shouldBeTrueish, message, var_args) {
  * @param {string=} opt_enumName
  * @return T
  * @template T
+ * @deprecated DO NOT USE. Replaced with user.assert.
  */
 export function assertEnumValue(enumObj, s, opt_enumName) {
   for (const k in enumObj) {
@@ -96,6 +101,7 @@ export function assertEnumValue(enumObj, s, opt_enumName) {
  * error'.
  * @param {string} message
  * @return {!Error}
+ * @deprecated DO NOT USE. Replaced with user.error.
  */
 export function userError(message) {
   return new Error(message + ASSERT_SENTINEL);
@@ -103,6 +109,7 @@ export function userError(message) {
 
 /**
  * @return {boolean} Whether this message was created from an assert.
+ * @deprecated DO NOT USE. Replaced with isUserErrorMessage.
  */
 export function isAssertErrorMessage(message) {
   return message.indexOf(ASSERT_SENTINEL) >= 0;
