@@ -59,6 +59,22 @@ export function parseUrl(url) {
 }
 
 /**
+ * Appends the string just before the fragment part of the URL.
+ * @param {string} url
+ * @param {string} paramString
+ * @return {string}
+ */
+function appendParamStringToUrl(url, paramString) {
+  if (!paramString) {
+    return url;
+  }
+  const parts = url.split('#', 2);
+  let newUrl = parts[0] + (
+      parts[0].indexOf('?') >= 0 ? `&${paramString}` : `?${paramString}`);
+  newUrl += parts[1] ? `#${parts[1]}` : '';
+  return newUrl;
+}
+/**
  * Appends a query string field and value to a url. `key` and `value`
  * will be ran through `encodeURIComponent` before appending.
  * @param {string} url
@@ -67,12 +83,8 @@ export function parseUrl(url) {
  * @return {string}
  */
 export function addParamToUrl(url, key, value) {
-  // TODO(erwinm, #1376) improve perf possibly by just doing a string
-  // scan instead of having to create an element for the parsing.
-  const urlObj = parseUrl(url);
   const field = `${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
-  const search = urlObj.search ? `${urlObj.search}&${field}` : `?${field}`;
-  return urlObj.origin + urlObj.pathname + search + urlObj.hash;
+  return appendParamStringToUrl(url, field);
 }
 
 /**
@@ -83,9 +95,12 @@ export function addParamToUrl(url, key, value) {
  * @return {string}
  */
 export function addParamsToUrl(url, params) {
-  return Object.keys(params).reduce((url, key) => {
-    return addParamToUrl(url, key, params[key]);
-  }, url);
+  const paramsString = Object.keys(params)
+      .reduce((paramsString, key) => {
+        return paramsString +
+            `&${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`;
+      }, '');
+  return appendParamStringToUrl(url, paramsString.substring(1));
 }
 
 /**

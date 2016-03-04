@@ -300,22 +300,34 @@ describe('addParamToUrl', () => {
     url = addParamToUrl(url, 'foo', 'b ar');
     expect(url).to.equal('https://www.ampproject.org/get/here?foo=b%20ar#hash-value');
   });
+
+  it('should keep host and path intact', () => {
+    url = addParamToUrl('https://${host}/${path}', 'foo', 'bar');
+    expect(url).to.equal('https://${host}/${path}?foo=bar');
+  });
 });
 
 describe('addParamsToUrl', () => {
   let url;
+  const params = {
+    hello: 'world',
+    foo: 'bar',
+  };
 
   beforeEach(() => {
     url = 'https://www.ampproject.org/get/here#hash-value';
   });
 
   it('should loop over the keys and values correctly', () => {
-    url = addParamsToUrl(url, {
-      hello: 'world',
-      foo: 'bar',
-    });
+    url = addParamsToUrl(url, params);
 
     expect(url).to.equal('https://www.ampproject.org/get/here?hello=world&foo=bar#hash-value');
+  });
+
+  it('should keep host and path intact', () => {
+    url = addParamsToUrl('https://${host}/${path}#hash-value', params);
+
+    expect(url).to.equal('https://${host}/${path}?hello=world&foo=bar#hash-value');
   });
 });
 
