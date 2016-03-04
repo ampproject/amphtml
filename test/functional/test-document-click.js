@@ -29,13 +29,13 @@ describe('test-document-click onDocumentElementClick_', () => {
   let preventDefaultSpy;
   let scrollIntoViewSpy;
   let querySelectorSpy;
-  let replaceStateSpy;
+  let replaceLocSpy;
   let viewport;
 
   beforeEach(() => {
     preventDefaultSpy = sinon.spy();
     scrollIntoViewSpy = sinon.spy();
-    replaceStateSpy = sinon.spy();
+    replaceLocSpy = sinon.spy();
     elem = {};
     getElementByIdSpy = sinon.stub();
     querySelectorSpy = sinon.stub();
@@ -47,9 +47,7 @@ describe('test-document-click onDocumentElementClick_', () => {
       defaultView: {
         location: {
           href: 'https://www.google.com/some-path?hello=world#link',
-        },
-        history: {
-          replaceState: replaceStateSpy,
+          replace: replaceLocSpy,
         },
       },
     };
@@ -174,8 +172,8 @@ describe('test-document-click onDocumentElementClick_', () => {
       onDocumentElementClick_(evt, viewport);
       expect(getElementByIdSpy.callCount).to.equal(1);
       expect(scrollIntoViewSpy.callCount).to.equal(0);
-      expect(replaceStateSpy.callCount).to.equal(1);
-      expect(replaceStateSpy.args[0][2]).to.equal('#test');
+      expect(replaceLocSpy.callCount).to.equal(1);
+      expect(replaceLocSpy.args[0][0]).to.equal('#test');
     });
 
     it('should call scrollIntoView if element with id is found', () => {
@@ -184,8 +182,8 @@ describe('test-document-click onDocumentElementClick_', () => {
       expect(scrollIntoViewSpy.callCount).to.equal(0);
       onDocumentElementClick_(evt, viewport);
       expect(scrollIntoViewSpy.callCount).to.equal(1);
-      expect(replaceStateSpy.callCount).to.equal(1);
-      expect(replaceStateSpy.args[0][2]).to.equal('#test');
+      expect(replaceLocSpy.callCount).to.equal(1);
+      expect(replaceLocSpy.args[0][0]).to.equal('#test');
     });
 
     it('should call scrollIntoView if element with name is found', () => {
@@ -195,8 +193,8 @@ describe('test-document-click onDocumentElementClick_', () => {
       expect(scrollIntoViewSpy.callCount).to.equal(0);
       onDocumentElementClick_(evt, viewport);
       expect(scrollIntoViewSpy.callCount).to.equal(1);
-      expect(replaceStateSpy.callCount).to.equal(1);
-      expect(replaceStateSpy.args[0][2]).to.equal('#test');
+      expect(replaceLocSpy.callCount).to.equal(1);
+      expect(replaceLocSpy.args[0][0]).to.equal('#test');
     });
   });
 

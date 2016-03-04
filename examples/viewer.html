@@ -279,6 +279,12 @@
 
       this.iframe.style.display = '';
       this.iframe.style.visibility = '';
+
+      this.iframe.contentWindow.onbeforeunload = (function() {
+        this.container.style.paddingTop = '120px';
+        this.container.textContent =
+            'Unload of the AMP iframe is not allowed!';
+      }).bind(this);
     };
 
 
