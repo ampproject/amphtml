@@ -22,14 +22,36 @@ import {
 
 describe('Rendering of one ad', () => {
   let fixture;
+  let beforeHref;
+
+  function replaceUrl(win) {
+    // TODO(#2402) Support glade as well.
+    const path = '/test/fixtures/doubleclick.html?google_glade=0';
+    try {
+      win.location.hash = 'google_glade=0';
+      win.history.replaceState(null, null, path);
+    } catch (e) {
+      // Browsers are weird. Firefox gets here. We do, however, also in
+      // firefox pass down the parent URL. So we change that, which we
+      // can. We just need to change it back after the test.
+      beforeHref = win.parent.location.href;
+      win.parent.history.replaceState(null, null, path);
+    }
+  }
+
   beforeEach(() => {
+    replaceParentHref = false;
     return createFixtureIframe('test/fixtures/doubleclick.html', 3000, win => {
-      win.history.replaceState(null, null,
-          // TODO(#2402) Support glade as well.
-          'test/fixtures/doubleclick.html?google_glade=0');
+      replaceUrl(win);
     }).then(f => {
       fixture = f;
     });
+  });
+
+  afterEach(() => {
+    if (beforeHref) {
+      fixture.win.parent.history.replaceState(null, null, beforeHref);
+    }
   });
 
   it('should create an iframe loaded', function() {
