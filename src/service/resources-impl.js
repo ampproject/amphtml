@@ -756,7 +756,7 @@ export class Resources {
                   (newScrollHeight - state./*OK*/scrollHeight));
             }
           },
-        });
+        }, {});
       }
     }
   }
