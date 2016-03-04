@@ -830,6 +830,14 @@ export class Viewer {
   }
 
   /**
+   * Triggers "prerenderComplete" event for the viewer.
+   * @param {!JSONObject} message
+   */
+  prerenderComplete(message) {
+    this.sendMessageUnreliable_('prerenderComplete', message, false);
+  }
+
+  /**
    * Requests AMP document to receive a message from Viewer.
    * @param {string} eventType
    * @param {*} data

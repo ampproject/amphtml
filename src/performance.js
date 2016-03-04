@@ -78,11 +78,8 @@ export class Performance {
     /** @const {!Window} */
     this.win = win;
 
-    /** @const @private {funtion(string,?string=,number=)|undefined} */
-    this.tick_ = undefined;
-
-    /** @const @private {funtion()|undefined} */
-    this.flush_ = undefined;
+    /** @private @const {number} */
+    this.initTime_ = timer.now();
 
     /** @const @private {!Array<TickEventDef>} */
     this.events_ = [];
@@ -137,7 +134,7 @@ export class Performance {
    */
   measureUserPerceivedVisualCompletenessTime_() {
     const didStartInPrerender = !this.viewer_.hasBeenVisible();
-    let docVisibleTime = didStartInPrerender ? -1 : timer.now();
+    let docVisibleTime = didStartInPrerender ? -1 : this.initTime_;
 
     // This is only relevant if the viewer is in prerender mode.
     // (hasn't been visible yet, ever at this point)
@@ -154,11 +151,15 @@ export class Performance {
             : 1 /* MS (magic number for prerender was complete
                    by the time the user opened the page) */;
         this.tickDelta('pc', userPerceivedVisualCompletenesssTime);
+        this.prerenderComplete_(userPerceivedVisualCompletenesssTime);
       } else {
         // If it didnt start in prerender, no need to calculate anything
         // and we just need to tick `pc`. (it will give us the relative
         // time since the viewer initialized the timer)
         this.tick('pc');
+        // We don't have the actual csi timer's clock start time,
+        // so we just have to use `docVisibleTime`.
+        this.prerenderComplete_(timer.now() - docVisibleTime);
       }
       this.flush();
     });
@@ -319,6 +320,18 @@ export class Performance {
       // visibility flush.
       this.setFlushParams_(params);
     });
+  }
+
+  /**
+   * @private
+   * @param {number} value
+   */
+  prerenderComplete_(value) {
+    if (this.viewer_ && this.viewer_.isPerformanceTrackingOn()) {
+      this.viewer_.prerenderComplete({
+        'value': value,
+      });
+    }
   }
 }
 
