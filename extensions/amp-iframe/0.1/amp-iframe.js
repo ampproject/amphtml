@@ -204,7 +204,7 @@ export class AmpIframe extends AMP.BaseElement {
   /**
    * @override
    */
-  getInsersectionElementLayoutBox() {
+  getIntersectionElementLayoutBox() {
     if (!this.iframeLayoutBox_) {
       this.measureIframeLayoutBox_();
     }
