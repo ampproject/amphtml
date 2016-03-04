@@ -88,7 +88,7 @@ describe('Rendering of one ad', () => {
     }).then(pubads => {
       const canvas = iframe.contentWindow.document.querySelector('#c');
       expect(pubads.get('page_url')).to.equal(
-          'http://localhost:9876/doubleclick.html');
+          'https://www.example.com/doubleclick.html');
       const slot = canvas.slot;
       expect(slot).to.not.be.null;
       expect(slot.getCategoryExclusions()).to.jsonEqual(['health']);
