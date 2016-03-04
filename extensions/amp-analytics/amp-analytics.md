@@ -101,6 +101,8 @@ Here's an example of usage of `type` for a provider called XYZ:
 <amp-analytics type="XYZ"> ... </amp-analytics>
 ```
 
+Please consult the documentation from your vendor, which may be linked in the sections below. You can also look at the [vendors.js](https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/0.1/vendors.js) file for further information on each vendor's configuration.
+
 ### Adobe Analytics
 
 Type attribute value: `adobeanalytics`
