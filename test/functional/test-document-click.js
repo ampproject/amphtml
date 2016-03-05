@@ -229,6 +229,15 @@ describe('test-document-click onDocumentElementClick_', () => {
       expect(preventDefaultSpy.callCount).to.equal(1);
     });
 
+    it('should not do anything for mailto: protocol', () => {
+      tgt.href = 'mailto:hello@example.com';
+      sandbox.stub(platform, 'isIos').returns(true);
+      sandbox.stub(platform, 'isSafari').returns(true);
+      onDocumentElementClick_(evt, viewport);
+      expect(win.open.called).to.be.false;
+      expect(preventDefaultSpy.callCount).to.equal(0);
+    });
+
     it('should not do anything on other non-safari iOS', () => {
       sandbox.stub(platform, 'isIos').returns(true);
       sandbox.stub(platform, 'isSafari').returns(false);

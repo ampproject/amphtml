@@ -119,7 +119,7 @@ export function onDocumentElementClick_(e, viewport) {
   // to the custom protocol href.
   const isSafariIOS = platform.isIos() && platform.isSafari();
   const isEmbedded = win.parent && win.parent != win;
-  const isNormalProtocol = /^https?:$/.test(tgtLoc.protocol);
+  const isNormalProtocol = /^(https?|mailto):$/.test(tgtLoc.protocol);
   if (isSafariIOS && isEmbedded && !isNormalProtocol) {
     win.open(target.href, '_blank');
     // Without preventing default the page would should an alert error twice
