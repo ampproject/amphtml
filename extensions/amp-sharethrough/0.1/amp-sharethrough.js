@@ -15,8 +15,7 @@
  */
 
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {AmpMustache}
-    from '../../../build/all/v0/amp-mustache-0.1.max';
+import {AmpMustache} from '../../../build/all/v0/amp-mustache-0.1.max';
 import {xhrFor} from '../../../src/xhr';
 
 /** @private @const */

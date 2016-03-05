@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import {AmpSharethrough}
-  from '../../../../build/all/v0/amp-sharethrough-0.1.max';
+import {AmpSharethrough} from '../../../../build/all/v0/amp-sharethrough-0.1.max';
 import {getService} from '../../../../src/service';
 import {createIframePromise} from '../../../../testing/iframe';
 import {markElementScheduledForTesting} from '../../../../src/custom-element';
@@ -58,20 +57,16 @@ describe('amp-sharethrough', () => {
             + 'uot;16&quot;&gt;&lt;/amp-img&gt; &lt;/div&gt; &lt;/div&gt; &lt;'
             + '/div&gt;',
           'backfillTag': '',
-          'publisher_key': '834589ed'
-        },
+          'publisher_key': '834589ed'},
         'allowInstantPlay': false,
         'status': 'pre-live',
         'metadata': {
           'strOptOutIcon': true,
           'experiment': {
             'script_url': '',
-            'block_rendering': false
-          }
-        },
+            'block_rendering': false}},
         'layout': 'single',
-        'articlesBetweenAds': null
-      },
+        'articlesBetweenAds': null},
       'creatives': [
         {
           'price': 0,
@@ -101,8 +96,7 @@ describe('amp-sharethrough', () => {
               'fifteen_second_silent_play': [],
               'click': [],
               'ten_second_silent_play': [],
-              'impression': []
-            },
+              'impression': []},
             'custom_engagement_url': '',
             'thumbnail_url': '//static.sharethrough.com/m/creative_thumbnails/'
               + '68965/images/thumb_320/time-square.jpg',
@@ -112,15 +106,11 @@ describe('amp-sharethrough', () => {
               + 'Digital Advertising',
             'custom_engagement_label': '',
             'thumbnail_styles': ['thumb_320','thumb_1000','original'],
-            'action': 'clickout'
-          },
+            'action': 'clickout'},
           'priceType': 'vCPM',
           'version': 1,
-          'auctionWinId': '18b4395f-cc1a-468e-bea3-d14eec382081'
-        }
-      ],
-      'adserverRequestId': '8803e6e7-4ee3-4977-a0bb-d8b9b83dd7a8'
-    };
+          'auctionWinId': '18b4395f-cc1a-468e-bea3-d14eec382081'}],
+      'adserverRequestId': '8803e6e7-4ee3-4977-a0bb-d8b9b83dd7a8'};
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
