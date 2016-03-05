@@ -21,6 +21,7 @@
 
 import {getService} from '../service';
 import {viewerFor} from '../viewer';
+import {viewportFor} from '../viewport';
 import {listen} from '../event-helper';
 
 
@@ -35,7 +36,7 @@ const DEFAULT_ENGAGED_SECONDS = 5;
  */
 const ActivityEventType = {
   ACTIVE: 'active',
-  INACTIVE: 'inactive'
+  INACTIVE: 'inactive',
 };
 
 /**
@@ -110,12 +111,13 @@ class ActivityHistory {
 
 
 /**
- * Array of event types which will be listened for on the document element to
- * indicate activity.
+ * Array of event types which will be listened for on the document to indicate
+ * activity. Other activities are also observed on the Viewer and Viewport
+ * objects. See {@link setUpActivityListeners_} for listener implementation.
  * @private @const {Array<string>}
  */
 const ACTIVE_EVENT_TYPES = [
-  'scroll', 'mousedown', 'mouseup', 'mousemove', 'keydown', 'keyup'
+  'mousedown', 'mouseup', 'mousemove', 'keydown', 'keyup',
 ];
 
 export class Activity {
@@ -170,6 +172,9 @@ export class Activity {
     /** @private @const {!Viewer} */
     this.viewer_ = viewerFor(this.win_);
 
+    /** @private @const {!Viewport} */
+    this.viewport_ = viewportFor(this.win_);
+
     this.viewer_.whenFirstVisible().then(this.start_.bind(this));
   }
 
@@ -204,11 +209,17 @@ export class Activity {
   /** @private */
   setUpActivityListeners_() {
     for (let i = 0; i < ACTIVE_EVENT_TYPES.length; i++) {
-      this.unlistenFuncs_.push(listen(this.win_.document.documentElement,
+      this.unlistenFuncs_.push(listen(this.win_.document,
         ACTIVE_EVENT_TYPES[i], this.boundHandleActivity_));
     }
 
-    this.viewer_.onVisibilityChanged(this.boundHandleVisibilityChange_);
+    this.unlistenFuncs_.push(
+        this.viewer_.onVisibilityChanged(this.boundHandleVisibilityChange_));
+
+    // Viewport.onScroll does not return an unlisten function.
+    // TODO(britice): If Viewport is updated to return an unlisten function,
+    // update this to capture the unlisten function.
+    this.viewport_.onScroll(this.boundHandleActivity_);
   }
 
   /** @private */
@@ -247,7 +258,7 @@ export class Activity {
 
     this.activityHistory_.push(/** @type {ActivityEventDef} */{
       type: type,
-      time: secondKey
+      time: secondKey,
     });
   }
 

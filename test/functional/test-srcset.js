@@ -33,37 +33,37 @@ describe('Srcset parseSrcset', () => {
 
   it('should accept single source, default to 1px', () => {
     test(' \n image \n ', [
-      {url: 'image', dpr: 1}
+      {url: 'image', dpr: 1},
     ]);
   });
 
   it('should ignore empty source', () => {
     test(' \n image \n, ', [
-      {url: 'image', dpr: 1}
+      {url: 'image', dpr: 1},
     ]);
     test(' , \n image \n, ', [
-      {url: 'image', dpr: 1}
+      {url: 'image', dpr: 1},
     ]);
   });
 
   it('should accept multiple sources, default to 1x', () => {
     test(' \n image 2x \n\t, image2 \n', [
       {url: 'image', dpr: 2},
-      {url: 'image2', dpr: 1}
+      {url: 'image2', dpr: 1},
     ]);
   });
 
   it('should accept width-based sources', () => {
     test(' \n image-100 100w\n, image 10w', [
       {url: 'image-100', width: 100},
-      {url: 'image', width: 10}
+      {url: 'image', width: 10},
     ]);
   });
 
   it('should accept dpr-based sources', () => {
     test(' \n image-x1.5 1.5x\n , image', [
       {url: 'image-x1.5', dpr: 1.5},
-      {url: 'image', dpr: 1}
+      {url: 'image', dpr: 1},
     ]);
   });
 
@@ -91,85 +91,85 @@ describe('Srcset parseSrcset', () => {
     test(' \n image1 100w\n , \n image2 50w\n , image3 10.5w', [
       {url: 'image1', width: 100},
       {url: 'image2', width: 50},
-      {url: 'image3', width: 10.5}
+      {url: 'image3', width: 10.5},
     ]);
   });
 
   it('should accept commas in URLs', () => {
     test(' \n image,1 100w\n , \n image,2 50w \n', [
       {url: 'image,1', width: 100},
-      {url: 'image,2', width: 50}
+      {url: 'image,2', width: 50},
     ]);
     test(' \n image,100w 100w\n , \n image,20w 50w \n', [
       {url: 'image,100w', width: 100},
-      {url: 'image,20w', width: 50}
+      {url: 'image,20w', width: 50},
     ]);
     test(' \n image,2 2x\n , \n image,1', [
       {url: 'image,2', dpr: 2},
-      {url: 'image,1', dpr: 1}
+      {url: 'image,1', dpr: 1},
     ]);
     test(' \n image,2x 2x\n , \n image,1x', [
       {url: 'image,2x', dpr: 2},
-      {url: 'image,1x', dpr: 1}
+      {url: 'image,1x', dpr: 1},
     ]);
     test(' \n image,2 , \n  image,1 2x\n', [
       {url: 'image,1', dpr: 2},
-      {url: 'image,2', dpr: 1}
+      {url: 'image,2', dpr: 1},
     ]);
     test(' \n image,1x , \n  image,2x 2x\n', [
       {url: 'image,2x', dpr: 2},
-      {url: 'image,1x', dpr: 1}
+      {url: 'image,1x', dpr: 1},
     ]);
     test(' \n image,1 \n ', [
-      {url: 'image,1', dpr: 1}
+      {url: 'image,1', dpr: 1},
     ]);
     test(' \n image,1x \n ', [
-      {url: 'image,1x', dpr: 1}
+      {url: 'image,1x', dpr: 1},
     ]);
   });
 
   it('should accept no-whitestpace', () => {
     test('image 100w,image 50w', [
       {url: 'image', width: 100},
-      {url: 'image', width: 50}
+      {url: 'image', width: 50},
     ]);
     test('image,1 100w,image,2 50w', [
       {url: 'image,1', width: 100},
-      {url: 'image,2', width: 50}
+      {url: 'image,2', width: 50},
     ]);
     test('image,1 2x,image,2', [
       {url: 'image,1', dpr: 2},
-      {url: 'image,2', dpr: 1}
+      {url: 'image,2', dpr: 1},
     ]);
     test('image,2 2x', [
-      {url: 'image,2', dpr: 2}
+      {url: 'image,2', dpr: 2},
     ]);
     test('image,1', [
-      {url: 'image,1', dpr: 1}
+      {url: 'image,1', dpr: 1},
     ]);
   });
 
   it('should accept other special chars in URLs', () => {
     test(' \n http://im-a+ge;1?&2#3 100w\n , \n image;2 50w \n', [
       {url: 'http://im-a+ge;1?&2#3', width: 100},
-      {url: 'image;2', width: 50}
+      {url: 'image;2', width: 50},
     ]);
   });
 
   it('should accept false cognitives in URLs', () => {
     test(' \n image,100w 100w\n , \n image,20x 50w \n', [
       {url: 'image,100w', width: 100},
-      {url: 'image,20x', width: 50}
+      {url: 'image,20x', width: 50},
     ]);
     test(' \n image,1x 2x\n , \n image,2x', [
       {url: 'image,1x', dpr: 2},
-      {url: 'image,2x', dpr: 1}
+      {url: 'image,2x', dpr: 1},
     ]);
     test(' \n image,1x \n ', [
-      {url: 'image,1x', dpr: 1}
+      {url: 'image,1x', dpr: 1},
     ]);
     test(' \n image,1w \n ', [
-      {url: 'image,1w', dpr: 1}
+      {url: 'image,1w', dpr: 1},
     ]);
   });
 
@@ -184,10 +184,10 @@ describe('Srcset parseSrcset', () => {
       {url: 'image-4x.png', dpr: 4},
       {url: 'image-3x.png', dpr: 3},
       {url: 'image-2x.png', dpr: 2},
-      {url: 'image-1x.png', dpr: 1}
+      {url: 'image-1x.png', dpr: 1},
     ]);
     test('image,one.png', [
-      {url: 'image,one.png', dpr: 1}
+      {url: 'image,one.png', dpr: 1},
     ]);
   });
 });
@@ -226,7 +226,7 @@ describe('Srcset construct', () => {
     // Width.
     let res = new Srcset([
         {url: 'image-10w', width: 10},
-        {url: 'image-100w', width: 100}
+        {url: 'image-100w', width: 100},
     ]);
     expect(res.sources_[0].url).to.equal('image-100w');
     expect(res.sources_[1].url).to.equal('image-10w');
@@ -234,7 +234,7 @@ describe('Srcset construct', () => {
     // DPR.
     res = new Srcset([
         {url: 'image-1x', dpr: 1},
-        {url: 'image-2x', dpr: 2}
+        {url: 'image-2x', dpr: 2},
     ]);
     expect(res.sources_[0].url).to.equal('image-2x');
     expect(res.sources_[1].url).to.equal('image-1x');
@@ -248,7 +248,7 @@ describe('Srcset select', () => {
         {url: 'image-1000', width: 1000},
         {url: 'image-500', width: 500},
         {url: 'image-250', width: 250},
-        {url: 'image', width: 50}
+        {url: 'image', width: 50},
     ]);
 
     // DPR = 1
@@ -286,7 +286,7 @@ describe('Srcset select', () => {
     const srcset = new Srcset([
         {url: 'image-3x', dpr: 3},
         {url: 'image-2x', dpr: 2},
-        {url: 'image', dpr: 1}
+        {url: 'image', dpr: 1},
     ]);
 
     expect(srcset.select(2000, 4).url).to.equal('image-3x', 'dpr=4');

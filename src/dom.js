@@ -16,6 +16,39 @@
 
 
 /**
+ * Whether the element is currently contained in the DOM. Polyfills
+ * `document.contains()` method when necessary. Notice that according to spec
+ * `document.contains` is inclusionary.
+ * See https://developer.mozilla.org/en-US/docs/Web/API/Node/contains
+ * @param {!Document} doc
+ * @param {!Element} element
+ * @return {boolean}
+ */
+export function documentContains(doc, element) {
+  if (!doc.contains) {
+    return documentContainsPolyfillInternal_(doc, element);
+  }
+  return doc.contains(element);
+}
+
+
+/**
+ * Polyfill for `document.contains()` method.
+ * See https://developer.mozilla.org/en-US/docs/Web/API/Node/contains
+ * @param {!Document} doc
+ * @param {!Element} element
+ * @return {boolean}
+ * @private Visible for testing only.
+ */
+export function documentContainsPolyfillInternal_(doc, element) {
+  // Per spec, "contains" method is inclusionary
+  // i.e. `node.contains(node) == true`. However, we still need to test
+  // equality to the document itself.
+  return element == doc || doc.documentElement.contains(element);
+}
+
+
+/**
  * Removes the element.
  * @param {!Element} element
  */
@@ -78,6 +111,9 @@ export function closest(element, callback) {
  * @return {?Element}
  */
 export function closestByTag(element, tagName) {
+  if (element.closest) {
+    return element.closest(tagName);
+  }
   tagName = tagName.toUpperCase();
   return closest(element, el => {
     return el.tagName == tagName;
@@ -93,7 +129,7 @@ export function closestByTag(element, tagName) {
  */
 export function elementByTag(element, tagName) {
   const elements = element.getElementsByTagName(tagName);
-  return elements.length > 0 ? elements[0] : null;
+  return elements[0] || null;
 }
 
 
@@ -104,30 +140,56 @@ export function elementByTag(element, tagName) {
  * @return {?Element}
  */
 export function childElement(parent, callback) {
-  const children = parent.children;
-  for (let i = 0; i < children.length; i++) {
-    if (callback(children[i])) {
-      return children[i];
+  for (let child = parent.firstElementChild; child;
+      child = child.nextElementSibling) {
+    if (callback(child)) {
+      return child;
     }
   }
   return null;
 }
 
+/**
+ * @type {boolean|undefined}
+ * @visiblefortesting
+ */
+let scopeSelectorSupported;
 
 /**
- * Finds the first child element that has the specified attribute, optionally
- * with a value.
+ * @param {boolean|undefined} val
+ * @visiblefortesting
+ */
+export function setScopeSelectorSupportedForTesting(val) {
+  scopeSelectorSupported = val;
+}
+
+/**
+ * @return {boolean}
+ */
+function isScopeSelectorSupported() {
+  try {
+    document.querySelector(':scope');
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+/**
+ * Finds the first child element that has the specified attribute.
  * @param {!Element} parent
  * @param {string} attr
- * @param {string=} opt_value
  * @return {?Element}
  */
-export function childElementByAttr(parent, attr, opt_value) {
+export function childElementByAttr(parent, attr) {
+  if (scopeSelectorSupported == null) {
+    scopeSelectorSupported = isScopeSelectorSupported();
+  }
+  if (scopeSelectorSupported) {
+    return parent.querySelector(':scope > [' + attr + ']');
+  }
   return childElement(parent, el => {
     if (!el.hasAttribute(attr)) {
-      return false;
-    }
-    if (opt_value !== undefined && el.getAttribute(attr) != opt_value) {
       return false;
     }
     return true;
@@ -142,6 +204,12 @@ export function childElementByAttr(parent, attr, opt_value) {
  * @return {?Element}
  */
 export function childElementByTag(parent, tagName) {
+  if (scopeSelectorSupported == null) {
+    scopeSelectorSupported = isScopeSelectorSupported();
+  }
+  if (scopeSelectorSupported) {
+    return parent.querySelector(':scope > ' + tagName);
+  }
   tagName = tagName.toUpperCase();
   return childElement(parent, el => {
     return el.tagName == tagName;

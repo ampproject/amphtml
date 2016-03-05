@@ -111,7 +111,7 @@ Authorization is an endpoint provided by the publisher and called by AMP Runtime
 
 ### Pingback Endpoint
 
-Pingback is an endpoint provided by the publisher and called by AMP Runtime or Google AMP Cache. It is a credentialed CORS endpoint. AMP Runtime calls this endpoint automatically when the Reader has started viewing the document. On of the main goals of the Pingback is for the Publisher to update metering information.
+Pingback is an endpoint provided by the publisher and called by AMP Runtime or Google AMP Cache. It is a credentialed CORS endpoint. AMP Runtime calls this endpoint automatically when the Reader has started viewing the document. This endpoint is also called after the Reader has successfully completed the Login Flow. On of the main goals of the Pingback is for the Publisher to update metering information.
 
 ### Login Page and Login Link
 
@@ -119,7 +119,7 @@ Login Page is implemented and served by the Publisher and called by the AMP Runt
 
 Login Page is triggered when the Reader taps on the Login Link which can be placed by the Publisher anywhere in the document.
 
-## Specification v0.4
+## Specification v0.5
 
 ### Configuration
 
@@ -322,6 +322,8 @@ Pingback URL can take any parameters as defined in the [Access URL Variables][7]
 
 Pingback does not produce a response - any response is ignored by AMP runtime.
 
+Pingback endpoint is called when the reader has started viewing the document and after the Rser has successfully completed the Login Flow.
+
 The publisher may choose to use the pingback as:
  - One of the main purposes for pingback is to count down meter when it is used.
  - As a credentialed CORS endpoint it may contain publisher cookies. Thus it can be used to map AMP Reader ID to the Publisher’s identity.
@@ -373,6 +375,8 @@ specified. Once Login Page completes its work, it must redirect back to the spec
 RETURN_URL#success=true|false
 ```
 Notice the use of a URL hash parameter “success”. The value is either “true” or “false” depending on whether the login succeeds or is abandoned. Ideally the Login Page, when possible, will send the signal in cases of both success or failure.
+
+If the `success=true` signal is returned, the AMP runtime will repeat calls to Authorization and Pingback endpoints to update the document's state and report the "view" with the new access profile.
 
 #### Login Link
 
@@ -437,6 +441,7 @@ Both steps are covered by the AMP Access spec. The referrer can be injected into
 - Feb 11: Authorization request timeout in [Authorization Endpoint][4].
 - Feb 15: [Configuration][8] and [Authorization Endpoint][4] now allow "authorizationFallbackResponse" property that can be used when authorization fails.
 - Feb 19: Corrected samples to remove `{}` from URL var substitutions.
+- Mar 3: Resend pingback after login (v0.5).
 
 ## Appendix A: “amp-access” expression grammar
 

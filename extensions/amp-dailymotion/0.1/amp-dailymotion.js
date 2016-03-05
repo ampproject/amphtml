@@ -68,7 +68,7 @@ class AmpDailymotion extends AMP.BaseElement {
     const query = [
       'api=1',
       'html=1',
-      'app=amp'
+      'app=amp',
     ];
 
     const settings = [
@@ -78,7 +78,7 @@ class AmpDailymotion extends AMP.BaseElement {
       'start',
       'ui-highlight',
       'ui-logo',
-      'info'
+      'info',
     ];
 
     settings.forEach(setting => {

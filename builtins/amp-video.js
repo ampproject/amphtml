@@ -59,7 +59,7 @@ export function installVideo(win) {
 
     /** @override */
     layoutCallback() {
-      if (!this.video_.play) {
+      if (!this.isVideoSupported_()) {
         this.toggleFallback(true);
         return Promise.resolve();
       }
@@ -100,6 +100,11 @@ export function installVideo(win) {
       // No need to do layout later - user action will be expect to resume
       // the playback.
       return false;
+    }
+
+    /** @private */
+    isVideoSupported_() {
+      return !!this.video_.play;
     }
   }
 

@@ -137,7 +137,7 @@ class UrlReplacements {
       return cidFor(win).then(cid => {
         return cid.get({
           scope: scope,
-          createCookieIfNotPresent: true
+          createCookieIfNotPresent: true,
         }, consent);
       });
     });
@@ -199,6 +199,18 @@ class UrlReplacements {
     // Returns screen.ColorDepth.
     this.set_('SCREEN_COLOR_DEPTH', () => {
       return this.win_.screen.colorDepth;
+    });
+
+    // Returns the viewport height.
+    this.set_('VIEWPORT_HEIGHT', () => {
+      return vsyncFor(this.win_).measurePromise(
+        () => viewportFor(this.win_).getSize().height);
+    });
+
+    // Returns the viewport width.
+    this.set_('VIEWPORT_WIDTH', () => {
+      return vsyncFor(this.win_).measurePromise(
+        () => viewportFor(this.win_).getSize().width);
     });
 
     // Returns document characterset.
@@ -268,9 +280,7 @@ class UrlReplacements {
     this.set_('AUTHDATA', field => {
       assert(field, 'The first argument to AUTHDATA, the field, is required');
       return this.getAccessValue_(accessService => {
-        return accessService.whenFirstAuthorized().then(() => {
-          return accessService.getAuthdataField(field);
-        });
+        return accessService.getAuthdataField(field);
       }, 'AUTHDATA');
     });
 

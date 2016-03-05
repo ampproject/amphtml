@@ -35,7 +35,7 @@ describe('Animation', () => {
         return () => {
           vsyncTasks.push(task);
         };
-      }
+      },
     };
     anim = new Animation(vsync);
   });

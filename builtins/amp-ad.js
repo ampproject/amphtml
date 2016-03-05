@@ -32,7 +32,7 @@ import {userNotificationManagerFor} from '../src/user-notification';
 
 /** @private @const These tags are allowed to have fixed positioning */
 const POSITION_FIXED_TAG_WHITELIST = {
-  'AMP-LIGHTBOX': true
+  'AMP-LIGHTBOX': true,
 };
 
 /**
@@ -55,6 +55,19 @@ export function installAd(win) {
       // If another ad is currently loading we only load ads that are currently
       // in viewport.
       if (loadingAdsCount > 0) {
+        return false;
+      }
+
+      // Ad opts into lazier loading strategy where we only load ads that are
+      // at closer than 1.25 viewports away.
+      if (this.element.getAttribute('data-loading-strategy') ==
+          'prefer-viewability-over-views') {
+        const box = this.getIntersectionElementLayoutBox();
+        const viewportBox = this.getViewport().getRect();
+        const distanceFromViewport = box.top - viewportBox.bottom;
+        if (distanceFromViewport <= 1.25 * (viewportBox.height)) {
+          return true;
+        }
         return false;
       }
 
@@ -122,10 +135,10 @@ export function installAd(win) {
       const prefetch = adPrefetch[type];
       const preconnect = adPreconnect[type];
       if (typeof prefetch == 'string') {
-        this.preconnect.prefetch(prefetch);
+        this.preconnect.prefetch(prefetch, 'script');
       } else if (prefetch) {
         prefetch.forEach(p => {
-          this.preconnect.prefetch(p);
+          this.preconnect.prefetch(p, 'script');
         });
       }
       if (typeof preconnect == 'string') {
@@ -174,7 +187,10 @@ export function installAd(win) {
     /**
      * @override
      */
-    getInsersectionElementLayoutBox() {
+    getIntersectionElementLayoutBox() {
+      if (!this.iframe_) {
+        return super.getIntersectionElementLayoutBox();
+      }
       if (!this.iframeLayoutBox_) {
         this.measureIframeLayoutBox_();
       }
@@ -360,6 +376,10 @@ export function installAd(win) {
       }
       this.deferMutate(() => {
         if (this.fallback_) {
+          // Hide placeholder when falling back.
+          if (this.placeholder_) {
+            this.togglePlaceholder(false);
+          }
           this.toggleFallback(true);
         }
         this.element.removeChild(this.iframe_);

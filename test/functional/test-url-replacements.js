@@ -83,12 +83,12 @@ describe('UrlReplacements', () => {
       performance: {
         timing: {
           navigationStart: 100,
-          loadEventStart: 0
-        }
+          loadEventStart: 0,
+        },
       },
       removeEventListener: function(type, callback) {
         loadObservable.remove(callback);
-      }
+      },
     };
     return win;
   }
@@ -203,6 +203,18 @@ describe('UrlReplacements', () => {
   it('should replace SCREEN_HEIGHT', () => {
     return expand('?sh=SCREEN_HEIGHT').then(res => {
       expect(res).to.match(/sh=\d+/);
+    });
+  });
+
+  it('should replace VIEWPORT_WIDTH', () => {
+    return expand('?vw=VIEWPORT_WIDTH').then(res => {
+      expect(res).to.match(/vw=\d+/);
+    });
+  });
+
+  it('should replace VIEWPORT_HEIGHT', () => {
+    return expand('?vh=VIEWPORT_HEIGHT').then(res => {
+      expect(res).to.match(/vh=\d+/);
     });
   });
 
@@ -397,7 +409,7 @@ describe('UrlReplacements', () => {
 
   it('should add an additional binding', () => {
     return expand('rid=NONSTANDARD?', false, false, {
-      'NONSTANDARD': 'abc'
+      'NONSTANDARD': 'abc',
     }).then(
         res => {
           expect(res).to.match(/rid=abc\?$/);
@@ -406,7 +418,7 @@ describe('UrlReplacements', () => {
 
   it('should NOT overwrite the cached expression with new bindings', () => {
     return expand('rid=NONSTANDARD?', false, false, {
-      'NONSTANDARD': 'abc'
+      'NONSTANDARD': 'abc',
     }).then(
       res => {
         expect(res).to.match(/rid=abc\?$/);
@@ -418,7 +430,7 @@ describe('UrlReplacements', () => {
 
   it('should expand bindings as functions', () => {
     return expand('rid=FUNC(abc)?', false, false, {
-      'FUNC': value => 'func_' + value
+      'FUNC': value => 'func_' + value,
     }).then(res => {
       expect(res).to.match(/rid=func_abc\?$/);
     });
@@ -426,7 +438,7 @@ describe('UrlReplacements', () => {
 
   it('should expand bindings as functions with promise', () => {
     return expand('rid=FUNC(abc)?', false, false, {
-      'FUNC': value => Promise.resolve('func_' + value)
+      'FUNC': value => Promise.resolve('func_' + value),
     }).then(res => {
       expect(res).to.match(/rid=func_abc\?$/);
     });
@@ -434,7 +446,7 @@ describe('UrlReplacements', () => {
 
   it('should expand null as empty string', () => {
     return expand('v=VALUE', false, false, {
-      'VALUE': null
+      'VALUE': null,
     }).then(res => {
       expect(res).to.equal('v=');
     });
@@ -442,7 +454,7 @@ describe('UrlReplacements', () => {
 
   it('should expand undefined as empty string', () => {
     return expand('v=VALUE', false, false, {
-      'VALUE': undefined
+      'VALUE': undefined,
     }).then(res => {
       expect(res).to.equal('v=');
     });
@@ -450,7 +462,7 @@ describe('UrlReplacements', () => {
 
   it('should expand empty string as empty string', () => {
     return expand('v=VALUE', false, false, {
-      'VALUE': ''
+      'VALUE': '',
     }).then(res => {
       expect(res).to.equal('v=');
     });
@@ -458,7 +470,7 @@ describe('UrlReplacements', () => {
 
   it('should expand zero as zero', () => {
     return expand('v=VALUE', false, false, {
-      'VALUE': 0
+      'VALUE': 0,
     }).then(res => {
       expect(res).to.equal('v=0');
     });
@@ -466,7 +478,7 @@ describe('UrlReplacements', () => {
 
   it('should expand false as false', () => {
     return expand('v=VALUE', false, false, {
-      'VALUE': false
+      'VALUE': false,
     }).then(res => {
       expect(res).to.equal('v=false');
     });
@@ -475,7 +487,7 @@ describe('UrlReplacements', () => {
   it('should resolve sub-included bindings', () => {
     // RANDOM is a standard property and we add RANDOM_OTHER.
     return expand('r=RANDOM&ro=RANDOM_OTHER?', false, false, {
-      'RANDOM_OTHER': 'ABC'
+      'RANDOM_OTHER': 'ABC',
     }).then(res => {
       expect(res).to.match(/r=(\d\.\d+)&ro=ABC\?$/);
     });
@@ -530,7 +542,6 @@ describe('UrlReplacements', () => {
       accessService = {
         getAccessReaderId: () => {},
         getAuthdataField: () => {},
-        whenFirstAuthorized: () => {},
       };
       accessServiceMock = sandbox.mock(accessService);
       reportDevSpy = sandbox.spy();
@@ -571,12 +582,9 @@ describe('UrlReplacements', () => {
     });
 
     it('should replace AUTHDATA', () => {
-      accessServiceMock.expects('whenFirstAuthorized')
-          .returns(Promise.resolve())
-          .once();
       accessServiceMock.expects('getAuthdataField')
           .withExactArgs('field1')
-          .returns('value1')
+          .returns(Promise.resolve('value1'))
           .once();
       return expand('?a=AUTHDATA(field1)').then(res => {
         expect(res).to.match(/a=value1/);

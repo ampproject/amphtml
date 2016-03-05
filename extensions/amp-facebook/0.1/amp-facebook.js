@@ -26,7 +26,8 @@ class AmpFacebook extends AMP.BaseElement {
   preconnectCallback(onLayout) {
     this.preconnect.url('https://facebook.com', onLayout);
     // Hosts the facebook SDK.
-    this.preconnect.prefetch('https://connect.facebook.net/en_US/sdk.js');
+    this.preconnect.prefetch(
+        'https://connect.facebook.net/en_US/sdk.js', 'script');
     prefetchBootstrap(this.getWin());
   }
 

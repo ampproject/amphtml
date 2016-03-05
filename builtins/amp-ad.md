@@ -97,6 +97,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [AdReactor](../ads/adreactor.md)
 - [AdSense](../ads/adsense.md)
 - [AdTech](../ads/adtech.md)
+- [Criteo](../ads/criteo.md)
 - [Dot and Media](../ads/dotandads.md)
 - [Doubleclick](../ads/doubleclick.md)
 - [Flite](../ads/flite.md)
@@ -104,6 +105,8 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [Smart AdServer](../ads/smartadserver.md)
 - [Yieldmo](../ads/yieldmo.md)
 - [Revcontent](../ads/revcontent.md)
+- [TripleLift](../ads/triplelift.md)
+- [Teads](../ads/teads.md)
 
 ## Styling
 
@@ -131,6 +134,10 @@ Optional attribute to pass configuration to the ad as an arbitrarily complex JSO
 ### data-consent-notification-id
 
 Optional attribute. If provided will require confirming the [amp-user-notification](../extensions/amp-user-notification/amp-user-notification.md) with the given HTML-id until the "AMP client id" for the user (similar to a cookie) is passed to the ad. The means ad rendering is delayed until the user confirmed the notification.
+
+### Experimental: data-loading-strategy
+
+Supported value: `prefer-viewability-over-views`. Instructs AMP to load ads in a way that prefers a high degree of viewability, while sometimes loading too late to generate a view.
 
 ## Placeholder
 
@@ -165,6 +172,19 @@ To enable this, copy the file [remote.html](../3p/remote.html) to your web serve
 
 The `content` attribute of the meta tag is the absolute URL to your copy of the remote.html file on your web server. This URL must use a "https" schema. It is not allowed to reside on the same origin as your AMP files. E.g. if you host AMP files on "www.example.com", this URL must not be on "www.example.com" but e.g. "something-else.example.com" is OK. See the doc ["Iframe origin policy"](../spec/amp-iframe-origin-policy.md) for further details on allowed origins for iframes.
 
+### Security
+
+**Validate incoming data** before passing it on to the `draw3p` function, to make sure your iframe only does things it expects to do. This is true, in particular, for ad networks that allow custom JavaScript injection.
+
+Iframes should also enforce that they are only iframed into origins that they expect to be iframed into. The origins would be:
+
+- your own origins
+- https://cdn.ampproject.org for the AMP cache
+
+In the case of the AMP cache you also need to check that the "source origin" (origin of the document served by cdn.ampproject.org) is one of your origins.
+
+Enforcing origins can be done with the 3rd argument to `draw3p` and must additionally be done using the (allow-from)[https://developer.mozilla.org/en-US/docs/Web/HTTP/X-Frame-Options] directive for full browser support.
+
 ### Enhance incoming ad configuration
 
 This is completely optional: It is sometimes desired to further process the incoming iframe configuration before drawing the ad using AMP's built-in system.
@@ -181,5 +201,5 @@ draw3p(function(config, done) {
   setTimeout(function() {
     done(config);
   }, 100)
-});
+}, ['allowed-ad-type'], ['your-domain.com']);
 ```

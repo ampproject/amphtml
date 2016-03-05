@@ -65,7 +65,7 @@ class AmpVimeo extends AMP.BaseElement {
       // https://developer.vimeo.com/player/js-api
       this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify({
         'method': 'pause',
-        'value': ''
+        'value': '',
       }), '*');
     }
     // No need to do layout later - user action will be expect to resume

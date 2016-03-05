@@ -24,7 +24,7 @@ function overwrite(object, property, value) {
     enumerable: true,
     writeable: false,
     configurable: true,
-    value: value
+    value: value,
   });
 }
 

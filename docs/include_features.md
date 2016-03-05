@@ -278,6 +278,7 @@ The following ad networks are supported in AMP HTML pages:
 - [AdReactor](../ads/adreactor.md)
 - [AdSense](../ads/adsense.md)
 - [AdTech](../ads/adtech.md)
+- [Criteo](../ads/criteo.md)
 - [Doubleclick](../ads/doubleclick.md)
 
 ## Display an ad

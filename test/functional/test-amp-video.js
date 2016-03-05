@@ -55,7 +55,7 @@ describe('amp-video', () => {
     return getVideo({
       src: 'video.mp4',
       width: 160,
-      height: 90
+      height: 90,
     }).then(v => {
       const video = v.querySelector('video');
       expect(video).to.be.an.instanceof(Element);
@@ -73,7 +73,7 @@ describe('amp-video', () => {
       'controls': '',
       'autoplay': '',
       'muted': '',
-      'loop': ''
+      'loop': '',
     }).then(v => {
       const video = v.querySelector('video');
       expect(video).to.be.an.instanceof(Element);
@@ -102,7 +102,7 @@ describe('amp-video', () => {
       'controls': '',
       'autoplay': '',
       'muted': '',
-      'loop': ''
+      'loop': '',
     }, sources).then(v => {
       const video = v.querySelector('video');
       // check that the source tags were propogated
@@ -135,7 +135,7 @@ describe('amp-video', () => {
       'controls': '',
       'autoplay': '',
       'muted': '',
-      'loop': ''
+      'loop': '',
     }, sources)).to.be.rejectedWith(/start with/);
   });
 
@@ -145,7 +145,7 @@ describe('amp-video', () => {
       width: 160,
       height: 90,
       'preload': 'auto',
-      'poster': 'img.png'
+      'poster': 'img.png',
     }, null, function(element) {
       const video = element.querySelector('video');
       expect(video.getAttribute('preload')).to.equal('none');
@@ -166,7 +166,7 @@ describe('amp-video', () => {
       src: 'video.mp4',
       width: 160,
       height: 90,
-      'poster': 'img.png'
+      'poster': 'img.png',
     }, null, function(element) {
       const video = element.querySelector('video');
       expect(video.getAttribute('preload')).to.equal('none');
@@ -199,7 +199,7 @@ describe('amp-video', () => {
       'controls': '',
       'autoplay': '',
       'muted': '',
-      'loop': ''
+      'loop': '',
     }, sources, function(element) {
       const video = element.querySelector('video');
       expect(video.children.length).to.equal(0);
@@ -225,7 +225,7 @@ describe('amp-video', () => {
       width: 160,
       height: 90,
       'preload': 'auto',
-      'poster': 'img.png'
+      'poster': 'img.png',
     }, null, function(element) {
       const video = element.querySelector('video');
       expect(video.getAttribute('preload')).to.equal('none');
@@ -240,4 +240,33 @@ describe('amp-video', () => {
     });
   });
 
+  it('should pause the video when document inactive', () => {
+    return getVideo({
+      src: 'video.mp4',
+      width: 160,
+      height: 90,
+    }).then(v => {
+      const impl = v.implementation_;
+      const video = v.querySelector('video');
+      sandbox.spy(video, 'pause');
+      impl.documentInactiveCallback();
+      expect(video.pause.called).to.be.true;
+    });
+  });
+
+  it('should fallback if video element is not supported', () => {
+    return getVideo({
+      src: 'video.mp4',
+      width: 160,
+      height: 90,
+    }, null, function(element) {
+      const impl = element.implementation_;
+      sandbox.stub(impl, 'isVideoSupported_').returns(false);
+      sandbox.spy(impl, 'toggleFallback');
+    }).then(v => {
+      const impl = v.implementation_;
+      expect(impl.toggleFallback.called).to.be.true;
+      expect(impl.toggleFallback.calledWith(true)).to.be.true;
+    });
+  });
 });

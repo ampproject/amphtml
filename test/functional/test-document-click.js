@@ -15,6 +15,8 @@
  */
 
 import {onDocumentElementClick_} from '../../src/document-click';
+import {platform} from '../../src/platform';
+import * as sinon from 'sinon';
 
 describe('test-document-click onDocumentElementClick_', () => {
   let evt;
@@ -27,13 +29,13 @@ describe('test-document-click onDocumentElementClick_', () => {
   let preventDefaultSpy;
   let scrollIntoViewSpy;
   let querySelectorSpy;
-  let replaceStateSpy;
+  let replaceLocSpy;
   let viewport;
 
   beforeEach(() => {
     preventDefaultSpy = sinon.spy();
     scrollIntoViewSpy = sinon.spy();
-    replaceStateSpy = sinon.spy();
+    replaceLocSpy = sinon.spy();
     elem = {};
     getElementByIdSpy = sinon.stub();
     querySelectorSpy = sinon.stub();
@@ -44,24 +46,22 @@ describe('test-document-click onDocumentElementClick_', () => {
       querySelector: querySelectorSpy,
       defaultView: {
         location: {
-          href: 'https://www.google.com/some-path?hello=world#link'
-        },
-        history: {
-          replaceState: replaceStateSpy
+          href: 'https://www.google.com/some-path?hello=world#link',
+          replace: replaceLocSpy,
         },
       },
     };
     win = doc.defaultView;
     docElem = {
-      ownerDocument: doc
+      ownerDocument: doc,
     };
     evt = {
       currentTarget: docElem,
       target: tgt,
-      preventDefault: preventDefaultSpy
+      preventDefault: preventDefaultSpy,
     };
     viewport = {
-      scrollIntoView: scrollIntoViewSpy
+      scrollIntoView: scrollIntoViewSpy,
     };
   });
 
@@ -172,8 +172,8 @@ describe('test-document-click onDocumentElementClick_', () => {
       onDocumentElementClick_(evt, viewport);
       expect(getElementByIdSpy.callCount).to.equal(1);
       expect(scrollIntoViewSpy.callCount).to.equal(0);
-      expect(replaceStateSpy.callCount).to.equal(1);
-      expect(replaceStateSpy.args[0][2]).to.equal('#test');
+      expect(replaceLocSpy.callCount).to.equal(1);
+      expect(replaceLocSpy.args[0][0]).to.equal('#test');
     });
 
     it('should call scrollIntoView if element with id is found', () => {
@@ -182,8 +182,8 @@ describe('test-document-click onDocumentElementClick_', () => {
       expect(scrollIntoViewSpy.callCount).to.equal(0);
       onDocumentElementClick_(evt, viewport);
       expect(scrollIntoViewSpy.callCount).to.equal(1);
-      expect(replaceStateSpy.callCount).to.equal(1);
-      expect(replaceStateSpy.args[0][2]).to.equal('#test');
+      expect(replaceLocSpy.callCount).to.equal(1);
+      expect(replaceLocSpy.args[0][0]).to.equal('#test');
     });
 
     it('should call scrollIntoView if element with name is found', () => {
@@ -193,8 +193,63 @@ describe('test-document-click onDocumentElementClick_', () => {
       expect(scrollIntoViewSpy.callCount).to.equal(0);
       onDocumentElementClick_(evt, viewport);
       expect(scrollIntoViewSpy.callCount).to.equal(1);
-      expect(replaceStateSpy.callCount).to.equal(1);
-      expect(replaceStateSpy.args[0][2]).to.equal('#test');
+      expect(replaceLocSpy.callCount).to.equal(1);
+      expect(replaceLocSpy.args[0][0]).to.equal('#test');
+    });
+  });
+
+  describe('when linking to custom protocols e.g. whatsapp:', () => {
+    let sandbox;
+    beforeEach(() => {
+      sandbox = sinon.sandbox.create();
+      win.open = sandbox.spy();
+      win.parent = {};
+      win.top = {
+        location: {
+          href: 'https://google.com',
+        },
+      };
+      tgt.href = 'whatsapp://send?text=hello';
+    });
+
+    afterEach(() => {
+      sandbox.restore();
+      sandbox = null;
+    });
+
+    it('should set top.location.href on Safari iOS when embedded', () => {
+      sandbox.stub(platform, 'isIos').returns(true);
+      sandbox.stub(platform, 'isSafari').returns(true);
+      onDocumentElementClick_(evt, viewport);
+      expect(win.open.called).to.be.true;
+      expect(win.open.calledWith(
+          'whatsapp://send?text=hello', '_blank')).to.be.true;
+      expect(preventDefaultSpy.callCount).to.equal(1);
+    });
+
+    it('should not do anything on other non-safari iOS', () => {
+      sandbox.stub(platform, 'isIos').returns(true);
+      sandbox.stub(platform, 'isSafari').returns(false);
+      onDocumentElementClick_(evt, viewport);
+      expect(win.open.called).to.be.false;
+      expect(preventDefaultSpy.callCount).to.equal(0);
+    });
+
+    it('should not do anything on other platforms', () => {
+      sandbox.stub(platform, 'isIos').returns(false);
+      sandbox.stub(platform, 'isSafari').returns(false);
+      onDocumentElementClick_(evt, viewport);
+      expect(win.top.location.href).to.equal('https://google.com');
+      expect(preventDefaultSpy.callCount).to.equal(0);
+    });
+
+    it('should not do anything if not embedded', () => {
+      sandbox.stub(platform, 'isIos').returns(true);
+      sandbox.stub(platform, 'isSafari').returns(true);
+      win.parent = undefined;
+      onDocumentElementClick_(evt, viewport);
+      expect(win.open.called).to.be.false;
+      expect(preventDefaultSpy.callCount).to.equal(0);
     });
   });
 });

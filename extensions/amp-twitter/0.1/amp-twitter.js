@@ -29,7 +29,8 @@ class AmpTwitter extends AMP.BaseElement {
     // All images
     this.preconnect.url('https://pbs.twimg.com', onLayout);
     // Hosts the script that renders tweets.
-    this.preconnect.prefetch('https://platform.twitter.com/widgets.js');
+    this.preconnect.prefetch(
+        'https://platform.twitter.com/widgets.js', 'script');
     prefetchBootstrap(this.getWin());
   }
 

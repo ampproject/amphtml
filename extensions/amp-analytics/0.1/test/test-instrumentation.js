@@ -250,14 +250,14 @@ describe('instrumentation', function() {
     const fn6 = sandbox.stub();
     ins.addListener({
       'on': 'timer',
-      'timerSpec': {'interval': 2, 'maxTimerLength': 0}
+      'timerSpec': {'interval': 2, 'maxTimerLength': 0},
     }, fn6);
     expect(fn6.callCount).to.equal(0);
 
     const fn7 = sandbox.stub();
     ins.addListener({
       'on': 'timer',
-      'timerSpec': {'interval': 2, 'maxTimerLength': null}
+      'timerSpec': {'interval': 2, 'maxTimerLength': null},
     }, fn7);
     expect(fn7.callCount).to.equal(0);
   });
@@ -287,13 +287,13 @@ describe('instrumentation', function() {
   it('stops firing after the maxTimerLength is exceeded', () => {
     const fn1 = sandbox.stub();
     ins.addListener({
-      'on': 'timer', 'timerSpec': {'interval': 10, 'maxTimerLength': 15}
+      'on': 'timer', 'timerSpec': {'interval': 10, 'maxTimerLength': 15},
     }, fn1);
     expect(fn1.callCount).to.equal(1);
 
     const fn2 = sandbox.stub();
     ins.addListener({
-      'on': 'timer', 'timerSpec': {'interval': 10, 'maxTimerLength': 20}
+      'on': 'timer', 'timerSpec': {'interval': 10, 'maxTimerLength': 20},
     }, fn2);
     expect(fn2.callCount).to.equal(1);
 
@@ -325,7 +325,7 @@ describe('instrumentation', function() {
       'on': 'scroll',
       'scrollSpec': {
         'verticalBoundaries': [0, 100],
-        'horizontalBoundaries': [0, 100]
+        'horizontalBoundaries': [0, 100],
       }},
       fn1);
     ins.addListener({'on': 'scroll', 'scrollSpec': {
@@ -349,7 +349,7 @@ describe('instrumentation', function() {
       'on': 'scroll',
       'scrollSpec': {
         'verticalBoundaries': [0, 100],
-        'horizontalBoundaries': [0, 100]
+        'horizontalBoundaries': [0, 100],
       }},
       fn1);
 
@@ -373,7 +373,7 @@ describe('instrumentation', function() {
     ins.addListener({
       'on': 'scroll',
       'scrollSpec': {
-        'verticalBoundaries': undefined, 'horizontalBoundaries': undefined
+        'verticalBoundaries': undefined, 'horizontalBoundaries': undefined,
       }},
       fn1);
     expect(fn1.callCount).to.equal(0);
@@ -387,7 +387,7 @@ describe('instrumentation', function() {
     ins.addListener({
       'on': 'scroll',
       'scrollSpec': {
-        'verticalBoundaries': ['foo'], 'horizontalBoundaries': ['foo']
+        'verticalBoundaries': ['foo'], 'horizontalBoundaries': ['foo'],
       }},
       fn1);
     expect(fn1.callCount).to.equal(0);

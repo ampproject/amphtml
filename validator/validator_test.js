@@ -134,14 +134,14 @@ describe('ValidatorOutput', () => {
         'http://google.com/foo.html:28:3 The attribute \'src\' in tag ' +
         '\'amphtml engine v0.js script\' is set to the invalid value ' +
         '\'https://example.com/v0-not-allowed.js\'. ' +
-        '(see https://github.com/ampproject/amphtml/blob/master/spec/' +
-        'amp-html-format.md#scrpt) [CUSTOM_JAVASCRIPT_DISALLOWED]\n' +
+        '(see https://www.ampproject.org/docs/reference/spec.html' +
+        '#required-markup) [CUSTOM_JAVASCRIPT_DISALLOWED]\n' +
         'http://google.com/foo.html:29:3 '+
         'The attribute \'custom-element\' ' +
         'in tag \'amp-access extension .js script\' is set to the invalid ' +
         'value \'amp-foo\'. ' +
-        '(see https://github.com/ampproject/amphtml/blob/master/extensions/' +
-        'amp-access/amp-access.md) [AMP_TAG_PROBLEM]';
+        '(see https://www.ampproject.org/docs/reference/extended/' +
+        'amp-access.html) [AMP_TAG_PROBLEM]';
     test.run();
   });
 });
@@ -177,10 +177,10 @@ describe('ValidatorCssLengthValidation', () => {
     test.expectedOutput =
         'FAIL\n' +
         'feature_tests/css_length.html:28:2 The author stylesheet specified ' +
-        'in tag \'style\' is too long - we saw 50001 bytes whereas the ' +
-        'limit is 50000 bytes. (see https://github.com/ampproject/amphtml/' +
-        'blob/master/spec/amp-html-format.md#maximum-size) ' +
-        '[AUTHOR_STYLESHEET_PROBLEM]';
+        'in tag \'style amp-custom\' is too long - we saw 50001 bytes ' +
+        'whereas the limit is 50000 bytes. ' +
+        '(see https://www.ampproject.org/docs/reference/spec.html' +
+        '#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
     test.run();
   });
 
@@ -194,10 +194,10 @@ describe('ValidatorCssLengthValidation', () => {
     test.expectedOutput =
         'FAIL\n' +
         'feature_tests/css_length.html:28:2 The author stylesheet specified ' +
-        'in tag \'style\' is too long - we saw 50002 bytes whereas the limit ' +
-        'is 50000 bytes. (see https://github.com/ampproject/amphtml/blob/' +
-        'master/spec/amp-html-format.md#maximum-size) ' +
-        '[AUTHOR_STYLESHEET_PROBLEM]';
+        'in tag \'style amp-custom\' is too long - we saw 50002 bytes ' +
+        'whereas the limit is 50000 bytes. ' +
+        '(see https://www.ampproject.org/docs/reference/spec.html' +
+        '#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
     test.run();
   });
 });

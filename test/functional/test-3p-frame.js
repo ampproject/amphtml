@@ -15,7 +15,7 @@
  */
 
 import {addDataAndJsonAttributes_, getIframe, getBootstrapBaseUrl,
-    prefetchBootstrap} from '../../src/3p-frame';
+    getSubDomain, prefetchBootstrap} from '../../src/3p-frame';
 import {validateData} from '../../src/3p';
 import {documentInfoFor} from '../../src/document-info';
 import {loadPromise} from '../../src/event-helper';
@@ -57,7 +57,7 @@ describe('3p-frame', () => {
     addDataAndJsonAttributes_(div, obj);
     expect(obj).to.deep.equal({
       'foo': 'foo',
-      'bar': 'bar'
+      'bar': 'bar',
     });
 
     div.setAttribute('json', '{"abc": [1,2,3]}');
@@ -67,7 +67,7 @@ describe('3p-frame', () => {
     expect(obj).to.deep.equal({
       'foo': 'foo',
       'bar': 'bar',
-      'abc': [1, 2, 3]
+      'abc': [1, 2, 3],
     });
   });
 
@@ -88,7 +88,7 @@ describe('3p-frame', () => {
     div.getLayoutBox = function() {
       return {
         width: 100,
-        height: 200
+        height: 200,
       };
     };
 
@@ -150,10 +150,10 @@ describe('3p-frame', () => {
         'http://ads.localhost:9876/dist.3p/current/frame.max.html');
   });
 
-  it('should pick the right bootstrap url (prod)', () => {
+  it('should pick the right bootstrap unique url (prod)', () => {
     setModeForTesting({});
-    expect(getBootstrapBaseUrl(window)).to.equal(
-        'https://3p.ampproject.net/$internalRuntimeVersion$/frame.html');
+    expect(getBootstrapBaseUrl(window)).to.match(
+        /^https:\/\/d-\d+\.ampproject\.net\/\$\internal\w+\$\/frame\.html$/);
   });
 
   it('should pick the right bootstrap url (custom)', () => {
@@ -183,7 +183,47 @@ describe('3p-frame', () => {
     expect(fetches).to.have.length(2);
     expect(fetches[0].href).to.equal(
         'http://ads.localhost:9876/dist.3p/current/frame.max.html');
+    expect(fetches[0].getAttribute('as')).to.equal('document');
     expect(fetches[1].href).to.equal(
         'https://3p.ampproject.net/$internalRuntimeVersion$/f.js');
+    expect(fetches[1].getAttribute('as')).to.equal('script');
+  });
+
+  it('should make sub domains (unique)', () => {
+    expect(getSubDomain(window)).to.match(/^d-\d+$/);
+    expect(getSubDomain(window)).to.not.equal('d-00');
+  });
+
+  it('should make sub domains (Math)', () => {
+    const fakeWin = {
+      document: document,
+      Math: Math,
+    };
+    expect(getSubDomain(fakeWin)).to.match(/^d-\d+$/);
+  });
+
+  it('should make sub domains (crypto)', () => {
+    const fakeWin = {
+      document: document,
+      crypto: {
+        getRandomValues: function(arg) {
+          arg[0] = 123;
+          arg[1] = 987;
+        },
+      },
+    };
+    expect(getSubDomain(fakeWin)).to.equal('d-123987');
+  });
+
+  it('should make sub domains (fallback)', () => {
+    const fakeWin = {
+      document: document,
+      Math: {
+        random: function() {
+          return 0.567;
+        },
+      },
+    };
+    expect(getSubDomain(fakeWin)).to.equal('d-5670');
   });
 });

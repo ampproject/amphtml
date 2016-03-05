@@ -19,8 +19,9 @@ import {createIframePromise} from '../../testing/iframe';
 import {installAd} from '../../builtins/amp-ad';
 import {installEmbed} from '../../builtins/amp-embed';
 import {installCidService} from '../../src/service/cid-impl';
-import {installUserNotificationManager} from
-    '../../build/all/v0/amp-user-notification-0.1.max';
+import {
+  installUserNotificationManager,
+} from '../../build/all/v0/amp-user-notification-0.1.max';
 import {markElementScheduledForTesting} from '../../src/custom-element';
 import {setCookie} from '../../src/cookies';
 import * as sinon from 'sinon';
@@ -86,7 +87,7 @@ function tests(name, installer) {
         'data-aax_pubname': 'test123',
         'data-aax_src': '302',
         // Test precedence
-        'data-width': '6666'
+        'data-width': '6666',
       }, 'https://schema.org').then(ad => {
         const iframe = ad.firstChild;
         expect(iframe).to.not.be.null;
@@ -137,7 +138,7 @@ function tests(name, installer) {
           height: 100,
           type: 'a9',
           src: 'testsrc',
-          resizable: ''
+          resizable: '',
         }, 'https://schema.org').then(element => {
           return new Promise((resolve, unusedReject) => {
             impl = element.implementation_;
@@ -151,7 +152,7 @@ function tests(name, installer) {
                 sentinel: 'amp-test',
                 type: 'requestHeight',
                 is3p: true,
-                height: 217
+                height: 217,
               }, '*');
             };
             impl.iframe_.src = iframeSrc;
@@ -167,7 +168,7 @@ function tests(name, installer) {
           height: 100,
           type: 'a9',
           src: 'testsrc',
-          resizable: ''
+          resizable: '',
         }, 'https://schema.org').then(element => {
           impl = element.implementation_;
           impl.attemptChangeHeight = sinon.spy();
@@ -290,6 +291,33 @@ function tests(name, installer) {
           expect(ad.style.display).to.equal('none');
         });
       });
+
+      it('should hide placeholder when ad falls back', () => {
+        return getAd({
+          width: 300,
+          height: 750,
+          type: 'a9',
+          src: 'testsrc',
+        }, 'https://schema.org', ad => {
+          const placeholder = document.createElement('div');
+          placeholder.setAttribute('placeholder', '');
+          ad.appendChild(placeholder);
+          expect(placeholder.classList.contains('amp-hidden')).to.be.false;
+
+          const fallback = document.createElement('div');
+          fallback.setAttribute('fallback', '');
+          ad.appendChild(fallback);
+          return ad;
+        }).then(ad => {
+          const placeholderEl = ad.querySelector('[placeholder]');
+          sandbox.stub(
+              ad.implementation_, 'deferMutate', function(callback) {
+                callback();
+              });
+          ad.implementation_.noContentHandler_();
+          expect(placeholderEl.classList.contains('amp-hidden')).to.be.true;
+        });
+      });
     });
 
     describe('cid-ad support', () => {
@@ -330,7 +358,7 @@ function tests(name, installer) {
           height: 250,
           type: 'with_cid',
           src: 'testsrc',
-          'data-consent-notification-id': 'uid'
+          'data-consent-notification-id': 'uid',
         }, 'https://schema.org', function(ad) {
           const win = ad.ownerDocument.defaultView;
           const cidService = installCidService(win);
@@ -369,8 +397,8 @@ function tests(name, installer) {
     });
 
     describe('renderOutsideViewport', () => {
-      function getGoodAd(cb, layoutCb) {
-        return getAd({
+      function getGoodAd(cb, layoutCb, opt_loadingStrategy) {
+        const attributes = {
           width: 300,
           height: 250,
           type: 'a9',
@@ -379,8 +407,12 @@ function tests(name, installer) {
           'data-aax_pubname': 'test123',
           'data-aax_src': '302',
           // Test precedence
-          'data-width': '6666'
-        }, 'https://schema.org', element => {
+          'data-width': '6666',
+        };
+        if (opt_loadingStrategy) {
+          attributes['data-loading-strategy'] = opt_loadingStrategy;
+        }
+        return getAd(attributes, 'https://schema.org', element => {
           cb(element.implementation_);
           return element;
         }, layoutCb);
@@ -398,6 +430,40 @@ function tests(name, installer) {
           clock.tick(900);
           expect(ad.renderOutsideViewport()).to.be.false;
           clock.tick(100);
+          expect(ad.renderOutsideViewport()).to.be.true;
+        });
+      });
+
+      it('should prefer-viewability-over-views', () => {
+        let clock;
+        const elementBox = {
+          top: 4000,
+        };
+        const viewportRect = {
+          height: 1000,
+          bottom: 1000,
+        };
+        return getGoodAd(ad => {
+          ad.resources_.add(ad.element);
+          sandbox.stub(ad, 'getIntersectionElementLayoutBox', () => {
+            return elementBox;
+          });
+          sandbox.stub(ad.getViewport(), 'getRect', () => {
+            return viewportRect;
+          });
+        }, () => {
+          clock = sandbox.useFakeTimers();
+        }, 'prefer-viewability-over-views').then(ad => {
+          clock.tick(10000);
+          // False because we just rendered one.
+          expect(ad.renderOutsideViewport()).to.be.false;
+          viewportRect.bottom = '2749';
+          expect(ad.renderOutsideViewport()).to.be.false;
+          // 125% of viewport away
+          viewportRect.bottom = '2750';
+          expect(ad.renderOutsideViewport()).to.be.true;
+          // We currently render above viewport.
+          viewportRect.bottom = '6000';
           expect(ad.renderOutsideViewport()).to.be.true;
         });
       });

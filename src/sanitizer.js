@@ -19,7 +19,7 @@ import {
   getSourceUrl,
   isProxyOrigin,
   parseUrl,
-  resolveRelativeUrl
+  resolveRelativeUrl,
 } from './url';
 import {parseSrcset} from './srcset';
 
@@ -212,7 +212,7 @@ export function sanitizeFormattingHtml(html) {
         }
         return {
           'tagName': tagName,
-          'attribs': []
+          'attribs': [],
         };
       }
   );

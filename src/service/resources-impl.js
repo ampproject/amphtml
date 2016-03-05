@@ -18,9 +18,12 @@ import {FocusHistory} from '../focus-history';
 import {Pass} from '../pass';
 import {assert} from '../asserts';
 import {closest} from '../dom';
-import {documentStateFor} from '../document-state';
-import {expandLayoutRect, layoutRectLtwh, layoutRectsOverlap} from
-    '../layout-rect';
+import {onDocumentReady} from '../document-ready';
+import {
+  expandLayoutRect,
+  layoutRectLtwh,
+  layoutRectsOverlap,
+} from '../layout-rect';
 import {getService} from '../service';
 import {inputFor} from '../input';
 import {log} from '../log';
@@ -153,9 +156,6 @@ export class Resources {
     /** @private @const {!Vsync} */
     this.vsync_ = installVsyncService(this.win);
 
-    /** @private @const {!DocumentState} */
-    this.docState_ = documentStateFor(this.win);
-
     /** @private @const {!FocusHistory} */
     this.activeHistory_ = new FocusHistory(this.win, FOCUS_HISTORY_TIMEOUT_);
 
@@ -194,7 +194,7 @@ export class Resources {
     });
 
     // Ensure that we attempt to rebuild things when DOM is ready.
-    this.docState_.onReady(() => {
+    onDocumentReady(this.win.document, () => {
       this.documentReady_ = true;
       this.forceBuild_ = true;
       this.relayoutAll_ = true;
@@ -525,7 +525,7 @@ export class Resources {
             this.schedulePass(FOUR_FRAME_DELAY_);
           }
         });
-      }
+      },
     });
   }
 
@@ -755,8 +755,8 @@ export class Resources {
               this.viewport_.setScrollTop(state./*OK*/scrollTop +
                   (newScrollHeight - state./*OK*/scrollHeight));
             }
-          }
-        });
+          },
+        }, {});
       }
     }
   }
@@ -1141,7 +1141,7 @@ export class Resources {
         resource: resource,
         newHeight: newHeight,
         force: force,
-        callback: opt_callback
+        callback: opt_callback,
       });
     }
     this.schedulePassVsync();
@@ -1235,7 +1235,7 @@ export class Resources {
       priority: Math.max(resource.getPriority(), parentPriority) +
           priorityOffset,
       callback: callback,
-      scheduleTime: timer.now()
+      scheduleTime: timer.now(),
     };
     log.fine(TAG_, 'schedule:', task.id, 'at', task.scheduleTime);
 
@@ -1689,7 +1689,6 @@ export class Resource {
 
     this.layoutPromise_ = promise.then(() => this.layoutComplete_(true),
         reason => this.layoutComplete_(false, reason));
-    this.layoutPromise_.then(this.whenFirstLayoutCompleteResolve_);
     return this.layoutPromise_;
   }
 
@@ -1975,7 +1974,7 @@ export const ResourceState_ = {
   /**
    * The latest resource's layout failed.
    */
-  LAYOUT_FAILED: 5
+  LAYOUT_FAILED: 5,
 };
 
 

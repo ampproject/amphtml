@@ -47,7 +47,7 @@ describe('amp-youtube', () => {
             yt.implementation_.handleYoutubeMessages_({
               origin: 'https://www.youtube.com',
               source: ytIframe.contentWindow,
-              data: JSON.stringify({event: 'onReady'})
+              data: JSON.stringify({event: 'onReady'}),
             });
           });
 
@@ -157,8 +157,8 @@ describe('amp-youtube', () => {
         source: iframe.contentWindow,
         data: JSON.stringify({
           event: 'infoDelivery',
-          info: {playerState: 1}
-        })
+          info: {playerState: 1},
+        }),
       });
 
       expect(yt.implementation_.playerState_).to.equal(1);
@@ -182,6 +182,5 @@ describe('amp-youtube', () => {
       yt.implementation_.documentInactiveCallback();
       expect(yt.implementation_.pauseVideo_.called).to.be.true;
     });
-
   });
 });
