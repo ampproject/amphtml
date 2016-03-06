@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-import {AmpSharethrough} from '../../../../build/all/v0/amp-sharethrough-0.1.max';
+import {
+  AmpSharethrough,
+} from '../../../../build/all/v0/amp-sharethrough-0.1.max';
 import {getService} from '../../../../src/service';
 import {createIframePromise} from '../../../../testing/iframe';
 import {markElementScheduledForTesting} from '../../../../src/custom-element';
