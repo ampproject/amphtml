@@ -31,7 +31,7 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://amp-by-example.appspot.com/amp-brightcove.html">amp-brightcove.html</a><br /><a href="https://github.com/ampproject/amphtml/blob/master/examples/brightcove.amp.html">brightcove.amp.html</a></td>
+    <td><a href="https://ampbyexample.com/components/amp-brightcove">amp-brightcove.html</a><br /><a href="https://github.com/ampproject/amphtml/blob/master/examples/brightcove.amp.html">brightcove.amp.html</a></td>
   </tr>
 </table>
 
