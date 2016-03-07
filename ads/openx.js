@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,6 @@ export function openx(global, data) {
     if (data.dfpSlot) {
 
         // anything starting with 'dfp' gets promoted
-        // otherwise it's removed
         for (let openxKey of openxData) {
             if (openxKey in dfpData && openxKey !== 'dfp') {
                 if (openxKey.startsWith('dfp')) {
@@ -60,11 +59,11 @@ export function openx(global, data) {
         ]);
     }
 
-    let jssdk = 'https://' + data.host + '/mw/1.0/jstag';
+    let jssdk = `https://${data.host}/mw/1.0/jstag`;
 
     // decide how to render
     if (data.nc && data.dfpSlot) { // doubleclick bidder
-        jssdk += '?nc=' + data.nc;
+        jssdk += `?nc=${data.nc}`;
         writeScript(global, jssdk, () => {
             doubleClickWithGpt(global, dfpData);
         });
@@ -87,6 +86,8 @@ export function openx(global, data) {
 }
 
 /**
+ * Copied from doubleclick.js
+ *
  * @param {!Window} global
  * @param {!Object} data
  */
@@ -159,6 +160,8 @@ function doubleClickWithGpt(global, data) {
 }
 
 /**
+ * Copied from doubleclick.js
+ *
  * @param {!Object} data
  * @return {number}
  */

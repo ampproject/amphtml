@@ -101,6 +101,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [Dot and Media](../ads/dotandads.md)
 - [Doubleclick](../ads/doubleclick.md)
 - [Flite](../ads/flite.md)
+- [OpenX](../ads/openx.md)
 - [plista](../ads/plista.md)
 - [Smart AdServer](../ads/smartadserver.md)
 - [Yieldmo](../ads/yieldmo.md)

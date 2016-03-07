@@ -48,7 +48,7 @@ forwarded to Doubleclick by the following rules:
 __Required:__
 
 - data-host - SSL-enabled OpenX delivery domain
-- data-nc - Network code
+- data-nc - Network code + sitename
 - data-dfp-slot - The Doubleclick slot
 
 __Optional:__
@@ -59,7 +59,7 @@ __Optional:__
 <amp-ad width="728" height="90"
       type="openx"
       data-host="domain.openx.net"
-      data-nc="56789"
+      data-nc="56789-MySite"
       data-dfp-slot="/12345/dfp_zone"
       json='{"dfp":{"targeting":{"sport":["rugby","cricket"]},"categoryExclusions":["health"],"tagForChildDirectedTreatment":1}}'>
 </amp-ad>
