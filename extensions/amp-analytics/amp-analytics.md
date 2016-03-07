@@ -117,7 +117,7 @@ Adds support for AT Internet. More details for adding AT Internet support can be
 
 Type attribute value: `chartbeat`
 
-Adds support for Chartbeat. More details for adding Chartbeat support can be found at [support.chartbeat.com](http://support.chartbeat.com/docs/).
+Adds support for Chartbeat. More details for adding Chartbeat support can be found at [support.chartbeat.com](http://support.chartbeat.com/docs/integrations.html#amp).
 
 ### comScore
 
