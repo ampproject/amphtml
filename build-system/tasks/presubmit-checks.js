@@ -296,7 +296,7 @@ var forbiddenTerms = {
       'src/error.js',
     ],
   },
-  '(doc.*)\\.contains': {
+  '(doc[^.]*)\\.contains': {
     message: 'Use dom.documentContains API.',
     whitelist: [
       'src/dom.js',
