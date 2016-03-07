@@ -27,7 +27,7 @@ limitations under the License.
   </tr>
    <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://amp-by-example.appspot.com/amp-img.html">amp-img.html</a><br /><a href="https://github.com/ampproject/amphtml/blob/master/examples/responsive.amp.html">responsive.amp.html</a></td>
+    <td><a href="https://ampbyexample.com/components/amp-img">amp-img.html</a><br /><a href="https://github.com/ampproject/amphtml/blob/master/examples/responsive.amp.html">responsive.amp.html</a></td>
   </tr>
 </table>
 
