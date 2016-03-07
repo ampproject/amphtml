@@ -33,6 +33,19 @@ var port = args[1];
 
 app.use(bodyParser.json());
 
+app.use('/examples', function(req, res, next) {
+  // Redirect physical dir to build dir that has versions belonging to
+  // local AMP.
+  if (req.url == '/' || req.url == '') {
+    res.writeHead(302, {
+      'Location': '../examples.build/'
+    });
+    res.end();
+    return;
+  }
+  next();
+});
+
 app.use('/api/show', function(req, res) {
   res.setHeader('Content-Type', 'application/json');
   res.end(JSON.stringify({
