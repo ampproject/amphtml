@@ -530,8 +530,8 @@ export class BaseElement {
    * @param {!Element|!Array<!Element>} elements
    * @protected
    */
-  schedulePause(elements) {
-    this.resources_.schedulePause(this.element, elements);
+  scheduleUnload(elements) {
+    this.resources_.scheduleUnload(this.element, elements);
   }
 
   /**

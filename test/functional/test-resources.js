@@ -211,8 +211,7 @@ describe('Resources', () => {
   });
 });
 
-
-describe('Resources schedulePause', () => {
+describe('Resources scheduleUnload', () => {
 
   let sandbox;
   let resources;
@@ -241,6 +240,8 @@ describe('Resources schedulePause', () => {
         contains() {
           return true;
         },
+      },
+      pauseCallback() {
       },
       unlayoutCallback() {
         return false;
@@ -273,19 +274,19 @@ describe('Resources schedulePause', () => {
 
   it('should not throw with a single element', () => {
     expect(() => {
-      resources.schedulePause(parent, child1);
+      resources.scheduleUnload(parent, child1);
     }).to.not.throw();
   });
 
   it('should not throw with an array of elements', () => {
     expect(() => {
-      resources.schedulePause(parent, [child1, child2]);
+      resources.scheduleUnload(parent, [child1, child2]);
     }).to.not.throw();
   });
 
   it('should be ok with non amp children', () => {
     expect(() => {
-      resources.schedulePause(parent, children);
+      resources.scheduleUnload(parent, children);
     }).to.not.throw();
   });
 
@@ -293,7 +294,7 @@ describe('Resources schedulePause', () => {
     const stub1 = sandbox.stub(child1, 'unlayoutCallback');
     const stub2 = sandbox.stub(child2, 'unlayoutCallback');
 
-    resources.schedulePause(parent, children);
+    resources.scheduleUnload(parent, children);
     expect(stub1.calledOnce).to.be.true;
     expect(stub2.calledOnce).to.be.true;
   });
@@ -302,7 +303,7 @@ describe('Resources schedulePause', () => {
     const stub1 = sandbox.stub(child1, 'pauseCallback');
     const stub2 = sandbox.stub(child2, 'pauseCallback');
 
-    resources.schedulePause(parent, children);
+    resources.scheduleUnload(parent, children);
     expect(stub1.calledOnce).to.be.true;
     expect(stub2.calledOnce).to.be.true;
   });

@@ -408,7 +408,7 @@ export class Resources {
    * @param {!Element} parentElement
    * @param {!Element|!Array<!Element>} subElements
    */
-  schedulePause(parentElement, subElements) {
+  scheduleUnload(parentElement, subElements) {
     const parentResource = this.getResourceForElement(parentElement);
     subElements = elements_(subElements);
 
