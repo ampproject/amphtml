@@ -96,7 +96,7 @@ describe('the framerate service', () => {
     expect(performance.tickDelta.callCount).to.equal(1);
     expect(performance.flush.callCount).to.equal(1);
     expect(performance.tickDelta.args[0][0]).to.equal('fps');
-    expect(performance.tickDelta.args[0][1]).to.within(15, 16);
+    expect(performance.tickDelta.args[0][1]).to.within(44, 45);
     expect(fr.frameCount_).to.equal(0);
 
     // Second round
@@ -118,7 +118,7 @@ describe('the framerate service', () => {
     expect(performance.tickDelta.callCount).to.equal(2);
     expect(performance.flush.callCount).to.equal(2);
     expect(performance.tickDelta.args[1][0]).to.equal('fps');
-    expect(performance.tickDelta.args[1][1]).to.within(9, 10);
+    expect(performance.tickDelta.args[1][1]).to.within(50, 51);
   });
 
   it('does nothing with an invisible window', () => {
@@ -153,9 +153,9 @@ describe('the framerate service', () => {
     expect(performance.tickDelta.callCount).to.equal(2);
     expect(performance.flush.callCount).to.equal(1);
     expect(performance.tickDelta.args[0][0]).to.equal('fps');
-    expect(performance.tickDelta.args[0][1]).to.within(15, 16);
+    expect(performance.tickDelta.args[0][1]).to.within(44, 45);
     expect(performance.tickDelta.args[1][0]).to.equal('fal');
-    expect(performance.tickDelta.args[1][1]).to.within(15, 16);
+    expect(performance.tickDelta.args[1][1]).to.within(44, 45);
     // Second round
     fr.collect();
     for (let i = 0; i < 50; i++) {
