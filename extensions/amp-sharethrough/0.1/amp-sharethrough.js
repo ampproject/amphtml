@@ -26,7 +26,7 @@ const serverUrl = 'https://btlr.sharethrough.com/';
 /**
  * @type {string} The address where analytics are posted
  */
-const analyticsUrl = 'https://b.sharethrough.com/';
+const analyticsUrl = 'https://b.sharethrough.com/butler';
 
 /**
  * @param {!Window} win Destination window for the new element.
