@@ -57,15 +57,35 @@ In concrete terms this means that:
       h1 {color: red}
     </style>
     <script type="application/ld+json">
-    {
-      "@context": "http://schema.org",
-      "@type": "NewsArticle",
-      "headline": "Article headline",
-      "image": [
-        "thumbnail1.jpg"
-      ],
-      "datePublished": "2015-02-05T08:00:00+08:00"
-    }
+      {
+        "@context": "http://schema.org",
+        "@type": "NewsArticle",
+        "mainEntityOfPage": "http://cdn.ampproject.org/article-metadata.html",
+        "headline": "Lorem Ipsum",
+        "datePublished": "1907-05-05T12:02:41Z",
+        "dateModified": "1907-05-05T12:02:41Z",
+        "description": "The Catiline Orations continue to beguile engineers and designers alike -- but can it stand the test of time?",
+        "author": {
+          "@type": "Person",
+          "name": "Jordan M Adler"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Google",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "http://cdn.ampproject.org/logo.jpg",
+            "width": 600,
+            "height": 60
+          }
+        },
+        "image": {
+          "@type": "ImageObject",
+          "url": "http://cdn.ampproject.org/leader.jpg",
+          "height": 2000,
+          "width": 800
+        }
+      }
     </script>
     <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
     <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
