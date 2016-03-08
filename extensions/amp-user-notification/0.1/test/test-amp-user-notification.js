@@ -47,7 +47,6 @@ describe('amp-user-notification', () => {
   afterEach(() => {
     storageMock.verify();
     sandbox.restore();
-    sandbox = null;
   });
 
   function getUserNotification(attrs = {}) {

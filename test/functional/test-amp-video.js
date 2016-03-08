@@ -27,7 +27,6 @@ describe('amp-video', () => {
 
   afterEach(() => {
     sandbox.restore();
-    sandbox = null;
   });
 
   function getFooVideoSrc(mediatype) {

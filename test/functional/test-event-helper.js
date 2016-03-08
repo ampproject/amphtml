@@ -72,12 +72,7 @@ describe('EventHelper', () => {
     expect(loadObservable.getHandlerCount()).to.equal(0);
     expect(errorObservable.getHandlerCount()).to.equal(0);
 
-    loadObservable = null;
-    errorObservable = null;
-    element = null;
-    clock = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   it('listen', () => {

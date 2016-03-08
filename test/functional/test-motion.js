@@ -74,7 +74,6 @@ describe('Motion continueMotion', () => {
 
   afterEach(() => {
     sandbox.restore();
-    sandbox = null;
   });
 
   function testContinuation(maxVelocity, haltAfterTime) {

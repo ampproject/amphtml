@@ -44,9 +44,6 @@ describe('instrumentation', function() {
 
   afterEach(() => {
     sandbox.restore();
-    sandbox = null;
-    fakeViewport = null;
-    ins = null;
   });
 
   it('always fires click listeners when selector is set to *', () => {

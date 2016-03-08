@@ -75,8 +75,6 @@ describe('FontLoader', () => {
 
   afterEach(() => {
     sandbox.restore();
-    sandbox = null;
-    fontloader = null;
   });
 
   function getIframe() {

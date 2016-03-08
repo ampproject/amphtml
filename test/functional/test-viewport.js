@@ -63,12 +63,7 @@ describe('Viewport', () => {
   });
 
   afterEach(() => {
-    viewport = null;
-    binding = null;
-    viewer = null;
-    clock = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   it('should pass through size and scroll', () => {
@@ -407,12 +402,7 @@ describe('Viewport META', () => {
     });
 
     afterEach(() => {
-      viewport = null;
-      binding = null;
-      viewer = null;
-      clock = null;
       sandbox.restore();
-      sandbox = null;
     });
 
     it('should initialize original viewport meta', () => {
@@ -513,11 +503,8 @@ describe('ViewportBindingNatural', () => {
   });
 
   afterEach(() => {
-    binding = null;
     windowMock.verify();
-    windowMock = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   it('should NOT require fixed layer transferring', () => {
@@ -669,11 +656,8 @@ describe('ViewportBindingNaturalIosEmbed', () => {
   });
 
   afterEach(() => {
-    binding = null;
     windowMock.verify();
-    windowMock = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   it('should require fixed layer transferring', () => {
@@ -863,10 +847,7 @@ describe('ViewportBindingVirtual', () => {
   });
 
   afterEach(() => {
-    binding = null;
-    viewer = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   it('should NOT require fixed layer transferring', () => {

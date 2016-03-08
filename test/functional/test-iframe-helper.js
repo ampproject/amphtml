@@ -39,7 +39,6 @@ describe('iframe-helper', function() {
 
   afterEach(() => {
     container.iframe.parentNode.removeChild(container.iframe);
-    testIframe = null;
     sandbox.restore();
   });
 

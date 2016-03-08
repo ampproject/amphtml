@@ -78,10 +78,6 @@ describe('amp-analytics', function() {
 
   afterEach(() => {
     sandbox.restore();
-    sandbox = null;
-    windowApi = null;
-    sendRequestSpy = null;
-    uidService = null;
   });
 
   function getAnalyticsTag(config, attrs) {

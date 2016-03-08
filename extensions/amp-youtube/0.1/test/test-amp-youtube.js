@@ -31,7 +31,6 @@ describe('amp-youtube', () => {
 
   afterEach(() => {
     sandbox.restore();
-    sandbox = null;
   });
 
   function getYt(videoId, opt_responsive, opt_beforeLayoutCallback) {

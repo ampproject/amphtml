@@ -43,7 +43,6 @@ describe('AccessService', () => {
       document.body.removeChild(element);
     }
     sandbox.restore();
-    sandbox = null;
   });
 
   it('should disable service when no config', () => {
@@ -329,7 +328,6 @@ describe('AccessService authorization', () => {
     }
     analyticsMock.verify();
     sandbox.restore();
-    sandbox = null;
   });
 
   function expectGetReaderId(result) {
@@ -619,7 +617,6 @@ describe('AccessService applyAuthorizationToElement_', () => {
       elementOff.parentElement.removeChild(elementOff);
     }
     sandbox.restore();
-    sandbox = null;
   });
 
   function createTemplate() {
@@ -774,7 +771,6 @@ describe('AccessService pingback', () => {
     }
     analyticsMock.verify();
     sandbox.restore();
-    sandbox = null;
   });
 
   function expectGetReaderId(result) {
@@ -1118,7 +1114,6 @@ describe('AccessService login', () => {
       configElement.parentElement.removeChild(configElement);
     }
     sandbox.restore();
-    sandbox = null;
   });
 
   it('should intercept global action to login', () => {
@@ -1408,7 +1403,6 @@ describe('AccessService analytics', () => {
       configElement.parentElement.removeChild(configElement);
     }
     sandbox.restore();
-    sandbox = null;
   });
 
   it('should return null when not enabled', () => {
@@ -1522,7 +1516,6 @@ describe('AccessService type=other', () => {
       configElement.parentElement.removeChild(configElement);
     }
     sandbox.restore();
-    sandbox = null;
   });
 
   it('should short-circuit authorization flow', () => {

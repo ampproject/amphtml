@@ -540,7 +540,6 @@ describe('Slides functional', () => {
     afterEach(() => {
       teardownElements();
       sandbox.restore();
-      sandbox = null;
     });
 
     it('should call setupAutoplay_', () => {

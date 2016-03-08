@@ -26,7 +26,6 @@ describe('Style', () => {
 
   afterEach(() => {
     sandbox.restore();
-    sandbox = null;
   });
 
   it('toggle', () => {

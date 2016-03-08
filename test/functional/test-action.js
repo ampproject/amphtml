@@ -262,9 +262,7 @@ describe('Action findAction', () => {
   });
 
   afterEach(() => {
-    action = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   it('should create action map in getActionMap_', () => {
@@ -341,9 +339,7 @@ describe('Action method', () => {
 
   afterEach(() => {
     document.body.removeChild(parent);
-    action = null;
     sandbox.restore();
-    sandbox = null;
   });
 
 
@@ -424,10 +420,7 @@ describe('Action interceptor', () => {
   });
 
   afterEach(() => {
-    action = null;
-    clock = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   function getQueue() {
@@ -515,9 +508,7 @@ describe('Action common handler', () => {
   });
 
   afterEach(() => {
-    action = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   it('should execute actions registered', () => {

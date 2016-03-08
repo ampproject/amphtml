@@ -38,7 +38,6 @@ describe('3p-frame', () => {
       m.parentElement.removeChild(m);
     }
     sandbox.restore();
-    sandbox = null;
   });
 
   function addCustomBootstrap(url) {

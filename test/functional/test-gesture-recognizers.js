@@ -43,9 +43,7 @@ describe('TapRecognizer', () => {
 
   afterEach(() => {
     gesturesMock.verify();
-    gesturesMock = null;
     sandbox.restore();
-    sandbox = null;
   });
 
 
@@ -134,9 +132,7 @@ describe('DoubletapRecognizer', () => {
 
   afterEach(() => {
     gesturesMock.verify();
-    gesturesMock = null;
     sandbox.restore();
-    sandbox = null;
   });
 
 
@@ -241,10 +237,7 @@ describe('SwipeXYRecognizer', () => {
 
   afterEach(() => {
     gesturesMock.verify();
-    gesturesMock = null;
-    clock = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   function diff(value, compare, error) {
@@ -428,10 +421,7 @@ describe('TapzoomRecognizer', () => {
 
   afterEach(() => {
     gesturesMock.verify();
-    gesturesMock = null;
-    clock = null;
     sandbox.restore();
-    sandbox = null;
   });
 
 
@@ -609,10 +599,7 @@ describe('PinchRecognizer', () => {
 
   afterEach(() => {
     gesturesMock.verify();
-    gesturesMock = null;
-    clock = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   function diff(value, compare, error) {

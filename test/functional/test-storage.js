@@ -62,7 +62,6 @@ describe('Storage', () => {
 
   afterEach(() => {
     sandbox.restore();
-    sandbox = null;
   });
 
   function expectStorage(keyValues) {
@@ -328,9 +327,7 @@ describe('Store', () => {
   });
 
   afterEach(() => {
-    clock = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   it('should get undefined with empty store', () => {
@@ -442,7 +439,6 @@ describe('LocalStorageBinding', () => {
 
   afterEach(() => {
     sandbox.restore();
-    sandbox = null;
   });
 
   it('should load store when available', () => {
@@ -513,7 +509,6 @@ describe('ViewerStorageBinding', () => {
 
   afterEach(() => {
     sandbox.restore();
-    sandbox = null;
   });
 
   it('should load store from viewer', () => {
