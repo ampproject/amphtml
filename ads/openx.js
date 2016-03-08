@@ -65,6 +65,7 @@ export function openx(global, data) {
     if (data.nc && data.dfpSlot) { // doubleclick bidder
         jssdk += `?nc=${data.nc}`;
         writeScript(global, jssdk, () => {
+            OX._requestArgs['amp'] = 1;
             doubleClickWithGpt(global, dfpData);
         });
     } else if (data.auid) { // show just an ad
@@ -73,6 +74,7 @@ export function openx(global, data) {
                 const oxRequest = OX();
                 const oxAnchor = document.createElement('div');
                 global.document.body.appendChild(oxAnchor);
+                OX._requestArgs['amp'] = 1;
                 oxRequest.addAdUnit(data.auid);
                 oxRequest.setAdSizes([data.width + 'x' + data.height]);
                 oxRequest.getOrCreateAdUnit(data.auid).set('anchor', oxAnchor);
