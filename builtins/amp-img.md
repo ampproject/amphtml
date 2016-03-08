@@ -36,7 +36,11 @@ limitations under the License.
 The runtime may choose to delay or prioritize resource loading based on the viewport position, system resources, connection bandwidth, or other factors. The `amp-img` components allows the runtime to effectively manage image resources this way.
 
 `amp-img` components, like all externally fetched AMP resources, must be given an
-explicit size (as in width / height) in advance, so that the aspect ratio can be known without fetching the image. Actual layout behavior is determined by the layout attribute. If the resource requested by the `amp-img` component fails to load, the space will be blank. A placeholder background color or other visual can be set using CSS selector and style on the element itself.
+explicit size (as in width / height) in advance, so that the aspect ratio can be known without fetching the image. Actual layout behavior is determined by the layout attribute.
+
+If the resource requested by the `amp-img` component fails to load, the space will be blank unless a [`fallback`](https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md#fallback) child is provided. A fallback is only executed on the initial layout and subsequent src changes after the fact (through resize + srcset for example) will not have a fallback for performance implications.
+
+A placeholder background color or other visual can be set using CSS selector and style on the element itself.
 
 The `amp-img` includes attributes for denoting attribution via the attribution attribute.
 
