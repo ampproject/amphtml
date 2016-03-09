@@ -156,9 +156,7 @@ export function addDataAndJsonAttributes_(element, attributes) {
 export function prefetchBootstrap(window) {
   const url = getBootstrapBaseUrl(window);
   const preconnect = preconnectFor(window);
-  // `as=document` attribute is left out on purpose for lack of support and is
-  // an invalid value that is thrown as a warning message in the logs.
-  preconnect.prefetch(url);
+  preconnect.prefetch(url, 'document');
   // While the URL may point to a custom domain, this URL will always be
   // fetched by it.
   preconnect.prefetch(
