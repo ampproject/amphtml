@@ -35,28 +35,6 @@ limitations under the License.
   </tr>
 </table>
 
-The following lists validation errors specific to the `amp-lightbox` tag
-(see also `amp-lightbox` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii)):
-
-<table>
-  <tr>
-    <th width="40%"><strong>Validation Error</strong></th>
-    <th>Description</th>
-  </tr>
-  <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#tag-required-by-another-tag-is-missing">The 'example1' tag is missing or incorrect, but required by 'example2'.</a></td>
-    <td>Error thrown when required <code>amp-lightbox</code> extension <code>.js</code> script tag is missing or incorrect.</td>
-  </tr>
-  <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#implied-layout-isnt-supported-by-amp-tag">The implied layout 'example1' is not supported by tag 'example2'.</a></td>
-    <td>The only supported layout type is <code>NODISPLAY</code>. Error thrown if implied layout is any other value.</td>
-  </tr>
-  <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#specified-layout-isnt-supported-by-amp-tag">The specified layout 'example1' is not supported by tag 'example2'.</a></td>
-    <td>The only supported layout type is <code>NODISPLAY</code>. Error thrown if specified layout is any other value.</td>
-  </tr>
-</table>
-
 ## Behavior
 
 The `amp-lightbox` component defines the child elements that will be displayed in a full-viewport overlay. It is triggered to take up the viewport when the user taps or clicks on an element with `on` attribute that targets `amp-lightbox` element’s `id`.
@@ -79,3 +57,27 @@ Example:
 ## Styling
 
 The `amp-lightbox` component can be styled with standard CSS.
+
+## Validation errors
+
+The following lists validation errors specific to the `amp-lightbox` tag
+(see also `amp-lightbox` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii)):
+
+<table>
+  <tr>
+    <th width="40%"><strong>Validation Error</strong></th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#tag-required-by-another-tag-is-missing">The 'example1' tag is missing or incorrect, but required by 'example2'.</a></td>
+    <td>Error thrown when required <code>amp-lightbox</code> extension <code>.js</code> script tag is missing or incorrect.</td>
+  </tr>
+  <tr>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#implied-layout-isnt-supported-by-amp-tag">The implied layout 'example1' is not supported by tag 'example2'.</a></td>
+    <td>The only supported layout type is <code>NODISPLAY</code>. Error thrown if implied layout is any other value.</td>
+  </tr>
+  <tr>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#specified-layout-isnt-supported-by-amp-tag">The specified layout 'example1' is not supported by tag 'example2'.</a></td>
+    <td>The only supported layout type is <code>NODISPLAY</code>. Error thrown if specified layout is any other value.</td>
+  </tr>
+</table>
