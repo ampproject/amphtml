@@ -31,6 +31,33 @@ limitations under the License.
   </tr>
 </table>
 
+## Behavior
+
+The `amp-pixel` component behaves like a simple tracking pixel `img`. It takes a single URL, but provides variables that can be replaced by the component in the URL string when making the request. See the `src` attribute for more information.
+
+## Attributes
+
+**src**
+
+A simple URL to send a GET request to when the tracking pixel is loaded.
+
+## Substitutions
+
+The `amp-pixel` allows all standard URL variable substitutions.
+See [Substitutions Guide](../spec/amp-var-substitutions.md) for more info.
+
+For instance:
+```html
+<amp-pixel src="https://foo.com/pixel?RANDOM"></amp-pixel>
+```
+may make a request to something like `https://foo.com/pixel?0.8390278471201` where the RANDOM value is randomly generated upon each impression.
+
+## Styling
+
+`amp-pixel` should not be styled.
+
+## Validation errors
+
 The following lists validation errors specific to the `amp-pixel` tag
 (see also `amp-pixel` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii)):
 
@@ -64,28 +91,3 @@ The following lists validation errors specific to the `amp-pixel` tag
     <td>Error thrown when specified layout set to <code>FIXED_HEIGHT</code>, <code>RESPONSIVE</code>, <code>FILL</code>, or <code>CONTAINER</code> as these aren't supported.</td>
   </tr>
 </table>
-
-## Behavior
-
-The `amp-pixel` component behaves like a simple tracking pixel `img`. It takes a single URL, but provides variables that can be replaced by the component in the URL string when making the request. See the `src` attribute for more information.
-
-## Attributes
-
-**src**
-
-A simple URL to send a GET request to when the tracking pixel is loaded.
-
-## Substitutions
-
-The `amp-pixel` allows all standard URL variable substitutions.
-See [Substitutions Guide](../spec/amp-var-substitutions.md) for more info.
-
-For instance:
-```html
-<amp-pixel src="https://foo.com/pixel?RANDOM"></amp-pixel>
-```
-may make a request to something like `https://foo.com/pixel?0.8390278471201` where the RANDOM value is randomly generated upon each impression.
-
-## Styling
-
-`amp-pixel` should not be styled.
