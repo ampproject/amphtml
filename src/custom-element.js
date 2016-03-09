@@ -692,7 +692,7 @@ export function createAmpElementProto(win, name, implementationClass) {
   * @final
   */
   ElementProto.getIntersectionChangeEntry = function() {
-    const box = this.implementation_.getInsersectionElementLayoutBox();
+    const box = this.implementation_.getIntersectionElementLayoutBox();
     const rootBounds = this.implementation_.getViewport().getRect();
     return getIntersectionChangeEntry(
         timer.now(),

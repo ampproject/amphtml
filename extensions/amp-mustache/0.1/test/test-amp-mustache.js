@@ -16,7 +16,7 @@
 
 import {
   AmpMustache,
-} from '../../../../build/all/v0/amp-mustache-0.1.max';
+} from '../amp-mustache';
 
 describe('amp-mustache template', () => {
 

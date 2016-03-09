@@ -21,7 +21,7 @@ import {installEmbed} from '../../builtins/amp-embed';
 import {installCidService} from '../../src/service/cid-impl';
 import {
   installUserNotificationManager,
-} from '../../build/all/v0/amp-user-notification-0.1.max';
+} from '../../extensions/amp-user-notification/0.1/amp-user-notification';
 import {markElementScheduledForTesting} from '../../src/custom-element';
 import {setCookie} from '../../src/cookies';
 import * as sinon from 'sinon';
@@ -397,8 +397,8 @@ function tests(name, installer) {
     });
 
     describe('renderOutsideViewport', () => {
-      function getGoodAd(cb, layoutCb) {
-        return getAd({
+      function getGoodAd(cb, layoutCb, opt_loadingStrategy) {
+        const attributes = {
           width: 300,
           height: 250,
           type: 'a9',
@@ -408,7 +408,11 @@ function tests(name, installer) {
           'data-aax_src': '302',
           // Test precedence
           'data-width': '6666',
-        }, 'https://schema.org', element => {
+        };
+        if (opt_loadingStrategy) {
+          attributes['data-loading-strategy'] = opt_loadingStrategy;
+        }
+        return getAd(attributes, 'https://schema.org', element => {
           cb(element.implementation_);
           return element;
         }, layoutCb);
@@ -426,6 +430,40 @@ function tests(name, installer) {
           clock.tick(900);
           expect(ad.renderOutsideViewport()).to.be.false;
           clock.tick(100);
+          expect(ad.renderOutsideViewport()).to.be.true;
+        });
+      });
+
+      it('should prefer-viewability-over-views', () => {
+        let clock;
+        const elementBox = {
+          top: 4000,
+        };
+        const viewportRect = {
+          height: 1000,
+          bottom: 1000,
+        };
+        return getGoodAd(ad => {
+          ad.resources_.add(ad.element);
+          sandbox.stub(ad, 'getIntersectionElementLayoutBox', () => {
+            return elementBox;
+          });
+          sandbox.stub(ad.getViewport(), 'getRect', () => {
+            return viewportRect;
+          });
+        }, () => {
+          clock = sandbox.useFakeTimers();
+        }, 'prefer-viewability-over-views').then(ad => {
+          clock.tick(10000);
+          // False because we just rendered one.
+          expect(ad.renderOutsideViewport()).to.be.false;
+          viewportRect.bottom = '2749';
+          expect(ad.renderOutsideViewport()).to.be.false;
+          // 125% of viewport away
+          viewportRect.bottom = '2750';
+          expect(ad.renderOutsideViewport()).to.be.true;
+          // We currently render above viewport.
+          viewportRect.bottom = '6000';
           expect(ad.renderOutsideViewport()).to.be.true;
         });
       });

@@ -206,6 +206,18 @@ describe('UrlReplacements', () => {
     });
   });
 
+  it('should replace VIEWPORT_WIDTH', () => {
+    return expand('?vw=VIEWPORT_WIDTH').then(res => {
+      expect(res).to.match(/vw=\d+/);
+    });
+  });
+
+  it('should replace VIEWPORT_HEIGHT', () => {
+    return expand('?vh=VIEWPORT_HEIGHT').then(res => {
+      expect(res).to.match(/vh=\d+/);
+    });
+  });
+
   it('should replace PAGE_LOAD_TIME', () => {
     return expand('?sh=PAGE_LOAD_TIME').then(res => {
       expect(res).to.match(/sh=\d+/);
@@ -352,6 +364,33 @@ describe('UrlReplacements', () => {
     replacements.set_('TWO', () => 'b');
     return expect(replacements.expand('?a=ONE&b=TWO'))
         .to.eventually.equal('?a=b&b=b');
+  });
+
+  it('should report errors & replace them with empty string (sync)', () => {
+    const clock = sandbox.useFakeTimers();
+    const replacements = urlReplacementsFor(window);
+    replacements.set_('ONE', () => {
+      throw new Error('boom');
+    });
+    const p = expect(replacements.expand('?a=ONE')).to.eventually.equal('?a=');
+    expect(() => {
+      clock.tick(1);
+    }).to.throw(/boom/);
+    return p;
+  });
+
+  it('should report errors & replace them with empty string (promise)', () => {
+    const clock = sandbox.useFakeTimers();
+    const replacements = urlReplacementsFor(window);
+    replacements.set_('ONE', () => {
+      return Promise.reject(new Error('boom'));
+    });
+    return expect(replacements.expand('?a=ONE')).to.eventually.equal('?a=')
+        .then(() => {
+          expect(() => {
+            clock.tick(1);
+          }).to.throw(/boom/);
+        });
   });
 
   it('should support positional arguments', () => {
@@ -530,7 +569,6 @@ describe('UrlReplacements', () => {
       accessService = {
         getAccessReaderId: () => {},
         getAuthdataField: () => {},
-        whenFirstAuthorized: () => {},
       };
       accessServiceMock = sandbox.mock(accessService);
       reportDevSpy = sandbox.spy();
@@ -571,12 +609,9 @@ describe('UrlReplacements', () => {
     });
 
     it('should replace AUTHDATA', () => {
-      accessServiceMock.expects('whenFirstAuthorized')
-          .returns(Promise.resolve())
-          .once();
       accessServiceMock.expects('getAuthdataField')
           .withExactArgs('field1')
-          .returns('value1')
+          .returns(Promise.resolve('value1'))
           .once();
       return expand('?a=AUTHDATA(field1)').then(res => {
         expect(res).to.match(/a=value1/);

@@ -23,6 +23,7 @@
 goog.provide('parse_css.AtRule');
 goog.provide('parse_css.BlockType');
 goog.provide('parse_css.Declaration');
+goog.provide('parse_css.ParsedCssUrl');
 goog.provide('parse_css.QualifiedRule');
 goog.provide('parse_css.Rule');
 goog.provide('parse_css.RuleVisitor');
@@ -30,6 +31,7 @@ goog.provide('parse_css.Stylesheet');
 goog.provide('parse_css.TokenStream');
 goog.provide('parse_css.extractAFunction');
 goog.provide('parse_css.extractASimpleBlock');
+goog.provide('parse_css.extractUrls');
 goog.provide('parse_css.parseAStylesheet');
 
 goog.require('amp.validator.ValidationError.Code');
@@ -740,4 +742,201 @@ parse_css.extractAFunction = function(tokenStream) {
   const tokenList = consumedTokens.slice(0, -1);
   tokenList.push(createEOFTokenAt(consumedTokens[consumedTokens.length - 1]));
   return tokenList;
+};
+
+/**
+ * Used by parse_css.ExtractUrls to return urls it has seen. This represents
+ * URLs in CSS such as url(http://foo.com/) and url("http://bar.com/").
+ * For this token, line() and col() indicate the position information
+ * of the left-most CSS token that's part of the URL. E.g., this would be
+ * the URLToken instance or the FunctionToken instance.
+ */
+parse_css.ParsedCssUrl = class extends parse_css.Token {
+  constructor() {
+    super();
+    /** @type {parse_css.TokenType} */
+    this.tokenType = parse_css.TokenType.PARSED_CSS_URL;
+    /**
+     * The decoded URL. This string will not contain CSS string escapes,
+     * quotes, or similar. Encoding is utf8.
+     * @type {!string}
+     */
+    this.utf8Url = '';
+    /**
+     * A rule scope, in case the url was encountered within an at-rule.
+     * If not within an at-rule, this string is empty.
+     * @type {!string}
+     */
+    this.atRuleScope = '';
+  }
+
+  /** @inheritDoc */
+  toJSON() {
+    const json = super.toJSON();
+    json['utf8Url'] = this.utf8Url;
+    json['atRuleScope'] = this.atRuleScope;
+    return json;
+  }
+};
+
+/**
+ * Parses a CSS URL token; typically takes the form "url(http://foo)".
+ * Preconditions: tokens[token_idx] is a URL token
+ *                and token_idx + 1 is in range.
+ * @param {!Array<!parse_css.Token>} tokens
+ * @param {!number} tokenIdx
+ * @param {!parse_css.ParsedCssUrl} parsed
+ */
+function parseUrlToken(tokens, tokenIdx, parsed) {
+  goog.asserts.assert(tokenIdx + 1 < tokens.length);
+  const token = tokens[tokenIdx];
+  goog.asserts.assert(token.tokenType === parse_css.TokenType.URL);
+  parsed.line = token.line;
+  parsed.col = token.col;
+  parsed.utf8Url = /** @type {parse_css.URLToken}*/(token).value;
 }
+
+/**
+ * Parses a CSS function token named 'url', including the string and closing
+ * paren. Typically takes the form "url('http://foo')".
+ * Returns the token_idx past the closing paren, or -1 if parsing fails.
+ * Preconditions: tokens[token_idx] is a URL token
+ *                and tokens[token_idx]->StringValue() == "url"
+ * @param {!Array<!parse_css.Token>} tokens
+ * @param {!number} tokenIdx
+ * @param {!parse_css.ParsedCssUrl} parsed
+ * @return {!number}
+ */
+function parseUrlFunction(tokens, tokenIdx, parsed) {
+  const token = tokens[tokenIdx]
+  goog.asserts.assert(token.tokenType == parse_css.TokenType.FUNCTION_TOKEN);
+  goog.asserts.assert(/** @type {parse_css.FunctionToken} */(token).value ===
+      'url');
+  goog.asserts.assert(tokens[tokens.length - 1].tokenType ===
+      parse_css.TokenType.EOF_TOKEN);
+  parsed.line = token.line;
+  parsed.col = token.col;
+  ++tokenIdx;  // We've digested the function token above.
+  // Safe: tokens ends w/ EOF_TOKEN.
+  goog.asserts.assert(tokenIdx < tokens.length);
+
+  // Consume optional whitespace.
+  while (tokens[tokenIdx].tokenType === parse_css.TokenType.WHITESPACE) {
+    ++tokenIdx;
+    // Safe: tokens ends w/ EOF_TOKEN.
+    goog.asserts.assert(tokenIdx < tokens.length);
+  }
+
+  // Consume URL.
+  if (tokens[tokenIdx].tokenType !== parse_css.TokenType.STRING) {
+    return -1;
+  }
+  parsed.utf8Url = /** @type {parse_css.StringToken} */(tokens[tokenIdx]).value;
+
+  ++tokenIdx;
+  // Safe: tokens ends w/ EOF_TOKEN.
+  goog.asserts.assert(tokenIdx < tokens.length);
+
+  // Consume optional whitespace.
+  while (tokens[tokenIdx].tokenType === parse_css.TokenType.WHITESPACE) {
+    ++tokenIdx;
+    // Safe: tokens ends w/ EOF_TOKEN.
+    goog.asserts.assert(tokenIdx < tokens.length);
+  }
+
+  // Consume ')'
+  if (tokens[tokenIdx].tokenType !== parse_css.TokenType.CLOSE_PAREN) {
+    return -1;
+  }
+  return tokenIdx + 1;
+}
+
+/**
+ * Helper class for implementing parse_css.extractUrls.
+ * @private
+ */
+class UrlFunctionVisitor extends parse_css.RuleVisitor {
+  /**
+   * @param {!Array<!parse_css.ParsedCssUrl>} parsedUrls
+   * @param {!Array<!parse_css.ErrorToken>} errors
+   */
+  constructor(parsedUrls, errors) {
+    /** @type {!Array<!parse_css.ParsedCssUrl>} */
+    this.parsedUrls = parsedUrls;
+    /** @type {!Array<!parse_css.ErrorToken>} */
+    this.errors = errors;
+    /** @type {!string} */
+    this.atRuleScope = '';
+  }
+
+  /** @inheritDoc */
+  visitStylesheet(stylesheet) {
+    this.atRuleScope = '';
+  }
+
+  /** @inheritDoc */
+  visitAtRule(atRule) {
+    this.atRuleScope = atRule.name;
+  }
+
+  /** @inheritDoc */
+  visitQualifiedRule(qualifiedRule) {
+    this.atRuleScope = '';
+  }
+
+  /** @inheritDoc */
+  visitDeclaration(declaration) {
+    goog.asserts.assert(declaration.value.length > 0);
+    goog.asserts.assert(
+        declaration.value[declaration.value.length - 1].tokenType ===
+            parse_css.TokenType.EOF_TOKEN);
+    for (let ii = 0; ii < declaration.value.length - 1;) {
+      const token = declaration.value[ii];
+      if (token.tokenType === parse_css.TokenType.URL) {
+        const parsedUrl = new parse_css.ParsedCssUrl();
+        parseUrlToken(declaration.value, ii, parsedUrl);
+        parsedUrl.atRuleScope = this.atRuleScope;
+        this.parsedUrls.push(parsedUrl);
+        ++ii;
+        continue;
+      }
+      if (token.tokenType === parse_css.TokenType.FUNCTION_TOKEN &&
+          /** @type {!parse_css.FunctionToken} */(token).value === 'url') {
+        const parsedUrl = new parse_css.ParsedCssUrl();
+        ii = parseUrlFunction(declaration.value, ii, parsedUrl);
+        if (ii === -1) {
+          const error = new parse_css.ErrorToken(
+              amp.validator.ValidationError.Code.CSS_SYNTAX_BAD_URL,
+              /* params */ ['style']);
+          error.line = token.line;
+          error.col = token.col;
+          this.errors.push(error);
+          return;
+        }
+        parsedUrl.atRuleScope = this.atRuleScope;
+        this.parsedUrls.push(parsedUrl);
+        continue;
+      }
+      // It's neither a url token nor a function token named url. So, we skip.
+      ++ii;
+    }
+  }
+}
+
+/**
+ * Extracts the URLs within the provided stylesheet, emitting them into
+ * parsedUrls and errors into errors.
+ * @param {!parse_css.Stylesheet} stylesheet
+ * @param {!Array<!parse_css.ParsedCssUrl>} parsedUrls
+ * @param {!Array<!parse_css.ErrorToken>} errors
+ */
+parse_css.extractUrls = function(stylesheet, parsedUrls, errors) {
+  const parsedUrlsOldLength = parsedUrls.length;
+  const errorsOldLength = errors.length;
+  const visitor = new UrlFunctionVisitor(parsedUrls, errors);
+  stylesheet.accept(visitor);
+  // If anything went wrong, delete the urls we've already emitted.
+  if (errorsOldLength !== errors.length) {
+    parsedUrls.splice(parsedUrlsOldLength);
+  }
+};

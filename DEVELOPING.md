@@ -44,7 +44,7 @@ If you have any questions, feel free to ask on the issue or join us on [Slack](h
 
 | Command                       | Description                                                           |
 | ----------------------------- | --------------------------------------------------------------------- |
-| `gulp`                        | Runs "watch" and "serve".                                             |
+| **`gulp`**                    | Runs "watch" and "serve". Use this for standard local dev.            |
 | `gulp dist`                   | Builds production binaries.                                           |
 | `gulp dist --fortesting`      | Indicates the production binaries are used for local testing. Without this ads, tweets and similar use cases are expected to break locally when using minified sources.|
 | `gulp lint`                   | Validates against Google Closure Linter.                              |
@@ -62,13 +62,8 @@ If you have any questions, feel free to ask on the issue or join us on [Slack](h
 | `gulp test --saucelabs`       | Runs test on saucelabs (requires [setup](#saucelabs)).                |
 | `gulp test --safari`          | Runs tests in Safari.                                                 |
 | `gulp test --firefox`         | Runs tests in Firefox.                                                |
-| `gulp serve`                  | Serves content in repo root dir over http://localhost:8000/.          |
-|-------------------------------|-----------------------------------------------------------------------|
+| `gulp serve`                  | Serves content in repo root dir over http://localhost:8000/. Examples live in http://localhost:8000/examples.build/          |
 
-To fix issues with Safari test runner launching multiple instances of the test, run:
-<pre>
-  defaults write com.apple.Safari ApplePersistenceIgnoreState YES
-</pre>
 
 #### Saucelabs
 
@@ -86,6 +81,17 @@ Because of the user name and password requirement pull requests do not directly 
 If a test flaked on a pull request you can ask for a retry by sending the comment `@ampsauce retry`. This will only be accepted if you are a member of the "ampproject" org. Ping us if you'd like to be added. You may also need to publicly reveal your membership.
 
 ### Manual testing
+
+#### Examples
+
+The content in the `examples` directory can be reached at: http://localhost:8000/examples.build/
+
+For each example there are 3 files:
+
+- Original name: This points to prod. This file would not reflect your local changes.
+- `.max.html` points to your local unminified AMP. You want to use this during normal dev.
+- `.min.html` points to a local minified AMP. This is closer to the prod setup. Only available after running `gulp dist`.
+
 
 #### Document proxy
 

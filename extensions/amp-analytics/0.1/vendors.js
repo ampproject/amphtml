@@ -61,6 +61,8 @@ export const ANALYTICS_CONFIG = {
       'title': 'TITLE',
       'totalEngagedTime': 'TOTAL_ENGAGED_TIME',
       'viewer': 'VIEWER',
+      'viewportHeight': 'VIEWPORT_HEIGHT',
+      'viewportWidth': 'VIEWPORT_WIDTH',
     },
   },
 

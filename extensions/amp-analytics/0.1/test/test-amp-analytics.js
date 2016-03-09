@@ -15,10 +15,10 @@
  */
 
 import {ANALYTICS_CONFIG} from '../vendors';
-import {AmpAnalytics} from '../../../../build/all/v0/amp-analytics-0.1.max';
+import {AmpAnalytics} from '../amp-analytics';
 import {
   installUserNotificationManager,
-} from '../../../../build/all/v0/amp-user-notification-0.1.max';
+} from '../../../amp-user-notification/0.1/amp-user-notification';
 import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
 import {getService} from '../../../../src/service';

@@ -756,7 +756,7 @@ export class Resources {
                   (newScrollHeight - state./*OK*/scrollHeight));
             }
           },
-        });
+        }, {});
       }
     }
   }
@@ -1689,7 +1689,6 @@ export class Resource {
 
     this.layoutPromise_ = promise.then(() => this.layoutComplete_(true),
         reason => this.layoutComplete_(false, reason));
-    this.layoutPromise_.then(this.whenFirstLayoutCompleteResolve_);
     return this.layoutPromise_;
   }
 

@@ -113,7 +113,7 @@ var unlisten = window.context.onResizeDenied(function(requestedHeight) {
 });
 ```
 
-Here are some factors that affect how fast the resize will be executed:
+Here are some factors that affect whether the resize will be executed:
 
 - Whether the resize is triggered by the user action;
 - Whether the resize is requested for a currently active ad;

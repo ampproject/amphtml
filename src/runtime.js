@@ -57,9 +57,8 @@ export function adopt(global) {
    * Registers an extended element and installs its styles.
    * @param {string} name
    * @param {!Function} implementationClass
-   * @param {string=} opt_css Optional CSS to install with the component. Use
-   *     the special variable $CSS$ in your code. It will be replaced with the
-   *     CSS file associated with the element.
+   * @param {string=} opt_css Optional CSS to install with the component.
+   *     Typically imported from generated CSS-in-JS file for each component.
    */
   global.AMP.registerElement = function(name, implementationClass, opt_css) {
     const register = function() {

@@ -201,8 +201,9 @@ function watch() {
  * to
  * dist/v0/$name-$version.js
  *
- * Optionally copies the CSS at extensions/$name/$version/$name.css into the
- * JS file marked with $CSS$ as a third argument to the registerElement call.
+ * Optionally copies the CSS at extensions/$name/$version/$name.css into
+ * a generated JS file that can be required from the extensions as
+ * `import {CSS} from '../../../build/$name-0.1.css';`
  *
  * @param {string} name Name of the extension. Must be the sub directory in
  *     the extensions directory and the name of the JS and optional CSS file.
@@ -228,23 +229,22 @@ function buildExtension(name, version, hasCss, options) {
       buildExtension(name, version, hasCss, copy);
     });
   }
-  var js = fs.readFileSync(jsPath, 'utf8');
   if (hasCss) {
+    mkdirSync('build');
     return jsifyCssPromise(path + '/' + name + '.css').then(function(css) {
-      console.assert(/\$CSS\$/.test(js),
-          'Expected to find $CSS$ marker in extension JS: ' + jsPath);
-      js = js.replace(/\$CSS\$/, css);
-      return buildExtensionJs(js, path, name, version, options);
+      var jsCss = 'export const CSS = ' + css + ';\n';
+      var builtName = 'build/' + name + '-' + version + '.css.js';
+      fs.writeFileSync(builtName, jsCss, 'utf-8');
+      return buildExtensionJs(path, name, version, options);
     });
   } else {
-    return buildExtensionJs(js, path, name, version, options);
+    return buildExtensionJs(path, name, version, options);
   }
 }
 
 /**
  * Build the JavaScript for the extension specified
  *
- * @param {string} js JavaScript file content
  * @param {string} path Path to the extensions directory
  * @param {string} name Name of the extension. Must be the sub directory in
  *     the extensions directory and the name of the JS and optional CSS file.
@@ -253,23 +253,16 @@ function buildExtension(name, version, hasCss, options) {
  * @param {!Object} options
  * @return {!Stream} Gulp object
  */
-function buildExtensionJs(js, path, name, version, options) {
-  var builtName = name + '-' + version + '.max.js';
-  var minifiedName = name + '-' + version + '.js';
-  var latestName = name + '-latest.js';
-  return gulp.src(path + '/*.js')
-      .pipe($$.file(builtName, js))
-      .pipe(gulp.dest('build/all/v0/'))
-      .on('end', function() {
-        compileJs('./build/all/v0/', builtName, './dist/v0', {
-          watch: options.watch,
-          minify: options.minify,
-          minifiedName: minifiedName,
-          latestName: latestName,
-          wrapper: '(window.AMP = window.AMP || [])' +
-              '.push(function(AMP) {<%= contents %>\n});',
-        });
-      });
+function buildExtensionJs(path, name, version, options) {
+  compileJs(path + '/', name + '.js', './dist/v0', {
+    watch: options.watch,
+    minify: options.minify,
+    toName:  name + '-' + version + '.max.js',
+    minifiedName: name + '-' + version + '.js',
+    latestName: name + '-latest.js',
+    wrapper: '(window.AMP = window.AMP || [])' +
+        '.push(function(AMP) {<%= contents %>\n});',
+  });
 }
 
 /**
@@ -464,7 +457,7 @@ function compileJs(srcDir, srcFilename, destDir, options) {
         if (err instanceof SyntaxError) {
           console.error($$.util.colors.red('Syntax error:', err.message));
         } else {
-          console.error(err);
+          console.error($$.util.colors.red(err.message));
         }
       })
       .pipe(lazybuild())
@@ -648,16 +641,6 @@ function buildLoginDoneVersion(version, options) {
       '../../../dist/v0/amp-login-done-' + version + '.max.js',
       'https://cdn.ampproject.org/v0/amp-login-done-' + version + '.js');
 
-  function mkdirSync(path) {
-    try {
-      fs.mkdirSync(path);
-    } catch(e) {
-      if (e.code != 'EEXIST') {
-        throw e;
-      }
-    }
-  }
-
   mkdirSync('dist');
   mkdirSync('dist/v0');
 
@@ -693,6 +676,16 @@ function checkMinVersion() {
     console.log('Please run AMP with node.js version 4 or newer.');
     console.log('Your version is', process.version);
     process.exit(1);
+  }
+}
+
+function mkdirSync(path) {
+  try {
+    fs.mkdirSync(path);
+  } catch(e) {
+    if (e.code != 'EEXIST') {
+      throw e;
+    }
   }
 }
 

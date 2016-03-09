@@ -117,7 +117,7 @@ Adds support for AT Internet. More details for adding AT Internet support can be
 
 Type attribute value: `chartbeat`
 
-Adds support for Chartbeat. More details for adding Chartbeat support can be found at [support.chartbeat.com](http://support.chartbeat.com/docs/).
+Adds support for Chartbeat. More details for adding Chartbeat support can be found at [support.chartbeat.com](http://support.chartbeat.com/docs/integrations.html#amp).
 
 ### comScore
 
@@ -352,16 +352,28 @@ If more than one of the above transport methods are enabled, the precedence is `
 In the example below, `beacon` and `xhrpost` are set to `false`, so they will not be used even though they have higher precedence than `image`. `image` would be set `true` by default, but it is explicitly declared here. If the client's user agent supports the `image` method, then it will be used; otherwise, no request would be sent.
 
 ```javascript
-'transport': {
-  'beacon': false,
-  'xhrpost': false,
-  'image': true
+"transport": {
+  "beacon": false,
+  "xhrpost": false,
+  "image": true
 }
 ```
 
 
-# Extra URL Params
+### Extra URL Params
 
-The `extraUrlParams` attribute specifies additional parameters to append to the query string of the url via the usual "&foo=baz" convention.
+The `extraUrlParams` attribute specifies additional parameters to append to the query string of a request URL via the usual "&foo=baz" convention.
 
-The `extraUrlParamsReplaceMap` attribute specifies a map of keys and values that act as parameters to String.replace() to preprocess keys in the extraUrlParams map.
+Here's an example that would append `&a=1&b=2&c=3` to a request:
+
+```javascript
+"extraUrlParams": {
+  "a": "1",
+  "b": "2",
+  "c": "3"
+}
+```
+
+The `extraUrlParamsReplaceMap` attribute specifies a map of keys and values that act as parameters to String.replace() to preprocess keys in the extraUrlParams configuration. For example, if an `extraUrlParams` configuration defines `"page.title": "The title of my page"` and the `extraUrlParamsReplaceMap` defines `"page.": "_p_"`, then `&_p_title=The%20title%20of%20my%20page%20` will be appended to the request.
+
+`extraUrlParamsReplaceMap` is not required to use `extraUrlParams`. If `extraUrlParamsReplaceMap` is not defined, then no string substitution will happens and the strings defined in `extraUrlParams` are used as-is.

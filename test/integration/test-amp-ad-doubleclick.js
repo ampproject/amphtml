@@ -22,11 +22,36 @@ import {
 
 describe('Rendering of one ad', () => {
   let fixture;
+  let beforeHref;
+
+  function replaceUrl(win) {
+    // TODO(#2402) Support glade as well.
+    const path = '/test/fixtures/doubleclick.html?google_glade=0';
+    try {
+      win.location.hash = 'google_glade=0';
+      win.history.replaceState(null, null, path);
+    } catch (e) {
+      // Browsers are weird. Firefox gets here. We do, however, also in
+      // firefox pass down the parent URL. So we change that, which we
+      // can. We just need to change it back after the test.
+      beforeHref = win.parent.location.href;
+      win.parent.history.replaceState(null, null, path);
+    }
+  }
+
   beforeEach(() => {
-    return createFixtureIframe('test/fixtures/doubleclick.html', 3000)
-      .then(f => {
-        fixture = f;
-      });
+    replaceParentHref = false;
+    return createFixtureIframe('test/fixtures/doubleclick.html', 3000, win => {
+      replaceUrl(win);
+    }).then(f => {
+      fixture = f;
+    });
+  });
+
+  afterEach(() => {
+    if (beforeHref) {
+      fixture.win.parent.history.replaceState(null, null, beforeHref);
+    }
   });
 
   it('should create an iframe loaded', function() {
@@ -69,7 +94,7 @@ describe('Rendering of one ad', () => {
       return poll('main ad JS is injected', () => {
         return iframe.contentWindow.document.querySelector(
             'script[src="https://www.googletagservices.com/tag/js/gpt.js"]');
-      }, undefined,  /* timeout */ 4000);
+      }, undefined,  /* timeout */ 5000);
     }).then(() => {
       return poll('render-start message received', () => {
         return fixture.messages.filter(message => {
@@ -85,7 +110,7 @@ describe('Rendering of one ad', () => {
     }).then(pubads => {
       const canvas = iframe.contentWindow.document.querySelector('#c');
       expect(pubads.get('page_url')).to.equal(
-          'http://localhost:9876/doubleclick.html');
+          'https://www.example.com/doubleclick.html');
       const slot = canvas.slot;
       expect(slot).to.not.be.null;
       expect(slot.getCategoryExclusions()).to.jsonEqual(['health']);
