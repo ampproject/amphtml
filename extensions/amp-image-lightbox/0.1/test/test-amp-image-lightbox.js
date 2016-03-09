@@ -16,10 +16,10 @@
 
 import {Timer} from '../../../../src/timer';
 import {createIframePromise} from '../../../../testing/iframe';
-require('../../../../build/all/v0/amp-image-lightbox-0.1.max');
+require('../amp-image-lightbox');
 import {
   ImageViewer,
-} from '../../../../build/all/v0/amp-image-lightbox-0.1.max';
+} from '../amp-image-lightbox';
 import {adopt} from '../../../../src/runtime';
 import {parseSrcset} from '../../../../src/srcset';
 import * as sinon from 'sinon';

@@ -18,7 +18,7 @@ import * as sinon from 'sinon';
 import {
   AmpUserNotification,
   UserNotificationManager,
-} from '../../../../build/all/v0/amp-user-notification-0.1.max';
+} from '../amp-user-notification';
 import {createIframePromise} from '../../../../testing/iframe';
 
 

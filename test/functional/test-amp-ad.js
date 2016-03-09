@@ -21,7 +21,7 @@ import {installEmbed} from '../../builtins/amp-embed';
 import {installCidService} from '../../src/service/cid-impl';
 import {
   installUserNotificationManager,
-} from '../../build/all/v0/amp-user-notification-0.1.max';
+} from '../../extensions/amp-user-notification/0.1/amp-user-notification';
 import {markElementScheduledForTesting} from '../../src/custom-element';
 import {setCookie} from '../../src/cookies';
 import * as sinon from 'sinon';

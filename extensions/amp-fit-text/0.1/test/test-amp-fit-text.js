@@ -16,11 +16,11 @@
 
 import {Timer} from '../../../../src/timer';
 import {createIframePromise} from '../../../../testing/iframe';
-require('../../../../build/all/v0/amp-fit-text-0.1.max');
+require('../amp-fit-text');
 import {
   calculateFontSize_,
   updateOverflow_,
-} from '../../../../build/all/v0/amp-fit-text-0.1.max';
+} from '../amp-fit-text';
 import {adopt} from '../../../../src/runtime';
 
 adopt(window);
