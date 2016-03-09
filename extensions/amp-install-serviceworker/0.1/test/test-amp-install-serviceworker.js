@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-require('../../../../build/all/v0/amp-install-serviceworker-0.1.max');
+require('../amp-install-serviceworker');
 import {adopt} from '../../../../src/runtime';
 
 adopt(window);

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {CSS} from '../../../build/amp-user-notification-0.1.css';
 import {assertHttpsUrl, addParamsToUrl} from '../../../src/url';
 import {assert} from '../../../src/asserts';
 import {cidFor} from '../../../src/cid';
@@ -407,4 +408,4 @@ export function installUserNotificationManager(window) {
 
 installUserNotificationManager(AMP.win);
 
-AMP.registerElement('amp-user-notification', AmpUserNotification, $CSS$);
+AMP.registerElement('amp-user-notification', AmpUserNotification, CSS);
