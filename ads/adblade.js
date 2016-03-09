@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {writeScript, checkData, validateData} from '../src/3p';
+import {writeScript, checkData, validateDataExists} from '../src/3p';
 
 /**
  * @param {!Window} global
@@ -29,7 +29,7 @@ export function adblade(global, data) {
   const adbladeFields = ['width', 'height', 'cid'];
 
   checkData(data, adbladeFields);
-  validateData(data, adbladeFields);
+  validateDataExists(data, adbladeFields);
 
   // create a data element so our script knows what to do
   const ins = document.createElement('ins');
