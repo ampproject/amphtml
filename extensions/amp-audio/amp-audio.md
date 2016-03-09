@@ -35,6 +35,48 @@ limitations under the License.
   </tr>
 </table>
 
+## Behavior
+
+The `amp-audio` component loads the audio resource specified by its `src` attribute at a time determined by the runtime. It can be controlled in much the same way as a standard HTML5 `audio` tag.
+Like all embedded external resources in an AMP file, the audio is "lazily" loaded, only when the `amp-audio` element is in or near the viewport.
+
+The `amp-audio` component HTML accepts up to three unique types of HTML nodes as children - `source` tags, a placeholder for before the audio starts, and a fallback if the browser doesn’t support HTML5 audio.
+
+`source` tag children can be used in the same way as the standard `audio` tag, to specify different source files to play.
+
+One or zero immediate child nodes can have the `placeholder` attribute. If present, this node and its children form a placeholder that will display instead of the audio. A click or tap anywhere inside of the `amp-audio` container will replace the placeholder with the audio itself.
+
+One or zero immediate child nodes can have the `fallback` attribute. If present, this node and its children form the content that will be displayed if HTML5 audio is not supported on the user’s browser.
+
+For example:
+```html
+<amp-audio width=400 height=300 src="https://yourhost.com/audios/myaudio.mp3">
+  <div fallback>
+    <p>Your browser doesn’t support HTML5 audio</p>
+  </div>
+  <source type="audio/mpeg" src="foo.mp3">
+  <source type="audio/ogg" src="foo.ogg">
+</amp-audio>
+```
+
+## Attributes
+
+**autoplay**
+
+The `autoplay` attribute allows the author to specify when - if ever - the animated image will autoplay.
+
+The presence of the attribute alone implies that the animated image will always autoplay. The author may specify values to limit when the animations will autoplay. Allowable values are `desktop`, `tablet`, or `mobile`, with multiple values separated by a space. The runtime makes a best-guess approximation to the device type to apply this value.
+
+**loop**
+
+If present, will automatically loop the audio back to the start upon reaching the end.
+
+**muted**
+
+If present, will mute the audio by default.
+
+## Validation errors
+
 The following lists validation errors specific to the `amp-audio` tag
 (see also `amp-audio` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii)):
 
@@ -77,43 +119,3 @@ May need to add something to this table based on technical review.
     <td>Error thrown when specified layout is set to <code>RESPONSIVE</code>, <code>FILL</code>, or <code>CONTAINER</code>; these layout types aren't supported.</td>
   </tr>
 </table>
-
-## Behavior
-
-The `amp-audio` component loads the audio resource specified by its `src` attribute at a time determined by the runtime. It can be controlled in much the same way as a standard HTML5 `audio` tag.
-Like all embedded external resources in an AMP file, the audio is "lazily" loaded, only when the `amp-audio` element is in or near the viewport.
-
-The `amp-audio` component HTML accepts up to three unique types of HTML nodes as children - `source` tags, a placeholder for before the audio starts, and a fallback if the browser doesn’t support HTML5 audio.
-
-`source` tag children can be used in the same way as the standard `audio` tag, to specify different source files to play.
-
-One or zero immediate child nodes can have the `placeholder` attribute. If present, this node and its children form a placeholder that will display instead of the audio. A click or tap anywhere inside of the `amp-audio` container will replace the placeholder with the audio itself.
-
-One or zero immediate child nodes can have the `fallback` attribute. If present, this node and its children form the content that will be displayed if HTML5 audio is not supported on the user’s browser.
-
-For example:
-```html
-<amp-audio width=400 height=300 src="https://yourhost.com/audios/myaudio.mp3">
-  <div fallback>
-    <p>Your browser doesn’t support HTML5 audio</p>
-  </div>
-  <source type="audio/mpeg" src="foo.mp3">
-  <source type="audio/ogg" src="foo.ogg">
-</amp-audio>
-```
-
-## Attributes
-
-**autoplay**
-
-The `autoplay` attribute allows the author to specify when - if ever - the animated image will autoplay.
-
-The presence of the attribute alone implies that the animated image will always autoplay. The author may specify values to limit when the animations will autoplay. Allowable values are `desktop`, `tablet`, or `mobile`, with multiple values separated by a space. The runtime makes a best-guess approximation to the device type to apply this value.
-
-**loop**
-
-If present, will automatically loop the audio back to the start upon reaching the end.
-
-**muted**
-
-If present, will mute the audio by default.
