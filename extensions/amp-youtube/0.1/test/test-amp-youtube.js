@@ -95,7 +95,7 @@ describe('amp-youtube', () => {
       expect(imgPlaceholder).to.not.be.null;
       expect(imgPlaceholder.className).to.not.match(/amp-hidden/);
       expect(imgPlaceholder.getAttribute('src')).to.be.equal(
-          'https://i.ytimg.com/vi/mGENRKrdoGY/sddefault.jpg');
+          'https://i.ytimg.com/vi/mGENRKrdoGY/sddefault.jpg#404_is_fine');
     }).then(yt => {
       const iframe = yt.querySelector('iframe');
       expect(iframe).to.not.be.null;
@@ -121,7 +121,7 @@ describe('amp-youtube', () => {
       expect(imgPlaceholder.className).to.match(/amp-hidden/);
 
       expect(imgPlaceholder.src).to.equal(
-          'https://i.ytimg.com/vi/mGENRKrdoGY/sddefault.jpg');
+          'https://i.ytimg.com/vi/mGENRKrdoGY/sddefault.jpg#404_is_fine');
     });
   });
 
