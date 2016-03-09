@@ -30,6 +30,26 @@ limitations under the License.
   </tr>
 </table>
 
+## Implementation
+
+The `<amp-embed>` is actually an alias to the [`<amp-ad>`](amp-ad.md) tag, deriving all of it's functionality with a different tag name.
+
+```html
+<amp-embed width=400 height=300
+        layout=responsive
+        data-publisher=thepublisher
+        data-mode=themode
+        data-article=auto
+        data-placement="Below Article Thumbnails">
+</amp-embed>
+```
+
+## Supported embed types
+
+- [Taboola](../ads/taboola.md)
+
+## Validation errors
+
 The following lists validation errors specific to the `amp-embed` tag
 (see also `amp-embed` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii)):
 
@@ -67,21 +87,3 @@ The following lists validation errors specific to the `amp-embed` tag
     <td>Error thrown when invalid value is given for attributes <code>height</code> or <code>width</code>. For example, <code>height=auto</code> triggers this error for all supported layout types, with the exception of <code>NODISPLAY</code>.</td>
   </tr>
 </table>
-
-## Implementation
-
-The `<amp-embed>` is actually an alias to the [`<amp-ad>`](amp-ad.md) tag, deriving all of it's functionality with a different tag name.
-
-```html
-<amp-embed width=400 height=300
-        layout=responsive
-        data-publisher=thepublisher
-        data-mode=themode
-        data-article=auto
-        data-placement="Below Article Thumbnails">
-</amp-embed>
-```
-
-## Supported embed types
-
-- [Taboola](../ads/taboola.md)
