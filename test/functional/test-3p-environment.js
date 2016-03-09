@@ -255,6 +255,16 @@ describe('3p environment', () => {
     if (win.webkitRequestAnimationFrame) {
       expect(win.webkitRequestAnimationFrame).to.not.match(/native/);
     }
+    expect(win.alert.toString()).to.not.match(/native/);
+    expect(win.prompt.toString()).to.not.match(/native/);
+    expect(win.confirm.toString()).to.not.match(/native/);
+    expect(win.alert()).to.be.undefined;
+    expect(win.prompt()).to.equal('');
+    expect(win.confirm()).to.be.false;
+    // We only allow 3 calls to these functions.
+    expect(() => win.alert()).to.throw(/security error/);
+    expect(() => win.prompt()).to.throw(/security error/);
+    expect(() => win.confirm()).to.throw(/security error/);
   }
 
   function waitForMutationObserver(iframe) {
