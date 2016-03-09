@@ -411,6 +411,9 @@
       if (type == 'broadcast') {
         return this.broadcast_(data);
       }
+      if (type == 'setFlushParams') {
+        return;
+      }
       return Promise.reject('request not supported: ' + type);
     };
 
