@@ -339,6 +339,7 @@ function buildExamples(watch) {
   buildExample('vine.amp.html');
   buildExample('multiple-docs.html');
   buildExample('youtube.amp.html');
+  buildExample('openx.amp.html');
 
   // TODO(dvoytenko, #1393): Enable for proxy-testing.
   // // Examples are also copied into `c/` directory for AMP-proxy testing.

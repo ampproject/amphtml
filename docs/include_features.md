@@ -280,6 +280,7 @@ The following ad networks are supported in AMP HTML pages:
 - [AdTech](../ads/adtech.md)
 - [Criteo](../ads/criteo.md)
 - [Doubleclick](../ads/doubleclick.md)
+- [OpenX](../ads/openx.md)
 
 ## Display an ad
 
