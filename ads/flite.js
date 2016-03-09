@@ -31,7 +31,7 @@
    o.FLITE.config[guid].ts = (+Number(new Date()));
    r = global.context.location.href;
    m = r.match(new RegExp('[A-Za-z]+:[/][/][A-Za-z0-9.-]+'));
-   dep = data.mixins ? 'dep=' + data.mixins : '';
+   dep = data.mixins ? '&dep=' + data.mixins : '';
    url = ['https://r.flite.com/syndication/uscript.js?i=',e(guid),
    '&v=3',dep,'&x=us',x,'&cb=',o.FLITE.config[guid].cb,'&d=',
    e((m && m[0]) || r), '&tz=', (new Date()).getTimezoneOffset()].join('');
