@@ -21,7 +21,6 @@ import {documentInfoFor} from './document-info';
 import {getMode} from './mode';
 import {getService} from './service';
 import {loadPromise} from './event-helper';
-import {log} from './log';
 import {getSourceUrl, parseUrl, removeFragment, parseQueryString} from './url';
 import {viewerFor} from './viewer';
 import {viewportFor} from './viewport';
@@ -29,8 +28,6 @@ import {vsyncFor} from './vsync';
 import {userNotificationManagerFor} from './user-notification';
 import {activityFor} from './activity';
 
-/** @private {string} */
-const TAG_ = 'UrlReplacements';
 
 /**
  * This class replaces substitution variables with their values.
@@ -388,15 +385,28 @@ class UrlReplacements {
       }
       const binding = (opt_bindings && (name in opt_bindings)) ?
           opt_bindings[name] : this.getReplacement_(name);
-      const val = (typeof binding == 'function') ?
-          binding.apply(null, args) : binding;
+      let val;
+      try {
+        val = (typeof binding == 'function') ?
+            binding.apply(null, args) : binding;
+      } catch (e) {
+        // Report error, but do not disrupt URL replacement. This will
+        // interpolate as the empty string.
+        setTimeout(() => {
+          throw e;
+        });
+      }
       // In case the produced value is a promise, we don't actually
       // replace anything here, but do it again when the promise resolves.
       if (val && val.then) {
-        const p = val.then(v => {
+        const p = val.catch(err => {
+          // Report error, but do not disrupt URL replacement. This will
+          // interpolate as the empty string.
+          setTimeout(() => {
+            throw err;
+          });
+        }).then(v => {
           url = url.replace(match, encodeValue(v));
-        }, err => {
-          log.error(TAG_, 'Failed to expand: ' + name, err);
         });
         if (replacementPromise) {
           replacementPromise = replacementPromise.then(() => p);

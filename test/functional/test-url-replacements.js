@@ -366,6 +366,33 @@ describe('UrlReplacements', () => {
         .to.eventually.equal('?a=b&b=b');
   });
 
+  it('should report errors & replace them with empty string (sync)', () => {
+    const clock = sandbox.useFakeTimers();
+    const replacements = urlReplacementsFor(window);
+    replacements.set_('ONE', () => {
+      throw new Error('boom');
+    });
+    const p = expect(replacements.expand('?a=ONE')).to.eventually.equal('?a=');
+    expect(() => {
+      clock.tick(1);
+    }).to.throw(/boom/);
+    return p;
+  });
+
+  it('should report errors & replace them with empty string (promise)', () => {
+    const clock = sandbox.useFakeTimers();
+    const replacements = urlReplacementsFor(window);
+    replacements.set_('ONE', () => {
+      return Promise.reject(new Error('boom'));
+    });
+    return expect(replacements.expand('?a=ONE')).to.eventually.equal('?a=')
+        .then(() => {
+          expect(() => {
+            clock.tick(1);
+          }).to.throw(/boom/);
+        });
+  });
+
   it('should support positional arguments', () => {
     const replacements = urlReplacementsFor(window);
     replacements.set_('FN', one => one);
