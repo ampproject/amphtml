@@ -35,6 +35,7 @@
  * </code>
  */
 
+import {CSS} from '../../../build/amp-pinterest-0.1.css';
 import {isLayoutSizeDefined} from '../../../src/layout';
 
 import {FollowButton} from './follow-button';
@@ -85,4 +86,4 @@ class AmpPinterest extends AMP.BaseElement {
 
 };
 
-AMP.registerElement('amp-pinterest', AmpPinterest, $CSS$);
+AMP.registerElement('amp-pinterest', AmpPinterest, CSS);

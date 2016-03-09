@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {CSS} from '../../../build/amp-accordion-0.1.css';
 import {Layout} from '../../../src/layout';
 import {assert} from '../../../src/asserts';
 import {isExperimentOn} from '../../../src/experiments';
@@ -86,4 +87,4 @@ class AmpAccordion extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-accordion', AmpAccordion, $CSS$);
+AMP.registerElement('amp-accordion', AmpAccordion, CSS);

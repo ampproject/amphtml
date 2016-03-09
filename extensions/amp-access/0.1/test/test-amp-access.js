@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {AccessService} from '../../../../build/all/v0/amp-access-0.1.max';
+import {AccessService} from '../amp-access';
 import {Observable} from '../../../../src/observable';
 import {installCidService} from '../../../../src/service/cid-impl';
 import {markElementScheduledForTesting} from '../../../../src/custom-element';

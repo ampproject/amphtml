@@ -15,6 +15,7 @@
  */
 
 import {Animation} from '../../../src/animation';
+import {CSS} from '../../../build/amp-image-lightbox-0.1.css';
 import {Gestures} from '../../../src/gesture';
 import {
   DoubletapRecognizer,
@@ -999,4 +1000,4 @@ class AmpImageLightbox extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-image-lightbox', AmpImageLightbox, $CSS$);
+AMP.registerElement('amp-image-lightbox', AmpImageLightbox, CSS);

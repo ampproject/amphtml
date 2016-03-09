@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {CSS} from '../../../build/amp-access-0.1.css';
 import {actionServiceFor} from '../../../src/action';
 import {analyticsFor} from '../../../src/analytics';
 import {assert, assertEnumValue} from '../../../src/asserts';
@@ -90,7 +91,7 @@ export class AccessService {
   constructor(win) {
     /** @const {!Window} */
     this.win = win;
-    installStyles(this.win.document, $CSS$, () => {}, false, 'amp-access');
+    installStyles(this.win.document, CSS, () => {}, false, 'amp-access');
 
     const accessElement = document.getElementById('amp-access');
 
