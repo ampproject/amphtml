@@ -64,6 +64,7 @@ function manageWin_(win) {
   installObserver(win);
   // Existing iframes.
   maybeInstrumentsNodes(win, win.document.querySelectorAll('iframe'));
+  blockSyncPopups(win);
 }
 
 
@@ -234,6 +235,33 @@ function instrumentEntryPoints(win) {
     win.webkitRequestAnimationFrame = win.requestAnimationFrame;
     win.webkitCancelAnimationFrame = win.webkitCancelRequestAnimationFrame =
         win.cancelAnimationFrame;
+  }
+}
+
+/**
+ * Blackhole the legacy popups since they should never be used for anything.
+ * @param {!Window} win
+ */
+function blockSyncPopups(win) {
+  let count = 0;
+  function maybeThrow() {
+    // Prevent deep recursion.
+    if (count++ > 2) {
+      throw new Error('security error');
+    }
+  }
+  try {
+    win.alert = maybeThrow;
+    win.prompt = function() {
+      maybeThrow();
+      return '';
+    };
+    win.confirm = function() {
+      maybeThrow();
+      return false;
+    };
+  } catch (e) {
+    console./*OK*/error(e.message, e.stack);
   }
 }
 
