@@ -81,23 +81,21 @@ or replace functionality of core HTML5 elements to allow the runtime to ensure
 it is solely responsible for loading external assets and to provide for shared
 best practices in implementation.
 
-These components can:
-* Replace HTML5 elements that are not directly permitted in the specification
-  such as [amp-img](builtins/amp-img.md) and [amp-video](builtins/amp-video.md).
-* Implement embedded third-party content, such as
-[amp-ad](builtins/amp-ad.md),
-[amp-pinterest](extensions/amp-pinterest/amp-pinterest.md),
-[amp-twitter](extensions/amp-twitter/amp-twitter.md),
-and [amp-youtube](extensions/amp-youtube/amp-youtube.md).
-* Provide for common patterns in web pages,
-such as [amp-lightbox](extensions/amp-lightbox/amp-lightbox.md)
-and [amp-carousel](extensions/amp-carousel/amp-carousel.md).
-* Make advanced performance techniques easy,
-such as [amp-anim](extensions/amp-anim/amp-anim.md),
-which allows web developers to dynamically serve animated images
-as either image files (GIF) or video files (WebM or MP4) based on browser compatibility.
+See our [docs and reference](https://www.ampproject.org/docs/get_started/about-amp.html) for more info.
 
-# AMP Dev Channel
+# Releases
+
+We push a new release of AMP to all AMP pages every week on Thursday. The more detailed schedule is as follows:
+
+- Every Thursday we cut a green release from our `master` branch.
+- This is then pushed to users of AMP who opted into the [AMP Dev Channel](#amp-dev-channel).
+- On Monday we check error rates for opt-in users and bug reports and if everything looks fine, we push this new release to 1% of AMP pages.
+- We then continue to monitor error rates and bug reports throughout the week.
+- On Thursday the "Dev Channel" release from last Thursday is then pushed to all users.
+
+You can always follow the current release state of AMP on our [releases page](https://github.com/ampproject/amphtml/releases). The release used by most users is marked as `Latest release` and the current Dev Channel release is marked as `Pre-release`.
+
+## AMP Dev Channel
 
 AMP Dev Channel is a way to opt a browser into using a newer version of the AMP JS libraries.
 
