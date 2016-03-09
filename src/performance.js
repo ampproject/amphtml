@@ -106,6 +106,7 @@ export class Performance {
     // Tick window.onload event.
     loadPromise(win).then(() => {
       this.tick('ol');
+      this.flush();
     });
   }
 
@@ -159,6 +160,7 @@ export class Performance {
         // time since the viewer initialized the timer)
         this.tick('pc');
       }
+      this.flush();
     });
   }
 
