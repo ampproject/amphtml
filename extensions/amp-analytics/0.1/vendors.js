@@ -168,14 +168,14 @@ export const ANALYTICS_CONFIG = {
   'googleanalytics': {
     'vars': {
       'eventValue': '0',
-      'documentLocation': 'AMPDOC_URL',
+      'documentLocation': 'SOURCE_URL',
+      'clientId': 'CLIENT_ID(AMP_ECID_GOOGLE)',
     },
     'requests': {
       'host': 'https://www.google-analytics.com',
       'basePrefix': 'v=1&_v=a0&aip=true&_s=${requestCount}&' +
           'dt=${title}&sr=${screenWidth}x${screenHeight}&_utmht=${timestamp}&' +
-          'jid=&cid=${clientId(AMP_ECID_GOOGLE)}&tid=${account}&' +
-          'dl=${documentLocation}&' +
+          'jid=&cid=${clientId}&tid=${account}&dl=${documentLocation}&' +
           'dr=${documentReferrer}&sd=${screenColorDepth}&' +
           'ul=${browserLanguage}&de=${documentCharset}' ,
       'baseSuffix': '&a=${pageViewId}&z=${random}',
@@ -191,6 +191,10 @@ export const ANALYTICS_CONFIG = {
           'dns=${domainLookupTime}&tcp=${tcpConnectTime}&rrt=${redirectTime}&' +
           'srt=${serverResponseTime}&pdt=${pageDownloadTime}&' +
           'clt=${contentLoadTime}&dit=${domInteractiveTime}${baseSuffix}',
+    },
+    'extraUrlParamsReplaceMap': {
+      'dimension': 'cd',
+      'metric': 'cm',
     },
     'optout': '_gaUserPrefs.ioo',
   },
