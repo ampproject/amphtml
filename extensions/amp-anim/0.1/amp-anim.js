@@ -16,7 +16,7 @@
 
 import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
-import {parseSrcset} from '../../../src/srcset';
+import {srcsetFromElement} from '../../../src/srcset';
 import * as st from '../../../src/style';
 
 class AmpAnim extends AMP.BaseElement {
@@ -46,8 +46,7 @@ class AmpAnim extends AMP.BaseElement {
     this.element.appendChild(this.img_);
 
     /** @private @const {!Srcset} */
-    this.srcset_ = parseSrcset(this.element.getAttribute('srcset') ||
-        this.element.getAttribute('src'));
+    this.srcset_ = srcsetFromElement(this.element);
 
     /** @private {?Promise} */
     this.loadPromise_ = null;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {Srcset, parseSrcset} from '../../src/srcset';
+import {Srcset, parseSrcset, srcsetFromElement} from '../../src/srcset';
 
 
 describe('Srcset parseSrcset', () => {
@@ -189,6 +189,74 @@ describe('Srcset parseSrcset', () => {
     test('image,one.png', [
       {url: 'image,one.png', dpr: 1},
     ]);
+  });
+});
+
+
+describe('Srcset srcsetFromElement', () => {
+  function test(srcset, src, expected) {
+    const element = document.createElement('div');
+    if (srcset !== undefined) {
+      element.setAttribute('srcset', srcset);
+    }
+    if (src !== undefined) {
+      element.setAttribute('src', src);
+    }
+    const res = srcsetFromElement(element);
+    expect(res.sources_.length).to.equal(expected.length);
+    for (let i = 0; i < expected.length; i++) {
+      const r = res.sources_[i];
+      const e = expected[i];
+      expect(r.url).to.equal(e.url);
+      expect(r.width).to.equal(e.width);
+      expect(r.dpr).to.equal(e.dpr);
+    }
+  }
+
+  it('should select srcset when only srcset available', () => {
+    test('image-2x.png 2x, image-1x.png 1x', undefined, [
+      {url: 'image-2x.png', dpr: 2},
+      {url: 'image-1x.png', dpr: 1},
+    ]);
+  });
+
+  it('should select srcset when src is empty', () => {
+    test('image-2x.png 2x, image-1x.png 1x', '', [
+      {url: 'image-2x.png', dpr: 2},
+      {url: 'image-1x.png', dpr: 1},
+    ]);
+  });
+
+  it('should select src when only src available', () => {
+    test(undefined, 'image-0.png', [
+      {url: 'image-0.png', dpr: 1},
+    ]);
+  });
+
+  it('should select src when only srcset is empty', () => {
+    test('', 'image-0.png', [
+      {url: 'image-0.png', dpr: 1},
+    ]);
+  });
+
+  it('should prefer srcset to src', () => {
+    test('image-2x.png 2x, image-1x.png 1x', 'image-0.png', [
+      {url: 'image-2x.png', dpr: 2},
+      {url: 'image-1x.png', dpr: 1},
+    ]);
+  });
+
+  it('should allow non-compliant src with space', () => {
+    test(undefined, 'image 0.png', [
+      {url: 'image 0.png', dpr: 1},
+    ]);
+  });
+
+  it('should require srcset or src to be available', () => {
+    expect(() => {
+      srcsetFromElement(document.createElement('div'));
+    }).to.throw(
+        /Either non-empty "srcset" or "src" attribute must be specified/);
   });
 });
 
