@@ -28,6 +28,7 @@ var gulp = $$.help(require('gulp'));
 var lazypipe = require('lazypipe');
 var minimist = require('minimist');
 var postcss = require('postcss');
+var postcssImport = require('postcss-import');
 var source = require('vinyl-source-stream');
 var touch = require('touch');
 var watchify = require('watchify');
@@ -93,6 +94,7 @@ function buildExtensions(options) {
    * Please see {@link AmpCarousel} with `type=slides` attribute instead.
    */
   buildExtension('amp-slides', '0.1', false, options);
+  buildExtension('amp-social-share', '0.1', true, options);
   buildExtension('amp-twitter', '0.1', false, options);
   buildExtension('amp-user-notification', '0.1', true, options);
   buildExtension('amp-vimeo', '0.1', false, options);
@@ -171,7 +173,9 @@ function jsifyCssPromise(filename) {
   var transformers = [cssprefixer, cssnano];
   // Remove copyright comment. Crude hack to get our own copyright out
   // of the string.
-  return postcss(transformers).process(css.toString())
+  return postcss(transformers).use(postcssImport).process(css.toString(), {
+        'from': filename
+      })
       .then(function(result) {
         result.warnings().forEach(function(warn) {
           console.warn(warn.toString());
@@ -332,6 +336,7 @@ function buildExamples(watch) {
   buildExample('instagram.amp.html');
   buildExample('pinterest.amp.html');
   buildExample('released.amp.html');
+  buildExample('social-share.amp.html');
   buildExample('twitter.amp.html');
   buildExample('soundcloud.amp.html');
   buildExample('user-notification.amp.html');
