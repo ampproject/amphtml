@@ -34,7 +34,7 @@ import {
   layoutRectLtwh,
   moveLayoutRect,
 } from '../../../src/layout-rect';
-import {parseSrcset} from '../../../src/srcset';
+import {srcsetFromElement} from '../../../src/srcset';
 import {timer} from '../../../src/timer';
 import * as dom from '../../../src/dom';
 import * as st from '../../../src/style';
@@ -213,8 +213,7 @@ export class ImageViewer {
   init(sourceElement, sourceImage) {
     this.sourceWidth_ = sourceElement./*OK*/offsetWidth;
     this.sourceHeight_ = sourceElement./*OK*/offsetHeight;
-    this.srcset_ = parseSrcset(sourceElement.getAttribute('srcset') ||
-        sourceElement.getAttribute('src'));
+    this.srcset_ = srcsetFromElement(sourceElement);
     if (sourceImage && isLoaded(sourceImage) && sourceImage.src) {
       // Set src provisionally to the known loaded value for fast display.
       // It will be updated later.

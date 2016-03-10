@@ -30,20 +30,43 @@ let SrcsetSourceDef;
 
 
 /**
+ * Extracts `srcset` and fallbacks to `src` if not available.
+ * @param {!Element} element
+ * @return {!Srcset}
+ */
+export function srcsetFromElement(element) {
+  const srcsetAttr = element.getAttribute('srcset');
+  if (srcsetAttr) {
+    return parseSrcset(srcsetAttr);
+  }
+  // We can't push `src` via `parseSrcset` because URLs in `src` are not always
+  // RFC compliant and can't be easily parsed as an `srcset`. For instance,
+  // they sometimes contain space characters.
+  const srcAttr = assert(element.getAttribute('src'),
+      'Either non-empty "srcset" or "src" attribute must be specified: %s',
+      element);
+  return new Srcset([{url: srcAttr, dpr: 1}]);
+}
+
+
+/**
  * Parses the text representation of srcset into Srcset object.
  * See https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#Attributes.
  * See http://www.w3.org/html/wg/drafts/html/master/semantics.html#attr-img-srcset.
  * @param {string} s
+ * @param {!Element=} opt_element
  * @return {!Srcset}
  */
-export function parseSrcset(s) {
+export function parseSrcset(s, opt_element) {
   // General grammar: (URL [NUM[w|x]],)*
   // Example 1: "image1.png 100w, image2.png 50w"
   // Example 2: "image1.png 2x, image2.png"
   // Example 3: "image1,100w.png 100w, image2.png 50w"
   const sSources = s.match(
       /\s*([^\s]*)(\s+(-?(\d+(\.(\d+)?)?|\.\d+)[a-zA-Z]))?(\s*,)?/g);
-  assert(sSources.length > 0, 'srcset has to have at least one source');
+  assert(sSources.length > 0,
+      'srcset has to have at least one source: %s',
+      opt_element);
   const sources = [];
   sSources.forEach(sSource => {
     sSource = sSource.trim();
@@ -71,7 +94,7 @@ export function parseSrcset(s) {
     }
   });
   return new Srcset(sources);
-};
+}
 
 
 /**
