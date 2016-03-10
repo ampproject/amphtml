@@ -73,10 +73,6 @@ describe('Motion continueMotion', () => {
   });
 
   afterEach(() => {
-    expect(vsyncTasks.length).to.equal(0);
-    vsync = null;
-    vsyncTasks = null;
-    clock = null;
     sandbox.restore();
     sandbox = null;
   });
