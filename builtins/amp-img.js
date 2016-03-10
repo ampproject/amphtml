@@ -51,9 +51,16 @@ export function installImg(win) {
 
       this.element.appendChild(this.img_);
 
-      /** @private @const {!Srcset} */
-      this.srcset_ = parseSrcset(this.element.getAttribute('srcset') ||
-          this.element.getAttribute('src'));
+      /** @private @const {?string} */
+      this.src_ = this.element.getAttribute('src');
+
+      /** @private {?Srcset} */
+      this.srcset_ = null;
+
+      const srcsetString = this.element.getAttribute('srcset');
+      if (srcsetString) {
+        this.srcset_ = parseSrcset(srcsetString);
+      }
     }
 
     /** @override */
@@ -79,7 +86,9 @@ export function installImg(win) {
       if (this.getLayoutWidth() <= 0) {
         return Promise.resolve();
       }
-      const src = this.srcset_.select(this.getLayoutWidth(), this.getDpr()).url;
+      const src = this.srcset_
+          ? this.srcset_.select(this.getLayoutWidth(), this.getDpr()).url
+          : this.src_;
       if (src == this.img_.getAttribute('src')) {
         return Promise.resolve();
       }
