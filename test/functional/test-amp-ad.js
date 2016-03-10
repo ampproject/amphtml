@@ -318,7 +318,66 @@ function tests(name, installer) {
           expect(placeholderEl.classList.contains('amp-hidden')).to.be.true;
         });
       });
+
+      it('should destroy non-master iframe', () => {
+        return getAd({
+          width: 300,
+          height: 750,
+          type: 'a9',
+          src: 'testsrc',
+        }, 'https://schema.org', ad => {
+          const placeholder = document.createElement('div');
+          placeholder.setAttribute('placeholder', '');
+          ad.appendChild(placeholder);
+          expect(placeholder.classList.contains('amp-hidden')).to.be.false;
+
+          const fallback = document.createElement('div');
+          fallback.setAttribute('fallback', '');
+          ad.appendChild(fallback);
+          return ad;
+        }).then(ad => {
+          ad.implementation_.iframe_.setAttribute(
+              'name', 'frame_doubleclick_0');
+          sandbox.stub(
+              ad.implementation_, 'deferMutate', function(callback) {
+                callback();
+              });
+          ad.implementation_.noContentHandler_();
+          expect(ad.implementation_.iframe_).to.be.null;
+        });
+      });
+
+      it('should not destroy a master iframe', () => {
+        return getAd({
+          width: 300,
+          height: 750,
+          type: 'a9',
+          src: 'testsrc',
+        }, 'https://schema.org', ad => {
+          const placeholder = document.createElement('div');
+          placeholder.setAttribute('placeholder', '');
+          ad.appendChild(placeholder);
+          expect(placeholder.classList.contains('amp-hidden')).to.be.false;
+
+          const fallback = document.createElement('div');
+          fallback.setAttribute('fallback', '');
+          ad.appendChild(fallback);
+          return ad;
+        }).then(ad => {
+          ad.implementation_.iframe_.setAttribute(
+              'name', 'frame_doubleclick_master');
+          sandbox.stub(
+              ad.implementation_, 'deferMutate', function(callback) {
+                callback();
+              });
+          ad.implementation_.noContentHandler_();
+          expect(ad.implementation_.iframe_).to.not.be.null;
+        });
+      });
+
     });
+
+
 
     describe('cid-ad support', () => {
       const cidScope = 'cid-in-ads-test';
