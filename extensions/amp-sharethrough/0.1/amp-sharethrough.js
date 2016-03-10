@@ -93,24 +93,21 @@ export class AmpSharethrough extends AMP.BaseElement {
 
   analyticsHTML(idSelector) {
     const analyticsElement = document.createElement('amp-analytics');
-    analyticsElement./*REVIEW*/innerHTML = '<script type="application/json">'
-    + '{'
-    + '  "requests": {'
-    + '    "event": "' + analyticsUrl + '?ckey=${ckey}&type=${eventLabel}"'
-    + '  },'
-    + '  "triggers": {'
-    + '    "trackAdVisible": {'
-    + '      "on": "visible",'
-    + '      "selector": "#' + idSelector + '",'
-    + '      "request": "event",'
-    + '      "vars": {'
-    + '        "ckey": "creative_key",'
-    + '        "eventLabel": "visible"'
-    + '      }'
-    + '    }'
-    + '  }'
-    + '}'
-    + '</script>';
+    const scriptElement = document.createElement('script');
+    scriptElement.type = 'application/json';
+    const payload = {
+      'requests': {
+        'event': analyticsUrl + '?ckey=${ckey}&type=${eventLabel}'},
+      'triggers': {
+        'trackAdVisible': {
+          'on': 'visible',
+          'selector': `#${idSelector}`,
+          'request': 'event',
+          'vars': {
+            'ckey': 'creative_key',
+            'eventLabel': 'visible'}}}};
+    scriptElement.text = JSON.stringify(payload);
+    analyticsElement.appendChild(scriptElement);
     return analyticsElement;
   }
 

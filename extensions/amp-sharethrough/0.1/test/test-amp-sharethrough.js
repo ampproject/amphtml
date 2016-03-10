@@ -206,7 +206,7 @@ describe('amp-sharethrough', () => {
       const sharethrough = getSharethroughTag();
       const pixelElement = sharethrough.pixelHTML('fake-ckey', 'fake-pkey');
       expect(pixelElement.tagName).to.equal('AMP-PIXEL');
-      expect(pixelElement.getAttribute('src')).to.equal('https://b.sharethrough.com/?ckey=fake-ckey&pkey=fake-pkey&type=rendered');
+      expect(pixelElement.getAttribute('src')).to.equal('https://b.sharethrough.com/butler?ckey=fake-ckey&pkey=fake-pkey&type=rendered');
     });
   });
 });
