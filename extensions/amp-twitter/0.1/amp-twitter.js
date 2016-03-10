@@ -40,6 +40,11 @@ class AmpTwitter extends AMP.BaseElement {
   }
 
   /** @override */
+  firstLayoutCompleted() {
+    // Do not hide placeholder
+  }
+
+  /** @override */
   layoutCallback() {
     // TODO(malteubl): Preconnect to twitter.
     const iframe = getIframe(this.element.ownerDocument.defaultView,
@@ -48,6 +53,9 @@ class AmpTwitter extends AMP.BaseElement {
     this.element.appendChild(iframe);
     // Triggered by context.updateDimensions() inside the iframe.
     listen(iframe, 'embed-size', data => {
+      // We only get the message if and when there is a tweet to display,
+      // so hide the placeholder.
+      this.togglePlaceholder(false);
       iframe.height = data.height;
       iframe.width = data.width;
       const amp = iframe.parentElement;
