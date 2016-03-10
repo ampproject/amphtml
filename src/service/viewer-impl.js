@@ -375,6 +375,32 @@ export class Viewer {
       }
     });
 
+    /** @private {string} */
+    this.resolvedViewerUrl_ = removeFragment(this.win.location.href || '');
+
+    /** @const @private {!Promise<string>} */
+    this.viewerUrl_ = new Promise(resolve => {
+      const viewerUrlOverride = this.params_['viewerUrl'];
+      if (this.isEmbedded() && viewerUrlOverride) {
+        // Viewer override, but only for whitelisted viewers. Only allowed for
+        // iframed documents.
+        this.isTrustedViewer_.then(isTrusted => {
+          if (isTrusted) {
+            this.resolvedViewerUrl_ = viewerUrlOverride;
+          } else {
+            this.win.setTimeout(() => {
+              throw new Error('Untrusted viewer url override: ' +
+                  viewerUrlOverride + ' at ' +
+                  this.messagingOrigin_);
+            });
+          }
+          resolve(this.resolvedViewerUrl_);
+        });
+      } else {
+        resolve(this.resolvedViewerUrl_);
+      }
+    });
+
     // Remove hash - no reason to keep it around, but only when embedded.
     if (this.isEmbedded_) {
       const newUrl = removeFragment(this.win.location.href);
@@ -599,6 +625,25 @@ export class Viewer {
    */
   getPaddingTop() {
     return this.paddingTop_;
+  }
+
+  /**
+   * Returns the resolved viewer URL value. It's by default the current page's
+   * URL. The trusted viewers are allowed to override this value.
+   * @return {string}
+   */
+  getResolvedViewerUrl() {
+    return this.resolvedViewerUrl_;
+  }
+
+  /**
+   * Returns the promise that will yield the viewer URL value. It's by default
+   * the current page's URL. The trusted viewers are allowed to override this
+   * value.
+   * @return {!Promise<string>}
+   */
+  getViewerUrl() {
+    return this.viewerUrl_;
   }
 
   /**
