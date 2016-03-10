@@ -52,6 +52,8 @@ This allows the AMP library to include:
 
 Get started [creating your first AMP page](https://www.ampproject.org/docs/get_started/create_page.html).
 
+[Full docs and reference.](https://www.ampproject.org/docs/get_started/about-amp.html)
+
 ## The AMP JS library
 
 The AMP JS library provides [builtin](builtins/README.md) AMP Components, manages the loading of external resources, and ensures a reliably fast time-to-paint.
@@ -59,7 +61,7 @@ The AMP JS library provides [builtin](builtins/README.md) AMP Components, manage
 ## The AMP Validator
 
 The AMP Validator allows a web developer to easily identify if the web page
-doesn't meet the [AMP HTML specification](spec/amp-html-format.md).
+doesn't meet the [AMP HTML specification](https://www.ampproject.org/docs/reference/spec.html).
 
 Adding "#development=1" to the URL of the page instructs the AMP Runtime to run
 a series of assertions confirming the page's markup meets the AMP HTML
