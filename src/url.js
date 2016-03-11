@@ -25,6 +25,9 @@ const a = document.createElement('a');
 // but we often parse the same one over and over again.
 const cache = Object.create(null);
 
+/** @private @const Matches amp_js_* paramters in query string. */
+const AMP_JS_PARAMS_REGEX = /[?&]amp_js[^&]*/;
+
 /**
  * Returns a Location-like object for the given URL. If it is relative,
  * the URL gets resolved.
@@ -210,6 +213,22 @@ export function isProxyOrigin(url) {
 }
 
 /**
+ * Removes parameters that start with amp js parameter pattern and returns the new
+ * search string.
+ * @param {string} urlSearch
+ * @return {string}
+ */
+function removeAmpJsParams(urlSearch) {
+  if (!urlSearch || urlSearch == '?') {
+    return '';
+  }
+  const search = urlSearch
+      .replace(AMP_JS_PARAMS_REGEX, '')
+      .replace(/^[?&]/, '');  // Removes first ? or &.
+  return search ? '?' + search : '';
+}
+
+/**
  * Returns the source URL of an AMP document for documents served
  * on a proxy origin or directly.
  * @param {string|!Location} url URL of an AMP document.
@@ -240,7 +259,8 @@ export function getSourceUrl(url) {
   // Sanity test that what we found looks like a domain.
   assert(origin.indexOf('.') > 0, 'Expected a . in origin %s', origin);
   path.splice(1, domainOrHttpsSignal == 's' ? 3 : 2);
-  return origin + path.join('/') + (url.search || '') + (url.hash || '');
+  return origin + path.join('/') + removeAmpJsParams(url.search) +
+      (url.hash || '');
 }
 
 /**
