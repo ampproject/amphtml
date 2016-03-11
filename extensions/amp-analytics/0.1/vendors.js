@@ -96,20 +96,21 @@ export const ANALYTICS_CONFIG = {
         'g2=${zone}&' +
         'g3=${sponsorName}&' +
         'g4=${contentType}&' +
+        'c=120&' +
         'x=${scrollTop}&' +
         'y=${scrollHeight}&' +
         'j=${decayTime}&' +
-        'r=${documentReferrer}&' +
-        'b=${pageLoadTime}&' +
-        't=${clientId(_cb)}${pageViewId}&' +
-        'i=${title}&' +
-        'T=${timestamp}&' +
-        'E=${totalEngagedTime}&' +
-        'C=2&' +
         'R=1&' +
         'W=0&' +
         'I=0&' +
-        'c=120',
+        'E=${totalEngagedTime}&' +
+        'r=${documentReferrer}&' +
+        't=${pageViewId}${clientId(_cb)}&' +
+        'b=${pageLoadTime}&' +
+        'i=${title}&' +
+        'T=${timestamp}&' +
+        'tz=${timezone}&' +
+        'C=2',
       'baseSuffix': '&_',
       'interval': '${host}${basePrefix}${baseSuffix}',
       'anchorClick': '${host}${basePrefix}${baseSuffix}',
