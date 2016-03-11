@@ -273,7 +273,6 @@ export function installAd(win) {
           this.viewer_.onVisibilityChanged(() => {
             this.sendEmbedInfo_(this.isInViewport());
           });
-
           return loadPromise(this.iframe_);
         });
       }

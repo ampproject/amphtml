@@ -798,8 +798,18 @@ describe('CustomElement Service Elements', () => {
   });
 
   it('toggleFallback should toggle unsupported class', () => {
+    const fallback = element.appendChild(createWithAttr('fallback'));
+    const resourcesSpy = sandbox.spy();
+    element.resources_ = {
+      scheduleLayout: function(el, fb) {
+        if (el == element && fb == fallback) {
+          resourcesSpy();
+        }
+      },
+    };
     element.toggleFallback(true);
     expect(element).to.have.class('amp-notsupported');
+    expect(resourcesSpy.callCount).to.equal(1);
 
     element.toggleFallback(false);
     expect(element).to.not.have.class('amp-notsupported');
