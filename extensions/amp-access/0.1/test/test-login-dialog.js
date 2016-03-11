@@ -160,6 +160,7 @@ describe('WebLoginDialog', () => {
     messageListener = undefined;
     viewer = {
       getParam: () => null,
+      getResolvedViewerUrl: () => 'http://localhost:8000/test-login-dialog',
     };
     windowApi = {
       services: {
@@ -169,7 +170,6 @@ describe('WebLoginDialog', () => {
       location: {
         protocol: 'http:',
         host: 'localhost:8000',
-        href: 'http://localhost:8000/test-login-dialog',
       },
       screen: {width: 1000, height: 1000},
       addEventListener: (type, callback) => {
@@ -339,6 +339,26 @@ describe('WebLoginDialog', () => {
         .then(result => {
           expect(result).to.equal('#success=true');
         });
+  });
+
+  it('should override return URL', () => {
+    viewer.getResolvedViewerUrl = () => 'http://acme.com/viewer1';
+    windowMock.expects('open')
+        .withArgs(
+            'http://acme.com/login?a=1&ret1=' +
+            encodeURIComponent('http://localhost:8000/extensions' +
+                '/amp-access/0.1/amp-login-done.html?url=' +
+                encodeURIComponent('http://acme.com/viewer1')))
+        .returns(dialog)
+        .once();
+    const promise = openLoginDialog(windowApi,
+        'http://acme.com/login?a=1&ret1=RETURN_URL');
+    return Promise.resolve().then(() => {
+      succeed();
+      return promise;
+    }).then(result => {
+      expect(result).to.equal('#success=true');
+    });
   });
 
   it('should respond with empty string when dialog is closed', () => {
