@@ -962,6 +962,20 @@ describe('AccessService pingback', () => {
     });
   });
 
+  it('should re-start "viewed" monitoring when directly requested', () => {
+    service.lastAuthorizationPromise_ = Promise.resolve();
+    const whenViewedSpy = sandbox.stub(service, 'whenViewed_', () => {
+      return Promise.resolve();
+    });
+    service.scheduleView_(/* timeToView */ 0);
+    return Promise.resolve().then(() => {
+      expect(whenViewedSpy.callCount).to.equal(1);
+      service.scheduleView_(/* timeToView */ 0);
+    }).then(() => {
+      expect(whenViewedSpy.callCount).to.equal(2);
+    });
+  });
+
   it('should send POST pingback', () => {
     expectGetReaderId('reader1');
     xhrMock.expects('sendSignal')
