@@ -934,6 +934,12 @@ export function createAmpElementProto(win, name, implementationClass) {
     // element, (b) some realyout is expected and (c) fallback condition would
     // be rare.
     this.classList.toggle('amp-notsupported', state);
+    if (state == true) {
+      const fallbackElement = this.getFallback();
+      if (fallbackElement) {
+        this.resources_.scheduleLayout(this, fallbackElement);
+      }
+    }
   };
 
   /**
