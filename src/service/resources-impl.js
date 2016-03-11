@@ -53,8 +53,7 @@ const FOUR_FRAME_DELAY_ = 70;
 /**
  * The internal state of the visibility state machine.
  * @typedef {{
- *   viewer: boolean,
- *   document: boolean
+ *   state: !VisibilityState
  * }}
  * @private
  */
