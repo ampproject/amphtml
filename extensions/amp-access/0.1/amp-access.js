@@ -575,6 +575,7 @@ export class AccessService {
    * @private
    */
   scheduleView_(timeToView) {
+    this.reportViewPromise_ = null;
     onDocumentReady(this.win.document, () => {
       if (this.viewer_.isVisible()) {
         this.reportWhenViewed_(timeToView);
