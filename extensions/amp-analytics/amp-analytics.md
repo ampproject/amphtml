@@ -161,7 +161,7 @@ The following variables are supported:
 * `account`: Name of the account (mandatory)
 * `page`: Alternative name of the page (optional)
 
-Configuration details can be found at [www.shinystat.com](http://www.shinystat.com/it/guida-elemento_codice-html-amp.html)
+Configuration details can be found at [www.shinystat.com](http://www.shinystat.com/en/guida-elemento_html-amp-code.html)
 
 ### SimpleReach
 
