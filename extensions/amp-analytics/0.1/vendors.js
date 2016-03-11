@@ -55,6 +55,7 @@ export const ANALYTICS_CONFIG = {
       'serverResponseTime': 'SERVER_RESPONSE_TIME',
       'sourceUrl': 'SOURCE_URL',
       'sourceHost': 'SOURCE_HOST',
+      'sourcePath': 'SOURCE_PATH',
       'tcpConnectTime': 'TCP_CONNECT_TIME',
       'timestamp': 'TIMESTAMP',
       'timezone': 'TIMEZONE',

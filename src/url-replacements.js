@@ -101,6 +101,11 @@ class UrlReplacements {
       return parseUrl(getSourceUrl(this.win_.location.href)).hostname;
     });
 
+    // Returns the path of the Source URL for this AMP document.
+    this.set_('SOURCE_PATH', () => {
+      return parseUrl(getSourceUrl(this.win_.location.href)).pathname;
+    });
+
     // Returns a random string that will be the constant for the duration of
     // single page view. It should have sufficient entropy to be unique for
     // all the page views a single user is making at a time.
