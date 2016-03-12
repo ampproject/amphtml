@@ -89,8 +89,11 @@ export function addParamsToUrl(url, params) {
 }
 
 /**
- * Asserts that a given url is HTTPS or protocol relative.
+ * Asserts that a given url is HTTPS or protocol relative. It's a user-level
+ * assert.
+ *
  * Provides an exception for localhost.
+ *
  * @param {string} urlString
  * @param {!Element} elementContext Element where the url was found.
  * @return {string}

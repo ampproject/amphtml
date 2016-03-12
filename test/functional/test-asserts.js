@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+// TODO(dvoytenko, #2527): Remove this module.
+
 import {ASSERT_SENTINEL, assert, assertEnumValue, isAssertErrorMessage,
     userError} from '../../src/asserts';
 
