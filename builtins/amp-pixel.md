@@ -18,15 +18,15 @@ limitations under the License.
 
 <table>
    <tr>
-    <td width="40%"><strong>Description</strong></td>
+    <td class="col-fourty"><strong>Description</strong></td>
     <td>The <code>amp-pixel</code> element is meant to be used as a typical tracking pixel - to count page views.</td>
   </tr>
    <tr>
-    <td width="40%"><strong>Availability</strong></td>
+    <td class="col-fourty"><strong>Availability</strong></td>
     <td>Stable</td>
   </tr>
    <tr>
-    <td width="40%"><strong>Examples</strong></td>
+    <td class="col-fourty"><strong>Examples</strong></td>
     <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/everything.amp.html">everything.amp.html</a></td>
   </tr>
 </table>
@@ -63,31 +63,31 @@ The following lists validation errors specific to the `amp-pixel` tag
 
 <table>
   <tr>
-    <th width="40%"><strong>Validation Error</strong></th>
+    <th class="col-fourty"><strong>Validation Error</strong></th>
     <th>Description</th>
   </tr>
   <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#mandatory-attribute-missing">The mandatory attribute 'example1' is missing in tag 'example2'.</a></td>
+    <td class="col-fourty"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#mandatory-attribute-missing">The mandatory attribute 'example1' is missing in tag 'example2'.</a></td>
     <td>Error thrown when <code>src</code> attribute is missing.</td>
   </tr>
   <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#missing-url">Missing URL for attribute 'example1' in tag 'example2'.</a></td>
+    <td class="col-fourty"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#missing-url">Missing URL for attribute 'example1' in tag 'example2'.</a></td>
     <td>Error thrown when <code>src</code> attribute is missing it's URL.</td>
   </tr>
   <tr>
-  <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-url">Malformed URL 'example3' for attribute 'example1' in tag 'example2'.</a></td>
+  <td class="col-fourty"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-url">Malformed URL 'example3' for attribute 'example1' in tag 'example2'.</a></td>
     <td>Error thrown when <code>src</code> attribute's URL is invalid.</td>
   </tr>
   <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-url-protocol">Invalid URL protocol 'example3:' for attribute 'example1' in tag 'example2'.</a></td>
+    <td class="col-fourty"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-url-protocol">Invalid URL protocol 'example3:' for attribute 'example1' in tag 'example2'.</a></td>
     <td>Error thrown <code>src</code> attribute's URL is <code>http</code>; <code>https</code> protocol required.</td>
   </tr>
   <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#implied-layout-isnt-supported-by-amp-tag">The implied layout 'example1' is not supported by tag 'example2'.</a></td>
+    <td class="col-fourty"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#implied-layout-isnt-supported-by-amp-tag">The implied layout 'example1' is not supported by tag 'example2'.</a></td>
     <td>Error thrown when implied layout set to <code>FIXED_HEIGHT</code>, <code>RESPONSIVE</code>, <code>FILL</code>, or <code>CONTAINER</code> as these aren't supported.</td>
   </tr>
   <tr>
-    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#specified-layout-isnt-supported-by-amp-tag">The specified layout 'example1' is not supported by tag 'example2'.</a></td>
+    <td class="col-fourty"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#specified-layout-isnt-supported-by-amp-tag">The specified layout 'example1' is not supported by tag 'example2'.</a></td>
     <td>Error thrown when specified layout set to <code>FIXED_HEIGHT</code>, <code>RESPONSIVE</code>, <code>FILL</code>, or <code>CONTAINER</code> as these aren't supported.</td>
   </tr>
 </table>
