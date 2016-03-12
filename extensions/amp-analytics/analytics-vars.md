@@ -92,6 +92,18 @@ Parses and provides the source URL of the current document to the URL.
 
 The source URL is extracted from the proxy URL if the document is being served from a *known* proxy. Otherwise the original document URL is returned. For instance, if the URL is served via the proxy `https://cdn.ampproject.org` from the URL `https://cdn.ampproject.org/c/s/example.com/page.html`, then `SOURCE_URL` would return `https://example.com/page.html`. If the URL is served directly from `https://example.com/page.html`, `https://example.com/page.html` will be returned.
 
+### sourceHost
+
+Parses and provides the source URL's host. See the description of `sourceUrl` for more details.
+
+Example value: `example.com`
+
+### sourcePath
+
+Parses and provides the source URL's path part. See the description of `sourceUrl` for more details.
+
+Example value: `%2Fpage.html`
+
 ### title
 
 Provides the title of the current document.

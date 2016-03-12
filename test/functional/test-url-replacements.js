@@ -148,6 +148,12 @@ describe('UrlReplacements', () => {
     });
   });
 
+  it('should replace SOURCE_PATH', () => {
+    return expand('?path=SOURCE_PATH').then(res => {
+      expect(res).to.not.match(/SOURCE_PATH/);
+    });
+  });
+
   it('should replace PAGE_VIEW_ID', () => {
     return expand('?pid=PAGE_VIEW_ID').then(res => {
       expect(res).to.match(/pid=\d+/);

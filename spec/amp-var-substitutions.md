@@ -98,6 +98,16 @@ For instance:
 ```
 may make a request to something like `https://foo.com/pixel?host=pinterest.com`.
 
+### SOURCE_PATH
+
+Use the special string `SOURCE_PATH` to add the source URL's path of the current document to the URL. See the description of `SOURCE_URL` for more details.
+
+For instance:
+```html
+<amp-pixel src="https://foo.com/pixel?path=SOURCE_PATH"></amp-pixel>
+```
+may make a request to something like `https://foo.com/pixel?path=%2Fpage2.html`.
+
 ### DOCUMENT_CHARSET
 
 Provides the character encoding of the current document.
