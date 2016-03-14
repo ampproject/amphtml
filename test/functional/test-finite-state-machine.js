@@ -21,66 +21,35 @@ describe('Finite State Machine', () => {
   describe('simple machines', () => {
     let fsm;
     let spy;
+    let other;
 
     beforeEach(() => {
-      fsm = new FiniteStateMachine({
-        bit1: undefined,
-      });
+      fsm = new FiniteStateMachine('init');
       spy = sinon.spy();
+      other = sinon.spy();
 
-      fsm.addTransition({
-        bit1: undefined,
-      }, {
-        bit1: true,
-      }, spy);
+      fsm.addTransition('init', 'start', spy);
+      fsm.addTransition('init', 'other', other);
     });
 
     it('invokes callbacks on transition', () => {
-      fsm.setState({
-        bit1: true,
-      });
+      fsm.setState('start');
 
       expect(spy).to.have.been.called;
     });
-  });
 
-  describe('complex machines', () => {
-    let fsm;
-    let goodSpy;
-    let badSpy;
+    it('ignores other transition callbacks', () => {
+      fsm.setState('other');
 
-    const initialState = {
-      bit1: true,
-      bit2: true,
-    };
-    const goodState = {
-      bit1: true,
-      bit2: false,
-    };
-    const badState = {
-      bit1: false,
-      bit2: false,
-    };
-
-    beforeEach(() => {
-      fsm = new FiniteStateMachine(initialState);
-      goodSpy = sinon.spy();
-      badSpy = sinon.spy();
-
-      fsm.addTransition(initialState, goodState, goodSpy);
-      fsm.addTransition(initialState, badState, badSpy);
+      expect(spy).not.to.have.been.called;
+      expect(other).to.have.been.called;
     });
 
-    it('invokes callbacks on transition', () => {
-      fsm.setState(goodState);
+    it('handles unregistered transitions', () => {
+      fsm.setState('unknown');
 
-      expect(goodSpy).to.have.been.called;
-    });
-
-    it('ignores callbacks registered to other transitions', () => {
-      fsm.setState(goodState);
-
-      expect(badSpy).not.to.have.been.called;
+      expect(spy).not.to.have.been.called;
+      expect(other).not.to.have.been.called;
     });
   });
 });

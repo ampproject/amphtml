@@ -51,16 +51,6 @@ const FOCUS_HISTORY_TIMEOUT_ = 1000 * 60;  // 1min
 const FOUR_FRAME_DELAY_ = 70;
 
 /**
- * The internal state of the visibility state machine.
- * @typedef {{
- *   state: !VisibilityState
- * }}
- * @private
- */
-let visibilityStateDef;
-
-
-/**
  * Returns the element-based priority. A value from 0 to 10.
  * @param {string} tagName
  * @return {number}
@@ -176,10 +166,10 @@ export class Resources {
     /** @private @const {!Framerate}  */
     this.framerate_ = installFramerateService(this.win);
 
-    /** @private @const {!FiniteStateMachine<visibilityStateDef>} */
-    this.visibilityStateMachine_ = new FiniteStateMachine({
-      state: this.viewer_.getVisibilityState(),
-    });
+    /** @private @const {!FiniteStateMachine<!VisibilityState>} */
+    this.visibilityStateMachine_ = new FiniteStateMachine(
+      this.viewer_.getVisibilityState()
+    );
     this.setupVisibilityStateMachine_(this.visibilityStateMachine_);
 
     // When viewport is resized, we have to re-measure all elements.
@@ -598,9 +588,9 @@ export class Resources {
     this.pass_.cancel();
     this.vsyncScheduled_ = false;
 
-    this.visibilityStateMachine_.setState({
-      state: this.viewer_.getVisibilityState(),
-    });
+    this.visibilityStateMachine_.setState(
+      this.viewer_.getVisibilityState()
+    );
   }
 
   /**
@@ -948,37 +938,39 @@ export class Resources {
 
     let timeout = -1;
     let task = this.queue_.peek(scorer);
-    while (task) {
-      timeout = this.calcTaskTimeout_(task);
-      dev.fine(TAG_, 'peek from queue:', task.id,
-          'sched at', task.scheduleTime,
-          'score', scorer(task),
-          'timeout', timeout);
-      if (timeout > 16) {
-        break;
-      }
+    if (task) {
+      do {
+        timeout = this.calcTaskTimeout_(task);
+        dev.fine(TAG_, 'peek from queue:', task.id,
+            'sched at', task.scheduleTime,
+            'score', scorer(task),
+            'timeout', timeout);
+        if (timeout > 16) {
+          break;
+        }
 
-      this.queue_.dequeue(task);
+        this.queue_.dequeue(task);
 
-      // Do not override a task in execution. This task will have to wait
-      // until the current one finished the execution.
-      const executing = this.exec_.getTaskById(task.id);
-      if (!executing) {
-        task.promise = task.callback(visibility);
-        task.startTime = now;
-        dev.fine(TAG_, 'exec:', task.id, 'at', task.startTime);
-        this.exec_.enqueue(task);
-        task.promise.then(this.taskComplete_.bind(this, task, true),
-            this.taskComplete_.bind(this, task, false))
-            .catch(reportError);
-      } else {
-        // Reschedule post execution.
-        executing.promise.then(this.reschedule_.bind(this, task),
-            this.reschedule_.bind(this, task));
-      }
+        // Do not override a task in execution. This task will have to wait
+        // until the current one finished the execution.
+        const executing = this.exec_.getTaskById(task.id);
+        if (!executing) {
+          task.promise = task.callback(visibility);
+          task.startTime = now;
+          dev.fine(TAG_, 'exec:', task.id, 'at', task.startTime);
+          this.exec_.enqueue(task);
+          task.promise.then(this.taskComplete_.bind(this, task, true),
+              this.taskComplete_.bind(this, task, false))
+              .catch(reportError);
+        } else {
+          // Reschedule post execution.
+          executing.promise.then(this.reschedule_.bind(this, task),
+              this.reschedule_.bind(this, task));
+        }
 
-      task = this.queue_.peek(scorer);
-      timeout = -1;
+        task = this.queue_.peek(scorer);
+        timeout = -1;
+      } while (task);
     }
 
     dev.fine(TAG_, 'queue size:', this.queue_.getSize());
@@ -1312,24 +1304,14 @@ export class Resources {
    * @param {function(!Resource, number)} iterator
    */
   setupVisibilityStateMachine_(vsm) {
-    const prerender = {
-      state: VisibilityState.PRERENDER,
-    };
-    const visible = {
-      state: VisibilityState.VISIBLE,
-    };
+    const prerender = VisibilityState.PRERENDER;
+    const visible = VisibilityState.VISIBLE;
     // Viewer has told us we are no longer active
-    const hidden = {
-      state: VisibilityState.HIDDEN,
-    };
+    const hidden = VisibilityState.HIDDEN;
     // Viewer has told us to pause media but don't unload it.
-    const paused = {
-      state: VisibilityState.PAUSED,
-    };
+    const paused = VisibilityState.PAUSED;
     // The browser tab is no longer active
-    const inactive = {
-      state: VisibilityState.INACTIVE,
-    };
+    const inactive = VisibilityState.INACTIVE;
 
     const doPass = () => {
       // If viewport size is 0, the manager will wait for the resize event.
@@ -1843,20 +1825,14 @@ export class Resource {
    * relayout in case document becomes active again.
    */
   unlayout() {
-    if (this.state_ == ResourceState_.NOT_BUILT) {
+    if (this.state_ == ResourceState_.NOT_BUILT ||
+        this.state_ == ResourceState_.NOT_LAID_OUT) {
       return;
     }
     this.setInViewport(false);
-    switch (this.state_) {
-      case ResourceState_.LAYOUT_COMPLETE:
-        if (!this.element.unlayoutCallback()) {
-          return;
-        }
-        // Intentional fall-through
-      case ResourceState_.READY_FOR_LAYOUT:
-      case ResourceState_.LAYOUT_SCHEDULED:
-        this.state_ = ResourceState_.NOT_LAID_OUT;
-        this.layoutCount_ = 0;
+    if (this.element.unlayoutCallback()) {
+      this.state_ = ResourceState_.NOT_LAID_OUT;
+      this.layoutCount_ = 0;
     }
   }
 
