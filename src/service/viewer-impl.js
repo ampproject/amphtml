@@ -19,7 +19,7 @@ import {assertEnumValue} from '../asserts';
 import {documentStateFor} from '../document-state';
 import {getMode} from '../mode';
 import {getService} from '../service';
-import {log} from '../log';
+import {dev} from '../log';
 import {parseQueryString, parseUrl, removeFragment} from '../url';
 import {platform} from '../platform';
 import {timer} from '../timer';
@@ -213,21 +213,21 @@ export class Viewer {
       parseParams_(this.win.location.hash, this.params_);
     }
 
-    log.fine(TAG_, 'Viewer params:', this.params_);
+    dev.fine(TAG_, 'Viewer params:', this.params_);
 
     this.isRuntimeOn_ = !parseInt(this.params_['off'], 10);
-    log.fine(TAG_, '- runtimeOn:', this.isRuntimeOn_);
+    dev.fine(TAG_, '- runtimeOn:', this.isRuntimeOn_);
 
     this.overtakeHistory_ = parseInt(this.params_['history'], 10) ||
         this.overtakeHistory_;
-    log.fine(TAG_, '- history:', this.overtakeHistory_);
+    dev.fine(TAG_, '- history:', this.overtakeHistory_);
 
     this.setVisibilityState_(this.params_['visibilityState']);
-    log.fine(TAG_, '- visibilityState:', this.getVisibilityState());
+    dev.fine(TAG_, '- visibilityState:', this.getVisibilityState());
 
     this.prerenderSize_ = parseInt(this.params_['prerenderSize'], 10) ||
         this.prerenderSize_;
-    log.fine(TAG_, '- prerenderSize:', this.prerenderSize_);
+    dev.fine(TAG_, '- prerenderSize:', this.prerenderSize_);
 
     this.viewportType_ = this.params_['viewportType'] || this.viewportType_;
     // Configure scrolling parameters when AMP is embeded in a viewer on iOS.
@@ -242,27 +242,27 @@ export class Viewer {
             (getMode().localDev || getMode().development)) {
       this.viewportType_ = ViewportType.NATURAL_IOS_EMBED;
     }
-    log.fine(TAG_, '- viewportType:', this.viewportType_);
+    dev.fine(TAG_, '- viewportType:', this.viewportType_);
 
     this.viewportWidth_ = parseInt(this.params_['width'], 10) ||
         this.viewportWidth_;
-    log.fine(TAG_, '- viewportWidth:', this.viewportWidth_);
+    dev.fine(TAG_, '- viewportWidth:', this.viewportWidth_);
 
     this.viewportHeight_ = parseInt(this.params_['height'], 10) ||
         this.viewportHeight_;
-    log.fine(TAG_, '- viewportHeight:', this.viewportHeight_);
+    dev.fine(TAG_, '- viewportHeight:', this.viewportHeight_);
 
     this./*OK*/scrollTop_ = parseInt(this.params_['scrollTop'], 10) ||
         this./*OK*/scrollTop_;
-    log.fine(TAG_, '- scrollTop:', this./*OK*/scrollTop_);
+    dev.fine(TAG_, '- scrollTop:', this./*OK*/scrollTop_);
 
     this.paddingTop_ = parseInt(this.params_['paddingTop'], 10) ||
         this.paddingTop_;
-    log.fine(TAG_, '- padding-top:', this.paddingTop_);
+    dev.fine(TAG_, '- padding-top:', this.paddingTop_);
 
     /** @private @const {boolean} */
     this.performanceTracking_ = this.params_['csi'] === '1';
-    log.fine(TAG_, '- performanceTracking:', this.performanceTracking_);
+    dev.fine(TAG_, '- performanceTracking:', this.performanceTracking_);
 
     /** @private {boolean} */
     this.hasBeenVisible_ = this.isVisible();
@@ -409,7 +409,7 @@ export class Viewer {
         // This is currently used my mode.js to infer development mode.
         this.win.location.originalHash = this.win.location.hash;
         this.win.history.replaceState({}, '', newUrl);
-        log.fine(TAG_, 'replace url:' + this.win.location.href);
+        dev.fine(TAG_, 'replace url:' + this.win.location.href);
       }
     }
 
@@ -469,7 +469,7 @@ export class Viewer {
    */
   toggleRuntime() {
     this.isRuntimeOn_ = !this.isRuntimeOn_;
-    log.fine(TAG_, 'Runtime state:', this.isRuntimeOn_);
+    dev.fine(TAG_, 'Runtime state:', this.isRuntimeOn_);
     this.runtimeOnObservable_.fire(this.isRuntimeOn_);
   }
 
@@ -535,7 +535,7 @@ export class Viewer {
 
     this.visibilityState_ = state;
 
-    log.fine(TAG_, 'visibilitychange event:', this.getVisibilityState());
+    dev.fine(TAG_, 'visibilitychange event:', this.getVisibilityState());
 
     if (oldState !== state) {
       this.onVisibilityChange_();
@@ -854,7 +854,7 @@ export class Viewer {
     if (eventType == 'visibilitychange') {
       if (data['prerenderSize'] !== undefined) {
         this.prerenderSize_ = data['prerenderSize'];
-        log.fine(TAG_, '- prerenderSize change:', this.prerenderSize_);
+        dev.fine(TAG_, '- prerenderSize change:', this.prerenderSize_);
       }
       this.setVisibilityState_(data['state']);
       return Promise.resolve();
@@ -863,7 +863,7 @@ export class Viewer {
       this.broadcastObservable_.fire(data);
       return Promise.resolve();
     }
-    log.fine(TAG_, 'unknown message:', eventType);
+    dev.fine(TAG_, 'unknown message:', eventType);
     return undefined;
   }
 
@@ -881,7 +881,7 @@ export class Viewer {
     if (!origin) {
       throw new Error('message channel must have an origin');
     }
-    log.fine(TAG_, 'message channel established with origin: ', origin);
+    dev.fine(TAG_, 'message channel established with origin: ', origin);
     this.messageDeliverer_ = deliverer;
     this.messagingOrigin_ = origin;
     if (this.messagingReadyResolver_) {

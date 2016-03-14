@@ -17,7 +17,7 @@
 import {Pass} from '../pass';
 import {cancellation} from '../error';
 import {getService} from '../service';
-import {log} from '../log';
+import {dev} from '../log';
 import {timer} from '../timer';
 import {installViewerService} from './viewer-impl';
 
@@ -231,7 +231,7 @@ export class Vsync {
   runAnim(task, opt_state) {
     // Do not request animation frames when the document is not visible.
     if (!this.canAnimate()) {
-      log.warn('Vsync',
+      dev.warn('Vsync',
           'Did not schedule a vsync request, because document was invisible');
       return false;
     }
