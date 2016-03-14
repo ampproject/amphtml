@@ -158,6 +158,12 @@ function doubleClickWithGlade(global, data) {
   slot.setAttribute('data-request-height', requestHeight);
   slot.setAttribute('data-request-width', requestWidth);
 
+  slot.addEventListener('gladeAdFetched', event => {
+    if (event.detail.empty) {
+      global.context.noContentAvailable();
+    }
+  });
+
   window.glade = {correlator: getCorrelator(global)};
   loadScript(global, 'https://securepubads.g.doubleclick.net/static/glade.js');
 }
