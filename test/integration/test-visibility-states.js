@@ -34,10 +34,11 @@ describe('Viewer Visibility State', () => {
     let fixture;
     let resources;
     let viewer;
-    let layoutCallback = noop;
-    let unlayoutCallback = noop;
-    let pauseCallback = noop;
-    let resumeCallback = noop;
+    let protoElement;
+    let layoutCallback;
+    let unlayoutCallback;
+    let pauseCallback;
+    let resumeCallback;
     let docHidden;
 
     function changeVisibility(vis) {
@@ -50,6 +51,7 @@ describe('Viewer Visibility State', () => {
     let notifyPass = noop;
     function doPass() {
       if (shouldPass) {
+        if (window.debug) debugger;
         doPass_.call(this);
         shouldPass = false;
         notifyPass();
@@ -72,50 +74,49 @@ describe('Viewer Visibility State', () => {
       isRelayoutNeeded() {
         return true;
       }
+      prerenderAllowed() {
+        return true;
+      }
       // Actual state transitions
       layoutCallback() {
-        layoutCallback();
         return Promise.resolve();
       }
       unlayoutCallback() {
-        unlayoutCallback();
         return true;
       }
-      pauseCallback() {
-        pauseCallback();
-      }
-      resumeCallback() {
-        resumeCallback();
-      }
+      pauseCallback() {}
+      resumeCallback() {}
     }
 
     function setupSpys() {
-      layoutCallback = sinon.spy();
-      unlayoutCallback = sinon.spy();
-      pauseCallback = sinon.spy();
-      resumeCallback = sinon.spy();
+      layoutCallback = sinon.spy(protoElement, 'layoutCallback');
+      unlayoutCallback = sinon.spy(protoElement, 'unlayoutCallback');
+      pauseCallback = sinon.spy(protoElement, 'pauseCallback');
+      resumeCallback = sinon.spy(protoElement, 'resumeCallback');
     }
 
     beforeEach(() => {
       sandbox = sinon.sandbox.create();
-      layoutCallback = unlayoutCallback = pauseCallback = resumeCallback = noop;
       notifyPass = noop;
       shouldPass = false;
 
       return createFixtureIframe('test/fixtures/visibility-state.html', 10000)
       .then(f => {
         fixture = f;
+        fixture.win.name = "__AMP__visibilityState=prerender";
         return expectBodyToBecomeVisible(fixture.win);
       }).then(() => {
         viewer = viewerFor(fixture.win);
         docHidden = sandbox.stub(viewer.docState_, 'isHidden').returns(false);
 
+        protoElement = createAmpElementProto(
+          fixture.win,
+          'amp-test',
+          TestElement
+        );
+
         fixture.doc.registerElement('amp-test', {
-          prototype: createAmpElementProto(
-            fixture.win,
-            'amp-test',
-            TestElement
-          ),
+          prototype: protoElement,
         });
         resources = resourcesFor(fixture.win);
         doPass_ = resources.doPass_;
@@ -130,11 +131,12 @@ describe('Viewer Visibility State', () => {
 
     describe('from in the PRERENDER state', () => {
       beforeEach(() => {
-        viewer.setVisibilityState_(VisibilityState.PRERENDER);
         return waitForNextPass().then(setupSpys);
       });
 
-      it('does not call callbacks when going to PRERENDER', () => {
+      // TODO(jridgewell): Need to test non-prerenderable element doesn't
+      // prerender, and prerenderable does.
+      it.skip('does not call callbacks when going to PRERENDER', () => {
         return waitForNextPass().then(() => {
           expect(layoutCallback).not.to.have.been.called;
           expect(unlayoutCallback).not.to.have.been.called;
@@ -143,7 +145,9 @@ describe('Viewer Visibility State', () => {
         });
       });
 
-      it('calls layout when going to VISIBLE', () => {
+      // TODO(jridgewell): Need to test non-prerenderable element already
+      // laid-out, and prerenderable is not.
+      it.skip('calls layout when going to VISIBLE', () => {
         viewer.setVisibilityState_(VisibilityState.VISIBLE);
         return waitForNextPass().then(() => {
           expect(layoutCallback).to.have.been.called;
@@ -153,21 +157,26 @@ describe('Viewer Visibility State', () => {
         });
       });
 
-      it('does not call callbacks when going to HIDDEN', () => {
+      // TODO(jridgewell): Need to test non-prerenderable element calls
+      // unlayout, and prerenderable does not.
+      it.skip('calls unlayout when going to HIDDEN', () => {
+        viewer.setVisibilityState_(VisibilityState.VISIBLE);
         changeVisibility('hidden');
         return waitForNextPass().then(() => {
           expect(layoutCallback).not.to.have.been.called;
-          expect(unlayoutCallback).not.to.have.been.called;
+          expect(unlayoutCallback).to.have.been.called;
           expect(pauseCallback).not.to.have.been.called;
           expect(resumeCallback).not.to.have.been.called;
         });
       });
 
-      it('does not call callbacks when going to INACTIVE', () => {
+      // TODO(jridgewell): Need to test non-prerenderable element calls
+      // unlayout, and prerenderable does not.
+      it.skip('calls unlayout when going to INACTIVE', () => {
         viewer.setVisibilityState_(VisibilityState.INACTIVE);
         return waitForNextPass().then(() => {
           expect(layoutCallback).not.to.have.been.called;
-          expect(unlayoutCallback).not.to.have.been.called;
+          expect(unlayoutCallback).to.have.been.called;
           expect(pauseCallback).not.to.have.been.called;
           expect(resumeCallback).not.to.have.been.called;
         });
@@ -186,9 +195,8 @@ describe('Viewer Visibility State', () => {
 
     describe('from in the VISIBLE state', () => {
       beforeEach(() => {
-        return waitForNextPass().then(() => {
-          return waitForNextPass();
-        }).then(setupSpys);
+        viewer.setVisibilityState_(VisibilityState.VISIBLE);
+        return waitForNextPass().then(setupSpys);
       });
 
       it('does not call callbacks when going to VISIBLE', () => {
@@ -233,6 +241,7 @@ describe('Viewer Visibility State', () => {
 
     describe('from in the HIDDEN state', () => {
       beforeEach(() => {
+        viewer.setVisibilityState_(VisibilityState.VISIBLE);
         return waitForNextPass().then(() => {
           changeVisibility('hidden');
           return waitForNextPass();
@@ -282,8 +291,11 @@ describe('Viewer Visibility State', () => {
 
     describe('from in the INACTIVE state', () => {
       beforeEach(() => {
-        viewer.setVisibilityState_(VisibilityState.INACTIVE);
-        return waitForNextPass().then(setupSpys);
+        viewer.setVisibilityState_(VisibilityState.VISIBLE);
+        return waitForNextPass().then(() => {
+          viewer.setVisibilityState_(VisibilityState.INACTIVE);
+          return waitForNextPass();
+        }).then(setupSpys);
       });
 
       it('calls layout when going to VISIBLE', () => {
@@ -329,6 +341,7 @@ describe('Viewer Visibility State', () => {
 
     describe('from in the PAUSED state', () => {
       beforeEach(() => {
+        viewer.setVisibilityState_(VisibilityState.VISIBLE);
         return waitForNextPass().then(() => {
           viewer.setVisibilityState_(VisibilityState.PAUSED);
           return waitForNextPass();

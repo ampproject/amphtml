@@ -20,6 +20,7 @@ import {
   Resources,
   TaskQueue_,
 } from '../../src/service/resources-impl';
+import {VisibilityState} from '../../src/service/viewer-impl';
 import {layoutRectLtwh} from '../../src/layout-rect';
 import * as sinon from 'sinon';
 
@@ -159,6 +160,9 @@ describe('Resources', () => {
       startLayout: () => {},
     };
     resources.visible_ = false;
+    sandbox.stub(resources.viewer_, 'getVisibilityState').returns(
+      VisibilityState.PRERENDER
+    );
     resources.scheduleLayoutOrPreload_(resource, true);
     expect(resources.queue_.getSize()).to.equal(0);
   });
@@ -176,6 +180,9 @@ describe('Resources', () => {
       layoutScheduled: () => {},
     };
     resources.visible_ = false;
+    sandbox.stub(resources.viewer_, 'getVisibilityState').returns(
+      VisibilityState.PRERENDER
+    );
     resources.scheduleLayoutOrPreload_(resource, true);
     expect(resources.queue_.getSize()).to.equal(1);
   });
@@ -367,6 +374,9 @@ describe('Resources discoverWork', () => {
 
   it('should render two screens when visible', () => {
     resources.visible_ = true;
+    sandbox.stub(resources.viewer_, 'getVisibilityState').returns(
+      VisibilityState.VISIBLE
+    );
     viewportMock.expects('getRect').returns(
         layoutRectLtwh(0, 0, 300, 400)).once();
 
@@ -381,6 +391,9 @@ describe('Resources discoverWork', () => {
     resource1.state_ = ResourceState_.LAYOUT_COMPLETE;
     resource2.state_ = ResourceState_.LAYOUT_COMPLETE;
     resources.visible_ = true;
+    sandbox.stub(resources.viewer_, 'getVisibilityState').returns(
+      VisibilityState.VISIBLE
+    );
     viewportMock.expects('getRect').returns(
         layoutRectLtwh(0, 0, 300, 400)).once();
 
@@ -397,6 +410,9 @@ describe('Resources discoverWork', () => {
     resource2.element.getBoundingClientRect =
         () => layoutRectLtwh(10, 1010, 100, 101);
     resources.visible_ = true;
+    sandbox.stub(resources.viewer_, 'getVisibilityState').returns(
+      VisibilityState.VISIBLE
+    );
     resources.relayoutAll_ = false;
     resources.relayoutTop_ = 1000;
     viewportMock.expects('getRect').returns(
@@ -413,6 +429,9 @@ describe('Resources discoverWork', () => {
 
   it('should prerender only one screen with prerenderSize = 1', () => {
     resources.visible_ = false;
+    sandbox.stub(resources.viewer_, 'getVisibilityState').returns(
+      VisibilityState.PRERENDER
+    );
     resources.prerenderSize_ = 1;
     viewportMock.expects('getRect').returns(
         layoutRectLtwh(0, 0, 300, 1009)).once();
@@ -425,6 +444,9 @@ describe('Resources discoverWork', () => {
 
   it('should NOT prerender anything with prerenderSize = 0', () => {
     resources.visible_ = false;
+    sandbox.stub(resources.viewer_, 'getVisibilityState').returns(
+      VisibilityState.PRERENDER
+    );
     resources.prerenderSize_ = 0;
     viewportMock.expects('getRect').returns(
         layoutRectLtwh(0, 0, 300, 400)).once();
@@ -438,6 +460,9 @@ describe('Resources discoverWork', () => {
     resource1.state_ = ResourceState_.LAYOUT_COMPLETE;
     resource2.state_ = ResourceState_.LAYOUT_COMPLETE;
     resources.visible_ = true;
+    sandbox.stub(resources.viewer_, 'getVisibilityState').returns(
+      VisibilityState.VISIBLE
+    );
     viewportMock.expects('getRect').returns(
         layoutRectLtwh(0, 0, 300, 400)).atLeast(1);
 
@@ -656,6 +681,9 @@ describe('Resources changeSize', () => {
 
     it('should change size when document is invisible', () => {
       resources.visible_ = false;
+      sandbox.stub(resources.viewer_, 'getVisibilityState').returns(
+        VisibilityState.PRERENDER
+      );
       resources.scheduleChangeSize_(resource1, 111, 222, false);
       resources.mutateWork_();
       expect(resources.requestsChangeSize_.length).to.equal(0);
@@ -1548,6 +1576,13 @@ describe('Resources.Resource', () => {
       resource.pause();
     });
 
+    it('should NOT call pauseCallback on paused element', () => {
+      resource.state_ = ResourceState_.LAYOUT_COMPLETE;
+      resource.paused_ = true;
+      elementMock.expects('pauseCallback').never();
+      resource.pause();
+    });
+
     it('should call pauseCallback on built element', () => {
       resource.state_ = ResourceState_.LAYOUT_COMPLETE;
       elementMock.expects('pauseCallback').once();
@@ -1562,8 +1597,15 @@ describe('Resources.Resource', () => {
       resource.resume();
     });
 
+    it('should NOT call resumeCallback on un-paused element', () => {
+      resource.state_ = ResourceState_.LAYOUT_COMPLETE;
+      elementMock.expects('resumeCallback').never();
+      resource.resume();
+    });
+
     it('should call resumeCallback on built element', () => {
       resource.state_ = ResourceState_.LAYOUT_COMPLETE;
+      resource.paused_ = true;
       elementMock.expects('resumeCallback').once();
       resource.resume();
     });

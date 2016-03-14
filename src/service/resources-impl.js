@@ -820,7 +820,7 @@ export class Resources {
       if (r.getState() == ResourceState_.NOT_BUILT) {
         r.build(this.forceBuild_);
       }
-      if (r.getState() == ResourceState_.NOT_LAID_OUT || relayoutAll) {
+      if (relayoutAll || r.getState() == ResourceState_.NOT_LAID_OUT) {
         r.applySizesAndMediaQuery();
         relayoutCount++;
       }
@@ -902,9 +902,7 @@ export class Resources {
       // elements to reduce CPU cycles.
       const shouldBeInViewport = (this.visible_ && r.isDisplayed() &&
           r.overlaps(visibleRect));
-      if (r.isInViewport() != shouldBeInViewport) {
-        r.setInViewport(shouldBeInViewport);
-      }
+      r.setInViewport(shouldBeInViewport);
     }
 
     // Phase 5: Idle layout: layout more if we are otherwise not doing much.
@@ -943,46 +941,44 @@ export class Resources {
    */
   work_() {
     const now = timer.now();
+    const visibility = this.viewer_.getVisibilityState();
 
     const scorer = this.calcTaskScore_.bind(this, this.viewport_.getRect(),
         Math.sign(this.lastVelocity_));
 
     let timeout = -1;
     let task = this.queue_.peek(scorer);
-    if (task) {
-      do {
-        timeout = this.calcTaskTimeout_(task);
-        dev.fine(TAG_, 'peek from queue:', task.id,
-            'sched at', task.scheduleTime,
-            'score', scorer(task),
-            'timeout', timeout);
-        if (timeout > 16) {
-          break;
-        }
+    while (task) {
+      timeout = this.calcTaskTimeout_(task);
+      dev.fine(TAG_, 'peek from queue:', task.id,
+          'sched at', task.scheduleTime,
+          'score', scorer(task),
+          'timeout', timeout);
+      if (timeout > 16) {
+        break;
+      }
 
-        this.queue_.dequeue(task);
+      this.queue_.dequeue(task);
 
-        // Do not override a task in execution. This task will have to wait
-        // until the current one finished the execution.
-        const executing = this.exec_.getTaskById(task.id);
-        if (!executing) {
-          // Ensure that task can prerender
-          task.promise = task.callback(this.visible_);
-          task.startTime = now;
-          dev.fine(TAG_, 'exec:', task.id, 'at', task.startTime);
-          this.exec_.enqueue(task);
-          task.promise.then(this.taskComplete_.bind(this, task, true),
-              this.taskComplete_.bind(this, task, false))
-              .catch(reportError);
-        } else {
-          // Reschedule post execution.
-          executing.promise.then(this.reschedule_.bind(this, task),
-              this.reschedule_.bind(this, task));
-        }
+      // Do not override a task in execution. This task will have to wait
+      // until the current one finished the execution.
+      const executing = this.exec_.getTaskById(task.id);
+      if (!executing) {
+        task.promise = task.callback(visibility);
+        task.startTime = now;
+        dev.fine(TAG_, 'exec:', task.id, 'at', task.startTime);
+        this.exec_.enqueue(task);
+        task.promise.then(this.taskComplete_.bind(this, task, true),
+            this.taskComplete_.bind(this, task, false))
+            .catch(reportError);
+      } else {
+        // Reschedule post execution.
+        executing.promise.then(this.reschedule_.bind(this, task),
+            this.reschedule_.bind(this, task));
+      }
 
-        task = this.queue_.peek(scorer);
-        timeout = -1;
-      } while (task);
+      task = this.queue_.peek(scorer);
+      timeout = -1;
     }
 
     dev.fine(TAG_, 'queue size:', this.queue_.getSize());
@@ -1164,11 +1160,17 @@ export class Resources {
         resource.isDisplayed(),
         'Not ready for layout: %s (%s)',
         resource.debugid, resource.getState());
-    // Don't schedule elements that can't prerender, they won't be allowed
-    // to execute anyway.
-    if (!this.visible_ && !resource.prerenderAllowed()) {
-      return;
+
+    // Don't schedule elements when we're not visible, or in prerender mode
+    // (and they can prerender).
+    if (!this.visible_) {
+      if (this.viewer_.getVisibilityState() != VisibilityState.PRERENDER) {
+        return;
+      } else if (!resource.prerenderAllowed()) {
+        return;
+      }
     }
+
     if (!resource.isInViewport() && !resource.renderOutsideViewport()) {
       return;
     }
@@ -1231,6 +1233,8 @@ export class Resources {
           priorityOffset,
       callback: callback,
       scheduleTime: timer.now(),
+      startTime: 0,
+      promise: null,
     };
     dev.fine(TAG_, 'schedule:', task.id, 'at', task.scheduleTime);
 
@@ -1349,6 +1353,7 @@ export class Resources {
         }
       }
     };
+    const noop = () => {};
     const pause = () => {
       this.resources_.forEach(r => r.pause());
     };
@@ -1365,15 +1370,11 @@ export class Resources {
       this.resources_.forEach(r => r.resume());
       doPass();
     };
-    const layout = () => {
-      this.resources_.forEach(r => r.layout());
-      doPass();
-    };
 
     vsm.addTransition(prerender, prerender, doPass);
-    vsm.addTransition(prerender, visible, layout);
-    vsm.addTransition(prerender, hidden, doPass);
-    vsm.addTransition(prerender, inactive, doPass);
+    vsm.addTransition(prerender, visible, doPass);
+    vsm.addTransition(prerender, hidden, unlayout);
+    vsm.addTransition(prerender, inactive, unlayout);
     vsm.addTransition(prerender, paused, doPass);
 
     vsm.addTransition(visible, visible, doPass);
@@ -1381,14 +1382,14 @@ export class Resources {
     vsm.addTransition(visible, inactive, pauseAndUnlayout);
     vsm.addTransition(visible, paused, pause);
 
-    vsm.addTransition(hidden, visible, layout);
+    vsm.addTransition(hidden, visible, doPass);
     vsm.addTransition(hidden, hidden, doPass);
     vsm.addTransition(hidden, inactive, pause);
     vsm.addTransition(hidden, paused, pause);
 
-    vsm.addTransition(inactive, visible, layout);
+    vsm.addTransition(inactive, visible, doPass);
     vsm.addTransition(inactive, hidden, doPass);
-    vsm.addTransition(inactive, inactive, doPass);
+    vsm.addTransition(inactive, inactive, noop);
     vsm.addTransition(inactive, paused, doPass);
 
     vsm.addTransition(paused, visible, resume);
@@ -1473,6 +1474,9 @@ export class Resource {
       /** @const  */
       this.loadPromiseResolve_ = resolve;
     });
+
+    /** @private {boolean} */
+    this.paused_ = false;
   }
 
   /**
@@ -1839,15 +1843,20 @@ export class Resource {
    * relayout in case document becomes active again.
    */
   unlayout() {
-    if (this.state_ != ResourceState_.LAYOUT_COMPLETE) {
+    if (this.state_ == ResourceState_.NOT_BUILT) {
       return;
     }
-    if (this.isInViewport()) {
-      this.setInViewport(false);
-    }
-    if (this.element.unlayoutCallback()) {
-      this.state_ = ResourceState_.NOT_LAID_OUT;
-      this.layoutCount_ = 0;
+    this.setInViewport(false);
+    switch (this.state_) {
+      case ResourceState_.LAYOUT_COMPLETE:
+        if (!this.element.unlayoutCallback()) {
+          return;
+        }
+        // Intentional fall-through
+      case ResourceState_.READY_FOR_LAYOUT:
+      case ResourceState_.LAYOUT_SCHEDULED:
+        this.state_ = ResourceState_.NOT_LAID_OUT;
+        this.layoutCount_ = 0;
     }
   }
 
@@ -1855,28 +1864,22 @@ export class Resource {
    * Calls element's pauseCallback callback.
    */
   pause() {
-    if (this.state_ == ResourceState_.NOT_BUILT) {
+    if (this.state_ == ResourceState_.NOT_BUILT || this.paused_) {
       return;
     }
-    if (this.isInViewport()) {
-      this.setInViewport(false);
-    }
+    this.paused_ = true;
+    this.setInViewport(false);
     this.element.pauseCallback();
-  }
-
-  /**
-   * TODO(jridgewell): This should eventually call layoutCallback
-   */
-  layout() {
   }
 
   /**
    * Calls element's resumeCallback callback.
    */
   resume() {
-    if (this.state_ == ResourceState_.NOT_BUILT) {
+    if (this.state_ == ResourceState_.NOT_BUILT || !this.paused_) {
       return;
     }
+    this.paused_ = false;
     this.element.resumeCallback();
   }
 
