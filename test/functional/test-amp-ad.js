@@ -142,8 +142,44 @@ function tests(name, installer) {
           return new Promise((resolve, unusedReject) => {
             impl = element.implementation_;
             impl.layoutCallback();
-            impl.updateHeight_ = newHeight => {
+            impl.updateSize_ = (newHeight, newWidth) => {
               expect(newHeight).to.equal(217);
+              expect(newWidth).to.equal(114);
+              resolve(impl);
+            };
+            impl.iframe_.onload = function() {
+              impl.iframe_.contentWindow.postMessage({
+                sentinel: 'amp-test',
+                type: 'requestHeight',
+                is3p: true,
+                height: 217,
+                width: 114,
+              }, '*');
+            };
+            impl.iframe_.src = iframeSrc;
+          });
+        }).then(impl => {
+          expect(impl.iframe_.height).to.equal('217');
+          expect(impl.iframe_.width).to.equal('114');
+        });
+      });
+
+      it('should resize height only', () => {
+        const iframeSrc = 'http://ads.localhost:' + location.port +
+            '/base/test/fixtures/served/iframe.html';
+        return getAd({
+          width: 100,
+          height: 100,
+          type: 'a9',
+          src: 'testsrc',
+          resizable: '',
+        }, 'https://schema.org').then(element => {
+          return new Promise((resolve, unusedReject) => {
+            impl = element.implementation_;
+            impl.layoutCallback();
+            impl.updateSize_ = (newHeight, newWidth) => {
+              expect(newHeight).to.equal(217);
+              expect(newWidth).to.be.undefined;
               resolve(impl);
             };
             impl.iframe_.onload = function() {
@@ -161,7 +197,7 @@ function tests(name, installer) {
         });
       });
 
-      it('should fallback for resize with overflow element', () => {
+      it('should fallback for resize with overflow', () => {
         return getAd({
           width: 100,
           height: 100,
@@ -170,12 +206,27 @@ function tests(name, installer) {
           resizable: '',
         }, 'https://schema.org').then(element => {
           impl = element.implementation_;
-          impl.attemptChangeHeight = sinon.spy();
-          impl.changeHeight = sinon.spy();
-          impl.updateHeight_(217);
-          expect(impl.changeHeight.callCount).to.equal(0);
-          expect(impl.attemptChangeHeight.callCount).to.equal(1);
-          expect(impl.attemptChangeHeight.firstCall.args[0]).to.equal(217);
+          impl.attemptChangeSize = sinon.spy();
+          impl.updateSize_(217, 114);
+          expect(impl.attemptChangeSize.callCount).to.equal(1);
+          expect(impl.attemptChangeSize.firstCall.args[0]).to.equal(217);
+          expect(impl.attemptChangeSize.firstCall.args[1]).to.equal(114);
+        });
+      });
+
+      it('should fallback for resize (height only) with overflow', () => {
+        return getAd({
+          width: 100,
+          height: 100,
+          type: 'a9',
+          src: 'testsrc',
+          resizable: '',
+        }, 'https://schema.org').then(element => {
+          impl = element.implementation_;
+          impl.attemptChangeSize = sinon.spy();
+          impl.updateSize_(217);
+          expect(impl.attemptChangeSize.callCount).to.equal(1);
+          expect(impl.attemptChangeSize.firstCall.args[0]).to.equal(217);
         });
       });
     });
@@ -375,8 +426,6 @@ function tests(name, installer) {
       });
 
     });
-
-
 
     describe('cid-ad support', () => {
       const cidScope = 'cid-in-ads-test';

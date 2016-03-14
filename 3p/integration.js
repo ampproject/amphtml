@@ -272,7 +272,7 @@ function updateVisibilityState(global) {
  */
 function onResizeSuccess(observerCallback) {
   return listenParent(window, 'embed-size-changed', data => {
-    observerCallback(data.requestedHeight);
+    observerCallback(data.requestedHeight, data.requestedWidth);
   });
 }
 
@@ -284,7 +284,7 @@ function onResizeSuccess(observerCallback) {
  */
 function onResizeDenied(observerCallback) {
   return listenParent(window, 'embed-size-denied', data => {
-    observerCallback(data.requestedHeight);
+    observerCallback(data.requestedHeight, data.requestedWidth);
   });
 }
 

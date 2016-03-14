@@ -587,18 +587,32 @@ describe('CustomElement', () => {
     expect(element2.sizerElement_.style.paddingTop).to.equal('1%');
   });
 
-  it('should change height without sizer', () => {
+  it('should change size without sizer', () => {
     const element = new ElementClass();
-    element.changeHeight(111);
+    element.changeSize(111, 222);
+    expect(element.style.height).to.equal('111px');
+    expect(element.style.width).to.equal('222px');
+  });
+
+  it('should change size - height only without sizer', () => {
+    const element = new ElementClass();
+    element.changeSize(111);
     expect(element.style.height).to.equal('111px');
   });
 
-  it('should change height with sizer', () => {
+  it('should change size - width only without sizer', () => {
+    const element = new ElementClass();
+    element.changeSize(undefined, 111);
+    expect(element.style.width).to.equal('111px');
+  });
+
+  it('should change size with sizer', () => {
     const element = new ElementClass();
     element.sizerElement_ = document.createElement('div');
-    element.changeHeight(111);
+    element.changeSize(111, 222);
     expect(parseInt(element.sizerElement_.style.paddingTop, 10)).to.equal(0);
     expect(element.style.height).to.equal('111px');
+    expect(element.style.width).to.equal('222px');
   });
 
   it('should NOT apply media condition in template', () => {
@@ -608,6 +622,19 @@ describe('CustomElement', () => {
     expect(() => {
       element1.applySizesAndMediaQuery();
     }).to.throw(/Must never be called in template/);
+  });
+
+  it('should change size to zero', () => {
+    const element = new ElementClass();
+    element.changeSize(0, 0);
+    expect(element.style.height).to.equal('0px');
+    expect(element.style.width).to.equal('0px');
+  });
+
+  it('should change width to zero', () => {
+    const element = new ElementClass();
+    element.changeSize(undefined, 0);
+    expect(element.style.width).to.equal('0px');
   });
 
 
@@ -1150,11 +1177,11 @@ describe('CustomElement Overflow Element', () => {
   it('should set overflow', () => {
     const overflowCallbackSpy =
         sandbox.spy(element.implementation_, 'overflowCallback');
-    element.overflowCallback(true, 117);
+    element.overflowCallback(true, 117, 113);
     expect(element.overflowElement_).to.equal(overflowElement);
     expect(overflowElement).to.have.class('amp-visible');
     expect(overflowElement.onclick).to.exist;
-    expect(overflowCallbackSpy).to.be.calledWith(true, 117);
+    expect(overflowCallbackSpy).to.be.calledWith(true, 117, 113);
   });
 
   it('should unset overflow', () => {
@@ -1162,17 +1189,17 @@ describe('CustomElement Overflow Element', () => {
         sandbox.spy(element.implementation_, 'overflowCallback');
     element.getOverflowElement();
     overflowElement.classList.toggle('amp-visible', true);
-    element.overflowCallback(false, 117);
+    element.overflowCallback(false, 117, 113);
     expect(element.overflowElement_).to.equal(overflowElement);
     expect(overflowElement).to.not.have.class('amp-visible');
     expect(overflowElement.onclick).to.not.exist;
-    expect(overflowCallbackSpy).to.be.calledWith(false, 117);
+    expect(overflowCallbackSpy).to.be.calledWith(false, 117, 113);
   });
 
-  it('should force change height when clicked', () => {
-    element.overflowCallback(true, 117);
+  it('should force change size when clicked', () => {
+    element.overflowCallback(true, 117, 113);
     expect(overflowElement).to.have.class('amp-visible');
-    resourcesMock.expects('changeHeight').withExactArgs(element, 117).once();
+    resourcesMock.expects('changeSize').withExactArgs(element, 117, 113).once();
 
     overflowElement.onclick();
 

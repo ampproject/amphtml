@@ -541,7 +541,8 @@ export class BaseElement {
    * @protected
    */
   changeHeight(newHeight, opt_callback) {
-    this.resources_./*OK*/changeHeight(this.element, newHeight, opt_callback);
+    this.resources_./*OK*/changeSize(
+        this.element, newHeight, /* newWidth */ undefined, opt_callback);
   }
 
   /**
@@ -558,8 +559,28 @@ export class BaseElement {
    * @protected
    */
   attemptChangeHeight(newHeight, opt_callback) {
-    this.resources_.attemptChangeHeight(this.element, newHeight, opt_callback);
+    this.resources_.attemptChangeSize(
+        this.element, newHeight, /* newWidth */ undefined, opt_callback);
   }
+
+ /**
+  * Requests the runtime to update the size of this element to the specified
+  * values. The runtime will schedule this request and attempt to process it
+  * as soon as possible. However, unlike in {@link changeSize}, the runtime
+  * may refuse to make a change in which case it will show the element's
+  * overflow element if provided, which is supposed to provide the reader with
+  * the necessary user action. (The overflow element is shown only if the
+  * requested height is greater than 0.)
+  * If the height is successfully updated then the opt_callback is called.
+  * @param {number|undefined} newHeight
+  * @param {number|undefined} newWidth
+  * @param {function=} opt_callback A callback function.
+  * @protected
+  */
+ attemptChangeSize(newHeight, newWidth, opt_callback) {
+   this.resources_.attemptChangeSize(
+       this.element, newHeight, newWidth, opt_callback);
+ }
 
  /**
   * Runs the specified mutation on the element and ensures that measures
@@ -616,7 +637,11 @@ export class BaseElement {
   /**
    * Called after a overflowCallback is triggered on an element.
    * @param {boolean} unusedOverflown
-   * @param {number} unusedRequestedHeight
+   * @param {number|undefined} unusedRequestedHeight
+   * @param {number|undefined} unusedRequestedWidth
    */
-  overflowCallback(unusedOverflown, unusedRequestedHeight) {}
+  overflowCallback(
+      unusedOverflown,
+      unusedRequestedHeight,
+      unusedRequestedWidth) {}
 };

@@ -253,16 +253,21 @@ export function installAd(win) {
             this.element.creativeId = info.id;
           }, /* opt_is3P */ true);
           listen(this.iframe_, 'embed-size', data => {
+            let newHeight, newWidth;
             if (data.width !== undefined) {
+              newWidth = Math.max(this.element./*OK*/offsetWidth +
+                  data.width - this.iframe_./*OK*/offsetWidth, data.width);
               this.iframe_.width = data.width;
-              this.element.setAttribute('width', data.width);
+              this.element.setAttribute('width', newWidth);
             }
             if (data.height !== undefined) {
-              const newHeight = Math.max(this.element./*OK*/offsetHeight +
+              newHeight = Math.max(this.element./*OK*/offsetHeight +
                   data.height - this.iframe_./*OK*/offsetHeight, data.height);
               this.iframe_.height = data.height;
               this.element.setAttribute('height', newHeight);
-              this.updateHeight_(newHeight);
+            }
+            if (newHeight !== undefined || newWidth !== undefined) {
+              this.updateSize_(newHeight, newWidth);
             }
           }, /* opt_is3P */ true);
           this.iframe_.style.visibility = 'hidden';
@@ -330,32 +335,34 @@ export function installAd(win) {
     }
 
     /** @override  */
-    overflowCallback(overflown, requestedHeight) {
+    overflowCallback(overflown, requestedHeight, requestedWidth) {
       if (overflown) {
         const targetOrigin =
             this.iframe_.src ? parseUrl(this.iframe_.src).origin : '*';
         postMessage(
             this.iframe_,
             'embed-size-denied',
-            {requestedHeight: requestedHeight},
+            {requestedHeight: requestedHeight, requestedWidth: requestedWidth},
             targetOrigin,
             /* opt_is3P */ true);
       }
     }
 
     /**
-     * Updates the elements height to accommodate the iframe's requested height.
-     * @param {number} newHeight
+     * Updates the element's dimensions to accommodate the iframe's
+     *    requested dimensions.
+     * @param {number|undefined} newWidth
+     * @param {number|undefined} newHeight
      * @private
      */
-    updateHeight_(newHeight) {
-      this.attemptChangeHeight(newHeight, () => {
+    updateSize_(newHeight, newWidth) {
+      this.attemptChangeSize(newHeight, newWidth, () => {
         const targetOrigin =
             this.iframe_.src ? parseUrl(this.iframe_.src).origin : '*';
         postMessage(
             this.iframe_,
             'embed-size-changed',
-            {requestedHeight: newHeight},
+            {requestedHeight: newHeight, requestedWidth: newWidth},
             targetOrigin,
             /* opt_is3P */ true);
       });

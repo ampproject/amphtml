@@ -286,17 +286,22 @@ export class AmpIframe extends AMP.BaseElement {
     };
 
     listen(iframe, 'embed-size', data => {
+      let newHeight, newWidth;
       if (data.width !== undefined) {
+        newWidth = Math.max(this.element./*OK*/offsetWidth +
+            data.width - iframe./*OK*/offsetWidth, data.width);
         iframe.width = data.width;
-        this.element.setAttribute('width', data.width);
+        this.element.setAttribute('width', newWidth);
       }
 
       if (data.height !== undefined) {
-        const newHeight = Math.max(this.element./*OK*/offsetHeight +
+        newHeight = Math.max(this.element./*OK*/offsetHeight +
             data.height - iframe./*OK*/offsetHeight, data.height);
         iframe.height = data.height;
         this.element.setAttribute('height', newHeight);
-        this.updateHeight_(newHeight);
+      }
+      if (newHeight !== undefined || newWidth !== undefined) {
+        this.updateSize_(newHeight, newWidth);
       }
     });
 
@@ -367,18 +372,20 @@ export class AmpIframe extends AMP.BaseElement {
   }
 
   /**
-   * Updates the elements height to accommodate the iframe's requested height.
-   * @param {number} newHeight
+   * Updates the element's dimensions to accommodate the iframe's
+   *    requested dimensions.
+   * @param {number|undefined} newWidth
+   * @param {number|undefined} newHeight
    * @private
    */
-  updateHeight_(newHeight) {
+  updateSize_(newHeight, newWidth) {
     if (!this.isResizable_) {
       user.warn(TAG_,
           'ignoring embed-size request because this iframe is not resizable',
           this.element);
       return;
     }
-    this.attemptChangeHeight(newHeight);
+    this.attemptChangeSize(newHeight, newWidth);
   }
 
   /**

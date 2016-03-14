@@ -348,8 +348,45 @@ describe('amp-iframe', () => {
       const impl = amp.container.implementation_;
       impl.layoutCallback();
       const p = new Promise((resolve, unusedReject) => {
-        impl.updateHeight_ = newHeight => {
-          resolve({amp: amp, newHeight: newHeight});
+        impl.updateSize_ = (newHeight, newWidth) => {
+          resolve({
+            amp: amp,
+            newHeight: newHeight,
+            newWidth: newWidth,
+          });
+        };
+      });
+      amp.iframe.contentWindow.postMessage({
+        sentinel: 'amp-test',
+        type: 'requestHeight',
+        height: 217,
+        width: 113,
+      }, '*');
+      return p;
+    }).then(res => {
+      expect(res.newHeight).to.equal(217);
+      expect(res.newWidth).to.equal(113);
+      expect(res.amp.iframe.height).to.equal('217');
+      expect(res.amp.iframe.width).to.equal('113');
+    });
+  });
+
+  it('should resize height only', () => {
+    return getAmpIframe({
+      src: iframeSrc,
+      sandbox: 'allow-scripts allow-same-origin',
+      width: 100,
+      height: 100,
+      resizable: '',
+    }).then(amp => {
+      const impl = amp.container.implementation_;
+      impl.layoutCallback();
+      const p = new Promise((resolve, unusedReject) => {
+        impl.updateSize_ = (newHeight, unusedNewWidth) => {
+          resolve({
+            amp: amp,
+            newHeight: newHeight,
+          });
         };
       });
       amp.iframe.contentWindow.postMessage({
@@ -373,12 +410,27 @@ describe('amp-iframe', () => {
       resizable: '',
     }).then(amp => {
       const impl = amp.container.implementation_;
-      impl.attemptChangeHeight = sinon.spy();
-      impl.changeHeight = sinon.spy();
-      impl.updateHeight_(217);
-      expect(impl.changeHeight.callCount).to.equal(0);
-      expect(impl.attemptChangeHeight.callCount).to.equal(1);
-      expect(impl.attemptChangeHeight.firstCall.args[0]).to.equal(217);
+      impl.attemptChangeSize = sinon.spy();
+      impl.updateSize_(217, 114);
+      expect(impl.attemptChangeSize.callCount).to.equal(1);
+      expect(impl.attemptChangeSize.firstCall.args[0]).to.equal(217);
+      expect(impl.attemptChangeSize.firstCall.args[1]).to.equal(114);
+    });
+  });
+
+  it('should fallback for resize (height only) with overflow element', () => {
+    return getAmpIframe({
+      src: iframeSrc,
+      sandbox: 'allow-scripts',
+      width: 100,
+      height: 100,
+      resizable: '',
+    }).then(amp => {
+      const impl = amp.container.implementation_;
+      impl.attemptChangeSize = sinon.spy();
+      impl.updateSize_(217);
+      expect(impl.attemptChangeSize.callCount).to.equal(1);
+      expect(impl.attemptChangeSize.firstCall.args[0]).to.equal(217);
     });
   });
 
@@ -390,11 +442,9 @@ describe('amp-iframe', () => {
       height: 100,
     }).then(amp => {
       const impl = amp.container.implementation_;
-      impl.attemptChangeHeight = sinon.spy();
-      impl.changeHeight = sinon.spy();
-      impl.updateHeight_(217);
-      expect(impl.changeHeight.callCount).to.equal(0);
-      expect(impl.attemptChangeHeight.callCount).to.equal(0);
+      impl.attemptChangeSize = sinon.spy();
+      impl.updateSize_(217, 114);
+      expect(impl.attemptChangeSize.callCount).to.equal(0);
     });
   });
 
