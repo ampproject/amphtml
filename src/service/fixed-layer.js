@@ -15,7 +15,7 @@
  */
 
 import {documentContains} from '../dom';
-import {log} from '../log';
+import {dev, user} from '../log';
 import {platform} from '../platform';
 import {setStyle, setStyles} from '../style';
 
@@ -112,7 +112,7 @@ export class FixedLayer {
       });
     } catch (e) {
       // Fail quietly.
-      setTimeout(() => {throw e;});
+      dev.error(TAG, 'Failed to setup fixed elements:', e);
     }
 
     // Sort in document order.
@@ -120,7 +120,7 @@ export class FixedLayer {
 
     if (this.fixedElements_.length > 0 && !this.transfer_ &&
             platform.isIos()) {
-      console./*OK*/warn('Please test this page inside of an AMP Viewer such' +
+      user.warn(TAG, 'Please test this page inside of an AMP Viewer such' +
           ' as Google\'s because the fixed positioning might have slightly' +
           ' different layout.');
     }
@@ -240,7 +240,7 @@ export class FixedLayer {
       },
     }, {}).catch(error => {
       // Fail silently.
-      setTimeout(() => {throw error;});
+      dev.error(TAG, 'Failed to mutate fixed elements:', error);
     });
   }
 
@@ -371,8 +371,8 @@ export class FixedLayer {
       return;
     }
 
-    log.fine(TAG, 'transfer to fixed:', fe.id, fe.element);
-    console./*OK*/warn('In order to improve scrolling performance in Safari,' +
+    dev.fine(TAG, 'transfer to fixed:', fe.id, fe.element);
+    user.warn(TAG, 'In order to improve scrolling performance in Safari,' +
         ' we now move the element to a fixed positioning layer:', fe.element);
 
     if (!fe.placeholder) {
@@ -415,7 +415,7 @@ export class FixedLayer {
       }
     } catch (e) {
       // Fail silently.
-      setTimeout(() => {throw e;});
+      dev.error(TAG, 'Failed to test query match:', e);
     }
     return false;
   }
@@ -428,7 +428,7 @@ export class FixedLayer {
     if (!fe.placeholder || !documentContains(this.doc, fe.placeholder)) {
       return;
     }
-    log.fine(TAG, 'return from fixed:', fe.id, fe.element);
+    dev.fine(TAG, 'return from fixed:', fe.id, fe.element);
     if (documentContains(this.doc, fe.element)) {
       if (fe.element.style.zIndex) {
         fe.element.style.zIndex = '';

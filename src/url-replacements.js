@@ -17,6 +17,7 @@
 import {accessServiceForOrNull} from './access-service';
 import {assert} from './asserts';
 import {cidFor} from './cid';
+import {dev} from './log';
 import {documentInfoFor} from './document-info';
 import {getMode} from './mode';
 import {getService} from './service';
@@ -27,6 +28,10 @@ import {viewportFor} from './viewport';
 import {vsyncFor} from './vsync';
 import {userNotificationManagerFor} from './user-notification';
 import {activityFor} from './activity';
+
+
+/** @private @const {string} */
+const TAG = 'UrlReplacements';
 
 
 /**
@@ -397,9 +402,7 @@ class UrlReplacements {
       } catch (e) {
         // Report error, but do not disrupt URL replacement. This will
         // interpolate as the empty string.
-        setTimeout(() => {
-          throw e;
-        });
+        dev.error(TAG, 'Failed to resolve var function: ', e);
       }
       // In case the produced value is a promise, we don't actually
       // replace anything here, but do it again when the promise resolves.
@@ -407,9 +410,7 @@ class UrlReplacements {
         const p = val.catch(err => {
           // Report error, but do not disrupt URL replacement. This will
           // interpolate as the empty string.
-          setTimeout(() => {
-            throw err;
-          });
+          dev.error(TAG, 'Var promise failed: ', err);
         }).then(v => {
           url = url.replace(match, encodeValue(v));
         });

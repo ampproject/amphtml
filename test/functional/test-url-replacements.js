@@ -16,6 +16,7 @@
 
 import {Observable} from '../../src/observable';
 import {createIframePromise} from '../../testing/iframe';
+import {dev} from '../../src/log';
 import {urlReplacementsFor} from '../../src/url-replacements';
 import {markElementScheduledForTesting} from '../../src/custom-element';
 import {installCidService} from '../../src/service/cid-impl';
@@ -32,9 +33,11 @@ describe('UrlReplacements', () => {
   let loadObservable;
   let replacements;
   let viewerService;
+  let errorStub;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
+    errorStub = sandbox.stub(dev, 'error');
   });
 
   afterEach(() => {
@@ -373,29 +376,33 @@ describe('UrlReplacements', () => {
   });
 
   it('should report errors & replace them with empty string (sync)', () => {
-    const clock = sandbox.useFakeTimers();
     const replacements = urlReplacementsFor(window);
     replacements.set_('ONE', () => {
       throw new Error('boom');
     });
     const p = expect(replacements.expand('?a=ONE')).to.eventually.equal('?a=');
-    expect(() => {
-      clock.tick(1);
-    }).to.throw(/boom/);
+    expect(errorStub.callCount).to.equal(1);
+    expect(errorStub.calledWith('UrlReplacements',
+        'Failed to resolve var function: ',
+        sinon.match(arg => {
+          return !!arg.message.match(/boom/);
+        }))).to.be.true;
     return p;
   });
 
   it('should report errors & replace them with empty string (promise)', () => {
-    const clock = sandbox.useFakeTimers();
     const replacements = urlReplacementsFor(window);
     replacements.set_('ONE', () => {
       return Promise.reject(new Error('boom'));
     });
     return expect(replacements.expand('?a=ONE')).to.eventually.equal('?a=')
         .then(() => {
-          expect(() => {
-            clock.tick(1);
-          }).to.throw(/boom/);
+          expect(errorStub.callCount).to.equal(1);
+          expect(errorStub.calledWith('UrlReplacements',
+              'Var promise failed: ',
+              sinon.match(arg => {
+                return !!arg.message.match(/boom/);
+              }))).to.be.true;
         });
   });
 

@@ -211,11 +211,12 @@ export class Log {
 
   /**
    * Creates an error object.
-   * @param {string} message
+   * @param {string|!Error} errorOrMessage
    * @return {!Error}
    */
-  createError(message) {
-    const error = new Error(message);
+  createError(errorOrMessage) {
+    const error = typeof errorOrMessage == 'string' ?
+        new Error(errorOrMessage) : errorOrMessage;
     this.prepareError_(error);
     return error;
   }

@@ -361,11 +361,9 @@ export class Viewer {
           } else {
             resolve(this.win.document.referrer);
             if (this.unconfirmedReferrerUrl_ != this.win.document.referrer) {
-              this.win.setTimeout(() => {
-                throw new Error('Untrusted viewer referrer override: ' +
-                    this.unconfirmedReferrerUrl_ + ' at ' +
-                    this.messagingOrigin_);
-              });
+              dev.error(TAG_, 'Untrusted viewer referrer override: ' +
+                  this.unconfirmedReferrerUrl_ + ' at ' +
+                  this.messagingOrigin_);
               this.unconfirmedReferrerUrl_ = this.win.document.referrer;
             }
           }
@@ -388,11 +386,9 @@ export class Viewer {
           if (isTrusted) {
             this.resolvedViewerUrl_ = viewerUrlOverride;
           } else {
-            this.win.setTimeout(() => {
-              throw new Error('Untrusted viewer url override: ' +
-                  viewerUrlOverride + ' at ' +
-                  this.messagingOrigin_);
-            });
+            dev.error(TAG_, 'Untrusted viewer url override: ' +
+                viewerUrlOverride + ' at ' +
+                this.messagingOrigin_);
           }
           resolve(this.resolvedViewerUrl_);
         });

@@ -310,6 +310,12 @@ var forbiddenTerms = {
       'src/service/viewer-impl.js',
     ],
   },
+  'setTimeout.*throw': {
+    message: 'Use dev.error or user.error instead.',
+    whitelist: [
+      'src/log.js',
+    ],
+  },
 };
 
 var ThreePTermsMessage = 'The 3p bootstrap iframe has no polyfills loaded and' +
