@@ -20,12 +20,12 @@
 # in production from crashing. This id is not relevant to validator.js
 # because thus far, engine (validator.js) and spec file (validator.protoascii)
 # are always released together.
-min_validator_revision_required: 109
+min_validator_revision_required: 110
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 178
+spec_file_revision: 179
 # Rules for AMP HTML
 # (https://www.ampproject.org/docs/reference/spec.html)
 #
@@ -782,6 +782,21 @@ tags: {  # Special custom 'author' spreadsheet.
       at_rule_spec: {
         name: '$DEFAULT'  # matches if none of the above match
         type: PARSE_AS_ERROR
+      }
+      image_url_spec: {
+        allowed_protocol: "https"
+        allowed_protocol: "http"
+        allowed_protocol: "data"
+        allowed_protocol: "absolute"  # Temporary / will go away.
+        allow_relative: true
+        allow_empty: true
+      }
+      font_url_spec: {
+        allowed_protocol: "https"
+        allowed_protocol: "http"
+        allowed_protocol: "data"
+        allow_relative: true
+        allow_empty: true
       }
     }
     blacklisted_cdata_regex: {
@@ -4376,5 +4391,21 @@ error_formats {
 error_formats {
   code: CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR
   format: "CSS syntax error in tag '%1' - unparsed input remains in selector."
+}
+error_formats {
+  code: CSS_SYNTAX_MISSING_URL
+  format: "CSS syntax error in tag '%1' - missing url."
+}
+error_formats {
+  code: CSS_SYNTAX_INVALID_URL
+  format: "CSS syntax error in tag '%1' - invalid url '%2'."
+}
+error_formats {
+  code: CSS_SYNTAX_INVALID_URL_PROTOCOL
+  format: "CSS syntax error in tag '%1' - invalid url protocol '%2:'."
+}
+error_formats {
+  code: CSS_SYNTAX_DISALLOWED_RELATIVE_URL
+  format: "CSS syntax error in tag '%1' - disallowed relative url '%2'."
 }
 

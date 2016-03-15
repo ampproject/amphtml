@@ -43,6 +43,8 @@ message UrlSpec {
   // allowed_protocol must be in lowercase (e.g. "javascript" not "JavaScript").
   repeated string allowed_protocol = 1;
   optional bool allow_relative = 2 [default = true];
+  // Whether the empty string '' is allowed for this URL value.
+  optional bool allow_empty = 3;
 }
 
 // Attributes that are not covered by at least one of these specs are
@@ -143,6 +145,9 @@ message CssSpec {
   // duplicate names, and must contain at least one entry for the default.
   repeated AtRuleSpec at_rule_spec = 1;
   repeated CssRuleSpec css_rule = 2;
+  // urls within the CSS are checked against this spec.
+  optional UrlSpec image_url_spec = 3;
+  optional UrlSpec font_url_spec = 4;
 }
 
 // NEXT AVAILABLE TAG: 8
@@ -346,7 +351,7 @@ message ValidationError {
     DEV_WARNING = 3; // DEPRECATED DO NOT USE.
   }
   optional Severity severity = 6 [ default = ERROR ];
-  // NEXT AVAILABLE TAG: 52
+  // NEXT AVAILABLE TAG: 56
   enum Code {
     UNKNOWN_CODE = 0;
     MANDATORY_TAG_MISSING = 1;
@@ -400,6 +405,10 @@ message ValidationError {
     CSS_SYNTAX_MISSING_SELECTOR = 46;
     CSS_SYNTAX_NOT_A_SELECTOR_START = 47;
     CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR = 48;
+    CSS_SYNTAX_MISSING_URL = 52;
+    CSS_SYNTAX_INVALID_URL = 53;
+    CSS_SYNTAX_INVALID_URL_PROTOCOL = 54;
+    CSS_SYNTAX_DISALLOWED_RELATIVE_URL = 55;
   }
   optional Code code = 1;
   optional int32 line = 2 [ default = 1 ];
