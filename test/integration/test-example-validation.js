@@ -70,8 +70,9 @@ describe('example', function() {
    * @constructor {!Array<!RegExp>}
    */
   const errorWhitelist = [
-    /invalid value \'.\/viewer-integr.js\'/,
-    /invalid value \'amp-brid-player\'/,
+    // TODO(dvoytenko, #2600): remove this from whitelist once the message
+    // contains more specific script identifier.
+    /The tag \'script\' is disallowed/,
     /\'amp-brid-player\' is disallowed/,
   ];
 
