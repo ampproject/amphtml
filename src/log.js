@@ -186,24 +186,8 @@ export class Log {
     if (this.level_ >= LogLevel.ERROR) {
       this.msg_(tag, 'ERROR', Array.prototype.slice.call(arguments, 1));
     } else {
-      let error = null;
-      let message = '';
-      for (let i = 1; i < arguments.length; i++) {
-        const arg = arguments[i];
-        if (arg instanceof Error && !error) {
-          error = arg;
-        } else {
-          if (message) {
-            message += ' ';
-          }
-          message += arg;
-        }
-      }
-      if (!error) {
-        error = new Error(message);
-      } else if (message) {
-        error.message = message + ': ' + error.message;
-      }
+      const error = createErrorVargs.apply(null,
+          Array.prototype.slice.call(arguments, 1));
       this.prepareError_(error);
       this.win.setTimeout(() => {throw error;});
     }
@@ -211,12 +195,11 @@ export class Log {
 
   /**
    * Creates an error object.
-   * @param {string|!Error} errorOrMessage
+   * @param {...*} var_args
    * @return {!Error}
    */
-  createError(errorOrMessage) {
-    const error = typeof errorOrMessage == 'string' ?
-        new Error(errorOrMessage) : errorOrMessage;
+  createError(var_args) {
+    const error = createErrorVargs.apply(null, arguments);
     this.prepareError_(error);
     return error;
   }
@@ -328,6 +311,45 @@ function pushIfNonEmpty(array, val) {
   if (val != '') {
     array.push(val);
   }
+}
+
+
+/**
+ * @param {...*} var_args
+ * @return {!Error}
+ * @private
+ */
+function createErrorVargs(var_args) {
+  let error = null;
+  let message = '';
+  for (let i = 0; i < arguments.length; i++) {
+    const arg = arguments[i];
+    if (arg instanceof Error && !error) {
+      error = arg;
+    } else {
+      if (message) {
+        message += ' ';
+      }
+      message += arg;
+    }
+  }
+  if (!error) {
+    error = new Error(message);
+  } else if (message) {
+    error.message = message + ': ' + error.message;
+  }
+  return error;
+}
+
+
+/**
+ * Rethrows the error without terminating the current context. This preserves
+ * whether the original error designation is a user error or a dev error.
+ * @param {...*} var_args
+ */
+export function rethrowAsync(var_args) {
+  const error = createErrorVargs.apply(null, arguments);
+  setTimeout(() => {throw error;});
 }
 
 
