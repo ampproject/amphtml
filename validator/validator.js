@@ -48,6 +48,8 @@ goog.require('parse_css.RuleVisitor');
 goog.require('parse_css.extractUrls');
 goog.require('parse_css.parseAStylesheet');
 goog.require('parse_css.tokenize');
+goog.require('parse_srcset.Srcset');
+goog.require('parse_srcset.parseSrcset');
 
 /**
  * Determines if |n| is an integer.
@@ -603,8 +605,8 @@ class CdataMatcher {
       if (bytes > cdataSpec.maxBytes) {
         context.addError(
             amp.validator.ValidationError.Code.STYLESHEET_TOO_LONG,
-            /* params */
-            [getDetailOrName(this.tagSpec_), bytes, cdataSpec.maxBytes],
+            /* params */ [getDetailOrName(this.tagSpec_),
+                          bytes, cdataSpec.maxBytes],
             cdataSpec.maxBytesSpecUrl, validationResult);
         // We return early if the byte length is violated as parsing
         // really long stylesheets is slow and not worth our time.
@@ -1078,16 +1080,26 @@ class ParsedAttrSpec {
     if (attrName != 'srcset') {
       maybe_uris.add(goog.string.trim(attrValue));
     } else {
-      // TODO: Replace this hack with a parser.
-      const segments = goog.string.trim(attrValue).split(',');
-      for (const segment of segments) {
-        const key_value = goog.string.trim(segment).split(' ');
-        // Allow srcsets with missing data, e.g. "img.jpg 2x,"
-        if (key_value[0] !== '') {
-          maybe_uris.add(goog.string.trim(key_value[0]));
-        }
+      let srcset = goog.string.trim(attrValue);
+      if (srcset == '') {
+        context.addError(
+            amp.validator.ValidationError.Code.MISSING_URL,
+            /* params */ [attrName, getDetailOrName(tagSpec)],
+            tagSpec.specUrl, result);
+        return;
       }
-      // TODO: End hack.
+      /** @type {!parse_srcset.Srcset} */
+      const srcset_images = parse_srcset.parseSrcset(srcset);
+      if (!srcset_images.isSuccessful()) {
+        context.addError(
+            amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
+            /* params */ [attrName, getDetailOrName(tagSpec), attrValue],
+            tagSpec.specUrl, result);
+        return;
+      }
+      for (const image of srcset_images.getSources()) {
+        maybe_uris.add(image.url);
+      }
     }
     if (maybe_uris.isEmpty()) {
       context.addError(

@@ -61,7 +61,8 @@ def CheckPrereqs():
   # Ensure source files are available.
   for f in ['validator.protoascii', 'validator.proto', 'validator_gen.py',
             'package.json', 'validator.js', 'validator_test.js',
-            'validator-in-browser.js', 'tokenize-css.js', 'parse-css.js']:
+            'validator-in-browser.js', 'tokenize-css.js', 'parse-css.js',
+            'parse-srcset.js']:
     if not os.path.exists(f):
       Die('%s not found. Must run in amp_validator source directory.' % f)
 
@@ -204,8 +205,8 @@ def CompileValidatorMinified(out_dir):
   """
   logging.info('entering ...')
   CompileWithClosure(
-      js_files=['htmlparser.js', 'parse-css.js', 'tokenize-css.js',
-                '%s/validator-generated.js' % out_dir,
+      js_files=['htmlparser.js', 'parse-css.js', 'parse-srcset.js',
+                'tokenize-css.js', '%s/validator-generated.js' % out_dir,
                 'validator-in-browser.js', 'validator.js'],
       closure_entry_points=['amp.validator.validateString',
                             'amp.validator.renderValidationResult',
@@ -336,8 +337,8 @@ def RunSmokeTest(out_dir, nodejs_cmd):
 def CompileValidatorTestMinified(out_dir):
   logging.info('entering ...')
   CompileWithClosure(
-      js_files=['htmlparser.js', 'parse-css.js', 'tokenize-css.js',
-                '%s/validator-generated.js' % out_dir,
+      js_files=['htmlparser.js', 'parse-css.js', 'parse-srcset.js',
+                'tokenize-css.js', '%s/validator-generated.js' % out_dir,
                 'validator-in-browser.js', 'validator.js', 'validator_test.js'],
       closure_entry_points=['amp.validator.ValidatorTest'],
       output_file='%s/validator_test_minified.js' % out_dir)
@@ -364,6 +365,16 @@ def CompileParseCssTestMinified(out_dir):
   logging.info('... success')
 
 
+def CompileParseSrcsetTestMinified(out_dir):
+  logging.info('entering ...')
+  CompileWithClosure(
+      js_files=['parse-srcset.js', 'json-testutil.js', 'parse-srcset_test.js',
+                '%s/validator-generated.js' % out_dir],
+      closure_entry_points=['parse_srcset.ParseSrcsetTest'],
+      output_file='%s/parse-srcset_test_minified.js' % out_dir)
+  logging.info('... success')
+
+
 def GenerateTestRunner(out_dir):
   """Generates a test runner: a nodejs script that runs our minified tests."""
   logging.info('entering ...')
@@ -378,6 +389,7 @@ def GenerateTestRunner(out_dir):
              require('./validator_test_minified');
              require('./htmlparser_test_minified');
              require('./parse-css_test_minified');
+             require('./parse-srcset_test_minified');
              jasmine.onComplete(function (passed) {
                  process.exit(passed ? 0 : 1);
              });
@@ -409,6 +421,7 @@ def Main():
   CompileValidatorTestMinified(out_dir='dist')
   CompileHtmlparserTestMinified(out_dir='dist')
   CompileParseCssTestMinified(out_dir='dist')
+  CompileParseSrcsetTestMinified(out_dir='dist')
   GenerateTestRunner(out_dir='dist')
   RunTests(out_dir='dist', nodejs_cmd=nodejs_cmd)
 
