@@ -22,6 +22,7 @@ Current list of extended components:
 | [`amp-analytics`](amp-analytics/amp-analytics.md) | Captures analytics data from an AMP document. |
 | [`amp-anim`](amp-anim/amp-anim.md) | Manages an animated image, typically a GIF. |
 | [`amp-audio`](amp-audio/amp-audio.md) | Replaces the HTML5 `audio` tag. |
+| [`amp-brid-player`](amp-brid-player/amp-brid-player.md) | Displays a Brid.tv player. |
 | [`amp-brightcove`](amp-brightcove/amp-brightcove.md) | Displays a Brightcove Video Cloud or Perform player. |
 | [`amp-carousel`](amp-carousel/amp-carousel.md) | Displays multiple similar pieces of content along a horizontal axis. |
 | [`amp-dailymotion`](amp-dailymotion/amp-dailymotion.md) | Displays a [Dailymotion](https://www.dailymotion.com) video. |
