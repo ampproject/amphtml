@@ -43,12 +43,14 @@ message UrlSpec {
   // allowed_protocol must be in lowercase (e.g. "javascript" not "JavaScript").
   repeated string allowed_protocol = 1;
   optional bool allow_relative = 2 [default = true];
+  // Whether the empty string '' is allowed for this URL value.
+  optional bool allow_empty = 3;
 }
 
 // Attributes that are not covered by at least one of these specs are
 // disallowed. Within a given context (e.g., for a given TagSpec),
 // names are unique.
-// NEXT AVAILABLE TAG: 15
+// NEXT AVAILABLE TAG: 16
 message AttrSpec {
   // Use lower-case attribute names only.
   optional string name = 1;
@@ -63,14 +65,14 @@ message AttrSpec {
   // This would be a oneof, but this file only uses features in protobuf 2.5.0.
   // begin oneof {
 
-  // If none of value, value_regex, value_url, value_properties are set,
-  // any value is accepted unless blacklisted_value_regex is set.
-  // Note that prior to comparing, the attributes in a given HTML document
-  // will be unescaped.
+  // If none of these are set, any value is accepted unless
+  // blacklisted_value_regex is set. Note that prior to comparing, the
+  // attributes in a given HTML document will be unescaped.
 
   // The attribute value must be equal to the value in this field.
-  optional string value = 4;
-  optional string value_regex = 5;
+  optional string value = 4;              // case sensitive
+  optional string value_regex = 15;       // case sensitive
+  optional string value_regex_casei = 5;  // case insensitive
   optional UrlSpec value_url = 14;
   // validates against a list of properties (see PropertySpec).
   optional PropertySpecList value_properties = 11;
@@ -143,6 +145,9 @@ message CssSpec {
   // duplicate names, and must contain at least one entry for the default.
   repeated AtRuleSpec at_rule_spec = 1;
   repeated CssRuleSpec css_rule = 2;
+  // urls within the CSS are checked against this spec.
+  optional UrlSpec image_url_spec = 3;
+  optional UrlSpec font_url_spec = 4;
 }
 
 // NEXT AVAILABLE TAG: 8
@@ -204,14 +209,14 @@ message AmpLayout {
 // NEXT AVAILABLE TAG: 19
 message TagSpec {
   // Use lower-case tag names only. If adding the same tag twice, then they must
-  // also have a detail string which is unique throughout all detail.
-  optional string name = 1;
+  // also have a spec_name string which is unique throughout all detail.
+  optional string tag_name = 1;
 
-  // The detail will be copied as is into ValidationError::detail for
-  // MANDATORY_TAG_MISSING and other errors. It is especially useful
-  // when the tag name by itself isn't sufficient to uniquely identify
-  // the tag spec, and itself must be unique.
-  optional string detail = 2;
+  // If provided, the spec_name must be unique within the validator
+  // rules. It will be used with preference over the tag_name in
+  // parameters for error messages and other usages that require or
+  // benefit from a unique identifier.
+  optional string spec_name = 2;
 
   // If true, a tag conforming to this tag spec must occur at least once
   // within the document.
@@ -346,12 +351,13 @@ message ValidationError {
     DEV_WARNING = 3; // DEPRECATED DO NOT USE.
   }
   optional Severity severity = 6 [ default = ERROR ];
-  // NEXT AVAILABLE TAG: 51
+  // NEXT AVAILABLE TAG: 56
   enum Code {
     UNKNOWN_CODE = 0;
     MANDATORY_TAG_MISSING = 1;
     TAG_REQUIRED_BY_MISSING = 24;
     DISALLOWED_TAG = 2;
+    GENERAL_DISALLOWED_TAG = 51;
     DISALLOWED_ATTR = 3;
     INVALID_ATTR_VALUE = 4;
     ATTR_VALUE_REQUIRED_BY_LAYOUT = 27;
@@ -399,6 +405,10 @@ message ValidationError {
     CSS_SYNTAX_MISSING_SELECTOR = 46;
     CSS_SYNTAX_NOT_A_SELECTOR_START = 47;
     CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR = 48;
+    CSS_SYNTAX_MISSING_URL = 52;
+    CSS_SYNTAX_INVALID_URL = 53;
+    CSS_SYNTAX_INVALID_URL_PROTOCOL = 54;
+    CSS_SYNTAX_DISALLOWED_RELATIVE_URL = 55;
   }
   optional Code code = 1;
   optional int32 line = 2 [ default = 1 ];
