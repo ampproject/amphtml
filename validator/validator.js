@@ -17,6 +17,7 @@
 goog.provide('amp.validator.CssLengthAndUnit');  // Only for testing.
 goog.provide('amp.validator.Terminal');
 goog.provide('amp.validator.annotateWithErrorCategories');
+goog.provide('amp.validator.isSeverityWarning');
 goog.provide('amp.validator.renderErrorMessage');
 goog.provide('amp.validator.renderValidationResult');
 goog.provide('amp.validator.validateString');
@@ -2901,4 +2902,14 @@ amp.validator.annotateWithErrorCategories = function(result) {
   for (const error of result.errors) {
     error.category = amp.validator.categorizeError(error);
   }
+};
+
+/**
+ * Convenience function which informs caller if given ValidationError is
+ * severity warning.
+ * @param {!amp.validator.ValidationError} error
+ * @export
+ */
+amp.validator.isSeverityWarning = function(error) {
+  return error.severity === amp.validator.ValidationError.Severity.WARNING;
 };
