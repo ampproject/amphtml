@@ -7,8 +7,9 @@ Temporary check in of a compiled closure compiler while we wait for
 a patch to land.
 
 Local Modifications:
-- Add runner.jar which adds custom CommandLineRunner that inerits from
-com.google.js.comp.CommandLineRunner which strips `dev.fine` and `dev.assert`.
+- Add runner.jar which adds a custom CommandLineRunner that inerits from
+com.google.js.comp.CommandLineRunner which then adds some mechansims to DCE
+`dev.fine` and `dev.assert` when possible.
 - Add compiler-and-tests.jar (built from all-classes-jar ant build) to use
 for testing.
 - Add Messages.properties and ParserConfig.properties for testing.
