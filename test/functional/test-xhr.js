@@ -18,7 +18,7 @@ import * as sinon from 'sinon';
 import {xhrFor, fetchPolyfill} from '../../src/xhr';
 
 describe('XHR', function() {
-  let mockXhr;
+  let sandbox;
   let requests;
 
   // Given XHR calls give tests more time.
@@ -42,7 +42,8 @@ describe('XHR', function() {
   }
 
   beforeEach(() => {
-    mockXhr = sinon.useFakeXMLHttpRequest();
+    sandbox = sinon.sandbox.create();
+    const mockXhr = sandbox.useFakeXMLHttpRequest().xhr;
     requests = [];
     mockXhr.onCreate = function(xhr) {
       requests.push(xhr);
@@ -50,7 +51,7 @@ describe('XHR', function() {
   });
 
   afterEach(() => {
-    mockXhr.restore();
+    sandbox.restore();
   });
 
   scenarios.forEach(test => {
