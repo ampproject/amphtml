@@ -59,9 +59,10 @@ def CheckPrereqs():
         'Please feel free to edit the source and fix it to your needs.')
 
   # Ensure source files are available.
-  for f in ['validator.protoascii', 'validator.proto', 'validator_gen.py',
+  for f in ['validator.protoascii', 'validator.proto', 'validator_gen_js.py',
             'package.json', 'validator.js', 'validator_test.js',
-            'validator-in-browser.js', 'tokenize-css.js', 'parse-css.js']:
+            'validator-in-browser.js', 'tokenize-css.js', 'parse-css.js',
+            'parse-srcset.js']:
     if not os.path.exists(f):
       Die('%s not found. Must run in amp_validator source directory.' % f)
 
@@ -145,7 +146,7 @@ def GenValidatorPb2Py(out_dir):
 
 
 def GenValidatorGeneratedJs(out_dir):
-  """Calls validator_gen to generate validator-generated.js.
+  """Calls validator_gen_js to generate validator-generated.js.
 
   Args:
     out_dir: directory name of the output directory. Must not have slashes,
@@ -160,15 +161,45 @@ def GenValidatorGeneratedJs(out_dir):
   from google.protobuf import text_format
   from google.protobuf import descriptor
   from dist import validator_pb2
-  import validator_gen
+  import validator_gen_js
   out = []
-  validator_gen.GenerateValidatorGeneratedJs(specfile='validator.protoascii',
-                                             validator_pb2=validator_pb2,
-                                             text_format=text_format,
-                                             descriptor=descriptor,
-                                             out=out)
+  validator_gen_js.GenerateValidatorGeneratedJs(
+      specfile='validator.protoascii',
+      validator_pb2=validator_pb2,
+      text_format=text_format,
+      descriptor=descriptor,
+      out=out)
   out.append('')
   f = open('%s/validator-generated.js' % out_dir, 'w')
+  f.write('\n'.join(out))
+  f.close()
+  logging.info('... done')
+
+
+def GenValidatorGeneratedMd(out_dir):
+  """Calls validator_gen_md to generate validator-generated.md.
+
+  Args:
+    out_dir: directory name of the output directory. Must not have slashes,
+      dots, etc.
+  """
+  logging.info('entering ...')
+  assert re.match(r'^[a-zA-Z_\-0-9]+$', out_dir), 'bad out_dir: %s' % out_dir
+
+  # These imports happen late, within this method because they don't necessarily
+  # exist when the module starts running, and the ones that probably do
+  # are checked by CheckPrereqs.
+  from google.protobuf import text_format
+  from dist import validator_pb2
+  import validator_gen_md
+  out = []
+  validator_gen_md.GenerateValidatorGeneratedMd(
+      specfile='validator.protoascii',
+      validator_pb2=validator_pb2,
+      text_format=text_format,
+      out=out)
+  out.append('')
+  f = open('%s/validator-generated.md' % out_dir, 'w')
   f.write('\n'.join(out))
   f.close()
   logging.info('... done')
@@ -204,8 +235,8 @@ def CompileValidatorMinified(out_dir):
   """
   logging.info('entering ...')
   CompileWithClosure(
-      js_files=['htmlparser.js', 'parse-css.js', 'tokenize-css.js',
-                '%s/validator-generated.js' % out_dir,
+      js_files=['htmlparser.js', 'parse-css.js', 'parse-srcset.js',
+                'tokenize-css.js', '%s/validator-generated.js' % out_dir,
                 'validator-in-browser.js', 'validator.js'],
       closure_entry_points=['amp.validator.validateString',
                             'amp.validator.renderValidationResult',
@@ -336,8 +367,8 @@ def RunSmokeTest(out_dir, nodejs_cmd):
 def CompileValidatorTestMinified(out_dir):
   logging.info('entering ...')
   CompileWithClosure(
-      js_files=['htmlparser.js', 'parse-css.js', 'tokenize-css.js',
-                '%s/validator-generated.js' % out_dir,
+      js_files=['htmlparser.js', 'parse-css.js', 'parse-srcset.js',
+                'tokenize-css.js', '%s/validator-generated.js' % out_dir,
                 'validator-in-browser.js', 'validator.js', 'validator_test.js'],
       closure_entry_points=['amp.validator.ValidatorTest'],
       output_file='%s/validator_test_minified.js' % out_dir)
@@ -364,6 +395,16 @@ def CompileParseCssTestMinified(out_dir):
   logging.info('... success')
 
 
+def CompileParseSrcsetTestMinified(out_dir):
+  logging.info('entering ...')
+  CompileWithClosure(
+      js_files=['parse-srcset.js', 'json-testutil.js', 'parse-srcset_test.js',
+                '%s/validator-generated.js' % out_dir],
+      closure_entry_points=['parse_srcset.ParseSrcsetTest'],
+      output_file='%s/parse-srcset_test_minified.js' % out_dir)
+  logging.info('... success')
+
+
 def GenerateTestRunner(out_dir):
   """Generates a test runner: a nodejs script that runs our minified tests."""
   logging.info('entering ...')
@@ -378,6 +419,7 @@ def GenerateTestRunner(out_dir):
              require('./validator_test_minified');
              require('./htmlparser_test_minified');
              require('./parse-css_test_minified');
+             require('./parse-srcset_test_minified');
              jasmine.onComplete(function (passed) {
                  process.exit(passed ? 0 : 1);
              });
@@ -403,12 +445,14 @@ def Main():
   SetupOutDir(out_dir='dist')
   GenValidatorPb2Py(out_dir='dist')
   GenValidatorGeneratedJs(out_dir='dist')
+  GenValidatorGeneratedMd(out_dir='dist')
   CompileValidatorMinified(out_dir='dist')
   GenerateValidateBin(out_dir='dist', nodejs_cmd=nodejs_cmd)
   RunSmokeTest(out_dir='dist', nodejs_cmd=nodejs_cmd)
   CompileValidatorTestMinified(out_dir='dist')
   CompileHtmlparserTestMinified(out_dir='dist')
   CompileParseCssTestMinified(out_dir='dist')
+  CompileParseSrcsetTestMinified(out_dir='dist')
   GenerateTestRunner(out_dir='dist')
   RunTests(out_dir='dist', nodejs_cmd=nodejs_cmd)
 
