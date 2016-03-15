@@ -20,12 +20,12 @@
 # in production from crashing. This id is not relevant to validator.js
 # because thus far, engine (validator.js) and spec file (validator.protoascii)
 # are always released together.
-min_validator_revision_required: 100
+min_validator_revision_required: 109
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 175
+spec_file_revision: 176
 # Rules for AMP HTML
 # (https://www.ampproject.org/docs/reference/spec.html)
 #
@@ -96,6 +96,7 @@ tags: {
   attrs: { name: "type" }
   attrs: { name: "href" }
   attrs: { name: "hreflang" }
+  attrs: { name: "sizes" }
   attrs: {
     name: "rel"
     mandatory: true
@@ -106,68 +107,109 @@ tags: {
     # no space prefix and the later matches cover strings with whitespace
     # prefixes.
     # TODO(gregable): Come up with a better scheme for this.
-    value_regex: "("
+    value_regex_casei: "("
         "accessibility|"
         "alternate|"
+        "apple-touch-icon|"
+        "apple-touch-icon-precomposed|"
+        "apple-touch-startup-image|"
         "appendix|"
+        "archived|"
         "archives?|"
         "attachment|"
         "author|"
         "bibliography|"
         "category|"
+        "cc:attributionurl|"
         "chapter|"
+        # This can't be triggered w/o javascript, but rather than
+        # forcing developers to remove it, we whitelist this.
+        "chrome-webstore-item|"
         "cite|"
+        "code-license|"
+        "code-repository|"
+        "colorschememapping|"
         "comment|"
+        "content-license|"
+        "content-repository|"
         "contents|"
         "contribution|"
         "copyright|"
+        "designer|"
         "directory|"
         "discussion|"
+        "dofollow|"
+        "dropmenu[0-9]*|"
         "DCTERMS\\..*|"  # Dublin Core Metadata
+        "edit-time-data|"
         "EditURI|"
         "endorsed|"
         "fan|"
         "feed|"
+        "file-list|"
+        "follow|"
         "footnote|"
+        "galeria|"
+        "galeria2|"
+        "generator|"
         "glossary|"
         "group|"
         "help|"
         "home|"
+        "homepage|"
         "hub|"
+        "icon|"
+        "image_src|"
         "in-reply-to|"
         "index|"
         "indieauth|"
+        "introspection|"
         "issues|"
         "its-rules|"
         "jslicense|"
         "license|"
+        "lightbox|"
+        "lightbox\\[[a-zA-Z0-9-]*\\]|"
         "made|"
         "map|"
         "me|"
+        "member|"
         "meta|"
         "micropub|"
         "microsummary|"
         "next|"
         "nofollow|"
         "noreferrer|"
+        "ole-object-data|"
+        "openid?\\..*|"  # OpenID Authentication
         "openid2?\\..*|"  # OpenID Authentication
+        "original-source|"
+        "owns|"
         "p3pv1|"
         "payment|"
-        "pingback|"
         "pgpkey|"
+        "pingback|"
+        "prettyphoto|"
         "privacy|"
         "pronounciation|"
         "profile|"
+        "pronunciation|"
+        "published-[0-9]*|"
         "publisher|"
         "prev|"
         "previous|"
         "referral|"
         "related|"
+        "rendition|"
         "replies|"
         "reply-to|"
+        "schema.dc|"
+        "schema.DCTERMS|"
         "search|"
         "section|"
         "service|"
+        "service\\.post|"
+        "shortcut|"
         "shortlink|"
         "source|"
         "sidebar|"
@@ -175,81 +217,128 @@ tags: {
         "sponsor|"
         "start|"
         "status|"
-        "syndication|"
         "subsection|"
+        "syndication|"
+        "tag|"
+        "themedata|"
         "timesheet|"
         "toc|"
         "token_endpoint|"
+        "top|"
         "trackback|"
         "transformation|"
         "unendorsed|"
+        "up|"
         "user|"
         "vcalendar-parent|"
         "vcalendar-sibling|"
         "webmention|"
+        "wikipedia|"
+        "wlwmanifest|"
         "yandex-tableau-widget"
       ")( +("
         "accessibility|"
         "alternate|"
+        "apple-touch-icon|"
+        "apple-touch-icon-precomposed|"
+        "apple-touch-startup-image|"
         "appendix|"
+        "archived|"
         "archives?|"
         "attachment|"
         "author|"
         "bibliography|"
         "category|"
+        "cc:attributionurl|"
         "chapter|"
+        # This can't be triggered w/o javascript, but rather than
+        # forcing developers to remove it, we whitelist this.
+        "chrome-webstore-item|"
         "cite|"
+        "code-license|"
+        "code-repository|"
+        "colorschememapping|"
         "comment|"
+        "content-license|"
+        "content-repository|"
         "contents|"
         "contribution|"
         "copyright|"
+        "designer|"
         "directory|"
         "discussion|"
+        "dofollow|"
+        "dropmenu[0-9]*|"
         "DCTERMS\\..*|"  # Dublin Core Metadata
+        "edit-time-data|"
         "EditURI|"
         "endorsed|"
         "fan|"
         "feed|"
+        "file-list|"
+        "follow|"
         "footnote|"
+        "galeria|"
+        "galeria2|"
+        "generator|"
         "glossary|"
         "group|"
         "help|"
         "home|"
+        "homepage|"
         "hub|"
+        "icon|"
+        "image_src|"
         "in-reply-to|"
         "index|"
         "indieauth|"
+        "introspection|"
         "issues|"
         "its-rules|"
         "jslicense|"
         "license|"
+        "lightbox|"
+        "lightbox\\[[a-zA-Z0-9-]*\\]|"
         "made|"
         "map|"
         "me|"
+        "member|"
         "meta|"
         "micropub|"
         "microsummary|"
         "next|"
         "nofollow|"
         "noreferrer|"
+        "ole-object-data|"
+        "openid?\\..*|"  # OpenID Authentication
         "openid2?\\..*|"  # OpenID Authentication
+        "original-source|"
+        "owns|"
         "p3pv1|"
         "payment|"
-        "pingback|"
         "pgpkey|"
+        "pingback|"
+        "prettyphoto|"
         "privacy|"
         "pronounciation|"
         "profile|"
+        "pronunciation|"
+        "published-[0-9]*|"
         "publisher|"
         "prev|"
         "previous|"
         "referral|"
         "related|"
+        "rendition|"
         "replies|"
         "reply-to|"
+        "schema.dc|"
+        "schema.DCTERMS|"
         "search|"
         "section|"
         "service|"
+        "service\\.post|"
+        "shortcut|"
         "shortlink|"
         "source|"
         "sidebar|"
@@ -257,18 +346,24 @@ tags: {
         "sponsor|"
         "start|"
         "status|"
-        "syndication|"
         "subsection|"
+        "syndication|"
+        "tag|"
+        "themedata|"
         "timesheet|"
         "toc|"
         "token_endpoint|"
+        "top|"
         "trackback|"
         "transformation|"
         "unendorsed|"
+        "up|"
         "user|"
         "vcalendar-parent|"
         "vcalendar-sibling|"
         "webmention|"
+        "wikipedia|"
+        "wlwmanifest|"
         "yandex-tableau-widget"
       "))*"
   }
@@ -356,7 +451,8 @@ tags: {
     mandatory: true
     value_regex: "https://fonts\\.googleapis\\.com/css\\?.*|"
                  "https://fonts\\.googleapis\\.com/earlyaccess/.*\\.css|"
-                 "https://fast\\.fonts\\.net/.*"
+                 "https://fast\\.fonts\\.net/.*|"
+                 "https://maxcdn\\.bootstrapcdn\\.com/font-awesome/.*"
   }
   attrs: {
     name: "type"
@@ -390,25 +486,6 @@ tags: {
   attrs: {
     name: "href"
     mandatory: true
-  }
-}
-# Various whitelisted rel attribute values which can co-occur with
-# "type", "href", and "sizes" attributes of arbitrary value.
-tags: {
-  name: "link"
-  detail: "link rel= for type= or href= or sizes="
-  attrs: { name: "type" }
-  attrs: { name: "href" }
-  attrs: { name: "sizes" }
-  attrs: {
-    name: "rel"
-    mandatory: true
-    value_regex: "icon|"
-    "shortcut icon|"
-    "image_src|"
-    "apple-touch-icon|"
-    "apple-touch-icon-precomposed|"
-    "apple-touch-startup-image"
   }
 }
 # 4.2.5 the meta element
@@ -498,6 +575,10 @@ tags: {  # Special custom 'author' spreadsheet.
     # attribute rather than the boilerplate tagspec which doesn't have an
     # attribute and thus can't have a dispatch_key.
     # dispatch_key: true
+  }
+  attrs: {  # This is a default, but it doesn't hurt.
+    name: "type"
+    value: "text/css"
   }
   cdata: {
     max_bytes: 50000
@@ -651,26 +732,32 @@ tags: {
 tags: {
   name: "h1"
   disallowed_ancestor: "head"
+  attrs: { name: "align" }
 }
 tags: {
   name: "h2"
   disallowed_ancestor: "head"
+  attrs: { name: "align" }
 }
 tags: {
   name: "h3"
   disallowed_ancestor: "head"
+  attrs: { name: "align" }
 }
 tags: {
   name: "h4"
   disallowed_ancestor: "head"
+  attrs: { name: "align" }
 }
 tags: {
   name: "h5"
   disallowed_ancestor: "head"
+  attrs: { name: "align" }
 }
 tags: {
   name: "h6"
   disallowed_ancestor: "head"
+  attrs: { name: "align" }
 }
 # 4.3 7 The header element
 tags: {
@@ -693,11 +780,13 @@ tags: {
 tags: {
   name: "p"
   disallowed_ancestor: "head"
+  attrs: { name: "align" }
 }
 # 4.4.2 The hr element
 tags: {
   name: "hr"
   disallowed_ancestor: "head"
+  attrs: { name: "align" }
 }
 # 4.4.3 The pre element
 tags: {
@@ -708,21 +797,44 @@ tags: {
 tags: {
   name: "blockquote"
   disallowed_ancestor: "head"
+  attrs: { name: "align" }
 }
 # 4.4.5 The ol element
 tags: {
   name: "ol"
   disallowed_ancestor: "head"
+  attrs: {
+    name: "start"
+    value_regex: "[0-9]*"
+  }
+  attrs: {
+    name: "reversed"
+    value: ""
+  }
+  attrs: {
+    name: "type"
+    value_regex: "[1AaIi]"
+  }
 }
 # 4.4.6 The ul element
 tags: {
   name: "ul"
   disallowed_ancestor: "head"
+  attrs: {  # Unsupported in html5, but won't hurt
+    name: "type"
+  }
 }
 # 4.4.7 The li element
 tags: {
   name: "li"
   disallowed_ancestor: "head"
+  attrs: {  # Unsupported in html5, but won't hurt
+    name: "type"
+  }
+  attrs: {
+    name: "value"
+    value_regex: "[0-9]*"
+  }
 }
 # 4.4.8 The dl element
 tags: {
@@ -753,6 +865,7 @@ tags: {
 tags: {
   name: "div"
   disallowed_ancestor: "head"
+  attrs: { name: "align" }
 }
 # 4.4.14 The main element
 tags: {
@@ -772,6 +885,7 @@ tags: {
       allowed_protocol: "http"
       allowed_protocol: "https"
       allowed_protocol: "mailto"
+      allowed_protocol: "ftp"
       # Whitelisting additional commonly observed third party
       # protocols which should be safe
       allowed_protocol: "sms"
@@ -783,7 +897,7 @@ tags: {
   attrs: { name: "hreflang" }
   attrs: {
     name: "target"
-    value: "_blank"
+    value_regex: "(_blank|_self)"
   }
   attrs: {
     name: "rel"
@@ -794,8 +908,9 @@ tags: {
     # no space prefix and the later matches cover strings with whitespace
     # prefixes.
     # TODO(gregable): Come up with a better scheme for this.
-    value_regex: "("
+    value_regex_casei: "("
         "accessibility|"
+        "acquaintance|"
         "alternate|"
         "appendix|"
         "archived|"
@@ -806,48 +921,90 @@ tags: {
         "bibliography|"
         "canonical|"
         "category|"
+        "cc:attributionurl|"
         "chapter|"
+        "child|"
+        # This can't be triggered w/o javascript, but rather than
+        # forcing developers to remove it, we whitelist this.
+        "chrome-webstore-item|"
         "cite|"
+        "code-license|"
+        "code-repository|"
         "colleague|"
+        "colorschememapping|"
         "comment|"
         "contact|"
+        "content-license|"
+        "content-repository|"
         "contents|"
         "contribution|"
         "copyright|"
+        "co-resident|"
+        "co-worker|"
+        "crush|"
+        "date|"
+        "designer|"
         "directory|"
+        "disclosure|"
         "discussion|"
+        "dofollow|"
+        "dropmenu[0-9]*|"
+        "edit-time-data|"
         "EditURI|"
         "endorsed|"
         "external|"
         "fan|"
         "feed|"
+        "file-list|"
+        "flickrgal0|"
+        "follow|"
         "footnote|"
+        "friend|"
+        "galeria|"
+        "galeria2|"
+        "generator|"
+        "geolocation|"
         "glossary|"
         "group|"
         "help|"
         "home|"
+        "homepage|"
         "hub|"
         "in-reply-to|"
         "index|"
         "indieauth|"
+        "introspection|"
         "issues|"
         "its-rules|"
         "jslicense|"
+        "kin|"
         "license|"
+        "lightbox|"
+        "lightbox\\[[a-zA-Z0-9-]*\\]|"
+        "longdesc|"
         "made|"
         "map|"
         "me|"
+        "member|"
+        "met|"
         "meta|"
         "micropub|"
         "microsummary|"
+        "muse|"
+        "neighbor|"
         "next|"
         "nofollow|"
         "noreferrer|"
+        "ole-object-data|"
+        "openid?\\..*|"  # OpenID Authentication
         "openid2?\\..*|"  # OpenID Authentication
+        "owns|"
         "p3pv1|"
+        "parent|"
         "payment|"
-        "pingback|"
         "pgpkey|"
+        "pingback|"
+        "prettyphoto|"
         "privacy|"
         "pronounciation|"
         "profile|"
@@ -856,35 +1013,51 @@ tags: {
         "previous|"
         "referral|"
         "related|"
+        "rendition|"
         "replies|"
         "reply-to|"
         "search|"
         "section|"
+        "self|"
         "service|"
+        "service\\.post|"
         "shortlink|"
+        "sibling|"
         "source|"
         "sidebar|"
         "sitemap|"
         "sponsor|"
+        "spouse|"
         "start|"
         "status|"
-        "syndication|"
         "subsection|"
+        "sweetheart|"
+        "syndication|"
         "tag|"
+        "themedata|"
         "timesheet|"
         "toc|"
         "token_endpoint|"
+        "top|"
         "trackback|"
         "transformation|"
         "unendorsed|"
+        "up|"
         "user|"
+        "v:url|"
         "vcalendar-parent|"
         "vcalendar-sibling|"
         "webmention|"
+        "wikipedia|"
+        "wlpp|"           # Commonly used by wordpress
+        "wlpp;url=[^ ]*|"  # Commonly used by wordpress
+        "wlwmanifest|"
         "wp-att-[0-9]+|"  # Commonly used by wordpress
+        "wp-img-[0-9]+|"  # Commonly used by wordpress
         "yandex-tableau-widget"
       ")( +("
         "accessibility|"
+        "acquaintance|"
         "alternate|"
         "appendix|"
         "archived|"
@@ -895,87 +1068,146 @@ tags: {
         "bibliography|"
         "canonical|"
         "category|"
+        "cc:attributionurl|"
         "chapter|"
+        "child|"
+        # This can't be triggered w/o javascript, but rather than
+        # forcing developers to remove it, we whitelist this.
+        "chrome-webstore-item|"
         "cite|"
+        "code-license|"
+        "code-repository|"
         "colleague|"
+        "colorschememapping|"
         "comment|"
         "contact|"
+        "content-license|"
+        "content-repository|"
         "contents|"
         "contribution|"
         "copyright|"
+        "co-resident|"
+        "co-worker|"
+        "crush|"
+        "date|"
+        "designer|"
         "directory|"
+        "disclosure|"
         "discussion|"
+        "dofollow|"
+        "dropmenu[0-9]*|"
+        "edit-time-data|"
         "EditURI|"
         "endorsed|"
         "external|"
         "fan|"
         "feed|"
+        "file-list|"
+        "flickrgal0|"
+        "follow|"
         "footnote|"
+        "friend|"
+        "galeria|"
+        "galeria2|"
+        "generator|"
+        "geolocation|"
         "glossary|"
         "group|"
         "help|"
         "home|"
+        "homepage|"
         "hub|"
         "in-reply-to|"
         "index|"
         "indieauth|"
+        "introspection|"
         "issues|"
         "its-rules|"
         "jslicense|"
+        "kin|"
         "license|"
+        "lightbox|"
+        "lightbox\\[[a-zA-Z0-9-]*\\]|"
+        "longdesc|"
         "made|"
         "map|"
         "me|"
+        "member|"
+        "met|"
         "meta|"
         "micropub|"
         "microsummary|"
+        "muse|"
+        "neighbor|"
         "next|"
         "nofollow|"
         "noreferrer|"
+        "ole-object-data|"
+        "openid?\\..*|"  # OpenID Authentication
         "openid2?\\..*|"  # OpenID Authentication
+        "owns|"
         "p3pv1|"
+        "parent|"
         "payment|"
-        "pingback|"
         "pgpkey|"
+        "pingback|"
+        "prettyphoto|"
         "privacy|"
         "pronounciation|"
         "profile|"
+        "published-[0-9]*|"
         "publisher|"
         "prev|"
         "previous|"
         "referral|"
         "related|"
+        "rendition|"
         "replies|"
         "reply-to|"
         "search|"
         "section|"
+        "self|"
         "service|"
+        "service\\.post|"
         "shortlink|"
+        "sibling|"
         "source|"
         "sidebar|"
         "sitemap|"
         "sponsor|"
+        "spouse|"
         "start|"
         "status|"
-        "syndication|"
         "subsection|"
+        "sweetheart|"
+        "syndication|"
         "tag|"
+        "themedata|"
         "timesheet|"
         "toc|"
         "token_endpoint|"
+        "top|"
         "trackback|"
         "transformation|"
         "unendorsed|"
+        "up|"
         "user|"
+        "v:url|"
         "vcalendar-parent|"
         "vcalendar-sibling|"
         "webmention|"
+        "wikipedia|"
+        "wlpp|"           # Commonly used by wordpress
+        "wlpp;url=[^ ]*|"  # Commonly used by wordpress
+        "wlwmanifest|"
         "wp-att-[0-9]+|"  # Commonly used by wordpress
+        "wp-img-[0-9]+|"  # Commonly used by wordpress
         "yandex-tableau-widget"
       "))*"
   }
   # These attributes appear harmless.
   attrs: { name: "name" }
+  attrs: { name: "border" }
 }
 # 4.5.2 The em element
 tags: {
@@ -1174,6 +1406,7 @@ tags: {
       allowed_protocol: "https"
     }
   }
+  attrs: { name: "border" }
   attrs: { name: "width" }
   spec_url: "https://www.ampproject.org/docs/reference/amp-img.html"
 }
@@ -1183,9 +1416,23 @@ tags: {
   name: "video"
   mandatory_ancestor: "noscript"
   mandatory_ancestor_suggested_alternative: "amp-video"
+  attrs: { name: "autoplay" }
   attrs: { name: "controls" }
   attrs: { name: "height" }
+  attrs: { name: "loop" }
+  attrs: { name: "muted" }
+  attrs: { name: "poster" }
+  attrs: { name: "preload" }
+  attrs: { name: "src" }
   attrs: { name: "width" }
+  attrs: {
+    name: "src"
+    value_url: {
+      allow_relative: false
+      allowed_protocol: "data"
+      allowed_protocol: "https"
+    }
+  }
   spec_url: "https://www.ampproject.org/docs/reference/amp-video.html"
 }
 # 4.7.7 The audio element
@@ -1194,7 +1441,20 @@ tags: {
   name: "audio"
   mandatory_ancestor: "noscript"
   mandatory_ancestor_suggested_alternative: "amp-audio"
+  attrs: { name: "autoplay" }
   attrs: { name: "controls" }
+  attrs: { name: "loop" }
+  attrs: { name: "muted" }
+  attrs: { name: "preload" }
+  attrs: {
+    name: "src"
+    value_url: {
+      allow_relative: false
+      allowed_protocol: "data"
+      allowed_protocol: "https"
+    }
+  }
+
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-audio.html"
 }
 # 4.7.8 The source element
@@ -1848,6 +2108,7 @@ tags: {
   name: "table"
   disallowed_ancestor: "head"
   attrs: { name: "align" }
+  attrs: { name: "border" }
 }
 # 4.9.2 The caption element
 tags: {
@@ -1898,6 +2159,9 @@ tags: {
   disallowed_ancestor: "head"
   attrs: { name: "align" }
   attrs: { name: "valign" }
+  attrs: { name: "width" }
+  attrs: { name: "height" }
+  attrs: { name: "bgcolor" }
 }
 # 4.9.9 The td element
 tags: {
@@ -1908,6 +2172,10 @@ tags: {
   attrs: { name: "headers" }
   attrs: { name: "rowspan" }
   attrs: { name: "valign" }
+  attrs: { name: "align" }
+  attrs: { name: "width" }
+  attrs: { name: "height" }
+  attrs: { name: "bgcolor" }
 }
 # 4.9.10 The th element
 tags: {
@@ -1921,6 +2189,10 @@ tags: {
   attrs: { name: "scope" }
   attrs: { name: "sorted" }
   attrs: { name: "valign" }
+  attrs: { name: "align" }
+  attrs: { name: "width" }
+  attrs: { name: "height" }
+  attrs: { name: "bgcolor" }
 }
 
 # 4.10 Forms
@@ -1928,6 +2200,13 @@ tags: {
 tags: {
   name: "button"
   disallowed_ancestor: "head"
+  attrs: {
+    name: "disabled"
+    value: ""
+  }
+  attrs: { name: "name" }
+  attrs: { name: "type" }
+  attrs: { name: "value" }
 }
 
 # 4.11 Scripting
@@ -2839,6 +3118,12 @@ tags: {
 
 # Some additional tags, microformats, allowances.
 
+# This tag is a preserved indicator for documents created in microsoft word.
+# They do not render.
+tags: {
+  name: "o:p"
+}
+
 # Schema.org meta tag; schema.org is explicitly allowed by the AMP HTML draft.
 tags: {
   name: "meta"
@@ -3001,6 +3286,7 @@ tags: {
   attr_lists: "mandatory-src-or-srcset"
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
+  attrs: { name: "border" }
   attrs: { name: "placeholder" }
   amp_layout: {
     supported_layouts: FIXED
@@ -3260,15 +3546,15 @@ tags: {
   attrs: {
     name: "data-videoid"
     mandatory: true
-    value_regex: "[a-zA-Z0-9]+"
+    value_regex_casei: "[a-z0-9]+"
   }
-  attrs: { name: "data-mute" value_regex: "true|false" }
-  attrs: { name: "data-endscreen-enable" value_regex: "true|false" }
-  attrs: { name: "data-sharing-enable" value_regex: "true|false" }
+  attrs: { name: "data-mute" value_regex_casei: "true|false" }
+  attrs: { name: "data-endscreen-enable" value_regex_casei: "true|false" }
+  attrs: { name: "data-sharing-enable" value_regex_casei: "true|false" }
   attrs: { name: "data-start" value_regex: "[0-9]+" }
-  attrs: { name: "data-ui-highlight" value_regex: "([0-9A-Fa-f]{3}){1,2}" }
-  attrs: { name: "data-ui-logo" value_regex: "true|false" }
-  attrs: { name: "data-info" value_regex: "true|false" }
+  attrs: { name: "data-ui-highlight" value_regex_casei: "([0-9a-f]{3}){1,2}" }
+  attrs: { name: "data-ui-logo" value_regex_casei: "true|false" }
+  attrs: { name: "data-info" value_regex_casei: "true|false" }
   amp_layout: {
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
@@ -3288,8 +3574,8 @@ tags: {
     mandatory: true
     value_regex: "[0-9]+"
   }
-  attrs: { name: "data-visual" value_regex: "true|false" }
-  attrs: { name: "data-color" value_regex: "([0-9A-Fa-f]{3}){1,2}" }
+  attrs: { name: "data-visual" value_regex_casei: "true|false" }
+  attrs: { name: "data-color" value_regex_casei: "([0-9a-f]{3}){1,2}" }
   amp_layout: {
     supported_layouts: FIXED_HEIGHT
   }
@@ -3398,7 +3684,7 @@ tags: {
   also_requires: "amp-iframe extension .js script"
   attr_lists: "extended-amp-global"
   attrs: { name: "sandbox" }
-  attrs: { name: "scrolling" value_regex: "auto|yes|no" }
+  attrs: { name: "scrolling" value_regex_casei: "auto|yes|no" }
   attrs: { name: "allowfullscreen" value: "" }
   attrs: { name: "allowtransparency" value: "" }
   attrs: { name: "resizable" value: "" }
@@ -3459,7 +3745,7 @@ tags: {
   attrs: {
     name: "autoplay"
     # ^$| prefix intended. empty string is valid.
-    value_regex: "^$|desktop|tablet|mobile|autoplay"
+    value_regex_casei: "^$|desktop|tablet|mobile|autoplay"
   }
   attrs: { name: "loop"  value: "" }
   attrs: { name: "muted" value: "" }

@@ -5,7 +5,6 @@ feature_tests/urls.html:40:2 Invalid URL protocol 'javascript:' for attribute 'h
 feature_tests/urls.html:41:2 Invalid URL protocol 'javascript:' for attribute 'href' in tag 'a'. [DISALLOWED_HTML]
 feature_tests/urls.html:42:2 Invalid URL protocol 'vbscript:' for attribute 'href' in tag 'a'. [DISALLOWED_HTML]
 feature_tests/urls.html:43:2 Invalid URL protocol 'data:' for attribute 'href' in tag 'a'. [DISALLOWED_HTML]
-feature_tests/urls.html:44:2 Invalid URL protocol 'ftp:' for attribute 'href' in tag 'a'. [DISALLOWED_HTML]
 feature_tests/urls.html:45:2 Malformed URL 'http://site:80808/%AFpage' for attribute 'href' in tag 'a'. [DISALLOWED_HTML]
 feature_tests/urls.html:47:2 Invalid URL protocol 'javascript:' for attribute 'srcset' in tag 'amp-img'. (see https://www.ampproject.org/docs/reference/amp-img.html) [AMP_TAG_PROBLEM]
 feature_tests/urls.html:49:2 Invalid URL protocol 'javascript:' for attribute 'srcset' in tag 'amp-img'. (see https://www.ampproject.org/docs/reference/amp-img.html) [AMP_TAG_PROBLEM]

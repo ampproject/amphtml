@@ -1072,9 +1072,14 @@ class ParsedAttrSpec {
           amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
           /* params */ [attrName, getDetailOrName(tagSpec), attrValue],
           tagSpec.specUrl, result);
-    } else if (this.spec_.valueRegex !== null) {
-      const valueRegex =
-          new RegExp('^(' + this.spec_.valueRegex + ')$');
+    } else if (
+        this.spec_.valueRegex !== null || this.spec_.valueRegexCasei !== null) {
+      var valueRegex;
+      if (this.spec_.valueRegex !== null) {
+        valueRegex = new RegExp('^(' + this.spec_.valueRegex + ')$');
+      } else {
+        valueRegex = new RegExp('^(' + this.spec_.valueRegexCasei + ')$', 'i');
+      }
       if (!valueRegex.test(attrValue)) {
         context.addError(
             amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
@@ -2843,6 +2848,13 @@ amp.validator.categorizeError = function(error) {
       MANDATORY_ATTR_MISSING)) {
     if (goog.string./*OK*/startsWith(error.params[1], "amp-")) {
       return amp.validator.ErrorCategory.Code.AMP_TAG_PROBLEM;
+    }
+    if (goog.string./*OK*/ startsWith(error.params[1], "on")) {
+      return amp.validator.ErrorCategory.Code.CUSTOM_JAVASCRIPT_DISALLOWED;
+    }
+    if (error.params[1] === "style" ||
+        error.params[1] === "link rel=stylesheet for fonts") {
+      return amp.validator.ErrorCategory.Code.AUTHOR_STYLESHEET_PROBLEM;
     }
     // E.g. "The attribute 'async' may not appear in tag 'link
     // rel=stylesheet for fonts'."
