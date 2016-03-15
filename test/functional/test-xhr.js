@@ -25,12 +25,23 @@ describe('XHR', function() {
   this.timeout(5000);
 
   const scenarios = [
-    {xhr: xhrFor(window), desc: 'Native'},
+    {xhr: xhrFor({
+      fetch: window.fetch,
+      location: {href: 'https://acme.com/path'},
+    }), desc: 'Native'},
     {xhr: xhrFor({
       fetch: fetchPolyfill,
       location: {href: 'https://acme.com/path'},
     }), desc: 'Polyfill'},
   ];
+
+  function setupMockXhr() {
+    const mockXhr = sandbox.useFakeXMLHttpRequest().xhr;
+    requests = [];
+    mockXhr.onCreate = function(xhr) {
+      requests.push(xhr);
+    };
+  }
 
   function noOrigin(url) {
     let index = url.indexOf('//');
@@ -43,11 +54,6 @@ describe('XHR', function() {
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    const mockXhr = sandbox.useFakeXMLHttpRequest().xhr;
-    requests = [];
-    mockXhr.onCreate = function(xhr) {
-      requests.push(xhr);
-    };
   });
 
   afterEach(() => {
@@ -62,6 +68,7 @@ describe('XHR', function() {
     if (test.desc != 'Native') {
 
       it('should allow GET and POST methods', () => {
+        setupMockXhr();
         const get = xhr.fetchJson.bind(xhr, '/get?k=v1');
         const post = xhr.fetchJson.bind(xhr, '/post', {
           method: 'POST',
@@ -96,11 +103,13 @@ describe('XHR', function() {
       });
 
       it('should do `GET` as default method', () => {
+        setupMockXhr();
         xhr.fetchJson('/get?k=v1');
         expect(requests[0].method).to.equal('GET');
       });
 
       it('should normalize method names to uppercase', () => {
+        setupMockXhr();
         xhr.fetchJson('/abc');
         xhr.fetchJson('/abc', {
           method: 'post',
@@ -113,36 +122,42 @@ describe('XHR', function() {
       });
 
       it('should inject source origin query parameter', () => {
+        setupMockXhr();
         xhr.fetchJson('/get?k=v1#h1');
         expect(noOrigin(requests[0].url)).to.equal(
             '/get?k=v1&__amp_source_origin=https%3A%2F%2Facme.com#h1');
       });
 
       it('should inject source origin query parameter w/o query', () => {
+        setupMockXhr();
         xhr.fetchJson('/get');
         expect(noOrigin(requests[0].url)).to.equal(
             '/get?__amp_source_origin=https%3A%2F%2Facme.com');
       });
 
       it('should defend against invalid source origin query parameter', () => {
+        setupMockXhr();
         expect(() => {
           xhr.fetchJson('/get?k=v1&__amp_source_origin=invalid#h1');
         }).to.throw(/Source origin is not allowed/);
       });
 
       it('should defend against empty source origin query parameter', () => {
+        setupMockXhr();
         expect(() => {
           xhr.fetchJson('/get?k=v1&__amp_source_origin=#h1');
         }).to.throw(/Source origin is not allowed/);
       });
 
       it('should defend against re-encoded source origin parameter', () => {
+        setupMockXhr();
         expect(() => {
           xhr.fetchJson('/get?k=v1&_%5famp_source_origin=#h1');
         }).to.throw(/Source origin is not allowed/);
       });
 
       it('should accept AMP origin when received in response', () => {
+        setupMockXhr();
         const promise = xhr.fetchJson('/get');
         requests[0].respond(200, {
           'Content-Type': 'application/json',
@@ -157,6 +172,7 @@ describe('XHR', function() {
       });
 
       it('should deny AMP origin for different origin in response', () => {
+        setupMockXhr();
         const promise = xhr.fetchJson('/get');
         requests[0].respond(200, {
           'Content-Type': 'application/json',
@@ -172,6 +188,7 @@ describe('XHR', function() {
       });
 
       it('should require AMP origin in response for when request', () => {
+        setupMockXhr();
         const promise = xhr.fetchJson('/get', {
           requireAmpResponseSourceOrigin: true,
         });
@@ -263,6 +280,7 @@ describe('XHR', function() {
 
       if (test.desc != 'Native') {
         it('should have required json POST headers by default', () => {
+          setupMockXhr();
           xhr.fetchJson(url, {
             method: 'POST',
             body: {

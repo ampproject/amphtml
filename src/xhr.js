@@ -64,13 +64,17 @@ class Xhr {
   constructor(win) {
     /** @const {!Window} */
     this.win = win;
+  }
 
-    /**
-     * We want to call `fetch_` unbound from any context since it could
-     * be either the native fetch or our polyfill.
-     * @private @const {function(string, ?FetchInitDef=):!Promise<!FetchResponse>}
-     */
-    this.fetch_ = (win.fetch || fetchPolyfill).bind(null);
+  /**
+   * We want to call `fetch_` unbound from any context since it could
+   * be either the native fetch or our polyfill.
+   *
+   * @private
+   * @return {!Promise<!FetchResponse>}
+   */
+  fetch_() {
+    return (this.win.fetch || fetchPolyfill).apply(null, arguments);
   }
 
   /**
