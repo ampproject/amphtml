@@ -19,6 +19,7 @@
  *   https://github.com/ampproject/amphtml/blob/master/src/srcset.js
  */
 goog.provide('parse_srcset.Srcset');
+goog.provide('parse_srcset.SrcsetSourceDef');
 goog.provide('parse_srcset.parseSrcset');
 
 /**
@@ -30,7 +31,7 @@ goog.provide('parse_srcset.parseSrcset');
  *   dpr: (number|undefined)
  * }}
  */
-let SrcsetSourceDef;
+parse_srcset.SrcsetSourceDef;
 
 /**
  * Parses the text representation of srcset into Srcset object.
@@ -92,7 +93,7 @@ parse_srcset.parseSrcset = function(srcset) {
  */
 parse_srcset.Srcset = class {
   /**
-   * @param {!Array<!SrcsetSourceDef>} sources
+   * @param {!Array<!parse_srcset.SrcsetSourceDef>} sources
    */
   constructor(sources) {
     this.is_successful_ = true;
@@ -101,7 +102,7 @@ parse_srcset.Srcset = class {
       this.is_successful_ = false;
       return;
     }
-    /** @private @const {!Array<!SrcsetSourceDef>} */
+    /** @private @const {!Array<!parse_srcset.SrcsetSourceDef>} */
     this.sources_ = sources;
 
     // Only one type of source specified can be used - width or DPR.
@@ -160,7 +161,7 @@ parse_srcset.Srcset = class {
 
   /**
    * Returns all sources in the srcset.
-   * @return {!Array<!SrcsetSourceDef>}
+   * @return {!Array<!parse_srcset.SrcsetSourceDef>}
    */
   getSources() {
     return this.sources_;

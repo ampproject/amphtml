@@ -209,14 +209,14 @@ message AmpLayout {
 // NEXT AVAILABLE TAG: 19
 message TagSpec {
   // Use lower-case tag names only. If adding the same tag twice, then they must
-  // also have a detail string which is unique throughout all detail.
-  optional string name = 1;
+  // also have a spec_name string which is unique throughout all detail.
+  optional string tag_name = 1;
 
-  // The detail will be copied as is into ValidationError::detail for
-  // MANDATORY_TAG_MISSING and other errors. It is especially useful
-  // when the tag name by itself isn't sufficient to uniquely identify
-  // the tag spec, and itself must be unique.
-  optional string detail = 2;
+  // If provided, the spec_name must be unique within the validator
+  // rules. It will be used with preference over the tag_name in
+  // parameters for error messages and other usages that require or
+  // benefit from a unique identifier.
+  optional string spec_name = 2;
 
   // If true, a tag conforming to this tag spec must occur at least once
   // within the document.

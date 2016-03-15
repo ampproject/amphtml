@@ -128,13 +128,13 @@ def PrintTagSpec(validator_pb2, tag_spec, out):
     out: A list of lines to output (without newline characters), to which this
          function will append.
   """
-  header = '## %s' % UnicodeEscape(tag_spec.name)
-  if tag_spec.detail and (tag_spec.name != tag_spec.detail):
-    header += ': %s' % UnicodeEscape(tag_spec.detail)
+  header = '## %s' % UnicodeEscape(tag_spec.tag_name)
+  if tag_spec.spec_name and (tag_spec.tag_name != tag_spec.spec_name):
+    header += ': %s' % UnicodeEscape(tag_spec.spec_name)
   if tag_spec.deprecation:
     header += ' (DEPRECATED)'
-  header += '{#%s_%s}' % (UnicodeEscape(tag_spec.name).replace(' ', '_'),
-                          UnicodeEscape(tag_spec.detail).replace(' ', '_'))
+  header += '{#%s_%s}' % (UnicodeEscape(tag_spec.tag_name).replace(' ', '_'),
+                          UnicodeEscape(tag_spec.spec_name).replace(' ', '_'))
   out.append('')
   out.append(header)
   out.append('')

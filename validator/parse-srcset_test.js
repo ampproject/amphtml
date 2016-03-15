@@ -20,6 +20,7 @@
  */
 goog.provide('parse_srcset.ParseSrcsetTest');
 
+goog.require('parse_srcset.SrcsetSourceDef');
 goog.require('parse_srcset.parseSrcset');
 
 /**
@@ -28,8 +29,9 @@ goog.require('parse_srcset.parseSrcset');
  * it truncates the provided arguments (and it's not configurable) and
  * with the Closure compiler, it requires a message argument to which
  * we'd always have to pass undefined. Too messy, so we roll our own.
- * @param {string} expected
- * @param {string} saw
+ * @param {T} expected
+ * @param {T} saw
+ * @template T
  */
 function assertStrictEqual(expected, saw) {
   assert.ok(expected === saw, 'expected: ' + expected + ' saw: ' + saw);
@@ -38,13 +40,13 @@ function assertStrictEqual(expected, saw) {
 /**
  * Test parseSrcset and assert results are as expected.
  * @param {string} s
- * @param {string} expected
+ * @param {!Array<!parse_srcset.SrcsetSourceDef>} expected
  */
 function test(s, expected) {
   const res = parse_srcset.parseSrcset(s);
-  assertStrictEqual(res.sources_.length, expected.length);
+  assertStrictEqual(res.getSources().length, expected.length);
   for (let i = 0; i < expected.length; i++) {
-    const r = res.sources_[i];
+    const r = res.getSources()[i];
     const e = expected[i];
     assertStrictEqual(r.url, e.url);
     assertStrictEqual(r.width, e.width);
