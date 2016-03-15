@@ -169,6 +169,7 @@ export class AmpSlides extends BaseCarousel {
   /**
    * @param {!Element} slide
    * @param {number} dir
+   * @private
    */
   prepareSlide_(slide, dir) {
     const containerWidth = this.element./*OK*/offsetWidth;
@@ -179,6 +180,28 @@ export class AmpSlides extends BaseCarousel {
     });
 
     this.scheduleLayout(slide);
+  }
+
+  /**
+   * @param {number} index
+   * @private
+   */
+  resetSlide_(index) {
+    const slide = this.slides_[index];
+    if (index == this.currentIndex_) {
+      st.setStyles(slide, {
+        zIndex: 0,
+        transform: '',
+        opacity: 1,
+      });
+    } else {
+      st.setStyles(slide, {
+        display: 'none',
+        zIndex: 0,
+        transform: '',
+        opacity: 1,
+      });
+    }
   }
 
   /**
@@ -394,13 +417,26 @@ export class AmpSlides extends BaseCarousel {
         s.nextTr(1);
         this.currentIndex_ = s.nextIndex;
         this.commitSwitch_(oldSlide, this.curSlide_());
+        if (s.prevIndex != -1 && s.prevIndex != this.currentIndex_) {
+          this.resetSlide_(s.prevIndex);
+        }
       } else if (newPos < -0.5) {
         s.prevTr(1);
         this.currentIndex_ = s.prevIndex;
         this.commitSwitch_(oldSlide, this.curSlide_());
+        if (s.nextIndex != -1 && s.nextIndex != this.currentIndex_) {
+          this.resetSlide_(s.nextIndex);
+        }
       } else {
         s.nextTr(0);
         s.prevTr(0);
+        this.resetSlide_(this.currentIndex_);
+        if (s.prevIndex != -1 && s.prevIndex != this.currentIndex_) {
+          this.resetSlide_(s.prevIndex);
+        }
+        if (s.nextIndex != -1 && s.nextIndex != this.currentIndex_) {
+          this.resetSlide_(s.nextIndex);
+        }
       }
     });
   }

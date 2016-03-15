@@ -17,7 +17,7 @@
 import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
 import {log} from '../../../src/log';
-import {parseUrl, removeFragment} from '../../../src/url';
+import {parseUrl} from '../../../src/url';
 import {viewerFor} from '../../../src/viewer';
 
 /** @const */
@@ -44,7 +44,7 @@ export function openLoginDialog(win, urlOrPromise) {
   if (overrideDialog) {
     return new ViewerLoginDialog(viewer, urlOrPromise).open();
   }
-  return new WebLoginDialog(win, urlOrPromise).open();
+  return new WebLoginDialog(win, viewer, urlOrPromise).open();
 }
 
 
@@ -94,11 +94,15 @@ class ViewerLoginDialog {
 class WebLoginDialog {
   /**
    * @param {!Window} win
+   * @param {!Viewer} viewer
    * @param {string|!Promise<string>} urlOrPromise
    */
-  constructor(win, urlOrPromise) {
+  constructor(win, viewer, urlOrPromise) {
     /** @const {!Window} */
     this.win = win;
+
+    /** @const {!Viewer} */
+    this.viewer = viewer;
 
     /** @const {string|!Promise<string>} */
     this.urlOrPromise = urlOrPromise;
@@ -271,7 +275,7 @@ class WebLoginDialog {
    * @private
    */
   getReturnUrl_() {
-    const currentUrl = removeFragment(this.win.location.href);
+    const currentUrl = this.viewer.getResolvedViewerUrl();
     let returnUrl;
     if (getMode().localDev) {
       const loc = this.win.location;

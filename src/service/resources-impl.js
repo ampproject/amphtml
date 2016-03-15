@@ -26,7 +26,7 @@ import {
 } from '../layout-rect';
 import {getService} from '../service';
 import {inputFor} from '../input';
-import {log} from '../log';
+import {dev} from '../log';
 import {reportError} from '../error';
 import {timer} from '../timer';
 import {installFramerateService} from './framerate-impl';
@@ -184,7 +184,7 @@ export class Resources {
     });
 
     this.viewer_.onRuntimeState(state => {
-      log.fine(TAG_, 'Runtime state:', state);
+      dev.fine(TAG_, 'Runtime state:', state);
       this.isRuntimeOn_ = state;
       this.schedulePass(1);
     });
@@ -321,7 +321,7 @@ export class Resources {
       this.schedulePass();
     }
 
-    log.fine(TAG_, 'element added:', resource.debugid);
+    dev.fine(TAG_, 'element added:', resource.debugid);
   }
 
   /**
@@ -336,7 +336,7 @@ export class Resources {
     if (index != -1) {
       this.resources_.splice(index, 1);
     }
-    log.fine(TAG_, 'element removed:', resource.debugid);
+    dev.fine(TAG_, 'element removed:', resource.debugid);
   }
 
   /**
@@ -353,7 +353,7 @@ export class Resources {
     } else if (resource.onUpgraded_) {
       resource.onUpgraded_();
     }
-    log.fine(TAG_, 'element upgraded:', resource.debugid);
+    dev.fine(TAG_, 'element upgraded:', resource.debugid);
   }
 
   /**
@@ -553,7 +553,7 @@ export class Resources {
    */
   doPass_() {
     if (!this.isRuntimeOn_) {
-      log.fine(TAG_, 'runtime is off');
+      dev.fine(TAG_, 'runtime is off');
       return;
     }
 
@@ -570,7 +570,7 @@ export class Resources {
 
     const viewportSize = this.viewport_.getSize();
     const now = timer.now();
-    log.fine(TAG_, 'PASS: at ' + now +
+    dev.fine(TAG_, 'PASS: at ' + now +
         ', visible=', this.visible_,
         ', forceBuild=', this.forceBuild_,
         ', relayoutAll=', this.relayoutAll_,
@@ -582,7 +582,7 @@ export class Resources {
 
     // If document becomes invisible, bring everything into inactive state.
     if (prevVisible && !this.visible_) {
-      log.fine(TAG_, 'document become inactive');
+      dev.fine(TAG_, 'document become inactive');
       this.documentBecameInactive_();
       return;
     }
@@ -599,11 +599,11 @@ export class Resources {
         delay = Math.min(delay, MUTATE_DEFER_DELAY_);
       }
       if (this.visible_) {
-        log.fine(TAG_, 'next pass:', delay);
+        dev.fine(TAG_, 'next pass:', delay);
         this.schedulePass(delay);
         this.updateScrollHeight_();
       } else {
-        log.fine(TAG_, 'document is not visible: no scheduling');
+        dev.fine(TAG_, 'document is not visible: no scheduling');
       }
     }
   }
@@ -646,7 +646,7 @@ export class Resources {
         now - this.lastScrollTime_ > MUTATE_DEFER_DELAY_ * 2);
 
     if (this.deferredMutates_.length > 0) {
-      log.fine(TAG_, 'deferred mutates:', this.deferredMutates_.length);
+      dev.fine(TAG_, 'deferred mutates:', this.deferredMutates_.length);
       const deferredMutates = this.deferredMutates_;
       this.deferredMutates_ = [];
       for (let i = 0; i < deferredMutates.length; i++) {
@@ -655,7 +655,7 @@ export class Resources {
     }
 
     if (this.requestsChangeHeight_.length > 0) {
-      log.fine(TAG_, 'change height requests:',
+      dev.fine(TAG_, 'change height requests:',
           this.requestsChangeHeight_.length);
       const requestsChangeHeight = this.requestsChangeHeight_;
       this.requestsChangeHeight_ = [];
@@ -756,7 +756,7 @@ export class Resources {
                   (newScrollHeight - state./*OK*/scrollHeight));
             }
           },
-        });
+        }, {});
       }
     }
   }
@@ -922,7 +922,7 @@ export class Resources {
         const r = this.resources_[i];
         if (r.getState() == ResourceState_.READY_FOR_LAYOUT &&
                 !r.hasOwner() && r.isDisplayed()) {
-          log.fine(TAG_, 'idle layout:', r.debugid);
+          dev.fine(TAG_, 'idle layout:', r.debugid);
           this.scheduleLayoutOrPreload_(r, /* layout */ false);
           idleScheduledCount++;
           if (idleScheduledCount >= 4) {
@@ -968,7 +968,7 @@ export class Resources {
     if (task) {
       do {
         timeout = this.calcTaskTimeout_(task);
-        log.fine(TAG_, 'peek from queue:', task.id,
+        dev.fine(TAG_, 'peek from queue:', task.id,
             'sched at', task.scheduleTime,
             'score', scorer(task),
             'timeout', timeout);
@@ -985,7 +985,7 @@ export class Resources {
           // Ensure that task can prerender
           task.promise = task.callback(this.visible_);
           task.startTime = now;
-          log.fine(TAG_, 'exec:', task.id, 'at', task.startTime);
+          dev.fine(TAG_, 'exec:', task.id, 'at', task.startTime);
           this.exec_.enqueue(task);
           task.promise.then(this.taskComplete_.bind(this, task, true),
               this.taskComplete_.bind(this, task, false))
@@ -1001,8 +1001,8 @@ export class Resources {
       } while (task);
     }
 
-    log.fine(TAG_, 'queue size:', this.queue_.getSize());
-    log.fine(TAG_, 'exec size:', this.exec_.getSize());
+    dev.fine(TAG_, 'queue size:', this.queue_.getSize());
+    dev.fine(TAG_, 'exec size:', this.exec_.getSize());
 
     if (timeout >= 0) {
       // Work pass.
@@ -1104,7 +1104,7 @@ export class Resources {
     this.exec_.dequeue(task);
     this.schedulePass(POST_TASK_PASS_DELAY_);
     if (!success) {
-      log.error(TAG_, 'task failed:',
+      dev.error(TAG_, 'task failed:',
           task.id, task.resource.debugid, opt_reason);
       return Promise.reject(opt_reason);
     }
@@ -1237,7 +1237,7 @@ export class Resources {
       callback: callback,
       scheduleTime: timer.now(),
     };
-    log.fine(TAG_, 'schedule:', task.id, 'at', task.scheduleTime);
+    dev.fine(TAG_, 'schedule:', task.id, 'at', task.scheduleTime);
 
     // Only schedule a new task if there's no one enqueued yet or if this task
     // has a higher priority.
@@ -1451,7 +1451,7 @@ export class Resource {
     try {
       built = this.element.build(force);
     } catch (e) {
-      log.error(TAG_, 'failed to build:', this.debugid, e);
+      dev.error(TAG_, 'failed to build:', this.debugid, e);
       built = false;
       this.blacklisted_ = true;
     }
@@ -1646,14 +1646,14 @@ export class Resource {
         'Not ready to start layout: %s (%s)', this.debugid, this.state_);
 
     if (!isDocumentVisible && !this.prerenderAllowed()) {
-      log.fine(TAG_, 'layout canceled due to non pre-renderable element:',
+      dev.fine(TAG_, 'layout canceled due to non pre-renderable element:',
           this.debugid, this.state_);
       this.state_ = ResourceState_.READY_FOR_LAYOUT;
       return Promise.resolve();
     }
 
     if (!this.renderOutsideViewport() && !this.isInViewport()) {
-      log.fine(TAG_, 'layout canceled due to element not being in viewport:',
+      dev.fine(TAG_, 'layout canceled due to element not being in viewport:',
           this.debugid, this.state_);
       this.state_ = ResourceState_.READY_FOR_LAYOUT;
       return Promise.resolve();
@@ -1662,20 +1662,20 @@ export class Resource {
     // Double check that the element has not disappeared since scheduling
     this.measure();
     if (!this.isDisplayed()) {
-      log.fine(TAG_, 'layout canceled due to element loosing display:',
+      dev.fine(TAG_, 'layout canceled due to element loosing display:',
           this.debugid, this.state_);
       return Promise.resolve();
     }
 
     // Not-wanted re-layouts are ignored.
     if (this.layoutCount_ > 0 && !this.element.isRelayoutNeeded()) {
-      log.fine(TAG_, 'layout canceled since it wasn\'t requested:',
+      dev.fine(TAG_, 'layout canceled since it wasn\'t requested:',
           this.debugid, this.state_);
       this.state_ = ResourceState_.LAYOUT_COMPLETE;
       return Promise.resolve();
     }
 
-    log.fine(TAG_, 'start layout:', this.debugid, 'count:', this.layoutCount_);
+    dev.fine(TAG_, 'start layout:', this.debugid, 'count:', this.layoutCount_);
     this.layoutCount_++;
     this.state_ = ResourceState_.LAYOUT_SCHEDULED;
 
@@ -1689,7 +1689,6 @@ export class Resource {
 
     this.layoutPromise_ = promise.then(() => this.layoutComplete_(true),
         reason => this.layoutComplete_(false, reason));
-    this.layoutPromise_.then(this.whenFirstLayoutCompleteResolve_);
     return this.layoutPromise_;
   }
 
@@ -1704,9 +1703,9 @@ export class Resource {
     this.state_ = success ? ResourceState_.LAYOUT_COMPLETE :
         ResourceState_.LAYOUT_FAILED;
     if (success) {
-      log.fine(TAG_, 'layout complete:', this.debugid);
+      dev.fine(TAG_, 'layout complete:', this.debugid);
     } else {
-      log.fine(TAG_, 'loading failed:', this.debugid, opt_reason);
+      dev.fine(TAG_, 'loading failed:', this.debugid, opt_reason);
       return Promise.reject(opt_reason);
     }
   }
@@ -1736,7 +1735,7 @@ export class Resource {
     if (inViewport == this.isInViewport_) {
       return;
     }
-    log.fine(TAG_, 'inViewport:', this.debugid, inViewport);
+    dev.fine(TAG_, 'inViewport:', this.debugid, inViewport);
     this.isInViewport_ = inViewport;
     this.element.viewportCallback(inViewport);
   }

@@ -127,9 +127,12 @@ export class Framerate {
       const duration = now - this.collectStartTime_;
       const framerate = 1000 / (duration / this.frameCount_);
       const performance = performanceFor(this.win);
-      performance.tickDelta('fps', framerate);
+      // We want good values to be low and CSI hates negative values, so we
+      // shift everything by 60.
+      const reportedValue = Math.max(60 - framerate, 0);
+      performance.tickDelta('fps', reportedValue);
       if (this.loadedAd_) {
-        performance.tickDelta('fal', framerate);
+        performance.tickDelta('fal', reportedValue);
       }
       performance.flush();
       this.reset_();

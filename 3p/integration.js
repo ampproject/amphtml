@@ -50,6 +50,8 @@ import {revcontent} from '../ads/revcontent';
 import {openadstream} from '../ads/openadstream';
 import {triplelift} from '../ads/triplelift';
 import {teads} from '../ads/teads';
+import {rubicon} from '../ads/rubicon';
+import {imobile} from '../ads/imobile';
 
 /**
  * Whether the embed type may be used with amp-embed tag.
@@ -82,6 +84,8 @@ register('revcontent', revcontent);
 register('openadstream', openadstream);
 register('triplelift', triplelift);
 register('teads', teads);
+register('rubicon', rubicon);
+register('imobile', imobile);
 
 // For backward compat, we always allow these types without the iframe
 // opting in.

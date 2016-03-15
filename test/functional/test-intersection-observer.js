@@ -141,7 +141,7 @@ describe('IntersectionObserver', () => {
     viewportCallback(inViewport) {
       testElementViewportCallback(inViewport);
     }
-    getInsersectionElementLayoutBox() {
+    getIntersectionElementLayoutBox() {
       testElementGetInsersectionElementLayoutBox();
       return {top: 10, left: 10, width: 11, height: 1};
     }

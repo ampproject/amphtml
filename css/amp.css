@@ -88,7 +88,8 @@ i-amp-sizer {
 
 .-amp-fill-content {
   display: block;
-  width: 100%;
+  min-width: 100%;     /* These lines are a work around to this issue in iOS: */
+  max-width: 100%;     /* https://bugs.webkit.org/show_bug.cgi?id=155198         */
   height: 100%;
   margin: auto;
 }
@@ -347,6 +348,7 @@ amp-ad iframe {
  */
 amp-instagram {
   padding: 48px 8px !important;
+  background-color: white;
 }
 
 

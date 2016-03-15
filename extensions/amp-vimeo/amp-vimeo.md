@@ -31,9 +31,30 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/vimeo.amp.html">vimeo.amp.html</a></td>
+    <td><a href="https://ampbyexample.com/components/amp-vimeo/">amp-vimeo.html</a><br /><a href="https://github.com/ampproject/amphtml/blob/master/examples/vimeo.amp.html">vimeo.amp.html</a></td>
   </tr>
 </table>
+
+## Example
+
+With responsive layout, the width and height from the example should yield correct layouts for 16:9 aspect ratio videos:
+
+```html
+<amp-vimeo
+    data-videoid="27246366"
+    layout="responsive"
+    width="500" height="281"></amp-vimeo>
+```
+
+## Attributes
+
+**data-videoid**
+
+The Vimeo video id found in every Vimeo video page URL
+
+E.g. in https://vimeo.com/27246366 27246366 is the video id.
+
+## Validation errors
 
 The following lists validation errors specific to the `amp-vimeo` tag
 (see also `amp-vimeo` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii)):
@@ -68,22 +89,3 @@ The following lists validation errors specific to the `amp-vimeo` tag
     <td>Error thrown when invalid value is given for attributes <code>height</code> or <code>width</code>. For example, <code>height=auto</code> triggers this error for all supported layout types.</td>
   </tr>
 </table>
-
-## Example
-
-With responsive layout, the width and height from the example should yield correct layouts for 16:9 aspect ratio videos:
-
-```html
-<amp-vimeo
-    data-videoid="27246366"
-    layout="responsive"
-    width="500" height="281"></amp-vimeo>
-```
-
-## Attributes
-
-**data-videoid**
-
-The Vimeo video id found in every Vimeo video page URL
-
-E.g. in https://vimeo.com/27246366 27246366 is the video id.

@@ -39,6 +39,11 @@ class AmpYoutube extends AMP.BaseElement {
   }
 
   /** @override */
+  renderOutsideViewport() {
+    return false;
+  }
+
+  /** @override */
   buildCallback() {
     const width = this.element.getAttribute('width');
     const height = this.element.getAttribute('height');
@@ -176,7 +181,7 @@ class AmpYoutube extends AMP.BaseElement {
     // load the needed size or even better match YTPlayer logic for loading
     // player thumbnails for different screen sizes for a cache win!
     imgPlaceholder.src = 'https://i.ytimg.com/vi/' +
-        encodeURIComponent(this.videoid_) + '/sddefault.jpg';
+        encodeURIComponent(this.videoid_) + '/sddefault.jpg#404_is_fine';
     imgPlaceholder.setAttribute('placeholder', '');
     imgPlaceholder.width = this.width_;
     imgPlaceholder.height = this.height_;

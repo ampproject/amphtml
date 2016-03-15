@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {CSS} from '../../../build/amp-fit-text-0.1.css';
 import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
 import * as st from '../../../src/style';
 
@@ -151,4 +152,4 @@ export function updateOverflow_(content, measurer, maxHeight, fontSize) {
 };
 
 
-AMP.registerElement('amp-fit-text', AmpFitText, $CSS$);
+AMP.registerElement('amp-fit-text', AmpFitText, CSS);

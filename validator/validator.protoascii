@@ -20,19 +20,19 @@
 # in production from crashing. This id is not relevant to validator.js
 # because thus far, engine (validator.js) and spec file (validator.protoascii)
 # are always released together.
-min_validator_revision_required: 95
+min_validator_revision_required: 100
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 161
+spec_file_revision: 173
 # Rules for AMP HTML
-# (https://github.com/google/amphtml/blob/master/spec/amp-html-format.md).
+# (https://www.ampproject.org/docs/reference/spec.html)
 #
 # Specific URL to reference for violations having to do with mustache
 # templates. These are specific to any particular tag, so must live at
 # the top level of this rules file.
-template_spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-templates.md"
+template_spec_url: "https://www.ampproject.org/docs/reference/extended/amp-mustache.html"
 
 tags: {
   name: "!doctype"
@@ -57,7 +57,7 @@ tags: {
   name: "html"
   detail: "html ⚡ for top-level html"
   mandatory: true
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#ampd"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
   mandatory_parent: "!doctype"
   unique: true
   attrs: {
@@ -75,7 +75,7 @@ tags: {
   mandatory: true
   mandatory_parent: "html"
   unique: true
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#crps"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
 }
 # 4.2.2 The title element
 tags: {
@@ -109,9 +109,9 @@ tags: {
     value_regex: "("
         "accessibility|"
         "alternate|"
+        "appendix|"
         "archives?|"
         "attachment|"
-        "appendix|"
         "author|"
         "bibliography|"
         "category|"
@@ -143,7 +143,6 @@ tags: {
         "license|"
         "made|"
         "map|"
-        "mask-icon|"
         "me|"
         "meta|"
         "micropub|"
@@ -192,9 +191,9 @@ tags: {
       ")( +("
         "accessibility|"
         "alternate|"
+        "appendix|"
         "archives?|"
         "attachment|"
-        "appendix|"
         "author|"
         "bibliography|"
         "category|"
@@ -226,7 +225,6 @@ tags: {
         "license|"
         "made|"
         "map|"
-        "mask-icon|"
         "me|"
         "meta|"
         "micropub|"
@@ -291,12 +289,13 @@ tags: {
     name: "href"
     mandatory: true
     value_url: {
+      allow_relative: true
       allowed_protocol: "http"
       allowed_protocol: "https"
     }
   }
   attrs: { name: "hreflang" }
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#canon"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
 }
 # rel=amphtml is designed to point from a non-amphtml page to an amp-html
 # page, but for ease of use and to match the syntax of rel=canonical, a
@@ -318,11 +317,33 @@ tags: {
   }
   attrs: { name: "hreflang" }
 }
+# Safari pinned tab icon
+# https://developer.apple.com/library/ios/documentation/AppleApplications/Reference/SafariWebContent/pinnedTabs/pinnedTabs.html
+tags: {
+  name: "link"
+  detail: "link rel=mask-icon"
+  mandatory_parent: "head"
+  attrs: {
+    name: "rel"
+    value: "mask-icon"
+    mandatory: true
+    dispatch_key: true
+  }
+  attrs: {
+    name: "href"
+    mandatory: true
+    value_url: {
+      allow_relative: false
+      allowed_protocol: "https"
+    }
+  }
+  attrs: { name: "color" }
+}
 # Whitelisted font providers
 tags: {
   name: "link"
   detail: "link rel=stylesheet for fonts"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#custom-fonts"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#custom-fonts"
   mandatory_parent: "head"
   attrs: {
     name: "rel"
@@ -399,7 +420,7 @@ tags: {
   mandatory: true
   mandatory_parent: "head"
   unique: true
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#chrs"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
   attrs: {
     dispatch_key: true
     name: "charset"
@@ -413,7 +434,7 @@ tags: {
   mandatory: true
   mandatory_parent: "head"
   unique: true
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#vprt"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
   attrs: {
     dispatch_key: true
     name: "name"
@@ -467,7 +488,7 @@ tags: {  # Special custom 'author' spreadsheet.
   name: "style"
   mandatory_parent: "head"
   unique: true
-  detail: "author stylesheet"
+  detail: "style amp-custom"
   attrs: {
     name: "amp-custom"
     value: ""
@@ -476,7 +497,7 @@ tags: {  # Special custom 'author' spreadsheet.
   }
   cdata: {
     max_bytes: 50000
-    max_bytes_spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#maximum-size"
+    max_bytes_spec_url: "https://www.ampproject.org/docs/reference/spec.html#maximum-size"
     css_spec: {
       at_rule_spec: {
         name: 'media'
@@ -526,38 +547,42 @@ tags: {  # Special custom 'author' spreadsheet.
       error_message: "CSS !important"
     }
   }
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#stylesheets"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#stylesheets"
 }
 tags: {
   name: "style"
   mandatory_parent: "head"
-  detail: "boilerplate (js enabled) - old variant"
+  detail: "head > style : boilerplate - old variant"
+  deprecation: "head > style : boilerplate"
+  deprecation_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
   unique: true
-  mandatory_alternatives: "boilerplate (js enabled)"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#boilerplate"
+  mandatory_alternatives: "head > style : boilerplate"
   cdata: {
     cdata_regex: "body ?{opacity: ?0}"
   }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
 }
 tags: {
   name: "style"
   mandatory_parent: "noscript"
-  detail: "boilerplate (noscript) - old variant"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#boilerplate"
+  detail: "noscript > style : boilerplate - old variant"
+  deprecation: "noscript > style : boilerplate"
+  deprecation_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
   unique: true
-  mandatory_alternatives: "boilerplate (noscript)"
+  mandatory_alternatives: "noscript > style : boilerplate"
   cdata {
     cdata_regex: "body ?{opacity: ?1}"
   }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
 }
 tags: {
   name: "style"
   mandatory_parent: "head"
-  detail: "boilerplate (js enabled)"
-  also_requires: "boilerplate (noscript)"
+  detail: "head > style : boilerplate"
+  also_requires: "noscript > style : boilerplate"
   unique: true
-  mandatory_alternatives: "boilerplate (js enabled)"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#boilerplate"
+  mandatory_alternatives: "head > style : boilerplate"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
   cdata: {
     # This regex allows arbitrary whitespace whenever some whitespace
     # is required in the boilerplate. It was made by replacing ' ' with \\s+.
@@ -572,11 +597,11 @@ tags: {
 tags: {
   name: "style"
   mandatory_parent: "noscript"
-  detail: "boilerplate (noscript)"
-  also_requires: "boilerplate (js enabled)"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#boilerplate"
+  detail: "noscript > style : boilerplate"
+  also_requires: "head > style : boilerplate"
   unique: true
-  mandatory_alternatives: "boilerplate (noscript)"
+  mandatory_alternatives: "noscript > style : boilerplate"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
   cdata {
     mandatory_cdata: "body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}"
   }
@@ -594,7 +619,7 @@ tags: {
   mandatory: true
   mandatory_parent: "html"
   unique: true
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#crps"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
 }
 # 4.3.2 The article element
 tags: {
@@ -737,6 +762,7 @@ tags: {
   attrs: {
     name: "href"
     value_url: {
+      allow_relative: true
       allowed_protocol: "http"
       allowed_protocol: "https"
       allowed_protocol: "mailto"
@@ -764,15 +790,11 @@ tags: {
     # TODO(gregable): Come up with a better scheme for this.
     value_regex: "("
         "accessibility|"
-        "attachment|"  # Commonly used by wordpress
-        "author|"
         "alternate|"
         "appendix|"
-        "alternate|"
         "archived|"
         "archives?|"
         "attachment|"
-        "appendix|"
         "author|"
         "bookmark|"
         "bibliography|"
@@ -857,15 +879,11 @@ tags: {
         "yandex-tableau-widget"
       ")( +("
         "accessibility|"
-        "attachment|"  # Commonly used by wordpress
-        "author|"
         "alternate|"
         "appendix|"
-        "alternate|"
         "archived|"
         "archives?|"
         "attachment|"
-        "appendix|"
         "author|"
         "bookmark|"
         "bibliography|"
@@ -1145,6 +1163,7 @@ tags: {
     alternative_names: "srcset"
     mandatory: true
     value_url: {
+      allow_relative: true  # Will be set to false at a future date.
       allowed_protocol: "data"
       allowed_protocol: "https"
     }
@@ -1188,6 +1207,7 @@ tags: {
   attrs: {
     name: "src"
     value_url: {
+      allow_relative: true  # Will be set to false at a future date.
       allowed_protocol: "https"
     }
   }
@@ -1201,6 +1221,7 @@ tags: {
   attrs: {
     name: "src"
     value_url: {
+      allow_relative: true  # Will be set to false at a future date.
       allowed_protocol: "https"
     }
   }
@@ -1214,6 +1235,7 @@ tags: {
     name: "src"
     mandatory: true
     value_url: {
+      allow_relative: true  # Will be set to false at a future date.
       allowed_protocol: "https"
     }
   }
@@ -1230,6 +1252,7 @@ tags: {
     name: "src"
     mandatory: true
     value_url: {
+      allow_relative: true  # Will be set to false at a future date.
       allowed_protocol: "https"
     }
   }
@@ -1370,6 +1393,7 @@ tags: {
   attrs: { name: "class" }
   attrs: { name: "externalresourcesrequired" }
   attrs: { name: "version" value_regex: "(1.0|1.1)" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
   name: "g"
@@ -1380,6 +1404,7 @@ tags: {
   attrs: { name: "class" }
   attrs: { name: "externalresourcesrequired" }
   attrs: { name: "transform" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
   name: "path"
@@ -1393,6 +1418,7 @@ tags: {
   attrs: { name: "pathlength" }
   attrs: { name: "sketch:type" }
   attrs: { name: "transform" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
   name: "glyph"
@@ -1409,6 +1435,7 @@ tags: {
   attrs: { name: "glyph-name" }
   attrs: { name: "orientation" }
   attrs: { name: "arabic-form" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
   name: "glyphref"
@@ -1423,6 +1450,7 @@ tags: {
   attrs: { name: "dy" }
   attrs: { name: "glyphref" }
   attrs: { name: "format" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
   name: "marker"
@@ -1440,6 +1468,7 @@ tags: {
   attrs: { name: "markerwidth" }
   attrs: { name: "markerheight" }
   attrs: { name: "orient" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
   name: "view"
@@ -1450,6 +1479,7 @@ tags: {
   attrs: { name: "preserveaspectratio" }
   attrs: { name: "zoomandpan" }
   attrs: { name: "viewtarget" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 # Shapes
 tags: {
@@ -1465,6 +1495,7 @@ tags: {
   attrs: { name: "r" }
   attrs: { name: "sketch:type" }
   attrs: { name: "transform" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
   name: "line"
@@ -1480,6 +1511,7 @@ tags: {
   attrs: { name: "x2" }
   attrs: { name: "y1" }
   attrs: { name: "y2" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
   name: "polygon"
@@ -1492,6 +1524,7 @@ tags: {
   attrs: { name: "points" }
   attrs: { name: "sketch:type" }
   attrs: { name: "transform" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
   name: "polyline"
@@ -1504,6 +1537,7 @@ tags: {
   attrs: { name: "points" }
   attrs: { name: "sketch:type" }
   attrs: { name: "transform" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
   name: "rect"
@@ -1521,6 +1555,7 @@ tags: {
   attrs: { name: "width" }
   attrs: { name: "x" }
   attrs: { name: "y" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 # Text
 tags: {
@@ -1540,6 +1575,7 @@ tags: {
   attrs: { name: "rotate" }
   attrs: { name: "textlength" }
   attrs: { name: "lengthadjust" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
   name: "textpath"
@@ -1553,6 +1589,7 @@ tags: {
   attrs: { name: "startoffset" }
   attrs: { name: "method" }
   attrs: { name: "spacing" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
   name: "tref"
@@ -1563,6 +1600,7 @@ tags: {
   attr_lists: "svg-xlink-attributes"
   attrs: { name: "class" }
   attrs: { name: "externalresourcesrequired" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
   name: "tspan"
@@ -1579,6 +1617,7 @@ tags: {
   attrs: { name: "rotate" }
   attrs: { name: "textlength" }
   attrs: { name: "lengthadjust" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 # Rendering
 tags: {
@@ -1591,6 +1630,7 @@ tags: {
   attrs: { name: "externalresourcesrequired" }
   attrs: { name: "transform" }
   attrs: { name: "clippathunits" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
   name: "filter"
@@ -1607,6 +1647,7 @@ tags: {
   attrs: { name: "filterres" }
   attrs: { name: "filterunits" }
   attrs: { name: "primitiveunits" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
   name: "lineargradient"
@@ -1623,6 +1664,7 @@ tags: {
   attrs: { name: "x2" }
   attrs: { name: "y2" }
   attrs: { name: "spreadmethod" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
   name: "stop"
@@ -1631,6 +1673,7 @@ tags: {
   attrs: { name: "offset" }
   attrs: { name: "stop-color" }
   attrs: { name: "stop-opacity" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
   name: "radialgradient"
@@ -1648,6 +1691,7 @@ tags: {
   attrs: { name: "fx" }
   attrs: { name: "fy" }
   attrs: { name: "spreadmethod" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
   name: "stop"
@@ -1656,6 +1700,7 @@ tags: {
   attrs: { name: "offset" }
   attrs: { name: "stop-color" }
   attrs: { name: "stop-opacity" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
   name: "mask"
@@ -1671,6 +1716,7 @@ tags: {
   attrs: { name: "y" }
   attrs: { name: "width" }
   attrs: { name: "height" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
   name: "pattern"
@@ -1690,6 +1736,7 @@ tags: {
   attrs: { name: "width" }
   attrs: { name: "height" }
   attrs: { name: "preserveaspectratio" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
   name: "vkern"
@@ -1700,6 +1747,7 @@ tags: {
   attrs: { name: "u2" }
   attrs: { name: "g2" }
   attrs: { name: "k" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
   name: "hkern"
@@ -1710,6 +1758,7 @@ tags: {
   attrs: { name: "u2" }
   attrs: { name: "g2" }
   attrs: { name: "k" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 # Special
 tags: {
@@ -1721,6 +1770,7 @@ tags: {
   attrs: { name: "class" }
   attrs: { name: "externalresourcesrequired" }
   attrs: { name: "transform" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
   name: "use"
@@ -1736,6 +1786,7 @@ tags: {
   attrs: { name: "y" }
   attrs: { name: "width" }
   attrs: { name: "height" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
   name: "symbol"
@@ -1746,6 +1797,7 @@ tags: {
   attrs: { name: "externalresourcesrequired" }
   attrs: { name: "preserveaspectratio" }
   attrs: { name: "viewbox" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 # HTML inside SVG, esp. to allow amp-img.
 # See https://github.com/ampproject/amphtml/issues/717
@@ -1762,6 +1814,7 @@ tags: {
   attrs: { name: "y" }
   attrs: { name: "width" }
   attrs: { name: "height" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 # ARIA
 tags: {
@@ -1769,6 +1822,7 @@ tags: {
   mandatory_ancestor: "svg"
   attr_lists: "svg-core-attributes"
   attrs: { name: "class" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 tags: {
   name: "title"
@@ -1776,6 +1830,7 @@ tags: {
   detail: "svg title"
   attr_lists: "svg-core-attributes"
   attrs: { name: "class" }
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#svg"
 }
 
 # 4.8 Links
@@ -1879,7 +1934,7 @@ tags: {
   mandatory_parent: "head"
   unique: true
   detail: "amphtml engine v0.js script"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#scrpt"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
   attrs: {
     name: "src"
     mandatory: true
@@ -1945,7 +2000,7 @@ tags: {  # amp-access
   name: "script"
   detail: "amp-access extension .js script"
   mandatory_parent: "head"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-access/amp-access.md"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-access.html"
   attrs: {
     name: "custom-element"
     value: "amp-access"
@@ -2497,7 +2552,7 @@ tags: {  # amp-vimeo
   name: "script"
   mandatory_parent: "head"
   detail: "amp-vimeo extension .js script"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-vimeo/amp-vimeo.md"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-vimeo.html"
   attrs: {
     name: "custom-element"
     value: "amp-vimeo"
@@ -2521,7 +2576,7 @@ tags: {  # amp-dailymotion
   name: "script"
   mandatory_parent: "head"
   detail: "amp-dailymotion extension .js script"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-dailymotion/amp-dailymotion.md"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-dailymotion.html"
   attrs: {
     name: "custom-element"
     value: "amp-dailymotion"
@@ -2545,7 +2600,7 @@ tags: {  # amp-soundcloud
   name: "script"
   mandatory_parent: "head"
   detail: "amp-soundcloud extension .js script"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-soundcloud/amp-soundcloud.md"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-soundcloud.html"
   attrs: {
     name: "custom-element"
     value: "amp-soundcloud"
@@ -2590,7 +2645,7 @@ tags: {
   detail: "noscript enclosure for boilerplate"
   unique: true
   mandatory: true
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-format.md#boilerplate"
+  spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
 }
 # We allow noscript in the body to contain tags otherwise disallowed by AMP.
 tags: {
@@ -2605,7 +2660,7 @@ tags: {
   name: "template"
   # <template> tags may not be nested inside other <template> tags.
   disallowed_ancestor: "template"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/spec/amp-html-templates.md"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-mustache.html"
   attrs: {
     name: "type"
     value: "amp-mustache"
@@ -2729,6 +2784,7 @@ attr_lists: {
     alternative_names: "srcset"
     mandatory: true
     value_url: {
+      allow_relative: true
       allowed_protocol: "data"
       allowed_protocol: "http"
       allowed_protocol: "https"
@@ -2821,6 +2877,7 @@ tags: {
   attrs: {
     name: "src"
     value_url: {
+      allow_relative: true  # Will be set to false at a future date.
       allowed_protocol: "https"
     }
   }
@@ -2849,6 +2906,7 @@ tags: {
   attrs: {
     name: "src"
     value_url: {
+      allow_relative: true  # Will be set to false at a future date.
       allowed_protocol: "https"
     }
   }
@@ -2868,12 +2926,13 @@ tags: {
 tags: {
   name: "amp-embed"
   disallowed_ancestor: "head"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/builtins/amp-embed.md"
+  spec_url: "https://www.ampproject.org/docs/reference/amp-embed.html"
   attr_lists: "extended-amp-global"
   attrs: { name: "alt" }
   attrs: {
     name: "src"
     value_url: {
+      allow_relative: true  # Will be set to false at a future date.
       allowed_protocol: "https"
     }
   }
@@ -2975,6 +3034,7 @@ tags: {
   attrs: {
     name: "config"
     value_url: {
+      allow_relative: true  # Will be set to false at a future date.
       allowed_protocol: "https"
     }
   }
@@ -3007,6 +3067,7 @@ tags: {
     name: "src"
     mandatory_oneof: "['src', 'data-videoid']"
     value_url: {
+      allow_relative: true
       allowed_protocol: "http"  # runtime will rewrite URL to https in this case
       allowed_protocol: "https"
     }
@@ -3030,7 +3091,7 @@ tags: {
   name: "amp-vimeo"
   disallowed_ancestor: "head"
   attr_lists: "extended-amp-global"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-vimeo/amp-vimeo.md"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-vimeo.html"
   also_requires: "amp-vimeo extension .js script"
   attrs: {
     name: "data-videoid"
@@ -3049,18 +3110,18 @@ tags: {
   name: "amp-dailymotion"
   disallowed_ancestor: "head"
   attr_lists: "extended-amp-global"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-dailymotion/amp-dailymotion.md"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-dailymotion.html"
   also_requires: "amp-dailymotion extension .js script"
   attrs: {
     name: "data-videoid"
     mandatory: true
-    value_regex: "[a-z0-9]+"
+    value_regex: "[a-zA-Z0-9]+"
   }
   attrs: { name: "data-mute" value_regex: "true|false" }
   attrs: { name: "data-endscreen-enable" value_regex: "true|false" }
   attrs: { name: "data-sharing-enable" value_regex: "true|false" }
   attrs: { name: "data-start" value_regex: "[0-9]+" }
-  attrs: { name: "data-ui-highlight" value_regex: "([0-9a-f]{3}){1,2}" }
+  attrs: { name: "data-ui-highlight" value_regex: "([0-9A-Fa-f]{3}){1,2}" }
   attrs: { name: "data-ui-logo" value_regex: "true|false" }
   attrs: { name: "data-info" value_regex: "true|false" }
   amp_layout: {
@@ -3075,7 +3136,7 @@ tags: {
   name: "amp-soundcloud"
   disallowed_ancestor: "head"
   attr_lists: "extended-amp-global"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-soundcloud/amp-soundcloud.md"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-soundcloud.html"
   also_requires: "amp-soundcloud extension .js script"
   attrs: {
     name: "data-trackid"
@@ -3083,7 +3144,7 @@ tags: {
     value_regex: "[0-9]+"
   }
   attrs: { name: "data-visual" value_regex: "true|false" }
-  attrs: { name: "data-color" value_regex: "([0-9a-f]{3}){1,2}" }
+  attrs: { name: "data-color" value_regex: "([0-9A-Fa-f]{3}){1,2}" }
   amp_layout: {
     supported_layouts: FIXED_HEIGHT
   }
@@ -3137,6 +3198,7 @@ tags: {
     name: "src"
     mandatory_oneof: "['data-tweetid', 'src']"
     value_url: {
+      allow_relative: true
       allowed_protocol: "http"  # runtime will rewrite URL to https in this case
       allowed_protocol: "https"
     }
@@ -3164,6 +3226,7 @@ tags: {
     name: "src"
     mandatory_oneof: "['data-shortcode', 'src']"
     value_url: {
+      allow_relative: true
       allowed_protocol: "http"  # runtime will rewrite URL to https in this case
       allowed_protocol: "https"
     }
@@ -3199,6 +3262,7 @@ tags: {
     name: "src"
     mandatory_oneof: "['src', 'srcdoc']"
     value_url: {
+      allow_relative: true  # Will be set to false at a future date.
       allowed_protocol: "data"
       allowed_protocol: "https"
     }
@@ -3222,6 +3286,7 @@ tags: {
     name: "src"
     mandatory: true
     value_url: {
+      allow_relative: true  # Will be set to false at a future date.
       allowed_protocol: "https"
     }
   }
@@ -3242,13 +3307,14 @@ tags: {
   attrs: {
     name: "src"
     value_url: {
+      allow_relative: true  # Will be set to false at a future date.
       allowed_protocol: "https"
     }
   }
   attrs: {
     name: "autoplay"
     # ^$| prefix intended. empty string is valid.
-    value_regex: "^$|desktop|tablet|mobile"
+    value_regex: "^$|desktop|tablet|mobile|autoplay"
   }
   attrs: { name: "loop"  value: "" }
   attrs: { name: "muted" value: "" }
@@ -3301,6 +3367,7 @@ tags: {
     name: "src"
     mandatory: true
     value_url: {
+      allow_relative: true  # Will be set to false at a future date.
       allowed_protocol: "https"
     }
   }
@@ -3323,6 +3390,7 @@ tags: {
     name: "src"
     mandatory: true
     value_url: {
+      allow_relative: true  # Will be set to false at a future date.
       allowed_protocol: "https"
     }
   }
@@ -3428,12 +3496,16 @@ attr_lists: {
 
 # Error formats
 error_formats {
+  code: UNKNOWN_CODE
+  format: "Unknown error."
+}
+error_formats {
   code: MANDATORY_TAG_MISSING
   format: "The mandatory tag '%1' is missing or incorrect."
 }
 error_formats {
   code: TAG_REQUIRED_BY_MISSING
-  format: "The '%1' tag is missing or incorrect, but required by '%2'."
+  format: "The tag '%1' is missing or incorrect, but required by '%2'."
 }
 error_formats {
   code: DISALLOWED_TAG
@@ -3471,9 +3543,14 @@ error_formats {
           "width is specified in '%2' whereas height is specified in '%3'."
 }
 error_formats {
+  code: STYLESHEET_TOO_LONG_OLD_VARIANT
+  format: "The author stylesheet specified in tag 'style amp-custom' is too "
+          "long - we saw %1 bytes whereas the limit is %2 bytes."
+}
+error_formats {
   code: STYLESHEET_TOO_LONG
-  format: "The author stylesheet specified in tag 'style' is too long - "
-          "we saw %1 bytes whereas the limit is %2 bytes."
+  format: "The author stylesheet specified in tag '%1' is too "
+          "long - we saw %2 bytes whereas the limit is %3 bytes."
 }
 error_formats {
   code: MANDATORY_CDATA_MISSING_OR_INCORRECT
@@ -3506,6 +3583,10 @@ error_formats {
   format: "Invalid URL protocol '%3:' for attribute '%1' in tag '%2'."
 }
 error_formats {
+  code: DISALLOWED_RELATIVE_URL
+  format: "The relative URL '%3' for attribute '%1' in tag '%2' is disallowed."
+}
+error_formats {
   code: MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE
   format: "The property '%1' is missing from attribute '%2' in tag '%3'."
 }
@@ -3518,6 +3599,10 @@ error_formats {
   code: TEMPLATE_PARTIAL_IN_ATTR_VALUE
   format: "The attribute '%1' in tag '%2' is set to '%3', which contains "
           "a Mustache template partial."
+}
+error_formats {
+  code: DEPRECATED_TAG
+  format: "The tag '%1' is deprecated - use '%2' instead."
 }
 error_formats {
   code: DEPRECATED_ATTR
@@ -3568,7 +3653,7 @@ error_formats {
 }
 error_formats {
   code: ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT
-  format: "The attribute '%1' in tag '%2' is disallowed by implied layout '%3'."
+  format: "The attribute '%1' in tag '%2' is disallowed by specified layout '%3'."
 }
 
 # CSS Errors. All of these use %1 for the tag name (in practice 'style'
@@ -3579,7 +3664,7 @@ error_formats {
 }
 error_formats {
   code: CSS_SYNTAX_INVALID_AT_RULE
-  format: "CSS syntax error in tag '%1' - saw invalid at rule '%2'."
+  format: "CSS syntax error in tag '%1' - saw invalid at rule '@%2'."
 }
 error_formats {
   code: CSS_SYNTAX_STRAY_TRAILING_BACKSLASH

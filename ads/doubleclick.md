@@ -67,3 +67,23 @@ Supported via `json` attribute:
 - `cookieOptions`
 - `tagForChildDirectedTreatment`
 - `targeting`
+
+
+### Unsupported DFP Features & Formats
+
+#### Unsupported Features:
+- Multisize requests. Since the size of the adslot needs to be defined prior to the ad request, multisize requests are not supported.
+- Guaranteed Roadblocks. Non-guaranteed roadblocks (As many as possible, One or More) delivery is supported
+
+#### Unsupported Formats/Creatives:
+- Interstitials
+- Expandables. Although expandables on interaction/click is a format that is work in progress.
+- Flash
+- Anchor Ads / Adhesion Units
+- Creatives served over HTTP.
+
+### DFP Implementation Examples
+[This](http://dfp-amp-testing-1185.appspot.com/) website has a list of implementation examples with source code that showcase DFP features. 
+
+
+

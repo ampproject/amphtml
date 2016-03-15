@@ -18,7 +18,7 @@ import * as sinon from 'sinon';
 import {
   AmpUserNotification,
   UserNotificationManager,
-} from '../../../../build/all/v0/amp-user-notification-0.1.max';
+} from '../amp-user-notification';
 import {createIframePromise} from '../../../../testing/iframe';
 
 
@@ -45,6 +45,7 @@ describe('amp-user-notification', () => {
   });
 
   afterEach(() => {
+    storageMock.verify();
     sandbox.restore();
     sandbox = null;
   });
@@ -124,6 +125,54 @@ describe('amp-user-notification', () => {
       return impl.shouldShow().then(shouldShow => {
         expect(shouldShow).to.equal(false);
       });
+    });
+  });
+
+  it('should skip storage if data-persist-dismissal=false', () => {
+    dftAttrs['data-persist-dismissal'] = false;
+    return getUserNotification(dftAttrs).then(el => {
+      const impl = el.implementation_;
+      impl.buildCallback();
+
+      storageMock.expects('get')
+          .withExactArgs('amp-user-notification:n1')
+          .returns(Promise.resolve(true))
+          .never();
+
+      const cidStub = sandbox.stub(impl, 'getAsyncCid_')
+          .returns(Promise.resolve('12345'));
+      const showEndpointStub = sandbox.stub(impl, 'getShowEndpoint_')
+          .returns(Promise.resolve({showNotification: true}));
+
+      return impl.shouldShow().then(shouldShow => {
+        expect(shouldShow).to.equal(true);
+        expect(cidStub.callCount).to.equal(1);
+        expect(showEndpointStub.callCount).to.equal(1);
+      });
+    });
+  });
+
+  it('should set persistDismissal to false', () => {
+    return getUserNotification({
+      id: 'n1',
+      layout: 'nodisplay',
+      'data-persist-dismissal': false,
+    }).then(el => {
+      const impl = el.implementation_;
+      impl.buildCallback();
+      expect(impl.persistDismissal_).to.be.false;
+    });
+  });
+
+  it('should set persistDismissal to true for any other value', () => {
+    return getUserNotification({
+      id: 'n1',
+      layout: 'nodisplay',
+      'data-persist-dismissal': 'anything',
+    }).then(el => {
+      const impl = el.implementation_;
+      impl.buildCallback();
+      expect(impl.persistDismissal_).to.be.true;
     });
   });
 
@@ -257,6 +306,40 @@ describe('amp-user-notification', () => {
 
       impl.dismiss();
       expect(postDismissStub.callCount).to.equal(0);
+    });
+  });
+
+  it('should not store value on dismiss if persist-dismissal=false', () => {
+    dftAttrs['data-persist-dismissal'] = false;
+    return getUserNotification(dftAttrs).then(el => {
+      const impl = el.implementation_;
+      impl.buildCallback();
+
+      storageMock.expects('set')
+          .withExactArgs('amp-user-notification:n1', true)
+          .returns(Promise.resolve())
+          .never();
+      const postDismissStub = sandbox.stub(impl, 'postDismissEnpoint_');
+
+      impl.dismiss();
+      expect(postDismissStub.callCount).to.equal(1);
+    });
+  });
+
+  it('should not store value on dismiss if persist-dismissal=no', () => {
+    dftAttrs['data-persist-dismissal'] = 'no';
+    return getUserNotification(dftAttrs).then(el => {
+      const impl = el.implementation_;
+      impl.buildCallback();
+
+      storageMock.expects('set')
+          .withExactArgs('amp-user-notification:n1', true)
+          .returns(Promise.resolve())
+          .never();
+      const postDismissStub = sandbox.stub(impl, 'postDismissEnpoint_');
+
+      impl.dismiss();
+      expect(postDismissStub.callCount).to.equal(1);
     });
   });
 

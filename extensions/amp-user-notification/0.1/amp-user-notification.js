@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {CSS} from '../../../build/amp-user-notification-0.1.css';
 import {assertHttpsUrl, addParamsToUrl} from '../../../src/url';
 import {assert} from '../../../src/asserts';
 import {cidFor} from '../../../src/cid';
@@ -96,7 +97,6 @@ export class AmpUserNotification extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
-
     /** @private {?string} */
     this.ampUserId_ = null;
 
@@ -125,6 +125,12 @@ export class AmpUserNotification extends AMP.BaseElement {
     if (this.dismissHref_) {
       assertHttpsUrl(this.dismissHref_, this.element);
     }
+
+    const persistDismissal = this.element.getAttribute(
+        'data-persist-dismissal');
+    /** @private @const {boolean} */
+    this.persistDismissal_ = (
+        persistDismissal != 'false' && persistDismissal != 'no');
 
     this.userNotificationManager_
         .registerUserNotification(this.elementId_, this);
@@ -223,9 +229,18 @@ export class AmpUserNotification extends AMP.BaseElement {
 
   /** @override */
   shouldShow() {
-    return this.storagePromise_.then(storage => {
-      return storage.get(this.storageKey_);
-    }).then(value => {
+    let maybeCheckStoragePromise;
+
+    if (this.persistDismissal_) {
+      maybeCheckStoragePromise = this.storagePromise_.then(storage => {
+        return storage.get(this.storageKey_);
+      });
+    } else {
+      // Skip reading storage when not data-persist-dismissal.
+      maybeCheckStoragePromise = Promise.resolve(null);
+    }
+
+    return maybeCheckStoragePromise.then(value => {
       if (value) {
         // Consent has been accepted. Nothing more to do.
         return false;
@@ -273,10 +288,12 @@ export class AmpUserNotification extends AMP.BaseElement {
     this.dialogResolve_();
     this.getViewport().removeFromFixedLayer(this.element);
 
-    // Store and post.
-    this.storagePromise_.then(storage => {
-      storage.set(this.storageKey_, true);
-    });
+    if (this.persistDismissal_) {
+      // Store and post.
+      this.storagePromise_.then(storage => {
+        storage.set(this.storageKey_, true);
+      });
+    }
     if (this.dismissHref_) {
       this.postDismissEnpoint_();
     }
@@ -407,4 +424,4 @@ export function installUserNotificationManager(window) {
 
 installUserNotificationManager(AMP.win);
 
-AMP.registerElement('amp-user-notification', AmpUserNotification, $CSS$);
+AMP.registerElement('amp-user-notification', AmpUserNotification, CSS);
