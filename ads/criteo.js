@@ -22,6 +22,6 @@ import {loadScript} from '../src/3p';
  */
 export function criteo(global, data) {
   loadScript(global, 'https://static.criteo.net/js/ld/publishertag.js', () => {
-    Criteo.DisplayAd({'zoneid': data.zone});
+    Criteo.DisplayAd({'zoneid': data.zone, 'async': true, 'containerid': 'c'});
   });
 }
