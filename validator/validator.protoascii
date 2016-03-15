@@ -1,5 +1,5 @@
 #
-# Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+# Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ min_validator_revision_required: 111
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 180
+spec_file_revision: 181
 # Rules for AMP HTML
 # (https://www.ampproject.org/docs/reference/spec.html)
 #
@@ -3160,6 +3160,39 @@ tags: {  # amp-pinterest
   }
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-pinterest.html"
 }
+tags: {  # amp-reach-player
+  tag_name: "script"
+  mandatory_parent: "head"
+  spec_name: "amp-reach-player extension .js script"
+  attrs: {
+    name: "async"
+    mandatory: true
+    value: ""
+  }
+  attrs: {
+    name: "custom-element"
+    mandatory: true
+    value: "amp-reach-player"
+    dispatch_key: true
+  }
+  attrs: {
+    name: "src"
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-reach-player-(latest|0\\.1).js"
+    mandatory: true
+  }
+  attrs: {
+    name: "type"
+    value: "text/javascript"
+  }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "."
+      error_message: "contents"
+    }
+  }
+  # Uncomment once reference is available.
+  # spec_url: "https://www.ampproject.org/docs/reference/extended/amp-reach-player.html"
+}
 tags: {  # amp-slides
   tag_name: "script"
   spec_name: "amp-slides extension .js script"
@@ -3926,6 +3959,26 @@ tags: {  # <amp-pixel>
     supported_layouts: FIXED
     supported_layouts: NODISPLAY
   }
+}
+tags: {  # <amp-reach-player>
+  tag_name: "amp-reach-player"
+  disallowed_ancestor: "head"
+  also_requires: "amp-reach-player extension .js script"
+  attr_lists: "extended-amp-global"
+  attrs: {
+    name: "data-embed-id"
+    mandatory: true
+    # All ids are lowercase, numeric or dashes.
+    value_regex: "[0-9a-z-]+"
+  }
+  amp_layout: {
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: RESPONSIVE
+    supported_layouts: FILL
+  }
+  # Uncomment once reference is available.
+  # spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-reach-player/amp-reach-player.md"
 }
 tags: {  # <amp-soundcloud>
   tag_name: "amp-soundcloud"
