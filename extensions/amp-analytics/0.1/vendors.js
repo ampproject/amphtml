@@ -462,6 +462,11 @@ export const ANALYTICS_CONFIG = {
       'event': '${trackURL}${parameterPrefix}&ct=${actionName}' +
         '${actionParameter}${parameterSuffix}',
     },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
+    },
   },
 };
 ANALYTICS_CONFIG['infonline']['triggers']['pageview']['iframe' +
