@@ -218,8 +218,16 @@ function specificity(code) {
     case amp.validator.ValidationError.Code.
         CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR:
       return 47;
-    case amp.validator.ValidationError.Code.GENERAL_DISALLOWED_TAG:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_MISSING_URL:
       return 48;
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_URL:
+      return 49;
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_URL_PROTOCOL:
+      return 50;
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_DISALLOWED_RELATIVE_URL:
+      return 51;
+    case amp.validator.ValidationError.Code.GENERAL_DISALLOWED_TAG:
+      return 52;
 
     case amp.validator.ValidationError.Code.DEPRECATED_ATTR:
       return 101;
@@ -674,6 +682,16 @@ class CdataMatcher {
             new LineCol(errorToken.line, errorToken.col),
             errorToken.code, params, /* url */ '', validationResult);
       }
+      const parsedFontUrlSpec =
+          new ParsedUrlSpec(cdataSpec.cssSpec.fontUrlSpec);
+      const parsedImageUrlSpec =
+          new ParsedUrlSpec(cdataSpec.cssSpec.imageUrlSpec);
+      for (const url of parsedUrls) {
+        ((url.atRuleScope === 'font-face')
+            ? parsedFontUrlSpec : parsedImageUrlSpec).
+            validateUrlAndProtocolInStylesheet(
+                context, url, this.tagSpec_, validationResult);
+      }
       const visitor = new InvalidAtRuleVisitor(
           this.tagSpec_, cdataSpec.cssSpec, context, validationResult);
       sheet.accept(visitor);
@@ -816,7 +834,7 @@ class Context {
    * @param {LineCol|amp.htmlparser.DocLocator} lineCol a line / column pair.
    * @param {!amp.validator.ValidationError.Code} validationErrorCode Error code
    * @param {!Array<!string>} params
-   * @param {string} specUrl a link (URL) to the amphtml spec
+   * @param {?string} specUrl a link (URL) to the amphtml spec
    * @param {!amp.validator.ValidationResult} validationResult
    * @return {boolean}
    */
@@ -842,7 +860,7 @@ class Context {
       error.params = params;
       error.line = lineCol.getLine();
       error.col = lineCol.getCol();
-      error.specUrl = specUrl;
+      error.specUrl = (specUrl === null ? '' : specUrl);
       goog.asserts.assert(validationResult.errors !== undefined);
       validationResult.errors.push(error);
     }
@@ -858,9 +876,6 @@ class Context {
    * @return {boolean}
    */
   addError(validationErrorCode, params, specUrl, validationResult) {
-    if (specUrl === null) {
-      specUrl = '';
-    }
     return this.addErrorWithLineCol(
         this.docLocator_, validationErrorCode, params, specUrl,
         validationResult);
@@ -915,11 +930,15 @@ class Context {
 }
 
 /**
- * Helper class for ParsedAttrSpec. Note that the spec can be null.
+ * ParsedUrlSpec is used for both ParsedAttrSpec and ParsedCdataSpec, to
+ * check URLs. The main logic is in ParsedUrlSpec.ValidateUrlAndProtocol,
+ * which gets instantiated with two different adapter classes, which
+ * emit errors either for URLs in attribute values or URLs in templates.
  * @private
  */
 class ParsedUrlSpec {
   /**
+   * Note that the spec can be null.
    * @param {amp.validator.UrlSpec} spec
    */
   constructor(spec) {
@@ -948,43 +967,185 @@ class ParsedUrlSpec {
    * @param {!amp.validator.TagSpec} tagSpec
    * @param {!amp.validator.ValidationResult} result
    */
-  validateUrlAndProtocol(context, attrName, url, tagSpec, result) {
-    if (url === '') {
-      context.addError(
-          amp.validator.ValidationError.Code.MISSING_URL,
-          /* params */ [attrName, getDetailOrName(tagSpec)],
-          tagSpec.specUrl, result);
+  validateUrlAndProtocolInAttr(context, attrName, url, tagSpec, result) {
+    this.validateUrlAndProtocol(new ParsedUrlSpec.AttrErrorAdapter(attrName),
+                                context, url, tagSpec, result);
+  }
+
+  /**
+   * @param {!Context} context
+   * @param {!parse_css.ParsedCssUrl} url
+   * @param {!amp.validator.TagSpec} tagSpec
+   * @param {!amp.validator.ValidationResult} result
+   */
+  validateUrlAndProtocolInStylesheet(context, url, tagSpec, result) {
+    this.validateUrlAndProtocol(
+        new ParsedUrlSpec.StylesheetErrorAdapter(url.line, url.col),
+        context, url.utf8Url, tagSpec, result);
+  }
+
+  /**
+   * @param {!ParsedUrlSpec.AttrErrorAdapter|!ParsedUrlSpec.StylesheetErrorAdapter} adapter
+   * @param {!Context} context
+   * @param {!string} url
+   * @param {!amp.validator.TagSpec} tagSpec
+   * @param {!amp.validator.ValidationResult} result
+   */
+  validateUrlAndProtocol(adapter, context, url, tagSpec, result) {
+    if (url === '' &&
+        (this.spec_.allowEmpty === null || this.spec_.allowEmpty === false)) {
+      adapter.missingUrl(context, tagSpec, result);
       return;
     }
     let uri;
     try {
       uri = goog.Uri.parse(url);
     } catch (ex) {
-      context.addError(
-          amp.validator.ValidationError.Code.INVALID_URL,
-          /* params */ [attrName, getDetailOrName(tagSpec), url],
-          tagSpec.specUrl, result);
+      adapter.invalidUrl(context, url, tagSpec, result);
       return;
     }
     if (uri.hasScheme() &&
         !this.allowedProtocols_.contains(uri.getScheme().toLowerCase())) {
-      context.addError(
-          amp.validator.ValidationError.Code.INVALID_URL_PROTOCOL,
-          /* params */
-          [attrName, getDetailOrName(tagSpec), uri.getScheme().toLowerCase()],
-          tagSpec.specUrl, result);
+      adapter.invalidUrlProtocol(context, uri.getScheme().toLowerCase(),
+                                 tagSpec, result);
       return;
     }
     if (!this.spec_.allowRelative && !uri.hasScheme()) {
-      context.addError(
-          amp.validator.ValidationError.Code.DISALLOWED_RELATIVE_URL,
-          /* params */[attrName, getDetailOrName(tagSpec), url],
-          tagSpec.specUrl, result);
+      adapter.disallowedRelativeUrl(context, url, tagSpec, result);
       return;
     }
   }
 
 }
+
+ParsedUrlSpec.AttrErrorAdapter = class {
+  /**
+   * @param {!string} attrName
+   */
+  constructor(attrName) {
+    this.attrName_ = attrName;
+  }
+
+  /**
+   * @param {!Context} context
+   * @param {!amp.validator.TagSpec} tagSpec
+   * @param {!amp.validator.ValidationResult} result
+   */
+  missingUrl(context, tagSpec, result) {
+    context.addError(
+        amp.validator.ValidationError.Code.MISSING_URL,
+        /* params */ [this.attrName_, getDetailOrName(tagSpec)],
+        tagSpec.specUrl, result);
+  }
+
+  /**
+   * @param {!Context} context
+   * @param {!string} url
+   * @param {!amp.validator.TagSpec} tagSpec
+   * @param {!amp.validator.ValidationResult} result
+   */
+  invalidUrl(context, url, tagSpec, result) {
+    context.addError(
+        amp.validator.ValidationError.Code.INVALID_URL,
+        /* params */ [this.attrName_, getDetailOrName(tagSpec), url],
+        tagSpec.specUrl, result);
+  }
+
+  /**
+   * @param {!Context} context
+   * @param {!string} protocol
+   * @param {!amp.validator.TagSpec} tagSpec
+   * @param {!amp.validator.ValidationResult} result
+   */
+  invalidUrlProtocol(context, protocol, tagSpec, result) {
+    context.addError(
+        amp.validator.ValidationError.Code.INVALID_URL_PROTOCOL,
+        /* params */ [this.attrName_, getDetailOrName(tagSpec), protocol],
+        tagSpec.specUrl, result);
+  }
+
+  /**
+   * @param {!Context} context
+   * @param {!string} url
+   * @param {!amp.validator.TagSpec} tagSpec
+   * @param {!amp.validator.ValidationResult} result
+   */
+  disallowedRelativeUrl(context, url, tagSpec, result) {
+      context.addError(
+          amp.validator.ValidationError.Code.DISALLOWED_RELATIVE_URL,
+          /* params */ [this.attrName_, getDetailOrName(tagSpec), url],
+          tagSpec.specUrl, result);
+  }
+};
+
+ParsedUrlSpec.StylesheetErrorAdapter = class {
+  /**
+   * @param {!number} line
+   * @param {!number} col
+   */
+  constructor(line, col) {
+    /**
+     * @type {!LineCol}
+     * @private
+     */
+    this.lineCol_ = new LineCol(line, col);
+  }
+
+  /**
+   * @param {!Context} context
+   * @param {!amp.validator.TagSpec} tagSpec
+   * @param {!amp.validator.ValidationResult} result
+   */
+  missingUrl(context, tagSpec, result) {
+    context.addErrorWithLineCol(
+        this.lineCol_,
+        amp.validator.ValidationError.Code.CSS_SYNTAX_MISSING_URL,
+        /* params */ [getDetailOrName(tagSpec)],
+        tagSpec.specUrl, result);
+  }
+
+  /**
+   * @param {!Context} context
+   * @param {!string} url
+   * @param {!amp.validator.TagSpec} tagSpec
+   * @param {!amp.validator.ValidationResult} result
+   */
+  invalidUrl(context, url, tagSpec, result) {
+    context.addErrorWithLineCol(
+        this.lineCol_,
+        amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_URL,
+        /* params */ [getDetailOrName(tagSpec), url],
+        tagSpec.specUrl, result);
+  }
+
+  /**
+   * @param {!Context} context
+   * @param {!string} protocol
+   * @param {!amp.validator.TagSpec} tagSpec
+   * @param {!amp.validator.ValidationResult} result
+   */
+  invalidUrlProtocol(context, protocol, tagSpec, result) {
+    context.addErrorWithLineCol(
+        this.lineCol_,
+        amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_URL_PROTOCOL,
+        /* params */ [getDetailOrName(tagSpec), protocol],
+        tagSpec.specUrl, result);
+  }
+
+  /**
+   * @param {!Context} context
+   * @param {!string} url
+   * @param {!amp.validator.TagSpec} tagSpec
+   * @param {!amp.validator.ValidationResult} result
+   */
+  disallowedRelativeUrl(context, url, tagSpec, result) {
+      context.addErrorWithLineCol(
+          this.lineCol_,
+          amp.validator.ValidationError.Code.CSS_SYNTAX_DISALLOWED_RELATIVE_URL,
+          /* params */ [getDetailOrName(tagSpec), url],
+          tagSpec.specUrl, result);
+  }
+};
 
 /**
  * This wrapper class provides access to an AttrSpec and
@@ -1138,7 +1299,7 @@ class ParsedAttrSpec {
     }
     for (const maybe_uri of maybe_uris.getValues()) {
       const unescaped_maybe_uri = goog.string.unescapeEntities(maybe_uri);
-      this.valueUrlSpec_.validateUrlAndProtocol(
+      this.valueUrlSpec_.validateUrlAndProtocolInAttr(
           context, attrName, unescaped_maybe_uri, tagSpec, result);
       if (result.status === amp.validator.ValidationResult.Status.FAIL) {
         return;
@@ -2765,7 +2926,13 @@ amp.validator.categorizeError = function(error) {
       amp.validator.ValidationError.Code.CSS_SYNTAX_NOT_A_SELECTOR_START ||
       error.code ===
       amp.validator.ValidationError.Code.
-      CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR) &&
+      CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR ||
+      error.code === amp.validator.ValidationError.Code.CSS_SYNTAX_MISSING_URL ||
+      error.code === amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_URL ||
+      error.code ===
+      amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_URL_PROTOCOL ||
+      error.code ===
+      amp.validator.ValidationError.Code.CSS_SYNTAX_DISALLOWED_RELATIVE_URL) &&
       error.params[0] === "style amp-custom") {
     return amp.validator.ErrorCategory.Code.AUTHOR_STYLESHEET_PROBLEM;
   }
