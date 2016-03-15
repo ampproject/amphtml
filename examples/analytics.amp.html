@@ -39,6 +39,13 @@ Container for analytics tags. Positioned far away from top to make sure that doe
   "vars": {
     "title": "Example Request"
   },
+  "extraUrlParams": {
+    "param1": "Interesting value",
+    "platform": "AMP"
+  },
+  "extraUrlParamsReplaceMap": {
+    "param": "p"
+  },
   "triggers": {
     "defaultPageview": {
       "on": "visible",
@@ -69,11 +76,11 @@ Container for analytics tags. Positioned far away from top to make sure that doe
 <script type="application/json">
   {
     "vars": {
-      "site": "123456", // Site number
-      "log": "logs", // Secured collect log
-      "domain": ".xiti.com", // Collect domain name
-      "title": "pageChapter::pageTitle", // Page label
-      "level2": "10" // Page level 2
+      "site": "123456",
+      "log": "logs",
+      "domain": ".xiti.com",
+      "title": "pageChapter::pageTitle",
+      "level2": "10"
     },
     "triggers": {
       "defaultPageview": {
@@ -85,9 +92,9 @@ Container for analytics tags. Positioned far away from top to make sure that doe
         "selector": "#test1",
         "request": "click",
         "vars": {
-          "label": "clickChapter::clickLabel", // Click label
-          "level2Click": "12", // Click level 2
-          "type": "a" // Click type (a = action, t = download, n = navigation, s  exit)
+          "label": "clickChapter::clickLabel",
+          "level2Click": "12",
+          "type": "a"
         }
       }
     }
@@ -122,9 +129,13 @@ Container for analytics tags. Positioned far away from top to make sure that doe
 </amp-analytics>
 <!-- End comScore example -->
 
-<amp-analytics type="googleanalytics" id="analytics2">
+<amp-analytics type="googleanalytics" id="googleanalytics">
 <script type="application/json">
 {
+  "extraUrlParams" : {
+    "dimension5": "AMP",
+    "metric17": "10"
+  },
   "vars": {
     "account": "UA-YYYY-Y"
   },

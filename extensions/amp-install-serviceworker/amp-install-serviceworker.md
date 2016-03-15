@@ -35,6 +35,37 @@ limitations under the License.
   </tr>
 </table>
 
+## Behavior
+
+Registers the ServiceWorker given by the `src` attribute. If the current origin is different from the origin of the ServiceWorker, this custom element does nothing (emits warning in development mode).
+
+This ServiceWorker runs whenever the AMP file is served from the origin where you publish the AMP file. The ServiceWorker will not be loaded when the document is loaded from an AMP cache.
+
+See [this article](https://medium.com/@cramforce/amps-and-websites-in-the-age-of-the-service-worker-8369841dc962) for how ServiceWorkers can help with making the AMP experience awesome with ServiceWorkers.
+
+Example
+
+```html
+
+  <amp-install-serviceworker
+      src="https://www.your-domain.com/serviceworker.js"
+      layout="nodisplay">
+  </amp-install-serviceworker>
+
+```
+
+## Attributes
+
+### `src`
+
+URL of the ServiceWorker to register.
+
+### `layout`
+
+Must have the value `nodisplay`.
+
+## Validation errors
+
 The following lists validation errors specific to the `amp-install-serviceworker` tag
 (see also `amp-install-serviceworker` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii)):
 
@@ -68,32 +99,3 @@ The following lists validation errors specific to the `amp-install-serviceworker
     <td>The only supported layout type is <code>NODISPLAY</code>. Error thrown if specified layout is any other value.</td>
   </tr>
 </table>
-
-## Behavior
-
-Registers the ServiceWorker given by the `src` attribute. If the current origin is different from the origin of the ServiceWorker, this custom element does nothing (emits warning in development mode).
-
-This ServiceWorker runs whenever the AMP file is served from the origin where you publish the AMP file. The ServiceWorker will not be loaded when the document is loaded from an AMP cache.
-
-See [this article](https://medium.com/@cramforce/amps-and-websites-in-the-age-of-the-service-worker-8369841dc962) for how ServiceWorkers can help with making the AMP experience awesome with ServiceWorkers.
-
-Example
-
-```html
-
-  <amp-install-serviceworker
-      src="https://www.your-domain.com/serviceworker.js"
-      layout="nodisplay">
-  </amp-install-serviceworker>
-
-```
-
-## Attributes
-
-### `src`
-
-URL of the ServiceWorker to register.
-
-### `layout`
-
-Must have the value `nodisplay`.

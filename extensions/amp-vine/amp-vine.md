@@ -31,9 +31,27 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/vine.amp.html">vine.amp.html</a></td>
+    <td><a href="https://ampbyexample.com/components/amp-vine/">amp-vine.html</a><br /><a href="https://github.com/ampproject/amphtml/blob/master/examples/vine.amp.html">vine.amp.html</a></td>
   </tr>
 </table>
+
+## Example
+
+A Vine simple embed has equal width and height:
+
+```html
+<amp-vine width="400" height="400"
+  data-vineid="MdKjXez002d">
+</amp-vine>
+```
+
+## Attributes
+
+**data-vineid**
+
+The ID of the Vine. In a URL like https://vine.co/v/MdKjXez002d `MdKjXez002d` is the vineID.
+
+## Validation errors
 
 The following lists validation errors specific to the `amp-vine` tag
 (see also `amp-vine` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii)):
@@ -64,19 +82,3 @@ The following lists validation errors specific to the `amp-vine` tag
     <td>Error thrown when invalid value is given for attributes <code>height</code> or <code>width</code>. For example, <code>height=auto</code> triggers this error for all supported layout types, with the exception of <code>NODISPLAY</code>.</td>
   </tr>
 </table>
-
-## Example
-
-A Vine simple embed has equal width and height:
-
-```html
-<amp-vine width="400" height="400"
-  data-vineid="MdKjXez002d">
-</amp-vine>
-```
-
-## Attributes
-
-**data-vineid**
-
-The ID of the Vine. In a URL like https://vine.co/v/MdKjXez002d `MdKjXez002d` is the vineID.

@@ -16,7 +16,7 @@
 
 import {assert} from '../asserts';
 import {getService} from '../service';
-import {log} from '../log';
+import {dev} from '../log';
 import {timer} from '../timer';
 import {vsyncFor} from '../vsync';
 import {isArray} from '../types';
@@ -180,7 +180,7 @@ export class ActionService {
           try {
             handler(invocation);
           } catch (e) {
-            log.error(TAG_, 'Action execution failed:', invocation, e);
+            dev.error(TAG_, 'Action execution failed:', invocation, e);
           }
         });
       }, 1);

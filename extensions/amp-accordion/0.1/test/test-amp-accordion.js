@@ -18,7 +18,7 @@ import {Timer} from '../../../../src/timer';
 import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
 import {toggleExperiment} from '../../../../src/experiments';
-require('../../../../build/all/v0/amp-accordion-0.1.max');
+require('../amp-accordion');
 
 adopt(window);
 

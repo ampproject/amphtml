@@ -18,20 +18,20 @@ limitations under the License.
 
 <table>
   <tr>
-    <td width="40%"><strong>Description</strong></td>
+    <td class="col-fourty"><strong>Description</strong></td>
     <td>An accordion provides a way for viewers to glance at the content outline and jump to any section. This is helpful for handheld mobile devices where even a couple of sentences into a section requires scrolling.</td>
   </tr>
   <tr>
-    <td width="40%"><strong>Availability</strong></td>
+    <td class="col-fourty"><strong>Availability</strong></td>
     <td><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a>; no validations yet.</td>
   </tr>
   <tr>
-    <td width="40%"><strong>Required Script</strong></td>
+    <td class="col-fourty"><strong>Required Script</strong></td>
     <td><code>&lt;script async custom-element="amp-accordion" src="https://cdn.ampproject.org/v0/amp-accordion-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
-    <td width="40%"><strong>Examples</strong></td>
-    <td>None</td>
+    <td class="col-fourty"><strong>Examples</strong></td>
+    <td><a href="https://ampbyexample.com/components/amp-accordion">amp-accordion.html</a></td>
   </tr>
 </table>
 

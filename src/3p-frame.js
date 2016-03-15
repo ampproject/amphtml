@@ -20,7 +20,6 @@ import {getLengthNumeral} from '../src/layout';
 import {getService} from './service';
 import {documentInfoFor} from './document-info';
 import {getMode} from './mode';
-import {isDevChannel} from './experiments';
 import {preconnectFor} from './preconnect';
 import {dashToCamelCase} from './string';
 import {parseUrl, assertHttpsUrl} from './url';
@@ -157,11 +156,11 @@ export function addDataAndJsonAttributes_(element, attributes) {
 export function prefetchBootstrap(window) {
   const url = getBootstrapBaseUrl(window);
   const preconnect = preconnectFor(window);
-  preconnect.prefetch(url);
+  preconnect.prefetch(url, 'document');
   // While the URL may point to a custom domain, this URL will always be
   // fetched by it.
   preconnect.prefetch(
-      'https://3p.ampproject.net/$internalRuntimeVersion$/f.js');
+      'https://3p.ampproject.net/$internalRuntimeVersion$/f.js', 'script');
 }
 
 /**
@@ -205,10 +204,6 @@ function getDefaultBootstrapBaseUrl(parentWindow) {
  * @visibleForTesting
  */
 export function getSubDomain(win) {
-  if (!isDevChannel(win)) {
-    return '3p';
-  }
-
   let rand;
   if (win.crypto && win.crypto.getRandomValues) {
     // By default use 2 32 bit integers.

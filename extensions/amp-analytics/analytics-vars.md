@@ -86,6 +86,24 @@ Provides the referrer where the user came from. It is read from `document.referr
 
 Example value: `https://www.google.com`
 
+### sourceUrl
+
+Parses and provides the source URL of the current document to the URL.
+
+The source URL is extracted from the proxy URL if the document is being served from a *known* proxy. Otherwise the original document URL is returned. For instance, if the URL is served via the proxy `https://cdn.ampproject.org` from the URL `https://cdn.ampproject.org/c/s/example.com/page.html`, then `SOURCE_URL` would return `https://example.com/page.html`. If the URL is served directly from `https://example.com/page.html`, `https://example.com/page.html` will be returned.
+
+### sourceHost
+
+Parses and provides the source URL's host. See the description of `sourceUrl` for more details.
+
+Example value: `example.com`
+
+### sourcePath
+
+Parses and provides the source URL's path part. See the description of `sourceUrl` for more details.
+
+Example value: `%2Fpage.html`
+
 ### title
 
 Provides the title of the current document.
@@ -243,18 +261,6 @@ Provides a string that is intended to be random and likely to be unique per URL,
 
 Example value: `978`
 
-### random
-
-Provides a random value every time a request is being constructed.
-
-Example value: `0.12345632345`
-
-### timestamp
-
-Provides the number of seconds that have elapsed since 1970. (Epoch time)
-
-Example value: `1452710304312`
-
 ### queryParam
 
 Pulls a value from the query string
@@ -269,9 +275,29 @@ Please see below the required and optional arguments you may pass into `queryPar
 Example usage: `${queryParam(foo)}` - if foo is available its associated value will be returned, if not an empty string will be returned
                `${queryParam(foo,bar)}` - if foo is available its associated value will be returned, if not bar will be returned
 
-## requestCount
+### random
+
+Provides a random value every time a request is being constructed.
+
+Example value: `0.12345632345`
+
+### requestCount
 
 Provides the number of requests sent out from a particular `amp-analytics` tag. This value can be used to reconstruct the sequence in which requests were sent from a tag. The value starts from 1 and increases monotonically. Note that there may be a gap in requestCount numbers if the request sending fails due to network issues.
 
 Example value: `6`
+
+### timestamp
+
+Provides the number of seconds that have elapsed since 1970. (Epoch time)
+
+Example value: `1452710304312`
+
+### totalEngagedTime
+
+Provides the total time (in seconds) the user has been enagaged with the page since the page
+first became visible in the viewport. Total engaged time will be 0 until the
+page first becomes visible.
+
+Example value: `36`
 

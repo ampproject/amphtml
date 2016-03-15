@@ -26,7 +26,7 @@ describe('Slides functional', () => {
   let element;
   let slide0, slide1, slide2;
   let slides;
-  let prepareCallback, switchCallback;
+  let prepareCallback, switchCallback, resetCallback;
 
   function setupElements() {
     element = document.createElement('div');
@@ -54,6 +54,7 @@ describe('Slides functional', () => {
   function setupSpies() {
     slides.prepareSlide_ = prepareCallback = sinon.spy();
     slides.commitSwitch_ = switchCallback = sinon.spy();
+    slides.resetSlide_ = resetCallback = sinon.spy();
   }
 
   function teardownElements() {
@@ -300,6 +301,8 @@ describe('Slides functional', () => {
         expect(switchCallback.callCount).to.equal(1);
         expect(switchCallback.firstCall.args[0]).to.equal(slide0);
         expect(switchCallback.firstCall.args[1]).to.equal(slide1);
+        expect(resetCallback.callCount).to.equal(1);
+        expect(resetCallback.firstCall.args[0]).to.equal(2);
       });
     });
 
@@ -325,6 +328,10 @@ describe('Slides functional', () => {
       return promise.then(() => {
         expect(slides.currentIndex_).to.equal(0);
         expect(switchCallback.callCount).to.equal(0);
+        expect(resetCallback.callCount).to.equal(3);
+        expect(resetCallback.getCall(0).args[0]).to.equal(0);
+        expect(resetCallback.getCall(1).args[0]).to.equal(2);
+        expect(resetCallback.getCall(2).args[0]).to.equal(1);
       });
     });
 
@@ -400,6 +407,8 @@ describe('Slides functional', () => {
         expect(slides.currentIndex_).to.equal(0);
         expect(switchCallback.firstCall.args[0]).to.equal(slide2);
         expect(switchCallback.firstCall.args[1]).to.equal(slide0);
+        expect(resetCallback.callCount).to.equal(1);
+        expect(resetCallback.firstCall.args[0]).to.equal(1);
       });
     });
 
@@ -429,6 +438,8 @@ describe('Slides functional', () => {
         expect(switchCallback.callCount).to.equal(1);
         expect(switchCallback.firstCall.args[0]).to.equal(slide0);
         expect(switchCallback.firstCall.args[1]).to.equal(slide1);
+        expect(resetCallback.callCount).to.equal(1);
+        expect(resetCallback.firstCall.args[0]).to.equal(2);
       });
     });
 
@@ -456,6 +467,10 @@ describe('Slides functional', () => {
         expect(nextTr.lastCall.args[0]).to.equal(0);
         expect(prevTr.lastCall.args[0]).to.equal(0);
         expect(switchCallback.callCount).to.equal(0);
+        expect(resetCallback.callCount).to.equal(3);
+        expect(resetCallback.getCall(0).args[0]).to.equal(0);
+        expect(resetCallback.getCall(1).args[0]).to.equal(2);
+        expect(resetCallback.getCall(2).args[0]).to.equal(1);
       });
     });
 

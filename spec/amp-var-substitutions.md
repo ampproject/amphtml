@@ -98,6 +98,16 @@ For instance:
 ```
 may make a request to something like `https://foo.com/pixel?host=pinterest.com`.
 
+### SOURCE_PATH
+
+Use the special string `SOURCE_PATH` to add the source URL's path of the current document to the URL. See the description of `SOURCE_URL` for more details.
+
+For instance:
+```html
+<amp-pixel src="https://foo.com/pixel?path=SOURCE_PATH"></amp-pixel>
+```
+may make a request to something like `https://foo.com/pixel?path=%2Fpage2.html`.
+
 ### DOCUMENT_CHARSET
 
 Provides the character encoding of the current document.
@@ -245,6 +255,24 @@ Provides the screen color depth provided by the browser.
 For instance:
 ```html
 <amp-pixel src="https://foo.com/pixel?colorDepth=SCREEN_COLOR_DEPTH"></amp-pixel>
+```
+
+### VIEWPORT_HEIGHT
+
+Provides the viewport height in pixels available for the page rendering. In contrast to `AVAILABLE_SCREEN_HEIGHT`, this value takes window size and zooming into account.
+
+For instance:
+```html
+<amp-pixel src="https://foo.com/pixel?viewportHeight=VIEWPORT_HEIGHT"></amp-pixel>
+```
+
+### VIEWPORT_WIDTH
+
+Provides the viewport width in pixels available for the page rendering. In contrast to `AVAILABLE_SCREEN_WIDTH`, this value takes window size and zooming into account.
+
+For instance:
+```html
+<amp-pixel src="https://foo.com/pixel?viewportWidth=VIEWPORT_WIDTH"></amp-pixel>
 ```
 
 ## Miscellaneous

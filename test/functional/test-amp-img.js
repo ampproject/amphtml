@@ -62,4 +62,17 @@ describe('amp-img', () => {
       expect(img.getAttribute('src')).to.equal('test.jpg');
     });
   });
+
+  it('should load an img with srcset', () => {
+    return getImg({
+      srcset: 'test-2000.jpg 2000w, test-1000.jpg 1000w',
+      width: 300,
+      height: 200,
+    }).then(ampImg => {
+      const img = ampImg.querySelector('img');
+      expect(img).to.be.an.instanceof(Element);
+      expect(img.tagName).to.equal('IMG');
+      expect(img.getAttribute('src')).to.equal('test-1000.jpg');
+    });
+  });
 });

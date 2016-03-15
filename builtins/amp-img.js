@@ -17,8 +17,8 @@
 import {BaseElement} from '../src/base-element';
 import {getLengthNumeral, isLayoutSizeDefined} from '../src/layout';
 import {loadPromise} from '../src/event-helper';
-import {parseSrcset} from '../src/srcset';
 import {registerElement} from '../src/custom-element';
+import {srcsetFromElement} from '../src/srcset';
 
 
 /**
@@ -52,8 +52,7 @@ export function installImg(win) {
       this.element.appendChild(this.img_);
 
       /** @private @const {!Srcset} */
-      this.srcset_ = parseSrcset(this.element.getAttribute('srcset') ||
-          this.element.getAttribute('src'));
+      this.srcset_ = srcsetFromElement(this.element);
     }
 
     /** @override */
