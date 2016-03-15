@@ -25,7 +25,7 @@ min_validator_revision_required: 100
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 174
+spec_file_revision: 175
 # Rules for AMP HTML
 # (https://www.ampproject.org/docs/reference/spec.html)
 #
@@ -1952,6 +1952,10 @@ tags: {
     value: ""
     mandatory: true
   }
+  attrs: {
+    name: "type"
+    value: "text/javascript"
+  }
   cdata: {
     blacklisted_cdata_regex: {
       regex: "."
@@ -2019,6 +2023,10 @@ tags: {  # amp-access
     value_regex: "https://cdn\\.ampproject\\.org/v0/amp-access-(latest|0\\.1).js"
     mandatory: true
   }
+  attrs: {
+    name: "type"
+    value: "text/javascript"
+  }
   cdata: {
     blacklisted_cdata_regex: {
       regex: "."
@@ -2042,6 +2050,10 @@ tags: {  # amp-analytics
     name: "src"
     value_regex: "https://cdn\\.ampproject\\.org/v0/amp-analytics-(latest|0\\.1).js"
     mandatory: true
+  }
+  attrs: {
+    name: "type"
+    value: "text/javascript"
   }
   cdata: {
     blacklisted_cdata_regex: {
@@ -2067,6 +2079,10 @@ tags: {  # amp-anim
     value_regex: "https://cdn\\.ampproject\\.org/v0/amp-anim-(latest|0\\.1).js"
     mandatory: true
   }
+  attrs: {
+    name: "type"
+    value: "text/javascript"
+  }
   cdata: {
     blacklisted_cdata_regex: {
       regex: "."
@@ -2090,6 +2106,10 @@ tags: {  # amp-audio
     name: "src"
     value_regex: "https://cdn\\.ampproject\\.org/v0/amp-audio-(latest|0\\.1).js"
     mandatory: true
+  }
+  attrs: {
+    name: "type"
+    value: "text/javascript"
   }
   cdata: {
     blacklisted_cdata_regex: {
@@ -2115,6 +2135,10 @@ tags: {  # amp-brightcove
     value_regex: "https://cdn\\.ampproject\\.org/v0/amp-brightcove-(latest|0\\.1).js"
     mandatory: true
   }
+  attrs: {
+    name: "type"
+    value: "text/javascript"
+  }
   cdata: {
     blacklisted_cdata_regex: {
       regex: "."
@@ -2138,6 +2162,10 @@ tags: {  # amp-carousel
     name: "src"
     value_regex: "https://cdn\\.ampproject\\.org/v0/amp-carousel-(latest|0\\.1).js"
     mandatory: true
+  }
+  attrs: {
+    name: "type"
+    value: "text/javascript"
   }
   cdata: {
     blacklisted_cdata_regex: {
@@ -2163,6 +2191,10 @@ tags: {  # amp-dynamic-css-classes
     value_regex: "https://cdn\\.ampproject\\.org/v0/amp-dynamic-css-classes-(latest|0\\.1).js"
     mandatory: true
   }
+  attrs: {
+    name: "type"
+    value: "text/javascript"
+  }
   cdata: {
     blacklisted_cdata_regex: {
       regex: "."
@@ -2186,6 +2218,10 @@ tags: {  # amp-facebook
     name: "src"
     value_regex: "https://cdn\\.ampproject\\.org/v0/amp-facebook-(latest|0\\.1).js"
     mandatory: true
+  }
+  attrs: {
+    name: "type"
+    value: "text/javascript"
   }
   cdata: {
     blacklisted_cdata_regex: {
@@ -2211,6 +2247,10 @@ tags: {  # amp-fit-text
     value_regex: "https://cdn\\.ampproject\\.org/v0/amp-fit-text-(latest|0\\.1).js"
     mandatory: true
   }
+  attrs: {
+    name: "type"
+    value: "text/javascript"
+  }
   cdata: {
     blacklisted_cdata_regex: {
       regex: "."
@@ -2234,6 +2274,10 @@ tags: {  # amp-font
     name: "src"
     value_regex: "https://cdn\\.ampproject\\.org/v0/amp-font-(latest|0\\.1).js"
     mandatory: true
+  }
+  attrs: {
+    name: "type"
+    value: "text/javascript"
   }
   cdata: {
     blacklisted_cdata_regex: {
@@ -2259,6 +2303,10 @@ tags: {  # amp-iframe
     value_regex: "https://cdn\\.ampproject\\.org/v0/amp-iframe-(latest|0\\.1).js"
     mandatory: true
   }
+  attrs: {
+    name: "type"
+    value: "text/javascript"
+  }
   cdata: {
     blacklisted_cdata_regex: {
       regex: "."
@@ -2282,6 +2330,10 @@ tags: {  # amp-image-lightbox
     name: "src"
     value_regex: "https://cdn\\.ampproject\\.org/v0/amp-image-lightbox-(latest|0\\.1).js"
     mandatory: true
+  }
+  attrs: {
+    name: "type"
+    value: "text/javascript"
   }
   cdata: {
     blacklisted_cdata_regex: {
@@ -2307,6 +2359,10 @@ tags: {  # amp-instagram
     value_regex: "https://cdn\\.ampproject\\.org/v0/amp-instagram-(latest|0\\.1).js"
     mandatory: true
   }
+  attrs: {
+    name: "type"
+    value: "text/javascript"
+  }
   cdata: {
     blacklisted_cdata_regex: {
       regex: "."
@@ -2330,6 +2386,10 @@ tags: {  # amp-install-serviceworker
     name: "src"
     value_regex: "https://cdn\\.ampproject\\.org/v0/amp-install-serviceworker-(latest|0\\.1).js"
     mandatory: true
+  }
+  attrs: {
+    name: "type"
+    value: "text/javascript"
   }
   cdata: {
     blacklisted_cdata_regex: {
@@ -2355,6 +2415,10 @@ tags: {  # amp-lightbox
     value_regex: "https://cdn\\.ampproject\\.org/v0/amp-lightbox-(latest|0\\.1).js"
     mandatory: true
   }
+  attrs: {
+    name: "type"
+    value: "text/javascript"
+  }
   cdata: {
     blacklisted_cdata_regex: {
       regex: "."
@@ -2378,6 +2442,10 @@ tags: {  # amp-mustache
     name: "src"
     value_regex: "https://cdn\\.ampproject\\.org/v0/amp-mustache-(latest|0\\.1).js"
     mandatory: true
+  }
+  attrs: {
+    name: "type"
+    value: "text/javascript"
   }
   cdata: {
     blacklisted_cdata_regex: {
@@ -2403,6 +2471,10 @@ tags: {  # amp-list
     value_regex: "https://cdn\\.ampproject\\.org/v0/amp-list-(latest|0\\.1).js"
     mandatory: true
   }
+  attrs: {
+    name: "type"
+    value: "text/javascript"
+  }
   cdata: {
     blacklisted_cdata_regex: {
       regex: "."
@@ -2426,6 +2498,10 @@ tags: {  # amp-pinterest
     name: "src"
     value_regex: "https://cdn\\.ampproject\\.org/v0/amp-pinterest-(latest|0\\.1).js"
     mandatory: true
+  }
+  attrs: {
+    name: "type"
+    value: "text/javascript"
   }
   cdata: {
     blacklisted_cdata_regex: {
@@ -2451,6 +2527,10 @@ tags: {  # amp-slides
     value_regex: "https://cdn\\.ampproject\\.org/v0/amp-slides-(latest|0\\.1).js"
     mandatory: true
   }
+  attrs: {
+    name: "type"
+    value: "text/javascript"
+  }
   cdata: {
     blacklisted_cdata_regex: {
       regex: "."
@@ -2474,6 +2554,10 @@ tags: {  # amp-twitter
     name: "src"
     value_regex: "https://cdn\\.ampproject\\.org/v0/amp-twitter-(latest|0\\.1).js"
     mandatory: true
+  }
+  attrs: {
+    name: "type"
+    value: "text/javascript"
   }
   cdata: {
     blacklisted_cdata_regex: {
@@ -2499,6 +2583,10 @@ tags: {  # amp-user-notification
     value_regex: "https://cdn\\.ampproject\\.org/v0/amp-user-notification-(latest|0\\.1).js"
     mandatory: true
   }
+  attrs: {
+    name: "type"
+    value: "text/javascript"
+  }
   cdata: {
     blacklisted_cdata_regex: {
       regex: "."
@@ -2522,6 +2610,10 @@ tags: {  # amp-vine
     name: "src"
     value_regex: "https://cdn\\.ampproject\\.org/v0/amp-vine-(latest|0\\.1).js"
     mandatory: true
+  }
+  attrs: {
+    name: "type"
+    value: "text/javascript"
   }
   cdata: {
     blacklisted_cdata_regex: {
@@ -2547,6 +2639,10 @@ tags: {  # amp-youtube
     value_regex: "https://cdn\\.ampproject\\.org/v0/amp-youtube-(latest|0\\.1)\\.js"
     mandatory: true
   }
+  attrs: {
+    name: "type"
+    value: "text/javascript"
+  }
   cdata: {
     blacklisted_cdata_regex: {
       regex: "."
@@ -2570,6 +2666,10 @@ tags: {  # amp-vimeo
     name: "src"
     value_regex: "https://cdn\\.ampproject\\.org/v0/amp-vimeo-(latest|0\\.1)\\.js"
     mandatory: true
+  }
+  attrs: {
+    name: "type"
+    value: "text/javascript"
   }
   cdata: {
     blacklisted_cdata_regex: {
@@ -2595,6 +2695,10 @@ tags: {  # amp-dailymotion
     value_regex: "https://cdn\\.ampproject\\.org/v0/amp-dailymotion-(latest|0\\.1)\\.js"
     mandatory: true
   }
+  attrs: {
+    name: "type"
+    value: "text/javascript"
+  }
   cdata: {
     blacklisted_cdata_regex: {
       regex: "."
@@ -2618,6 +2722,10 @@ tags: {  # amp-soundcloud
     name: "src"
     value_regex: "https://cdn\\.ampproject\\.org/v0/amp-soundcloud-(latest|0\\.1)\\.js"
     mandatory: true
+  }
+  attrs: {
+    name: "type"
+    value: "text/javascript"
   }
   cdata: {
     blacklisted_cdata_regex: {
