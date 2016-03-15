@@ -25,7 +25,7 @@ min_validator_revision_required: 100
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 173
+spec_file_revision: 174
 # Rules for AMP HTML
 # (https://www.ampproject.org/docs/reference/spec.html)
 #
@@ -493,7 +493,11 @@ tags: {  # Special custom 'author' spreadsheet.
     name: "amp-custom"
     value: ""
     mandatory: true
-    dispatch_key: true
+    # This is a fine dispatch key, but we would prefer that this tagspec
+    # is used for errors related to <style> tags missing the amp-custom
+    # attribute rather than the boilerplate tagspec which doesn't have an
+    # attribute and thus can't have a dispatch_key.
+    # dispatch_key: true
   }
   cdata: {
     max_bytes: 50000
@@ -592,6 +596,7 @@ tags: {
     name: "amp-boilerplate"
     mandatory: true
     value: ""
+    dispatch_key: true
   }
 }
 tags: {
@@ -609,6 +614,7 @@ tags: {
     name: "amp-boilerplate"
     mandatory: true
     value: ""
+    dispatch_key: true
   }
 }
 
@@ -2630,6 +2636,7 @@ tags: {
     name: "type"
     mandatory: true
     value: "application/json"
+    dispatch_key: true
   }
   cdata: {
     blacklisted_cdata_regex: {
@@ -2772,7 +2779,37 @@ tags: {
     value: "text/html; charset=utf-8"
   }
 }
-
+# Identical to the above, but a common case variant of content-type.
+tags: {
+  name: "meta"
+  detail: "meta http-equiv=Content-Type"
+  attrs: {
+    name: "http-equiv"
+    mandatory: true
+    value: "Content-Type"
+    dispatch_key: true
+  }
+  attrs: {
+    name: "content"
+    mandatory: true
+    value: "text/html; charset=utf-8"
+  }
+}
+# Another common http-equiv tag
+tags: {
+  name: "meta"
+  detail: "meta http-equiv=content-language"
+  attrs: {
+    name: "http-equiv"
+    mandatory: true
+    value: "content-language"
+    dispatch_key: true
+  }
+  attrs: {
+    name: "content"
+    mandatory: true
+  }
+}
 # Tags and attributes specific to AMP HTML.
 
 # AMP Custom elements require a "src" or a "srcset" attribute,
@@ -3510,6 +3547,10 @@ error_formats {
 error_formats {
   code: DISALLOWED_TAG
   format: "The tag '%1' is disallowed."
+}
+error_formats {
+  code: GENERAL_DISALLOWED_TAG
+  format: "The tag '%1' is disallowed except in specific forms."
 }
 error_formats {
   code: DISALLOWED_ATTR

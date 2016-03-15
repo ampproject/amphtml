@@ -120,13 +120,13 @@ function specificity(code) {
       return 1;
     case amp.validator.ValidationError.Code.CDATA_VIOLATES_BLACKLIST:
       return 2;
-    case amp.validator.ValidationError.Code.DISALLOWED_TAG_ANCESTOR:
-      return 3;
-    case amp.validator.ValidationError.Code.MANDATORY_TAG_ANCESTOR:
-      return 4;
-    case amp.validator.ValidationError.Code.MANDATORY_TAG_ANCESTOR_WITH_HINT:
-      return 5;
     case amp.validator.ValidationError.Code.WRONG_PARENT_TAG:
+      return 3;
+    case amp.validator.ValidationError.Code.DISALLOWED_TAG_ANCESTOR:
+      return 4;
+    case amp.validator.ValidationError.Code.MANDATORY_TAG_ANCESTOR:
+      return 5;
+    case amp.validator.ValidationError.Code.MANDATORY_TAG_ANCESTOR_WITH_HINT:
       return 6;
     case amp.validator.ValidationError.Code.MANDATORY_TAG_MISSING:
       return 7;
@@ -215,6 +215,8 @@ function specificity(code) {
     case amp.validator.ValidationError.Code.
         CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR:
       return 47;
+    case amp.validator.ValidationError.Code.GENERAL_DISALLOWED_TAG:
+      return 48;
 
     case amp.validator.ValidationError.Code.DEPRECATED_ATTR:
       return 101;
@@ -598,10 +600,11 @@ class CdataMatcher {
     if (cdataSpec.maxBytes !== null) {
       const bytes = byteLength(cdata);
       if (bytes > cdataSpec.maxBytes) {
-        context.addError(amp.validator.ValidationError.Code.STYLESHEET_TOO_LONG,
-                         /* params */ [getDetailOrName(this.tagSpec_),
-                                       bytes, cdataSpec.maxBytes],
-                         cdataSpec.maxBytesSpecUrl, validationResult);
+        context.addError(
+            amp.validator.ValidationError.Code.STYLESHEET_TOO_LONG,
+            /* params */
+            [getDetailOrName(this.tagSpec_), bytes, cdataSpec.maxBytes],
+            cdataSpec.maxBytesSpecUrl, validationResult);
         // We return early if the byte length is violated as parsing
         // really long stylesheets is slow and not worth our time.
         return;
@@ -1394,6 +1397,25 @@ function shouldRecordTagspecValidated(tag, detailOrNamesToTrack) {
 }
 
 /**
+ *  DispatchKey represents a tuple of either 2 or 3 strings:
+ *    - attribute name
+ *    - attribute value
+ *    - mandatory parent html tag (optional)
+ *  A Dispatch key can be generated from some validator TagSpecs. One dispatch
+ *  key per attribute can be generated from any HTML tag. If one of the
+ *  dispatch keys for an HTML tag match that of a a TagSpec, we validate that
+ *  HTML tag against only this one TagSpec. Otherwise, this TagSpec is not
+ *  eligible for validation against this HTML tag.
+ * @param {!string} attrName
+ * @param {!string} attrValue
+ * @param {!string} mandatoryParent may be set to "$NOPARENT"
+ * @returns {string} dispatch key
+ */
+function makeDispatchKey(attrName, attrValue, mandatoryParent) {
+  return attrName + '\0' + attrValue + '\0' + mandatoryParent;
+}
+
+/**
  * This wrapper class provides access to a TagSpec and a tag id
  * which is unique within its context, the ParsedValidatorRules.
  * @private
@@ -1520,7 +1542,10 @@ class ParsedTagSpec {
   getDispatchKey() {
     goog.asserts.assert(this.hasDispatchKey());
     const parsedSpec = this.attrsById_[this.dispatchKeyAttrSpec_];
-    return parsedSpec.getSpec().name + '=' + parsedSpec.getSpec().value;
+    var mandatoryParent =
+        this.spec_.mandatoryParent === null ? '' : this.spec_.mandatoryParent;
+    return makeDispatchKey(
+        parsedSpec.getSpec().name, parsedSpec.getSpec().value, mandatoryParent);
   }
 
   /**
@@ -1890,8 +1915,11 @@ class ParsedTagSpec {
       // both succinct and should be well understood by web developers.
       context.addError(
           amp.validator.ValidationError.Code.WRONG_PARENT_TAG,
-          /* params */ [this.spec_.name, context.getTagNames().getParent(),
-                        this.spec_.mandatoryParent],
+          /* params */
+          [
+            getDetailOrName(this.spec_), context.getTagNames().getParent(),
+            this.spec_.mandatoryParent
+          ],
           this.spec_.specUrl, validationResult);
     }
   }
@@ -1941,17 +1969,83 @@ class TagSpecDispatch {
   /** Creates an empty instance. */
   constructor() {
     /**
-     * TagSpecs for a specific attribute name/value dispatch key.
-     * @type {!goog.structs.Map<!Array<string>, number>}
-     * @public
+     * TagSpec ids for a specific attribute dispatch key.
+     * @type {!goog.structs.Map<!string, number>}
+     * @private
      */
-    this.tagSpecsByDispatch = new goog.structs.Map();
+    this.tagSpecsByDispatch_ = new goog.structs.Map();
     /**
      * @type {!Array<number>}
-     * @public
+     * @private
      */
-    this.allTagSpecs = [];
+    this.allTagSpecs_ = [];
   }
+
+  /**
+   * Registers a new dispatch key to match a tagspec id
+   * @param {string} dispatchKey
+   * @param {number} tagSpecId
+   * @public
+   */
+  registerDispatchKey(dispatchKey, tagSpecId) {
+    goog.asserts.assert(
+        this.tagSpecsByDispatch_.containsKey(dispatchKey) === false);
+    this.tagSpecsByDispatch_.set(dispatchKey, tagSpecId);
+  }
+
+  /**
+   * Registers a new non dispatch key tagspec id.
+   * @param {!number} tagSpecId
+   * @public
+   */
+  registerTagSpec(tagSpecId) { this.allTagSpecs_.push(tagSpecId); }
+
+  /**
+   * @return {boolean}
+   */
+  hasDispatchKeys() { return !this.tagSpecsByDispatch_.isEmpty(); }
+
+  /**
+   * Looks up a dispatch key as previously registered, returning the
+   * corresponding tagSpecId or -1 if none.
+   * @param {string} attrName
+   * @param {string} attrValue
+   * @param {string} mandatoryParent
+   * @return {number}
+   */
+  matchingDispatchKey(attrName, attrValue, mandatoryParent) {
+    // Try first to find a key with the given parent.
+    const dispatchKey = makeDispatchKey(attrName, attrValue, mandatoryParent);
+    const match = this.tagSpecsByDispatch_.get(dispatchKey);
+    if (match !== undefined) {
+      return match;
+    }
+
+    // Try next to find a key with the *any* parent.
+    const noParentKey =
+        makeDispatchKey(attrName, attrValue, /*mandatoryParent*/ "");
+    const noParentMatch = this.tagSpecsByDispatch_.get(noParentKey);
+    if (noParentMatch !== undefined) {
+      return noParentMatch;
+    }
+
+    // Special case for foo=foo. We consider this a match for a dispatch key of
+    // foo="" or just <tag foo>.
+    if (attrName == attrValue)
+      return this.matchingDispatchKey(attrName, "", mandatoryParent);
+
+    return -1;
+  }
+
+  /**
+   * @return {boolean}
+   */
+  hasTagSpecs() { return this.allTagSpecs_.length > 0; }
+
+  /**
+   * @return {!Array<number>}
+   */
+  allTagSpecs() { return this.allTagSpecs_; }
 }
 
 /**
@@ -2019,11 +2113,12 @@ class ParsedValidatorRules {
         this.tagSpecByTagName_.set(tag.name, new TagSpecDispatch());
       }
       const tagnameDispatch = this.tagSpecByTagName_.get(tag.name);
-      if (parsedTagSpec.hasDispatchKey())
-      tagnameDispatch.tagSpecsByDispatch.set(parsedTagSpec.getDispatchKey(), i);
-      tagnameDispatch.allTagSpecs.push(parsedTagSpec);
-      if (tag.mandatory)
-      this.mandatoryTagSpecs_.push(i);
+      if (parsedTagSpec.hasDispatchKey()) {
+        tagnameDispatch.registerDispatchKey(parsedTagSpec.getDispatchKey(), i);
+      } else {
+        tagnameDispatch.registerTagSpec(i);
+      }
+      if (tag.mandatory) this.mandatoryTagSpecs_.push(i);
     }
     /** type {!goog.structs.Map<!amp.validator.ValidationError.Code, !string>} */
     this.formatByCode_ = new goog.structs.Map();
@@ -2052,48 +2147,65 @@ class ParsedValidatorRules {
   validateTag(context, tagName, encounteredAttrs, validationResult) {
     const tagSpecDispatch = this.tagSpecByTagName_.get(tagName);
     if (tagSpecDispatch === undefined) {
-      context.addError(amp.validator.ValidationError.Code.DISALLOWED_TAG,
-                       /* params */ [tagName], /* specUrl */ '', validationResult);
+      context.addError(
+          amp.validator.ValidationError.Code.DISALLOWED_TAG,
+          /* params */[tagName], /* specUrl */ '', validationResult);
       return;
     }
+    // At this point, we have dispatch keys, tagspecs, or both.
+    // The strategy is to look for a matching dispatch key first. A matching
+    // dispatch key does not guarantee that the dispatched tagspec will also
+    // match. If we find a matching dispatch key, we immediately return the
+    // result for that tagspec, success or fail.
+    // If we don't find a matching dispatch key, we must try all of the
+    // tagspecs to see if any of them match. If there are no tagspecs, we want
+    // to return a GENERAL_DISALLOWED_TAG error.
     let resultForBestAttempt = new amp.validator.ValidationResult();
     resultForBestAttempt.status = amp.validator.ValidationResult.Status.FAIL;
-    // Attempt to validate against dispatched tagspecs first.
-    if (!tagSpecDispatch.tagSpecsByDispatch.isEmpty()) {
+    // calling HasDispatchKeys here is only an optimization to skip the loop
+    // over encountered attributes in the case where we have no dispatches.
+    if (tagSpecDispatch.hasDispatchKeys()) {
       for (let i = 0; i < encounteredAttrs.length; i += 2) {
         let attrName = encounteredAttrs[i];
         let attrValue = encounteredAttrs[i + 1];
         // Our html parser repeats the key as the value if there is no value. We
         // replace the value with an empty string instead in this case.
-        if (attrName === attrValue)
-        attrValue = '';
+        if (attrName === attrValue) attrValue = '';
         attrName = attrName.toLowerCase();
 
-        const match = tagSpecDispatch.tagSpecsByDispatch.get(
-            attrName + '=' + attrValue);
-        if (match !== undefined) {
-          const parsedSpec = this.tagSpecById_[match];
+        const maybeTagSpecId = tagSpecDispatch.matchingDispatchKey(
+            attrName, attrValue, context.getTagNames().getParent());
+        if (maybeTagSpecId !== -1) {
+          const parsedSpec = this.tagSpecById_[maybeTagSpecId];
+          goog.asserts.assert(parsedSpec !== undefined, '1');
           this.validateTagAgainstSpec(parsedSpec, context, encounteredAttrs,
                                       resultForBestAttempt);
-          if (resultForBestAttempt.status !==
-              amp.validator.ValidationResult.Status.FAIL) {
-            validationResult.mergeFrom(resultForBestAttempt);
-            return;  // Exit early on success
-          }
+          // Use the dispatched TagSpec validation results, success or fail.
+          validationResult.mergeFrom(resultForBestAttempt);
+          return;
         }
       }
+      // If none of the dispatch tagspecs matched and passed and there are no
+      // non-dispatch tagspecs, consider this a 'generally' disallowed tag,
+      // which gives an error that reads "tag foo is disallowed except in
+      // specific forms".
+      if (!tagSpecDispatch.hasTagSpecs()) {
+        // TODO(gregable): Determine a good way to source a specUrl in these
+        // instances.
+        context.addError(
+            amp.validator.ValidationError.Code.GENERAL_DISALLOWED_TAG,
+            /* params */[tagName], /* specUrl */ '', validationResult);
+        return;
+      }
     }
-    // Validate against all tagspecs if we still haven't matched.
-    if (resultForBestAttempt.status ===
-        amp.validator.ValidationResult.Status.FAIL) {
-      for (const parsedSpec of tagSpecDispatch.allTagSpecs) {
-        this.validateTagAgainstSpec(parsedSpec, context, encounteredAttrs,
-                                    resultForBestAttempt);
-        if (resultForBestAttempt.status !==
-            amp.validator.ValidationResult.Status.FAIL) {
-          validationResult.mergeFrom(resultForBestAttempt);
-          return;  // Exit early on success
-        }
+    // Validate against all tagspecs.
+    for (const tagSpecId of tagSpecDispatch.allTagSpecs()) {
+      const parsedSpec = this.tagSpecById_[tagSpecId];
+      this.validateTagAgainstSpec(
+          parsedSpec, context, encounteredAttrs, resultForBestAttempt);
+      if (resultForBestAttempt.status !==
+          amp.validator.ValidationResult.Status.FAIL) {
+        break;  // Exit early on success
       }
     }
     validationResult.mergeFrom(resultForBestAttempt);
@@ -2108,20 +2220,38 @@ class ParsedValidatorRules {
    */
   validateTagAgainstSpec(
       parsedSpec, context, encounteredAttrs, resultForBestAttempt) {
-    goog.asserts.assert(resultForBestAttempt.status ===
-        amp.validator.ValidationResult.Status.FAIL);
     let resultForAttempt = new amp.validator.ValidationResult();
     resultForAttempt.status = amp.validator.ValidationResult.Status.UNKNOWN;
     parsedSpec.validateAttributes(context, encounteredAttrs, resultForAttempt);
     parsedSpec.validateParentTag(context, resultForAttempt);
     parsedSpec.validateAncestorTags(context, resultForAttempt);
 
-    if (resultForAttempt.status === amp.validator.ValidationResult.Status.FAIL) {
+    if (resultForAttempt.status ===
+        amp.validator.ValidationResult.Status.FAIL) {
+      // If this is the first attempt, always use it.
+      if (resultForBestAttempt.errors.length == 0) {
+        resultForBestAttempt.status = resultForAttempt.status;
+        resultForBestAttempt.errors = resultForAttempt.errors;
+        return;
+      }
+
+      // Prefer the attempt with the fewest errors.
+      if (resultForAttempt.errors.length < resultForBestAttempt.errors.length) {
+        resultForBestAttempt.status = resultForAttempt.status;
+        resultForBestAttempt.errors = resultForAttempt.errors;
+        return;
+      }
+      if (resultForAttempt.errors.length > resultForBestAttempt.errors.length) {
+        return;
+      }
+
+      // If the same number of errors, prefer the most specific error.
       if (maxSpecificity(resultForAttempt) >
           maxSpecificity(resultForBestAttempt)) {
         resultForBestAttempt.status = resultForAttempt.status;
         resultForBestAttempt.errors = resultForAttempt.errors;
       }
+
       return;
     }
     // This is the successful branch of the code: locally the tagspec matches.
@@ -2182,7 +2312,7 @@ class ParsedValidatorRules {
 
   /**
    * Emits errors for tags that specify that another tag is also required.
-   * Returns false iff context->Progress(result).complete.
+   * Returns false iff context.Progress(result).complete.
    * @param {!Context} context
    * @param {!amp.validator.ValidationResult} validationResult
    */
@@ -2209,7 +2339,7 @@ class ParsedValidatorRules {
 
   /**
    * Emits errors for tags that are specified as mandatory alternatives.
-   * Returns false iff context->Progress(result).complete.
+   * Returns false iff context.Progress(result).complete.
    * @param {!Context} context
    * @param {!amp.validator.ValidationResult} validationResult
    */
@@ -2648,12 +2778,18 @@ amp.validator.categorizeError = function(error) {
       ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT) {
     return amp.validator.ErrorCategory.Code.AMP_LAYOUT_PROBLEM;
   }
-  // E..g. "The attribute 'src' in tag 'amphtml engine v0.js script'
+  // E.g. "The attribute 'src' in tag 'amphtml engine v0.js script'
   // is set to the invalid value
   // '//static.breakingnews.com/ads/gptLoader.js'."
   if (error.code === amp.validator.ValidationError.Code.INVALID_ATTR_VALUE
       && error.params[0] === "src"
       && goog.string./*OK*/endsWith(error.params[1], "script")) {
+    return amp.validator.ErrorCategory.Code.CUSTOM_JAVASCRIPT_DISALLOWED;
+  }
+  // E.g. "The tag 'script' is disallowed except in specific forms."
+  if (error.code ===
+          amp.validator.ValidationError.Code.GENERAL_DISALLOWED_TAG &&
+      error.params[0] === "script") {
     return amp.validator.ErrorCategory.Code.CUSTOM_JAVASCRIPT_DISALLOWED;
   }
   // E.g.: "The attribute 'type' in tag 'script type=application/ld+json'

@@ -129,19 +129,11 @@ describe('ValidatorOutput', () => {
     const test = new ValidatorTestCase('feature_tests/no_custom_js.html',
         'http://google.com/foo.html#development=1');
     test.expectedOutputFile = null;
-    test.expectedOutput =
-        'FAIL\n' +
-        'http://google.com/foo.html:28:3 The attribute \'src\' in tag ' +
-        '\'amphtml engine v0.js script\' is set to the invalid value ' +
-        '\'https://example.com/v0-not-allowed.js\'. ' +
-        '(see https://www.ampproject.org/docs/reference/spec.html' +
-        '#required-markup) [CUSTOM_JAVASCRIPT_DISALLOWED]\n' +
-        'http://google.com/foo.html:29:3 '+
-        'The attribute \'custom-element\' ' +
-        'in tag \'amp-access extension .js script\' is set to the invalid ' +
-        'value \'amp-foo\'. ' +
-        '(see https://www.ampproject.org/docs/reference/extended/' +
-        'amp-access.html) [AMP_TAG_PROBLEM]';
+    test.expectedOutput = 'FAIL\n' +
+        'http://google.com/foo.html:28:3 The tag \'script\' is disallowed ' +
+        'except in specific forms. [CUSTOM_JAVASCRIPT_DISALLOWED]\n' +
+        'http://google.com/foo.html:29:3 The tag \'script\' is disallowed ' +
+        'except in specific forms. [CUSTOM_JAVASCRIPT_DISALLOWED]';
     test.run();
   });
 });
