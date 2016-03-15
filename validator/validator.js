@@ -915,6 +915,78 @@ class Context {
 }
 
 /**
+ * Helper class for ParsedAttrSpec. Note that the spec can be null.
+ * @private
+ */
+class ParsedUrlSpec {
+  /**
+   * @param {amp.validator.UrlSpec} spec
+   */
+  constructor(spec) {
+    /**
+     * @type {amp.validator.UrlSpec}
+     * @private
+     */
+    this.spec_ = spec;
+
+    /**
+     * @type {!goog.structs.Set<string>}
+     * @private
+     */
+    this.allowedProtocols_ = new goog.structs.Set();
+    if (this.spec_ !== null) {
+      for (const protocol of this.spec_.allowedProtocol) {
+        this.allowedProtocols_.add(protocol);
+      }
+    }
+  }
+
+  /**
+   * @param {!Context} context
+   * @param {!string} attrName
+   * @param {!string} url
+   * @param {!amp.validator.TagSpec} tagSpec
+   * @param {!amp.validator.ValidationResult} result
+   */
+  validateUrlAndProtocol(context, attrName, url, tagSpec, result) {
+    if (url === '') {
+      context.addError(
+          amp.validator.ValidationError.Code.MISSING_URL,
+          /* params */ [attrName, getDetailOrName(tagSpec)],
+          tagSpec.specUrl, result);
+      return;
+    }
+    let uri;
+    try {
+      uri = goog.Uri.parse(url);
+    } catch (ex) {
+      context.addError(
+          amp.validator.ValidationError.Code.INVALID_URL,
+          /* params */ [attrName, getDetailOrName(tagSpec), url],
+          tagSpec.specUrl, result);
+      return;
+    }
+    if (uri.hasScheme() &&
+        !this.allowedProtocols_.contains(uri.getScheme().toLowerCase())) {
+      context.addError(
+          amp.validator.ValidationError.Code.INVALID_URL_PROTOCOL,
+          /* params */
+          [attrName, getDetailOrName(tagSpec), uri.getScheme().toLowerCase()],
+          tagSpec.specUrl, result);
+      return;
+    }
+    if (!this.spec_.allowRelative && !uri.hasScheme()) {
+      context.addError(
+          amp.validator.ValidationError.Code.DISALLOWED_RELATIVE_URL,
+          /* params */[attrName, getDetailOrName(tagSpec), url],
+          tagSpec.specUrl, result);
+      return;
+    }
+  }
+
+}
+
+/**
  * This wrapper class provides access to an AttrSpec and
  * an attribute id which is unique within its context
  * (e.g., it's unique within the ParsedTagSpec).
@@ -922,13 +994,13 @@ class Context {
  */
 class ParsedAttrSpec {
   /**
-   * @param {!Object} attrSpec
+   * @param {!amp.validator.AttrSpec} attrSpec
    * @param {number} attrId
    */
   constructor(attrSpec, attrId) {
     /**
      * JSON Attribute Spec dictionary.
-     * @type {!Object}
+     * @type {!amp.validator.AttrSpec}
      * @private
      */
     this.spec_ = attrSpec;
@@ -939,17 +1011,13 @@ class ParsedAttrSpec {
      */
     this.id_ = attrId;
     /**
-     * @type {!goog.structs.Set<string>}
+     * @type {!ParsedUrlSpec}
      * @private
      */
-    this.valueUrlAllowedProtocols_ = new goog.structs.Set();
-    if (this.spec_.valueUrl !== null) {
-      for (const protocol of this.spec_.valueUrl.allowedProtocol) {
-        this.valueUrlAllowedProtocols_.add(protocol);
-      }
-    }
+    this.valueUrlSpec_ = new ParsedUrlSpec(this.spec_.valueUrl);
+
     /**
-     * @type {!goog.structs.Map<string, !Object>}
+     * @type {!goog.structs.Map<string, !amp.validator.PropertySpec>}
      * @private
      */
     this.valuePropertyByName_ = new goog.structs.Map();
@@ -1025,51 +1093,6 @@ class ParsedAttrSpec {
   /**
    * @param {!Context} context
    * @param {!string} attrName
-   * @param {!string} url
-   * @param {!amp.validator.TagSpec} tagSpec
-   * @param {!amp.validator.ValidationResult} result
-   * @private
-   */
-  validateUrlAndProtocol(context, attrName, url, tagSpec, result) {
-    if (url === '') {
-      context.addError(
-          amp.validator.ValidationError.Code.MISSING_URL,
-          /* params */ [attrName, getDetailOrName(tagSpec)],
-          tagSpec.specUrl, result);
-      return;
-    }
-    let uri;
-    try {
-      uri = goog.Uri.parse(url);
-    } catch (ex) {
-      context.addError(
-          amp.validator.ValidationError.Code.INVALID_URL,
-          /* params */ [attrName, getDetailOrName(tagSpec), url],
-          tagSpec.specUrl, result);
-      return;
-    }
-    if (uri.hasScheme() &&
-        !this.valueUrlAllowedProtocols_.contains(
-            uri.getScheme().toLowerCase())) {
-      context.addError(
-          amp.validator.ValidationError.Code.INVALID_URL_PROTOCOL,
-          /* params */
-          [attrName, getDetailOrName(tagSpec), uri.getScheme().toLowerCase()],
-          tagSpec.specUrl, result);
-      return;
-    }
-    if (!this.spec_.valueUrl.allowRelative && !uri.hasScheme()) {
-      context.addError(
-          amp.validator.ValidationError.Code.DISALLOWED_RELATIVE_URL,
-          /* params */[attrName, getDetailOrName(tagSpec), url],
-          tagSpec.specUrl, result);
-      return;
-    }
-  }
-
-  /**
-   * @param {!Context} context
-   * @param {!string} attrName
    * @param {!string} attrValue
    * @param {!amp.validator.TagSpec} tagSpec
    * @param {!amp.validator.ValidationResult} result
@@ -1110,7 +1133,7 @@ class ParsedAttrSpec {
     }
     for (const maybe_uri of maybe_uris.getValues()) {
       const unescaped_maybe_uri = goog.string.unescapeEntities(maybe_uri);
-      this.validateUrlAndProtocol(
+      this.valueUrlSpec_.validateUrlAndProtocol(
           context, attrName, unescaped_maybe_uri, tagSpec, result);
       if (result.status === amp.validator.ValidationResult.Status.FAIL) {
         return;
@@ -1193,7 +1216,7 @@ class ParsedAttrSpec {
  * such specification can be active. The precedence is (1), (2), (3), (4)
  * @param {!Object} tagSpec
  * @param {!goog.structs.Map<string, !amp.validator.AttrList>} rulesAttrMap
- * @return {!Array<!Object>} all of the AttrSpec pointers
+ * @return {!Array<!amp.validator.AttrSpec>} all of the AttrSpec pointers
  */
 function GetAttrsFor(tagSpec, rulesAttrMap) {
   const attrs = [];
