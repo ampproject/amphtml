@@ -307,6 +307,43 @@ Container for analytics tags. Positioned far away from top to make sure that doe
 </amp-analytics>
 <!-- End SimpleReach Example -->
 
+<!-- Snowplow Analytics tracking -->
+<amp-analytics type="snowplow" id="snowplow">
+<script type="application/json">
+{
+  "vars": {
+    "collectorHost": "d3rkrsqld9gmqf.cloudfront.net",
+    "appId": "amp-examples"
+  },
+  "triggers": {
+    "defaultPageview": {
+      "on": "visible",
+      "request": "pageView"
+    },
+    "clickOnTest1Trigger": {
+      "on": "click",
+      "selector": "#test1",
+      "request": "structEvent",
+      "vars": {
+        "structEventCategory": "examples",
+        "structEventAction": "clicked-test1"
+      }
+    },
+    "clickOnTopTrigger": {
+      "on": "click",
+      "selector": "#top",
+      "request": "structEvent",
+      "vars": {
+        "structEventCategory": "examples",
+        "structEventAction": "clicked-header"
+      }
+    }
+  }
+}
+</script>
+</amp-analytics>
+<!-- End Snowplow Analytics example -->
+
 <!-- Webtrekk tracking -->
 <amp-analytics type="webtrekk">
 <script type="application/json">

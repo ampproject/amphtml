@@ -61,6 +61,12 @@
     "visible": "https://edge.simplereach.com/n?amp=true&pid=$pid&title=_title_&url=_canonical_url_&date=$published_at&authors=$authors&channels=$categories&tags=$tags&referrer=_document_referrer_&page_url=_source_url_&user_id=_client_id_&domain=_canonical_host_",
     "timer": "https://edge.simplereach.com/t?amp=true&pid=$pid&title=_title_&url=_canonical_url_&date=$published_at&authors=$authors&channels=$categories&tags=$tags&referrer=_document_referrer_&page_url=_source_url_&user_id=_client_id_&domain=_canonical_host_&t=5000&e=5000"
   },
+  "snowplow": {
+    "aaVersion": "amp-0.1",
+    "basePrefix": "https://$collectorHost/i?url=_canonical_url_&page=_title_&res=_screen_width_x_screen_height_&stm=_timestamp_&tz=_timezone_&aid=$appId&p=web&tv=amp-0.1",
+    "pageView": "https://$collectorHost/i?url=_canonical_url_&page=_title_&res=_screen_width_x_screen_height_&stm=_timestamp_&tz=_timezone_&aid=$appId&p=web&tv=amp-0.1&e=pv",
+    "structEvent": "https://$collectorHost/i?url=_canonical_url_&page=_title_&res=_screen_width_x_screen_height_&stm=_timestamp_&tz=_timezone_&aid=$appId&p=web&tv=amp-0.1&e=se&se_ca=$structEventCategory&se_ac=$structEventAction&se_la=$structEventLabel&se_pr=$structEventProperty&se_va=$structEventValue"
+  },
   "webtrekk": {
     "trackURL": "https://$trackDomain/$trackId/wt",
     "parameterPrefix": "?p=431,$contentId,1,_screen_width_x_screen_height_,_screen_color_depth_,_document_referrer_,_timestamp_,0,,0&tz=_timezone_&eid=_client_id_&la=_browser_language_",
