@@ -130,10 +130,17 @@ export function onDocumentElementClick_(e, viewport, history) {
   // document is iframed - in order to go around this, we set the top.location
   // to the custom protocol href.
   const isSafariIOS = platform.isIos() && platform.isSafari();
-  const isEmbedded = win.parent && win.parent != win;
-  const isNormalProtocol = /^(https?|mailto):$/.test(tgtLoc.protocol);
-  if (isSafariIOS && isEmbedded && !isNormalProtocol) {
+  const isFTP = tgtLoc.protocol == 'ftp:';
+
+  // In case of FTP Links in embedded documents always open then in _blank.
+  if (isFTP) {
     win.open(target.href, '_blank');
+    e.preventDefault();
+  }
+
+  const isNormalProtocol = /^(https?|mailto):$/.test(tgtLoc.protocol);
+  if (isSafariIOS && !isNormalProtocol) {
+    win.open(target.href, '_top');
     // Without preventing default the page would should an alert error twice
     // in the case where there's no app to handle the custom protocol.
     e.preventDefault();
