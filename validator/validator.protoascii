@@ -25,7 +25,7 @@ min_validator_revision_required: 109
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 177
+spec_file_revision: 178
 # Rules for AMP HTML
 # (https://www.ampproject.org/docs/reference/spec.html)
 #
@@ -83,8 +83,34 @@ tags: {
   detail: "title"
 }
 # 4.2.3 the base element
+tags: {
+  name: "base"
+  # Currently the amp cache doesn't correctly rewrite URLs for documents
+  # with <base href>. When it does, we will add support for href attributes.
+  # attrs: {
+  #   name: "href"
+  #   value_url: {
+  #     allow_relative: false
+  #     allowed_protocol: "http"
+  #     allowed_protocol: "https"
+  #   }
+  # }
+  attrs: {
+    name: "target"
+    value_regex_casei: "(_blank|_self)"
+  }
+}
 # Disallowed.
 # 4.2.4 the link element
+attr_lists: {
+  name: "common-link-attrs"
+  attrs: { name: "media" }
+  attrs: { name: "sizes" }
+  attrs: { name: "target" }
+  attrs: { name: "type" }
+  attrs: { name: "hreflang" }
+  attrs: { name: "charset" value: "utf-8" }
+}
 # While there are a wide variety of link rel attributes being used in
 # the wild, some of these are being used to affect browser behavior.
 # Examples include rel=import|components, rel=prerender|subresource,
@@ -94,7 +120,7 @@ tags: {
   name: "link"
   detail: "link rel="
   attrs: { name: "href" }
-  attrs: { name: "hreflang" }
+  attr_lists: "common-link-attrs"
   attrs: {
     name: "rel"
     mandatory: true
@@ -383,7 +409,7 @@ tags: {
       allow_relative: true
     }
   }
-  attrs: { name: "hreflang" }
+  attr_lists: "common-link-attrs"
   attrs: {
     name: "rel"
     value: "canonical"
@@ -411,6 +437,7 @@ tags: {
     mandatory: true
     dispatch_key: true
   }
+  attr_lists: "common-link-attrs"
 }
 # Safari pinned tab icon
 # https://developer.apple.com/library/ios/documentation/AppleApplications/Reference/SafariWebContent/pinnedTabs/pinnedTabs.html
@@ -433,6 +460,7 @@ tags: {
     mandatory: true
     dispatch_key: true
   }
+  attr_lists: "common-link-attrs"
 }
 # Whitelisted font providers
 tags: {
@@ -457,7 +485,7 @@ tags: {
     name: "type"
     value: "text/css"
   }
-  spec_url: "https://www.ampproject.org/docs/reference/spec.html#custom-fonts"
+  attrs: { name: "media" }
 }
 # itemprop=sameAs is allowed per schema.org, needs not be in head
 tags: {
@@ -474,6 +502,7 @@ tags: {
     value: "sameAs"
     dispatch_key: true
   }
+  attr_lists: "common-link-attrs"
 }
 # rel= isn't mandatory when itemprop= is present.
 tags: {
@@ -487,10 +516,10 @@ tags: {
     name: "itemprop"
     mandatory: true
   }
+  attr_lists: "common-link-attrs"
 }
 # 4.2.5 the meta element
 # Charset must be utf8, and a specific viewport is required.
-# Other meta elements not supported.
 tags: {
   name: "meta"
   detail: "meta charset=utf-8"
@@ -531,34 +560,172 @@ tags: {
   }
   spec_url: "https://www.ampproject.org/docs/reference/spec.html#required-markup"
 }
+# This tag is a hack to tell IE 10 to use its modern rendering engine as opposed
+# to the IE8 engine. So it's explicitly allowed.
 tags: {
   name: "meta"
-  detail: "meta property= and content="
+  detail: "meta http-equiv=X-UA-Compatible"
+  attrs: {
+    name: "http-equiv"
+    mandatory: true
+    value: "X-UA-Compatible"
+    dispatch_key: true
+  }
   attrs: {
     name: "content"
     mandatory: true
-  }
-  attrs: {
-    name: "property"
-    mandatory: true
+    value_properties: {
+      properties: { name: "ie" value: "edge" }
+      properties: { name: "chrome" value: "1" }
+    }
   }
 }
-# The validator accepts any name="..." content="..." attribute pair except
-# for a few specific name values which have more specific rules above or
-# are altogether disallowed.
 tags: {
   name: "meta"
   detail: "meta name= and content="
+  # The validator accepts any name="..." attribute values except
+  # for a few specific name values which have more specific rules above or
+  # are altogether disallowed.
+  attrs: {
+    name: "name"
+    blacklisted_value_regex: "(^|\\s)(viewport|content-disposition|revisit-after)(\\s|$)"
+  }
+  attrs: { name: "content" }
+  # property / content is non-standard, but commonly seen.
+  attrs: { name: "property" }
+  attrs: { name: "itemprop" }
+}
+# This is redundant with meta charset, but also harmless as long as it's
+# set to utf-8.
+tags: {
+  name: "meta"
+  detail: "meta http-equiv=content-type"
+  attrs: {
+    name: "http-equiv"
+    mandatory: true
+    value: "content-type"
+    dispatch_key: true
+  }
+  attrs: {
+    name: "content"
+    mandatory: true
+    value: "text/html; charset=utf-8"
+  }
+}
+# Identical to the above, but a common case variant of content-type.
+tags: {
+  name: "meta"
+  detail: "meta http-equiv=Content-Type"
+  attrs: {
+    name: "http-equiv"
+    mandatory: true
+    value: "Content-Type"
+    dispatch_key: true
+  }
+  attrs: {
+    name: "content"
+    mandatory: true
+    value: "text/html; charset=utf-8"
+  }
+}
+# http-equiv content-language tag
+tags: {
+  name: "meta"
+  detail: "meta http-equiv=content-language"
+  attrs: {
+    name: "http-equiv"
+    mandatory: true
+    value: "content-language"
+    dispatch_key: true
+  }
   attrs: {
     name: "content"
     mandatory: true
   }
+}
+# http-equiv pics-label tag
+# https://www.w3.org/PICS/
+tags: {
+  name: "meta"
+  detail: "meta http-equiv=pics-label"
   attrs: {
-    name: "name"
+    name: "http-equiv"
     mandatory: true
-    blacklisted_value_regex: "(^|\\s)(viewport|content-disposition|revisit-after)(\\s|$)"
+    value: "pics-label"
+    dispatch_key: true
+  }
+  attrs: {
+    name: "content"
+    mandatory: true
   }
 }
+# http-equiv imagetoolbar tag
+# https://msdn.microsoft.com/en-us/library/ms532986(v=vs.85).aspx
+tags: {
+  name: "meta"
+  detail: "meta http-equiv=imagetoolbar"
+  attrs: {
+    name: "http-equiv"
+    mandatory: true
+    value: "imagetoolbar"
+    dispatch_key: true
+  }
+  attrs: {
+    name: "content"
+    mandatory: true
+  }
+}
+# http-equiv content-style-type
+# https://www.w3.org/TR/REC-html40/present/styles.html#h-14.2.1
+tags: {
+  name: "meta"
+  detail: "meta http-equiv=Content-Style-Type"
+  attrs: {
+    name: "http-equiv"
+    mandatory: true
+    value: "Content-Style-Type"
+    dispatch_key: true
+  }
+  attrs: {
+    name: "content"
+    mandatory: true
+    value: "text/css"
+  }
+}
+# http-equiv content-script-type
+# https://www.w3.org/TR/html4/interact/scripts.html#h-18.2.2.1
+tags: {
+  name: "meta"
+  detail: "meta http-equiv=Content-Script-Type"
+  attrs: {
+    name: "http-equiv"
+    mandatory: true
+    value: "Content-Script-Type"
+    dispatch_key: true
+  }
+  attrs: {
+    name: "content"
+    mandatory: true
+    value: "text/javascript"
+  }
+}
+# http-equiv resource-type
+# http://www.metatags.info/meta_http_equiv_resource_type
+tags: {
+  name: "meta"
+  detail: "meta http-equiv=resource-type"
+  attrs: {
+    name: "http-equiv"
+    mandatory: true
+    value: "RESOURCE-TYPE"
+    dispatch_key: true
+  }
+  attrs: {
+    name: "content"
+    mandatory: true
+  }
+}
+
 # 4.2.6 The style
 # Text contents of the style tag will be validated seperately.
 tags: {  # Special custom 'author' spreadsheet.
@@ -786,7 +953,6 @@ tags: {
 tags: {
   name: "hr"
   disallowed_ancestor: "head"
-  attrs: { name: "align" }
 }
 # 4.4.3 The pre element
 tags: {
@@ -794,10 +960,32 @@ tags: {
   disallowed_ancestor: "head"
 }
 # 4.4.4 The blockquote element
+attr_lists: {
+  name: "cite-attr"
+  attrs: {
+    name: "cite"
+    # It may be safe to allow all URLs here, but just in case javascript: or
+    # similar URLs are an issue, we add the same constraints as an anchor.
+    value_url: {
+      allow_relative: true
+      allowed_protocol: "http"
+      allowed_protocol: "https"
+      allowed_protocol: "mailto"
+      allowed_protocol: "ftp"
+      # Whitelisting additional commonly observed third party
+      # protocols which should be safe
+      allowed_protocol: "sms"
+      allowed_protocol: "tel"
+      allowed_protocol: "viber"
+      allowed_protocol: "whatsapp"
+    }
+  }
+}
 tags: {
   name: "blockquote"
   disallowed_ancestor: "head"
   attrs: { name: "align" }
+  attr_lists: "cite-attr"
 }
 # 4.4.5 The ol element
 tags: {
@@ -820,17 +1008,11 @@ tags: {
 tags: {
   name: "ul"
   disallowed_ancestor: "head"
-  attrs: {  # Unsupported in html5, but won't hurt
-    name: "type"
-  }
 }
 # 4.4.7 The li element
 tags: {
   name: "li"
   disallowed_ancestor: "head"
-  attrs: {  # Unsupported in html5, but won't hurt
-    name: "type"
-  }
   attrs: {
     name: "value"
     value_regex: "[0-9]*"
@@ -1205,7 +1387,11 @@ tags: {
     name: "target"
     value_regex: "(_blank|_self)"
   }
-  # These attributes appear harmless.
+  attrs: { name: "download" }
+  attrs: { name: "media" }
+  attrs: { name: "type" value: "text/html" }
+  # These are not valid html5 but are commonly used and are supported in all
+  # major browsers.
   attrs: { name: "border" }
   attrs: { name: "name" }
 }
@@ -1238,6 +1424,7 @@ tags: {
 tags: {
   name: "q"
   disallowed_ancestor: "head"
+  attr_lists: "cite-attr"
 }
 # 4.5.8 The dfn element
 tags: {
@@ -1344,6 +1531,7 @@ tags: {
 # 4.5.27 The bdo element
 tags: {
   name: "bdo"
+  attrs: { name: "dir" }
   disallowed_ancestor: "head"
 }
 # 4.5.28 The span element
@@ -1371,8 +1559,8 @@ tags: {
   # These attributes have specific formatting, but as they are metadata
   # that can't hurt performance, rendering or security, we don't validate
   # the values.
-  attrs { name: "cite" }
   attrs { name: "datetime" }
+  attr_lists: "cite-attr"
 }
 # 4.6.2 The del element
 tags: {
@@ -1382,8 +1570,8 @@ tags: {
   # These attributes have specific formatting, but as they are metadata
   # that can't hurt performance, rendering or security, we don't validate
   # the values.
-  attrs { name: "cite" }
   attrs { name: "datetime" }
+  attr_lists: "cite-attr"
 }
 
 # 4.7 Embedded Content
@@ -1394,9 +1582,17 @@ tags: {
   name: "img"
   mandatory_ancestor: "noscript"
   mandatory_ancestor_suggested_alternative: "amp-img"
+  spec_url: "https://www.ampproject.org/docs/reference/amp-img.html"
   attrs: { name: "alt" }
-  attrs: { name: "border" }
-  attrs: { name: "height" }
+  attrs: { name: "ismap" }
+  attrs: {
+    name: "longdesc"
+    value_url: {
+      allow_relative: true
+      allowed_protocol: "http"
+      allowed_protocol: "https"
+    }
+  }
   attrs: {
     name: "src"
     alternative_names: "srcset"
@@ -1407,8 +1603,12 @@ tags: {
       allow_relative: true  # Will be set to false at a future date.
     }
   }
+  # These are not supported in html5, but are widely supported by browsers
+  # and are commonly used. Since these are only used in noscript contexts,
+  # we allow them.
+  attrs: { name: "border" }
+  attrs: { name: "height" }
   attrs: { name: "width" }
-  spec_url: "https://www.ampproject.org/docs/reference/amp-img.html"
 }
 # 4.7.6 The video element
 # Only allowed in noscript tags. Otherwise use amp-video.
@@ -1473,6 +1673,7 @@ tags: {
       allow_relative: true  # Will be set to false at a future date.
     }
   }
+  attrs: { name: "media" }
   attrs: { name: "type" }
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-audio.html"
 }
@@ -1487,6 +1688,7 @@ tags: {
       allow_relative: true  # Will be set to false at a future date.
     }
   }
+  attrs: { name: "media" }
   attrs: { name: "type" }
   spec_url: "https://www.ampproject.org/docs/reference/amp-video.html"
 }
@@ -1506,6 +1708,7 @@ tags: {
     name: "type"
     mandatory: true
   }
+  attrs: { name: "media" }
 }
 tags: {
   name: "source"
@@ -1523,6 +1726,42 @@ tags: {
     name: "type"
     mandatory: true
   }
+  attrs: { name: "media" }
+}
+# 4.7.8 The track element
+tags: {
+  name: "track"
+  detail: "audio > track"
+  mandatory_parent: "audio"
+  attrs: {
+    name: "src"
+    mandatory: true
+    value_url: {
+      allow_relative: false
+      allowed_protocol: "https"
+    }
+  }
+  attrs: { name: "default" value: "" }
+  attrs: { name: "kind" }
+  attrs: { name: "label" }
+  attrs: { name: "srclang" }
+}
+tags: {
+  name: "track"
+  detail: "video > track"
+  mandatory_parent: "video"
+  attrs: {
+    name: "src"
+    mandatory: true
+    value_url: {
+      allow_relative: false
+      allowed_protocol: "https"
+    }
+  }
+  attrs: { name: "default" value: "" }
+  attrs: { name: "kind" }
+  attrs: { name: "label" }
+  attrs: { name: "srclang" }
 }
 # 4.7.15 SVG
 # We allow some limited embedded SVG tags. We do not allow inline styles
@@ -2104,90 +2343,91 @@ tags: {
 tags: {
   name: "table"
   disallowed_ancestor: "head"
+  attrs: { name: "sortable" }
+  # These attributes are not supported in HTML5, but are widely supported and
+  # commonly found.
   attrs: { name: "align" }
-  attrs: { name: "border" }
+  attrs: { name: "border" value_regex: "0|1" }
+  attrs: { name: "bgcolor" }
+  attrs: { name: "cellpadding" }
+  attrs: { name: "cellspacing" }
+  attrs: { name: "width" }
 }
 # 4.9.2 The caption element
 tags: {
   name: "caption"
   disallowed_ancestor: "head"
-  attrs: { name: "align" }
 }
 # 4.9.3 The colgroup element
 tags: {
   name: "colgroup"
   disallowed_ancestor: "head"
-  attrs: { name: "align" }
   attrs: { name: "span" }
-  attrs: { name: "valign" }
 }
 # 4.9.4 The col element
 tags: {
   name: "col"
   disallowed_ancestor: "head"
-  attrs: { name: "align" }
   attrs: { name: "span" }
-  attrs: { name: "valign" }
 }
 # 4.9.5 The tbody element
 tags: {
   name: "tbody"
   disallowed_ancestor: "head"
-  attrs: { name: "align" }
-  attrs: { name: "valign" }
 }
 # 4.9.6 The thead element
 tags: {
   name: "thead"
   disallowed_ancestor: "head"
-  attrs: { name: "align" }
-  attrs: { name: "valign" }
 }
 # 4.9.7 The tfoot element
 tags: {
   name: "tfoot"
   disallowed_ancestor: "head"
-  attrs: { name: "align" }
-  attrs: { name: "valign" }
 }
 # 4.9.8 The tr element
 tags: {
   name: "tr"
   disallowed_ancestor: "head"
+  # These attributes are not supported in HTML5, but are widely supported and
+  # commonly found.
   attrs: { name: "align" }
-  attrs: { name: "valign" }
-  attrs: { name: "width" }
-  attrs: { name: "height" }
   attrs: { name: "bgcolor" }
+  attrs: { name: "height" }
+  attrs: { name: "valign" }
 }
 # 4.9.9 The td element
 tags: {
   name: "td"
   disallowed_ancestor: "head"
-  attrs: { name: "align" }
   attrs: { name: "colspan" }
   attrs: { name: "headers" }
   attrs: { name: "rowspan" }
+  # These attributes are not supported in HTML5, but are widely supported and
+  # commonly found.
+  attrs: { name: "align" }
+  attrs: { name: "bgcolor" }
+  attrs: { name: "height" }
   attrs: { name: "valign" }
   attrs: { name: "width" }
-  attrs: { name: "height" }
-  attrs: { name: "bgcolor" }
 }
 # 4.9.10 The th element
 tags: {
   name: "th"
   disallowed_ancestor: "head"
   attrs: { name: "abbr" }
-  attrs: { name: "align" }
-  attrs: { name: "headers" }
   attrs: { name: "colspan" }
+  attrs: { name: "headers" }
   attrs: { name: "rowspan" }
   attrs: { name: "scope" }
   attrs: { name: "sorted" }
+  # These attributes are not supported in HTML5, but are widely supported and
+  # commonly found.
+  attrs: { name: "align" }
+  attrs: { name: "bgcolor" }
+  attrs: { name: "height" }
   attrs: { name: "valign" }
   attrs: { name: "width" }
-  attrs: { name: "height" }
-  attrs: { name: "bgcolor" }
 }
 
 # 4.10 Forms
@@ -3223,86 +3463,6 @@ tags: {
   name: "o:p"
 }
 
-# Schema.org meta tag; schema.org is explicitly allowed by the AMP HTML draft.
-tags: {
-  name: "meta"
-  detail: "meta from schema.org"
-  attrs: {
-    name: "content"
-    mandatory: true
-  }
-  attrs: {
-    name: "itemprop"
-    mandatory: true
-  }
-}
-# This tag is a hack to tell IE 10 to use its modern rendering engine as opposed
-# to the IE8 engine. So it's explicitly allowed.
-tags: {
-  name: "meta"
-  detail: "meta http-equiv=X-UA-Compatible"
-  attrs: {
-    name: "content"
-    mandatory: true
-    value_properties: {
-      properties: { name: "ie" value: "edge" }
-    }
-  }
-  attrs: {
-    name: "http-equiv"
-    mandatory: true
-    value: "X-UA-Compatible"
-    dispatch_key: true
-  }
-}
-# This is redundant with meta charset, but also harmless
-tags: {
-  name: "meta"
-  detail: "meta http-equiv=content-type"
-  attrs: {
-    name: "http-equiv"
-    mandatory: true
-    value: "content-type"
-    dispatch_key: true
-  }
-  attrs: {
-    name: "content"
-    mandatory: true
-    value: "text/html; charset=utf-8"
-  }
-}
-# Identical to the above, but a common case variant of content-type.
-tags: {
-  name: "meta"
-  detail: "meta http-equiv=Content-Type"
-  attrs: {
-    name: "content"
-    mandatory: true
-    value: "text/html; charset=utf-8"
-  }
-  attrs: {
-    name: "http-equiv"
-    mandatory: true
-    value: "Content-Type"
-    dispatch_key: true
-  }
-}
-# Another common http-equiv tag
-tags: {
-  name: "meta"
-  detail: "meta http-equiv=content-language"
-  attrs: {
-    name: "content"
-    mandatory: true
-  }
-  attrs: {
-    name: "http-equiv"
-    mandatory: true
-    value: "content-language"
-    dispatch_key: true
-  }
-}
-
 # Tags and attributes specific to AMP HTML.
 # AMP Custom elements require a "src" or a "srcset" attribute,
 # having both is also allowed.
@@ -3391,7 +3551,7 @@ tags: {  # <amp-audio>
   attrs: {
     name: "autoplay"
     # ^$| prefix intended. empty string is valid.
-    value_regex_casei: "^$|desktop|tablet|mobile|autoplay"
+    value_regex: "^$|desktop|tablet|mobile|autoplay"
   }
   attrs: { name: "controls" }
   attrs: { name: "loop"  value: "" }
@@ -3464,13 +3624,13 @@ tags: {  # <amp-dailymotion>
   name: "amp-dailymotion"
   disallowed_ancestor: "head"
   also_requires: "amp-dailymotion extension .js script"
-  attrs: { name: "data-endscreen-enable" value_regex_casei: "true|false" }
-  attrs: { name: "data-info" value_regex_casei: "true|false" }
-  attrs: { name: "data-mute" value_regex_casei: "true|false" }
-  attrs: { name: "data-sharing-enable" value_regex_casei: "true|false" }
+  attrs: { name: "data-endscreen-enable" value_regex: "true|false" }
+  attrs: { name: "data-info" value_regex: "true|false" }
+  attrs: { name: "data-mute" value_regex: "true|false" }
+  attrs: { name: "data-sharing-enable" value_regex: "true|false" }
   attrs: { name: "data-start" value_regex: "[0-9]+" }
   attrs: { name: "data-ui-highlight" value_regex_casei: "([0-9a-f]{3}){1,2}" }
-  attrs: { name: "data-ui-logo" value_regex_casei: "true|false" }
+  attrs: { name: "data-ui-logo" value_regex: "true|false" }
   attrs: {
     name: "data-videoid"
     mandatory: true
@@ -3578,7 +3738,7 @@ tags: {  # <amp-iframe>
   attrs: { name: "frameborder" value_regex: "0|1" }
   attrs: { name: "resizable" value: "" }
   attrs: { name: "sandbox" }
-  attrs: { name: "scrolling" value_regex_casei: "auto|yes|no" }
+  attrs: { name: "scrolling" value_regex: "auto|yes|no" }
   attrs: {
     name: "src"
     mandatory_oneof: "['src', 'srcdoc']"
@@ -3616,7 +3776,6 @@ tags: {  # <amp-img>
   disallowed_ancestor: "head"
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
-  attrs: { name: "border" }
   attrs: { name: "placeholder" }
   attr_lists: "extended-amp-global"
   attr_lists: "mandatory-src-or-srcset"
@@ -3763,7 +3922,7 @@ tags: {  # <amp-soundcloud>
     mandatory: true
     value_regex: "[0-9]+"
   }
-  attrs: { name: "data-visual" value_regex_casei: "true|false" }
+  attrs: { name: "data-visual" value_regex: "true|false" }
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-soundcloud.html"
   amp_layout: {
@@ -3901,6 +4060,7 @@ tags: {  # <amp-youtube>
     supported_layouts: RESPONSIVE
   }
 }
+
 
 # AMP Layout attributes: implied for TagSpecs with amp_layout field
 # set. Note that while these attributes are defined as optional here,
