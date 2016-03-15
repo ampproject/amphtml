@@ -93,7 +93,7 @@ import {vsyncFor} from './vsync';
  * after becoming inactive, e.g. when the user swipes away from the document
  * and swipes back. In these situations, any paused media may begin playing
  * again, if user interaction is not required.
- * // TODO(jridgewell) slide slides into view
+ * TODO(jridgewell) slide slides into view
  *
  * The unlayoutCallback is called when the document becomes inactive, e.g.
  * when the user swipes away from the document, or another tab is focused.
@@ -333,6 +333,8 @@ export class BaseElement {
   /**
    * Requests the element to unload any expensive resources when the element
    * goes into non-visible state. The scope is up to the actual component.
+   * The component must return `true` if it'd like to later receive
+   * {@link layoutCallback} in case document becomes active again.
    *
    * @return {boolean}
    */
