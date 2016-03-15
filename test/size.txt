@@ -1,10 +1,10 @@
       max   |         min   |       gzip   |   file
       ---   |         ---   |        ---   |   ---
 611.74 kB   |   178.04 kB   |   49.15 kB   |   v0.js / amp.js
-352.88 kB   |    88.66 kB   |   26.35 kB   |   v0/amp-access-0.1.js
+352.88 kB   |    88.66 kB   |   26.34 kB   |   v0/amp-access-0.1.js
  27.07 kB   |     9.38 kB   |    3.64 kB   |   v0/amp-accordion-0.1.js
 372.16 kB   |   101.86 kB   |   32.09 kB   |   v0/amp-analytics-0.1.js
- 87.25 kB   |    14.34 kB   |    5.35 kB   |   v0/amp-anim-0.1.js
+ 87.25 kB   |    14.34 kB   |    5.34 kB   |   v0/amp-anim-0.1.js
  84.09 kB   |    13.69 kB   |    5.19 kB   |   v0/amp-audio-0.1.js
  78.94 kB   |     12.8 kB   |     4.7 kB   |   v0/amp-brid-player-0.1.js
  94.63 kB   |    16.69 kB   |    6.09 kB   |   v0/amp-brightcove-0.1.js
@@ -20,7 +20,7 @@
  81.11 kB   |    12.85 kB   |    4.82 kB   |   v0/amp-install-serviceworker-0.1.js
  78.37 kB   |    12.23 kB   |    4.58 kB   |   v0/amp-jwplayer-0.1.js
  92.36 kB   |    16.29 kB   |    6.04 kB   |   v0/amp-kaltura-player-0.1.js
-136.78 kB   |    21.99 kB   |    6.96 kB   |   v0/amp-lightbox-0.1.js
+136.78 kB   |    21.99 kB   |    6.98 kB   |   v0/amp-lightbox-0.1.js
 276.88 kB   |    62.82 kB   |   18.58 kB   |   v0/amp-list-0.1.js
 143.99 kB   |    44.79 kB   |   15.62 kB   |   v0/amp-mustache-0.1.js
 120.43 kB   |    31.39 kB   |    9.68 kB   |   v0/amp-pinterest-0.1.js
@@ -29,7 +29,7 @@
 105.86 kB   |    18.03 kB   |    6.37 kB   |   v0/amp-slides-0.1.js
 114.12 kB   |     25.1 kB   |    8.93 kB   |   v0/amp-social-share-0.1.js
  71.21 kB   |    10.46 kB   |    4.03 kB   |   v0/amp-soundcloud-0.1.js
- 79.18 kB   |    12.95 kB   |    4.68 kB   |   v0/amp-springboard-player-0.1.js
+ 79.18 kB   |    12.95 kB   |    4.67 kB   |   v0/amp-springboard-player-0.1.js
 132.13 kB   |    24.59 kB   |    8.84 kB   |   v0/amp-twitter-0.1.js
 278.81 kB   |    63.63 kB   |   18.79 kB   |   v0/amp-user-notification-0.1.js
  71.14 kB   |    10.37 kB   |       4 kB   |   v0/amp-vimeo-0.1.js

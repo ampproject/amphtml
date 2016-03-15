@@ -164,7 +164,7 @@ function compile(entryModuleFilename, outputDir,
     .pipe(closureCompiler({
       // Temporary shipping with our own compiler that has a single patch
       // applied
-      compilerPath: 'third_party/closure-compiler/compiler.jar',
+      compilerPath: 'build-system/runner/build/runner.jar',
       fileName: intermediateFilename,
       continueWithWarnings: true,
       tieredCompilation: true,  // Magic speed up.
