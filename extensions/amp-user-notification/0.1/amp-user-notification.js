@@ -19,12 +19,16 @@ import {assertHttpsUrl, addParamsToUrl} from '../../../src/url';
 import {assert} from '../../../src/asserts';
 import {cidFor} from '../../../src/cid';
 import {getService} from '../../../src/service';
-import {log} from '../../../src/log';
+import {dev, user, rethrowAsync} from '../../../src/log';
 import {storageFor} from '../../../src/storage';
 import {urlReplacementsFor} from '../../../src/url-replacements';
 import {viewerFor} from '../../../src/viewer';
 import {whenDocumentReady} from '../../../src/document-ready';
 import {xhrFor} from '../../../src/xhr';
+
+
+/** @private @const {string} */
+const TAG = 'AmpUserNotification';
 
 
 /**
@@ -240,22 +244,20 @@ export class AmpUserNotification extends AMP.BaseElement {
       maybeCheckStoragePromise = Promise.resolve(null);
     }
 
-    return maybeCheckStoragePromise.then(value => {
-      if (value) {
+    return maybeCheckStoragePromise.catch(reason => {
+      dev.error(TAG, 'Failed to read storage', reason);
+      return false;
+    }).then(dismissed => {
+      if (dismissed) {
         // Consent has been accepted. Nothing more to do.
         return false;
       }
       if (this.showIfHref_) {
-        // Ask remote endpoint if available.
+        // Ask remote endpoint if available. XHR will throw a user error when
+        // fails.
         return this.shouldShowViaXhr_();
       }
       // Otherwise, show the notification.
-      return true;
-    }).catch(reason => {
-      log.error('Failed to read storage', reason);
-      if (this.showIfHref_) {
-        return this.shouldShowViaXhr_();
-      }
       return true;
     });
   }
@@ -336,7 +338,7 @@ export class UserNotificationManager {
   get(id) {
     this.managerReadyPromise_.then(() => {
       if (this.win_.document.getElementById(id) == null) {
-        console./*OK*/warn(`Did not find amp-user-notification element ${id}.`);
+        user.warn(TAG, `Did not find amp-user-notification element ${id}.`);
       }
     });
     return this.getElementDeferById_(id).promise;
@@ -363,11 +365,8 @@ export class UserNotificationManager {
           });
         })
         .then(deferred.resolve)
-        .catch(this.onRejection_.bind(this, id));
-  }
-
-  onRejection_(id, err) {
-    log.error('Notification service failed amp-user-notification', id, err);
+        .catch(rethrowAsync.bind(null,
+            'Notification service failed amp-user-notification', id));
   }
 
   /**
