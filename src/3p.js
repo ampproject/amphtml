@@ -24,6 +24,11 @@
 
 import {assert} from './asserts';
 import {isArray} from './types';
+import {user} from './log';
+
+
+/** @private @const {string} */
+const TAG = '3p';
 
 
 /** @typedef {function(!Window, !Object)}  */
@@ -147,9 +152,7 @@ export function checkData(data, allowedFields) {
   try {
     validateData(data, allowedFields);
   } catch (e) {
-    setTimeout(() => {
-      throw e;
-    });
+    user.error(TAG, e);
   }
 }
 

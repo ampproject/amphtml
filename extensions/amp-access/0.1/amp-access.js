@@ -27,7 +27,7 @@ import {getValueForExpr} from '../../../src/json';
 import {installStyles} from '../../../src/styles';
 import {isObject} from '../../../src/types';
 import {listenOnce} from '../../../src/event-helper';
-import {log} from '../../../src/log';
+import {log, user} from '../../../src/log';
 import {onDocumentReady} from '../../../src/document-ready';
 import {openLoginDialog} from './login-dialog';
 import {parseQueryString} from '../../../src/url';
@@ -184,7 +184,7 @@ export class AccessService {
     try {
       configJson = JSON.parse(this.accessElement_.textContent);
     } catch (e) {
-      throw new Error('Failed to parse "amp-access" JSON: ' + e);
+      throw user.createError('Failed to parse "amp-access" JSON: ' + e);
     }
 
     // Access type.
@@ -380,10 +380,10 @@ export class AccessService {
       this.analyticsEvent_('access-authorization-failed');
       if (this.config_.authorizationFallbackResponse && !opt_disableFallback) {
         // Use fallback.
-        setTimeout(() => {throw error;});
+        user.error(TAG, 'Authorization failed: ', error);
         return this.config_.authorizationFallbackResponse;
       } else {
-        // Rethrow the error.
+        // Rethrow the error, it will be processed in the bottom `catch`.
         throw error;
       }
     }).then(response => {
@@ -398,7 +398,7 @@ export class AccessService {
         });
       });
     }).catch(error => {
-      log.error(TAG, 'Authorization failed: ', error);
+      user.error(TAG, 'Authorization failed: ', error);
       this.toggleTopClass_('amp-access-loading', false);
       this.toggleTopClass_('amp-access-error', true);
     });

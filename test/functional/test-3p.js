@@ -17,16 +17,19 @@
 import {computeInMasterFrame, validateSrcPrefix, validateSrcContains,
     checkData, validateData, validateDataExists, validateExactlyOne,}
     from '../../src/3p';
+import {user} from '../../src/log';
 import * as sinon from 'sinon';
 
 describe('3p', () => {
 
   let sandbox;
   let clock;
+  let errorStub;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
+    errorStub = sandbox.stub(user, 'error');
   });
 
   afterEach(() => {
@@ -131,10 +134,11 @@ describe('3p', () => {
       foo: true,
       'not-whitelisted': true,
     }, ['foo']);
-    expect(() => {
-      clock.tick(1);
-    }).to.throw(/Unknown attribute for TEST: not-whitelisted./);
-
+    expect(errorStub.callCount).to.equal(1);
+    expect(errorStub.calledWith('3p', sinon.match(arg => {
+      return !!arg.message.match(
+          /Unknown attribute for TEST: not-whitelisted./);
+    }))).to.be.true;
 
     expect(() => {
       // Sync throw, not validateData vs. checkData
