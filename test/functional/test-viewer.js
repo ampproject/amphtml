@@ -621,6 +621,9 @@ describe('Viewer', () => {
       test('https://google.com', true);
       test('https://www.google.com', true);
       test('https://news.google.com', true);
+      test('https://google.co', true);
+      test('https://www.google.co', true);
+      test('https://news.google.co', true);
       test('https://www.google.co.uk', true);
       test('https://www.google.co.au', true);
       test('https://news.google.co.uk', true);
@@ -628,6 +631,7 @@ describe('Viewer', () => {
       test('https://google.de', true);
       test('https://www.google.de', true);
       test('https://news.google.de', true);
+      test('https://abc.www.google.com', true);
     });
 
     it('should not trust host as referrer with http', () => {
@@ -640,6 +644,8 @@ describe('Viewer', () => {
       test('https://www.google.other.com', false);
       test('https://withgoogle.com', false);
       test('https://acme.com', false);
+      test('https://google', false);
+      test('https://www.google', false);
     });
   });
 

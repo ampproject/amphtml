@@ -109,7 +109,20 @@ export const VisibilityState = {
  * @export {!Array<!RegExp>}
  */
 export const TRUSTED_VIEWER_HOSTS = [
-  /^(.*\.)?(google)(\.com?)?(\.[a-z]{2})?$/,
+  /**
+   * Google domains, including country-codes and subdomains:
+   * - google.com
+   * - www.google.com
+   * - google.co
+   * - www.google.co
+   * - google.az
+   * - www.google..az
+   * - google.com.az
+   * - www.google.com.az
+   * - google.co.az
+   * - www.google.co.az
+   */
+  /(^|\.)google\.(com?|[a-z]{2}|com?\.[a-z]{2})$/,
 ];
 
 
