@@ -26,7 +26,6 @@ describe('Transition', () => {
 
   afterEach(() => {
     sandbox.restore();
-    sandbox = null;
   });
 
   it('all', () => {

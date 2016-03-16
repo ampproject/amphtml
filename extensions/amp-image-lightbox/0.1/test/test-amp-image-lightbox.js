@@ -49,7 +49,6 @@ describe('amp-image-lightbox component', () => {
 
   afterEach(() => {
     sandbox.restore();
-    sandbox = null;
   });
 
   it('should render correctly', () => {
@@ -216,10 +215,7 @@ describe('amp-image-lightbox image viewer', () => {
   afterEach(() => {
     document.body.removeChild(imageViewer.getElement());
     lightboxMock.verify();
-    lightboxMock = null;
-    clock = null;
     sandbox.restore();
-    sandbox = null;
   });
 
 
@@ -400,9 +396,7 @@ describe('amp-image-lightbox image viewer gestures', () => {
   afterEach(() => {
     document.body.removeChild(imageViewer.getElement());
     lightboxMock.verify();
-    lightboxMock = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   it('should have initial bounds', () => {

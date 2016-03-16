@@ -73,7 +73,6 @@ describe('test-document-click onDocumentElementClick_', () => {
 
   afterEach(() => {
     sandbox.restore();
-    sandbox = null;
   });
 
   describe('when linking to a different origin or path', () => {

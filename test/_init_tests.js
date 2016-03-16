@@ -91,12 +91,13 @@ afterEach(() => {
   window.ENABLE_LOG = false;
   window.AMP_DEV_MODE = false;
   window.context = undefined;
+  if (sandboxes.length > 0) {
+    sandboxes.splice(0, sandboxes.length).forEach(sb => sb.restore());
+    throw new Error('You forgot to restore your sandbox!');
+  }
   if (!/native/.test(window.setTimeout)) {
     throw new Error('You likely forgot to restore sinon timers ' +
         '(installed via sandbox.useFakeTimers).');
-  }
-  if (sandboxes.length > 0) {
-    throw new Error('You forgot to restore your sandbox!');
   }
 });
 

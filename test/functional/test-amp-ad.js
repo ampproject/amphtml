@@ -42,7 +42,6 @@ function tests(name, installer) {
     });
     afterEach(() => {
       sandbox.restore();
-      sandbox = null;
     });
 
     function getAd(attributes, canonical, opt_handleElement,

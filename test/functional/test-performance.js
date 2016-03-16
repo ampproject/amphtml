@@ -37,10 +37,7 @@ describe('performance', () => {
   });
 
   afterEach(() => {
-    perf = null;
-    clock = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   describe('when viewer is not ready', () => {

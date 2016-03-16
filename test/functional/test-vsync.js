@@ -38,7 +38,6 @@ describe('vsync', () => {
 
   afterEach(() => {
     sandbox.restore();
-    sandbox = null;
   });
 
   it('should init correctly', () => {

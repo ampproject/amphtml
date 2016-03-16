@@ -147,7 +147,6 @@ describe('FixedLayer', () => {
 
   afterEach(() => {
     sandbox.restore();
-    sandbox = null;
   });
 
   function createElement(id) {

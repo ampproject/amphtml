@@ -37,10 +37,7 @@ describe('Resources', () => {
   });
 
   afterEach(() => {
-    resources = null;
-    clock = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   it('should calculate correct calcTaskScore', () => {
@@ -353,10 +350,7 @@ describe('Resources discoverWork', () => {
 
   afterEach(() => {
     viewportMock.verify();
-    viewportMock = null;
-    resources = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   it('should render two screens when visible', () => {
@@ -528,11 +522,7 @@ describe('Resources changeHeight', () => {
 
   afterEach(() => {
     viewportMock.verify();
-    viewportMock = null;
-    resources = null;
-    clock = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   it('should schedule separate requests', () => {
@@ -898,10 +888,7 @@ describe('Resources mutateElement', () => {
 
   afterEach(() => {
     viewportMock.verify();
-    viewportMock = null;
-    resources = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   it('should mutate from visible to invisible', () => {
@@ -967,9 +954,7 @@ describe('Resources.TaskQueue', () => {
   });
 
   afterEach(() => {
-    clock = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   it('should enqueue and dequeue', () => {
@@ -1042,13 +1027,8 @@ describe('Resources.Resource', () => {
 
   afterEach(() => {
     viewportMock.verify();
-    viewportMock = null;
-    resource = null;
     elementMock.verify();
-    elementMock = null;
-    element = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   it('should initialize correctly', () => {

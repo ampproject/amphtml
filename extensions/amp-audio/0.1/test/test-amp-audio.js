@@ -36,7 +36,6 @@ describe('amp-audio', () => {
 
   afterEach(() => {
     sandbox.restore();
-    sandbox = null;
     document.body.removeChild(iframe.iframe);
   });
 

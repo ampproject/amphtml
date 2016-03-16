@@ -47,7 +47,7 @@ var forbiddenTerms = {
   '(\\w*([sS]py|[sS]tub|[mM]ock|clock).restore)': {
     message: 'Use a sandbox instead to avoid repeated `#restore` calls'
   },
-  'sinon\\.useFakeTimers': {
+  'sinon\\.useFake\\w+': {
     message: 'Use a sandbox instead to avoid repeated `#restore` calls'
   },
   'console\\.\\w+\\(': {

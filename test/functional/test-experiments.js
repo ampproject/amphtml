@@ -64,9 +64,7 @@ describe('toggleExperiment', () => {
   });
 
   afterEach(() => {
-    clock = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   function expectToggle(cookiesString, experimentId, opt_on) {

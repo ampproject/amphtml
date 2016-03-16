@@ -50,12 +50,8 @@ describe('History', () => {
 
   afterEach(() => {
     bindingMock.verify();
-    bindingMock = null;
     history.cleanup_();
-    history = null;
-    clock = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   it('should initialize correctly', () => {
@@ -130,10 +126,7 @@ describe('HistoryBindingNatural', () => {
 
   afterEach(() => {
     history.cleanup_();
-    history = null;
-    clock = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   it('should initialize correctly', () => {
@@ -282,12 +275,8 @@ describe('HistoryBindingVirtual', () => {
 
   afterEach(() => {
     viewerMock.verify();
-    viewerMock = null;
     history.cleanup_();
-    history = null;
-    clock = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   it('should initialize correctly', () => {

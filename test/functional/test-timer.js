@@ -34,11 +34,8 @@ describe('Timer', () => {
   });
 
   afterEach(() => {
-    timer = null;
     windowMock.verify();
-    windowMock = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   it('delay', () => {

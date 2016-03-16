@@ -64,7 +64,6 @@ describe('ViewerLoginDialog', () => {
 
   afterEach(() => {
     sandbox.restore();
-    sandbox = null;
   });
 
   it('should delegate to viewer with url', () => {
@@ -203,7 +202,6 @@ describe('WebLoginDialog', () => {
 
   afterEach(() => {
     sandbox.restore();
-    sandbox = null;
   });
 
   function succeed() {

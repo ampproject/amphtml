@@ -50,11 +50,8 @@ describe('PullToRefreshBlocker', () => {
 
   afterEach(() => {
     viewportMock.verify();
-    viewportMock = null;
     blocker.cleanup();
-    blocker = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   function sendEvent(event, opt_prevetDefault) {

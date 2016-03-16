@@ -113,9 +113,7 @@ describe('CustomElement', () => {
 
   afterEach(() => {
     resourcesMock.verify();
-    resourcesMock = null;
     sandbox.restore();
-    sandbox = null;
   });
 
 
@@ -738,7 +736,6 @@ describe('CustomElement Service Elements', () => {
 
   afterEach(() => {
     sandbox.restore();
-    sandbox = null;
   });
 
   function createWithAttr(attr) {
@@ -861,7 +858,6 @@ describe('CustomElement Loading Indicator', () => {
     vsync.mutate = savedMutate;
     resourcesMock.verify();
     sandbox.restore();
-    sandbox = null;
   });
 
 
@@ -1115,7 +1111,6 @@ describe('CustomElement Overflow Element', () => {
     vsync.mutate = savedMutate;
     resourcesMock.verify();
     sandbox.restore();
-    sandbox = null;
   });
 
   it('should NOT be initialized by default', () => {

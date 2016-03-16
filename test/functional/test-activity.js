@@ -100,15 +100,6 @@ describe('Activity getTotalEngagedTime', () => {
   });
 
   afterEach(() => {
-    fakeDoc = null;
-    fakeWin = null;
-    viewer = null;
-    viewport = null;
-    activity = null;
-    whenFirstVisibleResolve = null;
-    visibilityObservable = null;
-    mousedownObservable = null;
-    scrollObservable = null;
     sandbox.restore();
   });
 

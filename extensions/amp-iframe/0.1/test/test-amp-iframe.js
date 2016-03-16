@@ -52,7 +52,6 @@ describe('amp-iframe', () => {
 
   afterEach(() => {
     sandbox.restore();
-    sandbox = null;
   });
 
   function waitForJsInIframe() {

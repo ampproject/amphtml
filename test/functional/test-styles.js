@@ -32,8 +32,6 @@ describe('Styles', () => {
 
   afterEach(() => {
     sandbox.restore();
-    sandbox = null;
-    clock = null;
   });
 
   it('makeBodyVisible', () => {

@@ -56,10 +56,6 @@ describe('amp-list component', () => {
     xhrMock.verify();
     listMock.verify();
     sandbox.restore();
-    templatesMock = null;
-    xhrMock = null;
-    listMock = null;
-    sandbox = null;
   });
 
   it('should load and render', () => {

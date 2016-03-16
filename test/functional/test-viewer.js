@@ -77,11 +77,8 @@ describe('Viewer', () => {
   });
 
   afterEach(() => {
-    viewer = null;
     windowMock.verify();
-    windowMock = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   it('should configure as natural viewport by default', () => {

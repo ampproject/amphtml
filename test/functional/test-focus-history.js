@@ -52,9 +52,7 @@ describe('FocusHistory', () => {
   });
 
   afterEach(() => {
-    clock = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   it('should subscribe to focus events', () => {

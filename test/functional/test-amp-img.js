@@ -28,7 +28,6 @@ describe('amp-img', () => {
 
   afterEach(() => {
     sandbox.restore();
-    sandbox = null;
   });
 
   function getImg(attributes, children) {

@@ -41,11 +41,7 @@ describe('UrlReplacements', () => {
   });
 
   afterEach(() => {
-    loadObservable = null;
     sandbox.restore();
-    sandbox = null;
-    replacements = null;
-    viewerService = null;
   });
 
   function getReplacements(withCid, withActivity) {
