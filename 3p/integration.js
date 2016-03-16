@@ -53,6 +53,7 @@ import {triplelift} from '../ads/triplelift';
 import {teads} from '../ads/teads';
 import {rubicon} from '../ads/rubicon';
 import {imobile} from '../ads/imobile';
+import {webediads} from '../ads/webediads';
 
 /**
  * Whether the embed type may be used with amp-embed tag.
@@ -89,6 +90,7 @@ register('triplelift', triplelift);
 register('teads', teads);
 register('rubicon', rubicon);
 register('imobile', imobile);
+register('webediads', webediads);
 
 // For backward compat, we always allow these types without the iframe
 // opting in.

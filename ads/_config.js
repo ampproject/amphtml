@@ -100,6 +100,9 @@ export const adPreconnect = {
     'https://optimized-by.rubiconproject.com',
   ],
   imobile: 'https://spad.i-mobile.co.jp',
+  webediads: [
+    'https://eu1.wbdds.com',
+  ],
 };
 
 /**
