@@ -16,6 +16,10 @@
 
 import {parseUrl, assertHttpsUrl, isProxyOrigin} from '../../../src/url';
 import {getMode} from '../../../src/mode';
+import {user} from '../../../src/log';
+
+/** @private @const {string} */
+const TAG = 'AmpServiceWorkerInstallation';
 
 /**
  * Implements custom element: <amp-install-serviceworker>
@@ -40,7 +44,7 @@ class AmpServiceWorkerInstallation extends AMP.BaseElement {
       install(this.getWin(), src);
     } else {
       if (getMode().development) {
-        console./* OK */warn(
+        user.warn(TAG,
             'Did not install ServiceWorker because it does not ' +
             'match the current origin: ' + src);
       }
@@ -66,11 +70,11 @@ function originMatches(href1, href2) {
 function install(win, src) {
   win.navigator.serviceWorker.register(src).then(function(registration) {
     if (getMode().development) {
-      console./*OK*/info('ServiceWorker registration successful with scope: ',
+      user.info(TAG, 'ServiceWorker registration successful with scope: ',
           registration.scope);
     }
   }).catch(function(e) {
-    console./*OK*/error('ServiceWorker registration failed:', e);
+    user.error(TAG, 'ServiceWorker registration failed:', e);
   });
 }
 

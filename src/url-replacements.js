@@ -17,9 +17,8 @@
 import {accessServiceForOrNull} from './access-service';
 import {assert} from './asserts';
 import {cidFor} from './cid';
-import {dev} from './log';
+import {user, rethrowAsync} from './log';
 import {documentInfoFor} from './document-info';
-import {getMode} from './mode';
 import {getService} from './service';
 import {loadPromise} from './event-helper';
 import {getSourceUrl, parseUrl, removeFragment, parseQueryString} from './url';
@@ -315,8 +314,7 @@ class UrlReplacements {
     return this.getAccessService_(this.win_).then(accessService => {
       if (!accessService) {
         // Access service is not installed.
-        this.reportDev_(
-            'Access service is not installed to access ' + expr);
+        user.error(TAG, 'Access service is not installed to access: ', expr);
         return null;
       }
       return getter(accessService);
@@ -402,7 +400,7 @@ class UrlReplacements {
       } catch (e) {
         // Report error, but do not disrupt URL replacement. This will
         // interpolate as the empty string.
-        dev.error(TAG, 'Failed to resolve var function: ', e);
+        rethrowAsync(e);
       }
       // In case the produced value is a promise, we don't actually
       // replace anything here, but do it again when the promise resolves.
@@ -410,7 +408,7 @@ class UrlReplacements {
         const p = val.catch(err => {
           // Report error, but do not disrupt URL replacement. This will
           // interpolate as the empty string.
-          dev.error(TAG, 'Var promise failed: ', err);
+          rethrowAsync(err);
         }).then(v => {
           url = url.replace(match, encodeValue(v));
         });
@@ -478,16 +476,6 @@ class UrlReplacements {
     // FOO_BAR(arg1)
     // FOO_BAR(arg1,arg2)
     return new RegExp('\\$?(' + all + ')(?:\\(([0-9a-zA-Z-_.,]+)\\))?', 'g');
-  }
-
-  /**
-   * @param {string} message
-   * @private
-   */
-  reportDev_(message) {
-    if (getMode().development || getMode().localDev) {
-      console./* OK */error(message);
-    }
   }
 }
 
