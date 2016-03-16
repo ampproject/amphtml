@@ -457,16 +457,16 @@ export const ANALYTICS_CONFIG = {
                  '&AMPSSIDC=${queryParam(ssidc)}' +
                  '&${ampp1}=${ampv1}' +
                  '&${ampp2}=${ampv2}',
-      'pageview': '${ssurl}?${ssparam}'
+      'pageview': '${ssurl}?${ssparam}',
     },
     'triggers': {
       'pageview': {
         'on': 'visible',
         'request': 'pageview',
-        'iframePing': true
-      }
-    }
-  }
+        'iframePing': true,
+      },
+    },
+  },
 };
 ANALYTICS_CONFIG['infonline']['triggers']['pageview']['iframe' +
 /* TEMPORARY EXCEPTION */ 'Ping'] = true;
