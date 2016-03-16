@@ -579,16 +579,16 @@ describe('amp-analytics', function() {
 
   it('sends extraUrlParams', () => {
     const analytics = getAnalyticsTag({
+      'vars': {'host': 'example.com', 'path': 'helloworld'},
       'extraUrlParams': {'s.evar0': '0', 's.evar1': '1', 'foofoo': 'baz'},
-      'requests': {'foo': 'https://example.com/${title}'},
+      'requests': {'foo': 'https://${host}/${path}?a=b'},
       'triggers': [{'on': 'visible', 'request': 'foo'}],
     }, {
       'config': 'config1',
     });
     return analytics.layoutCallback().then(() => {
-      expect(sendRequestSpy.args[0][0]).to.have.string('s.evar0=0');
-      expect(sendRequestSpy.args[0][0]).to.have.string('s.evar1=1');
-      expect(sendRequestSpy.args[0][0]).to.have.string('foofoo=baz');
+      expect(sendRequestSpy.args[0][0]).to.equal(
+          'https://example.com/helloworld?a=b&s.evar0=0&s.evar1=1&foofoo=baz');
     });
   });
 
