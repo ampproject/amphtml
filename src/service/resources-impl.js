@@ -1368,7 +1368,7 @@ export class Resources {
     vsm.addTransition(paused, visible, resume);
     vsm.addTransition(paused, hidden, doPass);
     vsm.addTransition(paused, inactive, unload);
-    vsm.addTransition(paused, paused, doPass);
+    vsm.addTransition(paused, paused, noop);
   }
 }
 
