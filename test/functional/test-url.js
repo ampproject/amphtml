@@ -373,6 +373,29 @@ describe('getSourceOrigin/Url', () => {
       'https://cdn.ampproject.org/c/s/origin.com%3A81/foo/?f=0',
       'https://origin.com:81/foo/?f=0');
 
+  // Removes amp-related paramters.
+  testOrigin(
+      'https://cdn.ampproject.org/c/o.com/foo/?amp_js_param=5',
+      'http://o.com/foo/');
+  testOrigin(
+      'https://cdn.ampproject.org/c/o.com/foo/?f=0&amp_js_v=5#something',
+      'http://o.com/foo/?f=0#something');
+  testOrigin(
+      'https://cdn.ampproject.org/c/o.com/foo/?amp_js_v=5&f=0#bar',
+      'http://o.com/foo/?f=0#bar');
+  testOrigin(
+      'https://cdn.ampproject.org/c/o.com/foo/?f=0&amp_js_param=5&d=5#baz',
+      'http://o.com/foo/?f=0&d=5#baz');
+  testOrigin(
+      'https://cdn.ampproject.org/c/o.com/foo/?f_amp_js_param=5&d=5',
+      'http://o.com/foo/?f_amp_js_param=5&d=5');
+  testOrigin(
+      'https://cdn.ampproject.org/c/o.com/foo/?amp_js_param=5?d=5',
+      'http://o.com/foo/');  // Treats amp_js_param=5?d=5 as one param.
+  testOrigin(
+      'https://cdn.ampproject.org/c/o.com/foo/&amp_js_param=5&d=5',
+      'http://o.com/foo/&amp_js_param=5&d=5');  // Treats &... as part of path.
+
   // Non-CDN.
   testOrigin(
       'https://origin.com/foo/?f=0',
