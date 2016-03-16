@@ -88,10 +88,10 @@ describe('Viewer Visibility State', () => {
     }
 
     function setupSpys() {
-      layoutCallback = sinon.spy(protoElement, 'layoutCallback');
-      unlayoutCallback = sinon.spy(protoElement, 'unlayoutCallback');
-      pauseCallback = sinon.spy(protoElement, 'pauseCallback');
-      resumeCallback = sinon.spy(protoElement, 'resumeCallback');
+      layoutCallback = sandbox.spy(protoElement, 'layoutCallback');
+      unlayoutCallback = sandbox.spy(protoElement, 'unlayoutCallback');
+      pauseCallback = sandbox.spy(protoElement, 'pauseCallback');
+      resumeCallback = sandbox.spy(protoElement, 'resumeCallback');
     }
 
     beforeEach(() => {
