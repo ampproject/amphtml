@@ -16,7 +16,7 @@
 
 import {closestByTag} from './dom';
 import {getService} from './service';
-import {log} from './log';
+import {dev} from './log';
 import {historyFor} from './history';
 import {parseUrl} from './url';
 import {viewerFor} from './viewer';
@@ -188,7 +188,7 @@ export function onDocumentElementClick_(e, viewport, history) {
   if (elem) {
     viewport./*OK*/scrollIntoView(elem);
   } else {
-    log.warn('documentElement',
+    dev.warn('documentElement',
         `failed to find element with id=${hash} or a[name=${hash}]`);
   }
 

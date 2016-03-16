@@ -22,7 +22,7 @@ import {ElementStub, stubbedElements} from './element-stub';
 import {assert} from './asserts';
 import {createLoaderElement} from '../src/loader';
 import {getIntersectionChangeEntry} from '../src/intersection-observer';
-import {log} from './log';
+import {log, user} from './log';
 import {parseSizeList} from './size-list';
 import {reportError} from './error';
 import {resourcesFor} from './resources';
@@ -1068,7 +1068,7 @@ export function createAmpElementProto(win, name, implementationClass) {
     this.getOverflowElement();
     if (!this.overflowElement_) {
       if (overflown) {
-        log.warn(TAG_,
+        user.warn(TAG_,
             'Cannot resize element and overlfow is not available', this);
       }
     } else {

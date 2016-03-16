@@ -19,7 +19,7 @@ import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
 import {endsWith} from '../../../src/string';
 import {listen} from '../../../src/iframe-helper';
 import {loadPromise} from '../../../src/event-helper';
-import {log} from '../../../src/log';
+import {user} from '../../../src/log';
 import {parseUrl} from '../../../src/url';
 import {removeElement} from '../../../src/dom';
 import {timer} from '../../../src/timer';
@@ -373,7 +373,7 @@ export class AmpIframe extends AMP.BaseElement {
    */
   updateHeight_(newHeight) {
     if (!this.isResizable_) {
-      log.warn(TAG_,
+      user.warn(TAG_,
           'ignoring embed-size request because this iframe is not resizable',
           this.element);
       return;
