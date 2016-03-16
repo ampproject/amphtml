@@ -17,7 +17,7 @@
 import {assert} from '../asserts';
 import {getService} from '../service';
 import {getSourceOrigin} from '../url';
-import {log} from '../log';
+import {dev, log} from '../log';
 import {recreateNonProtoObject} from '../json';
 import {timer} from '../timer';
 import {viewerFor} from '../viewer';
@@ -144,7 +144,7 @@ export class Storage {
     this.viewer_.onBroadcast(message => {
       if (message['type'] == 'amp-storage-reset' &&
               message['origin'] == this.origin_) {
-        log.fine(TAG, 'Received reset message');
+        dev.fine(TAG, 'Received reset message');
         this.storePromise_ = null;
       }
     });
@@ -152,7 +152,7 @@ export class Storage {
 
   /** @private */
   broadcastReset_() {
-    log.fine(TAG, 'Broadcasted reset message');
+    dev.fine(TAG, 'Broadcasted reset message');
     this.viewer_.broadcast({
       'type': 'amp-storage-reset',
       'origin': this.origin_,

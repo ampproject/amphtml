@@ -18,7 +18,7 @@ import {CSS} from '../../../build/amp-accordion-0.1.css';
 import {Layout} from '../../../src/layout';
 import {assert} from '../../../src/asserts';
 import {isExperimentOn} from '../../../src/experiments';
-import {log} from '../../../src/log';
+import {user} from '../../../src/log';
 
 /** @const */
 const EXPERIMENT = 'amp-accordion';
@@ -41,7 +41,7 @@ class AmpAccordion extends AMP.BaseElement {
     /** @const @private {boolean} */
     this.isExperimentOn_ = isExperimentOn(this.getWin(), EXPERIMENT);
     if (!this.isExperimentOn_) {
-      log.warn(TAG, `Experiment ${EXPERIMENT} disabled`);
+      user.warn(TAG, `Experiment ${EXPERIMENT} disabled`);
       return;
     }
     this.element.setAttribute('role', 'tablist');

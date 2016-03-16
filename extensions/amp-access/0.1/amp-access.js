@@ -27,7 +27,7 @@ import {getValueForExpr} from '../../../src/json';
 import {installStyles} from '../../../src/styles';
 import {isObject} from '../../../src/types';
 import {listenOnce} from '../../../src/event-helper';
-import {log, user} from '../../../src/log';
+import {dev, log, user} from '../../../src/log';
 import {onDocumentReady} from '../../../src/document-ready';
 import {openLoginDialog} from './login-dialog';
 import {parseQueryString} from '../../../src/url';
@@ -264,7 +264,7 @@ export class AccessService {
    */
   start_() {
     if (!this.enabled_) {
-      log.info(TAG, 'Access is disabled - no "id=amp-access" element');
+      user.info(TAG, 'Access is disabled - no "id=amp-access" element');
       return this;
     }
     this.startInternal_();
@@ -273,7 +273,7 @@ export class AccessService {
 
   /** @private */
   startInternal_() {
-    log.fine(TAG, 'config:', this.config_);
+    dev.fine(TAG, 'config:', this.config_);
 
     actionServiceFor(this.win).installActionHandler(
         this.accessElement_, this.handleAction_.bind(this));
@@ -359,17 +359,17 @@ export class AccessService {
    */
   runAuthorization_(opt_disableFallback) {
     if (this.config_.type == AccessType.OTHER) {
-      log.fine(TAG, 'Ignore authorization due to type=other');
+      dev.fine(TAG, 'Ignore authorization due to type=other');
       this.firstAuthorizationResolver_();
       return Promise.resolve();
     }
 
-    log.fine(TAG, 'Start authorization via ', this.config_.authorization);
+    dev.fine(TAG, 'Start authorization via ', this.config_.authorization);
     this.toggleTopClass_('amp-access-loading', true);
     const urlPromise = this.buildUrl_(
         this.config_.authorization, /* useAuthData */ false);
     const promise = urlPromise.then(url => {
-      log.fine(TAG, 'Authorization URL: ', url);
+      dev.fine(TAG, 'Authorization URL: ', url);
       return this.timer_.timeoutPromise(
           AUTHORIZATION_TIMEOUT,
           this.xhr_.fetchJson(url, {
@@ -387,7 +387,7 @@ export class AccessService {
         throw error;
       }
     }).then(response => {
-      log.fine(TAG, 'Authorization response: ', response);
+      dev.fine(TAG, 'Authorization response: ', response);
       this.setAuthResponse_(response);
       this.toggleTopClass_('amp-access-loading', false);
       this.toggleTopClass_('amp-access-error', false);
@@ -597,7 +597,7 @@ export class AccessService {
     if (this.reportViewPromise_) {
       return this.reportViewPromise_;
     }
-    log.fine(TAG, 'start view monitoring');
+    dev.fine(TAG, 'start view monitoring');
     this.reportViewPromise_ = this.whenViewed_(timeToView)
         .then(() => {
           // Wait for the most recent authorization flow to complete.
@@ -610,7 +610,7 @@ export class AccessService {
         })
         .catch(reason => {
           // Ignore - view has been canceled.
-          log.fine(TAG, 'view cancelled:', reason);
+          dev.fine(TAG, 'view cancelled:', reason);
           this.reportViewPromise_ = null;
           throw reason;
         });
@@ -667,13 +667,13 @@ export class AccessService {
    */
   reportViewToServer_() {
     if (!this.config_.pingback) {
-      log.fine(TAG, 'Ignore pingback');
+      dev.fine(TAG, 'Ignore pingback');
       return Promise.resolve();
     }
     const promise = this.buildUrl_(
         this.config_.pingback, /* useAuthData */ true);
     return promise.then(url => {
-      log.fine(TAG, 'Pingback URL: ', url);
+      dev.fine(TAG, 'Pingback URL: ', url);
       return this.xhr_.sendSignal(url, {
         method: 'POST',
         credentials: 'include',
@@ -684,7 +684,7 @@ export class AccessService {
         body: '',
       });
     }).then(() => {
-      log.fine(TAG, 'Pingback complete');
+      dev.fine(TAG, 'Pingback complete');
       this.analyticsEvent_('access-pingback-sent');
     }).catch(error => {
       log.error(TAG, 'Pingback failed: ', error);
@@ -744,7 +744,7 @@ export class AccessService {
       return this.loginPromise_;
     }
 
-    log.fine(TAG, 'Start login: ', type);
+    dev.fine(TAG, 'Start login: ', type);
     assert(this.config_.loginMap[type],
         'Login URL is not configured: %s', type);
     // Login URL should always be available at this time.
@@ -753,7 +753,7 @@ export class AccessService {
 
     this.loginAnalyticsEvent_(type, 'started');
     const loginPromise = this.openLoginDialog_(loginUrl).then(result => {
-      log.fine(TAG, 'Login dialog completed: ', type, result);
+      dev.fine(TAG, 'Login dialog completed: ', type, result);
       this.loginPromise_ = null;
       const query = parseQueryString(result);
       const s = query['success'];
@@ -771,7 +771,7 @@ export class AccessService {
         this.loginAnalyticsEvent_(type, 'rejected');
       }
     }).catch(reason => {
-      log.fine(TAG, 'Login dialog failed: ', type, reason);
+      dev.fine(TAG, 'Login dialog failed: ', type, reason);
       this.loginAnalyticsEvent_(type, 'failed');
       if (this.loginPromise_ == loginPromise) {
         this.loginPromise_ = null;

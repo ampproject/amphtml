@@ -15,7 +15,7 @@
  */
 
 import {getCurve} from './curve';
-import {log} from './log';
+import {dev, log} from './log';
 import {timer} from './timer';
 import {vsyncFor} from './vsync';
 
@@ -232,7 +232,7 @@ class AnimationPlayer {
     if (this.vsync_.canAnimate()) {
       this.task_(this.state_);
     } else {
-      log.warn(TAG_, 'cannot animate');
+      dev.warn(TAG_, 'cannot animate');
       this.complete_(/* success */ false, /* dir */ 0);
     }
   }
@@ -314,7 +314,7 @@ class AnimationPlayer {
       if (this.vsync_.canAnimate()) {
         this.task_(this.state_);
       } else {
-        log.warn(TAG_, 'cancel animation');
+        dev.warn(TAG_, 'cancel animation');
         this.complete_(/* success */ false, /* dir */ 0);
       }
     }

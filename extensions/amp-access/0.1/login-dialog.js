@@ -16,7 +16,7 @@
 
 import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
-import {log} from '../../../src/log';
+import {dev} from '../../../src/log';
 import {parseUrl} from '../../../src/url';
 import {viewerFor} from '../../../src/viewer';
 
@@ -79,7 +79,7 @@ class ViewerLoginDialog {
     }
     return urlPromise.then(url => {
       const loginUrl = buildLoginUrl(url, 'RETURN_URL');
-      log.fine(TAG, 'Open viewer dialog: ', loginUrl);
+      dev.fine(TAG, 'Open viewer dialog: ', loginUrl);
       return this.viewer.sendMessage('openDialog', {
         'url': loginUrl,
       }, true);
@@ -182,18 +182,18 @@ class WebLoginDialog {
     let dialogReadyPromise = null;
     if (typeof this.urlOrPromise == 'string') {
       const loginUrl = buildLoginUrl(this.urlOrPromise, returnUrl);
-      log.fine(TAG, 'Open dialog: ', loginUrl, returnUrl, w, h, x, y);
+      dev.fine(TAG, 'Open dialog: ', loginUrl, returnUrl, w, h, x, y);
       this.dialog_ = this.win.open(loginUrl, '_blank', options);
       if (this.dialog_) {
         dialogReadyPromise = Promise.resolve();
       }
     } else {
-      log.fine(TAG, 'Open dialog: ', 'about:blank', returnUrl, w, h, x, y);
+      dev.fine(TAG, 'Open dialog: ', 'about:blank', returnUrl, w, h, x, y);
       this.dialog_ = this.win.open('', '_blank', options);
       if (this.dialog_) {
         dialogReadyPromise = this.urlOrPromise.then(url => {
           const loginUrl = buildLoginUrl(url, returnUrl);
-          log.fine(TAG, 'Set dialog url: ', loginUrl);
+          dev.fine(TAG, 'Set dialog url: ', loginUrl);
           this.dialog_.location.replace(loginUrl);
         }, error => {
           throw new Error('failed to resolve url: ' + error);
@@ -232,14 +232,14 @@ class WebLoginDialog {
     }, 500);
 
     this.messageUnlisten_ = listen(this.win, 'message', e => {
-      log.fine(TAG, 'MESSAGE:', e);
+      dev.fine(TAG, 'MESSAGE:', e);
       if (e.origin != returnOrigin) {
         return;
       }
       if (!e.data || e.data.sentinel != 'amp') {
         return;
       }
-      log.fine(TAG, 'Received message from dialog: ', e.data);
+      dev.fine(TAG, 'Received message from dialog: ', e.data);
       if (e.data.type == 'result') {
         if (this.dialog_) {
           this.dialog_./*OK*/postMessage({
@@ -261,7 +261,7 @@ class WebLoginDialog {
     if (!this.resolve_) {
       return;
     }
-    log.fine(TAG, 'Login done: ', result, opt_error);
+    dev.fine(TAG, 'Login done: ', result, opt_error);
     if (opt_error) {
       this.reject_(opt_error);
     } else {

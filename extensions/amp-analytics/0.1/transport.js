@@ -16,7 +16,7 @@
 
 import {assert} from '../../../src/asserts';
 import {assertHttpsUrl, parseUrl} from '../../../src/url';
-import {log} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {loadPromise} from '../../../src/event-helper';
 import {timer} from '../../../src/timer';
 import {removeElement} from '../../../src/dom';
@@ -43,7 +43,7 @@ export function sendRequest(win, request, transportOptions) {
     Transport.sendRequestUsingImage(win, request);
     return;
   }
-  log.warn(TAG_, 'Failed to send request', request, transportOptions);
+  user.warn(TAG_, 'Failed to send request', request, transportOptions);
 }
 
 /**
@@ -61,9 +61,9 @@ export class Transport {
     image.width = 1;
     image.height = 1;
     loadPromise(image).then(() => {
-      log.fine(TAG_, 'Sent image request', request);
+      dev.fine(TAG_, 'Sent image request', request);
     }).catch(() => {
-      log.warn(TAG_, 'Failed to send image request', request);
+      user.warn(TAG_, 'Failed to send image request', request);
     });
   }
 
@@ -77,7 +77,7 @@ export class Transport {
       return false;
     }
     win.navigator.sendBeacon(request, '');
-    log.fine(TAG_, 'Sent beacon request', request);
+    dev.fine(TAG_, 'Sent beacon request', request);
     return true;
   }
 
@@ -102,7 +102,7 @@ export class Transport {
 
     xhr.onreadystatechange = () => {
       if (xhr.readystate == 4) {
-        log.fine(TAG_, 'Sent XHR request', request);
+        dev.fine(TAG_, 'Sent XHR request', request);
       }
     };
 

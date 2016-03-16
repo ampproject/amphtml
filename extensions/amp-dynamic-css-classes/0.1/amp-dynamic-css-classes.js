@@ -16,7 +16,7 @@
 
 import {getService} from '../../../src/service';
 import {isExperimentOn} from '../../../src/experiments';
-import {log} from '../../../src/log';
+import {user} from '../../../src/log';
 import {parseUrl} from '../../../src/url';
 import {viewerFor} from '../../../src/viewer';
 import {vsyncFor} from '../../../src/vsync';
@@ -147,7 +147,7 @@ function addRuntimeClasses(win) {
     addReferrerClasses(win);
     addViewerClass(win);
   } else {
-    log.warn(TAG, `Experiment ${EXPERIMENT} disabled`);
+    user.warn(TAG, `Experiment ${EXPERIMENT} disabled`);
   }
 }
 
