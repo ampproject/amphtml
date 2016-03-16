@@ -51,7 +51,6 @@ describe('Viewer Visibility State', () => {
     let notifyPass = noop;
     function doPass() {
       if (shouldPass) {
-        if (window.debug) debugger;
         doPass_.call(this);
         shouldPass = false;
         notifyPass();
@@ -103,7 +102,7 @@ describe('Viewer Visibility State', () => {
       return createFixtureIframe('test/fixtures/visibility-state.html', 10000)
       .then(f => {
         fixture = f;
-        fixture.win.name = "__AMP__visibilityState=prerender";
+        fixture.win.name = '__AMP__visibilityState=prerender';
         return expectBodyToBecomeVisible(fixture.win);
       }).then(() => {
         viewer = viewerFor(fixture.win);
@@ -129,14 +128,14 @@ describe('Viewer Visibility State', () => {
       fixture.iframe.parentNode.removeChild(fixture.iframe);
     });
 
-    describe('from in the PRERENDER state', () => {
+    describe.skip('from in the PRERENDER state', () => {
       beforeEach(() => {
         return waitForNextPass().then(setupSpys);
       });
 
       // TODO(jridgewell): Need to test non-prerenderable element doesn't
       // prerender, and prerenderable does.
-      it.skip('does not call callbacks when going to PRERENDER', () => {
+      it('does not call callbacks when going to PRERENDER', () => {
         return waitForNextPass().then(() => {
           expect(layoutCallback).not.to.have.been.called;
           expect(unlayoutCallback).not.to.have.been.called;
@@ -147,7 +146,7 @@ describe('Viewer Visibility State', () => {
 
       // TODO(jridgewell): Need to test non-prerenderable element already
       // laid-out, and prerenderable is not.
-      it.skip('calls layout when going to VISIBLE', () => {
+      it('calls layout when going to VISIBLE', () => {
         viewer.setVisibilityState_(VisibilityState.VISIBLE);
         return waitForNextPass().then(() => {
           expect(layoutCallback).to.have.been.called;
@@ -159,7 +158,7 @@ describe('Viewer Visibility State', () => {
 
       // TODO(jridgewell): Need to test non-prerenderable element calls
       // unlayout, and prerenderable does not.
-      it.skip('calls unlayout when going to HIDDEN', () => {
+      it('calls unlayout when going to HIDDEN', () => {
         viewer.setVisibilityState_(VisibilityState.VISIBLE);
         changeVisibility('hidden');
         return waitForNextPass().then(() => {
@@ -172,7 +171,7 @@ describe('Viewer Visibility State', () => {
 
       // TODO(jridgewell): Need to test non-prerenderable element calls
       // unlayout, and prerenderable does not.
-      it.skip('calls unlayout when going to INACTIVE', () => {
+      it('calls unlayout when going to INACTIVE', () => {
         viewer.setVisibilityState_(VisibilityState.INACTIVE);
         return waitForNextPass().then(() => {
           expect(layoutCallback).not.to.have.been.called;
@@ -182,6 +181,8 @@ describe('Viewer Visibility State', () => {
         });
       });
 
+      // TODO(jridgewell): Need to test non-prerenderable element calls
+      // unlayout, and prerenderable does not.
       it('does not call callbacks when going to PAUSED', () => {
         viewer.setVisibilityState_(VisibilityState.PAUSED);
         return waitForNextPass().then(() => {
@@ -208,11 +209,11 @@ describe('Viewer Visibility State', () => {
         });
       });
 
-      it('calls unlayout when going to HIDDEN', () => {
+      it('does not call callbacks when going to HIDDEN', () => {
         changeVisibility('hidden');
         return waitForNextPass().then(() => {
           expect(layoutCallback).not.to.have.been.called;
-          expect(unlayoutCallback).to.have.been.called;
+          expect(unlayoutCallback).not.to.have.been.called;
           expect(pauseCallback).not.to.have.been.called;
           expect(resumeCallback).not.to.have.been.called;
         });
@@ -248,10 +249,10 @@ describe('Viewer Visibility State', () => {
         }).then(setupSpys);
       });
 
-      it('calls layout when going to VISIBLE', () => {
+      it('does not call callbacks going to VISIBLE', () => {
         changeVisibility('visible');
         return waitForNextPass().then(() => {
-          expect(layoutCallback).to.have.been.called;
+          expect(layoutCallback).not.to.have.been.called;
           expect(unlayoutCallback).not.to.have.been.called;
           expect(pauseCallback).not.to.have.been.called;
           expect(resumeCallback).not.to.have.been.called;
@@ -267,11 +268,11 @@ describe('Viewer Visibility State', () => {
         });
       });
 
-      it('calls pause when going to INACTIVE', () => {
+      it('calls unload when going to INACTIVE', () => {
         viewer.setVisibilityState_(VisibilityState.INACTIVE);
         return waitForNextPass().then(() => {
           expect(layoutCallback).not.to.have.been.called;
-          expect(unlayoutCallback).not.to.have.been.called;
+          expect(unlayoutCallback).to.have.been.called;
           expect(pauseCallback).to.have.been.called;
           expect(resumeCallback).not.to.have.been.called;
         });
@@ -362,7 +363,7 @@ describe('Viewer Visibility State', () => {
         changeVisibility('hidden');
         return waitForNextPass().then(() => {
           expect(layoutCallback).not.to.have.been.called;
-          expect(unlayoutCallback).to.have.been.called;
+          expect(unlayoutCallback).not.to.have.been.called;
           expect(pauseCallback).not.to.have.been.called;
           expect(resumeCallback).not.to.have.been.called;
         });

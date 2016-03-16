@@ -1306,11 +1306,8 @@ export class Resources {
   setupVisibilityStateMachine_(vsm) {
     const prerender = VisibilityState.PRERENDER;
     const visible = VisibilityState.VISIBLE;
-    // Viewer has told us we are no longer active
     const hidden = VisibilityState.HIDDEN;
-    // Viewer has told us to pause media but don't unload it.
     const paused = VisibilityState.PAUSED;
-    // The browser tab is no longer active
     const inactive = VisibilityState.INACTIVE;
 
     const doPass = () => {
@@ -1339,14 +1336,8 @@ export class Resources {
     const pause = () => {
       this.resources_.forEach(r => r.pause());
     };
-    const unlayout = () => {
-      this.resources_.forEach(r => r.unlayout());
-    };
-    const pauseAndUnlayout = () => {
-      this.resources_.forEach(r => {
-        r.pause();
-        r.unlayout();
-      });
+    const unload = () => {
+      this.resources_.forEach(r => r.unload());
     };
     const resume = () => {
       this.resources_.forEach(r => r.resume());
@@ -1355,18 +1346,18 @@ export class Resources {
 
     vsm.addTransition(prerender, prerender, doPass);
     vsm.addTransition(prerender, visible, doPass);
-    vsm.addTransition(prerender, hidden, unlayout);
-    vsm.addTransition(prerender, inactive, unlayout);
+    vsm.addTransition(prerender, hidden, doPass);
+    vsm.addTransition(prerender, inactive, doPass);
     vsm.addTransition(prerender, paused, doPass);
 
     vsm.addTransition(visible, visible, doPass);
-    vsm.addTransition(visible, hidden, unlayout);
-    vsm.addTransition(visible, inactive, pauseAndUnlayout);
+    vsm.addTransition(visible, hidden, doPass);
+    vsm.addTransition(visible, inactive, unload);
     vsm.addTransition(visible, paused, pause);
 
     vsm.addTransition(hidden, visible, doPass);
     vsm.addTransition(hidden, hidden, doPass);
-    vsm.addTransition(hidden, inactive, pause);
+    vsm.addTransition(hidden, inactive, unload);
     vsm.addTransition(hidden, paused, pause);
 
     vsm.addTransition(inactive, visible, doPass);
@@ -1375,8 +1366,8 @@ export class Resources {
     vsm.addTransition(inactive, paused, doPass);
 
     vsm.addTransition(paused, visible, resume);
-    vsm.addTransition(paused, hidden, unlayout);
-    vsm.addTransition(paused, inactive, unlayout);
+    vsm.addTransition(paused, hidden, doPass);
+    vsm.addTransition(paused, inactive, unload);
     vsm.addTransition(paused, paused, doPass);
   }
 }
