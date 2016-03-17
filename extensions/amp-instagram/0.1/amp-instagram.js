@@ -61,7 +61,10 @@ class AmpInstagram extends AMP.BaseElement {
      * @private {?Promise}
      */
     this.iframePromise_ = null;
-
+    /**
+     * @private {?Element}
+     */
+    this.placeholderWrapper_ = null;
     /**
      * @private @const
      */
@@ -104,6 +107,11 @@ class AmpInstagram extends AMP.BaseElement {
         setStyles(iframe, {
           'opacity': 1,
         });
+
+        // Hide the initial rendered image to avoid overlaying videos.
+        setStyles(this.placeholderWrapper_, {
+          'display': 'none',
+        });
       });
     });
   }
@@ -131,6 +139,7 @@ class AmpInstagram extends AMP.BaseElement {
       'right': '8px',
     });
     wrapper.appendChild(image);
+    this.placeholderWrapper_ = wrapper;
     this.applyFillContent(image);
     this.element.appendChild(wrapper);
     // The iframe takes up a lot of resources. We only render it of we are in
@@ -155,6 +164,9 @@ class AmpInstagram extends AMP.BaseElement {
       removeElement(this.iframe_);
       this.iframe_ = null;
       this.iframePromise_ = null;
+      setStyles(this.placeholderWrapper_, {
+        'display': '',
+      });
     }
     return true;  // Call layoutCallback again.
   }
