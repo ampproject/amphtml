@@ -442,3 +442,5 @@ export const ANALYTICS_CONFIG = {
 ANALYTICS_CONFIG['infonline']['triggers']['pageview']['iframe' +
 /* TEMPORARY EXCEPTION */ 'Ping'] = true;
 
+ANALYTICS_CONFIG['adobeanalytics']['triggers']['pageview']['iframe' +
+/* TEMPORARY EXCEPTION */ 'Ping'] = true;
