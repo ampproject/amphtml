@@ -27,9 +27,11 @@ export const adPrefetch = {
     'https://securepubads.g.doubleclick.net/static/glade.js',
   ],
   a9: 'https://c.amazon-adsystem.com/aax2/assoc.js',
+  adblade: 'https://web.adblade.com/js/ads/async/show.js',
   adsense: 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js',
   criteo: 'https://static.criteo.net/js/ld/publishertag.js',
   dotandads: 'https://amp.ad.dotandad.com/dotandadsAmp.js',
+  industrybrains: 'https://web.industrybrains.com/js/ads/async/show.js',
   mediaimpact: 'https://ec-ns.sascdn.com/diff/251/divscripte/amp.js',
   smartadserver: 'https://ec-ns.sascdn.com/diff/js/smart.js',
   yieldmo: 'https://static.yieldmo.com/ym.amp1.js',
@@ -46,6 +48,14 @@ export const adPrefetch = {
  * @const {!Object<string, (string|!Array<string>)>}
  */
 export const adPreconnect = {
+  adblade: [
+    'https://staticd.cdn.adblade.com',
+    'https://static.adblade.com',
+  ],
+  industrybrains: [
+    'https://staticd.cdn.industrybrains.com',
+    'https://static.industrybrains.com',
+  ],
   adform: 'https://track.adform.net',
   adreactor: 'https://adserver.adreactor.com',
   adsense: 'https://googleads.g.doubleclick.net',

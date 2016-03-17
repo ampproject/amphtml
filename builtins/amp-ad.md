@@ -55,6 +55,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 ## Supported ad networks
 
 - [A9](../ads/a9.md)
+- [Adblade](../ads/adblade.md)
 - [Adform](../ads/adform.md)
 - [AdReactor](../ads/adreactor.md)
 - [AdSense](../ads/adsense.md)
@@ -63,6 +64,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [Dot and Media](../ads/dotandads.md)
 - [Doubleclick](../ads/doubleclick.md)
 - [Flite](../ads/flite.md)
+- [Industrybrains](../ads/industrybrains.md)
 - [plista](../ads/plista.md)
 - [Smart AdServer](../ads/smartadserver.md)
 - [Yieldmo](../ads/yieldmo.md)
