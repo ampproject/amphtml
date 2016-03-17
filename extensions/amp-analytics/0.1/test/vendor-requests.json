@@ -42,7 +42,7 @@
     "host": "https://api-v3.tinypass.com",
     "basePrefix": "/api/v3",
     "baseSuffix": "&pageview_id=_page_view_id_&rand=_random_&amp_client_id=_client_id_&aid=$aid",
-    "pageview": "https://api-v3.tinypass.com/api/v3/page/track?url=_canonical_url_&referer=_document_referrer_&content_created=$contentCreated&content_author=$contentAuthor&content_section=$contentSection&timezone_offset=_timezone_&tags=$tags&amp_url=_ampdoc_url_&screen=_screen_width_x_screen_height_&pageview_id=_page_view_id_&rand=_random_&aid=$aid&amp_client_id=_client_id_"
+    "pageview": "https://api-v3.tinypass.com/api/v3/page/track?url=_canonical_url_&referer=_document_referrer_&content_created=$contentCreated&content_author=$contentAuthor&content_section=$contentSection&timezone_offset=_timezone_&tags=$tags&amp_url=_ampdoc_url_&screen=_screen_width_x_screen_height_&pageview_id=_page_view_id_&rand=_random_&amp_client_id=_client_id_&aid=$aid"
   },
   "quantcast": {
     "host": "https://pixel.quantserve.com/pixel",
