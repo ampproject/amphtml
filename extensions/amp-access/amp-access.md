@@ -85,11 +85,11 @@ Access Content Markup determines which sections are visible or hidden based on t
 
 ### Authorization Endpoint
 
-Authorization is an endpoint provided by the publisher and called by AMP Runtime or Google AMP Cache. It is a credentialed CORS endpoint. This endpoint returns the access parameters that can be used by the Content Markup to hide or show different parts of the document.
+Authorization is an endpoint provided by the publisher and called by AMP Runtime or Google AMP Cache. It is a credentialed CORS GET endpoint. This endpoint returns the access parameters that can be used by the Content Markup to hide or show different parts of the document.
 
 ### Pingback Endpoint
 
-Pingback is an endpoint provided by the publisher and called by AMP Runtime or Google AMP Cache. It is a credentialed CORS endpoint. AMP Runtime calls this endpoint automatically when the Reader has started viewing the document. This endpoint is also called after the Reader has successfully completed the Login Flow. On of the main goals of the Pingback is for the Publisher to update metering information.
+Pingback is an endpoint provided by the publisher and called by AMP Runtime or Google AMP Cache. It is a credentialed CORS POST endpoint. AMP Runtime calls this endpoint automatically when the Reader has started viewing the document. This endpoint is also called after the Reader has successfully completed the Login Flow. On of the main goals of the Pingback is for the Publisher to update metering information.
 
 ### Login Page and Login Link
 
@@ -230,7 +230,7 @@ And here’s an example that shows additional content to the premium subscribers
 
 ### Authorization Endpoint
 
-Authorization is configured via ```authorization``` property in the [AMP Access Configuration][8] section. It is a credentialed CORS endpoint. See [CORS Origin Security][9] for how this request should be secured.
+Authorization is configured via ```authorization``` property in the [AMP Access Configuration][8] section. It is a credentialed CORS GET endpoint. See [CORS Origin Security][9] for how this request should be secured.
 
 Authorization can take any parameters as defined in the [Access URL Variables][7] section. For instance, it could pass AMP Reader ID and document URL. Besides URL parameters, the Publisher may use any information naturally delivered via HTTP protocol, such as Reader’s IP address. The inclusion of the `READER_ID` is required.
 
@@ -294,7 +294,7 @@ In the *server* option, the call to Authorization endpoint is done by Google AMP
 
 ### Pingback Endpoint
 
-Pingback is configured via ```pingback``` property in the [AMP Access Configuration][8] section. It is a credentialed CORS endpoint. See [CORS Origin Security][9]” for how this request should be secured.
+Pingback is configured via ```pingback``` property in the [AMP Access Configuration][8] section. It is a credentialed CORS POST endpoint. See [CORS Origin Security][9]” for how this request should be secured.
 
 Pingback URL can take any parameters as defined in the [Access URL Variables][7] section. For instance, it could pass AMP Reader ID and document URL. The inclusion of the `READER_ID` is required.
 
