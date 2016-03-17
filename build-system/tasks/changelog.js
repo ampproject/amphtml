@@ -217,7 +217,8 @@ function getLastGitTag() {
  */
 function getGitLog(tag) {
   var options = {
-    args: 'log ' + branch + '...' + tag + ' --pretty=format:%s --merges'
+    args: 'log ' + branch + '...' + tag +
+        ' --pretty=format:%s --merges --first-parent'
   };
   return gitExec(options).then(function(log) {
     if (!log) {
@@ -306,7 +307,7 @@ function onGitLogSuccess(gitMetadata, logs) {
   assert(typeof logs == 'string', 'git log should be a string.\n' + logs);
   return commits
     .filter(function(commit) {
-      // filter non Pull request merges
+      // Filter non Pull request merges.
       return commit.indexOf('Merge pull') == 0;
     })
     .map(function(commit) {
@@ -324,7 +325,7 @@ function errHandler(err) {
     msg = err.message;
   }
   util.log(util.colors.red(msg));
-  return err;
+  throw err;
 }
 
 /**
