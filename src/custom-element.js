@@ -22,10 +22,10 @@ import {ElementStub, stubbedElements} from './element-stub';
 import {assert} from './asserts';
 import {createLoaderElement} from '../src/loader';
 import {getIntersectionChangeEntry} from '../src/intersection-observer';
-import {log, user} from './log';
 import {parseSizeList} from './size-list';
 import {reportError} from './error';
 import {resourcesFor} from './resources';
+import {rethrowAsync, user} from './log';
 import {timer} from './timer';
 import {vsyncFor} from './vsync';
 import {getServicePromise, getServicePromiseOrNull} from './service';
@@ -851,7 +851,8 @@ export function createAmpElementProto(win, name, implementationClass) {
     try {
       this.implementation_.executeAction(invocation, deferred);
     } catch (e) {
-      log.error(TAG_, 'Action execution failed:', invocation, e);
+      rethrowAsync('Action execution failed:', e,
+          invocation.target.tagName, invocation.method);
     }
   };
 

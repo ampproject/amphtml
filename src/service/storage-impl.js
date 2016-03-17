@@ -17,7 +17,7 @@
 import {assert} from '../asserts';
 import {getService} from '../service';
 import {getSourceOrigin} from '../url';
-import {dev, log} from '../log';
+import {dev} from '../log';
 import {recreateNonProtoObject} from '../json';
 import {timer} from '../timer';
 import {viewerFor} from '../viewer';
@@ -116,7 +116,7 @@ export class Storage {
       this.storePromise_ = this.binding_.loadBlob(this.origin_)
           .then(blob => blob ? JSON.parse(atob(blob)) : {})
           .catch(reason => {
-            log.error(TAG, 'Failed to load store: ', reason);
+            dev.error(TAG, 'Failed to load store: ', reason);
             return {};
           })
           .then(obj => new Store(obj));

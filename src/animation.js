@@ -15,7 +15,7 @@
  */
 
 import {getCurve} from './curve';
-import {dev, log} from './log';
+import {dev} from './log';
 import {timer} from './timer';
 import {vsyncFor} from './vsync';
 
@@ -267,7 +267,7 @@ class AnimationPlayer {
           }
         }
       } catch (e) {
-        log.error(TAG_, 'completion failed: ' + e, e);
+        dev.error(TAG_, 'completion failed: ' + e, e);
         success = false;
       }
     }
@@ -335,7 +335,7 @@ class AnimationPlayer {
         try {
           normTime = segment.curve(normLinearTime);
         } catch (e) {
-          log.error(TAG_, 'step curve failed: ' + e, e);
+          dev.error(TAG_, 'step curve failed: ' + e, e);
           this.complete_(/* success */ false, /* dir */ 0);
           return;
         }
@@ -350,7 +350,7 @@ class AnimationPlayer {
     try {
       segment.func(normTime, segment.completed);
     } catch (e) {
-      log.error(TAG_, 'step mutate failed: ' + e, e);
+      dev.error(TAG_, 'step mutate failed: ' + e, e);
       this.complete_(/* success */ false, /* dir */ 0);
       return;
     }

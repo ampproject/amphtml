@@ -27,7 +27,7 @@ import {getValueForExpr} from '../../../src/json';
 import {installStyles} from '../../../src/styles';
 import {isObject} from '../../../src/types';
 import {listenOnce} from '../../../src/event-helper';
-import {dev, log, user} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {onDocumentReady} from '../../../src/document-ready';
 import {openLoginDialog} from './login-dialog';
 import {parseQueryString} from '../../../src/url';
@@ -529,7 +529,7 @@ export class AccessService {
         const p = this.renderTemplate_(element, templateElements[i], response)
             .catch(error => {
               // Ignore the error.
-              log.error(TAG, 'Template failed: ', error,
+              dev.error(TAG, 'Template failed: ', error,
                   templateElements[i], element);
             });
         promises.push(p);
@@ -687,9 +687,8 @@ export class AccessService {
       dev.fine(TAG, 'Pingback complete');
       this.analyticsEvent_('access-pingback-sent');
     }).catch(error => {
-      log.error(TAG, 'Pingback failed: ', error);
       this.analyticsEvent_('access-pingback-failed');
-      throw error;
+      throw user.createError('Pingback failed: ', error);
     });
   }
 
