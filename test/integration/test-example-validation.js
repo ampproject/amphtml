@@ -55,6 +55,7 @@ describe('example', function() {
     'instagram.amp.html',
     'released.amp.html',
     'soundcloud.amp.html',
+    'springboard-player.amp.html',
     'twitter.amp.html',
     'vine.amp.html',
     'vimeo.amp.html',
@@ -74,6 +75,7 @@ describe('example', function() {
     // contains more specific script identifier.
     /The tag \'script\' is disallowed/,
     /\'amp-brid-player\' is disallowed/,
+    /\'amp-springboard-player\' is disallowed/,
   ];
 
   const usedWhitelist = [];

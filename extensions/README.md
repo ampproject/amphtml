@@ -39,6 +39,7 @@ Current list of extended components:
 | [`amp-mustache`](amp-mustache/amp-mustache.md) | Allows rendering of [`Mustache.js`](https://github.com/janl/mustache.js/) templates. |
 | [`amp-pinterest`](amp-pinterest/amp-pinterest.md) | Displays a Pinterest widget or Pin It button. |
 | [`amp-soundcloud`](amp-soundcloud/amp-soundcloud.md) | Displays a [Soundcloud](https://soundcloud.com/) clip. |
+| [`amp-springboard-player`](amp-springboard-player/amp-springboard-player.md) | Displays a Springboard Platform video player |
 | [`amp-twitter`](amp-twitter/amp-twitter.md) | Displays a Twitter tweet. |
 | [`amp-user-notification`](amp-user-notification/amp-user-notification.md) | Displays a dismissable notification to the user. |
 | [`amp-vimeo`](amp-vimeo/amp-vimeo.md) | Displays a Vimeo video. |
