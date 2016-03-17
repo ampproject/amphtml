@@ -38,6 +38,7 @@ Current list of extended components:
 | [`amp-list`](amp-list/amp-list.md) | Dynamically downloads data and creates list items using a template. |
 | [`amp-mustache`](amp-mustache/amp-mustache.md) | Allows rendering of [`Mustache.js`](https://github.com/janl/mustache.js/) templates. |
 | [`amp-pinterest`](amp-pinterest/amp-pinterest.md) | Displays a Pinterest widget or Pin It button. |
+| [`amp-reach-player`](amp-reach-player/amp-reach-player.md) | Displays a [Beachfront Reach](https://beachfrontreach.com/) video player. |
 | [`amp-soundcloud`](amp-soundcloud/amp-soundcloud.md) | Displays a [Soundcloud](https://soundcloud.com/) clip. |
 | [`amp-springboard-player`](amp-springboard-player/amp-springboard-player.md) | Displays a Springboard Platform video player |
 | [`amp-twitter`](amp-twitter/amp-twitter.md) | Displays a Twitter tweet. |
