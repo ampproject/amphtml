@@ -22,7 +22,8 @@ import * as sinon from 'sinon';
 
 adopt(window);
 
-describe('amp-youtube', () => {
+describe('amp-youtube', function() {
+  this.timeout(5000);
   let sandbox;
 
   beforeEach(() => {
