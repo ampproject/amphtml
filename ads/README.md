@@ -98,18 +98,18 @@ Once the request is processed the AMP runtime will try to accommodate this reque
 possible, but it will take into account where the reader is currently reading, whether the scrolling
 is ongoing and any other UX or performance factors.
 
-Ads can observe wehther resize request were successful using the `window.context.onResizeSuccess` and `window.context.onResizeDenied` methods.
+Ads can observe whether resize request were successful using the `window.context.onResizeSuccess` and `window.context.onResizeDenied` methods.
 
 Example
 ```javascript
-var unlisten = window.context.onResizeSuccess(function(requestedHeight) {
+var unlisten = window.context.onResizeSuccess(function(requestedHeight, requestedWidth) {
   // Hide any overflow elements that were shown.
-  // The requestedHeight argument may be used to check which height change the request corresponds to.
+  // The requestedHeight and requestedWidth arguments may be used to check which size change the request corresponds to.
 });
 
-var unlisten = window.context.onResizeDenied(function(requestedHeight) {
+var unlisten = window.context.onResizeDenied(function(requestedHeight, requestedWidth) {
   // Show the overflow element and send a window.context.requestResize(width, height) when the overflow element is clicked.
-  // You may use the requestedHeight to check which height change the request corresponds to.
+  // You may use the requestedHeight and requestedWidth to check which size change the request corresponds to.
 });
 ```
 

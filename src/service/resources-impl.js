@@ -131,18 +131,19 @@ export class Resources {
     * The internal structure of a ChangeHeightRequest.
     * @typedef {{
     *   resource: !Resource,
-    *   newHeight: number,
+    *   newHeight: (number|undefined),
+    *   newWidth: (number|undefined),
     *   force: boolean,
     *   callback: (function()|undefined)
     * }}
     * @private
     */
-    let ChangeHeightRequestDef;
+    let ChangeSizeRequestDef;
 
-    /**
-     * @private {!Array<!ChangeHeightRequestDef>}
-     */
-    this.requestsChangeHeight_ = [];
+   /**
+    * @private {!Array<!ChangeSizeRequestDef>}
+    */
+    this.requestsChangeSize_ = [];
 
     /** @private {!Array<!Function>} */
     this.deferredMutates_ = [];
@@ -190,7 +191,7 @@ export class Resources {
     });
 
     this.activeHistory_.onFocus(element => {
-      this.checkPendingChangeHeight_(element);
+      this.checkPendingChangeSize_(element);
     });
 
     // Ensure that we attempt to rebuild things when DOM is ready.
@@ -432,21 +433,22 @@ export class Resources {
   }
 
   /**
-   * Requests the runtime to change the element's height. When the height is
+   * Requests the runtime to change the element's size. When the size is
    * successfully updated then the opt_callback is called.
    * @param {!Element} element
-   * @param {number} newHeight
+   * @param {number|undefined} newHeight
+   * @param {number|undefined} newWidth
    * @param {function=} opt_callback A callback function.
    */
-  changeHeight(element, newHeight, opt_callback) {
-    this.scheduleChangeHeight_(this.getResourceForElement(element), newHeight,
-        /* force */ true, opt_callback);
+  changeSize(element, newHeight, newWidth, opt_callback) {
+    this.scheduleChangeSize_(this.getResourceForElement(element), newHeight,
+        newWidth, /* force */ true, opt_callback);
   }
 
   /**
-   * Requests the runtime to update the height of this element to the specified
+   * Requests the runtime to update the size of this element to the specified
    * value. The runtime will schedule this request and attempt to process it
-   * as soon as possible. However, unlike in {@link changeHeight}, the runtime
+   * as soon as possible. However, unlike in {@link changeSize}, the runtime
    * may refuse to make a change in which case it will call the
    * `overflowCallback` method on the target resource with the height value.
    * Overflow callback is expected to provide the reader with the user action
@@ -455,14 +457,15 @@ export class Resources {
    * requested height is 0 or negative.
    * If the height is successfully updated then the opt_callback is called.
    * @param {!Element} element
-   * @param {number} newHeight
+   * @param {number|undefined} newHeight
+   * @param {number|undefined} newWidth
    * @param {function=} opt_callback A callback function to be called if the
    *    height is updated.
    * @protected
    */
-  attemptChangeHeight(element, newHeight, opt_callback) {
-    this.scheduleChangeHeight_(this.getResourceForElement(element), newHeight,
-        /* force */ false, opt_callback);
+  attemptChangeSize(element, newHeight, newWidth, opt_callback) {
+    this.scheduleChangeSize_(this.getResourceForElement(element), newHeight,
+        newWidth, /* force */ false, opt_callback);
   }
 
   /**
@@ -615,7 +618,7 @@ export class Resources {
    */
   hasMutateWork_() {
     return (this.deferredMutates_.length > 0 ||
-        this.requestsChangeHeight_.length > 0);
+        this.requestsChangeSize_.length > 0);
   }
 
   /**
@@ -654,17 +657,17 @@ export class Resources {
       }
     }
 
-    if (this.requestsChangeHeight_.length > 0) {
-      dev.fine(TAG_, 'change height requests:',
-          this.requestsChangeHeight_.length);
-      const requestsChangeHeight = this.requestsChangeHeight_;
-      this.requestsChangeHeight_ = [];
+    if (this.requestsChangeSize_.length > 0) {
+      dev.fine(TAG_, 'change size requests:',
+          this.requestsChangeSize_.length);
+      const requestsChangeSize = this.requestsChangeSize_;
+      this.requestsChangeSize_ = [];
 
       // Find minimum top position and run all mutates.
       let minTop = -1;
       const scrollAdjSet = [];
-      for (let i = 0; i < requestsChangeHeight.length; i++) {
-        const request = requestsChangeHeight[i];
+      for (let i = 0; i < requestsChangeSize.length; i++) {
+        const request = requestsChangeSize[i];
         const resource = request.resource;
         const box = resource.getLayoutBox();
         const iniBox = resource.getInitialLayoutBox();
@@ -700,7 +703,7 @@ export class Resources {
             scrollAdjSet.push(request);
           } else {
             // Defer till next cycle.
-            this.requestsChangeHeight_.push(request);
+            this.requestsChangeSize_.push(request);
           }
         } else if (iniBox.bottom >= docBottomOffset ||
                       box.bottom >= docBottomOffset) {
@@ -714,17 +717,17 @@ export class Resources {
           // 7. Element is in viewport don't resize and try overflow callback
           // instead.
           request.resource.overflowCallback(/* overflown */ true,
-              request.newHeight);
+              request.newHeight, request.newWidth);
         }
 
         if (resize) {
           if (box.top >= 0) {
             minTop = minTop == -1 ? box.top : Math.min(minTop, box.top);
           }
-          request.resource./*OK*/changeHeight(
-              request.newHeight, request.callback);
+          request.resource./*OK*/changeSize(
+              request.newHeight, request.newWidth, request.callback);
           request.resource.overflowCallback(/* overflown */ false,
-              request.newHeight);
+              request.newHeight, request.newWidth);
         }
       }
 
@@ -744,7 +747,8 @@ export class Resources {
             scrollAdjSet.forEach(request => {
               const box = request.resource.getLayoutBox();
               minTop = minTop == -1 ? box.top : Math.min(minTop, box.top);
-              request.resource./*OK*/changeHeight(request.newHeight);
+              request.resource./*OK*/changeSize(
+                  request.newHeight, request.newWidth);
             });
             if (minTop != -1) {
               this.setRelayoutTop_(minTop);
@@ -774,20 +778,20 @@ export class Resources {
   }
 
   /**
-   * Reschedules change height request when an overflown element is activated.
+   * Reschedules change size request when an overflown element is activated.
    * @param {!Element} element
    * @private
    */
-  checkPendingChangeHeight_(element) {
+  checkPendingChangeSize_(element) {
     const resourceElement = closest(element, el => el[RESOURCE_PROP_]);
     if (!resourceElement) {
       return;
     }
     const resource = this.getResourceForElement(resourceElement);
-    const pendingChangeHeight = resource.getPendingChangeHeight();
-    if (pendingChangeHeight !== undefined) {
-      this.scheduleChangeHeight_(resource, pendingChangeHeight,
-          /* force */ true);
+    const pendingChangeSize = resource.getPendingChangeSize();
+    if (pendingChangeSize !== undefined) {
+      this.scheduleChangeSize_(resource, pendingChangeSize.height,
+          pendingChangeSize.width, /* force */ true);
     }
   }
 
@@ -1113,33 +1117,44 @@ export class Resources {
   /**
    * Schedules change of the element's height.
    * @param {!Resource} resource
-   * @param {number} newHeight
+   * @param {number|undefined} newHeight
+   * @param {number|undefined} newWidth
    * @param {boolean} force
    * @param {function=} opt_callback A callback function.
    * @private
    */
-  scheduleChangeHeight_(resource, newHeight, force, opt_callback) {
-    resource.resetPendingChangeHeight();
-    if (resource.getLayoutBox().height == newHeight) {
+  scheduleChangeSize_(resource, newHeight, newWidth, force, opt_callback) {
+    resource.resetPendingChangeSize();
+    const layoutBox = resource.getLayoutBox();
+    if ((newHeight === undefined || newHeight == layoutBox.height) &&
+        (newWidth === undefined || newWidth == layoutBox.width)) {
+      if (newHeight === undefined && newWidth === undefined) {
+        dev.error(
+            TAG_, 'attempting to change size with undefined dimensions',
+            resource.debugid);
+      }
       // Nothing to do.
       return;
     }
 
     let request = null;
-    for (let i = 0; i < this.requestsChangeHeight_.length; i++) {
-      if (this.requestsChangeHeight_[i].resource == resource) {
-        request = this.requestsChangeHeight_[i];
+    for (let i = 0; i < this.requestsChangeSize_.length; i++) {
+      if (this.requestsChangeSize_[i].resource == resource) {
+        request = this.requestsChangeSize_[i];
         break;
       }
     }
+
     if (request) {
       request.newHeight = newHeight;
+      request.newWidth = newWidth;
       request.force = force || request.force;
       request.callback = opt_callback;
     } else {
-      this.requestsChangeHeight_.push(/** {!ChangeHeightRequestDef}*/{
+      this.requestsChangeSize_.push(/** {!ChangeSizeRequestDef} */{
         resource: resource,
         newHeight: newHeight,
+        newWidth: newWidth,
         force: force,
         callback: opt_callback,
       });
@@ -1373,11 +1388,11 @@ export class Resource {
      */
     this.onUpgraded_ = undefined;
 
-    /**
-     * Pending change height that was requested but could not be satisfied.
-     * @private {number|undefined}
-     */
-    this.pendingChangeHeight_ = undefined;
+   /**
+    * Pending change size that was requested but could not be satisfied.
+    * @private {!SizeDef|undefined}
+    */
+    this.pendingChangeSize_ = undefined;
 
     /** @private @const {!Promise} */
     this.loadPromise_ = new Promise(resolve => {
@@ -1477,11 +1492,12 @@ export class Resource {
   /**
    * Instructs the element to change its size and transitions to the state
    * awaiting the measure and possibly layout.
-   * @param {number} newHeight
+   * @param {number|undefined} newHeight
+   * @param {number|undefined} newWidth
    * @param {function=} opt_callback A callback function.
    */
-  changeHeight(newHeight, opt_callback) {
-    this.element./*OK*/changeHeight(newHeight);
+  changeSize(newHeight, newWidth, opt_callback) {
+    this.element./*OK*/changeSize(newHeight, newWidth);
     // Schedule for re-layout.
     if (this.state_ != ResourceState_.NOT_BUILT) {
       this.state_ = ResourceState_.NOT_LAID_OUT;
@@ -1494,25 +1510,29 @@ export class Resource {
   /**
    * Informs the element that it's either overflown or not.
    * @param {boolean} overflown
-   * @param {number} requestedHeight
+   * @param {number|undefined} requestedHeight
+   * @param {number|undefined} requestedWidth
    */
-  overflowCallback(overflown, requestedHeight) {
+  overflowCallback(overflown, requestedHeight, requestedWidth) {
     if (overflown) {
-      this.pendingChangeHeight_ = requestedHeight;
+      this.pendingChangeSize_ = {
+        height: requestedHeight,
+        width: requestedWidth,
+      };
     }
-    this.element.overflowCallback(overflown, requestedHeight);
+    this.element.overflowCallback(overflown, requestedHeight, requestedWidth);
   }
 
   /** @private */
-  resetPendingChangeHeight() {
-    this.pendingChangeHeight_ = undefined;
+  resetPendingChangeSize() {
+    this.pendingChangeSize_ = undefined;
   }
 
   /**
-   * @return {number|undefined}
+   * @return {!SizeDef|undefined}
    */
-  getPendingChangeHeight() {
-    return this.pendingChangeHeight_;
+  getPendingChangeSize() {
+    return this.pendingChangeSize_;
   }
 
   /**
@@ -1993,6 +2013,15 @@ export const ResourceState_ = {
  */
 let TaskDef;
 
+/**
+ * The internal structure of a ChangeHeightRequest.
+ * @typedef {{
+ *   height: (number|undefined),
+ *   width: (number|undefined)
+ * }}
+ * @private
+ */
+let SizeDef;
 
 /**
  * @param {!Window} win

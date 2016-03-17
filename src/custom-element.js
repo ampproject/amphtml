@@ -561,23 +561,29 @@ export function createAmpElementProto(win, name, implementationClass) {
   };
 
   /**
-   * Changes the height of the element.
+   * Changes the size of the element.
    *
    * This method is called by Resources and shouldn't be called by anyone else.
    * This method must always be called in the mutation context.
    *
-   * @param {number} newHeight
+   * @param {number|undefined} newHeight
+   * @param {number|undefined} newWidth
    * @final
    * @package
    */
-  ElementProto./*OK*/changeHeight = function(newHeight) {
+  ElementProto./*OK*/changeSize = function(newHeight, newWidth) {
     if (this.sizerElement_) {
       // From the moment height is changed the element becomes fully
       // responsible for managing its height. Aspect ratio is no longer
       // preserved.
       this.sizerElement_.style.paddingTop = '0';
     }
-    this.style.height = newHeight + 'px';
+    if (newHeight !== undefined) {
+      this.style.height = newHeight + 'px';
+    }
+    if (newWidth !== undefined) {
+      this.style.width = newWidth + 'px';
+    }
   };
 
   /**
@@ -1062,10 +1068,12 @@ export function createAmpElementProto(win, name, implementationClass) {
    * Hides or shows the overflow, if available. This function must only
    * be called inside a mutate context.
    * @param {boolean} overflown
-   * @param {number} requestedHeight
+   * @param {number|undefined} requestedHeight
+   * @param {number|undefined} requestedWidth
    * @package @final
    */
-  ElementProto.overflowCallback = function(overflown, requestedHeight) {
+  ElementProto.overflowCallback = function(
+      overflown, requestedHeight, requestedWidth) {
     this.getOverflowElement();
     if (!this.overflowElement_) {
       if (overflown) {
@@ -1077,16 +1085,19 @@ export function createAmpElementProto(win, name, implementationClass) {
 
       if (overflown) {
         this.overflowElement_.onclick = () => {
-          this.resources_./*OK*/changeHeight(this, requestedHeight);
+          this.resources_./*OK*/changeSize(
+              this, requestedHeight, requestedWidth);
           this.getVsync_().mutate(() => {
-            this.overflowCallback(/* overflown */ false, requestedHeight);
+            this.overflowCallback(
+                /* overflown */ false, requestedHeight, requestedWidth);
           });
         };
       } else {
         this.overflowElement_.onclick = null;
       }
     }
-    this.implementation_.overflowCallback(overflown, requestedHeight);
+    this.implementation_.overflowCallback(
+        overflown, requestedHeight, requestedWidth);
   };
 
   return ElementProto;
