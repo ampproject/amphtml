@@ -354,15 +354,6 @@ export function rethrowAsync(var_args) {
 
 
 /**
- * @deprecated Use either publog or devlog
- * TODO(dvoytenko, #2527): Remove this constant.
- */
-export const log = new Log(window, mode => {
-  return mode.log == '1' ? LogLevel.FINE : LogLevel.OFF;
-});
-
-
-/**
  * Publisher level log.
  *
  * Enabled in the following conditions:
