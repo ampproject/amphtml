@@ -68,14 +68,14 @@ export class Log {
     /**
      * In tests we use the main test window instead of the iframe where
      * the tests runs because only the former is relayed to the console.
-     * @const @const {!Window}
+     * @const {!Window}
      */
     this.win = win.AMP_TEST ? win.parent : win;
 
     /** @private @const {function(!Mode):boolean} */
     this.levelFunc_ = levelFunc;
 
-    /** @private @cost {!LogLevel} */
+    /** @private @const {!LogLevel} */
     this.level_ = this.calcLevel_();
 
     /** @private @const {string} */
