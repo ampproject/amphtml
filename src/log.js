@@ -16,7 +16,6 @@
 
 import {getMode} from './mode';
 
-
 /** @const Time when this JS loaded.  */
 const start = new Date().getTime();
 
