@@ -74,28 +74,43 @@ describe('amp-instagram', () => {
   it('renders outside viewport', () => {
     inViewport = false;
     return getIns('fBwFP').then(ins => {
+      const wrapper = ins.querySelector('wrapper');
       let iframe = ins.querySelector('iframe');
       expect(iframe).to.be.null;
+
+      ins.getVsync = () => {
+        return {
+          mutate: fn => fn(),
+        };
+      };
+
       // Still not in viewport
       ins.implementation_.viewportCallback(false);
       iframe = ins.querySelector('iframe');
       expect(iframe).to.be.null;
+      expect(wrapper.style.display).to.be.equal('');
+
       // In viewport
       ins.implementation_.viewportCallback(true);
       iframe = ins.querySelector('iframe');
       testIframe(iframe);
       testImage(ins.querySelector('img'));
+      ins.implementation_.iframePromise_.then(() => {
+        expect(wrapper.style.display).to.be.equal('none');
+      });
     });
   });
 
   it('removes iframe after documentInactiveCallback', () => {
     return getIns('fBwFP').then(ins => {
+      const wrapper = ins.querySelector('wrapper');
       testIframe(ins.querySelector('iframe'));
       const obj = ins.implementation_;
       obj.documentInactiveCallback();
       expect(ins.querySelector('iframe')).to.be.null;
       expect(obj.iframe_).to.be.null;
       expect(obj.iframePromise_).to.be.null;
+      expect(wrapper.style.display).to.be.equal('');
     });
   });
 
