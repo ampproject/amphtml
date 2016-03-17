@@ -838,6 +838,18 @@ export function createAmpElementProto(win, name, implementationClass) {
   };
 
   /**
+   * Whether to call {@link unlayoutCallback} when pausing the element.
+   * Certain elements cannot properly pause (like amp-iframes with unknown
+   * video content), and so we must unlayout to stop playback.
+   *
+   * @return {boolean}
+   * @package @final
+   */
+  ElementProto.unlayoutOnPause = function() {
+    return this.implementation_.unlayoutOnPause();
+  };
+
+  /**
    * Enqueues the action with the element. If element has been upgraded and
    * built, the action is dispatched to the implementation right away.
    * Otherwise the invocation is enqueued until the implementation is ready

@@ -218,7 +218,7 @@ describe('Resources', () => {
   });
 });
 
-describe('Resources scheduleUnload', () => {
+describe('Resources schedulePause', () => {
 
   let sandbox;
   let resources;
@@ -253,6 +253,9 @@ describe('Resources scheduleUnload', () => {
       unlayoutCallback() {
         return false;
       },
+      unlayoutOnPause() {
+        return false;
+      },
     };
   }
 
@@ -281,39 +284,41 @@ describe('Resources scheduleUnload', () => {
 
   it('should not throw with a single element', () => {
     expect(() => {
-      resources.scheduleUnload(parent, child1);
+      resources.schedulePause(parent, child1);
     }).to.not.throw();
   });
 
   it('should not throw with an array of elements', () => {
     expect(() => {
-      resources.scheduleUnload(parent, [child1, child2]);
+      resources.schedulePause(parent, [child1, child2]);
     }).to.not.throw();
   });
 
   it('should be ok with non amp children', () => {
     expect(() => {
-      resources.scheduleUnload(parent, children);
+      resources.schedulePause(parent, children);
     }).to.not.throw();
-  });
-
-  it('should call unlayoutCallback on custom element', () => {
-    const stub1 = sandbox.stub(child1, 'unlayoutCallback');
-    const stub2 = sandbox.stub(child2, 'unlayoutCallback');
-
-    resources.scheduleUnload(parent, children);
-    expect(stub1.calledOnce).to.be.true;
-    expect(stub2.calledOnce).to.be.true;
   });
 
   it('should call pauseCallback on custom element', () => {
     const stub1 = sandbox.stub(child1, 'pauseCallback');
     const stub2 = sandbox.stub(child2, 'pauseCallback');
 
-    resources.scheduleUnload(parent, children);
+    resources.schedulePause(parent, children);
     expect(stub1.calledOnce).to.be.true;
     expect(stub2.calledOnce).to.be.true;
   });
+
+  it('should call unlayoutCallback when unlayoutOnPause', () => {
+    const stub1 = sandbox.stub(child1, 'unlayoutCallback');
+    const stub2 = sandbox.stub(child2, 'unlayoutCallback');
+    sandbox.stub(child1, 'unlayoutOnPause').returns(true);
+
+    resources.schedulePause(parent, children);
+    expect(stub1.calledOnce).to.be.true;
+    expect(stub2.calledOnce).to.be.false;
+  });
+
 });
 
 
@@ -1088,6 +1093,7 @@ describe('Resources.Resource', () => {
       isRelayoutNeeded: () => false,
       layoutCallback: () => {},
       changeSize: () => {},
+      unlayoutOnPause: () => false,
       unlayoutCallback: () => true,
       pauseCallback: () => false,
       resumeCallback: () => false,
@@ -1587,6 +1593,35 @@ describe('Resources.Resource', () => {
       resource.state_ = ResourceState_.LAYOUT_COMPLETE;
       elementMock.expects('pauseCallback').once();
       resource.pause();
+    });
+
+    it('should NOT call unlayoutCallback', () => {
+      resource.state_ = ResourceState_.LAYOUT_COMPLETE;
+      elementMock.expects('pauseCallback').once();
+      elementMock.expects('unlayoutCallback').never();
+      resource.pause();
+    });
+
+    describe('when unlayoutOnPause', () => {
+      beforeEach(() => {
+        elementMock.expects('unlayoutOnPause').returns(true).once();
+      });
+
+      it('should call unlayoutCallback and update state', () => {
+        resource.state_ = ResourceState_.LAYOUT_COMPLETE;
+        elementMock.expects('pauseCallback').once();
+        elementMock.expects('unlayoutCallback').returns(true).once();
+        resource.pause();
+        expect(resource.getState()).to.equal(ResourceState_.NOT_LAID_OUT);
+      });
+
+      it('should call unlayoutCallback but NOT update state', () => {
+        resource.state_ = ResourceState_.LAYOUT_COMPLETE;
+        elementMock.expects('pauseCallback').once();
+        elementMock.expects('unlayoutCallback').returns(false).once();
+        resource.pause();
+        expect(resource.getState()).to.equal(ResourceState_.LAYOUT_COMPLETE);
+      });
     });
   });
 

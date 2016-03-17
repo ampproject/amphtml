@@ -343,6 +343,15 @@ export class BaseElement {
   }
 
   /**
+   * Subclasses can override this method to opt-in into calling
+   * {@link unlayoutCallback} when paused.
+   * @return {boolean}
+   */
+  unlayoutOnPause() {
+    return false;
+  }
+
+  /**
    * Instructs the element that its activation is requested based on some
    * user event. Intended to be implemented by actual components.
    * @param {!ActionInvocation} unusedInvocation
@@ -532,8 +541,8 @@ export class BaseElement {
    * @param {!Element|!Array<!Element>} elements
    * @protected
    */
-  scheduleUnload(elements) {
-    this.resources_.scheduleUnload(this.element, elements);
+  schedulePause(elements) {
+    this.resources_.schedulePause(this.element, elements);
   }
 
   /**

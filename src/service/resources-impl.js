@@ -397,12 +397,12 @@ export class Resources {
    * @param {!Element} parentElement
    * @param {!Element|!Array<!Element>} subElements
    */
-  scheduleUnload(parentElement, subElements) {
+  schedulePause(parentElement, subElements) {
     const parentResource = this.getResourceForElement(parentElement);
     subElements = elements_(subElements);
 
     this.discoverResourcesForArray_(parentResource, subElements, resource => {
-      resource.unload();
+      resource.pause();
     });
   }
 
@@ -1154,7 +1154,7 @@ export class Resources {
         resource.debugid, resource.getState());
 
     // Don't schedule elements when we're not visible, or in prerender mode
-    // (and they can prerender).
+    // (and they can't prerender).
     if (!this.visible_) {
       if (this.viewer_.getVisibilityState() != VisibilityState.PRERENDER) {
         return;
@@ -1837,6 +1837,9 @@ export class Resource {
     this.paused_ = true;
     this.setInViewport(false);
     this.element.pauseCallback();
+    if (this.element.unlayoutOnPause()) {
+      this.unlayout();
+    }
   }
 
   /**

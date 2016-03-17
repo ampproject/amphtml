@@ -187,7 +187,7 @@ export class AmpCarousel extends BaseCarousel {
       this.withinWindow_(oldPos, cell => {
         if (seen.indexOf(cell) == -1) {
           this.updateInViewport(cell, false);
-          this.scheduleUnload(cell);
+          this.schedulePause(cell);
         }
       });
     }
