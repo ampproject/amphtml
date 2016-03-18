@@ -17,14 +17,6 @@
 import {assert} from './asserts';
 
 /**
- * Sanitizes commas into an escaped form
- * @param {*} value
- */
-function stringSanitizer(value) {
-  return String(value).replace(/,/g, '\\,');
-}
-
-/**
  * @template STATE
  */
 export class FiniteStateMachine {
@@ -40,13 +32,6 @@ export class FiniteStateMachine {
      * @type {!STATE}
      */
     this.state_ = initialState;
-
-    /**
-     * The bits of state that may change.
-     * @type {!Array<string>}
-     */
-    this.bits_ = Object.keys(initialState);
-    assert(this.bits_.length > 0, 'must pass an initialState object');
 
     /**
      * Callbacks that are invoked when transitioning from an old state
@@ -97,9 +82,6 @@ export class FiniteStateMachine {
    * @return {string}
    */
   statesToTransition_(oldState, newState) {
-    const oldBits = this.bits_.map(bit => stringSanitizer(oldState[bit]));
-    const newBits = this.bits_.map(bit => stringSanitizer(newState[bit]));
-
-    return `${oldBits}|${newBits}`;
+    return `${oldState}|${newState}`;
   }
 }
