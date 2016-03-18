@@ -31,7 +31,6 @@ import {stubElements} from './custom-element';
 import {adopt} from './runtime';
 import {cssText} from '../build/css';
 import {maybeValidate} from './validator-integration';
-import {waitForExtensions} from './render-delaying-extensions';
 
 // We must under all circumstances call makeBodyVisible.
 // It is much better to have AMP tags not rendered than having
@@ -62,7 +61,7 @@ try {
       installGlobalClickListener(window);
 
       maybeValidate(window);
-      makeBodyVisible(document, waitForExtensions(window));
+      makeBodyVisible(document, /* waitForExtensions */ true);
     } catch (e) {
       makeBodyVisible(document);
       throw e;

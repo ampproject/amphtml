@@ -14,20 +14,22 @@
  * limitations under the License.
  */
 
+import {Observable} from '../../src/observable';
 import {adopt} from '../../src/runtime';
+import {dev} from '../../src/log';
 import {parseUrl} from '../../src/url';
 import {getServicePromise} from '../../src/service';
+import * as dom from '../../src/dom';
 import * as sinon from 'sinon';
 
 describe('runtime', () => {
 
   let win;
   let sandbox;
-  let clock;
+  let errorStub;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
-    clock = sandbox.useFakeTimers();
     win = {
       AMP: [],
       location: {},
@@ -40,6 +42,7 @@ describe('runtime', () => {
       Object: Object,
       HTMLElement: HTMLElement,
     };
+    errorStub = sandbox.stub(dev, 'error');
   });
 
   afterEach(() => {
@@ -95,6 +98,47 @@ describe('runtime', () => {
     expect(queueExtensions).to.have.length(0);
   });
 
+  it('should wait for body before processing extensions', () => {
+    const bodyCallbacks = new Observable();
+    sandbox.stub(dom, 'waitForBody', (unusedDoc, callback) => {
+      bodyCallbacks.add(callback);
+    });
+
+    let progress = '';
+    const queueExtensions = win.AMP;
+    win.AMP.push(amp => {
+      expect(amp).to.equal(win.AMP);
+      progress += '1';
+    });
+    win.AMP.push(amp => {
+      expect(amp).to.equal(win.AMP);
+      progress += '2';
+    });
+    win.AMP.push(amp => {
+      expect(amp).to.equal(win.AMP);
+      progress += '3';
+    });
+    expect(queueExtensions).to.have.length(3);
+    adopt(win);
+
+    // Extensions are still unprocessed
+    expect(queueExtensions).to.have.length(3);
+    expect(progress).to.equal('');
+
+    // Add one more
+    win.AMP.push(amp => {
+      expect(amp).to.equal(win.AMP);
+      progress += '4';
+    });
+    expect(queueExtensions).to.have.length(3);
+    expect(progress).to.equal('');
+
+    // Body is available now.
+    bodyCallbacks.fire();
+    expect(progress).to.equal('1234');
+    expect(queueExtensions).to.have.length(0);
+  });
+
   it('should be robust against errors in early extensions', () => {
     let progress = '';
     win.AMP.push(() => {
@@ -108,9 +152,13 @@ describe('runtime', () => {
     });
     adopt(win);
     expect(progress).to.equal('13');
-    expect(() => {
-      clock.tick(1);
-    }).to.throw(/extension error/);
+
+    expect(errorStub.callCount).to.equal(1);
+    expect(errorStub.calledWith('runtime',
+        sinon.match(() => true),
+        sinon.match(arg => {
+          return !!arg.message.match(/extension error/);
+        }))).to.be.true;
   });
 
   describe('registerElement', () => {

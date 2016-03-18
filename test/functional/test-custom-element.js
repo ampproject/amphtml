@@ -17,17 +17,18 @@
 import {BaseElement} from '../../src/base-element';
 import {ElementStub} from '../../src/element-stub';
 import {LOADING_ELEMENTS_, Layout} from '../../src/layout';
-import {createAmpElementProto} from '../../src/custom-element';
 import {resourcesFor} from '../../src/resources';
 import {vsyncFor} from '../../src/vsync';
 import * as sinon from 'sinon';
 
 import {getService, resetServiceForTesting} from '../../src/service';
 import {
+  createAmpElementProto,
   getElementService,
   getElementServiceIfAvailable,
   markElementScheduledForTesting,
   resetScheduledElementForTesting,
+  stubElements,
 } from '../../src/custom-element';
 
 
@@ -1322,4 +1323,181 @@ describe('CustomElement Overflow Element', () => {
     });
   });
 
+  describe('no body', () => {
+
+    let elements;
+    let doc;
+    let win;
+    let elem1;
+    let intervalCallback;
+
+    beforeEach(() => {
+      elements = [];
+
+      doc = {
+        querySelectorAll: selector => {
+          if (selector == '[custom-element]') {
+            return elements;
+          }
+          return [];
+        },
+        registerElement: sandbox.spy(),
+        documentElement: {
+          ownerDocument: doc,
+        },
+        body: {},
+      };
+
+      elem1 = {
+        getAttribute: name => {
+          if (name == 'custom-element') {
+            return 'amp-test1';
+          }
+        },
+        ownerDocument: doc,
+      };
+      elements.push(elem1);
+
+      intervalCallback = undefined;
+      win = {
+        document: doc,
+        Object: {
+          create: proto => Object.create(proto),
+        },
+        HTMLElement: HTMLElement,
+        setInterval: callback => {
+          intervalCallback = callback;
+        },
+        clearInterval: () => {},
+        ampExtendedElements: {},
+      };
+      doc.defaultView = win;
+
+      resetServiceForTesting(window, 'e1');
+      resetScheduledElementForTesting(window, 'element-1');
+    });
+
+    afterEach(() => {
+      resetScheduledElementForTesting(window, 'amp-test1');
+      resetScheduledElementForTesting(window, 'amp-test2');
+    });
+
+    it('should be stub elements when body available', () => {
+      stubElements(win);
+
+      expect(win.ampExtendedElements).to.exist;
+      expect(win.ampExtendedElements['amp-test1']).to.be.true;
+      expect(win.ampExtendedElements['amp-test2']).to.be.undefined;
+      expect(doc.registerElement.callCount).to.equal(1);
+      expect(doc.registerElement.firstCall.args[0]).to.equal('amp-test1');
+      expect(intervalCallback).to.be.undefined;
+    });
+
+    it('should repeat stubbing when body is not available', () => {
+      doc.body = null;  // Body not available
+
+      stubElements(win);
+
+      expect(win.ampExtendedElements).to.exist;
+      expect(win.ampExtendedElements['amp-test1']).to.be.true;
+      expect(win.ampExtendedElements['amp-test2']).to.be.undefined;
+      expect(doc.registerElement.callCount).to.equal(1);
+      expect(doc.registerElement.firstCall.args[0]).to.equal('amp-test1');
+      expect(intervalCallback).to.exist;
+
+      // Add more elements
+      const elem2 = {
+        getAttribute: name => {
+          if (name == 'custom-element') {
+            return 'amp-test2';
+          }
+        },
+        ownerDocument: doc,
+      };
+      elements.push(elem2);
+      doc.body = {};
+      intervalCallback();
+
+      expect(win.ampExtendedElements['amp-test1']).to.be.true;
+      expect(win.ampExtendedElements['amp-test2']).to.be.true;
+      expect(doc.registerElement.callCount).to.equal(2);
+      expect(doc.registerElement.getCall(1).args[0]).to.equal('amp-test2');
+    });
+
+    it('getElementService should wait for body when not available', () => {
+      doc.body = null;  // Body not available
+      let resolvedService;
+      const p1 = getElementServiceIfAvailable(win, 'e1', 'element-1')
+          .then(service => {
+            resolvedService = service;
+            return service;
+          });
+      return Promise.resolve().then(() => {
+        expect(intervalCallback).to.exist;
+        expect(resolvedService).to.be.undefined;
+
+        // Resolve body.
+        doc.body = {};
+        intervalCallback();
+        return p1;
+      }).then(service => {
+        expect(resolvedService).to.be.null;
+        expect(service).to.be.null;
+      });
+    });
+
+    it('getElementService should resolve with body when not available', () => {
+      doc.body = {};  // Body is available
+      const p1 = getElementServiceIfAvailable(win, 'e1', 'element-1');
+      return Promise.resolve().then(() => {
+        expect(intervalCallback).to.be.undefined;
+        return p1;
+      }).then(service => {
+        expect(service).to.be.null;
+      });
+    });
+
+    it('getElementService should wait for body when available', () => {
+      doc.body = null;  // Body not available
+      let resolvedService;
+      const p1 = getElementServiceIfAvailable(win, 'e1', 'element-1')
+          .then(service => {
+            resolvedService = service;
+            return service;
+          });
+      return Promise.resolve().then(() => {
+        expect(intervalCallback).to.exist;
+        expect(resolvedService).to.be.undefined;
+
+        // Resolve body.
+        markElementScheduledForTesting(win, 'element-1');
+        getService(win, 'e1', function() {
+          return 'fake1';
+        });
+        doc.body = {};
+        intervalCallback();
+        return p1;
+      }).then(service => {
+        expect(resolvedService).to.equal('fake1');
+        expect(service).to.equal('fake1');
+      });
+    });
+
+    it('getElementService should resolve with body when available', () => {
+      doc.body = {};  // Body is available
+      markElementScheduledForTesting(win, 'element-1');
+      const p1 = getElementServiceIfAvailable(win, 'e1', 'element-1');
+      return Promise.resolve().then(() => {
+        expect(intervalCallback).to.be.undefined;
+
+        // Resolve service.
+        getService(win, 'e1', function() {
+          return 'fake1';
+        });
+        return p1;
+      }).then(service => {
+        expect(service).to.equal('fake1');
+      });
+    });
+  });
 });
