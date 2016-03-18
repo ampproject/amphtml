@@ -118,14 +118,13 @@ class AmpKaltura extends AMP.BaseElement {
   }
 
   /** @override */
-  documentInactiveCallback() {
+  pauseCallback() {
     if (this.iframe_ && this.iframe_.contentWindow) {
       this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify({
         'method': 'pause' ,
         'value': '' ,
       }) , '*');
     }
-    return false;
   }
 
 };

@@ -248,7 +248,7 @@ describe('amp-video', () => {
       const impl = v.implementation_;
       const video = v.querySelector('video');
       sandbox.spy(video, 'pause');
-      impl.documentInactiveCallback();
+      impl.pauseCallback();
       expect(video.pause.called).to.be.true;
     });
   });

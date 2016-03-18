@@ -30,9 +30,10 @@ import {dev} from '../log';
 import {reportError} from '../error';
 import {timer} from '../timer';
 import {installFramerateService} from './framerate-impl';
-import {installViewerService} from './viewer-impl';
+import {installViewerService, VisibilityState} from './viewer-impl';
 import {installViewportService} from './viewport-impl';
 import {installVsyncService} from './vsync-impl';
+import {FiniteStateMachine} from '../finite-state-machine';
 
 
 const TAG_ = 'Resources';
@@ -48,7 +49,6 @@ const POST_TASK_PASS_DELAY_ = 1000;
 const MUTATE_DEFER_DELAY_ = 500;
 const FOCUS_HISTORY_TIMEOUT_ = 1000 * 60;  // 1min
 const FOUR_FRAME_DELAY_ = 70;
-
 
 /**
  * Returns the element-based priority. A value from 0 to 10.
@@ -165,6 +165,12 @@ export class Resources {
 
     /** @private @const {!Framerate}  */
     this.framerate_ = installFramerateService(this.win);
+
+    /** @private @const {!FiniteStateMachine<!VisibilityState>} */
+    this.visibilityStateMachine_ = new FiniteStateMachine(
+      this.viewer_.getVisibilityState()
+    );
+    this.setupVisibilityStateMachine_(this.visibilityStateMachine_);
 
     // When viewport is resized, we have to re-measure all elements.
     this.viewport_.onChanged(event => {
@@ -396,7 +402,7 @@ export class Resources {
     subElements = elements_(subElements);
 
     this.discoverResourcesForArray_(parentResource, subElements, resource => {
-      resource.unload();
+      resource.pause();
     });
   }
 
@@ -560,7 +566,6 @@ export class Resources {
       return;
     }
 
-    const prevVisible = this.visible_;
     this.visible_ = this.viewer_.isVisible();
     this.prerenderSize_ = this.viewer_.getPrerenderSize();
 
@@ -583,32 +588,9 @@ export class Resources {
     this.pass_.cancel();
     this.vsyncScheduled_ = false;
 
-    // If document becomes invisible, bring everything into inactive state.
-    if (prevVisible && !this.visible_) {
-      dev.fine(TAG_, 'document become inactive');
-      this.documentBecameInactive_();
-      return;
-    }
-
-    // If viewport size is 0, the manager will wait for the resize event.
-    if (viewportSize.height > 0 && viewportSize.width > 0) {
-      if (this.hasMutateWork_()) {
-        this.mutateWork_();
-      }
-      this.discoverWork_();
-      let delay = this.work_();
-      if (this.hasMutateWork_()) {
-        // Overflow mutate work.
-        delay = Math.min(delay, MUTATE_DEFER_DELAY_);
-      }
-      if (this.visible_) {
-        dev.fine(TAG_, 'next pass:', delay);
-        this.schedulePass(delay);
-        this.updateScrollHeight_();
-      } else {
-        dev.fine(TAG_, 'document is not visible: no scheduling');
-      }
-    }
+    this.visibilityStateMachine_.setState(
+      this.viewer_.getVisibilityState()
+    );
   }
 
   /**
@@ -828,7 +810,7 @@ export class Resources {
       if (r.getState() == ResourceState_.NOT_BUILT) {
         r.build(this.forceBuild_);
       }
-      if (r.getState() == ResourceState_.NOT_LAID_OUT || relayoutAll) {
+      if (relayoutAll || r.getState() == ResourceState_.NOT_LAID_OUT) {
         r.applySizesAndMediaQuery();
         relayoutCount++;
       }
@@ -910,9 +892,7 @@ export class Resources {
       // elements to reduce CPU cycles.
       const shouldBeInViewport = (this.visible_ && r.isDisplayed() &&
           r.overlaps(visibleRect));
-      if (r.isInViewport() != shouldBeInViewport) {
-        r.setInViewport(shouldBeInViewport);
-      }
+      r.setInViewport(shouldBeInViewport);
     }
 
     // Phase 5: Idle layout: layout more if we are otherwise not doing much.
@@ -938,18 +918,6 @@ export class Resources {
   }
 
   /**
-   * Brings all resources into inactive state. First it sets "in viewport"
-   * state to false and then it calls documentInactive callback.
-   * @private
-   */
-  documentBecameInactive_() {
-    for (let i = 0; i < this.resources_.length; i++) {
-      const r = this.resources_[i];
-      r.documentBecameInactive();
-    }
-  }
-
-  /**
    * Dequeues layout and preload tasks from the queue and initiates their
    * execution.
    *
@@ -963,6 +931,7 @@ export class Resources {
    */
   work_() {
     const now = timer.now();
+    const visibility = this.viewer_.getVisibilityState();
 
     const scorer = this.calcTaskScore_.bind(this, this.viewport_.getRect(),
         Math.sign(this.lastVelocity_));
@@ -986,8 +955,7 @@ export class Resources {
         // until the current one finished the execution.
         const executing = this.exec_.getTaskById(task.id);
         if (!executing) {
-          // Ensure that task can prerender
-          task.promise = task.callback(this.visible_);
+          task.promise = task.callback(visibility);
           task.startTime = now;
           dev.fine(TAG_, 'exec:', task.id, 'at', task.startTime);
           this.exec_.enqueue(task);
@@ -1184,11 +1152,17 @@ export class Resources {
         resource.isDisplayed(),
         'Not ready for layout: %s (%s)',
         resource.debugid, resource.getState());
-    // Don't schedule elements that can't prerender, they won't be allowed
-    // to execute anyway.
-    if (!this.visible_ && !resource.prerenderAllowed()) {
-      return;
+
+    // Don't schedule elements when we're not visible, or in prerender mode
+    // (and they can't prerender).
+    if (!this.visible_) {
+      if (this.viewer_.getVisibilityState() != VisibilityState.PRERENDER) {
+        return;
+      } else if (!resource.prerenderAllowed()) {
+        return;
+      }
     }
+
     if (!resource.isInViewport() && !resource.renderOutsideViewport()) {
       return;
     }
@@ -1251,6 +1225,8 @@ export class Resources {
           priorityOffset,
       callback: callback,
       scheduleTime: timer.now(),
+      startTime: 0,
+      promise: null,
     };
     dev.fine(TAG_, 'schedule:', task.id, 'at', task.scheduleTime);
 
@@ -1321,6 +1297,78 @@ export class Resources {
         }
       }
     }
+  }
+
+  /**
+   * Calls iterator on each sub-resource
+   * @param {function(!Resource, number)} iterator
+   */
+  setupVisibilityStateMachine_(vsm) {
+    const prerender = VisibilityState.PRERENDER;
+    const visible = VisibilityState.VISIBLE;
+    const hidden = VisibilityState.HIDDEN;
+    const paused = VisibilityState.PAUSED;
+    const inactive = VisibilityState.INACTIVE;
+
+    const doPass = () => {
+      // If viewport size is 0, the manager will wait for the resize event.
+      const viewportSize = this.viewport_.getSize();
+      if (viewportSize.height > 0 && viewportSize.width > 0) {
+        if (this.hasMutateWork_()) {
+          this.mutateWork_();
+        }
+        this.discoverWork_();
+        let delay = this.work_();
+        if (this.hasMutateWork_()) {
+          // Overflow mutate work.
+          delay = Math.min(delay, MUTATE_DEFER_DELAY_);
+        }
+        if (this.visible_) {
+          dev.fine(TAG_, 'next pass:', delay);
+          this.schedulePass(delay);
+          this.updateScrollHeight_();
+        } else {
+          dev.fine(TAG_, 'document is not visible: no scheduling');
+        }
+      }
+    };
+    const noop = () => {};
+    const pause = () => {
+      this.resources_.forEach(r => r.pause());
+    };
+    const unload = () => {
+      this.resources_.forEach(r => r.unload());
+    };
+    const resume = () => {
+      this.resources_.forEach(r => r.resume());
+      doPass();
+    };
+
+    vsm.addTransition(prerender, prerender, doPass);
+    vsm.addTransition(prerender, visible, doPass);
+    vsm.addTransition(prerender, hidden, doPass);
+    vsm.addTransition(prerender, inactive, doPass);
+    vsm.addTransition(prerender, paused, doPass);
+
+    vsm.addTransition(visible, visible, doPass);
+    vsm.addTransition(visible, hidden, doPass);
+    vsm.addTransition(visible, inactive, unload);
+    vsm.addTransition(visible, paused, pause);
+
+    vsm.addTransition(hidden, visible, doPass);
+    vsm.addTransition(hidden, hidden, doPass);
+    vsm.addTransition(hidden, inactive, unload);
+    vsm.addTransition(hidden, paused, pause);
+
+    vsm.addTransition(inactive, visible, doPass);
+    vsm.addTransition(inactive, hidden, doPass);
+    vsm.addTransition(inactive, inactive, noop);
+    vsm.addTransition(inactive, paused, doPass);
+
+    vsm.addTransition(paused, visible, resume);
+    vsm.addTransition(paused, hidden, doPass);
+    vsm.addTransition(paused, inactive, unload);
+    vsm.addTransition(paused, paused, noop);
   }
 }
 
@@ -1399,6 +1447,9 @@ export class Resource {
       /** @const  */
       this.loadPromiseResolve_ = resolve;
     });
+
+    /** @private {boolean} */
+    this.paused_ = false;
   }
 
   /**
@@ -1761,28 +1812,53 @@ export class Resource {
   }
 
   /**
-   * Calls element's documentInactiveCallback callback and resets state for
+   * Calls element's unlayoutCallback callback and resets state for
    * relayout in case document becomes active again.
    */
-  documentBecameInactive() {
-    if (this.state_ == ResourceState_.NOT_BUILT) {
+  unlayout() {
+    if (this.state_ == ResourceState_.NOT_BUILT ||
+        this.state_ == ResourceState_.NOT_LAID_OUT) {
       return;
     }
-    if (this.isInViewport()) {
-      this.setInViewport(false);
-    }
-    if (this.element.documentInactiveCallback()) {
+    this.setInViewport(false);
+    if (this.element.unlayoutCallback()) {
       this.state_ = ResourceState_.NOT_LAID_OUT;
       this.layoutCount_ = 0;
     }
   }
 
   /**
-   * Called when a previously visible element has become invisible.
+   * Calls element's pauseCallback callback.
+   */
+  pause() {
+    if (this.state_ == ResourceState_.NOT_BUILT || this.paused_) {
+      return;
+    }
+    this.paused_ = true;
+    this.setInViewport(false);
+    this.element.pauseCallback();
+    if (this.element.unlayoutOnPause()) {
+      this.unlayout();
+    }
+  }
+
+  /**
+   * Calls element's resumeCallback callback.
+   */
+  resume() {
+    if (this.state_ == ResourceState_.NOT_BUILT || !this.paused_) {
+      return;
+    }
+    this.paused_ = false;
+    this.element.resumeCallback();
+  }
+
+  /**
+   * Called when a previously visible element is no longer displayed.
    */
   unload() {
-    // TODO(dvoytenko): Likely warrants its own callback and re-layout rules.
-    this.documentBecameInactive();
+    this.pause();
+    this.unlayout();
   }
 
   /**

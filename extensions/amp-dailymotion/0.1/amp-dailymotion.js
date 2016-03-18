@@ -89,13 +89,10 @@ class AmpDailymotion extends AMP.BaseElement {
   }
 
   /** @override */
-  documentInactiveCallback() {
+  pauseCallback() {
     if (this.iframe_ && this.iframe_.contentWindow) {
       this.iframe_.contentWindow./*OK*/postMessage('pause', '*');
     }
-    // No need to do layout later - user action will be expect to resume
-    // the playback.
-    return false;
   }
 };
 

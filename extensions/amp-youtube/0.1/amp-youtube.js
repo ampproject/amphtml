@@ -109,7 +109,7 @@ class AmpYoutube extends AMP.BaseElement {
   }
 
   /** @override */
-  documentInactiveCallback() {
+  pauseCallback() {
     // Only send pauseVideo command if the player is playing. Otherwise
     // The player breaks if the user haven't played the video yet specially
     // on mobile.
@@ -117,9 +117,6 @@ class AmpYoutube extends AMP.BaseElement {
         this.playerState_ == YT_PLAYER_STATE_PLAYING) {
       this.pauseVideo_();
     }
-    // No need to do layout later - user action will be expect to resume
-    // the playback.
-    return false;
   }
 
   /** @private */

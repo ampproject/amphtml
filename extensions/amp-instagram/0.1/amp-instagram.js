@@ -159,7 +159,12 @@ class AmpInstagram extends AMP.BaseElement {
   }
 
   /** @override */
-  documentInactiveCallback() {
+  unlayoutOnPause() {
+    return true;
+  }
+
+  /** @override */
+  unlayoutCallback() {
     if (this.iframe_) {
       removeElement(this.iframe_);
       this.iframe_ = null;

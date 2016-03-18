@@ -77,7 +77,7 @@ class AmpAnim extends AMP.BaseElement {
   }
 
   /** @override */
-  documentInactiveCallback() {
+  unlayoutCallback() {
     // Release memory held by the image - animations are typically large.
     this.img_.src = '';
     return true;

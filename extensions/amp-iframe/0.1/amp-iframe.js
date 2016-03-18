@@ -323,13 +323,18 @@ export class AmpIframe extends AMP.BaseElement {
     });
   }
 
+  /** @override */
+  unlayoutOnPause() {
+    return true;
+  }
+
   /**
    * Removes this iframe from the page, freeing its resources. This is needed
    * to stop the bad eggs who continue to play videos even after the user has
    * swiped away from the doc.
    * @override
    **/
-  documentInactiveCallback() {
+  unlayoutCallback() {
     if (this.iframe_) {
       removeElement(this.iframe_);
       if (this.placeholder_) {
