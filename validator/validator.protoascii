@@ -20,12 +20,12 @@
 # in production from crashing. This id is not relevant to validator.js
 # because thus far, engine (validator.js) and spec file (validator.protoascii)
 # are always released together.
-min_validator_revision_required: 111
+min_validator_revision_required: 112
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 181
+spec_file_revision: 185
 # Rules for AMP HTML
 # (https://www.ampproject.org/docs/reference/spec.html)
 #
@@ -899,6 +899,7 @@ tags: {
 tags: {
   tag_name: "section"
   disallowed_ancestor: "head"
+  disallowed_ancestor: "amp-accordion"
 }
 # 4.3.4 The nav element
 tags: {
@@ -2319,7 +2320,7 @@ tags: {
 # HTML inside SVG, esp. to allow amp-img.
 # See https://github.com/ampproject/amphtml/issues/717
 tags: {
-  tag_name: "foreignObject"
+  tag_name: "foreignobject"
   mandatory_ancestor: "svg"
   attrs: { name: "class" }
   attrs: { name: "externalresourcesrequired" }
@@ -2566,6 +2567,38 @@ tags: {  # amp-access (json)
   }
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-access-spec.html"
 }
+tags: {  # amp-accordion
+  tag_name: "script"
+  spec_name: "amp-accordion extension .js script"
+  mandatory_parent: "head"
+  attrs: {
+    name: "async"
+    mandatory: true
+    value: ""
+  }
+  attrs: {
+    name: "custom-element"
+    mandatory: true
+    value: "amp-accordion"
+    dispatch_key: true
+  }
+  attrs: {
+    name: "src"
+    mandatory: true
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-accordion-(latest|0\\.1).js"
+  }
+  attrs: {
+    name: "type"
+    value: "text/javascript"
+  }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "."
+      error_message: "contents"
+    }
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-accordion.html"
+}
 tags: {  # amp-analytics
   tag_name: "script"
   spec_name: "amp-analytics extension .js script"
@@ -2680,6 +2713,40 @@ tags: {  # amp-audio
   }
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-audio.html"
 }
+tags: {  # amp-brid-player
+  tag_name: "script"
+  spec_name: "amp-brid-player extension .js script"
+  mandatory_parent: "head"
+  attrs: {
+    name: "async"
+    mandatory: true
+    value: ""
+  }
+  attrs: {
+    name: "custom-element"
+    mandatory: true
+    value: "amp-brid-player"
+    dispatch_key: true
+  }
+  attrs: {
+    name: "src"
+    mandatory: true
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-brid-player-(latest|0\\.1).js"
+  }
+  attrs: {
+    name: "type"
+    value: "text/javascript"
+  }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "."
+      error_message: "contents"
+    }
+  }
+  # TODO(gregable): Replace me with an ampproject.org URL eventually.
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-brid-player/amp-brid-player.md"
+}
+
 tags: {  # amp-brightcove
   tag_name: "script"
   spec_name: "amp-brightcove extension .js script"
@@ -3257,6 +3324,38 @@ tags: {  # amp-soundcloud
   }
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-soundcloud.html"
 }
+tags: {  # amp-springboard-player
+  tag_name: "script"
+  spec_name: "amp-springboard-player extension .js script"
+  mandatory_parent: "head"
+  attrs: {
+    name: "async"
+    mandatory: true
+    value: ""
+  }
+  attrs: {
+    name: "custom-element"
+    mandatory: true
+    value: "amp-springboard-player"
+    dispatch_key: true
+  }
+  attrs: {
+    name: "src"
+    mandatory: true
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-springboard-player-(latest|0\\.1)\\.js"
+  }
+  attrs: {
+    name: "type"
+    value: "text/javascript"
+  }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "."
+      error_message: "contents"
+    }
+  }
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-springboard-player/amp-springboard-player.html"
+}
 tags: {  # amp-twitter
   tag_name: "script"
   spec_name: "amp-twitter extension .js script"
@@ -3624,6 +3723,41 @@ tags: {  # <amp-audio>
     supported_layouts: NODISPLAY
   }
 }
+tags: {  # <amp-brid-player>
+  tag_name: "amp-brid-player"
+  disallowed_ancestor: "head"
+  also_requires: "amp-brid-player extension .js script"
+  attrs: {
+    name: "data-partner"
+    mandatory: true
+    value_regex: "[0-9]+"
+  }
+  attrs: {
+    name: "data-player"
+    mandatory: true
+    value_regex: "[0-9]+"
+  }
+  attrs: {
+    name: "data-playlist"
+    mandatory_oneof: "['data-playlist', 'data-video']"
+    value_regex: "[0-9]+"
+  }
+  attrs: {
+    name: "data-video"
+    mandatory_oneof: "['data-playlist', 'data-video']"
+    value_regex: "[0-9]+"
+  }
+  attr_lists: "extended-amp-global"
+  # TODO(gregable): Replace me with an ampproject.org URL eventually.
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-brid-player/amp-brid-player.md"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}
 tags: {  # <amp-brightcove>
   tag_name: "amp-brightcove"
   disallowed_ancestor: "head"
@@ -3668,6 +3802,36 @@ tags: {  # <amp-carousel>
     supported_layouts: RESPONSIVE
   }
 }
+tags: {  # <amp-accordion>
+  tag_name: "amp-accordion"
+  disallowed_ancestor: "head"
+  also_requires: "amp-accordion extension .js script"
+  attrs: { name: "animate" value: "" }
+  amp_layout: {
+    supported_layouts: CONTAINER
+  }
+  child_tags: {
+    child_tag_name_oneof: "section"
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-accordion.html"
+}
+tags: {
+  tag_name: "section"
+  spec_name: "amp-accordion > section"
+  disallowed_ancestor: "head"
+  mandatory_parent: "amp-accordion"
+  attrs: { name: "expanded" value: "" }
+  child_tags: {
+    mandatory_num_child_tags: 2
+    first_child_tag_name_oneof: "h1"
+    first_child_tag_name_oneof: "h2"
+    first_child_tag_name_oneof: "h3"
+    first_child_tag_name_oneof: "h4"
+    first_child_tag_name_oneof: "h5"
+    first_child_tag_name_oneof: "h6"
+  }
+}
+
 tags: {  # <amp-dailymotion>
   tag_name: "amp-dailymotion"
   disallowed_ancestor: "head"
@@ -3964,21 +4128,21 @@ tags: {  # <amp-reach-player>
   tag_name: "amp-reach-player"
   disallowed_ancestor: "head"
   also_requires: "amp-reach-player extension .js script"
-  attr_lists: "extended-amp-global"
   attrs: {
     name: "data-embed-id"
     mandatory: true
     # All ids are lowercase, numeric or dashes.
     value_regex: "[0-9a-z-]+"
   }
+  attr_lists: "extended-amp-global"
+  # Uncomment once reference is available.
+  # spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-reach-player/amp-reach-player.md"
   amp_layout: {
+    supported_layouts: FILL
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
     supported_layouts: RESPONSIVE
-    supported_layouts: FILL
   }
-  # Uncomment once reference is available.
-  # spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-reach-player/amp-reach-player.md"
 }
 tags: {  # <amp-soundcloud>
   tag_name: "amp-soundcloud"
@@ -3995,6 +4159,45 @@ tags: {  # <amp-soundcloud>
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-soundcloud.html"
   amp_layout: {
     supported_layouts: FIXED_HEIGHT
+  }
+}
+tags: {  # <amp-springboard-player>
+  tag_name: "amp-springboard-player"
+  disallowed_ancestor: "head"
+  also_requires: "amp-springboard-player extension .js script"
+  attrs: {
+    name: "data-content-id"
+    mandatory: true
+  }
+  attrs: {
+    name: "data-domain"
+    mandatory: true
+  }
+  attrs: {
+    name: "data-items"
+    mandatory: true
+  }
+  attrs: {
+    name: "data-mode"
+    mandatory: true
+    value_regex_casei: "playlist|video"
+  }
+  attrs: {
+    name: "data-player-id"
+    mandatory: true
+    value_regex_casei: "[a-z0-9]+"
+  }
+  attrs: {
+    name: "data-site-id"
+    mandatory: true
+    value_regex: "[0-9]+"
+  }
+  attr_lists: "extended-amp-global"
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-springboard-player/amp-springboard-player.html"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: RESPONSIVE
   }
 }
 tags: {  # <amp-twitter>
@@ -4390,6 +4593,20 @@ error_formats {
   code: ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT
   format: "The attribute '%1' in tag '%2' is disallowed by specified layout '%3'."
 }
+error_formats {
+  code: INCORRECT_NUM_CHILD_TAGS
+  format: "Tag '%1' must have %2 child tags - saw %3 child tags."
+}
+error_formats {
+  code: DISALLOWED_CHILD_TAG_NAME
+  format: "Tag '%1' is disallowed as child of tag '%2'. "
+          "Child tag must be one of %3."
+}
+error_formats {
+  code: DISALLOWED_FIRST_CHILD_TAG_NAME
+  format: "Tag '%1' is disallowed as first child of tag '%2'. "
+          "First child tag must be one of %3."
+}
 
 # CSS Errors. All of these use %1 for the tag name (in practice 'style'
 # by default).
@@ -4461,4 +4678,3 @@ error_formats {
   code: CSS_SYNTAX_DISALLOWED_RELATIVE_URL
   format: "CSS syntax error in tag '%1' - disallowed relative url '%2'."
 }
-
