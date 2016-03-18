@@ -72,6 +72,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [TripleLift](../ads/triplelift.md)
 - [Teads](../ads/teads.md)
 - [I-Mobile](../ads/imobile.md)
+- [Webediads](../ads/webediads.md)
 
 ## Styling
 
