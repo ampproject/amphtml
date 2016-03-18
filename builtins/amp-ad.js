@@ -292,7 +292,9 @@ export function installAd(win) {
      */
     getAdCid_() {
       const scope = clientIdScope[this.element.getAttribute('type')];
-      if (!scope) {
+      const consentId = this.element.getAttribute(
+          'data-consent-notification-id');
+      if (!(scope || consentId)) {
         return Promise.resolve();
       }
       return cidForOrNull(this.getWin()).then(cidService => {
@@ -300,12 +302,13 @@ export function installAd(win) {
           return;
         }
         let consent = Promise.resolve();
-        const consentId = this.element.getAttribute(
-            'data-consent-notification-id');
         if (consentId) {
           consent = userNotificationManagerFor(this.getWin()).then(service => {
             return service.get(consentId);
           });
+          if (!scope && consentId) {
+            return consent;
+          }
         }
         return cidService.get(scope, consent);
       });
