@@ -105,15 +105,25 @@ describe('3p messaging', () => {
 
   it('should not stop on errors', () => {
     let progress = '';
+    const origOnError = window.onError;
+    const expected = new Error('expected');
+    window.onerror = (message, source, lineno, colno, error) => {
+      if (error === expected) {
+        return;
+      }
+      origOnError.apply(this, arguments);
+    };
+
     listenParent(testWin, 'test', function() {
-      throw new Error('expected');
+      throw expected;
     });
     listenParent(testWin, 'test', function(d) {
       progress += d.s;
     });
     postMessage(iframe, 'test', {s: 'a'}, '*', true);
     postMessage(iframe, 'test', {s: 'd'}, '*', true);
-    return timer.promise(10).then(() => {
+    return timer.promise(10).catch(() => {}).then(() => {
+      window.onError = origOnError;
       expect(progress).to.equal('ad');
     });
   });
