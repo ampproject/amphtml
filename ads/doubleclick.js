@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {loadScript, checkData} from '../src/3p';
+import {loadScript, checkData, computeInMasterFrame} from '../src/3p';
 
 /**
  * @param {!Window} global
@@ -164,8 +164,25 @@ function doubleClickWithGlade(global, data) {
     }
   });
 
-  window.glade = {correlator: getCorrelator(global)};
-  loadScript(global, 'https://securepubads.g.doubleclick.net/static/glade.js');
+  computeInMasterFrame(global, 'gladeJs', done => {
+    global.glade = {correlator: getCorrelator(global)};
+    loadScript(global, 'https://securepubads.g.doubleclick.net/static/glade.js', done);
+  }, () => {
+    if (global.context.isMaster) {
+      return;
+    }
+    const master = global.context.master;
+    const orig = master.document.querySelectorAll;
+    try {
+      master.document.querySelectorAll = selector => {
+        return global.document.querySelectorAll(selector);
+      };
+      master.glade.run();
+    } finally {
+      master.document.querySelectorAll = orig;
+    }
+  });
+
 }
 
 /**
