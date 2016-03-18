@@ -226,9 +226,14 @@ function specificity(code) {
       return 50;
     case amp.validator.ValidationError.Code.CSS_SYNTAX_DISALLOWED_RELATIVE_URL:
       return 51;
-    case amp.validator.ValidationError.Code.GENERAL_DISALLOWED_TAG:
+    case amp.validator.ValidationError.Code.INCORRECT_NUM_CHILD_TAGS:
       return 52;
-
+    case amp.validator.ValidationError.Code.DISALLOWED_CHILD_TAG_NAME:
+      return 53;
+    case amp.validator.ValidationError.Code.DISALLOWED_FIRST_CHILD_TAG_NAME:
+      return 54;
+    case amp.validator.ValidationError.Code.GENERAL_DISALLOWED_TAG:
+      return 100;
     case amp.validator.ValidationError.Code.DEPRECATED_ATTR:
       return 101;
     case amp.validator.ValidationError.Code.DEPRECATED_TAG:
@@ -387,8 +392,112 @@ const TagsWithNoEndTags = function() {
 }();
 
 /**
- * This abstraction keeps track of the tag names as we enter / exit
- * tags in the document. Closing tags is tricky:
+ * The child tag matcher evaluates ChildTagSpec. The constructor
+ * provides the enclosing TagSpec for the parent tag so that we can
+ * produce error messages mentioning the parent.
+ * @private
+ */
+class ChildTagMatcher {
+  /**
+   * @param {amp.validator.TagSpec} parentSpec
+   */
+  constructor(parentSpec) {
+    /**
+     * @type {amp.validator.TagSpec}
+     * @private
+     */
+    this.parentSpec_ = parentSpec;
+
+    /**
+     * @type {!number}
+     * @private
+     */
+    this.numChildTagsSeen_ = 0;
+
+    /**
+     * @type {!LineCol}
+     * @private
+     */
+    this.lineCol_ = new LineCol(1, 0);
+  }
+
+  /**
+   * @param {!LineCol} lineCol
+   */
+  setLineCol(lineCol) { this.lineCol_ = lineCol; }
+
+  /**
+   * @return {boolean}
+   */
+  isEnabled() {
+    return this.parentSpec_ !== null && this.parentSpec_.childTags !== null;
+  }
+
+  /**
+   * @param {!Context} context
+   * @param {!amp.validator.ValidationResult} result
+   */
+  matchChildTagName(context, result) {
+    if (!this.isEnabled()) {
+      return;
+    }
+    const tagName = context.getTagStack().getCurrent();
+    const childTags = this.parentSpec_.childTags;
+    if (childTags.childTagNameOneof.length > 0) {
+      const names = childTags.childTagNameOneof;
+      if (names.indexOf(tagName) == -1) {
+        const allowedNames = "['" + names.join("', '") + "']";
+        context.addError(
+            amp.validator.ValidationError.Code.DISALLOWED_CHILD_TAG_NAME,
+            /* params */ [tagName, getTagSpecName(this.parentSpec_),
+                          allowedNames],
+            this.parentSpec_.specUrl, result);
+      }
+    }
+    if (childTags.firstChildTagNameOneof.length > 0
+        && this.numChildTagsSeen_ == 0) {
+      const names = childTags.firstChildTagNameOneof;
+      if (names.indexOf(tagName) == -1) {
+        const allowedNames = "['" + names.join("', '") + "']";
+        context.addError(
+            amp.validator.ValidationError.Code.DISALLOWED_FIRST_CHILD_TAG_NAME,
+            /* params */ [tagName, getTagSpecName(this.parentSpec_),
+                          allowedNames],
+            this.parentSpec_.specUrl, result);
+      }
+    }
+    this.numChildTagsSeen_++;
+  }
+
+  /**
+   * @param {!Context} context
+   * @param {!amp.validator.ValidationResult} result
+   */
+  exitTag(context, result) {
+    if (!this.isEnabled()) {
+      return;
+    }
+    const expected = this.parentSpec_.childTags.mandatoryNumChildTags;
+    if (expected === null || expected === this.numChildTagsSeen_) {
+      return;
+    }
+    context.addErrorWithLineCol(
+        this.lineCol_,
+        amp.validator.ValidationError.Code.INCORRECT_NUM_CHILD_TAGS,
+        /* params */ [getTagSpecName(this.parentSpec_),
+                      expected.toString(), this.numChildTagsSeen_.toString()],
+        this.parentSpec_.specUrl, result);
+  }
+}
+
+/**
+ * @typedef {{ tagName: string, matcher: (ChildTagMatcher|null) }}
+ */
+let TagStackEntry;
+
+/**
+ * This abstraction keeps track of the tag names and ChildTagMatchers
+ * as we enter / exit tags in the document. Closing tags is tricky:
  * - For tags with no end tag per spec, we close them in EnterTag when
  *   another tag is encountered.
  * - In addition, we assume that all end tags are optional and we close,
@@ -398,40 +507,88 @@ const TagsWithNoEndTags = function() {
  *   it when the parent closing tag (in practice <select>) is encountered.
  * @private
  */
-class TagNameStack {
+class TagStack {
   /** Creates an empty instance. */
   constructor() {
     /**
      * The current tag name and its parents.
-     * @type {!Array<string>}
+     * @type {!Array<TagStackEntry>}
      * @private
      */
     this.stack_ = [];
   }
 
   /**
-   * We enter a tag, and if the previously entered tag doesn't come with an
-   * end tag (per spec), we exit that.
+   * Enter a tag, opening a scope for child tags. Reason |context| and
+   * |result| are provided is that entering a tag can close the previous
+   * tag, which can trigger validation (e.g., the previous tag may be
+   * required to have two child tags).
    * @param {!string} tagName
+   * @param {!Context} context
+   * @param {!amp.validator.ValidationResult} result
    */
-  enterTag(tagName) {
+  enterTag(tagName, context, result) {
     if (this.stack_.length > 0 &&
-        TagsWithNoEndTags.hasOwnProperty(this.stack_[this.stack_.length - 1])) {
-      this.stack_.pop();
+        TagsWithNoEndTags.hasOwnProperty(
+            this.stack_[this.stack_.length - 1].tagName)) {
+      this.popFromStack_(context, result);
     }
-    this.stack_.push(tagName);
+    this.stack_.push({tagName: tagName, matcher: null});
   }
 
   /**
-   * We exit a tag.
-   * @param {!string} tagName
+   * Sets the tag matcher for the tag which is currently on the stack.
+   * This gets called shortly after EnterTag for a given tag.
+   * @param {!ChildTagMatcher} matcher
    */
-  exitTag(tagName) {
-    // We look for ragName from the end. If we can find it, we pop
+  setChildTagMatcher(matcher) {
+    this.stack_[this.stack_.length - 1].matcher = matcher;
+  }
+
+  /**
+   * This method is called as we're visiting a tag; so the matcher we
+   * need here is the one provided/specified for the tag parent.
+   * @param {!Context} context
+   * @param {!amp.validator.ValidationResult} result
+   */
+  matchChildTagName(context, result) {
+    if (this.stack_.length < 2) {
+      return;
+    }
+    const matcher = this.stack_[this.stack_.length - 2].matcher;
+    if (matcher !== null) {
+      matcher.matchChildTagName(context, result);
+    }
+  }
+
+  /**
+   * Upon exiting a tag, validation for the current matcher is triggered,
+   * e.g. for checking that the tag had some specified number of children.
+   * @param {!string} tagName
+   * @param {!Context} context
+   * @param {!amp.validator.ValidationResult} result
+   */
+  exitTag(tagName, context, result) {
+    // We look for tagName from the end. If we can find it, we pop
     // everything from thereon off the stack.
-    const idx = this.stack_.lastIndexOf(tagName);
-    if (idx !== -1) {
-      this.stack_ = this.stack_.slice(0, idx);
+    for (let idx = this.stack_.length - 1; idx > 0; idx--) {
+      if (this.stack_[idx].tagName === tagName) {
+        while (this.stack_.length > idx) {
+          this.popFromStack_(context, result);
+        }
+        return;
+      }
+    }
+  }
+
+  /**
+   * This method is called when we're done with the
+   * document. Normally, the parser should actually close the tags,
+   * but just in case it doesn't this easy-enough method will take care of it.
+   */
+  exitRemainingTags(context, result) {
+    while (this.stack_.length > 0) {
+      this.popFromStack_(context, result);
     }
   }
 
@@ -441,7 +598,7 @@ class TagNameStack {
    */
   getCurrent() {
     goog.asserts.assert(this.stack_.length > 0, 'Empty tag stack.');
-    return this.stack_[this.stack_.length - 1];
+    return this.stack_[this.stack_.length - 1].tagName;
   };
 
   /**
@@ -449,8 +606,9 @@ class TagNameStack {
    * @return {!string}
    */
   getParent() {
-    if (this.stack_.length >= 2)
-    return this.stack_[this.stack_.length - 2];
+    if (this.stack_.length >= 2) {
+      return this.stack_[this.stack_.length - 2].tagName;
+    }
     return '$ROOT';
   }
 
@@ -462,10 +620,23 @@ class TagNameStack {
   hasAncestor(ancestor) {
     // Skip the last element, which is the current tag.
     for (let i = 0; i < this.stack_.length - 1; ++i) {
-      if (this.stack_[i] === ancestor)
-      return true;
+      if (this.stack_[i].tagName === ancestor) {
+        return true;
+      }
     }
     return false;
+  }
+
+  /**
+   * @param {!Context} context
+   * @param {!amp.validator.ValidationResult} result
+   * @private
+   */
+  popFromStack_(context, result) {
+    const top = this.stack_.pop();
+    if (top.matcher !== null) {
+      top.matcher.exitTag(context, result);
+    }
   }
 }
 
@@ -773,11 +944,20 @@ class Context {
      */
     this.docLocator_ = null;
 
-    this.tagNames_ = new TagNameStack();
-
+    /**
+     * @type {!CdataMatcher}
+     * @private
+     */
     this.cdataMatcher_ = new CdataMatcher(new amp.validator.TagSpec());
 
     /**
+     * @type {!TagStack}
+     * @private
+     */
+    this.tagStack_ = new TagStack();
+
+    /**
+     * @type {!goog.structs.Set<number>}
      * @private
      */
     this.tagspecsValidated_ = new goog.structs.Set();
@@ -791,12 +971,6 @@ class Context {
 
   /** @return {amp.htmlparser.DocLocator} */
   getDocLocator() { return this.docLocator_; }
-
-  /**
-   * Returns the TagNameStack instance associated with this context.
-   * @return {!TagNameStack}
-   */
-  getTagNames() { return this.tagNames_; }
 
   /**
    * Returns an object with two fields, complete and wantsMoreErrors. When
@@ -926,6 +1100,16 @@ class Context {
     matcher.setLineCol(
         new LineCol(this.docLocator_.getLine(), this.docLocator_.getCol()));
     this.cdataMatcher_ = matcher;
+  }
+
+  /** @return {!TagStack} */
+  getTagStack() { return this.tagStack_; }
+
+  /** @param {ChildTagMatcher} matcher */
+  setChildTagMatcher(matcher) {
+    matcher.setLineCol(
+        new LineCol(this.docLocator_.getLine(), this.docLocator_.getCol()));
+    this.tagStack_.setChildTagMatcher(matcher);
   }
 }
 
@@ -2022,7 +2206,7 @@ class ParsedTagSpec {
         return;
       }
     }
-    const hasTemplateAncestor = context.getTagNames().hasAncestor('template');
+    const hasTemplateAncestor = context.getTagStack().hasAncestor('template');
     let mandatoryAttrsSeen = [];
     /** @type {!goog.structs.Set<string>} */
     const mandatoryOneofsSeen = new goog.structs.Set();
@@ -2122,7 +2306,7 @@ class ParsedTagSpec {
    */
   validateParentTag(context, validationResult) {
     if (this.spec_.mandatoryParent !== null &&
-        this.spec_.mandatoryParent !== context.getTagNames().getParent()) {
+        this.spec_.mandatoryParent !== context.getTagStack().getParent()) {
 
       // Output a parent/child error using CSS Child Selector syntax which is
       // both succinct and should be well understood by web developers.
@@ -2130,7 +2314,7 @@ class ParsedTagSpec {
           amp.validator.ValidationError.Code.WRONG_PARENT_TAG,
           /* params */
           [
-            getTagSpecName(this.spec_), context.getTagNames().getParent(),
+            getTagSpecName(this.spec_), context.getTagStack().getParent(),
             this.spec_.mandatoryParent
           ],
           this.spec_.specUrl, validationResult);
@@ -2145,7 +2329,7 @@ class ParsedTagSpec {
   validateAncestorTags(context, validationResult) {
     if (this.spec_.mandatoryAncestor !== null) {
       const mandatoryAncestor = this.spec_.mandatoryAncestor;
-      if (!context.getTagNames().hasAncestor(mandatoryAncestor)) {
+      if (!context.getTagStack().hasAncestor(mandatoryAncestor)) {
         if (this.spec_.mandatoryAncestorSuggestedAlternative !== null) {
           context.addError(
               amp.validator.ValidationError.Code.MANDATORY_TAG_ANCESTOR_WITH_HINT,
@@ -2162,7 +2346,7 @@ class ParsedTagSpec {
       }
     }
     for (const disallowedAncestor of this.spec_.disallowedAncestor) {
-      if (context.getTagNames().hasAncestor(disallowedAncestor)) {
+      if (context.getTagStack().hasAncestor(disallowedAncestor)) {
         context.addError(
             amp.validator.ValidationError.Code.DISALLOWED_TAG_ANCESTOR,
             /* params */ [this.spec_.tagName, disallowedAncestor],
@@ -2387,7 +2571,7 @@ class ParsedValidatorRules {
         attrName = attrName.toLowerCase();
 
         const maybeTagSpecId = tagSpecDispatch.matchingDispatchKey(
-            attrName, attrValue, context.getTagNames().getParent());
+            attrName, attrValue, context.getTagStack().getParent());
         if (maybeTagSpecId !== -1) {
           const parsedSpec = this.tagSpecById_[maybeTagSpecId];
           goog.asserts.assert(parsedSpec !== undefined, '1');
@@ -2502,6 +2686,7 @@ class ParsedValidatorRules {
     // (Re)set the cdata matcher to the expectations that this tag
     // brings with it.
     context.setCdataMatcher(new CdataMatcher(spec));
+    context.setChildTagMatcher(new ChildTagMatcher(spec));
   }
 
   /**
@@ -2686,15 +2871,17 @@ class ValidationHandler extends amp.htmlparser.HtmlSaxHandlerWithLocation {
    * tag presence.
    */
   endDoc() {
-    if (this.context_.getProgress(this.validationResult_).complete)
-    return;
+    if (this.context_.getProgress(this.validationResult_).complete) {
+      return;
+    }
     this.context_.setCdataMatcher(new CdataMatcher(new amp.validator.TagSpec()));
     this.rules_.maybeEmitGlobalTagValidationErrors(
         this.context_, this.validationResult_);
     if (this.validationResult_.status ===
-        amp.validator.ValidationResult.Status.UNKNOWN)
-    this.validationResult_.status =
-        amp.validator.ValidationResult.Status.PASS;
+        amp.validator.ValidationResult.Status.UNKNOWN) {
+      this.validationResult_.status =
+          amp.validator.ValidationResult.Status.PASS;
+    }
   }
 
   /**
@@ -2705,14 +2892,20 @@ class ValidationHandler extends amp.htmlparser.HtmlSaxHandlerWithLocation {
    */
   startTag(tagName, attrs) {
     goog.asserts.assert(attrs !== null, 'Null attributes for tag: ' + tagName);
-    this.context_.setCdataMatcher(new CdataMatcher(new amp.validator.TagSpec()));
-    if (this.context_.getProgress(this.validationResult_).complete)
-    return;
-    this.context_.getTagNames().enterTag(tagName);
+    this.context_.setCdataMatcher(
+        new CdataMatcher(new amp.validator.TagSpec()));
+    if (this.context_.getProgress(this.validationResult_).complete) {
+      return;
+    }
+    this.context_.getTagStack().enterTag(
+        tagName, this.context_, this.validationResult_);
     this.rules_.validateTag(this.context_, tagName, attrs,
                             this.validationResult_);
-    if (tagName === 'style')
-    this.inCssRegion_ = true;
+    this.context_.getTagStack().matchChildTagName(
+        this.context_, this.validationResult_);
+    if (tagName === 'style') {
+      this.inCssRegion_ = true;
+    }
   }
 
   /**
@@ -2721,8 +2914,10 @@ class ValidationHandler extends amp.htmlparser.HtmlSaxHandlerWithLocation {
    * @override
    */
   endTag(tagName) {
-    this.context_.setCdataMatcher(new CdataMatcher(new amp.validator.TagSpec()));
-    this.context_.getTagNames().exitTag(tagName);
+    this.context_.setCdataMatcher(
+        new CdataMatcher(new amp.validator.TagSpec()));
+    this.context_.getTagStack().exitTag(
+        tagName, this.context_, this.validationResult_);
   };
 
   /**
@@ -2891,6 +3086,28 @@ amp.validator.categorizeError = function(error) {
   // (since there is such a TagSpec as well, for the head).
   if (error.code ===
       amp.validator.ValidationError.Code.MANDATORY_TAG_ANCESTOR) {
+    if (goog.string./*OK*/startsWith(error.params[0], "amp-")
+        || goog.string./*OK*/startsWith(error.params[1], "amp-")) {
+      return amp.validator.ErrorCategory.Code.AMP_TAG_PROBLEM;
+    }
+    return amp.validator.ErrorCategory.Code.DISALLOWED_HTML;
+  }
+  // E.g. "Tag 'amp-accordion > section' must have 2 child tags - saw
+  // 3 child tags."
+  if (error.code ==
+      amp.validator.ValidationError.Code.INCORRECT_NUM_CHILD_TAGS) {
+    if (goog.string./*OK*/startsWith(error.params[0], "amp-")) {
+      return amp.validator.ErrorCategory.Code.AMP_TAG_PROBLEM;
+    }
+    return amp.validator.ErrorCategory.Code.DISALLOWED_HTML;
+  }
+  // e.g. "Tag 'div' is disallowed as first child of tag
+  // 'amp-accordion > section'. Allowed first child tag names are
+  // ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']."
+  if (error.code ==
+      amp.validator.ValidationError.Code.DISALLOWED_CHILD_TAG_NAME ||
+      error.code ==
+      amp.validator.ValidationError.Code.DISALLOWED_FIRST_CHILD_TAG_NAME) {
     if (goog.string./*OK*/startsWith(error.params[0], "amp-")
         || goog.string./*OK*/startsWith(error.params[1], "amp-")) {
       return amp.validator.ErrorCategory.Code.AMP_TAG_PROBLEM;
