@@ -18,6 +18,7 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
 import {addParamsToUrl} from '../../../src/url';
 import {dashToCamelCase} from '../../../src/string';
+import {removeElement} from '../../../src/dom';
 
 class AmpBrightcove extends AMP.BaseElement {
 
@@ -105,6 +106,27 @@ class AmpBrightcove extends AMP.BaseElement {
       this.iframe_.contentWindow./*OK*/postMessage(
           'pause', 'https://players.brightcove.net');
     }
+  }
+
+  /** @override */
+  unlayoutOnPause() {
+    return true;
+  }
+
+  /**
+   * To prevent improperly setup videos (do not include the pauseCallback
+   * listener script) from playing after being told to pause, we destroy the
+   * iframe. Once the listener script is updated to inform AMP that it is listening,
+   * we can prevent the unlayout.
+   *
+   * See https://github.com/ampproject/amphtml/issues/2224 for information.
+   */
+  unlayout() {
+    if (this.iframe_) {
+      removeElement(this.iframe_);
+      this.iframe_ = null;
+    }
+    return true;
   }
 };
 
