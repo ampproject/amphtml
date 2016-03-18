@@ -61,6 +61,7 @@ import {webediads} from '../ads/webediads';
  */
 const AMP_EMBED_ALLOWED = {
   taboola: true,
+  plista: true,
 };
 
 register('a9', a9);
