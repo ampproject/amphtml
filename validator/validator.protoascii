@@ -25,7 +25,7 @@ min_validator_revision_required: 112
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 184
+spec_file_revision: 185
 # Rules for AMP HTML
 # (https://www.ampproject.org/docs/reference/spec.html)
 #
@@ -2713,6 +2713,40 @@ tags: {  # amp-audio
   }
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-audio.html"
 }
+tags: {  # amp-brid-player
+  tag_name: "script"
+  spec_name: "amp-brid-player extension .js script"
+  mandatory_parent: "head"
+  attrs: {
+    name: "async"
+    mandatory: true
+    value: ""
+  }
+  attrs: {
+    name: "custom-element"
+    mandatory: true
+    value: "amp-brid-player"
+    dispatch_key: true
+  }
+  attrs: {
+    name: "src"
+    mandatory: true
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-brid-player-(latest|0\\.1).js"
+  }
+  attrs: {
+    name: "type"
+    value: "text/javascript"
+  }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "."
+      error_message: "contents"
+    }
+  }
+  # TODO(gregable): Replace me with an ampproject.org URL eventually.
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-brid-player/amp-brid-player.md"
+}
+
 tags: {  # amp-brightcove
   tag_name: "script"
   spec_name: "amp-brightcove extension .js script"
@@ -3687,6 +3721,41 @@ tags: {  # <amp-audio>
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
     supported_layouts: NODISPLAY
+  }
+}
+tags: {  # <amp-brid-player>
+  tag_name: "amp-brid-player"
+  disallowed_ancestor: "head"
+  also_requires: "amp-brid-player extension .js script"
+  attrs: {
+    name: "data-partner"
+    mandatory: true
+    value_regex: "[0-9]+"
+  }
+  attrs: {
+    name: "data-player"
+    mandatory: true
+    value_regex: "[0-9]+"
+  }
+  attrs: {
+    name: "data-playlist"
+    mandatory_oneof: "['data-playlist', 'data-video']"
+    value_regex: "[0-9]+"
+  }
+  attrs: {
+    name: "data-video"
+    mandatory_oneof: "['data-playlist', 'data-video']"
+    value_regex: "[0-9]+"
+  }
+  attr_lists: "extended-amp-global"
+  # TODO(gregable): Replace me with an ampproject.org URL eventually.
+  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-brid-player/amp-brid-player.md"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
   }
 }
 tags: {  # <amp-brightcove>
