@@ -322,6 +322,7 @@ var forbiddenTerms = {
     message: 'Use `window.document` or similar to access document, the global' +
       '`document` is forbidden',
     whitelist: [
+      'build-system/server.js',
       'validator/validator.js',
       'testing/iframe.js',
       'testing/screenshots/make-screenshot.js',
