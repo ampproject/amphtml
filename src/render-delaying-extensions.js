@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {dev} from './log';
 import {getServicePromise} from './service';
 import {timer} from './timer';
 
@@ -64,6 +65,7 @@ export function waitForExtensions(win) {
  */
 export function includedExtensions(win) {
   const document = win.document;
+  dev.assert(document.body);
 
   return EXTENSIONS.filter(extension => {
     return document.querySelector(`[custom-element="${extension}"]`);

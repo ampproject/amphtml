@@ -15,12 +15,20 @@
  */
 
 import * as dom from '../../src/dom';
+import * as sinon from 'sinon';
 
 
 describe('DOM', () => {
 
+  let sandbox;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+  });
+
   afterEach(() => {
     dom.setScopeSelectorSupportedForTesting(undefined);
+    sandbox.restore();
   });
 
   it('should remove all children', () => {
@@ -224,6 +232,125 @@ describe('DOM', () => {
           document, document)).to.be.true;
       expect(dom.documentContainsPolyfillInternal_(
           document, document)).to.be.true;
+    });
+  });
+
+  describe('waitFor', () => {
+    let parent;
+    let child;
+
+    beforeEach(() => {
+      parent = document.createElement('div');
+      child = document.createElement('div');
+    });
+
+    function contains() {
+      return parent.contains(child);
+    }
+
+    it('should immediately return if child is available', () => {
+      parent.appendChild(child);
+      const spy = sandbox.spy();
+      dom.waitForChild(parent, contains, spy);
+      expect(spy.callCount).to.equal(1);
+    });
+
+    it('should wait until child is available', () => {
+      const spy = sandbox.spy();
+      dom.waitForChild(parent, contains, spy);
+      expect(spy.callCount).to.equal(0);
+
+      return new Promise(resolve => {
+        const interval = setInterval(() => {
+          if (spy.callCount > 0) {
+            clearInterval(interval);
+            resolve();
+          }
+        }, 10);
+        parent.appendChild(child);
+      }).then(() => {
+        expect(spy.callCount).to.equal(1);
+      });
+    });
+
+    it('should prefer MutationObserver and disconnect when done', () => {
+      let mutationCallback;
+      const mutationObserver = {
+        observe: sandbox.spy(),
+        disconnect: sandbox.spy(),
+      };
+      const parent = {
+        ownerDocument: {
+          defaultView: {
+            MutationObserver: callback => {
+              mutationCallback = callback;
+              return mutationObserver;
+            },
+          },
+        },
+      };
+      let checkFuncValue = false;
+      const checkFunc = () => checkFuncValue;
+      const spy = sandbox.spy();
+
+      dom.waitForChild(parent, checkFunc, spy);
+      expect(spy.callCount).to.equal(0);
+      expect(mutationObserver.observe.callCount).to.equal(1);
+      expect(mutationObserver.observe.firstCall.args[0]).to.equal(parent);
+      expect(mutationObserver.observe.firstCall.args[1])
+          .to.deep.equal({childList: true});
+      expect(mutationCallback).to.exist;
+
+      // False callback.
+      mutationCallback();
+      expect(spy.callCount).to.equal(0);
+      expect(mutationObserver.disconnect.callCount).to.equal(0);
+
+      // True callback.
+      checkFuncValue = true;
+      mutationCallback();
+      expect(spy.callCount).to.equal(1);
+      expect(mutationObserver.disconnect.callCount).to.equal(1);
+    });
+
+    it('should fallback to polling without MutationObserver', () => {
+      let intervalCallback;
+      const win = {
+        setInterval: callback => {
+          intervalCallback = callback;
+          return 123;
+        },
+        clearInterval: sandbox.spy(),
+      };
+      const parent = {
+        ownerDocument: {
+          defaultView: win,
+        },
+      };
+      let checkFuncValue = false;
+      const checkFunc = () => checkFuncValue;
+      const spy = sandbox.spy();
+
+      dom.waitForChild(parent, checkFunc, spy);
+      expect(spy.callCount).to.equal(0);
+      expect(intervalCallback).to.exist;
+
+      // False callback.
+      intervalCallback();
+      expect(spy.callCount).to.equal(0);
+      expect(win.clearInterval.callCount).to.equal(0);
+
+      // True callback.
+      checkFuncValue = true;
+      intervalCallback();
+      expect(spy.callCount).to.equal(1);
+      expect(win.clearInterval.callCount).to.equal(1);
+    });
+
+    it('should wait for body', () => {
+      return dom.waitForBodyPromise(document).then(() => {
+        expect(document.body).to.exist;
+      });
     });
   });
 });

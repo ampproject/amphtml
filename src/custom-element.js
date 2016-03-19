@@ -108,7 +108,9 @@ export function upgradeOrRegisterElement(win, name, toClass) {
  * @param {!Window} win
  */
 export function stubElements(win) {
-  win.ampExtendedElements = {};
+  if (!win.ampExtendedElements) {
+    win.ampExtendedElements = {};
+  }
   const list = win.document.querySelectorAll('[custom-element]');
   for (let i = 0; i < list.length; i++) {
     const name = list[i].getAttribute('custom-element');
@@ -117,6 +119,10 @@ export function stubElements(win) {
       continue;
     }
     registerElement(win, name, ElementStub);
+  }
+  // Repeat stubbing when HEAD is complete.
+  if (!win.document.body) {
+    dom.waitForBody(win.document, () => stubElements(win));
   }
 }
 
@@ -1210,6 +1216,7 @@ export function resetScheduledElementForTesting(win, elementName) {
   if (win.ampExtendedElements) {
     win.ampExtendedElements[elementName] = null;
   }
+  delete knownElements[elementName];
 }
 
 
@@ -1227,14 +1234,14 @@ export function resetScheduledElementForTesting(win, elementName) {
  * @return {!Promise<*>}
  */
 export function getElementService(win, id, providedByElement) {
-  return Promise.resolve().then(() => {
-    assert(isElementScheduled(win, providedByElement),
-        'Service %s was requested to be provided through %s, ' +
-        'but %s is not loaded in the current page. To fix this ' +
-        'problem load the JavaScript file for %s in this page.',
-        id, providedByElement, providedByElement, providedByElement);
-    return getServicePromise(win, id);
-  });
+  return getElementServiceIfAvailable(win, id, providedByElement).then(
+      service => {
+        return assert(service,
+            'Service %s was requested to be provided through %s, ' +
+            'but %s is not loaded in the current page. To fix this ' +
+            'problem load the JavaScript file for %s in this page.',
+            id, providedByElement, providedByElement, providedByElement);
+      });
 }
 
 /**
@@ -1251,8 +1258,18 @@ export function getElementServiceIfAvailable(win, id, providedByElement) {
   if (s) {
     return s;
   }
-  if (!isElementScheduled(win, providedByElement)) {
-    return Promise.resolve(null);
-  }
-  return getElementService(win, id, providedByElement);
+  // Microtask is necessary to ensure that window.ampExtendedElements has been
+  // initialized.
+  return Promise.resolve().then(() => {
+    if (isElementScheduled(win, providedByElement)) {
+      return getServicePromise(win, id);
+    }
+    // Wait for HEAD to fully form before denying access to the service.
+    return dom.waitForBodyPromise(win.document).then(() => {
+      if (isElementScheduled(win, providedByElement)) {
+        return getServicePromise(win, id);
+      }
+      return null;
+    });
+  });
 }
