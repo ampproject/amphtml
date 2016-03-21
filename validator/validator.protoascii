@@ -3099,24 +3099,6 @@ tags: {  # amp-install-serviceworker
   }
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-install-serviceworker.html"
 }
-tags: {  # amp-jwplayer
-  name: "script"
-  mandatory_parent: "head"
-  detail: "amp-jwplayer extension .js script"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-jwplayer/amp-jwplayer.md"
-  attrs: {
-    name: "custom-element"
-    value: "amp-jwplayer"
-    mandatory: true
-    dispatch_key: true
-  }
-  attrs: { name: "async" value: "" mandatory: true }
-  attrs: {
-    name: "src"
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-jwplayer-(latest|0\\.1).js"
-    mandatory: true
-  }
-}
 tags: {  # amp-lightbox
   tag_name: "script"
   spec_name: "amp-lightbox extension .js script"
