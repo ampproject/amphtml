@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-import { writeScript } from '../src/3p';
+import {loadScript} from '../src/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function pubmatic(global, data) {
-    loadScript(global, 'https://ads.pubmatic.com/AdServer/js/amp.js', () => {
-        data.kadpageurl = global.context.location.href;
-        PubMatic.showAd(data);
-    });
+  loadScript(global, 'https://ads.pubmatic.com/AdServer/js/amp.js', () => {
+      data.kadpageurl = global.context.location.href;
+      PubMatic.showAd(data);
+  });
 }
