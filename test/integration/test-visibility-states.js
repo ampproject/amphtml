@@ -125,7 +125,6 @@ describe('Viewer Visibility State', () => {
 
     afterEach(() => {
       sandbox.restore();
-      fixture.iframe.parentNode.removeChild(fixture.iframe);
     });
 
     describe.skip('from in the PRERENDER state', () => {
