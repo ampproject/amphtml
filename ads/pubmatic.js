@@ -33,6 +33,6 @@ export function pubmatic(global, data) {
     loaded.then(() = > {
         data.kadpageurl = context.location.href;
         PubMatic.showAd(data);
-    });
+    }, null);
 
 }

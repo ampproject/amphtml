@@ -54,7 +54,7 @@ import {teads} from '../ads/teads';
 import {rubicon} from '../ads/rubicon';
 import {imobile} from '../ads/imobile';
 import {webediads} from '../ads/webediads';
-import {pubmatic} from '../ads/pubmatic'
+import {pubmatic} from '../ads/pubmatic';
 
 /**
  * Whether the embed type may be used with amp-embed tag.
