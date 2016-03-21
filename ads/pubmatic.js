@@ -21,20 +21,8 @@ import { writeScript } from '../src/3p';
  * @param {!Object} data
  */
 export function pubmatic(global, data) {
-
-    var loaded = new Promise((resolve, reject) = > {
-        var s = document.createElement('script');
-        s.src = 'https://ads.pubmatic.com/AdServer/js/amp.js';
-        s.onload = resolve;
-        s.onerror = reject;
-        global.document.body.appendChild(s);
-    });
-
-    loaded.then(() = > {
-        data.kadpageurl = context.location.href;
+    loadScript(global, 'https://ads.pubmatic.com/AdServer/js/amp.js', () => {
+        data.kadpageurl = global.context.location.href;
         PubMatic.showAd(data);
-    }, () => {
-        console.log("Failed to load.");
     });
-
 }
