@@ -21,7 +21,7 @@ limitations under the License.
 ```html
 <amp-ad width=300 height=250
 	type="pubmatic"
-	json= '{"pubId":37521, "siteId":38293, "adId":53895, "width":320, "height":50}'>
+	json= '{"pubId":319, "siteId":320, "adId":622270, "width":300, "height":250}'>
 </amp-ad>
 ```
 
