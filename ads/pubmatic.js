@@ -22,7 +22,7 @@ import {loadScript} from '../src/3p';
  */
 export function pubmatic(global, data) {
   loadScript(global, 'https://ads.pubmatic.com/AdServer/js/amp.js', () => {
-      data.kadpageurl = global.context.location.href;
-      PubMatic.showAd(data);
+    data.kadpageurl = global.context.location.href;
+    PubMatic.showAd(data);
   });
 }
