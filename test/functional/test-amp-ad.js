@@ -437,6 +437,7 @@ function tests(name, installer) {
 
       afterEach(() => {
         sandbox.restore();
+        delete clientIdScope['with_cid'];
         setCookie(window, cidScope, '', new Date().getTime() - 5000);
       });
 
@@ -483,6 +484,58 @@ function tests(name, installer) {
           return ad;
         }).then(ad => {
           expect(ad.getAttribute('ampcid')).to.equal('consent-cid');
+        });
+      });
+
+      it('waits for consent w/o cidScope', () => {
+        return getAd({
+          width: 300,
+          height: 250,
+          type: 'with_cid',
+          src: 'testsrc',
+          'data-consent-notification-id': 'uid',
+        }, 'https://schema.org', function(ad) {
+          const win = ad.ownerDocument.defaultView;
+          const cidService = installCidService(win);
+          const uidService = installUserNotificationManager(win);
+          sandbox.stub(uidService, 'get', id => {
+            expect(id).to.equal('uid');
+            return Promise.resolve('consent');
+          });
+          sandbox.stub(cidService, 'get', (scope, consent) => {
+            expect(scope).to.equal(cidScope);
+            return consent.then(val => {
+              return val + '-cid';
+            });
+          });
+          return ad;
+        }).then(ad => {
+          expect(ad.getAttribute('ampcid')).to.equal('consent');
+        });
+      });
+
+      it('provide null if notification and cid is not provided', () => {
+        let uidSpy = null;
+        return getAd({
+          width: 300,
+          height: 250,
+          type: 'with_cid',
+          src: 'testsrc',
+        }, 'https://schema.org', function(ad) {
+          const win = ad.ownerDocument.defaultView;
+          const cidService = installCidService(win);
+          const uidService = installUserNotificationManager(win);
+          uidSpy = sandbox.spy(uidService, 'get');
+          sandbox.stub(cidService, 'get', (scope, consent) => {
+            expect(scope).to.equal(cidScope);
+            return consent.then(val => {
+              return val + '-cid';
+            });
+          });
+          return ad;
+        }).then(ad => {
+          expect(uidSpy.callCount).to.equal(0);
+          expect(ad.getAttribute('ampcid')).to.be.null;
         });
       });
 

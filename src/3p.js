@@ -245,6 +245,7 @@ export function validateData(data, allowedFields) {
     pageViewId: true,
     location: true,
     mode: true,
+    consentNotificationId: true,
   };
   for (const field in data) {
     if (!data.hasOwnProperty(field) ||
