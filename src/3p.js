@@ -22,7 +22,7 @@
 // Note: loaded by 3p system. Cannot rely on babel polyfills.
 
 
-import {assert} from './asserts';
+import {dev, user} from './log';
 import {isArray} from './types';
 import {rethrowAsync} from './log';
 
@@ -45,7 +45,7 @@ let syncScriptLoads = 0;
  * @param {ThirdPartyFunctionDef} draw Function that draws the 3p integration.
  */
 export function register(id, draw) {
-  assert(!registrations[id], 'Double registration %s', id);
+  dev.assert(!registrations[id], 'Double registration %s', id);
   registrations[id] = draw;
 }
 
@@ -57,7 +57,7 @@ export function register(id, draw) {
  */
 export function run(id, win, data) {
   const fn = registrations[id];
-  assert(fn, 'Unknown 3p: ' + id);
+  user.assert(fn, 'Unknown 3p: ' + id);
   fn(win, data);
 }
 
@@ -200,7 +200,7 @@ export function computeInMasterFrame(global, taskId, work, cb) {
 export function validateDataExists(data, mandatoryFields) {
   for (let i = 0; i < mandatoryFields.length; i++) {
     const field = mandatoryFields[i];
-    assert(data[field],
+    user.assert(data[field],
         'Missing attribute for %s: %s.', data.type, field);
   }
 }
@@ -221,7 +221,7 @@ export function validateExactlyOne(data, alternativeFields) {
     }
   }
 
-  assert(countFileds === 1,
+  user.assert(countFileds === 1,
       '%s must contain exactly one of attributes: %s.',
       data.type,
       alternativeFields.join(', '));
@@ -252,7 +252,7 @@ export function validateData(data, allowedFields) {
         field in defaultAvailableFields) {
       continue;
     }
-    assert(allowedFields.indexOf(field) != -1,
+    user.assert(allowedFields.indexOf(field) != -1,
         'Unknown attribute for %s: %s.', data.type, field);
   }
 }

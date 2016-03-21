@@ -16,7 +16,6 @@
 
 import {BaseElement} from '../src/base-element';
 import {IntersectionObserver} from '../src/intersection-observer';
-import {assert} from '../src/asserts';
 import {cidForOrNull} from '../src/cid';
 import {getIframe, prefetchBootstrap} from '../src/3p-frame';
 import {isLayoutSizeDefined} from '../src/layout';
@@ -26,8 +25,9 @@ import {parseUrl} from '../src/url';
 import {registerElement} from '../src/custom-element';
 import {adPrefetch, adPreconnect, clientIdScope} from '../ads/_config';
 import {timer} from '../src/timer';
-import {viewerFor} from '../src/viewer';
+import {user} from '../src/log';
 import {userNotificationManagerFor} from '../src/user-notification';
+import {viewerFor} from '../src/viewer';
 
 
 /** @private @const These tags are allowed to have fixed positioning */
@@ -223,7 +223,7 @@ export function installAd(win) {
     layoutCallback() {
       if (!this.iframe_) {
         loadingAdsCount++;
-        assert(!this.isInFixedContainer_,
+        user.assert(!this.isInFixedContainer_,
             '<amp-ad> is not allowed to be placed in elements with ' +
             'position:fixed: %s', this.element);
         timer.delay(() => {

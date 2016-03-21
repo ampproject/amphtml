@@ -15,7 +15,7 @@
  */
 
 import {timer} from './timer';
-import {assert} from './asserts';
+import {user} from './log';
 
 
 /**
@@ -112,13 +112,9 @@ export function loadPromise(element, opt_timeout) {
         unlistenLoad = listenOnce(element, 'load', () => resolve(element));
       }
       unlistenError = listenOnce(element, 'error', () => {
-        try {
-          // Report failed loads as asserts so that they automatically go into
-          // the "document error" bucket.
-          assert(false, 'Failed HTTP request for %s.', element);
-        } catch (e) {
-          reject(e);
-        }
+        // Report failed loads as asserts so that they automatically go into
+        // the "document error" bucket.
+        reject(user.createError('Failed HTTP request for %s.', element));
       });
     }
   });
