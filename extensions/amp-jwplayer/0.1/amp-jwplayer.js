@@ -16,8 +16,6 @@
 
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
-import {addParamsToUrl} from '../../../src/url';
-import {dashToCamelCase} from '../../../src/string';
 
 class AmpJWPlayer extends AMP.BaseElement {
 

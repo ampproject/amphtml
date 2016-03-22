@@ -17,7 +17,6 @@
 import {createIframePromise} from '../../../../testing/iframe';
 require('../amp-jwplayer');
 import {adopt} from '../../../../src/runtime';
-import {parseUrl} from '../../../../src/url';
 
 adopt(window);
 
