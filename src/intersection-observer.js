@@ -88,7 +88,7 @@ export function getIntersectionChangeEntry(
 export class IntersectionObserver extends Observable {
   /**
    * @param {!BaseElement} element.
-   * @param {!Element} iframe Iframe element to which would request intersection
+   * @param {!Element} iframe Iframe element which requested the intersection
    *    data.
    * @param {?boolean} opt_is3p Set to `true` when the iframe is 3'rd party.
    * @constructor
