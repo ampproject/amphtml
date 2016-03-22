@@ -135,7 +135,7 @@ class AmpYoutube extends AMP.BaseElement {
       return;
     }
     let data;
-    if (event.data.indexOf('{') != 0) {
+    if (!event.data || event.data.indexOf('{') != 0) {
       return;  // Doesn't look like JSON.
     }
     try {
