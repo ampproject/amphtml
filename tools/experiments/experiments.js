@@ -63,6 +63,11 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
         'amp-sidebar/amp-sidebar.md',
   },
+  {
+    id: 'amp-analytics-viewability',
+    name: 'Viewability APIs for amp-analytics',
+    spec: 'https://github.com/ampproject/amphtml/issues/1297#issuecomment-197441289',
+  },
 ];
 
 

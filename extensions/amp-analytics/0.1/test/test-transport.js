@@ -21,7 +21,7 @@ import * as sinon from 'sinon';
 
 adopt(window);
 
-describe('transport', () => {
+describe('amp-analytics.transport', () => {
 
   let sandbox;
   beforeEach(() => {

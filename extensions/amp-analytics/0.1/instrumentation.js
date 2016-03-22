@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {isExperimentOn} from '../../../src/experiments';
 import {Observable} from '../../../src/observable';
 import {getService} from '../../../src/service';
 import {timer} from '../../../src/timer';
@@ -128,15 +129,7 @@ export class InstrumentationService {
   addListener(config, listener) {
     const eventType = config['on'];
     if (eventType === AnalyticsEventType.VISIBLE) {
-      if (this.viewer_.isVisible()) {
-        listener(new AnalyticsEvent(AnalyticsEventType.VISIBLE));
-      } else {
-        this.viewer_.onVisibilityChanged(() => {
-          if (this.viewer_.isVisible()) {
-            listener(new AnalyticsEvent(AnalyticsEventType.VISIBLE));
-          }
-        });
-      }
+      this.createVisibilityListener_(listener, config);
     } else if (eventType === AnalyticsEventType.CLICK) {
       if (!config['selector']) {
         user.error(this.TAG_, 'Missing required selector on click trigger');
@@ -209,6 +202,109 @@ export class InstrumentationService {
     if (observers) {
       observers.fire(event);
     }
+  }
+
+  /**
+   * Creates listeners for visibility conditions or calls the callback if all
+   * the conditions are met.
+   * @param {!AnalyticsEventListenerDef} The callback to call when the event
+   *   occurs.
+   * @param {!JSONObject} config Configuration for instrumentation.
+   * @private
+   */
+  createVisibilityListener_(callback, config) {
+    if (!this.isVisibilitySpecValid_(config)) {
+      return;
+    }
+
+    // TODO(avimehta, #1297): Add all the listeners so that visibility
+    // conditions are monitored and callback is called when the conditions
+    // are met.
+    if (this.viewer_.isVisible()) {
+      callback(new AnalyticsEvent(AnalyticsEventType.VISIBLE));
+    } else {
+      this.viewer_.onVisibilityChanged(() => {
+        if (this.viewer_.isVisible()) {
+          callback(new AnalyticsEvent(AnalyticsEventType.VISIBLE));
+        }
+      });
+    }
+  }
+
+  /**
+   * Checks if the value is undefined or positive number like.
+   * "", 1, 0, undefined, 100, 101 are positive. -1, NaN are not.
+   * @param {number} num The number to verify.
+   * @return {boolean}
+   * @private
+   */
+  isPositiveNumber_(num) {
+    return num === undefined || Math.sign(num) >= 0;
+  }
+
+  /**
+   * Checks if the value is undefined or a number between 0 and 100.
+   * "", 1, 0, undefined, 100 return true. -1, NaN and 101 return false.
+   * @param {number} num The number to verify.
+   * @return {boolean}
+   * @private
+   */
+  isValidPercentage_(num) {
+    return num === undefined || (Math.sign(num) >= 0 && num <= 100);
+  }
+
+  /**
+   * Checks and outputs information about visibilitySpecValidation.
+   * @param {!JSONObject} config Configuration for instrumentation.
+   */
+  isVisibilitySpecValid_(config) {
+    if (!config['visibilitySpec'] || !this.isViewabilityExperimentOn_()) {
+      return true;
+    }
+
+    const spec = config['visibilitySpec'];
+    if (!spec['selector'] || spec['selector'][0] != '#') {
+      user.error(this.TAG_, 'Visibility spec requires an id selector');
+      return false;
+    }
+
+    const ctMax = spec['continuousTimeMax'];
+    const ctMin = spec['continuousTimeMin'];
+    const ttMax = spec['totalTimeMax'];
+    const ttMin = spec['totalTimeMin'];
+
+    if (!this.isPositiveNumber_(ctMin) || !this.isPositiveNumber_(ctMax) ||
+        !this.isPositiveNumber_(ttMin) || !this.isPositiveNumber_(ttMax)) {
+      user.error(this.TAG_, 'Timing conditions should be positive integers ' +
+          'when specified.');
+      return false;
+    }
+
+    if ((ctMax || ttMax) && !spec['unload']) {
+      user.warn(this.TAG_, 'Unload condition should be used when using ' +
+          ' totalTimeMax or continuousTimeMax');
+      return false;
+    }
+
+    if (ctMax < ctMin || ttMax < ttMin) {
+      user.warn(this.TAG_, 'Max value in timing conditions should be more ' +
+          'than the min value.');
+      return false;
+    }
+
+    if (!this.isValidPercentage_(spec['visiblePercentageMax']) ||
+        !this.isValidPercentage_(spec['visiblePercentageMin'])) {
+      user.error(this.TAG_,
+          'visiblePercentage conditions should be between 0 and 100.');
+      return false;
+    }
+
+    if (spec['visiblePercentageMax'] < spec['visiblePercentageMin']) {
+      user.error(this.TAG_, 'visiblePercentageMax should be greater than ' +
+          'visiblePercentageMin');
+      return false;
+    }
+    return true;
   }
 
   /**
@@ -415,6 +511,13 @@ export class InstrumentationService {
         DEFAULT_MAX_TIMER_LENGTH_SECONDS_;
     this.win_.setTimeout(this.win_.clearInterval.bind(this.win_, intervalId),
         maxTimerLength * 1000);
+  }
+
+  /**
+   * @return {boolean} True if the experiment is on. False otherwise.
+   */
+  isViewabilityExperimentOn_() {
+    return isExperimentOn(this.win_, 'amp-analytics-viewability');
   }
 }
 
