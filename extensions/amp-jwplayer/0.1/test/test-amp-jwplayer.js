@@ -40,7 +40,7 @@ describe('amp-jwplayer', () => {
   it('renders', () => {
     return getjwplayer({
       'data-media-id': 'Wferorsv',
-      'data-player-id': 'sDZEo0ea'
+      'data-player-id': 'sDZEo0ea',
     }).then(jw => {
       const iframe = jw.querySelector('iframe');
       expect(iframe).to.not.be.null;
@@ -55,7 +55,7 @@ describe('amp-jwplayer', () => {
   it('renders with a playlist', () => {
     return getjwplayer({
       'data-playlist-id': '482jsTAr',
-      'data-player-id': 'sDZEo0ea'
+      'data-player-id': 'sDZEo0ea',
     }).then(jw => {
       const iframe = jw.querySelector('iframe');
       expect(iframe).to.not.be.null;
@@ -67,9 +67,9 @@ describe('amp-jwplayer', () => {
 
   it('fails if no media is specified', () => {
     return getjwplayer({
-      'data-player-id': 'sDZEo0ea'
+      'data-player-id': 'sDZEo0ea',
     }).should.eventually.be.rejectedWith(
-      /Either the data-media-id or the data-playlist-id attributes must be specified for/
+      /Either the data-media-id or the data-playlist-id attributes must be specified/
     );
   });
 
@@ -84,7 +84,7 @@ describe('amp-jwplayer', () => {
   it('renders with a bad playlist', () => {
     return getjwplayer({
       'data-playlist-id': 'zzz',
-      'data-player-id': 'sDZEo0ea'
+      'data-player-id': 'sDZEo0ea',
     }).then(jw => {
       const iframe = jw.querySelector('iframe');
       expect(iframe).to.not.be.null;
