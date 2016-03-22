@@ -69,7 +69,7 @@ describe('amp-jwplayer', () => {
     return getjwplayer({
       'data-player-id': 'sDZEo0ea',
     }).should.eventually.be.rejectedWith(
-      /Either the data-media-id or the data-playlist-id attributes must be specified/
+      /Either the data-media-id or the data-playlist-id attributes must be/
     );
   });
 
