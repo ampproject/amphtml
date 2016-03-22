@@ -20,9 +20,11 @@ import {loadPromise} from '../../../src/event-helper';
 class AmpJWPlayer extends AMP.BaseElement {
 
   /** @override */
-  createdCallback() {
-    this.preconnect.url('https://content.jwplatform.com');
-    this.preconnect.url('https://p.jwpcdn.com');
+  preconnectCallback(onLayout) {
+    // Host that serves player configuration and content redirects
+    this.preconnect.url('https://content.jwplatform.com', onLayout);
+    // CDN which hosts jwplayer assets
+    this.preconnect.url('https://ssl.p.jwpcdn.com', onLayout);
   }
 
   /** @override */
