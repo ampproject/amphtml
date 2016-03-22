@@ -45,7 +45,9 @@ class AmpJWPlayer extends AMP.BaseElement {
       this.element);
 
     const iframe = document.createElement('iframe');
-    let src = `https://content.jwplatform.com/players/${contentid}-${playerid}.html`;
+    const src = 'https://content.jwplatform.com/players/'+
+      encodeURIComponent(contentid) + '-' +
+      encodeURIComponent(playerid) + '.html';
 
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
