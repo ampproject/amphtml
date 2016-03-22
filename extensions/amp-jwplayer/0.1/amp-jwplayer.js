@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {isLayoutSizeDefined} from '../../../src/layout';
+import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
+import {setStyles} from '../../../src/style';
 
 class AmpJWPlayer extends AMP.BaseElement {
 
@@ -33,30 +34,50 @@ class AmpJWPlayer extends AMP.BaseElement {
   }
 
   /** @override */
-  layoutCallback() {
+  buildCallback() {
     const width = this.element.getAttribute('width');
     const height = this.element.getAttribute('height');
-    const contentid = AMP.assert(
+
+    /** @private @const {number} */
+    this.width_ = getLengthNumeral(width);
+
+    /** @private @const {number} */
+    this.height_ = getLengthNumeral(height);
+
+    /** @private @const {string} */
+    this.contentid_ = AMP.assert(
       (this.element.getAttribute('data-playlist-id') ||
       this.element.getAttribute('data-media-id')),
-      'Either the data-media-id or the data-playlist-id attributes must be specified for <amp-jwplayer> %s',
+      'Either the data-media-id or the data-playlist-id ' +
+      'attributes must be specified for <amp-jwplayer> %s',
       this.element);
-    const playerid = AMP.assert(
+
+    /** @private @const {string} */
+    this.playerid_ = AMP.assert(
       this.element.getAttribute('data-player-id'),
       'The data-player-id attribute is required for <amp-jwplayer> %s',
       this.element);
 
+
+    if (!this.getPlaceholder()) {
+      this.buildImagePlaceholder_();
+    }
+  }
+
+
+  /** @override */
+  layoutCallback() {
     const iframe = document.createElement('iframe');
     const src = 'https://content.jwplatform.com/players/'+
-      encodeURIComponent(contentid) + '-' +
-      encodeURIComponent(playerid) + '.html';
+      encodeURIComponent(this.contentid_) + '-' +
+      encodeURIComponent(this.playerid_) + '.html';
 
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
     iframe.src = src;
     this.applyFillContent(iframe);
-    iframe.width = width;
-    iframe.height = height;
+    iframe.width = this.width_;
+    iframe.height = this.height_;
     this.element.appendChild(iframe);
     /** @private {?Element} */
     this.iframe_ = iframe;
@@ -66,11 +87,43 @@ class AmpJWPlayer extends AMP.BaseElement {
   /** @override */
   documentInactiveCallback() {
     if (this.iframe_ && this.iframe_.contentWindow) {
-      // The /players page can respond to "play" and "pause" commands from the iframe's parent
-      this.iframe_.contentWindow./*OK*/postMessage('pause', 'https://content.jwplatform.com');
+      // The /players page can respond to "play" and "pause" commands from the
+      // iframe's parent
+      this.iframe_.contentWindow./*OK*/postMessage('pause',
+        'https://content.jwplatform.com');
     }
     return false;
   }
+
+  /** @private */
+  buildImagePlaceholder_() {
+    const imgPlaceholder = new Image();
+
+    setStyles(imgPlaceholder, {
+      'object-fit': 'cover',
+      'visibility': 'hidden',
+    });
+
+    imgPlaceholder.src = 'https://content.jwplatform.com/thumbs/' +
+        encodeURIComponent(this.contentid_) + '-720.jpg';
+    imgPlaceholder.setAttribute('placeholder', '');
+    imgPlaceholder.width = this.width_;
+    imgPlaceholder.height = this.height_;
+
+    this.element.appendChild(imgPlaceholder);
+    this.applyFillContent(imgPlaceholder);
+
+    loadPromise(imgPlaceholder).then(() => {
+      setStyles(imgPlaceholder, {
+        'visibility': '',
+      });
+    }).catch(() => {
+      // Thumbnails aren't available for all media content.
+      // On a 404, remove the placeholder image.
+      this.element.removeChild(imgPlaceholder);
+    });
+  }
+
 };
 
 AMP.registerElement('amp-jwplayer', AmpJWPlayer);
