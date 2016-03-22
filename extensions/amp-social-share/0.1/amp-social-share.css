@@ -41,10 +41,6 @@ amp-social-share .twitter {
   background-color: #55acee;
 }
 
-amp-social-share .twitter a {
-  background-image: url('https://g.twimg.com/dev/documentation/image/Twitter_logo_white_32.png');
-}
-
 /* Facebook Styling */
 amp-social-share .facebook {
   background-color: #3b5998;
