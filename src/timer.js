@@ -47,8 +47,7 @@ export class Timer {
    * @return {number}
    */
   now() {
-    // TODO(dvoytenko): when can we use Date.now?
-    return Number(new Date());
+    return Date.now();
   }
 
  /**
