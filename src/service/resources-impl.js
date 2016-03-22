@@ -938,50 +938,50 @@ export class Resources {
 
     let timeout = -1;
     let task = this.queue_.peek(scorer);
-    if (task) {
-      do {
-        timeout = this.calcTaskTimeout_(task);
-        dev.fine(TAG_, 'peek from queue:', task.id,
-            'sched at', task.scheduleTime,
-            'score', scorer(task),
-            'timeout', timeout);
-        if (timeout > 16) {
-          break;
-        }
+    while (task) {
+      timeout = this.calcTaskTimeout_(task);
+      dev.fine(TAG_, 'peek from queue:', task.id,
+          'sched at', task.scheduleTime,
+          'score', scorer(task),
+          'timeout', timeout);
+      if (timeout > 16) {
+        break;
+      }
 
-        this.queue_.dequeue(task);
+      this.queue_.dequeue(task);
 
-        // Do not override a task in execution. This task will have to wait
-        // until the current one finished the execution.
-        const executing = this.exec_.getTaskById(task.id);
-        if (!executing) {
-          task.promise = task.callback(visibility);
-          task.startTime = now;
-          dev.fine(TAG_, 'exec:', task.id, 'at', task.startTime);
-          this.exec_.enqueue(task);
-          task.promise.then(this.taskComplete_.bind(this, task, true),
-              this.taskComplete_.bind(this, task, false))
-              .catch(reportError);
-        } else {
-          // Reschedule post execution.
-          executing.promise.then(this.reschedule_.bind(this, task),
-              this.reschedule_.bind(this, task));
-        }
+      // Do not override a task in execution. This task will have to wait
+      // until the current one finished the execution.
+      const executing = this.exec_.getTaskById(task.id);
+      if (executing) {
+        // Reschedule post execution.
+        const reschedule = this.reschedule_.bind(this, task);
+        executing.promise.then(reschedule, reschedule);
+      } else {
+        task.promise = task.callback(visibility);
+        task.startTime = now;
+        dev.fine(TAG_, 'exec:', task.id, 'at', task.startTime);
+        this.exec_.enqueue(task);
+        task.promise.then(this.taskComplete_.bind(this, task, true),
+            this.taskComplete_.bind(this, task, false))
+            .catch(reportError);
+      }
 
-        task = this.queue_.peek(scorer);
-        timeout = -1;
-      } while (task);
+      task = this.queue_.peek(scorer);
+      timeout = -1;
     }
 
     dev.fine(TAG_, 'queue size:', this.queue_.getSize());
     dev.fine(TAG_, 'exec size:', this.exec_.getSize());
 
     if (timeout >= 0) {
-      // Work pass.
+      // Still tasks in the queue, but we took too much time.
+      // Schedule the next work pass.
       return timeout;
     }
 
-    // Idle pass.
+    // No tasks left in the queue.
+    // Schedule the next idle pass.
     let nextPassDelay = (now - this.exec_.getLastDequeueTime()) * 2;
     nextPassDelay = Math.max(Math.min(30000, nextPassDelay), 5000);
     return nextPassDelay;
