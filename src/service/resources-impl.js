@@ -103,6 +103,12 @@ export class Resources {
      */
     this.firstPassAfterDocumentReady_ = true;
 
+    /**
+     * We also adjust the timeout penalty shortly after the first pass.
+     * @private {number}
+     */
+    this.firstVisibleTime_ = -1;
+
     /** @private {boolean} */
     this.relayoutAll_ = true;
 
@@ -187,6 +193,9 @@ export class Resources {
     // When document becomes visible, e.g. from "prerender" mode, do a
     // simple pass.
     this.viewer_.onVisibilityChanged(() => {
+      if (this.firstVisibleTime_ == -1 && this.viewer_.isVisible()) {
+        this.firstVisibleTime_ = timer.now();
+      }
       this.schedulePass();
     });
 
@@ -1037,11 +1046,22 @@ export class Resources {
    * @private
    */
   calcTaskTimeout_(task) {
+    const now = timer.now();
+
     if (this.exec_.getSize() == 0) {
-      return 0;
+      // If we've never been visible, return 0. This follows the previous
+      // behavior of not delaying tasks when there's nothing to do.
+      if (this.firstVisibleTime_ === -1) {
+        return 0;
+      }
+
+      // Scale off the first visible time, so penalized tasks must wait a
+      // second or two to run. After we have been visible for a time, we no
+      // longer have to wait.
+      const penalty = task.priority * PRIORITY_PENALTY_TIME_;
+      return Math.max(penalty - (now - this.firstVisibleTime_), 0);
     }
 
-    const now = timer.now();
     let timeout = 0;
     this.exec_.forEach(other => {
       // Higher priority tasks get the head start. Currently 500ms per a drop
