@@ -16,7 +16,32 @@ limitations under the License.
 
 ### <a name="amp-social-share"></a> `amp-social-share`
 
-Displays a social share button.
+<table>
+   <tr>
+    <td class="col-fourty"><strong>Description</strong></td>
+    <td>Displays a social share button.</td>
+  </tr>
+   <tr>
+    <td class="col-fourty"><strong>Availability</strong></td>
+    <td>
+      <a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a>
+       or <code>AMP.toggleExperiment('amp-social-share')</code> (if #development=1 is enabled)
+    </td>
+  </tr>
+  <tr>
+    <td class="col-fourty"><strong>Required Script</strong></td>
+    <td>
+      <div>
+        <code>&lt;script async custom-element="amp-social-share" src="https://cdn.ampproject.org/v0/amp-social-share-0.1.js">&lt;/script></code>
+      </div>
+    </td>
+  </tr>
+   <tr>
+    <td class="col-fourty"><strong>Examples</strong></td>
+    <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/social-share.amp.html">social-share.amp.html</a>
+    </td>
+  </tr>
+</table>
 
 #### The simplest example:
 The share button guesses some defaults for you. It assumes that the current window location is the URL you want to share and the page title is the text you want to share.

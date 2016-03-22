@@ -18,16 +18,20 @@ import {addParamsToUrl} from '../../../src/url';
 import {documentInfoFor} from '../../../src/document-info';
 import {elementByTag} from '../../../src/dom';
 import {getSocialConfig} from './amp-social-share-config';
+import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined, getLengthNumeral,
   Layout} from '../../../src/layout';
 import {user} from '../../../src/log';
 import {CSS} from '../../../build/amp-social-share-0.1.css';
 
+/** @const */
+const EXPERIMENT = 'amp-social-share';
+
+/** @const */
+const TAG = 'AmpSocialShare';
+
 /** @const {number} */
 const DEFAULT_WIDTH = 60;
-
-/** @const {string} */
-const TAG = 'AmpSocialShare';
 
 class AmpSocialShare extends AMP.BaseElement {
 
@@ -38,6 +42,12 @@ class AmpSocialShare extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.isExperimentOn_ = isExperimentOn(this.getWin(), EXPERIMENT);
+    if (!this.isExperimentOn_) {
+      user.warn(TAG, `Experiment ${EXPERIMENT} disabled`);
+      return;
+    }
+
     /** @private @const {!Element} */
     this.type_ = user.assert(this.element.getAttribute('type'),
         'The type attribute is required. %s',
