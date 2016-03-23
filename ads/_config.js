@@ -80,6 +80,7 @@ export const adPreconnect = {
     'https://tpc.googlesyndication.com',
   ],
   dotandads: 'https://bal.ad.dotandad.com',
+  improvedigital: 'https://ad.360yield.com/',
   openx: [
     'https://partner.googleadservices.com',
     'https://securepubads.g.doubleclick.net',
