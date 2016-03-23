@@ -19,7 +19,7 @@
  * details.
  */
 
-import {assert} from './asserts';
+import {dev, user} from './log';
 
 
 /**
@@ -166,7 +166,7 @@ export function parseLength(s) {
  * @return {!LengthDef}
  */
 export function assertLength(length) {
-  assert(/^\d+(\.\d+)?(px|em|rem|vh|vw|vmin|vmax)$/.test(length),
+  user.assert(/^\d+(\.\d+)?(px|em|rem|vh|vw|vmin|vmax)$/.test(length),
       'Invalid length value: %s', length);
   return length;
 }
@@ -181,7 +181,7 @@ export function assertLength(length) {
  * @return {!LengthDef}
  */
 export function assertLengthOrPercent(length) {
-  assert(/^\d+(\.\d+)?(px|em|rem|vh|vw|vmin|vmax|%)$/.test(length),
+  user.assert(/^\d+(\.\d+)?(px|em|rem|vh|vw|vmin|vmax|%)$/.test(length),
       'Invalid length or percent value: %s', length);
   return length;
 }
@@ -194,7 +194,7 @@ export function assertLengthOrPercent(length) {
  */
 export function getLengthUnits(length) {
   assertLength(length);
-  const m = assert(length.match(/[a-z]+/i),
+  const m = user.assert(length.match(/[a-z]+/i),
       'Failed to read units from %s', length);
   return m[0];
 }
@@ -232,7 +232,7 @@ export function hasNaturalDimensions(tagName) {
  */
 export function getNaturalDimensions(tagName) {
   tagName = tagName.toUpperCase();
-  assert(naturalDimensions_[tagName] !== undefined);
+  dev.assert(naturalDimensions_[tagName] !== undefined);
   if (!naturalDimensions_[tagName]) {
     const naturalTagName = tagName.replace(/^AMP\-/, '');
     const temp = document.createElement(naturalTagName);

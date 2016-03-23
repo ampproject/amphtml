@@ -17,7 +17,7 @@
 // Requires polyfills in immediate side effect.
 import './polyfills';
 
-import {userError} from './asserts';
+import {user} from './log';
 
 /**
  * Helper with all things Timer.
@@ -141,7 +141,7 @@ export class Timer {
     const delayPromise = new Promise((_resolve, reject) => {
       timerKey = this.delay(() => {
         timerKey = -1;
-        reject(userError(opt_message || 'timeout'));
+        reject(user.createError(opt_message || 'timeout'));
       }, delay);
       if (timerKey == -1) {
         reject(new Error('Failed to schedule timer.'));

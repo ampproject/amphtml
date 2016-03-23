@@ -15,7 +15,7 @@
  */
 
 import {Observable} from './observable';
-import {assert} from './asserts';
+import {dev} from './log';
 import {layoutRectLtwh, rectIntersection, moveLayoutRect} from './layout-rect';
 import {listen, postMessage} from './iframe-helper';
 import {parseUrl} from './url';
@@ -45,7 +45,7 @@ export function getIntersectionChangeEntry(
 
   const boundingClientRect =
       moveLayoutRect(elementLayoutBox, -1 * rootBounds.x, -1 * rootBounds.y);
-  assert(boundingClientRect.width >= 0 &&
+  dev.assert(boundingClientRect.width >= 0 &&
       boundingClientRect.height >= 0, 'Negative dimensions in ad.');
   boundingClientRect.x = boundingClientRect.left;
   boundingClientRect.y = boundingClientRect.top;
