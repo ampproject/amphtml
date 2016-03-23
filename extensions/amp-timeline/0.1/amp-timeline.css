@@ -1,0 +1,414 @@
+/**
+ * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+/* amp timeline styles */
+
+amp-timeline ol,
+ul {
+    list-style: none
+}
+amp-timeline h1,
+amp-timeline h2,
+amp-timeline h3 {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font: inherit;
+    vertical-align: baseline
+}
+section {
+    max-width: 620px;
+    background: #f5f5f5;
+    font-size: 1em;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    border-radius: 5px;
+    overflow: hidden;
+    margin: 0 auto;
+}
+.amp-timeline-list {
+    padding: 15px 2px;
+    max-width: 510px;
+    margin: 0 auto;
+    position: relative;
+    overflow: hidden;
+}
+.amp-timeline-list:after {
+    content: " ";
+    position: absolute;
+    top: 0;
+    left: 6%;
+    right: auto;
+    bottom: -65px;
+    background: #ddd;
+    width: 2px;
+    margin-left: -1px;
+}
+.amp-timeline-list.two-column:after {
+    content: " ";
+    position: absolute;
+    top: 0;
+    left: 50%;
+    right: auto;
+    bottom: -65px;
+    background: #ddd;
+    width: 2px;
+    margin-left: -1px;
+}
+.heading {
+    padding: 0.5em;
+    font-size: 1.6em;
+    color: #fff;
+    font-weight: bold;
+    background-color: #8e0000;
+}
+.amp-timeline-item {
+    width: 100%;
+    margin-top: 0;
+}
+.amp-timeline-card {
+    float: right;
+}
+.amp-timeline-card:after {
+    right: -15px;
+    left: auto;
+}
+.amp-timeline-item .amp-timeline-card {
+    max-width: 100%;
+    width: 85%;
+    background: #fff;
+    box-shadow: 0px 1px 3px 0px #d4d4d5, 0px 0px 0px 1px #d4d4d5;
+    margin: 1em 0em;
+    position: relative;
+}
+.amp-timeline-item .amp-timeline-card:after {
+    content: "";
+    width: 110%;
+    height: 2px;
+    z-index: 0;
+    position: absolute;
+    left: -12%;
+    top: 38px;
+    background-color: #8e0000;
+}
+.amp-timeline-card:before {
+    content: "";
+    background-color: #8e0000;
+    position: absolute;
+    z-index: 2;
+    left: -12.5%;
+    top: 32px;
+    display: block;
+    width: 10px;
+    height: 10px;
+    border: 2px solid #fff;
+    -webkit-box-shadow: 0px 0px 0px 2px #8e0000;
+    -moz-box-shadow: 0px 0px 0px 2px #8e0000;
+    -o-box-shadow: 0px 0px 0px 2px #8e0000;
+    box-shadow: 0px 0px 0px 2px #8e0000;
+    -ms-transform: rotate(45deg);
+    -o-transform: rotate(45deg);
+    -moz-transform: rotate(45deg);
+    -webkit-transform: rotate(45deg);
+    transform: rotate(45deg);
+}
+/*Marker custom shape ---------*/
+
+.square .amp-timeline-list .amp-timeline-item .amp-timeline-card:before {
+    -ms-transform: rotate(90deg);
+    -moz-transform: rotate(90deg);
+    -webkit-transform: rotate(90deg);
+    transform: rotate(90deg);
+}
+.circle .amp-timeline-list .amp-timeline-item .amp-timeline-card:before {
+    border-radius: 50%;
+}
+/*Two-Column ---------*/
+
+.amp-timeline-list.two-column {
+    padding: 15px 20px;
+}
+.amp-timeline-list.two-column .amp-timeline-item .amp-timeline-card {
+    max-width: 100%;
+    width: 240px;
+    background: #fff;
+    box-shadow: 0px 1px 3px 0px #d4d4d5, 0px 0px 0px 1px #d4d4d5;
+    margin: 1em 0em;
+    position: relative;
+}
+.amp-timeline-list.two-column .amp-timeline-item .amp-timeline-card:after {
+    content: "";
+    width: 100%;
+    height: 2px;
+    z-index: 0;
+    position: absolute;
+    left: -12%;
+    top: 38px;
+    background-color: #8e0000;
+}
+.amp-timeline-list.two-column .amp-timeline-item.left,
+.amp-timeline-list.two-column .amp-timeline-item.right {
+    width: 50%;
+}
+.amp-timeline-list.two-column .amp-timeline-item.left {
+    margin-top: 0px;
+    position: relative;
+    right: 15px;
+}
+.amp-timeline-list.two-column .amp-timeline-item.left .amp-timeline-card {
+    float: left;
+}
+.amp-timeline-list.two-column .amp-timeline-item.left .amp-timeline-card:after {
+    right: -25px;
+    left: auto;
+}
+.amp-timeline-list.two-column .amp-timeline-item.right {
+    float: right;
+    clear: right;
+    margin-top: 50px;
+    position: relative;
+    left: 1em;
+}
+.amp-timeline-list.two-column .amp-timeline-item.left .amp-timeline-card:before {
+    content: "";
+    display: block;
+    width: 10px;
+    height: 10px;
+    border: 2px solid #fff;
+    -webkit-box-shadow: 0px 0px 0px 2px #8e0000;
+    -moz-box-shadow: 0px 0px 0px 2px #8e0000;
+    -o-box-shadow: 0px 0px 0px 2px #8e0000;
+    box-shadow: 0px 0px 0px 2px #8e0000;
+    -ms-transform: rotate(45deg);
+    -o-transform: rotate(45deg);
+    -moz-transform: rotate(45deg);
+    -webkit-transform: rotate(45deg);
+    transform: rotate(45deg);
+    background-color: #8e0000;
+    position: absolute;
+    z-index: 2;
+    right: -37.5px;
+    left: auto;
+    top: 32px;
+}
+.amp-timeline-list.two-column .amp-timeline-item.right .amp-timeline-card:after {
+    left: -22px;
+}
+.amp-timeline-list.two-column .amp-timeline-item.right .amp-timeline-card:before {
+    content: "";
+    display: block;
+    width: 10px;
+    height: 10px;
+    border: 2px solid #fff;
+    -webkit-box-shadow: 0px 0px 0px 2px #8e0000;
+    -moz-box-shadow: 0px 0px 0px 2px #8e0000;
+    -o-box-shadow: 0px 0px 0px 2px #8e0000;
+    box-shadow: 0px 0px 0px 2px #8e0000;
+    -ms-transform: rotate(45deg);
+    -o-transform: rotate(45deg);
+    -moz-transform: rotate(45deg);
+    -webkit-transform: rotate(45deg);
+    transform: rotate(45deg);
+    background-color: #8e0000;
+    position: absolute;
+    z-index: 2;
+    left: -37.5px;
+    right: auto;
+    top: 32px;
+}
+.square .amp-timeline-list.two-column .amp-timeline-item .amp-timeline-card:before {
+    -ms-transform: rotate(90deg);
+    -moz-transform: rotate(90deg);
+    -webkit-transform: rotate(90deg);
+    transform: rotate(90deg);
+}
+.circle .amp-timeline-list.two-column .amp-timeline-item .amp-timeline-card:before {
+    border-radius: 50%;
+}
+.amp-timeline-item .amp-timeline-card .amp-timeline-video-container {
+    position: relative;
+    padding-bottom: 56.25%;
+    padding-top: 30px;
+    height: 0;
+    overflow: hidden;
+}
+.amp-timeline-item .amp-timeline-card .amp-timeline-video-container iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+.amp-timeline-item .amp-timeline-card .amp-timeline-media * {
+    width: 100%;
+}
+.amp-timeline-item .amp-timeline-card .amp-timeline-media i.source {
+    text-align: left;
+    position: relative;
+    margin: 0.3em 0;
+    text-transform: uppercase;
+    font-size: 0.6em;
+    display: inline-block;
+    color: #999;
+    width: 95%;
+    padding: 0 1em;
+}
+.amp-timeline-item .amp-timeline-card .amp-timeline-content {
+    width: 100%;
+    margin: 0em;
+    font-size: 1em;
+    padding: 0.6em;
+    padding-left: 0;
+}
+.amp-timeline-item .amp-timeline-card .amp-timeline-content h3.date {
+    font-size: 1.2em;
+    line-height: 1.2em;
+    font-weight: bold;
+    text-align: left;
+    padding-left: 0.6em;
+}
+.amp-timeline-item .amp-timeline-card .amp-timeline-content h2.title {
+    font-weight: bold;
+    font-size: 1em;
+    color: #8e0000;
+    padding-left: 0.6em;
+    margin-top: 0.8em;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    margin-bottom: 0.2em;
+    line-height: 1em;
+}
+.amp-timeline-item .amp-timeline-card .amp-timeline-content p {
+    color: #666;
+    margin-bottom: 1em;
+    line-height: 1.4em;
+    font-size: 0.875em;
+    padding: 0.875em;
+}
+.amp-timeline-item .amp-timeline-card .amp-timeline-content p:first-child {
+    margin-top: 0em;
+}
+.amp-timeline-item .amp-timeline-card .amp-timeline-content p:last-child {
+    margin-bottom: 0em;
+}
+.amp-timeline-item .amp-timeline-card .amp-timeline-content .amp-timeline-description h1,
+.amp-timeline-item .amp-timeline-card .amp-timeline-content .amp-timeline-description h2,
+.amp-timeline-item .amp-timeline-card .amp-timeline-content .amp-timeline-description h3,
+.amp-timeline-item .amp-timeline-card .amp-timeline-content .amp-timeline-description h4 {
+    font-weight: bold;
+}
+.amp-timeline-item .amp-timeline-card .amp-timeline-content .amp-timeline-description h1 {
+    font-size: 1.4rem;
+}
+.amp-timeline-item .amp-timeline-card .amp-timeline-content .amp-timeline-description h2 {
+    font-size: 1.2rem;
+    color: #8e0000;
+}
+.amp-timeline-item .amp-timeline-card .amp-timeline-content .amp-timeline-description h3 {
+    font-size: 1.2rem;
+}
+.amp-timeline-item .amp-timeline-card .amp-timeline-content .amp-timeline-description h4 {
+    font-size: 1rem;
+}
+.amp-timeline-item .amp-timeline-card .amp-timeline-content .amp-timeline-description ul {
+    margin: 15px 0;
+}
+.amp-timeline-item .amp-timeline-card .amp-timeline-content .amp-timeline-description ul li {
+    margin: 0;
+    width: 100%;
+    font-size: 0.875rem;
+    list-style-position: inside;
+    list-style-type: disc;
+}
+.amp-timeline-item .amp-timeline-card .amp-timeline-content a {
+    color: #8e0000;
+    text-decoration: none;
+}
+.amp-timeline-item .amp-timeline-card .amp-timeline-content a:hover {
+    text-decoration: underline;
+}
+@media only screen and (max-width: 520px),
+only screen and (max-device-width: 520px) {
+    .amp-timeline-item {
+        width: 100%;
+        margin-top: 0;
+        margin-left: 5%;
+    }
+    .amp-timeline-item .amp-timeline-card {
+        max-width: 100%;
+        width: 85%;
+        margin: 25px 10% 0 5%;
+        float: left;
+    }
+    .amp-timeline-list:after {
+        left: 5%;
+        right: auto;
+    }
+    .amp-timeline-card:before {
+        left: -8.5%;
+    }
+    .amp-timeline-item .amp-timeline-card:after {
+        width: 103%;
+        right: auto;
+        left: -20px;
+    }
+    .amp-timeline-list.two-column .amp-timeline-item.left,
+    .amp-timeline-list.two-column .amp-timeline-item.right {
+        width: 100%;
+        margin-top: 0;
+        float: left;
+    }
+    .amp-timeline-list.two-column .amp-timeline-item .amp-timeline-card {
+        width: 85%;
+    }
+    .amp-timeline-list.two-column .amp-timeline-item.left .amp-timeline-card:after {
+        left: -23px;
+        right: auto;
+    }
+    .amp-timeline-list.two-column:after {
+        left: 6%;
+        right: auto;
+    }
+    .amp-timeline-list.two-column .amp-timeline-item.left .amp-timeline-card:before,
+    .amp-timeline-list.two-column .amp-timeline-item.right .amp-timeline-card:before {
+        left: -11.5%;
+    }
+    .amp-timeline-item.left .amp-timeline-card:before {
+        left: -23px;
+        right: auto;
+    }
+    .amp-timeline-item.left {
+        left: 1em;
+        position: relative;
+    }
+    .amp-timeline-item.right {
+        margin-top: 0px;
+    }
+}
+@media only screen and (max-width: 360px),
+only screen and (max-device-width: 360px) {
+    .amp-timeline-list.two-column .amp-timeline-item.left .amp-timeline-card:before,
+    .amp-timeline-list.two-column .amp-timeline-item.right .amp-timeline-card:before {
+        left: -13.5%;
+    }
+    .amp-timeline-item .amp-timeline-card:after {
+        right: auto;
+        left: -24px;
+    }
+}
+@media only screen and (min-width: 434px) and (max-width: 520px) {
+    .amp-timeline-list.two-column .amp-timeline-item.left .amp-timeline-card:before,
+    .amp-timeline-list.two-column .amp-timeline-item.right .amp-timeline-card:before {
+        left: -11%;
+    }
+}
