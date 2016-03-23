@@ -17,6 +17,7 @@
 import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
 import {setStyles} from '../../../src/style';
+import {user} from '../../../src/log';
 
 class AmpJWPlayer extends AMP.BaseElement {
 
@@ -44,21 +45,6 @@ class AmpJWPlayer extends AMP.BaseElement {
     /** @private @const {number} */
     this.height_ = getLengthNumeral(height);
 
-    /** @private @const {string} */
-    this.contentid_ = AMP.assert(
-      (this.element.getAttribute('data-playlist-id') ||
-      this.element.getAttribute('data-media-id')),
-      'Either the data-media-id or the data-playlist-id ' +
-      'attributes must be specified for <amp-jwplayer> %s',
-      this.element);
-
-    /** @private @const {string} */
-    this.playerid_ = AMP.assert(
-      this.element.getAttribute('data-player-id'),
-      'The data-player-id attribute is required for <amp-jwplayer> %s',
-      this.element);
-
-
     if (!this.getPlaceholder()) {
       this.buildImagePlaceholder_();
     }
@@ -67,6 +53,21 @@ class AmpJWPlayer extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
+    /** @private @const {string} */
+    this.contentid_ = user.assert(
+      (this.element.getAttribute('data-playlist-id') ||
+      this.element.getAttribute('data-media-id')),
+      'Either the data-media-id or the data-playlist-id ' +
+      'attributes must be specified for <amp-jwplayer> %s',
+      this.element);
+
+    /** @private @const {string} */
+    this.playerid_ = user.assert(
+      this.element.getAttribute('data-player-id'),
+      'The data-player-id attribute is required for <amp-jwplayer> %s',
+      this.element);
+
+
     const iframe = document.createElement('iframe');
     const src = 'https://content.jwplatform.com/players/' +
       encodeURIComponent(this.contentid_) + '-' +
