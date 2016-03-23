@@ -16,7 +16,7 @@
 
 import {writeScript, loadScript, checkData} from '../src/3p';
 import {getSourceUrl} from '../src/url';
-import {doubleclick} from '../ads/doubleclick';
+import {doubleclick} from '../ads/google/doubleclick';
 
 /**
  * @param {!Window} global
