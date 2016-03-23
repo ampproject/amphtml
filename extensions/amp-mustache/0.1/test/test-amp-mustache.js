@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {AmpMustache}
-    from '../../../../build/all/v0/amp-mustache-0.1.max';
+import {
+  AmpMustache,
+} from '../amp-mustache';
 
 describe('amp-mustache template', () => {
 
@@ -34,7 +35,7 @@ describe('amp-mustache template', () => {
     const template = new AmpMustache(templateElement);
     template.compileCallback();
     const result = template.render({
-      value: /*eslint no-script-url: 0*/ 'javascript:alert();'
+      value: /*eslint no-script-url: 0*/ 'javascript:alert();',
     });
     expect(result./*OK*/innerHTML).to.equal('value = <a>abc</a>');
   });

@@ -37,6 +37,9 @@ const COOKIE_EXPIRATION_INTERVAL = COOKIE_MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
 /** @const {string} */
 const CANARY_EXPERIMENT_ID = 'dev-channel';
 
+/** @const {!Object<string, boolean>} */
+const EXPERIMENT_TOGGLES = Object.create(null);
+
 
 /**
  * Whether the scripts come from a dev channel.
@@ -47,7 +50,7 @@ export function isDevChannel(win) {
   if (isExperimentOn(win, CANARY_EXPERIMENT_ID)) {
     return true;
   }
-  if (isDevChannelVersionDoNotUse_('$internalRuntimeVersion$')) {
+  if (isDevChannelVersionDoNotUse_(win)) {
     return true;
   }
   return false;
@@ -56,12 +59,13 @@ export function isDevChannel(win) {
 
 /**
  * Whether the version corresponds to the dev-channel binary.
+ * @param {!Window} win
  * @param {string} version
  * @return {boolean}
  * @private Visible for testing only!
  */
-export function isDevChannelVersionDoNotUse_(version) {
-  return !!version.match(/\-canary$/);
+export function isDevChannelVersionDoNotUse_(win) {
+  return !!win.AMP_CONFIG && win.AMP_CONFIG.canary;
 }
 
 
@@ -72,7 +76,30 @@ export function isDevChannelVersionDoNotUse_(version) {
  * @return {boolean}
  */
 export function isExperimentOn(win, experimentId) {
-  return getExperimentIds(win).indexOf(experimentId) != -1;
+  if (experimentId in EXPERIMENT_TOGGLES) {
+    return EXPERIMENT_TOGGLES[experimentId];
+  }
+  return EXPERIMENT_TOGGLES[experimentId] = calcExperimentOn(win, experimentId);
+}
+
+/**
+ * Calculate whether the specified experiment is on or off based off of the
+ * cookieFlag or the global config frequency given.
+ * @param {!Window} win
+ * @param {string} experimentId
+ * @return {boolean}
+ */
+function calcExperimentOn(win, experimentId) {
+  const cookieFlag = getExperimentIds(win).indexOf(experimentId) != -1;
+  if (cookieFlag) {
+    return true;
+  }
+
+  if (win.AMP_CONFIG && win.AMP_CONFIG.hasOwnProperty(experimentId)) {
+    const frequency = win.AMP_CONFIG[experimentId];
+    return Math.random() < frequency;
+  }
+  return false;
 }
 
 
@@ -119,4 +146,14 @@ function getExperimentIds(win) {
 function saveExperimentIds(win, experimentIds) {
   setCookie(win, COOKIE_NAME, experimentIds.join(','),
       timer.now() + COOKIE_EXPIRATION_INTERVAL);
+}
+
+/**
+ * Resets the experimentsToggle cache for testing purposes.
+ * @visibleForTesting
+ */
+export function resetExperimentToggles_() {
+  Object.keys(EXPERIMENT_TOGGLES).forEach(key => {
+    delete EXPERIMENT_TOGGLES[key];
+  });
 }

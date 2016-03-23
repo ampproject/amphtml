@@ -20,7 +20,7 @@ import {assert} from '../../src/asserts';
 import {getCookie, setCookie} from '../../src/cookies';
 import {isExperimentOn, toggleExperiment} from '../../src/experiments';
 import {listenOnce} from '../../src/event-helper';
-import {onDocumentReady} from '../../src/document-state';
+import {onDocumentReady} from '../../src/document-ready';
 
 const COOKIE_MAX_AGE_DAYS = 180;  // 6 month
 
@@ -48,22 +48,7 @@ const EXPERIMENTS = [
     id: CANARY_EXPERIMENT_ID,
     name: 'AMP Dev Channel (more info)',
     spec: 'https://github.com/ampproject/amphtml/blob/master/' +
-        'DEVELOPING.md#amp-dev-channel-experimental',
-  },
-
-  // AMP Access
-  {
-    id: 'amp-access',
-    name: 'AMP Access',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-        'amp-access/amp-access-spec.md',
-  },
-
-  // AMP Access Analytics
-  {
-    id: 'amp-access-analytics',
-    name: 'AMP Access Analytics',
-    spec: 'https://github.com/ampproject/amphtml/issues/1556',
+        'README.md#amp-dev-channel',
   },
 
   // Dynamic CSS Classes
@@ -72,6 +57,14 @@ const EXPERIMENTS = [
     name: 'Dynamic CSS Classes',
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
         'amp-dynamic-css-classes/amp-dynamic-css-classes.md',
+  },
+
+  // Amp Accordion
+  {
+    id: 'amp-accordion',
+    name: 'Amp Accordion',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
+        'amp-accordion/amp-accordion.md',
   },
 ];
 

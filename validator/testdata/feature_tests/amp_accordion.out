@@ -1,0 +1,5 @@
+FAIL
+feature_tests/amp_accordion.html:58:4 Tag 'amp-accordion' is disallowed as child of tag 'amp-accordion'. Child tag must be one of ['section']. (see https://www.ampproject.org/docs/reference/extended/amp-accordion.html) [AMP_TAG_PROBLEM]
+feature_tests/amp_accordion.html:60:4 Tag 'p' is disallowed as child of tag 'amp-accordion'. Child tag must be one of ['section']. (see https://www.ampproject.org/docs/reference/extended/amp-accordion.html) [AMP_TAG_PROBLEM]
+feature_tests/amp_accordion.html:62:6 Tag 'div' is disallowed as first child of tag 'amp-accordion > section'. First child tag must be one of ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']. [AMP_TAG_PROBLEM]
+feature_tests/amp_accordion.html:61:4 Tag 'amp-accordion > section' must have 2 child tags - saw 3 child tags. [AMP_TAG_PROBLEM]

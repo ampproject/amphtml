@@ -19,7 +19,11 @@ import {parseQueryString} from './url';
 
 /**
  * @typedef {{
- *   localDev: boolean
+ *   localDev: boolean,
+ *   development: boolean,
+ *   minified: boolean,
+ *   test: boolean,
+ *   log: (string|undefined),
  * }}
  */
 let ModeDef;
@@ -51,6 +55,9 @@ export function setModeForTesting(m) {
  * @return {!ModeDef}
  */
 function getMode_() {
+  if (window.context && window.context.mode) {
+    return window.context.mode;
+  }
   const isLocalDev = (location.hostname == 'localhost' ||
       (location.ancestorOrigins && location.ancestorOrigins[0] &&
           location.ancestorOrigins[0].indexOf('http://localhost:') == 0)) &&
@@ -59,16 +66,17 @@ function getMode_() {
       // occur during local dev.
       !!document.querySelector('script[src*="/dist/"],script[src*="/base/"]');
 
-  const developmentQueryString = parseQueryString(
+  const developmentQuery = parseQueryString(
       // location.originalHash is set by the viewer when it removes the fragment
       // from the URL.
-      location.originalHash || location.hash)['development'];
+      location.originalHash || location.hash);
 
   return {
     localDev: isLocalDev,
     // Triggers validation
-    development: developmentQueryString == '1' || window.AMP_DEV_MODE,
+    development: developmentQuery['development'] == '1' || window.AMP_DEV_MODE,
     minified: process.env.NODE_ENV == 'production',
-    test: window.AMP_TEST
+    test: window.AMP_TEST,
+    log: developmentQuery['log'],
   };
 }

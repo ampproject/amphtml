@@ -33,7 +33,7 @@ limitations under the License.
 <amp-ad width=320 height=50
     type="doubleclick"
     data-slot="/4119129/mobile_ad_banner"
-    json='{"targeting":{"sport":["rugby","cricket"]},"categoryExclusion":"health","tagForChildDirectedTreatment":1}'>
+    json='{"targeting":{"sport":["rugby","cricket"]},"categoryExclusions":["health"],"tagForChildDirectedTreatment":1}'>
 </amp-ad>
 ```
 
@@ -63,7 +63,27 @@ Example:
 
 Supported via `json` attribute:
 
-- `categoryExclusion`
+- `categoryExclusions`
 - `cookieOptions`
 - `tagForChildDirectedTreatment`
 - `targeting`
+
+
+### Unsupported DFP Features & Formats
+
+#### Unsupported Features:
+- Multisize requests. Since the size of the adslot needs to be defined prior to the ad request, multisize requests are not supported.
+- Guaranteed Roadblocks. Non-guaranteed roadblocks (As many as possible, One or More) delivery is supported
+
+#### Unsupported Formats/Creatives:
+- Interstitials
+- Expandables. Although expandables on interaction/click is a format that is work in progress.
+- Flash
+- Anchor Ads / Adhesion Units
+- Creatives served over HTTP.
+
+### DFP Implementation Examples
+[This](http://dfp-amp-testing-1185.appspot.com/) website has a list of implementation examples with source code that showcase DFP features. 
+
+
+

@@ -32,7 +32,6 @@ describe('StandardActions', () => {
 
   afterEach(() => {
     sandbox.restore();
-    sandbox = null;
   });
 
   it('should handle "hide" action', () => {

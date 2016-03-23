@@ -36,21 +36,19 @@ var GITHUB_ACCESS_TOKEN = process.env.GITHUB_ACCESS_TOKEN;
 var exec = BBPromise.promisify(child_process.exec);
 var gitExec = BBPromise.promisify(git.exec);
 
-var isCanary = argv.type == 'canary';
-var suffix =  isCanary ? '-canary' : '';
-var branch = isCanary ? 'canary' : 'release';
+var branch = argv.branch || 'canary';
 var isDryrun = argv.dryrun;
 
 
 function changelog() {
   if (!GITHUB_ACCESS_TOKEN) {
     util.log(util.colors.red('Warning! You have not set the ' +
-        'GITHUB_ACCESS_TOKEN env var. This task might hit the default ' +
-        'rate limit set by github (60).'));
+        'GITHUB_ACCESS_TOKEN env var. Aborting "changelog" task.'));
     util.log(util.colors.green('See https://help.github.com/articles/' +
         'creating-an-access-token-for-command-line-use/ ' +
         'for instructions on how to create a github access token. We only ' +
         'need `public_repo` scope.'));
+    return;
   }
 
   return getGitMetadata();
@@ -96,7 +94,7 @@ function submitReleaseNotes(version, changelog, sha) {
       'name': name,
       'body': changelog,
       'draft': true,
-      'prerelease': isCanary
+      'prerelease': true
     }
   };
 
@@ -118,7 +116,9 @@ function getCurrentSha() {
 }
 
 function buildChangelog(gitMetadata, githubMetadata) {
-  var titles = githubMetadata
+  var changelog = `## Version: ${argv.version}\n\n`;
+  // append all titles
+  changelog += githubMetadata
       .filter(function(data) {
         return !data.filenames.every(function(filename) {
           return config.changelogIgnoreFileTypes.test(filename);
@@ -127,8 +127,75 @@ function buildChangelog(gitMetadata, githubMetadata) {
       .map(function(data) {
         return '  - ' + data.title.trim();
       }).join('\n');
-  gitMetadata.changelog = titles;
+  changelog += '\n\n## Breakdown by component\n\n';
+  var sections = buildSections(githubMetadata);
+
+  Object.keys(sections).sort().forEach(function(section) {
+    changelog += `### ${section}\n\n`;
+    var uniqueItems = sections[section].filter(function(title, idx) {
+      return sections[section].indexOf(title) == idx;
+    });
+    changelog += uniqueItems.join('');
+    changelog += '\n';
+  });
+
+  gitMetadata.changelog = changelog;
   return gitMetadata;
+}
+
+/**
+ * @param {!Array<PullRequestMetedata>} githubMetadata
+ * @return {!Object}
+ */
+function buildSections(githubMetadata) {
+  var sections = {};
+  githubMetadata.forEach(function(pr) {
+    var hasNonDocChange = !pr.filenames.every(function(filename) {
+      return config.changelogIgnoreFileTypes.test(filename);
+    });
+    var listItem = `  - ${pr.title.trim()}\n`;
+
+    if (hasNonDocChange) {
+      changelog += listItem;
+    }
+
+    pr.filenames.forEach(function(filename) {
+      var section;
+      var body = '';
+      var path = filename.split('/');
+      var isExtensionChange = path[0] == 'extensions';
+      var isBuiltinChange = path[0] == 'builtins';
+      var isAdsChange = path[0] == 'ads';
+      // TODO: figure out how to break down validator changes since
+      // it is usually a big PR with a number of commits, and the commit
+      // message is what is useful for a changelog.
+      var isValidatorChange = path[0] == 'validator';
+
+      if (isExtensionChange) {
+        section = path[1];
+      } else if (isBuiltinChange && isJs(path[1])) {
+        // builtins files dont have a nested per component folder.
+        section = path[1].replace(/\.js$/, '');
+      } else if (isAdsChange && isJs(path[1])) {
+        section = 'ads';
+      } else if (isValidatorChange) {
+        section = 'validator';
+      }
+
+      if (section) {
+        if (!sections[section]) {
+          sections[section] = [];
+        }
+        // if its the validator section, read the body of the PR
+        // and format it correctly under the bullet list.
+        if (section == 'validator') {
+          body = `\n    ${pr.body.split('\n').join('\n    ')}`;
+        }
+        sections[section].push(listItem + body);
+      }
+    });
+  });
+  return sections;
 }
 
 /**
@@ -137,14 +204,11 @@ function buildChangelog(gitMetadata, githubMetadata) {
  */
 function getLastGitTag() {
   var options = {
-    args: 'describe --abbrev=0 --tags'
+    args: `describe --abbrev=0 --first-parent --tags ${branch}`
   };
-  var canaryGrep = isCanary ? 'grep canary$' : 'grep -v canary$';
-  return exec('git tag | ' + canaryGrep + ' | ' +
-      'xargs -I@ git log --format=format:"%ai @%n" -1 @ | ' +
-      'sort -r | awk \'{print $4}\' | head -1').then(function(tag) {
-        return tag.replace('\n', '');
-      });
+  return gitExec(options).then(function(tag) {
+    return tag.trim();
+  });
 }
 
 /**
@@ -153,7 +217,8 @@ function getLastGitTag() {
  */
 function getGitLog(tag) {
   var options = {
-    args: 'log ' + branch + '...' + tag + ' --pretty=format:%s --merges'
+    args: 'log ' + branch + '...' + tag +
+        ' --pretty=format:%s --merges --first-parent'
   };
   return gitExec(options).then(function(log) {
     if (!log) {
@@ -186,7 +251,7 @@ function fetchGithubMetadata(ids) {
     var prOption = extend({}, options);
     prOption.url += id;
 
-    return getPullRequestTitle(prOption).then(function(title) {
+    return getPullRequestMetadata(prOption).then(function(title) {
       var filesOption = extend({}, prOption);
       filesOption.url += '/files';
       return getPullRequestFiles(title, filesOption);
@@ -196,17 +261,20 @@ function fetchGithubMetadata(ids) {
   return BBPromise/*OK*/.all(requests);
 }
 
-function getPullRequestTitle(prOption) {
+function getPullRequestMetadata(prOption) {
   return request(prOption).then(function(res) {
     var body = JSON.parse(res.body);
     assert(typeof body.url == 'string', 'should have url string. ' + res.body);
     var url = body.url.split('/');
     var pr = url[url.length - 1];
-    return body.title + ' (#' + pr + ')';
+    return {
+      title: body.title + ' (#' + pr + ')',
+      body: body.body
+    };
   });
 }
 
-function getPullRequestFiles(title, filesOption) {
+function getPullRequestFiles(prMetadata, filesOption) {
   return request(filesOption).then(function(res) {
     var body = JSON.parse(res.body);
 
@@ -217,7 +285,8 @@ function getPullRequestFiles(title, filesOption) {
     });
 
     return {
-      title: title,
+      body: prMetadata.body,
+      title: prMetadata.title,
       filenames: filenames
     };
   });
@@ -238,7 +307,7 @@ function onGitLogSuccess(gitMetadata, logs) {
   assert(typeof logs == 'string', 'git log should be a string.\n' + logs);
   return commits
     .filter(function(commit) {
-      // filter non Pull request merges
+      // Filter non Pull request merges.
       return commit.indexOf('Merge pull') == 0;
     })
     .map(function(commit) {
@@ -256,7 +325,16 @@ function errHandler(err) {
     msg = err.message;
   }
   util.log(util.colors.red(msg));
-  return err;
+  throw err;
+}
+
+/**
+ * Checks if string ends with ".js"
+ * @param {string} str
+ * @return {boolean}
+ */
+function isJs(str) {
+  return str./*OK*/endsWith('.js');
 }
 
 gulp.task('changelog', 'Create github release draft', changelog, {

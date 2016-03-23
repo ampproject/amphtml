@@ -37,7 +37,7 @@ export class AmpSlides extends BaseCarousel {
     /** @private @const {boolean} */
     this.isLooping_ = this.element.hasAttribute('loop');
 
-    /** @private @const {boolean} */
+    /** @private {boolean} */
     this.isAutoplayRequested_ = this.element.hasAttribute('autoplay');
 
     /** @private @const {number} */
@@ -58,28 +58,42 @@ export class AmpSlides extends BaseCarousel {
     /** @private {?number} */
     this.autoplayTimeoutId_ = null;
 
+    AMP.assert(this.slides_.length >= 1,
+        'amp-carousel with type=slides should have at least 1 slide.');
+
     this.setupAutoplay_();
   }
 
   /** @override */
   layoutCallback() {
-    this.scheduleLayout(this.slides_[this.currentIndex_]);
-    this.preloadNext_(1);
+    const curSlide = this.curSlide_();
+    if (curSlide) {
+      this.scheduleLayout(curSlide);
+      this.preloadNext_(1);
+    }
     return Promise.resolve();
   }
 
   /** @override */
   viewportCallback(inViewport) {
-    this.updateInViewport(this.slides_[this.currentIndex_], inViewport);
-    this.tryAutoplay_(1, true);
+    const curSlide = this.curSlide_();
+    if (curSlide) {
+      this.updateInViewport(curSlide, inViewport);
+      this.tryAutoplay_(1, true);
+      if (inViewport) {
+        this.hintControls();
+      }
+    }
   }
 
   /** @override */
   goCallback(dir, animate) {
     const newIndex = this.nextIndex_(dir);
-    if (newIndex != this.currentIndex_) {
+    // Guard again NaN by checking if greater than or equal to zero
+    // since we can't have negative indexes anyways.
+    if (newIndex >= 0 && newIndex != this.currentIndex_) {
       const newSlide = this.slides_[newIndex];
-      const oldSlide = this.slides_[this.currentIndex_];
+      const oldSlide = this.curSlide_();
       this.currentIndex_ = newIndex;
       this.prepareSlide_(newSlide, dir);
       if (!animate) {
@@ -105,13 +119,13 @@ export class AmpSlides extends BaseCarousel {
       return;
     }
 
-    const autoplayValue = Number(this.element.getAttribute('autoplay'));
+    const delayValue = Number(this.element.getAttribute('delay'));
     // If it isn't a number and is not greater than 0 then don't assign
     // and use the default.
-    if (autoplayValue > 0) {
+    if (delayValue > 0) {
       // Guard against autoplayValue that is lower than 1s to prevent
       // people from crashing the runtime with providing very low delays.
-      this.autoplayDelay_ = Math.max(1000, autoplayValue);
+      this.autoplayDelay_ = Math.max(1000, delayValue);
     }
 
     // By default `autoplay` should also mean that the current carousel slide
@@ -155,16 +169,39 @@ export class AmpSlides extends BaseCarousel {
   /**
    * @param {!Element} slide
    * @param {number} dir
+   * @private
    */
   prepareSlide_(slide, dir) {
     const containerWidth = this.element./*OK*/offsetWidth;
     st.setStyles(slide, {
       transform: st.translateX(dir * containerWidth),
       zIndex: 1,
-      display: 'block'
+      display: 'block',
     });
 
     this.scheduleLayout(slide);
+  }
+
+  /**
+   * @param {number} index
+   * @private
+   */
+  resetSlide_(index) {
+    const slide = this.slides_[index];
+    if (index == this.currentIndex_) {
+      st.setStyles(slide, {
+        zIndex: 0,
+        transform: '',
+        opacity: 1,
+      });
+    } else {
+      st.setStyles(slide, {
+        display: 'none',
+        zIndex: 0,
+        transform: '',
+        opacity: 1,
+      });
+    }
   }
 
   /**
@@ -178,12 +215,12 @@ export class AmpSlides extends BaseCarousel {
     return tr.all([
       tr.setStyles(newSlide, {
         transform: tr.translateX(tr.numeric(dir * containerWidth, 0)),
-        opacity: tr.numeric(0.8, 1)
+        opacity: tr.numeric(0.8, 1),
       }),
       tr.setStyles(oldSlide, {
         transform: tr.scale(tr.numeric(1, 0.98)),
-        opacity: tr.numeric(1, 0.4)
-      })
+        opacity: tr.numeric(1, 0.4),
+      }),
     ]);
   }
 
@@ -197,17 +234,27 @@ export class AmpSlides extends BaseCarousel {
       display: 'none',
       zIndex: 0,
       transform: '',
-      opacity: 1
+      opacity: 1,
     });
     st.setStyles(newSlide, {
       display: 'block',
       zIndex: 0,
       transform: '',
-      opacity: 1
+      opacity: 1,
     });
     this.scheduleLayout(newSlide);
     this.updateInViewport(oldSlide, false);
     this.updateInViewport(newSlide, true);
+    this.setControlsState();
+    this.schedulePause(oldSlide);
+  }
+
+  /**
+   * @private
+   * @return {?Element}
+   */
+  curSlide_() {
+    return this.slides_[this.currentIndex_];
   }
 
   /**
@@ -269,7 +316,11 @@ export class AmpSlides extends BaseCarousel {
    * @private
    */
   onSwipeStart_(unusedSwipe) {
-    const currentSlide = this.slides_[this.currentIndex_];
+    // cancel any current and future autoplay request
+    this.tryCancelAutoplayTimeout_();
+    this.isAutoplayRequested_ = false;
+
+    const currentSlide = this.curSlide_();
     const containerWidth = this.element./*OK*/offsetWidth;
     let minDelta = 0;
     let maxDelta = 0;
@@ -301,7 +352,7 @@ export class AmpSlides extends BaseCarousel {
       min: minDelta,
       max: maxDelta,
       pos: 0,
-      currentIndex: this.currentIndex_
+      currentIndex: this.currentIndex_,
     };
   }
 
@@ -361,18 +412,31 @@ export class AmpSlides extends BaseCarousel {
       if (s.currentIndex != this.currentIndex_) {
         return;
       }
-      const oldSlide = this.slides_[this.currentIndex_];
+      const oldSlide = this.curSlide_();
       if (newPos > 0.5) {
         s.nextTr(1);
         this.currentIndex_ = s.nextIndex;
-        this.commitSwitch_(oldSlide, this.slides_[this.currentIndex_]);
+        this.commitSwitch_(oldSlide, this.curSlide_());
+        if (s.prevIndex != -1 && s.prevIndex != this.currentIndex_) {
+          this.resetSlide_(s.prevIndex);
+        }
       } else if (newPos < -0.5) {
         s.prevTr(1);
         this.currentIndex_ = s.prevIndex;
-        this.commitSwitch_(oldSlide, this.slides_[this.currentIndex_]);
+        this.commitSwitch_(oldSlide, this.curSlide_());
+        if (s.nextIndex != -1 && s.nextIndex != this.currentIndex_) {
+          this.resetSlide_(s.nextIndex);
+        }
       } else {
         s.nextTr(0);
         s.prevTr(0);
+        this.resetSlide_(this.currentIndex_);
+        if (s.prevIndex != -1 && s.prevIndex != this.currentIndex_) {
+          this.resetSlide_(s.prevIndex);
+        }
+        if (s.nextIndex != -1 && s.nextIndex != this.currentIndex_) {
+          this.resetSlide_(s.nextIndex);
+        }
       }
     });
   }
@@ -390,7 +454,23 @@ export class AmpSlides extends BaseCarousel {
     if (this.isLooping_) {
       return true;
     }
-    return this.currentIndex_ != this.slides_.length - 1;
+    return this.currentIndex_ < this.slides_.length - 1;
+  }
+
+  /** @override */
+  interactionNext() {
+    if (!this.nextButton_.classList.contains('amp-disabled')) {
+      this.isAutoplayRequested_ = false;
+      this.go(1, true);
+    }
+  }
+
+  /** @override */
+  interactionPrev() {
+    if (!this.prevButton_.classList.contains('amp-disabled')) {
+      this.isAutoplayRequested_ = false;
+      this.go(-1, true);
+    }
   }
 
   /**

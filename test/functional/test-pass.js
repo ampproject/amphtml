@@ -34,12 +34,9 @@ describe('Pass', () => {
   });
 
   afterEach(() => {
-    pass = null;
     expect(handlerCalled).to.equal(0);
     timerMock.verify();
-    timerMock = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   it('handler called', () => {

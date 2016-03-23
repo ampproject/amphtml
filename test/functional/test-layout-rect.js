@@ -75,12 +75,12 @@ describe('LayoutRect', () => {
     const rect2 = lr.layoutRectLtwh(40, 60, 10, 10);
     const rect3 = lr.layoutRectLtwh(1000, 60, 10, 10);
     expect(lr.rectIntersection(rect1, rect2)).to.jsonEqual({
-      "left": 40,
-      "top": 60,
-      "width": 10,
-      "height": 10,
-      "bottom": 70,
-      "right": 50
+      'left': 40,
+      'top': 60,
+      'width': 10,
+      'height': 10,
+      'bottom': 70,
+      'right': 50,
     });
     expect(lr.rectIntersection(rect1, rect3)).to.be.null;
     expect(lr.rectIntersection(rect2, rect3)).to.be.null;

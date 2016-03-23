@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {assert} from './asserts';
 import {assertLength, assertLengthOrPercent} from './layout';
+import {user} from './log';
 
 
 /**
@@ -44,7 +44,7 @@ let SizeListOptionDef;
  */
 export function parseSizeList(s, opt_allowPercentAsLength) {
   const sSizes = s.split(',');
-  assert(sSizes.length > 0, 'sizes has to have at least one size');
+  user.assert(sSizes.length > 0, 'sizes has to have at least one size');
   const sizes = [];
   sSizes.forEach(sSize => {
     sSize = sSize.replace(/\s+/g, ' ').trim();
@@ -85,7 +85,7 @@ export class SizeList {
    * @param {!Array<!SizeListOptionDef>} sizes
    */
   constructor(sizes) {
-    assert(sizes.length > 0, 'SizeList must have at least one option');
+    user.assert(sizes.length > 0, 'SizeList must have at least one option');
     /** @private @const {!Array<!SizeListOptionDef>} */
     this.sizes_ = sizes;
 
@@ -94,10 +94,10 @@ export class SizeList {
     for (let i = 0; i < sizes.length; i++) {
       const option = sizes[i];
       if (i < sizes.length - 1) {
-        assert(option.mediaQuery,
+        user.assert(option.mediaQuery,
             'All options except for the last must have a media condition');
       } else {
-        assert(!option.mediaQuery,
+        user.assert(!option.mediaQuery,
             'The last option must not have a media condition');
       }
     }

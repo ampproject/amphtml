@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
+import {FixedLayer} from './fixed-layer';
 import {Observable} from '../observable';
 import {getService} from '../service';
 import {layoutRectLtwh} from '../layout-rect';
-import {log} from '../log';
-import {onDocumentReady} from '../document-state';
+import {dev} from '../log';
+import {onDocumentReady} from '../document-ready';
 import {platform} from '../platform';
 import {px, setStyle, setStyles} from '../style';
 import {timer} from '../timer';
@@ -33,6 +34,7 @@ const TAG_ = 'Viewport';
  * @typedef {{
  *   relayoutAll: boolean,
  *   top: number,
+ *   left: number,
  *   width: number,
  *   height: number,
  *   velocity: number
@@ -107,6 +109,14 @@ export class Viewport {
     /** @private {string|undefined} */
     this.originalViewportMetaString_ = undefined;
 
+    /** @private @const {!FixedLayer} */
+    this.fixedLayer_ = new FixedLayer(
+        this.win_.document,
+        this.vsync_,
+        this.paddingTop_,
+        this.binding_.requiresFixedLayerTransfer());
+    onDocumentReady(this.win_.document, () => this.fixedLayer_.setup());
+
     /** @private @const (function()) */
     this.boundThrottledScroll_ = this.throttledScroll_.bind(this);
 
@@ -116,6 +126,7 @@ export class Viewport {
       if (paddingTop != this.paddingTop_) {
         this.paddingTop_ = paddingTop;
         this.binding_.updatePaddingTop(this.paddingTop_);
+        this.fixedLayer_.updatePaddingTop(this.paddingTop_);
       }
     });
     this.binding_.updateViewerViewport(this.viewer_);
@@ -304,7 +315,7 @@ export class Viewport {
     // and prohibit further default zooming.
     const newValue = updateViewportMetaString(viewportMeta.content, {
       'maximum-scale': '1',
-      'user-scalable': 'no'
+      'user-scalable': 'no',
     });
     return this.setViewportMetaString_(newValue);
   }
@@ -330,6 +341,43 @@ export class Viewport {
   }
 
   /**
+   * Hides the fixed layer.
+   */
+  hideFixedLayer() {
+    this.fixedLayer_.setVisible(false);
+  }
+
+  /**
+   * Shows the fixed layer.
+   */
+  showFixedLayer() {
+    this.fixedLayer_.setVisible(true);
+  }
+
+  /**
+   * Updates the fixed layer.
+   */
+  updatedFixedLayer() {
+    this.fixedLayer_.update();
+  }
+
+  /**
+   * Adds the element to the fixed layer.
+   * @param {!Element} element
+   */
+  addToFixedLayer(element) {
+    this.fixedLayer_.addElement(element);
+  }
+
+  /**
+   * Removes the element from the fixed layer.
+   * @param {!Element} element
+   */
+  removeFromFixedLayer(element) {
+    this.fixedLayer_.removeElement(element);
+  }
+
+  /**
    * Updates touch zoom meta data. Returns `true` if any actual
    * changes have been done.
    * @return {boolean}
@@ -337,7 +385,7 @@ export class Viewport {
   setViewportMetaString_(viewportMetaString) {
     const viewportMeta = this.getViewportMeta_();
     if (viewportMeta && viewportMeta.content != viewportMetaString) {
-      log.fine(TAG_, 'changed viewport meta to:', viewportMetaString);
+      dev.fine(TAG_, 'changed viewport meta to:', viewportMetaString);
       viewportMeta.content = viewportMetaString;
       return true;
     }
@@ -371,17 +419,20 @@ export class Viewport {
   changed_(relayoutAll, velocity) {
     const size = this.getSize();
     const scrollTop = this.getScrollTop();
-    log.fine(TAG_, 'changed event:',
+    const scrollLeft = this.getScrollLeft();
+    dev.fine(TAG_, 'changed event:',
         'relayoutAll=', relayoutAll,
         'top=', scrollTop,
+        'top=', scrollLeft,
         'bottom=', (scrollTop + size.height),
         'velocity=', velocity);
     this.changeObservable_.fire({
       relayoutAll: relayoutAll,
       top: scrollTop,
+      left: scrollLeft,
       width: size.width,
       height: size.height,
-      velocity: velocity
+      velocity: velocity,
     });
   }
 
@@ -416,7 +467,6 @@ export class Viewport {
    * @private
    */
   throttledScroll_(referenceTime, referenceTop) {
-    this.scrollTracking_ = false;
     const newScrollTop = this.scrollTop_ = this.binding_.getScrollTop();
     const now = timer.now();
     let velocity = 0;
@@ -424,13 +474,12 @@ export class Viewport {
       velocity = (newScrollTop - referenceTop) /
           (now - referenceTime);
     }
-    log.fine(TAG_, 'scroll: ' +
+    dev.fine(TAG_, 'scroll: ' +
         'scrollTop=' + newScrollTop + '; ' +
         'velocity=' + velocity);
-    // TODO(dvoytenko): confirm the desired value and document it well.
-    // Currently, this is 30px/second -> 0.03px/millis
     if (Math.abs(velocity) < 0.03) {
       this.changed_(/* relayoutAll */ false, velocity);
+      this.scrollTracking_ = false;
     } else {
       timer.delay(() => this.vsync_.measure(
           this.throttledScroll_.bind(this, now, newScrollTop)), 20);
@@ -442,17 +491,28 @@ export class Viewport {
     const oldSize = this.size_;
     this.size_ = null;  // Need to recalc.
     const newSize = this.getSize();
-    this.changed_(!oldSize || oldSize.width != newSize.width, 0);
+    this.fixedLayer_.update().then(() => {
+      this.changed_(!oldSize || oldSize.width != newSize.width, 0);
+    });
   }
 }
 
 
 /**
- * ViewportBindingDef is an interface that defines an underlying technology behind
- * the {@link Viewport}.
+ * ViewportBindingDef is an interface that defines an underlying technology
+ * behind the {@link Viewport}.
  * @interface
  */
 class ViewportBindingDef {
+
+  /**
+   * Whether the binding requires fixed elements to be transfered to a
+   * independent fixed layer.
+   * @return {boolean}
+   */
+  requiresFixedLayerTransfer() {
+    return false;
+  }
 
   /**
    * Register a callback for scroll events.
@@ -554,12 +614,17 @@ export class ViewportBindingNatural_ {
     this.win.addEventListener('scroll', () => this.scrollObservable_.fire());
     this.win.addEventListener('resize', () => this.resizeObservable_.fire());
 
-    log.fine(TAG_, 'initialized natural viewport');
+    dev.fine(TAG_, 'initialized natural viewport');
   }
 
   /** @override */
   cleanup_() {
     // TODO(dvoytenko): remove listeners
+  }
+
+  /** @override */
+  requiresFixedLayerTransfer() {
+    return false;
   }
 
   /** @override */
@@ -702,7 +767,12 @@ export class ViewportBindingNaturalIosEmbed_ {
     });
     this.win.addEventListener('resize', () => this.resizeObservable_.fire());
 
-    log.fine(TAG_, 'initialized natural viewport for iOS embeds');
+    dev.fine(TAG_, 'initialized natural viewport for iOS embeds');
+  }
+
+  /** @override */
+  requiresFixedLayerTransfer() {
+    return true;
   }
 
   /** @private */
@@ -726,7 +796,7 @@ export class ViewportBindingNaturalIosEmbed_ {
     // }
     setStyles(documentElement, {
       overflowY: 'auto',
-      webkitOverflowScrolling: 'touch'
+      webkitOverflowScrolling: 'touch',
     });
     setStyles(documentBody, {
       overflowY: 'auto',
@@ -735,7 +805,7 @@ export class ViewportBindingNaturalIosEmbed_ {
       top: 0,
       left: 0,
       right: 0,
-      bottom: 0
+      bottom: 0,
     });
 
     // Insert scrollPos element into DOM. See {@link onScrolled_} for why
@@ -748,7 +818,7 @@ export class ViewportBindingNaturalIosEmbed_ {
       left: 0,
       width: 0,
       height: 0,
-      visibility: 'hidden'
+      visibility: 'hidden',
     });
     documentBody.appendChild(this.scrollPosEl_);
 
@@ -762,7 +832,7 @@ export class ViewportBindingNaturalIosEmbed_ {
       left: 0,
       width: 0,
       height: 0,
-      visibility: 'hidden'
+      visibility: 'hidden',
     });
     documentBody.appendChild(this.scrollMoveEl_);
 
@@ -773,7 +843,7 @@ export class ViewportBindingNaturalIosEmbed_ {
     setStyles(this.endPosEl_, {
       width: 0,
       height: 0,
-      visibility: 'hidden'
+      visibility: 'hidden',
     });
     // TODO(dvoytenko): not only it should be at the bottom at setup time,
     // but it must always be at the bottom. Consider using BODY "childList"
@@ -792,7 +862,10 @@ export class ViewportBindingNaturalIosEmbed_ {
   /** @override */
   updatePaddingTop(paddingTop) {
     onDocumentReady(this.win.document, () => {
-      this.win.document.body.style.paddingTop = px(paddingTop);
+      // Also tried `paddingTop` but it didn't work for `position:absolute`
+      // on iOS.
+      this.win.document.body.style.borderTop =
+          `${paddingTop}px solid transparent`;
     });
   }
 
@@ -815,7 +888,7 @@ export class ViewportBindingNaturalIosEmbed_ {
   getSize() {
     return {
       width: this.win./*OK*/innerWidth,
-      height: this.win./*OK*/innerHeight
+      height: this.win./*OK*/innerHeight,
     };
   }
 
@@ -968,12 +1041,17 @@ export class ViewportBindingVirtual_ {
     /** @private @const {!Observable} */
     this.resizeObservable_ = new Observable();
 
-    log.fine(TAG_, 'initialized virtual viewport');
+    dev.fine(TAG_, 'initialized virtual viewport');
   }
 
   /** @override */
   cleanup_() {
     // TODO(dvoytenko): remove listeners
+  }
+
+  /** @override */
+  requiresFixedLayerTransfer() {
+    return false;
   }
 
   /** @override */

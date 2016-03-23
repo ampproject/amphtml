@@ -36,7 +36,9 @@ describe('example', function() {
 
   const examples = [
     'ads.amp.html',
+    'brid-player.amp.html',
     'brightcove.amp.html',
+    'dailymotion.amp.html',
     'metadata-examples/article-json-ld.amp.html',
     'metadata-examples/article-microdata.amp.html',
     'metadata-examples/recipe-json-ld.amp.html',
@@ -46,12 +48,18 @@ describe('example', function() {
     'metadata-examples/video-json-ld.amp.html',
     'metadata-examples/video-microdata.amp.html',
     'article.amp.html',
+    'analytics.amp.html',
+    'analytics-notification.amp.html',
     'everything.amp.html',
+    'facebook.amp.html',
     'instagram.amp.html',
     'released.amp.html',
+    'soundcloud.amp.html',
+    'springboard-player.amp.html',
     'twitter.amp.html',
     'viafoura.amp.html',
     'vine.amp.html',
+    'vimeo.amp.html',
     'old-boilerplate.amp.html',
   ];
 
@@ -64,7 +72,11 @@ describe('example', function() {
    * @constructor {!Array<!RegExp>}
    */
   const errorWhitelist = [
-    /invalid value \'.\/viewer-integr.js\'/,
+    // TODO(dvoytenko, #2600): remove this from whitelist once the message
+    // contains more specific script identifier.
+    /The tag \'script\' is disallowed/,
+    /\'amp-brid-player\' is disallowed/,
+    /\'amp-springboard-player\' is disallowed/,
   ];
 
   const usedWhitelist = [];
@@ -137,7 +149,7 @@ describe('example', function() {
           }
         }
       };
-      xhr.open("GET", filename, true);
+      xhr.open('GET', filename, true);
       xhr.send();
     });
   }

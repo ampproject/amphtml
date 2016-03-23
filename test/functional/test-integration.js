@@ -17,8 +17,14 @@
 // Tests integration.js
 // Most coverage through test-3p-frame
 
-import {draw3p, validateParentOrigin, parseFragment}
-    from '../../3p/integration';
+import {
+  draw3p,
+  ensureFramed,
+  validateParentOrigin,
+  validateAllowedEmbeddingOrigins,
+  validateAllowedTypes,
+  parseFragment,
+} from '../../3p/integration';
 import {registrations, register} from '../../src/3p';
 
 describe('3p integration.js', () => {
@@ -29,38 +35,47 @@ describe('3p integration.js', () => {
 
   it('should register integrations', () => {
     expect(registrations).to.include.key('a9');
+    expect(registrations).to.include.key('adblade');
+    expect(registrations).to.include.key('adform');
     expect(registrations).to.include.key('adsense');
     expect(registrations).to.include.key('adtech');
     expect(registrations).to.include.key('adreactor');
+    expect(registrations).to.include.key('criteo');
     expect(registrations).to.include.key('doubleclick');
+    expect(registrations).to.include.key('flite');
+    expect(registrations).to.include.key('industrybrains');
+    expect(registrations).to.include.key('openx');
     expect(registrations).to.include.key('twitter');
+    expect(registrations).to.include.key('yieldmo');
+    expect(registrations).to.include.key('triplelift');
     expect(registrations).to.include.key('_ping_');
+    expect(registrations).to.include.key('imobile');
   });
 
   it('should validateParentOrigin without ancestorOrigins', () => {
     let parent = {};
     validateParentOrigin({
-      location: {}
+      location: {},
     }, parent);
     expect(parent.originValidated).to.be.false;
 
     parent = {};
     validateParentOrigin({
       location: {
-        ancestorOrigins: []
-      }
+        ancestorOrigins: [],
+      },
     }, parent);
     expect(parent.originValidated).to.be.false;
   });
 
   it('should validateParentOrigin with correct ancestorOrigins', () => {
     const parent = {
-      origin: 'abc'
+      origin: 'abc',
     };
     validateParentOrigin({
       location: {
-        ancestorOrigins: ['abc', 'xyz']
-      }
+        ancestorOrigins: ['abc', 'xyz'],
+      },
     }, parent);
 
     expect(parent.originValidated).to.be.true;
@@ -69,13 +84,13 @@ describe('3p integration.js', () => {
   it('should throw in validateParentOrigin with incorrect ancestorOrigins',
     () => {
       const parent = {
-        origin: 'abc'
+        origin: 'abc',
       };
       expect(() => {
         validateParentOrigin({
           location: {
-            ancestorOrigins: ['xyz']
-          }
+            ancestorOrigins: ['xyz'],
+          },
         }, parent);
       }).to.throw(/Parent origin mismatch/);
     });
@@ -123,10 +138,10 @@ describe('3p integration.js', () => {
     const win = {
       context: {
         location: {
-          originValidated: true
+          originValidated: true,
         },
         data: data,
-      }
+      },
     };
     let called = false;
     register('testAction', function(myWin, myData) {
@@ -146,10 +161,10 @@ describe('3p integration.js', () => {
     const win = {
       context: {
         location: {
-          originValidated: true
+          originValidated: true,
         },
         data: data,
-      }
+      },
     };
     let called = false;
     register('testAction2', function(myWin, myData) {
@@ -164,7 +179,7 @@ describe('3p integration.js', () => {
     draw3p(win, data, (_config, done) => {
       finish = () => {
         done({
-          custom: true
+          custom: true,
         });
       };
     });
@@ -181,7 +196,7 @@ describe('3p integration.js', () => {
       context: {
         location: {},
         data: data,
-      }
+      },
     };
     expect(() => {
       draw3p(win, data);
@@ -195,14 +210,167 @@ describe('3p integration.js', () => {
     const win = {
       context: {
         location: {
-          originValidated: true
+          originValidated: true,
         },
         data: data,
         tagName: 'AMP-EMBED',
-      }
+      },
     };
     expect(() => {
       draw3p(win, data);
     }).to.throw(/Embed type testAction not allowed with tag AMP-EMBED/);
+  });
+
+  it('should allow all types on localhost', () => {
+    const localhost = {
+      location: {
+        hostname: 'ads.localhost',
+      },
+    };
+    validateAllowedTypes(localhost, 'twitter');
+    validateAllowedTypes(localhost, 'facebook');
+    validateAllowedTypes(localhost, 'a9');
+    validateAllowedTypes(localhost, 'not present');
+  });
+
+  it('should allow all types on default host', () => {
+    const defaultHost = {
+      location: {
+        hostname: '3p.ampproject.net',
+      },
+    };
+    validateAllowedTypes(defaultHost, 'twitter');
+    validateAllowedTypes(defaultHost, 'facebook');
+    validateAllowedTypes(defaultHost, 'a9');
+    validateAllowedTypes(defaultHost, 'not present');
+  });
+
+  it('should allow all types on unique default host', () => {
+    function get(domain) {
+      return {
+        location: {
+          hostname: domain,
+        },
+      };
+    }
+    validateAllowedTypes(get('d-123.ampproject.net'), 'twitter');
+    validateAllowedTypes(get('d-46851196780996873.ampproject.net'), 'adtech');
+    validateAllowedTypes(get('d-46851196780996873.ampproject.net'), 'a9');
+    expect(() => {
+      validateAllowedTypes(get('d-124.ampproject.net.com'), 'not present');
+    }).to.throw(/Non-whitelisted 3p type for custom iframe/);
+  });
+
+  it('should validate types on custom host', () => {
+    const defaultHost = {
+      location: {
+        hostname: 'other.com',
+      },
+    };
+    validateAllowedTypes(defaultHost, 'twitter');
+    validateAllowedTypes(defaultHost, 'facebook');
+    validateAllowedTypes(defaultHost, 'doubleclick');
+    expect(() => {
+      validateAllowedTypes(defaultHost, 'not present');
+    }).to.throw(/Non-whitelisted 3p type for custom iframe/);
+    expect(() => {
+      validateAllowedTypes(defaultHost, 'adtech');
+    }).to.throw(/Non-whitelisted 3p type for custom iframe/);
+    validateAllowedTypes(defaultHost, 'adtech', ['adtech']);
+  });
+
+  it('should ensure the 3p frame is actually framed', () => {
+    ensureFramed(window); // Test window is always framed.
+    ensureFramed({
+      parent: 'other',
+    });
+    const win = {
+      location: {
+        href: 'sentinel',
+      },
+    };
+    win.parent = win;
+    expect(() => {
+      ensureFramed(win);
+    }).to.throw(/Must be framed: sentinel/);
+  });
+
+  it('should validateAllowedEmbeddingOrigins: non-cache', () => {
+    const win = {
+      document: {
+        referrer: 'https://should-be-ignored',
+      },
+      location: {
+        ancestorOrigins: ['https://www.foo.com'],
+      },
+    };
+    function invalid(fn) {
+      expect(fn).to.throw(/Invalid embedding hostname/);
+    }
+    validateAllowedEmbeddingOrigins(win, ['foo.com']);
+    validateAllowedEmbeddingOrigins(win, ['foo.net', 'foo.com']);
+    validateAllowedEmbeddingOrigins(win, ['www.foo.com']);
+    invalid(() => validateAllowedEmbeddingOrigins(win, ['bar.com']));
+    invalid(() => validateAllowedEmbeddingOrigins(win, ['amp.www.foo.com']));
+    invalid(() => validateAllowedEmbeddingOrigins(win, ['ampwww.foo.com']));
+  });
+
+  it('should validateAllowedEmbeddingOrigins: cache', () => {
+    const win = {
+      location: {
+        ancestorOrigins: ['https://cdn.ampproject.org'],
+      },
+      document: {
+        referrer: 'https://cdn.ampproject.org/c/www.foo.com/test',
+      },
+    };
+    function invalid(fn) {
+      expect(fn).to.throw(/Invalid embedding hostname/);
+    }
+    validateAllowedEmbeddingOrigins(win, ['foo.com']);
+    validateAllowedEmbeddingOrigins(win, ['www.foo.com']);
+    invalid(() => validateAllowedEmbeddingOrigins(win, ['bar.com']));
+    invalid(() => validateAllowedEmbeddingOrigins(win, ['amp.www.foo.com']));
+    invalid(() => validateAllowedEmbeddingOrigins(win, ['ampwww.foo.com']));
+    win.document.referrer = 'https://cdn.ampproject.net/c/www.foo.com/test';
+    invalid(() => validateAllowedEmbeddingOrigins(win, ['foo.com']));
+  });
+
+  it('should validateAllowedEmbeddingOrigins: referrer non-cache', () => {
+    const win = {
+      location: {
+      },
+      document: {
+        referrer: 'https://www.foo.com/test',
+      },
+    };
+    function invalid(fn) {
+      expect(fn).to.throw(/Invalid embedding hostname/);
+    }
+    validateAllowedEmbeddingOrigins(win, ['foo.com']);
+    validateAllowedEmbeddingOrigins(win, ['www.foo.com']);
+    invalid(() => validateAllowedEmbeddingOrigins(win, ['bar.com']));
+    invalid(() => validateAllowedEmbeddingOrigins(win, ['amp.www.foo.com']));
+    invalid(() => validateAllowedEmbeddingOrigins(win, ['ampwww.foo.com']));
+  });
+
+  it('should validateAllowedEmbeddingOrigins: referrer cache', () => {
+    const win = {
+      location: {
+      },
+      document: {
+        referrer: 'https://cdn.ampproject.org/c/www.foo.com/test',
+      },
+    };
+    function invalid(fn) {
+      expect(fn).to.throw(/Invalid embedding hostname/);
+    }
+    validateAllowedEmbeddingOrigins(win, ['foo.com']);
+    validateAllowedEmbeddingOrigins(win, ['www.foo.com']);
+    invalid(() => validateAllowedEmbeddingOrigins(win, ['bar.com']));
+    invalid(() => validateAllowedEmbeddingOrigins(win, ['amp.www.foo.com']));
+    invalid(() => validateAllowedEmbeddingOrigins(win, ['ampwww.foo.com']));
+    win.document.referrer = 'https://cdn.ampproject.net/c/www.foo.com/test';
+    invalid(() => validateAllowedEmbeddingOrigins(win, ['foo.com']));
   });
 });

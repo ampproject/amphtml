@@ -31,6 +31,10 @@ export function setInViewportForTesting(inV) {
 
 let rafId = 0;
 let rafQueue = {};
+// Active intervals. Must be global, because people clear intervals
+// with clearInterval from a different window.
+const intervals = {};
+let intervalId = 0;
 
 /**
  * Add instrumentation to a window and all child iframes.
@@ -60,6 +64,7 @@ function manageWin_(win) {
   installObserver(win);
   // Existing iframes.
   maybeInstrumentsNodes(win, win.document.querySelectorAll('iframe'));
+  blockSyncPopups(win);
 }
 
 
@@ -176,24 +181,33 @@ function instrumentEntryPoints(win) {
   const setTimeout = win.setTimeout;
   win.setTimeout = function(fn, time) {
     time = minTime(time);
-    return setTimeout(fn, time);
+    arguments[1] = time;
+    return setTimeout.apply(this, arguments);
   };
   // Implement setInterval in terms of setTimeout to make
   // it respect the same rules
-  const intervals = {};
-  let intervalId = 0;
-  win.setInterval = function(fn, time) {
+  win.setInterval = function(fn) {
     const id = intervalId++;
-    function next() {
-      intervals[id] = win.setTimeout(function() {
-        next();
+    const args = Array.prototype.slice.call(arguments);
+    function wrapper() {
+      next();
+      if (typeof fn == 'string') {
+        // Handle rare and dangerous string arg case.
+        return (0, win.eval/*NOT OK but whatcha gonna do.*/).call(win, fn);
+      } else {
         return fn.apply(this, arguments);
-      }, time);
+      }
+    }
+    args[0] = wrapper;
+    function next() {
+      intervals[id] = win.setTimeout.apply(win, args);
     }
     next();
     return id;
   };
+  const clearInterval = win.clearInterval;
   win.clearInterval = function(id) {
+    clearInterval(id);
     win.clearTimeout(intervals[id]);
     delete intervals[id];
   };
@@ -221,6 +235,33 @@ function instrumentEntryPoints(win) {
     win.webkitRequestAnimationFrame = win.requestAnimationFrame;
     win.webkitCancelAnimationFrame = win.webkitCancelRequestAnimationFrame =
         win.cancelAnimationFrame;
+  }
+}
+
+/**
+ * Blackhole the legacy popups since they should never be used for anything.
+ * @param {!Window} win
+ */
+function blockSyncPopups(win) {
+  let count = 0;
+  function maybeThrow() {
+    // Prevent deep recursion.
+    if (count++ > 2) {
+      throw new Error('security error');
+    }
+  }
+  try {
+    win.alert = maybeThrow;
+    win.prompt = function() {
+      maybeThrow();
+      return '';
+    };
+    win.confirm = function() {
+      maybeThrow();
+      return false;
+    };
+  } catch (e) {
+    console./*OK*/error(e.message, e.stack);
   }
 }
 
@@ -255,9 +296,11 @@ function minTime(time) {
   return time;
 }
 
-listenParent('embed-state', function(data) {
-  inViewport = data.inViewport;
-  if (inViewport) {
-    becomeVisible();
-  }
-});
+export function installEmbedStateListener() {
+  listenParent(window, 'embed-state', function(data) {
+    inViewport = data.inViewport;
+    if (inViewport) {
+      becomeVisible();
+    }
+  });
+};

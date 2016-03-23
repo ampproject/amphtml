@@ -58,17 +58,18 @@ export class Framerate {
      */
     this.loadedAd_ = false;
 
-    const viewer = viewerFor(this.win);
+    /** @private @const {!Viewer} */
+    this.viewer_ = viewerFor(this.win);
 
     /**
      * We do not make measurements when the window is hidden, because
      * animation frames not not fire in that case.
      * @private {boolean}
      */
-    this.isActive_ = viewer.isVisible();
+    this.isActive_ = this.isActive();
 
-    viewer.onVisibilityChanged(() => {
-      this.isActive_ = viewer.isVisible();
+    this.viewer_.onVisibilityChanged(() => {
+      this.isActive_ = this.isActive();
       this.reset_();
       if (this.isActive_) {
         this.collect();
@@ -76,6 +77,15 @@ export class Framerate {
     });
 
     this.collect();
+  }
+
+  /**
+   * Framerate instrumentation should only be on if viewer is visible
+   * and csi is actually on.
+   * @return {boolean}
+   */
+  isActive() {
+    return this.viewer_.isPerformanceTrackingOn() && this.viewer_.isVisible();
   }
 
   /**
@@ -117,9 +127,12 @@ export class Framerate {
       const duration = now - this.collectStartTime_;
       const framerate = 1000 / (duration / this.frameCount_);
       const performance = performanceFor(this.win);
-      performance.tickDelta('fps', framerate);
+      // We want good values to be low and CSI hates negative values, so we
+      // shift everything by 60.
+      const reportedValue = Math.max(60 - framerate, 0);
+      performance.tickDelta('fps', reportedValue);
       if (this.loadedAd_) {
-        performance.tickDelta('fal', framerate);
+        performance.tickDelta('fal', reportedValue);
       }
       performance.flush();
       this.reset_();

@@ -15,14 +15,17 @@
  */
 
 import {AmpCarousel} from '../carousel';
+import * as sinon from 'sinon';
 
 
 describe('Carousel gestures', () => {
 
+  let sandbox;
   let element;
   let carousel;
 
   beforeEach(() => {
+    sandbox = sinon.sandbox.create();
     element = document.createElement('div');
     element.style.width = '320px';
     element.style.height = '200px';
@@ -105,5 +108,58 @@ describe('Carousel gestures', () => {
     carousel.onSwipeStart_({});
     carousel.onSwipeEnd_({deltaX: 0, velocityX: -0.01});
     expect(carousel.motion_).to.equal(null);
+  });
+
+  it('should set control state even on gestures', () => {
+    const spy = sandbox.spy(carousel, 'setControlsState');
+    carousel.buildButtons();
+    expect(spy.callCount).to.equal(0);
+    carousel.onSwipeStart_({});
+    return carousel.onSwipeEnd_({deltaX: 200, velocityX: 0.5}).then(() => {
+      expect(spy.callCount).to.equal(1);
+    });
+  });
+
+  it('should hint when not in mouse mode', () => {
+    carousel.inViewport_ = true;
+    carousel.getVsync = function() {
+      return {
+        mutate: function(fn) {
+          fn();
+        },
+      };
+    };
+    carousel.deferMutate = function(fn) {
+      fn();
+    };
+    expect(
+        carousel.element.classList.contains('-amp-carousel-button-start-hint'))
+            .to.be.false;
+    carousel.hintControls();
+    expect(
+        carousel.element.classList.contains('-amp-carousel-button-start-hint'))
+            .to.be.true;
+  });
+
+  it('should not hint when in mouse mode', () => {
+    carousel.inViewport_ = true;
+    carousel.showControls_ = true;
+    carousel.getVsync = function() {
+      return {
+        mutate: function(fn) {
+          fn();
+        },
+      };
+    };
+    carousel.deferMutate = function(fn) {
+      fn();
+    };
+    expect(
+        carousel.element.classList.contains('-amp-carousel-button-start-hint'))
+            .to.be.false;
+    carousel.hintControls();
+    expect(
+        carousel.element.classList.contains('-amp-carousel-button-start-hint'))
+            .to.be.false;
   });
 });

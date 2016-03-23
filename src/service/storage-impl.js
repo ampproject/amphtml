@@ -17,14 +17,10 @@
 import {assert} from '../asserts';
 import {getService} from '../service';
 import {getSourceOrigin} from '../url';
-import {isDevChannel, isExperimentOn} from '../experiments';
-import {isObject} from '../types';
-import {log} from '../log';
+import {dev} from '../log';
+import {recreateNonProtoObject} from '../json';
 import {timer} from '../timer';
 import {viewerFor} from '../viewer';
-
-/** @const */
-const EXPERIMENT = 'amp-storage';
 
 /** @const */
 const TAG = 'Storage';
@@ -39,8 +35,6 @@ const MAX_VALUES_PER_ORIGIN = 8;
  *
  * The storage is done per source origin. See `get`, `set` and `remove` methods
  * for more info.
- *
- * Requires "amp-storage" experiment.
  *
  * @see https://html.spec.whatwg.org/multipage/webstorage.html
  * @private Visible for testing only.
@@ -65,10 +59,6 @@ export class Storage {
     /** @const @private {string} */
     this.origin_ = getSourceOrigin(this.win.location);
 
-    /** @const @private {boolean} */
-    this.isExperimentOn_ = (isExperimentOn(this.win, EXPERIMENT) ||
-        isDevChannel(this.win));
-
     /** @private {?Promise<!Store>} */
     this.storePromise_ = null;
   }
@@ -78,10 +68,6 @@ export class Storage {
    * @private
    */
   start_() {
-    if (!this.isExperimentOn_) {
-      log.info(TAG, 'Storage experiment is off: ', EXPERIMENT);
-      return this;
-    }
     this.listenToBroadcasts_();
     return this;
   }
@@ -126,14 +112,11 @@ export class Storage {
    * @private
    */
   getStore_() {
-    if (!this.isExperimentOn_) {
-      return Promise.reject(`Enable experiment ${EXPERIMENT}`);
-    }
     if (!this.storePromise_) {
       this.storePromise_ = this.binding_.loadBlob(this.origin_)
           .then(blob => blob ? JSON.parse(atob(blob)) : {})
           .catch(reason => {
-            log.error(TAG, 'Failed to load store: ', reason);
+            dev.error(TAG, 'Failed to load store: ', reason);
             return {};
           })
           .then(obj => new Store(obj));
@@ -147,9 +130,6 @@ export class Storage {
    * @private
    */
   saveStore_(mutator) {
-    if (!this.isExperimentOn_) {
-      return Promise.reject(`Enable experiment ${EXPERIMENT}`);
-    }
     return this.getStore_()
         .then(store => {
           mutator(store);
@@ -164,7 +144,7 @@ export class Storage {
     this.viewer_.onBroadcast(message => {
       if (message['type'] == 'amp-storage-reset' &&
               message['origin'] == this.origin_) {
-        log.fine(TAG, 'Received reset message');
+        dev.fine(TAG, 'Received reset message');
         this.storePromise_ = null;
       }
     });
@@ -172,10 +152,10 @@ export class Storage {
 
   /** @private */
   broadcastReset_() {
-    log.fine(TAG, 'Broadcasted reset message');
+    dev.fine(TAG, 'Broadcasted reset message');
     this.viewer_.broadcast({
       'type': 'amp-storage-reset',
-      'origin': this.origin_
+      'origin': this.origin_,
     });
   }
 }
@@ -203,7 +183,7 @@ export class Store {
    */
   constructor(obj, opt_maxValues) {
     /** @const {!JSONObject} */
-    this.obj = recreateObject(obj);
+    this.obj = recreateNonProtoObject(obj);
 
     /** @private @const {number} */
     this.maxValues_ = opt_maxValues || MAX_VALUES_PER_ORIGIN;
@@ -355,7 +335,7 @@ export class ViewerStorageBinding {
   /** @override */
   loadBlob(origin) {
     return this.viewer_.sendMessage('loadStore', {
-      'origin': origin
+      'origin': origin,
     }, true).then(response => response['blob']);
   }
 
@@ -363,27 +343,9 @@ export class ViewerStorageBinding {
   saveBlob(origin, blob) {
     return this.viewer_.sendMessage('saveStore', {
       'origin': origin,
-      'blob': blob
+      'blob': blob,
     }, true);
   }
-}
-
-
-/**
- * Recreates objects with prototype-less copies.
- * @param {!JSONObject} obj
- * @return {!JSONObject}
- */
-function recreateObject(obj) {
-  const copy = Object.create(null);
-  for (const k in obj) {
-    if (!obj.hasOwnProperty(k)) {
-      continue;
-    }
-    const v = obj[k];
-    copy[k] = isObject(v) ? recreateObject(v) : v;
-  }
-  return copy;
 }
 
 

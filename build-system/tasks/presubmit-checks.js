@@ -47,7 +47,7 @@ var forbiddenTerms = {
   '(\\w*([sS]py|[sS]tub|[mM]ock|clock).restore)': {
     message: 'Use a sandbox instead to avoid repeated `#restore` calls'
   },
-  'sinon\\.useFakeTimers': {
+  'sinon\\.useFake\\w+': {
     message: 'Use a sandbox instead to avoid repeated `#restore` calls'
   },
   'console\\.\\w+\\(': {
@@ -59,6 +59,13 @@ var forbiddenTerms = {
       'validator/parse-css.js',
       'validator/validator-in-browser.js',
     ]
+  },
+  'iframePing': {
+    message: 'This is only available in vendor config for ' +
+        'temporary workarounds.',
+    whitelist: [
+      'extensions/amp-analytics/0.1/amp-analytics.js',
+    ],
   },
   // Service factories that should only be installed once.
   'installActionService': {
@@ -75,6 +82,13 @@ var forbiddenTerms = {
       'src/service/action-impl.js',
       'extensions/amp-access/0.1/amp-access.js',
     ],
+  },
+  'installActivityService': {
+    message: privateServiceFactory,
+    whitelist: [
+      'src/service/activity-impl.js',
+      'extensions/amp-analytics/0.1/amp-analytics.js'
+    ]
   },
   'installCidService': {
     message: privateServiceFactory,
@@ -133,6 +147,7 @@ var forbiddenTerms = {
       'src/service/viewer-impl.js',
       'src/service/storage-impl.js',
       'examples/viewer-integr-messaging.js',
+      'extensions/amp-access/0.1/login-dialog.js',
     ],
   },
   // Privacy sensitive
@@ -184,8 +199,10 @@ var forbiddenTerms = {
     whitelist: [
       'extensions/amp-access/0.1/amp-access.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js',
+      'src/3p-frame.js',
       'src/experiments.js',
       'src/service/storage-impl.js',
+      'src/service/viewport-impl.js',
       'tools/experiments/experiments.js',
     ]
   },
@@ -221,14 +238,26 @@ var forbiddenTerms = {
   'openDatabase': requiresReviewPrivacy,
   'requestFileSystem': requiresReviewPrivacy,
   'webkitRequestFileSystem': requiresReviewPrivacy,
+  'getAccessReaderId': {
+    message: requiresReviewPrivacy,
+    whitelist: [
+      'extensions/amp-access/0.1/amp-access.js',
+      'src/url-replacements.js',
+    ]
+  },
+  'getAuthdataField': {
+    message: requiresReviewPrivacy,
+    whitelist: [
+      'extensions/amp-access/0.1/amp-access.js',
+      'src/url-replacements.js',
+    ]
+  },
   'debugger': '',
 
   // ES6. These are only the most commonly used.
   'Array\\.of': es6polyfill,
   // These currently depend on core-js/modules/web.dom.iterable which
   // we don't want. That decision could be reconsidered.
-  'Promise\\.all': es6polyfill,
-  'Promise\\.race': es6polyfill,
   '\\.startsWith': {
     message: es6polyfill,
     whitelist: [
@@ -236,7 +265,13 @@ var forbiddenTerms = {
       'validator/validator.js'
     ]
   },
-  '\\.endsWith': es6polyfill,
+  '\\.endsWith': {
+    message: es6polyfill,
+    whitelist: [
+      // .endsWith occurs in babel generated code.
+      'dist.3p/current/integration.js',
+    ],
+  },
   // TODO: (erwinm) rewrite the destructure and spread warnings as
   // eslint rules (takes more time than this quick regex fix).
   // No destructuring allowed since we dont ship with Array polyfills.
@@ -255,7 +290,30 @@ var forbiddenTerms = {
   '(doc.*)\\.referrer': {
     message: 'Use Viewer.getReferrerUrl() instead.',
     whitelist: [
+      '3p/integration.js',
+      'dist.3p/current/integration.js',
       'src/service/viewer-impl.js',
+      'src/error.js',
+    ],
+  },
+  '(doc[^.]*)\\.contains': {
+    message: 'Use dom.documentContains API.',
+    whitelist: [
+      'src/dom.js',
+    ],
+  },
+  'getUnconfirmedReferrerUrl': {
+    message: 'Use Viewer.getReferrerUrl() instead.',
+    whitelist: [
+      'extensions/amp-dynamic-css-classes/0.1/amp-dynamic-css-classes.js',
+      'src/3p-frame.js',
+      'src/service/viewer-impl.js',
+    ],
+  },
+  'setTimeout.*throw': {
+    message: 'Use dev.error or user.error instead.',
+    whitelist: [
+      'src/log.js',
     ],
   },
 };
@@ -327,6 +385,14 @@ var forbiddenTermsSrcInclusive = {
   '\\.webkitConvertPointFromNodeToPage(?!_)': bannedTermsHelpString,
   '\\.webkitConvertPointFromPageToNode(?!_)': bannedTermsHelpString,
   '\\.changeHeight(?!_)': bannedTermsHelpString,
+  '\\.changeSize(?!_)': bannedTermsHelpString,
+  'reject\\(\\)': {
+    message: 'Always supply a reason in rejections. ' +
+        'error.cancellation() may be applicable.',
+    whitelist: [
+      'extensions/amp-access/0.1/access-expr-impl.js',
+    ],
+  }
 };
 
 // Terms that must appear in a source file.

@@ -37,11 +37,11 @@ describe('PullToRefreshBlocker', () => {
         if (eventListeners[eventType] == handler) {
           delete eventListeners[eventType];
         }
-      }
+      },
     };
 
     const viewportApi = {
-      getTop: () => 0
+      getTop: () => 0,
     };
     viewportMock = sandbox.mock(viewportApi);
 
@@ -50,11 +50,8 @@ describe('PullToRefreshBlocker', () => {
 
   afterEach(() => {
     viewportMock.verify();
-    viewportMock = null;
     blocker.cleanup();
-    blocker = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   function sendEvent(event, opt_prevetDefault) {

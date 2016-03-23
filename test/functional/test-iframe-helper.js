@@ -15,6 +15,8 @@
  */
 import * as IframeHelper from '../../src/iframe-helper';
 import * as sinon from 'sinon';
+import {createIframePromise} from '../../testing/iframe';
+import {timer} from '../../src/timer';
 
 describe('iframe-helper', function() {
   const iframeSrc = 'http://iframe.localhost:' + location.port +
@@ -22,58 +24,70 @@ describe('iframe-helper', function() {
 
   let testIframe;
   let sandbox;
-
-  function getIframe(src) {
-    const i = document.createElement('iframe');
-    i.src = src;
-    document.body.appendChild(i);
-    return i;
-  }
+  let container;
 
   beforeEach(() => {
-    testIframe = getIframe(iframeSrc);
     sandbox = sinon.sandbox.create();
+    return createIframePromise().then(c => {
+      container = c;
+      const i = document.createElement('iframe');
+      i.src = iframeSrc;
+      container.doc.body.appendChild(i);
+      testIframe = i;
+    });
   });
 
   afterEach(() => {
-    testIframe.parentNode.removeChild(testIframe);
-    testIframe = null;
+    container.iframe.parentNode.removeChild(container.iframe);
     sandbox.restore();
   });
 
 
   it('should listen to iframe messages', () => {
+    const removeEventListenerSpy = sandbox.spy(container.win,
+        'removeEventListener');
+    let unlisten;
     return new Promise(resolve => {
-      IframeHelper.listen(testIframe, 'send-intersections', () => {
-        resolve();
-      });
+      unlisten = IframeHelper.listen(testIframe, 'send-intersections',
+          resolve);
+    }).then(() => {
+      expect(removeEventListenerSpy.callCount).to.equal(0);
+      unlisten();
+      expect(removeEventListenerSpy.callCount).to.equal(1);
     });
   });
 
   it('should un-listen after first hit', () => {
-    const removeEventListenerSpy = sandbox.spy(window, 'removeEventListener');
-    listen = function() {return unlisten;};
+    const removeEventListenerSpy = sandbox.spy(container.win,
+        'removeEventListener');
     return new Promise(resolve => {
-      IframeHelper.listenOnce(testIframe, 'send-intersections', () => {
-        resolve(resolve);
-      });
-    }).then(resolve => {
+      IframeHelper.listenOnce(testIframe, 'send-intersections', resolve);
+    }).then(() => {
       expect(removeEventListenerSpy.callCount).to.equal(1);
-      resolve();
+    });
+  });
+
+  it('should un-listen on next message when iframe is unattached', () => {
+    const removeEventListenerSpy = sandbox.spy(container.win,
+        'removeEventListener');
+    IframeHelper.listen(testIframe, 'send-intersections', function() {});
+    testIframe.parentElement.removeChild(testIframe);
+    expect(removeEventListenerSpy.callCount).to.equal(0);
+    container.win.postMessage('hello world', '*');
+    expect(removeEventListenerSpy.callCount).to.equal(0);
+    return timer.promise(1).then(() => {
+      expect(removeEventListenerSpy.callCount).to.equal(1);
     });
   });
 
   it('should set sentinel on postMessage data', () => {
     postMessageSpy = sinon/*OK*/.spy(testIframe.contentWindow, 'postMessage');
-    return new Promise(resolve => {
-      IframeHelper.postMessage(
+    IframeHelper.postMessage(
         testIframe, 'testMessage', {}, 'http://google.com');
-      expect(postMessageSpy.getCall(0).args[0].sentinel).to.equal('amp');
-      expect(postMessageSpy.getCall(0).args[0].type).to.equal('testMessage');
-      // Very important to do this outside of the sandbox, or else hell
-      // breaks loose.
-      postMessageSpy/*OK*/.restore();
-      resolve();
-    });
+    expect(postMessageSpy.getCall(0).args[0].sentinel).to.equal('amp');
+    expect(postMessageSpy.getCall(0).args[0].type).to.equal('testMessage');
+    // Very important to do this outside of the sandbox, or else hell
+    // breaks loose.
+    postMessageSpy/*OK*/.restore();
   });
 });

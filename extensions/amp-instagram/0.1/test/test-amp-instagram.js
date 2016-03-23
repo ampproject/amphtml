@@ -17,10 +17,22 @@
 import {createIframePromise} from '../../../../testing/iframe';
 require('../amp-instagram');
 import {adopt} from '../../../../src/runtime';
+import * as sinon from 'sinon';
 
 adopt(window);
 
 describe('amp-instagram', () => {
+  let sandbox;
+  let inViewport;
+
+  beforeEach(() => {
+    inViewport = true;
+    sandbox = sinon.sandbox.create();
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
 
   function getIns(shortcode, opt_responsive) {
     return createIframePromise().then(iframe => {
@@ -31,18 +43,74 @@ describe('amp-instagram', () => {
       if (opt_responsive) {
         ins.setAttribute('layout', 'responsive');
       }
+      sandbox.stub(ins.implementation_, 'isInViewport', () => {
+        return inViewport;
+      });
       return iframe.addElement(ins);
     });
   }
 
-  it('renders', () => {
+  function testImage(image) {
+    expect(image).to.not.be.null;
+    expect(image.src).to.equal('https://www.instagram.com/p/fBwFP/media/?size=l');
+    expect(image.getAttribute('width')).to.equal('111');
+    expect(image.getAttribute('height')).to.equal('222');
+  }
+
+  function testIframe(iframe) {
+    expect(iframe).to.not.be.null;
+    expect(iframe.src).to.equal('https://www.instagram.com/p/fBwFP/embed/?v=4');
+    expect(iframe.getAttribute('width')).to.equal('111');
+    expect(iframe.getAttribute('height')).to.equal('222');
+  }
+
+  it('renders in viewport', () => {
     return getIns('fBwFP').then(ins => {
-      const iframe = ins.firstChild;
-      expect(iframe).to.not.be.null;
-      expect(iframe.tagName).to.equal('IFRAME');
-      expect(iframe.src).to.equal('https://instagram.com/p/fBwFP/embed/?v=4');
-      expect(iframe.getAttribute('width')).to.equal('111');
-      expect(iframe.getAttribute('height')).to.equal('222');
+      testIframe(ins.querySelector('iframe'));
+      testImage(ins.querySelector('img'));
+    });
+  });
+
+  it('renders outside viewport', () => {
+    inViewport = false;
+    return getIns('fBwFP').then(ins => {
+      const wrapper = ins.querySelector('wrapper');
+      let iframe = ins.querySelector('iframe');
+      expect(iframe).to.be.null;
+
+      ins.getVsync = () => {
+        return {
+          mutate: fn => fn(),
+        };
+      };
+
+      // Still not in viewport
+      ins.implementation_.viewportCallback(false);
+      iframe = ins.querySelector('iframe');
+      expect(iframe).to.be.null;
+      expect(wrapper.style.display).to.be.equal('');
+
+      // In viewport
+      ins.implementation_.viewportCallback(true);
+      iframe = ins.querySelector('iframe');
+      testIframe(iframe);
+      testImage(ins.querySelector('img'));
+      ins.implementation_.iframePromise_.then(() => {
+        expect(wrapper.style.display).to.be.equal('none');
+      });
+    });
+  });
+
+  it('removes iframe after unlayoutCallback', () => {
+    return getIns('fBwFP').then(ins => {
+      const wrapper = ins.querySelector('wrapper');
+      testIframe(ins.querySelector('iframe'));
+      const obj = ins.implementation_;
+      obj.unlayoutCallback();
+      expect(ins.querySelector('iframe')).to.be.null;
+      expect(obj.iframe_).to.be.null;
+      expect(obj.iframePromise_).to.be.null;
+      expect(wrapper.style.display).to.be.equal('');
     });
   });
 

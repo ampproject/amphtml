@@ -60,13 +60,10 @@ export class AmpAudio extends AMP.BaseElement {
   }
 
   /** @override */
-  documentInactiveCallback() {
+  pauseCallback() {
     if (this.audio_) {
       this.audio_.pause();
     }
-    // No need to do layout later - user action will be expect to resume
-    // the playback.
-    return false;
   }
 }
 

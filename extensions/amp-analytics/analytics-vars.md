@@ -74,11 +74,35 @@ Provides the canonical URL of the current document.
 
 Example value: `http%3A%2F%2Fexample.com%3A8000%2Fanalytics.html`
 
+### documentCharset
+
+Provides the character encoding of the current document.
+
+Example value: `UTF-8`
+
 ### documentReferrer
 
 Provides the referrer where the user came from. It is read from `document.referrer`. The value is empty for direct visitors.
 
 Example value: `https://www.google.com`
+
+### sourceUrl
+
+Parses and provides the source URL of the current document to the URL.
+
+The source URL is extracted from the proxy URL if the document is being served from a *known* proxy. Otherwise the original document URL is returned. For instance, if the URL is served via the proxy `https://cdn.ampproject.org` from the URL `https://cdn.ampproject.org/c/s/example.com/page.html`, then `SOURCE_URL` would return `https://example.com/page.html`. If the URL is served directly from `https://example.com/page.html`, `https://example.com/page.html` will be returned.
+
+### sourceHost
+
+Parses and provides the source URL's host. See the description of `sourceUrl` for more details.
+
+Example value: `example.com`
+
+### sourcePath
+
+Parses and provides the source URL's path part. See the description of `sourceUrl` for more details.
+
+Example value: `%2Fpage.html`
 
 ### title
 
@@ -86,17 +110,22 @@ Provides the title of the current document.
 
 Example value: `The New York Times - Breaking News, World News...`
 
+### viewer
+Provides an identifier for the viewer that contains the AMP document. Empty string if the document is loaded directly in a browser or if the id is not found.
+
+Example value: `www.google.com`
+
 ## Device and Browser
 
 ### availableScreenHeight
 
-Provides the screen height in pixels available for the page rendering.
+Provides the screen height in pixels available for the page rendering. Note that this can be slightly more or less than the actual viewport height due to various browser quirks.
 
 Example value: `1480`
 
 ### availableScreenWidth
 
-Provides the screen width in pixels available for the page rendering.
+Provides the screen width in pixels available for the page rendering. Note that this can be slightly more or less than the actual viewport height due to various browser quirks.
 
 Example value: `2500`
 
@@ -105,12 +134,6 @@ Example value: `2500`
 Provides a string representing the preferred language of the user, usually the language of the browser UI.
 
 Example value: `en-us`
-
-### documentCharset
-
-Provides the character encoding of the current document.
-
-Example value: `UTF-8`
 
 ### screenColorDepth
 
@@ -132,7 +155,7 @@ Example value: `2560`
 
 ### scrollHeight
 
-Provides the total size of the page in pixels.
+Provides the total height of the page in pixels.
 
 Example value: `400`
 
@@ -147,6 +170,12 @@ Example value: `100`
 Provides the number of pixels that the user has scrolled from top.
 
 Example value: `0`
+
+### scrollWidth
+
+Provides the total width of the page in pixels.
+
+Example value: `600`
 
 ### timezone
 
@@ -232,11 +261,31 @@ Provides a string that is intended to be random and likely to be unique per URL,
 
 Example value: `978`
 
+### queryParam
+
+Pulls a value from the query string
+
+Please see below the required and optional arguments you may pass into `queryParam` like a function. Spaces between arguments and values are not allowed.
+
+**arguments**
+
+ - `query string param` (Required) - The query string param for which you want the value
+ - `default value` (Optional) - If the query string param is not available use this default instead
+
+Example usage: `${queryParam(foo)}` - if foo is available its associated value will be returned, if not an empty string will be returned
+               `${queryParam(foo,bar)}` - if foo is available its associated value will be returned, if not bar will be returned
+
 ### random
 
 Provides a random value every time a request is being constructed.
 
 Example value: `0.12345632345`
+
+### requestCount
+
+Provides the number of requests sent out from a particular `amp-analytics` tag. This value can be used to reconstruct the sequence in which requests were sent from a tag. The value starts from 1 and increases monotonically. Note that there may be a gap in requestCount numbers if the request sending fails due to network issues.
+
+Example value: `6`
 
 ### timestamp
 
@@ -244,9 +293,11 @@ Provides the number of seconds that have elapsed since 1970. (Epoch time)
 
 Example value: `1452710304312`
 
-## requestCount
+### totalEngagedTime
 
-Provides the number of requests sent out from a particular `amp-analytics` tag. This value can be used to reconstruct the sequence in which requests were sent from a tag. The value starts from 0 and increases monotonically. Note that there may be a gap in requestCount numbers if the request sending fails due to network issues.
+Provides the total time (in seconds) the user has been enagaged with the page since the page
+first became visible in the viewport. Total engaged time will be 0 until the
+page first becomes visible.
 
-Example value: `6`
+Example value: `36`
 

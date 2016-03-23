@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import {validateSrcPrefix, validateSrcContains, checkData, validateData,
-    validateDataExists, validateExactlyOne} from '../../src/3p';
+import {computeInMasterFrame, validateSrcPrefix, validateSrcContains,
+    checkData, validateData, validateDataExists, validateExactlyOne,}
+    from '../../src/3p';
 import * as sinon from 'sinon';
 
 describe('3p', () => {
@@ -33,14 +34,28 @@ describe('3p', () => {
     sandbox.restore();
   });
 
-  it('should throw an error if prefix is not https:', () => {
-    expect(() => {
-      validateSrcPrefix('https:', 'http://adserver.adtechus.com');
-    }).to.throw(/Invalid src/);
-  });
+  describe('validateSrcPrefix()', () => {
 
-  it('should not throw if source starts with https', () => {
-    validateSrcPrefix('https:', 'https://adserver.adtechus.com');
+    it('should throw when a string prefix does not match', () => {
+      expect(() => {
+        validateSrcPrefix('https:', 'http://example.org');
+      }).to.throw(/Invalid src/);
+    });
+
+    it('should throw when array prefixes do not match', () => {
+      expect(() => {
+        validateSrcPrefix(['https:', 'ftp:'], 'http://example.org');
+      }).to.throw(/Invalid src/);
+    });
+
+    it('should not throw when a string prefix matches', () => {
+      validateSrcPrefix('http:', 'http://example.org');
+    });
+
+    it('should not throw when any of the array prefixes match', () => {
+      validateSrcPrefix(['https:', 'http:'], 'http://example.org');
+      validateSrcPrefix(['http:', 'https:'], 'http://example.org');
+    });
   });
 
   it('should throw an error if src does not contain addyn', () => {
@@ -69,7 +84,7 @@ describe('3p', () => {
     clock.tick(1);
 
     checkData({
-      width: "",
+      width: '',
       foo: true,
       bar: true,
     }, ['foo', 'bar']);
@@ -82,7 +97,7 @@ describe('3p', () => {
       height: false,
       initialWindowWidth: 1,
       initialWindowHeight: 2,
-      type: "taboola",
+      type: 'taboola',
       referrer: true,
       canonicalUrl: true,
       pageViewId: true,
@@ -92,8 +107,8 @@ describe('3p', () => {
     clock.tick(1);
 
     validateDataExists({
-      width: "",
-      type: "taboola",
+      width: '',
+      type: 'taboola',
       foo: true,
       bar: true,
     }, ['foo', 'bar']);
@@ -102,8 +117,8 @@ describe('3p', () => {
 
   it('should accept supplied data', () => {
     validateExactlyOne({
-      width: "",
-      type: "taboola",
+      width: '',
+      type: 'taboola',
       foo: true,
       bar: true,
     }, ['foo', 'day', 'night']);
@@ -120,7 +135,6 @@ describe('3p', () => {
       clock.tick(1);
     }).to.throw(/Unknown attribute for TEST: not-whitelisted./);
 
-
     expect(() => {
       // Sync throw, not validateData vs. checkData
       validateData({
@@ -135,8 +149,8 @@ describe('3p', () => {
 
     expect(() => {
       validateDataExists({
-        width: "",
-        type: "xxxxxx",
+        width: '',
+        type: 'xxxxxx',
         foo: true,
         bar: true,
       }, ['foo', 'bar', 'persika']);
@@ -144,8 +158,8 @@ describe('3p', () => {
 
     expect(() => {
       validateExactlyOne({
-        width: "",
-        type: "xxxxxx",
+        width: '',
+        type: 'xxxxxx',
         foo: true,
         bar: true,
       }, ['red', 'green', 'blue']);
@@ -153,6 +167,54 @@ describe('3p', () => {
         /xxxxxx must contain exactly one of attributes: red, green, blue./);
   });
 
-
+  it('should do work only in master', () => {
+    const taskId = 'exampleId';
+    const master = {
+      context: {
+        isMaster: true,
+      },
+    };
+    master.context.master = master;
+    const slave0 = {
+      context: {
+        isMaster: false,
+        master: master,
+      },
+    };
+    const slave1 = {
+      context: {
+        isMaster: false,
+        master: master,
+      },
+    };
+    const slave2 = {
+      context: {
+        isMaster: false,
+        master: master,
+      },
+    };
+    let done;
+    let workCalls = 0;
+    const work = d => {
+      workCalls++;
+      done = d;
+    };
+    let progress = '';
+    const frame = id => {
+      return result => {
+        progress += result + id;
+      };
+    };
+    computeInMasterFrame(slave0, taskId, work, frame('slave0'));
+    expect(workCalls).to.equal(0);
+    computeInMasterFrame(master, taskId, work, frame('master'));
+    expect(workCalls).to.equal(1);
+    computeInMasterFrame(slave1, taskId, work, frame('slave1'));
+    expect(progress).to.equal('');
+    done(';');
+    expect(progress).to.equal(';slave0;master;slave1');
+    computeInMasterFrame(slave2, taskId, work, frame('slave2'));
+    expect(progress).to.equal(';slave0;master;slave1;slave2');
+    expect(workCalls).to.equal(1);
+  });
 });
-

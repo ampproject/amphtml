@@ -14,8 +14,13 @@
  * limitations under the License.
  */
 
-import {isLoaded, listen, listenOnce, listenOncePromise, loadPromise}
-    from '../../src/event-helper';
+import {
+  isLoaded,
+  listen,
+  listenOnce,
+  listenOncePromise,
+  loadPromise,
+} from '../../src/event-helper';
 import {Observable} from '../../src/observable';
 import * as sinon from 'sinon';
 
@@ -47,7 +52,7 @@ describe('EventHelper', () => {
         } else if (type == 'error') {
           errorObservable.add(callback);
         } else {
-          expect(type).to.equal("load or error");
+          expect(type).to.equal('load or error');
         }
       },
       removeEventListener: function(type, callback) {
@@ -56,9 +61,9 @@ describe('EventHelper', () => {
         } else if (type == 'error') {
           errorObservable.remove(callback);
         } else {
-          expect(type).to.equal("load or error");
+          expect(type).to.equal('load or error');
         }
-      }
+      },
     };
   });
 
@@ -67,12 +72,7 @@ describe('EventHelper', () => {
     expect(loadObservable.getHandlerCount()).to.equal(0);
     expect(errorObservable.getHandlerCount()).to.equal(0);
 
-    loadObservable = null;
-    errorObservable = null;
-    element = null;
-    clock = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   it('listen', () => {
@@ -203,7 +203,10 @@ describe('EventHelper', () => {
   it('loadPromise - error event', () => {
     const promise = loadPromise(element).then(result => {
       assert.fail('must never be here: ' + result);
-    }).catch(unusedReason => {
+    }).then(() => {
+      throw new Error('Should not be reached.');
+    }, reason => {
+      expect(reason.message).to.include('Failed HTTP request for');
     });
     errorObservable.fire(getEvent('error'));
     return promise;

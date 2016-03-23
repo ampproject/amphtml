@@ -59,18 +59,15 @@ class AmpVimeo extends AMP.BaseElement {
   }
 
   /** @override */
-  documentInactiveCallback() {
+  pauseCallback() {
     if (this.iframe_ && this.iframe_.contentWindow) {
       // See
       // https://developer.vimeo.com/player/js-api
       this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify({
         'method': 'pause',
-        'value': ''
+        'value': '',
       }), '*');
     }
-    // No need to do layout later - user action will be expect to resume
-    // the playback.
-    return false;
   }
 };
 

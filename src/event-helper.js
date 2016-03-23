@@ -15,6 +15,7 @@
  */
 
 import {timer} from './timer';
+import {user} from './log';
 
 
 /**
@@ -110,7 +111,11 @@ export function loadPromise(element, opt_timeout) {
       } else {
         unlistenLoad = listenOnce(element, 'load', () => resolve(element));
       }
-      unlistenError = listenOnce(element, 'error', reject);
+      unlistenError = listenOnce(element, 'error', () => {
+        // Report failed loads as asserts so that they automatically go into
+        // the "document error" bucket.
+        reject(user.createError('Failed HTTP request for %s.', element));
+      });
     }
   });
   return racePromise_(loadingPromise, () => {

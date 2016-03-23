@@ -42,13 +42,35 @@ function whenMessagingLoaded(callback) {
   var viewer = AMP.viewer;
 
   if (window.parent && window.parent != window) {
+    var handshakePromise = new Promise(function(resolve) {
+      var unconfirmedViewerOrigin = viewer.getParam('viewerorigin');
+      if (!unconfirmedViewerOrigin) {
+        throw new Error('Expected viewer origin must be specified!');
+      }
+
+      var listener = function(event) {
+        if (event.origin == unconfirmedViewerOrigin &&
+                event.data == 'amp-handshake-response' &&
+                (!event.source || event.source == window.parent)) {
+          window.removeEventListener('message', listener, false);
+          resolve(event.origin);
+        }
+      };
+      window.addEventListener('message', listener, false);
+
+      window.parent./*OK*/postMessage('amp-handshake-request',
+          unconfirmedViewerOrigin);
+    });
+
     whenMessagingLoaded(function(ViewerMessaging) {
-      var messaging = new ViewerMessaging(window.parent,
-          function(type, payload, awaitResponse) {
-            return viewer.receiveMessage(type, payload, awaitResponse);
-          });
-      viewer.setMessageDeliverer(function(type, payload, awaitResponse) {
-        return messaging.sendRequest(type, payload, awaitResponse);
+      handshakePromise.then(function(viewerOrigin) {
+        var messaging = new ViewerMessaging(window.parent, viewerOrigin,
+            function(type, payload, awaitResponse) {
+              return viewer.receiveMessage(type, payload, awaitResponse);
+            }, window.location.href);
+        viewer.setMessageDeliverer(function(type, payload, awaitResponse) {
+          return messaging.sendRequest(type, payload, awaitResponse);
+        }, viewerOrigin);
       });
     });
   }

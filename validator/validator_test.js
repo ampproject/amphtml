@@ -90,6 +90,7 @@ const ValidatorTestCase = function(ampHtmlFile, opt_ampUrl) {
  */
 ValidatorTestCase.prototype.run = function() {
   const results = amp.validator.validateString(this.ampHtmlFileContents);
+  amp.validator.annotateWithErrorCategories(results);
   const observed = amp.validator.renderValidationResult(
       results, this.ampUrl).join('\n');
   if (observed === this.expectedOutput) {
@@ -128,18 +129,11 @@ describe('ValidatorOutput', () => {
     const test = new ValidatorTestCase('feature_tests/no_custom_js.html',
         'http://google.com/foo.html#development=1');
     test.expectedOutputFile = null;
-    test.expectedOutput =
-        'FAIL\n' +
-        'http://google.com/foo.html:28:3 The attribute \'src\' in tag ' +
-        '\'amphtml engine v0.js script\' is set to the invalid value ' +
-        '\'https://example.com/v0-not-allowed.js\'. ' +
-        '(see https://github.com/ampproject/amphtml/blob/master/spec/' +
-        'amp-html-format.md#scrpt)\n' +
-        'http://google.com/foo.html:29:3 The attribute \'custom-element\' ' +
-        'in tag \'amp-access extension .js script\' is set to the invalid ' +
-        'value \'amp-foo\'. ' +
-        '(see https://github.com/ampproject/amphtml/blob/master/extensions/' +
-        'amp-access/amp-access.md)';
+    test.expectedOutput = 'FAIL\n' +
+        'http://google.com/foo.html:28:3 The tag \'script\' is disallowed ' +
+        'except in specific forms. [CUSTOM_JAVASCRIPT_DISALLOWED]\n' +
+        'http://google.com/foo.html:29:3 The tag \'script\' is disallowed ' +
+        'except in specific forms. [CUSTOM_JAVASCRIPT_DISALLOWED]';
     test.run();
   });
 });
@@ -175,9 +169,10 @@ describe('ValidatorCssLengthValidation', () => {
     test.expectedOutput =
         'FAIL\n' +
         'feature_tests/css_length.html:28:2 The author stylesheet specified ' +
-        'in tag \'style\' is too long - we saw 50001 bytes whereas the ' +
-        'limit is 50000 bytes. (see https://github.com/ampproject/amphtml/' +
-        'blob/master/spec/amp-html-format.md#maximum-size)';
+        'in tag \'style amp-custom\' is too long - we saw 50001 bytes ' +
+        'whereas the limit is 50000 bytes. ' +
+        '(see https://www.ampproject.org/docs/reference/spec.html' +
+        '#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
     test.run();
   });
 
@@ -191,9 +186,10 @@ describe('ValidatorCssLengthValidation', () => {
     test.expectedOutput =
         'FAIL\n' +
         'feature_tests/css_length.html:28:2 The author stylesheet specified ' +
-        'in tag \'style\' is too long - we saw 50002 bytes whereas the limit ' +
-        'is 50000 bytes. (see https://github.com/ampproject/amphtml/blob/' +
-        'master/spec/amp-html-format.md#maximum-size)';
+        'in tag \'style amp-custom\' is too long - we saw 50002 bytes ' +
+        'whereas the limit is 50000 bytes. ' +
+        '(see https://www.ampproject.org/docs/reference/spec.html' +
+        '#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
     test.run();
   });
 });

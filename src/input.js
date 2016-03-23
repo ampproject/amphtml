@@ -16,7 +16,7 @@
 
 import {Observable} from './observable';
 import {getService} from './service';
-import {log} from './log';
+import {dev} from './log';
 import {listenOnce, listenOncePromise} from './event-helper';
 
 
@@ -58,7 +58,7 @@ export class Input {
         (win.navigator['maxTouchPoints'] !== undefined &&
             win.navigator['maxTouchPoints'] > 0) ||
         win['DocumentTouch'] !== undefined);
-    log.fine(TAG_, 'touch detected:', this.hasTouch_);
+    dev.fine(TAG_, 'touch detected:', this.hasTouch_);
 
     /** @private {boolean} */
     this.keyboardActive_ = false;
@@ -182,7 +182,7 @@ export class Input {
 
     this.keyboardActive_ = true;
     this.keyboardStateObservable_.fire(true);
-    log.fine(TAG_, 'keyboard activated');
+    dev.fine(TAG_, 'keyboard activated');
   }
 
   /** @private */
@@ -192,11 +192,20 @@ export class Input {
     }
     this.keyboardActive_ = false;
     this.keyboardStateObservable_.fire(false);
-    log.fine(TAG_, 'keyboard deactivated');
+    dev.fine(TAG_, 'keyboard deactivated');
   }
 
-  /** @private */
-  onMouseMove_() {
+  /**
+   * @param {!Event} e
+   * @return {!Promise|undefined}
+   * @private
+   */
+  onMouseMove_(e) {
+    // The event explicitly states that it's a result of a touch event.
+    if (e.sourceCapabilities && e.sourceCapabilities.firesTouchEvents) {
+      this.mouseCanceled_();
+      return undefined;
+    }
     // If "click" arrives within a timeout time, this is most likely a
     // touch/mouse emulation. Otherwise, if timeout exceeded, this looks
     // like a legitimate mouse event.
@@ -208,7 +217,7 @@ export class Input {
   mouseConfirmed_() {
     this.hasMouse_ = true;
     this.mouseDetectedObservable_.fire(true);
-    log.fine(TAG_, 'mouse detected');
+    dev.fine(TAG_, 'mouse detected');
   }
 
   /** @private */
@@ -218,7 +227,7 @@ export class Input {
     if (this.mouseConfirmAttemptCount_ <= MAX_MOUSE_CONFIRM_ATTEMPS_) {
       listenOnce(this.win.document, 'mousemove', this.boundOnMouseMove_);
     } else {
-      log.fine(TAG_, 'mouse detection failed');
+      dev.fine(TAG_, 'mouse detection failed');
     }
   }
 }

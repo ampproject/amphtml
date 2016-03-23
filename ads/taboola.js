@@ -35,7 +35,7 @@ export function taboola(global, data) {
   // setup default values for referrer and url
   const params = {
     referrer: data.referrer || global.context.referrer,
-    url: data.url || global.context.canonicalUrl
+    url: data.url || global.context.canonicalUrl,
   };
 
   // copy none blacklisted attribute to the 'params' map
@@ -52,9 +52,11 @@ export function taboola(global, data) {
     placement: data.placement,
     mode: data.mode,
     framework: 'amp',
-    container: 'c'
+    container: 'c',
   },
-    params]);
+    params,
+    {flush: true}]
+  );
 
   // install observation on entering/leaving the view
   global.context.observeIntersection(function(changes) {
@@ -63,7 +65,7 @@ export function taboola(global, data) {
         global._taboola.push({
           visible: true,
           rects: c,
-          placement: data.placement
+          placement: data.placement,
         });
       }
     });

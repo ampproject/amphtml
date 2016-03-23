@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import {setStyles} from './style';
+import {setStyles, setStyle} from './style';
+import {platformFor} from './platform';
+import {waitForBody} from './dom';
+import {waitForExtensions} from './render-delaying-extensions';
 
 
 /**
@@ -32,8 +35,12 @@ import {setStyles} from './style';
  * @param {boolean=} opt_isRuntimeCss If true, this style tag will be inserted
  *     as the first element in head and all style elements will be positioned
  *     after.
+ * @param {string=} opt_ext
  */
-export function installStyles(doc, cssText, cb, opt_isRuntimeCss) {
+export function installStyles(doc, cssText, cb, opt_isRuntimeCss, opt_ext) {
+  if (platformFor(doc.defaultView).isIos() && opt_isRuntimeCss) {
+    setStyle(doc.documentElement, 'cursor', 'pointer');
+  }
   const style = doc.createElement('style');
   style.textContent = cssText;
   let afterElement = null;
@@ -42,6 +49,7 @@ export function installStyles(doc, cssText, cb, opt_isRuntimeCss) {
   if (opt_isRuntimeCss) {
     style.setAttribute('amp-runtime', '');
   } else {
+    style.setAttribute('amp-extension', opt_ext || '');
     afterElement = doc.querySelector('style[amp-runtime]');
   }
   insertAfterOrAtStart(doc.head, style, afterElement);
@@ -78,31 +86,26 @@ export function installStyles(doc, cssText, cb, opt_isRuntimeCss) {
  * If the body is not yet available (because our script was loaded
  * synchronously), polls until it is.
  * @param {!Document} doc The document who's body we should make visible.
- * @param {?Promise=} extensionsPromise A loading promise for special extensions
- *     which must load before the body can be made visible
+ * @param {boolean=} opt_waitForExtensions Whether the body visibility should
+ *     be blocked on key extensions being loaded.
  */
-export function makeBodyVisible(doc, extensionsPromise) {
-  let interval;
+export function makeBodyVisible(doc, opt_waitForExtensions) {
   const set = () => {
-    if (doc.body) {
-      setStyles(doc.body, {
-        opacity: 1,
-        visibility: 'visible',
-        animation: 'none'
-      });
-      clearInterval(interval);
+    setStyles(doc.body, {
+      opacity: 1,
+      visibility: 'visible',
+      animation: 'none',
+    });
+  };
+  waitForBody(doc, () => {
+    const extensionsPromise = opt_waitForExtensions ?
+        waitForExtensions(doc.defaultView) : null;
+    if (extensionsPromise) {
+      extensionsPromise.then(set, set);
+    } else {
+      set();
     }
-  };
-  const poll = () => {
-    interval = setInterval(set, 4);
-    set();
-  };
-
-  if (extensionsPromise) {
-    extensionsPromise.then(poll, poll);
-  } else {
-    poll();
-  }
+  });
 }
 
 

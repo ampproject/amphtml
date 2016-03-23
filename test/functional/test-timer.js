@@ -27,17 +27,15 @@ describe('Timer', () => {
     const WindowApi = function() {};
     WindowApi.prototype.setTimeout = function(unusedCallback, unusedDelay) {};
     WindowApi.prototype.clearTimeout = function(unusedTimerId) {};
+    WindowApi.prototype.document = {};
     const windowApi = new WindowApi();
     windowMock = sandbox.mock(windowApi);
     timer = new Timer(windowApi);
   });
 
   afterEach(() => {
-    timer = null;
     windowMock.verify();
-    windowMock = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   it('delay', () => {
@@ -99,7 +97,7 @@ describe('Timer', () => {
     }).catch(reason => {
       c++;
       expect(c).to.equal(1);
-      expect(reason).to.equal('timeout');
+      expect(reason.message).to.contain('timeout');
     });
   });
 
@@ -131,7 +129,7 @@ describe('Timer', () => {
     }).catch(reason => {
       c++;
       expect(c).to.equal(1);
-      expect(reason).to.equal('timeout');
+      expect(reason.message).to.contain('timeout');
     });
   });
 });

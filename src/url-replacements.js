@@ -14,20 +14,24 @@
  * limitations under the License.
  */
 
+import {accessServiceForOrNull} from './access-service';
 import {assert} from './asserts';
 import {cidFor} from './cid';
+import {user, rethrowAsync} from './log';
 import {documentInfoFor} from './document-info';
 import {getService} from './service';
 import {loadPromise} from './event-helper';
-import {log} from './log';
-import {parseUrl, removeFragment} from './url';
+import {getSourceUrl, parseUrl, removeFragment, parseQueryString} from './url';
 import {viewerFor} from './viewer';
 import {viewportFor} from './viewport';
 import {vsyncFor} from './vsync';
 import {userNotificationManagerFor} from './user-notification';
+import {activityFor} from './activity';
 
-/** @private {string} */
-const TAG_ = 'UrlReplacements';
+
+/** @private @const {string} */
+const TAG = 'UrlReplacements';
+
 
 /**
  * This class replaces substitution variables with their values.
@@ -44,6 +48,9 @@ class UrlReplacements {
 
     /** @private @const {!Object<string, function(*):*>} */
     this.replacements_ = this.win_.Object.create(null);
+
+    /** @private @const {function():!Promise<?AccessService>} */
+    this.getAccessService_ = accessServiceForOrNull.bind(null);
 
     // Returns a random value for cache busters.
     this.set_('RANDOM', () => {
@@ -88,11 +95,37 @@ class UrlReplacements {
       return url && url.hostname;
     });
 
+    // Returns the Source URL for this AMP document.
+    this.set_('SOURCE_URL', () => {
+      return removeFragment(getSourceUrl(this.win_.location.href));
+    });
+
+    // Returns the host of the Source URL for this AMP document.
+    this.set_('SOURCE_HOST', () => {
+      return parseUrl(getSourceUrl(this.win_.location.href)).hostname;
+    });
+
+    // Returns the path of the Source URL for this AMP document.
+    this.set_('SOURCE_PATH', () => {
+      return parseUrl(getSourceUrl(this.win_.location.href)).pathname;
+    });
+
     // Returns a random string that will be the constant for the duration of
     // single page view. It should have sufficient entropy to be unique for
     // all the page views a single user is making at a time.
     this.set_('PAGE_VIEW_ID', () => {
       return documentInfoFor(this.win_).pageViewId;
+    });
+
+    this.set_('QUERY_PARAM', (param, defaultValue = '') => {
+      assert(param, 'The first argument to QUERY_PARAM, the query string ' +
+          /*OK*/'param is required');
+      const url = parseUrl(this.win_.location.href);
+      const params = parseQueryString(url.search);
+
+      return (typeof params[param] !== 'undefined') ?
+        params[param] :
+        defaultValue;
     });
 
     this.set_('CLIENT_ID', (scope, opt_userNotificationId) => {
@@ -110,7 +143,7 @@ class UrlReplacements {
       return cidFor(win).then(cid => {
         return cid.get({
           scope: scope,
-          createCookieIfNotPresent: true
+          createCookieIfNotPresent: true,
         }, consent);
       });
     });
@@ -143,6 +176,12 @@ class UrlReplacements {
         () => viewportFor(this.win_).getScrollHeight());
     });
 
+    // Returns a promise resolving to viewport.getScrollWidth.
+    this.set_('SCROLL_WIDTH', () => {
+      return vsyncFor(this.win_).measurePromise(
+        () => viewportFor(this.win_).getScrollWidth());
+    });
+
     // Returns screen.width.
     this.set_('SCREEN_WIDTH', () => {
       return this.win_.screen.width;
@@ -166,6 +205,18 @@ class UrlReplacements {
     // Returns screen.ColorDepth.
     this.set_('SCREEN_COLOR_DEPTH', () => {
       return this.win_.screen.colorDepth;
+    });
+
+    // Returns the viewport height.
+    this.set_('VIEWPORT_HEIGHT', () => {
+      return vsyncFor(this.win_).measurePromise(
+        () => viewportFor(this.win_).getSize().height);
+    });
+
+    // Returns the viewport width.
+    this.set_('VIEWPORT_WIDTH', () => {
+      return vsyncFor(this.win_).measurePromise(
+        () => viewportFor(this.win_).getSize().width);
     });
 
     // Returns document characterset.
@@ -223,6 +274,51 @@ class UrlReplacements {
       return this.getTimingData_('navigationStart',
           'domContentLoadedEventStart');
     });
+
+    // Access: Reader ID.
+    this.set_('ACCESS_READER_ID', () => {
+      return this.getAccessValue_(accessService => {
+        return accessService.getAccessReaderId();
+      }, 'ACCESS_READER_ID');
+    });
+
+    // Access: data from the authorization response.
+    this.set_('AUTHDATA', field => {
+      assert(field, 'The first argument to AUTHDATA, the field, is required');
+      return this.getAccessValue_(accessService => {
+        return accessService.getAuthdataField(field);
+      }, 'AUTHDATA');
+    });
+
+    // Returns an identifier for the viewer.
+    this.set_('VIEWER', () => {
+      return viewerFor(this.win_).getViewerOrigin();
+    });
+
+    // Returns the total engaged time since the content became viewable.
+    this.set_('TOTAL_ENGAGED_TIME', () => {
+      return activityFor(this.win_).then(activity => {
+        return activity.getTotalEngagedTime();
+      });
+    });
+  }
+
+  /**
+   * Resolves the value via access service. If access service is not configured,
+   * the resulting value is `null`.
+   * @param {function(!AccessService):*} getter
+   * @param {string} expr
+   * @return {*|null}
+   */
+  getAccessValue_(getter, expr) {
+    return this.getAccessService_(this.win_).then(accessService => {
+      if (!accessService) {
+        // Access service is not installed.
+        user.error(TAG, 'Access service is not installed to access: ', expr);
+        return null;
+      }
+      return getter(accessService);
+    });
   }
 
   /**
@@ -250,8 +346,8 @@ class UrlReplacements {
       return loadPromise(this.win_).then(() => {
         metric = timingInfo[endEvent] - timingInfo[startEvent];
         return (isNaN(metric) || metric == Infinity || metric < 0)
-            ? Promise.resolve()
-            : Promise.resolve(String(metric));
+            ? undefined
+            : String(metric);
       });
     } else {
       return Promise.resolve(String(metric));
@@ -296,16 +392,25 @@ class UrlReplacements {
         args = opt_strargs.split(',');
       }
       const binding = (opt_bindings && (name in opt_bindings)) ?
-          opt_bindings[name] : this.replacements_[name];
-      const val = (typeof binding == 'function') ?
-          binding.apply(null, args) : binding;
+          opt_bindings[name] : this.getReplacement_(name);
+      let val;
+      try {
+        val = (typeof binding == 'function') ?
+            binding.apply(null, args) : binding;
+      } catch (e) {
+        // Report error, but do not disrupt URL replacement. This will
+        // interpolate as the empty string.
+        rethrowAsync(e);
+      }
       // In case the produced value is a promise, we don't actually
       // replace anything here, but do it again when the promise resolves.
       if (val && val.then) {
-        const p = val.then(v => {
+        const p = val.catch(err => {
+          // Report error, but do not disrupt URL replacement. This will
+          // interpolate as the empty string.
+          rethrowAsync(err);
+        }).then(v => {
           url = url.replace(match, encodeValue(v));
-        }, err => {
-          log.error(TAG_, 'Failed to expand: ' + name, err);
         });
         if (replacementPromise) {
           replacementPromise = replacementPromise.then(() => p);
@@ -322,6 +427,14 @@ class UrlReplacements {
     }
 
     return replacementPromise || Promise.resolve(url);
+  }
+
+  /**
+   * @param {string} name
+   * @return {function(*):*}
+   */
+  getReplacement_(name) {
+    return this.replacements_[name];
   }
 
   /**
@@ -362,7 +475,7 @@ class UrlReplacements {
     // FOO_BAR
     // FOO_BAR(arg1)
     // FOO_BAR(arg1,arg2)
-    return new RegExp('\\$?(' + all + ')(?:\\(([0-9a-zA-Z-_,]+)\\))?', 'g');
+    return new RegExp('\\$?(' + all + ')(?:\\(([0-9a-zA-Z-_.,]+)\\))?', 'g');
   }
 }
 

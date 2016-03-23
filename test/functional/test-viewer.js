@@ -15,7 +15,10 @@
  */
 
 import {Viewer} from '../../src/service/viewer-impl';
+import {dev} from '../../src/log';
 import {platform} from '../../src/platform';
+import {setModeForTesting} from '../../src/mode';
+import * as sinon from 'sinon';
 
 
 describe('Viewer', () => {
@@ -24,11 +27,32 @@ describe('Viewer', () => {
   let windowMock;
   let viewer;
   let windowApi;
+  let timeouts;
+  let clock;
+  let events;
+  let errorStub;
+
+  function changeVisibility(vis) {
+    windowApi.document.hidden = vis !== 'visible';
+    windowApi.document.visibilityState = vis;
+    if (events.visibilitychange) {
+      events.visibilitychange({
+        target: windowApi.document,
+        type: 'visibilitychange',
+        bubbles: false,
+        cancelable: false,
+      });
+    }
+  }
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
+    clock = sandbox.useFakeTimers();
+    timeouts = [];
     const WindowApi = function() {};
-    WindowApi.prototype.setTimeout = function() {};
+    WindowApi.prototype.setTimeout = function(handler) {
+      timeouts.push(handler);
+    };
     windowApi = new WindowApi();
     windowApi.location = {
       hash: '',
@@ -36,20 +60,25 @@ describe('Viewer', () => {
       ancestorOrigins: null,
     };
     windowApi.document = {
+      hidden: false,
+      visibilityState: 'visible',
+      addEventListener: function(type, listener) {
+        events[type] = listener;
+      },
       referrer: '',
       body: {style: {}},
       documentElement: {style: {}},
+      title: 'Awesome doc',
     };
+    events = {};
+    errorStub = sandbox.stub(dev, 'error');
     windowMock = sandbox.mock(windowApi);
     viewer = new Viewer(windowApi);
   });
 
   afterEach(() => {
-    viewer = null;
     windowMock.verify();
-    windowMock = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   it('should configure as natural viewport by default', () => {
@@ -84,17 +113,31 @@ describe('Viewer', () => {
   });
 
   it('should configure visibilityState and prerender', () => {
-    windowApi.location.hash = '#visibilityState=hidden&prerenderSize=3';
+    windowApi.location.hash = '#visibilityState=prerender&prerenderSize=3';
     const viewer = new Viewer(windowApi);
-    expect(viewer.getVisibilityState()).to.equal('hidden');
+    expect(viewer.getVisibilityState()).to.equal('prerender');
     expect(viewer.isVisible()).to.equal(false);
     expect(viewer.getPrerenderSize()).to.equal(3);
+  });
+
+  it('should configure performance tracking', () => {
+    windowApi.location.hash = '';
+    let viewer = new Viewer(windowApi);
+    expect(viewer.isPerformanceTrackingOn()).to.be.false;
+
+    windowApi.location.hash = '#csi=1';
+    viewer = new Viewer(windowApi);
+    expect(viewer.isPerformanceTrackingOn()).to.be.true;
+
+    windowApi.location.hash = '#csi=0';
+    viewer = new Viewer(windowApi);
+    expect(viewer.isPerformanceTrackingOn()).to.be.false;
   });
 
   it('should configure correctly for iOS embedding', () => {
     windowApi.name = '__AMP__viewportType=natural';
     windowApi.parent = {};
-    sandbox.mock(platform).expects('isIos').returns(true).once();
+    sandbox.mock(platform).expects('isIos').returns(true).atLeast(1);
     const viewer = new Viewer(windowApi);
 
     expect(viewer.getViewportType()).to.equal('natural-ios-embed');
@@ -103,11 +146,14 @@ describe('Viewer', () => {
   it('should NOT configure for iOS embedding if not embedded', () => {
     windowApi.name = '__AMP__viewportType=natural';
     windowApi.parent = windowApi;
-    sandbox.mock(platform).expects('isIos').returns(true).once();
-    expect(new Viewer(windowApi).getViewportType()).to.equal('natural');
-
-    windowApi.parent = null;
-    expect(new Viewer(windowApi).getViewportType()).to.equal('natural');
+    sandbox.mock(platform).expects('isIos').returns(true).atLeast(1);
+    setModeForTesting({
+      localDev: false,
+      development: false,
+    });
+    const viewportType = new Viewer(windowApi).getViewportType();
+    setModeForTesting(null);
+    expect(viewportType).to.equal('natural');
   });
 
   it('should receive viewport event', () => {
@@ -120,7 +166,7 @@ describe('Viewer', () => {
       scrollLeft: 12,
       width: 13,
       height: 14,
-      paddingTop: 19
+      paddingTop: 19,
     });
     expect(viewportEvent).to.not.equal(null);
     expect(viewer.getScrollTop()).to.equal(11);
@@ -129,19 +175,188 @@ describe('Viewer', () => {
     expect(viewer.getPaddingTop()).to.equal(19);
   });
 
-  it('should receive visibilitychange event', () => {
-    let visEvent = null;
-    viewer.onVisibilityChanged(event => {
-      visEvent = event;
+  describe('should receive the visibilitychange event', () => {
+    it('should change prerenderSize', () => {
+      viewer.receiveMessage('visibilitychange', {
+        prerenderSize: 4,
+      });
+      expect(viewer.getPrerenderSize()).to.equal(4);
     });
-    viewer.receiveMessage('visibilitychange', {
-      state: 'other',
-      prerenderSize: 4
+
+    it('should change visibilityState', () => {
+      viewer.receiveMessage('visibilitychange', {
+        state: 'paused',
+      });
+      expect(viewer.getVisibilityState()).to.equal('paused');
+      expect(viewer.isVisible()).to.equal(false);
     });
-    expect(visEvent).to.not.equal(null);
-    expect(viewer.getVisibilityState()).to.equal('other');
-    expect(viewer.isVisible()).to.equal(false);
-    expect(viewer.getPrerenderSize()).to.equal(4);
+
+    it('should receive "paused" visibilityState', () => {
+      viewer.receiveMessage('visibilitychange', {
+        state: 'paused',
+      });
+      expect(viewer.getVisibilityState()).to.equal('paused');
+      expect(viewer.isVisible()).to.equal(false);
+    });
+
+    it('should receive "inactive" visibilityState', () => {
+      viewer.receiveMessage('visibilitychange', {
+        state: 'inactive',
+      });
+      expect(viewer.getVisibilityState()).to.equal('inactive');
+      expect(viewer.isVisible()).to.equal(false);
+    });
+
+    it('should parse "hidden" as "prerender" before first visible', () => {
+      viewer.hasBeenVisible_ = false;
+      viewer.receiveMessage('visibilitychange', {
+        state: 'hidden',
+      });
+      expect(viewer.getVisibilityState()).to.equal('prerender');
+      expect(viewer.isVisible()).to.equal(false);
+    });
+
+    it('should parse "hidden" as "inactive" after first visible', () => {
+      viewer.hasBeenVisible_ = true;
+      viewer.receiveMessage('visibilitychange', {
+        state: 'hidden',
+      });
+      expect(viewer.getVisibilityState()).to.equal('inactive');
+      expect(viewer.isVisible()).to.equal(false);
+    });
+
+    it('should reject unknown values', () => {
+      viewer.receiveMessage('visibilitychange', {
+        state: 'paused',
+      });
+      expect(() => {
+        viewer.receiveMessage('visibilitychange', {
+          state: 'what is this',
+        });
+      }).to.throw('Unknown VisibilityState value');
+      expect(viewer.getVisibilityState()).to.equal('paused');
+      expect(viewer.isVisible()).to.equal(false);
+    });
+
+    it('should be inactive when the viewer tells us we are inactive', () => {
+      viewer.receiveMessage('visibilitychange', {
+        state: 'inactive',
+      });
+      expect(viewer.getVisibilityState()).to.equal('inactive');
+      expect(viewer.isVisible()).to.equal(false);
+      changeVisibility('hidden');
+      expect(viewer.getVisibilityState()).to.equal('inactive');
+      expect(viewer.isVisible()).to.equal(false);
+    });
+
+    it('should be prerender when the viewer tells us we are prerender', () => {
+      viewer.receiveMessage('visibilitychange', {
+        state: 'prerender',
+      });
+      expect(viewer.getVisibilityState()).to.equal('prerender');
+      expect(viewer.isVisible()).to.equal(false);
+      changeVisibility('visible');
+      expect(viewer.getVisibilityState()).to.equal('prerender');
+      expect(viewer.isVisible()).to.equal(false);
+    });
+
+    it('should be hidden when the browser document is hidden', () => {
+      changeVisibility('hidden');
+      viewer.receiveMessage('visibilitychange', {
+        state: 'visible',
+      });
+      expect(viewer.getVisibilityState()).to.equal('hidden');
+      expect(viewer.isVisible()).to.equal(false);
+      viewer.receiveMessage('visibilitychange', {
+        state: 'paused',
+      });
+      expect(viewer.getVisibilityState()).to.equal('hidden');
+      expect(viewer.isVisible()).to.equal(false);
+      viewer.receiveMessage('visibilitychange', {
+        state: 'visible',
+      });
+      expect(viewer.getVisibilityState()).to.equal('hidden');
+      expect(viewer.isVisible()).to.equal(false);
+    });
+
+    it('should be paused when the browser document is visible but viewer is' +
+       'paused', () => {
+      changeVisibility('visible');
+      viewer.receiveMessage('visibilitychange', {
+        state: 'paused',
+      });
+      expect(viewer.getVisibilityState()).to.equal('paused');
+      expect(viewer.isVisible()).to.equal(false);
+    });
+
+    it('should be visible when the browser document is visible', () => {
+      changeVisibility('visible');
+      viewer.receiveMessage('visibilitychange', {
+        state: 'visible',
+      });
+      expect(viewer.getVisibilityState()).to.equal('visible');
+      expect(viewer.isVisible()).to.equal(true);
+    });
+
+    it('should be hidden when the browser document is unknown state', () => {
+      changeVisibility('what is this');
+      expect(viewer.getVisibilityState()).to.equal('hidden');
+      expect(viewer.isVisible()).to.equal(false);
+      viewer.receiveMessage('visibilitychange', {
+        state: 'paused',
+      });
+      expect(viewer.getVisibilityState()).to.equal('hidden');
+      expect(viewer.isVisible()).to.equal(false);
+    });
+
+    it('should change visibility on visibilitychange event', () => {
+      changeVisibility('hidden');
+      expect(viewer.getVisibilityState()).to.equal('hidden');
+      expect(viewer.isVisible()).to.equal(false);
+      changeVisibility('visible');
+      expect(viewer.getVisibilityState()).to.equal('visible');
+      expect(viewer.isVisible()).to.equal(true);
+
+      viewer.receiveMessage('visibilitychange', {
+        state: 'hidden',
+      });
+      changeVisibility('hidden');
+      expect(viewer.getVisibilityState()).to.equal('inactive');
+      expect(viewer.isVisible()).to.equal(false);
+      changeVisibility('visible');
+      expect(viewer.getVisibilityState()).to.equal('inactive');
+      expect(viewer.isVisible()).to.equal(false);
+
+      viewer.receiveMessage('visibilitychange', {
+        state: 'inactive',
+      });
+      changeVisibility('hidden');
+      expect(viewer.getVisibilityState()).to.equal('inactive');
+      expect(viewer.isVisible()).to.equal(false);
+      changeVisibility('visible');
+      expect(viewer.getVisibilityState()).to.equal('inactive');
+      expect(viewer.isVisible()).to.equal(false);
+
+      viewer.receiveMessage('visibilitychange', {
+        state: 'paused',
+      });
+      changeVisibility('hidden');
+      expect(viewer.getVisibilityState()).to.equal('hidden');
+      expect(viewer.isVisible()).to.equal(false);
+      changeVisibility('visible');
+      expect(viewer.getVisibilityState()).to.equal('paused');
+      expect(viewer.isVisible()).to.equal(false);
+
+      viewer.receiveMessage('visibilitychange', {
+        state: 'visible',
+      });
+      changeVisibility('hidden');
+      expect(viewer.getVisibilityState()).to.equal('hidden');
+      expect(viewer.isVisible()).to.equal(false);
+      changeVisibility('visible');
+      expect(viewer.getVisibilityState()).to.equal('visible');
+      expect(viewer.isVisible()).to.equal(true);
+    });
   });
 
   it('should post documentLoaded event', () => {
@@ -150,6 +365,7 @@ describe('Viewer', () => {
     expect(m.eventType).to.equal('documentLoaded');
     expect(m.data.width).to.equal(11);
     expect(m.data.height).to.equal(12);
+    expect(m.data.title).to.equal('Awesome doc');
   });
 
   it('should post documentResized event', () => {
@@ -165,23 +381,6 @@ describe('Viewer', () => {
     viewer.cancelFullOverlay();
     expect(viewer.messageQueue_[0].eventType).to.equal('requestFullOverlay');
     expect(viewer.messageQueue_[1].eventType).to.equal('cancelFullOverlay');
-  });
-
-  it('should receive broadcast event', () => {
-    let broadcastMessage = null;
-    viewer.onBroadcast(message => {
-      broadcastMessage = message;
-    });
-    viewer.receiveMessage('broadcast', {type: 'type1'});
-    expect(broadcastMessage).to.exist;
-    expect(broadcastMessage.type).to.equal('type1');
-  });
-
-  it('should post broadcast event', () => {
-    viewer.broadcast({type: 'type1'});
-    const m = viewer.messageQueue_[0];
-    expect(m.eventType).to.equal('broadcast');
-    expect(m.data.type).to.equal('type1');
   });
 
   it('should queue non-dupe events', () => {
@@ -204,7 +403,7 @@ describe('Viewer', () => {
     const delivered = [];
     viewer.setMessageDeliverer((eventType, data) => {
       delivered.push({eventType: eventType, data: data});
-    });
+    }, 'https://acme.com');
 
     expect(viewer.messageQueue_.length).to.equal(0);
     expect(delivered.length).to.equal(2);
@@ -214,62 +413,217 @@ describe('Viewer', () => {
     expect(delivered[1].data.width).to.equal(13);
   });
 
-  describe('isTrustedViewer', () => {
-    function test(referrer, toBeTrusted) {
+  describe('Messaging not embedded', () => {
+
+    it('should not expect messaging', () => {
+      expect(viewer.messagingReadyPromise_).to.be.null;
+      expect(viewer.messagingMaybePromise_).to.be.null;
+    });
+
+    it('should fail sendMessage', () => {
+      return viewer.sendMessage('message1', {}, /* awaitResponse */ false)
+          .then(() => {
+            throw new Error('should not succeed');
+          }, error => {
+            expect(error.message).to.match(/No messaging channel/);
+          });
+    });
+
+    it('should post broadcast event but not fail', () => {
+      viewer.broadcast({type: 'type1'});
+      expect(viewer.messageQueue_.length).to.equal(0);
+    });
+  });
+
+  describe('Messaging', () => {
+    beforeEach(() => {
       windowApi.parent = {};
+      viewer = new Viewer(windowApi);
+    });
 
-      windowApi.location.ancestorOrigins = referrer ? [referrer] : [];
-      expect(new Viewer(windowApi).isTrustedViewer())
-          .to.equal(toBeTrusted, 'by ancestor');
-      windowApi.location.ancestorOrigins = null;
+    it('should receive broadcast event', () => {
+      let broadcastMessage = null;
+      viewer.onBroadcast(message => {
+        broadcastMessage = message;
+      });
+      viewer.receiveMessage('broadcast', {type: 'type1'});
+      expect(broadcastMessage).to.exist;
+      expect(broadcastMessage.type).to.equal('type1');
+    });
 
-      windowApi.document.referrer = referrer;
-      expect(new Viewer(windowApi).isTrustedViewer())
-          .to.equal(toBeTrusted, 'by referrer');
-      windowApi.document.referrer = '';
+    it('should post broadcast event', () => {
+      const delivered = [];
+      viewer.setMessageDeliverer((eventType, data) => {
+        delivered.push({eventType: eventType, data: data});
+      }, 'https://acme.com');
+      viewer.broadcast({type: 'type1'});
+      expect(viewer.messageQueue_.length).to.equal(0);
+      return viewer.messagingMaybePromise_.then(() => {
+        expect(delivered.length).to.equal(1);
+        const m = delivered[0];
+        expect(m.eventType).to.equal('broadcast');
+        expect(m.data.type).to.equal('type1');
+      });
+    });
+
+    it('should post broadcast event but not fail w/o messaging', () => {
+      viewer.broadcast({type: 'type1'});
+      expect(viewer.messageQueue_.length).to.equal(0);
+      clock.tick(20001);
+      return viewer.messagingReadyPromise_.then(() => 'OK', () => 'ERROR')
+          .then(res => {
+            expect(res).to.equal('ERROR');
+            return viewer.messagingMaybePromise_;
+          }).then(() => {
+            expect(viewer.messageQueue_.length).to.equal(0);
+          });
+    });
+
+    it('should wait for messaging channel', () => {
+      let m1Resolved = false;
+      let m2Resolved = false;
+      const m1 = viewer.sendMessage('message1', {}, /* awaitResponse */ false)
+          .then(() => {
+            m1Resolved = true;
+          });
+      const m2 = viewer.sendMessage('message2', {}, /* awaitResponse */ true)
+          .then(() => {
+            m2Resolved = true;
+          });
+      return Promise.resolve().then(() => {
+        // Not resolved yet.
+        expect(m1Resolved).to.be.false;
+        expect(m2Resolved).to.be.false;
+
+        // Set message deliverer.
+        viewer.setMessageDeliverer(() => {
+          return Promise.resolve();
+        }, 'https://acme.com');
+        expect(m1Resolved).to.be.false;
+        expect(m2Resolved).to.be.false;
+
+        return Promise.all([m1, m2]);
+      }).then(() => {
+        // All resolved now.
+        expect(m1Resolved).to.be.true;
+        expect(m2Resolved).to.be.true;
+      });
+    });
+
+    it('should timeout messaging channel', () => {
+      let m1Resolved = false;
+      let m2Resolved = false;
+      const m1 = viewer.sendMessage('message1', {}, /* awaitResponse */ false)
+          .then(() => {
+            m1Resolved = true;
+          });
+      const m2 = viewer.sendMessage('message2', {}, /* awaitResponse */ true)
+          .then(() => {
+            m2Resolved = true;
+          });
+      return Promise.resolve().then(() => {
+        // Not resolved yet.
+        expect(m1Resolved).to.be.false;
+        expect(m2Resolved).to.be.false;
+
+        // Timeout.
+        clock.tick(20001);
+        return Promise.all([m1, m2]);
+      }).then(() => {
+        throw new Error('must never be here');
+      }, () => {
+        // Not resolved ever.
+        expect(m1Resolved).to.be.false;
+        expect(m2Resolved).to.be.false;
+      });
+    });
+  });
+
+  describe('isTrustedViewer', () => {
+
+    function test(origin, toBeTrusted) {
+      const viewer = new Viewer(windowApi);
+      expect(viewer.isTrustedViewerOrigin_(origin)).to.equal(toBeTrusted);
     }
 
-    it('should verify ancestorOrigins ahead of referrer', () => {
-      windowApi.parent = {};
-      windowApi.document.referrer = 'https://google.com';
-      expect(new Viewer(windowApi).isTrustedViewer()).to.equal(true);
-
-      windowApi.location.ancestorOrigins = ['https://google.com'];
-      expect(new Viewer(windowApi).isTrustedViewer()).to.equal(true);
-
-      windowApi.location.ancestorOrigins = ['https://google.other.com'];
-      expect(new Viewer(windowApi).isTrustedViewer()).to.equal(false);
-
-      // Even empty ancestorOrigins takes precendence.
-      windowApi.location.ancestorOrigins = [];
-      expect(new Viewer(windowApi).isTrustedViewer()).to.equal(false);
-    });
-
-    it('should only consider viewer trusted when iframed', () => {
-      windowApi.parent = {};
-      windowApi.location.ancestorOrigins = ['https://google.com'];
-      expect(new Viewer(windowApi).isTrustedViewer()).to.equal(true);
-
+    it('should consider non-trusted when not iframed', () => {
       windowApi.parent = windowApi;
-      expect(new Viewer(windowApi).isTrustedViewer()).to.equal(false);
+      windowApi.location.ancestorOrigins = ['https://google.com'];
+      return new Viewer(windowApi).isTrustedViewer().then(res => {
+        expect(res).to.be.false;
+      });
     });
 
-    it('should flag viewer as not trusted without referrer or ancestor', () => {
-      test('', false);
+    it('should consider trusted by ancestor', () => {
+      windowApi.parent = {};
+      windowApi.location.ancestorOrigins = ['https://google.com'];
+      return new Viewer(windowApi).isTrustedViewer().then(res => {
+        expect(res).to.be.true;
+      });
     });
 
-    it('should trust host as referrer with https', () => {
-      test('https://google.com', true);
+    it('should consider non-trusted without ancestor', () => {
+      windowApi.parent = {};
+      windowApi.location.ancestorOrigins = [];
+      return new Viewer(windowApi).isTrustedViewer().then(res => {
+        expect(res).to.be.false;
+      });
     });
 
-    it('should not trust host as referrer with http', () => {
-      test('http://google.com', false);
+    it('should consider non-trusted with wrong ancestor', () => {
+      windowApi.parent = {};
+      windowApi.location.ancestorOrigins = ['https://untrusted.com'];
+      return new Viewer(windowApi).isTrustedViewer().then(res => {
+        expect(res).to.be.false;
+      });
+    });
+
+    it('should decide trusted on connection with origin', () => {
+      windowApi.parent = {};
+      windowApi.location.ancestorOrigins = null;
+      const viewer = new Viewer(windowApi);
+      viewer.setMessageDeliverer(() => {}, 'https://google.com');
+      return viewer.isTrustedViewer().then(res => {
+        expect(res).to.be.true;
+      });
+    });
+
+    it('should NOT allow channel without origin', () => {
+      windowApi.parent = {};
+      windowApi.location.ancestorOrigins = null;
+      const viewer = new Viewer(windowApi);
+      expect(() => {
+        viewer.setMessageDeliverer(() => {});
+      }).to.throw(/message channel must have an origin/);
+    });
+
+    it('should decide non-trusted on connection with wrong origin', () => {
+      windowApi.parent = {};
+      windowApi.location.ancestorOrigins = null;
+      const viewer = new Viewer(windowApi);
+      viewer.setMessageDeliverer(() => {}, 'https://untrusted.com');
+      return viewer.isTrustedViewer().then(res => {
+        expect(res).to.be.false;
+      });
+    });
+
+    it('should give precedence to ancestor', () => {
+      windowApi.parent = {};
+      windowApi.location.ancestorOrigins = ['https://google.com'];
+      const viewer = new Viewer(windowApi);
+      viewer.setMessageDeliverer(() => {}, 'https://untrusted.com');
+      return viewer.isTrustedViewer().then(res => {
+        expect(res).to.be.true;
+      });
     });
 
     it('should trust domain variations', () => {
       test('https://google.com', true);
       test('https://www.google.com', true);
       test('https://news.google.com', true);
+      test('https://google.co', true);
+      test('https://www.google.co', true);
+      test('https://news.google.co', true);
       test('https://www.google.co.uk', true);
       test('https://www.google.co.au', true);
       test('https://news.google.co.uk', true);
@@ -277,6 +631,11 @@ describe('Viewer', () => {
       test('https://google.de', true);
       test('https://www.google.de', true);
       test('https://news.google.de', true);
+      test('https://abc.www.google.com', true);
+    });
+
+    it('should not trust host as referrer with http', () => {
+      test('http://google.com', false);
     });
 
     it('should NOT trust wrong or non-whitelisted domain variations', () => {
@@ -285,72 +644,316 @@ describe('Viewer', () => {
       test('https://www.google.other.com', false);
       test('https://withgoogle.com', false);
       test('https://acme.com', false);
+      test('https://google', false);
+      test('https://www.google', false);
     });
   });
 
   describe('referrer', () => {
-    it('should return overridden trusted viewer referrer by ancestor', () => {
+
+    it('should return document referrer if not overriden', () => {
+      windowApi.parent = {};
+      windowApi.location.hash = '#';
+      windowApi.document.referrer = 'https://acme.org/docref';
+      const viewer = new Viewer(windowApi);
+      expect(viewer.getUnconfirmedReferrerUrl())
+          .to.equal('https://acme.org/docref');
+      return viewer.getReferrerUrl().then(referrerUrl => {
+        expect(referrerUrl).to.equal('https://acme.org/docref');
+        expect(errorStub.callCount).to.equal(0);
+      });
+    });
+
+    it('should NOT allow override if not iframed', () => {
+      windowApi.parent = windowApi;
+      windowApi.location.hash = '#referrer=' +
+          encodeURIComponent('https://acme.org/viewer');
+      windowApi.document.referrer = 'https://acme.org/docref';
+      const viewer = new Viewer(windowApi);
+      expect(viewer.getUnconfirmedReferrerUrl())
+          .to.equal('https://acme.org/docref');
+      return viewer.getReferrerUrl().then(referrerUrl => {
+        expect(referrerUrl).to.equal('https://acme.org/docref');
+        expect(errorStub.callCount).to.equal(0);
+      });
+    });
+
+    it('should NOT allow override if not trusted', () => {
       windowApi.parent = {};
       windowApi.location.hash = '#referrer=' +
           encodeURIComponent('https://acme.org/viewer');
-      windowApi.location.ancestorOrigins = [
-        'https://google.com'
-      ];
-      expect(new Viewer(windowApi).getReferrerUrl())
+      windowApi.document.referrer = 'https://acme.org/docref';
+      windowApi.location.ancestorOrigins = ['https://untrusted.com'];
+      const viewer = new Viewer(windowApi);
+      expect(viewer.getUnconfirmedReferrerUrl())
+          .to.equal('https://acme.org/docref');
+      return viewer.getReferrerUrl().then(referrerUrl => {
+        expect(referrerUrl).to.equal('https://acme.org/docref');
+        expect(errorStub.callCount).to.equal(0);
+      });
+    });
+
+    it('should NOT allow override if ancestor is empty', () => {
+      windowApi.parent = {};
+      windowApi.location.hash = '#referrer=' +
+          encodeURIComponent('https://acme.org/viewer');
+      windowApi.document.referrer = 'https://acme.org/docref';
+      windowApi.location.ancestorOrigins = [];
+      const viewer = new Viewer(windowApi);
+      expect(viewer.getUnconfirmedReferrerUrl())
+          .to.equal('https://acme.org/docref');
+      return viewer.getReferrerUrl().then(referrerUrl => {
+        expect(referrerUrl).to.equal('https://acme.org/docref');
+        expect(errorStub.callCount).to.equal(0);
+      });
+    });
+
+    it('should allow partial override if async not trusted', () => {
+      windowApi.parent = {};
+      windowApi.location.hash = '#referrer=' +
+          encodeURIComponent('https://acme.org/viewer');
+      windowApi.document.referrer = 'https://acme.org/docref';
+      const viewer = new Viewer(windowApi);
+      // Unconfirmed referrer is overriden, but not confirmed yet.
+      expect(viewer.getUnconfirmedReferrerUrl())
           .to.equal('https://acme.org/viewer');
+      viewer.setMessageDeliverer(() => {}, 'https://untrusted.com');
+      return viewer.getReferrerUrl().then(referrerUrl => {
+        expect(referrerUrl).to.equal('https://acme.org/docref');
+        // Unconfirmed referrer is reset. Async error is thrown.
+        expect(viewer.getUnconfirmedReferrerUrl())
+            .to.equal('https://acme.org/docref');
+        expect(errorStub.callCount).to.equal(1);
+        expect(errorStub.calledWith('Viewer',
+            sinon.match(arg => {
+              return !!arg.match(/Untrusted viewer referrer override/);
+            }))).to.be.true;
+      });
     });
 
-    it('should return overridden trusted viewer referrer by referrer', () => {
+    it('should allow full override if async trusted', () => {
       windowApi.parent = {};
       windowApi.location.hash = '#referrer=' +
           encodeURIComponent('https://acme.org/viewer');
-      windowApi.document.referrer = 'https://google.com/';
-      expect(new Viewer(windowApi).getReferrerUrl())
+      windowApi.document.referrer = 'https://acme.org/docref';
+      const viewer = new Viewer(windowApi);
+      // Unconfirmed referrer is overriden and will be confirmed next.
+      expect(viewer.getUnconfirmedReferrerUrl())
           .to.equal('https://acme.org/viewer');
+      viewer.setMessageDeliverer(() => {}, 'https://google.com');
+      return viewer.getReferrerUrl().then(referrerUrl => {
+        expect(referrerUrl).to.equal('https://acme.org/viewer');
+        // Unconfirmed is confirmed and kept.
+        expect(viewer.getUnconfirmedReferrerUrl())
+            .to.equal('https://acme.org/viewer');
+        expect(errorStub.callCount).to.equal(0);
+      });
     });
 
-    it('should return document referrer if no viewer referrer', () => {
+    it('should allow override if iframed and trusted', () => {
       windowApi.parent = {};
-      windowApi.location.hash = '#';
-      windowApi.document.referrer = 'https://acme.org/docref';
-      expect(new Viewer(windowApi).getReferrerUrl())
-          .to.equal('https://acme.org/docref');
-    });
-
-    it('should return document referrer if not embedded', () => {
-      windowApi.parent = windowApi;  // Top window.
-      windowApi.document.referrer = 'https://acme.org/docref';
       windowApi.location.hash = '#referrer=' +
           encodeURIComponent('https://acme.org/viewer');
-      expect(new Viewer(windowApi).getReferrerUrl())
-          .to.equal('https://acme.org/docref');
-    });
-
-    it('should return doc referrer if not embedded by trusted viewer', () => {
-      windowApi.parent = {};
       windowApi.document.referrer = 'https://acme.org/docref';
-      windowApi.location.hash = '#referrer=' +
+      windowApi.location.ancestorOrigins = ['https://google.com'];
+      const viewer = new Viewer(windowApi);
+      expect(viewer.getUnconfirmedReferrerUrl())
+          .to.equal('https://acme.org/viewer');
+      return viewer.getReferrerUrl().then(referrerUrl => {
+        expect(referrerUrl).to.equal('https://acme.org/viewer');
+        expect(errorStub.callCount).to.equal(0);
+      });
+    });
+
+    it('should allow override to empty if iframed and trusted', () => {
+      windowApi.parent = {};
+      windowApi.location.hash = '#referrer=';
+      windowApi.document.referrer = 'https://acme.org/docref';
+      windowApi.location.ancestorOrigins = ['https://google.com'];
+      const viewer = new Viewer(windowApi);
+      expect(viewer.getUnconfirmedReferrerUrl())
+          .to.equal('');
+      return viewer.getReferrerUrl().then(referrerUrl => {
+        expect(referrerUrl).to.equal('');
+        expect(errorStub.callCount).to.equal(0);
+      });
+    });
+  });
+
+  describe('viewerUrl', () => {
+
+    it('should initially always return current location', () => {
+      windowApi.location.href = 'https://acme.org/doc1#hash';
+      const viewer = new Viewer(windowApi);
+      expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
+    });
+
+    it('should always return current location for top-level window', () => {
+      windowApi.parent = windowApi;
+      windowApi.location.href = 'https://acme.org/doc1#hash';
+      const viewer = new Viewer(windowApi);
+      expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
+      return viewer.getViewerUrl().then(viewerUrl => {
+        expect(viewerUrl).to.equal('https://acme.org/doc1');
+        expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
+        expect(errorStub.callCount).to.equal(0);
+      });
+    });
+
+    it('should NOT allow override if not iframed', () => {
+      windowApi.parent = windowApi;
+      windowApi.location.href = 'https://acme.org/doc1';
+      windowApi.location.hash = '#viewerUrl=' +
           encodeURIComponent('https://acme.org/viewer');
-      windowApi.location.ancestorOrigins = ['https://acme.org/viewer'];
-      expect(new Viewer(windowApi).getReferrerUrl())
-          .to.equal('https://acme.org/docref');
+      const viewer = new Viewer(windowApi);
+      expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
+      return viewer.getViewerUrl().then(viewerUrl => {
+        expect(viewerUrl).to.equal('https://acme.org/doc1');
+        expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
+        expect(errorStub.callCount).to.equal(0);
+      });
     });
 
-    it('should return ancestor origin no viewer/doc referrer', () => {
+    it('should NOT allow override if not trusted', () => {
       windowApi.parent = {};
-      windowApi.location.hash = '#';
-      windowApi.location.ancestorOrigins = [
-        'https://acme.org/ancestor1',
-        'https://acme.org/ancestor2'
-      ];
-      expect(new Viewer(windowApi).getReferrerUrl())
-          .to.equal('https://acme.org/ancestor1');
+      windowApi.location.href = 'https://acme.org/doc1';
+      windowApi.location.hash = '#viewerUrl=' +
+          encodeURIComponent('https://acme.org/viewer');
+      windowApi.location.ancestorOrigins = ['https://untrusted.com'];
+      const viewer = new Viewer(windowApi);
+      expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
+      return viewer.getViewerUrl().then(viewerUrl => {
+        expect(viewerUrl).to.equal('https://acme.org/doc1');
+        expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
+        expect(errorStub.callCount).to.equal(1);
+        expect(errorStub.calledWith('Viewer',
+            sinon.match(arg => {
+              return !!arg.match(/Untrusted viewer url override/);
+            }))).to.be.true;
+      });
     });
 
-    it('should return empty string if nothing matches', () => {
+    it('should NOT allow override if ancestor is empty', () => {
       windowApi.parent = {};
-      windowApi.location.hash = '#';
-      expect(new Viewer(windowApi).getReferrerUrl()).to.be.equal('');
+      windowApi.location.href = 'https://acme.org/doc1';
+      windowApi.location.hash = '#viewerUrl=' +
+          encodeURIComponent('https://acme.org/viewer');
+      windowApi.location.ancestorOrigins = [];
+      const viewer = new Viewer(windowApi);
+      expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
+      return viewer.getViewerUrl().then(viewerUrl => {
+        expect(viewerUrl).to.equal('https://acme.org/doc1');
+        expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
+        expect(errorStub.callCount).to.equal(1);
+        expect(errorStub.calledWith('Viewer',
+            sinon.match(arg => {
+              return !!arg.match(/Untrusted viewer url override/);
+            }))).to.be.true;
+      });
+    });
+
+    it('should allow partial override if async not trusted', () => {
+      windowApi.parent = {};
+      windowApi.location.href = 'https://acme.org/doc1';
+      windowApi.location.hash = '#viewerUrl=' +
+          encodeURIComponent('https://acme.org/viewer');
+      const viewer = new Viewer(windowApi);
+      expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
+      viewer.setMessageDeliverer(() => {}, 'https://untrusted.com');
+      return viewer.getViewerUrl().then(viewerUrl => {
+        expect(viewerUrl).to.equal('https://acme.org/doc1');
+        expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
+        expect(errorStub.callCount).to.equal(1);
+        expect(errorStub.calledWith('Viewer',
+            sinon.match(arg => {
+              return !!arg.match(/Untrusted viewer url override/);
+            }))).to.be.true;
+      });
+    });
+
+    it('should allow full override if async trusted', () => {
+      windowApi.parent = {};
+      windowApi.location.href = 'https://acme.org/doc1';
+      windowApi.location.hash = '#viewerUrl=' +
+          encodeURIComponent('https://acme.org/viewer');
+      const viewer = new Viewer(windowApi);
+      expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
+      viewer.setMessageDeliverer(() => {}, 'https://google.com');
+      return viewer.getViewerUrl().then(viewerUrl => {
+        expect(viewerUrl).to.equal('https://acme.org/viewer');
+        expect(viewer.getResolvedViewerUrl())
+            .to.equal('https://acme.org/viewer');
+        expect(errorStub.callCount).to.equal(0);
+      });
+    });
+
+    it('should allow override if iframed and trusted', () => {
+      windowApi.parent = {};
+      windowApi.location.href = 'https://acme.org/doc1';
+      windowApi.location.hash = '#viewerUrl=' +
+          encodeURIComponent('https://acme.org/viewer');
+      windowApi.location.ancestorOrigins = ['https://google.com'];
+      const viewer = new Viewer(windowApi);
+      expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
+      return viewer.getViewerUrl().then(viewerUrl => {
+        expect(viewerUrl).to.equal('https://acme.org/viewer');
+        expect(viewer.getResolvedViewerUrl())
+            .to.equal('https://acme.org/viewer');
+        expect(errorStub.callCount).to.equal(0);
+      });
+    });
+
+    it('should ignore override to empty if iframed and trusted', () => {
+      windowApi.parent = {};
+      windowApi.location.href = 'https://acme.org/doc1';
+      windowApi.location.hash = '#viewerUrl=';
+      windowApi.location.ancestorOrigins = ['https://google.com'];
+      const viewer = new Viewer(windowApi);
+      expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
+      return viewer.getViewerUrl().then(viewerUrl => {
+        expect(viewerUrl).to.equal('https://acme.org/doc1');
+        expect(viewer.getResolvedViewerUrl()).to.equal('https://acme.org/doc1');
+        expect(errorStub.callCount).to.equal(0);
+      });
+    });
+  });
+
+  describe('viewerOrigin', () => {
+
+    it('should return empty string if origin is not known', () => {
+      const viewer = new Viewer(windowApi);
+      return viewer.getViewerOrigin().then(viewerOrigin => {
+        expect(viewerOrigin).to.equal('');
+      });
+    });
+
+    it('should return ancestor origin if known', () => {
+      windowApi.parent = {};
+      windowApi.location.ancestorOrigins = ['https://google.com'];
+      const viewer = new Viewer(windowApi);
+      return viewer.getViewerOrigin().then(viewerOrigin => {
+        expect(viewerOrigin).to.equal('https://google.com');
+      });
+    });
+
+    it('should return viewer origin if set via handshake', () => {
+      windowApi.parent = {};
+      const viewer = new Viewer(windowApi);
+      const result = viewer.getViewerOrigin().then(viewerOrigin => {
+        expect(viewerOrigin).to.equal('https://foobar.com');
+      });
+      viewer.setMessageDeliverer(() => {}, 'https://foobar.com');
+      return result;
+    });
+
+    it('should return empty string if handshake does not happen', () => {
+      windowApi.parent = {};
+      const viewer = new Viewer(windowApi);
+      const result = viewer.getViewerOrigin().then(viewerOrigin => {
+        expect(viewerOrigin).to.equal('');
+      });
+      clock.tick(1010);
+      return result;
     });
   });
 });

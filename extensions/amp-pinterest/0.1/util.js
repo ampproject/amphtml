@@ -93,5 +93,5 @@ export const Util = {
   guid: guid,
   log: log,
   make: make,
-  set: set
+  set: set,
 };

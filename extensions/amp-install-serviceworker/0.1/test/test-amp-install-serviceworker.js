@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-require('../../../../build/all/v0/amp-install-serviceworker-0.1.max');
+require('../amp-install-serviceworker');
 import {adopt} from '../../../../src/runtime';
 
 adopt(window);
@@ -30,7 +30,7 @@ describe('amp-install-serviceworker', () => {
     implementation.getWin = () => {
       return {
         location: {
-          href: 'https://example.com/some/path'
+          href: 'https://example.com/some/path',
         },
         navigator: {
           serviceWorker: {
@@ -38,9 +38,9 @@ describe('amp-install-serviceworker', () => {
               expect(calledSrc).to.be.undefined;
               calledSrc = src;
               return p;
-            }
-          }
-        }
+            },
+          },
+        },
       };
     };
     implementation.buildCallback();
@@ -55,10 +55,10 @@ describe('amp-install-serviceworker', () => {
     implementation.getWin = () => {
       return {
         location: {
-          href: 'https://example.com/some/path'
+          href: 'https://example.com/some/path',
         },
         navigator: {
-        }
+        },
       };
     };
     implementation.buildCallback();
@@ -74,16 +74,16 @@ describe('amp-install-serviceworker', () => {
     implementation.getWin = () => {
       return {
         location: {
-          href: 'https://example.com/some/path'
+          href: 'https://example.com/some/path',
         },
         navigator: {
           serviceWorker: {
             register: src => {
               calledSrc = src;
               return p;
-            }
-          }
-        }
+            },
+          },
+        },
       };
     };
     implementation.buildCallback();
@@ -100,16 +100,16 @@ describe('amp-install-serviceworker', () => {
     implementation.getWin = () => {
       return {
         location: {
-          href: 'https://cdn.ampproject.org/some/path'
+          href: 'https://cdn.ampproject.org/some/path',
         },
         navigator: {
           serviceWorker: {
             register: src => {
               calledSrc = src;
               return p;
-            }
-          }
-        }
+            },
+          },
+        },
       };
     };
     implementation.buildCallback();

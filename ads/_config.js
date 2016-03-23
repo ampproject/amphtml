@@ -22,10 +22,23 @@
  * @const {!Object<string, (string|!Array<string>)>}
  */
 export const adPrefetch = {
-  doubleclick: 'https://www.googletagservices.com/tag/js/gpt.js',
+  doubleclick: [
+    'https://www.googletagservices.com/tag/js/gpt.js',
+    'https://securepubads.g.doubleclick.net/static/glade.js',
+  ],
   a9: 'https://c.amazon-adsystem.com/aax2/assoc.js',
+  adblade: 'https://web.adblade.com/js/ads/async/show.js',
   adsense: 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js',
+  criteo: 'https://static.criteo.net/js/ld/publishertag.js',
   dotandads: 'https://amp.ad.dotandad.com/dotandadsAmp.js',
+  industrybrains: 'https://web.industrybrains.com/js/ads/async/show.js',
+  mediaimpact: 'https://ec-ns.sascdn.com/diff/251/divscripte/amp.js',
+  openx: 'https://www.googletagservices.com/tag/js/gpt.js',
+  smartadserver: 'https://ec-ns.sascdn.com/diff/js/smart.js',
+  yieldmo: 'https://static.yieldmo.com/ym.amp1.js',
+  revcontent: 'https://labs-cdn.revcontent.com/build/amphtml/revcontent.amp.min.js',
+  teads: 'https://cdn.teads.tv/media/format/v3/teads-format.min.js',
+  imobile: 'https://spamp.i-mobile.co.jp/script/amp.js',
 };
 
 /**
@@ -36,15 +49,66 @@ export const adPrefetch = {
  * @const {!Object<string, (string|!Array<string>)>}
  */
 export const adPreconnect = {
+  adblade: [
+    'https://staticd.cdn.adblade.com',
+    'https://static.adblade.com',
+  ],
+  industrybrains: [
+    'https://staticd.cdn.industrybrains.com',
+    'https://static.industrybrains.com',
+  ],
+  adform: 'https://track.adform.net',
   adreactor: 'https://adserver.adreactor.com',
   adsense: 'https://googleads.g.doubleclick.net',
-  taboola: 'https://cdn.taboola.com',
+  taboola: [
+    'https://cdn.taboola.com',
+    'https://trc.taboola.com',
+    'https://images.taboola.com',
+  ],
+  teads: [
+    'https://cdn.teads.tv',
+    'https://cdn2.teads.tv',
+    'https://a.teads.tv',
+    'https://t.teads.tv',
+  ],
+  criteo: [
+    'https://cas.criteo.com',
+  ],
   doubleclick: [
     'https://partner.googleadservices.com',
     'https://securepubads.g.doubleclick.net',
     'https://tpc.googlesyndication.com',
   ],
   dotandads: 'https://bal.ad.dotandad.com',
+  openx: [
+    'https://partner.googleadservices.com',
+    'https://securepubads.g.doubleclick.net',
+    'https://tpc.googlesyndication.com',
+  ],
+  yieldmo: [
+    'https://static.yieldmo.com',
+    'https://s.yieldmo.com',
+    'https://ads.yieldmo.com',
+  ],
+  triplelift: [
+    'https://ib.3lift.com',
+    'https://dynamic.3lift.com',
+    'https://img.3lift.com',
+    'https://eb2.3lift.com',
+  ],
+  revcontent: [
+    'https://trends.revcontent.com',
+    'https://cdn.revcontent.com',
+    'https://img.revcontent.com',
+  ],
+  rubicon: [
+    'https://ads.rubiconproject.com',
+    'https://optimized-by.rubiconproject.com',
+  ],
+  imobile: 'https://spad.i-mobile.co.jp',
+  webediads: [
+    'https://eu1.wbdds.com',
+  ],
 };
 
 /**

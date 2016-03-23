@@ -16,8 +16,9 @@
 
 import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
-import {log} from '../../../src/log';
-import {parseUrl, removeFragment} from '../../../src/url';
+import {dev} from '../../../src/log';
+import {parseUrl} from '../../../src/url';
+import {viewerFor} from '../../../src/viewer';
 
 /** @const */
 const TAG = 'AmpAccessLogin';
@@ -38,20 +39,72 @@ const RETURN_URL_REGEX = new RegExp('RETURN_URL');
  * @return {!Promise<string>}
  */
 export function openLoginDialog(win, urlOrPromise) {
-  return new LoginDialog(win, urlOrPromise).open();
+  const viewer = viewerFor(win);
+  const overrideDialog = parseInt(viewer.getParam('dialog'), 10);
+  if (overrideDialog) {
+    return new ViewerLoginDialog(viewer, urlOrPromise).open();
+  }
+  return new WebLoginDialog(win, viewer, urlOrPromise).open();
 }
 
 
-class LoginDialog {
+/**
+ * The implementation of the Login Dialog delegated via Viewer.
+ */
+class ViewerLoginDialog {
   /**
-   * @param {!Window} win
+   * @param {!Viewer} viewer
    * @param {string|!Promise<string>} urlOrPromise
    */
-  constructor(win, urlOrPromise) {
+  constructor(viewer, urlOrPromise) {
+    /** @const {!Viewer} */
+    this.viewer = viewer;
+
+    /** @const {string|!Promise<string>} */
+    this.urlOrPromise = urlOrPromise;
+  }
+
+  /**
+   * Opens the dialog. Returns the promise that will yield with the dialog's
+   * result or will be rejected if dialog fails. The dialog's result is
+   * typically a hash string from the return URL.
+   * @return {!Promise<string>}
+   */
+  open() {
+    let urlPromise;
+    if (typeof this.urlOrPromise == 'string') {
+      urlPromise = Promise.resolve(this.urlOrPromise);
+    } else {
+      urlPromise = this.urlOrPromise;
+    }
+    return urlPromise.then(url => {
+      const loginUrl = buildLoginUrl(url, 'RETURN_URL');
+      dev.fine(TAG, 'Open viewer dialog: ', loginUrl);
+      return this.viewer.sendMessage('openDialog', {
+        'url': loginUrl,
+      }, true);
+    });
+  }
+}
+
+
+/**
+ * Web-based implementation of the Login Dialog.
+ */
+class WebLoginDialog {
+  /**
+   * @param {!Window} win
+   * @param {!Viewer} viewer
+   * @param {string|!Promise<string>} urlOrPromise
+   */
+  constructor(win, viewer, urlOrPromise) {
     /** @const {!Window} */
     this.win = win;
 
-    /** @const {string} */
+    /** @const {!Viewer} */
+    this.viewer = viewer;
+
+    /** @const {string|!Promise<string>} */
     this.urlOrPromise = urlOrPromise;
 
     /** @private {?function(string)} */
@@ -128,19 +181,19 @@ class LoginDialog {
 
     let dialogReadyPromise = null;
     if (typeof this.urlOrPromise == 'string') {
-      const loginUrl = this.buildLoginUrl_(this.urlOrPromise, returnUrl);
-      log.fine(TAG, 'Open dialog: ', loginUrl, returnUrl, w, h, x, y);
+      const loginUrl = buildLoginUrl(this.urlOrPromise, returnUrl);
+      dev.fine(TAG, 'Open dialog: ', loginUrl, returnUrl, w, h, x, y);
       this.dialog_ = this.win.open(loginUrl, '_blank', options);
       if (this.dialog_) {
         dialogReadyPromise = Promise.resolve();
       }
     } else {
-      log.fine(TAG, 'Open dialog: ', 'about:blank', returnUrl, w, h, x, y);
+      dev.fine(TAG, 'Open dialog: ', 'about:blank', returnUrl, w, h, x, y);
       this.dialog_ = this.win.open('', '_blank', options);
       if (this.dialog_) {
         dialogReadyPromise = this.urlOrPromise.then(url => {
-          const loginUrl = this.buildLoginUrl_(url, returnUrl);
-          log.fine(TAG, 'Set dialog url: ', loginUrl);
+          const loginUrl = buildLoginUrl(url, returnUrl);
+          dev.fine(TAG, 'Set dialog url: ', loginUrl);
           this.dialog_.location.replace(loginUrl);
         }, error => {
           throw new Error('failed to resolve url: ' + error);
@@ -179,19 +232,19 @@ class LoginDialog {
     }, 500);
 
     this.messageUnlisten_ = listen(this.win, 'message', e => {
-      log.fine(TAG, 'MESSAGE:', e);
+      dev.fine(TAG, 'MESSAGE:', e);
       if (e.origin != returnOrigin) {
         return;
       }
       if (!e.data || e.data.sentinel != 'amp') {
         return;
       }
-      log.fine(TAG, 'Received message from dialog: ', e.data);
+      dev.fine(TAG, 'Received message from dialog: ', e.data);
       if (e.data.type == 'result') {
         if (this.dialog_) {
           this.dialog_./*OK*/postMessage({
             sentinel: 'amp',
-            type: 'result-ack'
+            type: 'result-ack',
           }, returnOrigin);
         }
         this.loginDone_(e.data.result);
@@ -208,7 +261,7 @@ class LoginDialog {
     if (!this.resolve_) {
       return;
     }
-    log.fine(TAG, 'Login done: ', result, opt_error);
+    dev.fine(TAG, 'Login done: ', result, opt_error);
     if (opt_error) {
       this.reject_(opt_error);
     } else {
@@ -218,29 +271,11 @@ class LoginDialog {
   }
 
   /**
-   * @param {string} url
-   * @param {string} returnUrl
-   * @return {string}
-   * @private
-   */
-  buildLoginUrl_(url, returnUrl) {
-    // RETURN_URL has to arrive here unreplaced by UrlReplacements for two
-    // reasons: (1) sync replacement and (2) if we need to propagate this
-    // replacement to the viewer.
-    if (RETURN_URL_REGEX.test(url)) {
-      return url.replace(RETURN_URL_REGEX, encodeURIComponent(returnUrl));
-    }
-    return url +
-        (url.indexOf('?') == -1 ? '?' : '&') +
-        'return=' + encodeURIComponent(returnUrl);
-  }
-
-  /**
    * @return {string}
    * @private
    */
   getReturnUrl_() {
-    const currentUrl = removeFragment(this.win.location.href);
+    const currentUrl = this.viewer.getResolvedViewerUrl();
     let returnUrl;
     if (getMode().localDev) {
       const loc = this.win.location;
@@ -251,4 +286,23 @@ class LoginDialog {
     }
     return returnUrl + '?url=' + encodeURIComponent(currentUrl);
   }
+}
+
+
+/**
+ * @param {string} url
+ * @param {string} returnUrl
+ * @return {string}
+ * @private
+ */
+function buildLoginUrl(url, returnUrl) {
+  // RETURN_URL has to arrive here unreplaced by UrlReplacements for two
+  // reasons: (1) sync replacement and (2) if we need to propagate this
+  // replacement to the viewer.
+  if (RETURN_URL_REGEX.test(url)) {
+    return url.replace(RETURN_URL_REGEX, encodeURIComponent(returnUrl));
+  }
+  return url +
+      (url.indexOf('?') == -1 ? '?' : '&') +
+      'return=' + encodeURIComponent(returnUrl);
 }

@@ -26,14 +26,22 @@ class AmpTwitter extends AMP.BaseElement {
   preconnectCallback(onLayout) {
     // This domain serves the actual tweets as JSONP.
     this.preconnect.url('https://syndication.twitter.com', onLayout);
+    // All images
+    this.preconnect.url('https://pbs.twimg.com', onLayout);
     // Hosts the script that renders tweets.
-    this.preconnect.prefetch('https://platform.twitter.com/widgets.js');
+    this.preconnect.prefetch(
+        'https://platform.twitter.com/widgets.js', 'script');
     prefetchBootstrap(this.getWin());
   }
 
   /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
+  }
+
+  /** @override */
+  firstLayoutCompleted() {
+    // Do not hide placeholder
   }
 
   /** @override */
@@ -45,6 +53,9 @@ class AmpTwitter extends AMP.BaseElement {
     this.element.appendChild(iframe);
     // Triggered by context.updateDimensions() inside the iframe.
     listen(iframe, 'embed-size', data => {
+      // We only get the message if and when there is a tweet to display,
+      // so hide the placeholder.
+      this.togglePlaceholder(false);
       iframe.height = data.height;
       iframe.width = data.width;
       const amp = iframe.parentElement;

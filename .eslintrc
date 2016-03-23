@@ -16,6 +16,7 @@
     "array-bracket-spacing": [2, "never"],
     "arrow-parens": [2, "as-needed"],
     "arrow-spacing": 2,
+    "comma-dangle": [2, "always-multiline"],
     "computed-property-spacing": [2, "never"],
     "curly": 2,
     "dot-location": [2, "property"],
@@ -61,6 +62,7 @@
       "arraysInObjects": false
     }],
     "prefer-const": 2,
+    "quotes": [2, "single", "avoid-escape"],
     "radix": 2,
     "semi": 2,
     "space-after-keywords": 2,

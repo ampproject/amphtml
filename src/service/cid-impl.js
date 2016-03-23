@@ -28,8 +28,9 @@ import {getService} from '../service';
 import {getSourceOrigin, isProxyOrigin, parseUrl} from '../url';
 import {timer} from '../timer';
 import {viewerFor} from '../viewer';
-import {sha384Base64} from
-    '../../third_party/closure-library/sha384-generated';
+import {
+  sha384Base64,
+} from '../../third_party/closure-library/sha384-generated';
 
 
 const ONE_DAY_MILLIS = 24 * 3600 * 1000;
@@ -138,6 +139,19 @@ function getExternalCid(cid, getCidStruct, persistenceConsent) {
 }
 
 /**
+ * Sets a new CID cookie for expire 1 year from now.
+ * @param {!Window} win
+ * @param {string} scope
+ * @param {string} cookie
+ */
+function setCidCookie(win, scope, cookie) {
+  const expiration = timer.now() + BASE_CID_MAX_AGE_MILLIS;
+  setCookie(win, scope, cookie, expiration, {
+    highestAvailableDomain: true,
+  });
+}
+
+/**
  * If cookie exists it's returned immediately. Otherwise, if instructed, the
  * new cookie is created.
  *
@@ -148,8 +162,18 @@ function getExternalCid(cid, getCidStruct, persistenceConsent) {
  */
 function getOrCreateCookie(cid, getCidStruct, persistenceConsent) {
   const win = cid.win;
-  const existingCookie = getCookie(win, getCidStruct.scope);
-  if (existingCookie || !getCidStruct.createCookieIfNotPresent) {
+  const scope = getCidStruct.scope;
+  const existingCookie = getCookie(win, scope);
+
+  if (!existingCookie && !getCidStruct.createCookieIfNotPresent) {
+    return Promise.resolve(null);
+  }
+
+  if (existingCookie) {
+    // If we created the cookie, update it's expiration time.
+    if (/^amp-/.test(existingCookie)) {
+      setCidCookie(win, scope, existingCookie);
+    }
     return Promise.resolve(existingCookie);
   }
 
@@ -161,12 +185,9 @@ function getOrCreateCookie(cid, getCidStruct, persistenceConsent) {
   persistenceConsent.then(() => {
     // The initial CID generation is inherently racy. First one that gets
     // consent wins.
-    const relookup = getCookie(win, getCidStruct.scope);
+    const relookup = getCookie(win, scope);
     if (!relookup) {
-      setCookie(win, getCidStruct.scope, newCookie,
-          timer.now() + BASE_CID_MAX_AGE_MILLIS, {
-            highestAvailableDomain: true,
-          });
+      setCidCookie(win, scope, newCookie);
     }
   });
   return Promise.resolve(newCookie);
@@ -215,7 +236,12 @@ function getBaseCid(cid, persistenceConsent) {
   // Note, that we never try to persist to localStorage in this case.
   const viewer = viewerFor(win);
   if (viewer.isEmbedded()) {
-    return viewer.getBaseCid();
+    return viewer.getBaseCid().then(cid => {
+      if (!cid) {
+        throw new Error('No CID');
+      }
+      return cid;
+    });
   }
 
   // We need to make a new one.
@@ -241,15 +267,16 @@ function getBaseCid(cid, persistenceConsent) {
  * @param {string} cidString Actual cid string to store.
  */
 function store(win, cidString) {
-  const item = {};
-  item['time'] = timer.now();
-  item['cid'] = cidString;
-  const data = JSON.stringify(item);
   try {
+    const item = {
+      time: timer.now(),
+      cid: cidString,
+    };
+    const data = JSON.stringify(item);
     win.localStorage.setItem('amp-cid', data);
   } catch (ignore) {
     // Setting localStorage may fail. In practice we don't expect that to
-    // happen a lot (since we don't go anywhere near the quote, but
+    // happen a lot (since we don't go anywhere near the quota, but
     // in particular in Safari private browsing mode it always fails.
     // In that case we just don't store anything, which is just fine.
   }
@@ -262,16 +289,16 @@ function store(win, cidString) {
  * @return {!BaseCidInfoDef|undefined}
  */
 function read(win) {
-  let val;
+  let data;
   try {
-    val = win.localStorage.getItem('amp-cid');
+    data = win.localStorage.getItem('amp-cid');
   } catch (ignore) {
     // If reading from localStorage fails, we assume it is empty.
   }
-  if (!val) {
+  if (!data) {
     return undefined;
   }
-  const item = JSON.parse(val);
+  const item = JSON.parse(data);
   return {
     time: item['time'],
     cid: item['cid'],

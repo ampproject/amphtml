@@ -57,6 +57,7 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
       'amp:stubbed': 0,
       'amp:load:start': 0
     };
+    const messages = [];
     let html = __html__[fixture];
     if (!html) {
       throw new Error('Cannot find fixture: ' + fixture);
@@ -74,6 +75,11 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
       if (opt_beforeLoad) {
         opt_beforeLoad(win);
       }
+      win.addEventListener('message', (event) => {
+        if (event.data && /^amp/.test(event.data.sentinel)) {
+          messages.push(event.data);
+        }
+      })
       // Function that returns a promise for when the given event fired at
       // least count times.
       let awaitEvent = (eventName, count) => {
@@ -99,9 +105,9 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
         });
       }
       win.onerror = function(message, file, line, col, error) {
-        throw new Error('Error in frame: ' + message + '\n' +
+        reject(new Error('Error in frame: ' + message + '\n' +
             file + ':' + line + '\n' +
-            (error ? error.stack : 'no stack'));
+            (error ? error.stack : 'no stack')));
       };
       let errors = [];
       win.console.error = function() {
@@ -123,7 +129,8 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
           doc: win.document,
           iframe: iframe,
           awaitEvent: awaitEvent,
-          errors: errors
+          errors: errors,
+          messages: messages,
         });
       };
     };
@@ -133,11 +140,11 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
     let iframe = document.createElement('iframe');
     iframe.name = 'test_' + fixture + iframeCount++;
     iframe.onerror = function(event) {
-      throw event.error;
+      reject(event.error);
     };
     iframe.height = initialIframeHeight;
     iframe.width = 500;
-    if ('scrdoc' in iframe) {
+    if ('srcdoc' in iframe) {
       iframe.srcdoc = html;
       document.body.appendChild(iframe);
     } else {
@@ -201,7 +208,7 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
             element.build(true);
             if (element.layoutCount_ == 0) {
               if (opt_beforeLayoutCallback) {
-                opt_beforeLayoutCallback();
+                opt_beforeLayoutCallback(element);
               }
               return element.layoutCallback().then(() => {
                 return element;

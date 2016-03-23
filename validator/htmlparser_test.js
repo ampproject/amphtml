@@ -22,32 +22,39 @@
  */
 goog.require('amp.htmlparser.HtmlParser');
 goog.require('amp.htmlparser.HtmlSaxHandler');
+goog.require('amp.htmlparser.HtmlSaxHandlerWithLocation');
 
 goog.provide('amp.htmlparser.HtmlParserTest');
 
 /**
- * @implements {amp.htmlparser.HtmlSaxHandler}
  * @private
  */
-class LoggingHandler {
+class LoggingHandler extends amp.htmlparser.HtmlSaxHandler {
   constructor() {
     this.log = [];
   }
 
+  /** @override */
   startDoc() { this.log.push('startDoc()'); }
 
+  /** @override */
   cdata(text) { this.log.push('cdata("' + text + '")'); }
 
+  /** @override */
   pcdata(text) { this.log.push('pcdata("' + text + '")'); }
 
+  /** @override */
   rcdata(text) { this.log.push('rcdata("' + text + '")'); }
 
+  /** @override */
   endDoc() { this.log.push('endDoc()'); }
 
+  /** @override */
   startTag(tagName, attrs) {
     this.log.push('startTag(' + tagName + ',[' + attrs + '])');
   }
 
+  /** @override */
   endTag(tagName) { this.log.push('endTag(' + tagName + ')'); }
 }
 
@@ -90,7 +97,7 @@ describe('HtmlParser', () => {
     const parser = new amp.htmlparser.HtmlParser();
     parser.parse(handler, '<input type=checkbox checked>');
     expect(handler.log).toEqual([
-      'startDoc()', 'startTag(input,[type,checkbox,checked,checked])',
+      'startDoc()', 'startTag(input,[type,checkbox,checked,])',
       'endDoc()']);
   });
 
@@ -165,50 +172,66 @@ describe('HtmlParser', () => {
     // Note the two double quotes at the end of the tag.
     parser.parse(handler, '<a href="foo.html""></a>');
     expect(handler.log).toEqual([
-        'startDoc()', 'startTag(a,[href,foo.html,","])',
+        'startDoc()', 'startTag(a,[href,foo.html,",])',
         'endTag(a)', 'endDoc()' ]);
   });
 });
 
 /**
- * @implements {amp.htmlparser.HtmlSaxHandlerWithLocation}
  * @private
  */
-class LoggingHandlerWithLocation {
+class LoggingHandlerWithLocation
+extends amp.htmlparser.HtmlSaxHandlerWithLocation {
   constructor() {
     /** @type {amp.htmlparser.DocLocator} */
     this.locator = null;
     /** @type {!Array<!string>} */
     this.log = [];
   }
+
+  /** @override */
   setDocLocator (locator) {
     this.locator = locator;
     this.log = [];
   }
+
+  /** @override */
   startDoc() {
     this.log.push(':' + this.locator.getLine() + ':' + this.locator.getCol() +
         ': startDoc()');
   }
+
+  /** @override */
   cdata(text) {
     this.log.push(':' + this.locator.getLine() + ':' + this.locator.getCol() +
         ': cdata("' + text + '")');
   }
+
+  /** @override */
   pcdata(text) {
     this.log.push(':' + this.locator.getLine() + ':' + this.locator.getCol() +
         ': pcdata("' + text + '")');
   }
+
+  /** @override */
   rcdata(text) {
     this.log.push(':' + this.locator.getLine() + ':' + this.locator.getCol() +
         ': rcdata("' + text + '")');
   }
+
+  /** @override */
   endDoc() {
     this.log.push(':' + this.locator.getLine() + ':' + this.locator.getCol() +
         ': endDoc()');
   }
+
+  /** @override */
   startTag(tagName, attrs) {
     this.log.push(':' + this.locator.getLine() + ':' + this.locator.getCol() +
         ': startTag(' + tagName + ',[' + attrs + '])');
   }
+
+  /** @override */
   endTag(tagName) {
     this.log.push(':' + this.locator.getLine() + ':' + this.locator.getCol() +
         ': endTag(' + tagName + ')');
@@ -339,5 +362,52 @@ describe('HtmlParser with location', () => {
       ':16:6: pcdata("\n")',
       ':17:0: endTag(html)',
       ':17:6: endDoc()']);
+  });
+
+  it('Supports Turkish UTF8 İ character in body', () => {
+    // A Javascript string with this character in it has .length 1, but
+    // when .toLowerCase()'d it becomes length 2, which would throw off
+    // the bookkeeping in htmlparser.js. Hence, amp.htmlparser.toLowerCase
+    // works around the problem.
+    const handler = new LoggingHandlerWithLocation();
+    const parser = new amp.htmlparser.HtmlParser();
+    parser.parse(
+        handler,
+        '<!doctype html>\n' +
+        '<html amp lang="tr">\n' +
+        '<head>\n' +
+        '<meta charset="utf-8">\n' +
+        '<title></title>\n' +
+        '<script async src="https://cdn.ampproject.org/v0.js"></script>\n' +
+        '</head>\n' +
+        '<body>İ</body>\n' +
+        '</html>');
+    expect(handler.log).toEqual([
+      ':1:0: startDoc()',
+      ':1:0: startTag(!doctype,[html,])',
+      ':1:14: pcdata("\n")',
+      ':2:0: startTag(html,[amp,,lang,tr])',
+      ':2:19: pcdata("\n")',
+      ':3:0: startTag(head,[])',
+      ':3:5: pcdata("\n")',
+      ':4:0: startTag(meta,[charset,utf-8])',
+      ':4:21: pcdata("\n")',
+      ':5:0: startTag(title,[])',
+      ':5:0: rcdata("")',
+      ':5:7: endTag(title)',
+      ':5:14: pcdata("\n")',
+      ':6:0: startTag(script,[async,,src,'+
+          'https://cdn.ampproject.org/v0.js])',
+      ':6:0: cdata("")',
+      ':6:53: endTag(script)',
+      ':6:61: pcdata("\n")',
+      ':7:0: endTag(head)',
+      ':7:6: pcdata("\n")',
+      ':8:0: startTag(body,[])',
+      ':8:5: pcdata("İ")',
+      ':8:7: endTag(body)',
+      ':8:13: pcdata("\n")',
+      ':9:0: endTag(html)',
+      ':9:6: endDoc()' ]);
   });
 });

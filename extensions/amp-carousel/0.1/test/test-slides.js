@@ -26,7 +26,7 @@ describe('Slides functional', () => {
   let element;
   let slide0, slide1, slide2;
   let slides;
-  let prepareCallback, switchCallback;
+  let prepareCallback, switchCallback, resetCallback;
 
   function setupElements() {
     element = document.createElement('div');
@@ -54,11 +54,53 @@ describe('Slides functional', () => {
   function setupSpies() {
     slides.prepareSlide_ = prepareCallback = sinon.spy();
     slides.commitSwitch_ = switchCallback = sinon.spy();
+    slides.resetSlide_ = resetCallback = sinon.spy();
   }
 
   function teardownElements() {
     document.body.removeChild(element);
   }
+
+  describe('Slides hint', () => {
+    beforeEach(() => {
+      setupElements();
+      setupSlides();
+      slides.inViewport_ = true;
+      slides.getVsync = function() {
+        return {
+          mutate: function(fn) {
+            fn();
+          },
+        };
+      };
+      slides.deferMutate = function(fn) {
+        fn();
+      };
+    });
+    afterEach(() => {
+      teardownElements();
+    });
+    it('should hint when not in mouse mode', () => {
+      expect(
+          slides.element.classList.contains('-amp-carousel-button-start-hint'))
+              .to.be.false;
+      slides.hintControls();
+      expect(
+          slides.element.classList.contains('-amp-carousel-button-start-hint'))
+              .to.be.true;
+    });
+
+    it('should not hint when in mouse mode', () => {
+      slides.showControls_ = true;
+      expect(
+          slides.element.classList.contains('-amp-carousel-button-start-hint'))
+              .to.be.false;
+      slides.hintControls();
+      expect(
+          slides.element.classList.contains('-amp-carousel-button-start-hint'))
+              .to.be.false;
+    });
+  });
 
   describe('Slides gestures', () => {
 
@@ -161,7 +203,7 @@ describe('Slides functional', () => {
         min: 0,
         max: 1,
         prevTr: prevTr,
-        nextTr: nextTr
+        nextTr: nextTr,
       };
       slides.onSwipe_({deltaX: -32});
       expect(slides.swipeState_.pos).to.equal(0.1);
@@ -184,7 +226,7 @@ describe('Slides functional', () => {
         min: -1,
         max: 1,
         prevTr: prevTr,
-        nextTr: nextTr
+        nextTr: nextTr,
       };
       slides.onSwipe_({deltaX: 32});
       expect(slides.swipeState_.pos).to.equal(-0.1);
@@ -207,7 +249,7 @@ describe('Slides functional', () => {
         min: 0,
         max: 1,
         prevTr: prevTr,
-        nextTr: nextTr
+        nextTr: nextTr,
       };
       slides.onSwipe_({deltaX: 32});
       expect(slides.swipeState_.pos).to.equal(0);
@@ -246,7 +288,7 @@ describe('Slides functional', () => {
         min: 0,
         max: 1,
         prevTr: prevTr,
-        nextTr: nextTr
+        nextTr: nextTr,
       };
       slides.swipeState_ = s;
       const promise = slides.onSwipeEnd_({velocityX: 0});
@@ -259,6 +301,8 @@ describe('Slides functional', () => {
         expect(switchCallback.callCount).to.equal(1);
         expect(switchCallback.firstCall.args[0]).to.equal(slide0);
         expect(switchCallback.firstCall.args[1]).to.equal(slide1);
+        expect(resetCallback.callCount).to.equal(1);
+        expect(resetCallback.firstCall.args[0]).to.equal(2);
       });
     });
 
@@ -277,13 +321,17 @@ describe('Slides functional', () => {
         min: 0,
         max: 0,
         prevTr: prevTr,
-        nextTr: nextTr
+        nextTr: nextTr,
       };
       slides.swipeState_ = s;
       const promise = slides.onSwipeEnd_({velocityX: 0});
       return promise.then(() => {
         expect(slides.currentIndex_).to.equal(0);
         expect(switchCallback.callCount).to.equal(0);
+        expect(resetCallback.callCount).to.equal(3);
+        expect(resetCallback.getCall(0).args[0]).to.equal(0);
+        expect(resetCallback.getCall(1).args[0]).to.equal(2);
+        expect(resetCallback.getCall(2).args[0]).to.equal(1);
       });
     });
 
@@ -301,7 +349,7 @@ describe('Slides functional', () => {
         min: -1,
         max: 1,
         prevTr: prevTr,
-        nextTr: nextTr
+        nextTr: nextTr,
       };
       slides.swipeState_ = s;
       const promise = slides.onSwipeEnd_({velocityX: 0});
@@ -327,7 +375,7 @@ describe('Slides functional', () => {
         min: 0,
         max: 0,
         prevTr: prevTr,
-        nextTr: nextTr
+        nextTr: nextTr,
       };
       slides.swipeState_ = s;
       const promise = slides.onSwipeEnd_({velocityX: 0});
@@ -351,7 +399,7 @@ describe('Slides functional', () => {
         min: -1,
         max: 1,
         prevTr: prevTr,
-        nextTr: nextTr
+        nextTr: nextTr,
       };
       slides.swipeState_ = s;
       const promise = slides.onSwipeEnd_({velocityX: 0});
@@ -359,6 +407,8 @@ describe('Slides functional', () => {
         expect(slides.currentIndex_).to.equal(0);
         expect(switchCallback.firstCall.args[0]).to.equal(slide2);
         expect(switchCallback.firstCall.args[1]).to.equal(slide0);
+        expect(resetCallback.callCount).to.equal(1);
+        expect(resetCallback.firstCall.args[0]).to.equal(1);
       });
     });
 
@@ -375,7 +425,7 @@ describe('Slides functional', () => {
         min: 0,
         max: 1,
         prevTr: prevTr,
-        nextTr: nextTr
+        nextTr: nextTr,
       };
       slides.swipeState_ = s;
       const promise = slides.onSwipeEnd_({velocityX: -0.5});
@@ -388,6 +438,8 @@ describe('Slides functional', () => {
         expect(switchCallback.callCount).to.equal(1);
         expect(switchCallback.firstCall.args[0]).to.equal(slide0);
         expect(switchCallback.firstCall.args[1]).to.equal(slide1);
+        expect(resetCallback.callCount).to.equal(1);
+        expect(resetCallback.firstCall.args[0]).to.equal(2);
       });
     });
 
@@ -404,7 +456,7 @@ describe('Slides functional', () => {
         min: 0,
         max: 1,
         prevTr: prevTr,
-        nextTr: nextTr
+        nextTr: nextTr,
       };
       slides.swipeState_ = s;
       const promise = slides.onSwipeEnd_({velocityX: 0});
@@ -415,6 +467,10 @@ describe('Slides functional', () => {
         expect(nextTr.lastCall.args[0]).to.equal(0);
         expect(prevTr.lastCall.args[0]).to.equal(0);
         expect(switchCallback.callCount).to.equal(0);
+        expect(resetCallback.callCount).to.equal(3);
+        expect(resetCallback.getCall(0).args[0]).to.equal(0);
+        expect(resetCallback.getCall(1).args[0]).to.equal(2);
+        expect(resetCallback.getCall(2).args[0]).to.equal(1);
       });
     });
 
@@ -431,7 +487,7 @@ describe('Slides functional', () => {
         min: 0,
         max: 1,
         prevTr: prevTr,
-        nextTr: nextTr
+        nextTr: nextTr,
       };
       slides.swipeState_ = s;
       const promise = slides.onSwipeEnd_({velocityX: 0.5});
@@ -451,15 +507,21 @@ describe('Slides functional', () => {
     let setupAutoplaySpy;
     let goSpy;
     let isInViewportStub;
+    let tryCancelAutoplayTimeoutSpy;
 
     function autoplaySetup(delay = '', inViewport = true) {
       clock = sandbox.useFakeTimers();
       setupElements();
-      element.setAttribute('autoplay', delay);
+      element.setAttribute('autoplay', '');
+      if (delay) {
+        element.setAttribute('delay', delay);
+      }
       element.removeAttribute('loop');
       setupAutoplaySpy = sandbox.spy(AmpSlides.prototype, 'setupAutoplay_');
       tryAutoplaySpy = sandbox.spy(AmpSlides.prototype, 'tryAutoplay_');
       goSpy = sandbox.spy(AmpSlides.prototype, 'go');
+      tryCancelAutoplayTimeoutSpy = sandbox
+          .spy(AmpSlides.prototype, 'tryCancelAutoplayTimeout_');
       setupSlides();
       setupSpies();
       setupInViewport(inViewport);
@@ -478,7 +540,6 @@ describe('Slides functional', () => {
     afterEach(() => {
       teardownElements();
       sandbox.restore();
-      sandbox = null;
     });
 
     it('should call setupAutoplay_', () => {
@@ -500,7 +561,7 @@ describe('Slides functional', () => {
 
         slides.viewportCallback(true);
         expect(tryAutoplaySpy.callCount).to.equal(1);
-        expect(isInViewportStub.callCount).to.equal(1);
+        expect(isInViewportStub.callCount).to.equal(2);
       });
 
       it('should call `go` after 5000ms(default)', () => {
@@ -518,11 +579,17 @@ describe('Slides functional', () => {
 
         expect(tryAutoplaySpy.callCount).to.equal(2);
         expect(goSpy.callCount).to.equal(1);
+
+        clock.tick(5000);
+
+        expect(tryAutoplaySpy.callCount).to.equal(3);
+        expect(goSpy.callCount).to.equal(2);
       });
 
       it('should call `go` after 2000ms (set by user)', () => {
         autoplaySetup(2000);
 
+        expect(slides.isAutoplayRequested_).to.be.true;
         expect(tryAutoplaySpy.callCount).to.equal(0);
         expect(goSpy.callCount).to.equal(0);
 
@@ -535,6 +602,71 @@ describe('Slides functional', () => {
 
         expect(tryAutoplaySpy.callCount).to.equal(2);
         expect(goSpy.callCount).to.equal(1);
+        expect(slides.isAutoplayRequested_).to.be.true;
+      });
+
+      it('should cancel autoplay on swipe start', () => {
+        autoplaySetup(2000);
+
+        expect(slides.isAutoplayRequested_).to.be.true;
+        expect(tryAutoplaySpy.callCount).to.equal(0);
+        expect(goSpy.callCount).to.equal(0);
+        expect(tryCancelAutoplayTimeoutSpy.callCount).to.equal(0);
+
+        slides.viewportCallback(true);
+
+        expect(tryCancelAutoplayTimeoutSpy.callCount).to.equal(1);
+        expect(tryAutoplaySpy.callCount).to.equal(1);
+        expect(goSpy.callCount).to.equal(0);
+
+        // user interaction
+        slides.onSwipeStart_({});
+
+        expect(slides.isAutoplayRequested_).to.be.false;
+        expect(tryCancelAutoplayTimeoutSpy.callCount).to.equal(2);
+
+        clock.tick(2000);
+
+        expect(tryAutoplaySpy.callCount).to.equal(1);
+        expect(goSpy.callCount).to.equal(0);
+      });
+
+      it('should cancel autoplay on user interaction', () => {
+        autoplaySetup(2000);
+
+        expect(slides.isAutoplayRequested_).to.be.true;
+        expect(tryAutoplaySpy.callCount).to.equal(0);
+        expect(goSpy.callCount).to.equal(0);
+
+        slides.viewportCallback(true);
+
+        expect(tryAutoplaySpy.callCount).to.equal(1);
+        expect(goSpy.callCount).to.equal(0);
+
+        clock.tick(2000);
+
+        // autoplay call
+        expect(tryAutoplaySpy.callCount).to.equal(2);
+        expect(goSpy.callCount).to.equal(1);
+
+        clock.tick(2000);
+
+        expect(tryAutoplaySpy.callCount).to.equal(3);
+        expect(goSpy.callCount).to.equal(2);
+
+        // user interaction
+        slides.interactionNext(1, false);
+        expect(slides.isAutoplayRequested_).to.be.false;
+
+        clock.tick(2000);
+
+        expect(tryAutoplaySpy.callCount).to.equal(4);
+        expect(goSpy.callCount).to.equal(3);
+
+        clock.tick(2000);
+
+        expect(tryAutoplaySpy.callCount).to.equal(4);
+        expect(goSpy.callCount).to.equal(3);
       });
     });
 
@@ -617,5 +749,81 @@ describe('Slides functional', () => {
       expect(index).to.equal(4);
       expect(slides[index]).to.equal('e');
     });
+  });
+});
+
+describe('empty Slides functional', () => {
+
+  let element;
+  let slides;
+
+  function setupElements() {
+    element = document.createElement('div');
+    element.setAttribute('type', 'slides');
+    element.style.width = '320px';
+    element.style.height = '200px';
+    document.body.appendChild(element);
+
+    element.getRealChildren = () => [];
+    return element;
+  }
+
+  function setupSlides() {
+    slides = new AmpSlides(element);
+    return slides;
+  }
+
+  function teardownElements() {
+    document.body.removeChild(element);
+  }
+
+  beforeEach(() => {
+    setupElements();
+    setupSlides();
+  });
+
+  afterEach(() => {
+    teardownElements();
+  });
+
+  it('should throw an assert error on buildCallback', () => {
+    expect(() => {
+      slides.buildCallback();
+    }).to.throw(/should have at least 1 slide/);
+  });
+
+  it('should not throw an error on layoutCallback', () => {
+    expect(() => {
+      slides.buildCallback();
+    }).to.throw(/should have at least 1 slide/);
+    expect(() => {
+      slides.layoutCallback();
+    }).to.not.throw();
+  });
+
+  it('should not throw an error on viewportCallback', () => {
+    expect(() => {
+      slides.buildCallback();
+    }).to.throw(/should have at least 1 slide/);
+    expect(() => {
+      slides.viewportCallback();
+    }).to.not.throw();
+  });
+
+  it('should not throw an error on goCallback', () => {
+    expect(() => {
+      slides.buildCallback();
+    }).to.throw(/should have at least 1 slide/);
+    expect(() => {
+      slides.goCallback();
+    }).to.not.throw();
+  });
+
+  it('should not have any controls', () => {
+    expect(() => {
+      slides.buildCallback();
+    }).to.throw(/should have at least 1 slide/);
+    expect(slides.hasNext()).to.be.false;
+    expect(slides.hasPrev()).to.be.false;
   });
 });

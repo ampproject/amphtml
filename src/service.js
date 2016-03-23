@@ -16,7 +16,7 @@
 
 // Requires polyfills in immediate side effect.
 import './polyfills';
-import {assert} from './asserts';
+import {dev} from './log';
 
 /**
  * Holds info about a service.
@@ -57,7 +57,7 @@ export function getService(win, id, opt_factory) {
   }
 
   if (!s.obj) {
-    assert(opt_factory, 'Factory not given and service missing %s', id);
+    dev.assert(opt_factory, 'Factory not given and service missing %s', id);
     s.obj = opt_factory(win);
     if (!s.promise) {
       s.promise = Promise.resolve(s.obj);

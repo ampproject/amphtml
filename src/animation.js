@@ -15,7 +15,7 @@
  */
 
 import {getCurve} from './curve';
-import {log} from './log';
+import {dev} from './log';
 import {timer} from './timer';
 import {vsyncFor} from './vsync';
 
@@ -145,7 +145,7 @@ class AnimationPlayer {
         duration: segment.duration,
         curve: segment.curve || defaultCurve,
         started: false,
-        completed: false
+        completed: false,
       });
     }
 
@@ -181,7 +181,7 @@ class AnimationPlayer {
 
     /** @const */
     this.task_ = this.vsync_.createAnimTask({
-      mutate: this.stepMutate_.bind(this)
+      mutate: this.stepMutate_.bind(this),
     });
   }
 
@@ -232,7 +232,7 @@ class AnimationPlayer {
     if (this.vsync_.canAnimate()) {
       this.task_(this.state_);
     } else {
-      log.warn(TAG_, 'cannot animate');
+      dev.warn(TAG_, 'cannot animate');
       this.complete_(/* success */ false, /* dir */ 0);
     }
   }
@@ -267,7 +267,7 @@ class AnimationPlayer {
           }
         }
       } catch (e) {
-        log.error(TAG_, 'completion failed: ' + e, e);
+        dev.error(TAG_, 'completion failed: ' + e, e);
         success = false;
       }
     }
@@ -314,7 +314,7 @@ class AnimationPlayer {
       if (this.vsync_.canAnimate()) {
         this.task_(this.state_);
       } else {
-        log.warn(TAG_, 'cancel animation');
+        dev.warn(TAG_, 'cancel animation');
         this.complete_(/* success */ false, /* dir */ 0);
       }
     }
@@ -335,7 +335,7 @@ class AnimationPlayer {
         try {
           normTime = segment.curve(normLinearTime);
         } catch (e) {
-          log.error(TAG_, 'step curve failed: ' + e, e);
+          dev.error(TAG_, 'step curve failed: ' + e, e);
           this.complete_(/* success */ false, /* dir */ 0);
           return;
         }
@@ -350,7 +350,7 @@ class AnimationPlayer {
     try {
       segment.func(normTime, segment.completed);
     } catch (e) {
-      log.error(TAG_, 'step mutate failed: ' + e, e);
+      dev.error(TAG_, 'step mutate failed: ' + e, e);
       this.complete_(/* success */ false, /* dir */ 0);
       return;
     }

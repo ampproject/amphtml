@@ -194,6 +194,78 @@ describe('evaluateAccessExpr', () => {
     expect(evaluateAccessExpr('a AND c', {a: 1, b: 2})).to.be.false;
   });
 
+  it('should evaluate nested expressions', () => {
+    const resp = {
+      obj: {
+        str: 'A',
+        num: 11,
+        bool: true,
+      },
+    };
+
+    expect(evaluateAccessExpr('obj.bool = true', resp)).to.be.true;
+    expect(evaluateAccessExpr('obj.num = 11', resp)).to.be.true;
+    expect(evaluateAccessExpr('obj.str = "A"', resp)).to.be.true;
+
+    expect(evaluateAccessExpr('obj.other = NULL', resp)).to.be.true;
+    expect(evaluateAccessExpr('obj.str = NULL', resp)).to.be.false;
+
+    expect(evaluateAccessExpr('obj.bool', resp)).to.be.true;
+    expect(evaluateAccessExpr('obj.str', resp)).to.be.true;
+    expect(evaluateAccessExpr('obj.num', resp)).to.be.true;
+    expect(evaluateAccessExpr('obj.other', resp)).to.be.false;
+
+    expect(evaluateAccessExpr('NOT obj.bool', resp)).to.be.false;
+    expect(evaluateAccessExpr('NOT obj.str', resp)).to.be.false;
+    expect(evaluateAccessExpr('NOT obj.num', resp)).to.be.false;
+    expect(evaluateAccessExpr('NOT obj.other', resp)).to.be.true;
+  });
+
+  it('should shortcircuit nested expressions with missing parent', () => {
+    const resp = {
+      obj: {
+        str: 'A',
+        child: {
+          str: 'B',
+        },
+      },
+    };
+
+    expect(evaluateAccessExpr('obj.str = "A"', resp)).to.be.true;
+    expect(evaluateAccessExpr('obj.child.str = "B"', resp)).to.be.true;
+    expect(evaluateAccessExpr('obj.child.other = NULL', resp)).to.be.true;
+    expect(evaluateAccessExpr('obj.child2 = NULL', resp)).to.be.true;
+    expect(evaluateAccessExpr('obj.child2.other = NULL', resp)).to.be.true;
+    expect(evaluateAccessExpr('obj.child2.other.x = NULL', resp)).to.be.true;
+    expect(evaluateAccessExpr('obj2.child2.other.x = NULL', resp)).to.be.true;
+  });
+
+  it('should NOT evaluate nested expressions with wrong type', () => {
+    expect(evaluateAccessExpr('obj.bool = true', {obj: true})).to.be.false;
+    expect(evaluateAccessExpr('obj.num = 11', {obj: 11})).to.be.false;
+    expect(evaluateAccessExpr('obj.str = "A"', {obj: 'A'})).to.be.false;
+    expect(evaluateAccessExpr('obj.str = "A"', {})).to.be.false;
+
+    expect(evaluateAccessExpr('obj.other = NULL', {obj: 11})).to.be.true;
+
+    expect(() => {
+      evaluateAccessExpr('obj.NULL', {});
+    }).to.throw();
+    expect(() => {
+      evaluateAccessExpr('NULL.obj', {});
+    }).to.throw();
+    expect(() => {
+      evaluateAccessExpr('1.obj', {});
+    }).to.throw();
+    expect(() => {
+      evaluateAccessExpr('TRUE.obj', {});
+    }).to.throw();
+  });
+
+  it('should evaluate nested expressions securely', () => {
+    expect(evaluateAccessExpr('obj.__bool__ = NULL', {obj: {}})).to.be.true;
+  });
+
   it('should accept name grammar', () => {
     expect(evaluateAccessExpr('num = 10', {num: 10})).to.be.true;
     expect(evaluateAccessExpr('num1 = 10', {num1: 10})).to.be.true;
@@ -201,13 +273,10 @@ describe('evaluateAccessExpr', () => {
     expect(evaluateAccessExpr('_num = 10', {_num: 10})).to.be.true;
 
     expect(() => {
-      evaluateAccessExpr('1num = 10', {"1num": 10});
+      evaluateAccessExpr('1num = 10', {'1num': 10});
     }).to.throw();
     expect(() => {
-      evaluateAccessExpr('num-a = 10', {"num-a": 10});
-    }).to.throw();
-    expect(() => {
-      evaluateAccessExpr('num.a = 10', {"num.a": 10});
+      evaluateAccessExpr('num-a = 10', {'num-a': 10});
     }).to.throw();
   });
 });

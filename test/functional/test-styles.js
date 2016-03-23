@@ -15,22 +15,23 @@
  */
 
 import {getStyle} from '../../src/style';
+import {platformFor} from '../../src/platform';
 import * as sinon from 'sinon';
 import * as styles from '../../src/styles';
 
 describe('Styles', () => {
   let sandbox;
   let clock;
+  let platform;
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     clock = sandbox.useFakeTimers();
+    platform = platformFor(window);
   });
 
   afterEach(() => {
     sandbox.restore();
-    sandbox = null;
-    clock = null;
   });
 
   it('makeBodyVisible', () => {
@@ -40,5 +41,15 @@ describe('Styles', () => {
     expect(getStyle(document.body, 'opacity')).to.equal('1');
     expect(getStyle(document.body, 'visibility')).to.equal('visible');
     expect(getStyle(document.body, 'animation')).to.equal('none');
+  });
+
+  it('should set cursor:pointer on document element correctly on iOS', () => {
+    const elem = document.documentElement;
+    expect(elem.style.cursor).to.not.be.ok;
+    sandbox.stub(platform, 'isIos').returns(true);
+    styles.installStyles(document, '', () => {});
+    expect(elem.style.cursor).to.not.be.ok;
+    styles.installStyles(document, '', () => {}, true);
+    expect(elem.style.cursor).to.equal('pointer');
   });
 });

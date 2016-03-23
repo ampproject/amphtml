@@ -19,7 +19,7 @@
  * details.
  */
 
-import {assert} from './asserts';
+import {dev, user} from './log';
 
 
 /**
@@ -31,7 +31,7 @@ export const Layout = {
   FIXED_HEIGHT: 'fixed-height',
   RESPONSIVE: 'responsive',
   CONTAINER: 'container',
-  FILL: 'fill'
+  FILL: 'fill',
 };
 
 
@@ -65,7 +65,7 @@ export const naturalDimensions_ = {
   'AMP-PIXEL': {width: '1px', height: '1px'},
   'AMP-ANALYTICS': {width: '1px', height: '1px'},
   // TODO(dvoytenko): audio should have width:auto.
-  'AMP-AUDIO': null
+  'AMP-AUDIO': null,
 };
 
 
@@ -78,12 +78,13 @@ export const naturalDimensions_ = {
 export const LOADING_ELEMENTS_ = {
   'AMP-ANIM': true,
   'AMP-BRIGHTCOVE': true,
+  'AMP-EMBED': true,
   'AMP-IFRAME': true,
   'AMP-IMG': true,
   'AMP-INSTAGRAM': true,
   'AMP-LIST': true,
   'AMP-PINTEREST': true,
-  'AMP-VIDEO': true
+  'AMP-VIDEO': true,
 };
 
 
@@ -165,7 +166,7 @@ export function parseLength(s) {
  * @return {!LengthDef}
  */
 export function assertLength(length) {
-  assert(/^\d+(\.\d+)?(px|em|rem|vh|vw|vmin|vmax)$/.test(length),
+  user.assert(/^\d+(\.\d+)?(px|em|rem|vh|vw|vmin|vmax)$/.test(length),
       'Invalid length value: %s', length);
   return length;
 }
@@ -180,7 +181,7 @@ export function assertLength(length) {
  * @return {!LengthDef}
  */
 export function assertLengthOrPercent(length) {
-  assert(/^\d+(\.\d+)?(px|em|rem|vh|vw|vmin|vmax|%)$/.test(length),
+  user.assert(/^\d+(\.\d+)?(px|em|rem|vh|vw|vmin|vmax|%)$/.test(length),
       'Invalid length or percent value: %s', length);
   return length;
 }
@@ -193,7 +194,7 @@ export function assertLengthOrPercent(length) {
  */
 export function getLengthUnits(length) {
   assertLength(length);
-  const m = assert(length.match(/[a-z]+/i),
+  const m = user.assert(length.match(/[a-z]+/i),
       'Failed to read units from %s', length);
   return m[0];
 }
@@ -231,7 +232,7 @@ export function hasNaturalDimensions(tagName) {
  */
 export function getNaturalDimensions(tagName) {
   tagName = tagName.toUpperCase();
-  assert(naturalDimensions_[tagName] !== undefined);
+  dev.assert(naturalDimensions_[tagName] !== undefined);
   if (!naturalDimensions_[tagName]) {
     const naturalTagName = tagName.replace(/^AMP\-/, '');
     const temp = document.createElement(naturalTagName);
@@ -242,7 +243,7 @@ export function getNaturalDimensions(tagName) {
     document.body.appendChild(temp);
     naturalDimensions_[tagName] = {
       width: (temp./*OK*/offsetWidth || 1) + 'px',
-      height: (temp./*OK*/offsetHeight || 1) + 'px'
+      height: (temp./*OK*/offsetHeight || 1) + 'px',
     };
     document.body.removeChild(temp);
   }

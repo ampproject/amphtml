@@ -60,6 +60,13 @@
       height: 40px;
     }
 
+    @media screen and (min-width: 420px) {
+      .logo {
+        position: static;
+        top: auto;
+      }
+    }
+
     .goto {
       display: block;
       margin: 16px;
@@ -81,7 +88,12 @@
     .comic-amp-font-missing .comic-amp {
       color: #f00;
     }
+
+    #amp-iframe:target {
+      border: 1px solid green;
+    }
   </style>
+  <script async custom-element="amp-dynamic-css-classes" src="https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.js"></script>
   <script async custom-element="amp-anim" src="https://cdn.ampproject.org/v0/amp-anim-0.1.js"></script>
   <script async custom-element="amp-audio" src="https://cdn.ampproject.org/v0/amp-audio-0.1.js"></script>
   <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>

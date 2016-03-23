@@ -224,12 +224,40 @@
 
   <amp-user-notification
       layout=nodisplay
-      id="amp-user-notification3"
-      data-show-if-href="http://localhost:8000/api/show"
-      data-dismiss-href="http://localhost:8000/api/echo/post">
-      notify 3
-      <a href="#learn-more">Learn more.</a>
+      id="amp-user-notification3">
+      This notification doesn't need remote endpoints.
      <button on="tap:amp-user-notification3.dismiss">I accept</button>
+  </amp-user-notification>
+
+  <amp-user-notification
+          layout=nodisplay
+          id="amp-user-notification4"
+          data-persist-dismissal="false"
+          data-show-if-href="http://localhost:8000/api/show?timestamp=TIMESTAMP"
+          data-dismiss-href="http://localhost:8000/api/echo/post">
+    This notification should ALWAYS show.
+    <a href="#learn-more">Learn more.</a>
+    <button on="tap:amp-user-notification4.dismiss">Dismiss</button>
+  </amp-user-notification>
+
+  <amp-user-notification
+          layout=nodisplay
+          id="amp-user-notification5"
+          data-persist-dismissal="false"
+          data-show-if-href="http://localhost:8000/api/dont-show"
+          data-dismiss-href="http://localhost:8000/api/echo/post">
+    This notification should NEVER show.
+    <a href="#learn-more">Learn more.</a>
+    <button on="tap:amp-user-notification5.dismiss">Dismiss</button>
+  </amp-user-notification>
+
+  <amp-user-notification
+          layout=nodisplay
+          id="amp-user-notification6"
+          data-persist-dismissal="false">
+    This notification should ALSO ALWAYS show.
+    <a href="#learn-more">Learn more.</a>
+    <button on="tap:amp-user-notification6.dismiss">Dismiss</button>
   </amp-user-notification>
 
   <header>

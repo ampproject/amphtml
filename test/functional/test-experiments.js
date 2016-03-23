@@ -14,38 +14,118 @@
  * limitations under the License.
  */
 
-import {isDevChannel, isDevChannelVersionDoNotUse_,
-    isExperimentOn, toggleExperiment} from '../../src/experiments';
+import {
+  isDevChannel, isDevChannelVersionDoNotUse_,
+  isExperimentOn, toggleExperiment,
+  resetExperimentToggles_} from '../../src/experiments';
 import * as sinon from 'sinon';
 
 
 describe('isExperimentOn', () => {
+  let win;
+  let sandbox;
 
-  function expectExperiment(cookiesString, experimentId) {
-    return expect(isExperimentOn({
-      document: {
-        cookie: cookiesString
-      }
-    }, experimentId));
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+    win = {document: {}, AMP_CONFIG: {}};
+  });
+
+  afterEach(() => {
+    resetExperimentToggles_();
+    sandbox.restore();
+  });
+
+  function expectExperiment(cookieString, experimentId) {
+    win.document.cookie = cookieString;
+    return expect(isExperimentOn(win, experimentId));
   }
 
-  it('should return "off" with no cookies, malformed or empty', () => {
-    expectExperiment(null, 'e1').to.be.false;
-    expectExperiment(undefined, 'e1').to.be.false;
-    expectExperiment('', 'e1').to.be.false;
-    expectExperiment('AMP_EXP', 'e1').to.be.false;
-    expectExperiment('AMP_EXP=', 'e1').to.be.false;
+  describe('with only cookie flag', () => {
+
+    it('should return "off" with no cookies, malformed or empty', () => {
+      expectExperiment(null, 'e1').to.be.false;
+      expectExperiment(undefined, 'e1').to.be.false;
+      expectExperiment('', 'e1').to.be.false;
+      expectExperiment('AMP_EXP', 'e1').to.be.false;
+      expectExperiment('AMP_EXP=', 'e1').to.be.false;
+    });
+
+    it('should return "off" when value is not in the list', () => {
+      expectExperiment('AMP_EXP=e1a,e2', 'e1').to.be.false;
+    });
+
+    it('should return "on" when value is in the list', () => {
+      expectExperiment('AMP_EXP=e1', 'e1').to.be.true;
+      expectExperiment('AMP_EXP=e1,e2', 'e1').to.be.true;
+      expectExperiment('AMP_EXP=e2,e1', 'e1').to.be.true;
+      expectExperiment('AMP_EXP=e2 , e1', 'e1').to.be.true;
+    });
   });
 
-  it('should return "off" when value is not in the list', () => {
-    expectExperiment('AMP_EXP=e1a,e2', 'e1').to.be.false;
-  });
+  describe('with global flag', () => {
 
-  it('should return "on" when value is in the list', () => {
-    expectExperiment('AMP_EXP=e1', 'e1').to.be.true;
-    expectExperiment('AMP_EXP=e1,e2', 'e1').to.be.true;
-    expectExperiment('AMP_EXP=e2,e1', 'e1').to.be.true;
-    expectExperiment('AMP_EXP=e2 , e1', 'e1').to.be.true;
+    it('should prioritize cookie flag', () => {
+      win.AMP_CONFIG['e1'] = true;
+      expectExperiment('AMP_EXP=e1', 'e1').to.be.true;
+    });
+
+    it('should fall back to global flag', () => {
+      const cookie = 'AMP_EXP=e2,e4';
+      win.AMP_CONFIG['e1'] = true;
+      win.AMP_CONFIG['e2'] = 1;
+      win.AMP_CONFIG['e3'] = 0;
+      win.AMP_CONFIG['e4'] = false;
+      expectExperiment(cookie, 'e1').to.be.true;
+      expectExperiment(cookie, 'e2').to.be.true;
+      expectExperiment(cookie, 'e3').to.be.false;
+      expectExperiment(cookie, 'e4').to.be.true;
+    });
+
+    it('should return "off" when not in cookie flag or global flag', () => {
+      expectExperiment('AMP_EXP=', 'e1').to.be.false;
+    });
+
+    it('should calc if experiment should be "on"', () => {
+      win.AMP_CONFIG['e1'] = 1;
+      expectExperiment('', 'e1').to.be.true;
+      resetExperimentToggles_();
+
+      win.AMP_CONFIG['e2'] = 0;
+      expectExperiment('', 'e2').to.be.false;
+
+      sandbox.stub(Math, 'random').returns(0.5);
+      win.AMP_CONFIG['e3'] = 0.3;
+      expectExperiment('', 'e3').to.be.false;
+
+      win.AMP_CONFIG['e4'] = 0.6;
+      expectExperiment('', 'e4').to.be.true;
+
+      win.AMP_CONFIG['e5'] = 0.5;
+      expectExperiment('', 'e5').to.be.false;
+
+      win.AMP_CONFIG['e6'] = 0.51;
+      expectExperiment('', 'e6').to.be.true;
+    });
+
+    it('should cache calc value', () => {
+      const randomStub = sandbox.stub(Math, 'random');
+      randomStub.onFirstCall().returns(0.4);
+      randomStub.onSecondCall().returns(0.4);
+      randomStub.returns(0.9);
+      win.AMP_CONFIG['e1'] = 0.5;
+      win.AMP_CONFIG['e2'] = 0.1;
+
+      expect(Math.random()).to.equal(0.4);
+      expectExperiment('', 'e1').to.be.true;
+
+      // it should continue to be true even though random() is not
+      // less than the experiment value which is 0.5
+      expect(Math.random()).to.equal(0.9);
+      expectExperiment('', 'e1').to.be.true;
+
+      expect(Math.random()).to.equal(0.9);
+      expectExperiment('', 'e2').to.be.false;
+    });
   });
 });
 
@@ -64,14 +144,12 @@ describe('toggleExperiment', () => {
   });
 
   afterEach(() => {
-    clock = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   function expectToggle(cookiesString, experimentId, opt_on) {
     const doc = {
-      cookie: cookiesString
+      cookie: cookiesString,
     };
     const on = toggleExperiment({document: doc}, experimentId, opt_on);
     const parts = doc.cookie.split(/\s*;\s*/g);
@@ -117,18 +195,25 @@ describe('isDevChannel', () => {
   function expectDevChannel(cookiesString) {
     return expect(isDevChannel({
       document: {
-        cookie: cookiesString
-      }
+        cookie: cookiesString,
+      },
     }));
   }
 
   it('should return value based on cookie', () => {
     expectDevChannel('AMP_EXP=other').to.be.false;
+    resetExperimentToggles_();
     expectDevChannel('AMP_EXP=dev-channel').to.be.true;
   });
 
   it('should return value based on binary version', () => {
-    expect(isDevChannelVersionDoNotUse_('123456789')).to.be.false;
-    expect(isDevChannelVersionDoNotUse_('123456789-canary')).to.be.true;
+    const win = {
+      AMP_CONFIG: {
+        canary: false,
+      },
+    };
+    expect(isDevChannelVersionDoNotUse_(win)).to.be.false;
+    win.AMP_CONFIG.canary = true;
+    expect(isDevChannelVersionDoNotUse_(win)).to.be.true;
   });
 });

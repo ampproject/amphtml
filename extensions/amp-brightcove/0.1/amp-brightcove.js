@@ -16,7 +16,9 @@
 
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
-
+import {addParamsToUrl} from '../../../src/url';
+import {dashToCamelCase} from '../../../src/string';
+import {removeElement} from '../../../src/dom';
 
 class AmpBrightcove extends AMP.BaseElement {
 
@@ -38,10 +40,14 @@ class AmpBrightcove extends AMP.BaseElement {
         this.element.getAttribute('data-account'),
         'The data-account attribute is required for <amp-brightcove> %s',
         this.element);
-    const playerid = (this.element.getAttribute('data-player-id') || 'default');
+    const playerid = (this.element.getAttribute('data-player') ||
+      this.element.getAttribute('data-player-id') ||
+      'default');
     const embed = (this.element.getAttribute('data-embed') || 'default');
     const iframe = document.createElement('iframe');
-    let src = 'https://players.brightcove.net/' + encodeURIComponent(account) + '/' + encodeURIComponent(playerid) + '_' + encodeURIComponent(embed) + '/index.html';
+    let src = `https://players.brightcove.net/${encodeURIComponent(account)}/${encodeURIComponent(playerid)}_${encodeURIComponent(embed)}/index.html`;
+    const params = {};
+
     if (this.element.getAttribute('data-playlist-id')) {
       src += '?playlistId=';
       src += this.encodeId_(this.element.getAttribute('data-playlist-id'));
@@ -49,6 +55,18 @@ class AmpBrightcove extends AMP.BaseElement {
       src += '?videoId=';
       src += this.encodeId_(this.element.getAttribute('data-video-id'));
     }
+
+    // Pass through data-param-* attributes as params for plugin use
+    for (let i = 0; i < this.element.attributes.length; i++) {
+      const attr = this.element.attributes[i];
+      const matches = attr.nodeName.match(/^data-param-(.+)/);
+      if (matches) {
+        const param = dashToCamelCase(matches[1]);
+        params[param] = attr.nodeValue;
+      }
+    }
+
+    src = addParamsToUrl(src, params);
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
     iframe.src = src;
@@ -66,14 +84,14 @@ class AmpBrightcove extends AMP.BaseElement {
     /* id is either a Brightcove-assigned id, or a customer-generated reference id.
       reference ids are prefixed 'ref:' and the colon must be preserved unencoded */
     if (id.substring(0,4) === 'ref:') {
-      return 'ref:' + encodeURIComponent(id.substring(4));
+      return `ref:${encodeURIComponent(id.substring(4))}`;
     } else {
       return encodeURIComponent(id);
     }
   }
 
   /** @override */
-  documentInactiveCallback() {
+  pauseCallback() {
     /*
     This stops playback with the postMessage API.
     Add this script to the player in the player configuration in the Studio
@@ -84,8 +102,31 @@ class AmpBrightcove extends AMP.BaseElement {
     It's not a 'real' video.js plugin, just a plain script running in
     the iframe so needs no configuration options.
     */
-    this.iframe_.contentWindow./*OK*/postMessage('pause', 'https://players.brightcove.net');
-    return false;
+    if (this.iframe_ && this.iframe_.contentWindow) {
+      this.iframe_.contentWindow./*OK*/postMessage(
+          'pause', 'https://players.brightcove.net');
+    }
+  }
+
+  /** @override */
+  unlayoutOnPause() {
+    return true;
+  }
+
+  /**
+   * To prevent improperly setup videos (do not include the pauseCallback
+   * listener script) from playing after being told to pause, we destroy the
+   * iframe. Once the listener script is updated to inform AMP that it is listening,
+   * we can prevent the unlayout.
+   *
+   * See https://github.com/ampproject/amphtml/issues/2224 for information.
+   */
+  unlayout() {
+    if (this.iframe_) {
+      removeElement(this.iframe_);
+      this.iframe_ = null;
+    }
+    return true;
   }
 };
 

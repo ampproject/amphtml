@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import {assert} from './asserts';
 import {childElementByTag} from './dom';
 import {getService} from './service';
+import {user} from './log';
 
 /**
  * @fileoverview
@@ -206,8 +206,8 @@ export class Templates {
     } else {
       templateElement = childElementByTag(parent, 'template');
     }
-    assert(templateElement, 'Template not found for %s', parent);
-    assert(templateElement.tagName == 'TEMPLATE',
+    user.assert(templateElement, 'Template not found for %s', parent);
+    user.assert(templateElement.tagName == 'TEMPLATE',
         'Template element must be a "template" tag %s', templateElement);
     return templateElement;
   }
@@ -225,7 +225,7 @@ export class Templates {
       return Promise.resolve(impl);
     }
 
-    const type = assert(element.getAttribute('type'),
+    const type = user.assert(element.getAttribute('type'),
         'Type must be specified: %s', element);
 
     let promise = element[PROP_PROMISE_];
@@ -283,7 +283,7 @@ export class Templates {
             'custom-template')] = true;
       }
     }
-    assert(this.declaredTemplates_[type],
+    user.assert(this.declaredTemplates_[type],
         'Template must be declared for %s as <script custom-template=%s>',
         element, type);
   }
@@ -300,7 +300,7 @@ export class Templates {
       this.templateClassMap_[type] = Promise.resolve(templateClass);
     } else {
       const resolver = this.templateClassResolvers_[type];
-      assert(resolver, 'Duplicate template type: %s', type);
+      user.assert(resolver, 'Duplicate template type: %s', type);
       delete this.templateClassResolvers_[type];
       resolver(templateClass);
     }

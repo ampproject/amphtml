@@ -47,7 +47,7 @@ export function layoutRectLtwh(left, top, width, height) {
     width: width,
     height: height,
     bottom: top + height,
-    right: left + width
+    right: left + width,
   };
 }
 
@@ -65,7 +65,7 @@ export function layoutRectFromDomRect(rect) {
     width: rect.width,
     height: rect.height,
     bottom: rect.top + rect.height,
-    right: rect.left + rect.width
+    right: rect.left + rect.width,
   };
 }
 
@@ -118,7 +118,7 @@ export function expandLayoutRect(rect, dw, dh) {
     left: rect.left - rect.width * dw,
     right: rect.right + rect.width * dw,
     width: rect.width * (1 + dw * 2),
-    height: rect.height * (1 + dh * 2)
+    height: rect.height * (1 + dh * 2),
   };
 }
 

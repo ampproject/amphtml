@@ -16,7 +16,7 @@
 
 import {getService} from '../../../src/service';
 import {isExperimentOn} from '../../../src/experiments';
-import {log} from '../../../src/log';
+import {user} from '../../../src/log';
 import {parseUrl} from '../../../src/url';
 import {viewerFor} from '../../../src/viewer';
 import {vsyncFor} from '../../../src/vsync';
@@ -33,7 +33,7 @@ const EXPERIMENT = 'dynamic-css-classes';
  * @returns {string}
  */
 function referrerDomain(win) {
-  const referrer = viewerFor(win).getReferrerUrl();
+  const referrer = viewerFor(win).getUnconfirmedReferrerUrl();
   if (referrer) {
     return parseUrl(referrer).hostname;
   }
@@ -147,7 +147,7 @@ function addRuntimeClasses(win) {
     addReferrerClasses(win);
     addViewerClass(win);
   } else {
-    log.warn(TAG, `Experiment ${EXPERIMENT} disabled`);
+    user.warn(TAG, `Experiment ${EXPERIMENT} disabled`);
   }
 }
 

@@ -39,5 +39,22 @@
       data-aax_pubname="abc123"
       data-aax_src="302">
   </amp-embed>
+  <h2>Doubleclick no ad with placeholder and fallback</h2>
+  <amp-ad width=300 height=200
+      type="doubleclick"
+      data-slot="/4119129/doesnt-exist"
+      >
+     <div class="adv-placeholder" placeholder>
+       <amp-anim width=16 height=16 src="//www.repstatic.it/cless-mobile/main/amp/2016-v1//img/loader.gif">
+           <amp-img placeholder width=16 height=16 src="//www.repstatic.it/cless-mobile/main/amp/2016-v1//img/loader.gif">
+         </amp-img>
+       </amp-anim>
+     </div>
+     <div fallback>
+       <a href="http://www.repubblica.it/sport/2016/02/09/news/app_rep-133068373/">
+         <amp-img placeholder width=300 height=100 src="//www.repstatic.it/cless-mobile/main/amp/2016-v1/img/adv-300-100.jpg">
+       </a>
+     </div>
+  </amp-ad>
 </body>
 </html>

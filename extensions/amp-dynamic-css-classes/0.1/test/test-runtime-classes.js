@@ -24,7 +24,7 @@ function overwrite(object, property, value) {
     enumerable: true,
     writeable: false,
     configurable: true,
-    value: value
+    value: value,
   });
 }
 
@@ -57,7 +57,7 @@ describe('dynamic classes are inserted at runtime', () => {
         overwrite(win.navigator, 'userAgent', userAgent);
       }
       if (referrer !== undefined) {
-        viewerFor(win).getReferrerUrl = () => referrer;
+        viewerFor(win).getUnconfirmedReferrerUrl = () => referrer;
       }
 
       return win.insertDynamicCssScript();
@@ -65,7 +65,8 @@ describe('dynamic classes are inserted at runtime', () => {
   }
 
   describe('when experiment is disabled', () => {
-    beforeEach(() => {
+    beforeEach(function() {
+      this.timeout(5000);
       return setup(false);
     });
 
@@ -79,7 +80,8 @@ describe('dynamic classes are inserted at runtime', () => {
   });
 
   describe('when experiment is enabled', () => {
-    beforeEach(() => {
+    beforeEach(function() {
+      this.timeout(5000);
       return setup(true);
     });
 
@@ -93,14 +95,16 @@ describe('dynamic classes are inserted at runtime', () => {
   });
 
   describe('Normalizing Referrers', () => {
-    it('should normalize twitter shortlinks to twitter', () => {
+    it('should normalize twitter shortlinks to twitter', function() {
+      this.timeout(5000);
       return setup(true, '', tcoReferrer).then(() => {
         expect(documentElement).to.have.class('amp-referrer-com');
         expect(documentElement).to.have.class('amp-referrer-twitter-com');
       });
     });
 
-    it('should normalize pinterest on android', () => {
+    it('should normalize pinterest on android', function() {
+      this.timeout(5000);
       return setup(true, PinterestUA, '').then(() => {
         expect(documentElement).to.have.class('amp-referrer-com');
         expect(documentElement).to.have.class('amp-referrer-pinterest-com');
@@ -109,7 +113,8 @@ describe('dynamic classes are inserted at runtime', () => {
     });
   });
 
-  it('should delay unhiding the body', () => {
+  it('should delay unhiding the body', function() {
+    this.timeout(5000);
     return createServedIframe(iframeSrc).then(fixture => {
       expect(fixture.doc.body).to.be.hidden;
 

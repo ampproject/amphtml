@@ -15,12 +15,17 @@
  */
 
 var fs = require('fs-extra');
+var argv = require('minimist')(process.argv.slice(2));
+var windowConfig = require('../window-config');
 var closureCompiler = require('gulp-closure-compiler');
 var gulp = require('gulp');
 var rename = require('gulp-rename');
 var replace = require('gulp-replace');
 var internalRuntimeVersion = require('../internal-version').VERSION;
+var internalRuntimeToken = require('../internal-version').TOKEN;
+var rimraf = require('rimraf');
 
+var isProdBuild = !!argv.type;
 var queue = [];
 var inProgress = 0;
 var MAX_PARALLEL_CLOSURE_INVOCATIONS = 4;
@@ -65,23 +70,33 @@ function compile(entryModuleFilename, outputDir,
         entryModuleFilename.replace(/\//g, '_').replace(/^\./, '');
     console./*OK*/log('Starting closure compiler for ', entryModuleFilename);
     fs.mkdirsSync('build/cc');
+    rimraf.sync('build/fake-module');
     fs.mkdirsSync('build/fake-module/third_party/babel');
-    fs.mkdirsSync('build/fake-module/src');
-    fs.writeFileSync(
-        'build/fake-module/third_party/babel/custom-babel-helpers.js',
-        '// Not needed in closure compiler\n');
-    fs.writeFileSync(
-        'build/fake-module/src/polyfills.js',
-        '// Not needed in closure compiler\n');
-    var wrapper = '(function(){var process={env:{}};%output%})();';
+    fs.mkdirsSync('build/fake-module/src/polyfills/');
+    var unneededFiles = [
+      'build/fake-module/third_party/babel/custom-babel-helpers.js',
+    ];
+    var wrapper = windowConfig.getTemplate() +
+        '(function(){var process={env:{NODE_ENV:"production"}};' +
+        '%output%})();';
     if (options.wrapper) {
       wrapper = options.wrapper.replace('<%= contents %>',
-          'var process={env:{}};%output%');
+          // TODO(@cramforce): Switch to define.
+          'var process={env:{NODE_ENV:"production"}};%output%');
     }
     wrapper += '\n//# sourceMappingURL=' +
         outputFilename + '.map\n';
     if (fs.existsSync(intermediateFilename)) {
       fs.unlinkSync(intermediateFilename);
+    }
+    if (/development/.test(internalRuntimeToken)) {
+      throw new Error('Should compile with a prod token');
+    }
+    var sourceMapBase = 'http://localhost:8000/';
+    if (isProdBuild) {
+      // Point sourcemap to fetch files from correct GitHub tag.
+      sourceMapBase = 'https://raw.githubusercontent.com/ampproject/amphtml/' +
+            internalRuntimeVersion + '/';
     }
     const srcs = [
       '3p/**/*.js',
@@ -90,6 +105,7 @@ function compile(entryModuleFilename, outputDir,
       'build/**/*.js',
       '!build/cc/**',
       '!build/polyfills.js',
+      '!build/polyfills/**/*.js',
       'src/**/*.js',
       '!third_party/babel/custom-babel-helpers.js',
       // Exclude since it's not part of the runtime/extension binaries.
@@ -98,6 +114,7 @@ function compile(entryModuleFilename, outputDir,
       'third_party/caja/html-sanitizer.js',
       'third_party/closure-library/sha384-generated.js',
       'third_party/mustache/**/*.js',
+      'node_modules/promise-pjs/promise.js',
       'node_modules/document-register-element/build/' +
           'document-register-element.max.js',
       'node_modules/core-js/modules/**.js',
@@ -112,10 +129,26 @@ function compile(entryModuleFilename, outputDir,
     // once. Since all files automatically wait for the main binary to load
     // this works fine.
     if (options.includePolyfills) {
-      srcs.push('!build/fake-module/src/polyfills.js');
+      srcs.push(
+        '!build/fake-module/src/polyfills.js',
+        '!build/fake-module/src/polyfills/**/*.js'
+      );
     } else {
-      srcs.push('!src/polyfills.js');
+      srcs.push(
+        '!src/polyfills.js',
+        '!src/polyfills/**/*.js'
+      );
+      unneededFiles.push(
+        'build/fake-module/src/polyfills.js',
+        'build/fake-module/src/polyfills/promise.js',
+        'build/fake-module/src/polyfills/math-sign.js'
+      );
     }
+    unneededFiles.forEach(function(fake) {
+      if (!fs.existsSync(fake)) {
+        fs.writeFileSync(fake, '// Not needed in closure compiler\n');
+      }
+    });
     /*eslint "google-camelcase/google-camelcase": 0*/
     return gulp.src(srcs)
     .pipe(closureCompiler({
@@ -140,7 +173,8 @@ function compile(entryModuleFilename, outputDir,
         only_closure_dependencies: true,
         output_wrapper: wrapper,
         create_source_map: intermediateFilename + '.map',
-        source_map_location_mapping: '|http://localhost:8000/',
+        source_map_location_mapping:
+            '|' + sourceMapBase,
         warning_level: process.env.TRAVIS ? 'QUIET' : 'DEFAULT',
       }
     }))
@@ -150,6 +184,7 @@ function compile(entryModuleFilename, outputDir,
     })
     .pipe(rename(outputFilename))
     .pipe(replace(/\$internalRuntimeVersion\$/g, internalRuntimeVersion))
+    .pipe(replace(/\$internalRuntimeToken\$/g, internalRuntimeToken))
     .pipe(gulp.dest(outputDir))
     .on('end', function() {
       console./*OK*/log('Compiled ', entryModuleFilename, 'to',

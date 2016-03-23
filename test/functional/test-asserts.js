@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import {assert, assertEnumValue} from '../../src/asserts';
+// TODO(dvoytenko, #2527): Remove this module.
+
+import {ASSERT_SENTINEL, assert, assertEnumValue, isAssertErrorMessage,
+    userError} from '../../src/asserts';
 
 describe('asserts', () => {
 
@@ -22,6 +25,14 @@ describe('asserts', () => {
     expect(function() {
       assert(false, 'xyz');
     }).to.throw(/xyz/);
+    try {
+      assert(false, '123');
+    } catch (e) {
+      expect(e.message).to.equal('123' + ASSERT_SENTINEL);
+      return;
+    }
+    // Unreachable
+    expect(false).to.be.true;
   });
 
   it('should not fail', () => {
@@ -51,7 +62,7 @@ describe('asserts', () => {
       error = e;
     }
     expect(error).to.be.instanceof(Error);
-    expect(error.message).to.equal('1 a 2 b 3');
+    expect(error.message).to.equal('1 a 2 b 3' + ASSERT_SENTINEL);
     expect(error.messageArray).to.deep.equal([1, 'a', 2, 'b', 3]);
   });
 
@@ -66,6 +77,34 @@ describe('asserts', () => {
     expect(error).to.be.instanceof(Error);
     expect(error.associatedElement).to.equal(div);
     expect(error.fromAssert).to.equal(true);
+  });
+
+  it('should recognize asserts', () => {
+    try {
+      assert(false, '123');
+    } catch (e) {
+      expect(isAssertErrorMessage(e.message)).to.be.true;
+      return;
+    }
+    // Unreachable
+    expect(false).to.be.true;
+  });
+
+  it('should recognize non-asserts', () => {
+    try {
+      throw new Error('123');
+    } catch (e) {
+      expect(isAssertErrorMessage(e.message)).to.be.false;
+      return;
+    }
+    // Unreachable
+    expect(false).to.be.true;
+  });
+
+  it('should create user errors', () => {
+    expect(userError('test')).to.be.instanceof(Error);
+    expect(isAssertErrorMessage(userError('test').message)).to.be.true;
+    expect(userError('test').message).to.contain('test');
   });
 });
 
