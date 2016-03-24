@@ -28,6 +28,7 @@ import {timer} from '../src/timer';
 import {user} from '../src/log';
 import {userNotificationManagerFor} from '../src/user-notification';
 import {viewerFor} from '../src/viewer';
+import {removeElement} from '../src/dom';
 
 
 /** @private @const These tags are allowed to have fixed positioning */
@@ -284,6 +285,30 @@ export function installAd(win) {
       return loadPromise(this.iframe_);
     }
 
+    /** @override  */
+    unlayoutCallback() {
+      if (this.iframe_) {
+        removeElement(this.iframe_);
+        if (this.placeholder_) {
+          this.togglePlaceholder(true);
+        }
+        if (this.fallback_) {
+          this.toggleFallback(false);
+        }
+
+        this.iframe_ = null;
+        // IntersectionObserver's listeners were cleaned up by
+        // setInViewport(false) before #unlayoutCallback
+        this.intersectionObserver_ = null;
+      }
+      return true;
+    }
+
+    /** @override  */
+    unlayoutOnPause() {
+      return true;
+    }
+
     /**
      * @return {!Promise<string|undefined>} A promise for a CID or undefined if
      *     - the ad network does not request one or
@@ -393,7 +418,7 @@ export function installAd(win) {
         }
         // Remove the iframe only if it is not the master.
         if (this.iframe_.name.indexOf('_master') == -1) {
-          this.element.removeChild(this.iframe_);
+          removeElement(this.iframe_);
           this.iframe_ = null;
         }
       });
