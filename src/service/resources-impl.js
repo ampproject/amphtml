@@ -1751,7 +1751,17 @@ export class Resource {
    * @return {boolean}
    */
   renderOutsideViewport() {
-    return this.element.renderOutsideViewport();
+    const renders = this.element.renderOutsideViewport();
+    // Boolean interface, element is either always allowed or never allowed to
+    // render outside viewport.
+    if (renders === true || renders === false) {
+      return renders;
+    }
+    // Numeric interface, element is allowed to render outside viewport when it
+    // is within X times the viewport height of the current viewport.
+    const viewportBox = this.viewport_.getRect();
+    const distanceFromViewport = this.layoutBox_.top - viewportBox.bottom;
+    return distanceFromViewport <= renders * viewportBox.height;
   }
 
   /**
@@ -1789,7 +1799,7 @@ export class Resource {
       return Promise.resolve();
     }
 
-    if (!this.renderOutsideViewport() && !this.isInViewport()) {
+    if (!this.isInViewport() && !this.renderOutsideViewport()) {
       dev.fine(TAG_, 'layout canceled due to element not being in viewport:',
           this.debugid, this.state_);
       this.state_ = ResourceState_.READY_FOR_LAYOUT;
