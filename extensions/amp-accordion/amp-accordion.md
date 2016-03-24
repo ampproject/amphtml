@@ -22,8 +22,8 @@ limitations under the License.
     <td>An accordion provides a way for viewers to glance at the content outline and jump to any section. This is helpful for handheld mobile devices where even a couple of sentences into a section requires scrolling.</td>
   </tr>
   <tr>
-    <td class="col-fourty"><strong>Availability</strong></td>
-    <td><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a>; no validations yet.</td>
+    <td class="col-fourty" width="40%"><strong>Availability</strong></td>
+    <td>Stable</td>
   </tr>
   <tr>
     <td class="col-fourty"><strong>Required Script</strong></td>
@@ -40,11 +40,9 @@ limitations under the License.
 Each of the `amp-accordion` component’s immediate children is considered a section in the accordion. Each of these nodes must be a `<section>` tag.
 
 - An `amp-accordion` can contain one or more `<section>`s as its direct children.
-- Each `<section>` must contain only two direct children.
-- The first child (of the section) will be considered as the heading of the section. Clicking/tapping on this section will trigger the expand/collapse behaviour.
-- The second child (of the section) will be the content or the section
-- There is no restriction on the type of tags that could be used for the `<section>`’s children.
-- Any additional children of the `<section>` would be ignored not be displayed. (This should just be a safety backup and should be enforced in the validator)
+- Each `<section>` must contain exactly two direct children.
+- The first child (of the section) must be one of `h1`, `h2`, ..., `h6` and is the heading of the section.
+- The second child (of the section) can be any tag allowed in AMP HTML and is the content of the section.
 - Clicking/tapping on the heading of a section expands/ or collapses the section.
 
 Example:
