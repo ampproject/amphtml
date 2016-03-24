@@ -68,6 +68,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [OpenX](../ads/openx.md)
 - [plista](../ads/plista.md)
 - [Smart AdServer](../ads/smartadserver.md)
+- [Sortable](../ads/sortable.md)
 - [Yieldmo](../ads/yieldmo.md)
 - [Revcontent](../ads/revcontent.md)
 - [TripleLift](../ads/triplelift.md)

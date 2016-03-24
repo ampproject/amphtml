@@ -39,6 +39,7 @@ export const adPrefetch = {
   revcontent: 'https://labs-cdn.revcontent.com/build/amphtml/revcontent.amp.min.js',
   teads: 'https://cdn.teads.tv/media/format/v3/teads-format.min.js',
   imobile: 'https://spamp.i-mobile.co.jp/script/amp.js',
+  sortable: 'https://www.googletagservices.com/tag/js/gpt.js',
 };
 
 /**
@@ -104,6 +105,12 @@ export const adPreconnect = {
   rubicon: [
     'https://ads.rubiconproject.com',
     'https://optimized-by.rubiconproject.com',
+  ],
+  sortable: [
+    'https://tags-cdn.deployads.com',
+    'https://partner.googleadservices.com',
+    'https://securepubads.g.doubleclick.net',
+    'https://tpc.googlesyndication.com',
   ],
   imobile: 'https://spad.i-mobile.co.jp',
   webediads: [
