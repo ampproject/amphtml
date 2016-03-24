@@ -17,7 +17,6 @@
 import {Timer} from '../../../../src/timer';
 import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
-import {toggleExperiment} from '../../../../src/experiments';
 require('../amp-accordion');
 
 adopt(window);
@@ -26,7 +25,6 @@ describe('amp-accordion', () => {
   const timer = new Timer(window);
   function getAmpAccordion() {
     return createIframePromise().then(iframe => {
-      toggleExperiment(iframe.win, 'amp-accordion', true);
       const ampAccordion = iframe.doc.createElement('amp-accordion');
       for (let i = 0; i < 3; i++) {
         const section = iframe.doc.createElement('section');
