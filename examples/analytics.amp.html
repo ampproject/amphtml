@@ -399,6 +399,24 @@ Container for analytics tags. Positioned far away from top to make sure that doe
 </script>
 </amp-analytics>
 <!-- End Webtrekk example -->
+
+<!-- SOASTA mPulse example -->
+<amp-analytics type="mpulse" config="https://c.go-mpulse.net/concerto/api/amp-config.json?d=SOURCE_HOST&key=XXXXX-XXXXX-XXXXX-XXXXX-XXXXX">
+<script type="application/json">
+{
+  "extraUrlParams": {
+    "ab_test": "a",
+    "page_group": "Home",
+    "custom_metric.Cache_Hits": 15,
+    "custom_metric.Cache_Misses": "0",
+    "custom_metric.SQL_Queries": 2,
+    "custom_dimension.Market_Vertical": "Sports",
+    "custom_dimension.Page_Language": "English"
+  }
+}
+</script>
+</amp-analytics>
+<!-- End SOASTA mPulse example -->
 </div>
 
 <div class="logo"></div>

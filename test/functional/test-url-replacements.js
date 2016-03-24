@@ -268,6 +268,33 @@ describe('UrlReplacements', () => {
     });
   });
 
+  it('should replace NAV_REDIRECT_COUNT', () => {
+    return expand('?sh=NAV_REDIRECT_COUNT').then(res => {
+      expect(res).to.match(/sh=\d+/);
+    });
+  });
+
+  it('should replace NAV_TIMING', () => {
+    return expand('?a=NAV_TIMING(navigationStart)' +
+        '&b=NAV_TIMING(navigationStart,responseStart)').then(res => {
+          expect(res).to.match(/a=\d+&b=\d+/);
+        });
+  });
+
+  it('should replace NAV_TIMING when attribute names are invalid', () => {
+    return expand('?a=NAV_TIMING(invalid)&b=NAV_TIMING(invalid,invalid)' +
+        '&c=NAV_TIMING(navigationStart,invalid)' +
+        '&d=NAV_TIMING(invalid,responseStart)').then(res => {
+          expect(res).to.match(/a=&b=&c=&d=/);
+        });
+  });
+
+  it('should replace NAV_TYPE', () => {
+    return expand('?sh=NAV_TYPE').then(res => {
+      expect(res).to.match(/sh=\d+/);
+    });
+  });
+
   it('should replace DOMAIN_LOOKUP_TIME', () => {
     return expand('?sh=DOMAIN_LOOKUP_TIME').then(res => {
       expect(res).to.match(/sh=\d+/);
