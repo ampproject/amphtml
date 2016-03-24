@@ -448,6 +448,7 @@ export const ANALYTICS_CONFIG = {
   },
 
   'adobeanalytics': {
+    'transport': {'xhrpost': false, 'beacon': false, 'image': true},
     'vars': {
       'pageName': 'TITLE',
       'host': '',
@@ -472,6 +473,15 @@ export const ANALYTICS_CONFIG = {
           '&s=${screenWidth}x${screenHeight}',
       'pageview': 'https://${host}${requestPath}?${basePrefix}',
       'click': 'https://${host}${requestPath}?${basePrefix}&pe=lnk_${linkType}&pev1=${linkUrl}&pev2=${linkName}',
+    },
+  },
+
+  'adobeanalytics_nativeConfig': {
+    'triggers': {
+      'pageLoad': {
+        'on': 'visible',
+        'request': 'iframeMessage',
+      },
     },
   },
 
@@ -663,5 +673,9 @@ export const ANALYTICS_CONFIG = {
 
 };
 ANALYTICS_CONFIG['infonline']['triggers']['pageview']['iframe' +
+/* TEMPORARY EXCEPTION */ 'Ping'] = true;
+
+ANALYTICS_CONFIG['adobeanalytics_nativeConfig']
+  ['triggers']['pageLoad']['iframe' +
 /* TEMPORARY EXCEPTION */ 'Ping'] = true;
 
