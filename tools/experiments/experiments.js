@@ -58,14 +58,6 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
         'amp-dynamic-css-classes/amp-dynamic-css-classes.md',
   },
-
-  // Amp Accordion
-  {
-    id: 'amp-accordion',
-    name: 'Amp Accordion',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-        'amp-accordion/amp-accordion.md',
-  },
 ];
 
 
