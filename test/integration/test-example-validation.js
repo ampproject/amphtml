@@ -74,6 +74,7 @@ describe('example', function() {
     // TODO(dvoytenko, #2600): remove this from whitelist once the message
     // contains more specific script identifier.
     /The tag \'script\' is disallowed/,
+    /\'amp-reach-player\' is disallowed/,
   ];
 
   const usedWhitelist = [];
