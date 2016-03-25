@@ -15,7 +15,6 @@
  */
 
 import {createServedIframe} from '../../../../testing/iframe';
-import {toggleExperiment} from '../../../../src/experiments';
 import {viewerFor} from '../../../../src/viewer';
 import {vsyncFor} from '../../../../src/vsync';
 
@@ -45,12 +44,11 @@ describe('dynamic classes are inserted at runtime', () => {
     };
   }
 
-  function setup(enabled, userAgent, referrer) {
+  function setup(userAgent, referrer) {
     return createServedIframe(iframeSrc).then(fixture => {
       const win = fixture.win;
       documentElement = fixture.doc.documentElement;
 
-      toggleExperiment(win, 'dynamic-css-classes', enabled);
       mockVsync(win);
 
       if (userAgent !== undefined) {
@@ -64,48 +62,32 @@ describe('dynamic classes are inserted at runtime', () => {
     });
   }
 
-  describe('when experiment is disabled', () => {
-    beforeEach(function() {
-      this.timeout(5000);
-      return setup(false);
-    });
+  beforeEach(function() {
+    this.timeout(5000);
+  });
 
-    it('should not include referrer classes', () => {
-      expect(documentElement).not.to.have.class('amp-referrer-localhost');
-    });
-
-    it('should not include viewer class', () => {
-      expect(documentElement).not.to.have.class('amp-viewer');
+  it('should include referrer classes', () => {
+    return setup().then(() => {
+      expect(documentElement).to.have.class('amp-referrer-localhost');
     });
   });
 
-  describe('when experiment is enabled', () => {
-    beforeEach(function() {
-      this.timeout(5000);
-      return setup(true);
-    });
-
-    it('should include referrer classes', () => {
-      expect(documentElement).to.have.class('amp-referrer-localhost');
-    });
-
-    it('should include viewer class', () => {
+  it('should include viewer class', () => {
+    return setup().then(() => {
       expect(documentElement).to.have.class('amp-viewer');
     });
   });
 
   describe('Normalizing Referrers', () => {
     it('should normalize twitter shortlinks to twitter', function() {
-      this.timeout(5000);
-      return setup(true, '', tcoReferrer).then(() => {
+      return setup('', tcoReferrer).then(() => {
         expect(documentElement).to.have.class('amp-referrer-com');
         expect(documentElement).to.have.class('amp-referrer-twitter-com');
       });
     });
 
     it('should normalize pinterest on android', function() {
-      this.timeout(5000);
-      return setup(true, PinterestUA, '').then(() => {
+      return setup(PinterestUA, '').then(() => {
         expect(documentElement).to.have.class('amp-referrer-com');
         expect(documentElement).to.have.class('amp-referrer-pinterest-com');
         expect(documentElement).to.have.class('amp-referrer-www-pinterest-com');
@@ -114,7 +96,6 @@ describe('dynamic classes are inserted at runtime', () => {
   });
 
   it('should delay unhiding the body', function() {
-    this.timeout(5000);
     return createServedIframe(iframeSrc).then(fixture => {
       expect(fixture.doc.body).to.be.hidden;
 

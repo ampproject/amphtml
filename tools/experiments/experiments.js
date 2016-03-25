@@ -50,14 +50,6 @@ const EXPERIMENTS = [
     spec: 'https://github.com/ampproject/amphtml/blob/master/' +
         'README.md#amp-dev-channel',
   },
-
-  // Dynamic CSS Classes
-  {
-    id: 'dynamic-css-classes',
-    name: 'Dynamic CSS Classes',
-    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
-        'amp-dynamic-css-classes/amp-dynamic-css-classes.md',
-  },
 ];
 
 
