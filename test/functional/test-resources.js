@@ -126,6 +126,11 @@ describe('Resources', () => {
     expect(resources.calcTaskTimeout_(task_p0)).to.equal(0);
     expect(resources.calcTaskTimeout_(task_p1)).to.equal(0);
 
+    // Idle render penalty after first visible
+    resources.firstVisibleTime_ = 0;
+    expect(resources.calcTaskTimeout_(task_p0)).to.equal(0);
+    expect(resources.calcTaskTimeout_(task_p1)).to.equal(1000);
+
     // Hight priority task in pool
     resources.exec_.tasks_ = [task_p0];
     expect(resources.calcTaskTimeout_(task_p0)).to.equal(0);
