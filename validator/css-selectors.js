@@ -36,10 +36,11 @@ goog.require('parse_css.EOFToken');
 goog.require('parse_css.ErrorToken');
 goog.require('parse_css.Token');
 goog.require('parse_css.TokenStream');
+goog.require('parse_css.extractAFunction');
 
 /**
  * Abstract super class for CSS Selectors. The Token class, which this
- * class inherits from has line, col, and tokenType fields.
+ * class inherits from, has line, col, and tokenType fields.
  */
 parse_css.Selector = class extends parse_css.Token {
 
@@ -84,7 +85,8 @@ parse_css.SelectorVisitor = class {
 };
 
 /**
- * Visits the node by calling the appropriate methods on the provided visitor.
+ * Visits selectorNode and its children, recursively, by calling the
+ * appropriate methods on the provided visitor.
  * @param {!parse_css.Selector} selectorNode
  * @param {!parse_css.SelectorVisitor} visitor
  */
@@ -105,21 +107,22 @@ parse_css.traverseSelectors = function(selectorNode, visitor) {
  * This node models type selectors and universial selectors.
  * http://www.w3.org/TR/css3-selectors/#type-selectors
  * http://www.w3.org/TR/css3-selectors/#universal-selector
- *
- * Choices for namespacePrefix:
- * 'a specific namespace prefix' means 'just that specific namespace'.
- * '' means 'without a namespace'
- * '*' means 'any namespace including without a namespace'
- * null means the default namespace if one is declared, and '*' otherwise.
- *
- * The universal selector is covered by setting the elementName to '*'.
  */
 parse_css.TypeSelector = class extends parse_css.Selector {
   /**
+   * Choices for namespacePrefix:
+   * - 'a specific namespace prefix' means 'just that specific namespace'.
+   * - '' means 'without a namespace'
+   * - '*' means 'any namespace including without a namespace'
+   * - null means the default namespace if one is declared, and '*' otherwise.
+   *
+   * The universal selector is covered by setting the elementName to '*'.
+   *
    * @param {?string} namespacePrefix
    * @param {string} elementName
    */
   constructor(namespacePrefix, elementName) {
+    super();
     /** @type {?string} */
     this.namespacePrefix = namespacePrefix;
     /** @type {string} */
@@ -157,7 +160,7 @@ parse_css.TypeSelector = class extends parse_css.Selector {
 /**
  * Helper function for determining whether the provided token is a specific
  * delimiter.
- * @param {!Object} token
+ * @param {!parse_css.Token} token
  * @param {string} delimChar
  * @return {boolean}
  */
@@ -225,6 +228,7 @@ parse_css.IdSelector = class extends parse_css.Selector {
    * @param {string} value
    */
   constructor(value) {
+    super();
     /** @type {string} */
     this.value = value;
     /** @type {parse_css.TokenType} */
@@ -275,10 +279,16 @@ parse_css.AttrSelector = class extends parse_css.Selector {
   /**
    * @param {string?} namespacePrefix
    * @param {!string} attrName
-   * @param {string?} matchOperator
-   * @param {string?} value
+   * @param {!string} matchOperator is either the string
+   * representation of the match operator (e.g., '=' or '~=') or '',
+   * in which case the attribute selector is a check for the presence
+   * of the attribute.
+   * @param {!string} value is the value to apply the match operator
+   * against, or if matchOperator is '', then this must be empty as
+   * well.
    */
   constructor(namespacePrefix, attrName, matchOperator, value) {
+    super();
     /** @type {string?} */
     this.namespacePrefix = namespacePrefix;
     /** @type {!string} */
@@ -364,8 +374,8 @@ parse_css.parseAnAttrSelector = function(tokenStream) {
   // 6.3.2 Substring matching attribute selectors
   // (https://www.w3.org/TR/css3-selectors/#attribute-substrings).
 
-  /** @type {string?} */
-  let matchOperator = null;
+  /** @type {string} */
+  let matchOperator = '';
   if (tokenStream.current() instanceof parse_css.DelimToken &&
       /** @type {!parse_css.DelimToken} */(
           tokenStream.current()).value === '=') {
@@ -390,8 +400,8 @@ parse_css.parseAnAttrSelector = function(tokenStream) {
   if (tokenStream.current() instanceof parse_css.WhitespaceToken) {
     tokenStream.consume();
   }
-  /** @type {string?} */
-  let value = null;
+  /** @type {string} */
+  let value = '';
   if (matchOperator !== null) {  // If we saw an operator, parse the value.
     if (tokenStream.current() instanceof parse_css.IdentToken) {
       const ident = goog.asserts.assertInstanceof(
@@ -439,18 +449,22 @@ parse_css.parseAnAttrSelector = function(tokenStream) {
  * http://www.w3.org/TR/css3-selectors/#pseudo-elements.
  *
  * Typically written as ':visited', ':lang(fr)', and '::first-line'.
+ *
+ * isClass: Pseudo selectors with a single colon (e.g., ':visited')
+ * are pseudo class selectors. Selectors with two colons (e.g.,
+ * '::first-line') are pseudo elements.
+ *
+ * func: If it's a function style pseudo selector, like lang(fr), then func
+ * the function tokens. TODO(powdercloud): parse this in more detail.
  */
 parse_css.PseudoSelector = class extends parse_css.Selector {
   /**
-   * @param {boolean} isClass selectors with a single colon (e.g., ':visited')
-   *   are pseudo class selectors. Selectors with two colons
-   *   (e.g., '::first-line') are pseudo elements.
+   * @param {boolean} isClass
    * @param {string} name
-   * @param {!Array<!parse_css.Token>} func If it's a function style
-   * pseudo selector, like lang(fr), then this parameter takes the function
-   * tokens.
+   * @param {!Array<!parse_css.Token>} func
    */
   constructor(isClass, name, func) {
+    super();
     /** @type {boolean} */
     this.isClass = isClass;
     /** @type {string} */
@@ -532,6 +546,7 @@ parse_css.ClassSelector = class extends parse_css.Selector {
    * @param {string} value the class to match.
    */
   constructor(value) {
+    super();
     /** @type {string} */
     this.value = value;
     /** @type {parse_css.TokenType} */
@@ -551,7 +566,7 @@ parse_css.ClassSelector = class extends parse_css.Selector {
   accept(visitor) {
     visitor.visitClassSelector(this);
   }
-}
+};
 
 /**
  * tokenStream.current() must be the '.' delimiter token.
@@ -596,6 +611,7 @@ parse_css.SimpleSelectorSequence = class extends parse_css.Selector {
    * @param {!Array<!parse_css.IdSelector>} otherSelectors
    */
   constructor(typeSelector, otherSelectors) {
+    super();
     /** @type {!parse_css.TypeSelector} */
     this.typeSelector = typeSelector;
     /** @type {!Array<!parse_css.IdSelector>} */
@@ -625,7 +641,7 @@ parse_css.SimpleSelectorSequence = class extends parse_css.Selector {
   accept(visitor) {
     visitor.visitSimpleSelectorSequence(this);
   }
-}
+};
 
 /**
  * tokenStream.current must be the first token of the sequence.
@@ -710,6 +726,7 @@ parse_css.Combinator = class extends parse_css.Selector {
    * @param {!parse_css.SimpleSelectorSequence} right
    */
   constructor(combinatorType, left, right) {
+    super();
     /** @type {!string} */
     this.combinatorType = combinatorType;
     /** @type {!parse_css.SimpleSelectorSequence|!parse_css.Combinator} */
@@ -851,13 +868,11 @@ parse_css.parseASelector = function(tokenStream) {
  */
 parse_css.SelectorsGroup = class extends parse_css.Selector {
   /**
-   * @param {number} line
-   * @param {number} col
    * @param {!Array<!parse_css.SimpleSelectorSequence|
    *         !parse_css.Combinator>} elements
    */
-  constructor(line, col, elements) {
-    super(line, col);
+  constructor(elements) {
+    super();
     /** @type {!Array<!parse_css.SimpleSelectorSequence|
         !parse_css.Combinator>} */
     this.elements = elements;
@@ -924,7 +939,7 @@ parse_css.parseASelectorsGroup = function(tokenStream) {
     if (elements.length == 1) {
       return elements[0];
     }
-    const group = new parse_css.SelectorsGroup(line, col, elements);
+    const group = new parse_css.SelectorsGroup(elements);
     group.line = line;
     group.col = col;
     return group;
@@ -952,4 +967,4 @@ parse_css.parseSelectors = function(tokenStream, errors) {
     errors.push(error);
   }
   return (group instanceof parse_css.ErrorToken) ? null : group;
-}
+};
