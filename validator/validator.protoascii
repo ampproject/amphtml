@@ -25,7 +25,7 @@ min_validator_revision_required: 112
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 190
+spec_file_revision: 193
 # Rules for AMP HTML
 # (https://www.ampproject.org/docs/reference/spec.html)
 #
@@ -4537,6 +4537,11 @@ error_formats {
           "'%4', which is invalid."
 }
 error_formats {
+  code: DUPLICATE_DIMENSION
+  format: "Multiple image candidates with the same width or pixel density "
+          "found in attribute '%1' in tag '%2'."
+}
+error_formats {
   code: MISSING_URL
   format: "Missing URL for attribute '%1' in tag '%2'."
 }
@@ -4619,7 +4624,8 @@ error_formats {
 }
 error_formats {
   code: ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT
-  format: "The attribute '%1' in tag '%2' is disallowed by specified layout '%3'."
+  format: "The attribute '%1' in tag '%2' is disallowed by specified "
+          "layout '%3'."
 }
 error_formats {
   code: INCORRECT_NUM_CHILD_TAGS

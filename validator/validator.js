@@ -48,7 +48,7 @@ goog.require('parse_css.RuleVisitor');
 goog.require('parse_css.extractUrls');
 goog.require('parse_css.parseAStylesheet');
 goog.require('parse_css.tokenize');
-goog.require('parse_srcset.SrcsetSourceDef');
+goog.require('parse_srcset.SrcsetParsingResult');
 goog.require('parse_srcset.parseSrcset');
 
 /**
@@ -186,52 +186,54 @@ function specificity(code) {
       return 31;
     case amp.validator.ValidationError.Code.ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT:
       return 32;
-    case amp.validator.ValidationError.Code.DISALLOWED_RELATIVE_URL:
+    case amp.validator.ValidationError.Code.DUPLICATE_DIMENSION:
       return 33;
-    case amp.validator.ValidationError.Code.MISSING_URL:
+    case amp.validator.ValidationError.Code.DISALLOWED_RELATIVE_URL:
       return 34;
-    case amp.validator.ValidationError.Code.INVALID_URL_PROTOCOL:
+    case amp.validator.ValidationError.Code.MISSING_URL:
       return 35;
-    case amp.validator.ValidationError.Code.INVALID_URL:
+    case amp.validator.ValidationError.Code.INVALID_URL_PROTOCOL:
       return 36;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_STRAY_TRAILING_BACKSLASH:
+    case amp.validator.ValidationError.Code.INVALID_URL:
       return 37;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_COMMENT:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_STRAY_TRAILING_BACKSLASH:
       return 38;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_STRING:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_COMMENT:
       return 39;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_BAD_URL:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_STRING:
       return 40;
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_BAD_URL:
+      return 41;
     case amp.validator.ValidationError.Code
         .CSS_SYNTAX_EOF_IN_PRELUDE_OF_QUALIFIED_RULE:
-      return 41;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_DECLARATION:
       return 42;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_INCOMPLETE_DECLARATION:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_DECLARATION:
       return 43;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_ERROR_IN_PSEUDO_SELECTOR:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_INCOMPLETE_DECLARATION:
       return 44;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_MISSING_SELECTOR:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_ERROR_IN_PSEUDO_SELECTOR:
       return 45;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_NOT_A_SELECTOR_START:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_MISSING_SELECTOR:
       return 46;
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_NOT_A_SELECTOR_START:
+      return 47;
     case amp.validator.ValidationError.Code.
         CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR:
-      return 47;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_MISSING_URL:
       return 48;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_URL:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_MISSING_URL:
       return 49;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_URL_PROTOCOL:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_URL:
       return 50;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_DISALLOWED_RELATIVE_URL:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_URL_PROTOCOL:
       return 51;
-    case amp.validator.ValidationError.Code.INCORRECT_NUM_CHILD_TAGS:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_DISALLOWED_RELATIVE_URL:
       return 52;
-    case amp.validator.ValidationError.Code.DISALLOWED_CHILD_TAG_NAME:
+    case amp.validator.ValidationError.Code.INCORRECT_NUM_CHILD_TAGS:
       return 53;
-    case amp.validator.ValidationError.Code.DISALLOWED_FIRST_CHILD_TAG_NAME:
+    case amp.validator.ValidationError.Code.DISALLOWED_CHILD_TAG_NAME:
       return 54;
+    case amp.validator.ValidationError.Code.DISALLOWED_FIRST_CHILD_TAG_NAME:
+      return 55;
     case amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_ATTR_SELECTOR:
       return 55;
     case amp.validator.ValidationError.Code.GENERAL_DISALLOWED_TAG:
@@ -1470,17 +1472,19 @@ class ParsedAttrSpec {
             tagSpec.specUrl, result);
         return;
       }
-      /** @type {!Array<!parse_srcset.SrcsetSourceDef>} */
-      const srcsetImages = [];
-      if (!parse_srcset.parseSrcset(srcset, srcsetImages)) {
+      /** @type {!parse_srcset.SrcsetParsingResult} */
+      const parseResult = parse_srcset.parseSrcset(srcset);
+      if (!parseResult.success) {
         context.addError(
-            amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
+            parseResult.errorCode,
             /* params */ [attrName, getTagSpecName(tagSpec), attrValue],
             tagSpec.specUrl, result);
         return;
       }
-      for (const image of srcsetImages) {
-        maybeUris.push(image.url);
+      if (parseResult.srcsetImages !== null) {
+        for (const image of parseResult.srcsetImages) {
+          maybeUris.push(image.url);
+        }
       }
     }
     if (maybeUris.length === 0) {
@@ -3333,6 +3337,11 @@ amp.validator.categorizeError = function(error) {
     if (goog.string./*OK*/startsWith(error.params[1], "amp-")) {
       return amp.validator.ErrorCategory.Code.AMP_TAG_PROBLEM;
     }
+    return amp.validator.ErrorCategory.Code.DISALLOWED_HTML;
+  }
+  // E.g. "The dimension '1x' in attribute 'srcset' appears more than once."
+  if (error.code ==
+      amp.validator.ValidationError.Code.DUPLICATE_DIMENSION) {
     return amp.validator.ErrorCategory.Code.DISALLOWED_HTML;
   }
   return amp.validator.ErrorCategory.Code.GENERIC;

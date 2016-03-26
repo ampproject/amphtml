@@ -377,7 +377,7 @@ message ValidationError {
     DEV_WARNING = 3; // DEPRECATED DO NOT USE.
   }
   optional Severity severity = 6 [ default = ERROR ];
-  // NEXT AVAILABLE TAG: 60
+  // NEXT AVAILABLE TAG: 61
   enum Code {
     UNKNOWN_CODE = 0;
     MANDATORY_TAG_MISSING = 1;
@@ -391,6 +391,7 @@ message ValidationError {
     SPECIFIED_LAYOUT_INVALID = 26;
     MANDATORY_ATTR_MISSING = 5;
     MANDATORY_ONEOF_ATTR_MISSING = 28;
+    DUPLICATE_DIMENSION = 60;
     DUPLICATE_UNIQUE_TAG = 6;
     WRONG_PARENT_TAG = 7;
     STYLESHEET_TOO_LONG_OLD_VARIANT = 8;

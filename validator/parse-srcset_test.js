@@ -19,7 +19,6 @@
  *    https://github.com/ampproject/amphtml/blob/master/test/functional/test-srcset.js
  */
 goog.provide('parse_srcset.ParseSrcsetTest');
-goog.require('parse_srcset.SrcsetSourceDef');
 goog.require('parse_srcset.parseSrcset');
 
 /**
@@ -42,16 +41,15 @@ function assertStrictEqual(expected, saw) {
  * @param {!Array<!parse_srcset.SrcsetSourceDef>} expected
  */
 function test(s, expected) {
-  const res = [];
-  const hasNoErrors = parse_srcset.parseSrcset(s, res);
-  assertStrictEqual(res.length, expected.length);
+  const result = parse_srcset.parseSrcset(s);
+  assertStrictEqual(result.srcsetImages.length, expected.length);
   for (let i = 0; i < expected.length; i++) {
-    const r = res[i];
+    const r = result.srcsetImages[i];
     const e = expected[i];
     assertStrictEqual(r.url, e.url);
     assertStrictEqual(r.widthOrPixelDensity, e.widthOrPixelDensity);
   }
-  expect(hasNoErrors).toBe(true);
+  expect(result.success).toBe(true);
 }
 
 describe('Srcset parseSrcset', () => {
@@ -100,8 +98,9 @@ describe('Srcset parseSrcset', () => {
   });
 
   it('should not accept multiple sources with duplicate width', () => {
-    expect(parse_srcset.parseSrcset(
-        'image1 10w, image2 100w, image3 1000w, image4 10w', [])).toBe(false);
+    let result = parse_srcset.parseSrcset(
+        'image1 10w, image2 100w, image3 1000w, image4 10w');
+    expect(result.success).toBe(false);
   });
 
   it('should accept width-based sources', () => {
@@ -225,30 +224,37 @@ describe('Srcset parseSrcset', () => {
   });
 
   it('should reject urls with spaces', () => {
-    expect(parse_srcset.parseSrcset('image 1x png 1x', [])).toBe(false);
-    expect(parse_srcset.parseSrcset(
-        'image 1x png 1x, image-2x.png 2x', [])).toBe(false);
+    let result = parse_srcset.parseSrcset('image 1x png 1x');
+    expect(result.success).toBe(false);
+    result = parse_srcset.parseSrcset('image 1x png 1x, image-2x.png 2x');
+    expect(result.success).toBe(false);
   });
 
   it('should reject width or pixel density with negatives', () => {
-    expect(parse_srcset.parseSrcset('image.png -1x', [])).toBe(false);
-    expect(parse_srcset.parseSrcset(
-        'image.png 1x, image2.png -2x', [])).toBe(false);
-    expect(parse_srcset.parseSrcset('image.png -480w', [])).toBe(false);
-    expect(parse_srcset.parseSrcset(
-        'image.png 1x, image2.png -100w', [])).toBe(false);
+    let result = parse_srcset.parseSrcset('image.png -1x');
+    expect(result.success).toBe(false);
+    result = parse_srcset.parseSrcset('image.png 1x, image2.png -2x');
+    expect(result.success).toBe(false);
+    result = parse_srcset.parseSrcset('image.png -480w');
+    expect(result.success).toBe(false);
+    result = parse_srcset.parseSrcset('image.png 1x, image2.png -100w');
+    expect(result.success).toBe(false);
   });
 
   it('should reject empty srcsets', () => {
-    expect(parse_srcset.parseSrcset('', [])).toBe(false);
-    expect(parse_srcset.parseSrcset(' \n\t\f\r', [])).toBe(false);
+    let result = parse_srcset.parseSrcset('');
+    expect(result.success).toBe(false);
+    result = parse_srcset.parseSrcset(' \n\t\f\r');
+    expect(result.success).toBe(false);
   });
 
   it('should reject invalid text after valid srcsets', () => {
-    expect(parse_srcset.parseSrcset('image1, image2, ,,,', [])).toBe(false);
+    let result = parse_srcset.parseSrcset('image1, image2, ,,,');
+    expect(result.success).toBe(false);
   });
 
   it('should reject no comma between sources', () => {
-    expect(parse_srcset.parseSrcset('image1 100w image2 50w', [])).toBe(false);
+    let result = parse_srcset.parseSrcset('image1 100w image2 50w');
+    expect(result.success).toBe(false);
   });
 });

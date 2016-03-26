@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-goog.provide('parse_srcset.SrcsetSourceDef');
+goog.provide('parse_srcset.SrcsetParsingResult');
 goog.provide('parse_srcset.parseSrcset');
 goog.require('goog.structs.Set');
 
@@ -28,18 +28,27 @@ goog.require('goog.structs.Set');
 parse_srcset.SrcsetSourceDef;
 
 /**
+ * Return value for parseSrcset.
+ * @typedef {{
+ *   success: boolean,
+ *   errorCode: !amp.validator.ValidationError.Code,
+ *   srcsetImages: !Array<!parse_srcset.SrcsetSourceDef>
+ * }}
+ */
+parse_srcset.SrcsetParsingResult;
+
+/**
  * Parses the text representation of srcset into array of SrcsetSourceDef.
  * See https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#Attributes.
  * See http://www.w3.org/html/wg/drafts/html/master/semantics.html#attr-img-srcset.
  *
- * If parsing fails, returns false.
+ * If parsing fails, returns false in SrcsetParsingResult.status.
  *
  * @param {!string} srcset
- * @param {!Array<!parse_srcset.SrcsetSourceDef>} srcsetImages
- * @return {boolean}
+ * @return {!parse_srcset.SrcsetParsingResult}
  * @export
  */
-parse_srcset.parseSrcset = function(srcset, srcsetImages) {
+parse_srcset.parseSrcset = function(srcset) {
   // Regex for leading spaces, followed by an optional comma and whitespace,
   // followed by an URL*, followed by an optional space, followed by an
   // optional width or pixel density**, followed by spaces, followed by an
@@ -77,6 +86,8 @@ parse_srcset.parseSrcset = function(srcset, srcsetImages) {
   let remainingSrcset = srcset;
   /** @type {!goog.structs.Set<string>} */
   let seenWidthOrPixelDensity = new goog.structs.Set();
+  /** @type {!Array<parse_srcset.SrcsetSourceDef>} */
+  let srcsetImages = [];
   let source;
   while (source = imageCandidateRegex.exec(srcset)) {
     let url = source[1];
@@ -85,8 +96,13 @@ parse_srcset.parseSrcset = function(srcset, srcsetImages) {
     if (widthOrPixelDensity === undefined) {
       widthOrPixelDensity = '1x';
     }
+    // Duplicate width or pixel density in srcset.
     if (seenWidthOrPixelDensity.contains(widthOrPixelDensity)) {
-      return false;
+      return {
+        success: false,
+        errorCode: amp.validator.ValidationError.Code.DUPLICATE_DIMENSION,
+        srcsetImages: srcsetImages
+      };
     }
     seenWidthOrPixelDensity.add(widthOrPixelDensity);
     srcsetImages.push(
@@ -98,13 +114,25 @@ parse_srcset.parseSrcset = function(srcset, srcsetImages) {
     }
     // More srcset, comma expected as separator for image candidates.
     if (comma === undefined) {
-      return false;
+      return {
+        success: false,
+        errorCode: amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
+        srcsetImages: srcsetImages
+      };
     }
   }
   // Regex didn't consume all of the srcset string
   if (remainingSrcset !== '') {
-    return false;
+    return {
+      success: false,
+      errorCode: amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
+      srcsetImages: srcsetImages
+    };
   }
   // Must have at least one image candidate.
-  return srcsetImages.length > 0;
+  return {
+    success: srcsetImages.length > 0,
+    errorCode: amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
+    srcsetImages: srcsetImages
+  };
 };
