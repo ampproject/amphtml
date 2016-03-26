@@ -16,6 +16,7 @@
  */
 goog.provide('parse_srcset.SrcsetParsingResult');
 goog.provide('parse_srcset.parseSrcset');
+goog.require('amp.validator.ValidationError');
 goog.require('goog.structs.Set');
 
 /**
