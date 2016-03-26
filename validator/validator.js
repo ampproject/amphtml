@@ -48,7 +48,7 @@ goog.require('parse_css.RuleVisitor');
 goog.require('parse_css.extractUrls');
 goog.require('parse_css.parseAStylesheet');
 goog.require('parse_css.tokenize');
-goog.require('parse_srcset.Srcset');
+goog.require('parse_srcset.SrcsetSourceDef');
 goog.require('parse_srcset.parseSrcset');
 
 /**
@@ -1455,9 +1455,10 @@ class ParsedAttrSpec {
    * @private
    */
   validateAttrValueUrl(context, attrName, attrValue, tagSpec, result) {
-    const maybe_uris = new goog.structs.Set();
+    /** @type {!Array<!string>} */
+    let maybeUris = [];
     if (attrName != 'srcset') {
-      maybe_uris.add(goog.string.trim(attrValue));
+      maybeUris.push(goog.string.trim(attrValue));
     } else {
       let srcset = goog.string.trim(attrValue);
       if (srcset == '') {
@@ -1467,30 +1468,31 @@ class ParsedAttrSpec {
             tagSpec.specUrl, result);
         return;
       }
-      /** @type {!parse_srcset.Srcset} */
-      const srcset_images = parse_srcset.parseSrcset(srcset);
-      if (!srcset_images.isSuccessful()) {
+      /** @type {!Array<!parse_srcset.SrcsetSourceDef>} */
+      const srcsetImages = [];
+      if (!parse_srcset.parseSrcset(srcset, srcsetImages)) {
         context.addError(
             amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
             /* params */ [attrName, getTagSpecName(tagSpec), attrValue],
             tagSpec.specUrl, result);
         return;
       }
-      for (const image of srcset_images.getSources()) {
-        maybe_uris.add(image.url);
+      for (const image of srcsetImages) {
+        maybeUris.push(image.url);
       }
     }
-    if (maybe_uris.isEmpty()) {
+    if (maybeUris.length === 0) {
       context.addError(
           amp.validator.ValidationError.Code.MISSING_URL,
           /* params */ [attrName, getTagSpecName(tagSpec)],
           tagSpec.specUrl, result);
       return;
     }
-    for (const maybe_uri of maybe_uris.getValues()) {
-      const unescaped_maybe_uri = goog.string.unescapeEntities(maybe_uri);
+    maybeUris = sortAndUniquify(maybeUris);
+    for (const maybeUri of maybeUris) {
+      const unescapedMaybeUri = goog.string.unescapeEntities(maybeUri);
       this.valueUrlSpec_.validateUrlAndProtocolInAttr(
-          context, attrName, unescaped_maybe_uri, tagSpec, result);
+          context, attrName, unescapedMaybeUri, tagSpec, result);
       if (result.status === amp.validator.ValidationResult.Status.FAIL) {
         return;
       }
@@ -1511,11 +1513,11 @@ class ParsedAttrSpec {
     const segments = attrValue.split(',');
     const properties = new goog.structs.Map();
     for (const segment of segments) {
-      const key_value = segment.split('=');
-      if (key_value.length < 2) {
+      const keyValue = segment.split('=');
+      if (keyValue.length < 2) {
         continue;
       }
-      properties.set(key_value[0].trim().toLowerCase(), key_value[1]);
+      properties.set(keyValue[0].trim().toLowerCase(), keyValue[1]);
     }
     // TODO(johannes): End hack.
     const names = properties.getKeys();
@@ -1597,8 +1599,8 @@ function GetAttrsFor(tagSpec, rulesAttrMap) {
     }
   }
   // (3) attributes specified via reference to an attr_list.
-  for (const tagSpec_key of tagSpec.attrLists) {
-    const specs = rulesAttrMap.get(tagSpec_key);
+  for (const tagSpecKey of tagSpec.attrLists) {
+    const specs = rulesAttrMap.get(tagSpecKey);
     goog.asserts.assert(specs !== undefined);
     for (const spec of specs.attrs) {
        if (!namesSeen.contains(spec.name)) {
