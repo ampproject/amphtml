@@ -20,11 +20,14 @@
  *   licensed under the CC0 license
  *   (http://creativecommons.org/publicdomain/zero/1.0/).
  */
-goog.require('css_selectors.parseATypeSelector');
 goog.require('goog.asserts');
 goog.require('json_testutil.renderJSON');
+goog.require('parse_css.SelectorVisitor');
 goog.require('parse_css.parseAStylesheet');
+goog.require('parse_css.parseATypeSelector');
+goog.require('parse_css.parseSelectors');
 goog.require('parse_css.tokenize');
+goog.require('parse_css.traverseSelectors');
 
 goog.provide('parse_css.ParseCssTest');
 
@@ -855,32 +858,32 @@ describe('css_selectors', () => {
          {'line': 1, 'col': 1, 'tokenType': 'EOF_TOKEN'}], tokens);
     let tokenStream = new parse_css.TokenStream(tokens);
     tokenStream.consume();
-    let typeSelector = css_selectors.parseATypeSelector(tokenStream);
+    let typeSelector = parse_css.parseATypeSelector(tokenStream);
     assertStrictEqual('*', typeSelector.toString());
 
     tokenStream = new parse_css.TokenStream(parseSelectorForTest('*|*'));
     tokenStream.consume();
-    typeSelector = css_selectors.parseATypeSelector(tokenStream);
+    typeSelector = parse_css.parseATypeSelector(tokenStream);
     assertStrictEqual('*|*', typeSelector.toString());
 
     tokenStream = new parse_css.TokenStream(parseSelectorForTest('*|E'));
     tokenStream.consume();
-    typeSelector = css_selectors.parseATypeSelector(tokenStream);
+    typeSelector = parse_css.parseATypeSelector(tokenStream);
     assertStrictEqual('*|E', typeSelector.toString());
 
     tokenStream = new parse_css.TokenStream(parseSelectorForTest('svg|E'));
     tokenStream.consume();
-    typeSelector = css_selectors.parseATypeSelector(tokenStream);
+    typeSelector = parse_css.parseATypeSelector(tokenStream);
     assertStrictEqual('svg|E', typeSelector.toString());
 
     tokenStream = new parse_css.TokenStream(parseSelectorForTest('svg|*'));
     tokenStream.consume();
-    typeSelector = css_selectors.parseATypeSelector(tokenStream);
+    typeSelector = parse_css.parseATypeSelector(tokenStream);
     assertStrictEqual('svg|*', typeSelector.toString());
 
     tokenStream = new parse_css.TokenStream(parseSelectorForTest('|E'));
     tokenStream.consume();
-    typeSelector = css_selectors.parseATypeSelector(tokenStream);
+    typeSelector = parse_css.parseATypeSelector(tokenStream);
     assertStrictEqual('|E', typeSelector.toString());
   });
 
@@ -892,7 +895,7 @@ describe('css_selectors', () => {
          {'line': 1, 'col': 12, 'tokenType': 'EOF_TOKEN'}], tokens);
     const tokenStream = new parse_css.TokenStream(tokens);
     tokenStream.consume();
-    const idSelector = css_selectors.parseAnIdSelector(tokenStream);
+    const idSelector = parse_css.parseAnIdSelector(tokenStream);
     assertStrictEqual('#hello-world', idSelector.toString());
     assertStrictEqual(1, idSelector.line);
     assertStrictEqual(0, idSelector.col);
@@ -907,7 +910,7 @@ describe('css_selectors', () => {
         tokens);
     const tokenStream = new parse_css.TokenStream(tokens);
     tokenStream.consume();
-    const classSelector = css_selectors.parseAClassSelector(tokenStream);
+    const classSelector = parse_css.parseAClassSelector(tokenStream);
     assertStrictEqual('.hello-world', classSelector.toString());
     assertStrictEqual(1, classSelector.line);
     assertStrictEqual(0, classSelector.col);
@@ -924,7 +927,7 @@ describe('css_selectors', () => {
          {'line': 1, 'col': 5, 'tokenType': 'EOF_TOKEN'}], tokens);
     let tokenStream = new parse_css.TokenStream(tokens);
     tokenStream.consume();
-    let sequence = css_selectors.parseASimpleSelectorSequence(tokenStream);
+    let sequence = parse_css.parseASimpleSelectorSequence(tokenStream);
     assertJSONEquals(
         {'line': 1, 'col': 0, 'tokenType': 'SIMPLE_SELECTOR_SEQUENCE',
          'otherSelectors':
@@ -936,7 +939,7 @@ describe('css_selectors', () => {
     tokens = parseSelectorForTest('a|foo#bar.baz');
     tokenStream = new parse_css.TokenStream(tokens);
     tokenStream.consume();
-    sequence = css_selectors.parseASimpleSelectorSequence(tokenStream);
+    sequence = parse_css.parseASimpleSelectorSequence(tokenStream);
     assertJSONEquals(
         {'line': 1, 'col': 0, 'tokenType': 'SIMPLE_SELECTOR_SEQUENCE',
          'otherSelectors':
@@ -960,7 +963,7 @@ describe('css_selectors', () => {
         tokens);
     const tokenStream = new parse_css.TokenStream(tokens);
     tokenStream.consume();
-    const selector = css_selectors.parseASelector(tokenStream);
+    const selector = parse_css.parseASelector(tokenStream);
     assertJSONEquals(
         {'line': 1, 'col': 7, 'combinatorType': 'DESCENDANT', 'left':
          {'line': 1, 'col': 3, 'combinatorType': 'DESCENDANT', 'left':
@@ -1001,7 +1004,7 @@ describe('css_selectors', () => {
         tokens);
     const tokenStream = new parse_css.TokenStream(tokens);
     tokenStream.consume();
-    const selector = css_selectors.parseASelectorsGroup(tokenStream);
+    const selector = parse_css.parseASelectorsGroup(tokenStream);
     assertJSONEquals(
         {'line': 1, 'col': 0, 'elements':
          [{'line': 1, 'col': 0, 'tokenType': 'SIMPLE_SELECTOR_SEQUENCE',
@@ -1042,7 +1045,7 @@ describe('css_selectors', () => {
         tokens);
     const tokenStream = new parse_css.TokenStream(tokens);
     tokenStream.consume();
-    const selector = css_selectors.parseASelectorsGroup(tokenStream);
+    const selector = parse_css.parseASelectorsGroup(tokenStream);
     assertJSONEquals(
         {'line': 1, 'col': 0, 'tokenType': 'SIMPLE_SELECTOR_SEQUENCE',
          'otherSelectors':
@@ -1076,7 +1079,7 @@ describe('css_selectors', () => {
         tokens);
     const tokenStream = new parse_css.TokenStream(tokens);
     tokenStream.consume();
-    const selector = css_selectors.parseASelectorsGroup(tokenStream);
+    const selector = parse_css.parseASelectorsGroup(tokenStream);
     assertJSONEquals(
         {'line': 1, 'col': 0, 'tokenType': 'SIMPLE_SELECTOR_SEQUENCE',
          'otherSelectors':
@@ -1101,7 +1104,7 @@ describe('css_selectors', () => {
     const tokens = parseSelectorForTest('html|*:not(:link):not(:visited)');
     const tokenStream = new parse_css.TokenStream(tokens);
     tokenStream.consume();
-    const selector = css_selectors.parseASelectorsGroup(tokenStream);
+    const selector = parse_css.parseASelectorsGroup(tokenStream);
     assertJSONEquals(
         {
           'line': 1,
@@ -1148,7 +1151,7 @@ describe('css_selectors', () => {
     const tokenStream = new parse_css.TokenStream(tokens);
     tokenStream.consume();
     const errors = [];
-    const selector = css_selectors.parse(tokenStream, errors);
+    const selector = parse_css.parseSelectors(tokenStream, errors);
     assertStrictEqual(null, selector);
     assertJSONEquals(
         [{'line': 1, 'col': 8, 'tokenType': 'ERROR',
@@ -1160,7 +1163,7 @@ describe('css_selectors', () => {
   });
 
   it('implements visitor pattern', () => {
-    class CollectCombinatorNodes extends css_selectors.NodeVisitor {
+    class CollectCombinatorNodes extends parse_css.SelectorVisitor {
       constructor() {
         this.combinatorNodes = [];
       }
@@ -1174,12 +1177,11 @@ describe('css_selectors', () => {
     const tokenStream = new parse_css.TokenStream(tokens);
     tokenStream.consume();
     const errors = [];
-    const maybeSelector = css_selectors.parse(tokenStream, errors);
+    const maybeSelector = parse_css.parseSelectors(tokenStream, errors);
     const visitor = new CollectCombinatorNodes();
     assertStrictEqual(false, maybeSelector === null);
-    const selector =
-        /** @type {!css_selectors.SelectorNode} */ (maybeSelector);
-    css_selectors.traverse(selector, visitor);
+    const selector = /** @type {!parse_css.Selector} */ (maybeSelector);
+    parse_css.traverseSelectors(selector, visitor);
     assertStrictEqual(4, visitor.combinatorNodes.length);
     assertStrictEqual('GENERAL_SIBLING',
                       visitor.combinatorNodes[0].combinatorType);
