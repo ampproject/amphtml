@@ -2819,6 +2819,8 @@ function byteLength(utf8Str) {
 class ValidationHandler extends amp.htmlparser.HtmlSaxHandlerWithLocation {
   /** Creates a new handler. */
   constructor() {
+    super();
+
     this.validationResult_ = new amp.validator.ValidationResult();
     this.validationResult_.status = amp.validator.ValidationResult.Status.UNKNOWN;
     // TODO(greggrothaus): plumb maxErrors all the way back to our API so the

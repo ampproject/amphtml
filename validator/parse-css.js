@@ -865,6 +865,8 @@ class UrlFunctionVisitor extends parse_css.RuleVisitor {
    * @param {!Array<!parse_css.ErrorToken>} errors
    */
   constructor(parsedUrls, errors) {
+    super();
+
     /** @type {!Array<!parse_css.ParsedCssUrl>} */
     this.parsedUrls = parsedUrls;
     /** @type {!Array<!parse_css.ErrorToken>} */

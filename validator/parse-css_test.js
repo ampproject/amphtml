@@ -1199,6 +1199,7 @@ describe('css_selectors', () => {
   it('implements visitor pattern', () => {
     class CollectCombinatorNodes extends parse_css.SelectorVisitor {
       constructor() {
+        super();
         this.combinatorNodes = [];
       }
 
