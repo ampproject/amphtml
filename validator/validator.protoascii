@@ -25,7 +25,7 @@ min_validator_revision_required: 112
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 187
+spec_file_revision: 188
 # Rules for AMP HTML
 # (https://www.ampproject.org/docs/reference/spec.html)
 #
@@ -2642,6 +2642,31 @@ tags: {  # amp-analytics (json)
     name: "type"
     mandatory: true
     value: "application/json"
+    dispatch_key: true
+  }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
+    }
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-analytics.html"
+}
+# This tag isn't intended to be used by publishers directly, but may be
+# emitted by the AMP cache.
+tags: {  # amp-ad-metadata (json)
+  tag_name: "script"
+  spec_name: "amp-ad-metadata .json script"
+  mandatory_parent: "body"
+  attrs: {
+    name: "type"
+    mandatory: true
+    value: "application/json"
+  }
+  attrs: {
+    name: "amp-ad-metadata"
+    mandatory: true
+    value: ""
     dispatch_key: true
   }
   cdata: {
