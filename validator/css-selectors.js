@@ -36,7 +36,6 @@ goog.require('parse_css.EOFToken');
 goog.require('parse_css.ErrorToken');
 goog.require('parse_css.Token');
 goog.require('parse_css.TokenStream');
-goog.require('parse_css.extractASimpleBlock');
 
 /**
  * Abstract super class for CSS Selectors. The Token class, which this
@@ -269,17 +268,24 @@ parse_css.parseAnIdSelector = function(tokenStream) {
 /**
  * An attribute selector matches document nodes based on their attributes.
  * http://www.w3.org/TR/css3-selectors/#attribute-selectors
- * Note: this is a placeholder implementation which has the raw tokens
- * as its value. We'll refine this in the future.
  *
  * Typically written as '[foo=bar]'.
  */
 parse_css.AttrSelector = class extends parse_css.Selector {
   /**
-   * @param {!Array<!parse_css.Token>} value
+   * @param {string?} namespacePrefix
+   * @param {!string} attrName
+   * @param {string?} matchOperator
+   * @param {string?} value
    */
-  constructor(value) {
-    /** @type {!Array<!parse_css.Token>} */
+  constructor(namespacePrefix, attrName, matchOperator, value) {
+    /** @type {string?} */
+    this.namespacePrefix = namespacePrefix;
+    /** @type {!string} */
+    this.attrName = attrName;
+    /** @type {string?} */
+    this.matchOperator = matchOperator;
+    /** @type {string?} */
     this.value = value;
     /** @type {parse_css.TokenType} */
     this.tokenType = parse_css.TokenType.ATTR_SELECTOR;
@@ -288,7 +294,10 @@ parse_css.AttrSelector = class extends parse_css.Selector {
   /** @inheritDoc */
   toJSON() {
     const json = super.toJSON();
-    json['value'] = recursiveArrayToJSON(this.value);
+    json['namespacePrefix'] = this.namespacePrefix;
+    json['attrName'] = this.attrName;
+    json['matchOperator'] = this.matchOperator;
+    json['value'] = this.value;
     return json;
   }
 
@@ -301,16 +310,112 @@ parse_css.AttrSelector = class extends parse_css.Selector {
 /**
  * tokenStream.current() must be the hash token.
  * @param {!parse_css.TokenStream} tokenStream
- * @return {!parse_css.AttrSelector}
+ * @return {!parse_css.AttrSelector|!parse_css.ErrorToken}
  */
 parse_css.parseAnAttrSelector = function(tokenStream) {
   goog.asserts.assert(
       tokenStream.current() instanceof parse_css.OpenSquareToken,
       'Precondition violated: must be an OpenSquareToken');
   const start = tokenStream.current();
-  const block = parse_css.extractASimpleBlock(tokenStream);
+  tokenStream.consume();  // Consumes '['.
+  // This part is defined in https://www.w3.org/TR/css3-selectors/#attrnmsp:
+  // Attribute selectors and namespaces. It is similar to parseATypeSelector.
+  let namespacePrefix = null;
+  if (isDelim(tokenStream.current(), '|')) {
+    namespacePrefix = '';
+    tokenStream.consume();
+  } else if (isDelim(tokenStream.current(), '*') &&
+      isDelim(tokenStream.next(), '|')) {
+    namespacePrefix = '*';
+    tokenStream.consume();
+    tokenStream.consume();
+  } else if (tokenStream.current() instanceof parse_css.IdentToken &&
+      isDelim(tokenStream.next(), '|')) {
+    const ident = goog.asserts.assertInstanceof(
+        tokenStream.current(), parse_css.IdentToken);
+    namespacePrefix = ident.value;
+    tokenStream.consume();
+    tokenStream.consume();
+  }
+  // Now parse the attribute name. This part is mandatory.
+  if (!(tokenStream.current() instanceof parse_css.IdentToken)) {
+    const error = new parse_css.ErrorToken(
+        amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_ATTR_SELECTOR,
+        ['style']);
+    error.line = start.line;
+    error.col = start.col;
+    return error;
+  }
+  const ident = goog.asserts.assertInstanceof(
+      tokenStream.current(), parse_css.IdentToken);
+  const attrName = ident.value;
   tokenStream.consume();
-  const selector = new parse_css.AttrSelector(block);
+
+  // After the attribute name, we may see an operator; if we do, then
+  // we must see either a string or an identifier. This covers
+  // 6.3.1 Attribute presence and value selectors
+  // (https://www.w3.org/TR/css3-selectors/#attribute-representation) and
+  // 6.3.2 Substring matching attribute selectors
+  // (https://www.w3.org/TR/css3-selectors/#attribute-substrings).
+
+  /** @type {string?} */
+  let matchOperator = null;
+  if (tokenStream.current() instanceof parse_css.DelimToken &&
+      /** @type {!parse_css.DelimToken} */(
+          tokenStream.current()).value === '=') {
+    matchOperator = '=';
+    tokenStream.consume();
+  } else if (tokenStream.current() instanceof parse_css.IncludeMatchToken) {
+    matchOperator = '~=';
+    tokenStream.consume();
+  } else if (tokenStream.current() instanceof parse_css.DashMatchToken) {
+    matchOperator = '|=';
+    tokenStream.consume();
+  } else if (tokenStream.current() instanceof parse_css.PrefixMatchToken) {
+    matchOperator = '^=';
+    tokenStream.consume();
+  } else if (tokenStream.current() instanceof parse_css.SuffixMatchToken) {
+    matchOperator = '$=';
+    tokenStream.consume();
+  } else if (tokenStream.current() instanceof parse_css.SubstringMatchToken) {
+    matchOperator = '*=';
+    tokenStream.consume();
+  }
+  /** @type {string?} */
+  let value = null;
+  if (matchOperator !== null) {  // If we saw an operator, parse the value.
+    if (tokenStream.current() instanceof parse_css.IdentToken) {
+      const ident = goog.asserts.assertInstanceof(
+        tokenStream.current(), parse_css.IdentToken);
+      value = ident.value;
+      tokenStream.consume();
+    } else if (tokenStream.current() instanceof parse_css.StringToken) {
+      const str = goog.asserts.assertInstanceof(
+        tokenStream.current(), parse_css.StringToken);
+      value = str.value;
+      tokenStream.consume();
+    } else {
+      const error = new parse_css.ErrorToken(
+          amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_ATTR_SELECTOR,
+          ['style']);
+      error.line = start.line;
+      error.col = start.col;
+      return error;
+    }
+  }
+  // The attribute selector must in any case terminate with a close square
+  // token.
+  if (!(tokenStream.current() instanceof parse_css.CloseSquareToken)) {
+    const error = new parse_css.ErrorToken(
+        amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_ATTR_SELECTOR,
+        ['style']);
+    error.line = start.line;
+    error.col = start.col;
+    return error;
+  }
+  tokenStream.consume();
+  const selector = new parse_css.AttrSelector(
+      namespacePrefix, attrName, matchOperator, value);
   selector.line = start.line;
   selector.col = start.col;
   return selector;
@@ -525,6 +630,7 @@ parse_css.parseASimpleSelectorSequence = function(tokenStream) {
       tokenStream.current() instanceof parse_css.IdentToken) {
     typeSelector = parse_css.parseATypeSelector(tokenStream);
   }
+  /** @type {!Array<!parse_css.Selector>} */
   const otherSelectors = [];
   while (true) {
     if (tokenStream.current() instanceof parse_css.HashToken) {
@@ -533,7 +639,11 @@ parse_css.parseASimpleSelectorSequence = function(tokenStream) {
         tokenStream.next() instanceof parse_css.IdentToken) {
       otherSelectors.push(parse_css.parseAClassSelector(tokenStream));
     } else if (tokenStream.current() instanceof parse_css.OpenSquareToken) {
-      otherSelectors.push(parse_css.parseAnAttrSelector(tokenStream));
+      const attrSelector = parse_css.parseAnAttrSelector(tokenStream);
+      if (attrSelector instanceof parse_css.ErrorToken) {
+        return attrSelector;
+      }
+      otherSelectors.push(attrSelector);
     } else if (tokenStream.current() instanceof parse_css.ColonToken) {
       const pseudo = parse_css.parseAPseudoSelector(tokenStream);
       if (pseudo instanceof parse_css.ErrorToken) {

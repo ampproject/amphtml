@@ -1049,15 +1049,48 @@ describe('css_selectors', () => {
     assertJSONEquals(
         {'line': 1, 'col': 0, 'tokenType': 'SIMPLE_SELECTOR_SEQUENCE',
          'otherSelectors':
-         [{'line': 1, 'col': 1, 'value':
-           [{'line': 1, 'col': 2, 'tokenType': 'IDENT', 'value': 'href'},
-            {'line': 1, 'col': 6, 'tokenType': 'DELIM', 'value': '='},
-            {'line': 1, 'col': 7, 'tokenType': 'STRING', 'value':
-             'http://www.w3.org/'},
-            {'line': 1, 'col': 27, 'tokenType': 'EOF_TOKEN'}], 'tokenType':
-           'ATTR_SELECTOR'}], 'typeSelector':
+         [{'line': 1, 'col': 1, 'tokenType': 'ATTR_SELECTOR', 'value':
+           'http://www.w3.org/', 'attrName': 'href', 'matchOperator':
+           '=', 'namespacePrefix': null}],
+         'typeSelector':
          {'line': 1, 'col': 0, 'elementName': 'a', 'namespacePrefix':
           null, 'tokenType': 'TYPE_SELECTOR'}},
+        selector);
+  });
+
+  it('parses a selectors group with more attrib matches', () => {
+    const tokens = parseSelectorForTest(
+        'elem[attr1="v1"][attr2=value2]' +
+        '[attr3~="foo"][attr4|="bar"][attr5|="baz"][attr6$=boo][attr7*=bang]');
+    const tokenStream = new parse_css.TokenStream(tokens);
+    tokenStream.consume();
+    const selector = parse_css.parseASelectorsGroup(tokenStream);
+    assertJSONEquals(
+        {'line': 1, 'col': 0, 'tokenType': 'SIMPLE_SELECTOR_SEQUENCE',
+         'otherSelectors':
+         [{'line': 1, 'col': 4, 'tokenType': 'ATTR_SELECTOR', 'value':
+           'v1', 'attrName': 'attr1', 'matchOperator': '=', 'namespacePrefix':
+           null},
+          {'line': 1, 'col': 16, 'tokenType': 'ATTR_SELECTOR', 'value':
+           'value2', 'attrName': 'attr2', 'matchOperator': '=',
+           'namespacePrefix': null},
+          {'line': 1, 'col': 30, 'tokenType': 'ATTR_SELECTOR', 'value':
+           'foo', 'attrName': 'attr3', 'matchOperator': '~=', 'namespacePrefix':
+           null},
+          {'line': 1, 'col': 44, 'tokenType': 'ATTR_SELECTOR', 'value':
+           'bar', 'attrName': 'attr4', 'matchOperator': '|=', 'namespacePrefix':
+           null},
+          {'line': 1, 'col': 58, 'tokenType': 'ATTR_SELECTOR', 'value':
+           'baz', 'attrName': 'attr5', 'matchOperator': '|=', 'namespacePrefix':
+           null},
+          {'line': 1, 'col': 72, 'tokenType': 'ATTR_SELECTOR', 'value':
+           'boo', 'attrName': 'attr6', 'matchOperator': '$=', 'namespacePrefix':
+           null},
+          {'line': 1, 'col': 84, 'tokenType': 'ATTR_SELECTOR', 'value':
+           'bang', 'attrName': 'attr7', 'matchOperator': '*=',
+           'namespacePrefix': null}], 'typeSelector':
+         {'line': 1, 'col': 0, 'tokenType': 'TYPE_SELECTOR', 'elementName':
+          'elem', 'namespacePrefix': null}},
         selector);
   });
 

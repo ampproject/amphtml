@@ -232,6 +232,8 @@ function specificity(code) {
       return 53;
     case amp.validator.ValidationError.Code.DISALLOWED_FIRST_CHILD_TAG_NAME:
       return 54;
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_ATTR_SELECTOR:
+      return 55;
     case amp.validator.ValidationError.Code.GENERAL_DISALLOWED_TAG:
       return 100;
     case amp.validator.ValidationError.Code.DEPRECATED_ATTR:

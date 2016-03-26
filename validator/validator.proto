@@ -377,7 +377,7 @@ message ValidationError {
     DEV_WARNING = 3; // DEPRECATED DO NOT USE.
   }
   optional Severity severity = 6 [ default = ERROR ];
-  // NEXT AVAILABLE TAG: 59
+  // NEXT AVAILABLE TAG: 60
   enum Code {
     UNKNOWN_CODE = 0;
     MANDATORY_TAG_MISSING = 1;
@@ -438,6 +438,7 @@ message ValidationError {
     CSS_SYNTAX_INVALID_URL = 53;
     CSS_SYNTAX_INVALID_URL_PROTOCOL = 54;
     CSS_SYNTAX_DISALLOWED_RELATIVE_URL = 55;
+    CSS_SYNTAX_INVALID_ATTR_SELECTOR = 59;
   }
   optional Code code = 1;
   optional int32 line = 2 [ default = 1 ];
