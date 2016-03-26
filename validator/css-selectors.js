@@ -33,13 +33,14 @@ goog.provide('css_selectors.traverse');
 goog.require('goog.asserts');
 goog.require('parse_css.EOFToken');
 goog.require('parse_css.ErrorToken');
+goog.require('parse_css.Token');
 goog.require('parse_css.TokenStream');
 goog.require('parse_css.extractASimpleBlock');
 
 /**
  * Abstract super class for CSS Selectors.
  */
-css_selectors.SelectorNode = class {
+css_selectors.SelectorNode = class extends parse_css.Token {
   /**
    * @param {!number} line
    * @param {!number} col
@@ -49,17 +50,8 @@ css_selectors.SelectorNode = class {
     this.line = line;
     /** @type {number} */
     this.col = col;
-    /** @type {string} */
-    this.nodeType = 'abstract';
-  }
-
-  /** @return {!Object} */
-  toJSON() {
-    return {
-      'line': this.line,
-      'col': this.col,
-      'node': this.nodeType
-    }
+    /** @type {parse_css.TokenType} */
+    this.tokenType = parse_css.TokenType.UNKNOWN;
   }
 
   /** @return {!Array<!css_selectors.SelectorNode>} */
@@ -146,8 +138,8 @@ css_selectors.TypeSelector = class extends css_selectors.SelectorNode {
     this.namespacePrefix = namespacePrefix;
     /** @type {string} */
     this.elementName = elementName;
-    /** @type {string} */
-    this.nodeType = 'TYPE_SELECTOR';
+    /** @type {parse_css.TokenType} */
+    this.tokenType = parse_css.TokenType.TYPE_SELECTOR;
   }
 
   /**
@@ -249,8 +241,8 @@ css_selectors.IdSelector = class extends css_selectors.SelectorNode {
     super(line, col);
     /** @type {string} */
     this.value = value;
-    /** @type {string} */
-    this.nodeType = 'ID_SELECTOR';
+    /** @type {parse_css.TokenType} */
+    this.tokenType = parse_css.TokenType.ID_SELECTOR;
   }
 
   /** @return {string} */
@@ -302,8 +294,8 @@ css_selectors.AttrSelector = class extends css_selectors.SelectorNode {
     super(line, col);
     /** @type {!Array<!parse_css.Token>} */
     this.value = value;
-    /** @type {string} */
-    this.nodeType = 'ATTR_SELECTOR';
+    /** @type {parse_css.TokenType} */
+    this.tokenType = parse_css.TokenType.ATTR_SELECTOR;
   }
 
   /** @inheritDoc */
@@ -361,8 +353,8 @@ css_selectors.PseudoSelector = class extends css_selectors.SelectorNode {
     this.name = name;
     /** @type {!Array<!parse_css.Token>} */
     this.func = func;
-    /** @type {string} */
-    this.nodeType = 'PSEUDO_SELECTOR';
+    /** @type {parse_css.TokenType} */
+    this.tokenType = parse_css.TokenType.PSEUDO_SELECTOR;
   }
 
   /** @inheritDoc */
@@ -438,8 +430,8 @@ css_selectors.ClassSelector = class extends css_selectors.SelectorNode {
     super(line, col);
     /** @type {string} */
     this.value = value;
-    /** @type {string} */
-    this.nodeType = 'CLASS_SELECTOR';
+    /** @type {parse_css.TokenType} */
+    this.tokenType = parse_css.TokenType.CLASS_SELECTOR;
   }
   /** @return {string} */
   toString() { return '.' + this.value; }
@@ -505,8 +497,8 @@ css_selectors.SelectorNode {
     this.typeSelector = typeSelector;
     /** @type {!Array<!css_selectors.IdSelector>} */
     this.otherSelectors = otherSelectors;
-    /** @type {string} */
-    this.nodeType = 'SIMPLE_SELECTOR_SEQUENCE';
+    /** @type {parse_css.TokenType} */
+    this.tokenType = parse_css.TokenType.SIMPLE_SELECTOR_SEQUENCE;
   }
 
   /** @inheritDoc */
@@ -614,8 +606,8 @@ css_selectors.Combinator = class extends css_selectors.SelectorNode {
     this.left = left;
     /** @type {!css_selectors.SimpleSelectorSequence} */
     this.right = right;
-    /** @type {string} */
-    this.nodeType = 'COMBINATOR';
+    /** @type {parse_css.TokenType} */
+    this.tokenType = parse_css.TokenType.COMBINATOR;
   }
 
   /** @inheritDoc */
@@ -758,8 +750,8 @@ css_selectors.SelectorsGroup = class extends css_selectors.SelectorNode {
     /** @type {!Array<!css_selectors.SimpleSelectorSequence|
         !css_selectors.Combinator>} */
     this.elements = elements;
-    /** @type {string} */
-    this.nodeType = 'SELECTORS_GROUP';
+    /** @type {parse_css.TokenType} */
+    this.tokenType = parse_css.TokenType.SELECTORS_GROUP;
   }
 
   /** @inheritDoc */

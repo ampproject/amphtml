@@ -926,25 +926,25 @@ describe('css_selectors', () => {
     tokenStream.consume();
     let sequence = css_selectors.parseASimpleSelectorSequence(tokenStream);
     assertJSONEquals(
-        {'line': 1, 'col': 0, 'node': 'SIMPLE_SELECTOR_SEQUENCE',
+        {'line': 1, 'col': 0, 'tokenType': 'SIMPLE_SELECTOR_SEQUENCE',
          'otherSelectors':
-         [{'line': 1, 'col': 3, 'value': 'c', 'node': 'ID_SELECTOR'}],
+         [{'line': 1, 'col': 3, 'value': 'c', 'tokenType': 'ID_SELECTOR'}],
          'typeSelector':
          {'line': 1, 'col': 0, 'elementName': 'b', 'namespacePrefix':
-          'a', 'node': 'TYPE_SELECTOR'}},
+          'a', 'tokenType': 'TYPE_SELECTOR'}},
         sequence);
     tokens = parseSelectorForTest('a|foo#bar.baz');
     tokenStream = new parse_css.TokenStream(tokens);
     tokenStream.consume();
     sequence = css_selectors.parseASimpleSelectorSequence(tokenStream);
     assertJSONEquals(
-        {'line': 1, 'col': 0, 'node': 'SIMPLE_SELECTOR_SEQUENCE',
+        {'line': 1, 'col': 0, 'tokenType': 'SIMPLE_SELECTOR_SEQUENCE',
          'otherSelectors':
-         [{'line': 1, 'col': 5, 'value': 'bar', 'node': 'ID_SELECTOR'},
-          {'line': 1, 'col': 9, 'value': 'baz', 'node': 'CLASS_SELECTOR'}],
+         [{'line': 1, 'col': 5, 'value': 'bar', 'tokenType': 'ID_SELECTOR'},
+          {'line': 1, 'col': 9, 'value': 'baz', 'tokenType': 'CLASS_SELECTOR'}],
          'typeSelector':
          {'line': 1, 'col': 0, 'elementName': 'foo', 'namespacePrefix':
-          'a', 'node': 'TYPE_SELECTOR'}},
+          'a', 'tokenType': 'TYPE_SELECTOR'}},
         sequence);
   });
 
@@ -964,23 +964,23 @@ describe('css_selectors', () => {
     assertJSONEquals(
         {'line': 1, 'col': 7, 'combinatorType': 'DESCENDANT', 'left':
          {'line': 1, 'col': 3, 'combinatorType': 'DESCENDANT', 'left':
-          {'line': 1, 'col': 0, 'node': 'SIMPLE_SELECTOR_SEQUENCE',
+          {'line': 1, 'col': 0, 'tokenType': 'SIMPLE_SELECTOR_SEQUENCE',
            'otherSelectors':
            [], 'typeSelector':
            {'line': 1, 'col': 0, 'elementName': 'foo', 'namespacePrefix':
-            null, 'node': 'TYPE_SELECTOR'}}, 'node': 'COMBINATOR',
+            null, 'tokenType': 'TYPE_SELECTOR'}}, 'tokenType': 'COMBINATOR',
           'right':
-          {'line': 1, 'col': 4, 'node': 'SIMPLE_SELECTOR_SEQUENCE',
+          {'line': 1, 'col': 4, 'tokenType': 'SIMPLE_SELECTOR_SEQUENCE',
            'otherSelectors':
            [], 'typeSelector':
            {'line': 1, 'col': 4, 'elementName': 'bar', 'namespacePrefix':
-            null, 'node': 'TYPE_SELECTOR'}}}, 'node': 'COMBINATOR',
+            null, 'tokenType': 'TYPE_SELECTOR'}}}, 'tokenType': 'COMBINATOR',
          'right':
-         {'line': 2, 'col': 1, 'node': 'SIMPLE_SELECTOR_SEQUENCE',
+         {'line': 2, 'col': 1, 'tokenType': 'SIMPLE_SELECTOR_SEQUENCE',
           'otherSelectors':
           [], 'typeSelector':
           {'line': 2, 'col': 1, 'elementName': 'baz', 'namespacePrefix':
-           null, 'node': 'TYPE_SELECTOR'}}},
+           null, 'tokenType': 'TYPE_SELECTOR'}}},
         selector);
   });
 
@@ -1004,21 +1004,22 @@ describe('css_selectors', () => {
     const selector = css_selectors.parseASelectorsGroup(tokenStream);
     assertJSONEquals(
         {'line': 1, 'col': 0, 'elements':
-         [{'line': 1, 'col': 0, 'node': 'SIMPLE_SELECTOR_SEQUENCE',
+         [{'line': 1, 'col': 0, 'tokenType': 'SIMPLE_SELECTOR_SEQUENCE',
            'otherSelectors':
            [], 'typeSelector':
            {'line': 1, 'col': 0, 'elementName': 'foo', 'namespacePrefix':
-            null, 'node': 'TYPE_SELECTOR'}},
-          {'line': 1, 'col': 5, 'node': 'SIMPLE_SELECTOR_SEQUENCE',
+            null, 'tokenType': 'TYPE_SELECTOR'}},
+          {'line': 1, 'col': 5, 'tokenType': 'SIMPLE_SELECTOR_SEQUENCE',
            'otherSelectors':
            [], 'typeSelector':
            {'line': 1, 'col': 5, 'elementName': 'bar', 'namespacePrefix':
-            null, 'node': 'TYPE_SELECTOR'}},
-          {'line': 2, 'col': 2, 'node': 'SIMPLE_SELECTOR_SEQUENCE',
+            null, 'tokenType': 'TYPE_SELECTOR'}},
+          {'line': 2, 'col': 2, 'tokenType': 'SIMPLE_SELECTOR_SEQUENCE',
            'otherSelectors':
            [], 'typeSelector':
            {'line': 2, 'col': 2, 'elementName': 'baz', 'namespacePrefix':
-            null, 'node': 'TYPE_SELECTOR'}}], 'node': 'SELECTORS_GROUP'},
+            null, 'tokenType': 'TYPE_SELECTOR'}}],
+         'tokenType': 'SELECTORS_GROUP'},
         selector);
   });
 
@@ -1043,17 +1044,17 @@ describe('css_selectors', () => {
     tokenStream.consume();
     const selector = css_selectors.parseASelectorsGroup(tokenStream);
     assertJSONEquals(
-        {'line': 1, 'col': 0, 'node': 'SIMPLE_SELECTOR_SEQUENCE',
+        {'line': 1, 'col': 0, 'tokenType': 'SIMPLE_SELECTOR_SEQUENCE',
          'otherSelectors':
          [{'line': 1, 'col': 1, 'value':
            [{'line': 1, 'col': 2, 'tokenType': 'IDENT', 'value': 'href'},
             {'line': 1, 'col': 6, 'tokenType': 'DELIM', 'value': '='},
             {'line': 1, 'col': 7, 'tokenType': 'STRING', 'value':
              'http://www.w3.org/'},
-            {'line': 1, 'col': 27, 'tokenType': 'EOF_TOKEN'}], 'node':
+            {'line': 1, 'col': 27, 'tokenType': 'EOF_TOKEN'}], 'tokenType':
            'ATTR_SELECTOR'}], 'typeSelector':
          {'line': 1, 'col': 0, 'elementName': 'a', 'namespacePrefix':
-          null, 'node': 'TYPE_SELECTOR'}},
+          null, 'tokenType': 'TYPE_SELECTOR'}},
         selector);
   });
 
@@ -1077,9 +1078,9 @@ describe('css_selectors', () => {
     tokenStream.consume();
     const selector = css_selectors.parseASelectorsGroup(tokenStream);
     assertJSONEquals(
-        {'line': 1, 'col': 0, 'node': 'SIMPLE_SELECTOR_SEQUENCE',
+        {'line': 1, 'col': 0, 'tokenType': 'SIMPLE_SELECTOR_SEQUENCE',
          'otherSelectors':
-         [{'line': 1, 'col': 1, 'name': 'b', 'isClass': false, 'node':
+         [{'line': 1, 'col': 1, 'name': 'b', 'isClass': false, 'tokenType':
            'PSEUDO_SELECTOR'},
           {'line': 1, 'col': 4, 'name': 'lang', 'func':
            [{'line': 1, 'col': 5, 'tokenType': 'FUNCTION_TOKEN', 'value':
@@ -1087,9 +1088,9 @@ describe('css_selectors', () => {
             {'line': 1, 'col': 10, 'tokenType': 'IDENT', 'value':
              'fr-be'},
             {'line': 1, 'col': 15, 'tokenType': 'EOF_TOKEN'}], 'isClass':
-           true, 'node': 'PSEUDO_SELECTOR'}], 'typeSelector':
+           true, 'tokenType': 'PSEUDO_SELECTOR'}], 'typeSelector':
          {'line': 1, 'col': 0, 'elementName': 'a', 'namespacePrefix':
-          null, 'node': 'TYPE_SELECTOR'}},
+          null, 'tokenType': 'TYPE_SELECTOR'}},
         selector);
   });
 
@@ -1105,7 +1106,7 @@ describe('css_selectors', () => {
         {
           'line': 1,
           'col': 0,
-          'node': 'SIMPLE_SELECTOR_SEQUENCE',
+          'tokenType': 'SIMPLE_SELECTOR_SEQUENCE',
           'otherSelectors': [{
             'line': 1,
             'col': 6,
@@ -1122,14 +1123,14 @@ describe('css_selectors', () => {
               {'line': 1, 'col': 16, 'tokenType': 'EOF_TOKEN'}
             ],
             'isClass': true,
-            'node': 'PSEUDO_SELECTOR'
+            'tokenType': 'PSEUDO_SELECTOR'
           }],
           'typeSelector': {
             'line': 1,
             'col': 0,
             'elementName': '*',
             'namespacePrefix': 'html',
-            'node': 'TYPE_SELECTOR'
+            'tokenType': 'TYPE_SELECTOR'
           }
         },
         selector);
@@ -1189,23 +1190,23 @@ describe('css_selectors', () => {
     assertJSONEquals(
         {'line': 1, 'col': 5, 'combinatorType': 'DESCENDANT', 'left':
          {'line': 1, 'col': 2, 'combinatorType': 'CHILD', 'left':
-          {'line': 1, 'col': 0, 'node': 'SIMPLE_SELECTOR_SEQUENCE',
+          {'line': 1, 'col': 0, 'tokenType': 'SIMPLE_SELECTOR_SEQUENCE',
            'otherSelectors':
            [], 'typeSelector':
            {'line': 1, 'col': 0, 'elementName': 'a', 'namespacePrefix':
-            null, 'node': 'TYPE_SELECTOR'}}, 'node': 'COMBINATOR',
+            null, 'tokenType': 'TYPE_SELECTOR'}}, 'tokenType': 'COMBINATOR',
           'right':
-          {'line': 1, 'col': 4, 'node': 'SIMPLE_SELECTOR_SEQUENCE',
+          {'line': 1, 'col': 4, 'tokenType': 'SIMPLE_SELECTOR_SEQUENCE',
            'otherSelectors':
            [], 'typeSelector':
            {'line': 1, 'col': 4, 'elementName': 'b', 'namespacePrefix':
-            null, 'node': 'TYPE_SELECTOR'}}}, 'node': 'COMBINATOR',
+            null, 'tokenType': 'TYPE_SELECTOR'}}}, 'tokenType': 'COMBINATOR',
          'right':
-         {'line': 1, 'col': 6, 'node': 'SIMPLE_SELECTOR_SEQUENCE',
+         {'line': 1, 'col': 6, 'tokenType': 'SIMPLE_SELECTOR_SEQUENCE',
           'otherSelectors':
           [], 'typeSelector':
           {'line': 1, 'col': 6, 'elementName': 'c', 'namespacePrefix':
-           null, 'node': 'TYPE_SELECTOR'}}},
+           null, 'tokenType': 'TYPE_SELECTOR'}}},
         visitor.combinatorNodes[2]);
   });
 });
