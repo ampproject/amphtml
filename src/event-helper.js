@@ -30,7 +30,11 @@ export function listen(element, eventType, listener, opt_capture) {
   const capture = opt_capture || false;
   element.addEventListener(eventType, listener, capture);
   return () => {
-    element.removeEventListener(eventType, listener, capture);
+    if (element) {
+      element.removeEventListener(eventType, listener, capture);
+    }
+    listener = null;
+    element = null;
   };
 }
 
@@ -47,12 +51,16 @@ export function listen(element, eventType, listener, opt_capture) {
 export function listenOnce(element, eventType, listener, opt_capture) {
   const capture = opt_capture || false;
   let unlisten;
-  const proxy = event => {
+  let proxy = event => {
     listener(event);
     unlisten();
   };
   unlisten = () => {
-    element.removeEventListener(eventType, proxy, capture);
+    if (element) {
+      element.removeEventListener(eventType, proxy, capture);
+    }
+    element = null;
+    proxy = null;
   };
   element.addEventListener(eventType, proxy, capture);
   return unlisten;
