@@ -1,5 +1,5 @@
 <!--
-  Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+  Copyright 2016 The AMP HTML Authors. All Rights Reserved.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 -->
 <!--
   Test Description:
-  This runs some tests which exercise our HTML parser.
+  Tests for the amp-social-share tag. See the inline comments.
 -->
 <!doctype html>
 <html ⚡>
@@ -27,36 +27,19 @@
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
-
-  <!-- Strangely quoted attributes: -->
-  <a href="foo.html""></a>
-  <a href='foo.html''></a>
-  <a href=""foo.html"></a>
-  <a href=''foo.html'></a>
-  <a href=""foo.html""></a>
-  <a href=''foo.html''></a>
-  <a '></a>
-  <a "></a>
-  <a href"foo.html"></a>
-  <a href'foo.html'></a>
-  <a href"foo.html""></a>
-  <a href'foo.html''></a>
-  <a href""foo.html"></a>
-  <a href''foo.html'></a>
-  <a href""foo.html""></a>
-  <a href''foo.html''></a>
-
-  <!-- Attributes in closing tags: -->
-  <a></a foo>
-  <a></a href>
-  <a></a foo="foo.html">
-  <a></a href="foo.html">
-
-  <!-- <, / as attributes: -->
-  <a < ></a>
-  <a / ></a>
-  <a /a></a>
-  <a /a ></a>
-
+  <!-- Error, container layout not allowed -->
+  <amp-social-share layout="container" height="50" width="50">
+  </amp-social-share>
+  <amp-social-share height="50" width="50" type="email">
+  </amp-social-share>
+  <amp-social-share type="pinterest" width="60" height="44">
+    <script type="application/json">
+      {
+        "text": "Hello world",
+        "url": "https://example.com/",
+        "attribution": "AMPhtml"
+      }
+    </script>
+  </amp-social-share>
 </body>
 </html>

@@ -377,7 +377,7 @@ message ValidationError {
     DEV_WARNING = 3; // DEPRECATED DO NOT USE.
   }
   optional Severity severity = 6 [ default = ERROR ];
-  // NEXT AVAILABLE TAG: 59
+  // NEXT AVAILABLE TAG: 61
   enum Code {
     UNKNOWN_CODE = 0;
     MANDATORY_TAG_MISSING = 1;
@@ -391,6 +391,7 @@ message ValidationError {
     SPECIFIED_LAYOUT_INVALID = 26;
     MANDATORY_ATTR_MISSING = 5;
     MANDATORY_ONEOF_ATTR_MISSING = 28;
+    DUPLICATE_DIMENSION = 60;
     DUPLICATE_UNIQUE_TAG = 6;
     WRONG_PARENT_TAG = 7;
     STYLESHEET_TOO_LONG_OLD_VARIANT = 8;
@@ -438,6 +439,7 @@ message ValidationError {
     CSS_SYNTAX_INVALID_URL = 53;
     CSS_SYNTAX_INVALID_URL_PROTOCOL = 54;
     CSS_SYNTAX_DISALLOWED_RELATIVE_URL = 55;
+    CSS_SYNTAX_INVALID_ATTR_SELECTOR = 59;
   }
   optional Code code = 1;
   optional int32 line = 2 [ default = 1 ];
@@ -449,6 +451,13 @@ message ValidationError {
   // amp.validator.categorizeError and
   // amp.validator.annotateWithErrorCategories if you need this.
   optional ErrorCategory.Code category = 8;
+
+  // Used only in JavaScript, if an error is emitted for a specific HTML tag and
+  // if that HTML tag has an attribute named data-amp-report-test, this string
+  // will be set and contain the value found for that attribute. This is used
+  // in tests to match specific errors to specific tags in the test cases. It
+  // is not a rendered value.
+  optional string data_amp_report_test_value = 9;
 }
 
 message ErrorFormat {
