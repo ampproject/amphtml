@@ -495,7 +495,9 @@ class ChildTagMatcher {
 }
 
 /**
- * @typedef {{ tagName: string, matcher: (ChildTagMatcher|null) }}
+ * @typedef {{ tagName: string,
+ *             matcher: ?ChildTagMatcher,
+ *             dataAmpReportTestValue: ?string }}
  */
 let TagStackEntry;
 
@@ -530,14 +532,25 @@ class TagStack {
    * @param {!string} tagName
    * @param {!Context} context
    * @param {!amp.validator.ValidationResult} result
+   * @param {!Array<string>} encounteredAttrs Alternating key/value pairs.
    */
-  enterTag(tagName, context, result) {
+  enterTag(tagName, context, result, encounteredAttrs) {
     if (this.stack_.length > 0 &&
         TagsWithNoEndTags.hasOwnProperty(
             this.stack_[this.stack_.length - 1].tagName)) {
       this.popFromStack_(context, result);
     }
-    this.stack_.push({tagName: tagName, matcher: null});
+    let maybeDataAmpReportTestValue = null;
+    for (let i = 0; i < encounteredAttrs.length; i += 2) {
+      const attrName = encounteredAttrs[i];
+      const attrValue = encounteredAttrs[i + 1];
+      if (attrName === 'data-amp-report-test') {
+        maybeDataAmpReportTestValue = attrValue;
+        break;
+      }
+    }
+    this.stack_.push({tagName: tagName, matcher: null,
+                      dataAmpReportTestValue: maybeDataAmpReportTestValue});
   }
 
   /**
@@ -603,6 +616,17 @@ class TagStack {
   getCurrent() {
     goog.asserts.assert(this.stack_.length > 0, 'Empty tag stack.');
     return this.stack_[this.stack_.length - 1].tagName;
+  };
+
+  /**
+   * The value of the data-amp-report-test attribute for the current tag,
+   * which may be null.
+   * @return {?string}
+   */
+  getReportTestValue() {
+    if (this.stack_.length > 0)
+      return this.stack_[this.stack_.length - 1].dataAmpReportTestValue;
+    return null;
   };
 
   /**
@@ -1039,6 +1063,9 @@ class Context {
       error.line = lineCol.getLine();
       error.col = lineCol.getCol();
       error.specUrl = (specUrl === null ? '' : specUrl);
+      const reportTestValue = this.tagStack_.getReportTestValue();
+      if (reportTestValue !== null)
+        error.dataAmpReportTestValue = reportTestValue;
       goog.asserts.assert(validationResult.errors !== undefined);
       validationResult.errors.push(error);
     }
@@ -2200,7 +2227,7 @@ class ParsedTagSpec {
    * explicitly mentioned by this tag spec may appear.
    *  Returns true iff the validation is successful.
    * @param {!Context} context
-   * @param {!Array<string>} encounteredAttrs Alternating key/value pain the array
+   * @param {!Array<string>} encounteredAttrs Alternating key/value pairs.
    * @param {!amp.validator.ValidationResult} result
    */
   validateAttributes(context, encounteredAttrs, result) {
@@ -2546,7 +2573,7 @@ class ParsedValidatorRules {
    * emitted via context.recordTagspecValidated().
    * @param {!Context} context
    * @param {string} tagName
-   * @param {!Array<string>} encounteredAttrs Alternating key/value pain the array
+   * @param {!Array<string>} encounteredAttrs Alternating key/value pairs.
    * @param {!amp.validator.ValidationResult} validationResult
    */
   validateTag(context, tagName, encounteredAttrs, validationResult) {
@@ -2620,7 +2647,7 @@ class ParsedValidatorRules {
    * Validates the provided |tagName| with respect to a single tag specification.
    * @param {!ParsedTagSpec} parsedSpec
    * @param {!Context} context
-   * @param {!Array<string>} encounteredAttrs Alternating key/value pain the array
+   * @param {!Array<string>} encounteredAttrs Alternating key/value pairs.
    * @param {!amp.validator.ValidationResult} resultForBestAttempt
    */
   validateTagAgainstSpec(
@@ -2897,7 +2924,7 @@ class ValidationHandler extends amp.htmlparser.HtmlSaxHandlerWithLocation {
   /**
    * Callback for a start HTML tag.
    * @param {string} tagName ie: 'table' (already lower-cased by htmlparser.js).
-   * @param {Array<string>} attrs Alternating key/value pain the array
+   * @param {Array<string>} attrs Alternating key/value pairs.
    * @override
    */
   startTag(tagName, attrs) {
@@ -2908,7 +2935,7 @@ class ValidationHandler extends amp.htmlparser.HtmlSaxHandlerWithLocation {
       return;
     }
     this.context_.getTagStack().enterTag(
-        tagName, this.context_, this.validationResult_);
+        tagName, this.context_, this.validationResult_, attrs);
     this.rules_.validateTag(this.context_, tagName, attrs,
                             this.validationResult_);
     this.context_.getTagStack().matchChildTagName(

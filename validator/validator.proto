@@ -451,6 +451,13 @@ message ValidationError {
   // amp.validator.categorizeError and
   // amp.validator.annotateWithErrorCategories if you need this.
   optional ErrorCategory.Code category = 8;
+
+  // Used only in JavaScript, if an error is emitted for a specific HTML tag and
+  // if that HTML tag has an attribute named data-amp-report-test, this string
+  // will be set and contain the value found for that attribute. This is used
+  // in tests to match specific errors to specific tags in the test cases. It
+  // is not a rendered value.
+  optional string data_amp_report_test_value = 9;
 }
 
 message ErrorFormat {
