@@ -1060,8 +1060,9 @@ describe('css_selectors', () => {
 
   it('parses a selectors group with more attrib matches', () => {
     const tokens = parseSelectorForTest(
-        'elem[attr1="v1"][attr2=value2]' +
-        '[attr3~="foo"][attr4|="bar"][attr5|="baz"][attr6$=boo][attr7*=bang]');
+        'elem[attr1="v1"][attr2=value2\n]' +
+        '[attr3~="foo"][attr4|="bar"][attr5|= "baz"][attr6 $=boo]' +
+        '[ attr7*=bang ]');
     const tokenStream = new parse_css.TokenStream(tokens);
     tokenStream.consume();
     const selector = parse_css.parseASelectorsGroup(tokenStream);
@@ -1074,19 +1075,19 @@ describe('css_selectors', () => {
           {'line': 1, 'col': 16, 'tokenType': 'ATTR_SELECTOR', 'value':
            'value2', 'attrName': 'attr2', 'matchOperator': '=',
            'namespacePrefix': null},
-          {'line': 1, 'col': 30, 'tokenType': 'ATTR_SELECTOR', 'value':
+          {'line': 2, 'col': 1, 'tokenType': 'ATTR_SELECTOR', 'value':
            'foo', 'attrName': 'attr3', 'matchOperator': '~=', 'namespacePrefix':
            null},
-          {'line': 1, 'col': 44, 'tokenType': 'ATTR_SELECTOR', 'value':
+          {'line': 2, 'col': 15, 'tokenType': 'ATTR_SELECTOR', 'value':
            'bar', 'attrName': 'attr4', 'matchOperator': '|=', 'namespacePrefix':
            null},
-          {'line': 1, 'col': 58, 'tokenType': 'ATTR_SELECTOR', 'value':
+          {'line': 2, 'col': 29, 'tokenType': 'ATTR_SELECTOR', 'value':
            'baz', 'attrName': 'attr5', 'matchOperator': '|=', 'namespacePrefix':
            null},
-          {'line': 1, 'col': 72, 'tokenType': 'ATTR_SELECTOR', 'value':
+          {'line': 2, 'col': 44, 'tokenType': 'ATTR_SELECTOR', 'value':
            'boo', 'attrName': 'attr6', 'matchOperator': '$=', 'namespacePrefix':
            null},
-          {'line': 1, 'col': 84, 'tokenType': 'ATTR_SELECTOR', 'value':
+          {'line': 2, 'col': 57, 'tokenType': 'ATTR_SELECTOR', 'value':
            'bang', 'attrName': 'attr7', 'matchOperator': '*=',
            'namespacePrefix': null}], 'typeSelector':
          {'line': 1, 'col': 0, 'tokenType': 'TYPE_SELECTOR', 'elementName':

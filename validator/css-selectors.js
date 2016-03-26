@@ -318,6 +318,9 @@ parse_css.parseAnAttrSelector = function(tokenStream) {
       'Precondition violated: must be an OpenSquareToken');
   const start = tokenStream.current();
   tokenStream.consume();  // Consumes '['.
+  if (tokenStream.current() instanceof parse_css.WhitespaceToken) {
+    tokenStream.consume();
+  }
   // This part is defined in https://www.w3.org/TR/css3-selectors/#attrnmsp:
   // Attribute selectors and namespaces. It is similar to parseATypeSelector.
   let namespacePrefix = null;
@@ -350,6 +353,9 @@ parse_css.parseAnAttrSelector = function(tokenStream) {
       tokenStream.current(), parse_css.IdentToken);
   const attrName = ident.value;
   tokenStream.consume();
+  if (tokenStream.current() instanceof parse_css.WhitespaceToken) {
+    tokenStream.consume();
+  }
 
   // After the attribute name, we may see an operator; if we do, then
   // we must see either a string or an identifier. This covers
@@ -381,6 +387,9 @@ parse_css.parseAnAttrSelector = function(tokenStream) {
     matchOperator = '*=';
     tokenStream.consume();
   }
+  if (tokenStream.current() instanceof parse_css.WhitespaceToken) {
+    tokenStream.consume();
+  }
   /** @type {string?} */
   let value = null;
   if (matchOperator !== null) {  // If we saw an operator, parse the value.
@@ -402,6 +411,9 @@ parse_css.parseAnAttrSelector = function(tokenStream) {
       error.col = start.col;
       return error;
     }
+  }
+  if (tokenStream.current() instanceof parse_css.WhitespaceToken) {
+    tokenStream.consume();
   }
   // The attribute selector must in any case terminate with a close square
   // token.
