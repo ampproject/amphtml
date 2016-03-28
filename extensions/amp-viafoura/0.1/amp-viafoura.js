@@ -44,7 +44,7 @@ class AmpViafoura extends AMP.BaseElement {
   }
 
   getPageAttrs() {
-    var attributes = locations();
+    const attributes = locations();
     attributes.push(['url', location.href]);
     return attributes;
   }
@@ -81,12 +81,20 @@ class AmpViafoura extends AMP.BaseElement {
     /** @private {?Element} */
     this.iframe_ = iframe;
 
-    var currentHeight = 0;
+    let currentHeight = 0;
     listen(iframe, 'embed-size', data => {
+      if (!this.isResizable_) {
+        user.warn(TAG_,
+          'ignoring embed-size request because this iframe is not resizable',
+          this.element);
+        return;
+      }
+
       if (currentHeight !== data.height) {
-        currentHeight = data.height;
-        iframe.width = currentHeight;
-        this.element.style.height = currentHeight + 'px';
+        // iframe.height = currentHeight;
+        this.attemptChangeHeight(data.height, () => {
+          currentHeight = data.height;
+        });
       }
     });
 

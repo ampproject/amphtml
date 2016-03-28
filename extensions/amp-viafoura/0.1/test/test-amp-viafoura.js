@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
- import {createIframePromise} from '../../../../testing/iframe';
- require('../amp-viafoura');
+import {createIframePromise} from '../../../../testing/iframe';
+require('../amp-viafoura');
 
- import {adopt} from '../../../../src/runtime';
+import {adopt} from '../../../../src/runtime';
 adopt(window);
 
 describe('amp-viafoura', () => {
@@ -34,7 +34,7 @@ describe('amp-viafoura', () => {
   }
 
   it('renders the Viafoura commenting widget', () => {
-    return getViafouraWidget("comments").then(ampViafoura => {
+    return getViafouraWidget('comments').then(ampViafoura => {
       const iframe = ampViafoura.firstChild;
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
@@ -44,7 +44,7 @@ describe('amp-viafoura', () => {
   });
 
   it('should pass data-attributes to the iframe src', () => {
-    return getViafouraWidget("comments").then(ampViafoura => {
+    return getViafouraWidget('comments').then(ampViafoura => {
       const iframe = ampViafoura.firstChild;
       expect(iframe.src).to.match(/data-widget=comments(&|&amp;)data-limit=5/);
     });

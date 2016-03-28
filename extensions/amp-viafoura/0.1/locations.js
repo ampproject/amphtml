@@ -11,41 +11,44 @@
  * @return {String} relative URI or undefined if href was falsy
  */
 parseUri = function(str) {
-  var options = {
+  const options = {
     strictMode: false,
     key: [
-      "source", "protocol", "authority", "userInfo", "user",
-      "password", "host", "port", "relative", "path", "directory",
-      "file", "query", "anchor"
+      'source', 'protocol', 'authority', 'userInfo', 'user', 'password', 'host',
+      'port', 'relative', 'path', 'directory', 'file', 'query', 'anchor',
     ],
     q: {
-      name: "queryKey",
-      parser: /(?:^|&)([^&=]*)=?([^&]*)/g
+      name: 'queryKey',
+      parser: /(?:^|&)([^&=]*)=?([^&]*)/g,
     },
     parser: {
-      strict: /^(?:([^:\/?#]+):)?(?:\/\/((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?))?((((?:[^?#\/]*\/)*)([^?#]*))(?:\?([^#]*))?(?:#(.*))?)/,
-      loose: /^(?:(?![^:@]+:[^:@\/]*@)([^:\/?#.]+):)?(?:\/\/)?((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/
-    }
+      strict: new RegExp('^(?:([^:\\/?#]+):)?(?:\\/\\/((?:(([^:@]*)' +
+        '(?::([^:@]*))?)?@)?([^:\\/?#]*)(?::(\\d*))?))?((((?:[^?#\\/]*\\/)*)' +
+        '([^?#]*))(?:\\?([^#]*))?(?:#(.*))?)'),
+      loose: new RegExp('^(?:(?![^:@]+:[^:@\\/]*@)([^:\\/?#.]+):)?(?:\\/\\/)?' +
+        '((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\\/?#]*)(?::(\\d*))?)' +
+        '(((\\/(?:[^?#](?![^?#\\/]*\\.[^?#\\/.]+(?:[?#]|$)))*\\/?)?' +
+        '([^?#\\/]*))(?:\\?([^#]*))?(?:#(.*))?)'),
+    },
   };
 
-  var o = options,
-    m = o.parser[o.strictMode ? "strict" : "loose"].exec(str),
-    uri = {},
-    i = 14;
+  const m = options.parser[options.strictMode ? 'strict' : 'loose'].exec(str),
+    uri = {};
+  let i = options.key.length;
 
   while (i--) {
-    uri[o.key[i]] = m[i] || "";
+    uri[options.key[i]] = m[i] || '';
   }
 
-  uri[o.q.name] = {};
-  uri[o.key[12]].replace(o.q.parser, function($0, $1, $2) {
+  uri[options.q.name] = {};
+  uri[options.key[12]].replace(options.q.parser, function($0, $1, $2) {
     if ($1) {
-      uri[o.q.name][$1] = $2;
+      uri[options.q.name][$1] = $2;
     }
   });
 
   return uri;
-}
+};
 
 /**
  * Generates a url from the given object
@@ -64,14 +67,14 @@ parseUri = function(str) {
  * @return String /something?asdf=foo#hash
  */
 stringifyUriPath = function(obj) {
-  var uri = obj.path;
+  let uri = obj.path;
 
-  var keys = Object.keys(obj.queryKey);
+  const keys = Object.keys(obj.queryKey);
 
   if (keys.length > 0) {
-    var params = [];
+    const params = [];
     uri += '?';
-    keys.forEach((key) => {
+    keys.forEach(key => {
       if (obj.queryKey[key]) {
         params.push(key + '=' + obj.queryKey[key]);
       }
@@ -84,7 +87,7 @@ stringifyUriPath = function(obj) {
   }
 
   return uri;
-}
+};
 
 /**
  * Takes any url string and returns a relative path.
@@ -102,7 +105,7 @@ stringifyUriPath = function(obj) {
  */
 parsePath = function(href) {
 
-  var url;
+  let url;
 
   href = decodeURIComponent(href);
   url = href.match(/^([a-z]+):\/\/\/?([^\/]+)(\/[^#]*)?/i);
@@ -114,26 +117,26 @@ parsePath = function(href) {
   url = (href[0] === '/' ? href : '/' + href).match(/^([^#]+)/);
 
   return url[1];
-}
+};
 
 /**
  * Searches for the meta tag with the attribute that matches the value provided and returns its content
  *
  * @param  {Array} attributes  Array of html elements
  * @param  {String} value      meta tag property to get content for
- * @param  {String} attribute  optional. Specify the attribute to find the tag by. Find element where "attribute" === "value" instead of "property" or "name" === "value"
+ * @param  {String} attribute  optional. Specify the attribute to find the tag by. Find element where 'attribute' === 'value' instead of 'property' or 'name' === 'value'
  * @param  {String} content    optional. Specify the attribute of the element to be returned instead of content
  * @return {String}            contents of the meta tag
  */
 getAttributeContents = function(attributes, value, attribute, content) {
-  for (var i = 0; i < attributes.length; i++) {
+  for (let i = 0; i < attributes.length; i++) {
     if (attributes[i].getAttribute(attribute) === value ||
-      attributes[i].getAttribute("name") === value ||
-      attributes[i].getAttribute("property") === value) {
-      return attributes[i].getAttribute(content || "content");
+      attributes[i].getAttribute('name') === value ||
+      attributes[i].getAttribute('property') === value) {
+      return attributes[i].getAttribute(content || 'content');
     }
   }
-}
+};
 
 /**
  * Returns the path for the page
@@ -142,11 +145,11 @@ getAttributeContents = function(attributes, value, attribute, content) {
  * @return {String}       Returns the og:url if there is one present and the url path otherwise
  */
 fetchPath = function(meta) {
-  var path;
-  var url = parsePath(location.href);
+  let path;
+  const url = parsePath(location.href);
 
-  var ogUrl = getAttributeContents(meta, "og:url"),
-    ogPath;
+  const ogUrl = getAttributeContents(meta, 'og:url');
+  let ogPath;
 
   if (ogUrl) {
     // strip out domain and hash
@@ -161,7 +164,7 @@ fetchPath = function(meta) {
 
   path = url || location.pathname;
 
-  var uri = parseUri(path);
+  const uri = parseUri(path);
 
   if (uri.queryKey && uri.queryKey.__vfz) {
     delete uri.queryKey.__vfz;
@@ -170,7 +173,7 @@ fetchPath = function(meta) {
   path = decodeURIComponent(stringifyUriPath(uri)) || '/';
 
   return path;
-}
+};
 
 /**
  * Looks for a page title in the meta tags
@@ -179,11 +182,13 @@ fetchPath = function(meta) {
  * @return {String}       Returns the title if there is one present and the url otherwise
  */
 fetchTitle = function(meta) {
-  return (getAttributeContents(meta, "vf:title") ||
-    getAttributeContents(meta, "og:title") ||
-    getAttributeContents(meta, "twitter:title") ||
-    (document.getElementsByTagName("title")[0] && document.getElementsByTagName("title")[0].innerHTML) || location.href).substring(0, 500); // Discuss whether we want the title to be url by default
-}
+  return (getAttributeContents(meta, 'vf:title') ||
+    getAttributeContents(meta, 'og:title') ||
+    getAttributeContents(meta, 'twitter:title') ||
+    (document.getElementsByTagName('title')[0] &&
+    document.getElementsByTagName('title')[0].innerHTML) ||
+    location.href).substring(0, 500);
+};
 
 /**
  * Looks for a page image in the meta tags
@@ -192,12 +197,13 @@ fetchTitle = function(meta) {
  * @return {String}       Returns the image if there is one present and an empty string otherwise
  */
 fetchImage = function(meta) {
-  return getAttributeContents(meta, "vf:image") ||
-    getAttributeContents(meta, "og:image") ||
-    getAttributeContents(meta, "twitter:image") ||
-    getAttributeContents(document.getElementsByTagName("link"), "rel", "image_src") ||
-    "";
-}
+  return getAttributeContents(meta, 'vf:image') ||
+    getAttributeContents(meta, 'og:image') ||
+    getAttributeContents(meta, 'twitter:image') ||
+    getAttributeContents(
+      document.getElementsByTagName('link'), 'rel', 'image_src'
+    ) || '';
+};
 
 /**
  * Looks for a page description in the meta tags
@@ -206,23 +212,24 @@ fetchImage = function(meta) {
  * @return {String}       Returns the description if there is one present and an empty string otherwise
  */
 fetchDescription = function(meta) {
-  return (getAttributeContents(meta, "vf:description") ||
-    getAttributeContents(meta, "og:description") ||
-    getAttributeContents(meta, "description") ||
-    getAttributeContents(meta, "twitter:description") || "").substring(0, 500);
-}
+  return (getAttributeContents(meta, 'vf:description') ||
+    getAttributeContents(meta, 'og:description') ||
+    getAttributeContents(meta, 'description') ||
+    getAttributeContents(meta, 'twitter:description') || '').substring(0, 500);
+};
 
 export function locations() {
-  var meta = document.getElementsByTagName("meta");
-  var url = parseUri(location.href);
-  var response = [];
-  response.push(["domain", url.host || location.hostname || ""]);
-  response.push(["path", fetchPath(meta) || ""]);
-  response.push(["title", fetchTitle(meta) || ""]);
-  response.push(["image", fetchImage(meta) || ""]);
-  response.push(["description", fetchDescription(meta) || ""]);
-  response.push(["unique_id", getAttributeContents(meta, "vf:unique_id") || ""]);
-  response.push(["lang", getAttributeContents(meta, "vf:lang") || ""]);
-  response.push(["section", getAttributeContents(meta, "vf:section") || ""]);
+  const meta = document.getElementsByTagName('meta');
+  const url = parseUri(location.href);
+  const response = [
+    ['domain', url.host || location.hostname || ''],
+    ['path', fetchPath(meta) || ''],
+    ['title', fetchTitle(meta) || ''],
+    ['image', fetchImage(meta) || ''],
+    ['description', fetchDescription(meta) || ''],
+    ['unique_id', getAttributeContents(meta, 'vf:unique_id') || ''],
+    ['lang', getAttributeContents(meta, 'vf:lang') || ''],
+    ['section', getAttributeContents(meta, 'vf:section') || ''],
+  ];
   return response;
 }
