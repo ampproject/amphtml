@@ -71,9 +71,7 @@ describe('example', function() {
    * @constructor {!Array<!RegExp>}
    */
   const errorWhitelist = [
-    // TODO(dvoytenko, #2600): remove this from whitelist once the message
-    // contains more specific script identifier.
-    /The tag \'script\' is disallowed/,
+    /GENERAL_DISALLOWED_TAG script viewer-integr.js/,
   ];
 
   const usedWhitelist = [];
@@ -87,33 +85,28 @@ describe('example', function() {
       const url = '/base/examples/' + filename;
       return get(url).then(html => {
         const validationResult = amp.validator.validateString(html);
-        const rendered = amp.validator.renderValidationResult(validationResult,
-            url);
-
         const errors = [];
-        if (rendered[0] == 'FAIL') {
-          for (let i = 1; i < rendered.length; i++) {
-            const line = rendered[i];
-            if (/DEV_MODE_ENABLED/.test(line)) {
-              // This error is expected since we have to be in dev mode to
-              // run the validator. It is only a warning and we'd probably
-              // see that by looking for PASS / FAIL. By itself it doesn't
-              // make things fail.
-              // TODO(johannes): Add warning prefixes to such events so they
-              // can be detected systematically.
+        if (validationResult.status == 'FAIL') {
+          for (let i = 0; i < validationResult.errors.length; i++) {
+            const error = validationResult.errors[i];
+            if (error.severity != 'ERROR') {
               continue;
             }
+            const errorText = error.code +
+                (error.params ? ' ' + error.params.join(' ') : '') +
+                (error.dataAmpReportTestValue ?
+                    ' ' + error.dataAmpReportTestValue : '');
             let whitelisted = false;
             for (let n = 0; n < errorWhitelist.length; n++) {
               const ok = errorWhitelist[n];
-              if (ok.test(line)) {
+              if (ok.test(errorText)) {
                 whitelisted = true;
                 usedWhitelist.push(ok);
                 break;
               }
             }
             if (!whitelisted) {
-              errors.push(line);
+              errors.push(errorText);
             }
           }
         }
