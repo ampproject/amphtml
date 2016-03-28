@@ -27,6 +27,6 @@ export function colombia(global, data) {
 	global.clmbPosition=data.clmbPosition;
 	global.clmbSection=data.clmbSection;
 	global.clmbDivid=data.clmbDivid;
-	writeScript(global,"https://static.clmbtech.com/ad/commons/js/colombia-amp.js");
+	writeScript(global,'https://static.clmbtech.com/ad/commons/js/colombia-amp.js');
 }
 
