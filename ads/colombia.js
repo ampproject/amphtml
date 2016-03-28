@@ -21,8 +21,11 @@ import {writeScript, checkData} from '../src/3p';
  * @param {!Object} data
  */
 export function colombia(global, data) {
-	checkData(data,['clmb_slot', 'clmb_position',
-	'clmb_section','clmb_divid','loadingStrategy']);
+	checkData(data,[
+	'clmb_slot', 'clmb_position',
+	'clmb_section','clmb_divid',
+	'loadingStrategy',
+	]);
 	global.clmbSlot=data.clmbSlot;
 	global.clmbPosition=data.clmbPosition;
 	global.clmbSection=data.clmbSection;
