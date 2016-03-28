@@ -40,6 +40,7 @@ describe('Viewer Visibility State', () => {
     let pauseCallback;
     let resumeCallback;
     let docHidden;
+    let unselect;
 
     function changeVisibility(vis) {
       docHidden.returns(vis === 'hidden');
@@ -92,6 +93,10 @@ describe('Viewer Visibility State', () => {
       unlayoutCallback = sandbox.spy(protoElement, 'unlayoutCallback');
       pauseCallback = sandbox.spy(protoElement, 'pauseCallback');
       resumeCallback = sandbox.spy(protoElement, 'resumeCallback');
+      unselect = sinon.spy();
+      sandbox.stub(fixture.win, 'getSelection').returns({
+        removeAllRanges: unselect,
+      });
     }
 
     beforeEach(function() {
@@ -219,13 +224,14 @@ describe('Viewer Visibility State', () => {
         });
       });
 
-      it('calls pause and unlayout when going to INACTIVE', () => {
+      it('calls unload when going to INACTIVE', () => {
         viewer.setVisibilityState_(VisibilityState.INACTIVE);
         return waitForNextPass().then(() => {
           expect(layoutCallback).not.to.have.been.called;
           expect(unlayoutCallback).to.have.been.called;
           expect(pauseCallback).to.have.been.called;
           expect(resumeCallback).not.to.have.been.called;
+          expect(unselect).to.have.been.called;
         });
       });
 
@@ -275,6 +281,7 @@ describe('Viewer Visibility State', () => {
           expect(unlayoutCallback).to.have.been.called;
           expect(pauseCallback).to.have.been.called;
           expect(resumeCallback).not.to.have.been.called;
+          expect(unselect).to.have.been.called;
         });
       });
 
@@ -376,6 +383,7 @@ describe('Viewer Visibility State', () => {
           expect(unlayoutCallback).to.have.been.called;
           expect(pauseCallback).not.to.have.been.called;
           expect(resumeCallback).not.to.have.been.called;
+          expect(unselect).to.have.been.called;
         });
       });
 

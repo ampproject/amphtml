@@ -1358,6 +1358,7 @@ export class Resources {
     };
     const unload = () => {
       this.resources_.forEach(r => r.unload());
+      this.unselectText();
     };
     const resume = () => {
       this.resources_.forEach(r => r.resume());
@@ -1389,6 +1390,17 @@ export class Resources {
     vsm.addTransition(paused, hidden, doPass);
     vsm.addTransition(paused, inactive, unload);
     vsm.addTransition(paused, paused, noop);
+  }
+
+  /**
+   * Unselects any selected text
+   */
+  unselectText() {
+    try {
+      this.win.getSelection().removeAllRanges();
+    } catch (e) {
+      // Selection API not supported.
+    }
   }
 }
 
