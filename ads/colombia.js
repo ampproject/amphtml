@@ -21,10 +21,13 @@ import {writeScript, checkData} from '../src/3p';
  * @param {!Object} data
  */
 export function colombia(global, data) {
-	checkData(data, ["clmb_slot", "clmb_position", "clmb_section","clmb_divid",'loadingStrategy']);
-	global.clmb_slot = data.clmb_slot;
-	global.clmb_position = data.clmb_position;
-	global.clmb_section = data.clmb_section;
-	global.clmb_divid = data.clmb_divid;
+	checkData(data, 
+	["clmb_slot", "clmb_position", 
+	"clmb_section","clmb_divid",
+	"loadingStrategy"]);
+	global.clmb_slot = data.clmbSlot;
+	global.clmb_position = data.clmbPosition;
+	global.clmb_section = data.clmbSection;
+	global.clmb_divid = data.clmbDivid;
 	writeScript(global, "https://static.clmbtech.com/ad/commons/js/colombia-amp.js");
 }
