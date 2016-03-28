@@ -56,6 +56,7 @@ const EXPERIMENTS = [
     name: 'AMP Social Share',
     spec: 'https://github.com/ampproject/amphtml/blob/master/' +
         'extensions/amp-social-share/amp-social-share.md',
+  }
 
   // Amp Sidebar
   {

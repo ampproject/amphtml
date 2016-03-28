@@ -202,14 +202,12 @@ describe('amp-sidebar', () => {
     return getAmpSidebar().then(obj => {
       const sidebarElement = obj.ampSidebar;
       const impl = sidebarElement.implementation_;
-      sandbox.stub(impl, 'getViewport').returns({
-        getPaddingTop: function() {
-          return 50;
-        },
-      });
+      impl.viewport_.getPaddingTop = function() {
+        return 50;
+      };
       const adjustPaddingSpy = sandbox.spy(impl, 'adjustPadding_');
       const initalChildrenCount = sidebarElement.children.length;
-      impl.buildCallback();
+      impl.open_();
       expect(adjustPaddingSpy.callCount).to.equal(1);
       // 10 lis + one top padding element inserted
       expect(sidebarElement.children.length).to.equal(initalChildrenCount + 1);
@@ -225,7 +223,7 @@ describe('amp-sidebar', () => {
 
       const adjustPaddingSpy = sandbox.spy(impl, 'adjustPadding_');
       const initalChildrenCount = sidebarElement.children.length;
-      impl.buildCallback();
+      impl.open_();
       expect(adjustPaddingSpy.callCount).to.equal(1);
       // 10 lis + one top padding element inserted
       expect(sidebarElement.children.length).to.equal(initalChildrenCount + 1);

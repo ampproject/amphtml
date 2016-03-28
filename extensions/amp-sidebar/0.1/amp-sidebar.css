@@ -25,7 +25,6 @@ amp-sidebar {
   overflow-x: hidden !important;
   overflow-y: auto !important;
   z-index: 9999 !important;
-  will-change: transform;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -46,7 +45,6 @@ amp-sidebar[direction="right"] {
 .amp-sidebar-closed amp-sidebar,
 .amp-sidebar-open amp-sidebar {
   transition: transform 0.5s ease;
-  will-change: transform;
 }
 
 .amp-sidebar-open {

@@ -71,10 +71,16 @@ export class AmpSidebar extends AMP.BaseElement {
     this.hasMask_ = false;
 
     /** @private @const {boolean} */
+    this.isPaddingAdjusted_ = false;
+
+    /** @private @const {boolean} */
     this.isIosSafari_ = platform.isIos() && platform.isSafari();
 
     if (this.direction_ != 'left' && this.direction_ != 'right') {
-      const pageDir = this.document_.body.getAttribute('dir') || 'ltr';
+      const pageDir =
+          this.document_.body.getAttribute('dir') ||
+          this.documentElement_.getAttribute('dir') ||
+          'ltr';
       this.direction_ = (pageDir == 'rtl') ? 'right' : 'left';
       this.element.setAttribute('direction', this.direction_);
     }
@@ -91,11 +97,9 @@ export class AmpSidebar extends AMP.BaseElement {
       this.fixIosElasticScrollLeak_();
     }
 
-    this.adjustPadding_();
-
     if (this.documentElement_.classList.contains('amp-sidebar-open')) {
       // Create the mask if the sidebar is rendered in open mode.
-      this.createMask_();
+      this.open_();
     }
 
     this.documentElement_.addEventListener('keydown', event => {
@@ -105,10 +109,14 @@ export class AmpSidebar extends AMP.BaseElement {
       }
     });
     //TODO (skrish, #2712) Add history support on back button.
-    this.registerAction('activate', this.open_.bind(this));
     this.registerAction('toggle', this.toggle_.bind(this));
     this.registerAction('open', this.open_.bind(this));
     this.registerAction('close', this.close_.bind(this));
+  }
+
+  /** @override */
+  activate() {
+    this.open_();
   }
 
   /**
@@ -136,6 +144,7 @@ export class AmpSidebar extends AMP.BaseElement {
       });
       this.element.appendChild(div);
     }
+    this.isPaddingAdjusted_ = true;
   }
 
   /**
@@ -155,10 +164,13 @@ export class AmpSidebar extends AMP.BaseElement {
    * @private
    */
   open_() {
+    this.viewport_.disableTouchZoom();
+    if (!this.isPaddingAdjusted_) {
+      this.adjustPadding_();
+    }
     this.mutateElement(() => {
-      this.getViewport().addToFixedLayer(this.element);
+      this.viewport_.addToFixedLayer(this.element);
       this.createMask_();
-      this.viewport_.disableTouchZoom();
       this.documentElement_.classList.add('amp-sidebar-open');
       this.documentElement_.classList.remove('amp-sidebar-closed');
       this.element./*REVIEW*/scrollTop = 1;
@@ -170,11 +182,11 @@ export class AmpSidebar extends AMP.BaseElement {
    * @private
    */
   close_() {
+    this.viewport_.restoreOriginalTouchZoom();
     this.mutateElement(() => {
       this.documentElement_.classList.remove('amp-sidebar-open');
       this.documentElement_.classList.add('amp-sidebar-closed');
-      this.getViewport().removeFromFixedLayer(this.element);
-      this.getViewport().restoreOriginalTouchZoom();
+      this.viewport_.removeFromFixedLayer(this.element);
     });
   }
 
@@ -210,7 +222,7 @@ export class AmpSidebar extends AMP.BaseElement {
       return;
     }
     const mask = this.document_.createElement('div');
-    mask.setAttribute('class', '-amp-sidebar-mask');
+    mask.classList.add('-amp-sidebar-mask');
     mask.addEventListener('click', () => {
       this.toggle_();
     });
@@ -226,28 +238,19 @@ export class AmpSidebar extends AMP.BaseElement {
    */
   fixIosElasticScrollLeak_() {
     this.element.addEventListener('scroll', e => {
-      this.mutateElement(() => {
-        if (this.documentElement_.classList.contains('amp-sidebar-open')) {
-          if (this.element./*REVIEW*/scrollTop < 1) {
-            this.element./*REVIEW*/scrollTop = 1;
-            e.preventDefault();
-          } else if (this.element./*REVIEW*/scrollHeight ==
-                this.element./*REVIEW*/scrollTop +
-                this.element./*REVIEW*/offsetHeight) {
-            this.element./*REVIEW*/scrollTop =
-                this.element./*REVIEW*/scrollTop - 1;
-            e.preventDefault();
-          }
+      if (this.documentElement_.classList.contains('amp-sidebar-open')) {
+        if (this.element./*REVIEW*/scrollTop < 1) {
+          this.element./*REVIEW*/scrollTop = 1;
+          e.preventDefault();
+        } else if (this.element./*REVIEW*/scrollHeight ==
+              this.element./*REVIEW*/scrollTop +
+              this.element./*REVIEW*/offsetHeight) {
+          this.element./*REVIEW*/scrollTop =
+              this.element./*REVIEW*/scrollTop - 1;
+          e.preventDefault();
         }
-      });
+      }
     });
-  }
-
-  /**
-   * @private
-   */
-  compensateSafariNavBarHeight_() {
-
   }
 }
 
