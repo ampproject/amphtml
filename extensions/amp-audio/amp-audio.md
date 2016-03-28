@@ -100,7 +100,7 @@ May need to add something to this table based on technical review.
   </tr>
   <tr>
     <td class="col-fourty"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#missing-url">Missing URL for attribute 'example1' in tag 'example2'.</a></td>
-    <td>Error thrown when <code>src</code> attribute is missing it's URL.</td>
+    <td>Error thrown when <code>src</code> attribute is missing its URL.</td>
   </tr>
   <tr>
     <td class="col-fourty"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-url">Malformed URL 'example3' for attribute 'example1' in tag 'example2'.</a></td>
