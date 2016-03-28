@@ -29,7 +29,15 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-access" src="https://cdn.ampproject.org/v0/amp-access-0.1.js">&lt;/script></code></td>
+    <td>
+      <div>
+        <code>&lt;script async custom-element="amp-access" src="https://cdn.ampproject.org/v0/amp-access-0.1.js">&lt;/script></code>
+      </div>
+      <div>
+        <code>&lt;script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js">&lt;/script></code>
+      </div>
+      <small>Notice that both "amp-access" and "amp-analytics" scripts are required.</small>
+    </td>
   </tr>
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
