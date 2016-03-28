@@ -790,9 +790,7 @@ export class Resources {
    * @private
    */
   discoverWork_() {
-
     // TODO(dvoytenko): vsync separation may be needed for different phases
-
     const now = timer.now();
 
     // Ensure all resources layout phase complete; when relayoutAll is requested
@@ -868,7 +866,24 @@ export class Resources {
       ? expandLayoutRect(viewportRect, 0.25, 0.25)
       : viewportRect;
 
-    // Phase 3: Schedule elements for layout within a reasonable distance from
+    // Phase 3.1: Schedule elements for prerender within a reasonable distance
+    // from current viewport.
+    if (loadRect) {
+      for (let i = 0; i < this.resources_.length; i++) {
+        const r = this.resources_[i];
+        // if scheduled for prerendered
+        // we need to still schedule for layout if we can
+        if (r.getPrerenderState() != ResourceState_.READY_FOR_LAYOUT ||
+            r.hasOwner()) {
+          continue;
+        }
+        if (r.isDisplayed() && r.overlaps(loadRect)) {
+          this.schedulePrerender_(r, /* layout */ true);
+        }
+      }
+    }
+
+    // Phase 3.2: Schedule elements for layout within a reasonable distance from
     // current viewport.
     if (loadRect) {
       for (let i = 0; i < this.resources_.length; i++) {
@@ -876,8 +891,9 @@ export class Resources {
         if (r.getState() != ResourceState_.READY_FOR_LAYOUT || r.hasOwner()) {
           continue;
         }
-        if (r.isDisplayed() && r.overlaps(loadRect)) {
-          this.scheduleLayoutOrPreload_(r, /* layout */ true);
+        if (this.viewer_.isVisible() &&  r.isDisplayed() &&
+            r.overlaps(loadRect)) {
+          this.scheduleLayout_(r);
         }
       }
     }
@@ -897,6 +913,7 @@ export class Resources {
 
     // Phase 5: Idle layout: layout more if we are otherwise not doing much.
     // TODO(dvoytenko): document/estimate IDLE timeouts and other constants
+    // TODO(mkhatib): Uncomment this and update it to prerender only?
     if (this.visible_ &&
           this.exec_.getSize() == 0 &&
           this.queue_.getSize() == 0 &&
@@ -1143,20 +1160,24 @@ export class Resources {
   /**
    * Schedules layout or preload for the specified resource.
    * @param {!Resource} resource
-   * @param {boolean} layout
+   * @param {boolean} layout Whether to use layout or preload priority.
    * @param {number=} opt_parentPriority
    * @private
    */
   scheduleLayoutOrPreload_(resource, layout, opt_parentPriority) {
+    dev.fine(TAG_, 'schduling layout or preload');
     assert(resource.getState() != ResourceState_.NOT_BUILT &&
         resource.isDisplayed(),
         'Not ready for layout: %s (%s)',
         resource.debugid, resource.getState());
 
+    const inPrerenderMode = (
+        this.viewer_.getVisibilityState() == VisibilityState.PRERENDER);
+
     // Don't schedule elements when we're not visible, or in prerender mode
     // (and they can't prerender).
     if (!this.visible_) {
-      if (this.viewer_.getVisibilityState() != VisibilityState.PRERENDER) {
+      if (!inPrerenderMode) {
         return;
       } else if (!resource.prerenderAllowed()) {
         return;
@@ -1166,24 +1187,87 @@ export class Resources {
     if (!resource.isInViewport() && !resource.renderOutsideViewport()) {
       return;
     }
-    if (layout) {
-      this.schedule_(resource,
-          LAYOUT_TASK_ID_, LAYOUT_TASK_OFFSET_,
-          opt_parentPriority || 0,
-          resource.startLayout.bind(resource));
+
+    // Schedule prerender if currently in prerender mode or if this is
+    // not a layout priority.
+    if (inPrerenderMode || !layout) {
+      this.schedulePrerender_(resource, layout, opt_parentPriority);
     } else {
-      this.schedule_(resource,
-          PRELOAD_TASK_ID_, PRELOAD_TASK_OFFSET_,
-          opt_parentPriority || 0,
-          resource.startLayout.bind(resource));
+      this.scheduleLayout_(resource, opt_parentPriority);
     }
   }
 
   /**
+   * Schedules prerender for the specified resource.
+   * @param {!Resource} resource
+   * @param {boolean} layout Whether to use layout or preload priority offset.
+   * @param {number=} opt_parentPriority
+   * @private
+   */
+  schedulePrerender_(resource, layout, opt_parentPriority) {
+    dev.fine(TAG_, 'schduling preload', resource.debugid);
+    assert(resource.getPrerenderState() != ResourceState_.NOT_BUILT &&
+        resource.isDisplayed(),
+        'Not ready for prerendering: %s (%s)',
+        resource.debugid, resource.getPrerenderState());
+
+    if (!resource.prerenderAllowed()) {
+      return;
+    }
+
+    // TODO(mkhatib): Explore what would it mean to change this to be
+    // prerenderOutsideViewPort?
+    if (!resource.isInViewport() && !resource.renderOutsideViewport()) {
+      return;
+    }
+
+    if (layout) {
+      this.schedule_(resource,
+          PRELOAD_TASK_ID_, LAYOUT_TASK_OFFSET_,
+          opt_parentPriority || 0,
+          resource.startPrerender.bind(resource));
+    } else {
+      this.schedule_(resource,
+          PRELOAD_TASK_ID_, PRELOAD_TASK_OFFSET_,
+          opt_parentPriority || 0,
+          resource.startPrerender.bind(resource));
+    }
+    resource.prerenderScheduled();
+  }
+
+  /**
+   * Schedules layout for the specified resource.
+   * @param {!Resource} resource
+   * @param {number=} opt_parentPriority
+   * @private
+   */
+  scheduleLayout_(resource, opt_parentPriority) {
+    dev.fine(TAG_, 'schduling layout', resource.debugid);
+    assert(resource.getState() != ResourceState_.NOT_BUILT &&
+        resource.isDisplayed(),
+        'Not ready for layout: %s (%s)',
+        resource.debugid, resource.getState());
+
+    // Never schedule layout when the viewer is hidden.
+    if (!this.viewer_.isVisible()) {
+      return;
+    }
+
+    if (!resource.isInViewport() && !resource.renderOutsideViewport()) {
+      return;
+    }
+
+    this.schedule_(resource,
+        LAYOUT_TASK_ID_, LAYOUT_TASK_OFFSET_,
+        opt_parentPriority || 0,
+        resource.startLayout.bind(resource));
+    resource.layoutScheduled();
+  }
+  /**
    * Schedules layout or preload for the sub-resources of the specified
    * resource.
    * @param {!Resource} parentResource
-   * @param {boolean} layout
+   * @param {boolean} layout Whether to use layout priority offset.
    * @param {!Array<!Element>} subElements
    * @private
    */
@@ -1194,11 +1278,13 @@ export class Resources {
         resources.push(resource);
       }
     });
+    console.log('scheduling for subresources of', parentResource.debugid);
     if (resources.length > 0) {
       resources.forEach(resource => {
         resource.measure();
         if (resource.getState() == ResourceState_.READY_FOR_LAYOUT &&
                 resource.isDisplayed()) {
+          console.log('scheduling for subresource', resource.debugid);
           this.scheduleLayoutOrPreload_(resource, layout,
               parentResource.getPriority());
         }
@@ -1240,7 +1326,6 @@ export class Resources {
       this.queue_.enqueue(task);
       this.schedulePass(this.calcTaskTimeout_(task));
     }
-    task.resource.layoutScheduled();
   }
 
   /**
@@ -1411,6 +1496,10 @@ export class Resource {
     this.state_ = element.isBuilt() ? ResourceState_.NOT_LAID_OUT :
         ResourceState_.NOT_BUILT;
 
+    /** @private {!ResourceState_} */
+    this.prerenderState_ = element.isBuilt() ? ResourceState_.NOT_LAID_OUT :
+        ResourceState_.NOT_BUILT;
+
     /** @private {number} */
     this.layoutCount_ = 0;
 
@@ -1441,6 +1530,12 @@ export class Resource {
     * @private {!SizeDef|undefined}
     */
     this.pendingChangeSize_ = undefined;
+
+    /** @private @const {!Promise} */
+    this.prerenderPromise_ = new Promise(resolve => {
+      /** @const  */
+      this.prerenderPromiseResolve_ = resolve;
+    });
 
     /** @private @const {!Promise} */
     this.loadPromise_ = new Promise(resolve => {
@@ -1504,6 +1599,14 @@ export class Resource {
   }
 
   /**
+   * Returns the resource's prerender state. See {@link ResourceState_} for details.
+   * @return {!ResourceState_}
+   */
+  getPrerenderState() {
+    return this.prerenderState_;
+  }
+
+  /**
    * Requests the resource's element to be built. See {@link AmpElement.build}
    * for details.
    * @param {boolean} force
@@ -1527,8 +1630,10 @@ export class Resource {
 
     if (this.hasBeenMeasured()) {
       this.state_ = ResourceState_.READY_FOR_LAYOUT;
+      this.prerenderState_ = ResourceState_.READY_FOR_LAYOUT;
     } else {
       this.state_ = ResourceState_.NOT_LAID_OUT;
+      this.prerenderState_ = ResourceState_.NOT_LAID_OUT;
     }
     return true;
   }
@@ -1552,6 +1657,7 @@ export class Resource {
     // Schedule for re-layout.
     if (this.state_ != ResourceState_.NOT_BUILT) {
       this.state_ = ResourceState_.NOT_LAID_OUT;
+      // TODO(mkhatib): Does prerenderState need to update here?
     }
     if (opt_callback) {
       opt_callback();
@@ -1603,6 +1709,15 @@ export class Resource {
               (this.state_ == ResourceState_.NOT_LAID_OUT ||
                   this.element.isRelayoutNeeded())) {
         this.state_ = ResourceState_.READY_FOR_LAYOUT;
+
+        // TODO(mkhatib): if isRelayoutNeeded returned true, maybe check if the
+        // first prerendering failed and update the state to do the
+        // prerendering again.
+        if (this.prerenderState_ == ResourceState_.NOT_LAID_OUT ||
+            (this.prerenderState_ == ResourceState_.LAYOUT_CANCELLED &&
+            this.element.isRelayoutNeeded())) {
+          this.prerenderState_ = ResourceState_.READY_FOR_LAYOUT;
+        }
       }
     }
     if (!this.hasBeenMeasured()) {
@@ -1689,10 +1804,63 @@ export class Resource {
   }
 
   /**
+   * Sets the resource's state to PRERENDER_SCHEDULED.
+   */
+  prerenderScheduled() {
+    this.prerenderState_ = ResourceState_.LAYOUT_SCHEDULED;
+  }
+
+  /**
    * Sets the resource's state to LAYOUT_SCHEDULED.
    */
   layoutScheduled() {
     this.state_ = ResourceState_.LAYOUT_SCHEDULED;
+  }
+
+  /**
+   * Starts prerendering the resource. Returns a promise that will yield once prerender
+   * is complete. Only allowed to be called on an upgraded and built element.
+   * @returns {!Promise}
+   */
+  startPrerender() {
+    dev.fine(TAG_, 'start prerender:', this.debugid);
+    this.resources_.framerate_.collect(this.element);
+    let promise;
+    try {
+      promise = this.element.prerenderCallback();
+    } catch (e) {
+      return Promise.reject(e);
+    }
+
+    this.prerenderPromise_ = promise.then(() => this.prerenderComplete_(true),
+        reason => this.prerenderComplete_(false, reason));
+    return this.prerenderPromise_;
+  }
+
+  /**
+   * @param {boolean} success
+   * @param {*=} opt_reason
+   * @return {!Promise|undefined}
+   */
+  prerenderComplete_(success, opt_reason) {
+    this.prerenderPromiseResolve_();
+    this.prerenderPromise_ = null;
+
+    // If prerender has been cancelled, notify the element to cleanup.
+    if (this.prerenderState_ == ResourceState_.LAYOUT_CANCELLED) {
+      dev.fine(TAG_, 'prerender cancelled: ', this.debugid);
+      return this.element.prerenderCancelled();
+    }
+
+    // TODO(mkhatib): NEED TO MAKE THIS IS CLEAR THAT WON'T OVERRIDE LAYOUTCOMPLETE WORK.
+    if (success) {
+      dev.fine(TAG_, 'prerender complete:', this.debugid);
+      this.prerenderState_ = ResourceState_.LAYOUT_COMPLETE;
+    } else {
+      this.prerenderState_ = ResourceState_.LAYOUT_FAILED;
+      dev.fine(TAG_, 'prerender failed:', this.debugid, opt_reason);
+      return Promise.reject(opt_reason);
+    }
   }
 
   /**
@@ -1716,8 +1884,8 @@ export class Resource {
     assert(this.state_ != ResourceState_.NOT_BUILT,
         'Not ready to start layout: %s (%s)', this.debugid, this.state_);
 
-    if (!isDocumentVisible && !this.prerenderAllowed()) {
-      dev.fine(TAG_, 'layout canceled due to non pre-renderable element:',
+    if (!isDocumentVisible) {
+      dev.fine(TAG_, 'layout canceled due to document being invisible:',
           this.debugid, this.state_);
       this.state_ = ResourceState_.READY_FOR_LAYOUT;
       return Promise.resolve();
@@ -1769,10 +1937,21 @@ export class Resource {
    * @return {!Promise|undefined}
    */
   layoutComplete_(success, opt_reason) {
+    dev.fine(TAG_, 'layout complete:', this.debugid);
     this.loadPromiseResolve_();
     this.layoutPromise_ = null;
     this.state_ = success ? ResourceState_.LAYOUT_COMPLETE :
         ResourceState_.LAYOUT_FAILED;
+
+    // If layout completed before prerender has completed mark the prerender
+    // state as cancelled and notify the user once the prerender promise
+    // resolves.
+    if (this.prerenderState_ != ResourceState_.LAYOUT_COMPLETE &&
+        this.prerenderState_ != ResourceState_.LAYOUT_FAILED &&
+        this.prerenderState_ != ResourceState_.LAYOUT_CANCELLED) {
+      this.prerenderState_ = ResourceState_.LAYOUT_CANCELLED;
+    }
+
     if (success) {
       dev.fine(TAG_, 'layout complete:', this.debugid);
     } else {
@@ -2071,8 +2250,12 @@ export const ResourceState_ = {
    * The latest resource's layout failed.
    */
   LAYOUT_FAILED: 5,
-};
 
+  /**
+   * The latest resource's layout was cancelled.
+   */
+  LAYOUT_CANCELLED: 5,
+};
 
 /**
  * The internal structure for the task.

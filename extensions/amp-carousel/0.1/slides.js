@@ -65,6 +65,15 @@ export class AmpSlides extends BaseCarousel {
   }
 
   /** @override */
+  prerenderCallback() {
+    const curSlide = this.curSlide_();
+    if (curSlide) {
+      this.scheduleLayout(curSlide);
+      this.preloadNext_(1);
+    }
+    return Promise.resolve();
+  }
+
   layoutCallback() {
     const curSlide = this.curSlide_();
     if (curSlide) {

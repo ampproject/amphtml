@@ -63,11 +63,6 @@ export class BaseCarousel extends AMP.BaseElement {
   }
 
   /** @override */
-  prerenderAllowed() {
-    return true;
-  }
-
-  /** @override */
   isRelayoutNeeded() {
     return true;
   }

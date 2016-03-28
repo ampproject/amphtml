@@ -64,17 +64,12 @@ export class AmpImg extends BaseElement {
   }
 
   /** @override */
-  prerenderAllowed() {
-    return true;
-  }
-
-  /** @override */
   isRelayoutNeeded() {
     return true;
   }
 
   /** @override */
-  layoutCallback() {
+  prerenderCallback() {
     let promise = this.updateImageSrc_();
 
     // We only allow to fallback on error on the initial layoutCallback

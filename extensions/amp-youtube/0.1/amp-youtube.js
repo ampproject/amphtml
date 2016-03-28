@@ -39,11 +39,6 @@ class AmpYoutube extends AMP.BaseElement {
   }
 
   /** @override */
-  renderOutsideViewport() {
-    return false;
-  }
-
-  /** @override */
   buildCallback() {
     const width = this.element.getAttribute('width');
     const height = this.element.getAttribute('height');
@@ -64,9 +59,23 @@ class AmpYoutube extends AMP.BaseElement {
         this.element.getAttribute('video-id')),
         'The data-videoid attribute is required for <amp-youtube> %s',
         this.element);
+  }
 
+  /** @override */
+  prerenderCallback() {
     if (!this.getPlaceholder()) {
-      this.buildImagePlaceholder_();
+      // Image load promise.
+      // Cancel this if the layoutCallback promise finished before it did.
+      return this.buildImagePlaceholder_();
+    }
+  }
+
+  /** @override */
+  prerenderCancelled() {
+    if (this.imgPlaceholder_) {
+      setStyles(this.imgPlaceholder_, {
+        'visibility': 'hidden',
+      });
     }
   }
 
@@ -186,9 +195,10 @@ class AmpYoutube extends AMP.BaseElement {
     this.element.appendChild(imgPlaceholder);
     this.applyFillContent(imgPlaceholder);
 
+    this.imgPlaceholder_ = imgPlaceholder;
     // Because sddefault.jpg isn't available for all videos, we try to load
     // it and fallback to hqdefault.jpg.
-    loadPromise(imgPlaceholder).then(() => {
+    return loadPromise(imgPlaceholder).then(() => {
       // A pretty ugly hack since onerror won't fire on YouTube image 404.
       // This might be due to the fact that YouTube returns data to the request
       // even when the status is 404. YouTube returns a placeholder image that
