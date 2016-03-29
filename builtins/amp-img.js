@@ -84,6 +84,14 @@ export class AmpImg extends BaseElement {
     return promise;
   }
 
+  /** @override */
+  layoutCallback() {
+    // This is specifically needed for elements that does its work on prerender
+    // e.g. amp-img. This is only needed because currently prerendering
+    // undisplayed elements does not work. See issue #2742.
+    return this.updateImageSrc_();
+  }
+
   /**
    * @return {!Promise}
    * @private

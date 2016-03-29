@@ -481,47 +481,32 @@
 
     function loadAmpDoc() {
       new Viewer(
-              'container1',
-              '1',
-              './article.amp.max.html',
-              true).start();
+          'container1',
+          '1',
+          './instagram.amp.max.html',
+          true).start();
       addShowContainer('1');
 
       new Viewer(
-              'container2',
-              '2',
-              './everything.amp.max.html',
-              false).start();
+          'container2',
+          '2',
+          './article.amp.max.html',
+          false).start();
       addShowContainer('2');
 
+      new Viewer(
+          'container3',
+          '3',
+          './youtube.amp.max.html',
+          false).start();
+      addShowContainer('3');
 
-//      new Viewer(
-//          'container1',
-//          '1',
-//          './instagram.amp.max.html',
-//          true).start();
-//      addShowContainer('1');
-//
-//      new Viewer(
-//          'container2',
-//          '2',
-//          './article.amp.max.html',
-//          false).start();
-//      addShowContainer('2');
-//
-//      new Viewer(
-//          'container3',
-//          '3',
-//          './youtube.amp.max.html',
-//          false).start();
-//      addShowContainer('3');
-//
-//      new Viewer(
-//              'container4',
-//              '4',
-//              './everything.amp.max.html',
-//              false).start();
-//      addShowContainer('4');
+      new Viewer(
+          'container4',
+          '4',
+          './everything.amp.max.html',
+          false).start();
+      addShowContainer('4');
 
       showContainer('1');
     }

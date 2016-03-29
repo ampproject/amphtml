@@ -88,13 +88,15 @@ class AmpSlides extends AMP.BaseElement {
   }
 
   /** @override */
-  prerenderAllowed() {
+  isRelayoutNeeded() {
     return true;
   }
 
   /** @override */
-  isRelayoutNeeded() {
-    return true;
+  prerenderCallback() {
+    this.schedulePreload(this.slides_[this.currentIndex_]);
+    this.preloadNext_(1);
+    return Promise.resolve();
   }
 
   /** @override */

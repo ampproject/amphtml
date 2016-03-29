@@ -68,7 +68,7 @@ export class AmpSlides extends BaseCarousel {
   prerenderCallback() {
     const curSlide = this.curSlide_();
     if (curSlide) {
-      this.scheduleLayout(curSlide);
+      this.schedulePreload(curSlide);
       this.preloadNext_(1);
     }
     return Promise.resolve();
@@ -288,6 +288,8 @@ export class AmpSlides extends BaseCarousel {
   preloadNext_(dir) {
     // TODO(dvoytenko): can we actually preload it here? There's no
     // guarantee of it has display!=none.
+    // Note(mkhatib): We're actually not preloading anything here for the
+    // reason mentioned above - display=none => no measurement => width=0.
     const nextIndex = this.nextIndex_(dir);
     if (nextIndex != this.currentIndex_) {
       this.schedulePreload(this.slides_[nextIndex]);

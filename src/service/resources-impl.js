@@ -1278,13 +1278,11 @@ export class Resources {
         resources.push(resource);
       }
     });
-    console.log('scheduling for subresources of', parentResource.debugid);
     if (resources.length > 0) {
       resources.forEach(resource => {
         resource.measure();
         if (resource.getState() == ResourceState_.READY_FOR_LAYOUT &&
                 resource.isDisplayed()) {
-          console.log('scheduling for subresource', resource.debugid);
           this.scheduleLayoutOrPreload_(resource, layout,
               parentResource.getPriority());
         }

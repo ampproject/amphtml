@@ -78,13 +78,6 @@ const CACHED_FONT_LOAD_TIME_ = 100;
 
 export class AmpFont extends AMP.BaseElement {
 
-
-  /** @override */
-  prerenderAllowed() {
-    return true;
-  }
-
-
   /** @override */
   buildCallback() {
     /** @private @const {string} */
