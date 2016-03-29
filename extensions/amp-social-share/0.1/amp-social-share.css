@@ -24,25 +24,23 @@ amp-social-share {
 amp-social-share span {
   display: block;
   border-radius: 5px;
-  height: 44px;
-  width: 60px;
+  height: 100%;
+  width: 100%;
 }
 
 amp-social-share a {
   display: block;
-  padding: 12px;
+  width: 100%;
+  height: 100%;
   background-repeat: no-repeat;
   background-position: center;
+  background-size: contain;
   text-decoration: none;
 }
 
 /* Twitter Styling */
 amp-social-share .twitter {
   background-color: #55acee;
-}
-
-amp-social-share .twitter a {
-  background-image: url('https://g.twimg.com/dev/documentation/image/Twitter_logo_white_32.png');
 }
 
 /* Facebook Styling */

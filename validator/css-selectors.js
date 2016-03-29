@@ -14,104 +14,87 @@
  * See the License for the specific language governing permissions and
  * limitations under the license.
  */
-goog.provide('css_selectors.AttrSelector');
-goog.provide('css_selectors.ClassSelector');
-goog.provide('css_selectors.Combinator');
-goog.provide('css_selectors.IdSelector');
-goog.provide('css_selectors.NodeVisitor');
-goog.provide('css_selectors.PseudoSelector');
-goog.provide('css_selectors.SelectorNode');
-goog.provide('css_selectors.SelectorsGroup');
-goog.provide('css_selectors.SimpleSelectorSequence');
-goog.provide('css_selectors.TypeSelector');
-goog.provide('css_selectors.parseASelector');
-goog.provide('css_selectors.parseATypeSelector');
-goog.provide('css_selectors.parseAnAttrSelector');
-goog.provide('css_selectors.parseAnIdSelector');
-goog.provide('css_selectors.traverse');
+goog.provide('parse_css.AttrSelector');
+goog.provide('parse_css.ClassSelector');
+goog.provide('parse_css.Combinator');
+goog.provide('parse_css.IdSelector');
+goog.provide('parse_css.PseudoSelector');
+goog.provide('parse_css.Selector');
+goog.provide('parse_css.SelectorVisitor');
+goog.provide('parse_css.SelectorsGroup');
+goog.provide('parse_css.SimpleSelectorSequence');
+goog.provide('parse_css.TypeSelector');
+goog.provide('parse_css.parseASelector');
+goog.provide('parse_css.parseATypeSelector');
+goog.provide('parse_css.parseAnAttrSelector');
+goog.provide('parse_css.parseAnIdSelector');
+goog.provide('parse_css.parseSelectors');
+goog.provide('parse_css.traverseSelectors');
 
 goog.require('goog.asserts');
 goog.require('parse_css.EOFToken');
 goog.require('parse_css.ErrorToken');
+goog.require('parse_css.Token');
 goog.require('parse_css.TokenStream');
-goog.require('parse_css.extractASimpleBlock');
+goog.require('parse_css.extractAFunction');
 
 /**
- * Abstract super class for CSS Selectors.
+ * Abstract super class for CSS Selectors. The Token class, which this
+ * class inherits from, has line, col, and tokenType fields.
  */
-css_selectors.SelectorNode = class {
-  /**
-   * @param {!number} line
-   * @param {!number} col
-   */
-  constructor(line, col) {
-    /** @type {number} */
-    this.line = line;
-    /** @type {number} */
-    this.col = col;
-    /** @type {string} */
-    this.nodeType = 'abstract';
-  }
+parse_css.Selector = class extends parse_css.Token {
 
-  /** @return {!Object} */
-  toJSON() {
-    return {
-      'line': this.line,
-      'col': this.col,
-      'node': this.nodeType
-    }
-  }
-
-  /** @return {!Array<!css_selectors.SelectorNode>} */
+  /** @return {!Array<!parse_css.Selector>} */
   getChildNodes() { return []; }
 
-  /** @param {!css_selectors.NodeVisitor} visitor */
+  /** @param {!parse_css.SelectorVisitor} visitor */
   accept(visitor) {}
 };
 
 /**
  * A super class for making visitors (by overriding the types of interest).
- * The css_selectors.traverse function can be used to visit nodes in a
+ * The parse_css.traverseSelectros function can be used to visit nodes in a
  * parsed CSS selector.
  */
-css_selectors.NodeVisitor = class {
+parse_css.SelectorVisitor = class {
   constructor() {}
 
-  /** @param {!css_selectors.TypeSelector} typeSelector */
+  /** @param {!parse_css.TypeSelector} typeSelector */
   visitTypeSelector(typeSelector) {}
 
-  /** @param {!css_selectors.IdSelector} idSelector */
+  /** @param {!parse_css.IdSelector} idSelector */
   visitIdSelector(idSelector) {}
 
-  /** @param {!css_selectors.AttrSelector} attrSelector */
+  /** @param {!parse_css.AttrSelector} attrSelector */
   visitAttrSelector(attrSelector) {}
 
-  /** @param {!css_selectors.PseudoSelector} pseudoSelector */
+  /** @param {!parse_css.PseudoSelector} pseudoSelector */
   visitPseudoSelector(pseudoSelector) {}
 
-  /** @param {!css_selectors.ClassSelector} classSelector */
+  /** @param {!parse_css.ClassSelector} classSelector */
   visitClassSelector(classSelector) {}
 
-  /** @param {!css_selectors.SimpleSelectorSequence} sequence */
+  /** @param {!parse_css.SimpleSelectorSequence} sequence */
   visitSimpleSelectorSequence(sequence) {}
 
-  /** @param {!css_selectors.Combinator} combinator */
+  /** @param {!parse_css.Combinator} combinator */
   visitCombinator(combinator) {}
 
-  /** @param {!css_selectors.SelectorsGroup} group */
+  /** @param {!parse_css.SelectorsGroup} group */
   visitSelectorsGroup(group) {}
 };
 
 /**
- * Visits the node by calling the appropriate methods on the provided visitor.
- * @param {!css_selectors.SelectorNode} selectorNode
- * @param {!css_selectors.NodeVisitor} visitor
+ * Visits selectorNode and its children, recursively, by calling the
+ * appropriate methods on the provided visitor.
+ * @param {!parse_css.Selector} selectorNode
+ * @param {!parse_css.SelectorVisitor} visitor
  */
-css_selectors.traverse = function(selectorNode, visitor) {
-  /** @type {!Array<!css_selectors.SelectorNode>} */
+parse_css.traverseSelectors = function(selectorNode, visitor) {
+  /** @type {!Array<!parse_css.Selector>} */
   const toVisit = [selectorNode];
   while (toVisit.length > 0) {
-    /** @type {!css_selectors.SelectorNode} */
+    /** @type {!parse_css.Selector} */
     const node = toVisit.shift();
     node.accept(visitor);
     for (const child of node.getChildNodes()) {
@@ -124,30 +107,28 @@ css_selectors.traverse = function(selectorNode, visitor) {
  * This node models type selectors and universial selectors.
  * http://www.w3.org/TR/css3-selectors/#type-selectors
  * http://www.w3.org/TR/css3-selectors/#universal-selector
- *
- * Choices for namespacePrefix:
- * 'a specific namespace prefix' means 'just that specific namespace'.
- * '' means 'without a namespace'
- * '*' means 'any namespace including without a namespace'
- * null means the default namespace if one is declared, and '*' otherwise.
- *
- * The universal selector is covered by setting the elementName to '*'.
  */
-css_selectors.TypeSelector = class extends css_selectors.SelectorNode {
+parse_css.TypeSelector = class extends parse_css.Selector {
   /**
-   * @param {number} line
-   * @param {number} col
+   * Choices for namespacePrefix:
+   * - 'a specific namespace prefix' means 'just that specific namespace'.
+   * - '' means 'without a namespace'
+   * - '*' means 'any namespace including without a namespace'
+   * - null means the default namespace if one is declared, and '*' otherwise.
+   *
+   * The universal selector is covered by setting the elementName to '*'.
+   *
    * @param {?string} namespacePrefix
    * @param {string} elementName
    */
-  constructor(line, col, namespacePrefix, elementName) {
-    super(line, col);
+  constructor(namespacePrefix, elementName) {
+    super();
     /** @type {?string} */
     this.namespacePrefix = namespacePrefix;
     /** @type {string} */
     this.elementName = elementName;
-    /** @type {string} */
-    this.nodeType = 'TYPE_SELECTOR';
+    /** @type {parse_css.TokenType} */
+    this.tokenType = parse_css.TokenType.TYPE_SELECTOR;
   }
 
   /**
@@ -179,7 +160,7 @@ css_selectors.TypeSelector = class extends css_selectors.SelectorNode {
 /**
  * Helper function for determining whether the provided token is a specific
  * delimiter.
- * @param {!Object} token
+ * @param {!parse_css.Token} token
  * @param {string} delimChar
  * @return {boolean}
  */
@@ -194,9 +175,9 @@ function isDelim(token, delimChar) {
 /**
  * tokenStream.current() is the first token of the type selector.
  * @param {!parse_css.TokenStream} tokenStream
- * @return {!css_selectors.TypeSelector}
+ * @return {!parse_css.TypeSelector}
  */
-css_selectors.parseATypeSelector = function(tokenStream) {
+parse_css.parseATypeSelector = function(tokenStream) {
   /** @type {?string} */
   let namespacePrefix = null;
   /** @type {string} */
@@ -230,8 +211,11 @@ css_selectors.parseATypeSelector = function(tokenStream) {
     elementName = ident.value;
     tokenStream.consume();
   }
-  return new css_selectors.TypeSelector(
-      line, col, namespacePrefix, elementName);
+  const selector =  new parse_css.TypeSelector(
+      namespacePrefix, elementName);
+  selector.line = line;
+  selector.col = col;
+  return selector;
 };
 
 /**
@@ -239,18 +223,16 @@ css_selectors.parseATypeSelector = function(tokenStream) {
  * http://www.w3.org/TR/css3-selectors/#id-selectors
  * Typically written as '#foo'.
  */
-css_selectors.IdSelector = class extends css_selectors.SelectorNode {
+parse_css.IdSelector = class extends parse_css.Selector {
   /**
-   * @param {number} line
-   * @param {number} col
    * @param {string} value
    */
-  constructor(line, col, value) {
-    super(line, col);
+  constructor(value) {
+    super();
     /** @type {string} */
     this.value = value;
-    /** @type {string} */
-    this.nodeType = 'ID_SELECTOR';
+    /** @type {parse_css.TokenType} */
+    this.tokenType = parse_css.TokenType.ID_SELECTOR;
   }
 
   /** @return {string} */
@@ -272,44 +254,60 @@ css_selectors.IdSelector = class extends css_selectors.SelectorNode {
 /**
  * tokenStream.current() must be the hash token.
  * @param {!parse_css.TokenStream} tokenStream
- * @return {!css_selectors.IdSelector}
+ * @return {!parse_css.IdSelector}
  */
-css_selectors.parseAnIdSelector = function(tokenStream) {
+parse_css.parseAnIdSelector = function(tokenStream) {
   goog.asserts.assertInstanceof(
       tokenStream.current(), parse_css.HashToken,
       'Precondition violated: must start with HashToken');
   const hash = goog.asserts.assertInstanceof(
       tokenStream.current(), parse_css.HashToken);
   tokenStream.consume();
-  return new css_selectors.IdSelector(hash.line, hash.col, hash.value);
+  const selector = new parse_css.IdSelector(hash.value);
+  selector.line = hash.line;
+  selector.col = hash.col;
+  return selector;
 };
 
 /**
  * An attribute selector matches document nodes based on their attributes.
  * http://www.w3.org/TR/css3-selectors/#attribute-selectors
- * Note: this is a placeholder implementation which has the raw tokens
- * as its value. We'll refine this in the future.
  *
  * Typically written as '[foo=bar]'.
  */
-css_selectors.AttrSelector = class extends css_selectors.SelectorNode {
+parse_css.AttrSelector = class extends parse_css.Selector {
   /**
-   * @param {number} line
-   * @param {number} col
-   * @param {!Array<!parse_css.Token>} value
+   * @param {string?} namespacePrefix
+   * @param {!string} attrName
+   * @param {!string} matchOperator is either the string
+   * representation of the match operator (e.g., '=' or '~=') or '',
+   * in which case the attribute selector is a check for the presence
+   * of the attribute.
+   * @param {!string} value is the value to apply the match operator
+   * against, or if matchOperator is '', then this must be empty as
+   * well.
    */
-  constructor(line, col, value) {
-    super(line, col);
-    /** @type {!Array<!parse_css.Token>} */
+  constructor(namespacePrefix, attrName, matchOperator, value) {
+    super();
+    /** @type {string?} */
+    this.namespacePrefix = namespacePrefix;
+    /** @type {!string} */
+    this.attrName = attrName;
+    /** @type {string?} */
+    this.matchOperator = matchOperator;
+    /** @type {string?} */
     this.value = value;
-    /** @type {string} */
-    this.nodeType = 'ATTR_SELECTOR';
+    /** @type {parse_css.TokenType} */
+    this.tokenType = parse_css.TokenType.ATTR_SELECTOR;
   }
 
   /** @inheritDoc */
   toJSON() {
     const json = super.toJSON();
-    json['value'] = recursiveArrayToJSON(this.value);
+    json['namespacePrefix'] = this.namespacePrefix;
+    json['attrName'] = this.attrName;
+    json['matchOperator'] = this.matchOperator;
+    json['value'] = this.value;
     return json;
   }
 
@@ -322,16 +320,127 @@ css_selectors.AttrSelector = class extends css_selectors.SelectorNode {
 /**
  * tokenStream.current() must be the hash token.
  * @param {!parse_css.TokenStream} tokenStream
- * @return {!css_selectors.AttrSelector}
+ * @return {!parse_css.AttrSelector|!parse_css.ErrorToken}
  */
-css_selectors.parseAnAttrSelector = function(tokenStream) {
+parse_css.parseAnAttrSelector = function(tokenStream) {
   goog.asserts.assert(
       tokenStream.current() instanceof parse_css.OpenSquareToken,
       'Precondition violated: must be an OpenSquareToken');
   const start = tokenStream.current();
-  const block = parse_css.extractASimpleBlock(tokenStream);
+  tokenStream.consume();  // Consumes '['.
+  if (tokenStream.current() instanceof parse_css.WhitespaceToken) {
+    tokenStream.consume();
+  }
+  // This part is defined in https://www.w3.org/TR/css3-selectors/#attrnmsp:
+  // Attribute selectors and namespaces. It is similar to parseATypeSelector.
+  let namespacePrefix = null;
+  if (isDelim(tokenStream.current(), '|')) {
+    namespacePrefix = '';
+    tokenStream.consume();
+  } else if (isDelim(tokenStream.current(), '*') &&
+      isDelim(tokenStream.next(), '|')) {
+    namespacePrefix = '*';
+    tokenStream.consume();
+    tokenStream.consume();
+  } else if (tokenStream.current() instanceof parse_css.IdentToken &&
+      isDelim(tokenStream.next(), '|')) {
+    const ident = goog.asserts.assertInstanceof(
+        tokenStream.current(), parse_css.IdentToken);
+    namespacePrefix = ident.value;
+    tokenStream.consume();
+    tokenStream.consume();
+  }
+  // Now parse the attribute name. This part is mandatory.
+  if (!(tokenStream.current() instanceof parse_css.IdentToken)) {
+    const error = new parse_css.ErrorToken(
+        amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_ATTR_SELECTOR,
+        ['style']);
+    error.line = start.line;
+    error.col = start.col;
+    return error;
+  }
+  const ident = goog.asserts.assertInstanceof(
+      tokenStream.current(), parse_css.IdentToken);
+  const attrName = ident.value;
   tokenStream.consume();
-  return new css_selectors.AttrSelector(start.line, start.col, block);
+  if (tokenStream.current() instanceof parse_css.WhitespaceToken) {
+    tokenStream.consume();
+  }
+
+  // After the attribute name, we may see an operator; if we do, then
+  // we must see either a string or an identifier. This covers
+  // 6.3.1 Attribute presence and value selectors
+  // (https://www.w3.org/TR/css3-selectors/#attribute-representation) and
+  // 6.3.2 Substring matching attribute selectors
+  // (https://www.w3.org/TR/css3-selectors/#attribute-substrings).
+
+  /** @type {string} */
+  let matchOperator = '';
+  if (tokenStream.current() instanceof parse_css.DelimToken &&
+      /** @type {!parse_css.DelimToken} */(
+          tokenStream.current()).value === '=') {
+    matchOperator = '=';
+    tokenStream.consume();
+  } else if (tokenStream.current() instanceof parse_css.IncludeMatchToken) {
+    matchOperator = '~=';
+    tokenStream.consume();
+  } else if (tokenStream.current() instanceof parse_css.DashMatchToken) {
+    matchOperator = '|=';
+    tokenStream.consume();
+  } else if (tokenStream.current() instanceof parse_css.PrefixMatchToken) {
+    matchOperator = '^=';
+    tokenStream.consume();
+  } else if (tokenStream.current() instanceof parse_css.SuffixMatchToken) {
+    matchOperator = '$=';
+    tokenStream.consume();
+  } else if (tokenStream.current() instanceof parse_css.SubstringMatchToken) {
+    matchOperator = '*=';
+    tokenStream.consume();
+  }
+  if (tokenStream.current() instanceof parse_css.WhitespaceToken) {
+    tokenStream.consume();
+  }
+  /** @type {string} */
+  let value = '';
+  if (matchOperator !== null) {  // If we saw an operator, parse the value.
+    if (tokenStream.current() instanceof parse_css.IdentToken) {
+      const ident = goog.asserts.assertInstanceof(
+        tokenStream.current(), parse_css.IdentToken);
+      value = ident.value;
+      tokenStream.consume();
+    } else if (tokenStream.current() instanceof parse_css.StringToken) {
+      const str = goog.asserts.assertInstanceof(
+        tokenStream.current(), parse_css.StringToken);
+      value = str.value;
+      tokenStream.consume();
+    } else {
+      const error = new parse_css.ErrorToken(
+          amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_ATTR_SELECTOR,
+          ['style']);
+      error.line = start.line;
+      error.col = start.col;
+      return error;
+    }
+  }
+  if (tokenStream.current() instanceof parse_css.WhitespaceToken) {
+    tokenStream.consume();
+  }
+  // The attribute selector must in any case terminate with a close square
+  // token.
+  if (!(tokenStream.current() instanceof parse_css.CloseSquareToken)) {
+    const error = new parse_css.ErrorToken(
+        amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_ATTR_SELECTOR,
+        ['style']);
+    error.line = start.line;
+    error.col = start.col;
+    return error;
+  }
+  tokenStream.consume();
+  const selector = new parse_css.AttrSelector(
+      namespacePrefix, attrName, matchOperator, value);
+  selector.line = start.line;
+  selector.col = start.col;
+  return selector;
 };
 
 /**
@@ -340,29 +449,30 @@ css_selectors.parseAnAttrSelector = function(tokenStream) {
  * http://www.w3.org/TR/css3-selectors/#pseudo-elements.
  *
  * Typically written as ':visited', ':lang(fr)', and '::first-line'.
+ *
+ * isClass: Pseudo selectors with a single colon (e.g., ':visited')
+ * are pseudo class selectors. Selectors with two colons (e.g.,
+ * '::first-line') are pseudo elements.
+ *
+ * func: If it's a function style pseudo selector, like lang(fr), then func
+ * the function tokens. TODO(powdercloud): parse this in more detail.
  */
-css_selectors.PseudoSelector = class extends css_selectors.SelectorNode {
+parse_css.PseudoSelector = class extends parse_css.Selector {
   /**
-   * @param {number} line
-   * @param {number} col
-   * @param {boolean} isClass selectors with a single colon (e.g., ':visited')
-   *   are pseudo class selectors. Selectors with two colons
-   *   (e.g., '::first-line') are pseudo elements.
+   * @param {boolean} isClass
    * @param {string} name
-   * @param {!Array<!parse_css.Token>} func If it's a function style
-   * pseudo selector, like lang(fr), then this parameter takes the function
-   * tokens.
+   * @param {!Array<!parse_css.Token>} func
    */
-  constructor(line, col, isClass, name, func) {
-    super(line, col);
+  constructor(isClass, name, func) {
+    super();
     /** @type {boolean} */
     this.isClass = isClass;
     /** @type {string} */
     this.name = name;
     /** @type {!Array<!parse_css.Token>} */
     this.func = func;
-    /** @type {string} */
-    this.nodeType = 'PSEUDO_SELECTOR';
+    /** @type {parse_css.TokenType} */
+    this.tokenType = parse_css.TokenType.PSEUDO_SELECTOR;
   }
 
   /** @inheritDoc */
@@ -386,9 +496,9 @@ css_selectors.PseudoSelector = class extends css_selectors.SelectorNode {
  * tokenStream.current() must be the ColonToken. Returns an error if
  * the pseudo token can't be parsed (e.g., a lone ':').
  * @param {!parse_css.TokenStream} tokenStream
- * @return {!css_selectors.PseudoSelector|!parse_css.ErrorToken}
+ * @return {!parse_css.PseudoSelector|!parse_css.ErrorToken}
  */
-css_selectors.parseAPseudoSelector = function(tokenStream) {
+parse_css.parseAPseudoSelector = function(tokenStream) {
   goog.asserts.assert(tokenStream.current() instanceof parse_css.ColonToken,
                       'Precondition violated: must be a ":"');
   const firstColon = tokenStream.current();
@@ -419,8 +529,11 @@ css_selectors.parseAPseudoSelector = function(tokenStream) {
     error.col = firstColon.col;
     return error;
   }
-  return new css_selectors.PseudoSelector(
-      firstColon.line, firstColon.col, isClass, name, func);
+  const selector = new parse_css.PseudoSelector(
+      isClass, name, func);
+  selector.line = firstColon.line;
+  selector.col = firstColon.col;
+  return selector;
 };
 
 /**
@@ -428,18 +541,16 @@ css_selectors.parseAPseudoSelector = function(tokenStream) {
  * an attribute match of the form '[class~=value]'.
  * http://www.w3.org/TR/css3-selectors/#class-html
  */
-css_selectors.ClassSelector = class extends css_selectors.SelectorNode {
+parse_css.ClassSelector = class extends parse_css.Selector {
   /**
-   * @param {number} line
-   * @param {number} col
    * @param {string} value the class to match.
    */
-  constructor(line, col, value) {
-    super(line, col);
+  constructor(value) {
+    super();
     /** @type {string} */
     this.value = value;
-    /** @type {string} */
-    this.nodeType = 'CLASS_SELECTOR';
+    /** @type {parse_css.TokenType} */
+    this.tokenType = parse_css.TokenType.CLASS_SELECTOR;
   }
   /** @return {string} */
   toString() { return '.' + this.value; }
@@ -455,14 +566,14 @@ css_selectors.ClassSelector = class extends css_selectors.SelectorNode {
   accept(visitor) {
     visitor.visitClassSelector(this);
   }
-}
+};
 
 /**
  * tokenStream.current() must be the '.' delimiter token.
  * @param {!parse_css.TokenStream} tokenStream
- * @return {!css_selectors.ClassSelector}
+ * @return {!parse_css.ClassSelector}
  */
-css_selectors.parseAClassSelector = function(tokenStream) {
+parse_css.parseAClassSelector = function(tokenStream) {
   goog.asserts.assert(
       isDelim(tokenStream.current(), '.') &&
       tokenStream.next() instanceof parse_css.IdentToken,
@@ -472,7 +583,10 @@ css_selectors.parseAClassSelector = function(tokenStream) {
   const ident = goog.asserts.assertInstanceof(
       tokenStream.current(), parse_css.IdentToken);
   tokenStream.consume();
-  return new css_selectors.ClassSelector(dot.line, dot.col, ident.value);
+  const selector = new parse_css.ClassSelector(ident.value);
+  selector.line = dot.line;
+  selector.col = dot.col;
+  return selector;
 };
 
 
@@ -491,22 +605,19 @@ function recursiveArrayToJSON(array) {
 /**
  * Models a simple selector sequence, e.g. '*|foo#id'.
  */
-css_selectors.SimpleSelectorSequence = class extends
-css_selectors.SelectorNode {
+parse_css.SimpleSelectorSequence = class extends parse_css.Selector {
   /**
-   * @param {number} line
-   * @param {number} col
-   * @param {!css_selectors.TypeSelector} typeSelector
-   * @param {!Array<!css_selectors.IdSelector>} otherSelectors
+   * @param {!parse_css.TypeSelector} typeSelector
+   * @param {!Array<!parse_css.IdSelector>} otherSelectors
    */
-  constructor(line, col, typeSelector, otherSelectors) {
-    super(line, col);
-    /** @type {!css_selectors.TypeSelector} */
+  constructor(typeSelector, otherSelectors) {
+    super();
+    /** @type {!parse_css.TypeSelector} */
     this.typeSelector = typeSelector;
-    /** @type {!Array<!css_selectors.IdSelector>} */
+    /** @type {!Array<!parse_css.IdSelector>} */
     this.otherSelectors = otherSelectors;
-    /** @type {string} */
-    this.nodeType = 'SIMPLE_SELECTOR_SEQUENCE';
+    /** @type {parse_css.TokenType} */
+    this.tokenType = parse_css.TokenType.SIMPLE_SELECTOR_SEQUENCE;
   }
 
   /** @inheritDoc */
@@ -530,34 +641,39 @@ css_selectors.SelectorNode {
   accept(visitor) {
     visitor.visitSimpleSelectorSequence(this);
   }
-}
+};
 
 /**
  * tokenStream.current must be the first token of the sequence.
  * This function will return an error if no selector is found.
  * @param {!parse_css.TokenStream} tokenStream
- * @return {!css_selectors.SimpleSelectorSequence|!parse_css.ErrorToken}
+ * @return {!parse_css.SimpleSelectorSequence|!parse_css.ErrorToken}
  */
-css_selectors.parseASimpleSelectorSequence = function(tokenStream) {
+parse_css.parseASimpleSelectorSequence = function(tokenStream) {
   const line = tokenStream.current().line;
   const col = tokenStream.current().col;
   let typeSelector = null;
   if (isDelim(tokenStream.current(), '*') ||
       isDelim(tokenStream.current(), '|') ||
       tokenStream.current() instanceof parse_css.IdentToken) {
-    typeSelector = css_selectors.parseATypeSelector(tokenStream);
+    typeSelector = parse_css.parseATypeSelector(tokenStream);
   }
+  /** @type {!Array<!parse_css.Selector>} */
   const otherSelectors = [];
   while (true) {
     if (tokenStream.current() instanceof parse_css.HashToken) {
-      otherSelectors.push(css_selectors.parseAnIdSelector(tokenStream));
+      otherSelectors.push(parse_css.parseAnIdSelector(tokenStream));
     } else if (isDelim(tokenStream.current(), '.') &&
         tokenStream.next() instanceof parse_css.IdentToken) {
-      otherSelectors.push(css_selectors.parseAClassSelector(tokenStream));
+      otherSelectors.push(parse_css.parseAClassSelector(tokenStream));
     } else if (tokenStream.current() instanceof parse_css.OpenSquareToken) {
-      otherSelectors.push(css_selectors.parseAnAttrSelector(tokenStream));
+      const attrSelector = parse_css.parseAnAttrSelector(tokenStream);
+      if (attrSelector instanceof parse_css.ErrorToken) {
+        return attrSelector;
+      }
+      otherSelectors.push(attrSelector);
     } else if (tokenStream.current() instanceof parse_css.ColonToken) {
-      const pseudo = css_selectors.parseAPseudoSelector(tokenStream);
+      const pseudo = parse_css.parseAPseudoSelector(tokenStream);
       if (pseudo instanceof parse_css.ErrorToken) {
         return pseudo;
       }
@@ -575,11 +691,16 @@ css_selectors.parseASimpleSelectorSequence = function(tokenStream) {
           return error;
         }
         // If no type selector is given then the universal selector is implied.
-        typeSelector = new css_selectors.TypeSelector(
-            line, col, /*namespacePrefix=*/ null, /*elementname=*/ '*');
+        typeSelector = new parse_css.TypeSelector(
+            /*namespacePrefix=*/ null, /*elementname=*/ '*');
+        typeSelector.line = line;
+        typeSelector.col = col;
       }
-      return new css_selectors.SimpleSelectorSequence(
-          line, col, typeSelector, otherSelectors);
+      const sequence = new parse_css.SimpleSelectorSequence(
+          typeSelector, otherSelectors);
+      sequence.line = line;
+      sequence.col = col;
+      return sequence;
     }
   }
 };
@@ -587,7 +708,7 @@ css_selectors.parseASimpleSelectorSequence = function(tokenStream) {
 /**
  * @enum {string}
  */
-css_selectors.CombinatorType = {
+parse_css.CombinatorType = {
   'DESCENDANT': 'DESCENDANT',
   'CHILD': 'CHILD',
   'ADJACENT_SIBLING': 'ADJACENT_SIBLING',
@@ -598,24 +719,22 @@ css_selectors.CombinatorType = {
  * Models a combinator, as described in
  * http://www.w3.org/TR/css3-selectors/#combinators.
  */
-css_selectors.Combinator = class extends css_selectors.SelectorNode {
+parse_css.Combinator = class extends parse_css.Selector {
   /**
-   * @param {number} line line of the original combinator token
-   * @param {number} col col of the original combinator token
    * @param {!string} combinatorType
-   * @param {!css_selectors.SimpleSelectorSequence|!css_selectors.Combinator} left
-   * @param {!css_selectors.SimpleSelectorSequence} right
+   * @param {!parse_css.SimpleSelectorSequence|!parse_css.Combinator} left
+   * @param {!parse_css.SimpleSelectorSequence} right
    */
-  constructor(line, col, combinatorType, left, right) {
-    super(line, col);
+  constructor(combinatorType, left, right) {
+    super();
     /** @type {!string} */
     this.combinatorType = combinatorType;
-    /** @type {!css_selectors.SimpleSelectorSequence|!css_selectors.Combinator} */
+    /** @type {!parse_css.SimpleSelectorSequence|!parse_css.Combinator} */
     this.left = left;
-    /** @type {!css_selectors.SimpleSelectorSequence} */
+    /** @type {!parse_css.SimpleSelectorSequence} */
     this.right = right;
-    /** @type {string} */
-    this.nodeType = 'COMBINATOR';
+    /** @type {parse_css.TokenType} */
+    this.tokenType = parse_css.TokenType.COMBINATOR;
   }
 
   /** @inheritDoc */
@@ -646,13 +765,13 @@ css_selectors.Combinator = class extends css_selectors.SelectorNode {
  */
 function combinatorTypeForToken(token) {
   if (token instanceof parse_css.WhitespaceToken) {
-    return css_selectors.CombinatorType.DESCENDANT;
+    return parse_css.CombinatorType.DESCENDANT;
   } else if (isDelim(token, '>')) {
-    return css_selectors.CombinatorType.CHILD;
+    return parse_css.CombinatorType.CHILD;
   } else if (isDelim(token, '+')) {
-    return css_selectors.CombinatorType.ADJACENT_SIBLING;
+    return parse_css.CombinatorType.ADJACENT_SIBLING;
   } else if (isDelim(token, '~')) {
-    return css_selectors.CombinatorType.GENERAL_SIBLING;
+    return parse_css.CombinatorType.GENERAL_SIBLING;
   }
   goog.asserts.fail('Internal Error: not a combinator token');
 }
@@ -695,10 +814,10 @@ function isSimpleSelectorSequenceStart(token) {
  * http://www.w3.org/TR/css3-selectors/#grammar
  * Returns an ErrorToken if no selector is found.
  * @param {!parse_css.TokenStream} tokenStream
- * @return {!css_selectors.SimpleSelectorSequence|
- *          !css_selectors.Combinator|!parse_css.ErrorToken}
+ * @return {!parse_css.SimpleSelectorSequence|
+ *          !parse_css.Combinator|!parse_css.ErrorToken}
  */
-css_selectors.parseASelector = function(tokenStream) {
+parse_css.parseASelector = function(tokenStream) {
   if (!isSimpleSelectorSequenceStart(tokenStream.current())) {
     const error = new parse_css.ErrorToken(
         amp.validator.ValidationError.Code.CSS_SYNTAX_NOT_A_SELECTOR_START,
@@ -707,7 +826,7 @@ css_selectors.parseASelector = function(tokenStream) {
     error.col = tokenStream.current().col;
     return error;
   }
-  let left = css_selectors.parseASimpleSelectorSequence(tokenStream);
+  let left = parse_css.parseASimpleSelectorSequence(tokenStream);
   if (left instanceof parse_css.ErrorToken) {
     return left;
   }
@@ -732,13 +851,14 @@ css_selectors.parseASelector = function(tokenStream) {
     if (tokenStream.current() instanceof parse_css.WhitespaceToken) {
       tokenStream.consume();
     }
-    const right = css_selectors.parseASimpleSelectorSequence(tokenStream);
+    const right = parse_css.parseASimpleSelectorSequence(tokenStream);
     if (right instanceof parse_css.ErrorToken) {
       return right;  // TODO(johannes): more than one error / partial tree.
     }
-    left = new css_selectors.Combinator(
-        combinatorToken.line, combinatorToken.col,
+    left = new parse_css.Combinator(
         combinatorTypeForToken(combinatorToken), left, right);
+    left.line = combinatorToken.line;
+    left.col = combinatorToken.col;
   }
 };
 
@@ -746,20 +866,18 @@ css_selectors.parseASelector = function(tokenStream) {
  * Models a selectors group, as described in
  * http://www.w3.org/TR/css3-selectors/#grouping.
  */
-css_selectors.SelectorsGroup = class extends css_selectors.SelectorNode {
+parse_css.SelectorsGroup = class extends parse_css.Selector {
   /**
-   * @param {number} line
-   * @param {number} col
-   * @param {!Array<!css_selectors.SimpleSelectorSequence|
-   *         !css_selectors.Combinator>} elements
+   * @param {!Array<!parse_css.SimpleSelectorSequence|
+   *         !parse_css.Combinator>} elements
    */
-  constructor(line, col, elements) {
-    super(line, col);
-    /** @type {!Array<!css_selectors.SimpleSelectorSequence|
-        !css_selectors.Combinator>} */
+  constructor(elements) {
+    super();
+    /** @type {!Array<!parse_css.SimpleSelectorSequence|
+        !parse_css.Combinator>} */
     this.elements = elements;
-    /** @type {string} */
-    this.nodeType = 'SELECTORS_GROUP';
+    /** @type {parse_css.TokenType} */
+    this.tokenType = parse_css.TokenType.SELECTORS_GROUP;
   }
 
   /** @inheritDoc */
@@ -774,7 +892,7 @@ css_selectors.SelectorsGroup = class extends css_selectors.SelectorNode {
     return this.elements;
   }
 
-  /** @param {!css_selectors.NodeVisitor} visitor */
+  /** @param {!parse_css.SelectorVisitor} visitor */
   accept(visitor) {
     visitor.visitSelectorsGroup(this);
   }
@@ -784,11 +902,11 @@ css_selectors.SelectorsGroup = class extends css_selectors.SelectorNode {
  * The selectors_group production from
  * http://www.w3.org/TR/css3-selectors/#grammar
  * @param {!parse_css.TokenStream} tokenStream
- * @return {!css_selectors.SelectorsGroup|
- *          !css_selectors.SimpleSelectorSequence|!css_selectors.Combinator|
+ * @return {!parse_css.SelectorsGroup|
+ *          !parse_css.SimpleSelectorSequence|!parse_css.Combinator|
  *          !parse_css.ErrorToken}
  */
-css_selectors.parseASelectorsGroup = function(tokenStream) {
+parse_css.parseASelectorsGroup = function(tokenStream) {
   if (!isSimpleSelectorSequenceStart(tokenStream.current())) {
     const error = new parse_css.ErrorToken(
         amp.validator.ValidationError.Code.CSS_SYNTAX_NOT_A_SELECTOR_START,
@@ -799,7 +917,7 @@ css_selectors.parseASelectorsGroup = function(tokenStream) {
   }
   const line = tokenStream.current().line;
   const col = tokenStream.current().col;
-  const elements = [css_selectors.parseASelector(tokenStream)];
+  const elements = [parse_css.parseASelector(tokenStream)];
   if (elements[0] instanceof parse_css.ErrorToken) {
     return elements[0];
   }
@@ -812,7 +930,7 @@ css_selectors.parseASelectorsGroup = function(tokenStream) {
       if (tokenStream.current() instanceof parse_css.WhitespaceToken) {
         tokenStream.consume();
       }
-      elements.push(css_selectors.parseASelector(tokenStream));
+      elements.push(parse_css.parseASelector(tokenStream));
       if (elements[elements.length - 1] instanceof parse_css.ErrorToken) {
         return elements[elements.length - 1];
       }
@@ -821,17 +939,21 @@ css_selectors.parseASelectorsGroup = function(tokenStream) {
     if (elements.length == 1) {
       return elements[0];
     }
-    return new css_selectors.SelectorsGroup(line, col, elements);
+    const group = new parse_css.SelectorsGroup(elements);
+    group.line = line;
+    group.col = col;
+    return group;
   }
 };
 
 /**
  * @param {!parse_css.TokenStream} tokenStream
  * @param {!Array<!parse_css.ErrorToken>} errors
- * @return {css_selectors.SelectorsGroup|css_selectors.SimpleSelectorSequence|css_selectors.Combinator}
+ * @return {parse_css.SelectorsGroup|parse_css.SimpleSelectorSequence|
+ *          parse_css.Combinator}
  */
-css_selectors.parse = function(tokenStream, errors) {
-  const group = css_selectors.parseASelectorsGroup(tokenStream);
+parse_css.parseSelectors = function(tokenStream, errors) {
+  const group = parse_css.parseASelectorsGroup(tokenStream);
   if (group instanceof parse_css.ErrorToken) {
     errors.push(group);
   }
@@ -845,4 +967,4 @@ css_selectors.parse = function(tokenStream, errors) {
     errors.push(error);
   }
   return (group instanceof parse_css.ErrorToken) ? null : group;
-}
+};

@@ -325,7 +325,6 @@ function errHandler(err) {
     msg = err.message;
   }
   util.log(util.colors.red(msg));
-  throw err;
 }
 
 /**

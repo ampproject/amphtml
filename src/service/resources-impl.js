@@ -103,6 +103,12 @@ export class Resources {
      */
     this.firstPassAfterDocumentReady_ = true;
 
+    /**
+     * We also adjust the timeout penalty shortly after the first pass.
+     * @private {number}
+     */
+    this.firstVisibleTime_ = -1;
+
     /** @private {boolean} */
     this.relayoutAll_ = true;
 
@@ -187,6 +193,9 @@ export class Resources {
     // When document becomes visible, e.g. from "prerender" mode, do a
     // simple pass.
     this.viewer_.onVisibilityChanged(() => {
+      if (this.firstVisibleTime_ == -1 && this.viewer_.isVisible()) {
+        this.firstVisibleTime_ = timer.now();
+      }
       this.schedulePass();
     });
 
@@ -938,50 +947,50 @@ export class Resources {
 
     let timeout = -1;
     let task = this.queue_.peek(scorer);
-    if (task) {
-      do {
-        timeout = this.calcTaskTimeout_(task);
-        dev.fine(TAG_, 'peek from queue:', task.id,
-            'sched at', task.scheduleTime,
-            'score', scorer(task),
-            'timeout', timeout);
-        if (timeout > 16) {
-          break;
-        }
+    while (task) {
+      timeout = this.calcTaskTimeout_(task);
+      dev.fine(TAG_, 'peek from queue:', task.id,
+          'sched at', task.scheduleTime,
+          'score', scorer(task),
+          'timeout', timeout);
+      if (timeout > 16) {
+        break;
+      }
 
-        this.queue_.dequeue(task);
+      this.queue_.dequeue(task);
 
-        // Do not override a task in execution. This task will have to wait
-        // until the current one finished the execution.
-        const executing = this.exec_.getTaskById(task.id);
-        if (!executing) {
-          task.promise = task.callback(visibility);
-          task.startTime = now;
-          dev.fine(TAG_, 'exec:', task.id, 'at', task.startTime);
-          this.exec_.enqueue(task);
-          task.promise.then(this.taskComplete_.bind(this, task, true),
-              this.taskComplete_.bind(this, task, false))
-              .catch(reportError);
-        } else {
-          // Reschedule post execution.
-          executing.promise.then(this.reschedule_.bind(this, task),
-              this.reschedule_.bind(this, task));
-        }
+      // Do not override a task in execution. This task will have to wait
+      // until the current one finished the execution.
+      const executing = this.exec_.getTaskById(task.id);
+      if (executing) {
+        // Reschedule post execution.
+        const reschedule = this.reschedule_.bind(this, task);
+        executing.promise.then(reschedule, reschedule);
+      } else {
+        task.promise = task.callback(visibility);
+        task.startTime = now;
+        dev.fine(TAG_, 'exec:', task.id, 'at', task.startTime);
+        this.exec_.enqueue(task);
+        task.promise.then(this.taskComplete_.bind(this, task, true),
+            this.taskComplete_.bind(this, task, false))
+            .catch(reportError);
+      }
 
-        task = this.queue_.peek(scorer);
-        timeout = -1;
-      } while (task);
+      task = this.queue_.peek(scorer);
+      timeout = -1;
     }
 
     dev.fine(TAG_, 'queue size:', this.queue_.getSize());
     dev.fine(TAG_, 'exec size:', this.exec_.getSize());
 
     if (timeout >= 0) {
-      // Work pass.
+      // Still tasks in the queue, but we took too much time.
+      // Schedule the next work pass.
       return timeout;
     }
 
-    // Idle pass.
+    // No tasks left in the queue.
+    // Schedule the next idle pass.
     let nextPassDelay = (now - this.exec_.getLastDequeueTime()) * 2;
     nextPassDelay = Math.max(Math.min(30000, nextPassDelay), 5000);
     return nextPassDelay;
@@ -1037,11 +1046,22 @@ export class Resources {
    * @private
    */
   calcTaskTimeout_(task) {
+    const now = timer.now();
+
     if (this.exec_.getSize() == 0) {
-      return 0;
+      // If we've never been visible, return 0. This follows the previous
+      // behavior of not delaying tasks when there's nothing to do.
+      if (this.firstVisibleTime_ === -1) {
+        return 0;
+      }
+
+      // Scale off the first visible time, so penalized tasks must wait a
+      // second or two to run. After we have been visible for a time, we no
+      // longer have to wait.
+      const penalty = task.priority * PRIORITY_PENALTY_TIME_;
+      return Math.max(penalty - (now - this.firstVisibleTime_), 0);
     }
 
-    const now = timer.now();
     let timeout = 0;
     this.exec_.forEach(other => {
       // Higher priority tasks get the head start. Currently 500ms per a drop
@@ -1338,6 +1358,7 @@ export class Resources {
     };
     const unload = () => {
       this.resources_.forEach(r => r.unload());
+      this.unselectText();
     };
     const resume = () => {
       this.resources_.forEach(r => r.resume());
@@ -1369,6 +1390,17 @@ export class Resources {
     vsm.addTransition(paused, hidden, doPass);
     vsm.addTransition(paused, inactive, unload);
     vsm.addTransition(paused, paused, noop);
+  }
+
+  /**
+   * Unselects any selected text
+   */
+  unselectText() {
+    try {
+      this.win.getSelection().removeAllRanges();
+    } catch (e) {
+      // Selection API not supported.
+    }
   }
 }
 

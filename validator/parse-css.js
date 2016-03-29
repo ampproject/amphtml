@@ -452,19 +452,23 @@ class Canonicalizer {
         const contents = parse_css.extractASimpleBlock(tokenStream);
 
         switch (this.blockTypeFor(rule)) {
-          case parse_css.BlockType.PARSE_AS_RULES:
-          rule.rules = this.parseAListOfRules(
-              contents, /* topLevel */ false, errors);
-          break;
-          case parse_css.BlockType.PARSE_AS_DECLARATIONS:
-          rule.declarations = this.parseAListOfDeclarations(contents, errors);
-          break;
-          case parse_css.BlockType.PARSE_AS_IGNORE:
-          break;
-          default:
-          goog.asserts.fail(
-              'Unrecognized blockType ' + this.blockTypeFor(rule));
-          break;
+          case parse_css.BlockType.PARSE_AS_RULES: {
+            rule.rules = this.parseAListOfRules(
+                contents, /* topLevel */ false, errors);
+            break;
+          }
+          case parse_css.BlockType.PARSE_AS_DECLARATIONS: {
+            rule.declarations = this.parseAListOfDeclarations(contents, errors);
+            break;
+          }
+          case parse_css.BlockType.PARSE_AS_IGNORE: {
+            break;
+          }
+          default: {
+            goog.asserts.fail(
+                'Unrecognized blockType ' + this.blockTypeFor(rule));
+            break;
+          }
         }
         return rule;
       }
@@ -861,6 +865,8 @@ class UrlFunctionVisitor extends parse_css.RuleVisitor {
    * @param {!Array<!parse_css.ErrorToken>} errors
    */
   constructor(parsedUrls, errors) {
+    super();
+
     /** @type {!Array<!parse_css.ParsedCssUrl>} */
     this.parsedUrls = parsedUrls;
     /** @type {!Array<!parse_css.ErrorToken>} */
