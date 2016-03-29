@@ -21,7 +21,7 @@ import {checkData} from '../src/3p';
  * @param {!Object} data
  */
 export function adsense(global, data) {
-  checkData(data, ['adClient', 'adSlot']);
+  checkData(data, ['adClient', 'adSlot', 'adFormat']);
   if (global.context.clientId) {
     // Read by GPT for GA/GPT integration.
     global.gaGlobal = {
@@ -37,6 +37,9 @@ export function adsense(global, data) {
   i.setAttribute('data-ad-client', data['adClient']);
   if (data['adSlot']) {
     i.setAttribute('data-ad-slot', data['adSlot']);
+  }
+  if (data['adFormat'] && data['adFormat'].match("link|autorelaxed")) {
+    i.setAttribute('data-ad-format', data['adFormat']);
   }
   i.setAttribute('data-page-url', global.context.canonicalUrl);
   i.setAttribute('class', 'adsbygoogle');
