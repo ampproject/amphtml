@@ -884,9 +884,13 @@ describe('Resources changeSize', () => {
 
 describe('Resources mutateElement', () => {
 
-  function createElement(rect) {
+  function createElement(rect, isAmp) {
     return {
-      tagName: 'amp-test',
+      tagName: isAmp ? 'amp-test' : 'div',
+      classList: {
+        contains: className => isAmp && className == '-amp-element',
+      },
+      getElementsByClassName: () => [],
       isBuilt: () => {
         return true;
       },
@@ -906,11 +910,17 @@ describe('Resources mutateElement', () => {
       contains: unused_otherElement => false,
       updateLayoutBox: () => {},
       overflowCallback: (unused_overflown, unused_requestedHeight) => {},
+      unlayoutOnPause: () => false,
+      pauseCallback: () => {},
+      unlayoutCallback: () => {},
     };
   }
 
   function createResource(id, rect) {
-    const resource = new Resource(id, createElement(rect), resources);
+    const resource = new Resource(
+        id,
+        createElement(rect, /* isAmp */ true),
+        resources);
     resource.element['__AMP__RESOURCE'] = resource;
     resource.state_ = ResourceState_.READY_FOR_LAYOUT;
     resource.layoutBox_ = rect;
@@ -954,8 +964,10 @@ describe('Resources mutateElement', () => {
     resource1RequestMeasureStub = sandbox.stub(resource1, 'requestMeasure');
     resource2RequestMeasureStub = sandbox.stub(resource2, 'requestMeasure');
 
-    parent1 = createElement(layoutRectLtwh(10, 10, 100, 100));
-    parent2 = createElement(layoutRectLtwh(10, 1010, 100, 100));
+    parent1 = createElement(layoutRectLtwh(10, 10, 100, 100),
+        /* isAmp */ false);
+    parent2 = createElement(layoutRectLtwh(10, 1010, 100, 100),
+        /* isAmp */ false);
 
     parent1.getElementsByClassName = className => {
       if (className == '-amp-element') {
@@ -978,6 +990,22 @@ describe('Resources mutateElement', () => {
     const mutateSpy = sandbox.spy();
     const promise = resources.mutateElement(parent1, () => {
       parent1.getBoundingClientRect = () => layoutRectLtwh(0, 0, 0, 0);
+      mutateSpy();
+    });
+    return promise.then(() => {
+      expect(mutateSpy.callCount).to.equal(1);
+      expect(resource1RequestMeasureStub.callCount).to.equal(1);
+      expect(resource2RequestMeasureStub.callCount).to.equal(0);
+      expect(relayoutTopStub.callCount).to.equal(1);
+      expect(relayoutTopStub.getCall(0).args[0]).to.equal(10);
+    });
+  });
+
+  it('should mutate from visible to invisible on itself', () => {
+    const mutateSpy = sandbox.spy();
+    const promise = resources.mutateElement(resource1.element, () => {
+      resource1.element.getBoundingClientRect =
+          () => layoutRectLtwh(0, 0, 0, 0);
       mutateSpy();
     });
     return promise.then(() => {
