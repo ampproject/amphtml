@@ -87,7 +87,7 @@ import {vsyncFor} from './vsync';
  * after layoutCallback.
  *
  * The prerenderCallback is always called before layoutCallback, however
- * they both can have loading work in parallel and either can resovle
+ * they both can have loading work in parallel and either can resolve
  * first. Best case is prerender load promise resolves first. However if
  * layout load promise resolves before prerender does, the resource will
  * be marked to be notified about that through the prerenderCancelled callback.

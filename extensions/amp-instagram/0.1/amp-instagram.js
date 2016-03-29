@@ -107,8 +107,6 @@ class AmpInstagram extends AMP.BaseElement {
     this.placeholderWrapper_ = wrapper;
     this.applyFillContent(image);
     this.element.appendChild(wrapper);
-
-    // Need a way to cancel this if the layout promise is ready to resolve.
     return loadPromise(image);
   }
 
