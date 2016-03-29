@@ -523,7 +523,11 @@ export class Resources {
       mutate: () => {
         mutator();
 
-        // Mark children for re-measurement.
+        // Mark itself and children for re-measurement.
+        if (element.classList.contains('-amp-element')) {
+          const r = this.getResourceForElement(element);
+          r.requestMeasure();
+        }
         const ampElements = element.getElementsByClassName('-amp-element');
         for (let i = 0; i < ampElements.length; i++) {
           const r = this.getResourceForElement(ampElements[i]);
