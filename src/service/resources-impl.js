@@ -859,7 +859,10 @@ export class Resources {
     // Unload all in one cycle.
     if (toUnload.length > 0) {
       this.vsync_.mutate(() => {
-        toUnload.forEach(r => r.unload());
+        toUnload.forEach(r => {
+          r.unload();
+          this.cleanupTasks_(r);
+        });
       });
     }
 
@@ -1241,7 +1244,7 @@ export class Resources {
    * @private
    */
   schedule_(resource, localId, priorityOffset, parentPriority, callback) {
-    const taskId = resource.debugid + '#' + localId;
+    const taskId = resource.getTaskId(localId);
 
     const task = {
       id: taskId,
@@ -1362,7 +1365,10 @@ export class Resources {
       this.resources_.forEach(r => r.pause());
     };
     const unload = () => {
-      this.resources_.forEach(r => r.unload());
+      this.resources_.forEach(r => {
+        r.unload();
+        this.cleanupTasks_(r);
+      });
       this.unselectText();
     };
     const resume = () => {
@@ -1405,6 +1411,29 @@ export class Resources {
       this.win.getSelection().removeAllRanges();
     } catch (e) {
       // Selection API not supported.
+    }
+  }
+
+  /**
+   * Cleanup task queues from tasks for elements that has been unloaded.
+   * @param resource
+   * @private
+   */
+  cleanupTasks_(resource) {
+    if (resource.getState() == ResourceState_.NOT_LAID_OUT) {
+      // If the layout promise for this resource has not resolved yet, remove
+      // it from the task queues to make sure this resource can be rescheduled
+      // for layout again later on.
+      // TODO(mkhatib): Think about how this might affect preload tasks once the
+      // prerender change is in.
+      this.queue_.purge(task => {
+        return task.resource == resource;
+      });
+      this.exec_.purge(task => {
+        return task.resource == resource;
+      });
+      this.requestsChangeSize_ = this.requestsChangeSize_.filter(
+          request => request.resource != resource);
     }
   }
 }
@@ -1861,7 +1890,17 @@ export class Resource {
     if (this.element.unlayoutCallback()) {
       this.state_ = ResourceState_.NOT_LAID_OUT;
       this.layoutCount_ = 0;
+      this.layoutPromise_ = null;
     }
+  }
+
+  /**
+   * Returns the task ID for this resource.
+   * @param localId
+   * @returns {string}
+   */
+  getTaskId(localId) {
+    return this.debugid + '#' + localId;
   }
 
   /**
@@ -2017,11 +2056,10 @@ export class TaskQueue_ {
    */
   dequeue(task) {
     const existing = this.taskIdMap_[task.id];
-    if (!existing) {
+    const dequeued = this.removeAtIndex(task, this.tasks_.indexOf(existing));
+    if (!dequeued) {
       return false;
     }
-    this.tasks_.splice(this.tasks_.indexOf(existing), 1);
-    delete this.taskIdMap_[task.id];
     this.lastDequeueTime_ = timer.now();
     return true;
   }
@@ -2052,6 +2090,36 @@ export class TaskQueue_ {
    */
   forEach(callback) {
     this.tasks_.forEach(callback);
+  }
+
+  /**
+   * Removes the task and returns "true" if dequeueing is successful. Otherwise
+   * returns "false", e.g. when this task is not currently enqueued.
+   * @param {!TaskDef} task
+   * @param {number} index of the task to remove.
+   * @return {boolean}
+   */
+  removeAtIndex(task, index) {
+    const existing = this.taskIdMap_[task.id];
+    if (!existing || this.tasks_[index] != existing) {
+      return false;
+    }
+    this.tasks_.splice(index, 1);
+    delete this.taskIdMap_[task.id];
+    return true;
+  }
+
+  /**
+   * Removes tasks in queue that pass the callback test.
+   * @param {function(!TaskDef):boolean} callback Return true to remove the task.
+   */
+  purge(callback) {
+    let index = this.tasks_.length;
+    while (index--) {
+      if (callback(this.tasks_[index])) {
+        this.removeAtIndex(this.tasks_[index], index);
+      }
+    }
   }
 }
 
