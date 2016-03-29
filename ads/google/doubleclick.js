@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {loadScript, checkData} from '../src/3p';
+import {loadScript, checkData} from '../../src/3p';
+import {getCorrelator} from './utils';
 
 /**
  * @param {!Window} global
@@ -166,18 +167,4 @@ function doubleClickWithGlade(global, data) {
 
   window.glade = {correlator: getCorrelator(global)};
   loadScript(global, 'https://securepubads.g.doubleclick.net/static/glade.js');
-}
-
-/**
- * @param {!Object} data
- * @return {number}
- */
-function getCorrelator(global) {
-  const clientId = global.context.clientId;
-  const pageViewId = global.context.pageViewId;
-  if (global.context.clientId) {
-    return pageViewId + (clientId.replace(/\D/g, '') % 1e6) * 1e6;
-  } else {
-    return pageViewId;
-  }
 }
