@@ -19,6 +19,7 @@ import {loadPromise} from '../../../src/event-helper';
 import {addParamsToUrl} from '../../../src/url';
 import {dashToCamelCase} from '../../../src/string';
 import {removeElement} from '../../../src/dom';
+import {user} from '../../../src/log';
 
 class AmpBrightcove extends AMP.BaseElement {
 
@@ -36,7 +37,7 @@ class AmpBrightcove extends AMP.BaseElement {
   layoutCallback() {
     const width = this.element.getAttribute('width');
     const height = this.element.getAttribute('height');
-    const account = AMP.assert(
+    const account = user.assert(
         this.element.getAttribute('data-account'),
         'The data-account attribute is required for <amp-brightcove> %s',
         this.element);

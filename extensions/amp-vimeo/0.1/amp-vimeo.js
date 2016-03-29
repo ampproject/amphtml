@@ -16,6 +16,7 @@
 
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
+import {user} from '../../../src/log';
 
 class AmpVimeo extends AMP.BaseElement {
 
@@ -38,7 +39,7 @@ class AmpVimeo extends AMP.BaseElement {
     const width = this.element.getAttribute('width');
     const height = this.element.getAttribute('height');
     // The video-id is supported only for backward compatibility.
-    const videoid = AMP.assert(
+    const videoid = user.assert(
         this.element.getAttribute('data-videoid'),
         'The data-videoid attribute is required for <amp-vimeo> %s',
         this.element);

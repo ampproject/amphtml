@@ -20,10 +20,14 @@ import {elementByTag} from '../../../src/dom';
 import {getSocialConfig} from './amp-social-share-config';
 import {isLayoutSizeDefined, getLengthNumeral,
   Layout} from '../../../src/layout';
+import {user} from '../../../src/log';
 import {CSS} from '../../../build/amp-social-share-0.1.css';
 
 /** @const {number} */
 const DEFAULT_WIDTH = 60;
+
+/** @const {string} */
+const TAG = 'AmpSocialShare';
 
 class AmpSocialShare extends AMP.BaseElement {
 
@@ -35,7 +39,7 @@ class AmpSocialShare extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     /** @private @const {!Element} */
-    this.type_ = AMP.assert(this.element.getAttribute('type'),
+    this.type_ = user.assert(this.element.getAttribute('type'),
         'The type attribute is required. %s',
         this.element);
 
@@ -66,7 +70,7 @@ class AmpSocialShare extends AMP.BaseElement {
       const paramConf = this.typeConfig_['params'][param];
       let paramValue = this.config_[param] || this.getDefaultValue_(
           param, this.config_);
-      AMP.assert(!paramConf['required'] || paramValue !== null,
+      user.assert(!paramConf['required'] || paramValue !== null,
           param + ' is a required attribute for ' + this.type_ + '. %s',
         this.element);
       if (paramValue == null && paramConf['type'] == 'fixed') {
@@ -74,7 +78,7 @@ class AmpSocialShare extends AMP.BaseElement {
       }
       if ('maxlength' in paramConf) {
         const maxlength = paramConf['maxlength'];
-        AMP.assert(!paramValue || paramValue.length < maxlength,
+        user.assert(!paramValue || paramValue.length < maxlength,
             param + ' cannot exceed ' + maxlength + '. %s', this.element);
       }
       if (paramValue != null) {
@@ -119,7 +123,7 @@ class AmpSocialShare extends AMP.BaseElement {
       try {
         config = JSON.parse(script.textContent);
       } catch (e) {
-        AMP.assert(false, 'Malformed JSON configuration. %s', this.element);
+        user.error(TAG, 'Malformed JSON configuration. %s', this.element);
       }
     } else {
       // Get config from attributes

@@ -99,7 +99,10 @@ export function adopt(global) {
     registerExtendedTemplate(global, name, implementationClass);
   };
 
-  /** @const */
+  /**
+   * @const
+   * TODO(dvoytenko, #2527): Remove this export.
+   */
   global.AMP.assert = assert;
 
   installCoreServices(global);

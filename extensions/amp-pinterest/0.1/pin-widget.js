@@ -15,6 +15,7 @@
  */
 
 import {assertHttpsUrl} from '../../../src/url';
+import {user} from '../../../src/log';
 import {xhrFor} from '../../../src/xhr';
 
 import {Util} from './util';
@@ -32,7 +33,7 @@ export class PinWidget {
 
   /** @param {!Element} rootElement */
   constructor(rootElement) {
-    AMP.assert(rootElement.getAttribute('data-url'),
+    user.assert(rootElement.getAttribute('data-url'),
       'The data-url attribute is required for Pin widgets');
     this.element = rootElement;
     this.xhr = xhrFor(rootElement.ownerDocument.defaultView);

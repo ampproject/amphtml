@@ -56,7 +56,6 @@ describe('runtime', () => {
     expect(win.AMP.BaseTemplate).to.be.a('function');
     expect(win.AMP.registerElement).to.be.a('function');
     expect(win.AMP.registerTemplate).to.be.a('function');
-    expect(win.AMP.assert).to.be.a('function');
     expect(win.AMP.setTickFunction).to.be.a('function');
     expect(win.AMP.win).to.equal(win);
     expect(win.AMP.viewer).to.be.a('object');
