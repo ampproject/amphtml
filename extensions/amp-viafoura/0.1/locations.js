@@ -186,7 +186,7 @@ fetchTitle = function(meta) {
     getAttributeContents(meta, 'og:title') ||
     getAttributeContents(meta, 'twitter:title') ||
     (document.getElementsByTagName('title')[0] &&
-    document.getElementsByTagName('title')[0].innerHTML) ||
+    document.getElementsByTagName('title')[0]. /*REVIEW*/ innerHTML) ||
     location.href).substring(0, 500);
 };
 

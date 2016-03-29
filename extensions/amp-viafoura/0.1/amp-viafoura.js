@@ -104,7 +104,7 @@ class AmpViafoura extends AMP.BaseElement {
   /** @override */
   documentInactiveCallback() {
     if (this.iframe_ && this.iframe_.contentWindow) {
-      this.iframe_.contentWindow. /*OK*/ postMessage('pause', '*');
+      this.iframe_.contentWindow. /*REVIEW*/ postMessage('pause', '*');
     }
 
     // No need to do layout later - user action will be expect to resume
