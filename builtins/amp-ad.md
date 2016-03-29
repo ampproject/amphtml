@@ -52,6 +52,16 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 </amp-ad>
 ```
 
+```html
+<amp-ad width=320 height=140
+    type="colombia"
+    layout=responsive
+    data-clmb_slot="129883"
+    data-clmb_position="1"
+    data-clmb_section="0">
+</amp-ad>
+```
+
 ## Supported ad networks
 
 - [A9](../ads/a9.md)
@@ -60,6 +70,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [AdReactor](../ads/adreactor.md)
 - [AdSense](../ads/adsense.md)
 - [AdTech](../ads/adtech.md)
+- [Colombia](../ads/colombia.md)
 - [Criteo](../ads/criteo.md)
 - [Dot and Media](../ads/dotandads.md)
 - [Doubleclick](../ads/doubleclick.md)
