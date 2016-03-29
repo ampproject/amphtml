@@ -15,6 +15,7 @@
  */
 
 import {assertHttpsUrl} from '../../../src/url';
+import {user} from '../../../src/log';
 
 import {Util} from './util';
 
@@ -32,9 +33,9 @@ export class FollowButton {
 
   /** @param {!Element} rootElement */
   constructor(rootElement) {
-    AMP.assert(rootElement.getAttribute('data-href'),
+    user.assert(rootElement.getAttribute('data-href'),
       'The data-href attribute is required for follow buttons');
-    AMP.assert(rootElement.getAttribute('data-label'),
+    user.assert(rootElement.getAttribute('data-label'),
       'The data-label attribute is required for follow buttons');
     this.element = rootElement;
     this.label = rootElement.getAttribute('data-label');

@@ -17,6 +17,7 @@
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
 import {setStyles} from '../../../src/style';
+import {user} from '../../../src/log';
 
 class AmpSpringboardPlayer extends AMP.BaseElement {
 
@@ -35,16 +36,16 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
   buildCallback() {
     const width = this.element.getAttribute('width');
     const height = this.element.getAttribute('height');
-    const mode = AMP.assert(
+    const mode = user.assert(
         this.element.getAttribute('data-mode'),
         'The data-mode attribute is required for <amp-springboard-player> %s',
         this.element);
-    const contentId = AMP.assert(
+    const contentId = user.assert(
         this.element.getAttribute('data-content-id'),
         'The data-content-id attribute is required for' +
         '<amp-springboard-player> %s',
         this.element);
-    const domain = AMP.assert(
+    const domain = user.assert(
         this.element.getAttribute('data-domain'),
         'The data-domain attribute is required for <amp-springboard-player> %s',
         this.element);
@@ -68,12 +69,12 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
   /** @override */
   layoutCallback() {
     const iframe = document.createElement('iframe');
-    const siteId = AMP.assert(
+    const siteId = user.assert(
         this.element.getAttribute('data-site-id'),
         'The data-site-id attribute is required for' +
         '<amp-springboard-player> %s',
         this.element);
-    const playerId = AMP.assert(
+    const playerId = user.assert(
         this.element.getAttribute('data-player-id'),
         'The data-player-id attribute is required for' +
         '<amp-springboard-player> %s',
