@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import {writeScript, checkData} from '../src/3p';
+import {writeScript, validateDataExists} from '../src/3p';
 
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function colombia(global, data) {
-  checkData(data, [
+  validateDataExists(data, [
     'clmb_slot', 'clmb_position', 'clmb_section',
     'clmb_divid', 'loadingStrategy',
   ]);
