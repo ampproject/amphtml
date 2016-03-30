@@ -39,7 +39,7 @@ export class BaseCarousel extends AMP.BaseElement {
   }
 
   buildButtons() {
-    this.prevButton_ = document.createElement('div');
+    this.prevButton_ = this.element.ownerDocument.createElement('div');
     this.prevButton_.classList.add('amp-carousel-button');
     this.prevButton_.classList.add('amp-carousel-button-prev');
     this.prevButton_.setAttribute('role', 'button');
@@ -51,7 +51,7 @@ export class BaseCarousel extends AMP.BaseElement {
     };
     this.element.appendChild(this.prevButton_);
 
-    this.nextButton_ = document.createElement('div');
+    this.nextButton_ = this.element.ownerDocument.createElement('div');
     this.nextButton_.classList.add('amp-carousel-button');
     this.nextButton_.classList.add('amp-carousel-button-next');
     this.nextButton_.setAttribute('role', 'button');

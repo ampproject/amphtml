@@ -18,7 +18,7 @@ import {assert} from './asserts';
 import {endsWith} from './string';
 
 // Cached a-tag to avoid memory allocation during URL parsing.
-const a = document.createElement('a');
+const a = window.document.createElement('a');
 
 // We cached all parsed URLs. As of now there are no use cases
 // of AMP docs that would ever parse an actual large number of URLs,

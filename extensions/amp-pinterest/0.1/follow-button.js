@@ -57,12 +57,12 @@ export class FollowButton {
    * @returns {Element}
    */
   renderTemplate() {
-    const followButton = Util.make({'a': {
+    const followButton = Util.make(this.element.ownerDocument, {'a': {
       class: '-amp-pinterest-follow-button',
       href: this.href,
       textContent: this.label,
     }});
-    followButton.appendChild(Util.make({'i': {}}));
+    followButton.appendChild(Util.make(this.element.ownerDocument, {'i': {}}));
     followButton.onclick = this.handleClick.bind(this);
     return followButton;
   }

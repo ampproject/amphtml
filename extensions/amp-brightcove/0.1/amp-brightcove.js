@@ -45,7 +45,7 @@ class AmpBrightcove extends AMP.BaseElement {
       this.element.getAttribute('data-player-id') ||
       'default');
     const embed = (this.element.getAttribute('data-embed') || 'default');
-    const iframe = document.createElement('iframe');
+    const iframe = this.element.ownerDocument.createElement('iframe');
     let src = `https://players.brightcove.net/${encodeURIComponent(account)}/${encodeURIComponent(playerid)}_${encodeURIComponent(embed)}/index.html`;
     const params = {};
 

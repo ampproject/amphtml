@@ -34,7 +34,7 @@ class AmpReachPlayer extends AMP.BaseElement {
     const width = this.element.getAttribute('width');
     const height = this.element.getAttribute('height');
     const embedId = (this.element.getAttribute('data-embed-id') || 'default');
-    const iframe = document.createElement('iframe');
+    const iframe = this.element.ownerDocument.createElement('iframe');
 
     iframe.setAttribute('frameborder', 'no');
     iframe.setAttribute('scrolling', 'no');
