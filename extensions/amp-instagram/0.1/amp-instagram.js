@@ -38,6 +38,7 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
 import {setStyles} from '../../../src/style';
 import {removeElement} from '../../../src/dom';
+import {user} from '../../../src/log';
 
 
 class AmpInstagram extends AMP.BaseElement {
@@ -68,7 +69,7 @@ class AmpInstagram extends AMP.BaseElement {
     /**
      * @private @const
      */
-    this.shortcode_ = AMP.assert(
+    this.shortcode_ = user.assert(
         (this.element.getAttribute('data-shortcode') ||
         this.element.getAttribute('shortcode')),
         'The data-shortcode attribute is required for <amp-instagram> %s',

@@ -30,6 +30,7 @@
 
 import {Layout} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
+import {user} from '../../../src/log';
 
 
 class AmpSoundcloud extends AMP.BaseElement {
@@ -50,7 +51,7 @@ class AmpSoundcloud extends AMP.BaseElement {
     const color = this.element.getAttribute('data-color');
     const visual = this.element.getAttribute('data-visual');
     const url = 'https://api.soundcloud.com/tracks/';
-    const trackid = AMP.assert(
+    const trackid = user.assert(
         (this.element.getAttribute('data-trackid')),
         'The data-trackid attribute is required for <amp-soundcloud> %s',
         this.element);

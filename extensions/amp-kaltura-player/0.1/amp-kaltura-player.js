@@ -19,6 +19,7 @@ import {loadPromise} from '../../../src/event-helper';
 import {addParamsToUrl} from '../../../src/url';
 import {dashToCamelCase} from '../../../src/string';
 import {setStyles} from '../../../src/style';
+import {user} from '../../../src/log';
 
 class AmpKaltura extends AMP.BaseElement {
 
@@ -43,7 +44,7 @@ class AmpKaltura extends AMP.BaseElement {
   layoutCallback() {
     const width = this.element.getAttribute('width');
     const height = this.element.getAttribute('height');
-    const partnerid = AMP.assert(
+    const partnerid = user.assert(
         this.element.getAttribute('data-partner'),
         'The data-account attribute is required for <amp-kaltura-player> %s',
         this.element);
@@ -89,7 +90,7 @@ class AmpKaltura extends AMP.BaseElement {
     });
     const width = this.element.getAttribute('width');
     const height = this.element.getAttribute('height');
-    const partnerid = AMP.assert(
+    const partnerid = user.assert(
       this.element.getAttribute('data-partner'),
       'The data-account attribute is required for <amp-kaltura-player> %s',
       this.element);

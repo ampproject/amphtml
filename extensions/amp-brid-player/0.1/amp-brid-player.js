@@ -17,6 +17,7 @@
 import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
 import {setStyles} from '../../../src/style';
+import {user} from '../../../src/log';
 
 class AmpBridPlayer extends AMP.BaseElement {
 
@@ -43,13 +44,13 @@ class AmpBridPlayer extends AMP.BaseElement {
     this.height_ = getLengthNumeral(height);
 
     /** @private @const {string} */
-    this.partnerID_ = AMP.assert(
+    this.partnerID_ = user.assert(
         this.element.getAttribute('data-partner'),
         'The data-partner attribute is required for <amp-brid-player> %s',
         this.element);
 
     /** @private @const {string} */
-    this.feedID_ = AMP.assert(
+    this.feedID_ = user.assert(
         (this.element.getAttribute('data-video') ||
         this.element.getAttribute('data-playlist')),
         'Either the data-video or the data-playlist ' +
@@ -63,11 +64,11 @@ class AmpBridPlayer extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const playerID = AMP.assert(this.element.getAttribute('data-player'),
+    const playerID = user.assert(this.element.getAttribute('data-player'),
         'The data-player attribute is required for <amp-brid-player> %s',
         this.element);
 
-    const partnerID = AMP.assert(
+    const partnerID = user.assert(
         this.partnerID_,
         'The data-partner attribute is required for <amp-brid-player> %s',
         this.element);
@@ -82,7 +83,11 @@ class AmpBridPlayer extends AMP.BaseElement {
 
     //Create iframe
     const iframe = document.createElement('iframe');
-    const src = 'https://services.brid.tv/services/iframe/' + encodeURIComponent(feedType) + '/' + encodeURIComponent(this.feedID_) + '/' + encodeURIComponent(partnerID) + '/' + encodeURIComponent(playerID) + '/0/1';
+    const src = 'https://services.brid.tv/services/iframe/' +
+        encodeURIComponent(feedType) +
+        '/' + encodeURIComponent(this.feedID_) +
+        '/' + encodeURIComponent(partnerID) +
+        '/' + encodeURIComponent(playerID) + '/0/1';
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
     iframe.src = src;

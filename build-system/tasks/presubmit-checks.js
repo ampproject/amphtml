@@ -316,6 +316,12 @@ var forbiddenTerms = {
       'src/log.js',
     ],
   },
+  'AMP\.assert': {  // TODO(dvoytenko, #2527): Remove when AMP.assert is gone.
+    message: 'Use user.assert instead.',
+    whitelist: [
+      'src/runtime.js',
+    ],
+  },
 };
 
 var ThreePTermsMessage = 'The 3p bootstrap iframe has no polyfills loaded and' +

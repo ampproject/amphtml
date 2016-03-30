@@ -19,10 +19,10 @@ import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
 import {endsWith} from '../../../src/string';
 import {listen} from '../../../src/iframe-helper';
 import {loadPromise} from '../../../src/event-helper';
-import {user} from '../../../src/log';
 import {parseUrl} from '../../../src/url';
 import {removeElement} from '../../../src/dom';
 import {timer} from '../../../src/timer';
+import {user} from '../../../src/log';
 
 /** @const {string} */
 const TAG_ = 'AmpIframe';
@@ -36,9 +36,6 @@ let trackingIframeCount = 0;
 /** @type {number}  */
 let trackingIframeTimeout = 5000;
 
-/** @const */
-const assert = AMP.assert;
-
 export class AmpIframe extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
@@ -50,21 +47,21 @@ export class AmpIframe extends AMP.BaseElement {
     // Some of these can be easily circumvented with redirects.
     // Checks are mostly there to prevent people easily do something
     // they did not mean to.
-    assert(
+    user.assert(
         url.protocol == 'https:' ||
         url.protocol == 'data:' ||
         url.origin.indexOf('http://iframe.localhost:') == 0,
         'Invalid <amp-iframe> src. Must start with https://. Found %s',
         this.element);
     const containerUrl = parseUrl(containerSrc);
-    assert(
+    user.assert(
         !((' ' + sandbox + ' ').match(/\s+allow-same-origin\s+/i)) ||
         (url.origin != containerUrl.origin && url.protocol != 'data:'),
         'Origin of <amp-iframe> must not be equal to container %s' +
         'if allow-same-origin is set. See https://github.com/ampproject/' +
         'amphtml/blob/master/spec/amp-iframe-origin-policy.md for details.',
         this.element);
-    assert(!(endsWith(url.hostname, '.ampproject.net') ||
+    user.assert(!(endsWith(url.hostname, '.ampproject.net') ||
         endsWith(url.hostname, '.ampproject.org')),
         'amp-iframe does not allow embedding of frames from ' +
         'ampproject.*: %s', src);
@@ -74,7 +71,7 @@ export class AmpIframe extends AMP.BaseElement {
   assertPosition() {
     const pos = this.element.getLayoutBox();
     const minTop = Math.min(600, this.getViewport().getSize().height * .75);
-    assert(pos.top >= minTop,
+    user.assert(pos.top >= minTop,
         '<amp-iframe> elements must be positioned outside the first 75% ' +
         'of the viewport or 600px from the top (whichever is smaller): %s ' +
         ' Current position %s. Min: %s' +
@@ -101,7 +98,7 @@ export class AmpIframe extends AMP.BaseElement {
     if (!srcdoc) {
       return;
     }
-    assert(
+    user.assert(
         !((' ' + sandbox + ' ').match(/\s+allow-same-origin\s+/i)),
         'allow-same-origin is not allowed with the srcdoc attribute %s.',
         this.element);
@@ -218,7 +215,7 @@ export class AmpIframe extends AMP.BaseElement {
     }
 
     if (this.isResizable_) {
-      assert(this.getOverflowElement(),
+      user.assert(this.getOverflowElement(),
           'Overflow element must be defined for resizable frames: %s',
           this.element);
     }
