@@ -56,7 +56,6 @@ describe('amp-img', () => {
       height: 200,
     }).then(ampImg => {
       const img = ampImg.querySelector('img');
-      expect(img).to.be.an.instanceof(Element);
       expect(img.tagName).to.equal('IMG');
       expect(img.getAttribute('src')).to.equal('test.jpg');
     });
@@ -69,7 +68,6 @@ describe('amp-img', () => {
       height: 200,
     }).then(ampImg => {
       const img = ampImg.querySelector('img');
-      expect(img).to.be.an.instanceof(Element);
       expect(img.tagName).to.equal('IMG');
       expect(img.getAttribute('src')).to.equal('test-1000.jpg');
     });
