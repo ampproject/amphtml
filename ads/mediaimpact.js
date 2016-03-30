@@ -37,9 +37,9 @@ export function mediaimpact(global, data) {
   };
   loadScript(global, 'https://ec-ns.sascdn.com/diff/251/divscripte/amp.js?dom=' + window.context.location.host, () => {
     if (!document.getElementById('sas_' + data.slot.replace('sas_',''))) {
-      const adContainer = document.createElement('div');
+      const adContainer = global.document.createElement('div');
       adContainer.id = 'sas_' + data.slot.replace('sas_','');
-      document.body.appendChild(adContainer);
+      global.document.body.appendChild(adContainer);
     }
   });
 }

@@ -82,7 +82,7 @@ class AmpBridPlayer extends AMP.BaseElement {
     }
 
     //Create iframe
-    const iframe = document.createElement('iframe');
+    const iframe = this.element.ownerDocument.createElement('iframe');
     const src = 'https://services.brid.tv/services/iframe/' +
         encodeURIComponent(feedType) +
         '/' + encodeURIComponent(this.feedID_) +

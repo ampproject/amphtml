@@ -239,7 +239,7 @@ export class AmpIframe extends AMP.BaseElement {
 
     const width = this.element.getAttribute('width');
     const height = this.element.getAttribute('height');
-    const iframe = document.createElement('iframe');
+    const iframe = this.element.ownerDocument.createElement('iframe');
 
     this.iframe_ = iframe;
 
@@ -427,7 +427,9 @@ function setSandbox(element, iframe, sandbox) {
  */
 function makeIOsScrollable(element) {
   if (element.getAttribute('scrolling') != 'no') {
-    const wrapper = document.createElement('i-amp-scroll-container');
+    const wrapper = element.ownerDocument.createElement(
+      'i-amp-scroll-container'
+    );
     element.appendChild(wrapper);
     return wrapper;
   }

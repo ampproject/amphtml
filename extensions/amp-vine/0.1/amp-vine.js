@@ -42,7 +42,7 @@ class AmpVine extends AMP.BaseElement {
     const width = this.element.getAttribute('width');
     const height = this.element.getAttribute('height');
 
-    const iframe = document.createElement('iframe');
+    const iframe = this.element.ownerDocument.createElement('iframe');
     iframe.setAttribute('frameborder', '0');
     iframe.src = 'https://vine.co/v/' +
       encodeURIComponent(vineid) + '/embed/simple';

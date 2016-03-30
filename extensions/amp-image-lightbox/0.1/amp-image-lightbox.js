@@ -72,11 +72,11 @@ export class ImageViewer {
     this.lightbox_ = lightbox;
 
     /** @private {!Element} */
-    this.viewer_ = document.createElement('div');
+    this.viewer_ = lightbox.element.ownerDocument.createElement('div');
     this.viewer_.classList.add('-amp-image-lightbox-viewer');
 
     /** @private {!Element} */
-    this.image_ = document.createElement('img');
+    this.image_ = lightbox.element.ownerDocument.createElement('img');
     this.image_.classList.add('-amp-image-lightbox-viewer-image');
     this.viewer_.appendChild(this.image_);
 
@@ -668,7 +668,7 @@ class AmpImageLightbox extends AMP.BaseElement {
     this.unlistenViewport_ = null;
 
     /** @private {!Element} */
-    this.container_ = document.createElement('div');
+    this.container_ = this.element.ownerDocument.createElement('div');
     this.container_.classList.add('-amp-image-lightbox-container');
     this.element.appendChild(this.container_);
 
@@ -677,7 +677,7 @@ class AmpImageLightbox extends AMP.BaseElement {
     this.container_.appendChild(this.imageViewer_.getElement());
 
     /** @private {!Element} */
-    this.captionElement_ = document.createElement('div');
+    this.captionElement_ = this.element.ownerDocument.createElement('div');
     this.captionElement_.classList.add('amp-image-lightbox-caption');
     this.captionElement_.classList.add('-amp-image-lightbox-caption');
     this.container_.appendChild(this.captionElement_);
@@ -813,7 +813,7 @@ class AmpImageLightbox extends AMP.BaseElement {
     // 2. Check "aria-describedby".
     if (!caption) {
       const describedBy = sourceElement.getAttribute('aria-describedby');
-      caption = document.getElementById(describedBy);
+      caption = this.element.ownerDocument.getElementById(describedBy);
     }
 
     if (caption) {
@@ -856,9 +856,9 @@ class AmpImageLightbox extends AMP.BaseElement {
     let transLayer = null;
     if (this.sourceImage_ && isLoaded(this.sourceImage_) &&
             this.sourceImage_.src) {
-      transLayer = document.createElement('div');
+      transLayer = this.element.ownerDocument.createElement('div');
       transLayer.classList.add('-amp-image-lightbox-trans');
-      document.body.appendChild(transLayer);
+      this.element.ownerDocument.body.appendChild(transLayer);
 
       const rect = layoutRectFromDomRect(this.sourceImage_
           ./*OK*/getBoundingClientRect());
@@ -902,7 +902,7 @@ class AmpImageLightbox extends AMP.BaseElement {
       st.setStyles(this.element, {opacity: ''});
       st.setStyles(this.container_, {opacity: ''});
       if (transLayer) {
-        document.body.removeChild(transLayer);
+        this.element.ownerDocument.body.removeChild(transLayer);
       }
     });
   }
@@ -926,9 +926,9 @@ class AmpImageLightbox extends AMP.BaseElement {
     // Try to transition to the source image.
     let transLayer = null;
     if (isLoaded(image) && image.src && this.sourceImage_) {
-      transLayer = document.createElement('div');
+      transLayer = this.element.ownerDocument.createElement('div');
       transLayer.classList.add('-amp-image-lightbox-trans');
-      document.body.appendChild(transLayer);
+      this.element.ownerDocument.body.appendChild(transLayer);
 
       const rect = layoutRectFromDomRect(this.sourceImage_
           ./*OK*/getBoundingClientRect());
@@ -987,7 +987,7 @@ class AmpImageLightbox extends AMP.BaseElement {
       });
       st.setStyles(this.container_, {opacity: ''});
       if (transLayer) {
-        document.body.removeChild(transLayer);
+        this.element.ownerDocument.body.removeChild(transLayer);
       }
       this.reset_();
     });

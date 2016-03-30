@@ -121,7 +121,7 @@ export class Transport {
  */
 export function sendRequestUsingIframe(win, request) {
   assertHttpsUrl(request);
-  const iframe = document.createElement('iframe');
+  const iframe = win.document.createElement('iframe');
   iframe.style.display = 'none';
   iframe.onload = iframe.onerror = () => {
     timer.delay(() => {
@@ -130,8 +130,8 @@ export function sendRequestUsingIframe(win, request) {
   };
   assert(
       parseUrl(request).origin != parseUrl(win.location.href).origin,
-      'Origin of iframe request must not be equal to the document origin. ' +
-      'See https://github.com/ampproject/' +
+      'Origin of iframe request must not be equal to the doc' +
+      'ument origin. See https://github.com/ampproject/' +
       'amphtml/blob/master/spec/amp-iframe-origin-policy.md for details.');
   iframe.setAttribute('amp-analytics', '');
   iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');

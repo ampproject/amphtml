@@ -41,7 +41,7 @@ export class AmpCarousel extends BaseCarousel {
     this.cells_ = this.getRealChildren();
 
     /** @private {!Element} */
-    this.container_ = document.createElement('div');
+    this.container_ = this.element.ownerDocument.createElement('div');
     st.setStyles(this.container_, {
       whiteSpace: 'nowrap',
       position: 'absolute',

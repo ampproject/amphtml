@@ -39,18 +39,18 @@ class AmpFitText extends AMP.BaseElement {
   buildCallback() {
 
     /** @private @const */
-    this.content_ = document.createElement('div');
+    this.content_ = this.element.ownerDocument.createElement('div');
     this.applyFillContent(this.content_);
     this.content_.classList.add('-amp-fit-text-content');
     st.setStyles(this.content_, {zIndex: 2});
 
     /** @private @const */
-    this.contentWrapper_ = document.createElement('div');
+    this.contentWrapper_ = this.element.ownerDocument.createElement('div');
     st.setStyles(this.contentWrapper_, {lineHeight: `${LINE_HEIGHT_EM_}em`});
     this.content_.appendChild(this.contentWrapper_);
 
     /** @private @const */
-    this.measurer_ = document.createElement('div');
+    this.measurer_ = this.element.ownerDocument.createElement('div');
     // Note that "measurer" cannot be styled with "bottom:0".
     st.setStyles(this.measurer_, {
       position: 'absolute',
