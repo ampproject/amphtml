@@ -39,7 +39,7 @@ export class AmpSidebar extends AMP.BaseElement {
 
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.CONTAINER;
+    return layout == Layout.NOLAYOUT;
   }
 
   /** @override */
@@ -67,8 +67,8 @@ export class AmpSidebar extends AMP.BaseElement {
     /** @private @const {!Viewport} */
     this.viewport_ = this.getViewport();
 
-    /** @private @const {boolean} */
-    this.hasMask_ = false;
+    /** @private @const {!Element} */
+    this.maskElement_ = false;
 
     /** @private @const {boolean} */
     this.isPaddingAdjusted_ = false;
@@ -97,9 +97,10 @@ export class AmpSidebar extends AMP.BaseElement {
       this.fixIosElasticScrollLeak_();
     }
 
-    if (this.documentElement_.classList.contains('amp-sidebar-open')) {
-      // Create the mask if the sidebar is rendered in open mode.
+    if (this.isOpen_()) {
       this.open_();
+    } else {
+      this.element.setAttribute('aria-hidden', 'true');
     }
 
     this.documentElement_.addEventListener('keydown', event => {
@@ -141,6 +142,7 @@ export class AmpSidebar extends AMP.BaseElement {
       setStyles(div, {
         'height': IOS_SAFARI_BOTTOMBAR_HEIGHT,
         'width': '100%',
+        'background-color': 'transparent',
       });
       this.element.appendChild(div);
     }
@@ -152,11 +154,20 @@ export class AmpSidebar extends AMP.BaseElement {
    * @private
    */
   toggle_() {
-    if (this.documentElement_.classList.contains('amp-sidebar-open')) {
+    if (this.isOpen_()) {
       this.close_();
     } else {
       this.open_();
     }
+  }
+
+  /**
+   * Returns true if the sidebar is opened.
+   * @returns {boolean}
+   * @private
+   */
+  isOpen_() {
+    return this.element.hasAttribute('open');
   }
 
   /**
@@ -170,9 +181,10 @@ export class AmpSidebar extends AMP.BaseElement {
     }
     this.mutateElement(() => {
       this.viewport_.addToFixedLayer(this.element);
-      this.createMask_();
-      this.documentElement_.classList.add('amp-sidebar-open');
-      this.documentElement_.classList.remove('amp-sidebar-closed');
+      this.openMask_();
+      this.element.setAttribute('open', '');
+      this.element.classList.remove('-amp-sidebar-closed');
+      this.element.setAttribute('aria-hidden', 'false');
       this.element./*REVIEW*/scrollTop = 1;
     });
   }
@@ -184,8 +196,10 @@ export class AmpSidebar extends AMP.BaseElement {
   close_() {
     this.viewport_.restoreOriginalTouchZoom();
     this.mutateElement(() => {
-      this.documentElement_.classList.remove('amp-sidebar-open');
-      this.documentElement_.classList.add('amp-sidebar-closed');
+      this.closeMask_()
+      this.element.removeAttribute('open');
+      this.element.classList.add('-amp-sidebar-closed');
+      this.element.setAttribute('aria-hidden', 'true');
       this.viewport_.removeFromFixedLayer(this.element);
     });
   }
@@ -217,20 +231,33 @@ export class AmpSidebar extends AMP.BaseElement {
   /**
    * @private
    */
-  createMask_() {
-    if (this.hasMask_) {
-      return;
+  openMask_() {
+    if (!this.maskElement_) {
+      const mask = this.document_.createElement('div');
+      mask.classList.add('-amp-sidebar-mask');
+      mask.addEventListener('click', () => {
+        this.close_();
+      });
+      this.element.parentNode.appendChild(mask);
+      mask.addEventListener('touchmove', e => {
+        e.preventDefault();
+      });
+      this.maskElement_ = mask;
     }
-    const mask = this.document_.createElement('div');
-    mask.classList.add('-amp-sidebar-mask');
-    mask.addEventListener('click', () => {
-      this.toggle_();
+    setStyles(this.maskElement_, {
+      'display': 'block',
     });
-    this.element.parentNode.appendChild(mask);
-    mask.addEventListener('touchmove', e => {
-      e.preventDefault();
-    });
-    this.hasMask_ = true;
+  }
+
+  /**
+   * @private
+   */
+  closeMask_() {
+    if (this.maskElement_) {
+      setStyles(this.maskElement_, {
+        'display': 'none',
+      });
+    }
   }
 
   /**
@@ -238,7 +265,7 @@ export class AmpSidebar extends AMP.BaseElement {
    */
   fixIosElasticScrollLeak_() {
     this.element.addEventListener('scroll', e => {
-      if (this.documentElement_.classList.contains('amp-sidebar-open')) {
+      if (this.isOpen_()) {
         if (this.element./*REVIEW*/scrollTop < 1) {
           this.element./*REVIEW*/scrollTop = 1;
           e.preventDefault();

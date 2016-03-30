@@ -71,6 +71,7 @@ Alternatively pressing the escape key on the keyboard will also close the lightb
 Example
 ```html
 <div class="hamburger" on='tap:sidebar1.toggle'></button>
+<button on='tap:sidebar1'>Open</button>
 <button on='tap:sidebar1.open'>Open</button>
 <button on='tap:sidebar1.close'>x</button>
 ```
@@ -81,17 +82,13 @@ Example
 
 The `side` attribute may be set to `left` or `right` depending upon whether sidebar should open in the left or right side of the page. If a `side` is not set on the `amp-sidebar` then it will be inherited from the `body` tag's `dir` attribute (`ltr` => `left` , `rtl` => right') and if one does not exist then the `side` is defaulted to `left`.
 
+**open**
+The `open` attribute is present on the sidebar when it is open.
+
 ## Styling
 
 The `amp-sidebar` component can be styled with standard CSS.
 
 - The `width` of the `amp-sidebar` may be set to adjust the width of the sidebar between the pre-set min(30vw) and max(80vw) values.
 - The height of the `amp-sidebar` may be set to adjust the height of the sidebar if required. If the height exceeds 100vw then the sidebar will have a vertical scrollbar. The preset height of the sidebar is 100vw and can be overridden in CSS to make it shorter.
-- The current state of the sidebar is exposed via the `amp-sidebar-open` class name that is set on the `html` tag when the side bar is open on the page.
-- The sidebar animation can be changed by overriding the following CSS selector:
-```css
-.amp-sidebar-closed amp-sidebar,
-.amp-sidebar-open amp-sidebar {
-  transition: transform 0.5s ease;
-}
-```
+- The current state of the sidebar is exposed via the `open` attribute that is set on the `amp-sidebar` tag when the side bar is open on the page.

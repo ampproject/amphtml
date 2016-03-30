@@ -94,8 +94,10 @@ describe('amp-sidebar', () => {
         callback();
       };
       impl.open_();
-      expect(iframe.doc.documentElement.classList.contains('amp-sidebar-open'))
-          .to.be.true;
+      expect(sidebarElement.hasAttribute('open')).to.be.true;
+      expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
+      expect(sidebarElement.classList.contains('-amp-sidebar-closed'))
+          .to.be.false;
     });
   });
 
@@ -108,9 +110,10 @@ describe('amp-sidebar', () => {
         callback();
       };
       impl.close_();
-      expect(
-          iframe.doc.documentElement.classList.contains('amp-sidebar-closed'))
-              .to.be.true;
+      expect(sidebarElement.hasAttribute('open')).to.be.false;
+      expect(sidebarElement.getAttribute('aria-hidden')).to.equal('true');
+      expect(sidebarElement.classList.contains('-amp-sidebar-closed'))
+          .to.be.true;
     });
   });
 
@@ -122,23 +125,20 @@ describe('amp-sidebar', () => {
       impl.mutateElement = function(callback) {
         callback();
       };
-      expect(iframe.doc.documentElement.classList.contains('amp-sidebar-open'))
+      expect(sidebarElement.hasAttribute('open')).to.be.false;
+      expect(sidebarElement.getAttribute('aria-hidden')).to.equal('true');
+      expect(sidebarElement.classList.contains('-amp-sidebar-closed'))
           .to.be.false;
-      expect(
-          iframe.doc.documentElement.classList.contains('amp-sidebar-closed'))
-              .to.be.false;
       impl.toggle_();
-      expect(iframe.doc.documentElement.classList.contains('amp-sidebar-open'))
+      expect(sidebarElement.hasAttribute('open')).to.be.true;
+      expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
+      expect(sidebarElement.classList.contains('-amp-sidebar-closed'))
+          .to.be.false;
+      impl.toggle_();
+      expect(sidebarElement.hasAttribute('open')).to.be.false;
+      expect(sidebarElement.getAttribute('aria-hidden')).to.equal('true');
+      expect(sidebarElement.classList.contains('-amp-sidebar-closed'))
           .to.be.true;
-      expect(
-          iframe.doc.documentElement.classList.contains('amp-sidebar-closed'))
-              .to.be.false;
-      impl.toggle_();
-      expect(iframe.doc.documentElement.classList.contains('amp-sidebar-open'))
-          .to.be.false;
-      expect(
-          iframe.doc.documentElement.classList.contains('amp-sidebar-closed'))
-              .to.be.true;
     });
   });
 
@@ -150,14 +150,12 @@ describe('amp-sidebar', () => {
       impl.mutateElement = function(callback) {
         callback();
       };
-      expect(iframe.doc.documentElement.classList.contains('amp-sidebar-open'))
-          .to.be.false;
+      expect(sidebarElement.hasAttribute('open')).to.be.false;
       impl.open_();
-      expect(iframe.doc.documentElement.classList.contains('amp-sidebar-open'))
-          .to.be.true;
-      expect(
-          iframe.doc.documentElement.classList.contains('amp-sidebar-closed'))
-              .to.be.false;
+      expect(sidebarElement.hasAttribute('open')).to.be.true;
+      expect(sidebarElement.getAttribute('aria-hidden')).to.equal('false');
+      expect(sidebarElement.classList.contains('-amp-sidebar-closed'))
+          .to.be.false;
       const eventObj = document.createEventObject ?
           document.createEventObject() : document.createEvent('Events');
       if (eventObj.initEvent) {
@@ -169,11 +167,10 @@ describe('amp-sidebar', () => {
       const el = iframe.doc.documentElement;
       el.dispatchEvent ?
           el.dispatchEvent(eventObj) : el.fireEvent('onkeydown', eventObj);
-      expect(iframe.doc.documentElement.classList.contains('amp-sidebar-open'))
-          .to.be.false;
-      expect(
-          iframe.doc.documentElement.classList.contains('amp-sidebar-closed'))
-              .to.be.true;
+      expect(sidebarElement.hasAttribute('open')).to.be.false;
+      expect(sidebarElement.getAttribute('aria-hidden')).to.equal('true');
+      expect(sidebarElement.classList.contains('-amp-sidebar-closed'))
+          .to.be.true;
     });
   });
 

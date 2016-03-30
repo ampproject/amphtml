@@ -28,6 +28,10 @@ amp-sidebar {
   -webkit-overflow-scrolling: touch;
 }
 
+amp-sidebar[side] {
+  display: block !important;
+}
+
 amp-sidebar[side="left"] {
   left: 0 !important;
   transform: translateX(-80vw) !important;
@@ -38,17 +42,13 @@ amp-sidebar[side="right"] {
   transform: translateX(80vw) !important;
 }
 
-.amp-sidebar-open amp-sidebar {
+amp-sidebar[side][open] {
   transform: translateX(0vw) !important;
 }
 
-.amp-sidebar-closed amp-sidebar,
-.amp-sidebar-open amp-sidebar {
+amp-sidebar[open],
+.-amp-sidebar-closed {
   transition: transform 0.5s ease;
-}
-
-.amp-sidebar-open {
-  overflow: hidden !important;
 }
 
 .-amp-sidebar-mask {
@@ -63,8 +63,4 @@ amp-sidebar[side="right"] {
   background-color: #000;
   z-index: 9998 !important;
   display: none;
-}
-
-.amp-sidebar-open .-amp-sidebar-mask {
-  display: block;
 }
