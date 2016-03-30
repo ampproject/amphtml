@@ -200,7 +200,7 @@ export class ActionService {
       return;
     }
 
-    const target = document.getElementById(action.actionInfo.target);
+    const target = this.win.document.getElementById(action.actionInfo.target);
     if (!target) {
       this.actionInfoError_('target not found', action.actionInfo, target);
       return;

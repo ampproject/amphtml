@@ -56,7 +56,7 @@ class AmpSoundcloud extends AMP.BaseElement {
         'The data-trackid attribute is required for <amp-soundcloud> %s',
         this.element);
 
-    const iframe = document.createElement('iframe');
+    const iframe = this.element.ownerDocument.createElement('iframe');
 
     iframe.setAttribute('frameborder', 'no');
     iframe.setAttribute('scrolling', 'no');

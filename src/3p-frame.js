@@ -93,7 +93,7 @@ function getFrameAttributes(parentWindow, element, opt_type) {
  */
 export function getIframe(parentWindow, element, opt_type) {
   const attributes = getFrameAttributes(parentWindow, element, opt_type);
-  const iframe = document.createElement('iframe');
+  const iframe = parentWindow.document.createElement('iframe');
   if (!count[attributes.type]) {
     count[attributes.type] = 0;
   }
@@ -241,9 +241,9 @@ function getCustomBootstrapBaseUrl(parentWindow, opt_strictForUnitTest) {
   const parsed = parseUrl(url);
   user.assert((parsed.hostname == 'localhost' && !opt_strictForUnitTest) ||
       parsed.origin != parseUrl(parentWindow.location.href).origin,
-      '3p iframe url must not be on the same origin as the current document ' +
-      '%s (%s) in element %s. See https://github.com/ampproject/amphtml/blob/' +
-      'master/spec/amp-iframe-origin-policy.md for details.', url,
+      '3p iframe url must not be on the same origin as the current doc' +
+      'ument %s (%s) in element %s. See https://github.com/ampproject/amphtml' +
+      '/blob/master/spec/amp-iframe-origin-policy.md for details.', url,
       parseUrl(url).origin, meta);
   return url + '?$internalRuntimeVersion$';
 }
