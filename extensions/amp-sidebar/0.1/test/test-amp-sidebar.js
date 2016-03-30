@@ -36,8 +36,8 @@ describe('amp-sidebar', () => {
         list.appendChild(li);
       }
       ampSidebar.appendChild(list);
-      if (options.direction) {
-        ampSidebar.setAttribute('direction', options.direction);
+      if (options.side) {
+        ampSidebar.setAttribute('side', options.side);
       }
       ampSidebar.setAttribute('id', 'sidebar1');
       return iframe.addElement(ampSidebar).then(() => {
@@ -57,17 +57,17 @@ describe('amp-sidebar', () => {
     sandbox.restore();
   });
 
-  it('should open from left is direction is not specified', () => {
+  it('should open from left is side is not specified', () => {
     return getAmpSidebar().then(obj => {
       const sidebarElement = obj.ampSidebar;
-      expect(sidebarElement.getAttribute('direction')).to.equal('left');
+      expect(sidebarElement.getAttribute('side')).to.equal('left');
     });
   });
 
-  it('should open from right is direction right is specified', () => {
-    return getAmpSidebar({'direction': 'right'}).then(obj => {
+  it('should open from right is side right is specified', () => {
+    return getAmpSidebar({'side': 'right'}).then(obj => {
       const sidebarElement = obj.ampSidebar;
-      expect(sidebarElement.getAttribute('direction')).to.equal('right');
+      expect(sidebarElement.getAttribute('side')).to.equal('right');
     });
   });
 

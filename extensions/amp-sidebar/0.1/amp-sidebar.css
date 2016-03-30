@@ -28,12 +28,12 @@ amp-sidebar {
   -webkit-overflow-scrolling: touch;
 }
 
-amp-sidebar[direction="left"] {
+amp-sidebar[side="left"] {
   left: 0 !important;
   transform: translateX(-80vw) !important;
 }
 
-amp-sidebar[direction="right"] {
+amp-sidebar[side="right"] {
   right: 0 !important;
   transform: translateX(80vw) !important;
 }

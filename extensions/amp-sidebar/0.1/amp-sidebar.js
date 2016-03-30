@@ -62,7 +62,7 @@ export class AmpSidebar extends AMP.BaseElement {
     this.documentElement_ = this.document_.documentElement;
 
     /** @private @const {string} */
-    this.direction_ = this.element.getAttribute('direction');
+    this.side_ = this.element.getAttribute('side');
 
     /** @private @const {!Viewport} */
     this.viewport_ = this.getViewport();
@@ -76,13 +76,13 @@ export class AmpSidebar extends AMP.BaseElement {
     /** @private @const {boolean} */
     this.isIosSafari_ = platform.isIos() && platform.isSafari();
 
-    if (this.direction_ != 'left' && this.direction_ != 'right') {
+    if (this.side_ != 'left' && this.side_ != 'right') {
       const pageDir =
           this.document_.body.getAttribute('dir') ||
           this.documentElement_.getAttribute('dir') ||
           'ltr';
-      this.direction_ = (pageDir == 'rtl') ? 'right' : 'left';
-      this.element.setAttribute('direction', this.direction_);
+      this.side_ = (pageDir == 'rtl') ? 'right' : 'left';
+      this.element.setAttribute('side', this.side_);
     }
 
     if (!this.isExperimentOn_) {
