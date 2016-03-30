@@ -205,6 +205,9 @@ describe('amp-image-lightbox image viewer', () => {
 
     lightbox = {
       getDpr: () => 1,
+      element: {
+        ownerDocument: document,
+      },
     };
     lightboxMock = sandbox.mock(lightbox);
 
@@ -379,6 +382,9 @@ describe('amp-image-lightbox image viewer gestures', () => {
       getDpr: () => 1,
       close: () => {},
       toggleViewMode: () => {},
+      element: {
+        ownerDocument: document,
+      },
     };
     lightboxMock = sandbox.mock(lightbox);
 
