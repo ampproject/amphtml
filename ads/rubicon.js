@@ -78,6 +78,7 @@ function fastLane(global, data) {
         ASTargeting = ASTargeting[i].values;
       }
     }
+    if (!data.targeting) { data.targeting = {}; };
     data.targeting['rpfl_' + data.account] = ASTargeting;
     data.targeting['rpfl_elemid'] = 'c';
 
@@ -99,6 +100,7 @@ function fastLane(global, data) {
       if (data.kw) { rubicontag.addKW(data.kw); };
       if (data.visitor) { setFPD('V', data.visitor); };
       if (data.inventory) { setFPD('I', data.inventory); };
+      rubicontag.setUrl(getSourceUrl(context.location.href));
       rubicontag.run(gptrun, 1000);
 
     });

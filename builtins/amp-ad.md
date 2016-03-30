@@ -72,6 +72,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [Sortable](../ads/sortable.md)
 - [Yieldmo](../ads/yieldmo.md)
 - [Revcontent](../ads/revcontent.md)
+- [Rubicon Project](../ads/rubicon.md)
 - [TripleLift](../ads/triplelift.md)
 - [Teads](../ads/teads.md)
 - [I-Mobile](../ads/imobile.md)
