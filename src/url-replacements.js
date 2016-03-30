@@ -65,6 +65,12 @@ class UrlReplacements {
     // Returns the host of the canonical URL for this AMP document.
     this.set_('CANONICAL_HOST', () => {
       const url = parseUrl(documentInfoFor(this.win_).canonicalUrl);
+      return url && url.host;
+    });
+
+    // Returns the hostname of the canonical URL for this AMP document.
+    this.set_('CANONICAL_HOSTNAME', () => {
+      const url = parseUrl(documentInfoFor(this.win_).canonicalUrl);
       return url && url.hostname;
     });
 
@@ -92,6 +98,12 @@ class UrlReplacements {
     // Returns the host of the URL for this AMP document.
     this.set_('AMPDOC_HOST', () => {
       const url = parseUrl(this.win_.location.href);
+      return url && url.host;
+    });
+
+    // Returns the hostname of the URL for this AMP document.
+    this.set_('AMPDOC_HOSTNAME', () => {
+      const url = parseUrl(this.win_.location.href);
       return url && url.hostname;
     });
 
@@ -102,6 +114,11 @@ class UrlReplacements {
 
     // Returns the host of the Source URL for this AMP document.
     this.set_('SOURCE_HOST', () => {
+      return parseUrl(getSourceUrl(this.win_.location.href)).host;
+    });
+
+    // Returns the hostname of the Source URL for this AMP document.
+    this.set_('SOURCE_HOSTNAME', () => {
       return parseUrl(getSourceUrl(this.win_.location.href)).hostname;
     });
 

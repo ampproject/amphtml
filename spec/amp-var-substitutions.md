@@ -34,7 +34,17 @@ For instance:
 ```html
 <amp-pixel src="https://foo.com/pixel?host=AMPDOC_HOST"></amp-pixel>
 ```
-may make a request to something like `https://foo.com/pixel?host=example.com`.
+may make a request to something like `https://foo.com/pixel?host=example.com:8080`.
+
+### AMPDOC_HOSTNAME
+
+Use the special string `AMPDOC_HOSTNAME` to add the AMP document's URL hostname.
+
+For instance:
+```html
+<amp-pixel src="https://foo.com/pixel?hostname=AMPDOC_HOSTNAME"></amp-pixel>
+```
+may make a request to something like `https://foo.com/pixel?hostname=example.com`.
 
 ### AMPDOC_URL
 
@@ -53,6 +63,16 @@ Use the special string `CANONICAL_HOST` to add the canonical URL's host of the c
 For instance:
 ```html
 <amp-pixel src="https://foo.com/pixel?host=CANONICAL_HOST"></amp-pixel>
+```
+may make a request to something like `https://foo.com/pixel?host=pinterest.com:9000`.
+
+### CANONICAL_HOSTNAME
+
+Use the special string `CANONICAL_HOSTNAME` to add the canonical URL's hostname of the current document to the URL
+
+For instance:
+```html
+<amp-pixel src="https://foo.com/pixel?hostname=CANONICAL_HOSTNAME"></amp-pixel>
 ```
 may make a request to something like `https://foo.com/pixel?host=pinterest.com`.
 
@@ -95,6 +115,16 @@ Use the special string `SOURCE_HOST` to add the source URL's host of the current
 For instance:
 ```html
 <amp-pixel src="https://foo.com/pixel?host=SOURCE_HOST"></amp-pixel>
+```
+may make a request to something like `https://foo.com/pixel?host=pinterest.com:9000`.
+
+### SOURCE_HOSTNAME
+
+Use the special string `SOURCE_HOSTNAME` to add the source URL's hostname of the current document to the URL. See the description of `SOURCE_URL` for more details.
+
+For instance:
+```html
+<amp-pixel src="https://foo.com/pixel?host=SOURCE_HOSTNAME"></amp-pixel>
 ```
 may make a request to something like `https://foo.com/pixel?host=pinterest.com`.
 
