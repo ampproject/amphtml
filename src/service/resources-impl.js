@@ -319,6 +319,14 @@ export class Resources {
   }
 
   /**
+   * Returns the viewport instance
+   * @return {!Viewport}
+   */
+  getViewport() {
+    return this.viewport_;
+  }
+
+  /**
    * Signals that an element has been added to the DOM. Resources manager
    * will start tracking it from this point on.
    * @param {!AmpElement} element
@@ -1759,7 +1767,7 @@ export class Resource {
     }
     // Numeric interface, element is allowed to render outside viewport when it
     // is within X times the viewport height of the current viewport.
-    const viewportBox = this.viewport_.getRect();
+    const viewportBox = this.resources_.getViewport().getRect();
     const distanceFromViewport = this.layoutBox_.top - viewportBox.bottom;
     return distanceFromViewport <= renders * viewportBox.height;
   }
