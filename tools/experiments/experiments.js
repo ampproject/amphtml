@@ -16,7 +16,7 @@
 
 import '../../third_party/babel/custom-babel-helpers';
 import '../../src/polyfills';
-import {assert} from '../../src/asserts';
+import {dev} from '../../src/log';
 import {getCookie, setCookie} from '../../src/cookies';
 import {isExperimentOn, toggleExperiment} from '../../src/experiments';
 import {listenOnce} from '../../src/event-helper';
@@ -55,6 +55,13 @@ const EXPERIMENTS = [
     name: 'AMP Social Share',
     spec: 'https://github.com/ampproject/amphtml/blob/master/' +
         'extensions/amp-social-share/amp-social-share.md',
+  },
+  // Amp Sidebar
+  {
+    id: 'amp-sidebar',
+    name: 'AMP Sidebar',
+    spec: 'https://github.com/ampproject/amphtml/blob/master/extensions/' +
+        'amp-sidebar/amp-sidebar.md',
   },
 ];
 
@@ -198,10 +205,11 @@ function toggleExperiment_(id, name, opt_on) {
  * @param {function()} callback
  */
 function showConfirmation_(message, callback) {
-  const container = assert(document.getElementById('popup-container'));
-  const messageElement = assert(document.getElementById('popup-message'));
-  const confirmButton = assert(document.getElementById('popup-button-ok'));
-  const cancelButton = assert(document.getElementById('popup-button-cancel'));
+  const container = dev.assert(document.getElementById('popup-container'));
+  const messageElement = dev.assert(document.getElementById('popup-message'));
+  const confirmButton = dev.assert(document.getElementById('popup-button-ok'));
+  const cancelButton = dev.assert(
+      document.getElementById('popup-button-cancel'));
   const unlistenSet = [];
   const closePopup = affirmative => {
     container.classList.remove('show');

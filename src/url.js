@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {assert} from './asserts';
 import {endsWith} from './string';
+import {user} from './log';
 
 // Cached a-tag to avoid memory allocation during URL parsing.
-const a = document.createElement('a');
+const a = window.document.createElement('a');
 
 // We cached all parsed URLs. As of now there are no use cases
 // of AMP docs that would ever parse an actual large number of URLs,
@@ -55,7 +55,7 @@ export function parseUrl(url) {
   // For data URI a.origin is equal to the string 'null' which is not useful.
   // We instead return the actual origin which is the full URL.
   info.origin = (a.origin && a.origin != 'null') ? a.origin : getOrigin(info);
-  assert(info.origin, 'Origin must exist');
+  user.assert(info.origin, 'Origin must exist');
   // Freeze during testing to avoid accidental mutation.
   cache[url] = (window.AMP_TEST && Object.freeze) ? Object.freeze(info) : info;
   return info;
@@ -117,9 +117,9 @@ export function addParamsToUrl(url, params) {
  * @return {string}
  */
 export function assertHttpsUrl(urlString, elementContext) {
-  assert(urlString != null, '%s source must be available', elementContext);
+  user.assert(urlString != null, '%s source must be available', elementContext);
   const url = parseUrl(urlString);
-  assert(
+  user.assert(
       url.protocol == 'https:' || /^(\/\/)/.test(urlString) ||
       url.hostname == 'localhost' || endsWith(url.hostname, '.localhost'),
       '%s source must start with ' +
@@ -135,7 +135,7 @@ export function assertHttpsUrl(urlString, elementContext) {
  * @return {string}
  */
 export function assertAbsoluteHttpOrHttpsUrl(urlString) {
-  assert(/^(http\:|https\:)/i.test(urlString),
+  user.assert(/^(http\:|https\:)/i.test(urlString),
       'URL must start with "http://" or "https://". Invalid value: %s',
       urlString);
   return parseUrl(urlString).href;
@@ -266,14 +266,14 @@ export function getSourceUrl(url) {
   // The /s/ is optional and signals a secure origin.
   const path = url.pathname.split('/');
   const prefix = path[1];
-  assert(prefix == 'c' || prefix == 'v',
+  user.assert(prefix == 'c' || prefix == 'v',
       'Unknown path prefix in url %s', url.href);
   const domainOrHttpsSignal = path[2];
   const origin = domainOrHttpsSignal == 's'
       ? 'https://' + decodeURIComponent(path[3])
       : 'http://' + decodeURIComponent(domainOrHttpsSignal);
   // Sanity test that what we found looks like a domain.
-  assert(origin.indexOf('.') > 0, 'Expected a . in origin %s', origin);
+  user.assert(origin.indexOf('.') > 0, 'Expected a . in origin %s', origin);
   path.splice(1, domainOrHttpsSignal == 's' ? 3 : 2);
   return origin + path.join('/') + removeAmpJsParams(url.search) +
       (url.hash || '');

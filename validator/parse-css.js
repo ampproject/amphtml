@@ -110,7 +110,7 @@ parse_css.TokenStream = class {
 
   /** Rewinds to the previous position in the input. */
   reconsume() { this.pos--; }
-}
+};
 
 /**
  * Creates an EOF token at the same line/col as the given token,
@@ -120,8 +120,7 @@ parse_css.TokenStream = class {
  */
 function createEOFTokenAt(positionToken) {
   const eof = new parse_css.EOFToken;
-  eof.line = positionToken.line;
-  eof.col = positionToken.col;
+  positionToken.copyStartPositionTo(eof);
   return eof;
 }
 
@@ -134,8 +133,7 @@ function createEOFTokenAt(positionToken) {
  */
 function createParseErrorTokenAt(positionToken, code, params) {
   const error = new parse_css.ErrorToken(code, params);
-  error.line = positionToken.line;
-  error.col = positionToken.col;
+  positionToken.copyStartPositionTo(error);
   return error;
 }
 
@@ -161,8 +159,7 @@ parse_css.parseAStylesheet = function(
 
   stylesheet.rules = canonicalizer.parseAListOfRules(
       tokenList, /* topLevel */ true, errors);
-  stylesheet.line = tokenList[0].line;
-  stylesheet.col = tokenList[0].col;
+  tokenList[0].copyStartPositionTo(stylesheet);
   const eof = /** @type {!parse_css.EOFToken} */
       (tokenList[tokenList.length - 1]);
   stylesheet.eof = eof;
@@ -435,8 +432,7 @@ class Canonicalizer {
     const startToken =
         /** @type {!parse_css.AtKeywordToken} */ (tokenStream.current());
     const rule = new parse_css.AtRule(startToken.value);
-    rule.line = startToken.line;
-    rule.col = startToken.col;
+    startToken.copyStartPositionTo(rule);
 
     while (true) {
       tokenStream.consume();
@@ -492,8 +488,7 @@ class Canonicalizer {
         'Internal Error: parseAQualifiedRule precondition not met');
 
     const rule = new parse_css.QualifiedRule();
-    rule.line = tokenStream.current().line;
-    rule.col = tokenStream.current().col;
+    tokenStream.current().copyStartPositionTo(rule);
     tokenStream.reconsume();
     while (true) {
       tokenStream.consume();
@@ -578,8 +573,7 @@ class Canonicalizer {
     const startToken =
         /** @type {!parse_css.IdentToken} */ (tokenStream.current());
     const decl = new parse_css.Declaration(startToken.value);
-    decl.line = startToken.line;
-    decl.col = startToken.col;
+    startToken.copyStartPositionTo(decl);
 
     while (tokenStream.next() instanceof parse_css.WhitespaceToken) {
       tokenStream.consume();
@@ -795,8 +789,7 @@ function parseUrlToken(tokens, tokenIdx, parsed) {
   goog.asserts.assert(tokenIdx + 1 < tokens.length);
   const token = tokens[tokenIdx];
   goog.asserts.assert(token.tokenType === parse_css.TokenType.URL);
-  parsed.line = token.line;
-  parsed.col = token.col;
+  token.copyStartPositionTo(parsed);
   parsed.utf8Url = /** @type {parse_css.URLToken}*/(token).value;
 }
 
@@ -812,14 +805,13 @@ function parseUrlToken(tokens, tokenIdx, parsed) {
  * @return {!number}
  */
 function parseUrlFunction(tokens, tokenIdx, parsed) {
-  const token = tokens[tokenIdx]
+  const token = tokens[tokenIdx];
   goog.asserts.assert(token.tokenType == parse_css.TokenType.FUNCTION_TOKEN);
   goog.asserts.assert(/** @type {parse_css.FunctionToken} */(token).value ===
       'url');
   goog.asserts.assert(tokens[tokens.length - 1].tokenType ===
       parse_css.TokenType.EOF_TOKEN);
-  parsed.line = token.line;
-  parsed.col = token.col;
+  token.copyStartPositionTo(parsed);
   ++tokenIdx;  // We've digested the function token above.
   // Safe: tokens ends w/ EOF_TOKEN.
   goog.asserts.assert(tokenIdx < tokens.length);
@@ -914,8 +906,7 @@ class UrlFunctionVisitor extends parse_css.RuleVisitor {
           const error = new parse_css.ErrorToken(
               amp.validator.ValidationError.Code.CSS_SYNTAX_BAD_URL,
               /* params */ ['style']);
-          error.line = token.line;
-          error.col = token.col;
+          token.copyStartPositionTo(error);
           this.errors.push(error);
           return;
         }

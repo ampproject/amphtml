@@ -37,7 +37,7 @@ limitations under the License.
 
 ## Behavior
 
-Registers the ServiceWorker given by the `src` attribute. If the current origin is different from the origin of the ServiceWorker, this custom element does nothing (emits warning in development mode).
+Registers the ServiceWorker given by the `src` attribute if the AMP document is loaded from the same origin as the given ServiceWorker URL. If the `data-iframe-src` is set, loads that URL as an iframe when the AMP document is served from an AMP cache. This allows ServiceWorker installation from the AMP cache, so that the ServiceWorker is installed by the time users visit the origin site.
 
 This ServiceWorker runs whenever the AMP file is served from the origin where you publish the AMP file. The ServiceWorker will not be loaded when the document is loaded from an AMP cache.
 
@@ -49,6 +49,7 @@ Example
 
   <amp-install-serviceworker
       src="https://www.your-domain.com/serviceworker.js"
+      data-iframe-src="https://www.your-domain.com/install-serviceworker.html"
       layout="nodisplay">
   </amp-install-serviceworker>
 
@@ -59,6 +60,10 @@ Example
 ### `src`
 
 URL of the ServiceWorker to register.
+
+### `data-iframe-src` (optional)
+
+URL of a HTML document that install a ServiceWorker.
 
 ### `layout`
 

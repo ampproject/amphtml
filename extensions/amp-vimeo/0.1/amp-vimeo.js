@@ -45,7 +45,7 @@ class AmpVimeo extends AMP.BaseElement {
         this.element);
     // See
     // https://developer.vimeo.com/player/embedding
-    const iframe = document.createElement('iframe');
+    const iframe = this.element.ownerDocument.createElement('iframe');
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
     iframe.src = 'https://player.vimeo.com/video/' + encodeURIComponent(

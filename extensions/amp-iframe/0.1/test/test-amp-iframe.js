@@ -136,7 +136,6 @@ describe('amp-iframe', () => {
       height: 100,
     }).then(amp => {
       const impl = amp.container.implementation_;
-      expect(amp.iframe).to.be.instanceof(Element);
       expect(amp.iframe.src).to.equal(iframeSrc);
       expect(amp.iframe.getAttribute('sandbox')).to.equal('');
       expect(amp.iframe.parentNode).to.equal(amp.scrollWrapper);
@@ -218,7 +217,6 @@ describe('amp-iframe', () => {
       width: 100,
       height: 100,
     }).then(amp => {
-      expect(amp.iframe).to.be.instanceof(Element);
       expect(amp.iframe.src).to.equal(dataUri);
       expect(amp.iframe.getAttribute('sandbox')).to.equal('');
       expect(amp.iframe.parentNode).to.equal(amp.scrollWrapper);
@@ -237,7 +235,6 @@ describe('amp-iframe', () => {
           'parent.parent./*OK*/postMessage(\'loaded-iframe\', \'*\');}' +
           '</script>',
     }).then(amp => {
-      expect(amp.iframe).to.be.instanceof(Element);
       expect(amp.iframe.src).to.match(
           /^data\:text\/html;charset=utf-8;base64,/);
       expect(amp.iframe.getAttribute('srcdoc')).to.be.null;

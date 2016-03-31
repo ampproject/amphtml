@@ -24,7 +24,10 @@ goog.provide('parse_css.SelectorVisitor');
 goog.provide('parse_css.SelectorsGroup');
 goog.provide('parse_css.SimpleSelectorSequence');
 goog.provide('parse_css.TypeSelector');
+goog.provide('parse_css.parseAClassSelector');
 goog.provide('parse_css.parseASelector');
+goog.provide('parse_css.parseASelectorsGroup');
+goog.provide('parse_css.parseASimpleSelectorSequence');
 goog.provide('parse_css.parseATypeSelector');
 goog.provide('parse_css.parseAnAttrSelector');
 goog.provide('parse_css.parseAnIdSelector');
@@ -43,9 +46,8 @@ goog.require('parse_css.extractAFunction');
  * class inherits from, has line, col, and tokenType fields.
  */
 parse_css.Selector = class extends parse_css.Token {
-
-  /** @return {!Array<!parse_css.Selector>} */
-  getChildNodes() { return []; }
+  /** @param {!function(!parse_css.Selector)} lambda */
+  forEachChild(lambda) {}
 
   /** @param {!parse_css.SelectorVisitor} visitor */
   accept(visitor) {}
@@ -97,9 +99,7 @@ parse_css.traverseSelectors = function(selectorNode, visitor) {
     /** @type {!parse_css.Selector} */
     const node = toVisit.shift();
     node.accept(visitor);
-    for (const child of node.getChildNodes()) {
-      toVisit.push(child);
-    }
+    node.forEachChild(child => { toVisit.push(child); });
   }
 };
 
@@ -182,8 +182,7 @@ parse_css.parseATypeSelector = function(tokenStream) {
   let namespacePrefix = null;
   /** @type {string} */
   let elementName = '*';
-  const line = tokenStream.current().line;
-  const col = tokenStream.current().col;
+  const start = tokenStream.current();
 
   if (isDelim(tokenStream.current(), '|')) {
     namespacePrefix = '';
@@ -213,8 +212,7 @@ parse_css.parseATypeSelector = function(tokenStream) {
   }
   const selector =  new parse_css.TypeSelector(
       namespacePrefix, elementName);
-  selector.line = line;
-  selector.col = col;
+  start.copyStartPositionTo(selector);
   return selector;
 };
 
@@ -264,8 +262,7 @@ parse_css.parseAnIdSelector = function(tokenStream) {
       tokenStream.current(), parse_css.HashToken);
   tokenStream.consume();
   const selector = new parse_css.IdSelector(hash.value);
-  selector.line = hash.line;
-  selector.col = hash.col;
+  hash.copyStartPositionTo(selector);
   return selector;
 };
 
@@ -318,7 +315,21 @@ parse_css.AttrSelector = class extends parse_css.Selector {
 };
 
 /**
- * tokenStream.current() must be the hash token.
+ * Helper for parseAnAttrSelector.
+ * @private
+ * @param {!parse_css.Token} start
+ * @return {!parse_css.ErrorToken}
+ */
+function newInvalidAttrSelectorError(start) {
+  const error = new parse_css.ErrorToken(
+      amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_ATTR_SELECTOR,
+      ['style']);
+  start.copyStartPositionTo(error);
+  return error;
+}
+
+/**
+ * tokenStream.current() must be the open square token.
  * @param {!parse_css.TokenStream} tokenStream
  * @return {!parse_css.AttrSelector|!parse_css.ErrorToken}
  */
@@ -352,12 +363,7 @@ parse_css.parseAnAttrSelector = function(tokenStream) {
   }
   // Now parse the attribute name. This part is mandatory.
   if (!(tokenStream.current() instanceof parse_css.IdentToken)) {
-    const error = new parse_css.ErrorToken(
-        amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_ATTR_SELECTOR,
-        ['style']);
-    error.line = start.line;
-    error.col = start.col;
-    return error;
+    return newInvalidAttrSelectorError(start);
   }
   const ident = goog.asserts.assertInstanceof(
       tokenStream.current(), parse_css.IdentToken);
@@ -376,9 +382,7 @@ parse_css.parseAnAttrSelector = function(tokenStream) {
 
   /** @type {string} */
   let matchOperator = '';
-  if (tokenStream.current() instanceof parse_css.DelimToken &&
-      /** @type {!parse_css.DelimToken} */(
-          tokenStream.current()).value === '=') {
+  if (isDelim(tokenStream.current(), '=')) {
     matchOperator = '=';
     tokenStream.consume();
   } else if (tokenStream.current() instanceof parse_css.IncludeMatchToken) {
@@ -402,7 +406,7 @@ parse_css.parseAnAttrSelector = function(tokenStream) {
   }
   /** @type {string} */
   let value = '';
-  if (matchOperator !== null) {  // If we saw an operator, parse the value.
+  if (matchOperator !== '') {  // If we saw an operator, parse the value.
     if (tokenStream.current() instanceof parse_css.IdentToken) {
       const ident = goog.asserts.assertInstanceof(
         tokenStream.current(), parse_css.IdentToken);
@@ -414,12 +418,7 @@ parse_css.parseAnAttrSelector = function(tokenStream) {
       value = str.value;
       tokenStream.consume();
     } else {
-      const error = new parse_css.ErrorToken(
-          amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_ATTR_SELECTOR,
-          ['style']);
-      error.line = start.line;
-      error.col = start.col;
-      return error;
+      return newInvalidAttrSelectorError(start);
     }
   }
   if (tokenStream.current() instanceof parse_css.WhitespaceToken) {
@@ -428,18 +427,12 @@ parse_css.parseAnAttrSelector = function(tokenStream) {
   // The attribute selector must in any case terminate with a close square
   // token.
   if (!(tokenStream.current() instanceof parse_css.CloseSquareToken)) {
-    const error = new parse_css.ErrorToken(
-        amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_ATTR_SELECTOR,
-        ['style']);
-    error.line = start.line;
-    error.col = start.col;
-    return error;
+    return newInvalidAttrSelectorError(start);
   }
   tokenStream.consume();
   const selector = new parse_css.AttrSelector(
       namespacePrefix, attrName, matchOperator, value);
-  selector.line = start.line;
-  selector.col = start.col;
+  start.copyStartPositionTo(selector);
   return selector;
 };
 
@@ -505,6 +498,7 @@ parse_css.parseAPseudoSelector = function(tokenStream) {
   tokenStream.consume();
   let isClass = true;
   if (tokenStream.current() instanceof parse_css.ColonToken) {
+    // '::' starts a pseudo element, ':' starts a pseudo class.
     isClass = false;
     tokenStream.consume();
   }
@@ -521,18 +515,17 @@ parse_css.parseAPseudoSelector = function(tokenStream) {
         tokenStream.current(), parse_css.FunctionToken);
     name = funcToken.value;
     func = parse_css.extractAFunction(tokenStream);
+    tokenStream.consume();
   } else {
     const error = new parse_css.ErrorToken(
         amp.validator.ValidationError.Code.CSS_SYNTAX_ERROR_IN_PSEUDO_SELECTOR,
         ['style']);
-    error.line = firstColon.line;
-    error.col = firstColon.col;
+    firstColon.copyStartPositionTo(error);
     return error;
   }
   const selector = new parse_css.PseudoSelector(
       isClass, name, func);
-  selector.line = firstColon.line;
-  selector.col = firstColon.col;
+  firstColon.copyStartPositionTo(selector);
   return selector;
 };
 
@@ -608,13 +601,13 @@ function recursiveArrayToJSON(array) {
 parse_css.SimpleSelectorSequence = class extends parse_css.Selector {
   /**
    * @param {!parse_css.TypeSelector} typeSelector
-   * @param {!Array<!parse_css.IdSelector>} otherSelectors
+   * @param {!Array<!parse_css.Selector>} otherSelectors
    */
   constructor(typeSelector, otherSelectors) {
     super();
     /** @type {!parse_css.TypeSelector} */
     this.typeSelector = typeSelector;
-    /** @type {!Array<!parse_css.IdSelector>} */
+    /** @type {!Array<!parse_css.Selector>} */
     this.otherSelectors = otherSelectors;
     /** @type {parse_css.TokenType} */
     this.tokenType = parse_css.TokenType.SIMPLE_SELECTOR_SEQUENCE;
@@ -629,12 +622,11 @@ parse_css.SimpleSelectorSequence = class extends parse_css.Selector {
   }
 
   /** @inheritDoc */
-  getChildNodes() {
-    const children = [this.typeSelector];
+  forEachChild(lambda) {
+    lambda(this.typeSelector);
     for (const other of this.otherSelectors) {
-      children.push(other);
+      lambda(other);
     }
-    return children;
   }
 
   /** @inheritDoc */
@@ -667,17 +659,17 @@ parse_css.parseASimpleSelectorSequence = function(tokenStream) {
         tokenStream.next() instanceof parse_css.IdentToken) {
       otherSelectors.push(parse_css.parseAClassSelector(tokenStream));
     } else if (tokenStream.current() instanceof parse_css.OpenSquareToken) {
-      const attrSelector = parse_css.parseAnAttrSelector(tokenStream);
-      if (attrSelector instanceof parse_css.ErrorToken) {
-        return attrSelector;
+      const maybeAttrSelector = parse_css.parseAnAttrSelector(tokenStream);
+      if (maybeAttrSelector instanceof parse_css.ErrorToken) {
+        return maybeAttrSelector;
       }
-      otherSelectors.push(attrSelector);
+      otherSelectors.push(maybeAttrSelector);
     } else if (tokenStream.current() instanceof parse_css.ColonToken) {
-      const pseudo = parse_css.parseAPseudoSelector(tokenStream);
-      if (pseudo instanceof parse_css.ErrorToken) {
-        return pseudo;
+      const maybePseudo = parse_css.parseAPseudoSelector(tokenStream);
+      if (maybePseudo instanceof parse_css.ErrorToken) {
+        return maybePseudo;
       }
-      otherSelectors.push(pseudo);
+      otherSelectors.push(maybePseudo);
       // NOTE: If adding more 'else if' clauses here, be sure to udpate
       // isSimpleSelectorSequenceStart accordingly.
     } else {
@@ -692,7 +684,7 @@ parse_css.parseASimpleSelectorSequence = function(tokenStream) {
         }
         // If no type selector is given then the universal selector is implied.
         typeSelector = new parse_css.TypeSelector(
-            /*namespacePrefix=*/ null, /*elementname=*/ '*');
+            /*namespacePrefix=*/null, /*elementName=*/'*');
         typeSelector.line = line;
         typeSelector.col = col;
       }
@@ -721,13 +713,13 @@ parse_css.CombinatorType = {
  */
 parse_css.Combinator = class extends parse_css.Selector {
   /**
-   * @param {!string} combinatorType
+   * @param {!parse_css.CombinatorType} combinatorType
    * @param {!parse_css.SimpleSelectorSequence|!parse_css.Combinator} left
    * @param {!parse_css.SimpleSelectorSequence} right
    */
   constructor(combinatorType, left, right) {
     super();
-    /** @type {!string} */
+    /** @type {!parse_css.CombinatorType} */
     this.combinatorType = combinatorType;
     /** @type {!parse_css.SimpleSelectorSequence|!parse_css.Combinator} */
     this.left = left;
@@ -747,8 +739,9 @@ parse_css.Combinator = class extends parse_css.Selector {
   }
 
   /** @inheritDoc */
-  getChildNodes() {
-    return [this.left, this.right];
+  forEachChild(lambda) {
+    lambda(this.left);
+    lambda(this.right);
   }
 
   /** @inheritDoc */
@@ -761,7 +754,7 @@ parse_css.Combinator = class extends parse_css.Selector {
  * The CombinatorType for a given token; helper function used when
  * constructing a Combinator instance.
  * @param {!parse_css.Token} token
- * @return {string}
+ * @return {!parse_css.CombinatorType}
  */
 function combinatorTypeForToken(token) {
   if (token instanceof parse_css.WhitespaceToken) {
@@ -888,8 +881,10 @@ parse_css.SelectorsGroup = class extends parse_css.Selector {
   }
 
   /** @inheritDoc */
-  getChildNodes() {
-    return this.elements;
+  forEachChild(lambda) {
+    for (const child of this.elements) {
+      lambda(child);
+    }
   }
 
   /** @param {!parse_css.SelectorVisitor} visitor */
@@ -900,7 +895,9 @@ parse_css.SelectorsGroup = class extends parse_css.Selector {
 
 /**
  * The selectors_group production from
- * http://www.w3.org/TR/css3-selectors/#grammar
+ * http://www.w3.org/TR/css3-selectors/#grammar.
+ * In addition, this parsing routine checks that no input remains,
+ * that is, after parsing the production we reached the end of |token_stream|.
  * @param {!parse_css.TokenStream} tokenStream
  * @return {!parse_css.SelectorsGroup|
  *          !parse_css.SimpleSelectorSequence|!parse_css.Combinator|
@@ -911,12 +908,10 @@ parse_css.parseASelectorsGroup = function(tokenStream) {
     const error = new parse_css.ErrorToken(
         amp.validator.ValidationError.Code.CSS_SYNTAX_NOT_A_SELECTOR_START,
         ['style']);
-    error.line = tokenStream.current().line;
-    error.col = tokenStream.current().col;
+    tokenStream.current().copyStartPositionTo(error);
     return error;
   }
-  const line = tokenStream.current().line;
-  const col = tokenStream.current().col;
+  const start = tokenStream.current();
   const elements = [parse_css.parseASelector(tokenStream)];
   if (elements[0] instanceof parse_css.ErrorToken) {
     return elements[0];
@@ -936,35 +931,21 @@ parse_css.parseASelectorsGroup = function(tokenStream) {
       }
       continue;
     }
+    // We're about to claim success and return a selector,
+    // but before we do, we check that no unparsed input remains.
+    if (!(tokenStream.current() instanceof parse_css.EOFToken)) {
+      const error = new parse_css.ErrorToken(
+          amp.validator.ValidationError.Code
+              .CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR,
+          ['style']);
+      tokenStream.current().copyStartPositionTo(error);
+      return error;
+    }
     if (elements.length == 1) {
       return elements[0];
     }
     const group = new parse_css.SelectorsGroup(elements);
-    group.line = line;
-    group.col = col;
+    start.copyStartPositionTo(group);
     return group;
   }
-};
-
-/**
- * @param {!parse_css.TokenStream} tokenStream
- * @param {!Array<!parse_css.ErrorToken>} errors
- * @return {parse_css.SelectorsGroup|parse_css.SimpleSelectorSequence|
- *          parse_css.Combinator}
- */
-parse_css.parseSelectors = function(tokenStream, errors) {
-  const group = parse_css.parseASelectorsGroup(tokenStream);
-  if (group instanceof parse_css.ErrorToken) {
-    errors.push(group);
-  }
-  if (!(tokenStream.current() instanceof parse_css.EOFToken)) {
-    const error = new parse_css.ErrorToken(
-        amp.validator.ValidationError.Code.
-            CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR,
-        ['style']);
-    error.line = tokenStream.current().line;
-    error.col = tokenStream.current().col;
-    errors.push(error);
-  }
-  return (group instanceof parse_css.ErrorToken) ? null : group;
 };

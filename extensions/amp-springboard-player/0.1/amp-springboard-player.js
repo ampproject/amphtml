@@ -68,7 +68,7 @@ class AmpSpringboardPlayer extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const iframe = document.createElement('iframe');
+    const iframe = this.element.ownerDocument.createElement('iframe');
     const siteId = user.assert(
         this.element.getAttribute('data-site-id'),
         'The data-site-id attribute is required for' +
