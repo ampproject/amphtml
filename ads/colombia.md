@@ -35,7 +35,7 @@ Supported parameters:
 
 - data-clmb_slot : Ad Slot;
 - data-clmb_position : Ad Position
-- data-clmb_section : Ad Section
+- data-clmb_section : Ad Sections
 
 
 
