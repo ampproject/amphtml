@@ -172,7 +172,7 @@ https://pub.com/access?
   &_=RANDOM
 ```
 
-AUTHDATA variable is availbale to Pingback and Login URLs. It allows passing any field in the authorization
+AUTHDATA variable is available to Pingback and Login URLs. It allows passing any field in the authorization
 response as an URL parameter. E.g. `AUTHDATA(isSubscriber)`. The nested expressions are allowed as well, such as
 `AUTHDATA(other.isSubscriber)`.
 
