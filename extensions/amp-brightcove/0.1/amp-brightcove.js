@@ -34,7 +34,19 @@ class AmpBrightcove extends AMP.BaseElement {
   }
 
   /** @override */
+  buildCallback() {
+    /** @private {?Element} */
+    this.iframe_ = null;
+
+    /** @private {?Promise} */
+    this.iframePromise_ = null;
+  }
+
+  /** @override */
   layoutCallback() {
+    if (this.iframePromise_) {
+      return this.iframePromise_;
+    }
     const width = this.element.getAttribute('width');
     const height = this.element.getAttribute('height');
     const account = user.assert(
@@ -77,7 +89,7 @@ class AmpBrightcove extends AMP.BaseElement {
     this.element.appendChild(iframe);
     /** @private {?Element} */
     this.iframe_ = iframe;
-    return loadPromise(iframe);
+    return this.iframePromise_ = loadPromise(iframe);
   }
 
   /** @private */
@@ -121,11 +133,13 @@ class AmpBrightcove extends AMP.BaseElement {
    * we can prevent the unlayout.
    *
    * See https://github.com/ampproject/amphtml/issues/2224 for information.
+   * @override
    */
-  unlayout() {
+  unlayoutCallback() {
     if (this.iframe_) {
       removeElement(this.iframe_);
       this.iframe_ = null;
+      this.iframePromise_ = null;
     }
     return true;
   }

@@ -71,6 +71,20 @@ describe('amp-brightcove', () => {
         /The data-account attribute is required for/);
   });
 
+  it('removes iframe after unlayoutCallback', () => {
+    return getBrightcove({
+      'data-account': '906043040001',
+      'data-video-id': 'ref:ampdemo',
+    }, true).then(bc => {
+      const iframe = bc.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      const obj = bc.implementation_;
+      obj.unlayoutCallback();
+      expect(bc.querySelector('iframe')).to.be.null;
+      expect(obj.iframe_).to.be.null;
+    });
+  });
+
   // TODO(erwinm) unskip this when we figure out why it fails on travis
   it.skip('should pass data-param-* attributes to the iframe src', () => {
     return getBrightcove({
