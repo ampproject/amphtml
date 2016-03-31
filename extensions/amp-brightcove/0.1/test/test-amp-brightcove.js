@@ -24,7 +24,7 @@ adopt(window);
 describe('amp-brightcove', () => {
 
   function getBrightcove(attributes, opt_responsive) {
-    return createIframePromise().then(iframe => {
+    return createIframePromise(true).then(iframe => {
       const bc = iframe.doc.createElement('amp-brightcove');
       for (const key in attributes) {
         bc.setAttribute(key, attributes[key]);
