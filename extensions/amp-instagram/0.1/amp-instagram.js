@@ -42,6 +42,12 @@ import {user} from '../../../src/log';
 
 
 class AmpInstagram extends AMP.BaseElement {
+
+  /** @override */
+  isLayoutSupported(layout) {
+    return isLayoutSizeDefined(layout);
+  }
+
   /** @override */
   preconnectCallback(onLayout) {
     // See
@@ -77,48 +83,7 @@ class AmpInstagram extends AMP.BaseElement {
   }
 
   /** @override */
-  prerenderAllowed() {
-    return true;
-  }
-
-  /** @override */
-  isLayoutSupported(layout) {
-    return isLayoutSizeDefined(layout);
-  }
-
-  maybeRenderIframe_() {
-    if (this.iframePromise_) {
-      return this.iframePromise_;
-    }
-    const iframe = document.createElement('iframe');
-    this.iframe_ = iframe;
-    iframe.setAttribute('frameborder', '0');
-    iframe.setAttribute('allowtransparency', 'true');
-    iframe.src = 'https://www.instagram.com/p/' +
-        encodeURIComponent(this.shortcode_) + '/embed/?v=4';
-    this.applyFillContent(iframe);
-    iframe.width = this.element.getAttribute('width');
-    iframe.height = this.element.getAttribute('height');
-    this.element.appendChild(iframe);
-    setStyles(iframe, {
-      'opacity': 0,
-    });
-    return this.iframePromise_ = loadPromise(iframe).then(() => {
-      this.getVsync().mutate(() => {
-        setStyles(iframe, {
-          'opacity': 1,
-        });
-
-        // Hide the initial rendered image to avoid overlaying videos.
-        setStyles(this.placeholderWrapper_, {
-          'display': 'none',
-        });
-      });
-    });
-  }
-
-  /** @override */
-  layoutCallback() {
+  prerenderCallback() {
     const image = new Image();
     // This will redirect to the image URL. By experimentation this is
     // always the same URL that is actually used inside of the embed.
@@ -143,20 +108,47 @@ class AmpInstagram extends AMP.BaseElement {
     this.placeholderWrapper_ = wrapper;
     this.applyFillContent(image);
     this.element.appendChild(wrapper);
-    // The iframe takes up a lot of resources. We only render it of we are in
-    // in the viewport.
-    if (this.isInViewport()) {
-      return this.maybeRenderIframe_();
-    }
     return loadPromise(image);
   }
 
   /** @override */
-  viewportCallback(inViewport) {
-    // We might not have been rendered this yet. Lets do it now.
-    if (inViewport) {
-      this.maybeRenderIframe_();
+  prerenderCancelled() {
+    setStyles(this.placeholderWrapper_, {
+      'visibility': 'hidden',
+    });
+  }
+
+  /** @override */
+  layoutCallback() {
+    if (this.iframePromise_) {
+      return this.iframePromise_;
     }
+    const iframe = document.createElement('iframe');
+    this.iframe_ = iframe;
+    iframe.setAttribute('frameborder', '0');
+    iframe.setAttribute('allowtransparency', 'true');
+    iframe.src = 'https://www.instagram.com/p/' +
+        encodeURIComponent(this.shortcode_) + '/embed/?v=4';
+    this.applyFillContent(iframe);
+    iframe.width = this.element.getAttribute('width');
+    iframe.height = this.element.getAttribute('height');
+    this.element.appendChild(iframe);
+    setStyles(iframe, {
+      'opacity': 0,
+    });
+    return this.iframePromise_ = loadPromise(iframe).then(() => {
+      this.getVsync().mutate(() => {
+        setStyles(iframe, {
+          'opacity': 1,
+        });
+
+        // TODO(mkhatib): See if you can make this into a normal placeholder.
+        // Hide the initial rendered image to avoid overlaying videos.
+        setStyles(this.placeholderWrapper_, {
+          'display': 'none',
+        });
+      });
+    });
   }
 
   /** @override */

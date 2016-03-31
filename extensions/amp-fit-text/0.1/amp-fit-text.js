@@ -79,19 +79,19 @@ class AmpFitText extends AMP.BaseElement {
   }
 
   /** @override */
-  prerenderAllowed() {
-    return true;
-  }
-
-  /** @override */
   isRelayoutNeeded() {
     return true;
   }
 
   /** @override */
-  layoutCallback() {
+  prerenderCallback() {
     this.updateFontSize_();
     return Promise.resolve();
+  }
+
+  /** @override */
+  layoutCallback() {
+    return this.prerenderCallback();
   }
 
   /** @private */

@@ -65,6 +65,8 @@ import {vsyncFor} from './vsync';
  *           \/
  *    State: <BUILT>
  *           ||
+ *           || prerenderCallback -> Can be cancelled if layoutCallback finishes first.
+ *           || prerenderCancelled -> Called when prerender resolves after layout.
  *           || layoutCallback        <==
  *           || (firstLayoutCompleted)  ||
  *           ||                         ||
@@ -83,6 +85,17 @@ import {vsyncFor} from './vsync';
  * to preconnect to hosts needed by an element. It will never be called
  * before buildCallback and it might be called multiple times including
  * after layoutCallback.
+ *
+ * The prerenderCallback is always called before layoutCallback, however
+ * they both can have loading work in parallel and either can resolve
+ * first. Best case is prerender load promise resolves first. However if
+ * layout load promise resolves before prerender does, the resource will
+ * be marked to be notified about that through the prerenderCancelled callback.
+ *
+ * prerenderCancelled callback will be called AFTER the prerender load promise
+ * resolves/rejects and only in the case mentioned above. This allows the
+ * element to cleanup or hide any visible placeholder DOM created during
+ * the prerender process.
  *
  * The pauseCallback is called when when the document becomes inactive, e.g.
  * when the user swipes away from the document, or when the element is no
@@ -250,12 +263,12 @@ export class BaseElement {
   }
 
   /**
-   * Subclasses can override this method to opt-in into being called to
+   * Subclasses can override this method to opt-out into being called to
    * prerender when document itself is not yet visible (pre-render mode).
    * @return {boolean}
    */
   prerenderAllowed() {
-    return false;
+    return true;
   }
 
   /**
@@ -275,6 +288,29 @@ export class BaseElement {
    */
   isRelayoutNeeded() {
     return false;
+  }
+
+  /**
+   * Called when the element should render any light-weight placeholder for
+   * users to be able to see something before layoutCallback be called and
+   * the element render itself fully.
+   *
+   * For example, amp-youtube prerenders a thumbnail placeholder for the
+   * element and then "upgrade" to the full iframe YT player on layoutCallback.
+   *
+   * @return {!Promise}
+   */
+  prerenderCallback() {
+    return Promise.resolve();
+  }
+
+  /**
+   * Called when the layout load promise is resolved before the prerender load promise
+   * does. This is called after the prerender load promise has finally resolved to allow
+   * the element to cleanup or hide any unnecessary DOM.
+   */
+  prerenderCancelled() {
+    // Subclasses may override.
   }
 
   /**

@@ -111,6 +111,14 @@
       text-decoration: underline;
     }
 
+    viewer[data-show-container="4"] #container4 {
+      visibility: visible;
+    }
+
+    viewer[data-show-container="4"] #show-container4-anchor {
+      text-decoration: underline;
+    }
+
     viewer.natural container {
       overflow-y: hidden;
     }
@@ -475,23 +483,30 @@
       new Viewer(
           'container1',
           '1',
-          './everything.amp.max.html',
+          './instagram.amp.max.html',
           true).start();
       addShowContainer('1');
 
       new Viewer(
           'container2',
           '2',
-          './article-access.amp.max.html',
+          './article.amp.max.html',
           false).start();
       addShowContainer('2');
 
       new Viewer(
           'container3',
           '3',
-          './article-access.amp.max.html',
+          './youtube.amp.max.html',
           false).start();
       addShowContainer('3');
+
+      new Viewer(
+          'container4',
+          '4',
+          './everything.amp.max.html',
+          false).start();
+      addShowContainer('4');
 
       showContainer('1');
     }
@@ -522,6 +537,7 @@
       <a class="show-container-anchor" id="show-container1-anchor">One</a>
       <a class="show-container-anchor" id="show-container2-anchor">Two</a>
       <a class="show-container-anchor" id="show-container3-anchor">Three</a>
+      <a class="show-container-anchor" id="show-container4-anchor">Four</a>
       <a>|</a>
       <a id="visibilityToggle">Visible</a>
     </header>
@@ -536,6 +552,11 @@
       </div>
     </container>
     <container id="container3">
+      <div class="wait">
+        Please wait, the AMP doc will appear here...
+      </div>
+    </container>
+    <container id="container4">
       <div class="wait">
         Please wait, the AMP doc will appear here...
       </div>

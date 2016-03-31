@@ -681,6 +681,30 @@ export function createAmpElementProto(win, name, implementationClass) {
   };
 
   /**
+   *
+   * @returns {!Promise}
+   */
+  ElementProto.prerenderCallback = function() {
+    this.assertNotTemplate_();
+    dev.assert(this.isUpgraded() && this.isBuilt(),
+        'Must be upgraded and built to receive viewport events');
+    const promise = this.implementation_.prerenderCallback();
+    this.preconnect(/* onLayout */ false);
+    return promise;
+  };
+
+  /**
+   * Instructs the element to cleanup prerender work if the prerender load promise
+   * has resolved after the layout load promise did.
+   */
+  ElementProto.prerenderCancelled = function () {
+    this.assertNotTemplate_();
+    dev.assert(this.isUpgraded() && this.isBuilt(),
+        'Must be upgraded and built to receive viewport events');
+    this.implementation_.prerenderCancelled();
+  };
+
+  /**
    * Whether the element should ever render when it is not in viewport.
    * @return {boolean}
    * @final

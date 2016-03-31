@@ -64,6 +64,14 @@ export class AmpCarousel extends BaseCarousel {
   }
 
   /** @override */
+  prerenderCallback() {
+    this.doPreload_(this.pos_);
+    this.preloadNext_(this.pos_, 1);
+    this.setControlsState();
+    return Promise.resolve();
+  }
+
+  /** @override */
   layoutCallback() {
     this.doLayout_(this.pos_);
     this.preloadNext_(this.pos_, 1);
@@ -160,15 +168,23 @@ export class AmpCarousel extends BaseCarousel {
 
   /**
    * @param {number} pos
+   * @private
+   */
+  doPreload_(pos) {
+    this.withinWindow_(pos, cell => {
+      this.schedulePreload(cell);
+    });
+  }
+
+  /**
+   * @param {number} pos
    * @param {number} dir
    * @private
    */
   preloadNext_(pos, dir) {
     const nextPos = this.nextPos_(pos, dir);
     if (nextPos != pos) {
-      this.withinWindow_(nextPos, cell => {
-        this.schedulePreload(cell);
-      });
+      this.doPreload_(nextPos);
     }
   }
 

@@ -64,17 +64,12 @@ export class AmpImg extends BaseElement {
   }
 
   /** @override */
-  prerenderAllowed() {
-    return true;
-  }
-
-  /** @override */
   isRelayoutNeeded() {
     return true;
   }
 
   /** @override */
-  layoutCallback() {
+  prerenderCallback() {
     let promise = this.updateImageSrc_();
 
     // We only allow to fallback on error on the initial layoutCallback
@@ -87,6 +82,14 @@ export class AmpImg extends BaseElement {
       this.allowImgLoadFallback_ = false;
     }
     return promise;
+  }
+
+  /** @override */
+  layoutCallback() {
+    // This is specifically needed for elements that does its work on prerender
+    // e.g. amp-img. This is only needed because currently prerendering
+    // undisplayed elements does not work. See issue #2742.
+    return this.updateImageSrc_();
   }
 
   /**
