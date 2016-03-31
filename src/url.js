@@ -112,11 +112,12 @@ export function addParamsToUrl(url, params) {
  *
  * Provides an exception for localhost.
  *
- * @param {string} urlString
+ * @param {?string|undefined} urlString
  * @param {!Element} elementContext Element where the url was found.
  * @return {string}
  */
 export function assertHttpsUrl(urlString, elementContext) {
+  assert(urlString != null, '%s source must be available', elementContext);
   const url = parseUrl(urlString);
   assert(
       url.protocol == 'https:' || /^(\/\/)/.test(urlString) ||
