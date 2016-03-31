@@ -655,6 +655,15 @@ export class Viewer {
   }
 
   /**
+   * Possibly return the messaging origin if set. This would be the origin
+   * of the parent viewer.
+   * @return {?string}
+   */
+  maybeGetMessagingOrigin() {
+    return this.messagingOrigin_;
+  }
+
+  /**
    * Returns an unconfirmed "referrer" URL that can be optionally customized by
    * the viewer. Consider using `getReferrerUrl()` instead, which returns the
    * promise that will yield the confirmed "referrer" URL.
