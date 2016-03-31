@@ -16,6 +16,7 @@
 
 import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
+import {toggleExperiment} from '../../../../src/experiments';
 import '../amp-social-share';
 
 adopt(window);
@@ -33,6 +34,7 @@ describe('amp-social-share', () => {
 
   function getShare(type, config) {
     return getCustomShare(iframe => {
+      toggleExperiment(iframe.win, 'amp-social-share', true);
       const share = iframe.doc.createElement('amp-social-share');
       const script = iframe.doc.createElement('script');
 
