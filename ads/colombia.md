@@ -31,7 +31,13 @@ limitations under the License.
 
 ## Configuration
 
-For semantics of configuration.
+Supported parameters:
+
+- data-clmb_slot : Ad Slot;
+- data-clmb_position : Ad Position
+- data-clmb_section : Ad Section
+
+
 
 
 
