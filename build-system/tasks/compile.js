@@ -161,7 +161,7 @@ function compile(entryModuleFilename, outputDir,
       compilerFlags: {
         // Custom compilation level. Trying to land this in the core
         // compiler.
-        compilation_level: 'SIMPLE_PLUS_OPTIMIZATIONS',
+        compilation_level: 'ADVANCED_OPTIMIZATIONS',
         // Transpile from ES6 to ES5.
         language_in: 'ECMASCRIPT6',
         language_out: 'ECMASCRIPT5',
