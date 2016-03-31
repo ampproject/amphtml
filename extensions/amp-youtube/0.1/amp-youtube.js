@@ -75,7 +75,7 @@ class AmpYoutube extends AMP.BaseElement {
   layoutCallback() {
     // See
     // https://developers.google.com/youtube/iframe_api_reference
-    const iframe = document.createElement('iframe');
+    const iframe = this.element.ownerDocument.createElement('iframe');
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
     iframe.src = 'https://www.youtube.com/embed/' + encodeURIComponent(

@@ -64,10 +64,10 @@ export function waitForExtensions(win) {
  * @return {!Array<string>}
  */
 export function includedExtensions(win) {
-  const document = win.document;
-  dev.assert(document.body);
+  const doc = win.document;
+  dev.assert(doc.body);
 
   return EXTENSIONS.filter(extension => {
-    return document.querySelector(`[custom-element="${extension}"]`);
+    return doc.querySelector(`[custom-element="${extension}"]`);
   });
 }

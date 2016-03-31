@@ -41,7 +41,7 @@ class AmpDailymotion extends AMP.BaseElement {
         this.element.getAttribute('data-videoid'),
         'The data-videoid attribute is required for <amp-dailymotion> %s',
         this.element);
-    const iframe = document.createElement('iframe');
+    const iframe = this.element.ownerDocument.createElement('iframe');
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
     iframe.src = 'https://www.dailymotion.com/embed/video/' + encodeURIComponent(

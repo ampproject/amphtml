@@ -34,6 +34,9 @@ export class Preconnect {
    * @param {!Window} win
    */
   constructor(win) {
+    /** @private @const {!Document} */
+    this.document_ = win.document;
+
     /** @private @const {!Element} */
     this.head_ = win.document.head;
     /**
@@ -87,10 +90,10 @@ export class Preconnect {
         ? ACTIVE_CONNECTION_TIMEOUT_MS
         : PRECONNECT_TIMEOUT_MS;
     this.origins_[origin] = now + timeout;
-    const dns = document.createElement('link');
+    const dns = this.document_.createElement('link');
     dns.setAttribute('rel', 'dns-prefetch');
     dns.setAttribute('href', origin);
-    const preconnect = document.createElement('link');
+    const preconnect = this.document_.createElement('link');
     preconnect.setAttribute('rel', 'preconnect');
     preconnect.setAttribute('href', origin);
     this.head_.appendChild(dns);
@@ -126,7 +129,7 @@ export class Preconnect {
     const command = this.preloadSupported_ ? 'preload' : 'prefetch';
     this.urls_[url] = true;
     this.url(url, /* opt_alsoConnecting */ true);
-    const prefetch = document.createElement('link');
+    const prefetch = this.document_.createElement('link');
     prefetch.setAttribute('rel', command);
     prefetch.setAttribute('href', url);
     if (opt_preloadAs) {
@@ -146,7 +149,7 @@ export class Preconnect {
 
   /** @private */
   isPreloadSupported_() {
-    const tokenList = document.createElement('link').relList;
+    const tokenList = this.document_.createElement('link').relList;
     if (!tokenList || !tokenList.supports) {
       this.preloadSupported_ = false;
       return this.preloadSupported_;

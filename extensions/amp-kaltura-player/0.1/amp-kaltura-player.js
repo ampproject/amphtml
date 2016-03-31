@@ -52,7 +52,7 @@ class AmpKaltura extends AMP.BaseElement {
     this.element.getAttribute('data-uiconf-id') ||
       'default';
     const entryid = this.element.getAttribute('data-entryid') || 'default';
-    const iframe = document.createElement('iframe');
+    const iframe = this.element.ownerDocument.createElement('iframe');
     let src = `https://cdnapisec.kaltura.com/p/${encodeURIComponent(partnerid)}/sp/${encodeURIComponent(partnerid)}00/embedIframeJs/uiconf_id/${encodeURIComponent(uiconfid)}/partner_id/${encodeURIComponent(partnerid)}?iframeembed=true&playerId=kaltura_player_amp&entry_id=${encodeURIComponent(entryid)}`;
     const params = {};
 
