@@ -18,6 +18,11 @@
     "interval": "https://ping.chartbeat.net/ping?h=$domain&p=_canonical_path_&u=_client_id_&d=_canonical_host_&g=$uid&g0=$sections&g1=$authors&g2=$zone&g3=$sponsorName&g4=$contentType&c=120&x=_scroll_top_&y=_scroll_height_&j=$decayTime&R=1&W=0&I=0&E=_total_engaged_time_&r=_document_referrer_&t=_page_view_id__client_id_&b=_page_load_time_&i=_title_&T=_timestamp_&tz=_timezone_&C=2&_",
     "anchorClick": "https://ping.chartbeat.net/ping?h=$domain&p=_canonical_path_&u=_client_id_&d=_canonical_host_&g=$uid&g0=$sections&g1=$authors&g2=$zone&g3=$sponsorName&g4=$contentType&c=120&x=_scroll_top_&y=_scroll_height_&j=$decayTime&R=1&W=0&I=0&E=_total_engaged_time_&r=_document_referrer_&t=_page_view_id__client_id_&b=_page_load_time_&i=_title_&T=_timestamp_&tz=_timezone_&C=2&_"
   },
+  "colanalytics": {
+    "host": "https://ase.clmbtech.com",
+    "base": "https://ase.clmbtech.com/message?",
+    "pageview": "https://ase.clmbtech.com/message?cid=2964&val_101=_canonical_path_&val_101=_canonical_host_&uuid=$uid&val_101=$authors&val_101=$zone&val_101=$sponsorName&val_101=$contentType&val_101=_scroll_top_&val_101=_scroll_height_&val_101=$decayTime&val_101=_total_engaged_time_&val_101=_document_referrer_&val_101=_page_load_time_&val_108=_title_"
+  },
   "comscore": {
     "host": "https://sb.scorecardresearch.com",
     "base": "https://sb.scorecardresearch.com/b?",

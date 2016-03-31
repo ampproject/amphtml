@@ -198,6 +198,29 @@ export const ANALYTICS_CONFIG = {
     },
   },
 
+  'colanalytics': {
+    'vars': {
+        'id': '',
+        'colurl':'',
+    },
+    'requests': {
+        'host': 'https://${colurl}',
+        'base': '${host}/message',
+        'pageview': '${base}?cid=${id}&val_101=${canonicalPath}&val_101=${canonicalHost}&uuid=${uid}&val_101=${authors}&val_101=${zone}&val_101=${sponsorName}&val_101=${contentType}&val_101=${scrollTop}&val_101=${scrollHeight}&val_101=${decayTime}&val_101=${totalEngagedTime}&val_101=${documentReferrer}&val_101=${pageLoadTime}&val_108=${title}'
+    },
+    'triggers': {
+        'defaultPageview': {
+            'on': 'visible',
+            'request': 'pageview'
+        }
+    },
+    'transport': {
+        'beacon': !1,
+        'xhrpost': !1,
+        'image': !0
+    },
+  },
+    
   'comscore': {
     'vars': {
       'c2': '1000001',
@@ -316,6 +339,11 @@ export const ANALYTICS_CONFIG = {
         'on': 'visible',
         'request': 'pageview',
       },
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
     },
   },
 
@@ -539,4 +567,3 @@ export const ANALYTICS_CONFIG = {
 };
 ANALYTICS_CONFIG['infonline']['triggers']['pageview']['iframe' +
 /* TEMPORARY EXCEPTION */ 'Ping'] = true;
-
