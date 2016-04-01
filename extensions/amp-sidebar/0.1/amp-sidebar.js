@@ -19,12 +19,17 @@ import {Layout} from '../../../src/layout';
 import {isExperimentOn} from '../../../src/experiments';
 import {dev} from '../../../src/log';
 import {setStyles} from '../../../src/style';
+import {vsyncFor} from '../../../src/vsync';
+import {timer} from '../../../src/timer';
 
 /** @const */
 const EXPERIMENT = 'amp-sidebar';
 
 /** @const */
 const TAG = 'AmpSidebar';
+
+/** @const */
+const ANIMATION_TIMEOUT = 500;
 
 export class AmpSidebar extends AMP.BaseElement {
   /** @override */
@@ -60,6 +65,9 @@ export class AmpSidebar extends AMP.BaseElement {
     /** @private @const {!Element} */
     this.maskElement_ = false;
 
+    /** @const @private {!Vsync} */
+    this.vsync_ = vsyncFor(this.win_);
+
     if (!this.isExperimentOn_) {
       dev.warn(TAG, `Experiment ${EXPERIMENT} disabled`);
       return;
@@ -80,13 +88,15 @@ export class AmpSidebar extends AMP.BaseElement {
       this.element.setAttribute('aria-hidden', 'true');
     }
 
+    // Prepare for animation (will not animate the initial state).
+    this.element.classList.add('-amp-sidebar-animate');
+
     this.documentElement_.addEventListener('keydown', event => {
       // Close sidebar on ESC.
       if (event.keyCode == 27) {
         this.close_();
       }
     });
-
     //TODO (skrish, #2712) Add history support on back button.
     this.registerAction('toggle', this.toggle_.bind(this));
     this.registerAction('open', this.open_.bind(this));
@@ -126,14 +136,19 @@ export class AmpSidebar extends AMP.BaseElement {
    */
   open_() {
     this.viewport_.disableTouchZoom();
-    this.mutateElement(() => {
-      this.viewport_.addToFixedLayer(this.element);
+    this.vsync_.mutate(() => {
       setStyles(this.element, {
         'display': 'block',
       });
+      this.viewport_.addToFixedLayer(this.element);
       this.openMask_();
-      this.element.setAttribute('open', '');
-      this.element.setAttribute('aria-hidden', 'false');
+      this.vsync_.mutate(() => {
+        this.element.setAttribute('open', '');
+        this.element.setAttribute('aria-hidden', 'false');
+      });
+      timer.delay(() => {
+        this.scheduleLayout(this.getRealChildren());
+      }, ANIMATION_TIMEOUT);
     });
   }
 
@@ -143,15 +158,22 @@ export class AmpSidebar extends AMP.BaseElement {
    */
   close_() {
     this.viewport_.restoreOriginalTouchZoom();
-    this.mutateElement(() => {
+    this.vsync_.mutate(() => {
       this.closeMask_();
       this.element.removeAttribute('open');
       this.element.setAttribute('aria-hidden', 'true');
-      setStyles(this.element, {
-        'display': 'none',
-      });
       this.viewport_.removeFromFixedLayer(this.element);
     });
+    timer.delay(() => {
+      if (!this.isOpen_()) {
+        this.mutateElement(() => {
+          setStyles(this.element, {
+            'display': 'none',
+          });
+          this.schedulePause(this.getRealChildren());
+        });
+      }
+    }, ANIMATION_TIMEOUT);
   }
 
   /**
