@@ -48,7 +48,7 @@ describe('UrlReplacements', () => {
     return createIframePromise().then(iframe => {
       iframe.doc.title = 'Pixel Test';
       const link = iframe.doc.createElement('link');
-      link.setAttribute('href', 'https://pinterest.com/pin1');
+      link.setAttribute('href', 'https://pinterest.com:8080/pin1');
       link.setAttribute('rel', 'canonical');
       iframe.doc.head.appendChild(link);
       if (withCid) {
@@ -100,12 +100,18 @@ describe('UrlReplacements', () => {
 
   it('should replace CANONICAL_URL', () => {
     return expand('?href=CANONICAL_URL').then(res => {
-      expect(res).to.equal('?href=https%3A%2F%2Fpinterest.com%2Fpin1');
+      expect(res).to.equal('?href=https%3A%2F%2Fpinterest.com%3A8080%2Fpin1');
     });
   });
 
   it('should replace CANONICAL_HOST', () => {
     return expand('?host=CANONICAL_HOST').then(res => {
+      expect(res).to.equal('?host=pinterest.com%3A8080');
+    });
+  });
+
+  it('should replace CANONICAL_HOSTNAME', () => {
+    return expand('?host=CANONICAL_HOSTNAME').then(res => {
       expect(res).to.equal('?host=pinterest.com');
     });
   });
@@ -140,10 +146,23 @@ describe('UrlReplacements', () => {
     });
   });
 
+  it('should replace AMPDOC_HOSTNAME', () => {
+    return expand('?ref=AMPDOC_HOSTNAME').then(res => {
+      expect(res).to.not.match(/AMPDOC_HOSTNAME/);
+    });
+  });
+
   it('should replace SOURCE_URL and _HOST', () => {
     return expand('?url=SOURCE_URL&host=SOURCE_HOST').then(res => {
       expect(res).to.not.match(/SOURCE_URL/);
       expect(res).to.not.match(/SOURCE_HOST/);
+    });
+  });
+
+  it('should replace SOURCE_URL and _HOSTNAME', () => {
+    return expand('?url=SOURCE_URL&host=SOURCE_HOSTNAME').then(res => {
+      expect(res).to.not.match(/SOURCE_URL/);
+      expect(res).to.not.match(/SOURCE_HOSTNAME/);
     });
   });
 
@@ -343,7 +362,7 @@ describe('UrlReplacements', () => {
 
   it('should accept $expressions', () => {
     return expand('?href=$CANONICAL_URL').then(res => {
-      expect(res).to.equal('?href=https%3A%2F%2Fpinterest.com%2Fpin1');
+      expect(res).to.equal('?href=https%3A%2F%2Fpinterest.com%3A8080%2Fpin1');
     });
   });
 
@@ -356,7 +375,7 @@ describe('UrlReplacements', () => {
   it('should replace several substitutions', () => {
     return expand('?a=UNKNOWN&href=CANONICAL_URL&title=TITLE').then(res => {
       expect(res).to.equal('?a=UNKNOWN' +
-          '&href=https%3A%2F%2Fpinterest.com%2Fpin1' +
+          '&href=https%3A%2F%2Fpinterest.com%3A8080%2Fpin1' +
           '&title=Pixel%20Test');
     });
   });

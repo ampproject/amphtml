@@ -523,7 +523,11 @@ export class Resources {
       mutate: () => {
         mutator();
 
-        // Mark children for re-measurement.
+        // Mark itself and children for re-measurement.
+        if (element.classList.contains('-amp-element')) {
+          const r = this.getResourceForElement(element);
+          r.requestMeasure();
+        }
         const ampElements = element.getElementsByClassName('-amp-element');
         for (let i = 0; i < ampElements.length; i++) {
           const r = this.getResourceForElement(ampElements[i]);
@@ -1358,6 +1362,7 @@ export class Resources {
     };
     const unload = () => {
       this.resources_.forEach(r => r.unload());
+      this.unselectText();
     };
     const resume = () => {
       this.resources_.forEach(r => r.resume());
@@ -1389,6 +1394,17 @@ export class Resources {
     vsm.addTransition(paused, hidden, doPass);
     vsm.addTransition(paused, inactive, unload);
     vsm.addTransition(paused, paused, noop);
+  }
+
+  /**
+   * Unselects any selected text
+   */
+  unselectText() {
+    try {
+      this.win.getSelection().removeAllRanges();
+    } catch (e) {
+      // Selection API not supported.
+    }
   }
 }
 

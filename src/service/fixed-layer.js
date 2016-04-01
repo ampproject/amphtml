@@ -394,6 +394,10 @@ export class FixedLayer {
     const matches = fe.selectors.some(
         selector => this.matches_(element, selector));
     if (!matches) {
+      user.warn(TAG,
+          'Failed to move the element to the fixed position layer.' +
+          ' This is most likely due to the compound CSS selector:',
+          fe.element);
       this.returnFromFixedLayer_(fe);
     }
   }

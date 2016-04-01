@@ -50,7 +50,7 @@ class AmpSlides extends AMP.BaseElement {
     /** @private {number} */
     this.currentIndex_ = 0;
 
-    this.prevButton_ = document.createElement('button');
+    this.prevButton_ = this.element.ownerDocument.createElement('button');
     this.prevButton_.textContent = '\u276E';
     st.setStyles(this.prevButton_, {
       opacity: 0.6,
@@ -68,7 +68,7 @@ class AmpSlides extends AMP.BaseElement {
     };
     this.element.appendChild(this.prevButton_);
 
-    this.nextButton_ = document.createElement('button');
+    this.nextButton_ = this.element.ownerDocument.createElement('button');
     this.nextButton_.textContent = '\u276F';
     st.setStyles(this.nextButton_, {
       opacity: 0.6,

@@ -63,7 +63,9 @@ const knownElements = {};
  * Whether this platform supports template tags.
  * @const {boolean}
  */
-const TEMPLATE_TAG_SUPPORTED = 'content' in document.createElement('template');
+const TEMPLATE_TAG_SUPPORTED = 'content' in window.document.createElement(
+  'template'
+);
 
 
 /**
@@ -158,7 +160,7 @@ export function applyLayout_(element) {
       (!inputWidth || !inputHeight) && hasNaturalDimensions(element.tagName)) {
     // Default width and height: handle elements that do not specify a
     // width/height and are defined to have natural browser dimensions.
-    const dimensions = getNaturalDimensions(element.tagName);
+    const dimensions = getNaturalDimensions(element);
     width = (inputWidth || inputLayout == Layout.FIXED_HEIGHT) ? inputWidth :
         dimensions.width;
     height = inputHeight || dimensions.height;
@@ -1028,12 +1030,12 @@ export function createAmpElementProto(win, name, implementationClass) {
    */
   ElementProto.prepareLoading_ = function() {
     if (!this.loadingContainer_) {
-      const container = document.createElement('div');
+      const container = win.document.createElement('div');
       container.classList.add('-amp-loading-container');
       container.classList.add('-amp-fill-content');
       container.classList.add('amp-hidden');
 
-      const element = createLoaderElement();
+      const element = createLoaderElement(win.document);
       container.appendChild(element);
 
       this.appendChild(container);

@@ -16,6 +16,7 @@
 
 import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
+import {toggleExperiment} from '../../../../src/experiments';
 import '../amp-social-share';
 
 adopt(window);
@@ -33,6 +34,7 @@ describe('amp-social-share', () => {
 
   function getShare(type, config) {
     return getCustomShare(iframe => {
+      toggleExperiment(iframe.win, 'amp-social-share', true);
       const share = iframe.doc.createElement('amp-social-share');
       const script = iframe.doc.createElement('script');
 
@@ -109,6 +111,7 @@ describe('amp-social-share', () => {
       const tShare = ins.getElementsByTagName('span')[0];
       expect(tShare).to.not.be.null;
       expect(tShare.firstChild).to.not.be.null;
+      expect(tShare).to.have.class('amp-social-share-twitter');
       const shareAnchor = tShare.firstChild;
       expect(shareAnchor.tagName).to.equal('A');
 
@@ -144,6 +147,7 @@ describe('amp-social-share', () => {
       const tShare = ins.getElementsByTagName('span')[0];
       expect(tShare).to.not.be.null;
       expect(tShare.firstChild).to.not.be.null;
+      expect(tShare).to.have.class('amp-social-share-twitter');
       const shareAnchor = tShare.firstChild;
       expect(shareAnchor.tagName).to.equal('A');
 
@@ -151,6 +155,31 @@ describe('amp-social-share', () => {
       expect(shareHref).to.contain(encodeURIComponent(STRINGS['text']));
       expect(shareHref).to.contain(encodeURIComponent(STRINGS['url']));
       expect(shareHref).to.contain(encodeURIComponent(STRINGS['attribution']));
+    });
+  });
+
+  it('Should not add prefixed class for social shares with tag', () => {
+    return getCustomShare(iframe => {
+      const share = iframe.doc.createElement('amp-social-share');
+      const container = iframe.doc.createElement('span');
+      const link = iframe.doc.createElement('a');
+
+      share.setAttribute('type', 'twitter');
+      share.setAttribute('width', 60);
+      share.setAttribute('height', 44);
+      share.appendChild(container);
+      container.classList.add('amp-social-share-test');
+      container.appendChild(link);
+
+      link.classList.add('amp-social-share-test');
+
+      return share;
+    }).then(ins => {
+      const tShare = ins.getElementsByTagName('span')[0];
+      expect(tShare).to.not.be.null;
+      expect(tShare.firstChild).to.not.be.null;
+      expect(tShare).to.not.have.class('amp-social-share-twitter');
+      expect(tShare).to.have.class('amp-social-share-test');
     });
   });
 

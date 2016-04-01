@@ -18,12 +18,23 @@ import {addParamsToUrl} from '../../../src/url';
 import {documentInfoFor} from '../../../src/document-info';
 import {elementByTag} from '../../../src/dom';
 import {getSocialConfig} from './amp-social-share-config';
+import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined, getLengthNumeral,
   Layout} from '../../../src/layout';
+import {user} from '../../../src/log';
 import {CSS} from '../../../build/amp-social-share-0.1.css';
+
+/** @const */
+const EXPERIMENT = 'amp-social-share';
+
+/** @const */
+const TAG = 'AmpSocialShare';
 
 /** @const {number} */
 const DEFAULT_WIDTH = 60;
+
+/** @const {string} */
+const CLASSNAME_PREFIX = 'amp-social-share-';
 
 class AmpSocialShare extends AMP.BaseElement {
 
@@ -34,8 +45,14 @@ class AmpSocialShare extends AMP.BaseElement {
 
   /** @override */
   buildCallback() {
+    this.isExperimentOn_ = isExperimentOn(this.getWin(), EXPERIMENT);
+    if (!this.isExperimentOn_) {
+      user.warn(TAG, `Experiment ${EXPERIMENT} disabled`);
+      return;
+    }
+
     /** @private @const {!Element} */
-    this.type_ = AMP.assert(this.element.getAttribute('type'),
+    this.type_ = user.assert(this.element.getAttribute('type'),
         'The type attribute is required. %s',
         this.element);
 
@@ -66,7 +83,7 @@ class AmpSocialShare extends AMP.BaseElement {
       const paramConf = this.typeConfig_['params'][param];
       let paramValue = this.config_[param] || this.getDefaultValue_(
           param, this.config_);
-      AMP.assert(!paramConf['required'] || paramValue !== null,
+      user.assert(!paramConf['required'] || paramValue !== null,
           param + ' is a required attribute for ' + this.type_ + '. %s',
         this.element);
       if (paramValue == null && paramConf['type'] == 'fixed') {
@@ -74,7 +91,7 @@ class AmpSocialShare extends AMP.BaseElement {
       }
       if ('maxlength' in paramConf) {
         const maxlength = paramConf['maxlength'];
-        AMP.assert(!paramValue || paramValue.length < maxlength,
+        user.assert(!paramValue || paramValue.length < maxlength,
             param + ' cannot exceed ' + maxlength + '. %s', this.element);
       }
       if (paramValue != null) {
@@ -93,7 +110,7 @@ class AmpSocialShare extends AMP.BaseElement {
       let container = elementByTag(this.element, 'span');
       if (container == null) {
         container = this.getWin().document.createElement('span');
-        container.classList.add(this.type_);
+        container.classList.add(CLASSNAME_PREFIX + this.type_);
 
         // Only add the container to the element if it didn't exist
         this.element.appendChild(container);
@@ -119,7 +136,7 @@ class AmpSocialShare extends AMP.BaseElement {
       try {
         config = JSON.parse(script.textContent);
       } catch (e) {
-        AMP.assert(false, 'Malformed JSON configuration. %s', this.element);
+        user.error(TAG, 'Malformed JSON configuration. %s', this.element);
       }
     } else {
       // Get config from attributes

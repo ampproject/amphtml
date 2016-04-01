@@ -38,6 +38,7 @@ import {isLayoutSizeDefined} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
 import {setStyles} from '../../../src/style';
 import {removeElement} from '../../../src/dom';
+import {user} from '../../../src/log';
 
 
 class AmpInstagram extends AMP.BaseElement {
@@ -68,7 +69,7 @@ class AmpInstagram extends AMP.BaseElement {
     /**
      * @private @const
      */
-    this.shortcode_ = AMP.assert(
+    this.shortcode_ = user.assert(
         (this.element.getAttribute('data-shortcode') ||
         this.element.getAttribute('shortcode')),
         'The data-shortcode attribute is required for <amp-instagram> %s',
@@ -89,7 +90,7 @@ class AmpInstagram extends AMP.BaseElement {
     if (this.iframePromise_) {
       return this.iframePromise_;
     }
-    const iframe = document.createElement('iframe');
+    const iframe = this.element.ownerDocument.createElement('iframe');
     this.iframe_ = iframe;
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowtransparency', 'true');
@@ -128,7 +129,7 @@ class AmpInstagram extends AMP.BaseElement {
     setStyles(image, {
       'object-fit': 'cover',
     });
-    const wrapper = document.createElement('wrapper');
+    const wrapper = this.element.ownerDocument.createElement('wrapper');
     // This makes the non-iframe image appear in the exact same spot
     // where it will be inside of the iframe.
     setStyles(wrapper, {

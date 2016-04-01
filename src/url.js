@@ -18,7 +18,7 @@ import {assert} from './asserts';
 import {endsWith} from './string';
 
 // Cached a-tag to avoid memory allocation during URL parsing.
-const a = document.createElement('a');
+const a = window.document.createElement('a');
 
 // We cached all parsed URLs. As of now there are no use cases
 // of AMP docs that would ever parse an actual large number of URLs,
@@ -112,11 +112,12 @@ export function addParamsToUrl(url, params) {
  *
  * Provides an exception for localhost.
  *
- * @param {string} urlString
+ * @param {?string|undefined} urlString
  * @param {!Element} elementContext Element where the url was found.
  * @return {string}
  */
 export function assertHttpsUrl(urlString, elementContext) {
+  assert(urlString != null, '%s source must be available', elementContext);
   const url = parseUrl(urlString);
   assert(
       url.protocol == 'https:' || /^(\/\/)/.test(urlString) ||
