@@ -24,7 +24,7 @@ const PinterestUA = 'Mozilla/5.0 (Linux; Android 5.1.1; SM-G920F' +
   ' Chrome/47.0.2526.100 Mobile Safari/537.36 [Pinterest/Android]';
 
 describe('dynamic classes are inserted at runtime', () => {
-  let documentElement;
+  let body;
   let mockWin;
   let viewer;
 
@@ -34,14 +34,14 @@ describe('dynamic classes are inserted at runtime', () => {
     classList.contains = function(c) {
       return this.indexOf(c) > -1;
     };
-    documentElement = {
-      tagName: 'HTML',
+    body = {
+      tagName: 'BODY',
       classList: classList,
     };
     mockWin = {
       document: {
         referrer: 'http://localhost/',
-        documentElement: documentElement,
+        body: body,
       },
       navigator: {
         userAgent: '',
@@ -77,22 +77,22 @@ describe('dynamic classes are inserted at runtime', () => {
     });
 
     it('should include viewer class', () => {
-      expect(documentElement).to.have.class('amp-viewer');
+      expect(body).to.have.class('amp-viewer');
     });
   });
 
   describe('Normalizing Referrers', () => {
     it('should normalize twitter shortlinks to twitter', () => {
       setup(false, '', tcoReferrer);
-      expect(documentElement).to.have.class('amp-referrer-com');
-      expect(documentElement).to.have.class('amp-referrer-twitter-com');
+      expect(body).to.have.class('amp-referrer-com');
+      expect(body).to.have.class('amp-referrer-twitter-com');
     });
 
     it('should normalize pinterest on android', () => {
       setup(false, PinterestUA, '');
-      expect(documentElement).to.have.class('amp-referrer-com');
-      expect(documentElement).to.have.class('amp-referrer-pinterest-com');
-      expect(documentElement).to.have.class('amp-referrer-www-pinterest-com');
+      expect(body).to.have.class('amp-referrer-com');
+      expect(body).to.have.class('amp-referrer-pinterest-com');
+      expect(body).to.have.class('amp-referrer-www-pinterest-com');
     });
   });
 });
