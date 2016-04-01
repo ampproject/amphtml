@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {assert} from '../asserts';
 import {getService} from '../service';
 import {getSourceOrigin} from '../url';
 import {dev} from '../log';
@@ -92,7 +91,7 @@ export class Storage {
    * @override
    */
   set(name, value) {
-    assert(typeof value == 'boolean', 'Only boolean values accepted');
+    dev.assert(typeof value == 'boolean', 'Only boolean values accepted');
     return this.saveStore_(store => store.set(name, value));
   }
 
@@ -212,7 +211,7 @@ export class Store {
    * @private
    */
   set(name, value) {
-    assert(name != '__proto__' && name != 'prototype',
+    dev.assert(name != '__proto__' && name != 'prototype',
         'Name is not allowed: %s', name);
     // The structure is {key: {v: *, t: time}}
     if (this.values_[name] !== undefined) {

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import {assert} from '../../src/asserts';
 import {getErrorReportUrl, cancellation} from '../../src/error';
 import {setModeForTesting} from '../../src/mode';
 import {parseUrl, parseQueryString} from '../../src/url';
+import {user} from '../../src/log';
 import * as sinon from 'sinon';
 
 
@@ -75,7 +75,7 @@ describe('reportErrorToServer', () => {
   it('reportError mark asserts', () => {
     let e = '';
     try {
-      assert(false, 'XYZ');
+      user.assert(false, 'XYZ');
     } catch (error) {
       e = error;
     }
@@ -91,7 +91,7 @@ describe('reportErrorToServer', () => {
   it('reportError mark asserts without error object', () => {
     let e = '';
     try {
-      assert(false, 'XYZ');
+      user.assert(false, 'XYZ');
     } catch (error) {
       e = error;
     }
