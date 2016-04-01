@@ -34,6 +34,12 @@ class AmpBrightcove extends AMP.BaseElement {
   }
 
   /** @override */
+  buildCallback() {
+    /** @private {?Element} */
+    this.iframe_ = null;
+  }
+
+  /** @override */
   layoutCallback() {
     const width = this.element.getAttribute('width');
     const height = this.element.getAttribute('height');
@@ -121,8 +127,9 @@ class AmpBrightcove extends AMP.BaseElement {
    * we can prevent the unlayout.
    *
    * See https://github.com/ampproject/amphtml/issues/2224 for information.
+   * @override
    */
-  unlayout() {
+  unlayoutCallback() {
     if (this.iframe_) {
       removeElement(this.iframe_);
       this.iframe_ = null;
