@@ -24,7 +24,6 @@ import {
   TapzoomRecognizer,
 } from '../../../src/gesture-recognizers';
 import {Layout} from '../../../src/layout';
-import {assert} from '../../../src/asserts';
 import {bezierCurve} from '../../../src/curve';
 import {continueMotion} from '../../../src/motion';
 import {historyFor} from '../../../src/history';
@@ -36,6 +35,7 @@ import {
 } from '../../../src/layout-rect';
 import {srcsetFromElement} from '../../../src/srcset';
 import {timer} from '../../../src/timer';
+import {user} from '../../../src/log';
 import * as dom from '../../../src/dom';
 import * as st from '../../../src/style';
 import * as tr from '../../../src/transition';
@@ -706,7 +706,7 @@ class AmpImageLightbox extends AMP.BaseElement {
     }
 
     const source = invocation.source;
-    assert(source && SUPPORTED_ELEMENTS_[source.tagName.toLowerCase()],
+    user.assert(source && SUPPORTED_ELEMENTS_[source.tagName.toLowerCase()],
         'Unsupported element: %s', source.tagName);
 
     this.active_ = true;

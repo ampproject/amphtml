@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {assert} from './asserts';
+import {dev, user} from './log';
 import {getService} from './service';
 import {
   addParamToUrl,
@@ -97,25 +97,26 @@ class Xhr {
     const sourceOrigin = getSourceOrigin(this.win.location.href);
     const url = parseUrl(input);
     const query = parseQueryString(url.search);
-    assert(!(SOURCE_ORIGIN_PARAM in query),
+    user.assert(!(SOURCE_ORIGIN_PARAM in query),
         'Source origin is not allowed in %s', input);
     input = addParamToUrl(input, SOURCE_ORIGIN_PARAM, sourceOrigin);
     return this.fetch_(input, opt_init).catch(reason => {
-      assert(false, 'Fetch failed %s: %s', input, reason && reason.message);
+      user.assert(false, 'Fetch failed %s: %s', input,
+          reason && reason.message);
     }).then(response => {
       const allowSourceOriginHeader = response.headers.get(
           ALLOW_SOURCE_ORIGIN_HEADER);
       if (allowSourceOriginHeader) {
         // If the `AMP-Access-Control-Allow-Source-Origin` header is returned,
         // ensure that it's equal to the current source origin.
-        assert(allowSourceOriginHeader == sourceOrigin,
+        user.assert(allowSourceOriginHeader == sourceOrigin,
               `Returned ${ALLOW_SOURCE_ORIGIN_HEADER} is not` +
               ` equal to the current: ${allowSourceOriginHeader}` +
               ` vs ${sourceOrigin}`);
       } else if (opt_init && opt_init.requireAmpResponseSourceOrigin) {
         // If the `AMP-Access-Control-Allow-Source-Origin` header is not
         // returned but required, return error.
-        assert(false, `Response must contain the` +
+        user.assert(false, `Response must contain the` +
             ` ${ALLOW_SOURCE_ORIGIN_HEADER} header`);
       }
       return response;
@@ -174,7 +175,7 @@ export function normalizeMethod_(method) {
   }
   method = method.toUpperCase();
 
-  assert(
+  dev.assert(
     allowedMethods_.indexOf(method) > -1,
     'Only one of %s is currently allowed. Got %s',
     allowedMethods_.join(', '),
@@ -196,7 +197,7 @@ function setupJson_(init) {
   if (init.method == 'POST') {
     // Assume JSON strict mode where only objects or arrays are allowed
     // as body.
-    assert(
+    dev.assert(
       allowedBodyTypes_.some(test => test(init.body)),
       'body must be of type object or array. %s',
       init.body
@@ -222,9 +223,9 @@ function setupJson_(init) {
  * @private Visible for testing
  */
 export function fetchPolyfill(input, opt_init) {
-  assert(typeof input == 'string', 'Only URL supported: %s', input);
+  dev.assert(typeof input == 'string', 'Only URL supported: %s', input);
   const init = opt_init || {};
-  assert(!init.credentials || init.credentials == 'include',
+  dev.assert(!init.credentials || init.credentials == 'include',
       'Only credentials=include support: %s', init.credentials);
 
   return new Promise(function(resolve, reject) {
@@ -301,7 +302,7 @@ function createXhrRequest(method, url, init) {
  * @return {!FetchResponse}
  */
 function assertSuccess(response) {
-  assert(response.status >= 200 && response.status < 300,
+  user.assert(response.status >= 200 && response.status < 300,
       'HTTP error %s', response.status);
   return response;
 }
@@ -336,7 +337,7 @@ class FetchResponse {
    * @private
    */
   drainText_() {
-    assert(!this.bodyUsed, 'Body already used');
+    dev.assert(!this.bodyUsed, 'Body already used');
     this.bodyUsed = true;
     return Promise.resolve(this.xhr_.responseText);
   }
