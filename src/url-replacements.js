@@ -15,9 +15,8 @@
  */
 
 import {accessServiceForOrNull} from './access-service';
-import {assert} from './asserts';
 import {cidFor} from './cid';
-import {user, rethrowAsync} from './log';
+import {dev, user, rethrowAsync} from './log';
 import {documentInfoFor} from './document-info';
 import {getService} from './service';
 import {loadPromise} from './event-helper';
@@ -135,8 +134,9 @@ class UrlReplacements {
     });
 
     this.set_('QUERY_PARAM', (param, defaultValue = '') => {
-      assert(param, 'The first argument to QUERY_PARAM, the query string ' +
-          /*OK*/'param is required');
+      user.assert(param,
+          'The first argument to QUERY_PARAM, the query string ' +
+          'param is required');
       const url = parseUrl(this.win_.location.href);
       const params = parseQueryString(url.search);
 
@@ -146,7 +146,7 @@ class UrlReplacements {
     });
 
     this.set_('CLIENT_ID', (scope, opt_userNotificationId) => {
-      assert(scope, 'The first argument to CLIENT_ID, the fallback c' +
+      user.assert(scope, 'The first argument to CLIENT_ID, the fallback c' +
           /*OK*/'ookie name, is required');
       let consent = Promise.resolve();
 
@@ -301,7 +301,8 @@ class UrlReplacements {
 
     // Access: data from the authorization response.
     this.set_('AUTHDATA', field => {
-      assert(field, 'The first argument to AUTHDATA, the field, is required');
+      user.assert(field,
+          'The first argument to AUTHDATA, the field, is required');
       return this.getAccessValue_(accessService => {
         return accessService.getAuthdataField(field);
       }, 'AUTHDATA');
@@ -380,7 +381,7 @@ class UrlReplacements {
    * @private
    */
   set_(varName, resolver) {
-    assert(varName.indexOf('RETURN') == -1);
+    dev.assert(varName.indexOf('RETURN') == -1);
     this.replacements_[varName] = resolver;
     this.replacementExpr_ = undefined;
     return this;

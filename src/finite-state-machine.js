@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {assert} from './asserts';
+import {dev} from './log';
 
 /**
  * @template STATE
@@ -50,7 +50,7 @@ export class FiniteStateMachine {
    */
   addTransition(oldState, newState, callback) {
     const transition = this.statesToTransition_(oldState, newState);
-    assert(
+    dev.assert(
       !this.transitions_[transition],
       'cannot define a duplicate transition callback'
     );

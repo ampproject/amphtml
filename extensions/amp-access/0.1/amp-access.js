@@ -17,7 +17,6 @@
 import {CSS} from '../../../build/amp-access-0.1.css';
 import {actionServiceFor} from '../../../src/action';
 import {analyticsFor} from '../../../src/analytics';
-import {assert, assertEnumValue} from '../../../src/asserts';
 import {assertHttpsUrl, getSourceOrigin} from '../../../src/url';
 import {cancellation} from '../../../src/error';
 import {cidFor} from '../../../src/cid';
@@ -189,7 +188,7 @@ export class AccessService {
 
     // Access type.
     const type = configJson['type'] ?
-        assertEnumValue(AccessType, configJson['type'], 'access type') :
+        user.assertEnumValue(AccessType, configJson['type'], 'access type') :
         AccessType.CLIENT;
     const config = {
       type: type,
@@ -213,9 +212,10 @@ export class AccessService {
 
     // Validate type = client/server.
     if (type == AccessType.CLIENT || type == AccessType.SERVER) {
-      assert(config.authorization, '"authorization" URL must be specified');
-      assert(config.pingback, '"pingback" URL must be specified');
-      assert(Object.keys(config.loginMap).length > 0,
+      user.assert(config.authorization,
+          '"authorization" URL must be specified');
+      user.assert(config.pingback, '"pingback" URL must be specified');
+      user.assert(Object.keys(config.loginMap).length > 0,
           'At least one "login" URL must be specified');
     }
     return config;
@@ -236,7 +236,8 @@ export class AccessService {
         loginMap[k] = loginConfig[k];
       }
     } else {
-      assert(false, '"login" must be either a single URL or a map of URLs');
+      user.assert(false,
+          '"login" must be either a single URL or a map of URLs');
     }
     return loginMap;
   }
@@ -744,10 +745,10 @@ export class AccessService {
     }
 
     dev.fine(TAG, 'Start login: ', type);
-    assert(this.config_.loginMap[type],
+    user.assert(this.config_.loginMap[type],
         'Login URL is not configured: %s', type);
     // Login URL should always be available at this time.
-    const loginUrl = assert(this.loginUrlMap_[type],
+    const loginUrl = user.assert(this.loginUrlMap_[type],
         'Login URL is not ready: %s', type);
 
     this.loginAnalyticsEvent_(type, 'started');

@@ -16,7 +16,6 @@
 
 import {ANALYTICS_CONFIG} from './vendors';
 import {addListener, instrumentationServiceFor} from './instrumentation';
-import {assert} from '../../../src/asserts';
 import {assertHttpsUrl, addParamsToUrl} from '../../../src/url';
 import {dev, user} from '../../../src/log';
 import {expandTemplate} from '../../../src/string';
@@ -375,7 +374,7 @@ export class AmpAnalytics extends AMP.BaseElement {
       return;
     }
     if (trigger['iframePing']) {
-      assert(trigger['on'] == 'visible',
+      user.assert(trigger['on'] == 'visible',
           'iframePing is only available on page view requests.');
       sendRequestUsingIframe(this.getWin(), request);
     } else {
@@ -408,7 +407,7 @@ export class AmpAnalytics extends AMP.BaseElement {
     }
 
     for (const property in from) {
-      assert(opt_predefinedConfig || property != 'iframePing',
+      user.assert(opt_predefinedConfig || property != 'iframePing',
           'iframePing config is only available to vendor config.');
       // Only deal with own properties.
       if (from.hasOwnProperty(property)) {

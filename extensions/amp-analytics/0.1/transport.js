@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {assert} from '../../../src/asserts';
 import {assertHttpsUrl, parseUrl} from '../../../src/url';
 import {dev, user} from '../../../src/log';
 import {loadPromise} from '../../../src/event-helper';
@@ -128,7 +127,7 @@ export function sendRequestUsingIframe(win, request) {
       removeElement(iframe);
     }, 5000);
   };
-  assert(
+  user.assert(
       parseUrl(request).origin != parseUrl(win.location.href).origin,
       'Origin of iframe request must not be equal to the doc' +
       'ument origin. See https://github.com/ampproject/' +
