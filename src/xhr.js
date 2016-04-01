@@ -70,10 +70,18 @@ class Xhr {
    * We want to call `fetch_` unbound from any context since it could
    * be either the native fetch or our polyfill.
    *
-   * @private
+   * @param {string} input
+   * @param {?FetchInitDef=} opt_init
    * @return {!Promise<!FetchResponse>}
+   * @private
    */
-  fetch_() {
+  fetch_(input, opt_init) {
+    // Fallback to xhr polyfill since `fetch` api does not support
+    // responseType = 'document'. We do this so we dont have to do any parsing
+    // and document construction on the UI thread which would be expensive.
+    if (opt_init && opt_init.responseType == 'document') {
+      return fetchPolyfill.apply(null, arguments);
+    }
     return (this.win.fetch || fetchPolyfill).apply(null, arguments);
   }
 
@@ -141,6 +149,26 @@ class Xhr {
 
     return this.fetchAmpCors_(input, init).then(response => {
       return assertSuccess(response).json();
+    });
+  }
+
+  /**
+   * Creates an XHR request with responseType=document
+   * and returns the `FetchResponse` object.
+   *
+   * @param {string} input
+   * @param {?FetchInitDef=} opt_init
+   * @return {!Promise<!HTMLDocument>}
+   */
+  fetchDocument(input, opt_init) {
+    const init = opt_init || {};
+    init.responseType = 'document';
+    init.method = normalizeMethod_(init.method);
+    init.headers = init.headers || {};
+    init.headers['Accept'] = 'text/html';
+
+    return this.fetchAmpCors_(input, init).then(response => {
+      return assertSuccess(response).document_();
     });
   }
 
@@ -229,10 +257,20 @@ export function fetchPolyfill(input, opt_init) {
       'Only credentials=include support: %s', init.credentials);
 
   return new Promise(function(resolve, reject) {
-    const xhr = createXhrRequest(init.method || 'GET', input, init);
+    const xhr = createXhrRequest(init.method || 'GET', input);
 
     if (init.credentials == 'include') {
       xhr.withCredentials = true;
+    }
+
+    if (init.responseType == 'document') {
+      xhr.responseType = 'document';
+    }
+
+    if (init.headers) {
+      Object.keys(init.headers).forEach(function(header) {
+        xhr.setRequestHeader(header, init.headers[header]);
+      });
     }
 
     xhr.onreadystatechange = () => {
@@ -271,11 +309,10 @@ export function fetchPolyfill(input, opt_init) {
 /**
  * @param {string} method
  * @param {string} url
- * @param {!FetchInitDef} init
  * @return {!XMLHttpRequest}
  * @private
  */
-function createXhrRequest(method, url, init) {
+function createXhrRequest(method, url) {
   let xhr = new XMLHttpRequest();
   if ('withCredentials' in xhr) {
     xhr.open(method, url, true);
@@ -286,13 +323,15 @@ function createXhrRequest(method, url, init) {
   } else {
     throw new Error('CORS is not supported');
   }
-
-  if (init.headers) {
-    Object.keys(init.headers).forEach(function(header) {
-      xhr.setRequestHeader(header, init.headers[header]);
-    });
-  }
   return xhr;
+}
+
+/**
+ * If 415 or in the 5xx range.
+ * @param {string} status
+ */
+function isRetriable(status) {
+  return status == 415 || (status >= 500 && status < 600);
 }
 
 
@@ -302,8 +341,13 @@ function createXhrRequest(method, url, init) {
  * @return {!FetchResponse}
  */
 function assertSuccess(response) {
-  user.assert(response.status >= 200 && response.status < 300,
-      'HTTP error %s', response.status);
+  if (!(response.status >= 200 && response.status < 300)) {
+    const err = user.createError(`HTTP error ${response.status}`);
+    if (isRetriable(response.status)) {
+      err.retriable = true;
+    }
+    throw err;
+  }
   return response;
 }
 
@@ -348,6 +392,19 @@ class FetchResponse {
    */
   json() {
     return this.drainText_().then(JSON.parse);
+  }
+
+  /**
+   * Reads the xhr responseXML.
+   * @return {!Promise<!HTMLDocument>}
+   * @private
+   */
+  document_() {
+    dev.assert(!this.bodyUsed, 'Body already used');
+    this.bodyUsed = true;
+    user.assert(this.xhr_.responseXML instanceof Document,
+        'responseXML should be a Document instance.');
+    return Promise.resolve(this.xhr_.responseXML);
   }
 }
 
