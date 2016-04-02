@@ -1,4 +1,1 @@
-FAIL
-feature_tests/mask-icon.html:32:2 Invalid URL protocol 'http:' for attribute 'href' in tag 'link rel=mask-icon'. [DISALLOWED_HTML]
-feature_tests/mask-icon.html:33:2 The relative URL '//example.com/website_icon.svg' for attribute 'href' in tag 'link rel=mask-icon' is disallowed. [DISALLOWED_HTML]
-feature_tests/mask-icon.html:34:2 The relative URL 'website_icon.svg' for attribute 'href' in tag 'link rel=mask-icon' is disallowed. [DISALLOWED_HTML]
+PASS
