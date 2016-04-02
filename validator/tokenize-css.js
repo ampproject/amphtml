@@ -1052,6 +1052,15 @@ parse_css.Token = class {
     this.tokenType = parse_css.TokenType.UNKNOWN;
   }
 
+  /**
+   * Propagates the start position of |this| to |other|.
+   * @param {!parse_css.Token} other
+   */
+  copyStartPositionTo(other) {
+    other.line = this.line;
+    other.col = this.col;
+  }
+
   /** @return {!string} */
   toSource() { return '' + this; }
 
@@ -1063,7 +1072,7 @@ parse_css.Token = class {
       'col': this.col
     };
   }
-}
+};
 
 /**
  * Error tokens carry an error code and parameters, which can be
