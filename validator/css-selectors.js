@@ -24,7 +24,10 @@ goog.provide('parse_css.SelectorVisitor');
 goog.provide('parse_css.SelectorsGroup');
 goog.provide('parse_css.SimpleSelectorSequence');
 goog.provide('parse_css.TypeSelector');
+goog.provide('parse_css.parseAClassSelector');
 goog.provide('parse_css.parseASelector');
+goog.provide('parse_css.parseASelectorsGroup');
+goog.provide('parse_css.parseASimpleSelectorSequence');
 goog.provide('parse_css.parseATypeSelector');
 goog.provide('parse_css.parseAnAttrSelector');
 goog.provide('parse_css.parseAnIdSelector');
@@ -900,6 +903,8 @@ parse_css.SelectorsGroup = class extends parse_css.Selector {
 /**
  * The selectors_group production from
  * http://www.w3.org/TR/css3-selectors/#grammar.
+ * In addition, this parsing routine checks that no input remains,
+ * that is, after parsing the production we reached the end of |token_stream|.
  * @param {!parse_css.TokenStream} tokenStream
  * @return {!parse_css.SelectorsGroup|
  *          !parse_css.SimpleSelectorSequence|!parse_css.Combinator|
@@ -935,6 +940,17 @@ parse_css.parseASelectorsGroup = function(tokenStream) {
       }
       continue;
     }
+    // We're about to claim success and return a selector,
+    // but before we do, we check that no unparsed input remains.
+    if (!(tokenStream.current() instanceof parse_css.EOFToken)) {
+      const error = new parse_css.ErrorToken(
+          amp.validator.ValidationError.Code
+              .CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR,
+          ['style']);
+      error.line = tokenStream.current().line;
+      error.col = tokenStream.current().col;
+      return error;
+    }
     if (elements.length == 1) {
       return elements[0];
     }
@@ -943,27 +959,4 @@ parse_css.parseASelectorsGroup = function(tokenStream) {
     group.col = col;
     return group;
   }
-};
-
-/**
- * @param {!parse_css.TokenStream} tokenStream
- * @param {!Array<!parse_css.ErrorToken>} errors
- * @return {parse_css.SelectorsGroup|parse_css.SimpleSelectorSequence|
- *          parse_css.Combinator}
- */
-parse_css.parseSelectors = function(tokenStream, errors) {
-  const group = parse_css.parseASelectorsGroup(tokenStream);
-  if (group instanceof parse_css.ErrorToken) {
-    errors.push(group);
-  }
-  if (!(tokenStream.current() instanceof parse_css.EOFToken)) {
-    const error = new parse_css.ErrorToken(
-        amp.validator.ValidationError.Code.
-            CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR,
-        ['style']);
-    error.line = tokenStream.current().line;
-    error.col = tokenStream.current().col;
-    errors.push(error);
-  }
-  return (group instanceof parse_css.ErrorToken) ? null : group;
 };
