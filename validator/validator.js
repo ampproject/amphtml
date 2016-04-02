@@ -3349,6 +3349,12 @@ amp.validator.categorizeError = function(error) {
       TEMPLATE_IN_ATTR_NAME) {
     return amp.validator.ErrorCategory.Code.AMP_MUSTACHE_TEMPLATE_PROBLEM;
   }
+  // E.g. "The tag 'amp-ad' may not appear as a descendant of tag 'amp-sidebar'.
+  if (error.code === amp.validator.ValidationError.Code
+      .DISALLOWED_TAG_ANCESTOR &&
+      (goog.string./*OK*/startsWith(error.params[1], "amp-"))) {
+    return amp.validator.ErrorCategory.Code.AMP_TAG_PROBLEM;
+  }
   if (error.code === amp.validator.ValidationError.Code
       .DISALLOWED_TAG_ANCESTOR &&
       (error.params[1] === "template")) {
