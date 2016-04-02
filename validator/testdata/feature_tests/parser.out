@@ -19,3 +19,7 @@ feature_tests/parser.html:56:2 The attribute '<' may not appear in tag 'a'. [DIS
 feature_tests/parser.html:57:2 The attribute '/' may not appear in tag 'a'. [DISALLOWED_HTML]
 feature_tests/parser.html:58:2 The attribute '/a' may not appear in tag 'a'. [DISALLOWED_HTML]
 feature_tests/parser.html:59:2 The attribute '/a' may not appear in tag 'a'. [DISALLOWED_HTML]
+feature_tests/parser.html:62:2 The tag '?php' is disallowed. [DISALLOWED_HTML]
+feature_tests/parser.html:64:2 The tag '?php' is disallowed. [DISALLOWED_HTML]
+feature_tests/parser.html:65:2 The tag '?php' is disallowed. [DISALLOWED_HTML]
+feature_tests/parser.html:66:2 The tag '?xml:namespace' is disallowed. [DISALLOWED_HTML]
