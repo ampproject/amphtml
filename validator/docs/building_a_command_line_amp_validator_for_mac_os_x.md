@@ -83,7 +83,7 @@ Not strictly initially necessary for the validator, but good not to forget:
 
 ```
 $ brew tap homebrew/versions
-$ brew install protobuf --c++11
+$ brew install protobuf --c++11 --with-python # and follow instructions to add modules to Python sys.path
 $ brew link protobuf
 $ protoc --version
 libprotoc 2.6.1
