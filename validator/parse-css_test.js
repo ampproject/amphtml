@@ -20,16 +20,23 @@
  *   licensed under the CC0 license
  *   (http://creativecommons.org/publicdomain/zero/1.0/).
  */
+goog.provide('parse_css.ParseCssTest');
+
 goog.require('goog.asserts');
+goog.require('json_testutil.defaultCmpFn');
 goog.require('json_testutil.renderJSON');
 goog.require('parse_css.SelectorVisitor');
+goog.require('parse_css.TokenStream');
+goog.require('parse_css.extractUrls');
+goog.require('parse_css.parseAClassSelector');
+goog.require('parse_css.parseASelector');
+goog.require('parse_css.parseASelectorsGroup');
+goog.require('parse_css.parseASimpleSelectorSequence');
 goog.require('parse_css.parseAStylesheet');
 goog.require('parse_css.parseATypeSelector');
-goog.require('parse_css.parseSelectors');
+goog.require('parse_css.parseAnIdSelector');
 goog.require('parse_css.tokenize');
 goog.require('parse_css.traverseSelectors');
-
-goog.provide('parse_css.ParseCssTest');
 
 /**
  * A strict comparison between two values.
@@ -37,13 +44,20 @@ goog.provide('parse_css.ParseCssTest');
  * it truncates the provided arguments (and it's not configurable) and
  * with the Closure compiler, it requires a message argument to which
  * we'd always have to pass undefined. Too messy, so we roll our own.
+ * @param {*} expected
+ * @param {*} saw
  */
 function assertStrictEqual(expected, saw) {
   assert.ok(expected === saw, 'expected: ' + expected + ' saw: ' + saw);
 }
 
-// Simple function which lets us sort the keys in json output from the parser
-// in a way that makes the most logical sense for viewing in the output.
+/**
+ * Simple function which lets us sort the keys in json output from the parser
+ * in a way that makes the most logical sense for viewing in the output.
+ * @param {string} a
+ * @param {string} b
+ * @return {number}
+ */
 function jsonKeyCmp(a, b) {
   // Lower numbers will be displayed first in the rendered json output.
   const keyPriority = {
@@ -80,6 +94,10 @@ function jsonKeyCmp(a, b) {
   return json_testutil.defaultCmpFn(a, b);
 }
 
+/**
+ * @param {!Object} left
+ * @param {!Object} right
+ */
 function assertJSONEquals(left, right) {
   assertStrictEqual(
       json_testutil.renderJSON(left, jsonKeyCmp, /*offset=*/4),
@@ -836,6 +854,10 @@ describe('extractUrls', () => {
   });
 });
 
+/**
+ * @param {string} selector
+ * @returns {!Array<parse_css.Token>}
+ */
 function parseSelectorForTest(selector) {
   const css = selector + '{}';
   const errors = [];
@@ -1168,26 +1190,15 @@ describe('css_selectors', () => {
   });
 
   it('reports error for unparsed remainder of input', () => {
-    const tokens = parseSelectorForTest('foo bar .');
-    assertJSONEquals(
-        [{'line': 1, 'col': 0, 'tokenType': 'IDENT', 'value': 'foo'},
-         {'line': 1, 'col': 3, 'tokenType': 'WHITESPACE'},
-         {'line': 1, 'col': 4, 'tokenType': 'IDENT', 'value': 'bar'},
-         {'line': 1, 'col': 7, 'tokenType': 'WHITESPACE'},
-         {'line': 1, 'col': 8, 'tokenType': 'DELIM', 'value': '.'},
-         {'line': 1, 'col': 9, 'tokenType': 'EOF_TOKEN'}], tokens);
+    const tokens = parseSelectorForTest('foo bar 9');
     const tokenStream = new parse_css.TokenStream(tokens);
     tokenStream.consume();
     const errors = [];
-    const selector = parse_css.parseSelectors(tokenStream, errors);
-    assertStrictEqual(null, selector);
+    const selector = parse_css.parseASelectorsGroup(tokenStream);
     assertJSONEquals(
-        [{'line': 1, 'col': 8, 'tokenType': 'ERROR',
-          'code': 'CSS_SYNTAX_MISSING_SELECTOR',
-          'params': ['style']},
-         {'line': 1, 'col': 8, 'tokenType': 'ERROR',
-          'code': 'CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR',
-          'params': ['style']}], errors);
+        {'code': 'CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR',
+         'col': 8, 'line': 1, 'params': ['style'], 'tokenType': 'ERROR'},
+        selector);
   });
 
   it('implements visitor pattern', () => {
@@ -1205,10 +1216,9 @@ describe('css_selectors', () => {
     const tokens = parseSelectorForTest('a > b c + d ~ e');
     const tokenStream = new parse_css.TokenStream(tokens);
     tokenStream.consume();
-    const errors = [];
-    const maybeSelector = parse_css.parseSelectors(tokenStream, errors);
-    assertStrictEqual(false, maybeSelector === null);
-    const selector = /** @type {!parse_css.Selector} */ (maybeSelector);
+    const maybe_selector = parse_css.parseASelectorsGroup(tokenStream);
+    const selector = goog.asserts.assertInstanceof(
+        maybe_selector, parse_css.Selector);
     const visitor = new CollectCombinatorNodes();
     parse_css.traverseSelectors(selector, visitor);
     assertStrictEqual(4, visitor.combinatorNodes.length);
