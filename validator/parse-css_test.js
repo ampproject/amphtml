@@ -901,7 +901,7 @@ describe('css_selectors', () => {
     assertStrictEqual(0, idSelector.col);
   });
 
-  it('parses a class selectro', () => {
+  it('parses a class selector', () => {
     const tokens = parseSelectorForTest('.hello-world');
     assertJSONEquals(
         [{'line': 1, 'col': 0, 'tokenType': 'DELIM', 'value': '.'},
