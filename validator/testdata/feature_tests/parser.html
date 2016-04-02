@@ -58,5 +58,13 @@
   <a /a></a>
   <a /a ></a>
 
+  <!-- Tags that may be processing instructions: -->
+  <?php ?>
+  < ?php ?>
+  <?php echo 'Hello, World'; ?>
+  <?php <span>Content</span> ?>
+  <?xml:namespace prefix = o ns = "urn:schemas-microsoft-com:office:office" />
+  < ?xml:namespace ?>
+
 </body>
 </html>
