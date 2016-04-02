@@ -1062,7 +1062,7 @@ describe('css_selectors', () => {
     const tokens = parseSelectorForTest(
         'elem[attr1="v1"][attr2=value2\n]' +
         '[attr3~="foo"][attr4|="bar"][attr5|= "baz"][attr6 $=boo]' +
-        '[ attr7*=bang ]');
+        '[ attr7*=bang ][attr8]');
     const tokenStream = new parse_css.TokenStream(tokens);
     tokenStream.consume();
     const selector = parse_css.parseASelectorsGroup(tokenStream);
@@ -1089,14 +1089,17 @@ describe('css_selectors', () => {
            null},
           {'line': 2, 'col': 57, 'tokenType': 'ATTR_SELECTOR', 'value':
            'bang', 'attrName': 'attr7', 'matchOperator': '*=',
-           'namespacePrefix': null}], 'typeSelector':
+           'namespacePrefix': null},
+          {'line': 2, 'col': 72, 'tokenType': 'ATTR_SELECTOR', 'value':
+           '', 'attrName': 'attr8', 'matchOperator': '', 'namespacePrefix':
+           null}], 'typeSelector':
          {'line': 1, 'col': 0, 'tokenType': 'TYPE_SELECTOR', 'elementName':
           'elem', 'namespacePrefix': null}},
         selector);
   });
 
   it('parses a selectors group with a pseudo class', () => {
-    const tokens = parseSelectorForTest('a::b:lang(fr-be)]');
+    const tokens = parseSelectorForTest('a::b:lang(fr-be)');
     assertJSONEquals(
         [
           {'line': 1, 'col': 0, 'tokenType': 'IDENT', 'value': 'a'},
@@ -1107,8 +1110,7 @@ describe('css_selectors', () => {
           {'line': 1, 'col': 5, 'tokenType': 'FUNCTION_TOKEN', 'value': 'lang'},
           {'line': 1, 'col': 10, 'tokenType': 'IDENT', 'value': 'fr-be'},
           {'line': 1, 'col': 15, 'tokenType': 'CLOSE_PAREN'},
-          {'line': 1, 'col': 16, 'tokenType': 'CLOSE_SQUARE'},
-          {'line': 1, 'col': 17, 'tokenType': 'EOF_TOKEN'}
+          {'line': 1, 'col': 16, 'tokenType': 'EOF_TOKEN'}
         ],
         tokens);
     const tokenStream = new parse_css.TokenStream(tokens);
@@ -1140,36 +1142,28 @@ describe('css_selectors', () => {
     tokenStream.consume();
     const selector = parse_css.parseASelectorsGroup(tokenStream);
     assertJSONEquals(
-        {
-          'line': 1,
-          'col': 0,
-          'tokenType': 'SIMPLE_SELECTOR_SEQUENCE',
-          'otherSelectors': [{
-            'line': 1,
-            'col': 6,
-            'name': 'not',
-            'func': [
-              {
-                'line': 1,
-                'col': 7,
-                'tokenType': 'FUNCTION_TOKEN',
-                'value': 'not'
-              },
-              {'line': 1, 'col': 11, 'tokenType': 'COLON'},
-              {'line': 1, 'col': 12, 'tokenType': 'IDENT', 'value': 'link'},
-              {'line': 1, 'col': 16, 'tokenType': 'EOF_TOKEN'}
-            ],
-            'isClass': true,
-            'tokenType': 'PSEUDO_SELECTOR'
-          }],
-          'typeSelector': {
-            'line': 1,
-            'col': 0,
-            'elementName': '*',
-            'namespacePrefix': 'html',
-            'tokenType': 'TYPE_SELECTOR'
-          }
-        },
+        {'line': 1, 'col': 0, 'tokenType': 'SIMPLE_SELECTOR_SEQUENCE',
+         'otherSelectors':
+         [{'line': 1, 'col': 6, 'tokenType': 'PSEUDO_SELECTOR', 'name':
+           'not', 'func':
+           [{'line': 1, 'col': 7, 'tokenType': 'FUNCTION_TOKEN', 'value':
+             'not'},
+            {'line': 1, 'col': 11, 'tokenType': 'COLON'},
+            {'line': 1, 'col': 12, 'tokenType': 'IDENT', 'value':
+             'link'},
+            {'line': 1, 'col': 16, 'tokenType': 'EOF_TOKEN'}], 'isClass':
+           true},
+          {'line': 1, 'col': 17, 'tokenType': 'PSEUDO_SELECTOR', 'name':
+           'not', 'func':
+           [{'line': 1, 'col': 18, 'tokenType': 'FUNCTION_TOKEN',
+             'value': 'not'},
+            {'line': 1, 'col': 22, 'tokenType': 'COLON'},
+            {'line': 1, 'col': 23, 'tokenType': 'IDENT', 'value':
+             'visited'},
+            {'line': 1, 'col': 30, 'tokenType': 'EOF_TOKEN'}], 'isClass':
+           true}], 'typeSelector':
+         {'line': 1, 'col': 0, 'tokenType': 'TYPE_SELECTOR', 'elementName':
+          '*', 'namespacePrefix': 'html'}},
         selector);
   });
 
@@ -1213,9 +1207,9 @@ describe('css_selectors', () => {
     tokenStream.consume();
     const errors = [];
     const maybeSelector = parse_css.parseSelectors(tokenStream, errors);
-    const visitor = new CollectCombinatorNodes();
     assertStrictEqual(false, maybeSelector === null);
     const selector = /** @type {!parse_css.Selector} */ (maybeSelector);
+    const visitor = new CollectCombinatorNodes();
     parse_css.traverseSelectors(selector, visitor);
     assertStrictEqual(4, visitor.combinatorNodes.length);
     assertStrictEqual('GENERAL_SIBLING',
