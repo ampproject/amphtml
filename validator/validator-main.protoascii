@@ -18,14 +18,22 @@
 # internal mechanism. When backwards incompatible changes to the validator
 # engine are made, this value must be incremented to prevent old binaries
 # in production from crashing. This id is not relevant to validator.js
-# because thus far, engine (validator.js) and spec file (validator.protoascii)
-# are always released together.
+# because thus far, engine (validator.js) and spec file
+# (validator-main.protoascii) are always released together.
 min_validator_revision_required: 112
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
-# change to this file requires updating this revision id.
-spec_file_revision: 204
+# change to this file (validator-main.js) requires updating this revision id.
+spec_file_revision: 205
+
+# Validator extensions.
+# =====================
+# In addition to the rules in this file, the Validator honors the rules
+# in the extensions/*/0.1/validator-*.protoascii files. This makes it
+# easy to organize the rules for extensions next to their Javascript
+# implementation.
+
 # Rules for AMP HTML
 # (https://www.ampproject.org/docs/reference/spec.html)
 #
