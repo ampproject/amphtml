@@ -160,7 +160,7 @@ def GenValidatorProtoascii(out_dir):
   # In the Github project, the extensions are located in a sibling directory
   # to the validator rather than a child directory.
   if not extensions:
-    extensions = glob.glob('../extensions/0/0.1/validator-*.protoascii')
+    extensions = glob.glob('../extensions/*/0.1/validator-*.protoascii')
   extensions.sort()
   for extension in extensions:
     protoascii_segments.append(open(extension).read())
