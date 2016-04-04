@@ -327,6 +327,17 @@ export class Resources {
   }
 
   /**
+   * Returns the direction the user last scrolled.
+   *  - -1 for scrolling up
+   *  - 1 for scrolling down
+   *  - Defaults to 1
+   * @return {number}
+   */
+  getScrollDirection() {
+    return Math.sign(this.lastVelocity_) || 1;
+  }
+
+  /**
    * Signals that an element has been added to the DOM. Resources manager
    * will start tracking it from this point on.
    * @param {!AmpElement} element
@@ -959,7 +970,7 @@ export class Resources {
     const visibility = this.viewer_.getVisibilityState();
 
     const scorer = this.calcTaskScore_.bind(this, this.viewport_.getRect(),
-        Math.sign(this.lastVelocity_));
+        this.getScrollDirection());
 
     let timeout = -1;
     let task = this.queue_.peek(scorer);
@@ -1768,8 +1779,32 @@ export class Resource {
     // Numeric interface, element is allowed to render outside viewport when it
     // is within X times the viewport height of the current viewport.
     const viewportBox = this.resources_.getViewport().getRect();
-    const distanceFromViewport = this.layoutBox_.top - viewportBox.bottom;
-    return distanceFromViewport <= renders * viewportBox.height;
+    const layoutBox = this.layoutBox_;
+    const scrollDirection = this.resources_.getScrollDirection();
+    const multipler = Math.max(renders, 0);
+    let scrollPenalty = 1;
+    let distance;
+    if (viewportBox.bottom < layoutBox.top) {
+      // Element is below viewport
+      distance = layoutBox.top - viewportBox.bottom;
+
+      // If we're scrolling away from the element
+      if (scrollDirection == -1) {
+        scrollPenalty = 2;
+      }
+    } else if (viewportBox.top > layoutBox.bottom) {
+      // Element is above viewport
+      distance = viewport.top - layoutBox.bottom;
+
+      // If we're scrolling away from the element
+      if (scrollDirection == 1) {
+        scrollPenalty = 2;
+      }
+    } else {
+      // Element is in viewport
+      return true;
+    }
+    return distance <= viewportBox.height * multipler / scrollPenalty;
   }
 
   /**

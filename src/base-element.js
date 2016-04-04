@@ -262,8 +262,9 @@ export class BaseElement {
    * Subclasses can override this method to opt-out of rendering the element
    * when it is not currently visible.
    * Returning a boolean allows or prevents rendering outside the viewport at
-   * any distance, while returning a number allows rendering only when the
-   * element is within X viewports of the current viewport.
+   * any distance, while returning a positive number allows rendering only when
+   * the element is within X viewports of the current viewport. Returning a
+   * zero causes the element to only render inside the viewport.
    * @return {boolean|number}
    */
   renderOutsideViewport() {
