@@ -14,20 +14,9 @@
  * limitations under the License.
  */
 
-import {createServedIframe} from '../../../../testing/iframe';
-import {viewerFor} from '../../../../src/viewer';
-import {vsyncFor} from '../../../../src/vsync';
-
-function overwrite(object, property, value) {
-  Object.defineProperty(object, property, {
-    enumerable: true,
-    writeable: false,
-    configurable: true,
-    value: value,
-  });
-}
-
-const iframeSrc = '/base/test/fixtures/served/amp-dynamic-css-classes.html';
+import {installViewerService} from '../../../../src/service/viewer-impl';
+import {installVsyncService} from '../../../../src/service/vsync-impl';
+import {installDynamicClassesService} from '../amp-dynamic-css-classes';
 
 const tcoReferrer = 'http://t.co/xyzabc123';
 const PinterestUA = 'Mozilla/5.0 (Linux; Android 5.1.1; SM-G920F' +
@@ -36,74 +25,74 @@ const PinterestUA = 'Mozilla/5.0 (Linux; Android 5.1.1; SM-G920F' +
 
 describe('dynamic classes are inserted at runtime', () => {
   let documentElement;
+  let mockWin;
+  let viewer;
 
-  function mockVsync(win) {
-    const vsync = vsyncFor(win);
+  beforeEach(() => {
+    const classList = [];
+    classList.add = classList.push;
+    classList.contains = function(c) {
+      return this.indexOf(c) > -1;
+    };
+    documentElement = {
+      tagName: 'HTML',
+      classList: classList,
+    };
+    mockWin = {
+      document: {
+        referrer: 'http://localhost/',
+        documentElement: documentElement,
+      },
+      navigator: {
+        userAgent: '',
+      },
+      location: {
+        href: 'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0',
+      },
+    };
+  });
+
+  function setup(embeded, userAgent, referrer) {
+    viewer = installViewerService(mockWin);
+    const vsync = installVsyncService(mockWin);
+
     vsync.schedule_ = () => {
       vsync.runScheduledTasks_();
     };
+
+    viewer.isEmbedded = () => !!embeded;
+
+    if (userAgent !== undefined) {
+      mockWin.navigator.userAgent = userAgent;
+    }
+    if (referrer !== undefined) {
+      viewer.getUnconfirmedReferrerUrl = () => referrer;
+    }
+    installDynamicClassesService(mockWin);
   }
 
-  function setup(userAgent, referrer) {
-    return createServedIframe(iframeSrc).then(fixture => {
-      const win = fixture.win;
-      documentElement = fixture.doc.documentElement;
-
-      mockVsync(win);
-
-      if (userAgent !== undefined) {
-        overwrite(win.navigator, 'userAgent', userAgent);
-      }
-      if (referrer !== undefined) {
-        viewerFor(win).getUnconfirmedReferrerUrl = () => referrer;
-      }
-
-      return win.insertDynamicCssScript();
+  describe('when embedded', () => {
+    beforeEach(() => {
+      setup(true);
     });
-  }
 
-  beforeEach(function() {
-    this.timeout(5000);
-  });
-
-  it('should include referrer classes', () => {
-    return setup().then(() => {
-      expect(documentElement).to.have.class('amp-referrer-localhost');
-    });
-  });
-
-  it('should include viewer class', () => {
-    return setup().then(() => {
+    it('should include viewer class', () => {
       expect(documentElement).to.have.class('amp-viewer');
     });
   });
 
   describe('Normalizing Referrers', () => {
-    it('should normalize twitter shortlinks to twitter', function() {
-      return setup('', tcoReferrer).then(() => {
-        expect(documentElement).to.have.class('amp-referrer-com');
-        expect(documentElement).to.have.class('amp-referrer-twitter-com');
-      });
+    it('should normalize twitter shortlinks to twitter', () => {
+      setup(false, '', tcoReferrer);
+      expect(documentElement).to.have.class('amp-referrer-com');
+      expect(documentElement).to.have.class('amp-referrer-twitter-com');
     });
 
-    it('should normalize pinterest on android', function() {
-      return setup(PinterestUA, '').then(() => {
-        expect(documentElement).to.have.class('amp-referrer-com');
-        expect(documentElement).to.have.class('amp-referrer-pinterest-com');
-        expect(documentElement).to.have.class('amp-referrer-www-pinterest-com');
-      });
-    });
-  });
-
-  it('should delay unhiding the body', function() {
-    return createServedIframe(iframeSrc).then(fixture => {
-      expect(fixture.doc.body).to.be.hidden;
-
-      const win = fixture.win;
-      mockVsync(win);
-      return win.insertDynamicCssScript().then(() => fixture);
-    }).then(fixture => {
-      expect(fixture.doc.body).to.be.visible;
+    it('should normalize pinterest on android', () => {
+      setup(false, PinterestUA, '');
+      expect(documentElement).to.have.class('amp-referrer-com');
+      expect(documentElement).to.have.class('amp-referrer-pinterest-com');
+      expect(documentElement).to.have.class('amp-referrer-www-pinterest-com');
     });
   });
 });

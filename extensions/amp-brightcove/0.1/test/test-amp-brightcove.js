@@ -85,8 +85,7 @@ describe('amp-brightcove', () => {
     });
   });
 
-  // TODO(erwinm) unskip this when we figure out why it fails on travis
-  it.skip('should pass data-param-* attributes to the iframe src', () => {
+  it('should pass data-param-* attributes to the iframe src', () => {
     return getBrightcove({
       'data-account': '906043040001',
       'data-video-id': 'ref:ampdemo',
