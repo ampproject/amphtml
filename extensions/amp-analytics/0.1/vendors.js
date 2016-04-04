@@ -317,6 +317,11 @@ export const ANALYTICS_CONFIG = {
         'request': 'pageview',
       },
     },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
+    },
   },
 
   'parsely': {

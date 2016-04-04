@@ -24,7 +24,7 @@ adopt(window);
 describe('amp-brightcove', () => {
 
   function getBrightcove(attributes, opt_responsive) {
-    return createIframePromise().then(iframe => {
+    return createIframePromise(true).then(iframe => {
       const bc = iframe.doc.createElement('amp-brightcove');
       for (const key in attributes) {
         bc.setAttribute(key, attributes[key]);
@@ -69,6 +69,20 @@ describe('amp-brightcove', () => {
   it('requires data-account', () => {
     return getBrightcove({}).should.eventually.be.rejectedWith(
         /The data-account attribute is required for/);
+  });
+
+  it('removes iframe after unlayoutCallback', () => {
+    return getBrightcove({
+      'data-account': '906043040001',
+      'data-video-id': 'ref:ampdemo',
+    }, true).then(bc => {
+      const iframe = bc.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      const obj = bc.implementation_;
+      obj.unlayoutCallback();
+      expect(bc.querySelector('iframe')).to.be.null;
+      expect(obj.iframe_).to.be.null;
+    });
   });
 
   // TODO(erwinm) unskip this when we figure out why it fails on travis
