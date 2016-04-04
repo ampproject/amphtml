@@ -227,25 +227,26 @@ export function hasNaturalDimensions(tagName) {
  * different browser implementations, like <audio> for instance.
  * This operation can only be completed for an element whitelisted by
  * `hasNaturalDimensions`.
- * @param {string} tagName The element tag name.
+ * @param {!Element} element
  * @return {DimensionsDef}
  */
-export function getNaturalDimensions(tagName) {
-  tagName = tagName.toUpperCase();
+export function getNaturalDimensions(element) {
+  const tagName = element.tagName.toUpperCase();
   dev.assert(naturalDimensions_[tagName] !== undefined);
   if (!naturalDimensions_[tagName]) {
+    const doc = element.ownerDocument;
     const naturalTagName = tagName.replace(/^AMP\-/, '');
-    const temp = document.createElement(naturalTagName);
+    const temp = doc.createElement(naturalTagName);
     // For audio, should no-op elsewhere.
     temp.controls = true;
     temp.style.position = 'absolute';
     temp.style.visibility = 'hidden';
-    document.body.appendChild(temp);
+    doc.body.appendChild(temp);
     naturalDimensions_[tagName] = {
       width: (temp./*OK*/offsetWidth || 1) + 'px',
       height: (temp./*OK*/offsetHeight || 1) + 'px',
     };
-    document.body.removeChild(temp);
+    doc.body.removeChild(temp);
   }
   return naturalDimensions_[tagName];
 }

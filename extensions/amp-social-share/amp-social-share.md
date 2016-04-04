@@ -103,7 +103,10 @@ You can include any additional document structure around the anchor, so long as 
 
 Required attributes are `type`, `width` and `height`. Some [types (social providers)](#user-content-types) require specific fields for their integration. For instance Facebook requires you include your ```app_id``` (as ```attribution```), failure to this attribute for ```type="facebook"``` will result in an error.
 
-You can embed an `anchor` tag _without a_ ```href``` into the element to for the extension to provide the href for you. This enables customization of the social share element. You can also specify an arbitrary amount of AMP compatible HTML within the element to provide any hooks for styling.
+AMP adds a class name `amp-social-share-<type>` to the extension, where `<type>` is the value provided in the `type` attribute. For example the social-share extension for twitter would have the classname `amp-social-share-twitter`. This class could be used as a hook for styling using CSS. 
+
+You can embed an `anchor` tag _without a_ ```href``` into the element for the extension to provide the href for you. This enables customization of the social share element.
+Also an arbitrary amount of AMP compatible HTML can be added within the element to provide any hooks for styling. AMP won't add `amp-social-share-<type>` classname when anchor element is provided. 
 
 ### Types
 

@@ -85,5 +85,5 @@ if (window.console) {
   (console.info || console.log).call(console,
       'Powered by AMP ⚡ HTML – Version $internalRuntimeVersion$');
 }
-document.documentElement.setAttribute('amp-version',
+window.document.documentElement.setAttribute('amp-version',
       '$internalRuntimeVersion$');

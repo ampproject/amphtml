@@ -383,7 +383,7 @@ For instance:
 
 Provides the total time the user has been enagaged with the page since the page
 first became visible in the viewport. Total engaged time will be 0 until the
-page first becomes visible.
+page first becomes visible. This variable requires the [amp-analytics](../extensions/amp-analytics/amp-analytics.md) extension to be present on the page.
 
 ## Access
 

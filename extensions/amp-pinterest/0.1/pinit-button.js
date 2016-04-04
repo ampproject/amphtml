@@ -104,7 +104,7 @@ export class PinItButton {
    */
   renderCount(count, heightClass) {
     Util.log('&type=pidget&button_count=1');
-    return Util.make({'span': {
+    return Util.make(this.element.ownerDocument, {'span': {
       class: `-amp-pinterest-bubble-${this.count}${heightClass}`,
       textContent: this.formatPinCount(count),
     }});
@@ -137,7 +137,7 @@ export class PinItButton {
       }
     }
 
-    const pinitButton = Util.make({'a': {
+    const pinitButton = Util.make(this.element.ownerDocument, {'a': {
       class: clazz.join(' '),
       href: this.href,
     }});

@@ -33,6 +33,9 @@ const TAG = 'AmpSocialShare';
 /** @const {number} */
 const DEFAULT_WIDTH = 60;
 
+/** @const {string} */
+const CLASSNAME_PREFIX = 'amp-social-share-';
+
 class AmpSocialShare extends AMP.BaseElement {
 
   /** @override */
@@ -107,7 +110,7 @@ class AmpSocialShare extends AMP.BaseElement {
       let container = elementByTag(this.element, 'span');
       if (container == null) {
         container = this.getWin().document.createElement('span');
-        container.classList.add(this.type_);
+        container.classList.add(CLASSNAME_PREFIX + this.type_);
 
         // Only add the container to the element if it didn't exist
         this.element.appendChild(container);

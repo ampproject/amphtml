@@ -1,5 +1,6 @@
+
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +15,18 @@
  * limitations under the License.
  */
 
+import {adopt} from '../../../../src/runtime';
+require('../amp-sidebar');
 
-/**
- * Creates a default "loading indicator" element. This element accepts
- * `amp-active` class in which case it may choose to run an animation.
- * @param {!Document} doc
- * @return {!Element}
- */
-export function createLoaderElement(doc) {
-  const loader = doc.createElement('div');
-  loader.classList.add('-amp-loader');
-  for (let i = 0; i < 3; i++) {
-    const dot = doc.createElement('div');
-    dot.classList.add('-amp-loader-dot');
-    loader.appendChild(dot);
-  }
-  return loader;
-}
+adopt(window);
+
+describe('amp-sidebar', () => {
+  let sandbox;
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
+});
