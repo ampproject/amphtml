@@ -64,7 +64,7 @@ unless only a single child is present.
 **type**
 - `carousel` (default) - All slides are shown and are scrollable horizontally.
   Be aware that `type=carousel` does not currently support `layout=responsive`.
-- `slides` - Shows a single slide at a time.
+- `slides` - Shows a single slide at a time. Supports `layout=responsive`.
 
 **loop** (type=slides only)
 
