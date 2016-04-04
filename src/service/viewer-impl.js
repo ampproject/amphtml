@@ -15,7 +15,6 @@
  */
 
 import {Observable} from '../observable';
-import {assertEnumValue} from '../asserts';
 import {documentStateFor} from '../document-state';
 import {getMode} from '../mode';
 import {getService} from '../service';
@@ -522,7 +521,7 @@ export class Viewer {
       return;
     }
     const oldState = this.visibilityState_;
-    state = assertEnumValue(VisibilityState, state, 'VisibilityState');
+    state = dev.assertEnumValue(VisibilityState, state, 'VisibilityState');
 
     // The viewer is informing us we are not currently active because we are
     // being pre-rendered, or the user swiped to another doc (or closed the
