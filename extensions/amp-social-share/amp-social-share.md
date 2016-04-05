@@ -16,7 +16,32 @@ limitations under the License.
 
 ### <a name="amp-social-share"></a> `amp-social-share`
 
-Displays a social share button.
+<table>
+   <tr>
+    <td class="col-fourty"><strong>Description</strong></td>
+    <td>Displays a social share button.</td>
+  </tr>
+   <tr>
+    <td class="col-fourty"><strong>Availability</strong></td>
+    <td>
+      <a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a>
+       or <code>AMP.toggleExperiment('amp-social-share')</code> (if #development=1 is enabled)
+    </td>
+  </tr>
+  <tr>
+    <td class="col-fourty"><strong>Required Script</strong></td>
+    <td>
+      <div>
+        <code>&lt;script async custom-element="amp-social-share" src="https://cdn.ampproject.org/v0/amp-social-share-0.1.js">&lt;/script></code>
+      </div>
+    </td>
+  </tr>
+   <tr>
+    <td class="col-fourty"><strong>Examples</strong></td>
+    <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/social-share.amp.html">social-share.amp.html</a>
+    </td>
+  </tr>
+</table>
 
 #### The simplest example:
 The share button guesses some defaults for you. It assumes that the current window location is the URL you want to share and the page title is the text you want to share.
@@ -78,7 +103,10 @@ You can include any additional document structure around the anchor, so long as 
 
 Required attributes are `type`, `width` and `height`. Some [types (social providers)](#user-content-types) require specific fields for their integration. For instance Facebook requires you include your ```app_id``` (as ```attribution```), failure to this attribute for ```type="facebook"``` will result in an error.
 
-You can embed an `anchor` tag _without a_ ```href``` into the element to for the extension to provide the href for you. This enables customization of the social share element. You can also specify an arbitrary amount of AMP compatible HTML within the element to provide any hooks for styling.
+AMP adds a class name `amp-social-share-<type>` to the extension, where `<type>` is the value provided in the `type` attribute. For example the social-share extension for twitter would have the classname `amp-social-share-twitter`. This class could be used as a hook for styling using CSS. 
+
+You can embed an `anchor` tag _without a_ ```href``` into the element for the extension to provide the href for you. This enables customization of the social share element.
+Also an arbitrary amount of AMP compatible HTML can be added within the element to provide any hooks for styling. AMP won't add `amp-social-share-<type>` classname when anchor element is provided. 
 
 ### Types
 

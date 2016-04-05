@@ -88,10 +88,10 @@ The optional layout attribute allows specifying how the component behaves in the
 Valid values for the layout attribute are:
 
 - Not present: The `layout` will be inferred as following:
-  - if `height` is present and `width` is absent or equals to `auto` `fixed-height` layout is assumed;
-  - if `width` or `height` attributes are present along with `sizes` and/or `heights` attribute, `responsive` layout is assumed;
-  - if `width` or `height` attributes are present `fixed` layout is assumed;
-  - if `width` and `height` are not present `container` layout is assumed
+  - if `height` is present and `width` is absent or equals to `auto`, `fixed-height` layout is assumed;
+  - if `width` and `height` attributes are present along with `sizes` or `heights` attribute, `responsive` layout is assumed;
+  - if `width` and `height` attributes are present, `fixed` layout is assumed;
+  - if `width` and `height` are not present, `container` layout is assumed
 - `fixed`: The `width` and `height` attributes must be present. The only exceptions are `amp-pixel`
 and `amp-audio` elements.
 - `fixed-height`: The `height` attribute must be present. The `width` attribute must not be present

@@ -308,6 +308,21 @@ describe('performance', () => {
         perf.coreServicesAvailable();
       });
 
+      it('should call prerenderComplete on viewer', () => {
+        clock.tick(100);
+        whenFirstVisibleResolve();
+        const prerenderSpy = sandbox.spy(viewer, 'prerenderComplete');
+        sandbox.stub(viewer, 'isPerformanceTrackingOn').returns(true);
+        return viewer.whenFirstVisible().then(() => {
+          clock.tick(400);
+          whenReadyToRetrieveResourcesResolve();
+          whenViewportLayoutCompleteResolve();
+          return perf.whenViewportLayoutComplete_().then(() => {
+            expect(prerenderSpy.firstCall.args[0].value).to.equal(400);
+          });
+        });
+      });
+
       it('should tick `pc` with opt_value=400 when user request document ' +
          'to be visible before before first viewport completion', () => {
         clock.tick(100);
@@ -350,6 +365,17 @@ describe('performance', () => {
       beforeEach(() => {
         stubHasBeenVisible(true);
         perf.coreServicesAvailable();
+      });
+
+      it('should call prerenderComplete on viewer', () => {
+        const prerenderSpy = sandbox.spy(viewer, 'prerenderComplete');
+        sandbox.stub(viewer, 'isPerformanceTrackingOn').returns(true);
+        clock.tick(300);
+        whenReadyToRetrieveResourcesResolve();
+        whenViewportLayoutCompleteResolve();
+        return perf.whenViewportLayoutComplete_().then(() => {
+          expect(prerenderSpy.firstCall.args[0].value).to.equal(300);
+        });
       });
 
       it('should tick `pc` with `opt_value=undefined` when user requests ' +

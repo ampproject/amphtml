@@ -25,7 +25,7 @@ min_validator_revision_required: 112
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file requires updating this revision id.
-spec_file_revision: 185
+spec_file_revision: 198
 # Rules for AMP HTML
 # (https://www.ampproject.org/docs/reference/spec.html)
 #
@@ -239,6 +239,7 @@ tags: {
         "sidebar|"
         "sitemap|"
         "sponsor|"
+        "standout|"
         "start|"
         "status|"
         "subsection|"
@@ -368,6 +369,7 @@ tags: {
         "sidebar|"
         "sitemap|"
         "sponsor|"
+        "standout|"
         "start|"
         "status|"
         "subsection|"
@@ -471,6 +473,7 @@ tags: {
     name: "href"
     mandatory: true
     value_regex: "https://fonts\\.googleapis\\.com/css\\?.*|"
+                 "https://fonts\\.googleapis\\.com/icon\\?.*|"
                  "https://fonts\\.googleapis\\.com/earlyaccess/.*\\.css|"
                  "https://fast\\.fonts\\.net/.*|"
                  "https://maxcdn\\.bootstrapcdn\\.com/font-awesome/.*"
@@ -1188,6 +1191,7 @@ tags: {
         "neighbor|"
         "next|"
         "nofollow|"
+        "noopener|"
         "noreferrer|"
         "ole-object-data|"
         "openid?\\..*|"  # OpenID Authentication
@@ -1335,6 +1339,7 @@ tags: {
         "neighbor|"
         "next|"
         "nofollow|"
+        "noopener|"
         "noreferrer|"
         "ole-object-data|"
         "openid?\\..*|"  # OpenID Authentication
@@ -2649,6 +2654,31 @@ tags: {  # amp-analytics (json)
   }
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-analytics.html"
 }
+# This tag isn't intended to be used by publishers directly, but may be
+# emitted by the AMP cache.
+tags: {  # amp-ad-metadata (json)
+  tag_name: "script"
+  spec_name: "amp-ad-metadata .json script"
+  mandatory_parent: "body"
+  attrs: {
+    name: "type"
+    mandatory: true
+    value: "application/json"
+  }
+  attrs: {
+    name: "amp-ad-metadata"
+    mandatory: true
+    value: ""
+    dispatch_key: true
+  }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
+    }
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-analytics.html"
+}
 tags: {  # amp-anim
   tag_name: "script"
   spec_name: "amp-anim extension .js script"
@@ -3292,6 +3322,56 @@ tags: {  # amp-slides
   }
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-slides.html"
 }
+tags: {  # amp-social-share
+  tag_name: "script"
+  spec_name: "amp-social-share extension .js script"
+  mandatory_parent: "head"
+  attrs: {
+    name: "async"
+    mandatory: true
+    value: ""
+  }
+  attrs: {
+    name: "custom-element"
+    mandatory: true
+    value: "amp-social-share"
+    dispatch_key: true
+  }
+  attrs: {
+    name: "src"
+    mandatory: true
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-social-share-(latest|0\\.1)\\.js"
+  }
+  attrs: {
+    name: "type"
+    value: "text/javascript"
+  }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "."
+      error_message: "contents"
+    }
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-social-share.html"
+}
+tags: {  # amp-social-share (json)
+  tag_name: "script"
+  spec_name: "amp-social-share extension .json script"
+  mandatory_parent: "amp-social-share"
+  attrs: {
+    name: "type"
+    mandatory: true
+    value: "application/json"
+    dispatch_key: true
+  }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
+    }
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-social-share.html"
+}
 tags: {  # amp-soundcloud
   tag_name: "script"
   spec_name: "amp-soundcloud extension .js script"
@@ -3829,6 +3909,7 @@ tags: {
     first_child_tag_name_oneof: "h4"
     first_child_tag_name_oneof: "h5"
     first_child_tag_name_oneof: "h6"
+    first_child_tag_name_oneof: "header"
   }
 }
 
@@ -4075,6 +4156,9 @@ tags: {  # <amp-list>
       allow_relative: true  # Will be set to false at a future date.
     }
   }
+  # TODO(gregable): Implement validation that requires the template attr value
+  # to reference the id of an existing template element.
+  attrs: { name: "template" }
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-list.html"
   amp_layout: {
@@ -4142,6 +4226,21 @@ tags: {  # <amp-reach-player>
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
     supported_layouts: RESPONSIVE
+  }
+}
+tags: {  # <amp-social-share>
+  tag_name: "amp-social-share"
+  disallowed_ancestor: "head"
+  also_requires: "amp-social-share extension .js script"
+  attrs: {
+    name: "type"
+    mandatory: true
+    value_regex: "(twitter|facebook|pinterest|linkedin|gplus|email)"
+  }
+  attr_lists: "extended-amp-global"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-social-share.html"
+  amp_layout: {
+    supported_layouts: FIXED
   }
 }
 tags: {  # <amp-soundcloud>
@@ -4509,6 +4608,11 @@ error_formats {
           "'%4', which is invalid."
 }
 error_formats {
+  code: DUPLICATE_DIMENSION
+  format: "Multiple image candidates with the same width or pixel density "
+          "found in attribute '%1' in tag '%2'."
+}
+error_formats {
   code: MISSING_URL
   format: "Missing URL for attribute '%1' in tag '%2'."
 }
@@ -4591,7 +4695,8 @@ error_formats {
 }
 error_formats {
   code: ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT
-  format: "The attribute '%1' in tag '%2' is disallowed by specified layout '%3'."
+  format: "The attribute '%1' in tag '%2' is disallowed by specified "
+          "layout '%3'."
 }
 error_formats {
   code: INCORRECT_NUM_CHILD_TAGS
@@ -4636,7 +4741,8 @@ error_formats {
 }
 error_formats {
   code: CSS_SYNTAX_EOF_IN_PRELUDE_OF_QUALIFIED_RULE
-  format: "CSS syntax error in tag '%1' - EOF in prelude of a qualified rule."
+  format: "CSS syntax error in tag '%1' - end of stylesheet encountered "
+          "in prelude of a qualified rule."
 }
 error_formats {
   code: CSS_SYNTAX_INVALID_DECLARATION
@@ -4677,4 +4783,8 @@ error_formats {
 error_formats {
   code: CSS_SYNTAX_DISALLOWED_RELATIVE_URL
   format: "CSS syntax error in tag '%1' - disallowed relative url '%2'."
+}
+error_formats {
+  code: CSS_SYNTAX_INVALID_ATTR_SELECTOR
+  format: "CSS syntax error in tag '%1' - invalid attribute selector."
 }

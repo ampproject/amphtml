@@ -19,13 +19,12 @@ import {Layout, getLayoutClass, getLengthNumeral, getLengthUnits,
     parseLayout, parseLength, getNaturalDimensions,
     hasNaturalDimensions} from './layout';
 import {ElementStub, stubbedElements} from './element-stub';
-import {assert} from './asserts';
 import {createLoaderElement} from '../src/loader';
+import {dev, rethrowAsync, user} from './log';
 import {getIntersectionChangeEntry} from '../src/intersection-observer';
 import {parseSizeList} from './size-list';
 import {reportError} from './error';
 import {resourcesFor} from './resources';
-import {rethrowAsync, user} from './log';
 import {timer} from './timer';
 import {vsyncFor} from './vsync';
 import {getServicePromise, getServicePromiseOrNull} from './service';
@@ -64,7 +63,9 @@ const knownElements = {};
  * Whether this platform supports template tags.
  * @const {boolean}
  */
-const TEMPLATE_TAG_SUPPORTED = 'content' in document.createElement('template');
+const TEMPLATE_TAG_SUPPORTED = 'content' in window.document.createElement(
+  'template'
+);
 
 
 /**
@@ -78,7 +79,7 @@ export function upgradeOrRegisterElement(win, name, toClass) {
     registerElement(win, name, toClass);
     return;
   }
-  assert(knownElements[name] == ElementStub,
+  user.assert(knownElements[name] == ElementStub,
       '%s is already registered. The script tag for ' +
       '%s is likely included twice in the page.', name, name);
   for (let i = 0; i < stubbedElements.length; i++) {
@@ -140,12 +141,13 @@ export function applyLayout_(element) {
 
   // Input layout attributes.
   const inputLayout = layoutAttr ? parseLayout(layoutAttr) : null;
-  assert(inputLayout !== undefined, 'Unknown layout: %s', layoutAttr);
+  user.assert(inputLayout !== undefined, 'Unknown layout: %s', layoutAttr);
   const inputWidth = (widthAttr && widthAttr != 'auto') ?
       parseLength(widthAttr) : widthAttr;
-  assert(inputWidth !== undefined, 'Invalid width value: %s', widthAttr);
+  user.assert(inputWidth !== undefined, 'Invalid width value: %s', widthAttr);
   const inputHeight = heightAttr ? parseLength(heightAttr) : null;
-  assert(inputHeight !== undefined, 'Invalid height value: %s', heightAttr);
+  user.assert(inputHeight !== undefined, 'Invalid height value: %s',
+      heightAttr);
 
   // Effective layout attributes. These are effectively constants.
   let width;
@@ -158,7 +160,7 @@ export function applyLayout_(element) {
       (!inputWidth || !inputHeight) && hasNaturalDimensions(element.tagName)) {
     // Default width and height: handle elements that do not specify a
     // width/height and are defined to have natural browser dimensions.
-    const dimensions = getNaturalDimensions(element.tagName);
+    const dimensions = getNaturalDimensions(element);
     width = (inputWidth || inputLayout == Layout.FIXED_HEIGHT) ? inputWidth :
         dimensions.width;
     height = inputHeight || dimensions.height;
@@ -183,24 +185,24 @@ export function applyLayout_(element) {
   // Verify layout attributes.
   if (layout == Layout.FIXED || layout == Layout.FIXED_HEIGHT ||
       layout == Layout.RESPONSIVE) {
-    assert(height, 'Expected height to be available: %s', heightAttr);
+    user.assert(height, 'Expected height to be available: %s', heightAttr);
   }
   if (layout == Layout.FIXED_HEIGHT) {
-    assert(!width || width == 'auto',
+    user.assert(!width || width == 'auto',
         'Expected width to be either absent or equal "auto" ' +
         'for fixed-height layout: %s', widthAttr);
   }
   if (layout == Layout.FIXED || layout == Layout.RESPONSIVE) {
-    assert(width && width != 'auto',
+    user.assert(width && width != 'auto',
         'Expected width to be available and not equal to "auto": %s',
         widthAttr);
   }
   if (layout == Layout.RESPONSIVE) {
-    assert(getLengthUnits(width) == getLengthUnits(height),
+    user.assert(getLengthUnits(width) == getLengthUnits(height),
         'Length units should be the same for width and height: %s, %s',
         widthAttr, heightAttr);
   } else {
-    assert(heightsAttr === null,
+    user.assert(heightsAttr === null,
         'Unexpected "heights" attribute for none-responsive layout');
   }
 
@@ -362,7 +364,7 @@ export function createAmpElementProto(win, name, implementationClass) {
 
   /** @private */
   ElementProto.assertNotTemplate_ = function() {
-    assert(!this.isInTemplate_, 'Must never be called in template');
+    dev.assert(!this.isInTemplate_, 'Must never be called in template');
   };
 
   /**
@@ -437,7 +439,7 @@ export function createAmpElementProto(win, name, implementationClass) {
     if (this.isBuilt()) {
       return true;
     }
-    assert(this.isUpgraded(), 'Cannot build unupgraded element');
+    dev.assert(this.isUpgraded(), 'Cannot build unupgraded element');
     if (!force && !this.implementation_.isReadyToBuild()) {
       return false;
     }
@@ -738,7 +740,7 @@ export function createAmpElementProto(win, name, implementationClass) {
    */
   ElementProto.layoutCallback = function() {
     this.assertNotTemplate_();
-    assert(this.isUpgraded() && this.isBuilt(),
+    dev.assert(this.isUpgraded() && this.isBuilt(),
         'Must be upgraded and built to receive viewport events');
     this.dispatchCustomEvent('amp:load:start');
     const promise = this.implementation_.layoutCallback();
@@ -866,7 +868,7 @@ export function createAmpElementProto(win, name, implementationClass) {
   ElementProto.enqueAction = function(invocation) {
     this.assertNotTemplate_();
     if (!this.isBuilt()) {
-      assert(this.actionQueue_).push(invocation);
+      dev.assert(this.actionQueue_).push(invocation);
     } else {
       this.executionAction_(invocation, false);
     }
@@ -882,7 +884,7 @@ export function createAmpElementProto(win, name, implementationClass) {
       return;
     }
 
-    const actionQueue = assert(this.actionQueue_);
+    const actionQueue = dev.assert(this.actionQueue_);
     this.actionQueue_ = null;
 
     // TODO(dvoytenko, #1260): dedupe actions.
@@ -1028,12 +1030,12 @@ export function createAmpElementProto(win, name, implementationClass) {
    */
   ElementProto.prepareLoading_ = function() {
     if (!this.loadingContainer_) {
-      const container = document.createElement('div');
+      const container = win.document.createElement('div');
       container.classList.add('-amp-loading-container');
       container.classList.add('-amp-fill-content');
       container.classList.add('amp-hidden');
 
-      const element = createLoaderElement();
+      const element = createLoaderElement(win.document);
       container.appendChild(element);
 
       this.appendChild(container);
@@ -1168,7 +1170,8 @@ export function registerElement(win, name, implementationClass) {
  * @return {boolean} Whether this element is scheduled to be loaded.
  */
 function isElementScheduled(win, elementName) {
-  assert(win.ampExtendedElements, 'win.ampExtendedElements not created yet');
+  dev.assert(win.ampExtendedElements,
+      'win.ampExtendedElements not created yet');
   return !!win.ampExtendedElements[elementName];
 }
 
@@ -1236,7 +1239,7 @@ export function resetScheduledElementForTesting(win, elementName) {
 export function getElementService(win, id, providedByElement) {
   return getElementServiceIfAvailable(win, id, providedByElement).then(
       service => {
-        return assert(service,
+        return user.assert(service,
             'Service %s was requested to be provided through %s, ' +
             'but %s is not loaded in the current page. To fix this ' +
             'problem load the JavaScript file for %s in this page.',

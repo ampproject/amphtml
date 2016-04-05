@@ -13,157 +13,127 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
- * Credits:
- *   Original version of this file was derived from
- *   https://github.com/ampproject/amphtml/blob/master/src/srcset.js
  */
-goog.provide('parse_srcset.Srcset');
-goog.provide('parse_srcset.SrcsetSourceDef');
+goog.provide('parse_srcset.SrcsetParsingResult');
 goog.provide('parse_srcset.parseSrcset');
+goog.require('amp.validator.ValidationError');
+goog.require('goog.structs.Set');
 
 /**
- * A single source within a srcset. Only one: width or DPR can be specified at
- * a time.
+ * A single source within a srcset.
  * @typedef {{
  *   url: string,
- *   width: (number|undefined),
- *   dpr: (number|undefined)
+ *   widthOrPixelDensity: string
  * }}
  */
 parse_srcset.SrcsetSourceDef;
 
 /**
- * Parses the text representation of srcset into Srcset object.
+ * Return value for parseSrcset.
+ * @typedef {{
+ *   success: boolean,
+ *   errorCode: !amp.validator.ValidationError.Code,
+ *   srcsetImages: !Array<!parse_srcset.SrcsetSourceDef>
+ * }}
+ */
+parse_srcset.SrcsetParsingResult;
+
+/**
+ * Parses the text representation of srcset into array of SrcsetSourceDef.
  * See https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#Attributes.
  * See http://www.w3.org/html/wg/drafts/html/master/semantics.html#attr-img-srcset.
- * @param {string} srcset
- * @return {!parse_srcset.Srcset}
+ *
+ * If parsing fails, returns false in SrcsetParsingResult.status.
+ *
+ * @param {!string} srcset
+ * @return {!parse_srcset.SrcsetParsingResult}
  * @export
  */
 parse_srcset.parseSrcset = function(srcset) {
-  // General grammar: (URL [NUM[w|x]],)*
-  // Example 1: "image1.png 100w, image2.png 50w"
-  // Example 2: "image1.png 2x, image2.png"
-  // Example 3: "image1,100w.png 100w, image2.png 50w"
-  const sSources = srcset.match(
-      /\s*([^\s]*)(\s+(-?(\d+(\.(\d+)?)?|\.\d+)[a-zA-Z]))?(\s*,)?/g);
-  // srcset has to have at least one source
-  if (sSources.length == 0) return new parse_srcset.Srcset([]);
-  const sources = [];
-  sSources.forEach(sSource => {
-    sSource = sSource.trim();
-    if (sSource.substr(-1) == ',') {
-      sSource = sSource.substr(0, sSource.length - 1).trim();
+  // Regex for leading spaces, followed by an optional comma and whitespace,
+  // followed by an URL*, followed by an optional space, followed by an
+  // optional width or pixel density**, followed by spaces, followed by an
+  // optional comma and whitespace.
+  //
+  // URL*: matches non-space, non-empty string which neither ends nor begins
+  // with a comma. The set of space characters in the srcset attribute is
+  // defined to include only ascii characters, so using \s, which is an
+  // ascii only character set, is fine. See
+  // https://html.spec.whatwg.org/multipage/infrastructure.html#space-character.
+  //
+  // Optional width or pixel density**: Matches the empty string or (one or
+  // more spaces + a non empty string containing no space or commas).
+  // Doesn't capture the initial space.
+  //
+  // \s*                       Match, but don't capture leading spaces
+  // (?:,\s*)?                 Optionally match comma and trailing space,
+  //                           but don't capture comma.
+  // ([^,\s]\S*[^,\s])         Match something like "google.com/favicon.ico"
+  //                           but not ",google.com/favicon.ico,"
+  // \s*                       Match, but dont capture spaces.
+  // ([\d]+.?[\d]*[w|x])?      e.g. "5w" or "5x" or "10.2x"
+  // \s*                       Match, but don't capture space
+  // (?:(,)\s*)?               Optionally match comma and trailing space,
+  //                           capturing comma.
+  const imageCandidateRegex = new RegExp(
+      '\\s*' +
+      '(?:,\\s*)?' +
+      '([^,\\s]\\S*[^,\\s])' +
+      '\\s*' +
+      '([\\d]+.?[\\d]*[w|x])?' +
+      '\\s*' +
+      '(?:(,)\\s*)?',
+      'g');
+  let remainingSrcset = srcset;
+  /** @type {!goog.structs.Set<string>} */
+  let seenWidthOrPixelDensity = new goog.structs.Set();
+  /** @type {!Array<parse_srcset.SrcsetSourceDef>} */
+  let srcsetImages = [];
+  let source;
+  while (source = imageCandidateRegex.exec(srcset)) {
+    let url = source[1];
+    let widthOrPixelDensity = source[2];
+    let comma = source[3];
+    if (widthOrPixelDensity === undefined) {
+      widthOrPixelDensity = '1x';
     }
-    const parts = sSource.split(/\s+/, 2);
-    if (parts.length == 0 ||
-          parts.length == 1 && !parts[0] ||
-          parts.length == 2 && !parts[0] && !parts[1]) {
-      return;
+    // Duplicate width or pixel density in srcset.
+    if (seenWidthOrPixelDensity.contains(widthOrPixelDensity)) {
+      return {
+        success: false,
+        errorCode: amp.validator.ValidationError.Code.DUPLICATE_DIMENSION,
+        srcsetImages: srcsetImages
+      };
     }
-    const url = parts[0].trim();
-    if (parts.length == 1 || parts.length == 2 && !parts[1]) {
-      // If no "w" or "x" specified, we assume it's "1x".
-      sources.push({url: url, dpr: 1});
-    } else {
-      const spec = parts[1].trim().toLowerCase();
-      const lastChar = spec.substring(spec.length - 1);
-      if (lastChar == 'w') {
-        sources.push({url: url, width: parseFloat(spec)});
-      } else if (lastChar == 'x') {
-        sources.push({url: url, dpr: parseFloat(spec)});
-      }
+    seenWidthOrPixelDensity.add(widthOrPixelDensity);
+    srcsetImages.push(
+        {url: url, widthOrPixelDensity: widthOrPixelDensity});
+    remainingSrcset = srcset.substr(imageCandidateRegex.lastIndex);
+    // If no more srcset, break.
+    if (srcset.length <= imageCandidateRegex.lastIndex) {
+      break;
     }
-  });
-  return new parse_srcset.Srcset(sources);
+    // More srcset, comma expected as separator for image candidates.
+    if (comma === undefined) {
+      return {
+        success: false,
+        errorCode: amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
+        srcsetImages: srcsetImages
+      };
+    }
+  }
+  // Regex didn't consume all of the srcset string
+  if (remainingSrcset !== '') {
+    return {
+      success: false,
+      errorCode: amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
+      srcsetImages: srcsetImages
+    };
+  }
+  // Must have at least one image candidate.
+  return {
+    success: srcsetImages.length > 0,
+    errorCode: amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
+    srcsetImages: srcsetImages
+  };
 };
-
-
-/**
- * A srcset object contains one or more sources.
- *
- * There are two types of sources: width-based and DPR-based. Only one type
- * of sources allowed to be specified within a single srcset. Depending on a
- * usecase, the components are free to choose any source that best corresponds
- * to the required rendering quality and network and CPU conditions. See
- * "select" method for details on how this selection is performed.
- *
- * See https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img#Attributes
- */
-parse_srcset.Srcset = class {
-  /**
-   * @param {!Array<!parse_srcset.SrcsetSourceDef>} sources
-   */
-  constructor(sources) {
-    this.is_successful_ = true;
-    // Srcset must have at least one source
-    if (sources.length == 0 ) {
-      this.is_successful_ = false;
-      return;
-    }
-    /** @private @const {!Array<!parse_srcset.SrcsetSourceDef>} */
-    this.sources_ = sources;
-
-    // Only one type of source specified can be used - width or DPR.
-    let hasWidth = false;
-    let hasDpr = false;
-    this.sources_.forEach(source => {
-      // Either dpr or width must be specified
-      if ((source.width && source.dpr) || (!source.width && !source.dpr)) {
-        this.is_successful_ = false;
-      }
-      hasWidth = hasWidth || !!source.width;
-      hasDpr = hasDpr || !!source.dpr;
-    });
-    if (!this.is_successful_) return;
-
-    // Srcset cannot have both width and dpr sources
-    if (hasWidth && hasDpr) {
-      this.is_successful_ = false;
-      return;
-    }
-
-    // Source and assert duplicates.
-    let hasDuplicate = false;
-    if (hasWidth) {
-      this.sources_.sort((s1, s2) => {
-        // Duplicate width
-        if (s1.width == s2.width) hasDuplicate = true;
-        return s2.width - s1.width;
-      });
-    } else {
-      this.sources_.sort((s1, s2) => {
-        // Duplicate dpr
-        if (s1.dpr == s2.dpr) hasDuplicate = true;
-        return s2.dpr - s1.dpr;
-      });
-    }
-    if (hasDuplicate) {
-      this.is_succesful_ = false;
-      return;
-    }
-
-    /** @private @const {boolean} */
-    this.widthBased_ = hasWidth;
-
-    /** @private @const {boolean} */
-    this.dprBased_ = hasDpr;
-  }
-
-  /**
-   * Returns whether parsing sources was successful.
-   * @return {!boolean}
-   */
-  isSuccessful() {
-    return this.is_successful_;
-  }
-
-  /**
-   * Returns all sources in the srcset.
-   * @return {!Array<!parse_srcset.SrcsetSourceDef>}
-   */
-  getSources() {
-    return this.sources_;
-  }
-}

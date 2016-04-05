@@ -16,7 +16,6 @@
 
 import {BaseElement} from '../src/base-element';
 import {IntersectionObserver} from '../src/intersection-observer';
-import {assert} from '../src/asserts';
 import {cidForOrNull} from '../src/cid';
 import {getIframe, prefetchBootstrap} from '../src/3p-frame';
 import {isLayoutSizeDefined} from '../src/layout';
@@ -26,8 +25,10 @@ import {parseUrl} from '../src/url';
 import {registerElement} from '../src/custom-element';
 import {adPrefetch, adPreconnect, clientIdScope} from '../ads/_config';
 import {timer} from '../src/timer';
-import {viewerFor} from '../src/viewer';
+import {user} from '../src/log';
 import {userNotificationManagerFor} from '../src/user-notification';
+import {viewerFor} from '../src/viewer';
+import {removeElement} from '../src/dom';
 
 
 /** @private @const These tags are allowed to have fixed positioning */
@@ -223,7 +224,7 @@ export function installAd(win) {
     layoutCallback() {
       if (!this.iframe_) {
         loadingAdsCount++;
-        assert(!this.isInFixedContainer_,
+        user.assert(!this.isInFixedContainer_,
             '<amp-ad> is not allowed to be placed in elements with ' +
             'position:fixed: %s', this.element);
         timer.delay(() => {
@@ -284,6 +285,30 @@ export function installAd(win) {
       return loadPromise(this.iframe_);
     }
 
+    /** @override  */
+    unlayoutCallback() {
+      if (this.iframe_) {
+        removeElement(this.iframe_);
+        if (this.placeholder_) {
+          this.togglePlaceholder(true);
+        }
+        if (this.fallback_) {
+          this.toggleFallback(false);
+        }
+
+        this.iframe_ = null;
+        // IntersectionObserver's listeners were cleaned up by
+        // setInViewport(false) before #unlayoutCallback
+        this.intersectionObserver_ = null;
+      }
+      return true;
+    }
+
+    /** @override  */
+    unlayoutOnPause() {
+      return true;
+    }
+
     /**
      * @return {!Promise<string|undefined>} A promise for a CID or undefined if
      *     - the ad network does not request one or
@@ -292,7 +317,9 @@ export function installAd(win) {
      */
     getAdCid_() {
       const scope = clientIdScope[this.element.getAttribute('type')];
-      if (!scope) {
+      const consentId = this.element.getAttribute(
+          'data-consent-notification-id');
+      if (!(scope || consentId)) {
         return Promise.resolve();
       }
       return cidForOrNull(this.getWin()).then(cidService => {
@@ -300,12 +327,13 @@ export function installAd(win) {
           return;
         }
         let consent = Promise.resolve();
-        const consentId = this.element.getAttribute(
-            'data-consent-notification-id');
         if (consentId) {
           consent = userNotificationManagerFor(this.getWin()).then(service => {
             return service.get(consentId);
           });
+          if (!scope && consentId) {
+            return consent;
+          }
         }
         return cidService.get(scope, consent);
       });
@@ -390,7 +418,7 @@ export function installAd(win) {
         }
         // Remove the iframe only if it is not the master.
         if (this.iframe_.name.indexOf('_master') == -1) {
-          this.element.removeChild(this.iframe_);
+          removeElement(this.iframe_);
           this.iframe_ = null;
         }
       });

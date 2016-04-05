@@ -15,17 +15,9 @@
  */
 
 import {getService} from '../../../src/service';
-import {isExperimentOn} from '../../../src/experiments';
-import {user} from '../../../src/log';
 import {parseUrl} from '../../../src/url';
 import {viewerFor} from '../../../src/viewer';
 import {vsyncFor} from '../../../src/vsync';
-
-/** @const */
-const TAG = 'AmpDynamicCssClasses';
-
-/** @const */
-const EXPERIMENT = 'dynamic-css-classes';
 
 /**
  * Strips everything but the domain from referrer string.
@@ -141,21 +133,19 @@ function addViewerClass(win) {
 
 /**
  * @param {!Window} win
+ * @private visible for testing
  */
 function addRuntimeClasses(win) {
-  if (isExperimentOn(win, EXPERIMENT)) {
-    addReferrerClasses(win);
-    addViewerClass(win);
-  } else {
-    user.warn(TAG, `Experiment ${EXPERIMENT} disabled`);
-  }
+  addReferrerClasses(win);
+  addViewerClass(win);
 }
 
 /**
  * @param {!Window} win
  * @return {!Object} All services need to return an object to "load".
+ * @visiblefortesting
  */
-function installDynamicClassesService(win) {
+export function installDynamicClassesService(win) {
   return getService(win, 'amp-dynamic-css-classes', () => {
     addRuntimeClasses(win);
     return {};

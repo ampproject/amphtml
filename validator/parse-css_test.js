@@ -20,11 +20,14 @@
  *   licensed under the CC0 license
  *   (http://creativecommons.org/publicdomain/zero/1.0/).
  */
-goog.require('css_selectors.parseATypeSelector');
 goog.require('goog.asserts');
 goog.require('json_testutil.renderJSON');
+goog.require('parse_css.SelectorVisitor');
 goog.require('parse_css.parseAStylesheet');
+goog.require('parse_css.parseATypeSelector');
+goog.require('parse_css.parseSelectors');
 goog.require('parse_css.tokenize');
+goog.require('parse_css.traverseSelectors');
 
 goog.provide('parse_css.ParseCssTest');
 
@@ -855,32 +858,32 @@ describe('css_selectors', () => {
          {'line': 1, 'col': 1, 'tokenType': 'EOF_TOKEN'}], tokens);
     let tokenStream = new parse_css.TokenStream(tokens);
     tokenStream.consume();
-    let typeSelector = css_selectors.parseATypeSelector(tokenStream);
+    let typeSelector = parse_css.parseATypeSelector(tokenStream);
     assertStrictEqual('*', typeSelector.toString());
 
     tokenStream = new parse_css.TokenStream(parseSelectorForTest('*|*'));
     tokenStream.consume();
-    typeSelector = css_selectors.parseATypeSelector(tokenStream);
+    typeSelector = parse_css.parseATypeSelector(tokenStream);
     assertStrictEqual('*|*', typeSelector.toString());
 
     tokenStream = new parse_css.TokenStream(parseSelectorForTest('*|E'));
     tokenStream.consume();
-    typeSelector = css_selectors.parseATypeSelector(tokenStream);
+    typeSelector = parse_css.parseATypeSelector(tokenStream);
     assertStrictEqual('*|E', typeSelector.toString());
 
     tokenStream = new parse_css.TokenStream(parseSelectorForTest('svg|E'));
     tokenStream.consume();
-    typeSelector = css_selectors.parseATypeSelector(tokenStream);
+    typeSelector = parse_css.parseATypeSelector(tokenStream);
     assertStrictEqual('svg|E', typeSelector.toString());
 
     tokenStream = new parse_css.TokenStream(parseSelectorForTest('svg|*'));
     tokenStream.consume();
-    typeSelector = css_selectors.parseATypeSelector(tokenStream);
+    typeSelector = parse_css.parseATypeSelector(tokenStream);
     assertStrictEqual('svg|*', typeSelector.toString());
 
     tokenStream = new parse_css.TokenStream(parseSelectorForTest('|E'));
     tokenStream.consume();
-    typeSelector = css_selectors.parseATypeSelector(tokenStream);
+    typeSelector = parse_css.parseATypeSelector(tokenStream);
     assertStrictEqual('|E', typeSelector.toString());
   });
 
@@ -892,7 +895,7 @@ describe('css_selectors', () => {
          {'line': 1, 'col': 12, 'tokenType': 'EOF_TOKEN'}], tokens);
     const tokenStream = new parse_css.TokenStream(tokens);
     tokenStream.consume();
-    const idSelector = css_selectors.parseAnIdSelector(tokenStream);
+    const idSelector = parse_css.parseAnIdSelector(tokenStream);
     assertStrictEqual('#hello-world', idSelector.toString());
     assertStrictEqual(1, idSelector.line);
     assertStrictEqual(0, idSelector.col);
@@ -907,7 +910,7 @@ describe('css_selectors', () => {
         tokens);
     const tokenStream = new parse_css.TokenStream(tokens);
     tokenStream.consume();
-    const classSelector = css_selectors.parseAClassSelector(tokenStream);
+    const classSelector = parse_css.parseAClassSelector(tokenStream);
     assertStrictEqual('.hello-world', classSelector.toString());
     assertStrictEqual(1, classSelector.line);
     assertStrictEqual(0, classSelector.col);
@@ -924,27 +927,27 @@ describe('css_selectors', () => {
          {'line': 1, 'col': 5, 'tokenType': 'EOF_TOKEN'}], tokens);
     let tokenStream = new parse_css.TokenStream(tokens);
     tokenStream.consume();
-    let sequence = css_selectors.parseASimpleSelectorSequence(tokenStream);
+    let sequence = parse_css.parseASimpleSelectorSequence(tokenStream);
     assertJSONEquals(
-        {'line': 1, 'col': 0, 'node': 'SIMPLE_SELECTOR_SEQUENCE',
+        {'line': 1, 'col': 0, 'tokenType': 'SIMPLE_SELECTOR_SEQUENCE',
          'otherSelectors':
-         [{'line': 1, 'col': 3, 'value': 'c', 'node': 'ID_SELECTOR'}],
+         [{'line': 1, 'col': 3, 'value': 'c', 'tokenType': 'ID_SELECTOR'}],
          'typeSelector':
          {'line': 1, 'col': 0, 'elementName': 'b', 'namespacePrefix':
-          'a', 'node': 'TYPE_SELECTOR'}},
+          'a', 'tokenType': 'TYPE_SELECTOR'}},
         sequence);
     tokens = parseSelectorForTest('a|foo#bar.baz');
     tokenStream = new parse_css.TokenStream(tokens);
     tokenStream.consume();
-    sequence = css_selectors.parseASimpleSelectorSequence(tokenStream);
+    sequence = parse_css.parseASimpleSelectorSequence(tokenStream);
     assertJSONEquals(
-        {'line': 1, 'col': 0, 'node': 'SIMPLE_SELECTOR_SEQUENCE',
+        {'line': 1, 'col': 0, 'tokenType': 'SIMPLE_SELECTOR_SEQUENCE',
          'otherSelectors':
-         [{'line': 1, 'col': 5, 'value': 'bar', 'node': 'ID_SELECTOR'},
-          {'line': 1, 'col': 9, 'value': 'baz', 'node': 'CLASS_SELECTOR'}],
+         [{'line': 1, 'col': 5, 'value': 'bar', 'tokenType': 'ID_SELECTOR'},
+          {'line': 1, 'col': 9, 'value': 'baz', 'tokenType': 'CLASS_SELECTOR'}],
          'typeSelector':
          {'line': 1, 'col': 0, 'elementName': 'foo', 'namespacePrefix':
-          'a', 'node': 'TYPE_SELECTOR'}},
+          'a', 'tokenType': 'TYPE_SELECTOR'}},
         sequence);
   });
 
@@ -960,27 +963,27 @@ describe('css_selectors', () => {
         tokens);
     const tokenStream = new parse_css.TokenStream(tokens);
     tokenStream.consume();
-    const selector = css_selectors.parseASelector(tokenStream);
+    const selector = parse_css.parseASelector(tokenStream);
     assertJSONEquals(
         {'line': 1, 'col': 7, 'combinatorType': 'DESCENDANT', 'left':
          {'line': 1, 'col': 3, 'combinatorType': 'DESCENDANT', 'left':
-          {'line': 1, 'col': 0, 'node': 'SIMPLE_SELECTOR_SEQUENCE',
+          {'line': 1, 'col': 0, 'tokenType': 'SIMPLE_SELECTOR_SEQUENCE',
            'otherSelectors':
            [], 'typeSelector':
            {'line': 1, 'col': 0, 'elementName': 'foo', 'namespacePrefix':
-            null, 'node': 'TYPE_SELECTOR'}}, 'node': 'COMBINATOR',
+            null, 'tokenType': 'TYPE_SELECTOR'}}, 'tokenType': 'COMBINATOR',
           'right':
-          {'line': 1, 'col': 4, 'node': 'SIMPLE_SELECTOR_SEQUENCE',
+          {'line': 1, 'col': 4, 'tokenType': 'SIMPLE_SELECTOR_SEQUENCE',
            'otherSelectors':
            [], 'typeSelector':
            {'line': 1, 'col': 4, 'elementName': 'bar', 'namespacePrefix':
-            null, 'node': 'TYPE_SELECTOR'}}}, 'node': 'COMBINATOR',
+            null, 'tokenType': 'TYPE_SELECTOR'}}}, 'tokenType': 'COMBINATOR',
          'right':
-         {'line': 2, 'col': 1, 'node': 'SIMPLE_SELECTOR_SEQUENCE',
+         {'line': 2, 'col': 1, 'tokenType': 'SIMPLE_SELECTOR_SEQUENCE',
           'otherSelectors':
           [], 'typeSelector':
           {'line': 2, 'col': 1, 'elementName': 'baz', 'namespacePrefix':
-           null, 'node': 'TYPE_SELECTOR'}}},
+           null, 'tokenType': 'TYPE_SELECTOR'}}},
         selector);
   });
 
@@ -1001,24 +1004,25 @@ describe('css_selectors', () => {
         tokens);
     const tokenStream = new parse_css.TokenStream(tokens);
     tokenStream.consume();
-    const selector = css_selectors.parseASelectorsGroup(tokenStream);
+    const selector = parse_css.parseASelectorsGroup(tokenStream);
     assertJSONEquals(
         {'line': 1, 'col': 0, 'elements':
-         [{'line': 1, 'col': 0, 'node': 'SIMPLE_SELECTOR_SEQUENCE',
+         [{'line': 1, 'col': 0, 'tokenType': 'SIMPLE_SELECTOR_SEQUENCE',
            'otherSelectors':
            [], 'typeSelector':
            {'line': 1, 'col': 0, 'elementName': 'foo', 'namespacePrefix':
-            null, 'node': 'TYPE_SELECTOR'}},
-          {'line': 1, 'col': 5, 'node': 'SIMPLE_SELECTOR_SEQUENCE',
+            null, 'tokenType': 'TYPE_SELECTOR'}},
+          {'line': 1, 'col': 5, 'tokenType': 'SIMPLE_SELECTOR_SEQUENCE',
            'otherSelectors':
            [], 'typeSelector':
            {'line': 1, 'col': 5, 'elementName': 'bar', 'namespacePrefix':
-            null, 'node': 'TYPE_SELECTOR'}},
-          {'line': 2, 'col': 2, 'node': 'SIMPLE_SELECTOR_SEQUENCE',
+            null, 'tokenType': 'TYPE_SELECTOR'}},
+          {'line': 2, 'col': 2, 'tokenType': 'SIMPLE_SELECTOR_SEQUENCE',
            'otherSelectors':
            [], 'typeSelector':
            {'line': 2, 'col': 2, 'elementName': 'baz', 'namespacePrefix':
-            null, 'node': 'TYPE_SELECTOR'}}], 'node': 'SELECTORS_GROUP'},
+            null, 'tokenType': 'TYPE_SELECTOR'}}],
+         'tokenType': 'SELECTORS_GROUP'},
         selector);
   });
 
@@ -1041,19 +1045,53 @@ describe('css_selectors', () => {
         tokens);
     const tokenStream = new parse_css.TokenStream(tokens);
     tokenStream.consume();
-    const selector = css_selectors.parseASelectorsGroup(tokenStream);
+    const selector = parse_css.parseASelectorsGroup(tokenStream);
     assertJSONEquals(
-        {'line': 1, 'col': 0, 'node': 'SIMPLE_SELECTOR_SEQUENCE',
+        {'line': 1, 'col': 0, 'tokenType': 'SIMPLE_SELECTOR_SEQUENCE',
          'otherSelectors':
-         [{'line': 1, 'col': 1, 'value':
-           [{'line': 1, 'col': 2, 'tokenType': 'IDENT', 'value': 'href'},
-            {'line': 1, 'col': 6, 'tokenType': 'DELIM', 'value': '='},
-            {'line': 1, 'col': 7, 'tokenType': 'STRING', 'value':
-             'http://www.w3.org/'},
-            {'line': 1, 'col': 27, 'tokenType': 'EOF_TOKEN'}], 'node':
-           'ATTR_SELECTOR'}], 'typeSelector':
+         [{'line': 1, 'col': 1, 'tokenType': 'ATTR_SELECTOR', 'value':
+           'http://www.w3.org/', 'attrName': 'href', 'matchOperator':
+           '=', 'namespacePrefix': null}],
+         'typeSelector':
          {'line': 1, 'col': 0, 'elementName': 'a', 'namespacePrefix':
-          null, 'node': 'TYPE_SELECTOR'}},
+          null, 'tokenType': 'TYPE_SELECTOR'}},
+        selector);
+  });
+
+  it('parses a selectors group with more attrib matches', () => {
+    const tokens = parseSelectorForTest(
+        'elem[attr1="v1"][attr2=value2\n]' +
+        '[attr3~="foo"][attr4|="bar"][attr5|= "baz"][attr6 $=boo]' +
+        '[ attr7*=bang ]');
+    const tokenStream = new parse_css.TokenStream(tokens);
+    tokenStream.consume();
+    const selector = parse_css.parseASelectorsGroup(tokenStream);
+    assertJSONEquals(
+        {'line': 1, 'col': 0, 'tokenType': 'SIMPLE_SELECTOR_SEQUENCE',
+         'otherSelectors':
+         [{'line': 1, 'col': 4, 'tokenType': 'ATTR_SELECTOR', 'value':
+           'v1', 'attrName': 'attr1', 'matchOperator': '=', 'namespacePrefix':
+           null},
+          {'line': 1, 'col': 16, 'tokenType': 'ATTR_SELECTOR', 'value':
+           'value2', 'attrName': 'attr2', 'matchOperator': '=',
+           'namespacePrefix': null},
+          {'line': 2, 'col': 1, 'tokenType': 'ATTR_SELECTOR', 'value':
+           'foo', 'attrName': 'attr3', 'matchOperator': '~=', 'namespacePrefix':
+           null},
+          {'line': 2, 'col': 15, 'tokenType': 'ATTR_SELECTOR', 'value':
+           'bar', 'attrName': 'attr4', 'matchOperator': '|=', 'namespacePrefix':
+           null},
+          {'line': 2, 'col': 29, 'tokenType': 'ATTR_SELECTOR', 'value':
+           'baz', 'attrName': 'attr5', 'matchOperator': '|=', 'namespacePrefix':
+           null},
+          {'line': 2, 'col': 44, 'tokenType': 'ATTR_SELECTOR', 'value':
+           'boo', 'attrName': 'attr6', 'matchOperator': '$=', 'namespacePrefix':
+           null},
+          {'line': 2, 'col': 57, 'tokenType': 'ATTR_SELECTOR', 'value':
+           'bang', 'attrName': 'attr7', 'matchOperator': '*=',
+           'namespacePrefix': null}], 'typeSelector':
+         {'line': 1, 'col': 0, 'tokenType': 'TYPE_SELECTOR', 'elementName':
+          'elem', 'namespacePrefix': null}},
         selector);
   });
 
@@ -1075,11 +1113,11 @@ describe('css_selectors', () => {
         tokens);
     const tokenStream = new parse_css.TokenStream(tokens);
     tokenStream.consume();
-    const selector = css_selectors.parseASelectorsGroup(tokenStream);
+    const selector = parse_css.parseASelectorsGroup(tokenStream);
     assertJSONEquals(
-        {'line': 1, 'col': 0, 'node': 'SIMPLE_SELECTOR_SEQUENCE',
+        {'line': 1, 'col': 0, 'tokenType': 'SIMPLE_SELECTOR_SEQUENCE',
          'otherSelectors':
-         [{'line': 1, 'col': 1, 'name': 'b', 'isClass': false, 'node':
+         [{'line': 1, 'col': 1, 'name': 'b', 'isClass': false, 'tokenType':
            'PSEUDO_SELECTOR'},
           {'line': 1, 'col': 4, 'name': 'lang', 'func':
            [{'line': 1, 'col': 5, 'tokenType': 'FUNCTION_TOKEN', 'value':
@@ -1087,9 +1125,9 @@ describe('css_selectors', () => {
             {'line': 1, 'col': 10, 'tokenType': 'IDENT', 'value':
              'fr-be'},
             {'line': 1, 'col': 15, 'tokenType': 'EOF_TOKEN'}], 'isClass':
-           true, 'node': 'PSEUDO_SELECTOR'}], 'typeSelector':
+           true, 'tokenType': 'PSEUDO_SELECTOR'}], 'typeSelector':
          {'line': 1, 'col': 0, 'elementName': 'a', 'namespacePrefix':
-          null, 'node': 'TYPE_SELECTOR'}},
+          null, 'tokenType': 'TYPE_SELECTOR'}},
         selector);
   });
 
@@ -1100,12 +1138,12 @@ describe('css_selectors', () => {
     const tokens = parseSelectorForTest('html|*:not(:link):not(:visited)');
     const tokenStream = new parse_css.TokenStream(tokens);
     tokenStream.consume();
-    const selector = css_selectors.parseASelectorsGroup(tokenStream);
+    const selector = parse_css.parseASelectorsGroup(tokenStream);
     assertJSONEquals(
         {
           'line': 1,
           'col': 0,
-          'node': 'SIMPLE_SELECTOR_SEQUENCE',
+          'tokenType': 'SIMPLE_SELECTOR_SEQUENCE',
           'otherSelectors': [{
             'line': 1,
             'col': 6,
@@ -1122,14 +1160,14 @@ describe('css_selectors', () => {
               {'line': 1, 'col': 16, 'tokenType': 'EOF_TOKEN'}
             ],
             'isClass': true,
-            'node': 'PSEUDO_SELECTOR'
+            'tokenType': 'PSEUDO_SELECTOR'
           }],
           'typeSelector': {
             'line': 1,
             'col': 0,
             'elementName': '*',
             'namespacePrefix': 'html',
-            'node': 'TYPE_SELECTOR'
+            'tokenType': 'TYPE_SELECTOR'
           }
         },
         selector);
@@ -1147,7 +1185,7 @@ describe('css_selectors', () => {
     const tokenStream = new parse_css.TokenStream(tokens);
     tokenStream.consume();
     const errors = [];
-    const selector = css_selectors.parse(tokenStream, errors);
+    const selector = parse_css.parseSelectors(tokenStream, errors);
     assertStrictEqual(null, selector);
     assertJSONEquals(
         [{'line': 1, 'col': 8, 'tokenType': 'ERROR',
@@ -1159,8 +1197,9 @@ describe('css_selectors', () => {
   });
 
   it('implements visitor pattern', () => {
-    class CollectCombinatorNodes extends css_selectors.NodeVisitor {
+    class CollectCombinatorNodes extends parse_css.SelectorVisitor {
       constructor() {
+        super();
         this.combinatorNodes = [];
       }
 
@@ -1173,12 +1212,11 @@ describe('css_selectors', () => {
     const tokenStream = new parse_css.TokenStream(tokens);
     tokenStream.consume();
     const errors = [];
-    const maybeSelector = css_selectors.parse(tokenStream, errors);
+    const maybeSelector = parse_css.parseSelectors(tokenStream, errors);
     const visitor = new CollectCombinatorNodes();
     assertStrictEqual(false, maybeSelector === null);
-    const selector =
-        /** @type {!css_selectors.SelectorNode} */ (maybeSelector);
-    css_selectors.traverse(selector, visitor);
+    const selector = /** @type {!parse_css.Selector} */ (maybeSelector);
+    parse_css.traverseSelectors(selector, visitor);
     assertStrictEqual(4, visitor.combinatorNodes.length);
     assertStrictEqual('GENERAL_SIBLING',
                       visitor.combinatorNodes[0].combinatorType);
@@ -1189,23 +1227,23 @@ describe('css_selectors', () => {
     assertJSONEquals(
         {'line': 1, 'col': 5, 'combinatorType': 'DESCENDANT', 'left':
          {'line': 1, 'col': 2, 'combinatorType': 'CHILD', 'left':
-          {'line': 1, 'col': 0, 'node': 'SIMPLE_SELECTOR_SEQUENCE',
+          {'line': 1, 'col': 0, 'tokenType': 'SIMPLE_SELECTOR_SEQUENCE',
            'otherSelectors':
            [], 'typeSelector':
            {'line': 1, 'col': 0, 'elementName': 'a', 'namespacePrefix':
-            null, 'node': 'TYPE_SELECTOR'}}, 'node': 'COMBINATOR',
+            null, 'tokenType': 'TYPE_SELECTOR'}}, 'tokenType': 'COMBINATOR',
           'right':
-          {'line': 1, 'col': 4, 'node': 'SIMPLE_SELECTOR_SEQUENCE',
+          {'line': 1, 'col': 4, 'tokenType': 'SIMPLE_SELECTOR_SEQUENCE',
            'otherSelectors':
            [], 'typeSelector':
            {'line': 1, 'col': 4, 'elementName': 'b', 'namespacePrefix':
-            null, 'node': 'TYPE_SELECTOR'}}}, 'node': 'COMBINATOR',
+            null, 'tokenType': 'TYPE_SELECTOR'}}}, 'tokenType': 'COMBINATOR',
          'right':
-         {'line': 1, 'col': 6, 'node': 'SIMPLE_SELECTOR_SEQUENCE',
+         {'line': 1, 'col': 6, 'tokenType': 'SIMPLE_SELECTOR_SEQUENCE',
           'otherSelectors':
           [], 'typeSelector':
           {'line': 1, 'col': 6, 'elementName': 'c', 'namespacePrefix':
-           null, 'node': 'TYPE_SELECTOR'}}},
+           null, 'tokenType': 'TYPE_SELECTOR'}}},
         visitor.combinatorNodes[2]);
   });
 });

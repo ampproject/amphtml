@@ -16,15 +16,7 @@
 
 import {CSS} from '../../../build/amp-accordion-0.1.css';
 import {Layout} from '../../../src/layout';
-import {assert} from '../../../src/asserts';
-import {isExperimentOn} from '../../../src/experiments';
 import {user} from '../../../src/log';
-
-/** @const */
-const EXPERIMENT = 'amp-accordion';
-
-/** @const */
-const TAG = 'AmpAccordion';
 
 class AmpAccordion extends AMP.BaseElement {
 
@@ -38,21 +30,15 @@ class AmpAccordion extends AMP.BaseElement {
     /** @const @private {!NodeList} */
     this.sections_ = this.getRealChildren();
 
-    /** @const @private {boolean} */
-    this.isExperimentOn_ = isExperimentOn(this.getWin(), EXPERIMENT);
-    if (!this.isExperimentOn_) {
-      user.warn(TAG, `Experiment ${EXPERIMENT} disabled`);
-      return;
-    }
     this.element.setAttribute('role', 'tablist');
     this.sections_.forEach((section, index) => {
-      assert(
+      user.assert(
           section.tagName.toLowerCase() == 'section',
           'Sections should be enclosed in a <section> tag, ' +
           'See https://github.com/ampproject/amphtml/blob/master/extensions/' +
           'amp-accordion/amp-accordion.md. Found in: %s', this.element);
       const sectionComponents_ = section.children;
-      assert(
+      user.assert(
           sectionComponents_.length == 2,
           'Each section must have exactly two children. ' +
           'See https://github.com/ampproject/amphtml/blob/master/extensions/' +

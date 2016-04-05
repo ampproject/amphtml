@@ -185,6 +185,15 @@ describe('parseQueryString', () => {
 
 describe('assertHttpsUrl', () => {
   const referenceElement = document.createElement('div');
+  it('should NOT allow null or undefined, but allow empty string', () => {
+    expect(() => {
+      assertHttpsUrl(null, referenceElement);
+    }).to.throw(/source must be available/);
+    expect(() => {
+      assertHttpsUrl(undefined, referenceElement);
+    }).to.throw(/source must be available/);
+    assertHttpsUrl('', referenceElement);
+  });
   it('should allow https', () => {
     assertHttpsUrl('https://twitter.com', referenceElement);
   });

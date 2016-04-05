@@ -58,17 +58,21 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [Adblade](../ads/adblade.md)
 - [Adform](../ads/adform.md)
 - [AdReactor](../ads/adreactor.md)
-- [AdSense](../ads/adsense.md)
+- [AdSense](../ads/google/adsense.md)
 - [AdTech](../ads/adtech.md)
 - [Criteo](../ads/criteo.md)
 - [Dot and Media](../ads/dotandads.md)
-- [Doubleclick](../ads/doubleclick.md)
+- [Doubleclick](../ads/google/doubleclick.md)
 - [Flite](../ads/flite.md)
+- [Improve Digital](../ads/improvedigital.md)
 - [Industrybrains](../ads/industrybrains.md)
+- [OpenX](../ads/openx.md)
 - [plista](../ads/plista.md)
 - [Smart AdServer](../ads/smartadserver.md)
+- [Sortable](../ads/sortable.md)
 - [Yieldmo](../ads/yieldmo.md)
 - [Revcontent](../ads/revcontent.md)
+- [Rubicon Project](../ads/rubicon.md)
 - [TripleLift](../ads/triplelift.md)
 - [Teads](../ads/teads.md)
 - [I-Mobile](../ads/imobile.md)
@@ -186,7 +190,7 @@ The following lists validation errors specific to the `amp-ad` tag
   </tr>
   <tr>
     <td class="col-fourty"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#missing-url">Missing URL for attribute 'example1' in tag 'example2'.</a></td>
-    <td>Error thrown when <code>src</code> attribute is missing it's URL.</td>
+    <td>Error thrown when <code>src</code> attribute is missing its URL.</td>
   </tr>
   <tr>
   <td class="col-fourty"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-url">Malformed URL 'example3' for attribute 'example1' in tag 'example2'.</a></td>

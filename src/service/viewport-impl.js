@@ -244,7 +244,8 @@ export class Viewport {
    * @return {!LayoutRect}
    */
   getLayoutRect(el) {
-    return this.binding_.getLayoutRect(el);
+    return this.binding_.getLayoutRect(el,
+        this.getScrollLeft(), this.getScrollTop());
   }
 
   /**
@@ -577,9 +578,13 @@ class ViewportBindingDef {
   /**
    * Returns the rect of the element within the document.
    * @param {!Element} unusedEl
+   * @param {number=} unusedScrollLeft Optional arguments that the caller may
+   *     pass in, if they cached these values and would like to avoid
+   *     remeasure. Requires appropriate updating the values on scroll.
+   * @param {number=} unusedScrollTop Same comment as above.
    * @return {!LayoutRect}
    */
-  getLayoutRect(unusedEl) {}
+  getLayoutRect(unusedEl, unusedScrollLeft, unusedScrollTop) {}
 
   /** For testing. */
   cleanup_() {}
@@ -686,9 +691,13 @@ export class ViewportBindingNatural_ {
   }
 
   /** @override */
-  getLayoutRect(el) {
-    const scrollTop = this.getScrollTop();
-    const scrollLeft = this.getScrollLeft();
+  getLayoutRect(el, opt_scrollLeft, opt_scrollTop) {
+    const scrollTop = opt_scrollTop != undefined
+        ? opt_scrollTop
+        : this.getScrollTop();
+    const scrollLeft = opt_scrollLeft != undefined
+        ? opt_scrollLeft
+        : this.getScrollLeft();
     const b = el./*OK*/getBoundingClientRect();
     return layoutRectLtwh(Math.round(b.left + scrollLeft),
         Math.round(b.top + scrollTop),
