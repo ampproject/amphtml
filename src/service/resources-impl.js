@@ -55,6 +55,8 @@ const FOUR_FRAME_DELAY_ = 70;
  * @return {number}
  */
 export function getElementPriority(tagName) {
+  // Filed https://github.com/ampproject/amphtml/issues/2714 to get this
+  // method into the element implementation classes.
   tagName = tagName.toLowerCase();
   if (tagName == 'amp-ad') {
     return 2;
