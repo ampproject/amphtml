@@ -32,6 +32,9 @@ const TAG = 'amp-sidebar';
 /** @const */
 const ANIMATION_TIMEOUT = 550;
 
+/** @const */
+const IOS_SAFARI_BOTTOMBAR_HEIGHT = '10vh';
+
 export class AmpSidebar extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
@@ -71,6 +74,9 @@ export class AmpSidebar extends AMP.BaseElement {
 
     /** @private @const {boolean} */
     this.isIosSafari_ = platform.isIos() && platform.isSafari();
+
+    /** @private {boolean} */
+    this.bottomBarCompensated_ = false;
 
     if (!this.isExperimentOn_) {
       dev.warn(TAG, `Experiment ${EXPERIMENT} disabled`);
@@ -147,6 +153,9 @@ export class AmpSidebar extends AMP.BaseElement {
       });
       this.viewport_.addToFixedLayer(this.element);
       this.openMask_();
+      if (this.isIosSafari_) {
+        this.compensateIosBottombar_();
+      }
       this.element./*OK*/scrollTop = 1;
       // Start animation in a separate vsync due to display:block; set above.
       this.vsync_.mutate(() => {
@@ -233,6 +242,23 @@ export class AmpSidebar extends AMP.BaseElement {
         }
       }
     });
+  }
+
+  /**
+   * @private
+   */
+  compensateIosBottombar_() {
+    if (!this.bottomBarCompensated_) {
+      // Compensate for IOS safari bottom navbar.
+      const div = this.document_.createElement('div');
+      setStyles(div, {
+        'height': IOS_SAFARI_BOTTOMBAR_HEIGHT,
+        'width': '100%',
+        'background-color': 'transparent',
+      });
+      this.element.appendChild(div);
+      this.bottomBarCompensated_ = true;
+    }
   }
 }
 
