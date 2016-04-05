@@ -1794,7 +1794,7 @@ export class Resource {
       }
     } else if (viewportBox.top > layoutBox.bottom) {
       // Element is above viewport
-      distance = viewport.top - layoutBox.bottom;
+      distance = viewportBox.top - layoutBox.bottom;
 
       // If we're scrolling away from the element
       if (scrollDirection == 1) {
@@ -1804,7 +1804,7 @@ export class Resource {
       // Element is in viewport
       return true;
     }
-    return distance <= viewportBox.height * multipler / scrollPenalty;
+    return distance < viewportBox.height * multipler / scrollPenalty;
   }
 
   /**
