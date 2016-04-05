@@ -46,6 +46,18 @@ function readdir(dir) {
 }
 
 /**
+ * @param {string} dir
+ * @return {boolean}
+ */
+function isdir(dir) {
+  try {
+    return fs.lstatSync(dir).isDirectory();
+  } catch (e) {
+    return false;  // If there's neither a file nor a directory.
+  }
+}
+
+/**
  * Returns all html files underneath the testdata roots. This looks
  * both for feature_tests/*.html and for tests in extension directories.
  * E.g.: extensions/amp-accordion/0.1/test/*.html and
@@ -57,8 +69,10 @@ function findHtmlFilesRelativeToTestdata() {
   for (const root of process.env['TESTDATA_ROOTS'].split(':')) {
     if (path.basename(root) === 'extensions') {
       for (const extension of readdir(root)) {
-        testSubdirs.push(
-            {root: root, subdir: path.join(extension, '0.1', 'test')});
+        const testPath = path.join(extension, '0.1', 'test');
+        if (isdir(path.join(root, testPath))) {
+          testSubdirs.push({root: root, subdir: testPath});
+        }
       }
     } else {
       for (const subdir of readdir(root)) {
