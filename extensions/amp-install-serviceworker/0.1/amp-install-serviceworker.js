@@ -14,19 +14,22 @@
  * limitations under the License.
  */
 
-import {parseUrl, assertHttpsUrl, isProxyOrigin} from '../../../src/url';
+import {assertHttpsUrl, isProxyOrigin, parseUrl} from '../../../src/url';
+import {documentInfoFor} from '../../../src/document-info';
 import {getMode} from '../../../src/mode';
+import {timer} from '../../../src/timer';
 import {user} from '../../../src/log';
+import {viewerFor} from '../../../src/viewer';
 
 /** @private @const {string} */
-const TAG = 'AmpServiceWorkerInstallation';
+const TAG = 'amp-install-serviceworker';
 
 /**
  * Implements custom element: <amp-install-serviceworker>
  * for installation of ServiceWorkers owned by the publisher
  * of the current page.
  */
-class AmpServiceWorkerInstallation extends AMP.BaseElement {
+class AmpInstallServiceWorker extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     const win = this.getWin();
@@ -36,30 +39,66 @@ class AmpServiceWorkerInstallation extends AMP.BaseElement {
     const src = this.element.getAttribute('src');
     assertHttpsUrl(src, this.element);
 
+    /** @private {?string}  */
+    this.iframeSrc_ = null;
+
     if (isProxyOrigin(src) || isProxyOrigin(win.location.href)) {
+      const iframeSrc = this.element.getAttribute('data-iframe-src');
+      if (iframeSrc) {
+        assertHttpsUrl(iframeSrc, this.element);
+        const origin = parseUrl(iframeSrc).origin;
+        const docInfo = documentInfoFor(win);
+        const sourceUrl = parseUrl(docInfo.sourceUrl);
+        const canonicalUrl = parseUrl(docInfo.canonicalUrl);
+        user.assert(
+            origin == sourceUrl.origin ||
+            origin == canonicalUrl.origin,
+            'data-iframe-src (%s) should be a URL on the same origin as the ' +
+            'source (%s) or canonical URL (%s) of the AMP-document.',
+            origin, sourceUrl.origin, canonicalUrl.origin);
+        this.iframeSrc_ = iframeSrc;
+        this.scheduleIframeLoad_();
+      }
       return;
     }
 
-    if (originMatches(win.location.href, src)) {
+    if (parseUrl(win.location.href).origin == parseUrl(src).origin) {
       install(this.getWin(), src);
     } else {
-      if (getMode().development) {
-        user.warn(TAG,
-            'Did not install ServiceWorker because it does not ' +
-            'match the current origin: ' + src);
-      }
+      user.error(TAG,
+          'Did not install ServiceWorker because it does not ' +
+          'match the current origin: ' + src);
     }
   }
-}
 
-/**
- * Returns true if the 2 hrefs are on the same origin.
- * @param {string} href1
- * @param {string} href2
- * return {boolean}
- */
-function originMatches(href1, href2) {
-  return parseUrl(href1).origin == parseUrl(href2).origin;
+  /** @private */
+  scheduleIframeLoad_() {
+    viewerFor(this.getWin()).whenFirstVisible().then(() => {
+      // If the user is longer than 20 seconds on this page, load
+      // the external iframe to install the ServiceWorker. The wait is
+      // introduced to avoid installing SWs for content that the user
+      // only engaged with superficially.
+      timer.delay(() => {
+        this.deferMutate(this.insertIframe_.bind(this));
+      }, 20000);
+    });
+  }
+
+  /** @private */
+  insertIframe_() {
+    // If we are no longer visible, we will not do a SW registration on this
+    // page view.
+    if (!viewerFor(this.getWin()).isVisible()) {
+      return;
+    }
+    this.insertedIframe_ = true;
+    // The iframe will stil be loaded.
+    this.element.style.display = 'none';
+    const iframe = /*OK*/document.createElement('iframe');
+    iframe.setAttribute('sandbox', 'allow-same-origin allow-scripts');
+    iframe.src = this.iframeSrc_;
+    this.element.appendChild(iframe);
+  }
 }
 
 /**
@@ -79,4 +118,4 @@ function install(win, src) {
 }
 
 AMP.registerElement('amp-install-serviceworker',
-    AmpServiceWorkerInstallation);
+    AmpInstallServiceWorker);
