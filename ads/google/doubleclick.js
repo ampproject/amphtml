@@ -22,7 +22,7 @@ import {getCorrelator} from './utils';
  * @param {!Object} data
  */
 export function doubleclick(global, data) {
-  const experimentFraction = 0.01;
+  const experimentFraction = 0.1;
 
   checkData(data, [
     'slot', 'targeting', 'categoryExclusions',
