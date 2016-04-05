@@ -435,13 +435,18 @@ def GenerateTestRunner(out_dir):
   """Generates a test runner: a nodejs script that runs our minified tests."""
   logging.info('entering ...')
   f = open('%s/test_runner' % out_dir, 'w')
+  extensions_dir = 'extensions'
+  # In the Github project, the extensions are located in a sibling directory
+  # to the validator rather than a child directory.
+  if not os.path.isdir(extensions_dir):
+    extensions_dir = '../extensions'
   f.write("""#!/usr/bin/nodejs
              global.assert = require('assert');
              global.fs = require('fs');
              global.path = require('path');
              var JasmineRunner = require('jasmine');
              var jasmine = new JasmineRunner();
-             process.env.TESTDATA_DIRS = 'testdata'
+             process.env.TESTDATA_ROOTS = 'testdata:%s'
              require('./validator_test_minified');
              require('./htmlparser_test_minified');
              require('./parse-css_test_minified');
@@ -450,7 +455,7 @@ def GenerateTestRunner(out_dir):
                  process.exit(passed ? 0 : 1);
              });
              jasmine.execute();
-          """)
+          """ % extensions_dir)
   os.chmod('%s/test_runner' % out_dir, 0750)
   logging.info('... success')
 
