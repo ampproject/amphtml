@@ -125,7 +125,7 @@ amp.htmlparser.DocLocator = class {
  */
 amp.htmlparser.HtmlSaxHandlerWithLocation = class
 extends amp.htmlparser.HtmlSaxHandler {
-  constructor() {}
+  constructor() { super(); }
 
   /**
    * Called prior to parsing a document, that is, before {@code startTag}.
@@ -612,11 +612,13 @@ amp.htmlparser.HtmlParser.INSIDE_TAG_TOKEN_ = new RegExp(
         // interpreters are inconsistent in whether a group that matches nothing
         // is null, undefined, or the empty string.
         ('(?:' +
-        // We don't allow attribute names starting with '/', but we allow them
-        // to contain '/' (differing from HTML5 spec), so that we can identify
-        // full mustache template variables and emit matching errors.
-        '([^\\t\\r\\n /=>][^\\t\\r\\n =>]*)' +  // attribute name
-        ('(' +                                  // optionally followed
+        // Allow attribute names to start with /, avoiding assigning the / in
+        // close-tag syntax */>.
+        '([^\\t\\r\\n /=>][^\\t\\r\\n =>]*|' + // e.g. "href"
+         '[^\\t\\r\\n =>]+[^ >]|' +            // e.g. "/asdfs/asd"
+         '\/+(?!>))' +                         // e.g. "/"
+        // Optionally followed by:
+        ('(' +
         '\\s*=\\s*' +
         ('(' +
         // A double quoted string.
@@ -653,10 +655,10 @@ amp.htmlparser.HtmlParser.OUTSIDE_TAG_TOKEN_ = new RegExp(
     '^(?:' +
         // Entity captured in group 1.
         '&(\\#[0-9]+|\\#[x][0-9a-f]+|\\w+);' +
-        // Comment, and processing instructions not captured.
-        '|<[!]--[\\s\\S]*?-->|<\\?[^>*]*>' +
+        // Comments not captured.
+        '|<[!]--[\\s\\S]*?-->' +
         // '/' captured in group 2 for close tags, and name captured in group 3.
-        '|<(/)?([a-z!][a-z0-9_-]*)' +
+        '|<(/)?([a-z!\\?][a-z0-9_:-]*)' +
         // Text captured in group 4.
         '|([^<&>]+)' +
         // Cruft captured in group 5.
@@ -674,6 +676,7 @@ extends amp.htmlparser.DocLocator {
    * @param {string} htmlText text of the entire HTML document to be processed.
    */
   constructor(htmlText) {
+    super();
     // Precomputes a mapping from positions within htmlText to line /
     // column numbers. TODO(johannes): This uses a fair amount of
     // space and we can probably do better, but it's also quite simple

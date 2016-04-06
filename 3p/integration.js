@@ -28,15 +28,16 @@ import {a9} from '../ads/a9';
 import {adblade, industrybrains} from '../ads/adblade';
 import {adform} from '../ads/adform';
 import {adreactor} from '../ads/adreactor';
-import {adsense} from '../ads/adsense';
+import {adsense} from '../ads/google/adsense';
 import {adtech} from '../ads/adtech';
 import {plista} from '../ads/plista';
 import {criteo} from '../ads/criteo';
-import {doubleclick} from '../ads/doubleclick';
+import {doubleclick} from '../ads/google/doubleclick';
 import {dotandads} from '../ads/dotandads';
 import {endsWith} from '../src/string';
 import {facebook} from './facebook';
 import {flite} from '../ads/flite';
+import {improvedigital} from '../ads/improvedigital';
 import {manageWin} from './environment';
 import {mediaimpact} from '../ads/mediaimpact';
 import {nonSensitiveDataPostMessage, listenParent} from './messaging';
@@ -44,16 +45,18 @@ import {twitter} from './twitter';
 import {yieldmo} from '../ads/yieldmo';
 import {computeInMasterFrame, register, run} from '../src/3p';
 import {parseUrl, getSourceUrl} from '../src/url';
-import {assert} from '../src/asserts';
 import {taboola} from '../ads/taboola';
 import {smartadserver} from '../ads/smartadserver';
+import {sortable} from '../ads/sortable';
 import {revcontent} from '../ads/revcontent';
 import {openadstream} from '../ads/openadstream';
+import {openx} from '../ads/openx';
 import {triplelift} from '../ads/triplelift';
 import {teads} from '../ads/teads';
 import {rubicon} from '../ads/rubicon';
 import {imobile} from '../ads/imobile';
 import {webediads} from '../ads/webediads';
+import {user} from '../src/log';
 
 /**
  * Whether the embed type may be used with amp-embed tag.
@@ -74,6 +77,7 @@ register('plista', plista);
 register('criteo', criteo);
 register('doubleclick', doubleclick);
 register('flite', flite);
+register('improvedigital', improvedigital);
 register('industrybrains', industrybrains);
 register('taboola', taboola);
 register('dotandads', dotandads);
@@ -86,7 +90,9 @@ register('facebook', facebook);
 register('smartadserver', smartadserver);
 register('mediaimpact', mediaimpact);
 register('revcontent', revcontent);
+register('sortable', sortable);
 register('openadstream', openadstream);
+register('openx', openx);
 register('triplelift', triplelift);
 register('teads', teads);
 register('rubicon', rubicon);
@@ -119,14 +125,15 @@ const defaultAllowedTypesInCustomFrame = [
  */
 export function draw3p(win, data, configCallback) {
   const type = data.type;
-  assert(win.context.location.originValidated != null,
+  user.assert(win.context.location.originValidated != null,
       'Origin should have been validated');
 
-  assert(isTagNameAllowed(data.type, win.context.tagName),
+  user.assert(isTagNameAllowed(data.type, win.context.tagName),
       'Embed type %s not allowed with tag %s', data.type, win.context.tagName);
   if (configCallback) {
     configCallback(data, data => {
-      assert(data, 'Expected configuration to be passed as first argument');
+      user.assert(data,
+          'Expected configuration to be passed as first argument');
       run(type, win, data);
     });
   } else {
@@ -304,7 +311,7 @@ function onResizeDenied(observerCallback) {
  * @param {string} entityId See comment above for content.
  */
 function reportRenderedEntityIdentifier(entityId) {
-  assert(typeof entityId == 'string',
+  user.assert(typeof entityId == 'string',
       'entityId should be a string %s', entityId);
   nonSensitiveDataPostMessage('entity-id', {
     id: entityId,
@@ -329,7 +336,7 @@ export function validateParentOrigin(window, parentLocation) {
     parentLocation.originValidated = false;
     return;
   }
-  assert(ancestors[0] == parentLocation.origin,
+  user.assert(ancestors[0] == parentLocation.origin,
       'Parent origin mismatch: %s, %s',
       ancestors[0], parentLocation.origin);
   parentLocation.originValidated = true;
@@ -356,7 +363,7 @@ export function validateAllowedTypes(window, type, allowedTypes) {
   if (defaultAllowedTypesInCustomFrame.indexOf(type) != -1) {
     return;
   }
-  assert(allowedTypes && allowedTypes.indexOf(type) != -1,
+  user.assert(allowedTypes && allowedTypes.indexOf(type) != -1,
       'Non-whitelisted 3p type for custom iframe: ' + type);
 }
 

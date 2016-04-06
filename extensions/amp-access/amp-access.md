@@ -29,7 +29,15 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-access" src="https://cdn.ampproject.org/v0/amp-access-0.1.js">&lt;/script></code></td>
+    <td>
+      <div>
+        <code>&lt;script async custom-element="amp-access" src="https://cdn.ampproject.org/v0/amp-access-0.1.js">&lt;/script></code>
+      </div>
+      <div>
+        <code>&lt;script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js">&lt;/script></code>
+      </div>
+      <small>Notice that both "amp-access" and "amp-analytics" scripts are required.</small>
+    </td>
   </tr>
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
@@ -164,7 +172,7 @@ https://pub.com/access?
   &_=RANDOM
 ```
 
-AUTHDATA variable is availbale to Pingback and Login URLs. It allows passing any field in the authorization
+AUTHDATA variable is available to Pingback and Login URLs. It allows passing any field in the authorization
 response as an URL parameter. E.g. `AUTHDATA(isSubscriber)`. The nested expressions are allowed as well, such as
 `AUTHDATA(other.isSubscriber)`.
 

@@ -22,7 +22,6 @@
  * For details, see https://goo.gl/Mwaacs
  */
 
-import {assert} from '../asserts';
 import {getCookie, setCookie} from '../cookies';
 import {getService} from '../service';
 import {getSourceOrigin, isProxyOrigin, parseUrl} from '../url';
@@ -31,6 +30,7 @@ import {viewerFor} from '../viewer';
 import {
   sha384Base64,
 } from '../../third_party/closure-library/sha384-generated';
+import {user} from '../log';
 
 
 const ONE_DAY_MILLIS = 24 * 3600 * 1000;
@@ -106,7 +106,7 @@ class Cid {
     } else {
       getCidStruct = /** @type {!GetCidDef} */ (externalCidScope);
     }
-    assert(/^[a-zA-Z0-9-_]+$/.test(getCidStruct.scope),
+    user.assert(/^[a-zA-Z0-9-_]+$/.test(getCidStruct.scope),
         'The client id name must only use the characters ' +
         '[a-zA-Z0-9-_]+\nInstead found: %s', getCidStruct.scope);
     return consent.then(() => {
@@ -202,7 +202,7 @@ function getOrCreateCookie(cid, getCidStruct, persistenceConsent) {
  *     factored into its own package.
  */
 export function getProxySourceOrigin(url) {
-  assert(isProxyOrigin(url), 'Expected proxy origin %s', url.origin);
+  user.assert(isProxyOrigin(url), 'Expected proxy origin %s', url.origin);
   return getSourceOrigin(url);
 }
 

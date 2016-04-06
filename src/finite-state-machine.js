@@ -14,15 +14,7 @@
  * limitations under the License.
  */
 
-import {assert} from './asserts';
-
-/**
- * Sanitizes commas into an escaped form
- * @param {*} value
- */
-function stringSanitizer(value) {
-  return String(value).replace(/,/g, '\\,');
-}
+import {dev} from './log';
 
 /**
  * @template STATE
@@ -42,13 +34,6 @@ export class FiniteStateMachine {
     this.state_ = initialState;
 
     /**
-     * The bits of state that may change.
-     * @type {!Array<string>}
-     */
-    this.bits_ = Object.keys(initialState);
-    assert(this.bits_.length > 0, 'must pass an initialState object');
-
-    /**
      * Callbacks that are invoked when transitioning from an old state
      * to the new.
      * @type {Object<string, function()>}
@@ -65,7 +50,7 @@ export class FiniteStateMachine {
    */
   addTransition(oldState, newState, callback) {
     const transition = this.statesToTransition_(oldState, newState);
-    assert(
+    dev.assert(
       !this.transitions_[transition],
       'cannot define a duplicate transition callback'
     );
@@ -97,9 +82,6 @@ export class FiniteStateMachine {
    * @return {string}
    */
   statesToTransition_(oldState, newState) {
-    const oldBits = this.bits_.map(bit => stringSanitizer(oldState[bit]));
-    const newBits = this.bits_.map(bit => stringSanitizer(newState[bit]));
-
-    return `${oldBits}|${newBits}`;
+    return `${oldState}|${newState}`;
   }
 }

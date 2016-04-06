@@ -84,6 +84,60 @@ export const ANALYTICS_CONFIG = {
     },
   },
 
+  'burt': {
+    'vars': {
+      'trackingKey': 'ignore',
+      'category': '',
+      'subCategory': '',
+    },
+    'requests': {
+      'host': '//${trackingKey}.c.richmetrics.com/',
+      'base': '${host}imglog?' +
+        'e=${trackingKey}&' +
+        'pi=${trackingKey}' +
+          '|${pageViewId}' +
+          '|${canonicalPath}' +
+          '|${clientId(burt-amp-user-id)}&' +
+        'ui=${clientId(burt-amp-user-id)}&' +
+        'v=amp&' +
+        'ts=${timestamp}&' +
+        'sn=${requestCount}&',
+      'pageview': '${base}' +
+        'type=page&' +
+        'ca=${category}&' +
+        'sc=${subCategory}&' +
+        'ln=${browserLanguage}&' +
+        'lr=${documentReferrer}&' +
+        'eu=${sourceUrl}&' +
+        'tz=${timezone}&' +
+        'pd=${scrollWidth}x${scrollHeight}&' +
+        'sd=${screenWidth}x${screenHeight}&' +
+        'wd=${availableScreenWidth}x${availableScreenHeight}&' +
+        'ws=${scrollLeft}x${scrollTop}',
+      'pageping': '${base}' +
+        'type=pageping',
+    },
+    'triggers': {
+      'pageview': {
+        'on': 'visible',
+        'request': 'pageview',
+      },
+      'pageping': {
+        'on': 'timer',
+        'timerSpec': {
+          'interval': 15,
+          'max-timer-length': 1200,
+        },
+        'request': 'pageping',
+      },
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
+    },
+  },
+
   'chartbeat': {
     'requests': {
       'host': 'https://ping.chartbeat.net',
@@ -263,6 +317,11 @@ export const ANALYTICS_CONFIG = {
         'request': 'pageview',
       },
     },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
+    },
   },
 
   'parsely': {
@@ -294,6 +353,20 @@ export const ANALYTICS_CONFIG = {
       'beacon': false,
       'xhrpost': false,
       'image': true,
+    },
+  },
+
+  'piano': {
+    'requests': {
+      'host': 'https://api-v3.tinypass.com',
+      'basePrefix': '/api/v3',
+      'baseSuffix': '&pageview_id=${pageViewId}&rand=${random}&' +
+        'amp_client_id=${clientId}&aid=${aid}',
+      'pageview': '${host}${basePrefix}/page/track?url=${canonicalUrl}&' +
+        'referer=${documentReferrer}&content_created=${contentCreated}&' +
+        'content_author=${contentAuthor}&content_section=${contentSection}&' +
+        'timezone_offset=${timezone}&tags=${tags}&amp_url=${ampdocUrl}&' +
+        'screen=${screenWidth}x${screenHeight}${baseSuffix}',
     },
   },
 

@@ -18,6 +18,7 @@ import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
 import {setStyles} from '../../../src/style';
 import {timer} from '../../../src/timer';
+import {user} from '../../../src/log';
 
 /** @type {number} Value of YouTube player state when playing. */
 const YT_PLAYER_STATE_PLAYING = 1;
@@ -59,7 +60,7 @@ class AmpYoutube extends AMP.BaseElement {
 
     // The video-id is supported only for backward compatibility.
     /** @private @const {string} */
-    this.videoid_ = AMP.assert(
+    this.videoid_ = user.assert(
         (this.element.getAttribute('data-videoid') ||
         this.element.getAttribute('video-id')),
         'The data-videoid attribute is required for <amp-youtube> %s',
@@ -74,7 +75,7 @@ class AmpYoutube extends AMP.BaseElement {
   layoutCallback() {
     // See
     // https://developers.google.com/youtube/iframe_api_reference
-    const iframe = document.createElement('iframe');
+    const iframe = this.element.ownerDocument.createElement('iframe');
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowfullscreen', 'true');
     iframe.src = 'https://www.youtube.com/embed/' + encodeURIComponent(
@@ -135,7 +136,7 @@ class AmpYoutube extends AMP.BaseElement {
       return;
     }
     let data;
-    if (event.data.indexOf('{') != 0) {
+    if (!event.data || event.data.indexOf('{') != 0) {
       return;  // Doesn't look like JSON.
     }
     try {

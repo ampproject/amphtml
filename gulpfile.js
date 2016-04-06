@@ -85,11 +85,13 @@ function buildExtensions(options) {
   buildExtension('amp-iframe', '0.1', false, options);
   buildExtension('amp-image-lightbox', '0.1', true, options);
   buildExtension('amp-instagram', '0.1', false, options);
+  buildExtension('amp-jwplayer', '0.1', false, options);
   buildExtension('amp-lightbox', '0.1', false, options);
   buildExtension('amp-list', '0.1', false, options);
   buildExtension('amp-mustache', '0.1', false, options);
   buildExtension('amp-pinterest', '0.1', true, options);
   buildExtension('amp-reach-player', '0.1', false, options);
+  buildExtension('amp-sidebar', '0.1', true, options);
   buildExtension('amp-soundcloud', '0.1', false, options);
   buildExtension('amp-springboard-player', '0.1', false, options);
   buildExtension('amp-install-serviceworker', '0.1', false, options);
@@ -340,6 +342,7 @@ function buildExamples(watch) {
   buildExample('font.amp.html');
   buildExample('facebook.amp.html');
   buildExample('instagram.amp.html');
+  buildExample('jwplayer.amp.html');
   buildExample('pinterest.amp.html');
   buildExample('reach-player.amp.html');
   buildExample('released.amp.html');
@@ -352,6 +355,7 @@ function buildExamples(watch) {
   buildExample('vine.amp.html');
   buildExample('multiple-docs.html');
   buildExample('youtube.amp.html');
+  buildExample('openx.amp.html');
 
   // TODO(dvoytenko, #1393): Enable for proxy-testing.
   // // Examples are also copied into `c/` directory for AMP-proxy testing.

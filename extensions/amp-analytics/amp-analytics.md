@@ -95,6 +95,12 @@ Type attribute value: `atinternet`
 
 Adds support for AT Internet. More details for adding AT Internet support can be found at [developers.atinternet-solutions.com](http://developers.atinternet-solutions.com/javascript-en/advanced-features-javascript-en/accelerated-mobile-pages-amp-javascript-en/).
 
+### Burt
+
+Type attribute value: `burt`
+
+Adds support for Burt. Additionally, the `trackingKey` variable must be specified. It's also possible to specify the optional variables `category` and `subCategory`.
+
 ### Chartbeat
 
 Type attribute value: `chartbeat`
@@ -145,6 +151,12 @@ Adds support for Médiamétrie tracking pages. Requires defining *var* `serial`.
 Type attribute value: `parsely`
 
 Adds support for Parsely. Configuration details can be found at [parsely.com/docs](http://parsely.com/docs/integration/tracking/google-amp.html).
+
+##### Piano
+
+Type attribute value: `piano`
+
+Adds support for Piano.  Configuration details can be found at [vx.piano.io](http://vx.piano.io/javascript-tracking-amp).
 
 ### Quantcast Measurement
 

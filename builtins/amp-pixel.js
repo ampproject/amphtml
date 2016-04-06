@@ -17,9 +17,9 @@
 import {BaseElement} from '../src/base-element';
 import {Layout} from '../src/layout';
 import {urlReplacementsFor} from '../src/url-replacements';
-import {assert} from '../src/asserts';
 import {registerElement} from '../src/custom-element';
 import {toggle} from '../src/style';
+import {user} from '../src/log';
 
 
 /**
@@ -62,7 +62,7 @@ export function installPixel(win) {
     }
 
     assertSource(src) {
-      assert(
+      user.assert(
           /^(https\:\/\/|\/\/)/i.test(src),
           'The <amp-pixel> src attribute must start with ' +
           '"https://" or "//". Invalid value: ' + src);

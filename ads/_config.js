@@ -33,11 +33,13 @@ export const adPrefetch = {
   dotandads: 'https://amp.ad.dotandad.com/dotandadsAmp.js',
   industrybrains: 'https://web.industrybrains.com/js/ads/async/show.js',
   mediaimpact: 'https://ec-ns.sascdn.com/diff/251/divscripte/amp.js',
+  openx: 'https://www.googletagservices.com/tag/js/gpt.js',
   smartadserver: 'https://ec-ns.sascdn.com/diff/js/smart.js',
   yieldmo: 'https://static.yieldmo.com/ym.amp1.js',
   revcontent: 'https://labs-cdn.revcontent.com/build/amphtml/revcontent.amp.min.js',
   teads: 'https://cdn.teads.tv/media/format/v3/teads-format.min.js',
   imobile: 'https://spamp.i-mobile.co.jp/script/amp.js',
+  sortable: 'https://www.googletagservices.com/tag/js/gpt.js',
 };
 
 /**
@@ -79,6 +81,12 @@ export const adPreconnect = {
     'https://tpc.googlesyndication.com',
   ],
   dotandads: 'https://bal.ad.dotandad.com',
+  improvedigital: 'https://ad.360yield.com/',
+  openx: [
+    'https://partner.googleadservices.com',
+    'https://securepubads.g.doubleclick.net',
+    'https://tpc.googlesyndication.com',
+  ],
   yieldmo: [
     'https://static.yieldmo.com',
     'https://s.yieldmo.com',
@@ -98,6 +106,12 @@ export const adPreconnect = {
   rubicon: [
     'https://ads.rubiconproject.com',
     'https://optimized-by.rubiconproject.com',
+  ],
+  sortable: [
+    'https://tags-cdn.deployads.com',
+    'https://partner.googleadservices.com',
+    'https://securepubads.g.doubleclick.net',
+    'https://tpc.googlesyndication.com',
   ],
   imobile: 'https://spad.i-mobile.co.jp',
   webediads: [

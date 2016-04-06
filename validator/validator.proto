@@ -202,11 +202,33 @@ message AmpLayout {
   optional bool defines_default_height = 3;
 }
 
+// TagSpec::child_tags uses this configuration to specify which child tags
+// are expected for a specific tag.
+//
+// Matching child tags is done by tag name, while the parent is
+// matched by TagSpec. The reason for this is that matching by tag
+// spec name would produce less useful error messages, because we want
+// to be able to produce a good message even if the tag spec name
+// could not be determined because the enclosed child tag is invalid
+// (no TagSpec matches). By doing a tag name match, we can produce a
+// reasonable error regardless if a child tag was misplaced.
+message ChildTagSpec {
+  // Unless set to -1 (the default), the parent tag must have exactly
+  // |mandatory_num_child_tags| immediate child tags.
+  optional int32 mandatory_num_child_tags = 1 [ default = -1 ];
+  // If at least one tag name is specified, then the first child of the
+  // parent tag must have one of the provided names.
+  repeated string first_child_tag_name_oneof = 2;
+  // If at least one tag name is specified, then the child tags of
+  // the parent tag must have one of the provided tag names.
+  repeated string child_tag_name_oneof = 3;
+}
+
 // Tags that are not covered by at least one of these specs are disallowed.
 // Some tags are mandatory. Note that the tag name is not unique, that is,
 // there can be multiple tag specs covering the same name, e.g., for
 // multiple meta tags (with different attributes).
-// NEXT AVAILABLE TAG: 19
+// NEXT AVAILABLE TAG: 20
 message TagSpec {
   // Use lower-case tag names only. If adding the same tag twice, then they must
   // also have a spec_name string which is unique throughout all detail.
@@ -263,6 +285,10 @@ message TagSpec {
   // has been evaluated. Unlike other checks in this TagSpec, we
   // no longer have the ability to fall back on a different TagSpec.
   optional CdataSpec cdata = 12;
+
+  // Specifies which tags can be the child tags, that is, immediately children
+  // of this tag in the document.
+  optional ChildTagSpec child_tags = 19;
 
   // If provided, a URL which linking to a section / sentence in the
   // AMP HTML spec.
@@ -351,7 +377,7 @@ message ValidationError {
     DEV_WARNING = 3; // DEPRECATED DO NOT USE.
   }
   optional Severity severity = 6 [ default = ERROR ];
-  // NEXT AVAILABLE TAG: 56
+  // NEXT AVAILABLE TAG: 61
   enum Code {
     UNKNOWN_CODE = 0;
     MANDATORY_TAG_MISSING = 1;
@@ -365,6 +391,7 @@ message ValidationError {
     SPECIFIED_LAYOUT_INVALID = 26;
     MANDATORY_ATTR_MISSING = 5;
     MANDATORY_ONEOF_ATTR_MISSING = 28;
+    DUPLICATE_DIMENSION = 60;
     DUPLICATE_UNIQUE_TAG = 6;
     WRONG_PARENT_TAG = 7;
     STYLESHEET_TOO_LONG_OLD_VARIANT = 8;
@@ -391,6 +418,9 @@ message ValidationError {
     MANDATORY_TAG_ANCESTOR_WITH_HINT = 32;
     ATTR_DISALLOWED_BY_IMPLIED_LAYOUT = 33;
     ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT = 34;
+    INCORRECT_NUM_CHILD_TAGS = 56;
+    DISALLOWED_CHILD_TAG_NAME = 57;
+    DISALLOWED_FIRST_CHILD_TAG_NAME = 58;
 
     CSS_SYNTAX = 13;  // Deprecated, remove after 2016-06-01.
     CSS_SYNTAX_INVALID_AT_RULE = 29;
@@ -409,6 +439,7 @@ message ValidationError {
     CSS_SYNTAX_INVALID_URL = 53;
     CSS_SYNTAX_INVALID_URL_PROTOCOL = 54;
     CSS_SYNTAX_DISALLOWED_RELATIVE_URL = 55;
+    CSS_SYNTAX_INVALID_ATTR_SELECTOR = 59;
   }
   optional Code code = 1;
   optional int32 line = 2 [ default = 1 ];
@@ -420,6 +451,13 @@ message ValidationError {
   // amp.validator.categorizeError and
   // amp.validator.annotateWithErrorCategories if you need this.
   optional ErrorCategory.Code category = 8;
+
+  // Used only in JavaScript, if an error is emitted for a specific HTML tag and
+  // if that HTML tag has an attribute named data-amp-report-test, this string
+  // will be set and contain the value found for that attribute. This is used
+  // in tests to match specific errors to specific tags in the test cases. It
+  // is not a rendered value.
+  optional string data_amp_report_test_value = 9;
 }
 
 message ErrorFormat {

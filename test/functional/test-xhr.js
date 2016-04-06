@@ -67,139 +67,134 @@ describe('XHR', function() {
     // mocking and testing the request becomes not doable.
     if (test.desc != 'Native') {
 
-      it('should allow GET and POST methods', () => {
-        setupMockXhr();
-        const get = xhr.fetchJson.bind(xhr, '/get?k=v1');
-        const post = xhr.fetchJson.bind(xhr, '/post', {
-          method: 'POST',
-          body: {
-            hello: 'world',
-          },
+      describe('#XHR', () => {
+
+        beforeEach(setupMockXhr);
+
+        it('should allow GET and POST methods', () => {
+          const get = xhr.fetchJson.bind(xhr, '/get?k=v1');
+          const post = xhr.fetchJson.bind(xhr, '/post', {
+            method: 'POST',
+            body: {
+              hello: 'world',
+            },
+          });
+          const put = xhr.fetchJson.bind(xhr, '/put', {
+            method: 'PUT',
+            body: {
+              hello: 'world',
+            },
+          });
+          const patch = xhr.fetchJson.bind(xhr, '/patch', {
+            method: 'PATCH',
+            body: {
+              hello: 'world',
+            },
+          });
+          const deleteMethod = xhr.fetchJson.bind(xhr, '/delete', {
+            method: 'DELETE',
+            body: {
+              id: 3,
+            },
+          });
+
+          expect(get).to.not.throw();
+          expect(post).to.not.throw();
+          expect(put).to.throw();
+          expect(patch).to.throw();
+          expect(deleteMethod).to.throw();
         });
-        const put = xhr.fetchJson.bind(xhr, '/put', {
-          method: 'PUT',
-          body: {
-            hello: 'world',
-          },
-        });
-        const patch = xhr.fetchJson.bind(xhr, '/patch', {
-          method: 'PATCH',
-          body: {
-            hello: 'world',
-          },
-        });
-        const deleteMethod = xhr.fetchJson.bind(xhr, '/delete', {
-          method: 'DELETE',
-          body: {
-            id: 3,
-          },
+
+        it('should do `GET` as default method', () => {
+          xhr.fetchJson('/get?k=v1');
+          expect(requests[0].method).to.equal('GET');
         });
 
-        expect(get).to.not.throw();
-        expect(post).to.not.throw();
-        expect(put).to.throw();
-        expect(patch).to.throw();
-        expect(deleteMethod).to.throw();
-      });
-
-      it('should do `GET` as default method', () => {
-        setupMockXhr();
-        xhr.fetchJson('/get?k=v1');
-        expect(requests[0].method).to.equal('GET');
-      });
-
-      it('should normalize method names to uppercase', () => {
-        setupMockXhr();
-        xhr.fetchJson('/abc');
-        xhr.fetchJson('/abc', {
-          method: 'post',
-          body: {
-            hello: 'world',
-          },
+        it('should normalize method names to uppercase', () => {
+          xhr.fetchJson('/abc');
+          xhr.fetchJson('/abc', {
+            method: 'post',
+            body: {
+              hello: 'world',
+            },
+          });
+          expect(requests[0].method).to.equal('GET');
+          expect(requests[1].method).to.equal('POST');
         });
-        expect(requests[0].method).to.equal('GET');
-        expect(requests[1].method).to.equal('POST');
-      });
 
-      it('should inject source origin query parameter', () => {
-        setupMockXhr();
-        xhr.fetchJson('/get?k=v1#h1');
-        expect(noOrigin(requests[0].url)).to.equal(
-            '/get?k=v1&__amp_source_origin=https%3A%2F%2Facme.com#h1');
-      });
-
-      it('should inject source origin query parameter w/o query', () => {
-        setupMockXhr();
-        xhr.fetchJson('/get');
-        expect(noOrigin(requests[0].url)).to.equal(
-            '/get?__amp_source_origin=https%3A%2F%2Facme.com');
-      });
-
-      it('should defend against invalid source origin query parameter', () => {
-        setupMockXhr();
-        expect(() => {
-          xhr.fetchJson('/get?k=v1&__amp_source_origin=invalid#h1');
-        }).to.throw(/Source origin is not allowed/);
-      });
-
-      it('should defend against empty source origin query parameter', () => {
-        setupMockXhr();
-        expect(() => {
-          xhr.fetchJson('/get?k=v1&__amp_source_origin=#h1');
-        }).to.throw(/Source origin is not allowed/);
-      });
-
-      it('should defend against re-encoded source origin parameter', () => {
-        setupMockXhr();
-        expect(() => {
-          xhr.fetchJson('/get?k=v1&_%5famp_source_origin=#h1');
-        }).to.throw(/Source origin is not allowed/);
-      });
-
-      it('should accept AMP origin when received in response', () => {
-        setupMockXhr();
-        const promise = xhr.fetchJson('/get');
-        requests[0].respond(200, {
-          'Content-Type': 'application/json',
-          'Access-Control-Expose-Headers':
-              'AMP-Access-Control-Allow-Source-Origin',
-          'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
-        }, '{}');
-        return promise.then(() => 'SUCCESS', reason => 'ERROR: ' + reason)
-            .then(res => {
-              expect(res).to.equal('SUCCESS');
-            });
-      });
-
-      it('should deny AMP origin for different origin in response', () => {
-        setupMockXhr();
-        const promise = xhr.fetchJson('/get');
-        requests[0].respond(200, {
-          'Content-Type': 'application/json',
-          'Access-Control-Expose-Headers':
-              'AMP-Access-Control-Allow-Source-Origin',
-          'AMP-Access-Control-Allow-Source-Origin': 'https://other.com',
-        }, '{}');
-        return promise.then(() => 'SUCCESS', reason => 'ERROR: ' + reason)
-            .then(res => {
-              expect(res).to.match(/ERROR/);
-              expect(res).to.match(/Returned AMP-Access-.* is not equal/);
-            });
-      });
-
-      it('should require AMP origin in response for when request', () => {
-        setupMockXhr();
-        const promise = xhr.fetchJson('/get', {
-          requireAmpResponseSourceOrigin: true,
+        it('should inject source origin query parameter', () => {
+          xhr.fetchJson('/get?k=v1#h1');
+          expect(noOrigin(requests[0].url)).to.equal(
+              '/get?k=v1&__amp_source_origin=https%3A%2F%2Facme.com#h1');
         });
-        requests[0].respond(200, {
-          'Content-Type': 'application/json',
-        }, '{}');
-        return promise.then(() => 'SUCCESS', reason => 'ERROR: ' + reason)
-            .then(res => {
-              expect(res).to.match(/ERROR/);
-              expect(res).to.match(/Response must contain/);
-            });
+
+        it('should inject source origin query parameter w/o query', () => {
+          xhr.fetchJson('/get');
+          expect(noOrigin(requests[0].url)).to.equal(
+              '/get?__amp_source_origin=https%3A%2F%2Facme.com');
+        });
+
+        it('should defend against invalid source origin query ' +
+           'parameter', () => {
+          expect(() => {
+            xhr.fetchJson('/get?k=v1&__amp_source_origin=invalid#h1');
+          }).to.throw(/Source origin is not allowed/);
+        });
+
+        it('should defend against empty source origin query parameter', () => {
+          expect(() => {
+            xhr.fetchJson('/get?k=v1&__amp_source_origin=#h1');
+          }).to.throw(/Source origin is not allowed/);
+        });
+
+        it('should defend against re-encoded source origin parameter', () => {
+          expect(() => {
+            xhr.fetchJson('/get?k=v1&_%5famp_source_origin=#h1');
+          }).to.throw(/Source origin is not allowed/);
+        });
+
+        it('should accept AMP origin when received in response', () => {
+          const promise = xhr.fetchJson('/get');
+          requests[0].respond(200, {
+            'Content-Type': 'application/json',
+            'Access-Control-Expose-Headers':
+                'AMP-Access-Control-Allow-Source-Origin',
+            'AMP-Access-Control-Allow-Source-Origin': 'https://acme.com',
+          }, '{}');
+          return promise.then(() => 'SUCCESS', reason => 'ERROR: ' + reason)
+              .then(res => {
+                expect(res).to.equal('SUCCESS');
+              });
+        });
+
+        it('should deny AMP origin for different origin in response', () => {
+          const promise = xhr.fetchJson('/get');
+          requests[0].respond(200, {
+            'Content-Type': 'application/json',
+            'Access-Control-Expose-Headers':
+                'AMP-Access-Control-Allow-Source-Origin',
+            'AMP-Access-Control-Allow-Source-Origin': 'https://other.com',
+          }, '{}');
+          return promise.then(() => 'SUCCESS', reason => 'ERROR: ' + reason)
+              .then(res => {
+                expect(res).to.match(/ERROR/);
+                expect(res).to.match(/Returned AMP-Access-.* is not equal/);
+              });
+        });
+
+        it('should require AMP origin in response for when request', () => {
+          const promise = xhr.fetchJson('/get', {
+            requireAmpResponseSourceOrigin: true,
+          });
+          requests[0].respond(200, {
+            'Content-Type': 'application/json',
+          }, '{}');
+          return promise.then(() => 'SUCCESS', reason => 'ERROR: ' + reason)
+              .then(res => {
+                expect(res).to.match(/ERROR/);
+                expect(res).to.match(/Response must contain/);
+              });
+        });
       });
     }
 
@@ -267,6 +262,75 @@ describe('XHR', function() {
             'AMP-Header=Value1&Access-Control-Expose-Headers=AMP-Header';
         return xhr.fetchAmpCors_(url).then(res => {
           expect(res.headers.get('AMP-Header')).to.equal('Value1');
+        });
+      });
+    });
+
+    describe('#fetchDocument', () => {
+
+      it('should be able to fetch a document', () => {
+        setupMockXhr();
+        expect(requests[0]).to.be.undefined;
+        const promise = xhr.fetchDocument('/index.html').then(doc => {
+          expect(doc instanceof Document).to.be.true;
+        });
+        expect(requests[0].requestHeaders['Accept']).to.equal('text/html');
+        requests[0].respond(200, {
+          'Content-Type': 'text/xml',
+        }, '<html></html>');
+        expect(requests[0].responseType).to.equal('document');
+        return promise;
+      });
+
+      it('should mark 400 as not retriable', () => {
+        setupMockXhr();
+        expect(requests[0]).to.be.undefined;
+        const promise = xhr.fetchDocument('/index.html');
+        requests[0].respond(400, {
+          'Content-Type': 'text/xml',
+        }, '<html></html>');
+        return promise.catch(e => {
+          expect(e.retriable).to.be.undefined;
+          expect(e.retriable === true).to.be.false;
+        });
+      });
+
+      it('should mark 415 as retriable', () => {
+        setupMockXhr();
+        expect(requests[0]).to.be.undefined;
+        const promise = xhr.fetchDocument('/index.html');
+        requests[0].respond(415, {
+          'Content-Type': 'text/xml',
+        }, '<html></html>');
+        return promise.catch(e => {
+          expect(e.retriable).to.be.defined;
+          expect(e.retriable === true).to.be.true;
+        });
+      });
+
+      it('should mark 500 as retriable', () => {
+        setupMockXhr();
+        expect(requests[0]).to.be.undefined;
+        const promise = xhr.fetchDocument('/index.html');
+        requests[0].respond(415, {
+          'Content-Type': 'text/xml',
+        }, '<html></html>');
+        return promise.catch(e => {
+          expect(e.retriable).to.be.defined;
+          expect(e.retriable === true).to.be.true;
+        });
+      });
+
+      it('should error on non document response', () => {
+        setupMockXhr();
+        expect(requests[0]).to.be.undefined;
+        const promise = xhr.fetchDocument('/index.html');
+        requests[0].respond(200, {
+          'Content-Type': 'application/json',
+        }, '{"hello": "world"}');
+        return promise.catch(e => {
+          expect(e.message)
+              .to.match(/responseXML should be a Document instance/);
         });
       });
     });

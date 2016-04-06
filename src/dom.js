@@ -16,6 +16,60 @@
 
 
 /**
+ * Waits until the child element is constructed. Once the child is found, the
+ * callback is executed.
+ * @param {!Element} parent
+ * @param {function(!Element):boolean} checkFunc
+ * @param {function()} callback
+ */
+export function waitForChild(parent, checkFunc, callback) {
+  if (checkFunc(parent)) {
+    callback();
+    return;
+  }
+  const win = parent.ownerDocument.defaultView;
+  if (win.MutationObserver) {
+    const observer = new win.MutationObserver(() => {
+      if (checkFunc(parent)) {
+        observer.disconnect();
+        callback();
+      }
+    });
+    observer.observe(parent, {childList: true});
+  } else {
+    const interval = win.setInterval(() => {
+      if (checkFunc(parent)) {
+        win.clearInterval(interval);
+        callback();
+      }
+    }, /* milliseconds */ 5);
+  }
+}
+
+
+/**
+ * Waits for document's body to be available.
+ * @param {!Document} doc
+ * @param {function()} callback
+ */
+export function waitForBody(doc, callback) {
+  waitForChild(doc.documentElement, () => !!doc.body, callback);
+}
+
+
+/**
+ * Waits for document's body to be available.
+ * @param {!Document} doc
+ * @return {!Promise}
+ */
+export function waitForBodyPromise(doc) {
+  return new Promise(resolve => {
+    waitForBody(doc, resolve);
+  });
+}
+
+
+/**
  * Whether the element is currently contained in the DOM. Polyfills
  * `document.contains()` method when necessary. Notice that according to spec
  * `document.contains` is inclusionary.
@@ -164,11 +218,12 @@ export function setScopeSelectorSupportedForTesting(val) {
 }
 
 /**
+ * @param {!Element} parent
  * @return {boolean}
  */
-function isScopeSelectorSupported() {
+function isScopeSelectorSupported(parent) {
   try {
-    document.querySelector(':scope');
+    parent.ownerDocument.querySelector(':scope');
     return true;
   } catch (e) {
     return false;
@@ -183,7 +238,7 @@ function isScopeSelectorSupported() {
  */
 export function childElementByAttr(parent, attr) {
   if (scopeSelectorSupported == null) {
-    scopeSelectorSupported = isScopeSelectorSupported();
+    scopeSelectorSupported = isScopeSelectorSupported(parent);
   }
   if (scopeSelectorSupported) {
     return parent.querySelector(':scope > [' + attr + ']');
@@ -205,7 +260,7 @@ export function childElementByAttr(parent, attr) {
  */
 export function childElementByTag(parent, tagName) {
   if (scopeSelectorSupported == null) {
-    scopeSelectorSupported = isScopeSelectorSupported();
+    scopeSelectorSupported = isScopeSelectorSupported(parent);
   }
   if (scopeSelectorSupported) {
     return parent.querySelector(':scope > ' + tagName);

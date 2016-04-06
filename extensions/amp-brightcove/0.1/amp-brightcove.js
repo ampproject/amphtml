@@ -19,6 +19,7 @@ import {loadPromise} from '../../../src/event-helper';
 import {addParamsToUrl} from '../../../src/url';
 import {dashToCamelCase} from '../../../src/string';
 import {removeElement} from '../../../src/dom';
+import {user} from '../../../src/log';
 
 class AmpBrightcove extends AMP.BaseElement {
 
@@ -33,10 +34,16 @@ class AmpBrightcove extends AMP.BaseElement {
   }
 
   /** @override */
+  buildCallback() {
+    /** @private {?Element} */
+    this.iframe_ = null;
+  }
+
+  /** @override */
   layoutCallback() {
     const width = this.element.getAttribute('width');
     const height = this.element.getAttribute('height');
-    const account = AMP.assert(
+    const account = user.assert(
         this.element.getAttribute('data-account'),
         'The data-account attribute is required for <amp-brightcove> %s',
         this.element);
@@ -44,7 +51,7 @@ class AmpBrightcove extends AMP.BaseElement {
       this.element.getAttribute('data-player-id') ||
       'default');
     const embed = (this.element.getAttribute('data-embed') || 'default');
-    const iframe = document.createElement('iframe');
+    const iframe = this.element.ownerDocument.createElement('iframe');
     let src = `https://players.brightcove.net/${encodeURIComponent(account)}/${encodeURIComponent(playerid)}_${encodeURIComponent(embed)}/index.html`;
     const params = {};
 
@@ -120,8 +127,9 @@ class AmpBrightcove extends AMP.BaseElement {
    * we can prevent the unlayout.
    *
    * See https://github.com/ampproject/amphtml/issues/2224 for information.
+   * @override
    */
-  unlayout() {
+  unlayoutCallback() {
     if (this.iframe_) {
       removeElement(this.iframe_);
       this.iframe_ = null;

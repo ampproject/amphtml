@@ -23,6 +23,7 @@ import {SwipeXRecognizer} from '../../../src/gesture-recognizers';
 import {bezierCurve} from '../../../src/curve';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {timer} from '../../../src/timer';
+import {user} from '../../../src/log';
 
 
 export class AmpSlides extends BaseCarousel {
@@ -58,7 +59,7 @@ export class AmpSlides extends BaseCarousel {
     /** @private {?number} */
     this.autoplayTimeoutId_ = null;
 
-    AMP.assert(this.slides_.length >= 1,
+    user.assert(this.slides_.length >= 1,
         'amp-carousel with type=slides should have at least 1 slide.');
 
     this.setupAutoplay_();

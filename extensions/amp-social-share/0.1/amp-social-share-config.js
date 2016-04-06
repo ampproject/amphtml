@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {user} from '../../../src/log';
 
 /**
  * Get social share configurations by supported type.
@@ -20,7 +21,7 @@
  * @return {!Object}
  */
 export function getSocialConfig(type) {
-  AMP.assert(type in BUILTINS,
+  user.assert(type in BUILTINS,
     'Unknown social share type ' + type);
   return BUILTINS[type];
 }

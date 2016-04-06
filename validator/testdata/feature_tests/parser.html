@@ -28,29 +28,43 @@
 </head>
 <body>
 
-Strangely quoted attributes:
-<a href="foo.html""></a>
-<a href='foo.html''></a>
-<a href=""foo.html"></a>
-<a href=''foo.html'></a>
-<a href=""foo.html""></a>
-<a href=''foo.html''></a>
-<a '></a>
-<a "></a>
-<a href"foo.html"></a>
-<a href'foo.html'></a>
-<a href"foo.html""></a>
-<a href'foo.html''></a>
-<a href""foo.html"></a>
-<a href''foo.html'></a>
-<a href""foo.html""></a>
-<a href''foo.html''></a>
+  <!-- Strangely quoted attributes: -->
+  <a href="foo.html""></a>
+  <a href='foo.html''></a>
+  <a href=""foo.html"></a>
+  <a href=''foo.html'></a>
+  <a href=""foo.html""></a>
+  <a href=''foo.html''></a>
+  <a '></a>
+  <a "></a>
+  <a href"foo.html"></a>
+  <a href'foo.html'></a>
+  <a href"foo.html""></a>
+  <a href'foo.html''></a>
+  <a href""foo.html"></a>
+  <a href''foo.html'></a>
+  <a href""foo.html""></a>
+  <a href''foo.html''></a>
 
-Attributes in closing tags:
-<a></a foo>
-<a></a href>
-<a></a foo="foo.html">
-<a></a href="foo.html">
+  <!-- Attributes in closing tags: -->
+  <a></a foo>
+  <a></a href>
+  <a></a foo="foo.html">
+  <a></a href="foo.html">
+
+  <!-- <, / as attributes: -->
+  <a < ></a>
+  <a / ></a>
+  <a /a></a>
+  <a /a ></a>
+
+  <!-- Tags that may be processing instructions: -->
+  <?php ?>
+  < ?php ?>
+  <?php echo 'Hello, World'; ?>
+  <?php <span>Content</span> ?>
+  <?xml:namespace prefix = o ns = "urn:schemas-microsoft-com:office:office" />
+  < ?xml:namespace ?>
 
 </body>
 </html>

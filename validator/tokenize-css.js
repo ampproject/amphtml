@@ -1026,7 +1026,17 @@ parse_css.TokenType = {
   FUNCTION: 'FUNCTION',
 
   // For ExtractUrls
-  PARSED_CSS_URL: 'PARSED_CSS_URL'
+  PARSED_CSS_URL: 'PARSED_CSS_URL',
+
+  // For css-selectors.js.
+  TYPE_SELECTOR: 'TYPE_SELECTOR',
+  ID_SELECTOR: 'ID_SELECTOR',
+  ATTR_SELECTOR: 'ATTR_SELECTOR',
+  PSEUDO_SELECTOR: 'PSEUDO_SELECTOR',
+  CLASS_SELECTOR: 'CLASS_SELECTOR',
+  SIMPLE_SELECTOR_SEQUENCE: 'SIMPLE_SELECTOR_SEQUENCE',
+  COMBINATOR: 'COMBINATOR',
+  SELECTORS_GROUP: 'SELECTORS_GROUP'
 };
 
 /**
@@ -1042,6 +1052,15 @@ parse_css.Token = class {
     this.tokenType = parse_css.TokenType.UNKNOWN;
   }
 
+  /**
+   * Propagates the start position of |this| to |other|.
+   * @param {!parse_css.Token} other
+   */
+  copyStartPositionTo(other) {
+    other.line = this.line;
+    other.col = this.col;
+  }
+
   /** @return {!string} */
   toSource() { return '' + this; }
 
@@ -1053,7 +1072,7 @@ parse_css.Token = class {
       'col': this.col
     };
   }
-}
+};
 
 /**
  * Error tokens carry an error code and parameters, which can be

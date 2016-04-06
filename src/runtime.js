@@ -17,18 +17,22 @@
 import {BaseElement} from './base-element';
 import {BaseTemplate, registerExtendedTemplate} from './template';
 import {assert} from './asserts';
+import {dev} from './log';
 import {getMode} from './mode';
+import {getService} from './service';
 import {installStyles} from './styles';
 import {installCoreServices} from './amp-core-service';
 import {isExperimentOn, toggleExperiment} from './experiments';
 import {registerElement} from './custom-element';
 import {registerExtendedElement} from './extended-element';
 import {resourcesFor} from './resources';
-import {timer} from './timer';
 import {viewerFor} from './viewer';
 import {viewportFor} from './viewport';
-import {getService} from './service';
+import {waitForBody} from './dom';
 
+
+/** @const @private {string} */
+const TAG = 'runtime';
 
 /** @type {!Array} */
 const elementsForTesting = [];
@@ -95,7 +99,10 @@ export function adopt(global) {
     registerExtendedTemplate(global, name, implementationClass);
   };
 
-  /** @const */
+  /**
+   * @const
+   * TODO(dvoytenko, #2527): Remove this export.
+   */
   global.AMP.assert = assert;
 
   installCoreServices(global);
@@ -130,7 +137,10 @@ export function adopt(global) {
    * @param {GlobalAmp} fn
    */
   global.AMP.push = function(fn) {
-    fn(global.AMP);
+    // Extensions are only processed once HEAD is complete.
+    waitForBody(global.document, () => {
+      fn(global.AMP);
+    });
   };
 
   /**
@@ -143,20 +153,23 @@ export function adopt(global) {
   global.AMP.setTickFunction = () => {};
 
   // Execute asynchronously scheduled elements.
-  for (let i = 0; i < preregisteredElements.length; i++) {
-    const fn = preregisteredElements[i];
-    try {
-      fn(global.AMP);
-    } catch (e) {
-      // Throw errors outside of loop in its own micro task to
-      // avoid on error stopping other extensions from loading.
-      timer.delay(() => {throw e;}, 1);
+  // Extensions are only processed once HEAD is complete.
+  waitForBody(global.document, () => {
+    for (let i = 0; i < preregisteredElements.length; i++) {
+      const fn = preregisteredElements[i];
+      try {
+        fn(global.AMP);
+      } catch (e) {
+        // Throw errors outside of loop in its own micro task to
+        // avoid on error stopping other extensions from loading.
+        dev.error(TAG, 'Extension failed: ', e);
+      }
     }
-  }
-  // Make sure we empty the array of preregistered extensions.
-  // Technically this is only needed for testing, as everything should
-  // go out of scope here, but just making sure.
-  preregisteredElements.length = 0;
+    // Make sure we empty the array of preregistered extensions.
+    // Technically this is only needed for testing, as everything should
+    // go out of scope here, but just making sure.
+    preregisteredElements.length = 0;
+  });
 }
 
 

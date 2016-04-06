@@ -103,6 +103,20 @@ Container for analytics tags. Positioned far away from top to make sure that doe
 </amp-analytics>
 <!-- End AT Internet tracking -->
 
+<!-- Burt tracking -->
+<amp-analytics type="burt">
+  <script type="application/json">
+    {
+      "vars": {
+        "trackingKey": "B31VT4QH1BFR",
+        "category": "sports",
+        "subCategory": "golf"
+      }
+    }
+  </script>
+</amp-analytics>
+<!-- End Burt example -->
+
 <!-- Chartbeat tracking -->
 <amp-analytics type="chartbeat">
 <script type="application/json">
@@ -215,6 +229,28 @@ Container for analytics tags. Positioned far away from top to make sure that doe
 }
 </script>
 </amp-analytics>
+
+<!-- Start Piano example -->
+<amp-analytics type="piano">
+<script type="application/json">
+{
+  "vars": {
+    "aid": "AIDAIDAID",
+    "contentCreated": "2015-02-16T05:00:00",
+    "contentSection": "Sports",
+    "contentAuthor": "John Higgins",
+    "tags": ["sports"]
+  },
+  "triggers": {
+    "defaultPageview": {
+      "on": "visible",
+      "request": "pageview"
+    }
+  }
+}
+</script>
+</amp-analytics>
+<!-- End Piano example -->
 
 <!-- Quantcast tracking -->
 <amp-analytics type="quantcast">

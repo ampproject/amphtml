@@ -15,8 +15,8 @@
  */
 
 import {getService} from './service';
-import {assert} from './asserts';
 import {parseUrl, getSourceUrl} from './url';
+import {user} from './log';
 
 /**
  * @param {!Window} win
@@ -29,7 +29,7 @@ import {parseUrl, getSourceUrl} from './url';
 export function documentInfoFor(win) {
   return getService(win, 'documentInfo', () => {
     return {
-      canonicalUrl: parseUrl(assert(
+      canonicalUrl: parseUrl(user.assert(
           win.document.querySelector('link[rel=canonical]'),
               'AMP files are required to have a <link rel=canonical> tag.')
               .href).href,

@@ -31,6 +31,7 @@ goog.provide('amp.htmlparser.HtmlParserTest');
  */
 class LoggingHandler extends amp.htmlparser.HtmlSaxHandler {
   constructor() {
+    super();
     this.log = [];
   }
 
@@ -183,6 +184,7 @@ describe('HtmlParser', () => {
 class LoggingHandlerWithLocation
 extends amp.htmlparser.HtmlSaxHandlerWithLocation {
   constructor() {
+    super();
     /** @type {amp.htmlparser.DocLocator} */
     this.locator = null;
     /** @type {!Array<!string>} */

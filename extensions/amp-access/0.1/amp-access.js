@@ -17,7 +17,6 @@
 import {CSS} from '../../../build/amp-access-0.1.css';
 import {actionServiceFor} from '../../../src/action';
 import {analyticsFor} from '../../../src/analytics';
-import {assert, assertEnumValue} from '../../../src/asserts';
 import {assertHttpsUrl, getSourceOrigin} from '../../../src/url';
 import {cancellation} from '../../../src/error';
 import {cidFor} from '../../../src/cid';
@@ -91,9 +90,9 @@ export class AccessService {
   constructor(win) {
     /** @const {!Window} */
     this.win = win;
-    installStyles(this.win.document, CSS, () => {}, false, 'amp-access');
+    installStyles(win.document, CSS, () => {}, false, 'amp-access');
 
-    const accessElement = document.getElementById('amp-access');
+    const accessElement = win.document.getElementById('amp-access');
 
     /** @const @private {boolean} */
     this.enabled_ = !!accessElement;
@@ -108,37 +107,37 @@ export class AccessService {
     this.config_ = this.buildConfig_();
 
     /** @const @private {string} */
-    this.pubOrigin_ = getSourceOrigin(this.win.location);
+    this.pubOrigin_ = getSourceOrigin(win.location);
 
     /** @const @private {!Timer} */
     this.timer_ = timer;
 
     /** @const @private {!Vsync} */
-    this.vsync_ = vsyncFor(this.win);
+    this.vsync_ = vsyncFor(win);
 
     /** @const @private {!Xhr} */
-    this.xhr_ = xhrFor(this.win);
+    this.xhr_ = xhrFor(win);
 
     /** @const @private {!UrlReplacements} */
-    this.urlReplacements_ = urlReplacementsFor(this.win);
+    this.urlReplacements_ = urlReplacementsFor(win);
 
     /** @private @const {!Cid} */
-    this.cid_ = cidFor(this.win);
+    this.cid_ = cidFor(win);
 
     /** @private @const {!Viewer} */
-    this.viewer_ = viewerFor(this.win);
+    this.viewer_ = viewerFor(win);
 
     /** @private @const {!Viewport} */
-    this.viewport_ = viewportFor(this.win);
+    this.viewport_ = viewportFor(win);
 
     /** @private @const {!Templates} */
-    this.templates_ = templatesFor(this.win);
+    this.templates_ = templatesFor(win);
 
     /** @private @const {!Resources} */
-    this.resources_ = resourcesFor(this.win);
+    this.resources_ = resourcesFor(win);
 
     /** @private @const {function(string):Promise<string>} */
-    this.openLoginDialog_ = openLoginDialog.bind(null, this.win);
+    this.openLoginDialog_ = openLoginDialog.bind(null, win);
 
     /** @private {?Promise<string>} */
     this.readerIdPromise_ = null;
@@ -168,7 +167,7 @@ export class AccessService {
     this.loginStartTime_ = 0;
 
     /** @private {!Promise<!InstrumentationService>} */
-    this.analyticsPromise_ = analyticsFor(this.win);
+    this.analyticsPromise_ = analyticsFor(win);
 
     this.firstAuthorizationPromise_.then(() => {
       this.analyticsEvent_('access-authorization-received');
@@ -189,7 +188,7 @@ export class AccessService {
 
     // Access type.
     const type = configJson['type'] ?
-        assertEnumValue(AccessType, configJson['type'], 'access type') :
+        user.assertEnumValue(AccessType, configJson['type'], 'access type') :
         AccessType.CLIENT;
     const config = {
       type: type,
@@ -213,9 +212,10 @@ export class AccessService {
 
     // Validate type = client/server.
     if (type == AccessType.CLIENT || type == AccessType.SERVER) {
-      assert(config.authorization, '"authorization" URL must be specified');
-      assert(config.pingback, '"pingback" URL must be specified');
-      assert(Object.keys(config.loginMap).length > 0,
+      user.assert(config.authorization,
+          '"authorization" URL must be specified');
+      user.assert(config.pingback, '"pingback" URL must be specified');
+      user.assert(Object.keys(config.loginMap).length > 0,
           'At least one "login" URL must be specified');
     }
     return config;
@@ -236,7 +236,8 @@ export class AccessService {
         loginMap[k] = loginConfig[k];
       }
     } else {
-      assert(false, '"login" must be either a single URL or a map of URLs');
+      user.assert(false,
+          '"login" must be either a single URL or a map of URLs');
     }
     return loginMap;
   }
@@ -744,10 +745,10 @@ export class AccessService {
     }
 
     dev.fine(TAG, 'Start login: ', type);
-    assert(this.config_.loginMap[type],
+    user.assert(this.config_.loginMap[type],
         'Login URL is not configured: %s', type);
     // Login URL should always be available at this time.
-    const loginUrl = assert(this.loginUrlMap_[type],
+    const loginUrl = user.assert(this.loginUrlMap_[type],
         'Login URL is not ready: %s', type);
 
     this.loginAnalyticsEvent_(type, 'started');

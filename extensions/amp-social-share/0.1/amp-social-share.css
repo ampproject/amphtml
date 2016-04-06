@@ -24,48 +24,46 @@ amp-social-share {
 amp-social-share span {
   display: block;
   border-radius: 5px;
-  height: 44px;
-  width: 60px;
+  height: 100%;
+  width: 100%;
 }
 
 amp-social-share a {
   display: block;
-  padding: 12px;
+  width: 100%;
+  height: 100%;
   background-repeat: no-repeat;
   background-position: center;
+  background-size: contain;
   text-decoration: none;
 }
 
 /* Twitter Styling */
-amp-social-share .twitter {
+.amp-social-share-twitter {
   background-color: #55acee;
 }
 
-amp-social-share .twitter a {
-  background-image: url('https://g.twimg.com/dev/documentation/image/Twitter_logo_white_32.png');
-}
-
 /* Facebook Styling */
-amp-social-share .facebook {
+.amp-social-share-facebook {
   background-color: #3b5998;
 }
 
 /* Pinterest Styling */
-amp-social-share .pinterest {
+.amp-social-share-pinterest {
   background-color: #bd081c;
 }
 
 /* LinkedIn Styling */
-amp-social-share .linkedin {
+.amp-social-share-linkedin {
   background-color: #0077b5;
 }
 
 /* Google+ Styling */
-amp-social-share .gplus {
+.amp-social-share-gplus {
   background-color: #dc4e41;
 }
 
 /* Email Styling */
-amp-social-share .email {
+.amp-social-share-email {
   background-color: #000000;
 }

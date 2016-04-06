@@ -16,15 +16,12 @@
 
 import {getMode} from '../../../src/mode';
 import {listen} from '../../../src/event-helper';
-import {dev} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {parseUrl} from '../../../src/url';
 import {viewerFor} from '../../../src/viewer';
 
 /** @const */
 const TAG = 'AmpAccessLogin';
-
-/** @const {!Function} */
-const assert = AMP.assert;
 
 /** @const {!RegExp} */
 const RETURN_URL_REGEX = new RegExp('RETURN_URL');
@@ -129,7 +126,7 @@ class WebLoginDialog {
    * @return {!Promise<string>}
    */
   open() {
-    assert(!this.resolve_, 'Dialog already opened');
+    user.assert(!this.resolve_, 'Dialog already opened');
     return new Promise((resolve, reject) => {
       this.resolve_ = resolve;
       this.reject_ = reject;

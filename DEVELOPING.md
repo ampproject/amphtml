@@ -76,9 +76,9 @@ export SAUCE_ACCESS_KEY=access-key
 
 Also for local testing, download [saucelabs connect](https://docs.saucelabs.com/reference/sauce-connect/) (If you are having trouble, downgrade to 4.3.10) and establish a tunnel by running the `sc` before running tests.
 
-Because of the user name and password requirement pull requests do not directly run on Travis. If your pull request contains JS or CSS changes and it does not change the build system, it will be automatically build by our bot [@ampsauce](https://github.com/ampsauce/amphtml). Builds can be seen on [@ampsauce's Travis](https://travis-ci.org/ampsauce/amphtml/builds) and after they finished their state will be logged to your PR.
+If your pull request contains JS or CSS changes and it does not change the build system, it will be automatically built and tested on [Travis](https://travis-ci.org/ampproject/amphtml/builds). After the travis run completes, the result will be logged to your PR.
 
-If a test flaked on a pull request you can ask for a retry by sending the comment `@ampsauce retry`. This will only be accepted if you are a member of the "ampproject" org. Ping us if you'd like to be added. You may also need to publicly reveal your membership.
+If a test flaked on a pull request you can ask a project owner to restart the tests for you.
 
 ### Manual testing
 

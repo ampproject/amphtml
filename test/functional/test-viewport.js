@@ -218,6 +218,16 @@ describe('Viewport', () => {
     viewport.scrollIntoView(element);
   });
 
+  it('should send cached scroll pos to getLayoutRect', () => {
+    const element = document.createElement('div');
+    const bindingMock = sandbox.mock(binding);
+    viewport.scrollTop_ = 111;
+    viewport.scrollLeft_ = 222;
+    bindingMock.expects('getLayoutRect').withArgs(element, 222, 111)
+        .returns('sentinel').once();
+    expect(viewport.getLayoutRect(element)).to.equal('sentinel');
+  });
+
   it('should deletegate scrollWidth', () => {
     const bindingMock = sandbox.mock(binding);
     bindingMock.expects('getScrollWidth').withArgs().returns(111).once();
@@ -596,6 +606,22 @@ describe('ViewportBindingNatural', () => {
       },
     };
     const rect = binding.getLayoutRect(el);
+    expect(rect.left).to.equal(112);  // round(100 + 11.5)
+    expect(rect.top).to.equal(213);  // round(200 + 12.5)
+    expect(rect.width).to.equal(14);  // round(13.5)
+    expect(rect.height).to.equal(15);  // round(14.5)
+  });
+
+  it('should offset client rect for layout and position passed in', () => {
+    windowApi.pageXOffset = 1000;
+    windowApi.pageYOffset = 2000;
+    windowApi.document = {scrollingElement: {}};
+    const el = {
+      getBoundingClientRect: () => {
+        return {left: 11.5, top: 12.5, width: 13.5, height: 14.5};
+      },
+    };
+    const rect = binding.getLayoutRect(el, 100, 200);
     expect(rect.left).to.equal(112);  // round(100 + 11.5)
     expect(rect.top).to.equal(213);  // round(200 + 12.5)
     expect(rect.width).to.equal(14);  // round(13.5)
