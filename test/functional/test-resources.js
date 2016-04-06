@@ -1823,173 +1823,270 @@ describe('Resource renderOutsideViewport', () => {
 
 
   describe('boolean API', () => {
-    it('should allow rendering when element returns true', () => {
-      elementMock.expects('renderOutsideViewport').returns(true).exactly(20);
+    describe('when element returns true', () => {
+      beforeEach(() => {
+        elementMock.expects('renderOutsideViewport').returns(true).once();
+      });
 
-      // Element in viewport
-      resource.layoutBox_ = layoutRectLtwh(0, 10, 100, 100);
-      expect(resource.renderOutsideViewport()).to.equal(true);
-      resource.layoutBox_ = layoutRectLtwh(0, -10, 100, 100);
-      expect(resource.renderOutsideViewport()).to.equal(true);
+      describe('when element is inside viewport', () => {
+        it('should allow rendering when bottom falls outside', () => {
+          resource.layoutBox_ = layoutRectLtwh(0, 10, 100, 100);
+          expect(resource.renderOutsideViewport()).to.equal(true);
+        });
 
-      // Element just below viewport
-      resource.layoutBox_ = layoutRectLtwh(0, 110, 100, 100);
-      expect(resource.renderOutsideViewport()).to.equal(true);
-      // Scrolling towards
-      resources.lastVelocity_ = 2;
-      expect(resource.renderOutsideViewport()).to.equal(true);
-      // Scrolling away
-      resources.lastVelocity_ = -2;
-      expect(resource.renderOutsideViewport()).to.equal(true);
-      resources.lastVelocity_ = 0;
+        it('should allow rendering when top falls outside', () => {
+          resource.layoutBox_ = layoutRectLtwh(0, -10, 100, 100);
+          expect(resource.renderOutsideViewport()).to.equal(true);
+        });
+      });
 
-      // Element marginally below viewport
-      resource.layoutBox_ = layoutRectLtwh(0, 250, 100, 100);
-      expect(resource.renderOutsideViewport()).to.equal(true);
-      // Scrolling towards
-      resources.lastVelocity_ = 2;
-      expect(resource.renderOutsideViewport()).to.equal(true);
-      // Scrolling away
-      resources.lastVelocity_ = -2;
-      expect(resource.renderOutsideViewport()).to.equal(true);
-      resources.lastVelocity_ = 0;
+      describe('when element is just below viewport', () => {
+        beforeEach(() => {
+          resource.layoutBox_ = layoutRectLtwh(0, 110, 100, 100);
+        });
 
-      // Element wayyy below viewport
-      resource.layoutBox_ = layoutRectLtwh(0, 1000, 100, 100);
-      expect(resource.renderOutsideViewport()).to.equal(true);
-      // Scrolling towards
-      resources.lastVelocity_ = 2;
-      expect(resource.renderOutsideViewport()).to.equal(true);
-      // Scrolling away
-      resources.lastVelocity_ = -2;
-      expect(resource.renderOutsideViewport()).to.equal(true);
-      resources.lastVelocity_ = 0;
+        it('should allow rendering when scrolling towards', () => {
+          resources.lastVelocity_ = 2;
+          expect(resource.renderOutsideViewport()).to.equal(true);
+        });
 
-      // Element just above viewport
-      resource.layoutBox_ = layoutRectLtwh(0, -10, 100, 100);
-      expect(resource.renderOutsideViewport()).to.equal(true);
-      // Scrolling towards
-      resources.lastVelocity_ = -2;
-      expect(resource.renderOutsideViewport()).to.equal(true);
-      // Scrolling away
-      resources.lastVelocity_ = 2;
-      expect(resource.renderOutsideViewport()).to.equal(true);
-      resources.lastVelocity_ = 0;
+        it('should allow rendering when scrolling away', () => {
+          resources.lastVelocity_ = -2;
+          expect(resource.renderOutsideViewport()).to.equal(true);
+        });
+      });
 
-      // Element marginally above viewport
-      resource.layoutBox_ = layoutRectLtwh(0, -250, 100, 100);
-      expect(resource.renderOutsideViewport()).to.equal(true);
-      // Scrolling towards
-      resources.lastVelocity_ = -2;
-      expect(resource.renderOutsideViewport()).to.equal(true);
-      // Scrolling away
-      resources.lastVelocity_ = 2;
-      expect(resource.renderOutsideViewport()).to.equal(true);
-      resources.lastVelocity_ = 0;
+      describe('when element is marginally below viewport', () => {
+        beforeEach(() => {
+          resource.layoutBox_ = layoutRectLtwh(0, 250, 100, 100);
+        });
 
-      // Element wayyy above viewport
-      resource.layoutBox_ = layoutRectLtwh(0, -1000, 100, 100);
-      expect(resource.renderOutsideViewport()).to.equal(true);
-      // Scrolling towards
-      resources.lastVelocity_ = -2;
-      expect(resource.renderOutsideViewport()).to.equal(true);
-      // Scrolling away
-      resources.lastVelocity_ = 2;
-      expect(resource.renderOutsideViewport()).to.equal(true);
-      resources.lastVelocity_ = 0;
+        it('should allow rendering when scrolling towards', () => {
+          resources.lastVelocity_ = 2;
+          expect(resource.renderOutsideViewport()).to.equal(true);
+        });
+
+        it('should allow rendering when scrolling away', () => {
+          resources.lastVelocity_ = -2;
+          expect(resource.renderOutsideViewport()).to.equal(true);
+        });
+      });
+
+      describe('when element is wayyy below viewport', () => {
+        beforeEach(() => {
+          resource.layoutBox_ = layoutRectLtwh(0, 1000, 100, 100);
+        });
+
+        it('should allow rendering', () => {
+          expect(resource.renderOutsideViewport()).to.equal(true);
+        });
+
+        it('should allow rendering when scrolling towards', () => {
+          resources.lastVelocity_ = 2;
+          expect(resource.renderOutsideViewport()).to.equal(true);
+        });
+
+        it('should allow rendering when scrolling away', () => {
+          resources.lastVelocity_ = -2;
+          expect(resource.renderOutsideViewport()).to.equal(true);
+        });
+      });
+
+      describe('when element is just above viewport', () => {
+        beforeEach(() => {
+          resource.layoutBox_ = layoutRectLtwh(0, -10, 100, 100);
+        });
+
+        it('should allow rendering when scrolling towards', () => {
+          resources.lastVelocity_ = -2;
+          expect(resource.renderOutsideViewport()).to.equal(true);
+        });
+
+        it('should allow rendering when scrolling away', () => {
+          resources.lastVelocity_ = 2;
+          expect(resource.renderOutsideViewport()).to.equal(true);
+        });
+      });
+
+      describe('when element is marginally above viewport', () => {
+        beforeEach(() => {
+          resource.layoutBox_ = layoutRectLtwh(0, -250, 100, 100);
+        });
+
+        it('should allow rendering when scrolling towards', () => {
+          resources.lastVelocity_ = -2;
+          expect(resource.renderOutsideViewport()).to.equal(true);
+        });
+
+        it('should allow rendering when scrolling away', () => {
+          resources.lastVelocity_ = 2;
+          expect(resource.renderOutsideViewport()).to.equal(true);
+        });
+      });
+
+      describe('when element is wayyy above viewport', () => {
+        beforeEach(() => {
+          resource.layoutBox_ = layoutRectLtwh(0, -1000, 100, 100);
+        });
+
+        it('should allow rendering', () => {
+          expect(resource.renderOutsideViewport()).to.equal(true);
+        });
+
+        it('should allow rendering when scrolling towards', () => {
+          resources.lastVelocity_ = -2;
+          expect(resource.renderOutsideViewport()).to.equal(true);
+        });
+
+        it('should allow rendering when scrolling away', () => {
+          resources.lastVelocity_ = 2;
+          expect(resource.renderOutsideViewport()).to.equal(true);
+        });
+      });
     });
 
-    it('should disallow rendering when element returns false', () => {
-      elementMock.expects('renderOutsideViewport').returns(false).exactly(20);
+    describe('when element returns false', () => {
+      beforeEach(() => {
+        elementMock.expects('renderOutsideViewport').returns(false).once();
+      });
 
-      // Element in viewport
-      resource.layoutBox_ = layoutRectLtwh(0, 10, 100, 100);
-      expect(resource.renderOutsideViewport()).to.equal(false);
-      resource.layoutBox_ = layoutRectLtwh(0, -10, 100, 100);
-      expect(resource.renderOutsideViewport()).to.equal(false);
+      describe('when element is inside viewport', () => {
+        it('should allow rendering when bottom falls outside', () => {
+          resource.layoutBox_ = layoutRectLtwh(0, 10, 100, 100);
+          expect(resource.renderOutsideViewport()).to.equal(false);
+        });
 
-      // Element just below viewport
-      resource.layoutBox_ = layoutRectLtwh(0, 110, 100, 100);
-      expect(resource.renderOutsideViewport()).to.equal(false);
-      // Scrolling towards
-      resources.lastVelocity_ = 2;
-      expect(resource.renderOutsideViewport()).to.equal(false);
-      // Scrolling away
-      resources.lastVelocity_ = -2;
-      expect(resource.renderOutsideViewport()).to.equal(false);
-      resources.lastVelocity_ = 0;
+        it('should allow rendering when top falls outside', () => {
+          resource.layoutBox_ = layoutRectLtwh(0, -10, 100, 100);
+          expect(resource.renderOutsideViewport()).to.equal(false);
+        });
+      });
 
-      // Element marginally below viewport
-      resource.layoutBox_ = layoutRectLtwh(0, 250, 100, 100);
-      expect(resource.renderOutsideViewport()).to.equal(false);
-      // Scrolling towards
-      resources.lastVelocity_ = 2;
-      expect(resource.renderOutsideViewport()).to.equal(false);
-      // Scrolling away
-      resources.lastVelocity_ = -2;
-      expect(resource.renderOutsideViewport()).to.equal(false);
-      resources.lastVelocity_ = 0;
+      describe('when element is just below viewport', () => {
+        beforeEach(() => {
+          resource.layoutBox_ = layoutRectLtwh(0, 110, 100, 100);
+        });
 
-      // Element wayyy below viewport
-      resource.layoutBox_ = layoutRectLtwh(0, 1000, 100, 100);
-      expect(resource.renderOutsideViewport()).to.equal(false);
-      // Scrolling towards
-      resources.lastVelocity_ = 2;
-      expect(resource.renderOutsideViewport()).to.equal(false);
-      // Scrolling away
-      resources.lastVelocity_ = -2;
-      expect(resource.renderOutsideViewport()).to.equal(false);
-      resources.lastVelocity_ = 0;
+        it('should disallow rendering when scrolling towards', () => {
+          resources.lastVelocity_ = 2;
+          expect(resource.renderOutsideViewport()).to.equal(false);
+        });
 
-      // Element just above viewport
-      resource.layoutBox_ = layoutRectLtwh(0, -10, 100, 100);
-      expect(resource.renderOutsideViewport()).to.equal(false);
-      // Scrolling towards
-      resources.lastVelocity_ = -2;
-      expect(resource.renderOutsideViewport()).to.equal(false);
-      // Scrolling away
-      resources.lastVelocity_ = 2;
-      expect(resource.renderOutsideViewport()).to.equal(false);
-      resources.lastVelocity_ = 0;
+        it('should disallow rendering when scrolling away', () => {
+          resources.lastVelocity_ = -2;
+          expect(resource.renderOutsideViewport()).to.equal(false);
+        });
+      });
 
-      // Element marginally above viewport
-      resource.layoutBox_ = layoutRectLtwh(0, -250, 100, 100);
-      expect(resource.renderOutsideViewport()).to.equal(false);
-      // Scrolling towards
-      resources.lastVelocity_ = -2;
-      expect(resource.renderOutsideViewport()).to.equal(false);
-      // Scrolling away
-      resources.lastVelocity_ = 2;
-      expect(resource.renderOutsideViewport()).to.equal(false);
-      resources.lastVelocity_ = 0;
+      describe('when element is marginally below viewport', () => {
+        beforeEach(() => {
+          resource.layoutBox_ = layoutRectLtwh(0, 250, 100, 100);
+        });
 
-      // Element wayyy above viewport
-      resource.layoutBox_ = layoutRectLtwh(0, -1000, 100, 100);
-      expect(resource.renderOutsideViewport()).to.equal(false);
-      // Scrolling towards
-      resources.lastVelocity_ = -2;
-      expect(resource.renderOutsideViewport()).to.equal(false);
-      // Scrolling away
-      resources.lastVelocity_ = 2;
-      expect(resource.renderOutsideViewport()).to.equal(false);
-      resources.lastVelocity_ = 0;
+        it('should disallow rendering when scrolling towards', () => {
+          resources.lastVelocity_ = 2;
+          expect(resource.renderOutsideViewport()).to.equal(false);
+        });
+
+        it('should disallow rendering when scrolling away', () => {
+          resources.lastVelocity_ = -2;
+          expect(resource.renderOutsideViewport()).to.equal(false);
+        });
+      });
+
+      describe('when element is wayyy below viewport', () => {
+        beforeEach(() => {
+          resource.layoutBox_ = layoutRectLtwh(0, 1000, 100, 100);
+        });
+
+        it('should disallow rendering', () => {
+          expect(resource.renderOutsideViewport()).to.equal(false);
+        });
+
+        it('should disallow rendering when scrolling towards', () => {
+          resources.lastVelocity_ = 2;
+          expect(resource.renderOutsideViewport()).to.equal(false);
+        });
+
+        it('should disallow rendering when scrolling away', () => {
+          resources.lastVelocity_ = -2;
+          expect(resource.renderOutsideViewport()).to.equal(false);
+        });
+      });
+
+      describe('when element is just above viewport', () => {
+        beforeEach(() => {
+          resource.layoutBox_ = layoutRectLtwh(0, -10, 100, 100);
+        });
+
+        it('should disallow rendering when scrolling towards', () => {
+          resources.lastVelocity_ = -2;
+          expect(resource.renderOutsideViewport()).to.equal(false);
+        });
+
+        it('should disallow rendering when scrolling away', () => {
+          resources.lastVelocity_ = 2;
+          expect(resource.renderOutsideViewport()).to.equal(false);
+        });
+      });
+
+      describe('when element is marginally above viewport', () => {
+        beforeEach(() => {
+          resource.layoutBox_ = layoutRectLtwh(0, -250, 100, 100);
+        });
+
+        it('should disallow rendering when scrolling towards', () => {
+          resources.lastVelocity_ = -2;
+          expect(resource.renderOutsideViewport()).to.equal(false);
+        });
+
+        it('should disallow rendering when scrolling away', () => {
+          resources.lastVelocity_ = 2;
+          expect(resource.renderOutsideViewport()).to.equal(false);
+        });
+      });
+
+      describe('when element is wayyy above viewport', () => {
+        beforeEach(() => {
+          resource.layoutBox_ = layoutRectLtwh(0, -1000, 100, 100);
+        });
+
+        it('should disallow rendering', () => {
+          expect(resource.renderOutsideViewport()).to.equal(false);
+        });
+
+        it('should disallow rendering when scrolling towards', () => {
+          resources.lastVelocity_ = -2;
+          expect(resource.renderOutsideViewport()).to.equal(false);
+        });
+
+        it('should disallow rendering when scrolling away', () => {
+          resources.lastVelocity_ = 2;
+          expect(resource.renderOutsideViewport()).to.equal(false);
+        });
+      });
     });
   });
 
   describe('number API', () => {
-    it('should allow rendering when element inside viewport', () => {
-      elementMock.expects('renderOutsideViewport').returns(3).exactly(2);
+    beforeEach(() => {
+      elementMock.expects('renderOutsideViewport').returns(3).once();
+    });
 
-      // Element in viewport
-      resource.layoutBox_ = layoutRectLtwh(0, 10, 100, 100);
-      expect(resource.renderOutsideViewport()).to.equal(true);
-      resource.layoutBox_ = layoutRectLtwh(0, -10, 100, 100);
-      expect(resource.renderOutsideViewport()).to.equal(true);
+    describe('when element is inside viewport', () => {
+      it('should allow rendering when bottom falls outside', () => {
+        resource.layoutBox_ = layoutRectLtwh(0, 10, 100, 100);
+        expect(resource.renderOutsideViewport()).to.equal(true);
+      });
+
+      it('should allow rendering when top falls outside', () => {
+        resource.layoutBox_ = layoutRectLtwh(0, -10, 100, 100);
+        expect(resource.renderOutsideViewport()).to.equal(true);
+      });
     });
 
     describe('when element is just below viewport', () => {
       beforeEach(() => {
-        elementMock.expects('renderOutsideViewport').returns(3).once();
         resource.layoutBox_ = layoutRectLtwh(0, 110, 100, 100);
       });
 
@@ -2006,7 +2103,6 @@ describe('Resource renderOutsideViewport', () => {
 
     describe('when element is marginally below viewport', () => {
       beforeEach(() => {
-        elementMock.expects('renderOutsideViewport').returns(3).once();
         resource.layoutBox_ = layoutRectLtwh(0, 250, 100, 100);
       });
 
@@ -2023,7 +2119,6 @@ describe('Resource renderOutsideViewport', () => {
 
     describe('when element is wayyy below viewport', () => {
       beforeEach(() => {
-        elementMock.expects('renderOutsideViewport').returns(3).once();
         resource.layoutBox_ = layoutRectLtwh(0, 1000, 100, 100);
       });
 
@@ -2044,7 +2139,6 @@ describe('Resource renderOutsideViewport', () => {
 
     describe('when element is just above viewport', () => {
       beforeEach(() => {
-        elementMock.expects('renderOutsideViewport').returns(3).once();
         resource.layoutBox_ = layoutRectLtwh(0, -10, 100, 100);
       });
 
@@ -2061,7 +2155,6 @@ describe('Resource renderOutsideViewport', () => {
 
     describe('when element is marginally above viewport', () => {
       beforeEach(() => {
-        elementMock.expects('renderOutsideViewport').returns(3).once();
         resource.layoutBox_ = layoutRectLtwh(0, -250, 100, 100);
       });
 
@@ -2078,7 +2171,6 @@ describe('Resource renderOutsideViewport', () => {
 
     describe('when element is wayyy above viewport', () => {
       beforeEach(() => {
-        elementMock.expects('renderOutsideViewport').returns(3).once();
         resource.layoutBox_ = layoutRectLtwh(0, -1000, 100, 100);
       });
 
