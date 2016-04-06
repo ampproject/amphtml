@@ -18,6 +18,8 @@ limitations under the License.
 
 ## Example
 
+**Display tag:**
+
 See below for an example of usage or our display tag, adapted for use with AMP websites:
 
 ```html
@@ -32,6 +34,18 @@ See below for an example of usage or our display tag, adapted for use with AMP w
   <div fallback>Ad could not be loaded.</div>
 </amp-ad>
 ```
+
+**Conversion tag:**
+
+In order to add conversion trackers to your page, please use the AMP pixel component that will be supplied to you by your Weborama contact.
+The values mentioned between brackets `[]` should be replaced by the proper values.
+
+`DOCUMENT_REFERRER`, `SOURCE_URL` and `RANDOM` should remain in the URL, as AMP takes care of the automatic substitution of these values.
+
+```html
+<amp-pixel src="http://[YOUR_HOST].solution.weborama.fr/fcgi-bin/dispatch.fcgi?a.A=co&a.si=[SITE_ID]&a.cp=[CONVERSION_PAGE]&a.ct=b&g.ru=DOCUMENT_REFERRER&g.pu=SOURCE_URL&g.cb=RANDOM"></amp-pixel>
+```
+
 
 ## Configuration
 
