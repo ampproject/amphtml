@@ -43,6 +43,10 @@ export const adPrefetch = {
   pubmatic: 'https://ads.pubmatic.com/AdServer/js/amp.js',
   sortable: 'https://www.googletagservices.com/tag/js/gpt.js',
   gmossp: 'https://cdn.gmossp-sp.jp/ads/amp.js',
+  'weborama-display': [
+    'https://cstatic.weborama.fr/js/advertiserv2/adperf_launch_1.0.0_scrambled.js',
+    'https://cstatic.weborama.fr/js/advertiserv2/adperf_core_1.0.0_scrambled.js',
+  ],
 };
 
 /**
@@ -122,6 +126,9 @@ export const adPreconnect = {
     'https://eu1.wbdds.com',
   ],
   gmossp: 'https://cdn.gmossp-sp.jp',
+  'weborama-display': [
+    'https://cstatic.weborama.fr',
+  ],
 };
 
 /**

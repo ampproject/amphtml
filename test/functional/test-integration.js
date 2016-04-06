@@ -52,6 +52,7 @@ describe('3p integration.js', () => {
     expect(registrations).to.include.key('_ping_');
     expect(registrations).to.include.key('imobile');
     expect(registrations).to.include.key('gmossp');
+    expect(registrations).to.include.key('weborama-display');
   });
 
   it('should validateParentOrigin without ancestorOrigins', () => {
