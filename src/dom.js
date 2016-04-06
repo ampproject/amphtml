@@ -218,11 +218,12 @@ export function setScopeSelectorSupportedForTesting(val) {
 }
 
 /**
+ * @param {!Element} parent
  * @return {boolean}
  */
-function isScopeSelectorSupported() {
+function isScopeSelectorSupported(parent) {
   try {
-    document.querySelector(':scope');
+    parent.ownerDocument.querySelector(':scope');
     return true;
   } catch (e) {
     return false;
@@ -237,7 +238,7 @@ function isScopeSelectorSupported() {
  */
 export function childElementByAttr(parent, attr) {
   if (scopeSelectorSupported == null) {
-    scopeSelectorSupported = isScopeSelectorSupported();
+    scopeSelectorSupported = isScopeSelectorSupported(parent);
   }
   if (scopeSelectorSupported) {
     return parent.querySelector(':scope > [' + attr + ']');
@@ -259,7 +260,7 @@ export function childElementByAttr(parent, attr) {
  */
 export function childElementByTag(parent, tagName) {
   if (scopeSelectorSupported == null) {
-    scopeSelectorSupported = isScopeSelectorSupported();
+    scopeSelectorSupported = isScopeSelectorSupported(parent);
   }
   if (scopeSelectorSupported) {
     return parent.querySelector(':scope > ' + tagName);

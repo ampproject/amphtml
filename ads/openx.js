@@ -63,7 +63,7 @@ export function openx(global, data) {
       global.OX_cmds = [
         () => {
           const oxRequest = OX();
-          const oxAnchor = document.createElement('div');
+          const oxAnchor = global.document.createElement('div');
           global.document.body.appendChild(oxAnchor);
           /*eslint "google-camelcase/google-camelcase": 0*/
           OX._requestArgs['amp'] = 1;

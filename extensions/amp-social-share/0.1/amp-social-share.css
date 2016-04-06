@@ -39,31 +39,31 @@ amp-social-share a {
 }
 
 /* Twitter Styling */
-amp-social-share .twitter {
+.amp-social-share-twitter {
   background-color: #55acee;
 }
 
 /* Facebook Styling */
-amp-social-share .facebook {
+.amp-social-share-facebook {
   background-color: #3b5998;
 }
 
 /* Pinterest Styling */
-amp-social-share .pinterest {
+.amp-social-share-pinterest {
   background-color: #bd081c;
 }
 
 /* LinkedIn Styling */
-amp-social-share .linkedin {
+.amp-social-share-linkedin {
   background-color: #0077b5;
 }
 
 /* Google+ Styling */
-amp-social-share .gplus {
+.amp-social-share-gplus {
   background-color: #dc4e41;
 }
 
 /* Email Styling */
-amp-social-share .email {
+.amp-social-share-email {
   background-color: #000000;
 }

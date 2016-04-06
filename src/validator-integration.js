@@ -31,7 +31,7 @@ export function maybeValidate(win) {
   if (filename.indexOf('about:') == 0) {  // Should only happen in tests.
     return;
   }
-  const s = document.createElement('script');
+  const s = win.document.createElement('script');
   // TODO(@cramforce): Introduce a switch to locally built version for local
   // development.
   s.src = 'https://cdn.ampproject.org/v0/validator.js';

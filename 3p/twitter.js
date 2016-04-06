@@ -39,7 +39,7 @@ function getTwttr(global, cb) {
  * @param {!Object} data
  */
 export function twitter(global, data) {
-  const tweet = document.createElement('div');
+  const tweet = global.document.createElement('div');
   tweet.id = 'tweet';
   tweet.style.width = '100%';
   global.document.getElementById('c').appendChild(tweet);

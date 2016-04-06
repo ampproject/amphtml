@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import {parseQueryString} from './url';
-
 
 /**
  * @typedef {{
@@ -66,7 +64,7 @@ function getMode_() {
       // occur during local dev.
       !!document.querySelector('script[src*="/dist/"],script[src*="/base/"]');
 
-  const developmentQuery = parseQueryString(
+  const developmentQuery = parseQueryString_(
       // location.originalHash is set by the viewer when it removes the fragment
       // from the URL.
       location.originalHash || location.hash);
@@ -79,4 +77,40 @@ function getMode_() {
     test: window.AMP_TEST,
     log: developmentQuery['log'],
   };
+}
+
+/**
+ * Parses the query string of an URL. This method returns a simple key/value
+ * map. If there are duplicate keys the latest value is returned.
+ * @param {string} queryString
+ * @return {!Object<string, string>}
+ * TODO(dvoytenko): dedupe with `url.js:parseQueryString`. This is currently
+ * necessary here because `url.js` itself inderectly depends on `mode.js`.
+ */
+function parseQueryString_(queryString) {
+  const params = Object.create(null);
+  if (!queryString) {
+    return params;
+  }
+  if (queryString.indexOf('?') == 0 || queryString.indexOf('#') == 0) {
+    queryString = queryString.substr(1);
+  }
+  const pairs = queryString.split('&');
+  for (let i = 0; i < pairs.length; i++) {
+    const pair = pairs[i];
+    const eqIndex = pair.indexOf('=');
+    let name;
+    let value;
+    if (eqIndex != -1) {
+      name = decodeURIComponent(pair.substring(0, eqIndex)).trim();
+      value = decodeURIComponent(pair.substring(eqIndex + 1)).trim();
+    } else {
+      name = decodeURIComponent(pair).trim();
+      value = '';
+    }
+    if (name) {
+      params[name] = value;
+    }
+  }
+  return params;
 }

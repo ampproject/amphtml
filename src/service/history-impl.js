@@ -15,7 +15,6 @@
  */
 
 import {Pass} from '../pass';
-import {assert} from '../asserts';
 import {getService} from '../service';
 import {dev} from '../log';
 import {timer} from '../timer';
@@ -444,7 +443,7 @@ export class HistoryBindingNatural_ {
 
   /** @private */
   assertReady_() {
-    assert(!this.waitingState_,
+    dev.assert(!this.waitingState_,
         'The history must not be in the waiting state');
   }
 
