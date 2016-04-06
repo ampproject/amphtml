@@ -31,8 +31,8 @@ export function colombia(global, data) {
   global.clmbDivid = data.clmbDivid;
   a.context.observeIntersection(function(d) {
     d.forEach(function() {
-    ampPushNotify.itemTrackURL(a);
-  });
+      ampPushNotify.itemTrackURL(a);
+    });
   });
   writeScript(global, 'https://static.clmbtech.com/ad/commons/js/colombia-amp.js');
 }
