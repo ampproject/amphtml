@@ -16,7 +16,6 @@
 
 import {FocusHistory} from '../focus-history';
 import {Pass} from '../pass';
-import {assert} from '../asserts';
 import {closest} from '../dom';
 import {onDocumentReady} from '../document-ready';
 import {
@@ -56,6 +55,8 @@ const FOUR_FRAME_DELAY_ = 70;
  * @return {number}
  */
 export function getElementPriority(tagName) {
+  // Filed https://github.com/ampproject/amphtml/issues/2714 to get this
+  // method into the element implementation classes.
   tagName = tagName.toLowerCase();
   if (tagName == 'amp-ad') {
     return 2;
@@ -313,7 +314,7 @@ export class Resources {
    * @package
    */
   getResourceForElement(element) {
-    return assert(/** @type {!Resource} */ (element[RESOURCE_PROP_]),
+    return dev.assert(/** @type {!Resource} */ (element[RESOURCE_PROP_]),
         'Missing resource prop on %s', element);
   }
 
@@ -380,7 +381,7 @@ export class Resources {
    * @package
    */
   setOwner(element, owner) {
-    assert(owner.contains(element), 'Owner must contain the element');
+    dev.assert(owner.contains(element), 'Owner must contain the element');
     element[OWNER_PROP_] = owner;
   }
 
@@ -1172,7 +1173,7 @@ export class Resources {
    * @private
    */
   scheduleLayoutOrPreload_(resource, layout, opt_parentPriority) {
-    assert(resource.getState() != ResourceState_.NOT_BUILT &&
+    dev.assert(resource.getState() != ResourceState_.NOT_BUILT &&
         resource.isDisplayed(),
         'Not ready for layout: %s (%s)',
         resource.debugid, resource.getState());
@@ -1290,7 +1291,7 @@ export class Resources {
    */
   discoverResourcesForArray_(parentResource, elements, callback) {
     elements.forEach(element => {
-      assert(parentResource.element.contains(element));
+      dev.assert(parentResource.element.contains(element));
       this.discoverResourcesForElement_(element, callback);
     });
   }
@@ -1749,7 +1750,7 @@ export class Resource {
       return Promise.reject('already failed');
     }
 
-    assert(this.state_ != ResourceState_.NOT_BUILT,
+    dev.assert(this.state_ != ResourceState_.NOT_BUILT,
         'Not ready to start layout: %s (%s)', this.debugid, this.state_);
 
     if (!isDocumentVisible && !this.prerenderAllowed()) {
@@ -1904,7 +1905,7 @@ export class Resource {
    * @export
    */
   forceAll() {
-    assert(!this.resources_.isRuntimeOn_);
+    dev.assert(!this.resources_.isRuntimeOn_);
     let p = Promise.resolve();
     if (this.state_ == ResourceState_.NOT_BUILT) {
       if (!this.element.isUpgraded()) {
@@ -2002,7 +2003,7 @@ export class TaskQueue_ {
    * @param {!TaskDef} task
    */
   enqueue(task) {
-    assert(!this.taskIdMap_[task.id], 'Task already enqueued: %s', task.id);
+    dev.assert(!this.taskIdMap_[task.id], 'Task already enqueued: %s', task.id);
     this.tasks_.push(task);
     this.taskIdMap_[task.id] = task;
     this.lastEnqueueTime_ = timer.now();
