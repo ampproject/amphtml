@@ -15,7 +15,9 @@
 -->
 <!--
   Test Description:
-  This tests for amp-access syntax.
+  Tests support for the amp-jwplayer tag.
+  TODO(honeybadgerdontcare): Replace me with an ampproject.org URL eventually.
+  https://github.com/ampproject/amphtml/blob/master/extensions/amp-jwplayer/amp-jwplayer.md
 -->
 <!doctype html>
 <html ⚡>
@@ -25,45 +27,28 @@
   <meta name="viewport" content="width=device-width,minimum-scale=1">
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
-  <script async custom-element="amp-access" src="https://cdn.ampproject.org/v0/amp-access-0.1.js"></script>
-  <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
-  <script async custom-element="amp-youtube" src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js"></script>
-  <script id="amp-access" type="application/json">
-    {
-      "contents": "currently untested"
-    }
-  </script>
-  <meta name="amp-access-state" content="lemur">
+  <script async custom-element="amp-jwplayer" src="https://cdn.ampproject.org/v0/amp-jwplayer-0.1.js"></script>
 </head>
 <body>
-Hello, world.
-
-<!-- amp-access attributes should be allowed on both valid amp elements
-     as well as valid html elements -->
-<amp-youtube
-    width="480" height="270"
-    data-videoid="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-    amp-access="lemur">
-</amp-youtube>
-<p amp-access="lemur"></p>
-<noscript>
-  <img src="https://example.com/" amp-access="lemur" />
-</noscript>
-
-<!-- test some other attributes -->
-<div amp-access="lemur"
-     amp-access-loading="lemur"
-     amp-access-loader="lemur"
-     amp-access-template="lemur"
-     amp-access-off="lemur"
-     amp-access-on="lemur"
-     amp-access-show="lemur"
-     amp-access-hide="lemur"
-     amp-access-style="lemur"
-     amp-access-behavior="lemur"
-     amp-access-id="lemur"
-     i-amp-access-id="lemur">
-</div>
-
+  <!-- Example of a valid amp-jwplayer. -->
+  <amp-jwplayer
+      data-player-id="aBcD1234"
+      data-media-id="5678WxYz"
+      layout="responsive"
+      width="160" height="90">
+  </amp-jwplayer>
+  <!-- Alternate valid example using a playlist rather than video. -->
+  <amp-jwplayer
+      data-player-id="aBcD1234"
+      data-playlist-id="5678WxYz"
+      width="160" height="90">
+  <!-- Invalid example missing a player id. -->
+  <amp-jwplayer
+      data-playerlist-id="5678WxYz"
+      width="160" height="90">
+  <!-- Invalid example missing playlist id or media-id. -->
+  <amp-jwplayer
+      data-player-id="aBcD1234"
+      width="160" height="90">
 </body>
 </html>
