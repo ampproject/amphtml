@@ -28,16 +28,20 @@ export function doubleclick(global, data) {
     'slot', 'targeting', 'categoryExclusions',
     'tagForChildDirectedTreatment', 'cookieOptions',
     'overrideWidth', 'overrideHeight', 'loadingStrategy',
-    'consentNotificationId',
+    'consentNotificationId', 'useSameDomainRenderingUntilDeprecated',
   ]);
 
-  const dice = Math.random();
-  const href = global.context.location.href;
-  if ((href.indexOf('google_glade=1') > 0 || dice < experimentFraction)
-      && href.indexOf('google_glade=0') < 0) {
-    doubleClickWithGlade(global, data);
+  if (data.useSameDomainRenderingUntilDeprecated != undefined) {
+    doubleClickWithGpt(global, data, false);
   } else {
-    doubleClickWithGpt(global, data, dice < 2 * experimentFraction);
+    const dice = Math.random();
+    const href = global.context.location.href;
+    if ((href.indexOf('google_glade=1') > 0 || dice < experimentFraction)
+        && href.indexOf('google_glade=0') < 0) {
+      doubleClickWithGlade(global, data);
+    } else {
+      doubleClickWithGpt(global, data, dice < 2 * experimentFraction);
+    }
   }
 }
 
