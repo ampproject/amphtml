@@ -74,6 +74,37 @@ class AmpInstagram extends AMP.BaseElement {
         this.element.getAttribute('shortcode')),
         'The data-shortcode attribute is required for <amp-instagram> %s',
         this.element);
+
+    this.buildPrerenderDom_();
+  }
+
+  /** @private */
+  buildPrerenderDom_() {
+    const image = this.getWin().document.createElement('amp-img');
+    // This will redirect to the image URL. By experimentation this is
+    // always the same URL that is actually used inside of the embed.
+    image.setAttribute('src', 'https://www.instagram.com/p/' +
+        encodeURIComponent(this.shortcode_) + '/media/?size=l');
+    image.setAttribute('width', this.element.getAttribute('width'));
+    image.setAttribute('height', this.element.getAttribute('height'));
+    image.setAttribute('layout', 'responsive');
+    setStyles(image, {
+      'object-fit': 'cover',
+    });
+    const wrapper = this.element.ownerDocument.createElement('wrapper');
+    // This makes the non-iframe image appear in the exact same spot
+    // where it will be inside of the iframe.
+    setStyles(wrapper, {
+      'position': 'absolute',
+      'top': '48px',
+      'bottom': '48px',
+      'left': '8px',
+      'right': '8px',
+    });
+    wrapper.appendChild(image);
+    this.placeholderWrapper_ = wrapper;
+    this.applyFillContent(image);
+    this.element.appendChild(wrapper);
   }
 
   /** @override */
@@ -119,44 +150,7 @@ class AmpInstagram extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const image = new Image();
-    // This will redirect to the image URL. By experimentation this is
-    // always the same URL that is actually used inside of the embed.
-    image.src = 'https://www.instagram.com/p/' +
-        encodeURIComponent(this.shortcode_) + '/media/?size=l';
-    image.width = this.element.getAttribute('width');
-    image.height = this.element.getAttribute('height');
-    setStyles(image, {
-      'object-fit': 'cover',
-    });
-    const wrapper = this.element.ownerDocument.createElement('wrapper');
-    // This makes the non-iframe image appear in the exact same spot
-    // where it will be inside of the iframe.
-    setStyles(wrapper, {
-      'position': 'absolute',
-      'top': '48px',
-      'bottom': '48px',
-      'left': '8px',
-      'right': '8px',
-    });
-    wrapper.appendChild(image);
-    this.placeholderWrapper_ = wrapper;
-    this.applyFillContent(image);
-    this.element.appendChild(wrapper);
-    // The iframe takes up a lot of resources. We only render it of we are in
-    // in the viewport.
-    if (this.isInViewport()) {
-      return this.maybeRenderIframe_();
-    }
-    return loadPromise(image);
-  }
-
-  /** @override */
-  viewportCallback(inViewport) {
-    // We might not have been rendered this yet. Lets do it now.
-    if (inViewport) {
-      this.maybeRenderIframe_();
-    }
+    return this.maybeRenderIframe_();
   }
 
   /** @override */

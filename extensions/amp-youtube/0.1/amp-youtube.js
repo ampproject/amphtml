@@ -164,7 +164,7 @@ class AmpYoutube extends AMP.BaseElement {
 
   /** @private */
   buildImagePlaceholder_() {
-    const imgPlaceholder = new Image();
+    const imgPlaceholder = this.getWin().document.createElement('amp-img');
     const videoid = this.videoid_;
 
     setStyles(imgPlaceholder, {
@@ -178,14 +178,21 @@ class AmpYoutube extends AMP.BaseElement {
     // TODO(mkhatib): Maybe add srcset to allow the browser to
     // load the needed size or even better match YTPlayer logic for loading
     // player thumbnails for different screen sizes for a cache win!
-    imgPlaceholder.src = 'https://i.ytimg.com/vi/' +
-        encodeURIComponent(this.videoid_) + '/sddefault.jpg#404_is_fine';
+    imgPlaceholder.setAttribute('src', 'https://i.ytimg.com/vi/' +
+        encodeURIComponent(this.videoid_) + '/sddefault.jpg#404_is_fine');
     imgPlaceholder.setAttribute('placeholder', '');
-    imgPlaceholder.width = this.width_;
-    imgPlaceholder.height = this.height_;
+    imgPlaceholder.setAttribute('width', this.width_);
+    imgPlaceholder.setAttribute('height', this.height_);
+    imgPlaceholder.setAttribute('layout', 'responsive');
 
     this.element.appendChild(imgPlaceholder);
     this.applyFillContent(imgPlaceholder);
+
+
+
+    // NOTE: The following logic will no longer work unless we expose load
+    // promise for the amp-img or fire a load event for it.
+    return;
 
     // Because sddefault.jpg isn't available for all videos, we try to load
     // it and fallback to hqdefault.jpg.
