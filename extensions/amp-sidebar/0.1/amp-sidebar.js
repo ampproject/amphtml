@@ -29,7 +29,7 @@ const EXPERIMENT = 'amp-sidebar';
 const TAG = 'AmpSidebar';
 
 /** @const */
-const ANIMATION_TIMEOUT = 500;
+const ANIMATION_TIMEOUT = 550;
 
 export class AmpSidebar extends AMP.BaseElement {
   /** @override */
@@ -142,13 +142,14 @@ export class AmpSidebar extends AMP.BaseElement {
       });
       this.viewport_.addToFixedLayer(this.element);
       this.openMask_();
+      // Start animation in a separate vsync due to display:block; set above.
       this.vsync_.mutate(() => {
         this.element.setAttribute('open', '');
         this.element.setAttribute('aria-hidden', 'false');
+        timer.delay(() => {
+          this.scheduleLayout(this.getRealChildren());
+        }, ANIMATION_TIMEOUT);
       });
-      timer.delay(() => {
-        this.scheduleLayout(this.getRealChildren());
-      }, ANIMATION_TIMEOUT);
     });
   }
 
@@ -163,17 +164,17 @@ export class AmpSidebar extends AMP.BaseElement {
       this.element.removeAttribute('open');
       this.element.setAttribute('aria-hidden', 'true');
       this.viewport_.removeFromFixedLayer(this.element);
-    });
-    timer.delay(() => {
-      if (!this.isOpen_()) {
-        this.mutateElement(() => {
-          setStyles(this.element, {
-            'display': 'none',
+      timer.delay(() => {
+        if (!this.isOpen_()) {
+          this.vsync_.mutate(() => {
+            setStyles(this.element, {
+              'display': 'none',
+            });
+            this.schedulePause(this.getRealChildren());
           });
-          this.schedulePause(this.getRealChildren());
-        });
-      }
-    }, ANIMATION_TIMEOUT);
+        }
+      }, ANIMATION_TIMEOUT);
+    });
   }
 
   /**

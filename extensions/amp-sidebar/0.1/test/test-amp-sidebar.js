@@ -86,9 +86,6 @@ describe('amp-sidebar', () => {
       const iframe = obj.iframe;
       const sidebarElement = obj.ampSidebar;
       const impl = sidebarElement.implementation_;
-      impl.mutateElement = function(callback) {
-        callback();
-      };
       impl.vsync_ = {
         mutate: function(callback) {
           callback();
@@ -107,9 +104,6 @@ describe('amp-sidebar', () => {
     return getAmpSidebar().then(obj => {
       const sidebarElement = obj.ampSidebar;
       const impl = sidebarElement.implementation_;
-      impl.mutateElement = function(callback) {
-        callback();
-      };
       impl.scheduleLayout = sandbox.spy();
       impl.vsync_ = {
         mutate: function(callback) {
@@ -131,9 +125,6 @@ describe('amp-sidebar', () => {
     return getAmpSidebar().then(obj => {
       const sidebarElement = obj.ampSidebar;
       const impl = sidebarElement.implementation_;
-      impl.mutateElement = function(callback) {
-        callback();
-      };
       impl.schedulePause = sandbox.spy();
       impl.vsync_ = {
         mutate: function(callback) {
@@ -155,9 +146,6 @@ describe('amp-sidebar', () => {
     return getAmpSidebar().then(obj => {
       const sidebarElement = obj.ampSidebar;
       const impl = sidebarElement.implementation_;
-      impl.mutateElement = function(callback) {
-        callback();
-      };
       impl.scheduleLayout = sandbox.spy();
       impl.schedulePause = sandbox.spy();
       impl.vsync_ = {
@@ -188,9 +176,6 @@ describe('amp-sidebar', () => {
       const iframe = obj.iframe;
       const sidebarElement = obj.ampSidebar;
       const impl = sidebarElement.implementation_;
-      impl.mutateElement = function(callback) {
-        callback();
-      };
       impl.schedulePause = sandbox.spy();
       impl.vsync_ = {
         mutate: function(callback) {
@@ -225,9 +210,6 @@ describe('amp-sidebar', () => {
     return getAmpSidebar().then(obj => {
       const sidebarElement = obj.ampSidebar;
       const impl = sidebarElement.implementation_;
-      impl.mutateElement = function(callback) {
-        callback();
-      };
       impl.vsync_ = {
         mutate: function(callback) {
           callback();
