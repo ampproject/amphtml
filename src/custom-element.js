@@ -31,7 +31,7 @@ import {getServicePromise, getServicePromiseOrNull} from './service';
 import * as dom from './dom';
 
 
-const TAG_ = 'custom-element';
+const TAG_ = 'CustomElement';
 
 /**
  * This is the minimum width of the element needed to trigger `loading`
