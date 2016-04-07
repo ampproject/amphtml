@@ -58,6 +58,7 @@ import {rubicon} from '../ads/rubicon';
 import {imobile} from '../ads/imobile';
 import {webediads} from '../ads/webediads';
 import {user} from '../src/log';
+import {gmossp} from '../ads/gmossp';
 
 /**
  * Whether the embed type may be used with amp-embed tag.
@@ -99,6 +100,7 @@ register('teads', teads);
 register('rubicon', rubicon);
 register('imobile', imobile);
 register('webediads', webediads);
+register('gmossp', gmossp);
 
 // For backward compat, we always allow these types without the iframe
 // opting in.
