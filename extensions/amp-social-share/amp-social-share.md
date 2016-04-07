@@ -124,7 +124,7 @@ The builtin supported types are configured in [AMP Social Share Config](v.0/amp-
   - image
 - linkedin
   - url `optional` (defaults: `rel=canonical` URL)
-  - title
+  - text
   - attribution
 - gplus
   - url `optional` (defaults: `rel=canonical` URL)
