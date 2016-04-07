@@ -183,6 +183,7 @@ describe('Resources', () => {
       getPriority: () => 1,
       startLayout: () => {},
       layoutScheduled: () => {},
+      getTaskId: () => 'resource#P',
     };
     resources.visible_ = false;
     sandbox.stub(resources.viewer_, 'getVisibilityState').returns(
@@ -217,6 +218,7 @@ describe('Resources', () => {
       getPriority: () => 1,
       startLayout: () => {},
       layoutScheduled: () => {},
+      getTaskId: () => 'resource#L',
     };
     resources.scheduleLayoutOrPreload_(resource, true);
     expect(resources.queue_.getSize()).to.equal(1);
@@ -349,6 +351,9 @@ describe('Resources discoverWork', () => {
       prerenderAllowed: () => true,
       renderOutsideViewport: () => true,
       isRelayoutNeeded: () => true,
+      pauseCallback: () => {},
+      unlayoutCallback: () => true,
+      unlayoutOnPause: () => true,
     };
   }
 
@@ -510,6 +515,52 @@ describe('Resources discoverWork', () => {
     expect(resource2MeasureStub.callCount).to.equal(2);
     expect(resource2UnloadStub.callCount).to.equal(1);
   });
+
+  it('should eject stale tasks when element unloaded', () => {
+    resources.visible_ = true;
+    // Don't resolve layout - immulating DOM being removed and load
+    // promise not resolving.
+    resource2.layoutCallback = new Promise(unusedResolve => {});
+    resource2.unlayoutCallback = () => true;
+    resource2.prerenderAllowed = () => false;
+
+    resource1.layoutCallback = new Promise(unusedResolve => {});
+    resource1.unlayoutCallback = () => true;
+
+    sandbox.stub(resources.viewer_, 'getVisibilityState').returns(
+        VisibilityState.VISIBLE
+    );
+    viewportMock.expects('getRect').returns(
+        layoutRectLtwh(0, 0, 300, 400)).atLeast(1);
+
+    resources.discoverWork_();
+    expect(resources.queue_.getSize()).to.equal(2);
+    expect(resources.queue_.tasks_[0].resource).to.equal(resource1);
+    expect(resources.queue_.tasks_[1].resource).to.equal(resource2);
+
+    resources.work_();
+    expect(resources.exec_.getSize()).to.equal(2);
+
+    // Remove unloaded resources from exec queue.
+    resource2.unload();
+    resources.cleanupTasks_(resource2);
+    expect(resources.exec_.getSize()).to.equal(1);
+
+    // Shouldn't remove tasks if the resource is not unloaded.
+    resources.cleanupTasks_(resource1);
+    expect(resources.exec_.getSize()).to.equal(1);
+
+    // Can successfully reschedules unloaded elements.
+    resources.discoverWork_();
+    expect(resources.queue_.getSize()).to.equal(1);
+    expect(resources.queue_.tasks_[0].resource).to.equal(resource2);
+
+    // Removes them even from scheduling queue.
+    resource2.unload();
+    resources.cleanupTasks_(resource2);
+    expect(resources.queue_.getSize()).to.equal(0);
+  });
+
 });
 
 
@@ -533,6 +584,9 @@ describe('Resources changeSize', () => {
       viewportCallback: sandbox.spy(),
       prerenderAllowed: () => true,
       renderOutsideViewport: () => false,
+      unlayoutCallback: () => true,
+      pauseCallback: () => {},
+      unlayoutOnPause: () => true,
       isRelayoutNeeded: () => true,
       contains: unused_otherElement => false,
       updateLayoutBox: () => {},
@@ -597,6 +651,16 @@ describe('Resources changeSize', () => {
     expect(resources.requestsChangeSize_[0].newHeight).to.equal(111);
     expect(resources.requestsChangeSize_[0].newWidth).to.be.undefined;
     expect(resources.requestsChangeSize_[0].force).to.equal(false);
+  });
+
+  it('should remove request change size for unloaded resources', () => {
+    resources.scheduleChangeSize_(resource1, 111, undefined, false);
+    resources.scheduleChangeSize_(resource2, 111, undefined, false);
+    expect(resources.requestsChangeSize_.length).to.equal(2);
+    resource1.unload();
+    resources.cleanupTasks_(resource1);
+    expect(resources.requestsChangeSize_.length).to.equal(1);
+    expect(resources.requestsChangeSize_[0].resource).to.equal(resource2);
   });
 
   it('should schedule width only size change', () => {
