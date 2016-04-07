@@ -24,7 +24,7 @@ import {setStyles} from '../../../src/style';
 const EXPERIMENT = 'amp-sidebar';
 
 /** @const */
-const TAG = 'AmpSidebar';
+const TAG = 'amp-sidebar';
 
 export class AmpSidebar extends AMP.BaseElement {
   /** @override */

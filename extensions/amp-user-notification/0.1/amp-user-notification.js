@@ -27,7 +27,7 @@ import {xhrFor} from '../../../src/xhr';
 
 
 /** @private @const {string} */
-const TAG = 'AmpUserNotification';
+const TAG = 'amp-user-notification';
 
 
 /**

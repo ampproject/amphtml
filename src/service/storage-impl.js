@@ -22,7 +22,7 @@ import {timer} from '../timer';
 import {viewerFor} from '../viewer';
 
 /** @const */
-const TAG = 'Storage';
+const TAG = 'storage';
 
 /** @const */
 const MAX_VALUES_PER_ORIGIN = 8;

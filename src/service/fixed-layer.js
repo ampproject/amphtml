@@ -19,7 +19,7 @@ import {dev, user} from '../log';
 import {platform} from '../platform';
 import {setStyle, setStyles} from '../style';
 
-const TAG = 'FixedLayer';
+const TAG = 'fixed-layer';
 
 
 /**
