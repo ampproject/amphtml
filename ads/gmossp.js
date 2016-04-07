@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,18 @@
  * limitations under the License.
  */
 
-import {writeScript} from '../src/3p';
+import {writeScript, checkData, validateDataExists} from '../src/3p';
+
+const gmosspFields = ['width', 'height', 'id'];
+
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
 export function gmossp(global, data) {
+  checkData(data, gmosspFields);
+  validateDataExists(data, gmosspFields);
+
   global.gmosspParam = data;
   writeScript(global, 'https://cdn.gmossp-sp.jp/ads/amp.js');
 }
