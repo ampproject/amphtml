@@ -42,7 +42,7 @@ amp-sidebar[side][open] {
   transform: translateX(0vw) !important;
 }
 
-.-amp-sidebar-animate {
+amp-sidebar[side] {
   transition: transform 0.5s ease;
 }
 

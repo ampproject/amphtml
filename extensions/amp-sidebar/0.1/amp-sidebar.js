@@ -88,9 +88,6 @@ export class AmpSidebar extends AMP.BaseElement {
       this.element.setAttribute('aria-hidden', 'true');
     }
 
-    // Prepare for animation (will not animate the initial state).
-    this.element.classList.add('-amp-sidebar-animate');
-
     this.documentElement_.addEventListener('keydown', event => {
       // Close sidebar on ESC.
       if (event.keyCode == 27) {

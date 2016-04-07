@@ -59,14 +59,6 @@ describe('amp-sidebar', () => {
     sandbox.restore();
   });
 
-  it('should prepare to be ready to be animated', () => {
-    return getAmpSidebar().then(obj => {
-      const sidebarElement = obj.ampSidebar;
-      expect(sidebarElement.classList.contains('-amp-sidebar-animate'))
-          .to.be.true;
-    });
-  });
-
   it('should open from left is side is not specified', () => {
     return getAmpSidebar().then(obj => {
       const sidebarElement = obj.ampSidebar;
