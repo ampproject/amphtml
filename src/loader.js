@@ -18,13 +18,14 @@
 /**
  * Creates a default "loading indicator" element. This element accepts
  * `amp-active` class in which case it may choose to run an animation.
+ * @param {!Document} doc
  * @return {!Element}
  */
-export function createLoaderElement() {
-  const loader = document.createElement('div');
+export function createLoaderElement(doc) {
+  const loader = doc.createElement('div');
   loader.classList.add('-amp-loader');
   for (let i = 0; i < 3; i++) {
-    const dot = document.createElement('div');
+    const dot = doc.createElement('div');
     dot.classList.add('-amp-loader-dot');
     loader.appendChild(dot);
   }

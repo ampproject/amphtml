@@ -25,7 +25,7 @@ function addAdiantUnit(hostname, global, data) {
   validateDataExists(data, adbladeFields);
 
   // create a data element so our script knows what to do
-  const ins = document.createElement('ins');
+  const ins = global.document.createElement('ins');
   ins.setAttribute('class', 'adbladeads');
   ins.setAttribute('data-width', data.width);
   ins.setAttribute('data-height', data.height);

@@ -37,7 +37,7 @@ export function installVideo(win) {
     /** @override */
     buildCallback() {
       /** @private @const {!HTMLVideoElement} */
-      this.video_ = document.createElement('video');
+      this.video_ = this.element.ownerDocument.createElement('video');
       const width = this.element.getAttribute('width');
       const height = this.element.getAttribute('height');
 

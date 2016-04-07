@@ -96,6 +96,12 @@ gulp.task('test', 'Runs tests', prerequisites, function(done) {
     useCompiledJs: !!argv.compiled
   };
 
+  if (argv.grep) {
+    c.client.mocha = {
+      'grep': argv.grep,
+    };
+  }
+
   karma.start(c, done);
 }, {
   options: {
@@ -108,5 +114,6 @@ gulp.task('test', 'Runs tests', prerequisites, function(done) {
     'compiled': 'Changes integration tests to use production JS ' +
         'binaries for execution',
     'oldchrome': 'Runs test with an old chrome. Saucelabs only.',
+    'grep': 'Runs tests that match the pattern',
   }
 });

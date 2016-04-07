@@ -48,7 +48,7 @@ class AmpLightbox extends AMP.BaseElement {
     const children = this.getRealChildren();
 
     /** @private {!Element} */
-    this.container_ = document.createElement('div');
+    this.container_ = this.element.ownerDocument.createElement('div');
     this.applyFillContent(this.container_);
     this.element.appendChild(this.container_);
     children.forEach(child => {

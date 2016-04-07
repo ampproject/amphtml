@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {assert} from './asserts';
+import {dev, user} from './log';
 import {getService} from './service';
 import {
   addParamToUrl,
@@ -70,10 +70,18 @@ class Xhr {
    * We want to call `fetch_` unbound from any context since it could
    * be either the native fetch or our polyfill.
    *
-   * @private
+   * @param {string} input
+   * @param {?FetchInitDef=} opt_init
    * @return {!Promise<!FetchResponse>}
+   * @private
    */
-  fetch_() {
+  fetch_(input, opt_init) {
+    // Fallback to xhr polyfill since `fetch` api does not support
+    // responseType = 'document'. We do this so we dont have to do any parsing
+    // and document construction on the UI thread which would be expensive.
+    if (opt_init && opt_init.responseType == 'document') {
+      return fetchPolyfill.apply(null, arguments);
+    }
     return (this.win.fetch || fetchPolyfill).apply(null, arguments);
   }
 
@@ -97,25 +105,26 @@ class Xhr {
     const sourceOrigin = getSourceOrigin(this.win.location.href);
     const url = parseUrl(input);
     const query = parseQueryString(url.search);
-    assert(!(SOURCE_ORIGIN_PARAM in query),
+    user.assert(!(SOURCE_ORIGIN_PARAM in query),
         'Source origin is not allowed in %s', input);
     input = addParamToUrl(input, SOURCE_ORIGIN_PARAM, sourceOrigin);
     return this.fetch_(input, opt_init).catch(reason => {
-      assert(false, 'Fetch failed %s: %s', input, reason && reason.message);
+      user.assert(false, 'Fetch failed %s: %s', input,
+          reason && reason.message);
     }).then(response => {
       const allowSourceOriginHeader = response.headers.get(
           ALLOW_SOURCE_ORIGIN_HEADER);
       if (allowSourceOriginHeader) {
         // If the `AMP-Access-Control-Allow-Source-Origin` header is returned,
         // ensure that it's equal to the current source origin.
-        assert(allowSourceOriginHeader == sourceOrigin,
+        user.assert(allowSourceOriginHeader == sourceOrigin,
               `Returned ${ALLOW_SOURCE_ORIGIN_HEADER} is not` +
               ` equal to the current: ${allowSourceOriginHeader}` +
               ` vs ${sourceOrigin}`);
       } else if (opt_init && opt_init.requireAmpResponseSourceOrigin) {
         // If the `AMP-Access-Control-Allow-Source-Origin` header is not
         // returned but required, return error.
-        assert(false, `Response must contain the` +
+        user.assert(false, `Response must contain the` +
             ` ${ALLOW_SOURCE_ORIGIN_HEADER} header`);
       }
       return response;
@@ -140,6 +149,26 @@ class Xhr {
 
     return this.fetchAmpCors_(input, init).then(response => {
       return assertSuccess(response).json();
+    });
+  }
+
+  /**
+   * Creates an XHR request with responseType=document
+   * and returns the `FetchResponse` object.
+   *
+   * @param {string} input
+   * @param {?FetchInitDef=} opt_init
+   * @return {!Promise<!HTMLDocument>}
+   */
+  fetchDocument(input, opt_init) {
+    const init = opt_init || {};
+    init.responseType = 'document';
+    init.method = normalizeMethod_(init.method);
+    init.headers = init.headers || {};
+    init.headers['Accept'] = 'text/html';
+
+    return this.fetchAmpCors_(input, init).then(response => {
+      return assertSuccess(response).document_();
     });
   }
 
@@ -174,7 +203,7 @@ export function normalizeMethod_(method) {
   }
   method = method.toUpperCase();
 
-  assert(
+  dev.assert(
     allowedMethods_.indexOf(method) > -1,
     'Only one of %s is currently allowed. Got %s',
     allowedMethods_.join(', '),
@@ -196,7 +225,7 @@ function setupJson_(init) {
   if (init.method == 'POST') {
     // Assume JSON strict mode where only objects or arrays are allowed
     // as body.
-    assert(
+    dev.assert(
       allowedBodyTypes_.some(test => test(init.body)),
       'body must be of type object or array. %s',
       init.body
@@ -222,16 +251,26 @@ function setupJson_(init) {
  * @private Visible for testing
  */
 export function fetchPolyfill(input, opt_init) {
-  assert(typeof input == 'string', 'Only URL supported: %s', input);
+  dev.assert(typeof input == 'string', 'Only URL supported: %s', input);
   const init = opt_init || {};
-  assert(!init.credentials || init.credentials == 'include',
+  dev.assert(!init.credentials || init.credentials == 'include',
       'Only credentials=include support: %s', init.credentials);
 
   return new Promise(function(resolve, reject) {
-    const xhr = createXhrRequest(init.method || 'GET', input, init);
+    const xhr = createXhrRequest(init.method || 'GET', input);
 
     if (init.credentials == 'include') {
       xhr.withCredentials = true;
+    }
+
+    if (init.responseType == 'document') {
+      xhr.responseType = 'document';
+    }
+
+    if (init.headers) {
+      Object.keys(init.headers).forEach(function(header) {
+        xhr.setRequestHeader(header, init.headers[header]);
+      });
     }
 
     xhr.onreadystatechange = () => {
@@ -270,11 +309,10 @@ export function fetchPolyfill(input, opt_init) {
 /**
  * @param {string} method
  * @param {string} url
- * @param {!FetchInitDef} init
  * @return {!XMLHttpRequest}
  * @private
  */
-function createXhrRequest(method, url, init) {
+function createXhrRequest(method, url) {
   let xhr = new XMLHttpRequest();
   if ('withCredentials' in xhr) {
     xhr.open(method, url, true);
@@ -285,13 +323,15 @@ function createXhrRequest(method, url, init) {
   } else {
     throw new Error('CORS is not supported');
   }
-
-  if (init.headers) {
-    Object.keys(init.headers).forEach(function(header) {
-      xhr.setRequestHeader(header, init.headers[header]);
-    });
-  }
   return xhr;
+}
+
+/**
+ * If 415 or in the 5xx range.
+ * @param {string} status
+ */
+function isRetriable(status) {
+  return status == 415 || (status >= 500 && status < 600);
 }
 
 
@@ -301,8 +341,13 @@ function createXhrRequest(method, url, init) {
  * @return {!FetchResponse}
  */
 function assertSuccess(response) {
-  assert(response.status >= 200 && response.status < 300,
-      'HTTP error %s', response.status);
+  if (!(response.status >= 200 && response.status < 300)) {
+    const err = user.createError(`HTTP error ${response.status}`);
+    if (isRetriable(response.status)) {
+      err.retriable = true;
+    }
+    throw err;
+  }
   return response;
 }
 
@@ -336,7 +381,7 @@ class FetchResponse {
    * @private
    */
   drainText_() {
-    assert(!this.bodyUsed, 'Body already used');
+    dev.assert(!this.bodyUsed, 'Body already used');
     this.bodyUsed = true;
     return Promise.resolve(this.xhr_.responseText);
   }
@@ -347,6 +392,19 @@ class FetchResponse {
    */
   json() {
     return this.drainText_().then(JSON.parse);
+  }
+
+  /**
+   * Reads the xhr responseXML.
+   * @return {!Promise<!HTMLDocument>}
+   * @private
+   */
+  document_() {
+    dev.assert(!this.bodyUsed, 'Body already used');
+    this.bodyUsed = true;
+    user.assert(this.xhr_.responseXML instanceof Document,
+        'responseXML should be a Document instance.');
+    return Promise.resolve(this.xhr_.responseXML);
   }
 }
 

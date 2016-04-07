@@ -90,7 +90,7 @@ class AmpInstagram extends AMP.BaseElement {
     if (this.iframePromise_) {
       return this.iframePromise_;
     }
-    const iframe = document.createElement('iframe');
+    const iframe = this.element.ownerDocument.createElement('iframe');
     this.iframe_ = iframe;
     iframe.setAttribute('frameborder', '0');
     iframe.setAttribute('allowtransparency', 'true');
@@ -129,7 +129,7 @@ class AmpInstagram extends AMP.BaseElement {
     setStyles(image, {
       'object-fit': 'cover',
     });
-    const wrapper = document.createElement('wrapper');
+    const wrapper = this.element.ownerDocument.createElement('wrapper');
     // This makes the non-iframe image appear in the exact same spot
     // where it will be inside of the iframe.
     setStyles(wrapper, {

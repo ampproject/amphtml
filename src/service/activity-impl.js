@@ -256,7 +256,7 @@ export class Activity {
     // stop ignoring activity at the start of the next activity bucket
     setTimeout(this.boundStopIgnore_, timeToWait);
 
-    this.activityHistory_.push(/** @type {ActivityEventDef} */{
+    this.activityHistory_.push({
       type: type,
       time: secondKey,
     });

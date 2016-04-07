@@ -67,7 +67,7 @@ class AmpJWPlayer extends AMP.BaseElement {
 
   /** @override */
   layoutCallback() {
-    const iframe = document.createElement('iframe');
+    const iframe = this.element.ownerDocument.createElement('iframe');
     const src = 'https://content.jwplatform.com/players/' +
       encodeURIComponent(this.contentid_) + '-' +
       encodeURIComponent(this.playerid_) + '.html';

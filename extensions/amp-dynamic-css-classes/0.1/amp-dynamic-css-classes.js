@@ -18,6 +18,7 @@ import {getService} from '../../../src/service';
 import {parseUrl} from '../../../src/url';
 import {viewerFor} from '../../../src/viewer';
 import {vsyncFor} from '../../../src/vsync';
+import {waitForBody} from '../../../src/dom';
 
 /**
  * Strips everything but the domain from referrer string.
@@ -91,12 +92,14 @@ function normalizedReferrers(win) {
  * @param {!Array<string>} classes
  */
 function addDynamicCssClasses(win, classes) {
-  const documentElement = win.document.documentElement;
-  const classList = documentElement.classList;
+  waitForBody(win.document, () => {
+    const body = win.document.body;
+    const classList = body.classList;
 
-  for (let i = 0; i < classes.length; i++) {
-    classList.add(classes[i]);
-  }
+    for (let i = 0; i < classes.length; i++) {
+      classList.add(classes[i]);
+    }
+  });
 }
 
 
@@ -133,6 +136,7 @@ function addViewerClass(win) {
 
 /**
  * @param {!Window} win
+ * @private visible for testing
  */
 function addRuntimeClasses(win) {
   addReferrerClasses(win);
@@ -142,8 +146,9 @@ function addRuntimeClasses(win) {
 /**
  * @param {!Window} win
  * @return {!Object} All services need to return an object to "load".
+ * @visiblefortesting
  */
-function installDynamicClassesService(win) {
+export function installDynamicClassesService(win) {
   return getService(win, 'amp-dynamic-css-classes', () => {
     addRuntimeClasses(win);
     return {};

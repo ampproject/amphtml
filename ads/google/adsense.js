@@ -29,11 +29,11 @@ export function adsense(global, data) {
       hid: global.context.pageViewId,
     };
   }
-  const s = document.createElement('script');
+  const s = global.document.createElement('script');
   s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js';
   global.document.body.appendChild(s);
 
-  const i = document.createElement('ins');
+  const i = global.document.createElement('ins');
   i.setAttribute('data-ad-client', data['adClient']);
   if (data['adSlot']) {
     i.setAttribute('data-ad-slot', data['adSlot']);
