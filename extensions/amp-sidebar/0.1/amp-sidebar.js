@@ -18,6 +18,7 @@ import {CSS} from '../../../build/amp-sidebar-0.1.css';
 import {Layout} from '../../../src/layout';
 import {isExperimentOn} from '../../../src/experiments';
 import {dev} from '../../../src/log';
+import {platform} from '../../../src/platform';
 import {setStyles} from '../../../src/style';
 import {vsyncFor} from '../../../src/vsync';
 import {timer} from '../../../src/timer';
@@ -68,6 +69,9 @@ export class AmpSidebar extends AMP.BaseElement {
     /** @const @private {!Vsync} */
     this.vsync_ = vsyncFor(this.win_);
 
+    /** @private @const {boolean} */
+    this.isIosSafari_ = platform.isIos() && platform.isSafari();
+
     if (!this.isExperimentOn_) {
       dev.warn(TAG, `Experiment ${EXPERIMENT} disabled`);
       return;
@@ -80,6 +84,10 @@ export class AmpSidebar extends AMP.BaseElement {
           'ltr';
       this.side_ = (pageDir == 'rtl') ? 'right' : 'left';
       this.element.setAttribute('side', this.side_);
+    }
+
+    if (this.isIosSafari_) {
+      this.fixIosElasticScrollLeak_();
     }
 
     if (this.isOpen_()) {
@@ -139,6 +147,7 @@ export class AmpSidebar extends AMP.BaseElement {
       });
       this.viewport_.addToFixedLayer(this.element);
       this.openMask_();
+      this.element./*OK*/scrollTop = 1;
       // Start animation in a separate vsync due to display:block; set above.
       this.vsync_.mutate(() => {
         this.element.setAttribute('open', '');
@@ -204,6 +213,26 @@ export class AmpSidebar extends AMP.BaseElement {
         'display': 'none',
       });
     }
+  }
+
+  /**
+   * @private
+   */
+  fixIosElasticScrollLeak_() {
+    this.element.addEventListener('scroll', e => {
+      if (this.isOpen_()) {
+        if (this.element./*OK*/scrollTop < 1) {
+          this.element./*OK*/scrollTop = 1;
+          e.preventDefault();
+        } else if (this.element./*OK*/scrollHeight ==
+              this.element./*OK*/scrollTop +
+              this.element./*OK*/offsetHeight) {
+          this.element./*OK*/scrollTop =
+              this.element./*OK*/scrollTop - 1;
+          e.preventDefault();
+        }
+      }
+    });
   }
 }
 

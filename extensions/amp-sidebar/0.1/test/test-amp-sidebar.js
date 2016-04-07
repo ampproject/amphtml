@@ -17,6 +17,7 @@
 
 import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
+import {platform} from '../../../../src/platform';
 import {timer} from '../../../../src/timer';
 import {toggleExperiment} from '../../../../src/experiments';
 require('../amp-sidebar');
@@ -42,6 +43,7 @@ describe('amp-sidebar', () => {
         ampSidebar.setAttribute('side', options.side);
       }
       ampSidebar.setAttribute('id', 'sidebar1');
+      ampSidebar.setAttribute('layout', 'nodisplay');
       return iframe.addElement(ampSidebar).then(() => {
         return Promise.resolve({
           iframe: iframe,
@@ -215,6 +217,26 @@ describe('amp-sidebar', () => {
       expect(impl.isOpen_()).to.be.true;
       impl.toggle_();
       expect(impl.isOpen_()).to.be.false;
+    });
+  });
+
+  it('should fix scroll leaks on ios safari', () => {
+    sandbox.stub(platform, 'isIos').returns(true);
+    sandbox.stub(platform, 'isSafari').returns(true);
+    return getAmpSidebar().then(obj => {
+      const sidebarElement = obj.ampSidebar;
+      const impl = sidebarElement.implementation_;
+      impl.vsync_ = {
+        mutate: function(callback) {
+          callback();
+        },
+      };
+      sandbox.stub(timer, 'delay', function(callback) {
+        callback();
+      });
+      const scrollLeakSpy = sandbox.spy(impl, 'fixIosElasticScrollLeak_');
+      impl.buildCallback();
+      expect(scrollLeakSpy.callCount).to.equal(1);
     });
   });
 });
