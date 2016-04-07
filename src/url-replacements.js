@@ -29,7 +29,7 @@ import {activityFor} from './activity';
 
 
 /** @private @const {string} */
-const TAG = 'url-replacements';
+const TAG = 'UrlReplacements';
 
 
 /**
