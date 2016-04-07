@@ -111,7 +111,7 @@ Adds support for Chartbeat. More details for adding Chartbeat support can be fou
 
 Type attribute value: `colanalytics`
 
-Adds support for ColAnalytics. Additionally, Need the value for cid and host. 
+Adds support for ColAnalytics. Additionally, Need the value for `id` and `colurl`. 
 
 ### comScore
 
