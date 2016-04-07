@@ -83,7 +83,7 @@ export class InstrumentationService {
     this.win_ = window;
 
     /** @const {string} */
-    this.TAG_ = 'Analytics.Instrumentation';
+    this.TAG_ = 'analytics.instrumentation';
 
     /** @const {!Viewer} */
     this.viewer_ = viewerFor(window);
