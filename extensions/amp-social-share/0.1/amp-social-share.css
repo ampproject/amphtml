@@ -67,3 +67,8 @@ amp-social-share a {
 .amp-social-share-email {
   background-color: #000000;
 }
+
+/* WhatsApp Styling */
+.amp-social-share-whatsapp {
+  background-color: #25d366;
+}
