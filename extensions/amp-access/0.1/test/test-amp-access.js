@@ -1532,6 +1532,50 @@ describe('AccessService type=other', () => {
     }).then(() => {
       expect(service.lastAuthorizationPromise_).to.equal(
           service.firstAuthorizationPromise_);
+      expect(service.authResponse_).to.be.null;
+    });
+  });
+
+  it('should ignore fallback in a proxy case', () => {
+    expect(service.isProxyOrigin_).to.be.false;  // Normally `false` in tests.
+    service.isProxyOrigin_ = true;
+    const fallback = {};
+    service.config_.authorizationFallbackResponse = fallback;
+    cidMock.expects('get').never();
+    xhrMock.expects('fetchJson').never();
+    const promise = service.runAuthorization_();
+    expect(document.documentElement).not.to.have.class('amp-access-loading');
+    expect(document.documentElement).not.to.have.class('amp-access-error');
+    return promise.then(() => {
+      expect(document.documentElement).not.to.have.class('amp-access-loading');
+      expect(document.documentElement).not.to.have.class('amp-access-error');
+      expect(service.firstAuthorizationPromise_).to.exist;
+      return service.firstAuthorizationPromise_;
+    }).then(() => {
+      expect(service.lastAuthorizationPromise_).to.equal(
+          service.firstAuthorizationPromise_);
+      expect(service.authResponse_).to.be.null;
+    });
+  });
+
+  it('should allow fallback use in a non-proxy case', () => {
+    service.isProxyOrigin_ = false;
+    const fallback = {};
+    service.config_.authorizationFallbackResponse = fallback;
+    cidMock.expects('get').never();
+    xhrMock.expects('fetchJson').never();
+    const promise = service.runAuthorization_();
+    expect(document.documentElement).to.have.class('amp-access-loading');
+    expect(document.documentElement).not.to.have.class('amp-access-error');
+    const lastPromise = service.lastAuthorizationPromise_;
+    return promise.then(() => {
+      expect(document.documentElement).not.to.have.class('amp-access-loading');
+      expect(document.documentElement).not.to.have.class('amp-access-error');
+      expect(service.firstAuthorizationPromise_).to.exist;
+      return service.firstAuthorizationPromise_;
+    }).then(() => {
+      expect(service.lastAuthorizationPromise_).to.equal(lastPromise);
+      expect(service.authResponse_).to.equal(fallback);
     });
   });
 
