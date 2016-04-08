@@ -41,6 +41,7 @@ export const adPrefetch = {
   teads: 'https://cdn.teads.tv/media/format/v3/teads-format.min.js',
   imobile: 'https://spamp.i-mobile.co.jp/script/amp.js',
   sortable: 'https://www.googletagservices.com/tag/js/gpt.js',
+  gmossp: 'https://cdn.gmossp-sp.jp/ads/amp.js',
 };
 
 /**
@@ -118,6 +119,7 @@ export const adPreconnect = {
   webediads: [
     'https://eu1.wbdds.com',
   ],
+  gmossp: 'https://cdn.gmossp-sp.jp',
 };
 
 /**

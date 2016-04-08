@@ -21,7 +21,7 @@ import {timer} from '../../../src/timer';
 import {removeElement} from '../../../src/dom';
 
 /** @const {string} */
-const TAG_ = 'AmpAnalytics.Transport';
+const TAG_ = 'amp-analytics.Transport';
 
 /**
  * @param {!Window} win

@@ -61,6 +61,8 @@ export function installAd(win) {
 
       // Ad opts into lazier loading strategy where we only load ads that are
       // at closer than 1.25 viewports away.
+      // TODO(jridgewell): Can this be moved to the new number based
+      // renderOutsideViewport?
       if (this.element.getAttribute('data-loading-strategy') ==
           'prefer-viewability-over-views') {
         const box = this.getIntersectionElementLayoutBox();
@@ -73,7 +75,7 @@ export function installAd(win) {
       }
 
       // Otherwise the ad is good to go.
-      return true;
+      return super.renderOutsideViewport();
     }
 
     /** @override */

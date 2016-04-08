@@ -68,7 +68,7 @@ const AccessType = {
 };
 
 /** @const */
-const TAG = 'AmpAccess';
+const TAG = 'amp-access';
 
 /** @const {number} */
 const AUTHORIZATION_TIMEOUT = 3000;
