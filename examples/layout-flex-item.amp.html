@@ -1,0 +1,105 @@
+<!doctype html>
+<html ⚡>
+<head>
+  <meta charset="utf-8">
+  <title>AMP #0</title>
+  <link rel="canonical" href="amps.html" >
+  <meta name="viewport" content="width=device-width,minimum-scale=1">
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+
+  <style amp-custom>
+  .container {
+    display: flex;
+    flex-direction: row;
+    width: 450px;
+    height: 200px;
+  }
+  .container-col {
+    display: flex;
+    flex-direction: column;
+    width: 150px;
+    height: 300px;
+  }
+  .container-no-flex {
+    display: block;
+    overflow: auto;
+    width: 450px;
+    height: 200px;
+  }
+
+  .child-flex-basis-50 {
+    flex-basis: 50%;
+  }
+
+  .child-flex-basis-25 {
+    flex-basis: 25%;
+  }
+
+  .child-flex-grow-2 {
+    flex-grow: 2;
+  }
+
+  .child-flex-default {
+  }
+
+  .child-flex-size-set {
+    width: 150px;
+    height: 100px;
+  }
+  </style>
+
+  <script async src="https://cdn.ampproject.org/v0.js"></script>
+</head>
+
+<body>
+<h3>Flex-item in row. Flex-item elements will fill up availabe parent's space.</h3>
+<div class="container">
+   <amp-img class="child-flex-default" src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n" layout=flex-item></amp-img>
+  <amp-img class="child-flex-default" src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w400-h300-no-n" layout=flex-item></amp-img>
+  <amp-img class="child-flex-default" src="https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w400-h300-no-n" layout=flex-item></amp-img>
+</div>
+
+<h3>Flex-item in column. Flex-item elements will fill up availabe parent's space.</h3>
+<div class="container-col">
+   <amp-img class="child-flex-default" src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n" layout=flex-item></amp-img>
+  <amp-img class="child-flex-default"src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w400-h300-no-n" layout=flex-item></amp-img>
+  <amp-img class="child-flex-default" src="https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w400-h300-no-n" layout=flex-item></amp-img>
+</div>
+
+<h3>Set flex-item's size through flex-basis.</h3>
+<div class="container">
+   <amp-img class="child-flex-basis-25" src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n" layout=flex-item></amp-img>
+  <amp-img class="child-flex-basis-50" src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w400-h300-no-n" layout=flex-item></amp-img>
+  <amp-img class="child-flex-basis-25" src="https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w400-h300-no-n" layout=flex-item></amp-img>
+</div>
+
+<h3>Set flex-item's size through flex-grow.</h3>
+<div class="container">
+   <amp-img class="child-flex-grow-2" src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n" layout=flex-item></amp-img>
+  <amp-img class="child-flex-default" src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w400-h300-no-n" layout=flex-item></amp-img>
+  <amp-img class="child-flex-default" src="https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w400-h300-no-n" layout=flex-item></amp-img>
+</div>
+
+<h3>Non flex container parent with flex-item children.</h3>
+<div class="container-no-flex">
+   <amp-img class="child-flex-size-set" src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n" layout=flex-item></amp-img>
+  <amp-img class="child-flex-size-set" src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w400-h300-no-n" layout=flex-item></amp-img>
+  <amp-img class="child-flex-size-set" src="https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w400-h300-no-n" layout=flex-item></amp-img>
+</div>
+
+<h3>Flex container parent contain both flex-item children and non flex-item children.</h3>
+<div class="container">
+  <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n" layout=fixed width="200" height="150"></amp-img>
+  <amp-img class="child-flex-default" src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n" width="100" height="75" layout=flex-item></amp-img>
+  <amp-img class="child-flex-default" src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w400-h300-no-n" layout=flex-item></amp-img>
+  <amp-img class="child-flex-default" src="https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w400-h300-no-n" layout=flex-item></amp-img>
+</div>
+
+<h3>Flex container parent with non flex-item children. Children's width and height have to be set manually.</h3>
+<div class="container">
+   <amp-img src="https://lh3.googleusercontent.com/pSECrJ82R7-AqeBCOEPGPM9iG9OEIQ_QXcbubWIOdkY=w400-h300-no-n" width="100" height="75"></amp-img>
+  <amp-img src="https://lh3.googleusercontent.com/5rcQ32ml8E5ONp9f9-Rf78IofLb9QjS5_0mqsY1zEFc=w400-h300-no-n"  width="100" height="75"></amp-img>
+  <amp-img src="https://lh3.googleusercontent.com/Z4gtm5Bkxyv21Z2PtbTf95Clb9AE4VTR6olbBKYrenM=w400-h300-no-n" width="100" height="75"></amp-img> 
+</div>
+</body>
+</html>

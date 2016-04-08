@@ -230,6 +230,15 @@ export function applyLayout_(element) {
     // Do nothing. Elements themselves will check whether the supplied
     // layout value is acceptable. In particular container is only OK
     // sometimes.
+  } else if (layout == Layout.FLEX_ITEM) {
+    // Set height and width to a flex item if they exist.
+    // The size set to a flex item could be overridden by `display: flex` later.
+    if (width) {
+      element.style.width = width;
+    }
+    if (height) {
+      element.style.height = height;
+    }
   }
   return layout;
 }

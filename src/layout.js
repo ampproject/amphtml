@@ -32,6 +32,7 @@ export const Layout = {
   RESPONSIVE: 'responsive',
   CONTAINER: 'container',
   FILL: 'fill',
+  FLEX_ITEM: 'flex-item',
 };
 
 
@@ -122,7 +123,8 @@ export function isLayoutSizeDefined(layout) {
   return (layout == Layout.FIXED ||
       layout == Layout.FIXED_HEIGHT ||
       layout == Layout.RESPONSIVE ||
-      layout == Layout.FILL);
+      layout == Layout.FILL ||
+      layout == Layout.FLEX_ITEM);
 }
 
 
