@@ -27,7 +27,7 @@ import {timer} from '../../../src/timer';
 const EXPERIMENT = 'amp-sidebar';
 
 /** @const */
-const TAG = 'AmpSidebar';
+const TAG = 'amp-sidebar';
 
 /** @const */
 const ANIMATION_TIMEOUT = 550;

@@ -21,7 +21,7 @@ import {parseUrl} from '../../../src/url';
 import {viewerFor} from '../../../src/viewer';
 
 /** @const */
-const TAG = 'AmpAccessLogin';
+const TAG = 'amp-access-login';
 
 /** @const {!RegExp} */
 const RETURN_URL_REGEX = new RegExp('RETURN_URL');
