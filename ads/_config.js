@@ -29,6 +29,7 @@ export const adPrefetch = {
   a9: 'https://c.amazon-adsystem.com/aax2/assoc.js',
   adblade: 'https://web.adblade.com/js/ads/async/show.js',
   adsense: 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js',
+  colombia: 'https://static.clmbtech.com/ad/commons/js/colombia-amp.js',
   criteo: 'https://static.criteo.net/js/ld/publishertag.js',
   dotandads: 'https://amp.ad.dotandad.com/dotandadsAmp.js',
   industrybrains: 'https://web.industrybrains.com/js/ads/async/show.js',
