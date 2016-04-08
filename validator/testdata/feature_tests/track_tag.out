@@ -1,0 +1,6 @@
+FAIL
+feature_tests/track_tag.html:48:4 Invalid URL protocol 'http:' for attribute 'src' in tag 'amp-audio > track'. [AMP_TAG_PROBLEM]
+feature_tests/track_tag.html:50:4 The mandatory attribute 'srclang' is missing in tag 'amp-audio > track[kind=subtitles]'. [AMP_TAG_PROBLEM]
+feature_tests/track_tag.html:55:11 The mandatory attribute 'srclang' is missing in tag 'audio > track[kind=subtitles]'. [DISALLOWED_HTML]
+feature_tests/track_tag.html:56:11 The mandatory attribute 'srclang' is missing in tag 'video > track[kind=subtitles]'. [DISALLOWED_HTML]
+feature_tests/track_tag.html:59:4 The mandatory attribute 'srclang' is missing in tag 'amp-video > track[kind=subtitles]'. [AMP_TAG_PROBLEM]
