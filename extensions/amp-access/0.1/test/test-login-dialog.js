@@ -279,7 +279,8 @@ describe('WebLoginDialog', () => {
         .withExactArgs(
             'http://acme.com/login?return=' + RETURN_URL_ESC,
             '_blank',
-            'height=450,width=700,left=150,top=275')
+            'height=450,width=700,left=150,top=275' +
+            ',resizable=yes,scrollbars=yes')
         .returns(dialog)
         .once();
     dialogMock.expects('postMessage')
@@ -305,7 +306,8 @@ describe('WebLoginDialog', () => {
         .withExactArgs(
             'http://acme.com/login?a=1&return=' + RETURN_URL_ESC,
             '_blank',
-            'height=450,width=700,left=150,top=275')
+            'height=450,width=700,left=150,top=275' +
+            ',resizable=yes,scrollbars=yes')
         .returns(dialog)
         .once();
     const promise = openLoginDialog(windowApi, 'http://acme.com/login?a=1');
@@ -324,7 +326,8 @@ describe('WebLoginDialog', () => {
         .withExactArgs(
             'http://acme.com/login?a=1&ret1=' + RETURN_URL_ESC,
             '_blank',
-            'height=450,width=700,left=150,top=275')
+            'height=450,width=700,left=150,top=275' +
+            ',resizable=yes,scrollbars=yes')
         .returns(dialog)
         .once();
     const promise = openLoginDialog(windowApi,
