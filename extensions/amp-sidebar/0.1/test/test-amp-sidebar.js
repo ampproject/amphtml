@@ -239,4 +239,28 @@ describe('amp-sidebar', () => {
       expect(scrollLeakSpy.callCount).to.equal(1);
     });
   });
+
+  it('should adjust for IOS safari bottom bar', () => {
+    sandbox.stub(platform, 'isIos').returns(true);
+    sandbox.stub(platform, 'isSafari').returns(true);
+    return getAmpSidebar().then(obj => {
+      const sidebarElement = obj.ampSidebar;
+      const impl = sidebarElement.implementation_;
+      impl.vsync_ = {
+        mutate: function(callback) {
+          callback();
+        },
+      };
+      sandbox.stub(timer, 'delay', function(callback) {
+        callback();
+      });
+      const compensateIosBottombarSpy =
+          sandbox.spy(impl, 'compensateIosBottombar_');
+      const initalChildrenCount = sidebarElement.children.length;
+      impl.open_();
+      expect(compensateIosBottombarSpy.callCount).to.equal(1);
+      // 10 lis + one top padding element inserted
+      expect(sidebarElement.children.length).to.equal(initalChildrenCount + 1);
+    });
+  });
 });
