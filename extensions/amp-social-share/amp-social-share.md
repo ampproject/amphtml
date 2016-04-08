@@ -110,7 +110,7 @@ Also an arbitrary amount of AMP compatible HTML can be added within the element 
 
 ### Types
 
-The builtin supported types are configured in [AMP Social Share Config](v.0/amp-amp-social-share-config.js). Below are the possible types and their configuration options:
+The builtin supported types are configured in [AMP Social Share Config](0.1/amp-social-share-config.js). Below are the possible types and their configuration options:
 - twitter
   - url `optional` (defaults: `rel=canonical` URL)
   - text
@@ -124,7 +124,7 @@ The builtin supported types are configured in [AMP Social Share Config](v.0/amp-
   - image
 - linkedin
   - url `optional` (defaults: `rel=canonical` URL)
-  - title
+  - text
   - attribution
 - gplus
   - url `optional` (defaults: `rel=canonical` URL)

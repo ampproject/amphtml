@@ -25,7 +25,7 @@ import {timer} from '../../../src/timer';
 import {user} from '../../../src/log';
 
 /** @const {string} */
-const TAG_ = 'AmpIframe';
+const TAG_ = 'amp-iframe';
 
 /** @type {number}  */
 let count = 0;

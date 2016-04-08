@@ -27,9 +27,11 @@ import {installEmbedStateListener} from './environment';
 import {a9} from '../ads/a9';
 import {adblade, industrybrains} from '../ads/adblade';
 import {adform} from '../ads/adform';
+import {adman} from '../ads/adman';
 import {adreactor} from '../ads/adreactor';
 import {adsense} from '../ads/google/adsense';
 import {adtech} from '../ads/adtech';
+import {aduptech} from '../ads/aduptech';
 import {plista} from '../ads/plista';
 import {criteo} from '../ads/criteo';
 import {doubleclick} from '../ads/google/doubleclick';
@@ -57,6 +59,7 @@ import {rubicon} from '../ads/rubicon';
 import {imobile} from '../ads/imobile';
 import {webediads} from '../ads/webediads';
 import {user} from '../src/log';
+import {gmossp} from '../ads/gmossp';
 
 /**
  * Whether the embed type may be used with amp-embed tag.
@@ -69,9 +72,11 @@ const AMP_EMBED_ALLOWED = {
 register('a9', a9);
 register('adblade', adblade);
 register('adform', adform);
+register('adman', adman);
 register('adreactor', adreactor);
 register('adsense', adsense);
 register('adtech', adtech);
+register('aduptech', aduptech);
 register('plista', plista);
 register('criteo', criteo);
 register('doubleclick', doubleclick);
@@ -97,6 +102,7 @@ register('teads', teads);
 register('rubicon', rubicon);
 register('imobile', imobile);
 register('webediads', webediads);
+register('gmossp', gmossp);
 
 // For backward compat, we always allow these types without the iframe
 // opting in.
