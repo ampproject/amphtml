@@ -126,9 +126,6 @@ export const adPreconnect = {
     'https://eu1.wbdds.com',
   ],
   gmossp: 'https://cdn.gmossp-sp.jp',
-  'weborama-display': [
-    'https://cstatic.weborama.fr',
-  ],
 };
 
 /**
