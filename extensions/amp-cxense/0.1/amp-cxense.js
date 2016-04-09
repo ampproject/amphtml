@@ -83,7 +83,7 @@ class AmpCxense extends AMP.BaseElement {
     /** @private */
     _pauseMpf() {
         let self = this;
-        window.RAMP && RAMP.Widgets.get('#' + this._target.getAttribute('id') + '.metaplayer', function(mpf) {
+        this._target && window.RAMP && RAMP.Widgets.get('#' + this._target.getAttribute('id') + '.metaplayer', function(mpf) {
             self._mpf = mpf;
             mpf.video.pause();
         });
