@@ -11,15 +11,29 @@
     <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
-<h2>Cxense Video Player 2</h2>
+
+<h2>Cxense Video Player - responsive</h2>
 
 <amp-cxense
-        id="my-player"
-        data-ramp-embed="/app/player/m4/debug/"
-        data-ramp-api-key="e30f107ac8e832cea22f01053104eb43"
-        data-ramp-item-id="100204134"
+        data-src="//embed.ramp.com/amd.js"
+        data-embed="/app/player/m4/debug/"
+        data-api-key="e30f107ac8e832cea22f01053104eb43"
+        data-item-id="100204134"
         layout="responsive" width="480" height="270">
 </amp-cxense>
+
+<h2>Cxense Video Player - fixed</h2>
+
+<amp-cxense
+        data-src="//embed.ramp.com/amd.js"
+        data-embed="/app/player/m4/debug/"
+        data-api-key="e30f107ac8e832cea22f01053104eb43"
+        data-item-id="100204134"
+        width="480" height="270">
+</amp-cxense>
+
+<!-- you can also use it to inject any script on the page, make sure you set data-ui-off="true" and height="1", don't worry, it will not be displayed nor have a height -->
+<amp-cxense data-src="//code.jquery.com/jquery-2.2.3.min.js" data-ui-off="true" height="1"></amp-cxense>
 
 </body>
 </html>
