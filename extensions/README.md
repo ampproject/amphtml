@@ -43,6 +43,7 @@ Current list of extended components:
 | [`amp-springboard-player`](amp-springboard-player/amp-springboard-player.md) | Displays a Springboard Platform video player |
 | [`amp-twitter`](amp-twitter/amp-twitter.md) | Displays a Twitter tweet. |
 | [`amp-user-notification`](amp-user-notification/amp-user-notification.md) | Displays a dismissable notification to the user. |
+| [`amp-viafoura`](amp-viafoura/amp-viafoura.md) | Displays a Viafoura Widget.                                                                   |
 | [`amp-vimeo`](amp-vimeo/amp-vimeo.md) | Displays a Vimeo video. |
 | [`amp-vine`](amp-vine/amp-vine.md) | Displays a Vine simple embed. |
 | [`amp-youtube`](amp-youtube/amp-youtube.md) | Displays a YouTube video. |

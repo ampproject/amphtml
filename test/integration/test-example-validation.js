@@ -57,6 +57,7 @@ describe('example', function() {
     'soundcloud.amp.html',
     'springboard-player.amp.html',
     'twitter.amp.html',
+    'viafoura.amp.html',
     'vine.amp.html',
     'vimeo.amp.html',
     'old-boilerplate.amp.html',
