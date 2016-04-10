@@ -21,12 +21,14 @@ import {setStyles} from '../../../src/style';
 import {timer} from '../../../src/timer';
 import {user} from '../../../src/log';
 
+const ES5_SHIM_SRC = location.protocol + '//cdnjs.cloudflare.com/ajax/libs/es5-shim/4.5.8/es5-shim.min.js';
 const DEFAULT_AMD_SRC = location.protocol + '//embed.widget.cx/amd.js';
 const DEFAULT_EMBED_APP = '/app/player/m4/dist/';
 const PRE_CONNECT_URLS = [DEFAULT_AMD_SRC].concat([location.protocol + '//api.widget.cx', location.protocol + '//api.ramp.com']);
 const DATA_ATTR_NAME_MIDFIX = '-ramp-';
 
 let skipTransfer = {
+    'data-legacy': true,
     'data-isplayer': true,
     'data-noui': true,
     'data-placeholder': true,
@@ -62,6 +64,7 @@ class AmpCxense extends AMP.BaseElement {
         let _widgetId = this._getDataAttribute('widget-id');
         let _embed = this._getDataAttribute('embed');
         let _module = this._getDataAttribute('module');
+
         if (!src && !_widgetId && !_embed && !_module) {
             // if none of these is specified, the default behavior is to load the app widget.
             this.element.setAttribute('data-embed', DEFAULT_EMBED_APP);
@@ -76,8 +79,8 @@ class AmpCxense extends AMP.BaseElement {
         /** @private @const {string} */
         this._placeholder = this.element.getAttribute('data-placeholder') !== "false";
 
-        /** @private @const {boolean} */
         // todo: we need a way to figure if metaplayer, so we can wait for it to be ready before removing the placeholder
+        /** @private @const {boolean} */
         this._isPlayer = !! (this.element.getAttribute('data-isplayer') || true);
 
         /** @private @const {boolean} */
@@ -109,20 +112,19 @@ class AmpCxense extends AMP.BaseElement {
                 self._embed = embed;
 
                 if (self._isPlayer) {
-                    return new Promise((resolve) => {
-                        RAMP.Widgets.get('#' + self._target.getAttribute('id') + '.metaplayer', function(mpf) {
-                            self._mpf = mpf;
-                            mpf.listen('ready', function() {
-                                self.applyFillContent(self._target);
-                                resolve();
-                            });
-                        });
-                    });
+                    return self._loadPlayer();
                 } else {
                     self.applyFillContent(self._target);
                 }
             });
         });
+    }
+
+    /** @override */
+    unlayoutCallback() {
+        this._embed && this._embed.destroy();
+        this._target && this._target.parentNode.removeChild(this._target);
+        return true;
     }
 
     /** @override */
@@ -165,11 +167,31 @@ class AmpCxense extends AMP.BaseElement {
 
     /** @private */
     _injectEmbedScript () {
+        return this._injectScript(this._src);
+    }
+
+    _injectScript (src) {
         const doc = this._getDoc();
         const script = doc.createElement('script');
-        script.setAttribute("src", this._src);
+        script.setAttribute("src", src);
         doc.head.appendChild(script);
         return loadPromise(script);
+    }
+
+    _loadPlayer () {
+        let self = this;
+        return new Promise((resolve) => {
+            if (self._target && window.RAMP) {
+                return RAMP.Widgets.get('#' + self._target.getAttribute('id') + '.metaplayer', function (mpf) {
+                    self._mpf = mpf;
+                    mpf.listen('ready', function () {
+                        self.applyFillContent(self._target);
+                        resolve();
+                    });
+                });
+            }
+            reject('cannot load player, widgets dependencies not loaded');
+        });
     }
 
     /** @private */
