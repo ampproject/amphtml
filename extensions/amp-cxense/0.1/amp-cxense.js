@@ -30,7 +30,6 @@ let skipTransfer = {
     'layout': true
 };
 
-
 class AmpCxense extends AMP.BaseElement {
 
     /** @override */
@@ -50,12 +49,6 @@ class AmpCxense extends AMP.BaseElement {
     buildCallback() {
         this.element.className += ' amp-cxense';
 
-        /** @private @const {number} */
-        this._width = getLengthNumeral(this.element.getAttribute('width'));
-
-        /** @private @const {number} */
-        this._height = getLengthNumeral(this.element.getAttribute('height'));
-
         /** @private @const {string} */
         this._src = this.element.getAttribute('data-src');
 
@@ -73,7 +66,7 @@ class AmpCxense extends AMP.BaseElement {
             RAMP.Widgets && RAMP.Widgets.init && RAMP.Widgets.init();
         }
 
-        if (!this.getPlaceholder() && this._placeholder) {
+        if (!this.getPlaceholder() && this._placeholder && !this._uiOff) {
             this._buildWidgetPlaceholder();
         }
     }
@@ -193,7 +186,6 @@ class AmpCxense extends AMP.BaseElement {
     getDoc () {
         return this.getWin().document;
     }
-
 }
 
 AMP.registerElement('amp-cxense', AmpCxense, CSS);
