@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {CSS} from '../../../build/amp-cxense-0.1.css';
 import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
 import {setStyles} from '../../../src/style';
@@ -21,6 +22,14 @@ import {timer} from '../../../src/timer';
 import {user} from '../../../src/log';
 
 const DATA_ATTR_NAME_INTERFIX = 'ramp-';
+let skipTransfer = {
+    'data-src': true,
+    'data-ui-off': true,
+    'data-placeholder': true,
+    'class': true,
+    'layout': true
+};
+
 
 class AmpCxense extends AMP.BaseElement {
 
@@ -39,36 +48,60 @@ class AmpCxense extends AMP.BaseElement {
 
     /** @override */
     buildCallback() {
-        const width = this.element.getAttribute('width');
-        const height = this.element.getAttribute('height');
+        this.element.className += ' amp-cxense';
+
         /** @private @const {number} */
-        this.width_ = getLengthNumeral(width);
+        this._width = getLengthNumeral(this.element.getAttribute('width'));
+
         /** @private @const {number} */
-        this.height_ = getLengthNumeral(height);
+        this._height = getLengthNumeral(this.element.getAttribute('height'));
+
+        /** @private @const {string} */
+        this._src = this.element.getAttribute('data-src');
+
+        /** @private @const {string} */
+        this._placeholder = this.element.getAttribute('data-placeholder');
+
+        /** @private @const {boolean} */
+        this._isPlayer = this._placeholder === 'player';
+
+        /** @private @const {boolean} */
+        this._uiOff = this.element.getAttribute('data-ui-off') === "true";
 
         if (window.RAMP) {
             RAMP.Widgets && RAMP.Widgets.init && RAMP.Widgets.init();
         }
-        if (!this.getPlaceholder()) {
-            // this._buildImagePlaceholder();
+        if (!this.getPlaceholder() && this._isPlayer) {
+            this._buildPlayerPlaceholder();
         }
     }
 
     /** @override */
     layoutCallback() {
         let self = this;
-        this._src = this.element.getAttribute('data-src');
-        if (this.element.getAttribute('data-ui-off') === "true") {
+
+        if (this._uiOff) {
             setStyles(this.element, {
                 'display': 'none'
             });
         } else {
             this._createChildTarget();
         }
+
         return this._injectEmbedScript().then(() => {
-            window.RAMP && RAMP.Widgets.get('#' + self._target.getAttribute('id'), function(embed) {
+            self._target && window.RAMP && RAMP.Widgets.get('#' + self._target.getAttribute('id'), function(embed) {
                 self._embed = embed;
-                self.applyFillContent(self._target);
+
+                if (! this._isPlayer) {
+                    self.applyFillContent(self._target);
+                } else {
+                    RAMP.Widgets.get('#' + self._target.getAttribute('id') + '.metaplayer', function(mpf) {
+                        self._mpf = mpf;
+                        mpf.listen('ready', function() {
+                            self.applyFillContent(self._target);
+                        });
+                    });
+                }
             });
         });
     }
@@ -82,9 +115,7 @@ class AmpCxense extends AMP.BaseElement {
 
     /** @private */
     _pauseMpf() {
-        let self = this;
         this._target && window.RAMP && RAMP.Widgets.get('#' + this._target.getAttribute('id') + '.metaplayer', function(mpf) {
-            self._mpf = mpf;
             mpf.video.pause();
         });
     }
@@ -95,54 +126,53 @@ class AmpCxense extends AMP.BaseElement {
     }
 
     /** @private */
-    _buildImagePlaceholder() {
-        const imgPlaceholder = new Image();
-        setStyles(imgPlaceholder, {
-            'object-fit': 'cover',
-            // Hiding the placeholder initially to give the browser time to fix
-            // the object-fit: cover.
-            'visibility': 'hidden'
-        });
+    _buildPlayerPlaceholder() {
+        const doc = this.getDoc();
 
-        // player thumbnails for different screen sizes for a cache win!
-        imgPlaceholder.src = 'img source here';
-        imgPlaceholder.setAttribute('placeholder', '');
-        imgPlaceholder.width = this.width_;
-        imgPlaceholder.height = this.height_;
-        this.element.appendChild(imgPlaceholder);
-        this.applyFillContent(imgPlaceholder);
+        let placeholder = doc.createElement('div');
+        placeholder.className = 'amp-mpf-player-placeholder';
 
-        loadPromise(imgPlaceholder).catch(() => {
-            imgPlaceholder.src = 'fallback img src here';
-            return loadPromise(imgPlaceholder);
-        }).then(() => {
-            setStyles(imgPlaceholder, {
-                'visibility': ''
-            });
-        });
+        let circle = doc.createElement('div');
+        circle.className = 'amp-mpf-play-circle';
+        let triangle = doc.createElement('div');
+        triangle.className = 'amp-mpf-play-triangle';
+        circle.appendChild(triangle);
+
+        placeholder.appendChild(circle);
+
+        let spinner = doc.createElement('div');
+        spinner.className = 'amp-mpf-loader';
+        spinner.appendChild(doc.createElement('div'));
+        spinner.appendChild(doc.createElement('div'));
+        spinner.appendChild(doc.createElement('div'));
+
+        placeholder.appendChild(spinner);
+
+        this.element.appendChild(placeholder);
+        this.applyFillContent(placeholder);
     }
 
     /** @private */
     _injectEmbedScript () {
-        const script = this.element.ownerDocument.createElement('script');
+        const doc = this.getDoc();
+        const script = doc.createElement('script');
         script.setAttribute("src", this._src);
-        this.element.ownerDocument.head.appendChild(script);
+        doc.head.appendChild(script);
         return loadPromise(script);
     }
 
     /** @private */
     _createChildTarget () {
-        const target = this.element.ownerDocument.createElement('div');
+        const target = this.getDoc().createElement('div');
         setStyles(target, {
             'background': 'black'
         });
-        let skipTransfer = {
-            'data-src': true,
-            'data-ui-off': true
-        };
         let id;
         let attr;
         let attributes = Array.prototype.slice.call(this.element.attributes);
+        let shortRegExp = new RegExp('^data-');
+        let fullRegExp = new RegExp('^data-' + DATA_ATTR_NAME_INTERFIX);
+
         while(attr = attributes.pop()) {
             let name = attr.nodeName;
             let skip = false;
@@ -152,9 +182,12 @@ class AmpCxense extends AMP.BaseElement {
             if (name == "id") {
                 id = "" + attr.nodeValue;
             }
-            if (/^data-/.test(attr.nodeName)) {
+            if (shortRegExp.test(name)) {
                 this.element.removeAttribute(attr.nodeName);
-                name = name.replace(/^data-/i, 'data-' + DATA_ATTR_NAME_INTERFIX)
+
+                if (!fullRegExp.test(name)) {
+                    name = name.replace(/^data-/i, 'data-' + DATA_ATTR_NAME_INTERFIX)
+                }
             }
             !skip && target.setAttribute(name, attr.nodeValue);
         }
@@ -163,6 +196,10 @@ class AmpCxense extends AMP.BaseElement {
         this._target = target;
     }
 
+    getDoc () {
+        return this.getWin().document;
+    }
+
 }
 
-AMP.registerElement('amp-cxense', AmpCxense);
+AMP.registerElement('amp-cxense', AmpCxense, CSS);

@@ -74,7 +74,7 @@ function buildExtensions(options) {
   buildExtension('amp-anim', '0.1', false, options);
   buildExtension('amp-audio', '0.1', false, options);
   buildExtension('amp-brid-player', '0.1', false, options);
-  buildExtension('amp-cxense', '0.1', false, options);
+  buildExtension('amp-cxense', '0.1', true, options);
   buildExtension('amp-brightcove', '0.1', false, options);
   buildExtension('amp-kaltura-player', '0.1', false, options);
   buildExtension('amp-carousel', '0.1', true, options);
