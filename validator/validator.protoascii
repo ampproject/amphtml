@@ -2809,6 +2809,40 @@ tags: {  # amp-brightcove
   }
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-brightcove.html"
 }
+
+tags: {  # amp-cxense
+  tag_name: "script"
+  spec_name: "amp-cxense extension .js script"
+  mandatory_parent: "head"
+  attrs: {
+    name: "async"
+    mandatory: true
+    value: ""
+  }
+  attrs: {
+    name: "custom-element"
+    mandatory: true
+    value: "amp-cxense"
+    dispatch_key: true
+  }
+  attrs: {
+    name: "src"
+    mandatory: true
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-cxense-(latest|0\\.1).js"
+  }
+  attrs: {
+    name: "type"
+    value: "text/javascript"
+  }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "."
+      error_message: "contents"
+    }
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-cxense.html"
+}
+
 tags: {  # amp-carousel
   tag_name: "script"
   spec_name: "amp-carousel extension .js script"
@@ -3853,6 +3887,20 @@ tags: {  # <amp-brightcove>
   attrs: { name: "data-video-id" }
   attr_lists: "extended-amp-global"
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-brightcove.html"
+  amp_layout: {
+    supported_layouts: FILL
+    supported_layouts: FIXED
+    supported_layouts: FIXED_HEIGHT
+    supported_layouts: NODISPLAY
+    supported_layouts: RESPONSIVE
+  }
+}
+tags: {  # <amp-cxense>
+  tag_name: "amp-cxense"
+  disallowed_ancestor: "head"
+  also_requires: "amp-cxense extension .js script"
+  attr_lists: "extended-amp-global"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-cxense.html"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED

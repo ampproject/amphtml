@@ -21,23 +21,31 @@ import {setStyles} from '../../../src/style';
 import {timer} from '../../../src/timer';
 import {user} from '../../../src/log';
 
-const DATA_ATTR_NAME_INTERFIX = 'ramp-';
+const DEFAULT_AMD_SRC = location.protocol + '//embed.widget.cx/amd.js';
+const DEFAULT_EMBED_APP = '/app/player/m4/dist/';
+const PRE_CONNECT_URLS = [DEFAULT_AMD_SRC].concat([location.protocol + '//api.widget.cx', location.protocol + '//api.ramp.com']);
+const DATA_ATTR_NAME_MIDFIX = '-ramp-';
+
 let skipTransfer = {
-    'data-src': true,
-    'data-ui-off': true,
+    'data-isplayer': true,
+    'data-noui': true,
     'data-placeholder': true,
     'class': true,
     'layout': true
+};
+
+let _getLongDataAttributeName = (name) => {
+    return name.replace(/^data-/i, 'data' + DATA_ATTR_NAME_MIDFIX);
 };
 
 class AmpCxense extends AMP.BaseElement {
 
     /** @override */
     preconnectCallback(onLayout) {
-        this.preconnect.url('https://embed.widget.cx/amd.js', onLayout);
-        this.preconnect.url('https://embed.ramp.com/amd.js', onLayout);
-        this.preconnect.url('https://api.ramp.com', onLayout);
-        this.preconnect.url('https://api.widget.cx', onLayout);
+        const self = this;
+        PRE_CONNECT_URLS.forEach(function(url) {
+            self.preconnect.url(url, onLayout);
+        });
     }
 
     /** @override */
@@ -49,24 +57,37 @@ class AmpCxense extends AMP.BaseElement {
     buildCallback() {
         this.element.className += ' amp-cxense';
 
+        let src = this.element.getAttribute('src');
+
+        let _widgetId = this._getDataAttribute('widget-id');
+        let _embed = this._getDataAttribute('embed');
+        let _module = this._getDataAttribute('module');
+        if (!src && !_widgetId && !_embed && !_module) {
+            // if none of these is specified, the default behavior is to load the app widget.
+            this.element.setAttribute('data-embed', DEFAULT_EMBED_APP);
+            this.element.setAttribute('data-isplayer', true);
+        }
+
         /** @private @const {string} */
-        this._src = this.element.getAttribute('data-src');
+        this._src =  src || DEFAULT_AMD_SRC;
+        // necessary, otherwise it would confuse AMP
+        this.element.removeAttribute('src');
 
         /** @private @const {string} */
         this._placeholder = this.element.getAttribute('data-placeholder') !== "false";
 
         /** @private @const {boolean} */
         // todo: we need a way to figure if metaplayer, so we can wait for it to be ready before removing the placeholder
-        this._isPlayer = !! (this.element.getAttribute('data-player') || true);
+        this._isPlayer = !! (this.element.getAttribute('data-isplayer') || true);
 
         /** @private @const {boolean} */
-        this._uiOff = this.element.getAttribute('data-ui-off') === "true";
+        this._noui = this.element.getAttribute('data-noui') === "true";
 
         if (window.RAMP) {
             RAMP.Widgets && RAMP.Widgets.init && RAMP.Widgets.init();
         }
 
-        if (!this.getPlaceholder() && this._placeholder && !this._uiOff) {
+        if (!this.getPlaceholder() && this._placeholder && !this._noui) {
             this._buildWidgetPlaceholder();
         }
     }
@@ -75,7 +96,7 @@ class AmpCxense extends AMP.BaseElement {
     layoutCallback() {
         let self = this;
 
-        if (this._uiOff) {
+        if (this._noui) {
             setStyles(this.element, {
                 'display': 'none'
             });
@@ -87,15 +108,18 @@ class AmpCxense extends AMP.BaseElement {
             self._target && window.RAMP && RAMP.Widgets.get('#' + self._target.getAttribute('id'), function(embed) {
                 self._embed = embed;
 
-                if (! self._isPlayer) {
-                    self.applyFillContent(self._target);
-                } else {
-                    RAMP.Widgets.get('#' + self._target.getAttribute('id') + '.metaplayer', function(mpf) {
-                        self._mpf = mpf;
-                        mpf.listen('ready', function() {
-                            self.applyFillContent(self._target);
+                if (self._isPlayer) {
+                    return new Promise((resolve) => {
+                        RAMP.Widgets.get('#' + self._target.getAttribute('id') + '.metaplayer', function(mpf) {
+                            self._mpf = mpf;
+                            mpf.listen('ready', function() {
+                                self.applyFillContent(self._target);
+                                resolve();
+                            });
                         });
                     });
+                } else {
+                    self.applyFillContent(self._target);
                 }
             });
         });
@@ -122,7 +146,7 @@ class AmpCxense extends AMP.BaseElement {
 
     /** @private */
     _buildWidgetPlaceholder() {
-        const doc = this.getDoc();
+        const doc = this._getDoc();
 
         let placeholder = doc.createElement('div');
         placeholder.className = 'amp-cxense-placeholder';
@@ -141,7 +165,7 @@ class AmpCxense extends AMP.BaseElement {
 
     /** @private */
     _injectEmbedScript () {
-        const doc = this.getDoc();
+        const doc = this._getDoc();
         const script = doc.createElement('script');
         script.setAttribute("src", this._src);
         doc.head.appendChild(script);
@@ -150,41 +174,47 @@ class AmpCxense extends AMP.BaseElement {
 
     /** @private */
     _createChildTarget () {
-        const target = this.getDoc().createElement('div');
+        const target = this._getDoc().createElement('div');
         setStyles(target, {
             'background': 'black'
         });
         let id;
         let attr;
         let attributes = Array.prototype.slice.call(this.element.attributes);
-        let shortRegExp = new RegExp('^data-');
-        let fullRegExp = new RegExp('^data-' + DATA_ATTR_NAME_INTERFIX);
+        let shortRegExp = new RegExp('^data-', 'i');
+        let fullRegExp = new RegExp('^data-' + DATA_ATTR_NAME_MIDFIX.replace('^-', ''), 'i');
 
         while(attr = attributes.pop()) {
             let name = attr.nodeName;
+            let value = attr.nodeValue;
+
             let skip = false;
             if (skipTransfer[name]) {
                 skip = true;
             }
             if (name == "id") {
-                id = "" + attr.nodeValue;
+                value += "-widget";
             }
             if (shortRegExp.test(name)) {
                 this.element.removeAttribute(attr.nodeName);
 
                 if (!fullRegExp.test(name)) {
-                    name = name.replace(/^data-/i, 'data-' + DATA_ATTR_NAME_INTERFIX)
+                    name = _getLongDataAttributeName(name);
                 }
             }
-            !skip && target.setAttribute(name, attr.nodeValue);
+            !skip && target.setAttribute(name, value);
         }
-        id && this.element.setAttribute("id", id + "-parent");
         this.element.appendChild(target);
         this._target = target;
     }
 
-    getDoc () {
+    _getDoc () {
         return this.getWin().document;
+    }
+
+    _getDataAttribute (name) {
+        name = 'data-' + name.replace(/^data-/i, '');
+        return this.element.getAttribute(name) || this.element.getAttribute(_getLongDataAttributeName(name));
     }
 }
 
