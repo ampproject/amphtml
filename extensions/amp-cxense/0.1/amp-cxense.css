@@ -1,4 +1,7 @@
-.amp-cxense .amp-mpf-player-placeholder {
+/*
+    inspired from http://connoratherton.com/loaders
+*/
+.amp-cxense .amp-cxense-placeholder {
     position: absolute;
     top: 0;
     height: 100%;
@@ -6,53 +9,7 @@
     overflow: hidden;
     background: black;
 }
-.amp-cxense .amp-mpf-player-placeholder .amp-mpf-play-circle {
-    cursor: pointer;
-    display: block;
-    font-size: 2em;
-    color: white;
-    position: absolute;
-    margin: auto;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
-    width: 3em;
-    height: 3em;
-    text-align: center;
-    background: rgb(0, 0, 0);
-    background: rgba(0, 0, 0, 0.5);
-    border: 2px solid white;
-    -moz-border-radius: 50%;
-    -khtml-border-radius: 50%;
-    -webkit-border-radius: 50%;
-    border-radius: 50%;
-    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
-    filter: alpha(opacity=50);
-    letter-spacing: normal;
-    word-spacing: normal;
-    text-transform: none;
-    text-indent: 0;
-    text-shadow: none;
-    -webkit-writing-mode: horizontal-tb;
-}
-.amp-cxense .amp-mpf-player-placeholder .amp-mpf-play-triangle {
-    position: absolute;
-    margin: auto;
-    left: 10px;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    width: 0;
-    height: 0;
-    border-top: 15px solid transparent;
-    border-bottom: 15px solid transparent;
-    border-left: 25px solid white;
-}
-/*
-    from http://connoratherton.com/loaders
-*/
-.amp-cxense .amp-mpf-player-placeholder .amp-mpf-loader {
+.amp-cxense .amp-cxense-placeholder .amp-mpf-loader {
     position: absolute;
     top: 0;
     right: 0;
@@ -62,7 +19,7 @@
     height: 60px;
     margin: auto;
 }
-.amp-cxense .amp-mpf-player-placeholder .amp-mpf-loader > div {
+.amp-cxense .amp-cxense-placeholder .amp-mpf-loader > div {
     -webkit-animation-fill-mode: both;
     animation-fill-mode: both;
     position: absolute;
@@ -105,15 +62,15 @@
         opacity: 0.0;
     }
 }
-.amp-cxense .amp-mpf-player-placeholder .amp-mpf-loader > div:nth-child(1) {
+.amp-cxense .amp-cxense-placeholder .amp-mpf-loader > div:nth-child(1) {
     -webkit-animation-delay: 0s;
     animation-delay: 0s;
 }
-.amp-cxense .amp-mpf-player-placeholder .amp-mpf-loader > div:nth-child(2) {
+.amp-cxense .amp-cxense-placeholder .amp-mpf-loader > div:nth-child(2) {
     -webkit-animation-delay: 0.2s;
     animation-delay: 0.2s;
 }
-.amp-cxense .amp-mpf-player-placeholder .amp-mpf-loader > div:nth-child(3) {
+.amp-cxense .amp-cxense-placeholder .amp-mpf-loader > div:nth-child(3) {
     -webkit-animation-delay: 0.4s;
     animation-delay: 0.4s;
 }

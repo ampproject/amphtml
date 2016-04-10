@@ -60,10 +60,11 @@ class AmpCxense extends AMP.BaseElement {
         this._src = this.element.getAttribute('data-src');
 
         /** @private @const {string} */
-        this._placeholder = this.element.getAttribute('data-placeholder');
+        this._placeholder = this.element.getAttribute('data-placeholder') !== "false";
 
         /** @private @const {boolean} */
-        this._isPlayer = this._placeholder === 'player';
+        // todo: we need a way to figure if metaplayer, so we can wait for it to be ready before removing the placeholder
+        this._isPlayer = !! (this.element.getAttribute('data-player') || true);
 
         /** @private @const {boolean} */
         this._uiOff = this.element.getAttribute('data-ui-off') === "true";
@@ -71,8 +72,9 @@ class AmpCxense extends AMP.BaseElement {
         if (window.RAMP) {
             RAMP.Widgets && RAMP.Widgets.init && RAMP.Widgets.init();
         }
-        if (!this.getPlaceholder() && this._isPlayer) {
-            this._buildPlayerPlaceholder();
+
+        if (!this.getPlaceholder() && this._placeholder) {
+            this._buildWidgetPlaceholder();
         }
     }
 
@@ -92,7 +94,7 @@ class AmpCxense extends AMP.BaseElement {
             self._target && window.RAMP && RAMP.Widgets.get('#' + self._target.getAttribute('id'), function(embed) {
                 self._embed = embed;
 
-                if (! this._isPlayer) {
+                if (! self._isPlayer) {
                     self.applyFillContent(self._target);
                 } else {
                     RAMP.Widgets.get('#' + self._target.getAttribute('id') + '.metaplayer', function(mpf) {
@@ -126,19 +128,11 @@ class AmpCxense extends AMP.BaseElement {
     }
 
     /** @private */
-    _buildPlayerPlaceholder() {
+    _buildWidgetPlaceholder() {
         const doc = this.getDoc();
 
         let placeholder = doc.createElement('div');
-        placeholder.className = 'amp-mpf-player-placeholder';
-
-        let circle = doc.createElement('div');
-        circle.className = 'amp-mpf-play-circle';
-        let triangle = doc.createElement('div');
-        triangle.className = 'amp-mpf-play-triangle';
-        circle.appendChild(triangle);
-
-        placeholder.appendChild(circle);
+        placeholder.className = 'amp-cxense-placeholder';
 
         let spinner = doc.createElement('div');
         spinner.className = 'amp-mpf-loader';
