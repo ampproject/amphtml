@@ -19,7 +19,6 @@ import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
 import {loadPromise} from '../../../src/event-helper';
 import {setStyles} from '../../../src/style';
 import {timer} from '../../../src/timer';
-import {user} from '../../../src/log';
 
 const DEFAULT_AMD_SRC = location.protocol + '//embed.widget.cx/amd.js';
 const DEFAULT_EMBED_APP = '/app/player/m4/dist/';
@@ -27,7 +26,6 @@ const PRE_CONNECT_URLS = [DEFAULT_AMD_SRC].concat([location.protocol + '//api.wi
 const DATA_ATTR_NAME_MIDFIX = '-ramp-';
 
 let skipTransfer = {
-    'data-legacy': true,
     'data-isplayer': true,
     'data-noui': true,
     'data-placeholder': true,
