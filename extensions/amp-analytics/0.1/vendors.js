@@ -199,28 +199,38 @@ export const ANALYTICS_CONFIG = {
   },
 
   'colanalytics': {
-    'vars': {
-        'id': '',
-        'colurl':'',
-    },
     'requests': {
-        'host': 'https://${colurl}',
-        'base': '${host}/message',
-        'pageview': '${base}?cid=${id}&val_101=${canonicalPath}&val_101=${canonicalHost}&uuid=${uid}&val_101=${authors}&val_101=${zone}&val_101=${sponsorName}&val_101=${contentType}&val_101=${scrollTop}&val_101=${scrollHeight}&val_101=${decayTime}&val_101=${totalEngagedTime}&val_101=${documentReferrer}&val_101=${pageLoadTime}&val_108=${title}'
+      'host': 'https://ase.clmbtech.com',
+      'base': '${host}/message',
+      'pageview': '${base}?cid=${id}' +
+        '&val_101=${canonicalPath}' +
+        '&ch=${canonicalHost}' +
+        '&uuid=${uid}' +
+        '&au=${authors}' +
+        '&zo=${zone}' +
+        '&sn=${sponsorName}' +
+        '&ct=${contentType}' +
+        '&st=${scrollTop}' +
+        '&sh=${scrollHeight}' +
+        '&dct=${decayTime}' +
+        '&tet=${totalEngagedTime}' +
+        '&dr=${documentReferrer}' +
+        '&plt=${pageLoadTime}' +
+        '&val_108=${title}',
     },
     'triggers': {
-        'defaultPageview': {
-            'on': 'visible',
-            'request': 'pageview'
-        }
+      'defaultPageview': {
+        'on': 'visible',
+        'request': 'pageview',
+      },
     },
     'transport': {
-        'beacon': !1,
-        'xhrpost': !1,
-        'image': !0
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
     },
   },
-    
+
   'comscore': {
     'vars': {
       'c2': '1000001',
