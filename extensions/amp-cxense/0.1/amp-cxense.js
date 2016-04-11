@@ -138,7 +138,7 @@ class AmpCxense extends AMP.BaseElement {
 
     /** @private */
     _pauseMpfSync() {
-        return !!(this._mpf && (this._mpf.video.pause() || 1));
+        return !!(this._mpf && (this._mpf.video.pause() || this._mpf.video.paused));
     }
 
     /** @private */
