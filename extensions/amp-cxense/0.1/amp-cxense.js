@@ -169,7 +169,8 @@ class AmpCxense extends AMP.BaseElement {
     _injectEmbedScript () {
         return this._injectScript(this._src);
     }
-
+    
+    /** @private */
     _injectScript (src) {
         const doc = this._getDoc();
         const script = doc.createElement('script');
@@ -177,7 +178,8 @@ class AmpCxense extends AMP.BaseElement {
         doc.head.appendChild(script);
         return loadPromise(script);
     }
-
+    
+    /** @private */
     _loadPlayer () {
         let self = this;
         return new Promise((resolve) => {
@@ -229,11 +231,13 @@ class AmpCxense extends AMP.BaseElement {
         this.element.appendChild(target);
         this._target = target;
     }
-
+    
+    /** @private */
     _getDoc () {
         return this.getWin().document;
     }
-
+    
+    /** @private */
     _getDataAttribute (name) {
         name = 'data-' + name.replace(/^data-/i, '');
         return this.element.getAttribute(name) || this.element.getAttribute(_getLongDataAttributeName(name));
