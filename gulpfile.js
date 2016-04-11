@@ -675,6 +675,7 @@ function buildLoginDoneVersion(version, options) {
       .on('end', function() {
         compileJs('./build/all/v0/', builtName, './dist/v0/', {
           watch: false,
+          includePolyfills: true,
           minify: options.minify || argv.minify,
           minifiedName: minifiedName,
           latestName: latestName,
