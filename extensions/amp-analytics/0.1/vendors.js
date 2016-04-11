@@ -206,18 +206,32 @@ export const ANALYTICS_CONFIG = {
     'requests': {
       'host': 'https://${colurl}',
       'base': '${host}/message',
-      'pageview': '${base}?cid=${id}&val_101=${canonicalPath}&val_101=${canonicalHost}&uuid=${uid}&val_101=${authors}&val_101=${zone}&val_101=${sponsorName}&val_101=${contentType}&val_101=${scrollTop}&val_101=${scrollHeight}&val_101=${decayTime}&val_101=${totalEngagedTime}&val_101=${documentReferrer}&val_101=${pageLoadTime}&val_108=${title}'
+      'pageview': '${base}?cid=${id}'+
+        '&val_101=${canonicalPath}'+
+        '&val_101=${canonicalHost}'+
+        '&uuid=${uid}'+
+        '&val_101=${authors}'+
+        '&val_101=${zone}'+
+        '&val_101=${sponsorName}'+'
+        '&val_101=${contentType}'+'
+        '&val_101=${scrollTop}'+
+        '&val_101=${scrollHeight}'+
+        '&val_101=${decayTime}'+'
+        '&val_101=${totalEngagedTime}'+'
+        '&val_101=${documentReferrer}'+
+        '&val_101=${pageLoadTime}'+
+        '&val_108=${title}',
     },
     'triggers': {
       'defaultPageview': {
-          'on': 'visible',
-          'request': 'pageview'
+        'on': 'visible',
+        'request': 'pageview',
       }
     },
     'transport': {
       'beacon': false,
       'xhrpost': false,
-      'image': true
+      'image': true,
     },
   },
     
