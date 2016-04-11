@@ -20,7 +20,7 @@
   },
   "colanalytics": {
     "host": "https://ase.clmbtech.com",
-    "base": "https://ase.clmbtech.com/message?",
+    "base": "https://ase.clmbtech.com/message",
     "pageview": "https://ase.clmbtech.com/message?cid=2964&val_101=_canonical_path_&val_101=_canonical_host_&uuid=$uid&val_101=$authors&val_101=$zone&val_101=$sponsorName&val_101=$contentType&val_101=_scroll_top_&val_101=_scroll_height_&val_101=$decayTime&val_101=_total_engaged_time_&val_101=_document_referrer_&val_101=_page_load_time_&val_108=_title_"
   },
   "comscore": {
