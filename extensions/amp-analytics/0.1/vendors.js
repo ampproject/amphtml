@@ -215,9 +215,9 @@ export const ANALYTICS_CONFIG = {
         }
     },
     'transport': {
-        'beacon': !1,
-        'xhrpost': !1,
-        'image': !0
+        'beacon': false,
+        'xhrpost': false,
+        'image': true
     },
   },
     
