@@ -578,10 +578,10 @@ function tests(name, installer) {
         }, layoutCb);
       }
 
-      it('should return true after scrolling and then false for 1s', () => {
+      it('should not return false after scrolling, then false for 1s', () => {
         let clock;
         return getGoodAd(ad => {
-          expect(ad.renderOutsideViewport()).to.be.true;
+          expect(ad.renderOutsideViewport()).not.to.be.false;
         }, () => {
           clock = sandbox.useFakeTimers();
         }).then(ad => {
@@ -590,7 +590,7 @@ function tests(name, installer) {
           clock.tick(900);
           expect(ad.renderOutsideViewport()).to.be.false;
           clock.tick(100);
-          expect(ad.renderOutsideViewport()).to.be.true;
+          expect(ad.renderOutsideViewport()).not.to.be.false;
         });
       });
 

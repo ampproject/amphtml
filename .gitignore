@@ -10,3 +10,4 @@ examples.min
 node_modules
 npm-debug.log
 .idea
+.tm_properties

@@ -42,6 +42,10 @@ amp-sidebar[side][open] {
   transform: translateX(0vw) !important;
 }
 
+amp-sidebar[side] {
+  transition: transform 0.5s ease;
+}
+
 .-amp-sidebar-mask {
   position: fixed !important;
   top: 0 !important;

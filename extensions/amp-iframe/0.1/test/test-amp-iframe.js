@@ -69,8 +69,9 @@ describe('amp-iframe', () => {
       if (opt_height) {
         iframe.iframe.style.height = opt_height;
       }
-      viewportFor(iframe.win).resize_();
       const top = opt_top || '600px';
+      const viewport = viewportFor(iframe.win);
+      viewport.resize_();
       i.style.position = 'absolute';
       i.style.top = top;
       if (opt_translateY) {
@@ -89,6 +90,7 @@ describe('amp-iframe', () => {
         i.appendChild(img);
       }
       iframe.doc.body.appendChild(i);
+      viewport.setScrollTop(parseInt(top, 10));
       if (opt_onAppend) {
         opt_onAppend(iframe.doc);
       }

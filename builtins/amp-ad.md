@@ -57,9 +57,11 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [A9](../ads/a9.md)
 - [Adblade](../ads/adblade.md)
 - [Adform](../ads/adform.md)
+- [Adman](../ads/adman.md)
 - [AdReactor](../ads/adreactor.md)
 - [AdSense](../ads/google/adsense.md)
 - [AdTech](../ads/adtech.md)
+- [Ad Up Technology](../ads/adup.md)
 - [Criteo](../ads/criteo.md)
 - [Dot and Media](../ads/dotandads.md)
 - [Doubleclick](../ads/google/doubleclick.md)
@@ -78,6 +80,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [I-Mobile](../ads/imobile.md)
 - [Webediads](../ads/webediads.md)
 - [PubMatic](../ads/pubmatic.md)
+- [GMOSSP](../ads/gmossp.md)
 
 ## Styling
 
