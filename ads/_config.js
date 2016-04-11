@@ -40,6 +40,7 @@ export const adPrefetch = {
   revcontent: 'https://labs-cdn.revcontent.com/build/amphtml/revcontent.amp.min.js',
   teads: 'https://cdn.teads.tv/media/format/v3/teads-format.min.js',
   imobile: 'https://spamp.i-mobile.co.jp/script/amp.js',
+  pubmatic: 'https://ads.pubmatic.com/AdServer/js/amp.js',
   sortable: 'https://www.googletagservices.com/tag/js/gpt.js',
   gmossp: 'https://cdn.gmossp-sp.jp/ads/amp.js',
 };
