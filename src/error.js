@@ -161,6 +161,21 @@ export function getErrorReportUrl(message, filename, line, col, error) {
   if (window.viewerState) {
     url += '&vs=' + encodeURIComponent(window.viewerState);
   }
+  // Is embedded?
+  if (window.parent && window.parent != window) {
+    url += '&iem=1';
+  }
+
+  if (window.AMP.viewer) {
+    const resolvedViewerUrl = window.AMP.viewer.getResolvedViewerUrl();
+    const messagingOrigin = window.AMP.viewer.maybeGetMessagingOrigin();
+    if (resolvedViewerUrl) {
+      url += `&rvu=${encodeURIComponent(resolvedViewerUrl)}`;
+    }
+    if (messagingOrigin) {
+      url += `&mso=${encodeURIComponent(messagingOrigin)}`;
+    }
+  }
 
   if (error) {
     const tagName = error && error.associatedElement
