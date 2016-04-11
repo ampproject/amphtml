@@ -43,10 +43,9 @@ class AmpCxense extends AMP.BaseElement {
 
     /** @override */
     preconnectCallback(onLayout) {
-        const self = this;
         PRE_CONNECT_URLS.forEach((url) => {
-            self.preconnect.url(url, onLayout);
-        });
+            this.preconnect.url(url, onLayout);
+        }.bind(this));
     }
 
     /** @override */
@@ -96,8 +95,6 @@ class AmpCxense extends AMP.BaseElement {
 
     /** @override */
     layoutCallback() {
-        let self = this;
-
         if (this._noui) {
             setStyles(this.element, {
                 'display': 'none'
@@ -107,16 +104,16 @@ class AmpCxense extends AMP.BaseElement {
         }
 
         return this._injectEmbedScript().then(() => {
-            self._target && window.RAMP && RAMP.Widgets.get('#' + self._target.getAttribute('id'), (embed) => {
-                self._embed = embed;
+            this._target && window.RAMP && RAMP.Widgets.get('#' + this._target.getAttribute('id'), (embed) => {
+                this._embed = embed;
 
-                if (self._isPlayer) {
-                    return self._loadPlayer();
+                if (this._isPlayer) {
+                    return this._loadPlayer();
                 } else {
-                    self.applyFillContent(self._target);
+                    this.applyFillContent(this._target);
                 }
-            });
-        });
+            }.bind(this));
+        }.bind(this));
     }
 
     /** @override */
@@ -135,10 +132,10 @@ class AmpCxense extends AMP.BaseElement {
 
     /** @private */
     _pauseMpf() {
-        this._target && window.RAMP && RAMP.Widgets.get('#' + this._target.getAttribute('id') + '.metaplayer', function(mpf) {
+        this._target && window.RAMP && RAMP.Widgets.get('#' + this._target.getAttribute('id') + '.metaplayer', (mpf) => {
             this._mpf = this._mpf || mpf;
             mpf.video.pause();
-        });
+        }.bind(this));
     }
 
     /** @private */
@@ -181,19 +178,18 @@ class AmpCxense extends AMP.BaseElement {
     
     /** @private */
     _loadPlayer () {
-        let self = this;
         return new Promise((resolve) => {
-            if (self._target && window.RAMP) {
-                return RAMP.Widgets.get('#' + self._target.getAttribute('id') + '.metaplayer', (mpf) => {
-                    self._mpf = mpf;
+            if (this._target && window.RAMP) {
+                return RAMP.Widgets.get('#' + this._target.getAttribute('id') + '.metaplayer', (mpf) => {
+                    this._mpf = mpf;
                     mpf.listen('ready', () => {
-                        self.applyFillContent(self._target);
+                        this.applyFillContent(this._target);
                         resolve(mpf);
-                    });
-                });
+                    }.bind(this));
+                }.bind(this));
             }
             reject('cannot load player, widgets dependencies not loaded');
-        });
+        }.bind(this));
     }
 
     /** @private */
