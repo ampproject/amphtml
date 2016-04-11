@@ -204,7 +204,7 @@ export const ANALYTICS_CONFIG = {
       'colurl': 'ase.clmbtech.com',
     },
     'requests': {
-      'host': 'https://${colurl}',
+      'host': 'https://ase.clmbtech.com',
       'base': '${host}/message',
       'pageview': '${base}?cid=${id}' +
         '&val_101=${canonicalPath}' +
