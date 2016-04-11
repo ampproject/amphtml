@@ -21,7 +21,6 @@ import {setStyles} from '../../../src/style';
 import {timer} from '../../../src/timer';
 import {user} from '../../../src/log';
 
-const ES5_SHIM_SRC = location.protocol + '//cdnjs.cloudflare.com/ajax/libs/es5-shim/4.5.8/es5-shim.min.js';
 const DEFAULT_AMD_SRC = location.protocol + '//embed.widget.cx/amd.js';
 const DEFAULT_EMBED_APP = '/app/player/m4/dist/';
 const PRE_CONNECT_URLS = [DEFAULT_AMD_SRC].concat([location.protocol + '//api.widget.cx', location.protocol + '//api.ramp.com']);
@@ -45,7 +44,7 @@ class AmpCxense extends AMP.BaseElement {
     /** @override */
     preconnectCallback(onLayout) {
         const self = this;
-        PRE_CONNECT_URLS.forEach(function(url) {
+        PRE_CONNECT_URLS.forEach((url) => {
             self.preconnect.url(url, onLayout);
         });
     }
@@ -108,7 +107,7 @@ class AmpCxense extends AMP.BaseElement {
         }
 
         return this._injectEmbedScript().then(() => {
-            self._target && window.RAMP && RAMP.Widgets.get('#' + self._target.getAttribute('id'), function(embed) {
+            self._target && window.RAMP && RAMP.Widgets.get('#' + self._target.getAttribute('id'), (embed) => {
                 self._embed = embed;
 
                 if (self._isPlayer) {
@@ -137,6 +136,7 @@ class AmpCxense extends AMP.BaseElement {
     /** @private */
     _pauseMpf() {
         this._target && window.RAMP && RAMP.Widgets.get('#' + this._target.getAttribute('id') + '.metaplayer', function(mpf) {
+            this._mpf = this._mpf || mpf;
             mpf.video.pause();
         });
     }
@@ -182,11 +182,11 @@ class AmpCxense extends AMP.BaseElement {
         let self = this;
         return new Promise((resolve) => {
             if (self._target && window.RAMP) {
-                return RAMP.Widgets.get('#' + self._target.getAttribute('id') + '.metaplayer', function (mpf) {
+                return RAMP.Widgets.get('#' + self._target.getAttribute('id') + '.metaplayer', (mpf) => {
                     self._mpf = mpf;
-                    mpf.listen('ready', function () {
+                    mpf.listen('ready', () => {
                         self.applyFillContent(self._target);
-                        resolve();
+                        resolve(mpf);
                     });
                 });
             }
