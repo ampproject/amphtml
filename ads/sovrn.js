@@ -1,0 +1,35 @@
+/**
+ * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ //<script type="text/javascript" src="http://ap.lijit.com/www/delivery/fpi.js?z=300427&u=pramos&width=300&height=250"></script>
+ */
+
+import {writeScript} from '../src/3p';
+
+/**
+ * @param {!Window} global
+ * @param {!Object} data
+ */
+export function sovrn(global, data) {
+  /*eslint "google-camelcase/google-camelcase": 0*/
+  global.width = data.width;
+  global.height = data.height;
+  global.domain = data.domain;
+  global.u = data.u;
+  global.iid=data.iid;
+  global.aid=data.aid;
+  global.z = data.z;
+  global.tf = data.tf;
+  writeScript(global, '//ap.lijit.com/www/sovrn_amp/sovrn_ads.js');
+}

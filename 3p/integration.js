@@ -47,6 +47,7 @@ import {computeInMasterFrame, register, run} from '../src/3p';
 import {parseUrl, getSourceUrl} from '../src/url';
 import {taboola} from '../ads/taboola';
 import {smartadserver} from '../ads/smartadserver';
+import {sovrn} from '../ads/sovrn';
 import {sortable} from '../ads/sortable';
 import {revcontent} from '../ads/revcontent';
 import {openadstream} from '../ads/openadstream';
@@ -57,6 +58,7 @@ import {rubicon} from '../ads/rubicon';
 import {imobile} from '../ads/imobile';
 import {webediads} from '../ads/webediads';
 import {user} from '../src/log';
+
 
 /**
  * Whether the embed type may be used with amp-embed tag.
@@ -87,6 +89,7 @@ register('_ping_', function(win, data) {
 register('twitter', twitter);
 register('facebook', facebook);
 register('smartadserver', smartadserver);
+register('sovrn',sovrn);
 register('mediaimpact', mediaimpact);
 register('revcontent', revcontent);
 register('sortable', sortable);
