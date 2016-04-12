@@ -93,3 +93,10 @@ Here are some extra parameters that might be set on the AMP ad:
   - Creatives served over HTTP.
 - Click and impression trackers can't be added to the tag. They need to be added through Weborama's ad platform: WCM.
 - At the moment we don't support dynamic resizing of the iframe. Support for this will be added on request.
+
+## Support
+
+If you have any questions, please refer to your contact at Weborama. Otherwise you can contact our TIER 2 support:
+
+- E: tier2support@weborama.nl
+- T: +31 (0) 20 52 46 690
