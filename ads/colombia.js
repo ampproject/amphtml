@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {writeScript, validateDataExists} from '../src/3p';
+import {loadScript, validateDataExists} from '../src/3p';
 
 /**
  * @param {!Window} global
@@ -34,5 +34,5 @@ export function colombia(global, data) {
       ampPushNotify.itemTrackURL(a);
     });
   });
-  writeScript(global, 'https://static.clmbtech.com/ad/commons/js/colombia-amp.js');
+  loadScript(global, 'https://static.clmbtech.com/ad/commons/js/colombia-amp.js');
 }
