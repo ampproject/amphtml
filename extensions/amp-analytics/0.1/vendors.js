@@ -200,8 +200,6 @@ export const ANALYTICS_CONFIG = {
 
   'colanalytics': {
     'vars': {
-      'id': '2964',
-      'colurl': 'ase.clmbtech.com',
     },
     'requests': {
       'host': 'https://ase.clmbtech.com',
