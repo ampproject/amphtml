@@ -61,6 +61,7 @@ import {webediads} from '../ads/webediads';
 import {pubmatic} from '../ads/pubmatic';
 import {user} from '../src/log';
 import {gmossp} from '../ads/gmossp';
+import {weboramaDisplay} from '../ads/weborama';
 
 
 /**
@@ -106,6 +107,7 @@ register('imobile', imobile);
 register('webediads', webediads);
 register('pubmatic', pubmatic);
 register('gmossp', gmossp);
+register('weborama-display', weboramaDisplay);
 
 // For backward compat, we always allow these types without the iframe
 // opting in.

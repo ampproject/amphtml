@@ -81,6 +81,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [Webediads](../ads/webediads.md)
 - [PubMatic](../ads/pubmatic.md)
 - [GMOSSP](../ads/gmossp.md)
+- [Weborama](../ads/weborama.md)
 
 ## Styling
 
