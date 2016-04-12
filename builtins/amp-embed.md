@@ -51,7 +51,7 @@ The `<amp-embed>` is actually an alias to the [`<amp-ad>`](amp-ad.md) tag, deriv
 ## Validation errors
 
 The following lists validation errors specific to the `amp-embed` tag
-(see also `amp-embed` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii)):
+(see also `amp-embed` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator-main.protoascii)):
 
 <table>
   <tr>

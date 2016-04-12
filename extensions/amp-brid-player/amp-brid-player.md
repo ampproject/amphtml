@@ -36,7 +36,7 @@ limitations under the License.
 </table>
 
 The following lists validation errors specific to the `amp-brid-player` tag
-(see also `amp-brid-player` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii)):
+(see also `amp-brid-player` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-brid-player/0.1/validator-amp-brid-player.protoascii)):
 
 <table>
   <tr>

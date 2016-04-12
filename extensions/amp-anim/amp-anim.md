@@ -79,7 +79,7 @@ amp-anim {
 ## Validation errors
 
 The following lists validation errors specific to the `amp-anim` tag
-(see also `amp-anim` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii)):
+(see also `amp-anim` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-anim/0.1/validator-amp-anim.protoascii)):
 
 <table>
   <tr>

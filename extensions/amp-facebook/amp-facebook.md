@@ -71,7 +71,7 @@ Checkout the documentation for differences between [post embeds](https://develop
 ## Validation errors
 
 The following lists validation errors specific to the `amp-facebook` tag
-(see also `amp-facebook` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii)):
+(see also `amp-facebook` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-facebook/0.1/validator-amp-facebook.protoascii)):
 
 <table>
   <tr>

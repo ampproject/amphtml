@@ -80,7 +80,7 @@ impossible to specify `{{&var}}` expressions - they will always be escaped as `{
 ## Validation errors
 
 The following lists validation errors specific to `amp-mustache`
-(see also `template` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii)):
+(see also `template` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-mustache/0.1/validator-amp-mustache.protoascii)):
 
 <table>
   <tr>

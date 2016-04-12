@@ -61,7 +61,7 @@ The `amp-lightbox` component can be styled with standard CSS.
 ## Validation errors
 
 The following lists validation errors specific to the `amp-lightbox` tag
-(see also `amp-lightbox` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii)):
+(see also `amp-lightbox` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-lightbox/0.1/validator-amp-lightbox.protoascii)):
 
 <table>
   <tr>

@@ -485,7 +485,7 @@ This section will cover a detailed explanation of the design underlying the amp-
 ## Validation errors
 
 The following lists validation errors specific to the `amp-access` tag
-(see also `amp-access` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii)):
+(see also `amp-access` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-access/0.1/validator-amp-access.protoascii)):
 
 <table>
   <tr>

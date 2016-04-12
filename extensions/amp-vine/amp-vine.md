@@ -54,7 +54,7 @@ The ID of the Vine. In a URL like https://vine.co/v/MdKjXez002d `MdKjXez002d` is
 ## Validation errors
 
 The following lists validation errors specific to the `amp-vine` tag
-(see also `amp-vine` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii)):
+(see also `amp-vine` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-vine/0.1/validator-amp-vine.protoascii)):
 
 <table>
   <tr>

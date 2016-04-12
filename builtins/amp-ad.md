@@ -180,7 +180,7 @@ draw3p(function(config, done) {
 ## Validation errors
 
 The following lists validation errors specific to the `amp-ad` tag
-(see also `amp-ad` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii)):
+(see also `amp-ad` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator-main.protoascii)):
 
 <table>
   <tr>

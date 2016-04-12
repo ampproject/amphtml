@@ -117,7 +117,7 @@ elements rendered via the template.
 ## Validation errors
 
 The following lists validation errors specific to the `amp-list` tag
-(see also `amp-list` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii)):
+(see also `amp-list` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-list/0.1/validator-amp-list.protoascii)):
 
 <table>
   <tr>

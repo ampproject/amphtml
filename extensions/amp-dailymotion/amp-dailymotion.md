@@ -113,7 +113,7 @@ Default value: `"true"`
 ## Validation errors
 
 The following lists validation errors specific to the `amp-dailymotion` tag
-(see also `amp-dailymotion` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii)):
+(see also `amp-dailymotion` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-dailymotion/0.1/validator-amp-dailymotion.protoascii)):
 
 <table>
   <tr>

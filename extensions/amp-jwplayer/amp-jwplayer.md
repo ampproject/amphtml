@@ -36,7 +36,7 @@ limitations under the License.
 </table>
 
 The following lists validation errors specific to the `amp-jwplayer` tag
-(see also `amp-jwplayer` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii):
+(see also `amp-jwplayer` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-jwplayer/0.1/validator-amp-jwplayer.protoascii):
 
 <table>
   <tr>
