@@ -73,7 +73,7 @@ E.g. in https://instagram.com/p/fBwFP fBwFP is the data-shortcode.
 ## Validation errors
 
 The following lists validation errors specific to the `amp-instagram` tag
-(see also `amp-instagram` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii)):
+(see also `amp-instagram` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-instagram/0.1/validator-amp-instagram.protoascii)):
 
 <table>
   <tr>
