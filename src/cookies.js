@@ -97,9 +97,3 @@ function trySetCookie(win, name, value, expirationTime, domain) {
       (domain ? '; domain=' + domain : '') +
       '; expires=' + new Date(expirationTime).toUTCString();
 }
-
-// Clean up cookies set by www.ampproject.org to 2nd level.
-if (location.hostname.indexOf('.ampproject.org') != 0) {
-  trySetCookie(window, '_ga', '', 0, 'ampproject.org');
-  trySetCookie(window, 'AMP_ECID_GOOGLE', '', 0, 'ampproject.org');
-}
