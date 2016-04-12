@@ -238,11 +238,6 @@ describe('IntersectionObserver', () => {
     clock.tick(33);
     ioInstance.startSendingIntersectionChanges_();
     expect(getIntersectionChangeEntrySpy.callCount).to.equal(1);
-    expect(messages).to.have.length(0);
-    clock.tick(99);
-    expect(ioInstance.pendingChanges_).to.have.length(1);
-    expect(messages).to.have.length(0);
-    clock.tick(1);
     expect(messages).to.have.length(1);
     expect(ioInstance.pendingChanges_).to.have.length(0);
     expect(messages[0].changes).to.have.length(1);
@@ -258,30 +253,37 @@ describe('IntersectionObserver', () => {
     const ioInstance = new IntersectionObserver(element, testIframe);
     ioInstance.startSendingIntersectionChanges_();
     expect(getIntersectionChangeEntrySpy.callCount).to.equal(1);
-    expect(messages).to.have.length(0);
-    clock.tick(99);
+    expect(messages).to.have.length(1);
+    expect(messages[0].changes).to.have.length(1);
+    expect(messages[0].changes[0].time).to.equal(0);
+    clock.tick(98);
+    ioInstance.fire();
+    clock.tick(1);
     ioInstance.fire();
     ioInstance.fire();  // Same time
     ioInstance.fire();  // Same time
     expect(ioInstance.pendingChanges_).to.have.length(2);
-    expect(messages).to.have.length(0);
-    clock.tick(1);
     expect(messages).to.have.length(1);
-    expect(messages[0].changes).to.have.length(2);
-    expect(messages[0].changes[0].time).to.equal(0);
-    expect(messages[0].changes[1].time).to.equal(99);
+    clock.tick(1);
+    expect(messages).to.have.length(2);
+    expect(messages[1].changes).to.have.length(2);
+    expect(messages[1].changes[0].time).to.equal(98);
+    expect(messages[1].changes[1].time).to.equal(99);
     expect(ioInstance.pendingChanges_).to.have.length(0);
     ioInstance.fire();
-    expect(ioInstance.pendingChanges_).to.have.length(1);
-    expect(messages).to.have.length(1);
+    expect(ioInstance.pendingChanges_).to.have.length(0);
+    expect(messages).to.have.length(3);
     clock.tick(99);
+    ioInstance.fire();
     expect(ioInstance.pendingChanges_).to.have.length(1);
-    expect(messages).to.have.length(1);
+    expect(messages).to.have.length(3);
     clock.tick(1);
     expect(ioInstance.pendingChanges_).to.have.length(0);
-    expect(messages).to.have.length(2);
-    expect(messages[1].changes).to.have.length(1);
-    expect(messages[1].changes[0].time).to.equal(100);
+    expect(messages).to.have.length(4);
+    expect(messages[2].changes).to.have.length(1);
+    expect(messages[2].changes[0].time).to.equal(100);
+    expect(messages[3].changes).to.have.length(1);
+    expect(messages[3].changes[0].time).to.equal(199);
   });
 
   it('should init listeners when element is in viewport', () => {
