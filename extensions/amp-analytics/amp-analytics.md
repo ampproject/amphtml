@@ -309,7 +309,8 @@ Use this configuration to fire a request under certain conditions when the page 
         "scrollSpec": {
           "verticalBoundaries": [25, 50, 90],
           "horizontalBoundaries": [90]
-        }
+        },
+        "request": "event"
       }
     }
     ```
