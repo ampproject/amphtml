@@ -199,8 +199,6 @@ export const ANALYTICS_CONFIG = {
   },
 
   'colanalytics': {
-    'vars': {
-    },
     'requests': {
       'host': 'https://ase.clmbtech.com',
       'base': '${host}/message',
