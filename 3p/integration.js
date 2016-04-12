@@ -60,6 +60,7 @@ import {imobile} from '../ads/imobile';
 import {webediads} from '../ads/webediads';
 import {user} from '../src/log';
 import {gmossp} from '../ads/gmossp';
+import {yahoojp} from '../ads/yahoojp';
 
 /**
  * Whether the embed type may be used with amp-embed tag.
@@ -103,6 +104,7 @@ register('rubicon', rubicon);
 register('imobile', imobile);
 register('webediads', webediads);
 register('gmossp', gmossp);
+register('yahoojp', yahoojp);
 
 // For backward compat, we always allow these types without the iframe
 // opting in.

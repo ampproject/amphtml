@@ -42,6 +42,7 @@ export const adPrefetch = {
   imobile: 'https://spamp.i-mobile.co.jp/script/amp.js',
   sortable: 'https://www.googletagservices.com/tag/js/gpt.js',
   gmossp: 'https://cdn.gmossp-sp.jp/ads/amp.js',
+  yahoojp: 'https://mwakkiy.github.io/yjamp/amp.js',    //@todo:本物に変更
 };
 
 /**
@@ -121,6 +122,7 @@ export const adPreconnect = {
     'https://eu1.wbdds.com',
   ],
   gmossp: 'https://cdn.gmossp-sp.jp',
+  yahoojp: 'https://mwakkiy.github.io',   //@todo:本物に変更
 };
 
 /**

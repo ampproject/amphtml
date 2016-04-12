@@ -80,6 +80,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [I-Mobile](../ads/imobile.md)
 - [Webediads](../ads/webediads.md)
 - [GMOSSP](../ads/gmossp.md)
+- [YahooJP](../ads/yahoojp.md)
 
 ## Styling
 
