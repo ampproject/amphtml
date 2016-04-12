@@ -59,6 +59,7 @@ import {rubicon} from '../ads/rubicon';
 import {imobile} from '../ads/imobile';
 import {webediads} from '../ads/webediads';
 import {pubmatic} from '../ads/pubmatic';
+import {yieldbot} from '../ads/yieldbot';
 import {user} from '../src/log';
 import {gmossp} from '../ads/gmossp';
 import {weboramaDisplay} from '../ads/weborama';
@@ -108,6 +109,7 @@ register('webediads', webediads);
 register('pubmatic', pubmatic);
 register('gmossp', gmossp);
 register('weborama-display', weboramaDisplay);
+register('yieldbot', yieldbot);
 
 // For backward compat, we always allow these types without the iframe
 // opting in.
@@ -119,6 +121,7 @@ const defaultAllowedTypesInCustomFrame = [
   'facebook',
   'twitter',
   'doubleclick',
+  'yieldbot',
   '_ping_',
 ];
 

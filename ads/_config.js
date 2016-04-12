@@ -47,6 +47,7 @@ export const adPrefetch = {
     'https://cstatic.weborama.fr/js/advertiserv2/adperf_launch_1.0.0_scrambled.js',
     'https://cstatic.weborama.fr/js/advertiserv2/adperf_core_1.0.0_scrambled.js',
   ],
+  yieldbot: 'https://cdn.yldbt.com/js/yieldbot.intent.js',
 };
 
 /**
@@ -126,6 +127,7 @@ export const adPreconnect = {
     'https://eu1.wbdds.com',
   ],
   gmossp: 'https://cdn.gmossp-sp.jp',
+  yieldbot: 'https://i.yldbt.com',
 };
 
 /**
