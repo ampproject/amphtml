@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,8 @@ export function sovrn(global, data) {
   global.height = data.height;
   global.domain = data.domain;
   global.u = data.u;
-  global.iid=data.iid;
-  global.aid=data.aid;
+  global.iid = data.iid;
+  global.aid = data.aid;
   global.z = data.z;
   global.tf = data.tf;
   writeScript(global, '//ap.lijit.com/www/sovrn_amp/sovrn_ads.js');
