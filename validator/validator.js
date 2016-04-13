@@ -2081,6 +2081,17 @@ class ParsedTagSpec {
     const sizesAttr = attrsByKey.get('sizes');
     const heightsAttr = attrsByKey.get('heights');
 
+    // We disable validating layout for tags where one of the layout attributes
+    // contains mustache syntax.
+    const hasTemplateAncestor = context.getTagStack().hasAncestor('template');
+    if (hasTemplateAncestor &&
+        (ParsedTagSpec.valueHasTemplateSyntax(layoutAttr) ||
+         ParsedTagSpec.valueHasTemplateSyntax(widthAttr) ||
+         ParsedTagSpec.valueHasTemplateSyntax(heightAttr) ||
+         ParsedTagSpec.valueHasTemplateSyntax(sizesAttr) ||
+         ParsedTagSpec.valueHasTemplateSyntax(heightsAttr)))
+      return;
+
     // Parse the input layout attributes which we found for this tag.
     const inputLayout = parseLayout(layoutAttr);
     if (layoutAttr !== undefined &&

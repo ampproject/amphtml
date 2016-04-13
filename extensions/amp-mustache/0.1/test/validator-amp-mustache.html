@@ -108,5 +108,14 @@
 <template type="amp-mustache">
 <amp-audio src="https://example.com/audio" layout="fixed" autoplay="{{valid}}">
 </template>
+
+<!-- Since layout calculations follow a different code path, test that layouts
+     validate. -->
+<!-- See https://github.com/ampproject/amphtml/issues/2670 -->
+<template type="amp-mustache">
+<amp-img src="{{image.url}}" width={{image.width}} height={{image.height}}></amp-img>
+</template>
+
+
 </body>
 </html>
