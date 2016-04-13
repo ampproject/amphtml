@@ -172,20 +172,6 @@ In these cases, services may set up endpoints that produce data that conforms to
 
 ## Components
 
-- [amp-img](../builtins/amp-img.md)
-- [amp-audio](../extensions/amp-audio/amp-audio.md)
-- [amp-anim](../extensions/amp-anim/amp-anim.md)
-- [amp-ad](../builtins/amp-ad.md)
-- [amp-pixel](../builtins/amp-pixel.md)
-- [amp-video](../builtins/amp-video.md)
-- [amp-brid-player](../extensions/amp-brid-player/amp-brid-player.md)
-- [amp-brightcove](../extensions/amp-brightcove/amp-brightcove.md)
-- [amp-carousel](../extensions/amp-carousel/amp-carousel.md)
-- [amp-font](../extensions/amp-font/amp-font.md)
-- [amp-lightbox](../extensions/amp-lightbox/amp-lightbox.md)
-- [amp-iframe](../extensions/amp-iframe/amp-iframe.md)
-- [amp-instagram](../extensions/amp-instagram/amp-instagram.md)
-- [amp-springboard-player](../extensions/amp-springboard-player/amp-springboard-player.md)
-- [amp-twitter](../extensions/amp-twitter/amp-twitter.md)
-- [amp-vine](../extensions/amp-vine/amp-vine.md)
-- [amp-youtube](../extensions/amp-youtube/amp-youtube.md)
+Built-in components include [amp-img](../builtins/amp-img.md), [amp-ad](../builtins/amp-ad.md), [amp-pixel](../builtins/amp-pixel.md) and [amp-video](../builtins/amp-video.md).
+
+AMP HTML extensions include [extended components](../extensions) and extended templates.
