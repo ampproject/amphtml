@@ -3347,7 +3347,7 @@ amp.validator.categorizeError = function(error) {
       TEMPLATE_PARTIAL_IN_ATTR_VALUE ||
       error.code === amp.validator.ValidationError.Code.
       TEMPLATE_IN_ATTR_NAME) {
-    return amp.validator.ErrorCategory.Code.AMP_MUSTACHE_TEMPLATE_PROBLEM;
+    return amp.validator.ErrorCategory.Code.AMP_HTML_TEMPLATE_PROBLEM;
   }
   // E.g. "The tag 'amp-ad' may not appear as a descendant of tag 'amp-sidebar'.
   if (error.code === amp.validator.ValidationError.Code
@@ -3358,7 +3358,7 @@ amp.validator.categorizeError = function(error) {
   if (error.code === amp.validator.ValidationError.Code
       .DISALLOWED_TAG_ANCESTOR &&
       (error.params[1] === "template")) {
-    return amp.validator.ErrorCategory.Code.AMP_MUSTACHE_TEMPLATE_PROBLEM;
+    return amp.validator.ErrorCategory.Code.AMP_HTML_TEMPLATE_PROBLEM;
   }
   // E.g. "Missing URL for attribute 'href' in tag 'a'."
   // E.g. "Invalid URL protocol 'http:' for attribute 'src' in tag
