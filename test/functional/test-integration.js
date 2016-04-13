@@ -101,7 +101,7 @@ describe('3p integration.js', () => {
 
   it('should parse JSON from fragment unencoded (most browsers)', () => {
     const unencoded = '#{"tweetid":"638793490521001985","width":390,' +
-        '"height":50,"initialWindowWidth":1290,"initialWindowHeight":165,' +
+        '"height":50,' +
         '"type":"twitter","_context":{"referrer":"http://localhost:8000/' +
         'examples.build/","canonicalUrl":"http://localhost:8000/' +
         'examples.build/amps.html","location":{"href":"http://' +

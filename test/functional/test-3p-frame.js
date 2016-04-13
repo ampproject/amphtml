@@ -25,11 +25,16 @@ import {viewerFor} from '../../src/viewer';
 
 describe('3p-frame', () => {
 
+  let clock;
+  let sandbox;
+
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
+    clock = sandbox.useFakeTimers();
   });
 
   afterEach(() => {
+    sandbox.restore();
     resetServiceForTesting(window, 'bootstrapBaseUrl');
     setModeForTesting(null);
     const m = document.querySelector(
@@ -37,7 +42,6 @@ describe('3p-frame', () => {
     if (m) {
       m.parentElement.removeChild(m);
     }
-    sandbox.restore();
   });
 
   function addCustomBootstrap(url) {
@@ -71,7 +75,7 @@ describe('3p-frame', () => {
   });
 
   it('should create an iframe', () => {
-
+    clock.tick(1234567888);
     const link = document.createElement('link');
     link.setAttribute('rel', 'canonical');
     link.setAttribute('href', 'https://foo.bar/baz');
@@ -103,15 +107,23 @@ describe('3p-frame', () => {
     expect(locationHref).to.not.be.empty;
     const docInfo = documentInfoFor(window);
     expect(docInfo.pageViewId).to.not.be.empty;
+    const width = window.innerWidth;
+    const height = window.innerHeight;
     const fragment =
         '#{"testAttr":"value","ping":"pong","width":50,"height":100,' +
-        '"initialWindowWidth":100,"initialWindowHeight":200,"type":"_ping_"' +
+        '"type":"_ping_"' +
         ',"_context":{"referrer":"http://acme.org/",' +
         '"canonicalUrl":"https://foo.bar/baz",' +
         '"pageViewId":"' + docInfo.pageViewId + '","clientId":"cidValue",' +
         '"location":{"href":"' + locationHref + '"},"tagName":"MY-ELEMENT",' +
         '"mode":{"localDev":true,"development":false,"minified":false}' +
-        ',"hidden":false}}';
+        ',"hidden":false,"initialIntersection":{"time":1234567888,' +
+        '"rootBounds":{"left":0,"top":0,"width":' + width + ',"height":' +
+        height + ',"bottom":' + height + ',"right":' + width +
+        ',"x":0,"y":0},"boundingClientRect":' +
+        '{"width":100,"height":200},"intersectionRect":{' +
+        '"left":0,"top":0,"width":0,"height":0,"bottom":0,' +
+        '"right":0,"x":0,"y":0}}}}';
     expect(src).to.equal(
         'http://ads.localhost:9876/dist.3p/current/frame.max.html' +
         fragment);

@@ -93,6 +93,22 @@ export function loadScript(win, url, cb) {
 }
 
 /**
+ * Call function in micro task or timeout as a fallback.
+ * This is a lightweight helper, because we cannot guarantee that
+ * Promises are available inside the 3p frame.
+ * @param {!Window} win
+ * @param {function} fn
+ */
+export function nextTick(win, fn) {
+  const P = win.Promise;
+  if (P) {
+    P.resolve().then/*OK*/(fn);
+  } else {
+    win.setTimeout(fn, 0);
+  }
+}
+
+/**
  * Run the function after all currently waiting sync scripts have been
  * executed.
  * @param {!Window} win
@@ -237,8 +253,6 @@ export function validateData(data, allowedFields) {
   const defaultAvailableFields = {
     width: true,
     height: true,
-    initialWindowWidth: true,
-    initialWindowHeight: true,
     type: true,
     referrer: true,
     canonicalUrl: true,

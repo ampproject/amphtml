@@ -45,7 +45,7 @@ import {mediaimpact} from '../ads/mediaimpact';
 import {nonSensitiveDataPostMessage, listenParent} from './messaging';
 import {twitter} from './twitter';
 import {yieldmo} from '../ads/yieldmo';
-import {computeInMasterFrame, register, run} from '../src/3p';
+import {computeInMasterFrame, nextTick, register, run} from '../src/3p';
 import {parseUrl, getSourceUrl} from '../src/url';
 import {taboola} from '../ads/taboola';
 import {smartadserver} from '../ads/smartadserver';
@@ -218,7 +218,15 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     }
 
     // This only actually works for ads.
-    window.context.observeIntersection = observeIntersection;
+    const initialIntersection = window.context.initialIntersection;
+    delete window.context.initialIntersection;
+    window.context.observeIntersection = cb => {
+      observeIntersection(cb);
+      // Call the callback with the value that was transmitted when the
+      // iframe was drawn. Called in nextTick, so that callers don't
+      // have to specially handle the sync case.
+      nextTick(window, () => cb([initialIntersection]));
+    };
     window.context.onResizeSuccess = onResizeSuccess;
     window.context.onResizeDenied = onResizeDenied;
     window.context.reportRenderedEntityIdentifier =
