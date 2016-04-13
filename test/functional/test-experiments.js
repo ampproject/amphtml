@@ -130,7 +130,7 @@ describe('isExperimentOn', () => {
 });
 
 
-describe('toggleExperiment', () => {
+describe.only('toggleExperiment', () => {
 
   let sandbox;
   let clock;
@@ -186,6 +186,25 @@ describe('toggleExperiment', () => {
   it('should set "off" when requested', () => {
     expectToggle('AMP_EXP=e2,e1', 'e1', false).to.equal('false; AMP_EXP=e2');
     expectToggle('AMP_EXP=e1', 'e1', false).to.equal('false; AMP_EXP=');
+  });
+
+  it('should not set cookies when toggling and !saveExperiments', () => {
+    const win = {
+      document: {
+        cookie: '',
+      },
+    };
+    toggleExperiment(win, 'e1', true, false);
+    expect(win.document.cookie).to.equal('');
+    toggleExperiment(win, 'e2', false, false);
+    expect(win.document.cookie).to.equal('');
+    toggleExperiment(win, 'e3', undefined, false);
+    expect(win.document.cookie).to.equal('');
+    // But all of those experiment states should be durable in the window
+    // environment.
+    expect(isExperimentOn(win, 'e1'), 'e1 is on').to.be.true;
+    expect(isExperimentOn(win, 'e2'), 'e2 is off').to.be.false;
+    expect(isExperimentOn(win, 'e3'), 'e3 is on').to.be.true;
   });
 });
 
