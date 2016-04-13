@@ -28,6 +28,7 @@ import {resourcesFor} from './resources';
 import {timer} from './timer';
 import {vsyncFor} from './vsync';
 import * as dom from './dom';
+import {getMode} from '../src/mode'
 
 
 const TAG_ = 'CustomElement';
@@ -93,6 +94,10 @@ export function upgradeOrRegisterElement(win, name, toClass) {
     // 3. A stub was attached. We upgrade which means we replay the
     //    implementation.
     const element = stub.element;
+    console.log("Element in adEmbed is ", element);
+    console.log("In upgradeOrRegisterElement element tag is ", element.tagName);
+    console.log("Upgrade to class ", toClass);
+    console.log("Request to register name is ", name);
     if (element.tagName.toLowerCase() == name) {
       try {
         element.upgrade(toClass);
@@ -111,6 +116,12 @@ export function upgradeOrRegisterElement(win, name, toClass) {
 export function stubElements(win) {
   if (!win.ampExtendedElements) {
     win.ampExtendedElements = {};
+    if (!knownElements['amp-ad'] && !knownElements['amp-embed']) {
+      win.ampExtendedElements['amp-ad'] = true;
+      registerElement(win, 'amp-ad', ElementStub);
+      win.ampExtendedElements['amp-embed'] = true;
+      registerElement(win, 'amp-embed', ElementStub);
+    }
   }
   const list = win.document.querySelectorAll('[custom-element]');
   for (let i = 0; i < list.length; i++) {
@@ -1204,8 +1215,10 @@ export function createAmpElementProto(win, name, opt_implementationClass) {
  * @param {function(new:BaseElement, !Element)} implementationClass
  */
 export function registerElement(win, name, implementationClass) {
+  console.log("In registerElement");
+  console.log("register element's name is ", name);
+  console.log("implementationClass's name is ", implementationClass);
   knownElements[name] = implementationClass;
-
   win.document.registerElement(name, {
     prototype: createAmpElementProto(win, name),
   });
@@ -1221,7 +1234,6 @@ export function registerElement(win, name, implementationClass) {
  */
 export function registerElementAlias(win, aliasName, sourceName) {
   const implementationClass = knownElements[sourceName];
-
   if (implementationClass) {
     knownElements[aliasName] = implementationClass;
     win.document.registerElement(aliasName, {

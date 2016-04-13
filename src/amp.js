@@ -19,12 +19,12 @@ import {installPerformanceService} from './service/performance-impl';
 import {installPullToRefreshBlocker} from './pull-to-refresh';
 import {templatesFor} from './template';
 import {installCoreServices} from './amp-core-service';
-import {installAd} from '../builtins/amp-ad';
+//import {installAd} from '../builtins/amp-ad';
 import {installGlobalClickListener} from './document-click';
 import {installImg} from '../builtins/amp-img';
 import {installVideo} from '../builtins/amp-video';
 import {installPixel} from '../builtins/amp-pixel';
-import {installEmbed} from '../builtins/amp-embed';
+//import {installEmbed} from '../builtins/amp-embed';
 import {installStyles, makeBodyVisible} from './styles';
 import {installErrorReporting} from './error';
 import {stubElements} from './custom-element';
@@ -51,10 +51,10 @@ try {
       templatesFor(window);
 
       installImg(window);
-      installAd(window);
+      //installAd(window);
       installPixel(window);
       installVideo(window);
-      installEmbed(window);
+      //installEmbed(window);
 
       adopt(window);
       stubElements(window);
