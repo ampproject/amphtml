@@ -331,21 +331,46 @@ amp.validator.Terminal = class {
  *   errors.
  * @param {string} url
  * @param {!amp.validator.Terminal=} opt_terminal
+ * @param {!string=} opt_errorCategoryFilter
  */
 amp.validator.ValidationResult.prototype.outputToTerminal =
-    function(url, opt_terminal) {
+    function(url, opt_terminal, opt_errorCategoryFilter) {
 
   const terminal = opt_terminal || new amp.validator.Terminal();
+  const errorCategoryFilter = opt_errorCategoryFilter || null;
+
   const status = this.status;
   if (status === amp.validator.ValidationResult.Status.PASS) {
     terminal.info('AMP validation successful.');
-  } else if (status === amp.validator.ValidationResult.Status.FAIL) {
-    terminal.error('AMP validation had errors:');
-  } else {
+    return;
+  }
+  if (status !== amp.validator.ValidationResult.Status.FAIL) {
     terminal.error(
         'AMP validation had unknown results. This should not happen.');
+    return;
   }
-  for (const error of this.errors) {
+  let errors;
+  if (errorCategoryFilter === null) {
+    terminal.error('AMP validation had errors:');
+    errors = this.errors;
+  } else {
+    errors = [];
+    for (const error of this.errors) {
+      if (amp.validator.categorizeError(error) === errorCategoryFilter) {
+        errors.push(error);
+      }
+    }
+    if (errors.length === 0) {
+      terminal.error('AMP validation - no errors matching ' +
+          'error_category_filter=' + errorCategoryFilter + ' found. ' +
+          'To see all errors, visit ' + url + '#development=1');
+    } else {
+      terminal.error('AMP validation - displaying errors matching ' +
+          'error_category_filter=' + errorCategoryFilter + '. ' +
+          'To see all errors, visit ' + url + '#development=1');
+    }
+  }
+  for (const error of errors) {
     if (error.severity ===
         amp.validator.ValidationError.Severity.ERROR) {
       terminal.error(errorLine(url, error));

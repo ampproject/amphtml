@@ -129,9 +129,11 @@ amp.validator.validateInBrowser = function(doc) {
  * and https://github.com/ampproject/amphtml/blob/master/src/validator-integration.js
  * @param {string} url
  * @param {!Document=} opt_doc
+ * @param {!string=} opt_errorCategoryFilter
  * @export
  */
-amp.validator.validateUrlAndLog = function(url, opt_doc) {
+amp.validator.validateUrlAndLog = function(
+    url, opt_doc, opt_errorCategoryFilter) {
   getUrl(url).then(
     function(html) {  // Success
       const validationResult = amp.validator.validateString(html);
