@@ -130,7 +130,7 @@ describe('isExperimentOn', () => {
 });
 
 
-describe.only('toggleExperiment', () => {
+describe('toggleExperiment', () => {
 
   let sandbox;
   let clock;
