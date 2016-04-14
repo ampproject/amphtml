@@ -1,4 +1,0 @@
-FAIL
-feature_tests/amp_jwplayer.html:46:2 The tag 'amp-jwplayer' is missing a mandatory attribute - pick one of data-media-id or data-playlist-id. (see https://github.com/ampproject/amphtml/blob/master/extensions/amp-jwplayer/amp-jwplayer.md) [AMP_TAG_PROBLEM]
-feature_tests/amp_jwplayer.html:46:2 The mandatory attribute 'data-player-id' is missing in tag 'amp-jwplayer'. (see https://github.com/ampproject/amphtml/blob/master/extensions/amp-jwplayer/amp-jwplayer.md) [AMP_TAG_PROBLEM]
-feature_tests/amp_jwplayer.html:50:2 The tag 'amp-jwplayer' is missing a mandatory attribute - pick one of data-media-id or data-playlist-id. (see https://github.com/ampproject/amphtml/blob/master/extensions/amp-jwplayer/amp-jwplayer.md) [AMP_TAG_PROBLEM]
