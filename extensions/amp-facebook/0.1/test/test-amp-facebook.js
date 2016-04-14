@@ -68,7 +68,8 @@ describe('amp-facebook', () => {
     });
   });
 
-  it('resizes facebook posts', () => {
+  it('resizes facebook posts', function() {
+    this.timeout(5000);
     const iframeSrc = 'http://ads.localhost:' + location.port +
         '/base/test/fixtures/served/iframe.html';
     return getFBPost(fbPostHref).then(ampFB => {
