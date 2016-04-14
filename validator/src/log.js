@@ -1,0 +1,393 @@
+/**
+ * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS-IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import {getMode} from './mode';
+
+
+/** @const Time when this JS loaded.  */
+const start = new Date().getTime();
+
+/**
+ * Triple zero width space.
+ *
+ * This is added to user error messages, so that we can later identify
+ * them, when the only thing that we have is the message. This is the
+ * case in many browsers when the global exception handler is invoked.
+ *
+ * @const {string}
+ */
+export const USER_ERROR_SENTINEL = '\u200B\u200B\u200B';
+
+
+/**
+ * @return {boolean} Whether this message was a user error.
+ */
+export function isUserErrorMessage(message) {
+  return message.indexOf(USER_ERROR_SENTINEL) >= 0;
+}
+
+
+/**
+ * @enum {number}
+ * @private Visible for testing only.
+ */
+export const LogLevel = {
+  OFF: 0,
+  ERROR: 1,
+  WARN: 2,
+  INFO: 3,
+  FINE: 4,
+};
+
+
+/**
+ * Logging class.
+ * @final
+ * @private Visible for testing only.
+ */
+export class Log {
+  /**
+   * @param {!Window} win
+   * @param {function(!Mode):!LogLevel} levelFunc
+   * @param {string=} opt_suffix
+   */
+  constructor(win, levelFunc, opt_suffix) {
+    /**
+     * In tests we use the main test window instead of the iframe where
+     * the tests runs because only the former is relayed to the console.
+     * @const {!Window}
+     */
+    this.win = win.AMP_TEST ? win.parent : win;
+
+    /** @private @const {function(!Mode):boolean} */
+    this.levelFunc_ = levelFunc;
+
+    /** @private @const {!LogLevel} */
+    this.level_ = this.calcLevel_();
+
+    /** @private @const {string} */
+    this.suffix_ = opt_suffix || '';
+  }
+
+  /**
+   * @return {!LogLevel}
+   * @private
+   */
+  calcLevel_() {
+    const mode = getMode();
+
+    // No console - can't enable logging.
+    if (!this.win.console || !this.win.console.log) {
+      return LogLevel.OFF;
+    }
+
+    // Logging has been explicitly disabled.
+    if (mode.log == '0') {
+      return LogLevel.OFF;
+    }
+
+    // Logging is enabled for tests directly.
+    if (this.win.ENABLE_LOG) {
+      return LogLevel.FINE;
+    }
+
+    // LocalDev by default allows INFO level, unless overriden by `#log`.
+    if (mode.localDev && !mode.log) {
+      return LogLevel.INFO;
+    }
+
+    // Delegate to the specific resolver.
+    return this.levelFunc_(mode);
+  }
+
+  /**
+   * @param {string} tag
+   * @param {string} level
+   * @param {!Array} messages
+   * @param {?} opt_error
+   */
+  msg_(tag, level, messages) {
+    if (this.level_ != LogLevel.OFF) {
+      let fn = this.win.console.log;
+      if (level == 'ERROR') {
+        fn = this.win.console.error || fn;
+      } else if (level == 'INFO') {
+        fn = this.win.console.info || fn;
+      } else if (level == 'WARN') {
+        fn = this.win.console.warn || fn;
+      }
+      messages.unshift(new Date().getTime() - start, '[' + tag + ']');
+      fn.apply(this.win.console, messages);
+    }
+  }
+
+  /**
+   * Whether the logging is enabled.
+   * @return {boolean}
+   */
+  isEnabled() {
+    return this.level_ != LogLevel.OFF;
+  }
+
+  /**
+   * Reports a fine-grained message.
+   * @param {string} tag
+   * @param {...*} var_args
+   */
+  fine(tag, var_args) {
+    if (this.level_ >= LogLevel.FINE) {
+      this.msg_(tag, 'FINE', Array.prototype.slice.call(arguments, 1));
+    }
+  }
+
+  /**
+   * Reports a informational message.
+   * @param {string} tag
+   * @param {...*} var_args
+   */
+  info(tag, var_args) {
+    if (this.level_ >= LogLevel.INFO) {
+      this.msg_(tag, 'INFO', Array.prototype.slice.call(arguments, 1));
+    }
+  }
+
+  /**
+   * Reports a warning message.
+   * @param {string} tag
+   * @param {...*} var_args
+   */
+  warn(tag, var_args) {
+    if (this.level_ >= LogLevel.WARN) {
+      this.msg_(tag, 'WARN', Array.prototype.slice.call(arguments, 1));
+    }
+  }
+
+  /**
+   * Reports an error message. If the logging is disabled, the error is rethrown
+   * asynchronously.
+   * @param {string} tag
+   * @param {...*} var_args
+   * @param {?} opt_error
+   */
+  error(tag, var_args) {
+    if (this.level_ >= LogLevel.ERROR) {
+      this.msg_(tag, 'ERROR', Array.prototype.slice.call(arguments, 1));
+    } else {
+      const error = createErrorVargs.apply(null,
+          Array.prototype.slice.call(arguments, 1));
+      this.prepareError_(error);
+      this.win.setTimeout(() => {throw error;});
+    }
+  }
+
+  /**
+   * Creates an error object.
+   * @param {...*} var_args
+   * @return {!Error}
+   */
+  createError(var_args) {
+    const error = createErrorVargs.apply(null, arguments);
+    this.prepareError_(error);
+    return error;
+  }
+
+  /**
+   * Throws an error if the first argument isn't trueish.
+   *
+   * Supports argument substitution into the message via %s placeholders.
+   *
+   * Throws an error object that has two extra properties:
+   * - associatedElement: This is the first element provided in the var args.
+   *   It can be used for improved display of error messages.
+   * - messageArray: The elements of the substituted message as non-stringified
+   *   elements in an array. When e.g. passed to console.error this yields
+   *   native displays of things like HTML elements.
+   *
+   * @param {T} shouldBeTrueish The value to assert. The assert fails if it does
+   *     not evaluate to true.
+   * @param {string} message The assertion message
+   * @param {...*} var_args Arguments substituted into %s in the message.
+   * @return {T} The value of shouldBeTrueish.
+   * @template T
+   */
+  /*eslint "google-camelcase/google-camelcase": 0*/
+  assert(shouldBeTrueish, message, var_args) {
+    let firstElement;
+    if (!shouldBeTrueish) {
+      message = message || 'Assertion failed';
+      const splitMessage = message.split('%s');
+      const first = splitMessage.shift();
+      let formatted = first;
+      const messageArray = [];
+      pushIfNonEmpty(messageArray, first);
+      for (let i = 2; i < arguments.length; i++) {
+        const val = arguments[i];
+        if (val && val.tagName) {
+          firstElement = val;
+        }
+        const nextConstant = splitMessage.shift();
+        messageArray.push(val);
+        pushIfNonEmpty(messageArray, nextConstant.trim());
+        formatted += toString(val) + nextConstant;
+      }
+      const e = new Error(formatted);
+      e.fromAssert = true;
+      e.associatedElement = firstElement;
+      e.messageArray = messageArray;
+      this.prepareError_(e);
+      throw e;
+    }
+    return shouldBeTrueish;
+  }
+  /*eslint "google-camelcase/google-camelcase": 2*/
+
+  /**
+   * Asserts and returns the enum value. If the enum doesn't contain such a value,
+   * the error is thrown.
+   *
+   * @param {!Enum<T>} enumObj
+   * @param {string} s
+   * @param {string=} opt_enumName
+   * @return T
+   * @template T
+   */
+  assertEnumValue(enumObj, s, opt_enumName) {
+    for (const k in enumObj) {
+      if (enumObj[k] == s) {
+        return enumObj[k];
+      }
+    }
+    this.assert(false,
+        'Unknown %s value: "%s"',
+        opt_enumName || 'enum', s);
+  }
+
+  /**
+   * @param {!Error} error
+   * @private
+   */
+  prepareError_(error) {
+    if (this.suffix_) {
+      if (!error.message) {
+        error.message = this.suffix_;
+      } else if (error.message.indexOf(this.suffix_) == -1) {
+        error.message += this.suffix_;
+      }
+    }
+  }
+}
+
+
+/**
+ * @param {*} val
+ * @return {string}
+ */
+function toString(val) {
+  if (val instanceof Element) {
+    return val.tagName.toLowerCase() + (val.id ? '#' + val.id : '');
+  }
+  return val;
+}
+
+
+/**
+ * @param {!Array} array
+ * @param {*} val
+ */
+function pushIfNonEmpty(array, val) {
+  if (val != '') {
+    array.push(val);
+  }
+}
+
+
+/**
+ * @param {...*} var_args
+ * @return {!Error}
+ * @private
+ */
+function createErrorVargs(var_args) {
+  let error = null;
+  let message = '';
+  for (let i = 0; i < arguments.length; i++) {
+    const arg = arguments[i];
+    if (arg instanceof Error && !error) {
+      error = arg;
+    } else {
+      if (message) {
+        message += ' ';
+      }
+      message += arg;
+    }
+  }
+  if (!error) {
+    error = new Error(message);
+  } else if (message) {
+    error.message = message + ': ' + error.message;
+  }
+  return error;
+}
+
+
+/**
+ * Rethrows the error without terminating the current context. This preserves
+ * whether the original error designation is a user error or a dev error.
+ * @param {...*} var_args
+ */
+export function rethrowAsync(var_args) {
+  const error = createErrorVargs.apply(null, arguments);
+  setTimeout(() => {throw error;});
+}
+
+
+/**
+ * Publisher level log.
+ *
+ * Enabled in the following conditions:
+ *  1. Not disabled using `#log=0`.
+ *  2. Development mode is enabled via `#development=1` or logging is explicitly
+ *     enabled via `#log=D` where D >= 1.
+ *
+ * @const {!Log}
+ */
+export const user = new Log(window, mode => {
+  const logNum = parseInt(mode.log, 10);
+  if (mode.development || logNum >= 1) {
+    return LogLevel.FINE;
+  }
+  return LogLevel.OFF;
+}, USER_ERROR_SENTINEL);
+
+
+/**
+ * AMP development log. Stripped in the PROD binary.
+ *
+ * Enabled in the following conditions:
+ *  1. Not disabled using `#log=0`.
+ *  2. Logging is explicitly enabled via `#log=D`, where D >= 2.
+ *
+ * @const {!Log}
+ */
+export const dev = new Log(window, mode => {
+  const logNum = parseInt(mode.log, 10);
+  if (logNum >= 3) {
+    return LogLevel.FINE;
+  }
+  if (logNum >= 2) {
+    return LogLevel.INFO;
+  }
+  return LogLevel.OFF;
+});
