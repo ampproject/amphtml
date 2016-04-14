@@ -54,6 +54,7 @@ describe('3p integration.js', () => {
     expect(registrations).to.include.key('gmossp');
     expect(registrations).to.include.key('weborama-display');
     expect(registrations).to.include.key('yieldbot');
+    expect(registrations).to.include.key('adstir');
   });
 
   it('should validateParentOrigin without ancestorOrigins', () => {
