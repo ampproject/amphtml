@@ -29,7 +29,7 @@ import {parseUrl} from './url';
  * @param {boolean=} opt_is3P set to true if the iframe is 3p.
  * @return {!Unlisten}
  */
-export function listen(iframe, typeOfMessage, callback, opt_is3P) {
+export function listenFor(iframe, typeOfMessage, callback, opt_is3P) {
   dev.assert(iframe.src, 'only iframes with src supported');
   dev.assert(!iframe.parentNode, 'cannot register events on an attached ' +
       'iframe. It will cause hair-pulling bugs like #2942');
@@ -89,8 +89,8 @@ export function listen(iframe, typeOfMessage, callback, opt_is3P) {
  * @param {boolean=} opt_is3P set to true if the iframe is 3p.
  * @return {!Unlisten}
  */
-export function listenOnce(iframe, typeOfMessage, callback, opt_is3P) {
-  const unlisten = listen(iframe, typeOfMessage, data => {
+export function listenForOnce(iframe, typeOfMessage, callback, opt_is3P) {
+  const unlisten = listenFor(iframe, typeOfMessage, data => {
     unlisten();
     return callback(data);
   }, opt_is3P);

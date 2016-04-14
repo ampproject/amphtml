@@ -67,7 +67,7 @@ describe('iframe-helper', function() {
         'removeEventListener');
     let unlisten;
     return new Promise(resolve => {
-      unlisten = IframeHelper.listen(testIframe, 'send-intersections',
+      unlisten = IframeHelper.listenFor(testIframe, 'send-intersections',
           resolve);
       insert(testIframe);
     }).then(() => {
@@ -81,7 +81,7 @@ describe('iframe-helper', function() {
     const removeEventListenerSpy = sandbox.spy(container.win,
         'removeEventListener');
     return new Promise(resolve => {
-      IframeHelper.listenOnce(testIframe, 'send-intersections', resolve);
+      IframeHelper.listenForOnce(testIframe, 'send-intersections', resolve);
       insert(testIframe);
     }).then(() => {
       expect(removeEventListenerSpy.callCount).to.equal(1);
@@ -91,7 +91,7 @@ describe('iframe-helper', function() {
   it('should un-listen on next message when iframe is unattached', () => {
     const removeEventListenerSpy = sandbox.spy(container.win,
         'removeEventListener');
-    IframeHelper.listen(testIframe, 'send-intersections', function() {});
+    IframeHelper.listenFor(testIframe, 'send-intersections', function() {});
     expect(removeEventListenerSpy.callCount).to.equal(0);
     container.win.postMessage('hello world', '*');
     expect(removeEventListenerSpy.callCount).to.equal(0);
