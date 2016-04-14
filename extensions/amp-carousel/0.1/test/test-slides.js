@@ -750,6 +750,47 @@ describe('Slides functional', () => {
       expect(slides[index]).to.equal('e');
     });
   });
+
+  describe('scheduling slides and updating viewport', () => {
+    beforeEach(() => {
+      sandbox = sinon.sandbox.create();
+      setupElements();
+      setupSlides();
+      slides.inViewport_ = true;
+      slides.getVsync = function() {
+        return {
+          mutate: function(fn) {
+            fn();
+          },
+        };
+      };
+      slides.deferMutate = function(fn) {
+        fn();
+      };
+      slides.scheduleLayout = sandbox.spy();
+      slides.updateInViewport = sandbox.spy();
+      slides.schedulePause = sandbox.spy();
+      slides.schedulePreload = sandbox.spy();
+    });
+    afterEach(() => {
+      sandbox.restore();
+      teardownElements();
+    });
+
+    it('should update viewport before scheduling slides', () => {
+      slides.goCallback(1, /*animate*/ false);
+      expect(slides.updateInViewport.calledBefore(
+          slides.scheduleLayout)).to.be.true;
+      expect(slides.updateInViewport.calledWith(slide0, false)).to.be.true;
+      expect(slides.updateInViewport.calledWith(slide1, true)).to.be.true;
+
+      slides.goCallback(-1, /*animate*/ false);
+      expect(slides.updateInViewport.calledBefore(
+          slides.scheduleLayout)).to.be.true;
+      expect(slides.updateInViewport.calledWith(slide0, true)).to.be.true;
+      expect(slides.updateInViewport.calledWith(slide1, false)).to.be.true;
+    });
+  });
 });
 
 describe('empty Slides functional', () => {
