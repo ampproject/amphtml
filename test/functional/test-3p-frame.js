@@ -116,7 +116,8 @@ describe('3p-frame', () => {
         '"canonicalUrl":"https://foo.bar/baz",' +
         '"pageViewId":"' + docInfo.pageViewId + '","clientId":"cidValue",' +
         '"location":{"href":"' + locationHref + '"},"tagName":"MY-ELEMENT",' +
-        '"mode":{"localDev":true,"development":false,"minified":false}' +
+        '"mode":{"localDev":true,"development":false,"minified":false,' +
+        '"version":"$internalRuntimeVersion$"}' +
         ',"hidden":false,"initialIntersection":{"time":1234567888,' +
         '"rootBounds":{"left":0,"top":0,"width":' + width + ',"height":' +
         height + ',"bottom":' + height + ',"right":' + width +
