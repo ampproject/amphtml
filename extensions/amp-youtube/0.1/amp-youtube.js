@@ -65,20 +65,10 @@ class AmpYoutube extends AMP.BaseElement {
         this.element.getAttribute('video-id')),
         'The data-videoid attribute is required for <amp-youtube> %s',
         this.element);
-  }
 
-  /** @override */
-  createPlaceholderCallback() {
-    const imgPlaceholder = this.getWin().document.createElement('amp-img');
-    imgPlaceholder.classList.add('-amp-object-fit-cover');
-    imgPlaceholder.setAttribute('src', 'https://i.ytimg.com/vi/' +
-        encodeURIComponent(this.videoid_) + '/hqdefault.jpg');
-    imgPlaceholder.setAttribute('placeholder', '');
-    imgPlaceholder.setAttribute('width', this.width_);
-    imgPlaceholder.setAttribute('height', this.height_);
-    imgPlaceholder.setAttribute('layout', 'responsive');
-    this.applyFillContent(imgPlaceholder);
-    return imgPlaceholder;
+    if (!this.getPlaceholder()) {
+      this.buildImagePlaceholder_();
+    }
   }
 
   /** @override */
@@ -170,6 +160,53 @@ class AmpYoutube extends AMP.BaseElement {
     this.iframe_.contentWindow./*OK*/postMessage(JSON.stringify({
       'event': 'listening',
     }), '*');
+  }
+
+  /** @private */
+  buildImagePlaceholder_() {
+    const imgPlaceholder = new Image();
+    const videoid = this.videoid_;
+
+    setStyles(imgPlaceholder, {
+      // Cover matches YouTube Player styling.
+      'object-fit': 'cover',
+      // Hiding the placeholder initially to give the browser time to fix
+      // the object-fit: cover.
+      'visibility': 'hidden',
+    });
+
+    // TODO(mkhatib): Maybe add srcset to allow the browser to
+    // load the needed size or even better match YTPlayer logic for loading
+    // player thumbnails for different screen sizes for a cache win!
+    imgPlaceholder.src = 'https://i.ytimg.com/vi/' +
+        encodeURIComponent(this.videoid_) + '/sddefault.jpg#404_is_fine';
+    imgPlaceholder.setAttribute('placeholder', '');
+    imgPlaceholder.width = this.width_;
+    imgPlaceholder.height = this.height_;
+
+    this.element.appendChild(imgPlaceholder);
+    this.applyFillContent(imgPlaceholder);
+
+    // Because sddefault.jpg isn't available for all videos, we try to load
+    // it and fallback to hqdefault.jpg.
+    loadPromise(imgPlaceholder).then(() => {
+      // A pretty ugly hack since onerror won't fire on YouTube image 404.
+      // This might be due to the fact that YouTube returns data to the request
+      // even when the status is 404. YouTube returns a placeholder image that
+      // is 120x90.
+      if (imgPlaceholder.naturalWidth == 120 &&
+          imgPlaceholder.naturalHeight == 90) {
+        throw new Error('sddefault.jpg is not found');
+      }
+    }).catch(() => {
+      imgPlaceholder.src = 'https://i.ytimg.com/vi/' +
+          encodeURIComponent(videoid) + '/hqdefault.jpg';
+      return loadPromise(imgPlaceholder);
+    }).then(() => {
+      setStyles(imgPlaceholder, {
+        'visibility': '',
+      });
+    });
   }
 };
 
