@@ -31,5 +31,5 @@ export function sovrn(global, data) {
   global.aid = data.aid;
   global.z = data.z;
   global.tf = data.tf;
-  writeScript(global, '//ap.lijit.com/www/sovrn_amp/sovrn_ads.js');
+  writeScript(global, 'https://ap.lijit.com/www/sovrn_amp/sovrn_ads.js');
 }

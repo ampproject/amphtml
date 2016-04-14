@@ -114,7 +114,6 @@ export const adPreconnect = {
     'https://securepubads.g.doubleclick.net',
     'https://tpc.googlesyndication.com',
   ],
-  sovrn: ['https://ap.lijit.com'],
   imobile: 'https://spad.i-mobile.co.jp',
   webediads: [
     'https://eu1.wbdds.com',
