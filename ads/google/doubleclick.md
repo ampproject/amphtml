@@ -67,6 +67,19 @@ Supported via `json` attribute:
 - `cookieOptions`
 - `tagForChildDirectedTreatment`
 - `targeting`
+- `useSameDomainRenderingUntilDeprecated`
+
+### Temporary use of useSameDomainRenderingUntilDeprecated
+An experiment to use the higher performance GLADE tag in place of the DoubleClick GPT tag causes the ad to render in a second cross domain iframe within the outer AMP iframe. This prevents ads from accessing the iframe sandbox information and methods which are provided by the AMP runtime. Until this API is available to work in the second level iframe, publishers can opt out of this experiment by including "useSameDomainRenderingUntilDeprecated": 1 as a json attribute. This attribute will be deprecated by the end of June 2016, when the GLADE tag will become the default, and all ads will always be rendered inside a second cross domain iframe
+
+Example:
+```html
+<amp-ad width=320 height=50
+    type="doubleclick"
+    data-slot="/4119129/mobile_ad_banner"
+    json='{"useSameDomainRenderingUntilDeprecated":1}'>
+</amp-ad>
+```
 
 
 ### Unsupported DFP Features & Formats
@@ -83,7 +96,7 @@ Supported via `json` attribute:
 - Creatives served over HTTP.
 
 ### DFP Implementation Examples
-[This](http://dfp-amp-testing-1185.appspot.com/) website has a list of implementation examples with source code that showcase DFP features. 
+[This](http://dfp-amp-testing-1185.appspot.com/) website has a list of implementation examples with source code that showcase DFP features.
 
 
 

@@ -22,6 +22,7 @@ var babel = require('babelify');
 var browserify = require('browserify');
 var buffer = require('vinyl-buffer');
 var closureCompile = require('./build-system/tasks/compile').closureCompile;
+var cleanupBuildDir = require('./build-system/tasks/compile').cleanupBuildDir;
 var cssnano = require('cssnano');
 var fs = require('fs-extra');
 var gulp = $$.help(require('gulp'));
@@ -122,8 +123,9 @@ function polyfillsForTests() {
  *
  * @param {boolean} watch
  * @param {boolean} shouldMinify
+ * @param {boolean=} opt_preventRemoveAndMakeDir
  */
-function compile(watch, shouldMinify) {
+function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir) {
   compileCss();
   // For compilation with babel we start with the amp-babel entry point,
   // but then rename to the amp.js which we've been using all along.
@@ -132,6 +134,7 @@ function compile(watch, shouldMinify) {
     minifiedName: 'v0.js',
     includePolyfills: true,
     watch: watch,
+    preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
     minify: shouldMinify,
     // If there is a sync JS error during initial load,
     // at least try to unhide the body.
@@ -147,7 +150,8 @@ function compile(watch, shouldMinify) {
   compileJs('./3p/', 'integration.js', './dist.3p/' + internalRuntimeVersion, {
     minifiedName: 'f.js',
     watch: watch,
-    minify: shouldMinify
+    minify: shouldMinify,
+    preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
   });
   thirdPartyBootstrap(watch, shouldMinify);
 }
@@ -266,6 +270,7 @@ function buildExtension(name, version, hasCss, options) {
 function buildExtensionJs(path, name, version, options) {
   compileJs(path + '/', name + '.js', './dist/v0', {
     watch: options.watch,
+    preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
     minify: options.minify,
     toName:  name + '-' + version + '.max.js',
     minifiedName: name + '-' + version + '.js',
@@ -291,10 +296,11 @@ function build() {
  */
 function dist() {
   process.env.NODE_ENV = 'production';
-  compile(false, true);
-  buildExtensions({minify: true});
-  buildExperiments({minify: true, watch: false});
-  buildLoginDone({minify: true, watch: false});
+  cleanupBuildDir();
+  compile(false, true, true);
+  buildExtensions({minify: true, preventRemoveAndMakeDir: true});
+  buildExperiments({minify: true, watch: false, preventRemoveAndMakeDir: true});
+  buildLoginDone({minify: true, watch: false, preventRemoveAndMakeDir: true});
 }
 
 /**
@@ -600,7 +606,9 @@ function buildExperiments(options) {
         compileJs('./build/experiments/', builtName, './dist.tools/experiments/', {
           watch: false,
           minify: options.minify || argv.minify,
+          includePolyfills: true,
           minifiedName: minifiedName,
+          preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
         });
       });
 }
@@ -675,8 +683,10 @@ function buildLoginDoneVersion(version, options) {
       .on('end', function() {
         compileJs('./build/all/v0/', builtName, './dist/v0/', {
           watch: false,
+          includePolyfills: true,
           minify: options.minify || argv.minify,
           minifiedName: minifiedName,
+          preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
           latestName: latestName,
         });
       });

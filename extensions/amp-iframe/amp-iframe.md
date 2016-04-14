@@ -179,7 +179,7 @@ Iframes are identified as tracking/analytics iframes if they appear to serve no 
 ## Validation errors
 
 The following lists validation errors specific to the `amp-iframe` tag
-(see also `amp-iframe` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii)):
+(see also `amp-iframe` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-iframe/0.1/validator-amp-iframe.protoascii)):
 
 <table>
   <tr>

@@ -351,9 +351,11 @@ message ErrorCategory {
     // a given AMP element, and responsiveness.
     // https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md
     AMP_LAYOUT_PROBLEM = 8;
-    // AMP supports Mustache templates; the validator generates errors
-    // for misplaced template syntax.
-    AMP_MUSTACHE_TEMPLATE_PROBLEM = 9;
+    // AMP supports the HTML template tag (e.g. within amp-list) and interprets
+    // Mustache syntax within such templates. To help with debugging, the AMP
+    // Validator generates errors for misplaced Mustache template syntax.
+    // https://github.com/ampproject/amphtml/blob/master/spec/amp-html-templates.md
+    AMP_HTML_TEMPLATE_PROBLEM = 9;
     // This is currently still allowed but may soon be disallowed. Usually
     // a recommendation for a replacement is rendered as part of the error.
     DEPRECATION = 10;

@@ -28,7 +28,6 @@ import {timer} from '../src/timer';
 import {user} from '../src/log';
 import {userNotificationManagerFor} from '../src/user-notification';
 import {viewerFor} from '../src/viewer';
-import {removeElement} from '../src/dom';
 
 
 /** @private @const These tags are allowed to have fixed positioning */
@@ -61,6 +60,8 @@ export function installAd(win) {
 
       // Ad opts into lazier loading strategy where we only load ads that are
       // at closer than 1.25 viewports away.
+      // TODO(jridgewell): Can this be moved to the new number based
+      // renderOutsideViewport?
       if (this.element.getAttribute('data-loading-strategy') ==
           'prefer-viewability-over-views') {
         const box = this.getIntersectionElementLayoutBox();
@@ -73,7 +74,7 @@ export function installAd(win) {
       }
 
       // Otherwise the ad is good to go.
-      return true;
+      return super.renderOutsideViewport();
     }
 
     /** @override */
@@ -285,30 +286,6 @@ export function installAd(win) {
       return loadPromise(this.iframe_);
     }
 
-    /** @override  */
-    unlayoutCallback() {
-      if (this.iframe_) {
-        removeElement(this.iframe_);
-        if (this.placeholder_) {
-          this.togglePlaceholder(true);
-        }
-        if (this.fallback_) {
-          this.toggleFallback(false);
-        }
-
-        this.iframe_ = null;
-        // IntersectionObserver's listeners were cleaned up by
-        // setInViewport(false) before #unlayoutCallback
-        this.intersectionObserver_ = null;
-      }
-      return true;
-    }
-
-    /** @override  */
-    unlayoutOnPause() {
-      return true;
-    }
-
     /**
      * @return {!Promise<string|undefined>} A promise for a CID or undefined if
      *     - the ad network does not request one or
@@ -418,7 +395,7 @@ export function installAd(win) {
         }
         // Remove the iframe only if it is not the master.
         if (this.iframe_.name.indexOf('_master') == -1) {
-          removeElement(this.iframe_);
+          this.element.removeChild(this.iframe_);
           this.iframe_ = null;
         }
       });

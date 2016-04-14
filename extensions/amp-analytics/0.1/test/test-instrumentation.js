@@ -20,7 +20,7 @@ import * as sinon from 'sinon';
 
 adopt(window);
 
-describe('instrumentation', function() {
+describe('amp-analytics.instrumentation', function() {
 
   let ins;
   let fakeViewport;
@@ -413,5 +413,66 @@ describe('instrumentation', function() {
         {'on': 'scroll', 'scrollSpec': {'verticalBoundaries': [4]}},
         fn2);
     expect(fn2.callCount).to.equal(1);
+  });
+
+  describe('visibility', () => {
+
+    beforeEach(() => {
+      sandbox.stub(ins, 'isViewabilityExperimentOn_').returns(true);
+    });
+
+    it('isVisibilitySpecValid passes valid visibility spec', () => {
+      const specs = [
+        undefined,
+        {selector: '#abc'},
+        {
+          selector: '#a', continuousTimeMin: 10, totalTimeMin: 1000,
+          visiblePercentageMax: 99, visiblePercentageMin: 10,
+        },
+        {selector: '#a', continuousTimeMax: 1000, unload: true},
+      ];
+      for (const s in specs) {
+        expect(ins.isVisibilitySpecValid_({visibilitySpec: specs[s]}),
+            JSON.stringify(specs[s])).to.be.true;
+      }
+    });
+
+    it('isVisibilitySpecValid rejects invalid visibility spec', () => {
+      const specs = [
+        {},
+        {selector: 'abc'},
+        {selector: '#a', continuousTimeMin: -10},
+        {
+          selector: '#a', continuousTimeMax: 10, continuousTimeMin: 100,
+          unload: true,
+        },
+        {selector: '#a', continuousTimeMax: 100, continuousTimeMin: 10},
+        {selector: '#a', visiblePercentageMax: 101},
+      ];
+      for (const s in specs) {
+        expect(ins.isVisibilitySpecValid_({visibilitySpec: specs[s]}),
+            JSON.stringify(specs[s])).to.be.false;
+      }
+    });
+  });
+
+  describe('utils', () => {
+    it('isPositiveNumber_', () => {
+      ['', 1, 0, undefined, 100, 101].forEach(num => {
+        expect(ins.isPositiveNumber_(num)).to.be.true;
+      });
+      [-1, NaN].forEach(num => {
+        expect(ins.isPositiveNumber_(num)).to.be.false;
+      });
+    });
+
+    it('isValidPercentage_', () => {
+      ['', 1, 0, undefined, 100].forEach(num => {
+        expect(ins.isValidPercentage_(num)).to.be.true;
+      });
+      [-1, NaN, 101].forEach(num => {
+        expect(ins.isValidPercentage_(num)).to.be.false;
+      });
+    });
   });
 });

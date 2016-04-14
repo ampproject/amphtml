@@ -295,6 +295,9 @@ export class FixedLayer {
   removeFixedElement_(element) {
     for (let i = 0; i < this.fixedElements_.length; i++) {
       if (this.fixedElements_[i].element == element) {
+        this.vsync_.mutate(() => {
+          element.style.top = '';
+        });
         this.fixedElements_.splice(i, 1);
         break;
       }

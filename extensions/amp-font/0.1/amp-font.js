@@ -39,7 +39,7 @@ import {timer} from '../../../src/timer';
 import {user} from '../../../src/log';
 
 /** @private @const {string} */
-const TAG = 'AmpFont';
+const TAG = 'amp-font';
 
 /** @private @const {number} */
 const DEFAULT_TIMEOUT_ = 3000;

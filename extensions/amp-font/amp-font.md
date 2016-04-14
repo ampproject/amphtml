@@ -101,7 +101,7 @@ The attributes above should all behave like they do on standard elements.
 ## Validation errors
 
 The following lists validation errors specific to the `amp-font` tag
-(see also `amp-font` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii)):
+(see also `amp-font` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-font/0.1/validator-amp-font.protoascii)):
 
 <table>
   <tr>

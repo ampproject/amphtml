@@ -25,7 +25,7 @@ import {timer} from '../../../src/timer';
 import {user} from '../../../src/log';
 
 /** @const {string} */
-const TAG_ = 'AmpIframe';
+const TAG_ = 'amp-iframe';
 
 /** @type {number}  */
 let count = 0;
@@ -339,8 +339,6 @@ export class AmpIframe extends AMP.BaseElement {
       }
 
       this.iframe_ = null;
-      // IntersectionObserver's listeners were cleaned up by
-      // setInViewport(false) before #unlayoutCallback
       this.intersectionObserver_ = null;
     }
     return true;

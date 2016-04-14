@@ -74,7 +74,7 @@ section.
 ## Validation errors
 
 The following lists validation errors specific to the `amp-image-lightbox` tag
-(see also `amp-image-lightbox` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii)):
+(see also `amp-image-lightbox` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-image-lightbox/0.1/validator-amp-image-lightbox.protoascii)):
 
 <table>
   <tr>

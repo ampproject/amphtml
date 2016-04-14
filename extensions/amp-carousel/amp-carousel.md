@@ -119,7 +119,7 @@ You may override this with your own svg or image like so:
 ## Validation errors
 
 The following lists validation errors specific to the `amp-carousel` tag
-(see also `amp-carousel` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii)):
+(see also `amp-carousel` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-carousel/0.1/validator-amp-carousel.protoascii)):
 
 <table>
   <tr>

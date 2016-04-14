@@ -28,7 +28,7 @@ import {CSS} from '../../../build/amp-social-share-0.1.css';
 const EXPERIMENT = 'amp-social-share';
 
 /** @const */
-const TAG = 'AmpSocialShare';
+const TAG = 'amp-social-share';
 
 /** @const {number} */
 const DEFAULT_WIDTH = 60;

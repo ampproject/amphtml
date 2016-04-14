@@ -253,7 +253,7 @@ Optionally one can delay generation of Client IDs used for analytics and similar
 ## Validation errors
 
 The following lists validation errors specific to the `amp-user-notification` tag
-(see also `amp-user-notification` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii)):
+(see also `amp-user-notification` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-user-notification/0.1/validator-amp-user-notification.protoascii)):
 
 <table>
   <tr>

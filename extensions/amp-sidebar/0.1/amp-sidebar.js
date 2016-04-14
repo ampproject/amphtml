@@ -16,15 +16,27 @@
 
 import {CSS} from '../../../build/amp-sidebar-0.1.css';
 import {Layout} from '../../../src/layout';
+import {dev, user} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
-import {dev} from '../../../src/log';
+import {platform} from '../../../src/platform';
 import {setStyles} from '../../../src/style';
+import {vsyncFor} from '../../../src/vsync';
+import {timer} from '../../../src/timer';
 
 /** @const */
 const EXPERIMENT = 'amp-sidebar';
 
 /** @const */
-const TAG = 'AmpSidebar';
+const TAG = 'amp-sidebar';
+
+/** @const */
+const ANIMATION_TIMEOUT = 550;
+
+/** @const */
+const IOS_SAFARI_BOTTOMBAR_HEIGHT = '10vh';
+
+/** @const */
+const WHITELIST_ = ['AMP-ACCORDION', 'AMP-FIT-TEXT', 'AMP-IMG'];
 
 export class AmpSidebar extends AMP.BaseElement {
   /** @override */
@@ -60,10 +72,21 @@ export class AmpSidebar extends AMP.BaseElement {
     /** @private @const {!Element} */
     this.maskElement_ = false;
 
+    /** @const @private {!Vsync} */
+    this.vsync_ = vsyncFor(this.win_);
+
+    /** @private @const {boolean} */
+    this.isIosSafari_ = platform.isIos() && platform.isSafari();
+
+    /** @private {boolean} */
+    this.bottomBarCompensated_ = false;
+
     if (!this.isExperimentOn_) {
       dev.warn(TAG, `Experiment ${EXPERIMENT} disabled`);
       return;
     }
+
+    this.checkWhitelist_();
 
     if (this.side_ != 'left' && this.side_ != 'right') {
       const pageDir =
@@ -72,6 +95,10 @@ export class AmpSidebar extends AMP.BaseElement {
           'ltr';
       this.side_ = (pageDir == 'rtl') ? 'right' : 'left';
       this.element.setAttribute('side', this.side_);
+    }
+
+    if (this.isIosSafari_) {
+      this.fixIosElasticScrollLeak_();
     }
 
     if (this.isOpen_()) {
@@ -86,7 +113,6 @@ export class AmpSidebar extends AMP.BaseElement {
         this.close_();
       }
     });
-
     //TODO (skrish, #2712) Add history support on back button.
     this.registerAction('toggle', this.toggle_.bind(this));
     this.registerAction('open', this.open_.bind(this));
@@ -126,14 +152,24 @@ export class AmpSidebar extends AMP.BaseElement {
    */
   open_() {
     this.viewport_.disableTouchZoom();
-    this.mutateElement(() => {
-      this.viewport_.addToFixedLayer(this.element);
+    this.vsync_.mutate(() => {
       setStyles(this.element, {
         'display': 'block',
       });
+      this.viewport_.addToFixedLayer(this.element);
       this.openMask_();
-      this.element.setAttribute('open', '');
-      this.element.setAttribute('aria-hidden', 'false');
+      if (this.isIosSafari_) {
+        this.compensateIosBottombar_();
+      }
+      this.element./*OK*/scrollTop = 1;
+      // Start animation in a separate vsync due to display:block; set above.
+      this.vsync_.mutate(() => {
+        this.element.setAttribute('open', '');
+        this.element.setAttribute('aria-hidden', 'false');
+        timer.delay(() => {
+          this.scheduleLayout(this.getRealChildren());
+        }, ANIMATION_TIMEOUT);
+      });
     });
   }
 
@@ -143,14 +179,21 @@ export class AmpSidebar extends AMP.BaseElement {
    */
   close_() {
     this.viewport_.restoreOriginalTouchZoom();
-    this.mutateElement(() => {
+    this.vsync_.mutate(() => {
       this.closeMask_();
       this.element.removeAttribute('open');
       this.element.setAttribute('aria-hidden', 'true');
-      setStyles(this.element, {
-        'display': 'none',
-      });
-      this.viewport_.removeFromFixedLayer(this.element);
+      timer.delay(() => {
+        if (!this.isOpen_()) {
+          this.viewport_.removeFromFixedLayer(this.element);
+          this.vsync_.mutate(() => {
+            setStyles(this.element, {
+              'display': 'none',
+            });
+            this.schedulePause(this.getRealChildren());
+          });
+        }
+      }, ANIMATION_TIMEOUT);
     });
   }
 
@@ -183,6 +226,65 @@ export class AmpSidebar extends AMP.BaseElement {
       setStyles(this.maskElement_, {
         'display': 'none',
       });
+    }
+  }
+
+  /**
+   * @private
+   */
+  fixIosElasticScrollLeak_() {
+    this.element.addEventListener('scroll', e => {
+      if (this.isOpen_()) {
+        if (this.element./*OK*/scrollTop < 1) {
+          this.element./*OK*/scrollTop = 1;
+          e.preventDefault();
+        } else if (this.element./*OK*/scrollHeight ==
+              this.element./*OK*/scrollTop +
+              this.element./*OK*/offsetHeight) {
+          this.element./*OK*/scrollTop =
+              this.element./*OK*/scrollTop - 1;
+          e.preventDefault();
+        }
+      }
+    });
+  }
+
+  /**
+   * @private
+   */
+  compensateIosBottombar_() {
+    if (!this.bottomBarCompensated_) {
+      // Compensate for IOS safari bottom navbar.
+      const div = this.document_.createElement('div');
+      setStyles(div, {
+        'height': IOS_SAFARI_BOTTOMBAR_HEIGHT,
+        'width': '100%',
+        'background-color': 'transparent',
+      });
+      this.element.appendChild(div);
+      this.bottomBarCompensated_ = true;
+    }
+  }
+
+  /**
+   * Checks if the sidebar only has the whitlisted custom amp- elements.
+   * @private
+   */
+  checkWhitelist_() {
+    const elements = this.element.getElementsByClassName('-amp-element');
+    let i = elements.length - 1;
+    while (i >= 0) {
+      const tagName = elements[i].tagName;
+      if (tagName.indexOf('AMP-') == 0) {
+        const isWhiteListed = user.assert(
+            WHITELIST_.indexOf(tagName) >= 0,
+            '%s can only contain the following custom tags: %s',
+            this.element, WHITELIST_);
+        if (!isWhiteListed) {
+          break;
+        }
+      }
+      i--;
     }
   }
 }

@@ -57,7 +57,7 @@ E.g. in https://www.youtube.com/watch?v=Z1q71gFeRqM Z1q71gFeRqM is the video id.
 ## Validation errors
 
 The following lists validation errors specific to the `amp-youtube` tag
-(see also `amp-youtube` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii)):
+(see also `amp-youtube` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-youtube/0.1/validator-amp-youtube.protoascii)):
 
 <table>
   <tr>

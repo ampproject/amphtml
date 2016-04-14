@@ -16,7 +16,8 @@
     "test": "gulp test",
     "lint": "gulp lint",
     "build": "gulp build",
-    "dist": "gulp dist"
+    "dist": "gulp dist",
+    "heroku-postbuild": "gulp clean && gulp build --fortesting && gulp dist --fortesting"
   },
   "dependencies": {
     "promise-pjs": "0.2.6",
