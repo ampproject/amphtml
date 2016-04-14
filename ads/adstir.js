@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {checkData} from '../src/3p';
+import {loadScript, checkData} from '../src/3p';
 
 /**
  * @param {!Window} global
@@ -34,7 +34,5 @@ export function adstir(global, data) {
   d.setAttribute('data-origin', global.context.location.href);
   global.document.getElementById('c').appendChild(d);
 
-  const s = global.document.createElement('script');
-  s.src = 'https://js.ad-stir.com/js/adstir_async.js';
-  global.document.body.appendChild(s);
+  loadScript(global, 'https://js.ad-stir.com/js/adstir_async.js');
 }

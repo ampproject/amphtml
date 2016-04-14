@@ -28,7 +28,8 @@ limitations under the License.
 
 ## Configuration
 
-For semantics of configuration, please see ad network documentation.
+For configuration details and generate your tags, please refer to [your publisher account](https://ad-stir.com/login) or [contact us](https://ad-stir.com/contact).
+
 
 Supported parameters:
 
