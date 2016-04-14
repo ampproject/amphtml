@@ -19,7 +19,11 @@ import {writeScript} from '../src/3p';
  * @param {!Window} global
  * @param {!Object} data
  */
+// export function yahoojp(global, data) {
+//   global.yahoojpParam = data;
+//   writeScript(global, 'https://mwakkiy.github.io/yjamp/amp.js');	//@todo:本物に変更
+// }
 export function yahoojp(global, data) {
   global.yahoojpParam = data;
-  writeScript(global, 'https://mwakkiy.github.io/yjamp/amp.js');	//@todo:本物に変更
+  writeScript(global, 'https://mwakkiy.github.io/yjamp/amp.js');
 }

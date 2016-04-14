@@ -23,9 +23,7 @@ limitations under the License.
   width="320"
   height="50"
   type="yahoojp"
-  data-pid="1847"
-  data-asid="813689"
-  data-adtype="banner"  
+  data-yadsid="69472_107276"
 >
 </amp-ad>
 ```
