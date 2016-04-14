@@ -25,5 +25,8 @@ var config = {
 
 exports.getTemplate = function() {
   var configStr = JSON.stringify(config);
-  return `window.AMP_CONFIG=${configStr};/*AMP_CONFIG*/`;
+  // If window.AMP_CONFIG already exists don't clobber it.
+  // This can be useful for testing where we need to setup experiments before
+  // the main binary has loaded (setting up builtins for example).
+  return `window.AMP_CONFIG||(window.AMP_CONFIG=${configStr});/*AMP_CONFIG*/`;
 };
