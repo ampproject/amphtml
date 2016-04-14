@@ -691,6 +691,14 @@ export function createAmpElementProto(win, name, implementationClass) {
   };
 
   /**
+   * Creates a placeholder for the element.
+   * @returns {HTMLElement|null}
+   */
+  ElementProto.createPlaceholder = function() {
+    return this.implementation_.createPlaceholderCallback();
+  };
+
+  /**
    * Whether the element should ever render when it is not in viewport.
    * @return {boolean}
    * @final
@@ -958,7 +966,7 @@ export function createAmpElementProto(win, name, implementationClass) {
    * @package @final
    */
   ElementProto.getPlaceholder = function() {
-    return dom.childElementByAttr(this, 'placeholder');
+    return dom.lastChildElementByAttr(this, 'placeholder');
   };
 
   /**

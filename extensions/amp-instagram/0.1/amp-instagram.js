@@ -63,10 +63,6 @@ class AmpInstagram extends AMP.BaseElement {
      */
     this.iframePromise_ = null;
     /**
-     * @private {?Element}
-     */
-    this.placeholderWrapper_ = null;
-    /**
      * @private @const
      */
     this.shortcode_ = user.assert(
@@ -74,12 +70,11 @@ class AmpInstagram extends AMP.BaseElement {
         this.element.getAttribute('shortcode')),
         'The data-shortcode attribute is required for <amp-instagram> %s',
         this.element);
-
-    this.buildPrerenderDom_();
   }
 
-  /** @private */
-  buildPrerenderDom_() {
+  /** @override */
+  createPlaceholderCallback() {
+    const placeholder = this.getWin().document.createElement('div');
     const image = this.getWin().document.createElement('amp-img');
     // This will redirect to the image URL. By experimentation this is
     // always the same URL that is actually used inside of the embed.
@@ -102,9 +97,9 @@ class AmpInstagram extends AMP.BaseElement {
       'right': '8px',
     });
     wrapper.appendChild(image);
-    this.placeholderWrapper_ = wrapper;
+    placeholder.appendChild(wrapper);
     this.applyFillContent(image);
-    this.element.appendChild(wrapper);
+    return placeholder;
   }
 
   /** @override */
@@ -139,11 +134,7 @@ class AmpInstagram extends AMP.BaseElement {
         setStyles(iframe, {
           'opacity': 1,
         });
-
-        // Hide the initial rendered image to avoid overlaying videos.
-        setStyles(this.placeholderWrapper_, {
-          'display': 'none',
-        });
+        this.togglePlaceholder(false);
       });
     });
   }
@@ -164,9 +155,7 @@ class AmpInstagram extends AMP.BaseElement {
       removeElement(this.iframe_);
       this.iframe_ = null;
       this.iframePromise_ = null;
-      setStyles(this.placeholderWrapper_, {
-        'display': '',
-      });
+      this.togglePlaceholder(true);
     }
     return true;  // Call layoutCallback again.
   }

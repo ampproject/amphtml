@@ -1621,6 +1621,13 @@ export class Resource {
     } else {
       this.state_ = ResourceState_.NOT_LAID_OUT;
     }
+    if (!this.element.getPlaceholder()) {
+      const placeholder = this.element.createPlaceholder();
+      if (placeholder) {
+        this.element.appendChild(placeholder);
+      }
+    }
+
     return true;
   }
 
