@@ -63,40 +63,63 @@ describe('iframe-helper', function() {
   });
 
   it('should listen to iframe messages', () => {
-    const removeEventListenerSpy = sandbox.spy(container.win,
-        'removeEventListener');
     let unlisten;
+    let calls = 0;
     return new Promise(resolve => {
       unlisten = IframeHelper.listenFor(testIframe, 'send-intersections',
-          resolve);
+          () => {
+            calls++;
+            resolve();
+          });
       insert(testIframe);
     }).then(() => {
-      expect(removeEventListenerSpy.callCount).to.equal(0);
+      const total = calls;
       unlisten();
-      expect(removeEventListenerSpy.callCount).to.equal(1);
+      return new Promise(resolve => {
+        setTimeout(resolve, 50);
+      }).then(() => {
+        expect(calls).to.equal(total);
+      });
     });
   });
 
   it('should un-listen after first hit', () => {
-    const removeEventListenerSpy = sandbox.spy(container.win,
-        'removeEventListener');
+    let calls = 0;
     return new Promise(resolve => {
-      IframeHelper.listenForOnce(testIframe, 'send-intersections', resolve);
+      IframeHelper.listenForOnce(testIframe, 'send-intersections', () => {
+        calls++;
+        resolve();
+      });
       insert(testIframe);
     }).then(() => {
-      expect(removeEventListenerSpy.callCount).to.equal(1);
+      const total = calls;
+      return new Promise(resolve => {
+        setTimeout(resolve, 50);
+      }).then(() => {
+        expect(calls).to.equal(total);
+      });
     });
   });
 
   it('should un-listen on next message when iframe is unattached', () => {
-    const removeEventListenerSpy = sandbox.spy(container.win,
-        'removeEventListener');
-    IframeHelper.listenFor(testIframe, 'send-intersections', function() {});
-    expect(removeEventListenerSpy.callCount).to.equal(0);
-    container.win.postMessage('hello world', '*');
-    expect(removeEventListenerSpy.callCount).to.equal(0);
-    return timer.promise(1).then(() => {
-      expect(removeEventListenerSpy.callCount).to.equal(1);
+    let unlisten;
+    let calls = 0;
+    return new Promise(resolve => {
+      unlisten = IframeHelper.listenFor(testIframe, 'send-intersections',
+          () => {
+            calls++;
+            resolve();
+          });
+      insert(testIframe);
+    }).then(() => {
+      const total = calls;
+      testIframe.parentElement.removeChild(testIframe);
+      container.win.postMessage('hello world', '*');
+      return new Promise(resolve => {
+        setTimeout(resolve, 50);
+      }).then(() => {
+        expect(calls).to.equal(total);
+      });
     });
   });
 
