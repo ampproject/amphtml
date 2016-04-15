@@ -109,14 +109,17 @@ function calcExperimentOn(win, experimentId) {
  * @param {!Window} win
  * @param {string} experimentId
  * @param {boolean=} opt_on
- * @param {boolean=} opt_saveExperimentIds  Whether to save the experiment IDs
- *     to the cookie after toggling or not.
- * @return {boolean}
+ * @param {boolean=} opt_transientExperiment  Whether to toggle the
+ *     experiment state "transiently" (i.e., for this page load only) or
+ *     durably (by saving the experiment IDs to the cookie after toggling).
+ *     Default: false (save durably).
+ * @return {boolean} New state for experimentId.
  */
 export function toggleExperiment(win, experimentId, opt_on,
-    opt_saveExperimentIds) {
+    opt_transientExperiment) {
   const experimentIds = getExperimentIds(win);
-  const currentlyOn = experimentIds.indexOf(experimentId) != -1;
+  const currentlyOn = (experimentIds.indexOf(experimentId) != -1) ||
+      EXPERIMENT_TOGGLES[experimentId];
   const on = opt_on !== undefined ? opt_on : !currentlyOn;
   if (on != currentlyOn) {
     if (on) {
@@ -126,7 +129,7 @@ export function toggleExperiment(win, experimentId, opt_on,
       experimentIds.splice(experimentIds.indexOf(experimentId), 1);
       EXPERIMENT_TOGGLES[experimentId] = false;
     }
-    if (opt_saveExperimentIds === undefined || opt_saveExperimentIds) {
+    if (!opt_transientExperiment) {
       saveExperimentIds(win, experimentIds);
     }
   }
