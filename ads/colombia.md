@@ -25,7 +25,6 @@ limitations under the License.
       data-clmb_slot="129883"
       data-clmb_position="1"
       data-clmb_section="0"
-      data-loading-strategy="prefer-viewability-over-views">
   </amp-ad>
 ```
 
@@ -33,11 +32,6 @@ limitations under the License.
 
 Supported parameters:
 
-- data-clmb_slot : Ad Slot;
+- data-clmb_slot : Ad Slot
 - data-clmb_position : Ad Position
 - data-clmb_section : Ad Sections
-
-
-
-
-
