@@ -25,16 +25,6 @@ const program = require('commander');
 const vm = require('vm');
 
 /**
- * Determines whether str starts with prefix.
- * @param {!string} str
- * @param {!string} prefix
- * @return {!boolean}
- */
-function hasPrefix(str, prefix) {
-  return str.indexOf(prefix) == 0;
-}
-
-/**
  * If the provided fileOrUrl start with 'http://' or 'https://', downloads
  * with the http or https module, otherwise reads the file with the file module.
  * Or, if the provided fileOrUrl is '-', reads from stdin.
@@ -57,8 +47,8 @@ function readFileOrDownload(fileOrUrl, onSuccess, onFailure) {
     process.stdin.resume();
     return;
   }
-  if (hasPrefix(fileOrUrl, 'http://') || hasPrefix(fileOrUrl, 'https://')) {
-    const clientModule = hasPrefix(fileOrUrl, 'http://') ? http : https;
+  if (fileOrUrl.startsWith('http://') || fileOrUrl.startsWith('https://')) {
+    const clientModule = fileOrUrl.startsWith('http://') ? http : https;
     const req = clientModule.get(fileOrUrl, (response) => {
       if (response.statusCode !== 200) {
         onFailure('HTTP ' + res.statusCode);
