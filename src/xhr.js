@@ -357,7 +357,7 @@ function assertSuccess(response) {
  *
  * See https://developer.mozilla.org/en-US/docs/Web/API/GlobalFetch/fetch
  */
-class FetchResponse {
+export class FetchResponse {
   /**
    * @param {!XMLHttpRequest} xhr
    */
@@ -384,6 +384,15 @@ class FetchResponse {
     dev.assert(!this.bodyUsed, 'Body already used');
     this.bodyUsed = true;
     return Promise.resolve(this.xhr_.responseText);
+  }
+
+  /**
+   * Drains the response and returns a promise that resolves with the response
+   * text.
+   * @return {!Promise<string>}
+   */
+  text() {
+    return this.drainText_();
   }
 
   /**
