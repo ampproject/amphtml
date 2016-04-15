@@ -415,23 +415,25 @@ describe('XHR', function() {
   });
 
   describe('FetchResponse', () => {
+    const TEST_TEXT = 'this is some test text';
     const mockXhr = {
       status: 200,
-      responseText: 'this is some test text',
+      responseText: TEST_TEXT,
     };
 
     it('should provide text', () => {
       const response = new FetchResponse(mockXhr);
       return response.text().then(result => {
-        expect(result).to.equal('this is some test text');
+        expect(result).to.equal(TEST_TEXT);
       });
     });
 
     it('should provide text only once', () => {
       const response = new FetchResponse(mockXhr);
       return response.text().then(result => {
-        expect(result).to.equal('this is some test text');
-        expect(response.text, 'should throw').to.throw(Error);
+        expect(result).to.equal(TEST_TEXT);
+        expect(response.text.bind(response), 'should throw').to.throw(Error,
+            /Body already used/);
       });
     });
 
@@ -446,12 +448,12 @@ describe('XHR', function() {
                 response => {
                   expect(response).to.be.instanceof(FetchResponse);
                   return response.text().then(result => {
-                    expect(result).to.equal('this is some test text');
+                    expect(result).to.equal(TEST_TEXT);
                   });
                 });
             requests[0].respond(200, {
               'Content-Type': 'text/plain',
-            }, 'this is some test text');
+            }, TEST_TEXT);
             return promise;
           });
         });
