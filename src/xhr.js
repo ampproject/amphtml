@@ -387,6 +387,15 @@ class FetchResponse {
   }
 
   /**
+   * Drains the response and returns a promise that resolves with the response
+   * text.
+   * @returns {!Promise.<string>}
+   */
+  text() {
+    return this.drainText_();
+  }
+
+  /**
    * Drains the response and returns the JSON object.
    * @return {!Promise<!JSONValue>}
    */
