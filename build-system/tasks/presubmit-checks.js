@@ -55,9 +55,10 @@ var forbiddenTerms = {
       'whitelist a legit case.',
     // TODO: temporary, remove when validator is up to date
     whitelist: [
-      'validator/validator.js',
+      'validator/index.js',  // NodeJs only.
       'validator/parse-css.js',
       'validator/validator-in-browser.js',
+      'validator/validator.js',
     ]
   },
   'iframePing': {
@@ -261,8 +262,9 @@ var forbiddenTerms = {
   '\\.startsWith': {
     message: es6polyfill,
     whitelist: [
+      'validator/index.js',  // NodeJs only.
       'validator/tokenize-css.js',
-      'validator/validator.js'
+      'validator/validator.js',
     ]
   },
   '\\.endsWith': {
