@@ -36,6 +36,7 @@ export const adPrefetch = {
   mediaimpact: 'https://ec-ns.sascdn.com/diff/251/divscripte/amp.js',
   openx: 'https://www.googletagservices.com/tag/js/gpt.js',
   smartadserver: 'https://ec-ns.sascdn.com/diff/js/smart.js',
+  sovrn: 'https://ap.lijit.com/www/sovrn_amp/sovrn_ads.js',
   yieldmo: 'https://static.yieldmo.com/ym.amp1.js',
   revcontent: 'https://labs-cdn.revcontent.com/build/amphtml/revcontent.amp.min.js',
   teads: 'https://cdn.teads.tv/media/format/v3/teads-format.min.js',

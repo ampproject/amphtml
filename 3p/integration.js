@@ -49,6 +49,7 @@ import {computeInMasterFrame, nextTick, register, run} from '../src/3p';
 import {parseUrl, getSourceUrl} from '../src/url';
 import {taboola} from '../ads/taboola';
 import {smartadserver} from '../ads/smartadserver';
+import {sovrn} from '../ads/sovrn';
 import {sortable} from '../ads/sortable';
 import {revcontent} from '../ads/revcontent';
 import {openadstream} from '../ads/openadstream';
@@ -64,6 +65,7 @@ import {user} from '../src/log';
 import {gmossp} from '../ads/gmossp';
 import {weboramaDisplay} from '../ads/weborama';
 import {adstir} from '../ads/adstir';
+
 
 
 /**
@@ -97,6 +99,7 @@ register('_ping_', function(win, data) {
 register('twitter', twitter);
 register('facebook', facebook);
 register('smartadserver', smartadserver);
+register('sovrn', sovrn);
 register('mediaimpact', mediaimpact);
 register('revcontent', revcontent);
 register('sortable', sortable);
