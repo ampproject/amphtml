@@ -73,6 +73,13 @@ class Cid {
      * @private {?string}
      */
     this.baseCid_ = null;
+
+    /**
+     * Cache to store external cids. Scope is used as the key and cookie value
+     * is the value.
+     * @private {!Object.<string, string>}
+     */
+    this.externalCidCache_ = Object.create(null);
   }
 
   /**
@@ -169,6 +176,10 @@ function getOrCreateCookie(cid, getCidStruct, persistenceConsent) {
     return Promise.resolve(null);
   }
 
+  if (cid.externalCidCache_[scope]) {
+    return Promise.resolve(cid.externalCidCache_[scope]);
+  }
+
   if (existingCookie) {
     // If we created the cookie, update it's expiration time.
     if (/^amp-/.test(existingCookie)) {
@@ -181,6 +192,7 @@ function getOrCreateCookie(cid, getCidStruct, persistenceConsent) {
   // the value whether we created it.
   const newCookie = 'amp-' + cid.sha384Base64_(getEntropy(win));
 
+  cid.externalCidCache_[scope] = newCookie;
   // Store it as a cookie based on the persistence consent.
   persistenceConsent.then(() => {
     // The initial CID generation is inherently racy. First one that gets
@@ -247,6 +259,8 @@ function getBaseCid(cid, persistenceConsent) {
   // We need to make a new one.
   const seed = getEntropy(win);
   const newVal = cid.sha384Base64_(seed);
+
+  cid.baseCid_ = newVal;
   // Storing the value may require consent. We wait for the respective
   // promise.
   persistenceConsent.then(() => {
