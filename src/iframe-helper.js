@@ -19,11 +19,11 @@ import {parseUrl} from './url';
 
 /**
  * @typedef {{
- *   win: !Window,
+ *   frame: !Element,
  *   events: !Object<string, !Array<function(!Object)>>
  * }}
  */
-var WindowEventsDef;
+let WindowEventsDef;
 
 /**
  * Returns a mapping from a URL's origin to an array of windows and their listenFor listeners.
@@ -45,7 +45,7 @@ function getListenFors(parentWin, opt_create) {
  * @param {!Window} parentWin the window that created the iframe
  * @param {string} origin the child window's origin
  * @param {boolean} opt_create create the array if it does not exist
- * @return {?!Array<!WindowEventsDef>}
+ * @return {?Array<!WindowEventsDef>}
  */
 function getListenForOrigin(parentWin, origin, opt_create) {
   const listeningFors = getListenFors(parentWin, opt_create);
@@ -63,30 +63,108 @@ function getListenForOrigin(parentWin, origin, opt_create) {
 /**
  * Returns an mapping of event names to listenFor listeners.
  * @param {!Window} parentWin the window that created the iframe
- * @param {string} origin the child window's origin
- * @param {!Window} listenForWin the child window
- * @param {boolean} opt_create create the mapping if it does not exist
+ * @param {!Element} iframe the iframe element who's context will trigger the
+ *     event
  * @return {?Object<string, !Array<function(!object)>>}
  */
-function getListenForEvents(parentWin, origin, listenForWin, opt_create) {
-  const listenOrigin = getListenForOrigin(parentWin, origin, opt_create);
+function getOrCreateListenForEvents(parentWin, iframe) {
+  const origin = parseUrl(iframe.src).origin;
+  const listenOrigin = getListenForOrigin(parentWin, origin, true);
 
-  if (!listenOrigin) {
-    return listenOrigin;
-  }
   let windowEvents = listenOrigin.find(we => {
-    return we.win === listenForWin;
+    return we.frame === iframe;
   });
 
-  if (!windowEvents && opt_create) {
+  if (!windowEvents) {
     windowEvents = {
-      win: listenForWin,
+      frame: iframe,
       events: Object.create(null),
     };
     listenOrigin.push(windowEvents);
   }
 
+  return windowEvents.events;
+}
+
+/**
+ * Returns an mapping of event names to listenFor listeners.
+ * @param {!Window} parentWin the window that created the iframe
+ * @param {string} origin the child window's origin
+ * @param {!Window} triggerWin the window that triggered the event
+ * @return {?Object<string, !Array<function(!object)>>}
+ */
+function getListenForEvents(parentWin, origin, triggerWin) {
+  const listenOrigin = getListenForOrigin(parentWin, origin);
+
+  if (!listenOrigin) {
+    return listenOrigin;
+  }
+  const windowEvents = listenOrigin.find(we => {
+    const contentWindow = we.frame.contentWindow;
+    if (!contentWindow) {
+      setTimeout(dropListenFors, 0, listenOrigin);
+    }
+    return contentWindow === triggerWin;
+  });
+
   return windowEvents ? windowEvents.events : null;
+}
+
+function dropListenFors(listenOrigin) {
+  const noopData = {sentinel: 'no-content-window'};
+
+  for (let i = listenOrigin.length - 1; i >= 0; i--) {
+    const windowEvents = listenOrigin[i];
+
+    if (!windowEvents.contentWindow) {
+      listenOrigin.splice(i, 1);
+
+      for (const name in windowEvents) {
+        const events = windowEvents[name];
+        // Splice here, so that each unlisten does not shift the array
+        events.splice(0, Infinity).forEach(event => {
+          event(noopData);
+        });
+      }
+    }
+  }
+}
+
+/**
+ * Registers the global listenFor event listener if it has yet to be.
+ * @param {!Window} parentWin
+ */
+function registerGlobalListenerIfNeeded(parentWin) {
+  if (!parentWin.listeningFors) {
+    const listenForListener = function(event) {
+      if (!event.data) {
+        return;
+      }
+      const listenForEvents = getListenForEvents(
+        parentWin,
+        event.origin,
+        event.source
+      );
+      if (!listenForEvents) {
+        return;
+      }
+
+      const data = parseIfNeeded(event.data);
+      const events = listenForEvents[data.type];
+      if (!events) {
+        return;
+      }
+
+      // Notice we use reverse iteration. That's because `event` may actually
+      // unlisten itself (splice itself out of `events`).
+      for (let i = events.length - 1; i >= 0; i--) {
+        const event = events[i];
+        event(data);
+      }
+    };
+
+    parentWin.addEventListener('message', listenForListener);
+  }
 }
 
 /**
@@ -106,38 +184,11 @@ export function listenFor(iframe, typeOfMessage, callback, opt_is3P) {
       'iframe. It will cause hair-pulling bugs like #2942');
   const parentWin = iframe.ownerDocument.defaultView;
 
-  if (!parentWin.listeningFors) {
-    const listenForListener = function(event) {
-      const listenForEvents = getListenForEvents(
-        parentWin,
-        event.origin,
-        event.source
-      );
-      if (!listenForEvents || !event.data) {
-        return;
-      }
+  registerGlobalListenerIfNeeded(parentWin);
 
-      const data = parseIfNeeded(event.data);
-      const events = listenForEvents[data.type];
-      if (!events) {
-        return;
-      }
-
-      for (let i = events.length - 1; i >= 0; i--) {
-        const event = events[i];
-        event(data);
-      }
-    };
-
-    parentWin.addEventListener('message', listenForListener);
-  }
-
-  const origin = parseUrl(iframe.src).origin;
-  const listenForEvents = getListenForEvents(
+  const listenForEvents = getOrCreateListenForEvents(
     parentWin,
-    origin,
-    iframe.contentWindow,
-    true
+    iframe
   );
 
   const sentinel = getSentinel_(opt_is3P);

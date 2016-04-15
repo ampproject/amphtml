@@ -16,7 +16,6 @@
 import * as IframeHelper from '../../src/iframe-helper';
 import * as sinon from 'sinon';
 import {createIframePromise} from '../../testing/iframe';
-import {timer} from '../../src/timer';
 
 describe('iframe-helper', function() {
   const iframeSrc = 'http://iframe.localhost:' + location.port +
@@ -102,14 +101,12 @@ describe('iframe-helper', function() {
   });
 
   it('should un-listen on next message when iframe is unattached', () => {
-    let unlisten;
     let calls = 0;
     return new Promise(resolve => {
-      unlisten = IframeHelper.listenFor(testIframe, 'send-intersections',
-          () => {
-            calls++;
-            resolve();
-          });
+      IframeHelper.listenFor(testIframe, 'send-intersections', () => {
+        calls++;
+        resolve();
+      });
       insert(testIframe);
     }).then(() => {
       const total = calls;
