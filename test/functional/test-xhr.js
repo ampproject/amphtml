@@ -17,7 +17,7 @@
 import * as sinon from 'sinon';
 import {xhrFor, fetchPolyfill, FetchResponse} from '../../src/xhr';
 
-describe.only('XHR', function() {
+describe('XHR', function() {
   let sandbox;
   let requests;
 
