@@ -57,6 +57,8 @@ Ads can call the special API `window.context.observeIntersection(changesCallback
 
 The API allows specifying a callback that fires with change records when AMP observes that an ad becomes visible and then while it is visible, changes are reported as they happen.
 
+When a listener is registered, it will be called 2x in short order. Once with the position of the ad when its iframe was created and then again with the current position.
+
 Example usage:
 
 ```javascript
@@ -81,6 +83,10 @@ Example usage:
   // condition to stop listening to intersection messages.
   unlisten();
 ```
+
+##### Initial position
+
+The value `window.context.initialIntersection` contains the initial intersection record at the time the iframe was created.
 
 #### Page visibility
 
