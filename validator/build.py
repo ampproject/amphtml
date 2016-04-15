@@ -277,9 +277,9 @@ def RunSmokeTest(out_dir, nodejs_cmd):
     nodejs_cmd: the command for calling Node.js
   """
   logging.info('entering ...')
-  # Run cli.js on the minimum valid amp and observe that it passes.
+  # Run index.js on the minimum valid amp and observe that it passes.
   p = subprocess.Popen(
-      [nodejs_cmd, 'cli.js', '--validator_js',
+      [nodejs_cmd, 'index.js', '--validator_js',
        '%s/validator_minified.js' % out_dir,
        'testdata/feature_tests/minimum_valid_amp.html'],
       stdout=subprocess.PIPE,
@@ -290,9 +290,9 @@ def RunSmokeTest(out_dir, nodejs_cmd):
     Die('Smoke test failed. returncode=%d stdout="%s" stderr="%s"' %
         (p.returncode, stdout, stderr))
 
-  # Run cli.js on an empty file and observe that it fails.
+  # Run index.js on an empty file and observe that it fails.
   p = subprocess.Popen(
-      [nodejs_cmd, 'cli.js', '--validator_js',
+      [nodejs_cmd, 'index.js', '--validator_js',
        '%s/validator_minified.js' % out_dir,
        'testdata/feature_tests/empty.html'],
       stdout=subprocess.PIPE,

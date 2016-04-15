@@ -12,7 +12,7 @@
     "url": "https://github.com/ampproject/amphtml.git"
   },
   "bin": {
-    "amp_validator": "cli.js"
+    "amp_validator": "index.js"
   },
   "dependencies": {
     "commander": "2.9.0"

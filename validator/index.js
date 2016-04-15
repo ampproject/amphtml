@@ -1,4 +1,4 @@
-#!/usr/bin / env node
+#!/usr/bin/env node
 /**
  * @license
  * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
@@ -25,6 +25,16 @@ const program = require('commander');
 const vm = require('vm');
 
 /**
+ * Determines whether str starts with prefix.
+ * @param {!string} str
+ * @param {!string} prefix
+ * @return {!boolean}
+ */
+function hasPrefix(str, prefix) {
+  return str.indexOf(prefix) == 0;
+}
+
+/**
  * If the provided fileOrUrl start with 'http://' or 'https://', downloads
  * with the http or https module, otherwise reads the file with the file module.
  * Or, if the provided fileOrUrl is '-', reads from stdin.
@@ -47,10 +57,8 @@ function readFileOrDownload(fileOrUrl, onSuccess, onFailure) {
     process.stdin.resume();
     return;
   }
-  if (fileOrUrl./*OK*/ startsWith('http://') ||
-      fileOrUrl./*OK*/ startsWith('https://')) {
-    const clientModule =
-        (fileOrUrl./*OK*/ startsWith('http://') === 0) ? http : https;
+  if (hasPrefix(fileOrUrl, 'http://') || hasPrefix(fileOrUrl, 'https://')) {
+    const clientModule = hasPrefix(fileOrUrl, 'http://') ? http : https;
     const req = clientModule.get(fileOrUrl, (response) => {
       if (response.statusCode !== 200) {
         onFailure('HTTP ' + res.statusCode);
@@ -112,28 +120,35 @@ function validateFiles(filesToProcess) {
   }
 }
 
-program.version('0.1.0')
-    .usage('[options] <fileOrUrlOrMinus ...>')
-    .option(
-        '--validator_js <fileOrUrl>',
-        'The Validator Javascript. Latest published version by ' +
-            'default, or dist/validator_minified.js (built with ' +
-            'build.py) for development.',
-        'https://cdn.ampproject.org/v0/validator.js')
-    .parse(process.argv);
-
-if (program.args.length == 0) {
-  program.outputHelp();
-  process.exit(1);
+/**
+ * Main entry point into the command line tool. This is called from index.js.
+ */
+function main() {
+  program.version('0.1.0')
+      .usage('[options] <fileOrUrlOrMinus ...>')
+      .option(
+          '--validator_js <fileOrUrl>',
+          'The Validator Javascript. Latest published version by ' +
+              'default, or dist/validator_minified.js (built with ' +
+              'build.py) for development.',
+          'https://cdn.ampproject.org/v0/validator.js')
+      .parse(process.argv);
+  if (program.args.length == 0) {
+    program.outputHelp();
+    process.exit(1);
+  }
+  readFileOrDownload(
+      program.validator_js,
+      (validatorScript) => {
+        vm.runInThisContext(validatorScript);
+        validateFiles(program.args);
+      },
+      (errorMessage) => {
+        console.error('Could not fetch validator.js: ' + errorMessage);
+        process.exitCode = 1;
+      });
 }
 
-readFileOrDownload(
-    program.validator_js,
-    (validatorScript) => {
-      vm.runInThisContext(validatorScript);
-      validateFiles(program.args);
-    },
-    (errorMessage) => {
-      console.error('Could not fetch validator.js: ' + errorMessage);
-      process.exitCode = 1;
-    });
+if (require.main === module) {
+  main();
+}
