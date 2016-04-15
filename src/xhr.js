@@ -357,7 +357,7 @@ function assertSuccess(response) {
  *
  * See https://developer.mozilla.org/en-US/docs/Web/API/GlobalFetch/fetch
  */
-class FetchResponse {
+export class FetchResponse {
   /**
    * @param {!XMLHttpRequest} xhr
    */
@@ -389,7 +389,7 @@ class FetchResponse {
   /**
    * Drains the response and returns a promise that resolves with the response
    * text.
-   * @returns {!Promise.<string>}
+   * @return {!Promise<string>}
    */
   text() {
     return this.drainText_();
