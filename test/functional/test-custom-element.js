@@ -35,7 +35,7 @@ import {
 } from '../../src/element-service';
 
 
-describe('CustomElement', () => {
+describe.only('CustomElement', () => {
 
   const resources = resourcesFor(window);
   let testElementCreatedCallback;
@@ -861,10 +861,10 @@ describe('CustomElement Service Elements', () => {
     expect(element.getPlaceholder()).to.be.null;
   });
 
-  it('getPlaceholder should return the first placeholder', () => {
-    const placeholder1 = element.appendChild(createWithAttr('placeholder'));
+  it('getPlaceholder should return the last placeholder', () => {
     element.appendChild(createWithAttr('placeholder'));
-    expect(element.getPlaceholder()).to.equal(placeholder1);
+    const placeholder2 = element.appendChild(createWithAttr('placeholder'));
+    expect(element.getPlaceholder()).to.equal(placeholder2);
   });
 
   it('togglePlaceholder should do nothing when no placeholder is found', () => {

@@ -206,6 +206,24 @@ export function childElement(parent, callback) {
 
 
 /**
+ * Finds all child elements that satisfies the callback.
+ * @param {!Element} parent
+ * @param {function(!Element):boolean} callback
+ * @return {Array.<Element>}
+ */
+export function childElements(parent, callback) {
+  var children = [];
+  for (let child = parent.firstElementChild; child;
+       child = child.nextElementSibling) {
+    if (callback(child)) {
+      children.push(child);
+    }
+  }
+  return children;
+}
+
+
+/**
  * Finds the last child element that satisfies the callback.
  * @param {!Element} parent
  * @param {function(!Element):boolean} callback
@@ -278,13 +296,29 @@ export function childElementByAttr(parent, attr) {
  * @return {?Element}
  */
 export function lastChildElementByAttr(parent, attr) {
+  return lastChildElement(parent, el => {
+    if (!el.hasAttribute(attr)) {
+      return false;
+    }
+    return true;
+  });
+}
+
+
+/**
+ * Finds all child elements that has the specified attribute.
+ * @param {!Element} parent
+ * @param {string} attr
+ * @return {Array.<Element>|NodeList}
+ */
+export function childElementsByAttr(parent, attr) {
   if (scopeSelectorSupported == null) {
     scopeSelectorSupported = isScopeSelectorSupported(parent);
   }
   if (scopeSelectorSupported) {
-    return parent.querySelector(':scope > [' + attr + ']:last-of-type');
+    return parent.querySelectorAll(':scope > [' + attr + ']');
   }
-  return lastChildElement(parent, el => {
+  return childElements(parent, el => {
     if (!el.hasAttribute(attr)) {
       return false;
     }

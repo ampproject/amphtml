@@ -971,14 +971,46 @@ export function createAmpElementProto(win, name, implementationClass) {
 
   /**
    * Hides or shows the placeholder, if available.
-   * @param {boolean} state
+   * @param {boolean} show
    * @package @final
    */
-  ElementProto.togglePlaceholder = function(state) {
+  ElementProto.togglePlaceholder = function(show) {
     this.assertNotTemplate_();
+    if (show) {
+      this.showLastPlaceholder_();
+    } else {
+      this.hideAllPlaceholders_();
+    }
+  };
+
+  /**
+   * Returns an optional placeholder element for this custom element.
+   * @return {?Element}
+   * @package @final
+   */
+  ElementProto.getAllPlaceholders_ = function() {
+    return dom.childElementsByAttr(this, 'placeholder');
+  };
+
+  /**
+   * Hides all placeholders in an element.
+   * @private
+   */
+  ElementProto.hideAllPlaceholders_ = function() {
+    const placeholders = this.getAllPlaceholders_();
+    if (placeholders) {
+      placeholders.forEach(p => p.classList.add('amp-hidden'));
+    }
+  };
+
+  /**
+   * Shows the last placeholder in an element.
+   * @private
+   */
+  ElementProto.showLastPlaceholder_ = function() {
     const placeholder = this.getPlaceholder();
     if (placeholder) {
-      placeholder.classList.toggle('amp-hidden', !state);
+      placeholder.classList.remove('amp-hidden');
     }
   };
 

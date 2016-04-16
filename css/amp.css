@@ -159,13 +159,10 @@ i-amp-sizer {
   /* Just state. */
 }
 
-
-/** Only show the last placeholder element */
 .-amp-element > [placeholder] {
-  display: none;
-}
-.-amp-element > [placeholder]:last-of-type {
   display: block;
+  /** Background is important to hide all other placeholders below it. */
+  background-color: #efefef;
 }
 
 .-amp-element > [placeholder].hidden,
