@@ -172,6 +172,8 @@ describe('amp-analytics', function() {
             return analytics.layoutCallback().then(() => {
               return analytics.handleEvent_({
                 request: name,
+              }, {
+                vars: Object.create(null),
               }).then(url => {
                 const val = VENDOR_REQUESTS[vendor][name];
                 if (val == null) {
