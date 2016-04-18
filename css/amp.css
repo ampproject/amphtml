@@ -380,12 +380,6 @@ amp-analytics {
   visibility: hidden;
 }
 
-/**
- * Allow images inside amp-img to be fit-cover: object.
- */
-amp-img.-amp-object-fit-cover > img {
-  object-fit: cover;
-}
 
 /**
  * Minimal AMP Access CSS. This part has to be here so that the correct UI

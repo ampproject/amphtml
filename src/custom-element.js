@@ -473,6 +473,12 @@ export function createAmpElementProto(win, name, implementationClass) {
         this.actionQueue_ = null;
       }
     }
+    if (!this.getPlaceholder()) {
+      const placeholder = this.createPlaceholder();
+      if (placeholder) {
+        this.appendChild(placeholder);
+      }
+    }
     return true;
   };
 
@@ -693,6 +699,7 @@ export function createAmpElementProto(win, name, implementationClass) {
   /**
    * Creates a placeholder for the element.
    * @returns {HTMLElement|null}
+   * @final
    */
   ElementProto.createPlaceholder = function() {
     return this.implementation_.createPlaceholderCallback();
@@ -986,7 +993,7 @@ export function createAmpElementProto(win, name, implementationClass) {
   /**
    * Returns an optional placeholder element for this custom element.
    * @return {?Element}
-   * @package @final
+   * @private
    */
   ElementProto.getAllPlaceholders_ = function() {
     return dom.childElementsByAttr(this, 'placeholder');
@@ -998,8 +1005,8 @@ export function createAmpElementProto(win, name, implementationClass) {
    */
   ElementProto.hideAllPlaceholders_ = function() {
     const placeholders = this.getAllPlaceholders_();
-    if (placeholders) {
-      placeholders.forEach(p => p.classList.add('amp-hidden'));
+    for (let i = 0; i < placeholders.length; i++) {
+      placeholders[i].classList.add('amp-hidden');
     }
   };
 

@@ -35,13 +35,14 @@ import {
 } from '../../src/element-service';
 
 
-describe.only('CustomElement', () => {
+describe('CustomElement', () => {
 
   const resources = resourcesFor(window);
   let testElementCreatedCallback;
   let testElementPreconnectCallback;
   let testElementFirstAttachedCallback;
   let testElementBuildCallback;
+  let testElementCreatePlaceholderCallback;
   let testElementLayoutCallback;
   let testElementFirstLayoutCompleted;
   let testElementViewportCallback;
@@ -68,6 +69,9 @@ describe.only('CustomElement', () => {
     }
     buildCallback() {
       testElementBuildCallback();
+    }
+    createPlaceholderCallback() {
+      testElementCreatePlaceholderCallback();
     }
     layoutCallback() {
       testElementLayoutCallback();
@@ -111,18 +115,19 @@ describe.only('CustomElement', () => {
     sandbox = sinon.sandbox.create();
     resourcesMock = sandbox.mock(resources);
     clock = sandbox.useFakeTimers();
-
-    testElementCreatedCallback = sandbox.spy();
-    testElementPreconnectCallback = sandbox.spy();
-    testElementFirstAttachedCallback = sandbox.spy();
-    testElementBuildCallback = sandbox.spy();
-    testElementLayoutCallback = sandbox.spy();
-    testElementFirstLayoutCompleted = sandbox.spy();
-    testElementViewportCallback = sandbox.spy();
-    testElementGetInsersectionElementLayoutBox = sandbox.spy();
-    testElementUnlayoutCallback = sandbox.spy();
-    testElementPauseCallback = sandbox.spy();
-    testElementResumeCallback = sandbox.spy();
+    
+    testElementCreatedCallback = sinon.spy();
+    testElementPreconnectCallback = sinon.spy();
+    testElementFirstAttachedCallback = sinon.spy();
+    testElementBuildCallback = sinon.spy();
+    testElementCreatePlaceholderCallback = sinon.spy();
+    testElementLayoutCallback = sinon.spy();
+    testElementFirstLayoutCompleted = sinon.spy();
+    testElementViewportCallback = sinon.spy();
+    testElementGetInsersectionElementLayoutBox = sinon.spy();
+    testElementUnlayoutCallback = sinon.spy();
+    testElementPauseCallback = sinon.spy();
+    testElementResumeCallback = sinon.spy();
   });
 
   afterEach(() => {
@@ -224,6 +229,31 @@ describe.only('CustomElement', () => {
     expect(testElementBuildCallback.callCount).to.equal(1);
   });
 
+  it('Element - build creates a placeholder if one does not exist' , () => {
+    const element = new ElementClass();
+    expect(testElementCreatePlaceholderCallback.callCount).to.equal(0);
+
+    testElementIsReadyToBuild = true;
+    element.build(false);
+
+    expect(element.isBuilt()).to.equal(true);
+    expect(testElementCreatePlaceholderCallback.callCount).to.equal(1);
+  });
+
+  it('Element - build does not create a placeholder when one exists' , () => {
+    const element = new ElementClass();
+    const placeholder = document.createElement('div');
+    placeholder.setAttribute('placeholder', '');
+    element.appendChild(placeholder);
+    expect(testElementCreatePlaceholderCallback.callCount).to.equal(0);
+
+    testElementIsReadyToBuild = true;
+    element.build(false);
+
+    expect(element.isBuilt()).to.equal(true);
+    expect(testElementCreatePlaceholderCallback.callCount).to.equal(0);
+  });
+
   it('Element - buildCallback cannot be called twice', () => {
     const element = new ElementClass();
     expect(element.isBuilt()).to.equal(false);
@@ -314,6 +344,12 @@ describe.only('CustomElement', () => {
     expect(testElementBuildCallback.callCount).to.equal(0);
   });
 
+  it('Element - createPlaceholder', () => {
+    const element = new ElementClass();
+    testElementIsReadyToBuild = true;
+    element.createPlaceholder();
+    expect(testElementCreatePlaceholderCallback.callCount).to.equal(1);
+  });
 
   it('Element - attachedCallback', () => {
     const element = new ElementClass();
@@ -810,7 +846,6 @@ describe.only('CustomElement', () => {
 
 
 describe('CustomElement Service Elements', () => {
-
   const StubElementClass = document.registerElement('amp-stub2', {
     prototype: createAmpElementProto(window, 'amp-stub2', ElementStub),
   });
@@ -833,7 +868,7 @@ describe('CustomElement Service Elements', () => {
     return child;
   }
 
-  it('getRealChildren should return nothign', () => {
+  it('getRealChildren should return nothing', () => {
     expect(element.getRealChildNodes().length).to.equal(0);
     expect(element.getRealChildren().length).to.equal(0);
   });
@@ -872,15 +907,16 @@ describe('CustomElement Service Elements', () => {
     element.togglePlaceholder(false);
   });
 
-  it('togglePlaceholder should do hide placeholder when found', () => {
+  it('togglePlaceholder should do hide all placeholders when found', () => {
     const placeholder1 = element.appendChild(createWithAttr('placeholder'));
     const placeholder2 = element.appendChild(createWithAttr('placeholder'));
     element.togglePlaceholder(false);
     expect(placeholder1).to.have.class('amp-hidden');
-    expect(placeholder2).to.not.have.class('amp-hidden');
+    expect(placeholder2).to.have.class('amp-hidden');
 
     element.togglePlaceholder(true);
-    expect(placeholder1).to.not.have.class('amp-hidden');
+    expect(placeholder1).to.have.class('amp-hidden');
+    expect(placeholder2).to.not.have.class('amp-hidden');
   });
 
   it('toggleFallback should toggle unsupported class', () => {

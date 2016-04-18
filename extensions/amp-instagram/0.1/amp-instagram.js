@@ -53,6 +53,11 @@ class AmpInstagram extends AMP.BaseElement {
   }
 
   /** @override */
+  renderOutsideViewport() {
+    return false;
+  }
+
+  /** @override */
   buildCallback() {
     /**
      * @private {?Element}
@@ -75,6 +80,7 @@ class AmpInstagram extends AMP.BaseElement {
   /** @override */
   createPlaceholderCallback() {
     const placeholder = this.getWin().document.createElement('div');
+    placeholder.setAttribute('placeholder', '');
     const image = this.getWin().document.createElement('amp-img');
     // This will redirect to the image URL. By experimentation this is
     // always the same URL that is actually used inside of the embed.
@@ -103,19 +109,12 @@ class AmpInstagram extends AMP.BaseElement {
   }
 
   /** @override */
-  prerenderAllowed() {
-    return true;
-  }
-
-  /** @override */
   isLayoutSupported(layout) {
     return isLayoutSizeDefined(layout);
   }
 
-  maybeRenderIframe_() {
-    if (this.iframePromise_) {
-      return this.iframePromise_;
-    }
+  /** @override */
+  layoutCallback() {
     const iframe = this.element.ownerDocument.createElement('iframe');
     this.iframe_ = iframe;
     iframe.setAttribute('frameborder', '0');
@@ -137,11 +136,6 @@ class AmpInstagram extends AMP.BaseElement {
         this.togglePlaceholder(false);
       });
     });
-  }
-
-  /** @override */
-  layoutCallback() {
-    return this.maybeRenderIframe_();
   }
 
   /** @override */

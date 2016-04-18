@@ -212,7 +212,7 @@ export function childElement(parent, callback) {
  * @return {Array.<Element>}
  */
 export function childElements(parent, callback) {
-  var children = [];
+  const children = [];
   for (let child = parent.firstElementChild; child;
        child = child.nextElementSibling) {
     if (callback(child)) {
