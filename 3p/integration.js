@@ -74,6 +74,7 @@ import {adstir} from '../ads/adstir';
  */
 const AMP_EMBED_ALLOWED = {
   taboola: true,
+  plista: true,
 };
 
 register('a9', a9);
