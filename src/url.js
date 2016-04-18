@@ -135,7 +135,7 @@ export function assertHttpsUrl(urlString, elementContext) {
  * @return {string}
  */
 export function assertAbsoluteHttpOrHttpsUrl(urlString) {
-  user.assert(/^(http\:|https\:)/i.test(urlString),
+  user.assert(/^https?\:/i.test(urlString),
       'URL must start with "http://" or "https://". Invalid value: %s',
       urlString);
   return parseUrl(urlString).href;
