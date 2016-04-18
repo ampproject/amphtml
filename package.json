@@ -81,7 +81,7 @@
     "postcss": "5.0.14",
     "postcss-import": "8.0.2",
     "pretty-bytes": "2.0.1",
-    "request": "2.69.0",
+    "request": "2.70.0",
     "rimraf": "2.5.1",
     "serve-index": "1.7.2",
     "serve-static": "1.9.1",
