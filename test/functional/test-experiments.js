@@ -248,6 +248,55 @@ describe('toggleExperiment', () => {
     expect(isExperimentOn(win, 'e3'), 'e3 is on').to.be.false;
     expect(isExperimentOn(win, 'e4'), 'e4 is on').to.be.false;
   });
+
+  it('should not mess up cookies when toggling w/o setting cookie ', () => {
+    const win = {
+      document: {
+        cookie: '',
+      },
+    };
+    // Make sure some experiments are enabled in the cookie.
+    toggleExperiment(win, 'e0', true);
+    toggleExperiment(win, 'e1', true);
+    toggleExperiment(win, 'e2', true);
+    toggleExperiment(win, 'e3', true);
+    expect(win.document.cookie).to.contain('e0');
+    expect(win.document.cookie).to.contain('e1');
+    expect(win.document.cookie).to.contain('e2');
+    expect(win.document.cookie).to.contain('e3');
+    expect(isExperimentOn(win, 'e0'), 'e0').to.be.true;
+    expect(isExperimentOn(win, 'e1'), 'e1').to.be.true;
+    expect(isExperimentOn(win, 'e2'), 'e2').to.be.true;
+    expect(isExperimentOn(win, 'e3'), 'e3').to.be.true;
+    toggleExperiment(win, 'x0', false, true);
+    toggleExperiment(win, 'x1', true, true);
+    toggleExperiment(win, 'x2', undefined, true);
+    expect(win.document.cookie).to.contain('e0');
+    expect(win.document.cookie).to.contain('e1');
+    expect(win.document.cookie).to.contain('e2');
+    expect(win.document.cookie).to.contain('e3');
+    expect(win.document.cookie).to.not.contain('x0');
+    expect(win.document.cookie).to.not.contain('x1');
+    expect(win.document.cookie).to.not.contain('x2');
+    expect(isExperimentOn(win, 'x0'), 'x0').to.be.false;
+    expect(isExperimentOn(win, 'x1'), 'x1').to.be.true;
+    expect(isExperimentOn(win, 'x2'), 'x2').to.be.true;
+    // The toggle(win, foo, false) cases here should hit the 'foo not in
+    // EXPERIMENT_TOGGLES' cases in toggleExperiments.
+    toggleExperiment(win, 'e4', false);
+    toggleExperiment(win, 'e5', true);
+    toggleExperiment(win, 'e6', false);
+    expect(win.document.cookie).to.contain('e0');
+    expect(win.document.cookie).to.contain('e1');
+    expect(win.document.cookie).to.contain('e2');
+    expect(win.document.cookie).to.contain('e3');
+    expect(win.document.cookie).to.not.contain('e4');
+    expect(win.document.cookie).to.contain('e5');
+    expect(win.document.cookie).to.not.contain('e6');
+    expect(isExperimentOn(win, 'e4'), 'e4').to.be.false;
+    expect(isExperimentOn(win, 'e5'), 'e5').to.be.true;
+    expect(isExperimentOn(win, 'e6'), 'e6').to.be.false;
+  });
 });
 
 describe('isDevChannel', () => {

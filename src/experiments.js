@@ -119,7 +119,7 @@ export function toggleExperiment(win, experimentId, opt_on,
     opt_transientExperiment) {
   const experimentIds = getExperimentIds(win);
   const currentlyOn = (experimentIds.indexOf(experimentId) != -1) ||
-      EXPERIMENT_TOGGLES[experimentId];
+      (experimentId in EXPERIMENT_TOGGLES && EXPERIMENT_TOGGLES[experimentId]);
   const on = opt_on !== undefined ? opt_on : !currentlyOn;
   if (on != currentlyOn) {
     if (on) {
