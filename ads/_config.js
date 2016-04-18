@@ -90,9 +90,6 @@ export const adPreconnect = {
     'https://tpc.googlesyndication.com',
   ],
   dotandads: 'https://bal.ad.dotandad.com',
-  nativo: [
-    'https://ntvimg-a.akamaihd.net'
-  ],
   improvedigital: 'https://ad.360yield.com/',
   openx: [
     'https://partner.googleadservices.com',

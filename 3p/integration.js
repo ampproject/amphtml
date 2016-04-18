@@ -121,7 +121,6 @@ const defaultAllowedTypesInCustomFrame = [
   'facebook',
   'twitter',
   'doubleclick',
-  'nativo',
   '_ping_',
 ];
 
