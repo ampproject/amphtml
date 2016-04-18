@@ -23,6 +23,7 @@ var bodyParser = require('body-parser');
 var clr = require('connect-livereload');
 var finalhandler = require('finalhandler');
 var path = require('path');
+var url = require('url');
 var request = require('request');
 var serveIndex = require('serve-index');
 var serveStatic = require('serve-static');
@@ -107,9 +108,18 @@ app.use('/min/', function(req, res) {
 
 app.use(clr());
 
+function setAMPAccessControlHeader(res, path) {
+  var curUrl = url.parse(path, true);
+  if (curUrl.pathname.indexOf('/examples.build/analytics.config.json') > 0) {
+    res.setHeader('AMP-Access-Control-Allow-Source-Origin',
+        'http://localhost:' + port);
+  }
+}
+
 paths.split(',').forEach(function(pth) {
   // Serve static files that exist
-  app.use(serveStatic(path.join(process.cwd(), pth)));
+  app.use(serveStatic(path.join(process.cwd(), pth),
+        {setHeaders: setAMPAccessControlHeader}));
   // Serve directory listings
   app.use(serveIndex(path.join(process.cwd(), pth),
     {'icons':true,'view':'details'}));
