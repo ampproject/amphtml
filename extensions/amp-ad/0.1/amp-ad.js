@@ -1,4 +1,9 @@
+<<<<<<< cc6f2db960bc6db52d385b21ec5af2cae7d357a6
 /* Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+=======
+/**
+Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+>>>>>>> add test
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,15 +18,14 @@
  * limitations under the License.
  */
 
-import {BaseElement} from '../../../src/base-element';
 import {IntersectionObserver} from '../../../src/intersection-observer';
 import {getAdCid} from '../../../src/ad-cid';
 import {getIframe, prefetchBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {listen, listenOnce, postMessage} from '../../../src/iframe-helper';
+import {listenFor, listenForOnce,
+    postMessage} from '../../../src/iframe-helper';
 import {loadPromise} from '../../../src/event-helper';
 import {parseUrl} from '../../../src/url';
-import {registerElement} from '../../../src/custom-element';
 import {adPrefetch, adPreconnect} from '../../../ads/_config';
 import {timer} from '../../../src/timer';
 import {user} from '../../../src/log';
@@ -36,20 +40,35 @@ const POSITION_FIXED_TAG_WHITELIST = {
 };
 
 /**
- * @type {boolean} Heuristic boolean as for whether another ad is currently
- *     loading.
+ * @type {number} Heuristic number as for counting whether another ad is
+ * currently loading.
  */
 let loadingAdsCount = 0;
+
+let delayIdForTesting = null;
+
+/**
+ * For testing purpose only.
+ * Set the loadingAdsCount to 0. And stop test from decreasing loadingAdsCount
+ * after each run.
+*/
+export function resetAdCountForTesting() {
+  loadingAdsCount = 0;
+  timer.cancel(delayIdForTesting);
+}
 
 class AmpAd extends AMP.BaseElement {
 
   /** @override */
+<<<<<<< cc6f2db960bc6db52d385b21ec5af2cae7d357a6
   getPriority() {
     // Loads ads after other content.
     return 2;
   }
 
   /** @override  */
+=======
+>>>>>>> add test
   renderOutsideViewport() {
     // If another ad is currently loading we only load ads that are currently
     // in viewport.
@@ -218,7 +237,7 @@ class AmpAd extends AMP.BaseElement {
           '<amp-ad> is not allowed to be placed in elements with ' +
           'position:fixed: %s', this.element);
       loadingAdsCount++;
-      timer.delay(() => {
+      delayIdForTesting = timer.delay(() => {
         // Unfortunately we don't really have a good way to measure how long it
         // takes to load an ad, so we'll just pretend it takes 1 second for
         // now.
@@ -229,22 +248,21 @@ class AmpAd extends AMP.BaseElement {
           this.element.setAttribute('ampcid', cid);
         }
         this.iframe_ = getIframe(this.element.ownerDocument.defaultView,
-          this.element);
+            this.element);
         this.iframe_.setAttribute('scrolling', 'no');
         this.applyFillContent(this.iframe_);
-        this.element.appendChild(this.iframe_);
         this.intersectionObserver_ =
             new IntersectionObserver(this, this.iframe_, /* opt_is3P */true);
         // Triggered by context.noContentAvailable() inside the ad iframe.
-        listenOnce(this.iframe_, 'no-content', () => {
+        listenForOnce(this.iframe_, 'no-content', () => {
           this.noContentHandler_();
         }, /* opt_is3P */ true);
         // Triggered by context.reportRenderedEntityIdentifier(…) inside the ad
         // iframe.
-        listenOnce(this.iframe_, 'entity-id', info => {
+        listenForOnce(this.iframe_, 'entity-id', info => {
           this.element.creativeId = info.id;
         }, /* opt_is3P */ true);
-        listen(this.iframe_, 'embed-size', data => {
+        listenFor(this.iframe_, 'embed-size', data => {
           let newHeight, newWidth;
           if (data.width !== undefined) {
             newWidth = Math.max(this.element./*OK*/offsetWidth +
@@ -263,13 +281,14 @@ class AmpAd extends AMP.BaseElement {
           }
         }, /* opt_is3P */ true);
         this.iframe_.style.visibility = 'hidden';
-        listenOnce(this.iframe_, 'render-start', () => {
+        listenForOnce(this.iframe_, 'render-start', () => {
           this.iframe_.style.visibility = '';
           this.sendEmbedInfo_(this.isInViewport());
         }, /* opt_is3P */ true);
         this.viewer_.onVisibilityChanged(() => {
           this.sendEmbedInfo_(this.isInViewport());
         });
+        this.element.appendChild(this.iframe_);
         return loadPromise(this.iframe_);
       });
     }
@@ -384,6 +403,4 @@ class AmpAd extends AMP.BaseElement {
 }
 
 AMP.registerElement('amp-ad', AmpAd);
-//temporarily change registerElementAlias to registerElement to remove
-//re-register problem
 AMP.registerElement('amp-embed', AmpAd);

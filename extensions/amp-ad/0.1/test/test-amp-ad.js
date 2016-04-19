@@ -14,27 +14,18 @@
  * limitations under the License.
  */
 
-import {createAdPromise} from '../../testing/ad-iframe';
-import {AmpAd} from '../../../../extensions/amp-ad/0.1/amp-ad';
-//import {installEmbed} from '../../../../extensions/amp-ad/0.1/amp-embed';
+import {createAdPromise} from '../../../../testing/ad-iframe';
+import {resetAdCountForTesting} from '../amp-ad';
 import * as sinon from 'sinon';
-//import {adopt} from '../../../../src/runtime';
 
-//adopt(window);
-
-//describe.only('amp-ad', tests('amp-ad', installAd));
-describe.only('amp-ad', tests('amp-ad'));
-/*describe('amp-embed', tests('amp-embed', win => {
-  installAd(win);
-  installEmbed(win);
-}));*/
-//describe.only('amp-embed', tests('amp-embed'));
+describe('amp-ad', tests('amp-ad'));
+describe('amp-embed', tests('amp-embed'));
 
 function tests(name) {
   function getAd(attributes, canonical, opt_handleElement,
-                 opt_beforeLayoutCallback) {
-    return createAdPromise(name, installer, attributes, canonical,
-                           opt_handleElement, opt_beforeLayoutCallback);
+      opt_beforeLayoutCallback) {
+    return createAdPromise(name, attributes, canonical,
+        opt_handleElement, opt_beforeLayoutCallback);
   }
 
   return () => {
@@ -44,6 +35,7 @@ function tests(name) {
       sandbox = sinon.sandbox.create();
     });
     afterEach(() => {
+      resetAdCountForTesting();
       sandbox.restore();
     });
 
@@ -382,7 +374,6 @@ function tests(name) {
           placeholder.setAttribute('placeholder', '');
           ad.appendChild(placeholder);
           expect(placeholder.classList.contains('amp-hidden')).to.be.false;
-
           const fallback = document.createElement('div');
           fallback.setAttribute('fallback', '');
           ad.appendChild(fallback);
@@ -431,15 +422,15 @@ function tests(name) {
           clock = sandbox.useFakeTimers();
         }).then(ad => {
           // False because we just rendered one.
-          //expect(ad.renderOutsideViewport()).to.be.false;
+          expect(ad.renderOutsideViewport()).to.be.false;
           clock.tick(900);
-          //expect(ad.renderOutsideViewport()).to.be.false;
+          expect(ad.renderOutsideViewport()).to.be.false;
           clock.tick(100);
-          //expect(ad.renderOutsideViewport()).not.to.be.false;
+          expect(ad.renderOutsideViewport()).not.to.be.false;
         });
       });
 
-      it.skip('should prefer-viewability-over-views', () => {
+      it('should prefer-viewability-over-views', () => {
         let clock;
         return getGoodAd(ad => {
           expect(ad.renderOutsideViewport()).not.to.be.false;

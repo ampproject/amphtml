@@ -41,13 +41,12 @@ import {markElementScheduledForTesting} from '../src/custom-element';
  *       other JS executes in the window.
  * @return {!Promise}
  */
-export function createAdPromise(name, installer, attributes, canonical,
-                                opt_handleElement, opt_beforeLayoutCallback) {
+export function createAdPromise(name, attributes, canonical,
+    opt_handleElement, opt_beforeLayoutCallback) {
   return createIframePromise(undefined, opt_beforeLayoutCallback)
     .then(iframe => {
       iframe.iframe.style.height = '400px';
       iframe.iframe.style.width = '400px';
-      installer(iframe.win);
       markElementScheduledForTesting(iframe.win, 'amp-user-notification');
       if (canonical) {
         const link = iframe.doc.createElement('link');

@@ -22,7 +22,7 @@ import {getService} from './service';
 import {installStyles} from './styles';
 import {installCoreServices} from './amp-core-service';
 import {isExperimentOn, toggleExperiment} from './experiments';
-import {registerElement, registerElementAlias, upgradeOrRegisterElement} from './custom-element';
+import {registerElement} from './custom-element';
 import {registerExtendedElement} from './extended-element';
 import {resourcesFor} from './resources';
 import {viewerFor} from './viewer';
@@ -82,12 +82,6 @@ export function adopt(global) {
       register();
     }
   };
-  
-  /** @const */
-  global.AMP.registerElementAlias = registerElementAlias;
-
-  /** @const */
-  global.AMP.upgradeOrRegisterElement = upgradeOrRegisterElement;
 
   /** @const */
   global.AMP.BaseElement = BaseElement;
