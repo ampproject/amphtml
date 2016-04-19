@@ -161,7 +161,7 @@ Iframes should also enforce that they are only iframed into origins that they ex
 
 In the case of the AMP cache you also need to check that the "source origin" (origin of the document served by cdn.ampproject.org) is one of your origins.
 
-Enforcing origins can be done with the 3rd argument to `draw3p` and must additionally be done using the (allow-from)[https://developer.mozilla.org/en-US/docs/Web/HTTP/X-Frame-Options] directive for full browser support.
+Enforcing origins can be done with the 3rd argument to `draw3p` and must additionally be done using the [allow-from](https://developer.mozilla.org/en-US/docs/Web/HTTP/X-Frame-Options) directive for full browser support.
 
 ### Enhance incoming ad configuration
 
