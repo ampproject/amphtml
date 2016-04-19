@@ -107,6 +107,12 @@ Type attribute value: `chartbeat`
 
 Adds support for Chartbeat. More details for adding Chartbeat support can be found at [support.chartbeat.com](http://support.chartbeat.com/docs/integrations.html#amp).
 
+### ColAnalytics
+
+Type attribute value: `colanalytics`
+
+Adds support for ColAnalytics. Additionally, need the value for `id`.
+
 ### comScore
 
 Type attribute value: `comscore`

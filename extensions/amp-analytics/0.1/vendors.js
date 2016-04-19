@@ -198,6 +198,41 @@ export const ANALYTICS_CONFIG = {
     },
   },
 
+  'colanalytics': {
+    'requests': {
+      'host': 'https://ase.clmbtech.com',
+      'base': '${host}/message',
+      'pageview': '${base}?cid=${id}' +
+        '&val_101=${id}' +
+        '&val_101=${canonicalUrl}' +
+        '&ch=${canonicalHost}' +
+        '&uuid=${uid}' +
+        '&au=${authors}' +
+        '&zo=${zone}' +
+        '&sn=${sponsorName}' +
+        '&ct=${contentType}' +
+        '&st=${scrollTop}' +
+        '&sh=${scrollHeight}' +
+        '&dct=${decayTime}' +
+        '&tet=${totalEngagedTime}' +
+        '&dr=${documentReferrer}' +
+        '&plt=${pageLoadTime}' +
+        '&val_108=${title}' +
+        '&val_120=3',
+    },
+    'triggers': {
+      'defaultPageview': {
+        'on': 'visible',
+        'request': 'pageview',
+      },
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
+    },
+  },
+
   'comscore': {
     'vars': {
       'c2': '1000001',
