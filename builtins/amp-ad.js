@@ -241,7 +241,6 @@ export function installAd(win) {
             this.element);
           this.iframe_.setAttribute('scrolling', 'no');
           this.applyFillContent(this.iframe_);
-          this.element.appendChild(this.iframe_);
           this.intersectionObserver_ =
               new IntersectionObserver(this, this.iframe_, /* opt_is3P */true);
           // Triggered by context.noContentAvailable() inside the ad iframe.
@@ -279,6 +278,7 @@ export function installAd(win) {
           this.viewer_.onVisibilityChanged(() => {
             this.sendEmbedInfo_(this.isInViewport());
           });
+          this.element.appendChild(this.iframe_);
           return loadPromise(this.iframe_);
         });
       }
