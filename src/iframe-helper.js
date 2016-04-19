@@ -31,8 +31,8 @@ import {parseUrl} from './url';
  */
 export function listen(iframe, typeOfMessage, callback, opt_is3P) {
   dev.assert(iframe.src, 'only iframes with src supported');
-  dev.assert(!iframe.parentNode, 'cannot register events on an iframe inside ' +
-      'the DOM tree. It will cause hair-pulling bugs like #2942');
+  dev.assert(!iframe.parentNode, 'cannot register events on an attached ' +
+      'iframe. It will cause hair-pulling bugs like #2942');
   const origin = parseUrl(iframe.src).origin;
   let win = iframe.ownerDocument.defaultView;
   const sentinel = getSentinel_(opt_is3P);
