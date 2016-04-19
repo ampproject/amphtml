@@ -243,9 +243,9 @@ export class AmpSlides extends BaseCarousel {
       transform: '',
       opacity: 1,
     });
-    this.scheduleLayout(newSlide);
     this.updateInViewport(oldSlide, false);
     this.updateInViewport(newSlide, true);
+    this.scheduleLayout(newSlide);
     this.setControlsState();
     this.schedulePause(oldSlide);
   }
