@@ -17,7 +17,7 @@
 import * as sinon from 'sinon';
 import * as tr from '../../../../src/transition';
 import {AmpSlides} from '../slides';
-
+import {Animation} from '../../../../src/animation';
 
 describe('Slides functional', () => {
 
@@ -771,6 +771,12 @@ describe('Slides functional', () => {
       slides.updateInViewport = sandbox.spy();
       slides.schedulePause = sandbox.spy();
       slides.schedulePreload = sandbox.spy();
+
+      Animation.animate = () => {
+        return {
+          thenAlways: cb => cb(),
+        };
+      };
     });
     afterEach(() => {
       sandbox.restore();
@@ -789,6 +795,68 @@ describe('Slides functional', () => {
           slides.scheduleLayout)).to.be.true;
       expect(slides.updateInViewport.calledWith(slide0, true)).to.be.true;
       expect(slides.updateInViewport.calledWith(slide1, false)).to.be.true;
+    });
+  });
+
+  describe('Navigating slides', () => {
+    beforeEach(() => {
+      sandbox = sinon.sandbox.create();
+      setupElements();
+      setupSlides();
+      slides.inViewport_ = true;
+      slides.getVsync = function() {
+        return {
+          mutate: function(fn) {
+            fn();
+          },
+        };
+      };
+      slides.deferMutate = function(fn) {
+        fn();
+      };
+      slides.scheduleLayout = sandbox.spy();
+      slides.updateInViewport = sandbox.spy();
+      slides.schedulePause = sandbox.spy();
+      slides.schedulePreload = sandbox.spy();
+    });
+    afterEach(() => {
+      sandbox.restore();
+      teardownElements();
+    });
+
+    it('should hide slides that are not the current one', () => {
+      expect(slide0.style.visibility).to.be.equal('visible');
+      expect(slide1.style.visibility).to.be.equal('hidden');
+      expect(slide2.style.visibility).to.be.equal('hidden');
+
+      slides.goCallback(1, /*animate*/ false);
+      expect(slide0.style.visibility).to.be.equal('hidden');
+      expect(slide1.style.visibility).to.be.equal('visible');
+      expect(slide2.style.visibility).to.be.equal('hidden');
+
+      slides.goCallback(-1, /*animate*/ false);
+      expect(slide0.style.visibility).to.be.equal('visible');
+      expect(slide1.style.visibility).to.be.equal('hidden');
+      expect(slide2.style.visibility).to.be.equal('hidden');
+    });
+
+    it('should preload slides in direction of navigation', () => {
+      expect(slide0.style.visibility).to.be.equal('visible');
+      expect(slide1.style.visibility).to.be.equal('hidden');
+
+      slides.goCallback(1, /*animate*/ true);
+      expect(slide0.style.visibility).to.be.equal('hidden');
+      expect(slide1.style.visibility).to.be.equal('visible');
+      expect(slide2.style.visibility).to.be.equal('hidden');
+      expect(slides.scheduleLayout.calledWith(slide1)).to.be.true;
+      expect(slides.schedulePreload.calledWith(slide2)).to.be.true;
+
+      slides.goCallback(-1, /*animate*/ false);
+      expect(slide0.style.visibility).to.be.equal('visible');
+      expect(slide1.style.visibility).to.be.equal('hidden');
+      expect(slide2.style.visibility).to.be.equal('hidden');
+      expect(slides.scheduleLayout.calledWith(slide0)).to.be.true;
+      expect(slides.schedulePreload.calledWith(slide2)).to.be.true;
     });
   });
 });
