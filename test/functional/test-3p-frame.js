@@ -124,7 +124,7 @@ describe('3p-frame', () => {
         ',"x":0,"y":0},"boundingClientRect":' +
         '{"width":100,"height":200},"intersectionRect":{' +
         '"left":0,"top":0,"width":0,"height":0,"bottom":0,' +
-        '"right":0,"x":0,"y":0}}}}';
+        '"right":0,"x":0,"y":0}},"startTime":1234567888}}';
     expect(src).to.equal(
         'http://ads.localhost:9876/dist.3p/current/frame.max.html' +
         fragment);

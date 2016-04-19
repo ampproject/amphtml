@@ -155,7 +155,7 @@ var forbiddenTerms = {
   'cidFor': {
     message: requiresReviewPrivacy,
     whitelist: [
-      'builtins/amp-ad.js',
+      'src/ad-cid.js',
       'src/cid.js',
       'src/service/cid-impl.js',
       'src/url-replacements.js',

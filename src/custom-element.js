@@ -1125,7 +1125,7 @@ export function createAmpElementProto(win, name, implementationClass) {
     if (!this.overflowElement_) {
       if (overflown) {
         user.warn(TAG_,
-            'Cannot resize element and overlfow is not available', this);
+            'Cannot resize element and overflow is not available', this);
       }
     } else {
       this.overflowElement_.classList.toggle('amp-visible', overflown);

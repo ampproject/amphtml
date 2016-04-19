@@ -45,6 +45,7 @@ const count = {};
  *     - A _context object for internal use.
  */
 function getFrameAttributes(parentWindow, element, opt_type) {
+  const startTime = timer.now();
   const width = element.getAttribute('width');
   const height = element.getAttribute('height');
   const type = opt_type || element.getAttribute('type');
@@ -79,6 +80,7 @@ function getFrameAttributes(parentWindow, element, opt_type) {
         timer.now(),
         viewportFor(parentWindow).getRect(),
         element.getLayoutBox()),
+    startTime: startTime,
   };
   const adSrc = element.getAttribute('src');
   if (adSrc) {
