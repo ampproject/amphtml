@@ -795,7 +795,7 @@ describe('Slides functional', () => {
           slides.scheduleLayout)).to.be.true;
       expect(slides.updateInViewport.calledWith(slide0, true)).to.be.true;
       expect(slides.updateInViewport.calledWith(slide1, false)).to.be.true;
-    })
+    });
   });
 
   describe('Navigating slides', () => {
