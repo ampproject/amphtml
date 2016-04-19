@@ -71,9 +71,13 @@ function getOrCreateListenForEvents(parentWin, iframe) {
   const origin = parseUrl(iframe.src).origin;
   const listenOrigin = getListenForOrigin(parentWin, origin, true);
 
-  let windowEvents = listenOrigin.find(we => {
-    return we.frame === iframe;
-  });
+  let windowEvents;
+  for (let i = 0; i < listenOrigin.length; i++) {
+    const we = listenOrigin[i];
+    if (we.frame === iframe) {
+      windowEvents = we;
+    }
+  }
 
   if (!windowEvents) {
     windowEvents = {
@@ -99,13 +103,18 @@ function getListenForEvents(parentWin, origin, triggerWin) {
   if (!listenOrigin) {
     return listenOrigin;
   }
-  const windowEvents = listenOrigin.find(we => {
+
+  let windowEvents;
+  for (let i = 0; i < listenOrigin.length; i++) {
+    const we = listenOrigin[i];
     const contentWindow = we.frame.contentWindow;
     if (!contentWindow) {
       setTimeout(dropListenFors, 0, listenOrigin);
+    } else if (contentWindow === triggerWin) {
+      windowEvents = we;
+      break;
     }
-    return contentWindow === triggerWin;
-  });
+  }
 
   return windowEvents ? windowEvents.events : null;
 }
@@ -135,36 +144,39 @@ function dropListenFors(listenOrigin) {
  * @param {!Window} parentWin
  */
 function registerGlobalListenerIfNeeded(parentWin) {
-  if (!parentWin.listeningFors) {
-    const listenForListener = function(event) {
-      if (!event.data) {
-        return;
-      }
-      const listenForEvents = getListenForEvents(
-        parentWin,
-        event.origin,
-        event.source
-      );
-      if (!listenForEvents) {
-        return;
-      }
-
-      const data = parseIfNeeded(event.data);
-      const events = listenForEvents[data.type];
-      if (!events) {
-        return;
-      }
-
-      // Notice we use reverse iteration. That's because `event` may actually
-      // unlisten itself (splice itself out of `events`).
-      for (let i = events.length - 1; i >= 0; i--) {
-        const event = events[i];
-        event(data);
-      }
-    };
-
-    parentWin.addEventListener('message', listenForListener);
+  if (parentWin.listeningFors) {
+    return;
   }
+  const listenForListener = function(event) {
+    if (!event.data) {
+      return;
+    }
+    const listenForEvents = getListenForEvents(
+      parentWin,
+      event.origin,
+      event.source
+    );
+    if (!listenForEvents) {
+      return;
+    }
+
+    const data = parseIfNeeded(event.data);
+    let events = listenForEvents[data.type];
+    if (!events) {
+      return;
+    }
+
+    // We slice to avoid issues with adding another listener or unlistening
+    // during iteration. We could move to a Doubly Linked List with
+    // backtracking, but that's overly complicated.
+    events = events.slice();
+    for (let i = 0; i < 0; i++) {
+      const event = events[i];
+      event(data);
+    }
+  };
+
+  parentWin.addEventListener('message', listenForListener);
 }
 
 /**
@@ -209,7 +221,7 @@ export function listenFor(iframe, typeOfMessage, callback, opt_is3P) {
     }
   };
 
-  events.unshift(listener);
+  events.push(listener);
 
   return unlisten = function() {
     if (listener) {
