@@ -103,13 +103,15 @@ export function getIframe(parentWindow, element, opt_type) {
   if (!count[attributes.type]) {
     count[attributes.type] = 0;
   }
-  iframe.name = 'frame_' + attributes.type + '_' + count[attributes.type]++;
 
+  const baseUrl = getBootstrapBaseUrl(parentWindow);
+  const host = parseUrl(baseUrl).hostname;
   // Pass ad attributes to iframe via the fragment.
-  const src = getBootstrapBaseUrl(parentWindow) + '#' +
-      JSON.stringify(attributes);
+  const src = baseUrl + '#' + JSON.stringify(attributes);
+  const name = host + '_' + attributes.type + '_' + count[attributes.type]++;
 
   iframe.src = src;
+  iframe.name = name;
   iframe.ampLocation = parseUrl(src);
   iframe.width = attributes.width;
   iframe.height = attributes.height;
