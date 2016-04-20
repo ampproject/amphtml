@@ -51,6 +51,15 @@ resources in AMP. It requires a `type` argument that select what ad network is d
     data-aax_src="302">
 </amp-ad>
 ```
+```html
+<amp-ad width=320 height=140
+    type="colombia"
+    layout=responsive
+    data-clmb_slot="129883"
+    data-clmb_position="1"
+    data-clmb_section="0">
+</amp-ad>
+```
 
 ## Supported ad networks
 
@@ -85,6 +94,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [Weborama](../ads/weborama.md)
 - [Yieldbot](../ads/yieldbot.md)
 - [Yieldmo](../ads/yieldmo.md)
+- [Colombia](../ads/colombia.md)
 
 ## Styling
 

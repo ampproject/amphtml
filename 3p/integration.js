@@ -65,6 +65,7 @@ import {user} from '../src/log';
 import {gmossp} from '../ads/gmossp';
 import {weboramaDisplay} from '../ads/weborama';
 import {adstir} from '../ads/adstir';
+import {colombia} from '../ads/colombia';
 
 
 
@@ -116,6 +117,7 @@ register('gmossp', gmossp);
 register('weborama-display', weboramaDisplay);
 register('yieldbot', yieldbot);
 register('adstir', adstir);
+register('colombia', colombia);
 
 // For backward compat, we always allow these types without the iframe
 // opting in.
