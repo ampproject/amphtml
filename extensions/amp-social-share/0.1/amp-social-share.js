@@ -16,12 +16,14 @@
 
 import {addParamsToUrl} from '../../../src/url';
 import {documentInfoFor} from '../../../src/document-info';
-import {elementByTag} from '../../../src/dom';
+import {getAttributesAsParams} from '../../../src/dom';
 import {getSocialConfig} from './amp-social-share-config';
 import {isExperimentOn} from '../../../src/experiments';
-import {isLayoutSizeDefined, getLengthNumeral,
-  Layout} from '../../../src/layout';
+import {listenForEventOnTagName} from '../../../src/event-helper';
+import {isLayoutSizeDefined, getLengthNumeral} from '../../../src/layout';
 import {user} from '../../../src/log';
+import {urlReplacementsFor} from '../../../src/url-replacements';
+import {platformFor} from '../../../src/platform';
 import {CSS} from '../../../build/amp-social-share-0.1.css';
 
 /** @const */
@@ -33,14 +35,14 @@ const TAG = 'amp-social-share';
 /** @const {number} */
 const DEFAULT_WIDTH = 60;
 
-/** @const {string} */
-const CLASSNAME_PREFIX = 'amp-social-share-';
+/** {function()} */
+let clickHandlerUnlistenCallback;
 
 class AmpSocialShare extends AMP.BaseElement {
 
   /** @override */
-  isLayoutSupported(layout) {
-    return layout == Layout.FIXED;
+  isLayoutSupported() {
+    return true;
   }
 
   /** @override */
@@ -50,17 +52,19 @@ class AmpSocialShare extends AMP.BaseElement {
       user.warn(TAG, `Experiment ${EXPERIMENT} disabled`);
       return;
     }
-
     /** @private @const {!Element} */
     this.type_ = user.assert(this.element.getAttribute('type'),
         'The type attribute is required. %s',
         this.element);
 
     /** @private @const {!Object} */
-    this.typeConfig_ = getSocialConfig(this.type_);
+    this.typeConfig_ = getSocialConfig(this.type_) || {};
 
-    /** @private @const {!Object} */
-    this.config_ = this.getElementConfig_();
+    /** @private @const {string} */
+    this.shareEndpoint_ = this.element.getAttribute('data-share-endpoint') ||
+        this.typeConfig_.shareEndpoint;
+    user.assert(this.shareEndpoint_, 'Missing data-share-endpoint attribute ' +
+        'for amp-social-share %s', this.element);
 
     /** @private @const {number} */
     this.width_ = getLengthNumeral(this.element.getAttribute('width'))
@@ -69,106 +73,49 @@ class AmpSocialShare extends AMP.BaseElement {
     /** @private @const {number} */
     this.height_ = getLengthNumeral(this.element.getAttribute('height'));
 
-    this.renderShare_();
+    /** @private @const {!Object} */
+    this.params_ = Object.assign({}, this.typeConfig_.defaultParams || {});
+    Object.assign(this.params_, getAttributesAsParams(
+        this.element, attr => {
+          const matches = attr.nodeName.match(/^data-param-(.+)/);
+          return (matches && matches[1]) || null;
+        }));
+
+    const hrefWithVars = addParamsToUrl(this.shareEndpoint_, this.params_);
+    urlReplacementsFor(this.getWin()).expand(hrefWithVars).then(href => {
+      this.element.setAttribute('href', href);
+    });
+    this.element.setAttribute('role', 'link');
+
+    // Install a global click listener only once for all amp-social-share.
+    if (!clickHandlerUnlistenCallback) {
+      this.addGlobalClickListener_();
+    }
   }
 
   /**
-   * Renders the share based on the element config.
-   * @return {!Element}
+   * Install a global click event listener to handle all amp-social-share targets.
+   * @param win
+   * @private
    */
-  renderShare_() {
-    const urlParams = {};
-
-    for (const param in this.typeConfig_['params']) {
-      const paramConf = this.typeConfig_['params'][param];
-      let paramValue = this.config_[param] || this.getDefaultValue_(
-          param, this.config_);
-      user.assert(!paramConf['required'] || paramValue !== null,
-          param + ' is a required attribute for ' + this.type_ + '. %s',
-        this.element);
-      if (paramValue == null && paramConf['type'] == 'fixed') {
-        paramValue = paramConf['value'];
-      }
-      if ('maxlength' in paramConf) {
-        const maxlength = paramConf['maxlength'];
-        user.assert(!paramValue || paramValue.length < maxlength,
-            param + ' cannot exceed ' + maxlength + '. %s', this.element);
-      }
-      if (paramValue != null) {
-        urlParams[paramConf['param']] = paramValue;
-      }
-    }
-
-    // Get the anchor or create one.
-    let link = elementByTag(this.element, 'a');
-    if (link == null) {
-      link = this.getWin().document.createElement('a');
-      link.textContent = this.typeConfig_['text'];
-      link.setAttribute('target', '_blank');
-
-      // Get the container or create one.
-      let container = elementByTag(this.element, 'span');
-      if (container == null) {
-        container = this.getWin().document.createElement('span');
-        container.classList.add(CLASSNAME_PREFIX + this.type_);
-
-        // Only add the container to the element if it didn't exist
-        this.element.appendChild(container);
-      }
-      container.appendChild(link);
-    }
-
-    // Set share url.
-    link.setAttribute('href',
-      addParamsToUrl(this.typeConfig_['url'], urlParams));
+  addGlobalClickListener_() {
+    const win = this.getWin();
+    clickHandlerUnlistenCallback = listenForEventOnTagName(
+        win, 'amp-social-share', 'click', event => {
+          const href = event.target.getAttribute('href');
+          const type = event.target.getAttribute('type');
+          const isDesktop = platformFor(win).isDesktop();
+          if (isDesktop) {
+            const pageViewId = documentInfoFor(win).pageViewId;
+            const popupId = 'share-popup-' + type + pageViewId;
+            const windowFeatures = 'resizable,scrollbars,width=640,height=480';
+            this.getWin().open(href, popupId, windowFeatures);
+          } else {
+            this.getWin().open(href, '_blank');
+          }
+        });
   }
 
-  /**
-   * Gets the configuration for the current social element
-   * @param {!element} element
-   * @return {?Object}
-   */
-  getElementConfig_() {
-    const script = elementByTag(this.element, 'script');
-    let config = {};
-    if (script) {
-      // Get config from script
-      try {
-        config = JSON.parse(script.textContent);
-      } catch (e) {
-        user.error(TAG, 'Malformed JSON configuration. %s', this.element);
-      }
-    } else {
-      // Get config from attributes
-      for (const param in this.typeConfig_['params']) {
-        if (this.element.hasAttribute('data-' + param)) {
-          config[param] = this.element.getAttribute('data-' + param);
-        }
-      }
-    }
-    return config;
-  }
-
-  /**
-   * Gets the default value for a given param, if there is one.
-   * Otherwise it returns null
-   * @param  {!string} param
-   * @param  {!Object} config
-   * @return {*}
-   */
-  getDefaultValue_(param, config) {
-    if (param in config) {
-      return config[param];
-    }
-    switch (param) {
-      case 'url':
-        const info = documentInfoFor(this.getWin());
-        return info.canonicalUrl;
-      case 'text':
-        return '';
-    }
-    return null;
-  }
 };
 
 AMP.registerElement('amp-social-share', AmpSocialShare, CSS);

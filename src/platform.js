@@ -89,6 +89,23 @@ export class Platform {
   isWebKit() {
     return /WebKit/i.test(this.navigator.userAgent) && !this.isEdge();
   }
+
+  /**
+   * Whether the current browser is on desktop.
+   * @return {boolean}
+   */
+  isDesktop() {
+    return !this.isMobile();
+  }
+
+  /**
+   * Whether the current browser is on mobile.
+   * @returns {boolean}
+   */
+  isMobile() {
+    return /iPhone|iPod|iPad|Android|Blackberry|IEMobile/i.test(
+        this.navigator.userAgent);
+  }
 };
 
 

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {dashToCamelCase} from './string';
 
 /**
  * Waits until the child element is constructed. Once the child is found, the
@@ -269,4 +270,25 @@ export function childElementByTag(parent, tagName) {
   return childElement(parent, el => {
     return el.tagName == tagName;
   });
+}
+
+
+/**
+ * Returns element attributes that pass the callback test as params.
+ * @param {!Element} element
+ * @param {function(!Element):string|null} parseAttributeCallback
+ * @return {Object}
+ */
+export function getAttributesAsParams(element, parseAttributeCallback) {
+  const attributes = element.attributes;
+  const params = {};
+  for (let i = 0; i < attributes.length; i++) {
+    const attr = attributes[i];
+    const parsedAttributeName = parseAttributeCallback(attr);
+    if (parsedAttributeName) {
+      const param = dashToCamelCase(parsedAttributeName);
+      params[param] = attr.nodeValue;
+    }
+  }
+  return params;
 }

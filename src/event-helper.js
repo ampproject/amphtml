@@ -40,6 +40,32 @@ export function listen(element, eventType, listener, opt_capture) {
 
 
 /**
+ * Globally Listens for the specified event for the specified tag name.
+ * @param {!Window} win
+ * @param {string} tagName
+ * @param {string} eventType
+ * @param {function(Event)} listener
+ * @param {boolean=} opt_capture
+ * @return {!UnlistenDef}
+ */
+export function listenForEventOnTagName(
+    win, tagName, eventType, listener, opt_capture) {
+  const capture = opt_capture || false;
+  win.addEventListener(eventType, event => {
+    if (event.target.tagName.toLowerCase() == tagName.toLowerCase()) {
+      listener(event);
+    }
+  }, capture);
+  return () => {
+    if (win) {
+      win.removeEventListener(eventType, listener, capture);
+    }
+    listener = null;
+  };
+}
+
+
+/**
  * Listens for the specified event on the element and removes the listener
  * as soon as event has been received.
  * @param {!EventTarget} element
@@ -165,3 +191,4 @@ function racePromise_(promise, unlisten, timeout) {
     throw reason;
   });
 }
+
