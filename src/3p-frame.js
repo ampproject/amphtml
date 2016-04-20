@@ -192,17 +192,15 @@ export function getBootstrapBaseUrl(parentWindow, opt_strictForUnitTest) {
  * @return {string}
  */
 function getDefaultBootstrapBaseUrl(parentWindow) {
-  let url =
-      'https://' + getSubDomain(parentWindow) +
-      '.ampproject.net/$internalRuntimeVersion$/frame.html';
   if (getMode().localDev) {
-    url = 'http://ads.localhost:' +
+    return 'http://ads.localhost:' +
         (parentWindow.location.port || parentWindow.parent.location.port) +
         '/dist.3p/current' +
         (getMode().minified ? '-min/frame' : '/frame.max') +
         '.html';
   }
-  return url;
+  return 'https://' + getSubDomain(parentWindow) +
+      '.ampproject.net/$internalRuntimeVersion$/frame.html';
 }
 
 /**
@@ -252,6 +250,6 @@ function getCustomBootstrapBaseUrl(parentWindow, opt_strictForUnitTest) {
       '3p iframe url must not be on the same origin as the current doc' +
       'ument %s (%s) in element %s. See https://github.com/ampproject/amphtml' +
       '/blob/master/spec/amp-iframe-origin-policy.md for details.', url,
-      parseUrl(url).origin, meta);
+      parsed.origin, meta);
   return url + '?$internalRuntimeVersion$';
 }
