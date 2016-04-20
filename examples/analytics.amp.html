@@ -18,6 +18,7 @@
       height: 10px;
     }
   </style>
+  <script async custom-element="amp-anim" src="https://cdn.ampproject.org/v0/amp-anim-0.1.js"></script>
   <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
@@ -53,6 +54,11 @@ Container for analytics tags. Positioned far away from top to make sure that doe
       "vars": {
         "eventName": "page-loaded",
         "eventId": "42"
+      },
+      "visibilitySpec": {
+        "selector": "#anim-id",
+        "visiblePercentageMin": 20,
+        "visiblePercentageMax": 80
       }
     },
     "scrollPings": {
@@ -271,7 +277,7 @@ Container for analytics tags. Positioned far away from top to make sure that doe
 <script type="application/json">
 {
   "requests": {
-    "test-ping": "https://my-analytics.com/ping?title=${title}&acct=${account}"
+    "test-ping": "https://example.com/ping?title=${title}&acct=${account}"
   },
   "vars": {
     "title": "A page that sends a ping",
@@ -459,6 +465,10 @@ Donec pharetra molestie sollicitudin. Duis mattis eleifend rutrum. Quisque luctu
 <li>Aenean ac sem eget libero varius viverra sit amet vitae nunc.</li>
 </ul>
 <p></p>
+    <amp-anim src="https://goo.gl/FBCKQO" id="anim-id"
+        width="400" height="225" layout="responsive">
+      <amp-img placeholder src="https://goo.gl/GjcSkr" width="400" height="225" layout="responsive"></amp-img>
+    </amp-anim>
 </body>
 </html>
 

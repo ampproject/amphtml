@@ -22,6 +22,7 @@ import {expandTemplate} from '../../../src/string';
 import {installCidService} from '../../../src/service/cid-impl';
 import {installStorageService} from '../../../src/service/storage-impl';
 import {installActivityService} from '../../../src/service/activity-impl';
+import {installVisibilityService} from '../../../src/service/visibility-impl';
 import {isArray, isObject} from '../../../src/types';
 import {sendRequest, sendRequestUsingIframe} from './transport';
 import {urlReplacementsFor} from '../../../src/url-replacements';
@@ -30,9 +31,10 @@ import {xhrFor} from '../../../src/xhr';
 import {toggle} from '../../../src/style';
 
 
+installActivityService(AMP.win);
 installCidService(AMP.win);
 installStorageService(AMP.win);
-installActivityService(AMP.win);
+installVisibilityService(AMP.win);
 instrumentationServiceFor(AMP.win);
 
 const MAX_REPLACES = 16; // The maximum number of entries in a extraUrlParamsReplaceMap

@@ -21,6 +21,7 @@ import {timer} from '../../../src/timer';
 import {user} from '../../../src/log';
 import {viewerFor} from '../../../src/viewer';
 import {viewportFor} from '../../../src/viewport';
+import {visibilityFor} from '../../../src/visibility';
 
 /** @private @const {number} */
 const MIN_TIMER_INTERVAL_SECONDS_ = 0.5;
@@ -217,15 +218,29 @@ export class InstrumentationService {
       return;
     }
 
-    // TODO(avimehta, #1297): Add all the listeners so that visibility
-    // conditions are monitored and callback is called when the conditions
-    // are met.
+    if (config['visibilitySpec']) {
+      this.runOrSchedule_(() => {
+        visibilityFor(this.win_).then(visibility => {
+          visibility.listenOnce(config['visibilitySpec'], () => {
+            callback(new AnalyticsEvent(AnalyticsEventType.VISIBLE));
+          });
+        });
+      });
+    } else {
+      this.runOrSchedule_(() => {
+        callback(new AnalyticsEvent(AnalyticsEventType.VISIBLE));
+      });
+    }
+  }
+
+  /** @private{function()} function to run or schedule. */
+  runOrSchedule_(fn) {
     if (this.viewer_.isVisible()) {
-      callback(new AnalyticsEvent(AnalyticsEventType.VISIBLE));
+      fn();
     } else {
       this.viewer_.onVisibilityChanged(() => {
         if (this.viewer_.isVisible()) {
-          callback(new AnalyticsEvent(AnalyticsEventType.VISIBLE));
+          fn();
         }
       });
     }
@@ -256,6 +271,8 @@ export class InstrumentationService {
   /**
    * Checks and outputs information about visibilitySpecValidation.
    * @param {!JSONObject} config Configuration for instrumentation.
+   * @return {boolean} True if the spec is valid.
+   * @private
    */
   isVisibilitySpecValid_(config) {
     if (!config['visibilitySpec'] || !this.isViewabilityExperimentOn_()) {
