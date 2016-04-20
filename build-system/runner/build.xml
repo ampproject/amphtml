@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="jar" basedir="." name="runner">
+  <!--
+    Use -Dtest.class to change what tests are run on the command-line.
+    i.e., -Dtest.class=CommandLineRunnerTest will run just that test class.
+  -->
+  <property name="test.class" value="*Test"/>
+
+  <!-- Use -Dtest.method in conjunction with the one-test rule. -->
+  <property name="test.method" value=""/>
+
+  <!--
+    Use -Dtest.fork to specify whether or not to fork the process.
+    Some machines run better with forking turned off.
+  -->
+  <property name="test.fork" value="true"/>
+
+  <!--this file was created by Eclipse Runnable JAR file Export Wizard-->
+  <!--ANT 1.7 is required-->
+  <!--define folder properties-->
+  <property name="dir.buildfile" value="."/>
+  <property name="src.dir" value="${basedir}/src"/>
+  <property name="gen.dir" value="${basedir}/gen"/>
+  <property name="test.dir" value="${basedir}/test"/>
+  <property name="build.dir" value="${basedir}/build"/>
+  <property name="lib.dir" value="${basedir}/lib"/>
+  <property name="runner-jarfile" value="${build.dir}/${ant.project.name}.jar"/>
+
+  <property name="classes.dir" value="${build.dir}/classes"/>
+  <property name="testClasses.dir" value="${build.dir}/test"/>
+
+  <target name="jar" depends="compile">
+    <jar destfile="${runner-jarfile}">
+      <zipfileset src="${lib.dir}/jar-in-jar-loader.zip"/>
+      <fileset dir="${classes.dir}"/>
+      <fileset dir="${lib.dir}">
+        <include name="compiler.jar"/>
+      </fileset>
+      <manifest>
+        <attribute name="Main-Class" value="org.eclipse.jdt.internal.jarinjarloader.JarRsrcLoader"/>
+        <attribute name="Rsrc-Main-Class" value="org.ampproject.AmpCommandLineRunner"/>
+        <attribute name="Class-Path" value="."/>
+        <attribute name="Rsrc-Class-Path" value="./ compiler.jar"/>
+      </manifest>
+    </jar>
+  </target>
+
+  <target name="compile">
+    <mkdir dir="${classes.dir}"/>
+    <copy file="${src.dir}/../../../third_party/closure-compiler/compiler.jar" todir="${lib.dir}"/>
+    <javac srcdir="${src.dir}"
+        destdir="${classes.dir}"
+        excludes=".git,.DS_Store"
+        includeantruntime="false"
+        encoding="utf-8">
+      <classpath refid="srcclasspath.path"/>
+      <compilerarg value="-Xlint:unchecked"/>
+    </javac>
+  </target>
+
+  <target name="clean" description="delete generated files">
+    <delete dir="${build.dir}"/>
+  </target>
+
+  <path id="srcclasspath.path">
+    <pathelement location="${classes.dir}"/>
+    <fileset dir="${lib.dir}">
+      <include name="compiler.jar"/>
+    </fileset>
+  </path>
+
+  <path id="allclasspath.path">
+    <pathelement location="${classes.dir}"/>
+  </path>
+</project>

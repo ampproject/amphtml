@@ -1,6 +1,7 @@
 .DS_Store
 .g4ignore
 build
+build-system/build/classes
 c
 dist
 dist.3p
