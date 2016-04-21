@@ -30,7 +30,7 @@ import {viewerFor} from './viewer';
 
 
 /** @type {!Object<string,number>} Number of 3p frames on the for that type. */
-const count = {};
+let count = {};
 
 
 /**
@@ -252,4 +252,12 @@ function getCustomBootstrapBaseUrl(parentWindow, opt_strictForUnitTest) {
       '/blob/master/spec/amp-iframe-origin-policy.md for details.', url,
       parsed.origin, meta);
   return url + '?$internalRuntimeVersion$';
+}
+
+/**
+ * Resets the count of each 3p frame type
+ * @visibleForTesting
+ */
+export function resetCountForTesting() {
+  count = {};
 }
