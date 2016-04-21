@@ -319,6 +319,20 @@ class UrlReplacements {
         return activity.getTotalEngagedTime();
       });
     });
+
+    this.set_('NAV_TIMING', (startAttribute, endAttribute) => {
+      assert(startAttribute, 'The first argument to NAV_TIMING, the start ' +
+          'attribute name, is required');
+      return this.getTimingData_(startAttribute, endAttribute);
+    });
+
+    this.set_('NAV_TYPE', () => {
+      return this.getNavigationData_('type');
+    });
+
+    this.set_('NAV_REDIRECT_COUNT', () => {
+      return this.getNavigationData_('redirectCount');
+    });
   }
 
   /**
@@ -342,8 +356,10 @@ class UrlReplacements {
   /**
    * Returns navigation timing information based on the start and end events.
    * The data for the timing events is retrieved from performance.timing API.
+   * If start and end events are both given, the result is the difference between the two.
+   * If only start event is given, the result is the timing value at start event.
    * @param {string} startEvent
-   * @param {string} endEvent
+   * @param {string=} endEvent
    * @return {!Promise<string|undefined>}
    * @private
    */
@@ -355,14 +371,19 @@ class UrlReplacements {
       return Promise.resolve();
     }
 
-    let metric = timingInfo[endEvent] - timingInfo[startEvent];
+    let metric = (endEvent === undefined)
+        ? timingInfo[startEvent]
+        : timingInfo[endEvent] - timingInfo[startEvent];
+
     if (isNaN(metric) || metric == Infinity) {
       // The metric is not supported.
       return Promise.resolve();
     } else if (metric < 0) {
       // Metric is not yet available. Retry after a delay.
       return loadPromise(this.win_).then(() => {
-        metric = timingInfo[endEvent] - timingInfo[startEvent];
+        metric = (endEvent === undefined)
+            ? timingInfo[startEvent]
+            : timingInfo[endEvent] - timingInfo[startEvent];
         return (isNaN(metric) || metric == Infinity || metric < 0)
             ? undefined
             : String(metric);
@@ -370,6 +391,23 @@ class UrlReplacements {
     } else {
       return Promise.resolve(String(metric));
     }
+  }
+
+  /**
+   * Returns navigation information from the current browsing context.
+   * @param {string} attribute
+   * @return {!Promise<string|undefined>}
+   * @private
+   */
+  getNavigationData_(attribute) {
+    const navigationInfo = this.win_['performance']
+        && this.win_['performance']['navigation'];
+    if (!navigationInfo || navigationInfo[attribute] === undefined) {
+      // PerformanceNavigation interface is not supported or attribute is not implemented.
+      return Promise.resolve();
+    }
+
+    return String(navigationInfo[attribute]);
   }
 
   /**

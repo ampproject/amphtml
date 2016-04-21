@@ -204,6 +204,49 @@ For instance:
 <amp-pixel src="https://foo.com/pixel?domInteractiveTime=DOM_INTERACTIVE_TIME"></amp-pixel>
 ```
 
+### NAV_REDIRECT_COUNT
+
+Provides the number of redirects since the last non-redirect navigation.
+See W3C Navigation Timing API [PerformanceNavigation interface](https://www.w3.org/TR/navigation-timing/#performancenavigation) for more information.
+
+For instance:
+```html
+<amp-pixel src="https://foo.com/pixel?nrc=NAV_REDIRECT_COUNT"></amp-pixel>
+```
+
+### NAV_TIMING
+
+Provides access to metrics from the browser's PerformanceTiming interface.
+If both `startEvent` and `endEvent` arguments are passed, the value will be the time elapsed between the two events.
+Otherwise, if only `startEvent` argument is passed, the value will be the timestamp of the given event.
+The value is in milliseconds.
+
+See the W3C Navigation Timing API [PerformanceTiming interface](https://www.w3.org/TR/navigation-timing/#sec-navigation-timing-interface) documentation for attribute names and definitions.
+
+Please see below for the required and optional arguments you may pass into `NAV_TIMING` like a function. Spaces between arguments and values are not allowed.
+
+**arguments**:
+
+  - `startEvent` (Required) - Name of the PerformanceTiming interface attribute corresponding to the start event.
+
+  - `endEvent` (Optional) - Optional name of the PerformanceTiming interface attribute corresponding to the end event. If `endEvent` is passed, the value will be the time difference between the start and end events.
+
+For instance:
+```html
+<amp-pixel src="https://foo.com/pixel?navStart=NAV_TIMING(navigationStart)&amp;pageLoadTime=NAV_TIMING(navigationStart,loadEventStart)"></amp-pixel>
+```
+may make a request to something like `https://foo.com/pixel?navStart=1451606400000&pageLoadTime=100`.
+
+### NAV_TYPE
+
+Provides the type of the last non-redirect navigation in the current browsing context.
+See W3C Navigation Timing API [PerformanceNavigation interface](https://www.w3.org/TR/navigation-timing/#performancenavigation) for more information.
+
+For instance:
+```html
+<amp-pixel src="https://foo.com/pixel?nt=NAV_TYPE"></amp-pixel>
+```
+
 ### PAGE_DOWNLOAD_TIME
 
 Provides the time between receiving the first and the last byte of response. The value is in milliseconds.
