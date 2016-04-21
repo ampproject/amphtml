@@ -51,6 +51,11 @@ const EXPERIMENTS = [
         'README.md#amp-dev-channel',
   },
   {
+    id: 'alp',
+    name: 'Activates support for measuring incoming clicks.',
+    spec: 'https://github.com/ampproject/amphtml/issues/2934',
+  },
+  {
     id: 'amp-social-share',
     name: 'AMP Social Share',
     spec: 'https://github.com/ampproject/amphtml/blob/master/' +

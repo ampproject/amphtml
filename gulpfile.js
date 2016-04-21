@@ -156,8 +156,11 @@ function watch() {
   $$.watch('css/**/*.css', function() {
     compileCss();
   });
+  buildAlp({
+    watch: true,
+  });
   buildExtensions({
-    watch: true
+    watch: true,
   });
   buildExamples(true);
   compile(true);
@@ -240,6 +243,7 @@ function buildExtensionJs(path, name, version, options) {
 function build() {
   process.env.NODE_ENV = 'development';
   polyfillsForTests();
+  buildAlp();
   buildExtensions();
   buildExamples(false);
   compile();
@@ -252,6 +256,7 @@ function dist() {
   process.env.NODE_ENV = 'production';
   cleanupBuildDir();
   compile(false, true, true);
+  buildAlp({minify: true, watch: false, preventRemoveAndMakeDir: true});
   buildExtensions({minify: true, preventRemoveAndMakeDir: true});
   buildExperiments({minify: true, watch: false, preventRemoveAndMakeDir: true});
   buildLoginDone({minify: true, watch: false, preventRemoveAndMakeDir: true});
@@ -279,6 +284,7 @@ function buildExamples(watch) {
 
   // Also update test-example-validation.js
   buildExample('ads.amp.html');
+  buildExample('alp.amp.html');
   buildExample('analytics-notification.amp.html');
   buildExample('analytics.amp.html');
   buildExample('article.amp.html');
@@ -644,6 +650,24 @@ function buildLoginDoneVersion(version, options) {
           latestName: latestName,
         });
       });
+}
+
+/**
+ * Build ALP JS
+ *
+ * @param {!Object} options
+ */
+function buildAlp(options) {
+  options = options || {};
+  console.log('Bundling alp.js');
+
+  compileJs('./ads/alp/', 'install-alp.js', './dist/', {
+    watch: options.watch,
+    minify: options.minify || argv.minify,
+    includePolyfills: true,
+    minifiedName: 'alp.js',
+    preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
+  });
 }
 
 /**
