@@ -26,13 +26,16 @@ describe('iframe-helper', function() {
   let sandbox;
   let container;
 
+  function insert(iframe) {
+    container.doc.body.appendChild(iframe);
+  }
+
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     return createIframePromise().then(c => {
       container = c;
-      const i = document.createElement('iframe');
+      const i = c.doc.createElement('iframe');
       i.src = iframeSrc;
-      container.doc.body.appendChild(i);
       testIframe = i;
     });
   });
@@ -42,6 +45,22 @@ describe('iframe-helper', function() {
     sandbox.restore();
   });
 
+  it('should assert src in iframe', () => {
+    const iframe = container.doc.createElement('iframe');
+    iframe.srcdoc = '<html>';
+    expect(() => {
+      IframeHelper.listen(iframe, 'test', () => {});
+    }).to.throw('only iframes with src supported');
+  });
+
+  it('should assert iframe is detached', () => {
+    const iframe = container.doc.createElement('iframe');
+    iframe.src = iframeSrc;
+    insert(iframe);
+    expect(() => {
+      IframeHelper.listen(iframe, 'test', () => {});
+    }).to.throw('cannot register events on an attached iframe');
+  });
 
   it('should listen to iframe messages', () => {
     const removeEventListenerSpy = sandbox.spy(container.win,
@@ -50,6 +69,7 @@ describe('iframe-helper', function() {
     return new Promise(resolve => {
       unlisten = IframeHelper.listen(testIframe, 'send-intersections',
           resolve);
+      insert(testIframe);
     }).then(() => {
       expect(removeEventListenerSpy.callCount).to.equal(0);
       unlisten();
@@ -62,6 +82,7 @@ describe('iframe-helper', function() {
         'removeEventListener');
     return new Promise(resolve => {
       IframeHelper.listenOnce(testIframe, 'send-intersections', resolve);
+      insert(testIframe);
     }).then(() => {
       expect(removeEventListenerSpy.callCount).to.equal(1);
     });
@@ -71,7 +92,6 @@ describe('iframe-helper', function() {
     const removeEventListenerSpy = sandbox.spy(container.win,
         'removeEventListener');
     IframeHelper.listen(testIframe, 'send-intersections', function() {});
-    testIframe.parentElement.removeChild(testIframe);
     expect(removeEventListenerSpy.callCount).to.equal(0);
     container.win.postMessage('hello world', '*');
     expect(removeEventListenerSpy.callCount).to.equal(0);
@@ -81,6 +101,7 @@ describe('iframe-helper', function() {
   });
 
   it('should set sentinel on postMessage data', () => {
+    insert(testIframe);
     postMessageSpy = sinon/*OK*/.spy(testIframe.contentWindow, 'postMessage');
     IframeHelper.postMessage(
         testIframe, 'testMessage', {}, 'http://google.com');

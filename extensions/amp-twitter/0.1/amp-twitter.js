@@ -50,7 +50,6 @@ class AmpTwitter extends AMP.BaseElement {
     const iframe = getIframe(this.element.ownerDocument.defaultView,
         this.element, 'twitter');
     this.applyFillContent(iframe);
-    this.element.appendChild(iframe);
     // Triggered by context.updateDimensions() inside the iframe.
     listen(iframe, 'embed-size', data => {
       // We only get the message if and when there is a tweet to display,
@@ -63,6 +62,7 @@ class AmpTwitter extends AMP.BaseElement {
       amp.setAttribute('width', data.width);
       this./*OK*/changeHeight(data.height);
     }, /* opt_is3P */true);
+    this.element.appendChild(iframe);
     return loadPromise(iframe);
   }
 };
