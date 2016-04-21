@@ -541,6 +541,35 @@ export const ANALYTICS_CONFIG = {
       'image': true,
     },
   },
+
+  'shinystat': {
+    'requests': {
+      'ssurl': 'https://amp.shinystat.com/cgi-bin/getcod.cgi',
+      'ssparam': 'AMP=1' +
+                 '&USER=${account}' +
+                 '&AMPPAG=${page}' +
+                 '&AMPHR=${canonicalUrl}' +
+                 '&AMPREFER=${documentReferrer}' +
+                 '&AMPRES=${screenWidth}X${screenHeight}' +
+                 '&AMPCOLOR=${screenColorDepth}' +
+                 '&AMPCID=${clientId(AMP_CID)}' +
+                 '&AMPPID=${pageViewId}' +
+                 '&AMPTTL=${title}' +
+                 '&AMPRQC=${requestCount}' +
+                 '&AMPVIE=${viewer}' +
+                 '&AMPSSIDC=${queryParam(ssidc)}' +
+                 '&${ampp1}=${ampv1}' +
+                 '&${ampp2}=${ampv2}',
+      'pageview': '${ssurl}?${ssparam}',
+    },
+    'triggers': {
+      'pageview': {
+        'on': 'visible',
+        'request': 'pageview',
+        'iframePing': true,
+      },
+    },
+  },
 };
 ANALYTICS_CONFIG['infonline']['triggers']['pageview']['iframe' +
 /* TEMPORARY EXCEPTION */ 'Ping'] = true;

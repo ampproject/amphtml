@@ -164,6 +164,17 @@ Type attribute value: `quantcast`
 
 Adds support for Quantcast Measurement. More details for adding Quantcast Measurement can be found at [quantcast.com](https://www.quantcast.com/help/guides/)
 
+### ShinyStat
+
+Type attribute value: `shinystat`
+
+The following variables are supported:
+
+* `account`: Name of the account (mandatory)
+* `page`: Alternative name of the page (optional)
+
+Configuration details can be found at [www.shinystat.com](http://www.shinystat.com/en/guida-elemento_html-amp-code.html)
+
 ### SimpleReach
 
 Type attribute value: `simplereach`
