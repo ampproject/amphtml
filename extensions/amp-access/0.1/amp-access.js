@@ -782,7 +782,7 @@ export class AccessService {
       }
       if (success || !s) {
         // In case of a success, repeat the authorization and pingback flows.
-        // Also do this for empty response to avoid false negatives.
+        // Also do this for an empty response to avoid false negatives.
         // Pingback is repeated in this case since this could now be a new
         // "view" with a different access profile.
         this.broadcastReauthorize_();
