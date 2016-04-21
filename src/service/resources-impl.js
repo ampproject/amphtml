@@ -1328,11 +1328,11 @@ export class Resources {
     if (element.classList.contains('-amp-element')) {
       callback(this.getResourceForElement(element));
       // Also schedule amp-element that is a placeholder for the element.
-      const placeholder = element.getPlaceholder();
-      const hasAmpPlaceholder = (!element.classList.contains('-amp-layout') &&
-          placeholder && placeholder.classList.contains('-amp-element'));
-      if (hasAmpPlaceholder) {
-        callback(this.getResourceForElement(placeholder));
+      if (!element.classList.contains('-amp-layout')) {
+        const placeholder = element.getPlaceholder();
+        if (placeholder && placeholder.classList.contains('-amp-element')) {
+          callback(this.getResourceForElement(placeholder));
+        }
       }
     } else {
       const ampElements = element.getElementsByClassName('-amp-element');
