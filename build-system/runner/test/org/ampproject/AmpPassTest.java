@@ -38,6 +38,18 @@ public class AmpPassTest extends Es6CompilerTestCase {
              "  var log = { dev: { fine: function() {} } };",
              "  console.log('this is preserved');",
             "})()"));
+    test(
+        LINE_JOINER.join(
+             "(function() {",
+             "  var log = { dev: { fine: function() {} } };",
+             "  log.dev.fine();",
+             "  console.log('this is preserved');",
+            "})()"),
+        LINE_JOINER.join(
+             "(function() {",
+             "  var log = { dev: { fine: function() {} } };",
+             "  console.log('this is preserved');",
+            "})()"));
   }
 
   public void testDevErrorPreserve() throws Exception {
@@ -70,6 +82,19 @@ public class AmpPassTest extends Es6CompilerTestCase {
              "\"hello world\";",
              "  console.log('this is preserved');",
             "})()"));
+    test(
+        LINE_JOINER.join(
+             "(function() {",
+             "  var log = { dev: { assert: function() {} } };",
+             "  var someValue = log.dev.assert();",
+             "  console.log('this is preserved', someValue);",
+            "})()"),
+        LINE_JOINER.join(
+             "(function() {",
+             "  var log = { dev: { assert: function() {} } };",
+             "  var someValue;",
+             "  console.log('this is preserved', someValue);",
+            "})()"));
   }
 
   public void testDevAssertPreserveFirstArg() throws Exception {
@@ -84,6 +109,23 @@ public class AmpPassTest extends Es6CompilerTestCase {
              "(function() {",
              "  var log = { dev: { assert: function() {} } };",
              "  var someValue = true;",
+             "  console.log('this is preserved', someValue);",
+            "})()"));
+  }
+
+  public void testShouldPreserveNoneCalls() throws Exception {
+    test(
+        // Does reliasing
+        LINE_JOINER.join(
+             "(function() {",
+             "  var log = { dev: { assert: function() {} } };",
+             "  var someValue = log.dev.assert;",
+             "  console.log('this is preserved', someValue);",
+            "})()"),
+        LINE_JOINER.join(
+             "(function() {",
+             "  var log = { dev: { assert: function() {} } };",
+             "  var someValue = log.dev.assert;",
              "  console.log('this is preserved', someValue);",
             "})()"));
   }

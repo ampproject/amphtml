@@ -94,14 +94,18 @@ class AmpPass extends AbstractPostOrderCallback implements HotSwapCompilerPass {
   }
 
   private void maybeEliminateCallExceptFirstParam(Node n, Node p) {
-    Node functionName = n.getFirstChild();
-    if (functionName == null) {
+    Node call = n.getFirstChild();
+    if (call == null) {
       return;
     }
-    Node firstArg = functionName.getNext();
+
+    Node firstArg = call.getNext();
     if (firstArg == null) {
+      p.removeChild(n);
+      compiler.reportCodeChange();
       return;
     }
+
     firstArg.detachFromParent();
     p.replaceChild(n, firstArg);
     compiler.reportCodeChange();
