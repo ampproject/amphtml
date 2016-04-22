@@ -31,7 +31,11 @@ limitations under the License.
   </tr>
   <tr>
     <td width="40%"><strong>Examples</strong></td>
-    <td><a href="https://github.com/ampproject/amphtml/blob/master/examples/everything.amp.html">everything.amp.html</a></td>
+    <td>
+      <a href="https://github.com/ampproject/amphtml/blob/master/examples/timeline.amp.html">timeline.amp.html</a>
+      <br/>
+      <a href="https://github.com/ampproject/amphtml/blob/master/examples/timeline-integrations.amp.html">timeline-integrations.amp.html</a>
+    </td>
   </tr>
 </table>
 
@@ -85,13 +89,13 @@ Example:
 </section>
 ```
 ## Styling
-You can style the markers using ```circle```, ```square``` class names in the ```&lt;amp-timeline>``` tag at the beggining of HTML markup like so:
+You can style the markers using ```circle```, ```square``` class names in the ```<amp-timeline>``` tag at the beggining of HTML markup like so:
 ```html
 <amp-timeline width="100" height="0" layout="responsive" class="circle">
 ```
 The default value is ```diamond```
 
-Both the line and the markers can be customized using the ```&lt;style amp-custom> &lt;/amp-custom&gt;``` tag in the head of your HTML file by writing the following CSS rules:
+Both the line and the markers can be customized using the ```<style amp-custom> </amp-custom>``` tag in the head of your HTML file by writing the following CSS rules:
 
 ```css
 .left .card:before, .right .card:before {
@@ -122,7 +126,7 @@ The following lists validation errors specific to the `amp-timeline` element
   </tr>
   <tr>
     <td width="40%">The first element in a timeline should be a <code>&lt;h1></code> tag</td>
-    <td>Error thwon when the element after the section element is not a <code>&lt;h1></code> element with class <code>heading</code>.</td>
+    <td>Error thrown when the element after the section element is not a <code>&lt;h1></code> element with class <code>heading</code>.</td>
   </tr>
   <tr>
     <td width="40%">The second element in a timeline should be an image</td>
