@@ -274,19 +274,19 @@ export function childElementByTag(parent, tagName) {
 
 
 /**
- * Returns element attributes that pass the callback test as params.
+ * Returns element data-param- attributes as url parameters key-value pairs.
+ * e.g. data-param-some-attr=value -> {someAttr: value}.
  * @param {!Element} element
- * @param {function(!Element):string|null} parseAttributeCallback
- * @return {Object}
+ * @return {!Object}
  */
-export function getAttributesAsParams(element, parseAttributeCallback) {
+export function getDataParamsFromAttributes(element) {
   const attributes = element.attributes;
-  const params = {};
+  const params = Object.create(null);
   for (let i = 0; i < attributes.length; i++) {
     const attr = attributes[i];
-    const parsedAttributeName = parseAttributeCallback(attr);
-    if (parsedAttributeName) {
-      const param = dashToCamelCase(parsedAttributeName);
+    const matches = attr.nodeName.match(/^data-param-(.+)/);
+    if (matches) {
+      const param = dashToCamelCase(matches[1]);
       params[param] = attr.nodeValue;
     }
   }

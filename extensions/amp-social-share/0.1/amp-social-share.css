@@ -17,13 +17,12 @@
 @import "../../../third_party/optimized-svg-icons/amp-social-share-svgs.css";
 
 amp-social-share {
-  height: 44px;
-  width: 60px;
   background-repeat: no-repeat;
   background-position: center;
   background-size: contain;
   text-decoration: none;
   cursor: pointer;
+  position: relative;
 }
 
 amp-social-share.-amp-layout-container {
