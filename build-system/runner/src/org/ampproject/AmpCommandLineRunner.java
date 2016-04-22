@@ -17,6 +17,7 @@ public class AmpCommandLineRunner extends CommandLineRunner {
    */
   ImmutableSet<String> suffixTypes = ImmutableSet.of(
       "dev.fine");
+
   private boolean collapseProperties = false;
 
   protected AmpCommandLineRunner(String[] args) {
@@ -26,12 +27,12 @@ public class AmpCommandLineRunner extends CommandLineRunner {
   @Override protected CompilerOptions createOptions() {
     CompilerOptions options = super.createOptions();
     AmpPass ampPass = new AmpPass(getCompiler(), suffixTypes);
-    options.setCollapseProperties(collapseProps);
+    options.setCollapseProperties(collapseProperties);
     options.addCustomPass(CustomPassExecutionTime.BEFORE_OPTIMIZATIONS, ampPass);
     return options;
   }
 
-  protected setCollapseProperties(boolean value) {
+  protected void setCollapseProperties(boolean value) {
     collapseProperties = value;
   }
 
