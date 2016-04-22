@@ -27,14 +27,14 @@ ul.timeline:after { content: " "; position: absolute; top: 0; left: 50%; bottom:
 h1.heading {padding: 0.5em; font-size: 1.6em; color: #fff; font-weight: bold; background-color: #8e0000;}
 
  li {width: 50%;}
- li.left {margin-top: 0px;}
- li.left .card {float: left; }
- li.left .card:after { right: -15px; left: auto;}
- li.right {float: right; clear: right; margin-top:50px; position: relative; left:1em;}
+ .left {margin-top: 0px;}
+ .left .card {float: left; }
+ .left .card:after { right: -15px; left: auto;}
+ .right {float: right; clear: right; margin-top:50px; position: relative; left:1em;}
  li .card {max-width: 100%; width: 240px; background: #fff; box-shadow: 0px 1px 3px 0px #d4d4d5, 0px 0px 0px 1px #d4d4d5; margin: 1em 0em; position: relative;}
  li .card:after { content: ""; width: 103%; height: 2px; z-index: 0; position: absolute; top: 38px; left: -15px; background-color: #8e0000; }
- li.left .card:before { content: ""; display: block; width: 10px; height: 10px; border: 2px solid #fff; -webkit-box-shadow: 0px 0px 0px 2px #8e0000; -moz-box-shadow: 0px 0px 0px 2px #8e0000; box-shadow: 0px 0px 0px 2px #8e0000;  -ms-transform: rotate(45deg); -moz-transform: rotate(45deg); -webkit-transform: rotate(45deg); transform: rotate(45deg); background-color: #8e0000; position: absolute; z-index: 2; right: -22px; left: auto; top: 32px; }
- li.right .card:before { content: ""; display: block; width: 10px; height: 10px; border: 2px solid #fff; -webkit-box-shadow: 0px 0px 0px 2px #8e0000; -moz-box-shadow: 0px 0px 0px 2px #8e0000; box-shadow: 0px 0px 0px 2px #8e0000; -ms-transform: rotate(45deg); -moz-transform: rotate(45deg); -webkit-transform: rotate(45deg); transform: rotate(45deg); background-color: #8e0000; position: absolute; z-index: 2; left: -23px; right:auto; top: 32px; }
+ .left .card:before { content: ""; display: block; width: 10px; height: 10px; border: 2px solid #fff; -webkit-box-shadow: 0px 0px 0px 2px #8e0000; -moz-box-shadow: 0px 0px 0px 2px #8e0000; -o-box-shadow: 0px 0px 0px 2px #8e0000; box-shadow: 0px 0px 0px 2px #8e0000;  -ms-transform: rotate(45deg); -o-transform: rotate(45deg); -moz-transform: rotate(45deg); -webkit-transform: rotate(45deg); transform: rotate(45deg); background-color: #8e0000; position: absolute; z-index: 2; right: -22px; left: auto; top: 32px; }
+ .right .card:before { content: ""; display: block; width: 10px; height: 10px; border: 2px solid #fff; -webkit-box-shadow: 0px 0px 0px 2px #8e0000; -moz-box-shadow: 0px 0px 0px 2px #8e0000;  -o-box-shadow: 0px 0px 0px 2px #8e0000; box-shadow: 0px 0px 0px 2px #8e0000; -ms-transform: rotate(45deg); -o-transform: rotate(45deg); -moz-transform: rotate(45deg); -webkit-transform: rotate(45deg); transform: rotate(45deg); background-color: #8e0000; position: absolute; z-index: 2; left: -23px; right:auto; top: 32px; }
 
  /*Marker custom shape */
  .circle .timeline .item .card:before {border-radius: 50%;}
