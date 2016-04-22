@@ -86,34 +86,30 @@ export class AmpTimeline extends AMP.BaseElement {
         // each item must be a li with class item
         assert(item.tagName.toLowerCase() == 'li' &&
                item.classList.contains('item'),
-               'Each item in the timeline must be a <li> tag with class item, ' +
+               'Each item in the timeline must be a <li> tag with class item. Item number: %s, ' +
                'See https://github.com/ampproject/amphtml/blob/master/extensions/' +
-               'amp-timeline/amp-timeline.md. Found in: %s' +
-               'Item number: %s', this.element, index+1);
+               'amp-timeline/amp-timeline.md. Found in: %s', index+1, this.element);
 
         // each item must be either left or right
         assert(item.classList.contains('left') ||
               item.classList.contains('right'),
-              'Each item in the timeline must have either a left or right class, ' +
+              'Each item in the timeline must have either a left or right class. Item number: %s, ' +
               'See https://github.com/ampproject/amphtml/blob/master/extensions/' +
-              'amp-timeline/amp-timeline.md. Found in: %s' +
-              'Item number: %s', this.element, index+1);
+              'amp-timeline/amp-timeline.md. Found in: %s', index+1, this.element);
 
         // each item must contain only one card element
         assert(item.children.length == 1,
-              'Each item in the timeline must contain only one child card element, ' +
+              'Each item in the timeline must contain only one child card element. Item number: %s, ' +
               'See https://github.com/ampproject/amphtml/blob/master/extensions/' +
-              'amp-timeline/amp-timeline.md. Found in: %s' +
-              'Item number: %s', this.element, index+1);
+              'amp-timeline/amp-timeline.md. Found in: %s', index+1, this.element);
 
 
         // each item must contain only one card element
         assert(card.tagName.toLowerCase() == 'div' &&
                card.classList.contains('card'),
-              'Each item in the timeline must contain a <div> tag with class card, ' +
+              'Each item in the timeline must contain a <div> tag with class card. Item number: %s, ' +
               'See https://github.com/ampproject/amphtml/blob/master/extensions/' +
-              'amp-timeline/amp-timeline.md. Found in: %s' +
-              'Item number: %s', this.element, index+1);
+              'amp-timeline/amp-timeline.md. Found in: %s', index+1, this.element);
 
         const header = card.children[0];
         const media = card.children[1];
@@ -122,26 +118,23 @@ export class AmpTimeline extends AMP.BaseElement {
         // each card must have a header
         assert(header.tagName.toLowerCase() == 'div' &&
                header.classList.contains('content'),
-              'Each card header must be defined by a <div> tag with class content, ' +
+              'Each card header must be defined by a <div> tag with class content. Item number: %s, ' +
               'See https://github.com/ampproject/amphtml/blob/master/extensions/' +
-              'amp-timeline/amp-timeline.md. Found in: %s' +
-              'Item number: %s', this.element, index+1);
+              'amp-timeline/amp-timeline.md. Found in: %s', index+1, this.element);
 
         // each card must have a media tag
         assert(media.tagName.toLowerCase() == 'div' &&
                media.classList.contains('media'),
-              'Each card media must be defined by a <div> tag with class media, ' +
+              'Each card media must be defined by a <div> tag with class media. Item number: %s, ' +
               'See https://github.com/ampproject/amphtml/blob/master/extensions/' +
-              'amp-timeline/amp-timeline.md. Found in: %s' +
-              'Item number: %s', this.element, index+1);
+              'amp-timeline/amp-timeline.md. Found in: %s', index+1, this.element);
 
         // each card must have a description container
         assert(descriptionContainer.tagName.toLowerCase() == 'div' &&
                descriptionContainer.classList.contains('content'),
-              'Each card description container must be defined by a <div> tag with class content, ' +
+              'Each card description container must be defined by a <div> tag with class content. Item number: %s, ' +
               'See https://github.com/ampproject/amphtml/blob/master/extensions/' +
-              'amp-timeline/amp-timeline.md. Found in: %s' +
-              'Item number: %s', this.element, index+1);
+              'amp-timeline/amp-timeline.md. Found in: %s', index+1, this.element);
       });
 
     });
