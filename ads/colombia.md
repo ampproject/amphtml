@@ -30,7 +30,7 @@ limitations under the License.
 
 ## Configuration
 
-For semantics of configuration, please see ad network documentation.
+For semantics of configuration, please see ad network documentation.For support contact care@timesadcenter.com
 
 Supported parameters:
 
