@@ -201,11 +201,16 @@ export class IntersectionObserver extends Observable {
     }
     this.pendingChanges_.push(change);
     if (!this.flushTimeout_) {
-      // Send a maximum of 10 postMessages per second.
+      // Send one immediately, …
+      this.flush_();
+      // but only send a maximum of 10 postMessages per second.
       this.flushTimeout_ = timer.delay(this.boundFlush_, 100);
     }
   }
 
+  /**
+   * @private
+   */
   flush_() {
     this.flushTimeout_ = 0;
     if (!this.pendingChanges_.length) {
