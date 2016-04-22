@@ -13,7 +13,7 @@ import com.google.javascript.jscomp.CustomPassExecutionTime;
 public class AmpCommandLineRunner extends CommandLineRunner {
 
   /**
-   * List of string suffixes to eliminate from the AST. 
+   * List of string suffixes to eliminate from the AST.
    */
   ImmutableSet<String> suffixTypes = ImmutableSet.of(
       "dev.fine");
@@ -24,6 +24,7 @@ public class AmpCommandLineRunner extends CommandLineRunner {
 
   @Override protected CompilerOptions createOptions() {
     CompilerOptions options = super.createOptions();
+    options.setCollapseProperties(true);
     AmpPass ampPass = new AmpPass(getCompiler(), suffixTypes);
     options.addCustomPass(CustomPassExecutionTime.BEFORE_OPTIMIZATIONS, ampPass);
     return options;
