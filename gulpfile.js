@@ -17,19 +17,16 @@
 checkMinVersion();
 
 var $$ = require('gulp-load-plugins')();
-var autoprefixer = require('autoprefixer');
 var babel = require('babelify');
 var browserify = require('browserify');
 var buffer = require('vinyl-buffer');
 var closureCompile = require('./build-system/tasks/compile').closureCompile;
 var cleanupBuildDir = require('./build-system/tasks/compile').cleanupBuildDir;
-var cssnano = require('cssnano');
+var jsifyCssAsync = require('./build-system/tasks/jsify-css').jsifyCssAsync;
 var fs = require('fs-extra');
 var gulp = $$.help(require('gulp'));
 var lazypipe = require('lazypipe');
 var minimist = require('minimist');
-var postcss = require('postcss');
-var postcssImport = require('postcss-import');
 var source = require('vinyl-source-stream');
 var touch = require('touch');
 var watchify = require('watchify');
@@ -40,24 +37,6 @@ var internalRuntimeToken = require('./build-system/internal-version').TOKEN;
 var argv = minimist(process.argv.slice(2), { boolean: ['strictBabelTransform'] });
 
 require('./build-system/tasks');
-
-// NOTE: see https://github.com/ai/browserslist#queries for `browsers` list
-var cssprefixer = autoprefixer({
-  browsers: [
-    'last 5 ChromeAndroid versions',
-    'last 5 iOS versions',
-    'last 3 FirefoxAndroid versions',
-    'last 5 Android versions',
-    'last 2 ExplorerMobile versions',
-    'last 2 OperaMobile versions',
-    'last 2 OperaMini versions'
-  ]
-});
-
-cssnano = cssnano({
-  convertValues: false,
-  zindex: false
-});
 
 
 /**
@@ -163,36 +142,11 @@ function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir) {
  */
 function compileCss() {
   console.info('Recompiling CSS.');
-  return jsifyCssPromise('css/amp.css').then(function(css) {
+  return jsifyCssAsync('css/amp.css').then(function(css) {
     return gulp.src('css/**.css')
         .pipe($$.file('css.js', 'export const cssText = ' + css))
         .pipe(gulp.dest('build'));
   });
-}
-
-/**
- * 'Jsify' a CSS file - Adds vendor specific css prefixes to the css file,
- * compresses the file, removes the copyright comment, and adds the sourceURL
- * to the stylesheet
- *
- * @param {string} filename css file
- * @return {!Promise} that resolves with the css content after processing
- */
-function jsifyCssPromise(filename) {
-  var css = fs.readFileSync(filename, 'utf8');
-  var transformers = [cssprefixer, cssnano];
-  // Remove copyright comment. Crude hack to get our own copyright out
-  // of the string.
-  return postcss(transformers).use(postcssImport).process(css.toString(), {
-        'from': filename
-      })
-      .then(function(result) {
-        result.warnings().forEach(function(warn) {
-          console.warn(warn.toString());
-        });
-        var css = result.css;
-        return JSON.stringify(css + '\n/*# sourceURL=/' + filename + '*/');
-      });
 }
 
 /**
@@ -245,7 +199,7 @@ function buildExtension(name, version, hasCss, options) {
   }
   if (hasCss) {
     mkdirSync('build');
-    return jsifyCssPromise(path + '/' + name + '.css').then(function(css) {
+    return jsifyCssAsync(path + '/' + name + '.css').then(function(css) {
       var jsCss = 'export const CSS = ' + css + ';\n';
       var builtName = 'build/' + name + '-' + version + '.css.js';
       fs.writeFileSync(builtName, jsCss, 'utf-8');
