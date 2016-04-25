@@ -17,7 +17,7 @@
 import {
   getElementService,
   getElementServiceIfAvailable,
-} from './custom-element';
+} from './element-service';
 
 
 /**

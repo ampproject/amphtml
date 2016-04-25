@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {getElementService} from './custom-element';
+import {getElementService} from './element-service';
 
 /**
  * @param {!Window} win
