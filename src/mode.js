@@ -19,6 +19,7 @@
  * @typedef {{
  *   localDev: boolean,
  *   development: boolean,
+ *   filter: (string|undefined)
  *   minified: boolean,
  *   test: boolean,
  *   log: (string|undefined),
@@ -88,6 +89,9 @@ function getMode_() {
     localDev: isLocalDev,
     // Triggers validation
     development: developmentQuery['development'] == '1' || window.AMP_DEV_MODE,
+    // Allows filtering validation errors by error category. For the
+    // available categories, see ErrorCategory in validator/validator.proto.
+    filter: developmentQuery['filter'],
     minified: process.env.NODE_ENV == 'production',
     test: window.AMP_TEST,
     log: developmentQuery['log'],
