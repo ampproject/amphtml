@@ -26,20 +26,20 @@ export function colombia(global, data) {
     'clmb_divid', 'loadingStrategy',
   ]);
   // push the two object into the '_colombia' global
-  (global._colombia = global._colombia || []).push([{
+  (global._colombia = global._colombia || []).push({
     clmbslot: data.clmb_slot,
     clmbposition: data.clmb_position,
     clmbsection: data.clmb_section,
     clmbdivid: data.clmb_divid,
-  }]);
+  });
 // install observation on entering/leaving the view
   global.context.observeIntersection(function(newrequest) {
     newrequest.forEach(function(d) {
       if (d.intersectionRect.height > 0) {
         global._colombia.push({
-                 visible: !0,
-                 rect: d,
-               });
+          visible: !0,
+          rect: d,
+        });
       }
     });
   });
