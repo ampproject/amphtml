@@ -19,10 +19,13 @@
 'use strict';
 
 const fs = require('fs');
-const https = require('https');
 const http = require('http');
+const https = require('https');
+const mustache = require('mustache');
+const path = require('path');
 const program = require('commander');
 const vm = require('vm');
+const url = require('url');
 
 /**
  * If the provided fileOrUrl start with 'http://' or 'https://', downloads
@@ -66,6 +69,109 @@ function readFileOrDownload(fileOrUrl, onSuccess, onFailure) {
       onSuccess(data);
     }
   });
+}
+
+/**
+ * Maps from file extension to a mime-type.
+ * @param {!string} extension
+ * @returns {!string}
+ */
+function extToMime(extension) {
+  if (extension === 'html') {
+    return 'text/html';
+  } else if (extension === 'js') {
+    return 'text/javascript';
+  } else if (extension === 'css') {
+    return 'text/css';
+  }
+  return 'text/plain';
+}
+
+/**
+ * Serves a web UI for validation.
+ * @param {!number} port
+ * @param {!string} validatorScript
+ */
+function serve(port, validatorScript) {
+  // By default, validatorScript will point at the latest published validator,
+  // a https:// URL. So in that case, we'll just use it. But if it's a file,
+  // then we need to also serve the file. So, we load it into RAM and make it
+  // available as /validator.js.
+  let validatorScriptContents = '';
+  if (!validatorScript.startsWith('http://') &&
+      !validatorScript.startsWith('https://')) {
+    validatorScriptContents = fs.readFileSync(validatorScript, 'utf-8');
+    validatorScript = '/validator.js';
+  }
+  http.createServer((request, response) => {
+        if (request.method !== 'GET') {
+          return;
+        }
+        //
+        // Handle '/'.
+        //
+        if (request.url === '/') {
+          response.writeHead(200, {'Content-Type': 'text/html'});
+          const contents = fs.readFileSync(
+              path.join(__dirname, 'webui/index.html'), 'utf-8');
+          const view = {'validatorScript': validatorScript};
+          const html = mustache.render(contents, view);
+          response.end(html);
+          return;
+        }
+        //
+        // Handle '/validator.js'.
+        //
+        if (request.url === '/validator.js') {
+          response.writeHead(200, {'Content-Type': 'text/javascript'});
+          response.end(validatorScriptContents);
+          return;
+        }
+        //
+        // Handle '/cm/*', that is, code mirror.
+        //
+        if (request.url.startsWith('/cm/')) {
+          const parsed = request.url.match(/\/cm\/([a-z0-9\/_-]*\.(js|css))$/);
+          if (parsed === null) {
+            return;
+          }
+          const contents = fs.readFileSync(
+              path.join(__dirname, 'node_modules/codemirror', parsed[1]),
+              'utf-8');
+          response.writeHead(200, {'Content-Type': extToMime(parsed[2])});
+          response.end(contents);
+          return;
+        }
+        //
+        // Handle fetch?, a request to fetch an arbitrary doc from the
+        // internet. It presents the results as JSON.
+        //
+        if (request.url.startsWith('/fetch?')) {
+          const parsedUrl = url.parse(request.url, true);
+          const urlToFetch = parsedUrl['query']['url'];
+          if (!urlToFetch.startsWith('https://') &&
+              !urlToFetch.startsWith('http://')) {
+            response.writeHead(400, {'Content-Type': 'text/plain'});
+            response.end('Bad request.');
+            return;
+          }
+          readFileOrDownload(
+              urlToFetch,
+              (contents) => {
+                response.writeHead(200, {'Content-Type': 'application/json'});
+                response.end(JSON.stringify({'contents': contents}));
+              },
+              (errorMessage) => {
+                response.writeHead(502, {'Content-Type': 'text/plain'});
+                response.end('Bad gateway (' + errorMessage + ').');
+              });
+          return;
+        }
+        response.writeHead(404, {'Content-Type': 'text/plain'});
+        response.end('Not found.');
+      })
+      .listen(port);
+  console.log('Serving at http://127.0.0.1:' + port + '/');
 }
 
 /**
@@ -115,28 +221,54 @@ function validateFiles(filesToProcess) {
  */
 function main() {
   program.version('0.1.0')
-      .usage('[options] <fileOrUrlOrMinus ...>')
+      .usage(
+          '<fileOrUrlOrMinus...>\n\n' +
+          '  By default, validates the files or urls provided as arguments.\n' +
+          '  If "-" is specified, reads from stdin instead.\n' +
+          '  Note the --validator_js option for selecting the Validator to\n' +
+          '  run.')
       .option(
-          '--validator_js <fileOrUrl>',
-          'The Validator Javascript. Latest published version by ' +
-              'default, or dist/validator_minified.js (built with ' +
-              'build.py) for development.',
-          'https://cdn.ampproject.org/v0/validator.js')
-      .parse(process.argv);
-  if (program.args.length == 0) {
+          '--validator_js <fileOrUrl>', 'The Validator Javascript. \n' +
+              '  Latest published version by default, or \n' +
+              '  dist/validator_minified.js (built with build.py) \n' +
+              '  for development.',
+          'https://cdn.ampproject.org/v0/validator.js');
+
+  program.command('* <fileOrUrlOrMinus...>')
+      .description('Validates list of files or urls (default).')
+      .action((validateOrUrlOrMinus) => {
+        if (validateOrUrlOrMinus.length == 0) {
+          program.outputHelp();
+          process.exit(1);
+        }
+        readFileOrDownload(
+            program.validator_js,
+            (validatorScript) => {
+              vm.runInThisContext(validatorScript);
+              validateFiles(validateOrUrlOrMinus);
+            },
+            (errorMessage) => {
+              console.error('Could not fetch validator.js: ' + errorMessage);
+              process.exitCode = 1;
+            });
+      });
+
+  program.command('webui')
+      .description('Serves a web UI for validation.')
+      .option(
+          '--port <number>', 'Port number',
+          (arg) => {
+            const n = parseInt(arg);
+            return isNaN(n) ? null : n;
+          },
+          8765)
+      .action((options) => { serve(options.port, program.validator_js); });
+
+  program.parse(process.argv);
+  if (program.args == 0) {
     program.outputHelp();
     process.exit(1);
   }
-  readFileOrDownload(
-      program.validator_js,
-      (validatorScript) => {
-        vm.runInThisContext(validatorScript);
-        validateFiles(program.args);
-      },
-      (errorMessage) => {
-        console.error('Could not fetch validator.js: ' + errorMessage);
-        process.exitCode = 1;
-      });
 }
 
 if (require.main === module) {

@@ -15,7 +15,9 @@
     "amp_validator": "index.js"
   },
   "dependencies": {
-    "commander": "2.9.0"
+    "commander": "2.9.0",
+    "codemirror": "5.13.4",
+    "mustache": "2.2.1"
   },
   "devDependencies": {
     "google-closure-compiler": "20151015.0.0",
