@@ -50,7 +50,7 @@ tags: {  # <amp-instagram>
   tag_name: "amp-instagram"
   disallowed_ancestor: "head"
   disallowed_ancestor: "amp-sidebar"
-  also_requires: "amp-instagram extension .js script"
+  also_requires_tag: "amp-instagram extension .js script"
   attrs: {
     name: "data-shortcode"
     mandatory_oneof: "['data-shortcode', 'src']"

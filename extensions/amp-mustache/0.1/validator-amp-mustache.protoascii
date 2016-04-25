@@ -57,7 +57,7 @@ tags: {
   tag_name: "template"
   # <template> tags may not be nested inside other <template> tags.
   disallowed_ancestor: "template"
-  also_requires: "amp-mustache extension .js script"
+  also_requires_tag: "amp-mustache extension .js script"
   attrs: {
     name: "type"
     mandatory: true

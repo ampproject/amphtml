@@ -51,7 +51,7 @@ tags: {  # <amp-reach-player>
   tag_name: "amp-reach-player"
   disallowed_ancestor: "head"
   disallowed_ancestor: "amp-sidebar"
-  also_requires: "amp-reach-player extension .js script"
+  also_requires_tag: "amp-reach-player extension .js script"
   attrs: {
     name: "data-embed-id"
     mandatory: true

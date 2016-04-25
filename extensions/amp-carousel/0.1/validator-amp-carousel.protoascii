@@ -50,7 +50,7 @@ tags: {  # <amp-carousel>
   tag_name: "amp-carousel"
   disallowed_ancestor: "head"
   disallowed_ancestor: "amp-sidebar"
-  also_requires: "amp-carousel extension .js script"
+  also_requires_tag: "amp-carousel extension .js script"
   attrs: { name: "arrows" value: "" }
   attrs: { name: "autoplay" value: "" }
   attrs: { name: "controls" }

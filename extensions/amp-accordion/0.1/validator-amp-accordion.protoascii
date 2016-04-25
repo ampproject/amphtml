@@ -48,7 +48,7 @@ tags: {  # amp-accordion
 tags: {  # <amp-accordion>
   tag_name: "amp-accordion"
   disallowed_ancestor: "head"
-  also_requires: "amp-accordion extension .js script"
+  also_requires_tag: "amp-accordion extension .js script"
   attrs: { name: "animate" value: "" }
   child_tags: {
     child_tag_name_oneof: "section"

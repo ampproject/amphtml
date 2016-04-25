@@ -50,7 +50,7 @@ tags: {  # <amp-brightcove>
   tag_name: "amp-brightcove"
   disallowed_ancestor: "head"
   disallowed_ancestor: "amp-sidebar"
-  also_requires: "amp-brightcove extension .js script"
+  also_requires_tag: "amp-brightcove extension .js script"
   attrs: { name: "data-account" mandatory: true }
   # If data-embed is missing, the default value is "default".
   attrs: { name: "data-embed" }

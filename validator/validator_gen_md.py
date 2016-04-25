@@ -162,9 +162,9 @@ def PrintTagSpec(validator_pb2, tag_spec, out):
   if tag_spec.disallowed_ancestor:
     out.append('* Disallowed Ancestor: %s' %
                RepeatedFieldToString(tag_spec.disallowed_ancestor))
-  if tag_spec.also_requires:
+  if tag_spec.also_requires_tag:
     out.append('* Also Requires: %s' %
-               RepeatedFieldToString(tag_spec.also_requires))
+               RepeatedFieldToString(tag_spec.also_requires_tag))
   if tag_spec.attrs:
     out.append('')
     out.append('Allowed Attributes:')

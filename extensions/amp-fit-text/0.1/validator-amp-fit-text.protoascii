@@ -53,7 +53,7 @@ tags: {  # <amp-fit-text>
   disallowed_ancestor: "head"
   # <amp-fit-text> is whitelisted for <amp-sidebar>, otherwise:
   # disallowed_ancestor: "amp-sidebar"
-  also_requires: "amp-fit-text extension .js script"
+  also_requires_tag: "amp-fit-text extension .js script"
   attrs: { name: "max-font-size" }
   attrs: { name: "min-font-size" }
   attr_lists: "extended-amp-global"

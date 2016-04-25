@@ -50,7 +50,7 @@ tags: {  # <amp-anim>
   tag_name: "amp-anim"
   disallowed_ancestor: "head"
   disallowed_ancestor: "amp-sidebar"
-  also_requires: "amp-anim extension .js script"
+  also_requires_tag: "amp-anim extension .js script"
   attrs: { name: "alt" }
   attrs: { name: "attribution" }
   attrs: { name: "autoplay" value: "" }
