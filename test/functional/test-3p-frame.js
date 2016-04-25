@@ -22,11 +22,12 @@ import {
   prefetchBootstrap,
   resetCountForTesting,
 } from '../../src/3p-frame';
-import {validateData} from '../../src/3p';
 import {documentInfoFor} from '../../src/document-info';
 import {loadPromise} from '../../src/event-helper';
-import {setModeForTesting} from '../../src/mode';
+import {preconnectFor} from '../../src/preconnect';
 import {resetServiceForTesting} from '../../src/service';
+import {setModeForTesting} from '../../src/mode';
+import {validateData} from '../../src/3p';
 import {viewerFor} from '../../src/viewer';
 
 describe('3p-frame', () => {
@@ -196,6 +197,9 @@ describe('3p-frame', () => {
   });
 
   it('should prefetch bootstrap frame and JS', () => {
+    const preconnect = preconnectFor(window);
+    const origPreloadSupportValue = preconnect.preloadSupported_;
+    preconnect.preloadSupported_ = false;
     prefetchBootstrap(window);
     const fetches = document.querySelectorAll(
         'link[rel=prefetch]');
@@ -206,6 +210,7 @@ describe('3p-frame', () => {
     expect(fetches[1].href).to.equal(
         'https://3p.ampproject.net/$internalRuntimeVersion$/f.js');
     expect(fetches[1].getAttribute('as')).to.equal('script');
+    preconnect.preloadSupported_ = origPreloadSupportValue;
   });
 
   it('should make sub domains (unique)', () => {
