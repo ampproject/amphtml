@@ -362,14 +362,16 @@ amp.validator.ValidationResult.prototype.outputToTerminal =
         errors.push(error);
       }
     }
+    const urlWithoutFilter =
+        goog.uri.utils.removeFragment(url) + '#development=1';
     if (errors.length === 0) {
       terminal.error('AMP validation - no errors matching ' +
-          'error_category_filter=' + errorCategoryFilter + ' found. ' +
-          'To see all errors, visit ' + url + '#development=1');
+          'filter=' + errorCategoryFilter + ' found. ' +
+          'To see all errors, visit ' + urlWithoutFilter);
     } else {
       terminal.error('AMP validation - displaying errors matching ' +
-          'error_category_filter=' + errorCategoryFilter + '. ' +
-          'To see all errors, visit ' + url + '#development=1');
+          'filter=' + errorCategoryFilter + '. ' +
+          'To see all errors, visit ' + urlWithoutFilter);
     }
   }
   for (const error of errors) {
