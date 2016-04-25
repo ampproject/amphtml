@@ -23,6 +23,7 @@ import {installUrlReplacementsService} from './service/url-replacements-impl';
 import {installViewerService} from './service/viewer-impl';
 import {installViewportService} from './service/viewport-impl';
 import {installVsyncService} from './service/vsync-impl';
+import {installXhrService} from './service/xhr-impl';
 
 
 /**
@@ -40,4 +41,5 @@ export function installCoreServices(window) {
   installStandardActions(window);
   installFramerateService(window);
   installUrlReplacementsService(window);
+  installXhrService(window);
 }

@@ -149,6 +149,13 @@ var forbiddenTerms = {
       'src/service/standard-actions-impl.js',
     ],
   },
+  'installXhrService': {
+    message: privateServiceFactory,
+    whitelist: [
+      'src/amp-core-service.js',
+      'src/service/xhr-impl.js',
+    ],
+  },
   'sendMessage': {
     message: privateServiceFactory,
     whitelist: [

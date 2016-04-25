@@ -21,7 +21,7 @@ import {
 } from '../../../amp-user-notification/0.1/amp-user-notification';
 import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
-import {getService} from '../../../../src/service';
+import {getService, resetServiceForTesting} from '../../../../src/service';
 import {markElementScheduledForTesting} from '../../../../src/custom-element';
 import {installCidService} from '../../../../src/service/cid-impl';
 import {installViewerService} from '../../../../src/service/viewer-impl';
@@ -60,6 +60,7 @@ describe('amp-analytics', function() {
       installCidService(iframe.win);
       installUrlReplacementsService(iframe.win);
       uidService = installUserNotificationManager(iframe.win);
+      resetServiceForTesting(iframe.win, 'xhr');
       getService(iframe.win, 'xhr', () => {
         return {fetchJson: (url, init) => {
           expect(init.requireAmpResponseSourceOrigin).to.be.true;
