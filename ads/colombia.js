@@ -25,13 +25,22 @@ export function colombia(global, data) {
     'clmb_slot', 'clmb_position', 'clmb_section',
     'clmb_divid', 'loadingStrategy',
   ]);
-  global.clmbSlot = data.clmbSlot;
-  global.clmbPosition = data.clmbPosition;
-  global.clmbSection = data.clmbSection;
-  global.clmbDivid = data.clmbDivid;
-  global.context.observeIntersection(function(d) {
-    d.forEach(function() {
-      ampPushNotify.itemTrackURL(global);
+  // push the two object into the '_colombia' global
+  (global._colombia = global._colombia || []).push([{
+    clmbslot: data.clmb_slot,
+    clmbposition: data.clmb_position,
+    clmbsection: data.clmb_section,
+    clmbdivid: data.clmb_divid,
+  }]);
+// install observation on entering/leaving the view
+  global.context.observeIntersection(function(newrequest) {
+    newrequest.forEach(function(d) {
+      if (d.intersectionRect.height > 0) {
+        global._colombia.push({
+                 visible: !0,
+                 rect: d,
+               });
+      }
     });
   });
   loadScript(global, 'https://static.clmbtech.com/ad/commons/js/colombia-amp.js');
