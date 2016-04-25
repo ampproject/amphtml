@@ -50,7 +50,7 @@ tags: {  # <amp-twitter>
   tag_name: "amp-twitter"
   disallowed_ancestor: "head"
   disallowed_ancestor: "amp-sidebar"
-  also_requires: "amp-twitter extension .js script"
+  also_requires_tag: "amp-twitter extension .js script"
   attrs: { name: "data-tweetid" mandatory_oneof: "['data-tweetid', 'src']" }
   attrs: {
     name: "src"

@@ -50,7 +50,7 @@ tags: {  # <amp-springboard-player>
   tag_name: "amp-springboard-player"
   disallowed_ancestor: "head"
   disallowed_ancestor: "amp-sidebar"
-  also_requires: "amp-springboard-player extension .js script"
+  also_requires_tag: "amp-springboard-player extension .js script"
   attrs: {
     name: "data-content-id"
     mandatory: true

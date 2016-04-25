@@ -49,7 +49,7 @@ tags: {  # <amp-dailymotion>
   tag_name: "amp-dailymotion"
   disallowed_ancestor: "head"
   disallowed_ancestor: "amp-sidebar"
-  also_requires: "amp-dailymotion extension .js script"
+  also_requires_tag: "amp-dailymotion extension .js script"
   attrs: { name: "data-endscreen-enable" value_regex: "true|false" }
   attrs: { name: "data-info" value_regex: "true|false" }
   attrs: { name: "data-mute" value_regex: "true|false" }

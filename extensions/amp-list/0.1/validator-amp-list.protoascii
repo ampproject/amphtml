@@ -50,7 +50,7 @@ tags: {  # <amp-list>
   tag_name: "amp-list"
   disallowed_ancestor: "head"
   disallowed_ancestor: "amp-sidebar"
-  also_requires: "amp-list extension .js script"
+  also_requires_tag: "amp-list extension .js script"
   attrs: { name: "credentials" }
   attrs: {
     name: "src"

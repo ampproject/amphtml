@@ -135,107 +135,109 @@ function specificity(code) {
       return 7;
     case amp.validator.ValidationError.Code.TAG_REQUIRED_BY_MISSING:
       return 8;
-    case amp.validator.ValidationError.Code.DISALLOWED_TAG:
+    case amp.validator.ValidationError.Code.ATTR_REQUIRED_BUT_MISSING:
       return 9;
-    case amp.validator.ValidationError.Code.DISALLOWED_ATTR:
+    case amp.validator.ValidationError.Code.DISALLOWED_TAG:
       return 10;
-    case amp.validator.ValidationError.Code.INVALID_ATTR_VALUE:
+    case amp.validator.ValidationError.Code.DISALLOWED_ATTR:
       return 11;
-    case amp.validator.ValidationError.Code.ATTR_VALUE_REQUIRED_BY_LAYOUT:
+    case amp.validator.ValidationError.Code.INVALID_ATTR_VALUE:
       return 12;
-    case amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING:
+    case amp.validator.ValidationError.Code.ATTR_VALUE_REQUIRED_BY_LAYOUT:
       return 13;
-    case amp.validator.ValidationError.Code.MANDATORY_ONEOF_ATTR_MISSING:
+    case amp.validator.ValidationError.Code.MANDATORY_ATTR_MISSING:
       return 14;
-    case amp.validator.ValidationError.Code.DUPLICATE_UNIQUE_TAG:
+    case amp.validator.ValidationError.Code.MANDATORY_ONEOF_ATTR_MISSING:
       return 15;
-    case amp.validator.ValidationError.Code.STYLESHEET_TOO_LONG_OLD_VARIANT:
+    case amp.validator.ValidationError.Code.DUPLICATE_UNIQUE_TAG:
       return 16;
-    case amp.validator.ValidationError.Code.STYLESHEET_TOO_LONG:
+    case amp.validator.ValidationError.Code.STYLESHEET_TOO_LONG_OLD_VARIANT:
       return 17;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX:
+    case amp.validator.ValidationError.Code.STYLESHEET_TOO_LONG:
       return 18;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_AT_RULE:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX:
       return 19;
-    case amp.validator.ValidationError.Code.
-        MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_AT_RULE:
       return 20;
     case amp.validator.ValidationError.Code.
-        INVALID_PROPERTY_VALUE_IN_ATTR_VALUE:
+        MANDATORY_PROPERTY_MISSING_FROM_ATTR_VALUE:
       return 21;
-    case amp.validator.ValidationError.Code.DISALLOWED_PROPERTY_IN_ATTR_VALUE:
+    case amp.validator.ValidationError.Code.
+        INVALID_PROPERTY_VALUE_IN_ATTR_VALUE:
       return 22;
-    case amp.validator.ValidationError.Code.MUTUALLY_EXCLUSIVE_ATTRS:
+    case amp.validator.ValidationError.Code.DISALLOWED_PROPERTY_IN_ATTR_VALUE:
       return 23;
-    case amp.validator.ValidationError.Code.UNESCAPED_TEMPLATE_IN_ATTR_VALUE:
+    case amp.validator.ValidationError.Code.MUTUALLY_EXCLUSIVE_ATTRS:
       return 24;
-    case amp.validator.ValidationError.Code.TEMPLATE_PARTIAL_IN_ATTR_VALUE:
+    case amp.validator.ValidationError.Code.UNESCAPED_TEMPLATE_IN_ATTR_VALUE:
       return 25;
-    case amp.validator.ValidationError.Code.TEMPLATE_IN_ATTR_NAME:
+    case amp.validator.ValidationError.Code.TEMPLATE_PARTIAL_IN_ATTR_VALUE:
       return 26;
+    case amp.validator.ValidationError.Code.TEMPLATE_IN_ATTR_NAME:
+      return 27;
     case amp.validator.ValidationError.Code.
         INCONSISTENT_UNITS_FOR_WIDTH_AND_HEIGHT:
-      return 27;
-    case amp.validator.ValidationError.Code.IMPLIED_LAYOUT_INVALID:
       return 28;
-    case amp.validator.ValidationError.Code.SPECIFIED_LAYOUT_INVALID:
+    case amp.validator.ValidationError.Code.IMPLIED_LAYOUT_INVALID:
       return 29;
-    case amp.validator.ValidationError.Code.DEV_MODE_ENABLED:
+    case amp.validator.ValidationError.Code.SPECIFIED_LAYOUT_INVALID:
       return 30;
-    case amp.validator.ValidationError.Code.ATTR_DISALLOWED_BY_IMPLIED_LAYOUT:
+    case amp.validator.ValidationError.Code.DEV_MODE_ENABLED:
       return 31;
-    case amp.validator.ValidationError.Code.ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT:
+    case amp.validator.ValidationError.Code.ATTR_DISALLOWED_BY_IMPLIED_LAYOUT:
       return 32;
-    case amp.validator.ValidationError.Code.DUPLICATE_DIMENSION:
+    case amp.validator.ValidationError.Code.ATTR_DISALLOWED_BY_SPECIFIED_LAYOUT:
       return 33;
-    case amp.validator.ValidationError.Code.DISALLOWED_RELATIVE_URL:
+    case amp.validator.ValidationError.Code.DUPLICATE_DIMENSION:
       return 34;
-    case amp.validator.ValidationError.Code.MISSING_URL:
+    case amp.validator.ValidationError.Code.DISALLOWED_RELATIVE_URL:
       return 35;
-    case amp.validator.ValidationError.Code.INVALID_URL_PROTOCOL:
+    case amp.validator.ValidationError.Code.MISSING_URL:
       return 36;
-    case amp.validator.ValidationError.Code.INVALID_URL:
+    case amp.validator.ValidationError.Code.INVALID_URL_PROTOCOL:
       return 37;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_STRAY_TRAILING_BACKSLASH:
+    case amp.validator.ValidationError.Code.INVALID_URL:
       return 38;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_COMMENT:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_STRAY_TRAILING_BACKSLASH:
       return 39;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_STRING:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_COMMENT:
       return 40;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_BAD_URL:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_UNTERMINATED_STRING:
       return 41;
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_BAD_URL:
+      return 42;
     case amp.validator.ValidationError.Code
         .CSS_SYNTAX_EOF_IN_PRELUDE_OF_QUALIFIED_RULE:
-      return 42;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_DECLARATION:
       return 43;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_INCOMPLETE_DECLARATION:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_DECLARATION:
       return 44;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_ERROR_IN_PSEUDO_SELECTOR:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_INCOMPLETE_DECLARATION:
       return 45;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_MISSING_SELECTOR:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_ERROR_IN_PSEUDO_SELECTOR:
       return 46;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_NOT_A_SELECTOR_START:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_MISSING_SELECTOR:
       return 47;
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_NOT_A_SELECTOR_START:
+      return 48;
     case amp.validator.ValidationError.Code.
         CSS_SYNTAX_UNPARSED_INPUT_REMAINS_IN_SELECTOR:
-      return 48;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_MISSING_URL:
       return 49;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_URL:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_MISSING_URL:
       return 50;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_URL_PROTOCOL:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_URL:
       return 51;
-    case amp.validator.ValidationError.Code.CSS_SYNTAX_DISALLOWED_RELATIVE_URL:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_URL_PROTOCOL:
       return 52;
-    case amp.validator.ValidationError.Code.INCORRECT_NUM_CHILD_TAGS:
+    case amp.validator.ValidationError.Code.CSS_SYNTAX_DISALLOWED_RELATIVE_URL:
       return 53;
-    case amp.validator.ValidationError.Code.DISALLOWED_CHILD_TAG_NAME:
+    case amp.validator.ValidationError.Code.INCORRECT_NUM_CHILD_TAGS:
       return 54;
+    case amp.validator.ValidationError.Code.DISALLOWED_CHILD_TAG_NAME:
+      return 55;
     case amp.validator.ValidationError.Code.DISALLOWED_FIRST_CHILD_TAG_NAME:
-      return 55;
+      return 56;
     case amp.validator.ValidationError.Code.CSS_SYNTAX_INVALID_ATTR_SELECTOR:
-      return 55;
+      return 57;
     case amp.validator.ValidationError.Code.GENERAL_DISALLOWED_TAG:
       return 100;
     case amp.validator.ValidationError.Code.DEPRECATED_ATTR:
@@ -1394,6 +1396,64 @@ ParsedUrlSpec.StylesheetErrorAdapter_ = class {
 };
 
 /**
+ * ParsedAttrTriggerSpec is used by ParsedAttrSpec to determine which
+ * attributes also require another attribute for some given set of
+ * conditions.
+ * (e.g. attr name: "on" if_value_regex: "tap:.*" also_require_attr: "role")
+ * @private
+ */
+class ParsedAttrTriggerSpec {
+  /**
+   * @param {!amp.validator.AttrSpec} attrSpec
+   */
+  constructor(attrSpec) {
+    /**
+     * JSON Attribute Trigger Spec dictionary.
+     * @type {amp.validator.AttrTriggerSpec}
+     * @private
+     */
+    this.spec_ = attrSpec.trigger;
+
+    goog.asserts.assert(attrSpec.name != null);
+    /**
+     * @type {!string} attrName
+     * @private
+     */
+    this.attrName_ = attrSpec.name;
+
+    /**
+     * @type {RegExp} ifValueRegex
+     * @private
+     */
+    this.ifValueRegex_ = null;
+
+    if (this.spec_ && this.spec_.ifValueRegex) {
+      this.ifValueRegex_ = new RegExp('^(' + this.spec_.ifValueRegex + ')$');
+    }
+  }
+
+  /**
+   * @return {boolean}
+   */
+  hasIfValueRegex() { return this.ifValueRegex_ !== null; }
+
+  /**
+   * @return {RegExp} ifValueRegex
+   */
+  getIfValueRegex() { return this.ifValueRegex_; }
+
+  /**
+   * @return {!string} attrName
+   */
+  getAttrName() { return this.attrName_; }
+
+  /**
+   * @return {amp.validator.AttrTriggerSpec}
+   */
+  getSpec() { return this.spec_; }
+}
+
+/**
  * This wrapper class provides access to an AttrSpec and
  * an attribute id which is unique within its context
  * (e.g., it's unique within the ParsedTagSpec).
@@ -1418,11 +1478,18 @@ class ParsedAttrSpec {
      */
     this.id_ = attrId;
     /**
+     * @type {ParsedAttrTriggerSpec}
+     * @private
+     */
+    this.triggerSpec_ = null;
+    if (this.spec_.trigger) {
+      this.triggerSpec_ = new ParsedAttrTriggerSpec(this.spec_);
+    }
+    /**
      * @type {!ParsedUrlSpec}
      * @private
      */
     this.valueUrlSpec_ = new ParsedUrlSpec(this.spec_.valueUrl);
-
     /**
      * @type {!goog.structs.Map<string, !amp.validator.PropertySpec>}
      * @private
@@ -1451,9 +1518,19 @@ class ParsedAttrSpec {
   getId() { return this.id_; }
 
   /**
-   * @return {!Object} AttrSpec from rules json library.
+   * @return {!amp.validator.AttrSpec}
    */
   getSpec() { return this.spec_; }
+
+  /**
+   * @return {boolean}
+   */
+  hasTriggerSpec() { return this.triggerSpec_ !== null; }
+
+  /**
+   * @return {ParsedAttrTriggerSpec}
+   */
+  getTriggerSpec() { return this.triggerSpec_; }
 
   /**
    * @param {!Context} context
@@ -1937,12 +2014,17 @@ class ParsedTagSpec {
      * @type {!Array<number>}
      * @private
      */
-    this.alsoRequires_ = [];
+    this.alsoRequiresTag_ = [];
     /**
      * @type {number}
      * @private
      */
     this.dispatchKeyAttrSpec_ = -1;
+    /**
+     * @type {!Array<number>}
+     * @private
+     */
+    this.implicitAttrspecs_ = [];
 
     const attrs = GetAttrsFor(tagSpec, attrListsByName);
     for (let i = 0; i < attrs.length; ++i) {
@@ -1952,8 +2034,9 @@ class ParsedTagSpec {
       if (parsedAttrSpec.getSpec().mandatory) {
         this.mandatoryAttrIds_.push(i);
       }
-      if (parsedAttrSpec.getSpec().mandatoryOneof) {
-        this.mandatoryOneofs_.push(parsedAttrSpec.getSpec().mandatoryOneof);
+      const mandatoryOneof = parsedAttrSpec.getSpec().mandatoryOneof;
+      if (mandatoryOneof !== null) {
+        this.mandatoryOneofs_.push(mandatoryOneof);
       }
       const altNames = parsedAttrSpec.getSpec().alternativeNames;
       for (const altName of altNames) {
@@ -1962,11 +2045,14 @@ class ParsedTagSpec {
       if (parsedAttrSpec.getSpec().dispatchKey) {
         this.dispatchKeyAttrSpec_ = i;
       }
+      if (parsedAttrSpec.getSpec().implicit) {
+        this.implicitAttrspecs_.push(i);
+      }
     }
     this.mandatoryOneofs_ = sortAndUniquify(this.mandatoryOneofs_);
 
-    for (const tagSpecName of tagSpec.alsoRequires) {
-      this.alsoRequires_.push(tagspecIdsByTagSpecName.get(tagSpecName));
+    for (const tagSpecName of tagSpec.alsoRequiresTag) {
+      this.alsoRequiresTag_.push(tagspecIdsByTagSpecName.get(tagSpecName));
     }
   }
 
@@ -2001,8 +2087,11 @@ class ParsedTagSpec {
     const parsedSpec = this.attrsById_[this.dispatchKeyAttrSpec_];
     var mandatoryParent =
         this.spec_.mandatoryParent === null ? '' : this.spec_.mandatoryParent;
-    return makeDispatchKey(
-        parsedSpec.getSpec().name, parsedSpec.getSpec().value, mandatoryParent);
+    const attrName = parsedSpec.getSpec().name;
+    goog.asserts.assert(attrName !== null);
+    const attrValue = parsedSpec.getSpec().value;
+    goog.asserts.assert(attrValue !== null);
+    return makeDispatchKey(attrName, attrValue, mandatoryParent);
   }
 
   /**
@@ -2011,7 +2100,7 @@ class ParsedTagSpec {
    * are also required if |this| tag occurs in the document.
    * @return {!Array<number>}
    */
-  getAlsoRequires() { return this.alsoRequires_; }
+  getAlsoRequiresTag() { return this.alsoRequiresTag_; }
 
   /**
    * Whether or not the tag should be recorded via
@@ -2281,6 +2370,12 @@ class ParsedTagSpec {
     let mandatoryAttrsSeen = [];
     /** @type {!goog.structs.Set<string>} */
     const mandatoryOneofsSeen = new goog.structs.Set();
+    let parsedTriggerSpecs = [];
+    /** If a tag has implicit attributes, we then add these attributes as
+     * validated. E.g. tag 'a' has implicit attributes 'role' and 'tabindex'.
+     * @type {!goog.structs.Set<number>}
+     */
+    const attrspecsValidated = new goog.structs.Set(this.implicitAttrspecs_);
     // Our html parser delivers attributes as an array of alternating keys and
     // values. We skip over this array 2 at a time to iterate over the keys.
     for (let i = 0; i < encounteredAttrs.length; i += 2) {
@@ -2347,6 +2442,13 @@ class ParsedTagSpec {
         return;
       }
       mandatoryOneofsSeen.add(parsedSpec.getSpec().mandatoryOneof);
+      if (parsedSpec.hasTriggerSpec() &&
+          parsedSpec.getTriggerSpec().hasIfValueRegex()) {
+        if (parsedSpec.getTriggerSpec().getIfValueRegex().test(attrValue)) {
+          parsedTriggerSpecs.push(parsedSpec.getTriggerSpec());
+        }
+      }
+      attrspecsValidated.add(parsedSpec.getId());
     }
     // The "at least 1" part of mandatory_oneof: If none of the
     // alternatives were present, we report that an attribute is missing.
@@ -2356,6 +2458,22 @@ class ParsedTagSpec {
             amp.validator.ValidationError.Code.MANDATORY_ONEOF_ATTR_MISSING,
             /* params */ [getTagSpecName(this.spec_), mandatoryOneof],
             this.spec_.specUrl, result);
+      }
+    }
+    for (const triggerSpec of parsedTriggerSpecs) {
+      for (const alsoRequiresAttr of triggerSpec.getSpec().alsoRequiresAttr) {
+        const parsedSpec = this.attrsByName_.get(alsoRequiresAttr);
+        if (parsedSpec === undefined) {
+          continue;
+        }
+        if (!attrspecsValidated.contains(parsedSpec.getId())) {
+          context.addError(
+              amp.validator.ValidationError.Code.ATTR_REQUIRED_BUT_MISSING,
+              /* params */ [parsedSpec.getSpec().name,
+                            getTagSpecName(this.spec_),
+                            triggerSpec.getAttrName()],
+              this.spec_.specUrl, result);
+        }
       }
     }
     mandatoryAttrsSeen = sortAndUniquify(mandatoryAttrsSeen);
@@ -2561,11 +2679,11 @@ class ParsedValidatorRules {
       goog.asserts.assert(
           !tagspecIdsByTagSpecName.containsKey(getTagSpecName(tag)));
       tagspecIdsByTagSpecName.set(getTagSpecName(tag), i);
-      if (tag.alsoRequires.length > 0) {
+      if (tag.alsoRequiresTag.length > 0) {
         tagSpecNamesToTrack.add(getTagSpecName(tag));
       }
-      for (const alsoRequires of tag.alsoRequires) {
-        tagSpecNamesToTrack.add(alsoRequires);
+      for (const alsoRequiresTag of tag.alsoRequiresTag) {
+        tagSpecNamesToTrack.add(alsoRequiresTag);
       }
     }
 
@@ -2785,18 +2903,18 @@ class ParsedValidatorRules {
    * @param {!Context} context
    * @param {!amp.validator.ValidationResult} validationResult
    */
-  maybeEmitAlsoRequiresValidationErrors(context, validationResult) {
+  maybeEmitAlsoRequiresTagValidationErrors(context, validationResult) {
     let tagspecsValidated = context.getTagspecsValidated().getValues();
     goog.array.sort(tagspecsValidated);
     for (const tagspecId of tagspecsValidated) {
       const spec = this.tagSpecById_[tagspecId];
-      for (const alsoRequiresTagspecId of spec.getAlsoRequires()) {
+      for (const alsoRequiresTagspecId of spec.getAlsoRequiresTag()) {
         if (!context.getTagspecsValidated().contains(alsoRequiresTagspecId)) {
-          const alsoRequiresSpec = this.tagSpecById_[alsoRequiresTagspecId];
+          const alsoRequiresTagspec = this.tagSpecById_[alsoRequiresTagspecId];
           if (!context.addError(
               amp.validator.ValidationError.Code.TAG_REQUIRED_BY_MISSING,
-              /* params */ [getTagSpecName(
-                  alsoRequiresSpec.getSpec()), getTagSpecName(spec.getSpec())],
+              /* params */ [getTagSpecName(alsoRequiresTagspec.getSpec()),
+                            getTagSpecName(spec.getSpec())],
               spec.getSpec().specUrl,
               validationResult)) {
             return;
@@ -2849,7 +2967,7 @@ class ParsedValidatorRules {
     this.maybeEmitMandatoryTagValidationErrors(context, validationResult);
     if (context.getProgress(validationResult).complete)
     return;
-    this.maybeEmitAlsoRequiresValidationErrors(context, validationResult);
+    this.maybeEmitAlsoRequiresTagValidationErrors(context, validationResult);
     if (context.getProgress(validationResult).complete)
     return;
     this.maybeEmitMandatoryAlternativesSatisfiedErrors(context, validationResult);
@@ -3360,6 +3478,12 @@ amp.validator.categorizeError = function(error) {
       (goog.string./*OK*/startsWith(error.params[1], "amp-") ||
        error.params[1] === "template")) {
     return amp.validator.ErrorCategory.Code.AMP_TAG_PROBLEM;
+  }
+  // E.g. "The attribute 'role' in tag 'amp-img' is missing or incorrect,
+  // but required by attribute 'on'."
+  if (error.code === amp.validator.ValidationError.Code.
+      ATTR_REQUIRED_BUT_MISSING) {
+    return amp.validator.ErrorCategory.Code.DISALLOWED_HTML;
   }
   // E.g. "Mutually exclusive attributes encountered in tag
   // 'amp-youtube' - pick one of ['src', 'data-videoid']."

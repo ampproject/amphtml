@@ -53,7 +53,7 @@ tags: {  # <amp-pinterest>
   tag_name: "amp-pinterest"
   disallowed_ancestor: "head"
   disallowed_ancestor: "amp-sidebar"
-  also_requires: "amp-pinterest extension .js script"
+  also_requires_tag: "amp-pinterest extension .js script"
   # data-* is generally allowed, but it's not generally mandatory.
   attrs: { name: "data-do" mandatory: true }
   attr_lists: "extended-amp-global"

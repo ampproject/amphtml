@@ -52,7 +52,7 @@ tags: {  # <amp-youtube>
   tag_name: "amp-youtube"
   disallowed_ancestor: "head"
   disallowed_ancestor: "amp-sidebar"
-  also_requires: "amp-youtube extension .js script"
+  also_requires_tag: "amp-youtube extension .js script"
   attrs: {
     name: "data-videoid"
     mandatory_oneof: "['src', 'data-videoid']"
