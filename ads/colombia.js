@@ -37,7 +37,7 @@ export function colombia(global, data) {
     newrequest.forEach(function(d) {
       if (d.intersectionRect.height > 0) {
         global._colombia.push({
-          visible: !0,
+          visible: true,
           rect: d,
         });
       }
