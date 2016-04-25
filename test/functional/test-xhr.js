@@ -15,7 +15,11 @@
  */
 
 import * as sinon from 'sinon';
-import {xhrFor, fetchPolyfill, FetchResponse} from '../../src/xhr';
+import {
+  installXhrService,
+  fetchPolyfill,
+  FetchResponse,
+} from '../../src/service/xhr-impl';
 
 describe('XHR', function() {
   let sandbox;
@@ -25,11 +29,11 @@ describe('XHR', function() {
   this.timeout(5000);
 
   const scenarios = [
-    {xhr: xhrFor({
+    {xhr: installXhrService({
       fetch: window.fetch,
       location: {href: 'https://acme.com/path'},
     }), desc: 'Native'},
-    {xhr: xhrFor({
+    {xhr: installXhrService({
       fetch: fetchPolyfill,
       location: {href: 'https://acme.com/path'},
     }), desc: 'Polyfill'},
