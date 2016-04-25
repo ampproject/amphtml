@@ -35,7 +35,8 @@ import {isArray, isObject} from '../types';
  *   body: (!Object|!Array|undefined),
  *   credentials: (string|undefined),
  *   headers: (!Object|undefined),
- *   method: (string|undefined)
+ *   method: (string|undefined),
+ *   requireAmpResponseSourceOrigin: (boolean|undefined)
  * }}
  */
 let FetchInitDef;
