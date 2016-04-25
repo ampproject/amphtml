@@ -21,7 +21,6 @@
 const fs = require('fs');
 const http = require('http');
 const https = require('https');
-const mustache = require('mustache');
 const path = require('path');
 const program = require('commander');
 const vm = require('vm');
@@ -54,7 +53,7 @@ function readFileOrDownload(fileOrUrl, onSuccess, onFailure) {
     const clientModule = fileOrUrl.startsWith('http://') ? http : https;
     const req = clientModule.get(fileOrUrl, (response) => {
       if (response.statusCode !== 200) {
-        onFailure('HTTP ' + res.statusCode);
+        onFailure('HTTP ' + response.statusCode);
         return;
       }
       digestChunksFrom(response);
@@ -114,8 +113,8 @@ function serve(port, validatorScript) {
           response.writeHead(200, {'Content-Type': 'text/html'});
           const contents = fs.readFileSync(
               path.join(__dirname, 'webui/index.html'), 'utf-8');
-          const view = {'validatorScript': validatorScript};
-          const html = mustache.render(contents, view);
+          const html = contents.replace(new RegExp(
+              '\\$\\$VALIDATOR_SCRIPT\\$\\$', 'g'), validatorScript);
           response.end(html);
           return;
         }
@@ -128,17 +127,48 @@ function serve(port, validatorScript) {
           return;
         }
         //
-        // Handle '/cm/*', that is, code mirror.
+        // Handle '/cm/*', that is, CodeMirror (editor control).
         //
         if (request.url.startsWith('/cm/')) {
           const parsed = request.url.match(/\/cm\/([a-z0-9\/_-]*\.(js|css))$/);
           if (parsed === null) {
+            response.writeHead(400, {'Content-Type': 'text/plain'});
+            response.end('Bad request.');
             return;
           }
           const contents = fs.readFileSync(
               path.join(__dirname, 'node_modules/codemirror', parsed[1]),
               'utf-8');
           response.writeHead(200, {'Content-Type': extToMime(parsed[2])});
+          response.end(contents);
+          return;
+        }
+        //
+        // Handle '/py/*', that is, Polymer (HTML Components library).
+        //
+        if (request.url.startsWith('/pm/')) {
+          console.log('request.url = ' + request.url);
+          const parsed = request.url.match(/\/pm\/([a-zA-Z0-9\/_-]*\.(html))$/);
+          if (parsed === null) {
+            response.writeHead(400, {'Content-Type': 'text/plain'});
+            response.end('Bad request.');
+            return;
+          }
+          const contents = fs.readFileSync(
+              path.join(__dirname, 'node_modules/@polymer', parsed[1]),
+              'utf-8');
+          response.writeHead(200, {'Content-Type': extToMime(parsed[2])});
+          response.end(contents);
+          return;
+        }
+        //
+        // Handle '/webcomponents-lite.js'
+        //
+        if (request.url == "/webcomponents-lite.js") {
+          const contents = fs.readFileSync(
+              path.join(__dirname, 'node_modules/webcomponents-lite/' +
+                  'webcomponents-lite.js'), 'utf-8');
+          response.writeHead(200, {'Content-Type': 'text/javascript'});
           response.end(contents);
           return;
         }
