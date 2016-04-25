@@ -20,6 +20,9 @@ import {
   UserNotificationManager,
 } from '../amp-user-notification';
 import {createIframePromise} from '../../../../testing/iframe';
+import {
+  installUrlReplacementsService,
+} from '../../../../src/service/url-replacements-impl';
 
 
 describe('amp-user-notification', () => {
@@ -53,6 +56,7 @@ describe('amp-user-notification', () => {
     return createIframePromise().then(iframe_ => {
       iframe = iframe_;
       iframe.win.ampExtendedElements = {};
+      installUrlReplacementsService(iframe.win);
       return buildElement(iframe.doc, attrs);
     });
   }

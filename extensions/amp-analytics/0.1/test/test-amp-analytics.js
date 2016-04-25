@@ -26,7 +26,9 @@ import {markElementScheduledForTesting} from '../../../../src/custom-element';
 import {installCidService} from '../../../../src/service/cid-impl';
 import {installViewerService} from '../../../../src/service/viewer-impl';
 import {installViewportService} from '../../../../src/service/viewport-impl';
-import {urlReplacementsFor} from '../../../../src/url-replacements';
+import {
+  installUrlReplacementsService,
+} from '../../../../src/service/url-replacements-impl';
 import * as sinon from 'sinon';
 
 const VENDOR_REQUESTS = require('./vendor-requests.json');
@@ -56,6 +58,7 @@ describe('amp-analytics', function() {
       installViewerService(iframe.win);
       installViewportService(iframe.win);
       installCidService(iframe.win);
+      installUrlReplacementsService(iframe.win);
       uidService = installUserNotificationManager(iframe.win);
       getService(iframe.win, 'xhr', () => {
         return {fetchJson: (url, init) => {
@@ -151,7 +154,8 @@ describe('amp-analytics', function() {
             });
             analytics.createdCallback();
             analytics.buildCallback();
-            const urlReplacements = urlReplacementsFor(analytics.getWin());
+            const urlReplacements = installUrlReplacementsService(
+                analytics.getWin());
             sandbox.stub(urlReplacements, 'getReplacement_', function(name) {
               expect(this.replacements_).to.have.property(name);
               return '_' + name.toLowerCase() + '_';

@@ -106,6 +106,13 @@ var forbiddenTerms = {
       'src/service/storage-impl.js',
     ],
   },
+  'installUrlReplacementsService': {
+    message: privateServiceFactory,
+    whitelist: [
+      'src/amp-core-service.js',
+      'src/service/url-replacements-impl.js',
+    ],
+  },
   'installViewerService': {
     message: privateServiceFactory,
     whitelist: [
@@ -158,7 +165,7 @@ var forbiddenTerms = {
       'src/ad-cid.js',
       'src/cid.js',
       'src/service/cid-impl.js',
-      'src/url-replacements.js',
+      'src/service/url-replacements-impl.js',
       'extensions/amp-access/0.1/amp-access.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js',
     ],
@@ -243,14 +250,14 @@ var forbiddenTerms = {
     message: requiresReviewPrivacy,
     whitelist: [
       'extensions/amp-access/0.1/amp-access.js',
-      'src/url-replacements.js',
+      'src/service/url-replacements-impl.js',
     ]
   },
   'getAuthdataField': {
     message: requiresReviewPrivacy,
     whitelist: [
       'extensions/amp-access/0.1/amp-access.js',
-      'src/url-replacements.js',
+      'src/service/url-replacements-impl.js',
     ]
   },
   'debugger': '',
