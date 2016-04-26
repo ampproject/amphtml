@@ -165,4 +165,3 @@ function racePromise_(promise, unlisten, timeout) {
     throw reason;
   });
 }
-

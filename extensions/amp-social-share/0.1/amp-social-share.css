@@ -25,11 +25,6 @@ amp-social-share {
   position: relative;
 }
 
-amp-social-share.-amp-layout-container {
-  display: inline-block;
-  vertical-align: top;
-}
-
 /* Twitter Styling */
 amp-social-share[type=twitter] {
   background-color: #55acee;

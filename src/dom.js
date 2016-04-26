@@ -277,7 +277,7 @@ export function childElementByTag(parent, tagName) {
  * Returns element data-param- attributes as url parameters key-value pairs.
  * e.g. data-param-some-attr=value -> {someAttr: value}.
  * @param {!Element} element
- * @return {!Object}
+ * @return {!Object<string, string>}
  */
 export function getDataParamsFromAttributes(element) {
   const attributes = element.attributes;

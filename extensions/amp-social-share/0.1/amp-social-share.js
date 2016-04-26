@@ -50,29 +50,31 @@ class AmpSocialShare extends AMP.BaseElement {
     const typeConfig = getSocialConfig(typeAttr) || {};
 
     /** @private @const {string} */
-    this.shareEndpoint_ = this.element.getAttribute('data-share-endpoint') ||
-        typeConfig.shareEndpoint;
-    user.assert(this.shareEndpoint_,
-        'The data-share-endpoint  attribute is required. %s', this.element);
+    this.shareEndpoint_ = user.assert(
+        this.element.getAttribute('data-share-endpoint') ||
+        typeConfig.shareEndpoint,
+        'The data-share-endpoint attribute is required. %s', this.element);
 
     /** @private @const {!Object} */
-    this.params_ = Object.assign({}, typeConfig.defaultParams);
-    Object.assign(this.params_, getDataParamsFromAttributes(this.element));
+    this.params_ = Object.assign({}, typeConfig.defaultParams,
+        getDataParamsFromAttributes(this.element));
 
-    this.element.setAttribute('role', 'link');
-    this.installEventListener_();
-  }
-
-  /** @private */
-  installEventListener_() {
+    /** @private {string} */
+    this.href_ = null;
     const hrefWithVars = addParamsToUrl(this.shareEndpoint_, this.params_);
     const urlReplacements = urlReplacementsFor(this.getWin());
     urlReplacements.expand(hrefWithVars).then(href => {
-      this.element.addEventListener('click', () => {
-        const windowFeatures = 'resizable,scrollbars,width=640,height=480';
-        this.getWin().open(href, '_blank', windowFeatures);
-      });
+      this.href_ = href;
     });
+
+    this.element.setAttribute('role', 'link');
+    this.element.addEventListener('click', () => this.handleClick_());
+  }
+
+  /** @private */
+  handleClick_() {
+    const windowFeatures = 'resizable,scrollbars,width=640,height=480';
+    this.getWin().open(this.href_, '_blank', windowFeatures);
   }
 
 };

@@ -367,14 +367,6 @@ amp-analytics {
 
 
 /**
- * Default size for amp-social-share
- */
-amp-social-share {
-  height: 44px;
-  width: 60px;
-}
-
-/**
  * Minimal AMP Access CSS. This part has to be here so that the correct UI
  * can be provided before AMP Access JS has been loaded.
  */

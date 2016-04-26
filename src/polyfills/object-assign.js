@@ -22,16 +22,17 @@
  * @returns {!Object}
  */
 export function assign(target) {
-  if (target === undefined || target === null) {
+  if (target == null) {
     throw new TypeError('Cannot convert undefined or null to object');
   }
 
+  const hasOwnProperty = Object.prototype.hasOwnProperty;
   const output = Object(target);
   for (let i = 1; i < arguments.length; i++) {
     const source = arguments[i];
-    if (source !== undefined && source !== null) {
+    if (source != null) {
       for (const key in source) {
-        if (source.hasOwnProperty(key)) {
+        if (hasOwnProperty.call(source, key)) {
           output[key] = source[key];
         }
       }
