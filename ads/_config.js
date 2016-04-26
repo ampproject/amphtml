@@ -70,6 +70,7 @@ export const adPreconnect = {
     'https://static.industrybrains.com',
   ],
   adform: 'https://track.adform.net',
+  adition: 'https://imagesrv.adition.com',
   adreactor: 'https://adserver.adreactor.com',
   adsense: 'https://googleads.g.doubleclick.net',
   aduptech: 'https://s.d.adup-tech.com',

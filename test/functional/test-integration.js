@@ -37,6 +37,7 @@ describe('3p integration.js', () => {
     expect(registrations).to.include.key('a9');
     expect(registrations).to.include.key('adblade');
     expect(registrations).to.include.key('adform');
+    expect(registrations).to.include.key('adition');
     expect(registrations).to.include.key('adsense');
     expect(registrations).to.include.key('adtech');
     expect(registrations).to.include.key('adreactor');

@@ -27,6 +27,7 @@ import {installEmbedStateListener} from './environment';
 import {a9} from '../ads/a9';
 import {adblade, industrybrains} from '../ads/adblade';
 import {adform} from '../ads/adform';
+import {adition} from '../ads/adition';
 import {adman} from '../ads/adman';
 import {adreactor} from '../ads/adreactor';
 import {adsense} from '../ads/google/adsense';
@@ -81,6 +82,7 @@ const AMP_EMBED_ALLOWED = {
 register('a9', a9);
 register('adblade', adblade);
 register('adform', adform);
+register('adition', adition);
 register('adman', adman);
 register('adreactor', adreactor);
 register('adsense', adsense);
