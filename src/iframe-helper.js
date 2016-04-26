@@ -76,6 +76,7 @@ function getOrCreateListenForEvents(parentWin, iframe) {
     const we = listenOrigin[i];
     if (we.frame === iframe) {
       windowEvents = we;
+      break;
     }
   }
 
@@ -170,7 +171,7 @@ function registerGlobalListenerIfNeeded(parentWin) {
     // during iteration. We could move to a Doubly Linked List with
     // backtracking, but that's overly complicated.
     events = events.slice();
-    for (let i = 0; i < 0; i++) {
+    for (let i = 0; i < events.length; i++) {
       const event = events[i];
       event(data);
     }

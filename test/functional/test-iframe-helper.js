@@ -48,7 +48,7 @@ describe('iframe-helper', function() {
     const iframe = container.doc.createElement('iframe');
     iframe.srcdoc = '<html>';
     expect(() => {
-      IframeHelper.listen(iframe, 'test', () => {});
+      IframeHelper.listenFor(iframe, 'test', () => {});
     }).to.throw('only iframes with src supported');
   });
 
@@ -57,7 +57,7 @@ describe('iframe-helper', function() {
     iframe.src = iframeSrc;
     insert(iframe);
     expect(() => {
-      IframeHelper.listen(iframe, 'test', () => {});
+      IframeHelper.listenFor(iframe, 'test', () => {});
     }).to.throw('cannot register events on an attached iframe');
   });
 
