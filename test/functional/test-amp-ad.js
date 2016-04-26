@@ -434,35 +434,17 @@ function tests(name, installer) {
 
       it('should prefer-viewability-over-views', () => {
         let clock;
-        const elementBox = {
-          top: 4000,
-        };
-        const viewportRect = {
-          height: 1000,
-          bottom: 1000,
-        };
         return getGoodAd(ad => {
-          ad.resources_.add(ad.element);
-          sandbox.stub(ad, 'getIntersectionElementLayoutBox', () => {
-            return elementBox;
-          });
-          sandbox.stub(ad.getViewport(), 'getRect', () => {
-            return viewportRect;
-          });
+          expect(ad.renderOutsideViewport()).not.to.be.false;
         }, () => {
           clock = sandbox.useFakeTimers();
         }, 'prefer-viewability-over-views').then(ad => {
-          clock.tick(10000);
           // False because we just rendered one.
           expect(ad.renderOutsideViewport()).to.be.false;
-          viewportRect.bottom = '2749';
+          clock.tick(900);
           expect(ad.renderOutsideViewport()).to.be.false;
-          // 125% of viewport away
-          viewportRect.bottom = '2750';
-          expect(ad.renderOutsideViewport()).to.be.true;
-          // We currently render above viewport.
-          viewportRect.bottom = '6000';
-          expect(ad.renderOutsideViewport()).to.be.true;
+          clock.tick(100);
+          expect(ad.renderOutsideViewport()).to.equal(1.25);
         });
       });
     });
