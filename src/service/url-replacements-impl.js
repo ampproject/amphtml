@@ -321,8 +321,8 @@ class UrlReplacements {
     });
 
     this.set_('NAV_TIMING', (startAttribute, endAttribute) => {
-      assert(startAttribute, 'The first argument to NAV_TIMING, the start ' +
-          'attribute name, is required');
+      user.assert(startAttribute, 'The first argument to NAV_TIMING, the ' +
+          'start attribute name, is required');
       return this.getTimingData_(startAttribute, endAttribute);
     });
 
