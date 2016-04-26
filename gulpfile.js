@@ -662,6 +662,7 @@ function buildAlp(options) {
   console.log('Bundling alp.js');
 
   compileJs('./ads/alp/', 'install-alp.js', './dist/', {
+    toName: 'alp.max.js',
     watch: options.watch,
     minify: options.minify || argv.minify,
     includePolyfills: true,
