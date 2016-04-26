@@ -85,8 +85,8 @@ export class AmpTimeline extends AMP.BaseElement {
 
         // each item must be a li with class item
         assert(item.tagName.toLowerCase() == 'li' &&
-               item.classList.contains('item'),
-               'Each item in the timeline must be a <li> tag with class item. Item number: %s, ' +
+               item.classList.contains('amp-timeline-item'),
+               'Each item in the timeline must be a <li> tag with class amp-timeline-item. Item number: %s, ' +
                'See https://github.com/ampproject/amphtml/blob/master/extensions/' +
                'amp-timeline/amp-timeline.md. Found in: %s', index+1, this.element);
 
@@ -106,8 +106,8 @@ export class AmpTimeline extends AMP.BaseElement {
 
         // each item must contain only one card element
         assert(card.tagName.toLowerCase() == 'div' &&
-               card.classList.contains('card'),
-              'Each item in the timeline must contain a <div> tag with class card. Item number: %s, ' +
+               card.classList.contains('amp-timeline-card'),
+              'Each item in the timeline must contain a <div> tag with class amp-timeline-card. Item number: %s, ' +
               'See https://github.com/ampproject/amphtml/blob/master/extensions/' +
               'amp-timeline/amp-timeline.md. Found in: %s', index+1, this.element);
 

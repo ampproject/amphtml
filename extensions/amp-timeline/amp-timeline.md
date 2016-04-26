@@ -141,8 +141,8 @@ The following lists validation errors specific to the `amp-timeline` element
     <td>Error thrown when the <code>&lt;ul></code> element doesn't have any children.</td>
   </tr>
   <tr>
-    <td width="40%">Each item in the timeline must be a <code>&lt;li></code> tag with class <code>item</code>. Item number: <i>[number]</i></td>
-    <td>Error thrown when an item that is not a <code>&lt;li></code> element. You can see the item number that generates the error.</td>
+    <td width="40%">Each item in the timeline must be a <code>&lt;li></code> tag with class <code>amp-timeline-item</code>. Item number: <i>[number]</i></td>
+    <td>Error thrown when an item that is not a <code>&lt;li></code> element with class amp-timeline-item. You can see the item number that generates the error.</td>
   </tr>
   <tr>
     <td width="40%">Each item in the timeline must have either a <code>left</code> or <code>right</code> class. Item number: <i>[number]</i></td>
@@ -153,8 +153,8 @@ The following lists validation errors specific to the `amp-timeline` element
     <td>Error thrown when a <code>li</code> item doesn't contain exactly one child item. You can see the item number that generates the error.</td>
   </tr>
   <tr>
-    <td width="40%">Each item in the timeline must contain a <code>&lt;div></code> tag with class <code>card</code>. Item number: <i>[number]</i></td>
-    <td>Error thrown when a <code>li</code> item doesn't contain one <code>div</code> with class <code>card</code>. You can see the item number that generates the error.</td>
+    <td width="40%">Each item in the timeline must contain a <code>&lt;div></code> tag with class <code>amp-timeline-card</code>. Item number: <i>[number]</i></td>
+    <td>Error thrown when a <code>li</code> item doesn't contain one <code>div</code> with class <code>amp-timeline-card</code>. You can see the item number that generates the error.</td>
   </tr>
   <tr>
     <td width="40%">Each card header must be defined by a <code>&lt;div></code> tag with class <code>content</code>. Item number: <i>[number]</i></td>
