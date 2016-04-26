@@ -15,6 +15,7 @@
  */
 
 import {isExperimentOn} from '../../../src/experiments';
+import {isVisibilitySpecValid} from '../../../src/service/visibility-impl';
 import {Observable} from '../../../src/observable';
 import {getService} from '../../../src/service';
 import {timer} from '../../../src/timer';
@@ -221,15 +222,15 @@ export class InstrumentationService {
    * @private
    */
   createVisibilityListener_(callback, config) {
-    if (!this.isVisibilitySpecValid_(config)) {
+    if (!isVisibilitySpecValid(config, this.isViewabilityExperimentOn_())) {
       return;
     }
 
     if (config['visibilitySpec']) {
       this.runOrSchedule_(() => {
         visibilityFor(this.win_).then(visibility => {
-          visibility.listenOnce(config['visibilitySpec'], () => {
-            callback(new AnalyticsEvent(AnalyticsEventType.VISIBLE));
+          visibility.listenOnce(config['visibilitySpec'], vars => {
+            callback(new AnalyticsEvent(AnalyticsEventType.VISIBLE, vars));
           });
         });
       });
@@ -251,84 +252,6 @@ export class InstrumentationService {
         }
       });
     }
-  }
-
-  /**
-   * Checks if the value is undefined or positive number like.
-   * "", 1, 0, undefined, 100, 101 are positive. -1, NaN are not.
-   * @param {number} num The number to verify.
-   * @return {boolean}
-   * @private
-   */
-  isPositiveNumber_(num) {
-    return num === undefined || Math.sign(num) >= 0;
-  }
-
-  /**
-   * Checks if the value is undefined or a number between 0 and 100.
-   * "", 1, 0, undefined, 100 return true. -1, NaN and 101 return false.
-   * @param {number} num The number to verify.
-   * @return {boolean}
-   * @private
-   */
-  isValidPercentage_(num) {
-    return num === undefined || (Math.sign(num) >= 0 && num <= 100);
-  }
-
-  /**
-   * Checks and outputs information about visibilitySpecValidation.
-   * @param {!JSONObject} config Configuration for instrumentation.
-   * @return {boolean} True if the spec is valid.
-   * @private
-   */
-  isVisibilitySpecValid_(config) {
-    if (!config['visibilitySpec'] || !this.isViewabilityExperimentOn_()) {
-      return true;
-    }
-
-    const spec = config['visibilitySpec'];
-    if (!spec['selector'] || spec['selector'][0] != '#') {
-      user.error(this.TAG_, 'Visibility spec requires an id selector');
-      return false;
-    }
-
-    const ctMax = spec['continuousTimeMax'];
-    const ctMin = spec['continuousTimeMin'];
-    const ttMax = spec['totalTimeMax'];
-    const ttMin = spec['totalTimeMin'];
-
-    if (!this.isPositiveNumber_(ctMin) || !this.isPositiveNumber_(ctMax) ||
-        !this.isPositiveNumber_(ttMin) || !this.isPositiveNumber_(ttMax)) {
-      user.error(this.TAG_, 'Timing conditions should be positive integers ' +
-          'when specified.');
-      return false;
-    }
-
-    if ((ctMax || ttMax) && !spec['unload']) {
-      user.warn(this.TAG_, 'Unload condition should be used when using ' +
-          ' totalTimeMax or continuousTimeMax');
-      return false;
-    }
-
-    if (ctMax < ctMin || ttMax < ttMin) {
-      user.warn(this.TAG_, 'Max value in timing conditions should be more ' +
-          'than the min value.');
-      return false;
-    }
-
-    if (!this.isValidPercentage_(spec['visiblePercentageMax']) ||
-        !this.isValidPercentage_(spec['visiblePercentageMin'])) {
-      user.error(this.TAG_,
-          'visiblePercentage conditions should be between 0 and 100.');
-      return false;
-    }
-
-    if (spec['visiblePercentageMax'] < spec['visiblePercentageMin']) {
-      user.error(this.TAG_, 'visiblePercentageMax should be greater than ' +
-          'visiblePercentageMin');
-      return false;
-    }
-    return true;
   }
 
   /**
