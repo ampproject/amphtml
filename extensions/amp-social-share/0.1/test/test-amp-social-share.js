@@ -132,7 +132,7 @@ describe('amp-social-share', () => {
       expect(el.implementation_.shareEndpoint_).to.be.equal(
           'https://twitter.com/intent/tweet');
 
-      expect(el.href_).to.not.contain('TITLE');
+      expect(el.implementation_.href_).to.not.contain('TITLE');
       expect(el.addEventListener.called).to.be.true;
       expect(el.addEventListener.calledWith('click')).to.be.true;
     });
