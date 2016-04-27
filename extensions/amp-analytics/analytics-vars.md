@@ -272,6 +272,30 @@ Provides the time it took for HTTP connection to be setup. The duration includes
 
 Example value `10`
 
+## Interaction
+
+### horizontalScrollBoundary
+
+Provides the horizontal scroll boundary that triggered a scroll event. This var is
+only available in a `trigger` of type `scroll`. The value of the boundary may be
+rounded based on the precision supported by the extension. For example, a
+boundary with value `1` and precision of `5` will result in value of var to be 0.
+
+### totalEngagedTime
+
+Provides the total time (in seconds) the user has been engaged with the page since the page
+first became visible in the viewport. Total engaged time will be 0 until the
+page first becomes visible.
+
+Example value: `36`
+
+### verticalScrollBoundary
+
+Provides the vertical scroll boundary that triggered a scroll event. This var is
+only available in a `trigger` of type `scroll`. The value of the boundary may be
+rounded based on the precision supported by the extension. For example, a
+boundary with value `1` and precision of `5` will result in value of var to be 0.
+
 ## Miscellaneous
 
 ### clientId
@@ -328,12 +352,4 @@ Example value: `6`
 Provides the number of seconds that have elapsed since 1970. (Epoch time)
 
 Example value: `1452710304312`
-
-### totalEngagedTime
-
-Provides the total time (in seconds) the user has been engaged with the page since the page
-first became visible in the viewport. Total engaged time will be 0 until the
-page first becomes visible.
-
-Example value: `36`
 
