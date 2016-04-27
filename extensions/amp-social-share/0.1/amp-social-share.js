@@ -15,14 +15,12 @@
  */
 
 import {addParamsToUrl} from '../../../src/url';
-import {documentInfoFor} from '../../../src/document-info';
 import {getDataParamsFromAttributes} from '../../../src/dom';
 import {getSocialConfig} from './amp-social-share-config';
 import {isExperimentOn} from '../../../src/experiments';
-import {isLayoutSizeDefined, getLengthNumeral} from '../../../src/layout';
+import {isLayoutSizeDefined} from '../../../src/layout';
 import {user} from '../../../src/log';
 import {urlReplacementsFor} from '../../../src/url-replacements';
-import {platformFor} from '../../../src/platform';
 import {CSS} from '../../../build/amp-social-share-0.1.css';
 
 /** @const */

@@ -79,6 +79,7 @@ describe('amp-social-share', () => {
 
   it('errors if share endpoint is missing', () => {
     return createIframePromise().then(iframe => {
+      toggleExperiment(iframe.win, 'amp-social-share', true);
       const share = iframe.doc.createElement('amp-social-share');
       share.setAttribute('type', 'unknown-provider');
       expect(() => {
@@ -89,6 +90,7 @@ describe('amp-social-share', () => {
 
   it('errors if type is missing', () => {
     return createIframePromise().then(iframe => {
+      toggleExperiment(iframe.win, 'amp-social-share', true);
       const share = iframe.doc.createElement('amp-social-share');
       expect(() => {
         share.build(true);
@@ -98,6 +100,7 @@ describe('amp-social-share', () => {
 
   it('renders unconfigured providers if share endpoint provided', () => {
     return getCustomShare(iframe => {
+      toggleExperiment(iframe.win, 'amp-social-share', true);
       const share = iframe.doc.createElement('amp-social-share');
 
       share.setAttribute('type', 'unknown-provider');
@@ -137,6 +140,7 @@ describe('amp-social-share', () => {
 
   it('adds a default value for url', () => {
     return getCustomShare(iframe => {
+      toggleExperiment(iframe.win, 'amp-social-share', true);
       const share = iframe.doc.createElement('amp-social-share');
 
       share.setAttribute('type', 'twitter');

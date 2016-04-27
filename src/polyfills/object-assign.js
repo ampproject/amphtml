@@ -21,12 +21,14 @@
  * @param {!Object} target
  * @returns {!Object}
  */
+
+const hasOwnProperty = Object.prototype.hasOwnProperty;
+
 export function assign(target) {
   if (target == null) {
     throw new TypeError('Cannot convert undefined or null to object');
   }
 
-  const hasOwnProperty = Object.prototype.hasOwnProperty;
   const output = Object(target);
   for (let i = 1; i < arguments.length; i++) {
     const source = arguments[i];
