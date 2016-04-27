@@ -934,8 +934,8 @@ export function createAmpElementProto(win, name, implementationClass) {
    */
   ElementProto.getRealChildren = function() {
     const elements = [];
-    for (let i = 0; i < this.children.length; i++) {
-      const child = this.children[i];
+    for (let child = this.firstElementChild; child;
+        child = child.nextElementSibling) {
       if (!isInternalOrServiceNode(child)) {
         elements.push(child);
       }
