@@ -21,10 +21,7 @@ import {writeScript, validateDataExists} from '../src/3p';
  * @param {!Object} data
  */
 export function adition(global, data) {
-
-  validateDataExists(data, ["version"]);
-
+  validateDataExists(data, ['version']);
   global.data = data;
-
-  writeScript(global, 'https://imagesrv.adition.com/js/amp/v'+String(data["version"])+'.js');
+  writeScript(global, 'https://imagesrv.adition.com/js/amp/v' + encodeURIComponent(data['version']) + '.js');
 }

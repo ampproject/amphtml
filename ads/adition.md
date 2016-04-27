@@ -16,6 +16,10 @@ limitations under the License.
 
 # ADITION technologies AG
 
+ADITION technologies AG specialises in the development and distribution of its own adserver technology, which is called ADITION adserving. The ADITION adserver now supports AMP.
+
+Please visit our [website](https://www.adition.com) for more information about us.
+
 ## Example
 
 ```html
@@ -28,7 +32,7 @@ limitations under the License.
 
 ## Configuration
 
-For semantics of configuration, please see ad network documentation.
+For semantics of configuration and examples, please sign-in and see ad network [documentation](https://wiki.adition.com/index.php?title=ADITION_technologies_AG:Manual/AMP) or [contact us](https://www.adition.com/en/contact/).
 
 Supported parameters:
 
