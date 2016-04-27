@@ -16,7 +16,7 @@
 
 import {CSS} from '../../../build/amp-sidebar-0.1.css';
 import {Layout} from '../../../src/layout';
-import {dev, user} from '../../../src/log';
+import {dev} from '../../../src/log';
 import {isExperimentOn} from '../../../src/experiments';
 import {platform} from '../../../src/platform';
 import {setStyles} from '../../../src/style';
@@ -34,9 +34,6 @@ const ANIMATION_TIMEOUT = 550;
 
 /** @const */
 const IOS_SAFARI_BOTTOMBAR_HEIGHT = '10vh';
-
-/** @const */
-const WHITELIST_ = ['AMP-ACCORDION', 'AMP-FIT-TEXT', 'AMP-IMG'];
 
 export class AmpSidebar extends AMP.BaseElement {
   /** @override */
@@ -85,8 +82,6 @@ export class AmpSidebar extends AMP.BaseElement {
       dev.warn(TAG, `Experiment ${EXPERIMENT} disabled`);
       return;
     }
-
-    this.checkWhitelist_();
 
     if (this.side_ != 'left' && this.side_ != 'right') {
       const pageDir =
@@ -263,28 +258,6 @@ export class AmpSidebar extends AMP.BaseElement {
       });
       this.element.appendChild(div);
       this.bottomBarCompensated_ = true;
-    }
-  }
-
-  /**
-   * Checks if the sidebar only has the whitlisted custom amp- elements.
-   * @private
-   */
-  checkWhitelist_() {
-    const elements = this.element.getElementsByClassName('-amp-element');
-    let i = elements.length - 1;
-    while (i >= 0) {
-      const tagName = elements[i].tagName;
-      if (tagName.indexOf('AMP-') == 0) {
-        const isWhiteListed = user.assert(
-            WHITELIST_.indexOf(tagName) >= 0,
-            '%s can only contain the following custom tags: %s',
-            this.element, WHITELIST_);
-        if (!isWhiteListed) {
-          break;
-        }
-      }
-      i--;
     }
   }
 }
