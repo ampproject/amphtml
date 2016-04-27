@@ -32,6 +32,7 @@ import {removeElement} from '../../../src/dom';
 const POSITION_FIXED_TAG_WHITELIST = {
   'AMP-LIGHTBOX': true,
   'AMP-STICKY-AD': true,
+  'AMP-FLYING-CARPET': true,
 };
 
 /**
@@ -212,18 +213,21 @@ class AmpAd extends AMP.BaseElement {
    */
   isPositionFixed() {
     let el = this.element;
-    const body = el.ownerDocument.body;
+    let hasFixedAncestor = false;
     do {
       if (POSITION_FIXED_TAG_WHITELIST[el.tagName]) {
         return false;
       }
       if (this.getWin()/*because only called from onLayoutMeasure */
           ./*OK*/getComputedStyle(el).position == 'fixed') {
-        return true;
+        // Because certain blessed elements may contain a position fixed
+        // container (which contain an ad), we continue to search the
+        // ancestry tree.
+        hasFixedAncestor = true;
       }
       el = el.parentNode;
-    } while (el.getAttribute && el != body);
-    return false;
+    } while (el.tagName != 'BODY');
+    return hasFixedAncestor;
   }
 
   /** @override */
