@@ -81,8 +81,8 @@ const AMP_EMBED_ALLOWED = {
 
 register('a9', a9);
 register('adblade', adblade);
-register('adform', adform);
 register('adition', adition);
+register('adform', adform);
 register('adman', adman);
 register('adreactor', adreactor);
 register('adsense', adsense);
