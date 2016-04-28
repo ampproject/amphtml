@@ -16,10 +16,12 @@
  * Existing sovrn customers feel free to contact amp-implementations@sovrn.com for assistance with setting up your amp-ad tagid
  * New customers please see www.sovrn.com to sign up and get started!
  *********
+ **/
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
+ import {writeScript} from '../src/3p';
 export function sovrn(global, data) {
   /*eslint "google-camelcase/google-camelcase": 0*/
   global.width = data.width;
