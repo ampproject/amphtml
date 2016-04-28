@@ -19,7 +19,7 @@ import {getDataParamsFromAttributes} from '../../../src/dom';
 import {getSocialConfig} from './amp-social-share-config';
 import {isExperimentOn} from '../../../src/experiments';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {user} from '../../../src/log';
+import {dev, user} from '../../../src/log';
 import {urlReplacementsFor} from '../../../src/url-replacements';
 import {CSS} from '../../../build/amp-social-share-0.1.css';
 
@@ -71,6 +71,10 @@ class AmpSocialShare extends AMP.BaseElement {
 
   /** @private */
   handleClick_() {
+    if (!this.href_) {
+      dev.error(TAG, 'Clicked before href is set.');
+      return;
+    }
     const windowFeatures = 'resizable,scrollbars,width=640,height=480';
     this.getWin().open(this.href_, '_blank', windowFeatures);
   }
