@@ -16,6 +16,7 @@ limitations under the License.
 
 # e-planning
 
+
 ## Example
 
 ```html
@@ -33,7 +34,7 @@ limitations under the License.
 
 ## Configuration
 
-For semantics of configuration, please see ad network documentation. For support contact support@e-planning.net
+For semantics of configuration, please see [ad network documentation](https://www.e-planning.net). For support contact support@e-planning.net
 
 Supported parameters:
 
