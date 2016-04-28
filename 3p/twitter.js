@@ -42,6 +42,9 @@ export function twitter(global, data) {
   const tweet = global.document.createElement('div');
   tweet.id = 'tweet';
   tweet.style.width = '100%';
+  tweet.style.display = 'flex';
+  tweet.style.alignItems = 'center';
+  tweet.style.justifyContent = 'center';
   global.document.getElementById('c').appendChild(tweet);
   getTwttr(global, function(twttr) {
     // Dimensions are given by the parent frame.
