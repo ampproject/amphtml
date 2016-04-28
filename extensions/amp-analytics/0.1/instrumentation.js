@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
+import {isExperimentOn} from '../../../src/experiments';
 import {Observable} from '../../../src/observable';
 import {getService} from '../../../src/service';
 import {timer} from '../../../src/timer';
 import {user} from '../../../src/log';
 import {viewerFor} from '../../../src/viewer';
 import {viewportFor} from '../../../src/viewport';
+import {visibilityFor} from '../../../src/visibility';
 
 /** @private @const {number} */
 const MIN_TIMER_INTERVAL_SECONDS_ = 0.5;
@@ -27,12 +29,17 @@ const MIN_TIMER_INTERVAL_SECONDS_ = 0.5;
 /** @private @const {number} */
 const DEFAULT_MAX_TIMER_LENGTH_SECONDS_ = 7200;
 
-/** @private {number} */
+/** @private @const {number} */
 const SCROLL_PRECISION_PERCENT = 5;
 
+/** @private @const {string} */
+const VAR_H_SCROLL_BOUNDARY = 'horizontalScrollBoundary';
+
+/** @private @const {string} */
+const VAR_V_SCROLL_BOUNDARY = 'verticalScrollBoundary';
+
 /**
- * This type signifies a callback that gets called when an analytics event that
- * the listener subscribed to fires.
+ * Type to define a callback that is called when an instrumented event fires.
  * @typedef {function(!AnalyticsEvent)}
  */
 let AnalyticsEventListenerDef;
@@ -67,9 +74,11 @@ class AnalyticsEvent {
 
   /**
    * @param {!AnalyticsEventType} type The type of event.
+   * @param {!Object<string, string>} A map of vars and their values.
    */
-  constructor(type) {
+  constructor(type, vars) {
     this.type = type;
+    this.vars = vars || Object.create(null);
   }
 }
 
@@ -128,15 +137,7 @@ export class InstrumentationService {
   addListener(config, listener) {
     const eventType = config['on'];
     if (eventType === AnalyticsEventType.VISIBLE) {
-      if (this.viewer_.isVisible()) {
-        listener(new AnalyticsEvent(AnalyticsEventType.VISIBLE));
-      } else {
-        this.viewer_.onVisibilityChanged(() => {
-          if (this.viewer_.isVisible()) {
-            listener(new AnalyticsEvent(AnalyticsEventType.VISIBLE));
-          }
-        });
-      }
+      this.createVisibilityListener_(listener, config);
     } else if (eventType === AnalyticsEventType.CLICK) {
       if (!config['selector']) {
         user.error(this.TAG_, 'Missing required selector on click trigger');
@@ -209,6 +210,125 @@ export class InstrumentationService {
     if (observers) {
       observers.fire(event);
     }
+  }
+
+  /**
+   * Creates listeners for visibility conditions or calls the callback if all
+   * the conditions are met.
+   * @param {!AnalyticsEventListenerDef} The callback to call when the event
+   *   occurs.
+   * @param {!JSONObject} config Configuration for instrumentation.
+   * @private
+   */
+  createVisibilityListener_(callback, config) {
+    if (!this.isVisibilitySpecValid_(config)) {
+      return;
+    }
+
+    if (config['visibilitySpec']) {
+      this.runOrSchedule_(() => {
+        visibilityFor(this.win_).then(visibility => {
+          visibility.listenOnce(config['visibilitySpec'], () => {
+            callback(new AnalyticsEvent(AnalyticsEventType.VISIBLE));
+          });
+        });
+      });
+    } else {
+      this.runOrSchedule_(() => {
+        callback(new AnalyticsEvent(AnalyticsEventType.VISIBLE));
+      });
+    }
+  }
+
+  /** @private{function()} function to run or schedule. */
+  runOrSchedule_(fn) {
+    if (this.viewer_.isVisible()) {
+      fn();
+    } else {
+      this.viewer_.onVisibilityChanged(() => {
+        if (this.viewer_.isVisible()) {
+          fn();
+        }
+      });
+    }
+  }
+
+  /**
+   * Checks if the value is undefined or positive number like.
+   * "", 1, 0, undefined, 100, 101 are positive. -1, NaN are not.
+   * @param {number} num The number to verify.
+   * @return {boolean}
+   * @private
+   */
+  isPositiveNumber_(num) {
+    return num === undefined || Math.sign(num) >= 0;
+  }
+
+  /**
+   * Checks if the value is undefined or a number between 0 and 100.
+   * "", 1, 0, undefined, 100 return true. -1, NaN and 101 return false.
+   * @param {number} num The number to verify.
+   * @return {boolean}
+   * @private
+   */
+  isValidPercentage_(num) {
+    return num === undefined || (Math.sign(num) >= 0 && num <= 100);
+  }
+
+  /**
+   * Checks and outputs information about visibilitySpecValidation.
+   * @param {!JSONObject} config Configuration for instrumentation.
+   * @return {boolean} True if the spec is valid.
+   * @private
+   */
+  isVisibilitySpecValid_(config) {
+    if (!config['visibilitySpec'] || !this.isViewabilityExperimentOn_()) {
+      return true;
+    }
+
+    const spec = config['visibilitySpec'];
+    if (!spec['selector'] || spec['selector'][0] != '#') {
+      user.error(this.TAG_, 'Visibility spec requires an id selector');
+      return false;
+    }
+
+    const ctMax = spec['continuousTimeMax'];
+    const ctMin = spec['continuousTimeMin'];
+    const ttMax = spec['totalTimeMax'];
+    const ttMin = spec['totalTimeMin'];
+
+    if (!this.isPositiveNumber_(ctMin) || !this.isPositiveNumber_(ctMax) ||
+        !this.isPositiveNumber_(ttMin) || !this.isPositiveNumber_(ttMax)) {
+      user.error(this.TAG_, 'Timing conditions should be positive integers ' +
+          'when specified.');
+      return false;
+    }
+
+    if ((ctMax || ttMax) && !spec['unload']) {
+      user.warn(this.TAG_, 'Unload condition should be used when using ' +
+          ' totalTimeMax or continuousTimeMax');
+      return false;
+    }
+
+    if (ctMax < ctMin || ttMax < ttMin) {
+      user.warn(this.TAG_, 'Max value in timing conditions should be more ' +
+          'than the min value.');
+      return false;
+    }
+
+    if (!this.isValidPercentage_(spec['visiblePercentageMax']) ||
+        !this.isValidPercentage_(spec['visiblePercentageMin'])) {
+      user.error(this.TAG_,
+          'visiblePercentage conditions should be between 0 and 100.');
+      return false;
+    }
+
+    if (spec['visiblePercentageMax'] < spec['visiblePercentageMin']) {
+      user.error(this.TAG_, 'visiblePercentageMax should be greater than ' +
+          'visiblePercentageMin');
+      return false;
+    }
+    return true;
   }
 
   /**
@@ -288,11 +408,13 @@ export class InstrumentationService {
     }
 
     /**
-     * @param {!Object.<number, boolean>} bounds.
+     * @param {!Object<number, boolean>} bounds.
      * @param {number} scrollPos Number representing the current scroll
+     * @param {string} varName variable name to assign to the bound that
+     * triggers the event
      * position.
      */
-    const triggerScrollEvents = function(bounds, scrollPos) {
+    const triggerScrollEvents = function(bounds, scrollPos, varName) {
       if (!scrollPos) {
         return;
       }
@@ -303,7 +425,9 @@ export class InstrumentationService {
           continue;
         }
         bounds[b] = true;
-        listener(new AnalyticsEvent(AnalyticsEventType.SCROLL));
+        const vars = Object.create(null);
+        vars[varName] = b;
+        listener(new AnalyticsEvent(AnalyticsEventType.SCROLL, vars));
       }
     };
 
@@ -313,9 +437,11 @@ export class InstrumentationService {
       // Calculates percentage scrolled by adding screen height/width to
       // top/left and dividing by the total scroll height/width.
       triggerScrollEvents(boundsV,
-          (e.top + e.height) * 100 / this.viewport_.getScrollHeight());
+          (e.top + e.height) * 100 / this.viewport_.getScrollHeight(),
+          VAR_V_SCROLL_BOUNDARY);
       triggerScrollEvents(boundsH,
-          (e.left + e.width) * 100 / this.viewport_.getScrollWidth());
+          (e.left + e.width) * 100 / this.viewport_.getScrollWidth(),
+          VAR_H_SCROLL_BOUNDARY);
     });
   }
 
@@ -324,8 +450,8 @@ export class InstrumentationService {
    * SCROLL_PRECISION_PERCENT and returns an object with normalized boundaries
    * as keys and false as values.
    *
-   * @param {!Array.<number>} bounds array of bounds.
-   * @return {!Object.<number,boolean>} Object with normalized bounds as keys
+   * @param {!Array<number>} bounds array of bounds.
+   * @return {!Object<number,boolean>} Object with normalized bounds as keys
    * and false as value.
    * @private
    */
@@ -415,6 +541,13 @@ export class InstrumentationService {
         DEFAULT_MAX_TIMER_LENGTH_SECONDS_;
     this.win_.setTimeout(this.win_.clearInterval.bind(this.win_, intervalId),
         maxTimerLength * 1000);
+  }
+
+  /**
+   * @return {boolean} True if the experiment is on. False otherwise.
+   */
+  isViewabilityExperimentOn_() {
+    return isExperimentOn(this.win_, 'amp-analytics-viewability');
   }
 }
 

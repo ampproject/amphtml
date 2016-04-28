@@ -23,8 +23,7 @@ import {loadScript, validateDataExists, validateExactlyOne} from '../src/3p';
 export function taboola(global, data) {
   // do not copy the following attributes from the 'data' object
   // to _tablloa global object
-  const blackList = ['height', 'initialWindowHeight', 'initialWindowWidth',
-    'type', 'width', 'placement', 'mode'];
+  const blackList = ['height', 'type', 'width', 'placement', 'mode'];
 
   // ensure we have vlid publisher, placement and mode
   // and exactly one page-type

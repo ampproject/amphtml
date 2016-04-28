@@ -25,7 +25,7 @@ import {timer} from '../../../src/timer';
 import {user} from '../../../src/log';
 
 /** @const {string} */
-const TAG_ = 'AmpIframe';
+const TAG_ = 'amp-iframe';
 
 /** @type {number}  */
 let count = 0;
@@ -258,8 +258,6 @@ export class AmpIframe extends AMP.BaseElement {
     setSandbox(this.element, iframe, this.sandbox_);
     iframe.src = this.iframeSrc;
 
-    this.container_.appendChild(iframe);
-
     if (!isTracking) {
       this.intersectionObserver_ = new IntersectionObserver(this, iframe);
     }
@@ -306,6 +304,8 @@ export class AmpIframe extends AMP.BaseElement {
       listen(iframe, 'embed-ready', this.activateIframe_.bind(this));
     }
 
+    this.container_.appendChild(iframe);
+
     return loadPromise(iframe).then(() => {
       // On iOS the iframe at times fails to render inside the `overflow:auto`
       // container. To avoid this problem, we set the `overflow:auto` property
@@ -339,8 +339,6 @@ export class AmpIframe extends AMP.BaseElement {
       }
 
       this.iframe_ = null;
-      // IntersectionObserver's listeners were cleaned up by
-      // setInViewport(false) before #unlayoutCallback
       this.intersectionObserver_ = null;
     }
     return true;

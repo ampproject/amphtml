@@ -33,6 +33,7 @@ import {installViewerService, VisibilityState} from './viewer-impl';
 import {installViewportService} from './viewport-impl';
 import {installVsyncService} from './vsync-impl';
 import {FiniteStateMachine} from '../finite-state-machine';
+import {isArray} from '../types';
 
 
 const TAG_ = 'Resources';
@@ -316,6 +317,25 @@ export class Resources {
   getResourceForElement(element) {
     return dev.assert(/** @type {!Resource} */ (element[RESOURCE_PROP_]),
         'Missing resource prop on %s', element);
+  }
+
+  /**
+   * Returns the viewport instance
+   * @return {!Viewport}
+   */
+  getViewport() {
+    return this.viewport_;
+  }
+
+  /**
+   * Returns the direction the user last scrolled.
+   *  - -1 for scrolling up
+   *  - 1 for scrolling down
+   *  - Defaults to 1
+   * @return {number}
+   */
+  getScrollDirection() {
+    return Math.sign(this.lastVelocity_) || 1;
   }
 
   /**
@@ -859,7 +879,10 @@ export class Resources {
     // Unload all in one cycle.
     if (toUnload.length > 0) {
       this.vsync_.mutate(() => {
-        toUnload.forEach(r => r.unload());
+        toUnload.forEach(r => {
+          r.unload();
+          this.cleanupTasks_(r);
+        });
       });
     }
 
@@ -948,7 +971,7 @@ export class Resources {
     const visibility = this.viewer_.getVisibilityState();
 
     const scorer = this.calcTaskScore_.bind(this, this.viewport_.getRect(),
-        Math.sign(this.lastVelocity_));
+        this.getScrollDirection());
 
     let timeout = -1;
     let task = this.queue_.peek(scorer);
@@ -1241,7 +1264,7 @@ export class Resources {
    * @private
    */
   schedule_(resource, localId, priorityOffset, parentPriority, callback) {
-    const taskId = resource.debugid + '#' + localId;
+    const taskId = resource.getTaskId(localId);
 
     const task = {
       id: taskId,
@@ -1362,7 +1385,10 @@ export class Resources {
       this.resources_.forEach(r => r.pause());
     };
     const unload = () => {
-      this.resources_.forEach(r => r.unload());
+      this.resources_.forEach(r => {
+        r.unload();
+        this.cleanupTasks_(r);
+      });
       this.unselectText();
     };
     const resume = () => {
@@ -1405,6 +1431,29 @@ export class Resources {
       this.win.getSelection().removeAllRanges();
     } catch (e) {
       // Selection API not supported.
+    }
+  }
+
+  /**
+   * Cleanup task queues from tasks for elements that has been unloaded.
+   * @param resource
+   * @private
+   */
+  cleanupTasks_(resource) {
+    if (resource.getState() == ResourceState_.NOT_LAID_OUT) {
+      // If the layout promise for this resource has not resolved yet, remove
+      // it from the task queues to make sure this resource can be rescheduled
+      // for layout again later on.
+      // TODO(mkhatib): Think about how this might affect preload tasks once the
+      // prerender change is in.
+      this.queue_.purge(task => {
+        return task.resource == resource;
+      });
+      this.exec_.purge(task => {
+        return task.resource == resource;
+      });
+      this.requestsChangeSize_ = this.requestsChangeSize_.filter(
+          request => request.resource != resource);
     }
   }
 }
@@ -1722,7 +1771,41 @@ export class Resource {
    * @return {boolean}
    */
   renderOutsideViewport() {
-    return this.element.renderOutsideViewport();
+    const renders = this.element.renderOutsideViewport();
+    // Boolean interface, element is either always allowed or never allowed to
+    // render outside viewport.
+    if (renders === true || renders === false) {
+      return renders;
+    }
+    // Numeric interface, element is allowed to render outside viewport when it
+    // is within X times the viewport height of the current viewport.
+    const viewportBox = this.resources_.getViewport().getRect();
+    const layoutBox = this.layoutBox_;
+    const scrollDirection = this.resources_.getScrollDirection();
+    const multipler = Math.max(renders, 0);
+    let scrollPenalty = 1;
+    let distance;
+    if (viewportBox.bottom < layoutBox.top) {
+      // Element is below viewport
+      distance = layoutBox.top - viewportBox.bottom;
+
+      // If we're scrolling away from the element
+      if (scrollDirection == -1) {
+        scrollPenalty = 2;
+      }
+    } else if (viewportBox.top > layoutBox.bottom) {
+      // Element is above viewport
+      distance = viewportBox.top - layoutBox.bottom;
+
+      // If we're scrolling away from the element
+      if (scrollDirection == 1) {
+        scrollPenalty = 2;
+      }
+    } else {
+      // Element is in viewport
+      return true;
+    }
+    return distance < viewportBox.height * multipler / scrollPenalty;
   }
 
   /**
@@ -1760,7 +1843,7 @@ export class Resource {
       return Promise.resolve();
     }
 
-    if (!this.renderOutsideViewport() && !this.isInViewport()) {
+    if (!this.isInViewport() && !this.renderOutsideViewport()) {
       dev.fine(TAG_, 'layout canceled due to element not being in viewport:',
           this.debugid, this.state_);
       this.state_ = ResourceState_.READY_FOR_LAYOUT;
@@ -1861,7 +1944,17 @@ export class Resource {
     if (this.element.unlayoutCallback()) {
       this.state_ = ResourceState_.NOT_LAID_OUT;
       this.layoutCount_ = 0;
+      this.layoutPromise_ = null;
     }
+  }
+
+  /**
+   * Returns the task ID for this resource.
+   * @param localId
+   * @returns {string}
+   */
+  getTaskId(localId) {
+    return this.debugid + '#' + localId;
   }
 
   /**
@@ -2017,11 +2110,10 @@ export class TaskQueue_ {
    */
   dequeue(task) {
     const existing = this.taskIdMap_[task.id];
-    if (!existing) {
+    const dequeued = this.removeAtIndex(task, this.tasks_.indexOf(existing));
+    if (!dequeued) {
       return false;
     }
-    this.tasks_.splice(this.tasks_.indexOf(existing), 1);
-    delete this.taskIdMap_[task.id];
     this.lastDequeueTime_ = timer.now();
     return true;
   }
@@ -2053,6 +2145,36 @@ export class TaskQueue_ {
   forEach(callback) {
     this.tasks_.forEach(callback);
   }
+
+  /**
+   * Removes the task and returns "true" if dequeueing is successful. Otherwise
+   * returns "false", e.g. when this task is not currently enqueued.
+   * @param {!TaskDef} task
+   * @param {number} index of the task to remove.
+   * @return {boolean}
+   */
+  removeAtIndex(task, index) {
+    const existing = this.taskIdMap_[task.id];
+    if (!existing || this.tasks_[index] != existing) {
+      return false;
+    }
+    this.tasks_.splice(index, 1);
+    delete this.taskIdMap_[task.id];
+    return true;
+  }
+
+  /**
+   * Removes tasks in queue that pass the callback test.
+   * @param {function(!TaskDef):boolean} callback Return true to remove the task.
+   */
+  purge(callback) {
+    let index = this.tasks_.length;
+    while (index--) {
+      if (callback(this.tasks_[index])) {
+        this.removeAtIndex(this.tasks_[index], index);
+      }
+    }
+  }
 }
 
 
@@ -2061,10 +2183,7 @@ export class TaskQueue_ {
  * @return {!Array<!Element>}
  */
 function elements_(elements) {
-  if (elements.length !== undefined) {
-    return elements;
-  }
-  return [elements];
+  return isArray(elements) ? elements : [elements];
 }
 
 

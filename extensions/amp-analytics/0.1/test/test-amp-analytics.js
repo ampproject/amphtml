@@ -21,12 +21,14 @@ import {
 } from '../../../amp-user-notification/0.1/amp-user-notification';
 import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
-import {getService} from '../../../../src/service';
+import {getService, resetServiceForTesting} from '../../../../src/service';
 import {markElementScheduledForTesting} from '../../../../src/custom-element';
 import {installCidService} from '../../../../src/service/cid-impl';
 import {installViewerService} from '../../../../src/service/viewer-impl';
 import {installViewportService} from '../../../../src/service/viewport-impl';
-import {urlReplacementsFor} from '../../../../src/url-replacements';
+import {
+  installUrlReplacementsService,
+} from '../../../../src/service/url-replacements-impl';
 import * as sinon from 'sinon';
 
 const VENDOR_REQUESTS = require('./vendor-requests.json');
@@ -56,7 +58,9 @@ describe('amp-analytics', function() {
       installViewerService(iframe.win);
       installViewportService(iframe.win);
       installCidService(iframe.win);
+      installUrlReplacementsService(iframe.win);
       uidService = installUserNotificationManager(iframe.win);
+      resetServiceForTesting(iframe.win, 'xhr');
       getService(iframe.win, 'xhr', () => {
         return {fetchJson: (url, init) => {
           expect(init.requireAmpResponseSourceOrigin).to.be.true;
@@ -151,7 +155,8 @@ describe('amp-analytics', function() {
             });
             analytics.createdCallback();
             analytics.buildCallback();
-            const urlReplacements = urlReplacementsFor(analytics.getWin());
+            const urlReplacements = installUrlReplacementsService(
+                analytics.getWin());
             sandbox.stub(urlReplacements, 'getReplacement_', function(name) {
               expect(this.replacements_).to.have.property(name);
               return '_' + name.toLowerCase() + '_';
@@ -167,6 +172,8 @@ describe('amp-analytics', function() {
             return analytics.layoutCallback().then(() => {
               return analytics.handleEvent_({
                 request: name,
+              }, {
+                vars: Object.create(null),
               }).then(url => {
                 const val = VENDOR_REQUESTS[vendor][name];
                 if (val == null) {

@@ -25,7 +25,7 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong>Availability</strong></td>
-    <td><a href="https://www.ampproject.org/docs/reference/experimental.html">Experimental</a></td>
+    <td>Stable</td>
   </tr>
   <tr>
     <td class="col-fourty"><strong>Required Script</strong></td>
@@ -485,7 +485,7 @@ This section will cover a detailed explanation of the design underlying the amp-
 ## Validation errors
 
 The following lists validation errors specific to the `amp-access` tag
-(see also `amp-access` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii)):
+(see also `amp-access` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-access/0.1/validator-amp-access.protoascii)):
 
 <table>
   <tr>

@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 The AMP HTML Authors. All Rights Reserved.
+ * Copyright 2016 The AMP HTML Authors. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ export const adPrefetch = {
   a9: 'https://c.amazon-adsystem.com/aax2/assoc.js',
   adblade: 'https://web.adblade.com/js/ads/async/show.js',
   adsense: 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js',
+  aduptech: 'https://s.d.adup-tech.com/jsapi',
   criteo: 'https://static.criteo.net/js/ld/publishertag.js',
   dotandads: 'https://amp.ad.dotandad.com/dotandadsAmp.js',
   industrybrains: 'https://web.industrybrains.com/js/ads/async/show.js',
@@ -40,7 +41,16 @@ export const adPrefetch = {
   revcontent: 'https://labs-cdn.revcontent.com/build/amphtml/revcontent.amp.min.js',
   teads: 'https://cdn.teads.tv/media/format/v3/teads-format.min.js',
   imobile: 'https://spamp.i-mobile.co.jp/script/amp.js',
+  pubmatic: 'https://ads.pubmatic.com/AdServer/js/amp.js',
   sortable: 'https://www.googletagservices.com/tag/js/gpt.js',
+  gmossp: 'https://cdn.gmossp-sp.jp/ads/amp.js',
+  'weborama-display': [
+    'https://cstatic.weborama.fr/js/advertiserv2/adperf_launch_1.0.0_scrambled.js',
+    'https://cstatic.weborama.fr/js/advertiserv2/adperf_core_1.0.0_scrambled.js',
+  ],
+  yieldbot: 'https://cdn.yldbt.com/js/yieldbot.intent.js',
+  adstir: 'https://js.ad-stir.com/js/adstir_async.js',
+  colombia: 'https://static.clmbtech.com/ad/commons/js/colombia-amp.js',
 };
 
 /**
@@ -62,6 +72,7 @@ export const adPreconnect = {
   adform: 'https://track.adform.net',
   adreactor: 'https://adserver.adreactor.com',
   adsense: 'https://googleads.g.doubleclick.net',
+  aduptech: 'https://s.d.adup-tech.com',
   taboola: [
     'https://cdn.taboola.com',
     'https://trc.taboola.com',
@@ -118,6 +129,9 @@ export const adPreconnect = {
   webediads: [
     'https://eu1.wbdds.com',
   ],
+  gmossp: 'https://cdn.gmossp-sp.jp',
+  yieldbot: 'https://i.yldbt.com',
+  adstir: 'https://ad.ad-stir.com',
 };
 
 /**

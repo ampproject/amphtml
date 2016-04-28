@@ -24,12 +24,15 @@ import * as sinon from 'sinon';
 import {getService, resetServiceForTesting} from '../../src/service';
 import {
   createAmpElementProto,
-  getElementService,
-  getElementServiceIfAvailable,
   markElementScheduledForTesting,
   resetScheduledElementForTesting,
   stubElements,
 } from '../../src/custom-element';
+// TODO(@cramforce): Move tests into their own file.
+import {
+  getElementService,
+  getElementServiceIfAvailable,
+} from '../../src/element-service';
 
 
 describe('CustomElement', () => {

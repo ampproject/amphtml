@@ -88,7 +88,7 @@ export function getIntersectionChangeEntry(
 export class IntersectionObserver extends Observable {
   /**
    * @param {!BaseElement} element.
-   * @param {!Element} iframe Iframe element to which would request intersection
+   * @param {!Element} iframe Iframe element which requested the intersection
    *    data.
    * @param {?boolean} opt_is3p Set to `true` when the iframe is 3'rd party.
    * @constructor
@@ -201,11 +201,16 @@ export class IntersectionObserver extends Observable {
     }
     this.pendingChanges_.push(change);
     if (!this.flushTimeout_) {
-      // Send a maximum of 10 postMessages per second.
+      // Send one immediately, …
+      this.flush_();
+      // but only send a maximum of 10 postMessages per second.
       this.flushTimeout_ = timer.delay(this.boundFlush_, 100);
     }
   }
 
+  /**
+   * @private
+   */
   flush_() {
     this.flushTimeout_ = 0;
     if (!this.pendingChanges_.length) {

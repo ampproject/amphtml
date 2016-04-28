@@ -16,19 +16,17 @@
 
 import {BaseElement} from '../src/base-element';
 import {IntersectionObserver} from '../src/intersection-observer';
-import {cidForOrNull} from '../src/cid';
+import {getAdCid} from '../src/ad-cid';
 import {getIframe, prefetchBootstrap} from '../src/3p-frame';
 import {isLayoutSizeDefined} from '../src/layout';
 import {listen, listenOnce, postMessage} from '../src/iframe-helper';
 import {loadPromise} from '../src/event-helper';
 import {parseUrl} from '../src/url';
 import {registerElement} from '../src/custom-element';
-import {adPrefetch, adPreconnect, clientIdScope} from '../ads/_config';
+import {adPrefetch, adPreconnect} from '../ads/_config';
 import {timer} from '../src/timer';
 import {user} from '../src/log';
-import {userNotificationManagerFor} from '../src/user-notification';
 import {viewerFor} from '../src/viewer';
-import {removeElement} from '../src/dom';
 
 
 /** @private @const These tags are allowed to have fixed positioning */
@@ -63,17 +61,11 @@ export function installAd(win) {
       // at closer than 1.25 viewports away.
       if (this.element.getAttribute('data-loading-strategy') ==
           'prefer-viewability-over-views') {
-        const box = this.getIntersectionElementLayoutBox();
-        const viewportBox = this.getViewport().getRect();
-        const distanceFromViewport = box.top - viewportBox.bottom;
-        if (distanceFromViewport <= 1.25 * (viewportBox.height)) {
-          return true;
-        }
-        return false;
+        return 1.25;
       }
 
       // Otherwise the ad is good to go.
-      return true;
+      return super.renderOutsideViewport();
     }
 
     /** @override */
@@ -223,17 +215,17 @@ export function installAd(win) {
     /** @override */
     layoutCallback() {
       if (!this.iframe_) {
-        loadingAdsCount++;
         user.assert(!this.isInFixedContainer_,
             '<amp-ad> is not allowed to be placed in elements with ' +
             'position:fixed: %s', this.element);
+        loadingAdsCount++;
         timer.delay(() => {
           // Unfortunately we don't really have a good way to measure how long it
           // takes to load an ad, so we'll just pretend it takes 1 second for
           // now.
           loadingAdsCount--;
         }, 1000);
-        return this.getAdCid_().then(cid => {
+        return getAdCid(this).then(cid => {
           if (cid) {
             this.element.setAttribute('ampcid', cid);
           }
@@ -241,7 +233,6 @@ export function installAd(win) {
             this.element);
           this.iframe_.setAttribute('scrolling', 'no');
           this.applyFillContent(this.iframe_);
-          this.element.appendChild(this.iframe_);
           this.intersectionObserver_ =
               new IntersectionObserver(this, this.iframe_, /* opt_is3P */true);
           // Triggered by context.noContentAvailable() inside the ad iframe.
@@ -279,64 +270,11 @@ export function installAd(win) {
           this.viewer_.onVisibilityChanged(() => {
             this.sendEmbedInfo_(this.isInViewport());
           });
+          this.element.appendChild(this.iframe_);
           return loadPromise(this.iframe_);
         });
       }
       return loadPromise(this.iframe_);
-    }
-
-    /** @override  */
-    unlayoutCallback() {
-      if (this.iframe_) {
-        removeElement(this.iframe_);
-        if (this.placeholder_) {
-          this.togglePlaceholder(true);
-        }
-        if (this.fallback_) {
-          this.toggleFallback(false);
-        }
-
-        this.iframe_ = null;
-        // IntersectionObserver's listeners were cleaned up by
-        // setInViewport(false) before #unlayoutCallback
-        this.intersectionObserver_ = null;
-      }
-      return true;
-    }
-
-    /** @override  */
-    unlayoutOnPause() {
-      return true;
-    }
-
-    /**
-     * @return {!Promise<string|undefined>} A promise for a CID or undefined if
-     *     - the ad network does not request one or
-     *     - `amp-analytics` which provides the CID service was not installed.
-     * @private
-     */
-    getAdCid_() {
-      const scope = clientIdScope[this.element.getAttribute('type')];
-      const consentId = this.element.getAttribute(
-          'data-consent-notification-id');
-      if (!(scope || consentId)) {
-        return Promise.resolve();
-      }
-      return cidForOrNull(this.getWin()).then(cidService => {
-        if (!cidService) {
-          return;
-        }
-        let consent = Promise.resolve();
-        if (consentId) {
-          consent = userNotificationManagerFor(this.getWin()).then(service => {
-            return service.get(consentId);
-          });
-          if (!scope && consentId) {
-            return consent;
-          }
-        }
-        return cidService.get(scope, consent);
-      });
     }
 
     /** @override  */
@@ -418,7 +356,7 @@ export function installAd(win) {
         }
         // Remove the iframe only if it is not the master.
         if (this.iframe_.name.indexOf('_master') == -1) {
-          removeElement(this.iframe_);
+          this.element.removeChild(this.iframe_);
           this.iframe_ = null;
         }
       });

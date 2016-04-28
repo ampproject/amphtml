@@ -107,6 +107,12 @@ Type attribute value: `chartbeat`
 
 Adds support for Chartbeat. More details for adding Chartbeat support can be found at [support.chartbeat.com](http://support.chartbeat.com/docs/integrations.html#amp).
 
+### ColAnalytics
+
+Type attribute value: `colanalytics`
+
+Adds support for ColAnalytics. Additionally, need the value for `id`.
+
 ### comScore
 
 Type attribute value: `comscore`
@@ -164,6 +170,12 @@ Type attribute value: `quantcast`
 
 Adds support for Quantcast Measurement. More details for adding Quantcast Measurement can be found at [quantcast.com](https://www.quantcast.com/help/guides/)
 
+### SOASTA mPulse
+
+Type attribute value: `mpulse`
+
+Adds support for [SOASTA mPulse](https://www.soasta.com/mPulse). Configuration details can be found at [docs.soasta.com](http://docs.soasta.com/).
+
 ### SimpleReach
 
 Type attribute value: `simplereach`
@@ -203,7 +215,7 @@ the `type` attribute.
 
 If configuration data from more than one of these sources is used, the configuration objects (vars, requests and triggers) will
 be merged together such that **(i) remote configuration takes precedence over inline configuration and (ii) inline configuration
-takes precendence over vendor configuration**.
+takes precedence over vendor configuration**.
 
 The `<amp-analytics>` configuration object uses the following format:
 
@@ -299,7 +311,7 @@ Use this configuration to fire a request when a specified element is clicked. Us
 
 #### Scroll trigger (`"on": "scroll"`)
 Use this configuration to fire a request under certain conditions when the page is scrolled. Use `scrollSpec` to control when this will fire:
-  - `scrollSpec` This object can contain `verticalBoundaries` and `horizontalBoundaries`. At least one of the two properties is required for a scroll event to fire. The values for both of the properties should be arrays of numbers containing the boundaries on which a scroll event is generated. For instance, in the following code snippet, the scroll event will be fired when page is scrolled vertically by 25%, 50% and 90%. Additionally, the event will also fire when the page is horizontally scrolled to 90% of scroll width.
+  - `scrollSpec` This object can contain `verticalBoundaries` and `horizontalBoundaries`. At least one of the two properties is required for a scroll event to fire. The values for both of the properties should be arrays of numbers containing the boundaries on which a scroll event is generated. For instance, in the following code snippet, the scroll event will be fired when page is scrolled vertically by 25%, 50% and 90%. Additionally, the event will also fire when the page is horizontally scrolled to 90% of scroll width. To keep the page performant, the scroll boundaries are rounded to the nearest multiple of `5`.
 
 
     ```javascript
@@ -309,7 +321,8 @@ Use this configuration to fire a request under certain conditions when the page 
         "scrollSpec": {
           "verticalBoundaries": [25, 50, 90],
           "horizontalBoundaries": [90]
-        }
+        },
+        "request": "event"
       }
     }
     ```
@@ -381,7 +394,7 @@ The `extraUrlParamsReplaceMap` attribute specifies a map of keys and values that
 ## Validation errors
 
 The following lists validation errors specific to the `amp-analytics` tag
-(see also `amp-analytics` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii)):
+(see also `amp-analytics` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-analytics/0.1/validator-amp-analytics.protoascii)):
 
 <table>
   <tr>

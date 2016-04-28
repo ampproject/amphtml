@@ -32,7 +32,7 @@ limitations under the License.
 
 ## Implementation
 
-The `<amp-embed>` is actually an alias to the [`<amp-ad>`](amp-ad.md) tag, deriving all of it's functionality with a different tag name.
+The `<amp-embed>` is actually an alias to the [`<amp-ad>`](amp-ad.md) tag, deriving all of its functionality with a different tag name.
 
 ```html
 <amp-embed width=400 height=300
@@ -51,7 +51,7 @@ The `<amp-embed>` is actually an alias to the [`<amp-ad>`](amp-ad.md) tag, deriv
 ## Validation errors
 
 The following lists validation errors specific to the `amp-embed` tag
-(see also `amp-embed` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii)):
+(see also `amp-embed` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator-main.protoascii)):
 
 <table>
   <tr>

@@ -17,6 +17,17 @@ syntax = "proto2";
 
 package amp.validator;
 
+// Used for validating attributes that require another attribute for some
+// given set of conditions.
+// E.g. attr name: "on" if_value_regex: "tap:.*" also_require_attr: "role"
+message AttrTriggerSpec {
+  optional string if_value_regex = 1;       // case sensitive
+
+  // If set, other attributes - identified by their name string - must
+  // be present as well.
+  repeated string also_requires_attr = 2;
+}
+
 // Used for validating properties in attribute values. Our validator
 // (via parse-viewport.h) implements the parsing algorithm as described here:
 // https://drafts.csswg.org/css-device-adapt/#parsing-algorithm
@@ -50,7 +61,7 @@ message UrlSpec {
 // Attributes that are not covered by at least one of these specs are
 // disallowed. Within a given context (e.g., for a given TagSpec),
 // names are unique.
-// NEXT AVAILABLE TAG: 16
+// NEXT AVAILABLE TAG: 18
 message AttrSpec {
   // Use lower-case attribute names only.
   optional string name = 1;
@@ -78,6 +89,8 @@ message AttrSpec {
   optional PropertySpecList value_properties = 11;
   // } end oneof
 
+  optional AttrTriggerSpec trigger = 16;
+
   // If set, then the attribute value may not match this regex, which is
   // always applied case-insensitively and as a partial match.
   optional string blacklisted_value_regex = 6;
@@ -93,6 +106,10 @@ message AttrSpec {
   // May only be set for an AttrSpec where mandatory=true and the value field
   // is set.
   optional bool dispatch_key = 13;
+
+  // If set to true, the TagSpec containing this AttrSpec implicitly has this
+  // attribute and the attribute is considered valid.
+  optional bool implicit = 17 [default = false];
 }
 
 // Some tags share several attributes, so they're identified by unique key
@@ -266,7 +283,7 @@ message TagSpec {
 
   // If set, other tags - identified by their detail string - must be
   // present as well.
-  repeated string also_requires = 14;
+  repeated string also_requires_tag = 14;
 
   // If set, generates a DEPRECATED_TAG error with severity WARNING.
   // The value of the deprecation field indicates what to use instead,
@@ -351,9 +368,11 @@ message ErrorCategory {
     // a given AMP element, and responsiveness.
     // https://github.com/ampproject/amphtml/blob/master/spec/amp-html-layout.md
     AMP_LAYOUT_PROBLEM = 8;
-    // AMP supports Mustache templates; the validator generates errors
-    // for misplaced template syntax.
-    AMP_MUSTACHE_TEMPLATE_PROBLEM = 9;
+    // AMP supports the HTML template tag (e.g. within amp-list) and interprets
+    // Mustache syntax within such templates. To help with debugging, the AMP
+    // Validator generates errors for misplaced Mustache template syntax.
+    // https://github.com/ampproject/amphtml/blob/master/spec/amp-html-templates.md
+    AMP_HTML_TEMPLATE_PROBLEM = 9;
     // This is currently still allowed but may soon be disallowed. Usually
     // a recommendation for a replacement is rendered as part of the error.
     DEPRECATION = 10;
@@ -377,11 +396,12 @@ message ValidationError {
     DEV_WARNING = 3; // DEPRECATED DO NOT USE.
   }
   optional Severity severity = 6 [ default = ERROR ];
-  // NEXT AVAILABLE TAG: 61
+  // NEXT AVAILABLE TAG: 62
   enum Code {
     UNKNOWN_CODE = 0;
     MANDATORY_TAG_MISSING = 1;
     TAG_REQUIRED_BY_MISSING = 24;
+    ATTR_REQUIRED_BUT_MISSING = 61;
     DISALLOWED_TAG = 2;
     GENERAL_DISALLOWED_TAG = 51;
     DISALLOWED_ATTR = 3;

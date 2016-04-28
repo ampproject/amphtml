@@ -21,7 +21,7 @@
 import {
   getElementService,
   getElementServiceIfAvailable,
-} from './custom-element';
+} from './element-service';
 
 /**
  * @param {!Window} window

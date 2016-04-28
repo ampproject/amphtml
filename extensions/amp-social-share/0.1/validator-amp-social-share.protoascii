@@ -1,0 +1,82 @@
+#
+# Copyright 2016 The AMP HTML Authors. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS-IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the license.
+#
+
+tags: {  # amp-social-share
+  tag_name: "script"
+  spec_name: "amp-social-share extension .js script"
+  mandatory_parent: "head"
+  attrs: {
+    name: "async"
+    mandatory: true
+    value: ""
+  }
+  attrs: {
+    name: "custom-element"
+    mandatory: true
+    value: "amp-social-share"
+    dispatch_key: true
+  }
+  attrs: {
+    name: "src"
+    mandatory: true
+    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-social-share-(latest|0\\.1)\\.js"
+  }
+  attrs: {
+    name: "type"
+    value: "text/javascript"
+  }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "."
+      error_message: "contents"
+    }
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-social-share.html"
+}
+tags: {  # amp-social-share (json)
+  tag_name: "script"
+  spec_name: "amp-social-share extension .json script"
+  mandatory_parent: "amp-social-share"
+  attrs: {
+    name: "type"
+    mandatory: true
+    value: "application/json"
+    dispatch_key: true
+  }
+  cdata: {
+    blacklisted_cdata_regex: {
+      regex: "<!--"
+      error_message: "html comments"
+    }
+  }
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-social-share.html"
+}
+tags: {  # <amp-social-share>
+  tag_name: "amp-social-share"
+  disallowed_ancestor: "head"
+  disallowed_ancestor: "amp-sidebar"
+  also_requires_tag: "amp-social-share extension .js script"
+  attrs: {
+    name: "type"
+    mandatory: true
+    value_regex: "(twitter|facebook|pinterest|linkedin|gplus|email)"
+  }
+  attr_lists: "extended-amp-global"
+  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-social-share.html"
+  amp_layout: {
+    supported_layouts: FIXED
+  }
+}

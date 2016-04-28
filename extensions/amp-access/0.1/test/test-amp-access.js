@@ -1202,7 +1202,7 @@ describe('AccessService login', () => {
 
   it('should open dialog in the same microtask', () => {
     service.openLoginDialog_ = sandbox.stub();
-    service.openLoginDialog_.returns(Promise.resolve());
+    service.openLoginDialog_.returns(new Promise(() => {}));
     analyticsMock.expects('triggerEvent')
         .withExactArgs('access-login-started')
         .once();
@@ -1265,15 +1265,33 @@ describe('AccessService login', () => {
     });
   });
 
-  it('should fail login with empty response', () => {
-    service.runAuthorization_ = sandbox.spy();
+  it('should fail login with empty response, but re-authorize', () => {
+    const authorizationStub = sandbox.stub(service, 'runAuthorization_',
+        () => Promise.resolve());
+    const viewStub = sandbox.stub(service, 'scheduleView_');
+    const broadcastStub = sandbox.stub(service.viewer_, 'broadcast');
     serviceMock.expects('openLoginDialog_')
         .withExactArgs('https://acme.com/l?rid=R')
         .returns(Promise.resolve(''))
         .once();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-login-started')
+        .once();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-login-rejected')
+        .once();
     return service.login('').then(() => {
       expect(service.loginPromise_).to.not.exist;
-      expect(service.runAuthorization_.callCount).to.equal(0);
+      expect(authorizationStub.callCount).to.equal(1);
+      expect(authorizationStub.calledWithExactly(
+          /* disableFallback */ true)).to.be.true;
+      expect(viewStub.callCount).to.equal(1);
+      expect(viewStub.calledWithExactly(/* timeToView */ 0)).to.be.true;
+      expect(broadcastStub.callCount).to.equal(1);
+      expect(broadcastStub.firstCall.args[0]).to.deep.equal({
+        'type': 'amp-access-reauthorize',
+        'origin': service.pubOrigin_,
+      });
     });
   });
 
@@ -1532,6 +1550,50 @@ describe('AccessService type=other', () => {
     }).then(() => {
       expect(service.lastAuthorizationPromise_).to.equal(
           service.firstAuthorizationPromise_);
+      expect(service.authResponse_).to.be.null;
+    });
+  });
+
+  it('should ignore fallback in a proxy case', () => {
+    expect(service.isProxyOrigin_).to.be.false;  // Normally `false` in tests.
+    service.isProxyOrigin_ = true;
+    const fallback = {};
+    service.config_.authorizationFallbackResponse = fallback;
+    cidMock.expects('get').never();
+    xhrMock.expects('fetchJson').never();
+    const promise = service.runAuthorization_();
+    expect(document.documentElement).not.to.have.class('amp-access-loading');
+    expect(document.documentElement).not.to.have.class('amp-access-error');
+    return promise.then(() => {
+      expect(document.documentElement).not.to.have.class('amp-access-loading');
+      expect(document.documentElement).not.to.have.class('amp-access-error');
+      expect(service.firstAuthorizationPromise_).to.exist;
+      return service.firstAuthorizationPromise_;
+    }).then(() => {
+      expect(service.lastAuthorizationPromise_).to.equal(
+          service.firstAuthorizationPromise_);
+      expect(service.authResponse_).to.be.null;
+    });
+  });
+
+  it('should allow fallback use in a non-proxy case', () => {
+    service.isProxyOrigin_ = false;
+    const fallback = {};
+    service.config_.authorizationFallbackResponse = fallback;
+    cidMock.expects('get').never();
+    xhrMock.expects('fetchJson').never();
+    const promise = service.runAuthorization_();
+    expect(document.documentElement).to.have.class('amp-access-loading');
+    expect(document.documentElement).not.to.have.class('amp-access-error');
+    const lastPromise = service.lastAuthorizationPromise_;
+    return promise.then(() => {
+      expect(document.documentElement).not.to.have.class('amp-access-loading');
+      expect(document.documentElement).not.to.have.class('amp-access-error');
+      expect(service.firstAuthorizationPromise_).to.exist;
+      return service.firstAuthorizationPromise_;
+    }).then(() => {
+      expect(service.lastAuthorizationPromise_).to.equal(lastPromise);
+      expect(service.authResponse_).to.equal(fallback);
     });
   });
 

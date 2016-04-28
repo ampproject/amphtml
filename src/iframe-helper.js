@@ -31,6 +31,8 @@ import {parseUrl} from './url';
  */
 export function listen(iframe, typeOfMessage, callback, opt_is3P) {
   dev.assert(iframe.src, 'only iframes with src supported');
+  dev.assert(!iframe.parentNode, 'cannot register events on an attached ' +
+      'iframe. It will cause hair-pulling bugs like #2942');
   const origin = parseUrl(iframe.src).origin;
   let win = iframe.ownerDocument.defaultView;
   const sentinel = getSentinel_(opt_is3P);
@@ -49,13 +51,17 @@ export function listen(iframe, typeOfMessage, callback, opt_is3P) {
     if (event.source != iframe.contentWindow) {
       return;
     }
-    if (!event.data || event.data.sentinel != sentinel) {
+    if (!event.data) {
       return;
     }
-    if (event.data.type != typeOfMessage) {
+    const data = parseIfNeeded(event.data, opt_is3P);
+    if (data.sentinel != sentinel) {
       return;
     }
-    callback(event.data);
+    if (data.type != typeOfMessage) {
+      return;
+    }
+    callback(data);
   };
 
   win.addEventListener('message', listener);
@@ -120,4 +126,25 @@ export function postMessage(iframe, type, object, targetOrigin, opt_is3P) {
  */
 function getSentinel_(opt_is3P) {
   return opt_is3P ? 'amp-$internalRuntimeToken$' : 'amp';
+}
+
+/**
+ * Json parses event.data if it needs to be
+ * @param {boolean=} opt_is3P set to true if the iframe is 3p.
+ * @returns {!Object} object message
+ * @private
+ */
+function parseIfNeeded(data, opt_is3P) {
+  const shouldBeParsed = typeof data === 'string'
+      && data.charAt(0) === '{'
+      && !opt_is3P;
+  if (shouldBeParsed) {
+    try {
+      data = JSON.parse(data);
+    } catch (e) {
+      log.warn('Postmessage could not be parsed. ' +
+          'Is it in a valid JSON format?', e);
+    }
+  }
+  return data;
 }

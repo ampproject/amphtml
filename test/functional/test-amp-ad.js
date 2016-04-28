@@ -14,16 +14,9 @@
  * limitations under the License.
  */
 
-import {clientIdScope} from '../../ads/_config';
-import {createIframePromise} from '../../testing/iframe';
+import {createAdPromise} from '../../testing/ad-iframe';
 import {installAd} from '../../builtins/amp-ad';
 import {installEmbed} from '../../builtins/amp-embed';
-import {installCidService} from '../../src/service/cid-impl';
-import {
-  installUserNotificationManager,
-} from '../../extensions/amp-user-notification/0.1/amp-user-notification';
-import {markElementScheduledForTesting} from '../../src/custom-element';
-import {setCookie} from '../../src/cookies';
 import * as sinon from 'sinon';
 
 
@@ -34,6 +27,12 @@ describe('amp-embed', tests('amp-embed', win => {
 }));
 
 function tests(name, installer) {
+  function getAd(attributes, canonical, opt_handleElement,
+                 opt_beforeLayoutCallback) {
+    return createAdPromise(name, installer, attributes, canonical,
+                           opt_handleElement, opt_beforeLayoutCallback);
+  }
+
   return () => {
     let sandbox;
 
@@ -43,38 +42,6 @@ function tests(name, installer) {
     afterEach(() => {
       sandbox.restore();
     });
-
-    function getAd(attributes, canonical, opt_handleElement,
-        opt_beforeLayoutCallback) {
-      return createIframePromise(undefined, opt_beforeLayoutCallback)
-          .then(iframe => {
-            iframe.iframe.style.height = '400px';
-            iframe.iframe.style.width = '400px';
-            installer(iframe.win);
-            markElementScheduledForTesting(iframe.win, 'amp-user-notification');
-            if (canonical) {
-              const link = iframe.doc.createElement('link');
-              link.setAttribute('rel', 'canonical');
-              link.setAttribute('href', canonical);
-              iframe.doc.head.appendChild(link);
-            }
-            let a = iframe.doc.createElement(name);
-            for (const key in attributes) {
-              a.setAttribute(key, attributes[key]);
-            }
-            if (attributes.resizable !== undefined) {
-              const overflowEl = iframe.doc.createElement('div');
-              overflowEl.setAttribute('overflow', '');
-              a.appendChild(overflowEl);
-            }
-            // Make document long.
-            a.style.marginBottom = '1000px';
-            if (opt_handleElement) {
-              a = opt_handleElement(a);
-            }
-            return iframe.addElement(a);
-          });
-    }
 
     it('render an ad', () => {
       return getAd({
@@ -106,25 +73,27 @@ function tests(name, installer) {
         expect(data._context.canonicalUrl).to.equal('https://schema.org/');
         expect(data.aax_size).to.equal('300x250');
 
-        describe('ad preconnect', () => {
-          const doc = iframe.ownerDocument;
-          const fetches = doc.querySelectorAll(
-              'link[rel=prefetch]');
-          expect(fetches).to.have.length(3);
-          expect(fetches[0].href).to.equal(
-              'http://ads.localhost:' + location.port +
-              '/dist.3p/current/frame.max.html');
-          expect(fetches[1].href).to.equal(
-              'https://3p.ampproject.net/$internalRuntimeVersion$/f.js');
-          expect(fetches[2].href).to.equal(
-              'https://c.amazon-adsystem.com/aax2/assoc.js');
-          const preconnects = doc.querySelectorAll(
-              'link[rel=preconnect]');
-          expect(preconnects[preconnects.length - 1].href).to.equal(
-              'https://testsrc/');
-          // Make sure we run tests without CID available by default.
-          expect(ad.ownerDocument.defaultView.services.cid).to.be.undefined;
-        });
+        const doc = iframe.ownerDocument;
+        let fetches = doc.querySelectorAll(
+            'link[rel=prefetch]');
+        if (!fetches.length) {
+          fetches = doc.querySelectorAll(
+              'link[rel=preload]');
+        }
+        expect(fetches).to.have.length(3);
+        expect(fetches[0].href).to.equal(
+            'http://ads.localhost:' + location.port +
+            '/dist.3p/current/frame.max.html');
+        expect(fetches[1].href).to.equal(
+            'https://3p.ampproject.net/$internalRuntimeVersion$/f.js');
+        expect(fetches[2].href).to.equal(
+            'https://c.amazon-adsystem.com/aax2/assoc.js');
+        const preconnects = doc.querySelectorAll(
+            'link[rel=preconnect]');
+        expect(preconnects[preconnects.length - 1].href).to.equal(
+            'https://testsrc/');
+        // Make sure we run tests without CID available by default.
+        expect(ad.ownerDocument.defaultView.services.cid).to.be.undefined;
       });
     });
 
@@ -427,135 +396,6 @@ function tests(name, installer) {
 
     });
 
-    describe('cid-ad support', () => {
-      const cidScope = 'cid-in-ads-test';
-      let sandbox;
-
-      beforeEach(() => {
-        sandbox = sinon.sandbox.create();
-      });
-
-      afterEach(() => {
-        sandbox.restore();
-        delete clientIdScope['with_cid'];
-        setCookie(window, cidScope, '', new Date().getTime() - 5000);
-      });
-
-      it('provides cid to ad', () => {
-        clientIdScope['with_cid'] = cidScope;
-        return getAd({
-          width: 300,
-          height: 250,
-          type: 'with_cid',
-          src: 'testsrc',
-        }, 'https://schema.org', function(ad) {
-          const win = ad.ownerDocument.defaultView;
-          setCookie(window, cidScope, 'sentinel123',
-              new Date().getTime() + 5000);
-          installCidService(win);
-          return ad;
-        }).then(ad => {
-          expect(ad.getAttribute('ampcid')).to.equal('sentinel123');
-        });
-      });
-
-      it('waits for consent', () => {
-        clientIdScope['with_cid'] = cidScope;
-        return getAd({
-          width: 300,
-          height: 250,
-          type: 'with_cid',
-          src: 'testsrc',
-          'data-consent-notification-id': 'uid',
-        }, 'https://schema.org', function(ad) {
-          const win = ad.ownerDocument.defaultView;
-          const cidService = installCidService(win);
-          const uidService = installUserNotificationManager(win);
-          sandbox.stub(uidService, 'get', id => {
-            expect(id).to.equal('uid');
-            return Promise.resolve('consent');
-          });
-          sandbox.stub(cidService, 'get', (scope, consent) => {
-            expect(scope).to.equal(cidScope);
-            return consent.then(val => {
-              return val + '-cid';
-            });
-          });
-          return ad;
-        }).then(ad => {
-          expect(ad.getAttribute('ampcid')).to.equal('consent-cid');
-        });
-      });
-
-      it('waits for consent w/o cidScope', () => {
-        return getAd({
-          width: 300,
-          height: 250,
-          type: 'with_cid',
-          src: 'testsrc',
-          'data-consent-notification-id': 'uid',
-        }, 'https://schema.org', function(ad) {
-          const win = ad.ownerDocument.defaultView;
-          const cidService = installCidService(win);
-          const uidService = installUserNotificationManager(win);
-          sandbox.stub(uidService, 'get', id => {
-            expect(id).to.equal('uid');
-            return Promise.resolve('consent');
-          });
-          sandbox.stub(cidService, 'get', (scope, consent) => {
-            expect(scope).to.equal(cidScope);
-            return consent.then(val => {
-              return val + '-cid';
-            });
-          });
-          return ad;
-        }).then(ad => {
-          expect(ad.getAttribute('ampcid')).to.equal('consent');
-        });
-      });
-
-      it('provide null if notification and cid is not provided', () => {
-        let uidSpy = null;
-        return getAd({
-          width: 300,
-          height: 250,
-          type: 'with_cid',
-          src: 'testsrc',
-        }, 'https://schema.org', function(ad) {
-          const win = ad.ownerDocument.defaultView;
-          const cidService = installCidService(win);
-          const uidService = installUserNotificationManager(win);
-          uidSpy = sandbox.spy(uidService, 'get');
-          sandbox.stub(cidService, 'get', (scope, consent) => {
-            expect(scope).to.equal(cidScope);
-            return consent.then(val => {
-              return val + '-cid';
-            });
-          });
-          return ad;
-        }).then(ad => {
-          expect(uidSpy.callCount).to.equal(0);
-          expect(ad.getAttribute('ampcid')).to.be.null;
-        });
-      });
-
-      it('provides null if cid service not available', () => {
-        clientIdScope['with_cid'] = cidScope;
-        return getAd({
-          width: 300,
-          height: 250,
-          type: 'with_cid',
-          src: 'testsrc',
-        }, 'https://schema.org', function(ad) {
-          setCookie(window, cidScope, 'XXX',
-              new Date().getTime() + 5000);
-          return ad;
-        }).then(ad => {
-          expect(ad.getAttribute('ampcid')).to.be.null;
-        });
-      });
-    });
-
     describe('renderOutsideViewport', () => {
       function getGoodAd(cb, layoutCb, opt_loadingStrategy) {
         const attributes = {
@@ -578,10 +418,10 @@ function tests(name, installer) {
         }, layoutCb);
       }
 
-      it('should return true after scrolling and then false for 1s', () => {
+      it('should not return false after scrolling, then false for 1s', () => {
         let clock;
         return getGoodAd(ad => {
-          expect(ad.renderOutsideViewport()).to.be.true;
+          expect(ad.renderOutsideViewport()).not.to.be.false;
         }, () => {
           clock = sandbox.useFakeTimers();
         }).then(ad => {
@@ -590,41 +430,23 @@ function tests(name, installer) {
           clock.tick(900);
           expect(ad.renderOutsideViewport()).to.be.false;
           clock.tick(100);
-          expect(ad.renderOutsideViewport()).to.be.true;
+          expect(ad.renderOutsideViewport()).not.to.be.false;
         });
       });
 
       it('should prefer-viewability-over-views', () => {
         let clock;
-        const elementBox = {
-          top: 4000,
-        };
-        const viewportRect = {
-          height: 1000,
-          bottom: 1000,
-        };
         return getGoodAd(ad => {
-          ad.resources_.add(ad.element);
-          sandbox.stub(ad, 'getIntersectionElementLayoutBox', () => {
-            return elementBox;
-          });
-          sandbox.stub(ad.getViewport(), 'getRect', () => {
-            return viewportRect;
-          });
+          expect(ad.renderOutsideViewport()).not.to.be.false;
         }, () => {
           clock = sandbox.useFakeTimers();
         }, 'prefer-viewability-over-views').then(ad => {
-          clock.tick(10000);
           // False because we just rendered one.
           expect(ad.renderOutsideViewport()).to.be.false;
-          viewportRect.bottom = '2749';
+          clock.tick(900);
           expect(ad.renderOutsideViewport()).to.be.false;
-          // 125% of viewport away
-          viewportRect.bottom = '2750';
-          expect(ad.renderOutsideViewport()).to.be.true;
-          // We currently render above viewport.
-          viewportRect.bottom = '6000';
-          expect(ad.renderOutsideViewport()).to.be.true;
+          clock.tick(100);
+          expect(ad.renderOutsideViewport()).to.equal(1.25);
         });
       });
     });

@@ -51,25 +51,25 @@ describe('amp-img', () => {
 
   it('should load an img', () => {
     return getImg({
-      src: 'test.jpg',
+      src: '/base/examples/img/sample.jpg',
       width: 300,
       height: 200,
     }).then(ampImg => {
       const img = ampImg.querySelector('img');
       expect(img.tagName).to.equal('IMG');
-      expect(img.getAttribute('src')).to.equal('test.jpg');
+      expect(img.getAttribute('src')).to.equal('/base/examples/img/sample.jpg');
     });
   });
 
   it('should load an img with srcset', () => {
     return getImg({
-      srcset: 'test-2000.jpg 2000w, test-1000.jpg 1000w',
+      srcset: 'bad.jpg 2000w, /base/examples/img/sample.jpg 1000w',
       width: 300,
       height: 200,
     }).then(ampImg => {
       const img = ampImg.querySelector('img');
       expect(img.tagName).to.equal('IMG');
-      expect(img.getAttribute('src')).to.equal('test-1000.jpg');
+      expect(img.getAttribute('src')).to.equal('/base/examples/img/sample.jpg');
     });
   });
 

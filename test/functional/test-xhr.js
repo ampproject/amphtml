@@ -15,7 +15,11 @@
  */
 
 import * as sinon from 'sinon';
-import {xhrFor, fetchPolyfill} from '../../src/xhr';
+import {
+  installXhrService,
+  fetchPolyfill,
+  FetchResponse,
+} from '../../src/service/xhr-impl';
 
 describe('XHR', function() {
   let sandbox;
@@ -25,11 +29,11 @@ describe('XHR', function() {
   this.timeout(5000);
 
   const scenarios = [
-    {xhr: xhrFor({
+    {xhr: installXhrService({
       fetch: window.fetch,
       location: {href: 'https://acme.com/path'},
     }), desc: 'Native'},
-    {xhr: xhrFor({
+    {xhr: installXhrService({
       fetch: fetchPolyfill,
       location: {href: 'https://acme.com/path'},
     }), desc: 'Polyfill'},
@@ -411,6 +415,53 @@ describe('XHR', function() {
         expect(nullFn).to.throw();
       });
 
+    });
+  });
+
+  describe('FetchResponse', () => {
+    const TEST_TEXT = 'this is some test text';
+    const mockXhr = {
+      status: 200,
+      responseText: TEST_TEXT,
+    };
+
+    it('should provide text', () => {
+      const response = new FetchResponse(mockXhr);
+      return response.text().then(result => {
+        expect(result).to.equal(TEST_TEXT);
+      });
+    });
+
+    it('should provide text only once', () => {
+      const response = new FetchResponse(mockXhr);
+      return response.text().then(result => {
+        expect(result).to.equal(TEST_TEXT);
+        expect(response.text.bind(response), 'should throw').to.throw(Error,
+            /Body already used/);
+      });
+    });
+
+    scenarios.forEach(test => {
+      if (test.desc === 'Polyfill') {
+        // FetchRequest is only returned by the Polyfill version of Xhr.
+        describe('#text', () => {
+          beforeEach(setupMockXhr);
+          it('should return text from a full XHR request', () => {
+            expect(requests[0]).to.be.undefined;
+            const promise = test.xhr.fetchAmpCors_('http://nowhere.org').then(
+                response => {
+                  expect(response).to.be.instanceof(FetchResponse);
+                  return response.text().then(result => {
+                    expect(result).to.equal(TEST_TEXT);
+                  });
+                });
+            requests[0].respond(200, {
+              'Content-Type': 'text/plain',
+            }, TEST_TEXT);
+            return promise;
+          });
+        });
+      }
     });
   });
 });

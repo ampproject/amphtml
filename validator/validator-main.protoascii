@@ -20,12 +20,12 @@
 # in production from crashing. This id is not relevant to validator.js
 # because thus far, engine (validator.js) and spec file
 # (validator-main.protoascii) are always released together.
-min_validator_revision_required: 112
+min_validator_revision_required: 131
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 205
+spec_file_revision: 211
 
 # Validator extensions.
 # =====================
@@ -36,11 +36,6 @@ spec_file_revision: 205
 
 # Rules for AMP HTML
 # (https://www.ampproject.org/docs/reference/spec.html)
-#
-# Specific URL to reference for violations having to do with mustache
-# templates. These are specific to any particular tag, so must live at
-# the top level of this rules file.
-template_spec_url: "https://www.ampproject.org/docs/reference/extended/amp-mustache.html"
 
 tags: {
   tag_name: "!doctype"
@@ -123,6 +118,7 @@ attr_lists: {
 tags: {
   tag_name: "link"
   spec_name: "link rel="
+  disallowed_ancestor: "template"
   attrs: { name: "href" }
   attr_lists: "common-link-attrs"
   attrs: {
@@ -568,7 +564,7 @@ tags: {
   mandatory_alternatives: "head > style : boilerplate"
   unique: true
   mandatory_parent: "head"
-  also_requires: "noscript > style : boilerplate"
+  also_requires_tag: "noscript > style : boilerplate"
   attrs: {
     name: "amp-boilerplate"
     mandatory: true
@@ -588,7 +584,7 @@ tags: {
   mandatory_alternatives: "noscript > style : boilerplate"
   unique: true
   mandatory_parent: "noscript"
-  also_requires: "head > style : boilerplate"
+  also_requires_tag: "head > style : boilerplate"
   attrs: {
     name: "amp-boilerplate"
     mandatory: true
@@ -841,6 +837,14 @@ tags: {
         "stylesheet|"  # Only allowed for link tags, specific req's for AMP.
         "subresource|"
         ")(\\s|$)"
+  }
+  attrs: {
+    name: "role"
+    implicit: true
+  }
+  attrs: {
+    name: "tabindex"
+    implicit: true
   }
   attrs: {
     name: "target"
@@ -1115,11 +1119,20 @@ tags: {
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-audio.html"
 }
 # 4.7.8 The source element
-attr_lists: {
-  name: "source-attrs"
-  attrs: { name: "sizes" }  # Not used thus far, just tolerated.
-  attrs: { name: "src" }
+tags: {
+  tag_name: "source"
+  spec_name: "amp-video > source"
+  mandatory_parent: "amp-video"
+  attrs: {
+    name: "src"
+    value_url: {
+      allowed_protocol: "https"
+      allow_relative: true  # Will be set to false at a future date.
+    }
+  }
+  attrs: { name: "media" }
   attrs: { name: "type" }
+  spec_url: "https://www.ampproject.org/docs/reference/amp-video.html"
 }
 tags: {
   tag_name: "source"
@@ -1135,21 +1148,6 @@ tags: {
   attrs: { name: "media" }
   attrs: { name: "type" }
   spec_url: "https://www.ampproject.org/docs/reference/extended/amp-audio.html"
-}
-tags: {
-  tag_name: "source"
-  spec_name: "amp-video > source"
-  mandatory_parent: "amp-video"
-  attrs: {
-    name: "src"
-    value_url: {
-      allowed_protocol: "https"
-      allow_relative: true  # Will be set to false at a future date.
-    }
-  }
-  attrs: { name: "media" }
-  attrs: { name: "type" }
-  spec_url: "https://www.ampproject.org/docs/reference/amp-video.html"
 }
 tags: {
   tag_name: "source"
@@ -1188,10 +1186,13 @@ tags: {
   attrs: { name: "media" }
 }
 # 4.7.8 The track element
-tags: {
-  tag_name: "track"
-  spec_name: "audio > track"
-  mandatory_parent: "audio"
+# We have two attr_list variants to encode the requirement that if
+# the attribute kind has the value 'subtitles', then the tag must
+# also have a srclang attribute. The first attr_list does not allow
+# kind=subtitles, but srclang is optional. The second attr_list
+# mandates kind=subtitles and srclang attributes.
+attr_lists: {
+  name: "track-attrs-no-subtitles"
   attrs: {
     name: "src"
     mandatory: true
@@ -1201,27 +1202,84 @@ tags: {
     }
   }
   attrs: { name: "default" value: "" }
-  attrs: { name: "kind" }
+  attrs: {
+    name: "kind"
+    value_regex: "(captions|descriptions|chapters|metadata)"
+  }
   attrs: { name: "label" }
   attrs: { name: "srclang" }
+}
+attr_lists: {
+  name: "track-attrs-subtitles"
+  attrs: {
+    name: "src"
+    mandatory: true
+    value_url: {
+      allow_relative: false
+      allowed_protocol: "https"
+    }
+  }
+  attrs: { name: "default" value: "" }
+  attrs: {
+    name: "kind"
+    mandatory: true
+    value: "subtitles"
+  }
+  attrs: { name: "label" }
+  attrs: {
+    name: "srclang"
+    mandatory: true
+  }
+}
+tags: {
+  tag_name: "track"
+  spec_name: "audio > track"
+  mandatory_parent: "audio"
+  attr_lists: "track-attrs-no-subtitles"
+}
+tags: {
+  tag_name: "track"
+  spec_name: "audio > track[kind=subtitles]"
+  mandatory_parent: "audio"
+  attr_lists: "track-attrs-subtitles"
 }
 tags: {
   tag_name: "track"
   spec_name: "video > track"
   mandatory_parent: "video"
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_url: {
-      allow_relative: false
-      allowed_protocol: "https"
-    }
-  }
-  attrs: { name: "default" value: "" }
-  attrs: { name: "kind" }
-  attrs: { name: "label" }
-  attrs: { name: "srclang" }
+  attr_lists: "track-attrs-no-subtitles"
 }
+tags: {
+  tag_name: "track"
+  spec_name: "video > track[kind=subtitles]"
+  mandatory_parent: "video"
+  attr_lists: "track-attrs-subtitles"
+}
+tags: {
+  tag_name: "track"
+  spec_name: "amp-audio > track"
+  mandatory_parent: "amp-audio"
+  attr_lists: "track-attrs-no-subtitles"
+}
+tags: {
+  tag_name: "track"
+  spec_name: "amp-audio > track[kind=subtitles]"
+  mandatory_parent: "amp-audio"
+  attr_lists: "track-attrs-subtitles"
+}
+tags: {
+  tag_name: "track"
+  spec_name: "amp-video > track"
+  mandatory_parent: "amp-video"
+  attr_lists: "track-attrs-no-subtitles"
+}
+tags: {
+  tag_name: "track"
+  spec_name: "amp-video > track[kind=subtitles]"
+  mandatory_parent: "amp-video"
+  attr_lists: "track-attrs-subtitles"
+}
+
 # 4.7.15 SVG
 # We allow some limited embedded SVG tags. We do not allow inline styles
 # or embedding any external resources.
@@ -1899,6 +1957,14 @@ tags: {
     value: ""
   }
   attrs: { name: "name" }
+  attrs: {
+    name: "role"
+    implicit: true
+  }
+  attrs: {
+    name: "tabindex"
+    implicit: true
+  }
   attrs: { name: "type" }
   attrs: { name: "value" }
 }
@@ -1954,1090 +2020,6 @@ tags: {
   }
 }
 # Specific script tags for custom elements and runtime imports.
-tags: {  # amp-access
-  tag_name: "script"
-  spec_name: "amp-access extension .js script"
-  mandatory_parent: "head"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
-  }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-access"
-    dispatch_key: true
-  }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-access-(latest|0\\.1).js"
-  }
-  attrs: {
-    name: "type"
-    value: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-access.html"
-}
-tags: {  # amp-access (json)
-  tag_name: "script"
-  spec_name: "amp-access extension .json script"
-  mandatory_parent: "head"
-  also_requires: "amp-access extension .js script"
-  also_requires: "amp-analytics extension .js script"
-  attrs: {
-    name: "id"
-    mandatory: true
-    value: "amp-access"
-    dispatch_key: true
-  }
-  attrs: {
-    name: "type"
-    mandatory: true
-    value: "application/json"
-  }
-  # TODO(gregable): Validate the cdata contents of this script tag.
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "<!--"
-      error_message: "html comments"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-access-spec.html"
-}
-tags: {  # amp-analytics
-  tag_name: "script"
-  spec_name: "amp-analytics extension .js script"
-  mandatory_parent: "head"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
-  }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-analytics"
-    dispatch_key: true
-  }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-analytics-(latest|0\\.1).js"
-  }
-  attrs: {
-    name: "type"
-    value: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-analytics.html"
-}
-tags: {  # amp-analytics (json)
-  tag_name: "script"
-  spec_name: "amp-analytics extension .json script"
-  mandatory_parent: "amp-analytics"
-  attrs: {
-    name: "type"
-    mandatory: true
-    value: "application/json"
-    dispatch_key: true
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "<!--"
-      error_message: "html comments"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-analytics.html"
-}
-# This tag isn't intended to be used by publishers directly, but may be
-# emitted by the AMP cache.
-tags: {  # amp-ad-metadata (json)
-  tag_name: "script"
-  spec_name: "amp-ad-metadata .json script"
-  mandatory_parent: "body"
-  attrs: {
-    name: "type"
-    mandatory: true
-    value: "application/json"
-  }
-  attrs: {
-    name: "amp-ad-metadata"
-    mandatory: true
-    value: ""
-    dispatch_key: true
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "<!--"
-      error_message: "html comments"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-analytics.html"
-}
-tags: {  # amp-anim
-  tag_name: "script"
-  spec_name: "amp-anim extension .js script"
-  mandatory_parent: "head"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
-  }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-anim"
-    dispatch_key: true
-  }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-anim-(latest|0\\.1).js"
-  }
-  attrs: {
-    name: "type"
-    value: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-anim.html"
-}
-tags: {  # amp-audio
-  tag_name: "script"
-  spec_name: "amp-audio extension .js script"
-  mandatory_parent: "head"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
-  }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-audio"
-    dispatch_key: true
-  }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-audio-(latest|0\\.1).js"
-  }
-  attrs: {
-    name: "type"
-    value: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-audio.html"
-}
-tags: {  # amp-brid-player
-  tag_name: "script"
-  spec_name: "amp-brid-player extension .js script"
-  mandatory_parent: "head"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
-  }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-brid-player"
-    dispatch_key: true
-  }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-brid-player-(latest|0\\.1).js"
-  }
-  attrs: {
-    name: "type"
-    value: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  # TODO(gregable): Replace me with an ampproject.org URL eventually.
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-brid-player/amp-brid-player.md"
-}
-
-tags: {  # amp-brightcove
-  tag_name: "script"
-  spec_name: "amp-brightcove extension .js script"
-  mandatory_parent: "head"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
-  }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-brightcove"
-    dispatch_key: true
-  }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-brightcove-(latest|0\\.1).js"
-  }
-  attrs: {
-    name: "type"
-    value: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-brightcove.html"
-}
-tags: {  # amp-carousel
-  tag_name: "script"
-  spec_name: "amp-carousel extension .js script"
-  mandatory_parent: "head"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
-  }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-carousel"
-    dispatch_key: true
-  }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-carousel-(latest|0\\.1).js"
-  }
-  attrs: {
-    name: "type"
-    value: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-carousel.html"
-}
-tags: {  # amp-dynamic-css-classes
-  tag_name: "script"
-  spec_name: "amp-dynamic-css-classes extension .js script"
-  mandatory_parent: "head"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
-  }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-dynamic-css-classes"
-    dispatch_key: true
-  }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-dynamic-css-classes-(latest|0\\.1).js"
-  }
-  attrs: {
-    name: "type"
-    value: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-dynamic-css-classes.html"
-}
-tags: {  # amp-facebook
-  tag_name: "script"
-  spec_name: "amp-facebook extension .js script"
-  mandatory_parent: "head"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
-  }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-facebook"
-    dispatch_key: true
-  }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-facebook-(latest|0\\.1).js"
-  }
-  attrs: {
-    name: "type"
-    value: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-facebook.html"
-}
-tags: {  # amp-fit-text
-  tag_name: "script"
-  spec_name: "amp-fit-text extension .js script"
-  mandatory_parent: "head"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
-  }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-fit-text"
-    dispatch_key: true
-  }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-fit-text-(latest|0\\.1).js"
-  }
-  attrs: {
-    name: "type"
-    value: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-fit-text.html"
-}
-tags: {  # amp-font
-  tag_name: "script"
-  spec_name: "amp-font extension .js script"
-  mandatory_parent: "head"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
-  }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-font"
-    dispatch_key: true
-  }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-font-(latest|0\\.1).js"
-  }
-  attrs: {
-    name: "type"
-    value: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-font.html"
-}
-tags: {  # amp-iframe
-  tag_name: "script"
-  spec_name: "amp-iframe extension .js script"
-  mandatory_parent: "head"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
-  }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-iframe"
-    dispatch_key: true
-  }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-iframe-(latest|0\\.1).js"
-  }
-  attrs: {
-    name: "type"
-    value: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-iframe.html"
-}
-tags: {  # amp-image-lightbox
-  tag_name: "script"
-  spec_name: "amp-image-lightbox extension .js script"
-  mandatory_parent: "head"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
-  }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-image-lightbox"
-    dispatch_key: true
-  }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-image-lightbox-(latest|0\\.1).js"
-  }
-  attrs: {
-    name: "type"
-    value: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-image-lightbox.html"
-}
-tags: {  # amp-instagram
-  tag_name: "script"
-  spec_name: "amp-instagram extension .js script"
-  mandatory_parent: "head"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
-  }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-instagram"
-    dispatch_key: true
-  }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-instagram-(latest|0\\.1).js"
-  }
-  attrs: {
-    name: "type"
-    value: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-instagram.html"
-}
-tags: {  # amp-install-serviceworker
-  tag_name: "script"
-  spec_name: "amp-install-serviceworker extension .js script"
-  mandatory_parent: "head"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
-  }
-  attrs: {
-    name: "custom-element"
-    value: "amp-install-serviceworker"
-    mandatory: true
-    dispatch_key: true
-  }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-install-serviceworker-(latest|0\\.1).js"
-  }
-  attrs: {
-    name: "type"
-    value: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-install-serviceworker.html"
-}
-tags: {  # amp-jwplayer
-  tag_name: "script"
-  spec_name: "amp-jwplayer extension .js script"
-  mandatory_parent: "head"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
-  }
-  attrs: {
-    name: "custom-element"
-    value: "amp-jwplayer"
-    mandatory: true
-    dispatch_key: true
-  }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-jwplayer-(latest|0\\.1).js"
-  }
-  attrs: {
-    name: "type"
-    value: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  # TODO(honeybadgerdontcare): Replace me with an ampproject.org URL eventually.
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-jwplayer/amp-jwplayer.md"
-}
-tags: {  # amp-lightbox
-  tag_name: "script"
-  spec_name: "amp-lightbox extension .js script"
-  mandatory_parent: "head"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
-  }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-lightbox"
-    dispatch_key: true
-  }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-lightbox-(latest|0\\.1).js"
-  }
-  attrs: {
-    name: "type"
-    value: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-lightbox.html"
-}
-tags: {  # amp-list
-  tag_name: "script"
-  spec_name: "amp-list extension .js script"
-  mandatory_parent: "head"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
-  }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-list"
-    dispatch_key: true
-  }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-list-(latest|0\\.1).js"
-  }
-  attrs: {
-    name: "type"
-    value: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-list.html"
-}
-tags: {  # amp-mustache
-  tag_name: "script"
-  spec_name: "amp-mustache extension .js script"
-  mandatory_parent: "head"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
-  }
-  attrs: {
-    name: "custom-template"
-    mandatory: true
-    value: "amp-mustache"
-    dispatch_key: true
-  }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-mustache-(latest|0\\.1).js"
-  }
-  attrs: {
-    name: "type"
-    value: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-mustache.html"
-}
-tags: {  # amp-pinterest
-  tag_name: "script"
-  spec_name: "amp-pinterest extension .js script"
-  mandatory_parent: "head"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
-  }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-pinterest"
-    dispatch_key: true
-  }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-pinterest-(latest|0\\.1).js"
-  }
-  attrs: {
-    name: "type"
-    value: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-pinterest.html"
-}
-tags: {  # amp-reach-player
-  tag_name: "script"
-  mandatory_parent: "head"
-  spec_name: "amp-reach-player extension .js script"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
-  }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-reach-player"
-    dispatch_key: true
-  }
-  attrs: {
-    name: "src"
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-reach-player-(latest|0\\.1).js"
-    mandatory: true
-  }
-  attrs: {
-    name: "type"
-    value: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  # Uncomment once reference is available.
-  # spec_url: "https://www.ampproject.org/docs/reference/extended/amp-reach-player.html"
-}
-tags: {  # amp-sidebar
-  tag_name: "script"
-  mandatory_parent: "head"
-  spec_name: "amp-sidebar extension .js script"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
-  }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-sidebar"
-    dispatch_key: true
-  }
-  attrs: {
-    name: "src"
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-sidebar-(latest|0\\.1).js"
-    mandatory: true
-  }
-  attrs: {
-    name: "type"
-    value: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  # Uncomment once reference is available.
-  # spec_url: "https://www.ampproject.org/docs/reference/extended/amp-sidebar.html"
-}
-tags: {  # amp-slides
-  tag_name: "script"
-  spec_name: "amp-slides extension .js script"
-  mandatory_parent: "head"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
-  }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-slides"
-    dispatch_key: true
-  }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-slides-(latest|0\\.1).js"
-  }
-  attrs: {
-    name: "type"
-    value: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-slides.html"
-}
-tags: {  # amp-social-share
-  tag_name: "script"
-  spec_name: "amp-social-share extension .js script"
-  mandatory_parent: "head"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
-  }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-social-share"
-    dispatch_key: true
-  }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-social-share-(latest|0\\.1)\\.js"
-  }
-  attrs: {
-    name: "type"
-    value: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-social-share.html"
-}
-tags: {  # amp-social-share (json)
-  tag_name: "script"
-  spec_name: "amp-social-share extension .json script"
-  mandatory_parent: "amp-social-share"
-  attrs: {
-    name: "type"
-    mandatory: true
-    value: "application/json"
-    dispatch_key: true
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "<!--"
-      error_message: "html comments"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-social-share.html"
-}
-tags: {  # amp-soundcloud
-  tag_name: "script"
-  spec_name: "amp-soundcloud extension .js script"
-  mandatory_parent: "head"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
-  }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-soundcloud"
-    dispatch_key: true
-  }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-soundcloud-(latest|0\\.1)\\.js"
-  }
-  attrs: {
-    name: "type"
-    value: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-soundcloud.html"
-}
-tags: {  # amp-springboard-player
-  tag_name: "script"
-  spec_name: "amp-springboard-player extension .js script"
-  mandatory_parent: "head"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
-  }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-springboard-player"
-    dispatch_key: true
-  }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-springboard-player-(latest|0\\.1)\\.js"
-  }
-  attrs: {
-    name: "type"
-    value: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-springboard-player/amp-springboard-player.html"
-}
-tags: {  # amp-twitter
-  tag_name: "script"
-  spec_name: "amp-twitter extension .js script"
-  mandatory_parent: "head"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
-  }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-twitter"
-    dispatch_key: true
-  }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-twitter-(latest|0\\.1).js"
-  }
-  attrs: {
-    name: "type"
-    value: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-twitter.html"
-}
-tags: {  # amp-user-notification
-  tag_name: "script"
-  spec_name: "amp-user-notification extension .js script"
-  mandatory_parent: "head"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
-  }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-user-notification"
-    dispatch_key: true
-  }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-user-notification-(latest|0\\.1).js"
-  }
-  attrs: {
-    name: "type"
-    value: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-user-notification.html"
-}
-tags: {  # amp-vimeo
-  tag_name: "script"
-  spec_name: "amp-vimeo extension .js script"
-  mandatory_parent: "head"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
-  }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-vimeo"
-    dispatch_key: true
-  }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-vimeo-(latest|0\\.1)\\.js"
-  }
-  attrs: {
-    name: "type"
-    value: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-vimeo.html"
-}
-tags: {  # amp-vine
-  tag_name: "script"
-  spec_name: "amp-vine extension .js script"
-  mandatory_parent: "head"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
-  }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-vine"
-    dispatch_key: true
-  }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-vine-(latest|0\\.1).js"
-  }
-  attrs: {
-    name: "type"
-    value: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-vine.html"
-}
-tags: {  # amp-youtube
-  tag_name: "script"
-  spec_name: "amp-youtube extension .js script"
-  mandatory_parent: "head"
-  attrs: {
-    name: "async"
-    mandatory: true
-    value: ""
-  }
-  attrs: {
-    name: "custom-element"
-    mandatory: true
-    value: "amp-youtube"
-    dispatch_key: true
-  }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_regex: "https://cdn\\.ampproject\\.org/v0/amp-youtube-(latest|0\\.1)\\.js"
-  }
-  attrs: {
-    name: "type"
-    value: "text/javascript"
-  }
-  cdata: {
-    blacklisted_cdata_regex: {
-      regex: "."
-      error_message: "contents"
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-youtube.html"
-}
 # 4.11.2 The noscript element
 tags: {
   tag_name: "noscript"
@@ -3056,18 +2038,7 @@ tags: {
   disallowed_ancestor: "noscript"
 }
 # 4.11.3 The template element
-tags: {
-  tag_name: "template"
-  # <template> tags may not be nested inside other <template> tags.
-  disallowed_ancestor: "template"
-  also_requires: "amp-mustache extension .js script"
-  attrs: {
-    name: "type"
-    mandatory: true
-    value: "amp-mustache"
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-mustache.html"
-}
+# See extensions/amp-mustache/0.1/validator-amp-mustache.protoascii.
 
 # 11 Obsolute features
 # 11.2 Non-conforming features
@@ -3181,156 +2152,6 @@ tags: {  # <amp-ad>
     supported_layouts: RESPONSIVE
   }
 }
-tags: {  # <amp-analytics>
-  tag_name: "amp-analytics"
-  disallowed_ancestor: "head"
-  disallowed_ancestor: "amp-sidebar"
-  also_requires: "amp-analytics extension .js script"
-  attrs: { name: "type" }
-  attrs: {
-    name: "config"
-    value_url: {
-      allowed_protocol: "https"
-      allow_relative: true  # Will be set to false at a future date.
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-analytics.html"
-}
-tags: {  # <amp-anim>
-  tag_name: "amp-anim"
-  disallowed_ancestor: "head"
-  disallowed_ancestor: "amp-sidebar"
-  also_requires: "amp-anim extension .js script"
-  attrs: { name: "alt" }
-  attrs: { name: "attribution" }
-  attrs: { name: "autoplay" value: "" }
-  attrs: { name: "controls" }
-  attr_lists: "extended-amp-global"
-  attr_lists: "mandatory-src-or-srcset"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-anim.html"
-  amp_layout: {
-    supported_layouts: FILL
-    supported_layouts: FIXED
-    supported_layouts: FIXED_HEIGHT
-    supported_layouts: NODISPLAY
-    supported_layouts: RESPONSIVE
-  }
-}
-tags: {  # <amp-audio>
-  tag_name: "amp-audio"
-  disallowed_ancestor: "head"
-  disallowed_ancestor: "amp-sidebar"
-  also_requires: "amp-audio extension .js script"
-  attrs: {
-    name: "autoplay"
-    # ^$| prefix intended. empty string is valid.
-    value_regex: "^$|desktop|tablet|mobile|autoplay"
-  }
-  attrs: { name: "controls" }
-  attrs: { name: "loop"  value: "" }
-  attrs: { name: "muted" value: "" }
-  attrs: {
-    name: "src"
-    value_url: {
-      allowed_protocol: "https"
-      allow_relative: true  # Will be set to false at a future date.
-    }
-  }
-  attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-audio.html"
-  amp_layout {
-    defines_default_height: true
-    # TODO(johannes): in the longer run, defines_default_width should
-    # be false, to make it a fixed height layout per default, rather
-    # than a fixed one.
-    defines_default_width: true
-    supported_layouts: FIXED
-    supported_layouts: FIXED_HEIGHT
-    supported_layouts: NODISPLAY
-  }
-}
-tags: {  # <amp-brid-player>
-  tag_name: "amp-brid-player"
-  disallowed_ancestor: "head"
-  disallowed_ancestor: "amp-sidebar"
-  also_requires: "amp-brid-player extension .js script"
-  attrs: {
-    name: "data-partner"
-    mandatory: true
-    value_regex: "[0-9]+"
-  }
-  attrs: {
-    name: "data-player"
-    mandatory: true
-    value_regex: "[0-9]+"
-  }
-  attrs: {
-    name: "data-playlist"
-    mandatory_oneof: "['data-playlist', 'data-video']"
-    value_regex: "[0-9]+"
-  }
-  attrs: {
-    name: "data-video"
-    mandatory_oneof: "['data-playlist', 'data-video']"
-    value_regex: "[0-9]+"
-  }
-  attr_lists: "extended-amp-global"
-  # TODO(gregable): Replace me with an ampproject.org URL eventually.
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-brid-player/amp-brid-player.md"
-  amp_layout: {
-    supported_layouts: FILL
-    supported_layouts: FIXED
-    supported_layouts: FIXED_HEIGHT
-    supported_layouts: NODISPLAY
-    supported_layouts: RESPONSIVE
-  }
-}
-tags: {  # <amp-brightcove>
-  tag_name: "amp-brightcove"
-  disallowed_ancestor: "head"
-  disallowed_ancestor: "amp-sidebar"
-  also_requires: "amp-brightcove extension .js script"
-  attrs: { name: "data-account" mandatory: true }
-  # If data-embed is missing, the default value is "default".
-  attrs: { name: "data-embed" }
-  # If data-player is missing, the default value is "default".
-  attrs: { name: "data-player" }
-  # If data-playlist-id is not used for perform player and hence it is optional.
-  attrs: { name: "data-playlist-id" }
-  # If data-video-id is not used for perform player and hence it is optional.
-  attrs: { name: "data-video-id" }
-  attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-brightcove.html"
-  amp_layout: {
-    supported_layouts: FILL
-    supported_layouts: FIXED
-    supported_layouts: FIXED_HEIGHT
-    supported_layouts: NODISPLAY
-    supported_layouts: RESPONSIVE
-  }
-}
-tags: {  # <amp-carousel>
-  tag_name: "amp-carousel"
-  disallowed_ancestor: "head"
-  disallowed_ancestor: "amp-sidebar"
-  also_requires: "amp-carousel extension .js script"
-  attrs: { name: "arrows" value: "" }
-  attrs: { name: "autoplay" value: "" }
-  attrs: { name: "controls" }
-  attrs: { name: "delay" value_regex: "[0-9]+" }
-  attrs: { name: "dots" value: "" }
-  attrs: { name: "loop" value: "" }
-  attrs: { name: "type" value_regex: "slides|carousel" }
-  attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-carousel.html"
-  amp_layout: {
-    supported_layouts: FILL
-    supported_layouts: FIXED
-    supported_layouts: FIXED_HEIGHT
-    supported_layouts: NODISPLAY
-    supported_layouts: RESPONSIVE
-  }
-}
 # In the AMP Runtime, amp-ad and amp-embed are implemented in the same way,
 # so if you're changing amp-embed consider changing amp-ad as well.
 tags: {  # <amp-embed>
@@ -3357,113 +2178,6 @@ tags: {  # <amp-embed>
     supported_layouts: RESPONSIVE
   }
 }
-tags: {  # <amp-facebook>
-  tag_name: "amp-facebook"
-  disallowed_ancestor: "head"
-  disallowed_ancestor: "amp-sidebar"
-  also_requires: "amp-facebook extension .js script"
-  # data-* is generally allowed, but it's not generally mandatory.
-  attrs: { name: "data-href" mandatory: true }
-  attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-facebook.html"
-  amp_layout: {
-    supported_layouts: FILL
-    supported_layouts: FIXED
-    supported_layouts: FIXED_HEIGHT
-    supported_layouts: NODISPLAY
-    supported_layouts: RESPONSIVE
-  }
-}
-# TODO(greggrothaus): amp-fit-text's attribute spec need flushing
-# out now that the spec is available.
-tags: {  # <amp-fit-text>
-  tag_name: "amp-fit-text"
-  disallowed_ancestor: "head"
-  # <amp-fit-text> is whitelisted for <amp-sidebar>, otherwise:
-  # disallowed_ancestor: "amp-sidebar"
-  also_requires: "amp-fit-text extension .js script"
-  attrs: { name: "max-font-size" }
-  attrs: { name: "min-font-size" }
-  attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-fit-text.html"
-  amp_layout: {
-    supported_layouts: FILL
-    supported_layouts: FIXED
-    supported_layouts: FIXED_HEIGHT
-    supported_layouts: NODISPLAY
-    supported_layouts: RESPONSIVE
-  }
-}
-tags: {  # <amp-font>
-  tag_name: "amp-font"
-  disallowed_ancestor: "head"
-  disallowed_ancestor: "amp-sidebar"
-  also_requires: "amp-font extension .js script"
-  attrs: {
-    name: "font-family"
-    mandatory: true
-  }
-  attrs: { name: "font-style" }
-  attrs: { name: "font-variant" }
-  attrs: {
-    name: "timeout"
-    value_regex: "[0-9]+"
-  }
-  attrs: { name: "font-weight" }
-  attrs: { name: "on-error-add-class" }
-  attrs: { name: "on-error-remove-class" }
-  attrs: { name: "on-load-add-class" }
-  attrs: { name: "on-load-remove-class" }
-  attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-font.html"
-  amp_layout: {
-    supported_layouts: NODISPLAY
-  }
-}
-tags: {  # <amp-iframe>
-  tag_name: "amp-iframe"
-  disallowed_ancestor: "head"
-  disallowed_ancestor: "amp-sidebar"
-  also_requires: "amp-iframe extension .js script"
-  attrs: { name: "allowfullscreen" value: "" }
-  attrs: { name: "allowtransparency" value: "" }
-  attrs: { name: "frameborder" value_regex: "0|1" }
-  attrs: { name: "resizable" value: "" }
-  attrs: { name: "sandbox" }
-  attrs: { name: "scrolling" value_regex: "auto|yes|no" }
-  attrs: {
-    name: "src"
-    mandatory_oneof: "['src', 'srcdoc']"
-    value_url: {
-      allowed_protocol: "data"
-      allowed_protocol: "https"
-      allow_relative: true  # Will be set to false at a future date.
-    }
-  }
-  attrs: { name: "srcdoc" mandatory_oneof: "['src', 'srcdoc']" }
-  attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-iframe.html"
-  amp_layout: {
-    supported_layouts: FILL
-    supported_layouts: FIXED
-    supported_layouts: FIXED_HEIGHT
-    supported_layouts: NODISPLAY
-    supported_layouts: RESPONSIVE
-  }
-}
-tags: {  # <amp-image-lightbox>
-  tag_name: "amp-image-lightbox"
-  disallowed_ancestor: "head"
-  disallowed_ancestor: "amp-sidebar"
-  also_requires: "amp-image-lightbox extension .js script"
-  # Support dimensions / sizes / etc. like an amp-lightbox.
-  attrs: { name: "controls" }
-  attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-image-lightbox.html"
-  amp_layout: {
-    supported_layouts: NODISPLAY
-  }
-}
 tags: {  # <amp-img>
   tag_name: "amp-img"
   disallowed_ancestor: "head"
@@ -3475,148 +2189,6 @@ tags: {  # <amp-img>
   attr_lists: "extended-amp-global"
   attr_lists: "mandatory-src-or-srcset"
   spec_url: "https://www.ampproject.org/docs/reference/amp-img.html"
-  amp_layout: {
-    supported_layouts: FILL
-    supported_layouts: FIXED
-    supported_layouts: FIXED_HEIGHT
-    supported_layouts: NODISPLAY
-    supported_layouts: RESPONSIVE
-  }
-}
-tags: {  # <amp-instagram>
-  tag_name: "amp-instagram"
-  disallowed_ancestor: "head"
-  disallowed_ancestor: "amp-sidebar"
-  also_requires: "amp-instagram extension .js script"
-  attrs: {
-    name: "data-shortcode"
-    mandatory_oneof: "['data-shortcode', 'src']"
-  }
-  attrs: {
-    name: "shortcode"
-    mandatory_oneof: "['data-shortcode', 'src']"
-    deprecation: "data-shortcode"
-    deprecation_url: "https://www.ampproject.org/docs/reference/extended/amp-instagram.html"
-  }
-  attrs: {
-    name: "src"
-    mandatory_oneof: "['data-shortcode', 'src']"
-    value_url: {
-      allowed_protocol: "http"  # runtime will rewrite URL to https in this case
-      allowed_protocol: "https"
-      allow_relative: true
-    }
-  }
-  attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-instagram.html"
-  amp_layout: {
-    supported_layouts: FILL
-    supported_layouts: FIXED
-    supported_layouts: FIXED_HEIGHT
-    supported_layouts: NODISPLAY
-    supported_layouts: RESPONSIVE
-  }
-}
-tags: {  # <amp-install-serviceworker>
-  tag_name: "amp-install-serviceworker"
-  disallowed_ancestor: "head"
-  disallowed_ancestor: "amp-sidebar"
-  also_requires: "amp-install-serviceworker extension .js script"
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_url: {
-      allowed_protocol: "https"
-      allow_relative: true  # Will be set to false at a future date.
-    }
-  }
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-install-serviceworker.html"
-  amp_layout: {
-    supported_layouts: NODISPLAY
-  }
-}
-tags: {  # <amp-jwplayer>
-  tag_name: "amp-jwplayer"
-  disallowed_ancestor: "head"
-  disallowed_ancestor: "amp-sidebar"
-  also_requires: "amp-jwplayer extension .js script"
-  attrs: {
-    name: "data-media-id"
-    mandatory_oneof: "data-media-id or data-playlist-id"
-    value_regex_casei: "[0-9a-z]{8}"
-  }
-  attrs: {
-    name: "data-player-id"
-    mandatory: true
-    value_regex_casei: "[0-9a-z]{8}"
-  }
-  attrs: {
-    name: "data-playlist-id"
-    mandatory_oneof: "data-media-id or data-playlist-id"
-    value_regex_casei: "[0-9a-z]{8}"
-  }
-  # TODO(honeybadgerdontcare): Replace me with an ampproject.org URL eventually.
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-jwplayer/amp-jwplayer.md"
- amp_layout: {
-    supported_layouts: FILL
-    supported_layouts: FIXED
-    supported_layouts: FIXED_HEIGHT
-    supported_layouts: NODISPLAY
-    supported_layouts: RESPONSIVE
-  }
-}
-tags: {  # <amp-lightbox>
-  tag_name: "amp-lightbox"
-  disallowed_ancestor: "head"
-  disallowed_ancestor: "amp-sidebar"
-  also_requires: "amp-lightbox extension .js script"
-  attrs: { name: "controls" }
-  attrs: { name: "from" }
-  attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-lightbox.html"
-  amp_layout: {
-    supported_layouts: NODISPLAY
-  }
-}
-tags: {  # <amp-list>
-  tag_name: "amp-list"
-  disallowed_ancestor: "head"
-  disallowed_ancestor: "amp-sidebar"
-  also_requires: "amp-list extension .js script"
-  attrs: { name: "credentials" }
-  attrs: {
-    name: "src"
-    mandatory: true
-    value_url: {
-      allowed_protocol: "https"
-      allow_relative: true  # Will be set to false at a future date.
-    }
-  }
-  # TODO(gregable): Implement validation that requires the template attr value
-  # to reference the id of an existing template element.
-  attrs: { name: "template" }
-  attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-list.html"
-  amp_layout: {
-    supported_layouts: FILL
-    supported_layouts: FIXED
-    supported_layouts: FIXED_HEIGHT
-    supported_layouts: NODISPLAY
-    supported_layouts: RESPONSIVE
-  }
-}
-# TODO: Enforce mandatory attributes depending on the value of another
-# attribute. In this case, depending on the value of data-do, data-media and
-# data-description may or may not be mandatory.
-tags: {  # <amp-pinterest>
-  tag_name: "amp-pinterest"
-  disallowed_ancestor: "head"
-  disallowed_ancestor: "amp-sidebar"
-  also_requires: "amp-pinterest extension .js script"
-  # data-* is generally allowed, but it's not generally mandatory.
-  attrs: { name: "data-do" mandatory: true }
-  attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-pinterest.html"
   amp_layout: {
     supported_layouts: FILL
     supported_layouts: FIXED
@@ -3643,156 +2215,6 @@ tags: {  # <amp-pixel>
     defines_default_height: true
     defines_default_width: true
     supported_layouts: FIXED
-    supported_layouts: NODISPLAY
-  }
-}
-tags: {  # <amp-reach-player>
-  tag_name: "amp-reach-player"
-  disallowed_ancestor: "head"
-  disallowed_ancestor: "amp-sidebar"
-  also_requires: "amp-reach-player extension .js script"
-  attrs: {
-    name: "data-embed-id"
-    mandatory: true
-    # All ids are lowercase, numeric or dashes.
-    value_regex: "[0-9a-z-]+"
-  }
-  attr_lists: "extended-amp-global"
-  # Uncomment once reference is available.
-  # spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-reach-player/amp-reach-player.md"
-  amp_layout: {
-    supported_layouts: FILL
-    supported_layouts: FIXED
-    supported_layouts: FIXED_HEIGHT
-    supported_layouts: RESPONSIVE
-  }
-}
-tags: {  # <amp-sidebar>
-  tag_name: "amp-sidebar"
-  unique: true
-  mandatory_parent: "body"
-  disallowed_ancestor: "head"
-  disallowed_ancestor: "amp-sidebar"
-  also_requires: "amp-sidebar extension .js script"
-  attrs: {
-    name: "direction"
-    value_regex: "(left|right)"
-  }
-  attr_lists: "extended-amp-global"
-  # Uncomment once reference is available.
-  # spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-sidebar/amp-sidebar.md"
-  amp_layout: {
-    supported_layouts: CONTAINER
-  }
-}
-tags: {  # <amp-social-share>
-  tag_name: "amp-social-share"
-  disallowed_ancestor: "head"
-  disallowed_ancestor: "amp-sidebar"
-  also_requires: "amp-social-share extension .js script"
-  attrs: {
-    name: "type"
-    mandatory: true
-    value_regex: "(twitter|facebook|pinterest|linkedin|gplus|email)"
-  }
-  attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-social-share.html"
-  amp_layout: {
-    supported_layouts: FIXED
-  }
-}
-tags: {  # <amp-soundcloud>
-  tag_name: "amp-soundcloud"
-  disallowed_ancestor: "head"
-  disallowed_ancestor: "amp-sidebar"
-  also_requires: "amp-soundcloud extension .js script"
-  attrs: { name: "data-color" value_regex_casei: "([0-9a-f]{3}){1,2}" }
-  attrs: {
-    name: "data-trackid"
-    mandatory: true
-    value_regex: "[0-9]+"
-  }
-  attrs: { name: "data-visual" value_regex: "true|false" }
-  attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-soundcloud.html"
-  amp_layout: {
-    supported_layouts: FIXED_HEIGHT
-  }
-}
-tags: {  # <amp-springboard-player>
-  tag_name: "amp-springboard-player"
-  disallowed_ancestor: "head"
-  disallowed_ancestor: "amp-sidebar"
-  also_requires: "amp-springboard-player extension .js script"
-  attrs: {
-    name: "data-content-id"
-    mandatory: true
-  }
-  attrs: {
-    name: "data-domain"
-    mandatory: true
-  }
-  attrs: {
-    name: "data-items"
-    mandatory: true
-  }
-  attrs: {
-    name: "data-mode"
-    mandatory: true
-    value_regex_casei: "playlist|video"
-  }
-  attrs: {
-    name: "data-player-id"
-    mandatory: true
-    value_regex_casei: "[a-z0-9]+"
-  }
-  attrs: {
-    name: "data-site-id"
-    mandatory: true
-    value_regex: "[0-9]+"
-  }
-  attr_lists: "extended-amp-global"
-  spec_url: "https://github.com/ampproject/amphtml/blob/master/extensions/amp-springboard-player/amp-springboard-player.html"
-  amp_layout: {
-    supported_layouts: FILL
-    supported_layouts: FIXED
-    supported_layouts: RESPONSIVE
-  }
-}
-tags: {  # <amp-twitter>
-  tag_name: "amp-twitter"
-  disallowed_ancestor: "head"
-  disallowed_ancestor: "amp-sidebar"
-  also_requires: "amp-twitter extension .js script"
-  attrs: { name: "data-tweetid" mandatory_oneof: "['data-tweetid', 'src']" }
-  attrs: {
-    name: "src"
-    mandatory_oneof: "['data-tweetid', 'src']"
-    value_url: {
-      allowed_protocol: "http"  # runtime will rewrite URL to https in this case
-      allowed_protocol: "https"
-      allow_relative: true
-    }
-  }
-  attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-twitter.html"
-  amp_layout: {
-    supported_layouts: FILL
-    supported_layouts: FIXED
-    supported_layouts: FIXED_HEIGHT
-    supported_layouts: NODISPLAY
-    supported_layouts: RESPONSIVE
-  }
-}
-tags: {  # <amp-user-notification>
-  tag_name: "amp-user-notification"
-  disallowed_ancestor: "head"
-  disallowed_ancestor: "amp-sidebar"
-  also_requires: "amp-analytics extension .js script"
-  also_requires: "amp-user-notification extension .js script"
-  attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-user-notification.html"
-  amp_layout: {
     supported_layouts: NODISPLAY
   }
 }
@@ -3825,79 +2247,6 @@ tags: {  # <amp-video>
     supported_layouts: RESPONSIVE
   }
 }
-tags: {  # <amp-vimeo>
-  tag_name: "amp-vimeo"
-  disallowed_ancestor: "head"
-  disallowed_ancestor: "amp-sidebar"
-  also_requires: "amp-vimeo extension .js script"
-  attrs: {
-    name: "data-videoid"
-    mandatory: true
-    value_regex: "[0-9]+"
-  }
-  attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-vimeo.html"
-  amp_layout: {
-    supported_layouts: FILL
-    supported_layouts: FIXED
-    supported_layouts: FIXED_HEIGHT
-    supported_layouts: RESPONSIVE
-  }
-}
-tags: {  # <amp-vine>
-  tag_name: "amp-vine"
-  disallowed_ancestor: "head"
-  disallowed_ancestor: "amp-sidebar"
-  also_requires: "amp-vine extension .js script"
-  # data-* is generally allowed, but it's not generally mandatory.
-  attrs: { name: "data-vineid" mandatory: true }
-  attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-vine.html"
-  amp_layout: {
-    supported_layouts: FILL
-    supported_layouts: FIXED
-    supported_layouts: FIXED_HEIGHT
-    supported_layouts: NODISPLAY
-    supported_layouts: RESPONSIVE
-  }
-}
-# amp-youtube either comes with a video-id attribute, or with
-# a data-videoid attribute.
-tags: {  # <amp-youtube>
-  tag_name: "amp-youtube"
-  disallowed_ancestor: "head"
-  disallowed_ancestor: "amp-sidebar"
-  also_requires: "amp-youtube extension .js script"
-  attrs: {
-    name: "data-videoid"
-    mandatory_oneof: "['src', 'data-videoid']"
-  }
-  attrs: {
-    name: "src"
-    mandatory_oneof: "['src', 'data-videoid']"
-    value_url: {
-      allowed_protocol: "http"  # runtime will rewrite URL to https in this case
-      allowed_protocol: "https"
-      allow_relative: true
-    }
-  }
-  attrs: {
-    name: "video-id"
-    mandatory_oneof: "['src', 'data-videoid']"
-    deprecation: "data-videoid"
-    deprecation_url: "https://www.ampproject.org/docs/reference/extended/amp-youtube.html"
-  }
-  attr_lists: "extended-amp-global"
-  spec_url: "https://www.ampproject.org/docs/reference/extended/amp-youtube.html"
-  amp_layout: {
-    supported_layouts: FILL
-    supported_layouts: FIXED
-    supported_layouts: FIXED_HEIGHT
-    supported_layouts: NODISPLAY
-    supported_layouts: RESPONSIVE
-  }
-}
-
 
 # AMP Layout attributes: implied for TagSpecs with amp_layout field
 # set. Note that while these attributes are defined as optional here,
@@ -3967,6 +2316,7 @@ attr_lists: {
   attrs: { name: "aria-valuemin" }
   attrs: { name: "aria-valuenow" }
   attrs: { name: "aria-valuetext" }
+  attrs: { name: "on" }
   attrs: { name: "role" }
   # For placeholders inside amp-ad and other tags, we allow the
   # placeholder empty attribute. See e.g.
@@ -3975,7 +2325,6 @@ attr_lists: {
   # We allow the empty fallback attribute on any element
   attrs: { name: "fallback" value: "" }
   attrs: { name: "lightbox" }
-  attrs: { name: "on" }
   attrs: { name: "overflow" }
   # amp-access specific attributes, see
   # https://www.ampproject.org/docs/reference/extended/amp-access-spec.html
@@ -4006,6 +2355,11 @@ error_formats {
 error_formats {
   code: TAG_REQUIRED_BY_MISSING
   format: "The tag '%1' is missing or incorrect, but required by '%2'."
+}
+error_formats {
+  code: ATTR_REQUIRED_BUT_MISSING
+  format: "The attribute '%1' in tag '%2' is missing or incorrect, but "
+          "required by attribute '%3'."
 }
 error_formats {
   code: DISALLOWED_TAG

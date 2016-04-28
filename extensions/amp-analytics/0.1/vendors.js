@@ -39,6 +39,9 @@ export const ANALYTICS_CONFIG = {
       'documentReferrer': 'DOCUMENT_REFERRER',
       'domainLookupTime': 'DOMAIN_LOOKUP_TIME',
       'domInteractiveTime': 'DOM_INTERACTIVE_TIME',
+      'navRedirectCount': 'NAV_REDIRECT_COUNT',
+      'navTiming': 'NAV_TIMING',
+      'navType': 'NAV_TYPE',
       'pageDownloadTime': 'PAGE_DOWNLOAD_TIME',
       'pageLoadTime': 'PAGE_LOAD_TIME',
       'pageViewId': 'PAGE_VIEW_ID',
@@ -189,6 +192,39 @@ export const ANALYTICS_CONFIG = {
         'vars': {
           'decayTime': 30,
         },
+      },
+    },
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
+    },
+  },
+
+  'colanalytics': {
+    'requests': {
+      'host': 'https://ase.clmbtech.com',
+      'base': '${host}/message',
+      'pageview': '${base}?cid=${id}' +
+        '&val_101=${canonicalPath}' +
+        '&ch=${canonicalHost}' +
+        '&uuid=${uid}' +
+        '&au=${authors}' +
+        '&zo=${zone}' +
+        '&sn=${sponsorName}' +
+        '&ct=${contentType}' +
+        '&st=${scrollTop}' +
+        '&sh=${scrollHeight}' +
+        '&dct=${decayTime}' +
+        '&tet=${totalEngagedTime}' +
+        '&dr=${documentReferrer}' +
+        '&plt=${pageLoadTime}' +
+        '&val_108=${title}',
+    },
+    'triggers': {
+      'defaultPageview': {
+        'on': 'visible',
+        'request': 'pageview',
       },
     },
     'transport': {
@@ -541,6 +577,73 @@ export const ANALYTICS_CONFIG = {
       'image': true,
     },
   },
+
+  'mpulse': {
+    'requests': {
+      'onvisible': 'https://${beacon_url}?' +
+        'h.d=${h.d}' +
+        '&h.key=${h.key}' +
+        '&h.t=${h.t}' +
+        '&h.cr=${h.cr}' +
+        '&rt.start=navigation' +
+        '&rt.si=${clientId(amp_mpulse)}' +
+        '&rt.ss=${timestamp}' +
+        '&rt.end=${timestamp}' +
+        '&t_resp=${navTiming(navigationStart,responseStart)}' +
+        '&t_page=${navTiming(responseStart,loadEventStart)}' +
+        '&t_done=${navTiming(navigationStart,loadEventStart)}' +
+        '&nt_nav_type=${navType}' +
+        '&nt_red_cnt=${navRedirectCount}' +
+        '&nt_nav_st=${navTiming(navigationStart)}' +
+        '&nt_red_st=${navTiming(redirectStart)}' +
+        '&nt_red_end=${navTiming(redirectEnd)}' +
+        '&nt_fet_st=${navTiming(fetchStart)}' +
+        '&nt_dns_st=${navTiming(domainLookupStart)}' +
+        '&nt_dns_end=${navTiming(domainLookupEnd)}' +
+        '&nt_con_st=${navTiming(connectStart)}' +
+        '&nt_ssl_st=${navTiming(secureConnectionStart)}' +
+        '&nt_con_end=${navTiming(connectEnd)}' +
+        '&nt_req_st=${navTiming(requestStart)}' +
+        '&nt_res_st=${navTiming(responseStart)}' +
+        '&nt_unload_st=${navTiming(unloadEventStart)}' +
+        '&nt_unload_end=${navTiming(unloadEventEnd)}' +
+        '&nt_domloading=${navTiming(domLoading)}' +
+        '&nt_res_end=${navTiming(responseEnd)}' +
+        '&nt_domint=${navTiming(domInteractive)}' +
+        '&nt_domcontloaded_st=${navTiming(domContentLoadedEventStart)}' +
+        '&nt_domcontloaded_end=${navTiming(domContentLoadedEventEnd)}' +
+        '&nt_domcomp=${navTiming(domComplete)}' +
+        '&nt_load_st=${navTiming(loadEventStart)}' +
+        '&nt_load_end=${navTiming(loadEventEnd)}' +
+        '&v=1' +
+        '&http.initiator=amp' +
+        '&u=${sourceUrl}' +
+        '&amp.u=${ampdocUrl}' +
+        '&r2=${documentReferrer}' +
+        '&scr.xy=${screenWidth}x${screenHeight}',
+    },
+
+    'triggers': {
+      'onvisible': {
+        'on': 'visible',
+        'request': 'onvisible',
+      },
+    },
+
+    'transport': {
+      'beacon': false,
+      'xhrpost': false,
+      'image': true,
+    },
+
+    'extraUrlParamsReplaceMap': {
+      'ab_test': 'h.ab',
+      'page_group': 'h.pg',
+      'custom_dimension.': 'cdim.',
+      'custom_metric.': 'cmet.',
+    },
+  },
+
 };
 ANALYTICS_CONFIG['infonline']['triggers']['pageview']['iframe' +
 /* TEMPORARY EXCEPTION */ 'Ping'] = true;

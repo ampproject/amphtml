@@ -17,18 +17,16 @@
 checkMinVersion();
 
 var $$ = require('gulp-load-plugins')();
-var autoprefixer = require('autoprefixer');
 var babel = require('babelify');
 var browserify = require('browserify');
 var buffer = require('vinyl-buffer');
 var closureCompile = require('./build-system/tasks/compile').closureCompile;
-var cssnano = require('cssnano');
+var cleanupBuildDir = require('./build-system/tasks/compile').cleanupBuildDir;
+var jsifyCssAsync = require('./build-system/tasks/jsify-css').jsifyCssAsync;
 var fs = require('fs-extra');
 var gulp = $$.help(require('gulp'));
 var lazypipe = require('lazypipe');
 var minimist = require('minimist');
-var postcss = require('postcss');
-var postcssImport = require('postcss-import');
 var source = require('vinyl-source-stream');
 var touch = require('touch');
 var watchify = require('watchify');
@@ -39,24 +37,6 @@ var internalRuntimeToken = require('./build-system/internal-version').TOKEN;
 var argv = minimist(process.argv.slice(2), { boolean: ['strictBabelTransform'] });
 
 require('./build-system/tasks');
-
-// NOTE: see https://github.com/ai/browserslist#queries for `browsers` list
-var cssprefixer = autoprefixer({
-  browsers: [
-    'last 5 ChromeAndroid versions',
-    'last 5 iOS versions',
-    'last 3 FirefoxAndroid versions',
-    'last 5 Android versions',
-    'last 2 ExplorerMobile versions',
-    'last 2 OperaMobile versions',
-    'last 2 OperaMini versions'
-  ]
-});
-
-cssnano = cssnano({
-  convertValues: false,
-  zindex: false
-});
 
 
 /**
@@ -122,8 +102,9 @@ function polyfillsForTests() {
  *
  * @param {boolean} watch
  * @param {boolean} shouldMinify
+ * @param {boolean=} opt_preventRemoveAndMakeDir
  */
-function compile(watch, shouldMinify) {
+function compile(watch, shouldMinify, opt_preventRemoveAndMakeDir) {
   compileCss();
   // For compilation with babel we start with the amp-babel entry point,
   // but then rename to the amp.js which we've been using all along.
@@ -132,6 +113,7 @@ function compile(watch, shouldMinify) {
     minifiedName: 'v0.js',
     includePolyfills: true,
     watch: watch,
+    preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
     minify: shouldMinify,
     // If there is a sync JS error during initial load,
     // at least try to unhide the body.
@@ -147,7 +129,8 @@ function compile(watch, shouldMinify) {
   compileJs('./3p/', 'integration.js', './dist.3p/' + internalRuntimeVersion, {
     minifiedName: 'f.js',
     watch: watch,
-    minify: shouldMinify
+    minify: shouldMinify,
+    preventRemoveAndMakeDir: opt_preventRemoveAndMakeDir,
   });
   thirdPartyBootstrap(watch, shouldMinify);
 }
@@ -159,36 +142,11 @@ function compile(watch, shouldMinify) {
  */
 function compileCss() {
   console.info('Recompiling CSS.');
-  return jsifyCssPromise('css/amp.css').then(function(css) {
+  return jsifyCssAsync('css/amp.css').then(function(css) {
     return gulp.src('css/**.css')
         .pipe($$.file('css.js', 'export const cssText = ' + css))
         .pipe(gulp.dest('build'));
   });
-}
-
-/**
- * 'Jsify' a CSS file - Adds vendor specific css prefixes to the css file,
- * compresses the file, removes the copyright comment, and adds the sourceURL
- * to the stylesheet
- *
- * @param {string} filename css file
- * @return {!Promise} that resolves with the css content after processing
- */
-function jsifyCssPromise(filename) {
-  var css = fs.readFileSync(filename, 'utf8');
-  var transformers = [cssprefixer, cssnano];
-  // Remove copyright comment. Crude hack to get our own copyright out
-  // of the string.
-  return postcss(transformers).use(postcssImport).process(css.toString(), {
-        'from': filename
-      })
-      .then(function(result) {
-        result.warnings().forEach(function(warn) {
-          console.warn(warn.toString());
-        });
-        var css = result.css;
-        return JSON.stringify(css + '\n/*# sourceURL=/' + filename + '*/');
-      });
 }
 
 /**
@@ -198,8 +156,11 @@ function watch() {
   $$.watch('css/**/*.css', function() {
     compileCss();
   });
+  buildAlp({
+    watch: true,
+  });
   buildExtensions({
-    watch: true
+    watch: true,
   });
   buildExamples(true);
   compile(true);
@@ -241,7 +202,7 @@ function buildExtension(name, version, hasCss, options) {
   }
   if (hasCss) {
     mkdirSync('build');
-    return jsifyCssPromise(path + '/' + name + '.css').then(function(css) {
+    return jsifyCssAsync(path + '/' + name + '.css').then(function(css) {
       var jsCss = 'export const CSS = ' + css + ';\n';
       var builtName = 'build/' + name + '-' + version + '.css.js';
       fs.writeFileSync(builtName, jsCss, 'utf-8');
@@ -266,6 +227,7 @@ function buildExtension(name, version, hasCss, options) {
 function buildExtensionJs(path, name, version, options) {
   compileJs(path + '/', name + '.js', './dist/v0', {
     watch: options.watch,
+    preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
     minify: options.minify,
     toName:  name + '-' + version + '.max.js',
     minifiedName: name + '-' + version + '.js',
@@ -281,6 +243,7 @@ function buildExtensionJs(path, name, version, options) {
 function build() {
   process.env.NODE_ENV = 'development';
   polyfillsForTests();
+  buildAlp();
   buildExtensions();
   buildExamples(false);
   compile();
@@ -291,10 +254,12 @@ function build() {
  */
 function dist() {
   process.env.NODE_ENV = 'production';
-  compile(false, true);
-  buildExtensions({minify: true});
-  buildExperiments({minify: true, watch: false});
-  buildLoginDone({minify: true, watch: false});
+  cleanupBuildDir();
+  compile(false, true, true);
+  buildAlp({minify: true, watch: false, preventRemoveAndMakeDir: true});
+  buildExtensions({minify: true, preventRemoveAndMakeDir: true});
+  buildExperiments({minify: true, watch: false, preventRemoveAndMakeDir: true});
+  buildLoginDone({minify: true, watch: false, preventRemoveAndMakeDir: true});
 }
 
 /**
@@ -319,6 +284,7 @@ function buildExamples(watch) {
 
   // Also update test-example-validation.js
   buildExample('ads.amp.html');
+  buildExample('alp.amp.html');
   buildExample('analytics-notification.amp.html');
   buildExample('analytics.amp.html');
   buildExample('article.amp.html');
@@ -600,7 +566,9 @@ function buildExperiments(options) {
         compileJs('./build/experiments/', builtName, './dist.tools/experiments/', {
           watch: false,
           minify: options.minify || argv.minify,
+          includePolyfills: true,
           minifiedName: minifiedName,
+          preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
         });
       });
 }
@@ -675,11 +643,32 @@ function buildLoginDoneVersion(version, options) {
       .on('end', function() {
         compileJs('./build/all/v0/', builtName, './dist/v0/', {
           watch: false,
+          includePolyfills: true,
           minify: options.minify || argv.minify,
           minifiedName: minifiedName,
+          preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
           latestName: latestName,
         });
       });
+}
+
+/**
+ * Build ALP JS
+ *
+ * @param {!Object} options
+ */
+function buildAlp(options) {
+  options = options || {};
+  console.log('Bundling alp.js');
+
+  compileJs('./ads/alp/', 'install-alp.js', './dist/', {
+    toName: 'alp.max.js',
+    watch: options.watch,
+    minify: options.minify || argv.minify,
+    includePolyfills: true,
+    minifiedName: 'alp.js',
+    preventRemoveAndMakeDir: options.preventRemoveAndMakeDir,
+  });
 }
 
 /**

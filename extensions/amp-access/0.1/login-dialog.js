@@ -21,7 +21,7 @@ import {parseUrl} from '../../../src/url';
 import {viewerFor} from '../../../src/viewer';
 
 /** @const */
-const TAG = 'AmpAccessLogin';
+const TAG = 'amp-access-login';
 
 /** @const {!RegExp} */
 const RETURN_URL_REGEX = new RegExp('RETURN_URL');
@@ -173,7 +173,8 @@ class WebLoginDialog {
     const h = Math.floor(Math.min(450, screen.height * 0.9));
     const x = Math.floor((screen.width - w) / 2);
     const y = Math.floor((screen.height - h) / 2);
-    const options = `height=${h},width=${w},left=${x},top=${y}`;
+    const sizing = `height=${h},width=${w},left=${x},top=${y}`;
+    const options = `${sizing},resizable=yes,scrollbars=yes`;
     const returnUrl = this.getReturnUrl_();
 
     let dialogReadyPromise = null;

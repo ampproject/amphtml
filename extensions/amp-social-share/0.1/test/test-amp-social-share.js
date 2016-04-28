@@ -17,6 +17,7 @@
 import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
 import {toggleExperiment} from '../../../../src/experiments';
+import * as sinon from 'sinon';
 import '../amp-social-share';
 
 adopt(window);
@@ -32,19 +33,25 @@ const STRINGS = {
 
 describe('amp-social-share', () => {
 
-  function getShare(type, config) {
+  let sandbox;
+
+  function getShare(type, opt_endpoint, opt_params) {
     return getCustomShare(iframe => {
       toggleExperiment(iframe.win, 'amp-social-share', true);
       const share = iframe.doc.createElement('amp-social-share');
-      const script = iframe.doc.createElement('script');
+      share.addEventListener = sandbox.spy();
+      iframe.win.open = sandbox.spy();
+      if (opt_endpoint) {
+        share.setAttribute('data-share-endpoint', opt_endpoint);
+      }
 
-      script.setAttribute('type', 'application/json');
-      script.textContent = JSON.stringify(config);;
+      for (const key in opt_params) {
+        share.setAttribute('data-param-' + key, opt_params[key]);
+      }
 
       share.setAttribute('type', type);
       share.setAttribute('width', 60);
       share.setAttribute('height', 44);
-      share.appendChild(script);
       return share;
     });
   }
@@ -53,138 +60,87 @@ describe('amp-social-share', () => {
     return createIframePromise().then(iframe => {
       const canonical = iframe.doc.createElement('link');
 
+      iframe.doc.title = 'doc title';
       canonical.setAttribute('rel', 'canonical');
-      canonical.setAttribute('href', STRINGS['url']);
-
+      canonical.setAttribute('href', 'https://canonicalexample.com/');
       iframe.addElement(canonical);
 
       return iframe.addElement(modifier(iframe));
     });
   }
 
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
+
+  it('errors if share endpoint is missing', () => {
+    return createIframePromise().then(iframe => {
+      toggleExperiment(iframe.win, 'amp-social-share', true);
+      const share = iframe.doc.createElement('amp-social-share');
+      share.setAttribute('type', 'unknown-provider');
+      expect(() => {
+        share.build(true);
+      }).to.throw('data-share-endpoint attribute is required');
+    });
+  });
+
+  it('errors if type is missing', () => {
+    return createIframePromise().then(iframe => {
+      toggleExperiment(iframe.win, 'amp-social-share', true);
+      const share = iframe.doc.createElement('amp-social-share');
+      expect(() => {
+        share.build(true);
+      }).to.throw('type attribute is required');
+    });
+  });
+
+  it('renders unconfigured providers if share endpoint provided', () => {
+    return getCustomShare(iframe => {
+      toggleExperiment(iframe.win, 'amp-social-share', true);
+      const share = iframe.doc.createElement('amp-social-share');
+
+      share.setAttribute('type', 'unknown-provider');
+      share.setAttribute('data-share-endpoint',
+          'https://exampleprovider.com/share/');
+      share.setAttribute('data-param-text', 'check out: CANONICAL_URL');
+      return share;
+    }).then(el => {
+      expect(el.implementation_.params_.text).to.be.equal(
+          'check out: CANONICAL_URL');
+      expect(el.implementation_.href_).to.not.contain(
+          encodeURIComponent('CANONICAL_URL'));
+      expect(el.implementation_.href_).to.contain(
+          encodeURIComponent('https://canonicalexample.com/'));
+      expect(el.implementation_.shareEndpoint_).to.be.equal(
+          'https://exampleprovider.com/share/');
+    });
+  });
+
   it('renders twitter', () => {
-    const conf = {
-      'text': STRINGS['text'],
+    const params = {
       'url': STRINGS['url'],
-      'attribution': STRINGS['attribution'],
+      'via': STRINGS['attribution'],
     };
-    return getShare('twitter', conf).then(ins => {
-      const tShare = ins.getElementsByTagName('span')[0];
-      expect(tShare).to.not.be.null;
-      expect(tShare.firstChild).to.not.be.null;
-      const shareAnchor = tShare.firstChild;
-      expect(shareAnchor.tagName).to.equal('A');
+    return getShare('twitter', /* endpoint */ undefined, params).then(el => {
+      expect(el.implementation_.params_.text).to.be.equal('TITLE');
+      expect(el.implementation_.params_.url).to.be.equal('https://example.com/');
+      expect(el.implementation_.params_.via).to.be.equal('AMPhtml');
+      expect(el.implementation_.shareEndpoint_).to.be.equal(
+          'https://twitter.com/intent/tweet');
 
-      const shareHref = shareAnchor.getAttribute('href');
-      expect(shareHref).to.contain(encodeURIComponent(STRINGS['text']));
-      expect(shareHref).to.contain(encodeURIComponent(STRINGS['url']));
-      expect(shareHref).to.contain(encodeURIComponent(STRINGS['attribution']));
-    });
-  });
-
-  it('renders a custom element', () => {
-    return getCustomShare(iframe => {
-      const share = iframe.doc.createElement('amp-social-share');
-      const script = iframe.doc.createElement('script');
-      const container = iframe.doc.createElement('span');
-      const link = iframe.doc.createElement('a');
-
-      script.setAttribute('type', 'application/json');
-      script.textContent = JSON.stringify({
-        'text': STRINGS['text'],
-        'url': STRINGS['url'],
-        'attribution': STRINGS['attribution'],
-      });;
-
-      share.setAttribute('type', 'twitter');
-      share.setAttribute('width', 60);
-      share.setAttribute('height', 44);
-      share.appendChild(script);
-
-      container.classList.add('amp-social-share-test');
-      container.appendChild(link);
-
-      link.classList.add('amp-social-share-test');
-
-      return share;
-    }).then(ins => {
-      const tShare = ins.getElementsByTagName('span')[0];
-      expect(tShare).to.not.be.null;
-      expect(tShare.firstChild).to.not.be.null;
-      expect(tShare).to.have.class('amp-social-share-twitter');
-      const shareAnchor = tShare.firstChild;
-      expect(shareAnchor.tagName).to.equal('A');
-
-      const shareHref = shareAnchor.getAttribute('href');
-      expect(shareHref).to.contain(encodeURIComponent(STRINGS['text']));
-      expect(shareHref).to.contain(encodeURIComponent(STRINGS['url']));
-      expect(shareHref).to.contain(encodeURIComponent(STRINGS['attribution']));
-    });
-  });
-
-  it('renders a custom element with attribute config', () => {
-    return getCustomShare(iframe => {
-      const share = iframe.doc.createElement('amp-social-share');
-      const container = iframe.doc.createElement('span');
-      const link = iframe.doc.createElement('a');
-
-      share.setAttribute('type', 'twitter');
-      share.setAttribute('width', 60);
-      share.setAttribute('height', 44);
-
-      // Set data
-      share.setAttribute('data-text', STRINGS['text']);
-      share.setAttribute('data-url', STRINGS['url']);
-      share.setAttribute('data-attribution', STRINGS['attribution']);
-
-      container.classList.add('amp-social-share-test');
-      container.appendChild(link);
-
-      link.classList.add('amp-social-share-test');
-
-      return share;
-    }).then(ins => {
-      const tShare = ins.getElementsByTagName('span')[0];
-      expect(tShare).to.not.be.null;
-      expect(tShare.firstChild).to.not.be.null;
-      expect(tShare).to.have.class('amp-social-share-twitter');
-      const shareAnchor = tShare.firstChild;
-      expect(shareAnchor.tagName).to.equal('A');
-
-      const shareHref = shareAnchor.getAttribute('href');
-      expect(shareHref).to.contain(encodeURIComponent(STRINGS['text']));
-      expect(shareHref).to.contain(encodeURIComponent(STRINGS['url']));
-      expect(shareHref).to.contain(encodeURIComponent(STRINGS['attribution']));
-    });
-  });
-
-  it('Should not add prefixed class for social shares with tag', () => {
-    return getCustomShare(iframe => {
-      const share = iframe.doc.createElement('amp-social-share');
-      const container = iframe.doc.createElement('span');
-      const link = iframe.doc.createElement('a');
-
-      share.setAttribute('type', 'twitter');
-      share.setAttribute('width', 60);
-      share.setAttribute('height', 44);
-      share.appendChild(container);
-      container.classList.add('amp-social-share-test');
-      container.appendChild(link);
-
-      link.classList.add('amp-social-share-test');
-
-      return share;
-    }).then(ins => {
-      const tShare = ins.getElementsByTagName('span')[0];
-      expect(tShare).to.not.be.null;
-      expect(tShare.firstChild).to.not.be.null;
-      expect(tShare).to.not.have.class('amp-social-share-twitter');
-      expect(tShare).to.have.class('amp-social-share-test');
+      expect(el.implementation_.href_).to.not.contain('TITLE');
+      expect(el.addEventListener.called).to.be.true;
+      expect(el.addEventListener.calledWith('click')).to.be.true;
     });
   });
 
   it('adds a default value for url', () => {
     return getCustomShare(iframe => {
+      toggleExperiment(iframe.win, 'amp-social-share', true);
       const share = iframe.doc.createElement('amp-social-share');
 
       share.setAttribute('type', 'twitter');
@@ -192,80 +148,26 @@ describe('amp-social-share', () => {
       share.setAttribute('height', 44);
 
       return share;
-    }).then(ins => {
-      const tShare = ins.getElementsByTagName('span')[0];
-      expect(tShare).to.not.be.null;
-      expect(tShare.firstChild).to.not.be.null;
-      const shareAnchor = tShare.firstChild;
-      expect(shareAnchor.tagName).to.equal('A');
-
-      const shareHref = shareAnchor.getAttribute('href');
-      expect(shareHref).to.contain(encodeURIComponent('url'));
+    }).then(el => {
+      expect(el.implementation_.params_.url).to.be.equal('CANONICAL_URL');
+      expect(el.implementation_.href_).to.not.contain(
+          encodeURIComponent('CANONICAL_URL'));
+      expect(el.implementation_.href_).to.contain(
+          encodeURIComponent('https://canonicalexample.com/'));
+      expect(el.implementation_.shareEndpoint_).to.be.equal(
+          'https://twitter.com/intent/tweet');
     });
   });
 
-  it('adds a default value for text', () => {
-    return getCustomShare(iframe => {
-      const share = iframe.doc.createElement('amp-social-share');
-
-      share.setAttribute('type', 'twitter');
-      share.setAttribute('width', 60);
-      share.setAttribute('height', 44);
-
-      return share;
-    }).then(ins => {
-      const tShare = ins.getElementsByTagName('span')[0];
-      expect(tShare).to.not.be.null;
-      expect(tShare.firstChild).to.not.be.null;
-      const shareAnchor = tShare.firstChild;
-      expect(shareAnchor.tagName).to.equal('A');
-
-      const shareHref = shareAnchor.getAttribute('href');
-      expect(shareHref).to.contain(encodeURIComponent('text'));
-    });
-  });
-
-  it('throws error with too long text', () => {
-    return createIframePromise().then(iframe => {
-      const share = iframe.doc.createElement('amp-social-share');
-      const script = iframe.doc.createElement('script');
-
-      script.setAttribute('type', 'application/json');
-      script.textContent = JSON.stringify({
-        'text': STRINGS['text-too-long'],
-        'url': STRINGS['url'],
-        'attribution': STRINGS['attribution'],
-      });;
-
-      share.setAttribute('type', 'twitter');
-      share.setAttribute('width', 60);
-      share.setAttribute('height', 44);
-      share.appendChild(script);
-
-      expect(() => {
-        share.build(true);
-      }).to.throw('text cannot exceed');
-    });
-  });
-
-  it('throws error with missing required field', () => {
-    return createIframePromise().then(iframe => {
-      const share = iframe.doc.createElement('amp-social-share');
-      const script = iframe.doc.createElement('script');
-
-      script.setAttribute('type', 'application/json');
-      script.textContent = JSON.stringify({
-        'url': STRINGS['url'],
-      });;
-
-      share.setAttribute('type', 'facebook');
-      share.setAttribute('width', 60);
-      share.setAttribute('height', 44);
-      share.appendChild(script);
-
-      expect(() => {
-        share.build(true);
-      }).to.throw('attribution is a required attribute for facebook');
+  it('opens share window in _blank', () => {
+    return getShare('twitter').then(el => {
+      el.implementation_.handleClick_();
+      expect(el.implementation_.getWin().open.called).to.be.true;
+      expect(el.implementation_.getWin().open.calledWith(
+        'https://twitter.com/intent/tweet?text=doc%20title&' +
+          'url=https%3A%2F%2Fcanonicalexample.com%2F',
+          '_blank', 'resizable,scrollbars,width=640,height=480'
+      )).to.be.true;
     });
   });
 });

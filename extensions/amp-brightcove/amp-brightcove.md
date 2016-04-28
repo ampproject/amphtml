@@ -98,7 +98,7 @@ This script should be added to the configuration of Brightcove Players used with
 ## Validation errors
 
 The following lists validation errors specific to the `amp-brightcove` tag
-(see also `amp-brightcove` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii)):
+(see also `amp-brightcove` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-brightcove/0.1/validator-amp-brightcove.protoascii)):
 
 <table>
   <tr>

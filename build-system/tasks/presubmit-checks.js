@@ -55,9 +55,10 @@ var forbiddenTerms = {
       'whitelist a legit case.',
     // TODO: temporary, remove when validator is up to date
     whitelist: [
-      'validator/validator.js',
+      'validator/index.js',  // NodeJs only.
       'validator/parse-css.js',
       'validator/validator-in-browser.js',
+      'validator/validator.js',
     ]
   },
   'iframePing': {
@@ -105,6 +106,13 @@ var forbiddenTerms = {
       'src/service/storage-impl.js',
     ],
   },
+  'installUrlReplacementsService': {
+    message: privateServiceFactory,
+    whitelist: [
+      'src/amp-core-service.js',
+      'src/service/url-replacements-impl.js',
+    ],
+  },
   'installViewerService': {
     message: privateServiceFactory,
     whitelist: [
@@ -141,6 +149,13 @@ var forbiddenTerms = {
       'src/service/standard-actions-impl.js',
     ],
   },
+  'installXhrService': {
+    message: privateServiceFactory,
+    whitelist: [
+      'src/amp-core-service.js',
+      'src/service/xhr-impl.js',
+    ],
+  },
   'sendMessage': {
     message: privateServiceFactory,
     whitelist: [
@@ -154,10 +169,10 @@ var forbiddenTerms = {
   'cidFor': {
     message: requiresReviewPrivacy,
     whitelist: [
-      'builtins/amp-ad.js',
+      'src/ad-cid.js',
       'src/cid.js',
       'src/service/cid-impl.js',
-      'src/url-replacements.js',
+      'src/service/url-replacements-impl.js',
       'extensions/amp-access/0.1/amp-access.js',
       'extensions/amp-user-notification/0.1/amp-user-notification.js',
     ],
@@ -242,14 +257,14 @@ var forbiddenTerms = {
     message: requiresReviewPrivacy,
     whitelist: [
       'extensions/amp-access/0.1/amp-access.js',
-      'src/url-replacements.js',
+      'src/service/url-replacements-impl.js',
     ]
   },
   'getAuthdataField': {
     message: requiresReviewPrivacy,
     whitelist: [
       'extensions/amp-access/0.1/amp-access.js',
-      'src/url-replacements.js',
+      'src/service/url-replacements-impl.js',
     ]
   },
   'debugger': '',
@@ -261,8 +276,9 @@ var forbiddenTerms = {
   '\\.startsWith': {
     message: es6polyfill,
     whitelist: [
+      'validator/index.js',  // NodeJs only.
       'validator/tokenize-css.js',
-      'validator/validator.js'
+      'validator/validator.js',
     ]
   },
   '\\.endsWith': {
@@ -325,12 +341,6 @@ var forbiddenTerms = {
     message: 'Use dev.error or user.error instead.',
     whitelist: [
       'src/log.js',
-    ],
-  },
-  'AMP\.assert': {  // TODO(dvoytenko, #2527): Remove when AMP.assert is gone.
-    message: 'Use user.assert instead.',
-    whitelist: [
-      'src/runtime.js',
     ],
   },
 };

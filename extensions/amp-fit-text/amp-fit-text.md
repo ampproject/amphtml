@@ -79,7 +79,7 @@ properties with the main exception of `font-size`.
 ## Validation errors
 
 The following lists validation errors specific to the `amp-fit-text` tag
-(see also `amp-fit-text` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii)):
+(see also `amp-fit-text` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-fit-text/0.1/validator-amp-fit-text.protoascii)):
 
 <table>
   <tr>

@@ -1,37 +1,39 @@
       max   |         min   |       gzip   |   file
       ---   |         ---   |        ---   |   ---
-607.69 kB   |   176.05 kB   |   48.38 kB   |   v0.js / amp.js
-350.75 kB   |    87.07 kB   |   25.89 kB   |   v0/amp-access-0.1.js
- 43.05 kB   |    13.16 kB   |    4.82 kB   |   v0/amp-accordion-0.1.js
-361.95 kB   |    98.31 kB   |   30.94 kB   |   v0/amp-analytics-0.1.js
-103.22 kB   |    18.16 kB   |    6.52 kB   |   v0/amp-anim-0.1.js
- 86.58 kB   |    13.89 kB   |    5.09 kB   |   v0/amp-audio-0.1.js
- 94.89 kB   |    16.59 kB   |    5.88 kB   |   v0/amp-brid-player-0.1.js
- 96.89 kB   |    16.81 kB   |    5.98 kB   |   v0/amp-brightcove-0.1.js
-206.99 kB   |     42.8 kB   |   12.59 kB   |   v0/amp-carousel-0.1.js
- 87.48 kB   |    14.48 kB   |     5.3 kB   |   v0/amp-dailymotion-0.1.js
- 76.59 kB   |      9.3 kB   |    3.52 kB   |   v0/amp-dynamic-css-classes-0.1.js
- 117.1 kB   |    21.05 kB   |    7.57 kB   |   v0/amp-facebook-0.1.js
- 50.49 kB   |    14.52 kB   |    5.25 kB   |   v0/amp-fit-text-0.1.js
-104.44 kB   |    17.98 kB   |    6.18 kB   |   v0/amp-font-0.1.js
-125.53 kB   |    23.44 kB   |    8.06 kB   |   v0/amp-iframe-0.1.js
-232.69 kB   |    52.44 kB   |   15.06 kB   |   v0/amp-image-lightbox-0.1.js
-103.32 kB   |    18.12 kB   |    6.43 kB   |   v0/amp-instagram-0.1.js
- 34.57 kB   |    10.04 kB   |    3.71 kB   |   v0/amp-install-serviceworker-0.1.js
- 94.33 kB   |    16.01 kB   |    5.76 kB   |   v0/amp-jwplayer-0.1.js
- 94.86 kB   |    16.49 kB   |    5.94 kB   |   v0/amp-kaltura-player-0.1.js
-152.74 kB   |    25.79 kB   |    8.15 kB   |   v0/amp-lightbox-0.1.js
-275.44 kB   |    61.65 kB   |   18.12 kB   |   v0/amp-list-0.1.js
-146.52 kB   |    45.02 kB   |   15.56 kB   |   v0/amp-mustache-0.1.js
-120.31 kB   |    30.27 kB   |    9.39 kB   |   v0/amp-pinterest-0.1.js
- 86.59 kB   |    14.04 kB   |    5.14 kB   |   v0/amp-reach-player-0.1.js
- 121.8 kB   |    21.81 kB   |    7.55 kB   |   v0/amp-slides-0.1.js
-116.21 kB   |    25.39 kB   |    8.89 kB   |   v0/amp-social-share-0.1.js
- 87.17 kB   |    14.23 kB   |    5.21 kB   |   v0/amp-soundcloud-0.1.js
- 95.14 kB   |    16.74 kB   |    5.85 kB   |   v0/amp-springboard-player-0.1.js
-117.57 kB   |    21.17 kB   |    7.61 kB   |   v0/amp-twitter-0.1.js
-277.42 kB   |    62.43 kB   |    18.3 kB   |   v0/amp-user-notification-0.1.js
-  87.1 kB   |    14.14 kB   |    5.18 kB   |   v0/amp-vimeo-0.1.js
- 86.63 kB   |    14.01 kB   |    5.14 kB   |   v0/amp-vine-0.1.js
- 97.59 kB   |    17.04 kB   |    6.08 kB   |   v0/amp-youtube-0.1.js
-123.42 kB   |     33.1 kB   |   11.22 kB   |   current-min/f.js / current/integration.js
+ 46.47 kB   |      5.5 kB   |    2.19 kB   |   alp.js / install-alp.js
+633.84 kB   |   161.79 kB   |   45.11 kB   |   v0.js / amp.js
+214.26 kB   |    37.73 kB   |   12.16 kB   |   v0/amp-access-0.1.js
+ 27.29 kB   |     5.97 kB   |    2.36 kB   |   v0/amp-accordion-0.1.js
+225.69 kB   |    54.05 kB   |   18.89 kB   |   v0/amp-analytics-0.1.js
+ 87.95 kB   |     9.51 kB   |    3.63 kB   |   v0/amp-anim-0.1.js
+ 84.79 kB   |     7.24 kB   |    2.93 kB   |   v0/amp-audio-0.1.js
+ 79.64 kB   |     8.35 kB   |    3.17 kB   |   v0/amp-brid-player-0.1.js
+ 95.33 kB   |        8 kB   |    3.06 kB   |   v0/amp-brightcove-0.1.js
+191.79 kB   |    33.18 kB   |    9.54 kB   |   v0/amp-carousel-0.1.js
+ 72.22 kB   |     6.98 kB   |    2.79 kB   |   v0/amp-dailymotion-0.1.js
+ 82.55 kB   |      5.3 kB   |    2.28 kB   |   v0/amp-dynamic-css-classes-0.1.js
+132.88 kB   |    14.47 kB   |    5.71 kB   |   v0/amp-facebook-0.1.js
+  34.8 kB   |     6.73 kB   |    2.65 kB   |   v0/amp-fit-text-0.1.js
+  89.2 kB   |     9.68 kB   |    3.51 kB   |   v0/amp-font-0.1.js
+124.47 kB   |    14.62 kB   |    5.28 kB   |   v0/amp-iframe-0.1.js
+217.67 kB   |    40.05 kB   |   11.23 kB   |   v0/amp-image-lightbox-0.1.js
+ 88.14 kB   |     8.13 kB   |    3.15 kB   |   v0/amp-instagram-0.1.js
+  81.8 kB   |     8.64 kB   |     3.5 kB   |   v0/amp-install-serviceworker-0.1.js
+ 79.07 kB   |     7.81 kB   |    3.04 kB   |   v0/amp-jwplayer-0.1.js
+ 93.06 kB   |     8.68 kB   |    3.38 kB   |   v0/amp-kaltura-player-0.1.js
+137.48 kB   |    15.37 kB   |    4.84 kB   |   v0/amp-lightbox-0.1.js
+100.94 kB   |     9.05 kB   |    3.41 kB   |   v0/amp-list-0.1.js
+144.21 kB   |    40.51 kB   |   14.28 kB   |   v0/amp-mustache-0.1.js
+107.44 kB   |    20.48 kB   |    6.05 kB   |   v0/amp-pinterest-0.1.js
+ 71.33 kB   |     6.54 kB   |    2.62 kB   |   v0/amp-reach-player-0.1.js
+    96 kB   |    11.62 kB   |    4.17 kB   |   v0/amp-sidebar-0.1.js
+106.56 kB   |    12.76 kB   |    4.55 kB   |   v0/amp-slides-0.1.js
+114.82 kB   |    16.13 kB   |    5.83 kB   |   v0/amp-social-share-0.1.js
+ 71.91 kB   |     6.69 kB   |    2.67 kB   |   v0/amp-soundcloud-0.1.js
+ 79.88 kB   |     8.52 kB   |    3.15 kB   |   v0/amp-springboard-player-0.1.js
+133.35 kB   |    14.59 kB   |    5.75 kB   |   v0/amp-twitter-0.1.js
+101.36 kB   |    11.33 kB   |    4.13 kB   |   v0/amp-user-notification-0.1.js
+ 71.84 kB   |     6.64 kB   |    2.66 kB   |   v0/amp-vimeo-0.1.js
+ 71.37 kB   |      6.5 kB   |    2.62 kB   |   v0/amp-vine-0.1.js
+ 82.33 kB   |     8.81 kB   |    3.38 kB   |   v0/amp-youtube-0.1.js
+137.63 kB   |    30.87 kB   |   10.88 kB   |   current-min/f.js / current/integration.js

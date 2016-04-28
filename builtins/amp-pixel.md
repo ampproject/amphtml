@@ -59,7 +59,7 @@ may make a request to something like `https://foo.com/pixel?0.8390278471201` whe
 ## Validation errors
 
 The following lists validation errors specific to the `amp-pixel` tag
-(see also `amp-pixel` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii)):
+(see also `amp-pixel` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator-main.protoascii)):
 
 <table>
   <tr>

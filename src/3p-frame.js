@@ -19,15 +19,18 @@ import {getLengthNumeral} from '../src/layout';
 import {getService} from './service';
 import {documentInfoFor} from './document-info';
 import {getMode} from './mode';
+import {getIntersectionChangeEntry} from './intersection-observer';
 import {preconnectFor} from './preconnect';
 import {dashToCamelCase} from './string';
 import {parseUrl, assertHttpsUrl} from './url';
+import {timer} from './timer';
 import {user} from './log';
+import {viewportFor} from './viewport';
 import {viewerFor} from './viewer';
 
 
 /** @type {!Object<string,number>} Number of 3p frames on the for that type. */
-const count = {};
+let count = {};
 
 
 /**
@@ -42,6 +45,7 @@ const count = {};
  *     - A _context object for internal use.
  */
 function getFrameAttributes(parentWindow, element, opt_type) {
+  const startTime = timer.now();
   const width = element.getAttribute('width');
   const height = element.getAttribute('height');
   const type = opt_type || element.getAttribute('type');
@@ -51,9 +55,6 @@ function getFrameAttributes(parentWindow, element, opt_type) {
   addDataAndJsonAttributes_(element, attributes);
   attributes.width = getLengthNumeral(width);
   attributes.height = getLengthNumeral(height);
-  const box = element.getLayoutBox();
-  attributes.initialWindowWidth = box.width;
-  attributes.initialWindowHeight = box.height;
   attributes.type = type;
   const docInfo = documentInfoFor(parentWindow);
   const viewer = viewerFor(parentWindow);
@@ -75,6 +76,11 @@ function getFrameAttributes(parentWindow, element, opt_type) {
     tagName: element.tagName,
     mode: getMode(),
     hidden: !viewer.isVisible(),
+    initialIntersection: getIntersectionChangeEntry(
+        timer.now(),
+        viewportFor(parentWindow).getRect(),
+        element.getLayoutBox()),
+    startTime: startTime,
   };
   const adSrc = element.getAttribute('src');
   if (adSrc) {
@@ -97,13 +103,15 @@ export function getIframe(parentWindow, element, opt_type) {
   if (!count[attributes.type]) {
     count[attributes.type] = 0;
   }
-  iframe.name = 'frame_' + attributes.type + '_' + count[attributes.type]++;
 
+  const baseUrl = getBootstrapBaseUrl(parentWindow);
+  const host = parseUrl(baseUrl).hostname;
   // Pass ad attributes to iframe via the fragment.
-  const src = getBootstrapBaseUrl(parentWindow) + '#' +
-      JSON.stringify(attributes);
+  const src = baseUrl + '#' + JSON.stringify(attributes);
+  const name = host + '_' + attributes.type + '_' + count[attributes.type]++;
 
   iframe.src = src;
+  iframe.name = name;
   iframe.ampLocation = parseUrl(src);
   iframe.width = attributes.width;
   iframe.height = attributes.height;
@@ -184,17 +192,15 @@ export function getBootstrapBaseUrl(parentWindow, opt_strictForUnitTest) {
  * @return {string}
  */
 function getDefaultBootstrapBaseUrl(parentWindow) {
-  let url =
-      'https://' + getSubDomain(parentWindow) +
-      '.ampproject.net/$internalRuntimeVersion$/frame.html';
   if (getMode().localDev) {
-    url = 'http://ads.localhost:' +
+    return 'http://ads.localhost:' +
         (parentWindow.location.port || parentWindow.parent.location.port) +
         '/dist.3p/current' +
         (getMode().minified ? '-min/frame' : '/frame.max') +
         '.html';
   }
-  return url;
+  return 'https://' + getSubDomain(parentWindow) +
+      '.ampproject.net/$internalRuntimeVersion$/frame.html';
 }
 
 /**
@@ -244,6 +250,14 @@ function getCustomBootstrapBaseUrl(parentWindow, opt_strictForUnitTest) {
       '3p iframe url must not be on the same origin as the current doc' +
       'ument %s (%s) in element %s. See https://github.com/ampproject/amphtml' +
       '/blob/master/spec/amp-iframe-origin-policy.md for details.', url,
-      parseUrl(url).origin, meta);
+      parsed.origin, meta);
   return url + '?$internalRuntimeVersion$';
+}
+
+/**
+ * Resets the count of each 3p frame type
+ * @visibleForTesting
+ */
+export function resetCountForTesting() {
+  count = {};
 }

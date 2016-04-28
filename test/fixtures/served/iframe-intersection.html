@@ -12,12 +12,10 @@ function log(m) {
   el.value =
       el.value + '\n[' + (new Date().getTime() - startTime) + '] ' + (m || '');
 }
-window.setTimeout(function() {
-  parent./*OK*/postMessage({
-    sentinel: 'amp',
-    type: 'send-intersections'
-  }, '*');
-}, 1000);
+parent./*OK*/postMessage({
+  sentinel: 'amp',
+  type: 'send-intersections'
+}, '*');
 
 window.addEventListener('message', function(event) {
   if (event.data) {

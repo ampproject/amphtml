@@ -63,16 +63,26 @@ exports.closureCompile = function(entryModuleFilename, outputDir,
   });
 };
 
+function cleanupBuildDir() {
+  fs.mkdirsSync('build/cc');
+  rimraf.sync('build/fake-module');
+  fs.mkdirsSync('build/fake-module/third_party/babel');
+  fs.mkdirsSync('build/fake-module/src/polyfills/');
+}
+exports.cleanupBuildDir = cleanupBuildDir;
+
 function compile(entryModuleFilename, outputDir,
     outputFilename, options) {
   return new Promise(function(resolve, reject) {
     var intermediateFilename = 'build/cc/' +
         entryModuleFilename.replace(/\//g, '_').replace(/^\./, '');
-    console./*OK*/log('Starting closure compiler for ', entryModuleFilename);
-    fs.mkdirsSync('build/cc');
-    rimraf.sync('build/fake-module');
-    fs.mkdirsSync('build/fake-module/third_party/babel');
-    fs.mkdirsSync('build/fake-module/src/polyfills/');
+    console./*OK*/log('Starting closure compiler for', entryModuleFilename);
+
+    // If undefined/null or false then we're ok executing the deletions
+    // and mkdir.
+    if (!options.preventRemoveAndMakeDir) {
+      cleanupBuildDir();
+    }
     var unneededFiles = [
       'build/fake-module/third_party/babel/custom-babel-helpers.js',
     ];
@@ -154,7 +164,7 @@ function compile(entryModuleFilename, outputDir,
     .pipe(closureCompiler({
       // Temporary shipping with our own compiler that has a single patch
       // applied
-      compilerPath: 'third_party/closure-compiler/compiler.jar',
+      compilerPath: 'build-system/runner/dist/runner.jar',
       fileName: intermediateFilename,
       continueWithWarnings: true,
       tieredCompilation: true,  // Magic speed up.
@@ -187,7 +197,7 @@ function compile(entryModuleFilename, outputDir,
     .pipe(replace(/\$internalRuntimeToken\$/g, internalRuntimeToken))
     .pipe(gulp.dest(outputDir))
     .on('end', function() {
-      console./*OK*/log('Compiled ', entryModuleFilename, 'to',
+      console./*OK*/log('Compiled', entryModuleFilename, 'to',
           outputDir + '/' + outputFilename, 'via', intermediateFilename);
       gulp.src(intermediateFilename + '.map')
           .pipe(rename(outputFilename + '.map'))

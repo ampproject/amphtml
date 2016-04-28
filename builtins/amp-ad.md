@@ -51,32 +51,50 @@ resources in AMP. It requires a `type` argument that select what ad network is d
     data-aax_src="302">
 </amp-ad>
 ```
+```html
+<amp-ad width=320 height=140
+    type="colombia"
+    layout=responsive
+    data-clmb_slot="129883"
+    data-clmb_position="1"
+    data-clmb_section="0">
+</amp-ad>
+```
 
 ## Supported ad networks
 
 - [A9](../ads/a9.md)
 - [Adblade](../ads/adblade.md)
 - [Adform](../ads/adform.md)
+- [Adman](../ads/adman.md)
 - [AdReactor](../ads/adreactor.md)
 - [AdSense](../ads/google/adsense.md)
+- [AdStir](../ads/adstir.md)
 - [AdTech](../ads/adtech.md)
+- [Ad Up Technology](../ads/adup.md)
+- [Colombia](../ads/colombia.md)
 - [Criteo](../ads/criteo.md)
 - [Dot and Media](../ads/dotandads.md)
 - [Doubleclick](../ads/google/doubleclick.md)
 - [Flite](../ads/flite.md)
+- [GMOSSP](../ads/gmossp.md)
+- [I-Mobile](../ads/imobile.md)
 - [Improve Digital](../ads/improvedigital.md)
 - [Industrybrains](../ads/industrybrains.md)
+- [MediaImpact](../ads/mediaimpact.md)
 - [OpenX](../ads/openx.md)
 - [plista](../ads/plista.md)
-- [Smart AdServer](../ads/smartadserver.md)
-- [Sortable](../ads/sortable.md)
-- [Yieldmo](../ads/yieldmo.md)
+- [PubMatic](../ads/pubmatic.md)
 - [Revcontent](../ads/revcontent.md)
 - [Rubicon Project](../ads/rubicon.md)
+- [Smart AdServer](../ads/smartadserver.md)
+- [Sortable](../ads/sortable.md)
 - [TripleLift](../ads/triplelift.md)
 - [Teads](../ads/teads.md)
-- [I-Mobile](../ads/imobile.md)
 - [Webediads](../ads/webediads.md)
+- [Weborama](../ads/weborama.md)
+- [Yieldbot](../ads/yieldbot.md)
+- [Yieldmo](../ads/yieldmo.md)
 
 ## Styling
 
@@ -153,7 +171,7 @@ Iframes should also enforce that they are only iframed into origins that they ex
 
 In the case of the AMP cache you also need to check that the "source origin" (origin of the document served by cdn.ampproject.org) is one of your origins.
 
-Enforcing origins can be done with the 3rd argument to `draw3p` and must additionally be done using the (allow-from)[https://developer.mozilla.org/en-US/docs/Web/HTTP/X-Frame-Options] directive for full browser support.
+Enforcing origins can be done with the 3rd argument to `draw3p` and must additionally be done using the [allow-from](https://developer.mozilla.org/en-US/docs/Web/HTTP/X-Frame-Options) directive for full browser support.
 
 ### Enhance incoming ad configuration
 
@@ -176,7 +194,7 @@ draw3p(function(config, done) {
 ## Validation errors
 
 The following lists validation errors specific to the `amp-ad` tag
-(see also `amp-ad` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator.protoascii)):
+(see also `amp-ad` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator-main.protoascii)):
 
 <table>
   <tr>

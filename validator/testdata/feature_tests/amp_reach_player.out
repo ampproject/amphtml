@@ -1,2 +1,0 @@
-FAIL
-feature_tests/amp_reach_player.html:39:2 The mandatory attribute 'data-embed-id' is missing in tag 'amp-reach-player'. [AMP_TAG_PROBLEM]

@@ -409,8 +409,9 @@ export class Viewer {
       }
     });
 
-    // Remove hash - no reason to keep it around, but only when embedded.
-    if (this.isEmbedded_) {
+    // Remove hash - no reason to keep it around, but only when embedded or we have
+    // an incoming click tracking string (see impression.js).
+    if (this.isEmbedded_ || this.params_['click']) {
       const newUrl = removeFragment(this.win.location.href);
       if (newUrl != this.win.location.href && this.win.history.replaceState) {
         // Persist the hash that we removed has location.originalHash.
@@ -652,6 +653,15 @@ export class Viewer {
    */
   getViewerUrl() {
     return this.viewerUrl_;
+  }
+
+  /**
+   * Possibly return the messaging origin if set. This would be the origin
+   * of the parent viewer.
+   * @return {?string}
+   */
+  maybeGetMessagingOrigin() {
+    return this.messagingOrigin_;
   }
 
   /**
