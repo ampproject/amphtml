@@ -22,7 +22,7 @@ import {loadScript, validateDataExists} from '../src/3p';
  */
 export function eplanning(global, data) {
   validateDataExists(data, [
-    'epl_sI', 'epl_isV', 'epl_sV', 'epl_sec', 'epl_kVs', 'epl_e'
+    'epl_sI', 'epl_isV', 'epl_sV', 'epl_sec', 'epl_kVs', 'epl_e',
   ]);
   // push the two object into the '_eplanning' global
   (global._eplanning = global._eplanning || []).push({
