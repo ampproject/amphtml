@@ -31,7 +31,7 @@ export function eplanning(global, data) {
     sV: data.epl_sV,
     sec: data.epl_sec,
     kVs: data.epl_kVs,
-    e: data.epl_e
+    e: data.epl_e,
   });
   loadScript(global, 'https://us.img.e-planning.net/layers/epl-amp.js');
 }
