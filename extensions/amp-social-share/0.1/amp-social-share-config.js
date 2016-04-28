@@ -156,4 +156,16 @@ const BUILTINS = {
       },
     },
   },
+  'whatsapp': {
+    'url': 'whatsapp://send',
+    'text': '\u00A0', // Use a nbsp to ensure the anchor isn't collapsed
+    'params': {
+      'text': {
+        'param': 'text',
+        'required': true,
+        'type': 'text',
+        'maxlength': 500,
+      },
+    },
+  },
 };
