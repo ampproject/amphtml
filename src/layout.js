@@ -66,6 +66,7 @@ export const naturalDimensions_ = {
   'AMP-ANALYTICS': {width: '1px', height: '1px'},
   // TODO(dvoytenko): audio should have width:auto.
   'AMP-AUDIO': null,
+  'AMP-SOCIAL-SHARE': {width: '60px', height: '44px'},
 };
 
 

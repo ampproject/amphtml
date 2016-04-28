@@ -353,4 +353,17 @@ describe('DOM', () => {
       });
     });
   });
+
+  describe('getDataParamsFromAttributes', () => {
+    it('should return key-value for data-param- attributes', () => {
+      const element = document.createElement('element');
+      element.setAttribute('attr1', '1');
+      element.setAttribute('data-param-hello', '2');
+      element.setAttribute('data-param-from-the-other-side', '3');
+      const params = dom.getDataParamsFromAttributes(element);
+      expect(params.hello).to.be.equal('2');
+      expect(params.fromTheOtherSide).to.be.equal('3');
+      expect(params.attr1).to.be.undefined;
+    });
+  });
 });
