@@ -22,15 +22,15 @@
  * @param {!Object} data
  */
  import {writeScript} from '../src/3p';
-export function sovrn(global, data) {
+ export function sovrn(global, data) {
   /*eslint "google-camelcase/google-camelcase": 0*/
-  global.width = data.width;
-  global.height = data.height;
-  global.domain = data.domain;
-  global.u = data.u;
-  global.iid = data.iid;
-  global.aid = data.aid;
-  global.z = data.z;
-  global.tf = data.tf;
-  writeScript(global, 'https://ap.lijit.com/www/sovrn_amp/sovrn_ads.js');
-}
+   global.width = data.width;
+   global.height = data.height;
+   global.domain = data.domain;
+   global.u = data.u;
+   global.iid = data.iid;
+   global.aid = data.aid;
+   global.z = data.z;
+   global.tf = data.tf;
+   writeScript(global, 'https://ap.lijit.com/www/sovrn_amp/sovrn_ads.js');
+ }
