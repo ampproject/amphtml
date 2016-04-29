@@ -88,6 +88,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [PubMatic](../ads/pubmatic.md)
 - [Revcontent](../ads/revcontent.md)
 - [Rubicon Project](../ads/rubicon.md)
+- [Sharethrough](../ads/sharethrough.md)
 - [Smart AdServer](../ads/smartadserver.md)
 - [Sortable](../ads/sortable.md)
 - [TripleLift](../ads/triplelift.md)
