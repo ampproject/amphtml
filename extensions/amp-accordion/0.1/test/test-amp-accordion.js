@@ -18,14 +18,27 @@ import {Timer} from '../../../../src/timer';
 import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
 require('../amp-accordion');
+import * as sinon from 'sinon';
 
 adopt(window);
 
 describe('amp-accordion', () => {
-  const timer = new Timer(window);
+  let timer;
+  let sandbox;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
+
   function getAmpAccordion() {
     return createIframePromise().then(iframe => {
+      timer = new Timer(iframe.win);
       const ampAccordion = iframe.doc.createElement('amp-accordion');
+      ampAccordion.implementation_.mutateElement = fn => fn();
       for (let i = 0; i < 3; i++) {
         const section = iframe.doc.createElement('section');
         section.innerHTML = '<h2>Section ' + i + '</h2><div>Loreum ipsum</div>';
@@ -46,43 +59,32 @@ describe('amp-accordion', () => {
   it('should expand when header of a collapsed section is clicked', () => {
     return getAmpAccordion().then(obj => {
       const iframe = obj.iframe;
-      let clickEvent;
-      if (iframe.doc.createEvent) {
-        clickEvent = iframe.doc.createEvent('MouseEvent');
-        clickEvent.initMouseEvent('click', true, true, iframe.win, 1);
-      } else {
-        clickEvent = iframe.doc.createEventObject();
-        clickEvent.type = 'click';
-      }
-      const headerElements =
-          iframe.doc.querySelectorAll('section > *:first-child');
+      const headerElements = iframe.doc.querySelectorAll(
+          'section > *:first-child');
+      const clickEvent = {
+        target: headerElements[0],
+        preventDefault: sandbox.spy(),
+      };
       expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be.false;
-      headerElements[0].dispatchEvent(clickEvent);
-      return timer.promise(50).then(() => {
-        expect(headerElements[0].parentNode.hasAttribute('expanded'))
-            .to.be.true;
-      });
+      obj.ampAccordion.implementation_.handleClick_(clickEvent);
+      expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be.true;
+      expect(clickEvent.preventDefault.called).to.be.true;
     });
   });
+
   it('should collapse when header of an expanded section is clicked', () => {
     return getAmpAccordion().then(obj => {
       const iframe = obj.iframe;
-      let clickEvent;
-      if (iframe.doc.createEvent) {
-        clickEvent = iframe.doc.createEvent('MouseEvent');
-        clickEvent.initMouseEvent('click', true, true, iframe.win, 1);
-      } else {
-        clickEvent = iframe.doc.createEventObject();
-        clickEvent.type = 'click';
-      }
-      const headerElements =
-          iframe.doc.querySelectorAll('section > *:first-child');
+      const headerElements = iframe.doc.querySelectorAll(
+          'section > *:first-child');
+      const clickEvent = {
+        target: headerElements[1],
+        preventDefault: sandbox.spy(),
+      };
       expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be.true;
-      headerElements[1].dispatchEvent(clickEvent);
-      return timer.promise(50).then(() => {
-        expect(headerElements[1].parentNode.hasAttribute('expanded'))
-            .to.be.false;
-      });
+      obj.ampAccordion.implementation_.handleClick_(clickEvent);
+      expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be.false;
+      expect(clickEvent.preventDefault.called).to.be.true;
     });
   });
 });
