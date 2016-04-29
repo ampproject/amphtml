@@ -113,7 +113,7 @@ export function addParamsToUrl(url, params) {
  * Provides an exception for localhost.
  *
  * @param {?string|undefined} urlString
- * @param {!Element} elementContext Element where the url was found.
+ * @param {!Element|string} elementContext Element where the url was found.
  * @return {string}
  */
 export function assertHttpsUrl(urlString, elementContext) {
