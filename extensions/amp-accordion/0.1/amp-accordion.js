@@ -57,12 +57,16 @@ class AmpAccordion extends AMP.BaseElement {
         content.setAttribute('id', contentId);
       }
       header.setAttribute('aria-controls', contentId);
-      header.addEventListener('click', this.handleClick_.bind(this));
+      header.addEventListener('click', this.onHeaderClick_.bind(this));
     });
   }
 
-  /** @private */
-  handleClick_(event) {
+  /**
+   * Handles accordion headers clicks to expand/collapse its content.
+   * @param {!MouseEvent} event Click event.
+   * @private
+   */
+  onHeaderClick_(event) {
     event.preventDefault();
     const section = event.target.parentNode;
     const sectionComponents_ = section.children;

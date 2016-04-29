@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import {Timer} from '../../../../src/timer';
 import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
 require('../amp-accordion');
@@ -23,7 +22,6 @@ import * as sinon from 'sinon';
 adopt(window);
 
 describe('amp-accordion', () => {
-  let timer;
   let sandbox;
 
   beforeEach(() => {
@@ -36,7 +34,6 @@ describe('amp-accordion', () => {
 
   function getAmpAccordion() {
     return createIframePromise().then(iframe => {
-      timer = new Timer(iframe.win);
       const ampAccordion = iframe.doc.createElement('amp-accordion');
       ampAccordion.implementation_.mutateElement = fn => fn();
       for (let i = 0; i < 3; i++) {
@@ -66,7 +63,7 @@ describe('amp-accordion', () => {
         preventDefault: sandbox.spy(),
       };
       expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be.false;
-      obj.ampAccordion.implementation_.handleClick_(clickEvent);
+      obj.ampAccordion.implementation_.onHeaderClick_(clickEvent);
       expect(headerElements[0].parentNode.hasAttribute('expanded')).to.be.true;
       expect(clickEvent.preventDefault.called).to.be.true;
     });
@@ -82,7 +79,7 @@ describe('amp-accordion', () => {
         preventDefault: sandbox.spy(),
       };
       expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be.true;
-      obj.ampAccordion.implementation_.handleClick_(clickEvent);
+      obj.ampAccordion.implementation_.onHeaderClick_(clickEvent);
       expect(headerElements[1].parentNode.hasAttribute('expanded')).to.be.false;
       expect(clickEvent.preventDefault.called).to.be.true;
     });
