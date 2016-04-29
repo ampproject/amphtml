@@ -21,7 +21,7 @@ import {checkData} from '../../src/3p';
  * @param {!Object} data
  */
 export function adsense(global, data) {
-  checkData(data, ['adClient', 'adSlot', 'adHost']);
+  checkData(data, ['adClient', 'adSlot', 'adHost', 'adtest', 'tagOrigin']);
   if (global.context.clientId) {
     // Read by GPT for GA/GPT integration.
     global.gaGlobal = {
@@ -40,6 +40,12 @@ export function adsense(global, data) {
   }
   if (data['adHost']) {
     i.setAttribute('data-ad-host', data['adHost']);
+  }
+  if (data['adtest']) {
+    i.setAttribute('data-adtest', data['adtest']);
+  }
+  if (data['tagOrigin']) {
+    i.setAttribute('data-tag-origin', data['tagOrigin']);
   }
   i.setAttribute('data-page-url', global.context.canonicalUrl);
   i.setAttribute('class', 'adsbygoogle');
