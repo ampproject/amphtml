@@ -32,6 +32,6 @@ limitations under the License.
 
 For semantics of configuration, please [contact Sharethrough](mailto:pubsupport@sharethrough.com).
 
-Supported parameters:
+Required Parameters:
 
-- data-pkey
+- ```data-pkey``` (String, non-empty) The unique identifier for your placement

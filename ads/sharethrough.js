@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import {writeScript, checkData} from '../src/3p';
+import {writeScript, checkData, validateDataExists} from '../src/3p';
 
 /**
  * @param {!Window} global
@@ -22,6 +22,7 @@ import {writeScript, checkData} from '../src/3p';
  */
 export function sharethrough(global, data) {
   checkData(data, ['pkey']);
+  validateDataExists(data, ['pkey']);
   global.pkey = data.pkey;
   writeScript(global, 'https://native.sharethrough.com/iframe/amp.js');
 }
