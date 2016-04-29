@@ -277,9 +277,12 @@ export function childElementByTag(parent, tagName) {
  * Returns element data-param- attributes as url parameters key-value pairs.
  * e.g. data-param-some-attr=value -> {someAttr: value}.
  * @param {!Element} element
+ * @param {function(string):string} opt_computeParamNameFunc to compute the parameter
+ *    name, get passed the camel-case parameter name.
  * @return {!Object<string, string>}
  */
-export function getDataParamsFromAttributes(element) {
+export function getDataParamsFromAttributes(element, opt_computeParamNameFunc) {
+  const computeParamNameFunc = opt_computeParamNameFunc || (key => key);
   const attributes = element.attributes;
   const params = Object.create(null);
   for (let i = 0; i < attributes.length; i++) {
@@ -287,7 +290,7 @@ export function getDataParamsFromAttributes(element) {
     const matches = attr.nodeName.match(/^data-param-(.+)/);
     if (matches) {
       const param = dashToCamelCase(matches[1]);
-      params[param] = attr.nodeValue;
+      params[computeParamNameFunc(param)] = attr.nodeValue;
     }
   }
   return params;
