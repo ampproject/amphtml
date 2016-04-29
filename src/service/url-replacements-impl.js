@@ -26,11 +26,15 @@ import {viewportFor} from '../viewport';
 import {vsyncFor} from '../vsync';
 import {userNotificationManagerFor} from '../user-notification';
 import {activityFor} from '../activity';
+import {storageFor} from '../storage';
+import {isArray} from '../types';
 
 
 /** @private @const {string} */
 const TAG = 'UrlReplacements';
 
+/** @private @const {number} */
+const SESSION_TIMEOUT_ = 30 * 60 * 1000;
 
 /**
  * This class replaces substitution variables with their values.
@@ -50,6 +54,11 @@ class UrlReplacements {
 
     /** @private @const {function():!Promise<?AccessService>} */
     this.getAccessService_ = accessServiceForOrNull.bind(null);
+
+    /** @const @private {!Promise<!Storage>} */
+    this.storagePromise_ = storageFor(this.win_);
+
+    this.sessionPromise_ = this.getSessionData_();
 
     // Returns a random value for cache busters.
     this.set_('RANDOM', () => {
@@ -333,6 +342,24 @@ class UrlReplacements {
     this.set_('NAV_REDIRECT_COUNT', () => {
       return this.getNavigationData_('redirectCount');
     });
+
+    this.set_('SESSION_START_TIME', () => {
+      return this.sessionPromise_.then(sessionData => {
+        return sessionData && sessionData.startTime;
+      });
+    });
+
+    this.set_('SESSION_ID', () => {
+      return this.sessionPromise_.then(sessionData => {
+        return sessionData && String(sessionData.id);
+      });
+    });
+
+    this.set_('SESSION_LEN', () => {
+      return this.sessionPromise_.then(sessionData => {
+        return sessionData && sessionData.len;
+      });
+    });
   }
 
   /**
@@ -409,6 +436,42 @@ class UrlReplacements {
 
     return String(navigationInfo[attribute]);
   }
+
+  /*
+   * Loads session information from storage
+   * @return {!Promise<!Array>}
+   * @private
+   */
+  getSessionData_() {
+    const promise = this.storagePromise_.then(storage => {
+      return storage.get('amp-analytics:session', SESSION_TIMEOUT_);
+    }).catch(function() {
+      return undefined;
+    }).then(data => {
+      let sessionData;
+      if (data && isArray(data) && data.length === 3 && data[2] < 9999) {
+        sessionData = {
+          startTime: data[0],
+          id: data[1],
+          len: data[2],
+        };
+      }
+      else {
+        sessionData = {
+          startTime: Date.now(),
+          id: Math.floor(this.win_.Math.random() * 10000),
+          len: 0,
+        };
+      }
+      sessionData.len++;
+      this.storagePromise_.then(storage => {
+        return storage.set('amp-analytics:session',
+            [sessionData.startTime, sessionData.id, sessionData.len]);
+      });
+      return Promise.resolve(sessionData);
+    });
+    return promise;
+  };
 
   /**
    * Sets the value resolver for the variable with the specified name. The

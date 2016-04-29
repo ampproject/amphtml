@@ -75,11 +75,12 @@ export class Storage {
    * Returns the promise that yields the value of the property for the specified
    * key.
    * @param {string} name
+   * @param {number=} timeout
    * @return {!Promise<*>}
    * @override
    */
-  get(name) {
-    return this.getStore_().then(store => store.get(name));
+  get(name, timeout) {
+    return this.getStore_().then(store => store.get(name, timeout));
   }
 
   /**
@@ -91,7 +92,7 @@ export class Storage {
    * @override
    */
   set(name, value) {
-    dev.assert(typeof value == 'boolean', 'Only boolean values accepted');
+    //TODO:re-add restrictions dev.assert(typeof value == 'boolean', 'Only boolean values accepted');
     return this.saveStore_(store => store.set(name, value));
   }
 
@@ -196,13 +197,23 @@ export class Store {
 
   /**
    * @param {string} name
+   * @param {number=} timeout
    * @return {*|undefined}
    * @private
    */
-  get(name) {
+  get(name, timeout) {
     // The structure is {key: {v: *, t: time}}
     const item = this.values_[name];
-    return item ? item['v'] : undefined;
+    if (!item) {
+      return undefined;
+    }
+    if (typeof timeout === 'number') {
+      if ((item['t'] + timeout) < timer.now()) {
+        this.remove(name);
+        return undefined;
+      }
+    }
+    return item['v'];
   }
 
   /**
