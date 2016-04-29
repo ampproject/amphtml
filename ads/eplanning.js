@@ -12,27 +12,26 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
- /*
- *********
- * Existing sovrn customers feel free to contact amp-implementations@sovrn.com for assistance with setting up your amp-ad tagid
- * New customers please see www.sovrn.com to sign up and get started!
- *********
  */
-import {writeScript} from '../src/3p';
+
+import {loadScript, validateDataExists} from '../src/3p';
+
 /**
  * @param {!Window} global
  * @param {!Object} data
  */
-export function sovrn(global, data) {
-  /*eslint "google-camelcase/google-camelcase": 0*/
-  global.width = data.width;
-  global.height = data.height;
-  global.domain = data.domain;
-  global.u = data.u;
-  global.iid = data.iid;
-  global.aid = data.aid;
-  global.z = data.z;
-  global.tf = data.tf;
-  writeScript(global, 'https://ap.lijit.com/www/sovrn_amp/sovrn_ads.js');
+export function eplanning(global, data) {
+  validateDataExists(data, [
+    'epl_sI', 'epl_isV', 'epl_sV', 'epl_sec', 'epl_kVs', 'epl_e',
+  ]);
+  // push the two object into the '_eplanning' global
+  (global._eplanning = global._eplanning || []).push({
+    sI: data.epl_sI,
+    isV: data.epl_isV,
+    sV: data.epl_sV,
+    sec: data.epl_sec,
+    kVs: data.epl_kVs,
+    e: data.epl_e,
+  });
+  loadScript(global, 'https://us.img.e-planning.net/layers/epl-amp.js');
 }

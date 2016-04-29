@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import {dashToCamelCase} from './string';
 
 /**
  * Waits until the child element is constructed. Once the child is found, the
@@ -269,4 +270,25 @@ export function childElementByTag(parent, tagName) {
   return childElement(parent, el => {
     return el.tagName == tagName;
   });
+}
+
+
+/**
+ * Returns element data-param- attributes as url parameters key-value pairs.
+ * e.g. data-param-some-attr=value -> {someAttr: value}.
+ * @param {!Element} element
+ * @return {!Object<string, string>}
+ */
+export function getDataParamsFromAttributes(element) {
+  const attributes = element.attributes;
+  const params = Object.create(null);
+  for (let i = 0; i < attributes.length; i++) {
+    const attr = attributes[i];
+    const matches = attr.nodeName.match(/^data-param-(.+)/);
+    if (matches) {
+      const param = dashToCamelCase(matches[1]);
+      params[param] = attr.nodeValue;
+    }
+  }
+  return params;
 }

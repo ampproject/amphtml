@@ -67,7 +67,7 @@ import {weboramaDisplay} from '../ads/weborama';
 import {adstir} from '../ads/adstir';
 import {colombia} from '../ads/colombia';
 import {sharethrough} from '../ads/sharethrough';
-
+import {eplanning} from '../ads/eplanning';
 
 
 /**
@@ -120,6 +120,7 @@ register('yieldbot', yieldbot);
 register('adstir', adstir);
 register('colombia', colombia);
 register('sharethrough', sharethrough);
+register('eplanning', eplanning);
 
 // For backward compat, we always allow these types without the iframe
 // opting in.
