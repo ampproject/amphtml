@@ -69,7 +69,6 @@ import {colombia} from '../ads/colombia';
 
 
 
-
 /**
  * Whether the embed type may be used with amp-embed tag.
  * @const {!Object<string: boolean>}
