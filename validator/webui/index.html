@@ -46,13 +46,6 @@
         cursor: pointer;
       };
     }
-    .flex-horizontal {
-      @apply(--layout-horizontal);
-      @apply(--layout-center);
-    }
-    .flexchild {
-      @apply(--layout-flex);
-    }
     .CodeMirror {
       height: 500px;
     }
@@ -79,10 +72,15 @@
       background-size: 40px 40px;
       background-position: center left;
     }
-    .ampproject a:link { color: #0379C4; text-decoration:none; }
-    .ampproject a:visited { color: #0379C4; text-decoration:none; }
-    .ampproject a:hover { color: #0379C4; text-decoration:none; }
-    .ampproject a:active { color: #0379C4; text-decoration:none; }
+    .ampproject a:link { color: #0379C4; text-decoration: none; }
+    .ampproject a:visited { color: #0379C4; text-decoration: none; }
+    .ampproject a:hover { color: #0379C4; text-decoration: none; }
+    .ampproject a:active { color: #0379C4; text-decoration: none; }
+    .ampproject-message { background-color: #FFF9C4; }
+  </style>
+  <style scope="iron-icon">
+    .ampproject-warning { color: #FF9800; }
+    .ampproject-error { color: #F44336; }
   </style>
 </head>
 
@@ -138,9 +136,23 @@
   <!-- Very simple status bar displaying PASS / FAIL
        below the editor window. -->
   <dom-module id="status-bar">
+    <style>
+      .ampproject-fail {
+        color: #F44336;
+      }
+      .ampproject-pass {
+        color: #4CAF50;
+      }
+      .ampproject-result {
+        margin: 8px;
+        padding: 16px;
+      }
+    </style>
     <template>
       <paper-material elevation="3">
-        <div style="margin:8px;padding:16px;">Validation Status: {{status}}</div>
+        <div class="ampproject-result">Validation Status:
+          <span class$="{{getClass(status)}}">{{status}}</span>
+        </div>
       </paper-material>
     </template>
     <script>
@@ -150,7 +162,14 @@
           status: {
             type: String,
             notify: true,
-            value: 'PASS'
+            value: ''
+          }
+        },
+        getClass: function(status) {
+          if (status === 'PASS') {
+            return 'ampproject-pass';
+          } else {
+            return 'ampproject-fail';
           }
         }
       });
@@ -165,9 +184,12 @@
       <paper-listbox on-iron-select="handleSelect" selected="{{selectedError}}">
         <template is="dom-repeat" items='{{errors}}' as="e">
           <paper-item>
-            <font color="#FF6E40">
-              <iron-icon icon='{{e.icon}}'></iron-icon>&nbsp;&nbsp;
-            </font>
+            <template is="dom-if" if="{{e.isError}}">
+              <iron-icon class="ampproject-error" icon='{{e.icon}}'></iron-icon>&nbsp;&nbsp;
+            </template>
+            <template is="dom-if" if="{{e.isWarning}}">
+              <iron-icon class="ampproject-warning" icon='{{e.icon}}'></iron-icon>&nbsp;&nbsp;
+            </template>
             <paper-item-body two-line>
               <div>{{e.message}}</div>
               <div secondary><small>line {{e.line}}, column {{e.col}}</small></div>
@@ -208,6 +230,41 @@
     </script>
   </dom-module>
 
+  <dom-module id="url-form">
+    <style scope="url-form">
+      .flex-horizontal {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+        margin-bottom: 10px;
+      }
+      .flexchild {
+        @apply(--layout-flex);
+      }
+    </style>
+    <template>
+      <div class="container flex-horizontal">
+        <paper-input auto-validate required pattern="[^ \s]+:.*" error-message="Please enter a valid URL" on-focus="checkURL" on-input="checkURL" label="URL" id="urlToFetch" class="flexchild"></paper-input>
+        <paper-material elevation="0">
+          <paper-button disabled$="{{!validURL}}" raised id="validateButton">Validate</paper-button>
+        </paper-material>
+      </div>
+    </template>
+    <script>
+      Polymer({
+        is: 'url-form',
+        properties: {
+          validURL: {
+            type: Boolean,
+            value: false
+          }
+        },
+        checkURL: function(e) {
+          this.validURL = !this.$.urlToFetch.invalid;
+        }
+      });
+    </script>
+  </dom-module>
+
   <!-- Below, the main contents of the page, which instantiates the
        custom elements defined above. -->
   <paper-toolbar>
@@ -218,8 +275,11 @@
 
   <script>
     function setExample(featureTestName) {
-      document.getElementById('urlToFetch').value =
-          'https://raw.githubusercontent.com/ampproject/amphtml/master/validator/testdata/feature_tests/' + featureTestName;
+      var urlToFetch = document.getElementById('urlToFetch');
+      urlToFetch.value =
+        'https://raw.githubusercontent.com/ampproject/amphtml/master/validator/testdata/feature_tests/' + featureTestName;
+      urlToFetch.validate();
+      document.getElementById('validateButton').click();
     }
   </script>
 
@@ -235,12 +295,7 @@
   <a href="javascript:setExample('several_errors.html')">this</a> for
   an invalid example document.
 
-  <div class="container flex-horizontal">
-    <paper-input label="URL" id="urlToFetch" class="flexchild"></paper-input>
-    <paper-material elevation="0">
-      <paper-button raised id="validateButton">Validate</paper-button>
-    </paper-material>
-  </div>
+  <url-form></url-form>
   <amphtml-editor id="amphtmlEditor"></amphtml-editor>
   <status-bar id="statusBar"></status-bar>
   <error-list id="errorListBox"></error-list>
@@ -293,22 +348,22 @@
             var error = validationResult.errors[ii];
             error.message = amp.validator.renderErrorMessage(error);
             error.icon = error.severity.toLowerCase();
-
+            error.isError = error.severity === 'ERROR';
+            error.isWarning = error.severity === 'WARNING';
             listbox.addError(error);
 
             // Create a dom element for the inline display of errors
             // inside the editor. TODO(powdercloud): Make this a Polymer
             // custom element.
             var div = document.createElement('div');
-            div.setAttribute(
-              'style', 'background:' + ((error.severity === 'ERROR')
-                                        ? 'gold' : 'yellow'));
+            div.setAttribute('class', 'ampproject-message');
             div.appendChild(document.createTextNode(
                                 new Array(error.col).join('\u00A0')));
             var span = document.createElement('span');
-            span.setAttribute('style', 'color:#FF6E40');
+            span.setAttribute('class',
+                              'ampproject-' + error.severity.toLowerCase());
             var icon = document.createElement('iron-icon');
-            icon.setAttribute('icon', error.severity.toLowerCase());
+            icon.setAttribute('icon', error.icon);
             span.appendChild(icon);
             div.appendChild(span);
             div.appendChild(document.createTextNode(' ' + error.message));
@@ -338,15 +393,17 @@
       var input = document.getElementById('urlToFetch');
       var button = document.getElementById('validateButton');
       button.addEventListener('click', function() {
-        var urlToFetch = input.value;
-        var xmlHttp = new XMLHttpRequest();
-        xmlHttp.onreadystatechange = function() {
-          if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
-            editor.setEditorValue(JSON.parse(xmlHttp.responseText).contents);
-          }
-        };
-        xmlHttp.open("GET", "/fetch?url=" + encodeURIComponent(urlToFetch), true);
-        xmlHttp.send();
+        var urlToFetch = input.value.trim();
+        if (urlToFetch.length > 0) {
+          var xmlHttp = new XMLHttpRequest();
+          xmlHttp.onreadystatechange = function() {
+            if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
+              editor.setEditorValue(JSON.parse(xmlHttp.responseText).contents);
+            }
+          };
+          xmlHttp.open("GET", "/fetch?url=" + encodeURIComponent(urlToFetch), true);
+          xmlHttp.send();
+        }
       });
     });
 </script>
