@@ -18,6 +18,12 @@ import {dev} from './log';
 import {parseUrl} from './url';
 
 /**
+ * Sentinel used to force unlistening after a iframe is detached.
+ * @type {string}
+ */
+const UNLISTEN_SENTINEL = 'unlisten';
+
+/**
  * @typedef {{
  *   frame: !Element,
  *   events: !Object<string, !Array<function(!Object)>>
@@ -126,7 +132,7 @@ function getListenForEvents(parentWin, origin, triggerWin) {
  * @param {!Array<!WindowEventsDef>} listenOrigin
  */
 function dropListenOrigin(listenOrigin) {
-  const noopData = {sentinel: 'no-content-window'};
+  const noopData = {sentinel: UNLISTEN_SENTINEL};
 
   for (let i = listenOrigin.length - 1; i >= 0; i--) {
     const windowEvents = listenOrigin[i];
@@ -218,7 +224,7 @@ export function listenFor(iframe, typeOfMessage, callback, opt_is3P) {
     // If this iframe no longer has a contentWindow is was removed
     // from the DOM. Unlisten immediately as we can never again receive
     // messages for it (
-    if (!iframe.contentWindow) {
+    if (data.sentinel == UNLISTEN_SENTINEL) {
       unlisten();
       return;
     }
@@ -238,7 +244,6 @@ export function listenFor(iframe, typeOfMessage, callback, opt_is3P) {
       // Make sure references to the unlisten function do not keep
       // alive too much.
       listener = null;
-      iframe = null;
       events = null;
       callback = null;
     }
