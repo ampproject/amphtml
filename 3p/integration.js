@@ -233,7 +233,7 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     // This only actually works for ads.
     const initialIntersection = window.context.initialIntersection;
     window.context.observeIntersection = cb => {
-      let unlisten = observeIntersection(cb);
+      const unlisten = observeIntersection(cb);
       // Call the callback with the value that was transmitted when the
       // iframe was drawn. Called in nextTick, so that callers don't
       // have to specially handle the sync case.
