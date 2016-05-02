@@ -17,7 +17,7 @@
 import {Observable} from './observable';
 import {dev} from './log';
 import {layoutRectLtwh, rectIntersection, moveLayoutRect} from './layout-rect';
-import {listen, postMessage} from './iframe-helper';
+import {listenFor, postMessage} from './iframe-helper';
 import {parseUrl} from './url';
 import {timer} from './timer';
 
@@ -126,7 +126,7 @@ export class IntersectionObserver extends Observable {
     // The second time this is called, it doesn't do much but it
     // guarantees that the receiver gets an initial intersection change
     // record.
-    listen(this.iframe_, 'send-intersections', () => {
+    listenFor(this.iframe_, 'send-intersections', () => {
       this.startSendingIntersectionChanges_();
     }, this.is3p_);
 

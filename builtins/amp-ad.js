@@ -19,7 +19,7 @@ import {IntersectionObserver} from '../src/intersection-observer';
 import {getAdCid} from '../src/ad-cid';
 import {getIframe, prefetchBootstrap} from '../src/3p-frame';
 import {isLayoutSizeDefined} from '../src/layout';
-import {listen, listenOnce, postMessage} from '../src/iframe-helper';
+import {listenFor, listenForOnce, postMessage} from '../src/iframe-helper';
 import {loadPromise} from '../src/event-helper';
 import {parseUrl} from '../src/url';
 import {registerElement} from '../src/custom-element';
@@ -236,15 +236,15 @@ export function installAd(win) {
           this.intersectionObserver_ =
               new IntersectionObserver(this, this.iframe_, /* opt_is3P */true);
           // Triggered by context.noContentAvailable() inside the ad iframe.
-          listenOnce(this.iframe_, 'no-content', () => {
+          listenForOnce(this.iframe_, 'no-content', () => {
             this.noContentHandler_();
           }, /* opt_is3P */ true);
           // Triggered by context.reportRenderedEntityIdentifier(…) inside the ad
           // iframe.
-          listenOnce(this.iframe_, 'entity-id', info => {
+          listenForOnce(this.iframe_, 'entity-id', info => {
             this.element.creativeId = info.id;
           }, /* opt_is3P */ true);
-          listen(this.iframe_, 'embed-size', data => {
+          listenFor(this.iframe_, 'embed-size', data => {
             let newHeight, newWidth;
             if (data.width !== undefined) {
               newWidth = Math.max(this.element./*OK*/offsetWidth +
@@ -263,7 +263,7 @@ export function installAd(win) {
             }
           }, /* opt_is3P */ true);
           this.iframe_.style.visibility = 'hidden';
-          listenOnce(this.iframe_, 'render-start', () => {
+          listenForOnce(this.iframe_, 'render-start', () => {
             this.iframe_.style.visibility = '';
             this.sendEmbedInfo_(this.isInViewport());
           }, /* opt_is3P */ true);
