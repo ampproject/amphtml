@@ -107,7 +107,7 @@ function doubleClickWithGpt(global, data, isGladeControl) {
       }
 
       if (data.setCollapseEmptyDiv) {
-        const collapse = (data.setCollapseEmptyDiv ? true : false );
+        const collapse = (data.setCollapseEmptyDiv ? true : false);
         slot.setCollapseEmptyDiv(collapse);
       }
 
@@ -150,7 +150,7 @@ function doubleClickWithGlade(global, data) {
     jsonParameters.targeting = data.targeting;
   }
   if (data.setCollapseEmptyDiv) {
-    const collapse = (data.setCollapseEmptyDiv ? true : false );
+    const collapse = (data.setCollapseEmptyDiv ? true : false);
     jsonParameters.setCollapseEmptyDiv = collapse;
   }
 
