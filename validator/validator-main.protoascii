@@ -20,12 +20,12 @@
 # in production from crashing. This id is not relevant to validator.js
 # because thus far, engine (validator.js) and spec file
 # (validator-main.protoascii) are always released together.
-min_validator_revision_required: 131
+min_validator_revision_required: 133
 # The spec file revision allows the validator engine to distinguish
 # newer versions of the spec file. This is currently a Google internal
 # mechanism, validator.js does not use this facility. However, any
 # change to this file (validator-main.js) requires updating this revision id.
-spec_file_revision: 211
+spec_file_revision: 212
 
 # Validator extensions.
 # =====================
@@ -2148,6 +2148,7 @@ tags: {  # <amp-ad>
     supported_layouts: FILL
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
     supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
   }
@@ -2174,6 +2175,7 @@ tags: {  # <amp-embed>
     supported_layouts: FILL
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
     supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
   }
@@ -2193,6 +2195,7 @@ tags: {  # <amp-img>
     supported_layouts: FILL
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
     supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
   }
@@ -2243,6 +2246,7 @@ tags: {  # <amp-video>
     supported_layouts: FILL
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
     supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
   }

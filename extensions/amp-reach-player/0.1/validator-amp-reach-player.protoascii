@@ -65,6 +65,7 @@ tags: {  # <amp-reach-player>
     supported_layouts: FILL
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
     supported_layouts: RESPONSIVE
   }
 }

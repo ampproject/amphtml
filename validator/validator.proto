@@ -209,6 +209,7 @@ message AmpLayout {
     RESPONSIVE = 4;
     CONTAINER = 5;
     FILL = 6;
+    FLEX_ITEM = 7;
   }
   // Specifies which layouts are supported by this element.
   repeated Layout supported_layouts = 1;
