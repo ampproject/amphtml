@@ -70,6 +70,9 @@ describe('Viewer', () => {
       documentElement: {style: {}},
       title: 'Awesome doc',
     };
+    windowApi.history = {
+      replaceState: sandbox.spy(),
+    };
     events = {};
     errorStub = sandbox.stub(dev, 'error');
     windowMock = sandbox.mock(windowApi);
@@ -104,6 +107,37 @@ describe('Viewer', () => {
     expect(viewer.getParam('paddingTop')).to.equal('17');
     expect(viewer.getParam('width')).to.equal('111');
     expect(viewer.getParam('other')).to.equal('something');
+  });
+
+  it('should not clear fragment in non-embedded mode', () => {
+    windowApi.parent = windowApi;
+    windowApi.location.href = 'http://www.example.com#test=1';
+    windowApi.location.hash = '#test=1';
+    const viewer = new Viewer(windowApi);
+    expect(windowApi.history.replaceState.callCount).to.equal(0);
+    expect(viewer.getParam('test')).to.equal('1');
+  });
+
+  it('should clear fragment in embedded mode', () => {
+    windowApi.parent = {};
+    windowApi.location.href = 'http://www.example.com#test=1';
+    windowApi.location.hash = '#test=1';
+    const viewer = new Viewer(windowApi);
+    expect(windowApi.history.replaceState.callCount).to.equal(1);
+    const replace = windowApi.history.replaceState.lastCall;
+    expect(replace.args).to.jsonEqual([{}, '', 'http://www.example.com']);
+    expect(viewer.getParam('test')).to.equal('1');
+  });
+
+  it('should clear fragment when click param is present', () => {
+    windowApi.parent = windowApi;
+    windowApi.location.href = 'http://www.example.com#click=abc';
+    windowApi.location.hash = '#click=abc';
+    const viewer = new Viewer(windowApi);
+    expect(windowApi.history.replaceState.callCount).to.equal(1);
+    const replace = windowApi.history.replaceState.lastCall;
+    expect(replace.args).to.jsonEqual([{}, '', 'http://www.example.com']);
+    expect(viewer.getParam('click')).to.equal('abc');
   });
 
   it('should configure visibilityState visible by default', () => {

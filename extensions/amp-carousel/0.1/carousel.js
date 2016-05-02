@@ -107,9 +107,9 @@ export class AmpCarousel extends BaseCarousel {
     st.setStyles(this.container_, {
       transform: st.translateX(-newPos),
     });
+    this.updateInViewport_(newPos, oldPos);
     this.doLayout_(newPos);
     this.preloadNext_(newPos, Math.sign(newPos - oldPos));
-    this.updateInViewport_(newPos, oldPos);
     this.setControlsState();
   }
 

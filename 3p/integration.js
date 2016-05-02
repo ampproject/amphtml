@@ -26,6 +26,7 @@ import './polyfills';
 import {installEmbedStateListener} from './environment';
 import {a9} from '../ads/a9';
 import {adblade, industrybrains} from '../ads/adblade';
+import {adition} from '../ads/adition';
 import {adform} from '../ads/adform';
 import {adman} from '../ads/adman';
 import {adreactor} from '../ads/adreactor';
@@ -46,10 +47,11 @@ import {mediaimpact} from '../ads/mediaimpact';
 import {nonSensitiveDataPostMessage, listenParent} from './messaging';
 import {twitter} from './twitter';
 import {yieldmo} from '../ads/yieldmo';
-import {computeInMasterFrame, register, run} from '../src/3p';
+import {computeInMasterFrame, nextTick, register, run} from '../src/3p';
 import {parseUrl, getSourceUrl} from '../src/url';
 import {taboola} from '../ads/taboola';
 import {smartadserver} from '../ads/smartadserver';
+import {sovrn} from '../ads/sovrn';
 import {sortable} from '../ads/sortable';
 import {revcontent} from '../ads/revcontent';
 import {openadstream} from '../ads/openadstream';
@@ -60,9 +62,14 @@ import {rubicon} from '../ads/rubicon';
 import {imobile} from '../ads/imobile';
 import {webediads} from '../ads/webediads';
 import {pubmatic} from '../ads/pubmatic';
+import {yieldbot} from '../ads/yieldbot';
 import {user} from '../src/log';
 import {gmossp} from '../ads/gmossp';
 import {weboramaDisplay} from '../ads/weborama';
+import {adstir} from '../ads/adstir';
+import {colombia} from '../ads/colombia';
+import {sharethrough} from '../ads/sharethrough';
+import {eplanning} from '../ads/eplanning';
 
 
 /**
@@ -71,10 +78,12 @@ import {weboramaDisplay} from '../ads/weborama';
  */
 const AMP_EMBED_ALLOWED = {
   taboola: true,
+  plista: true,
 };
 
 register('a9', a9);
 register('adblade', adblade);
+register('adition', adition);
 register('adform', adform);
 register('adman', adman);
 register('adreactor', adreactor);
@@ -97,6 +106,7 @@ register('_ping_', function(win, data) {
 register('twitter', twitter);
 register('facebook', facebook);
 register('smartadserver', smartadserver);
+register('sovrn', sovrn);
 register('mediaimpact', mediaimpact);
 register('revcontent', revcontent);
 register('sortable', sortable);
@@ -110,6 +120,11 @@ register('webediads', webediads);
 register('pubmatic', pubmatic);
 register('gmossp', gmossp);
 register('weborama-display', weboramaDisplay);
+register('yieldbot', yieldbot);
+register('adstir', adstir);
+register('colombia', colombia);
+register('sharethrough', sharethrough);
+register('eplanning', eplanning);
 
 // For backward compat, we always allow these types without the iframe
 // opting in.
@@ -121,6 +136,7 @@ const defaultAllowedTypesInCustomFrame = [
   'facebook',
   'twitter',
   'doubleclick',
+  'yieldbot',
   '_ping_',
 ];
 
@@ -217,7 +233,15 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     }
 
     // This only actually works for ads.
-    window.context.observeIntersection = observeIntersection;
+    const initialIntersection = window.context.initialIntersection;
+    window.context.observeIntersection = cb => {
+      const unlisten = observeIntersection(cb);
+      // Call the callback with the value that was transmitted when the
+      // iframe was drawn. Called in nextTick, so that callers don't
+      // have to specially handle the sync case.
+      nextTick(window, () => cb([initialIntersection]));
+      return unlisten;
+    };
     window.context.onResizeSuccess = onResizeSuccess;
     window.context.onResizeDenied = onResizeDenied;
     window.context.reportRenderedEntityIdentifier =

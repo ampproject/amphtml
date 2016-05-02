@@ -33,6 +33,7 @@ import {installViewerService, VisibilityState} from './viewer-impl';
 import {installViewportService} from './viewport-impl';
 import {installVsyncService} from './vsync-impl';
 import {FiniteStateMachine} from '../finite-state-machine';
+import {isArray} from '../types';
 
 
 const TAG_ = 'Resources';
@@ -2182,10 +2183,7 @@ export class TaskQueue_ {
  * @return {!Array<!Element>}
  */
 function elements_(elements) {
-  if (elements.length !== undefined) {
-    return elements;
-  }
-  return [elements];
+  return isArray(elements) ? elements : [elements];
 }
 
 

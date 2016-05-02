@@ -20,7 +20,9 @@ import {adopt} from '../../../../src/runtime';
 
 adopt(window);
 
-describe('amp-facebook', () => {
+describe('amp-facebook', function() {
+  this.timeout(5000);
+
   const fbPostHref = 'https://www.facebook.com/zuck/posts/10102593740125791';
   const fbVideoHref = 'https://www.facebook.com/zuck/videos/10102509264909801/';
 

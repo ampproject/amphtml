@@ -177,14 +177,20 @@
     }
   </style>
   <script async src="../../dist/amp.js"></script>
-  <script async custom-element="amp-youtube" src="../../dist/v0/amp-accordion-0.1.max.js"></script>
-  <script async custom-element="amp-youtube" src="../../dist/v0/amp-sidebar-0.1.max.js"></script>
+  <script async custom-element="amp-accordion" src="../../dist/v0/amp-accordion-0.1.max.js"></script>
+  <script async custom-element="amp-sidebar" src="../../dist/v0/amp-sidebar-0.1.max.js"></script>
   <script async custom-element="amp-youtube" src="../../dist/v0/amp-youtube-0.1.max.js"></script>
+  <script async custom-element="amp-social-share" src="../../dist/v0/amp-social-share-0.1.max.js"></script>
   <script src="../../dist/v0/amp-lightbox-0.1.js"></script>
 
 </head>
 <body>
   <amp-sidebar id="sidebar1" layout="nodisplay">
+    <div>
+      <amp-social-share width="57" type="twitter"></amp-social-share>
+      <amp-social-share width="57" type="linkedin"></amp-social-share>
+      <amp-social-share width="57" type="facebook"></amp-social-share>
+    </div>
     <ul>
       <li> Nav item 1</li>
       <li> Nav item 2</li>
@@ -204,7 +210,6 @@
       <li> Nav item 16</li>
       <li> Nav item 17</li>
       <li> Nav item 18</li>
-      <li> Nav item 19</li>
       <li> <a href="http://abcnews.go.com/">Google</a></li>
       <li> <a href="http://www.wsj.com">WSJ</a></li>
       <li on="tap:sidebar1.close"> Close</li>

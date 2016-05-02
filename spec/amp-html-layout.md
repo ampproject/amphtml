@@ -68,6 +68,8 @@ the layout of a `fill` element matches its parent.
 
 The element lets its children to define its size, much like a normal HTML `div`.
 
+### `flex-item`
+The element and other elements in its parent with layout type `flex-item` take their parent container's remaining space when parent has `display: flex`. 
 
 ## Layout Attributes
 
@@ -104,6 +106,7 @@ maintaining the height based on the aspect ratio.
 container. Its children are rendered immediately.
 - `nodisplay`: The component takes up zero space on the screen as if its display style was `none`.
 The `width` and `height` attributes are not required.
+- `flex-item`: Element size will be determined by the parent element and the number of other elements inside parent according to `display:flex` CSS layout.
 
 Each element documents which `layout` values it supported. If an element does not support the
 specified value it would trigger a runtime error.
@@ -215,8 +218,8 @@ The element is sized and displayed based on the `layout`, `width`, `height` and 
 by the runtime. All of the layout rules are implemented via CSS internally. The element is said to
 "define size" if its size is inferrable via CSS styles and does not change based on its children:
 available immediately or inserted dynamically. This does not mean that this element's size cannot
-change. The layout could be fully responsive as is the case with `responsive`, `fixed-height` and
-`fill` layouts. It simply means that the size does not change without an explicit user action, e.g.
+change. The layout could be fully responsive as is the case with `responsive`, `fixed-height`, `fill` and
+`flex-item` layouts. It simply means that the size does not change without an explicit user action, e.g.
 during rendering or scrolling or post download.
 
 If the element has been configured incorrectly it will not be rendered at all in PROD and in DEV mode
@@ -242,3 +245,4 @@ apply as is the case with `amp-pixel` and `amp-audio`.
 | fixed-height | `height` only. `width` can be `auto` | yes, specified by the parent container and `height` | no | `block` |
 | fill         | no                     | yes, parent's size | no | `block` |
 | container    | no                     | no            | no | `block` |
+| flex-item    | no                     | no            | yes, based on parent container | `block` |

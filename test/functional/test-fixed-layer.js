@@ -376,6 +376,34 @@ describe('FixedLayer', () => {
       expect(fe.element.style.top).to.equal('calc(17px + 11px)');
     });
 
+    it('should reset top upon being removed from fixedlayer', () => {
+      expect(fixedLayer.fixedElements_).to.have.length(2);
+
+      // Add.
+      fixedLayer.addElement(element3, '*');
+      expect(fixedLayer.fixedElements_).to.have.length(3);
+      const fe = fixedLayer.fixedElements_[2];
+      expect(fe.id).to.equal('F2');
+      expect(fe.element).to.equal(element3);
+      expect(fe.selectors).to.deep.equal(['*']);
+      fixedLayer.mutateFixedElement_(fe, 1, {
+        fixed: true,
+        top: '17px',
+      });
+
+      expect(fe.fixedNow).to.be.true;
+      expect(fe.element.style.top).to.equal('calc(17px + 11px)');
+      // Remove.
+      fixedLayer.vsync_ = {
+        mutate: function(callback) {
+          callback();
+        },
+      };
+      fixedLayer.removeElement(element3);
+      expect(fixedLayer.fixedElements_).to.have.length(2);
+      expect(element3.style.top).to.equal('');
+    });
+
     it('should mutate element to non-fixed', () => {
       const fe = fixedLayer.fixedElements_[0];
       fe.fixedNow = true;
@@ -569,6 +597,7 @@ describe('FixedLayer', () => {
       element1.computedStyle['position'] = 'fixed';
       element1.offsetWidth = 10;
       element1.offsetHeight = 10;
+      element1.computedStyle['top'] = '0px';
       element1.computedStyle['opacity'] = '0';
 
       expect(vsyncTasks).to.have.length(1);
@@ -579,10 +608,11 @@ describe('FixedLayer', () => {
       expect(state['F0'].transferrable).to.equal(false);
     });
 
-    it('should disregard visibility=hidden element', () => {
+    it('should force transfer for visibility=hidden element', () => {
       element1.computedStyle['position'] = 'fixed';
       element1.offsetWidth = 10;
       element1.offsetHeight = 10;
+      element1.computedStyle['top'] = '0px';
       element1.computedStyle['visibility'] = 'hidden';
 
       expect(vsyncTasks).to.have.length(1);
@@ -590,7 +620,7 @@ describe('FixedLayer', () => {
       vsyncTasks[0].measure(state);
 
       expect(state['F0'].fixed).to.equal(true);
-      expect(state['F0'].transferrable).to.equal(false);
+      expect(state['F0'].transferrable).to.equal(true);
     });
   });
 });

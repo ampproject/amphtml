@@ -18,6 +18,7 @@
       height: 10px;
     }
   </style>
+  <script async custom-element="amp-anim" src="https://cdn.ampproject.org/v0/amp-anim-0.1.js"></script>
   <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
@@ -34,7 +35,7 @@ Container for analytics tags. Positioned far away from top to make sure that doe
   "requests": {
     "base": "https://example.com/?domain=${canonicalHost}&path=${canonicalPath}&title=${title}&time=${timestamp}&tz=${timezone}&pid=${pageViewId}&_=${random}",
     "pageview": "${base}&name=${eventName}&type=${eventId}&screenSize=${screenWidth}x${screenHeight}",
-    "event": "${base}&name=${eventName}&scrollY=${scrollTop}&scrollX=${scrollLeft}&height=${availableScreenHeight}&width=${availableScreenWidth}"
+    "event": "${base}&name=${eventName}&scrollY=${scrollTop}&scrollX=${scrollLeft}&height=${availableScreenHeight}&width=${availableScreenWidth}&scrollBoundV=${verticalScrollBoundary}&scrollBoundH=${horizontalScrollBoundary}"
   },
   "vars": {
     "title": "Example Request"
@@ -53,6 +54,11 @@ Container for analytics tags. Positioned far away from top to make sure that doe
       "vars": {
         "eventName": "page-loaded",
         "eventId": "42"
+      },
+      "visibilitySpec": {
+        "selector": "#anim-id",
+        "visiblePercentageMin": 20,
+        "visiblePercentageMax": 80
       }
     },
     "scrollPings": {
@@ -130,6 +136,18 @@ Container for analytics tags. Positioned far away from top to make sure that doe
 </script>
 </amp-analytics>
 <!-- End Chartbeat example -->
+
+<!-- ColAnalytics pageview tracking -->
+<amp-analytics type="colanalytics">
+<script type="application/json">
+{
+  "vars": {
+    "id": "100000"
+  }
+}
+</script>
+</amp-analytics>
+<!-- End ColAnalytics example -->
 
 <!-- comScore UDM pageview tracking -->
 <amp-analytics type="comscore">
@@ -271,7 +289,7 @@ Container for analytics tags. Positioned far away from top to make sure that doe
 <script type="application/json">
 {
   "requests": {
-    "test-ping": "https://my-analytics.com/ping?title=${title}&acct=${account}"
+    "test-ping": "https://example.com/ping?title=${title}&acct=${account}"
   },
   "vars": {
     "title": "A page that sends a ping",
@@ -399,6 +417,24 @@ Container for analytics tags. Positioned far away from top to make sure that doe
 </script>
 </amp-analytics>
 <!-- End Webtrekk example -->
+
+<!-- SOASTA mPulse example -->
+<amp-analytics type="mpulse" config="https://c.go-mpulse.net/api/amp-config.json?d=SOURCE_HOST&key=XXXXX-XXXXX-XXXXX-XXXXX-XXXXX">
+<script type="application/json">
+{
+  "extraUrlParams": {
+    "ab_test": "a",
+    "page_group": "Home",
+    "custom_metric.Cache_Hits": 15,
+    "custom_metric.Cache_Misses": "0",
+    "custom_metric.SQL_Queries": 2,
+    "custom_dimension.Market_Vertical": "Sports",
+    "custom_dimension.Page_Language": "English"
+  }
+}
+</script>
+</amp-analytics>
+<!-- End SOASTA mPulse example -->
 </div>
 
 <div class="logo"></div>
@@ -459,6 +495,10 @@ Donec pharetra molestie sollicitudin. Duis mattis eleifend rutrum. Quisque luctu
 <li>Aenean ac sem eget libero varius viverra sit amet vitae nunc.</li>
 </ul>
 <p></p>
+    <amp-anim src="https://goo.gl/FBCKQO" id="anim-id"
+        width="400" height="225" layout="responsive">
+      <amp-img placeholder src="https://goo.gl/GjcSkr" width="400" height="225" layout="responsive"></amp-img>
+    </amp-anim>
 </body>
 </html>
 

@@ -777,15 +777,18 @@ export class AccessService {
       const success = (s == 'true' || s == 'yes' || s == '1');
       if (success) {
         this.loginAnalyticsEvent_(type, 'success');
+      } else {
+        this.loginAnalyticsEvent_(type, 'rejected');
+      }
+      if (success || !s) {
+        // In case of a success, repeat the authorization and pingback flows.
+        // Also do this for an empty response to avoid false negatives.
+        // Pingback is repeated in this case since this could now be a new
+        // "view" with a different access profile.
         this.broadcastReauthorize_();
-        // Repeat the authorization and pingback flows. Pingback is repeated
-        // in this case since this is now a new "view" with a different access
-        // profile.
         return this.runAuthorization_(/* disableFallback */ true).then(() => {
           this.scheduleView_(/* timeToView */ 0);
         });
-      } else {
-        this.loginAnalyticsEvent_(type, 'rejected');
       }
     }).catch(reason => {
       dev.fine(TAG, 'Login dialog failed: ', type, reason);

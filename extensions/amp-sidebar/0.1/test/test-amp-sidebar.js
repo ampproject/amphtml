@@ -263,31 +263,4 @@ describe('amp-sidebar', () => {
       expect(sidebarElement.children.length).to.equal(initalChildrenCount + 1);
     });
   });
-
-  it('should whitelist properly', () => {
-    return getAmpSidebar().then(obj => {
-      assert = function() {};
-      const iframe = obj.iframe;
-      const sidebarElement = obj.ampSidebar;
-      const impl = sidebarElement.implementation_;
-      const accordion = iframe.doc.createElement('amp-accordion');
-      accordion.classList.add('-amp-element');
-      const fitText = iframe.doc.createElement('amp-fit-text');
-      fitText.classList.add('-amp-element');
-      const img = iframe.doc.createElement('amp-img');
-      img.classList.add('-amp-element');
-      sidebarElement.appendChild(accordion);
-      sidebarElement.appendChild(fitText);
-      sidebarElement.appendChild(img);
-      expect(() => {
-        impl.checkWhitelist_();
-      }).to.not.throw(/can only contain the following custom tags/);
-      const ad = iframe.doc.createElement('amp-ad');
-      ad.classList.add('-amp-element');
-      sidebarElement.appendChild(ad);
-      expect(() => {
-        impl.checkWhitelist_();
-      }).to.throw(/can only contain the following custom tags/);
-    });
-  });
 });

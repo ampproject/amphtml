@@ -163,3 +163,78 @@ describe('Carousel gestures', () => {
             .to.be.false;
   });
 });
+
+describe('Carousel layout scheduling and viewport updates', () => {
+  let sandbox;
+  let element;
+  let cell0, cell1, cell2;
+  let carousel;
+
+  function setupElements() {
+    element = document.createElement('div');
+    element.style.width = '320px';
+    element.style.height = '200px';
+    document.body.appendChild(element);
+
+    element.appendChild(cell0 = document.createElement('div'));
+    element.appendChild(cell1 = document.createElement('div'));
+    element.appendChild(cell2 = document.createElement('div'));
+    cell0.classList.add('cell0');
+    cell0.style.width = '300px';
+    cell1.classList.add('cell1');
+    cell1.style.width = '300px';
+    cell2.classList.add('cell2');
+    cell2.style.width = '300px';
+    element.getRealChildren = () => [cell0, cell1, cell2];
+    return element;
+  }
+
+  function setupCarousel() {
+    carousel = new AmpCarousel(element);
+    carousel.buildCallback();
+    carousel.container_.style.width = '320px';
+    return carousel;
+  }
+
+  function teardownElements() {
+    document.body.removeChild(element);
+  }
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+    setupElements();
+    setupCarousel();
+    carousel.inViewport_ = true;
+    carousel.getVsync = function() {
+      return {
+        mutate: function(fn) {
+          fn();
+        },
+      };
+    };
+    carousel.deferMutate = function(fn) {
+      fn();
+    };
+    carousel.doLayout_ = sandbox.spy();
+    carousel.updateInViewport_ = sandbox.spy();
+    carousel.preloadNext_ = sandbox.spy();
+    carousel.scheduleLayout = sandbox.spy();
+    carousel.updateInViewport = sandbox.spy();
+    carousel.schedulePause = sandbox.spy();
+    carousel.schedulePreload = sandbox.spy();
+  });
+  afterEach(() => {
+    sandbox.restore();
+    teardownElements();
+  });
+
+  it('should update viewport before scheduling carousel', () => {
+    carousel.goCallback(1, /*animate*/ false);
+    expect(
+        carousel.updateInViewport_.calledBefore(
+            carousel.doLayout_)).to.be.true;
+    expect(carousel.updateInViewport_.calledWith(320, 0)).to.be.true;
+    expect(carousel.doLayout_.calledWith(320)).to.be.true;
+  });
+
+});

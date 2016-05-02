@@ -183,6 +183,7 @@ def PrintEnumFor(enum_desc, out):
   """
   out.append('/**')
   out.append(' * @enum {string}')
+  out.append(' * @export')
   out.append(' */')
   out.append('%s = {' % enum_desc.full_name)
   out.append(',\n'.join(["  %s: '%s'" % (v.name, v.name)

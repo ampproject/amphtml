@@ -20,7 +20,7 @@ For example : Amazon A9 server can be invoked using following syntax :
 </amp-ad>
 ```
 
-Also note that each of the attributes that follow ‘type’ are dependent on the parameters that Amazon’s A9 server expects in order to deliver an ad. The file [a9.js](/a9.js) shows you how the parameters are mapped to making a JavaScript call which will invoke the server by invoking the URL : https://c.amazon-adsystem.com/aax2/assoc.js  and appending the corresponding parameters being passed in by the AMP ad tag  and return the ad.
+Also note that each of the attributes that follow ‘type’ are dependent on the parameters that Amazon’s A9 server expects in order to deliver an ad. The file [a9.js](./a9.js) shows you how the parameters are mapped to making a JavaScript call which will invoke the server by invoking the URL : https://c.amazon-adsystem.com/aax2/assoc.js  and appending the corresponding parameters being passed in by the AMP ad tag  and return the ad.
 
 ##### Server Side Platform (SSP) or an Ad Exchange
 
