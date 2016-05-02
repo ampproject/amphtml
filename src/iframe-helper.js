@@ -110,7 +110,7 @@ function getListenForEvents(parentWin, origin, triggerWin) {
     const we = listenOrigin[i];
     const contentWindow = we.frame.contentWindow;
     if (!contentWindow) {
-      setTimeout(dropListenFors, 0, listenOrigin);
+      setTimeout(dropListenOrigin, 0, listenOrigin);
     } else if (contentWindow === triggerWin) {
       windowEvents = we;
       break;
@@ -120,19 +120,24 @@ function getListenForEvents(parentWin, origin, triggerWin) {
   return windowEvents ? windowEvents.events : null;
 }
 
-function dropListenFors(listenOrigin) {
+/**
+ * Removes any listenFors registed on listenOrigin that do not have
+ * a contentWindow (the frame was removed from the DOM tree).
+ * @param {!Array<!WindowEventsDef>} listenOrigin
+ */
+function dropListenOrigin(listenOrigin) {
   const noopData = {sentinel: 'no-content-window'};
 
   for (let i = listenOrigin.length - 1; i >= 0; i--) {
     const windowEvents = listenOrigin[i];
 
-    if (!windowEvents.contentWindow) {
+    if (!windowEvents.frame.contentWindow) {
       listenOrigin.splice(i, 1);
 
-      for (const name in windowEvents) {
-        const events = windowEvents[name];
+      const events = windowEvents.events;
+      for (const name in events) {
         // Splice here, so that each unlisten does not shift the array
-        events.splice(0, Infinity).forEach(event => {
+        events[name].splice(0, Infinity).forEach(event => {
           event(noopData);
         });
       }

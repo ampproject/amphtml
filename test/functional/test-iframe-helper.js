@@ -40,7 +40,6 @@ describe('iframe-helper', function() {
   });
 
   afterEach(() => {
-    container.iframe.parentNode.removeChild(container.iframe);
     sandbox.restore();
   });
 
@@ -102,20 +101,30 @@ describe('iframe-helper', function() {
 
   it('should un-listen on next message when iframe is unattached', () => {
     let calls = 0;
+    let otherCalls = 0;
+    let other;
+
     return new Promise(resolve => {
       IframeHelper.listenFor(testIframe, 'send-intersections', () => {
         calls++;
         resolve();
       });
       insert(testIframe);
+      other = container.doc.createElement('iframe');
+      other.src = iframeSrc;
+      IframeHelper.listenFor(other, 'send-intersections', () => {
+        otherCalls++;
+      });
+      insert(other);
     }).then(() => {
       const total = calls;
+      const otherTotal = otherCalls;
       testIframe.parentElement.removeChild(testIframe);
-      container.win.postMessage('hello world', '*');
       return new Promise(resolve => {
         setTimeout(resolve, 50);
       }).then(() => {
         expect(calls).to.equal(total);
+        expect(otherCalls).to.be.above(otherTotal + 4);
       });
     });
   });
