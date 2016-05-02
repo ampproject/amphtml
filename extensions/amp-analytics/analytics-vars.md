@@ -298,6 +298,12 @@ boundary with value `1` and precision of `5` will result in value of var to be 0
 
 ## Miscellaneous
 
+### ampVersion
+
+Provides a string with the AMP release version. The prefix denotes canary(`00`), production(`01`) or an experiment version ( &gt; `01`).
+
+Example value: `001460655576651`
+
 ### clientId
 
 Provides a per document-source-origin (the origin of the website where you publish your AMP doc) and user identifier. The client id will be the same for the same user if they visit again within one year.

@@ -26,6 +26,7 @@ import {viewportFor} from '../viewport';
 import {vsyncFor} from '../vsync';
 import {userNotificationManagerFor} from '../user-notification';
 import {activityFor} from '../activity';
+import {getMode} from '../mode';
 
 
 /** @private @const {string} */
@@ -333,6 +334,11 @@ export class UrlReplacements {
 
     this.set_('NAV_REDIRECT_COUNT', () => {
       return this.getNavigationData_('redirectCount');
+    });
+
+    this.set_('AMP_VERSION', () => {
+      const mode = getMode();
+      return mode && mode.version;
     });
   }
 
