@@ -26,6 +26,7 @@ import './polyfills';
 import {installEmbedStateListener} from './environment';
 import {a9} from '../ads/a9';
 import {adblade, industrybrains} from '../ads/adblade';
+import {adition} from '../ads/adition';
 import {adform} from '../ads/adform';
 import {adman} from '../ads/adman';
 import {adreactor} from '../ads/adreactor';
@@ -81,6 +82,7 @@ const AMP_EMBED_ALLOWED = {
 
 register('a9', a9);
 register('adblade', adblade);
+register('adition', adition);
 register('adform', adform);
 register('adman', adman);
 register('adreactor', adreactor);
