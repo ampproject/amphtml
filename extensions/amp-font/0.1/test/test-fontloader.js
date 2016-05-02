@@ -195,7 +195,13 @@ describe('FontLoader', () => {
       iframe.doc.body.appendChild(fontDiv);
       fontloader.defaultFontElements_ = [defaultDiv];
       fontloader.customFontElement_ = fontDiv;
-      expect(fontloader.compareMeasurements_()).to.be.true;
+      return fontloader.load(FONT_CONFIG, 3000).then(() => {
+        fontloader.defaultFontElements_ = [defaultDiv];
+        fontloader.customFontElement_ = fontDiv;
+        expect(fontloader.compareMeasurements_()).to.be.true;
+      }).catch(() => {
+        assert.fail('Font load failed');
+      });
     });
   });
 });

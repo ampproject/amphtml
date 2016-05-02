@@ -65,6 +65,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 
 - [A9](../ads/a9.md)
 - [Adblade](../ads/adblade.md)
+- [ADITION](../ads/adition.md)
 - [Adform](../ads/adform.md)
 - [Adman](../ads/adman.md)
 - [AdReactor](../ads/adreactor.md)

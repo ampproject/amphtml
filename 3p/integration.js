@@ -26,6 +26,7 @@ import './polyfills';
 import {installEmbedStateListener} from './environment';
 import {a9} from '../ads/a9';
 import {adblade, industrybrains} from '../ads/adblade';
+import {adition} from '../ads/adition';
 import {adform} from '../ads/adform';
 import {adman} from '../ads/adman';
 import {adreactor} from '../ads/adreactor';
@@ -81,6 +82,7 @@ const AMP_EMBED_ALLOWED = {
 
 register('a9', a9);
 register('adblade', adblade);
+register('adition', adition);
 register('adform', adform);
 register('adman', adman);
 register('adreactor', adreactor);
@@ -231,11 +233,12 @@ window.draw3p = function(opt_configCallback, opt_allowed3pTypes,
     // This only actually works for ads.
     const initialIntersection = window.context.initialIntersection;
     window.context.observeIntersection = cb => {
-      observeIntersection(cb);
+      const unlisten = observeIntersection(cb);
       // Call the callback with the value that was transmitted when the
       // iframe was drawn. Called in nextTick, so that callers don't
       // have to specially handle the sync case.
       nextTick(window, () => cb([initialIntersection]));
+      return unlisten;
     };
     window.context.onResizeSuccess = onResizeSuccess;
     window.context.onResizeDenied = onResizeDenied;

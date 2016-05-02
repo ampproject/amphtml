@@ -17,7 +17,7 @@
 
 import {getIframe, prefetchBootstrap} from '../../../src/3p-frame';
 import {isLayoutSizeDefined} from '../../../src/layout';
-import {listen} from '../../../src/iframe-helper';
+import {listenFor} from '../../../src/iframe-helper';
 import {loadPromise} from '../../../src/event-helper';
 
 
@@ -51,7 +51,7 @@ class AmpTwitter extends AMP.BaseElement {
         this.element, 'twitter');
     this.applyFillContent(iframe);
     // Triggered by context.updateDimensions() inside the iframe.
-    listen(iframe, 'embed-size', data => {
+    listenFor(iframe, 'embed-size', data => {
       // We only get the message if and when there is a tweet to display,
       // so hide the placeholder.
       this.togglePlaceholder(false);
