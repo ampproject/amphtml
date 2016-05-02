@@ -2203,7 +2203,7 @@ class ParsedTagSpec {
       return;
     }
     const inputHeight = new amp.validator.CssLengthAndUnit(
-        heightAttr, /* allowAuto */ false);
+        heightAttr, /* allowAuto */ true);
     if (!inputHeight.isValid) {
       context.addError(
           amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
@@ -2218,6 +2218,16 @@ class ParsedTagSpec {
                                    inputHeight);
     const layout =
         CalculateLayout(inputLayout, width, height, sizesAttr, heightsAttr);
+
+    // height="auto" is only allowed if the layout is FLEX_ITEM.
+    if (height.isAuto &&
+        layout !== amp.validator.AmpLayout.Layout.FLEX_ITEM) {
+      context.addError(
+          amp.validator.ValidationError.Code.INVALID_ATTR_VALUE,
+          /* params */['height', getTagSpecName(this.spec_), heightAttr],
+          this.spec_.specUrl, result);
+      return;
+    }
 
     // Does the tag support the computed layout?
     if (this.spec_.ampLayout.supportedLayouts.indexOf(layout) === -1) {
