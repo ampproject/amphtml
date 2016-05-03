@@ -454,7 +454,7 @@ describe('Resources schedulePreload', () => {
 
     const insidePlaceholder1 = createElementWithResource(4)[0];
     const placeholder1 = document.createElement('div');
-    child0.getElementsByClassName = classname => [insidePlaceholder1];
+    child0.getElementsByClassName = () => [insidePlaceholder1];
     child0.getPlaceholder = () => placeholder1;
 
     resources.schedulePreload(parent, children);
