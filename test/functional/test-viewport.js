@@ -540,13 +540,19 @@ describe('ViewportBindingNatural', () => {
     windowApi.innerHeight = 222;
     windowApi.document = {
       documentElement: {
-        clientWidth: 111,
-        clientHeight: 222,
+        clientWidth: 333,
+        clientHeight: 444,
       },
     };
-    const size = binding.getSize();
+    let size = binding.getSize();
     expect(size.width).to.equal(111);
     expect(size.height).to.equal(222);
+
+    delete windowApi.innerWidth;
+    delete windowApi.innerHeight;
+    size = binding.getSize();
+    expect(size.width).to.equal(333);
+    expect(size.height).to.equal(444);
   });
 
   it('should calculate scrollTop from scrollElement', () => {
