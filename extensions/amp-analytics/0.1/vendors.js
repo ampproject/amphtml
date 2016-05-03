@@ -377,6 +377,35 @@ export const ANALYTICS_CONFIG = {
     },
   },
 
+  'oewadirect': {
+    'transport': {'beacon': false, 'xhrpost': false, 'image': true},
+    'requests': {
+      'pageview': 'https://${s}.oewabox.at/j0=,,,r=${canonicalUrl};+,amp=1+cp=${cp}+ssl=1+hn=${canonicalHost};;;?lt=${pageViewId}&x=${screenWidth}x${screenHeight}x24&c=CLIENT_ID(oewa)',
+    },
+    'triggers': {
+      'pageview': {
+        'on': 'visible',
+        'request': 'pageview',
+      },
+    },
+  },
+
+  'oewa': {
+    'transport': {'beacon': false, 'xhrpost': false, 'image': true},
+    'requests': {
+      'pageview': '${url}?s=${s}' +
+        '&amp=1' +
+        '&cp=${cp}' +
+        '&host=${canonicalHost}' +
+        '&path=${canonicalPath}',
+    },
+    'triggers': {
+      'pageview': {
+        'on': 'visible',
+        'request': 'pageview',
+      },
+    },
+  },
   'parsely': {
     'requests': {
       'host': 'https://srv.pixel.parsely.com',
@@ -507,7 +536,6 @@ export const ANALYTICS_CONFIG = {
       },
     },
   },
-
   'simplereach': {
     'vars': {
       'pid': '',
@@ -745,5 +773,8 @@ ANALYTICS_CONFIG['infonline']['triggers']['pageview']['iframe' +
 
 ANALYTICS_CONFIG['adobeanalytics_nativeConfig']
   ['triggers']['pageLoad']['iframe' +
+/* TEMPORARY EXCEPTION */ 'Ping'] = true;
+
+ANALYTICS_CONFIG['oewa']['triggers']['pageview']['iframe' +
 /* TEMPORARY EXCEPTION */ 'Ping'] = true;
 
