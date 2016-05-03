@@ -50,7 +50,7 @@ tags: {  # <amp-instagram>
   tag_name: "amp-instagram"
   disallowed_ancestor: "head"
   disallowed_ancestor: "amp-sidebar"
-  also_requires: "amp-instagram extension .js script"
+  also_requires_tag: "amp-instagram extension .js script"
   attrs: {
     name: "data-shortcode"
     mandatory_oneof: "['data-shortcode', 'src']"
@@ -76,6 +76,7 @@ tags: {  # <amp-instagram>
     supported_layouts: FILL
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
     supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
   }

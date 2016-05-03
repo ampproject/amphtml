@@ -22,6 +22,9 @@ import {markElementScheduledForTesting} from '../../src/custom-element';
 import {installCidService} from '../../src/service/cid-impl';
 import {installViewerService} from '../../src/service/viewer-impl';
 import {installActivityService} from '../../src/service/activity-impl';
+import {
+  installUrlReplacementsService,
+} from '../../src/service/url-replacements-impl';
 import {setCookie} from '../../src/cookies';
 import {parseUrl} from '../../src/url';
 
@@ -60,6 +63,7 @@ describe('UrlReplacements', () => {
         installActivityService(iframe.win);
       }
       viewerService = installViewerService(iframe.win);
+      installUrlReplacementsService(iframe.win);
       replacements = urlReplacementsFor(iframe.win);
       return replacements;
     });
@@ -251,7 +255,7 @@ describe('UrlReplacements', () => {
   it('should replace PAGE_LOAD_TIME if timing info is not available', () => {
     const win = getFakeWindow();
     win.complete = true;
-    return urlReplacementsFor(win).expand('?sh=PAGE_LOAD_TIME&s')
+    return installUrlReplacementsService(win).expand('?sh=PAGE_LOAD_TIME&s')
         .then(res => {
           expect(res).to.match(/sh=&s/);
         });
@@ -259,12 +263,39 @@ describe('UrlReplacements', () => {
 
   it('should replace PAGE_LOAD_TIME if available within a delay', () => {
     const win = getFakeWindow();
-    const urlReplacements = urlReplacementsFor(win);
+    const urlReplacements = installUrlReplacementsService(win);
     const validMetric = urlReplacements.expand('?sh=PAGE_LOAD_TIME&s');
     urlReplacements.win_.performance.timing.loadEventStart = 109;
     loadObservable.fire(document.createEvent('Event')); // Mimics load event.
     return validMetric.then(res => {
       expect(res).to.match(/sh=9&s/);
+    });
+  });
+
+  it('should replace NAV_REDIRECT_COUNT', () => {
+    return expand('?sh=NAV_REDIRECT_COUNT').then(res => {
+      expect(res).to.match(/sh=\d+/);
+    });
+  });
+
+  it('should replace NAV_TIMING', () => {
+    return expand('?a=NAV_TIMING(navigationStart)' +
+        '&b=NAV_TIMING(navigationStart,responseStart)').then(res => {
+          expect(res).to.match(/a=\d+&b=\d+/);
+        });
+  });
+
+  it('should replace NAV_TIMING when attribute names are invalid', () => {
+    return expand('?a=NAV_TIMING(invalid)&b=NAV_TIMING(invalid,invalid)' +
+        '&c=NAV_TIMING(navigationStart,invalid)' +
+        '&d=NAV_TIMING(invalid,responseStart)').then(res => {
+          expect(res).to.match(/a=&b=&c=&d=/);
+        });
+  });
+
+  it('should replace NAV_TYPE', () => {
+    return expand('?sh=NAV_TYPE').then(res => {
+      expect(res).to.match(/sh=\d+/);
     });
   });
 
@@ -381,7 +412,7 @@ describe('UrlReplacements', () => {
   });
 
   it('should replace new substitutions', () => {
-    const replacements = urlReplacementsFor(window);
+    const replacements = installUrlReplacementsService(window);
     replacements.set_('ONE', () => 'a');
     expect(replacements.expand('?a=ONE')).to.eventually.equal('?a=a');
     replacements.set_('ONE', () => 'b');
@@ -392,7 +423,7 @@ describe('UrlReplacements', () => {
 
   it('should report errors & replace them with empty string (sync)', () => {
     const clock = sandbox.useFakeTimers();
-    const replacements = urlReplacementsFor(window);
+    const replacements = installUrlReplacementsService(window);
     replacements.set_('ONE', () => {
       throw new Error('boom');
     });
@@ -405,7 +436,7 @@ describe('UrlReplacements', () => {
 
   it('should report errors & replace them with empty string (promise)', () => {
     const clock = sandbox.useFakeTimers();
-    const replacements = urlReplacementsFor(window);
+    const replacements = installUrlReplacementsService(window);
     replacements.set_('ONE', () => {
       return Promise.reject(new Error('boom'));
     });
@@ -418,14 +449,14 @@ describe('UrlReplacements', () => {
   });
 
   it('should support positional arguments', () => {
-    const replacements = urlReplacementsFor(window);
+    const replacements = installUrlReplacementsService(window);
     replacements.set_('FN', one => one);
     return expect(replacements.expand('?a=FN(xyz1)')).to
         .eventually.equal('?a=xyz1');
   });
 
   it('should support multiple positional arguments', () => {
-    const replacements = urlReplacementsFor(window);
+    const replacements = installUrlReplacementsService(window);
     replacements.set_('FN', (one, two) => {
       return one + '-' + two;
     });
@@ -434,7 +465,7 @@ describe('UrlReplacements', () => {
   });
 
   it('should support multiple positional arguments with dots', () => {
-    const replacements = urlReplacementsFor(window);
+    const replacements = installUrlReplacementsService(window);
     replacements.set_('FN', (one, two) => {
       return one + '-' + two;
     });
@@ -443,7 +474,7 @@ describe('UrlReplacements', () => {
   });
 
   it('should support promises as replacements', () => {
-    const replacements = urlReplacementsFor(window);
+    const replacements = installUrlReplacementsService(window);
     replacements.set_('P1', () => Promise.resolve('abc '));
     replacements.set_('P2', () => Promise.resolve('xyz'));
     replacements.set_('P3', () => Promise.resolve('123'));
@@ -556,7 +587,7 @@ describe('UrlReplacements', () => {
   it('should replace QUERY_PARAM with foo', () => {
     const win = getFakeWindow();
     win.location = parseUrl('https://example.com?query_string_param1=foo');
-    return urlReplacementsFor(win)
+    return installUrlReplacementsService(win)
       .expand('?sh=QUERY_PARAM(query_string_param1)&s')
       .then(res => {
         expect(res).to.match(/sh=foo&s/);
@@ -566,7 +597,7 @@ describe('UrlReplacements', () => {
   it('should replace QUERY_PARAM with ""', () => {
     const win = getFakeWindow();
     win.location = parseUrl('https://example.com');
-    return urlReplacementsFor(win)
+    return installUrlReplacementsService(win)
       .expand('?sh=QUERY_PARAM(query_string_param1)&s')
       .then(res => {
         expect(res).to.match(/sh=&s/);
@@ -576,7 +607,7 @@ describe('UrlReplacements', () => {
   it('should replace QUERY_PARAM with default_value', () => {
     const win = getFakeWindow();
     win.location = parseUrl('https://example.com');
-    return urlReplacementsFor(win)
+    return installUrlReplacementsService(win)
       .expand('?sh=QUERY_PARAM(query_string_param1,default_value)&s')
       .then(res => {
         expect(res).to.match(/sh=default_value&s/);
@@ -608,7 +639,7 @@ describe('UrlReplacements', () => {
         link.setAttribute('rel', 'canonical');
         iframe.doc.head.appendChild(link);
 
-        const replacements = urlReplacementsFor(iframe.win);
+        const replacements = installUrlReplacementsService(iframe.win);
         replacements.getAccessService_ = () => {
           if (opt_disabled) {
             return Promise.resolve(null);

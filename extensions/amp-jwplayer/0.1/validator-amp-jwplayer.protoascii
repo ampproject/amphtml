@@ -51,7 +51,7 @@ tags: {  # <amp-jwplayer>
   tag_name: "amp-jwplayer"
   disallowed_ancestor: "head"
   disallowed_ancestor: "amp-sidebar"
-  also_requires: "amp-jwplayer extension .js script"
+  also_requires_tag: "amp-jwplayer extension .js script"
   attrs: {
     name: "data-media-id"
     mandatory_oneof: "data-media-id or data-playlist-id"
@@ -73,6 +73,7 @@ tags: {  # <amp-jwplayer>
     supported_layouts: FILL
     supported_layouts: FIXED
     supported_layouts: FIXED_HEIGHT
+    supported_layouts: FLEX_ITEM
     supported_layouts: NODISPLAY
     supported_layouts: RESPONSIVE
   }

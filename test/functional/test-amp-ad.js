@@ -73,25 +73,27 @@ function tests(name, installer) {
         expect(data._context.canonicalUrl).to.equal('https://schema.org/');
         expect(data.aax_size).to.equal('300x250');
 
-        describe('ad preconnect', () => {
-          const doc = iframe.ownerDocument;
-          const fetches = doc.querySelectorAll(
-              'link[rel=prefetch]');
-          expect(fetches).to.have.length(3);
-          expect(fetches[0].href).to.equal(
-              'http://ads.localhost:' + location.port +
-              '/dist.3p/current/frame.max.html');
-          expect(fetches[1].href).to.equal(
-              'https://3p.ampproject.net/$internalRuntimeVersion$/f.js');
-          expect(fetches[2].href).to.equal(
-              'https://c.amazon-adsystem.com/aax2/assoc.js');
-          const preconnects = doc.querySelectorAll(
-              'link[rel=preconnect]');
-          expect(preconnects[preconnects.length - 1].href).to.equal(
-              'https://testsrc/');
-          // Make sure we run tests without CID available by default.
-          expect(ad.ownerDocument.defaultView.services.cid).to.be.undefined;
-        });
+        const doc = iframe.ownerDocument;
+        let fetches = doc.querySelectorAll(
+            'link[rel=prefetch]');
+        if (!fetches.length) {
+          fetches = doc.querySelectorAll(
+              'link[rel=preload]');
+        }
+        expect(fetches).to.have.length(3);
+        expect(fetches[0].href).to.equal(
+            'http://ads.localhost:' + location.port +
+            '/dist.3p/current/frame.max.html');
+        expect(fetches[1].href).to.equal(
+            'https://3p.ampproject.net/$internalRuntimeVersion$/f.js');
+        expect(fetches[2].href).to.equal(
+            'https://c.amazon-adsystem.com/aax2/assoc.js');
+        const preconnects = doc.querySelectorAll(
+            'link[rel=preconnect]');
+        expect(preconnects[preconnects.length - 1].href).to.equal(
+            'https://testsrc/');
+        // Make sure we run tests without CID available by default.
+        expect(ad.ownerDocument.defaultView.services.cid).to.be.undefined;
       });
     });
 
@@ -434,35 +436,17 @@ function tests(name, installer) {
 
       it('should prefer-viewability-over-views', () => {
         let clock;
-        const elementBox = {
-          top: 4000,
-        };
-        const viewportRect = {
-          height: 1000,
-          bottom: 1000,
-        };
         return getGoodAd(ad => {
-          ad.resources_.add(ad.element);
-          sandbox.stub(ad, 'getIntersectionElementLayoutBox', () => {
-            return elementBox;
-          });
-          sandbox.stub(ad.getViewport(), 'getRect', () => {
-            return viewportRect;
-          });
+          expect(ad.renderOutsideViewport()).not.to.be.false;
         }, () => {
           clock = sandbox.useFakeTimers();
         }, 'prefer-viewability-over-views').then(ad => {
-          clock.tick(10000);
           // False because we just rendered one.
           expect(ad.renderOutsideViewport()).to.be.false;
-          viewportRect.bottom = '2749';
+          clock.tick(900);
           expect(ad.renderOutsideViewport()).to.be.false;
-          // 125% of viewport away
-          viewportRect.bottom = '2750';
-          expect(ad.renderOutsideViewport()).to.be.true;
-          // We currently render above viewport.
-          viewportRect.bottom = '6000';
-          expect(ad.renderOutsideViewport()).to.be.true;
+          clock.tick(100);
+          expect(ad.renderOutsideViewport()).to.equal(1.25);
         });
       });
     });

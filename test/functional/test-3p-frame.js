@@ -14,13 +14,20 @@
  * limitations under the License.
  */
 
-import {addDataAndJsonAttributes_, getIframe, getBootstrapBaseUrl,
-    getSubDomain, prefetchBootstrap} from '../../src/3p-frame';
-import {validateData} from '../../src/3p';
+import {
+  addDataAndJsonAttributes_,
+  getIframe,
+  getBootstrapBaseUrl,
+  getSubDomain,
+  prefetchBootstrap,
+  resetCountForTesting,
+} from '../../src/3p-frame';
 import {documentInfoFor} from '../../src/document-info';
 import {loadPromise} from '../../src/event-helper';
-import {setModeForTesting} from '../../src/mode';
+import {preconnectFor} from '../../src/preconnect';
 import {resetServiceForTesting} from '../../src/service';
+import {setModeForTesting} from '../../src/mode';
+import {validateData} from '../../src/3p';
 import {viewerFor} from '../../src/viewer';
 
 describe('3p-frame', () => {
@@ -36,6 +43,7 @@ describe('3p-frame', () => {
   afterEach(() => {
     sandbox.restore();
     resetServiceForTesting(window, 'bootstrapBaseUrl');
+    resetCountForTesting();
     setModeForTesting(null);
     const m = document.querySelector(
         '[name="amp-3p-iframe-src"]');
@@ -189,6 +197,9 @@ describe('3p-frame', () => {
   });
 
   it('should prefetch bootstrap frame and JS', () => {
+    const preconnect = preconnectFor(window);
+    const origPreloadSupportValue = preconnect.preloadSupported_;
+    preconnect.preloadSupported_ = false;
     prefetchBootstrap(window);
     const fetches = document.querySelectorAll(
         'link[rel=prefetch]');
@@ -199,6 +210,7 @@ describe('3p-frame', () => {
     expect(fetches[1].href).to.equal(
         'https://3p.ampproject.net/$internalRuntimeVersion$/f.js');
     expect(fetches[1].getAttribute('as')).to.equal('script');
+    preconnect.preloadSupported_ = origPreloadSupportValue;
   });
 
   it('should make sub domains (unique)', () => {
@@ -237,5 +249,34 @@ describe('3p-frame', () => {
       },
     };
     expect(getSubDomain(fakeWin)).to.equal('d-5670');
+  });
+
+  it('uses a unique name based on domain', () => {
+    const viewerMock = sandbox.mock(viewerFor(window));
+    viewerMock.expects('getUnconfirmedReferrerUrl')
+        .returns('http://acme.org/').twice();
+
+    setModeForTesting({});
+    const link = document.createElement('link');
+    link.setAttribute('rel', 'canonical');
+    link.setAttribute('href', 'https://foo.bar/baz');
+    document.head.appendChild(link);
+
+    const div = document.createElement('div');
+    div.setAttribute('type', '_ping_');
+    div.getLayoutBox = function() {
+      return {
+        width: 100,
+        height: 200,
+      };
+    };
+
+    const name = getIframe(window, div).name;
+    resetServiceForTesting(window, 'bootstrapBaseUrl');
+    resetCountForTesting();
+    const newName = getIframe(window, div).name;
+    expect(name).to.match(/d-\d+.ampproject.net__ping__0/);
+    expect(newName).to.match(/d-\d+.ampproject.net__ping__0/);
+    expect(newName).not.to.equal(name);
   });
 });

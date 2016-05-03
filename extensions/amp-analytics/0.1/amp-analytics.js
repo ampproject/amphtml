@@ -315,10 +315,10 @@ export class AmpAnalytics extends AMP.BaseElement {
    * method generates the request and sends the request out.
    *
    * @param {!JSONObject} trigger JSON config block that resulted in this event.
-   * @param {!Object} unusedEvent Object with details about the event.
+   * @param {!Object} event Object with details about the event.
    * @private
    */
-  handleEvent_(trigger, unusedEvent) {
+  handleEvent_(trigger, event) {
     let request = this.requests_[trigger['request']];
     if (!request) {
       user.error(this.getName_(), 'Ignoring event. Request string ' +
@@ -334,13 +334,14 @@ export class AmpAnalytics extends AMP.BaseElement {
     this.config_['vars']['requestCount']++;
 
     // Replace placeholders with URI encoded values.
-    // Precedence is trigger.vars > config.vars.
+    // Precedence is event.vars > trigger.vars > config.vars.
     // Nested expansion not supported.
     request = expandTemplate(request, key => {
       const match = key.match(/([^(]*)(\([^)]*\))?/);
       const name = match[1];
       const argList = match[2] || '';
-      const raw = (trigger['vars'] && trigger['vars'][name] ||
+      const raw = event.vars[name] ||
+          (trigger['vars'] && trigger['vars'][name] ||
           this.config_['vars'] && this.config_['vars'][name]);
       const val = this.encodeVars_(raw != null ? raw : '', name);
       return val + argList;

@@ -68,7 +68,7 @@ tags: {  # <amp-social-share>
   tag_name: "amp-social-share"
   disallowed_ancestor: "head"
   disallowed_ancestor: "amp-sidebar"
-  also_requires: "amp-social-share extension .js script"
+  also_requires_tag: "amp-social-share extension .js script"
   attrs: {
     name: "type"
     mandatory: true

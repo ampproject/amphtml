@@ -279,6 +279,18 @@ describe('Layout', () => {
     expect(div.children.length).to.equal(0);
   });
 
+  it('layout=flex-item', () => {
+    div.setAttribute('layout', 'flex-item');
+    div.setAttribute('width', 100);
+    div.setAttribute('height', 200);
+    expect(applyLayout_(div)).to.equal(Layout.FLEX_ITEM);
+    expect(div.style.width).to.equal('100px');
+    expect(div.style.height).to.equal('200px');
+    expect(div).to.have.class('-amp-layout-flex-item');
+    expect(div).to.have.class('-amp-layout-size-defined');
+    expect(div.children.length).to.equal(0);
+  });
+
   it('layout=unknown', () => {
     div.setAttribute('layout', 'foo');
     expect(function() {

@@ -51,11 +51,21 @@ resources in AMP. It requires a `type` argument that select what ad network is d
     data-aax_src="302">
 </amp-ad>
 ```
+```html
+<amp-ad width=320 height=140
+    type="colombia"
+    layout=responsive
+    data-clmb_slot="129883"
+    data-clmb_position="1"
+    data-clmb_section="0">
+</amp-ad>
+```
 
 ## Supported ad networks
 
 - [A9](../ads/a9.md)
 - [Adblade](../ads/adblade.md)
+- [ADITION](../ads/adition.md)
 - [Adform](../ads/adform.md)
 - [Adman](../ads/adman.md)
 - [AdReactor](../ads/adreactor.md)
@@ -63,9 +73,12 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [AdStir](../ads/adstir.md)
 - [AdTech](../ads/adtech.md)
 - [Ad Up Technology](../ads/adup.md)
+- [AppNexus](../ads/appnexus.md)
+- [Colombia](../ads/colombia.md)
 - [Criteo](../ads/criteo.md)
 - [Dot and Media](../ads/dotandads.md)
 - [Doubleclick](../ads/google/doubleclick.md)
+- [E-Planning](../ads/eplanning.md)
 - [Flite](../ads/flite.md)
 - [GMOSSP](../ads/gmossp.md)
 - [I-Mobile](../ads/imobile.md)
@@ -77,6 +90,7 @@ resources in AMP. It requires a `type` argument that select what ad network is d
 - [PubMatic](../ads/pubmatic.md)
 - [Revcontent](../ads/revcontent.md)
 - [Rubicon Project](../ads/rubicon.md)
+- [Sharethrough](../ads/sharethrough.md)
 - [Smart AdServer](../ads/smartadserver.md)
 - [Sortable](../ads/sortable.md)
 - [TripleLift](../ads/triplelift.md)

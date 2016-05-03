@@ -597,6 +597,7 @@ describe('FixedLayer', () => {
       element1.computedStyle['position'] = 'fixed';
       element1.offsetWidth = 10;
       element1.offsetHeight = 10;
+      element1.computedStyle['top'] = '0px';
       element1.computedStyle['opacity'] = '0';
 
       expect(vsyncTasks).to.have.length(1);
@@ -607,10 +608,11 @@ describe('FixedLayer', () => {
       expect(state['F0'].transferrable).to.equal(false);
     });
 
-    it('should disregard visibility=hidden element', () => {
+    it('should force transfer for visibility=hidden element', () => {
       element1.computedStyle['position'] = 'fixed';
       element1.offsetWidth = 10;
       element1.offsetHeight = 10;
+      element1.computedStyle['top'] = '0px';
       element1.computedStyle['visibility'] = 'hidden';
 
       expect(vsyncTasks).to.have.length(1);
@@ -618,7 +620,7 @@ describe('FixedLayer', () => {
       vsyncTasks[0].measure(state);
 
       expect(state['F0'].fixed).to.equal(true);
-      expect(state['F0'].transferrable).to.equal(false);
+      expect(state['F0'].transferrable).to.equal(true);
     });
   });
 });

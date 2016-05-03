@@ -1,7 +1,7 @@
 .DS_Store
 .g4ignore
 build
-build-system/build/classes
+.amp-build
 c
 dist
 dist.3p
@@ -12,3 +12,5 @@ node_modules
 npm-debug.log
 .idea
 .tm_properties
+.settings
+build-system/runner/TESTS-TestSuites.xml

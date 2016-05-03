@@ -115,6 +115,7 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
         console.error.apply(console, arguments);
       };
       // Make time go 10x as fast
+      let setTimeout = win.setTimeout;
       win.setTimeout = function(fn, ms) {
         ms = ms || 0;
         setTimeout(fn, ms / 10);

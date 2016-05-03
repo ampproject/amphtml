@@ -29,12 +29,17 @@ const MIN_TIMER_INTERVAL_SECONDS_ = 0.5;
 /** @private @const {number} */
 const DEFAULT_MAX_TIMER_LENGTH_SECONDS_ = 7200;
 
-/** @private {number} */
+/** @private @const {number} */
 const SCROLL_PRECISION_PERCENT = 5;
 
+/** @private @const {string} */
+const VAR_H_SCROLL_BOUNDARY = 'horizontalScrollBoundary';
+
+/** @private @const {string} */
+const VAR_V_SCROLL_BOUNDARY = 'verticalScrollBoundary';
+
 /**
- * This type signifies a callback that gets called when an analytics event that
- * the listener subscribed to fires.
+ * Type to define a callback that is called when an instrumented event fires.
  * @typedef {function(!AnalyticsEvent)}
  */
 let AnalyticsEventListenerDef;
@@ -69,9 +74,11 @@ class AnalyticsEvent {
 
   /**
    * @param {!AnalyticsEventType} type The type of event.
+   * @param {!Object<string, string>} A map of vars and their values.
    */
-  constructor(type) {
+  constructor(type, vars) {
     this.type = type;
+    this.vars = vars || Object.create(null);
   }
 }
 
@@ -401,11 +408,13 @@ export class InstrumentationService {
     }
 
     /**
-     * @param {!Object.<number, boolean>} bounds.
+     * @param {!Object<number, boolean>} bounds.
      * @param {number} scrollPos Number representing the current scroll
+     * @param {string} varName variable name to assign to the bound that
+     * triggers the event
      * position.
      */
-    const triggerScrollEvents = function(bounds, scrollPos) {
+    const triggerScrollEvents = function(bounds, scrollPos, varName) {
       if (!scrollPos) {
         return;
       }
@@ -416,7 +425,9 @@ export class InstrumentationService {
           continue;
         }
         bounds[b] = true;
-        listener(new AnalyticsEvent(AnalyticsEventType.SCROLL));
+        const vars = Object.create(null);
+        vars[varName] = b;
+        listener(new AnalyticsEvent(AnalyticsEventType.SCROLL, vars));
       }
     };
 
@@ -426,9 +437,11 @@ export class InstrumentationService {
       // Calculates percentage scrolled by adding screen height/width to
       // top/left and dividing by the total scroll height/width.
       triggerScrollEvents(boundsV,
-          (e.top + e.height) * 100 / this.viewport_.getScrollHeight());
+          (e.top + e.height) * 100 / this.viewport_.getScrollHeight(),
+          VAR_V_SCROLL_BOUNDARY);
       triggerScrollEvents(boundsH,
-          (e.left + e.width) * 100 / this.viewport_.getScrollWidth());
+          (e.left + e.width) * 100 / this.viewport_.getScrollWidth(),
+          VAR_H_SCROLL_BOUNDARY);
     });
   }
 
@@ -437,8 +450,8 @@ export class InstrumentationService {
    * SCROLL_PRECISION_PERCENT and returns an object with normalized boundaries
    * as keys and false as values.
    *
-   * @param {!Array.<number>} bounds array of bounds.
-   * @return {!Object.<number,boolean>} Object with normalized bounds as keys
+   * @param {!Array<number>} bounds array of bounds.
+   * @return {!Object<number,boolean>} Object with normalized bounds as keys
    * and false as value.
    * @private
    */

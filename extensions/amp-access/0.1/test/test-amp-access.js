@@ -1202,7 +1202,7 @@ describe('AccessService login', () => {
 
   it('should open dialog in the same microtask', () => {
     service.openLoginDialog_ = sandbox.stub();
-    service.openLoginDialog_.returns(Promise.resolve());
+    service.openLoginDialog_.returns(new Promise(() => {}));
     analyticsMock.expects('triggerEvent')
         .withExactArgs('access-login-started')
         .once();
@@ -1265,15 +1265,33 @@ describe('AccessService login', () => {
     });
   });
 
-  it('should fail login with empty response', () => {
-    service.runAuthorization_ = sandbox.spy();
+  it('should fail login with empty response, but re-authorize', () => {
+    const authorizationStub = sandbox.stub(service, 'runAuthorization_',
+        () => Promise.resolve());
+    const viewStub = sandbox.stub(service, 'scheduleView_');
+    const broadcastStub = sandbox.stub(service.viewer_, 'broadcast');
     serviceMock.expects('openLoginDialog_')
         .withExactArgs('https://acme.com/l?rid=R')
         .returns(Promise.resolve(''))
         .once();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-login-started')
+        .once();
+    analyticsMock.expects('triggerEvent')
+        .withExactArgs('access-login-rejected')
+        .once();
     return service.login('').then(() => {
       expect(service.loginPromise_).to.not.exist;
-      expect(service.runAuthorization_.callCount).to.equal(0);
+      expect(authorizationStub.callCount).to.equal(1);
+      expect(authorizationStub.calledWithExactly(
+          /* disableFallback */ true)).to.be.true;
+      expect(viewStub.callCount).to.equal(1);
+      expect(viewStub.calledWithExactly(/* timeToView */ 0)).to.be.true;
+      expect(broadcastStub.callCount).to.equal(1);
+      expect(broadcastStub.firstCall.args[0]).to.deep.equal({
+        'type': 'amp-access-reauthorize',
+        'origin': service.pubOrigin_,
+      });
     });
   });
 
