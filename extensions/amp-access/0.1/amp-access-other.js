@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import {isProxyOrigin} from '../../../src/url';
 import {dev} from '../../../src/log';
+import {isProxyOrigin} from '../../../src/url';
 
 /** @const {string} */
 const TAG = 'amp-access-other';
@@ -47,7 +47,7 @@ export class AccessOtherAdapter {
   /** @override */
   getConfig() {
     return {
-      authorizationResponse: this.authorizationResponse_,
+      'authorizationResponse': this.authorizationResponse_,
     };
   }
 

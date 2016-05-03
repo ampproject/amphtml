@@ -61,8 +61,8 @@ export class AccessClientAdapter {
   /** @override */
   getConfig() {
     return {
-      authorizationUrl: this.authorizationUrl_,
-      pingbackUrl: this.pingbackUrl_,
+      'authorizationUrl': this.authorizationUrl_,
+      'pingbackUrl': this.pingbackUrl_,
     };
   }
 
