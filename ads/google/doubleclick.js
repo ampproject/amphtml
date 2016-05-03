@@ -29,6 +29,7 @@ export function doubleclick(global, data) {
     'tagForChildDirectedTreatment', 'cookieOptions',
     'overrideWidth', 'overrideHeight', 'loadingStrategy',
     'consentNotificationId', 'useSameDomainRenderingUntilDeprecated',
+    'setCollapseEmptyDiv',
   ]);
 
   if (data.useSameDomainRenderingUntilDeprecated != undefined) {
@@ -105,6 +106,11 @@ function doubleClickWithGpt(global, data, isGladeControl) {
         }
       }
 
+      if (data.setCollapseEmptyDiv) {
+        const collapse = (data.setCollapseEmptyDiv ? true : false);
+        slot.setCollapseEmptyDiv(collapse);
+      }
+
       pubads.addEventListener('slotRenderEnded', event => {
         let creativeId = event.creativeId || '_backfill_';
         if (event.isEmpty) {
@@ -142,6 +148,10 @@ function doubleClickWithGlade(global, data) {
   }
   if (data.targeting) {
     jsonParameters.targeting = data.targeting;
+  }
+  if (data.setCollapseEmptyDiv) {
+    const collapse = (data.setCollapseEmptyDiv ? true : false);
+    jsonParameters.setCollapseEmptyDiv = collapse;
   }
 
   const slot = global.document.querySelector('#c');
