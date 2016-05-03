@@ -36,6 +36,9 @@ export const adPrefetch = {
   mediaimpact: 'https://ec-ns.sascdn.com/diff/251/divscripte/amp.js',
   openx: 'https://www.googletagservices.com/tag/js/gpt.js',
   smartadserver: 'https://ec-ns.sascdn.com/diff/js/smart.js',
+  'mantis-display': 'https://assets.mantisadnetwork.com/mantodea.min.js',
+  'mantis-video': 'https://assets.mantisadnetwork.com/video/video.min.js',
+  'mantis-recommend': 'https://assets.mantisadnetwork.com/recommend.min.js',
   yieldmo: 'https://static.yieldmo.com/ym.amp1.js',
   revcontent: 'https://labs-cdn.revcontent.com/build/amphtml/revcontent.amp.min.js',
   teads: 'https://cdn.teads.tv/media/format/v3/teads-format.min.js',
@@ -88,6 +91,19 @@ export const adPreconnect = {
     'https://partner.googleadservices.com',
     'https://securepubads.g.doubleclick.net',
     'https://tpc.googlesyndication.com',
+  ],
+  'mantis-display': [
+    'https://mantodea.mantisadnetwork.com',
+    'https://res.cloudinary.com',
+    'https://resize.mantisadnetwork.com'
+  ],
+  'mantis-video': [
+    'https://mantodea.mantisadnetwork.com',
+    'https://resize.mantisadnetwork.com'
+  ],
+  'mantis-recommend': [
+    'https://mantodea.mantisadnetwork.com',
+    'https://resize.mantisadnetwork.com'
   ],
   dotandads: 'https://bal.ad.dotandad.com',
   improvedigital: 'https://ad.360yield.com/',

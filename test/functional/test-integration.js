@@ -43,6 +43,9 @@ describe('3p integration.js', () => {
     expect(registrations).to.include.key('criteo');
     expect(registrations).to.include.key('doubleclick');
     expect(registrations).to.include.key('flite');
+    expect(registrations).to.include.key('mantis-display');
+    expect(registrations).to.include.key('mantis-video');
+    expect(registrations).to.include.key('mantis-recommend');
     expect(registrations).to.include.key('industrybrains');
     expect(registrations).to.include.key('openx');
     expect(registrations).to.include.key('twitter');
