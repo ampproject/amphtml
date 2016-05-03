@@ -16,21 +16,21 @@
 
 import {loadScript} from '../src/3p';
 
-export function nativo(global,data) {
+export function nativo(global, data) {
 
   let ntvAd;
-  (function() {
-    window
+  (function (ntvAd, global, data) {
+    global
       .frames
       .location
-      .hash = window.frames.location.hash.replace(/({).*(})/,'');
+      .hash = global.frames.location.hash.replace(/({).*(})/,'');
 
     ///
     // Private
     ///
-    let delayedAdLoad = false,
-      percentageOfadViewed = undefined;
-    const loc = window.context.location;
+    let delayedAdLoad = false;
+    let percentageOfadViewed;
+    const loc = global.context.location;
 
     function isValidDelayTime(delay) {
       return ((typeof delay != 'undefined'
@@ -68,7 +68,7 @@ export function nativo(global,data) {
       setTimeout(function() {
         g.PostRelease.Start();
         delayedAdLoad = true;
-      },parseInt(data.delayByTime,10));
+      },parseInt(data.delayByTime, 10));
     }
     function getLastPositionCoordinates(positions) {
       return positions[positions.length - 1];
@@ -114,7 +114,7 @@ export function nativo(global,data) {
       }
     };
 
-    //Used to Delay Start and Initalize Tracking. This is a callback AMP will use once script is loaded
+    // Used to Delay Start and Initalize Tracking. This is a callback AMP will use once script is loaded
     ntvAd.Start = function() {
       if (isDelayedTimeStart(data)) {
         loadAdWhenTimedout();
@@ -127,11 +127,11 @@ export function nativo(global,data) {
       // ADD TRACKING HANDLER TO OBSERVER
       global.context.observeIntersection(viewabilityConfiguration);
     };
-  })(ntvAd || (ntvAd = {}),global,data);
+  })(ntvAd || (ntvAd = {}), global, data);
 
-  //Setup Configurations
+  // Setup Configurations
   ntvAd.setupAd();
 
-  //Load Nativo Script
+  // Load Nativo Script
   loadScript(global,ntvAd.getScriptURL(),ntvAd.Start);
 }
