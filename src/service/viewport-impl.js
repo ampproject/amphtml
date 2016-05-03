@@ -654,15 +654,14 @@ export class ViewportBindingNatural_ {
 
   /** @override */
   getSize() {
-    // Notice, that documentElement./*OK*/clientHeight is buggy on iOS Safari
-    // and thus cannot be used. But when the values are undefined, fallback to
-    // documentElement./*OK*/clientHeight.
-    if (platform.isIos() && !platform.isChrome()) {
-      const winWidth = this.win./*OK*/innerWidth;
-      const winHeight = this.win./*OK*/innerHeight;
-      if (winWidth && winHeight) {
-        return {width: winWidth, height: winHeight};
-      }
+    // Prefer window innerWidth/innerHeight but fall back to
+    // documentElement clientWidth/clientHeight.
+    // documentElement./*OK*/clientHeight is buggy on iOS Safari
+    // and thus cannot be used.
+    const winWidth = this.win./*OK*/innerWidth;
+    const winHeight = this.win./*OK*/innerHeight;
+    if (winWidth && winHeight) {
+      return {width: winWidth, height: winHeight};
     }
     const el = this.win.document.documentElement;
     return {width: el./*OK*/clientWidth, height: el./*OK*/clientHeight};
