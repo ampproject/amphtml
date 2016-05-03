@@ -126,6 +126,34 @@
       <div fallback>Teads fallback - Discover <a href="http://teads.tv/en/platform/">inRead by Teads</a> !</div>
   </amp-ad>
 
+  <h2>AppNexus single ad with tagid (placement id)</h2>
+  <amp-ad width=300 height=250
+    type="appnexus"
+    data-tagid="6063968"
+    >
+  </amp-ad>
+
+  <h2>AppNexus single ad with member and code</h2>
+  <amp-ad width=300 height=250
+    type="appnexus"
+    data-member="958"
+    data-code="inv_code_test"
+    >
+  </amp-ad>
+
+  <h2>AppNexus with JSON based configuration multi ad</h2>
+  <amp-ad width=300 height=250
+      type="appnexus"
+      data-target="apn_ad_1"
+      json='{"pageOpts":{"member": 958}, "adUnits": [{"disablePsa": true, "tagId": 6063968,"sizes": [300,250],"targetId": "apn_ad_1"}, {"tagId": 6063968,"sizes": [728,90],"targetId":"apn_ad_2"}]}'>
+  </amp-ad>
+
+  <amp-ad width=728 height=90
+      type="appnexus"
+      data-target="apn_ad_2"
+      json='{"pageOpts":{"member": 958}, "adUnits": [{"disablePsa": true, "tagId": 6063968,"sizes": [300,250],"targetId": "apn_ad_1"}, {"tagId": 6063968,"sizes": [728,90],"targetId":"apn_ad_2"}]}'>
+  </amp-ad>
+
   <h2>Doubleclick</h2>
   <amp-ad width=320 height=50
       type="doubleclick"
@@ -392,14 +420,14 @@
   </amp-ad>
 
  <h2>Colombia ad</h2>
-  <amp-ad width=320 
+  <amp-ad width=320
       height=140
       type="colombia"
       layout=responsive
       data-clmb_slot="129883"
       data-clmb_position="1"
       data-clmb_section="0">
-  </amp-ad> 
+  </amp-ad>
 
   <h2>Sharethrough</h2>
   <amp-ad width=300 height=150
