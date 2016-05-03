@@ -436,11 +436,11 @@ describe('Resources schedulePreload', () => {
   it('should schedule on nested custom element placeholder', () => {
     const stub1 = sandbox.stub(resources, 'schedule_');
 
-    placeholder1 = createElementWithResource(4)[0];
+    const placeholder1 = createElementWithResource(4)[0];
     child1.getPlaceholder = () => placeholder1;
     child1.classList.contains = name => name != '-amp-layout';
 
-    placeholder2 = createElementWithResource(5)[0];
+    const placeholder2 = createElementWithResource(5)[0];
     child2.getPlaceholder = () => placeholder2;
     child2.classList.contains = name => name != '-amp-layout';
 
@@ -449,6 +449,18 @@ describe('Resources schedulePreload', () => {
     expect(stub1.callCount).to.be.equal(4);
   });
 
+  it('should schedule amp-* placeholder inside non-amp element', () => {
+    const stub1 = sandbox.stub(resources, 'schedule_');
+
+    const insidePlaceholder1 = createElementWithResource(4)[0];
+    const placeholder1 = document.createElement('div');
+    child0.getElementsByClassName = classname => [insidePlaceholder1];
+    child0.getPlaceholder = () => placeholder1;
+
+    resources.schedulePreload(parent, children);
+    expect(stub1.called).to.be.true;
+    expect(stub1.callCount).to.be.equal(3);
+  });
 });
 
 
