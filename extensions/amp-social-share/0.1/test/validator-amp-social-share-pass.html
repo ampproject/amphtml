@@ -28,6 +28,7 @@
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
+  <!-- a fixed-layout example (layout is implicitly fixed) -->
   <amp-social-share type="pinterest" width="60" height="44">
     <script type="application/json">
       {
@@ -36,6 +37,19 @@
         "attribution": "AMPhtml"
       }
     </script>
+  </amp-social-share>
+  <!-- responsive layout is allowed as well -->
+  <amp-social-share layout="responsive" type="pinterest" width="60" height="44">
+    <script type="application/json">
+      {
+        "text": "Hello world",
+        "url": "https://example.com/",
+        "attribution": "AMPhtml"
+      }
+    </script>
+  </amp-social-share>
+  <!-- container layout is allowed as well -->
+  <amp-social-share layout="container" type="email">
   </amp-social-share>
 </body>
 </html>

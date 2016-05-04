@@ -27,12 +27,12 @@
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
-  <!-- Error, container layout not allowed -->
-  <amp-social-share layout="container" height="50" width="50">
-  </amp-social-share>
+  <!-- Valid except that the extension script isn't included
+       in the header -->
   <amp-social-share height="50" width="50" type="email">
   </amp-social-share>
-  <amp-social-share type="pinterest" width="60" height="44">
+  <!-- Invalid: We only allow specific values for type -->
+  <amp-social-share type="unknown_social_network" width="60" height="44">
     <script type="application/json">
       {
         "text": "Hello world",
