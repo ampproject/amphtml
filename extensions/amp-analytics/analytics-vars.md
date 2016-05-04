@@ -206,6 +206,42 @@ is unloaded. The value is in milliseconds.
 
 Example value: `40`
 
+### navRedirectCount
+
+Provides the number of redirects since the last non-redirect navigation.
+See W3C Navigation Timing API [PerformanceNavigation interface](https://www.w3.org/TR/navigation-timing/#performancenavigation) for more information.
+
+Example value: `0`
+
+### navTiming
+
+Provides access to metrics from the browser's PerformanceTiming interface.
+If both `startEvent` and `endEvent` arguments are passed, the value will be the time elapsed between the two events.
+Otherwise, if only `startEvent` argument is passed, the value will be the timestamp of the given event.
+The value is in milliseconds.
+
+See the W3C Navigation Timing API [PerformanceTiming interface](https://www.w3.org/TR/navigation-timing/#sec-navigation-timing-interface) documentation for attribute names and definitions.
+
+Please see below for the required and optional arguments you may pass into `navTiming` like a function. Spaces between arguments and values are not allowed.
+
+**arguments**:
+
+  - `startEvent` (Required) - Name of the PerformanceTiming interface attribute corresponding to the start event.
+
+  - `endEvent` (Optional) - Optional name of the PerformanceTiming interface attribute corresponding to the end event. If `endEvent` is passed, the value will be the time difference between the start and end events.
+
+
+Example 1: `${navTiming(navigationStart)}` results in value: `1451606400000`
+
+Example 2: `${navTiming(navigationStart,responseStart)}` results in value: `10`
+
+### navType
+
+Provides the type of the last non-redirect navigation in the current browsing context.
+See W3C Navigation Timing API [PerformanceNavigation interface](https://www.w3.org/TR/navigation-timing/#performancenavigation) for more information.
+
+Example value: `1`
+
 ### pageDownloadTime
 
 Provides the time between receiving the first and the last byte of response. The value is in milliseconds.
@@ -214,7 +250,7 @@ Example value: `100`
 
 ### pageLoadTime
 
-Provides the time taken to load the whole page. The value is calculated from the time `unload` event handler on previous page ends to the time `load` event for the current page is fired. If there is no previous page, the duration starts from the time the user agent is ready to fetch the document using an HTTP requesti. The value is in milliseconds.
+Provides the time taken to load the whole page. The value is calculated from the time `unload` event handler on previous page ends to the time `load` event for the current page is fired. If there is no previous page, the duration starts from the time the user agent is ready to fetch the document using an HTTP request. The value is in milliseconds.
 
 Example value: `220`
 
@@ -235,6 +271,30 @@ Example value: `10`
 Provides the time it took for HTTP connection to be setup. The duration includes connection handshake time and SOCKS authentication. The value is in milliseconds.
 
 Example value `10`
+
+## Interaction
+
+### horizontalScrollBoundary
+
+Provides the horizontal scroll boundary that triggered a scroll event. This var is
+only available in a `trigger` of type `scroll`. The value of the boundary may be
+rounded based on the precision supported by the extension. For example, a
+boundary with value `1` and precision of `5` will result in value of var to be 0.
+
+### totalEngagedTime
+
+Provides the total time (in seconds) the user has been engaged with the page since the page
+first became visible in the viewport. Total engaged time will be 0 until the
+page first becomes visible.
+
+Example value: `36`
+
+### verticalScrollBoundary
+
+Provides the vertical scroll boundary that triggered a scroll event. This var is
+only available in a `trigger` of type `scroll`. The value of the boundary may be
+rounded based on the precision supported by the extension. For example, a
+boundary with value `1` and precision of `5` will result in value of var to be 0.
 
 ## Miscellaneous
 
@@ -292,12 +352,4 @@ Example value: `6`
 Provides the number of seconds that have elapsed since 1970. (Epoch time)
 
 Example value: `1452710304312`
-
-### totalEngagedTime
-
-Provides the total time (in seconds) the user has been enagaged with the page since the page
-first became visible in the viewport. Total engaged time will be 0 until the
-page first becomes visible.
-
-Example value: `36`
 

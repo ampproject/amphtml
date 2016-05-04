@@ -32,7 +32,7 @@ function toString(value) {
  * @return {boolean}
  */
 export function isArray(value) {
-  return toString(value) === '[object Array]';
+  return Array.isArray(value);
 }
 
 /**

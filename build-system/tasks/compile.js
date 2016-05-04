@@ -164,7 +164,7 @@ function compile(entryModuleFilename, outputDir,
     .pipe(closureCompiler({
       // Temporary shipping with our own compiler that has a single patch
       // applied
-      compilerPath: 'third_party/closure-compiler/compiler.jar',
+      compilerPath: 'build-system/runner/dist/runner.jar',
       fileName: intermediateFilename,
       continueWithWarnings: true,
       tieredCompilation: true,  // Magic speed up.
@@ -198,7 +198,7 @@ function compile(entryModuleFilename, outputDir,
     .pipe(gulp.dest(outputDir))
     .on('end', function() {
       console./*OK*/log('Compiled', entryModuleFilename, 'to',
-          outputDir + outputFilename, 'via', intermediateFilename);
+          outputDir + '/' + outputFilename, 'via', intermediateFilename);
       gulp.src(intermediateFilename + '.map')
           .pipe(rename(outputFilename + '.map'))
           .pipe(gulp.dest(outputDir))

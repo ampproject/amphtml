@@ -36,6 +36,7 @@ describe('3p integration.js', () => {
   it('should register integrations', () => {
     expect(registrations).to.include.key('a9');
     expect(registrations).to.include.key('adblade');
+    expect(registrations).to.include.key('adition');
     expect(registrations).to.include.key('adform');
     expect(registrations).to.include.key('adsense');
     expect(registrations).to.include.key('adtech');
@@ -57,6 +58,8 @@ describe('3p integration.js', () => {
     expect(registrations).to.include.key('gmossp');
     expect(registrations).to.include.key('weborama-display');
     expect(registrations).to.include.key('yieldbot');
+    expect(registrations).to.include.key('adstir');
+    expect(registrations).to.include.key('colombia');
   });
 
   it('should validateParentOrigin without ancestorOrigins', () => {

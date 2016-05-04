@@ -16,7 +16,9 @@
 
 import 'document-register-element/build/document-register-element.max';
 import {install as installMathSign} from './polyfills/math-sign';
+import {install as installObjectAssign} from './polyfills/object-assign';
 import {install as installPromise} from './polyfills/promise';
 
 installMathSign(window);
+installObjectAssign(window);
 installPromise(window);

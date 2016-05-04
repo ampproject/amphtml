@@ -19,15 +19,27 @@
  * @typedef {{
  *   localDev: boolean,
  *   development: boolean,
+ *   filter: (string|undefined)
  *   minified: boolean,
  *   test: boolean,
  *   log: (string|undefined),
+ *   version: string,
  * }}
  */
 let ModeDef;
 
 /** @typedef {?ModeDef} */
 let mode = null;
+
+/** @typedef {string} */
+const version = '$internalRuntimeVersion$';
+
+/**
+ * `fullVersion` is the prefixed version we serve off of the cdn.
+ * The prefix denotes canary(00) or prod(01) or an experiment version ( > 01).
+ * @type {string}
+ */
+let fullVersion = '';
 
 /**
  * Provides info about the current app.
@@ -69,13 +81,21 @@ function getMode_() {
       // from the URL.
       location.originalHash || location.hash);
 
+  if (!fullVersion) {
+    fullVersion = getFullVersion_(window, isLocalDev);
+  }
+
   return {
     localDev: isLocalDev,
     // Triggers validation
     development: developmentQuery['development'] == '1' || window.AMP_DEV_MODE,
+    // Allows filtering validation errors by error category. For the
+    // available categories, see ErrorCategory in validator/validator.proto.
+    filter: developmentQuery['filter'],
     minified: process.env.NODE_ENV == 'production',
     test: window.AMP_TEST,
     log: developmentQuery['log'],
+    version: fullVersion,
   };
 }
 
@@ -113,4 +133,28 @@ function parseQueryString_(queryString) {
     }
   }
   return params;
+}
+
+/**
+ * Retrieve the `fullVersion` which will have a numeric prefix
+ * denoting canary/prod/experiment.
+ *
+ * @param {!Window} win
+ * @param {boolean} isLocalDev
+ * @return {string}
+ * @private
+ * @visibleForTesting
+ */
+export function getFullVersion_(win, isLocalDev) {
+  // If it's local dev then we won't actually have a full version so
+  // just use the version.
+  if (isLocalDev) {
+    return version;
+  }
+
+  if (win.AMP_CONFIG && win.AMP_CONFIG.v) {
+    return win.AMP_CONFIG.v;
+  }
+
+  return version;
 }

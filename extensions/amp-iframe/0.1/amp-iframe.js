@@ -17,7 +17,7 @@
 import {IntersectionObserver} from '../../../src/intersection-observer';
 import {getLengthNumeral, isLayoutSizeDefined} from '../../../src/layout';
 import {endsWith} from '../../../src/string';
-import {listen} from '../../../src/iframe-helper';
+import {listenFor} from '../../../src/iframe-helper';
 import {loadPromise} from '../../../src/event-helper';
 import {parseUrl} from '../../../src/url';
 import {removeElement} from '../../../src/dom';
@@ -258,8 +258,6 @@ export class AmpIframe extends AMP.BaseElement {
     setSandbox(this.element, iframe, this.sandbox_);
     iframe.src = this.iframeSrc;
 
-    this.container_.appendChild(iframe);
-
     if (!isTracking) {
       this.intersectionObserver_ = new IntersectionObserver(this, iframe);
     }
@@ -282,7 +280,7 @@ export class AmpIframe extends AMP.BaseElement {
       }
     };
 
-    listen(iframe, 'embed-size', data => {
+    listenFor(iframe, 'embed-size', data => {
       let newHeight, newWidth;
       if (data.width !== undefined) {
         newWidth = Math.max(this.element./*OK*/offsetWidth +
@@ -303,8 +301,10 @@ export class AmpIframe extends AMP.BaseElement {
     });
 
     if (this.isClickToPlay_) {
-      listen(iframe, 'embed-ready', this.activateIframe_.bind(this));
+      listenFor(iframe, 'embed-ready', this.activateIframe_.bind(this));
     }
+
+    this.container_.appendChild(iframe);
 
     return loadPromise(iframe).then(() => {
       // On iOS the iframe at times fails to render inside the `overflow:auto`

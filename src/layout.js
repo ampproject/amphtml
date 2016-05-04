@@ -32,6 +32,7 @@ export const Layout = {
   RESPONSIVE: 'responsive',
   CONTAINER: 'container',
   FILL: 'fill',
+  FLEX_ITEM: 'flex-item',
 };
 
 
@@ -66,6 +67,7 @@ export const naturalDimensions_ = {
   'AMP-ANALYTICS': {width: '1px', height: '1px'},
   // TODO(dvoytenko): audio should have width:auto.
   'AMP-AUDIO': null,
+  'AMP-SOCIAL-SHARE': {width: '60px', height: '44px'},
 };
 
 
@@ -121,7 +123,8 @@ export function isLayoutSizeDefined(layout) {
   return (layout == Layout.FIXED ||
       layout == Layout.FIXED_HEIGHT ||
       layout == Layout.RESPONSIVE ||
-      layout == Layout.FILL);
+      layout == Layout.FILL ||
+      layout == Layout.FLEX_ITEM);
 }
 
 

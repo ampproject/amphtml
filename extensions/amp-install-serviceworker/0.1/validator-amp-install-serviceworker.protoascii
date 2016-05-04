@@ -50,7 +50,7 @@ tags: {  # <amp-install-serviceworker>
   tag_name: "amp-install-serviceworker"
   disallowed_ancestor: "head"
   disallowed_ancestor: "amp-sidebar"
-  also_requires: "amp-install-serviceworker extension .js script"
+  also_requires_tag: "amp-install-serviceworker extension .js script"
   attrs: {
     name: "src"
     mandatory: true

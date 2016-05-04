@@ -16,7 +16,6 @@
 import * as IframeHelper from '../../src/iframe-helper';
 import * as sinon from 'sinon';
 import {createIframePromise} from '../../testing/iframe';
-import {timer} from '../../src/timer';
 
 describe('iframe-helper', function() {
   const iframeSrc = 'http://iframe.localhost:' + location.port +
@@ -26,61 +25,112 @@ describe('iframe-helper', function() {
   let sandbox;
   let container;
 
+  function insert(iframe) {
+    container.doc.body.appendChild(iframe);
+  }
+
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     return createIframePromise().then(c => {
       container = c;
-      const i = document.createElement('iframe');
+      const i = c.doc.createElement('iframe');
       i.src = iframeSrc;
-      container.doc.body.appendChild(i);
       testIframe = i;
     });
   });
 
   afterEach(() => {
-    container.iframe.parentNode.removeChild(container.iframe);
     sandbox.restore();
   });
 
+  it('should assert src in iframe', () => {
+    const iframe = container.doc.createElement('iframe');
+    iframe.srcdoc = '<html>';
+    expect(() => {
+      IframeHelper.listenFor(iframe, 'test', () => {});
+    }).to.throw('only iframes with src supported');
+  });
+
+  it('should assert iframe is detached', () => {
+    const iframe = container.doc.createElement('iframe');
+    iframe.src = iframeSrc;
+    insert(iframe);
+    expect(() => {
+      IframeHelper.listenFor(iframe, 'test', () => {});
+    }).to.throw('cannot register events on an attached iframe');
+  });
 
   it('should listen to iframe messages', () => {
-    const removeEventListenerSpy = sandbox.spy(container.win,
-        'removeEventListener');
     let unlisten;
+    let calls = 0;
     return new Promise(resolve => {
-      unlisten = IframeHelper.listen(testIframe, 'send-intersections',
-          resolve);
+      unlisten = IframeHelper.listenFor(testIframe, 'send-intersections',
+          () => {
+            calls++;
+            resolve();
+          });
+      insert(testIframe);
     }).then(() => {
-      expect(removeEventListenerSpy.callCount).to.equal(0);
+      const total = calls;
       unlisten();
-      expect(removeEventListenerSpy.callCount).to.equal(1);
+      return new Promise(resolve => {
+        setTimeout(resolve, 50);
+      }).then(() => {
+        expect(calls).to.equal(total);
+      });
     });
   });
 
   it('should un-listen after first hit', () => {
-    const removeEventListenerSpy = sandbox.spy(container.win,
-        'removeEventListener');
+    let calls = 0;
     return new Promise(resolve => {
-      IframeHelper.listenOnce(testIframe, 'send-intersections', resolve);
+      IframeHelper.listenForOnce(testIframe, 'send-intersections', () => {
+        calls++;
+        resolve();
+      });
+      insert(testIframe);
     }).then(() => {
-      expect(removeEventListenerSpy.callCount).to.equal(1);
+      const total = calls;
+      return new Promise(resolve => {
+        setTimeout(resolve, 50);
+      }).then(() => {
+        expect(calls).to.equal(total);
+      });
     });
   });
 
   it('should un-listen on next message when iframe is unattached', () => {
-    const removeEventListenerSpy = sandbox.spy(container.win,
-        'removeEventListener');
-    IframeHelper.listen(testIframe, 'send-intersections', function() {});
-    testIframe.parentElement.removeChild(testIframe);
-    expect(removeEventListenerSpy.callCount).to.equal(0);
-    container.win.postMessage('hello world', '*');
-    expect(removeEventListenerSpy.callCount).to.equal(0);
-    return timer.promise(1).then(() => {
-      expect(removeEventListenerSpy.callCount).to.equal(1);
+    let calls = 0;
+    let otherCalls = 0;
+    let other;
+
+    return new Promise(resolve => {
+      IframeHelper.listenFor(testIframe, 'send-intersections', () => {
+        calls++;
+        resolve();
+      });
+      insert(testIframe);
+      other = container.doc.createElement('iframe');
+      other.src = iframeSrc;
+      IframeHelper.listenFor(other, 'send-intersections', () => {
+        otherCalls++;
+      });
+      insert(other);
+    }).then(() => {
+      const total = calls;
+      const otherTotal = otherCalls;
+      testIframe.parentElement.removeChild(testIframe);
+      return new Promise(resolve => {
+        setTimeout(resolve, 50);
+      }).then(() => {
+        expect(calls).to.equal(total);
+        expect(otherCalls).to.be.above(otherTotal + 4);
+      });
     });
   });
 
   it('should set sentinel on postMessage data', () => {
+    insert(testIframe);
     postMessageSpy = sinon/*OK*/.spy(testIframe.contentWindow, 'postMessage');
     IframeHelper.postMessage(
         testIframe, 'testMessage', {}, 'http://google.com');
