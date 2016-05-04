@@ -94,7 +94,7 @@ describe('Viewer Visibility State', () => {
       unlayoutCallback = sandbox.spy(protoElement, 'unlayoutCallback');
       pauseCallback = sandbox.spy(protoElement, 'pauseCallback');
       resumeCallback = sandbox.spy(protoElement, 'resumeCallback');
-      unselect = sinon.spy();
+      unselect = sandbox.spy();
       sandbox.stub(fixture.win, 'getSelection').returns({
         removeAllRanges: unselect,
       });

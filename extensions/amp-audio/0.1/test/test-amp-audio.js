@@ -155,7 +155,7 @@ describe('amp-audio', () => {
       return savedCreateElement.call(document, name);
     };
     const element = document.createElement('div');
-    element.toggleFallback = sinon.spy();
+    element.toggleFallback = sandbox.spy();
     const audio = new AmpAudio(element);
     const promise = audio.layoutCallback();
     document.createElement = savedCreateElement;

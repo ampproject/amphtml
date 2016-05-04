@@ -321,7 +321,7 @@ describe('Action method', () => {
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     action = new ActionService(window);
-    onEnqueue = sinon.spy();
+    onEnqueue = sandbox.spy();
     targetElement = document.createElement('target');
     const id = ('E' + Math.random()).replace('.', '');
     targetElement.setAttribute('on', 'tap:' + id + '.method1');
@@ -460,7 +460,7 @@ describe('Action interceptor', () => {
     expect(Array.isArray(getQueue())).to.be.true;
     expect(getQueue()).to.have.length(2);
 
-    const handler = sinon.spy();
+    const handler = sandbox.spy();
     action.installActionHandler(target, handler);
     expect(Array.isArray(getQueue())).to.be.false;
     expect(handler.callCount).to.equal(0);

@@ -409,7 +409,7 @@ describe('amp-iframe', () => {
       resizable: '',
     }).then(amp => {
       const impl = amp.container.implementation_;
-      impl.attemptChangeSize = sinon.spy();
+      impl.attemptChangeSize = sandbox.spy();
       impl.updateSize_(217, 114);
       expect(impl.attemptChangeSize.callCount).to.equal(1);
       expect(impl.attemptChangeSize.firstCall.args[0]).to.equal(217);
@@ -426,7 +426,7 @@ describe('amp-iframe', () => {
       resizable: '',
     }).then(amp => {
       const impl = amp.container.implementation_;
-      impl.attemptChangeSize = sinon.spy();
+      impl.attemptChangeSize = sandbox.spy();
       impl.updateSize_(217);
       expect(impl.attemptChangeSize.callCount).to.equal(1);
       expect(impl.attemptChangeSize.firstCall.args[0]).to.equal(217);
@@ -441,7 +441,7 @@ describe('amp-iframe', () => {
       height: 100,
     }).then(amp => {
       const impl = amp.container.implementation_;
-      impl.attemptChangeSize = sinon.spy();
+      impl.attemptChangeSize = sandbox.spy();
       impl.updateSize_(217, 114);
       expect(impl.attemptChangeSize.callCount).to.equal(0);
     });

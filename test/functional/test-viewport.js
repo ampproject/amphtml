@@ -386,7 +386,7 @@ describe('Viewport META', () => {
       originalViewportMetaString = 'width=device-width,minimum-scale=1';
       viewportMetaString = originalViewportMetaString;
       viewportMeta = Object.create(null);
-      viewportMetaSetter = sinon.spy();
+      viewportMetaSetter = sandbox.spy();
       Object.defineProperty(viewportMeta, 'content', {
         get: () => viewportMetaString,
         set: value => {
@@ -677,7 +677,7 @@ describe('ViewportBindingNaturalIosEmbed', () => {
           tagName: tagName,
           id: '',
           style: {},
-          scrollIntoView: sinon.spy(),
+          scrollIntoView: sandbox.spy(),
         };
       },
     };
@@ -818,7 +818,7 @@ describe('ViewportBindingNaturalIosEmbed', () => {
     const posEl = bodyChildren[0];
     posEl.getBoundingClientRect = () => {return {top: 0, left: 0};};
     const moveEl = bodyChildren[1];
-    const event = {preventDefault: sinon.spy()};
+    const event = {preventDefault: sandbox.spy()};
     binding.adjustScrollPos_(event);
     expect(getStyle(moveEl, 'transform')).to.equal('translateY(1px)');
     expect(moveEl.scrollIntoView.callCount).to.equal(1);
@@ -838,7 +838,7 @@ describe('ViewportBindingNaturalIosEmbed', () => {
     const posEl = bodyChildren[0];
     posEl.getBoundingClientRect = () => {return {top: -10, left: 0};};
     const moveEl = bodyChildren[1];
-    const event = {preventDefault: sinon.spy()};
+    const event = {preventDefault: sandbox.spy()};
     binding.adjustScrollPos_(event);
     expect(moveEl.scrollIntoView.callCount).to.equal(0);
     expect(event.preventDefault.callCount).to.equal(0);
@@ -848,7 +848,7 @@ describe('ViewportBindingNaturalIosEmbed', () => {
     const posEl = bodyChildren[0];
     posEl.getBoundingClientRect = () => {return {top: 10, left: 0};};
     const moveEl = bodyChildren[1];
-    const event = {preventDefault: sinon.spy()};
+    const event = {preventDefault: sandbox.spy()};
     binding.adjustScrollPos_(event);
     expect(moveEl.scrollIntoView.callCount).to.equal(0);
     expect(event.preventDefault.callCount).to.equal(0);
@@ -903,7 +903,7 @@ describe('ViewportBindingVirtual', () => {
   });
 
   it('should send event on scroll changed', () => {
-    const scrollHandler = sinon.spy();
+    const scrollHandler = sandbox.spy();
     binding.onScroll(scrollHandler);
     expect(scrollHandler.callCount).to.equal(0);
 
@@ -926,7 +926,7 @@ describe('ViewportBindingVirtual', () => {
   });
 
   it('should send event on size changed', () => {
-    const resizeHandler = sinon.spy();
+    const resizeHandler = sandbox.spy();
     binding.onResize(resizeHandler);
     expect(resizeHandler.callCount).to.equal(0);
 

@@ -112,17 +112,17 @@ describe('CustomElement', () => {
     resourcesMock = sandbox.mock(resources);
     clock = sandbox.useFakeTimers();
 
-    testElementCreatedCallback = sinon.spy();
-    testElementPreconnectCallback = sinon.spy();
-    testElementFirstAttachedCallback = sinon.spy();
-    testElementBuildCallback = sinon.spy();
-    testElementLayoutCallback = sinon.spy();
-    testElementFirstLayoutCompleted = sinon.spy();
-    testElementViewportCallback = sinon.spy();
-    testElementGetInsersectionElementLayoutBox = sinon.spy();
-    testElementUnlayoutCallback = sinon.spy();
-    testElementPauseCallback = sinon.spy();
-    testElementResumeCallback = sinon.spy();
+    testElementCreatedCallback = sandbox.spy();
+    testElementPreconnectCallback = sandbox.spy();
+    testElementFirstAttachedCallback = sandbox.spy();
+    testElementBuildCallback = sandbox.spy();
+    testElementLayoutCallback = sandbox.spy();
+    testElementFirstLayoutCompleted = sandbox.spy();
+    testElementViewportCallback = sandbox.spy();
+    testElementGetInsersectionElementLayoutBox = sandbox.spy();
+    testElementUnlayoutCallback = sandbox.spy();
+    testElementPauseCallback = sandbox.spy();
+    testElementResumeCallback = sandbox.spy();
   });
 
   afterEach(() => {
@@ -493,7 +493,7 @@ describe('CustomElement', () => {
 
   it('should enqueue actions until built', () => {
     const element = new ElementClass();
-    const handler = sinon.spy();
+    const handler = sandbox.spy();
     element.implementation_.executeAction = handler;
     expect(element.actionQueue_).to.not.equal(null);
 
@@ -506,7 +506,7 @@ describe('CustomElement', () => {
 
   it('should execute action immediately after built', () => {
     const element = new ElementClass();
-    const handler = sinon.spy();
+    const handler = sandbox.spy();
     element.implementation_.executeAction = handler;
     element.build(true);
 
@@ -519,7 +519,7 @@ describe('CustomElement', () => {
 
   it('should dequeue all actions after build', () => {
     const element = new ElementClass();
-    const handler = sinon.spy();
+    const handler = sandbox.spy();
     element.implementation_.executeAction = handler;
 
     const inv1 = {};
@@ -543,7 +543,7 @@ describe('CustomElement', () => {
 
   it('should NOT enqueue actions when in template', () => {
     const element = new ElementClass();
-    const handler = sinon.spy();
+    const handler = sandbox.spy();
     element.implementation_.executeAction = handler;
     expect(element.actionQueue_).to.not.equal(null);
 

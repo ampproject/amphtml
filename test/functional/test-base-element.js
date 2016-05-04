@@ -17,15 +17,20 @@
 import {BaseElement} from '../../src/base-element';
 import * as sinon from 'sinon';
 
-
 describe('BaseElement', () => {
 
+  let sandbox;
   let div;
   let element;
 
   beforeEach(() => {
+    sandbox = sinon.sandbox.create();
     div = document.createElement('div');
     element = new BaseElement(div);
+  });
+
+  afterEach(() => {
+    sandbox.restore();
   });
 
   it('propagateAttributes - niente', () => {
@@ -72,14 +77,14 @@ describe('BaseElement', () => {
   });
 
   it('should execute registered action', () => {
-    const handler = sinon.spy();
+    const handler = sandbox.spy();
     element.registerAction('method1', handler);
     element.executeAction({method: 'method1'}, false);
     expect(handler.callCount).to.equal(1);
   });
 
   it('should execute "activate" action without registration', () => {
-    const handler = sinon.spy();
+    const handler = sandbox.spy();
     element.activate = handler;
     element.executeAction({method: 'activate'}, false);
     expect(handler.callCount).to.equal(1);
