@@ -18,6 +18,7 @@ import {AmpAudio} from '../amp-audio';
 import {adopt} from '../../../../src/runtime';
 import {naturalDimensions_} from '../../../../src/layout';
 import {createIframePromise} from '../../../../testing/iframe';
+import * as sinon from 'sinon';
 require('../amp-audio');
 
 adopt(window);

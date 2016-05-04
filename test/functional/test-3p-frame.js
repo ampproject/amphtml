@@ -29,6 +29,7 @@ import {resetServiceForTesting} from '../../src/service';
 import {setModeForTesting} from '../../src/mode';
 import {validateData} from '../../src/3p';
 import {viewerFor} from '../../src/viewer';
+import * as sinon from 'sinon';
 
 describe('3p-frame', () => {
 

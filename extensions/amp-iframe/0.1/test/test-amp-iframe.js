@@ -448,7 +448,6 @@ describe('amp-iframe', () => {
   });
 
   it('should listen for embed-ready event', () => {
-    sinon.sandbox.create();
     const activateIframeSpy_ =
         sandbox.spy(AmpIframe.prototype, 'activateIframe_');
     return getAmpIframe({

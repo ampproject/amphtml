@@ -15,6 +15,7 @@
  */
 
 import {FiniteStateMachine} from '../../src/finite-state-machine';
+import * as sinon from 'sinon';
 
 describe('Finite State Machine', () => {
 

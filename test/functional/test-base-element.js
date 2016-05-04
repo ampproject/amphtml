@@ -15,6 +15,7 @@
  */
 
 import {BaseElement} from '../../src/base-element';
+import * as sinon from 'sinon';
 
 
 describe('BaseElement', () => {

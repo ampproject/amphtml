@@ -19,6 +19,7 @@ import '../third_party/babel/custom-babel-helpers';
 import '../src/polyfills';
 import {removeElement} from '../src/dom';
 import {adopt} from '../src/runtime';
+import * as sinon from 'sinon';
 
 adopt(window);
 
