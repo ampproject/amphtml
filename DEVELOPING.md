@@ -62,6 +62,7 @@ If you have any questions, feel free to ask on the issue or join us on [Slack](h
 | `gulp test --saucelabs`       | Runs test on saucelabs (requires [setup](#saucelabs)).                |
 | `gulp test --safari`          | Runs tests in Safari.                                                 |
 | `gulp test --firefox`         | Runs tests in Firefox.                                                |
+| `gulp test --files=<test-files-path-glob>`         | Runs specific test files.                                                |
 | `gulp serve`                  | Serves content in repo root dir over http://localhost:8000/. Examples live in http://localhost:8000/examples.build/          |
 
 

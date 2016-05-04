@@ -117,6 +117,7 @@ var karma = {
 
 /** @const  */
 module.exports = {
+  commonTestPaths: commonTestPaths,
   testPaths: testPaths,
   integrationTestPaths: integrationTestPaths,
   karma: karma,

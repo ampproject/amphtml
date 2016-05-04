@@ -26,6 +26,7 @@ var jsifyCssAsync = require('./build-system/tasks/jsify-css').jsifyCssAsync;
 var fs = require('fs-extra');
 var gulp = $$.help(require('gulp'));
 var lazypipe = require('lazypipe');
+var minimatch = require('minimatch');
 var minimist = require('minimist');
 var source = require('vinyl-source-stream');
 var touch = require('touch');
@@ -186,9 +187,19 @@ function watch() {
  */
 function buildExtension(name, version, hasCss, options) {
   options = options || {};
-  console.log('Bundling ' + name);
   var path = 'extensions/' + name + '/' + version;
   var jsPath = path + '/' + name + '.js';
+  var jsTestPath = path + '/test/' + 'test-' + name + '.js';
+  if (argv.files && options.bundleOnlyIfListedInFiles) {
+    const passedFiles = Array.isArray(argv.files) ? argv.files : [argv.files];
+    const shouldBundle = passedFiles.some(glob => {
+      return minimatch(jsPath, glob) || minimatch(jsTestPath, glob);
+    });
+    if (!shouldBundle) {
+      return;
+    }
+  }
+  console.log('Bundling ' + name);
   // Building extensions is a 2 step process because of the renaming
   // and CSS inlining. This watcher watches the original file, copies
   // it to the destination and adds the CSS.
@@ -244,7 +255,7 @@ function build() {
   process.env.NODE_ENV = 'development';
   polyfillsForTests();
   buildAlp();
-  buildExtensions();
+  buildExtensions({bundleOnlyIfListedInFiles: true});
   buildExamples(false);
   compile();
 }
