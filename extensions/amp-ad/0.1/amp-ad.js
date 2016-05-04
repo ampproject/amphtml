@@ -45,13 +45,18 @@ const POSITION_FIXED_TAG_WHITELIST = {
  */
 let loadingAdsCount = 0;
 
+/**
+ * For testing purpose only.
+ * Record the id for timer delay in order to remove them after each test.
+ */
 let delayIdForTesting = null;
 
 /**
+ * @visibleForTesting
  * For testing purpose only.
  * Set the loadingAdsCount to 0. And stop test from decreasing loadingAdsCount
  * after each run.
-*/
+ */
 export function resetAdCountForTesting() {
   loadingAdsCount = 0;
   timer.cancel(delayIdForTesting);

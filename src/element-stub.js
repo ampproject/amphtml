@@ -29,7 +29,8 @@ export const stubbedElements = [];
 let ampAdScriptInsertedOrPresent = false;
 
 /**
-* For testing purpose only.
+* @visibleForTesting
+* Reset the ampAdScriptInsertedOrPresent value for each test.
 */
 export function resetAdScriptInsertedOrPresentForTesting() {
   ampAdScriptInsertedOrPresent = false;
