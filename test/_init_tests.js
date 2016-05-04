@@ -185,4 +185,4 @@ chai.Assertion.addMethod('jsonEqual', function(compare) {
   );
 });
 
-delete sinon;
+delete window.sinon;
