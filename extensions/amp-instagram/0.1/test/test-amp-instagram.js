@@ -39,8 +39,7 @@ describe('amp-instagram', () => {
     expect(image).to.not.be.null;
     expect(image.getAttribute('src')).to.equal(
         'https://www.instagram.com/p/fBwFP/media/?size=l');
-    expect(image.getAttribute('width')).to.equal('111');
-    expect(image.getAttribute('height')).to.equal('222');
+    expect(image.getAttribute('layout')).to.equal('fill');
   }
 
   function testIframe(iframe) {

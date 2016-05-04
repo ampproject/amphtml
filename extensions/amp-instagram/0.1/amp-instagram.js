@@ -86,13 +86,10 @@ class AmpInstagram extends AMP.BaseElement {
     // always the same URL that is actually used inside of the embed.
     image.setAttribute('src', 'https://www.instagram.com/p/' +
         encodeURIComponent(this.shortcode_) + '/media/?size=l');
-    image.setAttribute('width', this.element.getAttribute('width'));
-    image.setAttribute('height', this.element.getAttribute('height'));
-    image.setAttribute('layout', 'responsive');
+    image.setAttribute('layout', 'fill');
     // This makes the non-iframe image appear in the exact same spot
     // where it will be inside of the iframe.
     setStyles(image, {
-      'position': 'absolute',
       'top': '48px',
       'bottom': '48px',
       'left': '8px',
