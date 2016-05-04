@@ -58,6 +58,7 @@ function buildExtensions(options) {
   buildExtension('amp-ad-network-doubleclick-impl', 0.1, false, options);
   buildExtension('amp-ad-network-fake-impl', 0.1, false, options);
   buildExtension('amp-analytics', '0.1', false, options);
+  buildExtension('amp-analytics-resources', '0.1', false, options);
   buildExtension('amp-anim', '0.1', false, options);
   buildExtension('amp-app-banner', '0.1', true, options);
   buildExtension('amp-audio', '0.1', false, options);

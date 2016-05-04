@@ -29,6 +29,7 @@ import {viewportFor} from '../viewport';
 import {vsyncFor} from '../vsync';
 import {userNotificationManagerFor} from '../user-notification';
 import {activityFor} from '../activity';
+import {analyticsResourcesFor} from '../analytics-resources';
 
 
 /** @private @const {string} */
@@ -389,22 +390,90 @@ export class UrlReplacements {
       });
     });
 
+    // Returns navigation timing timestamps or time deltas.
     this.set_('NAV_TIMING', (startAttribute, endAttribute) => {
       user().assert(startAttribute, 'The first argument to NAV_TIMING, the ' +
           'start attribute name, is required');
       return this.getTimingData_(startAttribute, endAttribute);
     });
 
+    // Returns the navigation type
     this.set_('NAV_TYPE', () => {
       return this.getNavigationData_('type');
     });
 
+    // Returns the count of redirects since last non-redirect navigation
     this.set_('NAV_REDIRECT_COUNT', () => {
       return this.getNavigationData_('redirectCount');
     });
 
     // returns the AMP version number
     this.set_('AMP_VERSION', () => '$internalRuntimeVersion$');
+
+    // Returns the rendered document size in bytes.
+    // This may not be what was sent on the network.
+    this.set_('PAGE_DOC_LENGTH', () => {
+      return analyticsResourcesFor(window).then(rt => {
+        return rt.getDocumentLength();
+      });
+    });
+
+    // Returns number of resources in ResourceTiming.
+    this.set_('RESOURCE_COUNT', () => {
+      return analyticsResourcesFor(window).then(rt => {
+        return rt.getResourceCount();
+      });
+    });
+
+    // Returns the number of DOM nodes on the page.
+    this.set_('DOM_NODE_COUNT', () => {
+      return analyticsResourcesFor(window).then(rt => {
+        return rt.getDomNodeCount();
+      });
+    });
+
+    // Returns the number of image nodes on the page.
+    this.set_('DOM_IMG_COUNT', () => {
+      return analyticsResourcesFor(window).then(rt => {
+        return rt.getDomImgCount();
+      });
+    });
+
+    // Returns the number of image nodes on the page that referenced
+    // external URLs.
+    this.set_('DOM_EXT_IMG_COUNT', () => {
+      return analyticsResourcesFor(window).then(rt => {
+        return rt.getDomExtImgCount();
+      });
+    });
+
+    // Returns the number of script nodes on the page.
+    this.set_('DOM_SCRIPT_COUNT', () => {
+      return analyticsResourcesFor(window).then(rt => {
+        return rt.getDomScriptCount();
+      });
+    });
+
+    // Returns the number of script nodes that referenced external URLs.
+    this.set_('DOM_EXT_SCRIPT_COUNT', () => {
+      return analyticsResourcesFor(window).then(rt => {
+        return rt.getDomExtScriptCount();
+      });
+    });
+
+    // Returns number of distinct domains referenced from the page.
+    this.set_('PAGE_DOMAIN_COUNT', () => {
+      return analyticsResourcesFor(window).then(rt => {
+        return rt.getDomainCount();
+      });
+    });
+
+    // Returns the compressed resource timing data.
+    this.set_('RESOURCE_TIMING', () => {
+      return analyticsResourcesFor(window).then(rt => {
+        return rt.getResourceTiming();
+      });
+    });
   }
 
   /**
@@ -490,7 +559,7 @@ export class UrlReplacements {
       return Promise.resolve();
     }
 
-    return String(navigationInfo[attribute]);
+    return Promise.resolve(String(navigationInfo[attribute]));
   }
 
   /**

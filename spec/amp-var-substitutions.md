@@ -96,6 +96,115 @@ For instance:
 ```
 may make a request to something like `https://foo.com/pixel?href=https%3A%2F%2Fpinterest.com%2F`.
 
+### DOM_EXT_IMG_COUNT
+
+Only available if the `amp-analytics-resources` extension is loaded.
+
+Use the special string `DOM_EXT_IMG_COUNT` to add the count of image nodes on the page that referenced external URLs to the URL.
+
+For instance:
+```html
+<amp-pixel src="https://foo.com/pixel?dom.img.ext=DOM_EXT_IMG_COUNT"></amp-pixel>
+```
+may make a request to something like `https://foo.com/pixel?dom.img.ext=8`.
+
+### DOM_EXT_SCRIPT_COUNT
+
+Only available if the `amp-analytics-resources` extension is loaded.
+
+Use the special string `DOM_EXT_SCRIPT_COUNT` to add the count of script nodes on the page that referenced external URLs to the URL.
+
+For instance:
+```html
+<amp-pixel src="https://foo.com/pixel?dom.img.ext=DOM_EXT_SCRIPT_COUNT"></amp-pixel>
+```
+may make a request to something like `https://foo.com/pixel?dom.script.ext=12`.
+
+### DOM_IMG_COUNT
+
+Only available if the `amp-analytics-resources` extension is loaded.
+
+Use the special string `DOM_IMG_COUNT` to add the count of image nodes on the page to the URL.
+
+For instance:
+```html
+<amp-pixel src="https://foo.com/pixel?dom.img=DOM_IMG_COUNT"></amp-pixel>
+```
+may make a request to something like `https://foo.com/pixel?dom.img=15`.
+
+### DOM_NODE_COUNT
+Only available if the `amp-analytics-resources` extension is loaded.
+
+Use the special string `DOM_NODE_COUNT` to add the count of DOM nodes on the page to the URL.
+
+For instance:
+```html
+<amp-pixel src="https://foo.com/pixel?dom.ln=DOM_NODE_COUNT"></amp-pixel>
+```
+may make a request to something like `https://foo.com/pixel?dom.ln=15`.
+
+### DOM_SCRIPT_COUNT
+
+Only available if the `amp-analytics-resources` extension is loaded.
+
+Use the special string `DOM_SCRIPT_COUNT` to add the count of script nodes on the page to the URL.
+
+For instance:
+```html
+<amp-pixel src="https://foo.com/pixel?dom.script=DOM_SCRIPT_COUNT"></amp-pixel>
+```
+may make a request to something like `https://foo.com/pixel?dom.script=12`.
+
+### PAGE_DOC_LENGTH
+
+Only available if the `amp-analytics-resources` extension is loaded.
+
+Use the special string `PAGE_DOC_LENGTH` to add the base page's rendered byte count to the URL. The value may not be what was sent on the network.
+
+For instance:
+```html
+<amp-pixel src="https://foo.com/pixel?dom.sz=PAGE_DOC_LENGTH"></amp-pixel>
+```
+may make a request to something like `https://foo.com/pixel?dom.sz=30000`.
+
+### PAGE_DOMAIN_COUNT
+
+Only available if the `amp-analytics-resources` extension is loaded.
+
+Use the special string `DOM_SCRIPT_COUNT` to add the count of distinct domains referenced from the page to the URL.
+
+For instance:
+```html
+<amp-pixel src="https://foo.com/pixel?dom.doms=DOM_SCRIPT_COUNT"></amp-pixel>
+```
+may make a request to something like `https://foo.com/pixel?dom.doms=6`.
+
+### RESOURCE_COUNT
+
+Only available if the `amp-analytics-resources` extension is loaded.
+
+Use the special string `RESOURCE_COUNT` to add the count of resources on the page to the URL.
+
+For instance:
+```html
+<amp-pixel src="https://foo.com/pixel?dom.res=RESOURCE_COUNT"></amp-pixel>
+```
+may make a request to something like `https://foo.com/pixel?dom.res=20`.
+
+See W3C Resource Timing API [PerformanceResourceTiming interface](https://www.w3.org/TR/resource-timing/) for more information.
+
+### RESOURCE_TIMING
+
+Only available if the `amp-analytics-resources` extension is loaded.
+
+Use the special string `RESOURCE_COUNT` to add the compressed resource timing data of the page to the request.
+
+See W3C Resource Timing API [PerformanceResourceTiming interface](https://www.w3.org/TR/resource-timing/) for more information.
+
+The data is formatted and compressed using the  [resourcetiming-compression](https://github.com/nicjansma/resourcetiming-compression.js) library.
+
+The data may be large, it is recommended to be used with `amp-analytics` with a `transport` of `beacon` or `xhrpost`.
+
 ### SOURCE_URL
 
 Use the special string `SOURCE_URL` to add the source URL of the current document to the URL.

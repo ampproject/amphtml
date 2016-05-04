@@ -57,6 +57,9 @@ When the same `var` is defined in multiple locations, the value is picked in the
 |account | ABC123 | Top level config |
 |clientId | 12332312 | Remote config |
 
+
+Additional variables are available the in the [`amp-analytics-resources`]('../amp-analytics-resources/amp-analytics-resources.md') extension.
+
 The remainder of this doc lists and describes the variables supported in `amp-analytics`.
 
 | Table of Contents  |
