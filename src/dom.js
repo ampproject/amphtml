@@ -233,19 +233,26 @@ function isScopeSelectorSupported(parent) {
 
 /**
  * Finds the first child element that has the specified attribute.
+ * Will also match specified attribute value if provided.
  * @param {!Element} parent
  * @param {string} attr
+ * @param {string=} opt_attrValue
  * @return {?Element}
  */
-export function childElementByAttr(parent, attr) {
+export function childElementByAttr(parent, attr, opt_attrValue) {
   if (scopeSelectorSupported == null) {
     scopeSelectorSupported = isScopeSelectorSupported(parent);
   }
   if (scopeSelectorSupported) {
-    return parent.querySelector(':scope > [' + attr + ']');
+    const attrValue = opt_attrValue === undefined ? '' : `="${opt_attrValue}"`;
+    return parent.querySelector(`:scope > [${attr}${attrValue}]`);
   }
   return childElement(parent, el => {
     if (!el.hasAttribute(attr)) {
+      return false;
+    }
+    if (opt_attrValue !== undefined &&
+        opt_attrValue != el.getAttribute(attr)) {
       return false;
     }
     return true;

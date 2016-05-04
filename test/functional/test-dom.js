@@ -156,6 +156,7 @@ describe('DOM', () => {
     const element1 = document.createElement('element1');
     element1.setAttribute('attr1', '1');
     element1.setAttribute('attr12', '1');
+    element1.setAttribute('attr14', '');
     parent.appendChild(element1);
 
     const element2 = document.createElement('element2');
@@ -168,6 +169,9 @@ describe('DOM', () => {
     element2.appendChild(element3);
 
     expect(dom.childElementByAttr(parent, 'attr1')).to.equal(element1);
+    expect(dom.childElementByAttr(parent, 'attr1', 'hello')).to.be.null;
+    expect(dom.childElementByAttr(parent, 'attr1', '')).to.be.null;
+    expect(dom.childElementByAttr(parent, 'attr14', '')).to.be.equal(element1);
     expect(dom.childElementByAttr(parent, 'attr2')).to.equal(element2);
     expect(dom.childElementByAttr(parent, 'attr12')).to.equal(element1);
     expect(dom.childElementByAttr(parent, 'attr3')).to.be.null;
@@ -176,7 +180,7 @@ describe('DOM', () => {
 
   it('childElementByAttr should find first match', testChildElementByAttr);
 
-  it('childElementByAttr should find first match', () => {
+  it('childElementByAttr should find first match (no scope selector)', () => {
     dom.setScopeSelectorSupportedForTesting(false);
     testChildElementByAttr();
   });
