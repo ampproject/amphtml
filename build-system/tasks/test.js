@@ -87,11 +87,7 @@ gulp.task('test', 'Runs tests', prerequisites, function(done) {
   }
 
   if (argv.files) {
-    const files = [];
-    const passedPaths = Array.isArray(argv.files) ? argv.files : [argv.files];
-    config.commonTestPaths.forEach(file => files.push(file));
-    passedPaths.forEach(file => files.push(file));
-    c.files = files;
+    c.files = [].concat(config.commonTestPaths, argv.files);
   } else if (argv.integration) {
     c.files = config.integrationTestPaths;
   } else {
