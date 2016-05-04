@@ -25,50 +25,226 @@ const path = require('path');
 const program = require('commander');
 const vm = require('vm');
 const url = require('url');
+const util = require('util');
 
 /**
- * If the provided fileOrUrl start with 'http://' or 'https://', downloads
- * with the http or https module, otherwise reads the file with the file module.
- * Or, if the provided fileOrUrl is '-', reads from stdin.
- * Then, calls onSuccess with the data, or onFailure with the error message.
- * This method will check the HTTP status code as well and generate
- * brief error messages if it's not 200.
- * @param {!string} fileOrUrl
- * @param {!function(string)} onSuccess
- * @param {!function(string)} onFailure
+ * Convenience function to detect whether an argument is a ULR or
+ * (perhaps) a local file.
+ * @param {!string} url
+ * @returns {!boolean}
  */
-function readFileOrDownload(fileOrUrl, onSuccess, onFailure) {
-  const digestChunksFrom = function(response) {
-    const chunks = [];
-    response.setEncoding('utf8');
-    response.on('data', function(chunk) { chunks.push(chunk); });
-    response.on('end', function() { onSuccess(chunks.join('')); });
-  };
-  if (fileOrUrl === '-') {
-    digestChunksFrom(process.stdin);
-    process.stdin.resume();
-    return;
-  }
-  if (fileOrUrl.startsWith('http://') || fileOrUrl.startsWith('https://')) {
-    const clientModule = fileOrUrl.startsWith('http://') ? http : https;
-    const req = clientModule.get(fileOrUrl, (response) => {
-      if (response.statusCode !== 200) {
-        onFailure('HTTP ' + response.statusCode);
-        return;
+function isHttpOrHttpsUrl(url) {
+  return url.startsWith('http://') || url.startsWith('https://');
+}
+
+/**
+ * Creates a promise which reads from a file.
+ * @param {!string} name
+ * @returns {!Promise<(!string|!Error)>}
+ */
+function readFromFile(name) {
+  return new Promise(function(resolve, reject) {
+    fs.readFile(name, 'utf8', (err, data) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(data);
       }
-      digestChunksFrom(response);
     });
-    req.on('error', (e) => { onFailure(e.message); });
-    return;
-  }
-  fs.readFile(fileOrUrl, 'utf8', (err, data) => {
-    if (err) {
-      onFailure(err.message);
-    } else {
-      onSuccess(data);
-    }
   });
 }
+
+/**
+ * Creates a promise which reads from a stream.
+ * @param {!stream.Readable} readable
+ * @returns {!Promise<!string|Error>}
+ */
+function readFromReadable(readable) {
+  return new Promise(function(resolve, reject) {
+    const chunks = [];
+    readable.setEncoding('utf8');
+    readable.on('data', (chunk) => { chunks.push(chunk); });
+    readable.on('end', () => { resolve(chunks.join('')); });
+    readable.on('error', (error) => { reject(error); });
+  });
+}
+
+/**
+ * Creates a promise which reads from standard input.
+ * @returns {!Promise<!string|Error>}
+ */
+function readFromStdin() {
+  return new Promise(function(resolve, reject) {
+    readFromReadable(process.stdin)
+        .then((data) => {
+          process.stdin.resume();
+          resolve(data);
+        })
+        .catch(reject);
+  });
+}
+
+/**
+ * Creates a promise which reads from a URL or more precisely, fetches
+ * the contents located at the URL by using the 'http' or 'https' module.
+ * Any HTTP status other than 200 is interpreted as an error.
+ * @param {!string} url
+ * @returns {!Promise<!string|Error>}
+ */
+function readFromUrl(url) {
+  return new Promise((resolve, reject) => {
+    const clientModule = url.startsWith('http://') ? http : https;
+    clientModule.get(url, (response) => {
+      if (response.statusCode != 200) {
+        response.resume();
+        reject(new Error('HTTP Status ' + response.statusCode));
+      } else {
+        readFromReadable(response).then(resolve);
+      }
+    });
+  });
+}
+
+/**
+ * ValidationResult is the record computed by the validator for each
+ * document. It contains an overall status (PASS/FAIL) and the list
+ * of errors, if any.
+ * @export
+ */
+class ValidationResult {
+  constructor() {
+    /**
+     * Possible values are 'UNKNOWN', 'PASS', and 'FAIL'.
+     * @type {!string}
+     */
+    this.status = 'UNKNOWN';
+    /** @type {!Array<!ValidationError>} */
+    this.errors = [];
+  }
+}
+exports.ValidationResult = ValidationResult;
+
+/**
+ * Each validation error describes a specific problem in a validated
+ * document.
+ * @export
+ */
+class ValidationError {
+  constructor() {
+    /**
+     * The severity of the error - possible values are 'UNKNOWN_SEVERITY',
+     * 'ERROR', and 'WARNING'.
+     */
+    this.severity = 'UNKNOWN_SEVERITY';
+    /**
+     * The line number at which the error was seen (1 is the first line).
+     */
+    this.line = 1;
+    /**
+     * The column number at which the error was seen (0 is the first column).
+     */
+    this.col = 0;
+    /**
+     * A human-readable error message for the validation error.
+     * If you find yourself trying to write a parser against this string
+     * to scrape out some detail, consider looking at the code and params
+     * fields below.
+     * @type {!string}
+     */
+    this.message = '';
+    /**
+     * The spec URL is often added by the validator to provide additional
+     * context for the error. In a user interface this would be shown
+     * as a "Learn more" link.
+     * @type {!string}
+     */
+    this.specUrl = null;
+    /**
+     * Categorizes error messages into higher-level groups. This makes it
+     * easier to create error statistics across a site and give advice based
+     * on the most common problems for a set of pages.
+     * See the ErrorCategory.Code enum in validator.proto for possible values.
+     * @type {!string}
+     */
+    this.category = 'UNKNOWN';
+    /**
+     * This field is only useful when scripting against the validator,
+     * it should not be displayed in a user interface as it adds nothing
+     * for humans to read over the message field (see above).
+     * Possible values are the codes listed in ValidationError.Code - see
+     * validator.proto. Examples: 'UNKNOWN_CODE', 'MANDATORY_TAG_MISSING',
+     * 'TAG_REQUIRED_BY_MISSING'. For each of these codes there is a
+     * format string in validator-main.protoascii (look for error_formats),
+     * which is used to assemble the message from the strings in params.
+     * @type {!string}
+     */
+    this.code = 'UNKNOWN_CODE';
+    /**
+     * This field is only useful when scripting against the validator,
+     * it should not be displayed in a user interface as it adds nothing
+     * for humans to read over the message field (see above).
+     * @type {!Array<!string>}
+     */
+    this.params = [];
+  }
+}
+exports.ValidationError = ValidationError;
+
+/**
+ * A global static map used by the validateString function to avoid loading
+ * AMP Validators more than once.
+ * @type {!Object<string, Object>}
+ */
+const precompiledByValidatorJs = {};
+
+/**
+ * @param {!string} inputString
+ * @param {string=} validatorJs_opt
+ * @returns {Promise.<(ValidationResult|Error)>}
+ * @export
+ */
+function validateString(inputString, validatorJs_opt) {
+  const validatorJs =
+      validatorJs_opt || 'https://cdn.ampproject.org/v0/validator.js';
+  const validate = (sandbox, resolve) => {
+    const internalResult = sandbox.amp.validator.validateString(inputString);
+    const result = new ValidationResult();
+    result.status = internalResult.status;
+    for (const internalError of internalResult.errors) {
+      const error = new ValidationError();
+      error.severity = internalError.severity;
+      error.line = internalError.line;
+      error.col = internalError.col;
+      error.message = sandbox.amp.validator.renderErrorMessage(internalError);
+      error.specUrl = internalError.specUrl;
+      error.code = internalError.code;
+      error.params = internalError.params;
+      error.category = sandbox.amp.validator.categorizeError(internalError);
+      result.errors.push(error);
+    }
+    resolve(result);
+  };
+  if (precompiledByValidatorJs.hasOwnProperty(validatorJs)) {
+    return new Promise(function(resolve, reject) {
+      const sandbox = precompiledByValidatorJs[validatorJs];
+      validate(sandbox, resolve);
+    });
+  }
+  const validatorJsPromise =
+      (isHttpOrHttpsUrl(validatorJs) ? readFromUrl : readFromFile)(validatorJs);
+  return new Promise(function(resolve, reject) {
+    validatorJsPromise
+        .then((scriptContents) => {
+          const script = new vm.Script(scriptContents);
+          const sandbox = vm.createContext();
+          script.runInContext(sandbox);
+          precompiledByValidatorJs[validatorJs] = sandbox;
+          validate(sandbox, resolve);
+        })
+        .catch(reject);
+  });
+};
+exports.validateString = validateString;
 
 /**
  * Maps from file extension to a mime-type.
@@ -113,8 +289,8 @@ function serve(port, validatorScript) {
           response.writeHead(200, {'Content-Type': 'text/html'});
           const contents = fs.readFileSync(
               path.join(__dirname, 'webui/index.html'), 'utf-8');
-          const html = contents.replace(new RegExp(
-              '\\$\\$VALIDATOR_SCRIPT\\$\\$', 'g'), validatorScript);
+          const html = contents.replace(
+              new RegExp('\\$\\$VALIDATOR_SCRIPT\\$\\$', 'g'), validatorScript);
           response.end(html);
           return;
         }
@@ -164,10 +340,12 @@ function serve(port, validatorScript) {
         //
         // Handle '/webcomponents-lite.js'
         //
-        if (request.url == "/webcomponents-lite.js") {
+        if (request.url == '/webcomponents-lite.js') {
           const contents = fs.readFileSync(
-              path.join(__dirname, 'node_modules/webcomponents-lite/' +
-                  'webcomponents-lite.js'), 'utf-8');
+              path.join(
+                  __dirname, 'node_modules/webcomponents-lite/' +
+                      'webcomponents-lite.js'),
+              'utf-8');
           response.writeHead(200, {'Content-Type': 'text/javascript'});
           response.end(contents);
           return;
@@ -185,15 +363,14 @@ function serve(port, validatorScript) {
             response.end('Bad request.');
             return;
           }
-          readFileOrDownload(
-              urlToFetch,
-              (contents) => {
+          readFromUrl(urlToFetch)
+              .then((contents) => {
                 response.writeHead(200, {'Content-Type': 'application/json'});
                 response.end(JSON.stringify({'contents': contents}));
-              },
-              (errorMessage) => {
+              })
+              .catch((error) => {
                 response.writeHead(502, {'Content-Type': 'text/plain'});
-                response.end('Bad gateway (' + errorMessage + ').');
+                response.end('Bad gateway (' + error.message + ').');
               });
           return;
         }
@@ -205,49 +382,31 @@ function serve(port, validatorScript) {
 }
 
 /**
- * Retrieves the provided files and validates them, emitting PASS or
- * error messages. If any of the files generates an error, the exit
- * code of the program is set to 1.
- * @param {!Array<string>} filesToProcess
+ * Logs a validation result to the console using console.log, console.warn,
+ * and console.error as is appropriate.
+ * @param {!string} filename
+ * @param {!ValidationResult} validationResult
  */
-function validateFiles(filesToProcess) {
-  for (const fileName of filesToProcess) {
-    readFileOrDownload(
-        fileName,
-        (contents) => {
-          const validationResult = amp.validator.validateString(contents);
-          // TODO(powdercloud): compare with
-          // amp.validator.ValidationResult.Status.PASS instead once exported.
-          if (validationResult.status === 'PASS') {
-            console.log(fileName + ': PASS');
-          } else {
-            for (const error of validationResult.errors) {
-              let msg = fileName + ':' + error.line + ':' + error.col;
-              msg += ' ' + amp.validator.renderErrorMessage(error);
-              if (error.specUrl) {
-                msg += ' (see ' + error.specUrl + ')';
-              }
-              // TODO(powdercloud): compare with
-              // amp.validator.ValidationError.Severity.ERROR instead once
-              // exported.
-              if (error.severity === 'ERROR') {
-                console.error(msg);
-                process.exitCode = 1;
-              } else {
-                console.warn(msg);
-              }
-            }
-          }
-        },
-        (errorMessage) => {
-          console.error(fileName + ': Unable to fetch - ' + errorMessage);
-          process.exitCode = 1;
-        });
+function logValidationResult(fileName, validationResult) {
+  if (validationResult.status === 'PASS') {
+    console.log(fileName + ': PASS');
+  }
+  for (const error of validationResult.errors) {
+    let msg =
+        fileName + ':' + error.line + ':' + error.col + ' ' + error.message;
+    if (error.specUrl) {
+      msg += ' (see ' + error.specUrl + ')';
+    }
+    if (error.severity === 'ERROR') {
+      console.error(msg);
+    } else {
+      console.warn(msg);
+    }
   }
 }
 
 /**
- * Main entry point into the command line tool. This is called from index.js.
+ * Main entry point into the command line tool.
  */
 function main() {
   program.version('0.1.0')
@@ -266,21 +425,40 @@ function main() {
 
   program.command('* <fileOrUrlOrMinus...>')
       .description('Validates list of files or urls (default).')
-      .action((validateOrUrlOrMinus) => {
-        if (validateOrUrlOrMinus.length == 0) {
+      .action((fileOrUrlOrMinus) => {
+        if (fileOrUrlOrMinus.length == 0) {
           program.outputHelp();
           process.exit(1);
         }
-        readFileOrDownload(
-            program.validator_js,
-            (validatorScript) => {
-              vm.runInThisContext(validatorScript);
-              validateFiles(validateOrUrlOrMinus);
-            },
-            (errorMessage) => {
-              console.error('Could not fetch validator.js: ' + errorMessage);
-              process.exitCode = 1;
-            });
+        for (const item of fileOrUrlOrMinus) {
+          let input;
+          if (item === '-') {
+            input = readFromStdin();
+          } else if (isHttpOrHttpsUrl(item)) {
+            input = readFromUrl(item);
+          } else {
+            input = readFromFile(item);
+          }
+          input
+              .then((data) => {
+                validateString(data, program.validator_js)
+                    .then((validationResult) => {
+                      logValidationResult(item, validationResult);
+                      if (validationResult.status !== 'PASS') {
+                        process.exitCode = 1;
+                      }
+                    })
+                    .catch((error) => {
+                      console.error(
+                          'Could not fetch validator.js: ' + error.message);
+                      process.exitCode = 1;
+                    });
+              })
+              .catch((error) => {
+                console.error(item + ': unable to fetch - ' + error.message);
+                process.exitCode = 1;
+              });
+        }
       });
 
   program.command('webui')
