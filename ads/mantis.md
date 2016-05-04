@@ -51,7 +51,7 @@ Depending on your page design, you may need to play with the "heights=" paramete
              heights="(min-width:1907px) 56%, (min-width:1100px) 64%, (min-width:780px) 75%, (min-width:480px) 105%, 200%"
              data-property="demo">
   </amp-embed>
-``
+```
 
 ### MANTIS.Video
 
