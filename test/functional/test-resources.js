@@ -438,11 +438,9 @@ describe('Resources schedulePreload', () => {
 
     const placeholder1 = createElementWithResource(4)[0];
     child1.getPlaceholder = () => placeholder1;
-    child1.classList.contains = name => name != '-amp-layout';
 
     const placeholder2 = createElementWithResource(5)[0];
     child2.getPlaceholder = () => placeholder2;
-    child2.classList.contains = name => name != '-amp-layout';
 
     resources.schedulePreload(parent, children);
     expect(stub1.called).to.be.true;

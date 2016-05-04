@@ -1328,11 +1328,9 @@ export class Resources {
     if (element.classList.contains('-amp-element')) {
       callback(this.getResourceForElement(element));
       // Also schedule amp-element that is a placeholder for the element.
-      if (!element.classList.contains('-amp-layout')) {
-        const placeholder = element.getPlaceholder();
-        if (placeholder) {
-          this.discoverResourcesForElement_(placeholder, callback);
-        }
+      const placeholder = element.getPlaceholder();
+      if (placeholder) {
+        this.discoverResourcesForElement_(placeholder, callback);
       }
     } else {
       const ampElements = element.getElementsByClassName('-amp-element');
