@@ -161,8 +161,6 @@ i-amp-sizer {
 
 .-amp-element > [placeholder] {
   display: block;
-  /** Background is important to hide all other placeholders below it. */
-  background-color: #efefef;
 }
 
 .-amp-element > [placeholder].hidden,

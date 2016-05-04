@@ -268,7 +268,7 @@ export class BaseElement {
    * Subclasses can override this method to create a dynamic placeholder
    * element and return it to be appended to the element. This will only
    * be called if the element doesn't already have a placeholder.
-   * @returns {HTMLElement|null}
+   * @returns {?Element}
    */
   createPlaceholderCallback() {
     return null;

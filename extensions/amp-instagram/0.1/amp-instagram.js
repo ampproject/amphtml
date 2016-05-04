@@ -89,22 +89,16 @@ class AmpInstagram extends AMP.BaseElement {
     image.setAttribute('width', this.element.getAttribute('width'));
     image.setAttribute('height', this.element.getAttribute('height'));
     image.setAttribute('layout', 'responsive');
-    setStyles(image, {
-      'object-fit': 'cover',
-    });
-    const wrapper = this.element.ownerDocument.createElement('wrapper');
     // This makes the non-iframe image appear in the exact same spot
     // where it will be inside of the iframe.
-    setStyles(wrapper, {
+    setStyles(image, {
       'position': 'absolute',
       'top': '48px',
       'bottom': '48px',
       'left': '8px',
       'right': '8px',
     });
-    wrapper.appendChild(image);
-    placeholder.appendChild(wrapper);
-    this.applyFillContent(image);
+    placeholder.appendChild(image);
     return placeholder;
   }
 

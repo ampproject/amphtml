@@ -209,7 +209,7 @@ export function childElement(parent, callback) {
  * Finds all child elements that satisfies the callback.
  * @param {!Element} parent
  * @param {function(!Element):boolean} callback
- * @return {Array.<Element>}
+ * @return {!Array.<!Element>}
  */
 export function childElements(parent, callback) {
   const children = [];
@@ -281,10 +281,7 @@ export function childElementByAttr(parent, attr) {
     return parent.querySelector(':scope > [' + attr + ']');
   }
   return childElement(parent, el => {
-    if (!el.hasAttribute(attr)) {
-      return false;
-    }
-    return true;
+    return el.hasAttribute(attr);
   });
 }
 
@@ -297,10 +294,7 @@ export function childElementByAttr(parent, attr) {
  */
 export function lastChildElementByAttr(parent, attr) {
   return lastChildElement(parent, el => {
-    if (!el.hasAttribute(attr)) {
-      return false;
-    }
-    return true;
+    return el.hasAttribute(attr);
   });
 }
 
@@ -309,20 +303,23 @@ export function lastChildElementByAttr(parent, attr) {
  * Finds all child elements that has the specified attribute.
  * @param {!Element} parent
  * @param {string} attr
- * @return {Array.<Element>|NodeList}
+ * @return {!Array.<!Element>}
  */
 export function childElementsByAttr(parent, attr) {
   if (scopeSelectorSupported == null) {
     scopeSelectorSupported = isScopeSelectorSupported(parent);
   }
   if (scopeSelectorSupported) {
-    return parent.querySelectorAll(':scope > [' + attr + ']');
+    const nodeList = parent.querySelectorAll(':scope > [' + attr + ']');
+    // Convert NodeList into Array.<Element>.
+    const children = [];
+    for (let i = 0; i < nodeList.length; i++) {
+      children.push(nodeList[i]);
+    }
+    return children;
   }
   return childElements(parent, el => {
-    if (!el.hasAttribute(attr)) {
-      return false;
-    }
-    return true;
+    return el.hasAttribute(attr);
   });
 }
 

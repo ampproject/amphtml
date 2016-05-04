@@ -698,7 +698,7 @@ export function createAmpElementProto(win, name, implementationClass) {
 
   /**
    * Creates a placeholder for the element.
-   * @returns {HTMLElement|null}
+   * @returns {?Element}
    * @final
    */
   ElementProto.createPlaceholder = function() {
@@ -992,7 +992,7 @@ export function createAmpElementProto(win, name, implementationClass) {
 
   /**
    * Returns an optional placeholder element for this custom element.
-   * @return {?Element}
+   * @return {!Array.<!Element>}
    * @private
    */
   ElementProto.getAllPlaceholders_ = function() {
