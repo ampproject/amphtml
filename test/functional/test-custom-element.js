@@ -689,17 +689,47 @@ describe('CustomElement', () => {
 
 
   describe('unlayoutCallback', () => {
-    it('Element', () => {
-      const element = new ElementClass();
 
+    it('should unlayout built element and reset layoutCount', () => {
+      const element = new ElementClass();
       // Non-built element doesn't receive unlayoutCallback.
       element.unlayoutCallback();
       expect(testElementUnlayoutCallback.callCount).to.equal(0);
 
+      element.implementation_.layoutCallback = () => {
+        testElementLayoutCallback();
+        element.layoutCount_++;
+        return Promise.resolve();
+      };
+
+      element.implementation_.unlayoutCallback = () => {
+        testElementUnlayoutCallback();
+        return true;
+      };
       // Built element receives unlayoutCallback.
       element.build(true);
       element.unlayoutCallback();
       expect(testElementUnlayoutCallback.callCount).to.equal(1);
+      expect(element.layoutCount_).to.equal(0);
+    });
+
+    it('should not reset layoutCount if relayout not requested', () => {
+      const element = new ElementClass();
+      element.build(true);
+      element.implementation_.layoutCallback = () => {
+        testElementLayoutCallback();
+        element.layoutCount_++;
+        return Promise.resolve();
+      };
+
+      element.implementation_.unlayoutCallback = () => {
+        testElementUnlayoutCallback();
+        return false;
+      };
+      element.layoutCallback();
+      element.unlayoutCallback();
+      expect(testElementUnlayoutCallback.callCount).to.equal(1);
+      expect(element.layoutCount_).to.equal(1);
     });
 
     it('StubElement', () => {

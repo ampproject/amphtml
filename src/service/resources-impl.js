@@ -1947,6 +1947,7 @@ export class Resource {
     }
     this.setInViewport(false);
     if (this.element.unlayoutCallback()) {
+      this.element.togglePlaceholder(true);
       this.state_ = ResourceState_.NOT_LAID_OUT;
       this.layoutCount_ = 0;
       this.layoutPromise_ = null;

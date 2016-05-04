@@ -865,7 +865,11 @@ export function createAmpElementProto(win, name, implementationClass) {
     if (!this.isBuilt() || !this.isUpgraded()) {
       return false;
     }
-    return this.implementation_.unlayoutCallback();
+    const isReLayoutNeeded = this.implementation_.unlayoutCallback();
+    if (isReLayoutNeeded) {
+      this.layoutCount_ = 0;
+    }
+    return isReLayoutNeeded;
   };
 
   /**

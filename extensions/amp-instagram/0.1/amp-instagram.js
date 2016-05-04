@@ -124,7 +124,6 @@ class AmpInstagram extends AMP.BaseElement {
         setStyles(iframe, {
           'opacity': 1,
         });
-        this.togglePlaceholder(false);
       });
     });
   }
@@ -140,7 +139,6 @@ class AmpInstagram extends AMP.BaseElement {
       removeElement(this.iframe_);
       this.iframe_ = null;
       this.iframePromise_ = null;
-      this.togglePlaceholder(true);
     }
     return true;  // Call layoutCallback again.
   }
