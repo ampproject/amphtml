@@ -15,4 +15,11 @@
  */
 
  amp-sticky-ad {
+ 	position: fixed;
+ 	bottom: 0;
+ 	left: 0 !important;
+ 	z-index: 2;
+ 	width: 100%;
+ 	display: none;
+ 	max-height: 100px;
  }
