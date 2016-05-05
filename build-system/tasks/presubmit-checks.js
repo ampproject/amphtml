@@ -41,7 +41,7 @@ var forbiddenTerms = {
   'DO NOT SUBMIT': '',
   'describe\\.only': '',
   'it\\.only': '',
-  'sinon\\.(spy|stub|mock)\\((\\w[^)])*\\)': {
+  'sinon\\.(spy|stub|mock)\\(': {
     message: 'Use a sandbox instead to avoid repeated `#restore` calls'
   },
   '(\\w*([sS]py|[sS]tub|[mM]ock|clock).restore)': {
