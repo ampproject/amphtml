@@ -32,6 +32,7 @@ import {installFramerateService} from './framerate-impl';
 import {installViewerService, VisibilityState} from './viewer-impl';
 import {installViewportService} from './viewport-impl';
 import {installVsyncService} from './vsync-impl';
+import {platformFor} from '../platform';
 import {FiniteStateMachine} from '../finite-state-machine';
 import {isArray} from '../types';
 
@@ -74,8 +75,11 @@ export class Resources {
     /** @const {!Window} */
     this.win = window;
 
-    /** @const {!Viewer} */
+    /** @const @private {!Viewer} */
     this.viewer_ = installViewerService(window);
+
+    /** @const @private {!Platform} */
+    this.platform_ = platformFor(window);
 
     /** @private {boolean} */
     this.isRuntimeOn_ = this.viewer_.isRuntimeOn();
@@ -215,12 +219,60 @@ export class Resources {
     onDocumentReady(this.win.document, () => {
       this.documentReady_ = true;
       this.forceBuild_ = true;
-      this.relayoutAll_ = true;
+      if (this.platform_.isIe()) {
+        this.fixMediaIe_(this.win);
+      } else {
+        this.relayoutAll_ = true;
+      }
       this.schedulePass();
       this.monitorInput_();
     });
 
     this.schedulePass();
+  }
+
+  /**
+   * An ugly fix for IE's problem with `matchMedia` API, where media queries
+   * are evaluated incorrectly. See #2577 for more details.
+   * @param {!Window} win
+   * @private
+   */
+  fixMediaIe_(win) {
+    if (!this.platform_.isIe() || this.matchMediaIeQuite_(win)) {
+      this.relayoutAll_ = true;
+      return;
+    }
+
+    // Poll until the expression resolves correctly, but only up to a point.
+    const endTime = timer.now() + 2000;
+    const interval = win.setInterval(() => {
+      const now = timer.now();
+      const matches = this.matchMediaIeQuite_(win);
+      if (matches || now > endTime) {
+        win.clearInterval(interval);
+        this.relayoutAll_ = true;
+        this.schedulePass();
+        if (!matches) {
+          dev.error(TAG_, 'IE media never resolved');
+        }
+      }
+    }, 10);
+  }
+
+  /**
+   * @param {!Window} win
+   * @return {boolean}
+   * @private
+   */
+  matchMediaIeQuite_(win) {
+    const q = `(min-width: ${win.innerWidth}px)`;
+    try {
+      return win.matchMedia(q).matches;
+    } catch (e) {
+      dev.error(TAG_, 'IE matchMedia failed: ', e);
+      // Return `true` to avoid polling on a broken API.
+      return true;
+    }
   }
 
   /**
