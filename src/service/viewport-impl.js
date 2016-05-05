@@ -807,6 +807,7 @@ export class ViewportBindingNaturalIosEmbed_ {
       webkitOverflowScrolling: 'touch',
     });
     setStyles(documentBody, {
+      overflowX: 'hidden',
       overflowY: 'auto',
       webkitOverflowScrolling: 'touch',
       position: 'absolute',
