@@ -711,6 +711,7 @@ describe('ViewportBindingNaturalIosEmbed', () => {
     const body = windowApi.document.body;
     expect(documentElement.style.overflowY).to.equal('auto');
     expect(documentElement.style.webkitOverflowScrolling).to.equal('touch');
+    expect(body.style.overflowX).to.equal('hidden');
     expect(body.style.overflowY).to.equal('auto');
     expect(body.style.webkitOverflowScrolling).to.equal('touch');
     expect(body.style.position).to.equal('absolute');
