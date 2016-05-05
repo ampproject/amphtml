@@ -422,6 +422,10 @@ export function createAmpElementProto(win, name, implementationClass) {
     return this.built_;
   };
 
+  ElementProto.getElementPriority = function() {
+    return this.implementation_.getElementPriority();
+  };
+
   /**
    * Requests or requires the element to be built. The build is done by
    * invoking {@link BaseElement.buildCallback} method.

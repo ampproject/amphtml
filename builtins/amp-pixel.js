@@ -21,7 +21,6 @@ import {registerElement} from '../src/custom-element';
 import {toggle} from '../src/style';
 import {user} from '../src/log';
 
-
 /**
  * @param {!Window} win Destination window for the new element.
  * @this {undefined}  // Make linter happy
@@ -29,6 +28,12 @@ import {user} from '../src/log';
  */
 export function installPixel(win) {
   class AmpPixel extends BaseElement {
+
+    /** @override */
+    getElementPriority() {
+      return 1;
+    }
+
     /** @override */
     isLayoutSupported(layout) {
       return layout == Layout.FIXED;

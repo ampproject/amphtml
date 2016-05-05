@@ -115,6 +115,7 @@ import {vsyncFor} from './vsync';
  * Each method is called exactly once and overriding them in subclasses
  * is optional.
  */
+
 export class BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -138,6 +139,14 @@ export class BaseElement {
 
     /** @private {!Resources}  */
     this.resources_ = resourcesFor(this.getWin());
+  }
+
+  /**
+  * Returns the element priority. A value from 0 to 10.
+  * @return {number}
+  */
+  getElementPriority() {
+    return 0;
   }
 
   /** @return {!Layout} */

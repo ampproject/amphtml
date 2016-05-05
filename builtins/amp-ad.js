@@ -49,6 +49,11 @@ export function installAd(win) {
 
   class AmpAd extends BaseElement {
 
+    /** @override */
+    getElementPriority() {
+      return 2;
+    }
+
     /** @override  */
     renderOutsideViewport() {
       // If another ad is currently loading we only load ads that are currently

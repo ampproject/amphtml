@@ -51,25 +51,6 @@ const MUTATE_DEFER_DELAY_ = 500;
 const FOCUS_HISTORY_TIMEOUT_ = 1000 * 60;  // 1min
 const FOUR_FRAME_DELAY_ = 70;
 
-/**
- * Returns the element-based priority. A value from 0 to 10.
- * @param {string} tagName
- * @return {number}
- */
-export function getElementPriority(tagName) {
-  // Filed https://github.com/ampproject/amphtml/issues/2714 to get this
-  // method into the element implementation classes.
-  tagName = tagName.toLowerCase();
-  if (tagName == 'amp-ad') {
-    return 2;
-  }
-  if (tagName == 'amp-pixel' || tagName == 'amp-analytics') {
-    return 1;
-  }
-  return 0;
-}
-
-
 export class Resources {
   constructor(window) {
     /** @const {!Window} */
@@ -1548,8 +1529,7 @@ export class Resource {
     /** @const {!AmpElement|undefined|null} */
     this.owner_ = undefined;
 
-    /** @const {number} */
-    this.priority_ = getElementPriority(element.tagName);
+    this.priority_ = element.getElementPriority();
 
     /** @private {!ResourceState_} */
     this.state_ = element.isBuilt() ? ResourceState_.NOT_LAID_OUT :

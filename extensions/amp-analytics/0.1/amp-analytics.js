@@ -42,6 +42,11 @@ const MAX_REPLACES = 16; // The maximum number of entries in a extraUrlParamsRep
 export class AmpAnalytics extends AMP.BaseElement {
 
   /** @override */
+  getElementPriority() {
+    return 1;
+  }
+
+  /** @override */
   isLayoutSupported(unusedLayout) {
     return true;
   }
