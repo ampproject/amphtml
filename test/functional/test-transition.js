@@ -15,6 +15,7 @@
  */
 
 import * as tr from '../../src/transition';
+import * as sinon from 'sinon';
 
 describe('Transition', () => {
 

@@ -16,6 +16,7 @@
 
 import {Pass} from '../../src/pass';
 import {timer} from '../../src/timer';
+import * as sinon from 'sinon';
 
 describe('Pass', () => {
 

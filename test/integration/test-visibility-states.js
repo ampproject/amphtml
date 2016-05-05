@@ -23,6 +23,7 @@ import {createAmpElementProto} from '../../src/custom-element';
 import {viewerFor} from '../../src/viewer';
 import {resourcesFor} from '../../src/resources';
 import {VisibilityState} from '../../src/service/viewer-impl';
+import * as sinon from 'sinon';
 
 describe('Viewer Visibility State', () => {
 

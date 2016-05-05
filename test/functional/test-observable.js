@@ -15,6 +15,7 @@
  */
 
 import {Observable} from '../../src/observable';
+import * as sinon from 'sinon';
 
 describe('Observable', () => {
 
