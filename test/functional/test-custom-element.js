@@ -115,19 +115,19 @@ describe('CustomElement', () => {
     sandbox = sinon.sandbox.create();
     resourcesMock = sandbox.mock(resources);
     clock = sandbox.useFakeTimers();
-    
-    testElementCreatedCallback = sinon.spy();
-    testElementPreconnectCallback = sinon.spy();
-    testElementFirstAttachedCallback = sinon.spy();
-    testElementBuildCallback = sinon.spy();
-    testElementCreatePlaceholderCallback = sinon.spy();
-    testElementLayoutCallback = sinon.spy();
-    testElementFirstLayoutCompleted = sinon.spy();
-    testElementViewportCallback = sinon.spy();
-    testElementGetInsersectionElementLayoutBox = sinon.spy();
-    testElementUnlayoutCallback = sinon.spy();
-    testElementPauseCallback = sinon.spy();
-    testElementResumeCallback = sinon.spy();
+
+    testElementCreatedCallback = sandbox.spy();
+    testElementPreconnectCallback = sandbox.spy();
+    testElementFirstAttachedCallback = sandbox.spy();
+    testElementBuildCallback = sandbox.spy();
+    testElementCreatePlaceholderCallback = sandbox.spy();
+    testElementLayoutCallback = sandbox.spy();
+    testElementFirstLayoutCompleted = sandbox.spy();
+    testElementViewportCallback = sandbox.spy();
+    testElementGetInsersectionElementLayoutBox = sandbox.spy();
+    testElementUnlayoutCallback = sandbox.spy();
+    testElementPauseCallback = sandbox.spy();
+    testElementResumeCallback = sandbox.spy();
   });
 
   afterEach(() => {
