@@ -35,19 +35,14 @@ describe('Animation', () => {
         return () => {
           vsyncTasks.push(task);
         };
-      }
+      },
     };
     anim = new Animation(vsync);
   });
 
   afterEach(() => {
     expect(vsyncTasks.length).to.equal(0);
-    anim = null;
-    vsync = null;
-    vsyncTasks = null;
-    clock = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   function runVsync() {

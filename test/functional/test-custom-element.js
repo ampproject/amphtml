@@ -17,18 +17,22 @@
 import {BaseElement} from '../../src/base-element';
 import {ElementStub} from '../../src/element-stub';
 import {LOADING_ELEMENTS_, Layout} from '../../src/layout';
-import {createAmpElementProto} from '../../src/custom-element';
 import {resourcesFor} from '../../src/resources';
 import {vsyncFor} from '../../src/vsync';
 import * as sinon from 'sinon';
 
 import {getService, resetServiceForTesting} from '../../src/service';
 import {
+  createAmpElementProto,
+  markElementScheduledForTesting,
+  resetScheduledElementForTesting,
+  stubElements,
+} from '../../src/custom-element';
+// TODO(@cramforce): Move tests into their own file.
+import {
   getElementService,
   getElementServiceIfAvailable,
-  markElementScheduledForTesting,
-  resetScheduledElementForTesting
-} from '../../src/custom-element';
+} from '../../src/element-service';
 
 
 describe('CustomElement', () => {
@@ -41,7 +45,9 @@ describe('CustomElement', () => {
   let testElementLayoutCallback;
   let testElementFirstLayoutCompleted;
   let testElementViewportCallback;
-  let testElementDocumentInactiveCallback;
+  let testElementUnlayoutCallback;
+  let testElementPauseCallback;
+  let testElementResumeCallback;
   let testElementIsReadyToBuild = true;
 
   class TestElement extends BaseElement {
@@ -73,22 +79,28 @@ describe('CustomElement', () => {
     viewportCallback(inViewport) {
       testElementViewportCallback(inViewport);
     }
-    getInsersectionElementLayoutBox() {
+    getIntersectionElementLayoutBox() {
       testElementGetInsersectionElementLayoutBox();
       return {top: 10, left: 10, width: 11, height: 1};
     }
-    documentInactiveCallback() {
-      testElementDocumentInactiveCallback();
+    unlayoutCallback() {
+      testElementUnlayoutCallback();
       return true;
+    }
+    pauseCallback() {
+      testElementPauseCallback();
+    }
+    resumeCallback() {
+      testElementResumeCallback();
     }
   }
 
   const ElementClass = document.registerElement('amp-test', {
-    prototype: createAmpElementProto(window, 'amp-test', TestElement)
+    prototype: createAmpElementProto(window, 'amp-test', TestElement),
   });
 
   const StubElementClass = document.registerElement('amp-stub', {
-    prototype: createAmpElementProto(window, 'amp-stub', ElementStub)
+    prototype: createAmpElementProto(window, 'amp-stub', ElementStub),
   });
 
   let sandbox;
@@ -108,14 +120,14 @@ describe('CustomElement', () => {
     testElementFirstLayoutCompleted = sinon.spy();
     testElementViewportCallback = sinon.spy();
     testElementGetInsersectionElementLayoutBox = sinon.spy();
-    testElementDocumentInactiveCallback = sinon.spy();
+    testElementUnlayoutCallback = sinon.spy();
+    testElementPauseCallback = sinon.spy();
+    testElementResumeCallback = sinon.spy();
   });
 
   afterEach(() => {
     resourcesMock.verify();
-    resourcesMock = null;
     sandbox.restore();
-    sandbox = null;
   });
 
 
@@ -589,18 +601,32 @@ describe('CustomElement', () => {
     expect(element2.sizerElement_.style.paddingTop).to.equal('1%');
   });
 
-  it('should change height without sizer', () => {
+  it('should change size without sizer', () => {
     const element = new ElementClass();
-    element.changeHeight(111);
+    element.changeSize(111, 222);
+    expect(element.style.height).to.equal('111px');
+    expect(element.style.width).to.equal('222px');
+  });
+
+  it('should change size - height only without sizer', () => {
+    const element = new ElementClass();
+    element.changeSize(111);
     expect(element.style.height).to.equal('111px');
   });
 
-  it('should change height with sizer', () => {
+  it('should change size - width only without sizer', () => {
+    const element = new ElementClass();
+    element.changeSize(undefined, 111);
+    expect(element.style.width).to.equal('111px');
+  });
+
+  it('should change size with sizer', () => {
     const element = new ElementClass();
     element.sizerElement_ = document.createElement('div');
-    element.changeHeight(111);
+    element.changeSize(111, 222);
     expect(parseInt(element.sizerElement_.style.paddingTop, 10)).to.equal(0);
     expect(element.style.height).to.equal('111px');
+    expect(element.style.width).to.equal('222px');
   });
 
   it('should NOT apply media condition in template', () => {
@@ -612,26 +638,87 @@ describe('CustomElement', () => {
     }).to.throw(/Must never be called in template/);
   });
 
-
-  it('Element - documentInactiveCallback', () => {
+  it('should change size to zero', () => {
     const element = new ElementClass();
-
-    // Non-built element doesn't receive documentInactiveCallback.
-    element.documentInactiveCallback();
-    expect(testElementDocumentInactiveCallback.callCount).to.equal(0);
-
-    // Built element receives documentInactiveCallback.
-    element.build(true);
-    element.documentInactiveCallback();
-    expect(testElementDocumentInactiveCallback.callCount).to.equal(1);
+    element.changeSize(0, 0);
+    expect(element.style.height).to.equal('0px');
+    expect(element.style.width).to.equal('0px');
   });
 
-  it('StubElement - documentInactiveCallback', () => {
-    const element = new StubElementClass();
+  it('should change width to zero', () => {
+    const element = new ElementClass();
+    element.changeSize(undefined, 0);
+    expect(element.style.width).to.equal('0px');
+  });
 
-    // Unupgraded document doesn't receive documentInactiveCallback.
-    element.documentInactiveCallback();
-    expect(testElementDocumentInactiveCallback.callCount).to.equal(0);
+
+  describe('unlayoutCallback', () => {
+    it('Element', () => {
+      const element = new ElementClass();
+
+      // Non-built element doesn't receive unlayoutCallback.
+      element.unlayoutCallback();
+      expect(testElementUnlayoutCallback.callCount).to.equal(0);
+
+      // Built element receives unlayoutCallback.
+      element.build(true);
+      element.unlayoutCallback();
+      expect(testElementUnlayoutCallback.callCount).to.equal(1);
+    });
+
+    it('StubElement', () => {
+      const element = new StubElementClass();
+
+      // Unupgraded document doesn't receive unlayoutCallback.
+      element.unlayoutCallback();
+      expect(testElementUnlayoutCallback.callCount).to.equal(0);
+    });
+  });
+
+  describe('pauseCallback', () => {
+    it('Element', () => {
+      const element = new ElementClass();
+
+      // Non-built element doesn't receive pauseCallback.
+      element.pauseCallback();
+      expect(testElementPauseCallback.callCount).to.equal(0);
+
+      // Built element receives pauseCallback.
+      element.build(true);
+      element.pauseCallback();
+      expect(testElementPauseCallback.callCount).to.equal(1);
+    });
+
+    it('StubElement', () => {
+      const element = new StubElementClass();
+
+      // Unupgraded document doesn't receive pauseCallback.
+      element.pauseCallback();
+      expect(testElementPauseCallback.callCount).to.equal(0);
+    });
+  });
+
+  describe('resumeCallback', () => {
+    it('Element', () => {
+      const element = new ElementClass();
+
+      // Non-built element doesn't receive resumeCallback.
+      element.resumeCallback();
+      expect(testElementResumeCallback.callCount).to.equal(0);
+
+      // Built element receives resumeCallback.
+      element.build(true);
+      element.resumeCallback();
+      expect(testElementResumeCallback.callCount).to.equal(1);
+    });
+
+    it('StubElement', () => {
+      const element = new StubElementClass();
+
+      // Unupgraded document doesn't receive resumeCallback.
+      element.resumeCallback();
+      expect(testElementResumeCallback.callCount).to.equal(0);
+    });
   });
 
   describe('viewportCallback', () => {
@@ -725,7 +812,7 @@ describe('CustomElement', () => {
 describe('CustomElement Service Elements', () => {
 
   const StubElementClass = document.registerElement('amp-stub2', {
-    prototype: createAmpElementProto(window, 'amp-stub2', ElementStub)
+    prototype: createAmpElementProto(window, 'amp-stub2', ElementStub),
   });
 
   let sandbox;
@@ -738,7 +825,6 @@ describe('CustomElement Service Elements', () => {
 
   afterEach(() => {
     sandbox.restore();
-    sandbox = null;
   });
 
   function createWithAttr(attr) {
@@ -798,8 +884,18 @@ describe('CustomElement Service Elements', () => {
   });
 
   it('toggleFallback should toggle unsupported class', () => {
+    const fallback = element.appendChild(createWithAttr('fallback'));
+    const resourcesSpy = sandbox.spy();
+    element.resources_ = {
+      scheduleLayout: function(el, fb) {
+        if (el == element && fb == fallback) {
+          resourcesSpy();
+        }
+      },
+    };
     element.toggleFallback(true);
     expect(element).to.have.class('amp-notsupported');
+    expect(resourcesSpy.callCount).to.equal(1);
 
     element.toggleFallback(false);
     expect(element).to.not.have.class('amp-notsupported');
@@ -819,7 +915,7 @@ describe('CustomElement Loading Indicator', () => {
   class TestElement extends BaseElement {
   }
   const ElementClass = document.registerElement('amp-test-loader', {
-    prototype: createAmpElementProto(window, 'amp-test-loader', TestElement)
+    prototype: createAmpElementProto(window, 'amp-test-loader', TestElement),
   });
 
   const resources = resourcesFor(window);
@@ -851,7 +947,6 @@ describe('CustomElement Loading Indicator', () => {
     vsync.mutate = savedMutate;
     resourcesMock.verify();
     sandbox.restore();
-    sandbox = null;
   });
 
 
@@ -1072,7 +1167,7 @@ describe('CustomElement Overflow Element', () => {
   class TestElement extends BaseElement {
   }
   const ElementClass = document.registerElement('amp-test-overflow', {
-    prototype: createAmpElementProto(window, 'amp-test-overflow', TestElement)
+    prototype: createAmpElementProto(window, 'amp-test-overflow', TestElement),
   });
 
   const resources = resourcesFor(window);
@@ -1105,7 +1200,6 @@ describe('CustomElement Overflow Element', () => {
     vsync.mutate = savedMutate;
     resourcesMock.verify();
     sandbox.restore();
-    sandbox = null;
   });
 
   it('should NOT be initialized by default', () => {
@@ -1145,11 +1239,11 @@ describe('CustomElement Overflow Element', () => {
   it('should set overflow', () => {
     const overflowCallbackSpy =
         sandbox.spy(element.implementation_, 'overflowCallback');
-    element.overflowCallback(true, 117);
+    element.overflowCallback(true, 117, 113);
     expect(element.overflowElement_).to.equal(overflowElement);
     expect(overflowElement).to.have.class('amp-visible');
     expect(overflowElement.onclick).to.exist;
-    expect(overflowCallbackSpy).to.be.calledWith(true, 117);
+    expect(overflowCallbackSpy).to.be.calledWith(true, 117, 113);
   });
 
   it('should unset overflow', () => {
@@ -1157,17 +1251,17 @@ describe('CustomElement Overflow Element', () => {
         sandbox.spy(element.implementation_, 'overflowCallback');
     element.getOverflowElement();
     overflowElement.classList.toggle('amp-visible', true);
-    element.overflowCallback(false, 117);
+    element.overflowCallback(false, 117, 113);
     expect(element.overflowElement_).to.equal(overflowElement);
     expect(overflowElement).to.not.have.class('amp-visible');
     expect(overflowElement.onclick).to.not.exist;
-    expect(overflowCallbackSpy).to.be.calledWith(false, 117);
+    expect(overflowCallbackSpy).to.be.calledWith(false, 117, 113);
   });
 
-  it('should force change height when clicked', () => {
-    element.overflowCallback(true, 117);
+  it('should force change size when clicked', () => {
+    element.overflowCallback(true, 117, 113);
     expect(overflowElement).to.have.class('amp-visible');
-    resourcesMock.expects('changeHeight').withExactArgs(element, 117).once();
+    resourcesMock.expects('changeSize').withExactArgs(element, 117, 113).once();
 
     overflowElement.onclick();
 
@@ -1232,4 +1326,181 @@ describe('CustomElement Overflow Element', () => {
     });
   });
 
+  describe('no body', () => {
+
+    let elements;
+    let doc;
+    let win;
+    let elem1;
+    let intervalCallback;
+
+    beforeEach(() => {
+      elements = [];
+
+      doc = {
+        querySelectorAll: selector => {
+          if (selector == '[custom-element]') {
+            return elements;
+          }
+          return [];
+        },
+        registerElement: sandbox.spy(),
+        documentElement: {
+          ownerDocument: doc,
+        },
+        body: {},
+      };
+
+      elem1 = {
+        getAttribute: name => {
+          if (name == 'custom-element') {
+            return 'amp-test1';
+          }
+        },
+        ownerDocument: doc,
+      };
+      elements.push(elem1);
+
+      intervalCallback = undefined;
+      win = {
+        document: doc,
+        Object: {
+          create: proto => Object.create(proto),
+        },
+        HTMLElement: HTMLElement,
+        setInterval: callback => {
+          intervalCallback = callback;
+        },
+        clearInterval: () => {},
+        ampExtendedElements: {},
+      };
+      doc.defaultView = win;
+
+      resetServiceForTesting(window, 'e1');
+      resetScheduledElementForTesting(window, 'element-1');
+    });
+
+    afterEach(() => {
+      resetScheduledElementForTesting(window, 'amp-test1');
+      resetScheduledElementForTesting(window, 'amp-test2');
+    });
+
+    it('should be stub elements when body available', () => {
+      stubElements(win);
+
+      expect(win.ampExtendedElements).to.exist;
+      expect(win.ampExtendedElements['amp-test1']).to.be.true;
+      expect(win.ampExtendedElements['amp-test2']).to.be.undefined;
+      expect(doc.registerElement.callCount).to.equal(1);
+      expect(doc.registerElement.firstCall.args[0]).to.equal('amp-test1');
+      expect(intervalCallback).to.be.undefined;
+    });
+
+    it('should repeat stubbing when body is not available', () => {
+      doc.body = null;  // Body not available
+
+      stubElements(win);
+
+      expect(win.ampExtendedElements).to.exist;
+      expect(win.ampExtendedElements['amp-test1']).to.be.true;
+      expect(win.ampExtendedElements['amp-test2']).to.be.undefined;
+      expect(doc.registerElement.callCount).to.equal(1);
+      expect(doc.registerElement.firstCall.args[0]).to.equal('amp-test1');
+      expect(intervalCallback).to.exist;
+
+      // Add more elements
+      const elem2 = {
+        getAttribute: name => {
+          if (name == 'custom-element') {
+            return 'amp-test2';
+          }
+        },
+        ownerDocument: doc,
+      };
+      elements.push(elem2);
+      doc.body = {};
+      intervalCallback();
+
+      expect(win.ampExtendedElements['amp-test1']).to.be.true;
+      expect(win.ampExtendedElements['amp-test2']).to.be.true;
+      expect(doc.registerElement.callCount).to.equal(2);
+      expect(doc.registerElement.getCall(1).args[0]).to.equal('amp-test2');
+    });
+
+    it('getElementService should wait for body when not available', () => {
+      doc.body = null;  // Body not available
+      let resolvedService;
+      const p1 = getElementServiceIfAvailable(win, 'e1', 'element-1')
+          .then(service => {
+            resolvedService = service;
+            return service;
+          });
+      return Promise.resolve().then(() => {
+        expect(intervalCallback).to.exist;
+        expect(resolvedService).to.be.undefined;
+
+        // Resolve body.
+        doc.body = {};
+        intervalCallback();
+        return p1;
+      }).then(service => {
+        expect(resolvedService).to.be.null;
+        expect(service).to.be.null;
+      });
+    });
+
+    it('getElementService should resolve with body when not available', () => {
+      doc.body = {};  // Body is available
+      const p1 = getElementServiceIfAvailable(win, 'e1', 'element-1');
+      return Promise.resolve().then(() => {
+        expect(intervalCallback).to.be.undefined;
+        return p1;
+      }).then(service => {
+        expect(service).to.be.null;
+      });
+    });
+
+    it('getElementService should wait for body when available', () => {
+      doc.body = null;  // Body not available
+      let resolvedService;
+      const p1 = getElementServiceIfAvailable(win, 'e1', 'element-1')
+          .then(service => {
+            resolvedService = service;
+            return service;
+          });
+      return Promise.resolve().then(() => {
+        expect(intervalCallback).to.exist;
+        expect(resolvedService).to.be.undefined;
+
+        // Resolve body.
+        markElementScheduledForTesting(win, 'element-1');
+        getService(win, 'e1', function() {
+          return 'fake1';
+        });
+        doc.body = {};
+        intervalCallback();
+        return p1;
+      }).then(service => {
+        expect(resolvedService).to.equal('fake1');
+        expect(service).to.equal('fake1');
+      });
+    });
+
+    it('getElementService should resolve with body when available', () => {
+      doc.body = {};  // Body is available
+      markElementScheduledForTesting(win, 'element-1');
+      const p1 = getElementServiceIfAvailable(win, 'e1', 'element-1');
+      return Promise.resolve().then(() => {
+        expect(intervalCallback).to.be.undefined;
+
+        // Resolve service.
+        getService(win, 'e1', function() {
+          return 'fake1';
+        });
+        return p1;
+      }).then(service => {
+        expect(service).to.equal('fake1');
+      });
+    });
+  });
 });

@@ -37,7 +37,7 @@ export function smartadserver(global, data) {
         'pageId': data.page,
         'formatId': data.format,
         'target': data.target,
-        'tagId': data.tag
+        'tagId': data.tag,
       });
     });
   });

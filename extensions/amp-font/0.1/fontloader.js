@@ -163,7 +163,7 @@ export class FontLoader {
           } else {
             vsyncTask();
           }
-        }
+        },
       });
       vsyncTask();
     });
@@ -189,7 +189,7 @@ export class FontLoader {
       padding: 0,
       position: 'absolute',
       top: '-999px',
-      visibility: 'hidden'
+      visibility: 'hidden',
     });
     this.defaultFontElements_ = [];
     DEFAULT_FONTS_.forEach(font => {
@@ -200,7 +200,7 @@ export class FontLoader {
         fontFamily: font,
         margin: 0,
         padding: 0,
-        whiteSpace: 'nowrap'
+        whiteSpace: 'nowrap',
       });
       containerElement.appendChild(defaultFontElement);
     });
@@ -212,7 +212,7 @@ export class FontLoader {
       fontFamily: this.fontConfig_.family,
       margin: 0,
       padding: 0,
-      whiteSpace: 'nowrap'
+      whiteSpace: 'nowrap',
     });
     customFontElement.textContent = TEST_STRING_;
     containerElement.appendChild(customFontElement);

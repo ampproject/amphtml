@@ -16,7 +16,7 @@
 
 import {AmpSlides} from './slides';
 import {AmpCarousel} from './carousel';
-
+import {CSS} from '../../../build/amp-carousel-0.1.css';
 
 class CarouselSelector {
 
@@ -29,4 +29,4 @@ class CarouselSelector {
   }
 }
 
-AMP.registerElement('amp-carousel', CarouselSelector, $CSS$);
+AMP.registerElement('amp-carousel', CarouselSelector, CSS);

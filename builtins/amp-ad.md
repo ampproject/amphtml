@@ -1,13 +1,7 @@
-### <a name="amp-ad"></a> `amp-ad`
+# <a name="amp-ad"></a> `amp-ad`
 
 NOTE: The specification of `amp-ad` is likely to significantly evolve over time. The current approach is designed to bootstrap the format to be able to show ads.
 
-A container to display an ad.
-
-Ads are loaded like all other resources in AMP documents, with a special
-custom element called `<amp-ad>`. No ad network provided JavaScript is allowed to run inside the AMP document. Instead the AMP runtime loads an iframe from a
-different origin (via iframe sandbox) as the AMP document and executes the ad
-network’s JS inside that iframe sandbox.
 <!---
 Copyright 2015 The AMP HTML Authors. All Rights Reserved.
 
@@ -24,12 +18,31 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-AMP documents only support ads served via HTTPS.
+<table>
+  <tr>
+    <td class="col-fourty"><strong>Description</strong></td>
+    <td>A container to display an ad. AMP documents only support ads served via HTTPS.</td>
+  </tr>
+  <tr>
+    <td class="col-fourty"><strong>Availability</strong></td>
+    <td>Stable</td>
+  </tr>
+  <tr>
+    <td class="col-fourty"><strong>Examples</strong></td>
+    <td><a href="https://ampbyexample.com/components/amp-ad">amp-ad.html</a><br /><a href="https://github.com/ampproject/amphtml/blob/master/examples/ads.amp.html">ads.amp.html</a></td>
+  </tr>
+</table>
 
-#### Behavior
+## Behavior
+
+Ads are loaded like all other resources in AMP documents, with a special
+custom element called `<amp-ad>`. No ad network provided JavaScript is allowed to run inside the AMP document. Instead the AMP runtime loads an iframe from a
+different origin (via iframe sandbox) as the AMP document and executes the ad
+network’s JS inside that iframe sandbox.
 
 The `<amp-ad>` requires width and height values to be specified like all
 resources in AMP. It requires a `type` argument that select what ad network is displayed. All `data-*` attributes on the tag are automatically passed as arguments to the code that eventually renders the ad. What `data-` attributes are required for a given type of network depends and must be documented with the ad network.
+
 ```html
 <amp-ad width=300 height=250
     type="a9"
@@ -38,48 +51,87 @@ resources in AMP. It requires a `type` argument that select what ad network is d
     data-aax_src="302">
 </amp-ad>
 ```
+```html
+<amp-ad width=320 height=140
+    type="colombia"
+    layout=responsive
+    data-clmb_slot="129883"
+    data-clmb_position="1"
+    data-clmb_section="0">
+</amp-ad>
+```
 
-#### Supported ad networks
+## Supported ad networks
 
 - [A9](../ads/a9.md)
+- [Adblade](../ads/adblade.md)
+- [ADITION](../ads/adition.md)
 - [Adform](../ads/adform.md)
+- [Adman](../ads/adman.md)
 - [AdReactor](../ads/adreactor.md)
-- [AdSense](../ads/adsense.md)
+- [AdSense](../ads/google/adsense.md)
+- [AdStir](../ads/adstir.md)
 - [AdTech](../ads/adtech.md)
+- [Ad Up Technology](../ads/adup.md)
+- [AppNexus](../ads/appnexus.md)
+- [Colombia](../ads/colombia.md)
+- [Criteo](../ads/criteo.md)
 - [Dot and Media](../ads/dotandads.md)
-- [Doubleclick](../ads/doubleclick.md)
+- [Doubleclick](../ads/google/doubleclick.md)
+- [E-Planning](../ads/eplanning.md)
+- [Flite](../ads/flite.md)
+- [GMOSSP](../ads/gmossp.md)
+- [I-Mobile](../ads/imobile.md)
+- [Improve Digital](../ads/improvedigital.md)
+- [Industrybrains](../ads/industrybrains.md)
+- [MediaImpact](../ads/mediaimpact.md)
+- [OpenX](../ads/openx.md)
 - [plista](../ads/plista.md)
+- [PubMatic](../ads/pubmatic.md)
+- [Revcontent](../ads/revcontent.md)
+- [Rubicon Project](../ads/rubicon.md)
+- [Sharethrough](../ads/sharethrough.md)
 - [Smart AdServer](../ads/smartadserver.md)
+- [Sortable](../ads/sortable.md)
+- [TripleLift](../ads/triplelift.md)
+- [Teads](../ads/teads.md)
+- [Webediads](../ads/webediads.md)
+- [Weborama](../ads/weborama.md)
+- [Yieldbot](../ads/yieldbot.md)
 - [Yieldmo](../ads/yieldmo.md)
 
-#### Styling
+## Styling
 
 `<amp-ad>` elements may not themselves have or be placed in containers that have CSS `position: fixed` set (with the exception of `amp-lightbox`).
 This is due to the UX implications of full page overlay ads. It may be considered to allow similar ad formats in the future inside of AMP controlled containers that maintain certain UX invariants.
 
-#### Attributes
+## Attributes
 
-##### type
+### type
 
 Identifier for the ad network. This selects the template that is used for the ad tag.
 
-##### src
+### src
 
 Optional src value for a script tag loaded for this ad network. This can be used with ad networks that require exactly a single script tag to be inserted in the page. The src value must have a prefix that is whitelisted for this ad network.
 
-##### data-foo-bar
+### data-foo-bar
 
 Most ad networks require further configuration. This can be passed to the network using HTML `data-` attributes. The parameter names are subject to standard data attribute dash to camel case conversion. E.g. "data-foo-bar" is send to the ad for configuration as "fooBar".
 
-##### json
+### json
 
 Optional attribute to pass configuration to the ad as an arbitrarily complex JSON object. The object is passed to the ad as-is with no mangling done on the names.
 
-##### data-consent-notification-id
+### data-consent-notification-id
 
 Optional attribute. If provided will require confirming the [amp-user-notification](../extensions/amp-user-notification/amp-user-notification.md) with the given HTML-id until the "AMP client id" for the user (similar to a cookie) is passed to the ad. The means ad rendering is delayed until the user confirmed the notification.
 
-#### Placeholder
+### Experimental: data-loading-strategy
+
+Supported value: `prefer-viewability-over-views`. Instructs AMP to load ads in a way that prefers a high degree of viewability, while sometimes loading too late to generate a view.
+
+## Placeholder
 
 Optionally `amp-ad` supports a child element with the `placeholder` attribute. If supported by the ad network, this element is shown until the ad is available for viewing.
 ```html
@@ -89,7 +141,7 @@ Optionally `amp-ad` supports a child element with the `placeholder` attribute. I
 </amp-ad>
 ```
 
-#### No Ad available
+## No Ad available
 - `amp-ad` supports a child element with the `fallback` attribute. If supported by the ad network, this element is shown if no ad is available for this slot.
 ```html
 <amp-ad width=300 height=250
@@ -100,7 +152,7 @@ Optionally `amp-ad` supports a child element with the `placeholder` attribute. I
 
 - If there is no fallback element available, the amp-ad tag will be collapsed (set to display: none) if the ad sends a message that the ad slot cannot be filled and AMP determines that this operation can be performed without affecting the user's scroll position.
 
-#### Running ads from a custom domain
+## Running ads from a custom domain
 
 AMP supports loading the bootstrap iframe that is used to load ads from a custom domain such as your own domain.
 
@@ -112,7 +164,20 @@ To enable this, copy the file [remote.html](../3p/remote.html) to your web serve
 
 The `content` attribute of the meta tag is the absolute URL to your copy of the remote.html file on your web server. This URL must use a "https" schema. It is not allowed to reside on the same origin as your AMP files. E.g. if you host AMP files on "www.example.com", this URL must not be on "www.example.com" but e.g. "something-else.example.com" is OK. See the doc ["Iframe origin policy"](../spec/amp-iframe-origin-policy.md) for further details on allowed origins for iframes.
 
-##### Enhance incoming ad configuration
+### Security
+
+**Validate incoming data** before passing it on to the `draw3p` function, to make sure your iframe only does things it expects to do. This is true, in particular, for ad networks that allow custom JavaScript injection.
+
+Iframes should also enforce that they are only iframed into origins that they expect to be iframed into. The origins would be:
+
+- your own origins
+- https://cdn.ampproject.org for the AMP cache
+
+In the case of the AMP cache you also need to check that the "source origin" (origin of the document served by cdn.ampproject.org) is one of your origins.
+
+Enforcing origins can be done with the 3rd argument to `draw3p` and must additionally be done using the [allow-from](https://developer.mozilla.org/en-US/docs/Web/HTTP/X-Frame-Options) directive for full browser support.
+
+### Enhance incoming ad configuration
 
 This is completely optional: It is sometimes desired to further process the incoming iframe configuration before drawing the ad using AMP's built-in system.
 
@@ -128,4 +193,44 @@ draw3p(function(config, done) {
   setTimeout(function() {
     done(config);
   }, 100)
-});
+}, ['allowed-ad-type'], ['your-domain.com']);
+```
+## Validation errors
+
+The following lists validation errors specific to the `amp-ad` tag
+(see also `amp-ad` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator-main.protoascii)):
+
+<table>
+  <tr>
+    <th class="col-fourty"><strong>Validation Error</strong></th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td class="col-fourty"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#mandatory-attribute-missing">The mandatory attribute 'example1' is missing in tag 'example2'.</a></td>
+    <td>Error thrown when <code>type</code> attribute missing.</td>
+  </tr>
+  <tr>
+    <td class="col-fourty"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#missing-url">Missing URL for attribute 'example1' in tag 'example2'.</a></td>
+    <td>Error thrown when <code>src</code> attribute is missing its URL.</td>
+  </tr>
+  <tr>
+  <td class="col-fourty"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-url">Malformed URL 'example3' for attribute 'example1' in tag 'example2'.</a></td>
+    <td>Error thrown when <code>src</code> attribute's URL is invalid.</td>
+  </tr>
+  <tr>
+    <td class="col-fourty"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-url-protocol">Invalid URL protocol 'example3:' for attribute 'example1' in tag 'example2'.</a></td>
+    <td>Error thrown <code>src</code> attribute's URL is <code>http</code>; <code>https</code> protocol required.</td>
+  </tr>
+  <tr>
+    <td class="col-fourty"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#implied-layout-isnt-supported-by-amp-tag">The implied layout 'example1' is not supported by tag 'example2'.</a></td>
+    <td>Error thrown when implied set to <code>CONTAINER</code>; this layout type isn't supported.</td>
+  </tr>
+  <tr>
+    <td class="col-fourty"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#specified-layout-isnt-supported-by-amp-tag">The specified layout 'example1' is not supported by tag 'example2'.</a></td>
+    <td>Error thrown when specified layout set to <code>CONTAINER</code>; this layout type isn't supported.</td>
+  </tr>
+  <tr>
+    <td class="col-fourty"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-property-value">The property 'example1' in attribute 'example2' in tag 'example3' is set to 'example4', which is invalid.</a></td>
+    <td>Error thrown when invalid value is given for attributes <code>height</code> or <code>width</code>. For example, <code>height=auto</code> triggers this error for all supported layout types, with the exception of <code>NODISPLAY</code>.</td>
+  </tr>
+</table>

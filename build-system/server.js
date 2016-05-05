@@ -23,6 +23,8 @@ var bodyParser = require('body-parser');
 var clr = require('connect-livereload');
 var finalhandler = require('finalhandler');
 var path = require('path');
+var url = require('url');
+var request = require('request');
 var serveIndex = require('serve-index');
 var serveStatic = require('serve-static');
 
@@ -31,6 +33,19 @@ var paths = args[0];
 var port = args[1];
 
 app.use(bodyParser.json());
+
+app.use('/examples', function(req, res, next) {
+  // Redirect physical dir to build dir that has versions belonging to
+  // local AMP.
+  if (req.url == '/' || req.url == '') {
+    res.writeHead(302, {
+      'Location': '../examples.build/'
+    });
+    res.end();
+    return;
+  }
+  next();
+});
 
 app.use('/api/show', function(req, res) {
   res.setHeader('Content-Type', 'application/json');
@@ -46,17 +61,65 @@ app.use('/api/dont-show', function(req, res) {
   }));
 });
 
-
 app.use('/api/echo/post', function(req, res) {
   res.setHeader('Content-Type', 'application/json');
   res.end(JSON.stringify(req.body, null, 2));
 });
 
+// Fetches an AMP document from the AMP proxy and replaces JS
+// URLs, so that they point to localhost.
+function proxyToAmpProxy(req, res, minify) {
+  res.setHeader('Content-Type', 'text/html');
+  var url = 'https://cdn.ampproject.org/c' + req.url;
+  request(url, function (error, response, body) {
+    body = body
+        // Unversion URLs.
+        .replace(/https\:\/\/cdn\.ampproject\.org\/rtv\/\d+\//g,
+            'https://cdn.ampproject.org/')
+        // <base> href pointing to the proxy, so that images, etc. still work.
+        .replace('<head>', '<head><base href="https://cdn.ampproject.org/">')
+        .replace(/(https:\/\/cdn.ampproject.org\/.+?).js/g, '$1.max.js')
+        .replace('https://cdn.ampproject.org/v0.max.js',
+            'http://localhost:8000/dist/amp.js')
+        .replace(/https:\/\/cdn.ampproject.org\/v0\//g,
+            'http://localhost:8000/dist/v0/');
+    if (minify) {
+      body = body.replace(/\.max\.js/g, '.js')
+          .replace('/dist/amp.js', '/dist/v0.js');
+    }
+    res.statusCode = response.statusCode;
+    res.end(body);
+  });
+}
+
+// Proxy with unminified JS.
+// Example:
+// http://localhost:8000/max/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
+app.use('/max/', function(req, res) {
+  proxyToAmpProxy(req, res, /* minify */ false);
+});
+
+// Proxy with minified JS.
+// Example:
+// http://localhost:8000/min/s/www.washingtonpost.com/amphtml/news/post-politics/wp/2016/02/21/bernie-sanders-says-lower-turnout-contributed-to-his-nevada-loss-to-hillary-clinton/
+app.use('/min/', function(req, res) {
+  proxyToAmpProxy(req, res, /* minify */ true);
+});
+
 app.use(clr());
+
+function setAMPAccessControlHeader(res, path) {
+  var curUrl = url.parse(path, true);
+  if (curUrl.pathname.indexOf('/examples.build/analytics.config.json') > 0) {
+    res.setHeader('AMP-Access-Control-Allow-Source-Origin',
+        'http://localhost:' + port);
+  }
+}
 
 paths.split(',').forEach(function(pth) {
   // Serve static files that exist
-  app.use(serveStatic(path.join(process.cwd(), pth)));
+  app.use(serveStatic(path.join(process.cwd(), pth),
+        {setHeaders: setAMPAccessControlHeader}));
   // Serve directory listings
   app.use(serveIndex(path.join(process.cwd(), pth),
     {'icons':true,'view':'details'}));

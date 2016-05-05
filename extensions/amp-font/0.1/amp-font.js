@@ -36,6 +36,10 @@
 
 import {FontLoader} from './fontloader';
 import {timer} from '../../../src/timer';
+import {user} from '../../../src/log';
+
+/** @private @const {string} */
+const TAG = 'amp-font';
 
 /** @private @const {number} */
 const DEFAULT_TIMEOUT_ = 3000;
@@ -84,7 +88,7 @@ export class AmpFont extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     /** @private @const {string} */
-    this.fontFamily_ = AMP.assert(this.element.getAttribute('font-family'),
+    this.fontFamily_ = user.assert(this.element.getAttribute('font-family'),
         'The font-family attribute is required for <amp-font> %s',
         this.element);
     /** @private @const {string} */
@@ -117,14 +121,13 @@ export class AmpFont extends AMP.BaseElement {
       variant: this.fontVariant_,
       weight: this.fontWeight_,
       size: DEFAULT_SIZE_,
-      family: this.fontFamily_
+      family: this.fontFamily_,
     };
     this.fontLoader_.load(fontConfig, this.getTimeout_()).then(() => {
       this.onFontLoadSuccess_();
     }).catch(unusedError => {
       this.onFontLoadError_();
-      console./* OK */warn(
-          'Font download timed out for ' + this.fontFamily_);
+      user.warn(TAG, 'Font download timed out for ' + this.fontFamily_);
     });
   }
 

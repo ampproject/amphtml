@@ -26,7 +26,7 @@ goog.provide('amp.validator.ValidatorTest');
  * @return {!string}
  */
 function absolutePathFor(testFile) {
-  for (const dir of process.env['TESTDATA_DIRS'].split(':')) {
+  for (const dir of process.env['TESTDATA_ROOTS'].split(':')) {
     const candidate = path.join(dir, testFile);
     if (fs.existsSync(candidate)) {
       return candidate;
@@ -36,21 +36,55 @@ function absolutePathFor(testFile) {
 }
 
 /**
- * Returns all html files underneath the testdata directories. This does
- * not traverse the directories recursively but only one level deep
- * (e.g., it will find the 'feature_tests' subdir and the .html files inside it.
+ * @param {string} dir
+ * @return {!Array<!string>}
+ */
+function readdir(dir) {
+  const files = fs.readdirSync(dir);
+  goog.asserts.assert(files != null, 'problem reading ' + dir);
+  return files;
+}
+
+/**
+ * @param {string} dir
+ * @return {boolean}
+ */
+function isdir(dir) {
+  try {
+    return fs.lstatSync(dir).isDirectory();
+  } catch (e) {
+    return false;  // If there's neither a file nor a directory.
+  }
+}
+
+/**
+ * Returns all html files underneath the testdata roots. This looks
+ * both for feature_tests/*.html and for tests in extension directories.
+ * E.g.: extensions/amp-accordion/0.1/test/*.html and
+ *       testdata/feature_tests/amp_accordion.html.
  * @return {!Array<!string>}
  */
 function findHtmlFilesRelativeToTestdata() {
-  const testFiles = [];
-  for (const dir of process.env['TESTDATA_DIRS'].split(':')) {
-    for (const subdir of /** @type {!Array<!string>} */(
-        fs.readdirSync(path.join(dir)))) {
-      for (const candidate of /** @type {!Array<!string>} */(
-          fs.readdirSync(path.join(dir, subdir)))) {
-        if (candidate.match(/^.*.html/g)) {
-          testFiles.push(path.join(subdir, candidate));
+  const testSubdirs = [];
+  for (const root of process.env['TESTDATA_ROOTS'].split(':')) {
+    if (path.basename(root) === 'extensions') {
+      for (const extension of readdir(root)) {
+        const testPath = path.join(extension, '0.1', 'test');
+        if (isdir(path.join(root, testPath))) {
+          testSubdirs.push({root: root, subdir: testPath});
         }
+      }
+    } else {
+      for (const subdir of readdir(root)) {
+        testSubdirs.push({root: root, subdir: subdir});
+      }
+    }
+  }
+  const testFiles = [];
+  for (const entry of testSubdirs) {
+    for (const candidate of readdir(path.join(entry.root, entry.subdir))) {
+      if (candidate.match(/^.*.html/g)) {
+        testFiles.push(path.join(entry.subdir, candidate));
       }
     }
   }
@@ -104,6 +138,17 @@ ValidatorTestCase.prototype.run = function() {
   assert.fail('', '', message, '');
 };
 
+describe('ValidatorTestdata', () => {
+  it('reports data-amp-report-test values', () => {
+    const result = amp.validator.validateString(
+        '<!doctype lemur data-amp-report-test="foo">');
+    assertStrictEqual(
+        result.status,
+        amp.validator.ValidationResult.Status.FAIL);
+    assertStrictEqual('foo', result.errors[0].dataAmpReportTestValue);
+  });
+});
+
 /**
  * A strict comparison between two values.
  * Note: Unfortunately assert.strictEqual has some drawbacks, including that
@@ -129,19 +174,11 @@ describe('ValidatorOutput', () => {
     const test = new ValidatorTestCase('feature_tests/no_custom_js.html',
         'http://google.com/foo.html#development=1');
     test.expectedOutputFile = null;
-    test.expectedOutput =
-        'FAIL\n' +
-        'http://google.com/foo.html:28:3 The attribute \'src\' in tag ' +
-        '\'amphtml engine v0.js script\' is set to the invalid value ' +
-        '\'https://example.com/v0-not-allowed.js\'. ' +
-        '(see https://github.com/ampproject/amphtml/blob/master/spec/' +
-        'amp-html-format.md#scrpt) [CUSTOM_JAVASCRIPT_DISALLOWED]\n' +
-        'http://google.com/foo.html:29:3 '+
-        'The attribute \'custom-element\' ' +
-        'in tag \'amp-access extension .js script\' is set to the invalid ' +
-        'value \'amp-foo\'. ' +
-        '(see https://github.com/ampproject/amphtml/blob/master/extensions/' +
-        'amp-access/amp-access.md) [AMP_TAG_PROBLEM]';
+    test.expectedOutput = 'FAIL\n' +
+        'http://google.com/foo.html:28:3 The tag \'script\' is disallowed ' +
+        'except in specific forms. [CUSTOM_JAVASCRIPT_DISALLOWED]\n' +
+        'http://google.com/foo.html:29:3 The tag \'script\' is disallowed ' +
+        'except in specific forms. [CUSTOM_JAVASCRIPT_DISALLOWED]';
     test.run();
   });
 });
@@ -177,10 +214,10 @@ describe('ValidatorCssLengthValidation', () => {
     test.expectedOutput =
         'FAIL\n' +
         'feature_tests/css_length.html:28:2 The author stylesheet specified ' +
-        'in tag \'style\' is too long - we saw 50001 bytes whereas the ' +
-        'limit is 50000 bytes. (see https://github.com/ampproject/amphtml/' +
-        'blob/master/spec/amp-html-format.md#maximum-size) ' +
-        '[AUTHOR_STYLESHEET_PROBLEM]';
+        'in tag \'style amp-custom\' is too long - we saw 50001 bytes ' +
+        'whereas the limit is 50000 bytes. ' +
+        '(see https://www.ampproject.org/docs/reference/spec.html' +
+        '#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
     test.run();
   });
 
@@ -194,10 +231,10 @@ describe('ValidatorCssLengthValidation', () => {
     test.expectedOutput =
         'FAIL\n' +
         'feature_tests/css_length.html:28:2 The author stylesheet specified ' +
-        'in tag \'style\' is too long - we saw 50002 bytes whereas the limit ' +
-        'is 50000 bytes. (see https://github.com/ampproject/amphtml/blob/' +
-        'master/spec/amp-html-format.md#maximum-size) ' +
-        '[AUTHOR_STYLESHEET_PROBLEM]';
+        'in tag \'style amp-custom\' is too long - we saw 50002 bytes ' +
+        'whereas the limit is 50000 bytes. ' +
+        '(see https://www.ampproject.org/docs/reference/spec.html' +
+        '#maximum-size) [AUTHOR_STYLESHEET_PROBLEM]';
     test.run();
   });
 });

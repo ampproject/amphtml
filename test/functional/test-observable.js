@@ -27,9 +27,7 @@ describe('Observable', () => {
   });
 
   afterEach(() => {
-    observable = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   it('add-remove-fire', () => {

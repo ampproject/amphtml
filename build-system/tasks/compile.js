@@ -23,6 +23,7 @@ var rename = require('gulp-rename');
 var replace = require('gulp-replace');
 var internalRuntimeVersion = require('../internal-version').VERSION;
 var internalRuntimeToken = require('../internal-version').TOKEN;
+var rimraf = require('rimraf');
 
 var isProdBuild = !!argv.type;
 var queue = [];
@@ -62,21 +63,29 @@ exports.closureCompile = function(entryModuleFilename, outputDir,
   });
 };
 
+function cleanupBuildDir() {
+  fs.mkdirsSync('build/cc');
+  rimraf.sync('build/fake-module');
+  fs.mkdirsSync('build/fake-module/third_party/babel');
+  fs.mkdirsSync('build/fake-module/src/polyfills/');
+}
+exports.cleanupBuildDir = cleanupBuildDir;
+
 function compile(entryModuleFilename, outputDir,
     outputFilename, options) {
   return new Promise(function(resolve, reject) {
     var intermediateFilename = 'build/cc/' +
         entryModuleFilename.replace(/\//g, '_').replace(/^\./, '');
-    console./*OK*/log('Starting closure compiler for ', entryModuleFilename);
-    fs.mkdirsSync('build/cc');
-    fs.mkdirsSync('build/fake-module/third_party/babel');
-    fs.mkdirsSync('build/fake-module/src');
-    fs.writeFileSync(
-        'build/fake-module/third_party/babel/custom-babel-helpers.js',
-        '// Not needed in closure compiler\n');
-    fs.writeFileSync(
-        'build/fake-module/src/polyfills.js',
-        '// Not needed in closure compiler\n');
+    console./*OK*/log('Starting closure compiler for', entryModuleFilename);
+
+    // If undefined/null or false then we're ok executing the deletions
+    // and mkdir.
+    if (!options.preventRemoveAndMakeDir) {
+      cleanupBuildDir();
+    }
+    var unneededFiles = [
+      'build/fake-module/third_party/babel/custom-babel-helpers.js',
+    ];
     var wrapper = windowConfig.getTemplate() +
         '(function(){var process={env:{NODE_ENV:"production"}};' +
         '%output%})();';
@@ -106,6 +115,7 @@ function compile(entryModuleFilename, outputDir,
       'build/**/*.js',
       '!build/cc/**',
       '!build/polyfills.js',
+      '!build/polyfills/**/*.js',
       'src/**/*.js',
       '!third_party/babel/custom-babel-helpers.js',
       // Exclude since it's not part of the runtime/extension binaries.
@@ -114,6 +124,7 @@ function compile(entryModuleFilename, outputDir,
       'third_party/caja/html-sanitizer.js',
       'third_party/closure-library/sha384-generated.js',
       'third_party/mustache/**/*.js',
+      'node_modules/promise-pjs/promise.js',
       'node_modules/document-register-element/build/' +
           'document-register-element.max.js',
       'node_modules/core-js/modules/**.js',
@@ -128,16 +139,32 @@ function compile(entryModuleFilename, outputDir,
     // once. Since all files automatically wait for the main binary to load
     // this works fine.
     if (options.includePolyfills) {
-      srcs.push('!build/fake-module/src/polyfills.js');
+      srcs.push(
+        '!build/fake-module/src/polyfills.js',
+        '!build/fake-module/src/polyfills/**/*.js'
+      );
     } else {
-      srcs.push('!src/polyfills.js');
+      srcs.push(
+        '!src/polyfills.js',
+        '!src/polyfills/**/*.js'
+      );
+      unneededFiles.push(
+        'build/fake-module/src/polyfills.js',
+        'build/fake-module/src/polyfills/promise.js',
+        'build/fake-module/src/polyfills/math-sign.js'
+      );
     }
+    unneededFiles.forEach(function(fake) {
+      if (!fs.existsSync(fake)) {
+        fs.writeFileSync(fake, '// Not needed in closure compiler\n');
+      }
+    });
     /*eslint "google-camelcase/google-camelcase": 0*/
     return gulp.src(srcs)
     .pipe(closureCompiler({
       // Temporary shipping with our own compiler that has a single patch
       // applied
-      compilerPath: 'third_party/closure-compiler/compiler.jar',
+      compilerPath: 'build-system/runner/dist/runner.jar',
       fileName: intermediateFilename,
       continueWithWarnings: true,
       tieredCompilation: true,  // Magic speed up.
@@ -170,7 +197,7 @@ function compile(entryModuleFilename, outputDir,
     .pipe(replace(/\$internalRuntimeToken\$/g, internalRuntimeToken))
     .pipe(gulp.dest(outputDir))
     .on('end', function() {
-      console./*OK*/log('Compiled ', entryModuleFilename, 'to',
+      console./*OK*/log('Compiled', entryModuleFilename, 'to',
           outputDir + '/' + outputFilename, 'via', intermediateFilename);
       gulp.src(intermediateFilename + '.map')
           .pipe(rename(outputFilename + '.map'))

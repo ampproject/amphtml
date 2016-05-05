@@ -15,8 +15,9 @@
  */
 
 import {Pass} from '../pass';
+import {cancellation} from '../error';
 import {getService} from '../service';
-import {log} from '../log';
+import {dev} from '../log';
 import {timer} from '../timer';
 import {installViewerService} from './viewer-impl';
 
@@ -69,16 +70,38 @@ export class Vsync {
     this.tasks_ = [];
 
     /**
+     * Double buffer for tasks.
+     * @private {!Array<!VsyncTaskSpecDef>}
+     */
+    this.nextTasks_ = [];
+
+    /**
      * States for tasks in the next frame in the same order.
      * @private {!Array<!VsyncStateDef>}
      */
     this.states_ = [];
 
     /**
+     * Double buffer for states.
+     * @private {!Array<!VsyncStateDef>}
+     */
+    this.nextStates_ = [];
+
+    /**
      * Whether a new animation frame has been scheduled.
      * @private {boolean}
      */
     this.scheduled_ = false;
+
+    /**
+     * @private {?Promise}
+     */
+    this.nextFramePromise_ = null;
+
+    /**
+     * @private {?function()}
+     */
+    this.nextFrameResolver_ = null;
 
     /** @const {!Function} */
     this.boundRunScheduledTasks_ = this.runScheduledTasks_.bind(this);
@@ -102,11 +125,11 @@ export class Vsync {
    * will be undefined.
    *
    * @param {!VsyncTaskSpecDef} task
-   * @param {!VsyncStateDef=} opt_state
+   * @param {VsyncStateDef=} opt_state
    */
   run(task, opt_state) {
     this.tasks_.push(task);
-    this.states_.push(opt_state || {});
+    this.states_.push(opt_state);
     this.schedule_();
   }
 
@@ -122,16 +145,12 @@ export class Vsync {
    * @return {!Promise}
    */
   runPromise(task, opt_state) {
-    return new Promise(resolve => {
-      this.run({
-        measure: state => {
-          task.measure(state);
-        },
-        mutate: state => {
-          task.mutate(state);
-          resolve();
-        }
-      }, opt_state);
+    this.run(task, opt_state);
+    if (this.nextFramePromise_) {
+      return this.nextFramePromise_;
+    }
+    return this.nextFramePromise_ = new Promise(resolve => {
+      this.nextFrameResolver_ = resolve;
     });
   }
 
@@ -151,7 +170,10 @@ export class Vsync {
    * @param {function()} mutator
    */
   mutate(mutator) {
-    this.run({mutate: mutator});
+    this.run({
+      measure: undefined,  // For uniform hidden class.
+      mutate: mutator,
+    });
   }
 
   /**
@@ -160,11 +182,9 @@ export class Vsync {
    * @return {!Promise}
    */
   mutatePromise(mutator) {
-    return new Promise(resolve => {
-      this.mutate(() => {
-        mutator();
-        resolve();
-      });
+    return this.runPromise({
+      measure: undefined,
+      mutate: mutator,
     });
   }
 
@@ -173,7 +193,10 @@ export class Vsync {
    * @param {function()} measurer
    */
   measure(measurer) {
-    this.run({measure: measurer});
+    this.run({
+      measure: measurer,
+      mutate: undefined,  // For uniform hidden class.
+    });
   }
 
   /**
@@ -208,8 +231,8 @@ export class Vsync {
   runAnim(task, opt_state) {
     // Do not request animation frames when the document is not visible.
     if (!this.canAnimate()) {
-      log.warn('Vsync',
-          'Did not schedule a vsync request, because document was invisible');
+      dev.warn('Vsync', 'Did not schedule a vsync request, because doc' +
+          'ument was invisible');
       return false;
     }
     this.run(task, opt_state);
@@ -243,7 +266,7 @@ export class Vsync {
    */
   runAnimMutateSeries(mutator, opt_timeout) {
     if (!this.canAnimate()) {
-      return Promise.reject();
+      return Promise.reject(cancellation());
     }
     return new Promise((resolve, reject) => {
       const startTime = timer.now();
@@ -255,12 +278,12 @@ export class Vsync {
           if (!res) {
             resolve();
           } else if (opt_timeout && timeSinceStart > opt_timeout) {
-            reject('timeout');
+            reject(new Error('timeout'));
           } else {
             prevTime = timeSinceStart;
             task(state);
           }
-        }
+        },
       });
       task({});
     });
@@ -293,11 +316,14 @@ export class Vsync {
    */
   runScheduledTasks_() {
     this.scheduled_ = false;
-    // TODO(malteubl) Avoid array allocation with a double buffer.
     const tasks = this.tasks_;
     const states = this.states_;
-    this.tasks_ = [];
-    this.states_ = [];
+    const resolver = this.nextFrameResolver_;
+    this.nextFrameResolver_ = null;
+    this.nextFramePromise_ = null;
+    // Double buffering
+    this.tasks_ = this.nextTasks_;
+    this.states_ = this.nextStates_;
     for (let i = 0; i < tasks.length; i++) {
       if (tasks[i].measure) {
         tasks[i].measure(states[i]);
@@ -307,6 +333,14 @@ export class Vsync {
       if (tasks[i].mutate) {
         tasks[i].mutate(states[i]);
       }
+    }
+    // Swap last arrays into double buffer.
+    this.nextTasks_ = tasks;
+    this.nextStates_ = states;
+    this.nextTasks_.length = 0;
+    this.nextStates_.length = 0;
+    if (resolver) {
+      resolver();
     }
   }
 

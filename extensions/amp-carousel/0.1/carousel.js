@@ -41,14 +41,14 @@ export class AmpCarousel extends BaseCarousel {
     this.cells_ = this.getRealChildren();
 
     /** @private {!Element} */
-    this.container_ = document.createElement('div');
+    this.container_ = this.element.ownerDocument.createElement('div');
     st.setStyles(this.container_, {
       whiteSpace: 'nowrap',
       position: 'absolute',
       zIndex: 1,
       top: 0,
       left: 0,
-      bottom: 0
+      bottom: 0,
     });
     this.element.appendChild(this.container_);
 
@@ -72,8 +72,11 @@ export class AmpCarousel extends BaseCarousel {
   }
 
   /** @override */
-  viewportCallback(unusedInViewport) {
+  viewportCallback(inViewport) {
     this.updateInViewport_(this.pos_, this.pos_);
+    if (inViewport) {
+      this.hintControls();
+    }
   }
 
   /** @override */
@@ -87,7 +90,7 @@ export class AmpCarousel extends BaseCarousel {
         this.commitSwitch_(oldPos, newPos);
       } else {
         Animation.animate(tr.setStyles(this.container_, {
-          transform: tr.translateX(tr.numeric(-oldPos, -newPos))
+          transform: tr.translateX(tr.numeric(-oldPos, -newPos)),
         }), 200, 'ease-out').thenAlways(() => {
           this.commitSwitch_(oldPos, newPos);
         });
@@ -102,11 +105,12 @@ export class AmpCarousel extends BaseCarousel {
    */
   commitSwitch_(oldPos, newPos) {
     st.setStyles(this.container_, {
-      transform: st.translateX(-newPos)
+      transform: st.translateX(-newPos),
     });
+    this.updateInViewport_(newPos, oldPos);
     this.doLayout_(newPos);
     this.preloadNext_(newPos, Math.sign(newPos - oldPos));
-    this.updateInViewport_(newPos, oldPos);
+    this.setControlsState();
   }
 
   /**
@@ -183,6 +187,7 @@ export class AmpCarousel extends BaseCarousel {
       this.withinWindow_(oldPos, cell => {
         if (seen.indexOf(cell) == -1) {
           this.updateInViewport(cell, false);
+          this.schedulePause(cell);
         }
       });
     }
@@ -236,7 +241,7 @@ export class AmpCarousel extends BaseCarousel {
   onSwipe_(swipe) {
     this.pos_ = this.boundPos_(this.startPos_ - swipe.deltaX, true);
     st.setStyles(this.container_, {
-      transform: st.translateX(-this.pos_)
+      transform: st.translateX(-this.pos_),
     });
     if (Math.abs(swipe.velocityX) < 0.05) {
       this.commitSwitch_(this.startPos_, this.pos_);
@@ -261,7 +266,7 @@ export class AmpCarousel extends BaseCarousel {
             }
             this.pos_ = newPos;
             st.setStyles(this.container_, {
-              transform: st.translateX(-this.pos_)
+              transform: st.translateX(-this.pos_),
             });
             return true;
           });
@@ -278,7 +283,7 @@ export class AmpCarousel extends BaseCarousel {
       return Animation.animate(time => {
         this.pos_ = posFunc(time);
         st.setStyles(this.container_, {
-          transform: st.translateX(-this.pos_)
+          transform: st.translateX(-this.pos_),
         });
       }, 250, bezierCurve(0.4, 0, 0.2, 1.4)).thenAlways();
     }).then(() => {

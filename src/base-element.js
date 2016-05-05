@@ -59,13 +59,14 @@ import {vsyncFor} from './vsync';
  *           ||
  *           || buildCallback
  *           || preconnectCallback may be called N times after this.
- *           || documentInactiveCallback may be called N times after this.
+ *           || pauseCallback may be called N times after this.
+ *           || resumeCallback may be called N times after this.
  *           ||
  *           \/
  *    State: <BUILT>
  *           ||
  *           || layoutCallback        <==
-             || (firstLayoutCompleted)  ||
+ *           || (firstLayoutCompleted)  ||
  *           ||                         ||
  *           \/                         || isRelayoutNeeded?
  *    State: <LAID OUT>                 ||
@@ -73,6 +74,7 @@ import {vsyncFor} from './vsync';
  *           ||                 =========
  *           ||
  *           || viewportCallback
+ *           || unlayoutCallback may be called N times after this.
  *           ||
  *           \/
  *    State: <IN VIEWPORT>
@@ -82,9 +84,20 @@ import {vsyncFor} from './vsync';
  * before buildCallback and it might be called multiple times including
  * after layoutCallback.
  *
- * The documentInactiveCallback is called when the document becomes
- * inactive. E.g. when the user swipes away from the document or
- * focuses a different tab.
+ * The pauseCallback is called when when the document becomes inactive, e.g.
+ * when the user swipes away from the document, or when the element is no
+ * longer being displayed, e.g. when the carousel slide slides out of view.
+ * In these situations, any actively playing media should pause.
+ *
+ * The resumeCallback is called when when the document becomes active again
+ * after becoming inactive, e.g. when the user swipes away from the document
+ * and swipes back. In these situations, any paused media may begin playing
+ * again, if user interaction is not required.
+ * TODO(jridgewell) slide slides into view
+ *
+ * The unlayoutCallback is called when the document becomes inactive, e.g.
+ * when the user swipes away from the document, or another tab is focused.
+ * In these situations, expensive memory and CPU resources should be freed.
  *
  * Additionally whenever the dimensions of an element might have changed
  * AMP remeasures its dimensions and calls `onLayoutMeasure` on the
@@ -248,10 +261,14 @@ export class BaseElement {
   /**
    * Subclasses can override this method to opt-out of rendering the element
    * when it is not currently visible.
-   * @return {boolean}
+   * Returning a boolean allows or prevents rendering outside the viewport at
+   * any distance, while returning a positive number allows rendering only when
+   * the element is within X viewports of the current viewport. Returning a
+   * zero causes the element to only render inside the viewport.
+   * @return {boolean|number}
    */
   renderOutsideViewport() {
-    return true;
+    return 3;
   }
 
   /**
@@ -302,14 +319,39 @@ export class BaseElement {
   }
 
   /**
-   * Requests the resource to stop its activity when the document goes into
+   * Requests the element to stop its activity when the document goes into
    * inactive state. The scope is up to the actual component. Among other
    * things the active playback of video or audio content must be stopped.
+   */
+  pauseCallback() {
+  }
+
+  /**
+   * Requests the element to resume its activity when the document returns from
+   * an inactive state. The scope is up to the actual component. Among other
+   * things the active playback of video or audio content may be resumed.
+   */
+  resumeCallback() {
+  }
+
+  /**
+   * Requests the element to unload any expensive resources when the element
+   * goes into non-visible state. The scope is up to the actual component.
    * The component must return `true` if it'd like to later receive
    * {@link layoutCallback} in case document becomes active again.
+   *
    * @return {boolean}
    */
-  documentInactiveCallback() {
+  unlayoutCallback() {
+    return false;
+  }
+
+  /**
+   * Subclasses can override this method to opt-in into calling
+   * {@link unlayoutCallback} when paused.
+   * @return {boolean}
+   */
+  unlayoutOnPause() {
     return false;
   }
 
@@ -484,7 +526,7 @@ export class BaseElement {
   * Returns a previously measured layout box of the element.
   * @return {!LayoutRect}
   */
-  getInsersectionElementLayoutBox() {
+  getIntersectionElementLayoutBox() {
     return this.resources_.getResourceForElement(this.element).getLayoutBox();
   }
 
@@ -497,6 +539,14 @@ export class BaseElement {
    */
   scheduleLayout(elements) {
     this.resources_.scheduleLayout(this.element, elements);
+  }
+
+  /**
+   * @param {!Element|!Array<!Element>} elements
+   * @protected
+   */
+  schedulePause(elements) {
+    this.resources_.schedulePause(this.element, elements);
   }
 
   /**
@@ -533,7 +583,8 @@ export class BaseElement {
    * @protected
    */
   changeHeight(newHeight, opt_callback) {
-    this.resources_./*OK*/changeHeight(this.element, newHeight, opt_callback);
+    this.resources_./*OK*/changeSize(
+        this.element, newHeight, /* newWidth */ undefined, opt_callback);
   }
 
   /**
@@ -550,8 +601,28 @@ export class BaseElement {
    * @protected
    */
   attemptChangeHeight(newHeight, opt_callback) {
-    this.resources_.attemptChangeHeight(this.element, newHeight, opt_callback);
+    this.resources_.attemptChangeSize(
+        this.element, newHeight, /* newWidth */ undefined, opt_callback);
   }
+
+ /**
+  * Requests the runtime to update the size of this element to the specified
+  * values. The runtime will schedule this request and attempt to process it
+  * as soon as possible. However, unlike in {@link changeSize}, the runtime
+  * may refuse to make a change in which case it will show the element's
+  * overflow element if provided, which is supposed to provide the reader with
+  * the necessary user action. (The overflow element is shown only if the
+  * requested height is greater than 0.)
+  * If the height is successfully updated then the opt_callback is called.
+  * @param {number|undefined} newHeight
+  * @param {number|undefined} newWidth
+  * @param {function=} opt_callback A callback function.
+  * @protected
+  */
+ attemptChangeSize(newHeight, newWidth, opt_callback) {
+   this.resources_.attemptChangeSize(
+       this.element, newHeight, newWidth, opt_callback);
+ }
 
  /**
   * Runs the specified mutation on the element and ensures that measures
@@ -608,7 +679,11 @@ export class BaseElement {
   /**
    * Called after a overflowCallback is triggered on an element.
    * @param {boolean} unusedOverflown
-   * @param {number} unusedRequestedHeight
+   * @param {number|undefined} unusedRequestedHeight
+   * @param {number|undefined} unusedRequestedWidth
    */
-  overflowCallback(unusedOverflown, unusedRequestedHeight) {}
+  overflowCallback(
+      unusedOverflown,
+      unusedRequestedHeight,
+      unusedRequestedWidth) {}
 };

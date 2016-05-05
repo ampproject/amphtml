@@ -15,7 +15,7 @@
  */
 
 import {loadScript} from '../src/3p';
-import {assert} from '../src/asserts';
+import {user} from '../src/log';
 
 
 /**
@@ -40,10 +40,10 @@ function getFacebookSdk(global, cb) {
  */
 export function facebook(global, data) {
   const embedAs = data.embedAs || 'post';
-  assert(['post', 'video'].indexOf(embedAs) !== -1,
+  user.assert(['post', 'video'].indexOf(embedAs) !== -1,
       'Attribute data-embed-as  for <amp-facebook> value is wrong, should be' +
       ' "post" or "video" was: %s', embedAs);
-  const fbPost = document.createElement('div');
+  const fbPost = global.document.createElement('div');
   fbPost.className = 'fb-' + embedAs;
   fbPost.setAttribute('data-href', data.href);
   global.document.getElementById('c').appendChild(fbPost);

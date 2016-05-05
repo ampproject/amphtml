@@ -17,244 +17,18 @@
 import * as sinon from 'sinon';
 import {
   AmpUserNotification,
-  UserNotificationManager
-} from '../../../../build/all/v0/amp-user-notification-0.1.max';
+  UserNotificationManager,
+} from '../amp-user-notification';
 import {createIframePromise} from '../../../../testing/iframe';
+import {
+  installUrlReplacementsService,
+} from '../../../../src/service/url-replacements-impl';
 
 
 describe('amp-user-notification', () => {
   let sandbox;
   let iframe;
   let dftAttrs;
-
-  function getUserNotification(attrs = {}) {
-    return createIframePromise().then(iframe_ => {
-      iframe = iframe_;
-      iframe.win.ampExtendedElements = {};
-      return buildElement(iframe.doc, attrs);
-    });
-  }
-
-  function buildElement(doc, attrs = {}) {
-    const elem = doc.createElement('amp-user-notification');
-
-    for (attr in attrs) {
-      elem.setAttribute(attr, attrs[attr]);
-    }
-    const button = doc.createElement('button');
-    button.setAttribute('on', 'tap:' + elem.getAttribute('id') + 'dismiss');
-    elem.appendChild(button);
-    return elem;
-  }
-
-  beforeEach(() => {
-    sandbox = sinon.sandbox.create();
-    dftAttrs = {
-      id: 'n1',
-      'data-show-if-href': 'https://www.ampproject.org/get/here',
-      'data-dismiss-href': 'https://www.ampproject.org/post/here',
-      'layout': 'nodisplay',
-    };
-  });
-
-  afterEach(() => {
-    sandbox.restore();
-    sandbox = null;
-  });
-
-  it('should have storage key by default', () => {
-    return getUserNotification(dftAttrs).then(el => {
-      const impl = el.implementation_;
-      impl.buildCallback();
-      expect(impl.storageKey_).to.not.be.null;
-    });
-  });
-
-  it('should require an id', () => {
-    return getUserNotification().then(el => {
-      const impl = el.implementation_;
-      expect(impl.buildCallback.bind(impl))
-          .to.throw(/should have an id/);
-    });
-  });
-
-  it('should show should return a boolean', () => {
-    stub = sandbox.stub(AmpUserNotification.prototype, 'getAsyncCid_')
-        .returns(Promise.resolve('12345'));
-    stub1 = sandbox.stub(AmpUserNotification.prototype, 'getShowEndpoint_')
-        .returns(Promise.resolve({showNotification: true}));
-    return getUserNotification(dftAttrs).then(el => {
-      const impl = el.implementation_;
-      impl.buildCallback();
-
-      return impl.shouldShow().then(shouldShow => {
-        expect(shouldShow).to.equal(true);
-      });
-    });
-  });
-
-  it('should have class `amp-active`', () => {
-    stub = sandbox.stub(AmpUserNotification.prototype, 'getAsyncCid_')
-        .returns(Promise.resolve('12345'));
-    stub1 = sandbox.stub(AmpUserNotification.prototype, 'getShowEndpoint_')
-        .returns(Promise.resolve({showNotification: true}));
-
-    return getUserNotification(dftAttrs).then(el => {
-      const impl = el.implementation_;
-      impl.buildCallback();
-      impl.dialogPromise_ = Promise.resolve();
-
-      expect(el).to.not.have.class('amp-active');
-
-      return impl.shouldShow().then(() => {
-        expect(el).to.not.have.class('amp-active');
-        return impl.show().then(() => {
-          expect(el).to.have.class('amp-active');
-        });
-      });
-    });
-  });
-
-  it('should not have `amp-active`', () => {
-    stub = sandbox.stub(AmpUserNotification.prototype, 'getAsyncCid_')
-        .returns(Promise.resolve('12345'));
-    stub1 = sandbox.stub(AmpUserNotification.prototype, 'getShowEndpoint_')
-        .returns(Promise.resolve({showNotification: false}));
-
-    return getUserNotification(dftAttrs).then(el => {
-      const impl = el.implementation_;
-      impl.buildCallback();
-      impl.dialogPromise_ = Promise.resolve();
-      impl.dialogResolve_ = function() {};
-
-      expect(el).to.not.have.class('amp-active');
-
-      return impl.shouldShow().then(shouldShow => {
-        if (shouldShow) {
-          impl.show();
-        }
-
-        expect(el).to.not.have.class('amp-active');
-      });
-    });
-  });
-
-  it('should have `amp-hidden` and no `amp-active`', () => {
-    stub = sandbox.stub(AmpUserNotification.prototype, 'getAsyncCid_')
-        .returns(Promise.resolve('12345'));
-    stub1 = sandbox.stub(AmpUserNotification.prototype, 'getShowEndpoint_')
-        .returns(Promise.resolve({showNotification: true}));
-    stub2 = sandbox.stub(AmpUserNotification.prototype, 'postDismissEnpoint_')
-        .returns(Promise.resolve());
-
-    return getUserNotification(dftAttrs).then(el => {
-      const impl = el.implementation_;
-      impl.buildCallback();
-      impl.dialogPromise_ = Promise.resolve();
-      impl.dialogResolve_ = function() {};
-
-      expect(el).to.not.have.class('amp-active');
-
-      return impl.shouldShow().then(shouldShow => {
-        if (shouldShow) {
-          impl.show();
-        }
-        expect(el).to.have.class('amp-active');
-        expect(stub2.calledOnce).to.be.false;
-        impl.executeAction({method: 'dismiss'});
-        expect(el).to.not.have.class('amp-active');
-        expect(el).to.have.class('amp-hidden');
-        expect(stub2.calledOnce).to.be.true;
-      });
-    });
-  });
-
-  describe('buildGetHref_', () => {
-
-    it('should do url replacement', () => {
-      dftAttrs['data-show-if-href'] = 'https://www.ampproject.org/path/?ord=RANDOM';
-      return getUserNotification(dftAttrs).then(el => {
-        const impl = el.implementation_;
-        impl.buildCallback();
-        return impl.buildGetHref_('12345').then(href => {
-          const value = href.match(/\?ord=(.*)$/)[1];
-          expect(href).to.not.contain('RANDOM');
-          expect(parseInt(value, 10)).to.be.a.number;
-        });
-      });
-    });
-
-    it('should build a valid url', () => {
-      return getUserNotification(dftAttrs).then(el => {
-        const impl = el.implementation_;
-        impl.buildCallback();
-        return impl.buildGetHref_('12345').then(href => {
-          expect(href).to
-              .equal('https://www.ampproject.org/get/here?elementId=n1&ampUserId=12345');
-        });
-      });
-    });
-  });
-
-  describe('userNotificationManager', () => {
-    let service;
-    let tag;
-
-    beforeEach(() => {
-      service = new UserNotificationManager(window);
-      service.managerReadyPromise_ = Promise.resolve();
-      service.nextInQueue_ = service.managerReadyPromise_;
-      tag = {
-        shouldShow: () => Promise.resolve(true),
-        show: () => Promise.resolve()
-      };
-    });
-
-    it('should be able to get a resolved service', () => {
-      service.registerUserNotification('n1', tag);
-
-      return service.get('n1');
-    });
-
-    it('should queue up multiple amp-user-notification elements', () => {
-      const tag1 = Object.assign({}, tag);
-      const tag2 = Object.assign({}, tag);
-      const show1 = sandbox.spy(tag, 'show');
-      const show2 = sandbox.spy(tag1, 'show');
-      const show3 = sandbox.spy(tag2, 'show');
-      const p1 = service.registerUserNotification('n1', tag);
-      const p2 = service.registerUserNotification('n2', tag1);
-      const p3 = service.registerUserNotification('n3', tag2);
-
-      return p1.then(() => {
-        expect(show1.calledOnce).to.be.true;
-        expect(show2.calledOnce).to.be.false;
-        expect(show3.calledOnce).to.be.false;
-        return p2.then(() => {
-          expect(show2.calledOnce).to.be.true;
-          expect(show3.calledOnce).to.be.false;
-          return p3.then(() => {
-            expect(show3.calledOnce).to.be.true;
-          });
-        });
-      });
-    });
-
-    it('should be able to get before a registration of an element', () => {
-      const get = service.get.bind(service, 'n4');
-      expect(get).to.not.throw();
-      expect(get().then).to.be.function;
-    });
-  });
-
-});
-
-
-// TODO(dvoytenko, #1942): Merge with the main `describe`.
-describe('amp-user-notification with storage', () => {
-  let iframe;
-  let dftAttrs;
-  let sandbox;
   let storage;
   let storageMock;
 
@@ -274,14 +48,15 @@ describe('amp-user-notification with storage', () => {
   });
 
   afterEach(() => {
+    storageMock.verify();
     sandbox.restore();
-    sandbox = null;
   });
 
   function getUserNotification(attrs = {}) {
     return createIframePromise().then(iframe_ => {
       iframe = iframe_;
       iframe.win.ampExtendedElements = {};
+      installUrlReplacementsService(iframe.win);
       return buildElement(iframe.doc, attrs);
     });
   }
@@ -297,10 +72,9 @@ describe('amp-user-notification with storage', () => {
     elem.appendChild(button);
 
     const impl = elem.implementation_;
-    impl.isStorageEnabled_ = true;
     impl.storagePromise_ = Promise.resolve(storage);
     impl.userNotificationManager_ = {
-      registerUserNotification: () => {}
+      registerUserNotification: () => {},
     };
 
     return elem;
@@ -314,9 +88,17 @@ describe('amp-user-notification with storage', () => {
     });
   });
 
+  it('should require an id', () => {
+    return getUserNotification().then(el => {
+      const impl = el.implementation_;
+      expect(impl.buildCallback.bind(impl))
+          .to.throw(/should have an id/);
+    });
+  });
+
   it('should NOT require `data-show-if-href`', () => {
     return getUserNotification({
-      id: 'n1'
+      id: 'n1',
     }).then(el => {
       const impl = el.implementation_;
       expect(impl.buildCallback.bind(impl)).to.not.throw;
@@ -326,7 +108,7 @@ describe('amp-user-notification with storage', () => {
   it('should NOT require `data-dismiss-href`', () => {
     return getUserNotification({
       id: 'n1',
-      'data-show-if-href': 'https://www.ampproject.org/get'
+      'data-show-if-href': 'https://www.ampproject.org/get',
     }).then(el => {
       const impl = el.implementation_;
       expect(impl.buildCallback.bind(impl)).to.not.throw;
@@ -346,6 +128,54 @@ describe('amp-user-notification with storage', () => {
       return impl.shouldShow().then(shouldShow => {
         expect(shouldShow).to.equal(false);
       });
+    });
+  });
+
+  it('should skip storage if data-persist-dismissal=false', () => {
+    dftAttrs['data-persist-dismissal'] = false;
+    return getUserNotification(dftAttrs).then(el => {
+      const impl = el.implementation_;
+      impl.buildCallback();
+
+      storageMock.expects('get')
+          .withExactArgs('amp-user-notification:n1')
+          .returns(Promise.resolve(true))
+          .never();
+
+      const cidStub = sandbox.stub(impl, 'getAsyncCid_')
+          .returns(Promise.resolve('12345'));
+      const showEndpointStub = sandbox.stub(impl, 'getShowEndpoint_')
+          .returns(Promise.resolve({showNotification: true}));
+
+      return impl.shouldShow().then(shouldShow => {
+        expect(shouldShow).to.equal(true);
+        expect(cidStub.callCount).to.equal(1);
+        expect(showEndpointStub.callCount).to.equal(1);
+      });
+    });
+  });
+
+  it('should set persistDismissal to false', () => {
+    return getUserNotification({
+      id: 'n1',
+      layout: 'nodisplay',
+      'data-persist-dismissal': false,
+    }).then(el => {
+      const impl = el.implementation_;
+      impl.buildCallback();
+      expect(impl.persistDismissal_).to.be.false;
+    });
+  });
+
+  it('should set persistDismissal to true for any other value', () => {
+    return getUserNotification({
+      id: 'n1',
+      layout: 'nodisplay',
+      'data-persist-dismissal': 'anything',
+    }).then(el => {
+      const impl = el.implementation_;
+      impl.buildCallback();
+      expect(impl.persistDismissal_).to.be.true;
     });
   });
 
@@ -479,6 +309,202 @@ describe('amp-user-notification with storage', () => {
 
       impl.dismiss();
       expect(postDismissStub.callCount).to.equal(0);
+    });
+  });
+
+  it('should not store value on dismiss if persist-dismissal=false', () => {
+    dftAttrs['data-persist-dismissal'] = false;
+    return getUserNotification(dftAttrs).then(el => {
+      const impl = el.implementation_;
+      impl.buildCallback();
+
+      storageMock.expects('set')
+          .withExactArgs('amp-user-notification:n1', true)
+          .returns(Promise.resolve())
+          .never();
+      const postDismissStub = sandbox.stub(impl, 'postDismissEnpoint_');
+
+      impl.dismiss();
+      expect(postDismissStub.callCount).to.equal(1);
+    });
+  });
+
+  it('should not store value on dismiss if persist-dismissal=no', () => {
+    dftAttrs['data-persist-dismissal'] = 'no';
+    return getUserNotification(dftAttrs).then(el => {
+      const impl = el.implementation_;
+      impl.buildCallback();
+
+      storageMock.expects('set')
+          .withExactArgs('amp-user-notification:n1', true)
+          .returns(Promise.resolve())
+          .never();
+      const postDismissStub = sandbox.stub(impl, 'postDismissEnpoint_');
+
+      impl.dismiss();
+      expect(postDismissStub.callCount).to.equal(1);
+    });
+  });
+
+  it('should have class `amp-active`', () => {
+    stub = sandbox.stub(AmpUserNotification.prototype, 'getAsyncCid_')
+        .returns(Promise.resolve('12345'));
+    stub1 = sandbox.stub(AmpUserNotification.prototype, 'getShowEndpoint_')
+        .returns(Promise.resolve({showNotification: true}));
+
+    return getUserNotification(dftAttrs).then(el => {
+      const impl = el.implementation_;
+      impl.buildCallback();
+      impl.dialogPromise_ = Promise.resolve();
+      const addToFixedLayerStub = sandbox.stub(
+          impl.getViewport(), 'addToFixedLayer');
+
+      expect(el).to.not.have.class('amp-active');
+
+      return impl.shouldShow().then(() => {
+        expect(el).to.not.have.class('amp-active');
+        return impl.show().then(() => {
+          expect(el).to.have.class('amp-active');
+          expect(addToFixedLayerStub.callCount).to.equal(1);
+          expect(addToFixedLayerStub.getCall(0).args[0]).to.equal(el);
+        });
+      });
+    });
+  });
+
+  it('should not have `amp-active`', () => {
+    stub = sandbox.stub(AmpUserNotification.prototype, 'getAsyncCid_')
+        .returns(Promise.resolve('12345'));
+    stub1 = sandbox.stub(AmpUserNotification.prototype, 'getShowEndpoint_')
+        .returns(Promise.resolve({showNotification: false}));
+
+    return getUserNotification(dftAttrs).then(el => {
+      const impl = el.implementation_;
+      impl.buildCallback();
+      impl.dialogPromise_ = Promise.resolve();
+      impl.dialogResolve_ = function() {};
+
+      expect(el).to.not.have.class('amp-active');
+
+      return impl.shouldShow().then(shouldShow => {
+        if (shouldShow) {
+          impl.show();
+        }
+
+        expect(el).to.not.have.class('amp-active');
+      });
+    });
+  });
+
+  it('should have `amp-hidden` and no `amp-active`', () => {
+    stub = sandbox.stub(AmpUserNotification.prototype, 'getAsyncCid_')
+        .returns(Promise.resolve('12345'));
+    stub1 = sandbox.stub(AmpUserNotification.prototype, 'getShowEndpoint_')
+        .returns(Promise.resolve({showNotification: true}));
+    stub2 = sandbox.stub(AmpUserNotification.prototype, 'postDismissEnpoint_')
+        .returns(Promise.resolve());
+
+    return getUserNotification(dftAttrs).then(el => {
+      const impl = el.implementation_;
+      impl.buildCallback();
+      impl.dialogPromise_ = Promise.resolve();
+      impl.dialogResolve_ = function() {};
+      const removeFromFixedLayerStub = sandbox.stub(
+          impl.getViewport(), 'removeFromFixedLayer');
+
+      expect(el).to.not.have.class('amp-active');
+
+      return impl.shouldShow().then(shouldShow => {
+        if (shouldShow) {
+          impl.show();
+        }
+        expect(el).to.have.class('amp-active');
+        expect(stub2.calledOnce).to.be.false;
+        impl.executeAction({method: 'dismiss'});
+        expect(el).to.not.have.class('amp-active');
+        expect(el).to.have.class('amp-hidden');
+        expect(stub2.calledOnce).to.be.true;
+        expect(removeFromFixedLayerStub.callCount).to.equal(1);
+        expect(removeFromFixedLayerStub.getCall(0).args[0]).to.equal(el);
+      });
+    });
+  });
+
+  describe('buildGetHref_', () => {
+
+    it('should do url replacement', () => {
+      dftAttrs['data-show-if-href'] = 'https://www.ampproject.org/path/?ord=RANDOM';
+      return getUserNotification(dftAttrs).then(el => {
+        const impl = el.implementation_;
+        impl.buildCallback();
+        return impl.buildGetHref_('12345').then(href => {
+          const value = href.match(/\?ord=(.*)$/)[1];
+          expect(href).to.not.contain('RANDOM');
+          expect(parseInt(value, 10)).to.be.a.number;
+        });
+      });
+    });
+
+    it('should build a valid url', () => {
+      return getUserNotification(dftAttrs).then(el => {
+        const impl = el.implementation_;
+        impl.buildCallback();
+        return impl.buildGetHref_('12345').then(href => {
+          expect(href).to
+              .equal('https://www.ampproject.org/get/here?elementId=n1&ampUserId=12345');
+        });
+      });
+    });
+  });
+
+  describe('userNotificationManager', () => {
+    let service;
+    let tag;
+
+    beforeEach(() => {
+      service = new UserNotificationManager(window);
+      service.managerReadyPromise_ = Promise.resolve();
+      service.nextInQueue_ = service.managerReadyPromise_;
+      tag = {
+        shouldShow: () => Promise.resolve(true),
+        show: () => Promise.resolve(),
+      };
+    });
+
+    it('should be able to get a resolved service', () => {
+      service.registerUserNotification('n1', tag);
+
+      return service.get('n1');
+    });
+
+    it('should queue up multiple amp-user-notification elements', () => {
+      const tag1 = Object.assign({}, tag);
+      const tag2 = Object.assign({}, tag);
+      const show1 = sandbox.spy(tag, 'show');
+      const show2 = sandbox.spy(tag1, 'show');
+      const show3 = sandbox.spy(tag2, 'show');
+      const p1 = service.registerUserNotification('n1', tag);
+      const p2 = service.registerUserNotification('n2', tag1);
+      const p3 = service.registerUserNotification('n3', tag2);
+
+      return p1.then(() => {
+        expect(show1.calledOnce).to.be.true;
+        expect(show2.calledOnce).to.be.false;
+        expect(show3.calledOnce).to.be.false;
+        return p2.then(() => {
+          expect(show2.calledOnce).to.be.true;
+          expect(show3.calledOnce).to.be.false;
+          return p3.then(() => {
+            expect(show3.calledOnce).to.be.true;
+          });
+        });
+      });
+    });
+
+    it('should be able to get before a registration of an element', () => {
+      const get = service.get.bind(service, 'n4');
+      expect(get).to.not.throw();
+      expect(get().then).to.be.function;
     });
   });
 });

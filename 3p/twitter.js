@@ -39,9 +39,12 @@ function getTwttr(global, cb) {
  * @param {!Object} data
  */
 export function twitter(global, data) {
-  const tweet = document.createElement('div');
+  const tweet = global.document.createElement('div');
   tweet.id = 'tweet';
   tweet.style.width = '100%';
+  tweet.style.display = 'flex';
+  tweet.style.alignItems = 'center';
+  tweet.style.justifyContent = 'center';
   global.document.getElementById('c').appendChild(tweet);
   getTwttr(global, function(twttr) {
     // Dimensions are given by the parent frame.
@@ -49,13 +52,17 @@ export function twitter(global, data) {
     delete data.height;
     twttr.widgets.createTweet(data.tweetid, tweet, data)./*OK*/then(() => {
       const iframe = global.document.querySelector('#c iframe');
-      // Unfortunately the tweet isn't really done at this time.
-      // We listen for resize to learn when things are
-      // really done.
-      iframe.contentWindow.addEventListener('resize', function() {
+      // There is no iframe if the tweet was deleted. Thanks for resolving
+      // the promise, though :)
+      if (iframe && iframe.contentWindow) {
+        // Unfortunately the tweet isn't really done at this time.
+        // We listen for resize to learn when things are
+        // really done.
+        iframe.contentWindow.addEventListener('resize', function() {
+          render();
+        }, true);
         render();
-      }, true);
-      render();
+      }
     });
   });
 

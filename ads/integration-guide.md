@@ -20,7 +20,7 @@ For example : Amazon A9 server can be invoked using following syntax :
 </amp-ad>
 ```
 
-Also note that each of the attributes that follow ‘type’ are dependent on the parameters that Amazon’s A9 server expects in order to deliver an ad. The file [a9.js](/a9.js) shows you how the parameters are mapped to making a JavaScript call which will invoke the server by invoking the URL : https://c.amazon-adsystem.com/aax2/assoc.js  and appending the corresponding parameters being passed in by the AMP ad tag  and return the ad.
+Also note that each of the attributes that follow ‘type’ are dependent on the parameters that Amazon’s A9 server expects in order to deliver an ad. The file [a9.js](./a9.js) shows you how the parameters are mapped to making a JavaScript call which will invoke the server by invoking the URL : https://c.amazon-adsystem.com/aax2/assoc.js  and appending the corresponding parameters being passed in by the AMP ad tag  and return the ad.
 
 ##### Server Side Platform (SSP) or an Ad Exchange
 
@@ -51,7 +51,7 @@ A brightcove player can be invoked by the following:
 <amp-brightcove
       data-account="906043040001"
       data-video-id="1401169490001"
-      data-player-id="180a5658-8be8-4f33-8eba-d562ab41b40c"
+      data-player="180a5658-8be8-4f33-8eba-d562ab41b40c"
       layout="responsive" width="480" height="270">
   </amp-brightcove>
 ```

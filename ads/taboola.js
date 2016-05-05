@@ -23,8 +23,7 @@ import {loadScript, validateDataExists, validateExactlyOne} from '../src/3p';
 export function taboola(global, data) {
   // do not copy the following attributes from the 'data' object
   // to _tablloa global object
-  const blackList = ['height', 'initialWindowHeight', 'initialWindowWidth',
-    'type', 'width', 'placement', 'mode'];
+  const blackList = ['height', 'type', 'width', 'placement', 'mode'];
 
   // ensure we have vlid publisher, placement and mode
   // and exactly one page-type
@@ -35,7 +34,7 @@ export function taboola(global, data) {
   // setup default values for referrer and url
   const params = {
     referrer: data.referrer || global.context.referrer,
-    url: data.url || global.context.canonicalUrl
+    url: data.url || global.context.canonicalUrl,
   };
 
   // copy none blacklisted attribute to the 'params' map
@@ -52,9 +51,11 @@ export function taboola(global, data) {
     placement: data.placement,
     mode: data.mode,
     framework: 'amp',
-    container: 'c'
+    container: 'c',
   },
-    params]);
+    params,
+    {flush: true}]
+  );
 
   // install observation on entering/leaving the view
   global.context.observeIntersection(function(changes) {
@@ -63,7 +64,7 @@ export function taboola(global, data) {
         global._taboola.push({
           visible: true,
           rects: c,
-          placement: data.placement
+          placement: data.placement,
         });
       }
     });

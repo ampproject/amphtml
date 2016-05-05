@@ -17,7 +17,7 @@
 import {
   getService,
   getServicePromise,
-  resetServiceForTesting
+  resetServiceForTesting,
 } from '../../src/service';
 
 describe('service', () => {

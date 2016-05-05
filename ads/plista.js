@@ -23,7 +23,7 @@ import {loadScript, checkData} from '../src/3p';
 export function plista(global, data) {
   checkData(data, [
     'publickey', 'widgetname', 'urlprefix',
-    'item', 'geo', 'categories', 'countrycode'
+    'item', 'geo', 'categories', 'countrycode',
   ]);
   const div = global.document.createElement('div');
   div.setAttribute('data-display', 'plista_widget_' + data.widgetname);
@@ -33,14 +33,14 @@ export function plista(global, data) {
     publickey: data.publickey,
     widgets: [{
       name: data.widgetname,
-      pre: data.urlprefix
+      pre: data.urlprefix,
     }],
     item: data.item,
     geo: data.geo,
     categories: data.categories,
     noCache: true,
     useDocumentReady: false,
-    dataMode: 'data-display'
+    dataMode: 'data-display',
   };
 
   // load the plista modules asynchronously

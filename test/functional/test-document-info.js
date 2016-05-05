@@ -40,11 +40,11 @@ describe('document-info', () => {
   it('should provide the sourceUrl', () => {
     const win = {
       document: {
-        querySelector() { return 'http://www.origin.com/foo/?f=0'; }
+        querySelector() { return 'http://www.origin.com/foo/?f=0'; },
       },
       Math: {random() { return 0.123456789; }},
       location: {
-        href: 'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0'
+        href: 'https://cdn.ampproject.org/v/www.origin.com/foo/?f=0',
       },
     };
     expect(documentInfoFor(win).sourceUrl).to.equal(

@@ -22,32 +22,40 @@
  */
 goog.require('amp.htmlparser.HtmlParser');
 goog.require('amp.htmlparser.HtmlSaxHandler');
+goog.require('amp.htmlparser.HtmlSaxHandlerWithLocation');
 
 goog.provide('amp.htmlparser.HtmlParserTest');
 
 /**
- * @implements {amp.htmlparser.HtmlSaxHandler}
  * @private
  */
-class LoggingHandler {
+class LoggingHandler extends amp.htmlparser.HtmlSaxHandler {
   constructor() {
+    super();
     this.log = [];
   }
 
+  /** @override */
   startDoc() { this.log.push('startDoc()'); }
 
+  /** @override */
   cdata(text) { this.log.push('cdata("' + text + '")'); }
 
+  /** @override */
   pcdata(text) { this.log.push('pcdata("' + text + '")'); }
 
+  /** @override */
   rcdata(text) { this.log.push('rcdata("' + text + '")'); }
 
+  /** @override */
   endDoc() { this.log.push('endDoc()'); }
 
+  /** @override */
   startTag(tagName, attrs) {
     this.log.push('startTag(' + tagName + ',[' + attrs + '])');
   }
 
+  /** @override */
   endTag(tagName) { this.log.push('endTag(' + tagName + ')'); }
 }
 
@@ -90,7 +98,7 @@ describe('HtmlParser', () => {
     const parser = new amp.htmlparser.HtmlParser();
     parser.parse(handler, '<input type=checkbox checked>');
     expect(handler.log).toEqual([
-      'startDoc()', 'startTag(input,[type,checkbox,checked,checked])',
+      'startDoc()', 'startTag(input,[type,checkbox,checked,])',
       'endDoc()']);
   });
 
@@ -165,50 +173,67 @@ describe('HtmlParser', () => {
     // Note the two double quotes at the end of the tag.
     parser.parse(handler, '<a href="foo.html""></a>');
     expect(handler.log).toEqual([
-        'startDoc()', 'startTag(a,[href,foo.html,","])',
+        'startDoc()', 'startTag(a,[href,foo.html,",])',
         'endTag(a)', 'endDoc()' ]);
   });
 });
 
 /**
- * @implements {amp.htmlparser.HtmlSaxHandlerWithLocation}
  * @private
  */
-class LoggingHandlerWithLocation {
+class LoggingHandlerWithLocation
+extends amp.htmlparser.HtmlSaxHandlerWithLocation {
   constructor() {
+    super();
     /** @type {amp.htmlparser.DocLocator} */
     this.locator = null;
     /** @type {!Array<!string>} */
     this.log = [];
   }
+
+  /** @override */
   setDocLocator (locator) {
     this.locator = locator;
     this.log = [];
   }
+
+  /** @override */
   startDoc() {
     this.log.push(':' + this.locator.getLine() + ':' + this.locator.getCol() +
         ': startDoc()');
   }
+
+  /** @override */
   cdata(text) {
     this.log.push(':' + this.locator.getLine() + ':' + this.locator.getCol() +
         ': cdata("' + text + '")');
   }
+
+  /** @override */
   pcdata(text) {
     this.log.push(':' + this.locator.getLine() + ':' + this.locator.getCol() +
         ': pcdata("' + text + '")');
   }
+
+  /** @override */
   rcdata(text) {
     this.log.push(':' + this.locator.getLine() + ':' + this.locator.getCol() +
         ': rcdata("' + text + '")');
   }
+
+  /** @override */
   endDoc() {
     this.log.push(':' + this.locator.getLine() + ':' + this.locator.getCol() +
         ': endDoc()');
   }
+
+  /** @override */
   startTag(tagName, attrs) {
     this.log.push(':' + this.locator.getLine() + ':' + this.locator.getCol() +
         ': startTag(' + tagName + ',[' + attrs + '])');
   }
+
+  /** @override */
   endTag(tagName) {
     this.log.push(':' + this.locator.getLine() + ':' + this.locator.getCol() +
         ': endTag(' + tagName + ')');
@@ -361,9 +386,9 @@ describe('HtmlParser with location', () => {
         '</html>');
     expect(handler.log).toEqual([
       ':1:0: startDoc()',
-      ':1:0: startTag(!doctype,[html,html])',
+      ':1:0: startTag(!doctype,[html,])',
       ':1:14: pcdata("\n")',
-      ':2:0: startTag(html,[amp,amp,lang,tr])',
+      ':2:0: startTag(html,[amp,,lang,tr])',
       ':2:19: pcdata("\n")',
       ':3:0: startTag(head,[])',
       ':3:5: pcdata("\n")',
@@ -373,7 +398,7 @@ describe('HtmlParser with location', () => {
       ':5:0: rcdata("")',
       ':5:7: endTag(title)',
       ':5:14: pcdata("\n")',
-      ':6:0: startTag(script,[async,async,src,'+
+      ':6:0: startTag(script,[async,,src,'+
           'https://cdn.ampproject.org/v0.js])',
       ':6:0: cdata("")',
       ':6:53: endTag(script)',

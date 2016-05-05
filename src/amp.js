@@ -31,7 +31,7 @@ import {stubElements} from './custom-element';
 import {adopt} from './runtime';
 import {cssText} from '../build/css';
 import {maybeValidate} from './validator-integration';
-import {waitForExtensions} from './render-delaying-extensions';
+import {maybeTrackImpression} from './impression';
 
 // We must under all circumstances call makeBodyVisible.
 // It is much better to have AMP tags not rendered than having
@@ -47,6 +47,7 @@ try {
       installCoreServices(window);
       // We need the core services (viewer/resources) to start instrumenting
       perf.coreServicesAvailable();
+      maybeTrackImpression(window);
       templatesFor(window);
 
       installImg(window);
@@ -62,16 +63,17 @@ try {
       installGlobalClickListener(window);
 
       maybeValidate(window);
-      makeBodyVisible(document, waitForExtensions(window));
+      makeBodyVisible(document, /* waitForExtensions */ true);
     } catch (e) {
       makeBodyVisible(document);
+      throw e;
     } finally {
       perf.tick('e_is');
       // TODO(erwinm): move invocation of the `flush` method when we have the
       // new ticks in place to batch the ticks properly.
       perf.flush();
     }
-  }, /* opt_isRuntimeCss */ true);
+  }, /* opt_isRuntimeCss */ true, /* opt_ext */ 'amp-runtime');
 } catch (e) {
   // In case of an error call this.
   makeBodyVisible(document);
@@ -85,5 +87,5 @@ if (window.console) {
   (console.info || console.log).call(console,
       'Powered by AMP ⚡ HTML – Version $internalRuntimeVersion$');
 }
-document.documentElement.setAttribute('amp-version',
+window.document.documentElement.setAttribute('amp-version',
       '$internalRuntimeVersion$');

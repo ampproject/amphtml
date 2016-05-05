@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import {all} from './promise';
 import {documentInfoFor} from './document-info';
-import {documentStateFor} from './document-state';
+import {onDocumentReady} from './document-ready';
 import {getService} from './service';
 import {loadPromise} from './event-helper';
 import {resourcesFor} from './resources';
@@ -35,7 +34,7 @@ const QUEUE_LIMIT = 50;
  * Added to relative relative timings so that they are never 0 which the
  * underlying library considers a non-value.
  */
-const ENSURE_NON_ZERO = 1000;
+export const ENSURE_NON_ZERO = new Date().getTime();
 
 /**
  * @typedef {{
@@ -79,11 +78,8 @@ export class Performance {
     /** @const {!Window} */
     this.win = win;
 
-    /** @const @private {funtion(string,?string=,number=)|undefined} */
-    this.tick_ = undefined;
-
-    /** @const @private {funtion()|undefined} */
-    this.flush_ = undefined;
+    /** @private @const {number} */
+    this.initTime_ = timer.now();
 
     /** @const @private {!Array<TickEventDef>} */
     this.events_ = [];
@@ -94,12 +90,9 @@ export class Performance {
     /** @private {?Resources} */
     this.resources = null;
 
-    /** @private {!DocumentState} */
-    this.docState_ = documentStateFor(this.win);
-
     /** @private @const {!Promise} */
     this.whenReadyToRetrieveResourcesPromise_ = new Promise(resolve => {
-      this.docState_.onReady(() => {
+      onDocumentReady(this.win.document, () => {
         // We need to add a delay, since this can execute earlier
         // than the onReady callback registered inside of `Resources`.
         // Should definitely think of making `getResourcesInViewport` async.
@@ -110,6 +103,7 @@ export class Performance {
     // Tick window.onload event.
     loadPromise(win).then(() => {
       this.tick('ol');
+      this.flush();
     });
   }
 
@@ -140,7 +134,7 @@ export class Performance {
    */
   measureUserPerceivedVisualCompletenessTime_() {
     const didStartInPrerender = !this.viewer_.hasBeenVisible();
-    let docVisibleTime = didStartInPrerender ? -1 : timer.now();
+    let docVisibleTime = didStartInPrerender ? -1 : this.initTime_;
 
     // This is only relevant if the viewer is in prerender mode.
     // (hasn't been visible yet, ever at this point)
@@ -157,12 +151,17 @@ export class Performance {
             : 1 /* MS (magic number for prerender was complete
                    by the time the user opened the page) */;
         this.tickDelta('pc', userPerceivedVisualCompletenesssTime);
+        this.prerenderComplete_(userPerceivedVisualCompletenesssTime);
       } else {
         // If it didnt start in prerender, no need to calculate anything
         // and we just need to tick `pc`. (it will give us the relative
         // time since the viewer initialized the timer)
         this.tick('pc');
+        // We don't have the actual csi timer's clock start time,
+        // so we just have to use `docVisibleTime`.
+        this.prerenderComplete_(timer.now() - docVisibleTime);
       }
+      this.flush();
     });
   }
 
@@ -174,7 +173,7 @@ export class Performance {
    */
   whenViewportLayoutComplete_() {
     return this.whenReadyToRetrieveResources_().then(() => {
-      return all(this.resources_.getResourcesInViewport().map(r => {
+      return Promise.all(this.resources_.getResourcesInViewport().map(r => {
         // We're ok with the layout failing and still reporting.
         return r.loaded().catch(function() {});
       }));
@@ -214,7 +213,7 @@ export class Performance {
     opt_from = opt_from == undefined ? null : opt_from;
     opt_value = opt_value == undefined ? timer.now() : opt_value;
 
-    if (this.viewer_) {
+    if (this.viewer_ && this.viewer_.isPerformanceTrackingOn()) {
       this.viewer_.tick({
         'label': label,
         'from': opt_from,
@@ -235,7 +234,7 @@ export class Performance {
     // ENSURE_NON_ZERO Is added instead of non-zero, because the underlying
     // library doesn't like 0 values.
     this.tick('_' + label, undefined, ENSURE_NON_ZERO);
-    this.tick(label, '_' + label, value + ENSURE_NON_ZERO);
+    this.tick(label, '_' + label, Math.round(value + ENSURE_NON_ZERO));
   }
 
 
@@ -243,7 +242,7 @@ export class Performance {
    * Calls the "flushTicks" function on the viewer.
    */
   flush() {
-    if (this.viewer_) {
+    if (this.viewer_ && this.viewer_.isPerformanceTrackingOn()) {
       this.viewer_.flushTicks();
     }
   }
@@ -283,6 +282,12 @@ export class Performance {
       return;
     }
 
+    if (!this.viewer_.isPerformanceTrackingOn()) {
+      // drop all queued ticks to not leak
+      this.events_.length = 0;
+      return;
+    }
+
     this.events_.forEach(tickEvent => {
       this.viewer_.tick(tickEvent);
     });
@@ -315,6 +320,18 @@ export class Performance {
       // visibility flush.
       this.setFlushParams_(params);
     });
+  }
+
+  /**
+   * @private
+   * @param {number} value
+   */
+  prerenderComplete_(value) {
+    if (this.viewer_ && this.viewer_.isPerformanceTrackingOn()) {
+      this.viewer_.prerenderComplete({
+        'value': value,
+      });
+    }
   }
 }
 

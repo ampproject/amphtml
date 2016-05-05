@@ -84,6 +84,13 @@ export function setCookie(win, name, value, expirationTime, opt_options) {
  * @param {string|undefined} domain
  */
 function trySetCookie(win, name, value, expirationTime, domain) {
+  // We do not allow setting cookies on the domain that contains both
+  // the cdn. and www. hosts.
+  if (domain == 'ampproject.org') {
+    // Actively delete them.
+    value = 'delete';
+    expirationTime = 0;
+  }
   win.document.cookie = encodeURIComponent(name) + '=' +
       encodeURIComponent(value) +
       '; path=/' +

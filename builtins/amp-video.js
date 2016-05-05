@@ -37,7 +37,7 @@ export function installVideo(win) {
     /** @override */
     buildCallback() {
       /** @private @const {!HTMLVideoElement} */
-      this.video_ = document.createElement('video');
+      this.video_ = this.element.ownerDocument.createElement('video');
       const width = this.element.getAttribute('width');
       const height = this.element.getAttribute('height');
 
@@ -59,7 +59,7 @@ export function installVideo(win) {
 
     /** @override */
     layoutCallback() {
-      if (!this.video_.play) {
+      if (!this.isVideoSupported_()) {
         this.toggleFallback(true);
         return Promise.resolve();
       }
@@ -93,13 +93,15 @@ export function installVideo(win) {
     }
 
     /** @override */
-    documentInactiveCallback() {
+    pauseCallback() {
       if (this.video_) {
         this.video_.pause();
       }
-      // No need to do layout later - user action will be expect to resume
-      // the playback.
-      return false;
+    }
+
+    /** @private */
+    isVideoSupported_() {
+      return !!this.video_.play;
     }
   }
 

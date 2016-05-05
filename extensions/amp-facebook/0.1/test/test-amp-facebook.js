@@ -20,7 +20,11 @@ import {adopt} from '../../../../src/runtime';
 
 adopt(window);
 
-describe('amp-facebook', () => {
+describe('amp-facebook', function() {
+  this.timeout(5000);
+
+  const fbPostHref = 'https://www.facebook.com/zuck/posts/10102593740125791';
+  const fbVideoHref = 'https://www.facebook.com/zuck/videos/10102509264909801/';
 
   function getFBPost(href, opt_embedAs) {
     return createIframePromise().then(iframe => {
@@ -41,7 +45,7 @@ describe('amp-facebook', () => {
   }
 
   it('renders fb-post', () => {
-    return getFBPost('https://www.facebook.com/zuck/posts/10102593740125791').then(ampFB => {
+    return getFBPost(fbPostHref).then(ampFB => {
       const iframe = ampFB.firstChild;
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
@@ -53,8 +57,8 @@ describe('amp-facebook', () => {
     });
   });
 
-  it('renders fb-post', () => {
-    return getFBPost('https://www.facebook.com/zuck/videos/10102509264909801/', 'video').then(ampFB => {
+  it('renders fb-post as video', () => {
+    return getFBPost(fbVideoHref, 'video').then(ampFB => {
       const iframe = ampFB.firstChild;
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
@@ -66,4 +70,31 @@ describe('amp-facebook', () => {
     });
   });
 
+  it('resizes facebook posts', () => {
+    const iframeSrc = 'http://ads.localhost:' + location.port +
+        '/base/test/fixtures/served/iframe.html';
+    return getFBPost(fbPostHref).then(ampFB => {
+      return new Promise((resolve, unusedReject) => {
+        const iframe = ampFB.firstChild;
+        impl = ampFB.implementation_;
+        impl.layoutCallback();
+        impl.changeHeight = newHeight => {
+          expect(newHeight).to.equal(666);
+          resolve(iframe);
+        };
+        iframe.onload = function() {
+          iframe.contentWindow.postMessage({
+            sentinel: 'amp-test',
+            type: 'requestHeight',
+            is3p: true,
+            height: 666,
+          }, '*');
+        };
+
+        iframe.src = iframeSrc;
+      });
+    }).then(iframe => {
+      expect(iframe.height).to.equal('666');
+    });
+  });
 });

@@ -2,7 +2,6 @@
 
 AMP Extensions are either extended components or extended templates.
 
-
 ## AMP HTML Extended Components
 
 Extended components must be explicitly included into the document as custom elements.
@@ -16,26 +15,37 @@ include the following script in the `<head>`:
 
 Current list of extended components:
 
-| Component                                     | Description                                                                                 |
-| --------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| [`amp-anim`](amp-anim/amp-anim.md)                     | Runtime-managed animated image, most typically a GIF.                                       |
-| [`amp-audio`](amp-audio/amp-audio.md)                      | Replacement for the HTML5 `audio` tag.                                                      |
-| [`amp-brightcove`](amp-brightcove/amp-brightcove.md)             | Displays a Brightcove Video Cloud or Perform player. |
-| [`amp-carousel`](amp-carousel/amp-carousel.md)                | Generic carousel for displaying multiple similar pieces of content along a horizontal axis. |
-| [`amp-facebook`](amp-facebook/amp-facebook.md)               | Displays a Facebook Post or Video.                                                                   |
-| [`amp-fit-text`](amp-fit-text/amp-fit-text.md)                | Expand or shrink font size to fit the content within the space given.                       |
-| [`amp-font`](amp-font/amp-font.md)                | Trigger and monitor the loading of custom fonts.                       |
-| [`amp-iframe`](amp-iframe/amp-iframe.md)                 | Displays an iframe.                                                                         |
-| [`amp-image-lightbox`](amp-image-lightbox/amp-image-lightbox.md) | Allows for a “image lightbox” or similar experience.                                        |
-| [`amp-instagram`](amp-instagram/amp-instagram.md)           | Displays an instagram embed.                                                                |
-| [`amp-install-serviceworker`](amp-install-serviceworker/amp-install-serviceworker.md)               | Installs a ServiceWorker.
-| [`amp-lightbox`](amp-lightbox/amp-lightbox.md)             | Allows for a “lightbox” or similar experience.                                              |
-| [`amp-list`](amp-list/amp-list.md)             | A dynamic list that can download data and create list items using a template |
-| [`amp-pinterest`](amp-pinterest/amp-pinterest.md)               | Displays a Pintrest widget or Pin It button.                                                                   |
-| [`amp-twitter`](amp-twitter/amp-twitter.md)               | Displays a Twitter Tweet.                                                                   |
-| [`amp-vimeo`](amp-vimeo/amp-vimeo.md)               | Displays a Vimeo player embed.                                                                   |
-| [`amp-vine`](amp-vine/amp-vine.md)               | Displays a Vine simple embed.                                                                   |
-| [`amp-youtube`](amp-youtube/amp-youtube.md)               | Displays a Youtube video.                                                                   |
+| Component | Description |
+| --------- | ----------- |
+| [`amp-access`](amp-access/amp-access.md) | Provides AMP paywall and subscription support.  |
+| [`amp-accordion`](amp-accordion/amp-accordion.md) | Provides a way for viewers to have a glance at the outline of the content and jump to a section of their choice at will. |
+| [`amp-analytics`](amp-analytics/amp-analytics.md) | Captures analytics data from an AMP document. |
+| [`amp-anim`](amp-anim/amp-anim.md) | Manages an animated image, typically a GIF. |
+| [`amp-audio`](amp-audio/amp-audio.md) | Replaces the HTML5 `audio` tag. |
+| [`amp-brid-player`](amp-brid-player/amp-brid-player.md) | Displays a Brid.tv player. |
+| [`amp-brightcove`](amp-brightcove/amp-brightcove.md) | Displays a Brightcove Video Cloud or Perform player. |
+| [`amp-carousel`](amp-carousel/amp-carousel.md) | Displays multiple similar pieces of content along a horizontal axis. |
+| [`amp-dailymotion`](amp-dailymotion/amp-dailymotion.md) | Displays a [Dailymotion](https://www.dailymotion.com) video. |
+| [`amp-dynamic-css-classes`](amp-dynamic-css-classes/amp-dynamic-css-classes.md) | Adds several dynamic CSS class names onto the HTML element. |
+| [`amp-facebook`](amp-facebook/amp-facebook.md) | Displays a Facebook post or video. |
+| [`amp-fit-text`](amp-fit-text/amp-fit-text.md) | Expands or shrinks font size to fit the content within the space given. |
+| [`amp-font`](amp-font/amp-font.md) | Triggers and monitors the loading of custom fonts. |
+| [`amp-iframe`](amp-iframe/amp-iframe.md) | Displays an iframe. |
+| [`amp-image-lightbox`](amp-image-lightbox/amp-image-lightbox.md) | Allows for an “image lightbox” or similar experience. |
+| [`amp-instagram`](amp-instagram/amp-instagram.md) | Displays an Instagram embed. |
+| [`amp-install-serviceworker`](amp-install-serviceworker/amp-install-serviceworker.md) | Installs a ServiceWorker. |
+| [`amp-lightbox`](amp-lightbox/amp-lightbox.md) | Allows for a “lightbox” or similar experience. |
+| [`amp-list`](amp-list/amp-list.md) | Dynamically downloads data and creates list items using a template. |
+| [`amp-mustache`](amp-mustache/amp-mustache.md) | Allows rendering of [`Mustache.js`](https://github.com/janl/mustache.js/) templates. |
+| [`amp-pinterest`](amp-pinterest/amp-pinterest.md) | Displays a Pinterest widget or Pin It button. |
+| [`amp-reach-player`](amp-reach-player/amp-reach-player.md) | Displays a [Beachfront Reach](https://beachfrontreach.com/) video player. |
+| [`amp-soundcloud`](amp-soundcloud/amp-soundcloud.md) | Displays a [Soundcloud](https://soundcloud.com/) clip. |
+| [`amp-springboard-player`](amp-springboard-player/amp-springboard-player.md) | Displays a Springboard Platform video player |
+| [`amp-twitter`](amp-twitter/amp-twitter.md) | Displays a Twitter tweet. |
+| [`amp-user-notification`](amp-user-notification/amp-user-notification.md) | Displays a dismissable notification to the user. |
+| [`amp-vimeo`](amp-vimeo/amp-vimeo.md) | Displays a Vimeo video. |
+| [`amp-vine`](amp-vine/amp-vine.md) | Displays a Vine simple embed. |
+| [`amp-youtube`](amp-youtube/amp-youtube.md) | Displays a YouTube video. |
 
 
 ## AMP HTML Extended Templates
@@ -44,7 +54,7 @@ NOT LAUNCHED YET
 
 Extended templates must be explicitly included into the document as custom templates.
 
-For example, to include a amp-mustache template in your page
+For example, to include an amp-mustache template in your page
 include the following script in the `<head>`:
 
 ```html

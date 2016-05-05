@@ -200,7 +200,7 @@ describe('evaluateAccessExpr', () => {
         str: 'A',
         num: 11,
         bool: true,
-      }
+      },
     };
 
     expect(evaluateAccessExpr('obj.bool = true', resp)).to.be.true;
@@ -226,8 +226,8 @@ describe('evaluateAccessExpr', () => {
       obj: {
         str: 'A',
         child: {
-          str: 'B'
-        }
+          str: 'B',
+        },
       },
     };
 
@@ -273,10 +273,10 @@ describe('evaluateAccessExpr', () => {
     expect(evaluateAccessExpr('_num = 10', {_num: 10})).to.be.true;
 
     expect(() => {
-      evaluateAccessExpr('1num = 10', {"1num": 10});
+      evaluateAccessExpr('1num = 10', {'1num': 10});
     }).to.throw();
     expect(() => {
-      evaluateAccessExpr('num-a = 10', {"num-a": 10});
+      evaluateAccessExpr('num-a = 10', {'num-a': 10});
     }).to.throw();
   });
 });

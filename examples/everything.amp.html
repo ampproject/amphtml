@@ -60,6 +60,13 @@
       height: 40px;
     }
 
+    @media screen and (min-width: 420px) {
+      .logo {
+        position: static;
+        top: auto;
+      }
+    }
+
     .goto {
       display: block;
       margin: 16px;
@@ -81,7 +88,12 @@
     .comic-amp-font-missing .comic-amp {
       color: #f00;
     }
+
+    #amp-iframe:target {
+      border: 1px solid green;
+    }
   </style>
+  <script async custom-element="amp-dynamic-css-classes" src="https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.js"></script>
   <script async custom-element="amp-anim" src="https://cdn.ampproject.org/v0/amp-anim-0.1.js"></script>
   <script async custom-element="amp-audio" src="https://cdn.ampproject.org/v0/amp-audio-0.1.js"></script>
   <script async custom-element="amp-carousel" src="https://cdn.ampproject.org/v0/amp-carousel-0.1.js"></script>
@@ -95,7 +107,7 @@
   <script async custom-element="amp-youtube" src="https://cdn.ampproject.org/v0/amp-youtube-0.1.js"></script>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
-  <script async src="./viewer-integr.js"></script>
+  <script async src="./viewer-integr.js" data-amp-report-test="viewer-integr.js"></script>
 </head>
 <body class="comic-amp-font-loading">
 
@@ -193,12 +205,12 @@
             https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w2004-h734-no/PANO_20150726_171347%257E2.jpg 2004w,
             https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w1002-h367-no/PANO_20150726_171347%257E2.jpg 1002w"
         width=527 height=193 layout="responsive"
-        on="tap:lightbox1"></amp-img>
+        on="tap:lightbox1" role="img" tabindex="0"></amp-img>
   </p>
 
   <amp-lightbox id="lightbox1" class="lightbox1" layout="nodisplay">
     <div class="lightbox1-content">
-      <amp-img id="img0" src="https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w452-h900-p/PANO_20150726_171347%257E2.jpg" width=226 height=450 layout="responsive" on="tap:lightbox1.close"></amp-img>
+      <amp-img id="img0" src="https://lh4.googleusercontent.com/-okOlNNHeoOc/VbYyrlFYFII/AAAAAAABYdA/La-3j3c-QQI/w452-h900-p/PANO_20150726_171347%257E2.jpg" width=226 height=450 layout="responsive" on="tap:lightbox1.close" role="img" tabindex="1"></amp-img>
     </div>
   </amp-lightbox>
 

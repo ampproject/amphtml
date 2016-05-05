@@ -14,13 +14,27 @@
  * limitations under the License.
  */
 
-import {getElementService} from './custom-element';
+import {
+  getElementService,
+  getElementServiceIfAvailable,
+} from './element-service';
 
 
 /**
- * @param {!Window} window
+ * Returns a promise for the Access service.
+ * @param {!Window} win
  * @return {!Promise<!AccessService>}
  */
-export function accessServiceFor(window) {
-  return getElementService(window, 'access', 'amp-access');
+export function accessServiceFor(win) {
+  return getElementService(win, 'access', 'amp-access');
+}
+
+/**
+ * Returns a promise for the Access service or a promise for null if the service
+ * is not available on the current page.
+ * @param {!Window} win
+ * @return {!Promise<?AccessService>}
+ */
+export function accessServiceForOrNull(win) {
+  return getElementServiceIfAvailable(win, 'access', 'amp-access');
 }

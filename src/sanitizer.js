@@ -19,9 +19,14 @@ import {
   getSourceUrl,
   isProxyOrigin,
   parseUrl,
-  resolveRelativeUrl
+  resolveRelativeUrl,
 } from './url';
 import {parseSrcset} from './srcset';
+import {user} from './log';
+
+
+/** @private @const {string} */
+const TAG = 'sanitizer';
 
 
 /**
@@ -212,7 +217,7 @@ export function sanitizeFormattingHtml(html) {
         }
         return {
           'tagName': tagName,
-          'attribs': []
+          'attribs': [],
         };
       }
   );
@@ -299,9 +304,9 @@ export function resolveUrlAttr(tagName, attrName, attrValue, windowLocation) {
     try {
       srcset = parseSrcset(attrValue);
     } catch (e) {
-      // Do not failed the whole template just because one srcset is broken.
+      // Do not fail the whole template just because one srcset is broken.
       // An AMP element will pick it up and report properly.
-      setTimeout(() => {throw e;});
+      user.error(TAG, 'Failed to parse srcset: ', e);
       return attrValue;
     }
     const sources = srcset.getSources();

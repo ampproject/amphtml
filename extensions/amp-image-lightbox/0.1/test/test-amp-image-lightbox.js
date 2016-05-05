@@ -16,9 +16,10 @@
 
 import {Timer} from '../../../../src/timer';
 import {createIframePromise} from '../../../../testing/iframe';
-require('../../../../build/all/v0/amp-image-lightbox-0.1.max');
-import {ImageViewer}
-    from '../../../../build/all/v0/amp-image-lightbox-0.1.max';
+require('../amp-image-lightbox');
+import {
+  ImageViewer,
+} from '../amp-image-lightbox';
 import {adopt} from '../../../../src/runtime';
 import {parseSrcset} from '../../../../src/srcset';
 import * as sinon from 'sinon';
@@ -48,7 +49,6 @@ describe('amp-image-lightbox component', () => {
 
   afterEach(() => {
     sandbox.restore();
-    sandbox = null;
   });
 
   it('should render correctly', () => {
@@ -81,9 +81,13 @@ describe('amp-image-lightbox component', () => {
       impl.requestFullOverlay = requestFullOverlay;
       const viewportOnChanged = sinon.spy();
       const disableTouchZoom = sinon.spy();
+      const hideFixedLayer = sinon.spy();
+      const showFixedLayer = sinon.spy();
       impl.getViewport = () => {return {
         onChanged: viewportOnChanged,
-        disableTouchZoom: disableTouchZoom
+        disableTouchZoom: disableTouchZoom,
+        hideFixedLayer: hideFixedLayer,
+        showFixedLayer: showFixedLayer,
       };};
       const historyPush = sinon.spy();
       impl.getHistory_ = () => {
@@ -106,6 +110,8 @@ describe('amp-image-lightbox component', () => {
       expect(enter.callCount).to.equal(1);
       expect(impl.sourceElement_).to.equal(ampImage);
       expect(disableTouchZoom.callCount).to.equal(1);
+      expect(hideFixedLayer.callCount).to.equal(1);
+      expect(showFixedLayer.callCount).to.equal(0);
     });
   });
 
@@ -119,8 +125,12 @@ describe('amp-image-lightbox component', () => {
       const viewportOnChangedUnsubscribed = sinon.spy();
       impl.unlistenViewport_ = viewportOnChangedUnsubscribed;
       const restoreOriginalTouchZoom = sinon.spy();
+      const hideFixedLayer = sinon.spy();
+      const showFixedLayer = sinon.spy();
       impl.getViewport = () => {return {
-        restoreOriginalTouchZoom: restoreOriginalTouchZoom
+        restoreOriginalTouchZoom: restoreOriginalTouchZoom,
+        hideFixedLayer: hideFixedLayer,
+        showFixedLayer: showFixedLayer,
       };};
       const historyPop = sinon.spy();
       impl.getHistory_ = () => {
@@ -140,6 +150,8 @@ describe('amp-image-lightbox component', () => {
       expect(cancelFullOverlay.callCount).to.equal(1);
       expect(restoreOriginalTouchZoom.callCount).to.equal(1);
       expect(historyPop.callCount).to.equal(1);
+      expect(showFixedLayer.callCount).to.equal(1);
+      expect(hideFixedLayer.callCount).to.equal(0);
     });
   });
 
@@ -153,7 +165,9 @@ describe('amp-image-lightbox component', () => {
       impl.getViewport = () => {return {
         onChanged: viewportOnChanged,
         disableTouchZoom: disableTouchZoom,
-        restoreOriginalTouchZoom: restoreOriginalTouchZoom
+        restoreOriginalTouchZoom: restoreOriginalTouchZoom,
+        hideFixedLayer: () => {},
+        showFixedLayer: () => {},
       };};
       const historyPush = sinon.spy();
       impl.getHistory_ = () => {
@@ -190,7 +204,10 @@ describe('amp-image-lightbox image viewer', () => {
     clock = sandbox.useFakeTimers();
 
     lightbox = {
-      getDpr: () => 1
+      getDpr: () => 1,
+      element: {
+        ownerDocument: document,
+      },
     };
     lightboxMock = sandbox.mock(lightbox);
 
@@ -201,10 +218,7 @@ describe('amp-image-lightbox image viewer', () => {
   afterEach(() => {
     document.body.removeChild(imageViewer.getElement());
     lightboxMock.verify();
-    lightboxMock = null;
-    clock = null;
     sandbox.restore();
-    sandbox = null;
   });
 
 
@@ -226,7 +240,7 @@ describe('amp-image-lightbox image viewer', () => {
           return 'image1';
         }
         return undefined;
-      }
+      },
     };
 
     imageViewer.init(sourceElement, null);
@@ -246,11 +260,11 @@ describe('amp-image-lightbox image viewer', () => {
           return 'image1';
         }
         return undefined;
-      }
+      },
     };
     const sourceImage = {
       complete: false,
-      src: 'image1-smaller'
+      src: 'image1-smaller',
     };
 
     imageViewer.init(sourceElement, sourceImage);
@@ -267,11 +281,11 @@ describe('amp-image-lightbox image viewer', () => {
           return 'image1';
         }
         return undefined;
-      }
+      },
     };
     const sourceImage = {
       complete: true,
-      src: 'image1-smaller'
+      src: 'image1-smaller',
     };
 
     imageViewer.init(sourceElement, sourceImage);
@@ -367,7 +381,10 @@ describe('amp-image-lightbox image viewer gestures', () => {
     lightbox = {
       getDpr: () => 1,
       close: () => {},
-      toggleViewMode: () => {}
+      toggleViewMode: () => {},
+      element: {
+        ownerDocument: document,
+      },
     };
     lightboxMock = sandbox.mock(lightbox);
 
@@ -385,9 +402,7 @@ describe('amp-image-lightbox image viewer gestures', () => {
   afterEach(() => {
     document.body.removeChild(imageViewer.getElement());
     lightboxMock.verify();
-    lightboxMock = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   it('should have initial bounds', () => {

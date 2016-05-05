@@ -26,7 +26,6 @@ describe('Style', () => {
 
   afterEach(() => {
     sandbox.restore();
-    sandbox = null;
   });
 
   it('toggle', () => {
@@ -57,7 +56,7 @@ describe('Style', () => {
     const element = document.createElement('div');
     st.setStyles(element, {
       width: st.px(101),
-      height: st.px(102)
+      height: st.px(102),
     });
     expect(element.style.width).to.equal('101px');
     expect(element.style.height).to.equal('102px');

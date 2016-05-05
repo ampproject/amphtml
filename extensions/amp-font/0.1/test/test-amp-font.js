@@ -32,7 +32,6 @@ describe('amp-font', function() {
 
   afterEach(() => {
     sandbox.restore();
-    sandbox = null;
   });
 
   function getAmpFontIframe() {

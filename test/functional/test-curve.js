@@ -26,7 +26,6 @@ describe('Curve', () => {
 
   afterEach(() => {
     sandbox.restore();
-    sandbox = null;
   });
 
   it('bezierCurve', () => {

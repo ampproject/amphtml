@@ -14,12 +14,27 @@
  * limitations under the License.
  */
 
-require('../../../../build/all/v0/amp-install-serviceworker-0.1.max');
+require('../amp-install-serviceworker');
 import {adopt} from '../../../../src/runtime';
+import {getService} from '../../../../src/service';
+import * as sinon from 'sinon';
 
 adopt(window);
 
 describe('amp-install-serviceworker', () => {
+
+  let clock;
+  let sandbox;
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+    clock = sandbox.useFakeTimers();
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
+
   it('should install for same origin', () => {
     const install = document.createElement('amp-install-serviceworker');
     const implementation = install.implementation_;
@@ -30,7 +45,7 @@ describe('amp-install-serviceworker', () => {
     implementation.getWin = () => {
       return {
         location: {
-          href: 'https://example.com/some/path'
+          href: 'https://example.com/some/path',
         },
         navigator: {
           serviceWorker: {
@@ -38,9 +53,9 @@ describe('amp-install-serviceworker', () => {
               expect(calledSrc).to.be.undefined;
               calledSrc = src;
               return p;
-            }
-          }
-        }
+            },
+          },
+        },
       };
     };
     implementation.buildCallback();
@@ -55,10 +70,10 @@ describe('amp-install-serviceworker', () => {
     implementation.getWin = () => {
       return {
         location: {
-          href: 'https://example.com/some/path'
+          href: 'https://example.com/some/path',
         },
         navigator: {
-        }
+        },
       };
     };
     implementation.buildCallback();
@@ -69,28 +84,27 @@ describe('amp-install-serviceworker', () => {
     const implementation = install.implementation_;
     expect(implementation).to.be.defined;
     install.setAttribute('src', 'https://other-origin.com/sw.js');
-    let calledSrc;
     const p = new Promise(() => {});
     implementation.getWin = () => {
       return {
         location: {
-          href: 'https://example.com/some/path'
+          href: 'https://example.com/some/path',
         },
         navigator: {
           serviceWorker: {
             register: src => {
               calledSrc = src;
               return p;
-            }
-          }
-        }
+            },
+          },
+        },
       };
     };
     implementation.buildCallback();
-    expect(calledSrc).to.undefined;
+    expect(install.children).to.have.length(0);
   });
 
-  it('should do nothing on proxy', () => {
+  it('should do nothing on proxy without iframe URL', () => {
     const install = document.createElement('amp-install-serviceworker');
     const implementation = install.implementation_;
     expect(implementation).to.be.defined;
@@ -100,19 +114,125 @@ describe('amp-install-serviceworker', () => {
     implementation.getWin = () => {
       return {
         location: {
-          href: 'https://cdn.ampproject.org/some/path'
+          href: 'https://cdn.ampproject.org/some/path',
         },
         navigator: {
           serviceWorker: {
             register: src => {
               calledSrc = src;
               return p;
-            }
-          }
-        }
+            },
+          },
+        },
       };
     };
     implementation.buildCallback();
     expect(calledSrc).to.undefined;
+    expect(install.children).to.have.length(0);
+  });
+
+  describe('proxy iframe injection', () => {
+
+    let documentInfo;
+    let install;
+    let implementation;
+    let whenVisible;
+    let calledSrc;
+
+    beforeEach(() => {
+      install = document.createElement('amp-install-serviceworker');
+      implementation = install.implementation_;
+      expect(implementation).to.be.defined;
+      install.setAttribute('src', 'https://www.example.com/sw.js');
+      calledSrc = undefined;
+      const p = new Promise(() => {});
+      const win = {
+        location: {
+          href: 'https://cdn.ampproject.org/c/s/www.example.com/path',
+        },
+        navigator: {
+          serviceWorker: {
+            register: src => {
+              calledSrc = src;
+              return p;
+            },
+          },
+        },
+      };
+      implementation.getWin = () => win;
+      documentInfo = {
+        canonicalUrl: 'https://www.example.com/path',
+        sourceUrl: 'https://source.example.com/path',
+      };
+      getService(win, 'documentInfo', () => {
+        return documentInfo;
+      });
+      whenVisible = Promise.resolve();
+      getService(win, 'viewer', () => {
+        return {
+          whenFirstVisible: () => whenVisible,
+          isVisible: () => true,
+        };
+      });
+    });
+
+    function testIframe() {
+      const iframeSrc = 'https://www.example.com/install-sw.html';
+      install.setAttribute('data-iframe-src', iframeSrc);
+      implementation.buildCallback();
+      let iframe;
+      const appendChild = install.appendChild;
+      install.appendChild = child => {
+        iframe = child;
+        iframe.complete = true;  // Mark as loaded.
+        expect(iframe.src).to.equal(iframeSrc);
+        iframe.src = 'about:blank';
+        appendChild.call(install, iframe);
+      };
+      let deferredMutate;
+      implementation.deferMutate = fn => {
+        expect(deferredMutate).to.be.undefined;
+        deferredMutate = fn;
+      };
+      return whenVisible.then(() => {
+        clock.tick(19999);
+        expect(deferredMutate).to.be.undefined;
+        expect(iframe).to.be.undefined;
+        clock.tick(1);
+        expect(deferredMutate).to.not.be.undefined;
+        expect(iframe).to.be.undefined;
+        deferredMutate();
+        expect(iframe).to.not.be.undefined;
+        expect(calledSrc).to.undefined;
+        expect(install.style.display).to.equal('none');
+        expect(iframe.tagName).to.equal('IFRAME');
+        expect(iframe.getAttribute('sandbox')).to.equal(
+            'allow-same-origin allow-scripts');
+      });
+    }
+
+    it('should inject iframe on proxy if provided (valid canonical)',
+        testIframe);
+
+    it('should inject iframe on proxy if provided (valid source)', () => {
+      documentInfo = {
+        canonicalUrl: 'https://canonical.example.com/path',
+        sourceUrl: 'https://www.example.com/path',
+      };
+      testIframe();
+    });
+
+    it('should reject bad iframe URLs', () => {
+      const iframeSrc = 'https://www2.example.com/install-sw.html';
+      install.setAttribute('data-iframe-src', iframeSrc);
+      expect(() => {
+        implementation.buildCallback();
+      }).to.throw(/should be a URL on the same origin as the source/);
+      install.setAttribute('data-iframe-src',
+          'http://www.example.com/install-sw.html');
+      expect(() => {
+        implementation.buildCallback();
+      }).to.throw(/https/);
+    });
   });
 });

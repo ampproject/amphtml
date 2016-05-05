@@ -14,13 +14,24 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-### <a name="amp-video"></a> `amp-video`
+# <a name="amp-video"></a> `amp-video`
 
-A replacement for the HTML5 `video` tag. Like all embedded external resources in a AMP file, the video is lazily loaded only when the `amp-video` element is in or near the viewport.
+<table>
+   <tr>
+    <td class="col-fourty"><strong>Description</strong></td>
+    <td>A replacement for the HTML5 <code>video</code> tag; only to be used for direct HTML5 video file embeds.</td>
+  </tr>
+   <tr>
+    <td class="col-fourty"><strong>Availability</strong></td>
+    <td>Stable</td>
+  </tr>
+   <tr>
+    <td class="col-fourty"><strong>Examples</strong></td>
+    <td><a href="https://ampbyexample.com/components/amp-video">amp-video.html</a><br /><a href="https://github.com/ampproject/amphtml/blob/master/examples/everything.amp.html">everything.amp.html</a></td>
+  </tr>
+</table>
 
-The `amp-video` component is only to be used for direct HTML5 video file embeds.
-
-#### Behavior
+## Behavior
 
 The `amp-video` component loads the video resource specified by its `src` attribute lazily, at a time determined by the runtime. It can be controlled much the same way as a standard HTML5 `video` tag.
 
@@ -44,7 +55,7 @@ For example:
 </amp-video>
 ```
 
-#### Attributes
+## Attributes
 
 **src**
 
@@ -72,3 +83,43 @@ If present, will automatically loop the video back to the start upon reaching th
 **muted**
 
 If present, will mute the audio by default.
+
+## Validation errors
+
+The following lists validation errors specific to the `amp-video` tag
+(see also `amp-video` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/validator/validator-main.protoascii)):
+
+<table>
+  <tr>
+    <th class="col-fourty"><strong>Validation Error</strong></th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td class="col-fourty"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#mandatory-tag-ancestor-with-hint">The tag 'example1' may only appear as a descendant of tag 'example2'. Did you mean 'example3'?</a></td>
+    <td>Error thrown if your AMP document uses <code>video</code> instead of <code>amp-video</code>. Error message: <code>The tag <code>video</code> may only appear as a descendant of tag <code>noscript</code>. Did you mean <code>amp-video</code>?</code>.</td>
+  </tr>
+  <tr>
+    <td class="col-fourty"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#missing-url">Missing URL for attribute 'example1' in tag 'example2'.</a></td>
+    <td>Error thrown when <code>src</code> attribute is missing its URL.</td>
+  </tr>
+  <tr>
+    <td class="col-fourty"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-url">Malformed URL 'example3' for attribute 'example1' in tag 'example2'.</a></td>
+    <td>Error thrown when <code>src</code> attribute's URL is invalid.</td>
+  </tr>
+  <tr>
+    <td class="col-fourty"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-url-protocol">Invalid URL protocol 'example3:' for attribute 'example1' in tag 'example2'.</a></td>
+    <td>Error thrown <code>src</code> attribute's URL is <code>http</code>; <code>https</code> protocol required.</td>
+  </tr>
+  <tr>
+    <td class="col-fourty"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#implied-layout-isnt-supported-by-amp-tag">The implied layout 'example1' is not supported by tag 'example2'.</a></td>
+    <td>Error thrown when implied layout is set to <code>CONTAINER</code>; this layout type isn't supported.</td>
+  </tr>
+  <tr>
+    <td class="col-fourty"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#specified-layout-isnt-supported-by-amp-tag">The specified layout 'example1' is not supported by tag 'example2'.</a></td>
+    <td>Error thrown when specified layout is set to <code>CONTAINER</code>; this layout type isn't supported.</td>
+  </tr>
+  <tr>
+    <td class="col-fourty"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-property-value">The property 'example1' in attribute 'example2' in tag 'example3' is set to 'example4', which is invalid.</a></td>
+    <td>Error thrown when invalid value is given for attributes <code>height</code> or <code>width</code>. For example, <code>height=auto</code> triggers this error for all supported layout types, with the exception of <code>NODISPLAY</code>.</td>
+  </tr>
+</table>

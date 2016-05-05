@@ -36,7 +36,6 @@ describe('amp-audio', () => {
 
   afterEach(() => {
     sandbox.restore();
-    sandbox = null;
     document.body.removeChild(iframe.iframe);
   });
 
@@ -72,10 +71,9 @@ describe('amp-audio', () => {
 
   it('should load audio through attribute', () => {
     return attachAndRun({
-      src: 'https://origin.com/audio.mp3'
+      src: 'https://origin.com/audio.mp3',
     }).then(a => {
       const audio = a.querySelector('audio');
-      expect(audio).to.be.an.instanceof(Element);
       expect(audio.tagName).to.equal('AUDIO');
       expect(audio.getAttribute('src'))
           .to.equal('https://origin.com/audio.mp3');
@@ -91,7 +89,7 @@ describe('amp-audio', () => {
       height: 53,
       autoplay: '',
       muted: '',
-      loop: ''
+      loop: '',
     }, [
         {tag: 'source', src: 'https://origin.com/audio.mp3',
             type: 'audio/mpeg'},
@@ -99,7 +97,6 @@ describe('amp-audio', () => {
         {tag: 'text', text: 'Unsupported.'},
     ]).then(a => {
       const audio = a.querySelector('audio');
-      expect(audio).to.be.an.instanceof(Element);
       expect(audio.tagName).to.equal('AUDIO');
       expect(a.getAttribute('width')).to.be.equal('503');
       expect(a.getAttribute('height')).to.be.equal('53');
@@ -123,7 +120,7 @@ describe('amp-audio', () => {
 
   it('should set its dimensions to the browser natural', () => {
     return attachAndRun({
-      src: 'https://origin.com/audio.mp3'
+      src: 'https://origin.com/audio.mp3',
     }).then(a => {
       const audio = a.querySelector('audio');
       expect(a.style.width).to.be.equal('300px');
@@ -141,7 +138,7 @@ describe('amp-audio', () => {
   it('should set its natural dimension only if not specified', () => {
     return attachAndRun({
       'width': '500',
-      src: 'https://origin.com/audio.mp3'
+      src: 'https://origin.com/audio.mp3',
     }).then(a => {
       expect(a.style.width).to.be.equal('500px');
       expect(a.style.height).to.be.equal('30px');

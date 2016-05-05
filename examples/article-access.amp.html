@@ -5,11 +5,13 @@
   <title>Lorem Ipsum | PublisherName</title>
   <link rel="canonical" href="amps.html" >
   <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+  <!-- See https://github.com/ampproject/amp-publisher-sample -->
   <script id="amp-access" type="application/json">
     {
-      "authorization": "http://localhost:8002/amp-authorization.json?rid=READER_ID&url=CANONICAL_URL&_=RANDOM",
-      "pingback": "http://localhost:8002/amp-pingback?rid=READER_ID&url=CANONICAL_URL",
-      "login": "http://localhost:8002/amp-login?rid=READER_ID&url=CANONICAL_URL"
+      "authorization": "http://localhost:8002/amp-access/api/amp-authorization.json?rid=READER_ID&url=CANONICAL_URL&ref=DOCUMENT_REFERRER&_=RANDOM",
+      "pingback": "http://localhost:8002/amp-access/api/amp-pingback?rid=READER_ID&ref=DOCUMENT_REFERRER&url=CANONICAL_URL",
+      "login": "http://localhost:8002/amp-access/login/?rid=READER_ID&url=CANONICAL_URL",
+      "authorizationFallbackResponse": {"error": true}
     }
   </script>
   <link href='https://fonts.googleapis.com/css?family=Georgia|Open+Sans|Roboto' rel='stylesheet' type='text/css'>
@@ -138,6 +140,13 @@
       background: #ffa;
     }
 
+    .error-section {
+      margin: 16px;
+      margin-top: 24px;
+      padding: 16px;
+      background: #fa7;
+    }
+
   </style>
   <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
   <script async custom-element="amp-access" src="https://cdn.ampproject.org/v0/amp-access-0.1.js"></script>
@@ -184,7 +193,7 @@
 
   <header>
     <div class="brand-logo">
-      PublisherLogo
+      PublisherLogo - <a href="photos-redirect://">Open Photos App on iOS</a>
     </div>
   </header>
   <main role="main">
@@ -217,7 +226,7 @@
             <p>
               by <span itemscope itemtype="http://schema.org/Person"
               itemprop="author"><b>Lorem Ipsum</b>
-              <a class="mailto" href="mailto:lorem.ipsum@">
+              <a class="mailto" href="mailto:lorem.ipsum@example.com">
               lorem.ipsum@</a></span>
             </p>
             <p class="brand">PublisherName News Reporter<p>
@@ -231,9 +240,21 @@
           <a on="tap:meter-notif.hide">[Close]</a>
         </section>
 
-        <section amp-access="NOT access" amp-access-hide class="login-section">
+        <section amp-access="NOT error AND NOT access" amp-access-hide class="login-section">
           <a on="tap:amp-access.login">Login to read more!</a>
         </section>
+
+        <section amp-access="error" amp-access-hide class="error-section">
+          Oops... Something broke.
+        </section>
+
+        <amp-ad amp-access="access" amp-access-hide
+            width=300 height=250
+            type="a9"
+            data-aax_size="300x250"
+            data-aax_pubname="abc123"
+            data-aax_src="302">
+        </amp-ad>
 
         <div amp-access="access" class="article-body" itemprop="articleBody">
           <p>

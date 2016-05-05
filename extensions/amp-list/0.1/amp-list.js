@@ -18,11 +18,8 @@ import {urlReplacementsFor} from '../../../src/url-replacements';
 import {assertHttpsUrl} from '../../../src/url';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {templatesFor} from '../../../src/template';
+import {user} from '../../../src/log';
 import {xhrFor} from '../../../src/xhr';
-
-
-/** @const {!Function} */
-const assert = AMP.assert;
 
 
 /**
@@ -55,14 +52,14 @@ export class AmpList extends AMP.BaseElement {
     return this.urlReplacements_.expand(assertHttpsUrl(
         this.element.getAttribute('src'), this.element)).then(src => {
           const opts = {
-            credentials: this.element.getAttribute('credentials')
+            credentials: this.element.getAttribute('credentials'),
           };
           if (opts.credentials) {
             opts.requireAmpResponseSourceOrigin = true;
           }
           return xhrFor(this.getWin()).fetchJson(src, opts);
         }).then(data => {
-          assert(typeof data == 'object' && Array.isArray(data['items']),
+          user.assert(typeof data == 'object' && Array.isArray(data['items']),
               'Response must be {items: []} object %s %s',
               this.element, data);
           const items = data['items'];

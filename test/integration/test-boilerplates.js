@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-import {createFixtureIframe, expectBodyToBecomeVisible} from
-    '../../testing/iframe.js';
+import {
+  createFixtureIframe,
+  expectBodyToBecomeVisible,
+} from '../../testing/iframe.js';
 import {getStyle} from '../../src/style';
 
 describe('Old Opacity Boilerplate', () => {

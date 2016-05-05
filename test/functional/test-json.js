@@ -39,6 +39,17 @@ describe('json', () => {
       expect(getValueForExpr(obj, 'child.other')).to.be.undefined;
     });
 
+    it('should return a nested value without proto', () => {
+      const child = {str: 'A', num: 1, bool: true, val: null};
+      const obj = recreateNonProtoObject({child: child});
+      expect(getValueForExpr(obj, 'child')).to.deep.equal(child);
+      expect(getValueForExpr(obj, 'child.str')).to.equal('A');
+      expect(getValueForExpr(obj, 'child.num')).to.equal(1);
+      expect(getValueForExpr(obj, 'child.bool')).to.equal(true);
+      expect(getValueForExpr(obj, 'child.val')).to.be.null;
+      expect(getValueForExpr(obj, 'child.other')).to.be.undefined;
+    });
+
     it('should shortcircuit if a parent in chain missing', () => {
       const child = {str: 'A'};
       const obj = {child: child};

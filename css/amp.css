@@ -20,6 +20,7 @@
  */
 html, body {
   overflow-x: hidden !important;
+  height: auto !important;
 }
 
 /**
@@ -77,6 +78,12 @@ body {
   right: 0;
 }
 
+.-amp-layout-flex-item {
+  display: block;
+  position: relative;
+  flex: 1 1 auto;
+}
+
 .-amp-layout-size-defined {
   overflow: hidden !important;
 }
@@ -87,7 +94,8 @@ i-amp-sizer {
 
 .-amp-fill-content {
   display: block;
-  width: 100%;
+  min-width: 100%;     /* These lines are a work around to this issue in iOS: */
+  max-width: 100%;     /* https://bugs.webkit.org/show_bug.cgi?id=155198         */
   height: 100%;
   margin: auto;
 }
@@ -196,6 +204,14 @@ i-amp-scroll-container {
   left: 0;
   right: 0;
   bottom: 0;
+  display: block;
+}
+
+/**
+ * Overflow:auto will be set with delay due to iOS bug where iframe is not
+ * rendered.
+ */
+i-amp-scroll-container.amp-active {
   overflow: auto;
 }
 
@@ -338,6 +354,7 @@ amp-ad iframe {
  */
 amp-instagram {
   padding: 48px 8px !important;
+  background-color: white;
 }
 
 

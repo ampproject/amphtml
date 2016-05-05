@@ -14,6 +14,94 @@
  * limitations under the License.
  */
 
+import {dashToCamelCase} from './string';
+
+/**
+ * Waits until the child element is constructed. Once the child is found, the
+ * callback is executed.
+ * @param {!Element} parent
+ * @param {function(!Element):boolean} checkFunc
+ * @param {function()} callback
+ */
+export function waitForChild(parent, checkFunc, callback) {
+  if (checkFunc(parent)) {
+    callback();
+    return;
+  }
+  const win = parent.ownerDocument.defaultView;
+  if (win.MutationObserver) {
+    const observer = new win.MutationObserver(() => {
+      if (checkFunc(parent)) {
+        observer.disconnect();
+        callback();
+      }
+    });
+    observer.observe(parent, {childList: true});
+  } else {
+    const interval = win.setInterval(() => {
+      if (checkFunc(parent)) {
+        win.clearInterval(interval);
+        callback();
+      }
+    }, /* milliseconds */ 5);
+  }
+}
+
+
+/**
+ * Waits for document's body to be available.
+ * @param {!Document} doc
+ * @param {function()} callback
+ */
+export function waitForBody(doc, callback) {
+  waitForChild(doc.documentElement, () => !!doc.body, callback);
+}
+
+
+/**
+ * Waits for document's body to be available.
+ * @param {!Document} doc
+ * @return {!Promise}
+ */
+export function waitForBodyPromise(doc) {
+  return new Promise(resolve => {
+    waitForBody(doc, resolve);
+  });
+}
+
+
+/**
+ * Whether the element is currently contained in the DOM. Polyfills
+ * `document.contains()` method when necessary. Notice that according to spec
+ * `document.contains` is inclusionary.
+ * See https://developer.mozilla.org/en-US/docs/Web/API/Node/contains
+ * @param {!Document} doc
+ * @param {!Element} element
+ * @return {boolean}
+ */
+export function documentContains(doc, element) {
+  if (!doc.contains) {
+    return documentContainsPolyfillInternal_(doc, element);
+  }
+  return doc.contains(element);
+}
+
+
+/**
+ * Polyfill for `document.contains()` method.
+ * See https://developer.mozilla.org/en-US/docs/Web/API/Node/contains
+ * @param {!Document} doc
+ * @param {!Element} element
+ * @return {boolean}
+ * @private Visible for testing only.
+ */
+export function documentContainsPolyfillInternal_(doc, element) {
+  // Per spec, "contains" method is inclusionary
+  // i.e. `node.contains(node) == true`. However, we still need to test
+  // equality to the document itself.
+  return element == doc || doc.documentElement.contains(element);
+}
+
 
 /**
  * Removes the element.
@@ -78,6 +166,9 @@ export function closest(element, callback) {
  * @return {?Element}
  */
 export function closestByTag(element, tagName) {
+  if (element.closest) {
+    return element.closest(tagName);
+  }
   tagName = tagName.toUpperCase();
   return closest(element, el => {
     return el.tagName == tagName;
@@ -93,7 +184,7 @@ export function closestByTag(element, tagName) {
  */
 export function elementByTag(element, tagName) {
   const elements = element.getElementsByTagName(tagName);
-  return elements.length > 0 ? elements[0] : null;
+  return elements[0] || null;
 }
 
 
@@ -104,30 +195,57 @@ export function elementByTag(element, tagName) {
  * @return {?Element}
  */
 export function childElement(parent, callback) {
-  const children = parent.children;
-  for (let i = 0; i < children.length; i++) {
-    if (callback(children[i])) {
-      return children[i];
+  for (let child = parent.firstElementChild; child;
+      child = child.nextElementSibling) {
+    if (callback(child)) {
+      return child;
     }
   }
   return null;
 }
 
+/**
+ * @type {boolean|undefined}
+ * @visiblefortesting
+ */
+let scopeSelectorSupported;
 
 /**
- * Finds the first child element that has the specified attribute, optionally
- * with a value.
+ * @param {boolean|undefined} val
+ * @visiblefortesting
+ */
+export function setScopeSelectorSupportedForTesting(val) {
+  scopeSelectorSupported = val;
+}
+
+/**
+ * @param {!Element} parent
+ * @return {boolean}
+ */
+function isScopeSelectorSupported(parent) {
+  try {
+    parent.ownerDocument.querySelector(':scope');
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+/**
+ * Finds the first child element that has the specified attribute.
  * @param {!Element} parent
  * @param {string} attr
- * @param {string=} opt_value
  * @return {?Element}
  */
-export function childElementByAttr(parent, attr, opt_value) {
+export function childElementByAttr(parent, attr) {
+  if (scopeSelectorSupported == null) {
+    scopeSelectorSupported = isScopeSelectorSupported(parent);
+  }
+  if (scopeSelectorSupported) {
+    return parent.querySelector(':scope > [' + attr + ']');
+  }
   return childElement(parent, el => {
     if (!el.hasAttribute(attr)) {
-      return false;
-    }
-    if (opt_value !== undefined && el.getAttribute(attr) != opt_value) {
       return false;
     }
     return true;
@@ -142,8 +260,38 @@ export function childElementByAttr(parent, attr, opt_value) {
  * @return {?Element}
  */
 export function childElementByTag(parent, tagName) {
+  if (scopeSelectorSupported == null) {
+    scopeSelectorSupported = isScopeSelectorSupported(parent);
+  }
+  if (scopeSelectorSupported) {
+    return parent.querySelector(':scope > ' + tagName);
+  }
   tagName = tagName.toUpperCase();
   return childElement(parent, el => {
     return el.tagName == tagName;
   });
+}
+
+
+/**
+ * Returns element data-param- attributes as url parameters key-value pairs.
+ * e.g. data-param-some-attr=value -> {someAttr: value}.
+ * @param {!Element} element
+ * @param {function(string):string} opt_computeParamNameFunc to compute the parameter
+ *    name, get passed the camel-case parameter name.
+ * @return {!Object<string, string>}
+ */
+export function getDataParamsFromAttributes(element, opt_computeParamNameFunc) {
+  const computeParamNameFunc = opt_computeParamNameFunc || (key => key);
+  const attributes = element.attributes;
+  const params = Object.create(null);
+  for (let i = 0; i < attributes.length; i++) {
+    const attr = attributes[i];
+    const matches = attr.nodeName.match(/^data-param-(.+)/);
+    if (matches) {
+      const param = dashToCamelCase(matches[1]);
+      params[computeParamNameFunc(param)] = attr.nodeValue;
+    }
+  }
+  return params;
 }

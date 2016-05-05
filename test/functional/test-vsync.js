@@ -31,14 +31,13 @@ describe('vsync', () => {
     saveVisibilityChangedHandler = undefined;
     viewer = {
       isVisible: () => true,
-      onVisibilityChanged: handler => saveVisibilityChangedHandler = handler
+      onVisibilityChanged: handler => saveVisibilityChangedHandler = handler,
     };
     vsync = new Vsync(window, viewer);
   });
 
   afterEach(() => {
     sandbox.restore();
-    sandbox = null;
   });
 
   it('should init correctly', () => {
@@ -55,7 +54,7 @@ describe('vsync', () => {
         },
         mutate: () => {
           result += 'mu1';
-        }
+        },
       });
       vsync.run({
         measure: () => {
@@ -63,17 +62,17 @@ describe('vsync', () => {
         },
         mutate: () => {
           result += 'mu2';
-        }
+        },
       });
       vsync.run({
         measure: () => {
           result += 'me3';
-        }
+        },
       });
       vsync.run({
         mutate: () => {
           result += 'mu3';
-        }
+        },
       });
       vsync.mutate(() => {
         result += 'mu4';
@@ -103,20 +102,20 @@ describe('vsync', () => {
               vsync.run({
                 measure: () => {
                   result += 'me3';
-                }
+                },
               });
               vsync.run({
                 mutate: () => {
                   result += 'mu3';
                   resolve();
-                }
+                },
               });
-            }
+            },
           });
         },
         mutate: () => {
           result += 'mu1';
-        }
+        },
       });
     }).then(() => {
       expect(result).to.equal('me1mu1me2mu2me3mu3');
@@ -158,7 +157,7 @@ describe('vsync', () => {
     vsync.run({
       mutate: () => {
         result += 'mu1';
-      }
+      },
     });
 
     expect(vsync.tasks_).to.have.length(1);
@@ -181,7 +180,7 @@ describe('vsync', () => {
     vsync.run({
       mutate: () => {
         result += 'mu1';
-      }
+      },
     });
 
     expect(vsync.tasks_).to.have.length(1);
@@ -205,7 +204,7 @@ describe('vsync', () => {
     vsync.run({
       mutate: () => {
         result += 'mu1';
-      }
+      },
     });
 
     expect(vsync.tasks_).to.have.length(1);
@@ -236,7 +235,7 @@ describe('vsync', () => {
     vsync.run({
       mutate: () => {
         result += 'mu1';
-      }
+      },
     });
 
     expect(vsync.tasks_).to.have.length(1);
@@ -285,7 +284,7 @@ describe('vsync', () => {
     const res = vsync.runAnim({
       mutate: () => {
         result += 'mu1';
-      }
+      },
     });
 
     expect(res).to.be.true;
@@ -305,7 +304,7 @@ describe('vsync', () => {
     const task = vsync.createAnimTask({
       mutate: () => {
         result += 'mu1';
-      }
+      },
     });
     const res = task();
 
@@ -326,7 +325,7 @@ describe('vsync', () => {
     const res = vsync.runAnim({
       mutate: () => {
         result += 'mu1';
-      }
+      },
     });
 
     expect(res).to.be.false;
@@ -343,7 +342,7 @@ describe('vsync', () => {
     const task = vsync.createAnimTask({
       mutate: () => {
         result += 'mu1';
-      }
+      },
     });
     const res = task();
 
@@ -384,13 +383,13 @@ describe('RAF polyfill', () => {
 
   const viewer = {
     isVisible: () => true,
-    onVisibilityChanged: unusedHandler => {}
+    onVisibilityChanged: unusedHandler => {},
   };
 
   const vsync = new Vsync({
     setTimeout: (fn, t) => {
       window.setTimeout(fn, t);
-    }
+    },
   }, viewer);
 
   it('should schedule frames using the polyfill', () => {

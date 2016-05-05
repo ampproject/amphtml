@@ -21,9 +21,10 @@
  * @param {string} targetOrigin
  * @param {function(string, *, boolean):(!Promise<*>|undefined)}
  *    requestProcessor
+ * @param {string=} opt_targetId
  * @constructor
  */
-function ViewerMessaging(target, targetOrigin, requestProcessor) {
+function ViewerMessaging(target, targetOrigin, requestProcessor, opt_targetId) {
   this.sentinel_ = '__AMP__';
   this.requestSentinel_ = this.sentinel_ + 'REQUEST';
   this.responseSentinel_ = this.sentinel_ + 'RESPONSE';
@@ -33,6 +34,8 @@ function ViewerMessaging(target, targetOrigin, requestProcessor) {
 
   /** @const @private {!Widnow} */
   this.target_ = target;
+  /** @const @private {string|undefined} */
+  this.targetId_ = opt_targetId;
   /** @const @private {string} */
   this.targetOrigin_ = targetOrigin;
   /** @const @private {function(string, *, boolean):(!Promise<*>|undefined)} */
@@ -74,7 +77,7 @@ ViewerMessaging.prototype.sendRequest = function(eventType, payload,
  * @private
  */
 ViewerMessaging.prototype.onMessage_ = function(event) {
-  if (event.source != this.target_ && event.origin != this.targetOrigin_) {
+  if (event.source != this.target_ || event.origin != this.targetOrigin_) {
     return;
   }
   var message = event.data;

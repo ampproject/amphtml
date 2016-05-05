@@ -15,8 +15,10 @@
  */
 
 import {cidFor} from '../../src/cid';
-import {installCidService, getProxySourceOrigin} from
-    '../../src/service/cid-impl';
+import {
+  installCidService,
+  getProxySourceOrigin,
+} from '../../src/service/cid-impl';
 import {parseUrl} from '../../src/url';
 import {timer} from '../../src/timer';
 import {installViewerService} from '../../src/service/viewer-impl';
@@ -59,12 +61,12 @@ describe('cid', () => {
           array[1] = 2;
           array[2] = 3;
           array[15] = 15;
-        }
+        },
       },
       document: {},
       ampExtendedElements: {
-        'amp-analytics': true
-      }
+        'amp-analytics': true,
+      },
     };
     const viewer = installViewerService(fakeWin);
     sandbox.stub(viewer, 'isEmbedded', function() {
@@ -198,8 +200,8 @@ describe('cid', () => {
       },
       services: {},
       ampExtendedElements: {
-        'amp-analytics': true
-      }
+        'amp-analytics': true,
+      },
     };
     win.__proto__ = window;
     expect(win.location.href).to.equal('https://cdn.ampproject.org/v/www.origin.com/');
@@ -307,12 +309,12 @@ describe('cid', () => {
     fakeWin.crypto = undefined;
     fakeWin.screen = {
       width: '111',
-      height: '222'
+      height: '222',
     };
     fakeWin.Math = {
       random: () => {
         return 999;
-      }
+      },
     };
     clock.tick(7777);
     return compare(
@@ -353,6 +355,59 @@ describe('cid', () => {
               '; domain=abc.org' +
               '; expires=Fri, 01 Jan 1971 00:00:00 GMT');  // 1 year from 0.
         });
+  });
+
+  it('should update fallback cookie expiration when present', () => {
+    fakeWin.location.href = 'https://foo.abc.org/v/www.DIFFERENT.com/foo/?f=0';
+    fakeWin.location.hostname = 'foo.abc.org';
+    fakeWin.document.cookie = 'cookie_name=amp-12345';
+
+    return cid.get('cookie_name', hasConsent).then(c => {
+      expect(fakeWin.document.cookie).to.equal(
+        'cookie_name=' + encodeURIComponent(c) +
+        '; path=/' +
+        '; domain=abc.org' +
+        '; expires=Fri, 01 Jan 1971 00:00:00 GMT'  // 1 year from 0.
+      );
+    });
+  });
+
+  it('should not update expiration when created externally', () => {
+    fakeWin.location.href = 'https://foo.abc.org/v/www.DIFFERENT.com/foo/?f=0';
+    fakeWin.location.hostname = 'foo.abc.org';
+    fakeWin.document.cookie = 'cookie_name=12345';
+
+    return cid.get('cookie_name', hasConsent).then(() => {
+      expect(fakeWin.document.cookie).to.equal('cookie_name=12345');
+    });
+  });
+
+  it('should return same value for multiple calls on non-proxied urls', () => {
+    fakeWin.location.href = 'https://abc.org/foo/?f=0';
+    fakeWin.location.hostname = 'foo.abc.org';
+    const cid1 = cid.get({scope: 'cookie', createCookieIfNotPresent: true},
+        hasConsent);
+    const cid2 = cid.get({scope: 'cookie', createCookieIfNotPresent: true},
+        hasConsent);
+    return cid1.then(c1 => {
+      return cid2.then(c2 => {
+        expect(c1).to.equal(c2);
+      });
+    });
+  });
+
+  it('should return same value for multiple calls on proxied urls', () => {
+    fakeWin.location.href = 'https://cdn.ampproject.org/v/abc.org/foo/?f=0';
+    fakeWin.location.hostname = 'cdn.ampproject.org';
+    const cid1 = cid.get({scope: 'cookie', createCookieIfNotPresent: true},
+        hasConsent);
+    const cid2 = cid.get({scope: 'cookie', createCookieIfNotPresent: true},
+        hasConsent);
+    return cid1.then(c1 => {
+      return cid2.then(c2 => {
+        expect(c1).to.equal(c2);
+      });
+    });
   });
 
   function compare(externalCidScope, compareValue) {

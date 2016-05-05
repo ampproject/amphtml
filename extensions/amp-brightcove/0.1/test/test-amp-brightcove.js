@@ -17,20 +17,20 @@
 import {createIframePromise} from '../../../../testing/iframe';
 require('../amp-brightcove');
 import {adopt} from '../../../../src/runtime';
+import {parseUrl} from '../../../../src/url';
 
 adopt(window);
 
 describe('amp-brightcove', () => {
 
-  function getBrightcove(accountId, videoId, opt_responsive) {
-    return createIframePromise().then(iframe => {
+  function getBrightcove(attributes, opt_responsive) {
+    return createIframePromise(true).then(iframe => {
       const bc = iframe.doc.createElement('amp-brightcove');
-      bc.setAttribute('data-account', accountId);
+      for (const key in attributes) {
+        bc.setAttribute(key, attributes[key]);
+      }
       bc.setAttribute('width', '111');
       bc.setAttribute('height', '222');
-      if (videoId) {
-        bc.setAttribute('data-video-id', videoId);
-      }
       if (opt_responsive) {
         bc.setAttribute('layout', 'responsive');
       }
@@ -41,7 +41,10 @@ describe('amp-brightcove', () => {
   }
 
   it('renders', () => {
-    return getBrightcove('906043040001','ref:ampdemo').then(bc => {
+    return getBrightcove({
+      'data-account': '906043040001',
+      'data-video-id': 'ref:ampdemo',
+    }).then(bc => {
       const iframe = bc.querySelector('iframe');
       expect(iframe).to.not.be.null;
       expect(iframe.tagName).to.equal('IFRAME');
@@ -53,7 +56,10 @@ describe('amp-brightcove', () => {
   });
 
   it('renders responsively', () => {
-    return getBrightcove('906043040001', 'ref:ampdemo', true).then(bc => {
+    return getBrightcove({
+      'data-account': '906043040001',
+      'data-video-id': 'ref:ampdemo',
+    }, true).then(bc => {
       const iframe = bc.querySelector('iframe');
       expect(iframe).to.not.be.null;
       expect(iframe.className).to.match(/-amp-fill-content/);
@@ -61,7 +67,33 @@ describe('amp-brightcove', () => {
   });
 
   it('requires data-account', () => {
-    return getBrightcove('').should.eventually.be.rejectedWith(
+    return getBrightcove({}).should.eventually.be.rejectedWith(
         /The data-account attribute is required for/);
+  });
+
+  it('removes iframe after unlayoutCallback', () => {
+    return getBrightcove({
+      'data-account': '906043040001',
+      'data-video-id': 'ref:ampdemo',
+    }, true).then(bc => {
+      const iframe = bc.querySelector('iframe');
+      expect(iframe).to.not.be.null;
+      const obj = bc.implementation_;
+      obj.unlayoutCallback();
+      expect(bc.querySelector('iframe')).to.be.null;
+      expect(obj.iframe_).to.be.null;
+    });
+  });
+
+  it('should pass data-param-* attributes to the iframe src', () => {
+    return getBrightcove({
+      'data-account': '906043040001',
+      'data-video-id': 'ref:ampdemo',
+      'data-param-my-param': 'hello world',
+    }).then(bc => {
+      const iframe = bc.querySelector('iframe');
+      const params = parseUrl(iframe.src).search.split('&');
+      expect(params).to.contain('myParam=hello%20world');
+    });
   });
 });

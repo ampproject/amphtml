@@ -18,8 +18,10 @@
  * @fileoverview Factory for ./service/cid-impl.js
  */
 
-import {getElementService, getElementServiceIfAvailable}
-    from './custom-element';
+import {
+  getElementService,
+  getElementServiceIfAvailable,
+} from './element-service';
 
 /**
  * @param {!Window} window

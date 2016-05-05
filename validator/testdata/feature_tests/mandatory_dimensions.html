@@ -25,7 +25,7 @@
   <meta charset="utf-8">
   <link rel="canonical" href="./regular-html-version.html" />
   <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,minimal-ui">
-  <style>body {opacity: 0}</style><noscript><style>body {opacity: 1}</style></noscript>
+  <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="https://cdn.ampproject.org/v0.js"></script>
 </head>
 <body>
@@ -68,10 +68,10 @@
     </amp-img>
 
     <!-- amp-audio/pixel/lightbox have relaxed width/heigh constraints -->
-    <amp-audio src="audio" layout="fixed" width="42"></amp-audio>
-    <amp-audio src="audio" layout="fixed"></amp-audio>
-    <amp-pixel src="pixel" layout="fixed" width="42"></amp-pixel>
-    <amp-pixel src="pixel" layout="fixed"></amp-pixel>
+    <amp-audio src="https://example.com/audio" layout="fixed" width="42"></amp-audio>
+    <amp-audio src="https://example.com/audio" layout="fixed"></amp-audio>
+    <amp-pixel src="https://example.com/pixel" layout="fixed" width="42"></amp-pixel>
+    <amp-pixel src="https://example.com/pixel" layout="fixed"></amp-pixel>
     <amp-lightbox layout="nodisplay" width="42"></amp-lightbox>
     <amp-lightbox layout="nodisplay"></amp-lightbox>
 
@@ -84,17 +84,17 @@
     <amp-anim width="42" height="42" src="anim" srcset="img 1x, img2 2x"></amp-anim>
 
     <!-- src optional -->
-    <amp-audio src="audio"></amp-audio>
+    <amp-audio src="https://example.com/audio"></amp-audio>
     <amp-audio></amp-audio>
-    <amp-video width="42" height="42" src="video"></amp-video>
+    <amp-video width="42" height="42" src="https://example.com/video"></amp-video>
     <amp-video width="42" height="42"></amp-video>
-    <amp-ad width="42" height="42" type="" src="ad"></amp-ad>
+    <amp-ad width="42" height="42" type="" src="https://example.com/ad"></amp-ad>
     <amp-ad width="42" height="42" type=""></amp-ad>
 
     <!-- src or srcdoc required -->
-    <amp-iframe width="42" height="42" src="iframe"></amp-iframe>
+    <amp-iframe width="42" height="42" src="https://example.com/iframe"></amp-iframe>
     <amp-iframe width="42" height="42" srcdoc="<p>Hello, world!</p>"></amp-iframe>
-    <amp-pixel src="pixel"></amp-pixel>
+    <amp-pixel src="https://example.com/pixel"></amp-pixel>
 
     <!-- disallow a src or srcset -->
     <amp-fit-text height="42"></amp-fit-text>

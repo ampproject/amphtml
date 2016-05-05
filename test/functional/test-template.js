@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-import {BaseTemplate, registerExtendedTemplate, templatesFor}
-    from '../../src/template';
+import {
+  BaseTemplate,
+  registerExtendedTemplate,
+  templatesFor,
+} from '../../src/template';
 
 
 describe('Template', () => {

@@ -68,17 +68,12 @@ describe('Motion continueMotion', () => {
       runAnimMutateSeries: mutator => {
         vsyncTasks.push(mutator);
         return new Promise((unusedResolve, unusedReject) => {});
-      }
+      },
     };
   });
 
   afterEach(() => {
-    expect(vsyncTasks.length).to.equal(0);
-    vsync = null;
-    vsyncTasks = null;
-    clock = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   function testContinuation(maxVelocity, haltAfterTime) {

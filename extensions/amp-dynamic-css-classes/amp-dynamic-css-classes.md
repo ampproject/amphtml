@@ -14,15 +14,31 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-### <a name="amp-dynamic-css-classes"></a> AMP Dynamic CSS Classes
+# <a name="amp-dynamic-css-classes"></a> AMP Dynamic CSS Classes
 
-The AMP Dynamic CSS Classes extension adds several dynamic CSS class
-names onto the HTML element.
+<table>
+  <tr>
+    <td width="40%"><strong>Description</strong></td>
+    <td>Adds several dynamic CSS class names onto the <code>&lt;body></code> element.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Availability</strong></td>
+    <td>Stable</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Required Script</strong></td>
+    <td><code>&lt;script async custom-element="amp-dynamic-css-classes" src="https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.js">&lt;/script></code></td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Examples</strong></td>
+    <td>None</td>
+  </tr>
+</table>
 
-#### Behavior
+## Behavior
 
 The AMP Dynamic CSS Classes extension adds the following CSS classes
-onto the HTML element:
+onto the `<body>` element:
 
 **amp-referrer-***
 

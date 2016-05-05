@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-import {History, HistoryBindingNatural_, HistoryBindingVirtual_} from
-    '../../src/service/history-impl';
+import {
+  History,
+  HistoryBindingNatural_,
+  HistoryBindingVirtual_,
+} from '../../src/service/history-impl';
 import {listenOncePromise} from '../../src/event-helper';
 import * as sinon from 'sinon';
 
@@ -38,7 +41,7 @@ describe('History', () => {
         onStackIndexUpdated = callback;
       },
       push: () => {},
-      pop(unusedStackIndex) {}
+      pop(unusedStackIndex) {},
     };
     bindingMock = sandbox.mock(binding);
 
@@ -47,12 +50,8 @@ describe('History', () => {
 
   afterEach(() => {
     bindingMock.verify();
-    bindingMock = null;
     history.cleanup_();
-    history = null;
-    clock = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   it('should initialize correctly', () => {
@@ -127,10 +126,7 @@ describe('HistoryBindingNatural', () => {
 
   afterEach(() => {
     history.cleanup_();
-    history = null;
-    clock = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   it('should initialize correctly', () => {
@@ -270,7 +266,7 @@ describe('HistoryBindingVirtual', () => {
         return () => {};
       },
       postPushHistory: unusedStackIndex => {},
-      postPopHistory: unusedStackIndex => {}
+      postPopHistory: unusedStackIndex => {},
     };
     viewerMock = sandbox.mock(viewer);
     history = new HistoryBindingVirtual_(viewer);
@@ -279,12 +275,8 @@ describe('HistoryBindingVirtual', () => {
 
   afterEach(() => {
     viewerMock.verify();
-    viewerMock = null;
     history.cleanup_();
-    history = null;
-    clock = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   it('should initialize correctly', () => {

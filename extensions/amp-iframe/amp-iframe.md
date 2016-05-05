@@ -14,9 +14,28 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-### <a name="amp-iframe"></a> `amp-iframe`
+# <a name="amp-iframe"></a> `amp-iframe`
 
-Displays an iframe.
+<table>
+  <tr>
+    <td width="40%"><strong>Description</strong></td>
+    <td>Displays an iframe.</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Availability</strong></td>
+    <td>Stable</td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Required Script</strong></td>
+    <td><code>&lt;script async custom-element="amp-iframe" src="https://cdn.ampproject.org/v0/amp-iframe-0.1.js">&lt;/script></code></td>
+  </tr>
+  <tr>
+    <td width="40%"><strong>Examples</strong></td>
+    <td><a href="https://ampbyexample.com/components/amp-iframe">amp-iframe.html</a><br /><a href="https://github.com/ampproject/amphtml/blob/master/examples/everything.amp.html">everything.amp.html</a></td>
+  </tr>
+</table>
+
+## Behavior
 
 `amp-iframe` has several important differences from vanilla iframes that are designed to make it more secure and avoid AMP files that are dominated by a single iframe:
 
@@ -35,13 +54,13 @@ Example:
 </amp-iframe>
 ```
 
-#### Attributes
+## Attributes
 
-##### src, srcdoc, frameborder, allowfullscreen, allowtransparency
+### src, srcdoc, frameborder, allowfullscreen, allowtransparency
 
 The attributes above should all behave like they do on standard iframes.
 
-##### sandbox
+### sandbox
 
 Iframes created by `amp-iframe` always have the `sandbox` attribute defined on them. By default the value is empty. That means that they are "maximum sandboxed" by default. By setting sandbox values, one can opt the iframe into being less sandboxed. All values supported by browsers are allowed. E.g. setting `sandbox="allow-scripts"` allows the iframe to run JavaScript, or `sandbox="allow-scripts allow-same-origin"` allows the iframe to run JavaScript, make non-CORS XHRs, and read/write cookies.
 
@@ -51,7 +70,7 @@ Note also, that the sandbox applies to all windows opened from a sandboxed ifram
 
 See the [the docs on MDN](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe#attr-sandbox) for further details on the sandbox attribute.
 
-#### Iframe Resizing
+## Iframe Resizing
 
 An `amp-iframe` must have static layout defined as is the case with any other AMP element. However,
 it's possible to resize an `amp-iframe` in runtime. To do so:
@@ -94,7 +113,7 @@ Here are some factors that affect how fast the resize will be executed:
 - Whether the resize is requested for a currently active Iframe;
 - Whether the resize is requested for an Iframe below the viewport or above the viewport.
 
-#### Iframe with Placeholder
+## Iframe with Placeholder
 It is possible to have an `amp-iframe` appear on the top of a document when the `amp-iframe` has a `placeholder` element as shown in the example below.
 
 ```html
@@ -116,7 +135,7 @@ window.parent.postMessage({
 }, '*');
 ```
 
-#### Iframe viewability
+## Iframe viewability
 
 Iframes can send a  `send-intersection` message to its parent to start receiving IntersectionObserver style [change records](http://rawgit.com/slightlyoff/IntersectionObserver/master/index.html#intersectionobserverentry) of the iframe's intersection with the parent viewport.
 
@@ -148,3 +167,59 @@ window.addEventListener('message', function(event) {
 ```
 
 The intersection message would be sent by the parent to the iframe when the iframe moves in or out of the viewport (or is partially visibile), when the iframe is scrolled or resized.
+
+## Tracking/Analytics iframes
+
+We strongly recommend using [`amp-analytics`](../amp-analytics/amp-analytics.md) for analytics purposes, because it is significantly more robust, complete and efficient solution and can be configured for a wide range of analytics vendors.
+
+AMP only allows a single iframe, that is used for analytics and tracking purposes, per page. To conserve resources these iframes will be removed from the DOM 5 seconds after they loaded, which should be sufficient time to complete whatever work is needed to be done.
+
+Iframes are identified as tracking/analytics iframes if they appear to serve no direct user purpose such as being invisible or small.
+
+## Validation errors
+
+The following lists validation errors specific to the `amp-iframe` tag
+(see also `amp-iframe` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-iframe/0.1/validator-amp-iframe.protoascii)):
+
+<table>
+  <tr>
+    <th width="40%"><strong>Validation Error</strong></th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#tag-required-by-another-tag-is-missing">The 'example1' tag is missing or incorrect, but required by 'example2'.</a></td>
+    <td>Error thrown when required <code>amp-iframe</code> extension <code>.js</code> script tag is missing or incorrect.</td>
+  </tr>
+  <tr>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#mandatory-attribute-missing">The tag 'example1' is missing a mandatory attribute - pick one of example2.</a></td>
+    <td>Error thrown when neither <code>src</code> or <code>srcdoc</code> is included. One of these attributes is mandatory.</td>
+  </tr>
+    <tr>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#missing-url">Missing URL for attribute 'example1' in tag 'example2'.</a></td>
+    <td>Error thrown when <code>src</code> or <code>srcdoc</code> is missing its URL.</td>
+  </tr>
+  <tr>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-url">Malformed URL 'example3' for attribute 'example1' in tag 'example2'.</a></td>
+    <td>Error thrown when <code>src</code> or <code>srcdoc</code> URL is invalid.</td>
+  </tr>
+  <tr>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-url-protocol">Invalid URL protocol 'example3:' for attribute 'example1' in tag 'example2'.</a></td>
+    <td>Error thrown <code>src</code> or <code>srcdoc</code> URL is <code>http</code>; <code>https</code> protocol required.</td>
+  </tr>
+    <tr>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-attribute-value">The attribute 'example1' in tag 'example2' is set to the invalid value 'example3'.</a></td>
+    <td>Error thrown when <code>scrolling</code> attribute not <code>auto</code>, <code>yes</code>, or <code>no</code>. Error also thrown when <code>frameborder</code> not <code>0</code> or <code>1</code>. Attribute value must be <code>""</code> for <code>allowfullscreen</code>, <code>allowtransparency</code>, <code>resizable</code>.</td>
+  </tr>
+  <tr>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#implied-layout-isnt-supported-by-amp-tag">The implied layout 'example1' is not supported by tag 'example2'.</a></td>
+    <td>Error thrown when implied layout is set to <code>CONTAINER</code>; this layout type isn't supported.</td>
+  </tr>
+  <tr>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#specified-layout-isnt-supported-by-amp-tag">The specified layout 'example1' is not supported by tag 'example2'.</a></td>
+    <td>Error thrown when specified layout is set to <code>CONTAINER</code>; this layout type isn't supported.</td>
+  </tr>
+  <tr>
+    <td width="40%"><a href="https://www.ampproject.org/docs/reference/validation_errors.html#invalid-property-value">The property 'example1' in attribute 'example2' in tag 'example3' is set to 'example4', which is invalid.</a></td>
+    <td>Error thrown when invalid value is given for attributes <code>height</code> or <code>width</code>. For example, <code>height=auto</code> triggers this error for all supported layout types, with the exception of <code>NODISPLAY</code>.</td>
+  </tr>
+</table>

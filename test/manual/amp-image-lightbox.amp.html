@@ -18,13 +18,45 @@
     figure {
       margin: 0;
     }
+
+    .logo {
+      background: yellow;
+      border: 5px solid black;
+      border-radius: 50%;
+      opacity: 0.7;
+      position: fixed;
+      z-index: 1000;
+      top: 0;
+      right: 10px;
+      width: 40px;
+      height: 40px;
+    }
+
+    @media screen and (min-width: 420px) {
+      .logo {
+        position: static;
+        top: auto;
+      }
+    }
+
+    footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0, 0, 0, 0.7);
+      color: #aaa;
+      height: 60px;
+    }
   </style>
   <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
   <script async src="../../dist/amp.js"></script>
 </head>
-<body>
+<body class="my-class">
 <article>
   <h1>Image Lightbox</h1>
+
+  <div class="logo"></div>
 
   <p>
     Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt. Propriae tincidunt id nec, elit nusquam te mea, ius noster platonem in. Mea an idque minim, sit sale deleniti apeirian et. Omnium legendos tractatos cu mea. Vix in stet dolorem accusamus. Iisque rationibus consetetur in cum, quo unum nulla legere ut. Simul numquam saperet no sit.
@@ -76,6 +108,10 @@
   <p>
     Lorem ipsum dolor sit amet, has nisl nihil convenire et, vim at aeque inermis reprehendunt. Propriae tincidunt id nec, elit nusquam te mea, ius noster platonem in. Mea an idque minim, sit sale deleniti apeirian et. Omnium legendos tractatos cu mea. Vix in stet dolorem accusamus. Iisque rationibus consetetur in cum, quo unum nulla legere ut. Simul numquam saperet no sit.
   </p>
+
+  <footer>
+    This is footer.
+  </footer>
 
 </article>
 </body>

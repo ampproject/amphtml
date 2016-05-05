@@ -105,9 +105,9 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
         });
       }
       win.onerror = function(message, file, line, col, error) {
-        throw new Error('Error in frame: ' + message + '\n' +
+        reject(new Error('Error in frame: ' + message + '\n' +
             file + ':' + line + '\n' +
-            (error ? error.stack : 'no stack'));
+            (error ? error.stack : 'no stack')));
       };
       let errors = [];
       win.console.error = function() {
@@ -115,6 +115,7 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
         console.error.apply(console, arguments);
       };
       // Make time go 10x as fast
+      let setTimeout = win.setTimeout;
       win.setTimeout = function(fn, ms) {
         ms = ms || 0;
         setTimeout(fn, ms / 10);
@@ -140,11 +141,11 @@ export function createFixtureIframe(fixture, initialIframeHeight, opt_beforeLoad
     let iframe = document.createElement('iframe');
     iframe.name = 'test_' + fixture + iframeCount++;
     iframe.onerror = function(event) {
-      throw event.error;
+      reject(event.error);
     };
     iframe.height = initialIframeHeight;
     iframe.width = 500;
-    if ('scrdoc' in iframe) {
+    if ('srcdoc' in iframe) {
       iframe.srcdoc = html;
       document.body.appendChild(iframe);
     } else {
@@ -182,7 +183,6 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
     let iframe = document.createElement('iframe');
     iframe.name = 'test_' + iframeCount++;
     iframe.srcdoc = '<!doctype><html><head>' +
-        '<script src="/base/build/polyfills.js"></script>' +
         '<body style="margin:0"><div id=parent></div>';
     iframe.onload = function() {
       // Flag as being a test window.

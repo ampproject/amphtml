@@ -49,7 +49,7 @@ describe('Gestures', () => {
     element = {
       addEventListener: (eventType, handler) => {
         eventListeners[eventType] = handler;
-      }
+      },
     };
 
     onGesture = sinon.spy();
@@ -63,10 +63,7 @@ describe('Gestures', () => {
 
   afterEach(() => {
     recognizerMock.verify();
-    recognizerMock = null;
-    clock = null;
     sandbox.restore();
-    sandbox = null;
   });
 
   function sendEvent(event) {

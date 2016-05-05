@@ -15,9 +15,8 @@
  */
 
 import {Pass} from '../pass';
-import {assert} from '../asserts';
 import {getService} from '../service';
-import {log} from '../log';
+import {dev} from '../log';
 import {timer} from '../timer';
 import {installViewerService} from './viewer-impl';
 
@@ -178,7 +177,7 @@ export class History {
     promise.then(result => {
       task.resolve(result);
     }, reason => {
-      log.error(TAG_, 'failed to execute a task:', reason);
+      dev.error(TAG_, 'failed to execute a task:', reason);
       task.reject(reason);
     }).then(() => {
       this.queue_.splice(0, 1);
@@ -189,8 +188,8 @@ export class History {
 
 
 /**
- * HistoryBindingInterface is an interface that defines an underlying technology behind
- * the {@link History}.
+ * HistoryBindingInterface is an interface that defines an underlying technology
+ * behind the {@link History}.
  * @interface
  */
 class HistoryBindingInterface {
@@ -316,7 +315,7 @@ export class HistoryBindingNatural_ {
     try {
       this.replaceState_(historyState_(this.stackIndex_));
     } catch (e) {
-      log.error(TAG_, 'Initial replaceState failed: ' + e.message);
+      dev.error(TAG_, 'Initial replaceState failed: ' + e.message);
     }
 
     history.pushState = this.historyPushState_.bind(this);
@@ -324,12 +323,12 @@ export class HistoryBindingNatural_ {
 
     const eventPass = new Pass(this.onHistoryEvent_.bind(this), 50);
     this.popstateHandler_ = e => {
-      log.fine(TAG_, 'popstate event: ' + this.win.history.length + ', ' +
+      dev.fine(TAG_, 'popstate event: ' + this.win.history.length + ', ' +
           JSON.stringify(e.state));
       eventPass.schedule();
     };
     this.hashchangeHandler_ = () => {
-      log.fine(TAG_, 'hashchange event: ' + this.win.history.length + ', ' +
+      dev.fine(TAG_, 'hashchange event: ' + this.win.history.length + ', ' +
           this.win.location.hash);
       eventPass.schedule();
     };
@@ -386,7 +385,7 @@ export class HistoryBindingNatural_ {
   /** @private */
   onHistoryEvent_() {
     let state = this.getState_();
-    log.fine(TAG_, 'history event: ' + this.win.history.length + ', ' +
+    dev.fine(TAG_, 'history event: ' + this.win.history.length + ', ' +
         JSON.stringify(state));
     const stackIndex = state ? state[HISTORY_PROP_] : undefined;
     let newStackIndex = this.stackIndex_;
@@ -444,7 +443,7 @@ export class HistoryBindingNatural_ {
 
   /** @private */
   assertReady_() {
-    assert(!this.waitingState_,
+    dev.assert(!this.waitingState_,
         'The history must not be in the waiting state');
   }
 
@@ -477,7 +476,7 @@ export class HistoryBindingNatural_ {
     this.waitingState_ = {
       promise: promise,
       resolve: resolve,
-      reject: reject
+      reject: reject,
     };
     return promise;
   }
@@ -546,7 +545,7 @@ export class HistoryBindingNatural_ {
     this.assertReady_();
     stackIndex = Math.min(stackIndex, this.win.history.length - 1);
     if (this.stackIndex_ != stackIndex) {
-      log.fine(TAG_, 'stack index changed: ' + this.stackIndex_ + ' -> ' +
+      dev.fine(TAG_, 'stack index changed: ' + this.stackIndex_ + ' -> ' +
           stackIndex);
       this.stackIndex_ = stackIndex;
       if (this.onStackIndexUpdated_) {
@@ -628,7 +627,7 @@ export class HistoryBindingVirtual_ {
    */
   updateStackIndex_(stackIndex) {
     if (this.stackIndex_ != stackIndex) {
-      log.fine(TAG_, 'stack index changed: ' + this.stackIndex_ + ' -> ' +
+      dev.fine(TAG_, 'stack index changed: ' + this.stackIndex_ + ' -> ' +
           stackIndex);
       this.stackIndex_ = stackIndex;
       if (this.onStackIndexUpdated_) {
