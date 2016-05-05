@@ -80,6 +80,27 @@ describe('Poller', () => {
     });
   });
 
+  it('should execute work w/o initial delay', () => {
+    workStub.returns(Promise.resolve());
+    expect(workStub.callCount).to.equal(0);
+    poller.start(true);
+    expect(workStub.callCount).to.equal(1);
+    return poller.lastWorkPromise_.then(() => {
+      expect(workStub.callCount).to.equal(1);
+      clock.tick(4000);
+      expect(workStub.callCount).to.equal(2);
+      return poller.lastWorkPromise_.then(() => {
+        expect(workStub.callCount).to.equal(2);
+        clock.tick(4000);
+        expect(workStub.callCount).to.equal(3);
+        poller.stop();
+      });
+    }).then(() => {
+      clock.tick(8000);
+      expect(workStub.callCount).to.equal(3);
+    });
+  });
+
   it('should not double any work if already started', () => {
     workStub.returns(Promise.resolve());
     expect(workStub.callCount).to.equal(0);

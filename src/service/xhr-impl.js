@@ -412,8 +412,9 @@ export class FetchResponse {
   document_() {
     dev.assert(!this.bodyUsed, 'Body already used');
     this.bodyUsed = true;
-    user.assert(this.xhr_.responseXML instanceof Document,
-        'responseXML should be a Document instance.');
+    user.assert(this.xhr_.responseXML,
+        'responseXML should exist. Make sure to return ' +
+        'Content-Type: text/html header.');
     return Promise.resolve(this.xhr_.responseXML);
   }
 }
