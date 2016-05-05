@@ -92,6 +92,18 @@
     #amp-iframe:target {
       border: 1px solid green;
     }
+
+    #breaker {
+      height: 100px;
+      background: green;
+    }
+
+    #breaking {
+      height: 200px;
+      width: 200vw;
+      background: rgba(0, 0, 0, 0.5);
+    }
+
   </style>
   <script async custom-element="amp-dynamic-css-classes" src="https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.js"></script>
   <script async custom-element="amp-anim" src="https://cdn.ampproject.org/v0/amp-anim-0.1.js"></script>
@@ -362,6 +374,10 @@
     on-error-add-class="comic-amp-font-missing"
     on-load-add-class="comic-amp-font-loaded">
   </amp-font>
+
+  <div id="breaker">
+    <div id="breaking"></div>
+  </div>
 </article>
 </body>
 </html>
