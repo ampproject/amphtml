@@ -18,6 +18,16 @@ import {loadScript, checkData} from '../../src/3p';
 import {getCorrelator} from './utils';
 
 /**
+ * @enum {number}
+ * @private
+ */
+const GladeExperiment = {
+  NO_EXPERIMENT: 0,
+  GLADE_CONTROL: 1,
+  GLADE_OPT_OUT: 2,
+};
+
+/**
  * @param {!Window} global
  * @param {!Object} data
  */
@@ -32,7 +42,7 @@ export function doubleclick(global, data) {
   ]);
 
   if (data.useSameDomainRenderingUntilDeprecated != undefined) {
-    doubleClickWithGpt(global, data, false);
+    doubleClickWithGpt(global, data, GladeExperiment.GLADE_OPT_OUT);
   } else {
     const dice = Math.random();
     const href = global.context.location.href;
@@ -40,7 +50,9 @@ export function doubleclick(global, data) {
         && href.indexOf('google_glade=0') < 0) {
       doubleClickWithGlade(global, data);
     } else {
-      doubleClickWithGpt(global, data, dice < 2 * experimentFraction);
+      const exp = (dice < 2 * experimentFraction) ?
+        GladeExperiment.GLADE_CONTROL : GladeExperiment.NO_EXPERIMENT;
+      doubleClickWithGpt(global, data, exp);
     }
   }
 }
@@ -48,9 +60,9 @@ export function doubleclick(global, data) {
 /**
  * @param {!Window} global
  * @param {!Object} data
- * @param {boolean} isGladeControl
+ * @param {!GladeExperiment} gladeExperiment
  */
-function doubleClickWithGpt(global, data, isGladeControl) {
+function doubleClickWithGpt(global, data, gladeExperiment) {
   const dimensions = [[
     parseInt(data.overrideWidth || data.width, 10),
     parseInt(data.overrideHeight || data.height, 10),
@@ -71,8 +83,10 @@ function doubleClickWithGpt(global, data, isGladeControl) {
       const slot = googletag.defineSlot(data.slot, dimensions, 'c')
           .addService(pubads);
 
-      if (isGladeControl) {
+      if (gladeExperiment === GladeExperiment.GLADE_CONTROL) {
         pubads.markAsGladeControl();
+      } else if (gladeExperiment === GladeExperiment.GLADE_OPT_OUT) {
+        pubads.markAsGladeOptOut();
       }
 
       pubads.markAsAmp();
