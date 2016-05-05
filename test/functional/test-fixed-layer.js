@@ -353,6 +353,26 @@ describe('FixedLayer', () => {
       expect(state['F1'].fixed).to.equal(false);
     });
 
+    it('should tollerate getComputedStyle = null', () => {
+      // See #3096 and https://bugzilla.mozilla.org/show_bug.cgi?id=548397
+      documentApi.defaultView.getComputedStyle = () => null;
+
+      element1.computedStyle['position'] = 'fixed';
+      element1.offsetWidth = 10;
+      element1.offsetHeight = 10;
+
+      expect(vsyncTasks).to.have.length(1);
+      const state = {};
+      vsyncTasks[0].measure(state);
+
+      expect(state['F0'].fixed).to.equal(false);
+      expect(state['F0'].transferrable).to.equal(false);
+      expect(state['F0'].top).to.equal('');
+      expect(state['F0'].zIndex).to.equal('');
+
+      expect(state['F1'].fixed).to.equal(false);
+    });
+
     it('should mutate element to fixed without top', () => {
       const fe = fixedLayer.fixedElements_[0];
       fixedLayer.mutateFixedElement_(fe, 1, {
