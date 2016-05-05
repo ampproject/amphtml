@@ -255,6 +255,8 @@ describe('Resources schedulePause', () => {
           return true;
         },
       },
+      getPlaceholder() {
+      },
       pauseCallback() {
       },
       unlayoutCallback() {
@@ -326,6 +328,137 @@ describe('Resources schedulePause', () => {
     expect(stub2.calledOnce).to.be.false;
   });
 
+});
+
+
+describe('Resources schedulePreload', () => {
+
+  let sandbox;
+  let resources;
+  let parent;
+  let children;
+  let child0;
+  let child1;
+  let child2;
+  let placeholder;
+
+  function createElement() {
+    return {
+      tagName: 'amp-test',
+      isBuilt() {
+        return true;
+      },
+      isUpgraded() {
+        return true;
+      },
+      getAttribute() {
+        return null;
+      },
+      contains() {
+        return true;
+      },
+      classList: {
+        contains() {
+          return true;
+        },
+      },
+      getPlaceholder() {
+        return placeholder;
+      },
+      renderOutsideViewport() {
+        return false;
+      },
+      layoutCallback() {
+      },
+      pauseCallback() {
+      },
+      unlayoutCallback() {
+        return false;
+      },
+      unlayoutOnPause() {
+        return false;
+      },
+    };
+  }
+
+  function createElementWithResource(id) {
+    const element = createElement();
+    const resource = new Resource(id, element, resources);
+    resource.state_ = ResourceState_.READY_FOR_LAYOUT;
+    resource.element['__AMP__RESOURCE'] = resource;
+    resource.measure = sandbox.spy();
+    resource.isDisplayed = () => true;
+    resource.isInViewport = () => true;
+    return [element, resource];
+  }
+
+  beforeEach(() => {
+    sandbox = sinon.sandbox.create();
+    resources = new Resources(window);
+    const parentTuple = createElementWithResource(1);
+    parent = parentTuple[0];
+    placeholder = document.createElement('div');
+    child0 = document.createElement('div');
+    child1 = createElementWithResource(2)[0];
+    child2 = createElementWithResource(3)[0];
+    children = [child0, child1, child2];
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
+
+  it('should not throw with a single element', () => {
+    expect(() => {
+      resources.schedulePreload(parent, child1);
+    }).to.not.throw();
+  });
+
+  it('should not throw with an array of elements', () => {
+    expect(() => {
+      resources.schedulePreload(parent, [child1, child2]);
+    }).to.not.throw();
+  });
+
+  it('should be ok with non amp children', () => {
+    expect(() => {
+      resources.schedulePreload(parent, children);
+    }).to.not.throw();
+  });
+
+  it('should schedule on custom element with multiple children', () => {
+    const stub1 = sandbox.stub(resources, 'schedule_');
+    resources.schedulePreload(parent, children);
+    expect(stub1.called).to.be.true;
+    expect(stub1.callCount).to.be.equal(2);
+  });
+
+  it('should schedule on nested custom element placeholder', () => {
+    const stub1 = sandbox.stub(resources, 'schedule_');
+
+    const placeholder1 = createElementWithResource(4)[0];
+    child1.getPlaceholder = () => placeholder1;
+
+    const placeholder2 = createElementWithResource(5)[0];
+    child2.getPlaceholder = () => placeholder2;
+
+    resources.schedulePreload(parent, children);
+    expect(stub1.called).to.be.true;
+    expect(stub1.callCount).to.be.equal(4);
+  });
+
+  it('should schedule amp-* placeholder inside non-amp element', () => {
+    const stub1 = sandbox.stub(resources, 'schedule_');
+
+    const insidePlaceholder1 = createElementWithResource(4)[0];
+    const placeholder1 = document.createElement('div');
+    child0.getElementsByClassName = () => [insidePlaceholder1];
+    child0.getPlaceholder = () => placeholder1;
+
+    resources.schedulePreload(parent, children);
+    expect(stub1.called).to.be.true;
+    expect(stub1.callCount).to.be.equal(3);
+  });
 });
 
 

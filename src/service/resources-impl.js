@@ -1327,6 +1327,11 @@ export class Resources {
     // Breadth-first search.
     if (element.classList.contains('-amp-element')) {
       callback(this.getResourceForElement(element));
+      // Also schedule amp-element that is a placeholder for the element.
+      const placeholder = element.getPlaceholder();
+      if (placeholder) {
+        this.discoverResourcesForElement_(placeholder, callback);
+      }
     } else {
       const ampElements = element.getElementsByClassName('-amp-element');
       const seen = [];
