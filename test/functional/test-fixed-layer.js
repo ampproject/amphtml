@@ -353,7 +353,7 @@ describe('FixedLayer', () => {
       expect(state['F1'].fixed).to.equal(false);
     });
 
-    it('should tollerate getComputedStyle = null', () => {
+    it('should tolerate getComputedStyle = null', () => {
       // See #3096 and https://bugzilla.mozilla.org/show_bug.cgi?id=548397
       documentApi.defaultView.getComputedStyle = () => null;
 
