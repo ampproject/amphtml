@@ -145,8 +145,8 @@ describe('amp-analytics.instrumentation', function() {
   });
 
   it('should listen on custom events', () => {
-    const handler1 = sinon.spy();
-    const handler2 = sinon.spy();
+    const handler1 = sandbox.spy();
+    const handler2 = sandbox.spy();
     ins.addListener({'on': 'custom-event-1'}, handler1);
     ins.addListener({'on': 'custom-event-2'}, handler2);
 
@@ -172,9 +172,9 @@ describe('amp-analytics.instrumentation', function() {
     expect(ins.customEventBuffer_['custom-event-2']).to.have.length(2);
 
     // Listeners added: immediate events fired.
-    const handler1 = sinon.spy();
-    const handler2 = sinon.spy();
-    const handler3 = sinon.spy();
+    const handler1 = sandbox.spy();
+    const handler2 = sandbox.spy();
+    const handler3 = sandbox.spy();
     ins.addListener({'on': 'custom-event-1'}, handler1);
     ins.addListener({'on': 'custom-event-2'}, handler2);
     ins.addListener({'on': 'custom-event-3'}, handler3);

@@ -20,17 +20,23 @@ import * as sinon from 'sinon';
 describe('Finite State Machine', () => {
 
   describe('simple machines', () => {
+    let sandbox;
     let fsm;
     let spy;
     let other;
 
     beforeEach(() => {
+      sandbox = sinon.sandbox.create();
       fsm = new FiniteStateMachine('init');
-      spy = sinon.spy();
-      other = sinon.spy();
+      spy = sandbox.spy();
+      other = sandbox.spy();
 
       fsm.addTransition('init', 'start', spy);
       fsm.addTransition('init', 'other', other);
+    });
+
+    afterEach(() => {
+      sandbox.restore();
     });
 
     it('invokes callbacks on transition', () => {
