@@ -28,7 +28,9 @@ Supported parameters:
 - data-zone
 
 ```html
-<amp-ad width=300 height=250
+<amp-ad
+    width=300
+    height=250
     type = "mantis-display"
     data-property = "demo"
     data-zone="medium-rectangle">
@@ -45,12 +47,14 @@ Supported parameters:
 Depending on your page design, you may need to play with the "heights=" parameter to ensure the styling works for your layout.
 
 ```html
-  <amp-embed width=100 height=283
-             type="mantis-recommend"
-             layout=responsive
-             heights="(min-width:1907px) 56%, (min-width:1100px) 64%, (min-width:780px) 75%, (min-width:480px) 105%, 200%"
-             data-property="demo">
-  </amp-embed>
+<amp-embed
+    width=100
+    height=283
+    type="mantis-recommend"
+    layout=responsive
+    heights="(min-width:1907px) 56%, (min-width:1100px) 64%, (min-width:780px) 75%, (min-width:480px) 105%, 200%"
+    data-property="demo">
+</amp-embed>
 ```
 
 ### MANTIS.Video
@@ -63,10 +67,12 @@ Supported parameters:
 If there are videos from MANTIS.Video that you would like to embed within your page, refer to the embed section of that video's page. Here is an example:
 
 ```html
-  <amp-embed width=512 height=288
-             type="mantis-video"
-             layout=responsive
-             data-video="56550a151fbad483c946adaa"
-             data-property="demo">
-  </amp-embed>
+<amp-embed
+    width=512
+    height=288
+    type="mantis-video"
+    layout=responsive
+    data-video="56550a151fbad483c946adaa"
+    data-property="demo">
+</amp-embed>
 ```
