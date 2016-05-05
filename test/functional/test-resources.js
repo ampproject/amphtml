@@ -2276,7 +2276,7 @@ describe('Resources fix IE matchMedia', () => {
     expect(schedulePassStub.callCount).to.equal(0);
     expect(intervalCallback).to.exist;
     windowMock.verify();
-    windowMock.restore();
+    windowMock./*OK*/restore();
 
     // Second pass.
     clock.tick(10);
@@ -2291,7 +2291,7 @@ describe('Resources fix IE matchMedia', () => {
     expect(devErrorStub.callCount).to.equal(0);
     expect(schedulePassStub.callCount).to.equal(0);
     windowMock.verify();
-    windowMock.restore();
+    windowMock./*OK*/restore();
 
     // Third pass - succeed.
     clock.tick(10);
@@ -2306,7 +2306,7 @@ describe('Resources fix IE matchMedia', () => {
     expect(schedulePassStub.callCount).to.equal(1);
     expect(devErrorStub.callCount).to.equal(0);
     windowMock.verify();
-    windowMock.restore();
+    windowMock./*OK*/restore();
   });
 
   it('should poll until times out', () => {

@@ -265,7 +265,7 @@ export class Resources {
    * @private
    */
   matchMediaIeQuite_(win) {
-    const q = `(min-width: ${win.innerWidth}px)`;
+    const q = `(min-width: ${win./*OK*/innerWidth}px)`;
     try {
       return win.matchMedia(q).matches;
     } catch (e) {
