@@ -101,15 +101,15 @@ export const adPreconnect = {
   'mantis-display': [
     'https://mantodea.mantisadnetwork.com',
     'https://res.cloudinary.com',
-    'https://resize.mantisadnetwork.com'
+    'https://resize.mantisadnetwork.com',
   ],
   'mantis-video': [
     'https://mantodea.mantisadnetwork.com',
-    'https://resize.mantisadnetwork.com'
+    'https://resize.mantisadnetwork.com',
   ],
   'mantis-recommend': [
     'https://mantodea.mantisadnetwork.com',
-    'https://resize.mantisadnetwork.com'
+    'https://resize.mantisadnetwork.com',
   ],
   dotandads: 'https://bal.ad.dotandad.com',
   improvedigital: 'https://ad.360yield.com/',
