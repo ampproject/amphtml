@@ -22,10 +22,6 @@ import {dev, user} from '../../../src/log';
 /** @const */
 const EXPERIMENT = 'amp-flying-carpet';
 
-/** @const */
-const TAG = 'amp-flying-carpet';
-
-
 class AmpFlyingCarpet extends AMP.BaseElement {
 
   /** @override */
@@ -43,7 +39,7 @@ class AmpFlyingCarpet extends AMP.BaseElement {
   buildCallback() {
     this.isExperimentOn_ = isExperimentOn(this.getWin(), EXPERIMENT);
     if (!this.isExperimentOn_) {
-      dev.warn(TAG, `Experiment ${EXPERIMENT} disabled`);
+      dev.warn(EXPERIMENT, `Experiment ${EXPERIMENT} disabled`);
       return;
     }
 
