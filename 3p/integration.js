@@ -40,6 +40,7 @@ import {dotandads} from '../ads/dotandads';
 import {endsWith} from '../src/string';
 import {facebook} from './facebook';
 import {flite} from '../ads/flite';
+import {mantisDisplay, mantisRecommend} from '../ads/mantis';
 import {improvedigital} from '../ads/improvedigital';
 import {manageWin} from './environment';
 import {mediaimpact} from '../ads/mediaimpact';
@@ -78,6 +79,7 @@ import {eplanning} from '../ads/eplanning';
  */
 const AMP_EMBED_ALLOWED = {
   taboola: true,
+  'mantis-recommend': true,
   plista: true,
 };
 
@@ -95,6 +97,8 @@ register('criteo', criteo);
 register('doubleclick', doubleclick);
 register('appnexus', appnexus);
 register('flite', flite);
+register('mantis-display', mantisDisplay);
+register('mantis-recommend', mantisRecommend);
 register('improvedigital', improvedigital);
 register('industrybrains', industrybrains);
 register('taboola', taboola);
