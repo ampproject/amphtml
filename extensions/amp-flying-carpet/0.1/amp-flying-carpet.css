@@ -17,14 +17,20 @@
 /* Non-overridable properties */
 amp-flying-carpet {
   position: relative !important;
+  box-sizing: border-box !important;
 }
 
 /* Clip the contents of the flying-carpet so it is only viewable "inside" */
 amp-flying-carpet > .-amp-flying-carpet-clip {
   /* Absolutely so clipping works */
   position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
   width: 100% !important;
   height: 100% !important;
+  border: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
   /*
    * Use the deprecated clip style for browsers that do not support clip-path.
    * Basically everything supports this, but we include clip-path to
