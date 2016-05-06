@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import {createIframePromise} from '../../../../testing/iframe';
+import {
+  createIframePromise,
+  doNotLoadExternalResourcesInTest,
+} from '../../../../testing/iframe';
 require('../amp-facebook');
 import {adopt} from '../../../../src/runtime';
 
@@ -26,8 +29,11 @@ describe('amp-facebook', function() {
   const fbPostHref = 'https://www.facebook.com/zuck/posts/10102593740125791';
   const fbVideoHref = 'https://www.facebook.com/zuck/videos/10102509264909801/';
 
-  function getFBPost(href, opt_embedAs) {
+  function getFBPost(href, opt_embedAs, opt_noFakeResources) {
     return createIframePromise().then(iframe => {
+      if (!opt_noFakeResources) {
+        doNotLoadExternalResourcesInTest(iframe.win);
+      }
       const link = document.createElement('link');
       link.setAttribute('rel', 'canonical');
       link.setAttribute('href', 'https://foo.bar/baz');
@@ -51,6 +57,7 @@ describe('amp-facebook', function() {
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.getAttribute('width')).to.equal('111');
       expect(iframe.getAttribute('height')).to.equal('222');
+      iframe.triggerLoad();
 
       const fbPost = iframe.getElementsByClassName('fb-post')[0];
       expect(fbPost).not.to.be.null;
@@ -64,6 +71,7 @@ describe('amp-facebook', function() {
       expect(iframe.tagName).to.equal('IFRAME');
       expect(iframe.getAttribute('width')).to.equal('111');
       expect(iframe.getAttribute('height')).to.equal('222');
+      iframe.triggerLoad();
 
       const fbVideo = iframe.getElementsByClassName('fb-video')[0];
       expect(fbVideo).not.to.be.null;
@@ -73,28 +81,28 @@ describe('amp-facebook', function() {
   it('resizes facebook posts', () => {
     const iframeSrc = 'http://ads.localhost:' + location.port +
         '/base/test/fixtures/served/iframe.html';
-    return getFBPost(fbPostHref).then(ampFB => {
-      return new Promise((resolve, unusedReject) => {
-        const iframe = ampFB.firstChild;
-        impl = ampFB.implementation_;
-        impl.layoutCallback();
-        impl.changeHeight = newHeight => {
-          expect(newHeight).to.equal(666);
-          resolve(iframe);
-        };
-        iframe.onload = function() {
-          iframe.contentWindow.postMessage({
-            sentinel: 'amp-test',
-            type: 'requestHeight',
-            is3p: true,
-            height: 666,
-          }, '*');
-        };
-
-        iframe.src = iframeSrc;
-      });
-    }).then(iframe => {
-      expect(iframe.height).to.equal('666');
-    });
+    return getFBPost(fbPostHref, undefined,
+        /* opt_noFakeResources */ true).then(ampFB => {
+          return new Promise((resolve, unusedReject) => {
+            const iframe = ampFB.firstChild;
+            impl = ampFB.implementation_;
+            impl.layoutCallback();
+            impl.changeHeight = newHeight => {
+              expect(newHeight).to.equal(666);
+              resolve(iframe);
+            };
+            iframe.onload = function() {
+              iframe.contentWindow.postMessage({
+                sentinel: 'amp-test',
+                type: 'requestHeight',
+                is3p: true,
+                height: 666,
+              }, '*');
+            };
+            iframe.src = iframeSrc;
+          });
+        }).then(iframe => {
+          expect(iframe.height).to.equal('666');
+        });
   });
 });
