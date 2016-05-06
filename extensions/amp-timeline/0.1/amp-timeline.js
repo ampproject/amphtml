@@ -80,7 +80,7 @@ export class AmpTimeline extends AMP.BaseElement {
       if (!listExists) {
         // Check the timeline items container
         assert(false,
-               'The timeline should contain an ul with class timeline, ' +
+               'The timeline should contain an ul with class amp-timeline-list, ' +
                'See https://github.com/ampproject/amphtml/blob/master/extensions/' +
                'amp-timeline/amp-timeline.md. Found in: %s', this.element);
       }
