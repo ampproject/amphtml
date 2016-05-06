@@ -31,8 +31,8 @@ class AmpFlyingCarpet extends AMP.BaseElement {
 
   /** @override */
   isReadyToBuild() {
-      // Wait for all our children to be parsed.
-      return false;
+    // Wait for all our children to be parsed.
+    return false;
   }
 
   /** @override */
@@ -51,7 +51,7 @@ class AmpFlyingCarpet extends AMP.BaseElement {
     const container = doc.createElement('div');
     container.setAttribute('class', '-amp-fx-flying-carpet-container');
 
-    for (var i = 0; i < children.length; i++) {
+    for (let i = 0; i < children.length; i++) {
       container.appendChild(children[i]);
     }
     clip.appendChild(container);

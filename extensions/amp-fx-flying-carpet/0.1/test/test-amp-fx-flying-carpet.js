@@ -16,12 +16,12 @@
 
 import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
+import {installImg} from '../../../../builtins/amp-img';
 require('../amp-fx-flying-carpet');
-import {installImg, AmpImg} from '../../builtins/amp-img';
 
 adopt(window);
 
-describe.only('amp-fx-flying-carpet', () => {
+describe('amp-fx-flying-carpet', () => {
   let iframe;
 
   function getAmpFlyingCarpet(childrenCallback) {
@@ -30,8 +30,8 @@ describe.only('amp-fx-flying-carpet', () => {
       const children = childrenCallback(iframe);
 
       const flyingCarpet = iframe.doc.createElement('amp-fx-flying-carpet');
-      children.forEach((child) => {
-        flyingCarpet.appendChild(img);
+      children.forEach(child => {
+        flyingCarpet.appendChild(child);
       });
 
       return iframe.addElement(flyingCarpet);
@@ -40,7 +40,7 @@ describe.only('amp-fx-flying-carpet', () => {
 
   it('should move children into wrapping divs', () => {
     let img;
-    return getAmpFlyingCarpet((iframe) => {
+    return getAmpFlyingCarpet(iframe => {
       installImg(iframe.win);
       img = iframe.doc.createElement('amp-img');
       img.setAttribute('src', '/base/examples/img/sample.jpg');
@@ -62,7 +62,7 @@ describe.only('amp-fx-flying-carpet', () => {
 
   it('should move text into wrapping divs', () => {
     let text;
-    return getAmpFlyingCarpet((iframe) => {
+    return getAmpFlyingCarpet(iframe => {
       text = iframe.doc.createTextNode('test');
       return [text];
     }).then(flyingCarpet => {
