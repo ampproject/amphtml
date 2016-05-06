@@ -50,7 +50,8 @@ export function installAd(win) {
   class AmpAd extends BaseElement {
 
     /** @override */
-    getElementPriority() {
+    getPriority() {
+      // Loads ads after other content.
       return 2;
     }
 

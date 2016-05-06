@@ -266,7 +266,7 @@ describe('Resources schedulePause', () => {
       unlayoutOnPause() {
         return false;
       },
-      getElementPriority() {
+      getPriority() {
         return 0;
       },
     };
@@ -382,7 +382,7 @@ describe('Resources schedulePreload', () => {
       unlayoutOnPause() {
         return false;
       },
-      getElementPriority() {
+      getPriority() {
         return 0;
       },
     };
@@ -495,7 +495,7 @@ describe('Resources discoverWork', () => {
       unlayoutCallback: () => true,
       unlayoutOnPause: () => true,
       togglePlaceholder: () => sandbox.spy(),
-      getElementPriority: () => 1,
+      getPriority: () => 1,
     };
   }
 
@@ -736,7 +736,7 @@ describe('Resources changeSize', () => {
       overflowCallback:
           (unused_overflown, unused_requestedHeight, unused_requestedWidth) => {
           },
-      getElementPriority: () => 0,
+      getPriority: () => 0,
     };
   }
 
@@ -1121,7 +1121,7 @@ describe('Resources mutateElement', () => {
       unlayoutOnPause: () => false,
       pauseCallback: () => {},
       unlayoutCallback: () => {},
-      getElementPriority: () => 0,
+      getPriority: () => 0,
     };
   }
 
@@ -1341,7 +1341,7 @@ describe('Resources.Resource', () => {
       resumeCallback: () => false,
       viewportCallback: () => {},
       togglePlaceholder: () => sandbox.spy(),
-      getElementPriority: () => 2,
+      getPriority: () => 2,
     };
     elementMock = sandbox.mock(element);
 
@@ -1958,7 +1958,7 @@ describe('Resource renderOutsideViewport', () => {
       pauseCallback: () => false,
       resumeCallback: () => false,
       viewportCallback: () => {},
-      getElementPriority: () => 0,
+      getPriority: () => 0,
     };
     elementMock = sandbox.mock(element);
 

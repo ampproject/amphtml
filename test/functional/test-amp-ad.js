@@ -62,7 +62,7 @@ function tests(name, installer) {
         expect(url).to.match(/^http:\/\/ads.localhost:/);
         expect(url).to.match(/frame(.max)?.html#{/);
         expect(iframe.style.display).to.equal('');
-        expect(ad.implementation_.getElementPriority()).to.equal(2);
+        expect(ad.implementation_.getPriority()).to.equal(2);
 
         const fragment = url.substr(url.indexOf('#') + 1);
         const data = JSON.parse(fragment);

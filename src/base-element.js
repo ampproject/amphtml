@@ -115,7 +115,6 @@ import {vsyncFor} from './vsync';
  * Each method is called exactly once and overriding them in subclasses
  * is optional.
  */
-
 export class BaseElement {
   /** @param {!AmpElement} element */
   constructor(element) {
@@ -142,10 +141,12 @@ export class BaseElement {
   }
 
   /**
-  * Returns the element priority. A value from 0 to 10.
+  * This is the priority of loading elements (layoutCallback).
+  * The lower the number, the higher the priority.
+  * The default priority for base elements is 0.
   * @return {number}
   */
-  getElementPriority() {
+  getPriority() {
     return 0;
   }
 

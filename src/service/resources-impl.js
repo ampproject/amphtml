@@ -1529,8 +1529,6 @@ export class Resource {
     /** @const {!AmpElement|undefined|null} */
     this.owner_ = undefined;
 
-    this.priority_ = element.getElementPriority();
-
     /** @private {!ResourceState_} */
     this.state_ = element.isBuilt() ? ResourceState_.NOT_LAID_OUT :
         ResourceState_.NOT_BUILT;
@@ -1616,7 +1614,7 @@ export class Resource {
    * @return {number}
    */
   getPriority() {
-    return this.priority_;
+    return this.element.getPriority();
   }
 
   /**

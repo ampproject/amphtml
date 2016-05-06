@@ -30,7 +30,8 @@ export function installPixel(win) {
   class AmpPixel extends BaseElement {
 
     /** @override */
-    getElementPriority() {
+    getPriority() {
+      // Loads after other content.
       return 1;
     }
 
