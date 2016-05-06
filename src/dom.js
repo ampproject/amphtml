@@ -204,6 +204,42 @@ export function childElement(parent, callback) {
   return null;
 }
 
+
+/**
+ * Finds all child elements that satisfies the callback.
+ * @param {!Element} parent
+ * @param {function(!Element):boolean} callback
+ * @return {!Array.<!Element>}
+ */
+export function childElements(parent, callback) {
+  const children = [];
+  for (let child = parent.firstElementChild; child;
+       child = child.nextElementSibling) {
+    if (callback(child)) {
+      children.push(child);
+    }
+  }
+  return children;
+}
+
+
+/**
+ * Finds the last child element that satisfies the callback.
+ * @param {!Element} parent
+ * @param {function(!Element):boolean} callback
+ * @return {?Element}
+ */
+export function lastChildElement(parent, callback) {
+  for (let child = parent.lastElementChild; child;
+       child = child.previousElementSibling) {
+    if (callback(child)) {
+      return child;
+    }
+  }
+  return null;
+}
+
+
 /**
  * @type {boolean|undefined}
  * @visiblefortesting
@@ -245,10 +281,45 @@ export function childElementByAttr(parent, attr) {
     return parent.querySelector(':scope > [' + attr + ']');
   }
   return childElement(parent, el => {
-    if (!el.hasAttribute(attr)) {
-      return false;
+    return el.hasAttribute(attr);
+  });
+}
+
+
+/**
+ * Finds the last child element that has the specified attribute.
+ * @param {!Element} parent
+ * @param {string} attr
+ * @return {?Element}
+ */
+export function lastChildElementByAttr(parent, attr) {
+  return lastChildElement(parent, el => {
+    return el.hasAttribute(attr);
+  });
+}
+
+
+/**
+ * Finds all child elements that has the specified attribute.
+ * @param {!Element} parent
+ * @param {string} attr
+ * @return {!Array.<!Element>}
+ */
+export function childElementsByAttr(parent, attr) {
+  if (scopeSelectorSupported == null) {
+    scopeSelectorSupported = isScopeSelectorSupported(parent);
+  }
+  if (scopeSelectorSupported) {
+    const nodeList = parent.querySelectorAll(':scope > [' + attr + ']');
+    // Convert NodeList into Array.<Element>.
+    const children = [];
+    for (let i = 0; i < nodeList.length; i++) {
+      children.push(nodeList[i]);
     }
-    return true;
+    return children;
+  }
+  return childElements(parent, el => {
+    return el.hasAttribute(attr);
   });
 }
 

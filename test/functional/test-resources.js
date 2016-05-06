@@ -487,6 +487,7 @@ describe('Resources discoverWork', () => {
       pauseCallback: () => {},
       unlayoutCallback: () => true,
       unlayoutOnPause: () => true,
+      togglePlaceholder: () => sandbox.spy(),
     };
   }
 
@@ -723,6 +724,7 @@ describe('Resources changeSize', () => {
       isRelayoutNeeded: () => true,
       contains: unused_otherElement => false,
       updateLayoutBox: () => {},
+      togglePlaceholder: () => sandbox.spy(),
       overflowCallback:
           (unused_overflown, unused_requestedHeight, unused_requestedWidth) => {
           },
@@ -1328,6 +1330,7 @@ describe('Resources.Resource', () => {
       pauseCallback: () => false,
       resumeCallback: () => false,
       viewportCallback: () => {},
+      togglePlaceholder: () => sandbox.spy(),
     };
     elementMock = sandbox.mock(element);
 
@@ -1758,6 +1761,7 @@ describe('Resources.Resource', () => {
         () => {
           resource.state_ = ResourceState_.LAYOUT_COMPLETE;
           elementMock.expects('unlayoutCallback').returns(true).once();
+          elementMock.expects('togglePlaceholder').withArgs(true).once();
           resource.unlayout();
           expect(resource.getState()).to.equal(ResourceState_.NOT_LAID_OUT);
         });
@@ -1765,6 +1769,7 @@ describe('Resources.Resource', () => {
     it('updated state should bypass isRelayoutNeeded', () => {
       resource.state_ = ResourceState_.LAYOUT_COMPLETE;
       elementMock.expects('unlayoutCallback').returns(true).once();
+      elementMock.expects('togglePlaceholder').withArgs(true).once();
       elementMock.expects('isUpgraded').returns(true).atLeast(1);
       elementMock.expects('getBoundingClientRect')
           .returns({left: 1, top: 1, width: 1, height: 1}).once();
@@ -1779,6 +1784,7 @@ describe('Resources.Resource', () => {
         ' but NOT update state', () => {
       resource.state_ = ResourceState_.LAYOUT_COMPLETE;
       elementMock.expects('unlayoutCallback').returns(false).once();
+      elementMock.expects('togglePlaceholder').withArgs(true).never();
       resource.unlayout();
       expect(resource.getState()).to.equal(ResourceState_.LAYOUT_COMPLETE);
     });
@@ -1800,6 +1806,7 @@ describe('Resources.Resource', () => {
     it('should delegate unload to unlayoutCallback', () => {
       resource.state_ = ResourceState_.LAYOUT_COMPLETE;
       elementMock.expects('unlayoutCallback').returns(false).once();
+      elementMock.expects('togglePlaceholder').withArgs(true).never();
       resource.unload();
       expect(resource.getState()).to.equal(ResourceState_.LAYOUT_COMPLETE);
     });
