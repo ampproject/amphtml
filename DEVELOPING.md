@@ -113,7 +113,7 @@ For testing documents on arbitrary URLs with your current local version of the A
 
 #### Deploying AMP on Cloud for testing on devices
 
-For deploying local AMP builds on a cloud(HEROKU) to better test on various devices, please follow the steps outlined in this [document](https://docs.google.com/document/d/1LOr8SEBEpLkqnFjzTNIZGi2VA8AC8_aKmDVux6co63U/edit?usp=sharing).
+For deploying and testing local AMP builds on [HEROKU](https://www.heroku.com/) , please follow the steps outlined in this [document](https://docs.google.com/document/d/1LOr8SEBEpLkqnFjzTNIZGi2VA8AC8_aKmDVux6co63U/edit?usp=sharing).
 
 ## Repository Layout
 <pre>
