@@ -19,8 +19,6 @@
 import {CSS} from '../../../build/amp-timeline-0.1.css';
 import {isLayoutSizeDefined} from '../../../src/layout';
 import {assert} from '../../../src/asserts';
-/** @const */
-const TAG = 'AmpTimeline';
 
 /**
  * The implementation of `amp-timeline` component. See {@link ../amp-timeline.md} for
@@ -38,7 +36,7 @@ export class AmpTimeline extends AMP.BaseElement {
     /** @const @private {!NodeList} */
 
     this.sections_ = this.getRealChildren();
-    this.sections_.forEach((section , index) => {
+    this.sections_.forEach(section => {
       // Check that there is a section tag defined
       assert(
           section.tagName.toLowerCase() == 'section',
@@ -46,11 +44,11 @@ export class AmpTimeline extends AMP.BaseElement {
           'See https://github.com/ampproject/amphtml/blob/master/extensions/' +
           'amp-timeline/amp-timeline.md. Found in: %s', section);
       const sectionComponents_ = section.children;
-      var listExists = false;
+      let listExists = false;
 
-      Array.from(sectionComponents_).forEach((elem, idx) => {
+      Array.from(sectionComponents_).forEach(elem => {
 
-        if(elem.tagName.toLowerCase() == 'ul' &&
+        if (elem.tagName.toLowerCase() == 'ul' &&
            elem.classList.contains('amp-timeline-list')) {
           listExists = true;
           const items = elem.children;
@@ -61,17 +59,22 @@ export class AmpTimeline extends AMP.BaseElement {
             // each item must be a li with class item
             assert(item.tagName.toLowerCase() == 'li' &&
                    item.classList.contains('amp-timeline-item'),
-                   'Each item in the timeline must be a <li> tag with class amp-timeline-item. Item number: %s, ' +
+                   'Each item in the timeline must be a <li> tag ' +
+                   'with class amp-timeline-item. Item number: %s, ' +
                    'See https://github.com/ampproject/amphtml/blob/master/extensions/' +
-                   'amp-timeline/amp-timeline.md. Found in: %s', index+1, this.element);
+                   'amp-timeline/amp-timeline.md. Found in: %s',
+                   index + 1, this.element);
 
             // each item must contain only one card element
             assert(item.children.length == 1 &&
-                   card.tagName.toLowerCase()  == 'div' &&
+                   card.tagName.toLowerCase() == 'div' &&
                    card.classList.contains('amp-timeline-card'),
-                  'Each item in the timeline must contain only one child card element with class amp-timeline-card. Item number: %s, ' +
+                  'Each item in the timeline must contain only one child ' +
+                  'card element with class amp-timeline-card.' +
+                  'Item number: %s, ' +
                   'See https://github.com/ampproject/amphtml/blob/master/extensions/' +
-                  'amp-timeline/amp-timeline.md. Found in: %s', index+1, this.element);
+                  'amp-timeline/amp-timeline.md. Found in: %s',
+                  index + 1, this.element);
           });
         }
       });
@@ -80,7 +83,8 @@ export class AmpTimeline extends AMP.BaseElement {
       if (!listExists) {
         // Check the timeline items container
         assert(false,
-               'The timeline should contain an ul with class amp-timeline-list, ' +
+               'The timeline should contain an ul with class ' +
+               'amp-timeline-list, ' +
                'See https://github.com/ampproject/amphtml/blob/master/extensions/' +
                'amp-timeline/amp-timeline.md. Found in: %s', this.element);
       }
