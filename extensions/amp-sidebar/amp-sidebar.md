@@ -45,7 +45,7 @@ limitations under the License.
 - The width of the sidebar can be set and adjusted between 45px and 80vw using CSS.
 - Touch zoom is disabled on the `amp-sidebar` and it's mask when the sidebar is open.
 
-Example
+Example:
 ```html
 <amp-sidebar id='sidebar1' layout='nodisplay'>
   <ul>
@@ -68,7 +68,7 @@ Setting the `on` attribute on one or more elements within the page and setting i
 
 Alternatively pressing the escape key on the keyboard will also close the lightbox.
 
-Example
+Example:
 ```html
 <div class="hamburger" on='tap:sidebar1.toggle'></button>
 <button on='tap:sidebar1'>Open</button>
