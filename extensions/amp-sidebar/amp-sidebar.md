@@ -47,7 +47,7 @@ limitations under the License.
 
 Example
 ```html
-<amp-sidebar id='sidebar1'>
+<amp-sidebar id='sidebar1' layout='nodisplay'>
   <ul>
     <li> Nav item 1</li>
     <li> Nav item 2</li>
@@ -84,6 +84,9 @@ The `side` attribute may be set to `left` or `right` depending upon whether side
 
 **open**
 The `open` attribute is present on the sidebar when it is open.
+
+**layout**
+The `amp-sidebar` extension accepts the `layout` value:  `nodisplay`
 
 ## Styling
 
