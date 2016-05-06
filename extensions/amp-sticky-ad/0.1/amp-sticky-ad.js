@@ -21,8 +21,6 @@ import {Layout} from '../../../src/layout';
 import {CSS} from '../../../build/amp-sticky-ad-0.1.css';
 
 /** @const */
-const EXPERIMENT = 'amp-sticky-ad';
-/** @const */
 const TAG = 'amp-sticky-ad';
 
 class AmpStickyAd extends AMP.BaseElement {
@@ -34,9 +32,9 @@ class AmpStickyAd extends AMP.BaseElement {
   /** @override */
   buildCallback() {
     /** @const @private {boolean} */
-    this.isExperimentOn_ = isExperimentOn(this.getWin(), EXPERIMENT);
+    this.isExperimentOn_ = isExperimentOn(this.getWin(), TAG);
     if (!this.isExperimentOn_) {
-      dev.warn(TAG, `Experiment ${EXPERIMENT} disabled`);
+      dev.warn(TAG, `TAG ${TAG} disabled`);
       return;
     }
   }
