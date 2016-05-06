@@ -88,8 +88,7 @@ The `open` attribute is present on the sidebar when it is open.
 
 **layout**
 
-The only permissible value for the `layout` attribute in `amp-sidebar` is
-`nodisplay`.
+The only permissible value for the `layout` attribute in `amp-sidebar` is `nodisplay`.
 
 ## Styling
 
