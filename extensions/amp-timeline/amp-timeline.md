@@ -57,16 +57,16 @@ One column example:
         height="800"
         layout="responsive"></amp-img>
 
-    <ul class="timeline">
-        <li class="item">
-            <div class="card">
-                <div class="content">
+    <ul class="amp-timeline-list">
+        <li class="amp-timeline-item">
+            <div class="amp-timeline-card">
+                <div class="amp-timeline-content">
                     <h3 class="date">24 December 1945</h3>
                 </div>
-                <div class="media">
+                <div class="amp-timeline-media">
                 </div>
-                <div class="content">
-                    <div class="description">
+                <div class="amp-timeline-content">
+                    <div class="amp-timeline-description">
                         <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam lacinia malesuada commodo. Praesent scelerisque elit non lorem sollicitudin tempor. </p>
 
                         <p>Fusce sit amet justo ac nunc rhoncus bibendum ut ultricies ligula. Morbi quis iaculis libero. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Nulla vitae mauris eleifend lacus malesuada elementum vitae eget nisi. Phasellus euismod dignissim ante sit amet blandit.</p>
@@ -74,15 +74,15 @@ One column example:
                 </div>
             </div>
         </li>
-        <li class="item">
-            <div class="card">
-                <div class="content">
+        <li class="amp-timeline-item">
+            <div class="amp-timeline-card">
+                <div class="amp-timeline-content">
                     <h3 class="date">1972</h3>
                 </div>
-                <div class="media">
+                <div class="amp-timeline-media">
                 </div>
-                <div class="content">
-                    <div class="description">
+                <div class="amp-timeline-content">
+                    <div class="amp-timeline-description">
                         <p>Pellentesque fringilla nisl tellus, vel facilisis odio sodales aliquam. Sed luctus elit eget purus tincidunt pharetra. </p>
                     </div>
                 </div>
@@ -104,16 +104,16 @@ Two columns example:
         height="800"
         layout="responsive"></amp-img>
 
-    <ul class="timeline two-column">
-        <li class="item left">
-            <div class="card">
-                <div class="content">
+    <ul class="amp-timeline-list two-column">
+        <li class="amp-timeline-item left">
+            <div class="amp-timeline-card">
+                <div class="amp-timeline-content">
                     <h3 class="date">24 December 1945</h3>
                 </div>
-                <div class="media">
+                <div class="amp-timeline-media">
                 </div>
-                <div class="content">
-                    <div class="description">
+                <div class="amp-timeline-content">
+                    <div class="amp-timeline-description">
                         <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam lacinia malesuada commodo. Praesent scelerisque elit non lorem sollicitudin tempor. </p>
 
                         <p>Fusce sit amet justo ac nunc rhoncus bibendum ut ultricies ligula. Morbi quis iaculis libero. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Nulla vitae mauris eleifend lacus malesuada elementum vitae eget nisi. Phasellus euismod dignissim ante sit amet blandit.</p>
@@ -121,15 +121,15 @@ Two columns example:
                 </div>
             </div>
         </li>
-        <li class="item right">
-            <div class="card">
-                <div class="content">
+        <li class="amp-timeline-item right">
+            <div class="amp-timeline-card">
+                <div class="amp-timeline-content">
                     <h3 class="date">1972</h3>
                 </div>
-                <div class="media">
+                <div class="amp-timeline-media">
                 </div>
-                <div class="content">
-                    <div class="description">
+                <div class="amp-timeline-content">
+                    <div class="amp-timeline-description">
                         <p>Pellentesque fringilla nisl tellus, vel facilisis odio sodales aliquam. Sed luctus elit eget purus tincidunt pharetra. </p>
                     </div>
                 </div>
@@ -176,10 +176,6 @@ The following lists validation errors specific to the `amp-timeline` element
       The first element in a timeline should be a <code>&lt;section></code> tag
     </td>
     <td>Error thrown when required <code>section</code> element is missing. Each amp-timeline should contain one section element to wrap the header and timeline elements.</td>
-  </tr>
-  <tr>
-    <td width="40%">The timeline should contain an <code>ul</code> with class <code>timeline</code></td>
-    <td>Error thrown when there is no <code>ul</code> element in the timeline or the ul doesn't have the class <code>timeline</code>. This is the wrapper for the items section.</td>
   </tr>
   <tr>
     <td width="40%">Each item in the timeline must be a <code>&lt;li></code> tag with class <code>amp-timeline-item</code>. Item number: <i>[number]</i></td>
