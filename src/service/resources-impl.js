@@ -1907,6 +1907,15 @@ export class Resource {
   }
 
   /**
+   * Returns true if the resource layout has not completed or failed.
+   * @return {boolean}
+   * */
+  isLayoutPending() {
+    return this.state_ != ResourceState_.LAYOUT_COMPLETE &&
+        this.state_ != ResourceState_.LAYOUT_FAILED;
+  }
+
+  /**
    * Returns a promise that is resolved when this resource is laid out
    * for the first time and the resource was loaded.
    * @return {!Promise}
