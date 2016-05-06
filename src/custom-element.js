@@ -423,6 +423,15 @@ export function createAmpElementProto(win, name, implementationClass) {
   };
 
   /**
+   * Get the priority to load the element.
+   * @return {number}
+   */
+  ElementProto.getPriority = function() {
+    dev.assert(this.isUpgraded(), 'Cannot get priority of unupgraded element');
+    return this.implementation_.getPriority();
+  };
+
+  /**
    * Requests or requires the element to be built. The build is done by
    * invoking {@link BaseElement.buildCallback} method.
    *

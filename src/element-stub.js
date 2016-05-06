@@ -27,6 +27,11 @@ export class ElementStub extends BaseElement {
   }
 
   /** @override */
+  getPriority() {
+    throw new Error('Cannot get priority of stubbed element');
+  }
+
+  /** @override */
   isLayoutSupported(unusedLayout) {
     // Always returns true and will eventually call this method on the actual
     // element.

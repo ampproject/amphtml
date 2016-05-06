@@ -266,6 +266,9 @@ describe('Resources schedulePause', () => {
       unlayoutOnPause() {
         return false;
       },
+      getPriority() {
+        return 0;
+      },
     };
   }
 
@@ -379,6 +382,9 @@ describe('Resources schedulePreload', () => {
       unlayoutOnPause() {
         return false;
       },
+      getPriority() {
+        return 0;
+      },
     };
   }
 
@@ -489,6 +495,7 @@ describe('Resources discoverWork', () => {
       unlayoutCallback: () => true,
       unlayoutOnPause: () => true,
       togglePlaceholder: () => sandbox.spy(),
+      getPriority: () => 1,
     };
   }
 
@@ -729,6 +736,7 @@ describe('Resources changeSize', () => {
       overflowCallback:
           (unused_overflown, unused_requestedHeight, unused_requestedWidth) => {
           },
+      getPriority: () => 0,
     };
   }
 
@@ -1113,6 +1121,7 @@ describe('Resources mutateElement', () => {
       unlayoutOnPause: () => false,
       pauseCallback: () => {},
       unlayoutCallback: () => {},
+      getPriority: () => 0,
     };
   }
 
@@ -1332,6 +1341,7 @@ describe('Resources.Resource', () => {
       resumeCallback: () => false,
       viewportCallback: () => {},
       togglePlaceholder: () => sandbox.spy(),
+      getPriority: () => 2,
     };
     elementMock = sandbox.mock(element);
 
@@ -1948,6 +1958,7 @@ describe('Resource renderOutsideViewport', () => {
       pauseCallback: () => false,
       resumeCallback: () => false,
       viewportCallback: () => {},
+      getPriority: () => 0,
     };
     elementMock = sandbox.mock(element);
 

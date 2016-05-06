@@ -140,6 +140,16 @@ export class BaseElement {
     this.resources_ = resourcesFor(this.getWin());
   }
 
+  /**
+  * This is the priority of loading elements (layoutCallback).
+  * The lower the number, the higher the priority.
+  * The default priority for base elements is 0.
+  * @return {number}
+  */
+  getPriority() {
+    return 0;
+  }
+
   /** @return {!Layout} */
   getLayout() {
     return this.layout_;
