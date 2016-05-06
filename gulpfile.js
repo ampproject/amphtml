@@ -64,6 +64,7 @@ function buildExtensions(options) {
   buildExtension('amp-fit-text', '0.1', true, options);
   buildExtension('amp-font', '0.1', false, options);
   buildExtension('amp-iframe', '0.1', false, options);
+  buildExtension('amp-ima', '0.1', false, options);
   buildExtension('amp-image-lightbox', '0.1', true, options);
   buildExtension('amp-instagram', '0.1', false, options);
   buildExtension('amp-jwplayer', '0.1', false, options);
@@ -319,6 +320,7 @@ function buildExamples(watch) {
   buildExample('everything.amp.html');
   buildExample('font.amp.html');
   buildExample('facebook.amp.html');
+  buildExample('ima.amp.html');
   buildExample('instagram.amp.html');
   buildExample('jwplayer.amp.html');
   buildExample('pinterest.amp.html');
