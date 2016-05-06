@@ -34,12 +34,33 @@ class AmpFlyingCarpet extends AMP.BaseElement {
   }
 
   /** @override */
+  isReadyToBuild() {
+      // Wait for all our children to be parsed.
+      return false;
+  }
+
+  /** @override */
   buildCallback() {
     this.isExperimentOn_ = isExperimentOn(this.getWin(), EXPERIMENT);
     if (!this.isExperimentOn_) {
       dev.warn(TAG, `Experiment ${EXPERIMENT} disabled`);
       return;
     }
+
+    const children = this.getRealChildNodes();
+    const doc = this.element.ownerDocument;
+
+    const clip = doc.createElement('div');
+    clip.setAttribute('class', '-amp-flying-carpet-clip');
+    const container = doc.createElement('div');
+    container.setAttribute('class', '-amp-flying-carpet-container');
+
+    for (var i = 0; i < children.length; i++) {
+      container.appendChild(children[i]);
+    }
+    clip.appendChild(container);
+
+    this.element.appendChild(clip);
   }
 
   assertPosition() {
@@ -66,28 +87,8 @@ class AmpFlyingCarpet extends AMP.BaseElement {
     );
   }
 
-  // REVIEW(@dima) How will Resources handle my wrapping elements?
   layoutCallback() {
-    if (!this.isExperimentOn_) {
-      return Promise.resolve();
-    }
-
     this.assertPosition();
-
-    const children = this.getRealChildNodes();
-    const doc = this.element.ownerDocument;
-
-    const clip = doc.createElement('div');
-    clip.setAttribute('class', '-amp-flying-carpet-clip');
-    const container = doc.createElement('div');
-    container.setAttribute('class', '-amp-flying-carpet-container');
-
-    for (var i = 0; i < children.length; i++) {
-      container.appendChild(children[i]);
-    }
-    clip.appendChild(container);
-
-    this.element.appendChild(clip);
     return Promise.resolve();
   }
 }
