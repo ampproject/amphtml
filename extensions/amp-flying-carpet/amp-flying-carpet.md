@@ -44,7 +44,7 @@ Example:
 ```html
 <amp-flying-carpet height="300px">
   <amp-img src="fullscreen.png" width="100vw" height="100vh"></amp-img>
-</amp-accordion>
+</amp-flying-carpet>
 ```
 
 ## Attributes
