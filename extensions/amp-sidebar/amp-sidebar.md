@@ -86,7 +86,7 @@ The `side` attribute may be set to `left` or `right` depending upon whether side
 The `open` attribute is present on the sidebar when it is open.
 
 **layout**
-The `amp-sidebar` extension accepts the `layout` value:  `nodisplay`
+The only permissible value for the `layout` attribute in `amp-sidebar` is `nodisplay`.
 
 ## Styling
 
