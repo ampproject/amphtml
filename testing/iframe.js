@@ -206,6 +206,12 @@ export function createIframePromise(opt_runtimeOff, opt_beforeLayoutCallback) {
             // Make sure it has dimensions since no styles are available.
             element.style.display = 'block';
             element.build(true);
+            if (!element.getPlaceholder()) {
+              const placeholder = element.createPlaceholder();
+              if (placeholder) {
+                element.appendChild(placeholder);
+              }
+            }
             if (element.layoutCount_ == 0) {
               if (opt_beforeLayoutCallback) {
                 opt_beforeLayoutCallback(element);

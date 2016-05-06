@@ -77,26 +77,26 @@ describe('amp-image-lightbox component', () => {
   it('should activate all steps', () => {
     return getImageLightbox().then(lightbox => {
       const impl = lightbox.implementation_;
-      const requestFullOverlay = sinon.spy();
+      const requestFullOverlay = sandbox.spy();
       impl.requestFullOverlay = requestFullOverlay;
-      const viewportOnChanged = sinon.spy();
-      const disableTouchZoom = sinon.spy();
-      const hideFixedLayer = sinon.spy();
-      const showFixedLayer = sinon.spy();
+      const viewportOnChanged = sandbox.spy();
+      const disableTouchZoom = sandbox.spy();
+      const hideFixedLayer = sandbox.spy();
+      const showFixedLayer = sandbox.spy();
       impl.getViewport = () => {return {
         onChanged: viewportOnChanged,
         disableTouchZoom: disableTouchZoom,
         hideFixedLayer: hideFixedLayer,
         showFixedLayer: showFixedLayer,
       };};
-      const historyPush = sinon.spy();
+      const historyPush = sandbox.spy();
       impl.getHistory_ = () => {
         return {push: () => {
           historyPush();
           return Promise.resolve(11);
         }};
       };
-      const enter = sinon.spy();
+      const enter = sandbox.spy();
       impl.enter_ = enter;
 
       const ampImage = document.createElement('amp-img');
@@ -120,23 +120,23 @@ describe('amp-image-lightbox component', () => {
       const impl = lightbox.implementation_;
       impl.active_ = true;
       impl.historyId_ = 11;
-      const cancelFullOverlay = sinon.spy();
+      const cancelFullOverlay = sandbox.spy();
       impl.cancelFullOverlay = cancelFullOverlay;
-      const viewportOnChangedUnsubscribed = sinon.spy();
+      const viewportOnChangedUnsubscribed = sandbox.spy();
       impl.unlistenViewport_ = viewportOnChangedUnsubscribed;
-      const restoreOriginalTouchZoom = sinon.spy();
-      const hideFixedLayer = sinon.spy();
-      const showFixedLayer = sinon.spy();
+      const restoreOriginalTouchZoom = sandbox.spy();
+      const hideFixedLayer = sandbox.spy();
+      const showFixedLayer = sandbox.spy();
       impl.getViewport = () => {return {
         restoreOriginalTouchZoom: restoreOriginalTouchZoom,
         hideFixedLayer: hideFixedLayer,
         showFixedLayer: showFixedLayer,
       };};
-      const historyPop = sinon.spy();
+      const historyPop = sandbox.spy();
       impl.getHistory_ = () => {
         return {pop: historyPop};
       };
-      const exit = sinon.spy();
+      const exit = sandbox.spy();
       impl.exit_ = exit;
 
       const ampImage = document.createElement('amp-img');
@@ -159,9 +159,9 @@ describe('amp-image-lightbox component', () => {
     return getImageLightbox().then(lightbox => {
       const impl = lightbox.implementation_;
       const setupCloseSpy = sandbox.spy(impl, 'close');
-      const viewportOnChanged = sinon.spy();
-      const disableTouchZoom = sinon.spy();
-      const restoreOriginalTouchZoom = sinon.spy();
+      const viewportOnChanged = sandbox.spy();
+      const disableTouchZoom = sandbox.spy();
+      const restoreOriginalTouchZoom = sandbox.spy();
       impl.getViewport = () => {return {
         onChanged: viewportOnChanged,
         disableTouchZoom: disableTouchZoom,
@@ -169,14 +169,14 @@ describe('amp-image-lightbox component', () => {
         hideFixedLayer: () => {},
         showFixedLayer: () => {},
       };};
-      const historyPush = sinon.spy();
+      const historyPush = sandbox.spy();
       impl.getHistory_ = () => {
         return {push: () => {
           historyPush();
           return Promise.resolve(11);
         }};
       };
-      const enter = sinon.spy();
+      const enter = sandbox.spy();
       impl.enter_ = enter;
 
       const ampImage = document.createElement('amp-img');
@@ -472,7 +472,7 @@ describe('amp-image-lightbox image viewer gestures', () => {
   });
 
   it('should zoom release', () => {
-    const updateSrc = sinon.spy();
+    const updateSrc = sandbox.spy();
     imageViewer.updateSrc_ = updateSrc;
     imageViewer.onZoomInc_(10, 10, -10, -10);
     return imageViewer.onZoomRelease_(10, 10, -10, -10, 0, 0).then(() => {

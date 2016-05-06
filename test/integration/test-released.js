@@ -51,7 +51,7 @@ function runTest(shouldKillPolyfillableApis) {
       this.timeout(15000);
       return pollForLayout(fixture.win, 13, 10000).then(() => {
         expect(fixture.doc.querySelectorAll('.-amp-element'))
-            .to.have.length(15);
+            .to.have.length(16);
         expect(fixture.doc.querySelectorAll('.-amp-layout'))
             .to.have.length(13);
         expect(fixture.doc.querySelectorAll('.-amp-error')).to.have.length(0);

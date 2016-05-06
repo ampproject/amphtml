@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import {installVisibilityService} from '../../src/service/visibility-impl';
+import {isPositiveNumber_, isValidPercentage_, isVisibilitySpecValid,
+  installVisibilityService} from '../../src/service/visibility-impl';
 import {installResourcesService} from '../../src/service/resources-impl';
 import {visibilityFor} from '../../src/visibility';
 import * as sinon from 'sinon';
@@ -26,13 +27,21 @@ describe('Visibility (tag: amp-analytics)', () => {
 
   let sandbox;
   let visibility;
-  let calls;
   let getIntersectionStub;
+  let callbackStub;
+
+  const INTERSECTION_0P = {
+    intersectionRect: {width: 0, height: 0},
+    boundingClientRect: {height: 100, width: 100},
+  };
+  const INTERSECTION_50P = {
+    intersectionRect: {width: 50, height: 100},
+    boundingClientRect: {height: 100, width: 100},
+  };
 
   beforeEach(() => {
     sandbox = sinon.sandbox.create();
     sandbox.useFakeTimers();
-    calls = 0;
 
     installResourcesService(window);
     installVisibilityService(window);
@@ -40,6 +49,7 @@ describe('Visibility (tag: amp-analytics)', () => {
     const getIdStub = sandbox.stub();
     getIdStub.returns('0');
     getIntersectionStub = sandbox.stub();
+    callbackStub = sandbox.stub();
 
     return visibilityFor(window).then(v => {
       visibility = v;
@@ -48,6 +58,7 @@ describe('Visibility (tag: amp-analytics)', () => {
       getResourceStub.returns({
         element: {getIntersectionChangeEntry: getIntersectionStub},
         getId: getIdStub,
+        isLayoutPending: () => false,
       });
     });
   });
@@ -58,77 +69,154 @@ describe('Visibility (tag: amp-analytics)', () => {
     sandbox.restore();
   });
 
-  function callback() {
-    calls++;
-  }
-
   function listen(intersectionChange, config, expectedCalls) {
     getIntersectionStub.returns(intersectionChange);
-    visibility.listenOnce(config, callback);
-    sandbox.clock.tick(200);
-
-    expect(calls).to.equal(expectedCalls);
+    config['selector'] = '#abc';
+    visibility.listenOnce(config, callbackStub);
+    sandbox.clock.tick(20);
+    expect(callbackStub.callCount).to.equal(expectedCalls);
   }
 
   function verifyChange(intersectionChange, expectedCalls) {
     getIntersectionStub.returns(intersectionChange);
     visibility.scrollListener_();
-    expect(calls).to.equal(expectedCalls);
+    expect(callbackStub.callCount).to.equal(expectedCalls);
   }
 
-  it('should fire (trivial config)', () => {
-    listen({
-      intersectionRect: {width: 50, height: 50},
-      boundingClientRect: {height: 100, width: 100},
-    }, {
-      selector: '#abc', visiblePercentageMin: 0, visiblePercentageMax: 100,
-    }, 1);
+  it('fires for trivial config', () => {
+    listen(INTERSECTION_50P, {
+      visiblePercentageMin: 0, visiblePercentageMax: 100}, 1);
   });
 
-  it('should fire (non-trivial config)', () => {
+  it('fires for non-trivial config', () => {
     listen({
-      intersectionRect: {height: 100, width: 19},
+      intersectionRect: {height: 100, width: 49},
       boundingClientRect: {height: 100, width: 100},
-    }, {
-      selector: '#abc', visiblePercentageMin: 20, visiblePercentageMax: 80,
-    }, 0);
+    }, {visiblePercentageMin: 49, visiblePercentageMax: 80}, 0);
 
-    verifyChange({
-      intersectionRect: {height: 100, width: 20},
-      boundingClientRect: {height: 100, width: 100},
-    }, 1);
+    verifyChange(INTERSECTION_50P, 1);
   });
 
-  it('should fire only once', () => {
-    listen({
-      intersectionRect: {width: 20, height: 100},
-      boundingClientRect: {height: 100, width: 100},
-    }, {
-      selector: '#abc', visiblePercentageMin: 20, visiblePercentageMax: 80,
+  it('fires only once', () => {
+    listen(INTERSECTION_50P, {
+      visiblePercentageMin: 49, visiblePercentageMax: 80,
     }, 1);
 
-    verifyChange({
-      intersectionRect: {height: 100, width: 100},
-      boundingClientRect: {height: 100, width: 100},
-    }, 1);
-
-    verifyChange({
-      intersectionRect: {height: 20, width: 100},
-      boundingClientRect: {height: 100, width: 100},
-    }, 1);
+    verifyChange(INTERSECTION_0P, 1);
+    verifyChange(INTERSECTION_50P, 1);
   });
 
-  it('does not fire if max condition fails', () => {
-    listen({
-      intersectionRect: {width: 100, height: 100},
-      boundingClientRect: {height: 100, width: 100},
-    }, {
-      selector: '#abc', visiblePercentageMin: 20, visiblePercentageMax: 80,
-    }, 0);
+  it('fires with just totalTimeMin condition', () => {
+    listen(INTERSECTION_0P, {totalTimeMin: 1000}, 0);
 
-    verifyChange({
-      intersectionRect: {height: 40, width: 100},
-      boundingClientRect: {height: 100, width: 100},
-    }, 0);
+    sandbox.clock.tick(999);
+    verifyChange(INTERSECTION_0P, 0);
+
+    sandbox.clock.tick(1);
+    expect(callbackStub.callCount).to.equal(1);
+  });
+
+  it('fires with just continuousTimeMin condition', () => {
+    listen(INTERSECTION_0P, {continuousTimeMin: 1000}, 0);
+
+    sandbox.clock.tick(999);
+    verifyChange(INTERSECTION_0P, 0);
+
+    sandbox.clock.tick(1);
+    expect(callbackStub.callCount).to.equal(1);
+  });
+
+  it('fires with totalTimeMin=1k and visiblePercentageMin=0', () => {
+    listen(INTERSECTION_0P, {totalTimeMin: 1000, visiblePercentageMin: 0}, 0);
+
+    sandbox.clock.tick(1000);
+    verifyChange(INTERSECTION_50P, 0);
+
+    sandbox.clock.tick(1000);
+    expect(callbackStub.callCount).to.equal(1);
+  });
+
+  it('fires for continuousTimeMin=1k and totalTimeMin=2k', () => {
+    // This test counts time from when the ad is loaded.
+    listen(INTERSECTION_0P, {totalTimeMin: 2000, continuousTimeMin: 1000}, 0);
+
+    sandbox.clock.tick(1000);
+    verifyChange(INTERSECTION_0P, 0);
+
+    sandbox.clock.tick(1000);
+    expect(callbackStub.callCount).to.equal(1);
+  });
+
+  it('fires for continuousTimeMin=1k and visiblePercentageMin=50', () => {
+    // This test counts time from when the ad is loaded.
+    listen(INTERSECTION_50P,
+        {continuousTimeMin: 1000, visiblePercentageMin: 49}, 0);
+
+    sandbox.clock.tick(999);
+    verifyChange(INTERSECTION_0P, 0);
+
+    sandbox.clock.tick(1000);
+    verifyChange(INTERSECTION_50P, 0);
+
+    sandbox.clock.tick(100);
+    expect(callbackStub.callCount).to.equal(0);
+    sandbox.clock.tick(900);
+    expect(callbackStub.callCount).to.equal(1);
+  });
+
+  describe('isVisibilitySpecValid', () => {
+    it('passes valid visibility spec', () => {
+      const specs = [
+        undefined,
+        {selector: '#abc'},
+        {
+          selector: '#a', continuousTimeMin: 10, totalTimeMin: 1000,
+          visiblePercentageMax: 99, visiblePercentageMin: 10,
+        },
+        {selector: '#a', continuousTimeMax: 1000, unload: true},
+      ];
+      for (const s in specs) {
+        expect(isVisibilitySpecValid({visibilitySpec: specs[s]}, true),
+            JSON.stringify(specs[s])).to.be.true;
+      }
+    });
+
+    it('rejects invalid visibility spec', () => {
+      const specs = [
+        {},
+        {selector: 'abc'},
+        {selector: '#a', continuousTimeMin: -10},
+        {
+          selector: '#a', continuousTimeMax: 10, continuousTimeMin: 100,
+          unload: true,
+        },
+        {selector: '#a', continuousTimeMax: 100, continuousTimeMin: 10},
+        {selector: '#a', visiblePercentageMax: 101},
+      ];
+      for (const s in specs) {
+        expect(isVisibilitySpecValid({visibilitySpec: specs[s]}, true),
+            JSON.stringify(specs[s])).to.be.false;
+      }
+    });
+  });
+
+  describe('utils', () => {
+    it('isPositiveNumber_', () => {
+      ['', 1, 0, undefined, 100, 101].forEach(num => {
+        expect(isPositiveNumber_(num)).to.be.true;
+      });
+      [-1, NaN].forEach(num => {
+        expect(isPositiveNumber_(num)).to.be.false;
+      });
+    });
+
+    it('isValidPercentage_', () => {
+      ['', 1, 0, undefined, 100].forEach(num => {
+        expect(isValidPercentage_(num)).to.be.true;
+      });
+      [-1, NaN, 101].forEach(num => {
+        expect(isValidPercentage_(num)).to.be.false;
+      });
+    });
   });
 });
