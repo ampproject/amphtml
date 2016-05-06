@@ -30,9 +30,9 @@ import {removeElement} from '../../../src/dom';
 
 /** @const These tags are allowed to have fixed positioning */
 const POSITION_FIXED_TAG_WHITELIST = {
+  'AMP-FX-FLYING-CARPET': true,
   'AMP-LIGHTBOX': true,
   'AMP-STICKY-AD': true,
-  'AMP-FLYING-CARPET': true,
 };
 
 /**

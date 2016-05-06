@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-# <a name="amp-flying-carpet"></a> `amp-flying-carpet`
+# <a name="amp-fx-flying-carpet"></a> `amp-fx-flying-carpet`
 
 <table>
   <tr>
@@ -27,24 +27,24 @@ limitations under the License.
   </tr>
   <tr>
     <td class="col-fourty"><strong>Required Script</strong></td>
-    <td><code>&lt;script async custom-element="amp-flying-carpet" src="https://cdn.ampproject.org/v0/amp-flying-carpet-0.1.js">&lt;/script></code></td>
+    <td><code>&lt;script async custom-element="amp-fx-flying-carpet" src="https://cdn.ampproject.org/v0/amp-fx-flying-carpet-0.1.js">&lt;/script></code></td>
   </tr>
   <tr>
     <td class="col-fourty"><strong>Examples</strong></td>
-    <td><a href="https://ampbyexample.com/components/amp-flying-carpet">amp-flying-carpet.html</a></td>
+    <td><a href="https://ampbyexample.com/components/amp-fx-flying-carpet">amp-fx-flying-carpet.html</a></td>
   </tr>
 </table>
 
 ## Behavior
 
-`amp-flying-carpet` displays its children inside a container of fixed height. As the user scrolls the page, the flying carpet reveals more of it contents, sliding across its children as if peering through a window in the page.
+`amp-fx-flying-carpet` displays its children inside a container of fixed height. As the user scrolls the page, the flying carpet reveals more of it contents, sliding across its children as if peering through a window in the page.
 
 Example:
 
 ```html
-<amp-flying-carpet height="300px">
+<amp-fx-flying-carpet height="300px">
   <amp-img src="fullscreen.png" width="100vw" height="100vh"></amp-img>
-</amp-flying-carpet>
+</amp-fx-flying-carpet>
 ```
 
 ## Attributes
@@ -55,13 +55,13 @@ The height of the flying carpets "window".
 
 ## Styling
 
-- You may use the `amp-flying-carpet` element selector to style it freely.
-- `amp-flying-carpet` elements are always `position: relative`.
+- You may use the `amp-fx-flying-carpet` element selector to style it freely.
+- `amp-fx-flying-carpet` elements are always `position: relative`.
 
 ## Validation errors
 
-The following lists validation errors specific to the `amp-flying-carpet` tag
-(see also `amp-flying-carpet` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-flying-carpet/0.1/validator-amp-flying-carpet.protoascii)):
+The following lists validation errors specific to the `amp-fx-flying-carpet` tag
+(see also `amp-fx-flying-carpet` in the [AMP validator specification](https://github.com/ampproject/amphtml/blob/master/extensions/amp-fx-flying-carpet/0.1/validator-amp-fx-flying-carpet.protoascii)):
 
 <table>
   <tr>

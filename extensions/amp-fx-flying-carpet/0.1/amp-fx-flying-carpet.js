@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import {CSS} from '../../../build/amp-flying-carpet-0.1.css';
+import {CSS} from '../../../build/amp-fx-flying-carpet-0.1.css';
 import {Layout} from '../../../src/layout';
 import {isExperimentOn} from '../../../src/experiments';
 import {dev, user} from '../../../src/log';
 
 /** @const */
-const EXPERIMENT = 'amp-flying-carpet';
+const EXPERIMENT = 'amp-fx-flying-carpet';
 
 class AmpFlyingCarpet extends AMP.BaseElement {
 
@@ -47,9 +47,9 @@ class AmpFlyingCarpet extends AMP.BaseElement {
     const doc = this.element.ownerDocument;
 
     const clip = doc.createElement('div');
-    clip.setAttribute('class', '-amp-flying-carpet-clip');
+    clip.setAttribute('class', '-amp-fx-flying-carpet-clip');
     const container = doc.createElement('div');
-    container.setAttribute('class', '-amp-flying-carpet-container');
+    container.setAttribute('class', '-amp-fx-flying-carpet-container');
 
     for (var i = 0; i < children.length; i++) {
       container.appendChild(children[i]);
@@ -67,7 +67,7 @@ class AmpFlyingCarpet extends AMP.BaseElement {
     // Hmm, can the page height change and affect us?
     user.assert(
       layoutBox.top >= viewportHeight,
-      '<amp-flying-carpet> elements must be positioned after the first ' +
+      '<amp-fx-flying-carpet> elements must be positioned after the first ' +
       'viewport: %s Current position: %s. Min: %s',
       this.element,
       layoutBox.top,
@@ -75,7 +75,7 @@ class AmpFlyingCarpet extends AMP.BaseElement {
     );
     user.assert(
       layoutBox.bottom <= docHeight - viewportHeight,
-      '<amp-flying-carpet> elements must be positioned before the last ' +
+      '<amp-fx-flying-carpet> elements must be positioned before the last ' +
       'viewport: %s Current position: %s. Min: %s',
       this.element,
       layoutBox.bottom,
@@ -89,4 +89,4 @@ class AmpFlyingCarpet extends AMP.BaseElement {
   }
 }
 
-AMP.registerElement('amp-flying-carpet', AmpFlyingCarpet, CSS);
+AMP.registerElement('amp-fx-flying-carpet', AmpFlyingCarpet, CSS);

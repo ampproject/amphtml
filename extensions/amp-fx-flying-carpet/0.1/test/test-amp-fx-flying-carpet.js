@@ -16,12 +16,12 @@
 
 import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
-require('../amp-flying-carpet');
+require('../amp-fx-flying-carpet');
 import {installImg, AmpImg} from '../../builtins/amp-img';
 
 adopt(window);
 
-describe.only('amp-flying-carpet', () => {
+describe.only('amp-fx-flying-carpet', () => {
   let iframe;
 
   function getAmpFlyingCarpet(childrenCallback) {
@@ -29,7 +29,7 @@ describe.only('amp-flying-carpet', () => {
       iframe = i;
       const children = childrenCallback(iframe);
 
-      const flyingCarpet = iframe.doc.createElement('amp-flying-carpet');
+      const flyingCarpet = iframe.doc.createElement('amp-fx-flying-carpet');
       children.forEach((child) => {
         flyingCarpet.appendChild(img);
       });
@@ -50,11 +50,11 @@ describe.only('amp-flying-carpet', () => {
     }).then(flyingCarpet => {
       const clip = flyingCarpet.firstChild;
       expect(clip.nodeName).to.equal('div');
-      expect(clip).to.have.class('-amp-flying-carpet-clip');
+      expect(clip).to.have.class('-amp-fx-flying-carpet-clip');
 
       const container = clip.firstChild;
       expect(container.nodeName).to.equal('div');
-      expect(container).to.have.class('-amp-flying-carpet-container');
+      expect(container).to.have.class('-amp-fx-flying-carpet-container');
 
       expect(container.firstChild).to.equal(img);
     });
@@ -68,11 +68,11 @@ describe.only('amp-flying-carpet', () => {
     }).then(flyingCarpet => {
       const clip = flyingCarpet.firstChild;
       expect(clip.nodeName).to.equal('div');
-      expect(clip).to.have.class('-amp-flying-carpet-clip');
+      expect(clip).to.have.class('-amp-fx-flying-carpet-clip');
 
       const container = clip.firstChild;
       expect(container.nodeName).to.equal('div');
-      expect(container).to.have.class('-amp-flying-carpet-container');
+      expect(container).to.have.class('-amp-fx-flying-carpet-container');
 
       expect(container.firstChild).to.equal(text);
     });
