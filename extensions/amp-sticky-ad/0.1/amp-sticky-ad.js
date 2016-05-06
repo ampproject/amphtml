@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import {isLayoutSizeDefined} from '../../../src/layout';
-import {isExperimentOn} from '../../../src/experiments';
-import {dev} from '../../../src/log';
-import {Layout} from '../../../src/layout';
 import {CSS} from '../../../build/amp-sticky-ad-0.1.css';
+import {Layout} from '../../../src/layout';
+import {dev} from '../../../src/log';
+import {isExperimentOn} from '../../../src/experiments';
+import {isLayoutSizeDefined} from '../../../src/layout';
 
 /** @const */
 const TAG = 'amp-sticky-ad';
@@ -26,7 +26,7 @@ const TAG = 'amp-sticky-ad';
 class AmpStickyAd extends AMP.BaseElement {
   /** @override */
   isLayoutSupported(layout) {
-    return layout == Layout.FIXED_HEIGHT;
+    return layout == Layout.NODISPLAY;
   }
 
   /** @override */
@@ -39,4 +39,5 @@ class AmpStickyAd extends AMP.BaseElement {
     }
   }
 }
+
 AMP.registerElement('amp-sticky-ad', AmpStickyAd, CSS);
