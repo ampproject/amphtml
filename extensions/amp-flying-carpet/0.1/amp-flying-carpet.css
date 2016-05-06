@@ -32,7 +32,6 @@ amp-flying-carpet > .-amp-flying-carpet-clip {
    */
   clip: rect(0, auto, auto, 0) !important;
   clip-path: polygon(0px 0px, 100% 0px, 100% 100%, 0px 100%) !important;
-  -webkit-clip-path: polygon(0px 0px, 100% 0px, 100% 100%, 0px 100%) !important;
 }
 
 /* Fixed position container that creates the scroll effect */
