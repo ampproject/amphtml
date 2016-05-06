@@ -247,7 +247,7 @@ export class Visibility {
     this.listeners_[resId].push({
       config: config,
       callback: callback,
-      state: {['' + TIME_LOADED]: Date.now()},
+      state: {[TIME_LOADED]: Date.now()},
     });
     this.resources_.push(res);
 
