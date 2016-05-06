@@ -53,22 +53,3 @@ export function mantisRecommend(global, data) {
 
   loadScript(global, 'https://assets.mantisadnetwork.com/recommend.min.js');
 }
-
-export function mantisVideo(global, data) {
-  checkData(data, ['property', 'video']);
-  validateDataExists(data, ['property', 'video']);
-
-  global.mantis = global.mantis || [];
-  global.mantis.push(['video', 'load', {
-    property: data['property'],
-    container: 'player',
-    videoId: data['video'],
-  }]);
-
-  const d = global.document.createElement('div');
-  d.setAttribute('id', 'player');
-  global.document.getElementById('c').appendChild(d);
-
-  loadScript(global, 'https://assets.mantisadnetwork.com/video/video.min.js');
-}
-
