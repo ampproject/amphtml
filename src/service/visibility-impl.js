@@ -25,59 +25,27 @@ import {viewportFor} from '../viewport';
 const LISTENER_INITIAL_RUN_DELAY_ = 20;
 
 // Variables that are passed to the callback.
-/** @const {string} */
 const MAX_CONTINUOUS_TIME = 'maxContinuousTime';
-
-/** @const {string} */
 const TOTAL_TIME = 'totalVisibleTime';
-
-/** @const {string} */
 const FIRST_SEEN_TIME = 'firstSeenTime';
-
-/** @const {string} */
 const LAST_SEEN_TIME = 'lastSeenTime';
-
-/** @const {string} */
 const FIRST_VISIBLE_TIME = 'fistVisibleTime';
-
-/** @const {string} */
 const LAST_VISIBLE_TIME = 'lastVisibleTime';
-
-/** @const {string} */
 const MIN_VISIBLE = 'minVisiblePercentage';
-
-/** @const {string} */
 const MAX_VISIBLE = 'maxVisiblePercentage';
 
 // Variables that are not exposed outside this class.
-/** @const {string} */
 const CONTINUOUS_TIME = 'cT';
-
-/** @const {string} */
 const LAST_UPDATE = 'lU';
-
-/** @const {string} */
 const IN_VIEWPORT = 'iV';
-
-/** @const {string} */
 const TIME_LOADED = 'tL';
 
-/** @const {string} */
+// Keys used in VisibilitySpec
 const CONTINUOUS_TIME_MAX = 'continuousTimeMax';
-
-/** @const {string} */
 const CONTINUOUS_TIME_MIN = 'continuousTimeMin';
-
-/** @const {string} */
 const TOTAL_TIME_MAX = 'totalTimeMax';
-
-/** @const {string} */
 const TOTAL_TIME_MIN = 'totalTimeMin';
-
-/** @const {string} */
 const VISIBLE_PERCENTAGE_MIN = 'visiblePercentageMin';
-
-/** @const {string} */
 const VISIBLE_PERCENTAGE_MAX = 'visiblePercentageMax';
 
 /**
@@ -113,8 +81,8 @@ export function isValidPercentage_(num) {
  * @return {boolean} True if the spec is valid.
  * @private
  */
-export function isVisibilitySpecValid(config, viewabilityEnabled) {
-  if (!config['visibilitySpec'] || !viewabilityEnabled) {
+export function isVisibilitySpecValid(config) {
+  if (!config['visibilitySpec']) {
     return true;
   }
 

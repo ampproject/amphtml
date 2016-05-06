@@ -24,19 +24,10 @@ import {viewerFor} from '../../../src/viewer';
 import {viewportFor} from '../../../src/viewport';
 import {visibilityFor} from '../../../src/visibility';
 
-/** @private @const {number} */
 const MIN_TIMER_INTERVAL_SECONDS_ = 0.5;
-
-/** @private @const {number} */
 const DEFAULT_MAX_TIMER_LENGTH_SECONDS_ = 7200;
-
-/** @private @const {number} */
 const SCROLL_PRECISION_PERCENT = 5;
-
-/** @private @const {string} */
 const VAR_H_SCROLL_BOUNDARY = 'horizontalScrollBoundary';
-
-/** @private @const {string} */
 const VAR_V_SCROLL_BOUNDARY = 'verticalScrollBoundary';
 
 /**
@@ -222,11 +213,11 @@ export class InstrumentationService {
    * @private
    */
   createVisibilityListener_(callback, config) {
-    if (!isVisibilitySpecValid(config, this.isViewabilityExperimentOn_())) {
-      return;
-    }
+    if (config['visibilitySpec'] && this.isViewabilityExperimentOn_()) {
+      if (!isVisibilitySpecValid(config)) {
+        return;
+      }
 
-    if (config['visibilitySpec']) {
       this.runOrSchedule_(() => {
         visibilityFor(this.win_).then(visibility => {
           visibility.listenOnce(config['visibilitySpec'], vars => {
