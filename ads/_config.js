@@ -37,7 +37,6 @@ export const adPrefetch = {
   openx: 'https://www.googletagservices.com/tag/js/gpt.js',
   smartadserver: 'https://ec-ns.sascdn.com/diff/js/smart.js',
   'mantis-display': 'https://assets.mantisadnetwork.com/mantodea.min.js',
-  'mantis-video': 'https://assets.mantisadnetwork.com/video/video.min.js',
   'mantis-recommend': 'https://assets.mantisadnetwork.com/recommend.min.js',
   sovrn: 'https://ap.lijit.com/www/sovrn_amp/sovrn_ads.js',
   yieldmo: 'https://static.yieldmo.com/ym.amp1.js',
@@ -101,10 +100,6 @@ export const adPreconnect = {
   'mantis-display': [
     'https://mantodea.mantisadnetwork.com',
     'https://res.cloudinary.com',
-    'https://resize.mantisadnetwork.com',
-  ],
-  'mantis-video': [
-    'https://mantodea.mantisadnetwork.com',
     'https://resize.mantisadnetwork.com',
   ],
   'mantis-recommend': [

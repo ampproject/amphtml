@@ -56,23 +56,3 @@ Depending on your page design, you may need to play with the "heights=" paramete
     data-property="demo">
 </amp-embed>
 ```
-
-### MANTIS.Video
-
-Supported parameters:
-
-- data-property
-- data-video
-
-If there are videos from MANTIS.Video that you would like to embed within your page, refer to the embed section of that video's page. Here is an example:
-
-```html
-<amp-embed
-    width=512
-    height=288
-    type="mantis-video"
-    layout=responsive
-    data-video="56550a151fbad483c946adaa"
-    data-property="demo">
-</amp-embed>
-```
