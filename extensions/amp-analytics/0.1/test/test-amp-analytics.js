@@ -23,7 +23,8 @@ import {adopt} from '../../../../src/runtime';
 import {createIframePromise} from '../../../../testing/iframe';
 import {getService, resetServiceForTesting} from '../../../../src/service';
 import {markElementScheduledForTesting} from '../../../../src/custom-element';
-import {installCidService} from '../../../../src/service/cid-impl';
+import {installCidService,} from
+    '../../../../extensions/amp-analytics/0.1/cid-impl';
 import {installViewerService} from '../../../../src/service/viewer-impl';
 import {installViewportService} from '../../../../src/service/viewport-impl';
 import {

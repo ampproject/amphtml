@@ -87,14 +87,14 @@ var forbiddenTerms = {
   'installActivityService': {
     message: privateServiceFactory,
     whitelist: [
-      'src/service/activity-impl.js',
+      'extensions/amp-analytics/0.1/activity-impl.js',
       'extensions/amp-analytics/0.1/amp-analytics.js'
     ]
   },
   'installCidService': {
     message: privateServiceFactory,
     whitelist: [
-      'src/service/cid-impl.js',
+      'extensions/amp-analytics/0.1/cid-impl.js',
       'extensions/amp-access/0.1/amp-access.js',
       'extensions/amp-analytics/0.1/amp-analytics.js',
     ],
@@ -103,7 +103,7 @@ var forbiddenTerms = {
     message: privateServiceFactory,
     whitelist: [
       'extensions/amp-analytics/0.1/amp-analytics.js',
-      'src/service/storage-impl.js',
+      'extensions/amp-analytics/0.1/storage-impl.js',
     ],
   },
   'installUrlReplacementsService': {
@@ -160,7 +160,7 @@ var forbiddenTerms = {
     message: privateServiceFactory,
     whitelist: [
       'src/service/viewer-impl.js',
-      'src/service/storage-impl.js',
+      'extensions/amp-analytics/0.1/storage-impl.js',
       'examples/viewer-integr-messaging.js',
       'extensions/amp-access/0.1/login-dialog.js',
     ],
@@ -180,7 +180,7 @@ var forbiddenTerms = {
   'getBaseCid': {
     message: requiresReviewPrivacy,
     whitelist: [
-      'src/service/cid-impl.js',
+      'extensions/amp-analytics/0.1/cid-impl.js',
       'src/service/viewer-impl.js',
     ],
   },
@@ -188,13 +188,13 @@ var forbiddenTerms = {
     message: requiresReviewPrivacy,
     whitelist: [
       'src/cookies.js',
-      'src/service/cid-impl.js',
+      'extensions/amp-analytics/0.1/cid-impl.js',
     ],
   },
   'getCookie\\W': {
     message: requiresReviewPrivacy,
     whitelist: [
-      'src/service/cid-impl.js',
+      'extensions/amp-analytics/0.1/cid-impl.js',
       'src/cookies.js',
       'src/experiments.js',
       'tools/experiments/experiments.js',
@@ -203,7 +203,7 @@ var forbiddenTerms = {
   'setCookie\\W': {
     message: requiresReviewPrivacy,
     whitelist: [
-      'src/service/cid-impl.js',
+      'extensions/amp-analytics/0.1/cid-impl.js',
       'src/cookies.js',
       'src/experiments.js',
       'tools/experiments/experiments.js',
@@ -244,8 +244,8 @@ var forbiddenTerms = {
   'localStorage': {
     message: requiresReviewPrivacy,
     whitelist: [
-      'src/service/cid-impl.js',
-      'src/service/storage-impl.js',
+      'extensions/amp-analytics/0.1/cid-impl.js',
+      'extensions/amp-analytics/0.1/storage-impl.js',
     ],
   },
   'sessionStorage': requiresReviewPrivacy,

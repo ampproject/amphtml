@@ -15,7 +15,7 @@
  */
 
 import {isExperimentOn} from '../../../src/experiments';
-import {isVisibilitySpecValid} from '../../../src/service/visibility-impl';
+import {isVisibilitySpecValid} from './visibility-impl';
 import {Observable} from '../../../src/observable';
 import {getService} from '../../../src/service';
 import {timer} from '../../../src/timer';
